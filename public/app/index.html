@@ -116,7 +116,7 @@
   </main>
 
   <dialog id="service" class="service-dialog">
-    <header class="stage"><button id="back">← Campus</button><span id="title"></span><button id="stage-ai"><img id="stage-ai-avatar" src="logos/commonweave.webp" alt="">Ask Aster</button><button id="stage-settings">Shared model</button></header>
+    <header class="stage"><button id="back">← Campus</button><span id="title"></span><button id="stage-ai"><img id="stage-ai-avatar" src="logos/commonweave.webp" alt="">Ask Aster</button><button id="stage-open-visual" title="Open this realm full-screen">Open visual realm</button><button id="stage-settings">Shared model</button></header>
     <iframe id="frame" title="Commonweave service"></iframe>
     <form id="stage-ai-bar" class="stage-ai-bar" hidden>
       <div class="persona"><img id="stage-ai-bar-avatar" src="logos/commonweave.webp" alt=""><span><strong id="stage-ai-title">Aster · Commonweave AI</strong><small id="stage-ai-domain">Campus router</small></span></div>
@@ -158,6 +158,9 @@
     </div>
   </dialog>
 
+  <script>
+  (()=>{const build='1.0.4-visual-recovery',key='commonweave.host-build';if(localStorage.getItem(key)!==build){localStorage.setItem(key,build);if('caches' in window)caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).catch(()=>{});if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).catch(()=>{});}})();
+  </script>
   <script src="shared/commonweave-operations.js"></script>
   <script src="shared/commonweave-model-runtime.js"></script>
   <script>
@@ -169,7 +172,8 @@
       browser:{label:"Browser model",model:"browser-native",endpoint:"",simple:true},
       manual:{label:"Manual exchange",model:"manual-exchange",endpoint:"",simple:true}
     };
-    const APP_ROUTES={living:["Living School","services/living-school/index.html?commonweave=1&visual=1"],cerbanimo:["Cerbanimo","services/cerbanimo/index.html?commonweave=1&visual=1"],anarchadia:["Anarchadia","services/anarchadia/index.html?commonweave=1&visual=1#hall"],fellowfare:["Fellowfare","services/fellowfare/index.html?commonweave=1&visual=1"]};
+    const APP_BUILD="1.0.4-visual-recovery";
+    const APP_ROUTES={living:["Living School",`services/living-school/index.html?commonweave=1&visual=1&build=${APP_BUILD}`],cerbanimo:["Cerbanimo",`services/cerbanimo/index.html?commonweave=1&visual=1&build=${APP_BUILD}#world-title`],anarchadia:["Anarchadia",`services/anarchadia/index.html?commonweave=1&visual=1&build=${APP_BUILD}#hall`],fellowfare:["FellowFare",`services/fellowfare/index.html?commonweave=1&visual=1&build=${APP_BUILD}`]};
     const PERSONAS={living:{name:"Moss",avatar:"logos/living-school.webp"},cerbanimo:{name:"Kamiya",avatar:"logos/cerbanimo.webp"},anarchadia:{name:"Rook",avatar:"logos/anarchadia.webp"},fellowfare:{name:"Tiller",avatar:"logos/fellowfare.png"}};
     const DEFAULT_CONFIG={route:"deterministic",model:ROUTES.deterministic.model,endpoint:"",remoteConsent:false,shareKey:false};
     const $=selector=>document.querySelector(selector);
@@ -457,7 +461,7 @@ ${journey.governanceQuestions.map(item=>`- ${item}`).join("\n")}`}
       const result=$("#route-result");result.hidden=false;result.innerHTML=`<strong>${escapeHtml(plan.summary)}</strong><ol>${plan.suggestions.map(item=>`<li><b>${escapeHtml(APP_ROUTES[item.service][0])}</b> · ${escapeHtml(item.reason)}</li>`).join("")}</ol>`;
     }
     function openService(app){
-      if(!APP_ROUTES[app])return;activeApp=app;const [title,url]=APP_ROUTES[app],persona=PERSONAS[app];$("#title").textContent=title;$("#stage-ai").lastChild.textContent=`Ask ${persona.name}`;$("#stage-ai-avatar").src=persona.avatar;$("#stage-ai-bar-avatar").src=persona.avatar;$("#stage-ai-title").textContent=`Aster → ${persona.name}`;$("#stage-ai-domain").textContent=`${title} AI`;$("#stage-prompt").placeholder=`Ask ${persona.name} to continue this intention…`;frame.src=url;if(!service.open)service.showModal()
+      if(!APP_ROUTES[app])return;activeApp=app;const [title,url]=APP_ROUTES[app],persona=PERSONAS[app];$("#title").textContent=title;$("#stage-ai").lastChild.textContent=`Ask ${persona.name}`;$("#stage-ai-avatar").src=persona.avatar;$("#stage-ai-bar-avatar").src=persona.avatar;$("#stage-ai-title").textContent=`Aster → ${persona.name}`;$("#stage-ai-domain").textContent=`${title} AI`;$("#stage-prompt").placeholder=`Ask ${persona.name} to continue this intention…`;frame.src="about:blank";requestAnimationFrame(()=>{frame.src=url});const direct=$("#stage-open-visual");direct.onclick=()=>{location.href=url};if(!service.open)service.showModal()
     }
     // Visual-world modules use this stable bridge instead of trying to click hidden classic controls.
     window.CommonweaveOpenService=(app)=>{openService(app);return true};

@@ -1,4 +1,4 @@
-const CACHE = 'fellowfare-v0.4.0-rc22.3.2-antigravity-proxy';
+const CACHE = 'fellowfare-1.0.4-visual-recovery';
 const SHELL = [
   './',
   './index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js',

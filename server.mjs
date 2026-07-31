@@ -15,6 +15,7 @@ const HUB_NAME = process.env.HUB_NAME || 'Commonweave Host Node';
 const HUB_TOKEN = String(process.env.HUB_TOKEN || '').trim();
 const MAX_ENVELOPES = Math.max(100, Number(process.env.MAX_ENVELOPES || 5000));
 const STARTED_AT = new Date().toISOString();
+const BUILD_VERSION = '1.0.4-visual-recovery';
 const sseClients = new Set();
 
 const state = {
@@ -208,10 +209,10 @@ const server = http.createServer(async (req, res) => {
       if (!authorized(req) && pathname !== '/api/health' && pathname !== '/api/config') return json(res, 401, { error: 'Host node token required' });
       if (pathname === '/api/ai/gemini/interactions' || pathname.startsWith('/api/ai/gemini/interactions/')) return proxyGeminiInteraction(req, res, pathname);
       if (pathname === '/api/health' && req.method === 'GET') {
-        return json(res, 200, { ok: true, name: HUB_NAME, startedAt: STARTED_AT, now: now(), nodes: Object.keys(state.nodes).length, envelopes: state.envelopes.length, persistence: STATE_FILE });
+        return json(res, 200, { ok: true, name: HUB_NAME, build: BUILD_VERSION, startedAt: STARTED_AT, now: now(), nodes: Object.keys(state.nodes).length, envelopes: state.envelopes.length, persistence: STATE_FILE });
       }
       if (pathname === '/api/config' && req.method === 'GET') {
-        return json(res, 200, { schema: 'commonweave.host-node-config.v1', name: HUB_NAME, baseUrl: `${url.protocol}//${url.host}`, apiBase: `${url.protocol}//${url.host}/api`, appUrl: `${url.protocol}//${url.host}/app/`, downloadUrl: `${url.protocol}//${url.host}/downloads/Commonweave-Mobile-Install-Kit.zip`, tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','pwa-hosting','offline-installer','gemini-agent-proxy'] });
+        return json(res, 200, { schema: 'commonweave.host-node-config.v1', name: HUB_NAME, build: BUILD_VERSION, baseUrl: `${url.protocol}//${url.host}`, apiBase: `${url.protocol}//${url.host}/api`, appUrl: `${url.protocol}//${url.host}/app/`, downloadUrl: `${url.protocol}//${url.host}/downloads/Commonweave-Mobile-Install-Kit.zip`, tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','pwa-hosting','offline-installer','gemini-agent-proxy'] });
       }
       if (pathname === '/api/events' && req.method === 'GET') {
         res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', connection: 'keep-alive' });

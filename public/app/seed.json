@@ -1,6 +1,6 @@
 {
   "schema": "commonweave.seed-manifest.v1",
-  "version": "1.0.3-weaveling-travel-wiring",
+  "version": "1.0.4-visual-recovery",
   "files": [
     {
       "path": "COMMONWEAVE-LIVING-WORLD-NEXT.md",
@@ -394,8 +394,8 @@
     },
     {
       "path": "commonweave-handoff-consumer.js",
-      "sha256": "7aa3f2898c5e705827d3d6486da33c3e01c873762f3f0b6bd5b6413b95f59a6b",
-      "bytes": 16959
+      "sha256": "6c6e26efd4f7fb68274bd652f04c551aefec6887828200a1a7dc4f9fdc7e9745",
+      "bytes": 17377
     },
     {
       "path": "commonweave-intention-orchestrator.js",
@@ -484,8 +484,8 @@
     },
     {
       "path": "index.html",
-      "sha256": "fb39a16ad373264f82b6f06dd1a502fc9649d454eb5617599207a52f6b71f649",
-      "bytes": 142877
+      "sha256": "16359cfd24e2adc2a7023b93ab87be75b8cb4b35365ff563d4c22e1c28bab4ab",
+      "bytes": 143648
     },
     {
       "path": "logos/anarchadia.webp",
@@ -624,8 +624,8 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "9448e5276cfa3b74b027bda9ccea9066155870a0ba243c5e27c1b70764d9f92f",
-      "bytes": 7007
+      "sha256": "30e70a0917459ac3bea08d2a6f55939a84d4d19daf145254ee5cbe5d72d4d2cb",
+      "bytes": 6987
     },
     {
       "path": "services/anarchadia/LICENSE",
@@ -759,8 +759,8 @@
     },
     {
       "path": "services/anarchadia/commonweave-handoff-consumer.js",
-      "sha256": "7aa3f2898c5e705827d3d6486da33c3e01c873762f3f0b6bd5b6413b95f59a6b",
-      "bytes": 16959
+      "sha256": "6c6e26efd4f7fb68274bd652f04c551aefec6887828200a1a7dc4f9fdc7e9745",
+      "bytes": 17377
     },
     {
       "path": "services/anarchadia/commonweave-presence.js",
@@ -834,8 +834,8 @@
     },
     {
       "path": "services/anarchadia/service-worker.js",
-      "sha256": "46a685086f3d8e36353596f838a96096629613f997d07e726120b1a5539140ef",
-      "bytes": 2309
+      "sha256": "713d5d908a1a6f15366e8ae6f3f1964fd9717fb6d9ff4593a16f6c8c4843542a",
+      "bytes": 2297
     },
     {
       "path": "services/anarchadia/shared/commonweave-model-runtime.js",
@@ -1074,8 +1074,8 @@
     },
     {
       "path": "services/cerbanimo/commonweave-handoff-consumer.js",
-      "sha256": "7aa3f2898c5e705827d3d6486da33c3e01c873762f3f0b6bd5b6413b95f59a6b",
-      "bytes": 16959
+      "sha256": "6c6e26efd4f7fb68274bd652f04c551aefec6887828200a1a7dc4f9fdc7e9745",
+      "bytes": 17377
     },
     {
       "path": "services/cerbanimo/commonweave-presence.js",
@@ -1109,8 +1109,8 @@
     },
     {
       "path": "services/cerbanimo/index.html",
-      "sha256": "2ce381f41e132aa6b82f9fe1347782dcae93e0ec32dad4bd6fadd42323a362ee",
-      "bytes": 780750
+      "sha256": "a4d466a738afa628e8562705b51264b890b602b893cc577d2fb886054bdaea22",
+      "bytes": 780871
     },
     {
       "path": "services/cerbanimo/manifest.webmanifest",
@@ -1119,8 +1119,8 @@
     },
     {
       "path": "services/cerbanimo/service-worker.js",
-      "sha256": "d375383620f6470fa39df4df8c9b9833e029e9432f466e1096b10addad0274ca",
-      "bytes": 3555
+      "sha256": "311d7e011cee232e3bc3e24167e79760e96ac17c098fe2f1f240ab63c0d27d3a",
+      "bytes": 3543
     },
     {
       "path": "services/cerbanimo/shared/commonweave-model-runtime.js",
@@ -1184,8 +1184,8 @@
     },
     {
       "path": "services/fellowfare/app.js",
-      "sha256": "98c8aa8da5c440e82b0ead28cf36019978f1824eaa684fa2351b3ed5b5b3d980",
-      "bytes": 157426
+      "sha256": "de17febd5a7e0c161e5a24e93b96a8d5597c1924096b1d6608b9046693fa7040",
+      "bytes": 157679
     },
     {
       "path": "services/fellowfare/assets/icons/icon-128.png",
@@ -1324,8 +1324,8 @@
     },
     {
       "path": "services/fellowfare/commonweave-handoff-consumer.js",
-      "sha256": "7aa3f2898c5e705827d3d6486da33c3e01c873762f3f0b6bd5b6413b95f59a6b",
-      "bytes": 16959
+      "sha256": "6c6e26efd4f7fb68274bd652f04c551aefec6887828200a1a7dc4f9fdc7e9745",
+      "bytes": 17377
     },
     {
       "path": "services/fellowfare/commonweave-presence.js",
@@ -1384,8 +1384,8 @@
     },
     {
       "path": "services/fellowfare/sw.js",
-      "sha256": "e2146b0b4d3b5c236f57d5b7972808502a23cd3c391e7c39da7afb616b9d4cea",
-      "bytes": 2319
+      "sha256": "e3d1f4c396d110140ccb078571af890dc9f5b864ef3ae38ddf46d8f717798beb",
+      "bytes": 2307
     },
     {
       "path": "services/fellowfare/tests/ai-test.mjs",
@@ -1439,8 +1439,8 @@
     },
     {
       "path": "services/living-school/commonweave-handoff-consumer.js",
-      "sha256": "7aa3f2898c5e705827d3d6486da33c3e01c873762f3f0b6bd5b6413b95f59a6b",
-      "bytes": 16959
+      "sha256": "6c6e26efd4f7fb68274bd652f04c551aefec6887828200a1a7dc4f9fdc7e9745",
+      "bytes": 17377
     },
     {
       "path": "services/living-school/commonweave-presence.js",
@@ -1484,8 +1484,8 @@
     },
     {
       "path": "services/living-school/service-worker.js",
-      "sha256": "6d0eb60cee7df5aef29aefe88ec5088f2e70901c7f3a47ed31facfd1e132a065",
-      "bytes": 1937
+      "sha256": "0c825ac39b077efaa6363491bc061a19d963a943d3e5d32d3592a27b2e853d8f",
+      "bytes": 1925
     },
     {
       "path": "services/living-school/shared/commonweave-model-runtime.js",

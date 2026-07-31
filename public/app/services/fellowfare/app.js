@@ -135,6 +135,8 @@ const starterState = {
 };
 
 let state = loadState();
+const FF_PARAMS=new URLSearchParams(location.search);
+if(FF_PARAMS.get('visual')==='1'||FF_PARAMS.get('commonweave')==='1'){state.route='mall';localStorage.setItem('fellowfare.mall.scene.v1',localStorage.getItem('fellowfare.mall.scene.v1')||'atrium');}
 let installPrompt = null;
 let activeComposerMode = 'need';
 let activeConversationThreadId = null;

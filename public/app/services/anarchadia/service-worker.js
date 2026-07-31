@@ -1,4 +1,4 @@
-const CACHE = 'anarchadia-v1.0.0-rc22.3.2-antigravity-proxy';
+const CACHE = 'anarchadia-1.0.4-visual-recovery';
 const CORE = [
   './','./index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js','./styles.css','./manifest.webmanifest',
   './src/app.js','./world-engine.js','./src/domain.js','./src/store.js','./src/ai.js','./src/export.js','./shared/commonweave-model-runtime.js',
