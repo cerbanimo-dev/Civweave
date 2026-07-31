@@ -15,10 +15,11 @@ const HUB_NAME = process.env.HUB_NAME || 'Commonweave Host Node';
 const HUB_TOKEN = String(process.env.HUB_TOKEN || '').trim();
 const MAX_ENVELOPES = Math.max(100, Number(process.env.MAX_ENVELOPES || 5000));
 const STARTED_AT = new Date().toISOString();
-const BUILD_VERSION = '1.0.5-default-host-update-broadcast';
-const APP_VERSION = 'rc22.3.4';
+const BUILD_VERSION = '1.0.7-update-banner-state';
+const APP_VERSION = 'rc22.3.7';
 const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://commonweave-host-node.onrender.com';
 const INSTALL_KIT_PATH = path.join(PUBLIC_DIR, 'downloads', 'Commonweave-Mobile-Install-Kit.zip');
+const CAMPUS_SEED_PATH = path.join(PUBLIC_DIR, 'downloads', 'commonweave-pocket-campus.cwseed');
 const sseClients = new Set();
 let installKitSha256 = '';
 let installKitSize = 0;
@@ -55,6 +56,15 @@ try {
   if (saved && typeof saved === 'object') Object.assign(state, saved);
 } catch (error) {
   if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);
+}
+
+
+function requestOrigin(req, url) {
+  const forwarded = cleanText(req.headers['x-forwarded-proto'], 20).split(',')[0].trim();
+  const protocol = forwarded === 'https' ? 'https:' : forwarded === 'http' ? 'http:' : url.protocol;
+  const host = cleanText(req.headers['x-forwarded-host'] || req.headers.host || url.host, 300).split(',')[0].trim();
+  if (host === 'commonweave-host-node.onrender.com') return 'https://commonweave-host-node.onrender.com';
+  return `${protocol}//${host}`;
 }
 
 function now() { return new Date().toISOString(); }
@@ -221,6 +231,11 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || '/', base);
   const pathname = decodeURIComponent(url.pathname);
   try {
+    if ((pathname === '/field/commonweave/seed' || pathname === '/downloads/commonweave-pocket-campus.cwseed') && req.method === 'GET') {
+      const served = await serveFile(req, res, '/downloads/commonweave-pocket-campus.cwseed');
+      if (served) return;
+      return json(res, 404, { error: 'Commonweave campus seed is not available on this host node.' });
+    }
     if (pathname.startsWith('/api/')) {
       if (req.method === 'OPTIONS') {
         res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-commonweave-hub-token', 'access-control-allow-methods': 'GET,POST,OPTIONS' });
@@ -230,22 +245,22 @@ const server = http.createServer(async (req, res) => {
       if (!authorized(req) && !['/api/health','/api/config','/api/releases/current','/api/events'].includes(pathname)) return json(res, 401, { error: 'Host node token required' });
       if (pathname === '/api/ai/gemini/interactions' || pathname.startsWith('/api/ai/gemini/interactions/')) return proxyGeminiInteraction(req, res, pathname);
       if (pathname === '/api/health' && req.method === 'GET') {
-        return json(res, 200, { ok: true, name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, release: releasePacket(`${url.protocol}//${url.host}`), startedAt: STARTED_AT, now: now(), nodes: Object.keys(state.nodes).length, envelopes: state.envelopes.length, persistence: STATE_FILE });
+        return json(res, 200, { ok: true, name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, release: releasePacket(requestOrigin(req, url)), startedAt: STARTED_AT, now: now(), nodes: Object.keys(state.nodes).length, envelopes: state.envelopes.length, persistence: STATE_FILE });
       }
       if (pathname === '/api/config' && req.method === 'GET') {
-        return json(res, 200, { schema: 'commonweave.host-node-config.v1', name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, baseUrl: `${url.protocol}//${url.host}`, apiBase: `${url.protocol}//${url.host}/api`, appUrl: `${url.protocol}//${url.host}/app/`, downloadUrl: `${url.protocol}//${url.host}/downloads/Commonweave-Mobile-Install-Kit.zip`, release: releasePacket(`${url.protocol}//${url.host}`), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy'] });
+        return json(res, 200, { schema: 'commonweave.host-node-config.v1', name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, baseUrl: requestOrigin(req, url), apiBase: `${requestOrigin(req, url)}/api`, appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Commonweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/commonweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download'] });
       }
       if (pathname === '/api/releases/current' && req.method === 'GET') {
-        return json(res, 200, releasePacket(`${url.protocol}//${url.host}`));
+        return json(res, 200, releasePacket(requestOrigin(req, url)));
       }
       if (pathname === '/api/releases/broadcast' && req.method === 'POST') {
-        const packet = releasePacket(`${url.protocol}//${url.host}`);
+        const packet = releasePacket(requestOrigin(req, url));
         emit('release', packet);
         return json(res, 200, { ok: true, release: packet, listeners: sseClients.size });
       }
       if (pathname === '/api/events' && req.method === 'GET') {
         res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', connection: 'keep-alive' });
-        const release = releasePacket(`${url.protocol}//${url.host}`);
+        const release = releasePacket(requestOrigin(req, url));
         res.write(`event: ready
 data: ${JSON.stringify({ now: now(), name: HUB_NAME, release })}
 
@@ -272,7 +287,7 @@ data: ${JSON.stringify(release)}
           lastSeenAt: now()
         };
         schedulePersist(); emit('node', publicNode(node));
-        return json(res, 200, { ok: true, node: publicNode(node), hub: HUB_NAME, release: releasePacket(`${url.protocol}//${url.host}`) });
+        return json(res, 200, { ok: true, node: publicNode(node), hub: HUB_NAME, release: releasePacket(requestOrigin(req, url)) });
       }
       if (pathname === '/api/nodes/heartbeat' && req.method === 'POST') {
         const input = await body(req);

@@ -1,4 +1,4 @@
-const CACHE = "commonweave-pocket-campus-v47-host-updates";
+const CACHE = "commonweave-pocket-campus-v49-release-state";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
@@ -11,7 +11,6 @@ self.addEventListener("install", (event) => {
           "./manifest.webmanifest",
           "./logos/commonweave.webp",
           "./logos/commonweave-app-icon.png",
-          "./logos/commonweave.webp",
           "./logos/commonweave-campus.webp",
           "./logos/commonweave-town-square.png",
           "./assets/world/town-square-home.webp",
@@ -87,7 +86,6 @@ self.addEventListener("install", (event) => {
           "./services/living-school/visual-assets/tower.webp",
           "./services/living-school/visual-assets/observatory.webp",
           "./services/living-school/visual-assets/bridge.webp",
-          "./services/anarchadia/assets/passport/anarchadia-passport-blank.webp",
           "./services/anarchadia/assets/passport/anarchadia-passport-blank.webp",
           "./logos/commonweave-icon-192.png",
           "./logos/commonweave-icon-512.png",

@@ -571,7 +571,7 @@ ${journey.governanceQuestions.map(item=>`- ${item}`).join("\n")}`}
       if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){await navigator.share({title,text,files:[file]});return "Shared through the device share sheet."}
       download(file);return "Downloaded. Send the file with your preferred device-sharing tool."
     }
-    const CAMPUS_SEED_URL="/field/commonweave/seed";
+    const CAMPUS_SEED_URL="/downloads/commonweave-pocket-campus.cwseed";
     let campusSeedFile=null,campusSeedError=null,campusSeedPromise=null;
     async function preloadCampusSeed(){
       if(campusSeedFile)return campusSeedFile;

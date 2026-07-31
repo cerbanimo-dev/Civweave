@@ -1,6 +1,6 @@
 {
   "schema": "commonweave.seed-manifest.v1",
-  "version": "1.0.4-visual-recovery",
+  "version": "rc22.3.7",
   "files": [
     {
       "path": "COMMONWEAVE-LIVING-WORLD-NEXT.md",
@@ -236,6 +236,16 @@
       "path": "RELEASE-NOTES-RC22.3.2.md",
       "sha256": "217792d77483caf531c870aa26c7e0d163ecf0c160097e9d8a33c267c67ea967",
       "bytes": 629
+    },
+    {
+      "path": "RELEASE-NOTES-RC22.3.5.md",
+      "sha256": "19fee4b9e05fbdc36d680c98e7f0cab22a5cee1e6f941065d1afa314400e112b",
+      "bytes": 243
+    },
+    {
+      "path": "RELEASE-NOTES-RC22.3.7.md",
+      "sha256": "8362e3c3df17e096b19c4aa0c78497a54236a8bfbb7a2a238f588777112cf5fb",
+      "bytes": 432
     },
     {
       "path": "assets/ai/kamiya-gift.png",
@@ -479,13 +489,13 @@
     },
     {
       "path": "host-node-setup.js",
-      "sha256": "d3176ab4be5e6a7ac8166860b89e1cbab1e5360b9bcd5c5df1f8af19cb2610a3",
-      "bytes": 7343
+      "sha256": "818da6a7bb520aab23d38f39841af2e6a4c0a36b6e6ed08b153167c0b2d9ee97",
+      "bytes": 11387
     },
     {
       "path": "index.html",
-      "sha256": "16359cfd24e2adc2a7023b93ab87be75b8cb4b35365ff563d4c22e1c28bab4ab",
-      "bytes": 143648
+      "sha256": "81a0951076a4b713358cd8a4e82ba09519fde3d7e99e9a659903e6ee92003b31",
+      "bytes": 143668
     },
     {
       "path": "logos/anarchadia.webp",
@@ -624,8 +634,8 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "30e70a0917459ac3bea08d2a6f55939a84d4d19daf145254ee5cbe5d72d4d2cb",
-      "bytes": 6987
+      "sha256": "3caa006a43daed84ba5cda1dacd94deb857e548284307ee1bcb9e5d9877b58d2",
+      "bytes": 6877
     },
     {
       "path": "services/anarchadia/LICENSE",
