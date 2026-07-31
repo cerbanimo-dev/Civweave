@@ -1,0 +1,9 @@
+const CACHE = "living-school-v1.0.0-rc22.3.2-antigravity-proxy";
+const CORE = ["./", "./index.html","./commonweave-handoff-consumer.js","./commonweave-presence.js", "./manifest.webmanifest", "./icon.svg", "./modules/bootstrap.mjs", "./modules/cerbanimo-bridge.mjs", "./modules/rubric-engine.mjs", "./modules/project-gate.mjs", "./shared/commonweave-model-runtime.js", "./world-engine.js", "./visual-assets/exterior.webp", "./visual-assets/courtyard.webp", "./visual-assets/entrance.webp", "./visual-assets/library.webp", "./visual-assets/moss.webp", "./visual-assets/forge.webp", "./visual-assets/workshop.webp", "./visual-assets/commons.webp", "./visual-assets/passport.webp", "./visual-assets/faculty.webp", "./visual-assets/review.webp", "./visual-assets/credential.png", "./visual-assets/map.webp", "./visual-assets/research.webp", "./visual-assets/challenge.webp", "./visual-assets/tower.webp", "./visual-assets/observatory.webp", "./visual-assets/bridge.webp", "./RELEASE-NOTES-RC17.11.md", "./RELEASE-NOTES-RC19.2.md", "./RELEASE-NOTES-RC19.3.md"];
+self.addEventListener("install", event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting())));
+self.addEventListener("activate", event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
+self.addEventListener("message", event => { if (event.data?.type === "SKIP_WAITING") self.skipWaiting(); });
+self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET" || new URL(event.request.url).origin !== self.location.origin) return;
+  event.respondWith(fetch(event.request).then(response => { const copy=response.clone(); caches.open(CACHE).then(cache => cache.put(event.request,copy)); return response; }).catch(() => caches.match(event.request).then(cached => cached || caches.match("./index.html"))));
+});

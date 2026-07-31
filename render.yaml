@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: commonweave-host-node
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HUB_NAME
+        value: Commonweave Host Node
+      - key: DATA_DIR
+        value: ./data
+      - key: MAX_ENVELOPES
+        value: "5000"

@@ -1,0 +1,15 @@
+{
+  "name": "commonweave-host-node-hub",
+  "version": "1.0.3",
+  "private": true,
+  "description": "Offline-first Commonweave PWA installer and lightweight host node relay.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "check": "node --check server.mjs"
+  }
+}

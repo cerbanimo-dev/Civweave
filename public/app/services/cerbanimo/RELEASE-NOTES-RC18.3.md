@@ -1,0 +1,3 @@
+# Cerbanimo RC18.3 — Execution Crossroads
+
+Cerbanimo-only pass. Normalizes Projects, Missions, Evidence Packets, Review Contracts, and Settlement Claims with explicit schema and authority metadata; adds a visual Commonweave Crossroads intake room for Living School capstones, Anarchadia mandates, FellowFare/Commonweave handoffs, Kamiya proposals, invitations, and party relay traffic; adds plain-language operational health in Systems Core; and repairs spatial deep-link restoration with selected project/task context. Cross-platform binary transport, universal identity resolution, notification delivery, reward settlement, and governance authority remain Commonweave-level responsibilities.

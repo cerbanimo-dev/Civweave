@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07141f">
+  <title>Commonweave Host Node</title>
+  <link rel="icon" href="/app/logos/commonweave-icon-192.png">
+  <style>
+    :root{font-family:Inter,system-ui,sans-serif;color:#f7f2df;background:#07141f;line-height:1.45}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% -10%,#234e61 0,#07141f 46%,#03090d 100%)}main{width:min(880px,calc(100% - 28px));margin:auto;padding:36px 0 60px}.hero{display:grid;gap:20px;text-align:center;padding:28px;border:1px solid #ffffff24;border-radius:28px;background:#0d202ad9;box-shadow:0 24px 80px #0008}.mark{width:108px;height:108px;margin:auto;border-radius:26px}.eyebrow{font:800 12px ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:#f4bf68}h1{font-size:clamp(2rem,8vw,4.8rem);line-height:.95;margin:0}p{margin:0;color:#cbd7d4}.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}.button{display:inline-flex;justify-content:center;align-items:center;min-height:52px;padding:0 20px;border:1px solid #ffffff2a;border-radius:14px;background:#1e7b78;color:white;font-weight:900;text-decoration:none;cursor:pointer}.button.secondary{background:#162a35}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}.card{padding:18px;border:1px solid #ffffff1f;border-radius:18px;background:#0b1a22c9}.card strong{display:block;font-size:1.05rem;margin-bottom:5px}.status{display:flex;gap:9px;align-items:center;justify-content:center;font:700 12px ui-monospace,monospace}.dot{width:10px;height:10px;border-radius:50%;background:#f4bf68}.dot.ok{background:#61ddb7;box-shadow:0 0 12px #61ddb7}.fine{font-size:.82rem;color:#93aaa7}code{font-family:ui-monospace,monospace;color:#c8fff5;overflow-wrap:anywhere}
+  </style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <img class="mark" src="/app/logos/commonweave-icon-192.png" alt="Commonweave">
+    <span class="eyebrow">Offline-first installer + host node</span>
+    <h1>Join Commonweave</h1>
+    <p>This node hosts the complete installable PWA, then helps your device connect for presence, handoffs, and relay envelopes. The app keeps working after installation even when this node is unreachable.</p>
+    <div class="status"><span id="dot" class="dot"></span><span id="status">Checking host node…</span></div>
+    <div class="actions">
+      <a class="button" id="wizard" href="/app/?setup=1">Open installation wizard</a>
+      <a class="button secondary" href="/downloads/Commonweave-Mobile-Install-Kit.zip">Download offline ZIP</a>
+    </div>
+    <div class="grid">
+      <article class="card"><strong>1. Open</strong><p>Launch the hosted Pocket Campus over HTTPS or localhost.</p></article>
+      <article class="card"><strong>2. Install</strong><p>Use the guided install button, or your browser’s Add to Home Screen command.</p></article>
+      <article class="card"><strong>3. Connect</strong><p>The wizard registers this device with the host node and saves the node URL locally.</p></article>
+    </div>
+    <p class="fine">Host node: <code id="origin"></code></p>
+  </section>
+</main>
+<script>
+const origin=location.origin;document.querySelector('#origin').textContent=origin;document.querySelector('#wizard').href=`/app/?setup=1&host=${encodeURIComponent(origin)}`;
+fetch('/api/health').then(r=>r.json()).then(data=>{document.querySelector('#dot').classList.add('ok');document.querySelector('#status').textContent=`${data.name} is ready · ${data.nodes} known node${data.nodes===1?'':'s'}`}).catch(()=>document.querySelector('#status').textContent='Host node is starting or unavailable');
+</script>
+</body>
+</html>
