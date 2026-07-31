@@ -1578,6 +1578,30 @@ input,textarea,select{background:rgba(3,5,18,.86);border-color:rgba(110,205,255,
 @media(max-width:560px){.visual-room-status{bottom:calc(8px + var(--visual-safe-bottom));padding:9px 11px}.visual-room-status small{display:none}.visual-world-tools{max-width:calc(100vw - 10px);overflow-x:auto;scrollbar-width:none}.visual-world-tools::-webkit-scrollbar{display:none}}
 @media(prefers-reduced-motion:reduce){.visual-scene.active .visual-scene-frame,.visual-scene-frame::after,.visual-hotspot::before,.visual-operator-pulse{animation:none!important}.visual-detail-drawer,.visual-detail-card{transition:none!important}}
 
+
+/* RC22.3.9 CARDINAL VISUAL CONTRACT */
+body.visual-world-open #app,body.visual-world-open>.ambient-field,body.visual-world-open>noscript,#visualClassicReturn{display:none!important}
+#cerbanimoVisualWorld{display:grid!important;z-index:5000!important}
+#visualScenes,.cw-world-scene,.visual-scene,.visual-scene-frame{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;aspect-ratio:auto!important;box-shadow:none!important}
+.visual-scene-frame>img,.cw-world-scene>img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important}
+.visual-hotspot span,.cw-world-object span,.cw-world-actor-name,.visual-route-bar,.visual-room-status{display:none!important}
+.visual-hotspot:hover,.visual-hotspot:focus-visible,.cw-world-object:hover,.cw-world-object:focus-visible{border-color:transparent!important;background:transparent!important;box-shadow:none!important;outline:3px solid rgba(113,229,255,.78)!important;outline-offset:-3px}
+.cerbanimo-image-dock{position:fixed!important;z-index:5050!important;top:auto!important;bottom:max(7px,env(safe-area-inset-bottom))!important;left:50%!important;transform:translateX(-50%)!important;width:min(95vw,650px)!important;display:grid!important;grid-template-columns:repeat(6,1fr)!important;gap:6px!important;padding:6px!important;border:1px solid rgba(115,225,255,.36)!important;border-radius:22px!important;background:rgba(3,2,11,.82)!important;backdrop-filter:blur(14px)!important;box-shadow:0 14px 42px #000b!important}
+.cerbanimo-image-dock button{position:relative;min-height:58px!important;padding:0!important;border:0!important;border-radius:16px!important;background:transparent!important;overflow:hidden!important;color:transparent!important}
+.cerbanimo-image-dock img{width:100%;height:100%;object-fit:cover;border-radius:14px;filter:brightness(.68) saturate(.88);transition:.16s}
+.cerbanimo-image-dock button:hover img,.cerbanimo-image-dock button:focus-visible img{filter:brightness(1.08) saturate(1.15);transform:scale(1.04)}
+.cerbanimo-image-dock button:focus-visible{outline:3px solid #67dcff;outline-offset:2px}
+.cerbanimo-image-dock [data-spatial-inbox]::after{position:absolute;top:4px;right:4px;z-index:2}
+.cerbanimo-version-plaque{position:fixed;z-index:5051;top:max(8px,env(safe-area-inset-top));left:8px;display:flex;align-items:center;gap:5px;padding:4px 8px 4px 4px;border:1px solid rgba(113,229,255,.42);border-radius:999px;background:rgba(3,2,11,.82);color:#dffaff;font:800 .68rem ui-monospace,monospace;backdrop-filter:blur(10px)}
+.cerbanimo-version-plaque img{width:28px;height:28px;object-fit:contain;border-radius:50%;background:#fff}
+.visual-detail-drawer,.spatial-command{background-image:linear-gradient(rgba(2,1,8,.44),rgba(2,1,8,.68)),var(--cerbanimo-projection-scene,url("assets/visual/form-workbench.webp"))!important;background-size:cover!important;background-position:center!important;backdrop-filter:none!important;padding:0 8px max(5.4rem,calc(env(safe-area-inset-bottom) + 4.8rem))!important;align-items:end!important}
+.visual-detail-card,.spatial-command-card{width:min(94vw,900px)!important;max-height:58dvh!important;overflow:auto!important;border:0!important;border-radius:0!important;background:radial-gradient(ellipse at center,rgba(12,17,42,.82),rgba(3,5,18,.9) 66%,transparent 90%)!important;box-shadow:none!important;backdrop-filter:none!important}
+.visual-detail-card header,.visual-detail-card footer,.spatial-command-head{background:transparent!important;border:0!important}
+.visual-detail-card .body,.spatial-results{background:transparent!important}
+.visual-detail-card .metric,.visual-native-card,.spatial-row,.spatial-result{background:rgba(5,8,27,.34)!important;border-color:rgba(94,220,255,.24)!important;box-shadow:none!important}
+.visual-detail-card input,.visual-detail-card textarea,.visual-detail-card select,.spatial-command input{background:rgba(3,6,20,.4)!important;border:0!important;border-bottom:2px solid rgba(95,227,255,.55)!important;border-radius:0!important;color:#fff!important}
+@media(max-width:650px){.cerbanimo-image-dock{width:calc(100vw - 12px)!important}.cerbanimo-image-dock button{min-height:48px!important}.visual-detail-card,.spatial-command-card{max-height:66dvh!important}}
+
 </style>
 </head>
 <body>
@@ -1585,19 +1609,20 @@ input,textarea,select{background:rgba(3,5,18,.86);border-color:rgba(110,205,255,
   <noscript>This field node needs JavaScript. Its data remains local unless you explicitly export it.</noscript>
   
 <div id="cerbanimoVisualWorld" aria-label="Cerbanimo environmental navigation">
-  <div class="visual-world-tools">
-    <button type="button" data-visual-home>System map</button>
-    <button type="button" data-visual-back aria-label="Go back one spatial step">Back</button><button type="button" data-visual-nexus>Nexus</button><button type="button" data-visual-route>Route</button><button type="button" data-visual-undo hidden>Undo</button>
-    <button type="button" data-spatial-search>Search</button>
-    <button type="button" data-spatial-inbox data-count="0">Inbox</button>
-    <button type="button" data-visual-classic hidden>Recovery console</button>
-  </div>
+  <nav class="visual-world-tools cerbanimo-image-dock" aria-label="Cerbanimo visual dock">
+    <button type="button" data-visual-home aria-label="System map"><img src="assets/visual/map.webp" alt=""></button>
+    <button type="button" data-visual-back aria-label="Previous illustrated room"><img src="assets/visual/transit.webp" alt=""></button>
+    <button type="button" data-visual-nexus aria-label="Nexus"><img src="assets/visual/nexus.webp" alt=""></button>
+    <button type="button" data-spatial-search aria-label="Search"><img src="assets/visual/asset-atlas.webp" alt=""></button>
+    <button type="button" data-spatial-inbox data-count="0" aria-label="Inbox"><img src="assets/visual/kiosks.webp" alt=""></button>
+    <button type="button" data-commonweave-return aria-label="Return to Commonweave"><img src="../../logos/commonweave.webp" alt=""></button>
+  </nav>
+  <div class="cerbanimo-version-plaque"><img src="assets/cerbanimo-logo.png" alt=""><span>v1.0.9</span></div>
   <div id="visualRouteBar" class="visual-route-bar" aria-live="polite"></div><div id="visualScenes"></div><aside id="visualRoomStatus" class="visual-room-status" aria-live="polite"><strong>Cerbanimo</strong><span>Forming the room…</span><small></small></aside>
   <div id="visualWorldToast" class="visual-toast" role="status" aria-live="polite"></div>
 </div>
 <div id="visualDetailDrawer" class="visual-detail-drawer" aria-hidden="true"><article class="visual-detail-card"><header><div><span class="overline">CERBANIMO LIVE OBJECT</span><h2 id="visualDetailTitle">Object detail</h2></div><button type="button" class="icon-button" data-close-visual-detail aria-label="Close">×</button></header><div id="visualDetailBody" class="body"></div><footer id="visualDetailActions"></footer></article></div>
 <div id="spatialCommand" class="spatial-command" aria-hidden="true"><section class="spatial-command-card"><div class="spatial-command-head"><input id="spatialSearchInput" type="search" placeholder="Search projects, missions, resources, people, rooms…" aria-label="Search Cerbanimo"><button type="button" class="icon-button" data-close-spatial-command aria-label="Close">×</button></div><div id="spatialSearchResults" class="spatial-results" aria-live="polite"></div></section></div>
-<button type="button" id="visualClassicReturn" class="visual-classic-return" hidden>Return to visual world</button>
 
   <div id="app" class="app-shell">
     <nav class="desktop-nav" aria-label="Cerbanimo systems">
@@ -6154,7 +6179,7 @@ q("#modelList").innerHTML=state.modelPacks.map((p)=>{const active=state.ai.engin
     const url=`#world-${name}`; if(!replace&&location.hash!==url)history.pushState({visualScene:name},'',url); else if(replace)history.replaceState({visualScene:name},'',url);
     if(detail)setTimeout(()=>openVisualDetail(detail),30);
   }
-  function closeVisualWorld(view){cerbanimoWorldEngine?.stopAmbient?.();document.body.classList.remove('visual-world-open');if(view)navTo(view);const b=q('#visualClassicReturn');if(b){b.hidden=false;b.textContent=`Return to ${VISUAL_SCENES[visualSceneName]?.label||'visual world'}`;}rememberVisualPlace({mode:'classic',view:view||state?.ui?.view||'today'});}
+  function closeVisualWorld(view){document.body.classList.add('visual-world-open');if(view){const map={today:'mission-room',kamiya:'kamiya-chamber',constellary:'project-workbench',public:'nexus',review:'mission-room',commons:'resource',mesh:'transit',chronicle:'observatory',engine:'systems',passport:'hangar'};openVisualScene(map[view]||visualSceneName||'nexus',{replace:true});}rememberVisualPlace({mode:'visual',view:view||state?.ui?.view||'today'});}
   function liveVisualData(kind){const quest=typeof selectedQuest==='function'?selectedQuest():null;const counts={projects:state?.quests?.length||0,missions:state?.quests?.filter?.(q=>q.status!=='completed')?.length||0,resources:state?.commons?.length||0,people:state?.passport?.displayName?1:0};return {quest,counts,kind};}
   function openVisualDetail(kind){
     const drawer=q('#visualDetailDrawer'),title=q('#visualDetailTitle'),body=q('#visualDetailBody'),actions=q('#visualDetailActions');if(!drawer||!title||!body||!actions)return;
@@ -6188,6 +6213,7 @@ q("#modelList").innerHTML=state.modelPacks.map((p)=>{const active=state.ai.engin
     const info=generic[kind]||{title:'Spatial action',copy:'This object is connected to live Cerbanimo state.',metrics:[['Projects',d.counts.projects],['Missions',d.counts.missions],['Resources',d.counts.resources],['System','Online']]};
     title.textContent=info.title;body.innerHTML=`<p>${esc(info.copy)}</p><div class="metrics">${info.metrics.map(([k,v])=>`<div class="metric"><span class="overline">${esc(String(k))}</span><b>${esc(String(v))}</b></div>`).join('')}</div>`;
     const spatialTarget=kind.includes('form')||kind==='task'||kind==='preview'||kind==='save'||kind==='submit'?'form-workbench':kind==='mission'||kind==='proof'||kind==='timeline'||kind==='risk'||kind==='map'?'mission-room':kind==='project'||kind==='projects'||kind==='health'||kind==='impact'||kind==='upload'?'project-workbench':kind==='resources'?'resource':kind==='community'?'transit':kind==='activity'?'observatory':kind==='systems'?'systems':kind==='identity'?'hangar':kind==='conversation'?'kamiya-chamber':kind.startsWith('crossroads')?'crossroads':'object-viewer';
+    drawer.style.setProperty('--cerbanimo-projection-scene',`url("assets/visual/${spatialTarget}.webp")`);
     const advancedView=kind.includes('form')||kind==='task'||kind==='conversation'?'kamiya':kind==='mission'||kind==='proof'||kind==='timeline'||kind==='risk'||kind==='map'?'today':kind==='project'||kind==='projects'||kind==='health'||kind==='impact'||kind==='upload'?'constellary':kind==='resources'?'commons':kind==='community'?'mesh':kind==='activity'?'chronicle':kind==='systems'?'engine':kind==='identity'?'passport':'today';
     actions.innerHTML=`<button type="button" class="primary-button" data-detail-open-scene="${spatialTarget}">Open spatial workspace</button><button type="button" class="secondary-button" data-close-visual-detail>Back to room</button>`;drawer.classList.add('open');drawer.setAttribute('aria-hidden','false');rememberVisualPlace({detail:kind});
   }
@@ -6267,6 +6293,7 @@ q("#modelList").innerHTML=state.modelPacks.map((p)=>{const active=state.ai.engin
     if(e.target instanceof Element&&e.target.closest('[data-visual-home]')){openVisualScene('map');return}
     if(e.target instanceof Element&&e.target.closest('[data-visual-nexus]')){openVisualScene('nexus');return}
     if(e.target instanceof Element&&e.target.closest('[data-visual-classic]')){closeVisualWorld(state.ui.view||'today');return}
+    if(e.target instanceof Element&&e.target.closest('[data-commonweave-return]')){location.href='../../index.html?visual=1';return}
     if(e.target instanceof Element&&e.target.closest('[data-close-visual-detail]')){closeVisualDetail();return}
     const sceneOpen=e.target instanceof Element?e.target.closest('[data-detail-open-scene]'):null;if(sceneOpen){closeVisualDetail();openVisualScene(sceneOpen.dataset.detailOpenScene||'object-viewer');return}
     const detailOpen=e.target instanceof Element?e.target.closest('[data-detail-open-view]'):null;if(detailOpen){closeVisualDetail();closeVisualWorld(detailOpen.dataset.detailOpenView||'today');return}

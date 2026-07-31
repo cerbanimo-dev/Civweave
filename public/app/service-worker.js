@@ -1,4 +1,4 @@
-const CACHE = "commonweave-pocket-campus-v49-release-state";
+const CACHE = "commonweave-pocket-campus-v51-cardinal-visual-contract";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
@@ -37,6 +37,10 @@ self.addEventListener("install", (event) => {
           "./commonweave-presence-ui.js",
           "./COMMONWEAVE-WORLD-SCREEN-PLAN.md",
           "./COMMONWEAVE-WORLD-ASSET-REPORT.json",
+          "./VISUAL-CONTRACT.md",
+          "./VISUAL-CONTRACT-AUDIT-v1.0.9.md",
+          "./VISUAL-ASSET-BACKLOG-v1.0.9.md",
+          "./RELEASE-NOTES-RC22.3.9.md",
           "./logos/commonweave-title-screen.png",
           "./assets/world/inside-quad.webp",
           "./assets/world/regional-world-map.webp",

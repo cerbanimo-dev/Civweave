@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0';
+const VERSION='1.2.0';
 const KEY='commonweave.weaveling.steward.v2';
 const uid=(p='w')=>`${p}-${crypto.randomUUID?.()||Date.now()+'-'+Math.random().toString(16).slice(2)}`;
 const now=()=>new Date().toISOString();
@@ -33,6 +33,19 @@ function session(){return read()}
 function reset(){localStorage.removeItem(KEY);bus.dispatchEvent(new CustomEvent('changed',{detail:null}))}
 function set(patch){const s=read()||newSession('');Object.assign(s,patch);write(s);bus.dispatchEvent(new CustomEvent('changed',{detail:clone(s)}));return clone(s)}
 function answerSkill(id,level){const s=read();if(!s)return null;const skill=s.skills.find(x=>x.id===id);if(skill)skill.level=Math.max(0,Math.min(4,Number(level)));write(s);return clone(s)}
+
+async function prepareSkills(){
+ const s=read();if(!s)return null;
+ const runtime=window.CommonweaveModelRuntime;
+ if(runtime?.generateInteractive){
+  try{
+   const result=await runtime.generateInteractive({purpose:'weaveling-wish-specific-capability-map',responseFormat:'json',schema:{type:'object',properties:{skills:{type:'array',minItems:4,maxItems:10,items:{type:'object',properties:{id:{type:'string'},name:{type:'string'},description:{type:'string'},required:{type:'integer',minimum:1,maximum:4},question:{type:'string'}},required:['id','name','description','required','question']}}},required:['skills']},system:'You are Weaveling, an intention steward. Build a capability self-assessment specifically for the user’s stated wish. Do not use a generic project-management checklist. Identify the concrete creative, technical, research, production, collaboration, safety, delivery, or domain skills that actually determine success. Each skill name must be specific enough that the user understands what ability is being assessed. The description should explain its role in this exact intention. The question should help the user rate themselves without testing or shaming them. Return 4 to 10 non-overlapping skills. Preserve user agency.',prompt:JSON.stringify({wish:s.wish,intention:s.intent,success:s.success,constraints:s.constraints}),deterministic:()=>({skills:inferSkills(s.intent).map(x=>({...x,question:`How comfortable are you applying ${x.name.toLowerCase()} to this intention?`}))})});
+   const skills=(result.outputJson?.skills||[]).slice(0,10).map((x,i)=>({id:clean(x.id||x.name||`skill-${i}`).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||`skill-${i}`,name:clean(x.name||`Capability ${i+1}`),description:clean(x.description||x.question||''),question:clean(x.question||''),level:null,required:Math.max(1,Math.min(4,Number(x.required)||3)),approach:'assess'}));
+   if(skills.length>=4)s.skills=skills;
+  }catch(error){console.warn('Wish-specific capability generation failed; using local fallback.',error)}
+ }
+ s.stage='skills';write(s);bus.dispatchEvent(new CustomEvent('changed',{detail:clone(s)}));return clone(s)
+}
 function allSkillsAnswered(s=read()){return !!s?.skills?.length&&s.skills.every(x=>Number.isFinite(x.level))}
 function inferNeeds(s){const gaps=s.skills.filter(x=>x.level<x.required);const knowledge=gaps.map(x=>({id:uid('know'),title:`Learn or verify ${x.name}`,detail:x.description,skillId:x.id,system:'living'}));
  const q=s.intent.toLowerCase();const materials=[];
@@ -71,5 +84,5 @@ function nextRealm(){const st=status(),next=st.explained?.next;return next?.syst
 function transport(system){const s=read(),st=status();const target=system||nextRealm();const payload={schema:'commonweave.weaveling-handoff.v1',source:'commonweave',target,intentionId:st.intention?.id||s?.intentionId||null,title:st.intention?.title||s?.title||'Active intention',intent:st.intention?.intent||s?.intent||'',success:st.intention?.success||s?.success||'',skills:s?.skills||[],knowledge:s?.knowledge||[],materials:s?.materials||[],tasks:s?.tasks||[],next:st.explained?.next||null,approved:true,createdAt:now()};localStorage.setItem(`commonweave.approved-handoffs.${target}.v1`,JSON.stringify([payload,...(()=>{try{return JSON.parse(localStorage.getItem(`commonweave.approved-handoffs.${target}.v1`)||'[]')}catch{return[]}})()].slice(0,100)));window.CommonweaveActionableQuad?.setRoute?.('square',target,`Continue “${payload.title}” in ${target}`);return payload}
 async function directAnswer(query){const runtime=window.CommonweaveModelRuntime;if(!runtime?.generateInteractive)return {answer:'I can help turn this into an intention, or we can continue the active intention. Tell me which outcome you are trying to reach.'};try{const r=await runtime.generateInteractive({purpose:'weaveling-direct-answer',prompt:query,system:'You are Weaveling, a flexible Commonweave guide. Answer the user’s direct question clearly and briefly. When their query is actually about beginning or continuing an intention, orient them to the next concrete step rather than inventing a new intention.',deterministic:()=>({answer:'Start by naming the concrete outcome you want to exist. I will then map the skills, knowledge, materials, tasks, and realm-by-realm route.'})});return {answer:r.outputText||r.outputJson?.answer||'I can help you map the next step.'}}catch{return {answer:'Start by naming the concrete outcome you want to exist. I will then map the skills, knowledge, materials, tasks, and realm-by-realm route.'}}}
 function interpret(input){const s=read(),q=clean(input);if(vague.test(q)&&s)return {kind:'resume',session:clone(s)};if(vague.test(q)&&window.CommonweaveIntentionOrchestrator?.active?.())return {kind:'active',session:newSession(q)};if(question.test(q)&&q.length<180&&!/i want|i wish|my goal|build|make|create|start/.test(q.toLowerCase()))return {kind:'answer'};return {kind:'intake',session:newSession(q)}}
-window.CommonweaveWeavelingSteward={VERSION,bus,session,reset,set,interpret,answerSkill,allSkillsAnswered,buildPlan,updateField,updateTask,addTask,removeTask,approve,status,nextRealm,transport,directAnswer};
+window.CommonweaveWeavelingSteward={VERSION,bus,session,reset,set,interpret,answerSkill,prepareSkills,allSkillsAnswered,buildPlan,updateField,updateTask,addTask,removeTask,approve,status,nextRealm,transport,directAnswer};
 })();

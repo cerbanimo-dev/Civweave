@@ -10,7 +10,7 @@ import {
   addReview as ledgerAddReview, advanceRecurringAgreement, createLedgerEvent, buildCommonweaveBundle, trustSnapshotFromReviews
 } from './ledger.js';
 
-const APP_VERSION = '0.4.0';
+const APP_VERSION = '0.4.1-cardinal-visual';
 const STORE_KEY = 'fellowfare.mvp.state.v3';
 const V2_STORE_KEY = 'fellowfare.mvp.state.v2';
 const LEGACY_STORE_KEY = 'fellowfare.mvp.state.v1';
@@ -296,10 +296,37 @@ function priceLabel(thread) {
 function routeTo(route, options = {}) {
   const next = ROUTES.includes(route) ? route : 'market';
   state.route = next;
+  if (next === 'mall' && !options.keepMallScene) { mallScene = 'atrium'; localStorage.setItem('fellowfare.mall.scene.v1','atrium'); }
   saveState();
   history.replaceState(null, '', `#${next}`);
   render();
   if (!options.keepScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+const FELLOWFARE_ROUTE_ART = {
+  market: './assets/mall/marketplace.webp',
+  loom: './assets/mall/skill-shop.webp',
+  assemblies: './assets/mall/volunteer-hub.webp',
+  inbox: './assets/mall/help-desk.webp',
+  profile: './assets/mall/resource-center.webp'
+};
+
+function applyFellowfareVisualContract() {
+  document.body.classList.add('ff-cardinal-visual');
+  document.documentElement.dataset.fellowfareVersion = APP_VERSION;
+  if (state.route === 'mall') {
+    main.className = 'ff-world-main ff-mall-main';
+    document.body.style.setProperty('--ff-current-scene', `url("${FELLOWFARE_MALL_ART[mallScene] || FELLOWFARE_MALL_ART.atrium}")`);
+    return;
+  }
+  const art = FELLOWFARE_ROUTE_ART[state.route] || './assets/mall/main-atrium.webp';
+  document.body.style.setProperty('--ff-current-scene', `url("${art}")`);
+  const current = main.innerHTML;
+  main.className = 'ff-world-main ff-projected-main';
+  main.innerHTML = `<section class="ff-route-scene" data-ff-route-scene="${esc(state.route)}">
+    <img class="ff-route-scene-art" src="${art}" alt="" aria-hidden="true" />
+    <div class="ff-world-projection" role="region" aria-label="${esc(state.route)} work surface">${current}</div>
+  </section>`;
 }
 
 function render() {
@@ -311,6 +338,7 @@ function render() {
   if (state.route === 'assemblies') renderAssemblies();
   if (state.route === 'inbox') renderInbox();
   if (state.route === 'profile') renderProfile();
+  applyFellowfareVisualContract();
   updateBadges();
 }
 
@@ -318,7 +346,7 @@ function render() {
 const FELLOWFARE_MALL_SCENES = {
   atrium:{label:'Main Atrium',floor:'Ground floor',wing:'Center',icon:'✦',summary:'The social heart of FellowFare. Search the whole mall, see what is moving, and choose a wing.',portals:['exchange','aid','makers','logistics','upper','rooftop'],actions:[['directory','Open directory kiosk'],['post-need','Post a need'],['post-offer','Post an offer'],['market','Browse every listing']]},
   exchange:{label:'Exchange Galleria',floor:'Ground floor',wing:'East Wing',icon:'↔',summary:'Goods, services, borrowing, gifts, and negotiated exchange share one bright arcade.',portals:['atrium','marketplace','free-store','skill-shop','tool-rental'],actions:[['market','Browse all exchange threads'],['post-offer','Open a storefront listing']]},
-  marketplace:{label:'Marketplace',floor:'Ground floor',wing:'East Wing',icon:'▦',summary:'Buy, sell, barter, commission, and assemble offers without hiding the terms.',portals:['exchange','free-store','skill-shop'],actions:[['market','Open classic marketplace'],['post-need','Request something'],['post-offer','List something']]},
+  marketplace:{label:'Marketplace',floor:'Ground floor',wing:'East Wing',icon:'▦',summary:'Buy, sell, barter, commission, and assemble offers without hiding the terms.',portals:['exchange','free-store','skill-shop'],actions:[['market','Open marketplace'],['post-need','Request something'],['post-offer','List something']]},
   'free-store':{label:'Free Store',floor:'Ground floor',wing:'East Wing',icon:'♡',summary:'A gift-economy storefront for taking, leaving, donating, and wish-listing useful things.',portals:['marketplace','tool-rental','exchange'],actions:[['filter-gift','Show gifts and free offers'],['post-offer','Donate an item'],['post-need','Add a wish']]},
   'skill-shop':{label:'Skill Shop',floor:'Ground floor',wing:'East Wing',icon:'✎',summary:'People offer teaching, mentoring, repair, care, and specialist help. Learning paths can cross into Living School.',portals:['marketplace','tool-rental','makers'],actions:[['filter-learning','Browse learning and services'],['post-offer','Offer a skill'],['loom-provider','Discover what I can offer']]},
   'tool-rental':{label:'Tool Rental',floor:'Ground floor',wing:'East Wing',icon:'⚒',summary:'Reserve, borrow, return, and maintain shared tools and spaces.',portals:['free-store','skill-shop','repair-cafe','loading-dock'],actions:[['filter-tools','Browse tools and spaces'],['post-need','Request a tool'],['post-offer','Lend a tool']]},
@@ -369,6 +397,13 @@ const FELLOWFARE_MALL_ART = {
 };
 
 const FELLOWFARE_SCENE_FEATURES={
+ atrium:[['Exchange Galleria','Enter the illustrated marketplace and exchange wing.',3,25,28,27,'scene-exchange'],['Mutual Aid Wing','Enter help, resources, and care coordination.',69,25,28,27,'scene-aid'],['Makers Arcade','Enter skills, tools, repair, and learning.',3,56,28,22,'scene-makers'],['Logistics Concourse','Enter transport, delivery, and regional routing.',69,56,28,22,'scene-logistics'],['Upper Gallery','Enter organizations, housing, time banking, and events.',30,20,40,18,'scene-upper'],['Rooftop Commons','Enter assemblies and shared outdoor projects.',30,79,40,16,'scene-rooftop']],
+ exchange:[['Marketplace','Browse offers, requests, local goods, and commissions.',4,25,29,28,'market'],['Free Store','Open gift-economy exchange.',68,25,29,28,'filter-gift'],['Help Desk','Ask for guided support.',35,58,30,25,'post-need']],
+ aid:[['Help Desk','Ask for practical help and navigation.',3,28,29,24,'post-need'],['Resource Center','Browse supplies, referrals, housing, and transport.',68,28,29,24,'market'],['Community Pantry','Find food and coordinate shared meals.',35,62,30,24,'filter-food']],
+ makers:[['Repair Café','Open repair requests and repair offers.',3,30,28,24,'filter-repair'],['Skill Shop','Find or teach a skill.',69,30,28,24,'filter-learning'],['Tool Rental','Browse shared tools and workspaces.',35,63,30,24,'filter-tools']],
+ upper:[['Resource Center','Browse local resources and services.',3,34,29,28,'market'],['Volunteer Hub','Join a shift, team, or assembly.',68,34,29,28,'assemblies']],
+ rooftop:[['Volunteer Hub','Open collective opportunities and active teams.',3,35,29,30,'assemblies'],['Community Assembly','Coordinate a shared project.',68,35,29,30,'post-collective']],
+ logistics:[['Tool Rental','Reserve tools and record returns.',3,34,29,28,'filter-tools'],['Help Desk','Coordinate pickup, delivery, or transportation.',68,34,29,28,'filter-transport']],
  marketplace:[['Offers','Browse goods, services, and available help.',4,29,28,17,'market'],['Requests','Browse needs and requests for support.',69,29,27,17,'market'],['Local Goods','Explore nearby goods and producers.',3,55,27,18,'market'],['Commissions','Request or offer custom work.',70,55,27,18,'post-need']],
  'free-store':[['Donate Here','Offer useful items without payment.',3,28,28,16,'post-offer'],['Take What You Need','Browse free and gift-economy listings.',70,28,27,16,'filter-gift'],['Clothing','Browse or donate clothing.',3,45,28,17,'filter-gift'],['Household','Browse or donate household supplies.',69,45,28,17,'filter-gift']],
  'help-desk':[['How Can We Help?','Open support for resources, housing, food, care, or community navigation.',3,42,28,23,'post-need'],['Translation Support','Request language and translation support.',70,43,27,18,'post-need'],['Accessibility Support','Open accessibility assistance and accommodations.',70,72,27,18,'post-need'],['Care Packages','Browse or contribute emergency care packages.',3,72,28,18,'filter-gift']],
@@ -400,37 +435,32 @@ function mallSceneStyle(id){
   return `--mall-scene-index:${index};`;
 }
 function renderMall(){
-  const scene=FELLOWFARE_MALL_SCENES[mallScene]||FELLOWFARE_MALL_SCENES.atrium;
-  const metrics=mallMetrics();
-  const portalCards=scene.portals.map(id=>{const target=FELLOWFARE_MALL_SCENES[id];return `<button class="mall-portal" data-mall-scene="${id}"><span>${target.icon}</span><strong>${esc(target.label)}</strong><small>${esc(target.floor)} · ${esc(target.wing)}</small></button>`}).join('');
-  const actions=scene.actions.map(([action,label])=>`<button class="button ${action==='directory'?'button-secondary':'button-ghost'}" data-mall-action="${action}">${esc(label)}</button>`).join('');
-  const directory=mallDirectoryOpen?renderMallDirectory():'';
-  main.innerHTML=`<div class="page mall-page">
-    <section class="mall-toolbar" aria-label="FellowFare visual mall controls">
-      <div><p class="eyebrow">FellowFare Mall · ${esc(scene.floor)}</p><h1>${scene.icon} ${esc(scene.label)}</h1></div>
-      <div class="mall-toolbar-actions"><button class="button button-ghost compact" data-mall-action="directory">Directory</button><button class="button button-ghost compact" data-route="market">Classic market</button></div>
-    </section>
-    <section class="mall-scene" data-mall-scene-id="${mallScene}" style="${mallSceneStyle(mallScene)}" aria-label="Visual placeholder for ${esc(scene.label)}">
-      ${FELLOWFARE_MALL_ART[mallScene]?`<img class="mall-scene-background" src="${FELLOWFARE_MALL_ART[mallScene]}" alt="FellowFare ${esc(scene.label)}">${renderMallFeatureHotspots(mallScene)}`:`<div class="mall-placeholder-art" aria-hidden="true"><span class="mall-placeholder-icon">${scene.icon}</span><i></i><i></i><i></i></div>`}
-      <div class="mall-scene-copy"><span class="mall-location-chip">${esc(scene.wing)}</span><h2>${esc(scene.label)}</h2><p>${esc(scene.summary)}</p><small>${FELLOWFARE_MALL_ART[mallScene]?'Illustrated environment active':'Illustrated background slot ready'} · scene ID <code>${mallScene}</code></small></div>
-      <div class="mall-status-strip"><span><strong>${metrics.needs}</strong> needs</span><span><strong>${metrics.offers}</strong> offers</span><span><strong>${metrics.collectives}</strong> collectives</span><span><strong>${metrics.agreements}</strong> active arrangements</span></div>
-    </section>
-    <section class="mall-actions panel"><div class="section-heading"><div><p class="eyebrow">Counter actions</p><h2>What can happen here</h2></div></div><div class="mall-action-grid">${actions}</div></section>
-    <section class="mall-portals"><div class="section-heading"><div><p class="eyebrow">Walk the mall</p><h2>Nearby destinations</h2></div></div><div class="mall-portal-grid">${portalCards}</div></section>
-    ${directory}
-  </div>`;
+  let scene=FELLOWFARE_MALL_SCENES[mallScene]||FELLOWFARE_MALL_SCENES.atrium;
+  let art=FELLOWFARE_MALL_ART[mallScene];
+  if(!art){
+    mallScene='atrium';
+    scene=FELLOWFARE_MALL_SCENES.atrium;
+    art=FELLOWFARE_MALL_ART.atrium;
+    localStorage.setItem('fellowfare.mall.scene.v1','atrium');
+  }
+  document.body.style.setProperty('--ff-current-scene', `url("${art}")`);
+  main.innerHTML=`<section class="mall-scene ff-image-screen" data-mall-scene-id="${mallScene}" style="${mallSceneStyle(mallScene)}" aria-label="${esc(scene.label)}">
+    <img class="mall-scene-background" src="${art}" alt="FellowFare ${esc(scene.label)}" />
+    ${renderMallFeatureHotspots(mallScene)}
+  </section>`;
 }
 function renderMallDirectory(){
   const query=mallSearch.trim().toLowerCase();
   const entries=Object.entries(FELLOWFARE_MALL_SCENES).filter(([id,s])=>!query||`${id} ${s.label} ${s.summary} ${s.floor} ${s.wing}`.toLowerCase().includes(query));
   return `<section class="mall-directory panel" aria-label="Mall directory"><div class="section-heading"><div><p class="eyebrow">Directory kiosk</p><h2>Find anything in FellowFare</h2></div><button class="icon-button" data-mall-action="close-directory" aria-label="Close directory">×</button></div><label class="field"><span>Search rooms and functions</span><input id="mallDirectorySearch" value="${esc(mallSearch)}" placeholder="tools, food, housing, repair, rides…"></label><div class="mall-directory-grid">${entries.map(([id,s])=>`<button data-mall-scene="${id}"><span>${s.icon}</span><strong>${esc(s.label)}</strong><small>${esc(s.floor)} · ${esc(s.wing)}</small><em>${esc(s.summary)}</em></button>`).join('')||'<div class="empty-state"><strong>No room matched.</strong><p>Try a broader word or open the classic market.</p></div>'}</div><p class="muted-copy">The kiosk is already wired to people, listings, assemblies, agreements, and future storefront plugins. Artwork can replace each placeholder without changing scene IDs.</p></section>`;
 }
-function enterMallScene(id){if(!FELLOWFARE_MALL_SCENES[id])return;mallScene=id;mallDirectoryOpen=false;localStorage.setItem('fellowfare.mall.scene.v1',id);renderMall();window.scrollTo({top:0,behavior:'smooth'});}
+function enterMallScene(id){if(!FELLOWFARE_MALL_SCENES[id])return;if(!FELLOWFARE_MALL_ART[id]){toast('That room still needs its illustrated host scene.');return;}mallScene=id;mallDirectoryOpen=false;localStorage.setItem('fellowfare.mall.scene.v1',id);render();}
 function setMarketFilter(query,mode='all'){state.filters.query=query;state.filters.mode=mode;saveState();routeTo('market');}
 function runMallAction(action){
+  if(action?.startsWith('scene-')){enterMallScene(action.slice(6));return;}
   const mappings={market:()=>routeTo('market'),inbox:()=>routeTo('inbox'),assemblies:()=>routeTo('assemblies'),profile:()=>routeTo('profile'),'post-need':()=>openComposer('need'),'post-offer':()=>openComposer('offer'),'post-collective':()=>openComposer('collective'),'market-needs':()=>{state.filters.mode='need';state.filters.query='';saveState();routeTo('market')},'market-offers':()=>{state.filters.mode='offer';state.filters.query='';saveState();routeTo('market')},'market-collective':()=>{state.filters.mode='collective';state.filters.query='';saveState();routeTo('market')},'filter-gift':()=>setMarketFilter('Gift'),'filter-learning':()=>setMarketFilter('Learning'),'filter-tools':()=>setMarketFilter('Tools & space'),'filter-food':()=>setMarketFilter('Food'),'filter-work':()=>setMarketFilter('Work'),'filter-repair':()=>setMarketFilter('Repair'),'filter-transport':()=>setMarketFilter('Transport'),'filter-housing':()=>setMarketFilter('Housing'),'filter-goods':()=>setMarketFilter('Goods'),'market-credit':()=>setMarketFilter('Community credit'),'loom-matches':()=>{state.loom.action='matches';saveState();routeTo('loom')},'loom-assembly':()=>{state.loom.action='assembly';saveState();routeTo('loom')},'loom-provider':()=>{state.loom.action='provider';saveState();routeTo('loom')},'loom-signals':()=>{state.loom.action='signals';saveState();routeTo('loom')},'loom-review':()=>{state.loom.action='review';saveState();routeTo('loom')}};
-  if(action==='directory'){mallDirectoryOpen=true;renderMall();setTimeout(()=>document.querySelector('#mallDirectorySearch')?.focus(),0);return;}
-  if(action==='close-directory'){mallDirectoryOpen=false;renderMall();return;}
+  if(action==='directory'){enterMallScene('resource-center');return;}
+  if(action==='close-directory'){enterMallScene('atrium');return;}
   mappings[action]?.();
 }
 
@@ -1844,7 +1874,7 @@ function registerServiceWorker() {
 
 function initialize() {
   const hash = location.hash.replace('#','');
-  if (ROUTES.includes(hash)) state.route = hash;
+  if (ROUTES.includes(hash)) state.route = hash; else state.route = 'mall';
   populateComposerOptions();
   render();
   registerServiceWorker();
@@ -1854,8 +1884,14 @@ function initialize() {
 document.addEventListener('click', (event) => {
   const target = event.target.closest('button, [data-route]');
   if (!target) return;
-  if(target.dataset.mallFeature){const action=target.dataset.mallFeatureAction;const label=target.dataset.mallFeature;const description=target.dataset.mallDescription;const scene=FELLOWFARE_MALL_SCENES[mallScene];main.querySelector('.mall-feature-description')?.remove();const card=document.createElement('aside');card.className='mall-feature-description';card.innerHTML=`<button class="icon-button" data-close-mall-feature aria-label="Close">×</button><p class="eyebrow">${esc(scene.label)}</p><h2>${esc(label)}</h2><p>${esc(description)}</p>${action?`<button class="button button-primary" data-mall-action="${esc(action)}">Open this feature</button>`:''}`;main.querySelector('.mall-scene')?.append(card);return;}if(target.dataset.closeMallFeature!==undefined){target.closest('.mall-feature-description')?.remove();return;}if (target.dataset.mallScene) { enterMallScene(target.dataset.mallScene); return; }
+  if(target.dataset.mallFeature){
+    const action=target.dataset.mallFeatureAction;
+    if(action) runMallAction(action); else toast(target.dataset.mallDescription || target.dataset.mallFeature);
+    return;
+  }
+  if (target.dataset.mallScene) { enterMallScene(target.dataset.mallScene); return; }
   if (target.dataset.mallAction) { runMallAction(target.dataset.mallAction); return; }
+  if (target.dataset.commonweaveReturn !== undefined) { location.href='../../index.html?visual=1#square'; return; }
   if (target.dataset.route) routeTo(target.dataset.route);
   if (target.dataset.openComposer) openComposer(target.dataset.openComposer);
   if (target.id === 'quickCreate' || target.id === 'mobileCreate') openComposer('need');

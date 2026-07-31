@@ -3163,27 +3163,58 @@ body.ls-fit-room .ls-visual-frame img{object-fit:contain}
 @keyframes cwWorldBreathe{50%{opacity:.5}}@keyframes cwWorldBob{50%{transform:translateY(-5px)}}
 @media(prefers-reduced-motion:reduce){.cw-world-ambient,.cw-world-actor-glyph{animation:none}}
 
+
+/* RC22.3.9 CARDINAL VISUAL CONTRACT */
+body.ls-visual-open .topbar,body.ls-visual-open .active-context-strip,body.ls-visual-open .workspace-bar,body.ls-visual-open .app-shell,body.ls-visual-open>.skip{display:none!important}
+#livingVisualWorld{display:block!important;z-index:5000!important}
+.ls-visual-stage,.ls-visual-frame{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;aspect-ratio:auto!important;box-shadow:none!important}
+.ls-visual-frame img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important}
+.ls-hotspot span,.cw-world-object span,.cw-world-actor-name,.cw-world-toast,.ls-room-label,.ls-directory,.ls-action-tray,.ls-classic-fallback{display:none!important}
+.ls-hotspot:hover,.ls-hotspot:focus-visible,.cw-world-object:hover,.cw-world-object:focus-visible{border-color:transparent!important;background:transparent!important;box-shadow:none!important;outline:3px solid rgba(255,244,155,.78)!important;outline-offset:-3px}
+.ls-image-dock{position:fixed!important;z-index:5050!important;top:auto!important;bottom:max(7px,env(safe-area-inset-bottom))!important;left:50%!important;transform:translateX(-50%)!important;width:min(92vw,440px)!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:6px!important;padding:6px!important;border:1px solid rgba(255,239,160,.38)!important;border-radius:22px!important;background:rgba(10,8,5,.8)!important;backdrop-filter:blur(14px)!important;box-shadow:0 14px 38px #0009!important}
+.ls-image-dock button{min-height:58px!important;padding:0!important;border:0!important;border-radius:16px!important;background:transparent!important;overflow:hidden!important}
+.ls-image-dock img{width:100%;height:100%;object-fit:cover;border-radius:14px;filter:brightness(.72) saturate(.9);transition:.16s}
+.ls-image-dock button:hover img,.ls-image-dock button:focus-visible img{filter:brightness(1.05) saturate(1.12);transform:scale(1.04)}
+.ls-image-dock button:focus-visible{outline:3px solid #fff0a8;outline-offset:2px}
+.ls-version-plaque{position:fixed;z-index:5051;top:max(8px,env(safe-area-inset-top));left:8px;display:flex;align-items:center;gap:5px;padding:4px 8px 4px 4px;border:1px solid rgba(255,240,167,.42);border-radius:999px;background:rgba(8,7,4,.8);color:#fff0a8;font:800 .68rem ui-monospace,monospace;backdrop-filter:blur(10px)}
+.ls-version-plaque img{width:28px;height:28px;object-fit:contain;border-radius:50%;background:#fff}
+.ls-visual-projection{position:fixed;z-index:5100;inset:0;display:none;background:#050403;overflow:hidden}
+.ls-visual-projection.open{display:block}
+.ls-projection-scene{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.55) saturate(.85)}
+.ls-projection-surface{position:absolute;z-index:2;left:50%;bottom:max(5.2rem,calc(env(safe-area-inset-bottom) + 4.6rem));transform:translateX(-50%);width:min(92vw,900px);max-height:58dvh;overflow:auto;padding:1rem 1.1rem;border:0;background:radial-gradient(ellipse at center,rgba(16,12,7,.7),rgba(5,4,2,.88) 64%,transparent 88%);color:#fff6cf;text-shadow:0 1px 2px #000}
+.ls-projection-close{position:sticky;top:0;float:right;width:42px;height:42px;padding:3px;border:0;border-radius:50%;background:rgba(0,0,0,.3);z-index:5}
+.ls-projection-close img{width:100%;height:100%;object-fit:contain}
+#livingVisualProjectionHost{clear:both}
+.ls-projected-workspace{display:block!important;visibility:visible!important;position:relative!important;inset:auto!important;width:100%!important;max-width:none!important;max-height:none!important;overflow:visible!important;background:transparent!important;color:#fff6cf!important;border:0!important;box-shadow:none!important;padding:.4rem!important}
+.ls-projected-workspace *{max-width:100%;box-sizing:border-box}
+.ls-projected-workspace .panel,.ls-projected-workspace .card,.ls-projected-workspace section,.ls-projected-workspace article{background:transparent!important;border:0!important;box-shadow:none!important;color:inherit!important}
+.ls-projected-workspace input,.ls-projected-workspace textarea,.ls-projected-workspace select{background:rgba(12,8,4,.48)!important;color:#fff8dd!important;border:0!important;border-bottom:2px solid rgba(238,255,45,.66)!important;border-radius:0!important}
+.ls-projected-workspace button,.ls-projected-workspace .button{background:rgba(236,61,159,.36)!important;color:#fff8dd!important;border:1px solid rgba(238,255,45,.42)!important;box-shadow:0 0 18px rgba(236,61,159,.12)!important}
+@media(max-width:620px){.ls-image-dock{width:calc(100vw - 12px)!important}.ls-image-dock button{min-height:50px!important}.ls-projection-surface{width:calc(100vw - 14px);max-height:64dvh;bottom:max(4.7rem,calc(env(safe-area-inset-bottom) + 4.1rem));padding:.8rem}}
+
 </style>
 </head>
 <body>
 
 <div id="livingVisualWorld" aria-hidden="true">
-  <div class="ls-visual-tools" aria-label="Visual campus tools">
-    <button type="button" data-ls-back aria-label="Previous room">← Back</button>
-    <button type="button" data-ls-home aria-label="Return to exterior campus">Home</button>
-    <button type="button" data-ls-directory>Campus map</button>
-    <button type="button" data-ls-hotspots>Tap zones</button>
-    <button type="button" data-ls-actions>Room actions</button>
-    <button type="button" data-ls-fit>Fit</button>
-    <button type="button" data-ls-classic>Classic UI</button>
-  </div>
+  <nav class="ls-visual-tools ls-image-dock" aria-label="Living School visual dock">
+    <button type="button" data-ls-back aria-label="Previous illustrated room"><img src="visual-assets/courtyard.webp" alt=""></button>
+    <button type="button" data-ls-home aria-label="Exterior campus"><img src="visual-assets/exterior.webp" alt=""></button>
+    <button type="button" data-ls-directory aria-label="Campus map"><img src="visual-assets/map.webp" alt=""></button>
+    <button type="button" data-ls-commonweave aria-label="Return to Commonweave"><img src="../../logos/commonweave.webp" alt=""></button>
+  </nav>
+  <div class="ls-version-plaque"><img src="../../logos/living-school.webp" alt=""><span>v1.0.9</span></div>
   <div class="ls-visual-stage" id="livingVisualStage"></div>
-  <div class="ls-room-label"><strong id="livingVisualTitle">Living School</strong><span id="livingVisualHint">Tap the illustrated room to explore.</span></div>
   <div id="livingVisualLive" class="ls-visual-live" aria-live="polite"></div>
 </div>
-<div id="livingVisualActions" class="ls-action-tray" aria-hidden="true"><button type="button" class="ls-action-close" data-ls-close-actions aria-label="Close room actions">×</button><h3 id="livingVisualActionsTitle">Room actions</h3><div class="ls-action-list" id="livingVisualActionList"></div></div>
-<div id="livingVisualDirectory" class="ls-directory" aria-hidden="true"><section class="ls-directory-card"><header class="ls-directory-head"><h2>Living School Directory</h2><button type="button" data-ls-close-directory aria-label="Close directory">×</button></header><div class="ls-directory-grid" id="livingVisualDirectoryGrid"></div></section></div>
-<div id="livingClassicFallback" class="ls-classic-fallback" aria-hidden="true"><section class="ls-classic-card"><h2 id="livingFallbackTitle">Open classic workspace?</h2><p id="livingFallbackText">This room's complete controls live in the regular interface for now.</p><div class="actions"><button type="button" class="primary" data-ls-open-classic>Open full controls</button><button type="button" data-ls-cancel-classic>Stay in visual mode</button></div></section></div>
+<div id="livingVisualProjection" class="ls-visual-projection" aria-hidden="true">
+  <img id="livingVisualProjectionScene" class="ls-projection-scene" src="visual-assets/moss.webp" alt="An illustrated Living School room hosting an in-world learning surface">
+  <section class="ls-projection-surface" aria-label="Living School in-world work surface">
+    <button type="button" class="ls-projection-close" data-ls-close-projection aria-label="Return to the illustrated room"><img src="../../logos/living-school.webp" alt=""></button>
+    <div id="livingVisualProjectionHost"></div>
+  </section>
+</div>
+<div id="livingVisualActions" hidden></div><div id="livingVisualDirectory" hidden><div id="livingVisualDirectoryGrid"></div></div><div id="livingClassicFallback" hidden></div>
 
   <a class="skip" href="#main">Skip to school</a>
 
@@ -7124,7 +7155,7 @@ Final model-native output:
 
     function hostedEntitlementIsActive(){
   
-    // RC17.9 Living School visual campus: image-first navigation with complete classic fallbacks.
+    // RC17.9 Living School visual campus: image-first navigation with in-world work surfaces.
     const LS_VISUAL_KEY="living-school.visual-mode.v1";
     const LS_VISUAL_PARAMS=new URLSearchParams(location.search);
     const LS_FORCE_VISUAL_DEFAULT=LS_VISUAL_PARAMS.get("visual")==="1"||LS_VISUAL_PARAMS.get("commonweave")==="1";
@@ -7178,10 +7209,9 @@ Final model-native output:
         onNavigate:room=>openLivingVisualRoom(room),
         onWorkspace:target=>openLivingClassicTarget(target),
         onAction:item=>{
-          if(item.action==="moss"){closeLivingVisual();document.getElementById("ask-moss")?.click();return;}
+          if(item.action==="moss"){openLivingVisualRoom("moss");return;}
           if(item.action==="directory"){openLivingDirectory();return;}
-          if(item.action==="moss"){closeLivingVisual();document.getElementById("ask-moss")?.click();return;}
-          if(item.action==="cerbanimo"){closeLivingVisual();document.getElementById("open-cerbanimo-connection")?.click();return;}
+          if(item.action==="cerbanimo"){location.href="../cerbanimo/index.html?commonweave=1&visual=1#world-title";return;}
           if(item.action==="quiet-library"){const quiet=livingWorldEngine.toggle("living-school.library.quiet");livingWorldEngine.set("living-school.library.mood",quiet?"quiet":"busy");livingWorldEngine.showMessage(quiet?"Quiet study settles over the stacks.":"The library returns to its bright communal hum.");livingWorldEngine.render();return;}
         },
         onAnnounce:announceLiving
@@ -7306,59 +7336,71 @@ Final model-native output:
     function closeLivingActions(){document.getElementById("livingVisualActions")?.classList.remove("open");document.getElementById("livingVisualActions")?.setAttribute("aria-hidden","true");}
     function announceLiving(message){const live=document.getElementById("livingVisualLive");if(live)live.textContent=message;}
     function openLivingVisualRoom(name,{push=true}={}){if(!LS_VISUAL_ROOMS[name])name="exterior";if(push&&name!==lsVisualRoom)lsVisualHistory.push(lsVisualRoom);lsVisualRoom=name;renderLivingVisualRoom();closeLivingDirectory();closeLivingActions();if(history.state?.livingRoom!==name)history.pushState({...history.state,livingRoom:name},"",location.href);announceLiving(`Entered ${LS_VISUAL_ROOMS[name].label}`);}
-    function openLivingVisual(){document.body.classList.add("ls-visual-open");document.getElementById("livingVisualWorld")?.setAttribute("aria-hidden","false");localStorage.setItem(LS_VISUAL_KEY,"visual");renderLivingVisualRoom();}
-    function closeLivingVisual(){document.body.classList.remove("ls-visual-open","ls-show-hotspots");document.getElementById("livingVisualWorld")?.setAttribute("aria-hidden","true");localStorage.setItem(LS_VISUAL_KEY,"classic");}
-    function openLivingDirectory(){document.getElementById("livingVisualDirectory")?.classList.add("open");document.getElementById("livingVisualDirectory")?.setAttribute("aria-hidden","false");}
-    function closeLivingDirectory(){document.getElementById("livingVisualDirectory")?.classList.remove("open");document.getElementById("livingVisualDirectory")?.setAttribute("aria-hidden","true");}
+    function openLivingVisual(){document.body.classList.add("ls-visual-open");document.body.classList.remove("ls-classic-open");document.getElementById("livingVisualWorld")?.setAttribute("aria-hidden","false");localStorage.setItem(LS_VISUAL_KEY,"visual");renderLivingVisualRoom();}
+    function closeLivingVisual(){openLivingVisual();}
+    function openLivingDirectory(){openLivingVisualRoom("map");}
+    function closeLivingDirectory(){}
+    let lsProjectedNode=null,lsProjectionMarker=null;
+    function closeLivingProjection(){
+      const projection=document.getElementById("livingVisualProjection");
+      if(lsProjectedNode&&lsProjectionMarker?.parentNode){lsProjectedNode.classList.remove("ls-projected-workspace");lsProjectionMarker.parentNode.insertBefore(lsProjectedNode,lsProjectionMarker);lsProjectionMarker.remove();}
+      lsProjectedNode=null;lsProjectionMarker=null;
+      projection?.classList.remove("open");projection?.setAttribute("aria-hidden","true");
+      document.body.classList.remove("ls-visual-projection-open");
+    }
     function activateLivingVisualSpot(spot){
       if(!spot)return;
       if(spot.room){openLivingVisualRoom(spot.room);return;}
       if(spot.action==="directory"){openLivingDirectory();return;}
-      if(spot.action==="moss"){closeLivingVisual();document.getElementById("ask-moss")?.click();return;}
-      if(spot.action==="cerbanimo"){closeLivingVisual();document.getElementById("open-cerbanimo-connection")?.click();return;}
+      if(spot.action==="moss"){openLivingVisualRoom("moss");return;}
+      if(spot.action==="cerbanimo"){location.href="../cerbanimo/index.html?commonweave=1&visual=1#world-title";return;}
       if(spot.workspace){openLivingClassicTarget(spot);return;}
     }
     function openLivingClassicTarget(target){
       if(!target?.workspace)return;
-      lsPendingClassic=null;
-      closeLivingVisual();
       setWorkspace(target.workspace,{focusId:target.focus||null});
       setTimeout(()=>{
-        const node=target.focus?document.getElementById(target.focus):null;
-        node?.scrollIntoView({behavior:"smooth",block:"start"});
-        const visualButton=document.getElementById("living-visual-return");
-        if(visualButton){visualButton.textContent=`Return to ${LS_VISUAL_ROOMS[lsVisualRoom]?.label||"Visual Campus"}`;}
-      },80);
+        closeLivingProjection();
+        const node=(target.focus&&document.getElementById(target.focus))||document.querySelector(`.workspace-region[data-workspace="${target.workspace}"]`)||document.querySelector(`[data-workspace="${target.workspace}"]`);
+        const host=document.getElementById("livingVisualProjectionHost"),projection=document.getElementById("livingVisualProjection"),scene=document.getElementById("livingVisualProjectionScene");
+        if(!node||!host||!projection){announceLiving("This function needs a dedicated illustrated host asset before it can open here.");return;}
+        lsProjectionMarker=document.createComment("living-school-projection-marker");node.parentNode.insertBefore(lsProjectionMarker,node);lsProjectedNode=node;host.replaceChildren(node);
+        node.classList.add("ls-projected-workspace");
+        if(scene)scene.src=(LS_VISUAL_ROOMS[lsVisualRoom]||LS_VISUAL_ROOMS.moss).image;
+        projection.classList.add("open");projection.setAttribute("aria-hidden","false");document.body.classList.add("ls-visual-projection-open");
+        node.querySelector("input,textarea,select,button")?.focus({preventScroll:true});
+      },60);
     }
     function bindLivingVisual(){
       const grid=document.getElementById("livingVisualDirectoryGrid");
       const classicDestinations=[];
       if(grid){
         const visualItems=Object.entries(LS_VISUAL_ROOMS).map(([key,room],index)=>`<button type="button" class="ls-directory-item" data-ls-room="${key}"><b>${String(index+1).padStart(2,"0")}</b><span><strong>${lsEsc(room.label)}</strong><small>${lsEsc(room.hint)}</small></span></button>`);
-        const classicItems=classicDestinations.map(item=>`<button type="button" class="ls-directory-item" data-ls-workspace="${item.workspace}" data-ls-focus="${item.focus}"><b>${String(item.n).padStart(2,"0")}</b><span><strong>${lsEsc(item.label)}</strong><small>${lsEsc(item.hint)} · Classic controls</small></span></button>`);
+        const classicItems=classicDestinations.map(item=>`<button type="button" class="ls-directory-item" data-ls-workspace="${item.workspace}" data-ls-focus="${item.focus}"><b>${String(item.n).padStart(2,"0")}</b><span><strong>${lsEsc(item.label)}</strong><small>${lsEsc(item.hint)} · In-world controls</small></span></button>`);
         grid.innerHTML=[...visualItems,...classicItems].join("");
       }
       grid?.querySelectorAll("[data-ls-room]").forEach(button=>button.addEventListener("click",()=>openLivingVisualRoom(button.dataset.lsRoom)));
       grid?.querySelectorAll("[data-ls-workspace]").forEach(button=>button.addEventListener("click",()=>openLivingClassicTarget({workspace:button.dataset.lsWorkspace,focus:button.dataset.lsFocus,label:button.querySelector("strong")?.textContent||"Workspace"})));
       document.querySelector("[data-ls-back]")?.addEventListener("click",()=>openLivingVisualRoom(lsVisualHistory.pop()||"exterior",{push:false}));
       document.querySelector("[data-ls-home]")?.addEventListener("click",()=>openLivingVisualRoom("exterior"));
+      document.querySelector("[data-ls-commonweave]")?.addEventListener("click",()=>{location.href="../../index.html?visual=1#square";});
+      document.querySelector("[data-ls-close-projection]")?.addEventListener("click",closeLivingProjection);
       document.querySelector("[data-ls-directory]")?.addEventListener("click",openLivingDirectory);
       document.querySelector("[data-ls-close-directory]")?.addEventListener("click",closeLivingDirectory);
-      document.querySelector("[data-ls-hotspots]")?.addEventListener("click",()=>document.body.classList.toggle("ls-show-hotspots"));
-      document.querySelector("[data-ls-actions]")?.addEventListener("click",()=>document.getElementById("livingVisualActions")?.classList.contains("open")?closeLivingActions():openLivingActions());
+      
+      
       document.querySelector("[data-ls-close-actions]")?.addEventListener("click",closeLivingActions);
-      document.querySelector("[data-ls-fit]")?.addEventListener("click",event=>{document.body.classList.toggle("ls-fit-room");event.currentTarget.textContent=document.body.classList.contains("ls-fit-room")?"Fill":"Fit";localStorage.setItem("living-school.visual-fit.v1",document.body.classList.contains("ls-fit-room")?"contain":"cover");});
-      document.querySelector("[data-ls-classic]")?.addEventListener("click",closeLivingVisual);
+      
+      
       document.querySelector("[data-ls-cancel-classic]")?.addEventListener("click",()=>{lsPendingClassic=null;document.getElementById("livingClassicFallback").classList.remove("open");document.getElementById("livingClassicFallback").setAttribute("aria-hidden","true");});
       document.querySelector("[data-ls-open-classic]")?.addEventListener("click",()=>{const target=lsPendingClassic;document.getElementById("livingClassicFallback").classList.remove("open");document.getElementById("livingClassicFallback").setAttribute("aria-hidden","true");closeLivingVisual();if(target?.workspace)setWorkspace(target.workspace,{focusId:target.focus||null});lsPendingClassic=null;});
       document.getElementById("livingVisualDirectory")?.addEventListener("click",event=>{if(event.target===event.currentTarget)closeLivingDirectory();});
-      const visualButton=document.createElement("button");visualButton.type="button";visualButton.className="header-action";visualButton.id="living-visual-return";visualButton.textContent="Visual Campus";visualButton.setAttribute("aria-label","Open Living School visual campus");visualButton.addEventListener("click",openLivingVisual);document.getElementById("app-header")?.insertBefore(visualButton,document.getElementById("ask-moss"));
       if(localStorage.getItem("living-school.visual-fit.v1")==="contain"){document.body.classList.add("ls-fit-room");const fit=document.querySelector("[data-ls-fit]");if(fit)fit.textContent="Fill";}
       let swipeStart=null;document.getElementById("livingVisualStage")?.addEventListener("pointerdown",event=>{swipeStart={x:event.clientX,y:event.clientY};});document.getElementById("livingVisualStage")?.addEventListener("pointerup",event=>{if(!swipeStart)return;const dx=event.clientX-swipeStart.x,dy=event.clientY-swipeStart.y;swipeStart=null;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4){if(dx>0)openLivingVisualRoom(lsVisualHistory.pop()||"exterior",{push:false});else openLivingActions();}});
       window.addEventListener("popstate",event=>{if(document.body.classList.contains("ls-visual-open")&&event.state?.livingRoom&&LS_VISUAL_ROOMS[event.state.livingRoom]){lsVisualRoom=event.state.livingRoom;renderLivingVisualRoom();}});
-      window.addEventListener("keydown",event=>{if(!document.body.classList.contains("ls-visual-open"))return;if(event.key==="Escape"){if(document.getElementById("livingVisualActions")?.classList.contains("open"))closeLivingActions();else if(document.getElementById("livingClassicFallback")?.classList.contains("open"))document.querySelector("[data-ls-cancel-classic]")?.click();else if(document.getElementById("livingVisualDirectory")?.classList.contains("open"))closeLivingDirectory();}else if(event.key.toLowerCase()==="m")openLivingDirectory();else if(event.key.toLowerCase()==="a")openLivingActions();else if(event.key.toLowerCase()==="h")openLivingVisualRoom("exterior");});
+      window.addEventListener("keydown",event=>{if(!document.body.classList.contains("ls-visual-open"))return;if(event.key==="Escape"){if(document.getElementById("livingVisualProjection")?.classList.contains("open"))closeLivingProjection();}else if(event.key.toLowerCase()==="m")openLivingDirectory();else if(event.key.toLowerCase()==="a")openLivingActions();else if(event.key.toLowerCase()==="h")openLivingVisualRoom("exterior");});
       if(LS_FORCE_VISUAL_DEFAULT){try{localStorage.setItem(LS_VISUAL_KEY,"visual");}catch{}}
-      if(LS_FORCE_VISUAL_DEFAULT||localStorage.getItem(LS_VISUAL_KEY)!=="classic")setTimeout(openLivingVisual,80);
+      setTimeout(openLivingVisual,40);
     }
 
     ensureCommerceState();

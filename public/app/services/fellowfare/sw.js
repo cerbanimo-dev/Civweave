@@ -1,4 +1,4 @@
-const CACHE = 'fellowfare-1.0.4-visual-recovery';
+const CACHE = 'fellowfare-0.4.1-cardinal-visual';
 const SHELL = [
   './',
   './index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js',
@@ -10,6 +10,7 @@ const SHELL = [
   './manifest.webmanifest',
   '../../logos/fellowfare-wordmark.png',
   '../../logos/fellowfare.png',
+  '../../logos/commonweave.webp',
   './assets/mall/main-atrium.webp',
   './assets/mall/exchange-galleria.webp',
   './assets/mall/mutual-aid-wing.webp',

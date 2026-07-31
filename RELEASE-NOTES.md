@@ -1,3 +1,12 @@
+# Commonweave Host Node Hub v1.0.9
+
+- Enforces the cardinal visual contract across the host gateway and all five realms.
+- Makes supplied artwork the visible application surface with invisible semantic hotspots.
+- Removes user-facing classic and legacy launch paths.
+- Hosts existing workflows in illustrated projections rather than exposing browser-style shells.
+- Repairs Anarchadia IndexedDB upgrades and wires all supplied FellowFare mall scenes.
+- Bundles Commonweave RC22.3.9 and updated offline caches.
+
 # Commonweave Host Node Hub v1.0.2
 
 - Bundles Commonweave RC22.3.2 with restored Weaveling guided intention stewardship.

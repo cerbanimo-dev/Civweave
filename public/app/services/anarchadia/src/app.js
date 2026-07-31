@@ -39,7 +39,15 @@ const esc = value => String(value ?? '')
   .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
   .replaceAll('"', '&quot;').replaceAll("'", '&#039;');
 const nl2br = value => esc(value).replaceAll('\n', '<br>');
-const route = () => (location.hash || '#hall').slice(1).split('?')[0];
+const VISUAL_HOST_FOR_ROUTE = {
+  workbench:'hall', overview:'observatory', charter:'hub-commons', proposals:'proposal-commons',
+  safeguards:'rails', exchange:'federation', ai:'forge', readiness:'observatory', constitution:'ledger'
+};
+const rawRoute = () => (location.hash || '#hall').slice(1).split('?')[0];
+const route = () => VISUAL_ROUTES.has(rawRoute()) ? rawRoute() : (VISUAL_HOST_FOR_ROUTE[rawRoute()] || 'hall');
+const visualRequested = true;
+const legacyMode = () => false;
+try{localStorage.setItem('anarchadia.interface-mode','visual');}catch{}
 const find = (collection, id) => state[collection]?.find(item => item.id === id);
 
 function formatBytes(bytes = 0) {
@@ -70,79 +78,21 @@ function applySessionSettings() {
   document.body.classList.toggle('large-text', Boolean(settings.largeText));
   document.body.classList.toggle('high-contrast', Boolean(settings.highContrast));
   document.body.classList.toggle('reduce-motion', Boolean(settings.reduceMotion));
-  document.body.classList.toggle('show-hotspots', sessionStorage.getItem('anarchadia-show-hotspots') === '1');
+  document.body.classList.toggle('show-hotspots', new URLSearchParams(location.search).get('debugHotspots') === '1');
 }
 
 function renderOnboarding() {
-  app.innerHTML = `
-    <main class="onboarding visual-onboarding">
-      <picture class="onboarding-art" aria-hidden="true">
-        <source media="(max-width: 760px) and (orientation: portrait)" srcset="assets/screens/home-portrait.webp">
-        <img src="assets/screens/home-landscape.webp" alt="" fetchpriority="high">
-      </picture>
-      <section class="onboarding-panel visual-onboarding-panel">
-        <div class="onboarding-top">
-          <div class="eyebrow">Anarchadia / living amendment system</div>
-          <h1>Enter the hall.<br>Keep the emergency brake.</h1>
-          <p>The illustrated hall is the new interface for a local-first constitutional workbench. It can draft, compare, preserve dissent, test improvements, exchange bundles, and fork. It still cannot certify legitimacy, consensus, identity, rights compliance, or ratification.</p>
-        </div>
-        <div class="onboarding-grid">
-          <article class="card choice accent">
-            <span class="tag acid">Recommended first run</span>
-            <strong>Synthetic Lantern Commons</strong>
-            <p>Open a complete fictional community with proposals, safeguards, records, and readiness drills already waiting behind the doors.</p>
-            <button class="btn primary" data-action="start-fixture">Enter Home Hall</button>
-          </article>
-          <article class="card choice">
-            <span class="tag gold">Blank local workspace</span>
-            <strong>Candidate community draft</strong>
-            <p>Begin with an empty hall. Nothing is published, federated, or treated as authority without a deliberate human action.</p>
-            <button class="btn secondary" data-action="start-blank">Create a new hall</button>
-          </article>
-          <article class="card choice">
-            <span class="tag cyan">Portable continuity</span>
-            <strong>Restore a bundle</strong>
-            <p>Restore a manually exchanged Anarchadia bundle. Conflicts remain visible rather than being quietly overwritten.</p>
-            <button class="btn" data-action="open-import">Choose bundle</button>
-          </article>
-        </div>
-        <div class="notice danger" style="margin:0 1rem 1rem">This is an MVP capability demonstration. The artwork is navigation; the underlying records remain bounded, inspectable, local-first, and human-controlled.</div>
-      </section>
-      <input id="import-file" type="file" accept="application/json,.json" hidden>
-    </main>`;
+  app.innerHTML = `<main class="anarchadia-emergency-entry">
+    <picture aria-hidden="true"><source media="(max-width:760px) and (orientation:portrait)" srcset="assets/screens/home-portrait.webp"><img src="assets/screens/home-landscape.webp" alt=""></picture>
+    <button type="button" data-action="start-blank" aria-label="Enter a new local Home Hall"></button>
+    <div class="anarchadia-version-plaque"><img src="assets/icon-192.png" alt=""><span>v${APP_VERSION}</span></div>
+  </main>`;
 }
-
 function shell(content, title, subtitle = '') {
-  const current = route();
-  const visual = VISUAL_ROUTES.has(current);
-  const navCurrent = CLASSIC_ROUTES.has(current) ? 'workbench' : current;
-  const readiness = readinessSummary(state);
-  return `
-    <div class="shell ${visual ? 'visual-shell' : 'classic-shell'}">
-      <aside class="sidebar">
-        <div class="brand"><img class="brand-mark brand-logo" src="../../logos/anarchadia.webp" alt=""><div><h1>Anarchadia</h1><p>Charter Forge v${APP_VERSION}</p></div></div>
-        <nav class="nav" aria-label="Workspace">
-          ${NAV.map(([id,label]) => `<a href="#${id}" class="${navCurrent === id ? 'active' : ''}">${esc(label)}</a>`).join('')}
-        </nav>
-        <div class="sidebar-foot">
-          <span class="mode-chip ${state.meta.mode !== 'synthetic' ? 'pilot' : ''}">${esc(state.meta.mode)}</span>
-          <div class="muted" style="font-size:.74rem">Local records persist in this browser. No telemetry is included.</div>
-        </div>
-      </aside>
-      <div class="workspace ${visual ? 'visual-workspace' : 'classic-workspace'}">
-        ${visual ? '' : `<header class="topbar">
-          <div class="topbar-title"><strong>${esc(title)}</strong><span>${esc(subtitle || state.meta.communityName)}</span></div>
-          <div class="topbar-actions">
-            ${CLASSIC_ROUTES.has(current) || current === 'workbench' ? '<a class="btn small secondary" href="#hall">Return to hall</a>' : '<a class="btn small ghost" href="#workbench">Open workbench</a>'}
-            <span class="status-chip">${readiness.complete}/${readiness.total} gates</span>
-            <button class="btn small ghost" data-action="accessibility">Accessibility</button>
-            <button class="btn small" data-action="install" ${installPrompt ? '' : 'hidden'}>Install app</button>
-          </div>
-        </header>`}
-        <main id="main" class="${visual ? 'visual-main' : 'classic-main'}">${content}</main>
-      </div>
-      <input id="import-file" type="file" accept="application/json,.json" hidden>
-    </div>`;
+  return `<div class="shell visual-shell cardinal-visual-shell">
+    <main id="main" class="visual-main">${content}</main>
+    <input id="import-file" type="file" accept="application/json,.json" hidden>
+  </div>`;
 }
 
 const VISUAL_ASSETS = {
@@ -240,7 +190,7 @@ const SCENE_HOTSPOTS = {
     {id:'observatory-participation',label:'Participation gauge',detail:'Open safeguards and participation conditions',href:'#safeguards',p:[40,27,19,21],l:[43,32,12,22]},
     {id:'observatory-adoption',label:'Adoption gauge',detail:'Open Federation Chamber',href:'#federation',p:[60,27,19,21],l:[57,32,12,22]},
     {id:'observatory-alerts',label:'Alerts gauge',detail:'Open actionable system alerts',action:'open-alert-center',p:[80,27,19,21],l:[70,32,12,22]},
-    {id:'observatory-overview',label:'System Overview map',detail:'Open classic system overview',href:'#overview',p:[19,49,62,23],l:[25,55,39,24]},
+    {id:'observatory-overview',label:'System Overview map',detail:'Open system overview projection',href:'#overview',p:[19,49,62,23],l:[25,55,39,24]},
     {id:'observatory-heatmap',label:'Activity Heatmap',detail:'Read privacy-bounded activity guidance',info:'observatory-heatmap',p:[1,70,30,18],l:[5,55,20,24]},
     {id:'observatory-trends',label:'Trends Over Time',detail:'Open the audit ledger',href:'#ledger',p:[32,70,35,18],l:[65,55,18,24]},
     {id:'observatory-top-alerts',label:'Top Alerts',detail:'Open actionable system alerts',action:'open-alert-center',p:[69,70,30,18],l:[83,55,16,24]}
@@ -394,14 +344,13 @@ function visualScene(key, alt) {
       ${sceneHotspots(key)}
       <div class="visual-stage-hint" aria-hidden="true">Tap the labeled stations</div>
     </div>
-    <div class="visual-stage-tools" aria-label="Room map tools">
-      <button class="scene-tool" type="button" data-action="toggle-hotspots">${showingZones ? 'Hide tap zones' : 'Show tap zones'}</button>
-      <a class="scene-tool" href="#hall">Hall map</a>
-      <a class="scene-tool" href="#workbench">Text workbench</a>
-      <button class="scene-tool passport-tool" type="button" data-action="open-passport">Passport</button>
-      <button class="scene-tool" type="button" data-action="accessibility">Accessibility</button>
-      <button class="scene-tool" type="button" data-action="install" ${installPrompt ? '' : 'hidden'}>Install app</button>
-    </div>
+    <nav class="visual-stage-tools cardinal-image-dock" aria-label="Anarchadia visual dock">
+      <a class="scene-tool" href="#hall" aria-label="Home Hall"><img src="assets/screens/home-portrait.webp" alt=""><span>Hall</span></a>
+      <button class="scene-tool passport-tool" type="button" data-action="open-passport" aria-label="Passport"><img src="assets/passport/anarchadia-passport-blank.webp" alt=""><span>Passport</span></button>
+      <button class="scene-tool" type="button" data-action="accessibility" aria-label="Accessibility"><img src="assets/icon-192.png" alt=""><span>Settings</span></button>
+      <button class="scene-tool" type="button" data-action="return-commonweave" aria-label="Return to Commonweave"><img src="../../logos/commonweave.webp" alt=""><span>Commonweave</span></button>
+    </nav>
+    <div class="anarchadia-version-plaque"><img src="assets/icon-192.png" alt=""><span>v${APP_VERSION}</span></div>
   </section>`;
 }
 
@@ -420,11 +369,7 @@ function sceneAction(action) {
 }
 
 function visualPage({key,title,subtitle,alt,actions,content=''}) {
-  return shell(`${visualScene(key, alt)}
-    <section class="scene-command" aria-label="${esc(title)} controls">
-      <div class="scene-command-head"><div><span class="eyebrow">Live room controls</span><h2>${esc(title)}</h2><p>${esc(subtitle)}</p></div><span class="tag acid">Local-first MVP</span></div>
-      <div class="scene-action-grid">${actions.map(sceneAction).join('')}</div>
-    </section>${content}`, title, subtitle);
+  return shell(`${visualScene(key, alt)}<p class="visually-hidden">${esc(title)}. ${esc(subtitle)}</p>`, title, subtitle);
 }
 
 function hallPage() {
@@ -820,8 +765,10 @@ function render() {
 function openModal(title, bodyHtml, { onSubmit, submitLabel = 'Save', wide = false } = {}) {
   closeModal();
   const backdrop = document.createElement('div');
-  backdrop.className = 'modal-backdrop';
-  backdrop.innerHTML = `<section class="modal ${wide?'wide':''}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-head"><h2 id="modal-title">${esc(title)}</h2><button class="btn small ghost" data-close-modal>Close</button></header><div class="modal-body">${onSubmit ? `<form id="modal-form">${bodyHtml}<div class="form-actions"><button class="btn primary" type="submit">${esc(submitLabel)}</button><button class="btn" type="button" data-close-modal>Cancel</button></div></form>` : bodyHtml}</div></section>`;
+  backdrop.className = 'modal-backdrop cardinal-projection';
+  const sceneAsset=VISUAL_ASSETS[route()]||VISUAL_ASSETS.hall;
+  backdrop.style.setProperty('--projection-scene',`url("assets/screens/${sceneAsset}-landscape.webp")`);
+  backdrop.innerHTML = `<section class="modal ${wide?'wide':''}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-head"><h2 id="modal-title">${esc(title)}</h2><button class="btn small ghost" data-close-modal aria-label="Close projection">×</button></header><div class="modal-body">${onSubmit ? `<form id="modal-form">${bodyHtml}<div class="form-actions"><button class="btn primary" type="submit">${esc(submitLabel)}</button><button class="btn" type="button" data-close-modal>Cancel</button></div></form>` : bodyHtml}</div></section>`;
   document.body.append(backdrop);
   const close = event => { if (event.target === backdrop || event.target.closest('[data-close-modal]')) closeModal(); };
   backdrop.addEventListener('click', close);
@@ -1376,7 +1323,7 @@ async function forkWorkspace() {
 async function exitWipe() {
   const bundle=await buildBundle(state,['charter','decisions','dissent','rights','roles','privacy-security','readiness'],{purpose:'Exit archive before local deletion'});
   downloadText(`anarchadia-exit-${state.meta.communityRef}.json`,JSON.stringify(bundle,null,2),'application/json');
-  openModal('Confirm local exit',`<div class="notice danger">The exit archive was downloaded. Clearing removes this browser’s local workspace. It cannot erase external copies or prove deletion elsewhere.</div>`,{onSubmit:async()=>{await clearWorkspace();state=null;exchangePreview=null;lastAiDraft=null;closeModal();render();announce('Local workspace cleared.');},submitLabel:'Clear local workspace'});
+  openModal('Confirm local exit',`<div class="notice danger">The exit archive was downloaded. Clearing removes this browser’s local workspace. It cannot erase external copies or prove deletion elsewhere.</div>`,{onSubmit:async()=>{await clearWorkspace();state=emptyState();state.meta.mode='candidate';exchangePreview=null;lastAiDraft=null;await saveWorkspace(state);closeModal();location.hash='#hall';render();announce('Local workspace cleared. A fresh local hall is ready.');},submitLabel:'Clear local workspace'});
 }
 
 async function castGovernanceVote(proposal, choice) {
@@ -1410,16 +1357,14 @@ async function castGovernanceVote(proposal, choice) {
 async function handleAction(target) {
   const action=target.dataset.action;
   if(!action) return;
+  if(action==='toggle-interface'){location.hash='#hall';render();return;}
+  if(action==='return-commonweave'){location.href='../../index.html?visual=1#square';return;}
   if(action==='start-fixture'){state=syntheticFixture();ensureImprovementState();await saveWorkspace(state);location.hash='#hall';render();announce('Synthetic Lantern Commons loaded.');}
   else if(action==='start-blank') startBlank();
   else if(action==='open-import') document.querySelector('#import-file')?.click();
   else if(action==='install'&&installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;render();}
   else if(action==='accessibility') openAccessibility();
-  else if(action==='toggle-hotspots'){
-    const next=sessionStorage.getItem('anarchadia-show-hotspots')!=='1';
-    sessionStorage.setItem('anarchadia-show-hotspots',next?'1':'0');
-    applySessionSettings();render();announce(next?'Tap zones are visible.':'Tap zones hidden.');
-  }
+  else if(action==='toggle-hotspots'){announce('Hotspot debugging is available only with ?debugHotspots=1.');}
   else if(action==='open-passport') openAnarchadiaPassport();
   else if(action==='scene-info') sceneInfoModal(target.dataset.info);
   else if(action==='edit-admission') openAdmission();
@@ -1795,7 +1740,14 @@ window.addEventListener('message',event=>{
 
 async function init(){
   applySessionSettings();
-  try{state=await loadWorkspace();}catch(error){console.warn(error);announce('Local database could not be opened. The app may not persist changes.','danger');}
+  try{state=await loadWorkspace();}catch(error){console.warn(error);announce('Local database was repaired. Starting a fresh local hall.','warn');state=null;}
+  if(!state && visualRequested && !legacyMode()){
+    state=emptyState();
+    state.meta.mode='candidate';
+    await saveWorkspace(state);
+    location.hash='#hall';
+  }
+
   if('serviceWorker' in navigator){try{await navigator.serviceWorker.register('./service-worker.js');}catch(error){console.warn('Service worker registration failed',error);}}
   render();
   if(state){

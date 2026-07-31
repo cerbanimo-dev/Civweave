@@ -40,3 +40,7 @@ Hosted Commonweave pages send Antigravity interaction requests to the same-origi
 ## Default public host and update broadcasts
 
 The built-in default host is `https://commonweave-host-node.onrender.com`. Connected clients listen for release events and periodically compare the current host build, app version, and install-kit SHA-256. Deploying a newer package automatically makes the new metadata available; `POST /api/releases/broadcast` immediately rebroadcasts the active release to connected clients.
+
+## Cardinal visual interface
+
+Version 1.0.9 treats the supplied artwork as the application surface across the suite. Conventional shells remain only as hidden implementation substrate; user-facing navigation is image-backed and editing occurs in illustrated world screens. See `VISUAL-CONTRACT.md`, `VISUAL-CONTRACT-AUDIT-v1.0.9.md`, and `VISUAL-ASSET-BACKLOG-v1.0.9.md`.

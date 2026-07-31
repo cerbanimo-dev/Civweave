@@ -15,34 +15,19 @@
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <div id="app" class="app-shell">
-    <header class="topbar">
-      <button class="brand-button" data-route="market" aria-label="Go to market">
-        <img src="../../logos/fellowfare-wordmark.png" alt="Fellowfare" class="brand-lockup" />
-      </button>
-      <nav class="desktop-nav" aria-label="Primary">
-        <button data-route="mall" class="nav-link is-active">Mall</button>
-        <button data-route="market" class="nav-link">Market</button>
-        <button data-route="loom" class="nav-link">Loom</button>
-        <button data-route="assemblies" class="nav-link">Assemblies</button>
-        <button data-route="inbox" class="nav-link">Desk <span id="inboxBadge" class="badge" hidden></span></button>
-        <button data-route="profile" class="nav-link">You</button>
-      </nav>
-      <div class="top-actions">
-        <button id="installButton" class="button button-ghost compact" hidden>Install</button>
-        <button id="quickCreate" class="button button-primary compact">Post</button>
-      </div>
-    </header>
+    <header class="topbar" aria-hidden="true"></header>
 
     <main id="main" tabindex="-1"></main>
 
-    <nav class="bottom-nav" aria-label="Primary mobile navigation">
-      <button data-route="mall" class="bottom-link is-active"><span aria-hidden="true">▦</span><small>Mall</small></button>
-      <button data-route="market" class="bottom-link"><span aria-hidden="true">⌂</span><small>Market</small></button>
-      <button data-route="loom" class="bottom-link"><span aria-hidden="true">✦</span><small>Loom</small></button>
-      <button data-route="assemblies" class="bottom-link"><span aria-hidden="true">⟳</span><small>Assemble</small></button>
-      <button id="mobileCreate" class="create-orb" aria-label="Create an exchange thread">＋</button>
-      <button data-route="inbox" class="bottom-link"><span aria-hidden="true">✉</span><small>Desk</small></button>
-      <button data-route="profile" class="bottom-link"><span aria-hidden="true">◉</span><small>You</small></button>
+    <div class="ff-version-plaque" aria-label="FellowFare version 1.0.9">v1.0.9</div>
+    <nav class="bottom-nav ff-image-dock" aria-label="FellowFare illustrated destinations">
+      <button data-route="mall" class="bottom-link is-active" aria-label="Main atrium"><img src="assets/mall/main-atrium.webp" alt="" /></button>
+      <button data-route="market" class="bottom-link" aria-label="Marketplace"><img src="assets/mall/marketplace.webp" alt="" /></button>
+      <button data-route="loom" class="bottom-link" aria-label="Skill Shop and Loom"><img src="assets/mall/skill-shop.webp" alt="" /></button>
+      <button data-route="assemblies" class="bottom-link" aria-label="Volunteer Hub and assemblies"><img src="assets/mall/volunteer-hub.webp" alt="" /></button>
+      <button data-route="inbox" class="bottom-link" aria-label="Help Desk and inbox"><img src="assets/mall/help-desk.webp" alt="" /><span id="inboxBadge" class="badge" hidden></span></button>
+      <button data-route="profile" class="bottom-link" aria-label="Resource Center and profile"><img src="assets/mall/resource-center.webp" alt="" /></button>
+      <button data-commonweave-return class="bottom-link ff-return-commonweave" aria-label="Return to Commonweave"><img src="../../logos/commonweave.webp" alt="" /></button>
     </nav>
   </div>
 

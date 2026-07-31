@@ -1,6 +1,6 @@
 {
   "schema": "commonweave.seed-manifest.v1",
-  "version": "rc22.3.7",
+  "version": "rc22.3.9",
   "files": [
     {
       "path": "COMMONWEAVE-LIVING-WORLD-NEXT.md",
@@ -248,6 +248,26 @@
       "bytes": 432
     },
     {
+      "path": "RELEASE-NOTES-RC22.3.9.md",
+      "sha256": "ceaaabb205cb3a8e9f756af22db02218ca89ef539aa7404fe158195bf086429f",
+      "bytes": 1073
+    },
+    {
+      "path": "VISUAL-ASSET-BACKLOG-v1.0.9.md",
+      "sha256": "2c218e42c5d7aecd12e735799cea6b56b37c8bb1970611894232fc8e323e0b36",
+      "bytes": 2127
+    },
+    {
+      "path": "VISUAL-CONTRACT-AUDIT-v1.0.9.md",
+      "sha256": "e5f67f7114cda3f1e712c275cc19d0d278b3133d8d58932c1d1972ee31dee80d",
+      "bytes": 3457
+    },
+    {
+      "path": "VISUAL-CONTRACT.md",
+      "sha256": "48fa4d51f1c82fff0767eed53e5b17ec03fb0cd479f3087255d94882ac6a4c9e",
+      "bytes": 1818
+    },
+    {
       "path": "assets/ai/kamiya-gift.png",
       "sha256": "37eb15aca7ae16f9f58d3233df74974b8e640a4753d915ccc53bc980822f49c4",
       "bytes": 489880
@@ -474,28 +494,28 @@
     },
     {
       "path": "commonweave-weaveling-steward.js",
-      "sha256": "b2cbed74341d28dd358e31cd2ed8a5dbcbd02f5a6bb3aed6a317e999430bc67b",
-      "bytes": 13750
+      "sha256": "3bd7e88336d020f0f716357be2ef1160c252441c6cd0d4a796b0512d1dfae7a4",
+      "bytes": 15920
     },
     {
       "path": "commonweave-world.css",
-      "sha256": "0bcd24fb949a53e27c2ac873599652e33a459a615b735fe4b3362857ab1238d3",
-      "bytes": 19278
+      "sha256": "2b5510bdd695ac3773611de4f52b200cd70e41e24b35bbea13f70dffb84a1a92",
+      "bytes": 26957
     },
     {
       "path": "commonweave-world.js",
-      "sha256": "28ccbfd552bf671329fb794addf1d9cf488971d01769c63286fc408e7af74a5a",
-      "bytes": 65477
+      "sha256": "1c9c6bfcbc183348ca44a682ca49f75aa75e926c955fa89c4e7750ffd06ab44a",
+      "bytes": 66584
     },
     {
       "path": "host-node-setup.js",
-      "sha256": "818da6a7bb520aab23d38f39841af2e6a4c0a36b6e6ed08b153167c0b2d9ee97",
-      "bytes": 11387
+      "sha256": "f4373fb61280924d12f1d6f663cea281aa7eaee77e9b3d70839593f850e10bf7",
+      "bytes": 12367
     },
     {
       "path": "index.html",
-      "sha256": "81a0951076a4b713358cd8a4e82ba09519fde3d7e99e9a659903e6ee92003b31",
-      "bytes": 143668
+      "sha256": "e10c17e66dfdfdfeaa5f65b8fe454298cd119c9308ba69f32b79c1181799f50d",
+      "bytes": 143755
     },
     {
       "path": "logos/anarchadia.webp",
@@ -634,8 +654,8 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "3caa006a43daed84ba5cda1dacd94deb857e548284307ee1bcb9e5d9877b58d2",
-      "bytes": 6877
+      "sha256": "08cf38a511ea153eea35691342f8b8fc971c6f51e115677c2b2ff91aef496bf7",
+      "bytes": 7056
     },
     {
       "path": "services/anarchadia/LICENSE",
@@ -844,8 +864,8 @@
     },
     {
       "path": "services/anarchadia/service-worker.js",
-      "sha256": "713d5d908a1a6f15366e8ae6f3f1964fd9717fb6d9ff4593a16f6c8c4843542a",
-      "bytes": 2297
+      "sha256": "8e788e0430c81d87661bd9f1600bb16f42558a6c36b93b0ebd1ef4121ba20179",
+      "bytes": 2278
     },
     {
       "path": "services/anarchadia/shared/commonweave-model-runtime.js",
@@ -859,12 +879,12 @@
     },
     {
       "path": "services/anarchadia/src/app.js",
-      "sha256": "7fc20dd1c8c32c77376a201365ba102e3125ba8d4cc04413c69f796801f58a64",
-      "bytes": 166707
+      "sha256": "6a21cc62cbefd64efaf14dd87d1b25f49f85af96ae15122f4641f91d4e0d8a61",
+      "bytes": 163854
     },
     {
       "path": "services/anarchadia/src/domain.js",
-      "sha256": "ddee45ffb9059272ff7ff64ef4dee6afc57ff7512170b0ae3fd96f761a1410fa",
+      "sha256": "13b43b784790af20bf95d6e120e6bcf0665da3e109e35adbcad2dd7edc57a757",
       "bytes": 26978
     },
     {
@@ -874,13 +894,13 @@
     },
     {
       "path": "services/anarchadia/src/store.js",
-      "sha256": "b7f4f69da777d165b41c610b3bffcc3003fce06ebd8e2b06f1c2805dbbc64b5c",
-      "bytes": 2257
+      "sha256": "bd240f14bc2ea2f1d5723edc792185f415bee1d10d0316b4bb9e0fde25075c27",
+      "bytes": 3398
     },
     {
       "path": "services/anarchadia/styles.css",
-      "sha256": "738f3c253f5be525ceb19ea258676f172d2d5ff083b4c8fd1a2570badf5f809f",
-      "bytes": 30258
+      "sha256": "6a59505e55a9efd81866f1d4dff3e3a5c09aa69d162872a12c0caac2e7d83e4f",
+      "bytes": 35771
     },
     {
       "path": "services/anarchadia/tests/domain.test.mjs",
@@ -1119,8 +1139,13 @@
     },
     {
       "path": "services/cerbanimo/index.html",
-      "sha256": "a4d466a738afa628e8562705b51264b890b602b893cc577d2fb886054bdaea22",
-      "bytes": 780871
+      "sha256": "971a9284975f96bdf901d8c262bfac2ac18d289014afd4af030cf0bd877c7f55",
+      "bytes": 785792
+    },
+    {
+      "path": "services/cerbanimo/index.html.cardinal.css",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
     },
     {
       "path": "services/cerbanimo/manifest.webmanifest",
@@ -1129,8 +1154,8 @@
     },
     {
       "path": "services/cerbanimo/service-worker.js",
-      "sha256": "311d7e011cee232e3bc3e24167e79760e96ac17c098fe2f1f240ab63c0d27d3a",
-      "bytes": 3543
+      "sha256": "4584d6db64d0665b39650708a03120c6bb4ce65b77f0b1f8241139202bb0c22f",
+      "bytes": 3577
     },
     {
       "path": "services/cerbanimo/shared/commonweave-model-runtime.js",
@@ -1194,8 +1219,8 @@
     },
     {
       "path": "services/fellowfare/app.js",
-      "sha256": "de17febd5a7e0c161e5a24e93b96a8d5597c1924096b1d6608b9046693fa7040",
-      "bytes": 157679
+      "sha256": "31df33342788f692da6c2d5a84da2194659c56e91a7183014e3eecc49d251933",
+      "bytes": 158531
     },
     {
       "path": "services/fellowfare/assets/icons/icon-128.png",
@@ -1344,8 +1369,8 @@
     },
     {
       "path": "services/fellowfare/index.html",
-      "sha256": "c09cb4456cbf3ceb5cdee20cbff5544fcbd3438cb6a692e7d56b31c4ebefa4ce",
-      "bytes": 15022
+      "sha256": "efb27bf8ae670104612579751d8f28298aa6c4dce018c6bf723c25e66fc1399a",
+      "bytes": 14479
     },
     {
       "path": "services/fellowfare/ledger.js",
@@ -1389,13 +1414,13 @@
     },
     {
       "path": "services/fellowfare/styles.css",
-      "sha256": "64a4ef6a4dbcdec6504e1667b87be1f641cc3404830f0339405f02561d2eff63",
-      "bytes": 44325
+      "sha256": "cfe4a0486af2fc5b0ffd6ef49394be010fb7bf26b7dd5da3c4b0570b31a44bd3",
+      "bytes": 51336
     },
     {
       "path": "services/fellowfare/sw.js",
-      "sha256": "e3d1f4c396d110140ccb078571af890dc9f5b864ef3ae38ddf46d8f717798beb",
-      "bytes": 2307
+      "sha256": "b4983a3058f5543da4005a2a941cbe77b6227ceef3a1058d65d0ed4a79cafaff",
+      "bytes": 2341
     },
     {
       "path": "services/fellowfare/tests/ai-test.mjs",
@@ -1464,8 +1489,13 @@
     },
     {
       "path": "services/living-school/index.html",
-      "sha256": "c80854eeace64118353d2e1407e1710cf024e03b255a2bfce3b5451c3ba7468a",
-      "bytes": 939009
+      "sha256": "e7b8adb13ad7fcfb7a01eb8f735fac26a7f6f3727bc6d25d5096eef2926f658d",
+      "bytes": 942996
+    },
+    {
+      "path": "services/living-school/index.html.tmp",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
     },
     {
       "path": "services/living-school/manifest.webmanifest",
@@ -1494,8 +1524,8 @@
     },
     {
       "path": "services/living-school/service-worker.js",
-      "sha256": "0c825ac39b077efaa6363491bc061a19d963a943d3e5d32d3592a27b2e853d8f",
-      "bytes": 1925
+      "sha256": "ad57937506fb9980fb3576bafcb45baf0f8abad985b4ed9ade580ed82fb2f79e",
+      "bytes": 1994
     },
     {
       "path": "services/living-school/shared/commonweave-model-runtime.js",

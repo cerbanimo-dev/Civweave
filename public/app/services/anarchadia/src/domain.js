@@ -1,4 +1,4 @@
-export const APP_VERSION = '0.3.3';
+export const APP_VERSION = '0.3.5';
 export const SCHEMA_VERSION = 'anarchadia.community-record.v1';
 export const BUNDLE_VERSION = 'anarchadia.bundle.v1';
 

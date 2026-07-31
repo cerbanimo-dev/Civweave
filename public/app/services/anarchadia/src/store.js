@@ -1,7 +1,19 @@
 const DB_NAME = 'anarchadia-charter-forge';
-const DB_VERSION = 1;
 const STORE = 'workspace';
 const KEY = 'active';
+
+function repairDatabase(currentVersion = 1) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, Math.max(1, Number(currentVersion || 1) + 1));
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error('Unable to repair local database.'));
+    request.onblocked = () => reject(new Error('Close other Anarchadia tabs so the local database can be repaired.'));
+  });
+}
 
 function openDb() {
   return new Promise((resolve, reject) => {
@@ -9,45 +21,64 @@ function openDb() {
       reject(new Error('IndexedDB is unavailable in this browser.'));
       return;
     }
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    // Open the newest version already present on this device. This avoids the
+    // VersionError caused by an earlier repair creating a version newer than a
+    // hard-coded application constant.
+    const request = indexedDB.open(DB_NAME);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
     };
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = async () => {
+      const db = request.result;
+      if (db.objectStoreNames.contains(STORE)) {
+        resolve(db);
+        return;
+      }
+      const version = db.version;
+      db.close();
+      try { resolve(await repairDatabase(version)); }
+      catch (error) { reject(error); }
+    };
     request.onerror = () => reject(request.error || new Error('Unable to open local database.'));
   });
 }
 
-export async function loadWorkspace() {
-  const db = await openDb();
+async function withStore(mode, operation) {
+  let db = await openDb();
+  if (!db.objectStoreNames.contains(STORE)) {
+    const version = db.version;
+    db.close();
+    db = await repairDatabase(version);
+  }
   return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readonly');
-    const request = tx.objectStore(STORE).get(KEY);
-    request.onsuccess = () => resolve(request.result || null);
-    request.onerror = () => reject(request.error || new Error('Unable to read local workspace.'));
-    tx.oncomplete = () => db.close();
+    let tx;
+    try { tx = db.transaction(STORE, mode); }
+    catch (error) { db.close(); reject(error); return; }
+    const store = tx.objectStore(STORE);
+    let request;
+    try { request = operation(store); }
+    catch (error) { db.close(); reject(error); return; }
+    if (request) {
+      request.onerror = () => reject(request.error || new Error('Local database request failed.'));
+    }
+    tx.oncomplete = () => { db.close(); resolve(request?.result ?? null); };
+    tx.onerror = () => { db.close(); reject(tx.error || new Error('Local database transaction failed.')); };
+    tx.onabort = () => { db.close(); reject(tx.error || new Error('Local database transaction was aborted.')); };
   });
+}
+
+export async function loadWorkspace() {
+  return withStore('readonly', store => store.get(KEY));
 }
 
 export async function saveWorkspace(state) {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).put(state, KEY);
-    tx.oncomplete = () => { db.close(); resolve(); };
-    tx.onerror = () => { db.close(); reject(tx.error || new Error('Unable to save local workspace.')); };
-  });
+  await withStore('readwrite', store => store.put(state, KEY));
 }
 
 export async function clearWorkspace() {
-  const db = await openDb();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).delete(KEY);
-    tx.oncomplete = () => { db.close(); resolve(); };
-    tx.onerror = () => { db.close(); reject(tx.error || new Error('Unable to clear local workspace.')); };
-  });
+  await withStore('readwrite', store => store.delete(KEY));
 }
 
 export async function storageEstimate() {
