@@ -35,3 +35,8 @@ See `HOST-NODE-SETUP-GUIDE.md` for local, Docker, LAN, and Render instructions.
 ## Gemini Antigravity routing
 
 Hosted Commonweave pages send Antigravity interaction requests to the same-origin `/api/ai/gemini/interactions` proxy. The host forwards each request to Google and does not write the Gemini key to disk, logs, or host-node state. Keep the key session-only in the browser. Standard creative-model routing remains unchanged.
+
+
+## Default public host and update broadcasts
+
+The built-in default host is `https://commonweave-host-node.onrender.com`. Connected clients listen for release events and periodically compare the current host build, app version, and install-kit SHA-256. Deploying a newer package automatically makes the new metadata available; `POST /api/releases/broadcast` immediately rebroadcasts the active release to connected clients.

@@ -1,4 +1,4 @@
-const CACHE = "commonweave-1.0.4-visual-recovery";
+const CACHE = "commonweave-pocket-campus-v47-host-updates";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches

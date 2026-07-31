@@ -15,8 +15,29 @@ const HUB_NAME = process.env.HUB_NAME || 'Commonweave Host Node';
 const HUB_TOKEN = String(process.env.HUB_TOKEN || '').trim();
 const MAX_ENVELOPES = Math.max(100, Number(process.env.MAX_ENVELOPES || 5000));
 const STARTED_AT = new Date().toISOString();
-const BUILD_VERSION = '1.0.4-visual-recovery';
+const BUILD_VERSION = '1.0.5-default-host-update-broadcast';
+const APP_VERSION = 'rc22.3.4';
+const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://commonweave-host-node.onrender.com';
+const INSTALL_KIT_PATH = path.join(PUBLIC_DIR, 'downloads', 'Commonweave-Mobile-Install-Kit.zip');
 const sseClients = new Set();
+let installKitSha256 = '';
+let installKitSize = 0;
+try {
+  const kit = await fsp.readFile(INSTALL_KIT_PATH);
+  installKitSha256 = crypto.createHash('sha256').update(kit).digest('hex');
+  installKitSize = kit.length;
+} catch (error) {
+  console.warn('Install kit metadata unavailable:', error.message);
+}
+function releasePacket(baseUrl = DEFAULT_PUBLIC_HOST) {
+  const root = String(baseUrl || DEFAULT_PUBLIC_HOST).replace(/\/$/, '');
+  return {
+    schema: 'commonweave.release.v1', channel: 'stable', hostBuild: BUILD_VERSION, appVersion: APP_VERSION,
+    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,
+    downloadUrl: `${root}/downloads/Commonweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,
+    bytes: installKitSize, mandatory: false, notes: 'Current stable Commonweave host-node and offline PWA release.'
+  };
+}
 
 const state = {
   version: 1,
@@ -206,17 +227,33 @@ const server = http.createServer(async (req, res) => {
         return res.end();
       }
       res.setHeader('access-control-allow-origin', '*');
-      if (!authorized(req) && pathname !== '/api/health' && pathname !== '/api/config') return json(res, 401, { error: 'Host node token required' });
+      if (!authorized(req) && !['/api/health','/api/config','/api/releases/current','/api/events'].includes(pathname)) return json(res, 401, { error: 'Host node token required' });
       if (pathname === '/api/ai/gemini/interactions' || pathname.startsWith('/api/ai/gemini/interactions/')) return proxyGeminiInteraction(req, res, pathname);
       if (pathname === '/api/health' && req.method === 'GET') {
-        return json(res, 200, { ok: true, name: HUB_NAME, build: BUILD_VERSION, startedAt: STARTED_AT, now: now(), nodes: Object.keys(state.nodes).length, envelopes: state.envelopes.length, persistence: STATE_FILE });
+        return json(res, 200, { ok: true, name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, release: releasePacket(`${url.protocol}//${url.host}`), startedAt: STARTED_AT, now: now(), nodes: Object.keys(state.nodes).length, envelopes: state.envelopes.length, persistence: STATE_FILE });
       }
       if (pathname === '/api/config' && req.method === 'GET') {
-        return json(res, 200, { schema: 'commonweave.host-node-config.v1', name: HUB_NAME, build: BUILD_VERSION, baseUrl: `${url.protocol}//${url.host}`, apiBase: `${url.protocol}//${url.host}/api`, appUrl: `${url.protocol}//${url.host}/app/`, downloadUrl: `${url.protocol}//${url.host}/downloads/Commonweave-Mobile-Install-Kit.zip`, tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','pwa-hosting','offline-installer','gemini-agent-proxy'] });
+        return json(res, 200, { schema: 'commonweave.host-node-config.v1', name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, baseUrl: `${url.protocol}//${url.host}`, apiBase: `${url.protocol}//${url.host}/api`, appUrl: `${url.protocol}//${url.host}/app/`, downloadUrl: `${url.protocol}//${url.host}/downloads/Commonweave-Mobile-Install-Kit.zip`, release: releasePacket(`${url.protocol}//${url.host}`), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy'] });
+      }
+      if (pathname === '/api/releases/current' && req.method === 'GET') {
+        return json(res, 200, releasePacket(`${url.protocol}//${url.host}`));
+      }
+      if (pathname === '/api/releases/broadcast' && req.method === 'POST') {
+        const packet = releasePacket(`${url.protocol}//${url.host}`);
+        emit('release', packet);
+        return json(res, 200, { ok: true, release: packet, listeners: sseClients.size });
       }
       if (pathname === '/api/events' && req.method === 'GET') {
         res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', connection: 'keep-alive' });
-        res.write(`event: ready\ndata: ${JSON.stringify({ now: now(), name: HUB_NAME })}\n\n`);
+        const release = releasePacket(`${url.protocol}//${url.host}`);
+        res.write(`event: ready
+data: ${JSON.stringify({ now: now(), name: HUB_NAME, release })}
+
+`);
+        res.write(`event: release
+data: ${JSON.stringify(release)}
+
+`);
         sseClients.add(res);
         req.on('close', () => sseClients.delete(res));
         return;
@@ -235,7 +272,7 @@ const server = http.createServer(async (req, res) => {
           lastSeenAt: now()
         };
         schedulePersist(); emit('node', publicNode(node));
-        return json(res, 200, { ok: true, node: publicNode(node), hub: HUB_NAME });
+        return json(res, 200, { ok: true, node: publicNode(node), hub: HUB_NAME, release: releasePacket(`${url.protocol}//${url.host}`) });
       }
       if (pathname === '/api/nodes/heartbeat' && req.method === 'POST') {
         const input = await body(req);
