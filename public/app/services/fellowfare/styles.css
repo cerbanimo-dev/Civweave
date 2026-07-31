@@ -577,3 +577,12 @@ body.ff-cardinal-visual{margin:0;background:#07120e;overscroll-behavior:none}
 .ff-cardinal-visual .toast-region{top:max(3rem,calc(env(safe-area-inset-top) + 2.5rem));bottom:auto;z-index:120}
 .ff-cardinal-visual .toast{background:rgba(5,35,27,.88);color:#ecfff7;border:1px solid rgba(167,255,226,.42)}
 @media(max-width:700px){.ff-cardinal-visual .ff-image-dock{width:calc(100vw - .6rem);height:4.25rem;gap:.18rem;padding:.24rem;border-radius:.9rem}.ff-cardinal-visual .ff-world-projection{width:92vw;max-height:75vh;top:45%;padding:.75rem}.ff-cardinal-visual dialog.sheet-dialog .dialog-frame{width:92vw;max-height:77vh;top:45%;padding:.75rem}}
+
+
+/* RC22.3.10 compact icon dock and safe-area return control */
+.ff-cardinal-visual .ff-image-dock{width:min(90vw,25rem)!important;height:3.65rem!important;grid-template-columns:repeat(6,1fr)!important;gap:.18rem!important;padding:.24rem!important;border-radius:.92rem!important}
+.ff-cardinal-visual .ff-image-dock .bottom-link{border-radius:.68rem!important;background:rgba(5,28,20,.82)!important}
+.ff-cardinal-visual .ff-image-dock .bottom-link img{object-fit:contain!important;padding:.52rem!important;filter:none!important;transform:none!important;background:transparent!important}
+.ff-cardinal-visual .ff-scene-back{position:fixed;z-index:95;left:max(.55rem,env(safe-area-inset-left));top:max(.55rem,env(safe-area-inset-top));width:3.05rem;height:3.05rem;padding:.42rem!important;border:1px solid rgba(255,244,188,.48)!important;border-radius:50%!important;background:rgba(5,28,20,.78)!important;backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.34)!important}
+.ff-cardinal-visual .ff-scene-back img{width:100%;height:100%;display:block;object-fit:contain}
+@media(max-width:700px){.ff-cardinal-visual .ff-image-dock{width:min(calc(100vw - 1rem),23rem)!important;height:3.5rem!important;bottom:max(.35rem,env(safe-area-inset-bottom))!important}.ff-cardinal-visual .ff-scene-back{width:2.8rem;height:2.8rem}}

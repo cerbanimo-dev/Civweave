@@ -85,7 +85,7 @@ function renderOnboarding() {
   app.innerHTML = `<main class="anarchadia-emergency-entry">
     <picture aria-hidden="true"><source media="(max-width:760px) and (orientation:portrait)" srcset="assets/screens/home-portrait.webp"><img src="assets/screens/home-landscape.webp" alt=""></picture>
     <button type="button" data-action="start-blank" aria-label="Enter a new local Home Hall"></button>
-    <div class="anarchadia-version-plaque"><img src="assets/icon-192.png" alt=""><span>v${APP_VERSION}</span></div>
+    <div class="anarchadia-version-plaque"><img src="../../ui-icons/settings.svg" alt=""><span>v${APP_VERSION}</span></div>
   </main>`;
 }
 function shell(content, title, subtitle = '') {
@@ -345,10 +345,10 @@ function visualScene(key, alt) {
       <div class="visual-stage-hint" aria-hidden="true">Tap the labeled stations</div>
     </div>
     <nav class="visual-stage-tools cardinal-image-dock" aria-label="Anarchadia visual dock">
-      <a class="scene-tool" href="#hall" aria-label="Home Hall"><img src="assets/screens/home-portrait.webp" alt=""><span>Hall</span></a>
+      <a class="scene-tool" href="#hall" aria-label="Home Hall"><img src="../../ui-icons/home.svg" alt=""><span>Hall</span></a>
       <button class="scene-tool passport-tool" type="button" data-action="open-passport" aria-label="Passport"><img src="assets/passport/anarchadia-passport-blank.webp" alt=""><span>Passport</span></button>
       <button class="scene-tool" type="button" data-action="accessibility" aria-label="Accessibility"><img src="assets/icon-192.png" alt=""><span>Settings</span></button>
-      <button class="scene-tool" type="button" data-action="return-commonweave" aria-label="Return to Commonweave"><img src="../../logos/commonweave.webp" alt=""><span>Commonweave</span></button>
+      <button class="scene-tool" type="button" data-action="return-commonweave" aria-label="Return to Commonweave"><img src="../../ui-icons/back.svg" alt=""><span>Commonweave</span></button>
     </nav>
     <div class="anarchadia-version-plaque"><img src="assets/icon-192.png" alt=""><span>v${APP_VERSION}</span></div>
   </section>`;
@@ -1358,7 +1358,7 @@ async function handleAction(target) {
   const action=target.dataset.action;
   if(!action) return;
   if(action==='toggle-interface'){location.hash='#hall';render();return;}
-  if(action==='return-commonweave'){location.href='../../index.html?visual=1#square';return;}
+  if(action==='return-commonweave'){location.href='../../index.html?visual=1&build=1.0.10#square';return;}
   if(action==='start-fixture'){state=syntheticFixture();ensureImprovementState();await saveWorkspace(state);location.hash='#hall';render();announce('Synthetic Lantern Commons loaded.');}
   else if(action==='start-blank') startBlank();
   else if(action==='open-import') document.querySelector('#import-file')?.click();

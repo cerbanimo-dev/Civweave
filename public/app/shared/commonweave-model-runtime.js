@@ -503,7 +503,24 @@
   }
 
   async function invokeGemini(config, messages, request, context, signal) {
-    if (isAntigravityModel(config.model)) return invokeAntigravity(config, messages, request, context, signal);
+    if (isAntigravityModel(config.model)) {
+      try {
+        return await invokeAntigravity(config, messages, request, context, signal);
+      } catch (error) {
+        const permissionDenied = Number(error?.status) === 403 || /permission[_ -]?denied|does not have permission|caller does not have permission/i.test(String(error?.message || ""));
+        if (!permissionDenied) throw error;
+        const fallbackModel = safeString(config.antigravityFallbackModel || readModelProfiles()?.interactive?.model || "gemini-2.5-flash", 200);
+        emit(context, "repairing", { reason: "antigravity-permission-denied", fallbackModel, detail: "The configured key cannot access Antigravity. Continuing with standard Gemini instead of blocking the workflow." });
+        const fallback = await invokeGemini({ ...config, model: fallbackModel, antigravityFallback: true }, messages, request, context, signal);
+        return {
+          ...fallback,
+          diagnostics: [
+            ...(Array.isArray(fallback.diagnostics) ? fallback.diagnostics : []),
+            `Antigravity permission was denied for this API key. Continued with ${fallbackModel}; no managed background sandbox was used.`
+          ]
+        };
+      }
+    }
     if (!config.apiKey) throw runtimeError("MISSING_API_KEY", "A session-only Gemini API key is required.");
     const base = checkedUrl(config.endpoint || "https://generativelanguage.googleapis.com/v1beta", config).href.replace(/\/+$/, "");
     const system = messages.filter(item => item.role === "system").map(item => item.content).join("\n\n");
@@ -516,6 +533,7 @@
     const body = {
       ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
       contents,
+      ...(config.antigravityFallback && !structured ? { tools: [{ googleSearch: {} }] } : {}),
       generationConfig: {
         temperature: config.temperature,
         maxOutputTokens: config.maxTokens,
@@ -526,6 +544,14 @@
     emit(context, "connecting", { endpoint: redactUrl(requestUrl), structured, streamed: useStream });
     const headers = { "content-type": "application/json", "x-goog-api-key": config.apiKey, ...config.headers };
     let response = await fetch(requestUrl, fetchOptions(requestUrl, { method: "POST", headers, body: JSON.stringify(body), signal }));
+    let toolRetry = false;
+    if (!response.ok && config.antigravityFallback && body.tools) {
+      const initial = await readBoundedText(response).catch(() => "");
+      toolRetry = true;
+      emit(context, "repairing", { reason: "search-grounding-rejected", detail: safeString(initial, 800) });
+      delete body.tools;
+      response = await fetch(requestUrl, fetchOptions(requestUrl, { method: "POST", headers, body: JSON.stringify(body), signal }));
+    }
     let schemaRetry = false;
     if (!response.ok && response.status === 400 && schema) {
       const initial = await readBoundedText(response).catch(() => "");
@@ -537,14 +563,14 @@
     if (!response.ok) throw providerHttpError("Gemini", response.status, await readBoundedText(response).catch(() => ""));
     if (useStream) {
       const streamed = await parseGeminiSse(response, context);
-      return { ...streamed, model: config.model, streamed: true, diagnostics: schemaRetry ? ["Gemini rejected the response schema; JSON mode succeeded without the attached schema."] : [] };
+      return { ...streamed, model: config.model, streamed: true, diagnostics: [...(toolRetry ? ["Search grounding was unavailable for the fallback model; standard Gemini generation continued."] : []), ...(schemaRetry ? ["Gemini rejected the response schema; JSON mode succeeded without the attached schema."] : [])] };
     }
     const responseText = await readBoundedText(response);
     let payload; try { payload = JSON.parse(responseText || "{}"); } catch { throw runtimeError("INVALID_PROVIDER_JSON", "Gemini returned invalid transport JSON.", { recoverableText: responseText.slice(0, 12000) }); }
     const blockReason = payload?.promptFeedback?.blockReason;
     const text = extractText(payload);
     if (!text && blockReason) throw runtimeError("PROVIDER_BLOCKED", `Gemini blocked the request: ${blockReason}`);
-    return { text, payload, usage: extractUsage(payload), model: config.model, streamed: false, diagnostics: schemaRetry ? ["Gemini rejected the response schema; JSON mode succeeded without the attached schema."] : [] };
+    return { text, payload, usage: extractUsage(payload), model: config.model, streamed: false, diagnostics: [...(toolRetry ? ["Search grounding was unavailable for the fallback model; standard Gemini generation continued."] : []), ...(schemaRetry ? ["Gemini rejected the response schema; JSON mode succeeded without the attached schema."] : [])] };
   }
 
   async function invokeOllama(config, messages, request, context, signal) {

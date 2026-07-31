@@ -1,6 +1,6 @@
 {
   "schema": "commonweave.seed-manifest.v1",
-  "version": "rc22.3.9",
+  "version": "rc22.3.10",
   "files": [
     {
       "path": "COMMONWEAVE-LIVING-WORLD-NEXT.md",
@@ -233,6 +233,11 @@
       "bytes": 913
     },
     {
+      "path": "RELEASE-NOTES-RC22.3.10.md",
+      "sha256": "b7f1fd2d41c29d0f77c8c8fc44ca52db61006f34723c1ec59ce55e0ab02b7bde",
+      "bytes": 1782
+    },
+    {
       "path": "RELEASE-NOTES-RC22.3.2.md",
       "sha256": "217792d77483caf531c870aa26c7e0d163ecf0c160097e9d8a33c267c67ea967",
       "bytes": 629
@@ -251,6 +256,11 @@
       "path": "RELEASE-NOTES-RC22.3.9.md",
       "sha256": "ceaaabb205cb3a8e9f756af22db02218ca89ef539aa7404fe158195bf086429f",
       "bytes": 1073
+    },
+    {
+      "path": "RUNTIME-RECOVERY-AUDIT-v1.0.10.md",
+      "sha256": "0c0cc10b3add8b797ba963678b0c7c26799a372f34a65fc040771708946d1fad",
+      "bytes": 1576
     },
     {
       "path": "VISUAL-ASSET-BACKLOG-v1.0.9.md",
@@ -499,23 +509,23 @@
     },
     {
       "path": "commonweave-world.css",
-      "sha256": "2b5510bdd695ac3773611de4f52b200cd70e41e24b35bbea13f70dffb84a1a92",
-      "bytes": 26957
+      "sha256": "5ea44d533f7013bc813fddb0cd59f3a04b1e6498b4b47e09d2cfa035b623fc63",
+      "bytes": 27501
     },
     {
       "path": "commonweave-world.js",
-      "sha256": "1c9c6bfcbc183348ca44a682ca49f75aa75e926c955fa89c4e7750ffd06ab44a",
-      "bytes": 66584
+      "sha256": "90ae342ae5a841cf61dee71d7b43a43df44e9c4c2765248ac163fca9321e2fca",
+      "bytes": 67113
     },
     {
       "path": "host-node-setup.js",
-      "sha256": "f4373fb61280924d12f1d6f663cea281aa7eaee77e9b3d70839593f850e10bf7",
-      "bytes": 12367
+      "sha256": "ba3edf31a4059b7b454d57683da2300e2911c38d1a557578aef1153078301487",
+      "bytes": 13847
     },
     {
       "path": "index.html",
-      "sha256": "e10c17e66dfdfdfeaa5f65b8fe454298cd119c9308ba69f32b79c1181799f50d",
-      "bytes": 143755
+      "sha256": "afc3bdfd8748170af78d84003f61c3e5ba6b8c937407d307d77c5a68f30d1269",
+      "bytes": 144029
     },
     {
       "path": "logos/anarchadia.webp",
@@ -654,8 +664,8 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "08cf38a511ea153eea35691342f8b8fc971c6f51e115677c2b2ff91aef496bf7",
-      "bytes": 7056
+      "sha256": "45d9254feeb4b9ed232802df84929d2cf3292970e33095a15b0265ce6d4ee654",
+      "bytes": 7472
     },
     {
       "path": "services/anarchadia/LICENSE",
@@ -829,8 +839,8 @@
     },
     {
       "path": "services/anarchadia/index.html",
-      "sha256": "1257cbdf7abbb5ff3237d98b297fa592bcb2065c845f597555a57fd56c0ef6d0",
-      "bytes": 1229
+      "sha256": "b47742ce942411129e00dc90e36fd67db85e08afa43734346a4c4dc9b3734bec",
+      "bytes": 1296
     },
     {
       "path": "services/anarchadia/manifest.webmanifest",
@@ -864,8 +874,8 @@
     },
     {
       "path": "services/anarchadia/service-worker.js",
-      "sha256": "8e788e0430c81d87661bd9f1600bb16f42558a6c36b93b0ebd1ef4121ba20179",
-      "bytes": 2278
+      "sha256": "f74972124bb32eab2f2e95eeaf44b998b9d7c17503fa5cfeb4a71da2feaa092f",
+      "bytes": 2549
     },
     {
       "path": "services/anarchadia/shared/commonweave-model-runtime.js",
@@ -879,8 +889,8 @@
     },
     {
       "path": "services/anarchadia/src/app.js",
-      "sha256": "6a21cc62cbefd64efaf14dd87d1b25f49f85af96ae15122f4641f91d4e0d8a61",
-      "bytes": 163854
+      "sha256": "3544ed321644b608c96a7fa4146cd49130dd1ff7c967382d83ec69417c48ce1d",
+      "bytes": 163860
     },
     {
       "path": "services/anarchadia/src/domain.js",
@@ -899,8 +909,8 @@
     },
     {
       "path": "services/anarchadia/styles.css",
-      "sha256": "6a59505e55a9efd81866f1d4dff3e3a5c09aa69d162872a12c0caac2e7d83e4f",
-      "bytes": 35771
+      "sha256": "896b2ed505feb4981aaa019e417070e32b48ec42dbc4e2f8fbad9ac6debcd96c",
+      "bytes": 36800
     },
     {
       "path": "services/anarchadia/tests/domain.test.mjs",
@@ -1139,13 +1149,18 @@
     },
     {
       "path": "services/cerbanimo/index.html",
-      "sha256": "971a9284975f96bdf901d8c262bfac2ac18d289014afd4af030cf0bd877c7f55",
-      "bytes": 785792
+      "sha256": "c0227cf069e6d932718f2cb9fa4f9a4b40fec5180294479c1a7fd78f54f696db",
+      "bytes": 785920
     },
     {
       "path": "services/cerbanimo/index.html.cardinal.css",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0
+    },
+    {
+      "path": "services/cerbanimo/index.inline.js",
+      "sha256": "452835e6473e46d435c9282fa675afa82ed411edf0c780aa97eabcc6e19d02fa",
+      "bytes": 586696
     },
     {
       "path": "services/cerbanimo/manifest.webmanifest",
@@ -1154,8 +1169,8 @@
     },
     {
       "path": "services/cerbanimo/service-worker.js",
-      "sha256": "4584d6db64d0665b39650708a03120c6bb4ce65b77f0b1f8241139202bb0c22f",
-      "bytes": 3577
+      "sha256": "5126b1ed2d03f4de07695209a5048bd563211f3e34071d84121daf41d97f99a1",
+      "bytes": 3849
     },
     {
       "path": "services/cerbanimo/shared/commonweave-model-runtime.js",
@@ -1219,8 +1234,8 @@
     },
     {
       "path": "services/fellowfare/app.js",
-      "sha256": "31df33342788f692da6c2d5a84da2194659c56e91a7183014e3eecc49d251933",
-      "bytes": 158531
+      "sha256": "8938cfe0cb6b82c98c1be5e1089a5053e19d93a27bc62ac3f1342baadf72cbc5",
+      "bytes": 158587
     },
     {
       "path": "services/fellowfare/assets/icons/icon-128.png",
@@ -1369,8 +1384,8 @@
     },
     {
       "path": "services/fellowfare/index.html",
-      "sha256": "efb27bf8ae670104612579751d8f28298aa6c4dce018c6bf723c25e66fc1399a",
-      "bytes": 14479
+      "sha256": "568cfeae8235433202f1acf1bdc570a706099e46dda94e869578e9e5a95b4804",
+      "bytes": 14380
     },
     {
       "path": "services/fellowfare/ledger.js",
@@ -1414,13 +1429,13 @@
     },
     {
       "path": "services/fellowfare/styles.css",
-      "sha256": "cfe4a0486af2fc5b0ffd6ef49394be010fb7bf26b7dd5da3c4b0570b31a44bd3",
-      "bytes": 51336
+      "sha256": "d37d615f696c42bde1f719718455de721f41f7eae7e1f40a3560c585175b72da",
+      "bytes": 52661
     },
     {
       "path": "services/fellowfare/sw.js",
-      "sha256": "b4983a3058f5543da4005a2a941cbe77b6227ceef3a1058d65d0ed4a79cafaff",
-      "bytes": 2341
+      "sha256": "a407c37105ff47ece9bc527ebb6dbfe26b30ae8dd35b7a88b85d579f047470e4",
+      "bytes": 2612
     },
     {
       "path": "services/fellowfare/tests/ai-test.mjs",
@@ -1489,13 +1504,18 @@
     },
     {
       "path": "services/living-school/index.html",
-      "sha256": "e7b8adb13ad7fcfb7a01eb8f735fac26a7f6f3727bc6d25d5096eef2926f658d",
-      "bytes": 942996
+      "sha256": "230b9fc256791bcdaac85a743346c8ecf3e3a76c93960a74d0b47fffbcd534fc",
+      "bytes": 943119
     },
     {
       "path": "services/living-school/index.html.tmp",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0
+    },
+    {
+      "path": "services/living-school/index.inline.js",
+      "sha256": "d1242ead723f4f26c7bec70f51698fca1597f9ce0ed5a64aa8c99463705cfe29",
+      "bytes": 712514
     },
     {
       "path": "services/living-school/manifest.webmanifest",
@@ -1524,8 +1544,8 @@
     },
     {
       "path": "services/living-school/service-worker.js",
-      "sha256": "ad57937506fb9980fb3576bafcb45baf0f8abad985b4ed9ade580ed82fb2f79e",
-      "bytes": 1994
+      "sha256": "a4c0cf25b37e18329142aea69fe57cb6e119f996298f233608acaea65c619127",
+      "bytes": 2266
     },
     {
       "path": "services/living-school/shared/commonweave-model-runtime.js",
@@ -1639,8 +1659,8 @@
     },
     {
       "path": "shared/commonweave-model-runtime.js",
-      "sha256": "24fbfa694aba9693d89f822a6880ba54f1f17b2129185b4ca2680391926d841f",
-      "bytes": 59796
+      "sha256": "e9160c192211ceee52ee2a68b4a73e2a9704a9d64032a21b62d71a39103287c8",
+      "bytes": 61725
     },
     {
       "path": "shared/commonweave-operations.js",
@@ -1651,6 +1671,11 @@
       "path": "shared/commonweave-reward-weave.js",
       "sha256": "fcef2a98459ef8203a2fff8b7f9da265907b0fdfbcac28826107a853ad881ae9",
       "bytes": 51999
+    },
+    {
+      "path": "shared/image-hotspot-calibrator.js",
+      "sha256": "753674d635b522fc06d4ee61507b7d10adca2abdb1e6ed53aa6caa0f00bf0779",
+      "bytes": 3903
     },
     {
       "path": "tools/cerbanimo",
@@ -1806,6 +1831,46 @@
       "path": "tools/vendor/qrcode/util.py",
       "sha256": "54e1b846b27a4243ecd1f2da6647de330c70c5d2292ac4479ba757be3a3d625e",
       "bytes": 17103
+    },
+    {
+      "path": "ui-icons/back.svg",
+      "sha256": "a7b1b588f1ba4a990054c4bfca7b6a20dc2a6d0c51b2fb9426249ab82744ab51",
+      "bytes": 474
+    },
+    {
+      "path": "ui-icons/directory.svg",
+      "sha256": "0368b930247a443b33d3363c0e85be4a922378b050094fac08310e1c7d956e71",
+      "bytes": 427
+    },
+    {
+      "path": "ui-icons/home.svg",
+      "sha256": "90ca2a44163bbb59ed6eadab5ce0a1985d48dd80410bd4169095654c45926434",
+      "bytes": 495
+    },
+    {
+      "path": "ui-icons/inbox.svg",
+      "sha256": "2f3f75c5e053e9b99f69fcabe57d61b394406dfdb1bca474b0bdfa6f8d396ff2",
+      "bytes": 467
+    },
+    {
+      "path": "ui-icons/map.svg",
+      "sha256": "977868b4e2c2ad7f41c15f2ec36a5393546fb1568ce50f9929ae91ad4650e235",
+      "bytes": 416
+    },
+    {
+      "path": "ui-icons/nexus.svg",
+      "sha256": "9f04855982856207d9beb4349c7c1c0d1990375537382d54d4e29d4b3fb483f6",
+      "bytes": 479
+    },
+    {
+      "path": "ui-icons/search.svg",
+      "sha256": "e41c7b0a432a763e87146978fce3be2d70e750b892d6f6ae0898fa7e1c754d17",
+      "bytes": 346
+    },
+    {
+      "path": "ui-icons/settings.svg",
+      "sha256": "11f13956dba479fb0842e3c89662ae8c68fbd031a75cc077bdb3cc6e45db1f4e",
+      "bytes": 405
     }
   ]
 }

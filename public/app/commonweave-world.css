@@ -90,3 +90,11 @@ body.cw-world-active > :not(#commonweave-world):not(.cw-panel):not(.cw-toast):no
 .cw-panel .cw-sheet input,.cw-panel .cw-sheet textarea,.cw-panel .cw-sheet select{background:rgba(1,12,22,.36)!important;border:0!important;border-bottom:2px solid rgba(126,229,255,.55)!important;border-radius:0!important}
 .cw-panel .cw-sheet button:not(.cw-close){border:0!important;background:linear-gradient(90deg,rgba(32,150,164,.28),rgba(54,217,197,.42),rgba(32,150,164,.28))!important;box-shadow:0 0 20px rgba(68,222,238,.18)!important}
 .service-dialog,.config-dialog,#service-dialog,#config-dialog{display:none!important}
+
+
+/* RC22.3.10 visual runtime recovery */
+.cw-world-bar{width:min(94vw,34rem)!important;height:clamp(3.45rem,7vh,4.5rem)!important;gap:.24rem!important;padding:.3rem!important}
+.cw-world-bar button{border-radius:.8rem!important}
+.cw-world-bar button img{object-fit:contain!important;padding:.34rem!important;background:rgba(4,20,25,.72)!important}
+.cw-world-bar button span{display:none!important}
+@media(max-width:700px){.cw-world-bar{width:calc(100vw - .6rem)!important;height:3.8rem!important;gap:.16rem!important;padding:.22rem!important}}

@@ -1,4 +1,4 @@
-const CACHE = "commonweave-pocket-campus-v51-cardinal-visual-contract";
+const CACHE = "commonweave-pocket-campus-v52-visual-runtime-recovery";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
@@ -17,6 +17,15 @@ self.addEventListener("install", (event) => {
           "./assets/world/town-square-weaveling.webp",
           "./commonweave-world.css",
           "./commonweave-world.js",
+          "./shared/image-hotspot-calibrator.js",
+          "./ui-icons/back.svg",
+          "./ui-icons/home.svg",
+          "./ui-icons/map.svg",
+          "./ui-icons/search.svg",
+          "./ui-icons/inbox.svg",
+          "./ui-icons/nexus.svg",
+          "./ui-icons/directory.svg",
+          "./ui-icons/settings.svg",
           "./commonweave-weaveling-steward.js",
           "./commonweave-living-world.js",
           "./commonweave-live-data.js",
@@ -41,6 +50,8 @@ self.addEventListener("install", (event) => {
           "./VISUAL-CONTRACT-AUDIT-v1.0.9.md",
           "./VISUAL-ASSET-BACKLOG-v1.0.9.md",
           "./RELEASE-NOTES-RC22.3.9.md",
+          "./RELEASE-NOTES-RC22.3.10.md",
+          "./RUNTIME-RECOVERY-AUDIT-v1.0.10.md",
           "./logos/commonweave-title-screen.png",
           "./assets/world/inside-quad.webp",
           "./assets/world/regional-world-map.webp",

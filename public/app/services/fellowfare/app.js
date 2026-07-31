@@ -397,7 +397,7 @@ const FELLOWFARE_MALL_ART = {
 };
 
 const FELLOWFARE_SCENE_FEATURES={
- atrium:[['Exchange Galleria','Enter the illustrated marketplace and exchange wing.',3,25,28,27,'scene-exchange'],['Mutual Aid Wing','Enter help, resources, and care coordination.',69,25,28,27,'scene-aid'],['Makers Arcade','Enter skills, tools, repair, and learning.',3,56,28,22,'scene-makers'],['Logistics Concourse','Enter transport, delivery, and regional routing.',69,56,28,22,'scene-logistics'],['Upper Gallery','Enter organizations, housing, time banking, and events.',30,20,40,18,'scene-upper'],['Rooftop Commons','Enter assemblies and shared outdoor projects.',30,79,40,16,'scene-rooftop']],
+ atrium:[['Handmade & Heartfelt','Enter the exchange galleria and local marketplace.',0,38,31,31,'scene-exchange'],['Neighbors Helping Neighbors','Enter mutual aid, resources, and care coordination.',69,39,31,31,'scene-aid'],['Directory Kiosk','Use the central mall directory and resource map.',34,49,32,22,'directory'],['Rook','Open your FellowFare profile and relationship ledger.',37,61,27,27,'profile'],['Share Skills · Share Stories','Enter the makers arcade for skills, repair, and teaching.',0,70,24,27,'scene-makers'],['Trade Time · Talent','Enter logistics, time exchange, transport, and delivery.',76,70,24,27,'scene-logistics']],
  exchange:[['Marketplace','Browse offers, requests, local goods, and commissions.',4,25,29,28,'market'],['Free Store','Open gift-economy exchange.',68,25,29,28,'filter-gift'],['Help Desk','Ask for guided support.',35,58,30,25,'post-need']],
  aid:[['Help Desk','Ask for practical help and navigation.',3,28,29,24,'post-need'],['Resource Center','Browse supplies, referrals, housing, and transport.',68,28,29,24,'market'],['Community Pantry','Find food and coordinate shared meals.',35,62,30,24,'filter-food']],
  makers:[['Repair Café','Open repair requests and repair offers.',3,30,28,24,'filter-repair'],['Skill Shop','Find or teach a skill.',69,30,28,24,'filter-learning'],['Tool Rental','Browse shared tools and workspaces.',35,63,30,24,'filter-tools']],
@@ -1891,7 +1891,7 @@ document.addEventListener('click', (event) => {
   }
   if (target.dataset.mallScene) { enterMallScene(target.dataset.mallScene); return; }
   if (target.dataset.mallAction) { runMallAction(target.dataset.mallAction); return; }
-  if (target.dataset.commonweaveReturn !== undefined) { location.href='../../index.html?visual=1#square'; return; }
+  if (target.dataset.commonweaveReturn !== undefined) { location.href='../../index.html?visual=1&build=1.0.10#square'; return; }
   if (target.dataset.route) routeTo(target.dataset.route);
   if (target.dataset.openComposer) openComposer(target.dataset.openComposer);
   if (target.id === 'quickCreate' || target.id === 'mobileCreate') openComposer('need');

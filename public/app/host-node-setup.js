@@ -4,8 +4,8 @@
   const suppliedHost=params.get('host')||'';
   const DEFAULT_HOST='https://commonweave-host-node.onrender.com';
   const RELEASE_KEY='commonweave.host-release-seen.v1';
-  const CURRENT_APP_VERSION='rc22.3.9';
-  const CURRENT_HOST_BUILD='1.0.9-cardinal-visual-contract';
+  const CURRENT_APP_VERSION='rc22.3.10';
+  const CURRENT_HOST_BUILD='1.0.10-visual-runtime-recovery';
   const KEY='commonweave.host-node.v1';
   const NODE_KEY='commonweave.host-node-id.v1';
   let deferredInstall=null;
@@ -24,9 +24,10 @@
     if(!/^https?:\/\//i.test(root))throw Error('Use a complete http:// or https:// host node URL.');
     const headers={'content-type':'application/json'};if(token)headers.authorization=`Bearer ${token}`;
     const health=await fetch(`${root}/api/health`,{headers}).then(async r=>{if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||`Host returned ${r.status}`);return r.json()});
+    const hostConfig=await fetch(`${root}/api/config`,{headers,cache:'no-store'}).then(async r=>r.ok?r.json():({features:[]})).catch(()=>({features:[]}));
     const vault=(()=>{try{return JSON.parse(localStorage.getItem('commonweave-identity-vault')||'null')}catch{return null}})();
     const registration=await fetch(`${root}/api/nodes/register`,{method:'POST',headers,body:JSON.stringify({nodeId:nodeId(),label:vault?.identity?.displayName||'Pocket Campus',system:'commonweave',capabilities:['offline-pwa','handoffs','presence','relay'],metadata:{userAgent:navigator.userAgent,installed:matchMedia('(display-mode: standalone)').matches}})}).then(async r=>{if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||`Registration returned ${r.status}`);return r.json()});
-    const config={schema:'commonweave.host-node.v1',baseUrl:root,apiBase:`${root}/api`,nodeId:registration.node.nodeId,hubName:health.name,token,connectedAt:new Date().toISOString()};
+    const config={schema:'commonweave.host-node.v1',baseUrl:root,apiBase:`${root}/api`,nodeId:registration.node.nodeId,hubName:health.name,token,features:Array.isArray(hostConfig.features)?hostConfig.features:[],hostBuild:health.build||hostConfig.build||'',appVersion:health.appVersion||hostConfig.appVersion||'',connectedAt:new Date().toISOString()};
     localStorage.setItem(KEY,JSON.stringify(config));
     window.dispatchEvent(new CustomEvent('commonweave:host-node-connected',{detail:config}));
     return config;
@@ -57,9 +58,34 @@
     const root=normalizeHost(config?.baseUrl||DEFAULT_HOST);if(!root||typeof EventSource==='undefined')return;
     try{const source=new EventSource(`${root}/api/events`);source.addEventListener('release',event=>{try{showRelease(JSON.parse(event.data))}catch{}});window.addEventListener('beforeunload',()=>source.close(),{once:true})}catch{}
   }
-  async function heartbeat(){const config=current();if(!config)return;const headers={'content-type':'application/json'};if(config.token)headers.authorization=`Bearer ${config.token}`;fetch(`${config.apiBase}/nodes/heartbeat`,{method:'POST',headers,body:JSON.stringify({nodeId:config.nodeId})}).catch(()=>{})}
-  setInterval(heartbeat,60000);heartbeat();setInterval(()=>checkRelease(),10*60*1000);setTimeout(()=>{checkRelease();subscribeReleases()},1500);
-  window.CommonweaveHostNode={connect,current,nodeId,checkRelease,subscribeReleases,defaultHost:DEFAULT_HOST,disconnect(){localStorage.removeItem(KEY)}};
+  async function refreshHostCapabilities(config=current()){
+    if(!config?.baseUrl)return config;
+    try{
+      const headers={};if(config.token)headers.authorization=`Bearer ${config.token}`;
+      const remote=await fetch(`${normalizeHost(config.baseUrl)}/api/config`,{headers,cache:'no-store'}).then(r=>r.ok?r.json():null);
+      if(remote){
+        const next={...config,apiBase:remote.apiBase||config.apiBase||`${normalizeHost(config.baseUrl)}/api`,features:Array.isArray(remote.features)?remote.features:[],hostBuild:remote.build||config.hostBuild||'',appVersion:remote.appVersion||config.appVersion||''};
+        localStorage.setItem(KEY,JSON.stringify(next));
+        return next;
+      }
+    }catch{}
+    return config;
+  }
+  async function heartbeat(){
+    let config=current();if(!config)return;
+    if(!Array.isArray(config.features))config=await refreshHostCapabilities(config);
+    if(!config?.features?.includes('heartbeat'))return;
+    const headers={'content-type':'application/json'};if(config.token)headers.authorization=`Bearer ${config.token}`;
+    try{
+      const response=await fetch(`${config.apiBase}/nodes/heartbeat`,{method:'POST',headers,body:JSON.stringify({nodeId:config.nodeId})});
+      if(response.status===404){
+        const refreshed=await refreshHostCapabilities(config);
+        if(!refreshed?.features?.includes('heartbeat'))return;
+      }
+    }catch{}
+  }
+  setInterval(heartbeat,60000);setTimeout(heartbeat,2500);setInterval(()=>checkRelease(),10*60*1000);setTimeout(()=>{refreshHostCapabilities();checkRelease();subscribeReleases()},1500);
+  window.CommonweaveHostNode={connect,current,nodeId,checkRelease,subscribeReleases,refreshHostCapabilities,defaultHost:DEFAULT_HOST,disconnect(){localStorage.removeItem(KEY)}};
   if(!setup)return;
   const style=document.createElement('style');style.textContent=`
   .cw-node-wizard{position:fixed;z-index:3000;inset:0;background-image:linear-gradient(rgba(1,8,12,.3),rgba(1,8,12,.65)),url("assets/world/town-square-home.webp");background-size:cover;background-position:center;display:grid;place-items:end center;padding:16px 16px max(16px,env(safe-area-inset-bottom));overflow:auto}.cw-node-card{width:min(720px,100%);max-height:72dvh;overflow:auto;border:0;border-radius:0;background:radial-gradient(ellipse at center,rgba(15,91,100,.34),rgba(2,16,26,.88) 65%,transparent 96%);color:#f7f2df;padding:24px 28px;text-shadow:0 1px 2px #001;box-shadow:none}.cw-node-card h1{margin:0 0 8px;font-size:clamp(1.8rem,8vw,3.2rem);text-shadow:0 0 14px rgba(111,225,255,.62)}.cw-node-card p{color:#d8e8e2}.cw-node-step{padding:14px 0;border-top:1px solid rgba(126,229,255,.2)}.cw-node-step:first-of-type{border-top:0}.cw-node-step strong{display:block;margin-bottom:7px}.cw-node-row{display:flex;gap:8px;flex-wrap:wrap}.cw-node-card input{width:100%;min-height:46px;border:0;border-bottom:2px solid rgba(126,229,255,.58);border-radius:0;background:rgba(2,19,29,.55);color:white;padding:10px}.cw-node-card button,.cw-node-card a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 15px;border:1px solid rgba(126,229,255,.42);border-radius:8px;background:rgba(26,126,128,.62);color:white;font-weight:900;text-decoration:none;box-shadow:0 0 18px rgba(75,220,235,.12)}.cw-node-card .secondary{background:rgba(50,44,94,.62)}.cw-node-status{min-height:24px;font:700 12px ui-monospace,monospace;color:#a8ffe6}.cw-node-close{float:right!important;background:transparent!important;border:0!important}`;document.head.append(style);

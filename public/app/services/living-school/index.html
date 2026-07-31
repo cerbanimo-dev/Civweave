@@ -3171,9 +3171,9 @@ body.ls-visual-open .topbar,body.ls-visual-open .active-context-strip,body.ls-vi
 .ls-visual-frame img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important}
 .ls-hotspot span,.cw-world-object span,.cw-world-actor-name,.cw-world-toast,.ls-room-label,.ls-directory,.ls-action-tray,.ls-classic-fallback{display:none!important}
 .ls-hotspot:hover,.ls-hotspot:focus-visible,.cw-world-object:hover,.cw-world-object:focus-visible{border-color:transparent!important;background:transparent!important;box-shadow:none!important;outline:3px solid rgba(255,244,155,.78)!important;outline-offset:-3px}
-.ls-image-dock{position:fixed!important;z-index:5050!important;top:auto!important;bottom:max(7px,env(safe-area-inset-bottom))!important;left:50%!important;transform:translateX(-50%)!important;width:min(92vw,440px)!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:6px!important;padding:6px!important;border:1px solid rgba(255,239,160,.38)!important;border-radius:22px!important;background:rgba(10,8,5,.8)!important;backdrop-filter:blur(14px)!important;box-shadow:0 14px 38px #0009!important}
-.ls-image-dock button{min-height:58px!important;padding:0!important;border:0!important;border-radius:16px!important;background:transparent!important;overflow:hidden!important}
-.ls-image-dock img{width:100%;height:100%;object-fit:cover;border-radius:14px;filter:brightness(.72) saturate(.9);transition:.16s}
+.ls-image-dock{position:fixed!important;z-index:5050!important;top:auto!important;bottom:max(7px,env(safe-area-inset-bottom))!important;left:50%!important;transform:translateX(-50%)!important;width:min(82vw,286px)!important;display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:4px!important;padding:5px!important;border:1px solid rgba(255,239,160,.38)!important;border-radius:22px!important;background:rgba(10,8,5,.8)!important;backdrop-filter:blur(14px)!important;box-shadow:0 14px 38px #0009!important}
+.ls-image-dock button{height:46px!important;min-height:46px!important;padding:0!important;border:0!important;border-radius:16px!important;background:transparent!important;overflow:hidden!important}
+.ls-image-dock img{width:100%;height:100%;object-fit:contain;padding:8px;border-radius:14px;filter:brightness(.96) saturate(1);transition:.16s}
 .ls-image-dock button:hover img,.ls-image-dock button:focus-visible img{filter:brightness(1.05) saturate(1.12);transform:scale(1.04)}
 .ls-image-dock button:focus-visible{outline:3px solid #fff0a8;outline-offset:2px}
 .ls-version-plaque{position:fixed;z-index:5051;top:max(8px,env(safe-area-inset-top));left:8px;display:flex;align-items:center;gap:5px;padding:4px 8px 4px 4px;border:1px solid rgba(255,240,167,.42);border-radius:999px;background:rgba(8,7,4,.8);color:#fff0a8;font:800 .68rem ui-monospace,monospace;backdrop-filter:blur(10px)}
@@ -3190,20 +3190,21 @@ body.ls-visual-open .topbar,body.ls-visual-open .active-context-strip,body.ls-vi
 .ls-projected-workspace .panel,.ls-projected-workspace .card,.ls-projected-workspace section,.ls-projected-workspace article{background:transparent!important;border:0!important;box-shadow:none!important;color:inherit!important}
 .ls-projected-workspace input,.ls-projected-workspace textarea,.ls-projected-workspace select{background:rgba(12,8,4,.48)!important;color:#fff8dd!important;border:0!important;border-bottom:2px solid rgba(238,255,45,.66)!important;border-radius:0!important}
 .ls-projected-workspace button,.ls-projected-workspace .button{background:rgba(236,61,159,.36)!important;color:#fff8dd!important;border:1px solid rgba(238,255,45,.42)!important;box-shadow:0 0 18px rgba(236,61,159,.12)!important}
-@media(max-width:620px){.ls-image-dock{width:calc(100vw - 12px)!important}.ls-image-dock button{min-height:50px!important}.ls-projection-surface{width:calc(100vw - 14px);max-height:64dvh;bottom:max(4.7rem,calc(env(safe-area-inset-bottom) + 4.1rem));padding:.8rem}}
+@media(max-width:620px){.ls-image-dock{width:min(88vw,286px)!important}.ls-image-dock button{height:44px!important;min-height:44px!important}.ls-projection-surface{width:calc(100vw - 14px);max-height:64dvh;bottom:max(4.7rem,calc(env(safe-area-inset-bottom) + 4.1rem));padding:.8rem}}
 
 </style>
+<script src="../../shared/image-hotspot-calibrator.js"></script>
 </head>
 <body>
 
 <div id="livingVisualWorld" aria-hidden="true">
   <nav class="ls-visual-tools ls-image-dock" aria-label="Living School visual dock">
-    <button type="button" data-ls-back aria-label="Previous illustrated room"><img src="visual-assets/courtyard.webp" alt=""></button>
-    <button type="button" data-ls-home aria-label="Exterior campus"><img src="visual-assets/exterior.webp" alt=""></button>
-    <button type="button" data-ls-directory aria-label="Campus map"><img src="visual-assets/map.webp" alt=""></button>
-    <button type="button" data-ls-commonweave aria-label="Return to Commonweave"><img src="../../logos/commonweave.webp" alt=""></button>
+    <button type="button" data-ls-back aria-label="Previous illustrated room"><img src="../../ui-icons/back.svg" alt=""></button>
+    <button type="button" data-ls-home aria-label="Exterior campus"><img src="../../ui-icons/home.svg" alt=""></button>
+    <button type="button" data-ls-directory aria-label="Campus map"><img src="../../ui-icons/map.svg" alt=""></button>
+    <button type="button" data-ls-commonweave aria-label="Return to Commonweave"><img src="../../ui-icons/back.svg" alt=""></button>
   </nav>
-  <div class="ls-version-plaque"><img src="../../logos/living-school.webp" alt=""><span>v1.0.9</span></div>
+  <div class="ls-version-plaque"><img src="../../logos/living-school.webp" alt=""><span>v1.0.10</span></div>
   <div class="ls-visual-stage" id="livingVisualStage"></div>
   <div id="livingVisualLive" class="ls-visual-live" aria-live="polite"></div>
 </div>
@@ -7153,8 +7154,6 @@ Final model-native output:
     async function stopGGUFModel(){const result=await bridgeJSON("/models/stop",{method:"POST",body:"{}"});document.getElementById("gguf-state").textContent="Local model stopped";document.getElementById("gguf-state").className="gguf-state";document.getElementById("gguf-status").textContent=result.message||"The active llama-server process was stopped."}
 
 
-    function hostedEntitlementIsActive(){
-  
     // RC17.9 Living School visual campus: image-first navigation with in-world work surfaces.
     const LS_VISUAL_KEY="living-school.visual-mode.v1";
     const LS_VISUAL_PARAMS=new URLSearchParams(location.search);
@@ -7383,7 +7382,7 @@ Final model-native output:
       grid?.querySelectorAll("[data-ls-workspace]").forEach(button=>button.addEventListener("click",()=>openLivingClassicTarget({workspace:button.dataset.lsWorkspace,focus:button.dataset.lsFocus,label:button.querySelector("strong")?.textContent||"Workspace"})));
       document.querySelector("[data-ls-back]")?.addEventListener("click",()=>openLivingVisualRoom(lsVisualHistory.pop()||"exterior",{push:false}));
       document.querySelector("[data-ls-home]")?.addEventListener("click",()=>openLivingVisualRoom("exterior"));
-      document.querySelector("[data-ls-commonweave]")?.addEventListener("click",()=>{location.href="../../index.html?visual=1#square";});
+      document.querySelector("[data-ls-commonweave]")?.addEventListener("click",()=>{location.href="../../index.html?visual=1&build=1.0.10#square";});
       document.querySelector("[data-ls-close-projection]")?.addEventListener("click",closeLivingProjection);
       document.querySelector("[data-ls-directory]")?.addEventListener("click",openLivingDirectory);
       document.querySelector("[data-ls-close-directory]")?.addEventListener("click",closeLivingDirectory);
@@ -7403,7 +7402,8 @@ Final model-native output:
       setTimeout(openLivingVisual,40);
     }
 
-    ensureCommerceState();
+    function hostedEntitlementIsActive(){
+      ensureCommerceState();
       const entitlement=state.commerce.entitlement;
       if(!entitlement||entitlement.status!=="active") return false;
       if(entitlement.expiresAt&&Date.parse(entitlement.expiresAt)<=Date.now()) return false;
@@ -14629,7 +14629,7 @@ Final model-native output:
         badge.style.cssText="position:fixed;right:12px;bottom:12px;z-index:80;display:flex;align-items:center;gap:7px;padding:6px 10px 6px 6px;border:1px solid rgba(107,161,60,.48);border-radius:999px;background:#f8fbf1;color:#263423;font:700 9px ui-monospace,monospace;box-shadow:0 8px 24px rgba(27,48,30,.22)";
         document.body.append(badge);
       }
-      badge.innerHTML=`<img src="/logos/living-school.webp" alt="" style="width:26px;height:26px;padding:2px;border-radius:50%;background:#fff;object-fit:contain"><span>MOSS · ${escapeHTML(plan.name||plan.id||"COMMONS")} · ${state.modelSettings.provider==="deterministic"?"LOCAL":escapeHTML(state.modelSettings.model)}</span>`;
+      badge.innerHTML=`<img src="../../logos/living-school.webp" alt="" style="width:26px;height:26px;padding:2px;border-radius:50%;background:#fff;object-fit:contain"><span>MOSS · ${escapeHTML(plan.name||plan.id||"COMMONS")} · ${state.modelSettings.provider==="deterministic"?"LOCAL":escapeHTML(state.modelSettings.model)}</span>`;
     }
 
     function commonweaveCapstone(){

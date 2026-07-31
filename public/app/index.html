@@ -6,6 +6,10 @@
   <meta name="theme-color" content="#06131f">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="commonweave-world.css">
+  <style id="cw-visual-first-paint">
+    html,body{background:#050a0d!important}
+    body>:not(#commonweave-world):not(script):not(style):not(.cw-node-wizard):not(.cw-release-banner){visibility:hidden}
+  </style>
   <title>Commonweave Pocket Campus</title>
   <style>
     :root{--ink:#17211b;--paper:#f4f1e8;--line:rgba(23,33,27,.16);--acid:#b5ed63;--muted:#657068;--pink:#ff4d8d;--cyan:#5ed8ff}
@@ -60,7 +64,7 @@
   <div id="boot-splash" class="boot-splash" role="status" aria-live="polite"><img src="logos/commonweave-title-screen.png" alt="Commonweave. Learn. Build. Govern. Together."><p>Opening the Pocket Campus…</p></div>
 
   <header class="top">
-    <div class="brand"><img src="logos/commonweave.webp" alt="Commonweave"><span><strong>COMMONWEAVE</strong><small>Pocket Campus · local node v1.0.0 RC17.3</small></span></div>
+    <div class="brand"><img src="logos/commonweave.webp" alt="Commonweave"><span><strong>COMMONWEAVE</strong><small>Pocket Campus · visual runtime rc22.3.10</small></span></div>
     <div class="top-actions"><button id="reward-weave-button">Rewards <b id="reward-pending-count" hidden>0</b></button><button id="action-inbox-button" class="pocket-inbox-button">Inbox <b id="action-inbox-count" hidden>0</b></button><button id="model-settings">Shared model</button><button id="install" class="primary">Install / update</button></div>
   </header>
   <main>
@@ -161,7 +165,7 @@
   </dialog>
 
   <script>
-  (()=>{const build='1.0.9-cardinal-visual-contract',key='commonweave.host-build';if(localStorage.getItem(key)!==build){localStorage.setItem(key,build);if('caches' in window)caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).catch(()=>{});if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).catch(()=>{});}})();
+  (()=>{const build='1.0.10-visual-runtime-recovery',key='commonweave.host-build';if(localStorage.getItem(key)!==build){localStorage.setItem(key,build);if('caches' in window)caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).catch(()=>{});if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).catch(()=>{});}})();
   </script>
   <script src="shared/commonweave-operations.js"></script>
   <script src="shared/commonweave-model-runtime.js"></script>
@@ -174,7 +178,7 @@
       browser:{label:"Browser model",model:"browser-native",endpoint:"",simple:true},
       manual:{label:"Manual exchange",model:"manual-exchange",endpoint:"",simple:true}
     };
-    const APP_BUILD="1.0.9-cardinal-visual-contract";
+    const APP_BUILD="1.0.10-visual-runtime-recovery";
     const APP_ROUTES={living:["Living School",`services/living-school/index.html?commonweave=1&visual=1&build=${APP_BUILD}`],cerbanimo:["Cerbanimo",`services/cerbanimo/index.html?commonweave=1&visual=1&build=${APP_BUILD}#world-title`],anarchadia:["Anarchadia",`services/anarchadia/index.html?commonweave=1&visual=1&build=${APP_BUILD}#hall`],fellowfare:["FellowFare",`services/fellowfare/index.html?commonweave=1&visual=1&build=${APP_BUILD}`]};
     const PERSONAS={living:{name:"Moss",avatar:"logos/living-school.webp"},cerbanimo:{name:"Kamiya",avatar:"logos/cerbanimo.webp"},anarchadia:{name:"Rook",avatar:"logos/anarchadia.webp"},fellowfare:{name:"Tiller",avatar:"logos/fellowfare.png"}};
     const DEFAULT_CONFIG={route:"deterministic",model:ROUTES.deterministic.model,endpoint:"",remoteConsent:false,shareKey:false};
@@ -763,6 +767,7 @@ ${journey.governanceQuestions.map(item=>`- ${item}`).join("\n")}`}
   <script src="commonweave-actionable-quad.js"></script>
   <script src="commonweave-adaptive-plan.js"></script>
   <script src="commonweave-strategy-steward.js"></script>
+  <script src="shared/image-hotspot-calibrator.js"></script>
   <script src="commonweave-world.js"></script>
   <script src="commonweave-steward-dashboard.js"></script>
   <script src="commonweave-predictive-portfolio.js"></script>

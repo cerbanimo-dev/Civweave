@@ -1,8 +1,8 @@
-const CACHE = 'anarchadia-v0.3.5-cardinal-visual';
+const CACHE = 'anarchadia-v0.3.6-visual-runtime-recovery';
 const CORE = [
   './','./index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js','./styles.css','./manifest.webmanifest',
   './src/app.js','./world-engine.js','./src/domain.js','./src/store.js','./src/ai.js','./src/export.js','./shared/commonweave-model-runtime.js',
-  '../../logos/anarchadia.webp','../../logos/commonweave.webp','./assets/icon-180.png','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-maskable-512.png',
+  '../../logos/anarchadia.webp','../../logos/commonweave.webp','../../shared/image-hotspot-calibrator.js','../../ui-icons/back.svg','../../ui-icons/home.svg','../../ui-icons/map.svg','../../ui-icons/search.svg','../../ui-icons/inbox.svg','../../ui-icons/nexus.svg','../../ui-icons/directory.svg','../../ui-icons/settings.svg','./assets/icon-180.png','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-maskable-512.png',
   './assets/passport/anarchadia-passport-blank.webp',
   './docs/PROVISIONAL_CONSTITUTION.md',
   './assets/screens/home-landscape.webp',

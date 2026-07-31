@@ -1,4 +1,4 @@
-const CACHE = 'fellowfare-0.4.1-cardinal-visual';
+const CACHE = 'fellowfare-0.4.2-visual-runtime-recovery';
 const SHELL = [
   './',
   './index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js',
@@ -10,7 +10,7 @@ const SHELL = [
   './manifest.webmanifest',
   '../../logos/fellowfare-wordmark.png',
   '../../logos/fellowfare.png',
-  '../../logos/commonweave.webp',
+  '../../logos/commonweave.webp','../../shared/image-hotspot-calibrator.js','../../ui-icons/back.svg','../../ui-icons/home.svg','../../ui-icons/map.svg','../../ui-icons/search.svg','../../ui-icons/inbox.svg','../../ui-icons/nexus.svg','../../ui-icons/directory.svg','../../ui-icons/settings.svg',
   './assets/mall/main-atrium.webp',
   './assets/mall/exchange-galleria.webp',
   './assets/mall/mutual-aid-wing.webp',

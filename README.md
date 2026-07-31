@@ -43,4 +43,9 @@ The built-in default host is `https://commonweave-host-node.onrender.com`. Conne
 
 ## Cardinal visual interface
 
-Version 1.0.9 treats the supplied artwork as the application surface across the suite. Conventional shells remain only as hidden implementation substrate; user-facing navigation is image-backed and editing occurs in illustrated world screens. See `VISUAL-CONTRACT.md`, `VISUAL-CONTRACT-AUDIT-v1.0.9.md`, and `VISUAL-ASSET-BACKLOG-v1.0.9.md`.
+Version 1.0.10 treats the supplied artwork as the application surface across the suite. Conventional shells remain only as hidden implementation substrate; user-facing navigation is image-backed and editing occurs in illustrated world screens. See `VISUAL-CONTRACT.md`, `VISUAL-CONTRACT-AUDIT-v1.0.9.md`, and `VISUAL-ASSET-BACKLOG-v1.0.9.md`.
+
+
+## v1.0.10 live-node recovery
+
+This build repairs Living School and Cerbanimo visual startup, routes the Quad into host setup on unconnected devices, adds compact image-backed navigation glyphs, calibrates FellowFare's main atrium, suppresses stale heartbeat calls, and gives Antigravity permission failures a non-blocking Gemini fallback. See `RELEASE-NOTES-v1.0.10.md`.
