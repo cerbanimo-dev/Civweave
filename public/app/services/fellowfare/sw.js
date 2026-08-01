@@ -1,4 +1,4 @@
-const CACHE = 'fellowfare-0.4.4-visual-asset-overhaul';
+const CACHE = 'fellowfare-0.4.5-host-cache-recovery';
 const SHELL = ["../../commonweave-merlin-chat.css","../../shared/commonweave-merlin-chat.js","../../assets/ai/merlin.png",
   './',
   './index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js',
@@ -56,10 +56,10 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(caches.match(event.request).then((cached) => {
-    const network = fetch(event.request).then((response) => {
+    const network = fetch(event.request, { cache: 'reload' }).then((response) => {
       if (response.ok) caches.open(CACHE).then((cache) => cache.put(event.request, response.clone()));
       return response;
     }).catch(() => cached);
-    return cached || network;
+    return network || cached;
   }));
 });

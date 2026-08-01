@@ -1,4 +1,4 @@
-const CACHE = "commonweave-pocket-campus-v59-visual-asset-overhaul";
+const CACHE = "commonweave-pocket-campus-v60-host-cache-recovery";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
@@ -189,7 +189,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   if (new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(
-    fetch(event.request).catch(() =>
+    fetch(event.request, { cache: "reload" }).catch(() =>
       caches.match(event.request).then((cached) => cached || caches.match("./index.html")),
     ),
   );

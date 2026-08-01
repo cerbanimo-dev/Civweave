@@ -15,8 +15,8 @@ const HUB_NAME = process.env.HUB_NAME || 'Commonweave Host Node';
 const HUB_TOKEN = String(process.env.HUB_TOKEN || '').trim();
 const MAX_ENVELOPES = Math.max(100, Number(process.env.MAX_ENVELOPES || 5000));
 const STARTED_AT = new Date().toISOString();
-const BUILD_VERSION = '1.0.16-surface-engine';
-const APP_VERSION = 'rc22.3.15-surface-engine';
+const BUILD_VERSION = '1.0.17-visual-overhaul';
+const APP_VERSION = 'rc22.3.16-visual-overhaul';
 const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://commonweave-host-node.onrender.com';
 const INSTALL_KIT_PATH = path.join(PUBLIC_DIR, 'downloads', 'Commonweave-Mobile-Install-Kit.zip');
 const CAMPUS_SEED_PATH = path.join(PUBLIC_DIR, 'downloads', 'commonweave-pocket-campus.cwseed');
@@ -208,8 +208,12 @@ async function serveFile(req, res, pathname) {
       'cross-origin-resource-policy': 'same-origin'
     };
     if (target.includes(`${path.sep}downloads${path.sep}`)) headers['content-disposition'] = `attachment; filename="${path.basename(target)}"`;
-    if (ext === '.html' || ext === '.js' || ext === '.css' || ext === '.json' || ext === '.webmanifest') headers['cache-control'] = 'no-cache';
-    else headers['cache-control'] = 'public, max-age=604800, immutable';
+    // Stable asset URLs must revalidate after deploys. Only content-hashed
+    // filenames are safe to keep immutable across visual releases.
+    const fingerprinted = /[.-][a-f0-9]{8,}[.-]/i.test(path.basename(target));
+    if (fingerprinted) headers['cache-control'] = 'public, max-age=31536000, immutable';
+    else if (target.includes(`${path.sep}downloads${path.sep}`)) headers['cache-control'] = 'no-store';
+    else headers['cache-control'] = 'no-cache, must-revalidate';
     if (range) {
       const match = /^bytes=(\d*)-(\d*)$/.exec(range);
       if (!match) return json(res, 416, { error: 'Invalid range' });

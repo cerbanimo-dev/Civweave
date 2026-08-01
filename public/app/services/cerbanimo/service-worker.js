@@ -1,4 +1,4 @@
-const CACHE="cerbanimo-rc22.3.12-visual-asset-overhaul";
+const CACHE="cerbanimo-rc22.3.13-host-cache-recovery";
 const SHELL=["../../commonweave-merlin-chat.css","../../shared/commonweave-merlin-chat.js","../../assets/ai/merlin.png","./","./index.html","./world-engine.js","./commonweave-handoff-consumer.js","./commonweave-presence.js","./manifest.webmanifest","../../logos/commonweave.webp","../../shared/image-hotspot-calibrator.js","../../ui-icons/back.svg","../../ui-icons/home.svg","../../ui-icons/map.svg","../../ui-icons/search.svg","../../ui-icons/inbox.svg","../../ui-icons/nexus.svg","../../ui-icons/directory.svg","../../ui-icons/settings.svg","./icons/icon-192.png","./icons/icon-maskable-192.png","./icons/icon-512.png","./icons/icon-maskable-512.png","./icons/favicon-64.png","./assets/cerbanimo-logo.png","./assets/cerbanimo-mark.png","./assets/cerbanimo-wordmark.png","./commonweave-bridge.js","./shared/commonweave-model-runtime.js","./assets/visual/title.webp","./assets/visual/loading.webp","./assets/visual/nexus.webp","./assets/visual/mission.webp","./assets/visual/workshop.webp","./assets/visual/quest.webp","./assets/visual/skill.webp","./assets/visual/resource.webp","./assets/visual/transit.webp","./assets/visual/observatory.webp","./assets/visual/ai-core.webp","./assets/visual/hangar.webp","./assets/visual/systems.webp","./assets/visual/kiosks.webp","./assets/visual/showroom.webp","./assets/visual/map.webp","./assets/visual/kamiya-chamber.webp","./assets/visual/object-viewer.webp","./assets/visual/form-workbench.webp","./assets/visual/project-workbench.webp","./assets/visual/mission-room.webp","./assets/visual/asset-atlas.webp"];
 const NETWORK_ONLY_PREFIXES=["/field/","/ollama/","/compatible/","/bigmoe/","/gemini/","/party/","/packaged/"];
 self.addEventListener("install",event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
@@ -12,7 +12,7 @@ self.addEventListener("fetch",event=>{
     event.respondWith(fetch(event.request).then(response=>{if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put("./index.html",copy));}return response;}).catch(()=>caches.match("./index.html")));
     return;
   }
-  event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(response=>{if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));}return response;})));
+  event.respondWith(fetch(event.request,{cache:"reload"}).then(response=>{if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));}return response;}).catch(()=>caches.match(event.request)));
 });
 
 self.addEventListener("push",event=>{
