@@ -1891,7 +1891,7 @@ document.addEventListener('click', (event) => {
   }
   if (target.dataset.mallScene) { enterMallScene(target.dataset.mallScene); return; }
   if (target.dataset.mallAction) { runMallAction(target.dataset.mallAction); return; }
-  if (target.dataset.commonweaveReturn !== undefined) { location.href='../../index.html?visual=1&build=1.0.14#square'; return; }
+  if (target.dataset.commonweaveReturn !== undefined) { location.href='../../index.html?visual=1&build=1.0.20#square'; return; }
   if (target.dataset.route) routeTo(target.dataset.route);
   if (target.dataset.openComposer) openComposer(target.dataset.openComposer);
   if (target.id === 'quickCreate' || target.id === 'mobileCreate') openComposer('need');

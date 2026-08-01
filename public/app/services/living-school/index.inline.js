@@ -2299,9 +2299,9 @@ Final model-native output:
         onAction:item=>{
           if(item.action==="moss"||item.action==="moss-dialog"){openLivingMossDialog();return;}
           if(item.action==="directory"){openLivingDirectory();return;}
-          if(item.action==="cerbanimo"){location.href="../cerbanimo/index.html?commonweave=1&visual=1#world-title";return;}
+          if(item.action==="cerbanimo"){location.href="../cerbanimo/index.html?commonweave=1&visual=1&build=1.0.20#world-nexus";return;}
           if(item.action==="fellowfare"){location.href="../fellowfare/index.html?commonweave=1&visual=1";return;}
-          if(item.action==="commonweave"){location.href="../../index.html?visual=1&build=1.0.14#square";return;}
+          if(item.action==="commonweave"){location.href="../../index.html?visual=1&build=1.0.20#square";return;}
           if(item.action==="settings"){openLivingClassicTarget({workspace:"studio",focus:"model-settings",label:"Settings and model controls"});return;}
           if(String(item.action||"").startsWith("journal-")){openLivingJournal(item.action.slice(8),item.prompt||"");return;}
           if(item.action==="quiet-library"){const quiet=livingWorldEngine.toggle("living-school.library.quiet");livingWorldEngine.set("living-school.library.mood",quiet?"quiet":"busy");livingWorldEngine.showMessage(quiet?"Quiet study settles over the stacks.":"The library returns to its bright communal hum.");livingWorldEngine.render();return;}
@@ -2450,9 +2450,9 @@ Final model-native output:
       if(spot.room){openLivingVisualRoom(spot.room);return;}
       if(spot.action==="directory"){openLivingDirectory();return;}
       if(spot.action==="moss"||spot.action==="moss-dialog"){openLivingMossDialog();return;}
-      if(spot.action==="cerbanimo"){location.href="../cerbanimo/index.html?commonweave=1&visual=1#world-title";return;}
+      if(spot.action==="cerbanimo"){location.href="../cerbanimo/index.html?commonweave=1&visual=1&build=1.0.20#world-nexus";return;}
       if(spot.action==="fellowfare"){location.href="../fellowfare/index.html?commonweave=1&visual=1";return;}
-      if(spot.action==="commonweave"){location.href="../../index.html?visual=1&build=1.0.14#square";return;}
+      if(spot.action==="commonweave"){location.href="../../index.html?visual=1&build=1.0.20#square";return;}
       if(spot.action==="settings"){openLivingClassicTarget({workspace:"studio",focus:"model-settings",label:"Settings and model controls"});return;}
       if(String(spot.action||"").startsWith("journal-")){openLivingJournal(spot.action.slice(8),spot.prompt||"");return;}
       if(spot.action==="message"){announceLiving(spot.message||spot.label);return;}
@@ -2487,7 +2487,7 @@ Final model-native output:
       grid?.querySelectorAll("[data-ls-workspace]").forEach(button=>button.addEventListener("click",()=>openLivingClassicTarget({workspace:button.dataset.lsWorkspace,focus:button.dataset.lsFocus,label:button.querySelector("strong")?.textContent||"Workspace"})));
       document.querySelector("[data-ls-back]")?.addEventListener("click",()=>openLivingVisualRoom(lsVisualHistory.pop()||"exterior",{push:false}));
       document.querySelector("[data-ls-home]")?.addEventListener("click",()=>openLivingVisualRoom("home"));
-      document.querySelector("[data-ls-commonweave]")?.addEventListener("click",()=>{location.href="../../index.html?visual=1&build=1.0.14#square";});
+      document.querySelector("[data-ls-commonweave]")?.addEventListener("click",()=>{location.href="../../index.html?visual=1&build=1.0.20#square";});
       document.querySelector("[data-ls-model]")?.addEventListener("click",()=>openModelFoundry());
       document.querySelector("[data-ls-close-projection]")?.addEventListener("click",closeLivingProjection);
       document.querySelector("[data-ls-journal-close]")?.addEventListener("click",closeLivingJournal);
@@ -9363,7 +9363,7 @@ Final model-native output:
       document.querySelector("[data-mobile-browse]").addEventListener("click",()=>setTraversalMode("browse"));
       document.querySelector("[data-mobile-more]").addEventListener("click",()=>openSheet("school-controls-sheet",document.getElementById("school-controls-toggle")));
       document.getElementById("school-cover-expand").addEventListener("click",event=>{const cover=document.getElementById("school-cover");cover.classList.toggle("expanded");event.currentTarget.setAttribute("aria-expanded",String(cover.classList.contains("expanded")));event.currentTarget.textContent=cover.classList.contains("expanded")?"Collapse purpose":"Read full purpose";});
-      document.getElementById("open-cerbanimo-connection").addEventListener("click",()=>{closeSheet("school-controls-sheet",document.getElementById("school-controls-toggle"));location.href="../cerbanimo/index.html?commonweave=1&visual=1#world-title";});
+      document.getElementById("open-cerbanimo-connection").addEventListener("click",()=>{closeSheet("school-controls-sheet",document.getElementById("school-controls-toggle"));location.href="../cerbanimo/index.html?commonweave=1&visual=1&build=1.0.20#world-nexus";});
       document.getElementById("quiet-toggle").addEventListener("click",()=>applyAppearanceMode("quiet"));
 
       document.getElementById("top-plan").addEventListener("click",()=>setWorkspace("admin",{focusId:"billing-panel"}));
@@ -10774,4 +10774,3 @@ Final model-native output:
       window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{scope:"./"}).catch(error=>console.warn("Living School service worker unavailable",error)));
     }
   })();
-  

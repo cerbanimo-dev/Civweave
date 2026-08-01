@@ -168,7 +168,7 @@
   </dialog>
 
   <script>
-  (()=>{const build='1.0.19-mvp',key='commonweave.host-build';if(localStorage.getItem(key)!==build){localStorage.setItem(key,build);if('caches' in window)caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('commonweave-pocket-campus-')).map(k=>caches.delete(k)))).catch(()=>{});if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>Promise.allSettled(rs.map(r=>r.update()))).catch(()=>{});}})();
+  (()=>{const build='1.0.20-visual-shell',key='commonweave.host-build';if(localStorage.getItem(key)!==build){localStorage.setItem(key,build);if('caches' in window)caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('commonweave-pocket-campus-')).map(k=>caches.delete(k)))).catch(()=>{});if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>Promise.allSettled(rs.map(r=>r.update()))).catch(()=>{});}})();
   </script>
   <script src="shared/commonweave-operations.js"></script>
   <script src="shared/commonweave-model-runtime.js"></script>
@@ -181,8 +181,8 @@
       browser:{label:"Browser model",model:"browser-native",endpoint:"",simple:true},
       manual:{label:"Manual exchange",model:"manual-exchange",endpoint:"",simple:true}
     };
-    const APP_BUILD="1.0.19-mvp";
-    const APP_ROUTES={living:["Living School",`services/living-school/index.html?commonweave=1&visual=1&build=${APP_BUILD}`],cerbanimo:["Cerbanimo",`services/cerbanimo/index.html?commonweave=1&visual=1&build=${APP_BUILD}#world-title`],anarchadia:["Anarchadia",`services/anarchadia/index.html?commonweave=1&visual=1&build=${APP_BUILD}#hall`],fellowfare:["FellowFare",`services/fellowfare/index.html?commonweave=1&visual=1&build=${APP_BUILD}`]};
+    const APP_BUILD="1.0.20-visual-shell";
+    const APP_ROUTES={living:["Living School",`services/living-school/index.html?commonweave=1&visual=1&build=${APP_BUILD}#exterior`],cerbanimo:["Cerbanimo",`services/cerbanimo/index.html?commonweave=1&visual=1&build=${APP_BUILD}#world-nexus`],anarchadia:["Anarchadia",`services/anarchadia/index.html?commonweave=1&visual=1&build=${APP_BUILD}#hall`],fellowfare:["FellowFare",`services/fellowfare/index.html?commonweave=1&visual=1&build=${APP_BUILD}#mall`]};
     const PERSONAS={living:{name:"Moss",avatar:"logos/living-school.webp"},cerbanimo:{name:"Kamiya",avatar:"logos/cerbanimo.webp"},anarchadia:{name:"Rook",avatar:"logos/anarchadia.webp"},fellowfare:{name:"Tiller",avatar:"logos/fellowfare.png"}};
     const DEFAULT_CONFIG={route:"deterministic",model:ROUTES.deterministic.model,endpoint:"",remoteConsent:false,shareKey:false};
     const $=selector=>document.querySelector(selector);

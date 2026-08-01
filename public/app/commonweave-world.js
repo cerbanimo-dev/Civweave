@@ -4,6 +4,7 @@ const LW=window.CommonweaveLivingWorld;
 if(!LW)return;
 const root=document.createElement('section');root.id='commonweave-world';root.innerHTML=`<div class="cw-version-plaque" aria-label="Commonweave version 1.0.14"><img src="logos/commonweave.webp" alt=""><span>v1.0.14</span></div><header class="cw-world-bar" aria-label="Commonweave visual dock"><button data-action="map" aria-label="World map"><img src="ui-icons/map.svg" alt=""><span>Map</span></button><button data-action="intentions" aria-label="Intentions"><img src="logos/commonweave.webp" alt=""><span>Intentions</span></button><button data-action="plan-studio" aria-label="Plan studio"><img src="assets/ai/kamiya-gift.png" alt=""><span>Plan</span></button><button data-action="journeys" aria-label="Journeys"><img src="assets/ai/moss-acorn.png" alt=""><span>Journeys</span></button><button data-action="review" aria-label="Review actions"><img src="assets/ai/rook-coin-button.png" alt=""><span>Review</span></button><button data-action="search" aria-label="Search"><img src="assets/ai/weaveling-compass.png" alt=""><span>Search</span></button><button data-action="settings" aria-label="Settings"><img src="ui-icons/settings.svg" alt=""><span>Settings</span></button></header><div id="cw-stage"></div>`;
 document.body.insertBefore(root,document.body.firstChild);document.body.classList.add('cw-classic-hidden','cw-world-active');
+root.querySelector('.cw-version-plaque span').textContent='v1.0.20';root.querySelector('.cw-version-plaque').setAttribute('aria-label','Commonweave version 1.0.20');
 const panel=document.createElement('div');panel.className='cw-panel';panel.hidden=true;panel.innerHTML=`<img class="cw-projection-scene" src="assets/world/inside-quad.webp" alt="Inside the Commonweave Quad, where information appears through an in-world projection"><section class="cw-sheet"><header><div><small id="cw-panel-kicker">COMMONWEAVE</small><h2 id="cw-panel-title"></h2><p id="cw-panel-copy"></p></div><button class="cw-close" aria-label="Close projection"><img src="assets/ai/weaveling-compass.png" alt=""></button></header><div id="cw-panel-body"></div></section>`;document.body.append(panel);
 const toast=document.createElement('div');toast.className='cw-toast';toast.hidden=true;document.body.append(toast);
 const stage=root.querySelector('#cw-stage');
@@ -30,12 +31,12 @@ function featureButtons(id){return (districtFeatures[id]||[]).map(([label,descri
 const aiProfiles={weaveling:{name:'Weaveling',role:'Commonweave guide',sprite:'assets/ai/weaveling.png',artifact:'assets/ai/weaveling-compass.png'},kamiya:{name:'Kitsune Kamiya',role:'Cerbanimo pathfinder',sprite:'assets/ai/kamiya.png',artifact:'assets/ai/kamiya-gift.png'},moss:{name:'Moss',role:'Living School mentor',sprite:'assets/ai/moss.png',artifact:'assets/ai/moss-acorn.png'},rook:{name:'Rook',role:'FellowFare steward',sprite:'assets/ai/rook.png',artifact:'assets/ai/rook-coin-button.png'},merlin:{name:'Merlin',role:'Universal read-only starfish wizard',sprite:'assets/ai/merlin.png',artifact:'assets/ai/merlin-hat.png'}};
 function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function notify(text){toast.textContent=text;toast.hidden=false;clearTimeout(notify.t);notify.t=setTimeout(()=>toast.hidden=true,3000)}
-function openPanel(kicker,title,copy,body){panel.hidden=false;panel.querySelector('#cw-panel-kicker').textContent=kicker;panel.querySelector('#cw-panel-title').textContent=title;panel.querySelector('#cw-panel-copy').textContent=copy;panel.querySelector('#cw-panel-body').innerHTML=body}
+function openPanel(kicker,title,copy,body){panel.classList.remove('cw-weaveling-panel');panel.hidden=false;panel.querySelector('#cw-panel-kicker').textContent=kicker;panel.querySelector('#cw-panel-title').textContent=title;panel.querySelector('#cw-panel-copy').textContent=copy;panel.querySelector('#cw-panel-body').innerHTML=body}
 const visualServiceRoutes={
- living:'services/living-school/index.html?commonweave=1&visual=1&build=1.0.14#exterior',
- cerbanimo:'services/cerbanimo/index.html?commonweave=1&visual=1&build=1.0.14#world-title',
- fellowfare:'services/fellowfare/index.html?commonweave=1&visual=1&build=1.0.14#mall',
- anarchadia:'services/anarchadia/index.html?commonweave=1&visual=1&build=1.0.14#hall'
+ living:'services/living-school/index.html?commonweave=1&visual=1&build=1.0.20#exterior',
+ cerbanimo:'services/cerbanimo/index.html?commonweave=1&visual=1&build=1.0.20#world-nexus',
+ fellowfare:'services/fellowfare/index.html?commonweave=1&visual=1&build=1.0.20#mall',
+ anarchadia:'services/anarchadia/index.html?commonweave=1&visual=1&build=1.0.20#hall'
 };
 function openService(key){
  if(key==='commonweave'){panel.hidden=true;showIntentions();return true}
@@ -62,14 +63,14 @@ function showMap(){openPanel('COMMONWEAVE · BEYOND THE CITY CENTER','Choose a d
 function showWeavelingWish(){
  const snap=window.CommonweaveActionableQuad?.snapshot?.()||{thread:{messages:[]}};
  openPanel('THE QUAD · WEAVELING','What is your wish?','Tell Weaveling what you want, need, wonder, or hope to change. She can answer directly, find existing threads, or derive a reviewable intention and route it across the realms.',`<div class="cw-weaveling-intro"><img src="assets/ai/weaveling.png" alt="Weaveling"><div><b>Weaveling</b><p>“What is your wish?”</p></div></div><div class="cw-thread-history">${snap.thread.messages.slice(-5).map(m=>`<div class="cw-thread-message ${esc(m.role)}"><small>${esc(m.role)}</small><div>${esc(m.content)}</div></div>`).join('')}</div><form class="cw-wish-form"><textarea id="cw-wish-prompt" maxlength="4000" autofocus placeholder="I wish to…"></textarea><button>Tell Weaveling →</button></form><p class="cw-muted">Nothing becomes a project, curriculum, exchange, or civic proposal until you review the prepared route.</p><div id="cw-wish-output" class="cw-ai-result" hidden></div>`);
- setTimeout(()=>panel.querySelector('#cw-wish-prompt')?.focus(),120);
+ panel.classList.add('cw-weaveling-panel');setTimeout(()=>panel.querySelector('#cw-wish-prompt')?.focus(),120);
 }
 function summonWeaveling(){
  const scene=stage.querySelector('.cw-home-scene');
  if(!scene){showWeavelingWish();return}
  const image=scene.querySelector('.cw-home-weaveling');if(image&&!image.src)image.src=image.dataset.src;
- scene.dataset.weavelingState='visible';
- setTimeout(showWeavelingWish,220);
+ scene.querySelector('.cw-weaveling-hit')?.setAttribute('data-image-points','30,45 64,45 68,58 63,72 35,72 28,59');
+ scene.dataset.weavelingState='visible';showWeavelingWish();
 }
 function activeIntentions(){return window.CommonweaveIntentionOrchestrator?.list?.().filter(x=>x.status!=='complete'&&x.status!=='archived')||[]}
 function showRealmTransfer(){

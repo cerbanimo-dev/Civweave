@@ -1,4 +1,4 @@
-const CACHE = 'anarchadia-v0.4.0-wave-two';
+const CACHE = 'anarchadia-v0.4.1-visual-shell';
 const CORE = ["../../commonweave-merlin-chat.css","../../shared/commonweave-merlin-chat.js","../../assets/ai/merlin.png",
   './','./index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js','./styles.css','./manifest.webmanifest',
   './src/app.js','./world-engine.js','./src/domain.js','./src/store.js','./src/ai.js','./src/export.js','./shared/commonweave-model-runtime.js',

@@ -1,0 +1,17 @@
+/* Commonweave v1.0.20: one compact visual shell; environmental art remains the UI. */
+html.cw-lean-visual-shell,html.cw-lean-visual-shell body{overflow:hidden!important;background:#05070c!important}
+html.cw-lean-visual-shell .desktop-nav,html.cw-lean-visual-shell .drawer,html.cw-lean-visual-shell .topbar,html.cw-lean-visual-shell .persistent-app-controls,html.cw-lean-visual-shell .classic-shell>.sidebar,html.cw-lean-visual-shell #commonweave-suite-badge,html.cw-lean-visual-shell #commonweave-quest-board{display:none!important}
+html.cw-system-cerbanimo .cerbanimo-image-dock{left:50%!important;right:auto!important;bottom:max(6px,env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;width:min(62vw,220px)!important;height:48px!important;grid-template-columns:repeat(3,1fr)!important;gap:3px!important;padding:3px!important;border:1px solid rgba(103,225,255,.34)!important;border-radius:17px!important;background:rgba(3,2,11,.72)!important;box-shadow:0 10px 25px #0008!important}
+html.cw-system-cerbanimo .cerbanimo-image-dock button{display:none!important;height:40px!important;min-height:40px!important;border:0!important;border-radius:12px!important}
+html.cw-system-cerbanimo .cerbanimo-image-dock button:nth-child(1),html.cw-system-cerbanimo .cerbanimo-image-dock button:nth-child(3),html.cw-system-cerbanimo .cerbanimo-image-dock button:nth-child(6){display:grid!important}
+html.cw-system-cerbanimo #visualScenes:empty::before{content:"";position:fixed;inset:0;background:#080412 url("../services/cerbanimo/assets/visual/nexus.webp") center/cover no-repeat}
+html.cw-system-anarchadia .visual-stage-tools.cardinal-image-dock{left:50%!important;right:auto!important;bottom:max(6px,env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;width:min(62vw,220px)!important;height:48px!important;grid-template-columns:repeat(3,1fr)!important;gap:3px!important;padding:3px!important;border-radius:17px!important;background:rgba(9,8,13,.72)!important}
+html.cw-system-anarchadia .visual-stage-tools.cardinal-image-dock .scene-tool{display:none!important;width:auto!important;height:40px!important;min-height:40px!important}
+html.cw-system-anarchadia .visual-stage-tools.cardinal-image-dock .scene-tool:nth-child(1),html.cw-system-anarchadia .visual-stage-tools.cardinal-image-dock .scene-tool:nth-child(3),html.cw-system-anarchadia .visual-stage-tools.cardinal-image-dock .scene-tool:nth-child(4){display:grid!important}
+html.cw-system-fellowfare .ff-image-dock{width:min(62vw,220px)!important;height:48px!important;grid-template-columns:repeat(3,1fr)!important;gap:3px!important;padding:3px!important;background:rgba(5,20,14,.72)!important}
+html.cw-system-fellowfare .ff-image-dock .bottom-link{display:none!important;height:40px!important}
+html.cw-system-fellowfare .ff-image-dock .bottom-link:nth-child(1),html.cw-system-fellowfare .ff-image-dock .bottom-link:nth-child(3),html.cw-system-fellowfare .ff-image-dock .bottom-link:nth-child(6){display:grid!important}
+.cw-scene-decoration{position:absolute;z-index:4;pointer-events:none;object-fit:contain;filter:drop-shadow(0 0 18px rgba(255,85,205,.38));opacity:.92}
+.cw-scene-decoration.logo{left:50%;top:8%;translate:-50% 0;width:min(28vw,190px);height:min(22vh,180px)}
+.cw-scene-decoration.guide{right:4%;top:43%;width:min(19vw,120px);height:min(25vh,190px);opacity:.82}
+@media(max-width:700px){.cw-scene-decoration.logo{top:7%;width:27vw;height:18vh}.cw-scene-decoration.guide{right:2%;top:45%;width:18vw;height:20vh}}

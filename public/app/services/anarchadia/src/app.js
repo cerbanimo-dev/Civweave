@@ -1358,7 +1358,7 @@ async function handleAction(target) {
   const action=target.dataset.action;
   if(!action) return;
   if(action==='toggle-interface'){location.hash='#hall';render();return;}
-  if(action==='return-commonweave'){location.href='../../index.html?visual=1&build=1.0.14#square';return;}
+  if(action==='return-commonweave'){location.href='../../index.html?visual=1&build=1.0.20#square';return;}
   if(action==='start-fixture'){state=syntheticFixture();ensureImprovementState();await saveWorkspace(state);location.hash='#hall';render();announce('Synthetic Lantern Commons loaded.');}
   else if(action==='start-blank') startBlank();
   else if(action==='open-import') document.querySelector('#import-file')?.click();
