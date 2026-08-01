@@ -1,4 +1,4 @@
-const CACHE='commonweave-pocket-campus-v65-unified-shell';
+const CACHE='commonweave-pocket-campus-v66-unified-shell';
 const CORE=[
   './','./index.html','./manifest.webmanifest','./host-node-setup.js',
   './commonweave-world.css','./commonweave-world.js','./commonweave-living-world.js','./commonweave-live-data.js',
@@ -13,6 +13,6 @@ const CORE=[
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(async cache=>{for(const url of CORE){try{await cache.add(new Request(url,{cache:'reload'}))}catch{}}}).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('commonweave-pocket-campus-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
-async function cacheFirstRefresh(request){const cache=await caches.open(CACHE),cached=await cache.match(request);const refresh=fetch(request).then(response=>{if(response.ok)cache.put(request,response.clone());return response}).catch(()=>null);return cached||refresh||Response.error()}
+async function cacheFirstRefresh(request){const cache=await caches.open(CACHE),cached=await cache.match(request,{ignoreSearch:true});const refresh=fetch(request).then(response=>{if(response.ok)cache.put(request,response.clone());return response}).catch(()=>null);return cached||refresh||Response.error()}
 async function networkFirst(request){const cache=await caches.open(CACHE);try{const response=await fetch(request);if(response.ok)cache.put(request,response.clone());return response}catch(error){const cached=await cache.match(request,{ignoreSearch:request.mode==='navigate'});if(cached)return cached;throw error}}
-self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;const url=new URL(request.url);if(url.origin!==location.origin)return;if(request.mode==='navigate'){event.respondWith(cacheFirstRefresh(new Request(url.pathname.endsWith('/')?`${url.origin}${url.pathname}index.html`:request,{headers:request.headers})));return}if(['image','font','style','script'].includes(request.destination)){event.respondWith(cacheFirstRefresh(request));return}event.respondWith(networkFirst(request))});
+self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;const url=new URL(request.url);if(url.origin!==location.origin)return;if(request.mode==='navigate'){event.respondWith(cacheFirstRefresh(request));return}if(['image','font','style','script'].includes(request.destination)){event.respondWith(cacheFirstRefresh(request));return}event.respondWith(networkFirst(request))});
