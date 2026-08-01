@@ -3,7 +3,7 @@ services:
     name: commonweave-host-node
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npm run build:install
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeploy: true
