@@ -1,6 +1,6 @@
 {
   "name": "commonweave-host-node-hub",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "private": true,
   "description": "Offline-first Commonweave PWA installer and lightweight host node relay.",
   "type": "module",
