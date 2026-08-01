@@ -1,101 +1,126 @@
 (()=>{
+  'use strict';
   const params=new URLSearchParams(location.search);
   const setup=params.get('setup')==='1';
   const suppliedHost=params.get('host')||'';
   const DEFAULT_HOST='https://commonweave-host-node.onrender.com';
-  const RELEASE_KEY='commonweave.host-release-seen.v1';
-  const CURRENT_APP_VERSION='rc22.3.11';
-  const CURRENT_HOST_BUILD='1.0.14-visual-fit-navigation';
   const KEY='commonweave.host-node.v1';
   const NODE_KEY='commonweave.host-node-id.v1';
+  const RELEASE_KEY='commonweave.host-release.v2';
+  const MODEL_CONFIRMED='commonweave.model-preference-confirmed.v1';
   let deferredInstall=null;
-  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstall=event;updateInstallButton()});
-  function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-  function normalizeHost(value){
-    let raw=String(value||'').trim();
-    if(!raw)return DEFAULT_HOST;
-    if(!/^https?:\/\//i.test(raw))raw=`https://${raw}`;
-    try{const url=new URL(raw);if(url.hostname==='commonweave-host-node.onrender.com')url.protocol='https:';return url.origin}catch{return raw.replace(/\/$/,'')}
-  }
-  function current(){try{const value=JSON.parse(localStorage.getItem(KEY)||'null');if(value?.baseUrl)value.baseUrl=normalizeHost(value.baseUrl);return value}catch{return null}}
-  function nodeId(){let id=localStorage.getItem(NODE_KEY);if(!id){id=`pocket:${crypto.randomUUID()}`;localStorage.setItem(NODE_KEY,id)}return id}
+  let releaseState=null;
+
+  const safeJson=(raw,fallback=null)=>{try{return JSON.parse(raw)}catch{return fallback}};
+  const normalizeHost=value=>{let raw=String(value||'').trim();if(!raw)return DEFAULT_HOST;if(!/^https?:\/\//i.test(raw))raw=`https://${raw}`;try{return new URL(raw).origin}catch{return DEFAULT_HOST}};
+  const current=()=>{const value=safeJson(localStorage.getItem(KEY),null);if(value?.baseUrl)value.baseUrl=normalizeHost(value.baseUrl);return value};
+  const nodeId=()=>{let id=localStorage.getItem(NODE_KEY);if(!id){id=`pocket:${crypto.randomUUID()}`;localStorage.setItem(NODE_KEY,id)}return id};
+  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstall=event});
+
   async function connect(baseUrl,token=''){
-    const root=normalizeHost(baseUrl);
-    if(!/^https?:\/\//i.test(root))throw Error('Use a complete http:// or https:// host node URL.');
-    const headers={'content-type':'application/json'};if(token)headers.authorization=`Bearer ${token}`;
-    const health=await fetch(`${root}/api/health`,{headers}).then(async r=>{if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||`Host returned ${r.status}`);return r.json()});
-    const hostConfig=await fetch(`${root}/api/config`,{headers,cache:'no-store'}).then(async r=>r.ok?r.json():({features:[]})).catch(()=>({features:[]}));
-    const vault=(()=>{try{return JSON.parse(localStorage.getItem('commonweave-identity-vault')||'null')}catch{return null}})();
-    const registration=await fetch(`${root}/api/nodes/register`,{method:'POST',headers,body:JSON.stringify({nodeId:nodeId(),label:vault?.identity?.displayName||'Pocket Campus',system:'commonweave',capabilities:['offline-pwa','handoffs','presence','relay'],metadata:{userAgent:navigator.userAgent,installed:matchMedia('(display-mode: standalone)').matches}})}).then(async r=>{if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||`Registration returned ${r.status}`);return r.json()});
-    const config={schema:'commonweave.host-node.v1',baseUrl:root,apiBase:`${root}/api`,nodeId:registration.node.nodeId,hubName:health.name,token,features:Array.isArray(hostConfig.features)?hostConfig.features:[],hostBuild:health.build||hostConfig.build||'',appVersion:health.appVersion||hostConfig.appVersion||'',connectedAt:new Date().toISOString()};
+    const root=normalizeHost(baseUrl),headers={'content-type':'application/json'};if(token)headers.authorization=`Bearer ${token}`;
+    const health=await fetch(`${root}/api/health`,{headers,cache:'no-store'}).then(async r=>{if(!r.ok)throw Error(`Host returned ${r.status}`);return r.json()});
+    const configResponse=await fetch(`${root}/api/config`,{headers,cache:'no-store'}).then(r=>r.ok?r.json():({features:[]})).catch(()=>({features:[]}));
+    const registration=await fetch(`${root}/api/nodes/register`,{method:'POST',headers,body:JSON.stringify({nodeId:nodeId(),label:'Pocket Campus',system:'commonweave',capabilities:['offline-pwa','handoffs','presence','relay']})}).then(async r=>{if(!r.ok)throw Error(`Registration returned ${r.status}`);return r.json()});
+    const config={schema:'commonweave.host-node.v1',baseUrl:root,apiBase:`${root}/api`,nodeId:registration.node.nodeId,hubName:health.name,token,features:Array.isArray(configResponse.features)?configResponse.features:[],connectedAt:new Date().toISOString()};
     localStorage.setItem(KEY,JSON.stringify(config));
-    window.dispatchEvent(new CustomEvent('commonweave:host-node-connected',{detail:config}));
+    dispatchEvent(new CustomEvent('commonweave:host-node-connected',{detail:config}));
     return config;
   }
-  function releaseIsCurrent(release){
-    return Boolean(release&&release.appVersion===CURRENT_APP_VERSION&&release.hostBuild===CURRENT_HOST_BUILD);
-  }
-  function rememberRelease(release){try{localStorage.setItem(RELEASE_KEY,JSON.stringify(release))}catch{}}
-  function clearReleaseBanner(){document.querySelector('.cw-release-banner')?.remove();document.querySelector('style[data-cw-release-style]')?.remove()}
-  function showRelease(release){
-    if(!release?.hostBuild)return;
-    if(releaseIsCurrent(release)){rememberRelease(release);clearReleaseBanner();return;}
-    let seen=null;try{seen=JSON.parse(localStorage.getItem(RELEASE_KEY)||'null')}catch{}
-    const changed=seen?.hostBuild!==release.hostBuild||seen?.appVersion!==release.appVersion||seen?.sha256!==release.sha256;
-    if(!changed||document.querySelector('.cw-release-banner'))return;
-    const bar=document.createElement('aside');bar.className='cw-release-banner';
-    bar.innerHTML=`<div><strong>Commonweave update available</strong><span>${esc(release.appVersion||release.hostBuild)} is ready from your host node.</span></div><div><a href="${esc(release.appUrl||'/app/?setup=1')}">Open update</a><a href="${esc(release.downloadUrl||'/downloads/Commonweave-Mobile-Install-Kit.zip')}">Download ZIP</a><button type="button">Later</button></div>`;
-    const style=document.createElement('style');style.dataset.cwReleaseStyle='1';style.textContent='.cw-release-banner{position:fixed;z-index:4000;left:50%;bottom:max(86px,calc(env(safe-area-inset-bottom) + 78px));transform:translateX(-50%);width:min(92vw,680px);min-height:110px;display:flex;gap:12px;align-items:center;justify-content:space-between;padding:18px 20px;border:1px solid rgba(126,229,255,.5);border-radius:18px;background-image:linear-gradient(90deg,rgba(2,15,24,.9),rgba(3,29,37,.78)),url("assets/world/dispatch-hall.webp");background-size:cover;background-position:center;color:#f5ffe9;box-shadow:0 0 42px rgba(76,215,255,.22),0 18px 60px #000a;backdrop-filter:blur(8px)}.cw-release-banner div{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.cw-release-banner strong{text-shadow:0 0 10px rgba(111,225,255,.7)}.cw-release-banner span{color:#d7eee7;font-size:.84rem}.cw-release-banner a,.cw-release-banner button{border:1px solid rgba(126,229,255,.42);border-radius:8px;padding:9px 12px;background:rgba(25,110,116,.72);color:#f5ffe9;font-weight:900;text-decoration:none}.cw-release-banner a:nth-child(2){background:rgba(72,52,124,.72)}.cw-release-banner button{background:rgba(17,44,50,.72)}@media(max-width:620px){.cw-release-banner{align-items:flex-start;flex-direction:column;bottom:max(70px,calc(env(safe-area-inset-bottom) + 62px));padding:14px}}';document.head.append(style);
-    bar.querySelector('button').onclick=()=>{rememberRelease(release);bar.remove();style.remove()};
-    bar.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>rememberRelease(release)));
-    document.body.append(bar);
-  }
-  async function checkRelease(config=current()){
-    const root=normalizeHost(config?.baseUrl||DEFAULT_HOST);
-    try{const headers={};if(config?.token)headers.authorization=`Bearer ${config.token}`;const release=await fetch(`${root}/api/releases/current`,{headers,cache:'no-store'}).then(r=>{if(!r.ok)throw Error(`Release check returned ${r.status}`);return r.json()});showRelease(release);return release}catch{return null}
-  }
-  function subscribeReleases(config=current()){
-    const root=normalizeHost(config?.baseUrl||DEFAULT_HOST);if(!root||typeof EventSource==='undefined')return;
-    try{const source=new EventSource(`${root}/api/events`);source.addEventListener('release',event=>{try{showRelease(JSON.parse(event.data))}catch{}});window.addEventListener('beforeunload',()=>source.close(),{once:true})}catch{}
-  }
-  async function refreshHostCapabilities(config=current()){
-    if(!config?.baseUrl)return config;
+
+  async function checkRelease(config=current(),{announce=false}={}){
+    const root=normalizeHost(config?.baseUrl||DEFAULT_HOST),headers={};if(config?.token)headers.authorization=`Bearer ${config.token}`;
     try{
-      const headers={};if(config.token)headers.authorization=`Bearer ${config.token}`;
-      const remote=await fetch(`${normalizeHost(config.baseUrl)}/api/config`,{headers,cache:'no-store'}).then(r=>r.ok?r.json():null);
-      if(remote){
-        const next={...config,apiBase:remote.apiBase||config.apiBase||`${normalizeHost(config.baseUrl)}/api`,features:Array.isArray(remote.features)?remote.features:[],hostBuild:remote.build||config.hostBuild||'',appVersion:remote.appVersion||config.appVersion||''};
-        localStorage.setItem(KEY,JSON.stringify(next));
-        return next;
-      }
-    }catch{}
-    return config;
+      const release=await fetch(`${root}/api/releases/current`,{headers,cache:'no-store'}).then(r=>{if(!r.ok)throw Error(`Release check returned ${r.status}`);return r.json()});
+      releaseState={...release,checkedAt:new Date().toISOString()};localStorage.setItem(RELEASE_KEY,JSON.stringify(releaseState));
+      dispatchEvent(new CustomEvent('commonweave:update-check-complete',{detail:releaseState}));
+      if(announce)showUpdateStatus(releaseState);
+      return releaseState;
+    }catch(error){releaseState={error:String(error.message||error),checkedAt:new Date().toISOString()};if(announce)showUpdateStatus(releaseState);return null}
   }
-  async function heartbeat(){
-    let config=current();if(!config)return;
-    if(!Array.isArray(config.features))config=await refreshHostCapabilities(config);
-    if(!config?.features?.includes('heartbeat'))return;
-    const headers={'content-type':'application/json'};if(config.token)headers.authorization=`Bearer ${config.token}`;
-    try{
-      const response=await fetch(`${config.apiBase}/nodes/heartbeat`,{method:'POST',headers,body:JSON.stringify({nodeId:config.nodeId})});
-      if(response.status===404){
-        const refreshed=await refreshHostCapabilities(config);
-        if(!refreshed?.features?.includes('heartbeat'))return;
-      }
-    }catch{}
+
+  async function checkServiceWorker({announce=false}={}){
+    let status={state:'unsupported'};
+    if('serviceWorker' in navigator){
+      try{const registration=await navigator.serviceWorker.getRegistration('./');await registration?.update();status={state:registration?.waiting?'ready':registration?.installing?'installing':'current',registration};if(registration?.waiting)registration.waiting.postMessage({type:'SKIP_WAITING'})}catch(error){status={state:'error',error:String(error.message||error)}}
+    }
+    if(announce)showUpdateStatus(status);
+    return status;
   }
-  setInterval(heartbeat,60000);setTimeout(heartbeat,2500);setInterval(()=>checkRelease(),10*60*1000);setTimeout(()=>{refreshHostCapabilities();checkRelease();subscribeReleases()},1500);
-  window.CommonweaveHostNode={connect,current,nodeId,checkRelease,subscribeReleases,refreshHostCapabilities,defaultHost:DEFAULT_HOST,disconnect(){localStorage.removeItem(KEY)}};
+
+  async function runUnifiedUpdateCheck(){
+    setUpdatePlaqueState('checking');
+    const [host,worker]=await Promise.all([checkRelease(current()),checkServiceWorker()]);
+    const state=worker.state==='ready'||worker.state==='installing'?'ready':host?.available===true||host?.updateAvailable===true?'ready':worker.state==='error'?'error':'current';
+    setUpdatePlaqueState(state);showUpdateStatus({state,host,worker});
+  }
+
+  function setUpdatePlaqueState(state){const plaque=document.querySelector('.cw-version-plaque');if(!plaque)return;plaque.dataset.updateState=state;plaque.setAttribute('aria-label',state==='checking'?'Checking Commonweave updates':state==='ready'?'Commonweave update ready':'Check Commonweave for updates')}
+  function showUpdateStatus(value){
+    let toast=document.querySelector('.cw-unified-update-toast');if(!toast){toast=document.createElement('div');toast.className='cw-unified-update-toast';toast.setAttribute('role','status');document.body.append(toast)}
+    const state=value?.state||value?.worker?.state||'current';toast.textContent=state==='checking'?'Checking the Commonweave loom…':state==='ready'?'A Commonweave update is ready. Reload once to apply it.':state==='error'||value?.error?'Update check could not reach the host. Your offline copy is still available.':'Commonweave is current. Your local campus copy remains ready offline.';
+    toast.hidden=false;clearTimeout(showUpdateStatus.timer);showUpdateStatus.timer=setTimeout(()=>toast.hidden=true,4200);
+  }
+
+  function openModelSettings(){
+    const dialog=document.querySelector('#model-config');
+    if(dialog?.showModal&&!dialog.open){dialog.showModal();const status=dialog.querySelector('#config-status');if(status)status.textContent='Choose the campus model route, then save. This one preference serves every realm.';return true}
+    document.querySelector('#configure,#model-settings,[data-action="model-settings"]')?.click();return Boolean(dialog)
+  }
+  function modelConfirmed(){return localStorage.getItem(MODEL_CONFIRMED)==='1'}
+  function markModelConfirmed(){localStorage.setItem(MODEL_CONFIRMED,'1');document.querySelector('.cw-first-run-coach')?.remove()}
+  function openCompass(){const launcher=document.querySelector('.cw-merlin-launcher');if(launcher){launcher.click();return true}return false}
+  function openWeavelingChat(){
+    if(!modelConfirmed()){openModelSettings();showFirstRunCoach();return}
+    const home=document.querySelector('.cw-home-scene');if(home)home.dataset.weavelingState='visible';
+    const hologram=home?.querySelector('.cw-home-weaveling');if(hologram?.dataset.src&&!hologram.src)hologram.src=hologram.dataset.src;
+    if(!openCompass())setTimeout(openCompass,120);
+  }
+
+  function showFirstRunCoach(){
+    if(document.querySelector('.cw-first-run-coach'))return;
+    const coach=document.createElement('aside');coach.className='cw-first-run-coach';coach.innerHTML='<strong>First, choose the mind behind the Compass.</strong><span>Pick a local, browser, Gemini, or manual model route, then press “Save both contexts.” The Quad will open Weaveling after that.</span>';
+    document.body.append(coach);
+  }
+
+  function addHomeControls(){
+    const scene=document.querySelector('.cw-home-scene');if(!scene||scene.dataset.cwHomeUplift)return false;scene.dataset.cwHomeUplift='1';
+    const cluster=document.createElement('div');cluster.className='cw-home-control-cluster';cluster.innerHTML=`<button type="button" data-cw-home-info aria-label="Campus information"><span>i</span></button><button type="button" data-cw-home-settings aria-label="Commonweave settings"><img src="ui-icons/settings.svg" alt=""></button><button type="button" data-cw-home-compass aria-label="Open Weaveling's Compass"><img src="assets/ai/weaveling-compass.png" alt=""></button>`;scene.append(cluster);
+    cluster.querySelector('[data-cw-home-settings]').onclick=openModelSettings;
+    cluster.querySelector('[data-cw-home-compass]').onclick=openCompass;
+    cluster.querySelector('[data-cw-home-info]').onclick=()=>{const info=document.querySelector('.cw-square-hud');if(info)info.classList.toggle('cw-info-revealed');else showUpdateStatus({state:'current'})};
+    const quad=scene.querySelector('[data-action="summon-weaveling"],.cw-quad');if(quad){quad.onclick=event=>{event.preventDefault();event.stopImmediatePropagation();openWeavelingChat()}}
+    const hit=scene.querySelector('[data-action="weaveling-chat"],.cw-weaveling-hit');if(hit){hit.onclick=event=>{event.preventDefault();event.stopImmediatePropagation();openWeavelingChat()}}
+    const plaque=document.querySelector('.cw-version-plaque');if(plaque){plaque.tabIndex=0;plaque.setAttribute('role','button');plaque.onclick=runUnifiedUpdateCheck;plaque.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();runUnifiedUpdateCheck()}}}
+    if(!modelConfirmed())showFirstRunCoach();
+    return true;
+  }
+
+  function installCampusUplift(){
+    const style=document.createElement('style');style.dataset.cwCampusUplift='1';style.textContent=`
+      .cw-release-banner{display:none!important}.cw-version-plaque{cursor:pointer;touch-action:manipulation}.cw-version-plaque[data-update-state="checking"]{filter:saturate(.5);animation:cwPulse 1s infinite}.cw-version-plaque[data-update-state="ready"]{box-shadow:0 0 0 2px #7ee5ff,0 0 24px #7ee5ff}
+      .cw-home-control-cluster{position:absolute;z-index:18;top:max(10px,env(safe-area-inset-top));right:10px;display:flex;align-items:flex-start;gap:7px}.cw-home-control-cluster button{width:48px;height:48px;display:grid;place-items:center;padding:4px;border:1px solid rgba(241,216,119,.58);border-radius:50%;background:rgba(3,15,25,.78);box-shadow:0 8px 22px #0008;backdrop-filter:blur(7px)}.cw-home-control-cluster img{width:100%;height:100%;object-fit:contain}.cw-home-control-cluster [data-cw-home-info] span{display:grid;place-items:center;width:30px;height:30px;border:2px solid #f4df95;border-radius:50%;color:#fff7d0;font:900 20px Georgia,serif}.cw-home-control-cluster [data-cw-home-compass]{width:62px;height:62px;margin-top:-5px}
+      .cw-square-hud{opacity:0;pointer-events:none;transition:opacity .18s}.cw-square-hud.cw-info-revealed{opacity:1;pointer-events:auto}.cw-home-weaveling{object-position:center bottom!important;transform:scale(.86);transform-origin:50% 91%;clip-path:polygon(0 0,100% 0,100% 61%,88% 63%,82% 72%,77% 89%,0 100%)}
+      .cw-first-run-coach{position:fixed;z-index:5000;top:82px;right:12px;width:min(330px,calc(100vw - 24px));padding:13px 15px;border:1px solid #7ee5ff88;border-radius:15px;background:#071923ee;color:#effffb;box-shadow:0 18px 50px #000b}.cw-first-run-coach strong,.cw-first-run-coach span{display:block}.cw-first-run-coach span{margin-top:5px;color:#cce5e2;font-size:12px;line-height:1.4}
+      .cw-unified-update-toast{position:fixed;z-index:6000;left:50%;bottom:max(72px,calc(env(safe-area-inset-bottom) + 64px));transform:translateX(-50%);width:min(92vw,520px);padding:12px 15px;border:1px solid #7ee5ff77;border-radius:13px;background:#06151eee;color:#effffb;text-align:center;box-shadow:0 14px 42px #000a}.cw-unified-update-toast[hidden]{display:none}
+      @keyframes cwPulse{50%{opacity:.55}}@media(max-width:560px){.cw-home-control-cluster{gap:4px}.cw-home-control-cluster button{width:42px;height:42px}.cw-home-control-cluster [data-cw-home-compass]{width:54px;height:54px}}
+    `;document.head.append(style);
+    document.querySelector('#config-save')?.addEventListener('click',markModelConfirmed);
+    const observer=new MutationObserver(()=>addHomeControls());observer.observe(document.documentElement,{subtree:true,childList:true});addHomeControls();
+    setTimeout(()=>checkRelease(),5000);setInterval(()=>checkRelease(),30*60*1000);
+  }
+
+  async function heartbeat(){const config=current();if(!config?.features?.includes('heartbeat'))return;const headers={'content-type':'application/json'};if(config.token)headers.authorization=`Bearer ${config.token}`;try{await fetch(`${config.apiBase}/nodes/heartbeat`,{method:'POST',headers,body:JSON.stringify({nodeId:config.nodeId})})}catch{}}
+  setTimeout(heartbeat,2500);setInterval(heartbeat,60000);
+  window.CommonweaveHostNode={connect,current,nodeId,checkRelease,runUnifiedUpdateCheck,defaultHost:DEFAULT_HOST,disconnect(){localStorage.removeItem(KEY)}};
+  installCampusUplift();
+
   if(!setup)return;
-  const style=document.createElement('style');style.textContent=`
-  .cw-node-wizard{position:fixed;z-index:3000;inset:0;background-image:linear-gradient(rgba(1,8,12,.3),rgba(1,8,12,.65)),url("assets/world/town-square-home.webp");background-size:cover;background-position:center;display:grid;place-items:end center;padding:16px 16px max(16px,env(safe-area-inset-bottom));overflow:auto}.cw-node-card{width:min(720px,100%);max-height:72dvh;overflow:auto;border:0;border-radius:0;background:radial-gradient(ellipse at center,rgba(15,91,100,.34),rgba(2,16,26,.88) 65%,transparent 96%);color:#f7f2df;padding:24px 28px;text-shadow:0 1px 2px #001;box-shadow:none}.cw-node-card h1{margin:0 0 8px;font-size:clamp(1.8rem,8vw,3.2rem);text-shadow:0 0 14px rgba(111,225,255,.62)}.cw-node-card p{color:#d8e8e2}.cw-node-step{padding:14px 0;border-top:1px solid rgba(126,229,255,.2)}.cw-node-step:first-of-type{border-top:0}.cw-node-step strong{display:block;margin-bottom:7px}.cw-node-row{display:flex;gap:8px;flex-wrap:wrap}.cw-node-card input{width:100%;min-height:46px;border:0;border-bottom:2px solid rgba(126,229,255,.58);border-radius:0;background:rgba(2,19,29,.55);color:white;padding:10px}.cw-node-card button,.cw-node-card a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 15px;border:1px solid rgba(126,229,255,.42);border-radius:8px;background:rgba(26,126,128,.62);color:white;font-weight:900;text-decoration:none;box-shadow:0 0 18px rgba(75,220,235,.12)}.cw-node-card .secondary{background:rgba(50,44,94,.62)}.cw-node-status{min-height:24px;font:700 12px ui-monospace,monospace;color:#a8ffe6}.cw-node-close{float:right!important;background:transparent!important;border:0!important}`;document.head.append(style);
-  const host=normalizeHost(suppliedHost||current()?.baseUrl||DEFAULT_HOST);
-  const overlay=document.createElement('section');overlay.className='cw-node-wizard';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.innerHTML=`<div class="cw-node-card"><button class="cw-node-close" data-close aria-label="Close setup">×</button><span style="font:800 11px ui-monospace,monospace;color:#f4bf68;letter-spacing:.12em">HOST NODE SETUP</span><h1>Install and connect</h1><p>Commonweave remains local-first. This node distributes the PWA and relays approved shared activity; your local records remain on your device unless a workflow explicitly sends them.</p><div class="cw-node-step"><strong>1. Connect this browser to a host node</strong><input id="cw-host-url" value="${esc(host)}" aria-label="Host node URL"><input id="cw-host-token" type="password" placeholder="Optional host token" aria-label="Optional host token" style="margin-top:8px"><div class="cw-node-row" style="margin-top:8px"><button id="cw-connect">Connect node</button><a class="secondary" href="/downloads/Commonweave-Mobile-Install-Kit.zip">Offline ZIP</a></div><div id="cw-node-status" class="cw-node-status"></div></div><div class="cw-node-step"><strong>2. Install the PWA</strong><p id="cw-install-copy">Install Commonweave from this secure origin so it opens full-screen and remains available offline.</p><div class="cw-node-row"><button id="cw-install" disabled>Install Commonweave</button><button class="secondary" id="cw-installed">I already installed it</button></div></div><div class="cw-node-step"><strong>3. Enter the campus</strong><p>The connection survives restarts. You can change or disconnect the host node later from World Settings.</p><button id="cw-enter">Enter Commonweave</button></div></div>`;document.body.append(overlay);
+  const overlay=document.createElement('section');overlay.className='cw-node-wizard';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.innerHTML=`<div class="cw-node-card"><button data-close aria-label="Close setup">×</button><h1>Connect Commonweave</h1><p>The campus stays local-first. A host node supplies optional sync and Commonweave-wide updates.</p><label>Host node URL<input id="cw-host-url" value="${normalizeHost(suppliedHost||current()?.baseUrl||DEFAULT_HOST)}"></label><label>Optional token<input id="cw-host-token" type="password"></label><div><button id="cw-connect">Connect node</button><button id="cw-install">Install Commonweave</button><button id="cw-enter">Enter campus</button></div><p id="cw-node-status" role="status"></p></div>`;document.body.append(overlay);
+  const setupStyle=document.createElement('style');setupStyle.textContent='.cw-node-wizard{position:fixed;z-index:7000;inset:0;display:grid;place-items:center;padding:18px;background:#061019dd url("assets/world/town-square-home.webp") center/cover}.cw-node-card{width:min(620px,100%);display:grid;gap:12px;padding:24px;border:1px solid #7ee5ff77;border-radius:20px;background:#06151eee;color:white}.cw-node-card input{width:100%;min-height:44px;margin-top:5px}.cw-node-card button{min-height:44px;padding:0 14px}.cw-node-card [data-close]{justify-self:end;width:40px}';document.head.append(setupStyle);
   const status=overlay.querySelector('#cw-node-status');
-  function updateInstallButton(){const btn=overlay?.querySelector('#cw-install');if(!btn)return;const installed=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;btn.disabled=!deferredInstall||installed;overlay.querySelector('#cw-install-copy').textContent=installed?'Commonweave is already running as an installed app.':deferredInstall?'Your browser is ready to install Commonweave.':'Use your browser menu and choose “Install app” or “Add to Home Screen” if the button stays unavailable.'}
-  updateInstallButton();
-  overlay.querySelector('#cw-connect').onclick=async()=>{status.textContent='Connecting…';try{const config=await connect(overlay.querySelector('#cw-host-url').value,overlay.querySelector('#cw-host-token').value);status.textContent=`Connected to ${config.hubName} as ${config.nodeId.slice(0,18)}…`}catch(error){status.textContent=`Connection failed: ${error.message}`}};
-  overlay.querySelector('#cw-install').onclick=async()=>{if(!deferredInstall)return;deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;updateInstallButton()};
-  function enter(){overlay.remove();const next=new URL(location.href);next.searchParams.delete('setup');next.searchParams.delete('host');history.replaceState(history.state,'',next)}
-  overlay.querySelector('#cw-installed').onclick=enter;overlay.querySelector('#cw-enter').onclick=enter;overlay.querySelector('[data-close]').onclick=enter;
+  overlay.querySelector('#cw-connect').onclick=async()=>{status.textContent='Connecting…';try{const config=await connect(overlay.querySelector('#cw-host-url').value,overlay.querySelector('#cw-host-token').value);status.textContent=`Connected to ${config.hubName||'host node'}.`}catch(error){status.textContent=`Connection failed: ${error.message}`}};
+  overlay.querySelector('#cw-install').onclick=async()=>{if(deferredInstall){await deferredInstall.prompt();deferredInstall=null}else status.textContent='Use the browser menu and choose Install app or Add to Home Screen.'};
+  const enter=()=>{overlay.remove();const next=new URL(location.href);next.searchParams.delete('setup');next.searchParams.delete('host');history.replaceState(history.state,'',next)};
+  overlay.querySelector('#cw-enter').onclick=enter;overlay.querySelector('[data-close]').onclick=enter;
 })();
