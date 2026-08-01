@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#06131f">
+  <link rel="preload" as="image" href="assets/world/town-square-home.webp" fetchpriority="high">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="commonweave-world.css">
   <link rel="stylesheet" href="commonweave-merlin-chat.css">
@@ -50,6 +51,7 @@
     .journey-criteria span{color:#334038;-webkit-text-fill-color:#334038}
     .route-result ::selection,.journey-capability ::selection,.journey-criteria ::selection{background:#9dc7ff;color:#07131b;-webkit-text-fill-color:#07131b}
     @media(prefers-reduced-motion:reduce){.boot-splash img,.boot-splash p{animation-duration:1ms;animation-delay:0ms}}
+    .boot-splash{background:radial-gradient(circle at 50% 42%,#2b5d6988,transparent 34%),linear-gradient(155deg,#091a27,#180b28 55%,#06131f)!important}.boot-splash img{width:min(300px,58vw);max-height:34vh}.boot-splash::before{content:"";position:absolute;width:min(72vw,520px);aspect-ratio:1;border:2px solid #65e8ff55;border-radius:50%;box-shadow:0 0 70px #ff4dca44,inset 0 0 50px #ffcf5d22;animation:pocket-title-arrival .8s ease both}
   </style>
   <script src="shared/commonweave-identity-sync.js"></script>
   <script src="shared/commonweave-reward-weave.js"></script>
@@ -62,7 +64,7 @@
 </style>
 </head>
 <body>
-  <div id="boot-splash" class="boot-splash" role="status" aria-live="polite"><img src="logos/commonweave-title-screen.png" alt="Commonweave. Learn. Build. Govern. Together."><p>Opening the Pocket Campus…</p></div>
+  <div id="boot-splash" class="boot-splash" role="status" aria-live="polite"><img src="logos/commonweave.webp" alt="Commonweave"><p id="boot-status">Loading the Town Square…</p></div>
 
   <header class="top">
     <div class="brand"><img src="logos/commonweave.webp" alt="Commonweave"><span><strong>COMMONWEAVE</strong><small>Pocket Campus · visual runtime rc22.3.11</small></span></div>
@@ -166,7 +168,7 @@
   </dialog>
 
   <script>
-  (()=>{const build='1.0.15-contrast-moss-bridge',key='commonweave.host-build';if(localStorage.getItem(key)!==build){localStorage.setItem(key,build);if('caches' in window)caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).catch(()=>{});if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).catch(()=>{});}})();
+  (()=>{const build='1.0.19-mvp',key='commonweave.host-build';if(localStorage.getItem(key)!==build){localStorage.setItem(key,build);if('caches' in window)caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('commonweave-pocket-campus-')).map(k=>caches.delete(k)))).catch(()=>{});if('serviceWorker' in navigator)navigator.serviceWorker.getRegistrations().then(rs=>Promise.allSettled(rs.map(r=>r.update()))).catch(()=>{});}})();
   </script>
   <script src="shared/commonweave-operations.js"></script>
   <script src="shared/commonweave-model-runtime.js"></script>
@@ -179,7 +181,7 @@
       browser:{label:"Browser model",model:"browser-native",endpoint:"",simple:true},
       manual:{label:"Manual exchange",model:"manual-exchange",endpoint:"",simple:true}
     };
-    const APP_BUILD="1.0.15-contrast-moss-bridge";
+    const APP_BUILD="1.0.19-mvp";
     const APP_ROUTES={living:["Living School",`services/living-school/index.html?commonweave=1&visual=1&build=${APP_BUILD}`],cerbanimo:["Cerbanimo",`services/cerbanimo/index.html?commonweave=1&visual=1&build=${APP_BUILD}#world-title`],anarchadia:["Anarchadia",`services/anarchadia/index.html?commonweave=1&visual=1&build=${APP_BUILD}#hall`],fellowfare:["FellowFare",`services/fellowfare/index.html?commonweave=1&visual=1&build=${APP_BUILD}`]};
     const PERSONAS={living:{name:"Moss",avatar:"logos/living-school.webp"},cerbanimo:{name:"Kamiya",avatar:"logos/cerbanimo.webp"},anarchadia:{name:"Rook",avatar:"logos/anarchadia.webp"},fellowfare:{name:"Tiller",avatar:"logos/fellowfare.png"}};
     const DEFAULT_CONFIG={route:"deterministic",model:ROUTES.deterministic.model,endpoint:"",remoteConsent:false,shareKey:false};
@@ -202,8 +204,9 @@
       CommonweaveRewardWeave.record(receipt);const exchange=await CommonweaveRewardWeave.exchange('receipt',receipt,vault);pocketDownload(exchange,`commonweave-verdict-${packet.subjectId}.json`);$('#pocket-reward-status').textContent=`${automatic?'Incoming packet automatically reviewed':'Fresh review completed'}: ${receipt.verdict.toUpperCase()}. The signed verdict is ready for relay or offline return; Fellowfare conditionally mints the validator bounty from useful validation labor.`;renderPocketRewards();return exchange
     }
 
-    const bootSplash=$("#boot-splash");
-    requestAnimationFrame(()=>setTimeout(()=>{bootSplash?.classList.add("leaving");setTimeout(()=>bootSplash?.remove(),520)},1050));
+    const bootSplash=$("#boot-splash"),bootStatus=$("#boot-status");let bootReleased=false;
+    function releaseBootSplash(){if(bootReleased)return;bootReleased=true;bootStatus&&(bootStatus.textContent='Town Square ready');requestAnimationFrame(()=>{bootSplash?.classList.add('leaving');setTimeout(()=>bootSplash?.remove(),520)})}
+    addEventListener('commonweave:visual-ready',releaseBootSplash,{once:true});setTimeout(releaseBootSplash,8000);
     const modelSelect=$("#model"),frame=$("#frame"),service=$("#service"),configDialog=$("#model-config");
     let installPrompt=null,activeApp=null,pendingIntent=null,activeJourney=null,operationManager=null,pendingDeepLink=null,pocketInboxTab="open",pocketInboxReturnFocus=null;
     const projectBridgeRegistry=new Map(),pendingProjectReceipts=[];

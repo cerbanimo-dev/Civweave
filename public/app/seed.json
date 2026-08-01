@@ -1,6 +1,6 @@
 {
   "schema": "commonweave.seed-manifest.v1",
-  "version": "rc22.3.11-host-v1.0.15",
+  "version": "rc22.3.12-mvp-host-v1.0.19",
   "generatedAt": "2026-07-31T23:59:30Z",
   "files": [
     {
