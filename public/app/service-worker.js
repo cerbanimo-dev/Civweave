@@ -1,4 +1,4 @@
-const CACHE = "commonweave-pocket-campus-v58-contrast-moss-bridge";
+const CACHE = "commonweave-pocket-campus-v59-visual-asset-overhaul";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches

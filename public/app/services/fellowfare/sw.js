@@ -1,4 +1,4 @@
-const CACHE = 'fellowfare-0.4.3-merlin';
+const CACHE = 'fellowfare-0.4.4-visual-asset-overhaul';
 const SHELL = ["../../commonweave-merlin-chat.css","../../shared/commonweave-merlin-chat.js","../../assets/ai/merlin.png",
   './',
   './index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js',
