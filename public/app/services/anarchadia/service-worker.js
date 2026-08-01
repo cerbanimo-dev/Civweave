@@ -1,5 +1,5 @@
-const CACHE = 'anarchadia-v0.3.6-visual-runtime-recovery';
-const CORE = [
+const CACHE = 'anarchadia-v0.3.7-merlin';
+const CORE = ["../../commonweave-merlin-chat.css","../../shared/commonweave-merlin-chat.js","../../assets/ai/merlin.png",
   './','./index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js','./styles.css','./manifest.webmanifest',
   './src/app.js','./world-engine.js','./src/domain.js','./src/store.js','./src/ai.js','./src/export.js','./shared/commonweave-model-runtime.js',
   '../../logos/anarchadia.webp','../../logos/commonweave.webp','../../shared/image-hotspot-calibrator.js','../../ui-icons/back.svg','../../ui-icons/home.svg','../../ui-icons/map.svg','../../ui-icons/search.svg','../../ui-icons/inbox.svg','../../ui-icons/nexus.svg','../../ui-icons/directory.svg','../../ui-icons/settings.svg','./assets/icon-180.png','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-maskable-512.png',

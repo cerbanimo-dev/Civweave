@@ -587,3 +587,18 @@ html,body,#app,.shell,.workspace,.visual-main{width:100%;height:100%;max-width:n
 .visual-stage-tools.cardinal-image-dock{width:min(88vw,300px)!important;grid-template-columns:repeat(4,1fr)!important;gap:4px!important;padding:4px!important;border-radius:16px!important}
 .visual-stage-tools.cardinal-image-dock .scene-tool{min-height:48px!important;border-radius:11px!important;background:rgba(38,24,12,.75)!important}
 .visual-stage-tools.cardinal-image-dock img{object-fit:contain!important;padding:8px!important;border-radius:9px!important;filter:none!important}
+
+/* v1.0.14 navigation contract: navigation is a true bottom bar, never a floating tray. */
+.visual-stage-tools.cardinal-image-dock{
+  left:0!important;right:0!important;bottom:0!important;transform:none!important;
+  width:100vw!important;max-width:none!important;min-height:calc(58px + env(safe-area-inset-bottom))!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;
+  padding:4px max(4px,env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left))!important;
+  border:0!important;border-top:1px solid rgba(255,240,168,.34)!important;border-radius:0!important;
+  background:rgba(9,8,13,.96)!important;box-shadow:0 -10px 28px rgba(0,0,0,.42)!important;
+}
+.visual-stage-tools.cardinal-image-dock .scene-tool{min-height:50px!important;border-radius:0!important;border-right:1px solid rgba(255,255,255,.08)!important;background:transparent!important}
+.visual-stage-tools.cardinal-image-dock .scene-tool:last-child{border-right:0!important}
+.anarchadia-version-plaque{display:none!important}
+.cardinal-projection.modal-backdrop{padding-bottom:calc(66px + env(safe-area-inset-bottom))!important}
+.scene-hotspot-label,.cw-world-object-badge,.anarchadia-world-scene .cw-world-object span{display:none!important}

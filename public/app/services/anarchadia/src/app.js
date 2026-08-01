@@ -205,13 +205,13 @@ function hotspotStyle({p,l}) {
 function sceneHotspot(item) {
   const attrs = [`class="scene-hotspot"`,`data-hotspot-id="${esc(item.id)}"`,`style="${hotspotStyle(item)}"`,`aria-label="${esc(item.label)}: ${esc(item.detail)}"`,`title="${esc(item.label)} · ${esc(item.detail)}"`];
   if (item.href) {
-    return `<a ${attrs.join(' ')} href="${esc(item.href)}"><span class="scene-hotspot-label">${esc(item.label)}</span></a>`;
+    return `<a ${attrs.join(' ')} href="${esc(item.href)}"></a>`;
   }
   attrs.push(`type="button"`, `data-action="${esc(item.info ? 'scene-info' : item.action)}"`);
   if (item.info) attrs.push(`data-info="${esc(item.info)}"`);
   if (item.aiTask) attrs.push(`data-ai-task="${esc(item.aiTask)}"`);
   if (item.aiTarget) attrs.push(`data-ai-target="${esc(item.aiTarget)}"`);
-  return `<button ${attrs.join(' ')}><span class="scene-hotspot-label">${esc(item.label)}</span></button>`;
+  return `<button ${attrs.join(' ')}></button>`;
 }
 
 function sceneHotspots(key) {
@@ -1358,7 +1358,7 @@ async function handleAction(target) {
   const action=target.dataset.action;
   if(!action) return;
   if(action==='toggle-interface'){location.hash='#hall';render();return;}
-  if(action==='return-commonweave'){location.href='../../index.html?visual=1&build=1.0.10#square';return;}
+  if(action==='return-commonweave'){location.href='../../index.html?visual=1&build=1.0.14#square';return;}
   if(action==='start-fixture'){state=syntheticFixture();ensureImprovementState();await saveWorkspace(state);location.hash='#hall';render();announce('Synthetic Lantern Commons loaded.');}
   else if(action==='start-blank') startBlank();
   else if(action==='open-import') document.querySelector('#import-file')?.click();

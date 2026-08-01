@@ -1,5 +1,5 @@
-const CACHE = 'fellowfare-0.4.2-visual-runtime-recovery';
-const SHELL = [
+const CACHE = 'fellowfare-0.4.3-merlin';
+const SHELL = ["../../commonweave-merlin-chat.css","../../shared/commonweave-merlin-chat.js","../../assets/ai/merlin.png",
   './',
   './index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js',
   './styles.css',

@@ -7,6 +7,22 @@
 
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const clamp=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
+  function fitVisualFrame(root,frame){
+    if(!root||!frame)return;
+    const image=frame.querySelector('img');
+    const apply=()=>{
+      const sourceWidth=Number(frame.dataset.sourceWidth)||image?.naturalWidth||768;
+      const sourceHeight=Number(frame.dataset.sourceHeight)||image?.naturalHeight||1792;
+      const bounds=root.getBoundingClientRect();
+      if(!bounds.width||!bounds.height||!sourceWidth||!sourceHeight)return;
+      const scale=Math.min(bounds.width/sourceWidth,bounds.height/sourceHeight);
+      frame.style.setProperty('--cw-fit-width',`${Math.max(1,Math.round(sourceWidth*scale))}px`);
+      frame.style.setProperty('--cw-fit-height',`${Math.max(1,Math.round(sourceHeight*scale))}px`);
+    };
+    if(image&&!image.complete)image.addEventListener('load',apply,{once:true});
+    apply();
+    return apply;
+  }
 
   class CommonweaveWorldEngine extends EventTarget {
     constructor(options={}){
@@ -23,6 +39,9 @@
       this.sceneId=null;
       this.state=this.loadState();
       this.ambientTimer=null;
+      this.fitHandler=()=>{const frame=this.root?.querySelector('.ls-visual-frame');if(frame)fitVisualFrame(this.root,frame);};
+      global.addEventListener('resize',this.fitHandler,{passive:true});
+      global.addEventListener('orientationchange',this.fitHandler,{passive:true});
     }
 
     loadState(){
@@ -78,7 +97,7 @@
       const image=typeof scene.image==='function'?scene.image(this.state,this):scene.image;
       const mood=this.get(`${scene.id}.mood`,'busy');
       this.root.innerHTML=`
-        <div class="ls-visual-frame cw-world-scene" data-world-scene="${esc(scene.id)}" data-world-mood="${esc(mood)}">
+        <div class="ls-visual-frame cw-world-scene" data-world-scene="${esc(scene.id)}" data-world-mood="${esc(mood)}" data-source-width="${esc(scene.width||'')}" data-source-height="${esc(scene.height||'')}">
           <img src="${esc(image)}" alt="${esc(scene.alt||`${scene.label} illustrated visual room`)}" draggable="false">
           <div class="cw-world-ambient" aria-hidden="true"></div>
           ${objects.map((item,index)=>this.renderObject(item,index)).join('')}
@@ -87,13 +106,14 @@
         </div>`;
       this.root.querySelectorAll('[data-world-object]').forEach(button=>button.addEventListener('click',()=>this.activateObject(objects[Number(button.dataset.worldObject)])));
       this.root.querySelectorAll('[data-world-actor]').forEach(button=>button.addEventListener('click',()=>this.activateActor(actors[Number(button.dataset.worldActor)])));
+      fitVisualFrame(this.root,this.root.querySelector('.ls-visual-frame'));
       if(typeof scene.onRender==='function')scene.onRender(this.root,this.state,this);
     }
     renderObject(item,index){
       const b=item.bounds||{};const label=this.objectLabel(item)||'Interact';
       const style=`left:${clamp(b.x,0,100)}%;top:${clamp(b.y,0,100)}%;width:${clamp(b.w,1,100)}%;height:${clamp(b.h,1,100)}%`;
       const classes=['ls-hotspot','cw-world-object',item.className||'',this.get(`${this.sceneId}.objects.${item.id}.active`,false)?'is-active':''].filter(Boolean).join(' ');
-      return `<button type="button" class="${classes}" data-world-object="${index}" data-world-id="${esc(item.id||index)}" aria-label="${esc(label)}" style="${style}"><span>${esc(label)}</span>${item.badge?`<b class="cw-world-object-badge">${esc(item.badge)}</b>`:''}</button>`;
+      return `<button type="button" class="${classes}" data-world-object="${index}" data-world-id="${esc(item.id||index)}" aria-label="${esc(label)}" style="${style}"><span>${esc(label)}</span></button>`;
     }
     renderActor(actor,index){
       const p=actor.position||{};const label=this.objectLabel(actor)||'Character';
@@ -108,6 +128,7 @@
       if(item.workspace){this.handlers.workspace({workspace:item.workspace,focus:item.focus,label:this.objectLabel(item)},detail);return;}
       if(item.action==='toggle'&&item.stateKey){const active=this.toggle(item.stateKey);this.showMessage(item.messages?.[active?'on':'off']||`${this.objectLabel(item)} ${active?'on':'off'}.`);this.render();return;}
       if(item.action==='increment'&&item.stateKey){const value=this.increment(item.stateKey,item.amount||1);this.showMessage(typeof item.message==='function'?item.message(value):item.message||`${this.objectLabel(item)}: ${value}`);this.render();return;}
+      if(item.action==='message'){this.showMessage(typeof item.message==='function'?item.message(this.state,this,item):item.message||this.objectLabel(item));return;}
       if(typeof item.run==='function'){item.run(this.state,this,item);return;}
       this.handlers.action(item,detail);
     }
@@ -145,5 +166,6 @@
     }
   }
 
+  global.CommonweaveFitVisualFrame=fitVisualFrame;
   global.CommonweaveWorldEngine=CommonweaveWorldEngine;
 })(window);

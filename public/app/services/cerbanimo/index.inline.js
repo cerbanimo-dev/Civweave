@@ -4131,7 +4131,7 @@ q("#modelList").innerHTML=state.modelPacks.map((p)=>{const active=state.ai.engin
     if(e.target instanceof Element&&e.target.closest('[data-visual-home]')){openVisualScene('map');return}
     if(e.target instanceof Element&&e.target.closest('[data-visual-nexus]')){openVisualScene('nexus');return}
     if(e.target instanceof Element&&e.target.closest('[data-visual-classic]')){closeVisualWorld(state.ui.view||'today');return}
-    if(e.target instanceof Element&&e.target.closest('[data-commonweave-return]')){location.href='../../index.html?visual=1&build=1.0.10#square';return}
+    if(e.target instanceof Element&&e.target.closest('[data-commonweave-return]')){location.href='../../index.html?visual=1&build=1.0.14#square';return}
     if(e.target instanceof Element&&e.target.closest('[data-close-visual-detail]')){closeVisualDetail();return}
     const sceneOpen=e.target instanceof Element?e.target.closest('[data-detail-open-scene]'):null;if(sceneOpen){closeVisualDetail();openVisualScene(sceneOpen.dataset.detailOpenScene||'object-viewer');return}
     const detailOpen=e.target instanceof Element?e.target.closest('[data-detail-open-view]'):null;if(detailOpen){closeVisualDetail();closeVisualWorld(detailOpen.dataset.detailOpenView||'today');return}

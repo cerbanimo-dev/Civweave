@@ -93,7 +93,7 @@
       const raw=typeof item.bounds==='function'?item.bounds(this.state,this):item.bounds||{};const b=raw;const label=this.objectLabel(item)||'Interact';
       const style=`left:${clamp(b.x,0,100)}%;top:${clamp(b.y,0,100)}%;width:${clamp(b.w,1,100)}%;height:${clamp(b.h,1,100)}%`;
       const classes=['scene-hotspot','cw-world-object',item.className||'',this.get(`${this.sceneId}.objects.${item.id}.active`,false)?'is-active':''].filter(Boolean).join(' ');
-      return `<button type="button" class="${classes}" data-world-object="${index}" data-world-id="${esc(item.id||index)}" aria-label="${esc(label)}" style="${style}"><span>${esc(label)}</span>${item.badge?`<b class="cw-world-object-badge">${esc(item.badge)}</b>`:''}</button>`;
+      return `<button type="button" class="${classes}" data-world-object="${index}" data-world-id="${esc(item.id||index)}" aria-label="${esc(label)}" style="${style}"></button>`;
     }
     renderActor(actor,index){
       const p=actor.position||{};const label=this.objectLabel(actor)||'Character';

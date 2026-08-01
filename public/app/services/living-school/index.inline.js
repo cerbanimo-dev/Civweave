@@ -2279,50 +2279,14 @@ Final model-native output:
     async function stopGGUFModel(){const result=await bridgeJSON("/models/stop",{method:"POST",body:"{}"});document.getElementById("gguf-state").textContent="Local model stopped";document.getElementById("gguf-state").className="gguf-state";document.getElementById("gguf-status").textContent=result.message||"The active llama-server process was stopped."}
 
 
-    // RC17.9 Living School visual campus: image-first navigation with in-world work surfaces.
+    // RC22.4 supplied Living School visual core: source-sized scenes and normalized touch maps.
     const LS_VISUAL_KEY="living-school.visual-mode.v1";
     const LS_VISUAL_PARAMS=new URLSearchParams(location.search);
     const LS_FORCE_VISUAL_DEFAULT=LS_VISUAL_PARAMS.get("visual")==="1"||LS_VISUAL_PARAMS.get("commonweave")==="1";
     const LS_ROOM_KEY="living-school.visual-room.v1";
-    const LS_VISUAL_ROOMS={
-      exterior:{label:"Exterior Campus",image:"./visual-assets/exterior.webp",hint:"Enter the academy, continue learning, build a school, or browse the campus.",spots:[
-        {label:"Enter the academy",x:20,y:58,w:60,h:10,room:"courtyard"},{label:"Continue learning",x:22,y:68,w:56,h:7,workspace:"learn"},{label:"Build a new school",x:21,y:76,w:58,h:7,room:"forge"},{label:"Campus directory",x:70,y:19,w:24,h:26,room:"map"}]},
-      courtyard:{label:"Front Courtyard",image:"./visual-assets/courtyard.webp",hint:"Choose a wing, read the bulletin, or ask Moss where to begin.",spots:[
-        {label:"Grand Entrance",x:34,y:25,w:38,h:26,room:"entrance"},{label:"Great Library",x:2,y:25,w:31,h:9,room:"library"},{label:"Moss's Study",x:2,y:34,w:31,h:8,room:"moss"},{label:"Curriculum Forge",x:2,y:42,w:31,h:8,room:"forge"},{label:"Practicum Workshop",x:2,y:50,w:34,h:8,room:"workshop"},{label:"Cohort Commons",x:2,y:58,w:31,h:8,room:"commons"},{label:"Campus Map",x:72,y:0,w:27,h:12,room:"map"}]},
-      entrance:{label:"Grand Entrance Hall",image:"./visual-assets/entrance.webp",hint:"The central hub. Every major Living School pathway begins here.",spots:[
-        {label:"Featured schools",x:0,y:20,w:31,h:22,room:"library"},{label:"Continue learning",x:0,y:42,w:31,h:12,workspace:"learn"},{label:"Templates",x:0,y:54,w:31,h:11,workspace:"market"},{label:"Build new school",x:0,y:65,w:31,h:10,room:"forge"},{label:"Learner Passport",x:69,y:22,w:30,h:22,room:"passport"},{label:"Ask Moss",x:35,y:43,w:31,h:28,room:"moss"},{label:"Daily Quest Board",x:69,y:48,w:30,h:20,workspace:"learn"},{label:"Campus Map",x:72,y:0,w:27,h:11,room:"map"}]},
-      library:{label:"Great Library",image:"./visual-assets/library.webp",hint:"Browse subjects, resume lessons, discover pathways, and search saved knowledge.",spots:[
-        {label:"Browse subjects",x:0,y:18,w:30,h:35,workspace:"market"},{label:"Today's focus",x:32,y:24,w:36,h:22,workspace:"learn"},{label:"Community feed",x:68,y:30,w:31,h:34,room:"commons"},{label:"Continue learning",x:17,y:62,w:43,h:20,workspace:"learn"},{label:"Ask Moss",x:0,y:77,w:28,h:17,room:"moss"},{label:"Learning tools",x:68,y:13,w:31,h:17,workspace:"learn"}]},
-      moss:{label:"Moss's Study",image:"./visual-assets/moss.webp",hint:"Ask questions, brainstorm, plan a path, generate a quiz, or get unstuck.",spots:[
-        {label:"Talk with Moss",x:24,y:27,w:52,h:43,action:"moss"},{label:"Today's focus",x:68,y:4,w:31,h:19,workspace:"learn"},{label:"Moss remembers",x:67,y:25,w:31,h:18,workspace:"constellation"},{label:"Moss tools",x:67,y:44,w:31,h:23,workspace:"studio"},{label:"Quick actions",x:5,y:78,w:90,h:12,action:"moss"},{label:"Campus map",x:72,y:0,w:27,h:9,room:"map"}]},
-      forge:{label:"Curriculum Forge",image:"./visual-assets/forge.webp",hint:"Generate, import, adapt, review, and publish a curriculum.",spots:[
-        {label:"Create from scratch",x:0,y:25,w:35,h:9,workspace:"studio",focus:"school-builder"},{label:"Use a template",x:0,y:34,w:35,h:8,workspace:"market"},{label:"Import and adapt",x:0,y:42,w:35,h:8,workspace:"studio",focus:"school-builder"},{label:"Collaborative build",x:0,y:50,w:35,h:8,room:"commons"},{label:"School blueprint",x:28,y:42,w:45,h:25,workspace:"studio",focus:"school-overview"},{label:"Blueprint preview",x:69,y:23,w:30,h:24,workspace:"studio",focus:"school-overview"},{label:"Brainstorm with Moss",x:64,y:65,w:35,h:14,room:"moss"},{label:"Publish school",x:54,y:87,w:22,h:9,workspace:"studio",focus:"school-builder"}]},
-      workshop:{label:"Practicum Workshop",image:"./visual-assets/workshop.webp",hint:"Choose a practicum, document evidence, request feedback, and connect learning to real work.",spots:[
-        {label:"Choose focus",x:0,y:20,w:36,h:40,workspace:"practica",focus:"practica-dashboard"},{label:"Active practicum",x:68,y:22,w:31,h:28,workspace:"practica",focus:"practica-dashboard"},{label:"Workshop bench",x:28,y:35,w:44,h:29,workspace:"practica",focus:"practica-dashboard"},{label:"Practicum flow",x:5,y:61,w:75,h:14,workspace:"practica",focus:"practica-dashboard"},{label:"Featured practica",x:0,y:75,w:69,h:17,workspace:"practica",focus:"practica-dashboard"},{label:"Today's challenge",x:68,y:72,w:31,h:20,workspace:"practica",focus:"practica-dashboard"}]},
-      commons:{label:"Cohort Commons",image:"./visual-assets/commons.webp",hint:"Find your people, collaborate, schedule sessions, and tend shared projects.",spots:[
-        {label:"Find your people",x:0,y:20,w:30,h:28,workspace:"cohort"},{label:"Community table",x:20,y:29,w:60,h:30,workspace:"cohort"},{label:"Community feed",x:28,y:51,w:42,h:25,workspace:"cohort"},{label:"Group tools",x:69,y:47,w:30,h:24,workspace:"cohort"},{label:"Join a session",x:0,y:75,w:32,h:17,workspace:"cohort"},{label:"Community challenge",x:33,y:75,w:36,h:17,workspace:"practica"},{label:"Your groups",x:69,y:75,w:30,h:17,workspace:"cohort"}]},
-      passport:{label:"Learner Passport Office",image:"./visual-assets/passport.webp",hint:"Inspect progress, badges, pathways, endorsements, and portable records.",spots:[
-        {label:"Passport station",x:0,y:28,w:25,h:18,workspace:"constellation"},{label:"Your journey",x:26,y:31,w:44,h:24,workspace:"constellation"},{label:"Your passport",x:66,y:38,w:33,h:22,workspace:"constellation"},{label:"Badges and achievements",x:25,y:51,w:43,h:17,workspace:"credentials"},{label:"Pathways to unlock",x:48,y:59,w:51,h:18,workspace:"learn"},{label:"Upcoming events",x:0,y:72,w:43,h:16,workspace:"cohort"}]},
-      faculty:{label:"Faculty Offices",image:"./visual-assets/faculty.webp",hint:"Find mentors, office hours, human help, and curriculum collaborators.",spots:[
-        {label:"Meet the faculty",x:0,y:16,w:39,h:35,workspace:"help",focus:"human-help-panel"},{label:"Office hours",x:39,y:16,w:26,h:18,workspace:"help",focus:"help-request-builder"},{label:"Learner support",x:39,y:34,w:27,h:19,workspace:"help",focus:"human-help-panel"},{label:"Current collaborations",x:66,y:30,w:33,h:22,workspace:"cohort"},{label:"Faculty workspace",x:13,y:48,w:74,h:33,workspace:"help",focus:"expert-studio-panel"},{label:"Faculty resources",x:0,y:55,w:31,h:21,workspace:"help"}]},
-      review:{label:"Peer Review Hall",image:"./visual-assets/review.webp",hint:"Submit work, review peers, reflect on feedback, and resubmit stronger evidence.",spots:[
-        {label:"Our pledge",x:0,y:13,w:38,h:20,workspace:"review"},{label:"Review principles",x:67,y:11,w:32,h:21,workspace:"review"},{label:"Review process",x:0,y:31,w:31,h:28,workspace:"review"},{label:"Current review queue",x:68,y:30,w:31,h:17,workspace:"review"},{label:"Review tables",x:22,y:37,w:56,h:39,workspace:"review"},{label:"Give great feedback",x:68,y:47,w:31,h:24,workspace:"review"},{label:"Today's focus",x:31,y:77,w:36,h:15,workspace:"review"}]},
-      credential:{label:"Credential Forge",image:"./visual-assets/credential.png",hint:"Verify evidence, issue credentials, export records, and celebrate impact.",spots:[
-        {label:"Credential forge",x:23,y:17,w:56,h:39,workspace:"credentials"},{label:"How credentials are earned",x:69,y:20,w:30,h:29,workspace:"credentials"},{label:"Our services",x:68,y:49,w:31,h:22,workspace:"credentials"},{label:"Credential wallet",x:46,y:58,w:29,h:16,workspace:"credentials"},{label:"Your credential record",x:65,y:66,w:34,h:22,workspace:"credentials"},{label:"Learner spotlight",x:0,y:69,w:34,h:18,room:"passport"}]},
-      map:{label:"Campus Map & Directory",image:"./visual-assets/map.webp",hint:"Tap a numbered location or open the full directory.",spots:[
-        {label:"Exterior Campus",x:0,y:8,w:28,h:14,room:"exterior"},{label:"Front Courtyard",x:28,y:8,w:34,h:14,room:"courtyard"},{label:"Grand Entrance",x:62,y:8,w:37,h:16,room:"entrance"},{label:"Great Library",x:0,y:21,w:31,h:16,room:"library"},{label:"Moss's Study",x:31,y:22,w:31,h:15,room:"moss"},{label:"Curriculum Forge",x:63,y:23,w:36,h:18,room:"forge"},{label:"Practicum Workshop",x:64,y:40,w:35,h:16,room:"workshop"},{label:"Cohort Commons",x:0,y:37,w:31,h:17,room:"commons"},{label:"Research Conservatory",x:31,y:37,w:33,h:22,workspace:"practica",focus:"artifacts-panel"},{label:"Passport Office",x:0,y:55,w:31,h:17,room:"passport"},{label:"Faculty Offices",x:55,y:52,w:22,h:15,room:"faculty"},{label:"Peer Review Hall",x:77,y:52,w:22,h:15,room:"review"},{label:"Credential Forge",x:20,y:62,w:25,h:16,room:"credential"},{label:"Challenge Arena",x:44,y:62,w:20,h:16,workspace:"learn",focus:"final-test-panel"},{label:"Final Competency Tower",x:63,y:61,w:18,h:20,workspace:"learn",focus:"final-test-panel"},{label:"Observatory",x:80,y:59,w:19,h:21,workspace:"constellation",focus:"learner-constellation-panel"},{label:"Cerbanimo Bridge",x:20,y:77,w:44,h:14,workspace:"practica",focus:"cerbanimo-panel"},{label:"Directory",x:68,y:77,w:31,h:15,action:"directory"}]}
-    };
-    // Illustrated gateway rooms keep visual continuity until dedicated artwork arrives.
-    Object.assign(LS_VISUAL_ROOMS,{
-      research:{label:"Research Conservatory",image:"./visual-assets/research.webp",hint:"Collect field notes, evidence, media, sources, and research artifacts.",gateway:true,workspace:"practica",focus:"artifacts-panel",spots:[{label:"Open research controls",x:18,y:42,w:64,h:18,workspace:"practica",focus:"artifacts-panel"},{label:"Return to workshop",x:18,y:64,w:30,h:12,room:"workshop"},{label:"Campus map",x:52,y:64,w:30,h:12,room:"map"}]},
-      challenge:{label:"Challenge Arena",image:"./visual-assets/challenge.webp",hint:"Take knowledge checks, retry challenges, use hints, and prove understanding.",gateway:true,workspace:"learn",focus:"final-test-panel",spots:[{label:"Open challenge controls",x:18,y:42,w:64,h:18,workspace:"learn",focus:"final-test-panel"},{label:"Return to library",x:18,y:64,w:30,h:12,room:"library"},{label:"Campus map",x:52,y:64,w:30,h:12,room:"map"}]},
-      tower:{label:"Final Competency Tower",image:"./visual-assets/tower.webp",hint:"Inspect prerequisites, validate evidence, and complete the final mastery gate.",gateway:true,workspace:"learn",focus:"final-test-panel",spots:[{label:"Open mastery controls",x:18,y:42,w:64,h:18,workspace:"learn",focus:"final-test-panel"},{label:"Credential Forge",x:18,y:64,w:30,h:12,room:"credential"},{label:"Observatory",x:52,y:64,w:30,h:12,room:"observatory"}]},
-      observatory:{label:"Observatory",image:"./visual-assets/observatory.webp",hint:"Explore the knowledge constellation, misconceptions, retrieval, and future pathways.",gateway:true,workspace:"constellation",focus:"learner-constellation-panel",spots:[{label:"Open constellation",x:18,y:42,w:64,h:18,workspace:"constellation",focus:"learner-constellation-panel"},{label:"Passport Office",x:18,y:64,w:30,h:12,room:"passport"},{label:"Campus map",x:52,y:64,w:30,h:12,room:"map"}]},
-      bridge:{label:"Cerbanimo Bridge",image:"./visual-assets/bridge.webp",hint:"Carry learning into real projects and return field evidence to the school.",gateway:true,workspace:"practica",focus:"cerbanimo-panel",spots:[{label:"Open bridge controls",x:18,y:42,w:64,h:18,workspace:"practica",focus:"cerbanimo-panel"},{label:"Open Cerbanimo",x:18,y:64,w:30,h:12,action:"cerbanimo"},{label:"Campus map",x:52,y:64,w:30,h:12,room:"map"}]}
-    });
-    const mapRoomByLabel={"Research Conservatory":"research","Challenge Arena":"challenge","Final Competency Tower":"tower","Observatory":"observatory","Cerbanimo Bridge":"bridge"};
-    LS_VISUAL_ROOMS.map.spots.forEach(spot=>{if(mapRoomByLabel[spot.label]){delete spot.workspace;delete spot.focus;spot.room=mapRoomByLabel[spot.label];}});
-
+    const LS_VISUAL_ROOMS=window.LivingSchoolVisualCore?.rooms||{};
+    const LS_ROOM_ALIASES=window.LivingSchoolVisualCore?.aliases||{};
+    if(!Object.keys(LS_VISUAL_ROOMS).length)console.error("Living School visual core did not load.");
     // RC19.3: every Living School visual room now runs through the reusable World Engine.
     Object.entries(LS_VISUAL_ROOMS).forEach(([roomId,room])=>{room.engineScene=`living-school.${roomId}`;});
     let livingWorldEngine=null;
@@ -2333,9 +2297,13 @@ Final model-native output:
         onNavigate:room=>openLivingVisualRoom(room),
         onWorkspace:target=>openLivingClassicTarget(target),
         onAction:item=>{
-          if(item.action==="moss"){openLivingVisualRoom("moss");return;}
+          if(item.action==="moss"||item.action==="moss-dialog"){openLivingMossDialog();return;}
           if(item.action==="directory"){openLivingDirectory();return;}
           if(item.action==="cerbanimo"){location.href="../cerbanimo/index.html?commonweave=1&visual=1#world-title";return;}
+          if(item.action==="fellowfare"){location.href="../fellowfare/index.html?commonweave=1&visual=1";return;}
+          if(item.action==="commonweave"){location.href="../../index.html?visual=1&build=1.0.14#square";return;}
+          if(item.action==="settings"){openLivingClassicTarget({workspace:"studio",focus:"model-settings",label:"Settings and model controls"});return;}
+          if(String(item.action||"").startsWith("journal-")){openLivingJournal(item.action.slice(8),item.prompt||"");return;}
           if(item.action==="quiet-library"){const quiet=livingWorldEngine.toggle("living-school.library.quiet");livingWorldEngine.set("living-school.library.mood",quiet?"quiet":"busy");livingWorldEngine.showMessage(quiet?"Quiet study settles over the stacks.":"The library returns to its bright communal hum.");livingWorldEngine.render();return;}
         },
         onAnnounce:announceLiving
@@ -2379,52 +2347,28 @@ Final model-native output:
         bridge:["A quest packet crosses toward Cerbanimo.","Field evidence returns across the bridge into the school."]
       };
       const makeEngineObject=(spot,index)=>({
-        id:`spot-${index}`,label:spot.label,bounds:{x:spot.x,y:spot.y,w:spot.w,h:spot.h},
+        ...spot,id:spot.id||`spot-${index}`,label:spot.label,bounds:{x:spot.x,y:spot.y,w:spot.w,h:spot.h},
         ...(spot.room?{portal:spot.room}:{}),
         ...(spot.workspace?{workspace:spot.workspace,focus:spot.focus}:{}),
-        ...(spot.action?{action:spot.action}:{}),
-        badge:spot.room?"Door":spot.workspace?"Controls":undefined
-      });
-      livingWorldEngine.registerScene({
-        id:"living-school.library",label:"Great Library",image:"./visual-assets/library.webp",
-        alt:"The illustrated Great Library, converted to the Commonweave World Engine",
-        ambientInterval:52000,
-        objects:[
-          {id:"subject-stacks",label:"Browse subjects",bounds:{x:0,y:18,w:30,h:35},workspace:"market",badge:"Stacks"},
-          {id:"focus-table",label:"Today's focus",bounds:{x:32,y:24,w:36,h:22},workspace:"learn",stateKey:"living-school.library.objects.focus-table.active"},
-          {id:"commons-door",label:"Community feed",bounds:{x:68,y:30,w:31,h:34},portal:"commons"},
-          {id:"reading-table",label:"Continue learning",bounds:{x:17,y:62,w:43,h:20},workspace:"learn",badge:"Resume"},
-          {id:"moss-door",label:"Ask Moss",bounds:{x:0,y:77,w:28,h:17},portal:"moss"},
-          {id:"tool-shelf",label:"Learning tools",bounds:{x:68,y:13,w:31,h:17},workspace:"learn"},
-          {id:"reading-lamps",label:state=>state?.["living-school"]?.library?.lamps?"Dim reading lamps":"Light reading lamps",bounds:{x:41,y:48,w:18,h:10},action:"toggle",stateKey:"living-school.library.lamps",messages:{on:"Warm reading lamps bloom across the central table.",off:"The lamps dim to a soft ember."}},
-          {id:"return-cart",label:"Shelve a returned book",bounds:{x:71,y:69,w:20,h:14},action:"increment",stateKey:"living-school.library.booksShelved",message:value=>`You return a book to the living stacks. ${value} shelved here so far.`},
-          {id:"quiet-sign",label:"Toggle quiet study",bounds:{x:7,y:58,w:15,h:10},action:"quiet-library"}
-        ],
-        actors:[
-          {id:"librarian",label:"Juniper, Librarian",glyph:"✎",position:{x:52,y:58},lines:state=>{const count=state?.["living-school"]?.library?.booksShelved||0;return ["Every curriculum leaves a trail. Follow the citations when the path gets foggy.",count?`The return cart is lighter by ${count}. The shelves noticed.`:"Returned books go on the little cart. The shelves sort out the rest.","The building remembers what you study, but your passport decides what travels with you."];}}
-        ],
-        ambient:[
-          {message:"A paper moth carries a citation toward the upper stacks."},
-          {message:"Somewhere above, a ladder rolls itself to the next shelf."},
-          {message:state=>state?.["living-school"]?.library?.lamps?"The reading lamps flicker approvingly.":"A student clicks on a tiny brass reading lamp."}
-        ]
+        badge:undefined
       });
       Object.entries(LS_VISUAL_ROOMS).forEach(([roomId,room])=>{
-        if(roomId==="library")return;
         const resident=roomResidents[roomId];
         livingWorldEngine.registerScene({
-          id:room.engineScene,label:room.label,image:room.image,
+          id:room.engineScene,label:room.label,image:room.image,width:room.width,height:room.height,
           alt:`${room.label} illustrated visual room`,
           ambientInterval:48000,
           objects:(room.spots||[]).map(makeEngineObject),
-          actors:resident?[{id:"resident",...resident}]:[],
+          actors:[],
           ambient:(roomAmbient[roomId]||[]).map(message=>({message}))
         });
       });
       return livingWorldEngine;
     }
 
-    let lsVisualRoom=localStorage.getItem(LS_ROOM_KEY)||"exterior";
+    let lsVisualRoom=localStorage.getItem(LS_ROOM_KEY)||"home";
+    lsVisualRoom=LS_ROOM_ALIASES[lsVisualRoom]||lsVisualRoom;
+    if(!LS_VISUAL_ROOMS[lsVisualRoom])lsVisualRoom="home";
     let lsVisualHistory=[];
     let lsPendingClassic=null;
     function lsEsc(value){return String(value??"").replace(/[&<>\"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
@@ -2442,7 +2386,8 @@ Final model-native output:
       }
       if(!engineMounted){
         const gateway=room.gateway?`<section class="ls-gateway-card" aria-label="${lsEsc(room.label)} temporary visual gateway"><span class="ls-status-chip">Artwork incoming</span><h2>${lsEsc(room.label)}</h2><p>${lsEsc(room.hint)} This compatibility gateway keeps every working control available while the scene engine recovers.</p><div class="ls-gateway-actions"><button type="button" class="primary" data-ls-gateway-open>Open full controls</button><button type="button" data-ls-gateway-map>Campus map</button></div></section>`:"";
-        stage.innerHTML=`<div class="ls-visual-frame"><img src="${room.image}" alt="${lsEsc(room.label)} illustrated visual room" draggable="false">${gateway}${room.spots.map((spot,index)=>`<button type="button" class="ls-hotspot" data-ls-spot="${index}" aria-label="${lsEsc(spot.label)}" style="left:${spot.x}%;top:${spot.y}%;width:${spot.w}%;height:${spot.h}%"><span>${lsEsc(spot.label)}</span></button>`).join("")}</div>`;
+        stage.innerHTML=`<div class="ls-visual-frame" data-source-width="${room.width||768}" data-source-height="${room.height||1792}"><img src="${room.image}" alt="${lsEsc(room.label)} illustrated visual room" draggable="false">${gateway}${room.spots.map((spot,index)=>`<button type="button" class="ls-hotspot" data-ls-spot="${index}" aria-label="${lsEsc(spot.label)}" style="left:${spot.x}%;top:${spot.y}%;width:${spot.w}%;height:${spot.h}%"><span>${lsEsc(spot.label)}</span></button>`).join("")}</div>`;
+        window.CommonweaveFitVisualFrame?.(stage,stage.querySelector(".ls-visual-frame"));
         stage.querySelectorAll("[data-ls-spot]").forEach(button=>button.addEventListener("click",()=>activateLivingVisualSpot(room.spots[Number(button.dataset.lsSpot)])));
         stage.querySelector("[data-ls-gateway-open]")?.addEventListener("click",()=>openLivingClassicTarget({workspace:room.workspace,focus:room.focus,label:room.label}));
         stage.querySelector("[data-ls-gateway-map]")?.addEventListener("click",()=>openLivingVisualRoom("map"));
@@ -2459,25 +2404,58 @@ Final model-native output:
     function openLivingActions(){renderLivingActionTray();document.getElementById("livingVisualActions")?.classList.add("open");document.getElementById("livingVisualActions")?.setAttribute("aria-hidden","false");}
     function closeLivingActions(){document.getElementById("livingVisualActions")?.classList.remove("open");document.getElementById("livingVisualActions")?.setAttribute("aria-hidden","true");}
     function announceLiving(message){const live=document.getElementById("livingVisualLive");if(live)live.textContent=message;}
-    function openLivingVisualRoom(name,{push=true}={}){if(!LS_VISUAL_ROOMS[name])name="exterior";if(push&&name!==lsVisualRoom)lsVisualHistory.push(lsVisualRoom);lsVisualRoom=name;renderLivingVisualRoom();closeLivingDirectory();closeLivingActions();if(history.state?.livingRoom!==name)history.pushState({...history.state,livingRoom:name},"",location.href);announceLiving(`Entered ${LS_VISUAL_ROOMS[name].label}`);}
+
+    const LS_JOURNAL_KEY="living-school.visual-journal.v1";
+    function livingJournalEntries(){try{const entries=JSON.parse(localStorage.getItem(LS_JOURNAL_KEY)||"[]");return Array.isArray(entries)?entries:[];}catch{return[];}}
+    function saveLivingJournalEntries(entries){localStorage.setItem(LS_JOURNAL_KEY,JSON.stringify(entries.slice(0,200)));}
+    function renderLivingJournalEntries(filter="all"){
+      const host=document.getElementById("livingJournalEntries");if(!host)return;
+      const entries=livingJournalEntries().filter(entry=>filter==="all"||entry.privacy===filter);
+      host.innerHTML=entries.length?entries.map(entry=>`<article class="ls-journal-entry"><small>${lsEsc(new Date(entry.createdAt).toLocaleString())} · ${lsEsc(entry.privacy)}${entry.mood?` · ${lsEsc(entry.mood)}`:""}</small><p>${lsEsc(entry.text)}</p></article>`).join(""):`<div class="ls-journal-empty">No ${filter==="all"?"":filter+" "}entries yet.</div>`;
+    }
+    function openLivingJournal(mode="new",prompt=""){
+      const dialog=document.getElementById("livingJournalDialog");if(!dialog)return;
+      const filter=mode==="private"?"private":mode==="shared"?"shared":"all";
+      document.getElementById("livingJournalPrompt").textContent=prompt||({mood:"Record how your energy and attention feel right now.",list:"Revisit what you have already noticed.",private:"Private entries stay only in this browser profile.",shared:"Shared reflections are marked for sharing but remain local until you explicitly export or attach them."}[mode]||"Write what changed, what remains open, or what the work taught you.");
+      if(mode==="private"||mode==="shared")document.getElementById("livingJournalPrivacy").value=mode;
+      dialog.hidden=false;dialog.setAttribute("aria-hidden","false");renderLivingJournalEntries(filter);
+      setTimeout(()=>document.getElementById(mode==="mood"?"livingJournalMood":"livingJournalText")?.focus(),30);
+    }
+    function closeLivingJournal(){const dialog=document.getElementById("livingJournalDialog");if(dialog){dialog.hidden=true;dialog.setAttribute("aria-hidden","true");}}
+    function recordLivingJournal(){
+      const text=document.getElementById("livingJournalText")?.value.trim();if(!text){announceLiving("Write a reflection before saving it.");document.getElementById("livingJournalText")?.focus();return;}
+      const entry={id:`journal-${Date.now()}`,text,mood:document.getElementById("livingJournalMood")?.value||"",privacy:document.getElementById("livingJournalPrivacy")?.value||"private",createdAt:new Date().toISOString(),room:lsVisualRoom};
+      const entries=livingJournalEntries();entries.unshift(entry);saveLivingJournalEntries(entries);document.getElementById("livingJournalText").value="";renderLivingJournalEntries("all");announceLiving("Journal entry saved locally.");
+    }
+    function openLivingMossDialog(){
+      try{openSheet("moss-sheet",document.getElementById("ask-moss"));document.getElementById("moss-question")?.focus({preventScroll:true});}
+      catch{openLivingClassicTarget({workspace:"studio",focus:"moss-pathway-desk",label:"Ask Moss"});}
+    }
+    function openLivingVisualRoom(name,{push=true}={}){name=LS_ROOM_ALIASES[name]||name;if(!LS_VISUAL_ROOMS[name])name="home";if(push&&name!==lsVisualRoom)lsVisualHistory.push(lsVisualRoom);lsVisualRoom=name;renderLivingVisualRoom();closeLivingDirectory();closeLivingActions();if(history.state?.livingRoom!==name)history.pushState({...history.state,livingRoom:name},"",location.href);announceLiving(`Entered ${LS_VISUAL_ROOMS[name].label}`);}
     function openLivingVisual(){document.body.classList.add("ls-visual-open");document.body.classList.remove("ls-classic-open");document.getElementById("livingVisualWorld")?.setAttribute("aria-hidden","false");localStorage.setItem(LS_VISUAL_KEY,"visual");renderLivingVisualRoom();}
     function closeLivingVisual(){openLivingVisual();}
     function openLivingDirectory(){openLivingVisualRoom("map");}
     function closeLivingDirectory(){}
-    let lsProjectedNode=null,lsProjectionMarker=null;
+    let lsProjectedNode=null,lsProjectionMarker=null,lsProjectionSurfaceSession=null;
     function closeLivingProjection(){
       const projection=document.getElementById("livingVisualProjection");
+      lsProjectionSurfaceSession?.destroy?.();lsProjectionSurfaceSession=null;
       if(lsProjectedNode&&lsProjectionMarker?.parentNode){lsProjectedNode.classList.remove("ls-projected-workspace");lsProjectionMarker.parentNode.insertBefore(lsProjectedNode,lsProjectionMarker);lsProjectionMarker.remove();}
       lsProjectedNode=null;lsProjectionMarker=null;
-      projection?.classList.remove("open");projection?.setAttribute("aria-hidden","true");
+      projection?.classList.remove("open","ls-surface-filled","ls-surface-has-data");projection?.setAttribute("aria-hidden","true");
       document.body.classList.remove("ls-visual-projection-open");
     }
     function activateLivingVisualSpot(spot){
       if(!spot)return;
       if(spot.room){openLivingVisualRoom(spot.room);return;}
       if(spot.action==="directory"){openLivingDirectory();return;}
-      if(spot.action==="moss"){openLivingVisualRoom("moss");return;}
+      if(spot.action==="moss"||spot.action==="moss-dialog"){openLivingMossDialog();return;}
       if(spot.action==="cerbanimo"){location.href="../cerbanimo/index.html?commonweave=1&visual=1#world-title";return;}
+      if(spot.action==="fellowfare"){location.href="../fellowfare/index.html?commonweave=1&visual=1";return;}
+      if(spot.action==="commonweave"){location.href="../../index.html?visual=1&build=1.0.14#square";return;}
+      if(spot.action==="settings"){openLivingClassicTarget({workspace:"studio",focus:"model-settings",label:"Settings and model controls"});return;}
+      if(String(spot.action||"").startsWith("journal-")){openLivingJournal(spot.action.slice(8),spot.prompt||"");return;}
+      if(spot.action==="message"){announceLiving(spot.message||spot.label);return;}
       if(spot.workspace){openLivingClassicTarget(spot);return;}
     }
     function openLivingClassicTarget(target){
@@ -2486,13 +2464,15 @@ Final model-native output:
       setTimeout(()=>{
         closeLivingProjection();
         const node=(target.focus&&document.getElementById(target.focus))||document.querySelector(`.workspace-region[data-workspace="${target.workspace}"]`)||document.querySelector(`[data-workspace="${target.workspace}"]`);
-        const host=document.getElementById("livingVisualProjectionHost"),projection=document.getElementById("livingVisualProjection"),scene=document.getElementById("livingVisualProjectionScene");
-        if(!node||!host||!projection){announceLiving("This function needs a dedicated illustrated host asset before it can open here.");return;}
+        if(node?.matches?.("details"))node.open=true;
+        const host=document.getElementById("livingVisualProjectionHost"),projection=document.getElementById("livingVisualProjection"),scene=document.getElementById("livingVisualProjectionScene"),device=document.getElementById("livingVisualInterfaceDevice"),image=document.getElementById("livingVisualInterfaceImage"),status=document.getElementById("livingVisualInterfaceStatus");
+        if(!node||!host||!projection||!device||!image){announceLiving("This function needs a dedicated illustrated host asset before it can open here.");return;}
         lsProjectionMarker=document.createComment("living-school-projection-marker");node.parentNode.insertBefore(lsProjectionMarker,node);lsProjectedNode=node;host.replaceChildren(node);
         node.classList.add("ls-projected-workspace");
         if(scene)scene.src=(LS_VISUAL_ROOMS[lsVisualRoom]||LS_VISUAL_ROOMS.moss).image;
+        lsProjectionSurfaceSession=window.LivingSchoolInterfaceSurfaces?.mount({target,node,projection,device,image,status})||null;
         projection.classList.add("open");projection.setAttribute("aria-hidden","false");document.body.classList.add("ls-visual-projection-open");
-        node.querySelector("input,textarea,select,button")?.focus({preventScroll:true});
+        requestAnimationFrame(()=>node.querySelector("input,textarea,select,button")?.focus({preventScroll:true}));
       },60);
     }
     function bindLivingVisual(){
@@ -2506,9 +2486,14 @@ Final model-native output:
       grid?.querySelectorAll("[data-ls-room]").forEach(button=>button.addEventListener("click",()=>openLivingVisualRoom(button.dataset.lsRoom)));
       grid?.querySelectorAll("[data-ls-workspace]").forEach(button=>button.addEventListener("click",()=>openLivingClassicTarget({workspace:button.dataset.lsWorkspace,focus:button.dataset.lsFocus,label:button.querySelector("strong")?.textContent||"Workspace"})));
       document.querySelector("[data-ls-back]")?.addEventListener("click",()=>openLivingVisualRoom(lsVisualHistory.pop()||"exterior",{push:false}));
-      document.querySelector("[data-ls-home]")?.addEventListener("click",()=>openLivingVisualRoom("exterior"));
-      document.querySelector("[data-ls-commonweave]")?.addEventListener("click",()=>{location.href="../../index.html?visual=1&build=1.0.10#square";});
+      document.querySelector("[data-ls-home]")?.addEventListener("click",()=>openLivingVisualRoom("home"));
+      document.querySelector("[data-ls-commonweave]")?.addEventListener("click",()=>{location.href="../../index.html?visual=1&build=1.0.14#square";});
+      document.querySelector("[data-ls-model]")?.addEventListener("click",()=>openModelFoundry());
       document.querySelector("[data-ls-close-projection]")?.addEventListener("click",closeLivingProjection);
+      document.querySelector("[data-ls-journal-close]")?.addEventListener("click",closeLivingJournal);
+      document.querySelector("[data-ls-journal-save]")?.addEventListener("click",recordLivingJournal);
+      document.querySelector("[data-ls-journal-new]")?.addEventListener("click",()=>{document.getElementById("livingJournalText").value="";document.getElementById("livingJournalMood").value="";document.getElementById("livingJournalText").focus();});
+      document.getElementById("livingJournalDialog")?.addEventListener("click",event=>{if(event.target===event.currentTarget)closeLivingJournal();});
       document.querySelector("[data-ls-directory]")?.addEventListener("click",openLivingDirectory);
       document.querySelector("[data-ls-close-directory]")?.addEventListener("click",closeLivingDirectory);
       
@@ -2520,9 +2505,9 @@ Final model-native output:
       document.querySelector("[data-ls-open-classic]")?.addEventListener("click",()=>{const target=lsPendingClassic;document.getElementById("livingClassicFallback").classList.remove("open");document.getElementById("livingClassicFallback").setAttribute("aria-hidden","true");closeLivingVisual();if(target?.workspace)setWorkspace(target.workspace,{focusId:target.focus||null});lsPendingClassic=null;});
       document.getElementById("livingVisualDirectory")?.addEventListener("click",event=>{if(event.target===event.currentTarget)closeLivingDirectory();});
       if(localStorage.getItem("living-school.visual-fit.v1")==="contain"){document.body.classList.add("ls-fit-room");const fit=document.querySelector("[data-ls-fit]");if(fit)fit.textContent="Fill";}
-      let swipeStart=null;document.getElementById("livingVisualStage")?.addEventListener("pointerdown",event=>{swipeStart={x:event.clientX,y:event.clientY};});document.getElementById("livingVisualStage")?.addEventListener("pointerup",event=>{if(!swipeStart)return;const dx=event.clientX-swipeStart.x,dy=event.clientY-swipeStart.y;swipeStart=null;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4){if(dx>0)openLivingVisualRoom(lsVisualHistory.pop()||"exterior",{push:false});else openLivingActions();}});
+      let swipeStart=null;document.getElementById("livingVisualStage")?.addEventListener("pointerdown",event=>{swipeStart={x:event.clientX,y:event.clientY};});document.getElementById("livingVisualStage")?.addEventListener("pointerup",event=>{if(!swipeStart)return;const dx=event.clientX-swipeStart.x,dy=event.clientY-swipeStart.y;swipeStart=null;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4){if(dx>0)openLivingVisualRoom(lsVisualHistory.pop()||"home",{push:false});else openLivingActions();}});
       window.addEventListener("popstate",event=>{if(document.body.classList.contains("ls-visual-open")&&event.state?.livingRoom&&LS_VISUAL_ROOMS[event.state.livingRoom]){lsVisualRoom=event.state.livingRoom;renderLivingVisualRoom();}});
-      window.addEventListener("keydown",event=>{if(!document.body.classList.contains("ls-visual-open"))return;if(event.key==="Escape"){if(document.getElementById("livingVisualProjection")?.classList.contains("open"))closeLivingProjection();}else if(event.key.toLowerCase()==="m")openLivingDirectory();else if(event.key.toLowerCase()==="a")openLivingActions();else if(event.key.toLowerCase()==="h")openLivingVisualRoom("exterior");});
+      window.addEventListener("keydown",event=>{if(!document.body.classList.contains("ls-visual-open"))return;if(event.key==="Escape"){if(document.getElementById("livingVisualProjection")?.classList.contains("open"))closeLivingProjection();}else if(event.key.toLowerCase()==="m")openLivingDirectory();else if(event.key.toLowerCase()==="a")openLivingActions();else if(event.key.toLowerCase()==="h")openLivingVisualRoom("home");});
       if(LS_FORCE_VISUAL_DEFAULT){try{localStorage.setItem(LS_VISUAL_KEY,"visual");}catch{}}
       setTimeout(openLivingVisual,40);
     }
@@ -9357,6 +9342,7 @@ Final model-native output:
         if(id) openModule(id);
       });
       document.getElementById("campus-return").addEventListener("click",()=>{if(window.parent!==window)window.parent.postMessage({type:"commonweave:navigate",target:"campus"},location.origin);else location.href="/campus";});
+      document.getElementById("model-key-shortcut")?.addEventListener("click",()=>openModelFoundry());
       document.getElementById("school-controls-toggle").addEventListener("click",event=>{renderHeaderControls();openSheet("school-controls-sheet",event.currentTarget);});
       document.getElementById("school-controls-close").addEventListener("click",()=>closeSheet("school-controls-sheet",document.getElementById("school-controls-toggle")));
       document.getElementById("ask-moss").addEventListener("click",event=>{renderMossOrchestration();openSheet("moss-sheet",event.currentTarget);});
@@ -9377,7 +9363,7 @@ Final model-native output:
       document.querySelector("[data-mobile-browse]").addEventListener("click",()=>setTraversalMode("browse"));
       document.querySelector("[data-mobile-more]").addEventListener("click",()=>openSheet("school-controls-sheet",document.getElementById("school-controls-toggle")));
       document.getElementById("school-cover-expand").addEventListener("click",event=>{const cover=document.getElementById("school-cover");cover.classList.toggle("expanded");event.currentTarget.setAttribute("aria-expanded",String(cover.classList.contains("expanded")));event.currentTarget.textContent=cover.classList.contains("expanded")?"Collapse purpose":"Read full purpose";});
-      document.getElementById("open-cerbanimo-connection").addEventListener("click",()=>{closeSheet("school-controls-sheet",document.getElementById("school-controls-toggle"));setWorkspace("practica",{focusId:"final-project-panel"});});
+      document.getElementById("open-cerbanimo-connection").addEventListener("click",()=>{closeSheet("school-controls-sheet",document.getElementById("school-controls-toggle"));location.href="../cerbanimo/index.html?commonweave=1&visual=1#world-title";});
       document.getElementById("quiet-toggle").addEventListener("click",()=>applyAppearanceMode("quiet"));
 
       document.getElementById("top-plan").addEventListener("click",()=>setWorkspace("admin",{focusId:"billing-panel"}));

@@ -1584,7 +1584,7 @@ body.visual-world-open #app,body.visual-world-open>.ambient-field,body.visual-wo
 #cerbanimoVisualWorld{display:grid!important;z-index:5000!important}
 #visualScenes,.cw-world-scene,.visual-scene,.visual-scene-frame{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;aspect-ratio:auto!important;box-shadow:none!important}
 .visual-scene-frame>img,.cw-world-scene>img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important}
-.visual-hotspot span,.cw-world-object span,.cw-world-actor-name,.visual-route-bar,.visual-room-status{display:none!important}
+.visual-hotspot span,.cw-world-object span,.cw-world-object-badge,.cw-world-actor-name,.visual-route-bar,.visual-room-status{display:none!important}
 .visual-hotspot:hover,.visual-hotspot:focus-visible,.cw-world-object:hover,.cw-world-object:focus-visible{border-color:transparent!important;background:transparent!important;box-shadow:none!important;outline:3px solid rgba(113,229,255,.78)!important;outline-offset:-3px}
 .cerbanimo-image-dock{position:fixed!important;z-index:5050!important;top:auto!important;bottom:max(7px,env(safe-area-inset-bottom))!important;left:50%!important;transform:translateX(-50%)!important;width:min(92vw,390px)!important;display:grid!important;grid-template-columns:repeat(6,1fr)!important;gap:4px!important;padding:5px!important;border:1px solid rgba(115,225,255,.36)!important;border-radius:22px!important;background:rgba(3,2,11,.82)!important;backdrop-filter:blur(14px)!important;box-shadow:0 14px 42px #000b!important}
 .cerbanimo-image-dock button{position:relative;height:48px!important;min-height:48px!important;padding:0!important;border:0!important;border-radius:16px!important;background:transparent!important;overflow:hidden!important;color:transparent!important}
@@ -1602,8 +1602,13 @@ body.visual-world-open #app,body.visual-world-open>.ambient-field,body.visual-wo
 .visual-detail-card input,.visual-detail-card textarea,.visual-detail-card select,.spatial-command input{background:rgba(3,6,20,.4)!important;border:0!important;border-bottom:2px solid rgba(95,227,255,.55)!important;border-radius:0!important;color:#fff!important}
 @media(max-width:650px){.cerbanimo-image-dock{width:min(96vw,390px)!important}.cerbanimo-image-dock button{height:44px!important;min-height:44px!important}.visual-detail-card,.spatial-command-card{max-height:66dvh!important}}
 
+/* v1.0.14 navigation contract: the visual dock is a full-width bottom bar. */
+.cerbanimo-image-dock{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100vw!important;max-width:none!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:0!important;padding:4px max(4px,env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left))!important;border:0!important;border-top:1px solid rgba(115,225,255,.34)!important;border-radius:0!important;background:rgba(3,2,11,.96)!important;box-shadow:0 -10px 28px #0008!important}
+.cerbanimo-image-dock button{border-radius:0!important;border-right:1px solid rgba(255,255,255,.08)!important}.cerbanimo-image-dock button:last-child{border-right:0!important}.cerbanimo-version-plaque{display:none!important}
+
 </style>
 <script src="../../shared/image-hotspot-calibrator.js"></script>
+  <link rel="stylesheet" href="../../commonweave-merlin-chat.css">
 </head>
 <body>
   <div class="ambient-field" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -1618,7 +1623,7 @@ body.visual-world-open #app,body.visual-world-open>.ambient-field,body.visual-wo
     <button type="button" data-spatial-inbox data-count="0" aria-label="Inbox"><img src="../../ui-icons/inbox.svg" alt=""></button>
     <button type="button" data-commonweave-return aria-label="Return to Commonweave"><img src="../../ui-icons/back.svg" alt=""></button>
   </nav>
-  <div class="cerbanimo-version-plaque"><img src="assets/cerbanimo-logo.png" alt=""><span>v1.0.10</span></div>
+  <div class="cerbanimo-version-plaque"><img src="assets/cerbanimo-logo.png" alt=""><span>v1.0.14</span></div>
   <div id="visualRouteBar" class="visual-route-bar" aria-live="polite"></div><div id="visualScenes"></div><aside id="visualRoomStatus" class="visual-room-status" aria-live="polite"><strong>Cerbanimo</strong><span>Forming the room…</span><small></small></aside>
   <div id="visualWorldToast" class="visual-toast" role="status" aria-live="polite"></div>
 </div>
@@ -5521,6 +5526,7 @@ Bring a node to contribute, validate, or help shape the next step.`;const bundle
   .visual-review-meter{height:10px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;margin:.75rem 0}.visual-review-meter span{display:block;height:100%;background:var(--accent,#63f5d2)}.visual-evidence-pre{white-space:pre-wrap;max-height:18rem;overflow:auto}.visual-inline-actions{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end}.mission-structure-row{align-items:center}.human-review-stage .visual-stage-card{border-left:3px solid rgba(99,245,210,.55)}
 </style></head><body><main><section class="hero"><div class="over">CERBANIMO / SIGNED QUEST ENTRANCE / ${esc(p.byline)}</div><h1>${esc(p.title)}</h1><p>${esc(p.description)}</p><div class="meta"><span>${p.progress}% APPROVED</span><span>${p.opportunities.length} OPEN PASSAGES</span><span>CHAPTER ${p.chapter}</span><span>SIGNED SOURCE ${esc(short(capsule.issuer.fingerprint,12))}</span></div></section><div class="call">${esc(p.callToAction)}</div><section class="grid">${cards||"<p>No open passages are currently published.</p>"}</section><div class="actions"><button id="download">DOWNLOAD FORK SEED</button><button class="alt" id="copy">COPY QUEST SUMMARY</button></div><footer>Public snapshot only. Evidence, private messages, API keys, relay room keys, and recovery material are excluded.</footer></main><script>const seed=${seed};document.getElementById('download').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(seed,null,2)],{type:'application/json'}));a.download='cerbanimo-fork-${slugify(p.title)}.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)};document.getElementById('copy').onclick=async()=>{await navigator.clipboard.writeText(seed.payload.title+'\\n\\n'+seed.payload.description+'\\n\\n'+seed.payload.callToAction);document.getElementById('copy').textContent='COPIED'};<\/script><script src="commonweave-handoff-consumer.js" data-system="cerbanimo"><\/script>
 <script src="commonweave-presence.js"><\/script>
+<script src="../../shared/commonweave-merlin-chat.js"></script>
 </body></html>`;
   }
   function downloadPublicEntrance() { if(!runtime.publicEntranceHtml)throw new Error("Generate a signed entrance first");const quest=selectedQuest();downloadBlob(new Blob([runtime.publicEntranceHtml],{type:"text/html"}),`quest-entrance-${slugify(quest?.title||"quest")}.html`);toast("Self-contained quest entrance downloaded","good"); }
@@ -6294,7 +6300,7 @@ q("#modelList").innerHTML=state.modelPacks.map((p)=>{const active=state.ai.engin
     if(e.target instanceof Element&&e.target.closest('[data-visual-home]')){openVisualScene('map');return}
     if(e.target instanceof Element&&e.target.closest('[data-visual-nexus]')){openVisualScene('nexus');return}
     if(e.target instanceof Element&&e.target.closest('[data-visual-classic]')){closeVisualWorld(state.ui.view||'today');return}
-    if(e.target instanceof Element&&e.target.closest('[data-commonweave-return]')){location.href='../../index.html?visual=1&build=1.0.10#square';return}
+    if(e.target instanceof Element&&e.target.closest('[data-commonweave-return]')){location.href='../../index.html?visual=1&build=1.0.14#square';return}
     if(e.target instanceof Element&&e.target.closest('[data-close-visual-detail]')){closeVisualDetail();return}
     const sceneOpen=e.target instanceof Element?e.target.closest('[data-detail-open-scene]'):null;if(sceneOpen){closeVisualDetail();openVisualScene(sceneOpen.dataset.detailOpenScene||'object-viewer');return}
     const detailOpen=e.target instanceof Element?e.target.closest('[data-detail-open-view]'):null;if(detailOpen){closeVisualDetail();closeVisualWorld(detailOpen.dataset.detailOpenView||'today');return}

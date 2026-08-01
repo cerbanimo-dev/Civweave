@@ -98,3 +98,6 @@ body.cw-world-active > :not(#commonweave-world):not(.cw-panel):not(.cw-toast):no
 .cw-world-bar button img{object-fit:contain!important;padding:.34rem!important;background:rgba(4,20,25,.72)!important}
 .cw-world-bar button span{display:none!important}
 @media(max-width:700px){.cw-world-bar{width:calc(100vw - .6rem)!important;height:3.8rem!important;gap:.16rem!important;padding:.22rem!important}}
+
+/* v1.0.14 production hotspot labels are screen-reader only. */
+.cw-hotspot span,.cw-feature-hotspot span,.cw-world-object span,.cw-world-object-badge,.cw-world-actor-name{display:none!important}

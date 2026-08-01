@@ -11,6 +11,10 @@ The separate Android bridge download is source code for people who want to
 build their own signed wrapper in Android Studio. You do not need it for the
 steps below.
 
+## RC22.3.11 Living Displays and Merlin
+
+This mobile seed includes state-aware Living School display surfaces and Merlin, the universal android starfish wizard. Merlin uses the shared interactive model connection for ordinary streamed conversation, can inspect a filtered read-only platform snapshot, and cannot navigate, move intentions, or change platform records. The chalkboard and hologram interfaces track curriculum intake, generated curriculum, practicum, submission, mentor feedback, and credential progress.
+
 ## One Mind, Many Rooms in RC4
 
 The RC4 mobile kit contains the same shared model runtime as the hosted campus and every standalone room. Configure the provider once under **Shared model**. Pocket Campus, Living School, Cerbanimo, and Anarchadia then inherit the route, model ID, and endpoint. API keys remain session-only and must be entered again after the browser session ends.

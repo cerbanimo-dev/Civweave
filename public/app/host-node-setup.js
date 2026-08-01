@@ -4,8 +4,8 @@
   const suppliedHost=params.get('host')||'';
   const DEFAULT_HOST='https://commonweave-host-node.onrender.com';
   const RELEASE_KEY='commonweave.host-release-seen.v1';
-  const CURRENT_APP_VERSION='rc22.3.10';
-  const CURRENT_HOST_BUILD='1.0.10-visual-runtime-recovery';
+  const CURRENT_APP_VERSION='rc22.3.11';
+  const CURRENT_HOST_BUILD='1.0.14-visual-fit-navigation';
   const KEY='commonweave.host-node.v1';
   const NODE_KEY='commonweave.host-node-id.v1';
   let deferredInstall=null;
