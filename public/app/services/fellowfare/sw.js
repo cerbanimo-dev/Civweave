@@ -1,4 +1,4 @@
-const CACHE = 'fellowfare-0.4.5-host-cache-recovery';
+const CACHE = 'fellowfare-0.4.6-wave-two-sync';
 const SHELL = ["../../commonweave-merlin-chat.css","../../shared/commonweave-merlin-chat.js","../../assets/ai/merlin.png",
   './',
   './index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js',
@@ -38,7 +38,7 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key.startsWith('fellowfare-') && key !== CACHE).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
 });
 
 self.addEventListener('fetch', (event) => {

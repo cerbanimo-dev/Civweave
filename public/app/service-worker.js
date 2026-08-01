@@ -1,4 +1,4 @@
-const CACHE = "commonweave-pocket-campus-v60-host-cache-recovery";
+const CACHE = "commonweave-pocket-campus-v61-wave-two";
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
@@ -15,6 +15,7 @@ self.addEventListener("install", (event) => {
           "./logos/commonweave-town-square.png",
           "./assets/world/town-square-home.webp",
           "./assets/world/town-square-weaveling.webp",
+          "./assets/world/host-wave2.webp",
           "./commonweave-world.css",
           "./commonweave-world.js",
           "./commonweave-merlin-chat.css",
@@ -154,6 +155,7 @@ self.addEventListener("install", (event) => {
           "./services/anarchadia/shared/commonweave-model-runtime.js",
           "./services/fellowfare/shared/commonweave-model-runtime.js",
           "./services/living-school/index.html",
+          "./services/living-school/service-worker.js",
           "./services/living-school/commonweave-handoff-consumer.js",
           "./services/living-school/commonweave-presence.js",
           "./services/living-school/modules/bootstrap.mjs",
@@ -161,13 +163,16 @@ self.addEventListener("install", (event) => {
           "./services/living-school/modules/rubric-engine.mjs",
           "./services/living-school/modules/project-gate.mjs",
           "./services/cerbanimo/index.html",
+          "./services/cerbanimo/service-worker.js",
           "./services/cerbanimo/commonweave-handoff-consumer.js",
           "./services/cerbanimo/commonweave-presence.js",
           "./services/cerbanimo/commonweave-bridge.js",
           "./services/anarchadia/index.html",
+          "./services/anarchadia/service-worker.js",
           "./services/anarchadia/commonweave-handoff-consumer.js",
           "./services/anarchadia/commonweave-presence.js",
           "./services/fellowfare/index.html",
+          "./services/fellowfare/sw.js",
           "./services/fellowfare/commonweave-handoff-consumer.js",
           "./services/fellowfare/commonweave-presence.js",
           "./services/fellowfare/app.js",
@@ -180,7 +185,7 @@ self.addEventListener("install", (event) => {
   );
 });
 self.addEventListener("activate", (event) => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith("commonweave-pocket-campus-") && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
 });
 self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();

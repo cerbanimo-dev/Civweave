@@ -1,11 +1,11 @@
 {
   "schema": "living-school-visual-core-1.0",
-  "generatedAt": "2026-07-31T18:30:00Z",
+  "generatedAt": "2026-08-01T20:00:00Z",
   "rooms": {
     "home": {
       "image": "./visual-assets/core/home.webp",
-      "width": 863,
-      "height": 1822,
+      "width": 941,
+      "height": 2072,
       "hotspotCount": 15
     },
     "faculty": {
@@ -16,26 +16,26 @@
     },
     "observatory": {
       "image": "./visual-assets/core/observatory.webp",
-      "width": 841,
-      "height": 1870,
+      "width": 941,
+      "height": 2072,
       "hotspotCount": 16
     },
     "forge": {
       "image": "./visual-assets/core/forge.webp",
-      "width": 841,
-      "height": 1870,
+      "width": 941,
+      "height": 2072,
       "hotspotCount": 16
     },
     "project-map": {
       "image": "./visual-assets/core/project-map.webp",
       "width": 941,
-      "height": 1672,
+      "height": 2072,
       "hotspotCount": 18
     },
     "moss": {
       "image": "./visual-assets/core/moss.webp",
       "width": 941,
-      "height": 1672,
+      "height": 2072,
       "hotspotCount": 17
     },
     "commons": {
@@ -64,14 +64,14 @@
     },
     "workshop": {
       "image": "./visual-assets/core/workshop.webp",
-      "width": 841,
-      "height": 1870,
+      "width": 941,
+      "height": 2072,
       "hotspotCount": 17
     },
     "tower": {
       "image": "./visual-assets/core/tower.webp",
       "width": 941,
-      "height": 1672,
+      "height": 2072,
       "hotspotCount": 17
     },
     "archive": {
@@ -112,8 +112,8 @@
     },
     "library": {
       "image": "./visual-assets/core/library.webp",
-      "width": 841,
-      "height": 1870,
+      "width": 941,
+      "height": 2072,
       "hotspotCount": 17
     },
     "review": {
@@ -162,9 +162,9 @@
     },
     "forge": {
       "file": "./visual-assets/core/forge.webp",
-      "width": 841,
-      "height": 1870,
-      "source": "file_00000000f8a481f6b00ea991c7d96d42.png"
+      "width": 941,
+      "height": 2072,
+      "source": "second-wave-visual-overhaul"
     },
     "project-map": {
       "file": "./visual-assets/core/project-map.webp",
@@ -175,8 +175,8 @@
     "moss": {
       "file": "./visual-assets/core/moss.webp",
       "width": 941,
-      "height": 1672,
-      "source": "file_00000000356081f9b2ed071b02abae39.png"
+      "height": 2072,
+      "source": "second-wave-visual-overhaul"
     },
     "commons": {
       "file": "./visual-assets/core/commons.webp",
@@ -186,9 +186,9 @@
     },
     "home": {
       "file": "./visual-assets/core/home.webp",
-      "width": 863,
-      "height": 1822,
-      "source": "file_00000000c1f081f98e3f2ca829e4125e.png"
+      "width": 941,
+      "height": 2072,
+      "source": "second-wave-visual-overhaul"
     },
     "projects": {
       "file": "./visual-assets/core/projects.webp",
@@ -210,15 +210,15 @@
     },
     "workshop": {
       "file": "./visual-assets/core/workshop.webp",
-      "width": 841,
-      "height": 1870,
-      "source": "file_000000004d24820cafbd98e76db8877c.png"
+      "width": 941,
+      "height": 2072,
+      "source": "second-wave-visual-overhaul"
     },
     "tower": {
       "file": "./visual-assets/core/tower.webp",
       "width": 941,
-      "height": 1672,
-      "source": "file_00000000504c81f6a9939cd06b64a05b.png"
+      "height": 2072,
+      "source": "second-wave-visual-overhaul"
     },
     "archive": {
       "file": "./visual-assets/core/archive.webp",
@@ -258,9 +258,9 @@
     },
     "library": {
       "file": "./visual-assets/core/library.webp",
-      "width": 841,
-      "height": 1870,
-      "source": "file_00000000c134820c8eedad61cbfecbfe.png"
+      "width": 941,
+      "height": 2072,
+      "source": "second-wave-visual-overhaul"
     },
     "review": {
       "file": "./visual-assets/core/review.webp",

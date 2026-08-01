@@ -55,6 +55,29 @@ SHEETS = {
     "commonweave-navbar.png": (3, 1, [
         "nav-orbit-left", "commonweave-bottom-navbar", "nav-orbit-right",
     ]),
+    "ChatGPT Image Aug 1, 2026, 03_02_20 PM (1).png": (3, 2, [
+        "merlin-welcome-guide", "merlin-conversation-listening", "merlin-proposal-forge",
+        "merlin-conflict-map", "merlin-consent-decision", "merlin-automation-execution",
+    ]),
+    "ChatGPT Image Aug 1, 2026, 03_02_20 PM (2).png": (4, 3, [
+        "commons-hall", "active-plan", "proposal", "edit-plan",
+        "objection", "idea", "assembly", "evidence-review",
+        "consent-recorded", "consent-blocked", "federation", "execution-accepted",
+    ]),
+    "ChatGPT Image Aug 1, 2026, 03_02_21 PM (3).png": (4, 3, [
+        "delegation-token", "anarchadia-token", "trigger-sensor", "schedule-clock",
+        "condition-switch", "approval-gate", "consent-console", "agent-capsule",
+        "dependency-map", "audit-ledger", "handoff-portal", "rollback-control",
+    ]),
+    "ChatGPT Image Aug 1, 2026, 03_02_21 PM (4).png": (3, 4, [
+        "zine-bulletin-board", "drafting-table", "amendment-placard",
+        "debate-table", "evidence-projector", "automation-control-bench", "objection-flag-rack",
+        "appeal-podium", "federation-node-map", "execution-dispatch-board", "task-assignment-board", "anarchadia-emblem-stand",
+    ]),
+    "ChatGPT Image Aug 1, 2026, 03_02_05 PM (8).png": (5, 2, [
+        "commons-route", "control-route", "proposal-route", "assembly-route", "consent-route",
+        "federation-route", "handoff-route", "model-controls", "settings-route", "return-route",
+    ]),
 }
 
 # Object centers are measured from the supplied sheets. They are deliberately
@@ -83,6 +106,11 @@ CENTERS = {
     ],
     "commonweave-navigation-icons.png": [(.14,.24),(.38,.24),(.62,.24),(.86,.24),(.19,.72),(.50,.72),(.81,.72)],
     "commonweave-navbar.png": [(.12,.24),(.50,.67),(.88,.24)],
+    "ChatGPT Image Aug 1, 2026, 03_02_20 PM (1).png": [(.17,.25),(.50,.25),(.83,.25),(.17,.75),(.50,.75),(.83,.75)],
+    "ChatGPT Image Aug 1, 2026, 03_02_20 PM (2).png": [(.125,.17),(.375,.17),(.625,.17),(.875,.17),(.125,.50),(.375,.50),(.625,.50),(.875,.50),(.125,.83),(.375,.83),(.625,.83),(.875,.83)],
+    "ChatGPT Image Aug 1, 2026, 03_02_21 PM (3).png": [(.125,.17),(.375,.17),(.625,.17),(.875,.17),(.125,.50),(.375,.50),(.625,.50),(.875,.50),(.125,.83),(.375,.83),(.625,.83),(.875,.83)],
+    "ChatGPT Image Aug 1, 2026, 03_02_21 PM (4).png": [(.17,.12),(.50,.12),(.83,.12),(.24,.35),(.73,.35),(.25,.55),(.75,.55),(.25,.72),(.75,.72),(.17,.90),(.50,.90),(.83,.90)],
+    "ChatGPT Image Aug 1, 2026, 03_02_05 PM (8).png": [(.10,.25),(.30,.25),(.50,.25),(.70,.25),(.90,.25),(.10,.75),(.30,.75),(.50,.75),(.70,.75),(.90,.75)],
 }
 
 

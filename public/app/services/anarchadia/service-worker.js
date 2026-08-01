@@ -1,4 +1,4 @@
-const CACHE = 'anarchadia-v0.3.9-host-cache-recovery';
+const CACHE = 'anarchadia-v0.4.0-wave-two';
 const CORE = ["../../commonweave-merlin-chat.css","../../shared/commonweave-merlin-chat.js","../../assets/ai/merlin.png",
   './','./index.html','./commonweave-handoff-consumer.js','./commonweave-presence.js','./styles.css','./manifest.webmanifest',
   './src/app.js','./world-engine.js','./src/domain.js','./src/store.js','./src/ai.js','./src/export.js','./shared/commonweave-model-runtime.js',
@@ -30,7 +30,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith('anarchadia-') && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
 });
 
 self.addEventListener('fetch', event => {
