@@ -1,2 +1,0 @@
-public/app/models/smollm2-360m-instruct/onnx/*.onnx filter=lfs diff=lfs merge=lfs -text
-public/app/models/smollm2-360m-instruct/onnx/*.onnx_data filter=lfs diff=lfs merge=lfs -text
