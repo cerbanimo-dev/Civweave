@@ -2,8 +2,8 @@
 
 A deliberately small host for Commonweave. It does four jobs:
 
-1. Serves the complete Commonweave Pocket Campus PWA from `/app/`.
-2. Walks a visitor through connecting and installing it.
+1. Serves the installer, updater, and optional network gateway from `/`.
+2. Serves the installed offline-first Commonweave Pocket Campus from `/loom/` and `/lite/`.
 3. Provides a lightweight host-node API for registration, presence, relay envelopes, and acknowledgements.
 4. Offers the full offline mobile install kit as a ZIP download.
 
@@ -20,7 +20,8 @@ npm start
 Open:
 
 - Installer: `http://localhost:8787`
-- PWA: `http://localhost:8787/app/`
+- Visual PWA: `http://localhost:8787/loom/`
+- Cabinet workstations: `http://localhost:8787/lite/`
 - Health: `http://localhost:8787/api/health`
 
 For another device on your LAN, open `http://YOUR_COMPUTER_IP:8787`. The server binds to `0.0.0.0` by default.
@@ -63,3 +64,16 @@ Visual and Lite consume the same systems, rooms, capability IDs, consent rules, 
 ## v1.0.29 cabinet workstations
 
 Commonweave Lite now uses the five system cabinet artworks as its actual interface shell. All canonical rooms and capabilities render inside the cabinet projection rectangle, the physical bottom controls switch systems, and mature source tools open inside the same screen. The hierarchy remains shared with Visual Commonweave through the parity ledger. See `RELEASE-NOTES-v1.0.29.md`.
+
+
+## v1.0.30 offline-first topology repair
+
+The website and local application are distinct again:
+
+- `/` installs, updates, reports host status, and exposes optional network/seed tools.
+- `/loom/` and `/lite/` are the installed local campus renderers.
+- `/service-worker.js` owns the root PWA scope and caches the coherent local shell.
+- Hub connectivity widens gossip, federation, updates, and trade but is not required for local work.
+- Visual pages use a small counted cabinet launcher to open their matching workstation as an overlay.
+
+Cabinet images are now direct WebP assets rather than browser-decoded base64 chunks, and workstation content is clipped to the calibrated projection glass. See `RELEASE-NOTES-v1.0.30.md`.

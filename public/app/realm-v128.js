@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.28';const BUILD='1.0.28-parity-ledger-foundation';const SETTINGS_KEY='commonweave.universal-ai.v127';
+const VERSION='1.0.30';const BUILD='1.0.30-offline-mesh-cabinet-runtime';const SETTINGS_KEY='commonweave.universal-ai.v127';
 const GUIDE_ART={
   'living-school':{image:'/app/assets/ai/moss.png',artifact:'/app/assets/ai/moss-acorn.png',role:'learning guide'},
   cerbanimo:{image:'/app/assets/ai/kamiya.png',artifact:'/app/assets/ai/kamiya-gift.png',role:'questwright'},
@@ -9,7 +9,7 @@ const GUIDE_ART={
 };
 const pathParts=location.pathname.split('/').filter(Boolean);const realmId=pathParts[pathParts.indexOf('realm')+1]||'living-school';
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-const parse=(value,fallback)=>{try{return JSON.parse(value)}catch{return fallback}};
+const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const report=(kind,detail={})=>{const event={schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:BUILD,kind:`v128-realm:${kind}`,url:location.href,detail:{realm:realmId,...detail}};console.info('[CW128-REALM]',event);fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(event),keepalive:true,cache:'no-store'}).catch(()=>{});return event};
 let ledger,realm,rooms,currentRoom,toastTimer;
 function toast(message){const node=document.querySelector('#cw127-toast');node.textContent=message;node.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.hidden=true,4200)}

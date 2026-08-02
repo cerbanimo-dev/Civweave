@@ -1,58 +1,67 @@
-name: Verify Commonweave v1.0.27
+name: Verify Commonweave v1.0.30
 
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Run clean-slate checks
+      - name: Run offline-first checks
         run: npm run check
-      - name: Start clean-slate host
+      - name: Start Commonweave host
         run: |
           PORT=8787 npm start > commonweave-server.log 2>&1 &
           echo $! > commonweave-server.pid
-      - name: Inspect live route surfaces
+      - name: Inspect installer, app, worker, and seed routes
         run: |
           set -euxo pipefail
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:8787/api/health > health.json; then break; fi
             sleep 1
           done
-          grep -q '1.0.27-clean-slate-shell' health.json
-          grep -q '"appVersion":"1.0.27"' health.json
-          curl -fsS -D loom-headers.txt http://127.0.0.1:8787/loom/ -o loom.html
-          grep -qi 'x-commonweave-version: 1.0.27' loom-headers.txt
-          grep -q 'loom-v127.js' loom.html
-          grep -q 'data-realm="living-school"' loom.html
-          ! grep -q '1.0.21' loom.html
-          ! grep -q 'commonweave-pocket-campus.cwseed' loom.html
-          curl -fsS http://127.0.0.1:8787/loom/realm/fellowfare/ -o realm.html
-          grep -q 'realm-v127.js' realm.html
-          curl -fsS -D app-migration.txt http://127.0.0.1:8787/app/ -o /dev/null
-          grep -qi 'location: /loom/' app-migration.txt
-          curl -fsS -D campus-migration.txt http://127.0.0.1:8787/campus/ -o /dev/null
-          grep -qi 'location: /loom/' campus-migration.txt
+          grep -q '1.0.30-offline-mesh-cabinet-runtime' health.json
+          grep -q '"appVersion":"1.0.30"' health.json
+          curl -fsS http://127.0.0.1:8787/ -o installer.html
+          grep -q 'Install Commonweave' installer.html
+          grep -q 'install-v130.js' installer.html
+          curl -fsS -D worker-headers.txt http://127.0.0.1:8787/service-worker.js -o service-worker.js
+          grep -qi 'service-worker-allowed: /' worker-headers.txt
+          grep -q 'commonweave-static-' service-worker.js
+          grep -q 'commonweave-runtime-' service-worker.js
+          grep -q "const VERSION='1.0.30'" service-worker.js
+          curl -fsS http://127.0.0.1:8787/loom/ -o loom.html
+          grep -q 'v130-cabinet-launcher.js' loom.html
+          grep -q 'pwa-v130.js' loom.html
+          curl -fsS http://127.0.0.1:8787/lite/ -o lite.html
+          grep -q 'lite-v129-app.js' lite.html
+          curl -fsS http://127.0.0.1:8787/field/commonweave/seed -o commonweave-pocket-campus.cwseed
+          test -s commonweave-pocket-campus.cwseed
           curl -fsS http://127.0.0.1:8787/api/boot-logs > boot-logs.json
-      - name: Upload clean-slate evidence
+      - name: Upload offline-first evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v127-smoke-logs
+          name: commonweave-v130-smoke-evidence
           path: |
             commonweave-server.log
             health.json
-            loom-headers.txt
+            installer.html
+            worker-headers.txt
+            service-worker.js
             loom.html
-            realm.html
-            app-migration.txt
-            campus-migration.txt
+            lite.html
+            commonweave-pocket-campus.cwseed
             boot-logs.json

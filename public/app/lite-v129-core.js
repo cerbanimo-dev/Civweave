@@ -1,24 +1,24 @@
 'use strict';
-const VERSION='1.0.29';
+const VERSION='1.0.30';
 const WORKFLOW_KEY='commonweave.cabinet-workflow.v129';
 const SETTINGS_KEY='commonweave.universal-ai.v127';
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const $=selector=>document.querySelector(selector);
-const parse=(value,fallback)=>{try{return JSON.parse(value)}catch{return fallback}};
+const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 let ledger,state,workspace=null,toastTimer;
 const cabinetUrls=new Map();
 async function cabinetUrl(system){
   if(cabinetUrls.has(system.id))return cabinetUrls.get(system.id);
   const shell=system.interfaceShell||{};
-  const promise=(async()=>{
-    if(shell.asset)return shell.asset;
-    const parts=await Promise.all((shell.assetParts||[]).map(async url=>{const response=await fetch(url,{cache:'force-cache'});if(!response.ok)throw new Error(`Cabinet part ${url} returned ${response.status}`);return response.text()}));
-    const binary=atob(parts.join('').replace(/\s+/g,''));const bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
-    return URL.createObjectURL(new Blob([bytes],{type:shell.assetType||'image/webp'}));
-  })();
+  const promise=Promise.resolve(shell.asset||`/app/assets/cabinets/${encodeURIComponent(system.id)}.webp`);
   cabinetUrls.set(system.id,promise);return promise;
 }
-function setCabinetArt(system){const image=$('#cabinet-art');image.removeAttribute('src');cabinetUrl(system).then(url=>{if(document.documentElement.dataset.system===system.id)image.src=url}).catch(error=>{toast(`Cabinet art could not load: ${error.message}`);report('cabinet-load-failed',{system:system.id,message:error.message})})}
+function setCabinetArt(system){
+  const image=$('#cabinet-art');
+  image.removeAttribute('src');
+  image.onerror=()=>{toast(`Cabinet art could not load for ${system.name}.`);report('cabinet-load-failed',{system:system.id,src:image.src})};
+  cabinetUrl(system).then(url=>{if(document.documentElement.dataset.system===system.id){image.src=url;image.alt=`${system.name} cabinet workstation`}});
+}
 function readWorkflow(){return parse(localStorage.getItem(WORKFLOW_KEY),{wish:'',clarification:{outcome:'',context:'',constraints:''},skill:{posture:'practice',level:2},weave:null,activatedAt:null,passport:null,rewards:{acorns:0,buttons:0}})}
 function writeWorkflow(next){localStorage.setItem(WORKFLOW_KEY,JSON.stringify(next));return next}
 function workflowPatch(patch){return writeWorkflow({...readWorkflow(),...patch})}

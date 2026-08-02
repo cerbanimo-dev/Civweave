@@ -6,7 +6,7 @@
 >
 > Cabinet renderer overlay: `public/app/shared/cabinet-shells-v129.json`
 
-Commonweave now has one information architecture and two renderers. As of v1.0.29, the Lite renderer is projected through the same five cabinet shells used as in-world terminal assets:
+Commonweave now has one information architecture and two renderers. As of v1.0.30, the Lite renderer is projected through the same five cabinet shells used as in-world terminal assets:
 
 - **Visual** at `/loom/`, where rooms are illustrated scenes and capabilities open through in-world objects or projections.
 - **Lite** at `/lite/`, where the same system, room, and capability IDs appear as accessible forms, ledgers, lists, and working tools projected inside each system’s cabinet screen.
@@ -84,7 +84,7 @@ The service applications remain the working implementation sources during migrat
 ## Cabinet renderer introduced in v1.0.29
 
 - `public/app/shared/cabinet-shells-v129.json`
-- `public/app/assets/cabinets-data/*.b64` (optimized WebP cabinet payloads)
+- `public/app/assets/cabinets/*.webp` (direct validated cabinet assets)
 - `public/app/lite-v129.html` with split `lite-v129-*` style and runtime files
 - `public/app/lite-source-v129.css`
 - `server-v129.mjs`
@@ -105,3 +105,10 @@ The service applications remain the working implementation sources during migrat
 - `Current integrated Commonweave`: Commonweave-main.zip 1.0.27
 - `Service reference bundle`: services(1).zip 
 - `GitHub source of truth`: cerbanimo-dev/Commonweave main
+
+
+## v1.0.30 visual-to-workstation convention
+
+Visual rooms no longer navigate automatically into Lite. Each page presents a small cabinet near the bottom center. Its screen reports the number of mapped workstation interactions in the current visual context. Activating it opens the matching Lite system and room as an overlay, while the illustrated room remains in place behind it.
+
+The workstation projection is a strict containment boundary. Content may scroll inside the glass but must not overflow across the cabinet art.
