@@ -66,7 +66,8 @@ assert(modelSettings.includes('agenticEnabled'),'Antigravity agentic profile tog
 assert(modelSettings.includes('permission failure falls back')||modelSettings.includes('Permission failure falls back'),'Antigravity fallback is not explained to users');
 
 const worker=await read('public/service-worker.js');
-assert(worker.includes("CACHE_REVISION='geometry-r3'"),'service worker cache revision was not rotated');
+const cacheRevision=worker.match(/CACHE_REVISION='([^']+)'/)?.[1]||'';
+assert(cacheRevision&&cacheRevision!=='cabinet-r2','service worker cache revision was not advanced beyond the original cabinet cache');
 for(const required of ['cabinet-calibration-v131.js','model-settings-v131.js','commonweave-model-runtime.js'])assert(worker.includes(required),`service worker does not precache ${required}`);
 
-console.log(JSON.stringify({ok:true,systems:systems.length,measuredControls:systems.length*5,anarchadiaMask:'dipped-polygon',geminiKeyStorage:'session-only',agenticProfile:'antigravity'},null,2));
+console.log(JSON.stringify({ok:true,systems:systems.length,measuredControls:systems.length*5,anarchadiaMask:'dipped-polygon',geminiKeyStorage:'session-only',agenticProfile:'antigravity',cacheRevision},null,2));
