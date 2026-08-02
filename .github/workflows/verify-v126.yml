@@ -1,0 +1,59 @@
+name: Verify Commonweave v1.0.26
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: npm run check
+      - name: Start diagnostic host
+        run: |
+          PORT=8787 npm start > commonweave-server.log 2>&1 &
+          echo $! > commonweave-server.pid
+      - name: Wait for host and inspect version surfaces
+        run: |
+          set -euxo pipefail
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8787/api/health > health.json; then break; fi
+            sleep 1
+          done
+          cat health.json
+          grep -q '1.0.26-loop-diagnostics' health.json
+          grep -q '"appVersion":"1.0.26"' health.json
+          curl -fsS -D campus-headers.txt http://127.0.0.1:8787/campus/ -o campus.html
+          grep -qi 'x-commonweave-version: 1.0.26' campus-headers.txt
+          grep -q 'boot-diagnostics-v126.js' campus.html
+          grep -q 'host-node-setup-v126.js' campus.html
+          if grep -q 'location.reload()' campus.html; then
+            echo 'Automatic reload survived in the isolated campus HTML' >&2
+            exit 1
+          fi
+          curl -fsS http://127.0.0.1:8787/campus/version.json > version.json
+          grep -q '"version": "1.0.26"' version.json
+          curl -fsSI http://127.0.0.1:8787/app/ > migration-headers.txt
+          grep -qi 'location: /campus/' migration-headers.txt
+          curl -fsS http://127.0.0.1:8787/api/boot-logs > boot-logs.json
+          cat boot-logs.json
+      - name: Upload diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: commonweave-v126-smoke-logs
+          path: |
+            commonweave-server.log
+            health.json
+            version.json
+            campus-headers.txt
+            campus.html
+            migration-headers.txt
+            boot-logs.json
