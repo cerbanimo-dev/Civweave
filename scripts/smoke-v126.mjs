@@ -34,6 +34,7 @@ try {
   const health = await waitForHealth();
   assert(health.build === '1.0.26-loop-diagnostics', `unexpected health build: ${health.build}`);
   assert(health.appVersion === '1.0.26', `unexpected app version: ${health.appVersion}`);
+  assert(String(health.release?.appUrl || '').includes('/campus/'), `release appUrl did not migrate: ${health.release?.appUrl}`);
 
   const campusResponse = await fetch(`${origin}/campus/`, { cache: 'no-store' });
   const campusHtml = await campusResponse.text();
