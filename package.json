@@ -1,6 +1,6 @@
 {
   "name": "commonweave-host-node-hub",
-  "version": "1.0.25",
+  "version": "1.0.26",
   "private": true,
   "description": "Offline-first Commonweave PWA installer and lightweight host node relay.",
   "type": "module",
@@ -8,10 +8,10 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node server-v125.mjs",
-    "dev": "node --watch server-v125.mjs",
-    "check": "node --check server-v125.mjs && node --check server.mjs && node --check scripts/patch-v125.mjs",
+    "start": "node server-v126.mjs",
+    "dev": "node --watch server-v126.mjs",
+    "check": "node --check server-v126.mjs && node --check server.mjs && node --check public/app/boot-diagnostics-v126.js && node --check public/app/host-node-setup-v126.js && node --check public/app/service-worker-v126.js",
     "build:install": "bash scripts/build-install-artifacts.sh",
-    "build:release": "node scripts/patch-v125.mjs && npm run build:install"
+    "build:release": "npm run check && npm run build:install"
   }
 }
