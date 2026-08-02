@@ -39,7 +39,9 @@ jobs:
           grep -q 'install-v130.js' installer.html
           curl -fsS -D worker-headers.txt http://127.0.0.1:8787/service-worker.js -o service-worker.js
           grep -qi 'service-worker-allowed: /' worker-headers.txt
-          grep -q 'commonweave-local-v130' service-worker.js
+          grep -q 'commonweave-static-' service-worker.js
+          grep -q 'commonweave-runtime-' service-worker.js
+          grep -q "const VERSION='1.0.30'" service-worker.js
           curl -fsS http://127.0.0.1:8787/loom/ -o loom.html
           grep -q 'v130-cabinet-launcher.js' loom.html
           grep -q 'pwa-v130.js' loom.html
