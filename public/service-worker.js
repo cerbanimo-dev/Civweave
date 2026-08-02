@@ -1,6 +1,6 @@
 'use strict';
 const VERSION='1.0.30';
-const CACHE_REVISION='geometry-r3';
+const CACHE_REVISION='visual-ai-r4';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
 const CABINET_PREFIX='/app/assets/cabinets/';
@@ -10,6 +10,7 @@ const CORE=[
   '/app/manifest.webmanifest',
   '/app/loom-v128.css','/app/loom-v128.js','/app/realm-v128.js',
   '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js',
+  '/app/visual-model-settings-v132.css','/app/visual-model-settings-v132.js',
   '/app/v130-cabinet-launcher.css','/app/v130-cabinet-launcher.js',
   '/app/pwa-v130.css','/app/pwa-v130.js',
   '/app/lite-v129.html','/app/lite-v129-base.css','/app/lite-v129-components.css','/app/lite-v129-themes.css','/app/lite-source-v129.css',
