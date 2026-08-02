@@ -1,0 +1,26 @@
+{
+  "schema": "commonweave.semantic-model-package.v1",
+  "id": "Xenova/all-MiniLM-L6-v2",
+  "localId": "all-minilm-l6-v2",
+  "displayName": "MiniLM Semantic Reflex",
+  "parameterCount": 22700000,
+  "embeddingDimensions": 384,
+  "role": "local semantic retrieval, intent matching, and immediate fallback composition",
+  "task": "feature-extraction",
+  "format": "transformers-js-local-onnx",
+  "adapter": "/app/models/all-minilm-l6-v2/adapter.js",
+  "worker": "/app/models/all-minilm-l6-v2/worker.js",
+  "index": "/app/models/all-minilm-l6-v2/reflex-index.json",
+  "modelRoot": "/app/models/all-minilm-l6-v2",
+  "webgpuGraph": "/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx",
+  "wasmGraph": "/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx",
+  "remoteDownloadsAllowed": false,
+  "license": "Apache-2.0",
+  "behavior": {
+    "canonicalRoutingOwnedByApplication": true,
+    "tokenGeneration": false,
+    "lexicalFallbackAlwaysAvailable": true,
+    "semanticPrewarm": "idle",
+    "maximumInteractiveSemanticWaitMs": 350
+  }
+}
