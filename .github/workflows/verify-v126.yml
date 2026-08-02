@@ -53,7 +53,7 @@ jobs:
           grep -q 'install-v130.js' installer.html
           curl -fsS -D worker-headers.txt http://127.0.0.1:8787/service-worker.js -o service-worker.js
           grep -qi 'service-worker-allowed: /' worker-headers.txt
-          grep -q "CACHE_REVISION='anarchadia-console-r15'" service-worker.js
+          grep -q "CACHE_REVISION='anarchadia-interior-r16'" service-worker.js
           grep -q '/app/models/all-minilm-l6-v2/tokenizer.json' service-worker.js
           grep -q '/app/anarchadia-console-v139.html' service-worker.js
           grep -q '/app/anarchadia-console-v139.css' service-worker.js
@@ -66,12 +66,20 @@ jobs:
           grep -q 'minilm-reflex-runtime-v138.js?v=reflex-r1' lite.html
           if grep -q 'smollm2-fallback-runtime' lite.html; then exit 1; fi
           curl -fsS http://127.0.0.1:8787/app/anarchadia-console-v139.html -o anarchadia-console.html
-          grep -q 'ANARCHADIA // CITIZEN CONSOLE' anarchadia-console.html
+          grep -q '>ANARCHADIA<' anarchadia-console.html
+          grep -q '// CITIZEN CONSOLE' anarchadia-console.html
+          grep -q 'ac-display' anarchadia-console.html
+          grep -q 'ac-console-bar' anarchadia-console.html
           grep -q 'BUGFIX REQUEST' anarchadia-console.html
           grep -q 'FEATURE REQUEST' anarchadia-console.html
           grep -q 'OPEN HUB BALLOT' anarchadia-console.html
           curl -fsS http://127.0.0.1:8787/app/anarchadia-console-v139.css -o anarchadia-console.css
-          grep -q '/app/assets/cabinets/anarchadia.webp' anarchadia-console.css
+          if grep -q '/app/assets/cabinets/anarchadia.webp' anarchadia-console.css; then
+            echo 'Citizen Console incorrectly renders a second cabinet exterior' >&2
+            exit 1
+          fi
+          grep -q '.ac-display' anarchadia-console.css
+          grep -q '.ac-console-bar' anarchadia-console.css
           grep -q -- '--pink:#ff2f87' anarchadia-console.css
           curl -fsS http://127.0.0.1:8787/app/anarchadia-console-v139.js -o anarchadia-console.js
           grep -q 'code-generation' anarchadia-console.js
@@ -118,7 +126,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v130-anarchadia-console-evidence
+          name: commonweave-v130-anarchadia-interior-evidence
           path: |
             commonweave-server.log
             health.json
