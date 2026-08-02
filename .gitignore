@@ -1,4 +1,5 @@
 node_modules/
+public/app/vendor/transformers/
 data/*.json
 data/*.tmp
 .DS_Store

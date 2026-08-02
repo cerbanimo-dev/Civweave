@@ -1,6 +1,6 @@
 'use strict';
 const VERSION='1.0.30';
-const CACHE_REVISION='micro-ai-r5';
+const CACHE_REVISION='smollm2-onboard-r6';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
 const CABINET_PREFIX='/app/assets/cabinets/';
@@ -10,10 +10,12 @@ const CORE=[
   '/loom/realm/living-school/','/loom/realm/cerbanimo/','/loom/realm/fellowfare/','/loom/realm/anarchadia/',
   '/app/manifest.webmanifest',
   '/app/loom-v128.css','/app/loom-v128.js','/app/realm-v128.js',
-  '/app/weaveling-hologram-v133.css','/app/assistant-runtime-v133.js',
+  '/app/weaveling-hologram-v133.css','/app/assistant-runtime-v133.js','/app/smollm2-fallback-runtime-v134.js',
   '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js',
   '/app/model-settings-v133.css','/app/model-settings-v133.js','/app/lite-model-settings-v133.js',
-  '/app/models/functiongemma-270m-it/model-manifest.json','/app/models/functiongemma-270m-it/adapter.js',
+  '/app/models/smollm2-360m-instruct/model-manifest.json','/app/models/smollm2-360m-instruct/adapter.js','/app/models/smollm2-360m-instruct/worker.js',
+  '/app/models/smollm2-360m-instruct/config.json','/app/models/smollm2-360m-instruct/generation_config.json','/app/models/smollm2-360m-instruct/tokenizer_config.json','/app/models/smollm2-360m-instruct/special_tokens_map.json',
+  '/app/vendor/transformers/transformers.min.js','/app/vendor/transformers/stage-manifest.json',
   '/app/v130-cabinet-launcher.css','/app/v130-cabinet-launcher.js',
   '/app/pwa-v130.css','/app/pwa-v130.js',
   '/app/lite-v129.html','/app/lite-v129-base.css','/app/lite-v129-components.css','/app/lite-v129-themes.css','/app/lite-source-v129.css',
@@ -29,7 +31,7 @@ const CORE=[
   '/offline.html'
 ];
 const report=async(kind,detail={})=>{
-  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-micro-ai-routing-hologram',kind:`service-worker:${kind}`,detail})})}catch{}
+  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-smollm2-onboard',kind:`service-worker:${kind}`,detail})})}catch{}
 };
 async function cacheOne(cache,url){
   try{const response=await fetch(url,{cache:'reload'});if(response.ok)await cache.put(url,response.clone());return response.ok}catch{return false}
@@ -57,7 +59,7 @@ async function networkFirst(request,fallback){
       fetch(request),
       new Promise((_,reject)=>setTimeout(()=>reject(new Error('network timeout')),3500))
     ]);
-    if(response?.ok)await cache.put(request,response.clone());
+    if(response?.ok&&request.method==='GET')await cache.put(request,response.clone());
     return response;
   }catch{
     return (await cache.match(request))||(fallback?await caches.match(fallback):null)||new Response('Offline',{status:503,headers:{'content-type':'text/plain'}});
@@ -67,12 +69,12 @@ async function cacheFirst(request){
   const cached=await caches.match(request);
   if(cached)return cached;
   const response=await fetch(request);
-  if(response.ok){const cache=await caches.open(RUNTIME_CACHE);await cache.put(request,response.clone())}
+  if(response.ok&&request.method==='GET'){const cache=await caches.open(RUNTIME_CACHE);await cache.put(request,response.clone())}
   return response;
 }
 self.addEventListener('fetch',event=>{
   const request=event.request;
-  if(request.method!=='GET')return;
+  if(!['GET','HEAD'].includes(request.method))return;
   const url=new URL(request.url);
   if(url.origin!==self.location.origin)return;
   if(url.pathname.startsWith('/api/'))return;
@@ -89,11 +91,17 @@ self.addEventListener('fetch',event=>{
     return;
   }
   if(url.pathname.startsWith(MODEL_PREFIX)){
-    const mutable=/\/(model-manifest\.json|adapter\.js)$/.test(url.pathname);
+    const mutable=/\/(model-manifest\.json|adapter\.js|worker\.js)$/.test(url.pathname);
+    if(request.method==='HEAD'){
+      event.respondWith((async()=>{
+        const cached=await caches.match(new Request(request.url,{method:'GET'}));
+        if(cached)return new Response(null,{status:200,headers:cached.headers});
+        return fetch(request,{cache:'no-cache'});
+      })());
+      return;
+    }
     event.respondWith(mutable?networkFirst(new Request(request,{cache:'no-cache'})):cacheFirst(request));
     return;
   }
-  if(url.pathname.startsWith('/app/')||url.pathname.startsWith('/downloads/')){
-    event.respondWith(cacheFirst(request));
-  }
+  if(url.pathname.startsWith('/app/')||url.pathname.startsWith('/downloads/'))event.respondWith(cacheFirst(request));
 });
