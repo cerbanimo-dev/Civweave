@@ -1,16 +1,65 @@
-const CACHE='commonweave-pocket-campus-v70-realm-recovery';
-const CORE=[
-'./','./index.html','./manifest.webmanifest','./version.json','./host-node-setup.js','./commonweave-world.css','./commonweave-world.js','./commonweave-living-world.js','./commonweave-weaveling-steward.js','./commonweave-intention-orchestrator.js','./commonweave-actionable-quad.js','./commonweave-merlin-chat.css','./shared/commonweave-ai-personas.js','./shared/commonweave-merlin-chat.js','./shared/commonweave-model-runtime.js','./shared/image-hotspot-calibrator.js','./shared/visual-shell-cleanup.css','./shared/visual-shell-cleanup.js',
-'./logos/commonweave.webp','./logos/commonweave-icon-96.png','./logos/living-school.webp','./logos/fellowfare.png','./logos/anarchadia.webp','./ui-icons/back.svg','./ui-icons/home.svg','./ui-icons/map.svg','./ui-icons/settings.svg','./assets/ai/weaveling-compass.png','./assets/ai/weaveling.png','./assets/ai/kamiya.png','./assets/ai/rook.png','./assets/ai/merlin.png','./assets/world/town-square-home.webp','./assets/world/inside-quad.webp',
-'./assets/generated/commonweave-navigation-icons/commonweave-home.png','./assets/generated/commonweave-navigation-icons/commonweave-route.png','./assets/generated/commonweave-navigation-icons/commonweave-realms.png','./assets/generated/commonweave-navigation-icons/weaveling-compass.png','./assets/generated/commonweave-navigation-icons/commonweave-ai-config.png',
-'./services/living-school/index.html','./services/living-school/visual-assets/core/home.webp','./services/living-school/visual-assets/core/moss.webp','./services/living-school/visual-assets/core/forge.webp','./services/living-school/visual-assets/core/library.webp','./services/living-school/visual-assets/core/workshop.webp','./services/living-school/visual-assets/core/tower.webp',
-'./services/cerbanimo/index.html','./services/cerbanimo/assets/cerbanimo-wordmark.png','./services/cerbanimo/assets/visual/nexus.webp','./services/cerbanimo/assets/visual/mission.webp','./services/cerbanimo/assets/visual/workshop.webp','./services/cerbanimo/assets/visual/quest.webp','./services/cerbanimo/assets/visual/observatory.webp','./services/cerbanimo/assets/visual/ai-core.webp',
-'./services/fellowfare/index.html','./services/fellowfare/assets/mall/exchange-galleria.webp','./services/fellowfare/assets/mall/marketplace.webp','./services/fellowfare/assets/mall/main-atrium.webp','./services/fellowfare/assets/mall/makers-arcade.webp','./services/fellowfare/assets/mall/resource-center.webp','./services/fellowfare/assets/mall/upper-gallery.webp',
-'./services/anarchadia/index.html','./services/anarchadia/assets/screens/home-portrait.webp','./services/anarchadia/assets/screens/rails-portrait.webp','./services/anarchadia/assets/screens/proposal-portrait.webp','./services/anarchadia/assets/screens/hub-portrait.webp','./services/anarchadia/assets/screens/ledger-portrait.webp','./services/anarchadia/assets/screens/federation-portrait.webp'
+const VERSION='1.0.25';
+const CACHE='commonweave-pocket-campus-v72-freeze-recovery';
+const CRITICAL=[
+  './','./index.html','./manifest.webmanifest','./version.json','./host-node-setup.js','./host-node-v125.js',
+  './commonweave-world.css','./commonweave-world.js','./commonweave-merlin-chat.css',
+  './shared/commonweave-model-runtime.js','./shared/commonweave-ai-personas.js','./shared/commonweave-merlin-chat.js',
+  './logos/commonweave.webp','./logos/commonweave-icon-96.png','./assets/ai/weaveling.png','./assets/world/town-square-home.webp',
+  './assets/generated/commonweave-navigation-icons/commonweave-home.png',
+  './assets/generated/commonweave-navigation-icons/commonweave-route.png',
+  './assets/generated/commonweave-navigation-icons/commonweave-realms.png',
+  './assets/generated/commonweave-navigation-icons/weaveling-compass.png',
+  './assets/generated/commonweave-navigation-icons/commonweave-ai-config.png'
 ];
-self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);await Promise.allSettled([...new Set(CORE)].map(url=>cache.add(new Request(url,{cache:'reload'}))));await self.skipWaiting()})()));
-self.addEventListener('activate',event=>event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(key=>(key.startsWith('commonweave-pocket-campus-')||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key))&&key!==CACHE).map(key=>caches.delete(key)));await self.clients.claim()})()));
+self.addEventListener('install',event=>event.waitUntil((async()=>{
+  const cache=await caches.open(CACHE);
+  await Promise.allSettled([...new Set(CRITICAL)].map(url=>cache.add(new Request(url,{cache:'reload'}))));
+  await self.skipWaiting();
+})()));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{
+  const keys=await caches.keys();
+  await Promise.allSettled(keys.filter(key=>(key.startsWith('commonweave-pocket-campus-')||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key))&&key!==CACHE).map(key=>caches.delete(key)));
+  await self.clients.claim();
+  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+  clients.forEach(client=>client.postMessage({type:'COMMONWEAVE_WORKER_ACTIVE',version:VERSION,cache:CACHE}));
+})()));
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
-async function inject(response,request){if(request.mode!=='navigate'||!new URL(request.url).pathname.includes('/services/'))return response;const type=response.headers.get('content-type')||'';if(!type.includes('text/html'))return response;let text=await response.text();const scope=self.registration.scope;if(!text.includes('cw-authoritative-visual-guard'))text=text.replace('</head>',`<style id="cw-authoritative-visual-guard">.app-update-banner,[data-app-update-banner],[class*="update-banner"],.cw-release-banner{display:none!important}</style><link rel="stylesheet" href="${scope}shared/visual-shell-cleanup.css"></head>`);if(!text.includes('visual-shell-cleanup.js'))text=text.replace('</body>',`<script src="${scope}shared/visual-shell-cleanup.js"></script></body>`);return new Response(text,{status:response.status,statusText:response.statusText,headers:response.headers})}
-async function cached(request){const cache=await caches.open(CACHE);const hit=await cache.match(request,{ignoreSearch:true});const update=fetch(request,{cache:'no-store'}).then(response=>{if(response.ok)cache.put(request,response.clone());return response}).catch(()=>null);if(hit){update.catch(()=>{});return inject(hit,request)}const response=await update;if(response)return inject(response,request);if(request.mode==='navigate'){const path=new URL(request.url).pathname;const fallback=path.includes('/services/living-school/')?'./services/living-school/index.html':path.includes('/services/cerbanimo/')?'./services/cerbanimo/index.html':path.includes('/services/fellowfare/')?'./services/fellowfare/index.html':path.includes('/services/anarchadia/')?'./services/anarchadia/index.html':'./index.html';const page=await cache.match(fallback,{ignoreSearch:true});if(page)return inject(page,request)}return new Response('Commonweave is offline and this asset was not cached.',{status:503,headers:{'content-type':'text/plain'}})}
-self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;const url=new URL(request.url);if(url.origin!==self.location.origin)return;if(/^\/(api|field|ollama|compatible|bigmoe|gemini|party|packaged)\//.test(url.pathname))return;event.respondWith(cached(request))});
+function isHubNavigation(request){if(request.mode!=='navigate')return false;const path=new URL(request.url).pathname;return path.endsWith('/app/')||path.endsWith('/app/index.html')}
+async function rewriteHub(response,request){
+  if(!isHubNavigation(request))return response;
+  const type=response.headers.get('content-type')||'';if(!type.includes('text/html'))return response;
+  let text=await response.text();
+  text=text.replaceAll('1.0.21-ai-uplift','1.0.25-freeze-recovery').replaceAll('HOST v1.0.21','HOST v1.0.25');
+  const headers=new Headers(response.headers);headers.delete('content-length');headers.set('cache-control','no-store');headers.set('x-commonweave-recovery','1.0.25');
+  return new Response(text,{status:response.status,statusText:response.statusText,headers});
+}
+function timeout(ms){return new Promise((_,reject)=>setTimeout(()=>reject(new Error('network-timeout')),ms))}
+async function fetchFresh(request){return Promise.race([fetch(request,{cache:'no-store'}),timeout(request.mode==='navigate'?7000:12000)])}
+async function networkFirst(request){
+  const cache=await caches.open(CACHE);
+  try{
+    const response=await fetchFresh(request);
+    if(response?.ok){const rewritten=await rewriteHub(response,request);cache.put(request,rewritten.clone()).catch(()=>{});return rewritten}
+  }catch{}
+  const hit=await cache.match(request,{ignoreSearch:true});if(hit)return rewriteHub(hit,request);
+  if(request.mode==='navigate'){
+    const path=new URL(request.url).pathname;
+    const fallback=path.includes('/services/living-school/')?'./services/living-school/index.html':path.includes('/services/cerbanimo/')?'./services/cerbanimo/index.html':path.includes('/services/fellowfare/')?'./services/fellowfare/index.html':path.includes('/services/anarchadia/')?'./services/anarchadia/index.html':'./index.html';
+    const page=await cache.match(fallback,{ignoreSearch:true});if(page)return rewriteHub(page,request)
+  }
+  return new Response('Commonweave is offline and this resource is not in the recovery cache.',{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store'}})
+}
+async function imageFirst(request){
+  const cache=await caches.open(CACHE),hit=await cache.match(request,{ignoreSearch:true});
+  const refresh=fetch(request,{cache:'no-store'}).then(response=>{if(response.ok)cache.put(request,response.clone());return response}).catch(()=>null);
+  if(hit){refresh.catch(()=>{});return hit}const response=await refresh;if(response)return response;
+  return new Response('',{status:404})
+}
+self.addEventListener('fetch',event=>{
+  const request=event.request;if(request.method!=='GET')return;
+  const url=new URL(request.url);if(url.origin!==self.location.origin)return;
+  if(/^\/(api|field|ollama|compatible|bigmoe|gemini|party|packaged)\//.test(url.pathname))return;
+  if(request.mode==='navigate'||['script','style','document','manifest','worker'].includes(request.destination)||/\.(?:js|css|json|webmanifest)$/i.test(url.pathname)){event.respondWith(networkFirst(request));return}
+  if(request.destination==='image'||/\.(?:png|jpe?g|webp|svg|gif|avif)$/i.test(url.pathname)){event.respondWith(imageFirst(request));return}
+  event.respondWith(networkFirst(request));
+});
