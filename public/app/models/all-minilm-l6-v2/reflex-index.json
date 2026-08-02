@@ -1,0 +1,92 @@
+{
+  "schema": "commonweave.reflex-index.v1",
+  "entries": [
+    {
+      "id": "mutual-aid-food-network",
+      "system": "commonweave",
+      "mode": "Reflect",
+      "embeddingText": "organize friends into a mutual aid network, community care circle, local food system, shared pantry, community garden, food cooperative, buying club, produce exchange, neighbors helping neighbors",
+      "keywords": ["mutual aid", "friends", "network", "local food", "food sources", "community garden", "shared pantry", "cooperative", "neighbors"],
+      "answer": "You want to turn a group of friends into a dependable mutual-aid network with stronger local food access. That crosses coordination, exchange, learning, and practical work, so Commonweave should hold the whole intention while each realm owns a clear piece. Start with one pilot people can actually maintain rather than designing the entire network at once.",
+      "nextAction": "Invite three to five people to a 45-minute mapping session where each person names one need, one offer, and one food project they would reliably help maintain.",
+      "subplans": [
+        "Anarchadia: agree on participation, consent, responsibilities, and conflict handling.",
+        "FellowFare: map food sources, tools, transport, storage, offers, and needs.",
+        "Living School: identify growing, preserving, cooking, organizing, and food-safety knowledge gaps.",
+        "Cerbanimo: launch one pilot such as a shared pantry, garden plot, buying club, or produce exchange."
+      ]
+    },
+    {
+      "id": "prioritize-projects",
+      "system": "commonweave",
+      "mode": "Reflect",
+      "embeddingText": "too many projects, overwhelmed, decide priorities, choose what deserves attention, coordinate multiple goals, plan next steps",
+      "keywords": ["too many", "prioritize", "priority", "which project", "overwhelmed", "what next"],
+      "answer": "You need a priority decision before you need another task list. Commonweave can compare the projects by urgency, dependency, energy, and visible payoff, then keep only one active lead intention.",
+      "nextAction": "List the projects and mark which one prevents harm, unlocks other work, or can show visible progress within seven days."
+    },
+    {
+      "id": "learning-path",
+      "system": "living-school",
+      "mode": "Learn",
+      "embeddingText": "learn, understand, study, practice, research, curriculum, lesson, gain knowledge, develop a skill, read results, watershed testing",
+      "keywords": ["learn", "understand", "study", "practice", "research", "teach", "curriculum", "lesson"],
+      "answer": "This is primarily a learning intention. Living School should turn it into a short progression from explanation to guided practice to evidence that you can use the skill independently.",
+      "nextAction": "Name the real-world task you want to perform after learning, then gather one example you can practice on."
+    },
+    {
+      "id": "build-repair-project",
+      "system": "cerbanimo",
+      "mode": "Build",
+      "embeddingText": "build, repair, make, implement, code, design, skilled work, finish a project, greenhouse vent, prove work is complete",
+      "keywords": ["build", "repair", "make", "implement", "code", "design", "project", "fix"],
+      "answer": "This belongs in Cerbanimo as a concrete skilled-work quest. The work should be split into a visible result, checkpoints, needed tools or knowledge, and proof that the result functions.",
+      "nextAction": "Define the smallest observable result that would count as done, then photograph or record the starting condition."
+    },
+    {
+      "id": "resource-exchange",
+      "system": "fellowfare",
+      "mode": "Acquire",
+      "embeddingText": "obtain materials, borrow equipment, trade resources, buy supplies, sell offer need inventory delivery reclaimed boards trailer",
+      "keywords": ["borrow", "trade", "buy", "sell", "materials", "resources", "boards", "trailer", "obtain", "need"],
+      "answer": "This is a FellowFare exchange problem. Make the need specific, separate borrowing from permanent acquisition, and state the trust and return conditions before searching for matches.",
+      "nextAction": "Create one need card listing quantity, acceptable condition, pickup range, deadline, and what can be offered or guaranteed in return."
+    },
+    {
+      "id": "governance-proposal",
+      "system": "anarchadia",
+      "mode": "Govern",
+      "embeddingText": "community proposal, policy, voting, shared rules, collective decision, neighborhood approval, consent, governance, assembly",
+      "keywords": ["proposal", "policy", "vote", "voting", "rule", "approval", "consent", "community decision"],
+      "answer": "This is an Anarchadia governance question. The decision needs a clear scope, affected participants, consent threshold, objection path, and review date before anyone is asked to approve it.",
+      "nextAction": "Draft one sentence stating exactly what decision is being made and who is directly affected by it."
+    },
+    {
+      "id": "community-organizing",
+      "system": "anarchadia",
+      "mode": "Govern",
+      "embeddingText": "organize a group, coordinate volunteers, create a community network, shared responsibilities, mutual aid governance, working together fairly",
+      "keywords": ["organize", "group", "volunteers", "community", "together", "responsibilities"],
+      "answer": "The group needs a lightweight agreement before it needs bureaucracy. Clarify the shared purpose, what participation actually asks of people, and how commitments can be changed without shame or hidden pressure.",
+      "nextAction": "Invite the first participants to confirm one shared purpose and one commitment they can realistically keep for four weeks."
+    },
+    {
+      "id": "food-growing-skill",
+      "system": "living-school",
+      "mode": "Learn",
+      "embeddingText": "learn gardening, grow food, soil, seed starting, preservation, cooking, food safety, local agriculture knowledge",
+      "keywords": ["gardening", "grow food", "soil", "seeds", "preserve", "food safety"],
+      "answer": "Living School can build the knowledge path around the exact food practice you plan to use, avoiding a sprawling agriculture curriculum that never reaches the soil.",
+      "nextAction": "Choose one crop or food practice and identify the next seasonal decision you must make correctly."
+    },
+    {
+      "id": "food-project-build",
+      "system": "cerbanimo",
+      "mode": "Build",
+      "embeddingText": "build community garden beds, pantry shelves, compost system, greenhouse, irrigation, food storage, practical local food infrastructure",
+      "keywords": ["garden beds", "pantry shelves", "compost", "greenhouse", "irrigation", "food storage"],
+      "answer": "Cerbanimo should turn the food idea into a buildable pilot with a site, dimensions, materials, labor checkpoints, and a maintenance owner.",
+      "nextAction": "Choose one physical pilot and measure the actual space or capacity it must serve."
+    }
+  ]
+}
