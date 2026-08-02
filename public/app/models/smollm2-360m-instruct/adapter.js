@@ -3,6 +3,7 @@ const LOCAL_ID = 'smollm2-360m-instruct';
 const MODEL_ROOT = '/app/models/smollm2-360m-instruct';
 const WORKER_URL = `${MODEL_ROOT}/worker.js`;
 const VENDOR_MODULE = '/app/vendor/transformers/transformers.min.js';
+const BODY_PROBE_LIMIT = 5_000_000;
 const REQUIRED = [
   { url: `${MODEL_ROOT}/config.json`, minBytes: 200 },
   { url: `${MODEL_ROOT}/tokenizer.json`, minBytes: 100000 },
@@ -64,19 +65,47 @@ function getWorker() {
   return worker;
 }
 
+async function measuredLength(response, minBytes) {
+  const headerLength = Number(response.headers.get('content-length') || 0);
+  if (headerLength > 0) return { length: headerLength, measuredBy: 'content-length' };
+  if (minBytes > BODY_PROBE_LIMIT) return { length: 0, measuredBy: 'header-missing' };
+  const blob = await response.clone().blob();
+  return { length: blob.size, measuredBy: 'body-size' };
+}
+
+async function purgeCachedUrl(url) {
+  if (!('caches' in globalThis)) return;
+  for (const cacheName of await caches.keys()) {
+    try { await (await caches.open(cacheName)).delete(url); } catch {}
+  }
+}
+
 async function inspect(spec) {
   const { url, minBytes } = spec;
   try {
     const cached = 'caches' in globalThis ? await caches.match(url) : null;
     if (cached) {
-      const length = Number(cached.headers.get('content-length') || 0);
-      return { url, ok: cached.ok && length >= minBytes, status: cached.status, length, minBytes, source: 'cache' };
+      const measured = await measuredLength(cached, minBytes);
+      if (cached.ok && measured.length >= minBytes) {
+        return { url, ok: true, status: cached.status, ...measured, minBytes, source: 'cache' };
+      }
+      if (measured.length > 0 && measured.length < minBytes) await purgeCachedUrl(url);
     }
-    const response = await fetch(url, { method: 'HEAD', cache: 'no-store' });
-    const length = Number(response.headers.get('content-length') || 0);
-    return { url, ok: response.ok && length >= minBytes, status: response.status, length, minBytes, source: 'network' };
+
+    const head = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+    let measured = await measuredLength(head, minBytes);
+    let source = 'network-head';
+
+    if (head.ok && measured.length === 0 && minBytes <= BODY_PROBE_LIMIT) {
+      const bodyResponse = await fetch(url, { method: 'GET', cache: 'no-store' });
+      measured = await measuredLength(bodyResponse, minBytes);
+      source = 'network-body';
+      return { url, ok: bodyResponse.ok && measured.length >= minBytes, status: bodyResponse.status, ...measured, minBytes, source };
+    }
+
+    return { url, ok: head.ok && measured.length >= minBytes, status: head.status, ...measured, minBytes, source };
   } catch (error) {
-    return { url, ok: false, status: 0, length: 0, minBytes, source: 'error', error: error.message };
+    return { url, ok: false, status: 0, length: 0, minBytes, source: 'error', measuredBy: 'error', error: error.message };
   }
 }
 

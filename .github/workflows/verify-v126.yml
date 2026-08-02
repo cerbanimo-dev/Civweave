@@ -49,10 +49,10 @@ jobs:
           grep -q 'commonweave-static-' service-worker.js
           grep -q 'commonweave-runtime-' service-worker.js
           grep -q "const VERSION='1.0.30'" service-worker.js
-          grep -q "CACHE_REVISION='smollm2-onboard-r6'" service-worker.js
+          grep -q "CACHE_REVISION='smollm2-probe-r7'" service-worker.js
           curl -fsS http://127.0.0.1:8787/loom/ -o loom.html
           grep -q 'smollm2-fallback-runtime-v134.js' loom.html
-          grep -q 'weaveling-hologram-v133.css' loom.html
+          grep -q 'weaveling-hologram-v133.css?v=heart-r7' loom.html
           grep -q 'v130-cabinet-launcher.js' loom.html
           grep -q 'pwa-v130.js' loom.html
           curl -fsS http://127.0.0.1:8787/lite/ -o lite.html
