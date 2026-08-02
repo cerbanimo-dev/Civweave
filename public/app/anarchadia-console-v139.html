@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05070b">
+  <title>Anarchadia Citizen Console</title>
+  <link rel="stylesheet" href="/app/anarchadia-console-v139.css?v=console-r1">
+</head>
+<body>
+  <main class="ac-shell" id="ac-app" data-screen="home">
+    <div class="ac-frame-noise" aria-hidden="true"></div>
+    <header class="ac-masthead">
+      <div class="ac-symbol" aria-hidden="true">Ⓐ</div>
+      <div>
+        <p class="ac-kicker">ANARCHADIA // CITIZEN CONSOLE</p>
+        <h1>ANARCHADIA</h1>
+        <p class="ac-tagline">Power stays visible. Automation stays accountable.</p>
+      </div>
+      <div class="ac-head-actions">
+        <span class="ac-version">v1.0.30</span>
+        <button class="ac-vote" type="button" data-action="vote-hub">VOTE!</button>
+      </div>
+    </header>
+
+    <section class="ac-passport" aria-label="Citizen passport">
+      <div class="ac-passport-icon" aria-hidden="true">◎</div>
+      <div>
+        <small>PASSPORT</small>
+        <strong>ACTIVE</strong>
+        <p>ANARCHADIAN CITIZEN</p>
+        <code id="ac-passport-id">AC-LOCAL</code>
+      </div>
+      <div class="ac-passport-mark" aria-hidden="true">Ⓐ</div>
+    </section>
+
+    <nav class="ac-grid" aria-label="Citizen console modules">
+      <button class="ac-module is-pink" data-screen-target="proposals" type="button"><span class="ac-icon">✊</span><span><b>OPEN PROPOSALS</b><small>Shape what’s next.</small></span><i>›</i></button>
+      <button class="ac-module is-gold" data-screen-target="ledger" type="button"><span class="ac-icon">▤</span><span><b>VIEW LEDGER</b><small>See the receipts.</small></span><i>›</i></button>
+      <button class="ac-module is-cyan" data-screen-target="automation" type="button"><span class="ac-icon">⚙</span><span><b>AUTOMATION</b><small>Build under rails.</small></span><i>›</i></button>
+      <button class="ac-module is-lime" data-screen-target="observatory" type="button"><span class="ac-icon">◉</span><span><b>OBSERVATORY</b><small>Watch the horizon.</small></span><i>›</i></button>
+    </nav>
+
+    <section class="ac-pulse" aria-label="Civic pulse">
+      <h2>CIVIC PULSE</h2>
+      <div class="ac-pulse-grid">
+        <div><b id="ac-citizens">1</b><span>CITIZENS</span></div>
+        <div><b id="ac-proposal-count">0</b><span>PROPOSALS</span></div>
+        <div><b id="ac-participation">0%</b><span>PARTICIPATION</span></div>
+        <div><b id="ac-momentum">IDLE</b><span>MOMENTUM</span></div>
+      </div>
+    </section>
+
+    <section class="ac-screen" id="screen-proposals" data-screen="proposals" hidden>
+      <header class="ac-screen-head"><div><small>PROPOSAL COMMONS</small><h2>Open proposals</h2></div><button type="button" data-screen-target="home">×</button></header>
+      <div class="ac-toolbar">
+        <button type="button" class="is-pink" data-request-kind="bugfix">+ BUGFIX REQUEST</button>
+        <button type="button" class="is-cyan" data-request-kind="feature">+ FEATURE REQUEST</button>
+        <button type="button" data-action="vote-hub">OPEN HUB BALLOT</button>
+      </div>
+      <div class="ac-proposal-list" id="ac-proposal-list"></div>
+    </section>
+
+    <section class="ac-screen" id="screen-ledger" data-screen="ledger" hidden>
+      <header class="ac-screen-head"><div><small>PUBLIC RECEIPTS</small><h2>Ledger</h2></div><button type="button" data-screen-target="home">×</button></header>
+      <p class="ac-screen-copy">This local ledger records requests, rail checks, generated patches, preview installs, vote signals, and explicit approvals. It does not claim identity, authority, or consensus.</p>
+      <div class="ac-ledger" id="ac-ledger"></div>
+    </section>
+
+    <section class="ac-screen" id="screen-automation" data-screen="automation" hidden>
+      <header class="ac-screen-head"><div><small>ACCOUNTABLE AUTOMATION</small><h2>Change pipeline</h2></div><button type="button" data-screen-target="home">×</button></header>
+      <p class="ac-screen-copy">Requests move through intake, semantic rail review, code generation, deterministic validation, sandbox installation, and preview. Publishing remains a separate human and community decision.</p>
+      <div class="ac-pipeline-list" id="ac-pipeline-list"></div>
+    </section>
+
+    <section class="ac-screen" id="screen-observatory" data-screen="observatory" hidden>
+      <header class="ac-screen-head"><div><small>READINESS &amp; RISK</small><h2>Observatory</h2></div><button type="button" data-screen-target="home">×</button></header>
+      <div class="ac-observatory" id="ac-observatory"></div>
+    </section>
+
+    <section class="ac-screen" id="screen-request" data-screen="request" hidden>
+      <header class="ac-screen-head"><div><small id="ac-request-kicker">CHANGE REQUEST</small><h2 id="ac-request-title">Submit request</h2></div><button type="button" data-screen-target="proposals">×</button></header>
+      <form class="ac-form" id="ac-request-form">
+        <input type="hidden" name="kind" value="feature">
+        <label>Title<input name="title" maxlength="120" required placeholder="What should change?"></label>
+        <label>Current problem<textarea name="problem" required placeholder="What is happening now, and who is affected?"></textarea></label>
+        <label>Expected result<textarea name="expected" required placeholder="What should happen instead?"></textarea></label>
+        <label>Affected area<select name="area"><option>Commonweave</option><option>Anarchadia</option><option>Living School</option><option>Cerbanimo</option><option>FellowFare</option><option>Installer / PWA</option><option>Model runtime</option></select></label>
+        <label>Acceptance criteria<textarea name="acceptance" required placeholder="One testable outcome per line"></textarea></label>
+        <label>Risk and consent notes<textarea name="risk" placeholder="Data, permissions, cost, publishing, deletion, or people affected"></textarea></label>
+        <label>Evidence or reproduction steps<textarea name="evidence" placeholder="Screenshots, logs, routes, inputs, or exact steps"></textarea></label>
+        <label class="ac-check"><input type="checkbox" name="autoRun" checked> Run rail check, code generation, validation, sandbox install, and preview automatically.</label>
+        <p class="ac-form-note">Automatic installation is limited to a sandbox preview. Production publication, spending, deletion, external messages, and binding governance still require explicit approval.</p>
+        <button class="ac-submit" type="submit">SUBMIT TO PIPELINE</button>
+      </form>
+    </section>
+
+    <footer class="ac-footer">
+      <span>★ Choose where to participate.</span>
+      <b>POWER TO THE PEOPLE. Ⓐ</b>
+    </footer>
+  </main>
+
+  <dialog class="ac-dialog" id="ac-preview-dialog">
+    <section>
+      <header><div><small>SANDBOX INSTALL</small><h2 id="ac-preview-title">Preview</h2></div><button type="button" data-close-preview>×</button></header>
+      <iframe id="ac-preview-frame" sandbox="allow-scripts" title="Generated change preview"></iframe>
+      <div class="ac-dialog-actions"><button type="button" data-action="vote-hub">SEND TO VOTE</button><button type="button" data-close-preview>CLOSE</button></div>
+    </section>
+  </dialog>
+
+  <script src="/app/shared/commonweave-model-runtime.js?v=1.0.30-antigravity" defer></script>
+  <script src="/app/minilm-reflex-runtime-v138.js?v=reflex-r1" defer></script>
+  <script src="/app/anarchadia-console-v139.js?v=console-r1" defer></script>
+</body>
+</html>
