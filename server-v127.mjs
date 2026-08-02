@@ -17,6 +17,18 @@ replaceRequired("const BUILD_VERSION = '1.0.21-ai-uplift';", `const BUILD_VERSIO
 replaceRequired("const APP_VERSION = 'rc22.3.20-ai-checkpoint';", `const APP_VERSION = '${VERSION}';`, 'app version marker');
 source = source.replace("appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`", "appUrl: `${root}/loom/?setup=1&host=${encodeURIComponent(root)}`");
 source = source.replace("appUrl: `${requestOrigin(req, url)}/app/`", "appUrl: `${requestOrigin(req, url)}/loom/`");
+replaceRequired(
+`    if ((pathname === '/field/commonweave/seed' || pathname === '/downloads/commonweave-pocket-campus.cwseed') && req.method === 'GET') {
+      const served = await serveFile(req, res, '/downloads/commonweave-pocket-campus.cwseed');
+      if (served) return;
+      return json(res, 404, { error: 'Commonweave campus seed is not available on this host node.' });
+    }`,
+`    if ((pathname === '/field/commonweave/seed' || pathname === '/downloads/commonweave-pocket-campus.cwseed') && req.method === 'GET') {
+      cwLog('legacy-seed-request-retired', { requestId, pathname }, req);
+      res.writeHead(204, { 'cache-control':'no-store', 'x-commonweave-version':CW_VERSION, 'x-commonweave-build':CW_BUILD, 'x-commonweave-seed-status':'retired' });
+      return res.end();
+    }`,
+'legacy campus seed route');
 
 const injected = String.raw`
 const CW_VERSION = '1.0.27';
