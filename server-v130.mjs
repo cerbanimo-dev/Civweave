@@ -141,6 +141,14 @@ replaceRequired(
   String.raw`    if (req.method === 'GET' && (originalPathname.startsWith('/app/vendor/transformers/wasm/') || originalPathname.endsWith('.onnx') || originalPathname.includes('.onnx?'))) {
       if (await serveFile(req, res, pathname)) return;
     }
+    const citizenConsoleAssets = new Set([
+      '/app/anarchadia-console-v139.html',
+      '/app/anarchadia-console-v139.css',
+      '/app/anarchadia-console-v139.js'
+    ]);
+    if (req.method === 'GET' && citizenConsoleAssets.has(originalPathname)) {
+      if (await serveFile(req, res, pathname)) return;
+    }
     if (req.method === 'GET' && (originalPathname === '/app' || originalPathname.startsWith('/app/') || originalPathname === '/campus' || originalPathname.startsWith('/campus/'))) {
       const isAsset = /\.(?:png|jpe?g|webp|svg|gif|avif|css|js|json|webmanifest|woff2?)$/i.test(originalPathname);
       if (!isAsset) { cwLog('legacy-route-redirected', {requestId,from:originalPathname,to:'/loom/'}, req); res.writeHead(302,{location:'/loom/','cache-control':'no-store','x-commonweave-version':CW_VERSION,'x-commonweave-build':CW_BUILD}); return res.end(); }
