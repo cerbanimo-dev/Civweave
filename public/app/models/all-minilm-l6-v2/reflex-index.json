@@ -17,6 +17,15 @@
       ]
     },
     {
+      "id": "self-love-boundaries",
+      "system": "living-school",
+      "mode": "Learn",
+      "embeddingText": "learn to love myself, self-love, self-compassion, self-care, caring for myself before others, personal boundaries, consent, not being touched, clear intentions, clear peer communication, emotional capacity, relational safety",
+      "keywords": ["love myself", "self-love", "self compassion", "self-compassion", "self-care", "caring for myself", "not being touched", "clear intentions", "clear communication", "boundaries", "personal space"],
+      "answer": "You are developing self-compassion alongside clearer physical and emotional boundaries. Living School can help you name your needs, recognize respectful consent, and practice communication that protects your capacity. Reflection is the beginning here, not the finish line.",
+      "nextAction": "Write one sentence describing how you want to treat yourself and one sentence stating a boundary you want trusted peers to understand."
+    },
+    {
       "id": "prioritize-projects",
       "system": "commonweave",
       "mode": "Reflect",
