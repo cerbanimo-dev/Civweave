@@ -1,5 +1,5 @@
 const ROOT='/app/models/all-minilm-l6-v2';
-const WORKER_URL=`${ROOT}/worker.js?v=reflex-r1`;
+const WORKER_URL=`${ROOT}/worker.js?v=reflex-r2`;
 const REQUIRED=[
   {url:`${ROOT}/config.json`,minBytes:300},
   {url:`${ROOT}/tokenizer.json`,minBytes:500000},
@@ -12,14 +12,22 @@ const GRAPH_OPTIONS=[
   {url:`${ROOT}/onnx/model_q4f16.onnx`,minBytes:25000000,device:'webgpu'},
   {url:`${ROOT}/onnx/model_quantized.onnx`,minBytes:18000000,device:'wasm'}
 ];
+const BODY_PROBE_LIMIT=2_000_000;
 let worker=null,sequence=0;
 const pending=new Map();
 
-async function inspect(spec){
+async function inspect(spec,{probeBody=true}={}){
   try{
-    const response=await fetch(spec.url,{method:'HEAD',cache:'no-store'});
-    const length=Number(response.headers.get('content-length')||0);
-    return {...spec,status:response.status,length,ok:response.ok&&(length===0||length>=spec.minBytes)};
+    const head=await fetch(spec.url,{method:'HEAD',cache:'no-store'});
+    let length=Number(head.headers.get('content-length')||0);
+    let status=head.status;
+    let type=String(head.headers.get('content-type')||'');
+    if(head.ok&&length===0&&probeBody&&spec.minBytes<=BODY_PROBE_LIMIT){
+      const response=await fetch(spec.url,{cache:'no-store'});
+      status=response.status;type=String(response.headers.get('content-type')||type);
+      if(response.ok)length=(await response.blob()).size;
+    }
+    return {...spec,status,length,type,ok:status>=200&&status<300&&(length===0||length>=spec.minBytes)};
   }catch(error){return {...spec,status:0,length:0,ok:false,error:error.message}}
 }
 function activeWorker(){
@@ -45,8 +53,8 @@ function request(type,payload={},timeoutMs=120000){
   });
 }
 export async function status(){
-  const files=await Promise.all(REQUIRED.map(inspect));
-  const graphs=await Promise.all(GRAPH_OPTIONS.map(inspect));
+  const files=await Promise.all(REQUIRED.map(spec=>inspect(spec,{probeBody:true})));
+  const graphs=await Promise.all(GRAPH_OPTIONS.map(spec=>inspect(spec,{probeBody:false})));
   const usableGraphs=graphs.filter(item=>item.ok);
   return {available:files.every(item=>item.ok)&&usableGraphs.length>0,id:'Xenova/all-MiniLM-L6-v2',source:'local-semantic-reflex',files,graphs,missing:[...files.filter(item=>!item.ok),...(usableGraphs.length?[]:graphs)],remoteDownloadsAllowed:false};
 }
