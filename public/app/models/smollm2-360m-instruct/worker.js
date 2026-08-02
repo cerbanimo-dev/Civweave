@@ -2,7 +2,9 @@ import { pipeline, env } from '/app/vendor/transformers/transformers.min.js';
 
 const MODEL_ID = 'smollm2-360m-instruct';
 const MODEL_ROOT = '/app/models/';
-const BACKEND_ROOT = '/app/vendor/transformers/wasm/';
+const BACKEND_VERSION = 'onnx-r9';
+const BACKEND_MJS = new URL(`/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs?v=${BACKEND_VERSION}`, self.location.origin).href;
+const BACKEND_WASM = new URL(`/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm?v=${BACKEND_VERSION}`, self.location.origin).href;
 let generatorPromise = null;
 
 function serializeError(error) {
@@ -23,18 +25,40 @@ function cleanGenerated(candidate) {
   return String(generated ?? '');
 }
 
-function configureRuntime() {
+async function verifyBackendResponse(url, kind) {
+  const response = await fetch(url, { cache: 'reload' });
+  if (!response.ok) throw new Error(`${kind} backend asset returned HTTP ${response.status}: ${url}`);
+  const type = String(response.headers.get('content-type') || '').toLowerCase();
+  if (kind === 'mjs' && !/(javascript|ecmascript|module)/.test(type)) {
+    const preview = (await response.clone().text()).slice(0, 120).replace(/\s+/g, ' ');
+    throw new Error(`ONNX Runtime loader was served as ${type || 'an unknown MIME type'} instead of JavaScript. Response begins: ${preview}`);
+  }
+  if (kind === 'wasm' && !/(application\/wasm|application\/octet-stream)/.test(type)) {
+    throw new Error(`ONNX Runtime binary was served as ${type || 'an unknown MIME type'} instead of WebAssembly.`);
+  }
+  return { url, type, bytes: Number(response.headers.get('content-length') || 0) };
+}
+
+async function configureRuntime() {
   env.allowRemoteModels = false;
   env.allowLocalModels = true;
   env.localModelPath = MODEL_ROOT;
+  env.useWasmCache = false;
+  env.cacheKey = `commonweave-smollm2-${BACKEND_VERSION}`;
   if (env.backends?.onnx?.wasm) {
-    env.backends.onnx.wasm.wasmPaths = BACKEND_ROOT;
+    env.backends.onnx.wasm.wasmPaths = { mjs: BACKEND_MJS, wasm: BACKEND_WASM };
     env.backends.onnx.wasm.numThreads = self.crossOriginIsolated ? Math.max(1, Math.min(4, navigator.hardwareConcurrency || 1)) : 1;
+    env.backends.onnx.wasm.initTimeout = 120000;
   }
+  const backend = await Promise.all([
+    verifyBackendResponse(BACKEND_MJS, 'mjs'),
+    verifyBackendResponse(BACKEND_WASM, 'wasm'),
+  ]);
+  self.postMessage({ type: 'progress', progress: { status: 'backend-verified', backend } });
 }
 
 async function createGenerator(device) {
-  self.postMessage({ type: 'progress', progress: { status: 'backend-start', device } });
+  self.postMessage({ type: 'progress', progress: { status: 'backend-start', device, mjs: BACKEND_MJS, wasm: BACKEND_WASM } });
   const generator = await pipeline('text-generation', MODEL_ID, {
     device,
     dtype: 'q4f16',
@@ -49,7 +73,7 @@ async function createGenerator(device) {
 async function loadGenerator() {
   if (generatorPromise) return generatorPromise;
   generatorPromise = (async () => {
-    configureRuntime();
+    await configureRuntime();
     const attempts = navigator.gpu ? ['webgpu', 'wasm'] : ['wasm'];
     const failures = [];
 
