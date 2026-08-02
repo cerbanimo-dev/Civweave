@@ -7,13 +7,13 @@
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <title>Commonweave Realm</title>
   <link rel="icon" href="/app/logos/commonweave-icon-192.png">
-  <link rel="stylesheet" href="/app/loom-v128.css?v=1.0.28">
+  <link rel="stylesheet" href="/app/loom-v128.css?v=1.0.29">
 </head>
 <body class="cw127-realm">
 <main class="cw127-app" id="cw127-realm-app">
   <section class="cw127-scene" aria-label="Commonweave realm">
     <img class="cw127-scene-bg" id="cw127-realm-scene" alt="" fetchpriority="high">
-    <button class="cw128-room-surface" data-action="room" aria-label="Open this room's capabilities"></button>
+    <button class="cw128-room-surface" data-action="room" aria-label="Open this room's workstation"></button>
     <img class="cw127-realm-logo" id="cw127-realm-logo" alt="">
     <button class="cw127-realm-guide" id="cw127-realm-guide" data-action="guide" aria-label="Talk to this realm's guide"><img alt=""></button>
     <div class="cw127-status" id="cw127-realm-status">Reading the parity ledger…</div>
@@ -21,16 +21,17 @@
 </main>
 <button class="cw127-back" data-action="back">← Commonweave</button>
 <header class="cw127-topbar">
-  <button class="cw127-version" data-action="version"><img src="/app/logos/commonweave.webp" alt=""><span>v1.0.28</span></button>
+  <button class="cw127-version" data-action="version"><img src="/app/logos/commonweave.webp" alt=""><span>v1.0.29</span></button>
   <nav class="cw127-tools" aria-label="Realm tools">
     <button data-action="info" aria-label="Realm information"><span class="cw127-info-glyph">i</span></button>
-    <button data-action="lite" aria-label="Open the Lite renderer"><img src="/app/assets/generated/commonweave-navigation-icons/commonweave-realms.png" alt=""></button>
+    <button data-action="lite" aria-label="Open this room's cabinet workstation"><img src="/app/assets/generated/commonweave-navigation-icons/commonweave-realms.png" alt=""></button>
     <button data-action="settings" aria-label="Universal AI settings"><img src="/app/assets/generated/commonweave-navigation-icons/commonweave-ai-config.png" alt=""></button>
   </nav>
 </header>
 <nav class="cw127-nav cw128-room-nav" id="cw127-realm-nav" aria-label="Room navigation"></nav>
 <div class="cw127-toast" id="cw127-toast" hidden></div>
-<script src="/app/shared/commonweave-parity-runtime.js?v=1.0.28" defer></script>
-<script src="/app/realm-v128.js?v=1.0.28" defer></script>
+<script src="/app/shared/commonweave-parity-runtime.js?v=1.0.29" defer></script>
+<script src="/app/realm-v128.js?v=1.0.29" defer></script>
+<script src="/app/v129-route-hotfix.js?v=1.0.29-route-activation" defer></script>
 </body>
 </html>
