@@ -13,14 +13,14 @@
 <body>
   <main class="host-world" aria-label="Commonweave host-node installation gateway">
     <img src="/app/assets/world/host-wave2.webp" alt="The newly renovated Living School hall from Commonweave's wave-two visual release." fetchpriority="high">
-    <a id="wizard" class="host-hotspot host-install" href="/app/?setup=1" aria-label="Open the Commonweave installation and host-node connection journey">Install and connect</a>
+    <a id="wizard" class="host-hotspot host-install" href="/recover.html" aria-label="Recover, install, and connect the Commonweave pocket campus">Recover and enter</a>
     <a class="host-hotspot host-download" href="/downloads/Commonweave-Mobile-Install-Kit.zip" aria-label="Download the complete offline Commonweave installation kit">Download offline kit</a>
   </main>
-  <div class="host-version"><img src="/app/logos/commonweave.webp" alt=""><span>AI UPLIFT · HOST v1.0.21</span></div>
-  <div class="host-projection" aria-live="polite"><strong><span id="dot" class="host-dot"></span><span id="status">Waking the host node…</span></strong><span>Touch the Quad to install Commonweave and connect this device. The lower-left gate downloads the offline kit.</span></div>
+  <div class="host-version"><img src="/app/logos/commonweave.webp" alt=""><span>RECOVERY BUILD · v1.0.25</span></div>
+  <div class="host-projection" aria-live="polite"><strong><span id="dot" class="host-dot"></span><span id="status">Waking the host node…</span></strong><span>Touch the Quad to retire stale v1.0.21 caches and enter Commonweave. Your plans and shared AI preference are preserved.</span></div>
 <script>
-const origin=location.origin;document.querySelector('#wizard').href=`/app/?setup=1&host=${encodeURIComponent(origin)}`;
-fetch('/api/health',{cache:'no-store'}).then(r=>r.json()).then(data=>{document.querySelector('#dot').classList.add('ok');document.querySelector('#status').textContent=`${data.name} ready · ${data.appVersion}`}).catch(()=>document.querySelector('#status').textContent='Host node is starting');
+const status=document.querySelector('#status');
+Promise.allSettled([fetch('/api/health',{cache:'no-store'}).then(r=>r.ok?r.json():null),fetch('/app/version.json',{cache:'no-store'}).then(r=>r.ok?r.json():null)]).then(([health,version])=>{const h=health.status==='fulfilled'?health.value:null,v=version.status==='fulfilled'?version.value:null;document.querySelector('#dot').classList.add('ok');status.textContent=`${h?.name||'Commonweave Host Node'} ready · v${v?.version||'1.0.25'}`}).catch(()=>status.textContent='Host node is starting · recovery gate remains available');
 </script>
 </body>
 </html>
