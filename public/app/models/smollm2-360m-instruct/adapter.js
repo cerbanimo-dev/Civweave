@@ -4,11 +4,11 @@ const MODEL_ROOT = '/app/models/smollm2-360m-instruct';
 const WORKER_URL = `${MODEL_ROOT}/worker.js`;
 const VENDOR_MODULE = '/app/vendor/transformers/transformers.min.js';
 const REQUIRED = [
-  `${MODEL_ROOT}/config.json`,
-  `${MODEL_ROOT}/tokenizer.json`,
-  `${MODEL_ROOT}/tokenizer_config.json`,
-  `${MODEL_ROOT}/onnx/model_q4f16.onnx`,
-  VENDOR_MODULE,
+  { url: `${MODEL_ROOT}/config.json`, minBytes: 200 },
+  { url: `${MODEL_ROOT}/tokenizer.json`, minBytes: 100000 },
+  { url: `${MODEL_ROOT}/tokenizer_config.json`, minBytes: 200 },
+  { url: `${MODEL_ROOT}/onnx/model_q4f16.onnx`, minBytes: 250000000 },
+  { url: VENDOR_MODULE, minBytes: 100000 },
 ];
 
 let worker = null;
@@ -64,17 +64,24 @@ function getWorker() {
   return worker;
 }
 
-async function head(url) {
+async function inspect(spec) {
+  const { url, minBytes } = spec;
   try {
+    const cached = 'caches' in globalThis ? await caches.match(url) : null;
+    if (cached) {
+      const length = Number(cached.headers.get('content-length') || 0);
+      return { url, ok: cached.ok && length >= minBytes, status: cached.status, length, minBytes, source: 'cache' };
+    }
     const response = await fetch(url, { method: 'HEAD', cache: 'no-store' });
-    return { url, ok: response.ok, status: response.status, length: Number(response.headers.get('content-length') || 0) };
+    const length = Number(response.headers.get('content-length') || 0);
+    return { url, ok: response.ok && length >= minBytes, status: response.status, length, minBytes, source: 'network' };
   } catch (error) {
-    return { url, ok: false, status: 0, length: 0, error: error.message };
+    return { url, ok: false, status: 0, length: 0, minBytes, source: 'error', error: error.message };
   }
 }
 
 export async function status() {
-  const files = await Promise.all(REQUIRED.map(head));
+  const files = await Promise.all(REQUIRED.map(inspect));
   const missing = files.filter(file => !file.ok);
   return {
     available: missing.length === 0,
