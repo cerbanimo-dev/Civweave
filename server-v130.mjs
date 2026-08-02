@@ -133,7 +133,10 @@ replaceRequired("    if (pathname.startsWith('/api/')) {", String.raw`    if (pa
       if (pathname === '/api/boot-logs' && req.method === 'GET') return json(res, 200, {version:CW_VERSION,build:CW_BUILD,count:cwBootLogs.length,logs:cwBootLogs.slice(-300)});`, 'API router');
 replaceRequired(
   "    if (await serveFile(req, res, pathname)) return;",
-  String.raw`    if (req.method === 'GET' && (originalPathname === '/app' || originalPathname.startsWith('/app/') || originalPathname === '/campus' || originalPathname.startsWith('/campus/'))) {
+  String.raw`    if (req.method === 'GET' && (originalPathname.startsWith('/app/vendor/transformers/wasm/') || originalPathname.endsWith('.onnx') || originalPathname.includes('.onnx?'))) {
+      if (await serveFile(req, res, pathname)) return;
+    }
+    if (req.method === 'GET' && (originalPathname === '/app' || originalPathname.startsWith('/app/') || originalPathname === '/campus' || originalPathname.startsWith('/campus/'))) {
       const isAsset = /\.(?:png|jpe?g|webp|svg|gif|avif|css|js|json|webmanifest|woff2?)$/i.test(originalPathname);
       if (!isAsset) { cwLog('legacy-route-redirected', {requestId,from:originalPathname,to:'/loom/'}, req); res.writeHead(302,{location:'/loom/','cache-control':'no-store','x-commonweave-version':CW_VERSION,'x-commonweave-build':CW_BUILD}); return res.end(); }
     }
@@ -142,8 +145,8 @@ replaceRequired(
   'static file router'
 );
 
-// String.raw preserves backslashes exactly. Normalize the two regular expressions
-// that are emitted into the generated runtime so they contain one escape, not two.
+// String.raw preserves backslashes exactly. Normalize regular expressions emitted
+// into the generated runtime so they contain one escape, not two.
 source = source.replace("/^\\\\/loom\\\\/realm\\\\/(living-school|cerbanimo|fellowfare|anarchadia)\\\\/?$/", "/^\\/loom\\/realm\\/(living-school|cerbanimo|fellowfare|anarchadia)\\/?$/");
 source = source.replace("/\\\\.(?:png|jpe?g|webp|svg|gif|avif|css|js|json|webmanifest|woff2?)$/i", "/\\.(?:png|jpe?g|webp|svg|gif|avif|css|js|json|webmanifest|woff2?)$/i");
 

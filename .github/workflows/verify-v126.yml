@@ -53,7 +53,7 @@ jobs:
           grep -q 'commonweave-static-' service-worker.js
           grep -q 'commonweave-runtime-' service-worker.js
           grep -q "const VERSION='1.0.30'" service-worker.js
-          grep -q "CACHE_REVISION='smollm2-onnx-r8'" service-worker.js
+          grep -q "CACHE_REVISION='smollm2-backend-r9'" service-worker.js
           curl -fsS http://127.0.0.1:8787/loom/ -o loom.html
           grep -q 'smollm2-fallback-runtime-v134.js' loom.html
           grep -q 'weaveling-hologram-v133.css?v=heart-r7' loom.html
@@ -64,16 +64,26 @@ jobs:
           grep -q 'lite-v129-app.js' lite.html
           curl -fsS http://127.0.0.1:8787/app/models/smollm2-360m-instruct/model-manifest.json -o smollm2-manifest.json
           grep -q 'HuggingFaceTB/SmolLM2-360M-Instruct' smollm2-manifest.json
+          curl -fsS http://127.0.0.1:8787/app/models/smollm2-360m-instruct/worker.js -o smollm2-worker.js
+          grep -q "BACKEND_VERSION = 'onnx-r9'" smollm2-worker.js
+          grep -q 'wasmPaths = { mjs: BACKEND_MJS, wasm: BACKEND_WASM }' smollm2-worker.js
+          grep -q 'env.useWasmCache = false' smollm2-worker.js
           curl -fsS http://127.0.0.1:8787/app/vendor/transformers/stage-manifest.json -o transformers-stage.json
           grep -q '@huggingface/transformers' transformers-stage.json
           grep -q 'ort-wasm-simd-threaded.jsep.mjs' transformers-stage.json
           grep -q 'ort-wasm-simd-threaded.jsep.wasm' transformers-stage.json
-          curl -fsSI http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs -o onnx-loader-headers.txt
+          curl -fsS "http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs?v=onnx-r9" -D onnx-loader-headers.txt -o onnx-loader.mjs
           grep -qi 'content-type: text/javascript' onnx-loader-headers.txt
           grep -qi 'content-length:' onnx-loader-headers.txt
-          curl -fsSI http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm -o onnx-wasm-headers.txt
+          test -s onnx-loader.mjs
+          if grep -qi '<!doctype html\|<html' onnx-loader.mjs; then
+            echo 'ONNX loader route returned HTML' >&2
+            exit 1
+          fi
+          curl -fsS "http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm?v=onnx-r9" -D onnx-wasm-headers.txt -o onnx-runtime.wasm
           grep -qi 'content-type: application/wasm\|content-type: application/octet-stream' onnx-wasm-headers.txt
           grep -qi 'content-length:' onnx-wasm-headers.txt
+          test -s onnx-runtime.wasm
           curl -fsS http://127.0.0.1:8787/field/commonweave/seed -o commonweave-pocket-campus.cwseed
           test -s commonweave-pocket-campus.cwseed
           if unzip -l commonweave-pocket-campus.cwseed | grep -q 'model_q4f16.onnx'; then
@@ -95,8 +105,10 @@ jobs:
             loom.html
             lite.html
             smollm2-manifest.json
+            smollm2-worker.js
             transformers-stage.json
             onnx-loader-headers.txt
+            onnx-loader.mjs
             onnx-wasm-headers.txt
             commonweave-pocket-campus.cwseed
             boot-logs.json
