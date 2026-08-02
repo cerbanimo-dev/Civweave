@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#071923">
+  <title>Recover Commonweave</title>
+  <style>
+    *{box-sizing:border-box}html,body{min-height:100%;margin:0;background:#061019;color:#effffb;font-family:system-ui,sans-serif}body{display:grid;place-items:center;padding:22px}.card{width:min(560px,100%);padding:24px;border:1px solid #7ee5ff66;border-radius:22px;background:#071923ee;box-shadow:0 24px 80px #000b}.sigil{width:74px;height:74px;object-fit:contain;filter:drop-shadow(0 0 18px #7ee5ff77)}small{color:#efd176;font-weight:900;letter-spacing:.12em}h1{margin:10px 0 8px;font:500 clamp(30px,7vw,48px)/1 Georgia,serif}p{color:#c7dcda;line-height:1.55}.meter{height:9px;overflow:hidden;border-radius:999px;background:#ffffff12}.meter span{display:block;width:12%;height:100%;border-radius:inherit;background:#7ee5ff;transition:width .25s ease}.status{min-height:44px;margin-top:12px;color:#fff4c2}button,a{min-height:44px;display:grid;place-items:center;width:100%;margin-top:10px;border:1px solid #efd17677;border-radius:12px;background:#174b58;color:white;text-decoration:none;font-weight:750}button{cursor:pointer}.secondary{background:transparent}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <img class="sigil" src="/app/logos/commonweave.webp" alt="">
+    <small>COMMONWEAVE RECOVERY GATE · v1.0.25</small>
+    <h1>Untangling the old cache.</h1>
+    <p>This page sits outside the installed campus worker, so it can safely retire the v1.0.21 shell without being intercepted by it.</p>
+    <div class="meter"><span id="bar"></span></div>
+    <div id="status" class="status" role="status">Preparing recovery…</div>
+    <button id="retry" hidden>Retry recovery</button>
+    <a class="secondary" href="/app/?recovered=1&v=1.0.25">Enter without cleanup</a>
+  </main>
+<script>
+const status=document.querySelector('#status'),bar=document.querySelector('#bar'),retry=document.querySelector('#retry');
+const say=(text,percent)=>{status.textContent=text;bar.style.width=`${percent}%`};
+async function recover(){retry.hidden=true;try{
+  say('Retiring old Commonweave and realm service workers…',22);
+  if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.allSettled(regs.filter(reg=>/\/app(?:\/|$)/.test(new URL(reg.scope).pathname)).map(reg=>reg.unregister()))}
+  say('Removing stale campus caches…',52);
+  if('caches' in window){const keys=await caches.keys();await Promise.allSettled(keys.filter(key=>key.startsWith('commonweave-pocket-campus-')||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key)).map(key=>caches.delete(key)))}
+  say('Resetting the boot marker while preserving your plans and AI preference…',76);
+  localStorage.setItem('commonweave.host-build','1.0.21-ai-uplift');
+  localStorage.setItem('commonweave.recovery.completed','1.0.25');
+  say('Opening the repaired local-first campus…',100);
+  setTimeout(()=>location.replace('/app/?recovered=1&v=1.0.25'),250);
+}catch(error){say(`Recovery stopped: ${error.message||error}`,100);retry.hidden=false}}
+retry.onclick=recover;recover();
+</script>
+</body>
+</html>
