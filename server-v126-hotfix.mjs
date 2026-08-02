@@ -22,7 +22,12 @@ replaceRequired(
 
 replaceRequired(
   "cwBootLog('campus-runtime-served', { requestId, bytes: text.length }, req);",
-  "const reloadCount = (text.match(/location\\.reload\\(\\)/g) || []).length;\n    text = text.replaceAll('location.reload()', `window.CommonweaveBootLog?.log('controllerchange-observed-no-reload',{controller:navigator.serviceWorker?.controller?.scriptURL||null,blockedBy:'${HOTFIX_BUILD}'})`);\n    const remainingReloads = (text.match(/location\\.reload\\(\\)/g) || []).length;\n    cwBootLog('campus-runtime-sanitized', { requestId, reloadCount, remainingReloads, build: HOTFIX_BUILD }, req);\n    if (remainingReloads) throw new Error('Unsafe automatic reload survived runtime sanitization.');\n    cwBootLog('campus-runtime-served', { requestId, bytes: text.length }, req);",
+  `const reloadCount = (text.match(/location\\.reload\\(\\)/g) || []).length;
+    text = text.replaceAll('location.reload()', "window.CommonweaveBootLog?.log('controllerchange-observed-no-reload',{controller:navigator.serviceWorker?.controller?.scriptURL||null,blockedBy:'${HOTFIX_BUILD}'})");
+    const remainingReloads = (text.match(/location\\.reload\\(\\)/g) || []).length;
+    cwBootLog('campus-runtime-sanitized', { requestId, reloadCount, remainingReloads, build: CW_DIAGNOSTIC_BUILD }, req);
+    if (remainingReloads) throw new Error('Unsafe automatic reload survived runtime sanitization.');
+    cwBootLog('campus-runtime-served', { requestId, bytes: text.length }, req);`,
   'the campus runtime response point'
 );
 
