@@ -1,7 +1,7 @@
 {
   "schema": "commonweave.version.v1",
-  "version": "1.0.24",
-  "build": "1.0.24-contextual-guides",
+  "version": "1.0.25",
+  "build": "1.0.25-freeze-recovery",
   "channel": "main",
-  "updatedAt": "2026-08-02T01:50:00Z"
+  "updatedAt": "2026-08-02T02:20:00Z"
 }
