@@ -11,7 +11,7 @@ const CORE=[
   '/loom/realm/living-school/','/loom/realm/cerbanimo/','/loom/realm/fellowfare/','/loom/realm/anarchadia/',
   '/app/manifest.webmanifest',
   '/app/loom-v128.css','/app/loom-v128.js','/app/realm-v128.js',
-  '/app/weaveling-hologram-v133.css','/app/assistant-runtime-v138.js','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/intention-planner-v138.js',
+  '/app/weaveling-hologram-v133.css','/app/assistant-runtime-v138.js','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/intention-planner-v138.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css',
   '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js',
   '/app/model-settings-v133.css',
   '/app/models/all-minilm-l6-v2/model-manifest.json','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js','/app/models/all-minilm-l6-v2/reflex-index.json',
