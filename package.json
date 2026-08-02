@@ -8,10 +8,10 @@
     "node": ">=20"
   },
   "scripts": {
-    "prestart": "node scripts/patch-v125.mjs && npm run build:install",
     "start": "node server-v125.mjs",
     "dev": "node --watch server-v125.mjs",
     "check": "node --check server-v125.mjs && node --check server.mjs && node --check scripts/patch-v125.mjs",
-    "build:install": "bash scripts/build-install-artifacts.sh"
+    "build:install": "bash scripts/build-install-artifacts.sh",
+    "build:release": "node scripts/patch-v125.mjs && npm run build:install"
   }
 }
