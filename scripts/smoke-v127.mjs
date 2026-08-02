@@ -33,7 +33,7 @@ try{
   assert(!hub.includes('commonweave-world.js'),'legacy world runtime survived in clean hub');
 
   const hubJs=await fetch(`${origin}/app/loom-v127.js`,{cache:'no-store'}).then(response=>response.text());
-  assert(hubJs.includes("/loom/realm/"),'clean hub does not route buildings to isolated realms');
+  assert(hubJs.includes('/loom/realm/'),'clean hub does not route buildings to isolated realms');
   assert(!hubJs.includes('.cwseed'),'clean hub runtime requests the legacy seed');
   assert(!hubJs.includes('location.reload'),'clean hub runtime contains a reload call');
 
@@ -52,9 +52,13 @@ try{
     const response=await fetch(origin+legacy,{redirect:'manual',cache:'no-store'});assert(response.status===302,`${legacy} returned ${response.status}`);assert(response.headers.get('location')==='/loom/',`${legacy} redirected to ${response.headers.get('location')}`);
   }
 
+  const seed=await fetch(`${origin}/downloads/commonweave-pocket-campus.cwseed`,{redirect:'manual',cache:'no-store'});
+  assert(seed.status===204,`retired seed request returned ${seed.status}`);
+  assert(seed.headers.get('x-commonweave-seed-status')==='retired','retired seed marker missing');
+
   await fetch(`${origin}/api/boot-log`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:'v127-smoke',detail:{source:'scripts/smoke-v127.mjs'}})});
   const logs=await fetch(`${origin}/api/boot-logs`,{cache:'no-store'}).then(response=>response.json());
-  assert(logs.version===VERSION,'boot log version mismatch');assert(logs.build===BUILD,'boot log build mismatch');assert(logs.logs.some(entry=>entry.kind==='client:v127-smoke'),'boot log did not retain smoke event');
+  assert(logs.version===VERSION,'boot log version mismatch');assert(logs.build===BUILD,'boot log build mismatch');assert(logs.logs.some(entry=>entry.kind==='client:v127-smoke'),'boot log did not retain smoke event');assert(logs.logs.some(entry=>entry.kind==='legacy-seed-request-retired'),'retired seed request was not logged');
   console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,hubBytes:hub.length,bootLogCount:logs.count},null,2));
 }catch(error){console.error(output.join(''));throw error}
 finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}
