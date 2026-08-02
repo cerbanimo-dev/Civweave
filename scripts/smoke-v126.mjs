@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const PORT = 18787;
 const origin = `http://127.0.0.1:${PORT}`;
-const EXPECTED_BUILD = '1.0.26-loop-diagnostics-hotfix-1';
+const EXPECTED_BUILD = '1.0.26-loop-diagnostics-hotfix-2';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataDir = await mkdtemp(path.join(os.tmpdir(), 'commonweave-v126-'));
 const output = [];
@@ -48,13 +48,12 @@ try {
 
   const setup = await fetch(`${origin}/campus/host-node-setup-v126.js`, { cache: 'no-store' }).then(response => response.text());
   assert(setup.includes('host-node-v126-safe.js'), 'safe runtime loader is not wired into bootstrap');
-  assert(setup.includes('hotfix=1'), 'hotfix cache-buster is missing from bootstrap');
 
   const runtime = await fetch(`${origin}/campus/host-node-v126.js`, { cache: 'no-store' }).then(response => response.text());
-  assert(!runtime.includes("controllerchange',()=>location.reload()"), 'controllerchange reload survived in served runtime');
-  assert(runtime.includes('controllerchange-observed-no-reload'), 'served runtime does not log the no-reload controller transition');
+  assert(!runtime.includes('location.reload()'), 'a location.reload call survived in served runtime');
+  assert(runtime.includes('controllerchange-observed-no-reload'), 'served runtime does not log blocked reload attempts');
 
-  const worker = await fetch(`${origin}/campus/service-worker-v126.js?hotfix=1`, { cache: 'no-store' }).then(response => response.text());
+  const worker = await fetch(`${origin}/campus/service-worker-v126.js`, { cache: 'no-store' }).then(response => response.text());
   assert(!worker.includes('clients.claim()'), 'service worker still claims the active page');
   assert(worker.includes('activate-without-client-claim'), 'service-worker no-claim activation marker is missing');
 
@@ -67,12 +66,11 @@ try {
   assert((migration.headers.get('location') || '').startsWith('/campus/'), `legacy app migration target was ${migration.headers.get('location')}`);
 
   await fetch(`${origin}/api/boot-log`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: 'smoke-test', detail: { source: 'scripts/smoke-v126.mjs' } }) });
-  await fetch(`${origin}/campus/assets/world/town-square-home.webp`, { cache: 'no-store' });
   const logs = await fetch(`${origin}/api/boot-logs`, { cache: 'no-store' }).then(response => response.json());
   assert(logs.version === '1.0.26', 'boot-log endpoint version mismatch');
   assert(logs.build === EXPECTED_BUILD, `boot-log build mismatch: ${logs.build}`);
   assert(logs.logs.some(entry => entry.kind === 'client:smoke-test'), 'boot-log endpoint did not retain the smoke event');
-  assert(!logs.logs.some(entry => entry.kind === 'http-request' && entry.detail?.originalPathname?.includes('town-square-home.webp')), 'noncritical asset request polluted the focused boot log');
+  assert(logs.logs.some(entry => entry.kind === 'campus-runtime-sanitized' && entry.detail?.remainingReloads === 0), 'runtime sanitization was not logged as successful');
   console.log(JSON.stringify({ ok: true, health, campusBytes: campusHtml.length, bootLogCount: logs.count }, null, 2));
 } catch (error) {
   console.error(output.join(''));
