@@ -1,6 +1,6 @@
 'use strict';
 const VERSION='1.0.30';
-const CACHE_REVISION='minilm-reflex-r13';
+const CACHE_REVISION='minilm-intention-r14';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
 const CABINET_PREFIX='/app/assets/cabinets/';
@@ -11,7 +11,7 @@ const CORE=[
   '/loom/realm/living-school/','/loom/realm/cerbanimo/','/loom/realm/fellowfare/','/loom/realm/anarchadia/',
   '/app/manifest.webmanifest',
   '/app/loom-v128.css','/app/loom-v128.js','/app/realm-v128.js',
-  '/app/weaveling-hologram-v133.css','/app/assistant-runtime-v138.js','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js',
+  '/app/weaveling-hologram-v133.css','/app/assistant-runtime-v138.js','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/intention-planner-v138.js',
   '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js',
   '/app/model-settings-v133.css',
   '/app/models/all-minilm-l6-v2/model-manifest.json','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js','/app/models/all-minilm-l6-v2/reflex-index.json',
@@ -33,7 +33,7 @@ const CORE=[
   '/offline.html'
 ];
 const report=async(kind,detail={})=>{
-  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-minilm-reflex-r13',kind:`service-worker:${kind}`,detail})})}catch{}
+  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-minilm-intention-r14',kind:`service-worker:${kind}`,detail})})}catch{}
 };
 async function cacheOne(cache,url){
   try{const response=await fetch(url,{cache:'reload'});if(response.ok)await cache.put(url,response.clone());return response.ok}catch{return false}
