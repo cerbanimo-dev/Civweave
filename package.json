@@ -1,6 +1,6 @@
 {
   "name": "commonweave-host-node-hub",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "private": true,
   "description": "Offline-first Commonweave host node and image-driven campus.",
   "type": "module",
@@ -8,10 +8,10 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node server-v128.mjs",
-    "dev": "node --watch server-v128.mjs",
-    "check:syntax": "node --check server-v128.mjs && node --check server.mjs && node --check public/app/loom-v128.js && node --check public/app/realm-v128.js && node --check public/app/lite-v128.js && node --check public/app/shared/commonweave-parity-runtime.js && node --check public/app/service-worker-v126.js && node --check public/app/service-worker.js && node --check scripts/verify-parity-ledger.mjs && node --check scripts/smoke-v128.mjs",
-    "check": "npm run check:syntax && node scripts/verify-parity-ledger.mjs && node scripts/smoke-v128.mjs",
+    "start": "node server-v129.mjs",
+    "dev": "node --watch server-v129.mjs",
+    "check:syntax": "node --check server-v129.mjs && node --check server.mjs && node --check public/app/loom-v128.js && node --check public/app/realm-v128.js && node --check public/app/lite-v129-core.js && node --check public/app/lite-v129-native.js && node --check public/app/lite-v129-app.js && node --check public/app/shared/commonweave-parity-runtime.js && node --check public/app/service-worker-v126.js && node --check public/app/service-worker.js && node --check scripts/verify-parity-ledger.mjs && node --check scripts/smoke-v129.mjs",
+    "check": "npm run check:syntax && node scripts/verify-parity-ledger.mjs && node scripts/smoke-v129.mjs",
     "build:install": "bash scripts/build-install-artifacts.sh",
     "build:release": "npm run check && npm run build:install"
   }
