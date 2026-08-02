@@ -58,13 +58,16 @@ jobs:
           curl -fsS http://127.0.0.1:8787/loom/ -o loom.html
           grep -q 'smollm2-fallback-runtime-v134.js' loom.html
           grep -q 'smollm2-small-model-v137.js?v=route-lock-r2' loom.html
-          grep -q 'commonweave-icon-192.png?v=dark-r1' loom.html
+          grep -q 'commonweave-icon-192.png?v=tight-r2' loom.html
+          grep -q 'manifest.webmanifest?v=1.0.30-icon-r2' loom.html
           grep -q 'weaveling-hologram-v133.css?v=heart-r8' loom.html
           grep -q 'v130-cabinet-launcher.js' loom.html
           grep -q 'pwa-v130.js' loom.html
           curl -fsS http://127.0.0.1:8787/lite/ -o lite.html
           grep -q 'smollm2-fallback-runtime-v134.js' lite.html
           grep -q 'smollm2-small-model-v137.js?v=route-lock-r2' lite.html
+          grep -q 'commonweave-icon-192.png?v=tight-r2' lite.html
+          grep -q 'manifest.webmanifest?v=1.0.30-icon-r2' lite.html
           grep -q 'lite-v129-app.js' lite.html
           curl -fsS http://127.0.0.1:8787/app/smollm2-small-model-v137.js -o smollm2-contract.js
           grep -q 'COMMONWEAVE_SMALL_MODEL_CONTRACT_V2' smollm2-contract.js
@@ -77,7 +80,8 @@ jobs:
           test -s tokenizer.json
           grep -q 'model' tokenizer.json
           curl -fsS http://127.0.0.1:8787/app/logos/commonweave-icon-generation.json -o icon-generation.json
-          grep -q 'dark-centered-thread-mark' icon-generation.json
+          grep -q 'tight-dark-centered-thread-mark' icon-generation.json
+          grep -q '90-94%' icon-generation.json
           curl -fsS -D icon-192-headers.txt http://127.0.0.1:8787/app/logos/commonweave-icon-192.png -o commonweave-icon-192.png
           grep -qi 'content-type: image/png' icon-192-headers.txt
           file commonweave-icon-192.png | grep -q '192 x 192'
