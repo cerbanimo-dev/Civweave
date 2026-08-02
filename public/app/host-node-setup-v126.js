@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='1.0.26';
-const BUILD='1.0.26-loop-diagnostics';
+const BUILD='1.0.26-loop-diagnostics-hotfix-1';
 const log=(kind,detail={})=>window.CommonweaveBootLog?.log(kind,detail)||console.info('[CW-BOOT]',kind,detail);
 const load=src=>new Promise((resolve,reject)=>{const wanted=new URL(src,location.href).pathname;const existing=[...document.scripts].find(script=>{try{return new URL(script.src||location.href,location.href).pathname===wanted}catch{return false}});if(existing&&window.CommonweaveBootLog)return resolve();const script=existing||document.createElement('script');if(!existing){script.src=src;script.async=false;document.head.append(script)}script.addEventListener('load',()=>{log('script-loaded',{src:wanted});resolve()},{once:true});script.addEventListener('error',()=>reject(new Error(`Could not load ${src}`)),{once:true})});
 async function retireLegacyWorkers(){
@@ -21,7 +21,7 @@ async function retireLegacyWorkers(){
 async function installWorker(){
   if(!('serviceWorker'in navigator)){log('worker-unsupported');return null}
   try{
-    const registration=await navigator.serviceWorker.register(`service-worker-v126.js?v=${VERSION}`,{scope:'./',updateViaCache:'none'});
+    const registration=await navigator.serviceWorker.register(`service-worker-v126.js?v=${VERSION}&hotfix=1`,{scope:'./',updateViaCache:'none'});
     log('worker-registered',{scope:registration.scope,active:registration.active?.scriptURL||null,waiting:registration.waiting?.scriptURL||null,installing:registration.installing?.scriptURL||null});
     if(registration.waiting)log('worker-waiting-no-auto-reload',{scriptURL:registration.waiting.scriptURL});
     registration.addEventListener('updatefound',()=>{const worker=registration.installing;log('worker-updatefound',{scriptURL:worker?.scriptURL||null,state:worker?.state||null});worker?.addEventListener('statechange',()=>log('worker-statechange',{scriptURL:worker.scriptURL,state:worker.state}))});
@@ -35,12 +35,12 @@ function exposeFallback(error){
   node.querySelector('span').textContent=error?.message||String(error||'Unknown boot error');log('visual-boot-fallback',{message:error?.message||String(error)})
 }
 (async()=>{
-  try{if(!window.CommonweaveBootLog)await load(`boot-diagnostics-v126.js?v=${VERSION}`)}catch(error){console.warn('Boot diagnostics could not preload',error)}
-  log('v126-bootstrap-start',{href:location.href,controller:navigator.serviceWorker?.controller?.scriptURL||null});
+  try{if(!window.CommonweaveBootLog)await load(`boot-diagnostics-v126.js?v=${VERSION}&hotfix=1`)}catch(error){console.warn('Boot diagnostics could not preload',error)}
+  log('v126-bootstrap-start',{href:location.href,controller:navigator.serviceWorker?.controller?.scriptURL||null,build:BUILD});
   localStorage.setItem('commonweave.host-build',BUILD);
   await retireLegacyWorkers();
   await installWorker();
-  try{await load(`host-node-v126.js?v=${VERSION}`);log('v126-runtime-ready',{universalAI:Boolean(window.CommonweaveUniversalAI)})}catch(error){console.error('Commonweave v1.0.26 shell failed to load',error);exposeFallback(error)}
+  try{await load(`host-node-v126-safe.js?v=${VERSION}&hotfix=1`);log('v126-runtime-ready',{universalAI:Boolean(window.CommonweaveUniversalAI),build:BUILD})}catch(error){console.error('Commonweave v1.0.26 shell failed to load',error);exposeFallback(error)}
 })();
 setTimeout(()=>{if(!window.CommonweaveUniversalAI&&!document.querySelector('.cw-v125-home-nav'))exposeFallback(new Error('The visual hub timed out before its controls became available.'))},9000);
 })();
