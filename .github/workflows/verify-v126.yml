@@ -53,9 +53,12 @@ jobs:
           grep -q 'install-v130.js' installer.html
           curl -fsS -D worker-headers.txt http://127.0.0.1:8787/service-worker.js -o service-worker.js
           grep -qi 'service-worker-allowed: /' worker-headers.txt
-          grep -q "CACHE_REVISION='minilm-runtime-r17'" service-worker.js
+          grep -q "CACHE_REVISION='minilm-runtime-r18'" service-worker.js
           grep -q 'MODEL_GRAPH_PREFIX' service-worker.js
           grep -q 'modelNetworkFirst' service-worker.js
+          grep -q 'binaryStreamFirst' service-worker.js
+          grep -q 'ONNX_BACKEND_PREFIX)){event.respondWith(binaryStreamFirst(request))' service-worker.js
+          grep -q 'MODEL_GRAPH_PREFIX)){event.respondWith(binaryStreamFirst(request))' service-worker.js
           grep -q '/app/models/all-minilm-l6-v2/tokenizer.json' service-worker.js
           grep -q '/app/anarchadia-console-v139.html' service-worker.js
           grep -q '/app/anarchadia-console-v139.css' service-worker.js
@@ -99,12 +102,17 @@ jobs:
           curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/adapter.js -o minilm-adapter.js
           grep -q 'BODY_PROBE_LIMIT=2_000_000' minilm-adapter.js
           grep -q 'response.blob()).size' minilm-adapter.js
-          grep -q 'worker.js?v=reflex-r3' minilm-adapter.js
+          grep -q 'worker.js?v=reflex-r4' minilm-adapter.js
           grep -q 'length>=spec.minBytes' minilm-adapter.js
+          grep -q 'stopWorker' minilm-adapter.js
           curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/worker.js -o minilm-worker.js
-          grep -q 'onnx-r11' minilm-worker.js
+          grep -q 'onnx-r12' minilm-worker.js
           grep -q 'wasmPaths=BACKEND_ROOT' minilm-worker.js
           grep -q 'env.useBrowserCache=false' minilm-worker.js
+          grep -q 'proxy=false' minilm-worker.js
+          grep -q 'numThreads=1' minilm-worker.js
+          grep -q 'verifyWasm' minilm-worker.js
+          grep -Fq "[['wasm','q8'],['webgpu','q4f16']]" minilm-worker.js
           if grep -q 'wasmPaths={' minilm-worker.js; then
             echo 'MiniLM worker still uses unsupported object-form wasmPaths' >&2
             exit 1
@@ -121,12 +129,13 @@ jobs:
           file commonweave-icon-192.png | grep -q '192 x 192'
           curl -fsS http://127.0.0.1:8787/app/vendor/transformers/stage-manifest.json -o transformers-stage.json
           grep -q '@huggingface/transformers' transformers-stage.json
-          curl -fsS "http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs?v=onnx-r11" -D onnx-loader-headers.txt -o onnx-loader.mjs
+          curl -fsS "http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs?v=onnx-r12" -D onnx-loader-headers.txt -o onnx-loader.mjs
           grep -Eqi 'content-type: (text|application)/(javascript|ecmascript)' onnx-loader-headers.txt
-          test -s onnx-loader.mjs
-          curl -fsS "http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm?v=onnx-r11" -D onnx-wasm-headers.txt -o onnx-runtime.wasm
+          test "$(wc -c < onnx-loader.mjs)" -ge 10000
+          curl -fsS "http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm?v=onnx-r12" -D onnx-wasm-headers.txt -o onnx-runtime.wasm
           grep -qi 'content-type: application/wasm' onnx-wasm-headers.txt
-          test -s onnx-runtime.wasm
+          test "$(wc -c < onnx-runtime.wasm)" -ge 1000000
+          test "$(od -An -t x1 -N4 onnx-runtime.wasm | tr -d ' \n')" = '0061736d'
           curl -fsS http://127.0.0.1:8787/field/commonweave/seed -o commonweave-pocket-campus.cwseed
           test -s commonweave-pocket-campus.cwseed
           if unzip -l commonweave-pocket-campus.cwseed | grep -q 'all-minilm-l6-v2/onnx/'; then
@@ -138,7 +147,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v130-minilm-runtime-r17-evidence
+          name: commonweave-v130-minilm-runtime-r18-evidence
           path: |
             commonweave-server.log
             health.json
@@ -164,5 +173,6 @@ jobs:
             onnx-loader-headers.txt
             onnx-loader.mjs
             onnx-wasm-headers.txt
+            onnx-runtime.wasm
             commonweave-pocket-campus.cwseed
             boot-logs.json
