@@ -49,3 +49,13 @@ Version 1.0.10 treats the supplied artwork as the application surface across the
 ## v1.0.10 live-node recovery
 
 This build repairs Living School and Cerbanimo visual startup, routes the Quad into host setup on unconnected devices, adds compact image-backed navigation glyphs, calibrates FellowFare's main atrium, suppresses stale heartbeat calls, and gives Antigravity permission failures a non-blocking Gemini fallback. See `RELEASE-NOTES-v1.0.10.md`.
+
+## v1.0.28 parity-ledger architecture
+
+The current entry points are:
+
+- Visual Commonweave: `/loom/`
+- Commonweave Lite: `/lite/`
+- Canonical capability ledger: `/app/shared/commonweave-parity-ledger.json`
+
+Visual and Lite consume the same systems, rooms, capability IDs, consent rules, handoffs, and reward semantics. The mature service applications remain available as working source surfaces while capabilities are migrated behind shared adapters. See `COMMONWEAVE-PARITY-LEDGER.md` and `RELEASE-NOTES-v1.0.28.md`.
