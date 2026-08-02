@@ -9,7 +9,7 @@ const origin = `http://127.0.0.1:${PORT}`;
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataDir = await mkdtemp(path.join(os.tmpdir(), 'commonweave-v126-'));
 const output = [];
-const child = spawn(process.execPath, ['server-v126.mjs'], {
+const child = spawn(process.execPath, ['server-v126-hotfix.mjs'], {
   cwd: root,
   env: { ...process.env, HOST: '127.0.0.1', PORT: String(PORT), DATA_DIR: dataDir },
   stdio: ['ignore', 'pipe', 'pipe']
@@ -45,6 +45,18 @@ try {
   assert(!campusHtml.includes('location.reload()'), 'automatic reload survived in campus HTML');
   assert(!campusHtml.includes('register("service-worker.js"'), 'legacy worker registration survived in campus HTML');
 
+  const setup = await fetch(`${origin}/campus/host-node-setup-v126.js`, { cache: 'no-store' }).then(response => response.text());
+  assert(setup.includes('host-node-v126-safe.js'), 'safe runtime loader is not wired into bootstrap');
+  assert(setup.includes('hotfix=1'), 'hotfix cache-buster is missing from bootstrap');
+
+  const runtime = await fetch(`${origin}/campus/host-node-v126.js`, { cache: 'no-store' }).then(response => response.text());
+  assert(!runtime.includes("controllerchange',()=>location.reload()"), 'controllerchange reload survived in served runtime');
+  assert(runtime.includes('controllerchange-observed-no-reload'), 'served runtime does not log the no-reload controller transition');
+
+  const worker = await fetch(`${origin}/campus/service-worker-v126.js?hotfix=1`, { cache: 'no-store' }).then(response => response.text());
+  assert(!worker.includes('clients.claim()'), 'service worker still claims the active page');
+  assert(worker.includes('activate-without-client-claim'), 'service-worker no-claim activation marker is missing');
+
   const version = await fetch(`${origin}/campus/version.json`, { cache: 'no-store' }).then(response => response.json());
   assert(version.version === '1.0.26', `unexpected campus version: ${version.version}`);
   assert(version.build === '1.0.26-loop-diagnostics', `unexpected campus build: ${version.build}`);
@@ -54,9 +66,11 @@ try {
   assert((migration.headers.get('location') || '').startsWith('/campus/'), `legacy app migration target was ${migration.headers.get('location')}`);
 
   await fetch(`${origin}/api/boot-log`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: 'smoke-test', detail: { source: 'scripts/smoke-v126.mjs' } }) });
+  await fetch(`${origin}/campus/assets/world/town-square-home.webp`, { cache: 'no-store' });
   const logs = await fetch(`${origin}/api/boot-logs`, { cache: 'no-store' }).then(response => response.json());
   assert(logs.version === '1.0.26', 'boot-log endpoint version mismatch');
   assert(logs.logs.some(entry => entry.kind === 'client:smoke-test'), 'boot-log endpoint did not retain the smoke event');
+  assert(!logs.logs.some(entry => entry.kind === 'http-request' && entry.detail?.originalPathname?.includes('town-square-home.webp')), 'noncritical asset request polluted the focused boot log');
   console.log(JSON.stringify({ ok: true, health, campusBytes: campusHtml.length, bootLogCount: logs.count }, null, 2));
 } catch (error) {
   console.error(output.join(''));
