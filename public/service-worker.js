@@ -1,6 +1,6 @@
 'use strict';
 const VERSION='1.0.30';
-const CACHE_REVISION='cabinet-r2';
+const CACHE_REVISION='geometry-r3';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
 const CABINET_PREFIX='/app/assets/cabinets/';
@@ -9,11 +9,13 @@ const CORE=[
   '/loom/realm/living-school/','/loom/realm/cerbanimo/','/loom/realm/fellowfare/','/loom/realm/anarchadia/',
   '/app/manifest.webmanifest',
   '/app/loom-v128.css','/app/loom-v128.js','/app/realm-v128.js',
-  '/app/shared/commonweave-parity-runtime.js',
+  '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js',
   '/app/v130-cabinet-launcher.css','/app/v130-cabinet-launcher.js',
   '/app/pwa-v130.css','/app/pwa-v130.js',
   '/app/lite-v129.html','/app/lite-v129-base.css','/app/lite-v129-components.css','/app/lite-v129-themes.css','/app/lite-source-v129.css',
   '/app/lite-v129-core.js','/app/lite-v129-native.js','/app/lite-v129-app.js',
+  '/app/cabinet-calibration-v131.css','/app/cabinet-calibration-v131.js',
+  '/app/model-settings-v131.css','/app/model-settings-v131.js',
   '/app/shared/commonweave-parity-ledger.json',
   '/app/shared/cabinet-shells-v129.json',
   '/app/assets/cabinets/commonweave.webp','/app/assets/cabinets/living-school.webp','/app/assets/cabinets/cerbanimo.webp','/app/assets/cabinets/fellowfare.webp','/app/assets/cabinets/anarchadia.webp',
