@@ -66,7 +66,7 @@ function selectLexical(text,entries,route){
 }
 async function semanticMatch(text,entries,route,waitMs=350){
   const engine=await adapter();
-  const task=engine.match(text,{limit:6,timeoutMs:120000}).then(result=>{semanticReady=true;return result});
+  const task=engine.match(text,{limit:6,timeoutMs:120000}).then(result=>{semanticReady=true;return result}).catch(()=>null);
   const timeout=new Promise(resolve=>setTimeout(()=>resolve(null),waitMs));
   const result=await Promise.race([task,timeout]);
   if(!result)return null;
