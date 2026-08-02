@@ -36,9 +36,10 @@ for(const required of [
   "^application\\/wasm(?:;|$)"
 ])assert(worker.includes(required),`worker missing ${required}`);
 
-assert(serviceWorker.includes("CACHE_REVISION='smollm2-contract-icon-r11'"),'service worker cache revision is stale');
+assert(serviceWorker.includes("CACHE_REVISION='smollm2-route-lock-r12'"),'service worker cache revision is stale');
 assert(serviceWorker.includes("const ONNX_BACKEND_PREFIX='/app/vendor/transformers/wasm/'"),'service worker has no ONNX backend route');
 assert(serviceWorker.includes("new Request(request,{cache:'reload'})"),'ONNX backend files are not revalidated');
+assert(serviceWorker.includes('/app/models/smollm2-360m-instruct/tokenizer.json'),'tokenizer is not part of the offline shell');
 assert(hostWrapper.includes("['.wasm','application/wasm']"),'host wrapper does not add the WebAssembly MIME type');
 assert(hostWrapper.includes("['.onnx','application/octet-stream']"),'host wrapper does not add the ONNX MIME type');
 
@@ -54,7 +55,8 @@ assert(pkg.scripts?.prestart?.includes('ensure-smollm2-model.mjs --soft'),'start
 assert(pkg.scripts?.['model:pull']==='node scripts/ensure-smollm2-model.mjs','model:pull script missing');
 assert(pkg.scripts?.['model:check']==='node scripts/ensure-smollm2-model.mjs --check','model:check script missing');
 
-assert(workflow.includes("CACHE_REVISION='smollm2-contract-icon-r11'"),'workflow does not verify the current cache');
+assert(workflow.includes("CACHE_REVISION='smollm2-route-lock-r12'"),'workflow does not verify the current cache');
+assert(workflow.includes('smollm2-small-model-v137.js?v=route-lock-r2'),'workflow does not verify the route-lock contract');
 assert(workflow.includes('onnx-r10'),'workflow does not probe versioned backend URLs');
 assert(workflow.includes("content-type: application/wasm"),'workflow does not require the streaming WebAssembly MIME type');
 assert(workflow.includes('lfs: false'),'lightweight CI should not fetch the 273 MB graph');
@@ -65,7 +67,9 @@ console.log(JSON.stringify({
   wasmMime:'application/wasm',
   streamingCompilation:true,
   internalWasmCache:false,
-  serviceWorkerRevision:'smollm2-contract-icon-r11',
+  serviceWorkerRevision:'smollm2-route-lock-r12',
+  routeLockContract:'v137',
+  tokenizerOffline:true,
   automaticLfsMaterialization:true,
   lightweightCiPullsLfs:false
 },null,2));
