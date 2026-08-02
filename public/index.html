@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07141f">
+  <meta http-equiv="Cache-Control" content="no-store">
   <title>Commonweave Host Node</title>
   <link rel="icon" href="/app/logos/commonweave-icon-192.png">
   <style>
@@ -12,15 +13,15 @@
 </head>
 <body>
   <main class="host-world" aria-label="Commonweave host-node installation gateway">
-    <img src="/app/assets/world/host-wave2.webp" alt="The newly renovated Living School hall from Commonweave's wave-two visual release." fetchpriority="high">
-    <a id="wizard" class="host-hotspot host-install" href="/recover.html" aria-label="Recover, install, and connect the Commonweave pocket campus">Recover and enter</a>
+    <img src="/app/assets/world/host-wave2.webp" alt="The renovated Commonweave host hall." fetchpriority="high">
+    <a class="host-hotspot host-install" href="/recover.html" aria-label="Recover old workers and enter the isolated Commonweave campus">Recover and enter</a>
     <a class="host-hotspot host-download" href="/downloads/Commonweave-Mobile-Install-Kit.zip" aria-label="Download the complete offline Commonweave installation kit">Download offline kit</a>
   </main>
-  <div class="host-version"><img src="/app/logos/commonweave.webp" alt=""><span>RECOVERY BUILD · v1.0.25</span></div>
-  <div class="host-projection" aria-live="polite"><strong><span id="dot" class="host-dot"></span><span id="status">Waking the host node…</span></strong><span>Touch the Quad to retire stale v1.0.21 caches and enter Commonweave. Your plans and shared AI preference are preserved.</span></div>
+  <div class="host-version"><img src="/app/logos/commonweave.webp" alt=""><span>DIAGNOSTIC BUILD · v1.0.26</span></div>
+  <div class="host-projection" aria-live="polite"><strong><span id="dot" class="host-dot"></span><span id="status">Checking the host build…</span></strong><span>Touch the Quad to retire the looping /app worker and enter the new /campus scope. Boot events are recorded without prompts or secrets.</span></div>
 <script>
 const status=document.querySelector('#status');
-Promise.allSettled([fetch('/api/health',{cache:'no-store'}).then(r=>r.ok?r.json():null),fetch('/app/version.json',{cache:'no-store'}).then(r=>r.ok?r.json():null)]).then(([health,version])=>{const h=health.status==='fulfilled'?health.value:null,v=version.status==='fulfilled'?version.value:null;document.querySelector('#dot').classList.add('ok');status.textContent=`${h?.name||'Commonweave Host Node'} ready · v${v?.version||'1.0.25'}`}).catch(()=>status.textContent='Host node is starting · recovery gate remains available');
+Promise.allSettled([fetch('/api/health?gateway='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null),fetch('/api/boot-logs',{cache:'no-store'}).then(r=>r.ok?r.json():null)]).then(([health,logs])=>{const h=health.status==='fulfilled'?health.value:null,l=logs.status==='fulfilled'?logs.value:null;document.querySelector('#dot').classList.add('ok');status.textContent=`${h?.name||'Commonweave Host Node'} ready · ${h?.appVersion||'unknown'} · ${l?.count||0} boot events`}).catch(()=>status.textContent='Host node is starting · recovery gate remains available');
 </script>
 </body>
 </html>
