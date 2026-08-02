@@ -1,7 +1,9 @@
 'use strict';
 const VERSION='1.0.30';
-const STATIC_CACHE=`commonweave-static-${VERSION}`;
-const RUNTIME_CACHE=`commonweave-runtime-${VERSION}`;
+const CACHE_REVISION='cabinet-r2';
+const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
+const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
+const CABINET_PREFIX='/app/assets/cabinets/';
 const CORE=[
   '/loom/','/lite/',
   '/loom/realm/living-school/','/loom/realm/cerbanimo/','/loom/realm/fellowfare/','/loom/realm/anarchadia/',
@@ -29,18 +31,18 @@ async function cacheOne(cache,url){
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(STATIC_CACHE);
   const results=await Promise.all(CORE.map(url=>cacheOne(cache,url)));
-  await report('installed',{cached:results.filter(Boolean).length,total:CORE.length});
+  await report('installed',{cached:results.filter(Boolean).length,total:CORE.length,revision:CACHE_REVISION});
 })()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
   const keys=await caches.keys();
   const stale=keys.filter(key=>(key.startsWith('commonweave-')&&key!==STATIC_CACHE&&key!==RUNTIME_CACHE)||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));
   await Promise.all(stale.map(key=>caches.delete(key)));
   await self.clients.claim();
-  await report('activated',{deleted:stale});
+  await report('activated',{deleted:stale,revision:CACHE_REVISION});
 })()));
 self.addEventListener('message',event=>{
   if(event.data?.type==='SKIP_WAITING')self.skipWaiting();
-  if(event.data?.type==='GET_VERSION')event.source?.postMessage?.({type:'COMMONWEAVE_VERSION',version:VERSION});
+  if(event.data?.type==='GET_VERSION')event.source?.postMessage?.({type:'COMMONWEAVE_VERSION',version:VERSION,revision:CACHE_REVISION});
 });
 async function networkFirst(request,fallback){
   const cache=await caches.open(RUNTIME_CACHE);
@@ -75,6 +77,11 @@ self.addEventListener('fetch',event=>{
     return;
   }
   if(url.pathname==='/service-worker.js'){event.respondWith(fetch(request,{cache:'no-store'}));return}
+  if(url.pathname.startsWith(CABINET_PREFIX)){
+    const revalidatingRequest=new Request(request,{cache:'no-cache'});
+    event.respondWith(networkFirst(revalidatingRequest));
+    return;
+  }
   if(url.pathname.startsWith('/app/')||url.pathname.startsWith('/downloads/')){
     event.respondWith(cacheFirst(request));
   }
