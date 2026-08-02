@@ -64,6 +64,10 @@ jobs:
           grep -q '@huggingface/transformers' transformers-stage.json
           curl -fsS http://127.0.0.1:8787/field/commonweave/seed -o commonweave-pocket-campus.cwseed
           test -s commonweave-pocket-campus.cwseed
+          if unzip -l commonweave-pocket-campus.cwseed | grep -q 'model_q4f16.onnx'; then
+            echo 'Pocket seed unexpectedly contains the 273 MB SmolLM2 graph' >&2
+            exit 1
+          fi
           curl -fsS http://127.0.0.1:8787/api/boot-logs > boot-logs.json
       - name: Upload offline-first evidence
         if: always()
