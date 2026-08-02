@@ -1,7 +1,7 @@
 const MODEL_ID = 'HuggingFaceTB/SmolLM2-360M-Instruct';
 const LOCAL_ID = 'smollm2-360m-instruct';
 const MODEL_ROOT = '/app/models/smollm2-360m-instruct';
-const WORKER_URL = `${MODEL_ROOT}/worker.js?v=onnx-runtime-r8`;
+const WORKER_URL = `${MODEL_ROOT}/worker.js?v=onnx-runtime-r9`;
 const VENDOR_ROOT = '/app/vendor/transformers';
 const VENDOR_MODULE = `${VENDOR_ROOT}/transformers.min.js`;
 const BACKEND_ROOT = `${VENDOR_ROOT}/wasm`;
@@ -124,6 +124,7 @@ export async function status() {
     files,
     missing,
     backendRoot: `${BACKEND_ROOT}/`,
+    workerUrl: WORKER_URL,
     remoteDownloadsAllowed: false,
   };
 }
