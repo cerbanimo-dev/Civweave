@@ -141,6 +141,9 @@ replaceRequired(
   String.raw`    if (req.method === 'GET' && (originalPathname.startsWith('/app/vendor/transformers/wasm/') || originalPathname.endsWith('.onnx') || originalPathname.includes('.onnx?'))) {
       if (await serveFile(req, res, pathname)) return;
     }
+    if (req.method === 'GET' && originalPathname.startsWith('/app/models/')) {
+      if (await serveFile(req, res, pathname)) return;
+    }
     const citizenConsoleAssets = new Set([
       '/app/anarchadia-console-v139.html',
       '/app/anarchadia-console-v139.css',
