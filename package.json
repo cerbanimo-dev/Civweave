@@ -9,9 +9,9 @@
   },
   "scripts": {
     "prestart": "npm run build:install",
-    "start": "node server.mjs",
-    "dev": "node --watch server.mjs",
-    "check": "node --check server.mjs",
+    "start": "node server-v125.mjs",
+    "dev": "node --watch server-v125.mjs",
+    "check": "node --check server-v125.mjs && node --check server.mjs",
     "build:install": "bash scripts/build-install-artifacts.sh"
   }
 }
