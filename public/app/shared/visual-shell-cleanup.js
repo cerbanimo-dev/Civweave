@@ -1,48 +1,25 @@
-(()=>{'use strict';
- const path=location.pathname;
- const system=path.includes('/cerbanimo/')?'cerbanimo':path.includes('/anarchadia/')?'anarchadia':path.includes('/living-school/')?'living':path.includes('/fellowfare/')?'fellowfare':'';
- if(!system)return;
- const params=new URLSearchParams(location.search);if(params.get('classic')==='1')return;
- document.documentElement.classList.add('cw-lean-visual-shell',`cw-system-${system}`);
-
- /* A district is never its own installable app. Commonweave owns updates and installation. */
- try{
-  document.querySelectorAll('link[rel="manifest"]').forEach(link=>link.href=new URL('../../manifest.webmanifest',location.href).href);
-  document.querySelectorAll('meta[name="apple-mobile-web-app-title"]').forEach(meta=>meta.content='Commonweave');
-  document.title=`Commonweave Pocket Campus · ${{cerbanimo:'Cerbanimo',anarchadia:'Anarchadia',living:'Living School',fellowfare:'FellowFare'}[system]}`;
- }catch{}
-
- const assets={
-  cerbanimo:['assets/cerbanimo-logo.png','../../assets/ai/kamiya.png'],
-  anarchadia:['../../logos/anarchadia.webp','../../assets/ai/merlin.png'],
-  living:['../../logos/living-school.webp','../../assets/ai/moss.png'],
-  fellowfare:['../../logos/fellowfare.png','../../assets/ai/rook.png']
- }[system];
- const selectors={cerbanimo:'.visual-scene-frame',anarchadia:'.visual-stage-canvas',living:'.ls-visual-frame',fellowfare:'.mall-scene'};
- const guideNames={cerbanimo:'Kamiya · Questwright',anarchadia:'Merlin · Boundaries',living:'Moss · Learning',fellowfare:'Rook · Exchange'};
-
- function removeLegacy(){
-  document.querySelectorAll('.legacy-toolbar,.legacy-bottom-nav,.legacy-hud,.rook-commons-local,[data-legacy-shell],[data-app-update-banner],.app-update-banner').forEach(node=>node.remove());
-  if(system==='anarchadia')document.querySelectorAll('.debug-region,.hotspot-debug,[data-debug-box]').forEach(node=>node.remove());
- }
-
- function decorate(){
-  removeLegacy();
-  for(const host of document.querySelectorAll(selectors[system])){
-   if(host.dataset.cwDecorated)continue;
-   host.dataset.cwDecorated='1';
-   const logo=document.createElement('img');logo.className='cw-scene-decoration logo';logo.src=assets[0];logo.alt='';host.append(logo);
-   const guide=document.createElement('img');guide.className=`cw-scene-decoration guide cw-guide-${system}`;guide.src=assets[1];guide.alt=guideNames[system];guide.title=`${guideNames[system]} · available through Weaveling's Compass`;host.append(guide);
-  }
- }
-
- /* Service workers may report updates, but only the Commonweave shell presents the action. */
- navigator.serviceWorker?.addEventListener?.('message',event=>{
-  if(event.data?.type==='UPDATE_AVAILABLE'){
-   try{localStorage.setItem('commonweave.update-available',JSON.stringify({at:Date.now(),source:system}));}catch{}
-  }
- });
-
- new MutationObserver(()=>requestAnimationFrame(decorate)).observe(document.documentElement,{childList:true,subtree:true});
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',decorate,{once:true});else decorate();
+(()=>{
+'use strict';
+const path=location.pathname,system=path.includes('/living-school/')?'living':path.includes('/cerbanimo/')?'cerbanimo':path.includes('/fellowfare/')?'fellowfare':path.includes('/anarchadia/')?'anarchadia':'';if(!system||new URLSearchParams(location.search).get('classic')==='1')return;
+const VERSION='1.0.22',ROOT=new URL('../../',location.href),A=relative=>new URL(relative,location.href).href,R=relative=>new URL(relative,ROOT).href;
+const config={
+ living:{name:'Living School',logo:R('logos/living-school.webp'),guide:R('assets/ai/moss.png'),guideName:'Moss',home:'home',scenes:{home:A('visual-assets/core/home.webp'),library:A('visual-assets/core/library.webp'),forge:A('visual-assets/core/forge.webp'),moss:A('visual-assets/core/moss.webp'),workshop:A('visual-assets/core/workshop.webp'),commons:A('visual-assets/core/commons.webp')},spots:[['Library','library',5,18,30,20],['Curriculum Forge','forge',64,18,31,20],['Moss','moss',4,58,31,18],['Workshop','workshop',64,48,31,18],['Commons','commons',34,58,31,16]]},
+ cerbanimo:{name:'Cerbanimo',logo:A('assets/cerbanimo-wordmark.png'),guide:R('assets/ai/kamiya.png'),guideName:'Kamiya',home:'nexus',scenes:{nexus:A('assets/visual/nexus.webp'),mission:A('assets/visual/mission.webp'),workshop:A('assets/visual/workshop.webp'),quest:A('assets/visual/quest.webp'),skill:A('assets/visual/skill.webp'),resource:A('assets/visual/resource.webp'),systems:A('assets/visual/systems.webp')},spots:[['Mission Control','mission',4,22,29,20],['Workshop','workshop',67,22,29,20],['Quest Arcade','quest',4,49,30,18],['Skill Simulator','skill',66,48,30,18],['Resources','resource',35,65,30,16]]},
+ fellowfare:{name:'FellowFare',logo:R('logos/fellowfare-wordmark.png'),guide:R('assets/ai/rook.png'),guideName:'Rook',home:'atrium',scenes:{atrium:A('assets/mall/main-atrium.webp'),market:A('assets/mall/marketplace.webp'),galleria:A('assets/mall/exchange-galleria.webp'),aid:A('assets/mall/mutual-aid-wing.webp'),makers:A('assets/mall/makers-arcade.webp'),logistics:A('assets/mall/logistics-concourse.webp')},spots:[['Marketplace','market',3,45,29,23],['Exchange Galleria','galleria',67,45,30,23],['Mutual Aid','aid',3,70,29,17],['Makers Arcade','makers',68,70,29,17],['Logistics','logistics',35,72,30,15]]},
+ anarchadia:{name:'Anarchadia',logo:R('logos/anarchadia.webp'),guide:R('assets/ai/merlin.png'),guideName:'Merlin',home:'hall',scenes:{hall:A('assets/screens/home-portrait.webp'),proposal:A('assets/screens/proposal-portrait.webp'),bug:A('assets/screens/bug-portrait.webp'),hub:A('assets/screens/hub-portrait.webp'),federation:A('assets/screens/federation-portrait.webp'),rails:A('assets/screens/rails-portrait.webp'),forge:A('assets/screens/forge-portrait.webp'),ledger:A('assets/screens/ledger-portrait.webp')},spots:[['Feature Request','proposal',7,34,28,18],['Bug Report','bug',66,34,28,18],['Hub','hub',7,60,28,17],['Federation','federation',66,60,28,17],['Rails','rails',36,65,28,15]]}
+}[system];
+document.documentElement.classList.add('cw-lean-visual-shell',`cw-system-${system}`);document.title=`Commonweave Pocket Campus · ${config.name}`;
+document.querySelectorAll('link[rel="manifest"]').forEach(link=>link.href=R('manifest.webmanifest'));document.querySelectorAll('meta[name="apple-mobile-web-app-title"]').forEach(meta=>meta.content='Commonweave');
+async function unifyWorker(){if(!('serviceWorker'in navigator))return;try{const regs=await navigator.serviceWorker.getRegistrations();await Promise.allSettled(regs.filter(r=>/\/services\//.test(r.scope)).map(r=>r.unregister()));await navigator.serviceWorker.register(R('service-worker.js'),{scope:ROOT.pathname,updateViaCache:'none'})}catch{}}
+function compass(){if(window.CommonweaveCompass?.open)return window.CommonweaveCompass.open();if(window.CommonweaveMerlinChat?.open)return window.CommonweaveMerlinChat.open();document.querySelector('.cw-merlin-launcher')?.click()}
+function settings(){location.href=`${R('index.html')}?open=model-settings`}
+function commonweave(){location.href=R('index.html')}
+function info(){const p=document.querySelector('.cw-district-info');p.hidden=!p.hidden}
+function board(){if(system!=='anarchadia')return'';return '<section class="cw-anarchadia-board"><strong>WHAT NEEDS DOING?</strong><div><button data-scene="proposal">FEATURE REQUEST</button><button data-scene="bug">BUG REPORT</button><button data-scene="hub">COMMUNITY HUB</button><button data-scene="federation">FEDERATION</button></div></section>'}
+function decorations(){return `<img class="cw-district-logo" src="${config.logo}" alt="${config.name}"><div class="cw-guide-frame"><img src="${config.guide}" alt="${config.guideName}"></div>${board()}`}
+function markup(){return `<section class="cw-recovery-stage" data-system="${system}" data-scene="${config.home}"><img class="cw-recovery-art" alt="${config.name} visual campus"><div class="cw-recovery-loading">Loading local ${config.name} scene…</div><button class="cw-commonweave-return" aria-label="Return to Commonweave"><img src="${R('ui-icons/back.svg')}" alt=""></button><button class="cw-district-version" aria-label="Commonweave version ${VERSION}"><img src="${R('logos/commonweave-icon-96.png')}" alt=""><span>v${VERSION}</span></button><nav class="cw-district-controls"><button data-info aria-label="Scene information"><span>i</span></button><button data-compass aria-label="Weaveling Compass"><img src="${R('assets/ai/weaveling-compass.png')}" alt=""></button><button data-settings aria-label="Commonweave settings"><img src="${R('ui-icons/settings.svg')}" alt=""></button></nav><div class="cw-scene-layer">${decorations()}<div class="cw-scene-hotspots"></div></div><nav class="cw-district-dock"><button data-home aria-label="${config.name} home"><img src="${R('ui-icons/home.svg')}" alt=""></button><button data-commonweave aria-label="Commonweave home"><img src="${R('logos/commonweave-icon-96.png')}" alt=""></button><button data-compass aria-label="Weaveling Compass"><img src="${R('assets/ai/weaveling-compass.png')}" alt=""></button></nav></section><aside class="cw-district-info" hidden><button aria-label="Close">×</button><small>COMMONWEAVE v${VERSION}</small><strong>${config.name}</strong><p>This realm is running from locally cached illustrated assets. Updates, installation, and the shared model belong to Commonweave, not to the individual realm.</p><span>Home: return to this realm's main room</span><span>Commonweave sigil: return to the Quad</span><span>Compass: open the site-wide guide</span></aside>`}
+function setScene(id){if(!config.scenes[id])id=config.home;const stage=document.querySelector('.cw-recovery-stage'),image=stage.querySelector('.cw-recovery-art'),loading=stage.querySelector('.cw-recovery-loading');stage.dataset.scene=id;loading.hidden=false;image.onload=()=>{loading.hidden=true;stage.classList.add('ready')};image.onerror=()=>{loading.textContent='This local scene asset could not be opened.'};image.fetchPriority='high';image.decoding='async';image.src=config.scenes[id];const hs=stage.querySelector('.cw-scene-hotspots');hs.innerHTML=(id===config.home?config.spots:[]).map(([label,scene,x,y,w,h])=>`<button data-scene="${scene}" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%" aria-label="${label}"><span>${label}</span></button>`).join('');stage.querySelectorAll('[data-scene]').forEach(b=>b.onclick=()=>setScene(b.dataset.scene));if(system==='anarchadia')stage.querySelector('.cw-anarchadia-board')?.removeAttribute('hidden')}
+function mount(){if(document.querySelector('.cw-recovery-stage'))return;document.body.insertAdjacentHTML('beforeend',markup());const stage=document.querySelector('.cw-recovery-stage');stage.querySelector('.cw-commonweave-return').onclick=commonweave;stage.querySelectorAll('[data-compass]').forEach(b=>b.onclick=compass);stage.querySelector('[data-settings]').onclick=settings;stage.querySelector('[data-info]').onclick=info;stage.querySelector('[data-home]').onclick=()=>setScene(config.home);stage.querySelector('[data-commonweave]').onclick=commonweave;document.querySelector('.cw-district-info>button').onclick=info;setScene(config.home);const preload=()=>Object.values(config.scenes).filter(src=>src!==config.scenes[config.home]).forEach(src=>{const i=new Image;i.decoding='async';i.src=src});('requestIdleCallback'in window?requestIdleCallback:fn=>setTimeout(fn,1400))(preload)}
+function removeLegacy(){document.querySelectorAll('.cw-release-banner,.app-update-banner,[data-app-update-banner],.legacy-toolbar,.legacy-bottom-nav,.legacy-hud,.rook-commons-local,.ff-version-plaque,.ff-scene-back,.cw-scene-decoration,.debug-region,.hotspot-debug,[data-debug-box]').forEach(n=>n.remove())}
+new MutationObserver(()=>{removeLegacy();if(!document.querySelector('.cw-recovery-stage'))mount()}).observe(document.documentElement,{childList:true,subtree:true});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{removeLegacy();mount();unifyWorker()},{once:true});else{removeLegacy();mount();unifyWorker()}
 })();
