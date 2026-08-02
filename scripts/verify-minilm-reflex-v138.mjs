@@ -46,19 +46,22 @@ assert(loom.includes('intention-ui-v138.js?v=weave-r1'),'Quad does not load inte
 assert(realm.includes('intention-planner-v138.js?v=weave-r1'),'realm guides do not load intention planner');
 
 for(const required of ['semanticWaitMs=350','selectLexical','semanticMatch','routeByRules','local-reflex','requestIdleCallback','mutual aid network'])assert(runtime.includes(required),`reflex runtime missing ${required}`);
-for(const required of ['Onboard Semantic Reflex','Run reflex speed trial','Chat never waits for this model','MiniLM Reflex remains the immediate fallback'])assert(settings.includes(required),`settings missing ${required}`);
+for(const required of ['Onboard Semantic Reflex','Run reflex speed trial','Chat never waits for this model','MiniLM Reflex remains the immediate fallback','missingSummary','warm?.ready===false','Semantic package incomplete'])assert(settings.includes(required),`settings missing ${required}`);
 assert(!settings.includes('Run five-prompt trial'),'old decoder trial remains active');
 for(const required of ['CommonweaveAssistantV138','matching this against the local weave','Never expose internal request packets','CommonweaveIntentionPlanner','commonweave-planner'])assert(assistant.includes(required),`assistant missing ${required}`);
 assert(!assistant.includes('fallbackExpectation'),'assistant can expose the old internal fallback packet');
-for(const required of ["pipeline('feature-extraction'","['webgpu','q4f16']","['wasm','q8']","pooling:'mean'",'normalize:true'])assert(worker.includes(required),`worker missing ${required}`);
-for(const required of ['model_q4f16.onnx','model_quantized.onnx','prewarm','match','benchmark'])assert(adapter.includes(required),`adapter missing ${required}`);
+for(const required of ["pipeline('feature-extraction'","['webgpu','q4f16']","['wasm','q8']","pooling:'mean'",'normalize:true','BACKEND_ROOT','wasmPaths=BACKEND_ROOT','env.useBrowserCache=false','onnx-r11'])assert(worker.includes(required),`worker missing ${required}`);
+assert(!worker.includes('wasmPaths={'),'worker uses the unsupported object-form wasmPaths configuration');
+for(const required of ['model_q4f16.onnx','model_quantized.onnx','prewarm','match','benchmark','worker.js?v=reflex-r3','htmlFallback','length>=spec.minBytes'])assert(adapter.includes(required),`adapter missing ${required}`);
 
-assert(sw.includes("CACHE_REVISION='anarchadia-interior-r16'"),'service worker revision is stale');
-for(const required of ['/app/models/all-minilm-l6-v2/tokenizer.json','/app/intention-planner-v138.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css'])assert(sw.includes(required),`service worker missing ${required}`);
+assert(sw.includes("CACHE_REVISION='minilm-runtime-r17'"),'service worker revision is stale');
+for(const required of ['/app/models/all-minilm-l6-v2/tokenizer.json','/app/intention-planner-v138.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css','MODEL_GRAPH_PREFIX','modelNetworkFirst','ONNX_BACKEND_PREFIX'])assert(sw.includes(required),`service worker missing ${required}`);
 assert(!/CORE=\[[\s\S]*all-minilm-l6-v2\/onnx\/model_q4f16\.onnx/.test(sw),'WebGPU graph is eagerly precached');
 assert(!sw.includes('smollm2-360m-instruct'),'service worker still references SmolLM2');
 assert(!pkgText.includes('ensure-smollm2'),'package lifecycle still invokes SmolLM2 materialization');
 assert(pkg.scripts?.postinstall?.includes('ensure-minilm-model.mjs --soft'),'MiniLM is not materialized during install');
+assert(pkg.scripts?.prestart?.includes('stage-transformers-assets.mjs && node scripts/ensure-minilm-model.mjs'),'host startup does not require a complete MiniLM package');
+assert(!pkg.scripts?.prestart?.includes('--soft'),'host startup can silently accept an incomplete MiniLM package');
 assert(pkg.scripts?.check?.includes('verify-minilm-reflex-v138.mjs'),'MiniLM verifier is not part of npm check');
 
 const entries=Array.isArray(index.entries)?index.entries:[];
@@ -119,5 +122,5 @@ console.log(JSON.stringify({
   graphs:{webgpu:30018257,wasm:22972370},
   patterns:entries.length,
   selfLoveWeave:{paths:built.paths.map(item=>item.realm),governance:built.governance.realm,state:built.state},
-  cacheRevision:'anarchadia-interior-r16'
+  cacheRevision:'minilm-runtime-r17'
 },null,2));
