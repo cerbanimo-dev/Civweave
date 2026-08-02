@@ -2,13 +2,15 @@ import { spawn } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const PORT = 18787;
 const origin = `http://127.0.0.1:${PORT}`;
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataDir = await mkdtemp(path.join(os.tmpdir(), 'commonweave-v126-'));
 const output = [];
 const child = spawn(process.execPath, ['server-v126.mjs'], {
-  cwd: path.resolve(path.dirname(new URL(import.meta.url).pathname), '..'),
+  cwd: root,
   env: { ...process.env, HOST: '127.0.0.1', PORT: String(PORT), DATA_DIR: dataDir },
   stdio: ['ignore', 'pipe', 'pipe']
 });
