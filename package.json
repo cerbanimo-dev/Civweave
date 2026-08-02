@@ -9,7 +9,7 @@
   },
   "scripts": {
     "postinstall": "node scripts/stage-transformers-assets.mjs && node scripts/ensure-minilm-model.mjs --soft",
-    "prestart": "node scripts/stage-transformers-assets.mjs --soft && node scripts/ensure-minilm-model.mjs --soft",
+    "prestart": "node scripts/stage-transformers-assets.mjs && node scripts/ensure-minilm-model.mjs",
     "start": "node server-v130.mjs",
     "predev": "node scripts/stage-transformers-assets.mjs --soft && node scripts/ensure-minilm-model.mjs --soft",
     "dev": "node --watch server-v130.mjs",
