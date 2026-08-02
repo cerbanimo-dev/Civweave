@@ -2,7 +2,9 @@
 
 > Canonical endpoint: `/app/shared/commonweave-parity-ledger.json`
 >
-> Repository source: `public/app/shared/commonweave-parity-ledger.part1.b64` through `.part4.b64` (lossless gzip-base64)
+> Base capability source: `public/app/shared/commonweave-parity-ledger.part1.b64` through `.part4.b64` (lossless gzip-base64)
+>
+> Cabinet renderer overlay: `public/app/shared/cabinet-shells-v129.json`
 
 Commonweave now has one information architecture and two renderers. As of v1.0.29, the Lite renderer is projected through the same five cabinet shells used as in-world terminal assets:
 
@@ -81,6 +83,7 @@ The service applications remain the working implementation sources during migrat
 
 ## Cabinet renderer introduced in v1.0.29
 
+- `public/app/shared/cabinet-shells-v129.json`
 - `public/app/assets/cabinets-data/*.b64` (optimized WebP cabinet payloads)
 - `public/app/lite-v129.html` with split `lite-v129-*` style and runtime files
 - `public/app/lite-source-v129.css`
