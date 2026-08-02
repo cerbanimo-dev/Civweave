@@ -1,5 +1,5 @@
 const VERSION='1.0.25';
-const CACHE='commonweave-pocket-campus-v72-freeze-recovery';
+const CACHE='commonweave-pocket-campus-v73-version-lock';
 const CRITICAL=[
   './','./index.html','./manifest.webmanifest','./version.json','./host-node-setup.js','./host-node-v125.js',
   './commonweave-world.css','./commonweave-world.js','./commonweave-merlin-chat.css',
@@ -29,7 +29,7 @@ async function rewriteHub(response,request){
   if(!isHubNavigation(request))return response;
   const type=response.headers.get('content-type')||'';if(!type.includes('text/html'))return response;
   let text=await response.text();
-  text=text.replaceAll('1.0.21-ai-uplift','1.0.25-freeze-recovery').replaceAll('HOST v1.0.21','HOST v1.0.25');
+  text=text.replaceAll('1.0.21-ai-uplift','1.0.25-freeze-recovery').replaceAll('rc22.3.20-ai-checkpoint','1.0.25').replaceAll('HOST v1.0.21','HOST v1.0.25');
   const headers=new Headers(response.headers);headers.delete('content-length');headers.set('cache-control','no-store');headers.set('x-commonweave-recovery','1.0.25');
   return new Response(text,{status:response.status,statusText:response.statusText,headers});
 }
