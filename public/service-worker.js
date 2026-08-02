@@ -1,6 +1,6 @@
 'use strict';
 const VERSION='1.0.30';
-const CACHE_REVISION='smollm2-backend-r9';
+const CACHE_REVISION='smollm2-backend-r10';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
 const CABINET_PREFIX='/app/assets/cabinets/';
@@ -33,7 +33,7 @@ const CORE=[
   '/offline.html'
 ];
 const report=async(kind,detail={})=>{
-  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-smollm2-backend-r9',kind:`service-worker:${kind}`,detail})})}catch{}
+  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-smollm2-backend-r10',kind:`service-worker:${kind}`,detail})})}catch{}
 };
 async function cacheOne(cache,url){
   try{const response=await fetch(url,{cache:'reload'});if(response.ok)await cache.put(url,response.clone());return response.ok}catch{return false}

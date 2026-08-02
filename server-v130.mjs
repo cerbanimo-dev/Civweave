@@ -15,6 +15,11 @@ function replaceRequired(before, after, label) {
 }
 replaceRequired("const BUILD_VERSION = '1.0.21-ai-uplift';", `const BUILD_VERSION = '${BUILD}';`, 'host build marker');
 replaceRequired("const APP_VERSION = 'rc22.3.20-ai-checkpoint';", `const APP_VERSION = '${VERSION}';`, 'app version marker');
+replaceRequired(
+  "  ['.md','text/markdown; charset=utf-8'],['.sh','text/x-shellscript; charset=utf-8']",
+  "  ['.md','text/markdown; charset=utf-8'],['.sh','text/x-shellscript; charset=utf-8'],['.wasm','application/wasm'],['.onnx','application/octet-stream'],['.map','application/json; charset=utf-8']",
+  'model runtime MIME map'
+);
 source = source.replace("appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`", "appUrl: `${root}/loom/?setup=1&host=${encodeURIComponent(root)}`");
 source = source.replace("appUrl: `${requestOrigin(req, url)}/app/`", "appUrl: `${requestOrigin(req, url)}/loom/`");
 const injected = String.raw`

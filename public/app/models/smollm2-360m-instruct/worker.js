@@ -2,7 +2,7 @@ import { pipeline, env } from '/app/vendor/transformers/transformers.min.js';
 
 const MODEL_ID = 'smollm2-360m-instruct';
 const MODEL_ROOT = '/app/models/';
-const BACKEND_VERSION = 'onnx-r9';
+const BACKEND_VERSION = 'onnx-r10';
 const BACKEND_MJS = new URL(`/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs?v=${BACKEND_VERSION}`, self.location.origin).href;
 const BACKEND_WASM = new URL(`/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm?v=${BACKEND_VERSION}`, self.location.origin).href;
 let generatorPromise = null;
@@ -33,8 +33,8 @@ async function verifyBackendResponse(url, kind) {
     const preview = (await response.clone().text()).slice(0, 120).replace(/\s+/g, ' ');
     throw new Error(`ONNX Runtime loader was served as ${type || 'an unknown MIME type'} instead of JavaScript. Response begins: ${preview}`);
   }
-  if (kind === 'wasm' && !/(application\/wasm|application\/octet-stream)/.test(type)) {
-    throw new Error(`ONNX Runtime binary was served as ${type || 'an unknown MIME type'} instead of WebAssembly.`);
+  if (kind === 'wasm' && !/^application\/wasm(?:;|$)/.test(type)) {
+    throw new Error(`ONNX Runtime binary was served as ${type || 'an unknown MIME type'} instead of application/wasm.`);
   }
   return { url, type, bytes: Number(response.headers.get('content-length') || 0) };
 }
