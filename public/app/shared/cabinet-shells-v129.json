@@ -3,13 +3,15 @@
   "version": "1.0.30",
   "systems": {
     "commonweave": {
-      "kind": "projected-cabinet-v1",
+      "kind": "projected-cabinet-v2",
       "screen": {
-        "x": 10.8,
-        "y": 21.9,
-        "width": 78.4,
-        "height": 61.2,
-        "radius": 4.2
+        "x": 11.2,
+        "y": 22.4,
+        "width": 77.6,
+        "height": 60.1,
+        "radius": 4.8,
+        "clip": "inset(0 round 4.8%)",
+        "contentTop": 0
       },
       "motif": "prismatic woven compass",
       "accent2": "#7d6cff",
@@ -20,17 +22,26 @@
         "living-school",
         "cerbanimo"
       ],
+      "controls": [
+        { "system": "anarchadia", "x": 25.1, "y": 91.2, "size": 9.6 },
+        { "system": "fellowfare", "x": 35.6, "y": 91.2, "size": 9.0 },
+        { "system": "commonweave", "x": 49.95, "y": 90.8, "size": 14.0 },
+        { "system": "living-school", "x": 64.4, "y": 91.2, "size": 9.1 },
+        { "system": "cerbanimo", "x": 74.9, "y": 91.2, "size": 9.1 }
+      ],
       "assetType": "image/webp",
       "asset": "/app/assets/cabinets/commonweave.webp"
     },
     "living-school": {
-      "kind": "projected-cabinet-v1",
+      "kind": "projected-cabinet-v2",
       "screen": {
-        "x": 15.1,
-        "y": 21.3,
-        "width": 70.3,
-        "height": 60.4,
-        "radius": 4.8
+        "x": 15.6,
+        "y": 21.6,
+        "width": 68.9,
+        "height": 59.1,
+        "radius": 5.2,
+        "clip": "inset(0 round 5.2%)",
+        "contentTop": 0
       },
       "motif": "botanical academy and illuminated manuscript",
       "accent2": "#d6b45d",
@@ -41,17 +52,26 @@
         "living-school",
         "cerbanimo"
       ],
+      "controls": [
+        { "system": "anarchadia", "x": 22.85, "y": 89.6, "size": 9.0 },
+        { "system": "fellowfare", "x": 34.0, "y": 89.6, "size": 8.2 },
+        { "system": "commonweave", "x": 49.95, "y": 89.6, "size": 13.8 },
+        { "system": "living-school", "x": 65.78, "y": 89.6, "size": 8.2 },
+        { "system": "cerbanimo", "x": 76.73, "y": 89.6, "size": 8.2 }
+      ],
       "assetType": "image/webp",
       "asset": "/app/assets/cabinets/living-school.webp"
     },
     "cerbanimo": {
-      "kind": "projected-cabinet-v1",
+      "kind": "projected-cabinet-v2",
       "screen": {
-        "x": 15.5,
-        "y": 19.7,
-        "width": 69.2,
-        "height": 62.6,
-        "radius": 4.4
+        "x": 16.5,
+        "y": 20.2,
+        "width": 67.0,
+        "height": 61.3,
+        "radius": 4.7,
+        "clip": "inset(0 round 4.7%)",
+        "contentTop": 0
       },
       "motif": "neon industrial quest forge",
       "accent2": "#5ac8ff",
@@ -62,17 +82,26 @@
         "living-school",
         "cerbanimo"
       ],
+      "controls": [
+        { "system": "anarchadia", "x": 26.57, "y": 87.44, "size": 8.1 },
+        { "system": "fellowfare", "x": 37.51, "y": 87.44, "size": 7.7 },
+        { "system": "commonweave", "x": 49.95, "y": 87.44, "size": 11.8 },
+        { "system": "living-school", "x": 62.27, "y": 87.44, "size": 8.5 },
+        { "system": "cerbanimo", "x": 73.01, "y": 87.44, "size": 8.1 }
+      ],
       "assetType": "image/webp",
       "asset": "/app/assets/cabinets/cerbanimo.webp"
     },
     "fellowfare": {
-      "kind": "projected-cabinet-v1",
+      "kind": "projected-cabinet-v2",
       "screen": {
-        "x": 9.6,
-        "y": 24.9,
-        "width": 80.5,
-        "height": 59.4,
-        "radius": 4.7
+        "x": 10.9,
+        "y": 25.4,
+        "width": 78.2,
+        "height": 57.8,
+        "radius": 5.0,
+        "clip": "inset(0 round 5%)",
+        "contentTop": 0
       },
       "motif": "woven market craft and trustworthy exchange",
       "accent2": "#39b8c8",
@@ -83,17 +112,26 @@
         "living-school",
         "cerbanimo"
       ],
+      "controls": [
+        { "system": "anarchadia", "x": 22.85, "y": 91.15, "size": 9.0 },
+        { "system": "fellowfare", "x": 34.22, "y": 91.15, "size": 8.4 },
+        { "system": "commonweave", "x": 49.84, "y": 90.8, "size": 12.4 },
+        { "system": "living-school", "x": 64.93, "y": 91.15, "size": 8.6 },
+        { "system": "cerbanimo", "x": 76.62, "y": 91.15, "size": 8.4 }
+      ],
       "assetType": "image/webp",
       "asset": "/app/assets/cabinets/fellowfare.webp"
     },
     "anarchadia": {
-      "kind": "projected-cabinet-v1",
+      "kind": "projected-cabinet-v2",
       "screen": {
-        "x": 9.7,
-        "y": 27.2,
-        "width": 80.3,
-        "height": 56.5,
-        "radius": 3.8
+        "x": 12.8,
+        "y": 26.85,
+        "width": 74.4,
+        "height": 56.15,
+        "radius": 0,
+        "clip": "polygon(7% 0,12% 0,17% 3.2%,83% 3.2%,88% 0,93% 0,97% 1%,100% 5%,100% 94%,99% 97.5%,96% 100%,4% 100%,1% 97.5%,0 94%,0 5%,3% 1%)",
+        "contentTop": 3.4
       },
       "motif": "punk civic console and highlighter governance",
       "accent2": "#ffd326",
@@ -103,6 +141,13 @@
         "commonweave",
         "living-school",
         "cerbanimo"
+      ],
+      "controls": [
+        { "system": "anarchadia", "x": 24.12, "y": 92.1, "size": 9.6 },
+        { "system": "fellowfare", "x": 35.39, "y": 92.1, "size": 8.5 },
+        { "system": "commonweave", "x": 49.95, "y": 92.1, "size": 14.0 },
+        { "system": "living-school", "x": 64.61, "y": 92.1, "size": 9.6 },
+        { "system": "cerbanimo", "x": 75.98, "y": 92.1, "size": 8.9 }
       ],
       "assetType": "image/webp",
       "asset": "/app/assets/cabinets/anarchadia.webp"
