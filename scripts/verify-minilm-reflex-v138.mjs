@@ -50,12 +50,15 @@ for(const required of ['Onboard Semantic Reflex','Run reflex speed trial','Chat 
 assert(!settings.includes('Run five-prompt trial'),'old decoder trial remains active');
 for(const required of ['CommonweaveAssistantV138','matching this against the local weave','Never expose internal request packets','CommonweaveIntentionPlanner','commonweave-planner'])assert(assistant.includes(required),`assistant missing ${required}`);
 assert(!assistant.includes('fallbackExpectation'),'assistant can expose the old internal fallback packet');
-for(const required of ["pipeline('feature-extraction'","['webgpu','q4f16']","['wasm','q8']","pooling:'mean'",'normalize:true','BACKEND_ROOT','wasmPaths=BACKEND_ROOT','env.useBrowserCache=false','onnx-r11'])assert(worker.includes(required),`worker missing ${required}`);
+for(const required of ["pipeline('feature-extraction'","['wasm','q8']","['webgpu','q4f16']","pooling:'mean'",'normalize:true','BACKEND_ROOT','wasmPaths=BACKEND_ROOT','env.useBrowserCache=false','proxy=false','numThreads=1','verifyWasm','wasmMagic','onnx-r12'])assert(worker.includes(required),`worker missing ${required}`);
+assert(worker.indexOf("['wasm','q8']")<worker.indexOf("['webgpu','q4f16']"),'stable WASM backend is not attempted before experimental WebGPU');
 assert(!worker.includes('wasmPaths={'),'worker uses the unsupported object-form wasmPaths configuration');
-for(const required of ['model_q4f16.onnx','model_quantized.onnx','prewarm','match','benchmark','worker.js?v=reflex-r3','htmlFallback','length>=spec.minBytes'])assert(adapter.includes(required),`adapter missing ${required}`);
+for(const required of ['model_q4f16.onnx','model_quantized.onnx','prewarm','match','benchmark','worker.js?v=reflex-r4','htmlFallback','length>=spec.minBytes','stopWorker'])assert(adapter.includes(required),`adapter missing ${required}`);
 
-assert(sw.includes("CACHE_REVISION='minilm-runtime-r17'"),'service worker revision is stale');
-for(const required of ['/app/models/all-minilm-l6-v2/tokenizer.json','/app/intention-planner-v138.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css','MODEL_GRAPH_PREFIX','modelNetworkFirst','ONNX_BACKEND_PREFIX'])assert(sw.includes(required),`service worker missing ${required}`);
+assert(sw.includes("CACHE_REVISION='minilm-runtime-r18'"),'service worker revision is stale');
+for(const required of ['/app/models/all-minilm-l6-v2/tokenizer.json','/app/intention-planner-v138.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css','MODEL_GRAPH_PREFIX','modelNetworkFirst','binaryStreamFirst','ONNX_BACKEND_PREFIX'])assert(sw.includes(required),`service worker missing ${required}`);
+assert(sw.includes("if(url.pathname.startsWith(ONNX_BACKEND_PREFIX)){event.respondWith(binaryStreamFirst(request))"),'ONNX runtime binary is not streamed directly');
+assert(sw.includes("if(url.pathname.startsWith(MODEL_GRAPH_PREFIX)){event.respondWith(binaryStreamFirst(request))"),'ONNX model graph is not streamed directly');
 assert(!/CORE=\[[\s\S]*all-minilm-l6-v2\/onnx\/model_q4f16\.onnx/.test(sw),'WebGPU graph is eagerly precached');
 assert(!sw.includes('smollm2-360m-instruct'),'service worker still references SmolLM2');
 assert(!pkgText.includes('ensure-smollm2'),'package lifecycle still invokes SmolLM2 materialization');
@@ -104,6 +107,10 @@ assert(created?.response?.choice?.mode==='Plan','plan trigger did not switch Wea
 const saved=JSON.parse(storage.get('commonweave.intentions.v127'));
 assert(saved?.[0]?.kind==='weave-plan'&&saved[0].state==='review','reviewable weave was not persisted');
 
+const wasmRuntime=await readFile(path.join(root,'public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm'));
+assert(wasmRuntime.length>1000000,`ONNX WASM runtime is only ${wasmRuntime.length} bytes`);
+assert(wasmRuntime[0]===0&&wasmRuntime[1]===97&&wasmRuntime[2]===115&&wasmRuntime[3]===109,'ONNX WASM runtime lacks the 0061736d magic bytes');
+
 for(const [relative,size,sha] of [
   ['public/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx',30018257,'eb08a666c46109637e0b6cb04f6052a68efd59bb0252d4e0438d28fb6b2d853d'],
   ['public/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx',22972370,'afdb6f1a0e45b715d0bb9b11772f032c399babd23bfc31fed1c170afc848bdb1']
@@ -119,8 +126,10 @@ console.log(JSON.stringify({
   architecture:'canonical planner + lexical reflex + background semantic retrieval',
   interactiveWaitMs:350,
   tokenGeneration:false,
+  backendOrder:['wasm','webgpu'],
+  wasmRuntime:{bytes:wasmRuntime.length,magic:'0061736d'},
   graphs:{webgpu:30018257,wasm:22972370},
   patterns:entries.length,
   selfLoveWeave:{paths:built.paths.map(item=>item.realm),governance:built.governance.realm,state:built.state},
-  cacheRevision:'minilm-runtime-r17'
+  cacheRevision:'minilm-runtime-r18'
 },null,2));
