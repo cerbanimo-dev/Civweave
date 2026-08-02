@@ -40,7 +40,7 @@ jobs:
           fi
           curl -fsS http://127.0.0.1:8787/campus/version.json > version.json
           grep -q '"version": "1.0.26"' version.json
-          curl -fsSI http://127.0.0.1:8787/app/ > migration-headers.txt
+          curl -fsS -D migration-headers.txt http://127.0.0.1:8787/app/ -o /dev/null
           grep -qi 'location: /campus/' migration-headers.txt
           curl -fsS http://127.0.0.1:8787/api/boot-logs > boot-logs.json
           cat boot-logs.json
