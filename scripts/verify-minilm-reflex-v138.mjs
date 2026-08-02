@@ -53,7 +53,7 @@ assert(!assistant.includes('fallbackExpectation'),'assistant can expose the old 
 for(const required of ["pipeline('feature-extraction'","['webgpu','q4f16']","['wasm','q8']","pooling:'mean'",'normalize:true'])assert(worker.includes(required),`worker missing ${required}`);
 for(const required of ['model_q4f16.onnx','model_quantized.onnx','prewarm','match','benchmark'])assert(adapter.includes(required),`adapter missing ${required}`);
 
-assert(sw.includes("CACHE_REVISION='anarchadia-console-r15'"),'service worker revision is stale');
+assert(sw.includes("CACHE_REVISION='anarchadia-interior-r16'"),'service worker revision is stale');
 for(const required of ['/app/models/all-minilm-l6-v2/tokenizer.json','/app/intention-planner-v138.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css'])assert(sw.includes(required),`service worker missing ${required}`);
 assert(!/CORE=\[[\s\S]*all-minilm-l6-v2\/onnx\/model_q4f16\.onnx/.test(sw),'WebGPU graph is eagerly precached');
 assert(!sw.includes('smollm2-360m-instruct'),'service worker still references SmolLM2');
@@ -119,5 +119,5 @@ console.log(JSON.stringify({
   graphs:{webgpu:30018257,wasm:22972370},
   patterns:entries.length,
   selfLoveWeave:{paths:built.paths.map(item=>item.realm),governance:built.governance.realm,state:built.state},
-  cacheRevision:'anarchadia-console-r15'
+  cacheRevision:'anarchadia-interior-r16'
 },null,2));
