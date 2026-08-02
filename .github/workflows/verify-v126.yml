@@ -36,7 +36,7 @@ jobs:
         run: |
           PORT=8787 npm start > commonweave-server.log 2>&1 &
           echo $! > commonweave-server.pid
-      - name: Inspect installer, app, worker, model contract, backend, and seed routes
+      - name: Inspect installer, app, model contract, icons, backend, and seed routes
         run: |
           set -euxo pipefail
           for i in $(seq 1 30); do
@@ -53,15 +53,30 @@ jobs:
           grep -q 'commonweave-static-' service-worker.js
           grep -q 'commonweave-runtime-' service-worker.js
           grep -q "const VERSION='1.0.30'" service-worker.js
-          grep -q "CACHE_REVISION='smollm2-backend-r10'" service-worker.js
+          grep -q "CACHE_REVISION='smollm2-contract-icon-r11'" service-worker.js
           curl -fsS http://127.0.0.1:8787/loom/ -o loom.html
           grep -q 'smollm2-fallback-runtime-v134.js' loom.html
+          grep -q 'smollm2-small-model-v136.js?v=contract-r1' loom.html
+          grep -q 'commonweave-icon-192.png?v=dark-r1' loom.html
           grep -q 'weaveling-hologram-v133.css?v=heart-r8' loom.html
           grep -q 'v130-cabinet-launcher.js' loom.html
           grep -q 'pwa-v130.js' loom.html
           curl -fsS http://127.0.0.1:8787/lite/ -o lite.html
           grep -q 'smollm2-fallback-runtime-v134.js' lite.html
+          grep -q 'smollm2-small-model-v136.js?v=contract-r1' lite.html
           grep -q 'lite-v129-app.js' lite.html
+          curl -fsS http://127.0.0.1:8787/app/smollm2-small-model-v136.js -o smollm2-contract.js
+          grep -q 'COMMONWEAVE_SMALL_MODEL_CONTRACT_V1' smollm2-contract.js
+          grep -q 'function normalizeRoute' smollm2-contract.js
+          grep -q 'maxNewTokens:56' smollm2-contract.js
+          curl -fsS http://127.0.0.1:8787/app/logos/commonweave-icon-generation.json -o icon-generation.json
+          grep -q 'dark-centered-thread-mark' icon-generation.json
+          curl -fsS -D icon-192-headers.txt http://127.0.0.1:8787/app/logos/commonweave-icon-192.png -o commonweave-icon-192.png
+          grep -qi 'content-type: image/png' icon-192-headers.txt
+          file commonweave-icon-192.png | grep -q '192 x 192'
+          curl -fsS -D icon-512-headers.txt http://127.0.0.1:8787/app/logos/commonweave-icon-512.png -o commonweave-icon-512.png
+          grep -qi 'content-type: image/png' icon-512-headers.txt
+          file commonweave-icon-512.png | grep -q '512 x 512'
           curl -fsS http://127.0.0.1:8787/app/models/smollm2-360m-instruct/model-manifest.json -o smollm2-manifest.json
           grep -q 'HuggingFaceTB/SmolLM2-360M-Instruct' smollm2-manifest.json
           curl -fsS http://127.0.0.1:8787/app/models/smollm2-360m-instruct/worker.js -o smollm2-worker.js
@@ -104,6 +119,12 @@ jobs:
             service-worker.js
             loom.html
             lite.html
+            smollm2-contract.js
+            icon-generation.json
+            icon-192-headers.txt
+            commonweave-icon-192.png
+            icon-512-headers.txt
+            commonweave-icon-512.png
             smollm2-manifest.json
             smollm2-worker.js
             transformers-stage.json
