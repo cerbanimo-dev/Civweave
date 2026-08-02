@@ -3,7 +3,7 @@
 const VERSION='1.0.26';
 const BUILD='1.0.26-loop-diagnostics';
 const log=(kind,detail={})=>window.CommonweaveBootLog?.log(kind,detail)||console.info('[CW-BOOT]',kind,detail);
-const load=src=>new Promise((resolve,reject)=>{const wanted=new URL(src,location.href).pathname;const existing=[...document.scripts].find(script=>{try{return new URL(script.src||location.href,location.href).pathname===wanted}catch{return false}});if(existing){log('script-already-present',{src:wanted});return resolve()}const script=document.createElement('script');script.src=src;script.async=false;script.onload=()=>{log('script-loaded',{src:wanted});resolve()};script.onerror=()=>reject(new Error(`Could not load ${src}`));document.head.append(script)});
+const load=src=>new Promise((resolve,reject)=>{const wanted=new URL(src,location.href).pathname;const existing=[...document.scripts].find(script=>{try{return new URL(script.src||location.href,location.href).pathname===wanted}catch{return false}});if(existing&&window.CommonweaveBootLog)return resolve();const script=existing||document.createElement('script');if(!existing){script.src=src;script.async=false;document.head.append(script)}script.addEventListener('load',()=>{log('script-loaded',{src:wanted});resolve()},{once:true});script.addEventListener('error',()=>reject(new Error(`Could not load ${src}`)),{once:true})});
 async function retireLegacyWorkers(){
   const marker='commonweave.scope-migration.v126';
   if(localStorage.getItem(marker)===BUILD){log('legacy-retirement-already-complete');return}
@@ -35,6 +35,7 @@ function exposeFallback(error){
   node.querySelector('span').textContent=error?.message||String(error||'Unknown boot error');log('visual-boot-fallback',{message:error?.message||String(error)})
 }
 (async()=>{
+  try{if(!window.CommonweaveBootLog)await load(`boot-diagnostics-v126.js?v=${VERSION}`)}catch(error){console.warn('Boot diagnostics could not preload',error)}
   log('v126-bootstrap-start',{href:location.href,controller:navigator.serviceWorker?.controller?.scriptURL||null});
   localStorage.setItem('commonweave.host-build',BUILD);
   await retireLegacyWorkers();
