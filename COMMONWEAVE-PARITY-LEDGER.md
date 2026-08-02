@@ -4,10 +4,10 @@
 >
 > Repository source: `public/app/shared/commonweave-parity-ledger.part1.b64` through `.part4.b64` (lossless gzip-base64)
 
-Commonweave now has one information architecture and two renderers:
+Commonweave now has one information architecture and two renderers. As of v1.0.29, the Lite renderer is projected through the same five cabinet shells used as in-world terminal assets:
 
 - **Visual** at `/loom/`, where rooms are illustrated scenes and capabilities open through in-world objects or projections.
-- **Lite** at `/lite/`, where the same system, room, and capability IDs appear through conventional accessible controls.
+- **Lite** at `/lite/`, where the same system, room, and capability IDs appear as accessible forms, ledgers, lists, and working tools projected inside each system’s cabinet screen.
 
 The service applications remain the working implementation sources during migration. They are opened through `/lite/source/<system>/` beneath the canonical room structure rather than treated as competing navigation systems.
 
@@ -19,6 +19,7 @@ The service applications remain the working implementation sources during migrat
 4. Visual capability activation begins on an illustrated asset.
 5. Lite may be plain, but it must never invent a different hierarchy.
 6. A feature is not considered parity-complete until both renderers execute the same operation against the same state contract.
+7. Every system owns one `interfaceShell` record defining its cabinet asset, projection rectangle, motif, and physical system controls.
 
 ## Current ledger size
 
@@ -77,6 +78,14 @@ The service applications remain the working implementation sources during migrat
 3. Bind each Visual capability to a shaped hotspot or illustrated instrument.
 4. Bind each Lite capability to the same adapter using standard controls.
 5. Add shared state-contract tests and remove the corresponding legacy navigation only after both renderers pass.
+
+## Cabinet renderer introduced in v1.0.29
+
+- `public/app/assets/cabinets-data/*.b64` (optimized WebP cabinet payloads)
+- `public/app/lite-v129.html` with split `lite-v129-*` style and runtime files
+- `public/app/lite-source-v129.css`
+- `server-v129.mjs`
+- native Commonweave wish-to-weave forms and an in-screen working-source workspace
 
 ## Files introduced in v1.0.28
 
