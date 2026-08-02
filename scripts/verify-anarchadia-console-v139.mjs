@@ -16,9 +16,11 @@ const [html,css,js,launcher,adapter,worker,serviceWorker]=await Promise.all([
   read('public/service-worker.js')
 ]);
 
-for(const required of ['ANARCHADIA // CITIZEN CONSOLE','OPEN PROPOSALS','VIEW LEDGER','AUTOMATION','OBSERVATORY','BUGFIX REQUEST','FEATURE REQUEST','VOTE!','ac-request-form','ac-preview-frame'])assert(html.includes(required),`console HTML missing ${required}`);
+for(const required of ['ANARCHADIA','// CITIZEN CONSOLE','OPEN PROPOSALS','VIEW LEDGER','AUTOMATION','OBSERVATORY','BUGFIX REQUEST','FEATURE REQUEST','VOTE!','ac-request-form','ac-preview-frame','ac-display','ac-console-bar'])assert(html.includes(required),`console HTML missing ${required}`);
 for(const required of ['title','problem','expected','acceptance','risk','evidence','autoRun'])assert(html.includes(`name="${required}"`),`request form missing ${required}`);
-for(const required of ['--pink:#ff2f87','--gold:#ffc21a','--cyan:#1fd8ff','--lime:#8dff2b','/app/assets/cabinets/anarchadia.webp','.ac-pipeline-track','.ac-observatory'])assert(css.includes(required),`console CSS missing ${required}`);
+for(const required of ['--pink:#ff2f87','--gold:#ffc21a','--cyan:#1fd8ff','--lime:#8dff2b','.ac-display','.ac-console-bar','.ac-pipeline-track','.ac-observatory','repeating-linear-gradient'])assert(css.includes(required),`console CSS missing ${required}`);
+assert(!css.includes('/app/assets/cabinets/anarchadia.webp'),'console interior must not draw a second cabinet exterior');
+assert(!html.includes('ac-masthead'),'console interior still contains the duplicate exterior masthead');
 for(const required of [
   "const STAGES=['intake','rail-check','code-generation','validation','sandbox-install','preview-ready']",
   'commonweave.anarchadia.citizen-console.v139',
@@ -39,16 +41,17 @@ assert(adapter.includes('BODY_PROBE_LIMIT=2_000_000'),'MiniLM status checker lac
 assert(adapter.includes("response.blob()).size"),'MiniLM status checker does not measure cached response bodies');
 assert(adapter.includes("probeBody:false"),'MiniLM graph checks could accidentally download full ONNX bodies');
 assert(worker.includes("pipeline('feature-extraction'"),'MiniLM worker no longer performs semantic feature extraction');
-assert(serviceWorker.includes("CACHE_REVISION='anarchadia-console-r15'"),'service worker revision was not rotated');
+assert(serviceWorker.includes("CACHE_REVISION='anarchadia-interior-r16'"),'service worker revision was not rotated');
 for(const required of ['/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-console-v139.js'])assert(serviceWorker.includes(required),`service worker does not precache ${required}`);
 
 console.log(JSON.stringify({
   ok:true,
-  console:'Anarchadia Citizen Console v139',
+  console:'Anarchadia Citizen Console v139 interior correction',
+  visualBoundary:'existing cabinet remains outside iframe; console renders only the display interior',
   modules:['proposals','ledger','automation','observatory'],
   requestKinds:['bugfix','feature'],
   pipeline:['intake','rail-check','code-generation','validation','sandbox-install','preview-ready'],
   publicationBoundary:'sandbox auto-install; production requires explicit community approval',
   minilmStatusProbe:'small cached files measured; ONNX bodies never probed',
-  cacheRevision:'anarchadia-console-r15'
+  cacheRevision:'anarchadia-interior-r16'
 },null,2));
