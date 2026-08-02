@@ -41,7 +41,7 @@ assert(adapter.includes('BODY_PROBE_LIMIT=2_000_000'),'MiniLM status checker lac
 assert(adapter.includes("response.blob()).size"),'MiniLM status checker does not measure cached response bodies');
 assert(adapter.includes("probeBody:false"),'MiniLM graph checks could accidentally download full ONNX bodies');
 assert(worker.includes("pipeline('feature-extraction'"),'MiniLM worker no longer performs semantic feature extraction');
-assert(serviceWorker.includes("CACHE_REVISION='anarchadia-interior-r16'"),'service worker revision was not rotated');
+assert(serviceWorker.includes("CACHE_REVISION='minilm-runtime-r17'"),'service worker revision was not rotated');
 for(const required of ['/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-console-v139.js'])assert(serviceWorker.includes(required),`service worker does not precache ${required}`);
 
 console.log(JSON.stringify({
@@ -53,5 +53,5 @@ console.log(JSON.stringify({
   pipeline:['intake','rail-check','code-generation','validation','sandbox-install','preview-ready'],
   publicationBoundary:'sandbox auto-install; production requires explicit community approval',
   minilmStatusProbe:'small cached files measured; ONNX bodies never probed',
-  cacheRevision:'anarchadia-interior-r16'
+  cacheRevision:'minilm-runtime-r17'
 },null,2));
