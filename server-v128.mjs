@@ -84,6 +84,12 @@ async function cwServeLoom(req, res, originalPathname, requestId) {
     text = text.replace(/<head([^>]*)>/i, '<head$1>' + injection);
     cwLog('lite-source-served', { requestId, service, bytes:text.length }, req); cwSend(res, 200, text, 'text/html; charset=utf-8', requestId); return true;
   }
+  if (originalPathname === '/app/shared/commonweave-parity-ledger.json') {
+    const { gunzipSync } = await import('node:zlib');
+    const encoded = (await Promise.all([1,2,3,4].map(part => fsp.readFile(path.join(PUBLIC_DIR, 'app', 'shared', 'commonweave-parity-ledger.part' + part + '.b64'), 'utf8')))).join('').replace(/\s+/g, '');
+    const text = gunzipSync(Buffer.from(encoded.trim(), 'base64')).toString('utf8');
+    cwLog('parity-ledger-served', { requestId, bytes:text.length }, req); cwSend(res, 200, text, 'application/json; charset=utf-8', requestId); return true;
+  }
   if (originalPathname === '/loom/version.json' || originalPathname === '/lite/version.json') {
     cwSend(res, 200, JSON.stringify({schema:'commonweave.version.v1',version:CW_VERSION,build:CW_BUILD,channel:'main',parityLedger:'/app/shared/commonweave-parity-ledger.json',updatedAt:new Date().toISOString()},null,2), 'application/json; charset=utf-8', requestId); return true;
   }
