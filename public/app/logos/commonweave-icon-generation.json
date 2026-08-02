@@ -1,0 +1,25 @@
+{
+  "schema": "commonweave.icon-generation.v1",
+  "source": "commonweave.webp",
+  "treatment": "dark-centered-thread-mark",
+  "generatedAt": "2026-08-02T15:38:33.161Z",
+  "files": [
+    "commonweave-icon-16.png",
+    "commonweave-icon-32.png",
+    "commonweave-icon-48.png",
+    "commonweave-icon-72.png",
+    "commonweave-icon-96.png",
+    "commonweave-icon-128.png",
+    "commonweave-icon-144.png",
+    "commonweave-icon-152.png",
+    "commonweave-icon-180.png",
+    "commonweave-icon-192.png",
+    "commonweave-icon-384.png",
+    "commonweave-icon-512.png",
+    "commonweave-icon-1024.png",
+    "commonweave-app-icon.png",
+    "commonweave-icon-maskable-192.png",
+    "commonweave-icon-maskable-512.png",
+    "commonweave-adaptive-foreground-512.png"
+  ]
+}
