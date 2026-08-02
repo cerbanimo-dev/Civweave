@@ -1,0 +1,36 @@
+name: Materialize Commonweave v1.0.30 source
+
+on:
+  push:
+    branches: [fix/offline-pwa-cabinet-runtime]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/offline-pwa-cabinet-runtime
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Materialize source files
+        run: node scripts/materialize-v130.mjs
+      - name: Validate v1.0.30
+        run: npm run check
+      - name: Commit materialized source
+        run: |
+          git config user.name "commonweave-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add README.md COMMONWEAVE-PARITY-LEDGER.md RELEASE-NOTES-v1.0.30.md server-v130.mjs scripts public package.json
+          if git diff --cached --quiet; then
+            echo "No materialized changes"
+          else
+            git commit -m "Materialize offline-first cabinet runtime"
+            git push origin HEAD:fix/offline-pwa-cabinet-runtime
+          fi
