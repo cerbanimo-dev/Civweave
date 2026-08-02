@@ -6,7 +6,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
-const [loom,realm,lite,settings,assistant,fallbackRuntime,adapter,hologram,worker,liteOverride]=await Promise.all([
+const [loom,realm,lite,settings,assistant,fallbackRuntime,adapter,hologram,worker,liteOverride,modelWorker,stager]=await Promise.all([
   read('public/app/loom-v128.html'),
   read('public/app/realm-v128.html'),
   read('public/app/lite-v129.html'),
@@ -16,7 +16,9 @@ const [loom,realm,lite,settings,assistant,fallbackRuntime,adapter,hologram,worke
   read('public/app/models/smollm2-360m-instruct/adapter.js'),
   read('public/app/weaveling-hologram-v133.css'),
   read('public/service-worker.js'),
-  read('public/app/lite-model-settings-v133.js')
+  read('public/app/lite-model-settings-v133.js'),
+  read('public/app/models/smollm2-360m-instruct/worker.js'),
+  read('scripts/stage-transformers-assets.mjs')
 ]);
 const manifest=JSON.parse(await read('public/app/models/smollm2-360m-instruct/model-manifest.json'));
 
@@ -40,7 +42,7 @@ assert(settings.includes("provider:'bundled'"),'bundled route is not persisted a
 assert(manifest.id==='HuggingFaceTB/SmolLM2-360M-Instruct','unexpected bundled model id');
 assert(Number(manifest.parameterCount)>0&&Number(manifest.parameterCount)<=500_000_000,'bundled model exceeds the 500M parameter ceiling');
 assert(manifest.remoteDownloadsAllowed===false,'bundled model permits remote downloads');
-for(const required of ['new Worker','type: \'module\'','transformers-js-worker','benchmark','measuredLength','body-size'])assert(adapter.includes(required),`local model adapter is missing ${required}`);
+for(const required of ['new Worker','type: \'module\'','transformers-js-worker','benchmark','measuredLength','body-size','ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm'])assert(adapter.includes(required),`local model adapter is missing ${required}`);
 
 for(const required of ['commonweave.structured-context.v1','routingQuestion','routingAnswer','responseContract','CommonweaveModelRuntime','modelRuntime.generate','RESPONSE_SCHEMA','outputJson','onboardFallback'])assert(assistant.includes(required),`assistant runtime is missing ${required}`);
 assert(!assistant.includes('request.deterministic'),'assistant runtime still invokes the deterministic provider');
@@ -54,8 +56,11 @@ assert(hologram.includes('height:min(18vh,164px)'),'Weaveling height was not dou
 assert(/\.cw127-weaveling\{[^}]*animation:none/.test(hologram),'the physical projector still floats');
 assert(/\.cw127-weaveling img\{[^}]*animation:cw133ProjectionHover/.test(hologram),'the light projection no longer floats independently');
 
-assert(worker.includes("CACHE_REVISION='smollm2-probe-r7'"),'service worker cache was not rotated for the package probe and hologram update');
-for(const required of ['assistant-runtime-v133.js','smollm2-fallback-runtime-v134.js','model-settings-v133.js','weaveling-hologram-v133.css','smollm2-360m-instruct/model-manifest.json','smollm2-360m-instruct/adapter.js','smollm2-360m-instruct/worker.js'])assert(worker.includes(required),`service worker does not precache ${required}`);
+for(const required of ["BACKEND_ROOT = '/app/vendor/transformers/wasm/'","attempts = navigator.gpu ? ['webgpu', 'wasm'] : ['wasm']",'SMOLLM2_BACKEND_UNAVAILABLE'])assert(modelWorker.includes(required),`SmolLM2 worker is missing ${required}`);
+for(const required of ['ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm','backendFiles','loaderCount'])assert(stager.includes(required),`Transformers staging is missing ${required}`);
+
+assert(worker.includes("CACHE_REVISION='smollm2-onnx-r8'"),'service worker cache was not rotated for the ONNX runtime repair');
+for(const required of ['assistant-runtime-v133.js','smollm2-fallback-runtime-v134.js','model-settings-v133.js','weaveling-hologram-v133.css','smollm2-360m-instruct/model-manifest.json','smollm2-360m-instruct/adapter.js','smollm2-360m-instruct/worker.js','wasm/ort-wasm-simd-threaded.jsep.mjs','wasm/ort-wasm-simd-threaded.jsep.wasm'])assert(worker.includes(required),`service worker does not precache ${required}`);
 assert(worker.includes("const MODEL_PREFIX='/app/models/'"),'service worker has no model asset policy');
 assert(!worker.match(/CORE=\[[\s\S]*model_q4f16\.onnx/),'the 273 MB graph is forced into every service-worker install');
 
@@ -69,6 +74,7 @@ console.log(JSON.stringify({
   fallbackFloor:'bundled-smollm2',
   cancellationFallsThrough:false,
   packageProbe:'header-or-small-body-size',
+  onnxBackend:'paired-mjs-wasm-with-webgpu-to-wasm-retry',
   hologram:'double-scale-lowered-100px-stationary-projector',
-  cacheRevision:'smollm2-probe-r7'
+  cacheRevision:'smollm2-onnx-r8'
 },null,2));

@@ -26,13 +26,17 @@ jobs:
           npm install --no-audit --no-fund
           test -s public/app/vendor/transformers/transformers.min.js
           test -s public/app/vendor/transformers/stage-manifest.json
+          test -s public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs
+          test -s public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm
+          grep -q 'ort-wasm-simd-threaded.jsep.mjs' public/app/vendor/transformers/stage-manifest.json
+          grep -q 'ort-wasm-simd-threaded.jsep.wasm' public/app/vendor/transformers/stage-manifest.json
       - name: Run offline-first checks
         run: npm run check
       - name: Start Commonweave host
         run: |
           PORT=8787 npm start > commonweave-server.log 2>&1 &
           echo $! > commonweave-server.pid
-      - name: Inspect installer, app, worker, model contract, and seed routes
+      - name: Inspect installer, app, worker, model contract, backend, and seed routes
         run: |
           set -euxo pipefail
           for i in $(seq 1 30); do
@@ -49,7 +53,7 @@ jobs:
           grep -q 'commonweave-static-' service-worker.js
           grep -q 'commonweave-runtime-' service-worker.js
           grep -q "const VERSION='1.0.30'" service-worker.js
-          grep -q "CACHE_REVISION='smollm2-probe-r7'" service-worker.js
+          grep -q "CACHE_REVISION='smollm2-onnx-r8'" service-worker.js
           curl -fsS http://127.0.0.1:8787/loom/ -o loom.html
           grep -q 'smollm2-fallback-runtime-v134.js' loom.html
           grep -q 'weaveling-hologram-v133.css?v=heart-r7' loom.html
@@ -62,6 +66,14 @@ jobs:
           grep -q 'HuggingFaceTB/SmolLM2-360M-Instruct' smollm2-manifest.json
           curl -fsS http://127.0.0.1:8787/app/vendor/transformers/stage-manifest.json -o transformers-stage.json
           grep -q '@huggingface/transformers' transformers-stage.json
+          grep -q 'ort-wasm-simd-threaded.jsep.mjs' transformers-stage.json
+          grep -q 'ort-wasm-simd-threaded.jsep.wasm' transformers-stage.json
+          curl -fsSI http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs -o onnx-loader-headers.txt
+          grep -qi 'content-type: text/javascript' onnx-loader-headers.txt
+          grep -qi 'content-length:' onnx-loader-headers.txt
+          curl -fsSI http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm -o onnx-wasm-headers.txt
+          grep -qi 'content-type: application/wasm\|content-type: application/octet-stream' onnx-wasm-headers.txt
+          grep -qi 'content-length:' onnx-wasm-headers.txt
           curl -fsS http://127.0.0.1:8787/field/commonweave/seed -o commonweave-pocket-campus.cwseed
           test -s commonweave-pocket-campus.cwseed
           if unzip -l commonweave-pocket-campus.cwseed | grep -q 'model_q4f16.onnx'; then
@@ -84,5 +96,7 @@ jobs:
             lite.html
             smollm2-manifest.json
             transformers-stage.json
+            onnx-loader-headers.txt
+            onnx-wasm-headers.txt
             commonweave-pocket-campus.cwseed
             boot-logs.json

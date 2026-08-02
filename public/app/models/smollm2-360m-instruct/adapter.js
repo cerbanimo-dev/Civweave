@@ -1,8 +1,10 @@
 const MODEL_ID = 'HuggingFaceTB/SmolLM2-360M-Instruct';
 const LOCAL_ID = 'smollm2-360m-instruct';
 const MODEL_ROOT = '/app/models/smollm2-360m-instruct';
-const WORKER_URL = `${MODEL_ROOT}/worker.js`;
-const VENDOR_MODULE = '/app/vendor/transformers/transformers.min.js';
+const WORKER_URL = `${MODEL_ROOT}/worker.js?v=onnx-runtime-r8`;
+const VENDOR_ROOT = '/app/vendor/transformers';
+const VENDOR_MODULE = `${VENDOR_ROOT}/transformers.min.js`;
+const BACKEND_ROOT = `${VENDOR_ROOT}/wasm`;
 const BODY_PROBE_LIMIT = 5_000_000;
 const REQUIRED = [
   { url: `${MODEL_ROOT}/config.json`, minBytes: 200 },
@@ -10,6 +12,8 @@ const REQUIRED = [
   { url: `${MODEL_ROOT}/tokenizer_config.json`, minBytes: 200 },
   { url: `${MODEL_ROOT}/onnx/model_q4f16.onnx`, minBytes: 250000000 },
   { url: VENDOR_MODULE, minBytes: 100000 },
+  { url: `${BACKEND_ROOT}/ort-wasm-simd-threaded.jsep.mjs`, minBytes: 10000 },
+  { url: `${BACKEND_ROOT}/ort-wasm-simd-threaded.jsep.wasm`, minBytes: 10000000 },
 ];
 
 let worker = null;
@@ -119,6 +123,7 @@ export async function status() {
     source: 'transformers-js-worker',
     files,
     missing,
+    backendRoot: `${BACKEND_ROOT}/`,
     remoteDownloadsAllowed: false,
   };
 }

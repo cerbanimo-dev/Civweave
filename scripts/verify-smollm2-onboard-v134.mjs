@@ -51,10 +51,10 @@ if(lfsPointer){
 }
 assert(attributes.includes('smollm2-360m-instruct/onnx/*.onnx filter=lfs'),'SmolLM2 ONNX graph is not tracked by Git LFS');
 
-for(const required of ["new Worker(WORKER_URL, { type: 'module'",'benchmark(cases','SMOLLM2_TIMEOUT','remoteDownloadsAllowed: false','BODY_PROBE_LIMIT','measuredLength','response.clone().blob()','network-body','purgeCachedUrl'])assert(adapter.includes(required),`adapter is missing ${required}`);
+for(const required of ["new Worker(WORKER_URL, { type: 'module'",'benchmark(cases','SMOLLM2_TIMEOUT','remoteDownloadsAllowed: false','BODY_PROBE_LIMIT','measuredLength','response.clone().blob()','network-body','purgeCachedUrl','ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm','onnx-runtime-r8'])assert(adapter.includes(required),`adapter is missing ${required}`);
 assert(adapter.includes('minBytes > BODY_PROBE_LIMIT'),'large model graph may be body-probed into memory');
 assert(adapter.includes("measuredBy: 'body-size'"),'small support files cannot be verified without Content-Length');
-for(const required of ["import { pipeline, env }",'env.allowRemoteModels = false','env.allowLocalModels = true','env.localModelPath = MODEL_ROOT',"dtype: 'q4f16'",'local_files_only: true',"device = navigator.gpu ? 'webgpu' : 'wasm'"])assert(modelWorker.includes(required),`worker is missing ${required}`);
+for(const required of ["import { pipeline, env }",'env.allowRemoteModels = false','env.allowLocalModels = true','env.localModelPath = MODEL_ROOT',"dtype: 'q4f16'",'local_files_only: true',"BACKEND_ROOT = '/app/vendor/transformers/wasm/'","attempts = navigator.gpu ? ['webgpu', 'wasm'] : ['wasm']",'SMOLLM2_BACKEND_UNAVAILABLE'])assert(modelWorker.includes(required),`worker is missing ${required}`);
 
 for(const required of ['fallbackExpectation','degraded-mode local fallback','smallest useful answer','Never claim network access','Never invent current facts','Preserve the user’s agency','delete clean.deterministic','delete clean.fallback','request?.signal?.aborted','bundled-smollm2'])assert(fallback.includes(required),`fallback runtime is missing ${required}`);
 assert(fallback.includes("if(isBundled(incoming.config))return generateLocal(incoming,{mode:'primary'})"),'SmolLM2 cannot act as the selected primary onboard model');
@@ -65,18 +65,20 @@ assert(!settings.includes('Bundled FunctionGemma'),'FunctionGemma is still shown
 
 assert(pkg.dependencies?.['@huggingface/transformers']==='3.8.1','Transformers.js is not pinned to 3.8.1');
 assert(pkg.scripts?.postinstall==='node scripts/stage-transformers-assets.mjs','Transformers.js is not staged after install');
-for(const required of ['@huggingface','transformers','dist','transformers.min.js','wasm','stage-manifest.json'])assert(stager.includes(required),`staging script is missing ${required}`);
+for(const required of ['@huggingface','transformers','dist','transformers.min.js','wasm','stage-manifest.json','ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm','backendFiles','loaderCount'])assert(stager.includes(required),`staging script is missing ${required}`);
 assert(gitignore.includes('public/app/vendor/transformers/'),'generated Transformers.js assets are not ignored');
 
-assert(serviceWorker.includes("CACHE_REVISION='smollm2-probe-r7'"),'service worker cache revision is stale');
-for(const required of ['smollm2-fallback-runtime-v134.js','smollm2-360m-instruct/model-manifest.json','smollm2-360m-instruct/adapter.js','smollm2-360m-instruct/worker.js','vendor/transformers/transformers.min.js'])assert(serviceWorker.includes(required),`service worker is missing ${required}`);
+assert(serviceWorker.includes("CACHE_REVISION='smollm2-onnx-r8'"),'service worker cache revision is stale');
+for(const required of ['smollm2-fallback-runtime-v134.js','smollm2-360m-instruct/model-manifest.json','smollm2-360m-instruct/adapter.js','smollm2-360m-instruct/worker.js','vendor/transformers/transformers.min.js','vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs','vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm'])assert(serviceWorker.includes(required),`service worker is missing ${required}`);
 assert(!/CORE=\[[\s\S]*model_q4f16\.onnx/.test(serviceWorker),'service worker eagerly downloads the 273 MB graph on every install');
 assert(serviceWorker.includes("if(url.pathname.startsWith(MODEL_PREFIX))"),'service worker lacks on-demand model caching');
 
 assert(workflow.includes('lfs: false'),'lightweight CI unexpectedly downloads the LFS graph');
 assert(workflow.includes('npm install --no-audit --no-fund'),'CI does not stage Transformers.js');
 assert(workflow.includes('smollm2-manifest.json'),'CI does not inspect the model contract');
-assert(workflow.includes("CACHE_REVISION='smollm2-probe-r7'"),'CI does not verify the revised cache');
+assert(workflow.includes("CACHE_REVISION='smollm2-onnx-r8'"),'CI does not verify the revised cache');
+assert(workflow.includes('ort-wasm-simd-threaded.jsep.mjs'),'CI does not verify the ONNX Runtime loader');
+assert(workflow.includes('ort-wasm-simd-threaded.jsep.wasm'),'CI does not verify the ONNX Runtime binary');
 
 console.log(JSON.stringify({
   ok:true,
@@ -85,7 +87,8 @@ console.log(JSON.stringify({
   graph:lfsPointer?'git-lfs-pointer':'materialized-onnx',
   graphBytes:lfsPointer?272737275:modelStat.size,
   runtime:'@huggingface/transformers@3.8.1',
-  execution:'module-worker-webgpu-or-wasm',
+  execution:'module-worker-webgpu-then-wasm',
+  onnxRuntimePair:'mjs+wasm',
   selectedPrimary:true,
   universalFallback:true,
   fallbackExcludesUserCancellation:true,
