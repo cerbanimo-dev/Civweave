@@ -18,7 +18,7 @@ const [loom,realm,lite,contract,worker,manifestText,generationText,generator]=aw
   read('public/app/loom-v128.html'),
   read('public/app/realm-v128.html'),
   read('public/app/lite-v129.html'),
-  read('public/app/smollm2-small-model-v136.js'),
+  read('public/app/smollm2-small-model-v137.js'),
   read('public/service-worker.js'),
   read('public/app/manifest.webmanifest'),
   read('public/app/logos/commonweave-icon-generation.json'),
@@ -28,33 +28,36 @@ const manifest=JSON.parse(manifestText);
 const generation=JSON.parse(generationText);
 
 for(const [name,html] of [['loom',loom],['realm',realm],['lite',lite]]){
-  assert(html.includes('smollm2-small-model-v136.js?v=contract-r1'),`${name} does not load the small-model contract`);
-  assert(html.indexOf('model-settings-v133.js')<html.indexOf('smollm2-small-model-v136.js'),`${name} loads the trial override before settings`);
-  if(name!=='lite')assert(html.indexOf('smollm2-small-model-v136.js')<html.indexOf('assistant-runtime-v133.js'),`${name} loads the contract after the guide runtime`);
+  assert(html.includes('smollm2-small-model-v137.js?v=route-lock-r2'),`${name} does not load the route-lock contract`);
+  assert(html.indexOf('model-settings-v133.js')<html.indexOf('smollm2-small-model-v137.js'),`${name} loads the trial override before settings`);
+  if(name!=='lite')assert(html.indexOf('smollm2-small-model-v137.js')<html.indexOf('assistant-runtime-v133.js'),`${name} loads the contract after the guide runtime`);
   assert(html.includes('commonweave-icon-192.png?v=dark-r1'),`${name} does not use the dark Commonweave icon`);
   assert(html.includes('manifest.webmanifest?v=1.0.30-icon-r1'),`${name} manifest cache key is stale`);
 }
-for(const html of [loom,realm])assert(!html.includes('<img src="/app/logos/commonweave.webp"'), 'active top bar still uses the old wordmark image');
+for(const html of [loom,realm])assert(!html.includes('<img src="/app/logos/commonweave.webp"'),'active top bar still uses the old wordmark image');
 
 for(const required of [
-  'COMMONWEAVE_SMALL_MODEL_CONTRACT_V1',
-  'function normalizeRoute',
+  'COMMONWEAVE_SMALL_MODEL_CONTRACT_V2',
+  'const ROUTE_CODES=',
+  'function parseRouteCode',
+  'function compactGuideRequest',
   'function normalizeGuideResult',
-  'nestedCandidates',
-  'isSchemaEcho',
-  'choice',
-  'route',
-  'schema echo',
-  'usable JSON',
-  'maxNewTokens:56',
+  'The route is LOCKED',
+  'schema:null',
+  '__smallModelContractV137',
+  'maxNewTokens:4',
+  'maxNewTokens:36',
+  'Production guide responses use the canonical Commonweave route lock',
   'event.stopImmediatePropagation()',
-  '__smallModelContractV136',
-  'Never output JSON Schema'
-])assert(contract.includes(required),`small-model contract missing ${required}`);
+  'routeLocked:true',
+  'policy or voting beats everything',
+  'route-locked actions structured'
+])assert(contract.includes(required),`route-lock contract missing ${required}`);
 
-assert(worker.includes("CACHE_REVISION='smollm2-contract-icon-r11'"),'service worker cache revision is stale');
+assert(worker.includes("CACHE_REVISION='smollm2-route-lock-r12'"),'service worker cache revision is stale');
 for(const required of [
-  '/app/smollm2-small-model-v136.js',
+  '/app/smollm2-small-model-v137.js',
+  '/app/models/smollm2-360m-instruct/tokenizer.json',
   '/app/logos/commonweave-icon-192.png',
   '/app/logos/commonweave-icon-512.png',
   '/app/logos/commonweave-icon-maskable-192.png',
@@ -100,12 +103,13 @@ for(const required of [
 
 console.log(JSON.stringify({
   ok:true,
-  modelContract:'compact-few-shot-with-nested-shape-normalization',
+  modelContract:'two-stage-selector-with-canonical-route-lock',
   benchmark:{
-    prompts:5,
-    maxNewTokens:56,
-    reportsParseableAndUsableJsonSeparately:true,
-    schemaEchoVisible:true
+    selectorPrompts:5,
+    selectorMaxNewTokens:4,
+    boundedActionPrompts:5,
+    actionMaxNewTokens:36,
+    productionRouteLocked:true
   },
   icons:{
     treatment:generation.treatment,
@@ -113,5 +117,5 @@ console.log(JSON.stringify({
     maskable:[192,512],
     activeTopbar:true
   },
-  cacheRevision:'smollm2-contract-icon-r11'
+  cacheRevision:'smollm2-route-lock-r12'
 },null,2));
