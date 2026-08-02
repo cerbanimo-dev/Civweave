@@ -1,5 +1,5 @@
 const ROOT='/app/models/all-minilm-l6-v2';
-const WORKER_URL=`${ROOT}/worker.js?v=reflex-r3`;
+const WORKER_URL=`${ROOT}/worker.js?v=reflex-r4`;
 const REQUIRED=[
   {url:`${ROOT}/config.json`,minBytes:300},
   {url:`${ROOT}/tokenizer.json`,minBytes:500000},
@@ -34,25 +34,27 @@ async function inspect(spec,{probeBody=true}={}){
     return {...spec,status,length,type,ok:status>=200&&status<300&&!htmlFallback&&length>=spec.minBytes,probe:'head'};
   }catch(error){return {...spec,status:0,length:0,type:'',ok:false,error:error.message}}
 }
+function stopWorker(error){
+  for(const task of pending.values()){clearTimeout(task.timer);task.reject(error)}
+  pending.clear();worker?.terminate();worker=null;
+}
 function activeWorker(){
   if(worker)return worker;
   worker=new Worker(WORKER_URL,{type:'module',name:'commonweave-minilm-reflex'});
   worker.addEventListener('message',event=>{
     const message=event.data||{};const task=pending.get(message.id);if(!task)return;
     pending.delete(message.id);clearTimeout(task.timer);
-    if(message.type==='error'){const error=new Error(message.error?.message||'MiniLM worker failed.');error.code=message.error?.code||'MINILM_WORKER_FAILED';task.reject(error)}else task.resolve(message);
+    if(message.type==='error'){
+      const error=new Error(message.error?.message||'MiniLM worker failed.');error.code=message.error?.code||'MINILM_WORKER_FAILED';task.reject(error);stopWorker(error);
+    }else task.resolve(message);
   });
-  worker.addEventListener('error',event=>{
-    const error=new Error(event.message||'MiniLM worker crashed.');
-    for(const task of pending.values()){clearTimeout(task.timer);task.reject(error)}
-    pending.clear();worker?.terminate();worker=null;
-  });
+  worker.addEventListener('error',event=>stopWorker(new Error(event.message||'MiniLM worker crashed.')));
   return worker;
 }
 function request(type,payload={},timeoutMs=120000){
   const id=`minilm-${Date.now().toString(36)}-${(++sequence).toString(36)}`;
   return new Promise((resolve,reject)=>{
-    const timer=setTimeout(()=>{pending.delete(id);const error=new Error(`MiniLM ${type} timed out.`);error.code='MINILM_TIMEOUT';reject(error)},timeoutMs);
+    const timer=setTimeout(()=>{pending.delete(id);const error=new Error(`MiniLM ${type} timed out.`);error.code='MINILM_TIMEOUT';reject(error);worker?.terminate();worker=null},timeoutMs);
     pending.set(id,{resolve,reject,timer});activeWorker().postMessage({id,type,...payload});
   });
 }
