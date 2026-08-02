@@ -99,20 +99,21 @@ async function writeIcon(file,buffer){
 async function main(){
   const symbol=await buildSymbol();
   for(const size of ICON_SIZES){
-    const ratio=size<=48?.76:size<=180?.64:.49;
+    const ratio=size<=48?.94:size<=180?.92:.90;
     await writeIcon(`commonweave-icon-${size}.png`,await renderIcon(symbol,size,ratio));
   }
-  const app=await renderIcon(symbol,1024,.49);
+  const app=await renderIcon(symbol,1024,.90);
   await writeIcon('commonweave-app-icon.png',app);
   await writeIcon('commonweave-icon-1024.png',app);
   for(const size of [192,512]){
-    await writeIcon(`commonweave-icon-maskable-${size}.png`,await renderIcon(symbol,size,.42));
+    await writeIcon(`commonweave-icon-maskable-${size}.png`,await renderIcon(symbol,size,.78));
   }
-  await writeIcon('commonweave-adaptive-foreground-512.png',await renderIcon(symbol,512,.62,{background:false}));
+  await writeIcon('commonweave-adaptive-foreground-512.png',await renderIcon(symbol,512,.92,{background:false}));
   const summary={
     schema:'commonweave.icon-generation.v1',
     source:'commonweave.webp',
-    treatment:'dark-centered-thread-mark',
+    treatment:'tight-dark-centered-thread-mark',
+    targetFill:{standard:'90-94%',maskable:'78%',adaptiveForeground:'92%'},
     generatedAt:new Date().toISOString(),
     files:[
       ...ICON_SIZES.map(size=>`commonweave-icon-${size}.png`),
@@ -123,7 +124,7 @@ async function main(){
     ]
   };
   await fsp.writeFile(path.join(logoDir,'commonweave-icon-generation.json'),JSON.stringify(summary,null,2));
-  console.log(`[Commonweave] Generated ${summary.files.length} dark Commonweave icon assets.`);
+  console.log(`[Commonweave] Generated ${summary.files.length} tightly cropped Commonweave icon assets.`);
 }
 
 main().catch(error=>{

@@ -1,8 +1,13 @@
 {
   "schema": "commonweave.icon-generation.v1",
   "source": "commonweave.webp",
-  "treatment": "dark-centered-thread-mark",
-  "generatedAt": "2026-08-02T15:38:33.161Z",
+  "treatment": "tight-dark-centered-thread-mark",
+  "targetFill": {
+    "standard": "90-94%",
+    "maskable": "78%",
+    "adaptiveForeground": "92%"
+  },
+  "generatedAt": "2026-08-02T16:20:54.476Z",
   "files": [
     "commonweave-icon-16.png",
     "commonweave-icon-32.png",
