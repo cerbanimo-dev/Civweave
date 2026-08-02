@@ -3,9 +3,10 @@ import { pipeline, env } from '/app/vendor/transformers/transformers.min.js';
 const MODEL_ID='all-minilm-l6-v2';
 const MODEL_ROOT='/app/models/';
 const INDEX_URL='/app/models/all-minilm-l6-v2/reflex-index.json';
-const BACKEND_VERSION='onnx-r10';
-const BACKEND_MJS=new URL(`/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs?v=${BACKEND_VERSION}`,self.location.origin).href;
-const BACKEND_WASM=new URL(`/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm?v=${BACKEND_VERSION}`,self.location.origin).href;
+const BACKEND_VERSION='onnx-r11';
+const BACKEND_ROOT=new URL('/app/vendor/transformers/wasm/',self.location.origin).href;
+const BACKEND_MJS=new URL(`ort-wasm-simd-threaded.jsep.mjs?v=${BACKEND_VERSION}`,BACKEND_ROOT).href;
+const BACKEND_WASM=new URL(`ort-wasm-simd-threaded.jsep.wasm?v=${BACKEND_VERSION}`,BACKEND_ROOT).href;
 let statePromise=null;
 
 function serialize(error){return {message:String(error?.message||error||'MiniLM worker error'),code:error?.code||null,stack:String(error?.stack||'').slice(0,3000)}}
@@ -15,11 +16,11 @@ async function configure(){
   env.allowRemoteModels=false;
   env.allowLocalModels=true;
   env.localModelPath=MODEL_ROOT;
-  env.useBrowserCache=true;
+  env.useBrowserCache=false;
   env.useWasmCache=false;
   env.cacheKey=`commonweave-minilm-${BACKEND_VERSION}`;
   if(env.backends?.onnx?.wasm){
-    env.backends.onnx.wasm.wasmPaths={mjs:BACKEND_MJS,wasm:BACKEND_WASM};
+    env.backends.onnx.wasm.wasmPaths=BACKEND_ROOT;
     env.backends.onnx.wasm.numThreads=self.crossOriginIsolated?Math.max(1,Math.min(4,navigator.hardwareConcurrency||1)):1;
     env.backends.onnx.wasm.initTimeout=120000;
   }
@@ -38,7 +39,7 @@ async function load(){
     let loaded=null;const failures=[];
     for(const [device,dtype] of attempts){try{loaded=await createExtractor(device,dtype);break}catch(error){failures.push({device,dtype,error:serialize(error)});self.postMessage({type:'progress',progress:{status:'backend-failed',device,dtype,message:String(error?.message||error)}})}}
     if(!loaded){const error=new Error(`No MiniLM backend initialized. ${failures.map(item=>`[${item.device}] ${item.error.message}`).join(' | ')}`);error.code='MINILM_BACKEND_UNAVAILABLE';error.failures=failures;throw error}
-    const index=await fetch(INDEX_URL,{cache:'force-cache'}).then(response=>{if(!response.ok)throw new Error(`Reflex index returned ${response.status}`);return response.json()});
+    const index=await fetch(INDEX_URL,{cache:'reload'}).then(response=>{if(!response.ok)throw new Error(`Reflex index returned ${response.status}`);return response.json()});
     const entries=Array.isArray(index.entries)?index.entries:[];
     const output=await loaded.extractor(entries.map(entry=>entry.embeddingText),{pooling:'mean',normalize:true});
     const vectors=output.tolist();
