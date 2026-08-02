@@ -1,0 +1,126 @@
+{
+  "schema": "commonweave.cabinet-shells.v1",
+  "version": "1.0.29",
+  "systems": {
+    "commonweave": {
+      "kind": "projected-cabinet-v1",
+      "screen": {
+        "x": 10.8,
+        "y": 21.9,
+        "width": 78.4,
+        "height": 61.2,
+        "radius": 4.2
+      },
+      "motif": "prismatic woven compass",
+      "accent2": "#7d6cff",
+      "controlOrder": [
+        "anarchadia",
+        "fellowfare",
+        "commonweave",
+        "living-school",
+        "cerbanimo"
+      ],
+      "assetType": "image/webp",
+      "assetParts": [
+        "/app/assets/cabinets-data/commonweave-v129.part1.b64",
+        "/app/assets/cabinets-data/commonweave-v129.part2.b64"
+      ]
+    },
+    "living-school": {
+      "kind": "projected-cabinet-v1",
+      "screen": {
+        "x": 15.1,
+        "y": 21.3,
+        "width": 70.3,
+        "height": 60.4,
+        "radius": 4.8
+      },
+      "motif": "botanical academy and illuminated manuscript",
+      "accent2": "#d6b45d",
+      "controlOrder": [
+        "anarchadia",
+        "fellowfare",
+        "commonweave",
+        "living-school",
+        "cerbanimo"
+      ],
+      "assetType": "image/webp",
+      "assetParts": [
+        "/app/assets/cabinets-data/living-school-v129.part1.b64",
+        "/app/assets/cabinets-data/living-school-v129.part2.b64"
+      ]
+    },
+    "cerbanimo": {
+      "kind": "projected-cabinet-v1",
+      "screen": {
+        "x": 15.5,
+        "y": 19.7,
+        "width": 69.2,
+        "height": 62.6,
+        "radius": 4.4
+      },
+      "motif": "neon industrial quest forge",
+      "accent2": "#5ac8ff",
+      "controlOrder": [
+        "anarchadia",
+        "fellowfare",
+        "commonweave",
+        "living-school",
+        "cerbanimo"
+      ],
+      "assetType": "image/webp",
+      "assetParts": [
+        "/app/assets/cabinets-data/cerbanimo-v129.part1.b64",
+        "/app/assets/cabinets-data/cerbanimo-v129.part2.b64"
+      ]
+    },
+    "fellowfare": {
+      "kind": "projected-cabinet-v1",
+      "screen": {
+        "x": 9.6,
+        "y": 24.9,
+        "width": 80.5,
+        "height": 59.4,
+        "radius": 4.7
+      },
+      "motif": "woven market craft and trustworthy exchange",
+      "accent2": "#39b8c8",
+      "controlOrder": [
+        "anarchadia",
+        "fellowfare",
+        "commonweave",
+        "living-school",
+        "cerbanimo"
+      ],
+      "assetType": "image/webp",
+      "assetParts": [
+        "/app/assets/cabinets-data/fellowfare-v129.part1.b64",
+        "/app/assets/cabinets-data/fellowfare-v129.part2.b64"
+      ]
+    },
+    "anarchadia": {
+      "kind": "projected-cabinet-v1",
+      "screen": {
+        "x": 9.7,
+        "y": 27.2,
+        "width": 80.3,
+        "height": 56.5,
+        "radius": 3.8
+      },
+      "motif": "punk civic console and highlighter governance",
+      "accent2": "#ffd326",
+      "controlOrder": [
+        "anarchadia",
+        "fellowfare",
+        "commonweave",
+        "living-school",
+        "cerbanimo"
+      ],
+      "assetType": "image/webp",
+      "assetParts": [
+        "/app/assets/cabinets-data/anarchadia-v129.part1.b64",
+        "/app/assets/cabinets-data/anarchadia-v129.part2.b64"
+      ]
+    }
+  }
+}
