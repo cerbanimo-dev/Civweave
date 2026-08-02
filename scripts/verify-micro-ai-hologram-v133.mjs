@@ -23,14 +23,15 @@ const [loom,realm,lite,settings,assistant,fallbackRuntime,adapter,hologram,worke
 const manifest=JSON.parse(await read('public/app/models/smollm2-360m-instruct/model-manifest.json'));
 
 for(const [name,html] of [['loom',loom],['realm',realm]]){
-  for(const required of ['commonweave-model-runtime.js','smollm2-fallback-runtime-v134.js','model-settings-v133.js','assistant-runtime-v133.js'])assert(html.includes(required),`${name} is missing ${required}`);
+  for(const required of ['commonweave-model-runtime.js','smollm2-fallback-runtime-v134.js','smollm2-small-model-v136.js','model-settings-v133.js','assistant-runtime-v133.js'])assert(html.includes(required),`${name} is missing ${required}`);
   assert(!html.includes('visual-model-settings-v132.js'),`${name} still loads the superseded Visual model modal`);
   assert(html.indexOf('commonweave-model-runtime.js')<html.indexOf('smollm2-fallback-runtime-v134.js'),`${name} fallback loads before the shared runtime`);
   assert(html.indexOf('smollm2-fallback-runtime-v134.js')<html.indexOf('model-settings-v133.js'),`${name} settings load before the fallback floor`);
-  assert(html.indexOf('model-settings-v133.js')<html.indexOf('assistant-runtime-v133.js'),`${name} assistant loads before settings migration`);
+  assert(html.indexOf('model-settings-v133.js')<html.indexOf('smollm2-small-model-v136.js'),`${name} small-model contract loads before settings`);
+  assert(html.indexOf('smollm2-small-model-v136.js')<html.indexOf('assistant-runtime-v133.js'),`${name} assistant loads before the small-model contract`);
 }
 assert(loom.includes('weaveling-hologram-v133.css?v=heart-r8'),'the Quad does not load the latest hologram styling');
-for(const required of ['model-settings-v133.css','model-settings-v133.js','lite-model-settings-v133.js','smollm2-fallback-runtime-v134.js'])assert(lite.includes(required),`Lite is missing ${required}`);
+for(const required of ['model-settings-v133.css','model-settings-v133.js','smollm2-small-model-v136.js','lite-model-settings-v133.js','smollm2-fallback-runtime-v134.js'])assert(lite.includes(required),`Lite is missing ${required}`);
 assert(lite.indexOf('model-settings-v131.js')<lite.indexOf('lite-model-settings-v133.js'),'Lite v133 override loads before the older renderer exists');
 assert(liteOverride.includes('commonweave.model-setup'),'Lite model setup is not overridden');
 
@@ -60,8 +61,8 @@ assert(/\.cw127-weaveling img\{[^}]*animation:cw133ProjectionHover/.test(hologra
 for(const required of ["BACKEND_VERSION = 'onnx-r10'",'BACKEND_MJS','BACKEND_WASM','env.useWasmCache = false','wasmPaths = { mjs: BACKEND_MJS, wasm: BACKEND_WASM }',"attempts = navigator.gpu ? ['webgpu', 'wasm'] : ['wasm']",'verifyBackendResponse','SMOLLM2_BACKEND_UNAVAILABLE'])assert(modelWorker.includes(required),`SmolLM2 worker is missing ${required}`);
 for(const required of ['ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm','backendFiles','loaderCount'])assert(stager.includes(required),`Transformers staging is missing ${required}`);
 
-assert(worker.includes("CACHE_REVISION='smollm2-backend-r10'"),'service worker cache was not rotated for the MIME repair');
-for(const required of ['assistant-runtime-v133.js','smollm2-fallback-runtime-v134.js','model-settings-v133.js','weaveling-hologram-v133.css','smollm2-360m-instruct/model-manifest.json','smollm2-360m-instruct/adapter.js','smollm2-360m-instruct/worker.js','wasm/ort-wasm-simd-threaded.jsep.mjs','wasm/ort-wasm-simd-threaded.jsep.wasm','ONNX_BACKEND_PREFIX'])assert(worker.includes(required),`service worker does not include ${required}`);
+assert(worker.includes("CACHE_REVISION='smollm2-contract-icon-r11'"),'service worker was not rotated for the contract and icon update');
+for(const required of ['assistant-runtime-v133.js','smollm2-fallback-runtime-v134.js','smollm2-small-model-v136.js','model-settings-v133.js','weaveling-hologram-v133.css','smollm2-360m-instruct/model-manifest.json','smollm2-360m-instruct/adapter.js','smollm2-360m-instruct/worker.js','wasm/ort-wasm-simd-threaded.jsep.mjs','wasm/ort-wasm-simd-threaded.jsep.wasm','ONNX_BACKEND_PREFIX'])assert(worker.includes(required),`service worker does not include ${required}`);
 assert(worker.includes("new Request(request,{cache:'reload'})"),'ONNX backend requests are not forced through revalidation');
 assert(worker.includes("const MODEL_PREFIX='/app/models/'"),'service worker has no model asset policy');
 assert(!worker.match(/CORE=\[[\s\S]*model_q4f16\.onnx/),'the 273 MB graph is forced into every service-worker install');
@@ -74,9 +75,10 @@ console.log(JSON.stringify({
   selectedProviderGeneration:true,
   structuredContext:'commonweave.structured-context.v1',
   fallbackFloor:'bundled-smollm2',
+  smallModelContract:'v136',
   cancellationFallsThrough:false,
   packageProbe:'header-or-small-body-size',
   onnxBackend:'application-wasm-streaming-with-webgpu-to-wasm-retry',
   hologram:'double-scale-50px-higher-5px-right-stationary-projector',
-  cacheRevision:'smollm2-backend-r10'
+  cacheRevision:'smollm2-contract-icon-r11'
 },null,2));
