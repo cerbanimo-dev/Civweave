@@ -1,5 +1,5 @@
 const ROOT='/app/models/all-minilm-l6-v2';
-const WORKER_URL=`${ROOT}/worker.js?v=reflex-r2`;
+const WORKER_URL=`${ROOT}/worker.js?v=reflex-r3`;
 const REQUIRED=[
   {url:`${ROOT}/config.json`,minBytes:300},
   {url:`${ROOT}/tokenizer.json`,minBytes:500000},
@@ -18,17 +18,18 @@ const pending=new Map();
 
 async function inspect(spec,{probeBody=true}={}){
   try{
-    const head=await fetch(spec.url,{method:'HEAD',cache:'no-store'});
+    const head=await fetch(spec.url,{method:'HEAD',cache:'reload'});
     let length=Number(head.headers.get('content-length')||0);
     let status=head.status;
     let type=String(head.headers.get('content-type')||'');
     if(head.ok&&length===0&&probeBody&&spec.minBytes<=BODY_PROBE_LIMIT){
-      const response=await fetch(spec.url,{cache:'no-store'});
+      const response=await fetch(spec.url,{cache:'reload'});
       status=response.status;type=String(response.headers.get('content-type')||type);
       if(response.ok)length=(await response.blob()).size;
     }
-    return {...spec,status,length,type,ok:status>=200&&status<300&&(length===0||length>=spec.minBytes)};
-  }catch(error){return {...spec,status:0,length:0,ok:false,error:error.message}}
+    const htmlFallback=/text\/html/i.test(type);
+    return {...spec,status,length,type,ok:status>=200&&status<300&&!htmlFallback&&length>=spec.minBytes};
+  }catch(error){return {...spec,status:0,length:0,type:'',ok:false,error:error.message}}
 }
 function activeWorker(){
   if(worker)return worker;
