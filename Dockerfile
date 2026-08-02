@@ -1,7 +1,7 @@
 FROM node:22-alpine
 WORKDIR /app
 COPY package.json ./
-COPY server.mjs server-v126.mjs ./
+COPY server.mjs server-v127.mjs ./
 COPY scripts ./scripts
 COPY public ./public
 RUN npm run check && mkdir -p /app/data && chown -R node:node /app
