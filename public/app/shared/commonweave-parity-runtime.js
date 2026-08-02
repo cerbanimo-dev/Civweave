@@ -12,7 +12,7 @@ function index(ledger){
 }
 async function load({force=false}={}){
   if(!promise||force){
-    promise=fetch(`${LEDGER_URL}?v=1.0.28`,{cache:'no-store'}).then(async response=>{
+    promise=fetch(`${LEDGER_URL}?v=1.0.29`,{cache:'no-store'}).then(async response=>{
       if(!response.ok)throw new Error(`Parity ledger returned ${response.status}`);
       const ledger=await response.json();
       ledger.index=index(ledger);
@@ -27,6 +27,8 @@ function validate(ledger){
   const errors=[];const ids=new Set();const systemIds=new Set((ledger.systems||[]).map(system=>system.id));const roomIds=new Set();
   for(const system of ledger.systems||[]){
     if(ids.has(system.id))errors.push(`duplicate system ${system.id}`);ids.add(system.id);
+    if(!system.interfaceShell?.asset&&!system.interfaceShell?.assetParts?.length)errors.push(`system ${system.id} has no cabinet asset`);
+    if(!system.interfaceShell?.screen)errors.push(`system ${system.id} has no cabinet screen rectangle`);
     for(const room of system.rooms||[]){const key=`${system.id}:${room.id}`;if(roomIds.has(key))errors.push(`duplicate room ${key}`);roomIds.add(key);if(!room.visualAsset)errors.push(`room ${key} has no visual asset`);if(!room.liteRoute)errors.push(`room ${key} has no lite route`)}
   }
   const capabilityIds=new Set();
