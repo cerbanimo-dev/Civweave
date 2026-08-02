@@ -5,18 +5,67 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07141f">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <title>Commonweave Host Node</title>
+  <title>Install Commonweave</title>
+  <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.30">
   <link rel="icon" href="/app/logos/commonweave-icon-192.png">
-  <style>*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#061019;font-family:Inter,system-ui,sans-serif}.host-world{position:fixed;inset:0}.host-world>img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}.host-hotspot{position:absolute;display:block;border:0;background:transparent;color:transparent;text-decoration:none;cursor:pointer}.host-hotspot:focus-visible{outline:4px solid rgba(255,241,166,.85);outline-offset:-4px}.host-install{left:20%;top:18%;width:60%;height:61%}.host-direct{right:2%;bottom:2%;width:25%;height:18%}.host-version{position:fixed;z-index:4;top:max(8px,env(safe-area-inset-top));right:max(8px,env(safe-area-inset-right));display:flex;align-items:center;gap:6px;padding:5px 9px 5px 5px;border:1px solid rgba(255,240,168,.42);border-radius:999px;background:rgba(4,17,24,.7);color:#fff0a8;font:800 .7rem ui-monospace,monospace;backdrop-filter:blur(10px)}.host-version img{width:30px;height:30px;object-fit:contain;border-radius:50%;background:#fff}.host-projection{position:fixed;z-index:3;left:50%;bottom:max(20px,calc(env(safe-area-inset-bottom) + 12px));transform:translateX(-50%);width:min(86vw,600px);padding:13px 18px;text-align:center;color:#effff7;text-shadow:0 1px 2px #001;background:radial-gradient(ellipse at center,rgba(29,174,184,.24),rgba(2,18,28,.78) 66%,transparent 98%);pointer-events:none}.host-projection strong{display:block;font-size:clamp(1rem,3vw,1.35rem);text-shadow:0 0 12px rgba(111,225,255,.72)}.host-projection span{display:block;margin-top:3px;color:#d1ebe3;font-size:.82rem}.host-dot{display:inline-block!important;width:8px;height:8px;margin-right:6px;border-radius:50%;background:#f4bf68}.host-dot.ok{background:#61ddb7;box-shadow:0 0 12px #61ddb7}@media(max-width:620px){.host-install{left:8%;top:15%;width:84%;height:68%}.host-direct{right:0;bottom:0;width:34%;height:20%}.host-projection{bottom:max(9px,env(safe-area-inset-bottom));width:94vw;padding:10px 12px}.host-projection span{font-size:.74rem}}</style>
+  <link rel="stylesheet" href="/install-v130.css?v=1.0.30">
 </head>
 <body>
-<main class="host-world" aria-label="Commonweave host-node gateway">
-  <img src="/app/assets/world/host-wave2.webp" alt="The Commonweave host hall." fetchpriority="high">
-  <a class="host-hotspot host-install" href="/recover.html" aria-label="Retire old workers and enter the clean Commonweave shell">Recover and enter</a>
-  <a class="host-hotspot host-direct" href="/loom/" aria-label="Enter the clean Commonweave shell directly">Enter clean shell</a>
+<main class="gateway">
+  <img class="gateway-bg" src="/app/assets/world/host-wave2.webp" alt="" fetchpriority="high">
+  <div class="gateway-shade"></div>
+  <header class="gateway-header">
+    <img src="/app/logos/commonweave.webp" alt="Commonweave">
+    <div><small>INSTALLER · UPDATER · OPTIONAL HUB</small><h1>Commonweave</h1></div>
+    <span class="version">v1.0.30</span>
+  </header>
+
+  <section class="install-card" aria-labelledby="install-title">
+    <div class="install-copy">
+      <small>OFFLINE-FIRST POCKET CAMPUS</small>
+      <h2 id="install-title">Install the local app. Visit the web when you need the wider weave.</h2>
+      <p>The installed PWA keeps the campus, your working state, and visited rooms available locally. This website remains the doorway for installing, updating, hub gossip, federation, and wider exchange.</p>
+    </div>
+    <div class="topology" aria-label="Commonweave topology">
+      <article><b>1</b><strong>Local campus</strong><span>Works offline on this device.</span></article>
+      <i>↔</i>
+      <article><b>2</b><strong>Nearby mesh</strong><span>Peers exchange when links are available.</span></article>
+      <i>↔</i>
+      <article><b>3</b><strong>Optional hub</strong><span>Updates, federation, gossip, and wider trade.</span></article>
+    </div>
+    <div class="gateway-actions">
+      <button id="install-app" class="primary" type="button">Install Commonweave</button>
+      <a class="secondary" href="/loom/?launch=installer">Open local campus</a>
+      <button id="check-update" class="secondary" type="button">Check for update</button>
+    </div>
+    <p id="install-help" class="install-help" role="status">Preparing the offline installer…</p>
+  </section>
+
+  <section class="gateway-grid">
+    <article class="status-card">
+      <small>THIS HOST NODE</small>
+      <h3 id="hub-name">Checking hub…</h3>
+      <dl>
+        <div><dt>Status</dt><dd id="hub-status">connecting</dd></div>
+        <div><dt>Build</dt><dd id="hub-build">unknown</dd></div>
+        <div><dt>Local mode</dt><dd id="local-mode">browser</dd></div>
+      </dl>
+      <div class="card-actions"><a href="/diagnostics.html">Diagnostics</a><a href="/api/health" target="_blank" rel="noopener">Health record</a></div>
+    </article>
+    <article class="status-card">
+      <small>PORTABLE INSTALLS</small>
+      <h3>Carry the campus farther</h3>
+      <p>Use the seed or mobile kit to install on a local host, cyberdeck, phone, or community node without making Render the center of the universe.</p>
+      <div class="card-actions"><a href="/downloads/commonweave-pocket-campus.cwseed">Download campus seed</a><a href="/downloads/Commonweave-Mobile-Install-Kit.zip">Mobile install kit</a></div>
+    </article>
+    <article class="status-card">
+      <small>HUB ROLE</small>
+      <h3>Connection is optional</h3>
+      <p>The hub may relay envelopes, advertise updates, exchange public presence, and widen federation or trade. Local work must not disappear when the hub does.</p>
+      <div class="card-actions"><a href="/api/node/config" target="_blank" rel="noopener">Node configuration</a><a href="/loom/version.json" target="_blank" rel="noopener">Release record</a></div>
+    </article>
+  </section>
 </main>
-<div class="host-version"><img src="/app/logos/commonweave.webp" alt=""><span>CLEAN-SLATE BUILD · v1.0.27</span></div>
-<div class="host-projection" aria-live="polite"><strong><span id="dot" class="host-dot"></span><span id="status">Checking the host build…</span></strong><span>Touch the Quad to erase the old /app and /campus workers, then enter the service-worker-free /loom shell.</span></div>
-<script>const status=document.querySelector('#status');Promise.allSettled([fetch('/api/health?gateway='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null),fetch('/api/boot-logs',{cache:'no-store'}).then(r=>r.ok?r.json():null)]).then(([health,logs])=>{const h=health.status==='fulfilled'?health.value:null,l=logs.status==='fulfilled'?logs.value:null;document.querySelector('#dot').classList.add('ok');status.textContent=`${h?.name||'Commonweave Host Node'} ready · ${h?.appVersion||'unknown'} · ${l?.count||0} boot events`}).catch(()=>status.textContent='Host node is starting · recovery remains available');</script>
+<script src="/install-v130.js?v=1.0.30"></script>
 </body>
 </html>

@@ -1,20 +1,79 @@
 {
   "name": "Commonweave Pocket Campus",
   "short_name": "Commonweave",
-  "description": "A local-first intention-to-completion campus containing Living School, Cerbanimo, FellowFare, and Anarchadia.",
-  "id": "/app/",
-  "start_url": "/loom/",
+  "description": "An offline-first local Commonweave campus with optional hub, trade, federation, and update connections.",
+  "id": "/commonweave-local",
+  "start_url": "/loom/?installed=1",
   "scope": "/",
   "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#04131d",
   "theme_color": "#04131d",
+  "orientation": "any",
+  "categories": [
+    "productivity",
+    "education",
+    "social"
+  ],
   "icons": [
-    {"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"/app/logos/commonweave-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
-    {"src":"/app/logos/commonweave-icon-maskable-192.png","sizes":"192x192","type":"image/png","purpose":"maskable"},
-    {"src":"/app/logos/commonweave-icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+    {
+      "src": "/app/logos/commonweave-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/logos/commonweave-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app/logos/commonweave-icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/app/logos/commonweave-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "screenshots": [
-    {"src":"/app/logos/commonweave-campus.webp","sizes":"941x1672","type":"image/webp","form_factor":"narrow","label":"Commonweave campus"}
+    {
+      "src": "/app/logos/commonweave-campus.webp",
+      "sizes": "941x1672",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Commonweave campus"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Open the Quad",
+      "url": "/loom/",
+      "icons": [
+        {
+          "src": "/app/logos/commonweave-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Open Workstations",
+      "url": "/lite/?system=commonweave",
+      "icons": [
+        {
+          "src": "/app/logos/commonweave-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }
