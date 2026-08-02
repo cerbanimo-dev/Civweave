@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const PORT = 18787;
 const origin = `http://127.0.0.1:${PORT}`;
+const EXPECTED_BUILD = '1.0.26-loop-diagnostics-hotfix-1';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataDir = await mkdtemp(path.join(os.tmpdir(), 'commonweave-v126-'));
 const output = [];
@@ -32,7 +33,7 @@ async function waitForHealth() {
 }
 try {
   const health = await waitForHealth();
-  assert(health.build === '1.0.26-loop-diagnostics', `unexpected health build: ${health.build}`);
+  assert(health.build === EXPECTED_BUILD, `unexpected health build: ${health.build}`);
   assert(health.appVersion === '1.0.26', `unexpected app version: ${health.appVersion}`);
   assert(String(health.release?.appUrl || '').includes('/campus/'), `release appUrl did not migrate: ${health.release?.appUrl}`);
 
@@ -59,7 +60,7 @@ try {
 
   const version = await fetch(`${origin}/campus/version.json`, { cache: 'no-store' }).then(response => response.json());
   assert(version.version === '1.0.26', `unexpected campus version: ${version.version}`);
-  assert(version.build === '1.0.26-loop-diagnostics', `unexpected campus build: ${version.build}`);
+  assert(version.build === EXPECTED_BUILD, `unexpected campus build: ${version.build}`);
 
   const migration = await fetch(`${origin}/app/`, { redirect: 'manual', cache: 'no-store' });
   assert(migration.status === 302, `legacy app migration returned ${migration.status}`);
@@ -69,6 +70,7 @@ try {
   await fetch(`${origin}/campus/assets/world/town-square-home.webp`, { cache: 'no-store' });
   const logs = await fetch(`${origin}/api/boot-logs`, { cache: 'no-store' }).then(response => response.json());
   assert(logs.version === '1.0.26', 'boot-log endpoint version mismatch');
+  assert(logs.build === EXPECTED_BUILD, `boot-log build mismatch: ${logs.build}`);
   assert(logs.logs.some(entry => entry.kind === 'client:smoke-test'), 'boot-log endpoint did not retain the smoke event');
   assert(!logs.logs.some(entry => entry.kind === 'http-request' && entry.detail?.originalPathname?.includes('town-square-home.webp')), 'noncritical asset request polluted the focused boot log');
   console.log(JSON.stringify({ ok: true, health, campusBytes: campusHtml.length, bootLogCount: logs.count }, null, 2));
