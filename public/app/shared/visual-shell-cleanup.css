@@ -1,79 +1,24 @@
-/* Commonweave visual uplift checkpoint: one campus shell, no service-owned chrome. */
-html.cw-lean-visual-shell,html.cw-lean-visual-shell body{overflow:hidden!important;background:#05070c!important}
-html.cw-lean-visual-shell .desktop-nav,
-html.cw-lean-visual-shell .drawer,
-html.cw-lean-visual-shell .topbar,
-html.cw-lean-visual-shell .persistent-app-controls,
-html.cw-lean-visual-shell .classic-shell>.sidebar,
-html.cw-lean-visual-shell #commonweave-suite-badge,
-html.cw-lean-visual-shell #commonweave-quest-board,
-html.cw-lean-visual-shell .legacy-toolbar,
-html.cw-lean-visual-shell .legacy-bottom-nav,
-html.cw-lean-visual-shell .legacy-hud,
-html.cw-lean-visual-shell .rook-commons-local,
-html.cw-lean-visual-shell [data-legacy-shell],
-html.cw-lean-visual-shell [data-app-update-banner],
-html.cw-lean-visual-shell .app-update-banner{display:none!important}
-
-/* Shared compact dock. Keep only Home, Compass/AI, and Settings. */
-html.cw-lean-visual-shell .cerbanimo-image-dock,
-html.cw-lean-visual-shell .visual-stage-tools.cardinal-image-dock,
-html.cw-lean-visual-shell .ff-image-dock,
-html.cw-lean-visual-shell .ls-image-dock{
- position:fixed!important;z-index:80!important;left:50%!important;right:auto!important;
- bottom:max(7px,env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;
- width:min(62vw,220px)!important;height:50px!important;display:grid!important;
- grid-template-columns:repeat(3,1fr)!important;gap:4px!important;padding:4px!important;
- border:1px solid rgba(154,231,255,.34)!important;border-radius:18px!important;
- background:rgba(3,6,12,.78)!important;backdrop-filter:blur(13px)!important;
- box-shadow:0 12px 30px #0009!important
-}
-html.cw-lean-visual-shell .cerbanimo-image-dock button,
-html.cw-lean-visual-shell .visual-stage-tools.cardinal-image-dock .scene-tool,
-html.cw-lean-visual-shell .ff-image-dock .bottom-link,
-html.cw-lean-visual-shell .ls-image-dock button{
- display:none!important;width:auto!important;height:40px!important;min-height:40px!important;
- border:0!important;border-radius:12px!important;background:transparent!important
-}
-html.cw-system-cerbanimo .cerbanimo-image-dock button:nth-child(1),
-html.cw-system-cerbanimo .cerbanimo-image-dock button:nth-child(3),
-html.cw-system-cerbanimo .cerbanimo-image-dock button:nth-child(6),
-html.cw-system-anarchadia .visual-stage-tools.cardinal-image-dock .scene-tool:nth-child(1),
-html.cw-system-anarchadia .visual-stage-tools.cardinal-image-dock .scene-tool:nth-child(3),
-html.cw-system-anarchadia .visual-stage-tools.cardinal-image-dock .scene-tool:nth-child(4),
-html.cw-system-fellowfare .ff-image-dock .bottom-link:nth-child(1),
-html.cw-system-fellowfare .ff-image-dock .bottom-link:nth-child(3),
-html.cw-system-fellowfare .ff-image-dock .bottom-link:nth-child(6),
-html.cw-system-living .ls-image-dock button:nth-child(1),
-html.cw-system-living .ls-image-dock button:nth-child(2),
-html.cw-system-living .ls-image-dock button:last-child{display:grid!important}
-
-html.cw-system-cerbanimo #visualScenes:empty::before{content:"";position:fixed;inset:0;background:#080412 url("../services/cerbanimo/assets/visual/nexus.webp") center/cover no-repeat}
-
-/* Remove accidental debug/bounding boxes from visual canvases. */
-html.cw-lean-visual-shell .visual-stage-canvas [style*="outline"],
-html.cw-lean-visual-shell .visual-stage-canvas .debug-region,
-html.cw-lean-visual-shell .visual-stage-canvas .hotspot-debug,
-html.cw-lean-visual-shell .visual-stage-canvas [data-debug-box]{outline:0!important;border-color:transparent!important;background:transparent!important}
-
-.cw-scene-decoration{position:absolute;z-index:4;pointer-events:none;object-fit:contain;filter:drop-shadow(0 0 18px rgba(255,85,205,.38));opacity:.96}
-.cw-scene-decoration.logo{left:50%;top:9%;translate:-50% 0;width:min(34vw,220px);height:min(24vh,190px)}
-.cw-scene-decoration.guide{width:min(22vw,145px);height:min(28vh,210px)}
-.cw-scene-decoration.guide.cw-guide-cerbanimo{right:3%;top:40%}
-.cw-scene-decoration.guide.cw-guide-living{right:4%;top:42%}
-.cw-scene-decoration.guide.cw-guide-anarchadia{right:1%;top:46%;width:min(28vw,180px)}
-.cw-scene-decoration.guide.cw-guide-fellowfare{right:17%;top:52%;width:min(24vw,160px);height:min(22vh,170px)}
-
-/* Compass bubble alignment. */
-html.cw-lean-visual-shell [data-commonweave-compass],
-html.cw-lean-visual-shell .commonweave-compass,
-html.cw-lean-visual-shell .cw-compass-launcher{right:max(10px,env(safe-area-inset-right))!important;top:max(10px,env(safe-area-inset-top))!important;transform:none!important}
-html.cw-lean-visual-shell [data-commonweave-compass] img,
-html.cw-lean-visual-shell .commonweave-compass img,
-html.cw-lean-visual-shell .cw-compass-launcher img{display:block!important;margin:auto!important;object-position:center!important}
-
-@media(max-width:700px){
- .cw-scene-decoration.logo{top:8%;width:33vw;height:19vh}
- .cw-scene-decoration.guide.cw-guide-fellowfare{right:16%;top:51%;width:25vw;height:20vh}
- .cw-scene-decoration.guide.cw-guide-anarchadia{right:0;top:47%;width:30vw;height:24vh}
-}
+/* Commonweave v1.0.22 visual recovery shell. Illustrated scenes are the interface. */
+html.cw-lean-visual-shell,html.cw-lean-visual-shell body{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#03060a!important}
+html.cw-lean-visual-shell body>*:not(.cw-recovery-stage):not(.cw-district-info):not(.cw-merlin-shell):not(.cw-merlin-launcher):not(script):not(style){display:none!important}
+html.cw-lean-visual-shell .cw-merlin-launcher{display:none!important}
+.cw-recovery-stage{position:fixed;z-index:100;inset:0;overflow:hidden;isolation:isolate;background:#04070b;color:white}
+.cw-recovery-art{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;object-position:center bottom;display:block;opacity:0;transition:opacity .22s ease}
+.cw-recovery-stage.ready .cw-recovery-art{opacity:1}
+.cw-recovery-loading{position:absolute;z-index:1;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#17313b,#03060a 70%);color:#e9fff9;font:800 11px ui-monospace,monospace;letter-spacing:.1em}.cw-recovery-loading[hidden]{display:none}
+.cw-scene-layer{position:absolute;z-index:3;inset:0;pointer-events:none}.cw-scene-hotspots,.cw-anarchadia-board{pointer-events:auto}
+.cw-scene-hotspots button{position:absolute;border:0;background:transparent;color:transparent;clip-path:polygon(7% 5%,91% 0,100% 86%,78% 100%,3% 92%,0 18%)}.cw-scene-hotspots button:focus-visible{outline:3px solid #7ee5ff;outline-offset:-4px;background:#7ee5ff1e}.cw-scene-hotspots span{position:absolute;width:1px;height:1px;overflow:hidden}
+.cw-commonweave-return,.cw-district-version,.cw-district-controls button,.cw-district-dock button{border:1px solid #f0d77472;background:#04131ed9;color:white;box-shadow:0 8px 24px #000a;backdrop-filter:blur(9px)}
+.cw-commonweave-return{position:absolute;z-index:20;left:max(8px,env(safe-area-inset-left));top:max(8px,env(safe-area-inset-top));width:43px;height:43px;padding:8px;border-radius:50%}.cw-commonweave-return img{width:100%;height:100%;object-fit:contain}
+.cw-district-version{position:absolute;z-index:20;right:max(82px,calc(env(safe-area-inset-right) + 74px));top:max(8px,env(safe-area-inset-top));min-width:67px;height:38px;display:flex;align-items:center;gap:4px;padding:3px 8px 3px 3px;border-radius:999px;font:900 9px ui-monospace,monospace}.cw-district-version img{width:30px;height:30px;object-fit:contain}
+.cw-district-controls{position:absolute;z-index:22;right:max(8px,env(safe-area-inset-right));top:max(8px,env(safe-area-inset-top));display:flex;align-items:center;gap:4px}.cw-district-controls button{width:40px;height:40px;display:grid;place-items:center;padding:5px;border-radius:50%}.cw-district-controls button[data-compass]{width:55px;height:55px;padding:1px}.cw-district-controls img{display:block;width:100%;height:100%;margin:auto;object-fit:contain;object-position:center}.cw-district-controls [data-info] span{display:grid;place-items:center;width:26px;height:26px;border:2px solid #f4df95;border-radius:50%;font:900 18px Georgia}
+.cw-district-dock{position:absolute;z-index:25;left:50%;bottom:max(8px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(61vw,218px);height:54px;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border:1px solid #7ee5ff55;border-radius:20px;background:#030b13df;box-shadow:0 12px 34px #000c;backdrop-filter:blur(13px)}.cw-district-dock button{display:grid;place-items:center;border:0;border-radius:15px;background:transparent;box-shadow:none}.cw-district-dock button:active{background:#7ee5ff21}.cw-district-dock img{width:35px;height:35px;object-fit:contain;object-position:center}
+.cw-district-info{position:fixed;z-index:400;top:max(75px,calc(env(safe-area-inset-top) + 68px));right:10px;width:min(345px,calc(100vw - 20px));display:grid;gap:6px;padding:17px;border:1px solid #7ee5ff77;border-radius:18px;background:#061923f3;color:#effffb;box-shadow:0 20px 60px #000c}.cw-district-info[hidden]{display:none}.cw-district-info>button{position:absolute;right:8px;top:8px;width:30px;height:30px;border:0;border-radius:50%;background:#ffffff14;color:white}.cw-district-info small{color:#f2d575;font-weight:900}.cw-district-info strong{font:600 22px Georgia}.cw-district-info p,.cw-district-info span{margin:0;color:#cce5e2;font-size:12px;line-height:1.42}
+.cw-district-logo{position:absolute;z-index:5;left:50%;top:9%;transform:translateX(-50%);width:min(36vw,230px);height:min(19vh,175px);object-fit:contain;filter:drop-shadow(0 3px 14px #000b)}
+.cw-guide-frame{position:absolute;z-index:5;right:3%;top:45%;width:min(25vw,155px);height:min(27vh,220px);display:grid;place-items:center;overflow:visible}.cw-guide-frame img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 16px #0009)}
+.cw-recovery-stage[data-system="living"] .cw-district-logo{top:8%;width:min(30vw,180px)}.cw-recovery-stage[data-system="living"] .cw-guide-frame{right:2%;top:51%;width:min(21vw,125px);height:min(22vh,170px)}
+.cw-recovery-stage[data-system="cerbanimo"] .cw-district-logo{top:12%;width:min(42vw,250px);height:min(20vh,180px)}.cw-recovery-stage[data-system="cerbanimo"] .cw-guide-frame{right:3%;top:48%;width:min(23vw,145px);height:min(25vh,195px)}
+.cw-recovery-stage[data-system="fellowfare"] .cw-district-logo{top:34.5%;width:min(46vw,230px);height:min(13vh,108px);filter:drop-shadow(0 2px 8px #000)}.cw-recovery-stage[data-system="fellowfare"] .cw-guide-frame{right:12%;top:53%;width:min(28vw,170px);height:min(25vh,205px);overflow:hidden;clip-path:inset(0 0 43% 0)}.cw-recovery-stage[data-system="fellowfare"] .cw-guide-frame img{object-position:center top}
+.cw-recovery-stage[data-system="anarchadia"] .cw-district-logo{top:17%;width:min(48vw,245px);height:min(20vh,175px)}.cw-recovery-stage[data-system="anarchadia"] .cw-guide-frame{right:-1%;top:43%;width:min(33vw,190px);height:min(31vh,250px);overflow:visible}.cw-recovery-stage[data-system="anarchadia"] .cw-guide-frame img{object-fit:contain;object-position:right center}
+.cw-anarchadia-board{position:absolute;z-index:7;left:25%;top:34%;width:50%;min-height:19%;display:grid;align-content:center;gap:8px;padding:15px;border:1px solid #f04d9a55;border-radius:4px;background:linear-gradient(#d9c5a3e8,#c8ae82e8);box-shadow:inset 0 0 24px #4b2b1a55,0 8px 22px #0008;color:#321c22;text-align:center}.cw-anarchadia-board strong{font:900 12px ui-monospace,monospace;letter-spacing:.12em}.cw-anarchadia-board div{display:grid;grid-template-columns:1fr 1fr;gap:6px}.cw-anarchadia-board button{min-height:34px;border:2px solid #25131c;border-radius:3px;background:#ff3c8e;color:#14060d;font:900 9px ui-monospace,monospace;transform:rotate(-1deg)}.cw-anarchadia-board button:nth-child(even){background:#f5ed58;transform:rotate(1deg)}
+@media(max-width:560px){.cw-district-version{right:70px;min-width:61px}.cw-district-controls{gap:2px}.cw-district-controls button{width:36px;height:36px}.cw-district-controls button[data-compass]{width:48px;height:48px}.cw-district-logo{top:10%}.cw-anarchadia-board{left:23%;width:54%;top:35%;padding:10px}.cw-district-dock{width:min(66vw,210px)}}
