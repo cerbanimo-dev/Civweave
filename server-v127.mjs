@@ -18,12 +18,12 @@ replaceRequired("const APP_VERSION = 'rc22.3.20-ai-checkpoint';", `const APP_VER
 source = source.replace("appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`", "appUrl: `${root}/loom/?setup=1&host=${encodeURIComponent(root)}`");
 source = source.replace("appUrl: `${requestOrigin(req, url)}/app/`", "appUrl: `${requestOrigin(req, url)}/loom/`");
 replaceRequired(
-`    if ((pathname === '/field/commonweave/seed' || pathname === '/downloads/commonweave-pocket-campus.cwseed') && req.method === 'GET') {
+String.raw`    if ((pathname === '/field/commonweave/seed' || pathname === '/downloads/commonweave-pocket-campus.cwseed') && req.method === 'GET') {
       const served = await serveFile(req, res, '/downloads/commonweave-pocket-campus.cwseed');
       if (served) return;
       return json(res, 404, { error: 'Commonweave campus seed is not available on this host node.' });
     }`,
-`    if ((pathname === '/field/commonweave/seed' || pathname === '/downloads/commonweave-pocket-campus.cwseed') && req.method === 'GET') {
+String.raw`    if ((pathname === '/field/commonweave/seed' || pathname === '/downloads/commonweave-pocket-campus.cwseed') && req.method === 'GET') {
       cwLog('legacy-seed-request-retired', { requestId, pathname }, req);
       res.writeHead(204, { 'cache-control':'no-store', 'x-commonweave-version':CW_VERSION, 'x-commonweave-build':CW_BUILD, 'x-commonweave-seed-status':'retired' });
       return res.end();
@@ -79,22 +79,39 @@ async function cwServeLoom(req, res, originalPathname, requestId) {
 }
 `;
 replaceRequired('const server = http.createServer(async (req, res) => {', injected + '\nconst server = http.createServer(async (req, res) => {', 'HTTP server declaration');
-replaceRequired('  const pathname = decodeURIComponent(url.pathname);', `  const originalPathname = decodeURIComponent(url.pathname);
+replaceRequired(
+  '  const pathname = decodeURIComponent(url.pathname);',
+  String.raw`  const originalPathname = decodeURIComponent(url.pathname);
   const pathname = originalPathname;
   const requestId = crypto.randomUUID();
-  if (/^\/(?:loom|app|campus)(?:\/|$)/.test(originalPathname) || originalPathname === '/recover.html' || originalPathname === '/diagnostics.html' || originalPathname.startsWith('/api/boot-log')) {
+  const isTrackedPath = originalPathname === '/loom'
+    || originalPathname.startsWith('/loom/')
+    || originalPathname === '/app'
+    || originalPathname.startsWith('/app/')
+    || originalPathname === '/campus'
+    || originalPathname.startsWith('/campus/')
+    || originalPathname === '/recover.html'
+    || originalPathname === '/diagnostics.html'
+    || originalPathname.startsWith('/api/boot-log');
+  if (isTrackedPath) {
     res.setHeader('x-commonweave-version', CW_VERSION); res.setHeader('x-commonweave-build', CW_BUILD); res.setHeader('x-commonweave-request-id', requestId);
     cwLog('http-request', { requestId, originalPathname }, req);
-  }`, 'request pathname declaration');
-replaceRequired("    if (pathname.startsWith('/api/')) {", `    if (pathname.startsWith('/api/')) {
+  }`,
+  'request pathname declaration'
+);
+replaceRequired("    if (pathname.startsWith('/api/')) {", String.raw`    if (pathname.startsWith('/api/')) {
       if (pathname === '/api/boot-log' && req.method === 'POST') { const input = await body(req, 64 * 1024); const entry = cwLog('client:' + String(input.kind || 'event'), {...input,receivedAt:new Date().toISOString(),requestId}, req); return json(res, 202, {ok:true,accepted:entry.time,version:CW_VERSION,build:CW_BUILD}); }
       if (pathname === '/api/boot-logs' && req.method === 'GET') return json(res, 200, {version:CW_VERSION,build:CW_BUILD,count:cwBootLogs.length,logs:cwBootLogs.slice(-300)});`, 'API router');
-replaceRequired("    if (await serveFile(req, res, pathname)) return;", `    if (req.method === 'GET' && (originalPathname === '/app' || originalPathname.startsWith('/app/') || originalPathname === '/campus' || originalPathname.startsWith('/campus/'))) {
+replaceRequired(
+  "    if (await serveFile(req, res, pathname)) return;",
+  String.raw`    if (req.method === 'GET' && (originalPathname === '/app' || originalPathname.startsWith('/app/') || originalPathname === '/campus' || originalPathname.startsWith('/campus/'))) {
       const isAsset = /\.(?:png|jpe?g|webp|svg|gif|avif|css|js|json|webmanifest|woff2?)$/i.test(originalPathname);
       if (!isAsset) { cwLog('legacy-route-redirected', {requestId,from:originalPathname,to:'/loom/'}, req); res.writeHead(302,{location:'/loom/','cache-control':'no-store','x-commonweave-version':CW_VERSION,'x-commonweave-build':CW_BUILD}); return res.end(); }
     }
     if (req.method === 'GET' && await cwServeLoom(req, res, originalPathname, requestId)) return;
-    if (await serveFile(req, res, pathname)) return;`, 'static file router');
+    if (await serveFile(req, res, pathname)) return;`,
+  'static file router'
+);
 
 await fsp.writeFile(runtimePath, source, 'utf8');
 try { await import(pathToFileURL(runtimePath).href + '?build=' + VERSION); }
