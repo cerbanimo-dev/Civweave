@@ -1,6 +1,6 @@
 'use strict';
 const VERSION='1.0.30';
-const CACHE_REVISION='smollm2-route-lock-r12';
+const CACHE_REVISION='minilm-intention-r14';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
 const CABINET_PREFIX='/app/assets/cabinets/';
@@ -11,11 +11,11 @@ const CORE=[
   '/loom/realm/living-school/','/loom/realm/cerbanimo/','/loom/realm/fellowfare/','/loom/realm/anarchadia/',
   '/app/manifest.webmanifest',
   '/app/loom-v128.css','/app/loom-v128.js','/app/realm-v128.js',
-  '/app/weaveling-hologram-v133.css','/app/assistant-runtime-v133.js','/app/smollm2-fallback-runtime-v134.js','/app/smollm2-small-model-v137.js',
+  '/app/weaveling-hologram-v133.css','/app/assistant-runtime-v138.js','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/intention-planner-v138.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css',
   '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js',
-  '/app/model-settings-v133.css','/app/model-settings-v133.js','/app/lite-model-settings-v133.js',
-  '/app/models/smollm2-360m-instruct/model-manifest.json','/app/models/smollm2-360m-instruct/adapter.js','/app/models/smollm2-360m-instruct/worker.js',
-  '/app/models/smollm2-360m-instruct/config.json','/app/models/smollm2-360m-instruct/generation_config.json','/app/models/smollm2-360m-instruct/tokenizer.json','/app/models/smollm2-360m-instruct/tokenizer_config.json','/app/models/smollm2-360m-instruct/special_tokens_map.json',
+  '/app/model-settings-v133.css',
+  '/app/models/all-minilm-l6-v2/model-manifest.json','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js','/app/models/all-minilm-l6-v2/reflex-index.json',
+  '/app/models/all-minilm-l6-v2/config.json','/app/models/all-minilm-l6-v2/tokenizer.json','/app/models/all-minilm-l6-v2/tokenizer_config.json','/app/models/all-minilm-l6-v2/special_tokens_map.json','/app/models/all-minilm-l6-v2/vocab.txt',
   '/app/vendor/transformers/transformers.min.js','/app/vendor/transformers/stage-manifest.json',
   '/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs','/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm',
   '/app/v130-cabinet-launcher.css','/app/v130-cabinet-launcher.js',
@@ -33,7 +33,7 @@ const CORE=[
   '/offline.html'
 ];
 const report=async(kind,detail={})=>{
-  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-smollm2-route-lock-r12',kind:`service-worker:${kind}`,detail})})}catch{}
+  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-minilm-intention-r14',kind:`service-worker:${kind}`,detail})})}catch{}
 };
 async function cacheOne(cache,url){
   try{const response=await fetch(url,{cache:'reload'});if(response.ok)await cache.put(url,response.clone());return response.ok}catch{return false}
@@ -57,10 +57,7 @@ self.addEventListener('message',event=>{
 async function networkFirst(request,fallback){
   const cache=await caches.open(RUNTIME_CACHE);
   try{
-    const response=await Promise.race([
-      fetch(request),
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error('network timeout')),3500))
-    ]);
+    const response=await Promise.race([fetch(request),new Promise((_,reject)=>setTimeout(()=>reject(new Error('network timeout')),3500))]);
     if(response?.ok&&request.method==='GET')await cache.put(request,response.clone());
     return response;
   }catch{
@@ -87,24 +84,12 @@ self.addEventListener('fetch',event=>{
     return;
   }
   if(url.pathname==='/service-worker.js'){event.respondWith(fetch(request,{cache:'no-store'}));return}
-  if(url.pathname.startsWith(CABINET_PREFIX)){
-    const revalidatingRequest=new Request(request,{cache:'no-cache'});
-    event.respondWith(networkFirst(revalidatingRequest));
-    return;
-  }
-  if(url.pathname.startsWith(ONNX_BACKEND_PREFIX)){
-    const exactRequest=new Request(request,{cache:'reload'});
-    event.respondWith(networkFirst(exactRequest));
-    return;
-  }
+  if(url.pathname.startsWith(CABINET_PREFIX)){event.respondWith(networkFirst(new Request(request,{cache:'no-cache'})));return}
+  if(url.pathname.startsWith(ONNX_BACKEND_PREFIX)){event.respondWith(networkFirst(new Request(request,{cache:'reload'})));return}
   if(url.pathname.startsWith(MODEL_PREFIX)){
-    const mutable=/\/(model-manifest\.json|adapter\.js|worker\.js)$/.test(url.pathname);
+    const mutable=/\/(model-manifest\.json|adapter\.js|worker\.js|reflex-index\.json)$/.test(url.pathname);
     if(request.method==='HEAD'){
-      event.respondWith((async()=>{
-        const cached=await caches.match(new Request(request.url,{method:'GET'}));
-        if(cached)return new Response(null,{status:200,headers:cached.headers});
-        return fetch(request,{cache:'no-cache'});
-      })());
+      event.respondWith((async()=>{const cached=await caches.match(new Request(request.url,{method:'GET'}));if(cached)return new Response(null,{status:200,headers:cached.headers});return fetch(request,{cache:'no-cache'})})());
       return;
     }
     event.respondWith(mutable?networkFirst(new Request(request,{cache:'no-cache'})):cacheFirst(request));

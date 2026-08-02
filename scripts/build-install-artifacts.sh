@@ -9,12 +9,15 @@ work_dir="$(mktemp -d)"
 trap 'rm -rf "$work_dir"' EXIT
 
 rm -f "$seed_path"
-# The pocket seed carries the SmolLM2 adapter, prompt/fallback contract,
-# tokenizer metadata, and staged Transformers.js runtime, but not the 273 MB
-# ONNX graph. The graph is acquired on first onboard-model use and retained in
-# the PWA cache. Model-bearing field bundles can be produced separately.
+# The pocket seed carries Commonweave's canonical planner, lexical reflex,
+# semantic adapter, response patterns, tokenizer metadata, and Transformers.js
+# runtime. The compact MiniLM ONNX graphs are materialized during install or
+# first hosted startup and retained in the PWA cache. The lexical reflex remains
+# usable even when those optional graph downloads are unavailable.
 (cd "$repo_dir/public/app" && zip -q -r -9 "$seed_path" . \
-  -x 'models/smollm2-360m-instruct/onnx/*.onnx' \
+  -x 'models/all-minilm-l6-v2/onnx/*.onnx' \
+     'models/all-minilm-l6-v2/onnx/*.onnx_data' \
+     'models/smollm2-360m-instruct/onnx/*.onnx' \
      'models/smollm2-360m-instruct/onnx/*.onnx_data')
 
 unzip -q "$kit_path" -d "$work_dir/kit"
@@ -29,4 +32,4 @@ sha256sum "$seed_path" | sed 's#  .*/#  #' > "$kit_root/commonweave-pocket-campu
 rm -f "$kit_path"
 (cd "$work_dir/kit" && zip -q -r -9 "$kit_path" "$(basename "$kit_root")")
 
-echo "Built $(basename "$seed_path") without the SmolLM2 graph and rebuilt $(basename "$kit_path")"
+echo "Built $(basename "$seed_path") without optional local model graphs and rebuilt $(basename "$kit_path")"
