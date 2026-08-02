@@ -29,6 +29,7 @@ jobs:
           test -s public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs
           test -s public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm
           test -s public/app/models/all-minilm-l6-v2/tokenizer.json
+          test -s public/app/models/all-minilm-l6-v2/vocab.txt
           test -s public/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx
           test -s public/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx
           node scripts/ensure-minilm-model.mjs --check
@@ -38,7 +39,7 @@ jobs:
         run: |
           PORT=8787 npm start > commonweave-server.log 2>&1 &
           echo $! > commonweave-server.pid
-      - name: Inspect installer, reflex, intention weave, icons, backend, and seed routes
+      - name: Inspect installer, reflex, citizen console, icons, backend, and seed routes
         run: |
           set -euxo pipefail
           for i in $(seq 1 30); do
@@ -52,31 +53,42 @@ jobs:
           grep -q 'install-v130.js' installer.html
           curl -fsS -D worker-headers.txt http://127.0.0.1:8787/service-worker.js -o service-worker.js
           grep -qi 'service-worker-allowed: /' worker-headers.txt
-          grep -q "CACHE_REVISION='minilm-intention-r14'" service-worker.js
+          grep -q "CACHE_REVISION='anarchadia-console-r15'" service-worker.js
           grep -q '/app/models/all-minilm-l6-v2/tokenizer.json' service-worker.js
-          grep -q '/app/intention-planner-v138.js' service-worker.js
-          grep -q '/app/intention-ui-v138.js' service-worker.js
+          grep -q '/app/anarchadia-console-v139.html' service-worker.js
+          grep -q '/app/anarchadia-console-v139.css' service-worker.js
+          grep -q '/app/anarchadia-console-v139.js' service-worker.js
           curl -fsS http://127.0.0.1:8787/loom/ -o loom.html
           grep -q 'minilm-reflex-runtime-v138.js?v=reflex-r1' loom.html
-          grep -q 'minilm-model-settings-v138.js?v=reflex-r1' loom.html
           grep -q 'intention-planner-v138.js?v=weave-r1' loom.html
-          grep -q 'intention-ui-v138.js?v=weave-r1' loom.html
-          grep -q 'assistant-runtime-v138.js?v=reflex-r2' loom.html
           if grep -q 'smollm2-fallback-runtime' loom.html; then exit 1; fi
           curl -fsS http://127.0.0.1:8787/lite/ -o lite.html
           grep -q 'minilm-reflex-runtime-v138.js?v=reflex-r1' lite.html
-          grep -q 'minilm-model-settings-v138.js?v=reflex-r1' lite.html
           if grep -q 'smollm2-fallback-runtime' lite.html; then exit 1; fi
+          curl -fsS http://127.0.0.1:8787/app/anarchadia-console-v139.html -o anarchadia-console.html
+          grep -q 'ANARCHADIA // CITIZEN CONSOLE' anarchadia-console.html
+          grep -q 'BUGFIX REQUEST' anarchadia-console.html
+          grep -q 'FEATURE REQUEST' anarchadia-console.html
+          grep -q 'OPEN HUB BALLOT' anarchadia-console.html
+          curl -fsS http://127.0.0.1:8787/app/anarchadia-console-v139.css -o anarchadia-console.css
+          grep -q '/app/assets/cabinets/anarchadia.webp' anarchadia-console.css
+          grep -q -- '--pink:#ff2f87' anarchadia-console.css
+          curl -fsS http://127.0.0.1:8787/app/anarchadia-console-v139.js -o anarchadia-console.js
+          grep -q 'code-generation' anarchadia-console.js
+          grep -q 'sandbox-install' anarchadia-console.js
+          grep -q 'preview-ready' anarchadia-console.js
+          grep -q 'commonweave-safe-scaffolder' anarchadia-console.js
+          grep -q 'HUB_PROPOSALS' anarchadia-console.js
+          curl -fsS http://127.0.0.1:8787/app/v130-cabinet-launcher.js -o cabinet-launcher.js
+          grep -q "anarchadia-console-v139.html?embed=1" cabinet-launcher.js
           curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/model-manifest.json -o minilm-manifest.json
           grep -q 'Xenova/all-MiniLM-L6-v2' minilm-manifest.json
           grep -q '"tokenGeneration": false' minilm-manifest.json
-          curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/reflex-index.json -o reflex-index.json
-          grep -q 'mutual-aid-food-network' reflex-index.json
-          grep -q 'self-compassion' reflex-index.json
-          curl -fsS http://127.0.0.1:8787/app/intention-planner-v138.js -o intention-planner.js
-          grep -q 'commonweave.intention-weave.v1' intention-planner.js
-          grep -q 'Build a practice of self-love' intention-planner.js
-          grep -q 'Personal consent and peer-communication agreements' intention-planner.js
+          curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/vocab.txt -o minilm-vocab.txt
+          test "$(wc -c < minilm-vocab.txt)" -ge 200000
+          curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/adapter.js -o minilm-adapter.js
+          grep -q 'BODY_PROBE_LIMIT=2_000_000' minilm-adapter.js
+          grep -q 'response.blob()).size' minilm-adapter.js
           curl -fsSI http://127.0.0.1:8787/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx -o minilm-webgpu-headers.txt
           grep -qi 'content-length: 30018257' minilm-webgpu-headers.txt
           curl -fsSI http://127.0.0.1:8787/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx -o minilm-wasm-headers.txt
@@ -106,7 +118,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v130-minilm-reflex-evidence
+          name: commonweave-v130-anarchadia-console-evidence
           path: |
             commonweave-server.log
             health.json
@@ -115,9 +127,13 @@ jobs:
             service-worker.js
             loom.html
             lite.html
+            anarchadia-console.html
+            anarchadia-console.css
+            anarchadia-console.js
+            cabinet-launcher.js
             minilm-manifest.json
-            reflex-index.json
-            intention-planner.js
+            minilm-vocab.txt
+            minilm-adapter.js
             minilm-webgpu-headers.txt
             minilm-wasm-headers.txt
             icon-generation.json

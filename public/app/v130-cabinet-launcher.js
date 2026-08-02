@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='1.0.30';
-const BUILD='1.0.30-offline-mesh-cabinet-runtime';
+const BUILD='1.0.30-anarchadia-citizen-console';
 const CABINETS={
   commonweave:'/app/assets/cabinets/commonweave.webp',
   'living-school':'/app/assets/cabinets/living-school.webp',
@@ -23,11 +23,15 @@ const roomRecord=(ledger,systemId,roomId)=>{
   const system=ledger?.index?.systems?.get?.(systemId)||ledger?.systems?.find?.(item=>item.id===systemId);
   return system?.rooms?.find?.(room=>room.id===roomId)||system?.rooms?.[0]||null;
 };
-const workstationUrl=(systemId,roomId)=>{const q=new URLSearchParams({system:systemId,embed:'1'});if(roomId)q.set('room',roomId);return `/lite/?${q}`};
+const workstationUrl=(systemId,roomId)=>{
+  if(systemId==='anarchadia')return '/app/anarchadia-console-v139.html?embed=1';
+  const q=new URLSearchParams({system:systemId,embed:'1'});if(roomId)q.set('room',roomId);return `/lite/?${q}`;
+};
 let ledger=null;
 let launcher=null;
 let dialog=null;
 function pageCount(systemId,room){
+  if(systemId==='anarchadia')return 4;
   const roomCount=Array.isArray(room?.capabilityIds)?room.capabilityIds.length:0;
   if(systemId==='commonweave'&&!location.pathname.includes('/realm/')){
     const realmLinks=document.querySelectorAll('[data-realm]').length;
@@ -70,20 +74,20 @@ function refresh(){
   img.src=CABINETS[ctx.systemId]||CABINETS.commonweave;
   img.alt=`${ctx.system?.name||'Commonweave'} cabinet`;
   node.querySelector('b').textContent=String(ctx.count);
-  node.querySelector('.cw-cabinet-launcher-label').textContent=ctx.room?.label?`${ctx.room.label} workstation`:'Workstation';
-  node.setAttribute('aria-label',`Open ${ctx.system?.name||'Commonweave'} workstation. ${ctx.count} cabinet interaction${ctx.count===1?'':'s'} mapped to this page.`);
+  node.querySelector('.cw-cabinet-launcher-label').textContent=ctx.systemId==='anarchadia'?'Citizen Console':ctx.room?.label?`${ctx.room.label} workstation`:'Workstation';
+  node.setAttribute('aria-label',ctx.systemId==='anarchadia'?'Open the Anarchadia Citizen Console. Four functional cabinet modules are available.':`Open ${ctx.system?.name||'Commonweave'} workstation. ${ctx.count} cabinet interaction${ctx.count===1?'':'s'} mapped to this page.`);
   node.dataset.system=ctx.systemId;
   node.dataset.room=ctx.roomId;
 }
 function openWorkstation(){
   const ctx=context();
   const node=ensureDialog();
-  node.querySelector('h2').textContent=`${ctx.system?.name||'Commonweave'} · ${ctx.room?.label||'Workstation'}`;
+  node.querySelector('h2').textContent=ctx.systemId==='anarchadia'?'Anarchadia · Citizen Console':`${ctx.system?.name||'Commonweave'} · ${ctx.room?.label||'Workstation'}`;
   const frame=node.querySelector('iframe');
   const next=workstationUrl(ctx.systemId,ctx.roomId);
   if(frame.getAttribute('src')!==next)frame.src=next;
   if(typeof node.showModal==='function')node.showModal();else node.setAttribute('open','');
-  report('workstation-opened',{system:ctx.systemId,room:ctx.roomId,count:ctx.count});
+  report('workstation-opened',{system:ctx.systemId,room:ctx.roomId,count:ctx.count,url:next});
 }
 function releaseDialog(){
   const node=document.createElement('dialog');
