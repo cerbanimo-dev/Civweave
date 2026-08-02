@@ -1,0 +1,79 @@
+name: Materialize MiniLM reflex assets
+
+on:
+  push:
+    branches:
+      - feature/minilm-reflex-engine
+    paths:
+      - .github/workflows/materialize-minilm-reflex.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    if: ${{ !contains(github.event.head_commit.message || '', 'Package official MiniLM reflex assets') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/minilm-reflex-engine
+          lfs: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download official Transformers.js package
+        run: |
+          python -m pip install --quiet 'huggingface_hub>=0.27,<2'
+          python - <<'PY'
+          from huggingface_hub import hf_hub_download
+          from pathlib import Path
+          import shutil, hashlib
+
+          repo='Xenova/all-MiniLM-L6-v2'
+          root=Path('public/app/models/all-minilm-l6-v2')
+          root.mkdir(parents=True, exist_ok=True)
+          files=[
+            'config.json',
+            'special_tokens_map.json',
+            'tokenizer.json',
+            'tokenizer_config.json',
+            'vocab.txt',
+            'onnx/model_q4f16.onnx',
+            'onnx/model_quantized.onnx',
+          ]
+          for name in files:
+            source=Path(hf_hub_download(repo_id=repo, filename=name))
+            target=root/name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source,target)
+          expected={
+            'onnx/model_q4f16.onnx':('eb08a666c46109637e0b6cb04f6052a68efd59bb0252d4e0438d28fb6b2d853d',30018257),
+            'onnx/model_quantized.onnx':('afdb6f1a0e45b715d0bb9b11772f032c399babd23bfc31fed1c170afc848bdb1',22972370),
+          }
+          for name,(digest,size) in expected.items():
+            target=root/name
+            actual=hashlib.sha256(target.read_bytes()).hexdigest()
+            assert target.stat().st_size==size,(name,target.stat().st_size,size)
+            assert actual==digest,(name,actual,digest)
+          PY
+      - name: Commit model package
+        run: |
+          git config user.name 'commonweave-model-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/app/models/all-minilm-l6-v2/config.json \
+                  public/app/models/all-minilm-l6-v2/special_tokens_map.json \
+                  public/app/models/all-minilm-l6-v2/tokenizer.json \
+                  public/app/models/all-minilm-l6-v2/tokenizer_config.json \
+                  public/app/models/all-minilm-l6-v2/vocab.txt \
+                  public/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx \
+                  public/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx
+          if git diff --cached --quiet; then
+            echo 'MiniLM package already materialized.'
+            exit 0
+          fi
+          git commit -m 'Package official MiniLM reflex assets [skip ci]'
+          git push origin HEAD:feature/minilm-reflex-engine
