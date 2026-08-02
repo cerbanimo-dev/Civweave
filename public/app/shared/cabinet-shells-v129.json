@@ -22,7 +22,8 @@
       ],
       "assetType": "image/webp",
       "assetParts": [
-        "/app/assets/cabinets-data/commonweave.b64"
+        "/app/assets/cabinets-data/commonweave-v129.part1.b64",
+        "/app/assets/cabinets-data/commonweave-v129.part2.b64"
       ]
     },
     "living-school": {
@@ -45,7 +46,8 @@
       ],
       "assetType": "image/webp",
       "assetParts": [
-        "/app/assets/cabinets-data/living-school.b64"
+        "/app/assets/cabinets-data/living-school-v129.part1.b64",
+        "/app/assets/cabinets-data/living-school-v129.part2.b64"
       ]
     },
     "cerbanimo": {
@@ -68,7 +70,8 @@
       ],
       "assetType": "image/webp",
       "assetParts": [
-        "/app/assets/cabinets-data/cerbanimo.b64"
+        "/app/assets/cabinets-data/cerbanimo-v129.part1.b64",
+        "/app/assets/cabinets-data/cerbanimo-v129.part2.b64"
       ]
     },
     "fellowfare": {
@@ -91,7 +94,8 @@
       ],
       "assetType": "image/webp",
       "assetParts": [
-        "/app/assets/cabinets-data/fellowfare.b64"
+        "/app/assets/cabinets-data/fellowfare-v129.part1.b64",
+        "/app/assets/cabinets-data/fellowfare-v129.part2.b64"
       ]
     },
     "anarchadia": {
@@ -114,7 +118,8 @@
       ],
       "assetType": "image/webp",
       "assetParts": [
-        "/app/assets/cabinets-data/anarchadia.b64"
+        "/app/assets/cabinets-data/anarchadia-v129.part1.b64",
+        "/app/assets/cabinets-data/anarchadia-v129.part2.b64"
       ]
     }
   }
