@@ -45,7 +45,7 @@ for(const required of ['new Worker','type: \'module\'','transformers-js-worker',
 for(const required of ['commonweave.structured-context.v1','routingQuestion','routingAnswer','responseContract','CommonweaveModelRuntime','modelRuntime.generate','RESPONSE_SCHEMA','outputJson','onboardFallback'])assert(assistant.includes(required),`assistant runtime is missing ${required}`);
 assert(!assistant.includes('request.deterministic'),'assistant runtime still invokes the deterministic provider');
 assert(assistant.includes('event.stopImmediatePropagation()'),'assistant does not replace the legacy deterministic submit handler');
-for(const required of ['fallbackExpectation','degraded-mode local fallback','delete clean.deterministic','delete clean.fallback','user-cancelled','bundled-smollm2'])assert(fallbackRuntime.includes(required),`fallback runtime is missing ${required}`);
+for(const required of ['fallbackExpectation','degraded-mode local fallback','delete clean.deterministic','delete clean.fallback','request?.signal?.aborted','AbortError',"error?.code==='CANCELLED'",'bundled-smollm2'])assert(fallbackRuntime.includes(required),`fallback runtime is missing ${required}`);
 
 for(const required of ['.cw127-weaveling::before','.cw127-weaveling::after','clip-path:polygon','mix-blend-mode:screen','cw133BeamPulse','cw133ProjectionHover'])assert(hologram.includes(required),`hologram styling is missing ${required}`);
 assert(hologram.includes('top:72%'),'projector is not centered in the Quad heart zone');
@@ -66,6 +66,7 @@ console.log(JSON.stringify({
   selectedProviderGeneration:true,
   structuredContext:'commonweave.structured-context.v1',
   fallbackFloor:'bundled-smollm2',
+  cancellationFallsThrough:false,
   hologram:'quarter-scale-stationary-projector',
   cacheRevision:'smollm2-onboard-r6'
 },null,2));
