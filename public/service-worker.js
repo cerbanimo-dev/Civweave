@@ -1,10 +1,11 @@
 'use strict';
 const VERSION='1.0.30';
-const CACHE_REVISION='anarchadia-interior-r16';
+const CACHE_REVISION='minilm-runtime-r17';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
 const CABINET_PREFIX='/app/assets/cabinets/';
 const MODEL_PREFIX='/app/models/';
+const MODEL_GRAPH_PREFIX='/app/models/all-minilm-l6-v2/onnx/';
 const ONNX_BACKEND_PREFIX='/app/vendor/transformers/wasm/';
 const CORE=[
   '/loom/','/lite/',
@@ -34,7 +35,7 @@ const CORE=[
   '/offline.html'
 ];
 const report=async(kind,detail={})=>{
-  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-anarchadia-interior-r16',kind:`service-worker:${kind}`,detail})})}catch{}
+  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-minilm-runtime-r17',kind:`service-worker:${kind}`,detail})})}catch{}
 };
 async function cacheOne(cache,url){
   try{const response=await fetch(url,{cache:'reload'});if(response.ok)await cache.put(url,response.clone());return response.ok}catch{return false}
@@ -65,6 +66,19 @@ async function networkFirst(request,fallback){
     return (await cache.match(request))||(fallback?await caches.match(fallback):null)||new Response('Offline',{status:503,headers:{'content-type':'text/plain'}});
   }
 }
+async function modelNetworkFirst(request){
+  const cache=await caches.open(RUNTIME_CACHE);
+  const getRequest=request.method==='HEAD'?new Request(request.url,{method:'GET'}):request;
+  try{
+    const response=await fetch(request,{cache:'reload'});
+    if(response?.ok&&request.method==='GET')await cache.put(getRequest,response.clone());
+    return response;
+  }catch{
+    const cached=await cache.match(getRequest)||await caches.match(getRequest);
+    if(cached&&request.method==='HEAD')return new Response(null,{status:200,headers:cached.headers});
+    return cached||new Response('MiniLM asset unavailable',{status:503,headers:{'content-type':'text/plain'}});
+  }
+}
 async function cacheFirst(request){
   const cached=await caches.match(request);
   if(cached)return cached;
@@ -86,14 +100,12 @@ self.addEventListener('fetch',event=>{
   }
   if(url.pathname==='/service-worker.js'){event.respondWith(fetch(request,{cache:'no-store'}));return}
   if(url.pathname.startsWith(CABINET_PREFIX)){event.respondWith(networkFirst(new Request(request,{cache:'no-cache'})));return}
-  if(url.pathname.startsWith(ONNX_BACKEND_PREFIX)){event.respondWith(networkFirst(new Request(request,{cache:'reload'})));return}
+  if(url.pathname.startsWith(ONNX_BACKEND_PREFIX)){event.respondWith(modelNetworkFirst(request));return}
+  if(url.pathname.startsWith(MODEL_GRAPH_PREFIX)){event.respondWith(modelNetworkFirst(request));return}
   if(url.pathname.startsWith(MODEL_PREFIX)){
     const mutable=/\/(model-manifest\.json|adapter\.js|worker\.js|reflex-index\.json)$/.test(url.pathname);
-    if(request.method==='HEAD'){
-      event.respondWith((async()=>{const cached=await caches.match(new Request(request.url,{method:'GET'}));if(cached)return new Response(null,{status:200,headers:cached.headers});return fetch(request,{cache:'no-cache'})})());
-      return;
-    }
-    event.respondWith(mutable?networkFirst(new Request(request,{cache:'no-cache'})):cacheFirst(request));
+    if(request.method==='HEAD'){event.respondWith(modelNetworkFirst(request));return}
+    event.respondWith(mutable?modelNetworkFirst(request):cacheFirst(request));
     return;
   }
   if(url.pathname.startsWith('/app/')||url.pathname.startsWith('/downloads/'))event.respondWith(cacheFirst(request));
