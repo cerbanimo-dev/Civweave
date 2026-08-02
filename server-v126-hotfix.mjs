@@ -5,7 +5,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(root, 'server-v126.mjs');
 const runtimePath = path.join(root, '.commonweave-server-v126-hotfix.runtime.mjs');
+const HOTFIX_BUILD = '1.0.26-loop-diagnostics-hotfix-1';
 let source = await fsp.readFile(sourcePath, 'utf8');
+source = source.replaceAll('1.0.26-loop-diagnostics', HOTFIX_BUILD);
 
 function replaceRequired(before, after, label) {
   if (!source.includes(before)) throw new Error(`Commonweave v1.0.26 hotfix could not find ${label}`);
