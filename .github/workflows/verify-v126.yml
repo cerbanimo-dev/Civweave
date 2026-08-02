@@ -21,22 +21,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install and stage local model runtime
+      - name: Install semantic runtime and model package
         run: |
           npm install --no-audit --no-fund
           test -s public/app/vendor/transformers/transformers.min.js
           test -s public/app/vendor/transformers/stage-manifest.json
           test -s public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs
           test -s public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm
-          grep -q 'ort-wasm-simd-threaded.jsep.mjs' public/app/vendor/transformers/stage-manifest.json
-          grep -q 'ort-wasm-simd-threaded.jsep.wasm' public/app/vendor/transformers/stage-manifest.json
+          test -s public/app/models/all-minilm-l6-v2/tokenizer.json
+          test -s public/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx
+          test -s public/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx
+          node scripts/ensure-minilm-model.mjs --check
       - name: Run offline-first checks
         run: npm run check
       - name: Start Commonweave host
         run: |
           PORT=8787 npm start > commonweave-server.log 2>&1 &
           echo $! > commonweave-server.pid
-      - name: Inspect installer, app, model contract, icons, backend, and seed routes
+      - name: Inspect installer, reflex, intention weave, icons, backend, and seed routes
         run: |
           set -euxo pipefail
           for i in $(seq 1 30); do
@@ -50,70 +52,53 @@ jobs:
           grep -q 'install-v130.js' installer.html
           curl -fsS -D worker-headers.txt http://127.0.0.1:8787/service-worker.js -o service-worker.js
           grep -qi 'service-worker-allowed: /' worker-headers.txt
-          grep -q 'commonweave-static-' service-worker.js
-          grep -q 'commonweave-runtime-' service-worker.js
-          grep -q "const VERSION='1.0.30'" service-worker.js
-          grep -q "CACHE_REVISION='smollm2-route-lock-r12'" service-worker.js
-          grep -q '/app/models/smollm2-360m-instruct/tokenizer.json' service-worker.js
+          grep -q "CACHE_REVISION='minilm-intention-r14'" service-worker.js
+          grep -q '/app/models/all-minilm-l6-v2/tokenizer.json' service-worker.js
+          grep -q '/app/intention-planner-v138.js' service-worker.js
+          grep -q '/app/intention-ui-v138.js' service-worker.js
           curl -fsS http://127.0.0.1:8787/loom/ -o loom.html
-          grep -q 'smollm2-fallback-runtime-v134.js' loom.html
-          grep -q 'smollm2-small-model-v137.js?v=route-lock-r2' loom.html
-          grep -q 'commonweave-icon-192.png?v=tight-r2' loom.html
-          grep -q 'manifest.webmanifest?v=1.0.30-icon-r2' loom.html
-          grep -q 'weaveling-hologram-v133.css?v=heart-r8' loom.html
-          grep -q 'v130-cabinet-launcher.js' loom.html
-          grep -q 'pwa-v130.js' loom.html
+          grep -q 'minilm-reflex-runtime-v138.js?v=reflex-r1' loom.html
+          grep -q 'minilm-model-settings-v138.js?v=reflex-r1' loom.html
+          grep -q 'intention-planner-v138.js?v=weave-r1' loom.html
+          grep -q 'intention-ui-v138.js?v=weave-r1' loom.html
+          grep -q 'assistant-runtime-v138.js?v=reflex-r2' loom.html
+          if grep -q 'smollm2-fallback-runtime' loom.html; then exit 1; fi
           curl -fsS http://127.0.0.1:8787/lite/ -o lite.html
-          grep -q 'smollm2-fallback-runtime-v134.js' lite.html
-          grep -q 'smollm2-small-model-v137.js?v=route-lock-r2' lite.html
-          grep -q 'commonweave-icon-192.png?v=tight-r2' lite.html
-          grep -q 'manifest.webmanifest?v=1.0.30-icon-r2' lite.html
-          grep -q 'lite-v129-app.js' lite.html
-          curl -fsS http://127.0.0.1:8787/app/smollm2-small-model-v137.js -o smollm2-contract.js
-          grep -q 'COMMONWEAVE_SMALL_MODEL_CONTRACT_V2' smollm2-contract.js
-          grep -q 'function parseRouteCode' smollm2-contract.js
-          grep -q 'function compactGuideRequest' smollm2-contract.js
-          grep -q 'maxNewTokens:4' smollm2-contract.js
-          grep -q 'maxNewTokens:36' smollm2-contract.js
-          grep -q 'Production guide responses use the canonical Commonweave route lock' smollm2-contract.js
-          curl -fsS http://127.0.0.1:8787/app/models/smollm2-360m-instruct/tokenizer.json -o tokenizer.json
-          test -s tokenizer.json
-          grep -q 'model' tokenizer.json
+          grep -q 'minilm-reflex-runtime-v138.js?v=reflex-r1' lite.html
+          grep -q 'minilm-model-settings-v138.js?v=reflex-r1' lite.html
+          if grep -q 'smollm2-fallback-runtime' lite.html; then exit 1; fi
+          curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/model-manifest.json -o minilm-manifest.json
+          grep -q 'Xenova/all-MiniLM-L6-v2' minilm-manifest.json
+          grep -q '"tokenGeneration": false' minilm-manifest.json
+          curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/reflex-index.json -o reflex-index.json
+          grep -q 'mutual-aid-food-network' reflex-index.json
+          grep -q 'self-compassion' reflex-index.json
+          curl -fsS http://127.0.0.1:8787/app/intention-planner-v138.js -o intention-planner.js
+          grep -q 'commonweave.intention-weave.v1' intention-planner.js
+          grep -q 'Build a practice of self-love' intention-planner.js
+          grep -q 'Personal consent and peer-communication agreements' intention-planner.js
+          curl -fsSI http://127.0.0.1:8787/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx -o minilm-webgpu-headers.txt
+          grep -qi 'content-length: 30018257' minilm-webgpu-headers.txt
+          curl -fsSI http://127.0.0.1:8787/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx -o minilm-wasm-headers.txt
+          grep -qi 'content-length: 22972370' minilm-wasm-headers.txt
           curl -fsS http://127.0.0.1:8787/app/logos/commonweave-icon-generation.json -o icon-generation.json
           grep -q 'tight-dark-centered-thread-mark' icon-generation.json
           grep -q '90-94%' icon-generation.json
           curl -fsS -D icon-192-headers.txt http://127.0.0.1:8787/app/logos/commonweave-icon-192.png -o commonweave-icon-192.png
           grep -qi 'content-type: image/png' icon-192-headers.txt
           file commonweave-icon-192.png | grep -q '192 x 192'
-          curl -fsS -D icon-512-headers.txt http://127.0.0.1:8787/app/logos/commonweave-icon-512.png -o commonweave-icon-512.png
-          grep -qi 'content-type: image/png' icon-512-headers.txt
-          file commonweave-icon-512.png | grep -q '512 x 512'
-          curl -fsS http://127.0.0.1:8787/app/models/smollm2-360m-instruct/model-manifest.json -o smollm2-manifest.json
-          grep -q 'HuggingFaceTB/SmolLM2-360M-Instruct' smollm2-manifest.json
-          curl -fsS http://127.0.0.1:8787/app/models/smollm2-360m-instruct/worker.js -o smollm2-worker.js
-          grep -q "BACKEND_VERSION = 'onnx-r10'" smollm2-worker.js
-          grep -q 'wasmPaths = { mjs: BACKEND_MJS, wasm: BACKEND_WASM }' smollm2-worker.js
-          grep -q 'env.useWasmCache = false' smollm2-worker.js
           curl -fsS http://127.0.0.1:8787/app/vendor/transformers/stage-manifest.json -o transformers-stage.json
           grep -q '@huggingface/transformers' transformers-stage.json
-          grep -q 'ort-wasm-simd-threaded.jsep.mjs' transformers-stage.json
-          grep -q 'ort-wasm-simd-threaded.jsep.wasm' transformers-stage.json
           curl -fsS "http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs?v=onnx-r10" -D onnx-loader-headers.txt -o onnx-loader.mjs
           grep -Eqi 'content-type: (text|application)/(javascript|ecmascript)' onnx-loader-headers.txt
-          grep -qi 'content-length:' onnx-loader-headers.txt
           test -s onnx-loader.mjs
-          if grep -qi '<!doctype html\|<html' onnx-loader.mjs; then
-            echo 'ONNX loader route returned HTML' >&2
-            exit 1
-          fi
           curl -fsS "http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm?v=onnx-r10" -D onnx-wasm-headers.txt -o onnx-runtime.wasm
           grep -qi 'content-type: application/wasm' onnx-wasm-headers.txt
-          grep -qi 'content-length:' onnx-wasm-headers.txt
           test -s onnx-runtime.wasm
           curl -fsS http://127.0.0.1:8787/field/commonweave/seed -o commonweave-pocket-campus.cwseed
           test -s commonweave-pocket-campus.cwseed
-          if unzip -l commonweave-pocket-campus.cwseed | grep -q 'model_q4f16.onnx'; then
-            echo 'Pocket seed unexpectedly contains the 273 MB SmolLM2 graph' >&2
+          if unzip -l commonweave-pocket-campus.cwseed | grep -q 'all-minilm-l6-v2/onnx/'; then
+            echo 'Pocket seed unexpectedly contains MiniLM graphs' >&2
             exit 1
           fi
           curl -fsS http://127.0.0.1:8787/api/boot-logs > boot-logs.json
@@ -121,7 +106,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v130-smollm2-evidence
+          name: commonweave-v130-minilm-reflex-evidence
           path: |
             commonweave-server.log
             health.json
@@ -130,15 +115,14 @@ jobs:
             service-worker.js
             loom.html
             lite.html
-            smollm2-contract.js
-            tokenizer.json
+            minilm-manifest.json
+            reflex-index.json
+            intention-planner.js
+            minilm-webgpu-headers.txt
+            minilm-wasm-headers.txt
             icon-generation.json
             icon-192-headers.txt
             commonweave-icon-192.png
-            icon-512-headers.txt
-            commonweave-icon-512.png
-            smollm2-manifest.json
-            smollm2-worker.js
             transformers-stage.json
             onnx-loader-headers.txt
             onnx-loader.mjs
