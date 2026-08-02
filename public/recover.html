@@ -14,13 +14,15 @@
     <img class="sigil" src="/app/logos/commonweave.webp" alt="">
     <small>COMMONWEAVE RECOVERY GATE · v1.0.25</small>
     <h1>Untangling the old cache.</h1>
-    <p>This page sits outside the installed campus worker, so it can safely retire the v1.0.21 shell without being intercepted by it.</p>
+    <p>This page sits outside the installed campus worker, so it can safely retire the old shell without being intercepted by it.</p>
     <div class="meter"><span id="bar"></span></div>
     <div id="status" class="status" role="status">Preparing recovery…</div>
     <button id="retry" hidden>Retry recovery</button>
     <a class="secondary" href="/app/?recovered=1&v=1.0.25">Enter without cleanup</a>
   </main>
 <script>
+const CURRENT_VERSION='1.0.25';
+const CURRENT_BUILD='1.0.25-freeze-recovery';
 const status=document.querySelector('#status'),bar=document.querySelector('#bar'),retry=document.querySelector('#retry');
 const say=(text,percent)=>{status.textContent=text;bar.style.width=`${percent}%`};
 async function recover(){retry.hidden=true;try{
@@ -28,11 +30,12 @@ async function recover(){retry.hidden=true;try{
   if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.allSettled(regs.filter(reg=>/\/app(?:\/|$)/.test(new URL(reg.scope).pathname)).map(reg=>reg.unregister()))}
   say('Removing stale campus caches…',52);
   if('caches' in window){const keys=await caches.keys();await Promise.allSettled(keys.filter(key=>key.startsWith('commonweave-pocket-campus-')||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key)).map(key=>caches.delete(key)))}
-  say('Resetting the boot marker while preserving your plans and AI preference…',76);
-  localStorage.setItem('commonweave.host-build','1.0.21-ai-uplift');
-  localStorage.setItem('commonweave.recovery.completed','1.0.25');
+  say('Aligning the boot marker while preserving your plans and AI preference…',76);
+  localStorage.setItem('commonweave.host-build',CURRENT_BUILD);
+  localStorage.setItem('commonweave.recovery.completed',CURRENT_VERSION);
+  sessionStorage.setItem('commonweave.recovery.entry',CURRENT_VERSION);
   say('Opening the repaired local-first campus…',100);
-  setTimeout(()=>location.replace('/app/?recovered=1&v=1.0.25'),250);
+  setTimeout(()=>location.replace(`/app/?recovered=1&v=${CURRENT_VERSION}&t=${Date.now()}`),300);
 }catch(error){say(`Recovery stopped: ${error.message||error}`,100);retry.hidden=false}}
 retry.onclick=recover;recover();
 </script>
