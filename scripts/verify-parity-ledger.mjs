@@ -1,8 +1,10 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gunzipSync } from 'node:zlib';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const ledger=JSON.parse(await fs.readFile(path.join(root,'public/app/shared/commonweave-parity-ledger.json'),'utf8'));
+const encoded=(await Promise.all([1,2,3,4].map(part=>fs.readFile(path.join(root,`public/app/shared/commonweave-parity-ledger.part${part}.b64`),'utf8')))).join('').replace(/\s+/g,'');
+const ledger=JSON.parse(gunzipSync(Buffer.from(encoded.trim(),'base64')).toString('utf8'));
 const errors=[];const systemIds=new Set();const roomIds=new Set();const capabilityIds=new Set();
 for(const system of ledger.systems||[]){
   if(systemIds.has(system.id))errors.push(`duplicate system: ${system.id}`);systemIds.add(system.id);
