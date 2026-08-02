@@ -30,7 +30,7 @@ async function loadGenerator() {
     env.localModelPath = MODEL_ROOT;
     if (env.backends?.onnx?.wasm) {
       env.backends.onnx.wasm.wasmPaths = '/app/vendor/transformers/wasm/';
-      env.backends.onnx.wasm.numThreads = Math.max(1, Math.min(4, navigator.hardwareConcurrency || 1));
+      env.backends.onnx.wasm.numThreads = self.crossOriginIsolated ? Math.max(1, Math.min(4, navigator.hardwareConcurrency || 1)) : 1;
     }
     const device = navigator.gpu ? 'webgpu' : 'wasm';
     const generator = await pipeline('text-generation', MODEL_ID, {
