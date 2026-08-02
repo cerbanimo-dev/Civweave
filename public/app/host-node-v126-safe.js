@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='1.0.26';
-const BUILD='1.0.26-loop-diagnostics-hotfix-1';
+const BUILD='1.0.26-loop-diagnostics-hotfix-2';
 const log=(kind,detail={})=>window.CommonweaveBootLog?.log(kind,detail)||console.info('[CW-BOOT]',kind,detail);
 const container=navigator.serviceWorker;
 const originalAdd=container?.addEventListener;
@@ -18,7 +18,7 @@ if(container&&originalAdd){
   };
 }
 const script=document.createElement('script');
-script.src=`host-node-v126.js?v=${VERSION}&hotfix=1`;
+script.src=`host-node-v126.js?v=${VERSION}&hotfix=2`;
 script.async=false;
 script.onload=()=>{
   if(container&&originalAdd)container.addEventListener=originalAdd;
