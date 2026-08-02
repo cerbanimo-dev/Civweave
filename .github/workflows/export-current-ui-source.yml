@@ -1,0 +1,44 @@
+name: Export current UI source
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build source bundle and canonical ledger
+        run: |
+          set -euxo pipefail
+          mkdir -p export
+          cp -a public/app export/app
+          cp public/service-worker.js export/service-worker.js
+          cp .github/workflows/verify-v126.yml export/verify-v126.yml
+          cp package.json server-v130.mjs export/
+          cp -a scripts export/scripts
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          import { gunzipSync } from 'node:zlib';
+          const chunks=[];
+          for (let i=1;i<=4;i+=1) chunks.push(await readFile(`public/app/shared/commonweave-parity-ledger.part${i}.b64`,'utf8'));
+          const encoded=chunks.join('').replace(/\s+/g,'');
+          const text=gunzipSync(Buffer.from(encoded,'base64')).toString('utf8');
+          await writeFile('export/commonweave-parity-ledger.json',text);
+          NODE
+          tar -czf current-ui-source.tgz export
+      - uses: actions/upload-artifact@v4
+        with:
+          name: current-ui-source
+          path: current-ui-source.tgz
+          retention-days: 2
