@@ -1,4 +1,4 @@
-name: Verify Commonweave v1.0.26
+name: Verify Commonweave v1.0.27
 
 on:
   push:
@@ -14,46 +14,45 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check JavaScript syntax
+      - name: Run clean-slate checks
         run: npm run check
-      - name: Start diagnostic host
+      - name: Start clean-slate host
         run: |
           PORT=8787 npm start > commonweave-server.log 2>&1 &
           echo $! > commonweave-server.pid
-      - name: Wait for host and inspect version surfaces
+      - name: Inspect live route surfaces
         run: |
           set -euxo pipefail
           for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:8787/api/health > health.json; then break; fi
             sleep 1
           done
-          cat health.json
-          grep -q '1.0.26-loop-diagnostics' health.json
-          grep -q '"appVersion":"1.0.26"' health.json
-          curl -fsS -D campus-headers.txt http://127.0.0.1:8787/campus/ -o campus.html
-          grep -qi 'x-commonweave-version: 1.0.26' campus-headers.txt
-          grep -q 'boot-diagnostics-v126.js' campus.html
-          grep -q 'host-node-setup-v126.js' campus.html
-          if grep -q 'location.reload()' campus.html; then
-            echo 'Automatic reload survived in the isolated campus HTML' >&2
-            exit 1
-          fi
-          curl -fsS http://127.0.0.1:8787/campus/version.json > version.json
-          grep -q '"version": "1.0.26"' version.json
-          curl -fsS -D migration-headers.txt http://127.0.0.1:8787/app/ -o /dev/null
-          grep -qi 'location: /campus/' migration-headers.txt
+          grep -q '1.0.27-clean-slate-shell' health.json
+          grep -q '"appVersion":"1.0.27"' health.json
+          curl -fsS -D loom-headers.txt http://127.0.0.1:8787/loom/ -o loom.html
+          grep -qi 'x-commonweave-version: 1.0.27' loom-headers.txt
+          grep -q 'loom-v127.js' loom.html
+          grep -q 'data-realm="living-school"' loom.html
+          ! grep -q '1.0.21' loom.html
+          ! grep -q 'commonweave-pocket-campus.cwseed' loom.html
+          curl -fsS http://127.0.0.1:8787/loom/realm/fellowfare/ -o realm.html
+          grep -q 'realm-v127.js' realm.html
+          curl -fsS -D app-migration.txt http://127.0.0.1:8787/app/ -o /dev/null
+          grep -qi 'location: /loom/' app-migration.txt
+          curl -fsS -D campus-migration.txt http://127.0.0.1:8787/campus/ -o /dev/null
+          grep -qi 'location: /loom/' campus-migration.txt
           curl -fsS http://127.0.0.1:8787/api/boot-logs > boot-logs.json
-          cat boot-logs.json
-      - name: Upload diagnostic evidence
+      - name: Upload clean-slate evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v126-smoke-logs
+          name: commonweave-v127-smoke-logs
           path: |
             commonweave-server.log
             health.json
-            version.json
-            campus-headers.txt
-            campus.html
-            migration-headers.txt
+            loom-headers.txt
+            loom.html
+            realm.html
+            app-migration.txt
+            campus-migration.txt
             boot-logs.json
