@@ -59,3 +59,7 @@ The current entry points are:
 - Canonical capability ledger: `/app/shared/commonweave-parity-ledger.json`
 
 Visual and Lite consume the same systems, rooms, capability IDs, consent rules, handoffs, and reward semantics. The mature service applications remain available as working source surfaces while capabilities are migrated behind shared adapters. See `COMMONWEAVE-PARITY-LEDGER.md` and `RELEASE-NOTES-v1.0.28.md`.
+
+## v1.0.29 cabinet workstations
+
+Commonweave Lite now uses the five system cabinet artworks as its actual interface shell. All canonical rooms and capabilities render inside the cabinet projection rectangle, the physical bottom controls switch systems, and mature source tools open inside the same screen. The hierarchy remains shared with Visual Commonweave through the parity ledger. See `RELEASE-NOTES-v1.0.29.md`.
