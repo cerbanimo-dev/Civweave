@@ -3,7 +3,7 @@ services:
     name: commonweave-host-node
     runtime: node
     plan: free
-    buildCommand: npm install && node scripts/patch-v125.mjs
+    buildCommand: npm install && npm run check
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeploy: true
