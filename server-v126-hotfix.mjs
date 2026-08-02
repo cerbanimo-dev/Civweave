@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(root, 'server-v126.mjs');
 const runtimePath = path.join(root, '.commonweave-server-v126-hotfix.runtime.mjs');
-const HOTFIX_BUILD = '1.0.26-loop-diagnostics-hotfix-1';
+const HOTFIX_BUILD = '1.0.26-loop-diagnostics-hotfix-2';
 let source = await fsp.readFile(sourcePath, 'utf8');
 source = source.replaceAll('1.0.26-loop-diagnostics', HOTFIX_BUILD);
 
@@ -21,14 +21,14 @@ replaceRequired(
 );
 
 replaceRequired(
-  "text = text.replace('setTimeout(()=>location.reload(),900)', 'window.CommonweaveBootLog?.log(\"legacy-reload-suppressed\",{reason:\"manual-update-candidate\"})');",
-  "text = text.replace('setTimeout(()=>location.reload(),900)', 'window.CommonweaveBootLog?.log(\"legacy-reload-suppressed\",{reason:\"manual-update-candidate\"})');\n    text = text.replace(\"navigator.serviceWorker?.addEventListener('controllerchange',()=>location.reload());\", \"navigator.serviceWorker?.addEventListener('controllerchange',()=>window.CommonweaveBootLog?.log('controllerchange-observed-no-reload',{controller:navigator.serviceWorker.controller?.scriptURL||null}));\");",
-  'the runtime reload suppression point'
+  "cwBootLog('campus-runtime-served', { requestId, bytes: text.length }, req);",
+  "const reloadCount = (text.match(/location\\.reload\\(\\)/g) || []).length;\n    text = text.replaceAll('location.reload()', `window.CommonweaveBootLog?.log('controllerchange-observed-no-reload',{controller:navigator.serviceWorker?.controller?.scriptURL||null,blockedBy:'${HOTFIX_BUILD}'})`);\n    const remainingReloads = (text.match(/location\\.reload\\(\\)/g) || []).length;\n    cwBootLog('campus-runtime-sanitized', { requestId, reloadCount, remainingReloads, build: HOTFIX_BUILD }, req);\n    if (remainingReloads) throw new Error('Unsafe automatic reload survived runtime sanitization.');\n    cwBootLog('campus-runtime-served', { requestId, bytes: text.length }, req);",
+  'the campus runtime response point'
 );
 
 await fsp.writeFile(runtimePath, source, 'utf8');
 try {
-  await import(pathToFileURL(runtimePath).href + '?hotfix=1');
+  await import(pathToFileURL(runtimePath).href + '?hotfix=2');
 } finally {
   setTimeout(() => fsp.unlink(runtimePath).catch(() => {}), 1000).unref?.();
 }
