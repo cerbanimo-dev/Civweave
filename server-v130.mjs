@@ -145,7 +145,10 @@ replaceRequired(
 // String.raw preserves backslashes exactly. Normalize the two regular expressions
 // that are emitted into the generated runtime so they contain one escape, not two.
 source = source.replace("/^\\\\/loom\\\\/realm\\\\/(living-school|cerbanimo|fellowfare|anarchadia)\\\\/?$/", "/^\\/loom\\/realm\\/(living-school|cerbanimo|fellowfare|anarchadia)\\/?$/");
-source = source.replace("/\\\\.(?:png|jpe?g|webp|svg|gif|avif|css|js|json|webmanifest|woff2?)$/i", "/\\.(?:png|jpe?g|webp|svg|gif|avif|css|js|json|webmanifest|woff2?)$/i");
+source = source.replace(
+  "/\\\\.(?:png|jpe?g|webp|svg|gif|avif|css|js|json|webmanifest|woff2?)$/i",
+  "/\\.(?:png|jpe?g|webp|svg|gif|avif|css|m?js|cjs|json|webmanifest|woff2?|wasm|onnx|map|bin)$/i"
+);
 
 await fsp.writeFile(runtimePath, source, 'utf8');
 try { await import(pathToFileURL(runtimePath).href + '?build=' + VERSION); }
