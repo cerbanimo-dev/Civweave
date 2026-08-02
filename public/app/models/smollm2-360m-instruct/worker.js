@@ -2,6 +2,7 @@ import { pipeline, env } from '/app/vendor/transformers/transformers.min.js';
 
 const MODEL_ID = 'smollm2-360m-instruct';
 const MODEL_ROOT = '/app/models/';
+const BACKEND_ROOT = '/app/vendor/transformers/wasm/';
 let generatorPromise = null;
 
 function serializeError(error) {
@@ -22,27 +23,54 @@ function cleanGenerated(candidate) {
   return String(generated ?? '');
 }
 
+function configureRuntime() {
+  env.allowRemoteModels = false;
+  env.allowLocalModels = true;
+  env.localModelPath = MODEL_ROOT;
+  if (env.backends?.onnx?.wasm) {
+    env.backends.onnx.wasm.wasmPaths = BACKEND_ROOT;
+    env.backends.onnx.wasm.numThreads = self.crossOriginIsolated ? Math.max(1, Math.min(4, navigator.hardwareConcurrency || 1)) : 1;
+  }
+}
+
+async function createGenerator(device) {
+  self.postMessage({ type: 'progress', progress: { status: 'backend-start', device } });
+  const generator = await pipeline('text-generation', MODEL_ID, {
+    device,
+    dtype: 'q4f16',
+    local_files_only: true,
+    progress_callback(progress) {
+      self.postMessage({ type: 'progress', progress: { ...progress, device } });
+    },
+  });
+  return { generator, device };
+}
+
 async function loadGenerator() {
   if (generatorPromise) return generatorPromise;
   generatorPromise = (async () => {
-    env.allowRemoteModels = false;
-    env.allowLocalModels = true;
-    env.localModelPath = MODEL_ROOT;
-    if (env.backends?.onnx?.wasm) {
-      env.backends.onnx.wasm.wasmPaths = '/app/vendor/transformers/wasm/';
-      env.backends.onnx.wasm.numThreads = self.crossOriginIsolated ? Math.max(1, Math.min(4, navigator.hardwareConcurrency || 1)) : 1;
+    configureRuntime();
+    const attempts = navigator.gpu ? ['webgpu', 'wasm'] : ['wasm'];
+    const failures = [];
+
+    for (const device of attempts) {
+      try {
+        return await createGenerator(device);
+      } catch (error) {
+        failures.push({ device, error: serializeError(error) });
+        self.postMessage({ type: 'progress', progress: { status: 'backend-failed', device, message: String(error?.message || error) } });
+      }
     }
-    const device = navigator.gpu ? 'webgpu' : 'wasm';
-    const generator = await pipeline('text-generation', MODEL_ID, {
-      device,
-      dtype: 'q4f16',
-      local_files_only: true,
-      progress_callback(progress) {
-        self.postMessage({ type: 'progress', progress });
-      },
-    });
-    return { generator, device };
-  })();
+
+    const summary = failures.map(item => `[${item.device}] ${item.error.message}`).join(' | ');
+    const error = new Error(`No available SmolLM2 backend completed initialization. ${summary}`);
+    error.code = 'SMOLLM2_BACKEND_UNAVAILABLE';
+    error.failures = failures;
+    throw error;
+  })().catch(error => {
+    generatorPromise = null;
+    throw error;
+  });
   return generatorPromise;
 }
 
