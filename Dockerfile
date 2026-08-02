@@ -1,10 +1,10 @@
 FROM node:22-alpine
 WORKDIR /app
 COPY package.json ./
-COPY server.mjs server-v125.mjs ./
+COPY server.mjs server-v126.mjs ./
 COPY scripts ./scripts
 COPY public ./public
-RUN node scripts/patch-v125.mjs && mkdir -p /app/data && chown -R node:node /app
+RUN npm run check && mkdir -p /app/data && chown -R node:node /app
 USER node
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=8787 DATA_DIR=/app/data
 EXPOSE 8787
