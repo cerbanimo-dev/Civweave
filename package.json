@@ -8,9 +8,9 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node server-v126.mjs",
-    "dev": "node --watch server-v126.mjs",
-    "check:syntax": "node --check server-v126.mjs && node --check server.mjs && node --check public/app/boot-diagnostics-v126.js && node --check public/app/host-node-setup-v126.js && node --check public/app/host-node-v126-safe.js && node --check public/app/service-worker-v126.js && node --check public/app/service-worker.js && node --check scripts/smoke-v126.mjs",
+    "start": "node server-v126-hotfix.mjs",
+    "dev": "node --watch server-v126-hotfix.mjs",
+    "check:syntax": "node --check server-v126-hotfix.mjs && node --check server-v126.mjs && node --check server.mjs && node --check public/app/boot-diagnostics-v126.js && node --check public/app/host-node-setup-v126.js && node --check public/app/host-node-v126-safe.js && node --check public/app/service-worker-v126.js && node --check public/app/service-worker.js && node --check scripts/smoke-v126.mjs",
     "check": "npm run check:syntax && node scripts/smoke-v126.mjs",
     "build:install": "bash scripts/build-install-artifacts.sh",
     "build:release": "npm run check && npm run build:install"
