@@ -1,6 +1,8 @@
 # Commonweave Capability-to-Room Parity Ledger
 
-> Canonical source: `public/app/shared/commonweave-parity-ledger.json`
+> Canonical endpoint: `/app/shared/commonweave-parity-ledger.json`
+>
+> Repository source: `public/app/shared/commonweave-parity-ledger.part1.b64` through `.part4.b64` (lossless gzip-base64)
 
 Commonweave now has one information architecture and two renderers:
 
@@ -78,7 +80,7 @@ The service applications remain the working implementation sources during migrat
 
 ## Files introduced in v1.0.28
 
-- `public/app/shared/commonweave-parity-ledger.json`
+- `public/app/shared/commonweave-parity-ledger.part1.b64` through `.part4.b64` (served as `/app/shared/commonweave-parity-ledger.json`)
 - `public/app/shared/commonweave-parity-runtime.js`
 - `public/app/lite-v128.html` / `.css` / `.js`
 - `public/app/realm-v128.html` / `.js`
