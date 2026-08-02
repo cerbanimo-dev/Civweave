@@ -1,17 +1,25 @@
 'use strict';
 const VERSION='1.0.30';
-const STATIC_CACHE=`commonweave-static-${VERSION}`;
-const RUNTIME_CACHE=`commonweave-runtime-${VERSION}`;
+const CACHE_REVISION='micro-ai-r5';
+const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
+const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
+const CABINET_PREFIX='/app/assets/cabinets/';
+const MODEL_PREFIX='/app/models/';
 const CORE=[
   '/loom/','/lite/',
   '/loom/realm/living-school/','/loom/realm/cerbanimo/','/loom/realm/fellowfare/','/loom/realm/anarchadia/',
   '/app/manifest.webmanifest',
   '/app/loom-v128.css','/app/loom-v128.js','/app/realm-v128.js',
-  '/app/shared/commonweave-parity-runtime.js',
+  '/app/weaveling-hologram-v133.css','/app/assistant-runtime-v133.js',
+  '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js',
+  '/app/model-settings-v133.css','/app/model-settings-v133.js','/app/lite-model-settings-v133.js',
+  '/app/models/functiongemma-270m-it/model-manifest.json','/app/models/functiongemma-270m-it/adapter.js',
   '/app/v130-cabinet-launcher.css','/app/v130-cabinet-launcher.js',
   '/app/pwa-v130.css','/app/pwa-v130.js',
   '/app/lite-v129.html','/app/lite-v129-base.css','/app/lite-v129-components.css','/app/lite-v129-themes.css','/app/lite-source-v129.css',
   '/app/lite-v129-core.js','/app/lite-v129-native.js','/app/lite-v129-app.js',
+  '/app/cabinet-calibration-v131.css','/app/cabinet-calibration-v131.js',
+  '/app/model-settings-v131.css','/app/model-settings-v131.js',
   '/app/shared/commonweave-parity-ledger.json',
   '/app/shared/cabinet-shells-v129.json',
   '/app/assets/cabinets/commonweave.webp','/app/assets/cabinets/living-school.webp','/app/assets/cabinets/cerbanimo.webp','/app/assets/cabinets/fellowfare.webp','/app/assets/cabinets/anarchadia.webp',
@@ -21,7 +29,7 @@ const CORE=[
   '/offline.html'
 ];
 const report=async(kind,detail={})=>{
-  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-offline-mesh-cabinet-runtime',kind:`service-worker:${kind}`,detail})})}catch{}
+  try{await fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:'1.0.30-micro-ai-routing-hologram',kind:`service-worker:${kind}`,detail})})}catch{}
 };
 async function cacheOne(cache,url){
   try{const response=await fetch(url,{cache:'reload'});if(response.ok)await cache.put(url,response.clone());return response.ok}catch{return false}
@@ -29,18 +37,18 @@ async function cacheOne(cache,url){
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(STATIC_CACHE);
   const results=await Promise.all(CORE.map(url=>cacheOne(cache,url)));
-  await report('installed',{cached:results.filter(Boolean).length,total:CORE.length});
+  await report('installed',{cached:results.filter(Boolean).length,total:CORE.length,revision:CACHE_REVISION});
 })()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{
   const keys=await caches.keys();
   const stale=keys.filter(key=>(key.startsWith('commonweave-')&&key!==STATIC_CACHE&&key!==RUNTIME_CACHE)||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));
   await Promise.all(stale.map(key=>caches.delete(key)));
   await self.clients.claim();
-  await report('activated',{deleted:stale});
+  await report('activated',{deleted:stale,revision:CACHE_REVISION});
 })()));
 self.addEventListener('message',event=>{
   if(event.data?.type==='SKIP_WAITING')self.skipWaiting();
-  if(event.data?.type==='GET_VERSION')event.source?.postMessage?.({type:'COMMONWEAVE_VERSION',version:VERSION});
+  if(event.data?.type==='GET_VERSION')event.source?.postMessage?.({type:'COMMONWEAVE_VERSION',version:VERSION,revision:CACHE_REVISION});
 });
 async function networkFirst(request,fallback){
   const cache=await caches.open(RUNTIME_CACHE);
@@ -75,6 +83,16 @@ self.addEventListener('fetch',event=>{
     return;
   }
   if(url.pathname==='/service-worker.js'){event.respondWith(fetch(request,{cache:'no-store'}));return}
+  if(url.pathname.startsWith(CABINET_PREFIX)){
+    const revalidatingRequest=new Request(request,{cache:'no-cache'});
+    event.respondWith(networkFirst(revalidatingRequest));
+    return;
+  }
+  if(url.pathname.startsWith(MODEL_PREFIX)){
+    const mutable=/\/(model-manifest\.json|adapter\.js)$/.test(url.pathname);
+    event.respondWith(mutable?networkFirst(new Request(request,{cache:'no-cache'})):cacheFirst(request));
+    return;
+  }
   if(url.pathname.startsWith('/app/')||url.pathname.startsWith('/downloads/')){
     event.respondWith(cacheFirst(request));
   }
