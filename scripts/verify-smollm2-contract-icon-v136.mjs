@@ -31,8 +31,8 @@ for(const [name,html] of [['loom',loom],['realm',realm],['lite',lite]]){
   assert(html.includes('smollm2-small-model-v137.js?v=route-lock-r2'),`${name} does not load the route-lock contract`);
   assert(html.indexOf('model-settings-v133.js')<html.indexOf('smollm2-small-model-v137.js'),`${name} loads the trial override before settings`);
   if(name!=='lite')assert(html.indexOf('smollm2-small-model-v137.js')<html.indexOf('assistant-runtime-v133.js'),`${name} loads the contract after the guide runtime`);
-  assert(html.includes('commonweave-icon-192.png?v=dark-r1'),`${name} does not use the dark Commonweave icon`);
-  assert(html.includes('manifest.webmanifest?v=1.0.30-icon-r1'),`${name} manifest cache key is stale`);
+  assert(html.includes('commonweave-icon-192.png?v=tight-r2'),`${name} does not use the tightly cropped Commonweave icon`);
+  assert(html.includes('manifest.webmanifest?v=1.0.30-icon-r2'),`${name} manifest cache key is stale`);
 }
 for(const html of [loom,realm])assert(!html.includes('<img src="/app/logos/commonweave.webp"'),'active top bar still uses the old wordmark image');
 
@@ -66,7 +66,9 @@ for(const required of [
 ])assert(worker.includes(required),`service worker does not cache ${required}`);
 
 assert(generation.schema==='commonweave.icon-generation.v1','unexpected icon generation schema');
-assert(generation.treatment==='dark-centered-thread-mark','icon treatment is not the approved dark centered mark');
+assert(generation.treatment==='tight-dark-centered-thread-mark','icon treatment is not the approved tight dark mark');
+assert(generation.targetFill?.standard==='90-94%','standard icon fill target is not 90-94%');
+assert(generation.targetFill?.maskable==='78%','maskable icon fill target is not 78%');
 for(const required of [
   'commonweave-icon-192.png',
   'commonweave-icon-512.png',
@@ -96,7 +98,8 @@ for(const required of [
 
 for(const required of [
   "import sharp from 'sharp'",
-  'dark-centered-thread-mark',
+  'tight-dark-centered-thread-mark',
+  '90-94%',
   'commonweave-icon-maskable-512.png',
   'commonweave-adaptive-foreground-512.png'
 ])assert(generator.includes(required),`icon generator missing ${required}`);
@@ -113,6 +116,8 @@ console.log(JSON.stringify({
   },
   icons:{
     treatment:generation.treatment,
+    standardFill:generation.targetFill.standard,
+    maskableFill:generation.targetFill.maskable,
     pwa:[192,512],
     maskable:[192,512],
     activeTopbar:true
