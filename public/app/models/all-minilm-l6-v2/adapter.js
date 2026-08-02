@@ -18,17 +18,20 @@ const pending=new Map();
 
 async function inspect(spec,{probeBody=true}={}){
   try{
-    const head=await fetch(spec.url,{method:'HEAD',cache:'reload'});
-    let length=Number(head.headers.get('content-length')||0);
-    let status=head.status;
-    let type=String(head.headers.get('content-type')||'');
-    if(head.ok&&length===0&&probeBody&&spec.minBytes<=BODY_PROBE_LIMIT){
+    if(probeBody&&spec.minBytes<=BODY_PROBE_LIMIT){
       const response=await fetch(spec.url,{cache:'reload'});
-      status=response.status;type=String(response.headers.get('content-type')||type);
-      if(response.ok)length=(await response.blob()).size;
+      const status=response.status;
+      const type=String(response.headers.get('content-type')||'');
+      const length=response.ok?(await response.blob()).size:Number(response.headers.get('content-length')||0);
+      const htmlFallback=/text\/html/i.test(type);
+      return {...spec,status,length,type,ok:status>=200&&status<300&&!htmlFallback&&length>=spec.minBytes,probe:'body'};
     }
+    const response=await fetch(spec.url,{method:'HEAD',cache:'reload'});
+    const status=response.status;
+    const type=String(response.headers.get('content-type')||'');
+    const length=Number(response.headers.get('content-length')||0);
     const htmlFallback=/text\/html/i.test(type);
-    return {...spec,status,length,type,ok:status>=200&&status<300&&!htmlFallback&&length>=spec.minBytes};
+    return {...spec,status,length,type,ok:status>=200&&status<300&&!htmlFallback&&length>=spec.minBytes,probe:'head'};
   }catch(error){return {...spec,status:0,length:0,type:'',ok:false,error:error.message}}
 }
 function activeWorker(){
