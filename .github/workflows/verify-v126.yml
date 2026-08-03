@@ -111,10 +111,12 @@ jobs:
           curl -fsS http://127.0.0.1:8788/app/v130-cabinet-launcher.js -o cabinet-launcher.js
           grep -q 'CommonweaveParity.cabinetUrl' cabinet-launcher.js
           grep -q 'Cabinet mode' cabinet-launcher.js
-          if grep -q 'showModal' cabinet-launcher.js; then
-            echo 'Nested shrunken cabinet modal survived' >&2
-            exit 1
-          fi
+          for token in realmSrcdoc cw-cabinet-modal cw-cabinet-frame; do
+            if grep -q "$token" cabinet-launcher.js; then
+              echo "Nested cabinet machinery survived: $token" >&2
+              exit 1
+            fi
+          done
           curl -fsS http://127.0.0.1:8788/app/shared/cabinet-shells-v129.json -o cabinet-shells.json
           grep -q '"referencePanels"' cabinet-shells.json
           grep -q '"cerbanimo"' cabinet-shells.json
