@@ -16,6 +16,7 @@ const pkg=JSON.parse(pkgRaw);
 for(const token of ['src/app.js','src/domain.js','src/store.js','commonweave-handoff-consumer.js','commonweave-presence.js','Citizen Console'])assert(html.includes(token),`Workbench entry is missing ${token}`);
 for(const route of ['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench'])assert(html.includes(`'${route}'`)||runtime.includes(`'${route}'`),`Workbench route ${route} is not wired`);
 assert(html.includes('loadWorkspace')&&html.includes('syntheticFixture')&&html.includes("mode:'candidate'"),'Cabinet workbench does not preserve existing, blank, and synthetic workspace paths.');
+assert(html.includes("worker.register=async()=>await rootRegistration?.('/')"),'Legacy Anarchadia worker registration is not contained by the root device package.');
 assert(css.includes('.cabinet-workbench-return')&&css.includes('.onboarding-art')&&css.includes('data-cabinet-workbench'),'Cabinet workbench styling is incomplete.');
 for(const label of ['Charter editor','Proposal deliberation','Rights & safeguards','Exchange, restore & fork','Constitutional AI','Readiness & emergency brake'])assert(runtime.includes(label),`Cabinet feature menu is missing ${label}`);
 assert(runtime.includes("[data-action=\"vote-hub\"]")&&runtime.includes("open('proposals')"),'Vote controls do not enter the real proposal workbench.');
@@ -24,4 +25,4 @@ for(const asset of ['workbench.html','cabinet-workbench-v144.css','anarchadia-ca
 assert(worker.includes("DEVICE_REVISION='device-package-r24-anarchadia-workbench'"),'Device package revision was not rotated.');
 assert(pkg.scripts['check:syntax'].includes('anarchadia-cabinet-workbench-v144.js'),'Syntax suite omits the Anarchadia workbench bridge.');
 assert(pkg.scripts.check.includes('verify-anarchadia-cabinet-workbench-v144.mjs'),'Main check suite omits the Anarchadia cabinet workbench verifier.');
-console.log(JSON.stringify({ok:true,cabinet:'anarchadia',surfaces:['citizen-console','governance-workbench'],classicRoutes:9,devicePackage:'r24'},null,2));
+console.log(JSON.stringify({ok:true,cabinet:'anarchadia',surfaces:['citizen-console','governance-workbench'],classicRoutes:9,devicePackage:'r24',serviceWorkerAuthority:'root-only'},null,2));
