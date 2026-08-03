@@ -1,3 +1,4 @@
+// Verifies source-calibrated Cabinet Mode against the combined Anarchadia + FellowFare r25 device package.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
