@@ -11,7 +11,7 @@ const GUIDE_ART={
 };
 const pathParts=location.pathname.split('/').filter(Boolean);
 const realmId=pathParts[pathParts.indexOf('realm')+1]||'living-school';
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 let ledger=null,realm=null,rooms=[],currentRoom=null,toastTimer=null;
 
