@@ -48,23 +48,25 @@ jobs:
           data['scripts']['check']=check
           p.write_text(json.dumps(data,indent=2)+'\n')
 
-          def add_intention_surface(filename, css_anchor, script_anchor):
-              p=Path(filename);s=p.read_text()
+          def add_intention_surface(filename):
+              p=Path(filename)
+              s=p.read_text()
               css='  <link rel="stylesheet" href="/app/intention-ui-v138.css?v=weave-r1">\n'
               if css not in s:
-                  if css_anchor not in s: raise SystemExit(f'CSS anchor missing in {filename}')
-                  s=s.replace(css_anchor,css_anchor+css,1)
+                  if '</head>' not in s: raise SystemExit(f'head close missing in {filename}')
+                  s=s.replace('</head>',css+'</head>',1)
               planner='  <script src="/app/intention-planner-v138.js?v=weave-r1" defer></script>\n'
               ui='  <script src="/app/intention-ui-v138.js?v=weave-r1" defer></script>\n'
-              if planner not in s:
-                  if script_anchor not in s: raise SystemExit(f'script anchor missing in {filename}')
-                  s=s.replace(script_anchor,script_anchor+planner,1)
-              if ui not in s:
-                  s=s.replace(planner,planner+ui,1)
+              additions=''
+              if planner not in s: additions+=planner
+              if ui not in s: additions+=ui
+              if additions:
+                  if '</body>' not in s: raise SystemExit(f'body close missing in {filename}')
+                  s=s.replace('</body>',additions+'</body>',1)
               p.write_text(s)
 
-          add_intention_surface('public/app/realm-v128.html','  <link rel="stylesheet" href="/app/model-settings-v133.css?v=reflex-r1">\n','  <script src="/app/minilm-model-settings-v138.js?v=reflex-r1" defer></script>\n')
-          add_intention_surface('public/app/lite-v129.html','  <link rel="stylesheet" href="/app/model-settings-v133.css?v=reflex-r1">\n','  <script src="/app/minilm-model-settings-v138.js?v=reflex-r1" defer></script>\n')
+          add_intention_surface('public/app/realm-v128.html')
+          add_intention_surface('public/app/lite-v129.html')
 
           p=Path('public/service-worker.js')
           s=p.read_text()
