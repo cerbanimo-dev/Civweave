@@ -22,6 +22,11 @@ replaceRequired(
   'gateway release URLs'
 );
 replaceRequired(
+  "let installKitSha256 = '';\nlet installKitSize = 0;\ntry {\n  const kit = await fsp.readFile(INSTALL_KIT_PATH);\n  installKitSha256 = crypto.createHash('sha256').update(kit).digest('hex');\n  installKitSize = kit.length;\n} catch (error) {\n  console.warn('Install kit metadata unavailable:', error.message);\n}",
+  "const installKitSha256 = '';\nconst installKitSize = 0;",
+  'install kit startup hashing'
+);
+replaceRequired(
   "    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Commonweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Commonweave host-node and offline PWA release.'",
   "    releasedAt: STARTED_AT, appUrl: null, sourceUrl: COMMONWEAVE_SOURCE_URL,\n    downloadUrl: COMMONWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'Commonweave runs from a local installation. This public node only advertises releases and optional federation APIs.'",
   'release packet hosting fields'
