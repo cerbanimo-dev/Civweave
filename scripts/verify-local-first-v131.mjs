@@ -13,7 +13,7 @@ assert(packageJson.scripts['start:local']==='node server-local-v131.mjs','local 
 assert(localHost.includes("const VERSION = '1.0.31';")&&localHost.includes("const BUILD = '1.0.31-local-campus-runtime';"),'local host does not align version and build markers');
 assert(!packageJson.scripts.prestart.includes('ensure-minilm-model'),'Render startup still materializes MiniLM');
 for(const token of ["appUrl: null","localInstallRequired: true","pathname === '/api/boot-log'","res.writeHead(204","localSurface","return json(res, 410","COMMONWEAVE_RELEASE_URL"])assert(gateway.includes(token),`gateway missing ${token}`);
-assert(gateway.includes("const installKitSha256 = '';\nconst installKitSize = 0;"),'gateway does not replace install-kit hashing with zero-cost metadata');
+assert(gateway.includes("const installKitSha256 = '';")&&gateway.includes('const installKitSize = 0;'),'gateway does not replace install-kit hashing with zero-cost metadata');
 assert(gateway.includes("'install kit startup hashing'"),'gateway lacks the explicit install-kit hashing replacement contract');
 for(const token of ["telemetryRequest","/api/boot-log","legacy-telemetry-blocked","Next: Tell me your wish or set an intention.","Next: Review or activate the saved intention","CHAT_KEYS","conversationLinkKey"])assert(policy.includes(token),`local-first policy missing ${token}`);
 assert(parity.includes('/app/cabinet-visual-v141.html'),'Visual mode still routes to legacy /loom scenes');
