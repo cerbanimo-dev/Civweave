@@ -1,6 +1,6 @@
 function renderDetail(system,room,capability){
   const native=renderNative(capability);
-  return `<button class="back-button" type="button" data-back-room>← ${esc(room.label)}</button><section class="detail-card"><small class="kicker">${esc(system.name)} · ${esc(room.label)} · ${esc(capability.id)}</small><h2>${esc(capability.label)}</h2><p>${esc(capability.summary)}</p><div class="meta-row">${consentChip(capability)}<span class="chip">${esc(capability.operation)}</span><span class="chip">source ${esc(capability.sourceStatus)}</span></div><div class="detail-grid">${detailItem('Visual surface',capability.visual.surface)}${detailItem('Lite route',capability.lite.route)}${detailItem('Handoffs',(Array.isArray(capability.handoffs)?capability.handoffs:[]).join(', ')||'none')}${detailItem('Rewards',(Array.isArray(capability.rewards)?capability.rewards:[]).join(', ')||'none')}</div><footer class="detail-actions">${capability.lite.sourceRoute?`<button class="primary" type="button" data-source="${esc(capability.id)}">Open working tool in this cabinet</button>`:''}<a href="${esc(CommonweaveParity.visualUrl(state))}">Open visual counterpart</a></footer></section>${native}`;
+  return `<button class="back-button" type="button" data-back-room>← ${esc(room.label)}</button><section class="detail-card"><small class="kicker">${esc(system.name)} · ${esc(room.label)} · ${esc(capability.id)}</small><h2>${esc(capability.label)}</h2><p>${esc(capability.summary)}</p><div class="meta-row">${consentChip(capability)}<span class="chip">${esc(capability.operation)}</span><span class="chip">source ${esc(capability.sourceStatus)}</span></div><div class="detail-grid">${detailItem('Cabinet surface',capability.visual.surface)}${detailItem('Lite route',capability.lite.route)}${detailItem('Handoffs',(Array.isArray(capability.handoffs)?capability.handoffs:[]).join(', ')||'none')}${detailItem('Rewards',(Array.isArray(capability.rewards)?capability.rewards:[]).join(', ')||'none')}</div><footer class="detail-actions">${capability.lite.sourceRoute?`<button class="primary" type="button" data-source="${esc(capability.id)}">Open working tool in this cabinet</button>`:''}<a href="${esc(CommonweaveParity.cabinetUrl(state))}">Open Cabinet Mode</a></footer></section>${native}`;
 }
 function renderSource(system,capability){
   return `<section class="source-workspace"><header class="source-toolbar"><div><b>${esc(capability.label)}</b><small>Existing working surface · themed for ${esc(system.name)}</small></div><div><a href="${esc(capability.lite.sourceRoute)}" target="_blank" rel="noopener">Pop out</a> <button type="button" data-close-source>Return</button></div></header><iframe class="source-frame" title="${esc(capability.label)} working tool" src="${esc(capability.lite.sourceRoute)}"></iframe></section>`;
@@ -8,9 +8,9 @@ function renderSource(system,capability){
 function render(){
   const resolved=CommonweaveParity.resolve(ledger,state);state={systemId:resolved.system.id,roomId:resolved.room.id,capabilityId:resolved.capability?.id||''};
   applyShell(resolved.system);renderCabinetControls(resolved.system);renderRooms(resolved.system,resolved.room);
-  $('#visual-link').href=CommonweaveParity.visualUrl(state);
+  $('#cabinet-link').href=CommonweaveParity.cabinetUrl(state);
   const caps=roomCapabilities(resolved.system,resolved.room);
-  $('#screen-status').innerHTML=`<span><b>${esc(resolved.room.label)}</b> · ${caps.length} capabilities</span><span>Visual ↔ Lite parity</span>`;
+  $('#screen-status').innerHTML=`<span><b>${esc(resolved.room.label)}</b> · ${caps.length} capabilities</span><span>Cabinet Mode ↔ Lite parity</span>`;
   const main=$('#lite-main');
   if(workspace){main.innerHTML=renderSource(resolved.system,workspace)}
   else if(resolved.capability)main.innerHTML=renderDetail(resolved.system,resolved.room,resolved.capability);
