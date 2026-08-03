@@ -12,7 +12,7 @@ const ROUTES=[
   ['Source constitution','Read the provisional constitutional source and principles.','constitution']
 ];
 let queued=false;
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 function open(route='workbench'){location.assign(`${WORKBENCH}#${encodeURIComponent(route)}`)}
 function configureFeature(button,route,description){button.classList.remove('is-coming');button.removeAttribute('data-ch142-coming');button.setAttribute('data-anarchadia-workbench',route);button.querySelector('small').textContent=description;button.querySelector('em').textContent='Open'}
 function mountFeatureGroup(){
