@@ -62,6 +62,7 @@ jobs:
 
           curl -fsS http://127.0.0.1:8787/service-worker.js -o gateway-worker.js
           grep -q "INSTALL_REVISION='install-only-r26'" gateway-worker.js
+          grep -q "DEVICE_REVISION='device-package-r29-complete-distribution'" gateway-worker.js
           curl -fsS http://127.0.0.1:8787/app/manifest.webmanifest -o gateway-manifest.json
           grep -q '/app/installed-entry-v146.html?target=hub' gateway-manifest.json
 
@@ -177,9 +178,10 @@ jobs:
 
           curl -fsS http://127.0.0.1:8788/service-worker.js -o service-worker.js
           grep -q "CACHE_REVISION='cabinet-mode-r23-subsystem-routing'" service-worker.js
-          grep -q "DEVICE_REVISION='device-package-r28-cabinet-subsystems'" service-worker.js
+          grep -q "DEVICE_REVISION='device-package-r29-complete-distribution'" service-worker.js
           grep -q "CALIBRATION_REVISION='source-svg-r24-user'" service-worker.js
           grep -q "INSTALL_REVISION='install-only-r26'" service-worker.js
+          grep -q 'for(const url of \[...new Set(DEVICE_REQUIRED)\])await cacheRequired' service-worker.js
           grep -q 'function navigationFallback' service-worker.js
           grep -q '/app/services/fellowfare/cabinet.html' service-worker.js
           grep -q '/app/cabinets/living-school/index.html' service-worker.js

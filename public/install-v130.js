@@ -2,6 +2,7 @@
 'use strict';
 const VERSION='1.0.32';
 const ENTRY='/app/installed-entry-v146.html?target=hub';
+const WORKER_URL=`/service-worker.js?v=${VERSION}-device-package-r29-complete-distribution`;
 const PREPARE_TIMEOUT_MS=180000;
 let installPrompt=null;
 let registration=null;
@@ -12,6 +13,7 @@ let preparing=false;
 const workerWaits=new WeakMap();
 const $=selector=>document.querySelector(selector);
 const help=message=>{$('#install-help').textContent=message};
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function standalone(){return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches)}
 function isIOS(){return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())}
 function showPackage(status={}){
@@ -24,7 +26,7 @@ function showPackage(status={}){
 function guidance(){
   const button=$('#install-app');
   if(standalone()){button.disabled=false;button.textContent='Open installed Commonweave';help('The installed app is ready on this device.');return}
-  if(packageError){button.disabled=false;button.textContent='Retry device package';help(`Device package preparation failed: ${packageError.message}. Tap retry after the host update finishes.`);return}
+  if(packageError){button.disabled=false;button.textContent='Retry device package';help(`Device package preparation failed: ${packageError.message}. Tap retry to reset the failed worker and try again.`);return}
   if(preparing||!packageReady){button.disabled=true;button.textContent='Preparing device package…';help('Downloading and verifying the complete offline package before installation.');return}
   if(installPrompt){button.disabled=false;button.textContent='Install Commonweave';help('The complete local package is ready. Install to enter the campus.');return}
   button.disabled=false;button.textContent=isIOS()?'Show iPhone/iPad instructions':'Show installation instructions';
@@ -42,6 +44,16 @@ async function retireLegacy(){
   const legacy=regs.filter(reg=>{const scope=new URL(reg.scope).pathname;const script=reg.active?.scriptURL||'';return scope.startsWith('/app/')||scope.startsWith('/campus/')||/\/services\//.test(scope)||/service-worker-v12[67]\.js|\/app\/service-worker\.js/.test(script)});
   await Promise.allSettled(legacy.map(reg=>reg.unregister()));
 }
+async function recoverBrokenRootRegistration(){
+  const regs=await navigator.serviceWorker.getRegistrations();
+  for(const reg of regs){
+    const scope=new URL(reg.scope);
+    if(scope.origin!==location.origin||scope.pathname!=='/')continue;
+    if(!reg.active)await reg.unregister().catch(()=>{});
+  }
+  registration=null;
+  await pause(250);
+}
 function askWorker(type){return new Promise(resolve=>{const worker=registration?.waiting||registration?.active||registration?.installing;if(!worker)return resolve(null);const channel=new MessageChannel(),timer=setTimeout(()=>resolve(null),5000);channel.port1.onmessage=event=>{clearTimeout(timer);resolve(event.data||null)};worker.postMessage({type},[channel.port2])})}
 function waitForWorker(worker){
   if(!worker)return Promise.resolve();
@@ -49,7 +61,7 @@ function waitForWorker(worker){
   const promise=new Promise((resolve,reject)=>{
     let done=false,timer=0;
     const finish=error=>{if(done)return;done=true;clearTimeout(timer);worker.removeEventListener('statechange',check);error?reject(error):resolve()};
-    const check=()=>{if(worker.state==='installed'||worker.state==='activated')finish();else if(worker.state==='redundant')finish(new Error('The browser rejected the device package because a required file could not be cached.'))};
+    const check=()=>{if(worker.state==='installed'||worker.state==='activated')finish();else if(worker.state==='redundant')finish(new Error('The browser rejected the device package because a required model or application file could not be cached.'))};
     worker.addEventListener('statechange',check);
     timer=setTimeout(()=>finish(new Error('Device package preparation timed out.')),PREPARE_TIMEOUT_MS);
     check();
@@ -79,9 +91,8 @@ async function preparePackage(){
   try{
     if(!('serviceWorker'in navigator))throw new Error('This browser cannot install the offline package. Use the mobile kit or a local host.');
     await retireLegacy();
-    if(retrying&&registration&&!registration.active){await registration.unregister().catch(()=>{});registration=null}
-    else if(retrying&&registration){await registration.update().catch(()=>{})}
-    registration=await navigator.serviceWorker.register(`/service-worker.js?v=${VERSION}-install-only-r26`,{scope:'/',updateViaCache:'none'});
+    if(retrying)await recoverBrokenRootRegistration();
+    registration=await navigator.serviceWorker.register(WORKER_URL,{scope:'/',updateViaCache:'none'});
     registration.addEventListener('updatefound',()=>{
       const worker=registration.installing;
       if(!worker)return;
@@ -98,7 +109,7 @@ addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPro
 addEventListener('appinstalled',()=>{installPrompt=null;packageReady=true;packageError=null;help('Installed. Launch Commonweave from its new app icon.');$('#install-app').textContent='Installed';$('#install-app').disabled=true});
 $('#install-app').addEventListener('click',async()=>{
   if(standalone()){location.assign(ENTRY);return}
-  if(packageError){help('Retrying the complete device package…');preparePackage();return}
+  if(packageError){help('Resetting the failed worker and retrying the complete device package…');preparePackage();return}
   if(!packageReady){help('The device package is still being prepared.');return}
   if(installPrompt){installPrompt.prompt();const result=await installPrompt.userChoice;help(result.outcome==='accepted'?'Installation accepted. Launch the app from its icon when ready.':'Installation was left for later.');installPrompt=null;guidance();return}
   help(isIOS()?'Open this page in Safari, tap Share, then Add to Home Screen.':'Open the browser menu and choose Install app. The browser controls when the native prompt is available.');
