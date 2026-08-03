@@ -26,12 +26,25 @@ const route = () => cabinetWorkbench
 const visualRequested = !cabinetWorkbench;
 const legacyMode = () => cabinetWorkbench;
 if(!cabinetWorkbench){try{localStorage.setItem('anarchadia.interface-mode','visual');}catch{}}`;
+const VISUAL_MODAL_BLOCK=[
+  "  backdrop.className = 'modal-backdrop cardinal-projection';",
+  "  const sceneAsset=VISUAL_ASSETS[route()]||VISUAL_ASSETS.hall;",
+  "  backdrop.style.setProperty('--projection-scene',`url(\"assets/screens/${sceneAsset}-landscape.webp\")`);"
+].join('\n');
+const CABINET_MODAL_BLOCK=[
+  "  backdrop.className = cabinetWorkbench ? 'modal-backdrop cabinet-workbench-modal' : 'modal-backdrop cardinal-projection';",
+  "  if(!cabinetWorkbench){",
+  "    const sceneAsset=VISUAL_ASSETS[route()]||VISUAL_ASSETS.hall;",
+  "    backdrop.style.setProperty('--projection-scene',`url(\"assets/screens/${sceneAsset}-landscape.webp\")`);",
+  "  }"
+].join('\n');
 let loadPromise=null;
 function patchSource(source){
   let output=source;
   for(const [before,after] of Object.entries(IMPORTS))output=output.replaceAll(before,after);
   if(!output.includes(VISUAL_ROUTE_BLOCK))throw new Error('The Anarchadia route boundary changed; Cabinet Mode refused to patch an unknown source shape.');
-  output=output.replace(VISUAL_ROUTE_BLOCK,CABINET_ROUTE_BLOCK);
+  if(!output.includes(VISUAL_MODAL_BLOCK))throw new Error('The Anarchadia modal boundary changed; Cabinet Mode refused to request archived room art.');
+  output=output.replace(VISUAL_ROUTE_BLOCK,CABINET_ROUTE_BLOCK).replace(VISUAL_MODAL_BLOCK,CABINET_MODAL_BLOCK);
   return output;
 }
 export function loadCabinetWorkbench(){
