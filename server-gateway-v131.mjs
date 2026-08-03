@@ -7,7 +7,7 @@ const sourcePath = path.join(rootDir, 'server.mjs');
 const runtimePath = path.join(rootDir, '.commonweave-gateway-v131.runtime.mjs');
 const VERSION = '1.0.31';
 const BUILD = '1.0.31-local-first-gateway';
-let source = await fsp.readFile(sourcePath, 'utf8');
+let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 
 function replaceRequired(before, after, label) {
   if (!source.includes(before)) throw new Error(`Commonweave gateway patch could not find ${label}`);
