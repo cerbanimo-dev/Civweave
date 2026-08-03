@@ -139,6 +139,9 @@ jobs:
           curl -fsS http://127.0.0.1:8788/app/cabinet-mode-v142.js -o cabinet-mode.js
           grep -q '/app/realm-console-v140.html' cabinet-mode.js
           grep -q '/app/anarchadia-console-v139.html' cabinet-mode.js
+          grep -q '/app/services/fellowfare/cabinet.html' cabinet-mode.js
+          grep -q 'cabinetScreen' cabinet-mode.js
+          grep -q '#cw127-app' cabinet-mode.js
           grep -q "function closeCabinet(){location.assign('/loom/')}" cabinet-mode.js
           if grep -q 'history.back()' cabinet-mode.js; then
             echo 'Cabinet close control still behaves like Back' >&2
@@ -173,8 +176,13 @@ jobs:
           grep -q '"referenceWidth": 489' cabinet-shells.json
 
           curl -fsS http://127.0.0.1:8788/service-worker.js -o service-worker.js
-          grep -q "CACHE_REVISION='cabinet-mode-r22'" service-worker.js
+          grep -q "CACHE_REVISION='cabinet-mode-r23-subsystem-routing'" service-worker.js
+          grep -q "DEVICE_REVISION='device-package-r28-cabinet-subsystems'" service-worker.js
+          grep -q "CALIBRATION_REVISION='source-svg-r24-user'" service-worker.js
           grep -q "INSTALL_REVISION='install-only-r26'" service-worker.js
+          grep -q 'function navigationFallback' service-worker.js
+          grep -q '/app/services/fellowfare/cabinet.html' service-worker.js
+          grep -q '/app/cabinets/living-school/index.html' service-worker.js
           grep -q '/app/installed-entry-v146.html' service-worker.js
           grep -q '/app/local-object-mesh-v146.js' service-worker.js
           grep -q '/app/cabinet-only-v144.html' service-worker.js
