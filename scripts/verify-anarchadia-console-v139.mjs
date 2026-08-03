@@ -15,7 +15,8 @@ assert(!css.includes('/app/assets/cabinets/anarchadia.webp'),'console interior m
 assert(!html.includes('ac-masthead'),'console interior still contains the duplicate exterior masthead');
 for(const required of ["const STAGES=['intake','rail-check','code-generation','validation','sandbox-install','preview-ready']",'commonweave.anarchadia.citizen-console.v139','CommonweaveReflexRuntime','CommonweaveModelRuntime','commonweave-safe-scaffolder','validatePatch','sandbox-install','preview-ready','vote-signal','HUB_PROPOSALS','No external action occurred.'])assert(js.includes(required),`console runtime missing ${required}`);
 for(const forbidden of ['eval(', 'new Function(', 'document.cookie'])assert(!js.includes(forbidden),`console runtime contains forbidden executable ${forbidden}`);
-assert(launcher.includes("if(systemId==='anarchadia')return '/app/anarchadia-console-v139.html?embed=1'"),'cabinet launcher does not route Anarchadia to the citizen console');
+assert(launcher.includes('/app/anarchadia-console-v139.html?embed=1'),'cabinet launcher does not route Anarchadia to the citizen console');
+assert(launcher.includes('cw-cabinet-frame-art'),'Anarchadia citizen console is not wrapped in the physical cabinet shell');
 assert(launcher.includes("'Citizen Console'"),'cabinet launcher does not label the Anarchadia console');
 assert(adapter.includes('BODY_PROBE_LIMIT=2_000_000'),'MiniLM status checker lacks the small-file body probe');
 assert(adapter.includes("response.blob()).size"),'MiniLM status checker does not measure cached response bodies');
