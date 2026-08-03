@@ -54,7 +54,7 @@ function activeWorker(){
 function request(type,payload={},timeoutMs=120000){
   const id=`minilm-${Date.now().toString(36)}-${(++sequence).toString(36)}`;
   return new Promise((resolve,reject)=>{
-    const timer=setTimeout(()=>{pending.delete(id);const error=new Error(`MiniLM ${type} timed out.`);error.code='MINILM_TIMEOUT';reject(error);worker?.terminate();worker=null},timeoutMs);
+    const timer=setTimeout(()=>{pending.delete(id);const error=new Error(`MiniLM ${type} timed out.`);error.code='MINILM_TIMEOUT';reject(error);stopWorker(error)},timeoutMs);
     pending.set(id,{resolve,reject,timer});activeWorker().postMessage({id,type,...payload});
   });
 }
