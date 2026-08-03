@@ -1,9 +1,9 @@
 'use strict';
-const VERSION='1.0.31';
-const CACHE_REVISION='cabinet-mode-r22';
+const VERSION='1.0.32';
+const CACHE_REVISION='cabinet-mode-r23-living-school';
 const GUIDE_REVISION='guide-orchestration-r21';
-const CABINET_REVISION='cabinet-home-r22';
-const DEVICE_REVISION='device-package-r23';
+const CABINET_REVISION='cabinet-home-r23-living-school';
+const DEVICE_REVISION='device-package-r24-living-school';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}`;
 const MODEL_PREFIX='/app/models/';
@@ -20,6 +20,9 @@ const CORE=[
   '/app/cabinet-mode-v142.html','/app/cabinet-mode-v142.css','/app/cabinet-mode-v142.js','/app/cabinet-runtime-v143.css',
   '/app/cabinet-visual-v141.html',
   '/app/realm-console-v140.html','/app/realm-console-v140.css','/app/realm-console-v140.js',
+  '/app/living-school-cabinet-v150.html','/app/living-school-cabinet-v150.css','/app/living-school-cabinet-v150.js',
+  '/app/living-school-cabinet-v150.c0.b64','/app/living-school-cabinet-v150.c1.b64','/app/living-school-cabinet-v150.c2.b64',
+  '/app/services/living-school/modules/rubric-engine.mjs','/app/services/living-school/modules/project-gate.mjs','/app/services/living-school/modules/cerbanimo-bridge.mjs',
   '/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-console-v139.js',
   '/app/cabinet-home-v142.css','/app/cabinet-home-v142.js','/app/cabinet-surfaces-v143.css','/app/cabinet-surfaces-v143.js','/app/sharing-library-v143.js',
   '/app/manifest.webmanifest','/app/local-first-policy-v131.js',
@@ -30,7 +33,7 @@ const CORE=[
   '/app/lite-v129.html','/app/lite-v129-base.css','/app/lite-v129-components.css','/app/lite-v129-themes.css','/app/lite-source-v129.css','/app/lite-v129-core.js','/app/lite-v129-native.js','/app/lite-v129-app.js',
   '/app/cabinet-calibration-v131.css','/app/cabinet-calibration-v131.js','/app/model-settings-v131.css','/app/model-settings-v131.js',
   '/app/assets/cabinets/commonweave.webp','/app/assets/cabinets/living-school.webp','/app/assets/cabinets/cerbanimo.webp','/app/assets/cabinets/fellowfare.webp','/app/assets/cabinets/anarchadia.webp',
-  '/app/assets/world/town-square-home.webp','/app/logos/commonweave.webp','/app/logos/commonweave-icon-192.png','/app/logos/commonweave-icon-512.png','/app/logos/commonweave-icon-maskable-192.png','/app/logos/commonweave-icon-maskable-512.png',
+  '/app/assets/world/town-square-home.webp','/app/logos/commonweave.webp','/app/logos/living-school-v2.webp','/app/logos/commonweave-icon-192.png','/app/logos/commonweave-icon-512.png','/app/logos/commonweave-icon-maskable-192.png','/app/logos/commonweave-icon-maskable-512.png',
   '/app/assets/ai/weaveling.png','/app/assets/ai/moss.png','/app/assets/ai/kamiya.png','/app/assets/ai/rook.png','/app/assets/ai/merlin.png',
   '/app/assets/generated/commonweave-navigation-icons/weaveling-compass.png','/app/assets/generated/commonweave-navigation-icons/commonweave-realms.png','/app/assets/generated/commonweave-navigation-icons/commonweave-ai-config.png','/app/assets/generated/commonweave-navigation-icons/commonweave-home.png','/app/assets/generated/commonweave-navigation-icons/commonweave-route.png'
 ];
@@ -64,7 +67,7 @@ self.addEventListener('fetch',event=>{
   if(url.pathname==='/service-worker.js'){event.respondWith(fetch(request,{cache:'no-store'}));return}
   if(url.pathname.startsWith('/downloads/'))return;
   if(request.mode==='navigate'){
-    const cabinetPath=url.pathname.includes('cabinet-mode')||url.pathname.includes('cabinet-visual');
+    const cabinetPath=url.pathname.includes('cabinet-mode')||url.pathname.includes('cabinet-visual')||url.pathname.includes('living-school-cabinet');
     const fallback=url.pathname.startsWith('/lite')?'/lite/':cabinetPath?'/app/cabinet-mode-v142.html':'/loom/';
     event.respondWith(deviceOnly(request,fallback));return;
   }
