@@ -10,5 +10,10 @@ replaceRequired("const VERSION = '1.0.30';","const VERSION = '1.0.31';",'local v
 replaceRequired("const BUILD = '1.0.30-offline-mesh-cabinet-runtime';","const BUILD = '1.0.31-local-campus-runtime';",'local build marker');
 replaceRequired("const CW_VERSION = '1.0.30';","const CW_VERSION = '1.0.31';",'generated runtime version marker');
 replaceRequired("const CW_BUILD = '1.0.30-offline-mesh-cabinet-runtime';","const CW_BUILD = '1.0.31-local-campus-runtime';",'generated runtime build marker');
+replaceRequired(
+  "const citizenConsoleAssets = new Set([\n      '/app/anarchadia-console-v139.html',",
+  "const citizenConsoleAssets = new Set([\n      '/app/cabinet-visual-v141.html',\n      '/app/realm-console-v140.html',\n      '/app/anarchadia-console-v139.html',",
+  'canonical visual HTML allowlist'
+);
 await fsp.writeFile(runtimePath,source,'utf8');
 try{await import(pathToFileURL(runtimePath).href+'?build=1.0.31')}finally{setTimeout(()=>fsp.unlink(runtimePath).catch(()=>{}),1000).unref?.()}
