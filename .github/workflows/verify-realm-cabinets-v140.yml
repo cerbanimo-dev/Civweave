@@ -13,7 +13,7 @@ permissions:
 jobs:
   realm-cabinets:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,7 +22,19 @@ jobs:
         with:
           node-version: 22
       - name: Install local semantic runtime
-        run: npm install --no-audit --no-fund
+        run: |
+          npm install --no-audit --no-fund
+          for attempt in 1 2 3 4 5; do
+            if npm run model:pull; then
+              break
+            fi
+            if [ "$attempt" = 5 ]; then
+              echo 'MiniLM package could not be materialized after five attempts.' >&2
+              exit 1
+            fi
+            sleep $((attempt * 8))
+          done
+          npm run model:check
       - name: Verify all release contracts
         run: npm run check
       - name: Start host
@@ -61,7 +73,7 @@ jobs:
             grep -q "/app/assets/cabinets/$realm.webp" cabinet-shells.json
           done
           curl -fsS http://127.0.0.1:8787/service-worker.js -o service-worker.js
-          grep -q "CACHE_REVISION='minilm-runtime-r17'" service-worker.js
+          grep -q "CACHE_REVISION='minilm-runtime-r19'" service-worker.js
           grep -q "CABINET_REVISION='realm-cabinets-r18'" service-worker.js
           grep -q '/app/realm-console-v140.js' service-worker.js
       - name: Upload cabinet evidence
