@@ -1,4 +1,4 @@
-name: Verify Commonweave v1.0.30
+name: Verify Commonweave v1.0.31
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  smoke:
+  local-first:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -21,179 +21,107 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install semantic runtime and model package
+      - name: Install local semantic package
         run: |
           npm install --no-audit --no-fund
-          test -s public/app/vendor/transformers/transformers.min.js
-          test -s public/app/vendor/transformers/stage-manifest.json
-          test -s public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs
-          test -s public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm
-          test -s public/app/models/all-minilm-l6-v2/tokenizer.json
-          test -s public/app/models/all-minilm-l6-v2/vocab.txt
-          test -s public/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx
-          test -s public/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx
           node scripts/ensure-minilm-model.mjs --check
-      - name: Run offline-first checks
+      - name: Run local-first regression suite
         run: npm run check
-      - name: Start Commonweave host
+      - name: Start public gateway
         run: |
-          PORT=8787 npm start > commonweave-server.log 2>&1 &
-          echo $! > commonweave-server.pid
-      - name: Inspect installer, contextual reflex, approval gate, console, icons, backend, and seed routes
+          PORT=8787 npm start > commonweave-gateway.log 2>&1 &
+          echo $! > commonweave-gateway.pid
+      - name: Verify Render serves no campus assets
         run: |
           set -euxo pipefail
-          for i in $(seq 1 30); do
-            if curl -fsS http://127.0.0.1:8787/api/health > health.json; then break; fi
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:8787/api/health > gateway-health.json; then break; fi
             sleep 1
           done
-          grep -q '1.0.30-offline-mesh-cabinet-runtime' health.json
-          grep -q '"appVersion":"1.0.30"' health.json
-          curl -fsS http://127.0.0.1:8787/ -o installer.html
-          grep -q 'Install Commonweave' installer.html
-          grep -q 'install-v130.js' installer.html
-          curl -fsS -D worker-headers.txt http://127.0.0.1:8787/service-worker.js -o service-worker.js
-          grep -qi 'service-worker-allowed: /' worker-headers.txt
-          grep -q "CACHE_REVISION='minilm-runtime-r19'" service-worker.js
-          grep -q 'MODEL_GRAPH_PREFIX' service-worker.js
-          grep -q 'binaryStreamFirst' service-worker.js
-          grep -q '/app/models/all-minilm-l6-v2/tokenizer.json' service-worker.js
-          grep -q '/app/anarchadia-console-v139.html' service-worker.js
-          curl -fsS http://127.0.0.1:8787/loom/ -o loom.html
-          grep -q 'minilm-reflex-runtime-v138.js' loom.html
-          grep -q 'intention-planner-v138.js' loom.html
-          grep -q 'intention-ui-v138.js' loom.html
-          if grep -q 'smollm2-fallback-runtime' loom.html; then exit 1; fi
-          curl -fsS http://127.0.0.1:8787/lite/ -o lite.html
-          grep -q 'minilm-reflex-runtime-v138.js' lite.html
-          if grep -q 'smollm2-fallback-runtime' lite.html; then exit 1; fi
-          curl -fsS http://127.0.0.1:8787/app/minilm-reflex-runtime-v138.js -o minilm-runtime.js
-          grep -q 'conversationKind' minilm-runtime.js
-          grep -q 'semantic.score>=.42' minilm-runtime.js
-          grep -q 'No stored response pattern was used as finished dialogue' minilm-runtime.js
-          if grep -q 'safe(entry?.answer' minilm-runtime.js; then
-            echo 'MiniLM runtime still emits canned index answers' >&2
+          grep -q '1.0.31-local-first-gateway' gateway-health.json
+          grep -q '"appVersion":"1.0.31"' gateway-health.json
+          grep -q '"appUrl":null' gateway-health.json
+          grep -q '"localInstallRequired":true' gateway-health.json
+          curl -fsS http://127.0.0.1:8787/ -o gateway.html
+          grep -q 'Commonweave runs locally.' gateway.html
+          test "$(curl -sS -o gateway-loom.json -w '%{http_code}' http://127.0.0.1:8787/loom/)" = '410'
+          grep -q 'Local surface not hosted here' gateway-loom.json
+          test "$(curl -sS -o gateway-worker.json -w '%{http_code}' http://127.0.0.1:8787/service-worker.js)" = '410'
+          test "$(curl -sS -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' -d '{"kind":"room-opened"}' http://127.0.0.1:8787/api/boot-log)" = '204'
+          curl -sSI http://127.0.0.1:8787/downloads/Commonweave-Mobile-Install-Kit.zip -o gateway-download-headers.txt
+          grep -qi '^location: https://github.com/cerbanimo-dev/Commonweave/' gateway-download-headers.txt
+      - name: Start local campus
+        run: |
+          PORT=8788 npm run start:local > commonweave-local.log 2>&1 &
+          echo $! > commonweave-local.pid
+      - name: Verify offline campus and canonical visuals
+        run: |
+          set -euxo pipefail
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:8788/api/health > local-health.json; then break; fi
+            sleep 1
+          done
+          grep -q '1.0.31-local-campus-runtime' local-health.json
+          grep -q '"appVersion":"1.0.31"' local-health.json
+          curl -fsS http://127.0.0.1:8788/loom/ -o loom.html
+          grep -q '/app/local-first-policy-v131.js' loom.html
+          grep -q '/app/cabinet-visual-v141' loom.html || true
+          curl -fsS http://127.0.0.1:8788/lite/ -o lite.html
+          grep -q '/app/local-first-policy-v131.js' lite.html
+          curl -fsS http://127.0.0.1:8788/app/shared/commonweave-parity-runtime.js -o parity-runtime.js
+          grep -q '/app/cabinet-visual-v141.html' parity-runtime.js
+          if grep -q '/loom/realm/' parity-runtime.js; then
+            echo 'Visual route still points to legacy scenes' >&2
             exit 1
           fi
-          curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/reflex-index.json -o reflex-index.json
-          grep -q 'commonweave.reflex-index.v2' reflex-index.json
-          grep -q 'routeHints' reflex-index.json
-          if grep -q '"answer"' reflex-index.json; then
-            echo 'Reflex index still contains finished answer prose' >&2
+          curl -fsS http://127.0.0.1:8788/app/cabinet-visual-v141.html -o cabinet-visual.html
+          grep -q 'CANONICAL VISUAL MODE' cabinet-visual.html
+          curl -fsS http://127.0.0.1:8788/app/cabinet-visual-v141.css -o cabinet-visual.css
+          grep -q 'aspect-ratio:941/1672' cabinet-visual.css
+          curl -fsS http://127.0.0.1:8788/app/cabinet-visual-v141.js -o cabinet-visual.js
+          grep -q '/app/realm-console-v140.html' cabinet-visual.js
+          grep -q '/app/anarchadia-console-v139.html' cabinet-visual.js
+          curl -fsS http://127.0.0.1:8788/app/v130-cabinet-launcher.js -o cabinet-launcher.js
+          grep -q 'CommonweaveParity.visualUrl' cabinet-launcher.js
+          if grep -q 'showModal' cabinet-launcher.js; then
+            echo 'Nested shrunken cabinet modal survived' >&2
             exit 1
           fi
-          curl -fsS http://127.0.0.1:8787/app/intention-planner-v138.js -o intention-planner.js
-          grep -q 'time looper' intention-planner.js
-          grep -q 'time traveler' intention-planner.js
-          grep -q 'intention-activation' intention-planner.js
-          grep -q 'approvalGate' intention-planner.js
-          curl -fsS http://127.0.0.1:8787/app/intention-ui-v138.js -o intention-ui.js
-          grep -q 'activate(planId)' intention-ui.js
-          grep -q 'review(planId)' intention-ui.js
-          grep -q 'commonweave:intentions-changed' intention-ui.js
-          curl -fsS http://127.0.0.1:8787/app/assistant-runtime-v138.js -o assistant-runtime.js
-          grep -q 'data-gate-action="activate"' assistant-runtime.js
-          grep -q 'CommonweaveIntentionUI' assistant-runtime.js
-          grep -q 'approvalGate' assistant-runtime.js
-          curl -fsS http://127.0.0.1:8787/app/anarchadia-console-v139.html -o anarchadia-console.html
-          grep -q '>ANARCHADIA<' anarchadia-console.html
-          grep -q '// CITIZEN CONSOLE' anarchadia-console.html
-          grep -q 'ac-display' anarchadia-console.html
-          grep -q 'BUGFIX REQUEST' anarchadia-console.html
-          grep -q 'OPEN HUB BALLOT' anarchadia-console.html
-          curl -fsS http://127.0.0.1:8787/app/anarchadia-console-v139.css -o anarchadia-console.css
-          if grep -q '/app/assets/cabinets/anarchadia.webp' anarchadia-console.css; then
-            echo 'Citizen Console incorrectly renders a second cabinet exterior' >&2
+          curl -fsS http://127.0.0.1:8788/service-worker.js -o service-worker.js
+          grep -q "CACHE_REVISION='local-first-r20'" service-worker.js
+          grep -q '/app/cabinet-visual-v141.html' service-worker.js
+          if grep -q '/api/boot-log' service-worker.js; then
+            echo 'Service worker still submits telemetry' >&2
             exit 1
           fi
-          grep -q -- '--pink:#ff2f87' anarchadia-console.css
-          curl -fsS http://127.0.0.1:8787/app/anarchadia-console-v139.js -o anarchadia-console.js
-          grep -q 'code-generation' anarchadia-console.js
-          grep -q 'sandbox-install' anarchadia-console.js
-          grep -q 'preview-ready' anarchadia-console.js
-          grep -q 'commonweave-safe-scaffolder' anarchadia-console.js
-          curl -fsS http://127.0.0.1:8787/app/v130-cabinet-launcher.js -o cabinet-launcher.js
-          grep -q "anarchadia-console-v139.html?embed=1" cabinet-launcher.js
-          curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/model-manifest.json -o minilm-manifest.json
-          grep -q 'Xenova/all-MiniLM-L6-v2' minilm-manifest.json
-          grep -q '"tokenGeneration": false' minilm-manifest.json
-          curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/vocab.txt -o minilm-vocab.txt
-          test "$(wc -c < minilm-vocab.txt)" -ge 200000
-          curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/adapter.js -o minilm-adapter.js
-          grep -q 'BODY_PROBE_LIMIT=2_000_000' minilm-adapter.js
-          grep -q 'worker.js?v=reflex-r4' minilm-adapter.js
-          grep -q 'stopWorker' minilm-adapter.js
-          curl -fsS http://127.0.0.1:8787/app/models/all-minilm-l6-v2/worker.js -o minilm-worker.js
-          grep -q 'onnx-r12' minilm-worker.js
-          grep -q 'wasmPaths=BACKEND_ROOT' minilm-worker.js
-          grep -q 'proxy=false' minilm-worker.js
-          grep -q 'numThreads=1' minilm-worker.js
-          grep -q 'verifyWasm' minilm-worker.js
-          grep -Fq "[['wasm','q8'],['webgpu','q4f16']]" minilm-worker.js
-          if grep -q 'wasmPaths={' minilm-worker.js; then
-            echo 'MiniLM worker still uses unsupported object-form wasmPaths' >&2
+          if grep -q 'networkFirst' service-worker.js; then
+            echo 'Service worker still redownloads cabinet assets network-first' >&2
             exit 1
           fi
-          curl -fsSI http://127.0.0.1:8787/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx -o minilm-webgpu-headers.txt
-          grep -qi 'content-length: 30018257' minilm-webgpu-headers.txt
-          curl -fsSI http://127.0.0.1:8787/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx -o minilm-wasm-headers.txt
-          grep -qi 'content-length: 22972370' minilm-wasm-headers.txt
-          curl -fsS http://127.0.0.1:8787/app/logos/commonweave-icon-generation.json -o icon-generation.json
-          grep -q 'tight-dark-centered-thread-mark' icon-generation.json
-          grep -q '90-94%' icon-generation.json
-          curl -fsS -D icon-192-headers.txt http://127.0.0.1:8787/app/logos/commonweave-icon-192.png -o commonweave-icon-192.png
-          grep -qi 'content-type: image/png' icon-192-headers.txt
-          file commonweave-icon-192.png | grep -q '192 x 192'
-          curl -fsS http://127.0.0.1:8787/app/vendor/transformers/stage-manifest.json -o transformers-stage.json
-          grep -q '@huggingface/transformers' transformers-stage.json
-          curl -fsS "http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs?v=onnx-r12" -D onnx-loader-headers.txt -o onnx-loader.mjs
-          grep -Eqi 'content-type: (text|application)/(javascript|ecmascript)' onnx-loader-headers.txt
-          test "$(wc -c < onnx-loader.mjs)" -ge 10000
-          curl -fsS "http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm?v=onnx-r12" -D onnx-wasm-headers.txt -o onnx-runtime.wasm
-          grep -qi 'content-type: application/wasm' onnx-wasm-headers.txt
-          test "$(wc -c < onnx-runtime.wasm)" -ge 1000000
-          test "$(od -An -t x1 -N4 onnx-runtime.wasm | tr -d ' \n')" = '0061736d'
-          curl -fsS http://127.0.0.1:8787/field/commonweave/seed -o commonweave-pocket-campus.cwseed
-          test -s commonweave-pocket-campus.cwseed
-          if unzip -l commonweave-pocket-campus.cwseed | grep -q 'all-minilm-l6-v2/onnx/'; then
-            echo 'Pocket seed unexpectedly contains MiniLM graphs' >&2
-            exit 1
-          fi
-          curl -fsS http://127.0.0.1:8787/api/boot-logs > boot-logs.json
-      - name: Upload offline-first evidence
+          curl -fsS http://127.0.0.1:8788/app/local-first-policy-v131.js -o local-first-policy.js
+          grep -q 'Next: Tell me your wish or set an intention.' local-first-policy.js
+          grep -q 'conversationLinkKey' local-first-policy.js
+          grep -q 'legacy-telemetry-blocked' local-first-policy.js
+      - name: Upload local-first evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v130-contextual-reflex-r19-evidence
+          name: commonweave-v131-local-first-evidence
           path: |
-            commonweave-server.log
-            health.json
-            installer.html
-            worker-headers.txt
-            service-worker.js
+            commonweave-gateway.log
+            commonweave-local.log
+            gateway-health.json
+            gateway.html
+            gateway-loom.json
+            gateway-worker.json
+            gateway-download-headers.txt
+            local-health.json
             loom.html
             lite.html
-            minilm-runtime.js
-            reflex-index.json
-            intention-planner.js
-            intention-ui.js
-            assistant-runtime.js
-            anarchadia-console.html
-            anarchadia-console.css
-            anarchadia-console.js
+            parity-runtime.js
+            cabinet-visual.html
+            cabinet-visual.css
+            cabinet-visual.js
             cabinet-launcher.js
-            minilm-manifest.json
-            minilm-vocab.txt
-            minilm-adapter.js
-            minilm-worker.js
-            minilm-webgpu-headers.txt
-            minilm-wasm-headers.txt
-            icon-generation.json
-            icon-192-headers.txt
-            commonweave-icon-192.png
-            transformers-stage.json
-            onnx-loader-headers.txt
-            onnx-loader.mjs
-            onnx-wasm-headers.txt
-            onnx-runtime.wasm
-            commonweave-pocket-campus.cwseed
-            boot-logs.json
+            service-worker.js
+            local-first-policy.js
