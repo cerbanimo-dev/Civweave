@@ -13,7 +13,7 @@ permissions:
 jobs:
   local-first:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,7 +24,17 @@ jobs:
       - name: Install local semantic package
         run: |
           npm install --no-audit --no-fund
-          node scripts/ensure-minilm-model.mjs --check
+          for attempt in 1 2 3 4 5; do
+            if npm run model:pull; then
+              break
+            fi
+            if [ "$attempt" = 5 ]; then
+              echo 'MiniLM package could not be materialized after five attempts.' >&2
+              exit 1
+            fi
+            sleep $((attempt * 8))
+          done
+          npm run model:check
       - name: Run local-first regression suite
         run: npm run check
       - name: Start public gateway
@@ -65,7 +75,6 @@ jobs:
           grep -q '"appVersion":"1.0.31"' local-health.json
           curl -fsS http://127.0.0.1:8788/loom/ -o loom.html
           grep -q '/app/local-first-policy-v131.js' loom.html
-          grep -q '/app/cabinet-visual-v141' loom.html || true
           curl -fsS http://127.0.0.1:8788/lite/ -o lite.html
           grep -q '/app/local-first-policy-v131.js' lite.html
           curl -fsS http://127.0.0.1:8788/app/shared/commonweave-parity-runtime.js -o parity-runtime.js
