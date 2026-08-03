@@ -29,7 +29,7 @@ const CORE=[
   '/app/model-settings-v133.css','/app/v130-cabinet-launcher.css','/app/v130-cabinet-launcher.js','/app/pwa-v130.css','/app/pwa-v130.js',
   '/app/lite-v129.html','/app/lite-v129-base.css','/app/lite-v129-components.css','/app/lite-v129-themes.css','/app/lite-source-v129.css','/app/lite-v129-core.js','/app/lite-v129-native.js','/app/lite-v129-app.js',
   '/app/cabinet-calibration-v131.css','/app/cabinet-calibration-v131.js','/app/model-settings-v131.css','/app/model-settings-v131.js',
-  '/app/services/anarchadia/workbench.html','/app/services/anarchadia/cabinet-workbench-v144.css','/app/services/anarchadia/styles.css',
+  '/app/services/anarchadia/workbench.html','/app/services/anarchadia/cabinet-workbench-v144.css','/app/services/anarchadia/cabinet-workbench-loader-v144.js','/app/services/anarchadia/styles.css',
   '/app/services/anarchadia/src/app.js','/app/services/anarchadia/src/domain.js','/app/services/anarchadia/src/store.js','/app/services/anarchadia/src/export.js','/app/services/anarchadia/src/ai.js',
   '/app/services/anarchadia/commonweave-handoff-consumer.js','/app/services/anarchadia/commonweave-presence.js','/app/services/anarchadia/docs/PROVISIONAL_CONSTITUTION.md',
   '/app/assets/cabinets/commonweave.webp','/app/assets/cabinets/living-school.webp','/app/assets/cabinets/cerbanimo.webp','/app/assets/cabinets/fellowfare.webp','/app/assets/cabinets/anarchadia.webp',
