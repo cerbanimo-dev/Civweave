@@ -4,17 +4,18 @@ import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-const [pkg,gateway,policy,parity,visualHtml,visualCss,visualJs,launcher,sw,loomHtml,realmHtml,liteHtml]=await Promise.all([
-  read('package.json'),read('server-gateway-v131.mjs'),read('public/app/local-first-policy-v131.js'),read('public/app/shared/commonweave-parity-runtime.js'),read('public/app/cabinet-visual-v141.html'),read('public/app/cabinet-visual-v141.css'),read('public/app/cabinet-visual-v141.js'),read('public/app/v130-cabinet-launcher.js'),read('public/service-worker.js'),read('public/app/loom-v128.html'),read('public/app/realm-v128.html'),read('public/app/lite-v129.html')
+const [pkg,gateway,localHost,policy,parity,visualHtml,visualCss,visualJs,launcher,sw,loomHtml,realmHtml,liteHtml]=await Promise.all([
+  read('package.json'),read('server-gateway-v131.mjs'),read('server-local-v131.mjs'),read('public/app/local-first-policy-v131.js'),read('public/app/shared/commonweave-parity-runtime.js'),read('public/app/cabinet-visual-v141.html'),read('public/app/cabinet-visual-v141.css'),read('public/app/cabinet-visual-v141.js'),read('public/app/v130-cabinet-launcher.js'),read('public/service-worker.js'),read('public/app/loom-v128.html'),read('public/app/realm-v128.html'),read('public/app/lite-v129.html')
 ]);
 const packageJson=JSON.parse(pkg);
 assert(packageJson.scripts.start==='node server-gateway-v131.mjs','Render start command is not the lightweight gateway');
-assert(packageJson.scripts['start:local']==='node server-v130.mjs','local campus start command was not preserved');
+assert(packageJson.scripts['start:local']==='node server-local-v131.mjs','local campus start command is not the aligned local entry');
+assert(localHost.includes("const VERSION = '1.0.31';")&&localHost.includes("const BUILD = '1.0.31-local-campus-runtime';"),'local host does not align version and build markers');
 assert(!packageJson.scripts.prestart.includes('ensure-minilm-model'),'Render startup still materializes MiniLM');
 for(const token of ["appUrl: null","localInstallRequired: true","pathname === '/api/boot-log'","res.writeHead(204","localSurface","return json(res, 410","COMMONWEAVE_RELEASE_URL"])assert(gateway.includes(token),`gateway missing ${token}`);
 assert(gateway.includes("const installKitSha256 = '';"),'gateway still reads and hashes the install kit at startup');
 assert(!gateway.includes("const kit = await fsp.readFile(INSTALL_KIT_PATH)"),'gateway inherited install kit hashing');
-for(const token of ["telemetryRequest","/api/boot-log","legacy-telemetry-blocked","Next: Tell me your wish or set an intention.","Next: Review or activate the saved intention","CHAT_KEYS"])assert(policy.includes(token),`local-first policy missing ${token}`);
+for(const token of ["telemetryRequest","/api/boot-log","legacy-telemetry-blocked","Next: Tell me your wish or set an intention.","Next: Review or activate the saved intention","CHAT_KEYS","conversationLinkKey"])assert(policy.includes(token),`local-first policy missing ${token}`);
 assert(parity.includes('/app/cabinet-visual-v141.html'),'Visual mode still routes to legacy /loom scenes');
 assert(parity.includes("from='lite'"),'visual route does not preserve its origin');
 for(const token of ['cabinet-visual-v141.css','local-first-policy-v131.js','cabinet-visual-v141.js'])assert(visualHtml.includes(token),`canonical visual page missing ${token}`);
