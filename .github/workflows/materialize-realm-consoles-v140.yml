@@ -3,6 +3,8 @@ name: Materialize realm consoles v140
 on:
   push:
     branches: [feature/realm-cabinet-consoles-v140]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: write
