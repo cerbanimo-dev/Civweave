@@ -125,13 +125,13 @@
     "anarchadia": {
       "kind": "projected-cabinet-v2",
       "screen": {
-        "x": 12.8,
+        "x": 14.6,
         "y": 25.15,
-        "width": 74.4,
-        "height": 53.75,
+        "width": 70.8,
+        "height": 56.15,
         "radius": 0,
         "clip": "polygon(7% 0,12% 0,17% 3.2%,83% 3.2%,88% 0,93% 0,97% 1%,100% 5%,100% 94%,99% 97.5%,96% 100%,4% 100%,1% 97.5%,0 94%,0 5%,3% 1%)",
-        "contentTop": 2.2
+        "contentTop": 3.4
       },
       "motif": "punk civic console and highlighter governance",
       "accent2": "#ffd326",
