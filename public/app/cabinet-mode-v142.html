@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-cabinet-only="false">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -8,21 +8,25 @@
   <link rel="icon" href="/app/logos/commonweave-icon-192.png?v=tight-r2">
   <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.31-icon-r2">
   <link rel="stylesheet" href="/app/cabinet-mode-v142.css?v=calibration-r22">
-  <link rel="stylesheet" href="/app/cabinet-runtime-v143.css?v=physical-controls-r23">
+  <link rel="stylesheet" href="/app/cabinet-runtime-v143.css?v=source-svg-r24">
 </head>
 <body>
 <main class="cv141-stage">
   <section class="cv141-shell" id="cv141-shell" aria-label="Commonweave cabinet mode">
-    <img class="cv141-art" id="cv141-art" alt="" draggable="false">
+    <img class="cv141-art cv144-art-layer" id="cv141-art-a" alt="" draggable="false">
+    <img class="cv141-art cv144-art-layer" id="cv141-art-b" alt="" draggable="false">
     <iframe class="cv141-screen" id="cv141-screen" title="Commonweave cabinet screen"></iframe>
-    <nav class="cv141-controls" id="cv141-controls" aria-label="Switch Commonweave realm"></nav>
+    <svg class="cv144-overlay" id="cv144-overlay" viewBox="0 0 941 1672" preserveAspectRatio="xMidYMid meet" aria-label="Physical cabinet controls"></svg>
     <button class="cv141-back" id="cv141-back" type="button" aria-label="Close Cabinet Mode and return to the Commonweave hub">×</button>
+    <a class="cv144-calibrate" id="cv144-calibrate" href="/app/cabinet-calibrator-v144.html" aria-label="Calibrate cabinet controls">◎</a>
     <div class="cv141-title"><small>CABINET MODE</small><b id="cv141-title">Opening cabinet…</b></div>
+    <div class="cv144-switch-state" id="cv144-switch-state" role="status">Opening cabinet…</div>
   </section>
 </main>
 <div class="cv141-error" id="cv141-error" hidden></div>
 <script src="/app/local-first-policy-v131.js?v=1.0.31" defer></script>
 <script src="/app/shared/commonweave-parity-runtime.js?v=cabinet-r22" defer></script>
-<script src="/app/cabinet-mode-v142.js?v=calibration-r22" defer></script>
+<script src="/app/cabinet-calibration-v144.js?v=source-svg-r24" defer></script>
+<script src="/app/cabinet-mode-v142.js?v=source-svg-r24" defer></script>
 </body>
 </html>
