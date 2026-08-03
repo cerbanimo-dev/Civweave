@@ -30,14 +30,14 @@ function validate(ledger){
     if(ids.has(system.id))errors.push(`duplicate system ${system.id}`);ids.add(system.id);
     if(!system.interfaceShell?.asset&&!system.interfaceShell?.assetParts?.length)errors.push(`system ${system.id} has no cabinet asset`);
     if(!system.interfaceShell?.screen)errors.push(`system ${system.id} has no cabinet screen rectangle`);
-    for(const room of system.rooms||[]){const key=`${system.id}:${room.id}`;if(roomIds.has(key))errors.push(`duplicate room ${key}`);roomIds.add(key);if(!room.visualAsset)errors.push(`room ${key} has no visual asset`);if(!room.liteRoute)errors.push(`room ${key} has no lite route`)}
+    for(const room of system.rooms||[]){const key=`${system.id}:${room.id}`;if(roomIds.has(key))errors.push(`duplicate room ${key}`);roomIds.add(key);if(!room.liteRoute)errors.push(`room ${key} has no lite route`)}
   }
   const capabilityIds=new Set();
   for(const capability of ledger.capabilities||[]){
     if(capabilityIds.has(capability.id))errors.push(`duplicate capability ${capability.id}`);capabilityIds.add(capability.id);
     if(!systemIds.has(capability.system))errors.push(`unknown system for ${capability.id}`);
     if(!roomIds.has(`${capability.system}:${capability.room}`))errors.push(`unknown room for ${capability.id}`);
-    if(!capability.visual?.status)errors.push(`missing visual mapping for ${capability.id}`);
+    if(!capability.visual?.status)errors.push(`missing legacy visual mapping for ${capability.id}`);
     if(!capability.lite?.status)errors.push(`missing lite mapping for ${capability.id}`);
     if(!['automatic','review','explicit'].includes(capability.consent))errors.push(`invalid consent for ${capability.id}`);
   }
@@ -57,10 +57,11 @@ function liteUrl({systemId,roomId,capabilityId}={}){
   const query=new URLSearchParams();if(systemId)query.set('system',systemId);if(roomId)query.set('room',roomId);if(capabilityId)query.set('capability',capabilityId);
   return `/lite/${query.size?`?${query}`:''}`;
 }
-function visualUrl({systemId,roomId,capabilityId,from='lite'}={}){
+function cabinetUrl({systemId,roomId,capabilityId,from='lite'}={}){
   const query=new URLSearchParams({system:systemId||'commonweave',from});if(roomId)query.set('room',roomId);if(capabilityId)query.set('capability',capabilityId);
-  return `/app/cabinet-visual-v141.html?${query}`;
+  return `/app/cabinet-mode-v142.html?${query}`;
 }
+function visualUrl(options={}){return cabinetUrl(options)}
 function sourceUrl(capability){return capability?.lite?.sourceRoute||null}
-window.CommonweaveParity={LEDGER_URL,LEDGER_VERSION,load,validate,resolve,routeState,liteUrl,visualUrl,sourceUrl,parse};
+window.CommonweaveParity={LEDGER_URL,LEDGER_VERSION,load,validate,resolve,routeState,liteUrl,cabinetUrl,visualUrl,sourceUrl,parse};
 })();
