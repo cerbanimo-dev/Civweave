@@ -6,15 +6,19 @@ const root=process.cwd();
 const read=file=>fs.readFile(path.join(root,file),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
-const [realmArchive,loom,assistant,contracts,planner,realmHtml,loomHtml,cabinetHtml,serviceWorker]=await Promise.all([
+const [realmArchive,loom,assistant,contracts,planner,coreLoop,realmHtml,loomHtml,cabinetHtml,livingHtml,fellowfareHtml,anarchadiaHtml,serviceWorker]=await Promise.all([
   read('public/app/realm-v141.js'),
   read('public/app/loom-v141.js'),
   read('public/app/assistant-runtime-v141.js'),
   read('public/app/guide-contracts-v141.js'),
   read('public/app/intention-planner-v141.js'),
+  read('public/app/core-loop-v152.js'),
   read('public/app/realm-v128.html'),
   read('public/app/loom-v128.html'),
   read('public/app/cabinet-mode-v142.html'),
+  read('public/app/cabinets/living-school/index.html'),
+  read('public/app/fellowfare-cabinet-v144.html'),
+  read('public/app/anarchadia-console-v139.html'),
   read('public/service-worker.js')
 ]);
 
@@ -38,15 +42,28 @@ assert(contracts.includes("a.kind==='feature-request'")&&contracts.includes('cer
 assert(contracts.includes("a.kind==='trade-request'")&&contracts.includes('fellowfare.need-card.published'),'Food requests must publish through the FellowFare contract after approval.');
 assert(contracts.includes('Do you mean the Dougie dance'),'Moss must clarify “duggy” rather than creating a global intention.');
 
+for(const required of ['commonweave.core-loop.v152','commonweave.living-school.intake.v152','commonweave.cerbanimo.quest-queue.v1','commonweave.fellowfare.resource-queue.v152','commonweave.anarchadia.passport.v152'])assert(coreLoop.includes(required),`Core loop is missing durable contract: ${required}`);
+assert(coreLoop.includes('ui.activate=x=>'),'Intention activation must materialize the child-system route.');
+assert(coreLoop.includes("receipt(plan,'living-school','learning-path'"),'Activation must create a Living School handoff.');
+assert(coreLoop.includes("receipt(plan,'cerbanimo','project-blueprint'"),'Activation must create a Cerbanimo handoff.');
+assert(coreLoop.includes("receipt(plan,'fellowfare','material-route'"),'Activation must create a FellowFare handoff.');
+assert(coreLoop.includes("receipt(plan,'anarchadia','passport-thread'"),'Activation must preserve the intention in Anarchadia.');
+assert(coreLoop.includes("closest?.('#moss')")&&coreLoop.includes("chat('living-school')"),'The Moss object must open a live guide chat instead of a stale information panel.');
+assert(coreLoop.includes("source:'commonweave-core-loop-v152'")&&coreLoop.includes('assessmentPassed:false'),'Living School intake must become native curriculum state.');
+
 assert(loomHtml.includes('/app/intention-planner-v141.js'),'Hub HTML must load the v141 planner.');
 assert(loomHtml.includes('/app/assistant-runtime-v141.js'),'Hub HTML must load the v141 assistant.');
+assert(loomHtml.includes('/app/core-loop-v152.js'),'Hub HTML must load the restored operational core.');
 assert(loomHtml.includes('/app/loom-v141.js'),'Hub HTML must load the active hub controller.');
 assert(realmHtml.includes('/app/cabinet-mode-v142.html'),'Legacy realm HTML must redirect to Cabinet Mode.');
 assert(!realmHtml.includes('/app/realm-v141.js'),'Legacy realm HTML must not load the archived location-scene controller.');
 assert(cabinetHtml.includes('CABINET MODE'),'Cabinet Mode HTML is missing its canonical mode label.');
+for(const [name,html] of [['Living School',livingHtml],['FellowFare',fellowfareHtml],['Anarchadia',anarchadiaHtml]])assert(html.includes('/app/core-loop-v152.js'),`${name} cabinet must load the restored core loop.`);
+assert(livingHtml.includes('/app/assistant-runtime-v141.js')&&livingHtml.includes('/app/shared/commonweave-model-runtime.js'),'Living School must load the same live guide stack as the other cabinets.');
 assert(serviceWorker.includes('guide-orchestration-r21'),'Service worker revision must evict the stale canned guide cache.');
 assert(serviceWorker.includes('/app/assistant-runtime-v141.js')&&serviceWorker.includes('/app/guide-contracts-v141.js'),'Service worker must cache the active guide runtimes.');
+assert(serviceWorker.includes('/app/core-loop-v152.js'),'Service worker must cache the restored operational core.');
 assert(serviceWorker.includes('/app/loom-v141.js'),'Service worker must cache the active hub controller.');
 assert(!serviceWorker.includes("'/app/realm-v141.js'"),'Service worker must not precache the archived location-scene controller.');
 
-console.log('Guide orchestration v141 verification passed in Cabinet Mode.');
+console.log('Guide orchestration and core loop verification passed in Cabinet Mode.');
