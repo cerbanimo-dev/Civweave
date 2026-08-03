@@ -1,8 +1,9 @@
 'use strict';
 const VERSION='1.0.31';
-const CACHE_REVISION='guide-orchestration-r21';
-const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
-const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
+const CACHE_REVISION='local-first-r20';
+const GUIDE_REVISION='guide-orchestration-r21';
+const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}`;
+const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}`;
 const MODEL_PREFIX='/app/models/';
 const MODEL_GRAPH_PREFIX='/app/models/all-minilm-l6-v2/onnx/';
 const ONNX_BACKEND_PREFIX='/app/vendor/transformers/wasm/';
@@ -27,7 +28,7 @@ const CORE=[
 async function cacheOne(cache,url){try{const cached=await cache.match(url);if(cached)return true;const response=await fetch(url);if(response.ok)await cache.put(url,response.clone());return response.ok}catch{return false}}
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(STATIC_CACHE);await Promise.allSettled(CORE.map(url=>cacheOne(cache,url)));await self.skipWaiting()})()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{const keys=await caches.keys();const stale=keys.filter(key=>(key.startsWith('commonweave-')&&key!==STATIC_CACHE&&key!==RUNTIME_CACHE)||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));await Promise.all(stale.map(key=>caches.delete(key)));await self.clients.claim()})()));
-self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();if(event.data?.type==='GET_VERSION')event.source?.postMessage?.({type:'COMMONWEAVE_VERSION',version:VERSION,revision:CACHE_REVISION})});
+self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();if(event.data?.type==='GET_VERSION')event.source?.postMessage?.({type:'COMMONWEAVE_VERSION',version:VERSION,revision:`${CACHE_REVISION}-${GUIDE_REVISION}`,localFirstRevision:CACHE_REVISION,guideRevision:GUIDE_REVISION})});
 async function cacheFirst(request,fallback=''){const cached=await caches.match(request);if(cached)return cached;try{const response=await fetch(request);if(response.ok&&request.method==='GET'){const cache=await caches.open(RUNTIME_CACHE);await cache.put(request,response.clone())}return response}catch{return(fallback?await caches.match(fallback):null)||new Response('Offline',{status:503,headers:{'content-type':'text/plain'}})}}
 async function staleWhileRevalidate(request){const cached=await caches.match(request);const update=fetch(request).then(async response=>{if(response.ok&&request.method==='GET'){const cache=await caches.open(RUNTIME_CACHE);await cache.put(request,response.clone())}return response}).catch(()=>null);return cached||await update||new Response('Offline',{status:503,headers:{'content-type':'text/plain'}})}
 self.addEventListener('fetch',event=>{
