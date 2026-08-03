@@ -59,6 +59,23 @@ replaceRequired(
     || pathname.startsWith('/cabinetonly/')
     || pathname === '/campus'
     || pathname.startsWith('/campus/');
+  if (gatewayRequest && packageInstall && pathname === '/app/shared/commonweave-parity-ledger.json') {
+    try {
+      const { gunzipSync } = await import('node:zlib');
+      const encoded = (await Promise.all([1, 2, 3, 4].map(part => fsp.readFile(path.join(PUBLIC_DIR, 'app', 'shared', 'commonweave-parity-ledger.part' + part + '.b64'), 'utf8')))).join('').replace(/\s+/g, '');
+      const payload = gunzipSync(Buffer.from(encoded, 'base64'));
+      res.writeHead(200, {
+        'content-type': 'application/json; charset=utf-8',
+        'content-length': payload.length,
+        'cache-control': 'public, max-age=31536000, immutable',
+        'x-commonweave-device-package': 'parity-ledger'
+      });
+      return res.end(req.method === 'HEAD' ? undefined : payload);
+    } catch (error) {
+      console.error('[Commonweave] Unable to reconstruct parity ledger:', error);
+      return json(res, 500, { error: 'The Commonweave parity ledger could not be reconstructed for this device package.' });
+    }
+  }
   if (gatewayRequest && packageInstall && (pathname === '/loom' || pathname === '/loom/' || pathname === '/loom/index.html')) {
     if (await serveFile(req, res, '/app/loom-v128.html')) return;
     return json(res, 404, { error: 'The Commonweave hub entry is missing from this device package.' });

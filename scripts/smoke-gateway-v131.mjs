@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,12 @@ child.stdout.on('data',chunk=>output.push(chunk.toString()));child.stderr.on('da
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 async function wait(){let last;for(let i=0;i<80;i+=1){try{const response=await fetch(`${origin}/api/health`,{cache:'no-store'});if(response.ok)return response.json();last=new Error(`health ${response.status}`)}catch(error){last=error}await sleep(200)}throw last||new Error('gateway did not start')}
+function requiredDeviceAssets(workerSource){
+  const core=workerSource.match(/const CORE=(\[[\s\S]*?\]);\nconst DEVICE_REQUIRED=/);
+  const required=workerSource.match(/const DEVICE_REQUIRED=(\[[\s\S]*?\]);\nasync function cacheRequired/);
+  assert(core&&required,'service worker device package manifest could not be parsed');
+  return Function(`"use strict";const CORE=${core[1]};return ${required[1]};`)();
+}
 try{
   const health=await wait();
   assert(output.join('').includes('Starting gateway runtime.'),'environment-aware start did not select the gateway on Render');
@@ -33,9 +39,22 @@ try{
     assert(response.ok,`installer asset ${route} returned ${response.status}`);
   }
   const packageHeaders={'x-commonweave-package':'install'};
+  const workerSource=await readFile(path.join(root,'public','service-worker.js'),'utf8');
+  const requiredAssets=[...new Set(requiredDeviceAssets(workerSource))];
+  for(const route of requiredAssets){
+    const response=await fetch(origin+route,{cache:'no-store',headers:{...packageHeaders,range:'bytes=0-0'}});
+    assert(response.ok,`required device package asset ${route} returned ${response.status}`);
+    await response.arrayBuffer();
+  }
   const packageAsset=await fetch(`${origin}/app/realm-console-v140.html`,{cache:'no-store',headers:packageHeaders});
   assert(packageAsset.ok,`marked device-package fetch returned ${packageAsset.status}`);
   assert((await packageAsset.text()).includes('Commonweave Realm Console'),'marked package fetch returned the wrong document');
+  const packageLedger=await fetch(`${origin}/app/shared/commonweave-parity-ledger.json`,{cache:'no-store',headers:packageHeaders});
+  assert(packageLedger.ok,`marked parity ledger route returned ${packageLedger.status}`);
+  assert(packageLedger.headers.get('x-commonweave-device-package')==='parity-ledger','parity ledger response is missing its package marker');
+  const ledger=await packageLedger.json();
+  assert(Array.isArray(ledger.systems)&&ledger.systems.length>=5,'reconstructed parity ledger is missing canonical systems');
+  assert(ledger.systems.some(system=>system.id==='commonweave'),'reconstructed parity ledger is missing Commonweave');
   const packageLoom=await fetch(`${origin}/loom/`,{cache:'no-store',headers:packageHeaders});
   assert(packageLoom.ok,`marked Loom package route returned ${packageLoom.status}`);
   const loomText=await packageLoom.text();
@@ -55,6 +74,6 @@ try{
   assert(config.features.includes('install-only-pwa'),'public config omits install-only mode');
   assert(config.features.includes('device-package-distribution'),'public config omits package distribution');
   assert(!config.features.includes('pwa-hosting'),'public config claims a live hosted PWA');
-  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,browserCampus:false,installer:true,markedPackageDistribution:true,markedVirtualRoutes:['/loom/','/lite/'],ordinaryApplicationRoutes:410,downloadOrigin:'GitHub',gatewayFeatures:config.features},null,2));
+  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,browserCampus:false,installer:true,markedPackageDistribution:true,requiredAssetCount:requiredAssets.length,markedVirtualRoutes:['/app/shared/commonweave-parity-ledger.json','/loom/','/lite/'],ordinaryApplicationRoutes:410,downloadOrigin:'GitHub',gatewayFeatures:config.features},null,2));
 }catch(error){console.error(output.join(''));throw error}
 finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}
