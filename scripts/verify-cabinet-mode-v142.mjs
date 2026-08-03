@@ -60,7 +60,7 @@ const expected={
   'living-school':{reference:[479,134],x:[24.32,35.59,52.09,68.37,80.27]},
   commonweave:{reference:[504,165],x:[25.10,35.02,49.70,63.59,74.50]},
   fellowfare:{reference:[490,110],x:[22.76,34.18,50.10,65.82,79.22]},
-  anarchadia:{reference:[436,122],x:[25.80,38.65,55.39,72.36,85.89]}
+  anarchadia:{reference:[524,191],x:[23.28,39.50,54.96,71.18,87.02]}
 };
 const controlOrder=['anarchadia','fellowfare','commonweave','living-school','cerbanimo'];
 assert(JSON.stringify(shells.controlCalibration?.referencePanels)===JSON.stringify(['cerbanimo','living-school','commonweave','fellowfare','anarchadia']),'Supplied control-panel order was not recorded');
