@@ -1,4 +1,4 @@
-// Verifies source-calibrated Cabinet Mode against the combined Anarchadia + FellowFare r25 device package.
+// Verifies source-calibrated Cabinet Mode against the r27 local-sovereignty device package.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
@@ -13,7 +13,7 @@ const pkg=JSON.parse(packageRaw),shells=JSON.parse(shellRaw),calibration=JSON.pa
 assert(count(packageRaw,/"check:syntax"\s*:/g)===1,'package.json must contain exactly one check:syntax key.');
 assert(count(packageRaw,/"check"\s*:/g)===1,'package.json must contain exactly one check key.');
 for(const token of ['cabinet-calibration-v144.js','cabinet-calibrator-v144.js','anarchadia-cabinet-workbench-v144.js'])assert(pkg.scripts['check:syntax'].includes(token),`Syntax suite omits ${token}.`);
-for(const token of ["DEVICE_REVISION='device-package-r25-anarchadia-fellowfare'","CALIBRATION_REVISION='source-svg-r24'",'DEVICE_REQUIRED','cabinet-only-v144.html','cabinet-calibrator-v144.html','async function deviceOnly'])assert(worker.includes(token),`Device package worker missing ${token}`);
+for(const token of ["DEVICE_REVISION='device-package-r27-local-sovereignty'","CALIBRATION_REVISION='source-svg-r24'",'DEVICE_REQUIRED','cabinet-only-v144.html','cabinet-calibrator-v144.html','async function deviceOnly'])assert(worker.includes(token),`Device package worker missing ${token}`);
 assert(worker.includes("if(url.pathname.startsWith('/api/'))return"),'Shared APIs must bypass the device asset cache.');
 assert(!worker.includes('staleWhileRevalidate'),'Installed application assets still revalidate against the node.');
 assert(adapter.includes('caches.match')&&adapter.includes("source:'installed-device-package'"),'MiniLM adapter does not inspect the installed package.');
