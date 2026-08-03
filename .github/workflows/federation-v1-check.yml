@@ -1,0 +1,35 @@
+name: Federation v1 check
+
+on:
+  pull_request:
+    paths:
+      - 'server-federated-v152.mjs'
+      - 'scripts/verify-federation-v152.mjs'
+      - 'Dockerfile.federated'
+      - 'docker-compose.federated.yml'
+      - '.github/workflows/federation-v1-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'server-federated-v152.mjs'
+      - 'scripts/verify-federation-v152.mjs'
+      - 'Dockerfile.federated'
+      - 'docker-compose.federated.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check federation syntax
+        run: |
+          node --check server-federated-v152.mjs
+          node --check scripts/verify-federation-v152.mjs
+      - name: Run federation smoke verification
+        run: node scripts/verify-federation-v152.mjs
+      - name: Build federated container
+        run: docker build -f Dockerfile.federated -t commonweave-federated:test .
