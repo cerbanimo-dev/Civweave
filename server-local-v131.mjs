@@ -8,5 +8,7 @@ let source=await fsp.readFile(sourcePath,'utf8');
 function replaceRequired(before,after,label){if(!source.includes(before))throw new Error(`Commonweave local v1.0.31 patch could not find ${label}`);source=source.replace(before,after)}
 replaceRequired("const VERSION = '1.0.30';","const VERSION = '1.0.31';",'local version marker');
 replaceRequired("const BUILD = '1.0.30-offline-mesh-cabinet-runtime';","const BUILD = '1.0.31-local-campus-runtime';",'local build marker');
+replaceRequired("const CW_VERSION = '1.0.30';","const CW_VERSION = '1.0.31';",'generated runtime version marker');
+replaceRequired("const CW_BUILD = '1.0.30-offline-mesh-cabinet-runtime';","const CW_BUILD = '1.0.31-local-campus-runtime';",'generated runtime build marker');
 await fsp.writeFile(runtimePath,source,'utf8');
 try{await import(pathToFileURL(runtimePath).href+'?build=1.0.31')}finally{setTimeout(()=>fsp.unlink(runtimePath).catch(()=>{}),1000).unref?.()}
