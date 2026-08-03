@@ -6,14 +6,15 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(value,message)=>{if(!value)throw new Error(message)};
 
-const [cabinet,index,css,runtime,rubric,projectGate,cerbanimoBridge]=await Promise.all([
+const [cabinet,index,css,runtime,rubric,projectGate,cerbanimoBridge,worker]=await Promise.all([
   read('public/app/cabinet-mode-v142.js'),
   read('public/app/cabinets/living-school/index.html'),
   read('public/app/cabinets/living-school/living-school-cabinet-v151.css'),
   read('public/app/cabinets/living-school/living-school-cabinet-v151.mjs'),
   read('public/app/services/living-school/modules/rubric-engine.mjs'),
   read('public/app/services/living-school/modules/project-gate.mjs'),
-  read('public/app/services/living-school/modules/cerbanimo-bridge.mjs')
+  read('public/app/services/living-school/modules/cerbanimo-bridge.mjs'),
+  read('public/service-worker.js')
 ]);
 
 assert(cabinet.includes("system?.id==='living-school'"),'Cabinet Mode does not select the dedicated Living School runtime');
@@ -21,6 +22,10 @@ assert(cabinet.includes('/app/cabinets/living-school/index.html'),'Dedicated Liv
 assert(!index.includes('realm-console-v140'),'Living School must not mount the generic realm console');
 assert(index.includes('living-school-cabinet-v151.css'),'Living School v151 stylesheet is not mounted');
 assert(index.includes('living-school-cabinet-v151.mjs'),'Living School v151 module runtime is not mounted');
+
+for(const token of ['/app/cabinets/living-school/index.html','/app/cabinets/living-school/living-school-cabinet-v151.css','/app/cabinets/living-school/living-school-cabinet-v151.mjs']){
+  assert(worker.includes(token),`Installed device package missing ${token}`);
+}
 
 for(const token of ['Pathway Desk','Curriculum Forge','Research Conservatory','Learning Map','Lesson Atelier','Constellation Observatory','Practicum Workshop','Cerbanimo Bridge','Credential Forge','Creator & Systems Loft']){
   assert(runtime.includes(token),`Living School cabinet missing ${token}`);
@@ -71,6 +76,7 @@ console.log(JSON.stringify({
   system:'living-school',
   version:'v151',
   rooms:10,
+  offlineDevicePackage:true,
   retainedEngines:['rubric-engine','project-gate','cerbanimo-bridge'],
   goldenPath:['forge','research','map','lesson','assessment','constellation','practicum','canonical-handoff','validated-receipt','final','credential'],
   fakeAcceptance:false
