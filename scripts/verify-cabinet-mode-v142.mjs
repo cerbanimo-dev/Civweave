@@ -89,7 +89,8 @@ for(const prefix of archivedPrefixes){
 }
 assert(buildScript.includes('assets/world/town-square-home.webp'),'Release guard does not preserve the main hub image');
 assert(buildScript.includes('assets/cabinets/${cabinet}.webp'),'Release guard does not preserve cabinet shells');
-assert(worker.includes("CACHE_REVISION='cabinet-mode-r23-living-school'"),'Service worker cache revision was not advanced for the Living School Cabinet Mode rebuild');
+assert(worker.includes("CACHE_REVISION='cabinet-mode-r22'"),'Service worker no longer preserves the shared local-first Cabinet Mode channel');
+assert(worker.includes("CABINET_REVISION='cabinet-home-r23-living-school'"),'Living School cabinet package revision was not activated');
 assert(worker.includes('/app/cabinet-mode-v142.html'),'Service worker does not precache Cabinet Mode');
 assert(worker.includes('/app/living-school-cabinet-v150.html'),'Service worker does not precache the Living School cabinet runtime');
 assert(!worker.includes("'/loom/realm/living-school/'"),'Service worker still precaches legacy realm scenes');
