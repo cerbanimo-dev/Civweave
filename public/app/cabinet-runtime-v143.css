@@ -1,0 +1,14 @@
+/* Cabinet Runtime v143: physical controls are measured against cabinet width. */
+.cv141-controls button{
+  width:var(--size)!important;
+  height:auto!important;
+  aspect-ratio:1/1!important;
+  border-radius:50%!important;
+  transform:translate(-50%,-50%)!important;
+}
+.cv141-controls button::before{
+  content:"";
+  position:absolute;
+  inset:4%;
+  border-radius:50%;
+}

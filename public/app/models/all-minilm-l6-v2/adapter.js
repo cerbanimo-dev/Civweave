@@ -1,5 +1,5 @@
 const ROOT='/app/models/all-minilm-l6-v2';
-const WORKER_URL=`${ROOT}/worker.js?v=reflex-r4`;
+const WORKER_URL=`${ROOT}/worker.js?v=device-package-r23`;
 const REQUIRED=[
   {url:`${ROOT}/config.json`,minBytes:300},
   {url:`${ROOT}/tokenizer.json`,minBytes:500000},
@@ -16,23 +16,19 @@ const BODY_PROBE_LIMIT=2_000_000;
 let worker=null,sequence=0;
 const pending=new Map();
 
-async function inspect(spec,{probeBody=true}={}){
+async function inspect(spec){
   try{
-    if(probeBody&&spec.minBytes<=BODY_PROBE_LIMIT){
-      const response=await fetch(spec.url,{cache:'reload'});
-      const status=response.status;
-      const type=String(response.headers.get('content-type')||'');
-      const length=response.ok?(await response.blob()).size:Number(response.headers.get('content-length')||0);
-      const htmlFallback=/text\/html/i.test(type);
-      return {...spec,status,length,type,ok:status>=200&&status<300&&!htmlFallback&&length>=spec.minBytes,probe:'body'};
-    }
-    const response=await fetch(spec.url,{method:'HEAD',cache:'reload'});
+    if(!('caches'in globalThis))throw new Error('Cache Storage is unavailable.');
+    const response=await caches.match(spec.url,{ignoreSearch:true});
+    if(!response)return{...spec,status:0,length:0,type:'',ok:false,probe:'cache-storage',error:'Missing from installed device package'};
     const status=response.status;
     const type=String(response.headers.get('content-type')||'');
-    const length=Number(response.headers.get('content-length')||0);
+    let length=Number(response.headers.get('content-length')||0);
+    if(spec.minBytes<=BODY_PROBE_LIMIT)length=(await response.clone().blob()).size;
+    else if(!length)length=spec.minBytes;
     const htmlFallback=/text\/html/i.test(type);
-    return {...spec,status,length,type,ok:status>=200&&status<300&&!htmlFallback&&length>=spec.minBytes,probe:'head'};
-  }catch(error){return {...spec,status:0,length:0,type:'',ok:false,error:error.message}}
+    return{...spec,status,length,type,ok:status>=200&&status<300&&!htmlFallback&&length>=spec.minBytes,probe:'cache-storage'};
+  }catch(error){return{...spec,status:0,length:0,type:'',ok:false,probe:'cache-storage',error:error.message}}
 }
 function stopWorker(error){
   for(const task of pending.values()){clearTimeout(task.timer);task.reject(error)}
@@ -59,15 +55,15 @@ function request(type,payload={},timeoutMs=120000){
   });
 }
 export async function status(){
-  const files=await Promise.all(REQUIRED.map(spec=>inspect(spec,{probeBody:true})));
-  const graphs=await Promise.all(GRAPH_OPTIONS.map(spec=>inspect(spec,{probeBody:false})));
+  const files=await Promise.all(REQUIRED.map(inspect));
+  const graphs=await Promise.all(GRAPH_OPTIONS.map(inspect));
   const usableGraphs=graphs.filter(item=>item.ok);
-  return {available:files.every(item=>item.ok)&&usableGraphs.length>0,id:'Xenova/all-MiniLM-L6-v2',source:'local-semantic-reflex',files,graphs,missing:[...files.filter(item=>!item.ok),...(usableGraphs.length?[]:graphs)],remoteDownloadsAllowed:false};
+  return{available:files.every(item=>item.ok)&&usableGraphs.length>0,id:'Xenova/all-MiniLM-L6-v2',source:'installed-device-package',files,graphs,missing:[...files.filter(item=>!item.ok),...(usableGraphs.length?[]:graphs)],remoteDownloadsAllowed:false};
 }
 export async function prewarm({timeoutMs=120000}={}){return request('prewarm',{},timeoutMs)}
 export async function match(text,{limit=5,timeoutMs=120000}={}){return request('match',{text,limit},timeoutMs)}
 export async function benchmark(cases,{timeoutMs=120000}={}){
   const started=performance.now();const results=[];
   for(const item of cases||[]){const one=performance.now();try{const result=await match(item.text,{limit:3,timeoutMs});results.push({id:item.id,ok:true,elapsedMs:Math.round(performance.now()-one),device:result.device,matches:result.matches})}catch(error){results.push({id:item.id,ok:false,elapsedMs:Math.round(performance.now()-one),error:error.message})}}
-  return {elapsedMs:Math.round(performance.now()-started),results};
+  return{elapsedMs:Math.round(performance.now()-started),results};
 }
