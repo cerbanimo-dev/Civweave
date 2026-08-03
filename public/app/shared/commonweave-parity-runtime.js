@@ -57,8 +57,8 @@ function liteUrl({systemId,roomId,capabilityId}={}){
   const query=new URLSearchParams();if(systemId)query.set('system',systemId);if(roomId)query.set('room',roomId);if(capabilityId)query.set('capability',capabilityId);
   return `/lite/${query.size?`?${query}`:''}`;
 }
-function visualUrl({systemId,roomId,capabilityId}={}){
-  const query=new URLSearchParams({system:systemId||'commonweave',from:'lite'});if(roomId)query.set('room',roomId);if(capabilityId)query.set('capability',capabilityId);
+function visualUrl({systemId,roomId,capabilityId,from='lite'}={}){
+  const query=new URLSearchParams({system:systemId||'commonweave',from});if(roomId)query.set('room',roomId);if(capabilityId)query.set('capability',capabilityId);
   return `/app/cabinet-visual-v141.html?${query}`;
 }
 function sourceUrl(capability){return capability?.lite?.sourceRoute||null}
