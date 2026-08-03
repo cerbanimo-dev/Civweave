@@ -5,13 +5,10 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const isRender = process.env.RENDER === 'true';
 
-if (isRender) {
-  console.log('[Commonweave] Public gateway mode: device-side Transformers.js and MiniLM staging skipped.');
-} else {
-  console.log('[Commonweave] Local campus mode: preparing device-side Transformers.js and MiniLM.');
-  await run(path.join(root, 'scripts', 'stage-transformers-assets.mjs'));
-  await run(path.join(root, 'scripts', 'ensure-minilm-model.mjs'));
-}
+console.log(`[Commonweave] ${isRender ? 'Public gateway' : 'Local campus'} mode: preparing the complete device package.`);
+await run(path.join(root, 'scripts', 'stage-transformers-assets.mjs'));
+await run(path.join(root, 'scripts', 'ensure-minilm-model.mjs'));
+console.log('[Commonweave] Transformers.js and MiniLM package files are ready for device installation.');
 
 function run(scriptPath) {
   return new Promise((resolve, reject) => {
