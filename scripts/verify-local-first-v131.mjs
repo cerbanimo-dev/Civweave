@@ -34,7 +34,7 @@ for(const token of ['/app/realm-console-v140.html','/app/anarchadia-console-v139
 assert(cabinetJs.includes("location.assign('/loom/')")&&!cabinetJs.includes('history.back()'),'Cabinet close control does not return directly to the hub');
 assert(legacyVisual.includes('/app/cabinet-mode-v142.html')&&legacyVisual.includes('location.replace'),'Legacy visual page does not redirect to Cabinet Mode');
 assert(launcher.includes('CommonweaveParity.cabinetUrl'),'cabinet launcher does not use the canonical Cabinet Mode route');
-assert(!launcher.includes('showModal'),'cabinet launcher still opens the shrunken nested modal');
+for(const token of ['realmSrcdoc','cw-cabinet-modal','cw-cabinet-frame'])assert(!launcher.includes(token),`cabinet launcher still contains nested-cabinet machinery: ${token}`);
 assert(!launcher.includes('/api/boot-log'),'cabinet launcher still submits telemetry');
 assert(!sw.includes('/api/boot-log'),'service worker still submits telemetry');
 assert(!sw.includes('networkFirst'),'service worker still forces cabinet traffic through the network');
