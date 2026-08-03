@@ -3,7 +3,21 @@ services:
     name: commonweave-host-node
     runtime: node
     plan: free
-    buildCommand: npm install && npm run check
+    buildCommand: |
+      npm install --no-audit --no-fund
+      node scripts/stage-transformers-assets.mjs --force
+      for attempt in 1 2 3 4 5; do
+        if npm run model:pull; then
+          break
+        fi
+        if [ "$attempt" = 5 ]; then
+          echo 'MiniLM package could not be materialized after five attempts.' >&2
+          exit 1
+        fi
+        sleep $((attempt * 8))
+      done
+      npm run model:check
+      npm run check
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeploy: true
