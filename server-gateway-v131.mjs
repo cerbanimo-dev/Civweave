@@ -35,9 +35,14 @@ replaceRequired(
   "  const pathname = decodeURIComponent(url.pathname);",
   String.raw`  const pathname = decodeURIComponent(url.pathname);
   const gatewayRequest = req.method === 'GET' || req.method === 'HEAD';
-  const localSurface = pathname === '/service-worker.js'
+  const localSurface = pathname === '/'
+    || pathname === '/index.html'
+    || pathname === '/service-worker.js'
     || pathname === '/diagnostics.html'
     || pathname === '/recover.html'
+    || pathname === '/field/commonweave/seed'
+    || pathname === '/downloads'
+    || pathname.startsWith('/downloads/')
     || pathname === '/app'
     || pathname.startsWith('/app/')
     || pathname === '/loom'
@@ -54,7 +59,7 @@ replaceRequired(
     if (req.method === 'HEAD') return res.end();
     return res.end(payload);
   }
-  if (gatewayRequest && (pathname === '/field/commonweave/seed' || pathname.startsWith('/downloads/'))) {
+  if (gatewayRequest && (pathname === '/field/commonweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) {
     res.writeHead(302, {location: COMMONWEAVE_RELEASE_URL, 'cache-control':'no-store'});
     return res.end();
   }
