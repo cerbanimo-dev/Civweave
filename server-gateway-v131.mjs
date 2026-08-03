@@ -62,13 +62,26 @@ replaceRequired(
   if (gatewayRequest && packageInstall && pathname === '/app/shared/commonweave-parity-ledger.json') {
     try {
       const { gunzipSync } = await import('node:zlib');
-      const encoded = (await Promise.all([1, 2, 3, 4].map(part => fsp.readFile(path.join(PUBLIC_DIR, 'app', 'shared', 'commonweave-parity-ledger.part' + part + '.b64'), 'utf8')))).join('').replace(/\s+/g, '');
-      const payload = gunzipSync(Buffer.from(encoded, 'base64'));
+      const sharedDir = path.join(PUBLIC_DIR, 'app', 'shared');
+      const encoded = (await Promise.all([1, 2, 3, 4].map(part => fsp.readFile(path.join(sharedDir, 'commonweave-parity-ledger.part' + part + '.b64'), 'utf8')))).join('').replace(/\s+/g, '');
+      const ledger = JSON.parse(gunzipSync(Buffer.from(encoded, 'base64')).toString('utf8'));
+      const shells = JSON.parse(await fsp.readFile(path.join(sharedDir, 'cabinet-shells-v129.json'), 'utf8'));
+      ledger.version = shells.version || ledger.version;
+      const missing = [];
+      for (const system of ledger.systems || []) {
+        const shell = shells.systems?.[system.id];
+        if (shell) system.interfaceShell = shell;
+        if (!system.interfaceShell?.asset) missing.push(system.id + ' asset');
+        if (!system.interfaceShell?.screen) missing.push(system.id + ' screen');
+      }
+      if (missing.length) throw new Error('Cabinet shell hydration incomplete: ' + missing.join(', '));
+      const payload = Buffer.from(JSON.stringify(ledger));
       res.writeHead(200, {
         'content-type': 'application/json; charset=utf-8',
         'content-length': payload.length,
         'cache-control': 'public, max-age=31536000, immutable',
-        'x-commonweave-device-package': 'parity-ledger'
+        'x-commonweave-device-package': 'parity-ledger',
+        'x-commonweave-cabinet-shells': shells.version || 'v129'
       });
       return res.end(req.method === 'HEAD' ? undefined : payload);
     } catch (error) {
