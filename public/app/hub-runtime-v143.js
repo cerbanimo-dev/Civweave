@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.31';
+const VERSION='1.0.32';
 const PLATFORM_KEY='commonweave.platform-settings.v143';
 const DEFAULT_GATEWAY='https://commonweave-host-node.onrender.com';
 const WEAVELING_SOURCE_DROP=100;
