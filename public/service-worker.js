@@ -3,7 +3,7 @@ const VERSION='1.0.31';
 const CACHE_REVISION='cabinet-mode-r22';
 const GUIDE_REVISION='guide-orchestration-r21';
 const CABINET_REVISION='cabinet-home-r22';
-const DEVICE_REVISION='device-package-r24-anarchadia-workbench';
+const DEVICE_REVISION='device-package-r25-anarchadia-fellowfare';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}`;
 const MODEL_PREFIX='/app/models/';
@@ -22,6 +22,7 @@ const CORE=[
   '/app/realm-console-v140.html','/app/realm-console-v140.css','/app/realm-console-v140.js',
   '/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-console-v139.js','/app/anarchadia-cabinet-workbench-v144.js',
   '/app/cabinet-home-v142.css','/app/cabinet-home-v142.js','/app/cabinet-surfaces-v143.css','/app/cabinet-surfaces-v143.js','/app/sharing-library-v143.js',
+  '/app/fellowfare-cabinet-v144.html','/app/fellowfare-cabinet-v144.css','/app/fellowfare-cabinet-v144.js',
   '/app/manifest.webmanifest','/app/local-first-policy-v131.js',
   '/app/loom-v128.css','/app/loom-v141.js','/app/hub-runtime-v143.css','/app/hub-runtime-v143.js',
   '/app/weaveling-hologram-v133.css','/app/guide-contracts-v141.js','/app/assistant-runtime-v141.js','/app/assistant-runtime-v141.css','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/intention-planner-v141.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css',
@@ -32,8 +33,11 @@ const CORE=[
   '/app/services/anarchadia/workbench.html','/app/services/anarchadia/cabinet-workbench-v144.css','/app/services/anarchadia/styles.css',
   '/app/services/anarchadia/src/app.js','/app/services/anarchadia/src/domain.js','/app/services/anarchadia/src/store.js','/app/services/anarchadia/src/export.js','/app/services/anarchadia/src/ai.js',
   '/app/services/anarchadia/commonweave-handoff-consumer.js','/app/services/anarchadia/commonweave-presence.js','/app/services/anarchadia/docs/PROVISIONAL_CONSTITUTION.md',
+  '/app/services/fellowfare/cabinet.html','/app/services/fellowfare/cabinet-embed.css','/app/services/fellowfare/cabinet-bridge.js',
+  '/app/services/fellowfare/styles.css','/app/services/fellowfare/app.js','/app/services/fellowfare/ai.js','/app/services/fellowfare/ledger.js',
+  '/app/services/fellowfare/shared/commonweave-model-runtime.js','/app/services/fellowfare/commonweave-handoff-consumer.js',
   '/app/assets/cabinets/commonweave.webp','/app/assets/cabinets/living-school.webp','/app/assets/cabinets/cerbanimo.webp','/app/assets/cabinets/fellowfare.webp','/app/assets/cabinets/anarchadia.webp',
-  '/app/assets/world/town-square-home.webp','/app/logos/commonweave.webp','/app/logos/anarchadia.webp','/app/logos/commonweave-icon-192.png','/app/logos/commonweave-icon-512.png','/app/logos/commonweave-icon-maskable-192.png','/app/logos/commonweave-icon-maskable-512.png',
+  '/app/assets/world/town-square-home.webp','/app/logos/commonweave.webp','/app/logos/anarchadia.webp','/app/logos/fellowfare.png','/app/logos/fellowfare-v2.webp','/app/logos/commonweave-icon-192.png','/app/logos/commonweave-icon-512.png','/app/logos/commonweave-icon-maskable-192.png','/app/logos/commonweave-icon-maskable-512.png',
   '/app/assets/ai/weaveling.png','/app/assets/ai/moss.png','/app/assets/ai/kamiya.png','/app/assets/ai/rook.png','/app/assets/ai/merlin.png',
   '/app/assets/generated/commonweave-navigation-icons/weaveling-compass.png','/app/assets/generated/commonweave-navigation-icons/commonweave-realms.png','/app/assets/generated/commonweave-navigation-icons/commonweave-ai-config.png','/app/assets/generated/commonweave-navigation-icons/commonweave-home.png','/app/assets/generated/commonweave-navigation-icons/commonweave-route.png'
 ];
@@ -68,7 +72,8 @@ self.addEventListener('fetch',event=>{
   if(url.pathname.startsWith('/downloads/'))return;
   if(request.mode==='navigate'){
     const cabinetPath=url.pathname.includes('cabinet-mode')||url.pathname.includes('cabinet-visual');
-    const fallback=url.pathname.startsWith('/lite')?'/lite/':cabinetPath?'/app/cabinet-mode-v142.html':'/loom/';
+    const fellowfarePath=url.pathname.includes('fellowfare-cabinet')||url.pathname.endsWith('/services/fellowfare/cabinet.html');
+    const fallback=url.pathname.startsWith('/lite')?'/lite/':fellowfarePath?'/app/fellowfare-cabinet-v144.html':cabinetPath?'/app/cabinet-mode-v142.html':'/loom/';
     event.respondWith(deviceOnly(request,fallback));return;
   }
   if(url.pathname.startsWith(MODEL_GRAPH_PREFIX)||url.pathname.startsWith(ONNX_BACKEND_PREFIX)||url.pathname.startsWith(MODEL_PREFIX)){event.respondWith(deviceOnly(request));return}
