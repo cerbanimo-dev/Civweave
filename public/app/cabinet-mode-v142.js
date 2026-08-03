@@ -4,7 +4,7 @@ const VERSION='1.0.32';
 const SHELLS_URL='/app/shared/cabinet-shells-v129.json';
 const DEFAULT_SYSTEM='commonweave';
 const params=new URLSearchParams(location.search);
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 let ledger=null,shells={};
 const $=selector=>document.querySelector(selector);
 function systemFor(id){return ledger?.index?.systems?.get?.(id)||ledger?.systems?.find?.(item=>item.id===id)||ledger?.systems?.[0]||null}
