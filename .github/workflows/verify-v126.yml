@@ -39,7 +39,7 @@ jobs:
         run: npm run check
       - name: Start public gateway
         run: |
-          PORT=8787 npm start > commonweave-gateway.log 2>&1 &
+          RENDER=true PORT=8787 npm start > commonweave-gateway.log 2>&1 &
           echo $! > commonweave-gateway.pid
       - name: Verify Render serves no campus assets
         run: |
@@ -62,7 +62,7 @@ jobs:
           grep -qi '^location: https://github.com/cerbanimo-dev/Commonweave/' gateway-download-headers.txt
       - name: Start local campus
         run: |
-          PORT=8788 npm run start:local > commonweave-local.log 2>&1 &
+          PORT=8788 npm start > commonweave-local.log 2>&1 &
           echo $! > commonweave-local.pid
       - name: Verify offline campus and canonical visuals
         run: |
