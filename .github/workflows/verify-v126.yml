@@ -37,6 +37,27 @@ jobs:
           npm run model:check
       - name: Run local-first regression suite
         run: npm run check
+      - name: Simulate clean Render package preparation
+        run: |
+          set -euxo pipefail
+          rm -rf public/app/vendor/transformers
+          rm -f \
+            public/app/models/all-minilm-l6-v2/config.json \
+            public/app/models/all-minilm-l6-v2/special_tokens_map.json \
+            public/app/models/all-minilm-l6-v2/tokenizer.json \
+            public/app/models/all-minilm-l6-v2/tokenizer_config.json \
+            public/app/models/all-minilm-l6-v2/vocab.txt \
+            public/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx \
+            public/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx
+          RENDER=true node scripts/prepare-start-v131.mjs | tee render-package-prepare.log
+          grep -q 'Public gateway mode: preparing the complete device package' render-package-prepare.log
+          grep -q 'Staged Transformers.js' render-package-prepare.log
+          grep -q 'MiniLM semantic package is ready' render-package-prepare.log
+          test -s public/app/vendor/transformers/transformers.min.js
+          test -s public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs
+          test -s public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm
+          test -s public/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx
+          test -s public/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx
       - name: Start public install gateway
         run: |
           RENDER=true PORT=8787 npm start > commonweave-gateway.log 2>&1 &
@@ -59,6 +80,10 @@ jobs:
             echo 'Installer still exposes browser-mode campus access' >&2
             exit 1
           fi
+          curl -fsS http://127.0.0.1:8787/install-v130.js -o gateway-installer.js
+          grep -q 'device-package-r30-render-transformers' gateway-installer.js
+          grep -q 'Reset and retry package' gateway-installer.js
+          grep -q 'resetDevicePackage' gateway-installer.js
 
           curl -fsS http://127.0.0.1:8787/service-worker.js -o gateway-worker.js
           grep -q "INSTALL_REVISION='install-only-r26'" gateway-worker.js
@@ -79,6 +104,12 @@ jobs:
           grep -q 'RTCPeerConnection' gateway-package-mesh.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/models/all-minilm-l6-v2/model-manifest.json -o gateway-package-model.json
           grep -q 'Xenova/all-MiniLM-L6-v2' gateway-package-model.json
+          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/vendor/transformers/transformers.min.js -o gateway-package-transformers.js
+          test -s gateway-package-transformers.js
+          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm -o gateway-package-transformers.wasm
+          test -s gateway-package-transformers.wasm
+          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx -o gateway-package-model.onnx
+          test -s gateway-package-model.onnx
 
           test "$(curl -sS -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' -d '{"kind":"room-opened"}' http://127.0.0.1:8787/api/boot-log)" = '204'
           curl -sSI http://127.0.0.1:8787/downloads/Commonweave-Mobile-Install-Kit.zip -o gateway-download-headers.txt
@@ -211,14 +242,19 @@ jobs:
           path: |
             commonweave-gateway.log
             commonweave-local.log
+            render-package-prepare.log
             gateway-health.json
             gateway.html
+            gateway-installer.js
             gateway-blocked.json
             gateway-worker.js
             gateway-manifest.json
             gateway-package-cabinet.html
             gateway-package-mesh.js
             gateway-package-model.json
+            gateway-package-transformers.js
+            gateway-package-transformers.wasm
+            gateway-package-model.onnx
             gateway-download-headers.txt
             local-health.json
             installed-entry.html
