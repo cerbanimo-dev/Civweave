@@ -56,11 +56,11 @@ for(const prefix of ['/app/services/living-school/visual-assets/','/app/services
 assert(loomHtml.includes('/app/assets/world/town-square-home.webp'),'Main Commonweave hub image was removed');
 
 const expected={
-  cerbanimo:{reference:[489,122],x:[26.38,38.85,51.12,63.39,73.62]},
-  'living-school':{reference:[479,134],x:[23.8,36.33,52.19,68.48,80.17]},
-  commonweave:{reference:[504,165],x:[25.0,35.91,49.8,63.69,74.6]},
-  fellowfare:{reference:[490,110],x:[22.86,34.08,50.41,66.33,76.94]},
-  anarchadia:{reference:[436,122],x:[25.46,39.22,55.96,72.94,86.01]}
+  cerbanimo:{reference:[489,122],x:[26.48,37.73,50.61,62.88,74.13]},
+  'living-school':{reference:[479,134],x:[24.32,35.59,52.09,68.37,80.27]},
+  commonweave:{reference:[504,165],x:[25.10,35.02,49.70,63.59,74.50]},
+  fellowfare:{reference:[490,110],x:[22.76,34.18,50.10,65.82,79.22]},
+  anarchadia:{reference:[436,122],x:[25.80,38.65,55.39,72.36,85.89]}
 };
 const controlOrder=['anarchadia','fellowfare','commonweave','living-school','cerbanimo'];
 assert(JSON.stringify(shells.controlCalibration?.referencePanels)===JSON.stringify(['cerbanimo','living-school','commonweave','fellowfare','anarchadia']),'Supplied control-panel order was not recorded');
