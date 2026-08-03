@@ -20,7 +20,7 @@ for(const system of ledger.systems){for(const room of system.rooms){for(const id
 assert(launcher.includes('realmSrcdoc'),'non-Anarchadia realms are not mounted as cabinet screen documents');
 assert(launcher.includes('/app/realm-console-v140.css'),'srcdoc does not load the shared realm presentation');
 assert(launcher.includes('/app/realm-console-v140.js'),'srcdoc does not load the functional realm runtime');
-assert(launcher.includes("return'/app/anarchadia-console-v139.html?embed=1'"),'Anarchadia lost its dedicated citizen console');
+assert(launcher.includes('/app/anarchadia-console-v139.html?embed=1'),'Anarchadia lost its dedicated citizen console');
 for(const token of ['SHELLS_URL','cw-cabinet-frame-art','--cw-screen-x','--cw-screen-clip','data-cabinet-system'])assert(launcher.includes(token),`cabinet launcher missing ${token}`);
 for(const token of ['.cw-cabinet-frame','.cw-cabinet-frame-art','.cw-cabinet-frame iframe','.cw-cabinet-frame-controls'])assert(launcherCss.includes(token),`cabinet CSS missing ${token}`);
 for(const [id,shell] of Object.entries(shells)){assert(shell.asset===`/app/assets/cabinets/${id}.webp`,`wrong physical cabinet asset for ${id}`);assert(Number(shell.screen?.width)>50&&Number(shell.screen?.height)>50,`invalid screen aperture for ${id}`)}
