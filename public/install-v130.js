@@ -2,27 +2,39 @@
 'use strict';
 const VERSION='1.0.32';
 const ENTRY='/app/installed-entry-v146.html?target=hub';
+const PREPARE_TIMEOUT_MS=180000;
 let installPrompt=null;
 let registration=null;
 let packageReady=false;
 let packageStatus=null;
+let packageError=null;
+let preparing=false;
+const workerWaits=new WeakMap();
 const $=selector=>document.querySelector(selector);
 const help=message=>{$('#install-help').textContent=message};
 function standalone(){return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches)}
 function isIOS(){return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())}
 function showPackage(status={}){
   packageStatus=status;
-  $('#package-state').textContent=packageReady?'complete':'preparing';
-  $('#package-assets').textContent=Number.isFinite(status.assetCount)?`${status.assetCount} required files`:'complete package';
+  $('#package-state').textContent=packageReady?'complete':packageError?'failed':'preparing';
+  const missing=Array.isArray(status.missing)?status.missing.length:0;
+  $('#package-assets').textContent=packageReady&&Number.isFinite(status.assetCount)?`${status.assetCount} required files`:missing?`${missing} missing files`:Number.isFinite(status.assetCount)?`${status.assetCount} required files`:'complete package';
   $('#local-mode').textContent=standalone()?'installed PWA':'installer browser';
 }
 function guidance(){
   const button=$('#install-app');
   if(standalone()){button.disabled=false;button.textContent='Open installed Commonweave';help('The installed app is ready on this device.');return}
-  if(!packageReady){button.disabled=true;button.textContent='Preparing device package…';help('Downloading and verifying the complete offline package before installation.');return}
+  if(packageError){button.disabled=false;button.textContent='Retry device package';help(`Device package preparation failed: ${packageError.message}. Tap retry after the host update finishes.`);return}
+  if(preparing||!packageReady){button.disabled=true;button.textContent='Preparing device package…';help('Downloading and verifying the complete offline package before installation.');return}
   if(installPrompt){button.disabled=false;button.textContent='Install Commonweave';help('The complete local package is ready. Install to enter the campus.');return}
   button.disabled=false;button.textContent=isIOS()?'Show iPhone/iPad instructions':'Show installation instructions';
   help(isIOS()?'In Safari, use Share → Add to Home Screen.':'Use the browser’s Install app command if it is not offered automatically.');
+}
+function failPackage(error){
+  packageReady=false;
+  packageError=error instanceof Error?error:new Error(String(error||'Unknown package error'));
+  showPackage({...packageStatus,error:packageError.message});
+  guidance();
 }
 async function retireLegacy(){
   if(!('serviceWorker'in navigator))return;
@@ -30,29 +42,63 @@ async function retireLegacy(){
   const legacy=regs.filter(reg=>{const scope=new URL(reg.scope).pathname;const script=reg.active?.scriptURL||'';return scope.startsWith('/app/')||scope.startsWith('/campus/')||/\/services\//.test(scope)||/service-worker-v12[67]\.js|\/app\/service-worker\.js/.test(script)});
   await Promise.allSettled(legacy.map(reg=>reg.unregister()));
 }
-function askWorker(type){return new Promise(resolve=>{const worker=registration?.active||registration?.waiting||registration?.installing;if(!worker)return resolve(null);const channel=new MessageChannel(),timer=setTimeout(()=>resolve(null),2500);channel.port1.onmessage=event=>{clearTimeout(timer);resolve(event.data||null)};worker.postMessage({type},[channel.port2])})}
-async function register(){
-  if(!('serviceWorker'in navigator)){help('This browser cannot install the offline package. Use the mobile kit or a local host.');return}
-  await retireLegacy();
-  registration=await navigator.serviceWorker.register(`/service-worker.js?v=${VERSION}-install-only-r26`,{scope:'/',updateViaCache:'none'});
-  registration.addEventListener('updatefound',()=>{
-    packageReady=false;guidance();
-    const worker=registration.installing;
-    worker?.addEventListener('statechange',async()=>{if(worker.state==='installed'){if(navigator.serviceWorker.controller)help('A complete updated package is ready to apply.');await confirmReady()}});
+function askWorker(type){return new Promise(resolve=>{const worker=registration?.waiting||registration?.active||registration?.installing;if(!worker)return resolve(null);const channel=new MessageChannel(),timer=setTimeout(()=>resolve(null),5000);channel.port1.onmessage=event=>{clearTimeout(timer);resolve(event.data||null)};worker.postMessage({type},[channel.port2])})}
+function waitForWorker(worker){
+  if(!worker)return Promise.resolve();
+  if(workerWaits.has(worker))return workerWaits.get(worker);
+  const promise=new Promise((resolve,reject)=>{
+    let done=false,timer=0;
+    const finish=error=>{if(done)return;done=true;clearTimeout(timer);worker.removeEventListener('statechange',check);error?reject(error):resolve()};
+    const check=()=>{if(worker.state==='installed'||worker.state==='activated')finish();else if(worker.state==='redundant')finish(new Error('The browser rejected the device package because a required file could not be cached.'))};
+    worker.addEventListener('statechange',check);
+    timer=setTimeout(()=>finish(new Error('Device package preparation timed out.')),PREPARE_TIMEOUT_MS);
+    check();
   });
-  await navigator.serviceWorker.ready;
-  await confirmReady();
+  workerWaits.set(worker,promise);
+  return promise;
 }
+function readyWorker(){return Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(new Error('The service worker did not become ready in time.')),PREPARE_TIMEOUT_MS))])}
 async function confirmReady(){
-  packageReady=true;
   const status=await askWorker('GET_DEVICE_PACKAGE_STATUS');
-  if(status?.type==='COMMONWEAVE_DEVICE_PACKAGE')packageReady=Boolean(status.ready);
-  showPackage(status||{});guidance();
+  if(status?.type!=='COMMONWEAVE_DEVICE_PACKAGE')throw new Error('The device package worker did not report its readiness.');
+  packageReady=Boolean(status.ready);
+  packageError=null;
+  showPackage(status);
+  if(!packageReady){const sample=(status.missing||[]).slice(0,2).join(', ');throw new Error(sample?`The device package is incomplete. Missing: ${sample}`:'The device package is incomplete.')}
+  guidance();
+  return status;
+}
+async function preparePackage(){
+  if(preparing)return;
+  const retrying=Boolean(packageError);
+  preparing=true;
+  packageReady=false;
+  packageError=null;
+  showPackage();
+  guidance();
+  try{
+    if(!('serviceWorker'in navigator))throw new Error('This browser cannot install the offline package. Use the mobile kit or a local host.');
+    await retireLegacy();
+    if(retrying&&registration&&!registration.active){await registration.unregister().catch(()=>{});registration=null}
+    else if(retrying&&registration){await registration.update().catch(()=>{})}
+    registration=await navigator.serviceWorker.register(`/service-worker.js?v=${VERSION}-install-only-r26`,{scope:'/',updateViaCache:'none'});
+    registration.addEventListener('updatefound',()=>{
+      const worker=registration.installing;
+      if(!worker)return;
+      packageReady=false;packageError=null;preparing=true;showPackage();guidance();
+      waitForWorker(worker).then(confirmReady).catch(failPackage).finally(()=>{preparing=false;guidance()});
+    });
+    if(registration.installing)await waitForWorker(registration.installing);
+    if(!registration.active&&!registration.waiting)await readyWorker();
+    await confirmReady();
+  }catch(error){failPackage(error)}
+  finally{preparing=false;guidance()}
 }
 addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;guidance()});
-addEventListener('appinstalled',()=>{installPrompt=null;packageReady=true;help('Installed. Launch Commonweave from its new app icon.');$('#install-app').textContent='Installed';$('#install-app').disabled=true});
+addEventListener('appinstalled',()=>{installPrompt=null;packageReady=true;packageError=null;help('Installed. Launch Commonweave from its new app icon.');$('#install-app').textContent='Installed';$('#install-app').disabled=true});
 $('#install-app').addEventListener('click',async()=>{
   if(standalone()){location.assign(ENTRY);return}
+  if(packageError){help('Retrying the complete device package…');preparePackage();return}
   if(!packageReady){help('The device package is still being prepared.');return}
   if(installPrompt){installPrompt.prompt();const result=await installPrompt.userChoice;help(result.outcome==='accepted'?'Installation accepted. Launch the app from its icon when ready.':'Installation was left for later.');installPrompt=null;guidance();return}
   help(isIOS()?'Open this page in Safari, tap Share, then Add to Home Screen.':'Open the browser menu and choose Install app. The browser controls when the native prompt is available.');
@@ -64,9 +110,8 @@ $('#check-update').addEventListener('click',async()=>{
     const endpoint=new URL('/api/releases/current',location.origin);const release=await fetch(endpoint,{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error(`release gateway returned ${response.status}`);return response.json()});
     help(`Release ${release.appVersion||release.version||'unknown'} is advertised. Package updates are applied only after the complete worker install succeeds.`);
     await confirmReady();
-  }catch(error){help(`Release check unavailable: ${error.message}. The prepared local package is unaffected.`)}
+  }catch(error){failPackage(error)}
 });
 if(standalone()){location.replace(ENTRY);return}
-showPackage();guidance();
-register().catch(error=>help(`Device package preparation failed: ${error.message}`));
+showPackage();guidance();preparePackage();
 })();
