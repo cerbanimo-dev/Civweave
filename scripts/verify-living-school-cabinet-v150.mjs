@@ -28,5 +28,6 @@ for(const token of ['commonweave.living-school.cabinet.v150','commonweave.realm-
 assert(router.includes("system?.id==='living-school'"),'Cabinet router does not select the dedicated Living School runtime');
 assert(router.includes('/app/living-school-cabinet-v150.html'),'Cabinet router is missing the Living School document');
 for(const asset of ['/app/living-school-cabinet-v150.html','/app/living-school-cabinet-v150.css','/app/living-school-cabinet-v150.js','/app/living-school-cabinet-v150.c0.b64','/app/living-school-cabinet-v150.c1.b64','/app/living-school-cabinet-v150.c2.b64'])assert(worker.includes(asset),`Device package is missing ${asset}`);
-assert(worker.includes("CACHE_REVISION='cabinet-mode-r23-living-school'"),'Living School cache revision was not rotated');
+assert(worker.includes("CACHE_REVISION='cabinet-mode-r22'"),'Living School rebuild no longer preserves the shared local-first cache channel');
+assert(worker.includes("CABINET_REVISION='cabinet-home-r23-living-school'"),'Living School cabinet package revision was not rotated');
 console.log(JSON.stringify({ok:true,mode:'Cabinet Mode',system:'living-school',rooms:rooms.length,capabilitySurfaces:capabilities.length,runtimeBytes:Buffer.byteLength(runtime),offlineParts:parts.length,projectEvidenceGate:true,migration:true},null,2));
