@@ -5,8 +5,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(rootDir, 'server.mjs');
 const runtimePath = path.join(rootDir, '.commonweave-gateway-v131.runtime.mjs');
-const VERSION = '1.0.31';
-const BUILD = '1.0.31-local-first-gateway';
+const VERSION = '1.0.32';
+const BUILD = '1.0.32-install-only-package-gateway';
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 
 function replaceRequired(before, after, label) {
@@ -28,48 +28,49 @@ replaceRequired(
 );
 replaceRequired(
   "    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Commonweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Commonweave host-node and offline PWA release.'",
-  "    releasedAt: STARTED_AT, appUrl: null, sourceUrl: COMMONWEAVE_SOURCE_URL,\n    downloadUrl: COMMONWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'Commonweave runs from a local installation. This public node only advertises releases and optional federation APIs.'",
+  "    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: COMMONWEAVE_SOURCE_URL,\n    downloadUrl: COMMONWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin is an install-only PWA and package distributor. Commonweave runs from the installed device package.'",
   'release packet hosting fields'
 );
 replaceRequired(
   "  const pathname = decodeURIComponent(url.pathname);",
   String.raw`  const pathname = decodeURIComponent(url.pathname);
   const gatewayRequest = req.method === 'GET' || req.method === 'HEAD';
-  const localSurface = pathname === '/'
+  const packageInstall = req.headers['x-commonweave-package'] === 'install';
+  const installerSurface = pathname === '/'
     || pathname === '/index.html'
+    || pathname === '/install-v130.js'
+    || pathname === '/install-v130.css'
     || pathname === '/service-worker.js'
-    || pathname === '/diagnostics.html'
-    || pathname === '/recover.html'
-    || pathname === '/field/commonweave/seed'
-    || pathname === '/downloads'
-    || pathname.startsWith('/downloads/')
+    || pathname === '/app/manifest.webmanifest'
+    || pathname === '/app/logos/commonweave.webp'
+    || pathname === '/app/logos/commonweave-icon-192.png'
+    || pathname === '/app/logos/commonweave-icon-512.png'
+    || pathname === '/app/logos/commonweave-icon-maskable-192.png'
+    || pathname === '/app/logos/commonweave-icon-maskable-512.png'
+    || pathname === '/app/assets/world/host-wave2.webp';
+  const applicationSurface = pathname === '/offline.html'
     || pathname === '/app'
     || pathname.startsWith('/app/')
     || pathname === '/loom'
     || pathname.startsWith('/loom/')
     || pathname === '/lite'
     || pathname.startsWith('/lite/')
+    || pathname === '/cabinetonly'
+    || pathname.startsWith('/cabinetonly/')
     || pathname === '/campus'
     || pathname.startsWith('/campus/');
-  if (gatewayRequest && (pathname === '/' || pathname === '/index.html')) {
-    const release = releasePacket(requestOrigin(req, url));
-    const html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07141f"><title>Commonweave Local-First Gateway</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#07141f;color:#f7efd2;font:16px/1.55 system-ui,sans-serif}main{max-width:720px;padding:32px}h1{font:700 clamp(32px,7vw,64px)/1 Georgia,serif;margin:0 0 18px}p{color:#bdd0d7}a{color:#7ee5ff}code{background:#ffffff12;padding:.15rem .35rem;border-radius:.35rem}.card{border:1px solid #7ee5ff55;border-radius:18px;padding:24px;background:#0b2230}.status{color:#70e5ae;font-weight:800}</style></head><body><main><div class="card"><div class="status">Gateway online</div><h1>Commonweave runs locally.</h1><p>This Render service does not serve the campus, rooms, models, cabinet art, or service worker. It only exposes lightweight health, release, and optional federation APIs.</p><p>Use the offline setup from the source repository, then run <code>npm run start:local</code> on your own device or local host.</p><p><a href="' + release.sourceUrl + '">Open source repository</a> · <a href="/api/health">Health record</a> · <a href="/api/releases/current">Release record</a></p></div></main></body></html>';
-    const payload = Buffer.from(html);
-    res.writeHead(200, {'content-type':'text/html; charset=utf-8','content-length':payload.length,'cache-control':'public, max-age=300','x-content-type-options':'nosniff'});
-    if (req.method === 'HEAD') return res.end();
-    return res.end(payload);
-  }
   if (gatewayRequest && (pathname === '/field/commonweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) {
     res.writeHead(302, {location: COMMONWEAVE_RELEASE_URL, 'cache-control':'no-store'});
     return res.end();
   }
-  if (localSurface) {
+  if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall) {
     return json(res, 410, {
-      error: 'Local surface not hosted here',
+      error: 'Installed runtime required',
       localInstallRequired: true,
+      installUrl: requestOrigin(req, url) + '/',
       sourceUrl: COMMONWEAVE_SOURCE_URL,
       releaseUrl: COMMONWEAVE_RELEASE_URL,
-      message: 'Install and run Commonweave locally. The public gateway intentionally does not serve the application.'
+      message: 'This public origin distributes the complete device package but does not run the Commonweave campus in browser mode.'
     });
   }
   if (pathname === '/api/boot-log' || pathname === '/api/boot-logs') {
@@ -80,12 +81,12 @@ replaceRequired(
 );
 replaceRequired(
   "appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Commonweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/commonweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download']",
-  "appUrl: null, sourceUrl: COMMONWEAVE_SOURCE_URL, downloadUrl: COMMONWEAVE_RELEASE_URL, seedUrl: null, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising']",
+  "appUrl: null, installUrl: `${requestOrigin(req, url)}/`, sourceUrl: COMMONWEAVE_SOURCE_URL, downloadUrl: COMMONWEAVE_RELEASE_URL, seedUrl: null, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['install-only-pwa','device-package-distribution','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising']",
   'public config hosting fields'
 );
 replaceRequired(
   "    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/commonweave-icon-32.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }",
-  "    if (pathname === '/favicon.ico') { res.writeHead(204, { 'cache-control': 'public, max-age=86400' }); return res.end(); }",
+  "    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/commonweave-icon-192.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }",
   'favicon route'
 );
 
