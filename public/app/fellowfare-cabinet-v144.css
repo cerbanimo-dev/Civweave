@@ -1,0 +1,25 @@
+/* FellowFare Cabinet v144: the mature exchange app lives inside the physical cabinet screen. */
+:root{color-scheme:dark;--ffc-ink:#fff7e6;--ffc-muted:#d5c4ae;--ffc-copper:#d89f58;--ffc-jade:#70c7a6;--ffc-panel:#26170f}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#170e09;color:var(--ffc-ink);font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+body{display:flex;flex-direction:column}
+.ffc144-header{flex:0 0 auto;border-bottom-color:#d89f5866;background:linear-gradient(135deg,#2f1b10f5,#102a25f5)}
+.ffc144-header .rc-brand img{object-fit:contain}
+.ch142-control-band{flex:0 0 auto;max-height:min(42vh,340px);overflow:auto;border-color:#d89f5866!important;background:linear-gradient(145deg,#2d1b12f5,#112a25f5)!important}
+.ch142-feature-menu{max-height:210px;overflow:auto}
+.ffc144-app{display:flex;min-height:0;flex:1 1 auto;flex-direction:column;padding:7px;gap:7px}
+.ffc144-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;flex:0 0 auto}
+.ffc144-tabs button{min-width:0;min-height:34px;padding:6px 4px;border:1px solid #d89f5866;border-radius:9px;background:#2d1b12;color:#fbe0a6;font:850 10px/1.1 inherit;cursor:pointer}
+.ffc144-tabs button[aria-current="page"]{background:linear-gradient(135deg,#714522,#1e5b4b);color:#fff;box-shadow:0 0 14px #d89f5833}
+.ffc144-frame{position:relative;min-height:0;flex:1 1 auto;overflow:hidden;border:1px solid #d89f5877;border-radius:12px;background:#f2e4ca;box-shadow:inset 0 0 22px #0008}
+.ffc144-frame iframe{display:block;width:100%;height:100%;border:0;background:#f5ead5}
+.ffc144-loading{position:absolute;inset:0;display:grid;place-items:center;padding:20px;background:linear-gradient(145deg,#2d1b12,#17392e);color:#ffe5ad;font-weight:850;text-align:center;transition:opacity .2s}
+.ffc144-loading[hidden]{display:none}
+.ffc144-status{flex:0 0 auto;min-height:17px;padding:0 4px;color:var(--ffc-muted);font-size:9px}
+@media(max-width:580px){
+  .ffc144-header .rc-status{display:none}
+  .ch142-control-band{max-height:36vh}
+  .ffc144-app{padding:5px}
+  .ffc144-tabs{gap:3px}
+  .ffc144-tabs button{min-height:31px;font-size:8px;padding:4px 2px}
+}
