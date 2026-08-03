@@ -1,0 +1,60 @@
+/* Hub Runtime v143: every scene overlay shares the rendered background coordinate frame. */
+.cw127-scene{
+  inset:auto!important;
+  transform:none;
+  overflow:visible!important;
+}
+.cw127-scene-bg{
+  width:100%!important;
+  height:100%!important;
+  object-fit:fill!important;
+  object-position:center center!important;
+}
+.cw127-weaveling{
+  left:50%!important;
+  bottom:6.8%!important;
+  width:31.5%!important;
+  height:35.5%!important;
+}
+.cw143-version-stack{
+  display:grid;
+  justify-items:start;
+  gap:5px;
+  pointer-events:auto;
+}
+.cw143-update{
+  min-height:30px;
+  padding:5px 10px;
+  border:1px solid #72d9c788;
+  border-radius:999px;
+  background:#031018e8;
+  color:#dffdf7;
+  box-shadow:0 8px 24px #0008;
+  font:850 9px/1.2 system-ui,sans-serif;
+  cursor:pointer;
+}
+.cw143-update.is-ready{
+  border-color:#ffd36a;
+  color:#fff2bd;
+  box-shadow:0 0 14px #ffd36a55;
+}
+.cw143-update-dialog .cw143-update-state{
+  display:grid;
+  gap:8px;
+  padding:12px;
+  border:1px solid #7ee5ff44;
+  border-radius:12px;
+  background:#020d1377;
+}
+.cw143-update-dialog output{color:#bfffe8;white-space:pre-wrap}
+.cw143-update-dialog code{overflow-wrap:anywhere}
+.cw143-update-dialog menu{justify-content:flex-start}
+.cw143-update-dialog a[aria-disabled="true"]{opacity:.45;pointer-events:none}
+#cw-pwa-state{display:none!important}
+@media(max-width:560px){
+  .cw127-weaveling{width:36%!important;height:34%!important;bottom:7.5%!important}
+  .cw143-update{max-width:132px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+@media(orientation:landscape){
+  .cw127-weaveling{width:24%!important;height:44%!important;bottom:4.5%!important}
+}
