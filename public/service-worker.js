@@ -21,7 +21,7 @@ const CORE=[
   '/app/cabinet-visual-v141.html',
   '/app/realm-console-v140.html','/app/realm-console-v140.css','/app/realm-console-v140.js',
   '/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-console-v139.js',
-  '/app/cabinet-home-v142.css','/app/cabinet-home-v142.js','/app/cabinet-surfaces-v143.css','/app/cabinet-surfaces-v143.js',
+  '/app/cabinet-home-v142.css','/app/cabinet-home-v142.js','/app/cabinet-surfaces-v143.css','/app/cabinet-surfaces-v143.js','/app/sharing-library-v143.js',
   '/app/manifest.webmanifest','/app/local-first-policy-v131.js',
   '/app/loom-v128.css','/app/loom-v141.js','/app/hub-runtime-v143.css','/app/hub-runtime-v143.js',
   '/app/weaveling-hologram-v133.css','/app/guide-contracts-v141.js','/app/assistant-runtime-v141.js','/app/assistant-runtime-v141.css','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/intention-planner-v141.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css',
@@ -37,7 +37,7 @@ const CORE=[
 const DEVICE_REQUIRED=[
   '/loom/','/app/cabinet-mode-v142.html','/app/realm-console-v140.html','/app/anarchadia-console-v139.html',
   '/app/cabinet-mode-v142.css','/app/cabinet-mode-v142.js','/app/cabinet-runtime-v143.css',
-  '/app/cabinet-home-v142.css','/app/cabinet-home-v142.js','/app/cabinet-surfaces-v143.css','/app/cabinet-surfaces-v143.js',
+  '/app/cabinet-home-v142.css','/app/cabinet-home-v142.js','/app/cabinet-surfaces-v143.css','/app/cabinet-surfaces-v143.js','/app/sharing-library-v143.js',
   '/app/loom-v128.css','/app/loom-v141.js','/app/hub-runtime-v143.css','/app/hub-runtime-v143.js',
   '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js','/app/shared/commonweave-parity-ledger.json','/app/shared/cabinet-shells-v129.json',
   '/app/models/all-minilm-l6-v2/model-manifest.json','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js','/app/models/all-minilm-l6-v2/reflex-index.json',
