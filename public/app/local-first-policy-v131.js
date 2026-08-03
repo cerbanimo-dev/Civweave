@@ -44,14 +44,15 @@ function fallbackNext(){
   if(review)return'Next: Review or activate the saved intention, or set this conversation as a new intention.';
   return'Next: Tell me your wish or set an intention.';
 }
-function linkedPlan(rows){
-  const discovered=[...rows].reverse().map(row=>row?.planId||row?.approvalGate?.planId||'').find(Boolean);
-  if(discovered){nativeSetItem.call(localStorage,LINK_KEY,discovered);return discovered}
-  return localStorage.getItem(LINK_KEY)||'';
+function conversationLinkKey(chatKey){return`${LINK_KEY}.${String(chatKey).replace(/[^a-z0-9.-]+/gi,'_')}`}
+function linkedPlan(rows,chatKey){
+  const key=conversationLinkKey(chatKey),discovered=[...rows].reverse().map(row=>row?.planId||row?.approvalGate?.planId||'').find(Boolean);
+  if(discovered){nativeSetItem.call(localStorage,key,discovered);return discovered}
+  return localStorage.getItem(key)||'';
 }
-function sanitizeChat(value){
+function sanitizeChat(chatKey,value){
   const rows=parse(value,null);if(!Array.isArray(rows))return value;
-  const planId=linkedPlan(rows),confirmed=['review','active'].includes(planState(planId));
+  const planId=linkedPlan(rows,chatKey),confirmed=['review','active'].includes(planState(planId));
   let changed=false;
   for(const row of rows){
     if(row?.role!=='assistant'||typeof row.text!=='string'||!row.text.includes('\n\nNext:'))continue;
@@ -65,17 +66,17 @@ function sanitizeChat(value){
   return changed?JSON.stringify(rows):value;
 }
 Storage.prototype.setItem=function(key,value){
-  const normalized=CHAT_KEYS.test(String(key))?sanitizeChat(String(value)):value;
+  const chatKey=String(key),normalized=CHAT_KEYS.test(chatKey)?sanitizeChat(chatKey,String(value)):value;
   return nativeSetItem.call(this,key,normalized);
 };
 function sweep(){
-  try{for(let i=0;i<localStorage.length;i+=1){const key=localStorage.key(i);if(key&&CHAT_KEYS.test(key)){const value=localStorage.getItem(key);nativeSetItem.call(localStorage,key,sanitizeChat(value))}}}catch{}
+  try{for(let i=0;i<localStorage.length;i+=1){const key=localStorage.key(i);if(key&&CHAT_KEYS.test(key)){const value=localStorage.getItem(key);nativeSetItem.call(localStorage,key,sanitizeChat(key,value))}}}catch{}
 }
 sweep();
 globalThis.CommonweaveLocalFirstPolicy={
   diagnostics:()=>parse(localStorage.getItem(DIAGNOSTICS_KEY),[]),
   clearDiagnostics:()=>localStorage.removeItem(DIAGNOSTICS_KEY),
-  linkedPlan:()=>localStorage.getItem(LINK_KEY)||'',
+  linkedPlan:chatKey=>localStorage.getItem(conversationLinkKey(chatKey||'commonweave.weaveling-chat.v127'))||'',
   version:'1.0.31'
 };
 })();
