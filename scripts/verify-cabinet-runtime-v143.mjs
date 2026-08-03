@@ -14,7 +14,7 @@ assert(count(packageRaw,/"check:syntax"\s*:/g)===1,'package.json must contain ex
 assert(count(packageRaw,/"check"\s*:/g)===1,'package.json must contain exactly one check key.');
 for(const token of ['cabinet-calibration-v144.js','cabinet-calibrator-v144.js','anarchadia-cabinet-workbench-v144.js','anarchadia-governance-kernel-v145.js','local-object-mesh-v146.js'])assert(pkg.scripts['check:syntax'].includes(token),`Syntax suite omits ${token}.`);
 assert(/const DEVICE_REVISION='device-package-r\d+-[a-z0-9-]+';/.test(worker),'Device package worker is missing a versioned DEVICE_REVISION.');
-for(const token of ["CALIBRATION_REVISION='source-svg-r24'","INSTALL_REVISION='install-only-r26'",'DEVICE_REQUIRED','cabinet-only-v144.html','cabinet-calibrator-v144.html','anarchadia-governance-kernel-v145.js','local-object-mesh-v146.js','async function deviceOnly'])assert(worker.includes(token),`Device package worker missing ${token}`);
+for(const token of ["CALIBRATION_REVISION='source-svg-r24-user'","INSTALL_REVISION='install-only-r26'",'DEVICE_REQUIRED','cabinet-only-v144.html','cabinet-calibrator-v144.html','anarchadia-governance-kernel-v145.js','local-object-mesh-v146.js','async function deviceOnly'])assert(worker.includes(token),`Device package worker missing ${token}`);
 assert(worker.includes("if(url.pathname.startsWith('/api/'))return"),'Shared APIs must bypass the device asset cache.');
 assert(!worker.includes('staleWhileRevalidate'),'Installed application assets still revalidate against the node.');
 assert(adapter.includes('caches.match')&&adapter.includes("source:'installed-device-package'"),'MiniLM adapter does not inspect the installed package.');
@@ -28,12 +28,12 @@ for(const token of ['data-cabinet-only="true"','cv144-overlay','cabinet-mode-v14
 for(const token of ['.cv144-overlay','.cv144-control','transition:opacity 120ms','data-cabinet-only="true"'])assert(cabinetCss.includes(token),`Source-image cabinet styling missing ${token}`);
 for(const token of ['renderControls','preloadAll','for(const [id,shell] of Object.entries(shells))','swapArt','image.decode','viewBox','CABINET_ONLY'])assert(cabinetRuntime.includes(token),`Cabinet runtime missing ${token}`);
 assert(!cabinetRuntime.includes('requestIdleCallback'),'Cabinet predecode still waits for idle time.');
-assert(calibration.schema==='commonweave.cabinet-calibration.v1'&&calibration.sourceSize.width===941&&calibration.sourceSize.height===1672,'Source-image calibration schema/dimensions are wrong.');
+assert(calibration.schema==='commonweave.cabinet-calibration.v1'&&calibration.revision==='source-svg-r24-user'&&calibration.sourceSize.width===941&&calibration.sourceSize.height===1672,'Source-image calibration schema, revision, or dimensions are wrong.');
 for(const id of ['commonweave','living-school','cerbanimo','fellowfare','anarchadia'])assert(calibration.systems[id]?.hotspots?.length===5,`${id} does not have five source hotspots.`);
-const anarchadiaX=[219.06,357.58,525.92,685.14,818.86];
+const anarchadiaX=[225.7,331.1,469.7,609,716.3];
 calibration.systems.anarchadia.hotspots.forEach((spot,index)=>assert(Math.abs(spot.cx-anarchadiaX[index])<0.01,`Anarchadia source hotspot ${index+1} x is ${spot.cx}.`));
 assert(anarchadia.screen.width===70.8&&anarchadia.screen.height===56.15,'Anarchadia screen calibration regressed.');
-assert(calibrationRuntime.includes('localStorage.setItem(KEY')&&calibrationRuntime.includes('source-svg-r24'),'Source defaults are not seeded before runtime.');
+assert(calibrationRuntime.includes('localStorage.setItem(KEY')&&calibrationRuntime.includes('source-svg-r24-user'),'Source defaults are not seeded before runtime.');
 for(const token of ['pointerdown','pointermove','localStorage.setItem','Copy JSON','Export JSON'])assert(calibratorHtml.includes(token)||calibratorRuntime.includes(token),`Calibrator missing ${token}`);
 for(const token of ['Commonweave settings','NODE LEARNING LIBRARY','ACTIVE QUEST','LOCAL MARKET BOARD','SUBMISSION → CHANGE PIPELINE','dedupeBands'])assert(surfacesRuntime.includes(token),`Cabinet work surfaces missing ${token}`);
 for(const token of ['cw143-button-coin','cw143-market','cw143-step-light','cw143-progress'])assert(surfacesCss.includes(token),`Cabinet surface styling missing ${token}`);
@@ -43,4 +43,4 @@ assert(publishStart>=0&&publishEnd>publishStart,'Learning library publish path i
 assert(publishBody.includes('runtime.createObject')&&publishBody.includes('runtime.syncGateway'),'Learning publish path does not use the local object outbox and optional delivery transport.');
 assert(publishBody.indexOf('runtime.createObject')<publishBody.indexOf('runtime.syncGateway'),'Learning records contact a gateway before local publication.');
 assert(gateway.includes('localInstallRequired: true')&&gateway.includes('applicationSurface && !installerSurface && !packageInstall'),'Public node does not enforce the install-only application boundary.');
-console.log(JSON.stringify({ok:true,hub:{weavelingScale:'one-third',weavelingDrop:'100 source pixels'},cabinets:{coordinatePlane:'941x1672',decodedPreload:'all five immediately',swapMs:120,cabinetOnlyParity:true,anarchadiaControlCenters:anarchadiaX},calibration:{editor:'/app/cabinet-calibrator-v144.html',localOverrides:true,jsonExport:true},package:{governedUpdates:true,installOnly:true,localObjectOutbox:true}},null,2));
+console.log(JSON.stringify({ok:true,hub:{weavelingScale:'one-third',weavelingDrop:'100 source pixels'},cabinets:{coordinatePlane:'941x1672',decodedPreload:'all five immediately',swapMs:120,cabinetOnlyParity:true,anarchadiaControlCenters:anarchadiaX},calibration:{revision:calibration.revision,editor:'/app/cabinet-calibrator-v144.html',localOverrides:true,jsonExport:true},package:{governedUpdates:true,installOnly:true,localObjectOutbox:true}},null,2));
