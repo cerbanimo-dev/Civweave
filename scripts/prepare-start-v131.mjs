@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const isRender = process.env.RENDER === 'true';
 
-console.log(`[Commonweave] ${isRender ? 'Public gateway' : 'Local campus'} mode: preparing the complete device package.`);
+if (isRender) console.log('[Commonweave] Public gateway mode: preparing the complete device package.');
+else console.log('[Commonweave] Local campus mode: preparing the complete device package.');
 await run(path.join(root, 'scripts', 'stage-transformers-assets.mjs'));
 await run(path.join(root, 'scripts', 'ensure-minilm-model.mjs'));
 console.log('[Commonweave] Transformers.js and MiniLM package files are ready for device installation.');
