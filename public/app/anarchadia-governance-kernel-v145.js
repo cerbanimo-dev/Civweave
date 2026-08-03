@@ -218,7 +218,7 @@ export async function issueExecutionAuthorization(change,ballot,consents,nodeCre
   change.state='authorized';change.updatedAt=now();return authorization;
 }
 export async function verifyExecutionAuthorization(auth){
-  if(auth?.schema!==AUTH_SCHEMA||auth.executionMode!=='branch-only'||!/^agent\/anarchadia-/i.test(auth.targetBranch)||!^[a-f0-9]{40}$/i.test(auth.baseCommit)||Date.parse(auth.expiresAt)<=Date.now())return false;
+  if(auth?.schema!==AUTH_SCHEMA||auth.executionMode!=='branch-only'||!/^agent\/anarchadia-/i.test(auth.targetBranch)||!/^[a-f0-9]{40}$/i.test(auth.baseCommit)||Date.parse(auth.expiresAt)<=Date.now())return false;
   return verifySignature(auth.publicKey,authorizationPayload(auth),auth.signature);
 }
 export async function createExecutionPacket(change,ballot,authorization,dissents=[]){
