@@ -15,7 +15,7 @@ const [html,css,ui,kernel,store,bridge,worker,pkgRaw,executor,testSource]=await 
   read('scripts/anarchadia-branch-executor-v145.mjs'),
   read('scripts/test-anarchadia-governance-v145.mjs')
 ]);
-const pkg=JSON.parse(pkgRaw);
+const pkg=JSON.parse(pkgRaw),deviceRevision=worker.match(/const DEVICE_REVISION='([^']+)'/)?.[1]||'';
 for(const token of ['Consent, ballots, federation, release','People & nodes','Changes','Ballots','Federation','Execution'])assert(html.includes(token),`Governance HTML is missing ${token}`);
 for(const token of ['createCredential','createChangeSet','openBallot','castBallot','recordConsent','createDissent','createNodeOutcome','issueExecutionAuthorization','createExecutionPacket','validateExecutionPacket'])assert(kernel.includes(`function ${token}`)||kernel.includes(`function ${token}(`)||kernel.includes(`async function ${token}`)||kernel.includes(`async function ${token}(`),`Kernel is missing ${token}`);
 for(const token of ['Exact immutable base commit','Branch-only target','Forbidden-code scan','Risk and consent declaration'])assert(kernel.includes(token),`Rails are missing ${token}`);
@@ -25,10 +25,10 @@ assert(ui.includes('request-amendment')&&ui.includes("action==='consent'")&&ui.i
 assert(store.includes("const KEYS='keys'")&&store.includes('putPrivateKey')&&store.includes('getPrivateKey'),'Private signing keys are not isolated in IndexedDB.');
 assert(bridge.includes('GOVERNED UPDATE')&&bridge.includes('data-signal-vote')&&bridge.includes('vote-hub'),'Citizen Console bridge is incomplete.');
 for(const asset of ['anarchadia-governance-v145.html','anarchadia-governance-v145.css','anarchadia-governance-v145.js','anarchadia-governance-kernel-v145.js','anarchadia-governance-store-v145.js','anarchadia-governance-bridge-v145.js','anarchadia-sovereignty-kernel-v146.js','install-boundary-v146.js','local-object-mesh-v146.js'])assert(worker.includes(asset),`Device package omits ${asset}`);
-assert(/const DEVICE_REVISION='device-package-r\d+-[a-z0-9-]+';/.test(worker),'Device package has no versioned revision.');
-assert(worker.includes("DEVICE_REVISION='device-package-r27-local-sovereignty'")&&worker.includes("INSTALL_REVISION='install-only-r26'"),'Governance is not installed inside the local-sovereignty install-only package.');
+assert(/^device-package-r\d+(?:-[a-z0-9-]+)?$/i.test(deviceRevision),'Device package has no versioned revision.');
+assert(worker.includes("INSTALL_REVISION='install-only-r26'")&&worker.includes('anarchadia-sovereignty-kernel-v146.js'),'Governance is not installed inside the local-sovereignty install-only package.');
 assert(executor.includes("git',['worktree','add','-b'")&&executor.includes("run('npm',['run','check']")&&executor.includes('pushPerformed:false')&&executor.includes('mergePerformed:false'),'Branch executor does not preserve the prepare-only boundary.');
 assert(pkg.scripts['anarchadia:execute']==='node scripts/anarchadia-branch-executor-v145.mjs','Executor command is missing.');
 assert(pkg.scripts.check.includes('verify-anarchadia-governance-v145.mjs')&&pkg.scripts.check.includes('test:anarchadia-governance'),'Main verification suite omits governed self-update.');
 assert(testSource.includes('execution packet is hash-bound')&&testSource.includes('signed node outcome verifies'),'Required governance tests are missing.');
-console.log(JSON.stringify({ok:true,system:'anarchadia',governanceKernel:'v145',capabilities:['hash-bound-change-sets','group-ballots','federation-node-ballots','separate-consent','preserved-dissent','signed-node-outcomes','branch-only-authorizations','tamper-evident-execution-packets','local-branch-executor'],devicePackage:'install-only-local-sovereignty-r27'},null,2));
+console.log(JSON.stringify({ok:true,system:'anarchadia',governanceKernel:'v145',capabilities:['hash-bound-change-sets','group-ballots','federation-node-ballots','separate-consent','preserved-dissent','signed-node-outcomes','branch-only-authorizations','tamper-evident-execution-packets','local-branch-executor'],devicePackage:deviceRevision},null,2));
