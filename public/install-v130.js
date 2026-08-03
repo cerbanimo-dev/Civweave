@@ -1,18 +1,28 @@
 (()=>{
 'use strict';
-const VERSION='1.0.30';
+const VERSION='1.0.32';
+const ENTRY='/app/installed-entry-v146.html?target=hub';
 let installPrompt=null;
 let registration=null;
+let packageReady=false;
+let packageStatus=null;
 const $=selector=>document.querySelector(selector);
 const help=message=>{$('#install-help').textContent=message};
-function standalone(){return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}
-function installGuidance(){
+function standalone(){return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches)}
+function isIOS(){return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase())}
+function showPackage(status={}){
+  packageStatus=status;
+  $('#package-state').textContent=packageReady?'complete':'preparing';
+  $('#package-assets').textContent=Number.isFinite(status.assetCount)?`${status.assetCount} required files`:'complete package';
+  $('#local-mode').textContent=standalone()?'installed PWA':'installer browser';
+}
+function guidance(){
   const button=$('#install-app');
-  if(standalone()){button.disabled=true;button.textContent='Commonweave is installed';help('This window is already running as the installed local app.');return}
-  if(installPrompt){button.disabled=false;button.textContent='Install Commonweave';help('Ready to install the offline-first local campus.');return}
-  const ua=navigator.userAgent.toLowerCase();
-  if(/iphone|ipad|ipod/.test(ua)){button.disabled=true;help('On iPhone or iPad, use Share → Add to Home Screen.');return}
-  button.disabled=false;button.textContent='Install instructions';help('Your browser may place Install app in the address bar or browser menu once the offline shell is ready.');
+  if(standalone()){button.disabled=false;button.textContent='Open installed Commonweave';help('The installed app is ready on this device.');return}
+  if(!packageReady){button.disabled=true;button.textContent='Preparing device package…';help('Downloading and verifying the complete offline package before installation.');return}
+  if(installPrompt){button.disabled=false;button.textContent='Install Commonweave';help('The complete local package is ready. Install to enter the campus.');return}
+  button.disabled=false;button.textContent=isIOS()?'Show iPhone/iPad instructions':'Show installation instructions';
+  help(isIOS()?'In Safari, use Share → Add to Home Screen.':'Use the browser’s Install app command if it is not offered automatically.');
 }
 async function retireLegacy(){
   if(!('serviceWorker'in navigator))return;
@@ -20,48 +30,43 @@ async function retireLegacy(){
   const legacy=regs.filter(reg=>{const scope=new URL(reg.scope).pathname;const script=reg.active?.scriptURL||'';return scope.startsWith('/app/')||scope.startsWith('/campus/')||/\/services\//.test(scope)||/service-worker-v12[67]\.js|\/app\/service-worker\.js/.test(script)});
   await Promise.allSettled(legacy.map(reg=>reg.unregister()));
 }
+function askWorker(type){return new Promise(resolve=>{const worker=registration?.active||registration?.waiting||registration?.installing;if(!worker)return resolve(null);const channel=new MessageChannel(),timer=setTimeout(()=>resolve(null),2500);channel.port1.onmessage=event=>{clearTimeout(timer);resolve(event.data||null)};worker.postMessage({type},[channel.port2])})}
 async function register(){
-  if(!('serviceWorker'in navigator)){help('This browser cannot install the offline app. The downloadable seed remains available.');return}
+  if(!('serviceWorker'in navigator)){help('This browser cannot install the offline package. Use the mobile kit or a local host.');return}
   await retireLegacy();
-  registration=await navigator.serviceWorker.register(`/service-worker.js?v=${VERSION}`,{scope:'/',updateViaCache:'none'});
+  registration=await navigator.serviceWorker.register(`/service-worker.js?v=${VERSION}-install-only-r26`,{scope:'/',updateViaCache:'none'});
   registration.addEventListener('updatefound',()=>{
+    packageReady=false;guidance();
     const worker=registration.installing;
-    worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller){help('An update is ready. Tap Check for update to apply it.');$('#check-update').classList.add('primary')}});
+    worker?.addEventListener('statechange',async()=>{if(worker.state==='installed'){if(navigator.serviceWorker.controller)help('A complete updated package is ready to apply.');await confirmReady()}});
   });
   await navigator.serviceWorker.ready;
-  await registration.update().catch(()=>{});
-  installGuidance();
+  await confirmReady();
 }
-addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;installGuidance()});
-addEventListener('appinstalled',()=>{installPrompt=null;installGuidance()});
+async function confirmReady(){
+  packageReady=true;
+  const status=await askWorker('GET_DEVICE_PACKAGE_STATUS');
+  if(status?.type==='COMMONWEAVE_DEVICE_PACKAGE')packageReady=Boolean(status.ready);
+  showPackage(status||{});guidance();
+}
+addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;guidance()});
+addEventListener('appinstalled',()=>{installPrompt=null;packageReady=true;help('Installed. Launch Commonweave from its new app icon.');$('#install-app').textContent='Installed';$('#install-app').disabled=true});
 $('#install-app').addEventListener('click',async()=>{
-  if(installPrompt){installPrompt.prompt();const result=await installPrompt.userChoice;help(result.outcome==='accepted'?'Commonweave installation started.':'Installation was left for later.');installPrompt=null;installGuidance();return}
-  help('Use the browser’s Install app command. On iPhone or iPad, use Share → Add to Home Screen.');
+  if(standalone()){location.assign(ENTRY);return}
+  if(!packageReady){help('The device package is still being prepared.');return}
+  if(installPrompt){installPrompt.prompt();const result=await installPrompt.userChoice;help(result.outcome==='accepted'?'Installation accepted. Launch the app from its icon when ready.':'Installation was left for later.');installPrompt=null;guidance();return}
+  help(isIOS()?'Open this page in Safari, tap Share, then Add to Home Screen.':'Open the browser menu and choose Install app. The browser controls when the native prompt is available.');
 });
 $('#check-update').addEventListener('click',async()=>{
   try{
-    help('Checking the host for a newer local shell…');
+    help('Checking the signed release record…');
     await registration?.update();
-    if(registration?.waiting){registration.waiting.postMessage({type:'SKIP_WAITING'});help('Applying the update…');navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload(),{once:true});return}
-    const release=await fetch(`/loom/version.json?t=${Date.now()}`,{cache:'no-store'}).then(r=>r.json());
-    help(`Host reports v${release.version}. Your offline shell will update when a new worker is available.`);
-  }catch{help('The hub is unavailable. The installed local copy remains usable.')}
+    const endpoint=new URL('/api/releases/current',location.origin);const release=await fetch(endpoint,{cache:'no-store'}).then(response=>{if(!response.ok)throw new Error(`release gateway returned ${response.status}`);return response.json()});
+    help(`Release ${release.appVersion||release.version||'unknown'} is advertised. Package updates are applied only after the complete worker install succeeds.`);
+    await confirmReady();
+  }catch(error){help(`Release check unavailable: ${error.message}. The prepared local package is unaffected.`)}
 });
-async function status(){
-  $('#local-mode').textContent=standalone()?'installed PWA':'installer website';
-  try{
-    const health=await fetch(`/api/health?t=${Date.now()}`,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json()});
-    $('#hub-name').textContent=health.name||'Commonweave Host Node';
-    $('#hub-status').textContent='online';
-    $('#hub-status').className='is-online';
-    $('#hub-build').textContent=health.appVersion||health.build||'unknown';
-  }catch{
-    $('#hub-name').textContent='Host unavailable';
-    $('#hub-status').textContent='offline';
-    $('#hub-status').className='is-offline';
-    $('#hub-build').textContent='local app unaffected';
-  }
-}
-register().catch(error=>help(`Offline installer could not start: ${error.message}`));
-status();
+if(standalone()){location.replace(ENTRY);return}
+showPackage();guidance();
+register().catch(error=>help(`Device package preparation failed: ${error.message}`));
 })();

@@ -3,16 +3,39 @@
 const PLATFORM_KEY='commonweave.platform-settings.v143';
 const REALM_STORE_KEY='commonweave.realm-console.v140';
 const LIBRARY_CACHE_KEY='commonweave.learning-library.cache.v143';
-const NODE_ID_KEY='commonweave.local-node-id.v143';
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const clean=(value,max=8000)=>String(value??'').trim().slice(0,max);
-const uid=prefix=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
-function platform(){return{sharedNode:location.origin,shareLearningLibrary:true,...parse(localStorage.getItem(PLATFORM_KEY),{})}}
-function nodeId(){let value=localStorage.getItem(NODE_ID_KEY);if(!value){value=uid('node');localStorage.setItem(NODE_ID_KEY,value)}return value}
+function platform(){return{sharedNode:'',shareLearningLibrary:true,...parse(localStorage.getItem(PLATFORM_KEY),{})}}
+function mesh(){return globalThis.CommonweaveLocalMeshV146}
 function status(message){const output=document.querySelector('#cw143-realm-surface [data-cw143-status]');if(output)output.textContent=message}
-function localLearnings(){const records=parse(localStorage.getItem(REALM_STORE_KEY),{records:{}}).records||{},rows=[];for(const id of['living-school.generate-curriculum','living-school.start-path','living-school.create-practicum'])for(const record of records[id]||[]){const data=record.data||{};rows.push({id:record.id,title:clean(data.title||data.topic||record.label||'Untitled learning',160),description:clean(data.objective||data.topic||data.work||data.assessment||'Generated on this device.',500),content:clean(data.sources||data.milestones||data.proof||'',4000),sourceNode:nodeId(),updatedAt:record.updatedAt||record.createdAt||new Date().toISOString()})}return rows}
-async function refresh(){const p=platform();if(!p.shareLearningLibrary)return status('Shared learning-library access is disabled in Commonweave settings.');status('Refreshing learning-library envelopes…');try{const endpoint=new URL('/api/envelopes',p.sharedNode||location.origin);endpoint.searchParams.set('limit','200');const response=await fetch(endpoint,{cache:'no-store'});if(!response.ok)throw new Error(`node returned ${response.status}`);const payload=await response.json(),items=(Array.isArray(payload.envelopes)?payload.envelopes:[]).filter(item=>item.kind==='learning-library.record'&&item.payload).map(item=>({...item.payload,envelopeId:item.id,sharedAt:item.createdAt}));localStorage.setItem(LIBRARY_CACHE_KEY,JSON.stringify({items,refreshedAt:new Date().toISOString(),node:p.sharedNode}));globalThis.CommonweaveCabinetSurfacesV143?.render?.();status(`${items.length} shared learning record${items.length===1?'':'s'} loaded from node envelopes.`)}catch(error){status(`Shared library refresh failed: ${error.message}`)}}
-async function publish(id){const p=platform(),item=localLearnings().find(row=>row.id===id);if(!item)return status('That local learning record could not be found.');if(!p.shareLearningLibrary)return status('Publishing is disabled in Commonweave settings.');status(`Publishing “${item.title}” as a shared learning envelope…`);try{const response=await fetch(new URL('/api/envelopes',p.sharedNode||location.origin),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.learning-library-envelope.v1',from:nodeId(),to:'*',kind:'learning-library.record',subject:item.title,payload:item,correlationId:item.id})});if(!response.ok)throw new Error(`node returned ${response.status}`);status('Learning published to the sharing node. Refresh the library to load the shared copy.')}catch(error){status(`Publishing failed: ${error.message}`)}}
+function localLearnings(){const records=parse(localStorage.getItem(REALM_STORE_KEY),{records:{}}).records||{},rows=[];for(const id of['living-school.generate-curriculum','living-school.start-path','living-school.create-practicum'])for(const record of records[id]||[]){const data=record.data||{};rows.push({id:record.id,title:clean(data.title||data.topic||record.label||'Untitled learning',160),description:clean(data.objective||data.topic||data.work||data.assessment||'Generated on this device.',500),content:clean(data.sources||data.milestones||data.proof||'',4000),updatedAt:record.updatedAt||record.createdAt||new Date().toISOString()})}return rows}
+async function localSharedItems(){const runtime=mesh();if(!runtime)return[];const objects=await runtime.listObjects();return objects.filter(item=>item.kind==='learning-library.record').map(item=>({...item.payload,communityObjectId:item.id,revisionHash:item.revisionHash,sharedAt:item.createdAt,sourceNode:item.origin?.nodeId}))}
+async function refresh(){
+  const p=platform(),runtime=mesh();
+  if(!p.shareLearningLibrary)return status('Shared learning-library access is disabled in Commonweave settings.');
+  status('Reading the local learning-object library…');
+  let transportMessage='Local library loaded.';
+  if(runtime&&p.sharedNode){try{const result=await runtime.syncGateway(p.sharedNode);transportMessage=`Gateway exchange: ${result.sent} sent, ${result.received} received.`}catch(error){transportMessage=`Gateway unavailable; local library remains active: ${error.message}`}}
+  const items=await localSharedItems();
+  localStorage.setItem(LIBRARY_CACHE_KEY,JSON.stringify({items,refreshedAt:new Date().toISOString(),node:p.sharedNode||'local-device'}));
+  globalThis.CommonweaveCabinetSurfacesV143?.render?.();
+  status(`${items.length} local/shared learning record${items.length===1?'':'s'} loaded. ${transportMessage}`);
+}
+async function publish(id){
+  const p=platform(),runtime=mesh(),item=localLearnings().find(row=>row.id===id);
+  if(!item)return status('That local learning record could not be found.');
+  if(!p.shareLearningLibrary)return status('Publishing is disabled in Commonweave settings.');
+  if(!runtime)return status('The local community-object runtime is unavailable. Reload the installed device package.');
+  status(`Signing and queuing “${item.title}” on this device…`);
+  try{
+    const object=await runtime.createObject({id:`learning:${item.id}`,kind:'learning-library.record',purpose:'Share a learning resource with the Commonweave learning library.',consent:'federated',audience:['*'],payload:item,publish:true});
+    let delivery='Queued locally. It will remain available for peer, companion, or gateway delivery.';
+    if(p.sharedNode){try{const result=await runtime.syncGateway(p.sharedNode);delivery=`Queued locally; gateway exchange sent ${result.sent} and received ${result.received}.`}catch(error){delivery=`Queued locally. Gateway delivery will retry later: ${error.message}`}}
+    status(`Learning object ${object.id} created. ${delivery}`);
+    await refresh();
+  }catch(error){status(`Local publication failed before anything left the device: ${error.message}`)}
+}
 document.addEventListener('click',event=>{const refreshButton=event.target.closest('[data-refresh-library]');if(refreshButton){event.preventDefault();event.stopImmediatePropagation();refresh();return}const publishButton=event.target.closest('[data-publish-learning]');if(publishButton){event.preventDefault();event.stopImmediatePropagation();publish(publishButton.dataset.publishLearning)}},true);
-globalThis.CommonweaveSharingLibraryV143={refresh,publish};
+navigator.serviceWorker?.addEventListener?.('message',event=>{if(event.data?.type==='COMMONWEAVE_OUTBOX_SYNC_REQUESTED'){const p=platform();if(p.sharedNode)mesh()?.syncGateway?.(p.sharedNode).catch(()=>{})}});
+globalThis.CommonweaveSharingLibraryV143={refresh,publish,localSharedItems};
 })();

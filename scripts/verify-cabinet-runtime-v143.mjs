@@ -1,4 +1,4 @@
-// Verifies source-calibrated Cabinet Mode against the r27 local-sovereignty device package.
+// Verifies source-calibrated Cabinet Mode against the governed install-only device package.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
@@ -12,8 +12,9 @@ const [packageRaw,worker,adapter,modelWorker,hubHtml,hubCss,hubRuntime,cabinetHt
 const pkg=JSON.parse(packageRaw),shells=JSON.parse(shellRaw),calibration=JSON.parse(calibrationRaw),anarchadia=shells.systems.anarchadia;
 assert(count(packageRaw,/"check:syntax"\s*:/g)===1,'package.json must contain exactly one check:syntax key.');
 assert(count(packageRaw,/"check"\s*:/g)===1,'package.json must contain exactly one check key.');
-for(const token of ['cabinet-calibration-v144.js','cabinet-calibrator-v144.js','anarchadia-cabinet-workbench-v144.js'])assert(pkg.scripts['check:syntax'].includes(token),`Syntax suite omits ${token}.`);
-for(const token of ["DEVICE_REVISION='device-package-r27-local-sovereignty'","CALIBRATION_REVISION='source-svg-r24'",'DEVICE_REQUIRED','cabinet-only-v144.html','cabinet-calibrator-v144.html','async function deviceOnly'])assert(worker.includes(token),`Device package worker missing ${token}`);
+for(const token of ['cabinet-calibration-v144.js','cabinet-calibrator-v144.js','anarchadia-cabinet-workbench-v144.js','anarchadia-governance-kernel-v145.js','local-object-mesh-v146.js'])assert(pkg.scripts['check:syntax'].includes(token),`Syntax suite omits ${token}.`);
+assert(/const DEVICE_REVISION='device-package-r\d+-[a-z0-9-]+';/.test(worker),'Device package worker is missing a versioned DEVICE_REVISION.');
+for(const token of ["CALIBRATION_REVISION='source-svg-r24'","INSTALL_REVISION='install-only-r26'",'DEVICE_REQUIRED','cabinet-only-v144.html','cabinet-calibrator-v144.html','anarchadia-governance-kernel-v145.js','local-object-mesh-v146.js','async function deviceOnly'])assert(worker.includes(token),`Device package worker missing ${token}`);
 assert(worker.includes("if(url.pathname.startsWith('/api/'))return"),'Shared APIs must bypass the device asset cache.');
 assert(!worker.includes('staleWhileRevalidate'),'Installed application assets still revalidate against the node.');
 assert(adapter.includes('caches.match')&&adapter.includes("source:'installed-device-package'"),'MiniLM adapter does not inspect the installed package.');
@@ -22,8 +23,8 @@ assert(modelWorker.includes('fromDevicePackage')&&modelWorker.includes('caches.m
 assert(hubHtml.includes('data-action="updates"'),'Update control is missing.');
 for(const token of ['width:10.5%!important','height:11.8333%!important','animation:none!important','--cw143-weaveling-drop'])assert(hubCss.includes(token),`Weaveling sizing/anchor missing ${token}`);
 assert(hubRuntime.includes('WEAVELING_SOURCE_DROP=100')&&hubRuntime.includes('WEAVELING_SOURCE_DROP*scale'),'Weaveling is not shifted 100 source pixels after shrink.');
-for(const token of ['cv144-overlay','cv141-art-a','cv141-art-b','cabinet-calibration-v144.js'])assert(cabinetHtml.includes(token),`Cabinet mode missing ${token}`);
-for(const token of ['data-cabinet-only="true"','cv144-overlay','cabinet-mode-v142.js'])assert(cabinetOnlyHtml.includes(token),`Cabinet-only mode missing ${token}`);
+for(const token of ['cv144-overlay','cv141-art-a','cv141-art-b','cabinet-calibration-v144.js','install-boundary-v146.js','local-object-mesh-v146.js'])assert(cabinetHtml.includes(token),`Cabinet mode missing ${token}`);
+for(const token of ['data-cabinet-only="true"','cv144-overlay','cabinet-mode-v142.js','install-boundary-v146.js','local-object-mesh-v146.js'])assert(cabinetOnlyHtml.includes(token),`Cabinet-only mode missing ${token}`);
 for(const token of ['.cv144-overlay','.cv144-control','transition:opacity 120ms','data-cabinet-only="true"'])assert(cabinetCss.includes(token),`Source-image cabinet styling missing ${token}`);
 for(const token of ['renderControls','preloadAll','for(const [id,shell] of Object.entries(shells))','swapArt','image.decode','viewBox','CABINET_ONLY'])assert(cabinetRuntime.includes(token),`Cabinet runtime missing ${token}`);
 assert(!cabinetRuntime.includes('requestIdleCallback'),'Cabinet predecode still waits for idle time.');
@@ -37,6 +38,9 @@ for(const token of ['pointerdown','pointermove','localStorage.setItem','Copy JSO
 for(const token of ['Commonweave settings','NODE LEARNING LIBRARY','ACTIVE QUEST','LOCAL MARKET BOARD','SUBMISSION → CHANGE PIPELINE','dedupeBands'])assert(surfacesRuntime.includes(token),`Cabinet work surfaces missing ${token}`);
 for(const token of ['cw143-button-coin','cw143-market','cw143-step-light','cw143-progress'])assert(surfacesCss.includes(token),`Cabinet surface styling missing ${token}`);
 assert(realmHtml.includes('cabinet-surfaces-v143.js')&&anarchadiaHtml.includes('cabinet-surfaces-v143.js'),'Cabinet surfaces are not mounted.');
-assert(sharingRuntime.includes("kind:'learning-library.record'")&&sharingRuntime.includes("new URL('/api/envelopes'"),'Learning library does not use the shared envelope ledger.');
-assert(gateway.includes('localInstallRequired: true')&&gateway.includes('intentionally does not serve the application'),'Public node is no longer a release/share-only gateway.');
-console.log(JSON.stringify({ok:true,hub:{weavelingScale:'one-third',weavelingDrop:'100 source pixels'},cabinets:{coordinatePlane:'941x1672',decodedPreload:'all five immediately',swapMs:120,cabinetOnlyParity:true,anarchadiaControlCenters:anarchadiaX},calibration:{editor:'/app/cabinet-calibrator-v144.html',localOverrides:true,jsonExport:true}},null,2));
+const publishStart=sharingRuntime.indexOf('async function publish'),publishEnd=sharingRuntime.indexOf('document.addEventListener',publishStart),publishBody=sharingRuntime.slice(publishStart,publishEnd);
+assert(publishStart>=0&&publishEnd>publishStart,'Learning library publish path is missing.');
+assert(publishBody.includes('runtime.createObject')&&publishBody.includes('runtime.syncGateway'),'Learning publish path does not use the local object outbox and optional delivery transport.');
+assert(publishBody.indexOf('runtime.createObject')<publishBody.indexOf('runtime.syncGateway'),'Learning records contact a gateway before local publication.');
+assert(gateway.includes('localInstallRequired: true')&&gateway.includes('applicationSurface && !installerSurface && !packageInstall'),'Public node does not enforce the install-only application boundary.');
+console.log(JSON.stringify({ok:true,hub:{weavelingScale:'one-third',weavelingDrop:'100 source pixels'},cabinets:{coordinatePlane:'941x1672',decodedPreload:'all five immediately',swapMs:120,cabinetOnlyParity:true,anarchadiaControlCenters:anarchadiaX},calibration:{editor:'/app/cabinet-calibrator-v144.html',localOverrides:true,jsonExport:true},package:{governedUpdates:true,installOnly:true,localObjectOutbox:true}},null,2));
