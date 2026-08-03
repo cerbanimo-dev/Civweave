@@ -8,7 +8,7 @@ const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
 const shells=JSON.parse(await read('public/app/shared/cabinet-shells-v129.json'));
 const systems=['commonweave','living-school','cerbanimo','fellowfare','anarchadia'];
-assert(shells.version==='1.0.30','cabinet shell version mismatch');
+assert(shells.version==='1.0.31','cabinet shell version mismatch');
 for(const id of systems){
   const shell=shells.systems?.[id];
   assert(shell,`missing cabinet shell ${id}`);
