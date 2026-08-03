@@ -83,6 +83,14 @@ jobs:
               s=s.replace(needle,needle+addition,1)
           p.write_text(s)
 
+          p=Path('scripts/verify-anarchadia-console-v139.mjs')
+          s=p.read_text()
+          old="assert(launcher.includes(\"if(systemId==='anarchadia')return '/app/anarchadia-console-v139.html?embed=1'\"),'cabinet launcher does not route Anarchadia to the citizen console');"
+          new="assert(launcher.includes('/app/anarchadia-console-v139.html?embed=1'),'cabinet launcher does not route Anarchadia to the citizen console');\nassert(launcher.includes('cw-cabinet-frame-art'),'Anarchadia citizen console is not wrapped in the physical cabinet shell');"
+          if old in s: s=s.replace(old,new,1)
+          elif new not in s: raise SystemExit('Anarchadia launcher verification contract changed')
+          p.write_text(s)
+
           p=Path('scripts/verify-realm-consoles-v140.mjs')
           s=p.read_text().replace("CACHE_REVISION='minilm-runtime-r17'","CACHE_REVISION='minilm-runtime-r19'")
           p.write_text(s)
@@ -95,7 +103,7 @@ jobs:
         run: |
           git config user.name commonweave-release-bot
           git config user.email commonweave-release-bot@users.noreply.github.com
-          git add package.json public/service-worker.js public/app/realm-v128.html public/app/lite-v129.html public/app/realm-console-v140.html public/app/realm-console-v140.css public/app/realm-console-v140.js public/app/v130-cabinet-launcher.css public/app/v130-cabinet-launcher.js scripts/verify-realm-consoles-v140.mjs
+          git add package.json public/service-worker.js public/app/realm-v128.html public/app/lite-v129.html public/app/realm-console-v140.html public/app/realm-console-v140.css public/app/realm-console-v140.js public/app/v130-cabinet-launcher.css public/app/v130-cabinet-launcher.js scripts/verify-anarchadia-console-v139.mjs scripts/verify-realm-consoles-v140.mjs
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Apply realm cabinet overhaul to current main"
           git push origin HEAD:feature/realm-cabinet-consoles-v140-current
