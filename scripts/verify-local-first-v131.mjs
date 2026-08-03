@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-const [pkg,gateway,localHost,policy,parity,visualHtml,visualCss,visualJs,launcher,sw,loomHtml,realmHtml,liteHtml]=await Promise.all([
-  read('package.json'),read('server-gateway-v131.mjs'),read('server-local-v131.mjs'),read('public/app/local-first-policy-v131.js'),read('public/app/shared/commonweave-parity-runtime.js'),read('public/app/cabinet-visual-v141.html'),read('public/app/cabinet-visual-v141.css'),read('public/app/cabinet-visual-v141.js'),read('public/app/v130-cabinet-launcher.js'),read('public/service-worker.js'),read('public/app/loom-v128.html'),read('public/app/realm-v128.html'),read('public/app/lite-v129.html')
+const [pkg,gateway,localHost,stageRuntime,policy,parity,visualHtml,visualCss,visualJs,launcher,sw,loomHtml,realmHtml,liteHtml]=await Promise.all([
+  read('package.json'),read('server-gateway-v131.mjs'),read('server-local-v131.mjs'),read('scripts/stage-transformers-assets.mjs'),read('public/app/local-first-policy-v131.js'),read('public/app/shared/commonweave-parity-runtime.js'),read('public/app/cabinet-visual-v141.html'),read('public/app/cabinet-visual-v141.css'),read('public/app/cabinet-visual-v141.js'),read('public/app/v130-cabinet-launcher.js'),read('public/service-worker.js'),read('public/app/loom-v128.html'),read('public/app/realm-v128.html'),read('public/app/lite-v129.html')
 ]);
 const packageJson=JSON.parse(pkg);
 assert(packageJson.scripts.start==='node server-gateway-v131.mjs','Render start command is not the lightweight gateway');
@@ -13,6 +13,7 @@ assert(packageJson.scripts['start:local']==='node server-local-v131.mjs','local 
 assert(localHost.includes("const VERSION = '1.0.31';")&&localHost.includes("const BUILD = '1.0.31-local-campus-runtime';"),'local host does not align version and build markers');
 for(const token of ['/app/cabinet-visual-v141.html','/app/realm-console-v140.html',"'canonical visual HTML allowlist'"])assert(localHost.includes(token),`local host does not allow ${token}`);
 assert(!packageJson.scripts.prestart.includes('ensure-minilm-model'),'Render startup still materializes MiniLM');
+for(const token of ["process.env.RENDER==='true'","renderBuild&&!force","skipping device-side Transformers.js staging"])assert(stageRuntime.includes(token),`Render semantic-runtime staging guard missing ${token}`);
 for(const token of ["appUrl: null","localInstallRequired: true","pathname === '/api/boot-log'","res.writeHead(204","localSurface","return json(res, 410","COMMONWEAVE_RELEASE_URL"])assert(gateway.includes(token),`gateway missing ${token}`);
 assert(gateway.includes("const installKitSha256 = '';")&&gateway.includes('const installKitSize = 0;'),'gateway does not replace install-kit hashing with zero-cost metadata');
 assert(gateway.includes("'install kit startup hashing'"),'gateway lacks the explicit install-kit hashing replacement contract');
@@ -23,6 +24,7 @@ for(const token of ['cabinet-visual-v141.css','local-first-policy-v131.js','cabi
 for(const token of ['aspect-ratio:941/1672','calc(100dvh * 941 / 1672)','calc(100vw * 1672 / 941)','.cv141-screen','.cv141-controls'])assert(visualCss.includes(token),`canonical cabinet sizing missing ${token}`);
 for(const token of ['/app/realm-console-v140.html','/app/anarchadia-console-v139.html','cabinet-shells-v129.json','data-system','CommonweaveParity.liteUrl'])assert(visualJs.includes(token),`canonical visual runtime missing ${token}`);
 assert(launcher.includes('CommonweaveParity.visualUrl'),'cabinet launcher does not use the canonical visual route');
+assert(launcher.includes("location.pathname.includes('/loom/realm/')")&&launcher.includes('location.replace(visualUrl(realmId()))'),'legacy realm URLs do not redirect to the canonical cabinet');
 assert(!launcher.includes('showModal'),'cabinet launcher still opens the shrunken nested modal');
 assert(!launcher.includes('/api/boot-log'),'cabinet launcher still submits telemetry');
 assert(!sw.includes('/api/boot-log'),'service worker still submits telemetry');
@@ -31,4 +33,4 @@ assert(!sw.includes('binaryStreamFirst'),'service worker still bypasses cached M
 for(const token of ['/app/cabinet-visual-v141.html','/app/local-first-policy-v131.js',"CACHE_REVISION='local-first-r20'"])assert(sw.includes(token),`service worker missing ${token}`);
 for(const [name,html] of [['loom',loomHtml],['realm',realmHtml],['lite',liteHtml]])assert(html.includes('/app/local-first-policy-v131.js'),`${name} does not load the local-first policy before its runtimes`);
 assert((realmHtml.match(/intention-planner-v138\.js/g)||[]).length===1,'realm loads the intention planner more than once');
-console.log(JSON.stringify({ok:true,version:packageJson.version,renderRole:'health, releases, and optional federation only',localRole:'campus, cabinets, models, rooms, state, and diagnostics',canonicalVisual:'/app/cabinet-visual-v141.html',telemetry:'local diagnostics only'},null,2));
+console.log(JSON.stringify({ok:true,version:packageJson.version,renderRole:'health, releases, and optional federation only',localRole:'campus, cabinets, models, rooms, state, and diagnostics',canonicalVisual:'/app/cabinet-visual-v141.html',miniLM:'user device only',telemetry:'local diagnostics only'},null,2));
