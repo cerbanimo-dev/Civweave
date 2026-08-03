@@ -6,6 +6,7 @@ const status=document.querySelector('[data-ffc-status]');
 const tabs=[...document.querySelectorAll('[data-ffc-command]')];
 const AI_KEY='commonweave.universal-ai.v127';
 const MODEL_KEY='commonweave-shared-model';
+const PENDING_KEY='commonweave.fellowfare.pending-threads.v1';
 const clean=(value,max=4000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 
@@ -38,8 +39,16 @@ function capabilityCommand(id){
   if(/profile|wallet|button|export|import|backup|privacy|setting/.test(value))return['profile',{}];
   return['market',{}];
 }
-function sendContext(){
-  frame?.contentWindow?.postMessage(modelContext(),location.origin);
+function sendContext(){frame?.contentWindow?.postMessage(modelContext(),location.origin)}
+function importPending(){
+  const threads=parse(localStorage.getItem(PENDING_KEY),[]);
+  if(!Array.isArray(threads)||!threads.length)return;
+  frame?.contentWindow?.postMessage({
+    type:'commonweave:exchange-import',
+    contractVersion:'commonweave.exchange-import.v1',
+    bundle:{format:'commonweave.exchange-bundle',schemaVersion:'1.0.0',entities:{threads,proposals:[],assemblies:[],agreements:[]},events:[]},
+    automaticEffect:false
+  },location.origin);
 }
 function interceptCapability(event){
   const button=event.target.closest?.('[data-ch142-capability]');
@@ -61,6 +70,7 @@ frame?.addEventListener('load',()=>{
   loading.hidden=true;
   status.textContent='Full FellowFare market, agreement ledger, repair path, trust, and portability tools are ready.';
   sendContext();
+  importPending();
 });
 addEventListener('message',event=>{
   if(event.origin!==location.origin||event.source!==frame?.contentWindow||!event.data||typeof event.data!=='object')return;
@@ -68,9 +78,17 @@ addEventListener('message',event=>{
     loading.hidden=true;
     status.textContent='FellowFare exchange ledger ready inside Cabinet Mode.';
     sendContext();
+    importPending();
+  }
+  if(event.data.type==='commonweave:exchange-import-receipt'&&event.data.status==='reviewed'){
+    localStorage.removeItem(PENDING_KEY);
+    status.textContent=clean(event.data.detail||'Rook’s queued need card was imported into FellowFare.',180);
   }
   if(event.data.type==='commonweave:action-signal'&&event.data.title)status.textContent=clean(event.data.title,180);
   if(event.data.type==='commonweave:navigation-receipt'&&event.data.detail)status.textContent=clean(event.data.detail,180);
 });
-addEventListener('storage',event=>{if([AI_KEY,MODEL_KEY].includes(event.key))sendContext()});
+addEventListener('storage',event=>{
+  if([AI_KEY,MODEL_KEY].includes(event.key))sendContext();
+  if(event.key===PENDING_KEY)importPending();
+});
 })();
