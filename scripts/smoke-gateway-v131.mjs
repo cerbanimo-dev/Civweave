@@ -6,13 +6,14 @@ import { fileURLToPath } from 'node:url';
 const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.31',BUILD='1.0.31-local-first-gateway';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const dataDir=await mkdtemp(path.join(os.tmpdir(),'commonweave-gateway-v131-')),output=[];
-const child=spawn(process.execPath,['server-gateway-v131.mjs'],{cwd:root,env:{...process.env,HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});
+const child=spawn(process.execPath,['scripts/start-commonweave-v131.mjs'],{cwd:root,env:{...process.env,RENDER:'true',HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});
 child.stdout.on('data',chunk=>output.push(chunk.toString()));child.stderr.on('data',chunk=>output.push(chunk.toString()));
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 async function wait(){let last;for(let i=0;i<60;i+=1){try{const response=await fetch(`${origin}/api/health`,{cache:'no-store'});if(response.ok)return response.json();last=new Error(`health ${response.status}`)}catch(error){last=error}await sleep(200)}throw last||new Error('gateway did not start')}
 try{
   const health=await wait();
+  assert(output.join('').includes('Starting gateway runtime.'),'environment-aware start did not select the gateway on Render');
   assert(health.build===BUILD,`unexpected build ${health.build}`);
   assert(health.appVersion===VERSION,`unexpected version ${health.appVersion}`);
   assert(health.release?.appUrl===null,'gateway advertises a remotely hosted app');
