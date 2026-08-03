@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const rootDir=path.dirname(fileURLToPath(import.meta.url));
 const sourcePath=path.join(rootDir,'server-v130.mjs');
 const runtimePath=path.join(rootDir,'.commonweave-server-local-v131.entry.mjs');
-let source=await fsp.readFile(sourcePath,'utf8');
+let source=(await fsp.readFile(sourcePath,'utf8')).replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n');
 function replaceRequired(before,after,label){if(!source.includes(before))throw new Error(`Commonweave local v1.0.31 patch could not find ${label}`);source=source.replace(before,after)}
 replaceRequired("const VERSION = '1.0.30';","const VERSION = '1.0.31';",'local version marker');
 replaceRequired("const BUILD = '1.0.30-offline-mesh-cabinet-runtime';","const BUILD = '1.0.31-local-campus-runtime';",'local build marker');
