@@ -1,6 +1,6 @@
 'use strict';
 const VERSION='1.0.32';
-const CACHE_REVISION='cabinet-mode-r23-living-school';
+const CACHE_REVISION='cabinet-mode-r22';
 const GUIDE_REVISION='guide-orchestration-r21';
 const CABINET_REVISION='cabinet-home-r23-living-school';
 const DEVICE_REVISION='device-package-r25-anarchadia-fellowfare';
