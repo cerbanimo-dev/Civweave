@@ -2,7 +2,7 @@
 'use strict';
 const VERSION='1.0.32';
 const ENTRY='/app/installed-entry-v146.html?target=hub';
-const WORKER_REVISION='device-package-r31-loom-route';
+const WORKER_REVISION='device-package-r30-render-transformers';
 const WORKER_URL=`/service-worker.js?v=${VERSION}-${WORKER_REVISION}`;
 const PREPARE_TIMEOUT_MS=180000;
 const AUTO_RESET_KEY='commonweave.device-package.auto-reset';
