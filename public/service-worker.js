@@ -1,6 +1,6 @@
 'use strict';
 const VERSION='1.0.31';
-const CACHE_REVISION='local-first-r20';
+const CACHE_REVISION='guide-orchestration-r21';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;
 const MODEL_PREFIX='/app/models/';
@@ -13,8 +13,8 @@ const CORE=[
   '/app/realm-console-v140.html','/app/realm-console-v140.css','/app/realm-console-v140.js',
   '/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-console-v139.js',
   '/app/manifest.webmanifest','/app/local-first-policy-v131.js',
-  '/app/loom-v128.css','/app/loom-v128.js','/app/realm-v128.js',
-  '/app/weaveling-hologram-v133.css','/app/assistant-runtime-v138.js','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/intention-planner-v138.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css',
+  '/app/loom-v128.css','/app/loom-v141.js','/app/realm-v141.js',
+  '/app/weaveling-hologram-v133.css','/app/guide-contracts-v141.js','/app/assistant-runtime-v141.js','/app/assistant-runtime-v141.css','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/intention-planner-v141.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css',
   '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js','/app/shared/commonweave-parity-ledger.json','/app/shared/cabinet-shells-v129.json',
   '/app/model-settings-v133.css','/app/v130-cabinet-launcher.css','/app/v130-cabinet-launcher.js','/app/pwa-v130.css','/app/pwa-v130.js',
   '/app/lite-v129.html','/app/lite-v129-base.css','/app/lite-v129-components.css','/app/lite-v129-themes.css','/app/lite-source-v129.css','/app/lite-v129-core.js','/app/lite-v129-native.js','/app/lite-v129-app.js',
@@ -25,7 +25,7 @@ const CORE=[
   '/app/assets/ai/weaveling.png','/app/assets/ai/moss.png','/app/assets/ai/kamiya.png','/app/assets/ai/rook.png','/app/assets/ai/merlin.png','/offline.html'
 ];
 async function cacheOne(cache,url){try{const cached=await cache.match(url);if(cached)return true;const response=await fetch(url);if(response.ok)await cache.put(url,response.clone());return response.ok}catch{return false}}
-self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(STATIC_CACHE);await Promise.allSettled(CORE.map(url=>cacheOne(cache,url)))})()));
+self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(STATIC_CACHE);await Promise.allSettled(CORE.map(url=>cacheOne(cache,url)));await self.skipWaiting()})()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{const keys=await caches.keys();const stale=keys.filter(key=>(key.startsWith('commonweave-')&&key!==STATIC_CACHE&&key!==RUNTIME_CACHE)||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));await Promise.all(stale.map(key=>caches.delete(key)));await self.clients.claim()})()));
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();if(event.data?.type==='GET_VERSION')event.source?.postMessage?.({type:'COMMONWEAVE_VERSION',version:VERSION,revision:CACHE_REVISION})});
 async function cacheFirst(request,fallback=''){const cached=await caches.match(request);if(cached)return cached;try{const response=await fetch(request);if(response.ok&&request.method==='GET'){const cache=await caches.open(RUNTIME_CACHE);await cache.put(request,response.clone())}return response}catch{return(fallback?await caches.match(fallback):null)||new Response('Offline',{status:503,headers:{'content-type':'text/plain'}})}}
