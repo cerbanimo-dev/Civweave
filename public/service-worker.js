@@ -35,21 +35,15 @@ const CORE=[
   '/app/assets/generated/commonweave-navigation-icons/weaveling-compass.png','/app/assets/generated/commonweave-navigation-icons/commonweave-realms.png','/app/assets/generated/commonweave-navigation-icons/commonweave-ai-config.png','/app/assets/generated/commonweave-navigation-icons/commonweave-home.png','/app/assets/generated/commonweave-navigation-icons/commonweave-route.png'
 ];
 const DEVICE_REQUIRED=[
-  '/loom/','/app/cabinet-mode-v142.html','/app/realm-console-v140.html','/app/anarchadia-console-v139.html',
-  '/app/cabinet-mode-v142.css','/app/cabinet-mode-v142.js','/app/cabinet-runtime-v143.css',
-  '/app/cabinet-home-v142.css','/app/cabinet-home-v142.js','/app/cabinet-surfaces-v143.css','/app/cabinet-surfaces-v143.js','/app/sharing-library-v143.js',
-  '/app/loom-v128.css','/app/loom-v141.js','/app/hub-runtime-v143.css','/app/hub-runtime-v143.js',
-  '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js','/app/shared/commonweave-parity-ledger.json','/app/shared/cabinet-shells-v129.json',
+  ...CORE,
   '/app/models/all-minilm-l6-v2/model-manifest.json','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js','/app/models/all-minilm-l6-v2/reflex-index.json',
   '/app/models/all-minilm-l6-v2/config.json','/app/models/all-minilm-l6-v2/tokenizer.json','/app/models/all-minilm-l6-v2/tokenizer_config.json','/app/models/all-minilm-l6-v2/vocab.txt',
   '/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx','/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx',
   '/app/vendor/transformers/transformers.min.js','/app/vendor/transformers/stage-manifest.json','/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs','/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm'
 ];
-async function cacheOptional(cache,url){try{if(await cache.match(url))return true;const response=await fetch(url,{cache:'no-store'});if(response.ok)await cache.put(url,response.clone());return response.ok}catch{return false}}
 async function cacheRequired(cache,url){const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error(`Device package asset ${url} returned ${response.status}`);await cache.put(url,response.clone());return true}
 self.addEventListener('install',event=>event.waitUntil((async()=>{
   const cache=await caches.open(STATIC_CACHE);
-  await Promise.allSettled(CORE.map(url=>cacheOptional(cache,url)));
   await Promise.all([...new Set(DEVICE_REQUIRED)].map(url=>cacheRequired(cache,url)));
   await self.skipWaiting();
 })()));
