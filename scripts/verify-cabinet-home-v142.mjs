@@ -33,7 +33,7 @@ assert(runtime.includes('<details class="ch142-features">'),'Feature controls mu
 assert(styles.includes('[data-cabinet-mode="home"] .rc-dashboard')&&styles.includes('[data-cabinet-mode="home"] .rc-workspace'),'Legacy feature grids must be hidden from cabinet home.');
 assert(styles.includes('.ac-grid{display:none!important}'),'Anarchadia’s lower feature tile grid must be replaced by the dropdown.');
 assert(runtime.includes('data-ch142-capability')&&runtime.includes("location.assign(`/app/realm-console-v140.html?${query}`)"),'Implemented realm features must launch directly.');
-assert(runtime.includes("data-screen-target")&&runtime.includes("data-request-kind"),'Implemented Anarchadia features must launch their existing screen or request form.');
+assert(runtime.includes('data-screen-target')&&runtime.includes('data-request-kind'),'Implemented Anarchadia features must launch their existing screen or request form.');
 assert(runtime.includes('data-ch142-coming="true"')&&runtime.includes("toast('Coming soon. This control stays here instead of sending you to a dead route.')"),'Missing features must say Coming soon without redirecting.');
 
 for(const html of [realmHtml,anarchadiaHtml]){
@@ -44,8 +44,10 @@ for(const html of [realmHtml,anarchadiaHtml]){
 
 const anarchadia=shells.systems.anarchadia.screen;
 assert(anarchadia.y<26.85,`Anarchadia overlay was not shifted upward: ${anarchadia.y}`);
-assert(anarchadia.height<56.15,`Anarchadia overlay was not thinned: ${anarchadia.height}`);
-assert(anarchadia.contentTop<3.4,`Anarchadia interior content still starts too low: ${anarchadia.contentTop}`);
+assert(anarchadia.x>12.8,`Anarchadia overlay did not move inward from the left: ${anarchadia.x}`);
+assert(anarchadia.width<74.4,`Anarchadia overlay was not thinned in width: ${anarchadia.width}`);
+assert(anarchadia.height===56.15,`Anarchadia overlay height must remain unchanged: ${anarchadia.height}`);
+assert(Math.abs((anarchadia.x+anarchadia.width/2)-50)<0.001,'Anarchadia overlay must remain horizontally centered.');
 assert(serviceWorker.includes('cabinet-home-r22'),'Service worker must rotate the cabinet-home cache.');
 assert(serviceWorker.includes('/app/cabinet-home-v142.js')&&serviceWorker.includes('/app/cabinet-home-v142.css'),'Service worker must cache the active cabinet-home layer.');
 
@@ -58,7 +60,8 @@ console.log(JSON.stringify({
     directFeatureLaunch:true,
     comingSoonFallback:true,
     anarchadiaOverlayRaised:true,
-    anarchadiaOverlayThinned:true
+    anarchadiaOverlayNarrowed:true,
+    anarchadiaOverlayHeightPreserved:true
   },
   anarchadiaScreen:anarchadia
 },null,2));
