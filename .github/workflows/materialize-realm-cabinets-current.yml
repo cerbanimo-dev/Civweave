@@ -1,0 +1,81 @@
+name: Materialize current realm cabinets
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/realm-cabinet-consoles-v140-current
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Transplant cabinet implementation onto current main
+        run: |
+          set -euxo pipefail
+          git fetch origin feature/realm-cabinet-consoles-v140
+          git checkout origin/feature/realm-cabinet-consoles-v140 -- \
+            public/app/realm-console-v140.html \
+            public/app/realm-console-v140.css \
+            public/app/realm-console-v140.js \
+            public/app/v130-cabinet-launcher.css \
+            public/app/v130-cabinet-launcher.js \
+            scripts/verify-realm-consoles-v140.mjs
+          python <<'PY'
+          from pathlib import Path
+          import json
+
+          p=Path('package.json')
+          data=json.loads(p.read_text())
+          syntax=data['scripts']['check:syntax']
+          if 'public/app/realm-console-v140.js' not in syntax:
+              syntax=syntax.replace('node --check public/app/anarchadia-console-v139.js','node --check public/app/anarchadia-console-v139.js && node --check public/app/realm-console-v140.js')
+          if 'scripts/verify-realm-consoles-v140.mjs' not in syntax:
+              syntax=syntax.replace('node --check scripts/verify-anarchadia-console-v139.mjs','node --check scripts/verify-anarchadia-console-v139.mjs && node --check scripts/verify-realm-consoles-v140.mjs')
+          data['scripts']['check:syntax']=syntax
+          check=data['scripts']['check']
+          if 'verify-realm-consoles-v140.mjs' not in check:
+              check=check.replace('node scripts/verify-anarchadia-console-v139.mjs','node scripts/verify-anarchadia-console-v139.mjs && node scripts/verify-realm-consoles-v140.mjs')
+          data['scripts']['check']=check
+          p.write_text(json.dumps(data,indent=2)+'\n')
+
+          p=Path('public/service-worker.js')
+          s=p.read_text()
+          marker="const CACHE_REVISION='minilm-runtime-r19';\n"
+          if "CABINET_REVISION='realm-cabinets-r18'" not in s:
+              if marker not in s: raise SystemExit('current MiniLM cache marker changed')
+              s=s.replace(marker,marker+"const CABINET_REVISION='realm-cabinets-r18';\n",1)
+          s=s.replace('const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}`;','const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}-${CABINET_REVISION}`;')
+          s=s.replace('const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}`;','const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}-${CABINET_REVISION}`;')
+          needle="  '/app/v130-cabinet-launcher.css','/app/v130-cabinet-launcher.js',\n"
+          addition="  '/app/realm-console-v140.html','/app/realm-console-v140.css','/app/realm-console-v140.js',\n"
+          if addition not in s:
+              if needle not in s: raise SystemExit('cabinet launcher cache entry missing')
+              s=s.replace(needle,needle+addition,1)
+          p.write_text(s)
+
+          p=Path('scripts/verify-realm-consoles-v140.mjs')
+          s=p.read_text().replace("CACHE_REVISION='minilm-runtime-r17'","CACHE_REVISION='minilm-runtime-r19'")
+          p.write_text(s)
+          PY
+      - name: Verify before committing
+        run: |
+          npm install --no-audit --no-fund
+          npm run check
+      - name: Commit current-main cabinet build
+        run: |
+          git config user.name commonweave-release-bot
+          git config user.email commonweave-release-bot@users.noreply.github.com
+          git add package.json public/service-worker.js public/app/realm-console-v140.html public/app/realm-console-v140.css public/app/realm-console-v140.js public/app/v130-cabinet-launcher.css public/app/v130-cabinet-launcher.js scripts/verify-realm-consoles-v140.mjs
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Apply realm cabinet overhaul to current main"
+          git push origin HEAD:feature/realm-cabinet-consoles-v140-current
