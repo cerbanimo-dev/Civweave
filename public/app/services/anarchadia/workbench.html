@@ -13,6 +13,13 @@
     const classic=new Set(['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench']);
     const normalize=()=>{const route=(location.hash||'#workbench').slice(1).split('?')[0];if(!classic.has(route))history.replaceState(null,'',`${location.pathname}${location.search}#workbench`)};
     normalize();addEventListener('hashchange',normalize);
+    try{
+      const worker=navigator.serviceWorker;
+      if(worker?.register){
+        const rootRegistration=worker.getRegistration?.bind(worker);
+        worker.register=async()=>await rootRegistration?.('/')||{scope:`${location.origin}/`};
+      }
+    }catch(error){console.warn('Cabinet worker boundary could not be installed',error)}
   })();
   </script>
 </head>
