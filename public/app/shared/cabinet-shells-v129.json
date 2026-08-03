@@ -1,6 +1,12 @@
 {
   "schema": "commonweave.cabinet-shells.v1",
-  "version": "1.0.31",
+  "version": "1.0.30",
+  "controlCalibration": {
+    "units": "percent of full cabinet shell",
+    "buttonAnchor": "center",
+    "realmOrder": ["anarchadia", "fellowfare", "commonweave", "living-school", "cerbanimo"],
+    "referencePanels": ["cerbanimo", "living-school", "commonweave", "fellowfare", "anarchadia"]
+  },
   "systems": {
     "commonweave": {
       "kind": "projected-cabinet-v2",
@@ -15,6 +21,7 @@
       },
       "motif": "prismatic woven compass",
       "accent2": "#7d6cff",
+      "controlPanel": { "referenceWidth": 504, "referenceHeight": 165 },
       "controlOrder": [
         "anarchadia",
         "fellowfare",
@@ -23,11 +30,11 @@
         "cerbanimo"
       ],
       "controls": [
-        { "system": "anarchadia", "x": 25.1, "y": 91.2, "size": 9.6 },
-        { "system": "fellowfare", "x": 35.6, "y": 91.2, "size": 9.0 },
-        { "system": "commonweave", "x": 49.95, "y": 90.8, "size": 14.0 },
-        { "system": "living-school", "x": 64.4, "y": 91.2, "size": 9.1 },
-        { "system": "cerbanimo", "x": 74.9, "y": 91.2, "size": 9.1 }
+        { "system": "anarchadia", "x": 25.0, "y": 91.2, "size": 9.6 },
+        { "system": "fellowfare", "x": 35.91, "y": 91.2, "size": 9.0 },
+        { "system": "commonweave", "x": 49.8, "y": 90.8, "size": 14.0 },
+        { "system": "living-school", "x": 63.69, "y": 91.2, "size": 9.1 },
+        { "system": "cerbanimo", "x": 74.6, "y": 91.2, "size": 9.1 }
       ],
       "assetType": "image/webp",
       "asset": "/app/assets/cabinets/commonweave.webp"
@@ -45,6 +52,7 @@
       },
       "motif": "botanical academy and illuminated manuscript",
       "accent2": "#d6b45d",
+      "controlPanel": { "referenceWidth": 479, "referenceHeight": 134 },
       "controlOrder": [
         "anarchadia",
         "fellowfare",
@@ -53,11 +61,11 @@
         "cerbanimo"
       ],
       "controls": [
-        { "system": "anarchadia", "x": 22.85, "y": 89.6, "size": 9.0 },
-        { "system": "fellowfare", "x": 34.0, "y": 89.6, "size": 8.2 },
-        { "system": "commonweave", "x": 49.95, "y": 89.6, "size": 13.8 },
-        { "system": "living-school", "x": 65.78, "y": 89.6, "size": 8.2 },
-        { "system": "cerbanimo", "x": 76.73, "y": 89.6, "size": 8.2 }
+        { "system": "anarchadia", "x": 23.8, "y": 89.6, "size": 9.0 },
+        { "system": "fellowfare", "x": 36.33, "y": 89.6, "size": 8.2 },
+        { "system": "commonweave", "x": 52.19, "y": 89.6, "size": 13.8 },
+        { "system": "living-school", "x": 68.48, "y": 89.6, "size": 8.2 },
+        { "system": "cerbanimo", "x": 80.17, "y": 89.6, "size": 8.2 }
       ],
       "assetType": "image/webp",
       "asset": "/app/assets/cabinets/living-school.webp"
@@ -75,6 +83,7 @@
       },
       "motif": "neon industrial quest forge",
       "accent2": "#5ac8ff",
+      "controlPanel": { "referenceWidth": 489, "referenceHeight": 122 },
       "controlOrder": [
         "anarchadia",
         "fellowfare",
@@ -83,11 +92,11 @@
         "cerbanimo"
       ],
       "controls": [
-        { "system": "anarchadia", "x": 26.57, "y": 87.44, "size": 8.1 },
-        { "system": "fellowfare", "x": 37.51, "y": 87.44, "size": 7.7 },
-        { "system": "commonweave", "x": 49.95, "y": 87.44, "size": 11.8 },
-        { "system": "living-school", "x": 62.27, "y": 87.44, "size": 8.5 },
-        { "system": "cerbanimo", "x": 73.01, "y": 87.44, "size": 8.1 }
+        { "system": "anarchadia", "x": 26.38, "y": 87.44, "size": 8.1 },
+        { "system": "fellowfare", "x": 38.85, "y": 87.44, "size": 7.7 },
+        { "system": "commonweave", "x": 51.12, "y": 87.44, "size": 11.8 },
+        { "system": "living-school", "x": 63.39, "y": 87.44, "size": 8.5 },
+        { "system": "cerbanimo", "x": 73.62, "y": 87.44, "size": 8.1 }
       ],
       "assetType": "image/webp",
       "asset": "/app/assets/cabinets/cerbanimo.webp"
@@ -105,6 +114,7 @@
       },
       "motif": "woven market craft and trustworthy exchange",
       "accent2": "#39b8c8",
+      "controlPanel": { "referenceWidth": 490, "referenceHeight": 110 },
       "controlOrder": [
         "anarchadia",
         "fellowfare",
@@ -113,11 +123,11 @@
         "cerbanimo"
       ],
       "controls": [
-        { "system": "anarchadia", "x": 22.85, "y": 91.15, "size": 9.0 },
-        { "system": "fellowfare", "x": 34.22, "y": 91.15, "size": 8.4 },
-        { "system": "commonweave", "x": 49.84, "y": 90.8, "size": 12.4 },
-        { "system": "living-school", "x": 64.93, "y": 91.15, "size": 8.6 },
-        { "system": "cerbanimo", "x": 76.62, "y": 91.15, "size": 8.4 }
+        { "system": "anarchadia", "x": 22.86, "y": 91.15, "size": 9.0 },
+        { "system": "fellowfare", "x": 34.08, "y": 91.15, "size": 8.4 },
+        { "system": "commonweave", "x": 50.41, "y": 90.8, "size": 12.4 },
+        { "system": "living-school", "x": 66.33, "y": 91.15, "size": 8.6 },
+        { "system": "cerbanimo", "x": 76.94, "y": 91.15, "size": 8.4 }
       ],
       "assetType": "image/webp",
       "asset": "/app/assets/cabinets/fellowfare.webp"
@@ -135,6 +145,7 @@
       },
       "motif": "punk civic console and highlighter governance",
       "accent2": "#ffd326",
+      "controlPanel": { "referenceWidth": 436, "referenceHeight": 122 },
       "controlOrder": [
         "anarchadia",
         "fellowfare",
@@ -143,11 +154,11 @@
         "cerbanimo"
       ],
       "controls": [
-        { "system": "anarchadia", "x": 24.12, "y": 92.1, "size": 9.6 },
-        { "system": "fellowfare", "x": 35.39, "y": 92.1, "size": 8.5 },
-        { "system": "commonweave", "x": 49.95, "y": 92.1, "size": 14.0 },
-        { "system": "living-school", "x": 64.61, "y": 92.1, "size": 9.6 },
-        { "system": "cerbanimo", "x": 75.98, "y": 92.1, "size": 8.9 }
+        { "system": "anarchadia", "x": 25.46, "y": 92.1, "size": 9.6 },
+        { "system": "fellowfare", "x": 39.22, "y": 92.1, "size": 8.5 },
+        { "system": "commonweave", "x": 55.96, "y": 92.1, "size": 14.0 },
+        { "system": "living-school", "x": 72.94, "y": 92.1, "size": 9.6 },
+        { "system": "cerbanimo", "x": 86.01, "y": 92.1, "size": 8.9 }
       ],
       "assetType": "image/webp",
       "asset": "/app/assets/cabinets/anarchadia.webp"

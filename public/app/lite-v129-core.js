@@ -1,5 +1,5 @@
 'use strict';
-const VERSION='1.0.30';
+const VERSION='1.0.31';
 const WORKFLOW_KEY='commonweave.cabinet-workflow.v129';
 const SETTINGS_KEY='commonweave.universal-ai.v127';
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -55,7 +55,7 @@ function capabilityCard(capability,system){
   return `<article class="capability-card">
     <small class="kicker">${esc(capability.operation)} · ${esc(capability.sourceStatus)}</small>
     <h3>${esc(capability.label)}</h3><p>${esc(capability.summary)}</p>
-    <div class="meta-row">${consentChip(capability)}<span class="chip">Visual ${esc(capability.visual.status)}</span><span class="chip">Lite ${esc(capability.lite.status)}</span></div>
+    <div class="meta-row">${consentChip(capability)}<span class="chip">Cabinet ${esc(capability.visual.status)}</span><span class="chip">Lite ${esc(capability.lite.status)}</span></div>
     <footer class="card-actions"><button class="primary" type="button" data-capability="${esc(capability.id)}">Open console</button>${capability.lite.sourceRoute?`<button type="button" data-source="${esc(capability.id)}">Working tool</button>`:''}</footer>
   </article>`
 }
@@ -74,10 +74,10 @@ function journeyProgress(){
 function renderJourney(){
   const done=journeyProgress();let foundCurrent=false;
   const steps=ledger.journey.map((id,index)=>{const c=ledger.index.capabilities.get(id);const complete=done.has(id);const current=!complete&&!foundCurrent;if(current)foundCurrent=true;return `<button type="button" class="journey-step ${complete?'is-complete':''} ${current?'is-current':''}" data-jump-capability="${esc(id)}"><i>${complete?'✓':index+1}</i><b>${esc(c?.label||id)}</b><small>${esc(c?.system||'')}</small></button>`}).join('');
-  return `<section class="journey-card"><small class="kicker">GOLDEN PATH · SHARED BY VISUAL AND LITE</small><div class="journey-list">${steps}</div></section>`;
+  return `<section class="journey-card"><small class="kicker">GOLDEN PATH · SHARED BY CABINET MODE AND LITE</small><div class="journey-list">${steps}</div></section>`;
 }
 function renderRoom(system,room,caps){
   const journey=system.id==='commonweave'?renderJourney():'';
-  return `<section class="workstation-hero"><div class="hero-copy"><small class="kicker">${esc(system.name)} · ${esc(room.id)}</small><h2>${esc(room.label)}</h2><p>${esc(room.purpose)}</p><div class="meta-row"><span class="chip">${caps.length} mapped capabilities</span><span class="chip">Same room ID in Visual and Lite</span><span class="chip">${esc(system.interfaceShell?.motif||'cabinet')}</span></div></div><div class="room-preview" style="background-image:url('${esc(room.visualAsset)}')"><span>${esc(room.label)} visual counterpart</span></div></section>${journey}<section class="capability-grid">${caps.length?caps.map(cap=>capabilityCard(cap,system)).join(''):'<div class="empty-state"><h2>Room reserved</h2><p>This canonical room has no capabilities assigned yet.</p></div>'}</section>`;
+  return `<section class="workstation-hero"><div class="hero-copy"><small class="kicker">${esc(system.name)} · ${esc(room.id)}</small><h2>${esc(room.label)}</h2><p>${esc(room.purpose)}</p><div class="meta-row"><span class="chip">${caps.length} mapped capabilities</span><span class="chip">Same room ID in Cabinet Mode and Lite</span><span class="chip">${esc(system.interfaceShell?.motif||'cabinet')}</span></div></div><div class="room-preview room-preview-cabinet"><span>${esc(room.label)} cabinet console</span></div></section>${journey}<section class="capability-grid">${caps.length?caps.map(cap=>capabilityCard(cap,system)).join(''):'<div class="empty-state"><h2>Room reserved</h2><p>This canonical room has no capabilities assigned yet.</p></div>'}</section>`;
 }
 function detailItem(label,value){return `<div class="detail-item"><small>${esc(label)}</small><p>${esc(value||'none')}</p></div>`}

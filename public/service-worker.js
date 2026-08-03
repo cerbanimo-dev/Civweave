@@ -1,6 +1,6 @@
 'use strict';
 const VERSION='1.0.31';
-const CACHE_REVISION='local-first-r20';
+const CACHE_REVISION='cabinet-mode-r22';
 const GUIDE_REVISION='guide-orchestration-r21';
 const CABINET_REVISION='cabinet-home-r22';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}`;
@@ -8,15 +8,21 @@ const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}-${GUIDE_RE
 const MODEL_PREFIX='/app/models/';
 const MODEL_GRAPH_PREFIX='/app/models/all-minilm-l6-v2/onnx/';
 const ONNX_BACKEND_PREFIX='/app/vendor/transformers/wasm/';
+const ARCHIVED_LOCATION_PREFIXES=[
+  '/app/services/living-school/visual-assets/',
+  '/app/services/cerbanimo/assets/visual/',
+  '/app/services/fellowfare/assets/mall/',
+  '/app/services/anarchadia/assets/screens/'
+];
 const CORE=[
   '/loom/','/lite/',
-  '/loom/realm/living-school/','/loom/realm/cerbanimo/','/loom/realm/fellowfare/','/loom/realm/anarchadia/',
-  '/app/cabinet-visual-v141.html','/app/cabinet-visual-v141.css','/app/cabinet-visual-v141.js',
+  '/app/cabinet-mode-v142.html','/app/cabinet-mode-v142.css','/app/cabinet-mode-v142.js','/app/cabinet-mode-overrides-v142.css',
+  '/app/cabinet-visual-v141.html',
   '/app/realm-console-v140.html','/app/realm-console-v140.css','/app/realm-console-v140.js',
   '/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-console-v139.js',
   '/app/cabinet-home-v142.css','/app/cabinet-home-v142.js',
   '/app/manifest.webmanifest','/app/local-first-policy-v131.js',
-  '/app/loom-v128.css','/app/loom-v141.js','/app/realm-v141.js',
+  '/app/loom-v128.css','/app/loom-v141.js',
   '/app/weaveling-hologram-v133.css','/app/guide-contracts-v141.js','/app/assistant-runtime-v141.js','/app/assistant-runtime-v141.css','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/intention-planner-v141.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css',
   '/app/shared/commonweave-parity-runtime.js','/app/shared/commonweave-model-runtime.js','/app/shared/commonweave-parity-ledger.json','/app/shared/cabinet-shells-v129.json',
   '/app/model-settings-v133.css','/app/v130-cabinet-launcher.css','/app/v130-cabinet-launcher.js','/app/pwa-v130.css','/app/pwa-v130.js',
@@ -36,8 +42,13 @@ async function staleWhileRevalidate(request){const cached=await caches.match(req
 self.addEventListener('fetch',event=>{
   const request=event.request;if(!['GET','HEAD'].includes(request.method))return;
   const url=new URL(request.url);if(url.origin!==self.location.origin||url.pathname.startsWith('/api/'))return;
+  if(ARCHIVED_LOCATION_PREFIXES.some(prefix=>url.pathname.startsWith(prefix))){
+    event.respondWith(Promise.resolve(new Response('Location scene archived from this Cabinet Mode release',{status:410,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-commonweave-asset-status':'archived'}})));
+    return;
+  }
   if(request.mode==='navigate'){
-    const fallback=url.pathname.startsWith('/lite')?'/lite/':url.pathname.includes('cabinet-visual')?'/app/cabinet-visual-v141.html':'/loom/';
+    const cabinetPath=url.pathname.includes('cabinet-mode')||url.pathname.includes('cabinet-visual');
+    const fallback=url.pathname.startsWith('/lite')?'/lite/':cabinetPath?'/app/cabinet-mode-v142.html':'/loom/';
     event.respondWith(cacheFirst(request,fallback).catch(()=>caches.match('/offline.html')));return;
   }
   if(url.pathname==='/service-worker.js'){event.respondWith(fetch(request,{cache:'no-store'}));return}

@@ -64,7 +64,7 @@ jobs:
         run: |
           PORT=8788 npm start > commonweave-local.log 2>&1 &
           echo $! > commonweave-local.pid
-      - name: Verify offline campus and canonical visuals
+      - name: Verify offline campus and Cabinet Mode
         run: |
           set -euxo pipefail
           for i in $(seq 1 40); do
@@ -74,31 +74,55 @@ jobs:
           grep -q '1.0.31-local-campus-runtime' local-health.json
           grep -q '"appVersion":"1.0.31"' local-health.json
           curl -fsS http://127.0.0.1:8788/loom/ -o loom.html
+          grep -q '/app/assets/world/town-square-home.webp' loom.html
           grep -q '/app/local-first-policy-v131.js' loom.html
+          grep -q 'data-action="cabinet"' loom.html
           curl -fsS http://127.0.0.1:8788/lite/ -o lite.html
           grep -q '/app/local-first-policy-v131.js' lite.html
+          grep -q 'id="cabinet-link"' lite.html
+          grep -q '>Cabinet mode<' lite.html
           curl -fsS http://127.0.0.1:8788/app/shared/commonweave-parity-runtime.js -o parity-runtime.js
-          grep -q '/app/cabinet-visual-v141.html' parity-runtime.js
+          grep -q '/app/cabinet-mode-v142.html' parity-runtime.js
+          grep -q 'function cabinetUrl' parity-runtime.js
           if grep -q '/loom/realm/' parity-runtime.js; then
-            echo 'Visual route still points to legacy scenes' >&2
+            echo 'Cabinet route still points to legacy scenes' >&2
             exit 1
           fi
-          curl -fsS http://127.0.0.1:8788/app/cabinet-visual-v141.html -o cabinet-visual.html
-          grep -q 'CANONICAL VISUAL MODE' cabinet-visual.html
-          curl -fsS http://127.0.0.1:8788/app/cabinet-visual-v141.css -o cabinet-visual.css
-          grep -q 'aspect-ratio:941/1672' cabinet-visual.css
-          curl -fsS http://127.0.0.1:8788/app/cabinet-visual-v141.js -o cabinet-visual.js
-          grep -q '/app/realm-console-v140.html' cabinet-visual.js
-          grep -q '/app/anarchadia-console-v139.html' cabinet-visual.js
+          curl -fsS http://127.0.0.1:8788/app/cabinet-mode-v142.html -o cabinet-mode.html
+          grep -q 'CABINET MODE' cabinet-mode.html
+          grep -q 'Close Cabinet Mode and return to the Commonweave hub' cabinet-mode.html
+          curl -fsS http://127.0.0.1:8788/app/cabinet-mode-v142.css -o cabinet-mode.css
+          grep -q 'aspect-ratio:941/1672' cabinet-mode.css
+          grep -q 'transform:translate(-50%,-50%)' cabinet-mode.css
+          curl -fsS http://127.0.0.1:8788/app/cabinet-mode-v142.js -o cabinet-mode.js
+          grep -q '/app/realm-console-v140.html' cabinet-mode.js
+          grep -q '/app/anarchadia-console-v139.html' cabinet-mode.js
+          grep -q "function closeCabinet(){location.assign('/loom/')}" cabinet-mode.js
+          if grep -q 'history.back()' cabinet-mode.js; then
+            echo 'Cabinet close control still behaves like Back' >&2
+            exit 1
+          fi
+          curl -fsS http://127.0.0.1:8788/app/cabinet-visual-v141.html -o legacy-visual.html
+          grep -q '/app/cabinet-mode-v142.html' legacy-visual.html
+          grep -q 'location.replace' legacy-visual.html
+          curl -fsS http://127.0.0.1:8788/loom/realm/cerbanimo/ -o legacy-realm.html
+          grep -q '/app/cabinet-mode-v142.html' legacy-realm.html
+          grep -q 'location.replace' legacy-realm.html
           curl -fsS http://127.0.0.1:8788/app/v130-cabinet-launcher.js -o cabinet-launcher.js
-          grep -q 'CommonweaveParity.visualUrl' cabinet-launcher.js
+          grep -q 'CommonweaveParity.cabinetUrl' cabinet-launcher.js
+          grep -q 'Cabinet mode' cabinet-launcher.js
           if grep -q 'showModal' cabinet-launcher.js; then
             echo 'Nested shrunken cabinet modal survived' >&2
             exit 1
           fi
+          curl -fsS http://127.0.0.1:8788/app/shared/cabinet-shells-v129.json -o cabinet-shells.json
+          grep -q '"referencePanels"' cabinet-shells.json
+          grep -q '"cerbanimo"' cabinet-shells.json
+          grep -q '"referenceWidth": 489' cabinet-shells.json
           curl -fsS http://127.0.0.1:8788/service-worker.js -o service-worker.js
-          grep -q "CACHE_REVISION='local-first-r20'" service-worker.js
-          grep -q '/app/cabinet-visual-v141.html' service-worker.js
+          grep -q "CACHE_REVISION='cabinet-mode-r22'" service-worker.js
+          grep -q '/app/cabinet-mode-v142.html' service-worker.js
+          grep -q 'ARCHIVED_LOCATION_PREFIXES' service-worker.js
           if grep -q '/api/boot-log' service-worker.js; then
             echo 'Service worker still submits telemetry' >&2
             exit 1
@@ -115,7 +139,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v131-local-first-evidence
+          name: commonweave-v131-cabinet-mode-evidence
           path: |
             commonweave-gateway.log
             commonweave-local.log
@@ -128,9 +152,12 @@ jobs:
             loom.html
             lite.html
             parity-runtime.js
-            cabinet-visual.html
-            cabinet-visual.css
-            cabinet-visual.js
+            cabinet-mode.html
+            cabinet-mode.css
+            cabinet-mode.js
+            legacy-visual.html
+            legacy-realm.html
             cabinet-launcher.js
+            cabinet-shells.json
             service-worker.js
             local-first-policy.js
