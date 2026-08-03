@@ -59,6 +59,10 @@ replaceRequired(
     || pathname.startsWith('/cabinetonly/')
     || pathname === '/campus'
     || pathname.startsWith('/campus/');
+  if (gatewayRequest && packageInstall && (pathname === '/loom' || pathname === '/loom/' || pathname === '/loom/index.html')) {
+    if (await serveFile(req, res, '/app/loom-v128.html')) return;
+    return json(res, 404, { error: 'The Commonweave hub entry is missing from this device package.' });
+  }
   if (gatewayRequest && packageInstall && (pathname === '/lite' || pathname === '/lite/' || pathname === '/lite/index.html')) {
     if (await serveFile(req, res, '/app/lite-v129.html')) return;
     return json(res, 404, { error: 'The Lite entry is missing from this device package.' });

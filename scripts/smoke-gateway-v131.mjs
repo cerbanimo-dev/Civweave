@@ -32,9 +32,18 @@ try{
     const response=await fetch(origin+route,{cache:'no-store'});
     assert(response.ok,`installer asset ${route} returned ${response.status}`);
   }
-  const packageAsset=await fetch(`${origin}/app/realm-console-v140.html`,{cache:'no-store',headers:{'x-commonweave-package':'install'}});
+  const packageHeaders={'x-commonweave-package':'install'};
+  const packageAsset=await fetch(`${origin}/app/realm-console-v140.html`,{cache:'no-store',headers:packageHeaders});
   assert(packageAsset.ok,`marked device-package fetch returned ${packageAsset.status}`);
   assert((await packageAsset.text()).includes('Commonweave Realm Console'),'marked package fetch returned the wrong document');
+  const packageLoom=await fetch(`${origin}/loom/`,{cache:'no-store',headers:packageHeaders});
+  assert(packageLoom.ok,`marked Loom package route returned ${packageLoom.status}`);
+  const loomText=await packageLoom.text();
+  assert(loomText.includes('/app/assets/world/town-square-home.webp'),'marked Loom package route returned the wrong hub document');
+  const packageLite=await fetch(`${origin}/lite/`,{cache:'no-store',headers:packageHeaders});
+  assert(packageLite.ok,`marked Lite package route returned ${packageLite.status}`);
+  const liteText=await packageLite.text();
+  assert(liteText.includes('id="cabinet-link"'),'marked Lite package route returned the wrong document');
   const telemetry=await fetch(`${origin}/api/boot-log`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:'room-opened'})});
   assert(telemetry.status===204,`boot telemetry returned ${telemetry.status}`);
   const download=await fetch(`${origin}/downloads/Commonweave-Mobile-Install-Kit.zip`,{redirect:'manual'});
@@ -46,6 +55,6 @@ try{
   assert(config.features.includes('install-only-pwa'),'public config omits install-only mode');
   assert(config.features.includes('device-package-distribution'),'public config omits package distribution');
   assert(!config.features.includes('pwa-hosting'),'public config claims a live hosted PWA');
-  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,browserCampus:false,installer:true,markedPackageDistribution:true,ordinaryApplicationRoutes:410,downloadOrigin:'GitHub',gatewayFeatures:config.features},null,2));
+  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,browserCampus:false,installer:true,markedPackageDistribution:true,markedVirtualRoutes:['/loom/','/lite/'],ordinaryApplicationRoutes:410,downloadOrigin:'GitHub',gatewayFeatures:config.features},null,2));
 }catch(error){console.error(output.join(''));throw error}
 finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}
