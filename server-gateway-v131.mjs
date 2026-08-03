@@ -62,7 +62,7 @@ replaceRequired(
   if (gatewayRequest && packageInstall && pathname === '/app/shared/commonweave-parity-ledger.json') {
     try {
       const { gunzipSync } = await import('node:zlib');
-      const encoded = (await Promise.all([1, 2, 3, 4].map(part => fsp.readFile(path.join(PUBLIC_DIR, 'app', 'shared', `commonweave-parity-ledger.part${part}.b64`), 'utf8')))).join('').replace(/\s+/g, '');
+      const encoded = (await Promise.all([1, 2, 3, 4].map(part => fsp.readFile(path.join(PUBLIC_DIR, 'app', 'shared', 'commonweave-parity-ledger.part' + part + '.b64'), 'utf8')))).join('').replace(/\s+/g, '');
       const payload = gunzipSync(Buffer.from(encoded, 'base64'));
       res.writeHead(200, {
         'content-type': 'application/json; charset=utf-8',
