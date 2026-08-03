@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.31';
+const VERSION='1.0.32';
 const SHELLS_URL='/app/shared/cabinet-shells-v129.json';
 const DEFAULT_SYSTEM='commonweave';
 const params=new URLSearchParams(location.search);
@@ -10,7 +10,7 @@ const $=selector=>document.querySelector(selector);
 function systemFor(id){return ledger?.index?.systems?.get?.(id)||ledger?.systems?.find?.(item=>item.id===id)||ledger?.systems?.[0]||null}
 function roomFor(system,id){return system?.rooms?.find?.(room=>room.id===id)||system?.rooms?.[0]||null}
 function shellFor(systemId){const configured=shells?.[systemId]||{};return{...configured,asset:configured.asset||`/app/assets/cabinets/${encodeURIComponent(systemId)}.webp`,screen:configured.screen||{x:11.2,y:22.4,width:77.6,height:60.1,radius:4.8,clip:'inset(0 round 4.8%)'},controls:configured.controls||[]}}
-function consoleUrl(system,room){const query=new URLSearchParams({embed:'1'});if(system?.id)query.set('system',system.id);if(room?.id)query.set('room',room.id);if(params.get('capability'))query.set('capability',params.get('capability'));if(system?.id==='fellowfare')return`/app/fellowfare-cabinet-v144.html?${query}`;return system?.id==='anarchadia'?`/app/anarchadia-console-v139.html?${query}`:`/app/realm-console-v140.html?${query}`}
+function consoleUrl(system,room){const query=new URLSearchParams({embed:'1'});if(system?.id)query.set('system',system.id);if(room?.id)query.set('room',room.id);if(params.get('capability'))query.set('capability',params.get('capability'));if(system?.id==='living-school')return`/app/living-school-cabinet-v150.html?${query}`;if(system?.id==='fellowfare')return`/app/fellowfare-cabinet-v144.html?${query}`;return system?.id==='anarchadia'?`/app/anarchadia-console-v139.html?${query}`:`/app/realm-console-v140.html?${query}`}
 function syncAddress(system,room,{replace=true}={}){const query=new URLSearchParams({system:system.id});if(room?.id)query.set('room',room.id);if(params.get('capability'))query.set('capability',params.get('capability'));query.set('from',params.get('from')||'cabinet');history[replace?'replaceState':'pushState']({system:system.id,room:room?.id||''},'',`/app/cabinet-mode-v142.html?${query}`);for(const key of [...params.keys()])params.delete(key);for(const [key,value] of query)params.set(key,value)}
 function render(systemId=params.get('system')||DEFAULT_SYSTEM,roomId=params.get('room')||''){
   const system=systemFor(systemId);if(!system)throw new Error(`Unknown Commonweave system: ${systemId}`);

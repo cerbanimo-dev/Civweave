@@ -29,7 +29,7 @@ const shells=JSON.parse(shellText);
 
 for(const token of ['CABINET MODE','cabinet-mode-v142.css','cabinet-mode-v142.js','Close Cabinet Mode and return to the Commonweave hub'])assert(html.includes(token),`Cabinet Mode HTML missing ${token}`);
 for(const token of ['left:var(--x)','top:var(--y)','height:var(--size)','transform:translate(-50%,-50%)'])assert(css.includes(token),`Cabinet control CSS missing ${token}`);
-for(const token of ['/app/realm-console-v140.html','/app/anarchadia-console-v139.html','cabinet-shells-v129.json','Cabinet mode could not open'])assert(runtime.includes(token),`Cabinet Mode runtime missing ${token}`);
+for(const token of ['/app/realm-console-v140.html','/app/anarchadia-console-v139.html','/app/living-school-cabinet-v150.html','cabinet-shells-v129.json','Cabinet mode could not open'])assert(runtime.includes(token),`Cabinet Mode runtime missing ${token}`);
 assert(runtime.includes("function closeCabinet(){location.assign('/loom/')}"),'Cabinet × does not close directly to the hub');
 assert(!runtime.includes('history.back()'),'Cabinet × still behaves like browser Back');
 assert(!runtime.includes("from==='lite'"),'Cabinet × still changes destination based on entry route');
@@ -89,9 +89,10 @@ for(const prefix of archivedPrefixes){
 }
 assert(buildScript.includes('assets/world/town-square-home.webp'),'Release guard does not preserve the main hub image');
 assert(buildScript.includes('assets/cabinets/${cabinet}.webp'),'Release guard does not preserve cabinet shells');
-assert(worker.includes("CACHE_REVISION='cabinet-mode-r22'"),'Service worker cache revision was not advanced for Cabinet Mode');
+assert(worker.includes("CACHE_REVISION='cabinet-mode-r23-living-school'"),'Service worker cache revision was not advanced for the Living School Cabinet Mode rebuild');
 assert(worker.includes('/app/cabinet-mode-v142.html'),'Service worker does not precache Cabinet Mode');
+assert(worker.includes('/app/living-school-cabinet-v150.html'),'Service worker does not precache the Living School cabinet runtime');
 assert(!worker.includes("'/loom/realm/living-school/'"),'Service worker still precaches legacy realm scenes');
 assert(localHost.includes('/app/cabinet-mode-v142.html'),'Local server does not allow the Cabinet Mode document');
 
-console.log(JSON.stringify({ok:true,mode:'Cabinet Mode',calibratedPanels:Object.keys(expected),controls:25,closeTarget:'/loom/',hubImage:'retained',locationScenes:'excluded from release payload'},null,2));
+console.log(JSON.stringify({ok:true,mode:'Cabinet Mode',calibratedPanels:Object.keys(expected),controls:25,closeTarget:'/loom/',hubImage:'retained',locationScenes:'excluded from release payload',livingSchool:'dedicated-cabinet-runtime'},null,2));
