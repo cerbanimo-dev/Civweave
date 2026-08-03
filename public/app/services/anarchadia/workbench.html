@@ -11,7 +11,7 @@
   <script>
   (()=>{
     const classic=new Set(['overview','charter','proposals','safeguards','exchange','ai','readiness','constitution','workbench']);
-    const normalize=()=>{const route=(location.hash||'#workbench').slice(1).split('?')[0];if(!classic.has(route))history.replaceState(null,'',`${location.pathname}${location.search}#workbench`)};
+    const normalize=()=>{const route=(location.hash||'#overview').slice(1).split('?')[0];if(!classic.has(route))history.replaceState(null,'',`${location.pathname}${location.search}#overview`)};
     normalize();addEventListener('hashchange',normalize);
     try{
       const worker=navigator.serviceWorker;
@@ -25,6 +25,16 @@
 </head>
 <body>
   <button class="cabinet-workbench-return" id="cabinet-workbench-return" type="button">← Citizen Console</button>
+  <nav class="cabinet-workbench-nav" aria-label="Anarchadia governance workbench">
+    <a href="#overview">Overview</a>
+    <a href="#charter">Charter</a>
+    <a href="#proposals">Proposals</a>
+    <a href="#safeguards">Safeguards</a>
+    <a href="#exchange">Exchange</a>
+    <a href="#ai">AI tools</a>
+    <a href="#readiness">Readiness</a>
+    <a href="#constitution">Constitution</a>
+  </nav>
   <section class="cabinet-workbench-launch" id="cabinet-workbench-launch" hidden aria-labelledby="cabinet-workbench-title">
     <small>ANARCHADIA · LOCAL GOVERNANCE ENGINE</small>
     <h1 id="cabinet-workbench-title">Open the civic workbench</h1>
@@ -42,16 +52,21 @@
   <script type="module">
     import { loadWorkspace, saveWorkspace } from './src/store.js';
     import { emptyState, syntheticFixture } from './src/domain.js';
+    import { loadCabinetWorkbench } from './cabinet-workbench-loader-v144.js';
 
     const launch=document.querySelector('#cabinet-workbench-launch');
     const status=document.querySelector('#cabinet-workbench-status');
     let booted=false;
-    async function boot(){if(booted)return;booted=true;launch?.remove();await import('./src/app.js')}
+    async function boot(){if(booted)return;booted=true;launch?.remove();await loadCabinetWorkbench()}
     async function start(mode){
       try{
         status.textContent='Preparing the local workspace…';
         if(mode==='blank')await saveWorkspace(emptyState({communityName:'Local Anarchadia cabinet',mode:'candidate'}));
         if(mode==='fixture')await saveWorkspace(syntheticFixture());
+        if(mode==='restore'){
+          await saveWorkspace(emptyState({communityName:'Restored Anarchadia workspace',mode:'candidate'}));
+          location.hash='#exchange';
+        }
         await boot();
       }catch(error){status.textContent=`The workbench could not open: ${error.message}`}
     }
