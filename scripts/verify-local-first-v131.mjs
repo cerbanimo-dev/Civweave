@@ -11,6 +11,7 @@ const packageJson=JSON.parse(pkg);
 assert(packageJson.scripts.start==='node server-gateway-v131.mjs','Render start command is not the lightweight gateway');
 assert(packageJson.scripts['start:local']==='node server-local-v131.mjs','local campus start command is not the aligned local entry');
 assert(localHost.includes("const VERSION = '1.0.31';")&&localHost.includes("const BUILD = '1.0.31-local-campus-runtime';"),'local host does not align version and build markers');
+for(const token of ['/app/cabinet-visual-v141.html','/app/realm-console-v140.html',"'canonical visual HTML allowlist'"])assert(localHost.includes(token),`local host does not allow ${token}`);
 assert(!packageJson.scripts.prestart.includes('ensure-minilm-model'),'Render startup still materializes MiniLM');
 for(const token of ["appUrl: null","localInstallRequired: true","pathname === '/api/boot-log'","res.writeHead(204","localSurface","return json(res, 410","COMMONWEAVE_RELEASE_URL"])assert(gateway.includes(token),`gateway missing ${token}`);
 assert(gateway.includes("const installKitSha256 = '';")&&gateway.includes('const installKitSize = 0;'),'gateway does not replace install-kit hashing with zero-cost metadata');
