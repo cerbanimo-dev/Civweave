@@ -52,9 +52,14 @@ try{
   const packageLedger=await fetch(`${origin}/app/shared/commonweave-parity-ledger.json`,{cache:'no-store',headers:packageHeaders});
   assert(packageLedger.ok,`marked parity ledger route returned ${packageLedger.status}`);
   assert(packageLedger.headers.get('x-commonweave-device-package')==='parity-ledger','parity ledger response is missing its package marker');
+  assert(packageLedger.headers.get('x-commonweave-cabinet-shells'),'parity ledger response is missing its cabinet-shell hydration marker');
   const ledger=await packageLedger.json();
   assert(Array.isArray(ledger.systems)&&ledger.systems.length>=5,'reconstructed parity ledger is missing canonical systems');
   assert(ledger.systems.some(system=>system.id==='commonweave'),'reconstructed parity ledger is missing Commonweave');
+  for(const system of ledger.systems){
+    assert(system.interfaceShell?.asset,`hydrated parity ledger is missing ${system.id} cabinet asset`);
+    assert(system.interfaceShell?.screen,`hydrated parity ledger is missing ${system.id} cabinet screen rectangle`);
+  }
   const packageLoom=await fetch(`${origin}/loom/`,{cache:'no-store',headers:packageHeaders});
   assert(packageLoom.ok,`marked Loom package route returned ${packageLoom.status}`);
   const loomText=await packageLoom.text();
@@ -74,6 +79,6 @@ try{
   assert(config.features.includes('install-only-pwa'),'public config omits install-only mode');
   assert(config.features.includes('device-package-distribution'),'public config omits package distribution');
   assert(!config.features.includes('pwa-hosting'),'public config claims a live hosted PWA');
-  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,browserCampus:false,installer:true,markedPackageDistribution:true,requiredAssetCount:requiredAssets.length,markedVirtualRoutes:['/app/shared/commonweave-parity-ledger.json','/loom/','/lite/'],ordinaryApplicationRoutes:410,downloadOrigin:'GitHub',gatewayFeatures:config.features},null,2));
+  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,browserCampus:false,installer:true,markedPackageDistribution:true,requiredAssetCount:requiredAssets.length,cabinetShells:ledger.systems.length,markedVirtualRoutes:['/app/shared/commonweave-parity-ledger.json','/loom/','/lite/'],ordinaryApplicationRoutes:410,downloadOrigin:'GitHub',gatewayFeatures:config.features},null,2));
 }catch(error){console.error(output.join(''));throw error}
 finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}
