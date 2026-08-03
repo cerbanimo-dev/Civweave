@@ -48,6 +48,16 @@ jobs:
           data['scripts']['check']=check
           p.write_text(json.dumps(data,indent=2)+'\n')
 
+          p=Path('public/app/realm-v128.html')
+          s=p.read_text()
+          css='  <link rel="stylesheet" href="/app/intention-ui-v138.css?v=weave-r1">\n'
+          if css not in s:
+              s=s.replace('  <link rel="stylesheet" href="/app/model-settings-v133.css?v=reflex-r1">\n','  <link rel="stylesheet" href="/app/model-settings-v133.css?v=reflex-r1">\n'+css,1)
+          script='  <script src="/app/intention-ui-v138.js?v=weave-r1" defer></script>\n'
+          if script not in s:
+              s=s.replace('  <script src="/app/realm-v128.js?v=1.0.30" defer></script>\n','  <script src="/app/realm-v128.js?v=1.0.30" defer></script>\n'+script,1)
+          p.write_text(s)
+
           p=Path('public/service-worker.js')
           s=p.read_text()
           marker="const CACHE_REVISION='minilm-runtime-r19';\n"
@@ -75,7 +85,7 @@ jobs:
         run: |
           git config user.name commonweave-release-bot
           git config user.email commonweave-release-bot@users.noreply.github.com
-          git add package.json public/service-worker.js public/app/realm-console-v140.html public/app/realm-console-v140.css public/app/realm-console-v140.js public/app/v130-cabinet-launcher.css public/app/v130-cabinet-launcher.js scripts/verify-realm-consoles-v140.mjs
+          git add package.json public/service-worker.js public/app/realm-v128.html public/app/realm-console-v140.html public/app/realm-console-v140.css public/app/realm-console-v140.js public/app/v130-cabinet-launcher.css public/app/v130-cabinet-launcher.js scripts/verify-realm-consoles-v140.mjs
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Apply realm cabinet overhaul to current main"
           git push origin HEAD:feature/realm-cabinet-consoles-v140-current
