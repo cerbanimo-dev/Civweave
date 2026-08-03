@@ -36,7 +36,9 @@ assert(!launcher.includes('/api/boot-log'),'cabinet launcher still submits telem
 assert(!sw.includes('/api/boot-log'),'service worker still submits telemetry');
 assert(!sw.includes('networkFirst'),'service worker still forces cabinet traffic through the network');
 assert(!sw.includes('binaryStreamFirst'),'service worker still bypasses cached MiniLM graphs');
-for(const token of ['/app/cabinet-visual-v141.html','/app/local-first-policy-v131.js',"CACHE_REVISION='local-first-r20'"])assert(sw.includes(token),`service worker missing ${token}`);
+for(const token of ['/app/cabinet-visual-v141.html','/app/local-first-policy-v131.js',"CACHE_REVISION='local-first-r20'","GUIDE_REVISION='guide-orchestration-r21'"])assert(sw.includes(token),`service worker missing ${token}`);
 for(const [name,html] of [['loom',loomHtml],['realm',realmHtml],['lite',liteHtml]])assert(html.includes('/app/local-first-policy-v131.js'),`${name} does not load the local-first policy before its runtimes`);
-assert((realmHtml.match(/intention-planner-v138\.js/g)||[]).length===1,'realm loads the intention planner more than once');
-console.log(JSON.stringify({ok:true,version:packageJson.version,defaultStart:'local campus off Render; gateway on Render',renderRole:'health, releases, and optional federation only',localRole:'campus, cabinets, models, rooms, state, and diagnostics',canonicalVisual:'/app/cabinet-visual-v141.html',miniLM:'user device only',telemetry:'local diagnostics only',windowsLineEndings:'supported'},null,2));
+assert((realmHtml.match(/intention-planner-v141\.js/g)||[]).length===1,'realm loads the active intention planner more than once');
+assert(!realmHtml.includes('/app/intention-planner-v138.js'),'realm still loads the superseded intention planner');
+for(const token of ['/app/assistant-runtime-v141.js','/app/guide-contracts-v141.js','/app/realm-v141.js'])assert(realmHtml.includes(token),`realm does not load ${token}`);
+console.log(JSON.stringify({ok:true,version:packageJson.version,defaultStart:'local campus off Render; gateway on Render',renderRole:'health, releases, and optional federation only',localRole:'campus, cabinets, models, rooms, state, and diagnostics',canonicalVisual:'/app/cabinet-visual-v141.html',miniLM:'user device only',telemetry:'local diagnostics only',windowsLineEndings:'supported',guideRuntime:'v141'},null,2));
