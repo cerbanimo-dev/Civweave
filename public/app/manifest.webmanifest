@@ -1,9 +1,9 @@
 {
   "name": "Commonweave Pocket Campus",
   "short_name": "Commonweave",
-  "description": "An offline-first local Commonweave campus with optional hub, trade, federation, and update connections.",
+  "description": "A complete offline Commonweave device package with optional local mesh and community exchange.",
   "id": "/commonweave-local",
-  "start_url": "/loom/?installed=1",
+  "start_url": "/app/installed-entry-v146.html?target=hub",
   "scope": "/",
   "display": "standalone",
   "display_override": [
@@ -14,66 +14,20 @@
   "background_color": "#04131d",
   "theme_color": "#04131d",
   "orientation": "any",
-  "categories": [
-    "productivity",
-    "education",
-    "social"
-  ],
+  "categories": ["productivity", "education", "social"],
   "icons": [
-    {
-      "src": "/app/logos/commonweave-icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/app/logos/commonweave-icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/app/logos/commonweave-icon-maskable-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/app/logos/commonweave-icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    {"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/app/logos/commonweave-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"/app/logos/commonweave-icon-maskable-192.png","sizes":"192x192","type":"image/png","purpose":"maskable"},
+    {"src":"/app/logos/commonweave-icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ],
   "screenshots": [
-    {
-      "src": "/app/logos/commonweave-campus.webp",
-      "sizes": "941x1672",
-      "type": "image/webp",
-      "form_factor": "narrow",
-      "label": "Commonweave campus"
-    }
+    {"src":"/app/logos/commonweave-campus.webp","sizes":"941x1672","type":"image/webp","form_factor":"narrow","label":"Commonweave campus"}
   ],
   "shortcuts": [
-    {
-      "name": "Open the Quad",
-      "url": "/loom/",
-      "icons": [
-        {
-          "src": "/app/logos/commonweave-icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Open Workstations",
-      "url": "/lite/?system=commonweave",
-      "icons": [
-        {
-          "src": "/app/logos/commonweave-icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    }
+    {"name":"Open the Quad","url":"/app/installed-entry-v146.html?target=hub","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Open Cabinet Mode","url":"/app/installed-entry-v146.html?target=cabinets","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Open Cabinet Only","url":"/app/installed-entry-v146.html?target=cabinetonly","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Open Workstations","url":"/app/installed-entry-v146.html?target=lite","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]}
   ]
 }
