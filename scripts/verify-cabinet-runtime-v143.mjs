@@ -23,7 +23,8 @@ assert(count(packageRaw,/"check"\s*:/g)===1,'package.json must contain exactly o
 assert(pkg.scripts['check:syntax'].includes('cabinet-surfaces-v143.js')&&pkg.scripts['check:syntax'].includes('sharing-library-v143.js'),'Syntax suite omits v143 cabinet runtimes.');
 assert(pkg.scripts.check.includes('verify-cabinet-mode-v142.mjs')&&pkg.scripts.check.includes('verify-cabinet-home-v142.mjs')&&pkg.scripts.check.includes('verify-cabinet-runtime-v143.mjs'),'Merged cabinet regression suites are not all active.');
 
-for(const token of ["DEVICE_REVISION='device-package-r23'",'DEVICE_REQUIRED','model_q4f16.onnx','model_quantized.onnx','ort-wasm-simd-threaded.jsep.wasm','cabinet-surfaces-v143.js','sharing-library-v143.js','async function deviceOnly'])assert(worker.includes(token),`Device package worker missing ${token}`);
+assert(/const DEVICE_REVISION='device-package-r\d+-[a-z0-9-]+';/.test(worker),'Device package worker is missing a versioned DEVICE_REVISION.');
+for(const token of ['DEVICE_REQUIRED','model_q4f16.onnx','model_quantized.onnx','ort-wasm-simd-threaded.jsep.wasm','cabinet-surfaces-v143.js','sharing-library-v143.js','async function deviceOnly'])assert(worker.includes(token),`Device package worker missing ${token}`);
 assert(worker.includes("if(url.pathname.startsWith('/api/'))return"),'Shared APIs must bypass the device asset cache.');
 assert(worker.includes("url.pathname.startsWith('/app/')")&&worker.includes('event.respondWith(deviceOnly(request))'),'Application assets must be cache-only during ordinary use.');
 assert(!worker.includes('staleWhileRevalidate'),'Installed application assets still revalidate against the node.');
