@@ -1,6 +1,7 @@
 (()=>{
 'use strict';
 const LEDGER_URL='/app/shared/commonweave-parity-ledger.json';
+const LEDGER_VERSION='1.0.31';
 let promise=null;
 const parse=(value,fallback)=>{try{return JSON.parse(value)}catch{return fallback}};
 function index(ledger){
@@ -12,7 +13,7 @@ function index(ledger){
 }
 async function load({force=false}={}){
   if(!promise||force){
-    promise=fetch(`${LEDGER_URL}?v=1.0.29`,{cache:'no-store'}).then(async response=>{
+    promise=fetch(`${LEDGER_URL}?v=${LEDGER_VERSION}`,{cache:force?'reload':'force-cache'}).then(async response=>{
       if(!response.ok)throw new Error(`Parity ledger returned ${response.status}`);
       const ledger=await response.json();
       ledger.index=index(ledger);
@@ -56,11 +57,10 @@ function liteUrl({systemId,roomId,capabilityId}={}){
   const query=new URLSearchParams();if(systemId)query.set('system',systemId);if(roomId)query.set('room',roomId);if(capabilityId)query.set('capability',capabilityId);
   return `/lite/${query.size?`?${query}`:''}`;
 }
-function visualUrl({systemId,roomId,capabilityId}={}){
-  if(!systemId||systemId==='commonweave')return '/loom/';
-  const query=new URLSearchParams();if(roomId)query.set('room',roomId);if(capabilityId)query.set('capability',capabilityId);
-  return `/loom/realm/${encodeURIComponent(systemId)}/${query.size?`?${query}`:''}`;
+function visualUrl({systemId,roomId,capabilityId,from='lite'}={}){
+  const query=new URLSearchParams({system:systemId||'commonweave',from});if(roomId)query.set('room',roomId);if(capabilityId)query.set('capability',capabilityId);
+  return `/app/cabinet-visual-v141.html?${query}`;
 }
 function sourceUrl(capability){return capability?.lite?.sourceRoute||null}
-window.CommonweaveParity={LEDGER_URL,load,validate,resolve,routeState,liteUrl,visualUrl,sourceUrl,parse};
+window.CommonweaveParity={LEDGER_URL,LEDGER_VERSION,load,validate,resolve,routeState,liteUrl,visualUrl,sourceUrl,parse};
 })();

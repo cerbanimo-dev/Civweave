@@ -7,6 +7,8 @@ const source=path.join(root,'node_modules','@huggingface','transformers','dist')
 const destination=path.join(root,'public','app','vendor','transformers');
 const backendDestination=path.join(destination,'wasm');
 const soft=process.argv.includes('--soft');
+const force=process.argv.includes('--force');
+const renderBuild=process.env.RENDER==='true';
 
 async function exists(target){try{await fsp.access(target);return true}catch{return false}}
 async function walk(directory){
@@ -20,6 +22,10 @@ async function walk(directory){
 }
 
 async function main(){
+  if(renderBuild&&!force){
+    console.log('[Commonweave] Render gateway build: skipping device-side Transformers.js staging.');
+    return;
+  }
   if(!await exists(source)){
     const message='@huggingface/transformers is not installed. Run npm install before starting the onboard model.';
     if(soft){console.warn(`[Commonweave] ${message}`);return}
