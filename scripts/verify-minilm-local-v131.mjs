@@ -15,7 +15,7 @@ assert(manifest.behavior?.lexicalFallbackAlwaysAvailable===true,'lexical fallbac
 assert(manifest.behavior?.maximumInteractiveSemanticWaitMs===350,'interactive semantic wait exceeds contract');
 assert(pkg.scripts?.['prestart:local']?.includes('ensure-minilm-model.mjs'),'local setup does not materialize MiniLM when explicitly requested');
 assert(!pkg.scripts?.prestart?.includes('ensure-minilm-model.mjs'),'public gateway npm prestart directly materializes MiniLM');
-assert(ensureModel.includes('verifyHashes=checkOnly')&&ensureModel.includes("'(fast size check)'"),'normal model readiness still hashes both ONNX graphs');
+assert(ensureModel.includes('verifyHashes=checkOnly')&&ensureModel.includes("' (fast size check)'"),'normal model readiness still hashes both ONNX graphs');
 assert(ensureModel.includes('if(spec.sha&&verifyHashes')&&ensureModel.includes('if(spec.sha&&(await hash(temp))!==spec.sha'),'release checks and downloads no longer verify model integrity');
 for(const token of ["pipeline('feature-extraction'","['wasm','q8']","['webgpu','q4f16']",'verifyWasm','fromDevicePackage','caches.match'])assert(worker.includes(token),`MiniLM worker missing ${token}`);
 for(const token of ['BODY_PROBE_LIMIT=2_000_000','caches.match',"source:'installed-device-package'",'probe:\'cache-storage\''])assert(adapter.includes(token),`MiniLM adapter missing ${token}`);
