@@ -16,6 +16,6 @@ for(const token of ['function openComposer','function submitThread','function op
 for(const token of ['createAgreementFromProposal','addMilestone','addEvidence','recordSettlement','openRepair','resolveRepair','addReview'])assert(ledger.includes(token),`Ledger lost ${token}`);
 for(const token of ['deterministicDraft','deterministicMatches','deterministicReview','deterministicAssembly'])assert(ai.includes(token),`Loom lost ${token}`);
 for(const token of ['CORE_PATCH_FILES','/app/fellowfare-cabinet-v144.html','/app/fellowfare-cabinet-v144.css','/app/fellowfare-cabinet-v144.js','/app/services/fellowfare/cabinet-embed.css','patchInstalledCore'])assert(worker.includes(token),`Installed update path is missing ${token}`);
-assert(family.includes("fellowfare:{label:'FellowFare',guide:'Rook'")&&loader.includes('CommonweaveGuideChatV153'),'Rook/family integration missing.');
+assert(/fellowfare:\{[^}]*label:'FellowFare'[^}]*guide:'Rook'/.test(family)&&loader.includes('CommonweaveGuideChatV153'),'Rook/family integration missing.');
 new Function(outerJs);new Function(worker);
 console.log('FellowFare verification passed with a scrollable market, inline Rook exchange desk, and installed-core patch delivery.');
