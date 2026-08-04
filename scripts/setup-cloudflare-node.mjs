@@ -75,7 +75,7 @@ function includesNamedResource(output, name) {
     const parsed = JSON.parse(output);
     const items = Array.isArray(parsed) ? parsed : parsed.result ?? parsed.projects ?? [];
     return items.some(
-      (item) => item?.name === name || item?.bucket_name === name || item?.title === name,
+      (item) => item?.name === name || item?.title === name,
     );
   } catch {
     return output.includes(name);
@@ -104,10 +104,12 @@ console.log("\n1/5 Checking Cloudflare authentication...");
 runWrangler(wrangler, ["whoami"]);
 
 console.log("\n2/5 Ensuring the R2 bucket exists...");
-const buckets = runWrangler(wrangler, ["r2", "bucket", "list", "--json"], {
-  capture: true,
-});
-if (!includesNamedResource(buckets.output, bucketName)) {
+const bucketInfo = runWrangler(
+  wrangler,
+  ["r2", "bucket", "info", bucketName, "--json"],
+  { capture: true, allowFailure: true },
+);
+if (bucketInfo.status !== 0) {
   runWrangler(wrangler, ["r2", "bucket", "create", bucketName]);
 } else {
   console.log(`R2 bucket ${bucketName} already exists.`);
