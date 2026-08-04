@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-commonweave-system="commonweave" data-build="working-campus-v156">
+<html lang="en" data-commonweave-system="commonweave" data-build="working-campus-v157-unified-settings">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -9,7 +9,31 @@
 <link rel="stylesheet" href="/app/working-campus-v156.css?v=1">
 </head>
 <body>
-<main class="app"><header class="top"><button class="brand" id="brand-home" style="border:0;background:transparent;color:inherit;text-align:left"><img src="/app/logos/commonweave.webp" alt=""><span><small>LOCAL WORKING CAMPUS</small><b>Commonweave</b></span></button><button class="pill active" id="guided-mode">Guided rails</button><button class="pill" id="roam-mode">Free roam</button><button class="pill" id="settings-button">AI settings</button></header><section class="campus" aria-label="Commonweave realms"><button class="realm-node" data-realm="living-school" style="--accent:var(--living)"><b class="badge" data-badge="living-school" hidden></b><img src="/app/assets/ai/moss.png" alt=""><small>Moss</small><strong>Living School</strong><span>Learn what the intention requires.</span></button><button class="realm-node" data-realm="cerbanimo" style="--accent:var(--cerb)"><b class="badge" data-badge="cerbanimo" hidden></b><img src="/app/assets/ai/kamiya.png" alt=""><small>Kamiya</small><strong>Cerbanimo</strong><span>Turn the route into skilled work.</span></button><button class="realm-node" data-realm="fellowfare" style="--accent:var(--fare)"><b class="badge" data-badge="fellowfare" hidden></b><img src="/app/assets/ai/rook.png" alt=""><small>Rook</small><strong>FellowFare</strong><span>Find materials, services, and help.</span></button><button class="realm-node" data-realm="anarchadia" style="--accent:var(--an)"><b class="badge" data-badge="anarchadia" hidden></b><img src="/app/assets/ai/merlin.png" alt=""><small>Merlin</small><strong>Anarchadia</strong><span>Store consent, roles, and review.</span></button></section><section class="main"><aside class="guide"><div class="guide-head"><img src="/app/assets/ai/weaveling.png" alt="Weaveling"><div><small class="muted">CENTRAL MIRROR</small><h1>Weaveling</h1><span class="muted">Wish → weave → realms</span></div></div><div class="conversation" id="conversation"></div><div class="guide-foot"><button class="btn" id="model-chip">Deterministic</button><button class="btn" id="export-button">Export</button></div></aside><section class="work"><header class="work-head"><b id="view-title">Your weave</b><span class="muted" id="state-label">Local draft</span></header><div class="workspace" id="workspace"></div></section></section></main><nav class="bottom"><button class="active" data-view="weave">Weave</button><button data-view="progress">Progress</button><button data-view="library">Library</button><button data-view="campus">Campus</button></nav><dialog id="settings"><h2>Shared AI route</h2><p class="muted">Gemini is prefilled for conversation. Antigravity can be tested separately for agentic work. Secrets remain in this session only.</p><div class="field-grid"><div class="field"><label>Route</label><select id="model-route"><option value="deterministic">Deterministic local</option><option value="gemini">Google Gemini</option><option value="browser">Browser model</option><option value="local-api">Local API / Ollama</option><option value="gguf">GGUF bridge</option><option value="manual">Manual handoff</option><option value="hosted">Hosted allowance</option></select></div><div class="field"><label>Model</label><input id="model-name" placeholder="gemini-3.5-flash-lite"></div><div class="field full"><label>Endpoint</label><input id="model-endpoint" placeholder="https://generativelanguage.googleapis.com/v1beta"></div><div class="field full"><label>API key or bearer token</label><input id="model-key" type="password" autocomplete="off" placeholder="Session-only Gemini key"></div><div class="field full" id="gemini-options"><label><input id="remote-consent" type="checkbox"> Allow prompts to leave this device for Gemini.</label><label><input id="agentic-enabled" type="checkbox"> Use Antigravity for agentic work.</label><label>Agentic model<input id="agentic-model" value="antigravity" readonly></label></div></div><div class="actions"><button class="btn" id="test-gemini" type="button">Test Gemini</button><button class="btn" id="test-antigravity" type="button">Test Antigravity</button></div><output class="muted" id="model-test-status" role="status">No provider test has run.</output><div class="actions"><button class="btn" id="close-settings">Cancel</button><button class="btn primary" id="save-settings">Save settings</button></div></dialog><div class="toast" id="toast" hidden></div>
-<script src="/app/working-campus-v156.js?v=1"></script>
+<main class="app">
+  <header class="top">
+    <button class="brand" id="brand-home" style="border:0;background:transparent;color:inherit;text-align:left"><img src="/app/logos/commonweave.webp" alt=""><span><small>LOCAL WORKING CAMPUS</small><b>Commonweave</b></span></button>
+    <button class="pill active" id="guided-mode">Guided rails</button>
+    <button class="pill" id="roam-mode">Free roam</button>
+    <button class="pill" id="settings-button">AI settings</button>
+  </header>
+  <section class="campus" aria-label="Commonweave realms">
+    <button class="realm-node" data-realm="living-school" style="--accent:var(--living)"><b class="badge" data-badge="living-school" hidden></b><img src="/app/assets/ai/moss.png" alt=""><small>Moss</small><strong>Living School</strong><span>Learn what the intention requires.</span></button>
+    <button class="realm-node" data-realm="cerbanimo" style="--accent:var(--cerb)"><b class="badge" data-badge="cerbanimo" hidden></b><img src="/app/assets/ai/kamiya.png" alt=""><small>Kamiya</small><strong>Cerbanimo</strong><span>Turn the route into skilled work.</span></button>
+    <button class="realm-node" data-realm="fellowfare" style="--accent:var(--fare)"><b class="badge" data-badge="fellowfare" hidden></b><img src="/app/assets/ai/rook.png" alt=""><small>Rook</small><strong>FellowFare</strong><span>Find materials, services, and help.</span></button>
+    <button class="realm-node" data-realm="anarchadia" style="--accent:var(--an)"><b class="badge" data-badge="anarchadia" hidden></b><img src="/app/assets/ai/merlin.png" alt=""><small>Merlin</small><strong>Anarchadia</strong><span>Store consent, roles, and review.</span></button>
+  </section>
+  <section class="main">
+    <aside class="guide">
+      <div class="guide-head"><img src="/app/assets/ai/weaveling.png" alt="Weaveling"><div><small class="muted">CENTRAL MIRROR</small><h1>Weaveling</h1><span class="muted">Wish → weave → realms</span></div></div>
+      <div class="conversation" id="conversation"></div>
+      <div class="guide-foot"><button class="btn" id="model-chip">Model settings</button><button class="btn" id="export-button">Export</button></div>
+    </aside>
+    <section class="work"><header class="work-head"><b id="view-title">Your weave</b><span class="muted" id="state-label">Local draft</span></header><div class="workspace" id="workspace"></div></section>
+  </section>
+</main>
+<nav class="bottom"><button class="active" data-view="weave">Weave</button><button data-view="progress">Progress</button><button data-view="library">Library</button><button data-view="campus">Campus</button></nav>
+<div class="toast" id="toast" hidden></div>
+<script src="/app/family-ai-loader-v105.js?v=unified-settings-r1"></script>
+<script src="/app/working-campus-v156.js?v=2"></script>
 </body>
 </html>
