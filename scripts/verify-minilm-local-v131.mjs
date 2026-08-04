@@ -19,7 +19,7 @@ for(const token of ["pipeline('feature-extraction'","['wasm','q8']","['webgpu','
 assert(!worker.includes("cache:'reload'")&&!worker.includes("headers:{range:"),'MiniLM worker still probes the node during ordinary use');
 for(const token of ['BODY_PROBE_LIMIT=2_000_000','caches.match',"source:'installed-device-package'",'probe:\'cache-storage\''])assert(adapter.includes(token),`MiniLM adapter missing ${token}`);
 assert(!adapter.includes("cache:'reload'")&&!adapter.includes("method:'HEAD'"),'MiniLM adapter still creates network probes');
-assert(/^cabinet-mode-r\d+(?:-[a-z0-9-]+)?$/i.test(cacheRevision),'service worker is not on a versioned Cabinet Mode cache policy');
+assert(/^(?:cabinet-mode|fullscreen-family)-r\d+(?:-[a-z0-9-]+)?$/i.test(cacheRevision),'service worker is not on a versioned Cabinet Mode/full-screen family cache policy');
 assert(/^device-package-r\d+(?:-[a-z0-9-]+)?$/i.test(deviceRevision),'service worker is not on the device-package policy');
 for(const token of ['DEVICE_REQUIRED','model_q4f16.onnx','model_quantized.onnx','ort-wasm-simd-threaded.jsep.wasm','async function deviceOnly'])assert(sw.includes(token),`device package worker missing ${token}`);
 assert(!sw.includes('binaryStreamFirst')&&!sw.includes('staleWhileRevalidate'),'model assets still bypass or revalidate beyond the device package');
