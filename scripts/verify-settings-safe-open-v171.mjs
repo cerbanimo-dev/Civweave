@@ -35,8 +35,9 @@ for(const token of [
   "controller.postMessage({type:'GET_MODEL_PACKAGE_STATUS'}",
   'async function ensureReflex()',
   "REFLEX_SCRIPT='/app/minilm-reflex-runtime-v138.js",
+  'installDormantReflexStatus();',
   "mark('ready')",
-  'CommonweaveModelSettingsControllerV173={version:VERSION,open,ensure,ensureReflex,modelPackageStatus,settingsBoundary,facade}'
+  'CommonweaveModelSettingsControllerV173={version:VERSION,open,ensure,ensureReflex,modelPackageStatus,settingsBoundary,facade:reflexStatusProxy,settingsFacade:facade}'
 ])assert(controller.includes(token),`Direct settings controller missing ${token}`);
 assert(!controller.includes("addEventListener('click'"),'The direct settings controller must not intercept application clicks.');
 assert(!controller.includes('CommonweaveFamilyAILoaderV105.openSettings='),'The settings controller still patches the chat loader.');
@@ -53,6 +54,7 @@ for(const token of [
 assert(!loader.includes('/app/minilm-model-settings-v138.js'),'Chat loader still owns the settings interface.');
 assert(!loader.includes('/app/model-settings-v133.css'),'Chat loader still owns settings styling.');
 assert(loader.includes('/app/minilm-reflex-runtime-v138.js'),'Chat lost its explicit semantic runtime dependency.');
+assert(loader.includes('CommonweaveModelSettingsControllerV173?.facade'),'Chat does not distinguish the dormant reflex status proxy from the real semantic runtime.');
 
 for(const token of [
   "VERSION='1.0.4-direct-settings-v173'",
@@ -94,7 +96,7 @@ for(const token of [
 const extensionBlock=worker.slice(worker.indexOf('const EXTENSION_FILES=['),worker.indexOf('const BOUNDARY='));
 assert(!extensionBlock.includes('commonweave-settings-safe-open'),'The new extension cache still installs the retired settings interceptor.');
 
-for(const token of ['name="apiKey"','data-test-gemini','data-test-agentic','data-package-state','data-run-reflex'])assert(settingsRuntime.includes(token),`Unified settings lost ${token}`);
+for(const token of ['name="apiKey"','data-test-gemini','data-test-antigravity','data-package-state','data-benchmark'])assert(settingsRuntime.includes(token),`Unified settings lost ${token}`);
 
 console.log(JSON.stringify({
   ok:true,
