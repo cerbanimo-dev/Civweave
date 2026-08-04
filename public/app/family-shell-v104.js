@@ -45,7 +45,8 @@ function build(){
   seedVisits();markVisited(current);
   document.documentElement.classList.add('cwf104-active');
   document.documentElement.dataset.commonweaveSystem=current;
-  document.documentElement.dataset.familyShell='sol-r1';
+  document.documentElement.dataset.familyShell='direct';
+  document.documentElement.dataset.visualShell='sol-r1';
   let head=document.getElementById('cwf104-head');
   if(!head){head=document.createElement('header');head.id='cwf104-head';head.className='cwf104-head';document.body.append(head)}
   head.innerHTML=`<div class="cwf104-realm-mark" aria-hidden="true"><img src="${item.artifact}" alt=""></div><div class="cwf104-title"><small>${esc(item.place)}</small><b>${esc(item.label)}</b></div><div class="cwf104-head-state"><i class="cwf104-dot"></i><span data-cwf-current-state>Ready</span></div><button class="cwf104-chat" type="button" data-cwf-chat aria-label="Talk to Weaveling from ${esc(item.label)}"><img src="${SYSTEMS.commonweave.artifact}" alt=""></button><button class="cwf104-settings" type="button" data-cwf-settings aria-label="Open Commonweave AI settings"><span aria-hidden="true">⚙</span></button>`;
