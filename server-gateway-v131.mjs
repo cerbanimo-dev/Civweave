@@ -5,8 +5,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(rootDir, 'server.mjs');
 const runtimePath = path.join(rootDir, '.commonweave-gateway-v131.runtime.mjs');
-const VERSION = '1.0.32';
-const BUILD = '1.0.32-install-only-package-gateway';
+const VERSION = '1.0.4';
+const BUILD = '1.0.4-install-only-fullscreen-family-gateway';
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 
 function replaceRequired(before, after, label) {
@@ -28,7 +28,7 @@ replaceRequired(
 );
 replaceRequired(
   "    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Commonweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Commonweave host-node and offline PWA release.'",
-  "    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: COMMONWEAVE_SOURCE_URL,\n    downloadUrl: COMMONWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin is an install-only PWA and package distributor. Commonweave runs from the installed device package.'",
+  "    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: COMMONWEAVE_SOURCE_URL,\n    downloadUrl: COMMONWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin distributes the lean v1.0.4 software package. Commonweave runs from the installed full-screen family.'",
   'release packet hosting fields'
 );
 replaceRequired(
@@ -65,37 +65,27 @@ replaceRequired(
       const sharedDir = path.join(PUBLIC_DIR, 'app', 'shared');
       const encoded = (await Promise.all([1, 2, 3, 4].map(part => fsp.readFile(path.join(sharedDir, 'commonweave-parity-ledger.part' + part + '.b64'), 'utf8')))).join('').replace(/\s+/g, '');
       const ledger = JSON.parse(gunzipSync(Buffer.from(encoded, 'base64')).toString('utf8'));
-      const shells = JSON.parse(await fsp.readFile(path.join(sharedDir, 'cabinet-shells-v129.json'), 'utf8'));
-      ledger.version = shells.version || ledger.version;
-      const missing = [];
-      for (const system of ledger.systems || []) {
-        const shell = shells.systems?.[system.id];
-        if (shell) system.interfaceShell = shell;
-        if (!system.interfaceShell?.asset) missing.push(system.id + ' asset');
-        if (!system.interfaceShell?.screen) missing.push(system.id + ' screen');
-      }
-      if (missing.length) throw new Error('Cabinet shell hydration incomplete: ' + missing.join(', '));
       const payload = Buffer.from(JSON.stringify(ledger));
       res.writeHead(200, {
         'content-type': 'application/json; charset=utf-8',
         'content-length': payload.length,
         'cache-control': 'public, max-age=31536000, immutable',
         'x-commonweave-device-package': 'parity-ledger',
-        'x-commonweave-cabinet-shells': shells.version || 'v129'
+        'x-commonweave-software-family': '1.0.4'
       });
       return res.end(req.method === 'HEAD' ? undefined : payload);
     } catch (error) {
       console.error('[Commonweave] Unable to reconstruct parity ledger:', error);
-      return json(res, 500, { error: 'The Commonweave parity ledger could not be reconstructed for this device package.' });
+      return json(res, 500, { error: 'The Commonweave capability ledger could not be reconstructed for this device package.' });
     }
   }
-  if (gatewayRequest && packageInstall && (pathname === '/loom' || pathname === '/loom/' || pathname === '/loom/index.html')) {
-    if (await serveFile(req, res, '/app/loom-v128.html')) return;
-    return json(res, 404, { error: 'The Commonweave hub entry is missing from this device package.' });
-  }
-  if (gatewayRequest && packageInstall && (pathname === '/lite' || pathname === '/lite/' || pathname === '/lite/index.html')) {
-    if (await serveFile(req, res, '/app/lite-v129.html')) return;
-    return json(res, 404, { error: 'The Lite entry is missing from this device package.' });
+  if (gatewayRequest && packageInstall && (
+    pathname === '/loom' || pathname === '/loom/' || pathname === '/loom/index.html'
+    || pathname === '/lite' || pathname === '/lite/' || pathname === '/lite/index.html'
+    || pathname === '/cabinetonly' || pathname === '/cabinetonly/' || pathname === '/cabinetonly/index.html'
+  )) {
+    if (await serveFile(req, res, '/app/fullscreen-family-v104.html')) return;
+    return json(res, 404, { error: 'The full-screen Commonweave family entry is missing from this device package.' });
   }
   if (gatewayRequest && (pathname === '/field/commonweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) {
     res.writeHead(302, {location: COMMONWEAVE_RELEASE_URL, 'cache-control':'no-store'});
@@ -108,7 +98,7 @@ replaceRequired(
       installUrl: requestOrigin(req, url) + '/',
       sourceUrl: COMMONWEAVE_SOURCE_URL,
       releaseUrl: COMMONWEAVE_RELEASE_URL,
-      message: 'This public origin distributes the complete device package but does not run the Commonweave campus in browser mode.'
+      message: 'This public origin distributes the complete device package but does not run the Commonweave software family in browser mode.'
     });
   }
   if (pathname === '/api/boot-log' || pathname === '/api/boot-logs') {
@@ -119,7 +109,7 @@ replaceRequired(
 );
 replaceRequired(
   "appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Commonweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/commonweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download']",
-  "appUrl: null, installUrl: `${requestOrigin(req, url)}/`, sourceUrl: COMMONWEAVE_SOURCE_URL, downloadUrl: COMMONWEAVE_RELEASE_URL, seedUrl: null, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['install-only-pwa','device-package-distribution','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising']",
+  "appUrl: null, installUrl: `${requestOrigin(req, url)}/`, sourceUrl: COMMONWEAVE_SOURCE_URL, downloadUrl: COMMONWEAVE_RELEASE_URL, seedUrl: null, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising']",
   'public config hosting fields'
 );
 replaceRequired(
