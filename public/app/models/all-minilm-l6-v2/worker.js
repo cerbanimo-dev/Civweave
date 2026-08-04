@@ -87,10 +87,12 @@ async function rankedCandidates(state,message){
   const candidates=(Array.isArray(message.candidates)?message.candidates:[]).slice(0,64).map((item,index)=>({id:String(item?.id||`candidate-${index+1}`).slice(0,180),text:String(item?.text||'').trim().slice(0,6000)})).filter(item=>item.text);
   if(!candidates.length)return[];
   const cacheKey=String(message.cacheKey||'').slice(0,240);
-  let vectors=cacheKey?rankCache.get(cacheKey):null;
+  const signature=candidates.map(item=>`${item.id}\n${item.text}`).join('\u241e');
+  const cached=cacheKey?rankCache.get(cacheKey):null;
+  let vectors=cached?.signature===signature?cached.vectors:null;
   if(!vectors||vectors.length!==candidates.length){
     vectors=await embed(state.extractor,candidates.map(item=>item.text));
-    if(cacheKey){rankCache.set(cacheKey,vectors);while(rankCache.size>24)rankCache.delete(rankCache.keys().next().value)}
+    if(cacheKey){rankCache.set(cacheKey,{signature,vectors});while(rankCache.size>24)rankCache.delete(rankCache.keys().next().value)}
   }
   const [query]=await embed(state.extractor,[String(message.text||'').slice(0,12000)]);
   return candidates.map((item,index)=>({id:item.id,score:cosine(query,vectors[index])})).sort((a,b)=>b.score-a.score).slice(0,Math.max(1,Math.min(16,Number(message.limit||8))));
