@@ -21,13 +21,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install local semantic package
+      - name: Install local semantic source package
         run: |
           npm install --no-audit --no-fund
           for attempt in 1 2 3 4 5; do
             if npm run model:pull; then break; fi
             if [ "$attempt" = 5 ]; then
-              echo 'MiniLM package could not be materialized after five attempts.' >&2
+              echo 'MiniLM source package could not be materialized after five attempts.' >&2
               exit 1
             fi
             sleep $((attempt * 8))
@@ -35,7 +35,7 @@ jobs:
           npm run model:check
       - name: Run local-first regression suite
         run: npm run check
-      - name: Simulate clean Render package preparation
+      - name: Simulate clean Render source preparation
         run: |
           set -euxo pipefail
           rm -rf public/app/vendor/transformers
@@ -56,7 +56,7 @@ jobs:
         run: |
           RENDER=true PORT=8787 npm start > commonweave-gateway.log 2>&1 &
           echo $! > commonweave-gateway.pid
-      - name: Verify direct marked package distribution
+      - name: Verify fast marked package distribution
         run: |
           set -euxo pipefail
           for i in $(seq 1 40); do
@@ -68,17 +68,28 @@ jobs:
           grep -q '"localInstallRequired":true' gateway-health.json
           curl -fsS http://127.0.0.1:8787/ -o gateway.html
           grep -q 'Install the five-system Commonweave family.' gateway.html
-          grep -q 'LEAN OFFLINE SOFTWARE PACKAGE' gateway.html
+          grep -q 'FAST OFFLINE SOFTWARE PACKAGE' gateway.html
+          ! grep -q 'host-wave2.webp' gateway.html
           ! grep -q 'Open local campus' gateway.html
           curl -fsS http://127.0.0.1:8787/install-v130.js -o gateway-installer.js
-          grep -q "WORKER_REVISION='device-package-r35-direct'" gateway-installer.js
+          grep -q "WORKER_REVISION='device-package-r37-core'" gateway-installer.js
+          grep -q "ADDITIONS_REVISION='working-campus-additions-v157-fast-core'" gateway-installer.js
+          grep -q 'GET_MODEL_PACKAGE_STATUS' gateway-installer.js
+          grep -q 'replaceSupersededRoot' gateway-installer.js
           grep -q 'Reset and retry package' gateway-installer.js
           curl -fsS http://127.0.0.1:8787/service-worker.js -o gateway-worker.js
-          grep -q "CACHE_REVISION='direct-family-r35'" gateway-worker.js
-          grep -q "DEVICE_REVISION='device-package-r35-direct'" gateway-worker.js
-          grep -q "INSTALL_REVISION='direct-entry-r35'" gateway-worker.js
+          grep -q "CACHE_REVISION='direct-family-r37-fast-install'" gateway-worker.js
+          grep -q "DEVICE_REVISION='device-package-r37-core'" gateway-worker.js
+          grep -q "INSTALL_REVISION='direct-entry-r37'" gateway-worker.js
+          grep -q "MODEL_REVISION='minilm-on-demand-r1'" gateway-worker.js
+          grep -q 'GET_MODEL_PACKAGE_STATUS' gateway-worker.js
+          grep -q 'modelOnDemand' gateway-worker.js
           grep -q '/app/family-ai-loader-v105.js' gateway-worker.js
           grep -q "pathname.includes('anarchadia')&&!text.includes('/app/anarchadia-local-sovereignty-v146.js')" gateway-worker.js
+          ! grep -q "DEVICE_REQUIRED=.*model_q4f16.onnx" gateway-worker.js
+          curl -fsS http://127.0.0.1:8787/service-worker-v156.js -o gateway-additive-worker.js
+          grep -q 'working-campus-additions-v157-fast-core' gateway-additive-worker.js
+          grep -q 'commonweave-model-download-v157.js' gateway-additive-worker.js
           curl -fsS http://127.0.0.1:8787/app/manifest.webmanifest -o gateway-manifest.json
           grep -q '/app/installed-entry-v146.html?system=commonweave' gateway-manifest.json
           for route in /loom/ /lite/ /app/realm-console-v140.html /app/fullscreen-family-v104.html; do
@@ -99,6 +110,9 @@ jobs:
           grep -q 'async function ensure()' gateway-ai-loader.js
           grep -q 'CommonweaveGuideChatV153' gateway-ai-loader.js
           grep -q 'CommonweaveModelSettingsV133' gateway-ai-loader.js
+          curl -fsS -H "$H" http://127.0.0.1:8787/extensions/commonweave-model-download-v157.js -o gateway-model-download.js
+          grep -q 'data-download-local-model' gateway-model-download.js
+          grep -q 'adapter.install' gateway-model-download.js
           for route in \
             '/app/realm-console-v140.html?system=commonweave' \
             '/app/cabinets/living-school/index.html' \
@@ -115,7 +129,7 @@ jobs:
           ! grep -qi '^x-commonweave-cabinet-shells:' gateway-ledger-headers.txt
           curl -fsS -H "$H" http://127.0.0.1:8787/app/models/all-minilm-l6-v2/model-manifest.json -o gateway-model.json
           grep -q 'Xenova/all-MiniLM-L6-v2' gateway-model.json
-          curl -fsS -H "$H" http://127.0.0.1:8787/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx -o gateway-model.onnx
+          curl -fsS -H "$H" http://127.0.0.1:8787/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx -o gateway-model.onnx
           test -s gateway-model.onnx
       - name: Start local software family
         run: |
@@ -145,6 +159,9 @@ jobs:
           curl -fsS http://127.0.0.1:8788/app/family-ai-loader-v105.js -o family-ai-loader.js
           node --check family-ai-loader.js
           grep -q '/app/assistant-runtime-v141.js' family-ai-loader.js
+          curl -fsS http://127.0.0.1:8788/extensions/commonweave-model-download-v157.js -o local-model-download.js
+          node --check local-model-download.js
+          grep -q 'Download local model' local-model-download.js
           for spec in \
             'commonweave:/app/realm-console-v140.html?system=commonweave' \
             'living-school:/app/cabinets/living-school/index.html' \
@@ -166,25 +183,32 @@ jobs:
           grep -q '/app/services/living-school/modules/rubric-engine.mjs' local-worker.js
           grep -q '/app/services/living-school/modules/project-gate.mjs' local-worker.js
           grep -q '/app/services/living-school/modules/cerbanimo-bridge.mjs' local-worker.js
-          for retired in '/app/assets/cabinets/commonweave.webp' '/app/assets/world/town-square-home.webp' '/app/cabinet-calibrator-v144.html' '/app/shared/cabinet-shells-v129.json'; do
+          grep -q "DEVICE_REVISION='device-package-r37-core'" local-worker.js
+          grep -q 'modelOnDemand' local-worker.js
+          for retired in '/app/assets/cabinets/commonweave.webp' '/app/assets/world/town-square-home.webp' '/app/cabinet-calibrator-v144.html' '/app/shared/cabinet-shells-v129.json' '/app/assets/world/host-wave2.webp'; do
             ! grep -q "$retired" local-worker.js
           done
       - name: Upload direct-startup evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v104-direct-startup-evidence
+          name: commonweave-v104-fast-core-startup-evidence
           path: |
             commonweave-gateway.log
             commonweave-local.log
             render-package-prepare.log
             gateway-health.json
+            gateway.html
+            gateway-installer.js
             gateway-worker.js
+            gateway-additive-worker.js
             gateway-family-shell.js
             gateway-ai-loader.js
+            gateway-model-download.js
             gateway-ledger-headers.txt
             local-health.json
             installed-entry.js
             compatibility.html
             family-shell.js
             family-ai-loader.js
+            local-model-download.js
