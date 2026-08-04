@@ -6,13 +6,14 @@ const root=process.cwd();
 const read=file=>fs.readFile(path.join(root,file),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
-const [runtime,styles,realmHtml,anarchadiaHtml,shellText,serviceWorker]=await Promise.all([
+const [runtime,styles,realmHtml,anarchadiaHtml,shellText,serviceWorker,family]=await Promise.all([
   read('public/app/cabinet-home-v142.js'),
   read('public/app/cabinet-home-v142.css'),
   read('public/app/realm-console-v140.html'),
   read('public/app/anarchadia-console-v139.html'),
   read('public/app/shared/cabinet-shells-v129.json'),
-  read('public/service-worker.js')
+  read('public/service-worker.js'),
+  read('public/app/family-shell-v104.js')
 ]);
 const shells=JSON.parse(shellText);
 
@@ -25,6 +26,7 @@ for(const [guide,asset] of [
 ]){
   assert(runtime.includes(`guide:'${guide}'`),`${guide} is missing from the cabinet home contract.`);
   assert(runtime.includes(`mascot:'${asset}'`),`${guide}'s mascot is not mounted next to cabinet chat.`);
+  assert(family.includes(guide),`${guide} is missing from the full-screen family header.`);
 }
 
 assert(runtime.includes("header.insertAdjacentElement('afterend',band)"),'Cabinet controls must mount immediately below the header.');
@@ -43,13 +45,13 @@ for(const html of [realmHtml,anarchadiaHtml]){
 }
 
 const anarchadia=shells.systems.anarchadia.screen;
-assert(anarchadia.y<26.85,`Anarchadia overlay was not shifted upward: ${anarchadia.y}`);
-assert(anarchadia.x>12.8,`Anarchadia overlay did not move inward from the left: ${anarchadia.x}`);
-assert(anarchadia.width<74.4,`Anarchadia overlay was not thinned in width: ${anarchadia.width}`);
-assert(anarchadia.height===56.15,`Anarchadia overlay height must remain unchanged: ${anarchadia.height}`);
-assert(Math.abs((anarchadia.x+anarchadia.width/2)-50)<0.001,'Anarchadia overlay must remain horizontally centered.');
-assert(serviceWorker.includes('cabinet-home-r22'),'Service worker must rotate the cabinet-home cache.');
-assert(serviceWorker.includes('/app/cabinet-home-v142.js')&&serviceWorker.includes('/app/cabinet-home-v142.css'),'Service worker must cache the active cabinet-home layer.');
+assert(anarchadia.y<26.85,`Anarchadia marketing overlay was not shifted upward: ${anarchadia.y}`);
+assert(anarchadia.x>12.8,`Anarchadia marketing overlay did not move inward from the left: ${anarchadia.x}`);
+assert(anarchadia.width<74.4,`Anarchadia marketing overlay was not thinned in width: ${anarchadia.width}`);
+assert(anarchadia.height===56.15,`Anarchadia marketing overlay height must remain unchanged: ${anarchadia.height}`);
+assert(Math.abs((anarchadia.x+anarchadia.width/2)-50)<0.001,'Anarchadia marketing overlay must remain horizontally centered.');
+assert(serviceWorker.includes("CABINET_REVISION='fullscreen-software-r34'"),'Service worker must rotate the full-screen software cache.');
+assert(serviceWorker.includes('/app/cabinet-home-v142.js')&&serviceWorker.includes('/app/cabinet-home-v142.css'),'Service worker must cache the active cabinet-home software layer.');
 
 console.log(JSON.stringify({
   ok:true,
@@ -59,9 +61,8 @@ console.log(JSON.stringify({
     featureDropdown:true,
     directFeatureLaunch:true,
     comingSoonFallback:true,
-    anarchadiaOverlayRaised:true,
-    anarchadiaOverlayNarrowed:true,
-    anarchadiaOverlayHeightPreserved:true
+    fullScreenFamily:true,
+    marketingOverlaySourcePreserved:true
   },
-  anarchadiaScreen:anarchadia
+  anarchadiaMarketingScreen:anarchadia
 },null,2));

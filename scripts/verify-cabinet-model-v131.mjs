@@ -32,26 +32,15 @@ assert(anarchadia.clip.startsWith('polygon('),'Anarchadia does not use a polygon
 assert(anarchadia.clip.includes('17% 3.2%')&&anarchadia.clip.includes('83% 3.2%'),'Anarchadia top dip was lost');
 assert(Number(anarchadia.contentTop)>=3,'Anarchadia content does not clear its dipped top border');
 
-const html=await read('public/app/lite-v129.html');
-for(const required of [
-  '/app/shared/commonweave-model-runtime.js',
-  '/app/cabinet-calibration-v131.css',
-  '/app/cabinet-calibration-v131.js',
-  '/app/model-settings-v131.css',
-  '/app/model-settings-v131.js'
-])assert(html.includes(required),`Lite entry is missing ${required}`);
-assert(html.indexOf('commonweave-model-runtime.js')<html.indexOf('model-settings-v131.js'),'model runtime loads after settings UI');
-assert(html.indexOf('lite-v129-core.js')<html.indexOf('cabinet-calibration-v131.js'),'cabinet calibration loads before core functions exist');
-assert(html.indexOf('lite-v129-native.js')<html.indexOf('model-settings-v131.js'),'model settings override loads before native renderer exists');
-assert(html.indexOf('model-settings-v131.js')<html.indexOf('lite-v129-app.js'),'model settings loads after app mount');
-
+// Physical cabinet calibration remains valid source material for marketing and visual production.
 const calibration=await read('public/app/cabinet-calibration-v131.js');
-assert(calibration.includes('--screen-clip'),'cabinet calibration does not apply clip masks');
-assert(calibration.includes('--control-x'),'cabinet calibration does not apply measured controls');
+assert(calibration.includes('--screen-clip'),'cabinet calibration source does not apply clip masks');
+assert(calibration.includes('--control-x'),'cabinet calibration source does not apply measured controls');
 const calibrationCss=await read('public/app/cabinet-calibration-v131.css');
-assert(calibrationCss.includes('clip-path:var(--screen-clip)'),'cabinet mask CSS missing');
+assert(calibrationCss.includes('clip-path:var(--screen-clip)'),'cabinet mask source CSS missing');
 
-const modelSettings=await read('public/app/model-settings-v131.js');
+// The installed family now uses the universal hub settings implementation everywhere.
+const universalSettings=await read('public/app/minilm-model-settings-v138.js');
 for(const required of [
   'Gemini API key',
   'gemini-3.5-flash-lite',
@@ -59,15 +48,20 @@ for(const required of [
   'antigravity',
   'saveSessionSecret',
   'detectCapabilities',
-  'sessionStorage'
-])assert(modelSettings.includes(required),`model setup is missing ${required}`);
-assert(!modelSettings.includes('localStorage.setItem("commonweave-model-session"'),'session API key is written to localStorage');
-assert(modelSettings.includes('agenticEnabled'),'Antigravity agentic profile toggle missing');
-assert(modelSettings.includes('permission failure falls back')||modelSettings.includes('Permission failure falls back'),'Antigravity fallback is not explained to users');
+  'sessionStorage',
+  'UNIVERSAL AI SETTINGS'
+])assert(universalSettings.includes(required),`universal model setup is missing ${required}`);
+assert(!universalSettings.includes('localStorage.setItem("commonweave-model-session"'),'session API key is written to localStorage');
+assert(universalSettings.includes('agenticEnabled'),'Antigravity agentic profile toggle missing');
+
+const family=await read('public/app/family-shell-v104.js');
+assert(family.includes('CommonweaveModelSettingsV133?.open?.()'),'family shell does not open universal AI settings');
+assert(family.includes('[data-ai-settings]')&&family.includes('[data-capability="commonweave.model-setup"]'),'realm-specific settings are not intercepted');
 
 const worker=await read('public/service-worker.js');
 const cacheRevision=worker.match(/CACHE_REVISION='([^']+)'/)?.[1]||'';
-assert(cacheRevision&&cacheRevision!=='cabinet-r2','service worker cache revision was not advanced beyond the original cabinet cache');
-for(const required of ['cabinet-calibration-v131.js','model-settings-v131.js','commonweave-model-runtime.js'])assert(worker.includes(required),`service worker does not precache ${required}`);
+assert(cacheRevision==='fullscreen-family-r34','service worker is not using the full-screen family cache revision');
+for(const required of ['minilm-model-settings-v138.js','model-settings-v133.css','commonweave-model-runtime.js'])assert(worker.includes(required),`service worker does not precache ${required}`);
+for(const marketingOnly of ['cabinet-calibration-v131.js','model-settings-v131.js','cabinet-shells-v129.json'])assert(!worker.includes(marketingOnly),`marketing-only or retired settings asset is still installed: ${marketingOnly}`);
 
-console.log(JSON.stringify({ok:true,systems:systems.length,measuredControls:systems.length*5,anarchadiaMask:'dipped-polygon',geminiKeyStorage:'session-only',agenticProfile:'antigravity',cacheRevision},null,2));
+console.log(JSON.stringify({ok:true,systems:systems.length,marketingCabinetControls:systems.length*5,anarchadiaMask:'dipped-polygon',geminiKeyStorage:'session-only',agenticProfile:'antigravity',installedSettings:'universal-v138',cabinetCalibration:'repository-only',cacheRevision},null,2));

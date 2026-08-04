@@ -3,9 +3,9 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.32',BUILD='1.0.32-install-only-package-gateway';
+const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.4',BUILD='1.0.4-install-only-fullscreen-family-gateway';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const dataDir=await mkdtemp(path.join(os.tmpdir(),'commonweave-gateway-v131-')),output=[];
+const dataDir=await mkdtemp(path.join(os.tmpdir(),'commonweave-gateway-v104-')),output=[];
 const child=spawn(process.execPath,['scripts/start-commonweave-v131.mjs'],{cwd:root,env:{...process.env,RENDER:'true',HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});
 child.stdout.on('data',chunk=>output.push(chunk.toString()));child.stderr.on('data',chunk=>output.push(chunk.toString()));
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -26,10 +26,11 @@ try{
   assert(health.release?.localInstallRequired===true,'gateway does not require installation');
   const rootResponse=await fetch(`${origin}/`,{cache:'no-store'}),rootHtml=await rootResponse.text();
   assert(rootResponse.ok,'gateway installer root failed');
-  assert(rootHtml.includes('Install Commonweave to enter the campus.'),'gateway root is not the install-only page');
+  assert(rootHtml.includes('Install the five-system Commonweave family.'),'gateway root is not the v1.0.4 install-only page');
+  assert(rootHtml.includes('LEAN OFFLINE SOFTWARE PACKAGE'),'gateway root does not describe the lean package');
   assert(rootHtml.includes('/service-worker.js')||rootHtml.includes('install-v130.js'),'gateway root does not boot the installer');
   assert(!rootHtml.includes('Open local campus'),'gateway root exposes browser-mode application access');
-  for(const route of ['/loom/','/lite/','/app/realm-console-v140.html','/app/cabinet-mode-v142.html']){
+  for(const route of ['/loom/','/lite/','/app/realm-console-v140.html','/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html']){
     const response=await fetch(origin+route,{cache:'no-store'}),body=await response.json();
     assert(response.status===410,`${route} returned ${response.status}, expected install-required 410`);
     assert(body.localInstallRequired===true,`${route} does not explain installation`);
@@ -46,28 +47,24 @@ try{
     assert(response.ok,`required device package asset ${route} returned ${response.status}`);
     await response.arrayBuffer();
   }
-  const packageAsset=await fetch(`${origin}/app/realm-console-v140.html`,{cache:'no-store',headers:packageHeaders});
-  assert(packageAsset.ok,`marked device-package fetch returned ${packageAsset.status}`);
-  assert((await packageAsset.text()).includes('Commonweave Realm Console'),'marked package fetch returned the wrong document');
+  const packageFamily=await fetch(`${origin}/app/fullscreen-family-v104.html`,{cache:'no-store',headers:packageHeaders});
+  assert(packageFamily.ok,`marked family host fetch returned ${packageFamily.status}`);
+  assert((await packageFamily.text()).includes('id="cwf104-frame"'),'marked package fetch returned the wrong family host');
   const packageLedger=await fetch(`${origin}/app/shared/commonweave-parity-ledger.json`,{cache:'no-store',headers:packageHeaders});
   assert(packageLedger.ok,`marked parity ledger route returned ${packageLedger.status}`);
   assert(packageLedger.headers.get('x-commonweave-device-package')==='parity-ledger','parity ledger response is missing its package marker');
-  assert(packageLedger.headers.get('x-commonweave-cabinet-shells'),'parity ledger response is missing its cabinet-shell hydration marker');
+  assert(packageLedger.headers.get('x-commonweave-software-family')==='1.0.4','parity ledger response is missing its software-family marker');
+  assert(!packageLedger.headers.get('x-commonweave-cabinet-shells'),'lean parity ledger still advertises cabinet-shell hydration');
   const ledger=await packageLedger.json();
   assert(Array.isArray(ledger.systems)&&ledger.systems.length>=5,'reconstructed parity ledger is missing canonical systems');
   assert(ledger.systems.some(system=>system.id==='commonweave'),'reconstructed parity ledger is missing Commonweave');
-  for(const system of ledger.systems){
-    assert(system.interfaceShell?.asset,`hydrated parity ledger is missing ${system.id} cabinet asset`);
-    assert(system.interfaceShell?.screen,`hydrated parity ledger is missing ${system.id} cabinet screen rectangle`);
+  for(const system of ledger.systems)assert(!system.interfaceShell?.asset,`lean parity ledger unexpectedly hydrates ${system.id} cabinet art`);
+  for(const route of ['/loom/','/lite/','/cabinetonly/']){
+    const response=await fetch(origin+route,{cache:'no-store',headers:packageHeaders});
+    assert(response.ok,`marked compatibility route ${route} returned ${response.status}`);
+    const text=await response.text();
+    assert(text.includes('id="cwf104-frame"'),`marked compatibility route ${route} did not return the full-screen family host`);
   }
-  const packageLoom=await fetch(`${origin}/loom/`,{cache:'no-store',headers:packageHeaders});
-  assert(packageLoom.ok,`marked Loom package route returned ${packageLoom.status}`);
-  const loomText=await packageLoom.text();
-  assert(loomText.includes('/app/assets/world/town-square-home.webp'),'marked Loom package route returned the wrong hub document');
-  const packageLite=await fetch(`${origin}/lite/`,{cache:'no-store',headers:packageHeaders});
-  assert(packageLite.ok,`marked Lite package route returned ${packageLite.status}`);
-  const liteText=await packageLite.text();
-  assert(liteText.includes('id="cabinet-link"'),'marked Lite package route returned the wrong document');
   const telemetry=await fetch(`${origin}/api/boot-log`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:'room-opened'})});
   assert(telemetry.status===204,`boot telemetry returned ${telemetry.status}`);
   const download=await fetch(`${origin}/downloads/Commonweave-Mobile-Install-Kit.zip`,{redirect:'manual'});
@@ -78,7 +75,8 @@ try{
   assert(config.installUrl===`${origin}/`,'public config does not advertise the installer');
   assert(config.features.includes('install-only-pwa'),'public config omits install-only mode');
   assert(config.features.includes('device-package-distribution'),'public config omits package distribution');
+  assert(config.features.includes('fullscreen-software-family'),'public config omits the full-screen software family');
   assert(!config.features.includes('pwa-hosting'),'public config claims a live hosted PWA');
-  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,browserCampus:false,installer:true,markedPackageDistribution:true,requiredAssetCount:requiredAssets.length,cabinetShells:ledger.systems.length,markedVirtualRoutes:['/app/shared/commonweave-parity-ledger.json','/loom/','/lite/'],ordinaryApplicationRoutes:410,downloadOrigin:'GitHub',gatewayFeatures:config.features},null,2));
+  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,browserApplication:false,installer:true,markedPackageDistribution:true,requiredAssetCount:requiredAssets.length,cabinetShellHydration:false,markedVirtualRoutes:['/app/shared/commonweave-parity-ledger.json','/loom/','/lite/','/cabinetonly/'],ordinaryApplicationRoutes:410,downloadOrigin:'GitHub',gatewayFeatures:config.features},null,2));
 }catch(error){console.error(output.join(''));throw error}
 finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}
