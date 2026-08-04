@@ -61,6 +61,14 @@ const EXTENSION_FILES=[
 const BOUNDARY='/app/install-boundary-v146.js';
 const CORE_PATCH_FILES=[
   BOUNDARY,
+  '/app/family-shell-v104.js',
+  '/app/merlinites-shell-fix-v166.css',
+  '/app/sol-shell-fix-v166.css',
+  '/app/assets/ai/weaveling-compass.png',
+  '/app/assets/ai/moss-acorn.png',
+  '/app/assets/ai/kamiya-gift.png',
+  '/app/assets/ai/rook-coin-button.png',
+  '/app/assets/ai/merlin-hat.png',
   '/app/platform-stability-v159.js',
   '/app/platform-stability-v159.css',
   '/app/platform-experience-v160.js',
