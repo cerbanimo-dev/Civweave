@@ -8,4 +8,7 @@ public/app/models/all-minilm-l6-v2/vocab.txt
 public/app/models/all-minilm-l6-v2/onnx/
 data/*.json
 data/*.tmp
+.wrangler/
+.dev.vars
+.dev.vars.*
 .DS_Store
