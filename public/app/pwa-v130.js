@@ -1,9 +1,8 @@
 (()=>{
 'use strict';
 const VERSION='1.0.4';
-const BUILD='1.0.4-device-package-r37-core-working-campus-additions-v167-two-agent-workflow-sol-semantic-planning';
-// Combined compatibility marker: BUILD='1.0.4-device-package-r37-core-working-campus-additions-v166-workflow-handoffs-sol-semantic-planning'
-// Sol compatibility marker: BUILD='1.0.4-device-package-r37-core-working-campus-additions-v165-sol-semantic-planning'
+const BUILD='1.0.4-device-package-r37-core-working-campus-additions-v168-two-agent-workflow-merlinites-semantic-planning';
+// Current-main compatibility marker: BUILD='1.0.4-device-package-r37-core-working-campus-additions-v166-two-agent-youtube-reviewed-handoffs'
 // Fast-core compatibility marker: BUILD='1.0.4-device-package-r37-core-working-campus-additions-v157-fast-core'
 const WORKER_URL=`/service-worker-v156.js?v=${BUILD}`;
 let registration=null;
