@@ -16,7 +16,7 @@ const renderBranch=prepareStart.slice(prepareStart.indexOf('if (isRender)'),prep
 assert(renderBranch.includes('Gateway fast start')&&!renderBranch.includes('await run'),'Render prestart still performs blocking semantic-model work');
 assert(prepareStart.includes('stage-transformers-assets.mjs')&&prepareStart.includes('ensure-minilm-model.mjs'),'Local startup no longer verifies optional model assets');
 assert(stageRuntime.includes('async function staged()')&&stageRuntime.includes('already staged'),'Transformers runtime is recopied on every start');
-assert(modelRuntime.includes('verifyHashes=checkOnly')&&modelRuntime.includes("'(fast size check)'"),'Normal MiniLM startup still hashes the full model graphs');
+assert(modelRuntime.includes('verifyHashes=checkOnly')&&modelRuntime.includes("' (fast size check)'"),'Normal MiniLM startup still hashes the full model graphs');
 for(const [name,wrapper] of [['gateway',gateway],['local',localHost]]){assert(wrapper.includes("replace(/^\\uFEFF/"),`${name} wrapper does not strip a UTF-8 BOM`);assert(wrapper.includes("replace(/\\r\\n?/g"),`${name} wrapper does not normalize Windows line endings`)}
 for(const token of ['packageInstall','installerSurface','applicationSurface',"req.headers['x-commonweave-package'] === 'install'",'localInstallRequired: true','COMMONWEAVE_RELEASE_URL'])assert(gateway.includes(token),`install-only gateway missing ${token}`);
 assert(gateway.includes('applicationSurface && !installerSurface && !packageInstall'),'gateway does not block ordinary browser application surfaces');
