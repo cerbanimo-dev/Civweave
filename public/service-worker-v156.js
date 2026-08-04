@@ -2,6 +2,7 @@
 importScripts('/service-worker.js?v=1.0.4-base-r37-core');
 const EXTENSION_VERSION='working-campus-additions-v158-proof-progress';
 const EXTENSION_CACHE='cwext-working-campus-additions-v158-proof-progress';
+const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v157-fast-core';
 const EXTENSION_FILES=[
   '/extensions/commonweave-additions-v156.css',
   '/extensions/commonweave-additions-v156.js',
@@ -17,7 +18,7 @@ const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function fetchRequired(url){const response=await fetch(`${url}${url.includes('?')?'&':'?'}v=${EXTENSION_VERSION}`,{cache:'no-store',headers:{'x-commonweave-package':'install'}});if(!response.ok)throw new Error(`Extension asset ${url} returned ${response.status}`);return response}
 async function cacheExtensions(){const cache=await caches.open(EXTENSION_CACHE);for(const url of EXTENSION_FILES)await cache.put(url,(await fetchRequired(url)).clone());return true}
 async function patchInstalledBoundary(){const fresh=await fetchRequired(BOUNDARY),deadline=Date.now()+120000;while(Date.now()<deadline){const names=(await caches.keys()).filter(name=>name.startsWith('commonweave-static-'));let patched=0;for(const name of names){const cache=await caches.open(name),existing=await cache.match(BOUNDARY,{ignoreSearch:true});if(existing){await cache.put(BOUNDARY,fresh.clone());patched++}}if(patched)return patched;await delay(100)}throw new Error('The base core package did not expose its install boundary in time for the additive layer.')}
-async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,cache:EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,missing}}
+async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,cache:EXTENSION_CACHE,previousCache:PREVIOUS_EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,missing}}
 self.addEventListener('install',event=>event.waitUntil(Promise.all([cacheExtensions(),patchInstalledBoundary()])));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names=>Promise.all(names.filter(name=>name.startsWith('cwext-')&&name!==EXTENSION_CACHE).map(name=>caches.delete(name))))));
 self.addEventListener('message',event=>{if(event.data?.type==='GET_ADDITIONS_STATUS')event.waitUntil(extensionStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}))});
