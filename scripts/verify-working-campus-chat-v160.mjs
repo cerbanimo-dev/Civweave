@@ -1,0 +1,12 @@
+import {readFile} from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const read=relative=>readFile(path.join(root,relative),'utf8');
+const assert=(condition,message)=>{if(!condition)throw new Error(message)};
+const [html,css,...parts]=await Promise.all([read('public/app/working-campus-v156.html'),read('public/app/working-campus-v156.css'),...[1,2,3,4,5].map(index=>read(`public/app/working-campus-v156.part${index}.txt`))]);
+const source=parts.join('');new Function(source);
+for(const token of ['id="weaveling-chat-form"','id="weaveling-chat-input"','id="weaveling-chat-send"'])assert(html.includes(token),`Working Campus is missing ${token}.`);
+for(const token of ['.weaveling-chat-form','.weaveling-chat-form textarea'])assert(css.includes(token),`Working Campus CSS is missing ${token}.`);
+for(const token of ['function sendWeaveling','CommonweaveFamilyAILoaderV105','CommonweaveAssistantV141',"systemId:'commonweave'",'weaveling-chat-form'])assert(source.includes(token),`Working Campus chat runtime is missing ${token}.`);
+console.log(JSON.stringify({ok:true,composer:true,sharedAssistant:true,syntax:true},null,2));
