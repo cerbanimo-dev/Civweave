@@ -53,11 +53,13 @@ jobs:
           node --check public/extensions/commonweave-proof-progress-v158.js
           node --check public/extensions/commonweave-gemini-interactions-v159.js
           node --check public/extensions/commonweave-device-credentials-v160.js
+          node --check public/extensions/commonweave-antigravity-live-source-guard-v167.js
           node --check scripts/verify-working-campus-additions-v156.mjs
           node --check scripts/verify-unified-ai-settings-v157.mjs
           node --check scripts/verify-settings-dialog-stability-v161.mjs
           node --check scripts/verify-intention-and-research-v163.mjs
           node --check scripts/verify-living-school-two-agent-relay-v165.mjs
+          node --check scripts/verify-antigravity-live-source-guard-v167.mjs
           node --check scripts/verify-five-system-inner-ui-v157.mjs
           node --check scripts/verify-runtime-stability-v159.mjs
           node --check scripts/verify-platform-flow-v160.mjs
@@ -103,6 +105,8 @@ jobs:
         run: node scripts/verify-intention-and-research-v163.mjs
       - name: Verify Living School two-agent relay
         run: node scripts/verify-living-school-two-agent-relay-v165.mjs
+      - name: Verify Antigravity live-source proof
+        run: node scripts/verify-antigravity-live-source-guard-v167.mjs
       - name: Verify merlinites semantic planning
         run: node scripts/verify-merlinites-semantic-v164.mjs
       - name: Verify merlinites visual shell
