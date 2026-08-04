@@ -81,8 +81,20 @@ function get(planId){return readStore().plans[planId]||null}
 function uniquePush(list,value){if(value&&!list.includes(value))list.push(value)}
 function applyRoutes(plan,record){
   if(!plan||!record)return plan;
-  const paths=rows(plan.paths),find=realm=>paths.find(path=>path.realm===realm);
-  const learn=find('living-school'),work=find('cerbanimo'),materials=find('fellowfare');
+  const paths=rows(plan.paths);plan.paths=paths;
+  const find=realm=>paths.find(path=>path.realm===realm);
+  const makePath=(realm,type,title,purpose,completionCriteria,evidence)=>{
+    let route=find(realm);
+    if(!route){route={id:`readiness-${realm}-${plan.id}`,type,realm,title,purpose,steps:[],completionCriteria,evidence,status:'draft',source:'capability-readiness-v154'};paths.push(route)}
+    route.steps=rows(route.steps);route.evidence=rows(route.evidence);return route
+  };
+  const gaps=record.capabilities.filter(cap=>cap.currentLevel<cap.requiredLevel&&cap.posture&&cap.posture!=='ready');
+  const needsLearning=gaps.some(cap=>cap.posture==='learn'||cap.posture==='practice');
+  const needsWork=gaps.some(cap=>cap.posture==='practice');
+  const needsRecruitment=gaps.some(cap=>cap.posture==='recruit');
+  const learn=find('living-school')||(needsLearning?makePath('living-school','learning','Build the required capability','Learn or practice only the gaps that the reviewed intention actually requires.','The selected capabilities are demonstrated with evidence in the intended context.',['Capability demonstration','Practice evidence','Remaining-uncertainty note']):null);
+  const work=find('cerbanimo')||(needsWork?makePath('cerbanimo','skilled-labor','Practice through consequential work','Turn selected practice gaps into supported project checkpoints.','The visible result is completed with inspectable practice and review evidence.',['Working artifact','Checkpoint evidence','Revision record']):null);
+  const materials=find('fellowfare')||(needsRecruitment?makePath('fellowfare','material-acquirement','Recruit the missing capability','Find a collaborator or provider with explicit role, timing, terms, and handoff evidence.','The missing capability is covered by an agreed and reviewable source.',['Need or role card','Agreement or terms record','Handoff confirmation']):null);
   if(learn)learn.steps=rows(learn.steps);if(work)work.steps=rows(work.steps);if(materials)materials.steps=rows(materials.steps);
   const simplifications=[];
   for(const cap of record.capabilities){
