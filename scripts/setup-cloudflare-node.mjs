@@ -136,8 +136,6 @@ runWrangler(wrangler, [
   projectName,
   "--branch",
   "main",
-  "--config",
-  "wrangler.jsonc",
 ]);
 
 console.log("\nCloudflare Pages setup complete.");
