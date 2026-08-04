@@ -7,6 +7,7 @@ import {
   rmSync,
   statSync,
 } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { dirname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -34,9 +35,22 @@ function walkFiles(directory) {
   return files;
 }
 
+function rebuildReleaseArtifacts() {
+  const result = spawnSync(
+    process.execPath,
+    [resolve(scriptDir, "build-mobile-install-kit.mjs")],
+    { cwd: repoRoot, stdio: "inherit" },
+  );
+  if (result.status !== 0) {
+    throw new Error("Commonweave release artifact rebuild failed.");
+  }
+}
+
 if (!existsSync(sourceDir) || !statSync(sourceDir).isDirectory()) {
   throw new Error(`Static source directory not found: ${sourceDir}`);
 }
+
+rebuildReleaseArtifacts();
 
 for (const [label, file] of [
   ["Mobile installer", installerPath],
@@ -77,5 +91,5 @@ if (oversizedAssets.length) {
 const installerBytes = statSync(installerPath).size;
 const seedBytes = statSync(pocketCampusSeedPath).size;
 console.log(
-  `Built .cloudflare-pages with mobile installer (${installerBytes} bytes) and Pocket Campus seed (${seedBytes} bytes).`,
+  `Built .cloudflare-pages with mobile installer (${installerBytes} bytes) and portable Commonweave seed (${seedBytes} bytes).`,
 );
