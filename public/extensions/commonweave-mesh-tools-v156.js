@@ -32,7 +32,7 @@ function rawPending(){return parse(sessionStorage.getItem(PENDING_KEY),{})}
 function savePending(value){sessionStorage.setItem(PENDING_KEY,JSON.stringify(value||{}));return value}
 function acceptedPairings(){return read(PAIRING_KEY,{})}
 function saveAccepted(value){return write(PAIRING_KEY,value||{})}
-function pairings(){const pending={};for(const [id,row] of Object.entries(rawPending()))pending[id]={rendezvousId:id,nodeUrl:row.nodeUrl,createdAt:row.createdAt,expiresAt:row.expiresAt,role:row.role};return{pending,accepted:acceptedPairings()}}
+function pairings(){const pending={};for(const [id,row] of Object.entries(rawPending()))pending[id]={token:id,rendezvousId:id,nodeUrl:row.nodeUrl,createdAt:row.createdAt,expiresAt:row.expiresAt,role:row.role};return{pending,accepted:acceptedPairings()}}
 function friends(){return list(read(FRIEND_KEY,[]))}
 function saveFriend(friend){const rows=friends(),index=rows.findIndex(item=>item.id===friend.id),next={...rows[index],...friend,updatedAt:now()};if(index<0)rows.unshift(next);else rows[index]=next;write(FRIEND_KEY,rows.slice(0,200));event('commonweave:friend-changed',{friend:next});return next}
 function parseInvite(input){const raw=clean(input,4000);if(!raw)throw new Error('Friend invitation is empty.');try{const url=new URL(raw,location.href),fragment=new URLSearchParams(url.hash.replace(/^#/,'')),token=fragment.get('cwfriend')||url.searchParams.get('cwfriend');if(token)return{nodeUrl:url.origin,token}}catch{}try{const value=JSON.parse(raw);if(value?.schema==='commonweave.friend-code.v156'&&value.token&&value.nodeUrl)return{nodeUrl:value.nodeUrl,token:value.token}}catch{}throw new Error('That is not a Commonweave friend invitation.');}
