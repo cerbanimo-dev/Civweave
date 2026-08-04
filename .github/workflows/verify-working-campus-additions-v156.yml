@@ -2,7 +2,7 @@ name: Verify working-campus additions v156
 
 on:
   push:
-    branches: ["agent/clean-baseline-five-system"]
+    branches: ["agent/pr55-after-pr56"]
   pull_request:
 
 jobs:
@@ -30,8 +30,11 @@ jobs:
           node --check public/extensions/commonweave-mesh-tools-v156.js
           node --check public/extensions/commonweave-additions-v156.js
           node --check scripts/verify-working-campus-additions-v156.mjs
+          node --check scripts/test-tiered-cerbanimo-rewards-v157.mjs
       - name: Verify additive integration
         run: node scripts/verify-working-campus-additions-v156.mjs
+      - name: Test tiered Cerbanimo rewards
+        run: node scripts/test-tiered-cerbanimo-rewards-v157.mjs
       - name: Materialize local semantic package
         run: |
           for attempt in 1 2 3 4 5; do
