@@ -4,13 +4,12 @@ import process from 'node:process';
 
 const root = process.cwd();
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
-const assert = (condition, message) => {
-  if (!condition) throw new Error(message);
-};
+const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
 const shell = read('public/app/family-shell-v104.js');
 const shellCss = read('public/app/family-shell-v104.css');
-const shellFix = read('public/app/sol-shell-fix-v166.css');
+const merlinitesFix = read('public/app/merlinites-shell-fix-v166.css');
+const solFix = read('public/app/sol-shell-fix-v166.css');
 const profiles = JSON.parse(read('public/app/assets/ai/profiles.json'));
 
 const expectedOrder = "['commonweave','living-school','cerbanimo','fellowfare','anarchadia']";
@@ -18,11 +17,12 @@ assert(shell.includes(`const SYSTEM_ORDER=${expectedOrder}`), 'Global realm orde
 assert(shell.includes('SYSTEM_ORDER.map'), 'The global dock is not rendering all five realm positions.');
 assert(!shell.includes("filter(([id])=>id!==current)"), 'The active realm is still being removed from the dock.');
 assert(shell.includes('data-cwf-chat'), 'The Weaveling top-rail control is missing.');
-assert(shell.includes("const VISUAL_SHELLS={primary:'merlinites-r1',legacy:'sol-r1'}"), 'The Merlinites/Sol transition identities are missing.');
+assert(shell.includes("const VISUAL_SHELLS={primary:'merlinites-r1',legacy:'sol-r1'}"), 'The Merlinites and Sol transition identities are missing.');
 assert(shell.includes('document.documentElement.dataset.visualShell=VISUAL_SHELLS.primary'), 'Merlinites is not the primary visual-shell identity.');
 assert(shell.includes('document.documentElement.dataset.visualShellLegacy=VISUAL_SHELLS.legacy'), 'Sol is not retained as a compatibility identity.');
-assert(shell.includes('/app/sol-shell-fix-v166.css?v=sol-r2'), 'The installed Sol compatibility stylesheet is not loaded.');
-assert(shell.includes('data-merlinites-shell-v166')&&shell.includes('data-sol-shell-v166'), 'The stylesheet link does not expose both transition names.');
+assert(shell.includes('/app/merlinites-shell-fix-v166.css?v=merlinites-r2'), 'The Merlinites primary stylesheet is not loaded.');
+assert(shell.includes('/app/sol-shell-fix-v166.css?v=sol-r2'), 'The Sol fallback stylesheet is not retained.');
+assert(shell.includes('data-merlinites-shell-v166') && shell.includes('data-sol-shell-v166'), 'The stylesheet link does not expose both transition names.');
 
 const expectedArtifacts = {
   weaveling: 'weaveling-compass.png',
@@ -46,12 +46,12 @@ for (const token of [
   'html[data-commonweave-system="living-school"]',
   'html[data-commonweave-system="fellowfare"]',
   'html[data-commonweave-system="anarchadia"]'
-]) {
-  assert(shellCss.includes(token), `Missing realm-defining CSS for ${token}.`);
-}
+]) assert(shellCss.includes(token), `Missing realm-defining CSS for ${token}.`);
 
-assert(shellFix.includes('grid-template-columns:36px minmax(0,1fr) auto 36px 38px'), 'Top rail does not reserve separate Weaveling and settings controls.');
-assert(shellFix.includes('.cwf104-chat'), 'Top-rail Weaveling styling is missing.');
+for (const [name, source] of [['Merlinites', merlinitesFix], ['Sol', solFix]]) {
+  assert(source.includes('grid-template-columns:36px minmax(0,1fr) auto 36px 38px'), `${name} top rail does not reserve separate Weaveling and settings controls.`);
+  assert(source.includes('.cwf104-chat'), `${name} top-rail Weaveling styling is missing.`);
+}
 
 for (const file of [
   'public/app/realm-console-v140.html',
