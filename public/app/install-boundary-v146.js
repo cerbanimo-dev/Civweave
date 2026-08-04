@@ -7,7 +7,7 @@ const ADDITIONS_STYLE='/extensions/commonweave-additions-v156.css';
 const MODEL_DOWNLOAD_SCRIPT='/extensions/commonweave-model-download-v157.js';
 const PROOF_PROGRESS_SCRIPT='/extensions/commonweave-proof-progress-v158.js';
 const GEMINI_INTERACTIONS_SCRIPT='/extensions/commonweave-gemini-interactions-v159.js';
-const PREVIOUS_ADDITIONS_VERSION='v158-proof-progress';
+const PREVIOUS_ADDITIONS_VERSION='v157-fast-core';
 const params=new URLSearchParams(location.search);
 function installedDisplay(){
   return navigator.standalone===true
