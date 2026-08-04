@@ -133,15 +133,13 @@ try {
   await fs.writeFile(`${seedPath}.sha256`, `${seedInfo.sha256}  ${path.basename(seedPath)}\n`);
   await fs.writeFile(`${kitPath}.sha256`, `${kitInfo.sha256}  ${path.basename(kitPath)}\n`);
 
-  for (const [label, info] of [['Pocket Campus seed', seedInfo], ['Mobile install kit', kitInfo]]) {
-    if (info.bytes > maxCloudflareAssetBytes) {
-      throw new Error(`${label} is ${(info.bytes / 1024 / 1024).toFixed(2)} MiB; the release boundary is 24 MiB.`);
-    }
+  if (kitInfo.bytes > maxCloudflareAssetBytes) {
+    throw new Error(`Mobile install kit is ${(kitInfo.bytes / 1024 / 1024).toFixed(2)} MiB; the Cloudflare release boundary is 24 MiB.`);
   }
 
   console.log(`Built ${manifestEntries.length} current core files.`);
-  console.log(`Seed: ${(seedInfo.bytes / 1024 / 1024).toFixed(2)} MiB ${seedInfo.sha256}`);
-  console.log(`Kit: ${(kitInfo.bytes / 1024).toFixed(1)} KiB ${kitInfo.sha256}`);
+  console.log(`Seed (Render host only): ${(seedInfo.bytes / 1024 / 1024).toFixed(2)} MiB ${seedInfo.sha256}`);
+  console.log(`Kit (Cloudflare Pages): ${(kitInfo.bytes / 1024).toFixed(1)} KiB ${kitInfo.sha256}`);
 } finally {
   await fs.rm(work, { recursive: true, force: true });
 }
