@@ -51,12 +51,14 @@ wrangler login
 node scripts/setup-cloudflare-node.mjs YOUR_EXISTING_PAGES_PROJECT_NAME
 ```
 
-The setup script now detects a locally installed Wrangler directly, including on Windows. It then:
+The setup script detects a locally installed Wrangler directly, including on Windows. It then:
 
 1. verifies Cloudflare authentication;
 2. reuses or creates the named Pages project;
 3. validates and builds the complete static site;
 4. deploys the `main` production build.
+
+`wrangler.jsonc` must remain in the repository root. Do not pass `--config wrangler.jsonc` to a Pages command. Cloudflare Pages auto-discovers the default configuration file and rejects an explicitly supplied custom configuration path.
 
 ## Manual publishing commands
 
@@ -69,7 +71,7 @@ node scripts/build-cloudflare-pages.mjs
 Deploy to the default project:
 
 ```bash
-npx wrangler pages deploy .cloudflare-pages --project-name commonweave-cloudflare-node --branch main --config wrangler.jsonc
+npx wrangler pages deploy .cloudflare-pages --project-name commonweave-cloudflare-node --branch main
 ```
 
 Replace `commonweave-cloudflare-node` with the exact existing Pages project name when necessary.
@@ -81,7 +83,7 @@ Rebuild the kit and redeploy Pages:
 ```bash
 npm run build:install
 node scripts/build-cloudflare-pages.mjs
-npx wrangler pages deploy .cloudflare-pages --project-name commonweave-cloudflare-node --branch main --config wrangler.jsonc
+npx wrangler pages deploy .cloudflare-pages --project-name commonweave-cloudflare-node --branch main
 ```
 
 The build stops with a clear error if a future installer exceeds 25 MiB.
@@ -107,10 +109,10 @@ The health endpoint reports `pages-static-assets` as the installer storage mode.
 
 ```bash
 node scripts/build-cloudflare-pages.mjs
-npx wrangler pages dev --config wrangler.jsonc
+npx wrangler pages dev
 ```
 
-Wrangler normally serves Pages development on port 8788.
+Wrangler normally serves Pages development on port 8788 and reads the root `wrangler.jsonc` automatically.
 
 ## Optional automated publishing
 
