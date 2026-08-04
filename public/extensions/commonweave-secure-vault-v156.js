@@ -1,11 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-v156';
+const VERSION='1.0.4-v156-post-pr56';
 const VAULT_KEY='commonweave.encrypted-ai-vault.v156';
 const PROFILE_KEY='commonweave-model-profiles-v1';
 const SHARED_KEY='commonweave-shared-model';
 const SECRET_KEY='commonweave-model-secrets-v1';
 const SESSION_KEY='commonweave-model-session';
+const NATIVE_SECRET_KEY='commonweave.model-secret.v1';
 const encoder=new TextEncoder(),decoder=new TextDecoder();
 const b64=bytes=>btoa(String.fromCharCode(...new Uint8Array(bytes)));
 const unb64=value=>Uint8Array.from(atob(String(value||'')),char=>char.charCodeAt(0));
@@ -23,19 +24,21 @@ function currentSnapshot(){
     shared:parse(localStorage.getItem(SHARED_KEY),null),
     secrets:parse(sessionStorage.getItem(SECRET_KEY),{}),
     session:parse(sessionStorage.getItem(SESSION_KEY),{}),
+    nativeSecret:sessionStorage.getItem(NATIVE_SECRET_KEY)||'',
     capturedAt:now()
   };
 }
 function publicStatus(){
   const snapshot=currentSnapshot(),profiles=snapshot.profiles||{},secrets=snapshot.secrets||{};
+  const secretCount=Object.keys(secrets).length+(snapshot.session?.apiKey?1:0)+(snapshot.nativeSecret?1:0);
   return{
     version:VERSION,
     remembered:Boolean(localStorage.getItem(VAULT_KEY)),
-    unlocked:Object.keys(secrets).length>0||Boolean(snapshot.session?.apiKey),
+    unlocked:secretCount>0,
     interactive:profiles.interactive||snapshot.shared?.model||null,
     agentic:profiles.agentic||null,
     agenticEnabled:Boolean(profiles.agenticEnabled),
-    secretCount:Object.keys(secrets).length+(snapshot.session?.apiKey?1:0)
+    secretCount
   };
 }
 function restore(snapshot){
@@ -44,6 +47,7 @@ function restore(snapshot){
   if(snapshot.shared)localStorage.setItem(SHARED_KEY,JSON.stringify(snapshot.shared));else localStorage.removeItem(SHARED_KEY);
   sessionStorage.setItem(SECRET_KEY,JSON.stringify(snapshot.secrets||{}));
   sessionStorage.setItem(SESSION_KEY,JSON.stringify(snapshot.session||{}));
+  if(snapshot.nativeSecret)sessionStorage.setItem(NATIVE_SECRET_KEY,snapshot.nativeSecret);else sessionStorage.removeItem(NATIVE_SECRET_KEY);
   dispatch('commonweave:model-config-changed',{source:'encrypted-vault',profiles:snapshot.profiles||{}});
   dispatch('commonweave:vault-unlocked',{status:publicStatus()});
   return publicStatus();
@@ -51,7 +55,7 @@ function restore(snapshot){
 async function remember(passphrase){
   if(String(passphrase||'').length<8)throw new Error('Use an encryption passphrase of at least eight characters.');
   const snapshot=currentSnapshot();
-  if(!Object.keys(snapshot.secrets||{}).length&&!snapshot.session?.apiKey)throw new Error('No session API secret is available to remember. Configure an AI source first.');
+  if(!Object.keys(snapshot.secrets||{}).length&&!snapshot.session?.apiKey&&!snapshot.nativeSecret)throw new Error('No session API secret is available to remember. Configure Gemini or another AI source first.');
   const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
   const key=await keyFrom(passphrase,salt,['encrypt']);
   const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,encoder.encode(JSON.stringify(snapshot)));
@@ -67,22 +71,19 @@ async function unlock(passphrase){
     return restore(JSON.parse(decoder.decode(plain)));
   }catch{throw new Error('The AI vault could not be unlocked. Check the passphrase.');}
 }
-function lock(){sessionStorage.removeItem(SECRET_KEY);sessionStorage.removeItem(SESSION_KEY);dispatch('commonweave:vault-locked',{status:publicStatus()});return publicStatus()}
+function lock(){
+  sessionStorage.removeItem(SECRET_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(NATIVE_SECRET_KEY);
+  dispatch('commonweave:vault-locked',{status:publicStatus()});
+  return publicStatus();
+}
 function forget(){localStorage.removeItem(VAULT_KEY);lock();dispatch('commonweave:vault-forgotten',{status:publicStatus()});return publicStatus()}
 function scrubPlaintext(){
   const keys=['gemini-api-key','commonweave-api-key','antigravity-api-key'];let removed=0;
   for(const key of keys)if(localStorage.getItem(key)){localStorage.removeItem(key);removed++}
   if(removed)dispatch('commonweave:vault-scrubbed',{removed});return removed;
 }
-function configure(input={},options={}){
-  const runtime=globalThis.CommonweaveModelRuntime;
-  if(!runtime?.saveSharedConfig)throw new Error('The shared model runtime has not loaded yet.');
-  const profile=options.profile==='agentic'?'agentic':'interactive';
-  const safe=runtime.saveSharedConfig({...input,profile},{profile,enabled:options.enabled});
-  if(input.apiKey||input.externalConsent)runtime.saveSessionSecret(input,{apiKey:input.apiKey,externalConsent:input.externalConsent});
-  dispatch('commonweave:vault-configured',{profile,config:safe});
-  return safe;
-}
 scrubPlaintext();
-globalThis.CommonweaveSecureVaultV156=Object.freeze({VERSION,remember,unlock,lock,forget,restore,configure,currentSnapshot,status:publicStatus,hasRemembered:()=>Boolean(localStorage.getItem(VAULT_KEY)),scrubPlaintext});
+globalThis.CommonweaveSecureVaultV156=Object.freeze({VERSION,remember,unlock,lock,forget,restore,currentSnapshot,status:publicStatus,hasRemembered:()=>Boolean(localStorage.getItem(VAULT_KEY)),scrubPlaintext});
 })();
