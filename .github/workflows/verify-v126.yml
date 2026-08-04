@@ -1,4 +1,4 @@
-name: Verify Commonweave v1.0.32
+name: Verify Commonweave v1.0.4
 
 on:
   push:
@@ -69,37 +69,59 @@ jobs:
             if curl -fsS http://127.0.0.1:8787/api/health > gateway-health.json; then break; fi
             sleep 1
           done
-          grep -q '1.0.32-install-only-package-gateway' gateway-health.json
-          grep -q '"appVersion":"1.0.32"' gateway-health.json
+          grep -q '1.0.4-install-only-fullscreen-family-gateway' gateway-health.json
+          grep -q '"appVersion":"1.0.4"' gateway-health.json
           grep -q '"localInstallRequired":true' gateway-health.json
 
           curl -fsS http://127.0.0.1:8787/ -o gateway.html
-          grep -q 'Install Commonweave to enter the campus.' gateway.html
-          grep -q 'INSTALL-ONLY DEVICE PACKAGE' gateway.html
+          grep -q 'Install the five-system Commonweave family.' gateway.html
+          grep -q 'LEAN OFFLINE SOFTWARE PACKAGE' gateway.html
           if grep -q 'Open local campus' gateway.html; then
-            echo 'Installer still exposes browser-mode campus access' >&2
+            echo 'Installer still exposes browser-mode application access' >&2
             exit 1
           fi
           curl -fsS http://127.0.0.1:8787/install-v130.js -o gateway-installer.js
-          grep -q 'device-package-r30-render-transformers' gateway-installer.js
+          grep -q 'device-package-r34-lean' gateway-installer.js
           grep -q 'Reset and retry package' gateway-installer.js
           grep -q 'resetDevicePackage' gateway-installer.js
 
           curl -fsS http://127.0.0.1:8787/service-worker.js -o gateway-worker.js
-          grep -q "INSTALL_REVISION='install-only-r26'" gateway-worker.js
-          grep -q "DEVICE_REVISION='device-package-r29-complete-distribution'" gateway-worker.js
+          grep -q "INSTALL_REVISION='fullscreen-entry-r34'" gateway-worker.js
+          grep -q "DEVICE_REVISION='device-package-r34-lean'" gateway-worker.js
+          grep -q "CACHE_REVISION='fullscreen-family-r34'" gateway-worker.js
           curl -fsS http://127.0.0.1:8787/app/manifest.webmanifest -o gateway-manifest.json
-          grep -q '/app/installed-entry-v146.html?target=hub' gateway-manifest.json
+          grep -q '/app/installed-entry-v146.html?system=commonweave' gateway-manifest.json
 
-          for route in /loom/ /lite/ /app/cabinet-mode-v142.html /app/realm-console-v140.html; do
+          for route in /loom/ /lite/ /app/cabinet-mode-v142.html /app/realm-console-v140.html /app/fullscreen-family-v104.html; do
             code="$(curl -sS -o gateway-blocked.json -w '%{http_code}' "http://127.0.0.1:8787${route}")"
             test "$code" = '410'
             grep -q 'Installed runtime required' gateway-blocked.json
             grep -q '"localInstallRequired":true' gateway-blocked.json
           done
 
-          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/cabinet-mode-v142.html -o gateway-package-cabinet.html
-          grep -q 'CABINET MODE' gateway-package-cabinet.html
+          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/fullscreen-family-v104.html -o gateway-package-family.html
+          grep -q 'id="cwf104-frame"' gateway-package-family.html
+          grep -q 'guide-chat-v153.js' gateway-package-family.html
+          grep -q 'minilm-model-settings-v138.js' gateway-package-family.html
+          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/family-shell-v104.js -o gateway-package-family.js
+          grep -q "const VERSION='1.0.4'" gateway-package-family.js
+          grep -q '.filter((\[id\])=>id!==current)' gateway-package-family.js
+          grep -q 'CommonweaveGuideChatV153' gateway-package-family.js
+          grep -q 'CommonweaveModelSettingsV133' gateway-package-family.js
+          curl -fsS -D gateway-ledger-headers.txt -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/shared/commonweave-parity-ledger.json -o gateway-package-ledger.json
+          grep -qi '^x-commonweave-device-package: parity-ledger' gateway-ledger-headers.txt
+          grep -qi '^x-commonweave-software-family: 1.0.4' gateway-ledger-headers.txt
+          if grep -qi '^x-commonweave-cabinet-shells:' gateway-ledger-headers.txt; then
+            echo 'Lean package still hydrates cabinet-shell geometry' >&2
+            exit 1
+          fi
+          grep -q '"commonweave"' gateway-package-ledger.json
+
+          for route in /loom/ /lite/ /cabinetonly/; do
+            curl -fsS -H 'x-commonweave-package: install' "http://127.0.0.1:8787${route}" -o gateway-package-compatibility.html
+            grep -q 'id="cwf104-frame"' gateway-package-compatibility.html
+          done
+
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/local-object-mesh-v146.js -o gateway-package-mesh.js
           grep -q 'RTCPeerConnection' gateway-package-mesh.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/models/all-minilm-l6-v2/model-manifest.json -o gateway-package-model.json
@@ -114,69 +136,66 @@ jobs:
           test "$(curl -sS -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' -d '{"kind":"room-opened"}' http://127.0.0.1:8787/api/boot-log)" = '204'
           curl -sSI http://127.0.0.1:8787/downloads/Commonweave-Mobile-Install-Kit.zip -o gateway-download-headers.txt
           grep -qi '^location: https://github.com/cerbanimo-dev/Commonweave/' gateway-download-headers.txt
-      - name: Start local campus
+      - name: Start local software family
         run: |
           PORT=8788 npm start > commonweave-local.log 2>&1 &
           echo $! > commonweave-local.pid
-      - name: Verify offline installed campus and Cabinet Mode
+      - name: Verify offline installed software family
         run: |
           set -euxo pipefail
           for i in $(seq 1 40); do
             if curl -fsS http://127.0.0.1:8788/api/health > local-health.json; then break; fi
             sleep 1
           done
-          grep -q '1.0.31-local-campus-runtime' local-health.json
-          grep -q '"appVersion":"1.0.31"' local-health.json
+          grep -q '1.0.4-fullscreen-family-local-runtime' local-health.json
+          grep -q '"appVersion":"1.0.4"' local-health.json
 
           curl -fsS http://127.0.0.1:8788/app/installed-entry-v146.html -o installed-entry.html
-          grep -q 'Opening the local weave' installed-entry.html
           grep -q '/app/installed-entry-v146.js' installed-entry.html
-
-          curl -fsS http://127.0.0.1:8788/loom/ -o loom.html
-          grep -q '/app/assets/world/town-square-home.webp' loom.html
-          grep -q '/app/local-first-policy-v131.js' loom.html
-          grep -q '/app/install-boundary-v146.js' loom.html
-          grep -q '/app/local-object-mesh-v146.js' loom.html
-          grep -q 'data-action="cabinet"' loom.html
-
-          curl -fsS http://127.0.0.1:8788/lite/ -o lite.html
-          grep -q '/app/local-first-policy-v131.js' lite.html
-          grep -q '/app/install-boundary-v146.js' lite.html
-          grep -q '/app/local-object-mesh-v146.js' lite.html
-          grep -q 'id="cabinet-link"' lite.html
-          grep -q '>Cabinet mode<' lite.html
-
-          curl -fsS http://127.0.0.1:8788/app/shared/commonweave-parity-runtime.js -o parity-runtime.js
-          grep -q '/app/cabinet-mode-v142.html' parity-runtime.js
-          grep -q 'function cabinetUrl' parity-runtime.js
-          if grep -q '/loom/realm/' parity-runtime.js; then
-            echo 'Cabinet route still points to legacy scenes' >&2
+          if grep -q 'Opening the local weave' installed-entry.html; then
+            echo 'Retired installed intro is still present' >&2
             exit 1
           fi
+          curl -fsS http://127.0.0.1:8788/app/installed-entry-v146.js -o installed-entry.js
+          grep -q "DEFAULT_DESTINATION='/app/fullscreen-family-v104.html?system=commonweave'" installed-entry.js
+          grep -q "params.get('system')" installed-entry.js
 
-          curl -fsS http://127.0.0.1:8788/app/cabinet-mode-v142.html -o cabinet-mode.html
-          grep -q 'CABINET MODE' cabinet-mode.html
-          grep -q 'Close Cabinet Mode and return to the Commonweave hub' cabinet-mode.html
-          grep -q '/app/install-boundary-v146.js' cabinet-mode.html
-          grep -q '/app/local-object-mesh-v146.js' cabinet-mode.html
+          curl -fsS http://127.0.0.1:8788/app/fullscreen-family-v104.html -o fullscreen-family.html
+          grep -q 'id="cwf104-frame"' fullscreen-family.html
+          grep -q '/app/guide-chat-v153.js' fullscreen-family.html
+          grep -q '/app/minilm-model-settings-v138.js' fullscreen-family.html
+          grep -q '/app/capability-readiness-v154.js' fullscreen-family.html
+          curl -fsS http://127.0.0.1:8788/app/family-shell-v104.css -o family-shell.css
+          grep -q 'grid-template-columns:repeat(4' family-shell.css
+          grep -q '.cwf104-badge' family-shell.css
+          grep -q '.cwf104-dot' family-shell.css
+          curl -fsS http://127.0.0.1:8788/app/family-shell-v104.js -o family-shell.js
+          grep -q "const VERSION='1.0.4'" family-shell.js
+          grep -q "commonweave:{label:'Commonweave',guide:'Weaveling'" family-shell.js
+          grep -q "'living-school':{label:'Living School',guide:'Moss'" family-shell.js
+          grep -q "cerbanimo:{label:'Cerbanimo',guide:'Kamiya'" family-shell.js
+          grep -q "fellowfare:{label:'FellowFare',guide:'Rook'" family-shell.js
+          grep -q "anarchadia:{label:'Anarchadia',guide:'Merlin'" family-shell.js
+          grep -q '.filter((\[id\])=>id!==current)' family-shell.js
+          grep -q 'CommonweaveGuideChatV153' family-shell.js
+          grep -q 'CommonweaveModelSettingsV133' family-shell.js
+          grep -q '\[data-ai-settings\]' family-shell.js
 
-          curl -fsS http://127.0.0.1:8788/app/cabinet-only-v144.html -o cabinet-only.html
-          grep -q 'CABINET ONLY' cabinet-only.html
-          grep -q '/app/install-boundary-v146.js' cabinet-only.html
-          grep -q '/app/local-object-mesh-v146.js' cabinet-only.html
+          curl -fsS 'http://127.0.0.1:8788/app/realm-console-v140.html?system=commonweave' -o commonweave-software.html
+          curl -fsS http://127.0.0.1:8788/app/cabinets/living-school/index.html -o living-school-software.html
+          curl -fsS 'http://127.0.0.1:8788/app/realm-console-v140.html?system=cerbanimo' -o cerbanimo-software.html
+          curl -fsS http://127.0.0.1:8788/app/fellowfare-cabinet-v144.html -o fellowfare-software.html
+          curl -fsS http://127.0.0.1:8788/app/anarchadia-console-v139.html -o anarchadia-software.html
+          for file in commonweave-software.html living-school-software.html cerbanimo-software.html fellowfare-software.html anarchadia-software.html; do
+            grep -q '/app/guide-chat-v153.js' "$file"
+            grep -q '/app/capability-readiness-v154.js' "$file"
+          done
 
-          curl -fsS http://127.0.0.1:8788/app/cabinet-mode-v142.css -o cabinet-mode.css
-          grep -q 'aspect-ratio:941/1672' cabinet-mode.css
-          grep -q 'transform:translate(-50%,-50%)' cabinet-mode.css
-          curl -fsS http://127.0.0.1:8788/app/cabinet-mode-v142.js -o cabinet-mode.js
-          grep -q '/app/realm-console-v140.html' cabinet-mode.js
-          grep -q '/app/anarchadia-console-v139.html' cabinet-mode.js
-          grep -q '/app/services/fellowfare/cabinet.html' cabinet-mode.js
-          grep -q 'cabinetScreen' cabinet-mode.js
-          grep -q '#cw127-app' cabinet-mode.js
-          grep -q "function closeCabinet(){location.assign('/loom/')}" cabinet-mode.js
-          if grep -q 'history.back()' cabinet-mode.js; then
-            echo 'Cabinet close control still behaves like Back' >&2
+          curl -fsS http://127.0.0.1:8788/app/shared/commonweave-parity-runtime.js -o parity-runtime.js
+          grep -q "FAMILY_URL='/app/fullscreen-family-v104.html'" parity-runtime.js
+          grep -q 'function cabinetUrl' parity-runtime.js
+          if grep -q 'Promise.all(\[fetch(`${LEDGER_URL}`' parity-runtime.js; then
+            echo 'Capability runtime still requires cabinet-shell geometry' >&2
             exit 1
           fi
 
@@ -185,48 +204,42 @@ jobs:
           grep -q 'RTCPeerConnection' local-object-mesh.js
           grep -q 'syncGateway' local-object-mesh.js
 
-          curl -fsS http://127.0.0.1:8788/app/cabinet-visual-v141.html -o legacy-visual.html
-          grep -q '/app/cabinet-mode-v142.html' legacy-visual.html
-          grep -q 'location.replace' legacy-visual.html
-          curl -fsS http://127.0.0.1:8788/loom/realm/cerbanimo/ -o legacy-realm.html
-          grep -q '/app/cabinet-mode-v142.html' legacy-realm.html
-          grep -q 'location.replace' legacy-realm.html
+          curl -fsS http://127.0.0.1:8788/app/cabinet-mode-v142.html -o marketing-cabinet.html
+          grep -q 'cv141-art' marketing-cabinet.html
+          grep -q 'cabinet-calibration-v144.js' marketing-cabinet.html
+          curl -fsS http://127.0.0.1:8788/app/shared/cabinet-shells-v129.json -o marketing-cabinet-shells.json
+          grep -q '"referencePanels"' marketing-cabinet-shells.json
 
-          curl -fsS http://127.0.0.1:8788/app/v130-cabinet-launcher.js -o cabinet-launcher.js
-          grep -q 'CommonweaveParity.cabinetUrl' cabinet-launcher.js
-          grep -q 'Cabinet mode' cabinet-launcher.js
-          for token in realmSrcdoc cw-cabinet-modal cw-cabinet-frame; do
-            if grep -q "$token" cabinet-launcher.js; then
-              echo "Nested cabinet machinery survived: $token" >&2
+          curl -fsS http://127.0.0.1:8788/service-worker.js -o service-worker.js
+          grep -q "VERSION='1.0.4'" service-worker.js
+          grep -q "CACHE_REVISION='fullscreen-family-r34'" service-worker.js
+          grep -q "DEVICE_REVISION='device-package-r34-lean'" service-worker.js
+          grep -q "INSTALL_REVISION='fullscreen-entry-r34'" service-worker.js
+          grep -q '/app/fullscreen-family-v104.html' service-worker.js
+          grep -q '/app/family-shell-v104.css' service-worker.js
+          grep -q '/app/family-shell-v104.js' service-worker.js
+          grep -q '/app/realm-console-v140.html' service-worker.js
+          grep -q '/app/cabinets/living-school/index.html' service-worker.js
+          grep -q '/app/fellowfare-cabinet-v144.html' service-worker.js
+          grep -q '/app/anarchadia-console-v139.html' service-worker.js
+          grep -q 'GET_DEVICE_PACKAGE_STATUS' service-worker.js
+          grep -q 'for(const url of \[...new Set(DEVICE_REQUIRED)\])await cacheRequired' service-worker.js
+          for retired in \
+            '/app/assets/cabinets/commonweave.webp' \
+            '/app/assets/world/town-square-home.webp' \
+            '/app/cabinet-calibrator-v144.html' \
+            '/app/shared/cabinet-shells-v129.json'; do
+            if grep -q "$retired" service-worker.js; then
+              echo "Marketing-only asset remains in installed package: $retired" >&2
               exit 1
             fi
           done
-
-          curl -fsS http://127.0.0.1:8788/app/shared/cabinet-shells-v129.json -o cabinet-shells.json
-          grep -q '"referencePanels"' cabinet-shells.json
-          grep -q '"cerbanimo"' cabinet-shells.json
-          grep -q '"referenceWidth": 489' cabinet-shells.json
-
-          curl -fsS http://127.0.0.1:8788/service-worker.js -o service-worker.js
-          grep -q "CACHE_REVISION='cabinet-mode-r23-subsystem-routing'" service-worker.js
-          grep -q "DEVICE_REVISION='device-package-r29-complete-distribution'" service-worker.js
-          grep -q "CALIBRATION_REVISION='source-svg-r24-user'" service-worker.js
-          grep -q "INSTALL_REVISION='install-only-r26'" service-worker.js
-          grep -q 'for(const url of \[...new Set(DEVICE_REQUIRED)\])await cacheRequired' service-worker.js
-          grep -q 'function navigationFallback' service-worker.js
-          grep -q '/app/services/fellowfare/cabinet.html' service-worker.js
-          grep -q '/app/cabinets/living-school/index.html' service-worker.js
-          grep -q '/app/installed-entry-v146.html' service-worker.js
-          grep -q '/app/local-object-mesh-v146.js' service-worker.js
-          grep -q '/app/cabinet-only-v144.html' service-worker.js
-          grep -q 'GET_DEVICE_PACKAGE_STATUS' service-worker.js
-          grep -q 'ARCHIVED_LOCATION_PREFIXES' service-worker.js
           if grep -q '/api/boot-log' service-worker.js; then
             echo 'Service worker still submits telemetry' >&2
             exit 1
           fi
           if grep -q 'networkFirst' service-worker.js; then
-            echo 'Service worker still redownloads cabinet assets network-first' >&2
+            echo 'Service worker still redownloads software assets network-first' >&2
             exit 1
           fi
 
@@ -234,11 +247,11 @@ jobs:
           grep -q 'Next: Tell me your wish or set an intention.' local-first-policy.js
           grep -q 'conversationLinkKey' local-first-policy.js
           grep -q 'legacy-telemetry-blocked' local-first-policy.js
-      - name: Upload local-first evidence
+      - name: Upload v1.0.4 software-family evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v132-install-only-mesh-evidence
+          name: commonweave-v104-fullscreen-family-evidence
           path: |
             commonweave-gateway.log
             commonweave-local.log
@@ -249,7 +262,11 @@ jobs:
             gateway-blocked.json
             gateway-worker.js
             gateway-manifest.json
-            gateway-package-cabinet.html
+            gateway-package-family.html
+            gateway-package-family.js
+            gateway-ledger-headers.txt
+            gateway-package-ledger.json
+            gateway-package-compatibility.html
             gateway-package-mesh.js
             gateway-package-model.json
             gateway-package-transformers.js
@@ -258,17 +275,18 @@ jobs:
             gateway-download-headers.txt
             local-health.json
             installed-entry.html
-            loom.html
-            lite.html
+            installed-entry.js
+            fullscreen-family.html
+            family-shell.css
+            family-shell.js
+            commonweave-software.html
+            living-school-software.html
+            cerbanimo-software.html
+            fellowfare-software.html
+            anarchadia-software.html
             parity-runtime.js
-            cabinet-mode.html
-            cabinet-only.html
-            cabinet-mode.css
-            cabinet-mode.js
             local-object-mesh.js
-            legacy-visual.html
-            legacy-realm.html
-            cabinet-launcher.js
-            cabinet-shells.json
+            marketing-cabinet.html
+            marketing-cabinet-shells.json
             service-worker.js
             local-first-policy.js
