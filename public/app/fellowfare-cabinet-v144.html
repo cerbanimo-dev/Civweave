@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-build="fellowfare-direct-family-r42-requests" data-commonweave-system="fellowfare">
+<html lang="en" data-build="fellowfare-direct-family-r43-material-request-followthrough" data-commonweave-system="fellowfare">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -24,7 +24,7 @@
         <div>
           <small>FELLOWFARE EXCHANGE GUIDE</small>
           <h1 id="ffc144-rook-title">Chat with Rook</h1>
-          <p>Name a need, offer, service, trade, or logistical knot. Rook will build a private request preview and ask before anything is published.</p>
+          <p>Name a need, offer, service, trade, or material list. Rook will build a private request preview. An explicit “submit this draft” publishes the reviewed request instead of starting over.</p>
         </div>
         <button type="button" class="ffc144-rook-settings" data-ffc-rook-settings>AI settings</button>
       </header>
@@ -39,7 +39,7 @@
         <button type="button" data-ffc-rook-action="offer">Draft an offer</button>
         <button type="button" data-ffc-rook-action="matches">Find matches</button>
       </div>
-      <output class="ffc144-rook-status" data-ffc-rook-status aria-live="polite">Rook is ready locally. Requests remain private until reviewed and approved.</output>
+      <output class="ffc144-rook-status" data-ffc-rook-status aria-live="polite">Rook is ready locally. Requests remain private until reviewed and explicitly approved.</output>
     </section>
     <nav class="ffc144-tabs" aria-label="FellowFare workbench">
       <button type="button" data-ffc-command="market" aria-current="page">Market</button>
@@ -63,5 +63,6 @@
   <script src="/app/family-ai-loader-v105.js?v=direct-r41" defer></script>
   <script src="/app/family-shell-v104.js?v=direct-r38" defer></script>
   <script src="/app/rook-request-flow-v160.js?v=request-preview-r1" defer></script>
+  <script src="/app/action-followthrough-v165.js?v=explicit-approval-r1" defer></script>
 </body>
 </html>
