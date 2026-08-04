@@ -8,6 +8,7 @@ const BACKEND_ROOT=new URL('/app/vendor/transformers/wasm/',self.location.origin
 const BACKEND_MJS=new URL(`ort-wasm-simd-threaded.jsep.mjs?v=${BACKEND_VERSION}`,BACKEND_ROOT).href;
 const BACKEND_WASM=new URL(`ort-wasm-simd-threaded.jsep.wasm?v=${BACKEND_VERSION}`,BACKEND_ROOT).href;
 let statePromise=null;
+const rankCache=new Map();
 
 function serialize(error){
   const raw=String(error?.message||error||'MiniLM worker error');
@@ -78,6 +79,22 @@ async function load(){
   })().catch(error=>{statePromise=null;throw error});
   return statePromise;
 }
+async function embed(extractor,texts){
+  const output=await extractor(texts,{pooling:'mean',normalize:true});
+  return output.tolist();
+}
+async function rankedCandidates(state,message){
+  const candidates=(Array.isArray(message.candidates)?message.candidates:[]).slice(0,64).map((item,index)=>({id:String(item?.id||`candidate-${index+1}`).slice(0,180),text:String(item?.text||'').trim().slice(0,6000)})).filter(item=>item.text);
+  if(!candidates.length)return[];
+  const cacheKey=String(message.cacheKey||'').slice(0,240);
+  let vectors=cacheKey?rankCache.get(cacheKey):null;
+  if(!vectors||vectors.length!==candidates.length){
+    vectors=await embed(state.extractor,candidates.map(item=>item.text));
+    if(cacheKey){rankCache.set(cacheKey,vectors);while(rankCache.size>24)rankCache.delete(rankCache.keys().next().value)}
+  }
+  const [query]=await embed(state.extractor,[String(message.text||'').slice(0,12000)]);
+  return candidates.map((item,index)=>({id:item.id,score:cosine(query,vectors[index])})).sort((a,b)=>b.score-a.score).slice(0,Math.max(1,Math.min(16,Number(message.limit||8))));
+}
 
 self.addEventListener('message',async event=>{
   const message=event.data||{};
@@ -90,6 +107,10 @@ self.addEventListener('message',async event=>{
       const vector=output.tolist()[0];
       const matches=state.entries.map((entry,index)=>({id:entry.id,system:entry.system,score:cosine(vector,state.vectors[index])})).sort((a,b)=>b.score-a.score).slice(0,Math.max(1,Math.min(8,Number(message.limit||5))));
       self.postMessage({id:message.id,type:'match',device:state.device,dtype:state.dtype,matches});return;
+    }
+    if(message.type==='rank'){
+      const matches=await rankedCandidates(state,message);
+      self.postMessage({id:message.id,type:'rank',device:state.device,dtype:state.dtype,matches});return;
     }
     throw new Error(`Unknown MiniLM worker request: ${message.type}`);
   }catch(error){self.postMessage({id:message.id,type:'error',error:serialize(error)})}
