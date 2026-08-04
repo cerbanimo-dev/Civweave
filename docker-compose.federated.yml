@@ -1,0 +1,27 @@
+services:
+  commonweave:
+    build:
+      context: .
+      dockerfile: Dockerfile.federated
+    image: commonweave/federated-node:local
+    init: true
+    restart: unless-stopped
+    ports:
+      - "${COMMONWEAVE_PORT:-8787}:8787"
+    environment:
+      PUBLIC_HOST_URL: ${PUBLIC_HOST_URL:-http://localhost:8787}
+      COMMONWEAVE_NODE_NAME: ${COMMONWEAVE_NODE_NAME:-Commonweave Community Node}
+      COMMONWEAVE_NODE_DESCRIPTION: ${COMMONWEAVE_NODE_DESCRIPTION:-A sovereign Commonweave community node.}
+      COMMONWEAVE_FEDERATION_ADMIN_TOKEN: ${COMMONWEAVE_FEDERATION_ADMIN_TOKEN:?Set COMMONWEAVE_FEDERATION_ADMIN_TOKEN in .env.federated}
+      COMMONWEAVE_ALLOW_UNAUTHENTICATED_ADMIN: ${COMMONWEAVE_ALLOW_UNAUTHENTICATED_ADMIN:-false}
+      COMMONWEAVE_NODE_CAPABILITIES: ${COMMONWEAVE_NODE_CAPABILITIES:-release-distribution,node-discovery,federated-events,fellowfare.exchange,living-school.curricula,anarchadia.proposals,portable-proofs}
+      COMMONWEAVE_AUTO_ACCEPT_PEERS: ${COMMONWEAVE_AUTO_ACCEPT_PEERS:-false}
+      COMMONWEAVE_MAX_FEDERATION_EVENTS: ${COMMONWEAVE_MAX_FEDERATION_EVENTS:-5000}
+      COMMONWEAVE_MAX_PENDING_PEERS: ${COMMONWEAVE_MAX_PENDING_PEERS:-256}
+      HUB_TOKEN: ${HUB_TOKEN:-}
+      DATA_DIR: /app/data
+    volumes:
+      - commonweave_data:/app/data
+
+volumes:
+  commonweave_data:
