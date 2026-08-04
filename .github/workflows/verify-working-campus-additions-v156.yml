@@ -2,7 +2,7 @@ name: Verify working-campus additions v156
 
 on:
   push:
-    branches: ["agent/fix-commonweave-hud-freeze-current"]
+    branches: ["agent/fix-merlin-rook-proof-handoffs"]
   pull_request:
 
 jobs:
@@ -28,9 +28,12 @@ jobs:
           node --check public/app/models/all-minilm-l6-v2/adapter.js
           node --check public/app/platform-stability-v159.js
           node --check public/app/platform-experience-v160.js
+          node --check public/app/action-followthrough-v165.js
           node --check public/app/rook-request-flow-v160.js
           node --check public/app/anarchadia-console-v158.js
           node --check public/app/anarchadia-runtime-stability-v159.js
+          node --check public/app/anarchadia-change-review-v165.js
+          node --check public/app/cerbanimo-proof-attachments-v165.js
           node --check public/app/cerbanimo-ai-validator-v159.js
           node --check public/app/intention-planner-v141.js
           node --check public/app/cabinets/living-school/living-school-workbench-v158.js
@@ -55,6 +58,7 @@ jobs:
           node --check scripts/verify-platform-flow-v160.mjs
           node --check scripts/test-platform-flow-v160.mjs
           node --check scripts/verify-platform-hud-stability-v163.mjs
+          node --check scripts/test-workflow-handoffs-v165.mjs
           node --check scripts/verify-living-school-cabinet-v151.mjs
           node --check scripts/verify-anarchadia-cabinet-workbench-v144.mjs
           node --check scripts/verify-cerbanimo-quest-engine-v144.mjs
@@ -78,6 +82,8 @@ jobs:
         run: node scripts/test-platform-flow-v160.mjs
       - name: Verify shared HUD observer stability
         run: node scripts/verify-platform-hud-stability-v163.mjs
+      - name: Test Merlin Rook and Cerbanimo handoffs
+        run: node scripts/test-workflow-handoffs-v165.mjs
       - name: Verify researched Living School
         run: node scripts/verify-living-school-cabinet-v151.mjs
       - name: Verify Merlin and Anarchadia stability
