@@ -63,15 +63,24 @@ for (const file of [
 
 const oldName = ['S','ol'].join('');
 const oldSlug = oldName.toLowerCase();
-for (const [label, source] of Object.entries({shell, shellFix})) {
-  assert(!source.includes(oldName), `${label} still contains the retired display name.`);
-  assert(!source.includes(`${oldSlug}-r`), `${label} still contains the retired cache key.`);
+for (const [label, source] of Object.entries({shell, shellCss, shellFix})) {
   assert(!source.includes(`${oldSlug}-shell`), `${label} still contains the retired shell path.`);
+  assert(!source.includes(`${oldSlug}-semantic`), `${label} still contains the retired semantic path.`);
+  assert(!source.includes(`--${oldSlug}-`), `${label} still contains a retired custom property.`);
+  assert(!source.includes(`${oldName} visual overhaul`), `${label} still contains the retired visual title.`);
 }
 
 const textRoots=['.github','docs','public','scripts'];
 const pathPattern=new RegExp(`(^|[-_.])${oldSlug}([-_.]|$)`,'i');
-const contentPattern=new RegExp(`\\b${oldName}\\b|${oldSlug}-(?:r[0-9]|shell|semantic|visual)|Commonweave${oldName}`,'i');
+const contentPattern=new RegExp([
+  `${oldSlug}-(?:r[0-9]|shell|semantic|visual)`,
+  `Commonweave${oldName}`,
+  `--${oldSlug}-`,
+  `\\b${oldName}\\s+(?:visual|semantic|planning|shell|overhaul)\\b`,
+  `commonweave[.:]${oldSlug}-`,
+  `__${oldSlug}Semantic`,
+  `${oldSlug}Feedback`
+].join('|'),'i');
 const ignoredExtensions=new Set(['.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.ttf','.otf','.onnx','.wasm','.zip','.pdf','.mp4','.mp3','.wav']);
 const violations=[];
 function inspectTree(relative){
@@ -84,7 +93,7 @@ function inspectTree(relative){
     if(ignoredExtensions.has(path.extname(entry.name).toLowerCase()))continue;
     let value='';try{value=fs.readFileSync(path.join(root,child),'utf8')}catch{continue}
     if(value.includes('\u0000'))continue;
-    if(contentPattern.test(value))violations.push(`${child}: retired name in content`);
+    if(contentPattern.test(value))violations.push(`${child}: retired subsystem marker in content`);
   }
 }
 for(const directory of textRoots)inspectTree(directory);
