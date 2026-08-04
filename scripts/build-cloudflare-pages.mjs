@@ -23,7 +23,8 @@ const pocketCampusSeedPath = resolve(
   sourceDir,
   "downloads/commonweave-pocket-campus.cwseed",
 );
-const maxCloudflareAssetBytes = 25 * 1024 * 1024;
+const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
+const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
 function walkFiles(directory) {
   const files = [];
@@ -35,15 +36,39 @@ function walkFiles(directory) {
   return files;
 }
 
+function runNodeScript(script, failureMessage) {
+  const result = spawnSync(process.execPath, [script], {
+    cwd: repoRoot,
+    stdio: "inherit",
+  });
+  if (result.status !== 0) throw new Error(failureMessage);
+}
+
 function rebuildReleaseArtifacts() {
-  const result = spawnSync(
-    process.execPath,
-    [resolve(scriptDir, "build-mobile-install-kit.mjs")],
-    { cwd: repoRoot, stdio: "inherit" },
+  runNodeScript(
+    parityMaterializer,
+    "Commonweave parity ledger materialization failed.",
   );
-  if (result.status !== 0) {
-    throw new Error("Commonweave release artifact rebuild failed.");
-  }
+  runNodeScript(
+    resolve(scriptDir, "build-mobile-install-kit.mjs"),
+    "Commonweave release artifact rebuild failed.",
+  );
+}
+
+function oversizedFiles(directory) {
+  return walkFiles(directory)
+    .map((file) => ({ file, bytes: statSync(file).size }))
+    .filter(({ bytes }) => bytes > maxCloudflareAssetBytes)
+    .sort((a, b) => b.bytes - a.bytes || a.file.localeCompare(b.file));
+}
+
+function formatOversized(directory, files) {
+  return files
+    .map(
+      ({ file, bytes }) =>
+        `${relative(directory, file)} (${(bytes / 1024 / 1024).toFixed(2)} MiB; ${bytes} bytes)`,
+    )
+    .join("\n- ");
 }
 
 if (!existsSync(sourceDir) || !statSync(sourceDir).isDirectory()) {
@@ -61,6 +86,13 @@ for (const [label, file] of [
   }
 }
 
+const sourceOversized = oversizedFiles(sourceDir);
+if (sourceOversized.length) {
+  throw new Error(
+    `Cloudflare Pages 24 MiB release boundary exceeded by ${sourceOversized.length} hosted file(s):\n- ${formatOversized(sourceDir, sourceOversized)}\nReplace or rebuild every listed file before deploying.`,
+  );
+}
+
 rmSync(outputDir, { recursive: true, force: true });
 
 cpSync(sourceDir, outputDir, {
@@ -72,19 +104,10 @@ cpSync(sourceDir, outputDir, {
   },
 });
 
-const oversizedAssets = walkFiles(outputDir)
-  .map((file) => ({ file, bytes: statSync(file).size }))
-  .filter(({ bytes }) => bytes > maxCloudflareAssetBytes);
-
-if (oversizedAssets.length) {
-  const details = oversizedAssets
-    .map(
-      ({ file, bytes }) =>
-        `${relative(outputDir, file)} (${(bytes / 1024 / 1024).toFixed(2)} MiB)`,
-    )
-    .join(", ");
+const outputOversized = oversizedFiles(outputDir);
+if (outputOversized.length) {
   throw new Error(
-    `Cloudflare Pages asset limit exceeded: ${details}. Replace or rebuild these files below 25 MiB before deploying.`,
+    `Cloudflare Pages output contains ${outputOversized.length} file(s) above 24 MiB:\n- ${formatOversized(outputDir, outputOversized)}`,
   );
 }
 
@@ -93,3 +116,4 @@ const seedBytes = statSync(pocketCampusSeedPath).size;
 console.log(
   `Built .cloudflare-pages with mobile installer (${installerBytes} bytes) and portable Commonweave seed (${seedBytes} bytes).`,
 );
+console.log("All Cloudflare-hosted files are at or below 24 MiB.");
