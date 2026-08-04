@@ -1,0 +1,8 @@
+- [x] Commonweave is the installed first screen
+- [x] Five underlying software sites render full-screen
+- [x] Exactly four labeled family buttons appear at the bottom
+- [x] Status dots and notification badges are derived from local state
+- [x] Universal AI settings intercept realm-specific setup controls
+- [x] Guide chat uses the working shared assistant runtime
+- [x] Cabinet art and calibration assets are excluded from DEVICE_REQUIRED
+- [x] Version is 1.0.4
