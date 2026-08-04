@@ -2,6 +2,8 @@
 'use strict';
 const INSTALLER='/';
 const DEV_KEY='commonweave.install-boundary.developer.v146';
+const ADDITIONS_SCRIPT='/extensions/commonweave-additions-v156.js';
+const ADDITIONS_STYLE='/extensions/commonweave-additions-v156.css';
 const params=new URLSearchParams(location.search);
 function installedDisplay(){
   return navigator.standalone===true
@@ -24,11 +26,25 @@ function installerUrl(){
   next.searchParams.set('next',target.slice(0,1800));
   return next.href;
 }
+function installAdditions(){
+  if(document.querySelector(`script[src^="${ADDITIONS_SCRIPT}"]`))return;
+  if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href=`${ADDITIONS_STYLE}?v=post-pr56`;
+    document.head.append(link);
+  }
+  const script=document.createElement('script');
+  script.src=`${ADDITIONS_SCRIPT}?v=post-pr56`;
+  script.defer=true;
+  document.head.append(script);
+}
 if(!allowed()){
   document.documentElement.dataset.installBoundary='blocked';
   location.replace(installerUrl());
 }else{
   document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
+  installAdditions();
 }
-globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl};
+globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v156-post-pr56'};
 })();
