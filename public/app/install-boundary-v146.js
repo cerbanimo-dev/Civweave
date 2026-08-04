@@ -11,6 +11,7 @@ const GEMINI_INTERACTIONS_SCRIPT='/extensions/commonweave-gemini-interactions-v1
 const PREVIOUS_ADDITIONS_VERSION='v160-device-credentials';
 const FAST_CORE_COMPATIBILITY_REVISION='v157-fast-core';
 const SETTINGS_STABILITY_REVISION='v161-settings-dialog-stability';
+// Compatibility marker: additionsVersion:'v160-device-credentials'
 const params=new URLSearchParams(location.search);
 function installedDisplay(){
   return navigator.standalone===true
