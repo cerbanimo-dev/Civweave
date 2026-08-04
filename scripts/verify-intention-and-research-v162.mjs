@@ -1,9 +1,10 @@
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
-const [plannerSource,researchSource,indexHtml,worker,installBoundary]=await Promise.all([
+const [plannerSource,researchSource,stabilitySource,indexHtml,worker,installBoundary]=await Promise.all([
   readFile('public/app/intention-planner-v141.js','utf8'),
   readFile('public/app/cabinets/living-school/living-school-research-v162.js','utf8'),
+  readFile('public/app/cabinets/living-school/living-school-runtime-stability-v159.js','utf8'),
   readFile('public/app/cabinets/living-school/index.html','utf8'),
   readFile('public/service-worker-v156.js','utf8'),
   readFile('public/app/install-boundary-v146.js','utf8')
@@ -63,6 +64,8 @@ assert(packet.sources.every(source=>source.verified===false&&!source.url&&/MODEL
 assert(calls.length===2&&calls[0].executionProfile==='agentic'&&calls[1].executionProfile==='interactive','Research routing did not try Antigravity before Gemini fallback.');
 assert(calls[1].config.model==='gemini-3.5-flash-lite','Fallback did not use the primary Gemini profile only after Antigravity failure.');
 
+assert(stabilitySource.includes('LivingSchoolResearchV162')&&stabilitySource.includes('delegatedToV162:true'),'The v159 research shim does not delegate to v162.');
+assert(!stabilitySource.includes('async function fetchJson'),'The v159 shim still performs direct Crossref/Wikipedia fetching.');
 for(const token of ['/app/cabinets/living-school/living-school-research-v162.js','agentic-research-v162'])assert(indexHtml.includes(token),`Living School index is missing ${token}.`);
 for(const token of ['/app/intention-planner-v141.js','/app/cabinets/living-school/living-school-research-v162.js',"INTENTION_RESEARCH_REVISION='latest-intention-agentic-research-v162'"])assert(worker.includes(token),`Installed package is missing ${token}.`);
 assert(installBoundary.includes("additionsVersion:'v162-latest-intention-agentic-research'"),'Install boundary did not rotate to v162.');
