@@ -40,7 +40,7 @@ class FakeNode{
   append(node){this._insert(node,this.children.length)}
   prepend(node){this._insert(node,0)}
   insertBefore(node,anchor){const index=this.children.indexOf(anchor);this._insert(node,index<0?this.children.length:index)}
-  _insert(node,index){if(node.parentElement){const prior=node.parentElement.children.indexOf(node);if(prior>=0)node.parentElement.children.splice(prior,1)}node.parentElement=this;this.children.splice(index,0,node)}
+  _insert(node,index){if(node.parentElement){const previousParent=node.parentElement,prior=previousParent.children.indexOf(node);if(prior>=0){previousParent.children.splice(prior,1);if(previousParent===this&&prior<index)index--}}node.parentElement=this;this.children.splice(index,0,node)}
   cloneNode(){return{outerHTML:this.outerHTML,querySelectorAll(){return[]}}}
 }
 const display=new FakeNode({className:'ac-display',outerHTML:'<section class="ac-display"></section>'});
