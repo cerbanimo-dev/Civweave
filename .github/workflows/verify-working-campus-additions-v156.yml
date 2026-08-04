@@ -40,6 +40,7 @@ jobs:
           node --check public/extensions/commonweave-model-download-v157.js
           node --check public/extensions/commonweave-proof-progress-v158.js
           node --check public/extensions/commonweave-gemini-interactions-v159.js
+          node --check public/extensions/commonweave-device-credentials-v160.js
           node --check scripts/verify-working-campus-additions-v156.mjs
           node --check scripts/verify-unified-ai-settings-v157.mjs
           node --check scripts/verify-five-system-inner-ui-v157.mjs
