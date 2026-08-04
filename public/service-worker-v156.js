@@ -2,10 +2,9 @@
 importScripts('/service-worker.js?v=1.0.4-base-r37-core');
 const INLINE_CHAT_REVISION='inline-commonweave-r41-tray-escape';
 // Inline chat compatibility marker: INLINE_CHAT_REVISION='inline-commonweave-r40'
-const EXTENSION_VERSION='working-campus-additions-v167-two-agent-workflow-sol-semantic-planning';
+const EXTENSION_VERSION='working-campus-additions-v168-two-agent-workflow-merlinites-semantic-planning';
 // Two-agent compatibility marker: EXTENSION_VERSION='working-campus-additions-v166-two-agent-youtube-reviewed-handoffs'
 // Workflow handoff compatibility marker: EXTENSION_VERSION='working-campus-additions-v165-reviewed-requests-material-followthrough-proof-attachments'
-// Sol compatibility marker: EXTENSION_VERSION='working-campus-additions-v165-sol-semantic-planning'
 // Previous current-main compatibility marker: EXTENSION_VERSION='working-campus-additions-v164-latest-intention-agentic-research-hud-stability'
 // HUD hotfix compatibility marker: EXTENSION_VERSION='working-campus-additions-v163-hud-observer-stability'
 // Latest intention and research compatibility marker: EXTENSION_VERSION='working-campus-additions-v163-latest-intention-agentic-research'
@@ -36,11 +35,10 @@ const HUD_OBSERVER_STABILITY_REVISION='hud-observer-stability-v164-current-main'
 // HUD hotfix revision compatibility marker: hud-observer-stability-v163
 const WORKFLOW_HANDOFF_REVISION='reviewed-merlin-rook-proof-attachments-v165';
 const TWO_AGENT_RELAY_REVISION='living-school-two-agent-youtube-v166';
-const SOL_SEMANTIC_REVISION='sol-semantic-planning-v164';
-const EXTENSION_CACHE='cwext-working-campus-additions-v167-two-agent-workflow-sol-semantic-planning';
+const MERLINITES_SEMANTIC_REVISION='merlinites-semantic-planning-v164';
+const EXTENSION_CACHE='cwext-working-campus-additions-v168-two-agent-workflow-merlinites-semantic-planning';
 // Two-agent cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v166-two-agent-youtube-reviewed-handoffs'
 // Workflow handoff cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v165-reviewed-requests-material-followthrough-proof-attachments'
-// Sol cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v165-sol-semantic-planning'
 // Previous current-main cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v164-latest-intention-agentic-research-hud-stability'
 // Latest intention and research compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v163-latest-intention-agentic-research'
 // Platform compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v162-dark-review-rook-learning'
@@ -82,7 +80,7 @@ const CORE_PATCH_FILES=[
   '/app/models/all-minilm-l6-v2/worker.js',
   '/app/model-settings-v133.css',
   '/app/intention-planner-v141.js',
-  '/app/sol-semantic-planner-v164.js',
+  '/app/merlinites-semantic-planner-v164.js',
   '/app/pwa-v130.js',
   '/app/working-campus-v156.html',
   '/app/working-campus-v156.css',
@@ -110,7 +108,7 @@ async function cacheExtensions(){const cache=await caches.open(EXTENSION_CACHE);
 async function patchInstalledCore(){const fresh=new Map();for(const url of CORE_PATCH_FILES)fresh.set(url,await fetchRequired(url));const deadline=Date.now()+120000;while(Date.now()<deadline){const names=(await caches.keys()).filter(name=>name.startsWith('commonweave-static-'));for(const name of names){const cache=await caches.open(name),boundary=await cache.match(BOUNDARY,{ignoreSearch:true});if(!boundary)continue;for(const [url,response] of fresh)await cache.put(url,response.clone());return{cache:name,patched:CORE_PATCH_FILES.length}}await delay(100)}throw new Error('The base core package did not expose its installed cache in time for the additive layer.')}
 async function patchInstalledBoundary(){return patchInstalledCore()}
 async function patchCorePackage(){return patchInstalledCore()}
-async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,settingsCompatibleRevision:SETTINGS_COMPATIBLE_EXTENSION_REVISION,interfaceCompatibleRevision:INTERFACE_COMPATIBLE_EXTENSION_REVISION,proofCompatibleRevision:PROOF_COMPATIBLE_EXTENSION_REVISION,functionalInterfaceRevision:FUNCTIONAL_INTERFACE_REVISION,geminiTransportRevision:GEMINI_TRANSPORT_REVISION,deviceCredentialsRevision:DEVICE_CREDENTIALS_REVISION,settingsDialogStabilityRevision:SETTINGS_DIALOG_STABILITY_REVISION,platformExperienceRevision:PLATFORM_EXPERIENCE_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudObserverStabilityRevision:HUD_OBSERVER_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,solSemanticRevision:SOL_SEMANTIC_REVISION,inlineChatRevision:INLINE_CHAT_REVISION,cache:EXTENSION_CACHE,previousCache:PREVIOUS_EXTENSION_CACHE,intermediateCache:INTERMEDIATE_EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,patchedCoreFiles:CORE_PATCH_FILES.length,corePatchFiles:CORE_PATCH_FILES,missing}}
+async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,settingsCompatibleRevision:SETTINGS_COMPATIBLE_EXTENSION_REVISION,interfaceCompatibleRevision:INTERFACE_COMPATIBLE_EXTENSION_REVISION,proofCompatibleRevision:PROOF_COMPATIBLE_EXTENSION_REVISION,functionalInterfaceRevision:FUNCTIONAL_INTERFACE_REVISION,geminiTransportRevision:GEMINI_TRANSPORT_REVISION,deviceCredentialsRevision:DEVICE_CREDENTIALS_REVISION,settingsDialogStabilityRevision:SETTINGS_DIALOG_STABILITY_REVISION,platformExperienceRevision:PLATFORM_EXPERIENCE_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudObserverStabilityRevision:HUD_OBSERVER_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,merlinitesSemanticRevision:MERLINITES_SEMANTIC_REVISION,inlineChatRevision:INLINE_CHAT_REVISION,cache:EXTENSION_CACHE,previousCache:PREVIOUS_EXTENSION_CACHE,intermediateCache:INTERMEDIATE_EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,patchedCoreFiles:CORE_PATCH_FILES.length,corePatchFiles:CORE_PATCH_FILES,missing}}
 self.addEventListener('install',event=>event.waitUntil(Promise.all([cacheExtensions(),patchInstalledBoundary()])));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names=>Promise.all(names.filter(name=>name.startsWith('cwext-')&&name!==EXTENSION_CACHE).map(name=>caches.delete(name))))));
 self.addEventListener('message',event=>{if(event.data?.type==='GET_ADDITIONS_STATUS')event.waitUntil(extensionStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}))});
