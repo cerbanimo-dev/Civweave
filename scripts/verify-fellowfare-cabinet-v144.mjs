@@ -11,6 +11,7 @@ assert(innerCss.includes('.ff-route-scene-art')&&innerCss.includes('display:none
 for(const token of ['function openComposer','function submitThread','function openMessage','function createOrOpenAssembly','function openAgreement','function submitLedgerAction','function exportPack','function mergeExchangeBundle'])assert(app.includes(token),`FellowFare app lost ${token}`);
 for(const token of ['createAgreementFromProposal','addMilestone','addEvidence','recordSettlement','openRepair','resolveRepair','addReview'])assert(ledger.includes(token),`Ledger lost ${token}`);
 for(const token of ['deterministicDraft','deterministicMatches','deterministicReview','deterministicAssembly'])assert(ai.includes(token),`Loom lost ${token}`);
-assert(worker.includes('/app/fellowfare-cabinet-v144.html')&&worker.includes("GUIDE_REVISION='lazy-five-system-chat-r36-stable'"),'Updated FellowFare is not in rotated installed package.');
+assert(worker.includes('/app/fellowfare-cabinet-v144.html')&&worker.includes("GUIDE_REVISION='lazy-five-system-chat-r37'"),'Updated FellowFare is not in the progressive installed package.');
+assert(worker.includes('async function staleWhileRevalidate'),'FellowFare assets do not background-refresh.');
 assert(family.includes("fellowfare:{label:'FellowFare',guide:'Rook'")&&loader.includes('CommonweaveGuideChatV153'),'Rook/family integration missing.');
 console.log('FellowFare verification passed with one Rook market surface and no Commonweave card overlay.');
