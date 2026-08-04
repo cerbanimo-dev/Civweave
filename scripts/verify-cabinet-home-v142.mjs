@@ -6,5 +6,6 @@ assert(realmHtml.includes('/app/cabinet-home-v142.css')&&realmHtml.includes('/ap
 assert(!anarchadiaHtml.includes('/app/cabinet-home-v142.js')&&!anarchadiaHtml.includes('/app/cabinet-surfaces-v143.js'),'Anarchadia must boot its native citizen console without legacy cabinet overlays.');
 assert(anarchadiaHtml.includes('ANARCHADIA')&&anarchadiaHtml.includes('CITIZEN CONSOLE')&&anarchadiaHtml.includes('ac-grid'),'Anarchadia native console is incomplete.');
 assert(loader.includes('/app/assistant-runtime-v141.js')&&loader.includes('CommonweaveAssistantV141'),'Lazy assistant loader is incomplete.');
-assert(worker.includes('/app/cabinet-home-v142.js')&&worker.includes("GUIDE_REVISION='lazy-five-system-chat-r36-stable'"),'Offline package did not rotate repaired cabinet/guide assets.');
+assert(worker.includes('/app/cabinet-home-v142.js')&&worker.includes("GUIDE_REVISION='lazy-five-system-chat-r37'"),'Offline package did not retain cabinet home and progressive guide assets.');
+assert(worker.includes('async function staleWhileRevalidate'),'Cabinet assets are not refreshed behind the visible interface.');
 console.log('Cabinet home verification passed; Anarchadia intentionally uses its native stable console.');
