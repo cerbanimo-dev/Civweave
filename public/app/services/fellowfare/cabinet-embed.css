@@ -1,14 +1,12 @@
-/* Pre-visual FellowFare, calibrated for the Cabinet Mode screen. */
-html,body{min-height:100%;height:auto!important;background:#f4ead6!important;overflow-x:hidden!important;overflow-y:auto!important;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y}
-body.ff-cabinet-embedded{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important}
-.ff-cabinet-embedded .topbar,.ff-cabinet-embedded .ff-version-plaque,.ff-cabinet-embedded .ff-scene-back,.ff-cabinet-embedded [data-route="mall"],.ff-cabinet-embedded .ff-route-scene-art{display:none!important}
-.ff-cabinet-embedded .app-shell{min-height:100vh!important;height:auto!important;padding:0 0 58px!important;background:linear-gradient(180deg,#f5ead7,#e8d8bc)!important;overflow:visible!important}
-.ff-cabinet-embedded #main,.ff-cabinet-embedded .ff-world-main,.ff-cabinet-embedded .ff-projected-main{position:static!important;inset:auto!important;width:100%!important;height:auto!important;min-height:calc(100vh - 58px)!important;margin:0!important;padding:0!important;overflow:visible!important;background:none!important}
-.ff-cabinet-embedded .ff-route-scene,.ff-cabinet-embedded .ff-world-projection{position:static!important;inset:auto!important;width:100%!important;height:auto!important;min-height:inherit!important;margin:0!important;transform:none!important;clip-path:none!important;overflow:visible!important;background:none!important;box-shadow:none!important;border:0!important}
+/* FellowFare embedded workbench: the outer cabinet owns the only page scroll. */
+html,body{min-height:0!important;height:auto!important;background:#f4ead6!important;overflow:visible!important}
+body.ff-cabinet-embedded{overflow:visible!important;touch-action:auto!important;overscroll-behavior:auto!important}
+.ff-cabinet-embedded .topbar,.ff-cabinet-embedded .ff-version-plaque,.ff-cabinet-embedded .ff-scene-back,.ff-cabinet-embedded [data-route="mall"],.ff-cabinet-embedded .ff-route-scene-art,.ff-cabinet-embedded .bottom-nav{display:none!important}
+.ff-cabinet-embedded .app-shell{min-height:0!important;height:auto!important;padding:0 0 12px!important;background:linear-gradient(180deg,#f5ead7,#e8d8bc)!important;overflow:visible!important}
+.ff-cabinet-embedded #main,.ff-cabinet-embedded .ff-world-main,.ff-cabinet-embedded .ff-projected-main{position:static!important;inset:auto!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;overflow:visible!important;background:none!important}
+.ff-cabinet-embedded .ff-route-scene,.ff-cabinet-embedded .ff-world-projection{position:static!important;inset:auto!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important;transform:none!important;clip-path:none!important;overflow:visible!important;background:none!important;box-shadow:none!important;border:0!important}
 .ff-cabinet-embedded .page{width:min(100%,1080px)!important;margin:0 auto!important;padding:clamp(12px,2.4vw,24px)!important}
-.ff-cabinet-embedded .bottom-nav{position:fixed!important;z-index:60!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;padding:6px max(6px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left))!important;border-radius:0!important;background:#20130df2!important;border-top:1px solid #c88e4f66!important;box-shadow:0 -8px 24px #0005!important}
-.ff-cabinet-embedded .bottom-link{min-height:38px!important;padding:5px 3px!important;color:#ffe4aa!important;font-size:9px!important}
-.ff-cabinet-embedded dialog{max-width:min(720px,calc(100vw - 16px))!important;max-height:calc(100vh - 16px)!important}
-.ff-cabinet-embedded .dialog-frame{max-height:calc(100vh - 16px)!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}
+.ff-cabinet-embedded dialog{max-width:min(720px,calc(100vw - 16px))!important;max-height:calc(100vh - 16px)!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}
+.ff-cabinet-embedded .dialog-frame{max-height:calc(100vh - 16px)!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important}
 .ff-cabinet-embedded img[src*="/assets/mall/"],.ff-cabinet-embedded img[src*="./assets/mall/"]{display:none!important}
 @media(max-width:620px){.ff-cabinet-embedded .page{padding:10px!important}.ff-cabinet-embedded .page-header{display:grid!important;gap:10px!important}.ff-cabinet-embedded .market-toolbar,.ff-cabinet-embedded .grid-two,.ff-cabinet-embedded .profile-grid{grid-template-columns:1fr!important}}
