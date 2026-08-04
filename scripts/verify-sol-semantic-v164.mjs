@@ -56,6 +56,13 @@ assert.equal(enhanced.semanticPlan.root.children.length,2);
 assert.ok(enhanced.semanticPlan.root.children.every(path=>path.children.length===2));
 assert.ok(enhanced.semanticPlan.root.children.flatMap(path=>path.children).every(step=>step.children.length>0));
 assert.equal(enhanced.semanticPlan.maxDepth,3);
+const next=sol.nextAction(enhanced);
+assert.equal(next.depth,3,'the next action should resolve to an atomic bounded leaf');
+assert.equal(next.children.length,0);
+const expanded=sol.expandNode({id:'manual',realm:'cerbanimo',title:'Build a parser',depth:0,status:'proposed'},{maxDepth:2});
+assert.ok(expanded.children.length>0,'manual nodes should be recursively expandable');
+assert.ok(expanded.children.every(child=>child.depth===1&&child.children.every(grandchild=>grandchild.depth===2)));
+assert.ok(expanded.children.flatMap(child=>child.children).every(grandchild=>grandchild.children.length===0));
 
 const created=context.CommonweaveIntentionPlanner.maybeCreate({text:'Make the planner work'});
 assert.equal(created.response.answer,'existing answer','Sol must preserve the existing user-facing response');
@@ -94,5 +101,6 @@ assert.match(adapter,/export async function match\(/,'existing reflex matching m
 assert.match(worker,/message\.type==='rank'/,'worker must handle custom ranking');
 assert.match(worker,/message\.type==='match'/,'worker must preserve reflex matching');
 assert.match(worker,/rankCache/,'worker should bound reusable candidate embeddings');
+assert.match(worker,/cached\?\.signature===signature/,'candidate cache must be invalidated when criterion text changes');
 
 console.log('Sol semantic planning v164 verification passed.');
