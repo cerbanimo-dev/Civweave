@@ -1,16 +1,19 @@
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
+import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
-const [html,loader,settings,styles,baseWorker,additiveWorker,...parts]=await Promise.all([
+const [html,loader,settings,styles,installBoundary,geminiTransport,baseWorker,additiveWorker,...parts]=await Promise.all([
   read('public/app/working-campus-v156.html'),
   read('public/app/family-ai-loader-v105.js'),
   read('public/app/minilm-model-settings-v138.js'),
   read('public/app/model-settings-v133.css'),
+  read('public/app/install-boundary-v146.js'),
+  read('public/extensions/commonweave-gemini-interactions-v159.js'),
   read('public/service-worker.js'),
   read('public/service-worker-v156.js'),
   ...[1,2,3,4,5].map(index=>read(`public/app/working-campus-v156.part${index}.txt`))
@@ -20,6 +23,8 @@ const campusSource=parts.join('');
 new Function(campusSource);
 new Function(settings);
 new Function(loader);
+new Function(installBoundary);
+new Function(geminiTransport);
 new Function(additiveWorker.replace(/^'use strict';\s*importScripts\([^\n]+\);/,'\'use strict\';'));
 
 assert(html.includes('/app/family-ai-loader-v105.js?v=unified-settings-r1'),'Working Campus does not load the shared settings loader.');
@@ -54,9 +59,25 @@ for(const token of ['.cw-ai-header','.cw-ai-secret-tools','.cw-ai-test-grid','.c
 for(const token of ['inline-commonweave-r40','function removeStale','function reset','CommonweaveModelSettingsV133','globalThis.CommonweaveModelSettingsV133.open()'])assert(loader.includes(token),`Inline family loader shared-settings contract is missing ${token}.`);
 assert(!loader.includes("['/app/guide-chat-v153.js?v=1.0.4'"),'Retired floating guide script returned to the load sequence.');
 
+for(const token of [
+  "VERSION='159.0-gemini-interactions-transport'",
+  '/api/ai/gemini/interactions',
+  "Api-Revision':API_REVISION",
+  "model:config.model",
+  'response_format',
+  'store:false',
+  "profile!=='agentic'",
+  '__geminiInteractionsTransport',
+  "fallback:{used:false}",
+  'Gemini completed the interaction but returned no text output.'
+])assert(geminiTransport.includes(token),`Gemini Interactions transport is missing ${token}.`);
+for(const token of ['GEMINI_INTERACTIONS_SCRIPT','/extensions/commonweave-gemini-interactions-v159.js','addScript(GEMINI_INTERACTIONS_SCRIPT)',"additionsVersion:'v159-gemini-interactions'"])assert(installBoundary.includes(token),`Install boundary does not load ${token}.`);
+
 for(const token of ["CACHE_REVISION='direct-family-r37-fast-install'","DEVICE_REVISION='device-package-r37-core'","MODEL_REVISION='minilm-on-demand-r1'",'modelOnDemand','GET_MODEL_PACKAGE_STATUS'])assert(baseWorker.includes(token),`Fast-core base worker lost ${token}.`);
 for(const token of [
-  "EXTENSION_VERSION='working-campus-additions-v157-unified-settings-fast-core'",
+  "EXTENSION_VERSION='working-campus-additions-v159-gemini-interactions-proof-progress-unified-settings-inner-ui-merlin-school-rook'",
+  "GEMINI_TRANSPORT_REVISION='gemini-interactions-v159'",
+  '/extensions/commonweave-gemini-interactions-v159.js',
   'PATCHED_CORE_FILES',
   'patchCorePackage',
   '/app/minilm-model-settings-v138.js',
@@ -67,6 +88,35 @@ for(const token of [
   'inlineChatRevision:INLINE_CHAT_REVISION'
 ])assert(additiveWorker.includes(token),`Fast-core additive worker does not deliver ${token}.`);
 
+const calls=[];
+const storage={values:new Map([['commonweave.host-node.v1',JSON.stringify({baseUrl:'https://node.example'})]]),getItem(key){return this.values.get(key)||null},setItem(key,value){this.values.set(key,String(value))}};
+const sandbox={
+  console,URL,AbortController,setTimeout,clearTimeout,EventTarget,Response,
+  CustomEvent:class{constructor(type,{detail}={}){this.type=type;this.detail=detail}},
+  dispatchEvent(){},localStorage:storage,location:{protocol:'https:',origin:'https://node.example',pathname:'/app/test'},
+  fetch:async(url,init)=>{calls.push({url,init});return new Response(JSON.stringify({id:'int_1',status:'completed',model:'gemini-3.5-flash-lite',steps:[{type:'model_output',content:[{type:'text',text:'READY'}]}],usage:{total_input_tokens:3,total_output_tokens:1,total_tokens:4}}),{status:200,headers:{'content-type':'application/json'}})},
+  globalThis:null
+};
+sandbox.globalThis=sandbox;
+vm.createContext(sandbox);
+vm.runInContext(geminiTransport,sandbox,{filename:'commonweave-gemini-interactions-v159.js'});
+const original=Object.freeze({
+  version:'test',resultSchema:'commonweave-model-result-1.0',
+  normalizeConfig:value=>({provider:value.provider||value.route,model:value.model,endpoint:value.endpoint,apiKey:value.apiKey,externalConsent:value.externalConsent,timeoutMs:value.timeoutMs||5000,maxTokens:value.maxTokens||48,temperature:value.temperature||0.2,stream:Boolean(value.stream),headers:value.headers||{}}),
+  resolveExecutionProfile:request=>request.executionProfile||'interactive',readSharedConfig:()=>null,
+  generate:async()=>({status:'delegated'})
+});
+sandbox.CommonweaveModelRuntime=original;
+const result=await sandbox.CommonweaveModelRuntime.generate({executionProfile:'interactive',config:{provider:'gemini',model:'gemini-3.5-flash-lite',endpoint:'https://generativelanguage.googleapis.com/v1beta',apiKey:'secret',externalConsent:true},messages:[{role:'user',content:'READY'}]});
+assert(result.status==='success'&&result.outputText==='READY','Standard Gemini did not complete through the Interactions transport.');
+assert(result.fallback?.used===false,'Standard Gemini transport incorrectly reported a deterministic fallback.');
+assert(result.actual?.provider==='gemini'&&result.actual?.model==='gemini-3.5-flash-lite','Standard Gemini transport lost actual provider/model identity.');
+assert(calls[0]?.url==='https://node.example/api/ai/gemini/interactions','Standard Gemini did not use the connected host-node proxy.');
+const body=JSON.parse(calls[0].init.body);
+assert(body.model==='gemini-3.5-flash-lite'&&body.input==='User: READY'&&body.store===false,'Standard Gemini Interactions payload is malformed.');
+const delegated=await sandbox.CommonweaveModelRuntime.generate({executionProfile:'agentic',config:{provider:'gemini',model:'antigravity',apiKey:'secret',externalConsent:true}});
+assert(delegated.status==='delegated','The Gemini transport intercepted the passing Antigravity route.');
+
 console.log(JSON.stringify({
   ok:true,
   settingsRuntime:'157.1',
@@ -74,8 +124,9 @@ console.log(JSON.stringify({
   sharedSurfaces:['working-campus','settings-bar'],
   guideLoader:'inline-commonweave-r40',
   geminiKeyIngestion:['direct-entry','clipboard','env-file','json-file','raw-key-file'],
-  liveTests:['gemini-generate','antigravity-direct-no-fallback'],
+  liveTests:['gemini-interactions-host-proxy','antigravity-direct-no-fallback'],
+  geminiTransport:'159.0-gemini-interactions-transport',
   duplicateWorkingCampusDialog:false,
   corePackage:'r37-fast-deferred-minilm',
-  additiveSettingsRevision:'proof-progress-unified-settings-inner-ui-merlin-school-rook'
+  additiveSettingsRevision:'v159-gemini-interactions-proof-progress-inner-ui'
 },null,2));
