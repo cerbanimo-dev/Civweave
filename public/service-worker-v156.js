@@ -1,5 +1,5 @@
 'use strict';
-importScripts('/service-worker.js?v=1.0.4-base-r37-core');
+importScripts('/service-worker.js?v=1.0.4-base-r40-inline-commonweave');
 const EXTENSION_VERSION='working-campus-additions-v158-proof-progress';
 const EXTENSION_CACHE='cwext-working-campus-additions-v158-proof-progress';
 const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v157-fast-core';
