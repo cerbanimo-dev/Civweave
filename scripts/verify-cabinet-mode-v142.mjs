@@ -1,50 +1,30 @@
-import { readFile } from 'node:fs/promises';
+import {readFile} from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-const [html,css,runtime,runtimeCss,cabinetOnly,calibratorHtml,calibratorJs,calibrationText,legacyHtml,realmRedirect,parity,liteHtml,liteCore,liteApp,launcher,loom,loomHtml,shellText,worker,buildScript,archiveReadme,localHost]=await Promise.all([
-  read('public/app/cabinet-mode-v142.html'),read('public/app/cabinet-mode-v142.css'),read('public/app/cabinet-mode-v142.js'),read('public/app/cabinet-runtime-v143.css'),read('public/app/cabinet-only-v144.html'),read('public/app/cabinet-calibrator-v144.html'),read('public/app/cabinet-calibrator-v144.js'),read('public/app/shared/cabinet-calibration-v144.json'),read('public/app/cabinet-visual-v141.html'),read('public/app/realm-v128.html'),read('public/app/shared/commonweave-parity-runtime.js'),read('public/app/lite-v129.html'),read('public/app/lite-v129-core.js'),read('public/app/lite-v129-app.js'),read('public/app/v130-cabinet-launcher.js'),read('public/app/loom-v141.js'),read('public/app/loom-v128.html'),read('public/app/shared/cabinet-shells-v129.json'),read('public/service-worker.js'),read('scripts/build-install-artifacts.sh'),read('archive/visual-mode-location-images/README.md'),read('server-local-v131.mjs')
+const [host,shell,styles,entry,manifest,worker,realm,living,fellowfare,anarchadia,marketingCabinet]=await Promise.all([
+  read('public/app/fullscreen-family-v104.html'),
+  read('public/app/family-shell-v104.js'),
+  read('public/app/family-shell-v104.css'),
+  read('public/app/installed-entry-v146.js'),
+  read('public/app/manifest.webmanifest'),
+  read('public/service-worker.js'),
+  read('public/app/realm-console-v140.html'),
+  read('public/app/cabinets/living-school/index.html'),
+  read('public/app/fellowfare-cabinet-v144.html'),
+  read('public/app/anarchadia-console-v139.html'),
+  read('public/app/cabinet-mode-v142.html')
 ]);
-const shells=JSON.parse(shellText),calibration=JSON.parse(calibrationText);
-for(const token of ['CABINET MODE','cv144-overlay','cv141-art-a','cv141-art-b','cabinet-calibration-v144.js','Close Cabinet Mode and return to the Commonweave hub'])assert(html.includes(token),`Cabinet Mode HTML missing ${token}`);
-for(const token of ['aspect-ratio:941/1672','calc(100dvh * 941 / 1672)','transform:translate(-50%,-50%)'])assert(css.includes(token),`Canonical cabinet sizing missing ${token}`);
-for(const token of ['.cv144-overlay','.cv144-control','.cv144-hitbox','transition:opacity 120ms','data-cabinet-only="true"'])assert(runtimeCss.includes(token),`Source-image cabinet styling missing ${token}`);
-for(const token of ['/app/realm-console-v140.html','/app/anarchadia-console-v139.html','/app/services/fellowfare/cabinet.html','cabinetScreen','cabinet-shells-v129.json','renderControls','preloadAll','swapArt','viewBox','#cw127-app','Cabinet mode could not open'])assert(runtime.includes(token),`Cabinet Mode runtime missing ${token}`);
-assert(runtime.includes("function closeCabinet(){location.assign('/loom/')}"),'Cabinet × does not close directly to the hub');
-assert(!runtime.includes('history.back()'),'Cabinet × still behaves like browser Back');
-assert(runtime.includes('CABINET_ONLY')&&runtime.includes("'/app/cabinet-only-v144.html'"),'Cabinet-only mode does not share the canonical renderer.');
-for(const token of ['data-cabinet-only="true"','cv144-overlay','cabinet-calibration-v144.js','cabinet-mode-v142.js'])assert(cabinetOnly.includes(token),`Cabinet-only page missing ${token}`);
-for(const token of ['Cabinet hotspot calibrator','cc144-overlay','cc144-save','cc144-export'])assert(calibratorHtml.includes(token),`Calibration workbench HTML missing ${token}`);
-for(const token of ['pointerdown','pointermove','commonweave.cabinet-calibration.v144','localStorage.setItem','navigator.clipboard','Blob'])assert(calibratorJs.includes(token),`Calibration workbench runtime missing ${token}`);
-assert(calibration.schema==='commonweave.cabinet-calibration.v1','Cabinet calibration schema changed unexpectedly.');
-assert(calibration.revision==='source-svg-r24-user','Shipped cabinet calibration is not the user-calibrated revision.');
-assert(calibration.sourceSize.width===941&&calibration.sourceSize.height===1672,'Cabinet calibration is not in source image coordinates.');
-const controlOrder=['anarchadia','fellowfare','commonweave','living-school','cerbanimo'];
-for(const id of ['commonweave','living-school','cerbanimo','fellowfare','anarchadia']){const entry=calibration.systems[id];assert(entry,`Missing source calibration for ${id}`);assert(entry.sourceSize.width===941&&entry.sourceSize.height===1672,`${id} source dimensions changed`);assert(entry.hotspots.length===5,`${id} must expose five source-pixel hotspots`);entry.hotspots.forEach((spot,index)=>{assert(spot.system===controlOrder[index],`${id} hotspot ${index+1} targets the wrong realm`);assert(spot.shape==='circle'&&Number.isFinite(spot.cx)&&Number.isFinite(spot.cy)&&spot.r>10,`${id} hotspot ${index+1} is not a valid source circle`)})}
-assert(calibration.systems.commonweave.hotspots[1].cx===339.5&&calibration.systems.commonweave.hotspots[4].cy===1531.5,'Commonweave user calibration was not preserved.');
-assert(calibration.systems['living-school'].hotspots[0].cx===215.6&&calibration.systems['living-school'].hotspots[2].cx===470.3,'Living School user calibration was not preserved.');
-assert(calibration.systems.anarchadia.hotspots[2].r===79&&calibration.systems.anarchadia.hotspots[4].cx===716.3,'Anarchadia user calibration was not preserved.');
-assert(legacyHtml.includes("location.replace(target.href)")&&legacyHtml.includes('/app/cabinet-mode-v142.html'),'Legacy visual route does not redirect to Cabinet Mode');
-assert(realmRedirect.includes("location.replace(target.href)")&&realmRedirect.includes('/app/cabinet-mode-v142.html'),'Legacy realm route does not redirect to Cabinet Mode');
-assert(parity.includes('function cabinetUrl')&&parity.includes('/app/cabinet-mode-v142.html'),'Parity runtime has no canonical Cabinet Mode URL');
-assert(parity.includes('function visualUrl(options={}){return cabinetUrl(options)}'),'Legacy visual URL is not a compatibility alias');
-assert(liteHtml.includes('id="cabinet-link"')&&liteHtml.includes('Cabinet mode'),'Lite header does not name Cabinet Mode');
-assert(!liteCore.includes('room.visualAsset'),'Lite still downloads room-location art');
-assert(liteApp.includes('CommonweaveParity.cabinetUrl'),'Lite does not link to Cabinet Mode');
-assert(launcher.includes('Cabinet mode')&&launcher.includes("action==='realms'")&&launcher.includes('CommonweaveParity.cabinetUrl'),'Hub launcher does not use canonical Cabinet Mode');
-assert(loom.includes('/app/assets/cabinets/living-school.webp'),'Hub chooser does not use cabinet art');
-for(const prefix of ['/app/services/living-school/visual-assets/','/app/services/cerbanimo/assets/visual/','/app/services/fellowfare/assets/mall/','/app/services/anarchadia/assets/screens/'])assert(!loom.includes(prefix),`Hub runtime still references archived location path ${prefix}`);
-assert(loomHtml.includes('/app/assets/world/town-square-home.webp'),'Main Commonweave hub image was removed');
-const anarchadia=shells.systems.anarchadia;assert(anarchadia.screen.width===70.8&&anarchadia.screen.height===56.15,'Anarchadia screen width/height calibration regressed.');
-assert(JSON.stringify(shells.controlCalibration?.referencePanels)===JSON.stringify(['cerbanimo','living-school','commonweave','fellowfare','anarchadia']),'Supplied control-panel order was not recorded');
-const archivedPrefixes=['services/living-school/visual-assets/','services/cerbanimo/assets/visual/','services/fellowfare/assets/mall/','services/anarchadia/assets/screens/'];
-for(const prefix of archivedPrefixes){assert(buildScript.includes(prefix),`Release build does not exclude ${prefix}`);assert(archiveReadme.includes(`public/app/${prefix}`),`Archive documentation omits ${prefix}`);assert(worker.includes(`/app/${prefix}`),`Service worker does not quarantine ${prefix}`)}
-assert(buildScript.includes('assets/world/town-square-home.webp'),'Release guard does not preserve the main hub image');
-assert(buildScript.includes('assets/cabinets/${cabinet}.webp'),'Release guard does not preserve cabinet shells');
-for(const token of ["CALIBRATION_REVISION='source-svg-r24-user'",'/app/cabinet-only-v144.html','/app/cabinet-calibrator-v144.html','/app/cabinet-calibration-v144.js','/app/shared/cabinet-calibration-v144.json'])assert(worker.includes(token),`Service worker does not install ${token}`);
-for(const token of ['function navigationFallback','/app/services/fellowfare/cabinet.html','/app/cabinets/living-school/index.html',"if(pathname.startsWith('/app/'))return pathname"])assert(worker.includes(token),`Cabinet subsystem navigation boundary missing ${token}`);
-assert(!worker.includes("cabinetPath?'/app/cabinet-mode-v142.html':'/loom/'"),'Application cache misses can still silently become the whole Commonweave hub.');
-for(const token of ['/app/cabinet-mode-v142.html','/app/cabinet-only-v144.html','/app/cabinet-calibrator-v144.html'])assert(localHost.includes(token),`Local server does not allow ${token}`);
-console.log(JSON.stringify({ok:true,mode:'Cabinet Mode + Cabinet Only',coordinatePlane:'941x1672 source pixels',calibrationRevision:calibration.revision,calibratedPanels:Object.keys(calibration.systems),controls:25,swapMs:120,editor:'/app/cabinet-calibrator-v144.html',closeTarget:'/loom/',subsystemFallback:'strict',hubImage:'retained',locationScenes:'excluded from release payload'},null,2));
+for(const token of ['data-fullscreen-family="v104"','id="cwf104-frame"','family-shell-v104.js','guide-chat-v153.js','minilm-model-settings-v138.js'])assert(host.includes(token),`Full-screen family host is missing ${token}`);
+for(const token of ["const VERSION='1.0.4'","commonweave:{label:'Commonweave'","'living-school':{label:'Living School'","cerbanimo:{label:'Cerbanimo'","fellowfare:{label:'FellowFare'","anarchadia:{label:'Anarchadia'",'.filter(([id])=>id!==current)','data-cwf-badge','data-cwf-state','CommonweaveModelSettingsV133','CommonweaveGuideChatV153'])assert(shell.includes(token),`Family runtime is missing ${token}`);
+assert(shell.includes("site:'/app/realm-console-v140.html?system=commonweave"),'Commonweave must open its software console, not the campus or cabinet art.');
+for(const token of ['grid-template-columns:repeat(4','cwf104-badge','cwf104-dot','cwf104-tray'])assert(styles.includes(token),`Four-button family tray styling is missing ${token}`);
+assert(entry.includes("'/app/fullscreen-family-v104.html'")&&entry.includes("params.get('system')"),'Installed entry does not skip directly to the full-screen family.');
+const parsedManifest=JSON.parse(manifest);assert(parsedManifest.start_url.includes('system=commonweave'),'PWA does not start in Commonweave Cabinet Mode.');assert(parsedManifest.shortcuts.length===5,'Manifest must expose all five software systems.');
+for(const page of [realm,living,fellowfare,anarchadia])assert(page.includes('/app/guide-chat-v153.js'),`Underlying software page is not wired to live guide chat.`);
+assert(marketingCabinet.includes('cv141-art'),'Physical cabinet renderer must remain in source for marketing use.');
+for(const token of ['/app/fullscreen-family-v104.html','/app/family-shell-v104.css','/app/family-shell-v104.js',"const VERSION='1.0.4'"])assert(worker.includes(token),`Lean device package is missing ${token}`);
+for(const unused of ['/app/assets/cabinets/commonweave.webp','/app/assets/world/town-square-home.webp','/app/logos/commonweave-campus.webp','/app/assets/generated/commonweave-navigation-icons/','/app/cabinet-calibrator-v144.html','/app/shared/cabinet-shells-v129.json'])assert(!worker.includes(unused),`Unused marketing image/tool is still installed: ${unused}`);
+console.log(JSON.stringify({ok:true,version:'1.0.4',mode:'five full-screen cabinet software sites',firstScreen:'commonweave',familyButtons:4,sharedAISettings:true,liveGuideChat:true,physicalCabinets:'repository-only marketing assets',devicePackage:'lean'},null,2));
