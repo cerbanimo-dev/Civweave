@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install dependencies without pulling model graphs
+      - name: Install dependencies
         run: npm install --no-audit --no-fund
         env:
           COMMONWEAVE_SKIP_MODEL_PULL: "1"
@@ -32,7 +32,16 @@ jobs:
           node --check scripts/verify-working-campus-additions-v156.mjs
       - name: Verify additive integration
         run: node scripts/verify-working-campus-additions-v156.mjs
+      - name: Materialize local semantic package
+        run: |
+          for attempt in 1 2 3 4 5; do
+            if npm run model:pull; then break; fi
+            if [ "$attempt" = 5 ]; then
+              echo 'MiniLM package could not be materialized after five attempts.' >&2
+              exit 1
+            fi
+            sleep $((attempt * 8))
+          done
+          npm run model:check
       - name: Run existing repository regression suite
         run: npm run check
-        env:
-          COMMONWEAVE_SKIP_MODEL_PULL: "1"
