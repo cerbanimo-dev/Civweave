@@ -9,6 +9,15 @@ const root=path.resolve(here,'..');
 const source=fs.readFileSync(path.join(root,'public/app/sol-semantic-planner-v164.js'),'utf8');
 const adapter=fs.readFileSync(path.join(root,'public/app/models/all-minilm-l6-v2/adapter.js'),'utf8');
 const worker=fs.readFileSync(path.join(root,'public/app/models/all-minilm-l6-v2/worker.js'),'utf8');
+const serviceWorker=fs.readFileSync(path.join(root,'public/service-worker-v156.js'),'utf8');
+const pwa=fs.readFileSync(path.join(root,'public/app/pwa-v130.js'),'utf8');
+const entryPages=[
+  'public/app/loom-v128.html',
+  'public/app/lite-v129.html',
+  'public/app/working-campus-v156.html',
+  'public/app/realm-console-v140.html',
+  'public/app/cabinets/living-school/index.html',
+].map(relative=>[relative,fs.readFileSync(path.join(root,relative),'utf8')]);
 
 class MemoryStorage{
   #rows=new Map();
@@ -102,5 +111,8 @@ assert.match(worker,/message\.type==='rank'/,'worker must handle custom ranking'
 assert.match(worker,/message\.type==='match'/,'worker must preserve reflex matching');
 assert.match(worker,/rankCache/,'worker should bound reusable candidate embeddings');
 assert.match(worker,/cached\?\.signature===signature/,'candidate cache must be invalidated when criterion text changes');
+for(const [relative,html] of entryPages)assert.match(html,/sol-semantic-planner-v164\.js/,`${relative} must load Sol`);
+for(const token of ['sol-semantic-planning-v164','/app/sol-semantic-planner-v164.js','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js'])assert.ok(serviceWorker.includes(token),`offline package is missing ${token}`);
+assert.match(pwa,/working-campus-additions-v165-sol-semantic-planning/,'installed updater must advance to the Sol package');
 
 console.log('Sol semantic planning v164 verification passed.');
