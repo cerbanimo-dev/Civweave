@@ -9,7 +9,7 @@ const MODEL_DOWNLOAD_SCRIPT='/extensions/commonweave-model-download-v157.js';
 const PROOF_PROGRESS_SCRIPT='/extensions/commonweave-proof-progress-v158.js';
 const GEMINI_INTERACTIONS_SCRIPT='/extensions/commonweave-gemini-interactions-v159.js';
 const LIVE_SOURCE_GUARD_SCRIPT='/extensions/commonweave-antigravity-live-source-guard-v167.js';
-const PREVIOUS_ADDITIONS_VERSION='v166-two-agent-youtube-reviewed-handoffs';
+const PREVIOUS_ADDITIONS_VERSION='v167-antigravity-live-source-proof';
 const FAST_CORE_COMPATIBILITY_REVISION='v157-fast-core';
 const SETTINGS_STABILITY_REVISION='v161-settings-dialog-stability';
 const INTENTION_RESEARCH_REVISION='v163-latest-intention-agentic-research';
@@ -17,6 +17,8 @@ const HUD_STABILITY_REVISION='v164-hud-observer-stability';
 const WORKFLOW_HANDOFF_REVISION='v165-reviewed-merlin-rook-proof-attachments';
 const TWO_AGENT_RELAY_REVISION='living-school-two-agent-youtube-v166';
 const LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167';
+const LOCAL_LAYOUT_REVISION='merlin-local-layout-fallback-v167';
+// Compatibility marker: additionsVersion:'v167-antigravity-live-source-proof'
 // Compatibility marker: additionsVersion:'v166-two-agent-youtube-reviewed-handoffs'
 // Compatibility marker: additionsVersion:'v165-reviewed-merlin-rook-proof-attachments'
 // Compatibility marker: additionsVersion:'v163-latest-intention-agentic-research'
@@ -45,10 +47,10 @@ function installerUrl(){
   next.searchParams.set('next',target.slice(0,1800));
   return next.href;
 }
-function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=antigravity-live-source-proof-v167`;script.defer=true;document.head.append(script)}
+function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=antigravity-live-source-proof-merlin-layout-v167`;script.defer=true;document.head.append(script)}
 function installAdditions(){
   if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
-    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=antigravity-live-source-proof-v167`;document.head.append(link);
+    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=antigravity-live-source-proof-merlin-layout-v167`;document.head.append(link);
   }
   addScript(LIVE_SOURCE_GUARD_SCRIPT);
   addScript(DEVICE_CREDENTIALS_SCRIPT);
@@ -64,5 +66,5 @@ if(!allowed()){
   document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
   installAdditions();
 }
-globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v167-antigravity-live-source-proof',previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,settingsStabilityRevision:SETTINGS_STABILITY_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudStabilityRevision:HUD_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION};
+globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v167-antigravity-live-source-proof-merlin-layout-fallback',previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,settingsStabilityRevision:SETTINGS_STABILITY_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudStabilityRevision:HUD_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,localLayoutRevision:LOCAL_LAYOUT_REVISION};
 })();
