@@ -12,6 +12,7 @@ const assert = (condition, message) => {
 const shell = read('public/app/family-shell-v104.js');
 const shellCss = read('public/app/family-shell-v104.css');
 const shellFix = read('public/app/merlinites-shell-fix-v166.css');
+const settingsController = read('public/app/model-settings-controller-v173.js');
 const profiles = JSON.parse(read('public/app/assets/ai/profiles.json'));
 
 const expectedOrder = "['commonweave','living-school','cerbanimo','fellowfare','anarchadia']";
@@ -55,7 +56,13 @@ assert(shellFix.includes('aspect-ratio:auto!important') && shellFix.includes('.f
 assert(shellFix.includes('.ls-room{position:relative!important') && shellFix.includes('.ls-recovery'), 'Living School lacks its visible mobile stage or startup recovery treatment.');
 assert(shell.includes('removeLegacyLaunchers') && shell.includes('restoreChatControl'), 'Family shell does not remove legacy launchers and restore the icon-only chat control.');
 assert(!shell.includes("button.textContent='Talk to Commonweave'"), 'Family shell still replaces the chat icon with collision-prone text.');
-assert(shell.includes('async function ensureSettings()') && shell.includes('SETTINGS_SCRIPTS'), 'Settings do not use the bounded settings-only loader.');
+assert(shell.includes("settingsOwner:'CommonweaveModelSettingsControllerV173'"), 'Family shell does not delegate settings to the direct controller.');
+assert(!shell.includes('async function ensureSettings()') && !shell.includes('SETTINGS_SCRIPTS'), 'Family shell still owns a retired settings loader.');
+assert(settingsController.includes("VERSION='173.0-direct-settings-controller'"), 'Direct settings controller revision is missing.');
+assert(settingsController.includes('/app/shared/commonweave-model-runtime.js') && settingsController.includes('/app/minilm-model-settings-v138.js'), 'Direct settings controller lost its bounded settings dependencies.');
+const dependencyBlock=settingsController.slice(settingsController.indexOf('const DEPENDENCIES='),settingsController.indexOf('const REFLEX_SCRIPT='));
+assert(!dependencyBlock.includes('minilm-reflex-runtime'), 'Opening settings still starts MiniLM.');
+assert(!settingsController.includes("addEventListener('click'"), 'Direct settings controller still installs a global click interceptor.');
 assert(shell.includes('CommonweaveCodeRailsV169') && shell.includes('canGenerate:false'), 'Local code rails capability boundary is missing.');
 assert(shell.includes('machine-readable test') && shell.includes('imported LLM'), 'Local validation and imported-generation boundaries are not explained.');
 
@@ -66,8 +73,11 @@ for (const file of [
   'public/app/anarchadia-console-v139.html'
 ]) {
   const html = read(file);
-  assert(html.includes('/app/family-shell-v104.css?v=merlinites-r1'), `${file} is not cache-busting the merlinites shell CSS.`);
-  assert(html.includes('/app/family-shell-v104.js?v=merlinites-r1'), `${file} is not cache-busting the merlinites shell JS.`);
+  assert(html.includes('/app/family-shell-v104.css?v=merlinites-r'), `${file} is not cache-busting the merlinites shell CSS.`);
+  assert(html.includes('/app/family-shell-v104.js?v=merlinites-r'), `${file} is not cache-busting the merlinites shell JS.`);
+  const controllerAt=html.indexOf('<script src="/app/model-settings-controller-v173.js');
+  const chatAt=html.indexOf('<script src="/app/family-ai-loader-v105.js');
+  assert(controllerAt>=0&&chatAt>=0&&controllerAt<chatAt, `${file} does not establish settings ownership before chat.`);
 }
 
 const sandbox={
@@ -131,4 +141,4 @@ function inspectTree(relative){
 for(const directory of textRoots)inspectTree(directory);
 assert(violations.length===0,`Retired subsystem name remains:\n${violations.slice(0,30).join('\n')}`);
 
-console.log('merlinites visual overhaul v166 verified with mobile recovery and local code rails boundaries.');
+console.log('merlinites visual overhaul v166 verified with direct settings ownership, mobile recovery, and local code rails boundaries.');
