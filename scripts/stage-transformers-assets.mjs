@@ -11,6 +11,15 @@ const force=process.argv.includes('--force');
 const renderBuild=process.env.RENDER==='true';
 
 async function exists(target){try{await fsp.access(target);return true}catch{return false}}
+async function staged(){
+  const required=[
+    path.join(destination,'transformers.min.js'),
+    path.join(destination,'stage-manifest.json'),
+    path.join(backendDestination,'ort-wasm-simd-threaded.jsep.mjs'),
+    path.join(backendDestination,'ort-wasm-simd-threaded.jsep.wasm')
+  ];
+  return (await Promise.all(required.map(exists))).every(Boolean);
+}
 async function walk(directory){
   const output=[];
   for(const entry of await fsp.readdir(directory,{withFileTypes:true})){
@@ -22,12 +31,16 @@ async function walk(directory){
 }
 
 async function main(){
+  if(!force&&await staged()){
+    console.log('[Commonweave] Transformers.js browser assets are already staged.');
+    return;
+  }
   if(renderBuild&&!force){
-    console.log('[Commonweave] Render gateway build: skipping device-side Transformers.js staging.');
+    console.log('[Commonweave] Render gateway build: using committed Transformers.js assets.');
     return;
   }
   if(!await exists(source)){
-    const message='@huggingface/transformers is not installed. Run npm install before starting the onboard model.';
+    const message='@huggingface/transformers is not installed. Run npm install before staging the onboard model.';
     if(soft){console.warn(`[Commonweave] ${message}`);return}
     throw new Error(message);
   }
