@@ -36,6 +36,7 @@ jobs:
           node --check public/app/anarchadia-console-v158.js
           node --check public/app/anarchadia-runtime-stability-v159.js
           node --check public/app/anarchadia-change-review-v165.js
+          node --check public/app/anarchadia-live-layout-v167.js
           node --check public/app/cerbanimo-proof-attachments-v165.js
           node --check public/app/cerbanimo-ai-validator-v159.js
           node --check public/app/intention-planner-v141.js
@@ -66,6 +67,7 @@ jobs:
           node --check scripts/test-platform-flow-v160.mjs
           node --check scripts/verify-platform-hud-stability-v163.mjs
           node --check scripts/test-workflow-handoffs-v165.mjs
+          node --check scripts/test-merlin-local-layout-v167.mjs
           node --check scripts/verify-merlinites-semantic-v164.mjs
           node --check scripts/verify-merlinites-visual-overhaul-v166.mjs
           node --check scripts/verify-living-school-cabinet-v151.mjs
@@ -84,6 +86,7 @@ jobs:
             public/app/merlinites-semantic-planner-v164.js \
             public/app/merlinites-shell-fix-v166.css \
             public/app/family-shell-v104.js \
+            public/app/family-shell-v104.css \
             public/app/loom-v128.html \
             public/app/lite-v129.html \
             public/app/working-campus-v156.html \
@@ -123,6 +126,8 @@ jobs:
         run: node scripts/verify-platform-hud-stability-v163.mjs
       - name: Test Merlin Rook and Cerbanimo handoffs
         run: node scripts/test-workflow-handoffs-v165.mjs
+      - name: Test Merlin live layout persistence
+        run: node scripts/test-merlin-local-layout-v167.mjs
       - name: Verify researched Living School
         run: node scripts/verify-living-school-cabinet-v151.mjs
       - name: Verify Merlin and Anarchadia stability
