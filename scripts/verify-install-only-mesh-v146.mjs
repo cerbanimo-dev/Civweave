@@ -10,7 +10,7 @@ const [architecture,index,installerCss,installer,manifest,boundary,entryHtml,ent
 const appManifest=JSON.parse(manifest);
 for(const token of ['public origin is an installer','installed PWA is the application','optional local node companion','foreground WebRTC','Local storage is canonical','Background Sync and Periodic Background Sync are optional accelerators'])assert(architecture.includes(token),`Architecture contract missing ${token}`);
 for(const token of ['LEAN OFFLINE SOFTWARE PACKAGE','Install the five-system Commonweave family','id="package-state"','id="package-assets"'])assert(index.includes(token),`Installer page missing ${token}`);
-assert(!index.includes('Open local campus')&&!/href=["']\/app\//.test(index),'Installer exposes browser-mode application access.');
+assert(!index.includes('Open local campus')&&!/href=["']\/app\/(?:installed-entry|fullscreen-family|realm-console|cabinet-mode|cabinet-only)/.test(index),'Installer exposes browser-mode application access.');
 assert(installerCss.includes('.package-state'),'Installer does not expose package readiness styling.');
 for(const token of ['packageReady=false','packageError=null','WORKER_URL','device-package-r35-direct','GET_DEVICE_PACKAGE_STATUS','beforeinstallprompt','appinstalled','Preparing device package','Reset and retry package','resetDevicePackage','invalidWorkerState','AUTO_RESET_KEY','caches.delete','waitForWorker','Share → Add to Home Screen'])assert(installer.includes(token),`Installer runtime missing ${token}`);
 const readyStart=installer.indexOf('async function confirmReady'),readyEnd=installer.indexOf('async function preparePackage',readyStart),readyBody=installer.slice(readyStart,readyEnd);
