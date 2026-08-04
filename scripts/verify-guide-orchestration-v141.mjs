@@ -16,6 +16,7 @@ assert(compatHost.includes('location.replace')&&!compatHost.includes('<iframe'),
 for(const token of ['/app/shared/commonweave-model-runtime.js','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/assistant-runtime-v141.js','/app/guide-chat-v153.js','for(const [src,ready] of SCRIPTS)','function removeStale','function reset','dataset.cwf105State',"addEventListener('pageshow'"])assert(loader.includes(token),`Stable lazy guide loader missing ${token}`);
 assert(loader.includes('CommonweaveGuideChatV153')&&loader.includes('CommonweaveModelSettingsV133'),'Lazy loader does not expose chat and settings.');
 assert(family.includes('CommonweaveFamilyAILoaderV105?.openChat?.')&&family.includes('CommonweaveFamilyAILoaderV105?.openSettings?.'),'Family chrome lost lazy delegation.');
-assert(worker.includes("GUIDE_REVISION='lazy-five-system-chat-r36-stable'"),'Service worker did not rotate the repaired guide cache.');
+assert(worker.includes("GUIDE_REVISION='lazy-five-system-chat-r37'"),'Service worker did not rotate the progressive guide cache.');
+assert(worker.includes("CACHE_REVISION='instant-shell-r37'")&&worker.includes('async function staleWhileRevalidate'),'Guide assets are not on the instant background-refresh path.');
 new Function(guideChat);new Function(loader);
-console.log('Guide orchestration passed with singleton chat, one in-flight call per realm, stale-script recovery, and rotated offline cache.');
+console.log('Guide orchestration passed with singleton chat, one in-flight call per realm, stale-script recovery, and progressive offline cache.');
