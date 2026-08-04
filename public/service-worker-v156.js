@@ -30,6 +30,7 @@ const HUD_OBSERVER_STABILITY_REVISION='hud-observer-stability-v164-current-main'
 const EXTENSION_CACHE='cwext-working-campus-additions-v164-latest-intention-agentic-research-hud-stability';
 // Latest intention and research compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v163-latest-intention-agentic-research'
 // Platform compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v162-dark-review-rook-learning'
+// Settings stability cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v161-settings-dialog-stability'
 const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v163-latest-intention-agentic-research';
 const INTERMEDIATE_EXTENSION_CACHE='cwext-working-campus-additions-v162-dark-review-rook-learning';
 const EXTENSION_FILES=[
