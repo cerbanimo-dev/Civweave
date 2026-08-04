@@ -18,7 +18,7 @@ const head={append(){},querySelector(){return null}};
 const document={
   readyState:'loading',hidden:false,
   documentElement:{dataset:{},style:{}},head,body:{append(){}},
-  querySelector(){return null},querySelectorAll(){return[]},
+  getElementById(){return null},querySelector(){return null},querySelectorAll(){return[]},
   createElement(tag){return{tagName:tag.toUpperCase(),dataset:{},style:{},append(){},addEventListener(){},querySelector(){return null},querySelectorAll(){return[]}}},
   addEventListener(){},
 };
