@@ -2,7 +2,7 @@ name: Verify working-campus additions v156
 
 on:
   push:
-    branches: ["agent/fix-chat-tray-and-stability-current"]
+    branches: ["agent/dark-mode-review-hud-rook-learning"]
   pull_request:
 
 jobs:
@@ -27,11 +27,14 @@ jobs:
           node --check public/app/pwa-v130.js
           node --check public/app/models/all-minilm-l6-v2/adapter.js
           node --check public/app/platform-stability-v159.js
+          node --check public/app/platform-experience-v160.js
+          node --check public/app/rook-request-flow-v160.js
           node --check public/app/anarchadia-console-v158.js
           node --check public/app/anarchadia-runtime-stability-v159.js
           node --check public/app/cerbanimo-ai-validator-v159.js
           node --check public/app/cabinets/living-school/living-school-workbench-v158.js
           node --check public/app/cabinets/living-school/living-school-runtime-stability-v159.js
+          node --check public/app/cabinets/living-school/living-school-paths-v160.js
           node --check public/extensions/commonweave-secure-vault-v156.js
           node --check public/extensions/commonweave-domain-bridge-v156.js
           node --check public/extensions/commonweave-qr-v156.js
@@ -46,6 +49,8 @@ jobs:
           node --check scripts/verify-settings-dialog-stability-v161.mjs
           node --check scripts/verify-five-system-inner-ui-v157.mjs
           node --check scripts/verify-runtime-stability-v159.mjs
+          node --check scripts/verify-platform-flow-v160.mjs
+          node --check scripts/test-platform-flow-v160.mjs
           node --check scripts/verify-living-school-cabinet-v151.mjs
           node --check scripts/verify-anarchadia-cabinet-workbench-v144.mjs
           node --check scripts/verify-cerbanimo-quest-engine-v144.mjs
@@ -61,6 +66,10 @@ jobs:
         run: node scripts/verify-five-system-inner-ui-v157.mjs
       - name: Verify interaction and review stability
         run: node scripts/verify-runtime-stability-v159.mjs
+      - name: Verify dark mode and routed request flows
+        run: node scripts/verify-platform-flow-v160.mjs
+      - name: Test dark mode, request funding, and learning paths
+        run: node scripts/test-platform-flow-v160.mjs
       - name: Verify researched Living School
         run: node scripts/verify-living-school-cabinet-v151.mjs
       - name: Verify Merlin and Anarchadia stability
