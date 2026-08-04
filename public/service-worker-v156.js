@@ -2,7 +2,8 @@
 importScripts('/service-worker.js?v=1.0.4-base-r37-core');
 const INLINE_CHAT_REVISION='inline-commonweave-r41-tray-escape';
 // Inline chat compatibility marker: INLINE_CHAT_REVISION='inline-commonweave-r40'
-const EXTENSION_VERSION='working-campus-additions-v171-settings-safe-open';
+const EXTENSION_VERSION='working-campus-additions-v172-settings-window-capture';
+// Compatibility marker: EXTENSION_VERSION='working-campus-additions-v171-settings-safe-open'
 // Compatibility marker: EXTENSION_VERSION='working-campus-additions-v170-mobile-shell-code-rails'
 // Compatibility marker: EXTENSION_VERSION='working-campus-additions-v169-merlinites-semantic-visual-planning'
 // Local layout compatibility marker: EXTENSION_VERSION='working-campus-additions-v167-antigravity-live-source-proof-merlin-local-layout-fallback'
@@ -31,7 +32,8 @@ const GEMINI_TRANSPORT_REVISION='gemini-interactions-v159';
 const DEVICE_CREDENTIALS_REVISION='device-credentials-v160.1-settings-stable';
 // Compatibility marker: DEVICE_CREDENTIALS_REVISION='device-credentials-v160'
 const SETTINGS_DIALOG_STABILITY_REVISION='settings-dialog-stability-v161';
-const SETTINGS_SAFE_OPEN_REVISION='settings-safe-open-v171';
+const SETTINGS_SAFE_OPEN_REVISION='settings-window-capture-v172';
+// Compatibility marker: SETTINGS_SAFE_OPEN_REVISION='settings-safe-open-v171'
 const PLATFORM_EXPERIENCE_REVISION='dark-review-rook-learning-v160.1-hud-stable';
 // PR #79 platform compatibility marker: PLATFORM_EXPERIENCE_REVISION='dark-review-rook-learning-v160'
 const INTENTION_RESEARCH_REVISION='latest-intention-agentic-research-v163';
@@ -44,7 +46,8 @@ const LOCAL_LAYOUT_REVISION='merlin-local-layout-fallback-v167';
 const MERLINITES_SEMANTIC_REVISION='merlinites-semantic-planning-v164';
 const MERLINITES_VISUAL_REVISION='merlinites-visual-overhaul-v166';
 const MOBILE_RECOVERY_REVISION='mobile-shell-rook-living-settings-code-rails-v170';
-const EXTENSION_CACHE='cwext-working-campus-additions-v171-settings-safe-open';
+const EXTENSION_CACHE='cwext-working-campus-additions-v172-settings-window-capture';
+// Compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v171-settings-safe-open'
 // Compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v170-mobile-shell-code-rails'
 // Compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v169-merlinites-semantic-visual-planning'
 // Local layout cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v167-antigravity-live-source-proof-merlin-local-layout-fallback'
@@ -54,12 +57,12 @@ const EXTENSION_CACHE='cwext-working-campus-additions-v171-settings-safe-open';
 // Latest intention and research cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v163-latest-intention-agentic-research'
 // Platform cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v162-dark-review-rook-learning'
 // Settings stability cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v161-settings-dialog-stability'
-const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v170-mobile-shell-code-rails';
-const INTERMEDIATE_EXTENSION_CACHE='cwext-working-campus-additions-v169-merlinites-semantic-visual-planning';
+const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v171-settings-safe-open';
+const INTERMEDIATE_EXTENSION_CACHE='cwext-working-campus-additions-v170-mobile-shell-code-rails';
 const EXTENSION_FILES=[
   '/extensions/commonweave-additions-v156.css',
   '/extensions/commonweave-additions-v156.js',
-  '/extensions/commonweave-settings-safe-open-v171.js',
+  '/extensions/commonweave-settings-safe-open-v172.js',
   '/extensions/commonweave-secure-vault-v156.js',
   '/extensions/commonweave-domain-bridge-v156.js',
   '/extensions/commonweave-qr-v156.js',
