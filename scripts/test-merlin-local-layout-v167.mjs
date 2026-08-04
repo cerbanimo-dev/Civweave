@@ -73,11 +73,14 @@ assert(runtime.includes('previewDocument(operation)'),'The request does not gene
 assert(html.indexOf('anarchadia-change-review-v165.js')<html.indexOf('anarchadia-live-layout-v167.js'),'The local layout layer must load after the reviewed change pipeline.');
 assert(html.includes('Try: Move this chat window to the top of the page.'),'The visible Merlin prompt does not expose the supported direct command.');
 assert(html.includes('family-shell-v104.css?v=sol-r1')&&html.includes('family-shell-v104.js?v=sol-r1'),'The reconciled Anarchadia page lost Sol’s global shell cache-bust.');
-assert(worker.includes("EXTENSION_VERSION='working-campus-additions-v167-merlin-local-layout-fallback'"),'Installed package did not rotate to the local-layout revision.');
+assert(worker.includes("EXTENSION_VERSION='working-campus-additions-v167-antigravity-live-source-proof-merlin-local-layout-fallback'"),'Installed package did not rotate to the combined proof-and-layout revision.');
+assert(worker.includes('/extensions/commonweave-antigravity-live-source-guard-v167.js'),'Installed package lost the Antigravity live-source guard.');
+assert(worker.includes("LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167'"),'Service worker status does not report live-source proof.');
 assert(worker.includes('/app/anarchadia-live-layout-v167.js'),'Installed cores do not receive the local layout runtime.');
 assert(worker.includes("LOCAL_LAYOUT_REVISION='merlin-local-layout-fallback-v167'"),'Service worker status does not report the local layout revision.');
 assert(worker.includes("TWO_AGENT_RELAY_REVISION='living-school-two-agent-youtube-v166'"),'The current package lost the Living School two-agent relay.');
-assert(boundary.includes("additionsVersion:'v167-merlin-local-layout-fallback'"),'Install boundary did not rotate to v167.');
+assert(boundary.includes("additionsVersion:'v167-antigravity-live-source-proof-merlin-layout-fallback'"),'Install boundary did not rotate to the combined revision.');
+assert(boundary.includes("additionsVersion:'v167-antigravity-live-source-proof'"),'Install boundary lost the Antigravity proof compatibility receipt.');
 assert(boundary.includes("additionsVersion:'v166-two-agent-youtube-reviewed-handoffs'"),'Install boundary lost the v166 relay compatibility receipt.');
 
 console.log(JSON.stringify({
@@ -87,5 +90,5 @@ console.log(JSON.stringify({
   keep:'device-persistent-local-override',
   fallback:'server-element-shell-and-original-placement',
   restore:'server-layout',
-  preserved:['sol-visual-shell','reviewed-merlin-handoffs','living-school-two-agent-relay','offline-installed-package']
+  preserved:['antigravity-live-source-proof','sol-visual-shell','reviewed-merlin-handoffs','living-school-two-agent-relay','offline-installed-package']
 },null,2));
