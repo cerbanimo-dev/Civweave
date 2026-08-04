@@ -11,7 +11,7 @@ const css=await readFile(path.join(root,'public/extensions/commonweave-additions
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
 for(const token of [
-  "input.disabled=true","stopImmediatePropagation","MutationObserver","data.proofDriven='true'",
+  "input.disabled=true","stopImmediatePropagation","MutationObserver","dataset.proofDriven='true'",
   "commonweave.working-campus.v1","commonweave.living-school.cabinet.v151","cerbanimo.quest-engine.v144",
   "fellowfare.mvp.state.v3","assessmentPassed","proofItems(task)","fulfilled","syncProgress"
 ])assert(source.includes(token),`Proof progress runtime is missing ${token}`);
