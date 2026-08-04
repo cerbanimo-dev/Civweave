@@ -1,70 +1,46 @@
 (()=>{
 'use strict';
 const VERSION='1.0.4';
-const HOST='/app/fullscreen-family-v104.html';
+const STATUS_KEY='commonweave.family-status.v105';
 const SYSTEMS={
-  commonweave:{label:'Commonweave',guide:'Weaveling',site:'/app/realm-console-v140.html?system=commonweave&cabinet=1&embed=1'},
-  'living-school':{label:'Living School',guide:'Moss',site:'/app/cabinets/living-school/index.html?cabinet=1&embed=1'},
-  cerbanimo:{label:'Cerbanimo',guide:'Kamiya',site:'/app/realm-console-v140.html?system=cerbanimo&cabinet=1&embed=1'},
-  fellowfare:{label:'FellowFare',guide:'Rook',site:'/app/fellowfare-cabinet-v144.html?cabinet=1&embed=1'},
-  anarchadia:{label:'Anarchadia',guide:'Merlin',site:'/app/anarchadia-console-v139.html?cabinet=1&embed=1'}
+  commonweave:{label:'Commonweave',guide:'Weaveling',site:'/app/realm-console-v140.html?system=commonweave&cabinet=1'},
+  'living-school':{label:'Living School',guide:'Moss',site:'/app/cabinets/living-school/index.html?cabinet=1'},
+  cerbanimo:{label:'Cerbanimo',guide:'Kamiya',site:'/app/realm-console-v140.html?system=cerbanimo&cabinet=1'},
+  fellowfare:{label:'FellowFare',guide:'Rook',site:'/app/fellowfare-cabinet-v144.html?cabinet=1'},
+  anarchadia:{label:'Anarchadia',guide:'Merlin',site:'/app/anarchadia-console-v139.html?cabinet=1'}
 };
-for(const [id,item] of Object.entries(SYSTEMS))item.url=`${HOST}?system=${encodeURIComponent(id)}`;
 const parse=(value,fallback)=>{try{const out=JSON.parse(value);return out==null?fallback:out}catch{return fallback}};
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-function detect(){const query=new URLSearchParams(location.search).get('system');return SYSTEMS[query]?query:'commonweave'}
-function list(key){const value=parse(localStorage.getItem(key),[]);return Array.isArray(value)?value:[]}
-function status(system){
-  if(system==='commonweave'){const plans=list('commonweave.intentions.v127').filter(item=>item?.kind==='weave-plan'),review=plans.filter(item=>item.state==='review').length,active=plans.filter(item=>item.state==='active'||item.plan?.state==='active').length;return{count:review,state:review?'attention':active?'active':'ready',label:review?'Review':active?'Active':'Ready'}}
-  if(system==='living-school'){const intake=list('commonweave.living-school.intake.v152'),native=parse(localStorage.getItem('living-school.cabinet.v151'),{}),active=intake.filter(item=>item?.state!=='complete').length;return{count:active,state:active?'attention':native?.activePathId?'active':'ready',label:active?'Path due':native?.activePathId?'Learning':'Ready'}}
-  if(system==='cerbanimo'){const queue=list('commonweave.cerbanimo.quest-queue.v1'),native=parse(localStorage.getItem('commonweave.realm-console.v140'),{}),active=queue.filter(item=>!['complete','accepted'].includes(item?.state)).length;return{count:active,state:active?'attention':native?.active?.cerbanimo?'active':'ready',label:active?'Quest due':native?.active?.cerbanimo?'Building':'Ready'}}
-  if(system==='fellowfare'){const queue=list('commonweave.fellowfare.resource-queue.v152'),native=parse(localStorage.getItem('fellowfare.mvp.state.v3'),{}),active=queue.filter(item=>!['fulfilled','closed'].includes(item?.state)).length;return{count:active,state:active?'attention':Array.isArray(native?.threads)&&native.threads.length?'active':'ready',label:active?'Need open':native?.threads?.length?'Exchange':'Ready'}}
-  const passport=parse(localStorage.getItem('commonweave.anarchadia.passport.v152'),{}),native=parse(localStorage.getItem('anarchadia.citizen-console.v139'),{}),count=Array.isArray(native?.proposals)?native.proposals.filter(item=>item?.state==='open').length:0;return{count,state:count?'attention':passport?.activeIntentionId?'active':'ready',label:count?'Vote due':passport?.activeIntentionId?'Governing':'Ready'}
+const array=key=>{const value=parse(localStorage.getItem(key),[]);return Array.isArray(value)?value:[]};
+const object=key=>{const value=parse(localStorage.getItem(key),{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}};
+const timestamp=item=>Date.parse(item?.updatedAt||item?.createdAt||item?.time||item?.at||item?.savedAt||0)||0;
+const nonSeedFellowFare=item=>!/^([tmp]|pr|ag|a|c|ev)[1-9]\d*$/.test(String(item?.id||''));
+function detect(){const query=new URLSearchParams(location.search).get('system');if(SYSTEMS[query])return query;if(document.documentElement.hasAttribute('data-living-school-cabinet')||location.pathname.includes('/cabinets/living-school/'))return'living-school';if(location.pathname.includes('fellowfare'))return'fellowfare';if(location.pathname.includes('anarchadia'))return'anarchadia';return'commonweave'}
+function readStatusStore(){const store=object(STATUS_KEY);store.visits=store.visits&&typeof store.visits==='object'?store.visits:{};return store}
+function seedVisits(){const store=readStatusStore();if(!Object.keys(store.visits).length){const at=Date.now();for(const id of Object.keys(SYSTEMS))store.visits[id]=at;localStorage.setItem(STATUS_KEY,JSON.stringify(store))}return store}
+function markVisited(system){const store=seedVisits();store.visits[system]=Date.now();localStorage.setItem(STATUS_KEY,JSON.stringify(store))}
+function actionable(system){
+  if(system==='commonweave')return array('commonweave.intentions.v127').filter(item=>item?.kind==='weave-plan'&&(item.state==='review'||item.plan?.state==='review'));
+  if(system==='living-school')return array('commonweave.living-school.intake.v152').filter(item=>['ready','review'].includes(item?.status||item?.state));
+  if(system==='cerbanimo')return [...array('commonweave.cerbanimo.quest-queue.v1').filter(item=>['review','ready','blocked'].includes(item?.state)),...array('commonweave.realm-actions.v141').filter(item=>item?.system==='cerbanimo'&&['clarifying','review'].includes(item?.state))];
+  if(system==='fellowfare'){const native=object('fellowfare.mvp.state.v3'),messages=Array.isArray(native.messages)?native.messages.filter(item=>item?.read===false&&nonSeedFellowFare(item)):[];return [...array('commonweave.fellowfare.resource-queue.v152').filter(item=>['review','ready','blocked'].includes(item?.status||item?.state)),...array('commonweave.fellowfare.pending-threads.v1').filter(item=>['draft','review'].includes(item?.status)),...messages]}
+  const native=object('commonweave.anarchadia.citizen-console.v139'),proposals=Array.isArray(native.proposals)?native.proposals.filter(item=>['open','review'].includes(item?.state||item?.status)):[];return [...proposals,...array('commonweave.realm-actions.v141').filter(item=>item?.system==='anarchadia'&&['clarifying','review'].includes(item?.state))]
 }
-function openSettings(){globalThis.CommonweaveModelSettingsV133?.open?.()}
-function openChat(system){globalThis.CommonweaveGuideChatV153?.open?.(system)}
-function route(system,{replace=false}={}){if(!SYSTEMS[system])return;location[replace?'replace':'assign'](SYSTEMS[system].url)}
-function isSettingsControl(target){
-  const explicit=target.closest?.('[data-action="settings"],#lite-settings,[data-model-settings],[data-ai-settings],[data-capability="commonweave.model-setup"]');
-  if(explicit)return true;
-  const control=target.closest?.('button,a,[role="button"]');
-  return Boolean(control&&/\b(ai settings|model setup|configure ai|configure model|choose the compass mind)\b/i.test(control.textContent||control.getAttribute('aria-label')||''));
-}
-function childStyle(doc,current){
-  if(doc.querySelector('style[data-cwf104-child]'))return;
-  const style=doc.createElement('style');style.dataset.cwf104Child='true';style.textContent=`
-  html,body{min-height:100%!important}body{padding-bottom:0!important}.gc153-launcher,.cw127-topbar,.cw127-nav{display:none!important}.cw127-app,.ls-app,.rc-app,.ffc144-app,.ac-shell{min-height:100dvh!important;padding-top:0!important;padding-bottom:0!important}.rc-bottom,.ls-tray{bottom:0!important}
-  `;doc.head.append(style);doc.documentElement.dataset.fullscreenCabinet=current;
-}
-function bindDocument(doc,current){
-  if(!doc||doc.documentElement.dataset.cwf104Bound==='true')return;
-  doc.documentElement.dataset.cwf104Bound='true';childStyle(doc,current);
-  doc.addEventListener('click',event=>{
-    const target=event.target;
-    const chat=target.closest?.('[data-action="chat"],#moss,.ch142-guide,[data-guide-chat]');
-    if(chat){event.preventDefault();event.stopImmediatePropagation();openChat(current);return}
-    if(isSettingsControl(target)){event.preventDefault();event.stopImmediatePropagation();openSettings();return}
-    const realm=target.closest?.('[data-realm]')?.dataset.realm;
-    if(SYSTEMS[realm]){event.preventDefault();event.stopImmediatePropagation();route(realm)}
-  },true);
-  const bindFrames=()=>doc.querySelectorAll('iframe').forEach(nested=>{const bind=()=>{try{bindDocument(nested.contentDocument,current)}catch{}};nested.addEventListener('load',bind);bind()});
-  bindFrames();new MutationObserver(bindFrames).observe(doc.documentElement,{childList:true,subtree:true});
-}
-function hookChild(frame,current){
-  try{bindDocument(frame.contentDocument,current);frame.classList.add('is-ready');frame.title=`${SYSTEMS[current].label} cabinet software`}catch(error){console.warn('[Commonweave family] Could not bind child software',error)}
-}
-function mountFrame(current){const frame=document.getElementById('cwf104-frame');if(!frame)return;frame.addEventListener('load',()=>hookChild(frame,current));frame.src=SYSTEMS[current].site}
-function build(){
-  const current=detect(),item=SYSTEMS[current];document.documentElement.classList.add('cwf104-active');document.documentElement.dataset.commonweaveSystem=current;
-  let head=document.getElementById('cwf104-head');if(!head){head=document.createElement('header');head.id='cwf104-head';head.className='cwf104-head';document.body.append(head)}
-  head.innerHTML=`<div class="cwf104-title"><small>CABINET MODE · <span class="cwf104-version">v${VERSION}</span></small><b>${esc(item.label)}</b></div><div class="cwf104-head-state"><i class="cwf104-dot"></i><span data-cwf-current-state>Ready</span></div><button type="button" data-cwf-chat>Talk to ${esc(item.guide)}</button><button type="button" data-cwf-settings>AI settings</button>`;
-  head.querySelector('[data-cwf-chat]').onclick=()=>openChat(current);head.querySelector('[data-cwf-settings]').onclick=openSettings;
-  let tray=document.getElementById('cwf104-tray');if(!tray){tray=document.createElement('nav');tray.id='cwf104-tray';tray.className='cwf104-tray';tray.setAttribute('aria-label','Travel between Commonweave systems');document.body.append(tray)}
-  tray.innerHTML=Object.entries(SYSTEMS).filter(([id])=>id!==current).map(([id,system])=>`<a class="cwf104-system" data-cwf-system="${id}" href="${system.url}"><b class="cwf104-badge" data-cwf-badge hidden>0</b><span class="cwf104-system-label">${esc(system.label)}</span><span class="cwf104-system-meta"><i class="cwf104-dot"></i><span data-cwf-state>Ready</span></span></a>`).join('');
-  tray.addEventListener('click',event=>{const target=event.target.closest('[data-cwf-system]');if(!target)return;event.preventDefault();route(target.dataset.cwfSystem)});mountFrame(current);refresh();
-}
-function refresh(){const current=detect(),currentState=status(current),head=document.getElementById('cwf104-head');if(head){head.classList.remove('is-ready','is-attention','is-active');head.classList.add(`is-${currentState.state}`);const label=head.querySelector('[data-cwf-current-state]');if(label)label.textContent=currentState.label}document.querySelectorAll('[data-cwf-system]').forEach(node=>{const value=status(node.dataset.cwfSystem);node.classList.remove('is-ready','is-attention','is-active');node.classList.add(`is-${value.state}`);const label=node.querySelector('[data-cwf-state]');if(label)label.textContent=value.label;const badge=node.querySelector('[data-cwf-badge]');if(badge){badge.textContent=String(value.count);badge.hidden=!value.count}})}
-function boot(){build();setInterval(refresh,2500);addEventListener('storage',refresh);addEventListener('commonweave:intentions-changed',refresh)}
+function state(system){const actions=actionable(system);
+  if(system==='commonweave'){const active=array('commonweave.intentions.v127').some(item=>item?.state==='active'||item?.plan?.state==='active');return actions.length?{kind:'attention',label:'Review'}:active?{kind:'active',label:'Active'}:{kind:'ready',label:'Ready'}}
+  if(system==='living-school'){const school=object('commonweave.living-school.cabinet.v151').school;return actions.length?{kind:'attention',label:'Path ready'}:school?{kind:'active',label:'Learning'}:{kind:'ready',label:'Ready'}}
+  if(system==='cerbanimo'){const active=array('commonweave.cerbanimo.quest-queue.v1').some(item=>item?.state==='active')||array('commonweave.realm-actions.v141').some(item=>item?.system==='cerbanimo'&&['active','published'].includes(item?.state));return actions.length?{kind:'attention',label:'Review'}:active?{kind:'active',label:'Active'}:{kind:'ready',label:'Ready'}}
+  if(system==='fellowfare'){const native=object('fellowfare.mvp.state.v3'),active=Array.isArray(native.threads)&&native.threads.some(item=>nonSeedFellowFare(item)&&!['closed','fulfilled','cancelled'].includes(item?.status));return actions.length?{kind:'attention',label:'Review'}:active?{kind:'active',label:'Exchange'}:{kind:'ready',label:'Ready'}}
+  const passport=object('commonweave.anarchadia.passport.v152');return actions.length?{kind:'attention',label:'Review'}:passport.activeIntentionId?{kind:'active',label:'Active'}:{kind:'ready',label:'Ready'}}
+function status(system){const store=seedVisits(),last=Number(store.visits[system]||Date.now()),items=actionable(system),count=items.filter(item=>timestamp(item)>last).length,live=state(system);return{count,state:live.kind,label:live.label,total:items.length}}
+function route(system){if(SYSTEMS[system])location.assign(SYSTEMS[system].site)}
+async function openChat(system=detect(),prefill=''){return globalThis.CommonweaveFamilyAILoaderV105?.openChat?.(system,{prefill})}
+async function openSettings(){return globalThis.CommonweaveFamilyAILoaderV105?.openSettings?.()}
+function isSettingsControl(target){const explicit=target.closest?.('[data-cwf-settings],[data-action="settings"],#lite-settings,[data-model-settings],[data-ai-settings],[data-capability="commonweave.model-setup"],[data-cw143-settings]');if(explicit)return true;const control=target.closest?.('button,a,[role="button"],summary');return Boolean(control&&/\b(ai settings|model setup|configure ai|configure model|choose the compass mind|model control)\b/i.test(control.textContent||control.getAttribute('aria-label')||''))}
+function build(){const current=detect(),item=SYSTEMS[current];seedVisits();markVisited(current);document.documentElement.classList.add('cwf104-active');document.documentElement.dataset.commonweaveSystem=current;document.documentElement.dataset.familyShell='direct';let head=document.getElementById('cwf104-head');if(!head){head=document.createElement('header');head.id='cwf104-head';head.className='cwf104-head';document.body.append(head)}head.innerHTML=`<div class="cwf104-title"><small>CABINET MODE · <span class="cwf104-version">v${VERSION}</span></small><b>${esc(item.label)}</b></div><div class="cwf104-head-state"><i class="cwf104-dot"></i><span data-cwf-current-state>Ready</span></div><button type="button" data-cwf-chat>Talk to ${esc(item.guide)}</button><button type="button" data-cwf-settings>AI settings</button>`;head.querySelector('[data-cwf-chat]').onclick=()=>openChat(current);head.querySelector('[data-cwf-settings]').onclick=openSettings;let tray=document.getElementById('cwf104-tray');if(!tray){tray=document.createElement('nav');tray.id='cwf104-tray';tray.className='cwf104-tray';tray.setAttribute('aria-label','Travel between Commonweave systems');document.body.append(tray)}tray.innerHTML=Object.entries(SYSTEMS).filter(([id])=>id!==current).map(([id,system])=>`<a class="cwf104-system" data-cwf-system="${id}" href="${system.site}"><b class="cwf104-badge" data-cwf-badge hidden></b><span class="cwf104-system-label">${esc(system.label)}</span><span class="cwf104-system-meta"><i class="cwf104-dot"></i><span data-cwf-state>Ready</span></span></a>`).join('');refresh()}
+function refresh(){const current=detect(),currentState=status(current),head=document.getElementById('cwf104-head');if(head){head.classList.remove('is-ready','is-attention','is-active');head.classList.add(`is-${currentState.state}`);head.querySelector('[data-cwf-current-state]').textContent=currentState.label}document.querySelectorAll('[data-cwf-system]').forEach(node=>{const value=status(node.dataset.cwfSystem);node.classList.remove('is-ready','is-attention','is-active');node.classList.add(`is-${value.state}`);node.querySelector('[data-cwf-state]').textContent=value.label;const badge=node.querySelector('[data-cwf-badge]');badge.textContent=String(value.count);badge.hidden=value.count<1})}
+function bind(){document.addEventListener('click',event=>{const target=event.target,nav=target.closest?.('[data-cwf-system]');if(nav){event.preventDefault();route(nav.dataset.cwfSystem);return}if(target.closest?.('[data-cwf-chat],[data-action="chat"],#moss,.ch142-guide,[data-guide-chat]')){event.preventDefault();event.stopImmediatePropagation();openChat(detect());return}if(isSettingsControl(target)){event.preventDefault();event.stopImmediatePropagation();openSettings()}},true);document.addEventListener('submit',event=>{const form=event.target.closest?.('[data-ch142-form]');if(!form)return;event.preventDefault();event.stopImmediatePropagation();const input=form.querySelector('textarea,input[type="text"]');openChat(detect(),input?.value||'')},true);addEventListener('storage',refresh);addEventListener('focus',refresh);addEventListener('commonweave:intentions-changed',refresh);document.addEventListener('visibilitychange',()=>{if(!document.hidden){markVisited(detect());refresh()}});document.addEventListener('click',()=>setTimeout(refresh,80),{passive:true});setInterval(refresh,30000)}
+function boot(){build();bind();requestAnimationFrame(()=>document.documentElement.dataset.familyReady='true')}
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
-globalThis.CommonweaveFamilyShellV104={version:VERSION,systems:SYSTEMS,detect,status,route,refresh,openSettings,openChat};
+globalThis.CommonweaveFamilyShellV104={version:VERSION,systems:SYSTEMS,detect,status,state,actionable,markVisited,route,refresh,openSettings,openChat};
 })();
