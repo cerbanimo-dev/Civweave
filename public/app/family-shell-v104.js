@@ -39,7 +39,7 @@ function route(system){if(SYSTEMS[system])location.assign(SYSTEMS[system].site)}
 async function openChat(system=detect(),prefill=''){return globalThis.CommonweaveFamilyAILoaderV105?.openChat?.('commonweave',{prefill,contextSystem:system})}
 async function openSettings(){return globalThis.CommonweaveFamilyAILoaderV105?.openSettings?.()}
 function isSettingsControl(target){const explicit=target.closest?.('[data-cwf-settings],[data-action="settings"],#lite-settings,[data-model-settings],[data-ai-settings],[data-capability="commonweave.model-setup"],[data-cw143-settings]');if(explicit)return true;const control=target.closest?.('button,a,[role="button"],summary');return Boolean(control&&/\b(ai settings|model setup|configure ai|configure model|choose the compass mind|model control)\b/i.test(control.textContent||control.getAttribute('aria-label')||''))}
-function installVisualStyle(){if(document.querySelector('link[data-merlinites-shell-v166],link[data-sol-shell-v166]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='/app/sol-shell-fix-v166.css?v=sol-r2';link.dataset.merlinitesShellV166='compat';link.dataset.solShellV166='legacy';document.head.append(link)}
+function installVisualStyle(){if(document.querySelector('link[data-merlinites-shell-v166],link[data-sol-shell-v166]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='/app/merlinites-shell-fix-v166.css?v=merlinites-r2';link.dataset.merlinitesShellV166='primary';link.dataset.solShellV166='legacy';link.onerror=()=>{link.onerror=null;link.href='/app/sol-shell-fix-v166.css?v=sol-r2'};document.head.append(link)}
 function build(){
   installVisualStyle();
   const current=detect(),item=SYSTEMS[current];
