@@ -35,34 +35,38 @@ jobs:
           npm run model:check
       - name: Run local-first regression suite
         run: npm run check
-      - name: Simulate clean Render source preparation
+      - name: Verify non-blocking Render preparation
         run: |
           set -euxo pipefail
-          rm -rf public/app/vendor/transformers
-          rm -f \
-            public/app/models/all-minilm-l6-v2/config.json \
-            public/app/models/all-minilm-l6-v2/special_tokens_map.json \
-            public/app/models/all-minilm-l6-v2/tokenizer.json \
-            public/app/models/all-minilm-l6-v2/tokenizer_config.json \
-            public/app/models/all-minilm-l6-v2/vocab.txt \
-            public/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx \
-            public/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx
+          start_ms="$(date +%s%3N)"
           RENDER=true node scripts/prepare-start-v131.mjs | tee render-package-prepare.log
-          grep -q 'Public gateway mode: preparing the complete device package' render-package-prepare.log
-          grep -q 'MiniLM semantic package is ready' render-package-prepare.log
+          elapsed_ms=$(( $(date +%s%3N) - start_ms ))
+          grep -q 'Public gateway mode: Gateway fast start' render-package-prepare.log
+          grep -q 'Optional Transformers.js and MiniLM verification is deferred' render-package-prepare.log
+          ! grep -q 'Fetching .*MiniLM' render-package-prepare.log
+          test "$elapsed_ms" -lt 5000
           test -s public/app/vendor/transformers/transformers.min.js
           test -s public/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx
+          grep -q 'async function staged()' scripts/stage-transformers-assets.mjs
+          grep -q 'verifyHashes=checkOnly' scripts/ensure-minilm-model.mjs
+          grep -q "cache:'force-cache'" public/app/working-campus-v156.js
+          printf '{"renderPrepareMs":%s}\n' "$elapsed_ms" > startup-budget.json
       - name: Start public install gateway
         run: |
+          start_ms="$(date +%s%3N)"
           RENDER=true PORT=8787 npm start > commonweave-gateway.log 2>&1 &
           echo $! > commonweave-gateway.pid
+          for i in $(seq 1 100); do
+            if curl -fsS http://127.0.0.1:8787/api/health > gateway-health.json; then break; fi
+            sleep 0.05
+          done
+          elapsed_ms=$(( $(date +%s%3N) - start_ms ))
+          test -s gateway-health.json
+          test "$elapsed_ms" -lt 5000
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('startup-budget.json'));p.gatewayHealthMs=Number(process.argv[1]);fs.writeFileSync('startup-budget.json',JSON.stringify(p,null,2))" "$elapsed_ms"
       - name: Verify fast marked package distribution
         run: |
           set -euxo pipefail
-          for i in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:8787/api/health > gateway-health.json; then break; fi
-            sleep 1
-          done
           grep -q '1.0.4-install-only-fullscreen-family-gateway' gateway-health.json
           grep -q '"appVersion":"1.0.4"' gateway-health.json
           grep -q '"localInstallRequired":true' gateway-health.json
@@ -197,6 +201,7 @@ jobs:
             commonweave-gateway.log
             commonweave-local.log
             render-package-prepare.log
+            startup-budget.json
             gateway-health.json
             gateway.html
             gateway-installer.js
