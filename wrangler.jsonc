@@ -3,9 +3,5 @@
   "name": "commonweave-cloudflare-node",
   "pages_build_output_dir": "./.cloudflare-pages",
   "compatibility_date": "2026-08-04",
-  "compatibility_flags": ["nodejs_compat"],
-  "observability": {
-    "enabled": true,
-    "head_sampling_rate": 1
-  }
+  "compatibility_flags": ["nodejs_compat"]
 }
