@@ -1,17 +1,21 @@
 const ROOT='/app/models/all-minilm-l6-v2';
-const WORKER_URL=`${ROOT}/worker.js?v=device-package-r23`;
+const WORKER_URL=`${ROOT}/worker.js?v=device-package-r37-core`;
+const MODEL_CACHE='commonweave-model-1.0.4-minilm-on-demand-r1';
 const REQUIRED=[
   {url:`${ROOT}/config.json`,minBytes:300},
   {url:`${ROOT}/tokenizer.json`,minBytes:500000},
   {url:`${ROOT}/tokenizer_config.json`,minBytes:100},
   {url:`${ROOT}/vocab.txt`,minBytes:200000},
   {url:`${ROOT}/reflex-index.json`,minBytes:3000},
-  {url:'/app/vendor/transformers/transformers.min.js',minBytes:100000}
+  {url:'/app/vendor/transformers/transformers.min.js',minBytes:100000},
+  {url:'/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs',minBytes:10000},
+  {url:'/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm',minBytes:1000000}
 ];
 const GRAPH_OPTIONS=[
   {url:`${ROOT}/onnx/model_q4f16.onnx`,minBytes:25000000,device:'webgpu'},
   {url:`${ROOT}/onnx/model_quantized.onnx`,minBytes:18000000,device:'wasm'}
 ];
+const DEFAULT_DOWNLOAD=[...REQUIRED,GRAPH_OPTIONS[1]];
 const BODY_PROBE_LIMIT=2_000_000;
 let worker=null,sequence=0;
 const pending=new Map();
@@ -20,7 +24,7 @@ async function inspect(spec){
   try{
     if(!('caches'in globalThis))throw new Error('Cache Storage is unavailable.');
     const response=await caches.match(spec.url,{ignoreSearch:true});
-    if(!response)return{...spec,status:0,length:0,type:'',ok:false,probe:'cache-storage',error:'Missing from installed device package'};
+    if(!response)return{...spec,status:0,length:0,type:'',ok:false,probe:'cache-storage',error:'Not downloaded on this device'};
     const status=response.status;
     const type=String(response.headers.get('content-type')||'');
     let length=Number(response.headers.get('content-length')||0);
@@ -29,6 +33,30 @@ async function inspect(spec){
     const htmlFallback=/text\/html/i.test(type);
     return{...spec,status,length,type,ok:status>=200&&status<300&&!htmlFallback&&length>=spec.minBytes,probe:'cache-storage'};
   }catch(error){return{...spec,status:0,length:0,type:'',ok:false,probe:'cache-storage',error:error.message}}
+}
+async function fetchAndCache(spec){
+  const existing=await inspect(spec);if(existing.ok)return existing;
+  const response=await fetch(spec.url,{cache:'no-store'});
+  if(!response.ok)throw new Error(`${spec.url} returned ${response.status}`);
+  const type=String(response.headers.get('content-type')||'');
+  if(/text\/html/i.test(type))throw new Error(`${spec.url} returned HTML instead of a model asset.`);
+  if('caches'in globalThis){const cache=await caches.open(MODEL_CACHE);await cache.put(spec.url,response.clone())}
+  const checked=await inspect(spec);
+  if(!checked.ok)throw new Error(`${spec.url} did not pass the local cache check.`);
+  return checked;
+}
+export async function install({includeWebGPU=false,onProgress}={}){
+  const files=includeWebGPU?[...DEFAULT_DOWNLOAD,GRAPH_OPTIONS[0]]:DEFAULT_DOWNLOAD;
+  const unique=[...new Map(files.map(item=>[item.url,item])).values()];
+  let completed=0;
+  for(const spec of unique){
+    onProgress?.({phase:'downloading',url:spec.url,completed,total:unique.length});
+    await fetchAndCache(spec);completed+=1;
+    onProgress?.({phase:'cached',url:spec.url,completed,total:unique.length});
+  }
+  const result=await status();
+  if(!result.available)throw new Error('The local semantic model download completed, but the package is still incomplete.');
+  return result;
 }
 function stopWorker(error){
   for(const task of pending.values()){clearTimeout(task.timer);task.reject(error)}
@@ -58,9 +86,16 @@ export async function status(){
   const files=await Promise.all(REQUIRED.map(inspect));
   const graphs=await Promise.all(GRAPH_OPTIONS.map(inspect));
   const usableGraphs=graphs.filter(item=>item.ok);
-  return{available:files.every(item=>item.ok)&&usableGraphs.length>0,id:'Xenova/all-MiniLM-L6-v2',source:'installed-device-package',files,graphs,missing:[...files.filter(item=>!item.ok),...(usableGraphs.length?[]:graphs)],remoteDownloadsAllowed:false};
+  return{available:files.every(item=>item.ok)&&usableGraphs.length>0,id:'Xenova/all-MiniLM-L6-v2',source:'local-model-cache',cache:MODEL_CACHE,files,graphs,missing:[...files.filter(item=>!item.ok),...(usableGraphs.length?[]:graphs)],sameOriginDownloadsOnly:true,remoteModelHostsAllowed:false,installRequired:!(files.every(item=>item.ok)&&usableGraphs.length>0)};
 }
-export async function prewarm({timeoutMs=120000}={}){return request('prewarm',{},timeoutMs)}
+export async function prewarm({timeoutMs=120000,installIfMissing=false,onProgress}={}){
+  const current=await status();
+  if(!current.available){
+    if(!installIfMissing){const error=new Error('MiniLM is not downloaded on this device. Use Download local model in AI settings.');error.code='MINILM_NOT_DOWNLOADED';throw error}
+    await install({onProgress});
+  }
+  return request('prewarm',{},timeoutMs);
+}
 export async function match(text,{limit=5,timeoutMs=120000}={}){return request('match',{text,limit},timeoutMs)}
 export async function benchmark(cases,{timeoutMs=120000}={}){
   const started=performance.now();const results=[];
