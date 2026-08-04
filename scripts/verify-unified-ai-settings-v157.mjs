@@ -51,19 +51,20 @@ for(const token of [
 assert(!settings.includes('localStorage.setItem("commonweave-model-session"'),'A session API key is written to localStorage.');
 
 for(const token of ['.cw-ai-header','.cw-ai-secret-tools','.cw-ai-test-grid','.cw-ai-form-footer','--cw-ai-mint','#0a1022'])assert(styles.includes(token),`Restyled settings surface is missing ${token}.`);
-for(const token of ["lazy-ai-r37-unified-settings","CommonweaveModelSettingsV157?.version==='157.1'",'const settingsApi=','CommonweaveModelSettingsV133','api.open()'])assert(loader.includes(token),`Family loader unified settings contract is missing ${token}.`);
+for(const token of ['inline-commonweave-r40','function removeStale','function reset','CommonweaveModelSettingsV133','globalThis.CommonweaveModelSettingsV133.open()'])assert(loader.includes(token),`Inline family loader shared-settings contract is missing ${token}.`);
+assert(!loader.includes("['/app/guide-chat-v153.js?v=1.0.4'"),'Retired floating guide script returned to the load sequence.');
 
 for(const token of ["CACHE_REVISION='direct-family-r37-fast-install'","DEVICE_REVISION='device-package-r37-core'","MODEL_REVISION='minilm-on-demand-r1'",'modelOnDemand','GET_MODEL_PACKAGE_STATUS'])assert(baseWorker.includes(token),`Fast-core base worker lost ${token}.`);
 for(const token of [
   "EXTENSION_VERSION='working-campus-additions-v157-unified-settings-fast-core'",
   'PATCHED_CORE_FILES',
   'patchCorePackage',
-  '/app/family-ai-loader-v105.js',
   '/app/minilm-model-settings-v138.js',
   '/app/model-settings-v133.css',
   '/app/working-campus-v156.html',
   '/app/working-campus-v156.part4.txt',
-  '/app/working-campus-v156.part5.txt'
+  '/app/working-campus-v156.part5.txt',
+  'inlineChatRevision:INLINE_CHAT_REVISION'
 ])assert(additiveWorker.includes(token),`Fast-core additive worker does not deliver ${token}.`);
 
 console.log(JSON.stringify({
@@ -71,9 +72,10 @@ console.log(JSON.stringify({
   settingsRuntime:'157.1',
   compatibilityAlias:'v133-to-v157',
   sharedSurfaces:['working-campus','settings-bar'],
+  guideLoader:'inline-commonweave-r40',
   geminiKeyIngestion:['direct-entry','clipboard','env-file','json-file','raw-key-file'],
   liveTests:['gemini-generate','antigravity-direct-no-fallback'],
   duplicateWorkingCampusDialog:false,
   corePackage:'r37-fast-deferred-minilm',
-  additiveSettingsRevision:'unified-settings-fast-core'
+  additiveSettingsRevision:'proof-progress-unified-settings-inner-ui-merlin-school-rook'
 },null,2));
