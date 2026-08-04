@@ -109,13 +109,14 @@ async function pollNative(meta,id){
 }
 async function continueIncomplete(meta,payload){
   let current=payload;
+  const accumulated=[...(Array.isArray(payload?.steps)?payload.steps:[])];
   for(let turn=0;turn<2&&clean(current?.status,80).toLowerCase()==='incomplete';turn++){
     const environment=current.environment_id||current.environment;
     if(!current.id||!environment)break;
     const body={agent:current.agent||meta.agent||'antigravity-preview-05-2026',input:'Continue. Finish the requested live-source JSON. Use Google Search and URL Context, and do not mark any URL opened or live unless the URL Context step actually retrieved it.',previous_interaction_id:current.id,environment,background:true,store:true,tools:[{type:'google_search'},{type:'url_context'}],agent_config:{type:'antigravity',max_total_tokens:'50000'}};
-    const response=await nativeFetch(meta.base,{method:'POST',headers:meta.headers,body:JSON.stringify(body),cache:'no-store',credentials:'omit'});current=await response.clone().json().catch(()=>({}));if(!response.ok)throw new Error(clean(current?.error?.message||current?.message||`Antigravity continuation returned HTTP ${response.status}.`,1600));if(ACTIVE.has(clean(current.status,80).toLowerCase()))current=(await pollNative(meta,current.id)).payload;
+    const response=await nativeFetch(meta.base,{method:'POST',headers:meta.headers,body:JSON.stringify(body),cache:'no-store',credentials:'omit'});current=await response.clone().json().catch(()=>({}));if(!response.ok)throw new Error(clean(current?.error?.message||current?.message||`Antigravity continuation returned HTTP ${response.status}.`,1600));if(ACTIVE.has(clean(current.status,80).toLowerCase()))current=(await pollNative(meta,current.id)).payload;accumulated.push(...(Array.isArray(current?.steps)?current.steps:[]));
   }
-  return current;
+  return{...current,steps:accumulated};
 }
 async function guardedFetch(input,init={}){
   if(!nativeFetch)return Promise.reject(new Error('Fetch is unavailable.'));
@@ -124,8 +125,12 @@ async function guardedFetch(input,init={}){
   if(method==='POST'&&/\/interactions$/.test(url.pathname)){
     const raw=bodyJson(init),kind=liveKind(raw);
     if(!kind)return nativeFetch(input,init);
-    const body=prepareBody(raw,kind),next=withLongSignal({...init,body:JSON.stringify(body)}),response=await nativeFetch(input,next),payload=await parseClone(response);
-    if(payload?.id)tracked.set(payload.id,{kind,base:url.href.replace(/\/+$/,''),headers:headersObject(next.headers),agent:body.agent,startedAt:Date.now()});
+    const body=prepareBody(raw,kind),next=withLongSignal({...init,body:JSON.stringify(body)}),response=await nativeFetch(input,next);let payload=await parseClone(response);
+    const meta={kind,base:url.href.replace(/\/+$/,''),headers:headersObject(next.headers),agent:body.agent,startedAt:Date.now()};
+    if(payload?.id)tracked.set(payload.id,meta);
+    if(!payload)return response;
+    if(clean(payload.status,80).toLowerCase()==='incomplete')payload=await continueIncomplete(meta,payload);
+    if(TERMINAL_OK.has(clean(payload.status||'',80).toLowerCase()))return responseWithJson(response,enforcePayload(payload,kind));
     return response;
   }
   if(method==='GET'){
