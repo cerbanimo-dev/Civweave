@@ -149,6 +149,7 @@ facade={
   renderInline:async(...args)=>{await ensure();return globalThis.CommonweaveModelSettingsV133.renderInline?.(...args)}
 };
 if(!globalThis.CommonweaveModelSettingsV133)globalThis.CommonweaveModelSettingsV133=facade;
+installDormantReflexStatus();
 mark('ready');
-globalThis.CommonweaveModelSettingsControllerV173={version:VERSION,open,ensure,ensureReflex,modelPackageStatus,settingsBoundary,facade};
+globalThis.CommonweaveModelSettingsControllerV173={version:VERSION,open,ensure,ensureReflex,modelPackageStatus,settingsBoundary,facade:reflexStatusProxy,settingsFacade:facade};
 })();
