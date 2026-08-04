@@ -1,0 +1,3 @@
+# This 65.6 MiB release artifact exceeds the Workers static-asset limit.
+# src/cloudflare-worker.ts serves the same URL from the DOWNLOADS R2 binding.
+downloads/Commonweave-Mobile-Install-Kit.zip
