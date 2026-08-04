@@ -1,18 +1,14 @@
 {
-  "name": "Commonweave Pocket Campus",
+  "name": "Commonweave Cabinet Family",
   "short_name": "Commonweave",
-  "description": "A complete offline Commonweave device package with optional local mesh and community exchange.",
+  "description": "Five connected, offline-ready Commonweave software systems with shared AI settings and live guide chat.",
   "id": "/commonweave-local",
-  "start_url": "/app/installed-entry-v146.html?target=hub",
+  "start_url": "/app/installed-entry-v146.html?system=commonweave",
   "scope": "/",
   "display": "standalone",
-  "display_override": [
-    "window-controls-overlay",
-    "standalone",
-    "minimal-ui"
-  ],
-  "background_color": "#04131d",
-  "theme_color": "#04131d",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#061019",
+  "theme_color": "#061019",
   "orientation": "any",
   "categories": ["productivity", "education", "social"],
   "icons": [
@@ -21,13 +17,11 @@
     {"src":"/app/logos/commonweave-icon-maskable-192.png","sizes":"192x192","type":"image/png","purpose":"maskable"},
     {"src":"/app/logos/commonweave-icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ],
-  "screenshots": [
-    {"src":"/app/logos/commonweave-campus.webp","sizes":"941x1672","type":"image/webp","form_factor":"narrow","label":"Commonweave campus"}
-  ],
   "shortcuts": [
-    {"name":"Open the Quad","url":"/app/installed-entry-v146.html?target=hub","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"Open Cabinet Mode","url":"/app/installed-entry-v146.html?target=cabinets","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"Open Cabinet Only","url":"/app/installed-entry-v146.html?target=cabinetonly","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"Open Workstations","url":"/app/installed-entry-v146.html?target=lite","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]}
+    {"name":"Commonweave","url":"/app/installed-entry-v146.html?system=commonweave","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Living School","url":"/app/installed-entry-v146.html?system=living-school","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Cerbanimo","url":"/app/installed-entry-v146.html?system=cerbanimo","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"FellowFare","url":"/app/installed-entry-v146.html?system=fellowfare","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Anarchadia","url":"/app/installed-entry-v146.html?system=anarchadia","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]}
   ]
 }
