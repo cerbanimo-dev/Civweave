@@ -54,7 +54,26 @@ function assertReleasePath(asset) {
 
 function run(command, args, cwd) {
   const result = spawnSync(command, args, { cwd, stdio: 'inherit' });
+  if (result.error) throw new Error(`${command} failed to start: ${result.error.message}`);
   if (result.status !== 0) throw new Error(`${command} ${args.join(' ')} failed.`);
+}
+
+function powershellLiteral(value) {
+  return `'${String(value).replaceAll("'", "''")}'`;
+}
+
+function createZip(archivePath, sourceDir, entryName) {
+  if (process.platform === 'win32') {
+    const sourcePath = path.join(sourceDir, entryName);
+    const command = [
+      "$ErrorActionPreference = 'Stop'",
+      `Compress-Archive -LiteralPath ${powershellLiteral(sourcePath)} -DestinationPath ${powershellLiteral(archivePath)} -CompressionLevel Optimal -Force`
+    ].join('; ');
+    run('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], sourceDir);
+    return;
+  }
+
+  run('zip', ['-q', '-r', '-9', archivePath, entryName], sourceDir);
 }
 
 async function sha256(file) {
@@ -134,7 +153,7 @@ try {
   const kitPath = path.join(downloadsDir, 'Commonweave-Mobile-Install-Kit.zip');
   await fs.rm(seedPath, { force: true });
   await fs.rm(kitPath, { force: true });
-  run('zip', ['-q', '-r', '-9', kitPath, 'commonweave-mobile-install-kit'], path.join(work, 'kit'));
+  createZip(kitPath, path.join(work, 'kit'), 'commonweave-mobile-install-kit');
 
   const kitInfo = await sha256(kitPath);
   await fs.writeFile(`${kitPath}.sha256`, `${kitInfo.sha256}  ${path.basename(kitPath)}\n`);
@@ -197,7 +216,7 @@ try {
     ]
   }, null, 2)}\n`);
 
-  run('zip', ['-q', '-r', '-9', seedPath, 'commonweave-seed'], path.join(work, 'seed'));
+  createZip(seedPath, path.join(work, 'seed'), 'commonweave-seed');
   const seedInfo = await sha256(seedPath);
   await fs.writeFile(`${seedPath}.sha256`, `${seedInfo.sha256}  ${path.basename(seedPath)}\n`);
 
