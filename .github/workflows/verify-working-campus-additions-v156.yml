@@ -49,6 +49,7 @@ jobs:
           node --check scripts/verify-five-system-inner-ui-v157.mjs
           node --check scripts/verify-runtime-stability-v159.mjs
           node --check scripts/verify-platform-flow-v160.mjs
+          node --check scripts/test-platform-flow-v160.mjs
           node --check scripts/verify-living-school-cabinet-v151.mjs
           node --check scripts/verify-anarchadia-cabinet-workbench-v144.mjs
           node --check scripts/verify-cerbanimo-quest-engine-v144.mjs
@@ -64,6 +65,8 @@ jobs:
         run: node scripts/verify-runtime-stability-v159.mjs
       - name: Verify dark mode and routed request flows
         run: node scripts/verify-platform-flow-v160.mjs
+      - name: Test dark mode, request funding, and learning paths
+        run: node scripts/test-platform-flow-v160.mjs
       - name: Verify researched Living School
         run: node scripts/verify-living-school-cabinet-v151.mjs
       - name: Verify Merlin and Anarchadia stability
