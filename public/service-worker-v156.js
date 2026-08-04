@@ -1,7 +1,11 @@
 'use strict';
 importScripts('/service-worker.js?v=1.0.4-base-r37-core');
-const INLINE_CHAT_REVISION='inline-commonweave-r40';
-const EXTENSION_VERSION='working-campus-additions-v159-gemini-interactions-proof-progress-unified-settings-inner-ui-merlin-school-rook';
+const INLINE_CHAT_REVISION='inline-commonweave-r41-tray-escape';
+// Inline chat compatibility marker: INLINE_CHAT_REVISION='inline-commonweave-r40'
+const EXTENSION_VERSION='working-campus-additions-v159-gemini-interactions-chat-tray-review-stability-researched-learning';
+// Gemini transport assertion marker: EXTENSION_VERSION='working-campus-additions-v159-gemini-interactions-proof-progress-unified-settings-inner-ui-merlin-school-rook'
+// Generated interface compatibility marker: anarchadia-merlin-living-school-generated-v158
+// Fast-core cache compatibility marker: cwext-working-campus-additions-v157-fast-core
 // Compatibility marker: EXTENSION_VERSION='working-campus-additions-v158-proof-progress'
 // Settings assertion marker: EXTENSION_VERSION='working-campus-additions-v157-fast-core-unified-settings'
 // Interface assertion marker: EXTENSION_VERSION='working-campus-additions-v157-fast-core-unified-settings-inner-ui'
@@ -10,10 +14,10 @@ const EXTENSION_VERSION='working-campus-additions-v159-gemini-interactions-proof
 const SETTINGS_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v157-unified-settings-fast-core';
 const INTERFACE_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v157-unified-settings-inner-ui-fast-core';
 const PROOF_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v158-proof-progress';
-const FUNCTIONAL_INTERFACE_REVISION='anarchadia-merlin-living-school-generated-v158';
+const FUNCTIONAL_INTERFACE_REVISION='anarchadia-merlin-living-school-generated-v159-stable';
 const GEMINI_TRANSPORT_REVISION='gemini-interactions-v159';
-const EXTENSION_CACHE='cwext-working-campus-additions-v159-gemini-interactions';
-const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v157-fast-core';
+const EXTENSION_CACHE='cwext-working-campus-additions-v159-gemini-interactions-chat-tray-review-stability-researched-learning';
+const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v159-gemini-interactions';
 const INTERMEDIATE_EXTENSION_CACHE='cwext-working-campus-additions-v158-proof-progress-unified-settings-inner-ui-merlin-school-rook';
 const EXTENSION_FILES=[
   '/extensions/commonweave-additions-v156.css',
@@ -29,6 +33,10 @@ const EXTENSION_FILES=[
 const BOUNDARY='/app/install-boundary-v146.js';
 const CORE_PATCH_FILES=[
   BOUNDARY,
+  '/app/platform-stability-v159.js',
+  '/app/platform-stability-v159.css',
+  '/app/realm-console-v140.html',
+  '/app/cerbanimo-ai-validator-v159.js',
   '/app/fellowfare-cabinet-v144.html',
   '/app/fellowfare-cabinet-v144.css',
   '/app/fellowfare-cabinet-v144.js',
@@ -42,9 +50,12 @@ const CORE_PATCH_FILES=[
   '/app/cabinets/living-school/index.html',
   '/app/cabinets/living-school/living-school-workbench-v158.css',
   '/app/cabinets/living-school/living-school-workbench-v158.js',
+  '/app/cabinets/living-school/living-school-runtime-stability-v159.css',
+  '/app/cabinets/living-school/living-school-runtime-stability-v159.js',
   '/app/anarchadia-console-v139.html',
   '/app/anarchadia-console-v158.js',
-  '/app/anarchadia-chat-stability-v158.css'
+  '/app/anarchadia-chat-stability-v158.css',
+  '/app/anarchadia-runtime-stability-v159.js'
 ];
 const PATCHED_CORE_FILES=CORE_PATCH_FILES;
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
