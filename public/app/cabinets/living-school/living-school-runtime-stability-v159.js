@@ -4,7 +4,7 @@ const VERSION='1.0.4-living-school-runtime-stability-v159';
 if(globalThis.LivingSchoolRuntimeStabilityV159?.version===VERSION)return;
 const KEY='commonweave.living-school.cabinet.v151';
 const $=(selector,root=document)=>root.querySelector(selector);
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const now=()=>new Date().toISOString();
 const uid=prefix=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
