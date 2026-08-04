@@ -20,7 +20,7 @@ for(const token of [
 assert(!source.includes('new MutationObserver(patchDom)'),'The shared HUD must not run its patch function for every page mutation.');
 assert(!source.includes('review.innerHTML='),'The review control must not rebuild its own child tree during refresh.');
 for(const token of [
-  'working-campus-additions-v163-hud-observer-stability',
+  'working-campus-additions-v165-living-school-two-agent-youtube',
   'hud-observer-stability-v163',
   "PLATFORM_EXPERIENCE_REVISION='dark-review-rook-learning-v160.1-hud-stable'",
   "'/app/platform-experience-v160.js'"
@@ -121,5 +121,5 @@ console.log(JSON.stringify({
   unrelatedMutationCallbacks:api.diagnostics.observerCallbacks,
   extraPatchRuns:api.diagnostics.patchRuns-stablePatches,
   extraDomWrites:api.diagnostics.domWrites-stableWrites,
-  installedRepair:'working-campus-additions-v163-hud-observer-stability'
+  installedRepair:'working-campus-additions-v165-living-school-two-agent-youtube'
 },null,2));
