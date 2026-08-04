@@ -11,8 +11,14 @@ const installerPath = resolve(
   repoRoot,
   "public/downloads/Commonweave-Mobile-Install-Kit.zip",
 );
+const buildScript = resolve(repoRoot, "scripts/build-cloudflare-pages.mjs");
+const pagesOutput = resolve(repoRoot, ".cloudflare-pages");
 const bucketName = "commonweave-downloads";
 const objectKey = "Commonweave-Mobile-Install-Kit.zip";
+const projectName =
+  process.env.CLOUDFLARE_PAGES_PROJECT ||
+  process.argv[2] ||
+  "commonweave-cloudflare-node";
 
 function detectWrangler() {
   const candidates =
@@ -36,10 +42,7 @@ function detectWrangler() {
         stdio: ["ignore", "pipe", "pipe"],
       },
     );
-
-    if (result.status === 0) {
-      return candidate;
-    }
+    if (result.status === 0) return candidate;
   }
 
   throw new Error(
@@ -47,31 +50,36 @@ function detectWrangler() {
   );
 }
 
-function run(wrangler, args, options = {}) {
-  const result = spawnSync(
-    wrangler.command,
-    [...wrangler.prefix, ...args],
-    {
-      cwd: repoRoot,
-      encoding: "utf8",
-      stdio: options.capture ? ["inherit", "pipe", "pipe"] : "inherit",
-    },
-  );
+function run(command, args, options = {}) {
+  const result = spawnSync(command, args, {
+    cwd: repoRoot,
+    encoding: "utf8",
+    stdio: options.capture ? ["inherit", "pipe", "pipe"] : "inherit",
+  });
 
-  if (options.capture) {
-    const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
-    if (result.status !== 0 && !options.allowFailure) {
-      process.stderr.write(output);
-      throw new Error(`Wrangler command failed: ${args.join(" ")}`);
-    }
-    return { status: result.status ?? 1, output };
+  const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
+  if (result.status !== 0 && !options.allowFailure) {
+    if (options.capture) process.stderr.write(output);
+    throw new Error(`Command failed: ${command} ${args.join(" ")}`);
   }
 
-  if (result.status !== 0) {
-    throw new Error(`Wrangler command failed: ${args.join(" ")}`);
-  }
+  return { status: result.status ?? 1, output };
+}
 
-  return { status: 0, output: "" };
+function runWrangler(wrangler, args, options = {}) {
+  return run(wrangler.command, [...wrangler.prefix, ...args], options);
+}
+
+function includesNamedResource(output, name) {
+  try {
+    const parsed = JSON.parse(output);
+    const items = Array.isArray(parsed) ? parsed : parsed.result ?? parsed.projects ?? [];
+    return items.some(
+      (item) => item?.name === name || item?.bucket_name === name || item?.title === name,
+    );
+  } catch {
+    return output.includes(name);
+  }
 }
 
 function formatMiB(bytes) {
@@ -80,33 +88,50 @@ function formatMiB(bytes) {
 
 if (!existsSync(installerPath)) {
   throw new Error(
-    `Installer not found at ${installerPath}. Build or restore it before running this setup.`,
+    `Installer not found at ${installerPath}. Run npm run build:install or restore the release file first.`,
   );
 }
 
 const wrangler = detectWrangler();
 const installerSize = statSync(installerPath).size;
 
-console.log(`Commonweave Cloudflare setup`);
-console.log(`Installer: ${formatMiB(installerSize)}`);
+console.log("Commonweave Cloudflare Pages + R2 setup");
+console.log(`Pages project: ${projectName}`);
 console.log(`R2 bucket: ${bucketName}`);
+console.log(`Installer: ${formatMiB(installerSize)}`);
 
-console.log("\n1/4 Checking Cloudflare authentication...");
-run(wrangler, ["whoami"]);
+console.log("\n1/5 Checking Cloudflare authentication...");
+runWrangler(wrangler, ["whoami"]);
 
-console.log("\n2/4 Ensuring the R2 bucket exists...");
-const listedBuckets = run(wrangler, ["r2", "bucket", "list"], {
+console.log("\n2/5 Ensuring the R2 bucket exists...");
+const buckets = runWrangler(wrangler, ["r2", "bucket", "list", "--json"], {
   capture: true,
 });
-
-if (!listedBuckets.output.includes(bucketName)) {
-  run(wrangler, ["r2", "bucket", "create", bucketName]);
+if (!includesNamedResource(buckets.output, bucketName)) {
+  runWrangler(wrangler, ["r2", "bucket", "create", bucketName]);
 } else {
   console.log(`R2 bucket ${bucketName} already exists.`);
 }
 
-console.log("\n3/4 Uploading the installer to R2...");
-run(wrangler, [
+console.log("\n3/5 Ensuring the Pages project exists...");
+const projects = runWrangler(wrangler, ["pages", "project", "list", "--json"], {
+  capture: true,
+});
+if (!includesNamedResource(projects.output, projectName)) {
+  runWrangler(wrangler, [
+    "pages",
+    "project",
+    "create",
+    projectName,
+    "--production-branch",
+    "main",
+  ]);
+} else {
+  console.log(`Pages project ${projectName} already exists.`);
+}
+
+console.log("\n4/5 Uploading the installer to R2...");
+runWrangler(wrangler, [
   "r2",
   "object",
   "put",
@@ -122,8 +147,23 @@ run(wrangler, [
   "--remote",
 ]);
 
-console.log("\n4/4 Deploying the Worker and static asset mirror...");
-run(wrangler, ["deploy", "--config", "wrangler.jsonc"]);
+console.log("\n5/5 Building and deploying Cloudflare Pages...");
+run(process.execPath, [buildScript]);
+runWrangler(wrangler, [
+  "pages",
+  "deploy",
+  pagesOutput,
+  "--project-name",
+  projectName,
+  "--branch",
+  "main",
+  "--config",
+  "wrangler.jsonc",
+]);
 
-console.log("\nCloudflare setup complete.");
-console.log("Test /api/health and /downloads/Commonweave-Mobile-Install-Kit.zip on the workers.dev URL printed above.");
+console.log("\nCloudflare Pages setup complete.");
+console.log(`Production URL: https://${projectName}.pages.dev`);
+console.log(`Health: https://${projectName}.pages.dev/api/health`);
+console.log(
+  `Installer: https://${projectName}.pages.dev/downloads/${objectKey}`,
+);
