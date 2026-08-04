@@ -8,11 +8,10 @@
   <title>Install Commonweave</title>
   <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.4">
   <link rel="icon" href="/app/logos/commonweave-icon-192.png">
-  <link rel="stylesheet" href="/install-v130.css?v=1.0.4">
+  <link rel="stylesheet" href="/install-v130.css?v=1.0.4-fast-core-r37">
 </head>
 <body>
 <main class="gateway">
-  <img class="gateway-bg" src="/app/assets/world/host-wave2.webp" alt="" fetchpriority="high">
   <div class="gateway-shade"></div>
   <header class="gateway-header">
     <img src="/app/logos/commonweave.webp" alt="Commonweave">
@@ -22,9 +21,9 @@
 
   <section class="install-card" aria-labelledby="install-title">
     <div class="install-copy">
-      <small>LEAN OFFLINE SOFTWARE PACKAGE</small>
+      <small>FAST OFFLINE SOFTWARE PACKAGE</small>
       <h2 id="install-title">Install the five-system Commonweave family.</h2>
-      <p>This browser page prepares the offline package and hands installation to your browser. The installed app opens directly into Commonweave Cabinet Mode, with full-screen Living School, Cerbanimo, FellowFare, and Anarchadia software one tap away.</p>
+      <p>The core HTML, CSS, JavaScript, local data engines, and five system surfaces install first. The optional local semantic model stays available from this same node and is downloaded only when you enable it, so it cannot hold the application installer hostage.</p>
     </div>
     <div class="topology" aria-label="Commonweave topology">
       <article><b>1</b><strong>Installed device</strong><span>Canonical local app and data.</span></article>
@@ -34,14 +33,14 @@
       <article><b>3</b><strong>Optional gateway</strong><span>Releases, rendezvous, and wider federation.</span></article>
     </div>
     <div class="gateway-actions">
-      <button id="install-app" class="primary" type="button" disabled>Preparing device package…</button>
+      <button id="install-app" class="primary" type="button" disabled>Preparing core package…</button>
       <button id="check-update" class="secondary" type="button">Check release</button>
     </div>
-    <p id="install-help" class="install-help" role="status">Registering the local package worker…</p>
+    <p id="install-help" class="install-help" role="status">Registering the fast local package worker…</p>
     <dl class="package-state" aria-label="Device package state">
-      <div><dt>Package</dt><dd id="package-state">preparing</dd></div>
+      <div><dt>Core package</dt><dd id="package-state">preparing</dd></div>
       <div><dt>Installed files</dt><dd id="package-assets">checking</dd></div>
-      <div><dt>Runtime</dt><dd id="local-mode">installer browser</dd></div>
+      <div><dt>Local model</dt><dd id="local-mode">downloads when enabled</dd></div>
     </dl>
   </section>
 
@@ -64,6 +63,6 @@
     </article>
   </section>
 </main>
-<script src="/install-v130.js?v=1.0.4"></script>
+<script src="/install-v130.js?v=1.0.4-fast-core-r37"></script>
 </body>
 </html>
