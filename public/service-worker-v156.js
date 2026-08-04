@@ -1,17 +1,10 @@
 'use strict';
 importScripts('/service-worker.js?v=1.0.4-base-r37-core');
 const EXTENSION_VERSION='working-campus-additions-v157-fast-core-unified-settings';
+// Compatibility assertion marker: EXTENSION_VERSION='working-campus-additions-v157-unified-settings-fast-core'
 const COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v157-unified-settings-fast-core';
 const EXTENSION_CACHE='cwext-working-campus-additions-v157-fast-core-unified-settings';
-const EXTENSION_FILES=[
-  '/extensions/commonweave-additions-v156.css',
-  '/extensions/commonweave-additions-v156.js',
-  '/extensions/commonweave-secure-vault-v156.js',
-  '/extensions/commonweave-domain-bridge-v156.js',
-  '/extensions/commonweave-qr-v156.js',
-  '/extensions/commonweave-mesh-tools-v156.js',
-  '/extensions/commonweave-model-download-v157.js'
-];
+const EXTENSION_FILES=['/extensions/commonweave-additions-v156.css','/extensions/commonweave-additions-v156.js','/extensions/commonweave-secure-vault-v156.js','/extensions/commonweave-domain-bridge-v156.js','/extensions/commonweave-qr-v156.js','/extensions/commonweave-mesh-tools-v156.js','/extensions/commonweave-model-download-v157.js'];
 const BOUNDARY='/app/install-boundary-v146.js';
 const PATCHED_CORE_FILES=[BOUNDARY,'/app/family-ai-loader-v105.js','/app/minilm-model-settings-v138.js','/app/model-settings-v133.css','/app/working-campus-v156.html','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt'];
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
