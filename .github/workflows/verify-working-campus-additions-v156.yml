@@ -2,7 +2,7 @@ name: Verify working-campus additions v156
 
 on:
   push:
-    branches: ["agent/fix-merlin-rook-proof-handoffs"]
+    branches: ["agent/living-school-two-agent-video-relay-current"]
   pull_request:
 
 jobs:
@@ -36,6 +36,7 @@ jobs:
           node --check public/app/cerbanimo-proof-attachments-v165.js
           node --check public/app/cerbanimo-ai-validator-v159.js
           node --check public/app/intention-planner-v141.js
+          node --check public/app/cabinets/living-school/living-school-two-agent-relay-v165.js
           node --check public/app/cabinets/living-school/living-school-workbench-v158.js
           node --check public/app/cabinets/living-school/living-school-research-v162.js
           node --check public/app/cabinets/living-school/living-school-runtime-stability-v159.js
@@ -53,6 +54,7 @@ jobs:
           node --check scripts/verify-unified-ai-settings-v157.mjs
           node --check scripts/verify-settings-dialog-stability-v161.mjs
           node --check scripts/verify-intention-and-research-v163.mjs
+          node --check scripts/verify-living-school-two-agent-relay-v165.mjs
           node --check scripts/verify-five-system-inner-ui-v157.mjs
           node --check scripts/verify-runtime-stability-v159.mjs
           node --check scripts/verify-platform-flow-v160.mjs
@@ -72,6 +74,8 @@ jobs:
         run: node scripts/verify-settings-dialog-stability-v161.mjs
       - name: Verify latest intention and Living School research
         run: node scripts/verify-intention-and-research-v163.mjs
+      - name: Verify Living School two-agent relay
+        run: node scripts/verify-living-school-two-agent-relay-v165.mjs
       - name: Verify internal system interfaces
         run: node scripts/verify-five-system-inner-ui-v157.mjs
       - name: Verify interaction and review stability
