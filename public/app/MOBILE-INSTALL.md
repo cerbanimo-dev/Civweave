@@ -1,8 +1,12 @@
 # Install Commonweave on Android
 
-The **Commonweave Mobile Install Kit** is now a small, reproducible bootstrap bundle for the current five-system software package. It no longer carries forward an old Pocket Campus archive and swaps a new seed into it.
+The **Commonweave Mobile Install Kit** is a small, reproducible bootstrap bundle
+for the current five-system software package. It downloads exactly the files
+declared by the current service worker plus the active shared extensions.
 
-The kit downloads exactly the files declared by the current service worker plus the active shared extensions. It excludes retired room-scene trees, cabinet marketing/calibration artwork, duplicate legacy runtimes, and optional MiniLM ONNX graphs. The local model remains available on demand after the core application is installed.
+It excludes retired room-scene trees, cabinet marketing and calibration artwork,
+duplicate legacy runtimes, and optional MiniLM ONNX graphs. The local model
+remains device-side and downloads only after the user enables it.
 
 ## Install with Termux
 
@@ -20,7 +24,9 @@ cd commonweave-mobile-install-kit
 bash install-mobile.sh
 ```
 
-The installer downloads the current core package, validates that its allowlist still matches the live service worker, replaces the previous local application files atomically, and starts a loopback-only server.
+The installer downloads the current core package, validates that its allowlist
+still matches the live service worker, replaces the previous local application
+files atomically, and starts a loopback-only server.
 
 Open:
 
@@ -30,9 +36,34 @@ http://127.0.0.1:8790/app/installed-entry-v146.html
 
 Use the browser menu to choose **Install app** or **Add to Home screen**.
 
+## Portable `.cwseed`
+
+`commonweave-pocket-campus.cwseed` is now a compact ZIP-compatible carrier rather
+than a second copy of the full application. It contains:
+
+- the current mobile install kit and SHA-256 checksum
+- a dependency-free Node 20+ host node
+- Render configuration and a seed manifest
+
+The node hub serves the bundled mobile installer and provides health/config,
+release broadcasts, node registration, heartbeat, presence, relay envelopes,
+and the session-key-only Gemini Interactions proxy. It never hosts MiniLM and is
+not the canonical data store.
+
+After extracting the seed:
+
+```sh
+cd commonweave-seed/node-hub
+npm start
+```
+
+Open `http://localhost:8787`.
+
 ## Update without deleting local data
 
-Download the newest kit and run `bash install-mobile.sh` again. Do not uninstall the PWA or clear browser storage first. The application files are refreshed while IndexedDB and localStorage remain in the browser profile.
+Download the newest kit and run `bash install-mobile.sh` again. Do not uninstall
+the PWA or clear browser storage first. Application files refresh while IndexedDB
+and localStorage remain in the browser profile.
 
 ## Start and stop later
 
@@ -49,8 +80,13 @@ COMMONWEAVE_PORT=8791 \
 bash install-mobile.sh
 ```
 
-The application server binds only to `127.0.0.1`. Narrow `/api/` requests can be relayed to the selected source node, and optional model files are mirrored locally only after the user enables them.
+The application server binds only to `127.0.0.1`. Narrow `/api/` requests can be
+relayed to the selected source node, and optional model files are mirrored locally
+only after the user enables them.
 
 ## Release boundary
 
-`scripts/build-mobile-install-kit.mjs` derives the mobile core from `public/service-worker.js` and active extension loaders, writes checksummed manifests, rebuilds the portable seed, and rebuilds the mobile kit from clean templates. Both downloadable artifacts must remain below a 24 MiB safety boundary so they can be deployed to hosts with a 25 MiB per-asset limit.
+`scripts/build-mobile-install-kit.mjs` derives the mobile hydration allowlist,
+rebuilds the mobile kit from clean templates, then packs that kit with the
+portable node hub into the `.cwseed`. Both downloadable artifacts must remain
+below the 24 MiB safety boundary used for hosts with a 25 MiB per-asset limit.
