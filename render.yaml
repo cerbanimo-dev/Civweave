@@ -18,6 +18,7 @@ services:
       done
       npm run model:check
       npm run check
+      npm run build:install
     startCommand: npm start
     healthCheckPath: /api/health
     autoDeploy: true
