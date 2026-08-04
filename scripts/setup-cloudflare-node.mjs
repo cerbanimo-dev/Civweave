@@ -136,6 +136,7 @@ runWrangler(wrangler, [
   projectName,
   "--branch",
   "main",
+  "--commit-dirty=true",
 ]);
 
 console.log("\nCloudflare Pages setup complete.");
