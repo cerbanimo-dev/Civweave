@@ -1,7 +1,7 @@
 'use strict';
 importScripts('/service-worker.js?v=1.0.4-base-r37-core');
-const INLINE_CHAT_REVISION='inline-commonweave-r40';
-const EXTENSION_VERSION='working-campus-additions-v158-proof-progress-unified-settings-inner-ui-merlin-school-rook';
+const INLINE_CHAT_REVISION='inline-commonweave-r41-tray-escape';
+const EXTENSION_VERSION='working-campus-additions-v159-chat-tray-review-stability-researched-learning';
 // Compatibility marker: EXTENSION_VERSION='working-campus-additions-v158-proof-progress'
 // Settings assertion marker: EXTENSION_VERSION='working-campus-additions-v157-fast-core-unified-settings'
 // Interface assertion marker: EXTENSION_VERSION='working-campus-additions-v157-fast-core-unified-settings-inner-ui'
@@ -10,9 +10,9 @@ const EXTENSION_VERSION='working-campus-additions-v158-proof-progress-unified-se
 const SETTINGS_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v157-unified-settings-fast-core';
 const INTERFACE_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v157-unified-settings-inner-ui-fast-core';
 const PROOF_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v158-proof-progress';
-const FUNCTIONAL_INTERFACE_REVISION='anarchadia-merlin-living-school-generated-v158';
-const EXTENSION_CACHE='cwext-working-campus-additions-v158-proof-progress-unified-settings-inner-ui-merlin-school-rook';
-const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v157-fast-core';
+const FUNCTIONAL_INTERFACE_REVISION='anarchadia-merlin-living-school-generated-v159-stable';
+const EXTENSION_CACHE='cwext-working-campus-additions-v159-chat-tray-review-stability-researched-learning';
+const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v158-proof-progress-unified-settings-inner-ui-merlin-school-rook';
 const EXTENSION_FILES=[
   '/extensions/commonweave-additions-v156.css',
   '/extensions/commonweave-additions-v156.js',
@@ -26,6 +26,10 @@ const EXTENSION_FILES=[
 const BOUNDARY='/app/install-boundary-v146.js';
 const CORE_PATCH_FILES=[
   BOUNDARY,
+  '/app/platform-stability-v159.js',
+  '/app/platform-stability-v159.css',
+  '/app/realm-console-v140.html',
+  '/app/cerbanimo-ai-validator-v159.js',
   '/app/fellowfare-cabinet-v144.html',
   '/app/fellowfare-cabinet-v144.css',
   '/app/fellowfare-cabinet-v144.js',
@@ -39,9 +43,12 @@ const CORE_PATCH_FILES=[
   '/app/cabinets/living-school/index.html',
   '/app/cabinets/living-school/living-school-workbench-v158.css',
   '/app/cabinets/living-school/living-school-workbench-v158.js',
+  '/app/cabinets/living-school/living-school-runtime-stability-v159.css',
+  '/app/cabinets/living-school/living-school-runtime-stability-v159.js',
   '/app/anarchadia-console-v139.html',
   '/app/anarchadia-console-v158.js',
-  '/app/anarchadia-chat-stability-v158.css'
+  '/app/anarchadia-chat-stability-v158.css',
+  '/app/anarchadia-runtime-stability-v159.js'
 ];
 const PATCHED_CORE_FILES=CORE_PATCH_FILES;
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
