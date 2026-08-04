@@ -98,13 +98,39 @@ function childStepsFor(realm,title,depth){
     completionEvidence:[completionFor(realmOf(realm),index===0?subject:step)],status:'proposed',confidence:.72,depth,children:[]
   }));
 }
+function expandNode(input,{maxDepth=MAX_DEPTH}={}){
+  const limit=Math.max(0,Math.min(6,Number(maxDepth)||MAX_DEPTH));
+  const node=clone(input&&typeof input==='object'?input:{});
+  node.id=clean(node.id,180)||uid('sol-node');
+  node.parentId=node.parentId==null?null:clean(node.parentId,180);
+  node.realm=realmOf(node.realm);
+  node.title=clean(node.title||node.objective,420)||'Define the next bounded action';
+  node.objective=clean(node.objective,1200)||`Advance ${node.title.toLowerCase()} without inventing missing facts.`;
+  node.depth=Math.max(0,Math.min(limit,Number(node.depth)||0));
+  node.status=clean(node.status,40)||'proposed';
+  node.completionEvidence=Array.isArray(node.completionEvidence)&&node.completionEvidence.length?node.completionEvidence.map(item=>clean(item,1200)).filter(Boolean):[completionFor(node.realm,node.title)];
+  if(node.depth>=limit){node.children=[];return node}
+  const source=Array.isArray(node.children)&&node.children.length?node.children:childStepsFor(node.realm,node.title,node.depth+1);
+  node.children=source.slice(0,12).map(child=>expandNode({...child,parentId:node.id,depth:Number(child?.depth)||node.depth+1},{maxDepth:limit}));
+  return node;
+}
+function nextAction(input){
+  const rootNode=input?.semanticPlan?.root||input?.root||input;
+  if(!rootNode||typeof rootNode!=='object')return null;
+  const complete=new Set(['completed','complete','accepted','done','archived']);
+  const visit=node=>{
+    if(!node||complete.has(clean(node.status,40).toLowerCase()))return null;
+    for(const child of Array.isArray(node.children)?node.children:[]){const found=visit(child);if(found)return found}
+    return clone(node);
+  };
+  return visit(rootNode);
+}
 function pathNode(path,index){
   const realm=realmOf(path?.realm),steps=Array.isArray(path?.steps)&&path.steps.length?path.steps:[path?.title||`Path ${index+1}`];
   const node={id:clean(path?.id,160)||uid('sol-path'),parentId:'sol-root',kind:path?.type||'path',realm,title:clean(path?.title,260)||`Path ${index+1}`,objective:clean(path?.purpose||path?.completionCriteria,1200),completionEvidence:[clean(path?.completionCriteria,1200)||completionFor(realm,path?.title)],status:clean(path?.status,40)||'draft',confidence:.86,depth:1,children:[]};
   node.children=steps.slice(0,12).map((step,stepIndex)=>{
     const child={id:uid('sol-step'),parentId:node.id,kind:nodeKind(realm,stepIndex,steps.length),realm,title:clean(step,420),objective:`Advance ${clean(path?.title,220).toLowerCase()} through a bounded, reviewable action.`,completionEvidence:[completionFor(realm,step)],status:'proposed',confidence:.8,depth:2,children:[]};
-    child.children=childStepsFor(realm,step,3).map(item=>({...item,parentId:child.id}));
-    return child;
+    return expandNode(child,{maxDepth:MAX_DEPTH});
   });
   return node;
 }
@@ -140,7 +166,7 @@ async function evaluateLearning({prompt='',response='',criteria=[],deterministic
   const rows=normalizeCriteria(criteria?.length?criteria:deterministic?.criteria||[]);
   const answer=clean(response,16000);
   const candidates=rows.map(item=>({id:item.id,text:criterionText(item)}));
-  const ranked=await semanticRank(`${prompt}\n${answer}\n${lessonExcerpt}`,candidates,{limit:Math.max(1,rows.length),cacheKey:rows.length?`sol-learning-${rows.map(item=>item.id).join('-')}`:'',semanticWaitMs});
+  const ranked=await semanticRank(`${prompt}\n${answer}\n${lessonExcerpt}`,candidates,{limit:Math.max(1,rows.length),cacheKey:rows.length?`sol-learning-${rows.map(criterionText).join('|').slice(0,220)}`:'',semanticWaitMs});
   const scores=new Map((ranked.matches||[]).map(item=>[item.id,Number(item.score||0)]));
   const coverage=rows.map(item=>{
     const semantic=scores.get(item.id)||0,lexical=overlap(answer,criterionText(item)),score=Math.max(semantic,lexical);
@@ -261,6 +287,6 @@ function install(){
   return true;
 }
 
-root.CommonweaveSolV164={version:VERSION,model:MODEL_ID,maxDepth:MAX_DEPTH,authority:'advisory',lexicalRank,rank:semanticRank,enhancePlan,refinePlan,evaluateLearning,evaluateTask,install,status,archetypes:clone(ARCHETYPES)};
+root.CommonweaveSolV164={version:VERSION,model:MODEL_ID,maxDepth:MAX_DEPTH,authority:'advisory',lexicalRank,rank:semanticRank,expandNode,nextAction,enhancePlan,refinePlan,evaluateLearning,evaluateTask,install,status,archetypes:clone(ARCHETYPES)};
 if(typeof document==='undefined')install();else if(document.readyState==='loading')addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
