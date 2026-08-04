@@ -18,8 +18,8 @@ for(const [name,wrapper] of [['gateway',gateway],['local',localHost]]){
   assert(wrapper.includes("replace(/^\\uFEFF/"),`${name} wrapper does not strip a UTF-8 BOM`);
   assert(wrapper.includes("replace(/\\r\\n?/g"),`${name} wrapper does not normalize Windows line endings`);
 }
-assert(localHost.includes("const VERSION = '1.0.31';")&&localHost.includes("const BUILD = '1.0.31-local-campus-runtime';"),'local host legacy transport markers changed unexpectedly');
-for(const token of ['/app/installed-entry-v146.html','/app/realm-console-v140.html',"'cabinet mode HTML allowlist'"])assert(localHost.includes(token),`local host does not preserve ${token}`);
+assert(localHost.includes("const VERSION = '1.0.4';")&&localHost.includes("const BUILD = '1.0.4-fullscreen-family-local-runtime';"),'local host does not report the v1.0.4 software family');
+for(const token of ['/app/installed-entry-v146.html','/app/fullscreen-family-v104.html','/app/realm-console-v140.html',"'software family HTML allowlist'"])assert(localHost.includes(token),`local host does not preserve ${token}`);
 for(const token of ["process.env.RENDER==='true'","renderBuild&&!force","skipping device-side Transformers.js staging"])assert(stageRuntime.includes(token),`Render semantic-runtime staging guard missing ${token}`);
 for(const token of ['packageInstall','installerSurface','applicationSurface',"req.headers['x-commonweave-package'] === 'install'",'installUrl: `${requestOrigin(req, url)}/`','localInstallRequired: true','pathname === \'/api/boot-log\'','res.writeHead(204','COMMONWEAVE_RELEASE_URL'])assert(gateway.includes(token),`install-only gateway missing ${token}`);
 assert(gateway.includes("const installKitSha256 = '';")&&gateway.includes('const installKitSize = 0;'),'gateway does not replace install-kit hashing with zero-cost metadata');
