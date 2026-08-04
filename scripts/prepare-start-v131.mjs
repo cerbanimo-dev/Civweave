@@ -6,10 +6,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const isRender = process.env.RENDER === 'true';
 
 if (isRender) {
-  console.log('[Commonweave] Gateway fast start: serving packaged assets immediately.');
+  console.log('[Commonweave] Public gateway mode: Gateway fast start, serving packaged assets immediately.');
   console.log('[Commonweave] Optional Transformers.js and MiniLM verification is deferred to build/release checks.');
 } else {
-  console.log('[Commonweave] Local campus fast start: checking staged optional model assets.');
+  console.log('[Commonweave] Local campus mode: fast start, checking staged optional model assets.');
   await run(path.join(root, 'scripts', 'stage-transformers-assets.mjs'));
   await run(path.join(root, 'scripts', 'ensure-minilm-model.mjs'));
 }
