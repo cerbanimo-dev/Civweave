@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='1.0.4';
-const BUILD='1.0.4-working-campus-additions-v156';
+const BUILD='1.0.4-device-package-r37-core-working-campus-additions-v157-fast-core';
 const WORKER_URL=`/service-worker-v156.js?v=${BUILD}`;
 let registration=null;
 let reloading=false;
@@ -12,16 +12,18 @@ function pill(){
   node.addEventListener('click',async()=>{
     if(globalThis.CommonweaveHubRuntimeV143?.openUpdateHub){globalThis.CommonweaveHubRuntimeV143.openUpdateHub();return}
     if(registration?.waiting){registration.waiting.postMessage({type:'SKIP_WAITING'});node.textContent='Applying update…'}
+    else{await registration?.update?.();updateState()}
   });
   document.body.append(node);return node;
 }
 function updateState(){
   const node=pill();
-  if(registration?.waiting){node.textContent='Update downloaded · open Hub & updates';node.classList.add('is-update');return}
+  if(registration?.waiting){node.textContent='Fast core update downloaded · tap to apply';node.classList.add('is-update');return}
   node.classList.remove('is-update');
   const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-  node.textContent=navigator.onLine?(standalone?'Installed working campus · manual updates':'Local installer · install on this device'):'Offline · working campus active';
+  node.textContent=navigator.onLine?(standalone?'Installed working campus · model downloads on demand':'Local installer · install on this device'):'Offline · working campus active';
 }
+function matchesCurrent(reg){return[reg?.active?.scriptURL,reg?.waiting?.scriptURL,reg?.installing?.scriptURL].filter(Boolean).some(value=>{try{const url=new URL(value);return url.pathname==='/service-worker-v156.js'&&url.searchParams.get('v')===BUILD}catch{return false}})}
 async function retireLegacyWorkers(){
   const regs=await navigator.serviceWorker.getRegistrations();
   const legacy=regs.filter(reg=>{
@@ -40,15 +42,15 @@ async function boot(){
   if(!('serviceWorker'in navigator)){pill().textContent='Offline install unsupported in this browser';return}
   try{
     await retireLegacyWorkers();
-    registration=await navigator.serviceWorker.getRegistration('/')||await navigator.serviceWorker.register(WORKER_URL,{scope:'/',updateViaCache:'none'});
-    if(!String(registration.active?.scriptURL||registration.waiting?.scriptURL||'').includes('service-worker-v156.js'))registration=await navigator.serviceWorker.register(WORKER_URL,{scope:'/',updateViaCache:'none'});
+    registration=await navigator.serviceWorker.getRegistration('/');
+    if(!registration||!matchesCurrent(registration))registration=await navigator.serviceWorker.register(WORKER_URL,{scope:'/',updateViaCache:'none'});
     registration.addEventListener('updatefound',()=>{
       const worker=registration.installing;
       worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)updateState()});
     });
     navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)return;reloading=true;location.reload()});
     updateState();
-  }catch{pill().textContent=navigator.onLine?'Device package install unavailable':'Offline · cached package unavailable'}
+  }catch{pill().textContent=navigator.onLine?'Device package update unavailable':'Offline · cached package unavailable'}
 }
 addEventListener('online',updateState);addEventListener('offline',updateState);
 boot();
