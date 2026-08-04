@@ -9,7 +9,8 @@ assert(!consoleHtml.includes('cabinet-home-v142.js')&&!consoleHtml.includes('cab
 for(const [name,source] of [['workbench',workbenchBridge],['governance',governanceBridge],['sovereignty',sovereigntyBridge]]){assert(!source.includes('new MutationObserver'),`${name} bridge still installs a permanent document observer`);assert(source.includes('attempts')&&source.includes('schedule'),`${name} bridge lacks bounded mounting`)}
 assert(localSovereignty.includes('MutationObserver')&&localSovereignty.includes('function needsObserver'),'Sovereignty runtime must reapply only when safe DOM operations exist.');
 for(const token of ['operationSafe','BROAD_SELECTOR','slice(0,80)','slice(0,100)','quarantined','dataset.cwSovereigntyNetwork'])assert(localSovereignty.includes(token),`Sovereignty hardening missing ${token}`);
-assert(worker.includes('/app/anarchadia-local-sovereignty-v146.js')&&worker.includes("GUIDE_REVISION='lazy-five-system-chat-r36-stable'"),'Repaired Anarchadia runtime is not in rotated package.');
+assert(worker.includes('/app/anarchadia-local-sovereignty-v146.js')&&worker.includes("GUIDE_REVISION='lazy-five-system-chat-r37'"),'Repaired Anarchadia runtime is not in the progressive package.');
+assert(worker.includes('async function staleWhileRevalidate'),'Anarchadia assets do not background-refresh.');
 assert(family.includes("anarchadia:{label:'Anarchadia',guide:'Merlin'")&&loader.includes('CommonweaveGuideChatV153'),'Merlin lazy guide integration missing.');
 new Function(workbenchBridge);new Function(governanceBridge);new Function(sovereigntyBridge);new Function(localSovereignty);
 console.log('Anarchadia verification passed with native startup, bounded bridges, and quarantined legacy sovereignty profiles.');
