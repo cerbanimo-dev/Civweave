@@ -18,7 +18,11 @@ assert(shell.includes(`const SYSTEM_ORDER=${expectedOrder}`), 'Global realm orde
 assert(shell.includes('SYSTEM_ORDER.map'), 'The global dock is not rendering all five realm positions.');
 assert(!shell.includes("filter(([id])=>id!==current)"), 'The active realm is still being removed from the dock.');
 assert(shell.includes('data-cwf-chat'), 'The Weaveling top-rail control is missing.');
-assert(shell.includes('/app/sol-shell-fix-v166.css?v=sol-r2'), 'The compact top-rail correction is not loaded.');
+assert(shell.includes("const VISUAL_SHELLS={primary:'merlinites-r1',legacy:'sol-r1'}"), 'The Merlinites/Sol transition identities are missing.');
+assert(shell.includes('document.documentElement.dataset.visualShell=VISUAL_SHELLS.primary'), 'Merlinites is not the primary visual-shell identity.');
+assert(shell.includes('document.documentElement.dataset.visualShellLegacy=VISUAL_SHELLS.legacy'), 'Sol is not retained as a compatibility identity.');
+assert(shell.includes('/app/sol-shell-fix-v166.css?v=sol-r2'), 'The installed Sol compatibility stylesheet is not loaded.');
+assert(shell.includes('data-merlinites-shell-v166')&&shell.includes('data-sol-shell-v166'), 'The stylesheet link does not expose both transition names.');
 
 const expectedArtifacts = {
   weaveling: 'weaveling-compass.png',
@@ -56,8 +60,10 @@ for (const file of [
   'public/app/anarchadia-console-v139.html'
 ]) {
   const html = read(file);
-  assert(html.includes('/app/family-shell-v104.css?v=sol-r1'), `${file} is not cache-busting the Sol shell CSS.`);
-  assert(html.includes('/app/family-shell-v104.js?v=sol-r1'), `${file} is not cache-busting the Sol shell JS.`);
+  const cssMarker = html.includes('/app/family-shell-v104.css?v=sol-r1') || html.includes('/app/family-shell-v104.css?v=merlinites-r1');
+  const jsMarker = html.includes('/app/family-shell-v104.js?v=sol-r1') || html.includes('/app/family-shell-v104.js?v=merlinites-r1');
+  assert(cssMarker, `${file} is not cache-busting the transitional visual shell CSS.`);
+  assert(jsMarker, `${file} is not cache-busting the transitional visual shell JS.`);
 }
 
-console.log('Sol visual overhaul v166 verified.');
+console.log('Sol and Merlinites visual overhaul v166 aliases verified.');
