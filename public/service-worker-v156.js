@@ -1,7 +1,7 @@
 'use strict';
 importScripts('/service-worker.js?v=1.0.4-base-r37-core');
-const EXTENSION_VERSION='working-campus-additions-v157-fast-core';
-const EXTENSION_CACHE='cwext-working-campus-additions-v157-fast-core';
+const EXTENSION_VERSION='working-campus-additions-v158-proof-progress';
+const EXTENSION_CACHE='cwext-working-campus-additions-v158-proof-progress';
 const EXTENSION_FILES=[
   '/extensions/commonweave-additions-v156.css',
   '/extensions/commonweave-additions-v156.js',
@@ -9,7 +9,8 @@ const EXTENSION_FILES=[
   '/extensions/commonweave-domain-bridge-v156.js',
   '/extensions/commonweave-qr-v156.js',
   '/extensions/commonweave-mesh-tools-v156.js',
-  '/extensions/commonweave-model-download-v157.js'
+  '/extensions/commonweave-model-download-v157.js',
+  '/extensions/commonweave-proof-progress-v158.js'
 ];
 const BOUNDARY='/app/install-boundary-v146.js';
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
