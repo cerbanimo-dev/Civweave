@@ -16,7 +16,7 @@ const ARCHIVED_LOCATION_PREFIXES=['/app/services/living-school/visual-assets/','
 const CORE=[
   '/index.html','/install-v130.css','/install-v130.js','/offline.html',
   '/app/manifest.webmanifest','/app/installed-entry-v146.html','/app/installed-entry-v146.js','/app/install-boundary-v146.js','/app/local-object-mesh-v146.js','/app/local-first-policy-v131.js',
-  '/app/fullscreen-family-v104.html','/app/family-shell-v104.css','/app/family-shell-v104.js','/app/family-ai-loader-v105.js',
+  '/app/fullscreen-family-v104.html','/app/working-campus-v156.html','/app/working-campus-v156.css','/app/working-campus-v156.js','/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt','/app/family-shell-v104.css','/app/family-shell-v104.js','/app/family-ai-loader-v105.js',
   '/app/realm-console-v140.html','/app/realm-console-v140.css','/app/realm-console-v140.js','/app/cerbanimo-quest-engine-v144.css','/app/cerbanimo-quest-engine-v144.js','/app/cerbanimo-ai-validator-v156.js','/app/cabinet-home-v142.css','/app/cabinet-home-v142.js','/app/cabinet-surfaces-v143.css','/app/cabinet-surfaces-v143.js','/app/sharing-library-v143.js',
   '/app/cabinets/living-school/index.html','/app/cabinets/living-school/living-school-cabinet-v151.css','/app/cabinets/living-school/living-school-cabinet-v151.mjs','/app/services/living-school/modules/rubric-engine.mjs','/app/services/living-school/modules/project-gate.mjs','/app/services/living-school/modules/cerbanimo-bridge.mjs',
   '/app/fellowfare-cabinet-v144.html','/app/fellowfare-cabinet-v144.css','/app/fellowfare-cabinet-v144.js',
