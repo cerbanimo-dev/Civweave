@@ -1,5 +1,5 @@
 const ROOT='/app/models/all-minilm-l6-v2';
-const WORKER_URL=`${ROOT}/worker.js?v=device-package-r38-sol`;
+const WORKER_URL=`${ROOT}/worker.js?v=device-package-r38-merlinites`;
 const MODEL_CACHE='commonweave-model-1.0.4-minilm-on-demand-r1';
 const REQUIRED=[
   {url:`${ROOT}/config.json`,minBytes:300},
