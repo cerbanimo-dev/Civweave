@@ -65,11 +65,24 @@ function powershellLiteral(value) {
 function createZip(archivePath, sourceDir, entryName) {
   if (process.platform === 'win32') {
     const sourcePath = path.join(sourceDir, entryName);
-    const command = [
+    const windowsZipPath = archivePath.toLowerCase().endsWith('.zip')
+      ? archivePath
+      : `${archivePath}.zip`;
+    const commands = [
       "$ErrorActionPreference = 'Stop'",
-      `Compress-Archive -LiteralPath ${powershellLiteral(sourcePath)} -DestinationPath ${powershellLiteral(archivePath)} -CompressionLevel Optimal -Force`
-    ].join('; ');
-    run('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', command], sourceDir);
+      `if (Test-Path -LiteralPath ${powershellLiteral(windowsZipPath)}) { Remove-Item -LiteralPath ${powershellLiteral(windowsZipPath)} -Force }`,
+      `Compress-Archive -LiteralPath ${powershellLiteral(sourcePath)} -DestinationPath ${powershellLiteral(windowsZipPath)} -CompressionLevel Optimal -Force`
+    ];
+    if (windowsZipPath !== archivePath) {
+      commands.push(
+        `Move-Item -LiteralPath ${powershellLiteral(windowsZipPath)} -Destination ${powershellLiteral(archivePath)} -Force`,
+      );
+    }
+    run(
+      'powershell.exe',
+      ['-NoProfile', '-NonInteractive', '-Command', commands.join('; ')],
+      sourceDir,
+    );
     return;
   }
 
