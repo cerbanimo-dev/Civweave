@@ -9,12 +9,14 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
 const publicDir = path.join(repo, 'public');
 const downloadsDir = path.join(publicDir, 'downloads');
-const templatesDir = path.join(here, 'mobile-install-kit');
+const mobileTemplatesDir = path.join(here, 'mobile-install-kit');
+const seedTemplatesDir = path.join(here, 'cwseed-node-hub');
 const packageJson = JSON.parse(await fs.readFile(path.join(repo, 'package.json'), 'utf8'));
 const workerPath = path.join(publicDir, 'service-worker.js');
 const boundaryPath = path.join(publicDir, 'app', 'install-boundary-v146.js');
 const additionsPath = path.join(publicDir, 'extensions', 'commonweave-additions-v156.js');
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
+const nodeVersion = `${packageJson.version}-seed-node-v1`;
 
 function extractArray(source, name) {
   const match = source.match(new RegExp(`const\\s+${name}\\s*=\\s*\\[(.*?)\\];`, 's'));
@@ -60,14 +62,18 @@ async function sha256(file) {
   return { bytes: bytes.length, sha256: crypto.createHash('sha256').update(bytes).digest('hex') };
 }
 
-async function copyAsset(asset, root) {
+async function inspectAsset(asset) {
   const source = path.join(publicDir, asset.slice(1));
-  const target = path.join(root, asset.slice(1));
   const stat = await fs.stat(source).catch(() => null);
   if (!stat?.isFile()) throw new Error(`Required mobile core file is missing: ${asset}`);
-  await fs.mkdir(path.dirname(target), { recursive: true });
-  await fs.copyFile(source, target);
   return { path: asset, ...(await sha256(source)) };
+}
+
+async function renderTemplate(sourceName, target, replacements = {}) {
+  let content = await fs.readFile(path.join(seedTemplatesDir, sourceName), 'utf8');
+  for (const [token, value] of Object.entries(replacements)) content = content.replaceAll(token, value);
+  await fs.mkdir(path.dirname(target), { recursive: true });
+  await fs.writeFile(target, content);
 }
 
 const workerSource = await fs.readFile(workerPath, 'utf8');
@@ -78,20 +84,23 @@ const dynamicExtensions = unique([...extensionPaths(boundarySource), ...extensio
 const requiredAssets = unique(['/service-worker.js', ...workerCore, ...dynamicExtensions]);
 requiredAssets.forEach(assertReleasePath);
 
-const work = await fs.mkdtemp(path.join(os.tmpdir(), 'commonweave-mobile-kit-'));
+const work = await fs.mkdtemp(path.join(os.tmpdir(), 'commonweave-release-artifacts-'));
 try {
-  const seedRoot = path.join(work, 'seed');
+  const seedRoot = path.join(work, 'seed', 'commonweave-seed');
+  const seedMobileDir = path.join(seedRoot, 'mobile');
+  const seedHubDir = path.join(seedRoot, 'node-hub');
   const kitRoot = path.join(work, 'kit', 'commonweave-mobile-install-kit');
-  await fs.mkdir(seedRoot, { recursive: true });
+  await fs.mkdir(seedMobileDir, { recursive: true });
+  await fs.mkdir(seedHubDir, { recursive: true });
   await fs.mkdir(kitRoot, { recursive: true });
   await fs.mkdir(downloadsDir, { recursive: true });
 
   const manifestEntries = [];
-  for (const asset of requiredAssets) manifestEntries.push(await copyAsset(asset, seedRoot));
+  for (const asset of requiredAssets) manifestEntries.push(await inspectAsset(asset));
 
-  await fs.copyFile(path.join(templatesDir, 'install-mobile.sh'), path.join(kitRoot, 'install-mobile.sh'));
-  await fs.copyFile(path.join(templatesDir, 'serve-commonweave.py'), path.join(kitRoot, 'serve-commonweave.py'));
-  await fs.copyFile(path.join(templatesDir, 'README.md'), path.join(kitRoot, 'README.md'));
+  await fs.copyFile(path.join(mobileTemplatesDir, 'install-mobile.sh'), path.join(kitRoot, 'install-mobile.sh'));
+  await fs.copyFile(path.join(mobileTemplatesDir, 'serve-commonweave.py'), path.join(kitRoot, 'serve-commonweave.py'));
+  await fs.copyFile(path.join(mobileTemplatesDir, 'README.md'), path.join(kitRoot, 'README.md'));
   await fs.chmod(path.join(kitRoot, 'install-mobile.sh'), 0o755);
   await fs.chmod(path.join(kitRoot, 'serve-commonweave.py'), 0o755);
 
@@ -125,22 +134,81 @@ try {
   const kitPath = path.join(downloadsDir, 'Commonweave-Mobile-Install-Kit.zip');
   await fs.rm(seedPath, { force: true });
   await fs.rm(kitPath, { force: true });
-  run('zip', ['-q', '-r', '-9', seedPath, '.'], seedRoot);
   run('zip', ['-q', '-r', '-9', kitPath, 'commonweave-mobile-install-kit'], path.join(work, 'kit'));
 
-  const seedInfo = await sha256(seedPath);
   const kitInfo = await sha256(kitPath);
-  await fs.writeFile(`${seedPath}.sha256`, `${seedInfo.sha256}  ${path.basename(seedPath)}\n`);
   await fs.writeFile(`${kitPath}.sha256`, `${kitInfo.sha256}  ${path.basename(kitPath)}\n`);
+  await fs.copyFile(kitPath, path.join(seedMobileDir, path.basename(kitPath)));
+  await fs.copyFile(`${kitPath}.sha256`, path.join(seedMobileDir, `${path.basename(kitPath)}.sha256`));
 
-  for (const [label, info] of [['Pocket Campus seed', seedInfo], ['Mobile install kit', kitInfo]]) {
+  await renderTemplate('server.mjs', path.join(seedHubDir, 'server.mjs'), {
+    '__COMMONWEAVE_APP_VERSION__': packageJson.version,
+    '__COMMONWEAVE_NODE_VERSION__': nodeVersion
+  });
+  await fs.copyFile(path.join(seedTemplatesDir, 'README.md'), path.join(seedHubDir, 'README.md'));
+  await fs.copyFile(path.join(seedTemplatesDir, 'SEED-README.md'), path.join(seedRoot, 'README.md'));
+  await fs.copyFile(path.join(seedTemplatesDir, 'render.yaml'), path.join(seedRoot, 'render.yaml'));
+  await fs.writeFile(path.join(seedHubDir, 'package.json'), `${JSON.stringify({
+    name: 'commonweave-portable-node-hub',
+    version: nodeVersion,
+    private: true,
+    description: 'Dependency-free Commonweave release, relay, presence, and node-registration hub.',
+    type: 'module',
+    engines: { node: '>=20' },
+    scripts: { start: 'node server.mjs' }
+  }, null, 2)}\n`);
+
+  const hubFiles = [];
+  for (const relative of ['node-hub/server.mjs', 'node-hub/package.json', 'node-hub/README.md', 'render.yaml']) {
+    hubFiles.push({ path: relative, ...(await sha256(path.join(seedRoot, relative))) });
+  }
+  await fs.writeFile(path.join(seedRoot, 'seed.json'), `${JSON.stringify({
+    schema: 'commonweave.portable-seed.v3',
+    version: nodeVersion,
+    generatedAt: new Date().toISOString(),
+    payloads: {
+      mobileInstallKit: {
+        path: `mobile/${path.basename(kitPath)}`,
+        sha256: kitInfo.sha256,
+        bytes: kitInfo.bytes
+      },
+      nodeHub: {
+        path: 'node-hub/',
+        entry: 'node-hub/server.mjs',
+        runtime: 'node>=20',
+        files: hubFiles,
+        features: [
+          'mobile-kit-distribution',
+          'release-events',
+          'node-registration',
+          'heartbeat',
+          'relay-envelopes',
+          'presence',
+          'gemini-agent-proxy'
+        ],
+        modelPolicy: 'device-only'
+      }
+    },
+    excludes: [
+      'full visual application duplicate',
+      'optional MiniLM and Transformers model files',
+      'archived room-scene trees',
+      'cabinet marketing and calibration assets'
+    ]
+  }, null, 2)}\n`);
+
+  run('zip', ['-q', '-r', '-9', seedPath, 'commonweave-seed'], path.join(work, 'seed'));
+  const seedInfo = await sha256(seedPath);
+  await fs.writeFile(`${seedPath}.sha256`, `${seedInfo.sha256}  ${path.basename(seedPath)}\n`);
+
+  for (const [label, info] of [['Portable seed', seedInfo], ['Mobile install kit', kitInfo]]) {
     if (info.bytes > maxCloudflareAssetBytes) {
       throw new Error(`${label} is ${(info.bytes / 1024 / 1024).toFixed(2)} MiB; the Cloudflare release boundary is 24 MiB.`);
     }
   }
 
-  console.log(`Built ${manifestEntries.length} current core files.`);
-  console.log(`Seed (Cloudflare Pages): ${(seedInfo.bytes / 1024 / 1024).toFixed(2)} MiB ${seedInfo.sha256}`);
+  console.log(`Indexed ${manifestEntries.length} current core files for mobile hydration.`);
+  console.log(`Seed (mobile kit + node hub): ${(seedInfo.bytes / 1024).toFixed(1)} KiB ${seedInfo.sha256}`);
   console.log(`Kit (Cloudflare Pages): ${(kitInfo.bytes / 1024).toFixed(1)} KiB ${kitInfo.sha256}`);
 } finally {
   await fs.rm(work, { recursive: true, force: true });
