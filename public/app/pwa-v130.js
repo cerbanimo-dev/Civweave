@@ -1,13 +1,14 @@
 (()=>{
 'use strict';
-const VERSION='1.0.31';
-const BUILD='1.0.31-device-package-r23';
+const VERSION='1.0.4';
+const BUILD='1.0.4-working-campus-additions-v156';
+const WORKER_URL=`/service-worker-v156.js?v=${BUILD}`;
 let registration=null;
 let reloading=false;
 function pill(){
   let node=document.querySelector('#cw-pwa-state');
   if(node)return node;
-  node=document.createElement('button');node.id='cw-pwa-state';node.type='button';node.className='cw-pwa-state';node.textContent=navigator.onLine?'Device package · updates are manual':'Device package · offline';
+  node=document.createElement('button');node.id='cw-pwa-state';node.type='button';node.className='cw-pwa-state';node.textContent=navigator.onLine?'Working campus · updates are manual':'Working campus · offline';
   node.addEventListener('click',async()=>{
     if(globalThis.CommonweaveHubRuntimeV143?.openUpdateHub){globalThis.CommonweaveHubRuntimeV143.openUpdateHub();return}
     if(registration?.waiting){registration.waiting.postMessage({type:'SKIP_WAITING'});node.textContent='Applying update…'}
@@ -19,7 +20,7 @@ function updateState(){
   if(registration?.waiting){node.textContent='Update downloaded · open Hub & updates';node.classList.add('is-update');return}
   node.classList.remove('is-update');
   const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-  node.textContent=navigator.onLine?(standalone?'Installed device package · manual updates':'Local installer · install on this device'):'Offline · device package active';
+  node.textContent=navigator.onLine?(standalone?'Installed working campus · manual updates':'Local installer · install on this device'):'Offline · working campus active';
 }
 async function retireLegacyWorkers(){
   const regs=await navigator.serviceWorker.getRegistrations();
@@ -39,7 +40,8 @@ async function boot(){
   if(!('serviceWorker'in navigator)){pill().textContent='Offline install unsupported in this browser';return}
   try{
     await retireLegacyWorkers();
-    registration=await navigator.serviceWorker.getRegistration('/')||await navigator.serviceWorker.register(`/service-worker.js?v=${VERSION}`,{scope:'/',updateViaCache:'none'});
+    registration=await navigator.serviceWorker.getRegistration('/')||await navigator.serviceWorker.register(WORKER_URL,{scope:'/',updateViaCache:'none'});
+    if(!String(registration.active?.scriptURL||registration.waiting?.scriptURL||'').includes('service-worker-v156.js'))registration=await navigator.serviceWorker.register(WORKER_URL,{scope:'/',updateViaCache:'none'});
     registration.addEventListener('updatefound',()=>{
       const worker=registration.installing;
       worker?.addEventListener('statechange',()=>{if(worker.state==='installed'&&navigator.serviceWorker.controller)updateState()});
