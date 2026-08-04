@@ -50,7 +50,7 @@ function installerUrl(){
   next.searchParams.set('next',target.slice(0,1800));
   return next.href;
 }
-function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=settings-safe-open-v171`;script.defer=true;document.head.append(script)}
+function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=settings-safe-open-v171`;script.async=false;document.head.append(script)}
 function installAdditions(){
   if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
     const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=settings-safe-open-v171`;document.head.append(link);
