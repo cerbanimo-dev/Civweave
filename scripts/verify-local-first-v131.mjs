@@ -17,7 +17,7 @@ for(const token of ["process.env.RENDER === 'true'",'stage-transformers-assets.m
 for(const [name,wrapper] of [['gateway',gateway],['local',localHost]]){assert(wrapper.includes("replace(/^\\uFEFF/"),`${name} wrapper does not strip a UTF-8 BOM`);assert(wrapper.includes("replace(/\\r\\n?/g"),`${name} wrapper does not normalize Windows line endings`)}
 assert(localHost.includes("const VERSION = '1.0.4';")&&localHost.includes("const BUILD = '1.0.4-fullscreen-family-local-runtime';"),'local host does not report v1.0.4');
 for(const token of ['/app/installed-entry-v146.html','/app/realm-console-v140.html',"'software family HTML allowlist'"])assert(localHost.includes(token),`local host does not preserve ${token}`);
-for(const token of ["process.env.RENDER==='true'",'stage-transformers-assets.mjs','ensure-minilm-model.mjs'])assert(stageRuntime.includes(token),`semantic runtime staging guard missing ${token}`);
+for(const token of ["process.env.RENDER==='true'",'renderBuild&&!force','skipping device-side Transformers.js staging','requiredBackendFiles'])assert(stageRuntime.includes(token),`semantic runtime staging guard missing ${token}`);
 for(const token of ['packageInstall','installerSurface','applicationSurface',"req.headers['x-commonweave-package'] === 'install'",'localInstallRequired: true','COMMONWEAVE_RELEASE_URL'])assert(gateway.includes(token),`install-only gateway missing ${token}`);
 assert(gateway.includes('applicationSurface && !installerSurface && !packageInstall'),'gateway does not block ordinary browser application surfaces');
 for(const token of ["telemetryRequest","legacy-telemetry-blocked","Next: Tell me your wish or set an intention.","CHAT_KEYS","conversationLinkKey"])assert(policy.includes(token),`local-first policy missing ${token}`);
