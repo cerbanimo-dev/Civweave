@@ -1,26 +1,28 @@
-# Commonweave on Cloudflare Pages with R2
+# Commonweave on Cloudflare Pages
 
-Commonweave uses Cloudflare Pages for the static PWA and a Pages Function for the oversized mobile installer. The installer stays at the same site-relative URL, but its bytes live in R2 instead of the Pages asset bundle.
+Commonweave deploys as a static Cloudflare Pages site with lightweight Pages Functions for health checks. The mobile install kit is now small enough to ship as a normal Pages asset.
 
-## Why this boundary exists
+## Installer size boundary
 
-Cloudflare Pages allows individual static site assets up to 25 MiB. This repository contains:
+The current file is:
 
 ```text
 public/downloads/Commonweave-Mobile-Install-Kit.zip
 ```
 
-The file is approximately 65.6 MiB. `scripts/build-cloudflare-pages.mjs` stages the site into `.cloudflare-pages` without that ZIP. The Pages Function at:
+Validated size:
 
 ```text
-functions/downloads/Commonweave-Mobile-Install-Kit.zip.ts
+8,171 bytes
 ```
 
-serves the matching URL from the `DOWNLOADS` R2 binding, including HEAD, ETag, and resumable byte-range support.
+Cloudflare Pages permits individual static assets up to 25 MiB, so this installer no longer needs R2, an asset ignore rule, or a download proxy Function.
 
-## Existing Git-connected Pages project
+`scripts/build-cloudflare-pages.mjs` verifies that the installer exists and remains below the 25 MiB limit before copying the complete `public/` tree into `.cloudflare-pages`.
 
-Keep the existing Pages project connected to `cerbanimo-dev/Commonweave` and use these build settings:
+## Git-connected Pages settings
+
+Keep the Pages project connected to `cerbanimo-dev/Commonweave` and use:
 
 ```text
 Production branch: main
@@ -29,25 +31,7 @@ Build output directory: .cloudflare-pages
 Root directory: /
 ```
 
-The committed `wrangler.jsonc` defines:
-
-```text
-Default Pages project: commonweave-cloudflare-node
-R2 binding: DOWNLOADS
-R2 bucket: commonweave-downloads
-```
-
-When the actual Pages project has a different name, pass that exact name to the setup command below. For an existing Git-integrated project, the command reuses the project and creates a manual production deployment; it does not disconnect the Git integration.
-
-Also verify the binding in the dashboard:
-
-```text
-Workers & Pages > your Pages project > Settings > Bindings
-Variable name: DOWNLOADS
-R2 bucket: commonweave-downloads
-```
-
-Redeploy after adding or changing a binding.
+No R2 binding is required.
 
 ## One-command setup and deployment
 
@@ -67,55 +51,40 @@ wrangler login
 node scripts/setup-cloudflare-node.mjs YOUR_EXISTING_PAGES_PROJECT_NAME
 ```
 
-On Windows PowerShell, the same commands work unchanged.
-
-The script:
+The setup script now detects a locally installed Wrangler directly, including on Windows. It then:
 
 1. verifies Cloudflare authentication;
-2. creates `commonweave-downloads` when absent;
-3. reuses or creates the named Pages project;
-4. uploads the ZIP to R2 with download metadata;
-5. builds `.cloudflare-pages` without the ZIP;
-6. deploys the static site and Pages Functions to the production `main` branch.
+2. reuses or creates the named Pages project;
+3. validates and builds the complete static site;
+4. deploys the `main` production build.
 
 ## Manual publishing commands
 
-Create the bucket once:
-
-```bash
-wrangler r2 bucket create commonweave-downloads
-```
-
-Upload or replace the installer:
-
-```bash
-wrangler r2 object put commonweave-downloads/Commonweave-Mobile-Install-Kit.zip --file public/downloads/Commonweave-Mobile-Install-Kit.zip --content-type application/zip --content-disposition 'attachment; filename="Commonweave-Mobile-Install-Kit.zip"' --cache-control 'public, max-age=3600' --remote
-```
-
-Build the Pages-safe static output:
+Build the Pages output:
 
 ```bash
 node scripts/build-cloudflare-pages.mjs
 ```
 
-Deploy to the default Pages project:
+Deploy to the default project:
 
 ```bash
-wrangler pages deploy .cloudflare-pages --project-name commonweave-cloudflare-node --branch main --config wrangler.jsonc
+npx wrangler pages deploy .cloudflare-pages --project-name commonweave-cloudflare-node --branch main --config wrangler.jsonc
 ```
 
 Replace `commonweave-cloudflare-node` with the exact existing Pages project name when necessary.
 
-## Updating the installer later
+## Updating the installer
 
-Rebuild the install kit, upload the stable R2 key, and leave the public URL unchanged:
+Rebuild the kit and redeploy Pages:
 
 ```bash
 npm run build:install
-wrangler r2 object put commonweave-downloads/Commonweave-Mobile-Install-Kit.zip --file public/downloads/Commonweave-Mobile-Install-Kit.zip --content-type application/zip --content-disposition 'attachment; filename="Commonweave-Mobile-Install-Kit.zip"' --cache-control 'public, max-age=3600' --remote
+node scripts/build-cloudflare-pages.mjs
+npx wrangler pages deploy .cloudflare-pages --project-name commonweave-cloudflare-node --branch main --config wrangler.jsonc
 ```
 
-A Pages redeploy is only required when the Function, Wrangler configuration, or static site changes. Replacing the object at the same R2 key updates the download without changing links.
+The build stops with a clear error if a future installer exceeds 25 MiB.
 
 ## Verification
 
@@ -126,33 +95,30 @@ https://YOUR-PAGES-DOMAIN/api/health
 https://YOUR-PAGES-DOMAIN/downloads/Commonweave-Mobile-Install-Kit.zip
 ```
 
-Or check headers from a terminal:
+Or inspect the installer response:
 
 ```bash
 curl -I https://YOUR-PAGES-DOMAIN/downloads/Commonweave-Mobile-Install-Kit.zip
 ```
 
-The health response reports whether the R2 object is present and its byte size.
+The health endpoint reports `pages-static-assets` as the installer storage mode.
 
 ## Local Pages testing
 
-Build the static output, seed local R2, and start Pages development:
-
 ```bash
 node scripts/build-cloudflare-pages.mjs
-wrangler r2 object put commonweave-downloads/Commonweave-Mobile-Install-Kit.zip --file public/downloads/Commonweave-Mobile-Install-Kit.zip --content-type application/zip --content-disposition 'attachment; filename="Commonweave-Mobile-Install-Kit.zip"' --cache-control 'public, max-age=3600' --local
-wrangler pages dev --config wrangler.jsonc
+npx wrangler pages dev --config wrangler.jsonc
 ```
 
 Wrangler normally serves Pages development on port 8788.
 
-## Optional GitHub Actions credentials
+## Optional automated publishing
 
-For automated Wrangler publishing, add these repository secrets rather than committing credentials:
+For GitHub Actions publishing, store these as repository secrets:
 
 ```text
 CLOUDFLARE_ACCOUNT_ID
 CLOUDFLARE_API_TOKEN
 ```
 
-The API token must be scoped only to the intended Cloudflare account and include permission to edit Cloudflare Pages and R2 storage. Never commit the token or place it in `.dev.vars` tracked by Git.
+Scope the token only to the intended Cloudflare account and Pages project. Never commit credentials.
