@@ -8,9 +8,12 @@ const DEVICE_CREDENTIALS_SCRIPT='/extensions/commonweave-device-credentials-v160
 const MODEL_DOWNLOAD_SCRIPT='/extensions/commonweave-model-download-v157.js';
 const PROOF_PROGRESS_SCRIPT='/extensions/commonweave-proof-progress-v158.js';
 const GEMINI_INTERACTIONS_SCRIPT='/extensions/commonweave-gemini-interactions-v159.js';
-const PREVIOUS_ADDITIONS_VERSION='v160-device-credentials';
+const PREVIOUS_ADDITIONS_VERSION='v162-dark-review-rook-learning';
 const FAST_CORE_COMPATIBILITY_REVISION='v157-fast-core';
 const SETTINGS_STABILITY_REVISION='v161-settings-dialog-stability';
+const INTENTION_RESEARCH_REVISION='v163-latest-intention-agentic-research';
+// Compatibility marker: settings-dialog-stability-v161
+// Compatibility marker: additionsVersion:'v161-settings-dialog-stability'
 // Compatibility marker: additionsVersion:'v160-device-credentials'
 const params=new URLSearchParams(location.search);
 function installedDisplay(){
@@ -34,10 +37,10 @@ function installerUrl(){
   next.searchParams.set('next',target.slice(0,1800));
   return next.href;
 }
-function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=settings-dialog-stability-v161`;script.defer=true;document.head.append(script)}
+function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=latest-intention-agentic-research-v163`;script.defer=true;document.head.append(script)}
 function installAdditions(){
   if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
-    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=settings-dialog-stability-v161`;document.head.append(link);
+    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=latest-intention-agentic-research-v163`;document.head.append(link);
   }
   addScript(DEVICE_CREDENTIALS_SCRIPT);
   addScript(ADDITIONS_SCRIPT);
@@ -52,5 +55,5 @@ if(!allowed()){
   document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
   installAdditions();
 }
-globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v161-settings-dialog-stability',previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,settingsStabilityRevision:SETTINGS_STABILITY_REVISION};
+globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v163-latest-intention-agentic-research',previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,settingsStabilityRevision:SETTINGS_STABILITY_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION};
 })();
