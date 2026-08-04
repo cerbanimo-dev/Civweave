@@ -8,7 +8,8 @@ const EXTENSION_FILES=[
   '/extensions/commonweave-secure-vault-v156.js',
   '/extensions/commonweave-domain-bridge-v156.js',
   '/extensions/commonweave-qr-v156.js',
-  '/extensions/commonweave-mesh-tools-v156.js'
+  '/extensions/commonweave-mesh-tools-v156.js',
+  '/extensions/commonweave-model-download-v157.js'
 ];
 const BOUNDARY='/app/install-boundary-v146.js';
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
