@@ -1,6 +1,6 @@
 # Commonweave on Cloudflare Pages
 
-Commonweave deploys as a static Cloudflare Pages site with lightweight Pages Functions for health checks. Both downloadable release artifacts are intended to ship from the same Pages domain:
+Commonweave deploys as a static Cloudflare Pages site with lightweight Pages Functions for health checks. Both downloadable release artifacts ship from the same Pages domain:
 
 ```text
 public/downloads/Commonweave-Mobile-Install-Kit.zip
@@ -11,14 +11,14 @@ public/downloads/commonweave-pocket-campus.cwseed
 
 Cloudflare Pages accepts individual static assets up to 25 MiB. Both release artifacts must stay below that limit.
 
-Current state:
+Current release shape:
 
 ```text
 Mobile install kit: approximately 8 KiB
-Pocket Campus seed currently in main: approximately 65.6 MiB
+Portable seed: approximately 16 KiB
 ```
 
-The current checked-in seed is therefore not deployable to Pages yet. Replace or regenerate it below 25 MiB before deploying.
+The seed carries one copy of the mobile installer plus a dependency-free Node 20+ node hub. It does not carry a second full application snapshot, optional local model graphs, or archived visual trees.
 
 `scripts/build-cloudflare-pages.mjs` copies the complete `public/` tree into `.cloudflare-pages`, includes both download artifacts, scans every copied file, and fails before Wrangler upload if any included asset exceeds 25 MiB.
 
