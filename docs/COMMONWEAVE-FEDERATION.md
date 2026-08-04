@@ -1,133 +1,192 @@
 # Commonweave Federation v1
 
-Commonweave Federation lets independently hosted Commonweave nodes discover one another, establish explicit trust, and exchange signed events without sharing entire databases.
+Commonweave Federation connects independently operated Commonweave nodes without turning them into one central database. Each node keeps its own identity, chooses its own peers, and exchanges signed events only after explicit trust is established.
 
-## Design goals
+## Protocol shape
 
-- Every node can operate independently.
-- A node remains authoritative for its own records.
-- Nothing federates merely because two servers can reach each other.
-- New peers require approval by default.
-- Events are signed with a persistent Ed25519 node identity.
-- Nodes may block, remove, or distrust peers locally.
-- Private intentions, chat history, and device-only state do not federate by default.
-- The existing Commonweave application and host-node API remain available behind the same public origin.
+Federation v1 is a signed push protocol:
+
+1. A node publishes a public discovery profile at `/.well-known/commonweave`.
+2. An operator discovers another node through the local administrator API.
+3. The discovered peer remains `pending` until approved.
+4. Both operators repeat the process in the opposite direction and approve each other.
+5. A node signs an event with its persistent Ed25519 key and pushes it to the trusted peer's `/federation/inbox`.
+6. The receiver checks the pinned key, sender identity, signature, event schema, timestamp, and duplicate status before retaining the event.
+
+A connection is intentionally bilateral. Trusting Node B on Node A does not silently grant Node A access to Node B.
+
+## Sovereignty rules
+
+- Every node remains authoritative for records created on that node.
+- Nodes exchange events and proofs, not whole databases.
+- New peers require operator approval by default.
+- A trusted peer's signing key is pinned. Rediscovery cannot silently replace it.
+- A blocked node cannot deliver events.
+- Removing a peer removes its local trust and block record.
+- Private intentions, API keys, chat history, precise location, and unpublished drafts do not federate by default.
+- Public outbox reads are disabled in v1. Events move through signed push delivery.
 
 ## Runtime topology
 
-`server-federated-v152.mjs` is the public gateway. It listens on port `8787`, starts the existing Commonweave gateway on loopback port `8788`, handles federation routes, and proxies all other traffic to the existing application.
+`server-federated-v152.mjs` is the public gateway. It:
 
-This keeps federation additive. The existing install-only PWA, release distribution, local-first runtime, host registration, and relay endpoints continue to work.
+- serves federation discovery and inbox routes;
+- exposes token-protected administrator routes;
+- starts the existing Commonweave gateway on a loopback port;
+- proxies ordinary HTTP traffic and upgrade connections to the existing application;
+- stores node identity and federation state in the configured data directory.
 
-## Node identity
+The default container layout is:
+
+```text
+public port 8787
+  ├─ /.well-known/commonweave
+  ├─ /federation/inbox
+  ├─ /api/federation/health
+  ├─ /api/federation/*     administrator token required
+  └─ all other traffic     proxied to Commonweave on 127.0.0.1:8788
+```
+
+## Persistent identity
 
 At first launch the node creates:
 
-- `data/federation-identity.json`
-- `data/federation-state.json`
-
-The identity file contains a persistent Ed25519 key pair and node ID. Protect the data directory as you would any server credential. Back it up before migrating a node. Copying the data directory preserves the node identity; starting with an empty directory creates a new identity.
-
-## Discovery
-
-Each node publishes:
-
 ```text
+data/federation-identity.json
+data/federation-state.json
+```
+
+The identity file contains the node ID and Ed25519 private key. The server refuses to silently regenerate an invalid or corrupted identity because doing so would unexpectedly create a different node.
+
+Back up the entire data directory before migration. Never commit it, copy it into a container image, or publish it as an artifact.
+
+## Discovery profile
+
+```http
 GET /.well-known/commonweave
 ```
 
-The response uses `commonweave.node-profile.v1` and includes:
+The `commonweave.node-profile.v1` response includes:
 
 - node ID;
-- public URL;
-- inbox and outbox URLs;
-- public signing key;
+- node name and description;
+- origin URL;
+- inbox URL;
+- Ed25519 public key;
+- SHA-256 key fingerprint;
 - advertised capabilities;
 - peer approval policy;
 - software build information.
 
-## Trust lifecycle
+Federation v1 expects `PUBLIC_HOST_URL` and peer `baseUrl` values to be origin URLs without a path, credentials, query, or fragment. The inbox must use the same origin and the exact `/federation/inbox` path. Discovery and delivery redirects are rejected.
 
-A peer can be in one of four local states:
+## Administrator authentication
 
-- `pending`: discovered but not allowed to deliver events;
-- `trusted`: signed events are accepted;
-- `blocked`: requests are refused;
-- removed: no local peer record remains.
+All `/api/federation/*` routes except `/api/federation/health` require the federation administrator token.
 
-Automatic acceptance is disabled by default. Set `COMMONWEAVE_AUTO_ACCEPT_PEERS=true` only for controlled networks.
-
-## Federation API
-
-### Inspect this node
+Set:
 
 ```text
-GET /api/federation/status
-GET /api/federation/peers
-GET /api/federation/events
+COMMONWEAVE_FEDERATION_ADMIN_TOKEN=<long-random-secret>
+```
+
+Send it as either:
+
+```http
+Authorization: Bearer <token>
+```
+
+or:
+
+```http
+X-Commonweave-Admin-Token: <token>
+```
+
+When no token is configured, administrator routes are locked unless `COMMONWEAVE_ALLOW_UNAUTHENTICATED_ADMIN=true` is explicitly set. Do not enable that override on a shared LAN or Internet-facing node.
+
+The public health route contains no peer or event data:
+
+```http
+GET /api/federation/health
+```
+
+## Peer lifecycle
+
+A local peer record has one of these states:
+
+- `pending`: discovered or seen at the inbox, but not approved;
+- `trusted`: signed events using the pinned key are accepted;
+- `blocked`: delivery is rejected;
+- removed: no local peer record remains.
+
+Unknown senders must provide a structurally valid profile and a correctly signed event before a pending record is created. Pending records are capped by `COMMONWEAVE_MAX_PENDING_PEERS` to limit inbox flooding.
+
+If a known node ID appears with a different public key, the request fails with a key-mismatch error. Operators must remove the peer, verify the new fingerprint out of band, and add it again deliberately.
+
+## Administrator API
+
+The examples below assume:
+
+```sh
+NODE=http://localhost:8787
+TOKEN=replace-with-your-token
+AUTH="Authorization: Bearer $TOKEN"
+```
+
+### Inspect the node
+
+```sh
+curl -H "$AUTH" "$NODE/api/federation/status"
+curl -H "$AUTH" "$NODE/api/federation/peers"
+curl -H "$AUTH" "$NODE/api/federation/events"
 ```
 
 ### Discover a peer
 
-```http
-POST /api/federation/peers/connect
-Content-Type: application/json
-
-{
-  "baseUrl": "https://another-node.example"
-}
+```sh
+curl -X POST "$NODE/api/federation/peers/connect" \
+  -H "$AUTH" \
+  -H 'Content-Type: application/json' \
+  -d '{"baseUrl":"https://peer.example"}'
 ```
 
-### Approve, block, or remove a peer
+Record and compare the returned key fingerprint with the remote operator before trusting it.
 
-```text
-POST /api/federation/peers/{nodeId}/trust
-POST /api/federation/peers/{nodeId}/block
-POST /api/federation/peers/{nodeId}/remove
+### Trust, block, or remove a peer
+
+URL-encode the node ID in the path.
+
+```sh
+curl -X POST -H "$AUTH" "$NODE/api/federation/peers/<node-id>/trust"
+curl -X POST -H "$AUTH" "$NODE/api/federation/peers/<node-id>/block"
+curl -X POST -H "$AUTH" "$NODE/api/federation/peers/<node-id>/remove"
 ```
 
-URL-encode the node ID when placing it in the path.
+### Publish an event
 
-### Publish a federated event
+Omit `targets` to deliver to every trusted peer. Supply an empty array to retain the signed event locally without delivering it. Supply node IDs to target specific peers.
 
-```http
-POST /api/federation/events
-Content-Type: application/json
-
-{
-  "kind": "fellowfare.offer.published",
-  "subject": "Shared workshop tools available",
-  "visibility": "federated",
-  "payload": {
-    "offerId": "offer:123",
-    "summary": "Drill press and hand tools",
-    "homeNodeRecord": "/offers/123"
-  }
-}
+```sh
+curl -X POST "$NODE/api/federation/events" \
+  -H "$AUTH" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "kind":"fellowfare.offer.published",
+    "subject":"Shared workshop tools available",
+    "visibility":"federated",
+    "payload":{
+      "offerId":"offer:123",
+      "summary":"Drill press and hand tools",
+      "homeNodeRecord":"/offers/123"
+    }
+  }'
 ```
 
-By default the node attempts delivery to every trusted peer. Supply a `targets` array of node IDs to restrict delivery.
-
-### Receive events
-
-```text
-POST /federation/inbox
-```
-
-Incoming events are accepted only when:
-
-1. the sender is trusted locally;
-2. the event origin matches the sender node ID;
-3. the Ed25519 signature verifies against the trusted peer key;
-4. the event ID has not already been stored.
-
-The first message from an unknown node creates a pending peer record and returns `202` without accepting the event.
+The response reports each delivery separately. A remote `pendingApproval` response is a failed delivery, not a success. Federation v1 does not yet retry failed deliveries automatically.
 
 ## Event model
 
-Federation exchanges events and proofs, not database snapshots.
-
-A `commonweave.federated-event.v1` record contains:
+A signed `commonweave.federated-event.v1` record contains:
 
 ```json
 {
@@ -143,61 +202,67 @@ A `commonweave.federated-event.v1` record contains:
 }
 ```
 
-The signed portion excludes only the `signature` field. Canonical JSON key ordering is used before signing and verification.
+The signature covers every field except `signature`, using canonical JSON key ordering. Receivers reject unsupported top-level fields, invalid timestamps, mismatched origins, invalid signatures, and duplicate origin-plus-event-ID pairs.
 
-## Recommended first federated object types
+Supported visibility values are `federated` and `public`. Both are delivered only to trusted peers in v1. `public` marks content that may be surfaced publicly by a later application layer; it does not make the raw federation inbox or event store public.
 
-Start with records that are naturally public and easy to revoke or supersede:
+## Good first federated objects
 
-- FellowFare needs and offers;
+- FellowFare public needs and offers;
 - Living School public curricula;
 - public events and capability listings;
 - Anarchadia public proposals;
-- portable completion proofs and credentials.
+- portable completion proofs and credentials;
+- release and node-discovery announcements.
 
-Keep these local unless a user explicitly publishes them:
+Keep these local unless the user explicitly publishes them:
 
-- private intentions;
+- private intentions and plans;
 - chat transcripts;
-- device workspace data;
-- API keys;
+- device workspace state;
+- API keys and tokens;
 - private learner records;
 - precise location data;
 - unpublished governance drafts.
 
-## Networking and HTTPS
+## Security boundaries
 
-Local nodes can federate over a trusted LAN using HTTP. Internet-visible nodes should use HTTPS through a reverse proxy or hosting platform.
+Federation v1 provides:
 
-Recommended reverse proxies:
+- persistent Ed25519 node identity;
+- signed event verification;
+- key pinning;
+- explicit bilateral trust;
+- blocking and removal;
+- event deduplication;
+- administrator API authentication;
+- redirect rejection for discovery and delivery;
+- bounded pending-peer and event retention;
+- atomic state writes;
+- persistent identity and state storage.
 
-- Caddy for the simplest automatic HTTPS setup;
-- Cloudflare Tunnel when inbound ports cannot be opened;
-- Nginx or Traefik in an existing server stack.
+It does not yet provide:
 
-`PUBLIC_HOST_URL` must contain the externally reachable URL. Other nodes use it for discovery and inbox delivery.
-
-## Security boundaries in v1
-
-Federation v1 provides node identity, signature verification, explicit peer trust, event deduplication, and local blocking. It does not yet provide:
-
-- end-to-end encryption for private cross-node payloads;
 - user-level portable identity;
-- key rotation or key revocation documents;
-- fine-grained per-capability peer permissions;
-- moderation queues for individual events;
-- automatic event re-delivery and exponential retry;
-- conflict-free replicated documents.
+- encrypted private envelopes;
+- signing-key rotation or revocation documents;
+- per-capability peer permissions;
+- individual-event moderation queues;
+- automatic retry queues and backoff;
+- conflict-free replicated documents;
+- distributed consensus.
 
-Those belong in later protocol revisions. Until encrypted envelopes are implemented, federate only data intended for the receiving node administrators and users to read.
+Federate only material intended for the receiving node's operators and users to read.
 
-## Migration and backup
+## Validation
 
-Back up the complete mounted `/app/data` directory. Restoring it preserves:
+Run:
 
-- node ID and signing keys;
-- trusted and blocked peers;
-- retained federation events;
-- legacy host-node state.
+```sh
+node --check server-federated-v152.mjs
+node --check scripts/verify-federation-v152.mjs
+node scripts/verify-federation-v152.mjs
+docker build -f Dockerfile.federated -t commonweave-federated:test .
+```
 
-Never publish `federation-identity.json` or commit it to Git.
+The verification script launches two isolated nodes, requires administrator authentication, connects and approves both directions, delivers a signed event, checks deduplication, rejects a tampered event, verifies blocking, confirms application proxying, and restarts a node to confirm identity persistence.
