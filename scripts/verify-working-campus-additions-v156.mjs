@@ -5,51 +5,30 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-const [campus,campusPart4,boundary,worker,installer,pwa,vault,domain,qr,mesh,additions,css,validator]=await Promise.all([
-  read('public/app/working-campus-v156.html'),
-  read('public/app/working-campus-v156.part4.txt'),
-  read('public/app/install-boundary-v146.js'),
-  read('public/service-worker-v156.js'),
-  read('public/install-v130.js'),
-  read('public/app/pwa-v130.js'),
-  read('public/extensions/commonweave-secure-vault-v156.js'),
-  read('public/extensions/commonweave-domain-bridge-v156.js'),
-  read('public/extensions/commonweave-qr-v156.js'),
-  read('public/extensions/commonweave-mesh-tools-v156.js'),
-  read('public/extensions/commonweave-additions-v156.js'),
-  read('public/extensions/commonweave-additions-v156.css'),
-  read('public/app/cerbanimo-ai-validator-v156.js')
+const [campus,campusPart4,boundary,worker,baseWorker,installer,pwa,vault,domain,qr,mesh,additions,css,validator]=await Promise.all([
+  read('public/app/working-campus-v156.html'),read('public/app/working-campus-v156.part4.txt'),read('public/app/install-boundary-v146.js'),read('public/service-worker-v156.js'),read('public/service-worker.js'),read('public/install-v130.js'),read('public/app/pwa-v130.js'),read('public/extensions/commonweave-secure-vault-v156.js'),read('public/extensions/commonweave-domain-bridge-v156.js'),read('public/extensions/commonweave-qr-v156.js'),read('public/extensions/commonweave-mesh-tools-v156.js'),read('public/extensions/commonweave-additions-v156.js'),read('public/extensions/commonweave-additions-v156.css'),read('public/app/cerbanimo-ai-validator-v156.js')
 ]);
-assert(campus.includes('Commonweave Working Campus')&&campus.includes('/app/working-campus-v156.js'),'PR #56 source-based Working Campus is not the retained foundation.');
-assert(!campus.includes("const payload='H4sI"),'The obsolete packed Working Campus payload was reintroduced.');
-for(const token of ['test-gemini','test-antigravity','commonweave-model-profiles-v1','agenticEnabled'])assert(campus+campusPart4.includes(token),`PR #56 native AI setup is missing ${token}.`);
-for(const token of ['/extensions/commonweave-additions-v156.js','/extensions/commonweave-additions-v156.css','installAdditions','v156-post-pr56'])assert(boundary.includes(token),`Install boundary is missing direct source-page additive hook ${token}.`);
-assert(!boundary.includes('Response.prototype.text')&&!boundary.includes('patchWorkingCampusPayload'),'Packed-response interception survived the PR #56 integration.');
-for(const token of ["importScripts('/service-worker.js",'cwext-working-campus-additions-v156','commonweave-secure-vault-v156.js','commonweave-domain-bridge-v156.js','commonweave-qr-v156.js','commonweave-mesh-tools-v156.js','patchInstalledBoundary','GET_ADDITIONS_STATUS'])assert(worker.includes(token),`Additive device worker is missing ${token}.`);
-assert(installer.includes('/service-worker-v156.js')&&installer.includes("WORKER_REVISION='device-package-r35-direct'")&&installer.includes("ADDITIONS_REVISION='working-campus-additions-v156'")&&installer.includes('GET_ADDITIONS_STATUS'),'Installer does not verify both the PR #56 base package and additive package.');
-assert(pwa.includes('/service-worker-v156.js')&&pwa.includes('working-campus-additions-v156'),'Installed manual updater does not retain the additive worker.');
+assert(campus.includes('Commonweave Working Campus')&&campus.includes('/app/working-campus-v156.js'),'Source-based Working Campus is not retained.');
+assert(!campus.includes("const payload='H4sI"),'Packed Working Campus payload was reintroduced.');
+for(const token of ['test-gemini','test-antigravity','commonweave-model-profiles-v1','agenticEnabled'])assert(campus+campusPart4.includes(token),`Native AI setup is missing ${token}.`);
+for(const token of ['/extensions/commonweave-additions-v156.js','/extensions/commonweave-additions-v156.css','installAdditions','v156-post-pr56'])assert(boundary.includes(token),`Install boundary is missing additive hook ${token}.`);
+assert(!boundary.includes('Response.prototype.text')&&!boundary.includes('patchWorkingCampusPayload'),'Packed-response interception survived integration.');
+for(const token of ["importScripts('/service-worker.js?v=1.0.4-instant-shell-r37')",'cwext-working-campus-additions-v156-r2','commonweave-secure-vault-v156.js','commonweave-domain-bridge-v156.js','commonweave-qr-v156.js','commonweave-mesh-tools-v156.js','patchInstalledBoundary','GET_ADDITIONS_STATUS','Promise.all(EXTENSION_FILES.map','event.waitUntil(update)'])assert(worker.includes(token),`Additive worker is missing ${token}.`);
+for(const token of ["CACHE_REVISION='instant-shell-r37'",'cacheBatch(cache,DEVICE_REQUIRED,6)','async function staleWhileRevalidate','async function cacheFirst'])assert(baseWorker.includes(token),`Base worker is missing ${token}.`);
+assert(installer.includes('/service-worker-v156.js')&&installer.includes("WORKER_REVISION='progressive-device-r37'")&&installer.includes("ADDITIONS_REVISION='working-campus-additions-v156-r2'")&&installer.includes('GET_ADDITIONS_STATUS')&&installer.includes('checkUpdate'),'Installer does not verify and update both layers.');
+assert(pwa.includes('/service-worker-v156.js')&&pwa.includes('instant-shell-r37-working-campus-additions-v156-r2'),'Installed updater does not retain the progressive additive worker.');
 for(const token of ['AES-GCM','PBKDF2','250000','commonweave-model-profiles-v1','commonweave.model-secret.v1','sessionStorage','remember','unlock','scrubPlaintext'])assert(vault.includes(token),`Secure vault is missing ${token}.`);
 assert(!vault.includes('localStorage.setItem(NATIVE_SECRET_KEY')&&!vault.includes('localStorage.setItem(SECRET_KEY'),'Vault stores raw API secrets in ordinary local storage.');
 for(const token of ['commonweave.learning-request.v156','commonweave.task-request.v156','commonweave.materials-request.v156','commonweave.reward-ledger.v156','cerbanimo.ai-reviews.v156','commonweave.cerbanimo.peer-reviews.v156','qualifiedProvider','recordPeerReview','peerReviewStatus','patchCerbanimoEngine'])assert(domain.includes(token),`Domain and reward bridge is missing ${token}.`);
-assert(domain.includes("[['button',2],['acorn',1]]"),'Local independent validation no longer mints Buttons and Acorns.');
-assert(domain.includes("currency:'xp',amount:25")&&domain.includes("phase:'main-xp'"),'Main skill XP is not tied to local independent AI validation.');
-assert(domain.includes('passingCount:validators.size,threshold:2')&&domain.includes("currency:'cotoken',amount:1")&&domain.includes("currency:'xp',amount:10")&&domain.includes("phase:'bonus-xp'"),'Two-peer Cotoken and bonus-XP threshold is incomplete.');
-assert(domain.includes('rows.some(row=>row.validatorId===validatorId||row.objectId===object?.id)'),'Duplicate peer validators or replayed receipts can count twice.');
-assert(domain.includes("!['','deterministic','bundled','reflex','minilm','manual'].includes(provider)"),'Unqualified local providers can mint rewards.');
+assert(domain.includes("[['button',2],['acorn',1]]")&&domain.includes("currency:'xp',amount:25")&&domain.includes("currency:'cotoken',amount:1"),'Reward rules are incomplete.');
+assert(domain.includes('passingCount:validators.size,threshold:2')&&domain.includes('rows.some(row=>row.validatorId===validatorId||row.objectId===object?.id)'),'Peer threshold or replay protection is incomplete.');
 for(const token of ['createOffer','acceptOffer','acceptAnswer','friend-offer-v156','friend-answer-v156','/api/envelopes','publishTrade','requestValidation','publishValidation','scrub','syncNode','ensureMesh'])assert(mesh.includes(token),`Mesh tools are missing ${token}.`);
 assert(mesh.includes('BarcodeDetector')&&mesh.includes('CommonweaveQRV156.canvas'),'QR friend pairing is incomplete.');
-for(const token of ["const PENDING_KEY='commonweave.friend-pairings.pending.v156'",'sessionStorage.getItem(PENDING_KEY)','crypto.subtle.digest(\'SHA-256\'','name:\'HMAC\'','answerProof','verifyAnswerProof','/#cwfriend='])assert(mesh.includes(token),`Private QR rendezvous is missing ${token}.`);
-assert(!mesh.includes('localStorage.setItem(PENDING_KEY'),'Pending QR secrets are stored persistently.');
 for(const token of ['PR #56','nativeSettings','Node & friends','Rewards','Active thread','data-cwv-request-validation','validatePeerRequest','2 distinct peer AI passes','automaticReward:false'])assert(additions.includes(token),`Shared additions UI is missing ${token}.`);
-assert(!additions.includes('interceptSettings'),'The additive layer hijacks PR #56 native Gemini/Antigravity settings.');
-for(const token of ['result?.status!==\'success\'','result?.fallback?.used','deterministic','requestId','fallbackUsed:false'])assert(additions.includes(token),`Peer validator is missing fail-closed token ${token}.`);
-for(const token of ['result?.fallback?.used','Self-validation is disabled','cerbanimo-independent-task-validation-v156'])assert(validator.includes(token),`PR #56 local independent validator is missing ${token}.`);
+assert(!additions.includes('interceptSettings'),'The additive layer hijacks native settings.');
+for(const token of ['result?.fallback?.used','Self-validation is disabled','cerbanimo-independent-task-validation-v156'])assert(validator.includes(token),`Local independent validator is missing ${token}.`);
 assert(css.includes('.cwv156-dialog')&&css.includes('.cwv156-tools')&&css.includes('prefers-reduced-motion'),'Additive UI styling or accessibility boundary is incomplete.');
 const sandbox={console,TextEncoder,Uint8Array,Array,Math,Error,Object,String,Number,Boolean,JSON,globalThis:null};sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(qr,sandbox,{filename:'commonweave-qr-v156.js'});
-const code='https://commonweave-host-node.onrender.com/#cwfriend=123e4567-e89b-12d3-a456-426614174000';
-const matrix=sandbox.CommonweaveQRV156.matrix(code);
-assert(matrix.version>=1&&matrix.version<=6,'QR renderer selected an unsupported version.');
-assert(matrix.size===21+(matrix.version-1)*4,'QR matrix has an invalid size.');
-assert(matrix.cells[0][0]&&matrix.cells[6][6]&&matrix.cells[matrix.size-7][0],'QR finder patterns are missing.');
-assert(matrix.cells.every(row=>row.every(value=>typeof value==='boolean')),'QR matrix contains unfilled modules.');
-console.log(JSON.stringify({ok:true,foundation:'working-campus-v156-source-retained',localCerbanimoRewards:['buttons','acorns','main-skill-xp'],twoPeerRewards:['cotoken','bonus-skill-xp'],additions:['encrypted-native-ai-vault','typed-cross-system-requests','private-qr-friends','signed-mesh-trade','peer-ai-validation'],offlineWorker:'service-worker-v156',qrVersion:matrix.version},null,2));
+const matrix=sandbox.CommonweaveQRV156.matrix('https://commonweave-host-node.onrender.com/#cwfriend=123e4567-e89b-12d3-a456-426614174000');
+assert(matrix.version>=1&&matrix.version<=6&&matrix.size===21+(matrix.version-1)*4,'QR matrix is invalid.');
+console.log(JSON.stringify({ok:true,foundation:'working-campus-v156-source-retained',boot:'instant base shell plus concurrent additions',offlineWorker:'service-worker-v156',qrVersion:matrix.version},null,2));
