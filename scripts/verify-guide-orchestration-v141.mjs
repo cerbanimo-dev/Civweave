@@ -22,7 +22,7 @@ const openChatBlock=loader.slice(loader.indexOf('async function openChat'),loade
 assert(openChatBlock.includes('ensureBand')&&!openChatBlock.includes('await ensure()'),'Opening chat must reveal the inline console immediately, before loading the response engine.');
 for(const token of ['Talk to Commonweave',"openChat?.('commonweave',{prefill,contextSystem:system})",'[data-guide-chat="commonweave"]'])assert(family.includes(token),`Family chrome missing ${token}`);
 assert(!family.includes("#moss,.ch142-guide")&&!family.includes("closest?.('[data-ch142-form]')"),'Family chrome still hijacks native guide controls or the built-in console form.');
-assert(installedWorker.includes("importScripts('/service-worker.js?v=1.0.4-base-r40-inline-commonweave')"),'Installed worker did not rotate the inline chat package.');
+assert(installedWorker.includes("INLINE_CHAT_REVISION='inline-commonweave-r40'"),'Installed worker did not rotate the inline chat package.');
 assert(worker.includes("GUIDE_REVISION='lazy-five-system-chat-r36-stable'"),'Base worker unexpectedly changed its stable cache identity.');
 new Function(guideChat);new Function(loader);new Function(family);
 console.log('Guide orchestration passed with immediate inline Commonweave chat, shared history, local workspace context, native cabinet controls, and no overlay detour.');
