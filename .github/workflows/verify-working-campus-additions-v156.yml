@@ -40,6 +40,7 @@ jobs:
           node --check scripts/verify-working-campus-additions-v156.mjs
           node --check scripts/verify-unified-ai-settings-v157.mjs
           node --check scripts/verify-guide-runtime-recovery-v160.mjs
+          node --check scripts/verify-working-campus-chat-v160.mjs
           node --check scripts/verify-five-system-inner-ui-v157.mjs
           node --check scripts/verify-living-school-cabinet-v151.mjs
           node --check scripts/verify-anarchadia-cabinet-workbench-v144.mjs
@@ -51,6 +52,8 @@ jobs:
         run: node scripts/verify-unified-ai-settings-v157.mjs
       - name: Verify guide runtime recovery
         run: node scripts/verify-guide-runtime-recovery-v160.mjs
+      - name: Verify Weaveling composer
+        run: node scripts/verify-working-campus-chat-v160.mjs
       - name: Verify internal system interfaces
         run: node scripts/verify-five-system-inner-ui-v157.mjs
       - name: Verify generated Living School
