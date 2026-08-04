@@ -14,11 +14,19 @@ const EXTENSION_FILES=[
   '/extensions/commonweave-proof-progress-v158.js'
 ];
 const BOUNDARY='/app/install-boundary-v146.js';
+const CORE_PATCH_FILES=[
+  BOUNDARY,
+  '/app/fellowfare-cabinet-v144.html',
+  '/app/fellowfare-cabinet-v144.css',
+  '/app/fellowfare-cabinet-v144.js',
+  '/app/services/fellowfare/cabinet-embed.css'
+];
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-async function fetchRequired(url){const response=await fetch(`${url}${url.includes('?')?'&':'?'}v=${EXTENSION_VERSION}`,{cache:'no-store',headers:{'x-commonweave-package':'install'}});if(!response.ok)throw new Error(`Extension asset ${url} returned ${response.status}`);return response}
+async function fetchRequired(url){const response=await fetch(`${url}${url.includes('?')?'&':'?'}v=${EXTENSION_VERSION}`,{cache:'no-store',headers:{'x-commonweave-package':'install'}});if(!response.ok)throw new Error(`Package asset ${url} returned ${response.status}`);return response}
 async function cacheExtensions(){const cache=await caches.open(EXTENSION_CACHE);for(const url of EXTENSION_FILES)await cache.put(url,(await fetchRequired(url)).clone());return true}
-async function patchInstalledBoundary(){const fresh=await fetchRequired(BOUNDARY),deadline=Date.now()+120000;while(Date.now()<deadline){const names=(await caches.keys()).filter(name=>name.startsWith('commonweave-static-'));let patched=0;for(const name of names){const cache=await caches.open(name),existing=await cache.match(BOUNDARY,{ignoreSearch:true});if(existing){await cache.put(BOUNDARY,fresh.clone());patched++}}if(patched)return patched;await delay(100)}throw new Error('The base core package did not expose its install boundary in time for the additive layer.')}
-async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,cache:EXTENSION_CACHE,previousCache:PREVIOUS_EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,missing}}
+async function patchInstalledCore(){const fresh=new Map();for(const url of CORE_PATCH_FILES)fresh.set(url,await fetchRequired(url));const deadline=Date.now()+120000;while(Date.now()<deadline){const names=(await caches.keys()).filter(name=>name.startsWith('commonweave-static-'));for(const name of names){const cache=await caches.open(name),boundary=await cache.match(BOUNDARY,{ignoreSearch:true});if(!boundary)continue;for(const [url,response] of fresh)await cache.put(url,response.clone());return{cache:name,patched:CORE_PATCH_FILES.length}}await delay(100)}throw new Error('The base core package did not expose its installed cache in time for the additive layer.')}
+async function patchInstalledBoundary(){return patchInstalledCore()}
+async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,cache:EXTENSION_CACHE,previousCache:PREVIOUS_EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,missing,corePatchFiles:CORE_PATCH_FILES}}
 self.addEventListener('install',event=>event.waitUntil(Promise.all([cacheExtensions(),patchInstalledBoundary()])));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names=>Promise.all(names.filter(name=>name.startsWith('cwext-')&&name!==EXTENSION_CACHE).map(name=>caches.delete(name))))));
 self.addEventListener('message',event=>{if(event.data?.type==='GET_ADDITIONS_STATUS')event.waitUntil(extensionStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}))});
