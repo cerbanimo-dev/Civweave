@@ -28,6 +28,7 @@ jobs:
           node --check public/app/models/all-minilm-l6-v2/adapter.js
           node --check public/app/models/all-minilm-l6-v2/worker.js
           node --check public/app/merlinites-semantic-planner-v164.js
+          node --check public/app/family-shell-v104.js
           node --check public/app/platform-stability-v159.js
           node --check public/app/platform-experience-v160.js
           node --check public/app/action-followthrough-v165.js
@@ -64,24 +65,34 @@ jobs:
           node --check scripts/verify-platform-hud-stability-v163.mjs
           node --check scripts/test-workflow-handoffs-v165.mjs
           node --check scripts/verify-merlinites-semantic-v164.mjs
+          node --check scripts/verify-merlinites-visual-overhaul-v166.mjs
           node --check scripts/verify-living-school-cabinet-v151.mjs
           node --check scripts/verify-anarchadia-cabinet-workbench-v144.mjs
           node --check scripts/verify-cerbanimo-quest-engine-v144.mjs
           node --check scripts/test-tiered-cerbanimo-rewards-v157.mjs
           node --check scripts/test-proof-driven-checkpoints-v158.mjs
-      - name: Reject retired semantic name
+      - name: Reject retired subsystem name
         run: |
-          ! grep -R -n -E 'CommonweaveSolV164|commonweave\.sol-|sol-semantic|__solSemanticInstalled|solFeedback|commonweave:sol-' \
+          legacy="$(printf '\163\157\154')"
+          legacy_title="$(printf '\123\157\154')"
+          pattern="${legacy_title}|${legacy}-r|${legacy}-shell|${legacy}-semantic|verify-${legacy}|${legacy}Feedback|__${legacy}Semantic|commonweave:${legacy}-|commonweave\.${legacy}-"
+          ! grep -R -n -E "$pattern" \
             docs/MERLINITES-SEMANTIC-PLANNING-v164.md \
+            docs/MERLINITES-VISUAL-OVERHAUL-v166.md \
             public/app/merlinites-semantic-planner-v164.js \
+            public/app/merlinites-shell-fix-v166.css \
+            public/app/family-shell-v104.js \
             public/app/loom-v128.html \
             public/app/lite-v129.html \
             public/app/working-campus-v156.html \
             public/app/realm-console-v140.html \
             public/app/cabinets/living-school/index.html \
+            public/app/fellowfare-cabinet-v144.html \
+            public/app/anarchadia-console-v139.html \
             public/app/pwa-v130.js \
             public/service-worker-v156.js \
-            scripts/verify-merlinites-semantic-v164.mjs
+            scripts/verify-merlinites-semantic-v164.mjs \
+            scripts/verify-merlinites-visual-overhaul-v166.mjs
       - name: Verify additive integration
         run: node scripts/verify-working-campus-additions-v156.mjs
       - name: Verify unified AI settings
@@ -94,6 +105,8 @@ jobs:
         run: node scripts/verify-living-school-two-agent-relay-v165.mjs
       - name: Verify merlinites semantic planning
         run: node scripts/verify-merlinites-semantic-v164.mjs
+      - name: Verify merlinites visual shell
+        run: node scripts/verify-merlinites-visual-overhaul-v166.mjs
       - name: Verify internal system interfaces
         run: node scripts/verify-five-system-inner-ui-v157.mjs
       - name: Verify interaction and review stability
