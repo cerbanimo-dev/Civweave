@@ -1,33 +1,28 @@
 # Commonweave on Cloudflare Pages
 
-Commonweave deploys as a static Cloudflare Pages site with lightweight Pages Functions for health checks. The compact mobile install kit ships as a normal Pages asset.
+Commonweave deploys as a static Cloudflare Pages site with lightweight Pages Functions for health checks. Both downloadable release artifacts are intended to ship from the same Pages domain:
 
-The optional full Pocket Campus seed is a separate large recovery artifact. It remains on the Render host node and is intentionally omitted from the Cloudflare Pages output.
+```text
+public/downloads/Commonweave-Mobile-Install-Kit.zip
+public/downloads/commonweave-pocket-campus.cwseed
+```
 
 ## Artifact boundary
 
-Cloudflare Pages accepts individual static assets up to 25 MiB.
+Cloudflare Pages accepts individual static assets up to 25 MiB. Both release artifacts must stay below that limit.
 
-Current release roles:
+Current state:
 
 ```text
-Cloudflare Pages:
-  public/downloads/Commonweave-Mobile-Install-Kit.zip
-
-Render host node:
-  public/downloads/commonweave-pocket-campus.cwseed
+Mobile install kit: approximately 8 KiB
+Pocket Campus seed currently in main: approximately 65.6 MiB
 ```
 
-The current mobile installer is approximately 8 KiB. The Pocket Campus seed is approximately 65.6 MiB.
+The current checked-in seed is therefore not deployable to Pages yet. Replace or regenerate it below 25 MiB before deploying.
 
-`scripts/build-cloudflare-pages.mjs`:
+`scripts/build-cloudflare-pages.mjs` copies the complete `public/` tree into `.cloudflare-pages`, includes both download artifacts, scans every copied file, and fails before Wrangler upload if any included asset exceeds 25 MiB.
 
-1. validates that the compact installer exists and is below the Pages limit;
-2. copies `public/` into `.cloudflare-pages`;
-3. excludes only `commonweave-pocket-campus.cwseed` and its checksum;
-4. scans every copied file and fails before deployment if any included asset exceeds 25 MiB.
-
-`scripts/build-mobile-install-kit.mjs` may rebuild both artifacts, but only the compact kit is checked against the Cloudflare release boundary. The seed is labeled Render-only in its build output.
+`scripts/build-mobile-install-kit.mjs` rebuilds both artifacts and uses a 24 MiB release boundary to leave safety margin below Cloudflare's hard ceiling.
 
 ## Git-connected Pages settings
 
@@ -40,7 +35,7 @@ Build output directory: .cloudflare-pages
 Root directory: /
 ```
 
-No R2 binding is required.
+No R2 binding is required while both artifacts remain below 25 MiB.
 
 ## One-command setup and deployment
 
@@ -65,42 +60,26 @@ The setup script:
 1. finds a local or global Wrangler installation, including Windows installs;
 2. verifies Cloudflare authentication;
 3. reuses or creates the named Pages project;
-4. validates and builds the Pages-safe static output;
+4. validates and builds the full Pages output;
 5. deploys the `main` production build;
 6. passes `--commit-dirty=true` so generated output does not produce a warning.
 
-## Manual publishing commands
-
-Build the Pages output:
-
-```bash
-node scripts/build-cloudflare-pages.mjs
-```
-
-Deploy to the default project:
-
-```bash
-npx wrangler pages deploy .cloudflare-pages --project-name commonweave-cloudflare-node --branch main --commit-dirty=true
-```
-
-Replace `commonweave-cloudflare-node` with the exact existing Pages project name when necessary. Do not pass `--config`; Pages automatically reads the root `wrangler.jsonc` and rejects custom config paths.
-
-## Updating release artifacts
-
-Rebuild both release artifacts:
+## Rebuilding the artifacts
 
 ```bash
 npm run build:install
 ```
 
-Then rebuild and deploy the Pages-safe output:
+The command must complete without reporting that either artifact exceeds the 24 MiB release boundary.
+
+Then build and deploy:
 
 ```bash
 node scripts/build-cloudflare-pages.mjs
-npx wrangler pages deploy .cloudflare-pages --project-name commonweave-cloudflare-node --branch main --commit-dirty=true
+npx wrangler pages deploy .cloudflare-pages --project-name commonweave --branch main --commit-dirty=true
 ```
 
-The Pages build excludes the full seed automatically while preserving the compact mobile kit.
+Do not pass `--config`; Pages automatically reads the root `wrangler.jsonc` and rejects custom configuration paths.
 
 ## Local MiniLM source checkout
 
@@ -131,12 +110,7 @@ After deployment, open:
 ```text
 https://YOUR-PAGES-DOMAIN/api/health
 https://YOUR-PAGES-DOMAIN/downloads/Commonweave-Mobile-Install-Kit.zip
-```
-
-The full seed remains at:
-
-```text
-https://commonweave-host-node.onrender.com/downloads/commonweave-pocket-campus.cwseed
+https://YOUR-PAGES-DOMAIN/downloads/commonweave-pocket-campus.cwseed
 ```
 
 ## Local Pages testing
