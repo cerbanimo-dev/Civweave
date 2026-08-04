@@ -3,7 +3,7 @@
 const VERSION='1.0.4';
 const HOST='/app/fullscreen-family-v104.html';
 const SYSTEMS={
-  commonweave:{label:'Commonweave',guide:'Weaveling',site:'/loom/?cabinet=1&embed=1'},
+  commonweave:{label:'Commonweave',guide:'Weaveling',site:'/app/realm-console-v140.html?system=commonweave&cabinet=1&embed=1'},
   'living-school':{label:'Living School',guide:'Moss',site:'/app/cabinets/living-school/index.html?cabinet=1&embed=1'},
   cerbanimo:{label:'Cerbanimo',guide:'Kamiya',site:'/app/realm-console-v140.html?system=cerbanimo&cabinet=1&embed=1'},
   fellowfare:{label:'FellowFare',guide:'Rook',site:'/app/fellowfare-cabinet-v144.html?cabinet=1&embed=1'},
@@ -31,7 +31,7 @@ function childStyle(doc,current){
 }
 function hookChild(frame,current){
   try{
-    const win=frame.contentWindow,doc=frame.contentDocument;if(!doc)return;
+    const doc=frame.contentDocument;if(!doc)return;
     childStyle(doc,current);
     doc.addEventListener('click',event=>{
       const chat=event.target.closest?.('[data-action="chat"],#moss,.ch142-guide,[data-guide-chat]');
