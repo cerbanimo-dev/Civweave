@@ -25,7 +25,7 @@ const context={
   CustomEvent:class CustomEvent{constructor(type,init){this.type=type;this.detail=init?.detail}},
   dispatchEvent:()=>{},
   addEventListener:()=>{},
-  document:{readyState:'complete',querySelectorAll:()=>[],querySelector:()=>null,getElementById:()=>null,createElement:()=>({addEventListener(){},querySelector(){return null},className:'',id:'',open:false,showModal(){this.open=true}}),body:{append(){}},head:{append(){}},documentElement:{hasAttribute:()=>false},addEventListener:()=>{}},
+  document:{readyState:'loading',querySelectorAll:()=>[],querySelector:()=>null,getElementById:()=>null,createElement:()=>({addEventListener(){},querySelector(){return null},className:'',id:'',open:false,showModal(){this.open=true}}),body:{append(){}},head:{append(){}},documentElement:{hasAttribute:()=>false,dataset:{}},addEventListener:()=>{}},
   MutationObserver:class MutationObserver{observe(){}},
   CommonweaveParity:{load:async()=>({systems:[
     {id:'commonweave',roomIds:['commonweave.quad']},
@@ -42,8 +42,8 @@ const context={
 };
 context.globalThis=context;
 vm.createContext(context);
-for(const file of ['public/app/intention-planner-v141.js','public/app/guide-contracts-v141.js','public/app/assistant-runtime-v141.js','public/app/core-loop-v152.js'])vm.runInContext(await fs.readFile(file,'utf8'),context,{filename:file});
-const a=context.CommonweaveAssistantV141,core=context.CommonweaveCoreLoopV152;
+for(const file of ['public/app/intention-planner-v141.js','public/app/guide-contracts-v141.js','public/app/assistant-runtime-v141.js','public/app/core-loop-v152.js','public/app/guide-chat-v153.js'])vm.runInContext(await fs.readFile(file,'utf8'),context,{filename:file});
+const a=context.CommonweaveAssistantV141,core=context.CommonweaveCoreLoopV152,chat=context.CommonweaveGuideChatV153;
 const assert=(x,m)=>{if(!x)throw new Error(m)};
 
 let result=await a.respond({text:'I want to make a video game with my friends about a time traveler facing off with a time looper',systemId:'commonweave',history:[]});
@@ -59,6 +59,21 @@ assert(JSON.parse(localStorage.getItem(core.keys.cerb))[0].system==='cerbanimo',
 assert(JSON.parse(localStorage.getItem(core.keys.passport)).activeIntentionId===result.plan.id,'Anarchadia must retain the active intention in the passport.');
 assert(JSON.parse(localStorage.getItem(core.keys.handoffs)).length>=3,'Activation must create durable child-system handoffs.');
 assert(core.activate(result.plan).duplicate===true,'Repeated activation must not duplicate the route.');
+
+const chatScenarios={
+  commonweave:'testing',
+  'living-school':'Teach me how to document a small prototype.',
+  cerbanimo:'Build a playable prototype with visible completion proof.',
+  fellowfare:'I need materials and tools for a small prototype.',
+  anarchadia:'Add a feature request for a clearer cabinet chat button.'
+};
+for(const [system,text] of Object.entries(chatScenarios)){
+  const reply=await chat.ask(system,text,[]);
+  assert(reply?.role==='assistant'&&reply.text.length>0,`${system} chat must receive a visible assistant reply.`);
+  assert(reply.provider,`${system} chat must identify the runtime that answered.`);
+}
+assert((await chat.ask('commonweave','I want to make a tiny game plan',[])).approvalGate?.kind==='intention-activation','Weaveling chat must return a reviewable plan gate.');
+assert((await chat.ask('cerbanimo','Build a tiny game prototype',[])).approvalGate?.kind==='realm-action-approval','Kamiya chat must return a reviewable quest gate.');
 
 result=await a.respond({text:'retry one more time',systemId:'commonweave',history:[{role:'user',text:'I want to make a video game with my friends about a time traveler facing off with a time looper'}]});
 assert(result.plan,'Retry should rebuild the prior weave.');
@@ -90,4 +105,4 @@ assert(result.action.missingRequired.includes('exact skill name'),'Moss should c
 const after=JSON.parse(localStorage.getItem('commonweave.intentions.v127')).length;
 assert(before===after,'Moss must not create a Commonweave intention automatically.');
 
-console.log('Dynamic orchestration and activated core-loop scenarios passed.');
+console.log('Dynamic orchestration, activated core-loop, and five-system send/receive chat scenarios passed.');
