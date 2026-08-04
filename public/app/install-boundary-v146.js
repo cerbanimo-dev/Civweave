@@ -12,6 +12,7 @@ const PREVIOUS_ADDITIONS_VERSION='v162-dark-review-rook-learning';
 const FAST_CORE_COMPATIBILITY_REVISION='v157-fast-core';
 const SETTINGS_STABILITY_REVISION='v161-settings-dialog-stability';
 const INTENTION_RESEARCH_REVISION='v163-latest-intention-agentic-research';
+// Compatibility marker: settings-dialog-stability-v161
 // Compatibility marker: additionsVersion:'v161-settings-dialog-stability'
 // Compatibility marker: additionsVersion:'v160-device-credentials'
 const params=new URLSearchParams(location.search);
