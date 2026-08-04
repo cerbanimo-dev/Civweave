@@ -8,13 +8,25 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, "..");
 const sourceDir = resolve(repoRoot, "public");
 const outputDir = resolve(repoRoot, ".cloudflare-pages");
-const excludedInstaller = resolve(
+const installerPath = resolve(
   sourceDir,
   "downloads/Commonweave-Mobile-Install-Kit.zip",
 );
+const maxCloudflareAssetBytes = 25 * 1024 * 1024;
 
 if (!existsSync(sourceDir) || !statSync(sourceDir).isDirectory()) {
   throw new Error(`Static source directory not found: ${sourceDir}`);
+}
+
+if (!existsSync(installerPath) || !statSync(installerPath).isFile()) {
+  throw new Error(`Mobile installer not found: ${installerPath}`);
+}
+
+const installerBytes = statSync(installerPath).size;
+if (installerBytes > maxCloudflareAssetBytes) {
+  throw new Error(
+    `Mobile installer is ${installerBytes} bytes, above Cloudflare's 25 MiB per-asset limit.`,
+  );
 }
 
 rmSync(outputDir, { recursive: true, force: true });
@@ -23,20 +35,11 @@ cpSync(sourceDir, outputDir, {
   recursive: true,
   force: true,
   filter(sourcePath) {
-    const resolved = resolve(sourcePath);
-    if (resolved === excludedInstaller) {
-      return false;
-    }
-
-    const relativePath = relative(sourceDir, resolved);
-    if (relativePath === ".assetsignore") {
-      return false;
-    }
-
+    const relativePath = relative(sourceDir, resolve(sourcePath));
     return !relativePath.split(sep).includes(".wrangler");
   },
 });
 
 console.log(
-  "Built .cloudflare-pages without Commonweave-Mobile-Install-Kit.zip; Pages Functions serve that URL from R2.",
+  `Built .cloudflare-pages with Commonweave-Mobile-Install-Kit.zip (${installerBytes} bytes).`,
 );
