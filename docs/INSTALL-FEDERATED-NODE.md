@@ -1,399 +1,341 @@
 # Install a Federated Commonweave Node
 
-This guide installs a full Commonweave node that serves the PWA, keeps its own persistent identity, and can connect to other Commonweave nodes.
+A Commonweave app and a Commonweave node are different things:
 
-## Choose what you are installing
+- **App users** install the PWA from a node they trust.
+- **Node operators** run a server that distributes Commonweave and exchanges signed events with other approved nodes.
 
-There are two distinct installations:
+A person can use Commonweave without operating a node.
 
-1. **Commonweave app:** a user installs the PWA from a node in their browser.
-2. **Commonweave node:** an administrator runs a server that distributes the app and participates in federation.
+## Install the Commonweave app
 
-A person may use the app without operating a node.
+Open the HTTPS address of a trusted node.
 
----
+### Android and ChromeOS
 
-# Part I: Install the Commonweave app
+In Chrome, Edge, or Brave, use the page's install action. When no prompt appears, open the browser menu and choose **Install app** or **Add to Home screen**.
 
-Open the HTTPS URL of any trusted Commonweave node.
+### iPhone and iPad
 
-## Android
+Open the node in Safari, tap **Share**, choose **Add to Home Screen**, and confirm.
 
-### Chrome, Edge, or Brave
+### Windows, macOS, and desktop Linux
 
-1. Open the node URL.
-2. Use the page's **Install Commonweave** action when shown.
-3. If no prompt appears, open the browser menu.
-4. Tap **Install app** or **Add to Home screen**.
-5. Confirm installation.
+Open the node in Chrome or Edge and choose the install icon in the address bar or the browser's **Install Commonweave** command.
 
-The installed app continues to receive updates from its home node through the service worker.
-
-## iPhone and iPad
-
-1. Open the node URL in Safari.
-2. Tap the Share button.
-3. Tap **Add to Home Screen**.
-4. Confirm the name and tap **Add**.
-
-Apple devices do not expose the same install prompt used by Chromium browsers. Installation must be initiated from Safari's Share menu.
-
-## Windows 10 and 11
-
-### Microsoft Edge
-
-1. Open the node URL.
-2. Select **Apps** in the Edge menu.
-3. Select **Install Commonweave**.
-4. Choose whether to pin it to Start, the taskbar, or the desktop.
-
-### Google Chrome
-
-1. Open the node URL.
-2. Select the install icon in the address bar, or open the menu.
-3. Select **Install Commonweave**.
-
-## macOS
-
-### Safari
-
-On supported macOS versions, open the node URL in Safari and choose **File → Add to Dock**.
-
-### Chrome or Edge
-
-Open the node URL and use the install icon or **Install Commonweave** menu action.
-
-## Linux
-
-Use Chrome, Chromium, Edge, Brave, or another browser that supports PWA installation:
-
-1. Open the node URL.
-2. Select the install icon in the address bar.
-3. Confirm installation.
-
-Firefox can run the site but does not provide equivalent desktop PWA installation on every Linux distribution.
-
-## ChromeOS
-
-1. Open the node URL in Chrome.
-2. Select the install icon in the address bar.
-3. Confirm installation.
+The installed PWA remains attached to that home node for releases and updates. Commonweave's local-first workspace remains on the device unless the user explicitly publishes a federated object.
 
 ---
 
-# Part II: Operate a Commonweave node
+# Operate a node with Docker Compose
 
-## Recommended method: Docker Compose
+Docker Compose is the recommended path for a laptop, desktop, Raspberry Pi, NAS, home server, VPS, or container host.
 
-Docker Compose is the most consistent installation path for Windows, macOS, Linux, Raspberry Pi, NAS systems, and many cloud servers.
+## Requirements
 
-### Prepare the repository
+- Git
+- Docker Engine or Docker Desktop
+- Docker Compose v2
+- an externally reachable HTTPS origin for Internet federation
 
-```bash
+## 1. Clone the repository
+
+```sh
 git clone https://github.com/cerbanimo-dev/Commonweave.git
 cd Commonweave
-cp .env.federated.example .env
 ```
 
-Edit `.env` and set at least:
+To test this PR before merge, check out its branch:
+
+```sh
+git checkout agent/federated-node-network
+```
+
+## 2. Create the environment file
+
+```sh
+cp .env.federated.example .env.federated
+```
+
+Generate a federation administrator token:
+
+```sh
+openssl rand -hex 32
+```
+
+Edit `.env.federated`:
 
 ```dotenv
-PUBLIC_HOST_URL=https://your-node.example
-COMMONWEAVE_NODE_NAME=Your Community Name
-COMMONWEAVE_NODE_DESCRIPTION=A short description of this node.
+PUBLIC_HOST_URL=https://weave.example.org
+COMMONWEAVE_NODE_NAME=Neighborhood Tool Library
+COMMONWEAVE_NODE_DESCRIPTION=Commonweave node for our local workshop and learning circle.
+COMMONWEAVE_PORT=8787
+COMMONWEAVE_FEDERATION_ADMIN_TOKEN=paste-the-random-token-here
+COMMONWEAVE_ALLOW_UNAUTHENTICATED_ADMIN=false
+COMMONWEAVE_AUTO_ACCEPT_PEERS=false
+COMMONWEAVE_MAX_FEDERATION_EVENTS=5000
+COMMONWEAVE_MAX_PENDING_PEERS=256
+HUB_TOKEN=
 ```
 
-For local-only testing, use:
+`PUBLIC_HOST_URL` must be the public origin other nodes can reach. Use no path, query, credentials, or fragment.
 
-```dotenv
-PUBLIC_HOST_URL=http://localhost:8787
+Keep `.env.federated` private. The administrator token grants peer-management and event-publication control.
+
+## 3. Start the node
+
+```sh
+docker compose --env-file .env.federated -f docker-compose.federated.yml up -d --build
 ```
 
-Start the node:
+Check the container:
 
-```bash
-docker compose -f docker-compose.federated.yml up -d --build
+```sh
+docker compose --env-file .env.federated -f docker-compose.federated.yml ps
+docker compose --env-file .env.federated -f docker-compose.federated.yml logs -f
 ```
 
-Check it:
+Check public health and discovery:
 
-```bash
-curl http://localhost:8787/api/federation/status
+```sh
+curl https://weave.example.org/api/federation/health
+curl https://weave.example.org/.well-known/commonweave
 ```
 
-Stop it:
+Check the protected administrator status:
 
-```bash
-docker compose -f docker-compose.federated.yml down
+```sh
+curl https://weave.example.org/api/federation/status \
+  -H 'Authorization: Bearer paste-the-random-token-here'
 ```
 
-Update it:
+## 4. Put HTTPS in front of the node
 
-```bash
-git pull
-docker compose -f docker-compose.federated.yml up -d --build
-```
+Internet-visible nodes should not publish plain HTTP.
 
-The named Docker volume preserves the node identity and federation state across rebuilds.
-
-## Windows 10 and 11
-
-### Docker Desktop
-
-1. Install Git for Windows.
-2. Install Docker Desktop and enable its WSL 2 backend.
-3. Open PowerShell.
-4. Run the Docker Compose instructions above.
-5. Open `http://localhost:8787`.
-
-To make the node reachable from the Internet, place it behind an HTTPS reverse proxy, Cloudflare Tunnel, or a router configuration you understand and control. Do not expose the Docker daemon itself.
-
-### Native Node.js development mode
-
-Install Node.js 22 or newer and Git, then run:
-
-```powershell
-git clone https://github.com/cerbanimo-dev/Commonweave.git
-cd Commonweave
-$env:PUBLIC_HOST_URL="http://localhost:8787"
-$env:COMMONWEAVE_NODE_NAME="My Windows Commonweave Node"
-npm install
-node server-federated-v152.mjs
-```
-
-Keep the terminal open while the node runs.
-
-## macOS
-
-### Docker Desktop
-
-Install Docker Desktop and Git, then use the Docker Compose instructions.
-
-### Native Node.js
-
-With Homebrew:
-
-```bash
-brew install node@22 git
-git clone https://github.com/cerbanimo-dev/Commonweave.git
-cd Commonweave
-npm install
-PUBLIC_HOST_URL=http://localhost:8787 \
-COMMONWEAVE_NODE_NAME="My Mac Commonweave Node" \
-node server-federated-v152.mjs
-```
-
-## Linux server or desktop
-
-Install Docker Engine, the Docker Compose plugin, and Git using your distribution's package manager. Then use the Docker Compose instructions.
-
-For a native Node.js installation:
-
-```bash
-git clone https://github.com/cerbanimo-dev/Commonweave.git
-cd Commonweave
-npm install
-export PUBLIC_HOST_URL=http://localhost:8787
-export COMMONWEAVE_NODE_NAME="My Linux Commonweave Node"
-node server-federated-v152.mjs
-```
-
-For a long-running native installation, create a systemd unit or use Docker's restart policy rather than leaving it attached to a shell.
-
-## Raspberry Pi
-
-Use a 64-bit Raspberry Pi OS installation when possible.
-
-1. Install Docker Engine and the Compose plugin.
-2. Clone the repository.
-3. Copy `.env.federated.example` to `.env`.
-4. Set `PUBLIC_HOST_URL` to the Pi's HTTPS hostname or local address.
-5. Start with Docker Compose.
-
-Example local configuration:
-
-```dotenv
-PUBLIC_HOST_URL=http://commonweave.local:8787
-COMMONWEAVE_NODE_NAME=Living Room Commonweave
-```
-
-For public federation, use HTTPS. Caddy or Cloudflare Tunnel can provide a public HTTPS route without placing Commonweave directly on port 80 or 443.
-
-## Android with Termux
-
-An Android device can run a small personal or local-network node, although the operating system may stop background processes to save battery.
-
-Install Termux from F-Droid or another maintained source, then run:
-
-```bash
-pkg update
-pkg upgrade
-pkg install git nodejs-lts
-termux-wake-lock
-git clone https://github.com/cerbanimo-dev/Commonweave.git
-cd Commonweave
-npm install
-export PUBLIC_HOST_URL=http://127.0.0.1:8787
-export COMMONWEAVE_NODE_NAME="My Pocket Commonweave Node"
-node server-federated-v152.mjs
-```
-
-Open `http://127.0.0.1:8787` on the same phone.
-
-For access from other devices on Wi-Fi, replace `127.0.0.1` with the phone's local IP address and allow Termux to remain active. Android battery optimization may still suspend the node.
-
-## Synology, QNAP, Unraid, TrueNAS SCALE, and other NAS platforms
-
-Use the platform's Docker or container application:
-
-1. Create a project from `docker-compose.federated.yml`.
-2. Create a persistent volume mapped to `/app/data`.
-3. Set the environment variables from `.env.federated.example`.
-4. Expose container port `8787` through a local host port.
-5. Configure the NAS reverse proxy for HTTPS before Internet federation.
-
-Never delete the `/app/data` volume unless you intend to create a new node identity.
-
-## Cloud VPS
-
-On a small Ubuntu, Debian, Fedora, or similar VPS:
-
-1. Install Docker and Git.
-2. Clone the repository.
-3. Configure `.env` with the node's public HTTPS URL.
-4. Start Docker Compose.
-5. Put Caddy, Nginx, Traefik, or Cloudflare Tunnel in front of port `8787`.
-6. Back up the Docker volume.
-
-A minimal Caddy configuration is:
+### Caddy
 
 ```caddyfile
-your-node.example {
+weave.example.org {
   reverse_proxy 127.0.0.1:8787
 }
 ```
 
-## Render
+Caddy obtains and renews certificates automatically when DNS points to the server and ports 80 and 443 are reachable.
 
-Create a new Web Service from the repository and configure:
+### Cloudflare Tunnel
 
-- Runtime: Docker
-- Dockerfile path: `Dockerfile.federated`
-- Persistent disk mount: `/app/data`
-- Health check path: `/api/federation/status`
-- Environment variable `PUBLIC_HOST_URL`: the final Render HTTPS URL
-- Environment variable `COMMONWEAVE_NODE_NAME`: the node's display name
-
-A persistent disk is required to preserve the signing identity through redeployments.
-
-## Railway, Fly.io, and similar container hosts
-
-Deploy using `Dockerfile.federated`, expose port `8787`, mount persistent storage at `/app/data`, and set `PUBLIC_HOST_URL` to the final HTTPS origin.
-
-The exact dashboard labels differ, but the four requirements are constant:
-
-1. build the federated Dockerfile;
-2. expose port `8787`;
-3. mount persistent storage at `/app/data`;
-4. set the public URL correctly.
-
-## Cloudflare Pages
-
-Cloudflare Pages can host the static PWA but cannot run this persistent Node federation server by itself.
-
-Use Pages for a public installer or release mirror, and run the federated node on a container host, home server, VPS, or a future Workers-compatible implementation.
-
----
-
-# Connect two nodes
-
-Assume these nodes are online:
-
-```text
-https://node-a.example
-https://node-b.example
-```
-
-From node A, discover node B:
-
-```bash
-curl -X POST https://node-a.example/api/federation/peers/connect \
-  -H 'content-type: application/json' \
-  -d '{"baseUrl":"https://node-b.example"}'
-```
-
-The response includes node B's node ID. Trust it on node A:
-
-```bash
-curl -X POST 'https://node-a.example/api/federation/peers/cw%3A.../trust'
-```
-
-Repeat the process from node B toward node A so trust is mutual.
-
-Publish a test event from node A:
-
-```bash
-curl -X POST https://node-a.example/api/federation/events \
-  -H 'content-type: application/json' \
-  -d '{
-    "kind":"commonweave.test",
-    "subject":"Hello from node A",
-    "payload":{"message":"The weave is connected."}
-  }'
-```
-
-Inspect node B:
-
-```bash
-curl https://node-b.example/api/federation/events
-```
-
-## Local test with two copies
-
-Run two repository copies or two Compose projects with different ports and data volumes. Each node must have a distinct `PUBLIC_HOST_URL` and persistent data directory.
-
-Example URLs:
+Use a tunnel when the host is behind carrier-grade NAT, a locked router, or a network where inbound ports cannot be opened. Point the tunnel service at:
 
 ```text
 http://localhost:8787
-http://localhost:8789
 ```
 
-Do not point two running nodes at the same `/app/data` directory.
+Set `PUBLIC_HOST_URL` to the HTTPS hostname assigned to the tunnel.
+
+### Nginx
+
+Proxy ordinary HTTP and upgrade connections to port 8787. Preserve the original host and forwarded protocol headers.
+
+## 5. Pair two nodes
+
+Federation trust is bilateral. Both operators perform these steps.
+
+Assume:
+
+```sh
+NODE_A=https://alpha.example
+TOKEN_A=alpha-secret
+NODE_B=https://beta.example
+TOKEN_B=beta-secret
+```
+
+Discover Node B from Node A:
+
+```sh
+curl -X POST "$NODE_A/api/federation/peers/connect" \
+  -H "Authorization: Bearer $TOKEN_A" \
+  -H 'Content-Type: application/json' \
+  -d "{\"baseUrl\":\"$NODE_B\"}"
+```
+
+Discover Node A from Node B:
+
+```sh
+curl -X POST "$NODE_B/api/federation/peers/connect" \
+  -H "Authorization: Bearer $TOKEN_B" \
+  -H 'Content-Type: application/json' \
+  -d "{\"baseUrl\":\"$NODE_A\"}"
+```
+
+Each response includes a node ID and signing-key fingerprint. Compare fingerprints through a separate trusted channel, then approve each peer:
+
+```sh
+curl -X POST "$NODE_A/api/federation/peers/<node-b-id>/trust" \
+  -H "Authorization: Bearer $TOKEN_A"
+
+curl -X POST "$NODE_B/api/federation/peers/<node-a-id>/trust" \
+  -H "Authorization: Bearer $TOKEN_B"
+```
+
+The nodes can now exchange signed events in both directions.
+
+## 6. Publish a test event
+
+```sh
+curl -X POST "$NODE_A/api/federation/events" \
+  -H "Authorization: Bearer $TOKEN_A" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "kind":"commonweave.hello",
+    "subject":"Hello from Alpha",
+    "visibility":"federated",
+    "payload":{"message":"The thread is connected."}
+  }'
+```
+
+Inspect Node B:
+
+```sh
+curl "$NODE_B/api/federation/events" \
+  -H "Authorization: Bearer $TOKEN_B"
+```
+
+A delivery result is successful only when the remote node acknowledges `accepted: true`. A pending peer is reported as a failed delivery until the receiving operator approves it.
 
 ---
 
-# Backups and updates
+# Platform notes
 
-Back up `/app/data` before host migrations or destructive upgrades. It contains the node's federation identity.
+## Raspberry Pi
 
-A safe update sequence is:
+Use a 64-bit Raspberry Pi OS release and a current Docker installation. The image is based on Node 22 Alpine and supports common 64-bit ARM hosts. Store Docker's data directory on reliable storage rather than a disposable SD-card partition when possible.
 
-1. back up the data volume;
-2. pull or deploy the new code;
-3. rebuild and restart the container;
-4. verify `/api/federation/status`;
-5. verify that the node ID has not changed;
-6. send a test event to one trusted peer.
+## NAS systems
+
+On Synology, QNAP, TrueNAS SCALE, Unraid, or similar systems, import the Compose file through the platform's container manager. Map port 8787 and preserve the named volume or bind-mount `/app/data` to a backed-up directory.
+
+## VPS and cloud virtual machines
+
+Open only the ports needed by the reverse proxy, usually 80 and 443. Keep port 8787 bound to localhost or blocked by the firewall when a reverse proxy sits in front of it.
+
+## Render and similar container hosts
+
+Deploy using `Dockerfile.federated`, set `PUBLIC_HOST_URL` to the final HTTPS service URL, configure `COMMONWEAVE_FEDERATION_ADMIN_TOKEN` as a secret, and attach persistent storage at `/app/data`.
+
+A host without persistent `/app/data` creates a new node identity after redeployment. That breaks existing key pins and requires every peer to verify and trust the replacement identity.
+
+## Termux on Android
+
+Termux is useful for development and LAN experiments, but Android background-process limits make it a fragile always-on public node. A small server, Raspberry Pi, NAS, or VPS is a better long-running home for federation.
+
+For local testing without Docker, use Node 22 or newer:
+
+```sh
+export PORT=8787
+export COMMONWEAVE_APP_PORT=8788
+export PUBLIC_HOST_URL=http://127.0.0.1:8787
+export COMMONWEAVE_FEDERATION_ADMIN_TOKEN="$(openssl rand -hex 32)"
+export DATA_DIR="$PWD/data"
+node server-federated-v152.mjs
+```
+
+---
+
+# Updates, backup, and recovery
+
+## Update
+
+```sh
+git pull
+docker compose --env-file .env.federated -f docker-compose.federated.yml up -d --build
+```
+
+The named volume survives container replacement.
+
+## Back up
+
+Back up all of `/app/data`. It contains:
+
+- the node ID and signing keys;
+- trusted, pending, and blocked peers;
+- retained federated events;
+- legacy host-node state.
+
+For a named Docker volume, stop the service before taking a consistent archive or use your host's volume-backup tooling.
+
+## Restore
+
+Restore the complete data directory before starting the replacement node. Keep the same `PUBLIC_HOST_URL` when possible. Restoring only the event state without the identity file creates an unusable mismatch.
+
+## Rotate a compromised administrator token
+
+Change `COMMONWEAVE_FEDERATION_ADMIN_TOKEN` in `.env.federated`, then recreate the container:
+
+```sh
+docker compose --env-file .env.federated -f docker-compose.federated.yml up -d --force-recreate
+```
+
+Administrator-token rotation does not change the node's signing identity.
+
+## Replace a compromised signing identity
+
+Federation v1 does not yet have an automated key-rotation document. A replacement identity must be treated as a new node:
+
+1. take the compromised node offline;
+2. preserve evidence needed for incident review;
+3. start with a fresh data directory;
+4. tell every peer operator the old node ID is retired;
+5. compare the new fingerprint out of band;
+6. remove the old peer and add the new node deliberately.
+
+---
 
 # Troubleshooting
 
-## The app works but federation does not
+## `503 Federation administration is disabled`
 
-Check that `PUBLIC_HOST_URL` is the URL another node can actually reach. `localhost` is only valid for same-machine testing.
+Set `COMMONWEAVE_FEDERATION_ADMIN_TOKEN` and restart the node. The public health and discovery routes remain available while administration is locked.
 
-## A peer remains pending
+## `401 Federation administrator authorization required`
 
-This is expected. Approve it with the `/trust` endpoint. Automatic trust is intentionally disabled by default.
+Send the configured token in `Authorization: Bearer ...` or `X-Commonweave-Admin-Token`.
 
-## Events return `pendingApproval`
+## Peer remains pending
 
-The receiving node has discovered the sender but has not trusted it. Approve the sender on the receiving node and send the event again.
+The receiving node's operator has not approved the sender. Both nodes must discover and trust each other for two-way exchange.
 
-## The node ID changed
+## Signing key changed
 
-The `/app/data` directory was replaced, deleted, or not mounted persistently. Restore the previous data backup to recover the original identity.
+Do not trust the replacement automatically. Confirm whether the peer intentionally rebuilt or migrated without its data volume. Compare the new fingerprint through another channel, remove the old peer, and add the replacement only after verification.
 
-## Internet peers cannot reach the node
+## Delivery reports remote approval missing
 
-Confirm DNS, HTTPS, firewall, router, reverse proxy, and container port settings. Test `/.well-known/commonweave` from a device outside the local network.
+The remote inbox returned `pendingApproval`. Ask that node's operator to inspect and trust your node ID and fingerprint.
+
+## Node identity changes after restart
+
+The data volume is not persistent or is mounted at the wrong path. Confirm `/app/data` is backed by the intended named volume or host directory.
+
+## Container is healthy but the app surface returns 502
+
+Inspect container logs. The federation gateway is running, but the internal Commonweave application process failed or has not started.
+
+## Discovery works locally but not from another node
+
+Check DNS, HTTPS, firewall rules, reverse-proxy routing, and `PUBLIC_HOST_URL`. Discovery redirects are rejected, so the exact origin must directly serve `/.well-known/commonweave`.
+
+---
+
+# Preflight checklist
+
+- `PUBLIC_HOST_URL` is the exact reachable HTTPS origin.
+- A long federation administrator token is configured as a secret.
+- Unauthenticated administration is disabled.
+- `/app/data` is persistent and backed up.
+- `/.well-known/commonweave` is publicly reachable.
+- `/api/federation/health` reports `ok: true`.
+- Administrator status requires the token.
+- Peer fingerprints were compared outside the federation channel.
+- Both nodes approved each other.
+- A signed test event arrived at the remote node.
