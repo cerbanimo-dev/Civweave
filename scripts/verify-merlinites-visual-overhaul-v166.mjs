@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import vm from 'node:vm';
 
 const root = process.cwd();
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
@@ -49,6 +50,14 @@ for (const token of [
 
 assert(shellFix.includes('grid-template-columns:36px minmax(0,1fr) auto 36px 38px'), 'Top rail does not reserve separate Weaveling and settings controls.');
 assert(shellFix.includes('.cwf104-chat'), 'Top-rail Weaveling styling is missing.');
+assert(shellFix.includes('#gc153-launcher') && shellFix.includes('[data-weaveling-launcher]'), 'Legacy bottom Weaveling launchers are not hidden.');
+assert(shellFix.includes('aspect-ratio:auto!important') && shellFix.includes('.ffc144-rook-form button'), 'Rook send control can still expand into the mobile workbench.');
+assert(shellFix.includes('.ls-room{position:relative!important') && shellFix.includes('.ls-recovery'), 'Living School lacks its visible mobile stage or startup recovery treatment.');
+assert(shell.includes('removeLegacyLaunchers') && shell.includes('restoreChatControl'), 'Family shell does not remove legacy launchers and restore the icon-only chat control.');
+assert(!shell.includes("button.textContent='Talk to Commonweave'"), 'Family shell still replaces the chat icon with collision-prone text.');
+assert(shell.includes('async function ensureSettings()') && shell.includes('SETTINGS_SCRIPTS'), 'Settings do not use the bounded settings-only loader.');
+assert(shell.includes('CommonweaveCodeRailsV169') && shell.includes('canGenerate:false'), 'Local code rails capability boundary is missing.');
+assert(shell.includes('machine-readable test') && shell.includes('imported LLM'), 'Local validation and imported-generation boundaries are not explained.');
 
 for (const file of [
   'public/app/realm-console-v140.html',
@@ -60,6 +69,29 @@ for (const file of [
   assert(html.includes('/app/family-shell-v104.css?v=merlinites-r1'), `${file} is not cache-busting the merlinites shell CSS.`);
   assert(html.includes('/app/family-shell-v104.js?v=merlinites-r1'), `${file} is not cache-busting the merlinites shell JS.`);
 }
+
+const sandbox={
+  console,
+  URLSearchParams,
+  TextEncoder,
+  location:{search:'?system=cerbanimo',pathname:'/app/realm-console-v140.html',assign(){}},
+  localStorage:{getItem(){return null},setItem(){}},
+  document:{readyState:'loading'},
+  addEventListener(){},
+  setInterval(){},
+  globalThis:null
+};
+sandbox.globalThis=sandbox;
+vm.createContext(sandbox);
+vm.runInContext(shell,sandbox);
+const validator=sandbox.CommonweaveCodeRailsV169;
+assert(validator?.canGenerate===false, 'The onboard code rails runtime claims generation authority.');
+const descriptive=validator.validate({code:'const garden = true;',language:'javascript',criteria:['The garden feature works.']});
+assert(descriptive.status==='review'&&!descriptive.verified, 'Descriptive rails were incorrectly treated as deterministic proof.');
+const deterministic=validator.validate({code:'const garden = true;',language:'javascript',criteria:[{label:'Declare garden',type:'required-pattern',pattern:'const\\s+garden'}]});
+assert(deterministic.status==='pass'&&deterministic.verified, 'Machine-readable rails do not produce a deterministic pass.');
+const unsafe=validator.validate({code:'eval("garden")',language:'javascript',criteria:[{label:'Small source',type:'max-bytes',maxBytes:200}]});
+assert(unsafe.status==='fail'&&!unsafe.verified, 'Forbidden dynamic code was not rejected.');
 
 const oldName = ['S','ol'].join('');
 const oldSlug = oldName.toLowerCase();
@@ -99,4 +131,4 @@ function inspectTree(relative){
 for(const directory of textRoots)inspectTree(directory);
 assert(violations.length===0,`Retired subsystem name remains:\n${violations.slice(0,30).join('\n')}`);
 
-console.log('merlinites visual overhaul v166 verified.');
+console.log('merlinites visual overhaul v166 verified with mobile recovery and local code rails boundaries.');
