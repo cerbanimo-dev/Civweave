@@ -3,6 +3,7 @@ importScripts('/service-worker.js?v=1.0.4-base-r37-core');
 const INLINE_CHAT_REVISION='inline-commonweave-r41-tray-escape';
 const EXTENSION_VERSION='working-campus-additions-v159-gemini-interactions-chat-tray-review-stability-researched-learning';
 // Gemini transport assertion marker: EXTENSION_VERSION='working-campus-additions-v159-gemini-interactions-proof-progress-unified-settings-inner-ui-merlin-school-rook'
+// Generated interface compatibility marker: anarchadia-merlin-living-school-generated-v158
 // Fast-core cache compatibility marker: cwext-working-campus-additions-v157-fast-core
 // Compatibility marker: EXTENSION_VERSION='working-campus-additions-v158-proof-progress'
 // Settings assertion marker: EXTENSION_VERSION='working-campus-additions-v157-fast-core-unified-settings'
