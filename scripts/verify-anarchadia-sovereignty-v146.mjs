@@ -4,7 +4,7 @@ const root=process.cwd(),read=relative=>fs.readFile(path.join(root,relative),'ut
 const required={kernel:'public/app/anarchadia-sovereignty-kernel-v146.js',runtime:'public/app/anarchadia-local-sovereignty-v146.js',html:'public/app/anarchadia-sovereignty-v146.html',css:'public/app/anarchadia-sovereignty-v146.css',app:'public/app/anarchadia-sovereignty-v146.js',bridge:'public/app/anarchadia-sovereignty-bridge-v146.js',executor:'scripts/anarchadia-local-fork-executor-v146.mjs',tests:'scripts/test-anarchadia-sovereignty-v146.mjs',worker:'public/service-worker.js',pkg:'package.json'};
 const files=Object.fromEntries(await Promise.all(Object.entries(required).map(async([key,file])=>[key,await read(file)])));
 function expect(condition,message){if(!condition)throw new Error(message)}
-expect(files.kernel.includes("BREAK_GLASS_PHRASE='FORK MY LOCAL COMMONWEAVE'"),'Kernel must require the explicit local-fork phrase.');
+expect(files.kernel.includes("BREAK_GLASS_PHRASE='FORK MY LOCAL COMMONWEAVE'"),'Kernel must require explicit local-fork phrase.');
 expect(files.kernel.includes("status:'diverged'")&&files.kernel.includes("networkMode:'quarantine'"),'Kernel must model divergence and quarantine.');
 for(const target of ['commonweave','living-school','cerbanimo','fellowfare','anarchadia'])expect(files.kernel.includes(`'${target}'`),`Missing target ${target}.`);
 for(const operation of ['css-variable','custom-css','hide','text','attribute','asset-swap','setting'])expect(files.kernel.includes(`'${operation}'`),`Missing operation ${operation}.`);
@@ -19,6 +19,8 @@ expect(files.executor.includes("run('git',['switch',fork.targetBranch]")&&files.
 expect(!/git[^\n]+push/.test(files.executor),'Executor must never run git push.');
 expect(files.executor.includes('--allow-failing-checks')&&files.executor.includes('--confirm-fork'),'Executor must require explicit escalation for failing divergent forks.');
 for(const asset of Object.values(required).filter(file=>file.startsWith('public/app/anarchadia-')))expect(files.worker.includes(`/${asset.replace(/^public\//,'')}`),`Device package is missing ${asset}.`);
-expect(files.worker.includes('injectSovereignty')&&files.worker.includes('/app/anarchadia-local-sovereignty-v146.js')&&files.worker.includes('/app/anarchadia-sovereignty-bridge-v146.js'),'Service worker must inject the sovereignty runtime and Anarchadia bridge into navigations.');
-const pkg=JSON.parse(files.pkg);expect(pkg.scripts['anarchadia:fork']==='node scripts/anarchadia-local-fork-executor-v146.mjs','Package must expose the local fork executor.');expect(pkg.scripts['test:anarchadia-sovereignty']==='node --test scripts/test-anarchadia-sovereignty-v146.mjs','Package must expose sovereignty tests.');expect(pkg.scripts.check.includes('verify-anarchadia-sovereignty-v146.mjs')&&pkg.scripts.check.includes('test:anarchadia-sovereignty'),'Normal checks must cover local sovereignty.');
-console.log('Anarchadia local sovereignty v146 verification passed.');
+expect(files.worker.includes('/app/anarchadia-local-sovereignty-v146.js')&&files.worker.includes('/app/anarchadia-sovereignty-bridge-v146.js'),'Service worker must package sovereignty runtime and bridge.');
+expect(files.worker.includes("pathname.includes('anarchadia')&&!text.includes('/app/anarchadia-local-sovereignty-v146.js')"),'Sovereignty runtime must be injected only into Anarchadia navigations.');
+expect(!files.worker.includes('function injectSovereignty'),'Worker still carries the old global sovereignty injector.');
+const pkg=JSON.parse(files.pkg);expect(pkg.scripts['anarchadia:fork']==='node scripts/anarchadia-local-fork-executor-v146.mjs','Package must expose local fork executor.');expect(pkg.scripts['test:anarchadia-sovereignty']==='node --test scripts/test-anarchadia-sovereignty-v146.mjs','Package must expose sovereignty tests.');expect(pkg.scripts.check.includes('verify-anarchadia-sovereignty-v146.mjs')&&pkg.scripts.check.includes('test:anarchadia-sovereignty'),'Normal checks must cover local sovereignty.');
+console.log('Anarchadia local sovereignty v146 verification passed with Anarchadia-only injection.');
