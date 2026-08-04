@@ -2,7 +2,7 @@ name: Verify working-campus additions v156
 
 on:
   push:
-    branches: ["agent/fix-installer-fast-core-package"]
+    branches: ["agent/proof-driven-readonly-checkpoints"]
   pull_request:
 
 jobs:
@@ -32,12 +32,16 @@ jobs:
           node --check public/extensions/commonweave-mesh-tools-v156.js
           node --check public/extensions/commonweave-additions-v156.js
           node --check public/extensions/commonweave-model-download-v157.js
+          node --check public/extensions/commonweave-proof-progress-v158.js
           node --check scripts/verify-working-campus-additions-v156.mjs
           node --check scripts/test-tiered-cerbanimo-rewards-v157.mjs
+          node --check scripts/test-proof-driven-checkpoints-v158.mjs
       - name: Verify additive integration
         run: node scripts/verify-working-campus-additions-v156.mjs
       - name: Test tiered Cerbanimo rewards
         run: node scripts/test-tiered-cerbanimo-rewards-v157.mjs
+      - name: Test proof-driven checkpoints
+        run: node scripts/test-proof-driven-checkpoints-v158.mjs
       - name: Materialize local semantic package
         run: |
           for attempt in 1 2 3 4 5; do

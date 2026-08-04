@@ -5,6 +5,8 @@ const DEV_KEY='commonweave.install-boundary.developer.v146';
 const ADDITIONS_SCRIPT='/extensions/commonweave-additions-v156.js';
 const ADDITIONS_STYLE='/extensions/commonweave-additions-v156.css';
 const MODEL_DOWNLOAD_SCRIPT='/extensions/commonweave-model-download-v157.js';
+const PROOF_PROGRESS_SCRIPT='/extensions/commonweave-proof-progress-v158.js';
+const PREVIOUS_ADDITIONS_VERSION='v157-fast-core';
 const params=new URLSearchParams(location.search);
 function installedDisplay(){
   return navigator.standalone===true
@@ -27,13 +29,14 @@ function installerUrl(){
   next.searchParams.set('next',target.slice(0,1800));
   return next.href;
 }
-function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=fast-core-r37`;script.defer=true;document.head.append(script)}
+function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=proof-progress-v158`;script.defer=true;document.head.append(script)}
 function installAdditions(){
   if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
-    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=fast-core-r37`;document.head.append(link);
+    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=proof-progress-v158`;document.head.append(link);
   }
   addScript(ADDITIONS_SCRIPT);
   addScript(MODEL_DOWNLOAD_SCRIPT);
+  addScript(PROOF_PROGRESS_SCRIPT);
 }
 if(!allowed()){
   document.documentElement.dataset.installBoundary='blocked';
@@ -42,5 +45,5 @@ if(!allowed()){
   document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
   installAdditions();
 }
-globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v157-fast-core'};
+globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v158-proof-progress',previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION};
 })();
