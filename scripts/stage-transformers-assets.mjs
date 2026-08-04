@@ -36,7 +36,7 @@ async function main(){
     return;
   }
   if(renderBuild&&!force){
-    console.log('[Commonweave] Render gateway build: using committed Transformers.js assets.');
+    console.log('[Commonweave] Render gateway build: skipping device-side Transformers.js staging; using committed Transformers.js assets.');
     return;
   }
   if(!await exists(source)){
