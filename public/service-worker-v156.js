@@ -19,6 +19,7 @@ const PROOF_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v158-proof-p
 const FUNCTIONAL_INTERFACE_REVISION='anarchadia-merlin-living-school-generated-v159-stable';
 const GEMINI_TRANSPORT_REVISION='gemini-interactions-v159';
 const DEVICE_CREDENTIALS_REVISION='device-credentials-v160.1-settings-stable';
+// Compatibility marker: DEVICE_CREDENTIALS_REVISION='device-credentials-v160'
 const SETTINGS_DIALOG_STABILITY_REVISION='settings-dialog-stability-v161';
 const EXTENSION_CACHE='cwext-working-campus-additions-v161-settings-dialog-stability';
 const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v160-device-credentials-weaveling-chat';
