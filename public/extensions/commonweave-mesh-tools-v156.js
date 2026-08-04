@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-v156';
+const VERSION='1.0.4-v156-post-pr56';
 const CONFIG_KEY='commonweave.mesh-node.v156';
 const PAIRING_KEY='commonweave.friend-pairings.v156';
 const PENDING_KEY='commonweave.friend-pairings.pending.v156';
@@ -51,5 +51,5 @@ async function bindIncoming(){const mesh=await ensureMesh();mesh.subscribe(async
 function renderInvite(canvas,code){if(!globalThis.CommonweaveQRV156)throw new Error('The local QR renderer has not loaded.');return globalThis.CommonweaveQRV156.canvas(canvas,code,{scale:5,margin:4})}
 async function scanInvite(video){if(!('BarcodeDetector'in globalThis))throw new Error('This browser cannot scan QR codes. Paste the friend invitation instead.');const detector=new BarcodeDetector({formats:['qr_code']}),stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});video.srcObject=stream;await video.play();return new Promise((resolve,reject)=>{const stop=value=>{stream.getTracks().forEach(track=>track.stop());value instanceof Error?reject(value):resolve(value)},deadline=Date.now()+30000;const tick=async()=>{try{const results=await detector.detect(video);if(results[0]?.rawValue)return stop(results[0].rawValue);if(Date.now()>deadline)return stop(new Error('No QR code was detected.'));requestAnimationFrame(tick)}catch(error){stop(error)}};tick()})}
 bindIncoming().catch(()=>{});addEventListener('focus',()=>{finishAll().catch(()=>{});syncNode().catch(()=>{})});addEventListener('online',()=>syncNode().catch(()=>{}));setInterval(()=>{if(!document.hidden)syncNode().catch(()=>{})},60000);
-globalThis.CommonweaveMeshToolsV156=Object.freeze({VERSION,configure,config,createInvite,acceptInvite,finishInvite,finishAll,parseInvite,friends,pairings,publishTrade,requestValidation,publishValidation,publishObject,renderInvite,scanInvite,envelopes,syncNode,bindIncoming});
+globalThis.CommonweaveMeshToolsV156=Object.freeze({VERSION,configure,config,ensureMesh,createInvite,acceptInvite,finishInvite,finishAll,parseInvite,friends,pairings,publishTrade,requestValidation,publishValidation,publishObject,renderInvite,scanInvite,envelopes,syncNode,bindIncoming});
 })();
