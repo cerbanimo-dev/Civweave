@@ -30,7 +30,9 @@ jobs:
           node --check public/app/anarchadia-console-v158.js
           node --check public/app/anarchadia-runtime-stability-v159.js
           node --check public/app/cerbanimo-ai-validator-v159.js
+          node --check public/app/intention-planner-v141.js
           node --check public/app/cabinets/living-school/living-school-workbench-v158.js
+          node --check public/app/cabinets/living-school/living-school-research-v162.js
           node --check public/app/cabinets/living-school/living-school-runtime-stability-v159.js
           node --check public/extensions/commonweave-secure-vault-v156.js
           node --check public/extensions/commonweave-domain-bridge-v156.js
@@ -44,6 +46,7 @@ jobs:
           node --check scripts/verify-working-campus-additions-v156.mjs
           node --check scripts/verify-unified-ai-settings-v157.mjs
           node --check scripts/verify-settings-dialog-stability-v161.mjs
+          node --check scripts/verify-intention-and-research-v162.mjs
           node --check scripts/verify-five-system-inner-ui-v157.mjs
           node --check scripts/verify-runtime-stability-v159.mjs
           node --check scripts/verify-living-school-cabinet-v151.mjs
@@ -57,6 +60,8 @@ jobs:
         run: node scripts/verify-unified-ai-settings-v157.mjs
       - name: Verify settings dialog stability
         run: node scripts/verify-settings-dialog-stability-v161.mjs
+      - name: Verify latest intention and Living School research
+        run: node scripts/verify-intention-and-research-v162.mjs
       - name: Verify internal system interfaces
         run: node scripts/verify-five-system-inner-ui-v157.mjs
       - name: Verify interaction and review stability
