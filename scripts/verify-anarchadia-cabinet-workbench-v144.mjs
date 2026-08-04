@@ -4,7 +4,7 @@ import process from 'node:process';
 const root=process.cwd();
 const read=file=>fs.readFile(path.join(root,file),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-const [html,css,runtime,loader,consoleHtml,worker,pkgRaw,sourceApp]=await Promise.all([
+const [html,css,runtime,loader,consoleHtml,worker,pkgRaw,sourceApp,family]=await Promise.all([
   read('public/app/services/anarchadia/workbench.html'),
   read('public/app/services/anarchadia/cabinet-workbench-v144.css'),
   read('public/app/anarchadia-cabinet-workbench-v144.js'),
@@ -12,7 +12,8 @@ const [html,css,runtime,loader,consoleHtml,worker,pkgRaw,sourceApp]=await Promis
   read('public/app/anarchadia-console-v139.html'),
   read('public/service-worker.js'),
   read('package.json'),
-  read('public/app/services/anarchadia/src/app.js')
+  read('public/app/services/anarchadia/src/app.js'),
+  read('public/app/family-shell-v104.js')
 ]);
 const pkg=JSON.parse(pkgRaw),deviceRevision=worker.match(/const DEVICE_REVISION='([^']+)'/)?.[1]||'';
 for(const token of ['src/domain.js','src/store.js','cabinet-workbench-loader-v144.js','commonweave-handoff-consumer.js','commonweave-presence.js','Citizen Console'])assert(html.includes(token),`Workbench entry is missing ${token}`);
@@ -27,10 +28,12 @@ for(const specifier of ['domain.js','store.js','ai.js','export.js'])assert(loade
 for(const label of ['Charter editor','Proposal deliberation','Rights & safeguards','Exchange, restore & fork','Constitutional AI','Readiness & emergency brake'])assert(runtime.includes(label),`Cabinet feature menu is missing ${label}`);
 assert(runtime.includes("[data-action=\"vote-hub\"]")&&runtime.includes("open('proposals')"),'Vote controls do not enter the real proposal workbench.');
 assert(consoleHtml.includes('anarchadia-cabinet-workbench-v144.js'),'Citizen Console does not load the workbench bridge.');
-for(const asset of ['workbench.html','cabinet-workbench-v144.css','cabinet-workbench-loader-v144.js','anarchadia-cabinet-workbench-v144.js','services/anarchadia/src/app.js','services/anarchadia/src/domain.js','services/anarchadia/src/store.js','services/anarchadia/src/export.js','services/anarchadia/src/ai.js','services/anarchadia/styles.css','logos/anarchadia.webp','anarchadia-governance-kernel-v145.js','anarchadia-sovereignty-kernel-v146.js','install-boundary-v146.js','local-object-mesh-v146.js'])assert(worker.includes(asset),`Device package omits ${asset}`);
-assert(!worker.includes('/app/services/anarchadia/assets/screens/home-portrait.webp'),'Cabinet device package must not revive archived Anarchadia location scenes.');
+for(const asset of ['workbench.html','cabinet-workbench-v144.css','cabinet-workbench-loader-v144.js','anarchadia-cabinet-workbench-v144.js','services/anarchadia/src/app.js','services/anarchadia/src/domain.js','services/anarchadia/src/store.js','services/anarchadia/src/export.js','services/anarchadia/src/ai.js','services/anarchadia/styles.css','anarchadia-governance-kernel-v145.js','anarchadia-sovereignty-kernel-v146.js','install-boundary-v146.js','local-object-mesh-v146.js'])assert(worker.includes(asset),`Device package omits ${asset}`);
+assert(!worker.includes('logos/anarchadia.webp'),'Unused Anarchadia marketing logo remains in the lean installed package.');
+assert(!worker.includes('/app/services/anarchadia/assets/screens/home-portrait.webp'),'Device package must not revive archived Anarchadia location scenes.');
 assert(/^device-package-r\d+(?:-[a-z0-9-]+)?$/i.test(deviceRevision),'Device package does not expose a versioned revision.');
-assert(worker.includes("INSTALL_REVISION='install-only-r26'")&&worker.includes('anarchadia-sovereignty-kernel-v146.js'),'Local sovereignty and install-only package contracts are not active together.');
-assert(pkg.scripts['check:syntax'].includes('anarchadia-cabinet-workbench-v144.js')&&pkg.scripts['check:syntax'].includes('cabinet-workbench-loader-v144.js'),'Syntax suite omits a Cabinet Mode workbench runtime.');
-assert(pkg.scripts.check.includes('verify-anarchadia-cabinet-workbench-v144.mjs'),'Main check suite omits the Anarchadia cabinet workbench verifier.');
-console.log(JSON.stringify({ok:true,cabinet:'anarchadia',surfaces:['citizen-console','governance-workbench','local-sovereignty'],classicRoutes:8,devicePackage:deviceRevision,serviceWorkerAuthority:'root-only',sourceBoundary:'cabinet-only compatibility loader',archivedSceneRequests:false},null,2));
+assert(worker.includes("INSTALL_REVISION='fullscreen-entry-r34'")&&worker.includes('anarchadia-sovereignty-kernel-v146.js'),'Local sovereignty and full-screen install package contracts are not active together.');
+assert(family.includes("anarchadia:{label:'Anarchadia',guide:'Merlin'")&&family.includes('CommonweaveGuideChatV153'),'Anarchadia is not connected to Merlin’s live family chat.');
+assert(pkg.scripts['check:syntax'].includes('anarchadia-cabinet-workbench-v144.js')&&pkg.scripts['check:syntax'].includes('cabinet-workbench-loader-v144.js'),'Syntax suite omits the Anarchadia software workbench runtime.');
+assert(pkg.scripts.check.includes('verify-anarchadia-cabinet-workbench-v144.mjs'),'Main check suite omits the Anarchadia workbench verifier.');
+console.log(JSON.stringify({ok:true,software:'anarchadia',surfaces:['citizen-console','governance-workbench','local-sovereignty'],classicRoutes:8,devicePackage:deviceRevision,serviceWorkerAuthority:'root-only',sourceBoundary:'software compatibility loader',archivedSceneRequests:false,unusedLogoInstalled:false,liveGuide:'Merlin'},null,2));
