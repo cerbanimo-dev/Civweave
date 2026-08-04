@@ -6,7 +6,7 @@ const sourceParts=rest.slice(0,parts.length),[shell,styles,loader,entry,manifest
 assert(host.includes('location.replace')&&!host.includes('<iframe'),'Compatibility host must remain iframe-free and retain direct fallback navigation.');
 for(const route of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html?system=cerbanimo','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(host.includes(route),`Compatibility host missing ${route}`);
 for(const token of ['Commonweave Working Campus','What is your wish?','Build reviewable weave','Activate weave','Google Gemini','gemini-3.5-flash-lite','https://generativelanguage.googleapis.com/v1beta','Test Gemini','Test Antigravity','agenticEnabled','commonweave-model-profiles-v1','working-campus-antigravity-test'])assert(campus.includes(token),`Working Campus missing ${token}`);
-assert(campusLoader.includes("source.join('')")&&sourceParts.length===5,'Working Campus loader does not assemble the cached source parts.');
+assert(campusLoader.includes("source.join('')")&&campusLoader.includes("cache:'force-cache'")&&sourceParts.length===5,'Working Campus loader does not assemble cached source parts.');
 new vm.Script(campusSource,{filename:'working-campus-v156.js'});new vm.Script(campusLoader,{filename:'working-campus-v156-loader.js'});
 for(const token of ["document.documentElement.dataset.familyShell='direct'",'commonweave.family-status.v105','badge.hidden=value.count<1'])assert(shell.includes(token),`Family shell missing ${token}`);
 assert(!shell.includes('MutationObserver')&&!shell.includes('contentDocument'),'Family shell reintroduced deep observation.');
@@ -15,6 +15,7 @@ const manifest=JSON.parse(manifestRaw);assert(manifest.start_url.includes('syste
 for(const [name,page] of [['realm',realm],['living-school',living],['fellowfare',fellowfare],['anarchadia',anarchadia]])assert(page.includes('/app/family-shell-v104.js')&&page.includes('/app/family-ai-loader-v105.js'),`${name} lost family chrome`);
 assert(marketingCabinet.includes('cv141-art'),'Marketing cabinet renderer was removed.');
 for(const asset of ['/app/working-campus-v156.html','/app/working-campus-v156.css','/app/working-campus-v156.js',...parts.map(file=>'/app/'+path.basename(file))])assert(worker.includes(asset),`Rotated device package missing ${asset}`);
-assert(worker.includes("GUIDE_REVISION='lazy-five-system-chat-r36-stable'"),'Repaired guide cache revision is missing.');
+assert(worker.includes("GUIDE_REVISION='lazy-five-system-chat-r37'"),'Progressive guide cache revision is missing.');
+assert(worker.includes("CACHE_REVISION='instant-shell-r37'")&&worker.includes('cacheBatch(cache,DEVICE_REQUIRED,6)'),'Instant shell cache contract is missing.');
 new Function(shell);new Function(loader);new Function(entry);
-console.log(JSON.stringify({ok:true,mode:'working campus + direct realm software',campusSource:'ordinary cached files',geminiPrefill:true,geminiTest:true,antigravityTest:true,guideLoader:'stale-safe',blockingFamilyIframe:false},null,2));
+console.log(JSON.stringify({ok:true,mode:'working campus + direct realm software',campusSource:'ordinary cached files',campusBoot:'cache-first',geminiPrefill:true,geminiTest:true,antigravityTest:true,guideLoader:'stale-safe',blockingFamilyIframe:false},null,2));
