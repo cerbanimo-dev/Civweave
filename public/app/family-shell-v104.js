@@ -23,39 +23,45 @@ function status(system){
 }
 function openSettings(){globalThis.CommonweaveModelSettingsV133?.open?.()}
 function openChat(system){globalThis.CommonweaveGuideChatV153?.open?.(system)}
-function route(system,{replace=false}={}){if(!SYSTEMS[system])return;const url=SYSTEMS[system].url;location[replace?'replace':'assign'](url)}
+function route(system,{replace=false}={}){if(!SYSTEMS[system])return;location[replace?'replace':'assign'](SYSTEMS[system].url)}
+function isSettingsControl(target){
+  const explicit=target.closest?.('[data-action="settings"],#lite-settings,[data-model-settings],[data-ai-settings],[data-capability="commonweave.model-setup"]');
+  if(explicit)return true;
+  const control=target.closest?.('button,a,[role="button"]');
+  return Boolean(control&&/\b(ai settings|model setup|configure ai|configure model|choose the compass mind)\b/i.test(control.textContent||control.getAttribute('aria-label')||''));
+}
 function childStyle(doc,current){
+  if(doc.querySelector('style[data-cwf104-child]'))return;
   const style=doc.createElement('style');style.dataset.cwf104Child='true';style.textContent=`
   html,body{min-height:100%!important}body{padding-bottom:0!important}.gc153-launcher,.cw127-topbar,.cw127-nav{display:none!important}.cw127-app,.ls-app,.rc-app,.ffc144-app,.ac-shell{min-height:100dvh!important;padding-top:0!important;padding-bottom:0!important}.rc-bottom,.ls-tray{bottom:0!important}
   `;doc.head.append(style);doc.documentElement.dataset.fullscreenCabinet=current;
 }
+function bindDocument(doc,current){
+  if(!doc||doc.documentElement.dataset.cwf104Bound==='true')return;
+  doc.documentElement.dataset.cwf104Bound='true';childStyle(doc,current);
+  doc.addEventListener('click',event=>{
+    const target=event.target;
+    const chat=target.closest?.('[data-action="chat"],#moss,.ch142-guide,[data-guide-chat]');
+    if(chat){event.preventDefault();event.stopImmediatePropagation();openChat(current);return}
+    if(isSettingsControl(target)){event.preventDefault();event.stopImmediatePropagation();openSettings();return}
+    const realm=target.closest?.('[data-realm]')?.dataset.realm;
+    if(SYSTEMS[realm]){event.preventDefault();event.stopImmediatePropagation();route(realm)}
+  },true);
+  const bindFrames=()=>doc.querySelectorAll('iframe').forEach(nested=>{const bind=()=>{try{bindDocument(nested.contentDocument,current)}catch{}};nested.addEventListener('load',bind);bind()});
+  bindFrames();new MutationObserver(bindFrames).observe(doc.documentElement,{childList:true,subtree:true});
+}
 function hookChild(frame,current){
-  try{
-    const doc=frame.contentDocument;if(!doc)return;
-    childStyle(doc,current);
-    doc.addEventListener('click',event=>{
-      const chat=event.target.closest?.('[data-action="chat"],#moss,.ch142-guide,[data-guide-chat]');
-      if(chat){event.preventDefault();event.stopImmediatePropagation();openChat(current);return}
-      const settings=event.target.closest?.('[data-action="settings"],#lite-settings,[data-model-settings]');
-      if(settings){event.preventDefault();event.stopImmediatePropagation();openSettings();return}
-      const realm=event.target.closest?.('[data-realm]')?.dataset.realm;
-      if(SYSTEMS[realm]){event.preventDefault();event.stopImmediatePropagation();route(realm)}
-    },true);
-    frame.classList.add('is-ready');
-    frame.title=`${SYSTEMS[current].label} cabinet software`;
-  }catch(error){console.warn('[Commonweave family] Could not bind child software',error)}
+  try{bindDocument(frame.contentDocument,current);frame.classList.add('is-ready');frame.title=`${SYSTEMS[current].label} cabinet software`}catch(error){console.warn('[Commonweave family] Could not bind child software',error)}
 }
 function mountFrame(current){const frame=document.getElementById('cwf104-frame');if(!frame)return;frame.addEventListener('load',()=>hookChild(frame,current));frame.src=SYSTEMS[current].site}
 function build(){
-  const current=detect(),item=SYSTEMS[current];
-  document.documentElement.classList.add('cwf104-active');document.documentElement.dataset.commonweaveSystem=current;
+  const current=detect(),item=SYSTEMS[current];document.documentElement.classList.add('cwf104-active');document.documentElement.dataset.commonweaveSystem=current;
   let head=document.getElementById('cwf104-head');if(!head){head=document.createElement('header');head.id='cwf104-head';head.className='cwf104-head';document.body.append(head)}
   head.innerHTML=`<div class="cwf104-title"><small>CABINET MODE · <span class="cwf104-version">v${VERSION}</span></small><b>${esc(item.label)}</b></div><div class="cwf104-head-state"><i class="cwf104-dot"></i><span data-cwf-current-state>Ready</span></div><button type="button" data-cwf-chat>Talk to ${esc(item.guide)}</button><button type="button" data-cwf-settings>AI settings</button>`;
   head.querySelector('[data-cwf-chat]').onclick=()=>openChat(current);head.querySelector('[data-cwf-settings]').onclick=openSettings;
   let tray=document.getElementById('cwf104-tray');if(!tray){tray=document.createElement('nav');tray.id='cwf104-tray';tray.className='cwf104-tray';tray.setAttribute('aria-label','Travel between Commonweave systems');document.body.append(tray)}
   tray.innerHTML=Object.entries(SYSTEMS).filter(([id])=>id!==current).map(([id,system])=>`<a class="cwf104-system" data-cwf-system="${id}" href="${system.url}"><b class="cwf104-badge" data-cwf-badge hidden>0</b><span class="cwf104-system-label">${esc(system.label)}</span><span class="cwf104-system-meta"><i class="cwf104-dot"></i><span data-cwf-state>Ready</span></span></a>`).join('');
-  tray.addEventListener('click',event=>{const target=event.target.closest('[data-cwf-system]');if(!target)return;event.preventDefault();route(target.dataset.cwfSystem)});
-  mountFrame(current);refresh();
+  tray.addEventListener('click',event=>{const target=event.target.closest('[data-cwf-system]');if(!target)return;event.preventDefault();route(target.dataset.cwfSystem)});mountFrame(current);refresh();
 }
 function refresh(){const current=detect(),currentState=status(current),head=document.getElementById('cwf104-head');if(head){head.classList.remove('is-ready','is-attention','is-active');head.classList.add(`is-${currentState.state}`);const label=head.querySelector('[data-cwf-current-state]');if(label)label.textContent=currentState.label}document.querySelectorAll('[data-cwf-system]').forEach(node=>{const value=status(node.dataset.cwfSystem);node.classList.remove('is-ready','is-attention','is-active');node.classList.add(`is-${value.state}`);const label=node.querySelector('[data-cwf-state]');if(label)label.textContent=value.label;const badge=node.querySelector('[data-cwf-badge]');if(badge){badge.textContent=String(value.count);badge.hidden=!value.count}})}
 function boot(){build();setInterval(refresh,2500);addEventListener('storage',refresh);addEventListener('commonweave:intentions-changed',refresh)}
