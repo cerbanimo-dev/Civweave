@@ -2,7 +2,7 @@ name: Verify working-campus additions v156
 
 on:
   push:
-    branches: ["agent/dark-mode-review-hud-rook-learning"]
+    branches: ["agent/fix-commonweave-hud-freeze-current"]
   pull_request:
 
 jobs:
@@ -54,6 +54,7 @@ jobs:
           node --check scripts/verify-runtime-stability-v159.mjs
           node --check scripts/verify-platform-flow-v160.mjs
           node --check scripts/test-platform-flow-v160.mjs
+          node --check scripts/verify-platform-hud-stability-v163.mjs
           node --check scripts/verify-living-school-cabinet-v151.mjs
           node --check scripts/verify-anarchadia-cabinet-workbench-v144.mjs
           node --check scripts/verify-cerbanimo-quest-engine-v144.mjs
@@ -75,6 +76,8 @@ jobs:
         run: node scripts/verify-platform-flow-v160.mjs
       - name: Test dark mode, request funding, and learning paths
         run: node scripts/test-platform-flow-v160.mjs
+      - name: Verify shared HUD observer stability
+        run: node scripts/verify-platform-hud-stability-v163.mjs
       - name: Verify researched Living School
         run: node scripts/verify-living-school-cabinet-v151.mjs
       - name: Verify Merlin and Anarchadia stability
