@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='1.0.32';
-const ENTRY='/app/installed-entry-v146.html?target=hub';
-const WORKER_REVISION='device-package-r30-render-transformers';
+const VERSION='1.0.4';
+const ENTRY='/app/installed-entry-v146.html?system=commonweave';
+const WORKER_REVISION='device-package-r34-lean';
 const WORKER_URL=`/service-worker.js?v=${VERSION}-${WORKER_REVISION}`;
 const PREPARE_TIMEOUT_MS=180000;
 const AUTO_RESET_KEY='commonweave.device-package.auto-reset';
@@ -31,8 +31,8 @@ function guidance(){
   const button=$('#install-app');
   if(standalone()){button.disabled=false;button.textContent='Open installed Commonweave';help('The installed app is ready on this device.');return}
   if(packageError){button.disabled=false;button.textContent='Reset and retry package';help(`Device package preparation failed: ${packageError.message}. Tap reset and retry to remove the failed worker, clear only package caches, and start clean.`);return}
-  if(preparing||!packageReady){button.disabled=true;button.textContent='Preparing device package…';help('Downloading and verifying the complete offline package before installation.');return}
-  if(installPrompt){button.disabled=false;button.textContent='Install Commonweave';help('The complete local package is ready. Install to enter the campus.');return}
+  if(preparing||!packageReady){button.disabled=true;button.textContent='Preparing device package…';help('Downloading and verifying the lean offline software package before installation.');return}
+  if(installPrompt){button.disabled=false;button.textContent='Install Commonweave';help('The complete local package is ready. Install to open Commonweave Cabinet Mode.');return}
   button.disabled=false;button.textContent=isIOS()?'Show iPhone/iPad instructions':'Show installation instructions';
   help(isIOS()?'In Safari, use Share → Add to Home Screen.':'Use the browser’s Install app command if it is not offered automatically.');
 }
