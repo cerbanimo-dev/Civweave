@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: commonweave-node-hub
+    runtime: node
+    rootDir: node-hub
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: HUB_NAME
+        value: Commonweave Node Hub
