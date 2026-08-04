@@ -1,8 +1,9 @@
 (()=>{
 'use strict';
 const VERSION='1.0.4';
-const BUILD='1.0.4-device-package-r37-core-working-campus-additions-v165-sol-semantic-planning';
-// Compatibility marker: BUILD='1.0.4-device-package-r37-core-working-campus-additions-v157-fast-core'
+const BUILD='1.0.4-device-package-r37-core-working-campus-additions-v166-workflow-handoffs-sol-semantic-planning';
+// Sol compatibility marker: BUILD='1.0.4-device-package-r37-core-working-campus-additions-v165-sol-semantic-planning'
+// Fast-core compatibility marker: BUILD='1.0.4-device-package-r37-core-working-campus-additions-v157-fast-core'
 const WORKER_URL=`/service-worker-v156.js?v=${BUILD}`;
 let registration=null;
 let reloading=false;
