@@ -40,7 +40,8 @@ for(const token of ['GENERATED LEARNING CONTENT','ACTIVE LEARNING PATH','moduleR
 for(const token of ['living-school-curriculum-generation','CommonweaveFamilyAILoaderV105','CommonweaveModelRuntime','readSharedConfig','executionProfile:\'interactive\'','runtime.generate','curriculum-generated-shared','curriculum-generated-local-fallback'])assert(workbench.includes(token),`Real shared curriculum generation missing ${token}`);
 for(const token of ['Shared Commonweave AI settings','Deterministic local compiler','Actual curriculum generation','data-form="forge"'])assert(workbench.includes(token),`Forge interception or unified settings route missing ${token}`);
 for(const token of ['.ls-stage[data-room]','background:','ls-scene-art','display:none!important','.lsw-grid','.lsw-reader','.lsw-modules','.lsw-actions'])assert(workbenchCss.includes(token),`Living School workbench styling missing ${token}`);
-assert(!workbenchCss.includes('ls-tree{')&&!workbenchCss.includes('ls-window{')&&!workbenchCss.includes('ls-floor{'),'New workbench stylesheet redraws the retired room scene');
+assert(workbenchCss.includes('.ls-scene-art')&&workbenchCss.includes('.ls-tree')&&workbenchCss.includes('display:none!important'),'Retired room scene is not explicitly disabled');
+for(const retiredArt of ['radial-gradient(ellipse at 40% 18%','border:9px solid #5d4430','repeating-linear-gradient(97deg'])assert(!workbenchCss.includes(retiredArt),`New workbench stylesheet redraws retired scene art: ${retiredArt}`);
 
 for(const token of [
   "../../services/living-school/modules/rubric-engine.mjs",
