@@ -32,18 +32,22 @@ Root directory: /
 The committed `wrangler.jsonc` defines:
 
 ```text
-Pages project: commonweave-cloudflare-node
+Default Pages project: commonweave-cloudflare-node
 R2 binding: DOWNLOADS
 R2 bucket: commonweave-downloads
 ```
 
-When the actual Pages project has a different name, use that project name when running the setup command below. For a dashboard-controlled project, also verify the `DOWNLOADS` binding under:
+When the actual Pages project has a different name, pass that exact name to the setup command below. For an existing Git-integrated project, the command reuses the project and creates a manual production deployment; it does not disconnect the Git integration.
+
+Also verify the binding in the dashboard:
 
 ```text
 Workers & Pages > your Pages project > Settings > Bindings
+Variable name: DOWNLOADS
+R2 bucket: commonweave-downloads
 ```
 
-It must point to `commonweave-downloads`. Redeploy after adding or changing a binding.
+Redeploy after adding or changing a binding.
 
 ## One-command setup and deployment
 
