@@ -1,5 +1,5 @@
 const ROOT='/app/models/all-minilm-l6-v2';
-const WORKER_URL=`${ROOT}/worker.js?v=device-package-r37-core`;
+const WORKER_URL=`${ROOT}/worker.js?v=device-package-r38-sol`;
 const MODEL_CACHE='commonweave-model-1.0.4-minilm-on-demand-r1';
 const REQUIRED=[
   {url:`${ROOT}/config.json`,minBytes:300},
@@ -67,6 +67,7 @@ function activeWorker(){
   worker=new Worker(WORKER_URL,{type:'module',name:'commonweave-minilm-reflex'});
   worker.addEventListener('message',event=>{
     const message=event.data||{};const task=pending.get(message.id);if(!task)return;
+    if(message.type==='progress')return;
     pending.delete(message.id);clearTimeout(task.timer);
     if(message.type==='error'){
       const error=new Error(message.error?.message||'MiniLM worker failed.');error.code=message.error?.code||'MINILM_WORKER_FAILED';task.reject(error);stopWorker(error);
@@ -97,6 +98,11 @@ export async function prewarm({timeoutMs=120000,installIfMissing=false,onProgres
   return request('prewarm',{},timeoutMs);
 }
 export async function match(text,{limit=5,timeoutMs=120000}={}){return request('match',{text,limit},timeoutMs)}
+export async function rank(text,candidates,{limit=8,cacheKey='',timeoutMs=120000}={}){
+  const rows=(Array.isArray(candidates)?candidates:[]).slice(0,64).map((item,index)=>typeof item==='string'?{id:`candidate-${index+1}`,text:item}:{id:String(item?.id||`candidate-${index+1}`),text:String(item?.text||item?.label||item?.description||'')}).filter(item=>item.text.trim());
+  if(!rows.length)return{type:'rank',device:'none',dtype:'none',matches:[]};
+  return request('rank',{text:String(text||''),candidates:rows,limit,cacheKey:String(cacheKey||'')},timeoutMs);
+}
 export async function benchmark(cases,{timeoutMs=120000}={}){
   const started=performance.now();const results=[];
   for(const item of cases||[]){const one=performance.now();try{const result=await match(item.text,{limit:3,timeoutMs});results.push({id:item.id,ok:true,elapsedMs:Math.round(performance.now()-one),device:result.device,matches:result.matches})}catch(error){results.push({id:item.id,ok:false,elapsedMs:Math.round(performance.now()-one),error:error.message})}}
