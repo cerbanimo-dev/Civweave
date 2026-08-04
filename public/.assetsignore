@@ -1,4 +1,0 @@
-# This 65.6 MiB release artifact exceeds Cloudflare's 25 MiB static asset limit.
-# scripts/build-cloudflare-pages.mjs excludes it from the Pages output, while
-# the matching Pages Function serves the same URL through the DOWNLOADS R2 binding.
-downloads/Commonweave-Mobile-Install-Kit.zip
