@@ -2,7 +2,7 @@ name: Verify working-campus additions v156
 
 on:
   push:
-    branches: ["agent/proof-driven-readonly-checkpoints"]
+    branches: ["agent/integrate-guides-learning-v158"]
   pull_request:
 
 jobs:
@@ -26,6 +26,8 @@ jobs:
           node --check public/install-v130.js
           node --check public/app/pwa-v130.js
           node --check public/app/models/all-minilm-l6-v2/adapter.js
+          node --check public/app/anarchadia-console-v158.js
+          node --check public/app/cabinets/living-school/living-school-workbench-v158.js
           node --check public/extensions/commonweave-secure-vault-v156.js
           node --check public/extensions/commonweave-domain-bridge-v156.js
           node --check public/extensions/commonweave-qr-v156.js
@@ -34,10 +36,22 @@ jobs:
           node --check public/extensions/commonweave-model-download-v157.js
           node --check public/extensions/commonweave-proof-progress-v158.js
           node --check scripts/verify-working-campus-additions-v156.mjs
+          node --check scripts/verify-unified-ai-settings-v157.mjs
+          node --check scripts/verify-five-system-inner-ui-v157.mjs
+          node --check scripts/verify-living-school-cabinet-v151.mjs
+          node --check scripts/verify-anarchadia-cabinet-workbench-v144.mjs
           node --check scripts/test-tiered-cerbanimo-rewards-v157.mjs
           node --check scripts/test-proof-driven-checkpoints-v158.mjs
       - name: Verify additive integration
         run: node scripts/verify-working-campus-additions-v156.mjs
+      - name: Verify unified AI settings
+        run: node scripts/verify-unified-ai-settings-v157.mjs
+      - name: Verify internal system interfaces
+        run: node scripts/verify-five-system-inner-ui-v157.mjs
+      - name: Verify generated Living School
+        run: node scripts/verify-living-school-cabinet-v151.mjs
+      - name: Verify Merlin and Anarchadia stability
+        run: node scripts/verify-anarchadia-cabinet-workbench-v144.mjs
       - name: Test tiered Cerbanimo rewards
         run: node scripts/test-tiered-cerbanimo-rewards-v157.mjs
       - name: Test proof-driven checkpoints
