@@ -35,7 +35,8 @@ for(const [name,html] of [['Commonweave/Cerbanimo',realmConsoleHtml],['Living Sc
 }
 assert(compatHost.includes('location.replace')&&!compatHost.includes('<iframe'),'Compatibility host still mounts the blocking iframe.');
 for(const token of ['/app/shared/commonweave-model-runtime.js','/app/minilm-reflex-runtime-v138.js','/app/minilm-model-settings-v138.js','/app/intention-planner-v141.js','/app/guide-contracts-v141.js','/app/assistant-runtime-v141.js','/app/core-loop-v152.js','/app/guide-chat-v153.js','/app/capability-readiness-v154.js','for(const [src,ready] of SCRIPTS)'])assert(aiLoader.includes(token),`Lazy guide loader missing ${token}`);
-for(const token of ['CommonweaveGuideChatV153','CommonweaveModelSettingsV133',"Talk to ${esc(item.guide)}"])assert(familyRuntime.includes(token),`Direct family runtime missing ${token}`);
+for(const token of ['CommonweaveGuideChatV153','CommonweaveModelSettingsV133'])assert(aiLoader.includes(token),`Lazy guide loader missing ${token}`);
+for(const token of ['CommonweaveFamilyAILoaderV105?.openChat?.','CommonweaveFamilyAILoaderV105?.openSettings?.',"Talk to ${esc(item.guide)}"])assert(familyRuntime.includes(token),`Direct family runtime missing lazy delegation ${token}`);
 assert(serviceWorker.includes("GUIDE_REVISION='lazy-five-system-chat-r35'"),'Service worker revision must evict eager guide caches.');
 for(const token of ['/app/family-ai-loader-v105.js','/app/assistant-runtime-v141.js','/app/guide-contracts-v141.js','/app/core-loop-v152.js','/app/guide-chat-v153.js','/app/capability-readiness-v154.js','/app/realm-console-v140.html'])assert(serviceWorker.includes(token),`Service worker must cache ${token}`);
 assert(!serviceWorker.includes("'/app/realm-v141.js'")&&!serviceWorker.includes("'/app/loom-v141.js'"),'Worker precaches retired location controllers.');
