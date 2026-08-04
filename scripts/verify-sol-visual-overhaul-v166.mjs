@@ -10,6 +10,7 @@ const shell = read('public/app/family-shell-v104.js');
 const shellCss = read('public/app/family-shell-v104.css');
 const merlinitesFix = read('public/app/merlinites-shell-fix-v166.css');
 const solFix = read('public/app/sol-shell-fix-v166.css');
+const additiveWorker = read('public/service-worker-v156.js');
 const profiles = JSON.parse(read('public/app/assets/ai/profiles.json'));
 
 const expectedOrder = "['commonweave','living-school','cerbanimo','fellowfare','anarchadia']";
@@ -35,7 +36,9 @@ for (const profile of profiles.profiles) {
   const expected = expectedArtifacts[profile.id];
   assert(expected, `Unexpected AI profile ${profile.id}.`);
   assert(profile.artifact.endsWith(expected), `${profile.id} does not point to the expected artifact.`);
-  assert(shell.includes(`/app/${profile.artifact}`), `${profile.id} artifact is not used by the global shell.`);
+  const artifactUrl = `/app/${profile.artifact}`;
+  assert(shell.includes(artifactUrl), `${profile.id} artifact is not used by the global shell.`);
+  assert(additiveWorker.includes(artifactUrl), `${profile.id} artifact is not patched into installed cores.`);
   assert(fs.existsSync(path.join(root, 'public/app', profile.artifact)), `${profile.id} artifact file is missing.`);
   assert(fs.existsSync(path.join(root, 'public/app', profile.sprite)), `${profile.id} avatar file is missing.`);
 }
@@ -48,10 +51,15 @@ for (const token of [
   'html[data-commonweave-system="anarchadia"]'
 ]) assert(shellCss.includes(token), `Missing realm-defining CSS for ${token}.`);
 
-for (const [name, source] of [['Merlinites', merlinitesFix], ['Sol', solFix]]) {
+for (const [name, source, url] of [
+  ['Merlinites', merlinitesFix, '/app/merlinites-shell-fix-v166.css'],
+  ['Sol', solFix, '/app/sol-shell-fix-v166.css']
+]) {
   assert(source.includes('grid-template-columns:36px minmax(0,1fr) auto 36px 38px'), `${name} top rail does not reserve separate Weaveling and settings controls.`);
   assert(source.includes('.cwf104-chat'), `${name} top-rail Weaveling styling is missing.`);
+  assert(additiveWorker.includes(url), `${name} stylesheet is not patched into installed cores.`);
 }
+assert(additiveWorker.includes('/app/family-shell-v104.js'), 'The updated family shell is not patched into existing installed cores.');
 
 for (const file of [
   'public/app/realm-console-v140.html',
@@ -66,4 +74,4 @@ for (const file of [
   assert(jsMarker, `${file} is not cache-busting the transitional visual shell JS.`);
 }
 
-console.log('Sol and Merlinites visual overhaul v166 aliases verified.');
+console.log('Sol and Merlinites visual overhaul v166 aliases verified, including installed-core delivery.');
