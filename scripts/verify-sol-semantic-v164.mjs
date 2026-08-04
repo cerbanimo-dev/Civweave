@@ -113,6 +113,6 @@ assert.match(worker,/rankCache/,'worker should bound reusable candidate embeddin
 assert.match(worker,/cached\?\.signature===signature/,'candidate cache must be invalidated when criterion text changes');
 for(const [relative,html] of entryPages)assert.match(html,/sol-semantic-planner-v164\.js/,`${relative} must load Sol`);
 for(const token of ['sol-semantic-planning-v164','/app/sol-semantic-planner-v164.js','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js'])assert.ok(serviceWorker.includes(token),`offline package is missing ${token}`);
-assert.match(pwa,/working-campus-additions-v165-sol-semantic-planning/,'installed updater must advance to the Sol package');
+assert.match(pwa,/working-campus-additions-v166-workflow-handoffs-sol-semantic-planning/,'installed updater must advance to the combined workflow-handoff and Sol package');
 
 console.log('Sol semantic planning v164 verification passed.');
