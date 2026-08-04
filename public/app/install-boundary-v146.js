@@ -8,16 +8,18 @@ const DEVICE_CREDENTIALS_SCRIPT='/extensions/commonweave-device-credentials-v160
 const MODEL_DOWNLOAD_SCRIPT='/extensions/commonweave-model-download-v157.js';
 const PROOF_PROGRESS_SCRIPT='/extensions/commonweave-proof-progress-v158.js';
 const GEMINI_INTERACTIONS_SCRIPT='/extensions/commonweave-gemini-interactions-v159.js';
-const PREVIOUS_ADDITIONS_VERSION='v164-latest-intention-agentic-research-hud-stability';
+const PREVIOUS_ADDITIONS_VERSION='v165-reviewed-merlin-rook-proof-attachments';
 const FAST_CORE_COMPATIBILITY_REVISION='v157-fast-core';
 const SETTINGS_STABILITY_REVISION='v161-settings-dialog-stability';
 const INTENTION_RESEARCH_REVISION='v163-latest-intention-agentic-research';
 const HUD_STABILITY_REVISION='v164-hud-observer-stability';
 const WORKFLOW_HANDOFF_REVISION='v165-reviewed-merlin-rook-proof-attachments';
+const TWO_AGENT_RELAY_REVISION='living-school-two-agent-youtube-v166';
+// Compatibility marker: additionsVersion:'v165-reviewed-merlin-rook-proof-attachments'
+// Compatibility marker: additionsVersion:'v163-latest-intention-agentic-research'
 // Compatibility marker: settings-dialog-stability-v161
 // Compatibility marker: additionsVersion:'v161-settings-dialog-stability'
 // Compatibility marker: additionsVersion:'v160-device-credentials'
-// Compatibility marker: additionsVersion:'v163-latest-intention-agentic-research'
 const params=new URLSearchParams(location.search);
 function installedDisplay(){
   return navigator.standalone===true
@@ -40,10 +42,10 @@ function installerUrl(){
   next.searchParams.set('next',target.slice(0,1800));
   return next.href;
 }
-function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=reviewed-merlin-rook-proof-attachments-v165`;script.defer=true;document.head.append(script)}
+function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=two-agent-youtube-reviewed-handoffs-v166`;script.defer=true;document.head.append(script)}
 function installAdditions(){
   if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
-    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=reviewed-merlin-rook-proof-attachments-v165`;document.head.append(link);
+    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=two-agent-youtube-reviewed-handoffs-v166`;document.head.append(link);
   }
   addScript(DEVICE_CREDENTIALS_SCRIPT);
   addScript(ADDITIONS_SCRIPT);
@@ -58,5 +60,5 @@ if(!allowed()){
   document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
   installAdditions();
 }
-globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v165-reviewed-merlin-rook-proof-attachments',previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,settingsStabilityRevision:SETTINGS_STABILITY_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudStabilityRevision:HUD_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION};
+globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v166-two-agent-youtube-reviewed-handoffs',previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,settingsStabilityRevision:SETTINGS_STABILITY_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudStabilityRevision:HUD_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION};
 })();
