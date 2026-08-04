@@ -2,7 +2,7 @@ name: Verify working-campus additions v156
 
 on:
   push:
-    branches: ["agent/living-school-two-agent-video-relay-current"]
+    branches: ["agent/merlin-live-layout-overrides"]
   pull_request:
 
 jobs:
@@ -33,6 +33,7 @@ jobs:
           node --check public/app/anarchadia-console-v158.js
           node --check public/app/anarchadia-runtime-stability-v159.js
           node --check public/app/anarchadia-change-review-v165.js
+          node --check public/app/anarchadia-live-layout-v167.js
           node --check public/app/cerbanimo-proof-attachments-v165.js
           node --check public/app/cerbanimo-ai-validator-v159.js
           node --check public/app/intention-planner-v141.js
@@ -61,11 +62,13 @@ jobs:
           node --check scripts/test-platform-flow-v160.mjs
           node --check scripts/verify-platform-hud-stability-v163.mjs
           node --check scripts/test-workflow-handoffs-v165.mjs
+          node --check scripts/test-merlin-local-layout-v167.mjs
           node --check scripts/verify-living-school-cabinet-v151.mjs
           node --check scripts/verify-anarchadia-cabinet-workbench-v144.mjs
           node --check scripts/verify-cerbanimo-quest-engine-v144.mjs
           node --check scripts/test-tiered-cerbanimo-rewards-v157.mjs
           node --check scripts/test-proof-driven-checkpoints-v158.mjs
+          node --check scripts/verify-sol-visual-overhaul-v166.mjs
       - name: Verify additive integration
         run: node scripts/verify-working-campus-additions-v156.mjs
       - name: Verify unified AI settings
@@ -76,6 +79,8 @@ jobs:
         run: node scripts/verify-intention-and-research-v163.mjs
       - name: Verify Living School two-agent relay
         run: node scripts/verify-living-school-two-agent-relay-v165.mjs
+      - name: Verify Sol visual overhaul
+        run: node scripts/verify-sol-visual-overhaul-v166.mjs
       - name: Verify internal system interfaces
         run: node scripts/verify-five-system-inner-ui-v157.mjs
       - name: Verify interaction and review stability
@@ -88,6 +93,8 @@ jobs:
         run: node scripts/verify-platform-hud-stability-v163.mjs
       - name: Test Merlin Rook and Cerbanimo handoffs
         run: node scripts/test-workflow-handoffs-v165.mjs
+      - name: Test Merlin live layout persistence
+        run: node scripts/test-merlin-local-layout-v167.mjs
       - name: Verify researched Living School
         run: node scripts/verify-living-school-cabinet-v151.mjs
       - name: Verify Merlin and Anarchadia stability
