@@ -26,6 +26,7 @@ assert(index.includes('living-school-cabinet-v151.mjs'),'Living School v151 modu
 for(const token of ['/app/cabinets/living-school/index.html','/app/cabinets/living-school/living-school-cabinet-v151.css','/app/cabinets/living-school/living-school-cabinet-v151.mjs']){
   assert(worker.includes(token),`Installed device package missing ${token}`);
 }
+assert(worker.includes("LIVING_STYLE_REVISION='living-school-screen-r1'"),'Installed package does not rotate for the restored Living School screen style.');
 
 for(const token of ['Pathway Desk','Curriculum Forge','Research Conservatory','Learning Map','Lesson Atelier','Constellation Observatory','Practicum Workshop','Cerbanimo Bridge','Credential Forge','Creator & Systems Loft']){
   assert(runtime.includes(token),`Living School cabinet missing ${token}`);
@@ -33,8 +34,13 @@ for(const token of ['Pathway Desk','Curriculum Forge','Research Conservatory','L
 for(const token of ['data-room','data-object','action-list','drawer','aria-label="Open room actions"']){
   assert(index.includes(token)||runtime.includes(token),`Shared visual and accessible action contract missing ${token}`);
 }
+for(const token of ['--panel:#082a22','--panel2:#0b352a','--accent:#8ecf70','.ls-scene-art{display:none}', '.ls-heading{', '.ls-object{', '.ls-tray{']){
+  assert(css.includes(token),`Previous Living School internal screen language missing ${token}`);
+}
 assert(css.includes('clip-path:polygon'),'In-world shaped cabinet instruments are missing');
 assert(css.includes('prefers-reduced-motion'),'Reduced-motion support is missing');
+assert(!css.includes('aspect-ratio:941/2072'),'Living School screen style must not recreate the physical cabinet shell.');
+assert(!index.includes('living-school-cabinet-heritage'),'Living School must not mount a parallel legacy or heritage skin.');
 
 for(const token of [
   "../../services/living-school/modules/rubric-engine.mjs",
@@ -72,11 +78,13 @@ assert(runtime.includes('.backup.${Date.now()}'),'State restore lacks a pre-impo
 
 console.log(JSON.stringify({
   ok:true,
-  mode:'cabinet-only',
+  mode:'current-runtime-with-restored-internal-screen-style',
   system:'living-school',
   version:'v151',
   rooms:10,
   offlineDevicePackage:true,
+  copiedLegacyFiles:false,
+  physicalCabinetShell:false,
   retainedEngines:['rubric-engine','project-gate','cerbanimo-bridge'],
   goldenPath:['forge','research','map','lesson','assessment','constellation','practicum','canonical-handoff','validated-receipt','final','credential'],
   fakeAcceptance:false
