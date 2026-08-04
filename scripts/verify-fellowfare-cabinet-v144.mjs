@@ -16,6 +16,8 @@ for(const token of ['function openComposer','function submitThread','function op
 for(const token of ['createAgreementFromProposal','addMilestone','addEvidence','recordSettlement','openRepair','resolveRepair','addReview'])assert(ledger.includes(token),`Ledger lost ${token}`);
 for(const token of ['deterministicDraft','deterministicMatches','deterministicReview','deterministicAssembly'])assert(ai.includes(token),`Loom lost ${token}`);
 for(const token of ['CORE_PATCH_FILES','/app/fellowfare-cabinet-v144.html','/app/fellowfare-cabinet-v144.css','/app/fellowfare-cabinet-v144.js','/app/services/fellowfare/cabinet-embed.css','patchInstalledCore'])assert(worker.includes(token),`Installed update path is missing ${token}`);
-assert(/fellowfare:\{[^}]*label:'FellowFare'[^}]*guide:'Rook'/.test(family)&&loader.includes('CommonweaveGuideChatV153'),'Rook/family integration missing.');
+const fellowfareFamily=family.match(/fellowfare:\{([^}]*)\}/)?.[1]||'';
+for(const token of ["label:'FellowFare'","guide:'Rook'","artifact:'/app/assets/ai/rook-coin-button.png'","avatar:'/app/assets/ai/rook.png'"])assert(fellowfareFamily.includes(token),`Rook/family integration missing ${token}`);
+assert(family.includes("const SYSTEM_ORDER=['commonweave','living-school','cerbanimo','fellowfare','anarchadia']")&&loader.includes('CommonweaveGuideChatV153'),'Five-realm family order or shared guide integration is missing.');
 new Function(outerJs);new Function(worker);
-console.log('FellowFare verification passed with a scrollable market, inline Rook exchange desk, and installed-core patch delivery.');
+console.log('FellowFare verification passed with a scrollable market, inline Rook exchange desk, canonical family identity, and installed-core patch delivery.');
