@@ -47,8 +47,8 @@ html.cwf104-active .rc-bottom,html.cwf104-active .ls-tray,html.cwf104-active .bo
 @keyframes cwf104-spin{to{transform:rotate(360deg)}}
 @media(max-width:560px){.cwf104-head{grid-template-columns:34px minmax(0,1fr) auto 36px}.cwf104-head-state span{display:none}.cwf104-head-state{padding:6px}.cwf104-system-label{font-size:7.5px}.cwf104-system-meta span{display:none}.cwf104-system{grid-template-rows:32px auto 5px}.cwf104-weaveling span{display:none}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.cwf104-weaveling:before{animation:none}}
-/* Sol visual overhaul v166: realm-defining anchor treatments layered over the working cabinets. */
-:root{--sol-thread:#7fe7dc;--sol-pearl:#eefcff}
+/* merlinites visual overhaul v166: realm-defining anchor treatments layered over the working cabinets. */
+:root{--merlinites-thread:#7fe7dc;--merlinites-pearl:#eefcff}
 
 /* Commonweave: the loom between worlds */
 html[data-system="commonweave"] .rc-app{background:radial-gradient(circle at 18% 4%,#72e5dc20,transparent 24%),radial-gradient(circle at 82% 7%,#a97aff22,transparent 28%),linear-gradient(180deg,#07172d,#061226 58%,#030a16)}

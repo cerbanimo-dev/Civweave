@@ -2,7 +2,6 @@
 'use strict';
 const VERSION='1.0.4';
 const STATUS_KEY='commonweave.family-status.v105';
-const VISUAL_SHELLS={primary:'merlinites-r1',legacy:'sol-r1'};
 const SYSTEM_ORDER=['commonweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const SYSTEMS={
   commonweave:{label:'Commonweave',place:'Intention Loom',guide:'Weaveling',site:'/app/realm-console-v140.html?system=commonweave&cabinet=1',artifact:'/app/assets/ai/weaveling-compass.png',avatar:'/app/assets/ai/weaveling.png'},
@@ -39,17 +38,15 @@ function route(system){if(SYSTEMS[system])location.assign(SYSTEMS[system].site)}
 async function openChat(system=detect(),prefill=''){return globalThis.CommonweaveFamilyAILoaderV105?.openChat?.('commonweave',{prefill,contextSystem:system})}
 async function openSettings(){return globalThis.CommonweaveFamilyAILoaderV105?.openSettings?.()}
 function isSettingsControl(target){const explicit=target.closest?.('[data-cwf-settings],[data-action="settings"],#lite-settings,[data-model-settings],[data-ai-settings],[data-capability="commonweave.model-setup"],[data-cw143-settings]');if(explicit)return true;const control=target.closest?.('button,a,[role="button"],summary');return Boolean(control&&/\b(ai settings|model setup|configure ai|configure model|choose the compass mind|model control)\b/i.test(control.textContent||control.getAttribute('aria-label')||''))}
-function installVisualStyle(){if(document.querySelector('link[data-merlinites-shell-v166],link[data-sol-shell-v166]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='/app/merlinites-shell-fix-v166.css?v=merlinites-r2';link.dataset.merlinitesShellV166='primary';link.dataset.solShellV166='legacy';link.onerror=()=>{link.onerror=null;link.href='/app/sol-shell-fix-v166.css?v=sol-r2'};document.head.append(link)}
+function installMerlinitesStyle(){if(document.querySelector('link[data-merlinites-shell-v166]'))return;const link=document.createElement('link');link.rel='stylesheet';link.href='/app/merlinites-shell-fix-v166.css?v=merlinites-r2';link.dataset.merlinitesShellV166='';document.head.append(link)}
 function build(){
-  installVisualStyle();
+  installMerlinitesStyle();
   const current=detect(),item=SYSTEMS[current];
   seedVisits();markVisited(current);
   document.documentElement.classList.add('cwf104-active');
   document.documentElement.dataset.commonweaveSystem=current;
   document.documentElement.dataset.familyShell='direct';
-  document.documentElement.dataset.visualShell=VISUAL_SHELLS.primary;
-  document.documentElement.dataset.visualShellLegacy=VISUAL_SHELLS.legacy;
-  document.documentElement.dataset.visualShellAliases=`${VISUAL_SHELLS.primary} ${VISUAL_SHELLS.legacy}`;
+  document.documentElement.dataset.visualShell='merlinites-r1';
   let head=document.getElementById('cwf104-head');
   if(!head){head=document.createElement('header');head.id='cwf104-head';head.className='cwf104-head';document.body.append(head)}
   head.innerHTML=`<div class="cwf104-realm-mark" aria-hidden="true"><img src="${item.artifact}" alt=""></div><div class="cwf104-title"><small>${esc(item.place)}</small><b>${esc(item.label)}</b></div><div class="cwf104-head-state"><i class="cwf104-dot"></i><span data-cwf-current-state>Ready</span></div><button class="cwf104-chat" type="button" data-cwf-chat aria-label="Talk to Commonweave with Weaveling from ${esc(item.label)}"><img src="${SYSTEMS.commonweave.artifact}" alt=""></button><button class="cwf104-settings" type="button" data-cwf-settings aria-label="Open Commonweave AI settings"><span aria-hidden="true">⚙</span></button>`;
@@ -68,5 +65,5 @@ function refresh(){
 function bind(){document.addEventListener('click',event=>{const target=event.target,nav=target.closest?.('[data-cwf-system]');if(nav){event.preventDefault();const destination=nav.dataset.cwfSystem;if(destination!==detect())route(destination);return}if(target.closest?.('[data-cwf-chat],[data-action="chat"],[data-guide-chat="commonweave"]')){event.preventDefault();event.stopImmediatePropagation();openChat(detect());return}if(isSettingsControl(target)){event.preventDefault();event.stopImmediatePropagation();openSettings()}},true);addEventListener('storage',refresh);addEventListener('focus',refresh);addEventListener('commonweave:intentions-changed',refresh);document.addEventListener('visibilitychange',()=>{if(!document.hidden){markVisited(detect());refresh()}});document.addEventListener('click',()=>setTimeout(refresh,80),{passive:true});setInterval(refresh,30000)}
 function boot(){build();bind();requestAnimationFrame(()=>document.documentElement.dataset.familyReady='true')}
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
-globalThis.CommonweaveFamilyShellV104={version:VERSION,visualShells:VISUAL_SHELLS,systems:SYSTEMS,systemOrder:SYSTEM_ORDER,detect,status,state,actionable,markVisited,route,refresh,openSettings,openChat};
+globalThis.CommonweaveFamilyShellV104={version:VERSION,systems:SYSTEMS,systemOrder:SYSTEM_ORDER,detect,status,state,actionable,markVisited,route,refresh,openSettings,openChat};
 })();

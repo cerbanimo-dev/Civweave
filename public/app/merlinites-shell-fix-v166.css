@@ -1,4 +1,4 @@
-/* Merlinites shell correction, retaining the same compact rail geometry as the Sol transition build. */
+/* merlinites shell correction: compact top rail with separate Weaveling and settings controls. */
 .cwf104-head{grid-template-columns:36px minmax(0,1fr) auto 36px 38px}
 .cwf104-chat,.cwf104-settings{width:36px;height:36px;border:1px solid #ffffff24;border-radius:50%;display:grid;place-items:center;background:#10212b;color:#eaf8ff;cursor:pointer}
 .cwf104-chat{position:relative;padding:4px;border-color:#8de5ff66;background:radial-gradient(circle at 38% 28%,#e8fbff 0 8%,#18354b 48%,#07131d 70%);box-shadow:0 0 17px #72ddff22}

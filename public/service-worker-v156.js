@@ -2,9 +2,9 @@
 importScripts('/service-worker.js?v=1.0.4-base-r37-core');
 const INLINE_CHAT_REVISION='inline-commonweave-r41-tray-escape';
 // Inline chat compatibility marker: INLINE_CHAT_REVISION='inline-commonweave-r40'
-const EXTENSION_VERSION='working-campus-additions-v167-antigravity-live-source-proof-merlin-local-layout-fallback';
-// Antigravity proof compatibility marker: EXTENSION_VERSION='working-campus-additions-v167-antigravity-live-source-proof'
-// Two-agent relay compatibility marker: EXTENSION_VERSION='working-campus-additions-v166-two-agent-youtube-reviewed-handoffs'
+const EXTENSION_VERSION='working-campus-additions-v169-merlinites-semantic-visual-planning';
+// Local layout compatibility marker: EXTENSION_VERSION='working-campus-additions-v167-antigravity-live-source-proof-merlin-local-layout-fallback'
+// Two-agent compatibility marker: EXTENSION_VERSION='working-campus-additions-v166-two-agent-youtube-reviewed-handoffs'
 // Workflow handoff compatibility marker: EXTENSION_VERSION='working-campus-additions-v165-reviewed-requests-material-followthrough-proof-attachments'
 // Previous current-main compatibility marker: EXTENSION_VERSION='working-campus-additions-v164-latest-intention-agentic-research-hud-stability'
 // HUD hotfix compatibility marker: EXTENSION_VERSION='working-campus-additions-v163-hud-observer-stability'
@@ -38,16 +38,18 @@ const WORKFLOW_HANDOFF_REVISION='reviewed-merlin-rook-proof-attachments-v165';
 const TWO_AGENT_RELAY_REVISION='living-school-two-agent-youtube-v166';
 const LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167';
 const LOCAL_LAYOUT_REVISION='merlin-local-layout-fallback-v167';
-const EXTENSION_CACHE='cwext-working-campus-additions-v167-antigravity-live-source-proof-merlin-local-layout-fallback';
-// Antigravity proof cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v167-antigravity-live-source-proof'
-// Two-agent relay cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v166-two-agent-youtube-reviewed-handoffs'
+const MERLINITES_SEMANTIC_REVISION='merlinites-semantic-planning-v164';
+const MERLINITES_VISUAL_REVISION='merlinites-visual-overhaul-v166';
+const EXTENSION_CACHE='cwext-working-campus-additions-v169-merlinites-semantic-visual-planning';
+// Local layout cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v167-antigravity-live-source-proof-merlin-local-layout-fallback'
+// Two-agent cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v166-two-agent-youtube-reviewed-handoffs'
 // Workflow handoff cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v165-reviewed-requests-material-followthrough-proof-attachments'
 // Previous current-main cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v164-latest-intention-agentic-research-hud-stability'
-// Latest intention and research compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v163-latest-intention-agentic-research'
-// Platform compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v162-dark-review-rook-learning'
+// Latest intention and research cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v163-latest-intention-agentic-research'
+// Platform cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v162-dark-review-rook-learning'
 // Settings stability cache compatibility marker: EXTENSION_CACHE='cwext-working-campus-additions-v161-settings-dialog-stability'
-const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v167-antigravity-live-source-proof';
-const INTERMEDIATE_EXTENSION_CACHE='cwext-working-campus-additions-v166-two-agent-youtube-reviewed-handoffs';
+const PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v168-two-agent-workflow-merlinites-semantic-planning';
+const INTERMEDIATE_EXTENSION_CACHE='cwext-working-campus-additions-v167-antigravity-live-source-proof-merlin-local-layout-fallback';
 const EXTENSION_FILES=[
   '/extensions/commonweave-additions-v156.css',
   '/extensions/commonweave-additions-v156.js',
@@ -64,19 +66,16 @@ const EXTENSION_FILES=[
 const BOUNDARY='/app/install-boundary-v146.js';
 const CORE_PATCH_FILES=[
   BOUNDARY,
-  '/app/family-shell-v104.js',
-  '/app/merlinites-shell-fix-v166.css',
-  '/app/sol-shell-fix-v166.css',
-  '/app/assets/ai/weaveling-compass.png',
-  '/app/assets/ai/moss-acorn.png',
-  '/app/assets/ai/kamiya-gift.png',
-  '/app/assets/ai/rook-coin-button.png',
-  '/app/assets/ai/merlin-hat.png',
   '/app/platform-stability-v159.js',
   '/app/platform-stability-v159.css',
   '/app/platform-experience-v160.js',
   '/app/platform-experience-v160.css',
   '/app/action-followthrough-v165.js',
+  '/app/lite-v129.html',
+  '/app/loom-v128.html',
+  '/app/family-shell-v104.css',
+  '/app/family-shell-v104.js',
+  '/app/merlinites-shell-fix-v166.css',
   '/app/realm-console-v140.html',
   '/app/cerbanimo-ai-validator-v159.js',
   '/app/cerbanimo-proof-attachments-v165.js',
@@ -86,8 +85,12 @@ const CORE_PATCH_FILES=[
   '/app/rook-request-flow-v160.js',
   '/app/services/fellowfare/cabinet-embed.css',
   '/app/minilm-model-settings-v138.js',
+  '/app/models/all-minilm-l6-v2/adapter.js',
+  '/app/models/all-minilm-l6-v2/worker.js',
   '/app/model-settings-v133.css',
   '/app/intention-planner-v141.js',
+  '/app/merlinites-semantic-planner-v164.js',
+  '/app/pwa-v130.js',
   '/app/working-campus-v156.html',
   '/app/working-campus-v156.css',
   '/app/working-campus-v156.part4.txt',
@@ -115,7 +118,7 @@ async function cacheExtensions(){const cache=await caches.open(EXTENSION_CACHE);
 async function patchInstalledCore(){const fresh=new Map();for(const url of CORE_PATCH_FILES)fresh.set(url,await fetchRequired(url));const deadline=Date.now()+120000;while(Date.now()<deadline){const names=(await caches.keys()).filter(name=>name.startsWith('commonweave-static-'));for(const name of names){const cache=await caches.open(name),boundary=await cache.match(BOUNDARY,{ignoreSearch:true});if(!boundary)continue;for(const [url,response] of fresh)await cache.put(url,response.clone());return{cache:name,patched:CORE_PATCH_FILES.length}}await delay(100)}throw new Error('The base core package did not expose its installed cache in time for the additive layer.')}
 async function patchInstalledBoundary(){return patchInstalledCore()}
 async function patchCorePackage(){return patchInstalledCore()}
-async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,settingsCompatibleRevision:SETTINGS_COMPATIBLE_EXTENSION_REVISION,interfaceCompatibleRevision:INTERFACE_COMPATIBLE_EXTENSION_REVISION,proofCompatibleRevision:PROOF_COMPATIBLE_EXTENSION_REVISION,functionalInterfaceRevision:FUNCTIONAL_INTERFACE_REVISION,geminiTransportRevision:GEMINI_TRANSPORT_REVISION,deviceCredentialsRevision:DEVICE_CREDENTIALS_REVISION,settingsDialogStabilityRevision:SETTINGS_DIALOG_STABILITY_REVISION,platformExperienceRevision:PLATFORM_EXPERIENCE_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudObserverStabilityRevision:HUD_OBSERVER_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,localLayoutRevision:LOCAL_LAYOUT_REVISION,inlineChatRevision:INLINE_CHAT_REVISION,cache:EXTENSION_CACHE,previousCache:PREVIOUS_EXTENSION_CACHE,intermediateCache:INTERMEDIATE_EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,patchedCoreFiles:CORE_PATCH_FILES.length,corePatchFiles:CORE_PATCH_FILES,missing}}
+async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,settingsCompatibleRevision:SETTINGS_COMPATIBLE_EXTENSION_REVISION,interfaceCompatibleRevision:INTERFACE_COMPATIBLE_EXTENSION_REVISION,proofCompatibleRevision:PROOF_COMPATIBLE_EXTENSION_REVISION,functionalInterfaceRevision:FUNCTIONAL_INTERFACE_REVISION,geminiTransportRevision:GEMINI_TRANSPORT_REVISION,deviceCredentialsRevision:DEVICE_CREDENTIALS_REVISION,settingsDialogStabilityRevision:SETTINGS_DIALOG_STABILITY_REVISION,platformExperienceRevision:PLATFORM_EXPERIENCE_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudObserverStabilityRevision:HUD_OBSERVER_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,localLayoutRevision:LOCAL_LAYOUT_REVISION,merlinitesSemanticRevision:MERLINITES_SEMANTIC_REVISION,merlinitesVisualRevision:MERLINITES_VISUAL_REVISION,inlineChatRevision:INLINE_CHAT_REVISION,cache:EXTENSION_CACHE,previousCache:PREVIOUS_EXTENSION_CACHE,intermediateCache:INTERMEDIATE_EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,patchedCoreFiles:CORE_PATCH_FILES.length,corePatchFiles:CORE_PATCH_FILES,missing}}
 self.addEventListener('install',event=>event.waitUntil(Promise.all([cacheExtensions(),patchInstalledBoundary()])));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names=>Promise.all(names.filter(name=>name.startsWith('cwext-')&&name!==EXTENSION_CACHE).map(name=>caches.delete(name))))));
 self.addEventListener('message',event=>{if(event.data?.type==='GET_ADDITIONS_STATUS')event.waitUntil(extensionStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}))});

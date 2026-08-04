@@ -1,4 +1,4 @@
-# Sol visual overhaul v166
+# merlinites visual overhaul v166
 
 This pass establishes a realm-defining visual layer without replacing the working application flows.
 
@@ -21,7 +21,7 @@ The overhaul reuses the canonical AI profile assets from `public/app/assets/ai/p
 - Rook: `rook.png` and `rook-coin-button.png`
 - Merlin: `merlin.png` and `merlin-hat.png`
 
-The artifact images now identify realms in the global shell. Existing guide avatars remain in their workspaces, and the Living School Moss control now uses the canonical Moss avatar instead of a generated CSS placeholder.
+The artifact images identify realms in the global shell. Existing guide avatars remain in their workspaces, and the Living School Moss control uses the canonical Moss avatar instead of a generated CSS placeholder.
 
 ## Realm-defining anchor treatments
 
@@ -51,7 +51,7 @@ This pass changes presentation and navigation composition only. It does not repl
 
 ## Next pass
 
-1. Capture the five anchor screens at common mobile widths and correct any collisions or contrast failures.
+1. Capture the five anchor screens at common mobile widths and correct collisions or contrast failures.
 2. Replace remaining glyph-only realm-local navigation icons with canonical art or purpose-built transparent icons.
 3. Reshape the Commonweave intention overview into the full woven route map.
 4. Propagate each anchor language into secondary rooms after the anchor screens are approved.
