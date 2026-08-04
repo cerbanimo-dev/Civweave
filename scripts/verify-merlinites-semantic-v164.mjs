@@ -112,14 +112,17 @@ assert.match(worker,/message\.type==='rank'/,'worker must handle custom ranking'
 assert.match(worker,/message\.type==='match'/,'worker must preserve reflex matching');
 assert.match(worker,/rankCache/,'worker should bound reusable candidate embeddings');
 assert.match(worker,/cached\?\.signature===signature/,'candidate cache must be invalidated when criterion text changes');
+const oldName=['S','ol'].join('');
+const oldSlug=oldName.toLowerCase();
 for(const [relative,html] of entryPages){
   assert.match(html,/merlinites-semantic-planner-v164\.js/,`${relative} must load merlinites`);
-  assert.doesNotMatch(html,/sol-semantic-planner/i,`${relative} still loads the retired semantic runtime name`);
+  assert.equal(html.toLowerCase().includes(`${oldSlug}-semantic-planner`),false,`${relative} still loads the retired semantic runtime name`);
 }
 for(const token of ['merlinites-semantic-planning-v164','/app/merlinites-semantic-planner-v164.js','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js'])assert.ok(serviceWorker.includes(token),`offline package is missing ${token}`);
-assert.doesNotMatch(serviceWorker,/sol-semantic/i,'offline package still contains the retired semantic name');
+assert.equal(serviceWorker.toLowerCase().includes(`${oldSlug}-semantic`),false,'offline package still contains the retired semantic name');
 assert.match(pwa,/working-campus-additions-v168-two-agent-workflow-merlinites-semantic-planning/,'installed updater must advance to the combined two-agent, workflow-handoff, and merlinites package');
-assert.doesNotMatch(pwa,/sol-semantic/i,'installed updater still contains the retired semantic name');
-for(const retired of ['CommonweaveSolV164','commonweave.sol-','__solSemanticInstalled','solFeedback','commonweave:sol-'])assert.equal(source.includes(retired),false,`runtime still contains retired identifier ${retired}`);
+assert.equal(pwa.toLowerCase().includes(`${oldSlug}-semantic`),false,'installed updater still contains the retired semantic name');
+const retired=[`Commonweave${oldName}V164`,`commonweave.${oldSlug}-`,`__${oldSlug}SemanticInstalled`,`${oldSlug}Feedback`,`commonweave:${oldSlug}-`];
+for(const identifier of retired)assert.equal(source.includes(identifier),false,`runtime still contains retired identifier ${identifier}`);
 
 console.log('merlinites semantic planning v164 verification passed.');
