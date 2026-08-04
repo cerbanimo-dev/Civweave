@@ -9,6 +9,7 @@ const MODEL_DOWNLOAD_SCRIPT='/extensions/commonweave-model-download-v157.js';
 const PROOF_PROGRESS_SCRIPT='/extensions/commonweave-proof-progress-v158.js';
 const GEMINI_INTERACTIONS_SCRIPT='/extensions/commonweave-gemini-interactions-v159.js';
 const PREVIOUS_ADDITIONS_VERSION='v159-gemini-interactions';
+const FAST_CORE_COMPATIBILITY_REVISION='v157-fast-core';
 const params=new URLSearchParams(location.search);
 function installedDisplay(){
   return navigator.standalone===true
@@ -49,5 +50,5 @@ if(!allowed()){
   document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
   installAdditions();
 }
-globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v160-device-credentials',previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION};
+globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v160-device-credentials',previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION};
 })();
