@@ -1,102 +1,13 @@
 {
-  "schema": "commonweave.reflex-index.v2",
+  "schema": "commonweave.reflex-index.v3",
   "entries": [
-    {
-      "id": "mutual-aid-food-network",
-      "system": "commonweave",
-      "mode": "Reflect",
-      "label": "a multi-realm mutual-aid and local-food intention",
-      "embeddingText": "organize friends into a mutual aid network, community care circle, local food system, shared pantry, community garden, food cooperative, buying club, produce exchange, neighbors helping neighbors",
-      "keywords": ["mutual aid", "friends", "network", "local food", "food sources", "community garden", "shared pantry", "cooperative", "neighbors"],
-      "clarify": "Which first pilot would matter most: shared pantry, produce exchange, garden, buying club, or meal rotation?",
-      "routeHints": [
-        "Commonweave coordinates the whole intention.",
-        "Anarchadia holds participation, consent, responsibilities, and conflict handling.",
-        "FellowFare maps food sources, tools, transport, storage, needs, and offers.",
-        "Living School identifies the minimum knowledge the pilot requires.",
-        "Cerbanimo turns the chosen pilot into checkpoints and visible proof."
-      ]
-    },
-    {
-      "id": "self-love-boundaries",
-      "system": "living-school",
-      "mode": "Learn",
-      "label": "self-compassion, consent, and boundary literacy",
-      "embeddingText": "learn to love myself, self-love, self-compassion, self-care, caring for myself before others, personal boundaries, consent, not being touched, clear intentions, clear peer communication, emotional capacity, relational safety",
-      "keywords": ["love myself", "self-love", "self compassion", "self-compassion", "self-care", "caring for myself", "not being touched", "clear intentions", "clear communication", "boundaries", "personal space"],
-      "clarify": "Which part needs attention first: treating yourself more kindly, recognizing your limits, stating a boundary, or judging whether someone respects it?"
-    },
-    {
-      "id": "prioritize-projects",
-      "system": "commonweave",
-      "mode": "Reflect",
-      "label": "a priority decision across competing intentions",
-      "embeddingText": "too many projects, overwhelmed, decide priorities, choose what deserves attention, coordinate multiple goals, plan next steps",
-      "keywords": ["too many", "prioritize", "priority", "which project", "overwhelmed", "what next"],
-      "clarify": "Which option prevents harm, unlocks other work, or could show meaningful progress within seven days?"
-    },
-    {
-      "id": "learning-path",
-      "system": "living-school",
-      "mode": "Learn",
-      "label": "a learning path tied to a real-world capability",
-      "embeddingText": "learn, understand, study, practice, research, curriculum, lesson, gain knowledge, develop a skill, read results, watershed testing",
-      "keywords": ["learn", "understand", "study", "practice", "research", "teach", "curriculum", "lesson"],
-      "clarify": "What do you want to be able to do, explain, or decide after learning?"
-    },
-    {
-      "id": "build-repair-project",
-      "system": "cerbanimo",
-      "mode": "Build",
-      "label": "a concrete skilled-work result",
-      "embeddingText": "build, repair, make, implement, code, design, skilled work, finish a project, greenhouse vent, prove work is complete",
-      "keywords": ["build", "repair", "make", "implement", "code", "design", "project", "fix"],
-      "clarify": "What observable result should exist when the work is complete?"
-    },
-    {
-      "id": "resource-exchange",
-      "system": "fellowfare",
-      "mode": "Acquire",
-      "label": "a material need, offer, loan, or exchange",
-      "embeddingText": "obtain materials, borrow equipment, trade resources, buy supplies, sell offer need inventory delivery reclaimed boards trailer",
-      "keywords": ["borrow", "trade", "buy", "sell", "materials", "resources", "boards", "trailer", "obtain", "need"],
-      "clarify": "What exactly is needed or offered, in what quantity and condition, by when, and under what return or trust terms?"
-    },
-    {
-      "id": "governance-proposal",
-      "system": "anarchadia",
-      "mode": "Govern",
-      "label": "a collective decision, agreement, or proposal",
-      "embeddingText": "community proposal, policy, voting, shared rules, collective decision, neighborhood approval, consent, governance, assembly",
-      "keywords": ["proposal", "policy", "vote", "voting", "rule", "approval", "consent", "community decision"],
-      "clarify": "What exact decision is being made, who is directly affected, and whose explicit agreement is required?"
-    },
-    {
-      "id": "community-organizing",
-      "system": "anarchadia",
-      "mode": "Govern",
-      "label": "a group-coordination and participation agreement",
-      "embeddingText": "organize a group, coordinate volunteers, create a community network, shared responsibilities, mutual aid governance, working together fairly",
-      "keywords": ["organize", "group", "volunteers", "community", "together", "responsibilities"],
-      "clarify": "What shared purpose and realistic commitment should the first participants explicitly agree to?"
-    },
-    {
-      "id": "food-growing-skill",
-      "system": "living-school",
-      "mode": "Learn",
-      "label": "a practical food-growing or food-safety skill",
-      "embeddingText": "learn gardening, grow food, soil, seed starting, preservation, cooking, food safety, local agriculture knowledge",
-      "keywords": ["gardening", "grow food", "soil", "seeds", "preserve", "food safety"],
-      "clarify": "Which crop or food practice do you need to perform, and what is the next seasonal or safety decision?"
-    },
-    {
-      "id": "food-project-build",
-      "system": "cerbanimo",
-      "mode": "Build",
-      "label": "a physical or operational local-food pilot",
-      "embeddingText": "build community garden beds, pantry shelves, compost system, greenhouse, irrigation, food storage, practical local food infrastructure",
-      "keywords": ["garden beds", "pantry shelves", "compost", "greenhouse", "irrigation", "food storage"],
-      "clarify": "Which physical pilot should be built first, and what real space or capacity must it serve?"
-    }
+    {"id":"learning-path","system":"living-school","label":"learning and curriculum","embeddingText":"learn understand study research curriculum lesson skill knowledge explain practice quiz test course module"},
+    {"id":"skilled-work","system":"cerbanimo","label":"tasks and skilled labor","embeddingText":"build repair implement code design make task project dependency proof work completion labor"},
+    {"id":"materials-trade","system":"fellowfare","label":"materials, goods, and services","embeddingText":"materials supplies equipment borrow trade buy sell offer request goods services delivery inventory"},
+    {"id":"feature-request","system":"anarchadia","label":"feature request and application change","embeddingText":"feature request add capability improve application modify software new behavior enhancement"},
+    {"id":"bug-report","system":"anarchadia","label":"bug report and repair","embeddingText":"bug broken error crash freeze not working repair software regression issue"},
+    {"id":"whole-intention","system":"commonweave","label":"multi-system intention","embeddingText":"wish goal intention plan coordinate learn build materials friends community complete outcome"},
+    {"id":"proof-validation","system":"cerbanimo","label":"proof and cross-validation","embeddingText":"validate proof evidence review acceptance criteria peer ai verification completion"},
+    {"id":"community-mesh","system":"commonweave","label":"friends, nodes, and mesh","embeddingText":"friend qr code node mesh peer connect share grapevine network community users"}
   ]
 }

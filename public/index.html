@@ -3,67 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#07141f">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <title>Install Commonweave</title>
-  <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.4">
-  <link rel="icon" href="/app/logos/commonweave-icon-192.png">
-  <link rel="stylesheet" href="/install-v130.css?v=1.0.4">
+  <meta name="theme-color" content="#10172b">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; frame-src https://www.youtube-nocookie.com; connect-src 'self' ws: wss: https://generativelanguage.googleapis.com http://localhost:* http://127.0.0.1:*; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <title>Commonweave</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/vendor/qrcode.js" defer></script>
+  <script type="module" src="/app.js"></script>
 </head>
 <body>
-<main class="gateway">
-  <img class="gateway-bg" src="/app/assets/world/host-wave2.webp" alt="" fetchpriority="high">
-  <div class="gateway-shade"></div>
-  <header class="gateway-header">
-    <img src="/app/logos/commonweave.webp" alt="Commonweave">
-    <div><small>INSTALLER · UPDATER · RECOVERY</small><h1>Commonweave</h1></div>
-    <span class="version">v1.0.4</span>
-  </header>
-
-  <section class="install-card" aria-labelledby="install-title">
-    <div class="install-copy">
-      <small>LEAN OFFLINE SOFTWARE PACKAGE</small>
-      <h2 id="install-title">Install the five-system Commonweave family.</h2>
-      <p>This browser page prepares the offline package and hands installation to your browser. The installed app opens directly into Commonweave Cabinet Mode, with full-screen Living School, Cerbanimo, FellowFare, and Anarchadia software one tap away.</p>
-    </div>
-    <div class="topology" aria-label="Commonweave topology">
-      <article><b>1</b><strong>Installed device</strong><span>Canonical local app and data.</span></article>
-      <i>↔</i>
-      <article><b>2</b><strong>Nearby peers</strong><span>Consented objects move through local links.</span></article>
-      <i>↔</i>
-      <article><b>3</b><strong>Optional gateway</strong><span>Releases, rendezvous, and wider federation.</span></article>
-    </div>
-    <div class="gateway-actions">
-      <button id="install-app" class="primary" type="button" disabled>Preparing device package…</button>
-      <button id="check-update" class="secondary" type="button">Check release</button>
-    </div>
-    <p id="install-help" class="install-help" role="status">Registering the local package worker…</p>
-    <dl class="package-state" aria-label="Device package state">
-      <div><dt>Package</dt><dd id="package-state">preparing</dd></div>
-      <div><dt>Installed files</dt><dd id="package-assets">checking</dd></div>
-      <div><dt>Runtime</dt><dd id="local-mode">installer browser</dd></div>
-    </dl>
-  </section>
-
-  <section class="gateway-grid">
-    <article class="status-card">
-      <small>DIRECT START</small>
-      <h3>No intro or cabinet shell</h3>
-      <p>The installed app opens Commonweave’s software immediately. Cabinet artwork and calibration assets remain available to marketing, but are not downloaded to the user’s device.</p>
-    </article>
-    <article class="status-card">
-      <small>LOCAL-FIRST BACKEND</small>
-      <h3>The device is the source of truth</h3>
-      <p>Records are written locally before any transfer is attempted. Peer links and gateways consume a durable outbox; they never replace local state.</p>
-    </article>
-    <article class="status-card">
-      <small>PORTABLE RECOVERY</small>
-      <h3>Carry the package another way</h3>
-      <p>A local host or mobile kit remains available for devices that cannot install directly from this browser.</p>
-      <div class="card-actions"><a href="/downloads/commonweave-pocket-campus.cwseed">Commonweave seed</a><a href="/downloads/Commonweave-Mobile-Install-Kit.zip">Mobile install kit</a></div>
-    </article>
-  </section>
-</main>
-<script src="/install-v130.js?v=1.0.4"></script>
+  <header><div class="brand"><img src="/icon.svg" alt=""><div><b>Commonweave</b><small>clean five-system baseline</small></div></div><div id="rewards"></div><div class="actions"><button data-guide>Guide</button><button data-mesh>Node</button><button data-ai>AI</button></div></header>
+  <nav id="nav" aria-label="Systems"></nav>
+  <main id="root"></main>
+  <dialog id="modal"><form method="dialog" class="modal-head"><h2 id="modal-title">Commonweave</h2><button value="close">×</button></form><div id="modal-body"></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

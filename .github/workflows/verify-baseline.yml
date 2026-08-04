@@ -1,0 +1,30 @@
+name: Verify clean baseline
+
+on:
+  push:
+    branches: [main, "agent/**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+        env:
+          COMMONWEAVE_SKIP_MODEL_PULL: "1"
+      - run: npm run check
+      - name: Smoke test node
+        run: |
+          PORT=4173 npm start > server.log 2>&1 &
+          SERVER_PID=$!
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/health > health.json; then break; fi
+            sleep 1
+          done
+          grep -q 'commonweave.clean-baseline' health.json
+          curl -fsS http://127.0.0.1:4173/ | grep -q 'Commonweave'
+          kill $SERVER_PID

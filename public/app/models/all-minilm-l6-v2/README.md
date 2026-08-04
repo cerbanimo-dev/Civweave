@@ -1,7 +1,5 @@
-# MiniLM Semantic Reflex
+# Local MiniLM semantic router
 
-Commonweave uses `Xenova/all-MiniLM-L6-v2` as a local semantic retrieval model, not as a text generator.
+This directory contains the tracked adapter, worker, manifest, and compact semantic index. The tokenizer and ONNX graphs are installed locally by `npm run setup:local` and are intentionally not committed.
 
-The engine embeds the user's message and compares it with a small Commonweave intent library. Commonweave retains canonical routing, state, consent, and planning. Guide responses are composed from grounded response patterns, so there is no token-by-token wait and no generated JSON contract to repair.
-
-The supplied `all-MiniLM-L6-v2.zip` established the matching tokenizer and configuration set. The packaged ONNX weights are the official Transformers.js `q4f16` WebGPU graph and quantized WASM graph.
+MiniLM performs feature extraction and semantic matching. It does not generate prose. Commonweave uses deterministic local planners when no generative provider is configured, and can connect to Gemini, Antigravity, Ollama, LM Studio, or another OpenAI-compatible generator through the shared AI vault.
