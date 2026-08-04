@@ -1,14 +1,14 @@
 (()=>{
 'use strict';
 const VERSION='1.0.4';
-const BUILD='1.0.4-working-campus-additions-v156';
+const BUILD='1.0.4-instant-shell-r37-working-campus-additions-v156-r2';
 const WORKER_URL=`/service-worker-v156.js?v=${BUILD}`;
 let registration=null;
 let reloading=false;
 function pill(){
   let node=document.querySelector('#cw-pwa-state');
   if(node)return node;
-  node=document.createElement('button');node.id='cw-pwa-state';node.type='button';node.className='cw-pwa-state';node.textContent=navigator.onLine?'Working campus · updates are manual':'Working campus · offline';
+  node=document.createElement('button');node.id='cw-pwa-state';node.type='button';node.className='cw-pwa-state';node.textContent=navigator.onLine?'Working campus · changes refresh in background':'Working campus · offline';
   node.addEventListener('click',async()=>{
     if(globalThis.CommonweaveHubRuntimeV143?.openUpdateHub){globalThis.CommonweaveHubRuntimeV143.openUpdateHub();return}
     if(registration?.waiting){registration.waiting.postMessage({type:'SKIP_WAITING'});node.textContent='Applying update…'}
@@ -17,10 +17,10 @@ function pill(){
 }
 function updateState(){
   const node=pill();
-  if(registration?.waiting){node.textContent='Update downloaded · open Hub & updates';node.classList.add('is-update');return}
+  if(registration?.waiting){node.textContent='Update ready · open Hub & updates';node.classList.add('is-update');return}
   node.classList.remove('is-update');
   const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
-  node.textContent=navigator.onLine?(standalone?'Installed working campus · manual updates':'Local installer · install on this device'):'Offline · working campus active';
+  node.textContent=navigator.onLine?(standalone?'Installed working campus · current shell':'Local installer · install on this device'):'Offline · working campus active';
 }
 async function retireLegacyWorkers(){
   const regs=await navigator.serviceWorker.getRegistrations();
@@ -48,7 +48,7 @@ async function boot(){
     });
     navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)return;reloading=true;location.reload()});
     updateState();
-  }catch{pill().textContent=navigator.onLine?'Device package install unavailable':'Offline · cached package unavailable'}
+  }catch{pill().textContent=navigator.onLine?'Device shell install unavailable':'Offline · cached shell unavailable'}
 }
 addEventListener('online',updateState);addEventListener('offline',updateState);
 boot();
