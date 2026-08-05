@@ -58,7 +58,7 @@ const unscopedBody=additiveBody
   .replace("(()=>{\n'use strict';\n","'use strict';\n")
   .replace(/\n\}\)\(\);\s*$/,'\n');
 const regression=evaluate(`${baseWorker}\n${unscopedBody}`,'unscoped-service-worker.js');
-assert(regression.error instanceof SyntaxError,'The verifier did not detect the unscoped global redeclaration regression.');
+assert(regression.error?.name==='SyntaxError','The verifier did not detect the unscoped global redeclaration regression.');
 assert(/PACKAGE_RECOVERY_REVISION|already been declared/i.test(String(regression.error.message)),'Regression failed for an unexpected reason.');
 
 console.log(JSON.stringify({
