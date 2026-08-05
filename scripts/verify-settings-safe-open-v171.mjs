@@ -82,10 +82,11 @@ assert(!family.includes('/app/minilm-reflex-runtime-v138.js'),'Opening family se
 assert(!family.includes('ensureSettings'),'Family shell still owns a settings readiness path.');
 
 const pages=[['realm',realm],['living-school',living],['fellowfare',fellowfare],['anarchadia',anarchadia],['working-campus',workingCampus]];
+const scriptIndex=(html,src)=>html.indexOf(`<script src="${src}`);
 for(const [name,html] of pages){
-  assert(html.includes('/app/model-settings-controller-v173.js'),`${name} does not load the direct settings controller.`);
-  const controllerIndex=html.indexOf('/app/model-settings-controller-v173.js');
-  const loaderIndex=html.indexOf('/app/family-ai-loader-v105.js');
+  const controllerIndex=scriptIndex(html,'/app/model-settings-controller-v173.js');
+  const loaderIndex=scriptIndex(html,'/app/family-ai-loader-v105.js');
+  assert(controllerIndex>=0,`${name} does not load the direct settings controller.`);
   if(loaderIndex>=0)assert(controllerIndex<loaderIndex,`${name} loads chat before the direct settings controller.`);
 }
 assert(workingPart.includes('CommonweaveModelSettingsControllerV173')&&!workingPart.includes('CommonweaveFamilyAILoaderV105.openSettings'),'Working Campus still routes settings through chat.');
