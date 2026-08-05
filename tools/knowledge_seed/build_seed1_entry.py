@@ -2,21 +2,22 @@
 """Run Seed 1 from the audited 1,001-title spine and refresh current article revisions."""
 from __future__ import annotations
 
-import base64
-import gzip
-import json
 import urllib.parse
 from pathlib import Path
 
 import build_seed1 as seed
 
-MANIFEST = Path(__file__).with_name("manifest") / "seed1-titles.json.gz.b64"
+MANIFEST_DIR = Path(__file__).with_name("manifest")
 
 
 def fetch_audited_manifest():
-    encoded = MANIFEST.read_text(encoding="ascii").strip()
-    raw = gzip.decompress(base64.b64decode(encoded))
-    titles = json.loads(raw.decode("utf-8"))
+    parts = sorted(MANIFEST_DIR.glob("seed1-titles-part*.txt"))
+    if not parts:
+        raise RuntimeError("No plain-text Seed 1 manifest shards were found")
+    manifest_bytes = b"".join(path.read_bytes() for path in parts)
+    titles = []
+    for path in parts:
+        titles.extend(path.read_text(encoding="utf-8").splitlines())
     selections = []
     seen = set()
     for title in titles:
@@ -31,13 +32,13 @@ def fetch_audited_manifest():
             subdomain="",
             source_url="https://en.wikipedia.org/wiki/" + urllib.parse.quote(title.replace(" ", "_")),
         ))
-    if not 950 <= len(selections) <= 1050:
-        raise RuntimeError(f"Pinned manifest decoded to {len(selections)} titles; expected approximately 1,000")
+    if len(selections) != 1001:
+        raise RuntimeError(f"Pinned manifest decoded to {len(selections)} unique titles; expected exactly 1,001")
     return selections, {
         "selection_url": seed.SELECTION_URL,
         "selection_method": "audited 1,001-title Wikipedia Vital Articles Level 3 manifest; article bodies and revision metadata refreshed at build time",
-        "manifest_file": str(MANIFEST.relative_to(Path.cwd())),
-        "manifest_sha256": seed.sha256_bytes(raw),
+        "manifest_files": [str(path.relative_to(Path.cwd())) for path in parts],
+        "manifest_sha256": seed.sha256_bytes(manifest_bytes),
         "retrieved_at": seed.now_iso(),
         "parsed_count": len(selections),
     }
