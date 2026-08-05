@@ -5,4 +5,4 @@ if(isRender){
   console.log('[Commonweave] Local campus mode: deterministic fast start.');
 }
 console.log('[Commonweave] Deterministic local mode is the default AI route.');
-console.log('[Commonweave] Transformer and MiniLM laboratory files are dormant and are never staged, downloaded, checked, or started by normal application commands.');
+console.log('[Commonweave] Fixed ONNX Runtime Web WASM assets and the local MiniLM package are materialized for explicit semantic-lab use. The semantic worker remains dormant until the user starts a test.');
