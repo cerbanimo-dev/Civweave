@@ -16,9 +16,9 @@ for(const token of [
   'COMMONWEAVE_PACKAGE_TIMEOUT',
   'recoverStalledRegistration',
   "registration-recovery",
-  'withTimeout(navigator.serviceWorker.register(',
-  'withTimeout(registration.update()',
-  'withTimeout(navigator.serviceWorker.ready',
+  'navigator.serviceWorker.register(WORKER_URL',
+  'registration.update()',
+  'navigator.serviceWorker.ready',
   'exactActive',
   'exactCandidate',
 ])assert(installerSource.includes(token),`Installer watchdog is missing ${token}`);
@@ -91,7 +91,7 @@ function makeInstallerContext({getRegistration,register,getRegistrations=async()
     setTimeout,
     clearTimeout,
     location,
-    navigator:{standalone:false,onLine:true,serviceWorker},
+    navigator:{standalone:false,onLine:true,userAgent:'Chrome watchdog test',serviceWorker},
     caches,
     sessionStorage,
     localStorage,
@@ -119,7 +119,7 @@ const acceleratedInstaller=installerSource
     cacheNames:['cwknowledge-school-seeds-v2','commonweave-stale-package'],
   });
   vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-stall.js'});
-  await delay(100);
+  await delay(450);
   assert.match(harness.location.replaced||'',/registration-recovery=/,'A stalled registration did not trigger one automatic recovery reload.');
   assert(harness.deleted.includes('commonweave-stale-package'),'Automatic recovery did not clear stale app caches.');
   assert(!harness.deleted.includes('cwknowledge-school-seeds-v2'),'Automatic recovery deleted the protected knowledge cache.');
