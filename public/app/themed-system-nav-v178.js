@@ -3,6 +3,7 @@
 
 const NAV_ID='cw-themed-system-nav';
 const STYLE_ID='cw-themed-system-nav-style';
+const RELEASE_VERSION='1.0.7';
 const PATH=location.pathname;
 const QUERY=new URLSearchParams(location.search);
 const EMBEDDED=window.self!==window.top||(QUERY.get('commonweave')==='1'&&QUERY.get('cabinet')==='1');
@@ -14,6 +15,17 @@ const SYSTEMS=[
   {id:'fellowfare',label:'FellowFare',image:'/app/assets/navigation/200-fellowfare-nav.webp?v=image-nav-r2',href:'/app/fellowfare-cabinet-v144.html?cabinet=1',glow:'#4f8ca8'},
   {id:'anarchadia',label:'Anarchadia',image:'/app/assets/navigation/200-anarchadia-nav.webp?v=image-nav-r2',href:'/app/anarchadia-console-v139.html?cabinet=1',glow:'#ff2f87'}
 ];
+
+function syncReleaseVersion(){
+  document.documentElement.dataset.commonweaveRelease=RELEASE_VERSION;
+  for(const node of document.querySelectorAll('.version-chip,.cw127-version span,[data-commonweave-release-version]')){
+    node.textContent=`v${RELEASE_VERSION}`;
+  }
+  for(const node of document.querySelectorAll('[aria-label*="version 1.0."],[aria-label*="Version 1.0."]')){
+    node.setAttribute('aria-label',node.getAttribute('aria-label').replace(/(version\s+)1\.0\.\d+/i,`$1${RELEASE_VERSION}`));
+  }
+  document.title=document.title.replace(/v1\.0\.\d+/i,`v${RELEASE_VERSION}`);
+}
 
 function clearEmbeddedCopy(){
   document.getElementById(NAV_ID)?.remove();
@@ -72,6 +84,7 @@ html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-com
 function mount(){
   const current=currentSystem();
   if(!current||document.getElementById(NAV_ID))return;
+  syncReleaseVersion();
   installStyle();
   document.documentElement.classList.add('cw-themed-system-nav-active');
   document.documentElement.dataset.cwThemedCurrent=current;
