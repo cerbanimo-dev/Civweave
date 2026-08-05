@@ -1,11 +1,11 @@
 (()=>{
 'use strict';
-const VERSION='1.0.7-settings-controller-v180';
+const VERSION='1.0.6-settings-controller-v180';
 if(globalThis.CommonweaveModelSettingsControllerV173?.version===VERSION)return;
-const STYLE='/app/model-settings-v133.css?v=1.0.7-settings-v180';
+const STYLE='/app/model-settings-v133.css?v=1.0.6-settings-v180';
 const DEPENDENCIES=[
-  ['/app/shared/commonweave-model-runtime.js?v=1.0.7-settings-v180',()=>globalThis.CommonweaveModelRuntime],
-  ['/app/unified-ai-settings-v175.js?v=1.0.7-settings-v180',()=>globalThis.CommonweaveUnifiedAISettingsV175]
+  ['/app/shared/commonweave-model-runtime.js?v=1.0.6-settings-v180',()=>globalThis.CommonweaveModelRuntime],
+  ['/app/unified-ai-settings-v175.js?v=1.0.6-settings-v180',()=>globalThis.CommonweaveUnifiedAISettingsV175]
 ];
 const BOOTSTRAP_ID='cw-ai-settings-bootstrap-v180';
 let ensurePromise=null,openPromise=null,openGeneration=0;
@@ -25,5 +25,5 @@ async function open(){
   return openPromise;
 }
 async function renderInline(target){await ensure();return globalThis.CommonweaveUnifiedAISettingsV175.renderInline(target)}
-const facade={version:`${VERSION}-facade`,open,ensure,renderInline};globalThis.CommonweaveModelSettingsV133=facade;mark('ready');globalThis.CommonweaveModelSettingsControllerV173=Object.freeze({version:VERSION,appVersion:'1.0.7',authority:'CommonweaveUnifiedAISettingsV175',eventOwnership:'controller-only',presentation:'first-paint-fixed-layer',nativeDialog:false,defaultRoute:'deterministic',legacySettingsCapture:false,transformerActive:false,open,ensure,renderInline,facade,settingsFacade:facade});
+const facade={version:`${VERSION}-facade`,open,ensure,renderInline};globalThis.CommonweaveModelSettingsV133=facade;mark('ready');globalThis.CommonweaveModelSettingsControllerV173=Object.freeze({version:VERSION,appVersion:'1.0.6',authority:'CommonweaveUnifiedAISettingsV175',eventOwnership:'controller-only',presentation:'first-paint-fixed-layer',nativeDialog:false,defaultRoute:'deterministic',legacySettingsCapture:false,transformerActive:false,open,ensure,renderInline,facade,settingsFacade:facade});
 })();
