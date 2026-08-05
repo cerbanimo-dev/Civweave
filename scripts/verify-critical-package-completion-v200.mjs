@@ -16,6 +16,7 @@ const installer=read('public/install-v130.js');
 const pwa=read('public/app/pwa-v130.js');
 
 const recognizedRevisions=[
+  'fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204',
   'fellowfare-active-v203-cerbanimo-boundary-v204',
   'fellowfare-active-v203-fast-runtime-proxy',
   'living-school-lesson-nav-v202-fast-runtime-proxy',
@@ -40,6 +41,12 @@ if(criticalRevision.startsWith('fellowfare-active-v203')){
     '/app/services/fellowfare/cabinet-embed.css',
     '/app/themed-system-nav-v178.js'
   ])assert(criticalList.includes(pathname),`Active FellowFare package path is missing from critical refresh: ${pathname}`);
+}
+if(criticalRevision.includes('parent-mobile-v205')){
+  for(const pathname of [
+    '/app/fellowfare-parent-theme-v205.css',
+    '/app/fellowfare-mobile-flow-v205.js'
+  ])assert(criticalList.includes(pathname),`FellowFare parent/mobile path is missing from critical refresh: ${pathname}`);
 }
 if(criticalRevision.includes('cerbanimo-boundary')){
   for(const pathname of [
@@ -70,6 +77,7 @@ console.log(JSON.stringify({
   navigationImagesOutsideCriticalLane:true,
   fastRuntimeCritical:true,
   activeFellowfareCritical:criticalRevision.startsWith('fellowfare-active-v203'),
+  fellowfareParentMobileCritical:criticalRevision.includes('parent-mobile-v205'),
   cerbanimoBoundaryCritical:criticalRevision.includes('cerbanimo-boundary'),
   legacyTrayHidden:true,
 },null,2));
