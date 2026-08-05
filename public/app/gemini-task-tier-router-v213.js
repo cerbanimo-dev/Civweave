@@ -9,6 +9,7 @@ const PROFILES_KEY='commonweave-model-profiles-v1';
 const NOTICE_ID='cw-gemini-task-tier-notice-v213';
 const STYLE_ID='cw-gemini-task-tier-style-v213';
 const ROUTER_FLAG='__commonweaveGeminiTaskTierRouterV213';
+let noticeTimer=null;
 const SETTINGS_SELECTOR='[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings],#settings-button,#model-chip';
 
 if(globalThis.CommonweaveGeminiTaskTierRouterV213?.version===VERSION)return;
@@ -143,6 +144,8 @@ function disclose(decision,model,request={}){
   if(!notice){notice=document.createElement('div');notice.id=NOTICE_ID;notice.setAttribute('role','status');notice.setAttribute('aria-live','polite');document.body.append(notice)}
   notice.textContent=`Complex task detected: using Gemini 3.5 Flash-Lite for ${decision.reason}. Routine requests use Gemini 3.1 Flash-Lite.`;
   notice.hidden=false;
+  clearTimeout(noticeTimer);
+  noticeTimer=setTimeout(()=>{if(notice?.isConnected)notice.hidden=true},7000);
   return detail;
 }
 
