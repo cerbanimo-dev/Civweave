@@ -5,3 +5,4 @@ requested: 2026-08-05T16:06:00-04:00
 retry: patch-generator-syntax-fixed
 retry2: multiline-smoke-assertion-aligned
 retry3: multiline-update-ready-assertions-aligned
+retry4: recovery-pause-simulation-aligned
