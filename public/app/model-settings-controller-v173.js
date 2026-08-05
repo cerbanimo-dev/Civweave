@@ -19,8 +19,8 @@ function showBootstrap(generation){installBootstrapStyle();removeBootstrap();con
 function afterPaint(){return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(resolve,0))))}
 async function ensure(){if(globalThis.CommonweaveUnifiedAISettingsV175){globalThis.CommonweaveUnifiedAISettingsV175.migrateDeterministicDefault?.();return true}if(ensurePromise)return ensurePromise;ensurePromise=(async()=>{addStyle();for(const [src,ready] of DEPENDENCIES)await loadScript(src,ready);globalThis.CommonweaveUnifiedAISettingsV175.migrateDeterministicDefault?.();return true})().catch(error=>{ensurePromise=null;throw error});return ensurePromise}
 async function open(){
-  const generation=++openGeneration,started=performance.now();showBootstrap(generation);mark('opening');
   if(openPromise)return openPromise;
+  const generation=++openGeneration,started=performance.now();showBootstrap(generation);mark('opening');
   openPromise=(async()=>{await afterPaint();if(generation!==openGeneration)return null;await ensure();if(generation!==openGeneration)return null;const runtime=globalThis.CommonweaveUnifiedAISettingsV175;if(!runtime?.open)throw new Error('The unified Commonweave AI settings surface did not become ready.');removeBootstrap();const layer=runtime.open();const elapsedMs=Math.round(performance.now()-started);mark('open');document.documentElement.dataset.settingsOpenMs=String(elapsedMs);dispatchEvent(new CustomEvent('commonweave:settings-first-open-metric',{detail:{version:VERSION,elapsedMs,transformerStarted:false}}));return layer})().catch(error=>{removeBootstrap();mark('error',error.message);dispatchEvent(new CustomEvent('commonweave:model-settings-error',{detail:{version:VERSION,message:error.message}}));throw error}).finally(()=>{openPromise=null});
   return openPromise;
 }
