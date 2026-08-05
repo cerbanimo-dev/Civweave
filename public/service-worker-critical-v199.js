@@ -1,15 +1,31 @@
 'use strict';
 (()=>{
-const VERSION='critical-living-school-boot-v199';
+const VERSION='critical-package-completion-v200';
 if(self.CommonweaveCriticalBootV199)return;
 
 const nativeAddEventListener=self.addEventListener;
 const capturedInstallListeners=[];
 const updating=Boolean(self.registration?.active);
-const CRITICAL_CACHE='cwboot-critical-living-school-v199';
+const CRITICAL_CACHE='cwboot-critical-living-school-v200';
 const BASE_CACHE='commonweave-static-1.0.6-direct-family-r45-memory-credential-v191-five-system-chat-r46-weaveling-memory-direct-software-r38-v106-device-package-r41-no-native-dialog-direct-entry-r45-memory-credential-v191';
 const EXTENSION_CACHE='cwext-working-campus-additions-v197-assistant-runtime-package';
+const BASE_EXPECTED_FILES=111;
+const EXTENSION_EXPECTED_FILES=53;
 const FETCH_TIMEOUT_MS=8000;
+const BASE_SENTINELS=[
+  '/index.html',
+  '/app/installed-entry-v146.html',
+  '/app/cabinets/living-school/living-school-cabinet-v151.mjs',
+  '/app/services/fellowfare/app.js',
+  '/app/anarchadia-console-v139.html'
+];
+const EXTENSION_SENTINELS=[
+  '/app/fast-interactive-runtime-v192.js',
+  '/app/context-plan-composer-v198.js',
+  '/app/themed-system-nav-v178.js',
+  '/app/cabinets/living-school/living-school-mutation-guard-v196.js',
+  '/extensions/commonweave-additions-v156.js'
+];
 const CRITICAL_FILES=[
   '/app/cabinets/living-school/index.html',
   '/app/cabinets/living-school/living-school-cabinet-v151.css',
@@ -66,6 +82,20 @@ async function matchNamedCache(name,pathname){
   try{return await (await caches.open(name)).match(pathname,{ignoreSearch:true,ignoreMethod:true})}catch{return null}
 }
 
+async function cacheInventory(name){
+  try{
+    const keys=await (await caches.open(name)).keys();
+    return{count:keys.length,paths:new Set(keys.map(request=>new URL(request.url).pathname))};
+  }catch{return{count:0,paths:new Set()}}
+}
+
+async function fullPackageStatus(){
+  const [base,extensions]=await Promise.all([cacheInventory(BASE_CACHE),cacheInventory(EXTENSION_CACHE)]);
+  const baseReady=base.count>=BASE_EXPECTED_FILES&&BASE_SENTINELS.every(pathname=>base.paths.has(pathname));
+  const extensionsReady=extensions.count>=EXTENSION_EXPECTED_FILES&&EXTENSION_SENTINELS.every(pathname=>extensions.paths.has(pathname));
+  return{ready:baseReady&&extensionsReady,baseReady,extensionsReady,baseCount:base.count,extensionCount:extensions.count};
+}
+
 async function networkResponse(requestOrPath){
   const pathname=typeof requestOrPath==='string'?requestOrPath:new URL(requestOrPath.url).pathname;
   const controller=new AbortController();
@@ -83,24 +113,41 @@ async function networkResponse(requestOrPath){
   finally{clearTimeout(timer)}
 }
 
-async function warmOne(pathname,cache){
-  const fresh=await networkResponse(pathname);
-  if(fresh){await cache.put(pathname,fresh.clone());return true}
+async function warmOne(pathname,cache,preferNetwork){
+  if(preferNetwork){
+    const fresh=await networkResponse(pathname);
+    if(fresh){await cache.put(pathname,fresh.clone());return true}
+  }
   const fallback=await matchNamedCache(BASE_CACHE,pathname)||await matchNamedCache(EXTENSION_CACHE,pathname)||await caches.match(pathname,{ignoreSearch:true,ignoreMethod:true});
   if(fallback){await cache.put(pathname,fallback.clone());return true}
+  if(!preferNetwork){
+    const fresh=await networkResponse(pathname);
+    if(fresh){await cache.put(pathname,fresh.clone());return true}
+  }
   return false;
 }
 
-async function warmCritical(){
+async function warmCritical(preferNetwork=false){
   const cache=await caches.open(CRITICAL_CACHE);
   let ready=0;
   for(let index=0;index<CRITICAL_FILES.length;index+=4){
     const batch=CRITICAL_FILES.slice(index,index+4);
-    const results=await Promise.all(batch.map(pathname=>warmOne(pathname,cache)));
+    const results=await Promise.all(batch.map(pathname=>warmOne(pathname,cache,preferNetwork)));
     ready+=results.filter(Boolean).length;
   }
-  if(ready<12)throw new Error(`Critical Living School package incomplete: ${ready}/${CRITICAL_FILES.length}`);
+  if(ready<CRITICAL_FILES.length)throw new Error(`Critical Living School package incomplete: ${ready}/${CRITICAL_FILES.length}`);
   return{ready,total:CRITICAL_FILES.length};
+}
+
+async function runCapturedInstallListeners(event){
+  const waits=[];
+  const installEvent=Object.create(event);
+  Object.defineProperty(installEvent,'waitUntil',{value:promise=>waits.push(Promise.resolve(promise)),enumerable:false});
+  for(const entry of capturedInstallListeners){
+    try{entry.listener.call(self,installEvent)}catch(error){waits.push(Promise.reject(error))}
+  }
+  await Promise.all(waits);
+  return waits.length;
 }
 
 function head(response){return new Response(null,{status:response.status,statusText:response.statusText,headers:response.headers})}
@@ -145,11 +192,16 @@ function finalize(){
   if(finalized)return;
   finalized=true;
   self.addEventListener=nativeAddEventListener;
-  if(!updating){
-    for(const entry of capturedInstallListeners)nativeAddEventListener.call(self,'install',entry.listener,entry.options);
-  }
   nativeAddEventListener.call(self,'install',event=>event.waitUntil((async()=>{
-    await warmCritical();
+    const before=await fullPackageStatus();
+    if(before.ready){
+      await warmCritical(true);
+    }else{
+      await runCapturedInstallListeners(event);
+      const after=await fullPackageStatus();
+      if(!after.ready)throw new Error(`Full Commonweave package incomplete after repair: base ${after.baseCount}/${BASE_EXPECTED_FILES}, additions ${after.extensionCount}/${EXTENSION_EXPECTED_FILES}`);
+      await warmCritical(false);
+    }
     await self.skipWaiting();
   })()));
   nativeAddEventListener.call(self,'message',event=>{
@@ -159,12 +211,15 @@ function finalize(){
       const keys=await cache.keys();
       const present=new Set(keys.map(request=>new URL(request.url).pathname));
       const missing=CRITICAL_FILES.filter(pathname=>!present.has(pathname));
-      const packet={type:'COMMONWEAVE_CRITICAL_BOOT_STATUS',version:VERSION,updateInstall:updating,capturedInstallListeners:capturedInstallListeners.length,cache:CRITICAL_CACHE,ready:missing.length===0,present:CRITICAL_FILES.length-missing.length,total:CRITICAL_FILES.length,missing};
+      const full=await fullPackageStatus();
+      const packet={type:'COMMONWEAVE_CRITICAL_BOOT_STATUS',version:VERSION,updateInstall:updating,capturedInstallListeners:capturedInstallListeners.length,cache:CRITICAL_CACHE,ready:missing.length===0&&full.ready,present:CRITICAL_FILES.length-missing.length,total:CRITICAL_FILES.length,missing,fullPackage:full};
       event.ports?.[0]?.postMessage(packet);
       event.source?.postMessage?.(packet);
     })());
   });
 }
 
-self.CommonweaveCriticalBootV199={version:VERSION,cache:CRITICAL_CACHE,paths:CRITICAL_FILES.slice(),updating,capturedInstallListeners,finalize};
+const api={version:VERSION,cache:CRITICAL_CACHE,paths:CRITICAL_FILES.slice(),updating,capturedInstallListeners,finalize,fullPackageStatus};
+self.CommonweaveCriticalBootV199=api;
+self.CommonweaveCriticalBootV200=api;
 })();
