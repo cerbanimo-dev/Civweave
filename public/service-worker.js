@@ -8,14 +8,14 @@ const CALIBRATION_REVISION='marketing-only-r1';
 const INSTALL_REVISION='direct-entry-r45-memory-credential-v191';
 const LEDGER_HYDRATION_REVISION='direct-software-r35';
 const AI_REVISION='settings-v191-explicit-device-credential';
-const PACKAGE_RECOVERY_REVISION='device-package-self-heal-v191';
+const BASE_PACKAGE_RECOVERY_REVISION='device-package-self-heal-v191';
 const MEMORY_REVISION='weaveling-working-long-memory-v191';
 // Compatibility markers retained for prior audits:
 // CACHE_REVISION='direct-family-r44-package-self-heal'
 // CACHE_REVISION='direct-family-r43-settings-single-pass'
 // AI_REVISION='settings-v183-diagnostics-package-self-heal-fixed-ort'
 // AI_REVISION='self-contained-settings-v182-single-pass-fixed-ort'
-// PACKAGE_RECOVERY_REVISION='device-package-self-heal-v184'
+// BASE_PACKAGE_RECOVERY_REVISION='device-package-self-heal-v184'
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}-${INSTALL_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}-${INSTALL_REVISION}`;
 const MODEL_CACHE='commonweave-model-1.0.6-minilm-fixed-ort-r1';
@@ -50,13 +50,13 @@ const CORE=[
 ];
 const DEVICE_REQUIRED=[...CORE];
 async function cacheRequired(cache,url){const response=await fetch(url,{cache:'no-store',headers:{'x-commonweave-package':'install'}});if(!response.ok)throw new Error(`Device package asset ${url} returned ${response.status}`);await cache.put(url,response.clone());return true}
-async function packageStatus(){const cache=await caches.open(STATIC_CACHE),keys=await cache.keys(),required=[...new Set(DEVICE_REQUIRED)],present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=required.filter(url=>!present.has(url));return{type:'COMMONWEAVE_DEVICE_PACKAGE',ready:missing.length===0,version:VERSION,revision:INSTALL_REVISION,deviceRevision:DEVICE_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,memoryRevision:MEMORY_REVISION,credentialPersistence:'explicit-session-or-device',packageRecoveryRevision:PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,defaultProvider:'deterministic',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,transformerActive:false,providerRuntimeOnOpen:false,singlePassOpen:true,migrationOnDemand:true,modelOnDemand:true,modelCache:MODEL_CACHE,cache:STATIC_CACHE,assetCount:required.length,presentCount:required.length-missing.length,missing}}
+async function packageStatus(){const cache=await caches.open(STATIC_CACHE),keys=await cache.keys(),required=[...new Set(DEVICE_REQUIRED)],present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=required.filter(url=>!present.has(url));return{type:'COMMONWEAVE_DEVICE_PACKAGE',ready:missing.length===0,version:VERSION,revision:INSTALL_REVISION,deviceRevision:DEVICE_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,memoryRevision:MEMORY_REVISION,credentialPersistence:'explicit-session-or-device',packageRecoveryRevision:BASE_PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,defaultProvider:'deterministic',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,transformerActive:false,providerRuntimeOnOpen:false,singlePassOpen:true,migrationOnDemand:true,modelOnDemand:true,modelCache:MODEL_CACHE,cache:STATIC_CACHE,assetCount:required.length,presentCount:required.length-missing.length,missing}}
 async function modelPackageStatus(){const cache=await caches.open(MODEL_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),required=[...MODEL_FILES],missing=required.filter(url=>!present.has(url));return{type:'COMMONWEAVE_MODEL_PACKAGE',ready:missing.length===0,version:VERSION,runtime:'onnxruntime-web/wasm',executionProvider:'wasm',threads:1,cache:MODEL_CACHE,assetCount:required.length,presentCount:required.length-missing.length,missing}}
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(STATIC_CACHE);try{for(const url of [...new Set(DEVICE_REQUIRED)])await cacheRequired(cache,url);await self.skipWaiting()}catch(error){await caches.delete(STATIC_CACHE);console.error('[Commonweave] Core package installation failed:',error);throw error}})()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{const keys=await caches.keys();const stale=keys.filter(key=>(key.startsWith('commonweave-')&&key!==STATIC_CACHE&&key!==RUNTIME_CACHE&&key!==MODEL_CACHE)||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));await Promise.all(stale.map(key=>caches.delete(key)));await self.clients.claim()})()));
 self.addEventListener('message',event=>{
   if(event.data?.type==='SKIP_WAITING')self.skipWaiting();
-  if(event.data?.type==='GET_VERSION'){const packet={type:'COMMONWEAVE_VERSION',version:VERSION,revision:`${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}-${INSTALL_REVISION}`,localFirstRevision:CACHE_REVISION,guideRevision:GUIDE_REVISION,cabinetRevision:CABINET_REVISION,deviceRevision:DEVICE_REVISION,calibrationRevision:CALIBRATION_REVISION,installRevision:INSTALL_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,memoryRevision:MEMORY_REVISION,credentialPersistence:'explicit-session-or-device',packageRecoveryRevision:PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,defaultProvider:'deterministic',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,transformerActive:false,providerRuntimeOnOpen:false,singlePassOpen:true,migrationOnDemand:true,modelOnDemand:true,modelRuntime:'onnxruntime-web/wasm'};event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}
+  if(event.data?.type==='GET_VERSION'){const packet={type:'COMMONWEAVE_VERSION',version:VERSION,revision:`${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}-${INSTALL_REVISION}`,localFirstRevision:CACHE_REVISION,guideRevision:GUIDE_REVISION,cabinetRevision:CABINET_REVISION,deviceRevision:DEVICE_REVISION,calibrationRevision:CALIBRATION_REVISION,installRevision:INSTALL_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,memoryRevision:MEMORY_REVISION,credentialPersistence:'explicit-session-or-device',packageRecoveryRevision:BASE_PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,defaultProvider:'deterministic',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,transformerActive:false,providerRuntimeOnOpen:false,singlePassOpen:true,migrationOnDemand:true,modelOnDemand:true,modelRuntime:'onnxruntime-web/wasm'};event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}
   if(event.data?.type==='GET_DEVICE_PACKAGE_STATUS')event.waitUntil(packageStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}));
   if(event.data?.type==='GET_MODEL_PACKAGE_STATUS')event.waitUntil(modelPackageStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}));
 });
@@ -73,7 +73,7 @@ async function networkRepair(request){
     if(!response.ok)return null;
     if(request.mode!=='navigate'&&/text\/html/i.test(type)&&!url.pathname.endsWith('.html'))return null;
     if(request.method==='GET'){const cache=await caches.open(RUNTIME_CACHE);await cache.put(url.pathname,response.clone())}
-    await notifyPackageEvent({event:'asset-repaired',pathname:url.pathname,status:response.status,recoveryRevision:PACKAGE_RECOVERY_REVISION});
+    await notifyPackageEvent({event:'asset-repaired',pathname:url.pathname,status:response.status,recoveryRevision:BASE_PACKAGE_RECOVERY_REVISION});
     return response;
   }catch{return null}
 }
@@ -83,9 +83,9 @@ function missingAssetResponse(pathname,fallback=''){
     'It was missing from the installed package cache and could not be repaired from the network.',
     fallback?`Offline fallback attempted: ${fallback}`:'No packaged fallback matched this route.',
     'Open the Commonweave installer, tap Check updates, then use Reset and retry package if the problem remains.',
-    `Package recovery revision: ${PACKAGE_RECOVERY_REVISION}`
+    `Package recovery revision: ${BASE_PACKAGE_RECOVERY_REVISION}`
   ].join('\n\n');
-  return new Response(body,{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-commonweave-device-package':'not-installed','x-commonweave-missing-asset':pathname,'x-commonweave-package-recovery':PACKAGE_RECOVERY_REVISION}})
+  return new Response(body,{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-commonweave-device-package':'not-installed','x-commonweave-missing-asset':pathname,'x-commonweave-package-recovery':BASE_PACKAGE_RECOVERY_REVISION}})
 }
 async function deviceOnly(request,fallback=''){
   const url=new URL(request.url),cached=await cachedResponse(request)||await cachedResponse(url.pathname);
@@ -93,8 +93,8 @@ async function deviceOnly(request,fallback=''){
   const repaired=await networkRepair(request);
   if(repaired)return request.method==='HEAD'?headResponse(repaired):repaired;
   const fallbackCached=fallback?await cachedResponse(fallback):null;
-  if(fallbackCached){await notifyPackageEvent({event:'asset-fallback',pathname:url.pathname,fallback,recoveryRevision:PACKAGE_RECOVERY_REVISION});return request.method==='HEAD'?headResponse(fallbackCached):fallbackCached}
-  await notifyPackageEvent({event:'asset-missing',pathname:url.pathname,fallback,recoveryRevision:PACKAGE_RECOVERY_REVISION});
+  if(fallbackCached){await notifyPackageEvent({event:'asset-fallback',pathname:url.pathname,fallback,recoveryRevision:BASE_PACKAGE_RECOVERY_REVISION});return request.method==='HEAD'?headResponse(fallbackCached):fallbackCached}
+  await notifyPackageEvent({event:'asset-missing',pathname:url.pathname,fallback,recoveryRevision:BASE_PACKAGE_RECOVERY_REVISION});
   return missingAssetResponse(url.pathname,fallback)
 }
 async function modelOnDemand(request){
