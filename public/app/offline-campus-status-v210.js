@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.6-offline-campus-status-v211';
+const VERSION='1.0.6-offline-campus-status-v210';
 const WORKER_REVISION='offline-campus-seed-provenance-v211';
 const STATUS_TYPES=new Set([
   'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',
@@ -15,7 +15,7 @@ function normalize(status={}){
   const skipped=Array.isArray(status.skipped)?status.skipped:[];
   const failedCount=Math.max(0,Number(status.failedCount??failed.length)||0);
   const skippedCount=Math.max(0,Number(status.skippedCount??skipped.length)||0);
-  const total=Math.max(0,Number(status.total||status.discovered-skippedCount||0)||0);
+  const total=Math.max(0,Number(status.total||Number(status.discovered||0)-skippedCount||0)||0);
   const rawCompleted=Math.max(0,Number(status.completed||0)||0);
   const hasAttempted=status.attempted!==undefined&&status.attempted!==null&&Number.isFinite(Number(status.attempted));
   const legacyAttemptSemantics=!hasAttempted&&status.revision==='lightweight-shell-v208';
@@ -43,10 +43,12 @@ function render(status){
   const state=$('#offline-package-state');
   const assets=$('#offline-package-assets');
   const button=$('#download-offline-package');
+  const requiredFailures=packet.failed.some(entry=>entry?.required===true||entry?.pathname==='package');
   if(state){
     if(packet.running)state.textContent='downloading';
     else if(packet.ready)state.textContent=packet.skippedCount?`ready offline · ${packet.skippedCount} stale reference${packet.skippedCount===1?'':'s'} skipped`:'ready offline';
-    else if(packet.failedCount)state.textContent=`${packet.failedCount} required file${packet.failedCount===1?'':'s'} need retry`;
+    else if(packet.failedCount&&requiredFailures)state.textContent=`${packet.failedCount} required file${packet.failedCount===1?'':'s'} need retry`;
+    else if(packet.failedCount)state.textContent=`${packet.failedCount} file${packet.failedCount===1?'':'s'} need retry`;
     else state.textContent=packet.downloaded?'partially downloaded':'not downloaded';
   }
   if(assets){
@@ -59,7 +61,8 @@ function render(status){
   if(button){
     if(packet.running)button.textContent=packet.total?`Downloading ${Math.min(packet.attempted,packet.total)}/${packet.total}…`:'Discovering campus files…';
     else if(packet.ready)button.textContent='Refresh offline campus';
-    else if(packet.failedCount)button.textContent=`Retry ${packet.failedCount} required file${packet.failedCount===1?'':'s'}`;
+    else if(packet.failedCount&&requiredFailures)button.textContent=`Retry ${packet.failedCount} required file${packet.failedCount===1?'':'s'}`;
+    else if(packet.failedCount)button.textContent=`Retry ${packet.failedCount} missing file${packet.failedCount===1?'':'s'}`;
     else if(packet.downloaded)button.textContent='Resume offline campus';
     else button.textContent='Download offline campus';
   }
@@ -83,10 +86,9 @@ function askWorker(worker,type,timeoutMs=6000){
 }
 
 async function ensureCurrentWorker(){
-  const controller=navigator.serviceWorker?.controller;
-  const version=await askWorker(controller,'GET_VERSION');
-  if(version?.revision===WORKER_REVISION)return controller;
-  const registration=await navigator.serviceWorker?.getRegistration?.('/').catch(()=>null);
+  const serviceWorker=typeof navigator!=='undefined'?navigator.serviceWorker:null;
+  const controller=serviceWorker?.controller||null;
+  const registration=await serviceWorker?.getRegistration?.('/').catch(()=>null);
   if(!registration)return controller;
   try{await registration.update()}catch{return controller}
   if(registration.waiting)registration.waiting.postMessage({type:'SKIP_WAITING'});
@@ -99,15 +101,17 @@ async function ensureCurrentWorker(){
 
 async function askCurrentStatus(){
   const worker=await ensureCurrentWorker();
-  const packet=await askWorker(worker||navigator.serviceWorker?.controller,'GET_OFFLINE_PACKAGE_STATUS');
+  const serviceWorker=typeof navigator!=='undefined'?navigator.serviceWorker:null;
+  const packet=await askWorker(worker||serviceWorker?.controller,'GET_OFFLINE_PACKAGE_STATUS');
   if(STATUS_TYPES.has(packet?.type))render(packet);
 }
 
 globalThis.CommonweaveOfflineCampusStatusV210=api;
-navigator.serviceWorker?.addEventListener('message',event=>{
+const serviceWorker=typeof navigator!=='undefined'?navigator.serviceWorker:null;
+serviceWorker?.addEventListener('message',event=>{
   if(STATUS_TYPES.has(event.data?.type))render(event.data);
 });
 addEventListener('load',askCurrentStatus,{once:true});
-navigator.serviceWorker?.addEventListener('controllerchange',()=>setTimeout(askCurrentStatus,0));
+serviceWorker?.addEventListener('controllerchange',()=>setTimeout(askCurrentStatus,0));
 
 })();
