@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='177.0-final-legacy-ai-retirement';
+const VERSION='177.1-final-legacy-ai-retirement';
 const PLATFORM_KEY='commonweave.platform-settings.v143';
 const AI_KEY='commonweave.universal-ai.v127';
 const PROFILES_KEY='commonweave-model-profiles-v1';
@@ -37,7 +37,8 @@ function replacement(form){
     const aiFields=[...form.elements].filter(field=>/provider|route|model|endpoint|apikey|api-key|token|consent|agentic/i.test(field.name||''));
     aiFields.forEach(field=>field.closest('label,section,.field,.form-row,.cw143-panel')?.remove());
     const submit=form.querySelector('button[type="submit"],input[type="submit"]');if(submit)submit.textContent='Save platform settings';
-    if(!form.querySelector('[data-open-unified-ai-settings]'))form.insertAdjacentHTML('beforeend','<section class="cw-ai-fallback-contract"><b>AI configuration</b><span>Provider, API key, consent, and agentic settings live in the single Commonweave AI settings surface. Deterministic local mode is the default.</span><button type="button" data-open-unified-ai-settings>Open Commonweave AI settings</button></section>');
+    const hasHandoff=form.querySelector('[data-open-ai-settings],[data-open-unified-ai-settings]');
+    if(!hasHandoff)form.insertAdjacentHTML('beforeend','<section class="cw-ai-fallback-contract"><b>AI configuration</b><span>Provider, API key, consent, and agentic settings live in the single Commonweave AI settings surface. Deterministic local mode is the default.</span><button type="button" data-open-unified-ai-settings>Open Commonweave AI settings</button></section>');
     return;
   }
   form.replaceWith(Object.assign(document.createElement('div'),{className:'cw-ai-fallback-contract',innerHTML:'<b>AI configuration moved</b><span>This legacy form is retired. Every guide uses the single Commonweave AI settings surface.</span><button type="button" data-open-unified-ai-settings>Open Commonweave AI settings</button>'}));
@@ -45,7 +46,7 @@ function replacement(form){
 function patch(root=document){for(const selector of SELECTORS)root.querySelectorAll?.(selector).forEach(replacement);root.querySelectorAll?.('[data-capability="commonweave.model-setup"]').forEach(button=>{button.dataset.opensUnifiedAiSettings='true';button.title='Open Commonweave AI settings'})}
 document.addEventListener('submit',event=>{const form=event.target.closest?.('form[data-cw143-settings]');if(!form)return;event.preventDefault();event.stopImmediatePropagation();savePlatform(form)},true);
 document.addEventListener('click',event=>{
-  const button=event.target.closest('[data-open-unified-ai-settings],[data-opens-unified-ai-settings]');if(!button)return;
+  const button=event.target.closest('[data-open-ai-settings],[data-open-unified-ai-settings],[data-opens-unified-ai-settings]');if(!button)return;
   event.preventDefault();event.stopImmediatePropagation();open().catch(error=>console.error('[Commonweave settings delegation]',error));
 },true);
 const observer=new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes)if(node.nodeType===1){replacement(node.matches?.(SELECTORS.join(','))?node:null);patch(node)}});
