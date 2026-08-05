@@ -60,7 +60,7 @@ jobs:
 
       - name: Build category school seeds
         run: >-
-          python tools/knowledge_seed/split_seed_schools.py
+          python tools/knowledge_seed/split_seed_schools_entry.py
           --source-db "${SOURCE_DB}"
           --output build/commonweave-category-school-seeds
           --unpack-script tools/knowledge_seed/batch_unpack_schools.py
@@ -79,7 +79,10 @@ jobs:
 
           bundle = Path('build/commonweave-category-school-seeds')
           catalog = json.loads((bundle / 'catalog.json').read_text())
+          assert len(catalog['schools']) == 11
           assert sum(s['counts']['articles'] for s in catalog['schools']) == 1001
+          assert catalog['reconciliation']['crossroads_articles'] == 0
+          assert catalog['reconciliation']['crossroads_titles'] == []
           for school in catalog['schools']:
               db = Path('build/verification-unpacked') / f"commonweave-school-{school['school_slug']}" / f"commonweave-school-{school['school_slug']}.sqlite"
               with sqlite3.connect(db) as connection:
@@ -90,6 +93,7 @@ jobs:
               'schools': len(catalog['schools']),
               'articles': sum(s['counts']['articles'] for s in catalog['schools']),
               'compressed_bytes': sum(s['zip_bytes'] for s in catalog['schools']),
+              'legacy_overrides': catalog['reconciliation'].get('legacy_override_count', 0),
               'crossroads': catalog['reconciliation']['crossroads_titles'],
           }, indent=2))
           PY
