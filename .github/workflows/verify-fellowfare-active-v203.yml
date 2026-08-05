@@ -1,10 +1,12 @@
-name: Verify active FellowFare v203
+name: Verify active FellowFare v205
 
 on:
   pull_request:
     paths:
       - 'public/app/fellowfare-cabinet-v144.html'
       - 'public/app/fellowfare-cabinet-v144.css'
+      - 'public/app/fellowfare-parent-theme-v205.css'
+      - 'public/app/fellowfare-mobile-flow-v205.js'
       - 'public/app/services/fellowfare/cabinet.html'
       - 'public/app/services/fellowfare/cabinet-embed.css'
       - 'public/app/themed-system-nav-v178.js'
