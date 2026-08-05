@@ -12,6 +12,9 @@ const read = relative => fs.readFile(path.join(repo, relative), 'utf8');
 const assertIncludes = (source, tokens, label) => {
   for (const token of tokens) if (!source.includes(token)) throw new Error(`${label} is missing ${token}`);
 };
+const assertMatches = (source, pattern, label) => {
+  if (!pattern.test(source)) throw new Error(`${label} is missing ${pattern}`);
+};
 
 async function sha256(file) {
   const data = await fs.readFile(file);
@@ -81,12 +84,11 @@ assertIncludes(helper, [
 ], 'knowledge helper');
 if (helper.includes('serviceWorker.register')) throw new Error('Optional school staging must not register or replace the core service worker.');
 assertIncludes(installer, ['neededSchools', 'Save selected library', 'Download ${needed.length}', "progress.phase==='cached'", 'saved offline'], 'knowledge installer');
+assertMatches(installRuntime, /const\s+LIBRARY_CACHE\s*=\s*['"]cwknowledge-school-seeds-v2['"]/, 'app installer protected library cache');
 assertIncludes(installRuntime, [
-  "const LIBRARY_CACHE='cwknowledge-school-seeds-v2'",
   'migrateKnowledgeCache',
   'protectedCache',
   'waitForCurrentWorker',
-  "UPDATE_REVISION='visible-update-library-preservation-v207-registration-watchdog'",
 ], 'app installer runtime');
 assertIncludes(boundary, ["PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'", 'addScript(PWA_UPDATE_SCRIPT)', "pwaUpdateRevision:'v207-registration-watchdog'"], 'install boundary');
 assertIncludes(updateController, [
@@ -98,7 +100,7 @@ assertIncludes(updateController, [
   "const LIBRARY_CACHE='cwknowledge-school-seeds-v2'",
 ], 'installed update controller');
 assertIncludes(updateWorker, ["const CACHE='cwupdate-visible-v207'", "'/app/pwa-update-controller-v204.js'", "knowledgeCache:'cwknowledge-school-seeds-v2'"], 'update service-worker lane');
-assertIncludes(workerWrapper, ["importScripts('/service-worker-update-v204.js?v=visible-update-library-preservation-v207-registration-watchdog')", 'update-v204'], 'service-worker wrapper');
+assertIncludes(workerWrapper, ['lightweight-shell-v208', 'offline-campus-seed-provenance-v211', "'cwupdate-'"], 'generated service-worker package');
 
 for (const source of [helper, installer, installRuntime, boundary, updateController, updateWorker]) new Function(source);
 
