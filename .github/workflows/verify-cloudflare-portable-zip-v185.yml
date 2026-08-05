@@ -26,5 +26,7 @@ jobs:
           node --check scripts/verify-cloudflare-portable-zip-v185.mjs
       - name: Build Pages output without system zip
         run: node scripts/verify-cloudflare-portable-zip-v185.mjs
-      - name: Verify Workers static-assets deployment configuration
-        run: npx --yes wrangler@4.118.0 deploy --dry-run
+      - name: Verify Pages deployment configuration
+        run: |
+          node -e "const fs=require('fs'); const c=JSON.parse(fs.readFileSync('wrangler.jsonc','utf8')); if(c.pages_build_output_dir!=='./.cloudflare-pages') throw new Error('Pages output directory is not configured'); if(c.assets) throw new Error('Workers static-assets config must not replace Pages');"
+          test -f .cloudflare-pages/index.html
