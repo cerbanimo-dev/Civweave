@@ -1,12 +1,12 @@
 'use strict';
 (()=>{
-const VERSION='critical-package-completion-v200';
-if(self.CommonweaveCriticalBootV199)return;
+const VERSION='living-school-lesson-nav-v201';
+if(self.CommonweaveCriticalBootV201)return;
 
 const nativeAddEventListener=self.addEventListener;
 const capturedInstallListeners=[];
 const updating=Boolean(self.registration?.active);
-const CRITICAL_CACHE='cwboot-critical-living-school-v200';
+const CRITICAL_CACHE='cwboot-critical-living-school-v201';
 const BASE_CACHE='commonweave-static-1.0.6-direct-family-r45-memory-credential-v191-five-system-chat-r46-weaveling-memory-direct-software-r38-v106-device-package-r41-no-native-dialog-direct-entry-r45-memory-credential-v191';
 const EXTENSION_CACHE='cwext-working-campus-additions-v197-assistant-runtime-package';
 const BASE_EXPECTED_FILES=111;
@@ -43,11 +43,6 @@ const CRITICAL_FILES=[
   '/app/services/living-school/modules/project-gate.mjs',
   '/app/services/living-school/modules/cerbanimo-bridge.mjs',
   '/app/themed-system-nav-v178.js',
-  '/app/assets/navigation/200-commonweave-nav.webp',
-  '/app/assets/navigation/200-cerbanimo-nav.webp',
-  '/app/assets/navigation/200-living-school-nav.webp',
-  '/app/assets/navigation/200-fellowfare-nav.webp',
-  '/app/assets/navigation/200-anarchadia-nav.webp',
   '/app/install-boundary-v146.js',
   '/app/local-first-policy-v131.js',
   '/app/platform-stability-v159.js',
@@ -222,4 +217,5 @@ function finalize(){
 const api={version:VERSION,cache:CRITICAL_CACHE,paths:CRITICAL_FILES.slice(),updating,capturedInstallListeners,finalize,fullPackageStatus};
 self.CommonweaveCriticalBootV199=api;
 self.CommonweaveCriticalBootV200=api;
+self.CommonweaveCriticalBootV201=api;
 })();
