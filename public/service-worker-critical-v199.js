@@ -1,12 +1,12 @@
 'use strict';
 (()=>{
-const VERSION='living-school-lesson-nav-v202-fast-runtime-proxy';
-if(self.CommonweaveCriticalBootV202)return;
+const VERSION='fellowfare-active-v203-fast-runtime-proxy';
+if(self.CommonweaveCriticalBootV203)return;
 
 const nativeAddEventListener=self.addEventListener;
 const capturedInstallListeners=[];
 const updating=Boolean(self.registration?.active);
-const CRITICAL_CACHE='cwboot-critical-living-school-v202-fast-runtime-proxy';
+const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-fast-runtime-proxy';
 const BASE_CACHE='commonweave-static-1.0.6-direct-family-r45-memory-credential-v191-five-system-chat-r46-weaveling-memory-direct-software-r38-v106-device-package-r41-no-native-dialog-direct-entry-r45-memory-credential-v191';
 const EXTENSION_CACHE='cwext-working-campus-additions-v197-assistant-runtime-package';
 const BASE_EXPECTED_FILES=111;
@@ -42,6 +42,9 @@ const CRITICAL_FILES=[
   '/app/services/living-school/modules/rubric-engine.mjs',
   '/app/services/living-school/modules/project-gate.mjs',
   '/app/services/living-school/modules/cerbanimo-bridge.mjs',
+  '/app/fellowfare-cabinet-v144.html',
+  '/app/fellowfare-cabinet-v144.css',
+  '/app/services/fellowfare/cabinet-embed.css',
   '/app/themed-system-nav-v178.js',
   '/app/install-boundary-v146.js',
   '/app/local-first-policy-v131.js',
@@ -131,7 +134,7 @@ async function warmCritical(preferNetwork=false){
     const results=await Promise.all(batch.map(pathname=>warmOne(pathname,cache,preferNetwork)));
     ready+=results.filter(Boolean).length;
   }
-  if(ready<CRITICAL_FILES.length)throw new Error(`Critical Living School package incomplete: ${ready}/${CRITICAL_FILES.length}`);
+  if(ready<CRITICAL_FILES.length)throw new Error(`Critical Commonweave package incomplete: ${ready}/${CRITICAL_FILES.length}`);
   return{ready,total:CRITICAL_FILES.length};
 }
 
@@ -220,4 +223,5 @@ self.CommonweaveCriticalBootV199=api;
 self.CommonweaveCriticalBootV200=api;
 self.CommonweaveCriticalBootV201=api;
 self.CommonweaveCriticalBootV202=api;
+self.CommonweaveCriticalBootV203=api;
 })();
