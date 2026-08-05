@@ -34,7 +34,8 @@ vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'offline-campus-status-v210.js'});
 
 const api=sandbox.CommonweaveOfflineCampusStatusV210;
-assert(api?.version==='1.0.6-offline-campus-status-v210','Offline campus status repair API is missing.');
+assert(api?.version==='1.0.7-offline-campus-status-v210','Offline campus status repair API is missing or carries the wrong release version.');
+assert(api.releaseVersion==='1.0.7','Offline campus status repair does not expose the v1.0.7 release marker.');
 
 const legacy=api.normalize({
   type:'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',
@@ -95,7 +96,7 @@ assert(listeners.has('load'),'Status repair does not query the current worker af
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'offline-campus-status-v210',
+  revision:'1.0.7-offline-campus-status-v210',
   legacyAttempted:205,
   legacyDownloaded:186,
   failedCount:19,
