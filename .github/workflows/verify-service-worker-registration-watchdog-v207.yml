@@ -10,6 +10,7 @@ on:
       - public/service-worker-v203.js
       - public/service-worker-update-v204.js
       - scripts/apply-service-worker-registration-watchdog-v207.mjs
+      - scripts/align-service-worker-registration-watchdog-smoke-v207.mjs
       - scripts/smoke-service-worker-registration-watchdog-v207.mjs
       - scripts/verify-knowledge-school-seeds-v1.mjs
       - .github/workflows/verify-service-worker-registration-watchdog-v207.yml
@@ -31,13 +32,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'push' && 'agent/service-worker-registration-watchdog-v207' || '' }}
-          fetch-depth: 0
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - name: Materialize deterministic watchdog repair
         if: github.event_name == 'push'
-        run: node scripts/apply-service-worker-registration-watchdog-v207.mjs
+        run: |
+          node scripts/apply-service-worker-registration-watchdog-v207.mjs
+          node scripts/align-service-worker-registration-watchdog-smoke-v207.mjs
       - name: Check watchdog JavaScript syntax
         run: |
           node --check public/install-v130.js
@@ -46,6 +49,7 @@ jobs:
           node --check public/service-worker-v203.js
           node --check public/service-worker-update-v204.js
           node --check scripts/apply-service-worker-registration-watchdog-v207.mjs
+          node --check scripts/align-service-worker-registration-watchdog-smoke-v207.mjs
           node --check scripts/smoke-service-worker-registration-watchdog-v207.mjs
           node --check scripts/verify-knowledge-school-seeds-v1.mjs
       - name: Simulate stalled registration and update promises
@@ -68,6 +72,7 @@ jobs:
             public/app/pwa-update-controller-v204.js \
             public/service-worker-v203.js \
             public/service-worker-update-v204.js \
+            scripts/smoke-service-worker-registration-watchdog-v207.mjs \
             scripts/verify-knowledge-school-seeds-v1.mjs
           if git diff --cached --quiet; then
             echo 'Registration watchdog already materialized.'
