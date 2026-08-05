@@ -62,9 +62,9 @@ assert.ok(waiting.CommonweaveFastInteractiveV192,'readiness must be published ev
 assert.equal(waiting.CommonweaveFastInteractiveV192.status().mode,'waiting','an absent model runtime must wait without throwing');
 
 assert.doesNotMatch(source,/runtime\.generate\s*=/,'the fast runtime must never mutate the frozen generate property');
-assert.match(critical,/living-school-lesson-nav-v202-fast-runtime-proxy/,'critical boot revision must rotate');
+assert.match(critical,/(?:living-school-lesson-nav-v202|fellowfare-active-v203)-fast-runtime-proxy/,'critical boot revision must retain the frozen runtime proxy repair');
 assert.ok(critical.includes("'/app/fast-interactive-runtime-v192.js'"),'critical boot must refresh the corrected runtime');
-assert.match(worker,/service-worker-critical-v199\.js\?v=fast-runtime-proxy-v202/,'the registered worker must force an imported-script refresh');
+assert.match(worker,/service-worker-critical-v199\.js\?v=(?:fast-runtime-proxy-v202|fellowfare-active-v203)/,'the registered worker must force an imported-script refresh');
 
 for(const forbidden of [
   'model-settings-controller-v173.js',
