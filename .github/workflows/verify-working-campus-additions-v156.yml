@@ -1,4 +1,4 @@
-name: Verify working-campus deterministic additions
+name: Verify Commonweave v1.0.6 Working Campus
 
 on:
   push:
@@ -19,10 +19,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Syntax check active runtime
         run: npm run check:syntax
-      - name: Verify deterministic AI and final settings retirement
-        run: |
-          node scripts/verify-deterministic-ai-v175.mjs
-          node scripts/verify-final-settings-retirement-v177.mjs
+      - name: Verify v1.0.6 settings layer
+        run: node scripts/verify-v106-settings-layer-v179.mjs
       - name: Verify repository package
         run: npm run check
       - name: Test Anarchadia governance kernel
