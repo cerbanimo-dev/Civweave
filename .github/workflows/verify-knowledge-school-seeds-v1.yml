@@ -1,0 +1,42 @@
+name: Verify optional knowledge school seeds
+
+on:
+  pull_request:
+    paths:
+      - public/downloads/knowledge-schools/**
+      - public/app/knowledge-school-**
+      - public/index.html
+      - scripts/verify-knowledge-school-seeds-v1.mjs
+      - .github/workflows/verify-knowledge-school-seeds-v1.yml
+  push:
+    branches:
+      - agent/optional-knowledge-school-seeds
+    paths:
+      - public/downloads/knowledge-schools/**
+      - public/app/knowledge-school-**
+      - public/index.html
+      - scripts/verify-knowledge-school-seeds-v1.mjs
+      - .github/workflows/verify-knowledge-school-seeds-v1.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify scripts and optional asset boundaries
+        run: |
+          node --check public/app/knowledge-school-seeds-v1.js
+          node --check public/app/knowledge-school-installer-v1.js
+          node --check scripts/verify-knowledge-school-seeds-v1.mjs
+          python -m py_compile public/downloads/knowledge-schools/batch_unpack_schools.py
+          node scripts/verify-knowledge-school-seeds-v1.mjs
