@@ -42,13 +42,18 @@ function evaluate(source,filename='worker.js'){
 }
 
 const importLine="importScripts('/service-worker.js?v=1.0.6-base-r48-worker-evaluation');";
+const importIndex=additiveWorker.indexOf(importLine);
+const scopeIndex=additiveWorker.indexOf('(()=>{',importIndex+importLine.length);
+const firstAdditiveConst=additiveWorker.indexOf('\nconst ',importIndex+importLine.length);
 assert(baseWorker.includes("const PACKAGE_RECOVERY_REVISION="),'Base worker no longer exposes the collision fixture.');
 assert(additiveWorker.includes("const PACKAGE_RECOVERY_REVISION="),'Additive worker no longer exposes the collision fixture.');
-assert(additiveWorker.includes(`${importLine}\n(()=>{`),'Additive worker is not isolated immediately after importScripts.');
+assert(importIndex>=0,'Additive worker does not import the v189 base worker.');
+assert(scopeIndex>importIndex,'Additive worker does not open an isolation closure after importScripts.');
+assert(firstAdditiveConst<0||scopeIndex<firstAdditiveConst,'An additive lexical declaration appears before the isolation closure.');
 assert(additiveWorker.trimEnd().endsWith('})();'),'Additive worker isolation closure is not closed.');
 assert(additiveWorker.includes('working-campus-additions-v189-worker-evaluation'),'v189 worker evaluation revision is missing.');
 
-const additiveBody=additiveWorker.replace(`${importLine}\n`,'');
+const additiveBody=additiveWorker.slice(0,importIndex)+additiveWorker.slice(importIndex+importLine.length);
 const combined=evaluate(`${baseWorker}\n${additiveBody}`,'combined-service-worker.js');
 assert(!combined.error,`Base and additive workers do not compile in one browser-style lexical scope: ${combined.error?.stack||combined.error}`);
 assert(combined.listeners.filter(entry=>entry.type==='install').length===2,'Base and additive install listeners did not both register.');
