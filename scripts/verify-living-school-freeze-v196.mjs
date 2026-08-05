@@ -1,22 +1,25 @@
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
-const [guard,index,worker,pwa,relay]=await Promise.all([
+const [guard,index,worker,pwa,relay,enhancements]=await Promise.all([
   readFile('public/app/cabinets/living-school/living-school-mutation-guard-v196.js','utf8'),
   readFile('public/app/cabinets/living-school/index.html','utf8'),
   readFile('public/service-worker-v156.js','utf8'),
   readFile('public/app/pwa-v130.js','utf8'),
-  readFile('public/app/cabinets/living-school/living-school-two-agent-relay-v165.js','utf8')
+  readFile('public/app/cabinets/living-school/living-school-two-agent-relay-v165.js','utf8'),
+  readFile('public/app/cabinets/living-school/living-school-enhancements-v202.js','utf8')
 ]);
 const assert=(value,message)=>{if(!value)throw new Error(message)};
 
 assert(relay.includes('new MutationObserver(queuePatch).observe(stage'),'Freeze fixture changed: relay stage observer was not found.');
 assert(relay.includes("reader.querySelector('[data-two-agent-media]')?.remove()"),'Freeze fixture changed: relay media replacement was not found.');
-assert(index.indexOf('living-school-mutation-guard-v196.js')<index.indexOf('living-school-two-agent-relay-v165.js'),'Mutation guard must load before the relay can construct its stage observer.');
-assert(index.indexOf('living-school-mutation-guard-v196.js')<index.indexOf('living-school-research-v162.js'),'Mutation guard must install before later Living School observers boot.');
+assert(index.includes('living-school-enhancements-v202.js'),'Living School no longer uses the post-core enhancement loader.');
+assert(!index.includes('living-school-two-agent-relay-v165.js?v='),'Relay still boots directly from the HTML shell.');
+assert(enhancements.indexOf('living-school-mutation-guard-v196.js')<enhancements.indexOf('living-school-two-agent-relay-v165.js'),'Mutation guard must load before the relay can construct its stage observer.');
+assert(enhancements.includes("document.addEventListener('commonweave:living-school-ready',start"),'Enhancers no longer wait for the core engine ready event.');
 assert(worker.includes('/app/cabinets/living-school/living-school-mutation-guard-v196.js'),'Installed package omits the Living School mutation guard.');
 assert(worker.includes("LIVING_SCHOOL_MUTATION_GUARD_REVISION='reader-self-mutation-filter-v196'"),'Worker status omits the mutation guard revision.');
-assert(pwa.includes('living-school-lesson-nav-v201'),'PWA package was not rotated for the lesson-triggered freeze repair.');
+assert(pwa.includes('living-school-image-runtime-v202'),'PWA package was not rotated for the isolated image runtime repair.');
 
 class NativeMutationObserver{
   static instances=[];
@@ -48,4 +51,4 @@ const ordinaryObserver=new sandbox.MutationObserver(ordinaryCallback);
 ordinaryObserver.trigger([selfRecord]);
 assert(sandbox.ordinaryCalls===1,'Mutation guard interfered with an unrelated observer.');
 
-console.log(JSON.stringify({ok:true,repair:'living-school-lesson-triggered-reader-loop-v201',guardBeforeRelay:true,selfMutationCallbacks:0,externalMutationCallbacks:1,unrelatedObserversPreserved:true,package:'v201'},null,2));
+console.log(JSON.stringify({ok:true,repair:'living-school-image-runtime-v202',guardBeforeRelay:true,enhancersAfterCore:true,selfMutationCallbacks:0,externalMutationCallbacks:1,unrelatedObserversPreserved:true,package:'v202'},null,2));
