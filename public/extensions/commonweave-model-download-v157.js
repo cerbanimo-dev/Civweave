@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='1.0.5-model-download-v180-fixed-ort';
+const VERSION='1.0.6-model-download-v180-fixed-ort';
 if(globalThis.CommonweaveModelDownloadV157?.version===VERSION)return;
-const ADAPTER='/app/models/all-minilm-l6-v2/adapter.js?v=device-package-r40-fixed-ort-wasm';
+const ADAPTER='/app/models/all-minilm-l6-v2/adapter.js?v=device-package-r41-fixed-ort-wasm';
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 let running=null;
 async function module(){return import(ADAPTER)}
