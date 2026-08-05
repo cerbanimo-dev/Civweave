@@ -1,5 +1,5 @@
 'use strict';
-importScripts('/service-worker-critical-v199.js?v=fellowfare-parent-mobile-v205');
+importScripts('/service-worker-critical-v199.js?v=memory-bridge-frozen-proxy-v205');
 importScripts('/service-worker.js?v=1.0.6-base-r52-living-school-boot-v195');
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r51-image-system-nav-repair')
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r50-memory-credential-v191')
@@ -28,7 +28,7 @@ const SETTINGS_LOG_REVISION='diagnostics-runtime-retired-v188';
 const PACKAGE_RECOVERY_REVISION='device-package-self-heal-v197-assistant-runtime-package';
 const ASSISTANT_RUNTIME_REVISION='fast-interactive-v192-context-planner-v198';
 const WEAVELING_PLAN_REVISION='structured-json-system-prompt-v190';
-const WEAVELING_MEMORY_REVISION='working-long-term-local-v191';
+const WEAVELING_MEMORY_REVISION='working-long-term-local-v191-frozen-runtime-proxy-v205';
 const PASSPORT_REVISION='anarchadia-passport-expanded-v193';
 const LIVING_SCHOOL_BOOT_REVISION='nonblocking-bootstrap-v194';
 const LIVING_SCHOOL_MUTATION_GUARD_REVISION='reader-self-mutation-filter-v196';
@@ -70,4 +70,4 @@ self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names
 self.addEventListener('message',event=>{if(event.data?.type==='GET_ADDITIONS_STATUS')event.waitUntil(extensionStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}))});
 self.addEventListener('fetch',event=>{const request=event.request;if(!['GET','HEAD'].includes(request.method))return;const url=new URL(request.url);if(url.origin!==self.location.origin||!url.pathname.startsWith('/extensions/'))return;event.respondWith(caches.open(EXTENSION_CACHE).then(async cache=>{const cached=await cache.match(url.pathname,{ignoreSearch:true});if(cached)return request.method==='HEAD'?new Response(null,{status:cached.status,statusText:cached.statusText,headers:cached.headers}):cached;try{const response=await fetch(request,{cache:'no-store'});if(response.ok)await cache.put(url.pathname,response.clone());return response}catch{return new Response(`Commonweave additive tool is not installed: ${url.pathname}`,{status:503,headers:{'content-type':'text/plain; charset=utf-8','x-commonweave-missing-asset':url.pathname,'x-commonweave-package-recovery':PACKAGE_RECOVERY_REVISION}})}}))});
 })();
-(self.CommonweaveCriticalBootV202||self.CommonweaveCriticalBootV201||self.CommonweaveCriticalBootV199)?.finalize();
+(self.CommonweaveCriticalBootV205||self.CommonweaveCriticalBootV204||self.CommonweaveCriticalBootV202||self.CommonweaveCriticalBootV201||self.CommonweaveCriticalBootV199)?.finalize();

@@ -24,8 +24,8 @@ for(const [name,source] of [['critical worker',critical],['shared image worker',
   try{new Function(source)}catch(error){throw new Error(`${name} does not parse: ${error.message}`)}
 }
 
-const combinedRevision='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204';
-assert(critical.includes(`VERSION='${combinedRevision}'`),'The combined FellowFare mobile and Cerbanimo critical core is not active.');
+const combinedRevision='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205';
+assert(critical.includes(`VERSION='${combinedRevision}'`),'The combined FellowFare mobile, Cerbanimo, and memory bridge critical core is not active.');
 assert(critical.includes(`CRITICAL_CACHE='cwboot-critical-${combinedRevision}'`),'The combined critical cache is not active.');
 assert(critical.includes('BASE_EXPECTED_FILES=111'),'The 111-file core package boundary changed unexpectedly.');
 assert(critical.includes('EXTENSION_EXPECTED_FILES=53'),'The 53-file shared package boundary changed unexpectedly.');
@@ -49,6 +49,7 @@ for(const pathname of essential){
 }
 for(const pathname of [
   '/app/fast-interactive-runtime-v192.js',
+  '/app/weaveling-memory-bridge-v191.js',
   '/app/fellowfare-cabinet-v144.html',
   '/app/fellowfare-cabinet-v144.css',
   '/app/fellowfare-parent-theme-v205.css',
@@ -60,6 +61,7 @@ for(const pathname of [
 assert(imageWorker.includes("event.stopImmediatePropagation()"),'Shared images are not protected from the generic /app fetch route.');
 assert(imageWorker.includes("type:'COMMONWEAVE_SHARED_IMAGE_STATUS'"),'Shared image readiness is not inspectable.');
 assert(wrapper.indexOf('service-worker-shared-images-v203.js')<wrapper.indexOf('service-worker-v156.js'),'The image repair lane must register before the generic package worker.');
+assert(wrapper.includes('flat-living-school-v203-memory-bridge-v205'),'The v203 wrapper does not refresh the changed inner worker.');
 
 assert((nav.match(/200-[a-z-]+-nav\.webp/g)||[]).length===5,'The shared family navigation does not reference all five image buttons.');
 assert(nav.includes('grid-template-columns:repeat(5'),'The family navigation is not mounted as five equal slots.');
@@ -89,7 +91,7 @@ assert(pwa.includes("WORKER_URL=`/service-worker-v203.js"),'The installed app do
 
 console.log(JSON.stringify({
   ok:true,
-  repair:'flat-living-school-v203',
+  repair:'flat-living-school-v203-memory-bridge-v205',
   combinedCritical:combinedRevision,
   coreBoundary:111,
   sharedBoundary:53,
@@ -102,5 +104,7 @@ console.log(JSON.stringify({
   fellowFareRefresh:true,
   fellowFareParentMobileRefresh:true,
   cerbanimoBoundaryRefresh:true,
+  memoryBridgeRefresh:true,
+  wrapperRefresh:true,
   spatialMode:false,
 },null,2));
