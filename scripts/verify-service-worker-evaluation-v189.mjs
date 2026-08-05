@@ -41,17 +41,19 @@ function evaluate(source,filename='worker.js'){
   }
 }
 
-const importLine="importScripts('/service-worker.js?v=1.0.6-base-r48-worker-evaluation');";
+const importMatch=additiveWorker.match(/importScripts\('\/service-worker\.js\?v=([^']+)'\);/);
+assert(importMatch,'Additive worker does not import the base worker.');
+const importLine=importMatch[0];
 const importIndex=additiveWorker.indexOf(importLine);
 const scopeIndex=additiveWorker.indexOf('(()=>{',importIndex+importLine.length);
 const firstAdditiveConst=additiveWorker.indexOf('\nconst ',importIndex+importLine.length);
 assert(baseWorker.includes("const PACKAGE_RECOVERY_REVISION="),'Base worker no longer exposes the collision fixture.');
 assert(additiveWorker.includes("const PACKAGE_RECOVERY_REVISION="),'Additive worker no longer exposes the collision fixture.');
-assert(importIndex>=0,'Additive worker does not import the v189 base worker.');
+assert(/base-r4[89]-/.test(importMatch[1]),'Additive worker does not import a recognized isolated-scope base revision.');
 assert(scopeIndex>importIndex,'Additive worker does not open an isolation closure after importScripts.');
 assert(firstAdditiveConst<0||scopeIndex<firstAdditiveConst,'An additive lexical declaration appears before the isolation closure.');
 assert(additiveWorker.trimEnd().endsWith('})();'),'Additive worker isolation closure is not closed.');
-assert(additiveWorker.includes('working-campus-additions-v189-worker-evaluation'),'v189 worker evaluation revision is missing.');
+assert(/working-campus-additions-v(?:189-worker-evaluation|190-weaveling-plan-json)/.test(additiveWorker),'Recognized worker evaluation revision is missing.');
 
 const additiveBody=additiveWorker.slice(0,importIndex)+additiveWorker.slice(importIndex+importLine.length);
 const combined=evaluate(`${baseWorker}\n${additiveBody}`,'combined-service-worker.js');
@@ -68,7 +70,8 @@ assert(/PACKAGE_RECOVERY_REVISION|already been declared/i.test(String(regression
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'v189-service-worker-evaluation',
+  revision:'v190-service-worker-evaluation-compatible',
+  importedBaseRevision:importMatch[1],
   browserStyleSharedLexicalCompilation:true,
   additiveGlobalScope:'isolated-iife',
   duplicateGlobalConstCrash:false,
