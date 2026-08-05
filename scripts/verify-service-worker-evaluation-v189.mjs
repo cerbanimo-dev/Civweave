@@ -41,21 +41,30 @@ function evaluate(source,filename='worker.js'){
   }
 }
 
+const criticalImportMatch=additiveWorker.match(/importScripts\('\/service-worker-critical-v199\.js'\);/);
 const importMatch=additiveWorker.match(/importScripts\('\/service-worker\.js\?v=([^']+)'\);/);
+assert(criticalImportMatch,'Additive worker does not import the critical package coordinator.');
 assert(importMatch,'Additive worker does not import the base worker.');
+const criticalImportLine=criticalImportMatch[0];
 const importLine=importMatch[0];
+const criticalImportIndex=additiveWorker.indexOf(criticalImportLine);
 const importIndex=additiveWorker.indexOf(importLine);
 const scopeIndex=additiveWorker.indexOf('(()=>{',importIndex+importLine.length);
 const firstAdditiveConst=additiveWorker.indexOf('\nconst ',importIndex+importLine.length);
+const finalizePattern=/\s*self\.CommonweaveCriticalBootV199\?\.finalize\(\);\s*$/;
 assert(baseWorker.includes("const PACKAGE_RECOVERY_REVISION="),'Base worker no longer exposes the collision fixture.');
 assert(additiveWorker.includes("const PACKAGE_RECOVERY_REVISION="),'Additive worker no longer exposes the collision fixture.');
 assert(/base-r(?:48|49|50|51|52)-/.test(importMatch[1]),'Additive worker does not import a recognized isolated-scope base revision.');
+assert(criticalImportIndex>=0&&criticalImportIndex<importIndex,'Critical package coordinator must load before the base worker.');
 assert(scopeIndex>importIndex,'Additive worker does not open an isolation closure after importScripts.');
 assert(firstAdditiveConst<0||scopeIndex<firstAdditiveConst,'An additive lexical declaration appears before the isolation closure.');
-assert(additiveWorker.trimEnd().endsWith('})();'),'Additive worker isolation closure is not closed.');
-assert(/working-campus-additions-v(?:189-worker-evaluation|190-weaveling-plan-json|191-memory-credential|194-image-system-nav-repair|195-living-school-boot)/.test(additiveWorker),'Recognized worker evaluation revision is missing.');
+assert(/\}\)\(\);\s*self\.CommonweaveCriticalBootV199\?\.finalize\(\);\s*$/.test(additiveWorker),'Additive worker isolation closure or critical finalizer is not closed.');
+assert(/working-campus-additions-v(?:189-worker-evaluation|190-weaveling-plan-json|191-memory-credential|194-image-system-nav-repair|195-living-school-boot|196-living-school-reader-loop|197-assistant-runtime-package)/.test(additiveWorker),'Recognized worker evaluation revision is missing.');
 
-const additiveBody=additiveWorker.slice(0,importIndex)+additiveWorker.slice(importIndex+importLine.length);
+const additiveBody=additiveWorker
+  .replace(criticalImportLine,'')
+  .replace(importLine,'')
+  .replace(finalizePattern,'\n');
 const combined=evaluate(`${baseWorker}\n${additiveBody}`,'combined-service-worker.js');
 assert(!combined.error,`Base and additive workers do not compile in one browser-style lexical scope: ${combined.error?.stack||combined.error}`);
 assert(combined.listeners.filter(entry=>entry.type==='install').length===2,'Base and additive install listeners did not both register.');
@@ -70,8 +79,9 @@ assert(/PACKAGE_RECOVERY_REVISION|already been declared/i.test(String(regression
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'v195-service-worker-evaluation-compatible',
+  revision:'v200-critical-coordinator-compatible',
   importedBaseRevision:importMatch[1],
+  criticalCoordinatorImportedFirst:true,
   browserStyleSharedLexicalCompilation:true,
   additiveGlobalScope:'isolated-iife',
   duplicateGlobalConstCrash:false,
