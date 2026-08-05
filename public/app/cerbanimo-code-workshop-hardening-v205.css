@@ -1,0 +1,4 @@
+.ccw205-file-controls{display:flex;justify-content:flex-end;padding:0 11px 9px}
+.ccw205-file-controls button{min-height:34px;border:1px solid #c07cff66;border-radius:9px;background:#21123a;color:#fff;padding:6px 10px;font-weight:850}
+.ccw204-file.is-excluded{opacity:.58;border-style:dashed}
+.ccw204-file.is-excluded pre,.ccw204-file.is-excluded .ccw204-delete{display:none}
