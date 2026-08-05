@@ -2,12 +2,12 @@
 'use strict';
 const VERSION='1.0.4';
 const ENTRY='/app/installed-entry-v146.html?system=commonweave';
-const WORKER_REVISION='device-package-r38-no-transformer';
-const ADDITIONS_REVISION='working-campus-additions-v175-deterministic-single-ai-settings';
+const WORKER_REVISION='device-package-r39-no-legacy-ai';
+const ADDITIONS_REVISION='working-campus-additions-v177-final-settings-retirement';
 const WORKER_BUILD=`${VERSION}-${WORKER_REVISION}-${ADDITIONS_REVISION}`;
 const WORKER_URL=`/service-worker-v156.js?v=${WORKER_BUILD}`;
 const PREPARE_TIMEOUT_MS=120000;
-const AUTO_RESET_KEY='commonweave.device-package.auto-reset.deterministic-r38';
+const AUTO_RESET_KEY='commonweave.device-package.auto-reset.clean-settings-r39';
 let installPrompt=null,registration=null,packageReady=false,packageStatus=null,packageError=null,preparing=false;
 const workerWaits=new WeakMap();
 const $=selector=>document.querySelector(selector);
@@ -18,8 +18,8 @@ function isIOS(){return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase(
 function rootScope(reg){try{const scope=new URL(reg.scope);return scope.origin===location.origin&&scope.pathname==='/'}catch{return false}}
 function workerUrls(reg){return[reg?.installing?.scriptURL,reg?.waiting?.scriptURL,reg?.active?.scriptURL].filter(Boolean)}
 function currentWorker(reg){return workerUrls(reg).some(value=>{try{const url=new URL(value);return url.pathname==='/service-worker-v156.js'&&url.searchParams.get('v')===WORKER_BUILD}catch{return false}})}
-function showPackage(status={}){packageStatus=status;$('#package-state').textContent=packageReady?'complete':packageError?'failed':'preparing';const missing=Array.isArray(status.missing)?status.missing.length:0,total=Number(status.assetCount||0)+Number(status.additions?.assetCount||0);$('#package-assets').textContent=packageReady&&total?`${total} core files`:missing?`${missing} missing files`:total?`${total} core files`:'checking core';$('#local-mode').textContent='deterministic · no model loaded'}
-function guidance(){const button=$('#install-app');if(standalone()){button.disabled=false;button.textContent='Open installed Commonweave';help('The installed deterministic Commonweave package is ready on this device.');return}if(packageError){button.disabled=false;button.textContent='Reset and retry package';help(`Core package preparation failed: ${packageError.message}. Tap reset and retry to remove the incomplete worker and cache.`);return}if(preparing||!packageReady){button.disabled=true;button.textContent='Preparing core package…';help('Caching the five software surfaces and deterministic local engines. No language model is downloaded or started.');return}if(installPrompt){button.disabled=false;button.textContent='Install Commonweave';help('The deterministic offline package is ready to install.');return}button.disabled=false;button.textContent=isIOS()?'Show iPhone/iPad instructions':'Show installation instructions';help(isIOS()?'In Safari, use Share → Add to Home Screen.':'Use the browser’s Install app command if it is not offered automatically.')}
+function showPackage(status={}){packageStatus=status;$('#package-state').textContent=packageReady?'complete':packageError?'failed':'preparing';const missing=Array.isArray(status.missing)?status.missing.length:0,total=Number(status.assetCount||0)+Number(status.additions?.assetCount||0);$('#package-assets').textContent=packageReady&&total?`${total} core files`:missing?`${missing} missing files`:total?`${total} core files`:'checking core';$('#local-mode').textContent='deterministic · one AI settings surface'}
+function guidance(){const button=$('#install-app');if(standalone()){button.disabled=false;button.textContent='Open installed Commonweave';help('The installed deterministic Commonweave package is ready on this device.');return}if(packageError){button.disabled=false;button.textContent='Reset and retry package';help(`Core package preparation failed: ${packageError.message}. Tap reset and retry to remove the incomplete worker and cache.`);return}if(preparing||!packageReady){button.disabled=true;button.textContent='Preparing core package…';help('Caching the five software surfaces and deterministic local engines. Legacy AI setup pages are not included.');return}if(installPrompt){button.disabled=false;button.textContent='Install Commonweave';help('The clean deterministic offline package is ready to install.');return}button.disabled=false;button.textContent=isIOS()?'Show iPhone/iPad instructions':'Show installation instructions';help(isIOS()?'In Safari, use Share → Add to Home Screen.':'Use the browser’s Install app command if it is not offered automatically.')}
 function failPackage(error){packageReady=false;packageError=error instanceof Error?error:new Error(String(error||'Unknown package error'));showPackage({...packageStatus,error:packageError.message});guidance()}
 async function clearPackageCaches(){if(!('caches'in window))return;const keys=await caches.keys();await Promise.allSettled(keys.filter(key=>key.startsWith('commonweave-')||key.startsWith('cwext-')).map(key=>caches.delete(key)))}
 async function resetDevicePackage(){help('Removing the failed or superseded package…');if('serviceWorker'in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.allSettled(regs.filter(rootScope).map(reg=>reg.unregister()))}await clearPackageCaches();registration=null;await pause(350);const next=new URL(location.href);next.searchParams.set('package-reset',Date.now().toString(36));location.replace(next.href)}
@@ -31,6 +31,6 @@ async function installOrOpen(){if(packageError)return resetDevicePackage();if(st
 addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;guidance()});
 addEventListener('appinstalled',()=>{installPrompt=null;help('Commonweave is installed. Open the new app icon to enter the deterministic campus.')});
 $('#install-app')?.addEventListener('click',installOrOpen);
-$('#check-update')?.addEventListener('click',async()=>{help('Checking the release package…');try{registration=registration||await navigator.serviceWorker.getRegistration('/');await registration?.update();await confirmReady();help('The current deterministic package is ready.')}catch(error){failPackage(error)}});
+$('#check-update')?.addEventListener('click',async()=>{help('Checking the release package…');try{registration=registration||await navigator.serviceWorker.getRegistration('/');await registration?.update();await confirmReady();help('The clean deterministic package is ready.')}catch(error){failPackage(error)}});
 showPackage({});guidance();preparePackage();
 })();
