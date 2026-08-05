@@ -5,14 +5,29 @@ const NAV_ID='cw-themed-system-nav';
 const STYLE_ID='cw-themed-system-nav-style';
 const PATH=location.pathname;
 const QUERY=new URLSearchParams(location.search);
+const EMBEDDED=window.self!==window.top||(QUERY.get('commonweave')==='1'&&QUERY.get('cabinet')==='1');
 
 const SYSTEMS=[
   {id:'commonweave',label:'Commonweave',image:'/app/assets/navigation/200-commonweave-nav.webp?v=image-nav-r2',href:'/app/working-campus-v156.html',glow:'#7fe7dc'},
   {id:'cerbanimo',label:'Cerbanimo',image:'/app/assets/navigation/200-cerbanimo-nav.webp?v=image-nav-r2',href:'/app/realm-console-v140.html?system=cerbanimo&cabinet=1',glow:'#ff54d3'},
   {id:'living-school',label:'Living School',image:'/app/assets/navigation/200-living-school-nav.webp?v=image-nav-r2',href:'/app/cabinets/living-school/index.html?cabinet=1',glow:'#9acb70'},
-  {id:'fellowfare',label:'FellowFare',image:'/app/assets/navigation/200-fellowfare-nav.webp?v=image-nav-r2',href:'/app/fellowfare-cabinet-v144.html?cabinet=1',glow:'#d89f58'},
+  {id:'fellowfare',label:'FellowFare',image:'/app/assets/navigation/200-fellowfare-nav.webp?v=image-nav-r2',href:'/app/fellowfare-cabinet-v144.html?cabinet=1',glow:'#4f8ca8'},
   {id:'anarchadia',label:'Anarchadia',image:'/app/assets/navigation/200-anarchadia-nav.webp?v=image-nav-r2',href:'/app/anarchadia-console-v139.html?cabinet=1',glow:'#ff2f87'}
 ];
+
+function clearEmbeddedCopy(){
+  document.getElementById(NAV_ID)?.remove();
+  document.getElementById(STYLE_ID)?.remove();
+  document.documentElement.classList.remove('cw-themed-system-nav-active');
+  delete document.documentElement.dataset.cwThemedCurrent;
+  document.body?.style.removeProperty('padding-bottom');
+}
+
+if(EMBEDDED){
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',clearEmbeddedCopy,{once:true});
+  else clearEmbeddedCopy();
+  return;
+}
 
 function currentSystem(){
   const explicit=QUERY.get('system');
@@ -65,7 +80,7 @@ function mount(){
   nav.setAttribute('aria-label','Travel between Commonweave systems');
   nav.innerHTML=SYSTEMS.map(item=>{
     const selected=item.id===current;
-    return `<a class="cw-themed-system-link${selected?' is-current':''}" data-system="${item.id}" href="${item.href}" aria-label="Open ${item.label}"${selected?' aria-current="page"':''} style="--system-glow:${item.glow}"><img src="${item.image}" alt="" width="200" height="100" draggable="false"></a>`;
+    return `<a class="cw-themed-system-link${selected?' is-current':''}" data-system="${item.id}" href="${item.href}" target="_top" aria-label="Open ${item.label}"${selected?' aria-current="page"':''} style="--system-glow:${item.glow}"><img src="${item.image}" alt="" width="200" height="100" draggable="false"></a>`;
   }).join('');
   document.body.append(nav);
 }
