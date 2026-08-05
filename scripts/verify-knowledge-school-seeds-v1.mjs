@@ -86,7 +86,7 @@ assertIncludes(installRuntime, [
   'migrateKnowledgeCache',
   'protectedCache',
   'waitForCurrentWorker',
-  "UPDATE_REVISION='visible-update-library-preservation-v204'",
+  "UPDATE_REVISION='visible-update-library-preservation-v206-worker-global-isolation-gateway-assets'",
 ], 'app installer runtime');
 assertIncludes(boundary, ["PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'", 'addScript(PWA_UPDATE_SCRIPT)', "pwaUpdateRevision:'v204-visible-update-library-preservation'"], 'install boundary');
 assertIncludes(updateController, [
