@@ -20,17 +20,17 @@
     <span class="version">v1.0.6</span>
   </header>
   <section class="install-card" aria-labelledby="install-title">
-    <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install Commonweave v1.0.6. Install now. Download the campus afterward.</h2><p>The browser now installs only the small Commonweave shell, icons, entry route, and offline fallback. The functional campus is a separate resumable download, so one slow or missing room can no longer freeze installation. No native modal is involved.</p></div>
-    <div class="topology" aria-label="Commonweave topology"><article><b>1</b><strong>Install shell</strong><span>Fast, browser-native app installation.</span></article><i>→</i><article><b>2</b><strong>Open online</strong><span>Rooms cache naturally as you use them.</span></article><i>→</i><article><b>3</b><strong>Choose offline</strong><span>Download the campus pack when useful.</span></article></div>
+    <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install Commonweave v1.0.6. The campus downloads automatically.</h2><p>The browser installs the small Commonweave shell first, then automatically downloads the required functional campus as a resumable stream. One slow or missing room no longer freezes installation, and interrupted files can continue later. No native modal is involved.</p></div>
+    <div class="topology" aria-label="Commonweave topology"><article><b>1</b><strong>Install shell</strong><span>Fast, browser-native app installation.</span></article><i>→</i><article><b>2</b><strong>Download campus</strong><span>Starts automatically and resumes per file.</span></article><i>→</i><article><b>3</b><strong>Open anywhere</strong><span>The functional campus remains available offline.</span></article></div>
     <div class="gateway-actions"><button id="install-app" class="primary" type="button" disabled>Preparing app shell…</button><button id="check-update" class="secondary" type="button">Check release</button></div>
-    <p id="install-help" class="install-help" role="status">Preparing only the small app shell. Saved knowledge schools and models remain in separate storage.</p>
-    <dl class="package-state" aria-label="App shell state"><div><dt>App shell</dt><dd id="package-state">preparing</dd></div><div><dt>Shell files</dt><dd id="package-assets">checking</dd></div><div><dt>Storage lanes</dt><dd id="local-mode">shell, campus, models, and schools separated</dd></div></dl>
+    <p id="install-help" class="install-help" role="status">Preparing the small app shell. The required campus download starts automatically; models and knowledge schools remain separate optional downloads.</p>
+    <dl class="package-state" aria-label="App shell state"><div><dt>App shell</dt><dd id="package-state">preparing</dd></div><div><dt>Shell files</dt><dd id="package-assets">checking</dd></div><div><dt>Storage lanes</dt><dd id="local-mode">shell and required campus · optional models and schools separated</dd></div></dl>
   </section>
 
   <section class="install-card" aria-labelledby="offline-campus-title">
-    <div class="install-copy"><small>OPTIONAL RESUMABLE CAMPUS</small><h2 id="offline-campus-title">Carry the functional campus offline.</h2><p>This pass starts from each realm’s functional entry point, discovers its current dependencies, and saves them individually. Failed files are listed and retried later instead of invalidating the whole package. Local models and high-volume knowledge schools remain optional separate downloads.</p></div>
-    <div class="gateway-actions"><button id="download-offline-package" class="secondary" type="button" disabled>Checking offline campus…</button></div>
-    <dl class="package-state" aria-label="Offline campus state"><div><dt>Offline campus</dt><dd id="offline-package-state">checking</dd></div><div><dt>Downloaded</dt><dd id="offline-package-assets">not measured</dd></div><div><dt>Behavior</dt><dd>resumable · per-file retry · no install gate</dd></div></dl>
+    <div class="install-copy"><small>REQUIRED RESUMABLE CAMPUS</small><h2 id="offline-campus-title">The functional campus downloads automatically.</h2><p>This pass starts from each realm’s functional entry point, discovers its current dependencies, and saves them individually. Failed files are listed and retried later instead of invalidating the whole campus. Local models and high-volume knowledge schools remain optional separate downloads.</p></div>
+    <div class="gateway-actions"><button id="download-offline-package" class="secondary" type="button" disabled>Preparing automatic campus download…</button></div>
+    <dl class="package-state" aria-label="Offline campus state"><div><dt>Offline campus</dt><dd id="offline-package-state">checking</dd></div><div><dt>Downloaded</dt><dd id="offline-package-assets">not measured</dd></div><div><dt>Behavior</dt><dd>automatic · resumable · per-file retry</dd></div></dl>
   </section>
 
   <section class="knowledge-card" aria-labelledby="knowledge-school-title">
@@ -52,14 +52,15 @@
   </section>
 
   <section class="gateway-grid">
-    <article class="status-card"><small>VISIBLE UPDATES</small><h3>Check without re-downloading everything</h3><p>Release checks update the tiny shell first. The optional campus pack can then refresh and reuse files already stored on the device.</p></article>
-    <article class="status-card"><small>FAILURE IS LOCAL</small><h3>One file no longer sinks the ship</h3><p>Optional campus files report their own failures and remain resumable. The install button depends only on the verified shell.</p></article>
+    <article class="status-card"><small>VISIBLE UPDATES</small><h3>Update without re-downloading everything</h3><p>Release checks update the tiny shell first. The required campus download then starts automatically and reuses files already stored on the device.</p></article>
+    <article class="status-card"><small>FAILURE IS LOCAL</small><h3>One file no longer sinks the ship</h3><p>Campus files report their own failures and remain resumable. The app shell can finish installing while the required campus continues downloading.</p></article>
     <article class="status-card"><small>PORTABLE RECOVERY</small><h3>Carry the package another way</h3><div class="card-actions"><a href="/downloads/Commonweave-Mobile-Install-Kit.zip">Mobile install kit</a><a href="/downloads/commonweave-pocket-campus.cwseed">Pocket Campus seed</a><a href="/downloads/knowledge-schools/catalog.json">Knowledge school catalog</a></div></article>
   </section>
 </main>
 <script src="/app/knowledge-school-seeds-v1.js?v=knowledge-schools-v2"></script>
 <script src="/install-v130.js?v=1.0.6-lightweight-shell-v208"></script>
 <script src="/app/offline-campus-status-v210.js?v=1.0.6-offline-retry-loop-v211"></script>
+<script src="/app/required-campus-autostart-v1.js?v=1.0.6-required-campus-v1"></script>
 <script src="/app/knowledge-school-installer-v1.js?v=knowledge-schools-v2"></script>
 </body>
 </html>
