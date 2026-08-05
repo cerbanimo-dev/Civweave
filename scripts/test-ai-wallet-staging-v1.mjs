@@ -44,7 +44,7 @@ async function request(baseUrl, pathname, { method = 'GET', headers = {}, body }
     body: body === undefined ? undefined : JSON.stringify(body)
   });
   const text = await response.text();
-  return { status: response.status, text, body: response.headers.get('content-type')?.includes('json') && text ? JSON.parse(text) : null };
+  return { status: response.status, text, body: /^application\/json(?:;|$)/i.test(response.headers.get('content-type') || '') && text ? JSON.parse(text) : null };
 }
 const admin = { 'x-commonweave-staging-key': STAGING_SECRET };
 
