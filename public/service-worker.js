@@ -1,4 +1,5 @@
 'use strict';
+// MiniLM safe-session runtime r39: refresh core adapter/worker assets on installed devices.
 const VERSION='1.0.4';
 const CACHE_REVISION='direct-family-r37-fast-install';
 const GUIDE_REVISION='lazy-five-system-chat-r36-stable';
