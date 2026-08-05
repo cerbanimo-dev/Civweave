@@ -1,6 +1,6 @@
 const ROOT='/app/models/all-minilm-l6-v2';
-const WORKER_URL=`${ROOT}/worker.js?v=device-package-r40-fixed-ort-wasm`;
-const MODEL_CACHE='commonweave-model-1.0.5-minilm-fixed-ort-r1';
+const WORKER_URL=`${ROOT}/worker.js?v=device-package-r41-fixed-ort-wasm`;
+const MODEL_CACHE='commonweave-model-1.0.6-minilm-fixed-ort-r1';
 const CIRCUIT_KEY='commonweave.minilm.circuit.v2';
 const FIXED_PROFILE=Object.freeze({device:'wasm',dtype:'q8',runtime:'onnxruntime-web'});
 const REQUIRED=[
