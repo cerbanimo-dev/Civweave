@@ -6,6 +6,7 @@ if(globalThis.CommonweaveFellowFareMobileFlowV205?.version===VERSION)return;
 const iframe=document.getElementById('ffc144-workbench');
 const shell=iframe?.closest('.ffc144-frame');
 const mobileQuery=matchMedia('(max-width: 760px)');
+const INNER_LAYOUT_SELECTOR='.app-shell,#main,.ff-world-main,.ff-projected-main,.ff-route-scene,.ff-world-projection';
 let resizeObserver=null;
 let mutationObserver=null;
 let innerResizeHandler=null;
@@ -55,35 +56,42 @@ function naturalHeight(doc){
   );
 }
 
+function markMobileNode(node){
+  if(!node)return;
+  node.dataset.ffcParentMobileNode='true';
+  node.style.setProperty('height','auto','important');
+  node.style.setProperty('min-height','0','important');
+  node.style.setProperty('max-height','none','important');
+  node.style.setProperty('overflow-x','hidden','important');
+  node.style.setProperty('overflow-y','visible','important');
+}
+
 function prepareInnerMobile(doc){
   const root=doc.documentElement;
   const body=doc.body;
   root?.setAttribute('data-ffc-parent-mobile-flow','true');
-  if(root){
-    root.style.setProperty('height','auto','important');
-    root.style.setProperty('min-height','0','important');
-    root.style.setProperty('overflow-x','hidden','important');
-    root.style.setProperty('overflow-y','visible','important');
-    root.style.setProperty('overscroll-behavior-y','auto','important');
-  }
+  markMobileNode(root);
+  markMobileNode(body);
+  if(root)root.style.setProperty('overscroll-behavior-y','auto','important');
   if(body){
-    body.style.setProperty('height','auto','important');
-    body.style.setProperty('min-height','0','important');
-    body.style.setProperty('overflow-x','hidden','important');
-    body.style.setProperty('overflow-y','visible','important');
     body.style.setProperty('overscroll-behavior-y','auto','important');
     body.style.setProperty('touch-action','pan-y','important');
+  }
+  doc.querySelectorAll(INNER_LAYOUT_SELECTOR).forEach(markMobileNode);
+  const localNav=doc.querySelector('.bottom-nav');
+  if(localNav){
+    localNav.dataset.ffcParentMobileNode='true';
+    localNav.style.setProperty('display','none','important');
   }
 }
 
 function restoreInnerDesktop(doc){
   const root=doc?.documentElement;
-  const body=doc?.body;
   root?.removeAttribute('data-ffc-parent-mobile-flow');
-  for(const node of [root,body]){
-    if(!node)continue;
-    for(const property of ['height','min-height','overflow-x','overflow-y','overscroll-behavior-y','touch-action'])node.style.removeProperty(property);
-  }
+  doc?.querySelectorAll('[data-ffc-parent-mobile-node="true"]').forEach(node=>{
+    delete node.dataset.ffcParentMobileNode;
+    for(const property of ['display','height','min-height','max-height','overflow-x','overflow-y','overscroll-behavior-y','touch-action'])node.style.removeProperty(property);
+  });
 }
 
 function measure(){
