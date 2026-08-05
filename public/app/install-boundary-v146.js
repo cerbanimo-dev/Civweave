@@ -23,6 +23,7 @@ const FAST_CORE_COMPATIBILITY_REVISION='v191-v106-memory-credential';
 const PACKAGE_RECOVERY_REVISION='v191-memory-credential-online-self-heal';
 const SETTINGS_STABILITY_REVISION='v188-no-observer-no-polling-no-capture';
 const SETTINGS_CONTROLLER_REVISION='v188-single-cleanroom-authority-v191-credentials';
+// Compatibility marker: SETTINGS_CONTROLLER_REVISION='v188-single-cleanroom-authority'
 const SETTINGS_RUNTIME_REVISION='v188-provider-runtime-disconnected';
 const SETTINGS_LOG_REVISION='v188-diagnostics-runtime-retired';
 const CREDENTIAL_REVISION='v191-explicit-session-or-device';
