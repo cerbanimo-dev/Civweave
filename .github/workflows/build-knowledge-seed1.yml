@@ -31,7 +31,7 @@ jobs:
 
       - name: Build live offline seed
         run: >-
-          python tools/knowledge_seed/build_seed1.py
+          python tools/knowledge_seed/build_seed1_entry.py
           --output build/commonweave-knowledge-seed1
           --workers 6
 
