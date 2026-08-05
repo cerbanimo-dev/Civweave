@@ -12,7 +12,7 @@ const activeWorker=read('public/service-worker-v203.js');
 const legacyWorker=read('public/service-worker-v156.js');
 const shell=read('public/app/cabinets/living-school/index.html');
 const bootstrap=read('public/app/cabinets/living-school/living-school-bootstrap-v194.js');
-const loader=read('public/app/cabinets/living-school/living-school-flat-loader-v203.js');
+const loader=read('public/app/cabinets/living-school/living-school-flat-loader-v211.js');
 const engine=read('public/app/cabinets/living-school/living-school-cabinet-v151.mjs');
 const nav=read('public/app/themed-system-nav-v178.js');
 const relay=read('public/app/cabinets/living-school/living-school-two-agent-relay-v165.js');
@@ -64,7 +64,7 @@ assert(imageWorker.includes("type:'COMMONWEAVE_SHARED_IMAGE_STATUS'"),'Shared im
 
 const lightweightMode=activeWorker.includes("const BUILD = 'lightweight-shell-v208'");
 if(lightweightMode){
-  assert(legacyWorker.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'Existing v156 registrations do not bridge to the direct lightweight worker.');
+  assert(legacyWorker.includes("importScripts('/service-worker-v203.js?v=1.0.7-lightweight-shell-v208-legacy-v156-bridge-v209')"),'Existing v156 registrations do not bridge to the v1.0.7 direct lightweight worker.');
   assert(!/^[ \t]*importScripts\(/m.test(activeWorker),'The direct lightweight worker reintroduced the layered worker stack.');
   assert(activeWorker.includes('const IMAGE_EXTENSION'),'The direct worker no longer validates image responses.');
   assert(activeWorker.includes("'/service-worker-shared-images-v203.js'"),'The direct worker no longer recognizes the retired image-worker URL during updates.');
@@ -77,8 +77,9 @@ if(lightweightMode){
 
 assert((nav.match(/200-[a-z-]+-nav\.webp/g)||[]).length===5,'The shared family navigation does not reference all five image buttons.');
 assert(nav.includes('grid-template-columns:repeat(5'),'The family navigation is not mounted as five equal slots.');
+assert(nav.includes('--cw-themed-nav-button-width:200px'),'The family navigation no longer caps each image button at 200 pixels.');
 assert(shell.includes('<nav class="ls-tray" aria-label="Living School navigation" hidden>'),'The legacy Living School text tray can still occupy the bottom edge.');
-assert(shell.includes('living-school-flat-loader-v203.js'),'The flat enhancement loader is missing.');
+assert(shell.includes('living-school-flat-loader-v211.js'),'The stable Living School enhancement loader is missing.');
 assert(!shell.includes('living-school-two-agent-relay-v165.js?v='),'The risky media relay still starts during initial boot.');
 assert(!shell.includes('living-school-workbench-v158.js?v='),'The workbench still races the flat core import.');
 assert(!shell.includes('/app/assets/living-school/'),'Spatial scene assets were pulled into the flat cabinet.');
@@ -87,9 +88,11 @@ assert(!shell.includes('ls-world-art'),'Spatial scene markup was pulled into the
 assert(bootstrap.includes("VERSION='living-school-flat-bootstrap-v203'"),'The bootstrap is not the flat v203 boot path.');
 assert(bootstrap.includes('firstShellPaint()'),'Shared controls do not receive a paint before the core import.');
 assert(bootstrap.includes("mode:'flat'"),'Ready events no longer identify flat mode.');
+assert(loader.includes("VERSION='living-school-flat-loader-v211-stable-path-controls'"),'The stable v211 Living School loader is not active.');
 assert(loader.includes("document.addEventListener('commonweave:living-school-ready',loadCore"),'Enhancements no longer wait for the core content.');
 assert(loader.indexOf('living-school-mutation-guard-v196.js')<loader.indexOf('living-school-workbench-v158.js'),'The mutation guard must precede workbench observers.');
 assert(loader.indexOf('living-school-mutation-guard-v196.js')<loader.indexOf('living-school-two-agent-relay-v165.js'),'The mutation guard must precede the optional relay.');
+assert(loader.includes('living-school-paths-v211.js'),'The guarded v211 learning-path controls are not loaded.');
 assert(loader.includes('commonweave:living-school-enable-rich-media'),'The risky rich-media relay is not explicit opt-in.');
 
 for(const token of ['Pathway Desk','Curriculum Forge','Learning Map','Open lesson','Assessment Studio','Practicum Workshop','Credential Forge','window.LivingSchoolCabinetV151'])assert(engine.includes(token),`Flat learning engine lost ${token}.`);
@@ -117,6 +120,7 @@ console.log(JSON.stringify({
   flatContentPreserved:true,
   optionalRelayAtBoot:false,
   navigationImageCount:5,
+  navigationButtonCap:'200x100',
   topAiMarks:2,
   sharedImageCompatibility:true,
   legacyImageRepair:true,
@@ -124,6 +128,7 @@ console.log(JSON.stringify({
   fellowFareParentMobileRefresh:true,
   cerbanimoBoundaryRefresh:true,
   memoryBridgeRefresh:true,
+  livingSchoolStableControls:true,
   installedWorkerMode:lightweightMode?'v209-direct-lightweight':'v203-layered-wrapper',
   spatialMode:false,
 },null,2));
