@@ -34,12 +34,12 @@ assert(themedNav.includes('if(EMBEDDED)'),'The embedded realm switcher suppressi
 assert(themedNav.includes('target="_top"'),'Realm links can still recurse a cabinet inside its iframe.');
 assert(themedNav.includes("glow:'#4f8ca8'"),'FellowFare selected navigation accent is not ink blue.');
 
-const criticalImport="importScripts('/service-worker-critical-v199.js?v=fellowfare-active-v203')";
-assert(worker.includes(criticalImport),'The active service worker does not request the FellowFare-aware critical coordinator.');
+const criticalImport="importScripts('/service-worker-critical-v199.js?v=memory-bridge-frozen-proxy-v205')";
+assert(worker.includes(criticalImport),'The active service worker does not request the current FellowFare-aware critical coordinator.');
 assert(worker.indexOf(criticalImport)<worker.indexOf("importScripts('/service-worker.js"),'The critical coordinator must register before the base package fetch handlers.');
 assert(!worker.includes('service-worker-fellowfare-active-v203.js'),'A third top-level worker import would break shared-scope evaluation.');
-assert(/const VERSION='(?:fellowfare-active-v203-fast-runtime-proxy|fellowfare-active-v203-cerbanimo-boundary-v204)'/.test(critical),'Critical active-package coordinator lost the FellowFare revision.');
-assert(/const CRITICAL_CACHE='cwboot-critical-(?:fellowfare-active-v203-fast-runtime-proxy|fellowfare-active-v203-cerbanimo-boundary-v204)'/.test(critical),'Critical active-package cache lost the FellowFare revision.');
+assert(/const VERSION='(?:fellowfare-active-v203-fast-runtime-proxy|fellowfare-active-v203-cerbanimo-boundary-v204(?:-memory-bridge-v205)?)'/.test(critical),'Critical active-package coordinator lost the FellowFare revision.');
+assert(/const CRITICAL_CACHE='cwboot-critical-(?:fellowfare-active-v203-fast-runtime-proxy|fellowfare-active-v203-cerbanimo-boundary-v204(?:-memory-bridge-v205)?)'/.test(critical),'Critical active-package cache lost the FellowFare revision.');
 for(const token of [
   '/app/fellowfare-cabinet-v144.html',
   '/app/fellowfare-cabinet-v144.css',
@@ -54,4 +54,4 @@ for(const [name,source] of [['themed navigation',themedNav],['critical package c
 }
 for(const [name,source] of [['outer CSS',outerCss],['embed CSS',embedCss]])assert((source.match(/{/g)||[]).length===(source.match(/}/g)||[]).length,`${name} has unbalanced braces.`);
 
-console.log('FellowFare active v203 verification passed: parchment/amber market, dark readable text, ink-blue accent, one top-level realm switcher, and combined critical-cache delivery.');
+console.log('FellowFare active v203 verification passed: parchment/amber market, dark readable text, ink-blue accent, one top-level realm switcher, and v205 combined critical-cache delivery.');
