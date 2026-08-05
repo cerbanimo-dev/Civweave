@@ -1,4 +1,5 @@
 'use strict';
+importScripts('/service-worker-critical-v199.js');
 importScripts('/service-worker.js?v=1.0.6-base-r52-living-school-boot-v195');
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r51-image-system-nav-repair')
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r50-memory-credential-v191')
@@ -68,3 +69,4 @@ self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names
 self.addEventListener('message',event=>{if(event.data?.type==='GET_ADDITIONS_STATUS')event.waitUntil(extensionStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}))});
 self.addEventListener('fetch',event=>{const request=event.request;if(!['GET','HEAD'].includes(request.method))return;const url=new URL(request.url);if(url.origin!==self.location.origin||!url.pathname.startsWith('/extensions/'))return;event.respondWith(caches.open(EXTENSION_CACHE).then(async cache=>{const cached=await cache.match(url.pathname,{ignoreSearch:true});if(cached)return request.method==='HEAD'?new Response(null,{status:cached.status,statusText:cached.statusText,headers:cached.headers}):cached;try{const response=await fetch(request,{cache:'no-store'});if(response.ok)await cache.put(url.pathname,response.clone());return response}catch{return new Response(`Commonweave additive tool is not installed: ${url.pathname}`,{status:503,headers:{'content-type':'text/plain; charset=utf-8','x-commonweave-missing-asset':url.pathname,'x-commonweave-package-recovery':PACKAGE_RECOVERY_REVISION}})}}))});
 })();
+self.CommonweaveCriticalBootV199?.finalize();
