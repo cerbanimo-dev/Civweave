@@ -66,6 +66,8 @@ replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.ra
     || pathname === '/app/knowledge-school-seeds-v1.js'
     || pathname === '/app/knowledge-school-installer-v1.js'
     || pathname === '/app/knowledge-school-installer-v1.css'
+    || pathname === '/app/offline-package-v208.json'
+    || pathname === '/app/offline-campus-status-v210.js'
     || pathname === '/app/pwa-update-controller-v204.js';
   const applicationSurface = pathname === '/offline.html'
     || pathname === '/app'
