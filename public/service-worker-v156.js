@@ -12,6 +12,7 @@ const EXTENSION_VERSION='working-campus-additions-v191-memory-credential';
 const PREVIOUS_EXTENSION_VERSION='working-campus-additions-v190-weaveling-plan-json';
 const EARLIER_EXTENSION_VERSION='working-campus-additions-v189-worker-evaluation';
 const SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188-credential-v191';
+// Compatibility marker: SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188'
 const SETTINGS_RUNTIME_REVISION='provider-runtime-disconnected-v188';
 const SETTINGS_LOG_REVISION='diagnostics-runtime-retired-v188';
 const PACKAGE_RECOVERY_REVISION='device-package-self-heal-v191-memory-credential';
