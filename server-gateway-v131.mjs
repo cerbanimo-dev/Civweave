@@ -5,15 +5,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(rootDir, 'server.mjs');
 const runtimePath = path.join(rootDir, '.commonweave-gateway-v131.runtime.mjs');
-const VERSION = '1.0.5';
-const BUILD = '1.0.5-install-only-fullscreen-family-gateway';
+const VERSION = '1.0.6';
+const BUILD = '1.0.6-install-only-fullscreen-family-gateway';
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 function replaceRequired(before, after, label) {if (!source.includes(before)) throw new Error(`Commonweave gateway patch could not find ${label}`);source = source.replace(before, after)}
 replaceRequired("const BUILD_VERSION = '1.0.21-ai-uplift';", `const BUILD_VERSION = '${BUILD}';`, 'host build marker');
 replaceRequired("const APP_VERSION = 'rc22.3.20-ai-checkpoint';", `const APP_VERSION = '${VERSION}';`, 'app version marker');
 replaceRequired("const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://commonweave-host-node.onrender.com';","const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://commonweave-host-node.onrender.com';\nconst COMMONWEAVE_SOURCE_URL = process.env.COMMONWEAVE_SOURCE_URL || 'https://github.com/cerbanimo-dev/Commonweave';\nconst COMMONWEAVE_RELEASE_URL = process.env.COMMONWEAVE_RELEASE_URL || 'https://github.com/cerbanimo-dev/Commonweave/archive/refs/heads/main.zip';",'gateway release URLs');
 replaceRequired("let installKitSha256 = '';\nlet installKitSize = 0;\ntry {\n  const kit = await fsp.readFile(INSTALL_KIT_PATH);\n  installKitSha256 = crypto.createHash('sha256').update(kit).digest('hex');\n  installKitSize = kit.length;\n} catch (error) {\n  console.warn('Install kit metadata unavailable:', error.message);\n}","const installKitSha256 = '';\nconst installKitSize = 0;",'install kit startup hashing');
-replaceRequired("    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Commonweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Commonweave host-node and offline PWA release.'","    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: COMMONWEAVE_SOURCE_URL,\n    downloadUrl: COMMONWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin distributes the Commonweave v1.0.5 settings-stable device package.'",'release packet hosting fields');
+replaceRequired("    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Commonweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Commonweave host-node and offline PWA release.'","    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: COMMONWEAVE_SOURCE_URL,\n    downloadUrl: COMMONWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin distributes the Commonweave v1.0.6 fixed-settings-layer device package.'",'release packet hosting fields');
 replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.raw`  const pathname = decodeURIComponent(url.pathname);
   const gatewayRequest = req.method === 'GET' || req.method === 'HEAD';
   const packageInstall = req.headers['x-commonweave-package'] === 'install';
@@ -48,7 +48,7 @@ replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.ra
       const encoded = (await Promise.all([1, 2, 3, 4].map(part => fsp.readFile(path.join(sharedDir, 'commonweave-parity-ledger.part' + part + '.b64'), 'utf8')))).join('').replace(/\s+/g, '');
       const ledger = JSON.parse(gunzipSync(Buffer.from(encoded, 'base64')).toString('utf8'));
       const payload = Buffer.from(JSON.stringify(ledger));
-      res.writeHead(200, {'content-type':'application/json; charset=utf-8','content-length':payload.length,'cache-control':'public, max-age=31536000, immutable','x-commonweave-device-package':'parity-ledger','x-commonweave-software-family':'1.0.5'});
+      res.writeHead(200, {'content-type':'application/json; charset=utf-8','content-length':payload.length,'cache-control':'public, max-age=31536000, immutable','x-commonweave-device-package':'parity-ledger','x-commonweave-software-family':'1.0.6'});
       return res.end(req.method === 'HEAD' ? undefined : payload);
     } catch (error) {console.error('[Commonweave] Unable to reconstruct parity ledger:', error);return json(res, 500, { error: 'The Commonweave capability ledger could not be reconstructed for this device package.' })}
   }
