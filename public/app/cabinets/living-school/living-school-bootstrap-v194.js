@@ -10,7 +10,7 @@ let attempt=0;
 let settled=false;
 let lateModulePromise=null;
 
-function esc(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]))}
+function esc(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
 function room(){return document.getElementById(ROOM_ID)}
 function mark(state,detail=''){document.documentElement.dataset.livingSchoolBoot=state;document.documentElement.dataset.livingSchoolBootRevision=VERSION;if(detail)document.documentElement.dataset.livingSchoolBootDetail=detail.slice(0,160)}
 function installStyle(){if(document.getElementById('ls-bootstrap-v194-style'))return;const style=document.createElement('style');style.id='ls-bootstrap-v194-style';style.textContent=`
