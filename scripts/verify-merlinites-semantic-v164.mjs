@@ -107,11 +107,21 @@ assert.ok(['claim-only','partial'].includes(task.status));
 
 assert.match(adapter,/export async function rank\(/,'adapter must expose custom semantic ranking');
 assert.match(adapter,/export async function match\(/,'existing reflex matching must remain');
-assert.match(adapter,/device-package-r38-merlinites/,'adapter must rotate the semantic worker revision');
+assert.match(adapter,/device-package-r39-minilm-safe-session/,'adapter must rotate to the safe-session semantic worker revision');
+assert.match(adapter,/CIRCUIT_KEY='commonweave\.minilm\.circuit\.v1'/,'adapter must preserve the failed-start circuit breaker');
+assert.match(adapter,/if\(!explicit\)return\{ready:false,dormant:true,reason:'explicit-activation-required'\}/,'incidental prewarm calls must remain dormant');
+assert.match(adapter,/if\(readyState\)return/,'adapter must reuse an established semantic session');
+assert.match(adapter,/if\(initPromise\)return initPromise/,'adapter must deduplicate concurrent session startup');
 assert.match(worker,/message\.type==='rank'/,'worker must handle custom ranking');
 assert.match(worker,/message\.type==='match'/,'worker must preserve reflex matching');
 assert.match(worker,/rankCache/,'worker should bound reusable candidate embeddings');
 assert.match(worker,/cached\?\.signature===signature/,'candidate cache must be invalidated when criterion text changes');
+assert.match(worker,/env\.useWasmCache=true/,'worker must retain the ONNX WASM compilation cache');
+assert.match(worker,/env\.backends\.onnx\.wasm\.numThreads=1/,'worker must cap the WASM backend to one thread');
+assert.match(worker,/EMBED_BATCH_SIZE=4/,'worker must chunk index embeddings to bound peak memory');
+assert.match(worker,/output\.dispose\?\.\(\)/,'worker must release completed tensor outputs when supported');
+assert.doesNotMatch(worker,/const attempts=/,'worker must not retry multiple backends in one activation');
+assert.doesNotMatch(worker,/env\.useWasmCache=false/,'worker must not disable WASM caching');
 const oldName=['S','ol'].join('');
 const oldSlug=oldName.toLowerCase();
 for(const [relative,html] of entryPages){
@@ -125,4 +135,4 @@ assert.equal(pwa.toLowerCase().includes(`${oldSlug}-semantic`),false,'installed 
 const retired=[`Commonweave${oldName}V164`,`commonweave.${oldSlug}-`,`__${oldSlug}SemanticInstalled`,`${oldSlug}Feedback`,`commonweave:${oldSlug}-`];
 for(const identifier of retired)assert.equal(source.includes(identifier),false,`runtime still contains retired identifier ${identifier}`);
 
-console.log('merlinites semantic planning v164 verification passed.');
+console.log('merlinites semantic planning v164 verification passed with MiniLM safe-session guards.');
