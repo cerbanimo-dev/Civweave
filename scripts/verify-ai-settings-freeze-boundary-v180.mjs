@@ -43,7 +43,7 @@ for(const token of [
   "if(!explicit)return{ready:false,dormant:true,reason:'explicit-activation-required'}",
   'let worker=null,sequence=0,readyState=null,initPromise=null;',
   'function activeWorker()',
-  "worker=new Worker(WORKER_URL,{type:'module',name:'commonweave-minilm-reflex'})"
+  "worker=new Worker(WORKER_URL,{type:'module',name:'commonweave-minilm-fixed-ort'})"
 ])assert(adapter.includes(token),`MiniLM adapter dormancy contract missing ${token}`);
 assert(adapter.indexOf('activeWorker().postMessage')>adapter.indexOf('function request('),'The worker may start outside an explicit request.');
 
@@ -79,6 +79,7 @@ console.log(JSON.stringify({
   settingsFirstPaint:true,
   settingsTransformerWork:false,
   miniLMActivation:'explicit-only',
+  miniLMRuntime:'fixed-onnxruntime-web-wasm',
   prewarmEmbedsReflexIndex:false,
   reflexVectorCache:'indexeddb-or-precomputed',
   semanticLabSettingsHooks:false,
