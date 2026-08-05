@@ -18,6 +18,7 @@ const THEMED_SYSTEM_NAV_SCRIPT='/app/themed-system-nav-v178.js';
 const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
 const ADDITIONS_VERSION='v204-visible-update-library-preservation';
 // Compatibility marker: ADDITIONS_VERSION='v191-memory-credential'
+// Compatibility marker: ADDITIONS_VERSION='v188-ai-settings-cleanroom'
 const PREVIOUS_ADDITIONS_VERSION='v191-memory-credential';
 const EARLIER_ADDITIONS_VERSION='v190-weaveling-plan-json';
 const FAST_CORE_COMPATIBILITY_REVISION='v204-v106-visible-update-library-preservation';
