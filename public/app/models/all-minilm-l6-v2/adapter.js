@@ -1,24 +1,21 @@
 const ROOT='/app/models/all-minilm-l6-v2';
-const WORKER_URL=`${ROOT}/worker.js?v=device-package-r39-minilm-safe-session`;
-const MODEL_CACHE='commonweave-model-1.0.4-minilm-on-demand-r1';
-const CIRCUIT_KEY='commonweave.minilm.circuit.v1';
+const WORKER_URL=`${ROOT}/worker.js?v=device-package-r40-fixed-ort-wasm`;
+const MODEL_CACHE='commonweave-model-1.0.5-minilm-fixed-ort-r1';
+const CIRCUIT_KEY='commonweave.minilm.circuit.v2';
+const FIXED_PROFILE=Object.freeze({device:'wasm',dtype:'q8',runtime:'onnxruntime-web'});
 const REQUIRED=[
   {url:`${ROOT}/config.json`,minBytes:300},
-  {url:`${ROOT}/tokenizer.json`,minBytes:500000},
   {url:`${ROOT}/tokenizer_config.json`,minBytes:100},
   {url:`${ROOT}/vocab.txt`,minBytes:200000},
   {url:`${ROOT}/reflex-index.json`,minBytes:3000},
-  {url:'/app/vendor/transformers/transformers.min.js',minBytes:100000},
-  {url:'/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs',minBytes:10000},
-  {url:'/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm',minBytes:1000000}
+  {url:'/app/vendor/onnxruntime/ort.wasm.min.mjs',minBytes:30000},
+  {url:'/app/vendor/onnxruntime/ort-wasm-simd-threaded.mjs',minBytes:10000},
+  {url:'/app/vendor/onnxruntime/ort-wasm-simd-threaded.wasm',minBytes:1000000}
 ];
-const GRAPH_OPTIONS=[
-  {url:`${ROOT}/onnx/model_q4f16.onnx`,minBytes:25000000,device:'webgpu',dtype:'q4f16'},
-  {url:`${ROOT}/onnx/model_quantized.onnx`,minBytes:18000000,device:'wasm',dtype:'q8'}
-];
-const DEFAULT_DOWNLOAD=[...REQUIRED,GRAPH_OPTIONS[1]];
+const GRAPH={url:`${ROOT}/onnx/model_quantized.onnx`,minBytes:18000000,device:'wasm',dtype:'q8'};
+const DEFAULT_DOWNLOAD=[...REQUIRED,GRAPH];
 const BODY_PROBE_LIMIT=2_000_000;
-const DEFAULT_INIT_TIMEOUT=30_000;
+const DEFAULT_INIT_TIMEOUT=45_000;
 const DEFAULT_REQUEST_TIMEOUT=20_000;
 const FAILURE_COOLDOWN_MS=10*60_000;
 let worker=null,sequence=0,readyState=null,initPromise=null;
@@ -69,9 +66,8 @@ async function fetchAndCache(spec){
   if(!checked.ok)throw new Error(`${spec.url} did not pass the local cache check.`);
   return checked;
 }
-export async function install({includeWebGPU=false,onProgress}={}){
-  const files=includeWebGPU?[...DEFAULT_DOWNLOAD,GRAPH_OPTIONS[0]]:DEFAULT_DOWNLOAD;
-  const unique=[...new Map(files.map(item=>[item.url,item])).values()];
+export async function install({onProgress}={}){
+  const unique=[...new Map(DEFAULT_DOWNLOAD.map(item=>[item.url,item])).values()];
   let completed=0;
   for(const spec of unique){
     onProgress?.({phase:'downloading',url:spec.url,completed,total:unique.length});
@@ -79,7 +75,7 @@ export async function install({includeWebGPU=false,onProgress}={}){
     onProgress?.({phase:'cached',url:spec.url,completed,total:unique.length});
   }
   const result=await status();
-  if(!result.available)throw new Error('The local semantic model download completed, but the package is still incomplete.');
+  if(!result.available)throw new Error('The fixed local semantic package downloaded, but its cache verification is incomplete.');
   return result;
 }
 function rejectPending(error){
@@ -97,7 +93,7 @@ export function shutdown(reason='MiniLM was stopped.'){
 }
 function activeWorker(){
   if(worker)return worker;
-  worker=new Worker(WORKER_URL,{type:'module',name:'commonweave-minilm-reflex'});
+  worker=new Worker(WORKER_URL,{type:'module',name:'commonweave-minilm-fixed-ort'});
   worker.addEventListener('message',event=>{
     const message=event.data||{};const task=pending.get(message.id);if(!task)return;
     if(message.type==='progress'){task.onProgress?.(message.progress||{});return}
@@ -112,7 +108,7 @@ function activeWorker(){
   worker.addEventListener('error',event=>{
     const error=new Error(event.message||'MiniLM worker crashed.');
     error.code='MINILM_WORKER_CRASHED';
-    stopWorker(error,{trip:true,profile:readyState?.profile||null});
+    stopWorker(error,{trip:true,profile:readyState?.profile||FIXED_PROFILE});
   });
   return worker;
 }
@@ -124,36 +120,21 @@ function request(type,payload={},options={}){
     const timer=setTimeout(()=>{
       pending.delete(id);
       const error=new Error(`MiniLM ${type} timed out after ${timeoutMs} ms.`);error.code='MINILM_TIMEOUT';
-      stopWorker(error,{trip:true,profile:payload.profile||readyState?.profile||null});
+      stopWorker(error,{trip:true,profile:FIXED_PROFILE});
       reject(error);
     },timeoutMs);
     pending.set(id,{resolve,reject,timer,onProgress});
-    activeWorker().postMessage({id,type,...payload});
+    activeWorker().postMessage({id,type,...payload,profile:FIXED_PROFILE});
   });
 }
 export async function status(){
   const files=await Promise.all(REQUIRED.map(inspect));
-  const graphs=await Promise.all(GRAPH_OPTIONS.map(inspect));
-  const usableGraphs=graphs.filter(item=>item.ok);
+  const graph=await inspect(GRAPH);
   const circuit=readCircuit();
-  return{available:files.every(item=>item.ok)&&usableGraphs.length>0,id:'Xenova/all-MiniLM-L6-v2',source:'local-model-cache',cache:MODEL_CACHE,files,graphs,missing:[...files.filter(item=>!item.ok),...(usableGraphs.length?[]:graphs)],sameOriginDownloadsOnly:true,remoteModelHostsAllowed:false,installRequired:!(files.every(item=>item.ok)&&usableGraphs.length>0),ready:Boolean(readyState),profile:readyState?.profile||null,circuit};
+  const available=files.every(item=>item.ok)&&graph.ok;
+  return{available,id:'Xenova/all-MiniLM-L6-v2',source:'local-model-cache',runtime:'onnxruntime-web/wasm',loaderPolicy:'fixed',cache:MODEL_CACHE,files,graphs:[graph],missing:[...files.filter(item=>!item.ok),...(graph.ok?[]:[graph])],sameOriginDownloadsOnly:true,remoteModelHostsAllowed:false,installRequired:!available,ready:Boolean(readyState),profile:readyState?.profile||FIXED_PROFILE,circuit};
 }
-function selectProfile(current,requested='auto'){
-  const byDevice=new Map((current.graphs||[]).filter(item=>item.ok).map(item=>[item.device,item]));
-  if(requested==='webgpu'){
-    if(!navigator.gpu)throw Object.assign(new Error('WebGPU is unavailable in this browser.'),{code:'MINILM_WEBGPU_UNAVAILABLE'});
-    if(!byDevice.has('webgpu'))throw Object.assign(new Error('The WebGPU MiniLM graph is not downloaded.'),{code:'MINILM_WEBGPU_GRAPH_MISSING'});
-    return{device:'webgpu',dtype:'q4f16'};
-  }
-  if(requested==='wasm'){
-    if(!byDevice.has('wasm'))throw Object.assign(new Error('The WASM MiniLM graph is not downloaded.'),{code:'MINILM_WASM_GRAPH_MISSING'});
-    return{device:'wasm',dtype:'q8'};
-  }
-  if(navigator.gpu&&byDevice.has('webgpu'))return{device:'webgpu',dtype:'q4f16'};
-  if(byDevice.has('wasm'))return{device:'wasm',dtype:'q8'};
-  throw Object.assign(new Error('No downloaded MiniLM graph matches this browser.'),{code:'MINILM_GRAPH_UNAVAILABLE'});
-}
-export async function prewarm({timeoutMs=DEFAULT_INIT_TIMEOUT,installIfMissing=false,onProgress,explicit=false,backend='auto',force=false}={}){
+export async function prewarm({timeoutMs=DEFAULT_INIT_TIMEOUT,installIfMissing=false,onProgress,explicit=false,force=false}={}){
   if(!explicit)return{ready:false,dormant:true,reason:'explicit-activation-required'};
   if(readyState)return{type:'ready',...readyState};
   if(initPromise)return initPromise;
@@ -163,17 +144,16 @@ export async function prewarm({timeoutMs=DEFAULT_INIT_TIMEOUT,installIfMissing=f
     let current=await status();
     if(!current.available){
       if(!installIfMissing){const error=new Error('MiniLM is not downloaded on this device. Use Download local model in AI settings.');error.code='MINILM_NOT_DOWNLOADED';throw error}
-      await install({includeWebGPU:backend==='webgpu',onProgress});current=await status();
+      await install({onProgress});current=await status();
     }
-    const profile=selectProfile(current,backend);
-    onProgress?.({phase:'starting',profile});
+    onProgress?.({phase:'starting',profile:FIXED_PROFILE});
     try{
-      const result=await request('prewarm',{profile},{timeoutMs,onProgress,allowCircuit:true});
-      readyState={profile,device:result.device,dtype:result.dtype,count:result.count,backend:result.backend,readyAt:new Date().toISOString()};
+      const result=await request('prewarm',{}, {timeoutMs,onProgress,allowCircuit:true});
+      readyState={profile:FIXED_PROFILE,device:'wasm',dtype:'q8',count:result.count,backend:result.backend,readyAt:new Date().toISOString()};
       resetCircuit();
       return{type:'ready',...readyState};
     }catch(error){
-      stopWorker(error,{trip:true,profile});
+      stopWorker(error,{trip:true,profile:FIXED_PROFILE});
       throw error;
     }
   })().finally(()=>{initPromise=null});
@@ -181,27 +161,27 @@ export async function prewarm({timeoutMs=DEFAULT_INIT_TIMEOUT,installIfMissing=f
 }
 function requireReady(){
   if(readyState)return readyState;
-  const error=new Error('MiniLM is dormant. Run the reflex speed trial to start a safe semantic session.');
+  const error=new Error('MiniLM is dormant. Run the reflex speed trial to start its fixed local session.');
   error.code='MINILM_NOT_READY';
   throw error;
 }
 export async function match(text,{limit=5,timeoutMs=DEFAULT_REQUEST_TIMEOUT}={}){
   requireReady();
-  return request('match',{text,limit,profile:readyState.profile},{timeoutMs});
+  return request('match',{text,limit},{timeoutMs});
 }
 export async function rank(text,candidates,{limit=8,cacheKey='',timeoutMs=DEFAULT_REQUEST_TIMEOUT}={}){
   requireReady();
   const rows=(Array.isArray(candidates)?candidates:[]).slice(0,64).map((item,index)=>typeof item==='string'?{id:`candidate-${index+1}`,text:item}:{id:String(item?.id||`candidate-${index+1}`),text:String(item?.text||item?.label||item?.description||'')}).filter(item=>item.text.trim());
   if(!rows.length)return{type:'rank',device:'none',dtype:'none',matches:[]};
-  return request('rank',{text:String(text||''),candidates:rows,limit,cacheKey:String(cacheKey||''),profile:readyState.profile},{timeoutMs});
+  return request('rank',{text:String(text||''),candidates:rows,limit,cacheKey:String(cacheKey||'')},{timeoutMs});
 }
-export async function benchmark(cases,{timeoutMs=DEFAULT_REQUEST_TIMEOUT,initTimeoutMs=DEFAULT_INIT_TIMEOUT,onProgress,backend='auto',force=false}={}){
-  await prewarm({explicit:true,timeoutMs:initTimeoutMs,onProgress,backend,force});
+export async function benchmark(cases,{timeoutMs=DEFAULT_REQUEST_TIMEOUT,initTimeoutMs=DEFAULT_INIT_TIMEOUT,onProgress,force=false}={}){
+  await prewarm({explicit:true,timeoutMs:initTimeoutMs,onProgress,force});
   const started=performance.now();const results=[];
   for(const item of cases||[]){
     const one=performance.now();
     try{const result=await match(item.text,{limit:3,timeoutMs});results.push({id:item.id,ok:true,elapsedMs:Math.round(performance.now()-one),device:result.device,matches:result.matches})}
     catch(error){results.push({id:item.id,ok:false,elapsedMs:Math.round(performance.now()-one),error:error.message,code:error.code||null});break}
   }
-  return{elapsedMs:Math.round(performance.now()-started),profile:readyState?.profile||null,results};
+  return{elapsedMs:Math.round(performance.now()-started),profile:FIXED_PROFILE,results};
 }
