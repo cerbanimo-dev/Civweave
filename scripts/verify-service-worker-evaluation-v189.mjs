@@ -74,7 +74,8 @@ assert(combined.listeners.filter(entry=>entry.type==='fetch').length===2,'Base a
 const unscopedBody=additiveBody
   .replace("(()=>{\n'use strict';\n","'use strict';\n")
   .replace(/\n\}\)\(\);\s*$/,'\n');
-const regression=evaluate(`${baseWorker}\n${unscopedBody}`,'unscoped-service-worker.js');
+const collisionBase=baseWorker.replaceAll('BASE_PACKAGE_RECOVERY_REVISION','PACKAGE_RECOVERY_REVISION');
+const regression=evaluate(`${collisionBase}\n${unscopedBody}`,'unscoped-service-worker.js');
 assert(regression.error?.name==='SyntaxError','The verifier did not detect the unscoped global redeclaration regression.');
 assert(/PACKAGE_RECOVERY_REVISION|already been declared/i.test(String(regression.error.message)),'Regression failed for an unexpected reason.');
 
