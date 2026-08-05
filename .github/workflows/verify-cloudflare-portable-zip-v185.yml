@@ -26,3 +26,5 @@ jobs:
           node --check scripts/verify-cloudflare-portable-zip-v185.mjs
       - name: Build Pages output without system zip
         run: node scripts/verify-cloudflare-portable-zip-v185.mjs
+      - name: Verify Workers static-assets deployment configuration
+        run: npx --yes wrangler@4.118.0 deploy --dry-run
