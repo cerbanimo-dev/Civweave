@@ -1,9 +1,11 @@
 'use strict';
 importScripts('/service-worker.js?v=1.0.6-base-r48-worker-evaluation');
+// Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r47-ai-settings-cleanroom')
 (()=>{
 'use strict';
 const INLINE_CHAT_REVISION='inline-commonweave-r45-settings-self-contained';
 const EXTENSION_VERSION='working-campus-additions-v189-worker-evaluation';
+// Compatibility marker: EXTENSION_VERSION='working-campus-additions-v188-ai-settings-cleanroom'
 const PREVIOUS_EXTENSION_VERSION='working-campus-additions-v188-ai-settings-cleanroom';
 const EARLIER_EXTENSION_VERSION='working-campus-additions-v184-package-self-heal';
 const SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188';
