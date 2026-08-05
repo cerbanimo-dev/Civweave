@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en" data-commonweave-system="commonweave" data-build="working-campus-v182-v106">
+<html lang="en" data-commonweave-system="commonweave" data-build="working-campus-v183-v106" data-previous-build="working-campus-v182-v106" data-settings-diagnostics="cwlog">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07162f">
 <title>Commonweave Working Campus · v1.0.6</title>
-<script src="/app/install-boundary-v146.js?v=1.0.6-v182"></script>
-<link rel="stylesheet" href="/app/working-campus-v156.css?v=header-v182-v106">
+<script src="/app/install-boundary-v146.js?v=1.0.6-v183"></script>
+<link rel="stylesheet" href="/app/working-campus-v156.css?v=header-v183-v106">
 <link rel="stylesheet" href="/app/system-interface-v157.css?v=inner-ui-v106">
 <link rel="stylesheet" href="/app/platform-experience-v160.css?v=dark-review-v106">
 </head>
@@ -21,7 +21,7 @@
       <button class="pill active" id="guided-mode" type="button">Guided rails</button>
       <button class="pill" id="roam-mode" type="button">Free roam</button>
     </div>
-    <button class="pill settings-pill" id="settings-button" type="button"><span aria-hidden="true">⚙</span><span>AI settings</span></button>
+    <button class="pill settings-pill" id="settings-button" type="button" data-open-unified-ai-settings><span aria-hidden="true">⚙</span><span>AI settings</span></button>
   </header>
   <section class="campus" aria-label="Commonweave realms">
     <button class="realm-node" data-realm="living-school" style="--accent:var(--living)"><b class="badge" data-badge="living-school" hidden></b><img src="/app/assets/ai/moss.png" alt=""><small>Moss</small><strong>Living School</strong><span>Learn what the intention requires.</span></button>
@@ -39,17 +39,18 @@
         <button class="btn primary" id="weaveling-chat-send" type="submit">Send</button>
         <small id="weaveling-chat-status" class="muted">Local history · deterministic by default</small>
       </form>
-      <div class="guide-foot"><button class="btn" id="model-chip" type="button">AI settings</button><button class="btn" id="export-button" type="button">Export</button></div>
+      <div class="guide-foot"><button class="btn" id="model-chip" type="button" data-open-unified-ai-settings>AI settings</button><button class="btn" id="export-button" type="button">Export</button></div>
     </aside>
     <section class="work"><header class="work-head"><b id="view-title">Your weave</b><span class="muted" id="state-label">Local draft</span></header><div class="workspace" id="workspace"></div></section>
   </section>
 </main>
 <nav class="bottom"><button class="active" data-view="weave">Weave</button><button data-view="progress">Progress</button><button data-view="library">Library</button><button data-view="campus">Campus</button></nav>
 <div class="toast" id="toast" hidden></div>
-<script src="/app/platform-experience-v160.js?v=header-v182-v106"></script>
-<script src="/app/model-settings-controller-v173.js?v=settings-v182-v106"></script>
+<script src="/app/platform-experience-v160.js?v=header-v183-v106"></script>
+<script src="/app/model-settings-controller-v173.js?v=settings-v183-logs-v106"></script>
+<!-- compatibility marker: settings-v182-v106 -->
 <script src="/app/family-ai-loader-v105.js?v=deterministic-v106"></script>
 <script src="/app/merlinites-semantic-planner-v164.js?v=deterministic-v106"></script>
-<script src="/app/working-campus-v156.js?v=header-v182-v106"></script>
+<script src="/app/working-campus-v156.js?v=header-v183-v106"></script>
 </body>
 </html>
