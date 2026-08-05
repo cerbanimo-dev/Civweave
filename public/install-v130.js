@@ -8,13 +8,13 @@ const PREVIOUS_ADDITIONS_REVISION='working-campus-additions-v196-living-school-r
 const EARLIER_ADDITIONS_REVISION='working-campus-additions-v195-living-school-boot';
 const CRITICAL_BOOT_REVISION='living-school-flat-core-v203';
 const IMAGE_REVISION='shared-image-delivery-v203';
-const UPDATE_REVISION='visible-update-library-preservation-v204';
+const UPDATE_REVISION='visible-update-library-preservation-v206-worker-global-isolation-gateway-assets';
 const PREVIOUS_PACKAGE_LABEL='Living School lesson and navigation repair';
 const EARLIER_PACKAGE_LABEL='complete critical package repair';
 const WORKER_BUILD=`${VERSION}-${WORKER_REVISION}-${ADDITIONS_REVISION}-${UPDATE_REVISION}`;
 const WORKER_URL=`/service-worker-v203.js?v=${WORKER_BUILD}`;
 const PREPARE_TIMEOUT_MS=180000;
-const AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r50';
+const AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r51';
 const PREVIOUS_AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r48';
 const EARLIER_AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r47';
 const LEGACY_LIBRARY_CACHE='commonweave-knowledge-schools-v1';

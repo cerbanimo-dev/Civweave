@@ -1,6 +1,7 @@
 'use strict';
 importScripts('/service-worker-critical-v199.js?v=memory-bridge-frozen-proxy-v205');
-importScripts('/service-worker.js?v=1.0.6-base-r52-living-school-boot-v195');
+importScripts('/service-worker.js?v=1.0.6-base-r53-isolated-recovery-v206');
+// Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r52-living-school-boot-v195');
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r51-image-system-nav-repair')
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r50-memory-credential-v191')
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r49-weaveling-plan-json')

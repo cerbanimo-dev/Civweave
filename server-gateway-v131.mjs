@@ -48,7 +48,7 @@ const aiWalletHttp = createAiWalletHttpHandler({
 });`,'host state restore and AI wallet setup');
 replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.raw`  const pathname = decodeURIComponent(url.pathname);
   const gatewayRequest = req.method === 'GET' || req.method === 'HEAD';
-  const packageInstall = req.headers['x-commonweave-package'] === 'install';
+  const packageInstall = ['install','update-controls'].includes(String(req.headers['x-commonweave-package'] || ''));
   const installerSurface = pathname === '/'
     || pathname === '/index.html'
     || pathname === '/install-v130.js'
@@ -61,7 +61,11 @@ replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.ra
     || pathname === '/app/logos/commonweave-icon-192.png'
     || pathname === '/app/logos/commonweave-icon-512.png'
     || pathname === '/app/logos/commonweave-icon-maskable-192.png'
-    || pathname === '/app/logos/commonweave-icon-maskable-512.png';
+    || pathname === '/app/logos/commonweave-icon-maskable-512.png'
+    || pathname === '/app/knowledge-school-seeds-v1.js'
+    || pathname === '/app/knowledge-school-installer-v1.js'
+    || pathname === '/app/knowledge-school-installer-v1.css'
+    || pathname === '/app/pwa-update-controller-v204.js';
   const applicationSurface = pathname === '/offline.html'
     || pathname === '/app'
     || pathname.startsWith('/app/')
@@ -88,7 +92,8 @@ replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.ra
     if (await serveFile(req,res,'/app/fullscreen-family-v104.html')) return;
     return json(res,404,{error:'The full-screen Commonweave family entry is missing from this device package.'});
   }
-  if (gatewayRequest && (pathname === '/field/commonweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) { res.writeHead(302,{location:COMMONWEAVE_RELEASE_URL,'cache-control':'no-store'}); return res.end(); }
+  const knowledgeSchoolDownload = pathname === '/downloads/knowledge-schools' || pathname.startsWith('/downloads/knowledge-schools/');
+  if (gatewayRequest && !knowledgeSchoolDownload && (pathname === '/field/commonweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) { res.writeHead(302,{location:COMMONWEAVE_RELEASE_URL,'cache-control':'no-store'}); return res.end(); }
   if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall) { return json(res,410,{error:'Installed runtime required',localInstallRequired:true,installUrl:requestOrigin(req,url)+'/',sourceUrl:COMMONWEAVE_SOURCE_URL,releaseUrl:COMMONWEAVE_RELEASE_URL,message:'This public origin distributes the complete device package but does not run the Commonweave software family in browser mode.'}); }
   if (pathname === '/api/boot-log' || pathname === '/api/boot-logs') { res.writeHead(204,{'cache-control':'no-store'}); return res.end(); }`,'request pathname declaration');
 replaceRequired("        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-commonweave-hub-token', 'access-control-allow-methods': 'GET,POST,OPTIONS' });","        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-commonweave-hub-token, x-commonweave-ai-capability, x-commonweave-internal-secret, x-commonweave-payment-signature', 'access-control-allow-methods': 'GET,POST,OPTIONS' });",'AI wallet CORS headers');
