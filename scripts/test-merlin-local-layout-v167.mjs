@@ -9,6 +9,7 @@ const [runtime,html,worker,boundary]=await Promise.all([
 ]);
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 new Function(runtime);
+new Function(boundary);
 
 class MemoryStorage{
   constructor(){this.values=new Map()}
@@ -74,7 +75,8 @@ assert(html.indexOf('anarchadia-change-review-v165.js')<html.indexOf('anarchadia
 assert(html.includes('Try: Move this chat window to the top of the page.'),'The visible Merlin prompt does not expose the supported direct command.');
 assert(html.includes('family-shell-v104.css?v=merlinites-r1')&&html.includes('family-shell-v104.js?v=merlinites-r2'),'The reconciled Anarchadia page lost the current merlinites global shell cache-bust.');
 assert(html.indexOf('model-settings-controller-v173.js')<html.indexOf('family-ai-loader-v105.js'),'Anarchadia loads chat before the direct settings controller.');
-assert(worker.includes("EXTENSION_VERSION='working-campus-additions-v173-ai-loader-cutover'"),'Installed package did not rotate to the direct settings cutover.');
+assert(worker.includes("EXTENSION_VERSION='working-campus-additions-v174-settings-single-owner-assets'"),'Installed package did not rotate to the single-owner settings cutover.');
+assert(worker.includes("SETTINGS_RUNTIME_REVISION='settings-runtime-v157.2-single-owner'"),'Service worker status does not report the single-owner settings runtime.');
 assert(worker.includes('/extensions/commonweave-antigravity-live-source-guard-v167.js'),'Installed package lost the Antigravity live-source guard.');
 assert(worker.includes("LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167'"),'Service worker status does not report live-source proof.');
 assert(worker.includes('/app/anarchadia-live-layout-v167.js'),'Installed cores do not receive the local layout runtime.');
@@ -82,8 +84,11 @@ assert(worker.includes("LOCAL_LAYOUT_REVISION='merlin-local-layout-fallback-v167
 assert(worker.includes("MERLINITES_VISUAL_REVISION='merlinites-visual-overhaul-v166'"),'Service worker status does not report the merlinites visual shell.');
 assert(worker.includes("TWO_AGENT_RELAY_REVISION='living-school-two-agent-youtube-v166'"),'The current package lost the Living School two-agent relay.');
 assert(worker.includes("SETTINGS_CONTROLLER_REVISION='direct-settings-controller-v173'"),'Service worker status does not report the direct settings controller.');
-assert(boundary.includes("additionsVersion:'v173-ai-loader-cutover'"),'Install boundary did not rotate to the direct settings cutover.');
+assert(boundary.includes("ADDITIONS_VERSION='v174-settings-single-owner-assets'"),'Install boundary did not rotate to the single-owner settings cutover.');
+assert(boundary.includes("PREVIOUS_ADDITIONS_VERSION='v173-ai-loader-cutover'"),'Install boundary lost the previous direct-settings receipt.');
 assert(boundary.includes("SETTINGS_CONTROLLER_REVISION='v173-direct-settings-controller'"),'Install boundary does not report the direct settings controller.');
+assert(boundary.includes("SETTINGS_RUNTIME_REVISION='v157.2-single-owner'"),'Install boundary does not report the single-owner settings runtime.');
+assert(boundary.includes("additionsVersion:'v173-ai-loader-cutover'"),'Install boundary lost the v173 settings compatibility receipt.');
 assert(boundary.includes("additionsVersion:'v172-settings-window-capture'"),'Install boundary lost the v172 settings compatibility receipt.');
 assert(boundary.includes("additionsVersion:'v171-settings-safe-open'"),'Install boundary lost the v171 settings compatibility receipt.');
 assert(boundary.includes("additionsVersion:'v167-antigravity-live-source-proof'"),'Install boundary lost the Antigravity proof compatibility receipt.');
@@ -96,5 +101,5 @@ console.log(JSON.stringify({
   keep:'device-persistent-local-override',
   fallback:'server-element-shell-and-original-placement',
   restore:'server-layout',
-  preserved:['direct-settings-controller','settings-window-capture-compatibility','settings-safe-open-compatibility','antigravity-live-source-proof','merlinites-visual-shell','reviewed-merlin-handoffs','living-school-two-agent-relay','offline-installed-package']
+  preserved:['single-owner-settings-runtime','direct-settings-controller','settings-window-capture-compatibility','settings-safe-open-compatibility','antigravity-live-source-proof','merlinites-visual-shell','reviewed-merlin-handoffs','living-school-two-agent-relay','offline-installed-package']
 },null,2));
