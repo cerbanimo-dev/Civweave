@@ -1,0 +1,58 @@
+name: Build Commonweave Knowledge Seed 1
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/build-commonweave-seed1
+    paths:
+      - .seed1-build-trigger
+
+permissions:
+  contents: read
+
+jobs:
+  build-seed1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out build branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: tools/knowledge_seed/requirements-seed1.txt
+
+      - name: Install harvest dependencies
+        run: python -m pip install -r tools/knowledge_seed/requirements-seed1.txt
+
+      - name: Build live offline seed
+        run: >-
+          python tools/knowledge_seed/build_seed1.py
+          --output build/commonweave-knowledge-seed1
+          --workers 6
+
+      - name: Display measured result
+        if: always()
+        run: |
+          find build -maxdepth 2 -type f -printf '%p\t%s bytes\n' | sort || true
+          cat build/commonweave-knowledge-seed1/SIZE_REPORT.md || true
+          cat build/commonweave-knowledge-seed1/audit.json || true
+
+      - name: Upload Seed 1 package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: commonweave-knowledge-seed1
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+          path: |
+            build/commonweave-knowledge-seed1.zip
+            build/commonweave-knowledge-seed1.zip.sha256
+            build/commonweave-knowledge-seed1/SIZE_REPORT.md
+            build/commonweave-knowledge-seed1/SIZE_REPORT.json
+            build/commonweave-knowledge-seed1/audit.json
