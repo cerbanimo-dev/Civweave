@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(value,message)=>{if(!value)throw new Error(message)};
-const [index,bootstrap,critical,pwa,nav,loader,engine,imageWorker,wrapper]=await Promise.all([
+const [index,bootstrap,critical,pwa,nav,loader,engine,imageWorker,activeWorker,legacyWorker]=await Promise.all([
   read('public/app/cabinets/living-school/index.html'),
   read('public/app/cabinets/living-school/living-school-bootstrap-v194.js'),
   read('public/service-worker-critical-v199.js'),
@@ -14,7 +14,8 @@ const [index,bootstrap,critical,pwa,nav,loader,engine,imageWorker,wrapper]=await
   read('public/app/cabinets/living-school/living-school-flat-loader-v203.js'),
   read('public/app/cabinets/living-school/living-school-cabinet-v151.mjs'),
   read('public/service-worker-shared-images-v203.js'),
-  read('public/service-worker-v203.js')
+  read('public/service-worker-v203.js'),
+  read('public/service-worker-v156.js')
 ]);
 
 assert(index.includes('data-commonweave-system="living-school"'),'Living School does not expose its shared system identity.');
@@ -34,14 +35,34 @@ new Function(loader);
 assert(loader.includes("document.addEventListener('commonweave:living-school-ready',loadCore"),'Flat enhancements no longer wait for core readiness.');
 assert(loader.includes('commonweave:living-school-enable-rich-media'),'Rich media is no longer explicit opt-in.');
 assert(engine.includes('render();\nwindow.LivingSchoolCabinetV151'),'The saved flat learning engine no longer renders and publishes its API.');
-assert(critical.includes("VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'The combined FellowFare parent/mobile, Cerbanimo, and memory bridge critical package is not active.');
+assert(critical.includes("VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'The combined FellowFare parent/mobile, Cerbanimo, and memory bridge compatibility package is not retained.');
 assert(critical.includes("mode:'flat'"),'The combined critical package no longer identifies the flat interface.');
-assert(critical.includes('/app/cabinets/living-school/living-school-flat-loader-v203.js'),'The flat loader is absent from the critical package.');
-assert(critical.includes('/app/weaveling-memory-bridge-v191.js'),'The frozen-safe memory bridge is absent from the critical package.');
+assert(critical.includes('/app/cabinets/living-school/living-school-flat-loader-v203.js'),'The flat loader is absent from the critical compatibility package.');
+assert(critical.includes('/app/weaveling-memory-bridge-v191.js'),'The frozen-safe memory bridge is absent from the critical compatibility package.');
 assert(pwa.includes('/service-worker-v203.js'),'The installed PWA does not request the v203 worker.');
-assert(wrapper.indexOf('service-worker-shared-images-v203.js')<wrapper.indexOf('service-worker-v156.js'),'Shared image interception does not start before the generic package worker.');
-assert(wrapper.includes('flat-living-school-v203-memory-bridge-v205'),'The active wrapper does not refresh the v205 memory bridge package.');
-assert(imageWorker.includes('/app/assets/ai/moss-acorn.png'),'The Living School AI mark is absent from shared image repair.');
-assert(imageWorker.includes('/app/assets/ai/weaveling-compass.png'),'The Commonweave AI mark is absent from shared image repair.');
+
+const lightweightMode=activeWorker.includes("const BUILD = 'lightweight-shell-v208'");
+if(lightweightMode){
+  assert(legacyWorker.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'Legacy Living School registrations do not bridge to the active lightweight worker.');
+  assert(!activeWorker.includes('importScripts('),'The active lightweight worker reintroduced the layered shared-image/package worker stack.');
+  assert(activeWorker.includes('IMAGE_EXTENSION'),'The direct worker no longer identifies image responses for cache validation.');
+  assert(activeWorker.includes('DOWNLOAD_OFFLINE_PACKAGE'),'The direct worker no longer exposes resumable campus hydration.');
+  assert(activeWorker.includes("'/service-worker-shared-images-v203.js'"),'The direct worker no longer recognizes the retired shared-image worker URL during updates.');
+}else{
+  assert(activeWorker.indexOf('service-worker-shared-images-v203.js')<activeWorker.indexOf('service-worker-v156.js'),'Shared image interception does not start before the generic package worker.');
+  assert(activeWorker.includes('flat-living-school-v203-memory-bridge-v205'),'The active wrapper does not refresh the v205 memory bridge package.');
+}
+assert(imageWorker.includes('/app/assets/ai/moss-acorn.png'),'The Living School AI mark is absent from shared image repair compatibility.');
+assert(imageWorker.includes('/app/assets/ai/weaveling-compass.png'),'The Commonweave AI mark is absent from shared image repair compatibility.');
 for(const token of ['.ls-tray','display:none!important','200-living-school-nav.webp'])assert(nav.includes(token),`Image navigation repair missing ${token}`);
-console.log(JSON.stringify({ok:true,system:'living-school',mode:'flat',boot:'core-before-enhancements',content:'preserved-local-state',imageNavigation:'direct-and-repaired',aiMarks:'repaired',packageRevision:'v203-v205-memory-bridge'},null,2));
+console.log(JSON.stringify({
+  ok:true,
+  system:'living-school',
+  mode:'flat',
+  boot:'core-before-enhancements',
+  content:'preserved-local-state',
+  imageNavigation:'direct-and-repaired',
+  aiMarks:'repaired',
+  installedWorkerMode:lightweightMode?'v209-direct-lightweight':'v203-layered-wrapper',
+  packageRevision:lightweightMode?'v208-shell-v209-bridge':'v203-v205-memory-bridge'
+},null,2));
