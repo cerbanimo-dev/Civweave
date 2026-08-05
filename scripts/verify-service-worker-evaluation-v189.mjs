@@ -51,7 +51,7 @@ const criticalImportIndex=additiveWorker.indexOf(criticalImportLine);
 const importIndex=additiveWorker.indexOf(importLine);
 const scopeIndex=additiveWorker.indexOf('(()=>{',importIndex+importLine.length);
 const firstAdditiveConst=additiveWorker.indexOf('\nconst ',importIndex+importLine.length);
-const finalizePattern=/\s*\(self\.CommonweaveCriticalBootV202\|\|self\.CommonweaveCriticalBootV201\|\|self\.CommonweaveCriticalBootV199\)\?\.finalize\(\);\s*$/;
+const finalizePattern=/\s*\(self\.CommonweaveCriticalBootV205\|\|self\.CommonweaveCriticalBootV204\|\|self\.CommonweaveCriticalBootV202\|\|self\.CommonweaveCriticalBootV201\|\|self\.CommonweaveCriticalBootV199\)\?\.finalize\(\);\s*$/;
 assert(baseWorker.includes("const PACKAGE_RECOVERY_REVISION="),'Base worker no longer exposes the collision fixture.');
 assert(additiveWorker.includes("const PACKAGE_RECOVERY_REVISION="),'Additive worker no longer exposes the collision fixture.');
 assert(/base-r(?:48|49|50|51|52)-/.test(importMatch[1]),'Additive worker does not import a recognized isolated-scope base revision.');
@@ -79,7 +79,7 @@ assert(/PACKAGE_RECOVERY_REVISION|already been declared/i.test(String(regression
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'v202-cache-busted-critical-coordinator-compatible',
+  revision:'v205-memory-bridge-critical-coordinator-compatible',
   importedBaseRevision:importMatch[1],
   criticalCoordinatorImportedFirst:true,
   criticalCoordinatorCacheBusted:/\?/.test(criticalImportLine),
