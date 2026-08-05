@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0a1024">
+  <title>Commonweave Hosted AI Staging Preview</title>
+  <link rel="stylesheet" href="/ai-wallet-preview-v1.css">
+</head>
+<body>
+  <main class="wallet-preview">
+    <header>
+      <div>
+        <small>COMMONWEAVE HOSTED AI · STAGING ONLY</small>
+        <h1>Wallet preview console</h1>
+        <p>Wooden coins, deterministic model output, real reservation and settlement plumbing.</p>
+      </div>
+      <a href="/">Back to installer</a>
+    </header>
+
+    <section class="warning">
+      <strong>No real payment or Gemini call occurs here.</strong>
+      The staging key is kept only for this browser session. Local and bring-your-own-key AI remain separate.
+    </section>
+
+    <section class="panel setup">
+      <h2>Staging connection</h2>
+      <label>Staging host<input id="host-url" inputmode="url" autocomplete="url" readonly></label>
+      <label>Passport-linked staging user<input id="user-id" autocomplete="off"></label>
+      <label>Device ID<input id="device-id" autocomplete="off"></label>
+      <label>Staging key<input id="staging-key" type="password" autocomplete="off" placeholder="32+ byte staging secret"></label>
+      <div class="actions">
+        <button id="connect" type="button">Register device and connect</button>
+        <button id="refresh" type="button">Refresh wallet</button>
+        <button id="revoke" type="button" class="danger">Revoke this device</button>
+      </div>
+      <output id="connection-status" role="status"></output>
+    </section>
+
+    <section class="metrics" aria-label="Hosted AI staging wallet status">
+      <article><small>PLAN</small><strong id="plan">Not connected</strong></article>
+      <article><small>AVAILABLE</small><strong id="available">$0.00</strong></article>
+      <article><small>RESERVED</small><strong id="reserved">$0.00</strong></article>
+      <article><small>SPENT TODAY</small><strong id="spent">$0.00</strong></article>
+    </section>
+
+    <section class="panel">
+      <h2>Test funds</h2>
+      <p>Creates an idempotent staging ledger credit. It does not contact a payment processor.</p>
+      <div class="inline">
+        <label>Plan<select id="plan-id"><option value="thread">Thread</option><option value="loom">Loom</option><option value="weaver">Weaver</option><option value="studio">Studio</option><option value="node">Node</option></select></label>
+        <label>Credit<select id="credit-cents"><option value="200">$2.00</option><option value="500">$5.00</option><option value="1000">$10.00</option></select></label>
+        <button id="grant" type="button">Grant staging credit</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Simulated hosted request</h2>
+      <label>Model<select id="model"><option value="gemini-flash-lite">Gemini Flash-Lite policy</option><option value="gemini-flash">Gemini Flash policy</option><option value="gemini-pro">Gemini Pro policy</option><option value="gemini-live">Gemini Live policy</option></select></label>
+      <label>Prompt<textarea id="prompt" rows="5">Explain how reservation, settlement, and released funds work in this staging wallet.</textarea></label>
+      <label>Output ceiling<input id="output-ceiling" type="number" min="100" max="12000" value="1200"></label>
+      <button id="simulate" type="button">Run simulated request</button>
+      <pre id="stream" aria-live="polite"></pre>
+    </section>
+
+    <section class="panel">
+      <div class="receipts-head"><h2>Recent staging receipts</h2><button id="load-receipts" type="button">Reload receipts</button></div>
+      <div id="receipts" class="receipts"><p>No receipts loaded.</p></div>
+    </section>
+  </main>
+  <script src="/ai-wallet-preview-v1.js" defer></script>
+</body>
+</html>
