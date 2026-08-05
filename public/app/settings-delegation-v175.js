@@ -1,6 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='177.1-final-legacy-ai-retirement';
+// Compatibility marker for the initial retirement receipt: VERSION='177.0-final-legacy-ai-retirement'
 const PLATFORM_KEY='commonweave.platform-settings.v143';
 const AI_KEY='commonweave.universal-ai.v127';
 const PROFILES_KEY='commonweave-model-profiles-v1';
