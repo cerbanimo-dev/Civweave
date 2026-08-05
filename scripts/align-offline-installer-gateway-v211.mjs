@@ -2,8 +2,11 @@ import { readFile, writeFile } from 'node:fs/promises';
 
 async function replaceOnce(path, before, after, label) {
   let source = await readFile(path, 'utf8');
-  if (source.includes(after)) return false;
-  if (!source.includes(before)) throw new Error(`Could not find ${label} in ${path}`);
+  if (after && source.includes(after)) return false;
+  if (!source.includes(before)) {
+    if (!after) return false;
+    throw new Error(`Could not find ${label} in ${path}`);
+  }
   source = source.replace(before, after);
   await writeFile(path, source, 'utf8');
   return true;
