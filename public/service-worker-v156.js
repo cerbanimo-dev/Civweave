@@ -1,8 +1,8 @@
 'use strict';
-importScripts('/service-worker.js?v=1.0.6-base-r41-no-native-dialog');
-const INLINE_CHAT_REVISION='inline-commonweave-r44-settings-stable';
-const EXTENSION_VERSION='working-campus-additions-v179-no-native-dialog';
-const SETTINGS_CONTROLLER_REVISION='deterministic-single-authority-v179';
+importScripts('/service-worker.js?v=1.0.7-base-r42-settings-freeze-boundary');
+const INLINE_CHAT_REVISION='inline-commonweave-r45-settings-freeze-boundary';
+const EXTENSION_VERSION='working-campus-additions-v180-settings-freeze-boundary';
+const SETTINGS_CONTROLLER_REVISION='first-paint-no-model-v180';
 const SETTINGS_RUNTIME_REVISION='unified-ai-settings-v179-fixed-layer';
 const DETERMINISTIC_RUNTIME_REVISION='deterministic-default-v175';
 const GEMINI_TRANSPORT_REVISION='gemini-interactions-v159';
@@ -10,7 +10,7 @@ const DEVICE_CREDENTIALS_REVISION='device-credentials-v160.1-settings-stable';
 const PROOF_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v158-proof-progress';
 const LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167';
 const THEMED_SYSTEM_NAV_REVISION='themed-system-nav-v178-offline';
-const EXTENSION_CACHE='cwext-working-campus-additions-v179-no-native-dialog';
+const EXTENSION_CACHE='cwext-working-campus-additions-v180-settings-freeze-boundary';
 const TOOL_FILES=['/extensions/commonweave-additions-v156.css','/extensions/commonweave-additions-v156.js','/extensions/commonweave-secure-vault-v156.js','/extensions/commonweave-domain-bridge-v156.js','/extensions/commonweave-qr-v156.js','/extensions/commonweave-mesh-tools-v156.js','/extensions/commonweave-device-credentials-v160.js','/extensions/commonweave-proof-progress-v158.js','/extensions/commonweave-gemini-interactions-v159.js','/extensions/commonweave-antigravity-live-source-guard-v167.js'];
 const APP_FILES=[
   '/app/platform-stability-v159.js','/app/platform-stability-v159.css','/app/platform-experience-v160.js','/app/platform-experience-v160.css','/app/action-followthrough-v165.js','/app/merlinites-shell-fix-v166.css','/app/mobile-regression-v170.css','/app/mobile-regression-v170.js','/app/local-rails-validator-v170.js','/app/cerbanimo-ai-validator-v159.js','/app/cerbanimo-proof-attachments-v165.js','/app/rook-request-flow-v160.js','/app/merlinites-semantic-planner-v164.js','/app/pwa-v130.js','/app/system-interface-v157.css',
@@ -20,7 +20,7 @@ const APP_FILES=[
 const EXTENSION_FILES=[...TOOL_FILES,...APP_FILES];
 async function fetchRequired(url){const response=await fetch(`${url}${url.includes('?')?'&':'?'}v=${EXTENSION_VERSION}`,{cache:'no-store',headers:{'x-commonweave-package':'install'}});if(!response.ok)throw new Error(`Package asset ${url} returned ${response.status}`);return response}
 async function cacheExtensions(){const cache=await caches.open(EXTENSION_CACHE);for(const url of EXTENSION_FILES)await cache.put(url,(await fetchRequired(url)).clone());return true}
-async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,appVersion:'1.0.6',settingsControllerRevision:SETTINGS_CONTROLLER_REVISION,settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION,deterministicRuntimeRevision:DETERMINISTIC_RUNTIME_REVISION,geminiTransportRevision:GEMINI_TRANSPORT_REVISION,deviceCredentialsRevision:DEVICE_CREDENTIALS_REVISION,proofCompatibleRevision:PROOF_COMPATIBLE_EXTENSION_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,themedSystemNavRevision:THEMED_SYSTEM_NAV_REVISION,inlineChatRevision:INLINE_CHAT_REVISION,defaultProvider:'deterministic',settingsPresentation:'fixed-layer',nativeDialog:false,legacySettingsCapture:false,transformerActive:false,cache:EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,presentCount:EXTENSION_FILES.length-missing.length,toolFiles:TOOL_FILES.length,applicationFiles:APP_FILES.length,missing}}
+async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,appVersion:'1.0.7',settingsControllerRevision:SETTINGS_CONTROLLER_REVISION,settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION,deterministicRuntimeRevision:DETERMINISTIC_RUNTIME_REVISION,geminiTransportRevision:GEMINI_TRANSPORT_REVISION,deviceCredentialsRevision:DEVICE_CREDENTIALS_REVISION,proofCompatibleRevision:PROOF_COMPATIBLE_EXTENSION_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,themedSystemNavRevision:THEMED_SYSTEM_NAV_REVISION,inlineChatRevision:INLINE_CHAT_REVISION,defaultProvider:'deterministic',settingsPresentation:'first-paint-fixed-layer',nativeDialog:false,legacySettingsCapture:false,transformerActive:false,cache:EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,presentCount:EXTENSION_FILES.length-missing.length,toolFiles:TOOL_FILES.length,applicationFiles:APP_FILES.length,missing}}
 self.addEventListener('install',event=>event.waitUntil(cacheExtensions()));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names=>Promise.all(names.filter(name=>name.startsWith('cwext-')&&name!==EXTENSION_CACHE).map(name=>caches.delete(name))))));
 self.addEventListener('message',event=>{if(event.data?.type==='GET_ADDITIONS_STATUS')event.waitUntil(extensionStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}))});
