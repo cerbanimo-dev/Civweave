@@ -1,4 +1,4 @@
-name: Verify Commonweave v1.0.6 Self-Contained Settings
+name: Verify Commonweave v1.0.6 Single-Pass Settings
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Verify v1.0.6 settings layer
         run: node scripts/verify-v106-settings-layer-v179.mjs
-      - name: Verify self-contained AI settings
+      - name: Verify single-pass AI settings
         run: node scripts/verify-ai-settings-self-contained-v181.mjs
       - name: Run repository checks
         run: npm run check
@@ -54,28 +54,40 @@ jobs:
           grep -q 'No native modal' gateway.html
           curl -fsS http://127.0.0.1:8787/install-v130.js -o gateway-installer.js
           grep -q "WORKER_REVISION='device-package-r41-no-native-dialog'" gateway-installer.js
-          grep -q "ADDITIONS_REVISION='working-campus-additions-v181-settings-self-contained'" gateway-installer.js
-          grep -q 'self-contained AI settings' gateway-installer.js
+          grep -q "ADDITIONS_REVISION='working-campus-additions-v182-settings-single-pass'" gateway-installer.js
+          grep -q "AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r44'" gateway-installer.js
+          grep -q 'single-pass AI settings' gateway-installer.js
           curl -fsS http://127.0.0.1:8787/service-worker.js -o gateway-worker.js
           grep -q "VERSION='1.0.6'" gateway-worker.js
-          grep -q "DEVICE_REVISION='device-package-r41-no-native-dialog'" gateway-worker.js
+          grep -q "CACHE_REVISION='direct-family-r43-settings-single-pass'" gateway-worker.js
+          grep -q "AI_REVISION='self-contained-settings-v182-single-pass-fixed-ort'" gateway-worker.js
           grep -q "settingsPresentation:'self-contained-fixed-layer'" gateway-worker.js
           grep -q "providerRuntimeOnOpen:false" gateway-worker.js
+          grep -q "singlePassOpen:true" gateway-worker.js
+          grep -q "migrationOnDemand:true" gateway-worker.js
           curl -fsS http://127.0.0.1:8787/service-worker-v156.js -o gateway-additive-worker.js
-          grep -q 'working-campus-additions-v181-settings-self-contained' gateway-additive-worker.js
-          grep -q "SETTINGS_CONTROLLER_REVISION='self-contained-no-import-v181'" gateway-additive-worker.js
+          grep -q 'working-campus-additions-v182-settings-single-pass' gateway-additive-worker.js
+          grep -q "SETTINGS_CONTROLLER_REVISION='single-pass-no-autofocus-v182'" gateway-additive-worker.js
           grep -q "settingsPresentation:'self-contained-fixed-layer'" gateway-additive-worker.js
           grep -q "nativeDialog:false" gateway-additive-worker.js
           grep -q "transformerActive:false" gateway-additive-worker.js
           grep -q "providerRuntimeOnOpen:false" gateway-additive-worker.js
+          grep -q "singlePassOpen:true" gateway-additive-worker.js
+          grep -q "migrationOnDemand:true" gateway-additive-worker.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/model-settings-controller-v173.js -o gateway-settings-controller.js
-          grep -q '1.0.6-settings-controller-v181' gateway-settings-controller.js
+          grep -q '1.0.6-settings-controller-v182' gateway-settings-controller.js
+          grep -q "authority:'self-contained-settings-v182'" gateway-settings-controller.js
           grep -q "presentation:'self-contained-fixed-layer'" gateway-settings-controller.js
           grep -q 'function build()' gateway-settings-controller.js
           grep -q 'function open()' gateway-settings-controller.js
           grep -q 'function ensureRuntime()' gateway-settings-controller.js
           grep -q 'providerRuntimeOnOpen:false' gateway-settings-controller.js
+          grep -q 'singlePassOpen:true' gateway-settings-controller.js
+          grep -q 'migrationOnDemand:true' gateway-settings-controller.js
           grep -q 'transformerStarted:false' gateway-settings-controller.js
+          grep -q "if(visible&&!visible.hidden)return visible" gateway-settings-controller.js
+          grep -q 'if(existed)fill(form,{refresh:true})' gateway-settings-controller.js
+          grep -q 'target.focus?.({preventScroll:true})' gateway-settings-controller.js
           ! grep -q 'function showBootstrap(' gateway-settings-controller.js
           ! grep -q 'function afterPaint()' gateway-settings-controller.js
           ! grep -q 'const DEPENDENCIES=' gateway-settings-controller.js
@@ -93,8 +105,8 @@ jobs:
           ! grep -q 'new Worker' gateway-ai-settings.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/working-campus-v156.html -o gateway-campus.html
           grep -q 'v1.0.6' gateway-campus.html
-          grep -q 'working-campus-v181-v106' gateway-campus.html
-          grep -q 'settings-v181-v106' gateway-campus.html
+          grep -q 'working-campus-v182-v106' gateway-campus.html
+          grep -q 'settings-v182-v106' gateway-campus.html
       - name: Start local software family
         run: |
           PORT=8788 npm start > commonweave-local.log 2>&1 &
@@ -109,12 +121,13 @@ jobs:
           curl -fsS http://127.0.0.1:8788/app/pwa-v130.js -o local-pwa.js
           grep -q "VERSION='1.0.6'" local-pwa.js
           grep -q 'device-package-r41-no-native-dialog' local-pwa.js
-          grep -q 'working-campus-additions-v181-settings-self-contained' local-pwa.js
+          grep -q 'working-campus-additions-v182-settings-single-pass' local-pwa.js
+          grep -q 'single-pass settings update' local-pwa.js
       - name: Upload v1.0.6 evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v106-self-contained-settings-evidence
+          name: commonweave-v106-single-pass-settings-evidence
           path: |
             commonweave-gateway.log
             commonweave-local.log
