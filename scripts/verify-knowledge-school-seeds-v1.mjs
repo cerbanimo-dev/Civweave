@@ -8,6 +8,10 @@ const repo = path.resolve(here, '..');
 const root = path.join(repo, 'public', 'downloads', 'knowledge-schools');
 const catalogPath = path.join(root, 'catalog.json');
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
+const read = relative => fs.readFile(path.join(repo, relative), 'utf8');
+const assertIncludes = (source, tokens, label) => {
+  for (const token of tokens) if (!source.includes(token)) throw new Error(`${label} is missing ${token}`);
+};
 
 async function sha256(file) {
   const data = await fs.readFile(file);
@@ -55,13 +59,48 @@ for (const relative of [
   if (!stat.isFile()) throw new Error(`Missing knowledge-school support file: ${relative}`);
 }
 
-const index = await fs.readFile(path.join(repo, 'public', 'index.html'), 'utf8');
-for (const marker of ['knowledge-school-list', 'knowledge-school-seeds-v1.js', 'knowledge-school-installer-v1.js']) {
-  if (!index.includes(marker)) throw new Error(`Installer is missing knowledge-school marker: ${marker}`);
-}
-const helper = await fs.readFile(path.join(repo, 'public', 'app', 'knowledge-school-seeds-v1.js'), 'utf8');
-if (!helper.includes("commonweave-knowledge-schools-v1")) throw new Error('Knowledge-school cache is not isolated from the core PWA cache.');
-if (helper.includes('service-worker')) throw new Error('Optional school staging must not mutate the core service worker.');
+const [index, helper, installer, installRuntime, boundary, updateController, updateWorker, workerWrapper] = await Promise.all([
+  read('public/index.html'),
+  read('public/app/knowledge-school-seeds-v1.js'),
+  read('public/app/knowledge-school-installer-v1.js'),
+  read('public/install-v130.js'),
+  read('public/app/install-boundary-v146.js'),
+  read('public/app/pwa-update-controller-v204.js'),
+  read('public/service-worker-update-v204.js'),
+  read('public/service-worker-v203.js'),
+]);
+assertIncludes(index, ['knowledge-school-list', 'knowledge-school-seeds-v1.js', 'knowledge-school-installer-v1.js', 'Download once. Keep it through updates.'], 'installer page');
+assertIncludes(helper, [
+  "CACHE_NAME='cwknowledge-school-seeds-v2'",
+  "LEGACY_CACHE_NAMES=['commonweave-knowledge-schools-v1']",
+  'migrateLegacyCaches',
+  'cachedCurrent',
+  'navigator.storage.persist()',
+  'async function save(',
+  "phase:'cached'",
+], 'knowledge helper');
+if (helper.includes('serviceWorker.register')) throw new Error('Optional school staging must not register or replace the core service worker.');
+assertIncludes(installer, ['neededSchools', 'Save selected library', 'Download ${needed.length}', "progress.phase==='cached'", 'saved offline'], 'knowledge installer');
+assertIncludes(installRuntime, [
+  "const LIBRARY_CACHE='cwknowledge-school-seeds-v2'",
+  'migrateKnowledgeCache',
+  'protectedCache',
+  'waitForCurrentWorker',
+  "UPDATE_REVISION='visible-update-library-preservation-v204'",
+], 'app installer runtime');
+assertIncludes(boundary, ["PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'", 'addScript(PWA_UPDATE_SCRIPT)', "pwaUpdateRevision:'v204-visible-update-library-preservation'"], 'install boundary');
+assertIncludes(updateController, [
+  'data-commonweave-update-control',
+  "setState('Check updates'",
+  "setState('Restart to update'",
+  'registration.update()',
+  'migrateKnowledgeCache',
+  "const LIBRARY_CACHE='cwknowledge-school-seeds-v2'",
+], 'installed update controller');
+assertIncludes(updateWorker, ["const CACHE='cwupdate-visible-v204'", "'/app/pwa-update-controller-v204.js'", "knowledgeCache:'cwknowledge-school-seeds-v2'"], 'update service-worker lane');
+assertIncludes(workerWrapper, ["importScripts('/service-worker-update-v204.js?v=visible-update-library-preservation-v204')", 'update-v204'], 'service-worker wrapper');
+
+for (const source of [helper, installer, installRuntime, boundary, updateController, updateWorker]) new Function(source);
 
 console.log(JSON.stringify({
   schools: catalog.schools.length,
@@ -70,4 +109,7 @@ console.log(JSON.stringify({
   compressedMiB: Number((compressedBytes / 1024 / 1024).toFixed(2)),
   largestSchoolMiB: Number((Math.max(...catalog.schools.map(school => school.zip_bytes)) / 1024 / 1024).toFixed(2)),
   crossroads: catalog.reconciliation.crossroads_articles,
+  knowledgeCache: 'cwknowledge-school-seeds-v2',
+  appUpdateControl: 'visible-v204',
+  currentFilesSkipRedownload: true,
 }, null, 2));
