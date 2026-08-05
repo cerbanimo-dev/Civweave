@@ -1,15 +1,15 @@
 'use strict';
-importScripts('/service-worker.js?v=1.0.4-base-r38-deterministic');
+importScripts('/service-worker.js?v=1.0.4-base-r39-clean-settings');
 const INLINE_CHAT_REVISION='inline-commonweave-r43-deterministic-default';
-const EXTENSION_VERSION='working-campus-additions-v175-deterministic-single-ai-settings';
-const SETTINGS_CONTROLLER_REVISION='deterministic-single-authority-v175';
+const EXTENSION_VERSION='working-campus-additions-v177-final-settings-retirement';
+const SETTINGS_CONTROLLER_REVISION='deterministic-single-authority-v177';
 const SETTINGS_RUNTIME_REVISION='unified-ai-settings-v175';
 const DETERMINISTIC_RUNTIME_REVISION='deterministic-default-v175';
 const GEMINI_TRANSPORT_REVISION='gemini-interactions-v159';
 const DEVICE_CREDENTIALS_REVISION='device-credentials-v160.1-settings-stable';
 const PROOF_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v158-proof-progress';
 const LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167';
-const EXTENSION_CACHE='cwext-working-campus-additions-v175-deterministic-single-ai-settings';
+const EXTENSION_CACHE='cwext-working-campus-additions-v177-final-settings-retirement';
 const TOOL_FILES=[
   '/extensions/commonweave-additions-v156.css',
   '/extensions/commonweave-additions-v156.js',
