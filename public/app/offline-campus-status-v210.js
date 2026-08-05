@@ -1,7 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.6-offline-campus-status-v210';
+const RELEASE_VERSION='1.0.7';
+const VERSION='1.0.7-offline-campus-status-v210';
 const WORKER_REVISION='offline-campus-seed-provenance-v211';
 const STATUS_TYPES=new Set([
   'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',
@@ -9,6 +10,15 @@ const STATUS_TYPES=new Set([
 ]);
 const $=selector=>document.querySelector(selector);
 const clamp=(value,min,max)=>Math.min(max,Math.max(min,Number.isFinite(value)?value:min));
+
+function syncReleaseVersion(){
+  document.documentElement.dataset.commonweaveRelease=RELEASE_VERSION;
+  document.title=document.title.replace(/v1\.0\.\d+/i,`v${RELEASE_VERSION}`);
+  const badge=$('.gateway-header .version');
+  if(badge)badge.textContent=`v${RELEASE_VERSION}`;
+  const title=$('#install-title');
+  if(title)title.textContent=title.textContent.replace(/v1\.0\.\d+/i,`v${RELEASE_VERSION}`);
+}
 
 function normalize(status={}){
   const failed=Array.isArray(status.failed)?status.failed:[];
@@ -36,7 +46,7 @@ function formatBytes(bytes){
   return`${(value/(1024*1024)).toFixed(value>=10*1024*1024?0:1)} MB`;
 }
 
-const api={version:VERSION,workerRevision:WORKER_REVISION,normalize,render,last:null};
+const api={version:VERSION,releaseVersion:RELEASE_VERSION,workerRevision:WORKER_REVISION,normalize,render,last:null};
 
 function render(status){
   const packet=normalize(status);
@@ -107,11 +117,12 @@ async function askCurrentStatus(){
 }
 
 globalThis.CommonweaveOfflineCampusStatusV210=api;
+syncReleaseVersion();
 const serviceWorker=typeof navigator!=='undefined'?navigator.serviceWorker:null;
 serviceWorker?.addEventListener('message',event=>{
   if(STATUS_TYPES.has(event.data?.type))render(event.data);
 });
-addEventListener('load',askCurrentStatus,{once:true});
+addEventListener('load',()=>{syncReleaseVersion();askCurrentStatus()},{once:true});
 serviceWorker?.addEventListener('controllerchange',()=>setTimeout(askCurrentStatus,0));
 
 })();
