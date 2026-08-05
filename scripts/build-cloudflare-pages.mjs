@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 
 import {
+  chmodSync,
   cpSync,
   existsSync,
+  mkdtempSync,
   readdirSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "node:fs";
+import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
-import { dirname, relative, resolve, sep } from "node:path";
+import { delimiter, dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -24,6 +28,7 @@ const pocketCampusSeedPath = resolve(
   "downloads/commonweave-pocket-campus.cwseed",
 );
 const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
+const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
 function walkFiles(directory) {
@@ -44,15 +49,55 @@ function runNodeScript(script, failureMessage) {
   if (result.status !== 0) throw new Error(failureMessage);
 }
 
+function commandAvailable(command, args = ["-v"]) {
+  const result = spawnSync(command, args, { cwd: repoRoot, stdio: "ignore" });
+  return !result.error && result.status === 0;
+}
+
+function withPortableZipFallback(task) {
+  if (process.platform === "win32" || commandAvailable("zip")) return task();
+  if (!existsSync(portableZipScript)) {
+    throw new Error(`Portable ZIP writer not found: ${portableZipScript}`);
+  }
+
+  const shimDir = mkdtempSync(join(tmpdir(), "commonweave-portable-zip-"));
+  const shimPath = join(shimDir, "zip");
+  const previousPath = process.env.PATH;
+  const previousNode = process.env.COMMONWEAVE_NODE_BIN;
+  const previousScript = process.env.COMMONWEAVE_PORTABLE_ZIP_SCRIPT;
+  writeFileSync(
+    shimPath,
+    '#!/bin/sh\nexec "$COMMONWEAVE_NODE_BIN" "$COMMONWEAVE_PORTABLE_ZIP_SCRIPT" "$@"\n',
+    "utf8",
+  );
+  chmodSync(shimPath, 0o755);
+  process.env.PATH = `${shimDir}${delimiter}${previousPath || ""}`;
+  process.env.COMMONWEAVE_NODE_BIN = process.execPath;
+  process.env.COMMONWEAVE_PORTABLE_ZIP_SCRIPT = portableZipScript;
+  console.log("System zip is unavailable; using the dependency-free Commonweave ZIP writer.");
+
+  try {
+    return task();
+  } finally {
+    if (previousPath === undefined) delete process.env.PATH;
+    else process.env.PATH = previousPath;
+    if (previousNode === undefined) delete process.env.COMMONWEAVE_NODE_BIN;
+    else process.env.COMMONWEAVE_NODE_BIN = previousNode;
+    if (previousScript === undefined) delete process.env.COMMONWEAVE_PORTABLE_ZIP_SCRIPT;
+    else process.env.COMMONWEAVE_PORTABLE_ZIP_SCRIPT = previousScript;
+    rmSync(shimDir, { recursive: true, force: true });
+  }
+}
+
 function rebuildReleaseArtifacts() {
   runNodeScript(
     parityMaterializer,
     "Commonweave parity ledger materialization failed.",
   );
-  runNodeScript(
+  withPortableZipFallback(() => runNodeScript(
     resolve(scriptDir, "build-mobile-install-kit.mjs"),
     "Commonweave release artifact rebuild failed.",
-  );
+  ));
 }
 
 function oversizedFiles(directory) {
