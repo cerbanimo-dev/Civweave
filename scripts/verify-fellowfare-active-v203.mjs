@@ -38,9 +38,9 @@ const criticalImport="importScripts('/service-worker-critical-v199.js?v=fellowfa
 assert(worker.includes(criticalImport),'The active service worker does not request the FellowFare-aware critical coordinator.');
 assert(worker.indexOf(criticalImport)<worker.indexOf("importScripts('/service-worker.js"),'The critical coordinator must register before the base package fetch handlers.');
 assert(!worker.includes('service-worker-fellowfare-active-v203.js'),'A third top-level worker import would break shared-scope evaluation.');
+assert.match(critical,/const VERSION='(?:fellowfare-active-v203-fast-runtime-proxy|fellowfare-active-v203-cerbanimo-boundary-v204)'/,'Critical active-package coordinator lost the FellowFare revision.');
+assert.match(critical,/const CRITICAL_CACHE='cwboot-critical-(?:fellowfare-active-v203-fast-runtime-proxy|fellowfare-active-v203-cerbanimo-boundary-v204)'/,'Critical active-package cache lost the FellowFare revision.');
 for(const token of [
-  "const VERSION='fellowfare-active-v203-fast-runtime-proxy'",
-  "const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-fast-runtime-proxy'",
   '/app/fellowfare-cabinet-v144.html',
   '/app/fellowfare-cabinet-v144.css',
   '/app/services/fellowfare/cabinet-embed.css',
@@ -54,4 +54,4 @@ for(const [name,source] of [['themed navigation',themedNav],['critical package c
 }
 for(const [name,source] of [['outer CSS',outerCss],['embed CSS',embedCss]])assert((source.match(/{/g)||[]).length===(source.match(/}/g)||[]).length,`${name} has unbalanced braces.`);
 
-console.log('FellowFare active v203 verification passed: parchment/amber market, dark readable text, ink-blue accent, one top-level realm switcher, and critical-cache delivery to the small package.');
+console.log('FellowFare active v203 verification passed: parchment/amber market, dark readable text, ink-blue accent, one top-level realm switcher, and combined critical-cache delivery.');
