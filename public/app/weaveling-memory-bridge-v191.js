@@ -8,7 +8,7 @@ function response(answer,extra={}){return{response:{answer,choice:{mode:'Reflect
 function installFastRuntime(){
   const runtime=globalThis.CommonweaveModelRuntime;
   if(!runtime?.generate)return false;
-  if(runtime.generate.__commonweaveFastMemoryV192){fastRuntimeInstalled=true;return true;}
+  if(runtime.generate.__commonweaveFastMemoryV192||runtime.generate.__commonweaveFastInteractiveV192){fastRuntimeInstalled=true;return true;}
   const original=runtime.generate.bind(runtime);
   const wrapped=async request=>{
     const purpose=String(request?.purpose||'');
