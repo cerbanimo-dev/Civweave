@@ -1,12 +1,14 @@
 (()=>{
 'use strict';
-const VERSION='v204-visible-update-library-preservation';
+const VERSION='v207-registration-watchdog';
 const WORKER_URL='/service-worker-v203.js';
 const LEGACY_LIBRARY_CACHE='commonweave-knowledge-schools-v1';
 const LIBRARY_CACHE='cwknowledge-school-seeds-v2';
 const RELOAD_KEY='commonweave.pwa-update.reload.v204';
 const LAST_CHECK_KEY='commonweave.pwa-update.last-check.v204';
 const AUTO_CHECK_MS=6*60*60*1000;
+const UPDATE_TIMEOUT_MS=15000;
+const REGISTRATION_QUERY_TIMEOUT_MS=6000;
 let registration=null;
 let button=null;
 let checking=false;
@@ -14,6 +16,13 @@ let restartReady=false;
 let repairMode=false;
 let observer=null;
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function withTimeout(promise,timeoutMs,message){
+  return new Promise((resolve,reject)=>{
+    let settled=false;
+    const timer=setTimeout(()=>{if(settled)return;settled=true;reject(new Error(message))},timeoutMs);
+    Promise.resolve(promise).then(value=>{if(settled)return;settled=true;clearTimeout(timer);resolve(value)},error=>{if(settled)return;settled=true;clearTimeout(timer);reject(error)});
+  });
+}
 function installed(){return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches)}
 function setState(label,state='idle',title=''){
   if(!button)return;
@@ -96,7 +105,7 @@ async function checkForUpdates(userInitiated=false){
   try{
     await migrateKnowledgeCache();
     if(!('serviceWorker'in navigator))throw new Error('Service workers are unavailable in this browser.');
-    registration=registration||await navigator.serviceWorker.getRegistration('/');
+    registration=registration||await withTimeout(navigator.serviceWorker.getRegistration('/'),REGISTRATION_QUERY_TIMEOUT_MS,'Chrome did not return the Commonweave update registration.');
     if(!registration){
       repairMode=true;
       setState('Open updater','error','The Commonweave package worker is missing. Open the installer to restore it.');
@@ -105,7 +114,7 @@ async function checkForUpdates(userInitiated=false){
     if(userInitiated)sessionStorage.setItem(RELOAD_KEY,'1');
     repairMode=false;
     const before=currentWorker(registration)?.scriptURL||'';
-    await registration.update();
+    await withTimeout(registration.update(),UPDATE_TIMEOUT_MS,'Chrome did not finish the update check. Open the updater to repair the package.');
     localStorage.setItem(LAST_CHECK_KEY,String(Date.now()));
     if(bindInstalling(registration))return;
     await pause(350);
@@ -122,7 +131,8 @@ async function checkForUpdates(userInitiated=false){
     }
   }catch(error){
     sessionStorage.removeItem(RELOAD_KEY);
-    setState('Update check failed','error',error?.message||String(error));
+    repairMode=true;
+    setState('Open updater','error',error?.message||String(error));
   }finally{
     checking=false;
     if(button?.dataset.state==='checking'&&!registration?.installing&&!registration?.waiting)setState('Check updates','idle');

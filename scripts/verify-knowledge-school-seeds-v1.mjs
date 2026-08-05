@@ -86,19 +86,19 @@ assertIncludes(installRuntime, [
   'migrateKnowledgeCache',
   'protectedCache',
   'waitForCurrentWorker',
-  "UPDATE_REVISION='visible-update-library-preservation-v206-worker-global-isolation-gateway-assets'",
+  "UPDATE_REVISION='visible-update-library-preservation-v207-registration-watchdog'",
 ], 'app installer runtime');
-assertIncludes(boundary, ["PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'", 'addScript(PWA_UPDATE_SCRIPT)', "pwaUpdateRevision:'v204-visible-update-library-preservation'"], 'install boundary');
+assertIncludes(boundary, ["PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'", 'addScript(PWA_UPDATE_SCRIPT)', "pwaUpdateRevision:'v207-registration-watchdog'"], 'install boundary');
 assertIncludes(updateController, [
   'data-commonweave-update-control',
   "setState('Check updates'",
   "setState('Restart to update'",
-  'registration.update()',
+  'withTimeout(registration.update()',
   'migrateKnowledgeCache',
   "const LIBRARY_CACHE='cwknowledge-school-seeds-v2'",
 ], 'installed update controller');
-assertIncludes(updateWorker, ["const CACHE='cwupdate-visible-v204'", "'/app/pwa-update-controller-v204.js'", "knowledgeCache:'cwknowledge-school-seeds-v2'"], 'update service-worker lane');
-assertIncludes(workerWrapper, ["importScripts('/service-worker-update-v204.js?v=visible-update-library-preservation-v206')", 'update-v204'], 'service-worker wrapper');
+assertIncludes(updateWorker, ["const CACHE='cwupdate-visible-v207'", "'/app/pwa-update-controller-v204.js'", "knowledgeCache:'cwknowledge-school-seeds-v2'"], 'update service-worker lane');
+assertIncludes(workerWrapper, ["importScripts('/service-worker-update-v204.js?v=visible-update-library-preservation-v207-registration-watchdog')", 'update-v204'], 'service-worker wrapper');
 
 for (const source of [helper, installer, installRuntime, boundary, updateController, updateWorker]) new Function(source);
 
@@ -110,6 +110,6 @@ console.log(JSON.stringify({
   largestSchoolMiB: Number((Math.max(...catalog.schools.map(school => school.zip_bytes)) / 1024 / 1024).toFixed(2)),
   crossroads: catalog.reconciliation.crossroads_articles,
   knowledgeCache: 'cwknowledge-school-seeds-v2',
-  appUpdateControl: 'visible-v204',
+  appUpdateControl: 'visible-v207-registration-watchdog',
   currentFilesSkipRedownload: true,
 }, null, 2));
