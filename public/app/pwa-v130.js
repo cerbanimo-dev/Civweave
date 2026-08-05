@@ -6,6 +6,8 @@ const PREVIOUS_BUILD='1.0.6-device-package-r41-no-native-dialog-working-campus-a
 const EARLIER_BUILD='1.0.6-device-package-r41-no-native-dialog-working-campus-additions-v197-assistant-runtime-package';
 const PREVIOUS_UPDATE_LABEL='complete critical package repair';
 const EARLIER_UPDATE_LABEL='critical Living School boot lane';
+// Compatibility marker: working-campus-additions-v196-living-school-reader-loop
+// Compatibility marker: working-campus-additions-v195-living-school-boot
 const WORKER_URL=`/service-worker-v156.js?v=${BUILD}`;
 let registration=null,reloading=false;
 function pill(){let node=document.querySelector('#cw-pwa-state');if(node)return node;node=document.createElement('button');node.id='cw-pwa-state';node.type='button';node.className='cw-pwa-state';node.textContent=navigator.onLine?'Commonweave v1.0.6 · check updates':'Commonweave v1.0.6 · offline';node.addEventListener('click',async()=>{if(globalThis.CommonweaveHubRuntimeV143?.openUpdateHub){globalThis.CommonweaveHubRuntimeV143.openUpdateHub();return}if(registration?.waiting){registration.waiting.postMessage({type:'SKIP_WAITING'});node.textContent='Applying v1.0.6…'}else{await registration?.update?.();updateState()}});document.body.append(node);return node}
