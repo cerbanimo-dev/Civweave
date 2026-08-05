@@ -1,23 +1,25 @@
 'use strict';
-importScripts('/service-worker.js?v=1.0.6-base-r50-memory-credential-v191');
+importScripts('/service-worker.js?v=1.0.6-base-r51-image-system-nav-repair');
+// Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r50-memory-credential-v191');
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r49-weaveling-plan-json')
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r48-worker-evaluation')
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r47-ai-settings-cleanroom')
 (()=>{
 'use strict';
 const INLINE_CHAT_REVISION='inline-commonweave-r45-settings-self-contained';
-const EXTENSION_VERSION='working-campus-additions-v193-passport-exposed';
+const EXTENSION_VERSION='working-campus-additions-v194-image-system-nav-repair';
+// Compatibility marker: EXTENSION_VERSION='working-campus-additions-v193-passport-exposed'
 // Compatibility marker: EXTENSION_VERSION='working-campus-additions-v192-credential-usable'
 // Compatibility marker: EXTENSION_VERSION='working-campus-additions-v191-memory-credential'
 // Compatibility marker: EXTENSION_VERSION='working-campus-additions-v190-weaveling-plan-json'
 // Compatibility marker: EXTENSION_VERSION='working-campus-additions-v188-ai-settings-cleanroom'
-const PREVIOUS_EXTENSION_VERSION='working-campus-additions-v192-credential-usable';
-const EARLIER_EXTENSION_VERSION='working-campus-additions-v191-memory-credential';
+const PREVIOUS_EXTENSION_VERSION='working-campus-additions-v193-passport-exposed';
+const EARLIER_EXTENSION_VERSION='working-campus-additions-v192-credential-usable';
 const SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188-credential-v191';
 // Compatibility marker: SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188'
 const SETTINGS_RUNTIME_REVISION='provider-runtime-disconnected-v188';
 const SETTINGS_LOG_REVISION='diagnostics-runtime-retired-v188';
-const PACKAGE_RECOVERY_REVISION='device-package-self-heal-v193-passport-exposed';
+const PACKAGE_RECOVERY_REVISION='device-package-self-heal-v194-image-system-nav-repair';
 const WEAVELING_PLAN_REVISION='structured-json-system-prompt-v190';
 const WEAVELING_MEMORY_REVISION='working-long-term-local-v191';
 const PASSPORT_REVISION='anarchadia-passport-expanded-v193';
@@ -26,8 +28,8 @@ const GEMINI_TRANSPORT_REVISION='gemini-interactions-v159';
 const DEVICE_CREDENTIALS_REVISION='usable-key-and-consent-v192';
 const PROOF_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v158-proof-progress';
 const LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167';
-const THEMED_SYSTEM_NAV_REVISION='themed-system-nav-v178-offline';
-const EXTENSION_CACHE='cwext-working-campus-additions-v193-passport-exposed';
+const THEMED_SYSTEM_NAV_REVISION='themed-system-nav-v194-image-buttons';
+const EXTENSION_CACHE='cwext-working-campus-additions-v194-image-system-nav-repair';
 const TOOL_FILES=[
   '/extensions/commonweave-additions-v156.css',
   '/extensions/commonweave-additions-v156.js',
