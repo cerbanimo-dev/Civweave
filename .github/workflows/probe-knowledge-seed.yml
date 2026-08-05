@@ -1,0 +1,51 @@
+name: Probe Commonweave Knowledge Source
+
+on:
+  push:
+    branches:
+      - agent/build-commonweave-seed1
+    paths:
+      - .github/workflows/probe-knowledge-seed.yml
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe Wikipedia endpoints
+        shell: bash
+        run: |
+          set -euxo pipefail
+          date -u
+          curl --fail --show-error --location --connect-timeout 5 --max-time 20 \
+            --user-agent 'CommonweaveKnowledgeSeed/1.0 (https://github.com/cerbanimo-dev/Commonweave)' \
+            --output /tmp/anarchism.html \
+            --write-out 'rest_status=%{http_code} bytes=%{size_download} seconds=%{time_total}\n' \
+            'https://en.wikipedia.org/w/rest.php/v1/page/Anarchism/html'
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/anarchism.html')
+          print('first_bytes=', p.read_bytes()[:120])
+          print('size=', p.stat().st_size)
+          PY
+          curl --fail --show-error --location --connect-timeout 5 --max-time 20 \
+            --user-agent 'CommonweaveKnowledgeSeed/1.0 (https://github.com/cerbanimo-dev/Commonweave)' \
+            --get --data-urlencode 'action=query' --data-urlencode 'format=json' \
+            --data-urlencode 'formatversion=2' --data-urlencode 'prop=extracts|info|revisions' \
+            --data-urlencode 'explaintext=1' --data-urlencode 'rvprop=ids|timestamp' \
+            --data-urlencode 'titles=Anarchism' \
+            --output /tmp/anarchism.json \
+            --write-out 'api_status=%{http_code} bytes=%{size_download} seconds=%{time_total}\n' \
+            'https://en.wikipedia.org/w/api.php'
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('/tmp/anarchism.json').read_text())
+          page=data['query']['pages'][0]
+          print('api_title=', page['title'])
+          print('extract_chars=', len(page.get('extract','')))
+          PY
