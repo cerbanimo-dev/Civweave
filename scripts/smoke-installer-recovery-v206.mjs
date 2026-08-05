@@ -59,7 +59,7 @@ try{
   };
   assert(files.base.includes('const BASE_PACKAGE_RECOVERY_REVISION='),'base worker recovery identifier is not isolated');
   assert(!files.base.includes('const PACKAGE_RECOVERY_REVISION='),'generic base worker recovery identifier still collides');
-  assert(files.shell.includes('update-recovery-v206'),'top-level worker revision was not bumped');
+  assert(/update-recovery-v20(?:6|7)/.test(files.shell),'top-level worker revision was not bumped');
   assert(files.composite.includes('base-r53-isolated-recovery-v206'),'composite worker still imports the colliding base revision');
   const stripImports=source=>source.replace(/^importScripts\([^\n]+\);\s*$/gm,'');
   new vm.Script([
@@ -68,7 +68,7 @@ try{
     files.critical,
     files.base,
     stripImports(files.composite)
-  ].join('\n'),{filename:'commonweave-composite-service-worker-v206.js'});
+  ].join('\n'),{filename:'commonweave-composite-service-worker-v207.js'});
 
   const gateway=await readFile(path.join(root,'server-gateway-v131.mjs'),'utf8');
   for(const token of [
@@ -84,7 +84,7 @@ try{
     knowledgeCatalogServed:true,
     knowledgeZipServed:firstZip,
     workerGlobalCollision:false,
-    workerRevision:'v206'
+    workerRevision:files.shell.includes('update-recovery-v207')?'v207':'v206'
   },null,2));
 }catch(error){
   console.error(output.join(''));
