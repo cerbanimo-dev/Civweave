@@ -20,7 +20,7 @@ assert(controller.includes('layer.hidden=true')&&controller.includes('layer.hidd
 for(const token of ['v1.0.6','working-campus-v181-v106','settings-v181-v106'])assert(campus.includes(token),`campus missing ${token}`);
 for(const token of ["VERSION='1.0.6'",'device-package-r41-no-native-dialog',"settingsPresentation:'self-contained-fixed-layer'",'nativeDialog:false','providerRuntimeOnOpen:false'])assert(worker.includes(token),`worker missing ${token}`);
 for(const token of ['working-campus-additions-v181-settings-self-contained',"settingsPresentation:'self-contained-fixed-layer'",'nativeDialog:false',"SETTINGS_CONTROLLER_REVISION='self-contained-no-import-v181'",'transformerActive:false','providerRuntimeOnOpen:false'])assert(additive.includes(token),`additive worker missing ${token}`);
-for(const token of ["VERSION='1.0.6'",'device-package-r41-no-native-dialog','settings-layer update'])assert(pwa.includes(token),`PWA missing ${token}`);
+for(const token of ["VERSION='1.0.6'",'device-package-r41-no-native-dialog','self-contained settings update'])assert(pwa.includes(token),`PWA missing ${token}`);
 assert(pkg.version==='1.0.6',`package version is ${pkg.version}`);
 assert(pkg.scripts.check.includes('verify-v106-settings-layer-v179.mjs'),'default check does not enforce v1.0.6');
 assert(pkg.scripts.check.includes('verify-ai-settings-self-contained-v181.mjs'),'default check does not enforce the self-contained settings boundary');
