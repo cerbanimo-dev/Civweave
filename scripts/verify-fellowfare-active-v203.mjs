@@ -1,30 +1,86 @@
-name: Verify active FellowFare v205
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
-on:
-  pull_request:
-    paths:
-      - 'public/app/fellowfare-cabinet-v144.html'
-      - 'public/app/fellowfare-cabinet-v144.css'
-      - 'public/app/fellowfare-parent-theme-v205.css'
-      - 'public/app/fellowfare-mobile-flow-v205.js'
-      - 'public/app/services/fellowfare/cabinet.html'
-      - 'public/app/services/fellowfare/cabinet-embed.css'
-      - 'public/app/themed-system-nav-v178.js'
-      - 'public/service-worker-v156.js'
-      - 'public/service-worker-critical-v199.js'
-      - 'scripts/verify-fellowfare-active-v203.mjs'
-      - '.github/workflows/verify-fellowfare-active-v203.yml'
-  workflow_dispatch:
+const root=process.cwd();
+const read=file=>fs.readFile(path.join(root,file),'utf8');
+const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
-permissions:
-  contents: read
+const [outerHtml,outerCss,parentTheme,mobileFlow,innerHtml,embedCss,themedNav,worker,critical]=await Promise.all([
+  read('public/app/fellowfare-cabinet-v144.html'),
+  read('public/app/fellowfare-cabinet-v144.css'),
+  read('public/app/fellowfare-parent-theme-v205.css'),
+  read('public/app/fellowfare-mobile-flow-v205.js'),
+  read('public/app/services/fellowfare/cabinet.html'),
+  read('public/app/services/fellowfare/cabinet-embed.css'),
+  read('public/app/themed-system-nav-v178.js'),
+  read('public/service-worker-v156.js'),
+  read('public/service-worker-critical-v199.js')
+]);
 
-jobs:
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: node scripts/verify-fellowfare-active-v203.mjs
+assert(outerHtml.includes('data-build="fellowfare-parent-mobile-v205"'),'Outer FellowFare cabinet did not rotate to the parent/mobile revision.');
+assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?commonweave=1&cabinet=1#market'),'Outer cabinet is not pointing at the active embedded FellowFare market.');
+assert(outerHtml.indexOf('/app/fellowfare-cabinet-v144.css')<outerHtml.indexOf('/app/fellowfare-parent-theme-v205.css'),'The complete FellowFare parent theme must load after the legacy cabinet stylesheet.');
+assert(outerHtml.indexOf('/app/fellowfare-cabinet-v144.js')<outerHtml.indexOf('/app/fellowfare-mobile-flow-v205.js'),'The mobile flow must layer on top of the working FellowFare cabinet runtime.');
+for(const token of ['--ffc-parchment-soft: #fff4d8','--ffc-blue: #1e4b64','color: var(--ffc-ink) !important','.ffc144-rook-log .ffc144-rook-message'])assert(outerCss.includes(token),`Outer active Rook contrast is missing ${token}`);
+
+for(const token of [
+  '--cwf104-surface:var(--ff205-parchment)',
+  'html[data-commonweave-system="fellowfare"] .cwf104-head',
+  'html[data-commonweave-system="fellowfare"] .cwf104-tray',
+  'html[data-commonweave-system="fellowfare"] .ffc144-header',
+  'html[data-commonweave-system="fellowfare"] .ch142-control-band',
+  'body.ffc144-mobile-flow .ffc144-frame',
+  'background:linear-gradient(180deg,rgba(30,75,100,.98),rgba(20,47,63,.99))!important'
+])assert(parentTheme.includes(token),`Complete FellowFare parent theme is missing ${token}`);
+for(const retired of ['#07131ded','#061019f7','#08151ef5'])assert(!parentTheme.includes(retired),`Commonweave default dark chrome leaked into the FellowFare parent override: ${retired}`);
+
+for(const token of [
+  "const VERSION='fellowfare-mobile-flow-v205'",
+  "const INNER_LAYOUT_SELECTOR='.app-shell,#main,.ff-world-main,.ff-projected-main,.ff-route-scene,.ff-world-projection'",
+  'new ResizeObserver(scheduleMeasure)',
+  'new MutationObserver(scheduleMeasure)',
+  "doc.querySelector('.bottom-nav')",
+  "iframe.setAttribute('scrolling','no')",
+  "document.body.classList.add('ffc144-mobile-flow')",
+  'naturalHeight(doc)'
+])assert(mobileFlow.includes(token),`FellowFare mobile single-scroll runtime is missing ${token}`);
+
+assert(innerHtml.indexOf('styles.css')<innerHtml.indexOf('cabinet-embed.css'),'Active embed overrides must load after the legacy FellowFare stylesheet.');
+for(const token of [
+  'body.ff-cabinet-embedded.ff-cardinal-visual .ff-world-projection h1',
+  'body.ff-cabinet-embedded.ff-cardinal-visual .ff-world-projection .hero',
+  'background:linear-gradient(150deg,#142f3f,#255a73)!important',
+  '.ff-cabinet-embedded #cw-themed-system-nav',
+  'html.cw-themed-system-nav-active body.ff-cabinet-embedded{padding-bottom:0!important}'
+])assert(embedCss.includes(token),`Active embedded FellowFare override is missing ${token}`);
+for(const retired of ['#07120e','rgba(4,24,20','.ff-world-projection{position:absolute'])assert(!embedCss.includes(retired),`Legacy cardinal styling leaked into active embed override: ${retired}`);
+
+assert(themedNav.includes("const EMBEDDED=window.self!==window.top"),'The realm switcher does not detect iframe embedding.');
+assert(themedNav.includes('if(EMBEDDED)'),'The embedded realm switcher suppression path is missing.');
+assert(themedNav.includes('target="_top"'),'Realm links can still recurse a cabinet inside its iframe.');
+assert(themedNav.includes("glow:'#4f8ca8'"),'FellowFare selected navigation accent is not ink blue.');
+
+const criticalImport="importScripts('/service-worker-critical-v199.js?v=fellowfare-parent-mobile-v205')";
+assert(worker.includes(criticalImport),'The active service worker does not request the FellowFare parent/mobile critical coordinator.');
+assert(worker.indexOf(criticalImport)<worker.indexOf("importScripts('/service-worker.js"),'The critical coordinator must register before the base package fetch handlers.');
+assert(worker.includes("const FELLOWFARE_ACTIVE_REVISION='fellowfare-parent-mobile-v205'"),'Additions status does not expose the current FellowFare parent/mobile revision.');
+assert(!worker.includes('service-worker-fellowfare-active-v203.js'),'A third top-level worker import would break shared-scope evaluation.');
+assert(critical.includes("const VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204'"),'Critical active-package coordinator lost the FellowFare parent/mobile revision.');
+assert(critical.includes("const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204'"),'Critical active-package cache did not rotate for the mobile parent surface.');
+for(const token of [
+  '/app/fellowfare-cabinet-v144.html',
+  '/app/fellowfare-cabinet-v144.css',
+  '/app/fellowfare-parent-theme-v205.css',
+  '/app/fellowfare-mobile-flow-v205.js',
+  '/app/services/fellowfare/cabinet-embed.css',
+  '/app/themed-system-nav-v178.js',
+  'event.stopImmediatePropagation()',
+  'self.CommonweaveCriticalBootV205=api'
+])assert(critical.includes(token),`Critical active-package coordinator is missing ${token}`);
+
+for(const [name,source] of [['mobile flow',mobileFlow],['themed navigation',themedNav],['critical package coordinator',critical],['active service worker',worker]]){
+  try{new Function(source)}catch(error){throw new Error(`${name} has invalid JavaScript: ${error.message}`)}
+}
+for(const [name,source] of [['outer CSS',outerCss],['parent theme CSS',parentTheme],['embed CSS',embedCss]])assert((source.match(/{/g)||[]).length===(source.match(/}/g)||[]).length,`${name} has unbalanced braces.`);
+
+console.log('FellowFare v205 verification passed: the full parent cabinet is parchment/amber/ink-blue, embedded platform navigation cannot recurse, and phones use one dynamically measured page scroll instead of a trapped iframe.');
