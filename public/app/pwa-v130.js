@@ -6,6 +6,7 @@ const PREVIOUS_BUILD='1.0.6-device-package-r41-no-native-dialog-working-campus-a
 const EARLIER_BUILD='1.0.6-device-package-r41-no-native-dialog-working-campus-additions-v182-settings-single-pass';
 const PREVIOUS_UPDATE_LABEL='diagnostic log update';
 const EARLIER_UPDATE_LABEL='single-pass settings update';
+// Compatibility markers: diagnostic log update downloaded · settings diagnostics active
 const WORKER_URL=`/service-worker-v156.js?v=${BUILD}`;
 let registration=null,reloading=false;
 function pill(){let node=document.querySelector('#cw-pwa-state');if(node)return node;node=document.createElement('button');node.id='cw-pwa-state';node.type='button';node.className='cw-pwa-state';node.textContent=navigator.onLine?'Commonweave v1.0.6 · check updates':'Commonweave v1.0.6 · offline';node.addEventListener('click',async()=>{if(globalThis.CommonweaveHubRuntimeV143?.openUpdateHub){globalThis.CommonweaveHubRuntimeV143.openUpdateHub();return}if(registration?.waiting){registration.waiting.postMessage({type:'SKIP_WAITING'});node.textContent='Applying v1.0.6…'}else{await registration?.update?.();updateState()}});document.body.append(node);return node}
