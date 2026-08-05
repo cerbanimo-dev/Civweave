@@ -93,7 +93,8 @@ jobs:
           ! grep -q 'new Worker' gateway-ai-settings.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/working-campus-v156.html -o gateway-campus.html
           grep -q 'v1.0.6' gateway-campus.html
-          grep -q 'settings-v179-v106' gateway-campus.html
+          grep -q 'working-campus-v181-v106' gateway-campus.html
+          grep -q 'settings-v181-v106' gateway-campus.html
       - name: Start local software family
         run: |
           PORT=8788 npm start > commonweave-local.log 2>&1 &
@@ -108,6 +109,7 @@ jobs:
           curl -fsS http://127.0.0.1:8788/app/pwa-v130.js -o local-pwa.js
           grep -q "VERSION='1.0.6'" local-pwa.js
           grep -q 'device-package-r41-no-native-dialog' local-pwa.js
+          grep -q 'working-campus-additions-v181-settings-self-contained' local-pwa.js
       - name: Upload v1.0.6 evidence
         if: always()
         uses: actions/upload-artifact@v4
