@@ -19,8 +19,10 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Syntax check active runtime
         run: npm run check:syntax
-      - name: Verify deterministic AI and single settings authority
-        run: node scripts/verify-deterministic-ai-v175.mjs
+      - name: Verify deterministic AI and final settings retirement
+        run: |
+          node scripts/verify-deterministic-ai-v175.mjs
+          node scripts/verify-final-settings-retirement-v177.mjs
       - name: Verify repository package
         run: npm run check
       - name: Test Anarchadia governance kernel
