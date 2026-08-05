@@ -17,7 +17,7 @@ for(const token of ["VERSION='1.0.6-settings-controller-v181'","appVersion:'1.0.
 for(const token of ['showModal','dialog.close','pipeline(','new Worker','function showBootstrap(','function afterPaint()','const DEPENDENCIES='])assert(!controller.includes(token),`controller still uses ${token}`);
 assert(controller.includes("role','dialog'")&&controller.includes("aria-modal','true'"),'accessible dialog semantics are missing');
 assert(controller.includes('layer.hidden=true')&&controller.includes('layer.hidden=false'),'bounded layer visibility is missing');
-for(const token of ['v1.0.6','working-campus-v179-v106','settings-v179-v106'])assert(campus.includes(token),`campus missing ${token}`);
+for(const token of ['v1.0.6','working-campus-v181-v106','settings-v181-v106'])assert(campus.includes(token),`campus missing ${token}`);
 for(const token of ["VERSION='1.0.6'",'device-package-r41-no-native-dialog',"settingsPresentation:'self-contained-fixed-layer'",'nativeDialog:false','providerRuntimeOnOpen:false'])assert(worker.includes(token),`worker missing ${token}`);
 for(const token of ['working-campus-additions-v181-settings-self-contained',"settingsPresentation:'self-contained-fixed-layer'",'nativeDialog:false',"SETTINGS_CONTROLLER_REVISION='self-contained-no-import-v181'",'transformerActive:false','providerRuntimeOnOpen:false'])assert(additive.includes(token),`additive worker missing ${token}`);
 for(const token of ["VERSION='1.0.6'",'device-package-r41-no-native-dialog','settings-layer update'])assert(pwa.includes(token),`PWA missing ${token}`);
