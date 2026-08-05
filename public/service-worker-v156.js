@@ -1,26 +1,29 @@
 'use strict';
-importScripts('/service-worker.js?v=1.0.6-base-r49-weaveling-plan-json');
+importScripts('/service-worker.js?v=1.0.6-base-r50-memory-credential-v191');
+// Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r49-weaveling-plan-json')
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r48-worker-evaluation')
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r47-ai-settings-cleanroom')
 (()=>{
 'use strict';
 const INLINE_CHAT_REVISION='inline-commonweave-r45-settings-self-contained';
-const EXTENSION_VERSION='working-campus-additions-v190-weaveling-plan-json';
+const EXTENSION_VERSION='working-campus-additions-v191-memory-credential';
+// Compatibility marker: EXTENSION_VERSION='working-campus-additions-v190-weaveling-plan-json'
 // Compatibility marker: EXTENSION_VERSION='working-campus-additions-v188-ai-settings-cleanroom'
-const PREVIOUS_EXTENSION_VERSION='working-campus-additions-v189-worker-evaluation';
-const EARLIER_EXTENSION_VERSION='working-campus-additions-v188-ai-settings-cleanroom';
-const SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188';
+const PREVIOUS_EXTENSION_VERSION='working-campus-additions-v190-weaveling-plan-json';
+const EARLIER_EXTENSION_VERSION='working-campus-additions-v189-worker-evaluation';
+const SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188-credential-v191';
 const SETTINGS_RUNTIME_REVISION='provider-runtime-disconnected-v188';
 const SETTINGS_LOG_REVISION='diagnostics-runtime-retired-v188';
-const PACKAGE_RECOVERY_REVISION='device-package-self-heal-v190-weaveling-plan-json';
+const PACKAGE_RECOVERY_REVISION='device-package-self-heal-v191-memory-credential';
 const WEAVELING_PLAN_REVISION='structured-json-system-prompt-v190';
+const WEAVELING_MEMORY_REVISION='working-long-term-local-v191';
 const DETERMINISTIC_RUNTIME_REVISION='deterministic-default-v175';
 const GEMINI_TRANSPORT_REVISION='gemini-interactions-v159';
-const DEVICE_CREDENTIALS_REVISION='device-credentials-v160.1-settings-stable';
+const DEVICE_CREDENTIALS_REVISION='explicit-session-or-device-v191';
 const PROOF_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v158-proof-progress';
 const LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167';
 const THEMED_SYSTEM_NAV_REVISION='themed-system-nav-v178-offline';
-const EXTENSION_CACHE='cwext-working-campus-additions-v190-weaveling-plan-json';
+const EXTENSION_CACHE='cwext-working-campus-additions-v191-memory-credential';
 const TOOL_FILES=[
   '/extensions/commonweave-additions-v156.css',
   '/extensions/commonweave-additions-v156.js',
@@ -35,6 +38,7 @@ const TOOL_FILES=[
   '/extensions/commonweave-weaveling-plan-json-v190.js'
 ];
 const APP_FILES=[
+  '/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js',
   '/app/platform-stability-v159.js','/app/platform-stability-v159.css','/app/platform-experience-v160.js','/app/platform-experience-v160.css','/app/action-followthrough-v165.js','/app/merlinites-shell-fix-v166.css','/app/mobile-regression-v170.css','/app/mobile-regression-v170.js','/app/local-rails-validator-v170.js','/app/cerbanimo-ai-validator-v159.js','/app/cerbanimo-proof-attachments-v165.js','/app/rook-request-flow-v160.js','/app/merlinites-semantic-planner-v164.js','/app/pwa-v130.js','/app/system-interface-v157.css',
   '/app/themed-system-nav-v178.js','/app/assets/navigation/200-commonweave-nav.webp','/app/assets/navigation/200-cerbanimo-nav.webp','/app/assets/navigation/200-living-school-nav.webp','/app/assets/navigation/200-fellowfare-nav.webp','/app/assets/navigation/200-anarchadia-nav.webp',
   '/app/cabinets/living-school/living-school-two-agent-relay-v165.js','/app/cabinets/living-school/living-school-workbench-v158.css','/app/cabinets/living-school/living-school-workbench-v158.js','/app/cabinets/living-school/living-school-research-v162.js','/app/cabinets/living-school/living-school-runtime-stability-v159.css','/app/cabinets/living-school/living-school-runtime-stability-v159.js','/app/cabinets/living-school/living-school-paths-v160.js','/app/anarchadia-console-v158.js','/app/anarchadia-chat-stability-v158.css','/app/anarchadia-runtime-stability-v159.js','/app/anarchadia-change-review-v165.js','/app/anarchadia-live-layout-v167.js'
@@ -42,7 +46,7 @@ const APP_FILES=[
 const EXTENSION_FILES=[...TOOL_FILES,...APP_FILES];
 async function fetchRequired(url){const response=await fetch(`${url}${url.includes('?')?'&':'?'}v=${EXTENSION_VERSION}`,{cache:'no-store',headers:{'x-commonweave-package':'install'}});if(!response.ok)throw new Error(`Package asset ${url} returned ${response.status}`);return response}
 async function cacheExtensions(){const cache=await caches.open(EXTENSION_CACHE);for(const url of EXTENSION_FILES)await cache.put(url,(await fetchRequired(url)).clone());return true}
-async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,previousVersion:PREVIOUS_EXTENSION_VERSION,earlierVersion:EARLIER_EXTENSION_VERSION,appVersion:'1.0.6',settingsControllerRevision:SETTINGS_CONTROLLER_REVISION,settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION,settingsLogRevision:SETTINGS_LOG_REVISION,packageRecoveryRevision:PACKAGE_RECOVERY_REVISION,workerEvaluationRevision:'v189-isolated-global-scope',weavelingPlanRevision:WEAVELING_PLAN_REVISION,onlineSelfHeal:true,missingAssetDetails:true,logLevelKey:null,logBufferKey:null,persistentLogBuffer:false,redactsSecrets:true,deterministicRuntimeRevision:DETERMINISTIC_RUNTIME_REVISION,geminiTransportRevision:GEMINI_TRANSPORT_REVISION,deviceCredentialsRevision:DEVICE_CREDENTIALS_REVISION,proofCompatibleRevision:PROOF_COMPATIBLE_EXTENSION_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,themedSystemNavRevision:THEMED_SYSTEM_NAV_REVISION,inlineChatRevision:INLINE_CHAT_REVISION,defaultProvider:'deterministic',settingsPresentation:'cleanroom-v188',nativeDialog:false,legacySettingsCapture:false,settingsMutationObserver:false,settingsPolling:false,settingsTimers:false,settingsDiagnosticsRuntime:false,transformerActive:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,singlePassOpen:true,migrationOnDemand:false,cache:EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,presentCount:EXTENSION_FILES.length-missing.length,toolFiles:TOOL_FILES.length,applicationFiles:APP_FILES.length,missing}}
+async function extensionStatus(){const cache=await caches.open(EXTENSION_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=EXTENSION_FILES.filter(url=>!present.has(url));return{type:'COMMONWEAVE_ADDITIONS_STATUS',version:EXTENSION_VERSION,previousVersion:PREVIOUS_EXTENSION_VERSION,earlierVersion:EARLIER_EXTENSION_VERSION,appVersion:'1.0.6',settingsControllerRevision:SETTINGS_CONTROLLER_REVISION,settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION,settingsLogRevision:SETTINGS_LOG_REVISION,packageRecoveryRevision:PACKAGE_RECOVERY_REVISION,workerEvaluationRevision:'v189-isolated-global-scope',weavelingPlanRevision:WEAVELING_PLAN_REVISION,weavelingMemoryRevision:WEAVELING_MEMORY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,logLevelKey:null,logBufferKey:null,persistentLogBuffer:false,redactsSecrets:true,deterministicRuntimeRevision:DETERMINISTIC_RUNTIME_REVISION,geminiTransportRevision:GEMINI_TRANSPORT_REVISION,deviceCredentialsRevision:DEVICE_CREDENTIALS_REVISION,automaticCredentialPersistence:false,credentialPersistence:'explicit-session-or-device',proofCompatibleRevision:PROOF_COMPATIBLE_EXTENSION_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,themedSystemNavRevision:THEMED_SYSTEM_NAV_REVISION,inlineChatRevision:INLINE_CHAT_REVISION,defaultProvider:'deterministic',settingsPresentation:'cleanroom-v188',nativeDialog:false,legacySettingsCapture:false,settingsMutationObserver:false,settingsPolling:false,settingsTimers:false,settingsDiagnosticsRuntime:false,transformerActive:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,singlePassOpen:true,migrationOnDemand:false,cache:EXTENSION_CACHE,ready:missing.length===0,assetCount:EXTENSION_FILES.length,presentCount:EXTENSION_FILES.length-missing.length,toolFiles:TOOL_FILES.length,applicationFiles:APP_FILES.length,missing}}
 self.addEventListener('install',event=>event.waitUntil(cacheExtensions()));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names=>Promise.all(names.filter(name=>name.startsWith('cwext-')&&name!==EXTENSION_CACHE).map(name=>caches.delete(name))))));
 self.addEventListener('message',event=>{if(event.data?.type==='GET_ADDITIONS_STATUS')event.waitUntil(extensionStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}))});
