@@ -20,54 +20,54 @@ function makeContext(){
   };
   const caches={
     open:async()=>({put:async()=>{},keys:async()=>[],match:async()=>null}),
-    keys:async()=>[],
-    match:async()=>null,
-    delete:async()=>true,
+    keys:async()=>[],match:async()=>null,delete:async()=>true,
   };
-  const context=vm.createContext({
-    console,URL,Request,Response,Headers,Set,Map,Promise,self,caches,
-    fetch:async()=>new Response('',{status:200}),
-  });
-  context.importScripts=()=>vm.runInContext(baseWorker,context,{filename:'service-worker.js'});
-  return{context,listeners};
+  return{
+    context:vm.createContext({
+      console,URL,Request,Response,Headers,Set,Map,Promise,self,caches,
+      fetch:async()=>new Response('',{status:200}),
+    }),
+    listeners,
+  };
 }
 
-function evaluate(source){
+function evaluate(source,filename='worker.js'){
   const {context,listeners}=makeContext();
   try{
-    vm.runInContext(source,context,{filename:'service-worker-v156.js'});
+    vm.runInContext(source,context,{filename});
     return{error:null,listeners};
   }catch(error){
     return{error,listeners};
   }
 }
 
+const importLine="importScripts('/service-worker.js?v=1.0.6-base-r48-worker-evaluation');";
 assert(baseWorker.includes("const PACKAGE_RECOVERY_REVISION="),'Base worker no longer exposes the collision fixture.');
 assert(additiveWorker.includes("const PACKAGE_RECOVERY_REVISION="),'Additive worker no longer exposes the collision fixture.');
-assert(additiveWorker.includes("importScripts('/service-worker.js?v=1.0.6-base-r48-worker-evaluation');\n(()=>{"),'Additive worker is not isolated immediately after importScripts.');
+assert(additiveWorker.includes(`${importLine}\n(()=>{`),'Additive worker is not isolated immediately after importScripts.');
 assert(additiveWorker.trimEnd().endsWith('})();'),'Additive worker isolation closure is not closed.');
-assert(additiveWorker.includes("working-campus-additions-v189-worker-evaluation"),'v189 worker evaluation revision is missing.');
+assert(additiveWorker.includes('working-campus-additions-v189-worker-evaluation'),'v189 worker evaluation revision is missing.');
 
-const fixed=evaluate(additiveWorker);
-assert(!fixed.error,`Combined service worker evaluation failed: ${fixed.error?.stack||fixed.error}`);
-assert(fixed.listeners.filter(entry=>entry.type==='install').length===2,'Base and additive install listeners did not both register.');
-assert(fixed.listeners.filter(entry=>entry.type==='fetch').length===2,'Base and additive fetch listeners did not both register.');
+const additiveBody=additiveWorker.replace(`${importLine}\n`,'');
+const combined=evaluate(`${baseWorker}\n${additiveBody}`,'combined-service-worker.js');
+assert(!combined.error,`Base and additive workers do not compile in one browser-style lexical scope: ${combined.error?.stack||combined.error}`);
+assert(combined.listeners.filter(entry=>entry.type==='install').length===2,'Base and additive install listeners did not both register.');
+assert(combined.listeners.filter(entry=>entry.type==='fetch').length===2,'Base and additive fetch listeners did not both register.');
 
-const unscoped=additiveWorker
+const unscopedBody=additiveBody
   .replace("(()=>{\n'use strict';\n","'use strict';\n")
   .replace(/\n\}\)\(\);\s*$/,'\n');
-const regression=evaluate(unscoped);
+const regression=evaluate(`${baseWorker}\n${unscopedBody}`,'unscoped-service-worker.js');
 assert(regression.error instanceof SyntaxError,'The verifier did not detect the unscoped global redeclaration regression.');
 assert(/PACKAGE_RECOVERY_REVISION|already been declared/i.test(String(regression.error.message)),'Regression failed for an unexpected reason.');
 
 console.log(JSON.stringify({
   ok:true,
   revision:'v189-service-worker-evaluation',
-  combinedEvaluation:true,
-  importedBaseWorker:true,
+  browserStyleSharedLexicalCompilation:true,
   additiveGlobalScope:'isolated-iife',
   duplicateGlobalConstCrash:false,
   regressionSensitivity:true,
-  installListeners:fixed.listeners.filter(entry=>entry.type==='install').length,
-  fetchListeners:fixed.listeners.filter(entry=>entry.type==='fetch').length,
+  installListeners:combined.listeners.filter(entry=>entry.type==='install').length,
+  fetchListeners:combined.listeners.filter(entry=>entry.type==='fetch').length,
 },null,2));
