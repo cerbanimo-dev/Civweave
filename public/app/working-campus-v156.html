@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en" data-commonweave-system="commonweave" data-build="working-campus-v183-v106" data-previous-build="working-campus-v182-v106" data-settings-diagnostics="cwlog">
+<html lang="en" data-commonweave-system="commonweave" data-build="working-campus-v184-v106" data-previous-build="working-campus-v183-v106" data-earlier-build="working-campus-v182-v106" data-settings-diagnostics="cwlog" data-package-recovery="v184">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07162f">
 <title>Commonweave Working Campus · v1.0.6</title>
-<script src="/app/install-boundary-v146.js?v=1.0.6-v183"></script>
-<link rel="stylesheet" href="/app/working-campus-v156.css?v=header-v183-v106">
+<script src="/app/install-boundary-v146.js?v=1.0.6-v184"></script>
+<link rel="stylesheet" href="/app/working-campus-v156.css?v=header-v184-v106">
 <link rel="stylesheet" href="/app/system-interface-v157.css?v=inner-ui-v106">
 <link rel="stylesheet" href="/app/platform-experience-v160.css?v=dark-review-v106">
 </head>
@@ -22,6 +22,7 @@
       <button class="pill" id="roam-mode" type="button">Free roam</button>
     </div>
     <button class="pill settings-pill" id="settings-button" type="button" data-open-unified-ai-settings><span aria-hidden="true">⚙</span><span>AI settings</span></button>
+    <button class="pill" id="diagnostics-button" type="button" data-open-log-diagnostics><span aria-hidden="true">◉</span><span>Diagnostics</span></button>
   </header>
   <section class="campus" aria-label="Commonweave realms">
     <button class="realm-node" data-realm="living-school" style="--accent:var(--living)"><b class="badge" data-badge="living-school" hidden></b><img src="/app/assets/ai/moss.png" alt=""><small>Moss</small><strong>Living School</strong><span>Learn what the intention requires.</span></button>
@@ -46,11 +47,29 @@
 </main>
 <nav class="bottom"><button class="active" data-view="weave">Weave</button><button data-view="progress">Progress</button><button data-view="library">Library</button><button data-view="campus">Campus</button></nav>
 <div class="toast" id="toast" hidden></div>
-<script src="/app/platform-experience-v160.js?v=header-v183-v106"></script>
-<script src="/app/model-settings-controller-v173.js?v=settings-v183-logs-v106"></script>
-<!-- compatibility marker: settings-v182-v106 -->
+<script src="/app/platform-experience-v160.js?v=header-v184-v106"></script>
+<script src="/app/model-settings-controller-v173.js?v=settings-v184-package-recovery-v106"></script>
+<!-- compatibility markers: settings-v183-logs-v106 settings-v182-v106 -->
 <script src="/app/family-ai-loader-v105.js?v=deterministic-v106"></script>
 <script src="/app/merlinites-semantic-planner-v164.js?v=deterministic-v106"></script>
-<script src="/app/working-campus-v156.js?v=header-v183-v106"></script>
+<script src="/app/working-campus-v156.js?v=header-v184-v106"></script>
+<script>
+(()=>{
+  const button=document.getElementById('diagnostics-button');
+  if(!button)return;
+  button.addEventListener('click',()=>{
+    localStorage.setItem('commonweave.log-level','debug');
+    const logger=globalThis.CommonweaveLogV183;
+    if(!logger){location.reload();return}
+    logger.setLevel('debug');
+    logger.renderDock();
+    setTimeout(()=>{
+      const toggle=document.querySelector('[data-cw-log-toggle]');
+      const panel=document.querySelector('[data-cw-log-panel]');
+      if(panel?.hidden)toggle?.click();
+    },0);
+  });
+})();
+</script>
 </body>
 </html>
