@@ -25,13 +25,14 @@ const dayKey=(date=new Date())=>{
   return `${year}-${month}-${day}`;
 };
 const words=value=>clean(value).toLowerCase().match(/[a-z0-9][a-z0-9'’-]*/g)||[];
+const array=value=>Array.isArray(value)?value:[];
 function hash(value){let h=2166136261;for(const char of clean(value,24000)){h^=char.charCodeAt(0);h=Math.imul(h,16777619)}return(h>>>0).toString(36)}
 function normalizeMode(value){return String(value||'deterministic').toLowerCase()==='generative'?'generative':'deterministic'}
 function state(){const value=parse(globalThis.localStorage?.getItem?.(STATE_KEY),{});return{schema:'commonweave.reward-policy-state.v1',version:1,days:value.days&&typeof value.days==='object'?value.days:{},claims:Array.isArray(value.claims)?value.claims:[]}}
 function save(value){globalThis.localStorage?.setItem?.(STATE_KEY,JSON.stringify(value));return value}
 function ledger(){const value=parse(globalThis.localStorage?.getItem?.(LEDGER_KEY),{});return Array.isArray(value)?{schema:'commonweave.rewards.v156',events:value}:value&&typeof value==='object'?{...value,events:Array.isArray(value.events)?value.events:[]}:{schema:'commonweave.rewards.v156',events:[]}}
-function taskFingerprint(task={}){return hash([task.id,task.title,task.objective,task.deliverable,...(task.evidence||[]),...(task.acceptanceCriteria||[])].map(value=>clean(value).toLowerCase().replace(/\s+/g,' ')).join('|'))}
-function proofText(submission={}){if(typeof submission==='string')return clean(submission);return clean([submission.text,submission.response,submission.note,submission.summary,...(submission.proofs||[]).map(item=>typeof item==='string'?item:item?.value||item?.label||item?.url),...(submission.evidence||[]).map(item=>typeof item==='string'?item:item?.value||item?.label||item?.url)].filter(Boolean).join(' '),20000)}
+function taskFingerprint(task={}){return hash([task.title,task.objective,task.deliverable,...array(task.evidence),...array(task.acceptanceCriteria)].map(value=>clean(value).toLowerCase().replace(/\s+/g,' ')).join('|'))}
+function proofText(submission={}){if(typeof submission==='string')return clean(submission);return clean([submission.text,submission.response,submission.note,submission.summary,...array(submission.proofs).map(item=>typeof item==='string'?item:item?.value||item?.label||item?.url),...array(submission.evidence).map(item=>typeof item==='string'?item:item?.value||item?.label||item?.url)].filter(Boolean).join(' '),20000)}
 function assessTask(task={},submission={}){
   const title=clean(task.title||task.action,500),objective=clean(task.objective||task.description,2000),deliverable=clean(task.deliverable,1200),evidence=(Array.isArray(task.evidence)?task.evidence:[]).map(item=>clean(item,500)).filter(Boolean),criteria=(Array.isArray(task.acceptanceCriteria)?task.acceptanceCriteria:[]).map(item=>clean(item,700)).filter(Boolean),complexity=Math.max(0,Number(task.complexityPoints||0)),combined=`${title} ${objective} ${deliverable}`,proof=proofText(submission),reasons=[];
   if(TRIVIAL.test(combined)&&complexity<5)reasons.push('A tiny next-step prompt is a substep, not a reward-bearing task.');
