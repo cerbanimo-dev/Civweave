@@ -36,7 +36,8 @@ const openBlock=controller.slice(controller.indexOf('async function open()'),con
 assert(openBlock.indexOf('showBootstrap(generation)')<openBlock.indexOf('await afterPaint()'),'The settings shell is not mounted before asynchronous work.');
 assert(openBlock.indexOf('await afterPaint()')<openBlock.indexOf('await ensure()'),'Settings dependencies begin before the first paint boundary.');
 
-for(const forbidden of ['new Worker','pipeline(','all-minilm','transformers.min.js'])assert(!settings.includes(forbidden),`Unified AI settings still contains runtime activation token ${forbidden}`);
+for(const forbidden of ['new Worker','pipeline(','transformers.min.js','/app/models/all-minilm-l6-v2/adapter.js','/app/models/all-minilm-l6-v2/worker.js'])assert(!settings.includes(forbidden),`Unified AI settings still contains runtime activation token ${forbidden}`);
+assert(settings.includes('LEGACY_PATTERN'),'Unified settings must still recognize and retire legacy MiniLM configuration labels without activating them.');
 
 for(const token of [
   "if(!explicit)return{ready:false,dormant:true,reason:'explicit-activation-required'}",
