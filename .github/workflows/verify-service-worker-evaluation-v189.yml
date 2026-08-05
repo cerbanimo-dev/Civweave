@@ -19,10 +19,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Syntax check workers and verifier
+      - name: Syntax check workers and verifiers
         run: |
           node --check public/service-worker.js
           node --check public/service-worker-v156.js
+          node --check public/service-worker-critical-v199.js
+          node --check public/app/fast-interactive-runtime-v192.js
           node --check scripts/verify-service-worker-evaluation-v189.mjs
+          node --check scripts/verify-rook-assistant-package-v197.mjs
+          node --check scripts/verify-fast-interactive-runtime-v202.mjs
       - name: Evaluate imported and additive workers together
         run: node scripts/verify-service-worker-evaluation-v189.mjs
+      - name: Verify Rook assistant runtime packaging
+        run: node scripts/verify-rook-assistant-package-v197.mjs
+      - name: Verify frozen fast-runtime proxy and critical refresh
+        run: node scripts/verify-fast-interactive-runtime-v202.mjs
