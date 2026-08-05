@@ -6,15 +6,15 @@ const WORKER_REVISION='device-package-r41-no-native-dialog';
 const ADDITIONS_REVISION='working-campus-additions-v197-assistant-runtime-package';
 const PREVIOUS_ADDITIONS_REVISION='working-campus-additions-v196-living-school-reader-loop';
 const EARLIER_ADDITIONS_REVISION='working-campus-additions-v195-living-school-boot';
-const CRITICAL_BOOT_REVISION='critical-package-completion-v200';
-const PREVIOUS_PACKAGE_LABEL='Living School reader-loop repair';
-const EARLIER_PACKAGE_LABEL='Living School nonblocking boot';
+const CRITICAL_BOOT_REVISION='living-school-lesson-nav-v201';
+const PREVIOUS_PACKAGE_LABEL='complete critical package repair';
+const EARLIER_PACKAGE_LABEL='Living School critical boot';
 const WORKER_BUILD=`${VERSION}-${WORKER_REVISION}-${ADDITIONS_REVISION}-${CRITICAL_BOOT_REVISION}`;
 const WORKER_URL=`/service-worker-v156.js?v=${WORKER_BUILD}`;
 const PREPARE_TIMEOUT_MS=180000;
-const AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r47';
-const PREVIOUS_AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r46';
-const EARLIER_AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r45';
+const AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r48';
+const PREVIOUS_AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r47';
+const EARLIER_AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r46';
 let installPrompt=null,registration=null,packageReady=false,packageStatus=null,packageError=null,preparing=false;
 const workerWaits=new WeakMap();
 const $=selector=>document.querySelector(selector);
@@ -25,8 +25,8 @@ function isIOS(){return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase(
 function rootScope(reg){try{const scope=new URL(reg.scope);return scope.origin===location.origin&&scope.pathname==='/'}catch{return false}}
 function workerUrls(reg){return[reg?.installing?.scriptURL,reg?.waiting?.scriptURL,reg?.active?.scriptURL].filter(Boolean)}
 function currentWorker(reg){return workerUrls(reg).some(value=>{try{const url=new URL(value);return url.pathname==='/service-worker-v156.js'&&url.searchParams.get('v')===WORKER_BUILD}catch{return false}})}
-function showPackage(status={}){packageStatus=status;$('#package-state').textContent=packageReady?'complete':packageError?'failed':'preparing';const missing=Array.isArray(status.missing)?status.missing.length:0,total=Number(status.assetCount||0)+Number(status.additions?.assetCount||0)+Number(status.critical?.total||0);$('#package-assets').textContent=packageReady&&total?`${total} packaged files`:missing?`${missing} missing files`:total?`${total} packaged files`:'checking package';$('#local-mode').textContent='v1.0.6 · deterministic · critical boot · complete offline package'}
-function guidance(){const button=$('#install-app');if(standalone()){button.disabled=false;button.textContent='Open Commonweave v1.0.6';help('The complete v1.0.6 package is ready. Open Commonweave.');return}if(packageError){button.disabled=false;button.textContent='Reset and retry package';help(`Core package preparation failed: ${packageError.message}. Tap reset and retry to remove every incomplete worker and cache layer.`);return}if(preparing||!packageReady){button.disabled=true;button.textContent='Preparing v1.0.6…';help('Preparing the complete offline package. Living School boot files are prioritized, but the installer will not declare success until every required core and shared file exists.');return}if(installPrompt){button.disabled=false;button.textContent='Install Commonweave v1.0.6';help('The complete v1.0.6 deterministic offline package is ready to install.');return}button.disabled=false;button.textContent=isIOS()?'Show iPhone/iPad instructions':'Show installation instructions';help(isIOS()?'In Safari, use Share → Add to Home Screen.':'Use the browser’s Install app command if it is not offered automatically.')}
+function showPackage(status={}){packageStatus=status;$('#package-state').textContent=packageReady?'complete':packageError?'failed':'preparing';const missing=Array.isArray(status.missing)?status.missing.length:0,total=Number(status.assetCount||0)+Number(status.additions?.assetCount||0)+Number(status.critical?.total||0);$('#package-assets').textContent=packageReady&&total?`${total} packaged files`:missing?`${missing} missing files`:total?`${total} packaged files`:'checking package';$('#local-mode').textContent='v1.0.6 · deterministic · lesson-safe · shared image navigation'}
+function guidance(){const button=$('#install-app');if(standalone()){button.disabled=false;button.textContent='Open Commonweave v1.0.6';help('The Living School lesson and image navigation repair is ready. Open Commonweave.');return}if(packageError){button.disabled=false;button.textContent='Reset and retry package';help(`Core package preparation failed: ${packageError.message}. Tap reset and retry to remove every incomplete worker and cache layer.`);return}if(preparing||!packageReady){button.disabled=true;button.textContent='Preparing v1.0.6…';help('Preparing the complete offline package with the Living School lesson and image navigation repair.');return}if(installPrompt){button.disabled=false;button.textContent='Install Commonweave v1.0.6';help('The complete v1.0.6 deterministic offline package is ready to install.');return}button.disabled=false;button.textContent=isIOS()?'Show iPhone/iPad instructions':'Show installation instructions';help(isIOS()?'In Safari, use Share → Add to Home Screen.':'Use the browser’s Install app command if it is not offered automatically.')}
 function failPackage(error){packageReady=false;packageError=error instanceof Error?error:new Error(String(error||'Unknown package error'));showPackage({...packageStatus,error:packageError.message});guidance()}
 async function clearPackageCaches(){if(!('caches'in window))return;const keys=await caches.keys();await Promise.allSettled(keys.filter(key=>key.startsWith('commonweave-')||key.startsWith('cwext-')||key.startsWith('cwboot-')).map(key=>caches.delete(key)))}
 async function resetDevicePackage(){help('Removing every incomplete package layer…');if('serviceWorker'in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.allSettled(regs.filter(rootScope).map(reg=>reg.unregister()))}await clearPackageCaches();registration=null;await pause(350);const next=new URL(location.href);next.searchParams.set('package-reset',Date.now().toString(36));location.replace(next.href)}
