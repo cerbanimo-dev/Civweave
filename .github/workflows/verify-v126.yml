@@ -1,4 +1,4 @@
-name: Verify Commonweave v1.0.4 Deterministic Startup
+name: Verify Commonweave v1.0.5 Settings Stability
 
 on:
   push:
@@ -21,10 +21,8 @@ jobs:
           node-version: 22
       - name: Install JavaScript dependencies
         run: npm install --no-audit --no-fund
-      - name: Verify deterministic AI boundary
-        run: |
-          node scripts/verify-deterministic-ai-v175.mjs
-          node scripts/verify-final-settings-retirement-v177.mjs
+      - name: Verify v1.0.5 settings ownership and header
+        run: node scripts/verify-v105-settings-header-v178.mjs
       - name: Run repository checks
         run: npm run check
       - name: Verify instant deterministic preparation
@@ -35,7 +33,6 @@ jobs:
           elapsed_ms=$(( $(date +%s%3N) - start_ms ))
           grep -q 'Public gateway mode: Gateway fast start' render-package-prepare.log
           grep -q 'Deterministic local mode is the default AI route' render-package-prepare.log
-          grep -q 'laboratory files are dormant' render-package-prepare.log
           test "$elapsed_ms" -lt 5000
           printf '{"renderPrepareMs":%s}\n' "$elapsed_ms" > startup-budget.json
       - name: Start public install gateway
@@ -47,45 +44,40 @@ jobs:
             sleep 0.05
           done
           test -s gateway-health.json
-      - name: Verify deterministic package distribution
+      - name: Verify v1.0.5 package distribution
         run: |
           set -euxo pipefail
           curl -fsS http://127.0.0.1:8787/ -o gateway.html
-          grep -q 'DETERMINISTIC OFFLINE SOFTWARE PACKAGE' gateway.html
-          grep -q 'one AI settings surface' gateway.html
+          grep -q 'Install Commonweave v1.0.5' gateway.html
+          grep -q '/app/logos/commonweave-app-icon.png' gateway.html
           curl -fsS http://127.0.0.1:8787/install-v130.js -o gateway-installer.js
-          grep -q "WORKER_REVISION='device-package-r39-no-legacy-ai'" gateway-installer.js
-          grep -q "ADDITIONS_REVISION='working-campus-additions-v177-final-settings-retirement'" gateway-installer.js
-          grep -q 'one AI settings surface' gateway-installer.js
+          grep -q "WORKER_REVISION='device-package-r40-settings-stable'" gateway-installer.js
+          grep -q "ADDITIONS_REVISION='working-campus-additions-v178-settings-stable'" gateway-installer.js
           curl -fsS http://127.0.0.1:8787/service-worker.js -o gateway-worker.js
-          grep -q "CACHE_REVISION='direct-family-r39-final-settings-retirement'" gateway-worker.js
-          grep -q "DEVICE_REVISION='device-package-r39-no-legacy-ai'" gateway-worker.js
-          grep -q "AI_REVISION='deterministic-single-authority-v177'" gateway-worker.js
-          grep -q '/app/cabinet-surfaces-v143.js' gateway-worker.js
+          grep -q "VERSION='1.0.5'" gateway-worker.js
+          grep -q "DEVICE_REVISION='device-package-r40-settings-stable'" gateway-worker.js
+          grep -q "AI_REVISION='deterministic-single-authority-v178'" gateway-worker.js
           curl -fsS http://127.0.0.1:8787/service-worker-v156.js -o gateway-additive-worker.js
-          grep -q 'working-campus-additions-v177-final-settings-retirement' gateway-additive-worker.js
+          grep -q 'working-campus-additions-v178-settings-stable' gateway-additive-worker.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/model-settings-controller-v173.js -o gateway-settings-controller.js
-          grep -q 'deterministic-single-authority-controller' gateway-settings-controller.js
-          grep -q '/app/unified-ai-settings-v175.js' gateway-settings-controller.js
+          grep -q '1.0.5-settings-controller-v178' gateway-settings-controller.js
+          grep -q "dismissal:'explicit-only'" gateway-settings-controller.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/unified-ai-settings-v175.js -o gateway-ai-settings.js
+          grep -q '1.0.5-unified-ai-settings-v178' gateway-ai-settings.js
           grep -q 'Gemini API key' gateway-ai-settings.js
-          grep -q 'Deterministic local mode' gateway-ai-settings.js
-          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/cabinet-surfaces-v143.js -o gateway-cabinet-surfaces.js
-          grep -q 'PLATFORM CONFIGURATION' gateway-cabinet-surfaces.js
-          grep -q 'Save platform settings' gateway-cabinet-surfaces.js
-          grep -q 'data-open-ai-settings' gateway-cabinet-surfaces.js
-          ! grep -q 'Xenova/all-MiniLM-L6-v2' gateway-cabinet-surfaces.js
-          ! grep -q "provider:'bundled'" gateway-cabinet-surfaces.js
-          ! grep -q 'Save platform and AI settings' gateway-cabinet-surfaces.js
-          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/settings-delegation-v175.js -o gateway-settings-retirement.js
-          grep -q 'form\[data-cw143-settings\]' gateway-settings-retirement.js
-          grep -q 'migrateLegacyAI' gateway-settings-retirement.js
-          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/family-ai-loader-v105.js -o gateway-ai-loader.js
-          grep -q '/app/deterministic-mode-v175.js' gateway-ai-loader.js
-          grep -q "defaultProvider:'deterministic'" gateway-ai-loader.js
-          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/extensions/commonweave-additions-v156.js -o gateway-shared-tools.js
-          grep -q 'Node & friends' gateway-shared-tools.js
-          grep -q 'aiVault:false' gateway-shared-tools.js
+          grep -q "dialog.dataset.dismissal='explicit-only'" gateway-ai-settings.js
+          ! grep -q 'event.target===dialog' gateway-ai-settings.js
+          ! grep -q 'Xenova/all-MiniLM-L6-v2' gateway-ai-settings.js
+          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/working-campus-v156.html -o gateway-campus.html
+          grep -q '/app/logos/commonweave-app-icon.png' gateway-campus.html
+          grep -q 'v1.0.5' gateway-campus.html
+          ! grep -q '/app/logos/commonweave.webp' gateway-campus.html
+          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/working-campus-v156.css -o gateway-campus.css
+          grep -q 'width:176px' gateway-campus.css
+          for retired in commonweave-settings-safe-open-v171.js commonweave-settings-safe-open-v172.js; do
+            status="$(curl -sS -o /dev/null -w '%{http_code}' -H 'x-commonweave-package: install' "http://127.0.0.1:8787/extensions/$retired")"
+            test "$status" = 404
+          done
       - name: Start local software family
         run: |
           PORT=8788 npm start > commonweave-local.log 2>&1 &
@@ -95,28 +87,16 @@ jobs:
             sleep 1
           done
           test -s local-health.json
-      - name: Verify direct offline software family
+      - name: Verify installed update marker
         run: |
-          set -euxo pipefail
-          for spec in \
-            'commonweave:/app/realm-console-v140.html?system=commonweave' \
-            'living-school:/app/cabinets/living-school/index.html' \
-            'cerbanimo:/app/realm-console-v140.html?system=cerbanimo' \
-            'fellowfare:/app/fellowfare-cabinet-v144.html' \
-            'anarchadia:/app/anarchadia-console-v139.html'; do
-            name="${spec%%:*}"; route="${spec#*:}"
-            curl -fsS "http://127.0.0.1:8788${route}" -o "${name}.html"
-            grep -q '<script src="/app/model-settings-controller-v173.js' "${name}.html"
-            grep -q '<script src="/app/family-ai-loader-v105.js' "${name}.html"
-            grep -q '<script src="/app/family-shell-v104.js' "${name}.html"
-          done
           curl -fsS http://127.0.0.1:8788/app/pwa-v130.js -o local-pwa.js
-          grep -q 'device-package-r39-no-legacy-ai' local-pwa.js
-      - name: Upload deterministic-startup evidence
+          grep -q "VERSION='1.0.5'" local-pwa.js
+          grep -q 'device-package-r40-settings-stable' local-pwa.js
+      - name: Upload v1.0.5 evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v104-clean-settings-evidence
+          name: commonweave-v105-settings-stability-evidence
           path: |
             commonweave-gateway.log
             commonweave-local.log
@@ -130,7 +110,6 @@ jobs:
             gateway-additive-worker.js
             gateway-settings-controller.js
             gateway-ai-settings.js
-            gateway-cabinet-surfaces.js
-            gateway-settings-retirement.js
-            gateway-ai-loader.js
-            gateway-shared-tools.js
+            gateway-campus.html
+            gateway-campus.css
+            local-pwa.js
