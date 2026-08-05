@@ -21,8 +21,9 @@ for(const source of [surface,delegation,controller,settings,worker,additiveWorke
 
 for(const token of ['PLATFORM CONFIGURATION','Commonweave platform settings','Save platform settings','data-open-ai-settings','Open Commonweave AI settings','Deterministic local mode is the default','function openAISettings()'])assert(surface.includes(token),`Cabinet surface missing ${token}`);
 for(const forbidden of ["const AI_KEY=","provider:'bundled'",'Xenova/all-MiniLM-L6-v2','Save platform and AI settings','name="provider"','name="model"','name="externalConsent"',"localStorage.setItem(AI_KEY"] )assert(!surface.includes(forbidden),`Cabinet surface can still resurrect ${forbidden}`);
+assert((surface.match(/data-open-ai-settings/g)||[]).length===2,'Platform surface should declare one AI handoff button and one click route.');
 
-for(const token of ["VERSION='177.0-final-legacy-ai-retirement'",'form[data-cw143-settings]','migrateLegacyAI','savePlatform','PLATFORM CONFIGURATION','data-open-unified-ai-settings',"provider:'deterministic'",'commonweave-deterministic-v175'])assert(delegation.includes(token),`Settings retirement guard missing ${token}`);
+for(const token of ["VERSION='177.1-final-legacy-ai-retirement'",'form[data-cw143-settings]','migrateLegacyAI','savePlatform','PLATFORM CONFIGURATION','data-open-unified-ai-settings','data-open-ai-settings',"provider:'deterministic'",'commonweave-deterministic-v175','const hasHandoff='])assert(delegation.includes(token),`Settings retirement guard missing ${token}`);
 assert(delegation.includes("document.addEventListener('submit'")&&delegation.includes('stopImmediatePropagation'),'Legacy full-page submit is not intercepted before its retired handler.');
 
 for(const token of ["authority:'CommonweaveUnifiedAISettingsV175'","defaultRoute:'deterministic'",'transformerActive:false'])assert(controller.includes(token),`Controller missing ${token}`);
@@ -35,4 +36,4 @@ for(const token of ["WORKER_REVISION='device-package-r39-no-legacy-ai'","ADDITIO
 for(const token of ["ADDITIONS_VERSION='v177-final-settings-retirement'","SETTINGS_STABILITY_REVISION='v177-no-legacy-ai-surfaces'"])assert(boundary.includes(token),`Install boundary missing ${token}`);
 assert(indexHtml.includes('clean-settings-r39')&&indexHtml.includes('one AI settings surface'),'Public installer does not publish the clean settings revision.');
 
-console.log(JSON.stringify({ok:true,visiblePlatformSurface:'platform-only',settingsAuthority:'CommonweaveUnifiedAISettingsV175',legacyBundledRoute:false,legacyMiniLMModel:false,legacyAISubmit:false,devicePackage:'r39-no-legacy-ai',additivePackage:'v177-final-settings-retirement'},null,2));
+console.log(JSON.stringify({ok:true,visiblePlatformSurface:'platform-only',platformAIHandoffs:1,settingsAuthority:'CommonweaveUnifiedAISettingsV175',legacyBundledRoute:false,legacyMiniLMModel:false,legacyAISubmit:false,devicePackage:'r39-no-legacy-ai',additivePackage:'v177-final-settings-retirement'},null,2));
