@@ -23,10 +23,22 @@ const verifierChanged = await replaceOnce(
   'retired installer update-revision assertion'
 );
 
+const [gateway, verifier] = await Promise.all([
+  readFile('server-gateway-v131.mjs', 'utf8'),
+  readFile('scripts/verify-knowledge-school-seeds-v1.mjs', 'utf8')
+]);
+for (const route of ['/app/offline-package-v208.json', '/app/offline-campus-status-v210.js']) {
+  if (!gateway.includes(`pathname === '${route}'`)) throw new Error(`Render installer allow-list is missing ${route}`);
+}
+if (verifier.includes('app installer update revision')) {
+  throw new Error('The retired v207 installer-revision assertion is still active.');
+}
+
 console.log(JSON.stringify({
   revision: 'offline-installer-gateway-v211',
   gatewayChanged,
   verifierChanged,
+  verified: true,
   installerAssets: [
     '/app/offline-package-v208.json',
     '/app/offline-campus-status-v210.js'
