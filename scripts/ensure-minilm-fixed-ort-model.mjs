@@ -33,7 +33,7 @@ async function download(spec){
   const target=path.join(modelRoot,spec.name),temp=`${target}.part`;
   await mkdir(path.dirname(target),{recursive:true});
   await rm(temp,{force:true});
-  const response=await fetch(`${base}/${spec.name}?download=true`,{redirect:'follow',headers:{'user-agent':'Commonweave/1.0.5-fixed-ort'}});
+  const response=await fetch(`${base}/${spec.name}?download=true`,{redirect:'follow',headers:{'user-agent':'Commonweave/1.0.6-fixed-ort'}});
   if(!response.ok||!response.body)throw new Error(`${spec.name} returned ${response.status}`);
   await pipeline(Readable.fromWeb(response.body),createWriteStream(temp));
   const info=await stat(temp);
