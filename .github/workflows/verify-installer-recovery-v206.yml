@@ -14,7 +14,10 @@ on:
       - public/app/pwa-update-controller-v204.js
       - public/downloads/knowledge-schools/**
       - scripts/apply-installer-recovery-v206.mjs
+      - scripts/apply-installer-recovery-ci-v206.mjs
       - scripts/smoke-installer-recovery-v206.mjs
+      - scripts/verify-knowledge-school-seeds-v1.mjs
+      - scripts/verify-service-worker-evaluation-v189.mjs
       - .github/workflows/verify-installer-recovery-v206.yml
   push:
     branches:
@@ -38,9 +41,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Materialize deterministic repair
+      - name: Materialize verifier alignment
         if: github.event_name == 'push'
-        run: node scripts/apply-installer-recovery-v206.mjs
+        run: node scripts/apply-installer-recovery-ci-v206.mjs
       - name: Check repaired JavaScript syntax
         run: |
           node --check public/install-v130.js
@@ -49,23 +52,24 @@ jobs:
           node --check public/service-worker-v203.js
           node --check public/service-worker-update-v204.js
           node --check scripts/apply-installer-recovery-v206.mjs
+          node --check scripts/apply-installer-recovery-ci-v206.mjs
           node --check scripts/smoke-installer-recovery-v206.mjs
+          node --check scripts/verify-knowledge-school-seeds-v1.mjs
+          node --check scripts/verify-service-worker-evaluation-v189.mjs
       - name: Exercise exact console-error routes and worker composition
         run: node scripts/smoke-installer-recovery-v206.mjs
-      - name: Commit materialized repair
+      - name: Commit materialized verifier alignment
         if: github.event_name == 'push'
         run: |
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add server-gateway-v131.mjs \
-            public/install-v130.js \
-            public/service-worker.js \
-            public/service-worker-v156.js \
-            public/service-worker-v203.js
+          git add public/service-worker-v203.js \
+            scripts/verify-knowledge-school-seeds-v1.mjs \
+            scripts/verify-service-worker-evaluation-v189.mjs
           if git diff --cached --quiet; then
-            echo 'Installer recovery already materialized.'
+            echo 'Installer recovery verifiers already aligned.'
             exit 0
           fi
-          git commit -m 'Repair installer worker and knowledge asset delivery'
+          git commit -m 'Align installer recovery verification'
           git push origin HEAD:agent/repair-installer-worker-410-v206
