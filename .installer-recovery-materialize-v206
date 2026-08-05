@@ -5,3 +5,4 @@ retry: current-worker-build-aligned
 alignment: isolated-recovery-verifiers
 matrix: human-triggered-final
 finalize: explicit-collision-fixture-and-v206-wrapper
+verification: final-human-matrix
