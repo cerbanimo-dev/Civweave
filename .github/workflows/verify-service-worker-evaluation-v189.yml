@@ -27,12 +27,16 @@ jobs:
           node --check public/service-worker-critical-v199.js
           node --check public/app/fast-interactive-runtime-v192.js
           node --check public/app/weaveling-memory-bridge-v191.js
+          node --check public/app/offline-campus-status-v210.js
           node --check scripts/verify-service-worker-evaluation-v189.mjs
           node --check scripts/verify-rook-assistant-package-v197.mjs
           node --check scripts/verify-fast-interactive-runtime-v202.mjs
           node --check scripts/verify-memory-bridge-frozen-runtime-v205.mjs
+          node --check scripts/verify-offline-campus-status-v210.mjs
       - name: Evaluate imported and additive workers together
         run: node scripts/verify-service-worker-evaluation-v189.mjs
+      - name: Verify offline campus downloaded counts
+        run: node scripts/verify-offline-campus-status-v210.mjs
       - name: Verify Rook assistant runtime packaging
         run: node scripts/verify-rook-assistant-package-v197.mjs
       - name: Verify frozen fast-runtime proxy and critical refresh
