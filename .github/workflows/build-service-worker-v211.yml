@@ -7,6 +7,7 @@ on:
       - public/service-worker-core-v208.js
       - scripts/service-worker-offline-v211-override.js
       - scripts/build-service-worker-v211.mjs
+      - scripts/align-offline-installer-gateway-v211.mjs
       - .github/workflows/build-service-worker-v211.yml
   workflow_dispatch:
 
@@ -25,18 +26,22 @@ jobs:
           node-version: 22
       - name: Generate service worker
         run: node scripts/build-service-worker-v211.mjs
-      - name: Validate generated worker
+      - name: Align Render installer routes and audits
+        run: node scripts/align-offline-installer-gateway-v211.mjs
+      - name: Validate generated installer package
         run: |
           node --check public/service-worker-v203.js
+          node --check server-gateway-v131.mjs
+          node --check scripts/verify-knowledge-school-seeds-v1.mjs
           node scripts/verify-service-worker-evaluation-v189.mjs
-      - name: Commit generated worker
+      - name: Commit generated installer package
         run: |
-          if git diff --quiet -- public/service-worker-v203.js; then
-            echo "Generated worker is already current."
+          if git diff --quiet -- public/service-worker-v203.js server-gateway-v131.mjs scripts/verify-knowledge-school-seeds-v1.mjs; then
+            echo "Generated installer package is already current."
             exit 0
           fi
           git config user.name "cerbanimo-dev"
           git config user.email "cerbanimo@gmail.com"
-          git add public/service-worker-v203.js
-          git commit -m "Generate v211 offline retry coordinator"
+          git add public/service-worker-v203.js server-gateway-v131.mjs scripts/verify-knowledge-school-seeds-v1.mjs
+          git commit -m "Allow offline campus metadata through the install gateway"
           git push origin HEAD:fix/offline-campus-retry-loop-v211
