@@ -48,13 +48,14 @@ const aiWalletHttp = createAiWalletHttpHandler({
 });`,'host state restore and AI wallet setup');
 replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.raw`  const pathname = decodeURIComponent(url.pathname);
   const gatewayRequest = req.method === 'GET' || req.method === 'HEAD';
-  const packageInstall = ['install','update-controls'].includes(String(req.headers['x-commonweave-package'] || ''));
+  const packageInstall = Boolean(String(req.headers['x-commonweave-package'] || '').trim());
   const installerSurface = pathname === '/'
     || pathname === '/index.html'
     || pathname === '/install-v130.js'
     || pathname === '/install-v130.css'
     || pathname === '/service-worker.js'
     || pathname === '/service-worker-v156.js'
+    || pathname === '/service-worker-v203.js'
     || pathname === '/app/manifest.webmanifest'
     || pathname === '/app/logos/commonweave.webp'
     || pathname === '/app/logos/commonweave-app-icon.png'
