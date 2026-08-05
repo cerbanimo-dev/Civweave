@@ -1,9 +1,9 @@
 {
-  "name": "Commonweave Cabinet Family",
+  "name": "Commonweave v1.0.5",
   "short_name": "Commonweave",
-  "description": "Five connected, offline-ready Commonweave software systems with shared AI settings and live guide chat.",
+  "description": "Five connected, offline-ready Commonweave systems with deterministic local operation and one controller-owned AI settings surface.",
   "id": "/commonweave-local",
-  "start_url": "/app/installed-entry-v146.html?system=commonweave",
+  "start_url": "/app/installed-entry-v146.html?system=commonweave&version=1.0.5",
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
