@@ -24,11 +24,10 @@ jobs:
           node --check public/app/reward-policy-v198.js
           node --check public/app/context-plan-composer-v198.js
           node --check public/app/deterministic-mode-v175.js
+          node --check scripts/verify-working-campus-planner-v199.mjs
       - name: Verify template diversity and anti-farming policy
         run: node scripts/verify-context-planning-rewards-v198.mjs
-      - name: Verify live loom wiring
-        run: |
-          grep -q '/app/reward-policy-v198.js' public/app/loom-v128.html
-          grep -q '/app/context-plan-composer-v198.js' public/app/loom-v128.html
-          grep -q '/app/deterministic-mode-v175.js' public/app/loom-v128.html
-          grep -q 'semanticPlanning' public/app/deterministic-mode-v175.js
+      - name: Verify active Working Campus wiring and settings boundary
+        run: node scripts/verify-working-campus-planner-v199.mjs
+      - name: Verify deterministic assistant integration
+        run: grep -q 'semanticPlanning' public/app/deterministic-mode-v175.js
