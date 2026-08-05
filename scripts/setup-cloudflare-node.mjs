@@ -12,7 +12,7 @@ const pagesOutput = resolve(repoRoot, ".cloudflare-pages");
 const projectName =
   process.env.CLOUDFLARE_PAGES_PROJECT ||
   process.argv[2] ||
-  "commonweave-cloudflare-node";
+  "commonweave";
 
 function detectWrangler() {
   const localWranglerJs = resolve(
@@ -54,9 +54,7 @@ function detectWrangler() {
       },
     );
 
-    if (result.status === 0) {
-      return candidate;
-    }
+    if (result.status === 0) return candidate;
   }
 
   throw new Error(
@@ -142,6 +140,3 @@ runWrangler(wrangler, [
 console.log("\nCloudflare Pages setup complete.");
 console.log(`Production URL: https://${projectName}.pages.dev`);
 console.log(`Health: https://${projectName}.pages.dev/api/health`);
-console.log(
-  `Installer: https://${projectName}.pages.dev/downloads/Commonweave-Mobile-Install-Kit.zip`,
-);
