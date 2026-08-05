@@ -8,7 +8,7 @@
   <title>Install Commonweave</title>
   <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.4">
   <link rel="icon" href="/app/logos/commonweave-icon-192.png">
-  <link rel="stylesheet" href="/install-v130.css?v=1.0.4-deterministic-r38">
+  <link rel="stylesheet" href="/install-v130.css?v=1.0.4-clean-settings-r39">
 </head>
 <body>
 <main class="gateway">
@@ -36,11 +36,11 @@
       <button id="install-app" class="primary" type="button" disabled>Preparing core package…</button>
       <button id="check-update" class="secondary" type="button">Check release</button>
     </div>
-    <p id="install-help" class="install-help" role="status">Registering the deterministic local package worker…</p>
+    <p id="install-help" class="install-help" role="status">Registering the clean deterministic package worker…</p>
     <dl class="package-state" aria-label="Device package state">
       <div><dt>Core package</dt><dd id="package-state">preparing</dd></div>
       <div><dt>Installed files</dt><dd id="package-assets">checking</dd></div>
-      <div><dt>AI default</dt><dd id="local-mode">deterministic · no model loaded</dd></div>
+      <div><dt>AI default</dt><dd id="local-mode">deterministic · one AI settings surface</dd></div>
     </dl>
   </section>
 
@@ -63,6 +63,6 @@
     </article>
   </section>
 </main>
-<script src="/install-v130.js?v=1.0.4-deterministic-r38"></script>
+<script src="/install-v130.js?v=1.0.4-clean-settings-r39"></script>
 </body>
 </html>
