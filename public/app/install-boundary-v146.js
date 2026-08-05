@@ -12,6 +12,7 @@ const DEVICE_CREDENTIALS_SCRIPT='/extensions/commonweave-device-credentials-v160
 const PROOF_PROGRESS_SCRIPT='/extensions/commonweave-proof-progress-v158.js';
 const GEMINI_INTERACTIONS_SCRIPT='/extensions/commonweave-gemini-interactions-v159.js';
 const LIVE_SOURCE_GUARD_SCRIPT='/extensions/commonweave-antigravity-live-source-guard-v167.js';
+const THEMED_SYSTEM_NAV_SCRIPT='/app/themed-system-nav-v178.js';
 const ADDITIONS_VERSION='v177-final-settings-retirement';
 const PREVIOUS_ADDITIONS_VERSION='v175-deterministic-single-ai-settings';
 const FAST_CORE_COMPATIBILITY_REVISION='v177-clean-settings-package';
@@ -44,6 +45,7 @@ function installAdditions(){
   addScript(SHARED_TOOLS_CLEANUP_SCRIPT);
   addScript(PROOF_PROGRESS_SCRIPT);
   addScript(GEMINI_INTERACTIONS_SCRIPT);
+  addScript(THEMED_SYSTEM_NAV_SCRIPT);
 }
 if(!allowed()){document.documentElement.dataset.installBoundary='blocked';location.replace(installerUrl())}
 else{document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';installAdditions()}
