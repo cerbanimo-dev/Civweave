@@ -23,7 +23,7 @@ assert(installer.includes("regs.filter(rootScope).map(reg=>reg.unregister())")&&
 assert(appManifest.start_url==='/app/installed-entry-v146.html?system=commonweave','Manifest does not launch Commonweave through installed entry.');
 assert((appManifest.shortcuts||[]).length===5,'Manifest does not expose all five systems.');
 for(const shortcut of appManifest.shortcuts||[])assert(String(shortcut.url).startsWith('/app/installed-entry-v146.html?system='),`Shortcut ${shortcut.name} bypasses installed entry.`);
-for(const token of ['display-mode: standalone','navigator.standalone','window.top!==window.self','developer','location.replace(installerUrl())','commonweave-model-download-v157.js'])assert(boundary.includes(token),`Install boundary missing ${token}`);
+for(const token of ['display-mode: standalone','navigator.standalone','window.top!==window.self','developer','location.replace(installerUrl())','commonweave-model-download-v157.js',"SETTINGS_CONTROLLER_SCRIPT='/app/model-settings-controller-v173.js'"])assert(boundary.includes(token),`Install boundary missing ${token}`);
 assert(entryHtml.includes('installed-entry-v146.js')&&entryJs.includes("if(!installed()&&!localDeveloper())"),'Installed entry can run in an ordinary browser tab.');
 for(const token of ["const sites={commonweave:'/app/realm-console-v140.html","'living-school':'/app/cabinets/living-school/index.html","fellowfare:'/app/fellowfare-cabinet-v144.html","params.get('system')"])assert(entryJs.includes(token),`Installed entry direct routing missing ${token}`);
 assert(!entryJs.includes("DEFAULT_DESTINATION='/app/fullscreen-family-v104.html"),'Installed entry still boots the wrapper host.');
@@ -51,8 +51,16 @@ assert(compatHost.includes('location.replace')&&!compatHost.includes('<iframe'),
 for(const token of ["document.documentElement.dataset.familyShell='direct'",'commonweave.family-status.v105','timestamp(item)>last','badge.hidden=value.count<1'])assert(familyShell.includes(token),`Family runtime missing ${token}`);
 assert(familyShell.includes('SYSTEM_ORDER.map(id=>')&&familyShell.includes('active=id===current')&&familyShell.includes('aria-current="page"')&&familyShell.includes('if(destination!==detect())route(destination)'),'Family tray must display all five systems, mark the current realm, and suppress self-navigation.');
 assert(!familyShell.includes('MutationObserver')&&!familyShell.includes('contentDocument'),'Family shell still observes nested documents.');
-for(const token of ['async function ensure()','CommonweaveGuideChatV153','CommonweaveModelSettingsV133'])assert(aiLoader.includes(token),`Lazy AI loader missing ${token}`);
-for(const [name,html] of [['commonweave/cerbanimo',realm],['living-school',living],['fellowfare',fellowfare],['anarchadia',anarchadia]]){assert(html.includes('/app/family-ai-loader-v105.js')&&html.includes('/app/family-shell-v104.js'),`${name} is not wired to direct family controls.`);assert(!html.includes('/app/guide-chat-v153.js'),`${name} eagerly loads guide chat.`)}
+for(const token of ['async function ensure()','CommonweaveGuideChatV153','CommonweaveModelSettingsControllerV173',"settingsOwner:'CommonweaveModelSettingsControllerV173'"])assert(aiLoader.includes(token),`Lazy AI loader missing ${token}`);
+assert(!aiLoader.includes('/app/minilm-model-settings-v138.js'),'Lazy AI loader still owns model settings.');
+assert(!aiLoader.includes('/app/model-settings-v133.css'),'Lazy AI loader still owns model-settings styling.');
+const scriptIndex=(html,src)=>html.indexOf(`<script src="${src}`);
+for(const [name,html] of [['commonweave/cerbanimo',realm],['living-school',living],['fellowfare',fellowfare],['anarchadia',anarchadia]]){
+  const settingsIndex=scriptIndex(html,'/app/model-settings-controller-v173.js'),chatIndex=scriptIndex(html,'/app/family-ai-loader-v105.js');
+  assert(settingsIndex>=0&&chatIndex>=0&&scriptIndex(html,'/app/family-shell-v104.js')>=0,`${name} is not wired to direct settings, chat, and family controls.`);
+  assert(settingsIndex<chatIndex,`${name} loads chat before settings ownership is established.`);
+  assert(!html.includes('/app/guide-chat-v153.js'),`${name} eagerly loads guide chat.`);
+}
 assert(marketingCabinet.includes('cv141-art'),'Physical cabinet source was deleted instead of retained for marketing.');
 new Function(entryJs);new Function(familyShell);new Function(aiLoader);new Function(worker);new Function(modelDownload);
-console.log(JSON.stringify({ok:true,version:'1.0.4',publicMode:'installer-only',installedEntry:appManifest.start_url,packageReadiness:'r37 fast core cache',localModel:'explicit same-origin cache after install',compatibilityHost:'redirect only',aiRuntime:'lazy',notifications:'unseen actionable local records',parityLedgerPackageRoute:'compressed parts -> unhydrated capability ledger',canonicalStore:'IndexedDB device objects',delivery:['WebRTC foreground mesh','optional local companion','optional gateway','portable bundle']},null,2));
+console.log(JSON.stringify({ok:true,version:'1.0.4',publicMode:'installer-only',installedEntry:appManifest.start_url,packageReadiness:'r37 fast core cache',localModel:'explicit same-origin cache after install',compatibilityHost:'redirect only',aiRuntime:'lazy chat with controller-owned settings',notifications:'unseen actionable local records',parityLedgerPackageRoute:'compressed parts -> unhydrated capability ledger',canonicalStore:'IndexedDB device objects',delivery:['WebRTC foreground mesh','optional local companion','optional gateway','portable bundle']},null,2));
