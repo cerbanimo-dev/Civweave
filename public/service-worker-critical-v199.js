@@ -1,11 +1,11 @@
 'use strict';
 (()=>{
-const VERSION='fellowfare-active-v203-cerbanimo-boundary-v204';
-if(self.CommonweaveCriticalBootV204)return;
+const VERSION='fellowfare-active-v203-cerbanimo-boundary-v204-memory-bridge-v205';
+if(self.CommonweaveCriticalBootV205)return;
 const nativeAddEventListener=self.addEventListener;
 const capturedInstallListeners=[];
 const updating=Boolean(self.registration?.active);
-const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-cerbanimo-boundary-v204';
+const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-cerbanimo-boundary-v204-memory-bridge-v205';
 const BASE_CACHE='commonweave-static-1.0.6-direct-family-r45-memory-credential-v191-five-system-chat-r46-weaveling-memory-direct-software-r38-v106-device-package-r41-no-native-dialog-direct-entry-r45-memory-credential-v191';
 const EXTENSION_CACHE='cwext-working-campus-additions-v197-assistant-runtime-package';
 const BASE_EXPECTED_FILES=111;
@@ -41,6 +41,7 @@ const CRITICAL_FILES=[
   '/app/model-settings-controller-v173.js',
   '/app/family-ai-loader-v105.js',
   '/app/fast-interactive-runtime-v192.js',
+  '/app/weaveling-memory-bridge-v191.js',
   '/app/realm-console-v140.html',
   '/app/cerbanimo-deterministic-boundary-v203.js',
   '/app/family-shell-v104.js','/app/family-shell-v104.css',
@@ -135,5 +136,5 @@ function finalize(){
   });
 }
 const api={version:VERSION,mode:'flat',cache:CRITICAL_CACHE,paths:CRITICAL_FILES.slice(),updating,capturedInstallListeners,finalize,fullPackageStatus};
-self.CommonweaveCriticalBootV199=api;self.CommonweaveCriticalBootV200=api;self.CommonweaveCriticalBootV201=api;self.CommonweaveCriticalBootV202=api;self.CommonweaveCriticalBootV203=api;self.CommonweaveCriticalBootV204=api;
+self.CommonweaveCriticalBootV199=api;self.CommonweaveCriticalBootV200=api;self.CommonweaveCriticalBootV201=api;self.CommonweaveCriticalBootV202=api;self.CommonweaveCriticalBootV203=api;self.CommonweaveCriticalBootV204=api;self.CommonweaveCriticalBootV205=api;
 })();
