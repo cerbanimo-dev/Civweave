@@ -32,7 +32,13 @@ assert(!familyRuntime.includes('const SETTINGS_SCRIPTS=')&&!familyRuntime.includ
 for(const token of ['async function ensure()','CommonweaveGuideChatV153',"settingsOwner:'CommonweaveModelSettingsControllerV173'"])assert(aiLoader.includes(token),`Lazy chat runtime missing ${token}`);
 assert(!aiLoader.includes('/app/minilm-model-settings-v138.js'),'Chat runtime still owns model settings.');
 for(const token of ["VERSION='173.0-direct-settings-controller'",'/app/minilm-model-settings-v138.js','function installDormantReflexStatus()'])assert(settingsController.includes(token),`Direct settings controller missing ${token}`);
-for(const [name,html] of [['realm',realmHtml],['living',livingHtml],['fellowfare',fellowfareHtml],['anarchadia',anarchadiaHtml]]){assert(html.includes('/app/model-settings-controller-v173.js')&&html.includes('/app/family-shell-v104.js')&&html.includes('/app/family-ai-loader-v105.js'),`${name} software does not mount direct settings, chat, and family controls`);assert(html.indexOf('/app/model-settings-controller-v173.js')<html.indexOf('/app/family-ai-loader-v105.js'),`${name} loads chat before settings ownership is established`);assert(!html.includes('/app/guide-chat-v153.js'),`${name} software eagerly loads guide chat`)}
+const scriptIndex=(html,src)=>html.indexOf(`<script src="${src}`);
+for(const [name,html] of [['realm',realmHtml],['living',livingHtml],['fellowfare',fellowfareHtml],['anarchadia',anarchadiaHtml]]){
+  const settingsIndex=scriptIndex(html,'/app/model-settings-controller-v173.js'),chatIndex=scriptIndex(html,'/app/family-ai-loader-v105.js');
+  assert(settingsIndex>=0&&scriptIndex(html,'/app/family-shell-v104.js')>=0&&chatIndex>=0,`${name} software does not mount direct settings, chat, and family controls`);
+  assert(settingsIndex<chatIndex,`${name} loads chat before settings ownership is established`);
+  assert(!html.includes('/app/guide-chat-v153.js'),`${name} software eagerly loads guide chat`);
+}
 // Physical cabinet renderer and calibration remain valid source for marketing production.
 for(const token of ['cv144-overlay','cv141-art-a','cv141-art-b','cabinet-calibration-v144.js'])assert(cabinetHtml.includes(token),`Marketing cabinet source missing ${token}`);
 for(const token of ['.cv144-overlay','.cv144-control','transition:opacity 120ms'])assert(cabinetCss.includes(token),`Marketing cabinet styling missing ${token}`);
