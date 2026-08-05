@@ -123,7 +123,10 @@ async function checkForUpdates(userInitiated=false){
   }catch(error){
     sessionStorage.removeItem(RELOAD_KEY);
     setState('Update check failed','error',error?.message||String(error));
-  }finally{checking=false;if(button?.dataset.state==='checking'&&!registration?.installing)setState('Check updates','idle')}
+  }finally{
+    checking=false;
+    if(button?.dataset.state==='checking'&&!registration?.installing&&!registration?.waiting)setState('Check updates','idle');
+  }
 }
 function init(){
   mount();
