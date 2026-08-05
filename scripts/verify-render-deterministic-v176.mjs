@@ -16,7 +16,7 @@ for(const forbidden of ['stage-transformers-assets','ensure-minilm-model','@hugg
   assert(!renderSource.includes(forbidden),`Render configuration resurrected forbidden Transformers.js work: ${forbidden}`);
 }
 
-assert(pkg.version==='1.0.6','Render package must publish v1.0.6.');
+assert(pkg.version==='1.0.7','Render package must publish v1.0.7.');
 assert(pkg.engines?.node==='22.x','Render Node version must be pinned to Node 22.');
 const productionDependencies=Object.entries(pkg.dependencies||{});
 assert(productionDependencies.length===1,'Normal npm install must contain exactly one approved production dependency.');
@@ -41,7 +41,7 @@ for(const name of ['check','build:release','start','prestart']){
 
 console.log(JSON.stringify({
   ok:true,
-  version:'1.0.6',
+  version:'1.0.7',
   renderBuild:'npm install --omit=dev && npm run build:release',
   node:'22.x',
   normalDependencyCount:productionDependencies.length,
