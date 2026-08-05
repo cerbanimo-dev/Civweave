@@ -39,6 +39,9 @@ const baseTask=index=>({...project.tasks[index%project.tasks.length],id:`det-${i
 for(let index=0;index<3;index++)assert.equal(policy.claim({mode:'deterministic',task:baseTask(index),submission:{text:'Attached prototype file, test log, and revision record showing the acceptance criteria were checked.'}}).ok,true);
 const capped=policy.claim({mode:'deterministic',task:baseTask(3),submission:{text:'Attached prototype file, test log, and revision record showing the acceptance criteria were checked.'}});
 assert.equal(capped.code,'DETERMINISTIC_DAILY_LIMIT');
+const ledger=JSON.parse(context.localStorage.getItem('commonweave.rewards.v156'));
+assert(ledger.events.some(event=>event.currency==='xp'&&event.skill==='general'),'Skill XP must use the passport-compatible xp currency');
+assert(ledger.events.every(event=>event.createdAt&&event.system),'reward receipts need canonical timestamps and system provenance');
 assert.equal(policy.quote({mode:'deterministic',baseRewards:{buttons:4,acorns:4,skillXp:20}}).buttons,2);
 assert.equal(policy.quote({mode:'generative',baseRewards:{buttons:4,acorns:4,skillXp:20}}).buttons,6);
 assert.equal(policy.quote({mode:'generative',activity:'peer-model-review',baseRewards:{buttons:4,acorns:4,skillXp:20}}).buttons,8);
