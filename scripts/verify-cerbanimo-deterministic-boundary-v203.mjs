@@ -6,10 +6,11 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [boundary,consoleHtml,worker]=await Promise.all([
+const [boundary,consoleHtml,worker,critical]=await Promise.all([
   read('public/app/cerbanimo-deterministic-boundary-v203.js'),
   read('public/app/realm-console-v140.html'),
   read('public/service-worker-v156.js'),
+  read('public/service-worker-critical-v199.js'),
 ]);
 
 assert(boundary.includes("VERSION='1.0.6-cerbanimo-deterministic-boundary-v203'"),'The Cerbanimo provider boundary revision is missing.');
@@ -21,6 +22,10 @@ assert(consoleHtml.indexOf('family-ai-loader-v105.js')<consoleHtml.indexOf('cerb
 assert(consoleHtml.indexOf('cerbanimo-deterministic-boundary-v203.js')<consoleHtml.indexOf('cerbanimo-ai-validator-v159.js'),'The provider boundary must load before Cerbanimo validation code.');
 assert(worker.includes("CERBANIMO_PROVIDER_BOUNDARY_REVISION='cerbanimo-deterministic-boundary-v203'"),'The installed package does not expose the Cerbanimo boundary revision.');
 assert(worker.includes("'/app/cerbanimo-deterministic-boundary-v203.js'"),'The installed package does not cache the Cerbanimo boundary.');
+assert(worker.includes('service-worker-critical-v199.js?v=fast-runtime-proxy-v202-cerbanimo-boundary-v203'),'The installed worker does not force a refreshed critical coordinator.');
+const criticalList=critical.slice(critical.indexOf('const CRITICAL_FILES=['),critical.indexOf('const CRITICAL_PATHS='));
+assert(criticalList.includes("'/app/realm-console-v140.html'"),'Critical boot does not refresh the active Cerbanimo console.');
+assert(criticalList.includes("'/app/cerbanimo-deterministic-boundary-v203.js'"),'Critical boot does not refresh the Cerbanimo provider boundary.');
 
 class MemoryStorage{
   constructor(seed={}){this.rows=new Map(Object.entries(seed))}
@@ -91,4 +96,5 @@ console.log(JSON.stringify({
   explicitGeminiCalls:modelCalls,
   staleRuntimeProfileOverridden:true,
   installedPackageIncludesBoundary:true,
+  criticalRefreshIncludesConsoleAndBoundary:true,
 },null,2));
