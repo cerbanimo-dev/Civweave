@@ -8,7 +8,8 @@ const assert=(value,message)=>{if(!value)throw new Error(message)};
 
 const critical=read('public/service-worker-critical-v199.js');
 const imageWorker=read('public/service-worker-shared-images-v203.js');
-const wrapper=read('public/service-worker-v203.js');
+const activeWorker=read('public/service-worker-v203.js');
+const legacyWorker=read('public/service-worker-v156.js');
 const shell=read('public/app/cabinets/living-school/index.html');
 const bootstrap=read('public/app/cabinets/living-school/living-school-bootstrap-v194.js');
 const loader=read('public/app/cabinets/living-school/living-school-flat-loader-v203.js');
@@ -20,18 +21,18 @@ const workbench=read('public/app/cabinets/living-school/living-school-workbench-
 const installer=read('public/install-v130.js');
 const pwa=read('public/app/pwa-v130.js');
 
-for(const [name,source] of [['critical worker',critical],['shared image worker',imageWorker],['worker wrapper',wrapper],['flat bootstrap',bootstrap],['flat loader',loader],['installer',installer],['pwa',pwa]]){
-  try{new Function(source)}catch(error){throw new Error(`${name} does not parse: ${error.message}`)}
+for(const [name,source] of [['critical worker',critical],['shared image worker',imageWorker],['active worker',activeWorker],['legacy worker bridge',legacyWorker],['flat bootstrap',bootstrap],['flat loader',loader],['installer',installer],['pwa',pwa]]){
+  try{new Function(source.replace(/^\s*importScripts\([^\n]+\);/m,''))}catch(error){throw new Error(`${name} does not parse: ${error.message}`)}
 }
 
 const combinedRevision='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205';
-assert(critical.includes(`VERSION='${combinedRevision}'`),'The combined FellowFare mobile, Cerbanimo, and memory bridge critical core is not active.');
-assert(critical.includes(`CRITICAL_CACHE='cwboot-critical-${combinedRevision}'`),'The combined critical cache is not active.');
-assert(critical.includes('BASE_EXPECTED_FILES=111'),'The 111-file core package boundary changed unexpectedly.');
-assert(critical.includes('EXTENSION_EXPECTED_FILES=53'),'The 53-file shared package boundary changed unexpectedly.');
-assert(critical.includes('runCaptured(event)'),'Incomplete packages no longer replay the complete installers.');
-assert(critical.includes("mode:'flat'"),'Critical status no longer identifies the flat interface.');
-assert(critical.includes('self.CommonweaveCriticalBootV205=api'),'The combined critical API alias is missing.');
+assert(critical.includes(`VERSION='${combinedRevision}'`),'The combined FellowFare mobile, Cerbanimo, and memory bridge compatibility core is not retained.');
+assert(critical.includes(`CRITICAL_CACHE='cwboot-critical-${combinedRevision}'`),'The combined critical compatibility cache is not retained.');
+assert(critical.includes('BASE_EXPECTED_FILES=111'),'The 111-file legacy core boundary changed unexpectedly.');
+assert(critical.includes('EXTENSION_EXPECTED_FILES=53'),'The 53-file legacy shared boundary changed unexpectedly.');
+assert(critical.includes('runCaptured(event)'),'Incomplete legacy packages no longer replay the complete installers.');
+assert(critical.includes("mode:'flat'"),'Critical compatibility status no longer identifies the flat interface.');
+assert(critical.includes('self.CommonweaveCriticalBootV205=api'),'The combined critical compatibility API alias is missing.');
 
 const essential=[
   '/app/assets/ai/moss-acorn.png',
@@ -43,7 +44,7 @@ const essential=[
   '/app/assets/navigation/200-anarchadia-nav.webp'
 ];
 for(const pathname of essential){
-  assert(imageWorker.includes(pathname),`Dedicated image worker omits ${pathname}.`);
+  assert(imageWorker.includes(pathname),`Dedicated image compatibility worker omits ${pathname}.`);
   assert(critical.includes(pathname),`Legacy worker repair path omits ${pathname}.`);
   assert(shell.includes(pathname),`Living School does not request ${pathname} during initial parsing.`);
 }
@@ -57,11 +58,22 @@ for(const pathname of [
   '/app/services/fellowfare/cabinet-embed.css',
   '/app/realm-console-v140.html',
   '/app/cerbanimo-deterministic-boundary-v203.js'
-])assert(critical.includes(pathname),`Combined critical refresh omits ${pathname}.`);
-assert(imageWorker.includes("event.stopImmediatePropagation()"),'Shared images are not protected from the generic /app fetch route.');
-assert(imageWorker.includes("type:'COMMONWEAVE_SHARED_IMAGE_STATUS'"),'Shared image readiness is not inspectable.');
-assert(wrapper.indexOf('service-worker-shared-images-v203.js')<wrapper.indexOf('service-worker-v156.js'),'The image repair lane must register before the generic package worker.');
-assert(wrapper.includes('flat-living-school-v203-memory-bridge-v205'),'The v203 wrapper does not refresh the changed inner worker.');
+])assert(critical.includes(pathname),`Combined critical compatibility refresh omits ${pathname}.`);
+assert(imageWorker.includes("event.stopImmediatePropagation()"),'Shared image compatibility repair no longer protects assets from the old generic /app fetch route.');
+assert(imageWorker.includes("type:'COMMONWEAVE_SHARED_IMAGE_STATUS'"),'Shared image compatibility readiness is not inspectable.');
+
+const lightweightMode=activeWorker.includes("const BUILD = 'lightweight-shell-v208'");
+if(lightweightMode){
+  assert(legacyWorker.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'Existing v156 registrations do not bridge to the direct lightweight worker.');
+  assert(!/^[ \t]*importScripts\(/m.test(activeWorker),'The direct lightweight worker reintroduced the layered worker stack.');
+  assert(activeWorker.includes('const IMAGE_EXTENSION'),'The direct worker no longer validates image responses.');
+  assert(activeWorker.includes("'/service-worker-shared-images-v203.js'"),'The direct worker no longer recognizes the retired image-worker URL during updates.');
+  assert(activeWorker.includes("'/service-worker-v156.js'"),'The direct worker no longer recognizes the legacy registration URL during updates.');
+  assert(activeWorker.includes('DOWNLOAD_OFFLINE_PACKAGE'),'The direct worker no longer exposes resumable campus hydration.');
+}else{
+  assert(activeWorker.indexOf('service-worker-shared-images-v203.js')<activeWorker.indexOf('service-worker-v156.js'),'The image repair lane must register before the generic package worker.');
+  assert(activeWorker.includes('flat-living-school-v203-memory-bridge-v205'),'The v203 wrapper does not refresh the changed inner worker.');
+}
 
 assert((nav.match(/200-[a-z-]+-nav\.webp/g)||[]).length===5,'The shared family navigation does not reference all five image buttons.');
 assert(nav.includes('grid-template-columns:repeat(5'),'The family navigation is not mounted as five equal slots.');
@@ -84,14 +96,21 @@ for(const token of ['Pathway Desk','Curriculum Forge','Learning Map','Open lesso
 assert(guard.includes("callback?.name==='queuePatch'"),'The reader mutation guard no longer recognizes the relay observer.');
 assert(relay.includes("action==='lesson'?openLesson(module,state):openAssessment(module,state)"),'Optional rich-media lesson routing changed unexpectedly.');
 assert(workbench.includes("if(action==='lesson')openNative('lesson',0)"),'The flat workbench no longer routes lessons through the cabinet.');
-assert(installer.includes("WORKER_URL=`/service-worker-v203.js"),'The installer does not request the v203 wrapper.');
-assert(installer.includes("GET_SHARED_IMAGE_STATUS"),'The installer does not verify shared images.');
-assert(installer.includes("critical.mode!=='flat'"),'The installer does not reject spatial-mode packages.');
-assert(pwa.includes("WORKER_URL=`/service-worker-v203.js"),'The installed app does not request the v203 wrapper.');
+assert(installer.includes("WORKER_URL = `/service-worker-v203.js"),'The installer does not request the direct v203 worker.');
+assert(pwa.includes("WORKER_URL=`/service-worker-v203.js")||pwa.includes("WORKER_URL = `/service-worker-v203.js"),'The installed app does not request the v203 worker.');
+if(lightweightMode){
+  assert(installer.includes('GET_DEVICE_PACKAGE_STATUS'),'The lightweight installer does not verify its shell package.');
+  assert(installer.includes('GET_OFFLINE_PACKAGE_STATUS'),'The lightweight installer does not inspect resumable campus state.');
+  assert(!installer.includes('GET_SHARED_IMAGE_STATUS'),'The lightweight installer still blocks on the retired image-worker lane.');
+  assert(!installer.includes("critical.mode!=='flat'"),'The lightweight installer still blocks on the retired critical package mode.');
+}else{
+  assert(installer.includes('GET_SHARED_IMAGE_STATUS'),'The layered installer does not verify shared images.');
+  assert(installer.includes("critical.mode!=='flat'"),'The layered installer does not reject spatial-mode packages.');
+}
 
 console.log(JSON.stringify({
   ok:true,
-  repair:'flat-living-school-v203-memory-bridge-v205',
+  repair:lightweightMode?'lightweight-shell-v208-legacy-bridge-v209':'flat-living-school-v203-memory-bridge-v205',
   combinedCritical:combinedRevision,
   coreBoundary:111,
   sharedBoundary:53,
@@ -99,12 +118,12 @@ console.log(JSON.stringify({
   optionalRelayAtBoot:false,
   navigationImageCount:5,
   topAiMarks:2,
-  sharedImageLane:true,
+  sharedImageCompatibility:true,
   legacyImageRepair:true,
   fellowFareRefresh:true,
   fellowFareParentMobileRefresh:true,
   cerbanimoBoundaryRefresh:true,
   memoryBridgeRefresh:true,
-  wrapperRefresh:true,
+  installedWorkerMode:lightweightMode?'v209-direct-lightweight':'v203-layered-wrapper',
   spatialMode:false,
 },null,2));
