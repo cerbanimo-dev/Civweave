@@ -4,7 +4,7 @@ services:
     runtime: node
     plan: free
     buildCommand: |
-      npm install --no-audit --no-fund
+      npm install --omit=dev --no-audit --no-fund
       npm run build:release
     startCommand: npm start
     healthCheckPath: /api/health
