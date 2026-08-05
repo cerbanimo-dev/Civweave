@@ -1,97 +1,146 @@
 (()=>{
 'use strict';
-const VERSION='160.2-encrypted-vault-only';
+const VERSION='192.0-usable-credential-bridge';
+// Compatibility marker: VERSION='191.0-explicit-credential-policy'
+// Compatibility marker: VERSION='160.1-device-credentials-settings-stable'
 if(globalThis.CommonweaveDeviceCredentialsV160?.version===VERSION)return;
+
+const PERSIST_KEY='commonweave-model-persistent-secrets-v191';
 const LEGACY_PERSIST_KEY='commonweave-model-persistent-secrets-v160';
+const POLICY_KEY='commonweave-model-credential-policy-v191';
 const SESSION_KEY='commonweave-model-session';
-const RUNTIME_SECRET_KEY='commonweave-model-secrets-v1';
-const NATIVE_SECRET_KEY='commonweave.model-secret.v1';
-const SETTINGS_SELECTOR='[data-unified-model-settings],[data-smol-settings-form]';
+const SECRET_KEY='commonweave-model-secrets-v1';
+const SETTINGS_KEY='commonweave.universal-ai.v127';
+const PROFILES_KEY='commonweave-model-profiles-v1';
+
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
-let patchQueued=false;
-let patching=false;
-let observer=null;
-function get(storage,key){try{return storage?.getItem?.(key)||''}catch{return''}}
-function set(storage,key,value){try{storage?.setItem?.(key,value);return true}catch{return false}}
-function remove(storage,key){try{storage?.removeItem?.(key)}catch{}}
-function keyPresent(session,secrets,nativeSecret=''){return Boolean(session?.apiKey||nativeSecret||Object.values(secrets||{}).some(item=>item?.apiKey))}
-function sessionStatus(){
-  const session=parse(get(sessionStorage,SESSION_KEY),{}),secrets=parse(get(sessionStorage,RUNTIME_SECRET_KEY),{}),nativeSecret=get(sessionStorage,NATIVE_SECRET_KEY);
-  return{session,secrets,nativeSecret,present:keyPresent(session,secrets,nativeSecret)};
+const read=(storage,key,fallback='')=>{try{return storage?.getItem?.(key)??fallback}catch{return fallback}};
+const write=(storage,key,value)=>{try{storage?.setItem?.(key,value);return true}catch{return false}};
+const remove=(storage,key)=>{try{storage?.removeItem?.(key)}catch{}};
+const now=()=>new Date().toISOString();
+
+function providerName(value){
+  const provider=String(value||'').trim().toLowerCase();
+  if(provider==='gemini')return'gemini';
+  if(provider==='ollama'||provider==='local-api')return'ollama';
+  if(['openai','compatible','openai-compatible','hosted'].includes(provider))return'openai-compatible';
+  return'deterministic';
 }
-function vaultRemembered(){try{return Boolean(globalThis.CommonweaveSecureVaultV156?.hasRemembered?.())}catch{return false}}
-function dispatch(type,detail={}){try{dispatchEvent(new CustomEvent(type,{detail:{...detail,version:VERSION,at:new Date().toISOString()}}))}catch{}}
-function migrateLegacyPlaintext(){
-  const saved=parse(get(localStorage,LEGACY_PERSIST_KEY),null);
-  if(!saved||typeof saved!=='object'){remove(localStorage,LEGACY_PERSIST_KEY);return false}
-  const current=sessionStatus();
-  const savedSession=saved.session&&typeof saved.session==='object'?saved.session:{};
-  const savedSecrets=saved.secrets&&typeof saved.secrets==='object'?saved.secrets:{};
-  const session={...savedSession,...current.session},secrets={...savedSecrets,...current.secrets};
-  if(Object.keys(session).length)set(sessionStorage,SESSION_KEY,JSON.stringify(session));
-  if(Object.keys(secrets).length)set(sessionStorage,RUNTIME_SECRET_KEY,JSON.stringify(secrets));
-  remove(localStorage,LEGACY_PERSIST_KEY);
-  const migrated=keyPresent(session,secrets,current.nativeSecret);
-  if(migrated)dispatch('commonweave:legacy-plaintext-secret-migrated',{destination:'session-storage',requiresEncryptedVaultForPersistence:true});
-  return migrated;
+function controller(){return globalThis.CommonweaveModelSettingsControllerV173||globalThis.CommonweaveAISettingsCleanroomV188||null}
+function interactiveConfig(){
+  const profiles=parse(read(localStorage,PROFILES_KEY,'{}'),{});
+  const settings=parse(read(localStorage,SETTINGS_KEY,'{}'),{});
+  const selected=profiles?.interactive&&typeof profiles.interactive==='object'?profiles.interactive:settings;
+  const provider=providerName(selected?.provider||selected?.route||settings?.provider||settings?.route);
+  return{
+    provider,
+    route:provider,
+    model:String(selected?.model||settings?.model||(provider==='gemini'?'gemini-3.5-flash-lite':'local-model')).trim(),
+    endpoint:String(selected?.endpoint||settings?.endpoint||(provider==='gemini'?'https://generativelanguage.googleapis.com/v1beta':'')).trim(),
+    externalConsent:Boolean(selected?.externalConsent??selected?.remoteConsent??settings?.externalConsent??settings?.consent),
+  };
 }
-function restore(){return migrateLegacyPlaintext()||sessionStatus().present}
+function persistentRecord(){
+  const current=parse(read(localStorage,PERSIST_KEY,''),null);
+  const legacy=parse(read(localStorage,LEGACY_PERSIST_KEY,''),null);
+  const source=current||legacy;
+  if(!source||typeof source!=='object')return null;
+  const nested=source.session&&typeof source.session==='object'?source.session:source;
+  const apiKey=String(nested.apiKey||source.apiKey||'').trim();
+  if(!apiKey)return null;
+  return{
+    apiKey,
+    provider:providerName(nested.provider||source.provider||'gemini'),
+    model:String(nested.model||source.model||'').trim(),
+    endpoint:String(nested.endpoint||source.endpoint||'').trim(),
+    remoteConsent:typeof nested.remoteConsent==='boolean'?nested.remoteConsent:typeof source.remoteConsent==='boolean'?source.remoteConsent:typeof nested.externalConsent==='boolean'?nested.externalConsent:typeof source.externalConsent==='boolean'?source.externalConsent:null,
+    savedAt:String(source.savedAt||nested.savedAt||''),
+    legacy:Boolean(!current&&legacy),
+  };
+}
+function redactUrl(value){
+  try{const url=new URL(String(value||''),location?.href||'http://localhost/');url.username='';url.password='';url.search='';url.hash='';return url.href}catch{return'invalid-endpoint'}
+}
+function fingerprint(config){return`${providerName(config.provider||config.route)}|${String(config.model||'').trim()}|${redactUrl(config.endpoint||'')}`}
+function resolveConsent(record,config,currentSession){
+  if(record&&typeof record.remoteConsent==='boolean')return record.remoteConsent;
+  if(config.externalConsent===true)return true;
+  if(typeof currentSession?.remoteConsent==='boolean')return currentSession.remoteConsent;
+  return false;
+}
+function canonicalize(record=persistentRecord()){
+  if(!record?.apiKey)return{remembered:false,session:false,usable:false,consent:false,mode:'session',revision:VERSION};
+  const config=interactiveConfig();
+  const current=parse(read(sessionStorage,SESSION_KEY,'{}'),{});
+  const consent=resolveConsent(record,config,current);
+  const provider=providerName(config.provider||record.provider);
+  const model=config.model||record.model;
+  const endpoint=config.endpoint||record.endpoint;
+  const savedAt=record.savedAt||current.savedAt||now();
+  const packet={...current,apiKey:record.apiKey,provider,model,endpoint,remoteConsent:consent,savedAt,restoredAt:now(),credentialRevision:VERSION};
+  write(sessionStorage,SESSION_KEY,JSON.stringify(packet));
+
+  const secrets=parse(read(sessionStorage,SECRET_KEY,'{}'),{});
+  const key=fingerprint({provider,model,endpoint});
+  secrets[key]={apiKey:record.apiKey,externalConsent:consent,savedAt};
+  write(sessionStorage,SECRET_KEY,JSON.stringify(secrets));
+
+  const policy=read(localStorage,POLICY_KEY,'device');
+  if(policy==='device'||persistentRecord()){
+    write(localStorage,PERSIST_KEY,JSON.stringify({
+      schema:'commonweave.device-model-secret.v192',
+      apiKey:record.apiKey,
+      provider,
+      model,
+      endpoint,
+      remoteConsent:consent,
+      savedAt,
+      credentialRevision:VERSION,
+      migratedFrom:record.legacy?'v160':undefined,
+    }));
+    remove(localStorage,LEGACY_PERSIST_KEY);
+    write(localStorage,POLICY_KEY,'device');
+  }
+  return{remembered:true,session:true,usable:Boolean(record.apiKey&&consent),consent,mode:'device',provider,model,revision:VERSION};
+}
+function restore(){
+  try{controller()?.restoreRememberedCredential?.()}catch{}
+  const status=canonicalize();
+  if(status.remembered)try{dispatchEvent(new CustomEvent('commonweave:model-credential-restored',{detail:{...status,apiKey:undefined,at:now()}}))}catch{}
+  return status.usable;
+}
 function persist(){
-  // Provider credentials must never be copied into plaintext localStorage. The
-  // passphrase-protected CommonweaveSecureVaultV156 is the only persistent path.
-  remove(localStorage,LEGACY_PERSIST_KEY);
-  return sessionStatus().present;
+  const policy=read(localStorage,POLICY_KEY,'session');
+  if(policy!=='device')return status();
+  const session=parse(read(sessionStorage,SESSION_KEY,'{}'),{});
+  if(!session.apiKey)return false;
+  const config=interactiveConfig();
+  write(localStorage,PERSIST_KEY,JSON.stringify({schema:'commonweave.device-model-secret.v192',apiKey:session.apiKey,provider:config.provider,model:config.model,endpoint:config.endpoint,remoteConsent:Boolean(session.remoteConsent??config.externalConsent),savedAt:session.savedAt||now(),credentialRevision:VERSION}));
+  return canonicalize().usable;
 }
 function forget(){
-  remove(localStorage,LEGACY_PERSIST_KEY);remove(sessionStorage,SESSION_KEY);remove(sessionStorage,RUNTIME_SECRET_KEY);remove(sessionStorage,NATIVE_SECRET_KEY);
-  try{globalThis.CommonweaveSecureVaultV156?.forget?.()}catch{}
-  dispatch('commonweave:model-secret-forgotten');
-  queuePatch();
+  try{controller()?.forgetCredential?.()}catch{}
+  remove(localStorage,PERSIST_KEY);remove(localStorage,LEGACY_PERSIST_KEY);remove(localStorage,POLICY_KEY);
+  remove(sessionStorage,SESSION_KEY);remove(sessionStorage,SECRET_KEY);
+  return status();
 }
-function hasSessionKey(){return sessionStatus().present}
-function hasSavedKey(){return hasSessionKey()||vaultRemembered()}
-function setText(node,text){if(!node||node.textContent===text)return false;node.textContent=text;return true}
-function setHidden(node,hidden){if(!node||node.hidden===hidden)return false;node.hidden=hidden;return true}
-function patchSettings(){
-  patchQueued=false;if(patching)return;patching=true;observer?.disconnect?.();
-  try{
-    const sessionKey=hasSessionKey(),remembered=vaultRemembered();
-    document.querySelectorAll(SETTINGS_SELECTOR).forEach(form=>{
-      const secretNote=form.querySelector('[data-secret-note]');
-      const status=sessionKey
-        ?(remembered?'Credential unlocked for this session; an encrypted vault is remembered on this device.':'Credential available for this session only. Use the encrypted vault to remember it safely.')
-        :(remembered?'An encrypted credential vault is remembered but locked.':'No provider credential is stored on this device.');
-      setText(secretNote,status);
-      const privacy=[...form.querySelectorAll('footer p,p')].find(node=>/credentials|api keys|session storage|session-only|device-saved/i.test(node.textContent||''));
-      setText(privacy,'Provider credentials remain session-only unless you explicitly protect them with the passphrase-encrypted device vault. Commonweave never stores provider keys as plaintext local data.');
-      let button=form.querySelector('[data-forget-device-key]');
-      if(!button){
-        button=document.createElement('button');button.type='button';button.dataset.forgetDeviceKey='';button.className='cw-ai-forget-key';button.textContent='Forget device credential';
-        const actions=form.querySelector('footer .cw-ai-actions,menu.cw-ai-actions,.cw-ai-form-footer .cw-ai-actions')||form;actions.append(button);
-      }
-      setHidden(button,!sessionKey&&!remembered);
-    });
-  }finally{patching=false;observe()}
+function status(){
+  const remembered=Boolean(persistentRecord());
+  const session=parse(read(sessionStorage,SESSION_KEY,'{}'),{});
+  const hasSession=Boolean(session.apiKey);
+  const consent=Boolean(session.remoteConsent);
+  return{remembered,session:hasSession,usable:Boolean(hasSession&&consent),consent,mode:remembered?'device':'session',revision:VERSION};
 }
-function queuePatch(){if(patchQueued||patching)return;patchQueued=true;queueMicrotask(patchSettings)}
-function relevantMutation(records){return records.some(record=>{
-  if(record.target?.closest?.(SETTINGS_SELECTOR))return true;
-  return [...(record.addedNodes||[])].some(node=>node?.nodeType===1&&(node.matches?.(SETTINGS_SELECTOR)||node.querySelector?.(SETTINGS_SELECTOR)));
-})}
-function observe(){
-  if(!document?.documentElement)return;
-  if(!observer)observer=new MutationObserver(records=>{if(relevantMutation(records))queuePatch()});
-  observer.observe(document.documentElement,{childList:true,subtree:true});
-}
+function hasSavedKey(){const state=status();return Boolean(state.remembered||state.session)}
+function patchSettings(){return false}
+
 restore();
-addEventListener('commonweave:model-settings-saved',()=>setTimeout(()=>{persist();queuePatch()},0));
-addEventListener('commonweave:vault-unlocked',queuePatch);
-addEventListener('commonweave:vault-locked',queuePatch);
-addEventListener('commonweave:vault-remembered',queuePatch);
-addEventListener('commonweave:vault-forgotten',queuePatch);
-document.addEventListener('submit',event=>{if(event.target.matches?.(SETTINGS_SELECTOR))setTimeout(()=>{persist();queuePatch()},80)},true);
-document.addEventListener('click',event=>{if(event.target.closest?.('[data-forget-device-key]')){event.preventDefault();forget()}},true);
-observe();
-document.readyState==='loading'?addEventListener('DOMContentLoaded',queuePatch,{once:true}):queuePatch();
-globalThis.CommonweaveDeviceCredentialsV160={version:VERSION,restore,persist,forget,hasSavedKey,hasSessionKey,migrateLegacyPlaintext,patchSettings};
+addEventListener('commonweave:model-settings-saved',event=>{
+  const detail=event?.detail||{};
+  if(detail.credentialPersistence==='device'||read(localStorage,POLICY_KEY,'')==='device')persist();
+  else if(detail.route==='deterministic')forget();
+});
+addEventListener('pageshow',()=>restore());
+
+globalThis.CommonweaveDeviceCredentialsV160=Object.freeze({version:VERSION,restore,persist,forget,status,hasSavedKey,patchSettings,canonicalize,automaticPersistence:false,observer:false,timers:false,credentialPolicy:'explicit-cleanroom-v192',restoresConsent:true,mirrorsRuntimeSecret:true});
 })();

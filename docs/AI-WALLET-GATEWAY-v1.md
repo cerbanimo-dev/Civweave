@@ -9,7 +9,7 @@ Let Commonweave offer prepaid hosted Gemini access without exposing the platform
 Commonweave keeps three explicit execution lanes:
 
 1. **Local**: MiniLM, WebGPU, Ollama, or another device model. No provider charge and no Commonweave inference request.
-2. **Bring your own key**: the user's provider credential is available only for the current session or stored in the passphrase-encrypted device vault. Calls may go directly from the device to the provider.
+2. **Bring your own key**: handled by Commonweave's current device credential and settings subsystem. The hosted wallet does not read, store, migrate, or authorize BYOK secrets.
 3. **Commonweave hosted**: the platform credential remains server-side. A small authorization gateway reserves wallet funds, enforces model and request limits, calls Gemini, then settles actual cost.
 
 Gemini Live may later use provider-supported short-lived ephemeral tokens so realtime media can travel directly between the device and Gemini after one Commonweave authorization call.
@@ -25,18 +25,16 @@ Gemini Live may later use provider-supported short-lived ephemeral tokens so rea
 | Studio | $75 | $51 | 68% | $2.00 | Adds Live |
 | Node | $150 | $112.50 | 75% | $5.00 | Pro / Live, larger limits |
 
-The hosted allowance is a user-facing spend balance. The provider reserve is an accounting target calculated from net distributable receipts. They are deliberately recorded separately so payment fees, taxes, refunds, promotions, and provider-price changes cannot hide an underfunded promise.
+The hosted allowance is a user-facing spend balance. The provider reserve is an accounting target calculated from net distributable receipts. They are recorded separately so payment fees, taxes, refunds, promotions, and provider-price changes cannot hide an underfunded promise.
 
 Top-up provider shares begin at 50% for $5, improve to 60% at $20, 70% at $50, and 75% at $100.
 
-These values are launch hypotheses, not permanent promises. Before release they must be tested against current Gemini prices, observed request shapes, payment fees, refunds, and support costs.
+These values are launch hypotheses, not permanent promises. Before release they must be tested against current provider prices, observed request shapes, payment fees, refunds, taxes, and support costs.
 
-## Security invariants
+## Hosted-wallet security invariants
 
-- The Commonweave Gemini credential is never delivered to browser, PWA, or native clients.
-- Client-side encryption is allowed for a user's own BYOK credential, but not treated as protection for a shared platform credential.
-- Plaintext provider secrets are forbidden in `localStorage`, IndexedDB exports, Commonweave seeds, realm handoffs, logs, analytics, and error payloads.
-- Persistent BYOK storage requires the existing AES-GCM passphrase vault. Session storage is the default.
+- The Commonweave platform Gemini credential is never delivered to browser, PWA, or native clients.
+- The hosted wallet never reads or persists the user's BYOK credential. Device credential policy remains owned by the current main-branch settings subsystem.
 - Hosted requests reserve the maximum allowed cost before contacting Gemini.
 - Settlement may charge less than the reservation, never more. A higher actual provider cost is a reconciliation fault and must stop the request family for investigation.
 - Every credit event has an idempotent external source ID, such as a payment invoice or manually approved adjustment.
@@ -56,21 +54,21 @@ Issues and verifies dependency-free HMAC-SHA256 Commonweave capability tokens. T
 
 ### `lib/ai-wallet-service-v1.mjs`
 
-Provides a small atomic file-backed ledger suitable for local development and a single-node prototype. Production should replace the storage adapter with transactional Postgres while preserving the same reservation semantics.
+Provides an atomic file-backed ledger suitable for local development and a single-node prototype.
 
-### `public/extensions/commonweave-device-credentials-v160.js`
+### `lib/ai-wallet-postgres-v1.mjs`
 
-Removes plaintext persistent credential storage. Legacy plaintext records are migrated into the current session and immediately removed. Users must explicitly use the encrypted vault for future persistence.
+Provides the Neon-compatible transactional adapter for hosted multi-instance operation. Database functions enforce row locking, replay protection, reservation ceilings, append-only accounting, and device revocation.
 
 ## Request lifecycle
 
-1. Authenticate the Commonweave user and device.
+1. Authenticate the Commonweave user and registered device.
 2. Estimate a conservative maximum provider cost from model, context, output ceiling, tools, grounding, and modality.
 3. Reserve that amount in the authoritative wallet.
 4. Issue or validate a short-lived device-bound capability.
 5. Send the request through the thin Gemini gateway, or mint a Gemini Live ephemeral token when that provider flow is supported.
 6. Record provider usage and settle the reservation.
-7. Return unused funds to the available balance.
+7. Release the unused portion of the reservation.
 8. Append an immutable usage event containing no prompt content or provider secret.
 
 If the provider response cannot be reconciled, cancel only when no provider work occurred. Otherwise quarantine the reservation for review rather than silently returning funds.
@@ -104,7 +102,7 @@ If the provider response cannot be reconciled, cancel only when no provider work
 
 ### Gate 4: direct-device optimizations
 
-- BYOK direct requests
+- Preserve current main-branch BYOK behavior without routing its secrets through the wallet
 - Device key pair and signed requests
 - Gemini Live ephemeral tokens
 - Capability caching with short expiry
@@ -112,7 +110,6 @@ If the provider response cannot be reconciled, cancel only when no provider work
 
 ### Gate 5: production hardening
 
-- Move ledger to transactional Postgres
 - Concurrency and replay tests
 - Refund and chargeback workflows
 - Provider price-card versioning
@@ -121,4 +118,4 @@ If the provider response cannot be reconciled, cancel only when no provider work
 
 ## Deferred decisions
 
-The foundation intentionally does not choose a payment processor, persist personally identifying billing data, enable production Gemini credentials, expose wallet mutation routes, or promise that the draft plan economics are profitable. Those decisions require current provider pricing, legal and tax review, and an authenticated Commonweave account model.
+The foundation intentionally does not choose a payment processor, persist personally identifying billing data, enable production Gemini credentials, expose public wallet mutation authority, or promise that the draft plan economics are profitable. Those decisions require current provider pricing, legal and tax review, and an authenticated Commonweave account model.

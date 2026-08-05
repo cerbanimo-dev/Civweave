@@ -1,0 +1,28 @@
+name: Verify Service Worker Evaluation v189
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate-workers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check workers and verifier
+        run: |
+          node --check public/service-worker.js
+          node --check public/service-worker-v156.js
+          node --check scripts/verify-service-worker-evaluation-v189.mjs
+      - name: Evaluate imported and additive workers together
+        run: node scripts/verify-service-worker-evaluation-v189.mjs

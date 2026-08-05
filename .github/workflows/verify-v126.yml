@@ -1,4 +1,4 @@
-name: Verify Commonweave v1.0.6 Settings Layer
+name: Verify Commonweave v1.0.6 Clean-Room Settings
 
 on:
   push:
@@ -21,90 +21,24 @@ jobs:
           node-version: 22
       - name: Install JavaScript dependencies
         run: npm install --no-audit --no-fund
-      - name: Verify v1.0.6 settings layer
-        run: node scripts/verify-v106-settings-layer-v179.mjs
+      - name: Verify clean-room AI settings
+        run: node scripts/verify-ai-settings-cleanroom-v188.mjs
       - name: Run repository checks
         run: npm run check
-      - name: Verify instant deterministic preparation
+      - name: Build Cloudflare Pages package
+        run: node scripts/build-cloudflare-pages.mjs
+      - name: Verify packaged clean-room files
         run: |
           set -euxo pipefail
-          start_ms="$(date +%s%3N)"
-          RENDER=true node scripts/prepare-start-v131.mjs | tee render-package-prepare.log
-          elapsed_ms=$(( $(date +%s%3N) - start_ms ))
-          grep -q 'Public gateway mode: Gateway fast start' render-package-prepare.log
-          grep -q 'Deterministic local mode is the default AI route' render-package-prepare.log
-          test "$elapsed_ms" -lt 5000
-          printf '{"renderPrepareMs":%s}\n' "$elapsed_ms" > startup-budget.json
-      - name: Start public install gateway
-        run: |
-          RENDER=true PORT=8787 npm start > commonweave-gateway.log 2>&1 &
-          echo $! > commonweave-gateway.pid
-          for i in $(seq 1 100); do
-            if curl -fsS http://127.0.0.1:8787/api/health > gateway-health.json; then break; fi
-            sleep 0.05
-          done
-          test -s gateway-health.json
-      - name: Verify v1.0.6 package distribution
-        run: |
-          set -euxo pipefail
-          curl -fsS http://127.0.0.1:8787/ -o gateway.html
-          grep -q 'Install Commonweave v1.0.6' gateway.html
-          grep -q 'No native modal' gateway.html
-          curl -fsS http://127.0.0.1:8787/install-v130.js -o gateway-installer.js
-          grep -q "WORKER_REVISION='device-package-r41-no-native-dialog'" gateway-installer.js
-          grep -q "ADDITIONS_REVISION='working-campus-additions-v179-no-native-dialog'" gateway-installer.js
-          curl -fsS http://127.0.0.1:8787/service-worker.js -o gateway-worker.js
-          grep -q "VERSION='1.0.6'" gateway-worker.js
-          grep -q "DEVICE_REVISION='device-package-r41-no-native-dialog'" gateway-worker.js
-          grep -q "settingsPresentation:'fixed-layer'" gateway-worker.js
-          curl -fsS http://127.0.0.1:8787/service-worker-v156.js -o gateway-additive-worker.js
-          grep -q 'working-campus-additions-v179-no-native-dialog' gateway-additive-worker.js
-          grep -q "nativeDialog:false" gateway-additive-worker.js
-          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/model-settings-controller-v173.js -o gateway-settings-controller.js
-          grep -q '1.0.6-settings-controller-v179' gateway-settings-controller.js
-          grep -q "presentation:'fixed-layer'" gateway-settings-controller.js
-          ! grep -q 'showModal' gateway-settings-controller.js
-          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/unified-ai-settings-v175.js -o gateway-ai-settings.js
-          grep -q '1.0.6-unified-ai-settings-v179' gateway-ai-settings.js
-          grep -q 'Gemini API key' gateway-ai-settings.js
-          grep -q "close('backdrop')" gateway-ai-settings.js
-          ! grep -q 'showModal(' gateway-ai-settings.js
-          ! grep -q "createElement('dialog')" gateway-ai-settings.js
-          ! grep -q 'document.body.style.overflow' gateway-ai-settings.js
-          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/working-campus-v156.html -o gateway-campus.html
-          grep -q 'v1.0.6' gateway-campus.html
-          grep -q 'settings-v179-v106' gateway-campus.html
-      - name: Start local software family
-        run: |
-          PORT=8788 npm start > commonweave-local.log 2>&1 &
-          echo $! > commonweave-local.pid
-          for i in $(seq 1 40); do
-            if curl -fsS http://127.0.0.1:8788/api/health > local-health.json; then break; fi
-            sleep 1
-          done
-          test -s local-health.json
-      - name: Verify installed update marker
-        run: |
-          curl -fsS http://127.0.0.1:8788/app/pwa-v130.js -o local-pwa.js
-          grep -q "VERSION='1.0.6'" local-pwa.js
-          grep -q 'device-package-r41-no-native-dialog' local-pwa.js
-      - name: Upload v1.0.6 evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: commonweave-v106-settings-layer-evidence
-          path: |
-            commonweave-gateway.log
-            commonweave-local.log
-            render-package-prepare.log
-            startup-budget.json
-            gateway-health.json
-            local-health.json
-            gateway.html
-            gateway-installer.js
-            gateway-worker.js
-            gateway-additive-worker.js
-            gateway-settings-controller.js
-            gateway-ai-settings.js
-            gateway-campus.html
-            local-pwa.js
+          test -f .cloudflare-pages/app/model-settings-controller-v173.js
+          test -f .cloudflare-pages/app/unified-ai-settings-v175.js
+          test -f .cloudflare-pages/app/settings-delegation-v175.js
+          test -f .cloudflare-pages/service-worker-v156.js
+          grep -q "1.0.6-ai-settings-cleanroom-v188" .cloudflare-pages/app/model-settings-controller-v173.js
+          grep -q "188.0-ai-settings-cleanroom-delegation" .cloudflare-pages/app/settings-delegation-v175.js
+          grep -q "working-campus-additions-v188-ai-settings-cleanroom" .cloudflare-pages/service-worker-v156.js
+          ! grep -q "MutationObserver" .cloudflare-pages/app/settings-delegation-v175.js
+          ! grep -q "PerformanceObserver" .cloudflare-pages/app/settings-delegation-v175.js
+          ! grep -q "setInterval(" .cloudflare-pages/app/settings-delegation-v175.js
+          ! grep -q "ensureRuntime" .cloudflare-pages/app/model-settings-controller-v173.js
+          ! grep -q "commonweave-model-runtime" .cloudflare-pages/app/model-settings-controller-v173.js

@@ -17,13 +17,42 @@ try{
   const packageHeaders={'x-commonweave-package':'install'},workerSource=await readFile(path.join(root,'public','service-worker.js'),'utf8'),requiredAssets=[...new Set(requiredDeviceAssets(workerSource))];
   for(const forbidden of ['all-minilm-l6-v2','transformers.min.js','ort-wasm','minilm-reflex','minilm-model-settings','commonweave-settings-safe-open'])assert(!requiredAssets.some(route=>route.includes(forbidden)),`v1.0.6 package still includes ${forbidden}`);
   for(const route of requiredAssets){const response=await fetch(origin+route,{cache:'no-store',headers:packageHeaders});assert(response.ok,`required core package asset ${route} returned ${response.status}`);await response.arrayBuffer()}
-  const controller=await fetch(`${origin}/app/model-settings-controller-v173.js`,{headers:packageHeaders}).then(response=>response.text());assert(controller.includes("VERSION='1.0.6-settings-controller-v179'")&&controller.includes("presentation:'fixed-layer'")&&controller.includes('nativeDialog:false'),'settings controller is not v1.0.6 fixed-layer');
-  const settings=await fetch(`${origin}/app/unified-ai-settings-v175.js`,{headers:packageHeaders}).then(response=>response.text());assert(settings.includes("VERSION='1.0.6-unified-ai-settings-v179'")&&settings.includes('Gemini API key')&&settings.includes("close('backdrop')")&&!settings.includes('showModal(')&&!settings.includes("createElement('dialog')"),'AI settings still use native modal behavior');
+
+  const controller=await fetch(`${origin}/app/model-settings-controller-v173.js`,{headers:packageHeaders}).then(response=>response.text());
+  for(const token of [
+    "VERSION='1.0.6-ai-settings-cleanroom-v188'",
+    "authority:'ai-settings-cleanroom-v188'",
+    "eventOwnership:'single-cleanroom-controller'",
+    "presentation:'cleanroom-v188'",
+    'providerRuntimeOnOpen:false',
+    'providerRuntimeAvailable:false',
+    'providerTestsAvailable:false',
+    'modelDiscoveryAvailable:false',
+    'singlePassOpen:true',
+    'function build()',
+    'function open(launcher)',
+    'function close(reason=',
+    'globalThis.CommonweaveAISettingsCleanroomV188=api',
+  ])assert(controller.includes(token),`clean-room settings controller missing ${token}`);
+  for(const forbidden of [
+    'MutationObserver','PerformanceObserver','setTimeout(','setInterval(','requestAnimationFrame(','requestIdleCallback(',
+    'commonweave-model-runtime','ensureRuntime','detectCapabilities','.generate(','new Worker(','navigator.gpu','showModal(',
+    "createElement('dialog')","createElement('script')",'document.body.style.overflow',
+  ])assert(!controller.includes(forbidden),`clean-room settings controller contains ${forbidden}`);
+  const openBlock=controller.slice(controller.indexOf('function open(launcher)'),controller.indexOf('function ensure()'));
+  for(const forbidden of ['await ','Promise','fetch(','.focus('])assert(!openBlock.includes(forbidden),`settings open path still performs ${forbidden}`);
+  for(const token of ['if(existing&&!existing.hidden)return existing','const layer=existing||build()','layer.hidden=false'])assert(openBlock.includes(token),`settings open path missing ${token}`);
+
+  const settings=await fetch(`${origin}/app/unified-ai-settings-v175.js`,{headers:packageHeaders}).then(response=>response.text());
+  assert(settings.includes("VERSION='1.0.6-unified-settings-compat-v188'")&&settings.includes('retiredRuntime:true')&&settings.includes("authority:'ai-settings-cleanroom-v188'")&&!settings.includes('MutationObserver')&&!settings.includes('ensureRuntime')&&!settings.includes('detectCapabilities')&&!settings.includes('.generate('),'unified settings compatibility file is not inert');
+  const delegation=await fetch(`${origin}/app/settings-delegation-v175.js`,{headers:packageHeaders}).then(response=>response.text());
+  assert(delegation.includes("VERSION='188.0-ai-settings-cleanroom-delegation'")&&delegation.includes("document.addEventListener('click',onClick);")&&delegation.includes("listenerPhase:'bubble'")&&delegation.includes('listenerCount:1')&&delegation.includes('mutationObserver:false')&&delegation.includes('polling:false')&&delegation.includes('timers:false')&&!delegation.includes('MutationObserver')&&!delegation.includes('PerformanceObserver')&&!delegation.includes('setInterval(')&&!delegation.includes("addEventListener('click',onClick,true)"),'settings delegation is not the one-listener clean-room bridge');
+
   const campus=await fetch(`${origin}/app/working-campus-v156.html`,{headers:packageHeaders}).then(response=>response.text());assert(campus.includes('/app/logos/commonweave-app-icon.png')&&campus.includes('v1.0.6')&&!campus.includes('/app/logos/commonweave.webp'),'Working Campus header is stale');
   const campusCss=await fetch(`${origin}/app/working-campus-v156.css`,{headers:packageHeaders}).then(response=>response.text());assert(campusCss.includes('width:176px')&&campusCss.includes('grid-template-areas'),'Working Campus icon or header layout is stale');
   for(const retired of ['/extensions/commonweave-settings-safe-open-v171.js','/extensions/commonweave-settings-safe-open-v172.js']){const response=await fetch(origin+retired,{headers:packageHeaders});assert(response.status===404,`${retired} still exists with status ${response.status}`)}
   const sharedTools=await fetch(`${origin}/extensions/commonweave-additions-v156.js`,{headers:packageHeaders}).then(response=>response.text());assert(sharedTools.includes('Node & friends')&&sharedTools.includes('aiVault:false'),'Shared Tools regressed');
   const packageLedger=await fetch(`${origin}/app/shared/commonweave-parity-ledger.json`,{cache:'no-store',headers:packageHeaders});assert(packageLedger.ok,`marked parity ledger returned ${packageLedger.status}`);const ledger=await packageLedger.json();assert(Array.isArray(ledger.systems)&&ledger.systems.length>=5,'parity ledger is missing systems');
   const telemetry=await fetch(`${origin}/api/boot-log`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:'room-opened'})});assert(telemetry.status===204,`boot telemetry returned ${telemetry.status}`);
-  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsPresentation:'fixed-layer',nativeDialog:false,outsideTap:'safe-close',campusIconPixels:176},null,2));
+  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsPresentation:'cleanroom-v188',nativeDialog:false,outsideTap:'safe-close',settingsTransformerWork:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,captureListener:false,mutationObserver:false,polling:false,timers:false,campusIconPixels:176},null,2));
 }catch(error){console.error(output.join(''));throw error}finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}

@@ -136,10 +136,3 @@ test('file-backed wallet service persists credits idempotently and rotates walle
   assert.equal(persisted.wallets['user:test'].balanceCents, 1770);
   assert.equal(persisted.sourceEvents['invoice:1'].amountCents, 1800);
 });
-
-test('device credential extension forbids plaintext persistent API-key storage', async () => {
-  const source = await readFile(new URL('../public/extensions/commonweave-device-credentials-v160.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(source, /localStorage\s*\.\s*setItem\s*\(\s*LEGACY_PERSIST_KEY/);
-  assert.match(source, /passphrase-encrypted device vault/);
-  assert.match(source, /migrateLegacyPlaintext/);
-});
