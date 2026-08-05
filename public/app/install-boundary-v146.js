@@ -13,16 +13,15 @@ const PROOF_PROGRESS_SCRIPT='/extensions/commonweave-proof-progress-v158.js';
 const GEMINI_INTERACTIONS_SCRIPT='/extensions/commonweave-gemini-interactions-v159.js';
 const LIVE_SOURCE_GUARD_SCRIPT='/extensions/commonweave-antigravity-live-source-guard-v167.js';
 const THEMED_SYSTEM_NAV_SCRIPT='/app/themed-system-nav-v178.js';
-const ADDITIONS_VERSION='v184-package-self-heal';
-const PREVIOUS_ADDITIONS_VERSION='v183-settings-diagnostics';
-const EARLIER_ADDITIONS_VERSION='v182-settings-single-pass';
-// Compatibility marker: ADDITIONS_VERSION='v183-settings-diagnostics'
-const FAST_CORE_COMPATIBILITY_REVISION='v184-v106-package-self-heal';
-const PACKAGE_RECOVERY_REVISION='v184-online-self-heal-missing-asset-details';
-const SETTINGS_STABILITY_REVISION='v182-single-pass-no-autofocus';
-const SETTINGS_CONTROLLER_REVISION='v182-single-pass-single-authority';
-const SETTINGS_RUNTIME_REVISION='v182-provider-runtime-on-test-only';
-const SETTINGS_LOG_REVISION='v183-reusable-log-levels';
+const ADDITIONS_VERSION='v188-ai-settings-cleanroom';
+const PREVIOUS_ADDITIONS_VERSION='v184-package-self-heal';
+const EARLIER_ADDITIONS_VERSION='v183-settings-diagnostics';
+const FAST_CORE_COMPATIBILITY_REVISION='v188-v106-ai-settings-cleanroom';
+const PACKAGE_RECOVERY_REVISION='v188-cleanroom-online-self-heal';
+const SETTINGS_STABILITY_REVISION='v188-no-observer-no-polling-no-capture';
+const SETTINGS_CONTROLLER_REVISION='v188-single-cleanroom-authority';
+const SETTINGS_RUNTIME_REVISION='v188-provider-runtime-disconnected';
+const SETTINGS_LOG_REVISION='v188-diagnostics-runtime-retired';
 const DETERMINISTIC_RUNTIME_REVISION='v175-deterministic-default';
 const INTENTION_RESEARCH_REVISION='v163-latest-intention-agentic-research';
 const HUD_STABILITY_REVISION='v164-hud-observer-stability';
@@ -40,5 +39,5 @@ function installerUrl(){const target=`${location.pathname}${location.search}${lo
 function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=${ADDITIONS_VERSION}`;script.async=false;document.head.append(script)}
 function installAdditions(){if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=${ADDITIONS_VERSION}`;document.head.append(link)}addScript(DETERMINISTIC_MODE_SCRIPT);addScript(SETTINGS_CONTROLLER_SCRIPT);addScript(SETTINGS_DELEGATION_SCRIPT);addScript(LIVE_SOURCE_GUARD_SCRIPT);addScript(DEVICE_CREDENTIALS_SCRIPT);addScript(ADDITIONS_SCRIPT);addScript(SHARED_TOOLS_CLEANUP_SCRIPT);addScript(PROOF_PROGRESS_SCRIPT);addScript(GEMINI_INTERACTIONS_SCRIPT);addScript(THEMED_SYSTEM_NAV_SCRIPT)}
 if(!allowed()){document.documentElement.dataset.installBoundary='blocked';location.replace(installerUrl())}else{document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';installAdditions()}
-globalThis.CommonweaveInstallBoundaryV146={version:'1.0.6',allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:ADDITIONS_VERSION,previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,earlierAdditionsVersion:EARLIER_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,packageRecoveryRevision:PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,settingsStabilityRevision:SETTINGS_STABILITY_REVISION,settingsControllerRevision:SETTINGS_CONTROLLER_REVISION,settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION,settingsLogRevision:SETTINGS_LOG_REVISION,logLevelKey:'commonweave.log-level',logBufferKey:'commonweave.log-buffer.v1',diagnosticQueryParameter:'cwlog',deterministicRuntimeRevision:DETERMINISTIC_RUNTIME_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudStabilityRevision:HUD_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,localLayoutRevision:LOCAL_LAYOUT_REVISION,themedSystemNavRevision:'v178',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,legacySettingsCapture:false,transformerActive:false,providerRuntimeOnOpen:false,singlePassOpen:true,migrationOnDemand:true};
+globalThis.CommonweaveInstallBoundaryV146={version:'1.0.6',allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:ADDITIONS_VERSION,previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,earlierAdditionsVersion:EARLIER_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,packageRecoveryRevision:PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,settingsStabilityRevision:SETTINGS_STABILITY_REVISION,settingsControllerRevision:SETTINGS_CONTROLLER_REVISION,settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION,settingsLogRevision:SETTINGS_LOG_REVISION,logLevelKey:null,logBufferKey:null,diagnosticQueryParameter:null,deterministicRuntimeRevision:DETERMINISTIC_RUNTIME_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudStabilityRevision:HUD_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,localLayoutRevision:LOCAL_LAYOUT_REVISION,themedSystemNavRevision:'v178',settingsPresentation:'cleanroom-v188',nativeDialog:false,legacySettingsCapture:false,settingsMutationObserver:false,settingsPolling:false,settingsTimers:false,settingsDiagnosticsRuntime:false,transformerActive:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,singlePassOpen:true,migrationOnDemand:false};
 })();
