@@ -4,7 +4,6 @@
 const STATUS_FALLBACK_MS = 8000;
 const startedAt = Date.now();
 let autoStarted = false;
-let observer = null;
 
 const $ = selector => document.querySelector(selector);
 
@@ -67,7 +66,7 @@ function tryAutoStart() {
 }
 
 function startWatching() {
-  observer = new MutationObserver(tryAutoStart);
+  const observer = new MutationObserver(tryAutoStart);
   observer.observe(document.documentElement, {
     subtree: true,
     childList: true,
@@ -78,10 +77,7 @@ function startWatching() {
 
   const timer = setInterval(() => {
     tryAutoStart();
-    if (autoStarted || campusIsReady()) {
-      clearInterval(timer);
-      observer?.disconnect();
-    }
+    if (autoStarted || campusIsReady()) clearInterval(timer);
   }, 250);
 
   setTimeout(() => clearInterval(timer), 60000);
