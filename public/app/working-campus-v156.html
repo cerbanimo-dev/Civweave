@@ -21,7 +21,7 @@
       <button class="pill active" id="guided-mode" type="button">Guided rails</button>
       <button class="pill" id="roam-mode" type="button">Free roam</button>
     </div>
-    <button class="pill settings-pill" id="settings-button" type="button"><span aria-hidden="true">⚙</span><span>AI settings</span></button>
+    <button class="pill settings-pill" id="settings-button" type="button" data-open-unified-ai-settings><span aria-hidden="true">⚙</span><span>AI settings</span></button>
   </header>
   <section class="campus" aria-label="Commonweave realms">
     <button class="realm-node" data-realm="living-school" style="--accent:var(--living)"><b class="badge" data-badge="living-school" hidden></b><img src="/app/assets/ai/moss.png" alt=""><small>Moss</small><strong>Living School</strong><span>Learn what the intention requires.</span></button>
@@ -39,7 +39,7 @@
         <button class="btn primary" id="weaveling-chat-send" type="submit">Send</button>
         <small id="weaveling-chat-status" class="muted">Local history · deterministic by default</small>
       </form>
-      <div class="guide-foot"><button class="btn" id="model-chip" type="button">AI settings</button><button class="btn" id="export-button" type="button">Export</button></div>
+      <div class="guide-foot"><button class="btn" id="model-chip" type="button" data-open-unified-ai-settings>AI settings</button><button class="btn" id="export-button" type="button">Export</button></div>
     </aside>
     <section class="work"><header class="work-head"><b id="view-title">Your weave</b><span class="muted" id="state-label">Local draft</span></header><div class="workspace" id="workspace"></div></section>
   </section>
