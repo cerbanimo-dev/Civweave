@@ -1,7 +1,7 @@
 'use strict';
 importScripts('/service-worker.js?v=1.0.4-base-r38-deterministic');
 const INLINE_CHAT_REVISION='inline-commonweave-r43-deterministic-default';
-const EXTENSION_VERSION='working-campus-additions-v175-deterministic-single-ai-settings';
+const EXTENSION_VERSION='working-campus-additions-v176-system-nav-buttons';
 const SETTINGS_CONTROLLER_REVISION='deterministic-single-authority-v175';
 const SETTINGS_RUNTIME_REVISION='unified-ai-settings-v175';
 const DETERMINISTIC_RUNTIME_REVISION='deterministic-default-v175';
@@ -9,7 +9,7 @@ const GEMINI_TRANSPORT_REVISION='gemini-interactions-v159';
 const DEVICE_CREDENTIALS_REVISION='device-credentials-v160.1-settings-stable';
 const PROOF_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v158-proof-progress';
 const LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167';
-const EXTENSION_CACHE='cwext-working-campus-additions-v175-deterministic-single-ai-settings';
+const EXTENSION_CACHE='cwext-working-campus-additions-v176-system-nav-buttons';
 const TOOL_FILES=[
   '/extensions/commonweave-additions-v156.css',
   '/extensions/commonweave-additions-v156.js',
@@ -34,7 +34,12 @@ const APP_FILES=[
   '/app/cabinets/living-school/living-school-research-v162.js',
   '/app/cabinets/living-school/living-school-runtime-stability-v159.css','/app/cabinets/living-school/living-school-runtime-stability-v159.js',
   '/app/cabinets/living-school/living-school-paths-v160.js',
-  '/app/anarchadia-console-v158.js','/app/anarchadia-chat-stability-v158.css','/app/anarchadia-runtime-stability-v159.js','/app/anarchadia-change-review-v165.js','/app/anarchadia-live-layout-v167.js'
+  '/app/anarchadia-console-v158.js','/app/anarchadia-chat-stability-v158.css','/app/anarchadia-runtime-stability-v159.js','/app/anarchadia-change-review-v165.js','/app/anarchadia-live-layout-v167.js',
+  '/app/assets/navigation/system-buttons/anarchadia-ai.png',
+  '/app/assets/navigation/system-buttons/commonweave-cw.png',
+  '/app/assets/navigation/system-buttons/living-school-ls.png',
+  '/app/assets/navigation/system-buttons/cerbanimo-co.png',
+  '/app/assets/navigation/system-buttons/fellowfare-ff.png'
 ];
 const EXTENSION_FILES=[...TOOL_FILES,...APP_FILES];
 async function fetchRequired(url){const response=await fetch(`${url}${url.includes('?')?'&':'?'}v=${EXTENSION_VERSION}`,{cache:'no-store',headers:{'x-commonweave-package':'install'}});if(!response.ok)throw new Error(`Package asset ${url} returned ${response.status}`);return response}
