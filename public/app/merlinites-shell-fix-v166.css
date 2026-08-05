@@ -51,3 +51,81 @@ html[data-commonweave-system="living-school"] .ls-recovery button{min-height:44p
   html[data-commonweave-system="living-school"] .ls-object{min-height:92px!important}
   html[data-commonweave-system="living-school"] .ls-room{padding-bottom:104px!important}
 }
+
+/* v176: five illustrated realm plates replace the old icon-and-label tray. */
+:root{--cwf104-tray-h:62px}
+.cwf104-tray{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:3px;
+  padding:5px max(5px,env(safe-area-inset-right)) calc(5px + env(safe-area-inset-bottom)) max(5px,env(safe-area-inset-left));
+}
+.cwf104-tray>:not([data-cwf-system]),
+.cwf104-tray [data-cwf-chat],
+.cwf104-tray [data-action="chat"],
+.cwf104-tray [data-guide-chat]{display:none!important}
+.cwf104-system{
+  grid-template-rows:1fr;
+  align-content:center;
+  min-height:48px;
+  padding:2px;
+  border-left:0;
+}
+.cwf104-system:before{
+  inset:1px;
+  clip-path:polygon(9% 0,91% 0,100% 18%,100% 82%,91% 100%,9% 100%,0 82%,0 18%);
+  background:linear-gradient(#09131b,#09131b) padding-box,linear-gradient(135deg,#ffffff18,transparent) border-box;
+}
+.cwf104-system-art{
+  width:min(100%,100px);
+  height:auto;
+  aspect-ratio:2/1;
+  display:block;
+  background:var(--cwf104-system-button) center/contain no-repeat;
+  filter:saturate(.88) brightness(.88);
+  transform:translateZ(0);
+  transition:transform .16s ease,filter .16s ease;
+}
+.cwf104-system-art img{display:none!important}
+.cwf104-system.is-current .cwf104-system-art,
+.cwf104-system:hover .cwf104-system-art,
+.cwf104-system:focus-visible .cwf104-system-art{
+  filter:none;
+  transform:translateY(-1px) scale(1.04);
+}
+.cwf104-system:focus-visible{outline:2px solid var(--cwf104-accent);outline-offset:-2px}
+.cwf104-system-label,.cwf104-system-meta{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+.cwf104-system[data-cwf-system="anarchadia"]{
+  order:1;
+  --cwf104-system-button:url("/app/assets/navigation/system-buttons/anarchadia-ai.png");
+}
+.cwf104-system[data-cwf-system="commonweave"]{
+  order:2;
+  --cwf104-system-button:url("/app/assets/navigation/system-buttons/commonweave-cw.png");
+}
+.cwf104-system[data-cwf-system="living-school"]{
+  order:3;
+  --cwf104-system-button:url("/app/assets/navigation/system-buttons/living-school-ls.png");
+}
+.cwf104-system[data-cwf-system="cerbanimo"]{
+  order:4;
+  --cwf104-system-button:url("/app/assets/navigation/system-buttons/cerbanimo-co.png");
+}
+.cwf104-system[data-cwf-system="fellowfare"]{
+  order:5;
+  --cwf104-system-button:url("/app/assets/navigation/system-buttons/fellowfare-ff.png");
+}
+.cwf104-badge{top:1px;right:2px}
+.cwf104-weaveling,#cwf104-weaveling,
+#gc153-launcher,.gc153-launcher,
+[data-commonweave-bottom-launcher],[data-weaveling-launcher],
+body>[data-action="chat"].cwf104-bottom-launcher{display:none!important}
