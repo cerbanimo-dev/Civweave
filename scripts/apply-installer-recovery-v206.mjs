@@ -71,15 +71,9 @@ await patch('public/service-worker-v203.js',source=>{
 await patch('public/install-v130.js',source=>{
   source=replaceRequired(
     source,
-    "const IMAGE_REVISION='shared-image-delivery-v203';",
-    "const IMAGE_REVISION='shared-image-delivery-v203';\nconst INSTALLER_RECOVERY_REVISION='worker-global-isolation-and-gateway-assets-v206';",
-    'installer recovery revision declaration'
-  );
-  source=replaceRequired(
-    source,
-    'const WORKER_BUILD=`${VERSION}-${WORKER_REVISION}-${ADDITIONS_REVISION}`;',
-    'const WORKER_BUILD=`${VERSION}-${WORKER_REVISION}-${ADDITIONS_REVISION}-${INSTALLER_RECOVERY_REVISION}`;',
-    'worker build identity'
+    "const UPDATE_REVISION='visible-update-library-preservation-v204';",
+    "const UPDATE_REVISION='visible-update-library-preservation-v206-worker-global-isolation-gateway-assets';",
+    'installer update revision'
   );
   source=replaceRequired(
     source,
