@@ -12,12 +12,12 @@ const $=selector=>document.querySelector(selector);
 const clamp=(value,min,max)=>Math.min(max,Math.max(min,Number.isFinite(value)?value:min));
 
 function syncReleaseVersion(){
-  document.documentElement.dataset.commonweaveRelease=RELEASE_VERSION;
-  document.title=document.title.replace(/v1\.0\.\d+/i,`v${RELEASE_VERSION}`);
+  if(document.documentElement?.dataset)document.documentElement.dataset.commonweaveRelease=RELEASE_VERSION;
+  if(typeof document.title==='string')document.title=document.title.replace(/v1\.0\.\d+/i,`v${RELEASE_VERSION}`);
   const badge=$('.gateway-header .version');
   if(badge)badge.textContent=`v${RELEASE_VERSION}`;
   const title=$('#install-title');
-  if(title)title.textContent=title.textContent.replace(/v1\.0\.\d+/i,`v${RELEASE_VERSION}`);
+  if(title&&typeof title.textContent==='string')title.textContent=title.textContent.replace(/v1\.0\.\d+/i,`v${RELEASE_VERSION}`);
 }
 
 function normalize(status={}){
@@ -76,7 +76,7 @@ function render(status){
     else if(packet.downloaded)button.textContent='Resume offline campus';
     else button.textContent='Download offline campus';
   }
-  document.documentElement.dataset.offlineCampusStatusRevision=VERSION;
+  if(document.documentElement?.dataset)document.documentElement.dataset.offlineCampusStatusRevision=VERSION;
   api.last=packet;
   return packet;
 }
