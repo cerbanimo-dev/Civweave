@@ -70,7 +70,8 @@ function claim({mode='deterministic',task={},submission={},baseRewards,activity=
   snapshot.claims.push(record);snapshot.claims=snapshot.claims.slice(-4000);
   if(normalized==='deterministic'){day.deterministicEligibleTasks=Number(day.deterministicEligibleTasks||0)+1;snapshot.days[dateKey]=day}
   save(snapshot);
-  const currencyEvents=[['button',amounts.buttons],['acorn',amounts.acorns],['skill-xp',amounts.skillXp]].filter(([,amount])=>amount>0).map(([currency,amount])=>({id:`${claimId}-${currency}`,type:'reward',currency,amount,source:activity,taskId:record.taskId,mode:normalized,claimId,at:record.at,metadata:{rewardPolicy:VERSION,reviewBonus:review}}));
+  const rewardSystem=clean(task.system||task.realm||(activity==='peer-model-review'?'commonweave':'commonweave'),80),skill=clean(task.skill||task.skillId||task.category||'general',180)||'general';
+  const currencyEvents=[['button',amounts.buttons],['acorn',amounts.acorns],['xp',amounts.skillXp]].filter(([,amount])=>amount>0).map(([currency,amount])=>({id:`${claimId}-${currency}`,type:'reward',currency,amount,skill:currency==='xp'?skill:undefined,system:rewardSystem,source:activity,sourceId:record.taskId||claimId,taskId:record.taskId,mode:normalized,claimId,phase:review?'peer-model-review':'verified-completion',createdAt:record.at,at:record.at,metadata:{rewardPolicy:VERSION,reviewBonus:review}}));
   appendLedger(currencyEvents);
   try{globalThis.dispatchEvent?.(new CustomEvent('commonweave:rewards-changed',{detail:{claim:clone(record),events:clone(currencyEvents)}}));globalThis.dispatchEvent?.(new CustomEvent('commonweave:reward-policy-claimed',{detail:{claim:clone(record)}}))}catch{}
   return{ok:true,claim:record,events:currencyEvents,assessment,remaining:remaining(normalized,date),promotion:PROMOTION};
