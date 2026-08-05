@@ -1,13 +1,13 @@
 'use strict';
 const VERSION='1.0.6';
-const CACHE_REVISION='direct-family-r41-no-native-dialog';
+const CACHE_REVISION='direct-family-r42-settings-self-contained';
 const GUIDE_REVISION='five-system-chat-r45-settings-layer';
 const CABINET_REVISION='direct-software-r38-v106';
 const DEVICE_REVISION='device-package-r41-no-native-dialog';
 const CALIBRATION_REVISION='marketing-only-r1';
-const INSTALL_REVISION='direct-entry-r41-v106';
+const INSTALL_REVISION='direct-entry-r42-settings-self-contained';
 const LEDGER_HYDRATION_REVISION='direct-software-r35';
-const AI_REVISION='deterministic-single-authority-v179';
+const AI_REVISION='self-contained-settings-v181-fixed-ort';
 const STATIC_CACHE=`commonweave-static-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}-${INSTALL_REVISION}`;
 const RUNTIME_CACHE=`commonweave-runtime-${VERSION}-${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}-${INSTALL_REVISION}`;
 const MODEL_CACHE='commonweave-model-1.0.6-minilm-fixed-ort-r1';
@@ -42,13 +42,13 @@ const CORE=[
 ];
 const DEVICE_REQUIRED=[...CORE];
 async function cacheRequired(cache,url){const response=await fetch(url,{cache:'no-store',headers:{'x-commonweave-package':'install'}});if(!response.ok)throw new Error(`Device package asset ${url} returned ${response.status}`);await cache.put(url,response.clone());return true}
-async function packageStatus(){const cache=await caches.open(STATIC_CACHE),keys=await cache.keys(),required=[...new Set(DEVICE_REQUIRED)],present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=required.filter(url=>!present.has(url));return{type:'COMMONWEAVE_DEVICE_PACKAGE',ready:missing.length===0,version:VERSION,revision:INSTALL_REVISION,deviceRevision:DEVICE_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,defaultProvider:'deterministic',settingsPresentation:'fixed-layer',nativeDialog:false,transformerActive:false,modelOnDemand:true,modelCache:MODEL_CACHE,cache:STATIC_CACHE,assetCount:required.length,presentCount:required.length-missing.length,missing}}
+async function packageStatus(){const cache=await caches.open(STATIC_CACHE),keys=await cache.keys(),required=[...new Set(DEVICE_REQUIRED)],present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=required.filter(url=>!present.has(url));return{type:'COMMONWEAVE_DEVICE_PACKAGE',ready:missing.length===0,version:VERSION,revision:INSTALL_REVISION,deviceRevision:DEVICE_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,defaultProvider:'deterministic',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,transformerActive:false,providerRuntimeOnOpen:false,modelOnDemand:true,modelCache:MODEL_CACHE,cache:STATIC_CACHE,assetCount:required.length,presentCount:required.length-missing.length,missing}}
 async function modelPackageStatus(){const cache=await caches.open(MODEL_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),required=[...MODEL_FILES],missing=required.filter(url=>!present.has(url));return{type:'COMMONWEAVE_MODEL_PACKAGE',ready:missing.length===0,version:VERSION,runtime:'onnxruntime-web/wasm',executionProvider:'wasm',threads:1,cache:MODEL_CACHE,assetCount:required.length,presentCount:required.length-missing.length,missing}}
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(STATIC_CACHE);try{for(const url of [...new Set(DEVICE_REQUIRED)])await cacheRequired(cache,url);await self.skipWaiting()}catch(error){await caches.delete(STATIC_CACHE);console.error('[Commonweave] Core package installation failed:',error);throw error}})()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{const keys=await caches.keys();const stale=keys.filter(key=>(key.startsWith('commonweave-')&&key!==STATIC_CACHE&&key!==RUNTIME_CACHE&&key!==MODEL_CACHE)||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));await Promise.all(stale.map(key=>caches.delete(key)));await self.clients.claim()})()));
 self.addEventListener('message',event=>{
   if(event.data?.type==='SKIP_WAITING')self.skipWaiting();
-  if(event.data?.type==='GET_VERSION'){const packet={type:'COMMONWEAVE_VERSION',version:VERSION,revision:`${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}-${INSTALL_REVISION}`,localFirstRevision:CACHE_REVISION,guideRevision:GUIDE_REVISION,cabinetRevision:CABINET_REVISION,deviceRevision:DEVICE_REVISION,calibrationRevision:CALIBRATION_REVISION,installRevision:INSTALL_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,defaultProvider:'deterministic',settingsPresentation:'fixed-layer',nativeDialog:false,transformerActive:false,modelOnDemand:true,modelRuntime:'onnxruntime-web/wasm'};event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}
+  if(event.data?.type==='GET_VERSION'){const packet={type:'COMMONWEAVE_VERSION',version:VERSION,revision:`${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}-${INSTALL_REVISION}`,localFirstRevision:CACHE_REVISION,guideRevision:GUIDE_REVISION,cabinetRevision:CABINET_REVISION,deviceRevision:DEVICE_REVISION,calibrationRevision:CALIBRATION_REVISION,installRevision:INSTALL_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,defaultProvider:'deterministic',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,transformerActive:false,providerRuntimeOnOpen:false,modelOnDemand:true,modelRuntime:'onnxruntime-web/wasm'};event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}
   if(event.data?.type==='GET_DEVICE_PACKAGE_STATUS')event.waitUntil(packageStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}));
   if(event.data?.type==='GET_MODEL_PACKAGE_STATUS')event.waitUntil(modelPackageStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}));
 });
