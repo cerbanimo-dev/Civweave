@@ -110,10 +110,16 @@ jobs:
           grep -q 'commonweave.family-status.v105' gateway-family-shell.js
           grep -q 'timestamp(item)>last' gateway-family-shell.js
           ! grep -q 'MutationObserver' gateway-family-shell.js
+          curl -fsS -H "$H" http://127.0.0.1:8787/app/model-settings-controller-v173.js -o gateway-settings-controller.js
+          grep -q "VERSION='173.0-direct-settings-controller'" gateway-settings-controller.js
+          grep -q '/app/minilm-model-settings-v138.js' gateway-settings-controller.js
           curl -fsS -H "$H" http://127.0.0.1:8787/app/family-ai-loader-v105.js -o gateway-ai-loader.js
           grep -q 'async function ensure()' gateway-ai-loader.js
           grep -q 'CommonweaveGuideChatV153' gateway-ai-loader.js
-          grep -q 'CommonweaveModelSettingsV133' gateway-ai-loader.js
+          grep -q 'CommonweaveModelSettingsControllerV173' gateway-ai-loader.js
+          grep -q "settingsOwner:'CommonweaveModelSettingsControllerV173'" gateway-ai-loader.js
+          ! grep -q '/app/minilm-model-settings-v138.js' gateway-ai-loader.js
+          ! grep -q '/app/model-settings-v133.css' gateway-ai-loader.js
           curl -fsS -H "$H" http://127.0.0.1:8787/extensions/commonweave-model-download-v157.js -o gateway-model-download.js
           grep -q 'data-download-local-model' gateway-model-download.js
           grep -q 'adapter.install' gateway-model-download.js
@@ -123,8 +129,9 @@ jobs:
             '/app/fellowfare-cabinet-v144.html' \
             '/app/anarchadia-console-v139.html'; do
             curl -fsS -H "$H" "http://127.0.0.1:8787${route}" -o gateway-direct-page.html
-            grep -q '/app/family-ai-loader-v105.js' gateway-direct-page.html
-            grep -q '/app/family-shell-v104.js' gateway-direct-page.html
+            grep -q '<script src="/app/model-settings-controller-v173.js' gateway-direct-page.html
+            grep -q '<script src="/app/family-ai-loader-v105.js' gateway-direct-page.html
+            grep -q '<script src="/app/family-shell-v104.js' gateway-direct-page.html
             ! grep -q '/app/guide-chat-v153.js' gateway-direct-page.html
           done
           curl -fsS -D gateway-ledger-headers.txt -H "$H" http://127.0.0.1:8787/app/shared/commonweave-parity-ledger.json -o gateway-ledger.json
@@ -160,9 +167,14 @@ jobs:
           grep -q 'badge.hidden=value.count<1' family-shell.js
           grep -q 'setInterval(refresh,30000)' family-shell.js
           ! grep -q 'contentDocument' family-shell.js
+          curl -fsS http://127.0.0.1:8788/app/model-settings-controller-v173.js -o settings-controller.js
+          node --check settings-controller.js
+          grep -q "VERSION='173.0-direct-settings-controller'" settings-controller.js
           curl -fsS http://127.0.0.1:8788/app/family-ai-loader-v105.js -o family-ai-loader.js
           node --check family-ai-loader.js
           grep -q '/app/assistant-runtime-v141.js' family-ai-loader.js
+          grep -q 'CommonweaveModelSettingsControllerV173' family-ai-loader.js
+          ! grep -q '/app/minilm-model-settings-v138.js' family-ai-loader.js
           curl -fsS http://127.0.0.1:8788/extensions/commonweave-model-download-v157.js -o local-model-download.js
           node --check local-model-download.js
           grep -q 'Download local model' local-model-download.js
@@ -174,8 +186,9 @@ jobs:
             'anarchadia:/app/anarchadia-console-v139.html'; do
             name="${spec%%:*}"; route="${spec#*:}"
             curl -fsS "http://127.0.0.1:8788${route}" -o "${name}.html"
-            grep -q '/app/family-shell-v104.js' "${name}.html"
-            grep -q '/app/family-ai-loader-v105.js' "${name}.html"
+            grep -q '<script src="/app/model-settings-controller-v173.js' "${name}.html"
+            grep -q '<script src="/app/family-shell-v104.js' "${name}.html"
+            grep -q '<script src="/app/family-ai-loader-v105.js' "${name}.html"
             ! grep -q '/app/guide-chat-v153.js' "${name}.html"
           done
           curl -fsS http://127.0.0.1:8788/app/local-object-mesh-v146.js -o local-object-mesh.js
@@ -208,6 +221,7 @@ jobs:
             gateway-worker.js
             gateway-additive-worker.js
             gateway-family-shell.js
+            gateway-settings-controller.js
             gateway-ai-loader.js
             gateway-model-download.js
             gateway-ledger-headers.txt
@@ -215,5 +229,6 @@ jobs:
             installed-entry.js
             compatibility.html
             family-shell.js
+            settings-controller.js
             family-ai-loader.js
             local-model-download.js
