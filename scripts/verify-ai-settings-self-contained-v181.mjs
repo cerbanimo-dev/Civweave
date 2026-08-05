@@ -39,17 +39,18 @@ for(const forbidden of [
   'function showBootstrap(',
   'await ensure()',
   "'/app/unified-ai-settings-v175.js",
-  "worker=new Worker(",
+  'worker=new Worker(',
   'pipeline('
 ])assert(!controller.includes(forbidden),`Settings open path still contains retired bootstrap/import behavior: ${forbidden}`);
 
 const openBlock=controller.slice(controller.indexOf('function open()'),controller.indexOf('function renderInline'));
-for(const forbidden of ['await ','ensureRuntime(',RUNTIME_TOKEN='RUNTIME_SCRIPT','createElement(\'script\')'])assert(!openBlock.includes(forbidden),`Opening settings still activates asynchronous runtime work: ${forbidden}`);
-for(const token of ['const layer=build()','layer.hidden=false','transformerStarted:false','providerRuntimeLoaded:Boolean(runtime())'])assert(openBlock.includes(token),`Immediate open contract missing ${token}`);
+for(const forbidden of ['await ','ensureRuntime(','RUNTIME_SCRIPT','createElement(\'script\')'])assert(!openBlock.includes(forbidden),`Opening settings still activates asynchronous runtime work: ${forbidden}`);
+for(const token of ['const started=performance.now(),layer=build()','layer.hidden=false','transformerStarted:false','providerRuntimeLoaded:Boolean(runtime())'])assert(openBlock.includes(token),`Immediate open contract missing ${token}`);
 
 const runtimeBlock=controller.slice(controller.indexOf('function ensureRuntime()'),controller.indexOf('async function testGemini'));
-assert(runtimeBlock.includes("'/app/shared/commonweave-model-runtime.js")||controller.includes("const RUNTIME_SCRIPT='/app/shared/commonweave-model-runtime.js"),'Provider runtime loader path is missing.');
-assert(controller.indexOf('ensureRuntime()')<controller.indexOf('async function testGemini'),'Provider runtime helper is not isolated before explicit tests.');
+assert(runtimeBlock.includes('document.createElement(\'script\')'),'Provider runtime loader does not create its script only on demand.');
+assert(controller.includes("const RUNTIME_SCRIPT='/app/shared/commonweave-model-runtime.js"),'Provider runtime loader path is missing.');
+assert(controller.indexOf('function ensureRuntime()')<controller.indexOf('async function testGemini'),'Provider runtime helper is not isolated before explicit tests.');
 assert(controller.match(/await ensureRuntime\(\)/g)?.length===2,'Provider runtime should load only from the two explicit test paths.');
 
 for(const token of [
