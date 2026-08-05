@@ -6,8 +6,13 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFileSync(path.join(root,relative),'utf8');
 const assert=(value,message)=>{if(!value)throw new Error(message)};
 
-const worker=read('public/service-worker-critical-v199.js');
+const critical=read('public/service-worker-critical-v199.js');
+const imageWorker=read('public/service-worker-shared-images-v203.js');
+const wrapper=read('public/service-worker-v203.js');
 const shell=read('public/app/cabinets/living-school/index.html');
+const bootstrap=read('public/app/cabinets/living-school/living-school-bootstrap-v194.js');
+const loader=read('public/app/cabinets/living-school/living-school-flat-loader-v203.js');
+const engine=read('public/app/cabinets/living-school/living-school-cabinet-v151.mjs');
 const nav=read('public/app/themed-system-nav-v178.js');
 const relay=read('public/app/cabinets/living-school/living-school-two-agent-relay-v165.js');
 const guard=read('public/app/cabinets/living-school/living-school-mutation-guard-v196.js');
@@ -15,36 +20,70 @@ const workbench=read('public/app/cabinets/living-school/living-school-workbench-
 const installer=read('public/install-v130.js');
 const pwa=read('public/app/pwa-v130.js');
 
-assert(worker.includes("VERSION='living-school-lesson-nav-v202-fast-runtime-proxy'"),'The v202 critical worker revision is not active.');
-assert(worker.includes("CRITICAL_CACHE='cwboot-critical-living-school-v202-fast-runtime-proxy'"),'The critical cache did not rotate for the corrected runtime.');
-assert(worker.includes('BASE_EXPECTED_FILES=111'),'The 111-file core package boundary changed unexpectedly.');
-assert(worker.includes('EXTENSION_EXPECTED_FILES=53'),'The 53-file shared package boundary changed unexpectedly.');
-assert(worker.includes('runCapturedInstallListeners(event)'),'Incomplete packages no longer replay the complete installers.');
+for(const [name,source] of [['critical worker',critical],['shared image worker',imageWorker],['worker wrapper',wrapper],['flat bootstrap',bootstrap],['flat loader',loader],['installer',installer],['pwa',pwa]]){
+  try{new Function(source)}catch(error){throw new Error(`${name} does not parse: ${error.message}`)}
+}
 
-const criticalList=worker.slice(worker.indexOf('const CRITICAL_FILES=['),worker.indexOf('const CRITICAL_PATHS='));
-assert(!criticalList.includes('/app/assets/navigation/'),'Family navigation images are still trapped in the Living School critical fetch lane.');
-assert(criticalList.includes('/app/fast-interactive-runtime-v192.js'),'The corrected fast interactive runtime is not refreshed through critical boot.');
+assert(critical.includes("VERSION='living-school-flat-core-v203'"),'The v203 flat critical core is not active.');
+assert(critical.includes('BASE_EXPECTED_FILES=111'),'The 111-file core package boundary changed unexpectedly.');
+assert(critical.includes('EXTENSION_EXPECTED_FILES=53'),'The 53-file shared package boundary changed unexpectedly.');
+assert(critical.includes('runCaptured(event)'),'Incomplete packages no longer replay the complete installers.');
+assert(critical.includes("mode:'flat'"),'Critical status no longer identifies the flat interface.');
+
+const essential=[
+  '/app/assets/ai/moss-acorn.png',
+  '/app/assets/ai/weaveling-compass.png',
+  '/app/assets/navigation/200-commonweave-nav.webp',
+  '/app/assets/navigation/200-cerbanimo-nav.webp',
+  '/app/assets/navigation/200-living-school-nav.webp',
+  '/app/assets/navigation/200-fellowfare-nav.webp',
+  '/app/assets/navigation/200-anarchadia-nav.webp'
+];
+for(const pathname of essential){
+  assert(imageWorker.includes(pathname),`Dedicated image worker omits ${pathname}.`);
+  assert(critical.includes(pathname),`Legacy worker repair path omits ${pathname}.`);
+  assert(shell.includes(pathname),`Living School does not request ${pathname} during initial parsing.`);
+}
+assert(imageWorker.includes("event.stopImmediatePropagation()"),'Shared images are not protected from the generic /app fetch route.');
+assert(imageWorker.includes("type:'COMMONWEAVE_SHARED_IMAGE_STATUS'"),'Shared image readiness is not inspectable.');
+assert(wrapper.indexOf('service-worker-shared-images-v203.js')<wrapper.indexOf('service-worker-v156.js'),'The image repair lane must register before the generic package worker.');
+
 assert((nav.match(/200-[a-z-]+-nav\.webp/g)||[]).length===5,'The shared family navigation does not reference all five image buttons.');
-assert(nav.includes('grid-template-columns:repeat(5'),'The family navigation is not mounted as five equal button slots.');
+assert(nav.includes('grid-template-columns:repeat(5'),'The family navigation is not mounted as five equal slots.');
 assert(shell.includes('<nav class="ls-tray" aria-label="Living School navigation" hidden>'),'The legacy Living School text tray can still occupy the bottom edge.');
+assert(shell.includes('living-school-flat-loader-v203.js'),'The flat enhancement loader is missing.');
+assert(!shell.includes('living-school-two-agent-relay-v165.js?v='),'The risky media relay still starts during initial boot.');
+assert(!shell.includes('living-school-workbench-v158.js?v='),'The workbench still races the flat core import.');
+assert(!shell.includes('/app/assets/living-school/'),'Spatial scene assets were pulled into the flat cabinet.');
+assert(!shell.includes('ls-world-art'),'Spatial scene markup was pulled into the flat cabinet.');
 
-const guardIndex=shell.indexOf('living-school-mutation-guard-v196.js');
-const relayIndex=shell.indexOf('living-school-two-agent-relay-v165.js');
-assert(guardIndex>=0&&relayIndex>=0&&guardIndex<relayIndex,'The mutation guard must load before the relay creates its observer.');
+assert(bootstrap.includes("VERSION='living-school-flat-bootstrap-v203'"),'The bootstrap is not the flat v203 boot path.');
+assert(bootstrap.includes('firstShellPaint()'),'Shared controls do not receive a paint before the core import.');
+assert(bootstrap.includes("mode:'flat'"),'Ready events no longer identify flat mode.');
+assert(loader.includes("document.addEventListener('commonweave:living-school-ready',loadCore"),'Enhancements no longer wait for the core content.');
+assert(loader.indexOf('living-school-mutation-guard-v196.js')<loader.indexOf('living-school-workbench-v158.js'),'The mutation guard must precede workbench observers.');
+assert(loader.indexOf('living-school-mutation-guard-v196.js')<loader.indexOf('living-school-two-agent-relay-v165.js'),'The mutation guard must precede the optional relay.');
+assert(loader.includes('commonweave:living-school-enable-rich-media'),'The risky rich-media relay is not explicit opt-in.');
+
+for(const token of ['Pathway Desk','Curriculum Forge','Learning Map','Open lesson','Assessment Studio','Practicum Workshop','Credential Forge','window.LivingSchoolCabinetV151'])assert(engine.includes(token),`Flat learning engine lost ${token}.`);
 assert(guard.includes("callback?.name==='queuePatch'"),'The reader mutation guard no longer recognizes the relay observer.');
-assert(relay.includes("action==='lesson'?openLesson(module,state):openAssessment(module,state)"),'Open full lesson is no longer intercepted into the lesson dialog.');
-assert(workbench.includes("if(action==='lesson')openNative('lesson',0)"),'The workbench no longer routes the lesson action through the cabinet.');
-assert(installer.includes('living-school-lesson-nav-v201'),'The installer no longer requests the current Living School repaired package.');
-assert(pwa.includes('living-school-lesson-nav-v201'),'The installed app no longer requests the current Living School repaired package.');
+assert(relay.includes("action==='lesson'?openLesson(module,state):openAssessment(module,state)"),'Optional rich-media lesson routing changed unexpectedly.');
+assert(workbench.includes("if(action==='lesson')openNative('lesson',0)"),'The flat workbench no longer routes lessons through the cabinet.');
+assert(installer.includes("WORKER_URL=`/service-worker-v203.js"),'The installer does not request the v203 wrapper.');
+assert(installer.includes("GET_SHARED_IMAGE_STATUS"),'The installer does not verify shared images.');
+assert(installer.includes("critical.mode!=='flat'"),'The installer does not reject spatial-mode packages.');
+assert(pwa.includes("WORKER_URL=`/service-worker-v203.js"),'The installed app does not request the v203 wrapper.');
 
 console.log(JSON.stringify({
   ok:true,
-  repair:'living-school-lesson-nav-v202-fast-runtime-proxy',
+  repair:'flat-living-school-v203',
   coreBoundary:111,
   sharedBoundary:53,
-  mutationGuardLoadsBeforeRelay:true,
+  flatContentPreserved:true,
+  optionalRelayAtBoot:false,
   navigationImageCount:5,
-  navigationImagesOutsideCriticalLane:true,
-  fastRuntimeCritical:true,
-  legacyTrayHidden:true,
+  topAiMarks:2,
+  sharedImageLane:true,
+  legacyImageRepair:true,
+  spatialMode:false,
 },null,2));
