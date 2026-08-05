@@ -55,9 +55,10 @@ assert(controller.match(/await ensureRuntime\(\)/g)?.length===2,'Provider runtim
 
 for(const token of [
   "CACHE_REVISION='direct-family-r42-settings-self-contained'",
-  "AI_REVISION='self-contained-settings-v181'",
+  "AI_REVISION='self-contained-settings-v181-fixed-ort'",
   "settingsPresentation:'self-contained-fixed-layer'",
-  'providerRuntimeOnOpen:false'
+  'providerRuntimeOnOpen:false',
+  "MODEL_CACHE='commonweave-model-1.0.6-minilm-fixed-ort-r1'"
 ])assert(worker.includes(token),`Core worker missing ${token}`);
 for(const token of [
   'working-campus-additions-v181-settings-self-contained',
@@ -79,12 +80,13 @@ for(const token of [
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'v181-ai-settings-self-contained',
+  revision:'v181-ai-settings-self-contained-fixed-ort',
   openPath:'synchronous-local-dom-only',
   bootstrap:false,
   dynamicSettingsImports:false,
   providerRuntimeOnOpen:false,
   providerRuntimeTrigger:'explicit-test-buttons-only',
+  fixedOrtModelCache:true,
   staleBootstrapCleanup:true,
   installedDeviceRefresh:true
 },null,2));
