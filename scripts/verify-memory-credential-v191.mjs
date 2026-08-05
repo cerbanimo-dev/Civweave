@@ -58,8 +58,10 @@ assert(!controller.credentialStatus().remembered&&!controller.credentialStatus()
 for(const token of ['name="credentialMode"','Remember on this device','This app session only','anyone with access to this unlocked browser profile','credentialPersistence'])assert(settingsSource.includes(token),`Settings teaching flow is missing ${token}.`);
 for(const forbidden of ['MutationObserver','setInterval(','setTimeout('])assert(!settingsSource.includes(forbidden),`Clean-room settings reintroduced ${forbidden}.`);
 assert(!deviceSource.includes('MutationObserver'),'Credential compatibility shim still observes the document.');
-assert(!deviceSource.includes("addEventListener('commonweave:model-settings-saved'"),'Credential compatibility shim still persists every save automatically.');
-assert(deviceSource.includes('automaticPersistence:false'),'Credential shim does not declare automatic persistence retired.');
+assert(deviceSource.includes("addEventListener('commonweave:model-settings-saved'"),'Credential bridge does not canonicalize an explicitly saved credential.');
+assert(deviceSource.includes("detail.credentialPersistence==='device'"),'Credential bridge does not preserve the explicit device-only persistence choice.');
+assert(deviceSource.includes('automaticPersistence:false'),'Credential shim does not declare indiscriminate automatic persistence retired.');
+assert(deviceSource.includes('restoresConsent:true')&&deviceSource.includes('mirrorsRuntimeSecret:true'),'Credential bridge does not declare the v192 usability repair.');
 for(const token of ['/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js']){
   assert(baseWorker.includes(token),`Base device package is missing ${token}.`);
   assert(additiveWorker.includes(token),`Additive package is missing ${token}.`);
@@ -67,6 +69,6 @@ for(const token of ['/app/weaveling-memory-v191.js','/app/weaveling-memory-bridg
   assert(loaderSource.includes(token),`Family loader is missing ${token}.`);
 }
 assert(campusSource.includes('hasResponseLayer')&&campusSource.includes('__weavelingMemoryV191'),'Working Campus does not protect against wrapper stacking.');
-assert(additiveWorker.includes('working-campus-additions-v191-memory-credential'),'Additive cache did not rotate to v191.');
+assert(/working-campus-additions-v19[12]-(?:memory-credential|credential-usable)/.test(additiveWorker),'Additive cache did not retain or advance the memory/credential package.');
 
-console.log(JSON.stringify({ok:true,revision:'v191-memory-credential',memory:{working:true,longTerm:true,explicitCommands:true,secretsExcluded:true,planPersistence:true},credential:{sessionChoice:true,deviceChoice:true,restoresAtBoot:true,forget:true,automaticPersistence:false},packaged:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v191-memory-credential-v192-compatible',memory:{working:true,longTerm:true,explicitCommands:true,secretsExcluded:true,planPersistence:true},credential:{sessionChoice:true,deviceChoice:true,restoresAtBoot:true,forget:true,automaticPersistence:false,explicitCanonicalization:true},packaged:true},null,2));
