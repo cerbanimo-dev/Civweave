@@ -45,7 +45,7 @@ function installStyle(){
   const style=document.createElement('style');
   style.id=STYLE_ID;
   style.textContent=`
-:root{--cw-themed-nav-height:clamp(44px,10vw,100px)}
+:root{--cw-themed-nav-height:clamp(44px,10vw,100px);--cw-themed-nav-button-width:200px}
 html.cw-themed-system-nav-active body{padding-bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom))!important}
 html.cw-themed-system-nav-active #cwf104-tray,
 html.cw-themed-system-nav-active nav.bottom,
@@ -55,14 +55,14 @@ html.cw-themed-system-nav-active .bottom-nav{display:none!important}
 html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-app{grid-template-rows:54px minmax(0,1fr)!important}
 html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-moss,
 html.cw-themed-system-nav-active[data-cw-themed-current="living-school"] .ls-compass{bottom:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom) + 10px)!important}
-#${NAV_ID}{position:fixed;z-index:2147483600;left:0;right:0;bottom:0;width:100vw;height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:start;gap:0;padding:0 0 env(safe-area-inset-bottom);margin:0;background:#03070bf2;box-shadow:0 -6px 24px #0009;backdrop-filter:blur(10px);isolation:isolate;overflow:hidden}
-#${NAV_ID} .cw-themed-system-link{position:relative;min-width:0;width:100%;height:var(--cw-themed-nav-height);display:grid;place-items:center;margin:0;padding:0;border:0;background:transparent;text-decoration:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;isolation:isolate;overflow:hidden}
+#${NAV_ID}{position:fixed;z-index:2147483600;left:0;right:0;bottom:0;width:100vw;height:calc(var(--cw-themed-nav-height) + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,minmax(0,var(--cw-themed-nav-button-width)));justify-content:center;align-items:start;gap:0;padding:0 0 env(safe-area-inset-bottom);margin:0;background:#03070bf2;box-shadow:0 -6px 24px #0009;backdrop-filter:blur(10px);isolation:isolate;overflow:hidden}
+#${NAV_ID} .cw-themed-system-link{position:relative;min-width:0;width:100%;max-width:var(--cw-themed-nav-button-width);height:var(--cw-themed-nav-height);display:grid;place-items:center;margin:0;padding:0;border:0;background:transparent;text-decoration:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;isolation:isolate;overflow:hidden}
 #${NAV_ID} .cw-themed-system-link::before{content:"";position:absolute;z-index:-1;inset:3px 2px;border-radius:13px;opacity:0;box-shadow:inset 0 0 12px var(--system-glow),0 0 16px var(--system-glow);transition:opacity .16s ease}
-#${NAV_ID} .cw-themed-system-link img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;transform:translateZ(0);filter:brightness(.9) saturate(.88);transition:filter .16s ease,transform .16s ease;user-select:none;-webkit-user-drag:none}
+#${NAV_ID} .cw-themed-system-link img{display:block;width:100%;height:100%;object-fit:contain;object-position:center;transform:translateZ(0);filter:brightness(.9) saturate(.88);transition:filter .16s ease;user-select:none;-webkit-user-drag:none}
 #${NAV_ID} .cw-themed-system-link:hover img{filter:brightness(1.05) saturate(1)}
 #${NAV_ID} .cw-themed-system-link.is-current{z-index:2}
 #${NAV_ID} .cw-themed-system-link.is-current::before{opacity:.92}
-#${NAV_ID} .cw-themed-system-link.is-current img{filter:brightness(1.17) saturate(1.1) drop-shadow(0 0 5px var(--system-glow)) drop-shadow(0 0 13px var(--system-glow));transform:translateY(-1px) scale(1.025)}
+#${NAV_ID} .cw-themed-system-link.is-current img{filter:brightness(1.17) saturate(1.1) drop-shadow(0 0 5px var(--system-glow)) drop-shadow(0 0 13px var(--system-glow));transform:translateZ(0)}
 #${NAV_ID} .cw-themed-system-link:focus-visible{outline:3px solid #fff8c7;outline-offset:-4px;border-radius:13px}
 @media(prefers-reduced-motion:reduce){#${NAV_ID} .cw-themed-system-link::before,#${NAV_ID} .cw-themed-system-link img{transition:none}}
 `;
