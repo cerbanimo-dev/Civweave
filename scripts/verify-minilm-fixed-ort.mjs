@@ -18,7 +18,7 @@ const [pkgText,adapter,worker,manifestText,stage,materializer,serviceWorker,down
 ]);
 const pkg=JSON.parse(pkgText),manifest=JSON.parse(manifestText);
 
-assert(pkg.version==='1.0.6','fixed runtime branch is not aligned with Commonweave 1.0.6');
+assert(pkg.version==='1.0.7','fixed runtime branch is not aligned with Commonweave 1.0.7');
 assert(pkg.dependencies?.['onnxruntime-web']==='1.27.0','onnxruntime-web is not pinned to 1.27.0');
 assert(pkg.scripts?.prestart?.includes('stage-onnxruntime-web-assets.mjs'),'normal startup does not stage the fixed runtime');
 assert(pkg.scripts?.prestart?.includes('ensure-minilm-fixed-ort-model.mjs'),'normal startup does not materialize the fixed graph');
