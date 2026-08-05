@@ -10,16 +10,19 @@ const MODEL_DOWNLOAD_SCRIPT='/extensions/commonweave-model-download-v157.js';
 const PROOF_PROGRESS_SCRIPT='/extensions/commonweave-proof-progress-v158.js';
 const GEMINI_INTERACTIONS_SCRIPT='/extensions/commonweave-gemini-interactions-v159.js';
 const LIVE_SOURCE_GUARD_SCRIPT='/extensions/commonweave-antigravity-live-source-guard-v167.js';
-const PREVIOUS_ADDITIONS_VERSION='v172-settings-window-capture';
+const ADDITIONS_VERSION='v174-settings-single-owner-assets';
+const PREVIOUS_ADDITIONS_VERSION='v173-ai-loader-cutover';
 const FAST_CORE_COMPATIBILITY_REVISION='v157-fast-core';
 const SETTINGS_STABILITY_REVISION='v161-settings-dialog-stability';
 const SETTINGS_CONTROLLER_REVISION='v173-direct-settings-controller';
+const SETTINGS_RUNTIME_REVISION='v157.2-single-owner';
 const INTENTION_RESEARCH_REVISION='v163-latest-intention-agentic-research';
 const HUD_STABILITY_REVISION='v164-hud-observer-stability';
 const WORKFLOW_HANDOFF_REVISION='v165-reviewed-merlin-rook-proof-attachments';
 const TWO_AGENT_RELAY_REVISION='living-school-two-agent-youtube-v166';
 const LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167';
 const LOCAL_LAYOUT_REVISION='merlin-local-layout-fallback-v167';
+// Compatibility marker: additionsVersion:'v173-ai-loader-cutover'
 // Compatibility marker: additionsVersion:'v172-settings-window-capture'
 // Compatibility marker: additionsVersion:'v171-settings-safe-open'
 // Compatibility marker: additionsVersion:'v170-mobile-shell-code-rails'
@@ -52,10 +55,10 @@ function installerUrl(){
   next.searchParams.set('next',target.slice(0,1800));
   return next.href;
 }
-function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=direct-settings-controller-v173`;script.async=false;document.head.append(script)}
+function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=${ADDITIONS_VERSION}`;script.async=false;document.head.append(script)}
 function installAdditions(){
   if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
-    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=direct-settings-controller-v173`;document.head.append(link);
+    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=${ADDITIONS_VERSION}`;document.head.append(link);
   }
   addScript(SETTINGS_CONTROLLER_SCRIPT);
   addScript(LIVE_SOURCE_GUARD_SCRIPT);
@@ -72,5 +75,5 @@ if(!allowed()){
   document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
   installAdditions();
 }
-globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:'v173-ai-loader-cutover',previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,settingsStabilityRevision:SETTINGS_STABILITY_REVISION,settingsControllerRevision:SETTINGS_CONTROLLER_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudStabilityRevision:HUD_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,localLayoutRevision:LOCAL_LAYOUT_REVISION};
+globalThis.CommonweaveInstallBoundaryV146={allowed,installedDisplay,developer,embedded,installerUrl,installAdditions,additionsVersion:ADDITIONS_VERSION,previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,settingsStabilityRevision:SETTINGS_STABILITY_REVISION,settingsControllerRevision:SETTINGS_CONTROLLER_REVISION,settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION,intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudStabilityRevision:HUD_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,localLayoutRevision:LOCAL_LAYOUT_REVISION};
 })();

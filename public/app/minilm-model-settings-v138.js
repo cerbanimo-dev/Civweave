@@ -1,6 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='157.1';
+const VERSION='157.2-single-owner';
+const EVENT_OWNERSHIP='controller-only';
 const SETTINGS_KEY='commonweave.universal-ai.v127';
 const SESSION_KEY='commonweave-model-session';
 const MODEL_ID='Xenova/all-MiniLM-L6-v2';
@@ -125,7 +126,7 @@ function fill(form){
   form.querySelector('[data-secret-note]').textContent=state.hasKey?'A Gemini key is already loaded for this browser session.':'Credentials are held only for this browser session.';
   form.querySelector('[data-save-status]').textContent='';
   sync(form);
-  checkPackage(form);
+  void checkPackage(form);
 }
 function setupFrom(form){
   const route=providerName(byName(form,'route').value),prior=existingKey();
@@ -190,17 +191,33 @@ async function testProvider(form,button){
   try{if(!runtime()?.detectCapabilities)throw new Error('The shared model runtime has not loaded.');const capability=await runtime().detectCapabilities({...setup.interactive,apiKey:setup.key},{probe:true});if(capability.available===false)throw new Error(capability.notes?.join(' ')||'The provider did not answer.');status.textContent=`${capability.provider} is reachable with ${capability.model}.`;status.className='cw-ai-test-status is-ok'}catch(error){status.textContent=`Connection test failed: ${error.message}`;status.className='cw-ai-test-status is-error'}finally{button.disabled=false}
 }
 function bind(form){
-  if(!form||form.dataset.unifiedModelBound==='true')return;form.dataset.unifiedModelBound='true';fill(form);
+  if(!form||form.dataset.unifiedModelBound==='true')return form;
+  form.dataset.unifiedModelBound='true';
   byName(form,'route').addEventListener('change',()=>sync(form));byName(form,'agenticEnabled').addEventListener('change',()=>sync(form));form.querySelector('[data-check-package]')?.addEventListener('click',()=>checkPackage(form));form.querySelector('[data-benchmark]')?.addEventListener('click',event=>benchmark(form,event.currentTarget));form.querySelector('[data-paste-key]')?.addEventListener('click',event=>pasteKey(form,event.currentTarget));form.querySelector('[data-import-key]')?.addEventListener('click',()=>form.querySelector('[data-key-file]').click());form.querySelector('[data-key-file]')?.addEventListener('change',event=>{importKey(form,event.target.files?.[0]);event.target.value=''});form.querySelector('[data-test-gemini]')?.addEventListener('click',event=>testGemini(form,'gemini',event.currentTarget));form.querySelector('[data-test-antigravity]')?.addEventListener('click',event=>testGemini(form,'antigravity',event.currentTarget));form.querySelectorAll('[data-test-provider]').forEach(button=>button.addEventListener('click',()=>testProvider(form,button)));
   form.addEventListener('submit',event=>{event.preventDefault();const setup=setupFrom(form);persist(setup);form.querySelector('[data-save-status]').textContent=setup.route==='bundled'?'Saved the onboard semantic reflex.':setup.agentic?'Saved Gemini and Antigravity. MiniLM remains the immediate local fallback.':'Saved the selected provider. MiniLM remains the immediate local fallback.'});
+  return form;
 }
 function build(){
-  let dialog=document.getElementById('cw-ai-settings-v157');if(dialog)return dialog;dialog=document.createElement('dialog');dialog.id='cw-ai-settings-v157';dialog.className='cw-ai-settings-dialog';dialog.innerHTML=markup();document.body.append(dialog);bind(dialog.querySelector('form'));dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});return dialog;
+  let dialog=document.getElementById('cw-ai-settings-v157');
+  if(dialog)return{dialog,created:false};
+  dialog=document.createElement('dialog');dialog.id='cw-ai-settings-v157';dialog.className='cw-ai-settings-dialog';dialog.innerHTML=markup();document.body.append(dialog);
+  const form=bind(dialog.querySelector('form'));fill(form);
+  dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
+  return{dialog,created:true};
 }
-function open(){const dialog=build();fill(dialog.querySelector('form'));if(!dialog.open)dialog.showModal();return dialog}
-function mount(target){const node=typeof target==='string'?document.querySelector(target):target;if(!node)throw new Error('A settings mount target is required.');node.innerHTML=`<section class="cw-ai-inline-card">${markup({inline:true})}</section>`;const form=node.querySelector('form');bind(form);return form}
-const observer=new MutationObserver(()=>document.querySelectorAll('[data-unified-model-settings]').forEach(bind));observer.observe(document.documentElement,{childList:true,subtree:true});
-document.addEventListener('click',event=>{const target=event.target.closest?.('[data-action="settings"],#lite-settings');if(!target||target.closest('[data-unified-model-settings]'))return;event.preventDefault();event.stopImmediatePropagation();open()},true);
-globalThis.CommonweaveModelSettingsV157={version:VERSION,open,mount,inlineMarkup:()=>`<section class="cw-ai-inline-card">${markup({inline:true})}</section>`,readState,model:MODEL_ID,manifest:MANIFEST};
+function open(){
+  const {dialog,created}=build();
+  if(!created)fill(dialog.querySelector('form'));
+  if(!dialog.open)dialog.showModal();
+  return dialog;
+}
+function mount(target){
+  const node=typeof target==='string'?document.querySelector(target):target;
+  if(!node)throw new Error('A settings mount target is required.');
+  node.innerHTML=`<section class="cw-ai-inline-card">${markup({inline:true})}</section>`;
+  const form=bind(node.querySelector('form'));fill(form);
+  return form;
+}
+globalThis.CommonweaveModelSettingsV157={version:VERSION,eventOwnership:EVENT_OWNERSHIP,open,mount,inlineMarkup:()=>`<section class="cw-ai-inline-card">${markup({inline:true})}</section>`,readState,model:MODEL_ID,manifest:MANIFEST};
 globalThis.CommonweaveModelSettingsV133=globalThis.CommonweaveModelSettingsV157;
 })();

@@ -42,7 +42,34 @@ assert(!controller.includes("addEventListener('click'"),'The direct settings con
 const dependencies=controller.slice(controller.indexOf('const DEPENDENCIES='),controller.indexOf('const REFLEX_SCRIPT='));
 assert(!dependencies.includes('minilm-reflex-runtime'),'Opening settings still eagerly loads MiniLM.');
 
-for(const token of ['CommonweaveModelSettingsV157','CommonweaveModelSettingsV133=globalThis.CommonweaveModelSettingsV157',"VERSION='157.1'",'Gemini API key','gemini-3.5-flash-lite','https://generativelanguage.googleapis.com/v1beta','data-paste-key','data-import-key','extractKey','GEMINI_API_KEY','GOOGLE_API_KEY','data-test-gemini','data-test-antigravity','runtime().generate',"actualModel.includes('antigravity')",'A Gemini fallback does not count as a successful Antigravity test.','commonweave:model-settings-saved','Run reflex speed trial'])assert(settings.includes(token),`Shared settings component is missing ${token}.`);
+for(const token of [
+  'CommonweaveModelSettingsV157',
+  'CommonweaveModelSettingsV133=globalThis.CommonweaveModelSettingsV157',
+  "VERSION='157.2-single-owner'",
+  "EVENT_OWNERSHIP='controller-only'",
+  'const {dialog,created}=build()',
+  "if(!created)fill(dialog.querySelector('form'))",
+  'void checkPackage(form)',
+  'eventOwnership:EVENT_OWNERSHIP',
+  'Gemini API key',
+  'gemini-3.5-flash-lite',
+  'https://generativelanguage.googleapis.com/v1beta',
+  'data-paste-key',
+  'data-import-key',
+  'extractKey',
+  'GEMINI_API_KEY',
+  'GOOGLE_API_KEY',
+  'data-test-gemini',
+  'data-test-antigravity',
+  'runtime().generate',
+  "actualModel.includes('antigravity')",
+  'A Gemini fallback does not count as a successful Antigravity test.',
+  'commonweave:model-settings-saved',
+  'Run reflex speed trial'
+])assert(settings.includes(token),`Shared settings component is missing ${token}.`);
+assert(!settings.includes("document.addEventListener('click'"),'The shared settings component still intercepts application clicks.');
+assert(!settings.includes('new MutationObserver'),'The shared settings component still observes the whole document.');
+assert(!settings.includes("document.querySelectorAll('[data-unified-model-settings]')"),'The shared settings component still auto-binds external forms.');
 assert(!settings.includes('localStorage.setItem("commonweave-model-session"'),'The base settings component writes a session API key directly to localStorage.');
 for(const token of ['.cw-ai-header','.cw-ai-secret-tools','.cw-ai-test-grid','.cw-ai-form-footer','--cw-ai-mint','#0a1022'])assert(styles.includes(token),`Restyled settings surface is missing ${token}.`);
 
@@ -53,11 +80,51 @@ assert(!loader.includes("['/app/guide-chat-v153.js?v=1.0.4'"),'Retired floating 
 
 for(const token of ["VERSION='159.0-gemini-interactions-transport'",'/api/ai/gemini/interactions',"Api-Revision':API_REVISION","model:config.model",'response_format','store:false',"profile!=='agentic'",'__geminiInteractionsTransport',"fallback:{used:false}",'Gemini completed the interaction but returned no text output.'])assert(geminiTransport.includes(token),`Gemini Interactions transport is missing ${token}.`);
 for(const token of ["VERSION='160.0-device-credentials'",'commonweave-model-persistent-secrets-v160','function restore','function persist','function forget','data-forget-device-key','Provider credentials are stored only on this device'])assert(deviceCredentials.includes(token),`Device credential runtime is missing ${token}.`);
-for(const token of ["SETTINGS_CONTROLLER_SCRIPT='/app/model-settings-controller-v173.js'",'DEVICE_CREDENTIALS_SCRIPT','GEMINI_INTERACTIONS_SCRIPT','addScript(SETTINGS_CONTROLLER_SCRIPT)','addScript(DEVICE_CREDENTIALS_SCRIPT)','addScript(GEMINI_INTERACTIONS_SCRIPT)',"additionsVersion:'v173-ai-loader-cutover'"])assert(installBoundary.includes(token),`Install boundary does not load ${token}.`);
+
+for(const token of [
+  "ADDITIONS_VERSION='v174-settings-single-owner-assets'",
+  "PREVIOUS_ADDITIONS_VERSION='v173-ai-loader-cutover'",
+  "SETTINGS_CONTROLLER_SCRIPT='/app/model-settings-controller-v173.js'",
+  "SETTINGS_RUNTIME_REVISION='v157.2-single-owner'",
+  'DEVICE_CREDENTIALS_SCRIPT',
+  'GEMINI_INTERACTIONS_SCRIPT',
+  'addScript(SETTINGS_CONTROLLER_SCRIPT)',
+  'addScript(DEVICE_CREDENTIALS_SCRIPT)',
+  'addScript(GEMINI_INTERACTIONS_SCRIPT)',
+  'script.src=`${src}?v=${ADDITIONS_VERSION}`',
+  'additionsVersion:ADDITIONS_VERSION',
+  'previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION',
+  'settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION'
+])assert(installBoundary.includes(token),`Install boundary does not load ${token}.`);
 assert(!installBoundary.includes('SETTINGS_SAFE_OPEN_SCRIPT'),'Install boundary still loads the retired settings interceptor.');
 
 for(const token of ["CACHE_REVISION='direct-family-r37-fast-install'","DEVICE_REVISION='device-package-r37-core'","MODEL_REVISION='minilm-on-demand-r1'",'modelOnDemand','GET_MODEL_PACKAGE_STATUS'])assert(baseWorker.includes(token),`Fast-core base worker lost ${token}.`);
-for(const token of ["EXTENSION_VERSION='working-campus-additions-v173-ai-loader-cutover'","SETTINGS_CONTROLLER_REVISION='direct-settings-controller-v173'",'/extensions/commonweave-device-credentials-v160.js',"GEMINI_TRANSPORT_REVISION='gemini-interactions-v159'",'/extensions/commonweave-gemini-interactions-v159.js','PATCHED_CORE_FILES','patchCorePackage','/app/model-settings-controller-v173.js','/app/family-ai-loader-v105.js','/app/platform-stability-v159.js','/app/cerbanimo-ai-validator-v159.js','/app/anarchadia-runtime-stability-v159.js','/app/minilm-model-settings-v138.js','/app/model-settings-v133.css','/app/working-campus-v156.html','/app/working-campus-v156.css','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt','inlineChatRevision:INLINE_CHAT_REVISION','settingsControllerRevision:SETTINGS_CONTROLLER_REVISION'])assert(additiveWorker.includes(token),`Current additive worker does not deliver ${token}.`);
+for(const token of [
+  "EXTENSION_VERSION='working-campus-additions-v174-settings-single-owner-assets'",
+  "SETTINGS_CONTROLLER_REVISION='direct-settings-controller-v173'",
+  "SETTINGS_RUNTIME_REVISION='settings-runtime-v157.2-single-owner'",
+  "EXTENSION_CACHE='cwext-working-campus-additions-v174-settings-single-owner-assets'",
+  "PREVIOUS_EXTENSION_CACHE='cwext-working-campus-additions-v173-ai-loader-cutover'",
+  '/extensions/commonweave-device-credentials-v160.js',
+  "GEMINI_TRANSPORT_REVISION='gemini-interactions-v159'",
+  '/extensions/commonweave-gemini-interactions-v159.js',
+  'PATCHED_CORE_FILES',
+  'patchCorePackage',
+  '/app/model-settings-controller-v173.js',
+  '/app/family-ai-loader-v105.js',
+  '/app/platform-stability-v159.js',
+  '/app/cerbanimo-ai-validator-v159.js',
+  '/app/anarchadia-runtime-stability-v159.js',
+  '/app/minilm-model-settings-v138.js',
+  '/app/model-settings-v133.css',
+  '/app/working-campus-v156.html',
+  '/app/working-campus-v156.css',
+  '/app/working-campus-v156.part4.txt',
+  '/app/working-campus-v156.part5.txt',
+  'inlineChatRevision:INLINE_CHAT_REVISION',
+  'settingsControllerRevision:SETTINGS_CONTROLLER_REVISION',
+  'settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION'
+])assert(additiveWorker.includes(token),`Current additive worker does not deliver ${token}.`);
 const extensionBlock=additiveWorker.slice(additiveWorker.indexOf('const EXTENSION_FILES=['),additiveWorker.indexOf('const BOUNDARY='));
 assert(!extensionBlock.includes('commonweave-settings-safe-open'),'New installations still receive the retired settings interceptor.');
 
@@ -86,4 +153,4 @@ credentialSession.removeItem('commonweave-model-session');credentialSession.remo
 assert(credentialSandbox.CommonweaveDeviceCredentialsV160.restore(),'Device credential persistence did not restore a saved key.');
 assert(JSON.parse(credentialSession.getItem('commonweave-model-session')).apiKey==='persist-me','Restored device credential does not match the saved key.');
 
-console.log(JSON.stringify({ok:true,settingsRuntime:'157.1',settingsController:'173.0-direct-settings-controller',chatLoader:'inline-commonweave-r42-chat-only',sharedSurfaces:['working-campus','family-shell','five-realms'],weavelingComposer:true,geminiKeyIngestion:['direct-entry','clipboard','env-file','json-file','raw-key-file'],credentialStorage:'device-local-explicit-forget',liveTests:['gemini-interactions-host-proxy','antigravity-direct-no-fallback','credential-restart-restore'],geminiTransport:'159.0-gemini-interactions-transport',deviceCredentials:'160.0-device-credentials',duplicateWorkingCampusDialog:false,corePackage:'r37-fast-deferred-minilm',additiveSettingsRevision:'v173-ai-loader-cutover'},null,2));
+console.log(JSON.stringify({ok:true,settingsRuntime:'157.2-single-owner',settingsController:'173.0-direct-settings-controller',settingsEventOwnership:'controller-only',chatLoader:'inline-commonweave-r42-chat-only',sharedSurfaces:['working-campus','family-shell','five-realms'],weavelingComposer:true,geminiKeyIngestion:['direct-entry','clipboard','env-file','json-file','raw-key-file'],credentialStorage:'device-local-explicit-forget',liveTests:['gemini-interactions-host-proxy','antigravity-direct-no-fallback','credential-restart-restore'],geminiTransport:'159.0-gemini-interactions-transport',deviceCredentials:'160.0-device-credentials',duplicateWorkingCampusDialog:false,corePackage:'r37-fast-deferred-minilm',additiveSettingsRevision:'v174-settings-single-owner-assets'},null,2));
