@@ -15,12 +15,13 @@ for(const token of ["VERSION='1.0.6-unified-ai-settings-v179'","APP_VERSION='1.0
 for(const token of ['showModal(',"createElement('dialog')",'HTMLDialogElement','document.body.style.overflow',"document.addEventListener('click'","window.addEventListener('click'",'::backdrop'])assert(!settings.includes(token),`settings still use ${token}`);
 assert(settings.includes("role','dialog'")&&settings.includes("aria-modal','true'"),'accessible dialog semantics are missing');
 assert(settings.includes('layer.hidden=true')&&settings.includes('layer.hidden=false'),'bounded layer visibility is missing');
-for(const token of ["VERSION='1.0.6-settings-controller-v179'","appVersion:'1.0.6'","presentation:'fixed-layer'",'nativeDialog:false'])assert(controller.includes(token),`controller missing ${token}`);
-for(const token of ['showModal','dialog.close'])assert(!controller.includes(token),`controller still uses ${token}`);
+for(const token of ["VERSION='1.0.6-settings-controller-v180'","appVersion:'1.0.6'","presentation:'first-paint-fixed-layer'",'nativeDialog:false','transformerActive:false','function showBootstrap(generation)','await afterPaint()'])assert(controller.includes(token),`controller missing ${token}`);
+for(const token of ['showModal','dialog.close','pipeline(','new Worker'])assert(!controller.includes(token),`controller still uses ${token}`);
 for(const token of ['v1.0.6','working-campus-v179-v106','settings-v179-v106'])assert(campus.includes(token),`campus missing ${token}`);
 for(const token of ["VERSION='1.0.6'",'device-package-r41-no-native-dialog',"settingsPresentation:'fixed-layer'",'nativeDialog:false'])assert(worker.includes(token),`worker missing ${token}`);
-for(const token of ['working-campus-additions-v179-no-native-dialog',"settingsPresentation:'fixed-layer'",'nativeDialog:false'])assert(additive.includes(token),`additive worker missing ${token}`);
+for(const token of ['working-campus-additions-v180-settings-freeze-boundary',"settingsPresentation:'first-paint-fixed-layer'",'nativeDialog:false',"SETTINGS_CONTROLLER_REVISION='first-paint-no-model-v180'",'transformerActive:false'])assert(additive.includes(token),`additive worker missing ${token}`);
 for(const token of ["VERSION='1.0.6'",'device-package-r41-no-native-dialog','settings-layer update'])assert(pwa.includes(token),`PWA missing ${token}`);
 assert(pkg.version==='1.0.6',`package version is ${pkg.version}`);
 assert(pkg.scripts.check.includes('verify-v106-settings-layer-v179.mjs'),'default check does not enforce v1.0.6');
-console.log(JSON.stringify({ok:true,version:'1.0.6',settingsPresentation:'fixed-layer',nativeDialog:false,outsideTap:'safe-close',globalClickOwner:false,bodyScrollLock:false,devicePackage:'r41-no-native-dialog'},null,2));
+assert(pkg.scripts.check.includes('verify-ai-settings-freeze-boundary-v180.mjs'),'default check does not enforce the freeze boundary');
+console.log(JSON.stringify({ok:true,version:'1.0.6',settingsPresentation:'first-paint-fixed-layer',nativeDialog:false,outsideTap:'safe-close',globalClickOwner:false,bodyScrollLock:false,devicePackage:'r41-no-native-dialog',settingsBoundary:'v180-no-model-start'},null,2));

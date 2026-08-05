@@ -1,4 +1,4 @@
-name: Verify Commonweave v1.0.6 Settings Layer
+name: Verify Commonweave v1.0.6 Settings Freeze Boundary
 
 on:
   push:
@@ -23,6 +23,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Verify v1.0.6 settings layer
         run: node scripts/verify-v106-settings-layer-v179.mjs
+      - name: Verify AI settings freeze boundary
+        run: node scripts/verify-ai-settings-freeze-boundary-v180.mjs
       - name: Run repository checks
         run: npm run check
       - name: Verify instant deterministic preparation
@@ -52,18 +54,27 @@ jobs:
           grep -q 'No native modal' gateway.html
           curl -fsS http://127.0.0.1:8787/install-v130.js -o gateway-installer.js
           grep -q "WORKER_REVISION='device-package-r41-no-native-dialog'" gateway-installer.js
-          grep -q "ADDITIONS_REVISION='working-campus-additions-v179-no-native-dialog'" gateway-installer.js
+          grep -q "ADDITIONS_REVISION='working-campus-additions-v180-settings-freeze-boundary'" gateway-installer.js
+          grep -q 'first-paint settings layer' gateway-installer.js
           curl -fsS http://127.0.0.1:8787/service-worker.js -o gateway-worker.js
           grep -q "VERSION='1.0.6'" gateway-worker.js
           grep -q "DEVICE_REVISION='device-package-r41-no-native-dialog'" gateway-worker.js
           grep -q "settingsPresentation:'fixed-layer'" gateway-worker.js
           curl -fsS http://127.0.0.1:8787/service-worker-v156.js -o gateway-additive-worker.js
-          grep -q 'working-campus-additions-v179-no-native-dialog' gateway-additive-worker.js
+          grep -q 'working-campus-additions-v180-settings-freeze-boundary' gateway-additive-worker.js
+          grep -q "SETTINGS_CONTROLLER_REVISION='first-paint-no-model-v180'" gateway-additive-worker.js
+          grep -q "settingsPresentation:'first-paint-fixed-layer'" gateway-additive-worker.js
           grep -q "nativeDialog:false" gateway-additive-worker.js
+          grep -q "transformerActive:false" gateway-additive-worker.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/model-settings-controller-v173.js -o gateway-settings-controller.js
-          grep -q '1.0.6-settings-controller-v179' gateway-settings-controller.js
-          grep -q "presentation:'fixed-layer'" gateway-settings-controller.js
+          grep -q '1.0.6-settings-controller-v180' gateway-settings-controller.js
+          grep -q "presentation:'first-paint-fixed-layer'" gateway-settings-controller.js
+          grep -q 'function showBootstrap(generation)' gateway-settings-controller.js
+          grep -q 'await afterPaint()' gateway-settings-controller.js
+          grep -q 'transformerStarted:false' gateway-settings-controller.js
           ! grep -q 'showModal' gateway-settings-controller.js
+          ! grep -q 'pipeline(' gateway-settings-controller.js
+          ! grep -q 'new Worker' gateway-settings-controller.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/unified-ai-settings-v175.js -o gateway-ai-settings.js
           grep -q '1.0.6-unified-ai-settings-v179' gateway-ai-settings.js
           grep -q 'Gemini API key' gateway-ai-settings.js
@@ -71,6 +82,8 @@ jobs:
           ! grep -q 'showModal(' gateway-ai-settings.js
           ! grep -q "createElement('dialog')" gateway-ai-settings.js
           ! grep -q 'document.body.style.overflow' gateway-ai-settings.js
+          ! grep -q 'pipeline(' gateway-ai-settings.js
+          ! grep -q 'new Worker' gateway-ai-settings.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/working-campus-v156.html -o gateway-campus.html
           grep -q 'v1.0.6' gateway-campus.html
           grep -q 'settings-v179-v106' gateway-campus.html
@@ -92,7 +105,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v106-settings-layer-evidence
+          name: commonweave-v106-settings-freeze-boundary-evidence
           path: |
             commonweave-gateway.log
             commonweave-local.log

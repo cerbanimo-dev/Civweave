@@ -11,6 +11,8 @@
   "adapter": "/app/models/all-minilm-l6-v2/adapter.js",
   "worker": "/app/models/all-minilm-l6-v2/worker.js",
   "index": "/app/models/all-minilm-l6-v2/reflex-index.json",
+  "optionalPrecomputedVectors": "/app/models/all-minilm-l6-v2/reflex-vectors.json",
+  "vectorCache": "indexeddb:commonweave-semantic-cache-v1/reflex-vectors",
   "modelRoot": "/app/models/all-minilm-l6-v2",
   "webgpuGraph": "/app/models/all-minilm-l6-v2/onnx/model_q4f16.onnx",
   "wasmGraph": "/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx",
@@ -20,7 +22,12 @@
     "canonicalRoutingOwnedByApplication": true,
     "tokenGeneration": false,
     "lexicalFallbackAlwaysAvailable": true,
-    "semanticPrewarm": "idle",
+    "semanticActivation": "explicit-only",
+    "semanticPrewarm": "session-only",
+    "prewarmEmbedsReflexIndex": false,
+    "reflexIndexEmbedding": "first-explicit-match-only",
+    "reflexIndexBatchSize": 1,
+    "reflexIndexYieldMs": 16,
     "maximumInteractiveSemanticWaitMs": 350
   }
 }
