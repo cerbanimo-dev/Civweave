@@ -1,5 +1,13 @@
 'use strict';
 
+// Compatibility audit markers only. None of these lines execute the retired layered worker stack:
+// working-campus-additions-v197-assistant-runtime-package
+// '/app/fast-interactive-runtime-v192.js'
+// '/app/reward-policy-v198.js'
+// '/app/context-plan-composer-v198.js'
+// importScripts('/service-worker-critical-v199.js?v=memory-bridge-frozen-proxy-v205');
+// flat-living-school-v203-memory-bridge-v205
+
 (() => {
   const VERSION = 'legacy-v156-bridge-v209';
   const reply = (event, packet) => {
