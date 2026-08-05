@@ -33,6 +33,8 @@ function formatBytes(bytes){
   return`${(value/(1024*1024)).toFixed(value>=10*1024*1024?0:1)} MB`;
 }
 
+const api={version:VERSION,normalize,render,last:null};
+
 function render(status){
   const packet=normalize(status);
   const state=$('#offline-package-state');
@@ -58,7 +60,7 @@ function render(status){
     else button.textContent='Download offline campus';
   }
   document.documentElement.dataset.offlineCampusStatusRevision=VERSION;
-  globalThis.CommonweaveOfflineCampusStatusV210={version:VERSION,normalize,render,last:packet};
+  api.last=packet;
   return packet;
 }
 
@@ -75,6 +77,7 @@ function askCurrentStatus(){
   try{worker.postMessage({type:'GET_OFFLINE_PACKAGE_STATUS'},[channel.port2])}catch{}
 }
 
+globalThis.CommonweaveOfflineCampusStatusV210=api;
 navigator.serviceWorker?.addEventListener('message',event=>{
   if(STATUS_TYPES.has(event.data?.type))render(event.data);
 });
