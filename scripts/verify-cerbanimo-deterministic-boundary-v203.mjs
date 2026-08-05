@@ -20,8 +20,8 @@ assert(boundary.includes("deterministic?.respond"),'The assistant boundary does 
 assert(consoleHtml.includes('/app/cerbanimo-deterministic-boundary-v203.js?v=provider-boundary-r1'),'The active realm console does not load the provider boundary.');
 assert(consoleHtml.indexOf('family-ai-loader-v105.js')<consoleHtml.indexOf('cerbanimo-deterministic-boundary-v203.js'),'The provider boundary must load after the shared loader.');
 assert(consoleHtml.indexOf('cerbanimo-deterministic-boundary-v203.js')<consoleHtml.indexOf('cerbanimo-ai-validator-v159.js'),'The provider boundary must load before Cerbanimo validation code.');
-assert(worker.includes("importScripts('/service-worker-critical-v199.js?v=fellowfare-active-v203')"),'The installed worker must still import the active critical coordinator.');
-assert(critical.includes("VERSION='fellowfare-active-v203-cerbanimo-boundary-v204'"),'The combined FellowFare and Cerbanimo critical revision is missing.');
+assert(worker.includes("importScripts('/service-worker-critical-v199.js?v=fellowfare-parent-mobile-v205')"),'The installed worker must still import the active critical coordinator.');
+assert(critical.includes("VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204'"),'The combined FellowFare and Cerbanimo critical revision is missing.');
 const criticalList=critical.slice(critical.indexOf('const CRITICAL_FILES=['),critical.indexOf('const CRITICAL_PATHS='));
 for(const required of [
   '/app/fellowfare-cabinet-v144.html',
@@ -94,7 +94,7 @@ assert.equal(modelCalls,1,'The model runtime remained blocked after the user exp
 console.log(JSON.stringify({
   ok:true,
   revision:'cerbanimo-deterministic-boundary-v203',
-  criticalRevision:'fellowfare-active-v203-cerbanimo-boundary-v204',
+  criticalRevision:'fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204',
   deterministicAssistantCalls:deterministicCalls,
   blockedGeminiCalls:1,
   explicitGeminiCalls:modelCalls,
