@@ -64,7 +64,7 @@ assert(imageWorker.includes("type:'COMMONWEAVE_SHARED_IMAGE_STATUS'"),'Shared im
 
 const lightweightMode=activeWorker.includes("const BUILD = 'lightweight-shell-v208'");
 if(lightweightMode){
-  assert(legacyWorker.includes("importScripts('/service-worker-v203.js?v=1.0.7-lightweight-shell-v208-legacy-v156-bridge-v209')"),'Existing v156 registrations do not bridge to the v1.0.7 direct lightweight worker.');
+  assert(legacyWorker.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'Existing v156 registrations do not retain the stable direct lightweight compatibility bridge.');
   assert(!/^[ \t]*importScripts\(/m.test(activeWorker),'The direct lightweight worker reintroduced the layered worker stack.');
   assert(activeWorker.includes('const IMAGE_EXTENSION'),'The direct worker no longer validates image responses.');
   assert(activeWorker.includes("'/service-worker-shared-images-v203.js'"),'The direct worker no longer recognizes the retired image-worker URL during updates.');
