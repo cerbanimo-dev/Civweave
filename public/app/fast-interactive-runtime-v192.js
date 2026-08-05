@@ -13,8 +13,8 @@ function install(){
     const config={...(request.config||{})};
     const provider=String(config.provider||config.route||'').toLowerCase();
     const configured=Number(config.timeoutMs)||Number(config.timeoutSeconds)*1000||0;
-    if(provider==='gemini')config.timeoutMs=Math.min(configured||10000,12000);
-    else if(provider==='hosted')config.timeoutMs=Math.min(configured||14000,18000);
+    if(provider==='gemini')config.timeoutMs=Math.min(configured||8000,10000);
+    else if(provider==='hosted')config.timeoutMs=Math.min(configured||12000,15000);
     const tokenLimit=Number(config.maxTokens||config.max_tokens)||0;
     config.maxTokens=Math.min(tokenLimit||1400,1800);
     config.stream=false;
