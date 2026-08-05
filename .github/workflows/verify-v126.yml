@@ -22,7 +22,9 @@ jobs:
       - name: Install JavaScript dependencies
         run: npm install --no-audit --no-fund
       - name: Verify deterministic AI boundary
-        run: node scripts/verify-deterministic-ai-v175.mjs
+        run: |
+          node scripts/verify-deterministic-ai-v175.mjs
+          node scripts/verify-final-settings-retirement-v177.mjs
       - name: Run repository checks
         run: npm run check
       - name: Verify instant deterministic preparation
@@ -50,23 +52,34 @@ jobs:
           set -euxo pipefail
           curl -fsS http://127.0.0.1:8787/ -o gateway.html
           grep -q 'DETERMINISTIC OFFLINE SOFTWARE PACKAGE' gateway.html
-          grep -q 'No language model is downloaded' gateway.html
+          grep -q 'one AI settings surface' gateway.html
           curl -fsS http://127.0.0.1:8787/install-v130.js -o gateway-installer.js
-          grep -q "WORKER_REVISION='device-package-r38-no-transformer'" gateway-installer.js
-          grep -q 'deterministic · no model loaded' gateway-installer.js
+          grep -q "WORKER_REVISION='device-package-r39-no-legacy-ai'" gateway-installer.js
+          grep -q "ADDITIONS_REVISION='working-campus-additions-v177-final-settings-retirement'" gateway-installer.js
+          grep -q 'one AI settings surface' gateway-installer.js
           curl -fsS http://127.0.0.1:8787/service-worker.js -o gateway-worker.js
-          grep -q "CACHE_REVISION='direct-family-r38-deterministic'" gateway-worker.js
-          grep -q "DEVICE_REVISION='device-package-r38-no-transformer'" gateway-worker.js
-          grep -q "AI_REVISION='deterministic-single-authority-v175'" gateway-worker.js
-          grep -q '/app/unified-ai-settings-v175.js' gateway-worker.js
+          grep -q "CACHE_REVISION='direct-family-r39-final-settings-retirement'" gateway-worker.js
+          grep -q "DEVICE_REVISION='device-package-r39-no-legacy-ai'" gateway-worker.js
+          grep -q "AI_REVISION='deterministic-single-authority-v177'" gateway-worker.js
+          grep -q '/app/cabinet-surfaces-v143.js' gateway-worker.js
           curl -fsS http://127.0.0.1:8787/service-worker-v156.js -o gateway-additive-worker.js
-          grep -q 'working-campus-additions-v175-deterministic-single-ai-settings' gateway-additive-worker.js
+          grep -q 'working-campus-additions-v177-final-settings-retirement' gateway-additive-worker.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/model-settings-controller-v173.js -o gateway-settings-controller.js
           grep -q 'deterministic-single-authority-controller' gateway-settings-controller.js
           grep -q '/app/unified-ai-settings-v175.js' gateway-settings-controller.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/unified-ai-settings-v175.js -o gateway-ai-settings.js
           grep -q 'Gemini API key' gateway-ai-settings.js
           grep -q 'Deterministic local mode' gateway-ai-settings.js
+          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/cabinet-surfaces-v143.js -o gateway-cabinet-surfaces.js
+          grep -q 'PLATFORM CONFIGURATION' gateway-cabinet-surfaces.js
+          grep -q 'Save platform settings' gateway-cabinet-surfaces.js
+          grep -q 'data-open-ai-settings' gateway-cabinet-surfaces.js
+          ! grep -q 'Xenova/all-MiniLM-L6-v2' gateway-cabinet-surfaces.js
+          ! grep -q "provider:'bundled'" gateway-cabinet-surfaces.js
+          ! grep -q 'Save platform and AI settings' gateway-cabinet-surfaces.js
+          curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/settings-delegation-v175.js -o gateway-settings-retirement.js
+          grep -q 'form\[data-cw143-settings\]' gateway-settings-retirement.js
+          grep -q 'migrateLegacyAI' gateway-settings-retirement.js
           curl -fsS -H 'x-commonweave-package: install' http://127.0.0.1:8787/app/family-ai-loader-v105.js -o gateway-ai-loader.js
           grep -q '/app/deterministic-mode-v175.js' gateway-ai-loader.js
           grep -q "defaultProvider:'deterministic'" gateway-ai-loader.js
@@ -98,12 +111,12 @@ jobs:
             grep -q '<script src="/app/family-shell-v104.js' "${name}.html"
           done
           curl -fsS http://127.0.0.1:8788/app/pwa-v130.js -o local-pwa.js
-          grep -q 'device-package-r38-no-transformer' local-pwa.js
+          grep -q 'device-package-r39-no-legacy-ai' local-pwa.js
       - name: Upload deterministic-startup evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: commonweave-v104-deterministic-startup-evidence
+          name: commonweave-v104-clean-settings-evidence
           path: |
             commonweave-gateway.log
             commonweave-local.log
@@ -117,5 +130,7 @@ jobs:
             gateway-additive-worker.js
             gateway-settings-controller.js
             gateway-ai-settings.js
+            gateway-cabinet-surfaces.js
+            gateway-settings-retirement.js
             gateway-ai-loader.js
             gateway-shared-tools.js
