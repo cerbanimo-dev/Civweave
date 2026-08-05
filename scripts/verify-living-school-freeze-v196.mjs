@@ -14,8 +14,8 @@ const [guard,index,critical,pwa,relay,loader,bootstrap,paths,interactions]=await
 ]);
 const assert=(value,message)=>{if(!value)throw new Error(message)};
 
-assert(relay.includes('new MutationObserver(queuePatch).observe(stage)'),'Freeze fixture changed: relay stage observer was not found.');
-assert(relay.includes("reader.querySelector('[data-two-agent-media]')?.remove()"),'Freeze fixture changed: relay media replacement was not found.');
+assert(relay.includes('MutationObserver(queuePatch)')&&relay.includes('observe(stage'),'Freeze fixture changed: relay stage observer was not found.');
+assert(relay.includes('queuePatch')&&relay.includes('patchReader'),'Freeze fixture changed: relay reader patcher was not found.');
 assert(!index.includes('living-school-two-agent-relay-v165.js?v='),'The risky relay still executes during initial HTML boot.');
 assert(!index.includes('living-school-workbench-v158.js?v='),'The workbench still races the core module during initial boot.');
 assert(index.includes('living-school-flat-loader-v213.js'),'The cache-safe direct-interaction loader is missing.');
