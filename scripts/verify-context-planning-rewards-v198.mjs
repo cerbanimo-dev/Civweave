@@ -30,6 +30,8 @@ for(const path of [learning,project,market]){
 const projectAgain=await composer.composePath({text:'build an offline neighborhood seed library app',kind:'project',semantic:false});
 assert.deepEqual(project.tasks.map(task=>task.templateId),projectAgain.tasks.map(task=>task.templateId),'deterministic fallback must be reproducible');
 assert.notDeepEqual(learning.tasks.map(task=>task.templateId),market.tasks.map(task=>task.templateId),'plan kinds must use different template pieces');
+assert.equal(composer.planKind('learn to build a game','cerbanimo'),'project','Cerbanimo paths should remain project work even when the wish includes learning');
+assert.equal(composer.planKind('learn what supplies are needed','fellowfare'),'market','FellowFare paths should remain market work even when the wish includes learning');
 
 const trivial={id:'tiny',title:'Identify the smallest task',objective:'Name it',deliverable:'one sentence',evidence:[],acceptanceCriteria:[],complexityPoints:1};
 assert.equal(policy.assessTask(trivial,{text:'done'}).eligible,false,'one-sentence farming task must be rejected');
