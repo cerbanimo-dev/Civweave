@@ -52,6 +52,8 @@ const CRITICAL_FILES=[
   '/app/model-settings-controller-v173.js',
   '/app/family-ai-loader-v105.js',
   '/app/fast-interactive-runtime-v192.js',
+  '/app/realm-console-v140.html',
+  '/app/cerbanimo-deterministic-boundary-v203.js',
   '/app/family-shell-v104.js',
   '/app/family-shell-v104.css',
   '/app/system-interface-v157.css',
