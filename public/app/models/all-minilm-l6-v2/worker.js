@@ -4,9 +4,10 @@ const ROOT='/app/models/all-minilm-l6-v2';
 const MODEL_URL=`${ROOT}/onnx/model_quantized.onnx`;
 const VOCAB_URL=`${ROOT}/vocab.txt`;
 const INDEX_URL=`${ROOT}/reflex-index.json`;
-const RUNTIME_ROOT=new URL('/app/vendor/onnxruntime/',self.location.origin).href;
 const RUNTIME_MJS='/app/vendor/onnxruntime/ort-wasm-simd-threaded.mjs';
 const RUNTIME_WASM='/app/vendor/onnxruntime/ort-wasm-simd-threaded.wasm';
+const RUNTIME_MJS_URL=new URL(RUNTIME_MJS,self.location.origin).href;
+const RUNTIME_WASM_URL=new URL(RUNTIME_WASM,self.location.origin).href;
 const MAX_TOKENS=128;
 const FIXED_PROFILE=Object.freeze({device:'wasm',dtype:'q8',runtime:'onnxruntime-web'});
 let statePromise=null;
@@ -156,9 +157,10 @@ async function load(id){
     const [runtimeModule,runtimeWasm,modelResponse,vocabResponse,indexResponse]=await Promise.all([
       verifyRuntimeAsset(RUNTIME_MJS),verifyRuntimeAsset(RUNTIME_WASM,{wasm:true}),fromDevicePackage(MODEL_URL),fromDevicePackage(VOCAB_URL),fromDevicePackage(INDEX_URL)
     ]);
-    ort.env.wasm.wasmPaths=RUNTIME_ROOT;
+    ort.env.wasm.wasmPaths={mjs:RUNTIME_MJS_URL,wasm:RUNTIME_WASM_URL};
     ort.env.wasm.proxy=false;
     ort.env.wasm.numThreads=1;
+    ort.env.wasm.initTimeout=30000;
     const modelBytes=await modelResponse.arrayBuffer();
     progress(id,{status:'session-start',...FIXED_PROFILE,modelBytes:modelBytes.byteLength});
     const session=await ort.InferenceSession.create(modelBytes,{executionProviders:['wasm'],graphOptimizationLevel:'all'});
@@ -195,11 +197,11 @@ self.addEventListener('message',async event=>{
     if(message.type==='match'){
       const vector=await embedOne(state,String(message.text||''));
       const matches=state.entries.map((entry,index)=>({id:entry.id,system:entry.system,score:cosine(vector,state.vectors[index])})).sort((a,b)=>b.score-a.score).slice(0,Math.max(1,Math.min(8,Number(message.limit||5))));
-      self.postMessage({id:message.id,type:'match',device:'wasm',dtype:'q8',matches});return;
+      self.postMessage({id:message.id,type:'match',device:'wasm',dtype:'q8',matches});return
     }
     if(message.type==='rank'){
       const matches=await rankedCandidates(message.id,state,message);
-      self.postMessage({id:message.id,type:'rank',device:'wasm',dtype:'q8',matches});return;
+      self.postMessage({id:message.id,type:'rank',device:'wasm',dtype:'q8',matches});return
     }
     throw new Error(`Unknown MiniLM worker request: ${message.type}`);
   }catch(error){self.postMessage({id:message.id,type:'error',error:serialize(error)})}
