@@ -74,7 +74,7 @@ assert(runtime.includes('previewDocument(operation)'),'The request does not gene
 assert(html.indexOf('anarchadia-change-review-v165.js')<html.indexOf('anarchadia-live-layout-v167.js'),'The local layout layer must load after the reviewed change pipeline.');
 assert(html.includes('Try: Move this chat window to the top of the page.'),'The visible Merlin prompt does not expose the supported direct command.');
 assert(html.includes('family-shell-v104.css?v=merlinites-r1')&&html.includes('family-shell-v104.js?v=merlinites-r2'),'The reconciled Anarchadia page lost the current merlinites global shell cache-bust.');
-assert(html.indexOf('model-settings-controller-v173.js')<html.indexOf('family-ai-loader-v105.js'),'Anarchadia loads chat before the direct settings controller.');
+assert(html.indexOf('<script src="/app/model-settings-controller-v173.js')<html.indexOf('<script src="/app/family-ai-loader-v105.js'),'Anarchadia loads chat before the direct settings controller.');
 assert(worker.includes("EXTENSION_VERSION='working-campus-additions-v174-settings-single-owner-assets'"),'Installed package did not rotate to the single-owner settings cutover.');
 assert(worker.includes("SETTINGS_RUNTIME_REVISION='settings-runtime-v157.2-single-owner'"),'Service worker status does not report the single-owner settings runtime.');
 assert(worker.includes('/extensions/commonweave-antigravity-live-source-guard-v167.js'),'Installed package lost the Antigravity live-source guard.');
