@@ -7,6 +7,9 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const source=await readFile(path.join(root,'public/extensions/commonweave-proof-progress-v158.js'),'utf8');
 const boundary=await readFile(path.join(root,'public/app/install-boundary-v146.js'),'utf8');
 const worker=await readFile(path.join(root,'public/service-worker-v156.js'),'utf8');
+const activeWorker=await readFile(path.join(root,'public/service-worker-v203.js'),'utf8');
+const workingCampus=await readFile(path.join(root,'public/app/working-campus-v156.html'),'utf8');
+const offlineManifest=JSON.parse(await readFile(path.join(root,'public/app/offline-package-v208.json'),'utf8'));
 const css=await readFile(path.join(root,'public/extensions/commonweave-additions-v156.css'),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
@@ -16,7 +19,20 @@ for(const token of [
   "fellowfare.mvp.state.v3","assessmentPassed","proofItems(task)","fulfilled","syncProgress"
 ])assert(source.includes(token),`Proof progress runtime is missing ${token}`);
 assert(boundary.includes('/extensions/commonweave-proof-progress-v158.js'),'Install boundary does not load the proof progress runtime.');
-assert(worker.includes('/extensions/commonweave-proof-progress-v158.js')&&worker.includes('working-campus-additions-v158-proof-progress'),'Offline extension package does not contain the proof progress runtime.');
+
+const lightweightMode=worker.includes('legacy-v156-bridge-v209');
+if(lightweightMode){
+  assert(worker.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'Legacy registrations do not reach the active lightweight worker.');
+  assert(activeWorker.includes("const BUILD = 'lightweight-shell-v208'"),'The active worker is not the lightweight shell.');
+  assert(activeWorker.includes('discoverReferences'),'The offline campus worker no longer discovers dependencies from seed pages.');
+  assert(activeWorker.includes('DOWNLOAD_OFFLINE_PACKAGE'),'The offline campus worker no longer exposes resumable hydration.');
+  assert(offlineManifest.revision==='resumable-discovered-campus-v208','The resumable campus manifest revision changed unexpectedly.');
+  assert(offlineManifest.seeds.includes('/app/working-campus-v156.html'),'The offline campus no longer seeds the working campus.');
+  assert(offlineManifest.includePrefixes.includes('/extensions/'),'The offline campus excludes extension runtimes from discovery.');
+  assert(workingCampus.includes('/app/install-boundary-v146.js'),'The working campus no longer reaches the install boundary that loads proof progress.');
+}else{
+  assert(worker.includes('/extensions/commonweave-proof-progress-v158.js')&&worker.includes('working-campus-additions-v158-proof-progress'),'Offline extension package does not contain the proof progress runtime.');
+}
 assert(css.includes('.step[data-proof-state]')&&css.includes('pointer-events:none'),'Read-only checkpoint styling is missing.');
 
 class MemoryStorage{
@@ -85,4 +101,11 @@ assert(intention.done===true&&intention.state==='completed','Canonical intention
 const inbox=JSON.parse(localStorage.getItem('commonweave.realm-inbox.v1'));
 assert(inbox.every(row=>row.status==='completed'),'Realm handoffs were not updated from proof completion.');
 
-console.log(JSON.stringify({ok:true,manualToggle:'blocked-and-scrubbed',completionAuthority:'accepted-realm-proof',realms:['living-school','cerbanimo','fellowfare'],planState:campus.plan.state},null,2));
+console.log(JSON.stringify({
+  ok:true,
+  manualToggle:'blocked-and-scrubbed',
+  completionAuthority:'accepted-realm-proof',
+  realms:['living-school','cerbanimo','fellowfare'],
+  planState:campus.plan.state,
+  offlinePackageMode:lightweightMode?'resumable-discovered-campus-v208':'layered-extension-package-v158'
+},null,2));
