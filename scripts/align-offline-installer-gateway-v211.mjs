@@ -30,7 +30,11 @@ const [gateway, verifier] = await Promise.all([
   readFile('server-gateway-v131.mjs', 'utf8'),
   readFile('scripts/verify-knowledge-school-seeds-v1.mjs', 'utf8')
 ]);
-for (const route of ['/app/offline-package-v208.json', '/app/offline-campus-status-v210.js']) {
+const installerAssets = [
+  '/app/offline-package-v208.json',
+  '/app/offline-campus-status-v210.js'
+];
+for (const route of installerAssets) {
   if (!gateway.includes(`pathname === '${route}'`)) throw new Error(`Render installer allow-list is missing ${route}`);
 }
 if (verifier.includes('app installer update revision')) {
@@ -41,9 +45,6 @@ console.log(JSON.stringify({
   revision: 'offline-installer-gateway-v211',
   gatewayChanged,
   verifierChanged,
-  verified: true,
-  installerAssets: [
-    '/app/offline-package-v208.json',
-    '/app/offline-campus-status-v210.js'
-  ]
+  materializedAndVerified: true,
+  installerAssets
 }, null, 2));
