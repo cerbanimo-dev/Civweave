@@ -24,11 +24,13 @@ for(const [name,source] of [['critical worker',critical],['shared image worker',
   try{new Function(source)}catch(error){throw new Error(`${name} does not parse: ${error.message}`)}
 }
 
-assert(critical.includes("VERSION='living-school-flat-core-v203'"),'The v203 flat critical core is not active.');
+assert(critical.includes("VERSION='fellowfare-active-v203-cerbanimo-boundary-v204'"),'The combined v204 critical core is not active.');
+assert(critical.includes("CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-cerbanimo-boundary-v204'"),'The combined critical cache is not active.');
 assert(critical.includes('BASE_EXPECTED_FILES=111'),'The 111-file core package boundary changed unexpectedly.');
 assert(critical.includes('EXTENSION_EXPECTED_FILES=53'),'The 53-file shared package boundary changed unexpectedly.');
 assert(critical.includes('runCaptured(event)'),'Incomplete packages no longer replay the complete installers.');
 assert(critical.includes("mode:'flat'"),'Critical status no longer identifies the flat interface.');
+assert(critical.includes('self.CommonweaveCriticalBootV204=api'),'The combined critical API alias is missing.');
 
 const essential=[
   '/app/assets/ai/moss-acorn.png',
@@ -44,6 +46,14 @@ for(const pathname of essential){
   assert(critical.includes(pathname),`Legacy worker repair path omits ${pathname}.`);
   assert(shell.includes(pathname),`Living School does not request ${pathname} during initial parsing.`);
 }
+for(const pathname of [
+  '/app/fast-interactive-runtime-v192.js',
+  '/app/fellowfare-cabinet-v144.html',
+  '/app/fellowfare-cabinet-v144.css',
+  '/app/services/fellowfare/cabinet-embed.css',
+  '/app/realm-console-v140.html',
+  '/app/cerbanimo-deterministic-boundary-v203.js'
+])assert(critical.includes(pathname),`Combined critical refresh omits ${pathname}.`);
 assert(imageWorker.includes("event.stopImmediatePropagation()"),'Shared images are not protected from the generic /app fetch route.');
 assert(imageWorker.includes("type:'COMMONWEAVE_SHARED_IMAGE_STATUS'"),'Shared image readiness is not inspectable.');
 assert(wrapper.indexOf('service-worker-shared-images-v203.js')<wrapper.indexOf('service-worker-v156.js'),'The image repair lane must register before the generic package worker.');
@@ -77,6 +87,7 @@ assert(pwa.includes("WORKER_URL=`/service-worker-v203.js"),'The installed app do
 console.log(JSON.stringify({
   ok:true,
   repair:'flat-living-school-v203',
+  combinedCritical:'fellowfare-active-v203-cerbanimo-boundary-v204',
   coreBoundary:111,
   sharedBoundary:53,
   flatContentPreserved:true,
@@ -85,5 +96,7 @@ console.log(JSON.stringify({
   topAiMarks:2,
   sharedImageLane:true,
   legacyImageRepair:true,
+  fellowFareRefresh:true,
+  cerbanimoBoundaryRefresh:true,
   spatialMode:false,
 },null,2));

@@ -1,12 +1,11 @@
 'use strict';
 (()=>{
-const VERSION='living-school-flat-core-v203';
-// Compatibility marker: living-school-lesson-nav-v202-fast-runtime-proxy
-if(self.CommonweaveCriticalBootV203)return;
+const VERSION='fellowfare-active-v203-cerbanimo-boundary-v204';
+if(self.CommonweaveCriticalBootV204)return;
 const nativeAddEventListener=self.addEventListener;
 const capturedInstallListeners=[];
 const updating=Boolean(self.registration?.active);
-const CRITICAL_CACHE='cwboot-critical-living-school-flat-v203';
+const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-cerbanimo-boundary-v204';
 const BASE_CACHE='commonweave-static-1.0.6-direct-family-r45-memory-credential-v191-five-system-chat-r46-weaveling-memory-direct-software-r38-v106-device-package-r41-no-native-dialog-direct-entry-r45-memory-credential-v191';
 const EXTENSION_CACHE='cwext-working-campus-additions-v197-assistant-runtime-package';
 const BASE_EXPECTED_FILES=111;
@@ -31,22 +30,10 @@ const CRITICAL_FILES=[
   '/app/services/living-school/modules/rubric-engine.mjs',
   '/app/services/living-school/modules/project-gate.mjs',
   '/app/services/living-school/modules/cerbanimo-bridge.mjs',
+  '/app/fellowfare-cabinet-v144.html',
+  '/app/fellowfare-cabinet-v144.css',
+  '/app/services/fellowfare/cabinet-embed.css',
   '/app/themed-system-nav-v178.js',
-  '/app/assets/ai/weaveling-compass.png',
-  '/app/assets/ai/moss-acorn.png',
-  '/app/assets/ai/kamiya-gift.png',
-  '/app/assets/ai/rook-coin-button.png',
-  '/app/assets/ai/merlin-hat.png',
-  '/app/assets/ai/weaveling.png',
-  '/app/assets/ai/moss.png',
-  '/app/assets/ai/kamiya.png',
-  '/app/assets/ai/rook.png',
-  '/app/assets/ai/merlin.png',
-  '/app/assets/navigation/200-commonweave-nav.webp',
-  '/app/assets/navigation/200-cerbanimo-nav.webp',
-  '/app/assets/navigation/200-living-school-nav.webp',
-  '/app/assets/navigation/200-fellowfare-nav.webp',
-  '/app/assets/navigation/200-anarchadia-nav.webp',
   '/app/install-boundary-v146.js',
   '/app/local-first-policy-v131.js',
   '/app/platform-stability-v159.js','/app/platform-stability-v159.css',
@@ -54,13 +41,22 @@ const CRITICAL_FILES=[
   '/app/model-settings-controller-v173.js',
   '/app/family-ai-loader-v105.js',
   '/app/fast-interactive-runtime-v192.js',
+  '/app/realm-console-v140.html',
+  '/app/cerbanimo-deterministic-boundary-v203.js',
   '/app/family-shell-v104.js','/app/family-shell-v104.css',
   '/app/system-interface-v157.css',
   '/app/local-rails-validator-v170.js',
   '/app/mobile-regression-v170.js','/app/mobile-regression-v170.css',
   '/app/merlinites-semantic-planner-v164.js',
   '/app/pwa-v130.js',
-  '/extensions/commonweave-antigravity-live-source-guard-v167.js'
+  '/extensions/commonweave-antigravity-live-source-guard-v167.js',
+  '/app/assets/ai/moss-acorn.png',
+  '/app/assets/ai/weaveling-compass.png',
+  '/app/assets/navigation/200-commonweave-nav.webp',
+  '/app/assets/navigation/200-cerbanimo-nav.webp',
+  '/app/assets/navigation/200-living-school-nav.webp',
+  '/app/assets/navigation/200-fellowfare-nav.webp',
+  '/app/assets/navigation/200-anarchadia-nav.webp'
 ];
 const CRITICAL_PATHS=new Set(CRITICAL_FILES);
 let finalized=false;
@@ -116,8 +112,7 @@ async function criticalResponse(request){
   let response=await cache.match(pathname,{ignoreSearch:true,ignoreMethod:true});
   if(!response||wrongMime(response,pathname))response=await network(request)||await named(BASE_CACHE,pathname)||await named(EXTENSION_CACHE,pathname)||await caches.match(pathname,{ignoreSearch:true,ignoreMethod:true});
   if(response&&!wrongMime(response,pathname)){if(request.method==='GET')await cache.put(pathname,response.clone());return request.method==='HEAD'?head(response):response}
-  const image=/\.(?:png|webp|jpe?g|gif|svg|avif)$/i.test(pathname);
-  return new Response(image?'<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" rx="14" fill="#10251d"/><path d="M20 72l22-27 18 20 13-14 16 21z" fill="#8db66f"/></svg>':`Flat Living School core asset unavailable: ${pathname}`,{status:503,headers:{'content-type':image?'image/svg+xml':'text/plain; charset=utf-8','cache-control':'no-store','x-commonweave-critical-boot':VERSION}});
+  return new Response(`Flat Living School core asset unavailable: ${pathname}`,{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-commonweave-critical-boot':VERSION}});
 }
 nativeAddEventListener.call(self,'fetch',event=>{
   const request=event.request;if(!['GET','HEAD'].includes(request.method))return;
@@ -136,9 +131,9 @@ function finalize(){
   })()));
   nativeAddEventListener.call(self,'message',event=>{
     if(event.data?.type!=='GET_CRITICAL_BOOT_STATUS')return;
-    event.waitUntil((async()=>{const cache=await caches.open(CRITICAL_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=CRITICAL_FILES.filter(path=>!present.has(path)),full=await fullPackageStatus(),packet={type:'COMMONWEAVE_CRITICAL_BOOT_STATUS',version:VERSION,mode:'flat',fastRuntimeProxy:true,updateInstall:updating,capturedInstallListeners:capturedInstallListeners.length,cache:CRITICAL_CACHE,ready:missing.length===0&&full.ready,present:CRITICAL_FILES.length-missing.length,total:CRITICAL_FILES.length,missing,fullPackage:full,essentialImages:15};event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)})());
+    event.waitUntil((async()=>{const cache=await caches.open(CRITICAL_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=CRITICAL_FILES.filter(path=>!present.has(path)),full=await fullPackageStatus(),packet={type:'COMMONWEAVE_CRITICAL_BOOT_STATUS',version:VERSION,mode:'flat',updateInstall:updating,capturedInstallListeners:capturedInstallListeners.length,cache:CRITICAL_CACHE,ready:missing.length===0&&full.ready,present:CRITICAL_FILES.length-missing.length,total:CRITICAL_FILES.length,missing,fullPackage:full};event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)})());
   });
 }
-const api={version:VERSION,mode:'flat',fastRuntimeProxy:true,cache:CRITICAL_CACHE,paths:CRITICAL_FILES.slice(),updating,capturedInstallListeners,finalize,fullPackageStatus};
-self.CommonweaveCriticalBootV199=api;self.CommonweaveCriticalBootV200=api;self.CommonweaveCriticalBootV201=api;self.CommonweaveCriticalBootV202=api;self.CommonweaveCriticalBootV203=api;
+const api={version:VERSION,mode:'flat',cache:CRITICAL_CACHE,paths:CRITICAL_FILES.slice(),updating,capturedInstallListeners,finalize,fullPackageStatus};
+self.CommonweaveCriticalBootV199=api;self.CommonweaveCriticalBootV200=api;self.CommonweaveCriticalBootV201=api;self.CommonweaveCriticalBootV202=api;self.CommonweaveCriticalBootV203=api;self.CommonweaveCriticalBootV204=api;
 })();
