@@ -57,7 +57,7 @@ function naturalHeight(doc){
 }
 
 function markMobileNode(node){
-  if(!node)return;
+  if(!node||node.dataset.ffcParentMobileNode==='true')return;
   node.dataset.ffcParentMobileNode='true';
   node.style.setProperty('height','auto','important');
   node.style.setProperty('min-height','0','important');
@@ -69,17 +69,17 @@ function markMobileNode(node){
 function prepareInnerMobile(doc){
   const root=doc.documentElement;
   const body=doc.body;
-  root?.setAttribute('data-ffc-parent-mobile-flow','true');
+  if(root?.getAttribute('data-ffc-parent-mobile-flow')!=='true')root?.setAttribute('data-ffc-parent-mobile-flow','true');
   markMobileNode(root);
   markMobileNode(body);
-  if(root)root.style.setProperty('overscroll-behavior-y','auto','important');
+  if(root&&root.style.getPropertyValue('overscroll-behavior-y')!=='auto')root.style.setProperty('overscroll-behavior-y','auto','important');
   if(body){
-    body.style.setProperty('overscroll-behavior-y','auto','important');
-    body.style.setProperty('touch-action','pan-y','important');
+    if(body.style.getPropertyValue('overscroll-behavior-y')!=='auto')body.style.setProperty('overscroll-behavior-y','auto','important');
+    if(body.style.getPropertyValue('touch-action')!=='pan-y')body.style.setProperty('touch-action','pan-y','important');
   }
   doc.querySelectorAll(INNER_LAYOUT_SELECTOR).forEach(markMobileNode);
   const localNav=doc.querySelector('.bottom-nav');
-  if(localNav){
+  if(localNav&&localNav.dataset.ffcParentMobileNode!=='true'){
     localNav.dataset.ffcParentMobileNode='true';
     localNav.style.setProperty('display','none','important');
   }
@@ -141,7 +141,7 @@ iframe?.addEventListener('load',bindInner);
 mobileQuery.addEventListener?.('change',()=>{bindInner();settle()});
 addEventListener('resize',settle,{passive:true});
 addEventListener('orientationchange',settle,{passive:true});
-visualViewport?.addEventListener('resize',settle,{passive:true});
+globalThis.visualViewport?.addEventListener('resize',settle,{passive:true});
 document.addEventListener('click',event=>{
   if(event.target.closest?.('[data-ffc-command], [data-ffc-rook-action], .ffc144-frame button, .ffc144-frame a'))settle();
 },true);
