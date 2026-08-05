@@ -15,15 +15,15 @@ const workbench=read('public/app/cabinets/living-school/living-school-workbench-
 const installer=read('public/install-v130.js');
 const pwa=read('public/app/pwa-v130.js');
 
-const criticalRevision=worker.includes("VERSION='fellowfare-active-v203-fast-runtime-proxy'")
-  ?'fellowfare-active-v203-fast-runtime-proxy'
-  :worker.includes("VERSION='living-school-lesson-nav-v202-fast-runtime-proxy'")
-    ?'living-school-lesson-nav-v202-fast-runtime-proxy'
-    :'';
+const recognizedRevisions=[
+  'fellowfare-active-v203-cerbanimo-boundary-v204',
+  'fellowfare-active-v203-fast-runtime-proxy',
+  'living-school-lesson-nav-v202-fast-runtime-proxy',
+];
+const criticalRevision=recognizedRevisions.find(revision=>worker.includes(`VERSION='${revision}'`))||'';
 assert(criticalRevision,'No recognized v202+ critical worker revision is active.');
 assert(
-  worker.includes("CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-fast-runtime-proxy'")||
-  worker.includes("CRITICAL_CACHE='cwboot-critical-living-school-v202-fast-runtime-proxy'"),
+  recognizedRevisions.some(revision=>worker.includes(`CRITICAL_CACHE='cwboot-critical-${revision}'`)),
   'The critical cache did not rotate for a recognized repaired runtime.'
 );
 assert(worker.includes('BASE_EXPECTED_FILES=111'),'The 111-file core package boundary changed unexpectedly.');
@@ -40,6 +40,12 @@ if(criticalRevision.startsWith('fellowfare-active-v203')){
     '/app/services/fellowfare/cabinet-embed.css',
     '/app/themed-system-nav-v178.js'
   ])assert(criticalList.includes(pathname),`Active FellowFare package path is missing from critical refresh: ${pathname}`);
+}
+if(criticalRevision.includes('cerbanimo-boundary')){
+  for(const pathname of [
+    '/app/realm-console-v140.html',
+    '/app/cerbanimo-deterministic-boundary-v203.js'
+  ])assert(criticalList.includes(pathname),`Cerbanimo deterministic boundary path is missing from critical refresh: ${pathname}`);
 }
 assert((nav.match(/200-[a-z-]+-nav\.webp/g)||[]).length===5,'The shared family navigation does not reference all five image buttons.');
 assert(nav.includes('grid-template-columns:repeat(5'),'The family navigation is not mounted as five equal button slots.');
@@ -64,5 +70,6 @@ console.log(JSON.stringify({
   navigationImagesOutsideCriticalLane:true,
   fastRuntimeCritical:true,
   activeFellowfareCritical:criticalRevision.startsWith('fellowfare-active-v203'),
+  cerbanimoBoundaryCritical:criticalRevision.includes('cerbanimo-boundary'),
   legacyTrayHidden:true,
 },null,2));
