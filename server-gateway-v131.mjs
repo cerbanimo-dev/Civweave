@@ -14,6 +14,11 @@ function replaceRequired(before, after, label) {
   source = source.replace(before, after);
 }
 
+replaceRequired(
+  "import { fileURLToPath } from 'node:url';",
+  "import { fileURLToPath } from 'node:url';\nimport { AiWalletService } from './lib/ai-wallet-service-v1.mjs';\nimport { createAiWalletHttpHandler } from './lib/ai-wallet-http-v1.mjs';",
+  'hosted AI wallet imports'
+);
 replaceRequired("const BUILD_VERSION = '1.0.21-ai-uplift';", `const BUILD_VERSION = '${BUILD}';`, 'host build marker');
 replaceRequired("const APP_VERSION = 'rc22.3.20-ai-checkpoint';", `const APP_VERSION = '${VERSION}';`, 'app version marker');
 replaceRequired(
@@ -30,6 +35,38 @@ replaceRequired(
   "    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Commonweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Commonweave host-node and offline PWA release.'",
   "    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: COMMONWEAVE_SOURCE_URL,\n    downloadUrl: COMMONWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin distributes the lean v1.0.4 software package. Commonweave runs from the installed full-screen family.'",
   'release packet hosting fields'
+);
+replaceRequired(
+  "} catch (error) {\n  if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);\n}",
+  String.raw`} catch (error) {
+  if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);
+}
+
+const AI_WALLET_REQUESTED = process.env.AI_WALLET_ENABLED === '1';
+const AI_WALLET_CAPABILITY_SECRET = String(process.env.AI_WALLET_CAPABILITY_SECRET || '').trim();
+const AI_WALLET_AUTH_SECRET = String(process.env.AI_WALLET_AUTH_SECRET || '').trim();
+const AI_WALLET_PAYMENT_SECRET = String(process.env.AI_WALLET_PAYMENT_SECRET || '').trim();
+const AI_WALLET_INTERNAL_SECRET = String(process.env.AI_WALLET_INTERNAL_SECRET || '').trim();
+let aiWalletService = null;
+if (AI_WALLET_REQUESTED) {
+  try {
+    aiWalletService = await new AiWalletService({
+      filePath: path.join(DATA_DIR, 'ai-wallet-ledger-v1.json'),
+      capabilitySecret: AI_WALLET_CAPABILITY_SECRET
+    }).load();
+  } catch (error) {
+    console.error('[Commonweave] Hosted AI wallet stayed disabled:', error.message);
+  }
+}
+const aiWalletHttp = createAiWalletHttpHandler({
+  walletService: aiWalletService,
+  requested: AI_WALLET_REQUESTED,
+  authSecret: AI_WALLET_AUTH_SECRET,
+  paymentSecret: AI_WALLET_PAYMENT_SECRET,
+  internalSecret: AI_WALLET_INTERNAL_SECRET,
+  capabilitySecret: AI_WALLET_CAPABILITY_SECRET
+});`,
+  'host state restore and AI wallet setup'
 );
 replaceRequired(
   "  const pathname = decodeURIComponent(url.pathname);",
@@ -108,14 +145,39 @@ replaceRequired(
   'request pathname declaration'
 );
 replaceRequired(
+  "        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-commonweave-hub-token', 'access-control-allow-methods': 'GET,POST,OPTIONS' });",
+  "        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-commonweave-hub-token, x-commonweave-ai-capability, x-commonweave-internal-secret, x-commonweave-payment-signature', 'access-control-allow-methods': 'GET,POST,OPTIONS' });",
+  'AI wallet CORS headers'
+);
+replaceRequired(
+  "      res.setHeader('access-control-allow-origin', '*');\n      if (!authorized(req)",
+  "      res.setHeader('access-control-allow-origin', '*');\n      if (await aiWalletHttp.handle(req, res, url)) return;\n      if (!authorized(req)",
+  'AI wallet route boundary'
+);
+replaceRequired(
   "appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Commonweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/commonweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download']",
   "appUrl: null, installUrl: `${requestOrigin(req, url)}/`, sourceUrl: COMMONWEAVE_SOURCE_URL, downloadUrl: COMMONWEAVE_RELEASE_URL, seedUrl: null, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising']",
   'public config hosting fields'
 );
 replaceRequired(
+  "features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising'] });",
+  "features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising','hosted-ai-wallet-foundation'], aiWallet: aiWalletHttp.status() });",
+  'public AI wallet status'
+);
+replaceRequired(
+  "persistence: STATE_FILE });",
+  "persistence: STATE_FILE, aiWallet: aiWalletHttp.status() });",
+  'health AI wallet status'
+);
+replaceRequired(
   "    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/commonweave-icon-32.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }",
   "    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/commonweave-icon-192.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }",
   'favicon route'
+);
+replaceRequired(
+  "  try { await fsp.writeFile(STATE_FILE, JSON.stringify(state, null, 2)); } catch {}\n  process.exit(0);",
+  "  try { await fsp.writeFile(STATE_FILE, JSON.stringify(state, null, 2)); } catch {}\n  try { await aiWalletService?.flush?.(); } catch {}\n  process.exit(0);",
+  'AI wallet shutdown flush'
 );
 
 await fsp.writeFile(runtimePath, source, 'utf8');
