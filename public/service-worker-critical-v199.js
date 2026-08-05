@@ -1,12 +1,12 @@
 'use strict';
 (()=>{
-const VERSION='living-school-lesson-nav-v201';
-if(self.CommonweaveCriticalBootV201)return;
+const VERSION='living-school-lesson-nav-v202-fast-runtime-proxy';
+if(self.CommonweaveCriticalBootV202)return;
 
 const nativeAddEventListener=self.addEventListener;
 const capturedInstallListeners=[];
 const updating=Boolean(self.registration?.active);
-const CRITICAL_CACHE='cwboot-critical-living-school-v201';
+const CRITICAL_CACHE='cwboot-critical-living-school-v202-fast-runtime-proxy';
 const BASE_CACHE='commonweave-static-1.0.6-direct-family-r45-memory-credential-v191-five-system-chat-r46-weaveling-memory-direct-software-r38-v106-device-package-r41-no-native-dialog-direct-entry-r45-memory-credential-v191';
 const EXTENSION_CACHE='cwext-working-campus-additions-v197-assistant-runtime-package';
 const BASE_EXPECTED_FILES=111;
@@ -51,6 +51,7 @@ const CRITICAL_FILES=[
   '/app/platform-experience-v160.css',
   '/app/model-settings-controller-v173.js',
   '/app/family-ai-loader-v105.js',
+  '/app/fast-interactive-runtime-v192.js',
   '/app/family-shell-v104.js',
   '/app/family-shell-v104.css',
   '/app/system-interface-v157.css',
@@ -218,4 +219,5 @@ const api={version:VERSION,cache:CRITICAL_CACHE,paths:CRITICAL_FILES.slice(),upd
 self.CommonweaveCriticalBootV199=api;
 self.CommonweaveCriticalBootV200=api;
 self.CommonweaveCriticalBootV201=api;
+self.CommonweaveCriticalBootV202=api;
 })();
