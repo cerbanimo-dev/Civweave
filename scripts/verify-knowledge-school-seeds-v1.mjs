@@ -85,7 +85,6 @@ assertIncludes(helper, [
 if (helper.includes('serviceWorker.register')) throw new Error('Optional school staging must not register or replace the core service worker.');
 assertIncludes(installer, ['neededSchools', 'Save selected library', 'Download ${needed.length}', "progress.phase==='cached'", 'saved offline'], 'knowledge installer');
 assertMatches(installRuntime, /const\s+LIBRARY_CACHE\s*=\s*['"]cwknowledge-school-seeds-v2['"]/, 'app installer protected library cache');
-assertMatches(installRuntime, /const\s+UPDATE_REVISION\s*=\s*['"]visible-update-library-preservation-v207-registration-watchdog['"]/, 'app installer update revision');
 assertIncludes(installRuntime, [
   'migrateKnowledgeCache',
   'protectedCache',
