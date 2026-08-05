@@ -11,16 +11,18 @@ const criticalSource=read('public/service-worker-critical-v199.js');
 const installer=read('public/install-v130.js');
 const pwa=read('public/app/pwa-v130.js');
 
-assert(workerSource.includes("importScripts('/service-worker-critical-v199.js')"),'The main worker no longer imports the critical package coordinator.');
-assert(workerSource.includes('CommonweaveCriticalBootV199?.finalize()'),'The main worker no longer finalizes the critical package coordinator.');
-assert(criticalSource.includes("VERSION='critical-package-completion-v200'"),'Critical package completion v200 is not active.');
+assert(/importScripts\('\/service-worker-critical-v199\.js(?:\?[^']+)?'\)/.test(workerSource),'The main worker no longer imports the critical package coordinator.');
+assert(/(?:CommonweaveCriticalBootV201\|\|self\.CommonweaveCriticalBootV199|CommonweaveCriticalBootV199).*finalize\(\)/.test(workerSource),'The main worker no longer finalizes the critical package coordinator.');
+assert(criticalSource.includes("VERSION='critical-package-completion-v201-fast-runtime-proxy'"),'Critical package completion v201 is not active.');
+assert(criticalSource.includes("CRITICAL_CACHE='cwboot-critical-fast-runtime-v201'"),'Critical package completion did not rotate its cache.');
+assert(criticalSource.includes("'/app/fast-interactive-runtime-v192.js'"),'Critical package completion does not refresh the corrected fast runtime.');
 assert(criticalSource.includes('runCapturedInstallListeners(event)'),'Captured full-package installers are not replayed when caches are incomplete.');
 assert(criticalSource.includes('BASE_EXPECTED_FILES=111'),'The base package completeness boundary changed unexpectedly.');
 assert(criticalSource.includes('EXTENSION_EXPECTED_FILES=53'),'The shared package completeness boundary changed unexpectedly.');
 assert(installer.includes("key.startsWith('cwboot-')"),'Reset does not clear the critical boot cache.');
-assert(installer.includes('critical-package-completion-v200'),'Installer does not request the corrected worker build.');
+assert(installer.includes('critical-package-completion-v200'),'Installer does not request a critical-package-aware worker build.');
 assert(installer.includes('GET_CRITICAL_BOOT_STATUS'),'Installer does not verify the critical and full package together.');
-assert(pwa.includes('critical-package-completion-v200'),'Installed app does not request the corrected worker build.');
+assert(pwa.includes('critical-package-completion-v200'),'Installed app does not request a critical-package-aware worker build.');
 
 function makeRuntime({preloadComplete=false}={}){
   const origin='https://commonweave.test';
@@ -121,14 +123,15 @@ const existing=makeRuntime({preloadComplete:true});
 await existing.run();
 const existingCritical=await existing.message('GET_CRITICAL_BOOT_STATUS');
 assert(existingCritical?.ready===true,'Complete existing package was not preserved.');
-assert(existing.fetchCount===existing.self.CommonweaveCriticalBootV200.paths.length,'Complete package update unnecessarily rebuilt the full cache instead of refreshing only critical files.');
+assert(existing.fetchCount===existing.self.CommonweaveCriticalBootV201.paths.length,'Complete package update unnecessarily rebuilt the full cache instead of refreshing only critical files.');
 
 console.log(JSON.stringify({
   ok:true,
-  repair:'critical-package-completion-v200',
+  repair:'critical-package-completion-v201-fast-runtime-proxy',
   freshCoreFiles:critical.fullPackage.baseCount,
   freshSharedFiles:critical.fullPackage.extensionCount,
   freshCriticalFiles:critical.present,
   existingPackageNetworkFetches:existing.fetchCount,
+  fastRuntimeCritical:true,
   resetClearsCriticalCache:true,
 },null,2));
