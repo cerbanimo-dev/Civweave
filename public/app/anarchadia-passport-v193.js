@@ -165,7 +165,7 @@ function sync(){
 }
 function openLedger(){globalThis.AnarchadiaCitizenConsoleV158?.setScreen?.('ledger')}
 function bind(){
-  document.querySelector('[data-passport-refresh]')?.addEventListener('click',sync);
+  document.querySelectorAll('[data-passport-refresh]').forEach(button=>button.addEventListener('click',sync));
   document.querySelector('[data-passport-ledger]')?.addEventListener('click',openLedger);
   addEventListener('storage',event=>{if(Object.values(KEYS).includes(event.key))queueRender()});
   for(const name of WATCHED_EVENTS)addEventListener(name,queueRender);
