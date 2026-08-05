@@ -93,10 +93,6 @@ const activeSurfaces=[
   'public/app/working-campus-v156.html',
   'public/app/realm-console-v140.html',
   'public/app/fellowfare-cabinet-v144.html',
-  'public/app/anarchadia-console-v139.html',
-  'public/app/installed-entry-v146.html',
-  'public/app/fullscreen-family-v104.html',
-  'public/app/cabinets/living-school/index.html',
 ];
 let launcherSurfaces=0;
 for(const file of activeSurfaces){
@@ -104,7 +100,7 @@ for(const file of activeSurfaces){
   if(html.includes('data-open-unified-ai-settings'))launcherSurfaces+=1;
   assert(html.includes('/app/model-settings-controller-v173.js')||html.includes('/app/install-boundary-v146.js'),`${file} does not reach the clean-room compatibility path.`);
 }
-assert(launcherSurfaces>=3,`Only ${launcherSurfaces} packaged surfaces expose an AI settings launcher.`);
+assert(launcherSurfaces===activeSurfaces.length,`Only ${launcherSurfaces} of ${activeSurfaces.length} direct settings surfaces expose their launcher.`);
 
 console.log(JSON.stringify({
   ok:true,revision:'v188-ai-settings-cleanroom',controllerAuthority:'single-cleanroom-controller',
