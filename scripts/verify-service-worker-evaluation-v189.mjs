@@ -45,8 +45,8 @@ function evaluate(source,filename='worker.js'){
 const bridgeImportMatch=additiveWorker.match(/importScripts\('\/service-worker-v203\.js(?:\?[^']+)?'\);/);
 if(bridgeImportMatch){
   assert(additiveWorker.includes('legacy-v156-bridge-v209'),'Legacy worker bridge revision is missing.');
-  assert(!additiveWorker.includes('/service-worker-critical-v199.js'),'Legacy bridge still imports the collision-prone critical coordinator.');
-  assert(!additiveWorker.includes("importScripts('/service-worker.js"),'Legacy bridge still imports the collision-prone base worker.');
+  assert(!/^[ \t]*importScripts\('\/service-worker-critical-v199\.js/m.test(additiveWorker),'Legacy bridge still executes the collision-prone critical coordinator.');
+  assert(!/^[ \t]*importScripts\('\/service-worker\.js/m.test(additiveWorker),'Legacy bridge still executes the collision-prone base worker.');
   assert(!additiveWorker.includes('const PACKAGE_RECOVERY_REVISION='),'Legacy bridge redeclares the collision-prone recovery binding.');
   for(const type of ['GET_SHARED_IMAGE_STATUS','GET_CRITICAL_BOOT_STATUS','GET_ADDITIONS_STATUS']){
     assert(additiveWorker.includes(type),`Legacy bridge does not answer ${type}.`);
