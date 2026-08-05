@@ -6,3 +6,4 @@ retry: patch-generator-syntax-fixed
 retry2: multiline-smoke-assertion-aligned
 retry3: multiline-update-ready-assertions-aligned
 retry4: recovery-pause-simulation-aligned
+retry5: browser-user-agent-mock-complete
