@@ -24,13 +24,17 @@ jobs:
       - name: Syntax check diagnostic delivery
         run: |
           node --check public/app/settings-delegation-v175.js
+          node --check public/service-worker.js
           node --check public/service-worker-v156.js
           node --check public/install-v130.js
           node --check public/app/pwa-v130.js
           node --check public/app/install-boundary-v146.js
           node --check scripts/verify-settings-diagnostics-v183.mjs
+          node --check scripts/verify-device-package-self-heal-v184.mjs
       - name: Verify reusable settings log levels
         run: node scripts/verify-settings-diagnostics-v183.mjs
+      - name: Verify installed package self-repair
+        run: node scripts/verify-device-package-self-heal-v184.mjs
       - name: Verify existing settings boundaries
         run: |
           node scripts/verify-ai-settings-self-contained-v181.mjs
