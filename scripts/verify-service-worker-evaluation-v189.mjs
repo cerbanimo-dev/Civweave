@@ -4,9 +4,10 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const [baseWorker,additiveWorker]=await Promise.all([
+const [baseWorker,additiveWorker,lightweightWorker]=await Promise.all([
   readFile(path.join(root,'public/service-worker.js'),'utf8'),
   readFile(path.join(root,'public/service-worker-v156.js'),'utf8'),
+  readFile(path.join(root,'public/service-worker-v203.js'),'utf8'),
 ]);
 const assert=(condition,message)=>{if(!condition)throw new Error(message);};
 
@@ -39,6 +40,44 @@ function evaluate(source,filename='worker.js'){
   }catch(error){
     return{error,listeners};
   }
+}
+
+const bridgeImportMatch=additiveWorker.match(/importScripts\('\/service-worker-v203\.js(?:\?[^']+)?'\);/);
+if(bridgeImportMatch){
+  assert(additiveWorker.includes('legacy-v156-bridge-v209'),'Legacy worker bridge revision is missing.');
+  assert(!additiveWorker.includes('/service-worker-critical-v199.js'),'Legacy bridge still imports the collision-prone critical coordinator.');
+  assert(!additiveWorker.includes("importScripts('/service-worker.js"),'Legacy bridge still imports the collision-prone base worker.');
+  assert(!additiveWorker.includes('const PACKAGE_RECOVERY_REVISION='),'Legacy bridge redeclares the collision-prone recovery binding.');
+  for(const type of ['GET_SHARED_IMAGE_STATUS','GET_CRITICAL_BOOT_STATUS','GET_ADDITIONS_STATUS']){
+    assert(additiveWorker.includes(type),`Legacy bridge does not answer ${type}.`);
+  }
+  assert(/lightweight-shell-v208/.test(lightweightWorker),'Legacy bridge target is not the lightweight shell worker.');
+  assert(!/importScripts\(/.test(lightweightWorker),'Lightweight shell worker unexpectedly imports the layered worker stack.');
+
+  const bridgeBody=additiveWorker.replace(bridgeImportMatch[0],'');
+  const bridgeEvaluation=evaluate(bridgeBody,'legacy-v156-bridge.js');
+  assert(!bridgeEvaluation.error,`Legacy bridge does not compile independently: ${bridgeEvaluation.error?.stack||bridgeEvaluation.error}`);
+  assert(bridgeEvaluation.listeners.some(entry=>entry.type==='message'),'Legacy bridge did not register its compatibility message listener.');
+
+  const lightweightEvaluation=evaluate(lightweightWorker,'lightweight-service-worker-v203.js');
+  assert(!lightweightEvaluation.error,`Lightweight worker does not compile in a browser-style scope: ${lightweightEvaluation.error?.stack||lightweightEvaluation.error}`);
+  assert(lightweightEvaluation.listeners.some(entry=>entry.type==='install'),'Lightweight worker did not register an install listener.');
+  assert(lightweightEvaluation.listeners.some(entry=>entry.type==='fetch'),'Lightweight worker did not register a fetch listener.');
+
+  const combined=evaluate(`${bridgeBody}\n${lightweightWorker}`,'bridged-lightweight-service-worker.js');
+  assert(!combined.error,`Legacy bridge and lightweight worker collide in one browser-style scope: ${combined.error?.stack||combined.error}`);
+
+  console.log(JSON.stringify({
+    ok:true,
+    revision:'v209-legacy-bridge-lightweight-shell',
+    bridgeTarget:'service-worker-v203.js',
+    layeredImports:false,
+    duplicateGlobalConstCrash:false,
+    compatibilityMessageListener:true,
+    lightweightInstallListener:true,
+    lightweightFetchListener:true,
+  },null,2));
+  process.exit(0);
 }
 
 const criticalImportMatch=additiveWorker.match(/importScripts\('\/service-worker-critical-v199\.js(?:\?[^']+)?'\);/);
