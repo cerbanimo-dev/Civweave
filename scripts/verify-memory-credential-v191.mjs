@@ -62,13 +62,19 @@ assert(deviceSource.includes("addEventListener('commonweave:model-settings-saved
 assert(deviceSource.includes("detail.credentialPersistence==='device'"),'Credential bridge does not preserve the explicit device-only persistence choice.');
 assert(deviceSource.includes('automaticPersistence:false'),'Credential shim does not declare indiscriminate automatic persistence retired.');
 assert(deviceSource.includes('restoresConsent:true')&&deviceSource.includes('mirrorsRuntimeSecret:true'),'Credential bridge does not declare the v192 usability repair.');
+const lightweightBridge=additiveWorker.includes("importScripts('/service-worker-v203.js?v=");
 for(const token of ['/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js']){
   assert(baseWorker.includes(token),`Base device package is missing ${token}.`);
-  assert(additiveWorker.includes(token),`Additive package is missing ${token}.`);
+  if(!lightweightBridge)assert(additiveWorker.includes(token),`Layered additive package is missing ${token}.`);
   assert(boundarySource.includes(token),`Install boundary is missing ${token}.`);
   assert(loaderSource.includes(token),`Family loader is missing ${token}.`);
 }
 assert(campusSource.includes('hasResponseLayer')&&campusSource.includes('__weavelingMemoryV191'),'Working Campus does not protect against wrapper stacking.');
-assert(/working-campus-additions-v19[12]-(?:memory-credential|credential-usable)/.test(additiveWorker),'Additive cache did not retain or advance the memory/credential package.');
+if(lightweightBridge){
+  assert(additiveWorker.includes('legacy-v156-bridge-v209'),'Legacy v156 registration no longer identifies the direct lightweight bridge.');
+  assert(/service-worker-v203\.js\?v=1\.0\.\d+-lightweight-shell-v208-legacy-v156-bridge-v209/.test(additiveWorker),'Legacy v156 registration does not rotate through the active lightweight shell.');
+}else{
+  assert(/working-campus-additions-v19[12]-(?:memory-credential|credential-usable)/.test(additiveWorker),'Additive cache did not retain or advance the memory/credential package.');
+}
 
-console.log(JSON.stringify({ok:true,revision:'v191-memory-credential-v192-compatible',memory:{working:true,longTerm:true,explicitCommands:true,secretsExcluded:true,planPersistence:true},credential:{sessionChoice:true,deviceChoice:true,restoresAtBoot:true,forget:true,automaticPersistence:false,explicitCanonicalization:true},packaged:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v191-memory-credential-v192-compatible',memory:{working:true,longTerm:true,explicitCommands:true,secretsExcluded:true,planPersistence:true},credential:{sessionChoice:true,deviceChoice:true,restoresAtBoot:true,forget:true,automaticPersistence:false,explicitCanonicalization:true},packaged:true,lightweightBridge},null,2));
