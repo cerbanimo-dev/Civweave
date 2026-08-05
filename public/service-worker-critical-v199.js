@@ -1,12 +1,12 @@
 'use strict';
 (()=>{
-const VERSION='fellowfare-active-v203-cerbanimo-boundary-v204';
-if(self.CommonweaveCriticalBootV204)return;
+const VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204';
+if(self.CommonweaveCriticalBootV205)return;
 
 const nativeAddEventListener=self.addEventListener;
 const capturedInstallListeners=[];
 const updating=Boolean(self.registration?.active);
-const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-cerbanimo-boundary-v204';
+const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204';
 const BASE_CACHE='commonweave-static-1.0.6-direct-family-r45-memory-credential-v191-five-system-chat-r46-weaveling-memory-direct-software-r38-v106-device-package-r41-no-native-dialog-direct-entry-r45-memory-credential-v191';
 const EXTENSION_CACHE='cwext-working-campus-additions-v197-assistant-runtime-package';
 const BASE_EXPECTED_FILES=111;
@@ -44,6 +44,8 @@ const CRITICAL_FILES=[
   '/app/services/living-school/modules/cerbanimo-bridge.mjs',
   '/app/fellowfare-cabinet-v144.html',
   '/app/fellowfare-cabinet-v144.css',
+  '/app/fellowfare-parent-theme-v205.css',
+  '/app/fellowfare-mobile-flow-v205.js',
   '/app/services/fellowfare/cabinet-embed.css',
   '/app/themed-system-nav-v178.js',
   '/app/install-boundary-v146.js',
@@ -227,4 +229,5 @@ self.CommonweaveCriticalBootV201=api;
 self.CommonweaveCriticalBootV202=api;
 self.CommonweaveCriticalBootV203=api;
 self.CommonweaveCriticalBootV204=api;
+self.CommonweaveCriticalBootV205=api;
 })();
