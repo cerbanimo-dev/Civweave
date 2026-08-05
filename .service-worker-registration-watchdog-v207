@@ -7,3 +7,4 @@ retry2: multiline-smoke-assertion-aligned
 retry3: multiline-update-ready-assertions-aligned
 retry4: recovery-pause-simulation-aligned
 retry5: browser-user-agent-mock-complete
+retry6: recovery-contract-v207-compatible
