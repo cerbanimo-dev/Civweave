@@ -24,13 +24,14 @@ for(const [name,source] of [['critical worker',critical],['shared image worker',
   try{new Function(source)}catch(error){throw new Error(`${name} does not parse: ${error.message}`)}
 }
 
-assert(critical.includes("VERSION='fellowfare-active-v203-cerbanimo-boundary-v204'"),'The combined v204 critical core is not active.');
-assert(critical.includes("CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-cerbanimo-boundary-v204'"),'The combined critical cache is not active.');
+const combinedRevision='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204';
+assert(critical.includes(`VERSION='${combinedRevision}'`),'The combined FellowFare mobile and Cerbanimo critical core is not active.');
+assert(critical.includes(`CRITICAL_CACHE='cwboot-critical-${combinedRevision}'`),'The combined critical cache is not active.');
 assert(critical.includes('BASE_EXPECTED_FILES=111'),'The 111-file core package boundary changed unexpectedly.');
 assert(critical.includes('EXTENSION_EXPECTED_FILES=53'),'The 53-file shared package boundary changed unexpectedly.');
 assert(critical.includes('runCaptured(event)'),'Incomplete packages no longer replay the complete installers.');
 assert(critical.includes("mode:'flat'"),'Critical status no longer identifies the flat interface.');
-assert(critical.includes('self.CommonweaveCriticalBootV204=api'),'The combined critical API alias is missing.');
+assert(critical.includes('self.CommonweaveCriticalBootV205=api'),'The combined critical API alias is missing.');
 
 const essential=[
   '/app/assets/ai/moss-acorn.png',
@@ -50,6 +51,8 @@ for(const pathname of [
   '/app/fast-interactive-runtime-v192.js',
   '/app/fellowfare-cabinet-v144.html',
   '/app/fellowfare-cabinet-v144.css',
+  '/app/fellowfare-parent-theme-v205.css',
+  '/app/fellowfare-mobile-flow-v205.js',
   '/app/services/fellowfare/cabinet-embed.css',
   '/app/realm-console-v140.html',
   '/app/cerbanimo-deterministic-boundary-v203.js'
@@ -87,7 +90,7 @@ assert(pwa.includes("WORKER_URL=`/service-worker-v203.js"),'The installed app do
 console.log(JSON.stringify({
   ok:true,
   repair:'flat-living-school-v203',
-  combinedCritical:'fellowfare-active-v203-cerbanimo-boundary-v204',
+  combinedCritical:combinedRevision,
   coreBoundary:111,
   sharedBoundary:53,
   flatContentPreserved:true,
@@ -97,6 +100,7 @@ console.log(JSON.stringify({
   sharedImageLane:true,
   legacyImageRepair:true,
   fellowFareRefresh:true,
+  fellowFareParentMobileRefresh:true,
   cerbanimoBoundaryRefresh:true,
   spatialMode:false,
 },null,2));

@@ -1,5 +1,5 @@
 'use strict';
-importScripts('/service-worker-critical-v199.js?v=fellowfare-active-v203');
+importScripts('/service-worker-critical-v199.js?v=fellowfare-parent-mobile-v205');
 importScripts('/service-worker.js?v=1.0.6-base-r52-living-school-boot-v195');
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r51-image-system-nav-repair')
 // Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r50-memory-credential-v191')
@@ -38,7 +38,7 @@ const DEVICE_CREDENTIALS_REVISION='usable-key-and-consent-v192';
 const PROOF_COMPATIBLE_EXTENSION_REVISION='working-campus-additions-v158-proof-progress';
 const LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167';
 const THEMED_SYSTEM_NAV_REVISION='themed-system-nav-v203-no-embedded-copy';
-const FELLOWFARE_ACTIVE_REVISION='fellowfare-active-surface-v203';
+const FELLOWFARE_ACTIVE_REVISION='fellowfare-parent-mobile-v205';
 const EXTENSION_CACHE='cwext-working-campus-additions-v197-assistant-runtime-package';
 const TOOL_FILES=[
   '/extensions/commonweave-additions-v156.css',
