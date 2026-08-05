@@ -1,17 +1,17 @@
 'use strict';
 (()=>{
-const VERSION='living-school-lesson-nav-v201';
-if(self.CommonweaveCriticalBootV201)return;
+const VERSION='living-school-image-runtime-v202';
+if(self.CommonweaveCriticalBootV202)return;
 
 const nativeAddEventListener=self.addEventListener;
 const capturedInstallListeners=[];
 const updating=Boolean(self.registration?.active);
-const CRITICAL_CACHE='cwboot-critical-living-school-v201';
+const CRITICAL_CACHE='cwboot-critical-living-school-v202';
 const BASE_CACHE='commonweave-static-1.0.6-direct-family-r45-memory-credential-v191-five-system-chat-r46-weaveling-memory-direct-software-r38-v106-device-package-r41-no-native-dialog-direct-entry-r45-memory-credential-v191';
 const EXTENSION_CACHE='cwext-working-campus-additions-v197-assistant-runtime-package';
 const BASE_EXPECTED_FILES=111;
 const EXTENSION_EXPECTED_FILES=53;
-const FETCH_TIMEOUT_MS=8000;
+const FETCH_TIMEOUT_MS=15000;
 const BASE_SENTINELS=[
   '/index.html',
   '/app/installed-entry-v146.html',
@@ -31,6 +31,9 @@ const CRITICAL_FILES=[
   '/app/cabinets/living-school/living-school-cabinet-v151.css',
   '/app/cabinets/living-school/living-school-cabinet-v151.mjs',
   '/app/cabinets/living-school/living-school-bootstrap-v194.js',
+  '/app/cabinets/living-school/living-school-visual-shell-v202.css',
+  '/app/cabinets/living-school/living-school-visual-shell-v202.js',
+  '/app/cabinets/living-school/living-school-enhancements-v202.js',
   '/app/cabinets/living-school/living-school-two-agent-relay-v165.js',
   '/app/cabinets/living-school/living-school-mutation-guard-v196.js',
   '/app/cabinets/living-school/living-school-workbench-v158.css',
@@ -43,6 +46,17 @@ const CRITICAL_FILES=[
   '/app/services/living-school/modules/project-gate.mjs',
   '/app/services/living-school/modules/cerbanimo-bridge.mjs',
   '/app/themed-system-nav-v178.js',
+  '/app/assets/navigation/200-commonweave-nav.webp',
+  '/app/assets/navigation/200-cerbanimo-nav.webp',
+  '/app/assets/navigation/200-living-school-nav.webp',
+  '/app/assets/navigation/200-fellowfare-nav.webp',
+  '/app/assets/navigation/200-anarchadia-nav.webp',
+  '/app/assets/living-school/home.webp',
+  '/app/assets/living-school/forge.webp',
+  '/app/assets/living-school/library.webp',
+  '/app/assets/living-school/moss.webp',
+  '/app/assets/living-school/workshop.webp',
+  '/app/assets/ai/moss.png',
   '/app/install-boundary-v146.js',
   '/app/local-first-policy-v131.js',
   '/app/platform-stability-v159.js',
@@ -130,7 +144,7 @@ async function warmCritical(preferNetwork=false){
     const results=await Promise.all(batch.map(pathname=>warmOne(pathname,cache,preferNetwork)));
     ready+=results.filter(Boolean).length;
   }
-  if(ready<CRITICAL_FILES.length)throw new Error(`Critical Living School package incomplete: ${ready}/${CRITICAL_FILES.length}`);
+  if(ready<CRITICAL_FILES.length)throw new Error(`Critical Living School image package incomplete: ${ready}/${CRITICAL_FILES.length}`);
   return{ready,total:CRITICAL_FILES.length};
 }
 
@@ -207,7 +221,7 @@ function finalize(){
       const present=new Set(keys.map(request=>new URL(request.url).pathname));
       const missing=CRITICAL_FILES.filter(pathname=>!present.has(pathname));
       const full=await fullPackageStatus();
-      const packet={type:'COMMONWEAVE_CRITICAL_BOOT_STATUS',version:VERSION,updateInstall:updating,capturedInstallListeners:capturedInstallListeners.length,cache:CRITICAL_CACHE,ready:missing.length===0&&full.ready,present:CRITICAL_FILES.length-missing.length,total:CRITICAL_FILES.length,missing,fullPackage:full};
+      const packet={type:'COMMONWEAVE_CRITICAL_BOOT_STATUS',version:VERSION,updateInstall:updating,capturedInstallListeners:capturedInstallListeners.length,cache:CRITICAL_CACHE,ready:missing.length===0&&full.ready,present:CRITICAL_FILES.length-missing.length,total:CRITICAL_FILES.length,missing,fullPackage:full,imageRuntime:true,navigationImages:5,sceneImages:5};
       event.ports?.[0]?.postMessage(packet);
       event.source?.postMessage?.(packet);
     })());
@@ -218,4 +232,5 @@ const api={version:VERSION,cache:CRITICAL_CACHE,paths:CRITICAL_FILES.slice(),upd
 self.CommonweaveCriticalBootV199=api;
 self.CommonweaveCriticalBootV200=api;
 self.CommonweaveCriticalBootV201=api;
+self.CommonweaveCriticalBootV202=api;
 })();
