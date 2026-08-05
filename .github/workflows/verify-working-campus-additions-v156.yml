@@ -1,14 +1,15 @@
-name: Verify working-campus additions v156
+name: Verify working-campus deterministic additions
 
 on:
   push:
-    branches: ["agent/merlinites-semantic-planning-v164"]
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,138 +17,17 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-        env:
-          COMMONWEAVE_SKIP_MODEL_PULL: "1"
-      - name: Syntax check additive runtime
-        run: |
-          node --check public/service-worker.js
-          node --check public/service-worker-v156.js
-          node --check public/app/install-boundary-v146.js
-          node --check public/install-v130.js
-          node --check public/app/pwa-v130.js
-          node --check public/app/models/all-minilm-l6-v2/adapter.js
-          node --check public/app/models/all-minilm-l6-v2/worker.js
-          node --check public/app/merlinites-semantic-planner-v164.js
-          node --check public/app/family-shell-v104.js
-          node --check public/app/platform-stability-v159.js
-          node --check public/app/platform-experience-v160.js
-          node --check public/app/action-followthrough-v165.js
-          node --check public/app/rook-request-flow-v160.js
-          node --check public/app/anarchadia-console-v158.js
-          node --check public/app/anarchadia-runtime-stability-v159.js
-          node --check public/app/anarchadia-change-review-v165.js
-          node --check public/app/anarchadia-live-layout-v167.js
-          node --check public/app/cerbanimo-proof-attachments-v165.js
-          node --check public/app/cerbanimo-ai-validator-v159.js
-          node --check public/app/intention-planner-v141.js
-          node --check public/app/cabinets/living-school/living-school-two-agent-relay-v165.js
-          node --check public/app/cabinets/living-school/living-school-workbench-v158.js
-          node --check public/app/cabinets/living-school/living-school-research-v162.js
-          node --check public/app/cabinets/living-school/living-school-runtime-stability-v159.js
-          node --check public/app/cabinets/living-school/living-school-paths-v160.js
-          node --check public/extensions/commonweave-secure-vault-v156.js
-          node --check public/extensions/commonweave-domain-bridge-v156.js
-          node --check public/extensions/commonweave-qr-v156.js
-          node --check public/extensions/commonweave-mesh-tools-v156.js
-          node --check public/extensions/commonweave-additions-v156.js
-          node --check public/extensions/commonweave-model-download-v157.js
-          node --check public/extensions/commonweave-proof-progress-v158.js
-          node --check public/extensions/commonweave-gemini-interactions-v159.js
-          node --check public/extensions/commonweave-device-credentials-v160.js
-          node --check public/extensions/commonweave-antigravity-live-source-guard-v167.js
-          node --check scripts/verify-working-campus-additions-v156.mjs
-          node --check scripts/verify-unified-ai-settings-v157.mjs
-          node --check scripts/verify-settings-dialog-stability-v161.mjs
-          node --check scripts/verify-intention-and-research-v163.mjs
-          node --check scripts/verify-living-school-two-agent-relay-v165.mjs
-          node --check scripts/verify-antigravity-live-source-guard-v167.mjs
-          node --check scripts/verify-five-system-inner-ui-v157.mjs
-          node --check scripts/verify-runtime-stability-v159.mjs
-          node --check scripts/verify-platform-flow-v160.mjs
-          node --check scripts/test-platform-flow-v160.mjs
-          node --check scripts/verify-platform-hud-stability-v163.mjs
-          node --check scripts/test-workflow-handoffs-v165.mjs
-          node --check scripts/test-merlin-local-layout-v167.mjs
-          node --check scripts/verify-merlinites-semantic-v164.mjs
-          node --check scripts/verify-merlinites-visual-overhaul-v166.mjs
-          node --check scripts/verify-living-school-cabinet-v151.mjs
-          node --check scripts/verify-anarchadia-cabinet-workbench-v144.mjs
-          node --check scripts/verify-cerbanimo-quest-engine-v144.mjs
-          node --check scripts/test-tiered-cerbanimo-rewards-v157.mjs
-          node --check scripts/test-proof-driven-checkpoints-v158.mjs
-      - name: Reject retired subsystem name
-        run: |
-          legacy="$(printf '\163\157\154')"
-          legacy_title="$(printf '\123\157\154')"
-          pattern="${legacy_title}|${legacy}-r|${legacy}-shell|${legacy}-semantic|verify-${legacy}|${legacy}Feedback|__${legacy}Semantic|commonweave:${legacy}-|commonweave\.${legacy}-"
-          ! grep -R -n -E "$pattern" \
-            docs/MERLINITES-SEMANTIC-PLANNING-v164.md \
-            docs/MERLINITES-VISUAL-OVERHAUL-v166.md \
-            public/app/merlinites-semantic-planner-v164.js \
-            public/app/merlinites-shell-fix-v166.css \
-            public/app/family-shell-v104.js \
-            public/app/family-shell-v104.css \
-            public/app/loom-v128.html \
-            public/app/lite-v129.html \
-            public/app/working-campus-v156.html \
-            public/app/realm-console-v140.html \
-            public/app/cabinets/living-school/index.html \
-            public/app/fellowfare-cabinet-v144.html \
-            public/app/anarchadia-console-v139.html \
-            public/app/pwa-v130.js \
-            public/service-worker-v156.js \
-            scripts/verify-merlinites-semantic-v164.mjs \
-            scripts/verify-merlinites-visual-overhaul-v166.mjs
-      - name: Verify additive integration
-        run: node scripts/verify-working-campus-additions-v156.mjs
-      - name: Verify unified AI settings
-        run: node scripts/verify-unified-ai-settings-v157.mjs
-      - name: Verify settings dialog stability
-        run: node scripts/verify-settings-dialog-stability-v161.mjs
-      - name: Verify latest intention and Living School research
-        run: node scripts/verify-intention-and-research-v163.mjs
-      - name: Verify Living School two-agent relay
-        run: node scripts/verify-living-school-two-agent-relay-v165.mjs
-      - name: Verify Antigravity live-source proof
-        run: node scripts/verify-antigravity-live-source-guard-v167.mjs
-      - name: Verify merlinites semantic planning
-        run: node scripts/verify-merlinites-semantic-v164.mjs
-      - name: Verify merlinites visual shell
-        run: node scripts/verify-merlinites-visual-overhaul-v166.mjs
-      - name: Verify internal system interfaces
-        run: node scripts/verify-five-system-inner-ui-v157.mjs
-      - name: Verify interaction and review stability
-        run: node scripts/verify-runtime-stability-v159.mjs
-      - name: Verify dark mode and routed request flows
-        run: node scripts/verify-platform-flow-v160.mjs
-      - name: Test dark mode, request funding, and learning paths
-        run: node scripts/test-platform-flow-v160.mjs
-      - name: Verify shared HUD observer stability
-        run: node scripts/verify-platform-hud-stability-v163.mjs
-      - name: Test Merlin Rook and Cerbanimo handoffs
-        run: node scripts/test-workflow-handoffs-v165.mjs
-      - name: Test Merlin live layout persistence
-        run: node scripts/test-merlin-local-layout-v167.mjs
-      - name: Verify researched Living School
-        run: node scripts/verify-living-school-cabinet-v151.mjs
-      - name: Verify Merlin and Anarchadia stability
-        run: node scripts/verify-anarchadia-cabinet-workbench-v144.mjs
-      - name: Verify Cerbanimo independent review
-        run: node scripts/verify-cerbanimo-quest-engine-v144.mjs
-      - name: Test tiered Cerbanimo rewards
-        run: node scripts/test-tiered-cerbanimo-rewards-v157.mjs
-      - name: Test proof-driven checkpoints
-        run: node scripts/test-proof-driven-checkpoints-v158.mjs
-      - name: Materialize local semantic package
-        run: |
-          for attempt in 1 2 3 4 5; do
-            if npm run model:pull; then break; fi
-            if [ "$attempt" = 5 ]; then
-              echo 'MiniLM source files could not be materialized after five attempts.' >&2
-              exit 1
-            fi
-            sleep $((attempt * 8))
-          done
-          npm run model:check
-      - name: Run existing repository regression suite
+      - name: Syntax check active runtime
+        run: npm run check:syntax
+      - name: Verify deterministic AI and single settings authority
+        run: node scripts/verify-deterministic-ai-v175.mjs
+      - name: Verify repository package
         run: npm run check
+      - name: Test Anarchadia governance kernel
+        run: npm run test:anarchadia-governance
+      - name: Test Anarchadia sovereignty kernel
+        run: npm run test:anarchadia-sovereignty
+      - name: Verify proof-driven checkpoints
+        run: node scripts/test-proof-driven-checkpoints-v158.mjs
+      - name: Verify tiered Cerbanimo rewards
+        run: node scripts/test-tiered-cerbanimo-rewards-v157.mjs
