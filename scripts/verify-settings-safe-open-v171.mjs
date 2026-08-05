@@ -26,6 +26,7 @@ new Function(controller);
 new Function(family);
 new Function(loader);
 new Function(settingsRuntime);
+new Function(boundary);
 
 for(const token of [
   "VERSION='173.0-direct-settings-controller'",
@@ -91,10 +92,16 @@ assert(workingPart.includes('CommonweaveModelSettingsControllerV173')&&!workingP
 assert(fellowfareRuntime.includes('CommonweaveFamilyAILoaderV105?.openSettings'),'FellowFare compatibility call was unexpectedly removed before its chat-loader delegate was retained.');
 
 for(const token of [
+  "ADDITIONS_VERSION='v174-settings-single-owner-assets'",
+  "PREVIOUS_ADDITIONS_VERSION='v173-ai-loader-cutover'",
   "SETTINGS_CONTROLLER_SCRIPT='/app/model-settings-controller-v173.js'",
   "SETTINGS_CONTROLLER_REVISION='v173-direct-settings-controller'",
+  "SETTINGS_RUNTIME_REVISION='v157.2-single-owner'",
   'addScript(SETTINGS_CONTROLLER_SCRIPT)',
-  "additionsVersion:'v173-ai-loader-cutover'"
+  'script.src=`${src}?v=${ADDITIONS_VERSION}`',
+  'additionsVersion:ADDITIONS_VERSION',
+  'previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION',
+  'settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION'
 ])assert(boundary.includes(token),`Install boundary missing ${token}`);
 assert(!boundary.includes('SETTINGS_SAFE_OPEN_SCRIPT'),'Install boundary still loads a click interceptor.');
 
