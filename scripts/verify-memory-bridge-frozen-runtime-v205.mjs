@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [bridge,boundary,worker,wrapper,critical]=await Promise.all([
+const [bridge,boundary,worker,activeWorker,critical]=await Promise.all([
   read('public/app/weaveling-memory-bridge-v191.js'),
   read('public/app/cerbanimo-deterministic-boundary-v203.js'),
   read('public/service-worker-v156.js'),
@@ -19,9 +19,18 @@ assert(!/runtime\.generate\s*=/.test(bridge),'The memory bridge still mutates ru
 assert(!/runtime\.fastMemoryRevision\s*=/.test(bridge),'The memory bridge still mutates a frozen runtime property.');
 assert(bridge.includes('__cerbanimoDeterministicBoundaryV203'),'The bridge does not recognize the Cerbanimo provider guard as an existing wrapper.');
 assert(bridge.includes('const proxy=Object.freeze({...runtime,generate:wrapped,fastMemoryRevision:VERSION})'),'The immutable memory-runtime proxy is missing.');
-assert(critical.includes("'/app/weaveling-memory-bridge-v191.js'"),'Critical boot does not refresh the corrected memory bridge.');
-assert(worker.includes('memory-bridge-frozen-proxy-v205'),'The inner service worker does not force the memory-bridge refresh.');
-assert(wrapper.includes('flat-living-school-v203-memory-bridge-v205'),'The active v203 wrapper does not refresh the changed inner worker.');
+assert(critical.includes("'/app/weaveling-memory-bridge-v191.js'"),'Critical boot compatibility package does not retain the corrected memory bridge.');
+
+const lightweightBridge=worker.includes('legacy-v156-bridge-v209');
+if(lightweightBridge){
+  assert(worker.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'The legacy registration path does not bridge to the active lightweight worker.');
+  assert(activeWorker.includes("const BUILD = 'lightweight-shell-v208'"),'The active v203 worker is not the direct lightweight shell.');
+  assert(!activeWorker.includes('importScripts('),'The direct lightweight worker reintroduced the layered worker stack.');
+  assert(activeWorker.includes('DOWNLOAD_OFFLINE_PACKAGE'),'The direct lightweight worker no longer exposes resumable campus hydration.');
+}else{
+  assert(worker.includes('memory-bridge-frozen-proxy-v205'),'The inner service worker does not force the memory-bridge refresh.');
+  assert(activeWorker.includes('flat-living-school-v203-memory-bridge-v205'),'The active v203 wrapper does not refresh the changed inner worker.');
+}
 
 class MemoryStorage{
   constructor(seed={}){this.rows=new Map(Object.entries(seed))}
@@ -104,5 +113,7 @@ console.log(JSON.stringify({
   cerbanimoBoundaryComposition:true,
   deterministicGeminiCalls:0,
   criticalRefresh:true,
-  flatWrapperRefresh:true,
+  installedWorkerMode:lightweightBridge?'v209-direct-lightweight':'v205-layered-wrapper',
+  flatWrapperRefresh:!lightweightBridge,
+  lightweightShellDirect:lightweightBridge,
 },null,2));
