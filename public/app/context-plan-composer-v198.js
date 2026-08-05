@@ -68,8 +68,11 @@ async function rankCandidates(query,candidates,{semantic=true,limit=12}={}){
 }
 function planKind(value,realm='commonweave'){
   const text=clean(value).toLowerCase();
-  if(realm==='living-school'||/\b(learn|study|lesson|curriculum|course|teach|understand|practice|master|research)\b/.test(text))return'learning';
-  if(realm==='fellowfare'||/\b(need|offer|buy|borrow|trade|market|materials|supplies|resource|vendor|request|inventory)\b/.test(text))return'market';
+  if(realm==='living-school')return'learning';
+  if(realm==='fellowfare')return'market';
+  if(realm==='cerbanimo')return'project';
+  if(/\b(learn|study|lesson|curriculum|course|teach|understand|practice|master|research)\b/.test(text))return'learning';
+  if(/\b(need|offer|buy|borrow|trade|market|materials|supplies|resource|vendor|request|inventory)\b/.test(text))return'market';
   return'project';
 }
 function goalText(value){return clean(value,1600).replace(/^\s*(i\s+(want|wish|need|hope)\s+(to\s+)?|we\s+(want|need)\s+(to\s+)?|please\s+|help\s+me\s+)/i,'').replace(/[.!?]+$/,'').trim()||'move the intention forward'}
