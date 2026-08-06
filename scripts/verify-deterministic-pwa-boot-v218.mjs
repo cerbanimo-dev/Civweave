@@ -12,7 +12,7 @@ assert(boundary.includes('function explicitInstalled()'),'boundary lacks explici
 assert(boundary.includes('commonweave.install-boundary.boot.v218'),'boundary boot key mismatch');
 const installer=await fs.readFile('public/install-v130.js','utf8');
 assert(installer.includes("const ENTRY = '/app/?system=commonweave&installed=1';"),'installer still opens legacy entry');
-assert(installer.includes("const WORKER_SCRIPT_REVISION = 'deterministic-boot-v218';"),'installer worker revision mismatch');
+assert(installer.includes("const WORKER_SCRIPT_REVISION = 'compat-fullscreen-launch-v219';"),'installer worker revision mismatch');
 const index=await fs.readFile('public/index.html','utf8');
-assert(index.includes('revision=deterministic-boot-v218'),'homepage worker bootstrap mismatch');
+assert(index.includes('revision=compat-fullscreen-launch-v219'),'homepage worker bootstrap mismatch');
 console.log('Deterministic PWA boot v218 verified.');

@@ -61,9 +61,11 @@ const APP_CACHE_PREFIXES = [
 const TEXT_CONTENT = /(?:text\/(?:html|css|plain)|javascript|ecmascript|application\/(?:json|manifest\+json))/i;
 const DISCOVERABLE_EXTENSION = /\.(?:html?|css|m?js|json|webmanifest|md|txt|png|webp|jpe?g|gif|svg|avif|ico|woff2?|ttf|otf)$/i;
 const IMAGE_EXTENSION = /\.(?:png|webp|jpe?g|gif|svg|avif|ico)$/i;
-const LEGACY_ENTRY_PATHS = new Set([
+const COMPAT_ENTRY_PATHS = new Set([
   '/app/installed-entry-v146.html',
-  '/app/installed-entry-v146'
+  '/app/installed-entry-v146',
+  '/app/fullscreen-family-v104.html',
+  '/app/fullscreen-family-v104'
 ]);
 
 const WORKER_PATHS = new Set([
@@ -463,7 +465,7 @@ async function normalizeStableAppEntryResponse(response) {
   headers.delete('location');
   if (!headers.get('content-type')) headers.set('content-type', 'text/html; charset=utf-8');
   headers.set('cache-control', 'no-store');
-  headers.set('x-commonweave-stable-entry', 'v217');
+  headers.set('x-commonweave-stable-entry', 'v219');
   const body = await response.clone().arrayBuffer();
   return new Response(body, { status: 200, statusText: 'OK', headers });
 }
@@ -580,7 +582,7 @@ self.addEventListener('fetch', event => {
     event.respondWith(modelOnDemand(request));
     return;
   }
-  if (request.mode === 'navigate' && LEGACY_ENTRY_PATHS.has(url.pathname)) {
+  if (request.mode === 'navigate' && COMPAT_ENTRY_PATHS.has(url.pathname)) {
     event.respondWith(stableAppEntry(request));
     return;
   }
