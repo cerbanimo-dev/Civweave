@@ -1,21 +1,15 @@
 (()=>{
 'use strict';
-const REVISION='campus-atomic-startup-v222';
+const REVISION='canonical-campus-startup-v223';
 const parts=['/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt'];
 const required=['conversation','weaveling-chat-form','weaveling-chat-input','workspace','view-title','state-label'];
 const controller=new AbortController();
+const bootDocument=document.documentElement;
+const bootUrl=location.href;
 let active=true;
-let campusRoot=null;
-let requiredNodes=[];
 function missingRequired(){return required.filter(id=>!document.getElementById(id));}
-function liveDocument(){return active&&document.documentElement?.isConnected&&document.head?.isConnected&&document.body?.isConnected;}
-function captureCampus(){
-  campusRoot=document.querySelector('main.app');
-  requiredNodes=required.map(id=>document.getElementById(id));
-  const missing=required.filter((id,index)=>!requiredNodes[index]);
-  return Boolean(campusRoot?.isConnected)&&missing.length===0;
-}
-function sameCampus(){return liveDocument()&&campusRoot?.isConnected&&requiredNodes.every(node=>node?.isConnected&&node.ownerDocument===document);}
+function liveDocument(){return active&&document.documentElement===bootDocument&&document.documentElement?.isConnected&&document.head?.isConnected&&document.body?.isConnected&&location.href===bootUrl;}
+function campusReady(){return liveDocument()&&Boolean(document.querySelector('main.app'))&&missingRequired().length===0;}
 function stop(){active=false;controller.abort();}
 addEventListener('pagehide',stop,{once:true});
 addEventListener('beforeunload',stop,{once:true});
@@ -28,13 +22,9 @@ async function fetchPart(pathname){
 }
 async function boot(){
   if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true,signal:controller.signal}));
-  if(!captureCampus())throw new Error(`Working Campus DOM contract is incomplete: ${missingRequired().join(', ')||'campus root'}.`);
+  if(!campusReady())throw new Error(`Working Campus DOM contract is incomplete: ${missingRequired().join(', ')||'campus root'}.`);
   const source=await Promise.all(parts.map(fetchPart));
-  if(!active)throw new DOMException('Working Campus navigation interrupted startup.','AbortError');
-  if(!sameCampus()){
-    const missing=missingRequired();
-    throw new Error(`Working Campus DOM was replaced before runtime evaluation${missing.length?`: ${missing.join(', ')}`:''}.`);
-  }
+  if(!liveDocument())throw new DOMException('Working Campus navigation interrupted startup.','AbortError');
   Function(source.join(''))();
   document.documentElement.dataset.commonweaveCampusRuntime='ready';
   dispatchEvent(new CustomEvent('commonweave:working-campus-runtime-ready',{detail:{revision:REVISION,parts:parts.length,at:new Date().toISOString()}}));
