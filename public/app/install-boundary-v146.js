@@ -9,6 +9,7 @@ const LEGACY_BOOT_KEY='commonweave.install-boundary.boot.v226';
 const DEV_KEY='commonweave.install-boundary.developer.v146';
 const ADDITIONS_VERSION='v1.0.16-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/commonweave-additions-v156.css';
+const BRAND_SCRIPT='/app/civweave-brand.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','commonweave'],
   ['/app/cabinets/living-school/index.html','living-school'],
@@ -97,6 +98,7 @@ function installAdditions(){
 }
 function start(){
   const root=document.documentElement,system=systemSurface();
+  addScript(BRAND_SCRIPT);
   if(!allowed()){
     if(root)root.dataset.installBoundary='blocked';
     location.replace(installerUrl());
@@ -128,6 +130,8 @@ globalThis.CommonweaveInstallBoundaryV146=Object.freeze({
   installerUrl,
   installAdditions,
   additionsVersion:ADDITIONS_VERSION,
+  brandScript:BRAND_SCRIPT,
+  publicBrand:'Civweave',
   canonicalPolicy:'five-system-first-class-routes-commonweave-core-only',
   canonicalSystemCount:5,
   canonicalAutoScripts:0,
