@@ -60,7 +60,7 @@
   "sharedAuthorities": {
     "aiSettings": "/app/model-settings-controller-v173.js",
     "guideRuntime": "/app/assistant-runtime-v141.js",
-    "rewardLedger": "/app/shared/commonweave-reward-ledger-v2.js",
+    "rewardLedger": "/app/cw-reward-ledger-v2.js",
     "serviceWorker": "/service-worker.js"
   },
   "generationTargets": [
