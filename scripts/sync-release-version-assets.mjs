@@ -44,6 +44,7 @@ await patch('public/app/manifest.webmanifest',source=>{
   manifest.name=`Commonweave v${version}`;
   const start=new URL(manifest.start_url||'/app/', 'https://commonweave.invalid');
   start.searchParams.set('version',version);
+  manifest.start_url=`${start.pathname}${start.search}${start.hash}`;
   return `${JSON.stringify(manifest,null,2)}\n`;
 });
 
