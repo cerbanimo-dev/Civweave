@@ -9,7 +9,10 @@ const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const DEV_KEY='civweave.install-boundary.developer.v146';
 const ADDITIONS_VERSION='v1.0.17-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
-const BRAND_SCRIPT='/app/civweave-brand.js';
+const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
+const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js';
+const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js';
+const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
   ['/app/cabinets/living-school/index.html','living-school'],
@@ -26,9 +29,9 @@ const LEGACY_SCRIPTS=[
   '/app/model-settings-controller-v173.js',
   '/app/settings-delegation-v175.js',
   '/app/gemini-task-tier-router-v213.js',
-  '/app/guide-identity-integrity-v216.js',
-  '/app/persistent-guide-chat-v215.js',
-  '/app/persistent-guide-viewport-v216.js',
+  GUIDE_IDENTITY_SCRIPT,
+  PERSISTENT_GUIDE_CHAT_SCRIPT,
+  PERSISTENT_GUIDE_VIEWPORT_SCRIPT,
   '/extensions/civweave-antigravity-live-source-guard-v167.js',
   '/extensions/civweave-device-credentials-v160.js',
   '/extensions/civweave-additions-v156.js',
@@ -36,7 +39,7 @@ const LEGACY_SCRIPTS=[
   '/extensions/civweave-proof-progress-v158.js',
   '/extensions/civweave-gemini-interactions-v159.js',
   '/app/themed-system-nav-v178.js',
-  '/app/pwa-update-controller-v204.js'
+  PWA_UPDATE_SCRIPT
 ];
 const params=new URLSearchParams(location.search);
 let unloading=false;
@@ -98,7 +101,6 @@ function installAdditions(){
 }
 function start(){
   const root=document.documentElement,system=systemSurface();
-  addScript(BRAND_SCRIPT);
   if(!allowed()){
     if(root)root.dataset.installBoundary='blocked';
     location.replace(installerUrl());
@@ -130,11 +132,16 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   installerUrl,
   installAdditions,
   additionsVersion:ADDITIONS_VERSION,
-  brandScript:BRAND_SCRIPT,
   publicBrand:'Civweave',
   canonicalPolicy:'five-system-first-class-routes-civweave-core-only',
   canonicalSystemCount:5,
   canonicalAutoScripts:0,
+  guideIdentityRevision:'v216-explicit-responder-ownership',
+  guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
+  guideIdentityMigration:'realm-action-owner',
+  persistentGuideChatSubmissionPipelines:1,
+  persistentGuideChatGuideCount:5,
+  pwaUpdateRevision:'v207-registration-watchdog',
   onlineSelfHeal:true,
   missingAssetDetails:true
 });

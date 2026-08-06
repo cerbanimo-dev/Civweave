@@ -7,15 +7,23 @@ const root=path.resolve(dir,'..');
 const sourcePath=path.join(dir,'smoke-service-worker-registration-watchdog-v207-legacy.mjs');
 const runtimePath=path.join(dir,'.smoke-service-worker-registration-watchdog-v207.runtime.mjs');
 const installerPath=path.join(root,'public/install-v130.js');
+const updaterPath=path.join(root,'public/app/pwa-update-controller-v204.js');
 let source=await readFile(sourcePath,'utf8');
 const installerSource=await readFile(installerPath,'utf8');
+const updaterSource=await readFile(updaterPath,'utf8');
+const releaseVersion=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
 const revision=installerSource.match(/const\s+WORKER_SCRIPT_REVISION\s*=\s*['"]([^'"]+)['"]/)?.[1];
+const updaterVersion=updaterSource.match(/const\s+VERSION\s*=\s*['"]([^'"]+)['"]/)?.[1];
 if(!revision)throw new Error('Watchdog verifier could not resolve the current worker revision.');
+if(!updaterVersion)throw new Error('Watchdog verifier could not resolve the current updater revision.');
 source=source.replaceAll('stable-entry-v217',revision);
+source=source.replaceAll('v207-registration-watchdog',updaterVersion);
+source=source.replaceAll('1.0.7',releaseVersion);
+source=source.replace("const indexSource=await fs.readFile('public/index.html','utf8');","const indexSource=await fs.readFile('public/app/index.html','utf8');");
 
-const boundaryBefore="assert(boundarySource.includes(\"const ADDITIONS_VERSION='v207-registration-watchdog'\"),'Installed pages do not cache-bust the v207 update controller.');";
-const boundaryAfter="assert(boundarySource.includes(\"const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'\"),'Installed boundary no longer names the shared update controller.');\nassert(boundarySource.includes('addScript(PWA_UPDATE_SCRIPT)'),'Installed boundary no longer loads the shared update controller.');\nassert.match(boundarySource,/const ADDITIONS_VERSION='v[^']+'/,'Installed boundary does not cache-bust shared additions.');";
-if(!source.includes(boundaryBefore))throw new Error('Watchdog verifier compatibility patch could not find the retired v207 additions assertion.');
+const boundaryBefore=`assert(boundarySource.includes("const ADDITIONS_VERSION='${updaterVersion}'"),'Installed pages do not cache-bust the v207 update controller.');`;
+const boundaryAfter="assert(boundarySource.includes(\"const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'\"),'Installed boundary no longer names the shared update controller.');\nassert(boundarySource.includes('PWA_UPDATE_SCRIPT'),'Installed boundary no longer includes the shared update controller in its compatibility bundle.');\nassert.match(boundarySource,/const ADDITIONS_VERSION='v[^']+'/,'Installed boundary does not cache-bust shared additions.');";
+if(!source.includes(boundaryBefore))throw new Error('Watchdog verifier compatibility patch could not find the retired updater additions assertion.');
 source=source.replace(boundaryBefore,boundaryAfter);
 
 const workerReadBefore="const workerSource=await fs.readFile('public/service-worker-v203.js','utf8');";

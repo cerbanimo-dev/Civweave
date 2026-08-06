@@ -41,7 +41,7 @@ for(const relative of ['catalog.json','civweave-school-catalog.sqlite','RECONCIL
 }
 
 const [index,helper,installer,installRuntime,boundary,updateController,updateWorker,workerWrapper,workerCore,offlineOverride,cleanroomWorker]=await Promise.all([
-  read('public/index.html'),read('public/app/knowledge-school-seeds-v1.js'),read('public/app/knowledge-school-installer-v1.js'),
+  read('public/app/index.html'),read('public/app/knowledge-school-seeds-v1.js'),read('public/app/knowledge-school-installer-v1.js'),
   read('public/install-v130.js'),read('public/app/install-boundary-v146.js'),read('public/app/pwa-update-controller-v204.js'),
   read('public/service-worker-update-v204.js'),read('public/service-worker-v203.js'),read('public/service-worker-core-v208.js'),
   read('public/service-worker-offline-v211-override.js'),read('public/service-worker-living-school-cleanroom-v218.js')
@@ -52,7 +52,7 @@ if(helper.includes('serviceWorker.register'))throw new Error('Optional school st
 assertIncludes(installer,['neededSchools','Save selected library','Download ${needed.length}',"progress.phase==='cached'",'saved offline'],'knowledge installer');
 assertMatches(installRuntime,/const\s+LIBRARY_CACHE\s*=\s*['"]cwknowledge-school-seeds-v2['"]/, 'app installer protected library cache');
 assertIncludes(installRuntime,['migrateKnowledgeCache','protectedCache','waitForCurrentWorker'],'app installer runtime');
-assertIncludes(boundary,["PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'",'addScript(PWA_UPDATE_SCRIPT)',"pwaUpdateRevision:'v207-registration-watchdog'"],'install boundary');
+assertIncludes(boundary,["const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'",'PWA_UPDATE_SCRIPT',"pwaUpdateRevision:'v207-registration-watchdog'"],'install boundary');
 assertIncludes(updateController,['data-civweave-update-control',"setState('Check updates'","setState('Restart to update'",'withTimeout(registration.update()','migrateKnowledgeCache',"const LIBRARY_CACHE='cwknowledge-school-seeds-v2'"],'installed update controller');
 assertIncludes(updateWorker,["const CACHE='cwupdate-visible-v207'","'/app/pwa-update-controller-v204.js'","knowledgeCache:'cwknowledge-school-seeds-v2'"],'update service-worker lane');
 assertIncludes(workerWrapper,["importScripts('/service-worker-living-school-cleanroom-v218.js","importScripts('/service-worker-core-v208.js","importScripts('/service-worker-offline-v211-override.js"],'active worker wrapper');
