@@ -1,8 +1,10 @@
 (()=>{
 'use strict';
-const VERSION='1.0.7-weaveling-memory-bridge-v205-frozen-runtime-proxy';
+const VERSION='1.0.9-weaveling-memory-bridge-v218-code-intent-loader';
 const MAX_MEMORY_ITEMS=6;
+const CODE_AUTOMATION_SCRIPT='/app/code-automation-orchestrator-v217.js?v=1.0.9-v218';
 let fastRuntimeInstalled=false;
+let codeAutomationPromise=null;
 function api(){return globalThis.CivweaveWeavelingMemoryV191;}
 function response(answer,extra={}){return{response:{answer,choice:{mode:'Reflect',system:'civweave',room:'civweave.quad',nextAction:''},assumptions:[],requiresConsent:false,confidence:.99},provider:'civweave-memory',requestedProvider:'civweave-memory',model:VERSION,fallbackFrom:null,...extra};}
 function installFastRuntime(){
@@ -26,10 +28,7 @@ function installFastRuntime(){
     if(!result||typeof result!=='object')return result;
     return{...result,latency:{...(result.latency||{}),interactiveMs:Math.round(performance.now()-started),revision:VERSION}};
   };
-  Object.defineProperties(wrapped,{
-    __civweaveFastMemoryV192:{value:true},
-    __prior:{value:original},
-  });
+  Object.defineProperties(wrapped,{__civweaveFastMemoryV192:{value:true},__prior:{value:original}});
   const proxy=Object.freeze({...runtime,generate:wrapped,fastMemoryRevision:VERSION});
   try{globalThis.CivweaveModelRuntime=proxy}catch{return false;}
   fastRuntimeInstalled=globalThis.CivweaveModelRuntime===proxy;
@@ -71,10 +70,21 @@ function install(){
   assistant.weavelingMemoryRevision=VERSION;
   return true;
 }
-function stabilize(){
-  installFastRuntime();
-  return install();
+function installCodeAutomation(){
+  if(globalThis.CivweaveCodeAutomationV217){globalThis.CivweaveCodeAutomationV217.install?.();return Promise.resolve(true);}
+  if(codeAutomationPromise)return codeAutomationPromise;
+  if(typeof document==='undefined'||typeof location==='undefined')return Promise.resolve(false);
+  codeAutomationPromise=new Promise((resolve,reject)=>{
+    const path=new URL(CODE_AUTOMATION_SCRIPT,location.href).pathname;
+    const existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===path);
+    const finish=()=>{if(globalThis.CivweaveCodeAutomationV217){globalThis.CivweaveCodeAutomationV217.install?.();resolve(true)}else reject(new Error('The code intent runtime loaded without becoming ready.'))};
+    if(existing){let ticks=0;const timer=setInterval(()=>{if(globalThis.CivweaveCodeAutomationV217){clearInterval(timer);finish()}else if(++ticks>=200){clearInterval(timer);reject(new Error('The code intent runtime did not become ready.'))}},50);return;}
+    const script=document.createElement('script');script.src=CODE_AUTOMATION_SCRIPT;script.async=false;script.onload=finish;script.onerror=()=>reject(new Error('The code intent runtime could not be loaded.'));document.head.append(script);
+  }).catch(error=>{codeAutomationPromise=null;try{dispatchEvent(new CustomEvent('civweave:code-automation-load-failed',{detail:{error:error.message}}))}catch{}return false});
+  return codeAutomationPromise;
 }
-globalThis.CivweaveWeavelingMemoryBridgeV191=Object.freeze({version:VERSION,install,stabilize,installFastRuntime,maxMemoryItems:MAX_MEMORY_ITEMS,get fastRuntimeInstalled(){return fastRuntimeInstalled;}});
+function stabilize(){installFastRuntime();const ready=install();installCodeAutomation();return ready;}
+globalThis.CivweaveWeavelingMemoryBridgeV191=Object.freeze({version:VERSION,install,stabilize,installFastRuntime,installCodeAutomation,maxMemoryItems:MAX_MEMORY_ITEMS,get fastRuntimeInstalled(){return fastRuntimeInstalled;}});
 install();
+installCodeAutomation();
 })();
