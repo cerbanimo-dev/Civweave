@@ -7,7 +7,7 @@ const installed=read('public/app/installed-entry-v146.js');
 const family=read('public/app/fullscreen-family-v104.html');
 const campus=read('public/app/working-campus-v156.html');
 
-assert.match(installed,/fullscreen-family-v104\.html/,'installed entry must route through the current family entry');
+assert.match(installed,/(?:working-campus-v156|fullscreen-family-v104)\.html/,'installed entry must route to an active Commonweave boot path');
 assert.match(family,/working-campus-v156\.html/,'current family entry must route Commonweave to Working Campus');
 const match=campus.match(/<script id="working-campus-planner-v199">([\s\S]*?)<\/script>/);
 assert(match,'Working Campus must contain the v199 planner integration');

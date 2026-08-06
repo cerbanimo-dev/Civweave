@@ -3,7 +3,7 @@
   "short_name": "Commonweave",
   "description": "Five connected, offline-ready Commonweave systems with deterministic local operation and a non-modal AI settings layer.",
   "id": "/commonweave-local",
-  "start_url": "/app/?system=commonweave&version=1.0.6",
+  "start_url": "/app/?system=commonweave&installed=1&version=1.0.6",
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
@@ -18,10 +18,10 @@
     {"src":"/app/logos/commonweave-icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ],
   "shortcuts": [
-    {"name":"Commonweave","url":"/app/?system=commonweave","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"Living School","url":"/app/?system=living-school","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"Cerbanimo","url":"/app/?system=cerbanimo","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"FellowFare","url":"/app/?system=fellowfare","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"Anarchadia","url":"/app/?system=anarchadia","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]}
+    {"name":"Commonweave","url":"/app/?system=commonweave&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Living School","url":"/app/?system=living-school&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Cerbanimo","url":"/app/?system=cerbanimo&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"FellowFare","url":"/app/?system=fellowfare&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Anarchadia","url":"/app/?system=anarchadia&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]}
   ]
 }
