@@ -21,13 +21,9 @@ function replaceRequired(source,pattern,replacement,label){
 }
 
 await patch('public/index.html',source=>{
-  source=replaceRequired(source,/<title>Install Commonweave v\d+\.\d+\.\d+<\/title>/,`<title>Install Commonweave v${version}</title>`,'installer title');
-  source=replaceRequired(source,/<span class="version">v\d+\.\d+\.\d+<\/span>/,`<span class="version">v${version}</span>`,'installer version badge');
-  source=replaceRequired(source,/Install Commonweave v\d+\.\d+\.\d+\. The campus downloads automatically\./,`Install Commonweave v${version}. The campus downloads automatically.`,'installer headline');
-  source=source.replace(/manifest\.webmanifest\?v=\d+\.\d+\.\d+/g,`manifest.webmanifest?v=${version}`);
-  source=source.replace(/\d+\.\d+\.\d+-lightweight-shell-v208/g,`${version}-lightweight-shell-v208`);
-  source=source.replace(/\d+\.\d+\.\d+-offline-retry-loop-v211/g,`${version}-offline-retry-loop-v211`);
-  source=source.replace(/\d+\.\d+\.\d+-required-campus-v1/g,`${version}-required-campus-v1`);
+  source=replaceRequired(source,/<title>Civweave<\/title>/,'<title>Civweave</title>','launcher title');
+  source=replaceRequired(source,/civweave-brand\.js\?v=\d+\.\d+\.\d+/,`civweave-brand.js?v=${version}`,'branding layer revision');
+  source=replaceRequired(source,/installed-entry-v146\.js\?v=\d+\.\d+\.\d+/,`installed-entry-v146.js?v=${version}`,'launcher entry revision');
   return source;
 });
 
