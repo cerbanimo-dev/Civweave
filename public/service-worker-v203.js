@@ -16,6 +16,7 @@ const REQUIRED_SHELL_ASSETS = [
   '/install-v130.js',
   '/offline.html',
   '/app/manifest.webmanifest',
+  '/app/index.html',
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146.js',
   '/app/fullscreen-family-v104.html',
@@ -61,6 +62,11 @@ const APP_CACHE_PREFIXES = [
 const TEXT_CONTENT = /(?:text\/(?:html|css|plain)|javascript|ecmascript|application\/(?:json|manifest\+json))/i;
 const DISCOVERABLE_EXTENSION = /\.(?:html?|css|m?js|json|webmanifest|md|txt|png|webp|jpe?g|gif|svg|avif|ico|woff2?|ttf|otf)$/i;
 const IMAGE_EXTENSION = /\.(?:png|webp|jpe?g|gif|svg|avif|ico)$/i;
+const LEGACY_ENTRY_PATHS = new Set([
+  '/app/installed-entry-v146.html',
+  '/app/installed-entry-v146'
+]);
+
 const WORKER_PATHS = new Set([
   '/service-worker.js',
   '/service-worker-v156.js',
@@ -451,6 +457,25 @@ async function cacheFirst(request) {
   }
 }
 
+async function stableAppEntry(request) {
+  let response = await findCached('/app/index.html');
+  if (!response) {
+    try {
+      response = await fetchFresh('/app/index.html', 'stable-app-entry');
+      await (await caches.open(SHELL_CACHE)).put(cacheKey('/app/index.html'), response.clone());
+    } catch {}
+  }
+  if (!response) {
+    return new Response('Commonweave launcher is unavailable.', {
+      status: 503,
+      headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' }
+    });
+  }
+  return request.method === 'HEAD'
+    ? new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers })
+    : response;
+}
+
 async function modelOnDemand(request) {
   const cacheName = `commonweave-model-${VERSION}-on-demand-v208`;
   const cache = await caches.open(cacheName);
@@ -540,6 +565,10 @@ self.addEventListener('fetch', event => {
   }
   if (MODEL_PREFIXES.some(prefix => url.pathname.startsWith(prefix))) {
     event.respondWith(modelOnDemand(request));
+    return;
+  }
+  if (request.mode === 'navigate' && LEGACY_ENTRY_PATHS.has(url.pathname)) {
+    event.respondWith(stableAppEntry(request));
     return;
   }
   if (request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {

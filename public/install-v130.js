@@ -4,7 +4,8 @@
 const VERSION = '1.0.6';
 const ENTRY = '/app/installed-entry-v146.html?system=commonweave';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
-const WORKER_URL = `/service-worker-v203.js?v=${WORKER_BUILD}`;
+const WORKER_SCRIPT_REVISION = 'stable-entry-v216';
+const WORKER_URL = `/service-worker-v203.js?v=${WORKER_BUILD}&revision=${WORKER_SCRIPT_REVISION}`;
 const REGISTRATION_TIMEOUT_MS = 15000;
 const REGISTRATION_QUERY_TIMEOUT_MS = 6000;
 const ACTIVATION_TIMEOUT_MS = 45000;
@@ -74,7 +75,9 @@ function rootScope(reg) {
 function workerMatches(worker) {
   try {
     const url = new URL(worker?.scriptURL || '');
-    return url.pathname === '/service-worker-v203.js' && url.searchParams.get('v') === WORKER_BUILD;
+    return url.pathname === '/service-worker-v203.js' &&
+      url.searchParams.get('v') === WORKER_BUILD &&
+      url.searchParams.get('revision') === WORKER_SCRIPT_REVISION;
   } catch {
     return false;
   }
