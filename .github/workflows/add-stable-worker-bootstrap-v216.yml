@@ -1,0 +1,41 @@
+name: Add stable worker bootstrap v216
+
+on:
+  push:
+    branches: [agent/stable-entry-worker-v216]
+    paths:
+      - scripts/add-stable-worker-bootstrap-v216.mjs
+      - .github/workflows/add-stable-worker-bootstrap-v216.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/stable-entry-worker-v216
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Add network bootstrap
+        run: node scripts/add-stable-worker-bootstrap-v216.mjs
+      - name: Validate bootstrap
+        run: |
+          grep -q "serviceWorker.register" public/index.html
+          grep -q "revision=stable-entry-v216" public/index.html
+          grep -q "updateViaCache: 'none'" public/index.html
+      - name: Commit bootstrap
+        run: |
+          git config user.name "cerbanimo-dev"
+          git config user.email "cerbanimo@gmail.com"
+          git add public/index.html
+          if git diff --cached --quiet; then
+            echo "Stable worker bootstrap is already current."
+            exit 0
+          fi
+          git commit -m "Bootstrap the stable entry worker from the installer"
+          git push origin HEAD:agent/stable-entry-worker-v216
