@@ -3,7 +3,7 @@
 
 const VERSION='1.0.16';
 const REVISION='five-system-boundary-v227';
-const INSTALLER='/';
+const INSTALLER='/app/index.html';
 const BOOT_KEY='commonweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='commonweave.install-boundary.boot.v226';
 const DEV_KEY='commonweave.install-boundary.developer.v146';
