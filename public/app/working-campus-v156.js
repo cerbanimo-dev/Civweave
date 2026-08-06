@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const REVISION='canonical-campus-startup-v223';
+const REVISION='canonical-campus-startup-v226';
 const parts=['/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt'];
 const required=['conversation','weaveling-chat-form','weaveling-chat-input','workspace','view-title','state-label'];
 const controller=new AbortController();
@@ -16,7 +16,7 @@ addEventListener('beforeunload',stop,{once:true});
 async function fetchPart(pathname){
   const url=new URL(pathname,location.origin);
   url.searchParams.set('revision',REVISION);
-  const response=await fetch(url,{cache:'no-store',signal:controller.signal});
+  const response=await fetch(url,{cache:'no-store',signal:controller.signal,redirect:'follow'});
   if(!response.ok)throw new Error(`Working Campus source ${pathname} returned ${response.status}`);
   return response.text();
 }
@@ -27,7 +27,7 @@ async function boot(){
   if(!liveDocument())throw new DOMException('Working Campus navigation interrupted startup.','AbortError');
   Function(source.join(''))();
   document.documentElement.dataset.commonweaveCampusRuntime='ready';
-  dispatchEvent(new CustomEvent('commonweave:working-campus-runtime-ready',{detail:{revision:REVISION,parts:parts.length,at:new Date().toISOString()}}));
+  dispatchEvent(new CustomEvent('commonweave:working-campus-runtime-ready',{detail:{revision:REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-core-only'}}));
 }
 boot().catch(error=>{
   if(!active||error?.name==='AbortError')return;
