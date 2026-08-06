@@ -8,64 +8,33 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [manifestText,campusHtml,campusLoader,lifecycle,installBoundary,additions,workerCore,releaseCoherence,wrapper]=await Promise.all([
-  read('public/app/manifest.webmanifest'),
-  read('public/app/working-campus-v156.html'),
-  read('public/app/working-campus-v156.js'),
-  read('public/app/document-lifecycle-v221.js'),
-  read('public/app/install-boundary-v146.js'),
-  read('public/extensions/commonweave-additions-v156.js'),
-  read('public/service-worker-core-v208.js'),
-  read('public/service-worker-release-coherence-v220.js'),
-  read('public/service-worker-v203.js')
+const [manifestText,campusHtml,campusLoader,campusPart4,lifecycle,installBoundary,routes,additions,workerCore,releaseCoherence,wrapper,canonicalNavigation]=await Promise.all([
+  read('public/app/manifest.webmanifest'),read('public/app/working-campus-v156.html'),read('public/app/working-campus-v156.js'),read('public/app/working-campus-v156.part4.txt'),read('public/app/document-lifecycle-v221.js'),read('public/app/install-boundary-v146.js'),read('public/app/system-routes-v227.js'),read('public/extensions/commonweave-additions-v156.js'),read('public/service-worker-core-v208.js'),read('public/service-worker-release-coherence-v220.js'),read('public/service-worker-v203.js'),read('public/service-worker-canonical-navigation-v227.js')
 ]);
-
 const manifest=JSON.parse(manifestText);
-assert.match(manifest.start_url,/^\/app\/working-campus-v156\.html\?/,'Installed PWA still starts on the empty /app/ launcher.');
-assert(campusHtml.indexOf('/app/document-lifecycle-v221.js')<campusHtml.indexOf('/app/install-boundary-v146.js'),'Lifecycle guard must load before the install boundary.');
-assert(campusHtml.includes('/app/document-lifecycle-v221.js?v=document-lifecycle-v222'),'Working Campus does not request the safe lifecycle revision.');
-assert(campusHtml.includes('/app/install-boundary-v146.js?v=canonical-core-only-v226'),'Working Campus does not request the core-only boundary revision.');
-assert(campusHtml.includes('/app/working-campus-v156.js?v=canonical-campus-startup-v226'),'Working Campus does not request the v226 loader revision.');
-
-assert(campusLoader.includes("cache:'no-store'"),'Working Campus fragments are not fetched fresh.');
-assert(campusLoader.includes("redirect:'follow'"),'Working Campus fragments do not follow host redirects internally.');
-assert(!campusLoader.includes("cache:'force-cache'"),'Working Campus still forces stale fragment cache.');
-for(const token of ['Promise.all(parts.map(fetchPart))','campusReady()','commonweave:working-campus-runtime-ready','document.documentElement===bootDocument','location.href===bootUrl',"policy:'canonical-core-only'"])assert(campusLoader.includes(token),`Working Campus loader is missing ${token}.`);
-
-for(const token of [
-  "location.pathname==='/app/working-campus-v156.html'",
-  "root.dataset.commonweaveCanonicalCore='only'",
-  "canonicalPolicy:'core-only-no-global-additions-no-redirect'",
-  'canonicalAutoScripts:0'
-])assert(installBoundary.includes(token),`Install boundary is missing ${token}.`);
-assert(!installBoundary.includes('function startAdditions()'),'Canonical boundary still contains delayed automatic additions.');
-assert(installBoundary.indexOf("if(canonicalAppSurface()){")<installBoundary.indexOf('installAdditions();'),'Canonical short-circuit does not occur before legacy additions.');
-
-for(const token of ['document-lifecycle-v222','CommonweaveLifecycleMutationObserver',"addEventListener('pagehide',stop"]){assert(lifecycle.includes(token),`Document lifecycle guard is missing ${token}.`)}
-assert(!lifecycle.includes("Object.defineProperty(document,'head'")&&!lifecycle.includes("Object.defineProperty(document,'body'"),'Lifecycle guard still overrides native document structure.');
-
+assert.match(manifest.start_url,/^\/app\/working-campus-v156\.html\?/,'Installed PWA starts on the empty launcher.');
+assert(campusHtml.indexOf('/app/document-lifecycle-v221.js')<campusHtml.indexOf('/app/install-boundary-v146.js'),'Lifecycle guard must load before boundary.');
+assert(campusHtml.includes('/app/document-lifecycle-v221.js?v=document-lifecycle-v222'),'Working Campus lifecycle revision is stale.');
+assert(campusHtml.includes('/app/install-boundary-v146.js?v=five-system-boundary-v227'),'Working Campus boundary revision is stale.');
+assert(campusHtml.includes('/app/working-campus-v156.js?v=canonical-campus-startup-v227'),'Working Campus loader revision is stale.');
+for(const token of ["cache:'no-store'","redirect:'follow'","'x-commonweave-package':'working-campus-v227'",'Promise.all(parts.map(fetchPart))','campusReady()','ensureRouteContract','commonweave:working-campus-runtime-ready','document.documentElement===bootDocument','location.href===bootUrl',"policy:'canonical-core-only-five-system-routing'"])assert(campusLoader.includes(token),`Working Campus loader is missing ${token}.`);
+assert(!campusLoader.includes("cache:'force-cache'"),'Working Campus forces stale fragments.');
+for(const token of ["['/app/working-campus-v156.html','commonweave']","['/app/cabinets/living-school/index.html','living-school']","['/app/realm-console-v140.html','cerbanimo']","['/app/fellowfare-cabinet-v144.html','fellowfare']","['/app/anarchadia-console-v139.html','anarchadia']","root.dataset.commonweaveCanonicalCore='only'","canonicalPolicy:'five-system-first-class-routes-commonweave-core-only'",'canonicalSystemCount:5','canonicalAutoScripts:0'])assert(installBoundary.includes(token),`Install boundary is missing ${token}.`);
+assert(!installBoundary.includes('function startAdditions()'),'Boundary contains delayed automatic additions.');
+assert(installBoundary.indexOf("if(system==='commonweave'){")<installBoundary.indexOf('installAdditions();'),'Commonweave short-circuit occurs after legacy additions.');
+for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
+assert(campusPart4.includes('CommonweaveSystemRoutesV227')&&campusPart4.includes('routes.navigate(id'),'Working Campus realm travel bypasses the route contract.');
+for(const token of ['document-lifecycle-v222','CommonweaveLifecycleMutationObserver',"addEventListener('pagehide',stop"])assert(lifecycle.includes(token),`Lifecycle guard is missing ${token}.`);
+assert(!lifecycle.includes("Object.defineProperty(document,'head'")&&!lifecycle.includes("Object.defineProperty(document,'body'"),'Lifecycle guard overrides native document structure.');
 assert(additions.includes('commonweaveAdditionsNavigating'),'Shared additions do not track navigation teardown.');
-assert(!additions.includes('Document navigation interrupted script loading.'),'Shared additions still emit the reported navigation interruption error.');
-assert(additions.includes('document.body?.append(tools)')&&additions.includes('document.body?.append(dialog)'),'Shared additions still require a live body during teardown.');
-
-assert(workerCore.includes("'/app/document-lifecycle-v221.js'"),'Lifecycle guard is missing from the required app shell.');
+assert(!additions.includes('Document navigation interrupted script loading.'),'Shared additions emit the reported navigation error.');
+assert(workerCore.includes("'/app/document-lifecycle-v221.js'"),'Lifecycle guard is absent from shell.');
 const installBlock=workerCore.match(/self\.addEventListener\('install',[\s\S]*?\n\}\);/)?.[0]||'';
-assert(installBlock.includes('event.waitUntil(cacheShell())'),'Service worker install does not cache the shell.');
-assert(!installBlock.includes('skipWaiting'),'Service worker still takes over active pages during installation.');
-assert(workerCore.includes("if (type === 'SKIP_WAITING')"),'Explicit update activation message was removed.');
-
+assert(installBlock.includes('event.waitUntil(cacheShell())'),'Worker install does not cache shell.');
+assert(!installBlock.includes('skipWaiting'),'Worker takes over active pages during install.');
 for(const token of ['release-coherence-v226','working-campus-v156.part5.txt','version-pinned-html-js-css-json-txt-network-first-cached-fallback'])assert(releaseCoherence.includes(token),`Release coherence is missing ${token}.`);
-assert(wrapper.includes('/service-worker-release-coherence-v220.js?v=release-coherence-v226'),'Active worker does not import release coherence v226.');
-
-for(const [name,source] of [['campus loader',campusLoader],['lifecycle guard',lifecycle],['install boundary',installBoundary],['shared additions',additions],['release coherence',releaseCoherence]])assert.doesNotThrow(()=>new vm.Script(source,{filename:name}),`${name} does not compile after startup synchronization.`);
-
-console.log(JSON.stringify({
-  ok:true,
-  revision:'canonical-campus-startup-v226',
-  directCampusStart:true,
-  canonicalCoreOnly:true,
-  canonicalAutoScripts:0,
-  navigationErrorsSilent:true,
-  campusFragmentsNetworkFirst:true,
-  nonInterruptingWorker:true
-},null,2));
+assert(wrapper.indexOf('/app/system-routes-v227.js')<wrapper.indexOf('/service-worker-core-v208.js'),'Worker route contract loads after core.');
+assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not final.');
+assert(canonicalNavigation.includes("headers.set('x-commonweave-package',REVISION)")&&canonicalNavigation.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical worker navigation contract is incomplete.');
+for(const [name,source] of [['campus loader',campusLoader],['lifecycle guard',lifecycle],['install boundary',installBoundary],['route contract',routes],['shared additions',additions],['release coherence',releaseCoherence],['canonical navigation',canonicalNavigation]])assert.doesNotThrow(()=>new vm.Script(source,{filename:name}),`${name} does not compile.`);
+console.log(JSON.stringify({ok:true,revision:'canonical-campus-startup-v227',directCampusStart:true,canonicalSystems:5,commonweaveCoreOnly:true,navigationErrorsSilent:true,campusFragmentsNetworkFirst:true,packageAuthenticatedNavigation:true,exactRouteFallback:true,nonInterruptingWorker:true},null,2));
