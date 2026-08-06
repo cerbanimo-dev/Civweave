@@ -2,6 +2,9 @@ import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
+await import('./sync-release-version-assets.mjs');
+await import('./verify-release-version-sync.mjs');
+
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};

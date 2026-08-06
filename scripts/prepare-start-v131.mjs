@@ -1,3 +1,5 @@
+await import('./sync-release-version-assets.mjs');
+
 const isRender=process.env.RENDER==='true';
 if(isRender){
   console.log('[Commonweave] Public gateway mode: Gateway fast start, serving packaged assets immediately.');
