@@ -3,12 +3,12 @@
 
 const VERSION = '1.0.6';
 const ENTRY = '/app/installed-entry-v146.html?system=commonweave';
-const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
+const WORKER_BUILD = `${VERSION}-lightweight-shell-v216-stable-entry-cache-route`;
 const WORKER_URL = `/service-worker-v203.js?v=${WORKER_BUILD}`;
 const REGISTRATION_TIMEOUT_MS = 15000;
 const REGISTRATION_QUERY_TIMEOUT_MS = 6000;
 const ACTIVATION_TIMEOUT_MS = 45000;
-const WATCHDOG_RECOVERY_KEY = 'commonweave.shell.registration-watchdog.v208';
+const WATCHDOG_RECOVERY_KEY = 'commonweave.shell.registration-watchdog.v216';
 const LEGACY_LIBRARY_CACHE = 'commonweave-knowledge-schools-v1';
 const LIBRARY_CACHE = 'cwknowledge-school-seeds-v2';
 const PROTECTED_CACHE_PREFIXES = ['cwknowledge-', 'cwupdate-', 'commonweave-model-'];

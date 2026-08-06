@@ -5,7 +5,7 @@ const GUIDE_REVISION='five-system-chat-r46-weaveling-memory';
 const CABINET_REVISION='direct-software-r38-v106';
 const DEVICE_REVISION='device-package-r41-no-native-dialog';
 const CALIBRATION_REVISION='marketing-only-r1';
-const INSTALL_REVISION='direct-entry-r45-memory-credential-v191';
+const INSTALL_REVISION='direct-entry-r46-stable-entry-cache-route-v216';
 const LEDGER_HYDRATION_REVISION='direct-software-r35';
 const AI_REVISION='settings-v191-explicit-device-credential';
 const BASE_PACKAGE_RECOVERY_REVISION='device-package-self-heal-v191';
@@ -29,10 +29,11 @@ const MODEL_FILES=new Set([
   '/app/vendor/onnxruntime/ort-wasm-simd-threaded.mjs',
   '/app/vendor/onnxruntime/ort-wasm-simd-threaded.wasm'
 ]);
+const LEGACY_ENTRY_PATHS=new Set(['/app/installed-entry-v146.html','/app/installed-entry-v146']);
 const ARCHIVED_LOCATION_PREFIXES=['/app/services/living-school/visual-assets/','/app/services/cerbanimo/assets/visual/','/app/services/fellowfare/assets/mall/','/app/services/anarchadia/assets/screens/'];
 const CORE=[
   '/index.html','/install-v130.css','/install-v130.js','/offline.html',
-  '/app/manifest.webmanifest','/app/installed-entry-v146.html','/app/installed-entry-v146.js','/app/install-boundary-v146.js','/app/local-object-mesh-v146.js','/app/local-first-policy-v131.js',
+  '/app/manifest.webmanifest','/app/index.html','/app/installed-entry-v146.html','/app/installed-entry-v146.js','/app/install-boundary-v146.js','/app/local-object-mesh-v146.js','/app/local-first-policy-v131.js',
   '/app/fullscreen-family-v104.html','/app/working-campus-v156.html','/app/working-campus-v156.css','/app/working-campus-v156.js','/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt','/app/family-shell-v104.css','/app/family-shell-v104.js','/app/family-ai-loader-v105.js','/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js',
   '/app/model-settings-controller-v173.js','/app/unified-ai-settings-v175.js','/app/deterministic-mode-v175.js','/app/settings-delegation-v175.js','/app/shared-tools-cleanup-v175.js','/app/model-settings-v133.css','/app/shared/commonweave-model-runtime.js',
   '/app/realm-console-v140.html','/app/realm-console-v140.css','/app/realm-console-v140.js','/app/cerbanimo-quest-engine-v144.css','/app/cerbanimo-quest-engine-v144.js','/app/cerbanimo-ai-validator-v156.js','/app/cabinet-home-v142.css','/app/cabinet-home-v142.js','/app/cabinet-surfaces-v143.css','/app/cabinet-surfaces-v143.js','/app/sharing-library-v143.js',
@@ -97,6 +98,15 @@ async function deviceOnly(request,fallback=''){
   await notifyPackageEvent({event:'asset-missing',pathname:url.pathname,fallback,recoveryRevision:BASE_PACKAGE_RECOVERY_REVISION});
   return missingAssetResponse(url.pathname,fallback)
 }
+async function stableAppEntry(request){
+  let response=await cachedResponse('/app/index.html');
+  if(!response){
+    const target=new Request(new URL('/app/index.html',self.location.origin),{method:'GET',cache:'no-store',credentials:'same-origin'});
+    response=await networkRepair(target);
+  }
+  if(!response)return missingAssetResponse('/app/index.html');
+  return request.method==='HEAD'?headResponse(response):response
+}
 async function modelOnDemand(request){
   const url=new URL(request.url),cache=await caches.open(MODEL_CACHE),cached=await cache.match(url.pathname,{ignoreSearch:true});
   if(cached)return request.method==='HEAD'?headResponse(cached):cached;
@@ -119,6 +129,7 @@ self.addEventListener('fetch',event=>{
   if(url.pathname==='/service-worker.js'||url.pathname==='/service-worker-v156.js'){event.respondWith(fetch(request,{cache:'no-store'}));return}
   if(url.pathname==='/'||url.pathname==='/index.html'||url.pathname.startsWith('/downloads/'))return;
   if(MODEL_FILES.has(url.pathname)){event.respondWith(modelOnDemand(request));return}
+  if(request.mode==='navigate'&&LEGACY_ENTRY_PATHS.has(url.pathname)){event.respondWith(stableAppEntry(request));return}
   if(request.mode==='navigate'){event.respondWith((async()=>injectNavigationPolicy(await deviceOnly(request,navigationFallback(url)),url.pathname))());return}
   if(url.pathname.startsWith('/app/')||url.pathname.startsWith('/loom/')||url.pathname.startsWith('/lite/')||url.pathname.startsWith('/cabinetonly/')||url.pathname==='/offline.html'){event.respondWith(deviceOnly(request));return}
 });
