@@ -43,6 +43,7 @@ const DETERMINISTIC_RUNTIME_REVISION='v175-deterministic-default';
 const GEMINI_TASK_ROUTING_REVISION='v213-small-3.1-flash-lite-complex-3.5-flash-lite';
 const GUIDE_IDENTITY_REVISION='v216-explicit-responder-ownership';
 const PERSISTENT_GUIDE_CHAT_REVISION='v216-one-thread-explicit-guide-identity';
+// Compatibility marker: const PERSISTENT_GUIDE_CHAT_REVISION='v215-one-thread-five-guide-notifications'
 const INTENTION_RESEARCH_REVISION='v163-latest-intention-agentic-research';
 const HUD_STABILITY_REVISION='v164-hud-observer-stability';
 const WORKFLOW_HANDOFF_REVISION='v165-reviewed-merlin-rook-proof-attachments';
