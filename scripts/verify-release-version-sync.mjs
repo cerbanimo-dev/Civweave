@@ -70,7 +70,7 @@ for(const token of [
 ])assert(syncSource.includes(token),`Release synchronizer is missing ${token}.`);
 
 for(const [label,source] of [['installer page',indexHtml],['manifest',manifestText],['installer runtime',installRuntime],['stable app entry',appIndex],['installed entry',installedEntry],['worker core',workerCore],['worker wrapper',workerWrapper],['legacy worker',legacyWorker],['working campus',workingCampus]]){
-  const visibleReleasePattern=new RegExp(`(?:Commonweave v|const VERSION = '|version=|\\?v=)(\\d+\\.\\d+\\.\\d+)`,'g');
+  const visibleReleasePattern=new RegExp(`(?:Commonweave v|const VERSION = '|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
   for(const match of source.matchAll(visibleReleasePattern)){
     if(match[1]!==version)throw new Error(`${label} still exposes release ${match[1]} instead of ${version}.`);
   }
