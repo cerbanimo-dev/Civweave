@@ -1,0 +1,42 @@
+name: Apply deterministic PWA boot v218
+
+on:
+  push:
+    branches: [agent/deterministic-pwa-boot-v218]
+    paths:
+      - scripts/apply-deterministic-pwa-boot-v218.mjs
+      - .github/workflows/apply-deterministic-pwa-boot-v218.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/deterministic-pwa-boot-v218
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply deterministic boot route
+        run: node scripts/apply-deterministic-pwa-boot-v218.mjs
+      - name: Validate boot runtime
+        run: |
+          node --check public/install-v130.js
+          node --check public/app/installed-entry-v146.js
+          node --check public/app/install-boundary-v146.js
+          node scripts/verify-deterministic-pwa-boot-v218.mjs
+      - name: Commit boot repair
+        run: |
+          git config user.name "cerbanimo-dev"
+          git config user.email "cerbanimo@gmail.com"
+          git add public/index.html public/install-v130.js public/app/manifest.webmanifest public/app/installed-entry-v146.js public/app/install-boundary-v146.js public/app/fullscreen-family-v104.html scripts/verify-deterministic-pwa-boot-v218.mjs
+          if git diff --cached --quiet; then
+            echo "Deterministic PWA boot repair already current."
+            exit 0
+          fi
+          git commit -m "Make installed PWA boot deterministic"
+          git push origin HEAD:agent/deterministic-pwa-boot-v218
