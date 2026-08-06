@@ -30,7 +30,10 @@ async function boot(){
   if(explicitInstalled||installedDisplay())authorize();
   const bootGranted=()=>{try{return sessionStorage.getItem(BOOT_KEY)==='1'||sessionStorage.getItem(LEGACY_BOOT_KEY)==='1'}catch{return explicitInstalled}};
   if(!installedDisplay()&&!bootGranted()&&!localDeveloper()){
-    const installer=new URL('/',location.origin);installer.searchParams.set('install','required');location.replace(installer.href);return;
+    const installer=new URL('/app/index.html',location.origin);
+    installer.searchParams.set('install','required');
+    installer.searchParams.set('next',`${location.pathname}${location.search}${location.hash}`.slice(0,1800));
+    location.replace(installer.href);return;
   }
   const requested=params.get('system')||params.get('target')||'commonweave';
   const aliases={hub:'commonweave',cabinet:'commonweave',cabinets:'commonweave',cabinetonly:'commonweave',lite:'commonweave'};
