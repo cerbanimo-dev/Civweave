@@ -3,7 +3,7 @@
 if(globalThis.CommonweaveRewardSurfacesV2)return;
 const api=globalThis.CommonweaveCanonicalRewardsV2;if(!api)throw Error('Canonical reward ledger must load before surfaces.');
 const V='2.0.0',TREE_KEY='living-school.skill-tree.v2';let queued=false,verifyTicket=0;
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c])),num=v=>Number.isFinite(Number(v))?Number(v):0,fmt=v=>new Intl.NumberFormat(undefined,{maximumFractionDigits:1}).format(num(v));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),num=v=>Number.isFinite(Number(v))?Number(v):0,fmt=v=>new Intl.NumberFormat(undefined,{maximumFractionDigits:1}).format(num(v));
 function setText(id,value){const node=document.getElementById(id);if(node)node.textContent=String(value)}
 function calculatePassportFromLedger(ledger=api.readLedger()){
   const data={schema:'anarchadia.passport-ledger-projection.v2',authority:'commonweave.reward-ledger.v2',skillXp:0,acorns:0,buttons:0,skills:{},entries:Array.isArray(ledger?.entries)?ledger.entries:[],ledgerUpdatedAt:ledger?.updatedAt};
