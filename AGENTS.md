@@ -154,3 +154,38 @@ A task is not complete when only a legacy copy works. Confirm the route reached 
 - When a migration intentionally retires an old path, say so and update this file plus the README.
 
 When uncertain, stop wandering through similarly named rooms and return to the dispatcher. It is the map pinned to the front door.
+
+## Long-horizon agentic pipeline mode
+
+Use the decade pipeline when the task asks for the next best improvement, continuous improvement, roadmap execution, an agentic cycle, or another unscoped advancement of Commonweave. A specific user request remains more authoritative than the queue.
+
+Before choosing work in pipeline mode:
+
+1. Read `TEN-YEAR-PIPELINE.md`.
+2. Select the first unchecked bundle whose preceding bundles are checked.
+3. Implement exactly that bundle.
+4. Check the bundle in the same branch only after its implementation, migration, compatibility, and verification gates pass.
+5. Follow `rebase.md` when the selected bundle is a scheduled rebase.
+6. Follow `renewal.md` when the final renewal bundle is reached.
+
+The priority order is:
+
+1. explicit user instruction,
+2. security, privacy, data preservation, and recovery,
+3. the active architectural convergence lock and executable ownership evidence,
+4. the selected pipeline bundle,
+5. later roadmap ideas.
+
+Pipeline rules:
+
+- One bundle per branch and pull request.
+- Default to a draft pull request.
+- Do not merge or push directly to `main`.
+- Do not skip forward because a later bundle is more interesting.
+- Do not duplicate work already present on current `main` or in a valid open pull request.
+- Do not mark a bundle complete until every gate passes.
+- Preserve completed bundle IDs and history. Rebases may rewrite unfinished work only.
+- A scheduled rebase is planning-only. Do not hide production feature changes inside it.
+- When the queue is exhausted, create the next epoch from fresh screenshots, redacted feedback, incidents, measurements, and current code. The old plan is a structural example, not the source of truth.
+
+The pipeline coordinates work. It does not grant authority. Human approval remains required for merge, compatibility removal, destructive migration, paid-service activation, and high-stakes governance or economic actions.
