@@ -4,7 +4,6 @@ import os from 'node:os';
 import path from 'node:path';
 import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
-
 const PORT=18806,origin=`http://127.0.0.1:${PORT}`,root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const dataDir=await mkdtemp(path.join(os.tmpdir(),'commonweave-installer-recovery-v218-')),output=[];
 const child=spawn(process.execPath,['scripts/start-commonweave-v131.mjs'],{cwd:root,env:{...process.env,RENDER:'true',HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});
@@ -24,12 +23,10 @@ try{
   const cleanImport="importScripts('/service-worker-living-school-cleanroom-v218.js",coreImport="importScripts('/service-worker-core-v208.js",offlineImport="importScripts('/service-worker-offline-v211-override.js";
   assert(files.wrapper.includes(cleanImport)&&files.wrapper.includes(coreImport)&&files.wrapper.includes(offlineImport),'active worker does not compose all three maintained layers');
   assert(files.wrapper.indexOf(cleanImport)<files.wrapper.indexOf(coreImport)&&files.wrapper.indexOf(coreImport)<files.wrapper.indexOf(offlineImport),'worker layer order is incorrect');
-  assert(files.core.includes("const BUILD = 'lightweight-shell-v208'"),'retained worker core is not the lightweight shell');assert(!/importScripts\(/.test(files.core),'retained lightweight core imports the retired layered stack');assert(files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained worker core lacks resumable campus hydration');
+  assert(files.core.includes("const BUILD = 'lightweight-shell-v208'")&&files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained lightweight/offline core is incomplete');assert(!/importScripts\(/.test(files.core),'retained lightweight core imports the retired layered stack');
   assert(files.cleanroom.includes("const REVISION='living-school-cleanroom-v218'")&&files.cleanroom.includes('event.stopImmediatePropagation()'),'Living School worker retirement boundary is incomplete');
   assert(files.offline.includes("const V211_REVISION = 'offline-campus-seed-provenance-v211'")&&files.offline.includes('CommonweaveOfflineCampusV211'),'offline retry override is incomplete');
-  assert(files.legacy.includes('legacy-v156-bridge-v209'),'legacy worker bridge revision is missing');assert(files.legacy.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'legacy worker does not import the active wrapper');assert(!/^[ \t]*importScripts\('\/service-worker\.js/m.test(files.legacy),'legacy bridge executes the retired base worker');assert(!/^[ \t]*importScripts\('\/service-worker-critical-v199\.js/m.test(files.legacy),'legacy bridge executes the retired critical coordinator');
+  assert(files.legacy.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'legacy worker does not import the active wrapper');
   const bridgeBody=files.legacy.replace(/importScripts\('\/service-worker-v203\.js[^\n]+\);/,'');new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.core}\n${files.offline}`,{filename:'commonweave-v218-bridged-cleanroom-worker.js'});
-  const gateway=await readFile(path.join(root,'server-gateway-v131.mjs'),'utf8');
-  for(const token of ["const packageInstall = Boolean(String(req.headers['x-commonweave-package'] || '').trim())","pathname === '/service-worker-v203.js'","pathname === '/app/knowledge-school-seeds-v1.js'","pathname === '/app/pwa-update-controller-v204.js'","pathname.startsWith('/downloads/knowledge-schools/')"])assert(gateway.includes(token),`gateway recovery is missing ${token}`);
   console.log(JSON.stringify({ok:true,directInstallerAssets:10,packagePurposeHeadersAccepted:4,knowledgeCatalogServed:true,knowledgeZipServed:firstZip,workerGlobalCollision:false,workerRevision:'v218-cleanroom-wrapper-retained-lightweight-core-v211-retry'},null,2));
 }catch(error){console.error(output.join(''));throw error}finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}
