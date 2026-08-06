@@ -5,13 +5,15 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(value,message)=>{if(!value)throw new Error(message)};
-const [index,bootstrap,critical,pwa,nav,loader,engine,imageWorker,activeWorker,legacyWorker]=await Promise.all([
+const [index,bootstrap,critical,pwa,nav,loader,paths,interactions,engine,imageWorker,activeWorker,legacyWorker]=await Promise.all([
   read('public/app/cabinets/living-school/index.html'),
   read('public/app/cabinets/living-school/living-school-bootstrap-v194.js'),
   read('public/service-worker-critical-v199.js'),
   read('public/app/pwa-v130.js'),
   read('public/app/themed-system-nav-v178.js'),
-  read('public/app/cabinets/living-school/living-school-flat-loader-v203.js'),
+  read('public/app/cabinets/living-school/living-school-flat-loader-v213.js'),
+  read('public/app/cabinets/living-school/living-school-paths-v213.js'),
+  read('public/app/cabinets/living-school/living-school-interactions-v213.js'),
   read('public/app/cabinets/living-school/living-school-cabinet-v151.mjs'),
   read('public/service-worker-shared-images-v203.js'),
   read('public/service-worker-v203.js'),
@@ -19,25 +21,35 @@ const [index,bootstrap,critical,pwa,nav,loader,engine,imageWorker,activeWorker,l
 ]);
 
 assert(index.includes('data-commonweave-system="living-school"'),'Living School does not expose its shared system identity.');
-assert(index.includes('data-build="living-school-flat-v203"'),'Living School is not marked as the flat v203 surface.');
+assert(index.includes('data-build="living-school-flat-v213-direct-interactions"'),'Living School is not marked as the direct-interaction v213 surface.');
 assert(index.includes('/app/themed-system-nav-v178.js'),'Living School does not load the image system navigation directly.');
 assert(!/<script[^>]+type=["']module["'][^>]+living-school-cabinet-v151\.mjs/i.test(index),'The blocking Living School module tag is still present.');
 assert(index.includes('living-school-bootstrap-v194.js'),'Living School does not use the non-blocking bootstrap.');
-assert(index.includes('living-school-flat-loader-v203.js'),'Living School does not use the post-core flat loader.');
+assert(index.includes('living-school-flat-loader-v213.js'),'Living School does not use the direct-interaction post-core loader.');
 assert(index.indexOf('family-shell-v104.js')<index.indexOf('living-school-bootstrap-v194.js'),'Shared controls must boot before the learning engine.');
-assert(index.indexOf('living-school-bootstrap-v194.js')<index.indexOf('living-school-flat-loader-v203.js'),'The core bootstrap must be declared before optional enhancements.');
+assert(index.indexOf('living-school-bootstrap-v194.js')<index.indexOf('living-school-flat-loader-v213.js'),'The core bootstrap must be declared before direct enhancements.');
 assert(index.indexOf('themed-system-nav-v178.js')<index.indexOf('install-boundary-v146.js'),'The direct image navigation must be discoverable before the install boundary.');
 assert(!index.includes('/app/assets/living-school/'),'Spatial assets were introduced into the flat page.');
 assert(!index.includes('living-school-two-agent-relay-v165.js?v='),'The relay still races initial content boot.');
+assert(index.includes('id="actions"')&&index.includes('aria-hidden="true"')&&index.includes('tabindex="-1"')&&index.includes('hidden>☰'),'The unfinished room menu remains interactive.');
 for(const token of ['import(`${MODULE}?v=${VERSION}&attempt=${currentAttempt}`)','data-ls-boot-retry','data-ls-boot-reset','commonweave:living-school-ready','livingSchoolBoot','firstShellPaint()'])assert(bootstrap.includes(token),`Living School bootstrap missing ${token}`);
 new Function(bootstrap);
 new Function(loader);
+new Function(paths);
+new Function(interactions);
 assert(loader.includes("document.addEventListener('commonweave:living-school-ready',loadCore"),'Flat enhancements no longer wait for core readiness.');
+assert(loader.includes('living-school-paths-v213.js?v=direct-controls-v213'),'The direct path controls are absent from the active loader.');
+assert(loader.includes('living-school-interactions-v213.js?v=direct-surfaces-v213'),'The direct workbench controller is absent from the active loader.');
+assert(!loader.includes('living-school-curriculum-launch-v212.js'),'The retired room bridge is still loaded.');
 assert(loader.includes('commonweave:living-school-enable-rich-media'),'Rich media is no longer explicit opt-in.');
+assert(!paths.includes('LivingSchoolCabinetV151?.setRoom'),'Path controls still depend on the stale room writer.');
+assert(!paths.includes('[data-lsw-action'),'Path controls still intercept workbench actions.');
+assert(!interactions.includes('openNative')&&!interactions.includes('.click()'),'Workbench actions still use synthetic navigation.');
+assert(interactions.includes('function openLesson()')&&interactions.includes('function openAssessment()'),'Direct lesson or assessment surfaces are missing.');
 assert(engine.includes('render();\nwindow.LivingSchoolCabinetV151'),'The saved flat learning engine no longer renders and publishes its API.');
 assert(critical.includes("VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'The combined FellowFare parent/mobile, Cerbanimo, and memory bridge compatibility package is not retained.');
 assert(critical.includes("mode:'flat'"),'The combined critical package no longer identifies the flat interface.');
-assert(critical.includes('/app/cabinets/living-school/living-school-flat-loader-v203.js'),'The flat loader is absent from the critical compatibility package.');
+assert(critical.includes('/app/cabinets/living-school/living-school-flat-loader-v203.js'),'The retained v203 compatibility loader is absent from the critical package.');
 assert(critical.includes('/app/weaveling-memory-bridge-v191.js'),'The frozen-safe memory bridge is absent from the critical compatibility package.');
 assert(pwa.includes('/service-worker-v203.js'),'The installed PWA does not request the v203 worker.');
 
@@ -59,6 +71,8 @@ console.log(JSON.stringify({
   ok:true,
   system:'living-school',
   mode:'flat',
+  activeSurface:'v213-direct-interactions',
+  compatibilityFloor:'v203',
   boot:'core-before-enhancements',
   content:'preserved-local-state',
   imageNavigation:'direct-and-repaired',

@@ -12,7 +12,10 @@ const activeWorker=read('public/service-worker-v203.js');
 const legacyWorker=read('public/service-worker-v156.js');
 const shell=read('public/app/cabinets/living-school/index.html');
 const bootstrap=read('public/app/cabinets/living-school/living-school-bootstrap-v194.js');
-const loader=read('public/app/cabinets/living-school/living-school-flat-loader-v203.js');
+const loader=read('public/app/cabinets/living-school/living-school-flat-loader-v213.js');
+const compatibilityLoader=read('public/app/cabinets/living-school/living-school-flat-loader-v203.js');
+const paths=read('public/app/cabinets/living-school/living-school-paths-v213.js');
+const interactions=read('public/app/cabinets/living-school/living-school-interactions-v213.js');
 const engine=read('public/app/cabinets/living-school/living-school-cabinet-v151.mjs');
 const nav=read('public/app/themed-system-nav-v178.js');
 const relay=read('public/app/cabinets/living-school/living-school-two-agent-relay-v165.js');
@@ -21,7 +24,7 @@ const workbench=read('public/app/cabinets/living-school/living-school-workbench-
 const installer=read('public/install-v130.js');
 const pwa=read('public/app/pwa-v130.js');
 
-for(const [name,source] of [['critical worker',critical],['shared image worker',imageWorker],['active worker',activeWorker],['legacy worker bridge',legacyWorker],['flat bootstrap',bootstrap],['flat loader',loader],['installer',installer],['pwa',pwa]]){
+for(const [name,source] of [['critical worker',critical],['shared image worker',imageWorker],['active worker',activeWorker],['legacy worker bridge',legacyWorker],['flat bootstrap',bootstrap],['active flat loader',loader],['compatibility flat loader',compatibilityLoader],['direct path controls',paths],['direct interactions',interactions],['installer',installer],['pwa',pwa]]){
   try{new Function(source.replace(/^\s*importScripts\([^\n]+\);/m,''))}catch(error){throw new Error(`${name} does not parse: ${error.message}`)}
 }
 
@@ -78,24 +81,33 @@ if(lightweightMode){
 assert((nav.match(/200-[a-z-]+-nav\.webp/g)||[]).length===5,'The shared family navigation does not reference all five image buttons.');
 assert(nav.includes('grid-template-columns:repeat(5'),'The family navigation is not mounted as five equal slots.');
 assert(shell.includes('<nav class="ls-tray" aria-label="Living School navigation" hidden>'),'The legacy Living School text tray can still occupy the bottom edge.');
-assert(shell.includes('living-school-flat-loader-v203.js'),'The flat enhancement loader is missing.');
+assert(shell.includes('living-school-flat-loader-v213.js'),'The active v213 enhancement loader is missing.');
+assert(shell.includes('living-school-interactions-v213.css'),'The direct interaction styles are missing.');
+assert(shell.includes('id="actions"')&&shell.includes('aria-hidden="true"')&&shell.includes('tabindex="-1"')&&shell.includes('hidden>☰'),'The unfinished hamburger remains interactive.');
 assert(!shell.includes('living-school-two-agent-relay-v165.js?v='),'The risky media relay still starts during initial boot.');
 assert(!shell.includes('living-school-workbench-v158.js?v='),'The workbench still races the flat core import.');
 assert(!shell.includes('/app/assets/living-school/'),'Spatial scene assets were pulled into the flat cabinet.');
 assert(!shell.includes('ls-world-art'),'Spatial scene markup was pulled into the flat cabinet.');
 
-assert(bootstrap.includes("VERSION='living-school-flat-bootstrap-v203'"),'The bootstrap is not the flat v203 boot path.');
+assert(bootstrap.includes("VERSION='living-school-flat-bootstrap-v203'"),'The retained bootstrap is not the flat v203-compatible boot path.');
 assert(bootstrap.includes('firstShellPaint()'),'Shared controls do not receive a paint before the core import.');
 assert(bootstrap.includes("mode:'flat'"),'Ready events no longer identify flat mode.');
 assert(loader.includes("document.addEventListener('commonweave:living-school-ready',loadCore"),'Enhancements no longer wait for the core content.');
 assert(loader.indexOf('living-school-mutation-guard-v196.js')<loader.indexOf('living-school-workbench-v158.js'),'The mutation guard must precede workbench observers.');
 assert(loader.indexOf('living-school-mutation-guard-v196.js')<loader.indexOf('living-school-two-agent-relay-v165.js'),'The mutation guard must precede the optional relay.');
+assert(loader.includes('living-school-paths-v213.js?v=direct-controls-v213'),'The active loader omits direct path controls.');
+assert(loader.includes('living-school-interactions-v213.js?v=direct-surfaces-v213'),'The active loader omits direct workbench interactions.');
+assert(!loader.includes('living-school-curriculum-launch-v212.js'),'The retired room bridge is still active.');
 assert(loader.includes('commonweave:living-school-enable-rich-media'),'The risky rich-media relay is not explicit opt-in.');
+assert(compatibilityLoader.includes('living-school-paths-v160.js'),'The retained v203 compatibility loader no longer provides the historical path runtime.');
 
 for(const token of ['Pathway Desk','Curriculum Forge','Learning Map','Open lesson','Assessment Studio','Practicum Workshop','Credential Forge','window.LivingSchoolCabinetV151'])assert(engine.includes(token),`Flat learning engine lost ${token}.`);
 assert(guard.includes("callback?.name==='queuePatch'"),'The reader mutation guard no longer recognizes the relay observer.');
 assert(relay.includes("action==='lesson'?openLesson(module,state):openAssessment(module,state)"),'Optional rich-media lesson routing changed unexpectedly.');
-assert(workbench.includes("if(action==='lesson')openNative('lesson',0)"),'The flat workbench no longer routes lessons through the cabinet.');
+assert(workbench.includes("if(action==='lesson')openNative('lesson',0)"),'The retained workbench compatibility layer changed unexpectedly.');
+assert(!paths.includes('LivingSchoolCabinetV151?.setRoom')&&!paths.includes('[data-lsw-action'),'Active path controls still depend on or intercept the legacy room layer.');
+assert(!interactions.includes('openNative')&&!interactions.includes('.click()')&&!interactions.includes('LivingSchoolCabinetV151?.setRoom'),'Active workbench interactions still use indirect room navigation.');
+assert(interactions.includes('function openLesson()')&&interactions.includes('function openAssessment()'),'Active direct lesson or assessment surfaces are missing.');
 assert(installer.includes("WORKER_URL = `/service-worker-v203.js"),'The installer does not request the direct v203 worker.');
 assert(pwa.includes("WORKER_URL=`/service-worker-v203.js")||pwa.includes("WORKER_URL = `/service-worker-v203.js"),'The installed app does not request the v203 worker.');
 if(lightweightMode){
@@ -110,11 +122,13 @@ if(lightweightMode){
 
 console.log(JSON.stringify({
   ok:true,
-  repair:lightweightMode?'lightweight-shell-v208-legacy-bridge-v209':'flat-living-school-v203-memory-bridge-v205',
+  repair:lightweightMode?'lightweight-shell-v208-legacy-bridge-v209':'flat-living-school-v213-direct-interactions',
   combinedCritical:combinedRevision,
   coreBoundary:111,
   sharedBoundary:53,
   flatContentPreserved:true,
+  activeLivingSchoolSurface:'v213-direct-interactions',
+  compatibilityFloor:'v203',
   optionalRelayAtBoot:false,
   navigationImageCount:5,
   topAiMarks:2,
