@@ -5,6 +5,10 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
+const releaseVersion=(await read('VERSION')).trim();
+assert(/^\d+\.\d+\.\d+$/.test(releaseVersion),`Invalid canonical VERSION: ${releaseVersion}`);
+const activeWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-lightweight-shell-v208-legacy-v156-bridge-v209')`;
+const legacyBaseImport=`importScripts('/service-worker.js?v=${releaseVersion}-base-r47-ai-settings-cleanroom')`;
 const sources={};
 for(const [name,file] of Object.entries({
   controller:'public/app/model-settings-controller-v173.js',
@@ -51,7 +55,7 @@ requires(sources.boundary,["ADDITIONS_VERSION='v188-ai-settings-cleanroom'","SET
 
 const bridgeMode=sources.additive.includes('legacy-v156-bridge-v209');
 if(bridgeMode){
-  requires(sources.additive,["importScripts('/service-worker-v203.js?v=1.0.7-lightweight-shell-v208-legacy-v156-bridge-v209')",'GET_SHARED_IMAGE_STATUS','GET_CRITICAL_BOOT_STATUS','GET_ADDITIONS_STATUS'],'legacy package bridge');
+  requires(sources.additive,[activeWorkerImport,'GET_SHARED_IMAGE_STATUS','GET_CRITICAL_BOOT_STATUS','GET_ADDITIONS_STATUS'],'legacy package bridge');
   assert(!/^[ \t]*importScripts\('\/service-worker\.js/m.test(sources.additive),'legacy package bridge executes the retired base worker');
   assert(!/^[ \t]*importScripts\('\/service-worker-critical-v199\.js/m.test(sources.additive),'legacy package bridge executes the retired critical coordinator');
   const cleanImport="importScripts('/service-worker-living-school-cleanroom-v218.js";
@@ -64,7 +68,7 @@ if(bridgeMode){
   assert(!sources.installer.includes('GET_CRITICAL_BOOT_STATUS'),'installer still waits on the retired critical package coordinator');
   assert(!sources.installer.includes('GET_ADDITIONS_STATUS'),'installer still waits on the retired additive package');
 }else{
-  requires(sources.additive,["importScripts('/service-worker.js?v=1.0.7-base-r47-ai-settings-cleanroom')","EXTENSION_VERSION='working-campus-additions-v188-ai-settings-cleanroom'","SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188'","SETTINGS_RUNTIME_REVISION='provider-runtime-disconnected-v188'","SETTINGS_LOG_REVISION='diagnostics-runtime-retired-v188'","settingsPresentation:'cleanroom-v188'",'settingsMutationObserver:false','settingsPolling:false','settingsTimers:false','settingsDiagnosticsRuntime:false','providerRuntimeOnOpen:false','providerTestsAvailable:false'],'installed package refresh');
+  requires(sources.additive,[legacyBaseImport,"EXTENSION_VERSION='working-campus-additions-v188-ai-settings-cleanroom'","SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188'","SETTINGS_RUNTIME_REVISION='provider-runtime-disconnected-v188'","SETTINGS_LOG_REVISION='diagnostics-runtime-retired-v188'","settingsPresentation:'cleanroom-v188'",'settingsMutationObserver:false','settingsPolling:false','settingsTimers:false','settingsDiagnosticsRuntime:false','providerRuntimeOnOpen:false','providerTestsAvailable:false'],'installed package refresh');
 }
 requires(sources.worker,["'/app/model-settings-controller-v173.js'","'/app/unified-ai-settings-v175.js'","'/app/settings-delegation-v175.js'"],'legacy core package compatibility');
 
@@ -77,4 +81,4 @@ for(const file of activeSurfaces){
   assert(html.includes('/app/model-settings-controller-v173.js')||html.includes('/app/install-boundary-v146.js'),`${file} does not reach the clean-room compatibility path.`);
 }
 assert(launcherSurfaces>=1,'No packaged surface exposes a recognized AI settings launcher.');
-console.log(JSON.stringify({ok:true,revision:'v188-ai-settings-cleanroom',controllerAuthority:'single-cleanroom-controller',openPath:'synchronous-local-dom-only',legacyDelegationRuntime:false,captureListener:false,mutationObserver:false,polling:false,timers:false,diagnosticsRuntime:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,installedPackageRefresh:true,installedPackageMode:bridgeMode?'v218-cleanroom-wrapper-retained-v208-core':'v188-layered-additive',launcherSurfaces},null,2));
+console.log(JSON.stringify({ok:true,releaseVersion,revision:'v188-ai-settings-cleanroom',controllerAuthority:'single-cleanroom-controller',openPath:'synchronous-local-dom-only',legacyDelegationRuntime:false,captureListener:false,mutationObserver:false,polling:false,timers:false,diagnosticsRuntime:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,installedPackageRefresh:true,installedPackageMode:bridgeMode?'v218-cleanroom-wrapper-retained-v208-core':'v188-layered-additive',launcherSurfaces},null,2));
