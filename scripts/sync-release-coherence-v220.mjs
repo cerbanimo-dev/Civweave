@@ -54,76 +54,45 @@ await patch('public/app/installed-entry-v146.js',source=>{
 
 await patch('public/app/working-campus-v156.html',source=>{
   const lifecycleScript=`<script src="/app/document-lifecycle-v221.js?v=${lifecycleRevision}"></script>`;
-  if(source.includes('/app/document-lifecycle-v221.js')){
-    source=source.replace(/<script src="\/app\/document-lifecycle-v221\.js\?v=[^"]+"><\/script>/,lifecycleScript);
-  }else{
-    source=replaceTextRequired(source,'<script src="/app/install-boundary-v146.js',`${lifecycleScript}\n<script src="/app/install-boundary-v146.js`,'Working Campus install-boundary script');
-  }
-  source=replaceRequired(
-    source,
-    /\/app\/working-campus-v156\.js\?v=[^"]+/,
-    `/app/working-campus-v156.js?v=${campusRevision}`,
-    'Working Campus runtime revision'
-  );
+  if(source.includes('/app/document-lifecycle-v221.js'))source=source.replace(/<script src="\/app\/document-lifecycle-v221\.js\?v=[^"]+"><\/script>/,lifecycleScript);
+  else source=replaceTextRequired(source,'<script src="/app/install-boundary-v146.js',`${lifecycleScript}\n<script src="/app/install-boundary-v146.js`,'Working Campus install-boundary script');
+  source=replaceRequired(source,/\/app\/working-campus-v156\.js\?v=[^"]+/,`/app/working-campus-v156.js?v=${campusRevision}`,'Working Campus runtime revision');
   return source;
 });
 
 await patch('public/service-worker-core-v208.js',source=>{
   if(!source.includes("'/app/document-lifecycle-v221.js'")){
-    source=replaceTextRequired(
+    source=replaceTextRequired(source,"  '/app/installed-entry-v146.js',\n","  '/app/installed-entry-v146.js',\n  '/app/document-lifecycle-v221.js',\n",'service-worker required shell entry list');
+  }
+  if(!source.includes("event.waitUntil(cacheShell());")){
+    source=replaceRequired(
       source,
-      "  '/app/installed-entry-v146.js',\n",
-      "  '/app/installed-entry-v146.js',\n  '/app/document-lifecycle-v221.js',\n",
-      'service-worker required shell entry list'
+      /self\.addEventListener\('install', event => \{\n  event\.waitUntil\(\(async \(\) => \{\n    await cacheShell\(\);\n    await self\.skipWaiting\(\);\n  \}\)\(\)\);\n\}\);/,
+      "self.addEventListener('install', event => {\n  event.waitUntil(cacheShell());\n});",
+      'service-worker non-interrupting install policy'
     );
   }
-  source=replaceRequired(
-    source,
-    /self\.addEventListener\('install', event => \{\n  event\.waitUntil\(\(async \(\) => \{\n    await cacheShell\(\);\n    await self\.skipWaiting\(\);\n  \}\)\(\)\);\n\}\);/,
-    "self.addEventListener('install', event => {\n  event.waitUntil(cacheShell());\n});",
-    'service-worker non-interrupting install policy'
-  );
   return source;
 });
 
 await patch('public/app/pwa-update-controller-v204.js',source=>{
-  for(const token of ['v222-atomic-campus-update-handoff','commonweave:working-campus-runtime-ready','activateWaiting','setTimeout(queueAutomaticCheck,45000)']){
-    if(!source.includes(token))throw new Error(`PWA update controller is missing ${token}.`);
-  }
+  for(const token of ['v222-atomic-campus-update-handoff','commonweave:working-campus-runtime-ready','activateWaiting','setTimeout(queueAutomaticCheck,45000)'])if(!source.includes(token))throw new Error(`PWA update controller is missing ${token}.`);
   return source;
 });
 
 await patch('public/app/persistent-guide-viewport-v216.js',source=>{
-  if(!source.includes('document-lifecycle-v221')){
-    source=replaceTextRequired(source,"const VERSION='1.0.8-persistent-guide-viewport-v216';", "const VERSION='1.0.8-persistent-guide-viewport-v216-document-lifecycle-v221';",'persistent guide lifecycle version');
-  }
-  if(!source.includes("addEventListener('pagehide',destroy,{once:true});")){
-    source=replaceTextRequired(source,"document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();", "addEventListener('pagehide',destroy,{once:true});\ndocument.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();",'persistent guide teardown hook');
-  }
+  if(!source.includes('document-lifecycle-v221'))source=replaceTextRequired(source,"const VERSION='1.0.8-persistent-guide-viewport-v216';","const VERSION='1.0.8-persistent-guide-viewport-v216-document-lifecycle-v221';",'persistent guide lifecycle version');
+  if(!source.includes("addEventListener('pagehide',destroy,{once:true});"))source=replaceTextRequired(source,"document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();","addEventListener('pagehide',destroy,{once:true});\ndocument.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();",'persistent guide teardown hook');
   source=source.replace('  document.head.append(style);','  const head=document.head;if(!head)return false;head.append(style);return true;');
   return source;
 });
 
 await patch('public/app/persistent-guide-chat-v215.js',source=>{
-  source=source.replace(
-    '.cwp215-legacy-retired{display:none!important}.cwp215-working-campus-retired>.main{grid-template-columns:minmax(0,1fr)!important}.cwp215-working-campus-retired .main>.guide{display:none!important}',
-    '.cwp215-legacy-retired{display:none!important}'
-  );
-  source=source.replace(
-    "  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>form.dataset.commonweaveLegacyChatRetired='v215');",
-    "  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>{if(form.id==='weaveling-chat-form'&&form.closest('.app')){delete form.dataset.commonweaveLegacyChatRetired;return}form.dataset.commonweaveLegacyChatRetired='v215'});"
-  );
-  source=source.replace(
-    "  const working=document.querySelector('.main>.guide #weaveling-chat-form')?.closest('.app');\n  if(working)working.classList.add('cwp215-working-campus-retired');",
-    "  const working=document.querySelector('.main>.guide #weaveling-chat-form')?.closest('.app');\n  if(working)working.classList.remove('cwp215-working-campus-retired');"
-  );
-  source=source.replace(
-    "  if(!(form instanceof HTMLFormElement)||form.closest(`#${ROOT_ID}`)||!form.matches(LEGACY_FORM_SELECTOR))return;",
-    "  if(!(form instanceof HTMLFormElement)||form.closest(`#${ROOT_ID}`)||!form.matches(LEGACY_FORM_SELECTOR)||(form.id==='weaveling-chat-form'&&form.closest('.app')))return;"
-  );
-  for(const token of ["classList.remove('cwp215-working-campus-retired')","form.id==='weaveling-chat-form'&&form.closest('.app')"]){
-    if(!source.includes(token))throw new Error(`Persistent guide coexistence patch is missing ${token}.`);
-  }
+  source=source.replace('.cwp215-legacy-retired{display:none!important}.cwp215-working-campus-retired>.main{grid-template-columns:minmax(0,1fr)!important}.cwp215-working-campus-retired .main>.guide{display:none!important}','.cwp215-legacy-retired{display:none!important}');
+  source=source.replace("  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>form.dataset.commonweaveLegacyChatRetired='v215');","  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>{if(form.id==='weaveling-chat-form'&&form.closest('.app')){delete form.dataset.commonweaveLegacyChatRetired;return}form.dataset.commonweaveLegacyChatRetired='v215'});");
+  source=source.replace("  const working=document.querySelector('.main>.guide #weaveling-chat-form')?.closest('.app');\n  if(working)working.classList.add('cwp215-working-campus-retired');","  const working=document.querySelector('.main>.guide #weaveling-chat-form')?.closest('.app');\n  if(working)working.classList.remove('cwp215-working-campus-retired');");
+  source=source.replace("  if(!(form instanceof HTMLFormElement)||form.closest(`#${ROOT_ID}`)||!form.matches(LEGACY_FORM_SELECTOR))return;","  if(!(form instanceof HTMLFormElement)||form.closest(`#${ROOT_ID}`)||!form.matches(LEGACY_FORM_SELECTOR)||(form.id==='weaveling-chat-form'&&form.closest('.app')))return;");
+  for(const token of ["classList.remove('cwp215-working-campus-retired')","form.id==='weaveling-chat-form'&&form.closest('.app')"])if(!source.includes(token))throw new Error(`Persistent guide coexistence patch is missing ${token}.`);
   return source;
 });
 
