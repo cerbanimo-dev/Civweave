@@ -8,12 +8,12 @@ const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 const [html,css,js,launcher,launcherCss,shellsText,sw]=await Promise.all([
   read('public/app/realm-console-v140.html'),read('public/app/realm-console-v140.css'),read('public/app/realm-console-v140.js'),read('public/app/v130-cabinet-launcher.js'),read('public/app/v130-cabinet-launcher.css'),read('public/app/shared/cabinet-shells-v129.json'),read('public/service-worker.js')
 ]);
-const chunks=[];for(let i=1;i<=4;i+=1)chunks.push(await read(`public/app/shared/commonweave-parity-ledger.part${i}.b64`));
+const chunks=[];for(let i=1;i<=4;i+=1)chunks.push(await read(`public/app/shared/civweave-parity-ledger.part${i}.b64`));
 const ledger=JSON.parse(gunzipSync(Buffer.from(chunks.join('').replace(/\s+/g,''),'base64')).toString('utf8'));
 const shells=JSON.parse(shellsText).systems;
-for(const token of ['Commonweave Realm Console','realm-console-v140.css','realm-console-v140.js'])assert(html.includes(token),`console HTML missing ${token}`);
-for(const token of ['data-system="living-school"','data-system="cerbanimo"','data-system="fellowfare"','data-system="commonweave"','.rc-feature-grid','.rc-room-nav','.rc-cap-grid','.rc-form'])assert(css.includes(token),`console CSS missing ${token}`);
-for(const token of ["commonweave.realm-console.v140","Commonweave","Living School","Cerbanimo","FellowFare","roomWorkspace","capabilityDetail","schemaFor","applyEffects","living-school.send-quest","cerbanimo.publish-need"])assert(js.includes(token),`console runtime missing ${token}`);
+for(const token of ['Civweave Realm Console','realm-console-v140.css','realm-console-v140.js'])assert(html.includes(token),`console HTML missing ${token}`);
+for(const token of ['data-system="living-school"','data-system="cerbanimo"','data-system="fellowfare"','data-system="civweave"','.rc-feature-grid','.rc-room-nav','.rc-cap-grid','.rc-form'])assert(css.includes(token),`console CSS missing ${token}`);
+for(const token of ["civweave.realm-console.v140","Civweave","Living School","Cerbanimo","FellowFare","roomWorkspace","capabilityDetail","schemaFor","applyEffects","living-school.send-quest","cerbanimo.publish-need"])assert(js.includes(token),`console runtime missing ${token}`);
 assert(!js.includes('sourceRoute'),'realm console still routes capabilities to legacy source pages');
 for(const forbidden of ['eval(', 'new Function(', 'document.cookie'])assert(!js.includes(forbidden),`console runtime contains forbidden ${forbidden}`);
 for(const system of ledger.systems){for(const room of system.rooms){for(const id of room.capabilityIds||[]){const cap=ledger.capabilities.find(item=>item.id===id);assert(cap,`room ${room.id} references missing capability ${id}`);assert(cap.system===system.id,`${id} is assigned to ${cap.system}, expected ${system.id}`);assert(cap.room===room.id,`${id} is assigned to room ${cap.room}, expected ${room.id}`)}}}

@@ -1,6 +1,6 @@
-# Commonweave Cabinet Family v1.0.4
+# Civweave Cabinet Family v1.0.4
 
-The installed application is software-first. It opens `/app/fullscreen-family-v104.html?system=commonweave` and displays the selected system’s existing application full-screen.
+The installed application is software-first. It opens `/app/fullscreen-family-v104.html?system=civweave` and displays the selected system’s existing application full-screen.
 
 The physical cabinet renderer, cabinet images, calibration tools, and archived room imagery remain in the repository for marketing and visual production. They are deliberately absent from the service worker’s `DEVICE_REQUIRED` list and therefore are not downloaded as part of the user’s offline installation.
 

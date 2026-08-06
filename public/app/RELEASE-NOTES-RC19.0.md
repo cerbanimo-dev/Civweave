@@ -18,4 +18,4 @@ This final Cerbanimo-focused pass locks the visual-native experience and concent
 
 ## Scope boundary
 
-Cerbanimo is now feature-complete for its current Commonweave role. Remaining work should be driven by device testing or shared ecosystem services, not additional Cerbanimo-only feature expansion.
+Cerbanimo is now feature-complete for its current Civweave role. Remaining work should be driven by device testing or shared ecosystem services, not additional Cerbanimo-only feature expansion.

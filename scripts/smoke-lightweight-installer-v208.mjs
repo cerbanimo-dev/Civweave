@@ -15,7 +15,7 @@ assert.match(worker, /lightweight-shell-v208/);
 assert.match(worker, /const SHELL_ASSETS = \[/);
 assert.doesNotMatch(worker, /importScripts\(/);
 assert.match(worker, /DOWNLOAD_OFFLINE_PACKAGE/);
-assert.match(worker, /COMMONWEAVE_OFFLINE_PACKAGE_PROGRESS/);
+assert.match(worker, /CIVWEAVE_OFFLINE_PACKAGE_PROGRESS/);
 assert.match(worker, /Promise\.allSettled/);
 assert.match(worker, /knowledgeLibrarySeparate: true/);
 

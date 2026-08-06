@@ -41,15 +41,15 @@ const context={
   performance:{now:()=>Date.now()},
 };
 context.globalThis=context;
-context.CommonweaveIntentionPlanner={
-  schema:'commonweave.intention-weave.v1',
+context.CivweaveIntentionPlanner={
+  schema:'civweave.intention-weave.v1',
   buildPlan(){return samplePlan()},
-  maybeCreate(){const plan=samplePlan(),item={id:plan.id,kind:'weave-plan',state:'review',plan};context.localStorage.setItem('commonweave.intentions.v127',JSON.stringify([item]));return{item,plan,response:{answer:'existing answer',approvalGate:{required:true}}}},
+  maybeCreate(){const plan=samplePlan(),item={id:plan.id,kind:'weave-plan',state:'review',plan};context.localStorage.setItem('civweave.intentions.v127',JSON.stringify([item]));return{item,plan,response:{answer:'existing answer',approvalGate:{required:true}}}},
   restore(plan){return{id:plan.id,plan}},
 };
 vm.createContext(context);
 vm.runInContext(source,context,{filename:'merlinites-semantic-planner-v164.js'});
-const merlinites=context.CommonweaveMerlinitesV164;
+const merlinites=context.CivweaveMerlinitesV164;
 assert.equal(merlinites.version,'1.0.4-merlinites-semantic-v164');
 assert.equal(merlinites.authority,'advisory');
 
@@ -60,7 +60,7 @@ const enhanced=merlinites.enhancePlan(original);
 assert.equal(original.semanticPlan,undefined,'enhancement must not mutate the original plan');
 assert.equal(enhanced.paths.length,original.paths.length,'existing path count must be preserved');
 assert.equal(enhanced.assumptions[0],original.assumptions[0],'existing assumptions must be preserved');
-assert.equal(enhanced.semanticPlan.schema,'commonweave.merlinites-semantic-plan.v1');
+assert.equal(enhanced.semanticPlan.schema,'civweave.merlinites-semantic-plan.v1');
 assert.equal(enhanced.semanticPlan.root.children.length,2);
 assert.ok(enhanced.semanticPlan.root.children.every(path=>path.children.length===2));
 assert.ok(enhanced.semanticPlan.root.children.flatMap(path=>path.children).every(step=>step.children.length>0));
@@ -73,12 +73,12 @@ assert.ok(expanded.children.length>0,'manual nodes should be recursively expanda
 assert.ok(expanded.children.every(child=>child.depth===1&&child.children.every(grandchild=>grandchild.depth===2)));
 assert.ok(expanded.children.flatMap(child=>child.children).every(grandchild=>grandchild.children.length===0));
 
-const created=context.CommonweaveIntentionPlanner.maybeCreate({text:'Make the planner work'});
+const created=context.CivweaveIntentionPlanner.maybeCreate({text:'Make the planner work'});
 assert.equal(created.response.answer,'existing answer','merlinites must preserve the existing user-facing response');
 assert.equal(created.response.approvalGate.required,true,'merlinites must preserve the approval gate');
-assert.equal(created.plan.semanticPlan.schema,'commonweave.merlinites-semantic-plan.v1');
-const persisted=JSON.parse(context.localStorage.getItem('commonweave.intentions.v127'));
-assert.equal(persisted[0].plan.semanticPlan.schema,'commonweave.merlinites-semantic-plan.v1','the saved weave must receive the additive plan');
+assert.equal(created.plan.semanticPlan.schema,'civweave.merlinites-semantic-plan.v1');
+const persisted=JSON.parse(context.localStorage.getItem('civweave.intentions.v127'));
+assert.equal(persisted[0].plan.semanticPlan.schema,'civweave.merlinites-semantic-plan.v1','the saved weave must receive the additive plan');
 
 const learning=await merlinites.evaluateLearning({
   prompt:'Why separate state from presentation?',
@@ -108,7 +108,7 @@ assert.ok(['claim-only','partial'].includes(task.status));
 assert.match(adapter,/export async function rank\(/,'adapter must expose custom semantic ranking');
 assert.match(adapter,/export async function match\(/,'existing reflex matching must remain');
 assert.match(adapter,/device-package-r39-minilm-safe-session/,'adapter must rotate to the safe-session semantic worker revision');
-assert.match(adapter,/CIRCUIT_KEY='commonweave\.minilm\.circuit\.v1'/,'adapter must preserve the failed-start circuit breaker');
+assert.match(adapter,/CIRCUIT_KEY='civweave\.minilm\.circuit\.v1'/,'adapter must preserve the failed-start circuit breaker');
 assert.match(adapter,/if\(!explicit\)return\{ready:false,dormant:true,reason:'explicit-activation-required'\}/,'incidental prewarm calls must remain dormant');
 assert.match(adapter,/if\(readyState\)return/,'adapter must reuse an established semantic session');
 assert.match(adapter,/if\(initPromise\)return initPromise/,'adapter must deduplicate concurrent session startup');
@@ -132,7 +132,7 @@ for(const token of ['merlinites-semantic-planning-v164','/app/merlinites-semanti
 assert.equal(serviceWorker.toLowerCase().includes(`${oldSlug}-semantic`),false,'offline package still contains the retired semantic name');
 assert.match(pwa,/working-campus-additions-v168-two-agent-workflow-merlinites-semantic-planning/,'installed updater must advance to the combined two-agent, workflow-handoff, and merlinites package');
 assert.equal(pwa.toLowerCase().includes(`${oldSlug}-semantic`),false,'installed updater still contains the retired semantic name');
-const retired=[`Commonweave${oldName}V164`,`commonweave.${oldSlug}-`,`__${oldSlug}SemanticInstalled`,`${oldSlug}Feedback`,`commonweave:${oldSlug}-`];
+const retired=[`Civweave${oldName}V164`,`civweave.${oldSlug}-`,`__${oldSlug}SemanticInstalled`,`${oldSlug}Feedback`,`civweave:${oldSlug}-`];
 for(const identifier of retired)assert.equal(source.includes(identifier),false,`runtime still contains retired identifier ${identifier}`);
 
 console.log('merlinites semantic planning v164 verification passed with MiniLM safe-session guards.');

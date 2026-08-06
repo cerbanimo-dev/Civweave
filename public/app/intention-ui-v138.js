@@ -1,10 +1,10 @@
 (()=>{
 'use strict';
-const KEY='commonweave.intentions.v127';
+const KEY='civweave.intentions.v127';
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const items=()=>{const value=parse(localStorage.getItem(KEY),[]);return Array.isArray(value)?value:[]};
-const save=value=>{localStorage.setItem(KEY,JSON.stringify(value.slice(0,100)));dispatchEvent(new CustomEvent('commonweave:intentions-changed',{detail:{items:value}}))};
+const save=value=>{localStorage.setItem(KEY,JSON.stringify(value.slice(0,100)));dispatchEvent(new CustomEvent('civweave:intentions-changed',{detail:{items:value}}))};
 let dialog=null,focusPlanId='';
 function ensureDialog(){
   if(dialog)return dialog;
@@ -15,7 +15,7 @@ function ensureDialog(){
   dialog.querySelector('[data-clear-completed]').onclick=()=>{save(items().filter(item=>!item.done&&item.state!=='completed'));render()};
   dialog.querySelector('[data-list]').addEventListener('click',handleClick);dialog.querySelector('[data-list]').addEventListener('change',handleChange);return dialog;
 }
-function pathCard(path,index,total){return`<article class="cw138-path" data-path="${index}"><header><div><small>${esc(path.type||'path')} · ${esc(path.realm||'commonweave')}</small><h4>${esc(path.title||'Untitled path')}</h4></div><div class="cw138-path-actions"><button type="button" data-path-up="${index}" ${index===0?'disabled':''}>↑</button><button type="button" data-path-down="${index}" ${index===total-1?'disabled':''}>↓</button><button type="button" data-path-remove="${index}" class="cw138-danger">Remove</button></div></header><p>${esc(path.purpose||'')}</p><ol>${(path.steps||[]).map(step=>`<li>${esc(step)}</li>`).join('')}</ol><p><b>Completion:</b> ${esc(path.completionCriteria||'Review and define completion evidence.')}</p></article>`}
+function pathCard(path,index,total){return`<article class="cw138-path" data-path="${index}"><header><div><small>${esc(path.type||'path')} · ${esc(path.realm||'civweave')}</small><h4>${esc(path.title||'Untitled path')}</h4></div><div class="cw138-path-actions"><button type="button" data-path-up="${index}" ${index===0?'disabled':''}>↑</button><button type="button" data-path-down="${index}" ${index===total-1?'disabled':''}>↓</button><button type="button" data-path-remove="${index}" class="cw138-danger">Remove</button></div></header><p>${esc(path.purpose||'')}</p><ol>${(path.steps||[]).map(step=>`<li>${esc(step)}</li>`).join('')}</ol><p><b>Completion:</b> ${esc(path.completionCriteria||'Review and define completion evidence.')}</p></article>`}
 function planCard(item,index){
   const plan=item.plan||{},paths=Array.isArray(plan.paths)?plan.paths:[],state=item.state||plan.state||'review',governance=plan.governance;
   return`<article class="cw138-plan" data-item="${index}" data-plan-id="${esc(item.id||plan.id||'')}"><header><div><small>INTENTION WEAVE</small><h3>${esc(plan.title||item.text||'Untitled intention')}</h3></div><span class="cw138-plan-state ${state==='active'?'is-active':''}">${esc(state)}</span></header><label>Governing intention<input data-plan-title="${index}" value="${esc(plan.title||item.text||'')}"></label><label>Outcome<textarea data-plan-outcome="${index}">${esc(plan.outcome||'')}</textarea></label><div class="cw138-plan-paths">${paths.map((path,pathIndex)=>pathCard(path,pathIndex,paths.length)).join('')||'<p class="cw138-empty">No sub-paths remain. Add or regenerate a path before activation.</p>'}</div>${governance?`<section class="cw138-governance"><h4>${esc(governance.title||'Consent layer')}</h4><p>${esc(governance.purpose||'')}</p><ul>${(governance.agreements||[]).map(value=>`<li>${esc(value)}</li>`).join('')}</ul><p><b>Review:</b> ${esc(governance.reviewQuestion||'Who must explicitly agree?')}</p></section>`:''}<section class="cw138-assumptions"><h4>Assumptions to inspect</h4><ul>${(plan.assumptions||[]).map((value,assumptionIndex)=>`<li>${esc(value)} <button type="button" data-assumption-remove="${assumptionIndex}">×</button></li>`).join('')}</ul></section><p class="cw138-review-note">This weave remains inert until you explicitly activate it. Activation changes the saved intention state and unlocks its routed paths.</p><div class="cw138-plan-actions"><button type="button" data-plan-save="${index}">Save revisions</button>${state==='active'?`<button type="button" data-plan-pause="${index}">Return to review</button>`:`<button type="button" data-plan-activate="${index}" ${paths.length?'':'disabled'}>Activate weave</button>`}<button type="button" data-plan-delete="${index}" class="cw138-danger">Delete weave</button></div></article>`;
@@ -30,5 +30,5 @@ function handleClick(event){const button=event.target.closest('button');if(!butt
 function handleChange(event){const box=event.target.closest('[data-basic-index]');if(!box)return;const current=items(),item=current[Number(box.dataset.basicIndex)];if(item){item.done=box.checked;item.state=box.checked?'completed':'active';save(current);render()}}
 function open(planId=''){focusPlanId=planId||'';const node=ensureDialog();render();for(const id of['cw127-intentions']){const old=document.getElementById(id);if(old?.open){try{old.close()}catch{old.removeAttribute('open')}}}if(!node.open)node.showModal()}
 document.addEventListener('click',event=>{const target=event.target.closest?.('[data-action="intentions"]');if(!target)return;event.preventDefault();event.stopImmediatePropagation();open()},true);
-globalThis.CommonweaveIntentionUI={open,render,activate,review,state,items};
+globalThis.CivweaveIntentionUI={open,render,activate,review,state,items};
 })();

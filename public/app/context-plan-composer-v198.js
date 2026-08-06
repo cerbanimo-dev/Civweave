@@ -3,7 +3,7 @@
 const VERSION='1.0.7-context-plan-composer-v198';
 const ADAPTER_URL='/app/models/all-minilm-l6-v2/adapter.js';
 const root=globalThis;
-if(root.CommonweaveContextPlanComposerV198?.version===VERSION)return;
+if(root.CivweaveContextPlanComposerV198?.version===VERSION)return;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const clone=value=>typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value));
 const words=value=>clean(value).toLowerCase().match(/[a-z0-9][a-z0-9'’-]*/g)||[];
@@ -66,7 +66,7 @@ async function rankCandidates(query,candidates,{semantic=true,limit=12}={}){
     return{rows:rows.slice(0,limit),device:result.device||'minilm',semantic:true,diagnostics};
   }catch(error){diagnostics.push(`MiniLM remained advisory and fell back safely: ${clean(error.message,240)}`);return{rows:lexical.slice(0,limit),device:'deterministic-lexical',semantic:false,diagnostics}}
 }
-function planKind(value,realm='commonweave'){
+function planKind(value,realm='civweave'){
   const text=clean(value).toLowerCase();
   if(realm==='living-school')return'learning';
   if(realm==='fellowfare')return'market';
@@ -85,12 +85,12 @@ function chooseByRoles(rows,kind,count=6){
 function taskFrom(piece,goal,kind,index,mode){
   const objective=`For “${goal},” ${piece.prompt.charAt(0).toLowerCase()}${piece.prompt.slice(1)}`;
   const task={id:`${kind}-${hash(`${goal}|${piece.id}`)}`,templateId:piece.id,role:piece.role,title:piece.title,objective,deliverable:piece.deliverable,evidence:clone(piece.evidence),acceptanceCriteria:clone(piece.criteria),complexityPoints:Math.max(4,Number(piece.weight||4)),sequence:index+1,status:'ready',microsteps:[`Open the materials and context needed for ${piece.title.toLowerCase()}.`,`Produce the stated deliverable.`,`Check every acceptance criterion and attach evidence.`]};
-  return root.CommonweaveRewardPolicyV198?.decorateTask?.(task,mode)||task;
+  return root.CivweaveRewardPolicyV198?.decorateTask?.(task,mode)||task;
 }
 async function composePath({text='',kind=planKind(text),realm,mode='deterministic',semantic=true,count=6}={}){
   const goal=goalText(text),resolved=POOLS[kind]?kind:'project',targetRealm=realm||(resolved==='learning'?'living-school':resolved==='market'?'fellowfare':'cerbanimo'),ranked=await rankCandidates(`${goal} ${resolved} ${targetRealm}`,POOLS[resolved],{semantic,limit:POOLS[resolved].length}),selected=chooseByRoles(ranked.rows,resolved,count),tasks=selected.map((piece,index)=>taskFrom(piece,goal,resolved,index,mode));
   const title=resolved==='learning'?`Learning path: ${titleCase(goal)}`:resolved==='market'?`Market request: ${titleCase(goal)}`:`Project plan: ${titleCase(goal)}`;
-  return{id:`path-${resolved}-${hash(goal)}`,type:resolved==='learning'?'learning':resolved==='market'?'material-acquirement':'skilled-labor',kind:resolved,realm:targetRealm,title,purpose:resolved==='learning'?`Build usable capability for ${goal} through sources, practice, transfer, and assessment.`:resolved==='market'?`Turn ${goal} into a fair, specific, verifiable request or offer with a recorded handoff.`:`Turn ${goal} into an observable result through bounded design, build, validation, and delivery.`,steps:tasks.map(task=>task.title),tasks,completionCriteria:resolved==='learning'?`The capability is independently demonstrated in its intended context and assessed against explicit criteria.`:resolved==='market'?`The need or offer has explicit terms, verified parties or sources, a completed handoff record, and a fairness review.`:`The promised result is delivered, tested against every acceptance criterion, and handed off with inspectable evidence.`,evidence:[...new Set(tasks.flatMap(task=>task.evidence))].slice(0,12),status:'draft',planning:{engine:ranked.semantic?'deterministic+minilm':'deterministic-lexical',semantic:ranked.semantic,device:ranked.device,templateIds:selected.map(item=>item.id),diagnostics:ranked.diagnostics},rewardPolicy:{mode,dailyEligibleTaskLimit:mode==='deterministic'?3:null,promotion:root.CommonweaveRewardPolicyV198?.PROMOTION||{headline:'Generative models earn 50% more rewards',detail:REWARD_COPY}}};
+  return{id:`path-${resolved}-${hash(goal)}`,type:resolved==='learning'?'learning':resolved==='market'?'material-acquirement':'skilled-labor',kind:resolved,realm:targetRealm,title,purpose:resolved==='learning'?`Build usable capability for ${goal} through sources, practice, transfer, and assessment.`:resolved==='market'?`Turn ${goal} into a fair, specific, verifiable request or offer with a recorded handoff.`:`Turn ${goal} into an observable result through bounded design, build, validation, and delivery.`,steps:tasks.map(task=>task.title),tasks,completionCriteria:resolved==='learning'?`The capability is independently demonstrated in its intended context and assessed against explicit criteria.`:resolved==='market'?`The need or offer has explicit terms, verified parties or sources, a completed handoff record, and a fairness review.`:`The promised result is delivered, tested against every acceptance criterion, and handed off with inspectable evidence.`,evidence:[...new Set(tasks.flatMap(task=>task.evidence))].slice(0,12),status:'draft',planning:{engine:ranked.semantic?'deterministic+minilm':'deterministic-lexical',semantic:ranked.semantic,device:ranked.device,templateIds:selected.map(item=>item.id),diagnostics:ranked.diagnostics},rewardPolicy:{mode,dailyEligibleTaskLimit:mode==='deterministic'?3:null,promotion:root.CivweaveRewardPolicyV198?.PROMOTION||{headline:'Generative models earn 50% more rewards',detail:REWARD_COPY}}};
 }
 function transcript({text='',history=[]}={}){return[...(Array.isArray(history)?history:[]).filter(item=>item?.role==='user').map(item=>clean(item.text||item.content,1800)),clean(text,1800)].filter(Boolean).slice(-12).join('\n')}
 async function enhancePlan(base,{text='',history=[],context={},mode='deterministic'}={}){
@@ -100,22 +100,22 @@ async function enhancePlan(base,{text='',history=[],context={},mode='determinist
     enhanced.push({...source,...composed,id:source.id||composed.id,title:source.title&&source.title.length>12?source.title:composed.title,purpose:source.purpose&&source.purpose.length>20?source.purpose:composed.purpose});
   }
   if(!enhanced.length)enhanced.push(await composePath({text:query,kind:planKind(query,context?.routingAnswer?.system),mode,semantic:true,count:6}));
-  plan.paths=enhanced;plan.updatedAt=now();plan.planning={schema:'commonweave.context-template-planning.v1',version:VERSION,authority:'advisory-structure-only',engine:enhanced.some(path=>path.planning?.semantic)?'deterministic+minilm':'deterministic-lexical',model:enhanced.some(path=>path.planning?.semantic)?'Xenova/all-MiniLM-L6-v2':'none',semanticUsed:enhanced.some(path=>path.planning?.semantic),templatePieces:enhanced.flatMap(path=>path.planning?.templateIds||[]),rewardPolicy:{deterministicDailyEligibleTasks:3,generativeRewardPromotion:REWARD_COPY},diagnostics:[...new Set(enhanced.flatMap(path=>path.planning?.diagnostics||[])),'MiniLM ranks template pieces only; deterministic evidence rules control reward eligibility and completion.']};
+  plan.paths=enhanced;plan.updatedAt=now();plan.planning={schema:'civweave.context-template-planning.v1',version:VERSION,authority:'advisory-structure-only',engine:enhanced.some(path=>path.planning?.semantic)?'deterministic+minilm':'deterministic-lexical',model:enhanced.some(path=>path.planning?.semantic)?'Xenova/all-MiniLM-L6-v2':'none',semanticUsed:enhanced.some(path=>path.planning?.semantic),templatePieces:enhanced.flatMap(path=>path.planning?.templateIds||[]),rewardPolicy:{deterministicDailyEligibleTasks:3,generativeRewardPromotion:REWARD_COPY},diagnostics:[...new Set(enhanced.flatMap(path=>path.planning?.diagnostics||[])),'MiniLM ranks template pieces only; deterministic evidence rules control reward eligibility and completion.']};
   plan.assumptions=[...(plan.assumptions||[]).filter(Boolean),'Template selection is advisory; no task is completed and no reward is minted by semantic similarity.'];
   return plan;
 }
 function format(plan){const paths=(plan.paths||[]).map((path,index)=>{const tasks=(path.tasks||[]).map((task,i)=>`  ${i+1}. ${task.title}\n     Deliverable: ${task.deliverable}\n     Evidence: ${(task.evidence||[]).join(', ')}`).join('\n');return`${index+1}. ${path.title} · ${path.realm}\n${path.purpose}\n${tasks}\nCompletion: ${path.completionCriteria}`}).join('\n\n');return[`I built and saved a reviewable weave for “${plan.title}.”`,'','Governing outcome',plan.outcome||plan.wish,'',paths,'',REWARD_COPY,'','The weave is in REVIEW. Inspect, revise, or explicitly activate it before any consequential action.'].join('\n').trim()}
 async function maybeCreate({text='',history=[],context={},force=false,mode='deterministic'}={}){
-  const planner=root.CommonweaveIntentionPlanner;if(!planner?.buildPlan||!planner?.persist)return null;if(!planner.shouldCreate?.({text,history,context,force}))return null;
+  const planner=root.CivweaveIntentionPlanner;if(!planner?.buildPlan||!planner?.persist)return null;if(!planner.shouldCreate?.({text,history,context,force}))return null;
   const built=planner.buildPlan({text,history,context}),plan=await enhancePlan(built,{text,history,context,mode}),item=planner.persist(plan);item.plan=plan;
   const approvalGate={kind:'intention-activation',planId:item.id,state:item.state||'review',required:true,actions:['review','revise','activate']};
-  return{item,plan,response:{answer:format(plan),choice:{mode:'Plan',system:'commonweave',room:plan.routing?.room||'commonweave.quad',nextAction:'Review the deliverables, evidence, acceptance criteria, and reward eligibility before activation.'},assumptions:plan.assumptions,requiresConsent:true,confidence:.96,approvalGate}};
+  return{item,plan,response:{answer:format(plan),choice:{mode:'Plan',system:'civweave',room:plan.routing?.room||'civweave.quad',nextAction:'Review the deliverables, evidence, acceptance criteria, and reward eligibility before activation.'},assumptions:plan.assumptions,requiresConsent:true,confidence:.96,approvalGate}};
 }
 async function enrichAction(action,text,system,context={},mode='deterministic'){
   if(!action||typeof action!=='object')return action;const kind=planKind(text,system),path=await composePath({text,kind,realm:system,mode,semantic:true,count:kind==='market'?7:6});
   action.templatePlan=path;action.checkpoints=path.tasks.map(task=>task.title);action.acceptanceCriteria=[...new Set([...(action.acceptanceCriteria||[]),...path.tasks.flatMap(task=>task.acceptanceCriteria||[])])].slice(0,16);action.evidence=[...new Set([...(action.evidence||[]),...path.tasks.flatMap(task=>task.evidence||[])])].slice(0,16);action.rewardPolicy=path.rewardPolicy;action.updatedAt=now();return action;
 }
 function status(){return{version:VERSION,templateCounts:Object.fromEntries(Object.entries(POOLS).map(([key,value])=>[key,value.length])),rewardCopy:REWARD_COPY,semanticAuthority:'ranking-only'}}
-root.CommonweaveContextPlanComposerV198=Object.freeze({version:VERSION,POOLS,REQUIRED_ROLES,REWARD_COPY,planKind,lexicalRank,rankCandidates,composePath,enhancePlan,maybeCreate,enrichAction,format,status});
-try{root.dispatchEvent?.(new CustomEvent('commonweave:context-plan-composer-ready',{detail:status()}))}catch{}
+root.CivweaveContextPlanComposerV198=Object.freeze({version:VERSION,POOLS,REQUIRED_ROLES,REWARD_COPY,planKind,lexicalRank,rankCandidates,composePath,enhancePlan,maybeCreate,enrichAction,format,status});
+try{root.dispatchEvent?.(new CustomEvent('civweave:context-plan-composer-ready',{detail:status()}))}catch{}
 })();

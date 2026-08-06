@@ -21,6 +21,6 @@
   function applyDefinition(el,definition){if(definition.points)el.dataset.imagePoints=definition.points.map(p=>p.join(',')).join(' ');else for(const key of ['x','y','w','h'])if(definition[key]!=null)el.dataset[`image${key.toUpperCase()}`]=definition[key];scan(el.closest('.cw-scene,.mall-scene,.ls-visual-frame,.visual-scene-frame,.visual-stage-canvas')||document)}
   const schedule=(()=>{let queued=false;return()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;scan(document)})}})();
   new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});addEventListener('resize',schedule,{passive:true});addEventListener('orientationchange',schedule,{passive:true});if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule,{once:true});else schedule();
-  window.CommonweaveVisualSurface={scan,calibrate,bind,points,pointFromEvent,applyDefinition,enableEditor};
-  window.CommonweaveImageHotspots=window.CommonweaveVisualSurface;
+  window.CivweaveVisualSurface={scan,calibrate,bind,points,pointFromEvent,applyDefinition,enableEditor};
+  window.CivweaveImageHotspots=window.CivweaveVisualSurface;
 })();

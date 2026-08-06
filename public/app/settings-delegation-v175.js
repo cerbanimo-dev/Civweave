@@ -1,9 +1,9 @@
 (()=>{
 'use strict';
 const VERSION='188.0-ai-settings-cleanroom-delegation';
-if(globalThis.CommonweaveSettingsDelegationV188?.version===VERSION)return;
+if(globalThis.CivweaveSettingsDelegationV188?.version===VERSION)return;
 const SELECTOR='[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings]';
-function controller(){return globalThis.CommonweaveAISettingsCleanroomV188||globalThis.CommonweaveModelSettingsControllerV173||globalThis.CommonweaveUnifiedAISettingsV175||null;}
+function controller(){return globalThis.CivweaveAISettingsCleanroomV188||globalThis.CivweaveModelSettingsControllerV173||globalThis.CivweaveUnifiedAISettingsV175||null;}
 function open(launcher){return controller()?.open?.(launcher)||null;}
 function onClick(event){
   const launcher=event.target instanceof Element?event.target.closest(SELECTOR):null;
@@ -31,8 +31,8 @@ const inertLog=Object.freeze({
   clear(){return true;},
   renderDock(){return null;},
 });
-globalThis.CommonweaveLogV183=inertLog;
-globalThis.CommonweaveSettingsDelegationV188=Object.freeze({
+globalThis.CivweaveLogV183=inertLog;
+globalThis.CivweaveSettingsDelegationV188=Object.freeze({
   version:VERSION,
   selector:SELECTOR,
   listenerPhase:'bubble',

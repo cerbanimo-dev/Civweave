@@ -2,9 +2,9 @@
 'use strict';
 const CATALOG_URL='/downloads/knowledge-schools/catalog.json';
 const CACHE_NAME='cwknowledge-school-seeds-v2';
-const LEGACY_CACHE_NAMES=['commonweave-knowledge-schools-v1'];
-const RECEIPT_KEY='commonweave.knowledge-schools.v2';
-const LEGACY_RECEIPT_KEY='commonweave.knowledge-schools.v1';
+const LEGACY_CACHE_NAMES=['civweave-knowledge-schools-v1'];
+const RECEIPT_KEY='civweave.knowledge-schools.v2';
+const LEGACY_RECEIPT_KEY='civweave.knowledge-schools.v1';
 let catalogPromise=null;
 let migrationPromise=null;
 
@@ -25,7 +25,7 @@ function cachedCurrent(response,school,receipt={}){
   if(!response)return false;
   const expectedBytes=Number(school.zip_bytes||0);
   const cachedBytes=headerNumber(response,'content-length')||Number(receipt.zip_bytes||0);
-  const cachedSha=String(response.headers.get('x-commonweave-sha256')||receipt.zip_sha256||'').toLowerCase();
+  const cachedSha=String(response.headers.get('x-civweave-sha256')||receipt.zip_sha256||'').toLowerCase();
   return cachedBytes===expectedBytes&&cachedSha===String(school.zip_sha256||'').toLowerCase();
 }
 async function persistStorage(){
@@ -65,7 +65,7 @@ async function loadCatalog(options={}){
   catalogPromise=fetch(CATALOG_URL,{cache:'no-store'}).then(async response=>{
     if(!response.ok)throw new Error(`School catalog request failed (${response.status}).`);
     const catalog=await response.json();
-    if(catalog?.schema!=='commonweave.knowledge-school-catalog.v1'||!Array.isArray(catalog.schools))throw new Error('The school catalog is not compatible with this installer.');
+    if(catalog?.schema!=='civweave.knowledge-school-catalog.v1'||!Array.isArray(catalog.schools))throw new Error('The school catalog is not compatible with this installer.');
     return catalog;
   }).catch(error=>{catalogPromise=null;throw error});
   return catalogPromise;
@@ -133,9 +133,9 @@ async function stage(slugs,options={}){
       'Content-Type':'application/zip',
       'Content-Length':String(buffer.byteLength),
       'Content-Disposition':`attachment; filename="${filename}"`,
-      'X-Commonweave-SHA256':actualSha,
-      'X-Commonweave-School':slug,
-      'X-Commonweave-Knowledge-Cache':CACHE_NAME,
+      'X-Civweave-SHA256':actualSha,
+      'X-Civweave-School':slug,
+      'X-Civweave-Knowledge-Cache':CACHE_NAME,
     }}));
     receipt[slug]={staged_at:new Date().toISOString(),zip_sha256:actualSha,zip_bytes:buffer.byteLength,url,filename};
     writeReceipt(receipt);
@@ -228,5 +228,5 @@ async function openSeed(slug){
   const cache=await caches.open(CACHE_NAME);
   return cache.match(seedUrl(school));
 }
-window.CommonweaveKnowledgeSchools=Object.freeze({CATALOG_URL,CACHE_NAME,LEGACY_CACHE_NAMES,loadCatalog,status,stage,save,remove,clear,openSeed,seedUrl,seedFilename,migrateLegacyCaches,persistStorage});
+window.CivweaveKnowledgeSchools=Object.freeze({CATALOG_URL,CACHE_NAME,LEGACY_CACHE_NAMES,loadCatalog,status,stage,save,remove,clear,openSeed,seedUrl,seedFilename,migrateLegacyCaches,persistStorage});
 })();

@@ -18,7 +18,7 @@ for(const forbidden of ['stage-transformers-assets','ensure-minilm-model','@hugg
 }
 
 assert(/^\d+\.\d+\.\d+$/.test(canonicalVersion),'VERSION must contain a semantic release version.');
-assert(pkg.version===canonicalVersion,`Render package ${pkg.version} must match canonical Commonweave ${canonicalVersion}.`);
+assert(pkg.version===canonicalVersion,`Render package ${pkg.version} must match canonical Civweave ${canonicalVersion}.`);
 assert(pkg.engines?.node==='22.x','Render Node version must be pinned to Node 22.');
 const productionDependencies=Object.entries(pkg.dependencies||{});
 assert(productionDependencies.length===1,'Normal npm install must contain exactly one approved production dependency.');

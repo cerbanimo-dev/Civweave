@@ -2,12 +2,12 @@
 'use strict';
 const VERSION='1.0.31';
 const SYSTEMS={
-  commonweave:{name:'Commonweave',guide:'Weaveling',role:'central mirror and orchestrator',mascot:'/app/assets/ai/weaveling.png',prompt:'Tell Weaveling what you want to become true.',primary:[
-    {label:'State an intention',id:'commonweave.state-wish'},
-    {label:'Clarify the wish',id:'commonweave.clarify-wish'},
-    {label:'Choose a skill posture',id:'commonweave.skill-posture'},
-    {label:'Model setup',id:'commonweave.model-setup'},
-    {label:'Shared intention map',id:'commonweave.shared-intention-map',planned:true}
+  civweave:{name:'Civweave',guide:'Weaveling',role:'central mirror and orchestrator',mascot:'/app/assets/ai/weaveling.png',prompt:'Tell Weaveling what you want to become true.',primary:[
+    {label:'State an intention',id:'civweave.state-wish'},
+    {label:'Clarify the wish',id:'civweave.clarify-wish'},
+    {label:'Choose a skill posture',id:'civweave.skill-posture'},
+    {label:'Model setup',id:'civweave.model-setup'},
+    {label:'Shared intention map',id:'civweave.shared-intention-map',planned:true}
   ]},
   'living-school':{name:'Living School',guide:'Moss',role:'learning guide',mascot:'/app/assets/ai/moss.png',prompt:'Tell Moss what you want to learn or demonstrate.',primary:[
     {label:'Start a learning path',id:'living-school.start-path'},
@@ -47,10 +47,10 @@ const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const params=()=>new URLSearchParams(location.search);
-const systemId=()=>{const query=params().get('system');if(SYSTEMS[query])return query;if(document.querySelector('.ac-console-bar'))return'anarchadia';return'commonweave'};
-const chatKey=id=>`commonweave.cabinet-chat.${id}.v142`;
+const systemId=()=>{const query=params().get('system');if(SYSTEMS[query])return query;if(document.querySelector('.ac-console-bar'))return'anarchadia';return'civweave'};
+const chatKey=id=>`civweave.cabinet-chat.${id}.v142`;
 let ledgerPromise=null,mountQueued=false;
-function loadLedger(){if(!ledgerPromise)ledgerPromise=globalThis.CommonweaveParity?.load?.().catch(()=>null)||Promise.resolve(null);return ledgerPromise}
+function loadLedger(){if(!ledgerPromise)ledgerPromise=globalThis.CivweaveParity?.load?.().catch(()=>null)||Promise.resolve(null);return ledgerPromise}
 function toast(message){let node=document.querySelector('#ch142-toast');if(!node){node=document.createElement('div');node.id='ch142-toast';node.className='ch142-toast';node.hidden=true;document.body.append(node)}node.textContent=message;node.hidden=false;clearTimeout(node._timer);node._timer=setTimeout(()=>node.hidden=true,2800)}
 function history(id){const rows=parse(localStorage.getItem(chatKey(id)),[]);return Array.isArray(rows)?rows:[]}
 function saveHistory(id,rows){localStorage.setItem(chatKey(id),JSON.stringify(rows.slice(-60)))}
@@ -70,11 +70,11 @@ async function createBand(header,id){const config=SYSTEMS[id],ledger=await loadL
   header.insertAdjacentElement('afterend',band);renderChat(band,id);return band
 }
 async function submitChat(event,band,id){event.preventDefault();const form=event.currentTarget,input=form.elements.message,text=clean(input.value,4000);if(!text)return;const rows=history(id),pendingId=`pending-${Date.now().toString(36)}`;rows.push({role:'user',text},{role:'assistant',text:`${SYSTEMS[id].guide} is working through the ${SYSTEMS[id].name} contract…`,pending:true,id:pendingId});saveHistory(id,rows);input.value='';form.querySelector('button').disabled=true;renderChat(band,id);
-  try{if(!globalThis.CommonweaveAssistantV141?.respond)throw new Error('The cabinet guide runtime has not loaded.');const result=await globalThis.CommonweaveAssistantV141.respond({text,systemId:id,history:rows.filter(row=>!row.pending)}),latest=history(id),index=latest.findIndex(row=>row.id===pendingId),next=clean(result.response?.choice?.nextAction,500),answer=clean(result.response?.answer||'The guide returned no text.'),replacement={role:'assistant',text:next?`${answer}\n\nNext: ${next}`:answer,provider:result.provider,model:result.model,approvalGate:result.response?.approvalGate||null,planSnapshot:result.plan?structuredClone(result.plan):null,actionSnapshot:result.action?structuredClone(result.action):null};if(index>=0)latest[index]=replacement;else latest.push(replacement);saveHistory(id,latest)}catch(error){const latest=history(id),index=latest.findIndex(row=>row.id===pendingId),replacement={role:'assistant',text:`The guide could not complete this call: ${error.message}`};if(index>=0)latest[index]=replacement;else latest.push(replacement);saveHistory(id,latest)}finally{form.querySelector('button').disabled=false;renderChat(band,id);input.focus()}
+  try{if(!globalThis.CivweaveAssistantV141?.respond)throw new Error('The cabinet guide runtime has not loaded.');const result=await globalThis.CivweaveAssistantV141.respond({text,systemId:id,history:rows.filter(row=>!row.pending)}),latest=history(id),index=latest.findIndex(row=>row.id===pendingId),next=clean(result.response?.choice?.nextAction,500),answer=clean(result.response?.answer||'The guide returned no text.'),replacement={role:'assistant',text:next?`${answer}\n\nNext: ${next}`:answer,provider:result.provider,model:result.model,approvalGate:result.response?.approvalGate||null,planSnapshot:result.plan?structuredClone(result.plan):null,actionSnapshot:result.action?structuredClone(result.action):null};if(index>=0)latest[index]=replacement;else latest.push(replacement);saveHistory(id,latest)}catch(error){const latest=history(id),index=latest.findIndex(row=>row.id===pendingId),replacement={role:'assistant',text:`The guide could not complete this call: ${error.message}`};if(index>=0)latest[index]=replacement;else latest.push(replacement);saveHistory(id,latest)}finally{form.querySelector('button').disabled=false;renderChat(band,id);input.focus()}
 }
 function openCapability(button,id){const capability=button.dataset.ch142Capability,room=button.dataset.room,query=new URLSearchParams({system:id,embed:'1',capability});if(room)query.set('room',room);location.assign(`/app/realm-console-v140.html?${query}`)}
 function runAnarchadiaAction(type,value){if(type==='screen'){document.querySelector(`[data-screen-target="${CSS.escape(value)}"]`)?.click();return true}if(type==='request'){document.querySelector(`[data-request-kind="${CSS.escape(value)}"]`)?.click();return true}if(type==='scroll'&&value==='passport'){document.querySelector('[data-screen-target="home"]')?.click();document.querySelector('.ac-passport')?.scrollIntoView({behavior:'smooth',block:'start'});return true}return false}
-function handleGate(button){const op=button.dataset.ch142Gate,id=button.dataset.id;if(op==='open-plan')globalThis.CommonweaveIntentionUI?.open?.(id);if(op==='activate-plan'){const result=globalThis.CommonweaveIntentionUI?.activate?.(id);toast(result?.ok?'Weave activated.':result?.error||'The weave could not be activated.')}if(op==='open-action')globalThis.CommonweaveActionUI?.open?.(id);if(op==='approve-action'){const result=globalThis.CommonweaveActionUI?.approve?.(id);toast(result?.ok?'Action approved and routed.':result?.error||'The action could not be approved.')}}
+function handleGate(button){const op=button.dataset.ch142Gate,id=button.dataset.id;if(op==='open-plan')globalThis.CivweaveIntentionUI?.open?.(id);if(op==='activate-plan'){const result=globalThis.CivweaveIntentionUI?.activate?.(id);toast(result?.ok?'Weave activated.':result?.error||'The weave could not be activated.')}if(op==='open-action')globalThis.CivweaveActionUI?.open?.(id);if(op==='approve-action'){const result=globalThis.CivweaveActionUI?.approve?.(id);toast(result?.ok?'Action approved and routed.':result?.error||'The action could not be approved.')}}
 function bindBand(band,id){band.addEventListener('submit',event=>{if(event.target.matches('[data-ch142-form]'))submitChat(event,band,id)});band.addEventListener('click',event=>{const gate=event.target.closest('[data-ch142-gate]');if(gate){handleGate(gate);setTimeout(()=>renderChat(band,id),40);return}const capability=event.target.closest('[data-ch142-capability]');if(capability){openCapability(capability,id);return}const action=event.target.closest('[data-ch142-action]');if(action){if(!runAnarchadiaAction(action.dataset.ch142Action,action.dataset.value))toast('Coming soon.');band.querySelector('details')?.removeAttribute('open');return}if(event.target.closest('[data-ch142-coming]'))toast('Coming soon. This control stays here instead of sending you to a dead route.')})}
 async function mount(){const id=systemId(),header=document.querySelector('.rc-top,.ac-console-bar');if(!header)return;document.documentElement.dataset.cabinetHomeV142='true';document.documentElement.dataset.cabinetMode=params().get('capability')?'feature':'home';if(document.querySelector('.ch142-control-band'))return;const band=await createBand(header,id);bindBand(band,id)}
 function queueMount(){if(mountQueued)return;mountQueued=true;queueMicrotask(()=>{mountQueued=false;mount()})}

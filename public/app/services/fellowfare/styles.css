@@ -526,11 +526,11 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 }
 
 
-/* Commonweave same-origin room integration */
-.commonweave-embedded body { background: var(--cream, #f5efe4); }
-.commonweave-embedded .app-shell { min-height: 100vh; }
-.commonweave-embedded .desktop-sidebar { top: 0; height: 100vh; }
-.commonweave-handoff-panel { border: 1px solid color-mix(in srgb, #dc6f3d 38%, transparent); background: color-mix(in srgb, #f3d7b7 32%, transparent); }
+/* Civweave same-origin room integration */
+.civweave-embedded body { background: var(--cream, #f5efe4); }
+.civweave-embedded .app-shell { min-height: 100vh; }
+.civweave-embedded .desktop-sidebar { top: 0; height: 100vh; }
+.civweave-handoff-panel { border: 1px solid color-mix(in srgb, #dc6f3d 38%, transparent); background: color-mix(in srgb, #f3d7b7 32%, transparent); }
 
 
 /* RC20 FellowFare Mall world foundation */

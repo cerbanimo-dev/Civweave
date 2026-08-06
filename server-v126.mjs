@@ -4,13 +4,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(root, 'server.mjs');
-const runtimePath = path.join(root, '.commonweave-server-v126.runtime.mjs');
+const runtimePath = path.join(root, '.civweave-server-v126.runtime.mjs');
 const VERSION = '1.0.26';
 const BUILD = '1.0.26-loop-diagnostics';
 
 let source = await fsp.readFile(sourcePath, 'utf8');
 function replaceRequired(before, after, label) {
-  if (!source.includes(before)) throw new Error('Commonweave v1.0.26 patch could not find ' + label);
+  if (!source.includes(before)) throw new Error('Civweave v1.0.26 patch could not find ' + label);
   source = source.replace(before, after);
 }
 replaceRequired("const BUILD_VERSION = '1.0.21-ai-uplift';", "const BUILD_VERSION = '" + BUILD + "';", 'the host build marker');
@@ -39,7 +39,7 @@ function cwBootSafe(value, depth = 0) {
 }
 function cwBootLog(kind, detail = {}, req = null) {
   const entry = {
-    schema: 'commonweave.boot-log.v1',
+    schema: 'civweave.boot-log.v1',
     time: new Date().toISOString(),
     version: CW_DIAGNOSTIC_VERSION,
     build: CW_DIAGNOSTIC_BUILD,
@@ -69,9 +69,9 @@ function cwSendText(res, status, text, type, requestId) {
     'cache-control': 'no-store, no-cache, must-revalidate',
     'pragma': 'no-cache',
     'expires': '0',
-    'x-commonweave-version': CW_DIAGNOSTIC_VERSION,
-    'x-commonweave-build': CW_DIAGNOSTIC_BUILD,
-    'x-commonweave-request-id': requestId,
+    'x-civweave-version': CW_DIAGNOSTIC_VERSION,
+    'x-civweave-build': CW_DIAGNOSTIC_BUILD,
+    'x-civweave-request-id': requestId,
     'x-content-type-options': 'nosniff'
   });
   res.end(payload);
@@ -89,22 +89,22 @@ async function cwServeCampus(req, res, originalPathname, requestId) {
       .replaceAll('v1.0.25', 'v' + CW_DIAGNOSTIC_VERSION)
       .replaceAll('host-node-setup.js', 'host-node-setup-v126.js');
     text = text.replace('if(localStorage.getItem(key)!==build)', 'if(false&&localStorage.getItem(key)!==build)');
-    text = text.replace('navigator.serviceWorker?.register("service-worker.js",{updateViaCache:"none"}).then(registration=>registration.update()).catch(()=>undefined);', 'window.CommonweaveBootLog?.log("legacy-worker-registration-disabled",{build:"' + CW_DIAGNOSTIC_BUILD + '"});');
-    text = text.replace('setTimeout(()=>location.reload(),900)', 'window.CommonweaveBootLog?.log("legacy-reload-suppressed",{reason:"manual-update-candidate"})');
+    text = text.replace('navigator.serviceWorker?.register("service-worker.js",{updateViaCache:"none"}).then(registration=>registration.update()).catch(()=>undefined);', 'window.CivweaveBootLog?.log("legacy-worker-registration-disabled",{build:"' + CW_DIAGNOSTIC_BUILD + '"});');
+    text = text.replace('setTimeout(()=>location.reload(),900)', 'window.CivweaveBootLog?.log("legacy-reload-suppressed",{reason:"manual-update-candidate"})');
     if (!text.includes('boot-diagnostics-v126.js')) text = text.replace('<head>', '<head>\n  <meta http-equiv="Cache-Control" content="no-store">\n  <script src="boot-diagnostics-v126.js?v=' + CW_DIAGNOSTIC_VERSION + '" defer></script>');
     cwBootLog('campus-index-served', { requestId, sourceBytes: text.length, originalPathname }, req);
     cwSendText(res, 200, text, 'text/html; charset=utf-8', requestId);
     return true;
   }
   if (mapped === '/app/version.json') {
-    const text = JSON.stringify({ schema: 'commonweave.version.v1', version: CW_DIAGNOSTIC_VERSION, build: CW_DIAGNOSTIC_BUILD, channel: 'main', updatedAt: new Date().toISOString() }, null, 2);
+    const text = JSON.stringify({ schema: 'civweave.version.v1', version: CW_DIAGNOSTIC_VERSION, build: CW_DIAGNOSTIC_BUILD, channel: 'main', updatedAt: new Date().toISOString() }, null, 2);
     cwSendText(res, 200, text, 'application/json; charset=utf-8', requestId);
     return true;
   }
   if (mapped === '/app/host-node-v126.js') {
     let text = await fsp.readFile(path.join(PUBLIC_DIR, 'app', 'host-node-v125.js'), 'utf8');
     text = text.replaceAll('1.0.25-freeze-recovery', CW_DIAGNOSTIC_BUILD).replaceAll('1.0.25', CW_DIAGNOSTIC_VERSION);
-    text = text.replace("'use strict';", "'use strict';\nwindow.CommonweaveBootLog?.log('host-runtime-evaluating',{version:'" + CW_DIAGNOSTIC_VERSION + "',build:'" + CW_DIAGNOSTIC_BUILD + "'});");
+    text = text.replace("'use strict';", "'use strict';\nwindow.CivweaveBootLog?.log('host-runtime-evaluating',{version:'" + CW_DIAGNOSTIC_VERSION + "',build:'" + CW_DIAGNOSTIC_BUILD + "'});");
     cwBootLog('campus-runtime-served', { requestId, bytes: text.length }, req);
     cwSendText(res, 200, text, 'text/javascript; charset=utf-8', requestId);
     return true;
@@ -115,9 +115,9 @@ async function cwServeCampus(req, res, originalPathname, requestId) {
 }
 `;
 replaceRequired('const server = http.createServer(async (req, res) => {', injected + '\nconst server = http.createServer(async (req, res) => {', 'the HTTP server declaration');
-replaceRequired('  const pathname = decodeURIComponent(url.pathname);', "  const originalPathname = decodeURIComponent(url.pathname);\n  const isCampusRequest = originalPathname === '/campus' || originalPathname.startsWith('/campus/');\n  const pathname = isCampusRequest ? (originalPathname.replace(/^\\/campus(?=\\/|$)/, '/app') || '/app/') : originalPathname;\n  const requestId = crypto.randomUUID();\n  if (/^\\/(?:app|campus)(?:\\/|$)/.test(originalPathname) || originalPathname === '/recover.html' || originalPathname.startsWith('/api/boot-log')) {\n    res.setHeader('x-commonweave-version', CW_DIAGNOSTIC_VERSION);\n    res.setHeader('x-commonweave-build', CW_DIAGNOSTIC_BUILD);\n    res.setHeader('x-commonweave-request-id', requestId);\n    cwBootLog('http-request', { requestId, originalPathname, mappedPathname: pathname }, req);\n  }", 'the request pathname declaration');
+replaceRequired('  const pathname = decodeURIComponent(url.pathname);', "  const originalPathname = decodeURIComponent(url.pathname);\n  const isCampusRequest = originalPathname === '/campus' || originalPathname.startsWith('/campus/');\n  const pathname = isCampusRequest ? (originalPathname.replace(/^\\/campus(?=\\/|$)/, '/app') || '/app/') : originalPathname;\n  const requestId = crypto.randomUUID();\n  if (/^\\/(?:app|campus)(?:\\/|$)/.test(originalPathname) || originalPathname === '/recover.html' || originalPathname.startsWith('/api/boot-log')) {\n    res.setHeader('x-civweave-version', CW_DIAGNOSTIC_VERSION);\n    res.setHeader('x-civweave-build', CW_DIAGNOSTIC_BUILD);\n    res.setHeader('x-civweave-request-id', requestId);\n    cwBootLog('http-request', { requestId, originalPathname, mappedPathname: pathname }, req);\n  }", 'the request pathname declaration');
 replaceRequired("    if (pathname.startsWith('/api/')) {", "    if (pathname.startsWith('/api/')) {\n      if (pathname === '/api/boot-log' && req.method === 'POST') {\n        const input = await body(req, 64 * 1024);\n        const entry = cwBootLog('client:' + String(input.kind || 'event'), { ...input, receivedAt: new Date().toISOString(), requestId }, req);\n        return json(res, 202, { ok: true, accepted: entry.time, version: CW_DIAGNOSTIC_VERSION, build: CW_DIAGNOSTIC_BUILD });\n      }\n      if (pathname === '/api/boot-logs' && req.method === 'GET') return json(res, 200, { version: CW_DIAGNOSTIC_VERSION, build: CW_DIAGNOSTIC_BUILD, count: cwBootLogs.length, logs: cwBootLogs.slice(-300) });", 'the API router');
-replaceRequired("    if (await serveFile(req, res, pathname)) return;", "    if (req.method === 'GET' && !isCampusRequest && (originalPathname === '/app' || originalPathname === '/app/' || originalPathname === '/app/index.html')) {\n      cwBootLog('legacy-app-migrated', { requestId, originalPathname }, req);\n      res.writeHead(302, { location: '/campus/' + (url.search || ''), 'cache-control': 'no-store', 'x-commonweave-version': CW_DIAGNOSTIC_VERSION, 'x-commonweave-build': CW_DIAGNOSTIC_BUILD });\n      return res.end();\n    }\n    if (isCampusRequest && await cwServeCampus(req, res, originalPathname, requestId)) return;\n    if (await serveFile(req, res, pathname)) return;", 'the static file router');
+replaceRequired("    if (await serveFile(req, res, pathname)) return;", "    if (req.method === 'GET' && !isCampusRequest && (originalPathname === '/app' || originalPathname === '/app/' || originalPathname === '/app/index.html')) {\n      cwBootLog('legacy-app-migrated', { requestId, originalPathname }, req);\n      res.writeHead(302, { location: '/campus/' + (url.search || ''), 'cache-control': 'no-store', 'x-civweave-version': CW_DIAGNOSTIC_VERSION, 'x-civweave-build': CW_DIAGNOSTIC_BUILD });\n      return res.end();\n    }\n    if (isCampusRequest && await cwServeCampus(req, res, originalPathname, requestId)) return;\n    if (await serveFile(req, res, pathname)) return;", 'the static file router');
 
 await fsp.writeFile(runtimePath, source, 'utf8');
 try {

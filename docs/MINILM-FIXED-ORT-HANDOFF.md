@@ -9,7 +9,7 @@ This branch combines two complementary freeze fixes without merging either imple
 1. The existing v180 freeze-boundary work keeps AI settings independent from MiniLM startup, makes semantic activation explicit-only, defers reflex-index embedding until the first explicit match, and stores generated vectors in IndexedDB.
 2. The fixed-runtime work removes the Transformers.js `pipeline()` loader and all WebGPU/WASM model-selection behavior. MiniLM now creates one direct ONNX Runtime Web session using one quantized graph and the WASM execution provider.
 
-The older branch `test/fixed-minilm-onnx-runtime` was intentionally abandoned as an integration source because it was based on Commonweave 1.0.5 and had diverged substantially from current main. Use this handoff branch instead.
+The older branch `test/fixed-minilm-onnx-runtime` was intentionally abandoned as an integration source because it was based on Civweave 1.0.5 and had diverged substantially from current main. Use this handoff branch instead.
 
 ## Resulting runtime contract
 
@@ -65,7 +65,7 @@ The older branch `test/fixed-minilm-onnx-runtime` was intentionally abandoned as
   - Preserves the model cache during service-worker activation.
   - Keeps the heavy graph out of `CORE`.
 
-- `public/extensions/commonweave-model-download-v157.js`
+- `public/extensions/civweave-model-download-v157.js`
   - Remains semantic-lab-only.
   - Does not hook settings buttons, settings opening, or automatic startup.
 

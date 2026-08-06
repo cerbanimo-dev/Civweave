@@ -2,9 +2,9 @@
 'use strict';
 const VERSION='1.0.30';
 const BUILD='1.0.30-offline-mesh-cabinet-runtime';
-const SETTINGS_KEY='commonweave.universal-ai.v127';
-const INTENTIONS_KEY='commonweave.intentions.v127';
-const CHAT_KEY='commonweave.weaveling-chat.v127';
+const SETTINGS_KEY='civweave.universal-ai.v127';
+const INTENTIONS_KEY='civweave.intentions.v127';
+const CHAT_KEY='civweave.weaveling-chat.v127';
 const MODES=['Reflect','Plan','Learn','Build','Acquire','Govern'];
 const REALMS={
   'living-school':{name:'Living School',copy:'Learning paths, curriculum, practice, reflection, and credentials.',image:'/app/services/living-school/visual-assets/core/home.webp'},
@@ -14,7 +14,7 @@ const REALMS={
 };
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-const report=(kind,detail={})=>{const event={schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:BUILD,kind:`v127:${kind}`,url:location.href,detail};console.info('[CW127]',event);fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(event),keepalive:true,cache:'no-store'}).catch(()=>{});return event};
+const report=(kind,detail={})=>{const event={schema:'civweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:BUILD,kind:`v127:${kind}`,url:location.href,detail};console.info('[CW127]',event);fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(event),keepalive:true,cache:'no-store'}).catch(()=>{});return event};
 let toastTimer;
 function toast(message){const node=document.querySelector('#cw127-toast');node.textContent=message;node.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.hidden=true,4200)}
 function show(dialog){if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','')}
@@ -29,13 +29,13 @@ function settings(){
 }
 function answerFor(text){
   const lower=text.toLowerCase();
-  let mode='Reflect',realm='Commonweave';
+  let mode='Reflect',realm='Civweave';
   if(/learn|study|course|understand|practice|skill/.test(lower)){mode='Learn';realm='Living School'}
   else if(/build|make|code|design|repair|work|project|ship/.test(lower)){mode='Build';realm='Cerbanimo'}
   else if(/buy|find|material|resource|trade|sell|offer|need|money/.test(lower)){mode='Acquire';realm='FellowFare'}
   else if(/govern|proposal|vote|rule|community|organize|policy|bug/.test(lower)){mode='Govern';realm='Anarchadia'}
   else if(/plan|steps|roadmap|how do i|what next/.test(lower)){mode='Plan'}
-  localStorage.setItem('commonweave.weaveling-mode',mode);document.querySelector('#cw127-context-label').textContent=mode;
+  localStorage.setItem('civweave.weaveling-mode',mode);document.querySelector('#cw127-context-label').textContent=mode;
   return `I hear the intention: ${text}\n\nWorking mode: ${mode}. Likely home: ${realm}.\n\nNext concrete step: define the smallest visible result that would prove movement. Then name what is already available and what is missing. I will keep the route editable rather than treating this first reading as certainty.`;
 }
 function chat(){
@@ -44,7 +44,7 @@ function chat(){
   const node=dialog('cw127-chat',`<section><header><div><small>WEAVELING’S COMPASS</small><h2>What is your wish?</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><div class="cw127-chat-log"></div><form class="cw127-chat-form"><textarea aria-label="Message Weaveling" maxlength="8000" placeholder="Share an intention, problem, or possibility…"></textarea><button>Send</button></form><menu><button type="button" data-settings>Universal AI settings</button><button type="button" data-clear>Clear conversation</button></menu></section>`);
   const log=node.querySelector('.cw127-chat-log');
   const render=()=>{const savedItems=parse(localStorage.getItem(CHAT_KEY),[]);const items=Array.isArray(savedItems)?savedItems:[];log.innerHTML=(items.length?items:[{role:'assistant',text:'I’m here. Tell me what you want to move toward, and we’ll turn it into a route with a concrete next step.'}]).map(item=>`<p class="${item.role==='user'?'user':'assistant'}">${escapeHtml(item.text)}</p>`).join('');log.scrollTop=log.scrollHeight};
-  node.querySelector('form').onsubmit=event=>{event.preventDefault();const input=node.querySelector('textarea'),text=input.value.trim();if(!text)return;const savedItems=parse(localStorage.getItem(CHAT_KEY),[]);const items=Array.isArray(savedItems)?savedItems:[];items.push({role:'user',text,time:new Date().toISOString()});const answer=answerFor(text);items.push({role:'assistant',text:answer,time:new Date().toISOString()});localStorage.setItem(CHAT_KEY,JSON.stringify(items.slice(-80)));input.value='';render();report('weaveling-message',{characters:text.length,mode:localStorage.getItem('commonweave.weaveling-mode')||'Reflect'})};
+  node.querySelector('form').onsubmit=event=>{event.preventDefault();const input=node.querySelector('textarea'),text=input.value.trim();if(!text)return;const savedItems=parse(localStorage.getItem(CHAT_KEY),[]);const items=Array.isArray(savedItems)?savedItems:[];items.push({role:'user',text,time:new Date().toISOString()});const answer=answerFor(text);items.push({role:'assistant',text:answer,time:new Date().toISOString()});localStorage.setItem(CHAT_KEY,JSON.stringify(items.slice(-80)));input.value='';render();report('weaveling-message',{characters:text.length,mode:localStorage.getItem('civweave.weaveling-mode')||'Reflect'})};
   node.querySelector('[data-settings]').onclick=settings;node.querySelector('[data-clear]').onclick=()=>{localStorage.removeItem(CHAT_KEY);render();report('chat-cleared')};render();show(node);setTimeout(()=>node.querySelector('textarea')?.focus(),60);report('dialog-opened',{dialog:'chat',history:history.length});
 }
 function intentions(){
@@ -57,8 +57,8 @@ function realms(){
   const cards=Object.entries(REALMS).map(([id,realm])=>`<button class="cw127-card" data-realm="${id}" style="background-image:url('${realm.image}')"><b>${realm.name}</b><span>${realm.copy}</span></button>`).join('');
   const node=dialog('cw127-realms',`<section><header><div><small>THE FOUR REALMS</small><h2>Choose a direction</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><div class="cw127-card-grid">${cards}</div></section>`);show(node);report('dialog-opened',{dialog:'realms'});
 }
-function info(){const node=dialog('cw127-info',`<section><header><div><small>COMMONWEAVE v${VERSION}</small><h2>One campus, two renderers</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>The parity ledger gives Visual and Lite the same systems, rooms, capability IDs, consent rules, handoffs, and rewards.</p><p>The four buildings open image-first rooms. Commonweave Lite opens the same structure with conventional accessible controls while feature migration continues.</p><menu><a href="/lite/?system=commonweave">Open Lite mirror</a><a href="/diagnostics.html">Boot diagnostics</a></menu></section>`);show(node);report('dialog-opened',{dialog:'info'})}
-function version(){const node=dialog('cw127-version-dialog',`<section><header><div><small>RELEASE STATE</small><h2>Commonweave v${VERSION}</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>Build: <code>${BUILD}</code></p><p>The installed PWA uses a root-scoped offline cache. Network hubs remain optional bridges for updates, gossip, federation, and wider trade.</p><menu><a href="/api/health" target="_blank" rel="noopener">Host health</a><a href="/diagnostics.html">Diagnostics</a></menu></section>`);show(node);report('dialog-opened',{dialog:'version'})}
+function info(){const node=dialog('cw127-info',`<section><header><div><small>CIVWEAVE v${VERSION}</small><h2>One campus, two renderers</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>The parity ledger gives Visual and Lite the same systems, rooms, capability IDs, consent rules, handoffs, and rewards.</p><p>The four buildings open image-first rooms. Civweave Lite opens the same structure with conventional accessible controls while feature migration continues.</p><menu><a href="/lite/?system=civweave">Open Lite mirror</a><a href="/diagnostics.html">Boot diagnostics</a></menu></section>`);show(node);report('dialog-opened',{dialog:'info'})}
+function version(){const node=dialog('cw127-version-dialog',`<section><header><div><small>RELEASE STATE</small><h2>Civweave v${VERSION}</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>Build: <code>${BUILD}</code></p><p>The installed PWA uses a root-scoped offline cache. Network hubs remain optional bridges for updates, gossip, federation, and wider trade.</p><menu><a href="/api/health" target="_blank" rel="noopener">Host health</a><a href="/diagnostics.html">Diagnostics</a></menu></section>`);show(node);report('dialog-opened',{dialog:'version'})}
 function enterRealm(id){const realm=REALMS[id];if(!realm)return;report('realm-enter',{realm:id});location.assign(`/loom/realm/${encodeURIComponent(id)}/`)}
 async function retireLegacy(){
   try{
@@ -66,18 +66,18 @@ async function retireLegacy(){
     const old=registrations.filter(reg=>{const path=new URL(reg.scope).pathname;return path.startsWith('/app/')||path.startsWith('/campus/')||/\/services\//.test(path)});
     for(const reg of old){const result=await reg.unregister();report('legacy-worker-unregistered',{scope:reg.scope,result})}
     const keys=await caches.keys();
-    const stale=keys.filter(key=>key.startsWith('commonweave-pocket-campus-')||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));
+    const stale=keys.filter(key=>key.startsWith('civweave-pocket-campus-')||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));
     for(const key of stale){const result=await caches.delete(key);report('legacy-cache-deleted',{key,result})}
   }catch(error){report('legacy-retirement-failed',{message:error.message})}
 }
 document.addEventListener('click',event=>{
   const control=event.target.closest('[data-action],[data-realm]');if(!control)return;
   const action=control.dataset.action,realm=control.dataset.realm;report('control-click',{action:action||null,realm:realm||null,tag:control.tagName});
-  try{if(realm){enterRealm(realm);return}({home:()=>toast('You are already at the Commonweave Quad.'),chat,settings,intentions,realms,info,version,lite:()=>location.assign('/lite/?system=commonweave')}[action]||(()=>toast(`The ${action||'unknown'} control has no action yet.`)))()}catch(error){report('control-error',{action,realm,message:error.message});toast(`That control hit an error: ${error.message}`)}
+  try{if(realm){enterRealm(realm);return}({home:()=>toast('You are already at the Civweave Quad.'),chat,settings,intentions,realms,info,version,lite:()=>location.assign('/lite/?system=civweave')}[action]||(()=>toast(`The ${action||'unknown'} control has no action yet.`)))()}catch(error){report('control-error',{action,realm,message:error.message});toast(`That control hit an error: ${error.message}`)}
 });
 addEventListener('error',event=>report('window-error',{message:event.message,filename:event.filename,line:event.lineno,column:event.colno}));addEventListener('unhandledrejection',event=>report('unhandled-rejection',{reason:event.reason?.message||String(event.reason)}));
-const mode=localStorage.getItem('commonweave.weaveling-mode')||MODES[new Date().getHours()%MODES.length];document.querySelector('#cw127-context-label').textContent=mode;
-localStorage.setItem('commonweave.host-build',BUILD);document.documentElement.dataset.commonweaveBuild=BUILD;
+const mode=localStorage.getItem('civweave.weaveling-mode')||MODES[new Date().getHours()%MODES.length];document.querySelector('#cw127-context-label').textContent=mode;
+localStorage.setItem('civweave.host-build',BUILD);document.documentElement.dataset.civweaveBuild=BUILD;
 report('page-ready',{navigationType:performance.getEntriesByType?.('navigation')?.[0]?.type||'unknown',controller:navigator.serviceWorker?.controller?.scriptURL||null,mode});
 const requestedPanel=new URLSearchParams(location.search).get('panel');if(requestedPanel==='settings')setTimeout(settings,30);else if(requestedPanel==='compass')setTimeout(chat,30);else if(requestedPanel==='routes')setTimeout(intentions,30);
 retireLegacy();

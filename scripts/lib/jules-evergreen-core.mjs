@@ -216,7 +216,7 @@ export function buildSessionPrompt({bundle, repository, roadmapPath, activePullR
   const active = activePullRequests.length
     ? `\nOpen pull requests at launch time: ${activePullRequests.join(', ')}. Inspect them and do not duplicate valid work.`
     : '';
-  return `You are the Commonweave evergreen implementation worker for ${bundle.id}.
+  return `You are the Civweave evergreen implementation worker for ${bundle.id}.
 
 Read root AGENTS.md first, then ${roadmapPath}. Implement exactly this bundle and no later bundle:
 
@@ -252,7 +252,7 @@ export function booleanValue(value, fallback = false) {
 }
 
 export function marker(kind, bundleId, discriminator = '') {
-  return `<!-- commonweave-jules:${kind}:${bundleId}:${discriminator} -->`;
+  return `<!-- civweave-jules:${kind}:${bundleId}:${discriminator} -->`;
 }
 
 function pathMatchesRule(filename, rule) {

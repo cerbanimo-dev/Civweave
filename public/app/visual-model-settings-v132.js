@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
-const SETTINGS_KEY='commonweave.universal-ai.v127';
-const SESSION_KEY='commonweave-model-session';
+const SETTINGS_KEY='civweave.universal-ai.v127';
+const SESSION_KEY='civweave-model-session';
 const GEMINI_ENDPOINT='https://generativelanguage.googleapis.com/v1beta';
 const GEMINI_MODEL='gemini-3.5-flash-lite';
 const OLLAMA_ENDPOINT='http://127.0.0.1:11434/api/chat';
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-const runtime=()=>globalThis.CommonweaveModelRuntime||null;
+const runtime=()=>globalThis.CivweaveModelRuntime||null;
 const canonicalRoute=value=>{
   const route=String(value||'deterministic').toLowerCase();
   if(['openai-compatible','openai','compatible'].includes(route))return 'compatible';
@@ -50,8 +50,8 @@ function build(){
   node.className='cw127-dialog cw-ai-settings-dialog';
   node.innerHTML=`<form><header><div><small>UNIVERSAL AI SETTINGS</small><h2>Choose the Compass mind</h2></div><button class="cw127-close" type="button" data-close aria-label="Close">×</button></header>
   <label>Route<select name="route"><option value="deterministic">Private local planner</option><option value="gemini">Gemini</option><option value="ollama">Ollama or local API</option><option value="compatible">OpenAI-compatible endpoint</option></select></label>
-  <section class="cw-ai-route-panel" data-route-panel="deterministic"><p>No network call is made. Commonweave uses its local deterministic planning compiler.</p><label>Planner label<input name="deterministicModel" value="Weaveling local planner"></label></section>
-  <section class="cw-ai-route-panel" data-route-panel="gemini" hidden><label>Gemini API key<input name="apiKey" type="password" maxlength="1000" autocomplete="off" spellcheck="false" placeholder="Paste a Google Gemini API key"></label><div class="cw-ai-secret-note" data-secret-note></div><label>Model<input name="geminiModel" maxlength="200" value="${GEMINI_MODEL}"></label><label>Google API endpoint<input name="geminiEndpoint" maxlength="2048" value="${GEMINI_ENDPOINT}"></label><label class="cw-ai-consent"><input name="geminiConsent" type="checkbox"><span>Allow prompts to leave this device for Google’s Gemini API.</span></label><label class="cw-ai-agent-toggle"><input name="agenticEnabled" type="checkbox"><span><b>Use Antigravity for agentic and background work</b><small>Standard conversation stays on the interactive Gemini model. Longer tool-using work uses Google’s Antigravity interactions route and falls back to standard Gemini if the key lacks permission.</small></span></label><div class="cw-ai-agent-options" data-agent-options hidden><label>Agentic model<input name="agenticModel" value="antigravity" readonly></label><p>Antigravity can use managed code execution, Google Search, and URL Context through the shared Commonweave model runtime.</p></div><div class="cw-ai-actions"><button type="button" data-test>Test Gemini connection</button></div><output class="cw-ai-test-status" data-test-status role="status">No connection test has been run.</output></section>
+  <section class="cw-ai-route-panel" data-route-panel="deterministic"><p>No network call is made. Civweave uses its local deterministic planning compiler.</p><label>Planner label<input name="deterministicModel" value="Weaveling local planner"></label></section>
+  <section class="cw-ai-route-panel" data-route-panel="gemini" hidden><label>Gemini API key<input name="apiKey" type="password" maxlength="1000" autocomplete="off" spellcheck="false" placeholder="Paste a Google Gemini API key"></label><div class="cw-ai-secret-note" data-secret-note></div><label>Model<input name="geminiModel" maxlength="200" value="${GEMINI_MODEL}"></label><label>Google API endpoint<input name="geminiEndpoint" maxlength="2048" value="${GEMINI_ENDPOINT}"></label><label class="cw-ai-consent"><input name="geminiConsent" type="checkbox"><span>Allow prompts to leave this device for Google’s Gemini API.</span></label><label class="cw-ai-agent-toggle"><input name="agenticEnabled" type="checkbox"><span><b>Use Antigravity for agentic and background work</b><small>Standard conversation stays on the interactive Gemini model. Longer tool-using work uses Google’s Antigravity interactions route and falls back to standard Gemini if the key lacks permission.</small></span></label><div class="cw-ai-agent-options" data-agent-options hidden><label>Agentic model<input name="agenticModel" value="antigravity" readonly></label><p>Antigravity can use managed code execution, Google Search, and URL Context through the shared Civweave model runtime.</p></div><div class="cw-ai-actions"><button type="button" data-test>Test Gemini connection</button></div><output class="cw-ai-test-status" data-test-status role="status">No connection test has been run.</output></section>
   <section class="cw-ai-route-panel" data-route-panel="ollama" hidden><label>Model<input name="ollamaModel" value="llama3.2"></label><label>Endpoint<input name="ollamaEndpoint" value="${OLLAMA_ENDPOINT}"></label><div class="cw-ai-actions"><button type="button" data-test>Test local model</button></div><output class="cw-ai-test-status" data-test-status role="status">No connection test has been run.</output></section>
   <section class="cw-ai-route-panel" data-route-panel="compatible" hidden><label>Model<input name="compatibleModel" value="local-model"></label><label>Endpoint<input name="compatibleEndpoint" placeholder="http://127.0.0.1:8000/v1/chat/completions"></label><label>Bearer token or API key<input name="compatibleApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="Optional session-only credential"></label><label class="cw-ai-consent"><input name="compatibleConsent" type="checkbox"><span>Allow prompts to leave this device when the endpoint is remote.</span></label><div class="cw-ai-actions"><button type="button" data-test>Test endpoint</button></div><output class="cw-ai-test-status" data-test-status role="status">No connection test has been run.</output></section>
   <p>Provider preferences are stored locally. API keys remain in session storage and are not included in exports or the offline seed.</p><menu class="cw-ai-actions"><button type="button" data-save>Save settings</button></menu><output data-save-status role="status"></output></form>`;
@@ -163,5 +163,5 @@ document.addEventListener('click',event=>{
 addEventListener('DOMContentLoaded',()=>{
   if(new URLSearchParams(location.search).get('panel')==='settings')setTimeout(()=>{closeOldDialogs();open()},90);
 });
-globalThis.CommonweaveVisualModelSettings={open,GEMINI_ENDPOINT,GEMINI_MODEL};
+globalThis.CivweaveVisualModelSettings={open,GEMINI_ENDPOINT,GEMINI_MODEL};
 })();

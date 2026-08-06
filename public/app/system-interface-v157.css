@@ -1,5 +1,5 @@
 /*
- * Commonweave system interface v157
+ * Civweave system interface v157
  *
  * Translates the proven inner-screen component language from the pre-v151
  * software into the current Working Campus and Living School markup.
@@ -7,8 +7,8 @@
  * scene renderer, aspect ratio, iframe, or physical-device geometry.
  */
 
-/* Commonweave Working Campus: historical civic-console palette and components. */
-html[data-commonweave-system="commonweave"]{
+/* Civweave Working Campus: historical civic-console palette and components. */
+html[data-civweave-system="civweave"]{
   --bg:#07162f;
   --panel:#0b2242;
   --panel2:#102b4d;
@@ -19,133 +19,133 @@ html[data-commonweave-system="commonweave"]{
   --gold:#e6c16d;
   --line:#ffffff24;
 }
-html[data-commonweave-system="commonweave"] body{
+html[data-civweave-system="civweave"] body{
   background:var(--bg);
   color:var(--ink);
   font-family:Georgia,"Times New Roman",serif;
 }
-html[data-commonweave-system="commonweave"] .app{
+html[data-civweave-system="civweave"] .app{
   background:
     radial-gradient(circle at 50% -10%,color-mix(in srgb,var(--mint) 18%,transparent),transparent 38rem),
     linear-gradient(180deg,color-mix(in srgb,var(--panel) 95%,#000),var(--bg));
 }
-html[data-commonweave-system="commonweave"] .app:before{
+html[data-civweave-system="civweave"] .app:before{
   opacity:.12;
   background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);
   background-size:34px 34px;
   mask-image:linear-gradient(#000,transparent 85%);
 }
-html[data-commonweave-system="commonweave"] .top{
+html[data-civweave-system="civweave"] .top{
   padding:8px 4px 14px;
   border-bottom:1px solid color-mix(in srgb,var(--mint) 55%,transparent);
 }
-html[data-commonweave-system="commonweave"] .brand b,
-html[data-commonweave-system="commonweave"] .guide-head h1,
-html[data-commonweave-system="commonweave"] .card h2,
-html[data-commonweave-system="commonweave"] .path h3,
-html[data-commonweave-system="commonweave"] .next strong,
-html[data-commonweave-system="commonweave"] .library h3{
+html[data-civweave-system="civweave"] .brand b,
+html[data-civweave-system="civweave"] .guide-head h1,
+html[data-civweave-system="civweave"] .card h2,
+html[data-civweave-system="civweave"] .path h3,
+html[data-civweave-system="civweave"] .next strong,
+html[data-civweave-system="civweave"] .library h3{
   font-family:Georgia,"Times New Roman",serif;
 }
-html[data-commonweave-system="commonweave"] .brand small,
-html[data-commonweave-system="commonweave"] .message small{
+html[data-civweave-system="civweave"] .brand small,
+html[data-civweave-system="civweave"] .message small{
   color:var(--mint);
   font-weight:900;
   letter-spacing:.13em;
 }
-html[data-commonweave-system="commonweave"] .pill,
-html[data-commonweave-system="commonweave"] .btn,
-html[data-commonweave-system="commonweave"] .bottom button{
+html[data-civweave-system="civweave"] .pill,
+html[data-civweave-system="civweave"] .btn,
+html[data-civweave-system="civweave"] .bottom button{
   border:1px solid var(--line);
   border-radius:12px;
   background:color-mix(in srgb,var(--panel2) 88%,transparent);
   color:var(--ink);
   font-weight:800;
 }
-html[data-commonweave-system="commonweave"] .pill.active,
-html[data-commonweave-system="commonweave"] .btn.primary,
-html[data-commonweave-system="commonweave"] .bottom button.active{
+html[data-civweave-system="civweave"] .pill.active,
+html[data-civweave-system="civweave"] .btn.primary,
+html[data-civweave-system="civweave"] .bottom button.active{
   border-color:var(--mint);
   background:color-mix(in srgb,var(--mint) 11%,var(--panel));
   color:var(--mint);
 }
-html[data-commonweave-system="commonweave"] .pill:hover,
-html[data-commonweave-system="commonweave"] .pill:focus-visible,
-html[data-commonweave-system="commonweave"] .btn:hover,
-html[data-commonweave-system="commonweave"] .btn:focus-visible,
-html[data-commonweave-system="commonweave"] .realm-node:hover,
-html[data-commonweave-system="commonweave"] .realm-node:focus-visible{
+html[data-civweave-system="civweave"] .pill:hover,
+html[data-civweave-system="civweave"] .pill:focus-visible,
+html[data-civweave-system="civweave"] .btn:hover,
+html[data-civweave-system="civweave"] .btn:focus-visible,
+html[data-civweave-system="civweave"] .realm-node:hover,
+html[data-civweave-system="civweave"] .realm-node:focus-visible{
   outline:none;
   border-color:var(--mint);
   box-shadow:0 0 14px color-mix(in srgb,var(--mint) 38%,transparent);
 }
-html[data-commonweave-system="commonweave"] .realm-node{
+html[data-civweave-system="civweave"] .realm-node{
   min-height:150px;
   border:1px solid color-mix(in srgb,var(--accent) 52%,transparent);
   border-radius:15px;
   background:linear-gradient(135deg,var(--panel2),var(--panel));
   box-shadow:none;
 }
-html[data-commonweave-system="commonweave"] .realm-node:nth-child(2n){
+html[data-civweave-system="civweave"] .realm-node:nth-child(2n){
   border-color:color-mix(in srgb,var(--accent) 62%,transparent);
 }
-html[data-commonweave-system="commonweave"] .realm-node small{
+html[data-civweave-system="civweave"] .realm-node small{
   color:var(--accent);
   font-weight:900;
 }
-html[data-commonweave-system="commonweave"] .realm-node strong{
+html[data-civweave-system="civweave"] .realm-node strong{
   font-family:Georgia,"Times New Roman",serif;
 }
-html[data-commonweave-system="commonweave"] .guide,
-html[data-commonweave-system="commonweave"] .work{
+html[data-civweave-system="civweave"] .guide,
+html[data-civweave-system="civweave"] .work{
   border:1px solid var(--line);
   border-radius:14px;
   background:var(--panel);
   backdrop-filter:none;
 }
-html[data-commonweave-system="commonweave"] .guide-head,
-html[data-commonweave-system="commonweave"] .guide-foot,
-html[data-commonweave-system="commonweave"] .work-head{
+html[data-civweave-system="civweave"] .guide-head,
+html[data-civweave-system="civweave"] .guide-foot,
+html[data-civweave-system="civweave"] .work-head{
   border-color:var(--line);
   background:color-mix(in srgb,var(--panel2) 56%,var(--panel));
 }
-html[data-commonweave-system="commonweave"] .message{
+html[data-civweave-system="civweave"] .message{
   border-radius:10px;
   background:var(--panel2);
 }
-html[data-commonweave-system="commonweave"] .message.user{
+html[data-civweave-system="civweave"] .message.user{
   background:color-mix(in srgb,var(--mint) 11%,var(--panel));
 }
-html[data-commonweave-system="commonweave"] .card{
+html[data-civweave-system="civweave"] .card{
   border:1px solid var(--line);
   border-radius:14px;
   background:var(--panel);
 }
-html[data-commonweave-system="commonweave"] .field input,
-html[data-commonweave-system="commonweave"] .field select,
-html[data-commonweave-system="commonweave"] .field textarea{
+html[data-civweave-system="civweave"] .field input,
+html[data-civweave-system="civweave"] .field select,
+html[data-civweave-system="civweave"] .field textarea{
   border:1px solid var(--line);
   border-radius:9px;
   background:#0005;
   color:var(--ink);
 }
-html[data-commonweave-system="commonweave"] .path{
+html[data-civweave-system="civweave"] .path{
   border:1px solid var(--line);
   border-left:4px solid var(--accent);
   border-radius:14px;
   background:var(--panel2);
 }
-html[data-commonweave-system="commonweave"] .next{
+html[data-civweave-system="civweave"] .next{
   border:1px solid color-mix(in srgb,var(--mint) 58%,transparent);
   border-radius:14px;
   background:color-mix(in srgb,var(--mint) 11%,var(--panel));
 }
-html[data-commonweave-system="commonweave"] .bottom{
+html[data-civweave-system="civweave"] .bottom{
   border:1px solid var(--line);
   border-radius:14px;
   background:color-mix(in srgb,var(--bg) 94%,transparent);
 }
-html[data-commonweave-system="commonweave"] dialog{
+html[data-civweave-system="civweave"] dialog{
   border:1px solid var(--line);
   border-radius:14px;
   background:var(--panel);
@@ -471,7 +471,7 @@ html[data-living-school-cabinet="v151"] .ls-toast{
 }
 
 @media(prefers-reduced-motion:reduce){
-  html[data-commonweave-system="commonweave"] *,
+  html[data-civweave-system="civweave"] *,
   html[data-living-school-cabinet="v151"] *{
     transition:none!important;
     scroll-behavior:auto!important;

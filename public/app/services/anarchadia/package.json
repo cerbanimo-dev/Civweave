@@ -3,7 +3,7 @@
   "version": "0.3.3",
   "private": true,
   "type": "module",
-  "description": "Local-first living amendment hall with precisely mapped interactive room artwork, existing Charter Forge governance, Commonweave sync, Rook advisory tools, selective exchange, and human-controlled records.",
+  "description": "Local-first living amendment hall with precisely mapped interactive room artwork, existing Charter Forge governance, Civweave sync, Rook advisory tools, selective exchange, and human-controlled records.",
   "scripts": {
     "dev": "node server.mjs",
     "start": "node server.mjs",

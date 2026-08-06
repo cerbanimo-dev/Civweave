@@ -44,16 +44,16 @@ SHEETS = {
         "state-ring-active", "state-ring-selected", "state-ring-disabled",
     ]),
     "cerbanimo-icons-and-nav-tray.png": (5, 3, [
-        "cerbanimo-home", "commonweave-home", "universal-ai-config", "settings", "ask-kamiya",
+        "cerbanimo-home", "civweave-home", "universal-ai-config", "settings", "ask-kamiya",
         "back-door", "map", "tray-left-cap", "tray-active-slot", "tray-right-cap",
         "bottom-nav-tray",
     ]),
-    "commonweave-navigation-icons.png": (4, 2, [
-        "commonweave-home", "commonweave-route", "weaveling-compass", "commonweave-journal",
-        "commonweave-passport", "commonweave-realms", "commonweave-ai-config",
+    "civweave-navigation-icons.png": (4, 2, [
+        "civweave-home", "civweave-route", "weaveling-compass", "civweave-journal",
+        "civweave-passport", "civweave-realms", "civweave-ai-config",
     ]),
-    "commonweave-navbar.png": (3, 1, [
-        "nav-orbit-left", "commonweave-bottom-navbar", "nav-orbit-right",
+    "civweave-navbar.png": (3, 1, [
+        "nav-orbit-left", "civweave-bottom-navbar", "nav-orbit-right",
     ]),
     "ChatGPT Image Aug 1, 2026, 03_02_20 PM (1).png": (3, 2, [
         "merlin-welcome-guide", "merlin-conversation-listening", "merlin-proposal-forge",
@@ -104,8 +104,8 @@ CENTERS = {
         (.16,.49),(.34,.49),(.50,.49),(.68,.49),(.86,.49),
         (.50,.82),
     ],
-    "commonweave-navigation-icons.png": [(.14,.24),(.38,.24),(.62,.24),(.86,.24),(.19,.72),(.50,.72),(.81,.72)],
-    "commonweave-navbar.png": [(.12,.24),(.50,.67),(.88,.24)],
+    "civweave-navigation-icons.png": [(.14,.24),(.38,.24),(.62,.24),(.86,.24),(.19,.72),(.50,.72),(.81,.72)],
+    "civweave-navbar.png": [(.12,.24),(.50,.67),(.88,.24)],
     "ChatGPT Image Aug 1, 2026, 03_02_20 PM (1).png": [(.17,.25),(.50,.25),(.83,.25),(.17,.75),(.50,.75),(.83,.75)],
     "ChatGPT Image Aug 1, 2026, 03_02_20 PM (2).png": [(.125,.17),(.375,.17),(.625,.17),(.875,.17),(.125,.50),(.375,.50),(.625,.50),(.875,.50),(.125,.83),(.375,.83),(.625,.83),(.875,.83)],
     "ChatGPT Image Aug 1, 2026, 03_02_21 PM (3).png": [(.125,.17),(.375,.17),(.625,.17),(.875,.17),(.125,.50),(.375,.50),(.625,.50),(.875,.50),(.125,.83),(.375,.83),(.625,.83),(.875,.83)],

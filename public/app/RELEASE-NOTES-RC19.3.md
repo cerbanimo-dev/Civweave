@@ -1,6 +1,6 @@
 # Living School RC19.3 — Full World Engine Migration
 
-Every Living School visual destination now runs through the reusable Commonweave World Engine.
+Every Living School visual destination now runs through the reusable Civweave World Engine.
 
 ## Migrated campus
 

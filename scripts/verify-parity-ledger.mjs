@@ -4,7 +4,7 @@ import { gunzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const shared=path.join(root,'public/app/shared');
-const encoded=(await Promise.all([1,2,3,4].map(part=>fs.readFile(path.join(shared,`commonweave-parity-ledger.part${part}.b64`),'utf8')))).join('').replace(/\s+/g,'');
+const encoded=(await Promise.all([1,2,3,4].map(part=>fs.readFile(path.join(shared,`civweave-parity-ledger.part${part}.b64`),'utf8')))).join('').replace(/\s+/g,'');
 const ledger=JSON.parse(gunzipSync(Buffer.from(encoded,'base64')).toString('utf8'));
 const shells=JSON.parse(await fs.readFile(path.join(shared,'cabinet-shells-v129.json'),'utf8'));
 ledger.version=shells.version;

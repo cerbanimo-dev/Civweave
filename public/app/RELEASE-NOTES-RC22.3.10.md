@@ -1,4 +1,4 @@
-# Commonweave RC22.3.10
+# Civweave RC22.3.10
 
 ## Visual runtime recovery
 
@@ -8,12 +8,12 @@ This release repairs the failures found during live host-node testing.
 - Restored Living School visual startup by moving its visual runtime out of an accidentally nested entitlement function.
 - Repaired Cerbanimo's truncated inline script and escaped nested script tags used by exported quest entrances.
 - Synchronized Cerbanimo and Living School inline source mirrors with their actual page runtimes.
-- Added first-paint shielding so Commonweave no longer flashes the conventional substrate before the illustrated world forms.
+- Added first-paint shielding so Civweave no longer flashes the conventional substrate before the illustrated world forms.
 - The Quad now opens host-node setup when the device is not connected, and summons Weaveling after connection.
 
 ### Navigation and artwork
 - Added a shared set of compact image-backed navigation glyphs.
-- Replaced tall screenshot-thumbnail docks in Commonweave, Living School, Cerbanimo, FellowFare, and Anarchadia.
+- Replaced tall screenshot-thumbnail docks in Civweave, Living School, Cerbanimo, FellowFare, and Anarchadia.
 - Added an always-visible FellowFare return glyph and recalibrated the Main Atrium hotspots to its actual depicted storefronts, kiosk, Rook, and notice boards.
 - Realm returns now go directly to the visual Town Square with a cache-busting build marker.
 - Re-themed Anarchadia work surfaces as parchment, timber, and iron rather than Cerbanimo-style neon holograms.

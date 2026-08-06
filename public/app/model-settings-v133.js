@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const SETTINGS_KEY='commonweave.universal-ai.v127';
-const SESSION_KEY='commonweave-model-session';
+const SETTINGS_KEY='civweave.universal-ai.v127';
+const SESSION_KEY='civweave-model-session';
 const GEMINI_ENDPOINT='https://generativelanguage.googleapis.com/v1beta';
 const GEMINI_MODEL='gemini-3.5-flash-lite';
 const OLLAMA_ENDPOINT='http://127.0.0.1:11434/api/chat';
@@ -10,7 +10,7 @@ const MODEL_LABEL='SmolLM2 360M Instruct';
 const MODEL_MANIFEST='/app/models/smollm2-360m-instruct/model-manifest.json';
 const MODEL_ADAPTER='/app/models/smollm2-360m-instruct/adapter.js';
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
-const runtime=()=>globalThis.CommonweaveModelRuntime||null;
+const runtime=()=>globalThis.CivweaveModelRuntime||null;
 let adapterPromise=null;
 
 function providerName(value){
@@ -22,7 +22,7 @@ function providerName(value){
 }
 
 function report(kind,detail={}){
-  try{fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:'1.0.30',build:'smollm2-onboard-r6',kind:`model-settings-v134:${kind}`,url:location.href,detail}),keepalive:true,cache:'no-store'}).catch(()=>{})}catch{}
+  try{fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'civweave.boot-log.v1',time:new Date().toISOString(),version:'1.0.30',build:'smollm2-onboard-r6',kind:`model-settings-v134:${kind}`,url:location.href,detail}),keepalive:true,cache:'no-store'}).catch(()=>{})}catch{}
 }
 
 function existingKey(){
@@ -225,13 +225,13 @@ function benchmarkCases(){
     ['build','Help me repair a broken community greenhouse vent and prove the work is complete.','cerbanimo','Build'],
     ['exchange','We need twelve reclaimed boards and a way to borrow a trailer fairly.','fellowfare','Acquire'],
     ['governance','Draft a proposal for how the neighborhood approves shared tool purchases.','anarchadia','Govern'],
-    ['reflection','I have too many projects and need to decide what deserves attention first.','commonweave','Reflect']
+    ['reflection','I have too many projects and need to decide what deserves attention first.','civweave','Reflect']
   ];
   return items.map(([id,text,system,mode])=>({
     id,expected:{system,mode},maxNewTokens:140,
     messages:[
-      {role:'system',content:'You are Commonweave’s small onboard routing guide. Return only JSON with system, mode, and nextAction. Do not use markdown.'},
-      {role:'user',content:JSON.stringify({question:'Which Commonweave system owns the next useful action?',message:text,systems:['commonweave','living-school','cerbanimo','fellowfare','anarchadia'],schema})}
+      {role:'system',content:'You are Civweave’s small onboard routing guide. Return only JSON with system, mode, and nextAction. Do not use markdown.'},
+      {role:'user',content:JSON.stringify({question:'Which Civweave system owns the next useful action?',message:text,systems:['civweave','living-school','cerbanimo','fellowfare','anarchadia'],schema})}
     ]
   }));
 }
@@ -322,5 +322,5 @@ document.addEventListener('click',event=>{
   if(target&&!target.closest('[data-smol-settings-form]')){event.preventDefault();event.stopImmediatePropagation();open()}
 },true);
 addEventListener('DOMContentLoaded',scanInline,{once:true});
-globalThis.CommonweaveModelSettingsV133={open,inlineMarkup:()=>`<section class="cw-ai-inline-card">${formMarkup({inline:true})}</section>`,model:MODEL_ID,manifest:MODEL_MANIFEST};
+globalThis.CivweaveModelSettingsV133={open,inlineMarkup:()=>`<section class="cw-ai-inline-card">${formMarkup({inline:true})}</section>`,model:MODEL_ID,manifest:MODEL_MANIFEST};
 })();

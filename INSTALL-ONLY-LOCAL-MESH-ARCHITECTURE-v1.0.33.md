@@ -1,8 +1,8 @@
-# Commonweave install-only and local mesh architecture
+# Civweave install-only and local mesh architecture
 
 ## Product boundary
 
-The public origin is an installer, updater, recovery doorway, and optional exchange rendezvous. It is not a live Commonweave application server.
+The public origin is an installer, updater, recovery doorway, and optional exchange rendezvous. It is not a live Civweave application server.
 
 The installed PWA is the application. Its device package contains the complete frontend, realm workbenches, Cabinet Mode and Cabinet Only, local semantic model runtime, application services, and offline state machinery.
 
@@ -14,7 +14,7 @@ During installation or an explicit update, the release origin may deliver immuta
 
 The PWA owns:
 
-- the Commonweave hub, cabinets, realm workbenches, and Lite mode;
+- the Civweave hub, cabinets, realm workbenches, and Lite mode;
 - IndexedDB and OPFS application state;
 - local model files and workers;
 - a signed community-object inbox and outbox;
@@ -34,7 +34,7 @@ A local node is required for capabilities browsers cannot provide reliably:
 - durable relay for several devices in one household or community;
 - larger local models and native integrations.
 
-The companion is optional for ordinary offline Commonweave use. It is required only for an always-on mesh.
+The companion is optional for ordinary offline Civweave use. It is required only for an always-on mesh.
 
 ### Ring 3: community gateway
 
@@ -50,7 +50,7 @@ It must not be the canonical store for private local work and must not serve the
 
 ## Install-only rule
 
-Top-level Commonweave application routes require installed display mode. A browser tab is redirected to the installer unless an explicit localhost developer bypass is active. Embedded realm consoles are allowed when their parent is the installed shell.
+Top-level Civweave application routes require installed display mode. A browser tab is redirected to the installer unless an explicit localhost developer bypass is active. Embedded realm consoles are allowed when their parent is the installed shell.
 
 The install prompt cannot be forced. Chromium exposes `beforeinstallprompt` only after browser-defined eligibility and engagement checks. Safari installation uses the platform share menu. The installer therefore prepares the complete package first, then exposes the browser-supported installation action or platform instructions.
 

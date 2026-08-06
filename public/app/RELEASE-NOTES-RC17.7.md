@@ -1,4 +1,4 @@
-# Commonweave v1.0.0-rc17.7 — Cerbanimo Visual Primary
+# Civweave v1.0.0-rc17.7 — Cerbanimo Visual Primary
 
 - Restores Cerbanimo visual mode as the default entry experience.
 - Remembers and restores the last visual room and open spatial detail.

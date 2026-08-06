@@ -8,7 +8,7 @@ const PORT = 18787;
 const origin = `http://127.0.0.1:${PORT}`;
 const EXPECTED_BUILD = '1.0.26-loop-diagnostics-hotfix-2';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const dataDir = await mkdtemp(path.join(os.tmpdir(), 'commonweave-v126-'));
+const dataDir = await mkdtemp(path.join(os.tmpdir(), 'civweave-v126-'));
 const output = [];
 const child = spawn(process.execPath, ['server-v126-hotfix.mjs'], {
   cwd: root,
@@ -40,7 +40,7 @@ try {
   const campusResponse = await fetch(`${origin}/campus/`, { cache: 'no-store' });
   const campusHtml = await campusResponse.text();
   assert(campusResponse.ok, `campus returned ${campusResponse.status}`);
-  assert(campusResponse.headers.get('x-commonweave-version') === '1.0.26', 'campus version header missing');
+  assert(campusResponse.headers.get('x-civweave-version') === '1.0.26', 'campus version header missing');
   assert(campusHtml.includes('boot-diagnostics-v126.js'), 'diagnostics script missing from campus HTML');
   assert(campusHtml.includes('host-node-setup-v126.js'), 'v1.0.26 bootstrap missing from campus HTML');
   assert(!campusHtml.includes('location.reload()'), 'automatic reload survived in campus HTML');

@@ -37,7 +37,7 @@ export async function runEvergreenDaemon({env = process.env, now = new Date()} =
   const roadmapPath = config.roadmapPath || 'TEN-YEAR-PIPELINE.md';
   const roadmap = await readFile(path.join(root, roadmapPath), 'utf8');
   const bundles = parsePipeline(roadmap);
-  const titlePrefix = config.sessionTitlePrefix || '[Commonweave Evergreen]';
+  const titlePrefix = config.sessionTitlePrefix || '[Civweave Evergreen]';
   const github = new GitHubApiClient({token: env.GITHUB_TOKEN, repository: env.GITHUB_REPOSITORY});
   const mergeGithub = env.EVERGREEN_GITHUB_TOKEN
     ? new GitHubApiClient({token: env.EVERGREEN_GITHUB_TOKEN, repository: env.GITHUB_REPOSITORY})
@@ -176,7 +176,7 @@ async function loadOverrideStates(github, mapping) {
 
 async function ensureLabels(github, labels) {
   const defaults = {
-    managed: {name: 'jules-evergreen', color: '8250df', description: 'Managed by the Commonweave Jules evergreen daemon'},
+    managed: {name: 'jules-evergreen', color: '8250df', description: 'Managed by the Civweave Jules evergreen daemon'},
     ready: {name: 'jules-auto-merge-ready', color: '1f883d', description: 'All unattended merge gates passed'},
     attention: {name: 'jules-needs-attention', color: 'd1242f', description: 'The Jules task or pull request needs attention'},
     blocked: {name: 'jules-auto-merge-blocked', color: 'bf8700', description: 'Policy requires manual review or an explicit override'}
@@ -271,7 +271,7 @@ async function monitorManagedPullRequests({
               method: config.autoMerge?.method || 'squash',
               sha: headSha,
               commitTitle: `${bundleId}: ${pr.title}`,
-              commitMessage: `Automatically merged by the Commonweave Jules evergreen daemon after session completion, roadmap integrity, sensitive-path, review, mergeability, and GitHub health gates passed.`
+              commitMessage: `Automatically merged by the Civweave Jules evergreen daemon after session completion, roadmap integrity, sensitive-path, review, mergeability, and GitHub health gates passed.`
             });
             if (!mergeResult.merged) throw new Error(mergeResult.message || `GitHub declined auto-merge for PR #${number}.`);
             await github.addComment(number, `${marker('merged', bundleId, headSha.slice(0, 12))}\n🧵 Auto-merged after the full evergreen policy and GitHub health gates passed.`);
@@ -322,7 +322,7 @@ async function monitorManagedPullRequests({
 class Summary {
   constructor(file) {
     this.file = file;
-    this.lines = ['## Commonweave Jules Evergreen'];
+    this.lines = ['## Civweave Jules Evergreen'];
   }
   line(value) { this.lines.push(`- ${value}`); }
   async finish(message) {

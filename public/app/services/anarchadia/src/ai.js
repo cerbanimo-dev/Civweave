@@ -224,8 +224,8 @@ export async function runAssistant({ task = 'rights-scan', context = {}, instruc
 
   if (requestedProvider === 'deterministic') {
     text = deterministic(task, context, instruction);
-  } else if (globalThis.CommonweaveModelRuntime) {
-    const runtime = globalThis.CommonweaveModelRuntime;
+  } else if (globalThis.CivweaveModelRuntime) {
+    const runtime = globalThis.CivweaveModelRuntime;
     const mappedProvider = requestedProvider === 'suite-bridge'
       ? 'hosted'
       : requestedProvider === 'openai-compatible'

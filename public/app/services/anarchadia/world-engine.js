@@ -1,6 +1,6 @@
-/* Commonweave World Engine v0.2
+/* Civweave World Engine v0.2
  * Data-driven visual scenes, objects, portals, NPCs, ambient events, and saved room state.
- * No framework or network dependency. Designed for offline Commonweave services.
+ * No framework or network dependency. Designed for offline Civweave services.
  */
 (function(global){
   'use strict';
@@ -8,11 +8,11 @@
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const clamp=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
 
-  class CommonweaveWorldEngine extends EventTarget {
+  class CivweaveWorldEngine extends EventTarget {
     constructor(options={}){
       super();
       this.root=options.root||null;
-      this.storageKey=options.storageKey||'commonweave.world-state.v1';
+      this.storageKey=options.storageKey||'civweave.world-state.v1';
       this.handlers={
         navigate:options.onNavigate||(()=>{}),
         workspace:options.onWorkspace||(()=>{}),
@@ -145,5 +145,5 @@
     }
   }
 
-  global.CommonweaveWorldEngine=CommonweaveWorldEngine;
+  global.CivweaveWorldEngine=CivweaveWorldEngine;
 })(window);

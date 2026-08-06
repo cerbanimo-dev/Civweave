@@ -16,7 +16,7 @@ async function patch(relative,transform){
   changed.push(relative);
 }
 function replaceRequired(source,pattern,replacement,label){
-  if(!pattern.test(source))throw new Error(`${label} was not found while synchronizing Commonweave ${version}.`);
+  if(!pattern.test(source))throw new Error(`${label} was not found while synchronizing Civweave ${version}.`);
   return source.replace(pattern,replacement);
 }
 
@@ -41,8 +41,8 @@ await patch('public/app/index.html',source=>{
 
 await patch('public/app/manifest.webmanifest',source=>{
   const manifest=JSON.parse(source);
-  manifest.name=`Commonweave v${version}`;
-  const start=new URL(manifest.start_url||'/app/', 'https://commonweave.invalid');
+  manifest.name=`Civweave v${version}`;
+  const start=new URL(manifest.start_url||'/app/', 'https://civweave.invalid');
   start.searchParams.set('version',version);
   manifest.start_url=`${start.pathname}${start.search}${start.hash}`;
   return `${JSON.stringify(manifest,null,2)}\n`;
@@ -73,7 +73,7 @@ await patch('public/app/install-boundary-v146.js',source=>{
 });
 
 await patch('public/app/working-campus-v156.html',source=>{
-  source=replaceRequired(source,/Commonweave Working Campus · v\d+\.\d+\.\d+/,`Commonweave Working Campus · v${version}`,'working-campus title');
+  source=replaceRequired(source,/Civweave Working Campus · v\d+\.\d+\.\d+/,`Civweave Working Campus · v${version}`,'working-campus title');
   source=replaceRequired(source,/<b class="version-chip">v\d+\.\d+\.\d+<\/b>/,`<b class="version-chip">v${version}</b>`,'working-campus version chip');
   source=source.replace(/install-boundary-v146\.js\?v=\d+\.\d+\.\d+-v184/,`install-boundary-v146.js?v=${version}-v184`);
   source=source.replace(/const VERSION='\d+\.\d+\.\d+-working-campus-planner-v199';/,`const VERSION='${version}-working-campus-planner-v199';`);
@@ -83,13 +83,13 @@ await patch('public/app/working-campus-v156.html',source=>{
 await patch('server-gateway-v131-base.mjs',source=>{
   source=replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'gateway base version');
   source=replaceRequired(source,/const BUILD = '\d+\.\d+\.\d+-install-only-fullscreen-family-gateway';/,`const BUILD = '${version}-install-only-fullscreen-family-gateway';`,'gateway build version');
-  source=source.replace(/Commonweave v\d+\.\d+\.\d+ fixed-settings-layer device package/g,`Commonweave v${version} fixed-settings-layer device package`);
+  source=source.replace(/Civweave v\d+\.\d+\.\d+ fixed-settings-layer device package/g,`Civweave v${version} fixed-settings-layer device package`);
   return source;
 });
 
 await patch('server-gateway-v131.mjs',source=>source.replace(/const VERSION = '\d+\.\d+\.\d+-render-installed-runtime-v132';/,`const VERSION = '${version}-render-installed-runtime-v132';`));
 await patch('server-local-v131.mjs',source=>{
-  source=source.replace(/Commonweave local v\d+\.\d+\.\d+ patch/g,`Commonweave local v${version} patch`);
+  source=source.replace(/Civweave local v\d+\.\d+\.\d+ patch/g,`Civweave local v${version} patch`);
   source=source.replace(/,"const VERSION = '\d+\.\d+\.\d+';",'local version marker'/,`,"const VERSION = '${version}';",'local version marker'`);
   source=source.replace(/,"const BUILD = '\d+\.\d+\.\d+-settings-layer-local-runtime';",'local build marker'/,`,"const BUILD = '${version}-settings-layer-local-runtime';",'local build marker'`);
   source=source.replace(/,"const CW_VERSION = '\d+\.\d+\.\d+';",'generated runtime version marker'/,`,"const CW_VERSION = '${version}';",'generated runtime version marker'`);
@@ -100,7 +100,7 @@ await patch('server-local-v131.mjs',source=>{
 
 await patch('scripts/smoke-gateway-v131-base.mjs',source=>{
   source=replaceRequired(source,/VERSION='\d+\.\d+\.\d+',BUILD='\d+\.\d+\.\d+-install-only-fullscreen-family-gateway'/,`VERSION='${version}',BUILD='${version}-install-only-fullscreen-family-gateway'`,'gateway smoke release constants');
-  source=source.replace(/Install Commonweave v\d+\.\d+\.\d+\./g,`Install Commonweave v${version}.`);
+  source=source.replace(/Install Civweave v\d+\.\d+\.\d+\./g,`Install Civweave v${version}.`);
   source=source.replace(/gateway root is not the v\d+\.\d+\.\d+ installer/g,`gateway root is not the v${version} installer`);
   source=source.replace(/v1\.0\.7 package still includes/g,`v${version} package still includes`);
   source=source.replace(/campus\.includes\('v\d+\.\d+\.\d+'\)/,`campus.includes('${version}')`);

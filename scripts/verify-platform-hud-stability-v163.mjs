@@ -85,7 +85,7 @@ const document={
   addEventListener(){},
 };
 const localStorage=new Storage(),microtasks=[],events=[];
-localStorage.setItem('commonweave.realm-actions.v141',JSON.stringify([{id:'action-1',title:'Add a platform dark mode',state:'review',system:'anarchadia',createdAt:'2026-08-04T12:00:00Z'}]));
+localStorage.setItem('civweave.realm-actions.v141',JSON.stringify([{id:'action-1',title:'Add a platform dark mode',state:'review',system:'anarchadia',createdAt:'2026-08-04T12:00:00Z'}]));
 const context={
   console,document,localStorage,sessionStorage:new Storage(),MutationObserver,
   CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}},
@@ -100,7 +100,7 @@ vm.createContext(context);
 vm.runInContext(source,context,{filename:'platform-experience-v160.js'});
 let flushes=0;
 while(microtasks.length){const task=microtasks.shift();task();if(++flushes>50)throw new Error('Shared HUD entered a recursive microtask loop during boot.')}
-const api=context.CommonweavePlatformExperienceV160;
+const api=context.CivweavePlatformExperienceV160;
 assert(api,'Shared HUD API did not boot.');
 assert(host.querySelector('[data-cw160-review]'),'Review HUD control was not mounted.');
 assert(host.querySelector('[data-cw160-theme]'),'Theme HUD control was not mounted.');
@@ -115,7 +115,7 @@ assert(api.diagnostics.domWrites===stableWrites,`Stable HUD refreshes performed 
 assert(api.diagnostics.observerCallbacks>=250,'The test did not exercise the shared observer under subsystem mutations.');
 console.log(JSON.stringify({
   ok:true,
-  systems:['commonweave','living-school','cerbanimo','fellowfare','anarchadia'],
+  systems:['civweave','living-school','cerbanimo','fellowfare','anarchadia'],
   bootPatchRuns:stablePatches,
   stableDomWrites:stableWrites,
   unrelatedMutationCallbacks:api.diagnostics.observerCallbacks,

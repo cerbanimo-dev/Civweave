@@ -1,17 +1,17 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.16';
+const VERSION='1.0.17';
 const REVISION='five-system-boundary-v227';
 const INSTALLER='/app/index.html';
-const BOOT_KEY='commonweave.install-boundary.boot.v227';
-const LEGACY_BOOT_KEY='commonweave.install-boundary.boot.v226';
-const DEV_KEY='commonweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION='v1.0.16-canonical-core-only-v226';
-const ADDITIONS_STYLE='/extensions/commonweave-additions-v156.css';
+const BOOT_KEY='civweave.install-boundary.boot.v227';
+const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
+const DEV_KEY='civweave.install-boundary.developer.v146';
+const ADDITIONS_VERSION='v1.0.17-canonical-core-only-v226';
+const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const BRAND_SCRIPT='/app/civweave-brand.js';
 const FALLBACK_PATHS=new Map([
-  ['/app/working-campus-v156.html','commonweave'],
+  ['/app/working-campus-v156.html','civweave'],
   ['/app/cabinets/living-school/index.html','living-school'],
   ['/app/realm-console-v140.html','cerbanimo'],
   ['/app/fellowfare-cabinet-v144.html','fellowfare'],
@@ -29,12 +29,12 @@ const LEGACY_SCRIPTS=[
   '/app/guide-identity-integrity-v216.js',
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
-  '/extensions/commonweave-antigravity-live-source-guard-v167.js',
-  '/extensions/commonweave-device-credentials-v160.js',
-  '/extensions/commonweave-additions-v156.js',
+  '/extensions/civweave-antigravity-live-source-guard-v167.js',
+  '/extensions/civweave-device-credentials-v160.js',
+  '/extensions/civweave-additions-v156.js',
   '/app/shared-tools-cleanup-v175.js',
-  '/extensions/commonweave-proof-progress-v158.js',
-  '/extensions/commonweave-gemini-interactions-v159.js',
+  '/extensions/civweave-proof-progress-v158.js',
+  '/extensions/civweave-gemini-interactions-v159.js',
   '/app/themed-system-nav-v178.js',
   '/app/pwa-update-controller-v204.js'
 ];
@@ -62,12 +62,12 @@ function explicitInstalled(){
   }catch{return params.get('installed')==='1'}
 }
 function systemSurface(){
-  const contract=globalThis.CommonweaveSystemRoutesV227;
+  const contract=globalThis.CivweaveSystemRoutesV227;
   const system=contract?.identify?.(location.pathname)||FALLBACK_PATHS.get(location.pathname)||'';
   if(system)authorize();
   return system;
 }
-function canonicalAppSurface(){return systemSurface()==='commonweave'}
+function canonicalAppSurface(){return systemSurface()==='civweave'}
 function allowed(){return Boolean(systemSurface())||installedDisplay()||explicitInstalled()||developer()||embedded()}
 function installerUrl(){
   const target=`${location.pathname}${location.search}${location.hash}`;
@@ -105,12 +105,12 @@ function start(){
     return;
   }
   if(system){
-    root.dataset.installBoundary=system==='commonweave'?'canonical':'canonical-system';
-    root.dataset.commonweaveSystemRoute=system;
+    root.dataset.installBoundary=system==='civweave'?'canonical':'canonical-system';
+    root.dataset.civweaveSystemRoute=system;
   }else if(root)root.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
-  if(system==='commonweave'){
-    root.dataset.commonweaveCanonicalCore='only';
-    queueMicrotask(()=>dispatchEvent(new CustomEvent('commonweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system}})));
+  if(system==='civweave'){
+    root.dataset.civweaveCanonicalCore='only';
+    queueMicrotask(()=>dispatchEvent(new CustomEvent('civweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system}})));
     return;
   }
   installAdditions();
@@ -118,8 +118,8 @@ function start(){
 
 start();
 
-globalThis.CommonweaveInstallBoundaryV146=Object.freeze({
-  version:'1.0.16',allowed,
+globalThis.CivweaveInstallBoundaryV146=Object.freeze({
+  version:'1.0.17',allowed,
   revision:REVISION,
   systemSurface,
   canonicalAppSurface,
@@ -132,7 +132,7 @@ globalThis.CommonweaveInstallBoundaryV146=Object.freeze({
   additionsVersion:ADDITIONS_VERSION,
   brandScript:BRAND_SCRIPT,
   publicBrand:'Civweave',
-  canonicalPolicy:'five-system-first-class-routes-commonweave-core-only',
+  canonicalPolicy:'five-system-first-class-routes-civweave-core-only',
   canonicalSystemCount:5,
   canonicalAutoScripts:0,
   onlineSelfHeal:true,

@@ -5,7 +5,7 @@ const files=await Promise.all([
   readFile('public/app/weaveling-memory-v191.js','utf8'),
   readFile('public/app/weaveling-memory-bridge-v191.js','utf8'),
   readFile('public/app/model-settings-controller-v173.js','utf8'),
-  readFile('public/extensions/commonweave-device-credentials-v160.js','utf8'),
+  readFile('public/extensions/civweave-device-credentials-v160.js','utf8'),
   readFile('public/service-worker.js','utf8'),
   readFile('public/service-worker-v156.js','utf8'),
   readFile('public/app/install-boundary-v146.js','utf8'),
@@ -20,7 +20,7 @@ class CustomEvent{constructor(type,{detail}={}){this.type=type;this.detail=detai
 const localStorage=new MemoryStorage(),sessionStorage=new MemoryStorage(),events=[];
 const sandbox={console,Date,Math,Set,Map,Promise,structuredClone,localStorage,sessionStorage,CustomEvent,dispatchEvent:event=>{events.push(event);return true},globalThis:null};
 sandbox.globalThis=sandbox;vm.createContext(sandbox);vm.runInContext(memorySource,sandbox,{filename:'weaveling-memory-v191.js'});
-const memory=sandbox.CommonweaveWeavelingMemoryV191;
+const memory=sandbox.CivweaveWeavelingMemoryV191;
 assert(memory?.version.includes('v191'),'Memory runtime did not initialize.');
 let command=memory.handleCommand('remember that the infinite loop is intentionally unresolved');
 assert(command?.ok&&memory.readLong().length===1,'Explicit long-term memory command did not persist.');
@@ -34,31 +34,31 @@ assert(memory.readWorking().activeWeaveId===plan.id&&memory.readWorking().object
 assert(memory.readLong().some(item=>item.scope===`weave:${plan.id}`&&item.kind==='project'),'Plan did not populate durable project memory.');
 
 let captured=null;
-sandbox.CommonweaveAssistantV141={respond:async args=>{captured=args;return{response:{answer:'Memory-aware answer'},provider:'gemini',model:'gemini-test',plan}}};
+sandbox.CivweaveAssistantV141={respond:async args=>{captured=args;return{response:{answer:'Memory-aware answer'},provider:'gemini',model:'gemini-test',plan}}};
 vm.runInContext(bridgeSource,sandbox,{filename:'weaveling-memory-bridge-v191.js'});
-const bridged=await sandbox.CommonweaveAssistantV141.respond({text:'Continue the book plan',systemId:'commonweave',history:[{role:'user',text:'Earlier turn'}]});
+const bridged=await sandbox.CivweaveAssistantV141.respond({text:'Continue the book plan',systemId:'civweave',history:[{role:'user',text:'Earlier turn'}]});
 assert(bridged.response.answer==='Memory-aware answer','Memory bridge changed the underlying assistant result.');
 assert(captured.history.some(item=>item.role==='system'&&/Local Weaveling memory follows/.test(item.text)),'Memory bridge did not inject working and long-term memory.');
-command=await sandbox.CommonweaveAssistantV141.respond({text:'what do you remember',systemId:'commonweave',history:[]});
-assert(command.provider==='commonweave-memory'&&/durable memory/i.test(command.response.answer),'Memory status command did not stay local.');
+command=await sandbox.CivweaveAssistantV141.respond({text:'what do you remember',systemId:'civweave',history:[]});
+assert(command.provider==='civweave-memory'&&/durable memory/i.test(command.response.answer),'Memory status command did not stay local.');
 
-const persisted={schema:'commonweave.device-model-secret.v191',apiKey:'AIza-device-test-key-not-real',provider:'gemini',savedAt:'2026-08-05T00:00:00.000Z'};
-const settingsLocal=new MemoryStorage({'commonweave-model-persistent-secrets-v191':JSON.stringify(persisted)}),settingsSession=new MemoryStorage(),settingsEvents=[];
+const persisted={schema:'civweave.device-model-secret.v191',apiKey:'AIza-device-test-key-not-real',provider:'gemini',savedAt:'2026-08-05T00:00:00.000Z'};
+const settingsLocal=new MemoryStorage({'civweave-model-persistent-secrets-v191':JSON.stringify(persisted)}),settingsSession=new MemoryStorage(),settingsEvents=[];
 const document={documentElement:{dataset:{}},getElementById(){return null},querySelector(){return null},head:{append(){}},body:{append(){}}};
 class HTMLElement{}
 const settingsSandbox={console,Date,Math,JSON,localStorage:settingsLocal,sessionStorage:settingsSession,CustomEvent,HTMLElement,document,dispatchEvent:event=>{settingsEvents.push(event);return true},globalThis:null};
 settingsSandbox.globalThis=settingsSandbox;vm.createContext(settingsSandbox);vm.runInContext(settingsSource,settingsSandbox,{filename:'model-settings-controller-v173.js'});
-const controller=settingsSandbox.CommonweaveModelSettingsControllerV173;
+const controller=settingsSandbox.CivweaveModelSettingsControllerV173;
 assert(controller?.credentialStatus?.().remembered===true,'Remembered device credential was not detected.');
 assert(controller.credentialStatus().session===true,'Remembered device credential was not restored into the runtime session.');
-assert(JSON.parse(settingsSession.getItem('commonweave-model-session')).apiKey===persisted.apiKey,'Restored Gemini key did not reach the session key used by the model runtime.');
+assert(JSON.parse(settingsSession.getItem('civweave-model-session')).apiKey===persisted.apiKey,'Restored Gemini key did not reach the session key used by the model runtime.');
 controller.forgetCredential();
 assert(!controller.credentialStatus().remembered&&!controller.credentialStatus().session,'Forget saved key did not clear both durable and session copies.');
 
 for(const token of ['name="credentialMode"','Remember on this device','This app session only','anyone with access to this unlocked browser profile','credentialPersistence'])assert(settingsSource.includes(token),`Settings teaching flow is missing ${token}.`);
 for(const forbidden of ['MutationObserver','setInterval(','setTimeout('])assert(!settingsSource.includes(forbidden),`Clean-room settings reintroduced ${forbidden}.`);
 assert(!deviceSource.includes('MutationObserver'),'Credential compatibility shim still observes the document.');
-assert(deviceSource.includes("addEventListener('commonweave:model-settings-saved'"),'Credential bridge does not canonicalize an explicitly saved credential.');
+assert(deviceSource.includes("addEventListener('civweave:model-settings-saved'"),'Credential bridge does not canonicalize an explicitly saved credential.');
 assert(deviceSource.includes("detail.credentialPersistence==='device'"),'Credential bridge does not preserve the explicit device-only persistence choice.');
 assert(deviceSource.includes('automaticPersistence:false'),'Credential shim does not declare indiscriminate automatic persistence retired.');
 assert(deviceSource.includes('restoresConsent:true')&&deviceSource.includes('mirrorsRuntimeSecret:true'),'Credential bridge does not declare the v192 usability repair.');

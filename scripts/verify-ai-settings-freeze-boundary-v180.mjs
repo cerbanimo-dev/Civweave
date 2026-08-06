@@ -11,7 +11,7 @@ const [controller,settings,adapter,worker,download,serviceWorker]=await Promise.
   read('public/app/unified-ai-settings-v175.js'),
   read('public/app/models/all-minilm-l6-v2/adapter.js'),
   read('public/app/models/all-minilm-l6-v2/worker.js'),
-  read('public/extensions/commonweave-model-download-v157.js'),
+  read('public/extensions/civweave-model-download-v157.js'),
   read('public/service-worker-v156.js')
 ]);
 
@@ -43,12 +43,12 @@ for(const token of [
   "if(!explicit)return{ready:false,dormant:true,reason:'explicit-activation-required'}",
   'let worker=null,sequence=0,readyState=null,initPromise=null;',
   'function activeWorker()',
-  "worker=new Worker(WORKER_URL,{type:'module',name:'commonweave-minilm-fixed-ort'})"
+  "worker=new Worker(WORKER_URL,{type:'module',name:'civweave-minilm-fixed-ort'})"
 ])assert(adapter.includes(token),`MiniLM adapter dormancy contract missing ${token}`);
 assert(adapter.indexOf('activeWorker().postMessage')>adapter.indexOf('function request('),'The worker may start outside an explicit request.');
 
 for(const token of [
-  "const VECTOR_DB='commonweave-semantic-cache-v1'",
+  "const VECTOR_DB='civweave-semantic-cache-v1'",
   "const INDEX_BATCH_SIZE=1",
   'async function ensureIndexVectors(id,state)',
   "yieldMs:16",
@@ -63,8 +63,8 @@ assert(!prewarmBlock.includes('ensureIndexVectors'),'Prewarm still embeds the en
 const loadBlock=worker.slice(worker.indexOf('async function load(id,requestedProfile)'),worker.indexOf('async function ensureIndexVectors'));
 assert(!loadBlock.includes('index-embedding'),'Session creation still embeds the reflex index.');
 
-for(const token of ["settingsHooks:false","automaticStartup:false","commonweave:open-semantic-lab"])assert(download.includes(token),`Semantic lab isolation missing ${token}`);
-for(const forbidden of ['commonweave:open-ai-settings','#settings-button','#model-chip'])assert(!download.includes(forbidden),`Model download still hooks the settings lifecycle through ${forbidden}`);
+for(const token of ["settingsHooks:false","automaticStartup:false","civweave:open-semantic-lab"])assert(download.includes(token),`Semantic lab isolation missing ${token}`);
+for(const forbidden of ['civweave:open-ai-settings','#settings-button','#model-chip'])assert(!download.includes(forbidden),`Model download still hooks the settings lifecycle through ${forbidden}`);
 
 for(const token of [
   'base-r42-settings-freeze-boundary',

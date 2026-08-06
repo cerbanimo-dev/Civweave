@@ -1,8 +1,8 @@
-# Fresh Commonweave MVP source map
+# Fresh Civweave MVP source map
 
 This MVP combines the strongest working layers from three sources instead of choosing one snapshot wholesale.
 
-## 1. Current `cerbanimo-dev/Commonweave`
+## 1. Current `cerbanimo-dev/Civweave`
 
 Kept as the runtime foundation:
 
@@ -12,7 +12,7 @@ Kept as the runtime foundation:
 - guide avatars, logos, and the current visual palette
 - current intention schema, explicit review gate, realm status records, and portable offline package
 
-## 2. Uploaded `Commonweave(1).zip`
+## 2. Uploaded `Civweave(1).zip`
 
 Carried into the new shell:
 
@@ -36,7 +36,7 @@ Carried into the intention flow:
 
 1. Weaveling asks for a wish.
 2. The user states current aptitude, desired learning mode, collaboration mode, available rhythm, and constraints.
-3. Commonweave creates a reviewable weave with up to three paths:
+3. Civweave creates a reviewable weave with up to three paths:
    - Living School learning path
    - Cerbanimo skilled-labor path
    - FellowFare material and assistance path
@@ -48,7 +48,7 @@ Carried into the intention flow:
 
 ## Deliberate boundaries
 
-- The Commonweave shell does not silently purchase, publish, assign work, or authorize governance actions.
+- The Civweave shell does not silently purchase, publish, assign work, or authorize governance actions.
 - API credentials remain session-only.
 - The deterministic planner is the always-available floor. Configured browser, local API, GGUF bridge, manual, or hosted routes can enrich later passes.
 - Existing realm engines remain independently usable and retain their own evidence, validation, exchange, and governance rules.

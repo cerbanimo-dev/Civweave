@@ -1,5 +1,5 @@
 {
-  "schema": "commonweave.optimization-report.v1",
+  "schema": "civweave.optimization-report.v1",
   "release": "1.0.0-rc22.2.6",
   "changes": {
     "largeOpaquePngToWebp": 55,

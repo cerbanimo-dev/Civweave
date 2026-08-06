@@ -15,7 +15,7 @@ for (const rule of expectedRedirects) {
   }
 }
 
-if (!String(manifest.start_url || '').startsWith('/app/?system=commonweave')) {
+if (!String(manifest.start_url || '').startsWith('/app/?system=civweave')) {
   throw new Error(`Manifest start_url must use /app/: ${manifest.start_url}`);
 }
 

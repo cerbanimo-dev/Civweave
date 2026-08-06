@@ -4,8 +4,8 @@
 const VERSION='1.0.7-offline-campus-status-v210';
 const WORKER_REVISION='offline-campus-seed-provenance-v211';
 const STATUS_TYPES=new Set([
-  'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',
-  'COMMONWEAVE_OFFLINE_PACKAGE_PROGRESS'
+  'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
+  'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS'
 ]);
 const $=selector=>document.querySelector(selector);
 const clamp=(value,min,max)=>Math.min(max,Math.max(min,Number.isFinite(value)?value:min));
@@ -106,7 +106,7 @@ async function askCurrentStatus(){
   if(STATUS_TYPES.has(packet?.type))render(packet);
 }
 
-globalThis.CommonweaveOfflineCampusStatusV210=api;
+globalThis.CivweaveOfflineCampusStatusV210=api;
 const serviceWorker=typeof navigator!=='undefined'?navigator.serviceWorker:null;
 serviceWorker?.addEventListener('message',event=>{
   if(STATUS_TYPES.has(event.data?.type))render(event.data);

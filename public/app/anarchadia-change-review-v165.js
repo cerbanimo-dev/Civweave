@@ -2,27 +2,27 @@
 'use strict';
 const VERSION='1.0.4-anarchadia-change-review-v165';
 if(globalThis.AnarchadiaChangeReviewV165?.version===VERSION)return;
-const CONSOLE_KEY='commonweave.anarchadia.citizen-console.v139';
-const ACTION_KEY='commonweave.realm-actions.v141';
-const SELECTED_KEY='commonweave.anarchadia.accepted-previews.v165';
+const CONSOLE_KEY='civweave.anarchadia.citizen-console.v139';
+const ACTION_KEY='civweave.realm-actions.v141';
+const SELECTED_KEY='civweave.anarchadia.accepted-previews.v165';
 const hasDOM=typeof document!=='undefined';
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clean=(value,max=8000)=>String(value??'').trim().slice(0,max);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const now=()=>new Date().toISOString();
 const uid=prefix=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
-const explicitApproval=text=>globalThis.CommonweaveActionFollowthroughV165?.explicitApproval?.(text)||/^\s*(?:yes[, ]*)?(?:go ahead(?: and)?\s+)?(?:approve|generate|run|proceed|do it)\b/i.test(clean(text,300));
+const explicitApproval=text=>globalThis.CivweaveActionFollowthroughV165?.explicitApproval?.(text)||/^\s*(?:yes[, ]*)?(?:go ahead(?: and)?\s+)?(?:approve|generate|run|proceed|do it)\b/i.test(clean(text,300));
 let currentPreviewId='';
 let decorateQueued=false;
-function defaultState(){return{schema:'commonweave.anarchadia-console.v1',passportId:`AC-${Math.random().toString(36).slice(2,10).toUpperCase()}`,proposals:[],ledger:[],settings:{autoRun:false}}}
-function readState(){const value=parse(localStorage.getItem(CONSOLE_KEY),null);return value?.schema==='commonweave.anarchadia-console.v1'?value:defaultState()}
+function defaultState(){return{schema:'civweave.anarchadia-console.v1',passportId:`AC-${Math.random().toString(36).slice(2,10).toUpperCase()}`,proposals:[],ledger:[],settings:{autoRun:false}}}
+function readState(){const value=parse(localStorage.getItem(CONSOLE_KEY),null);return value?.schema==='civweave.anarchadia-console.v1'?value:defaultState()}
 function notifyState(serialized){
   try{dispatchEvent(new StorageEvent('storage',{key:CONSOLE_KEY,newValue:serialized,url:location.href,storageArea:localStorage}))}catch{}
 }
 function writeState(state){state.proposals=Array.isArray(state.proposals)?state.proposals.slice(0,80):[];state.ledger=Array.isArray(state.ledger)?state.ledger.slice(0,250):[];const serialized=JSON.stringify(state);localStorage.setItem(CONSOLE_KEY,serialized);notifyState(serialized);scheduleDecorate();return state}
 function record(state,kind,detail,proposalId=''){state.ledger.unshift({id:uid('evt'),time:now(),kind,detail:clean(detail,2400),proposalId})}
 function actions(){const rows=parse(localStorage.getItem(ACTION_KEY),[]);return Array.isArray(rows)?rows:[]}
-function writeActions(rows){localStorage.setItem(ACTION_KEY,JSON.stringify(rows.slice(0,120)));try{dispatchEvent(new CustomEvent('commonweave:actions-changed',{detail:{items:rows}}))}catch{}}
+function writeActions(rows){localStorage.setItem(ACTION_KEY,JSON.stringify(rows.slice(0,120)));try{dispatchEvent(new CustomEvent('civweave:actions-changed',{detail:{items:rows}}))}catch{}}
 function updateAction(id,patch){if(!id)return null;const rows=actions(),index=rows.findIndex(item=>item.id===id);if(index<0)return null;const action=rows[index];patch(action);action.updatedAt=now();rows[index]=action;writeActions(rows);return action}
 function deriveTitle(text,fallback='Feature request'){
   const value=clean(text,180).replace(/^(?:please\s+)?(?:can|could|would)\s+you\s+/i,'').replace(/^(?:add|create|make|build|request)\s+/i,'').replace(/[.!?]+$/,'');
@@ -33,7 +33,7 @@ function normalizeAction(action){
   const source=clean(action.sourceText,5000),dark=/\bdark mode\b/i.test(source),feature=action.kind==='feature-request';
   if(feature&&!dark){
     action.title=deriveTitle(source,action.title||'Feature request');
-    action.fields={...(action.fields||{}),problem:source,proposedChange:`Implement the requested feature: ${source}`,affectedSystems:Array.isArray(action.fields?.affectedSystems)?action.fields.affectedSystems:['commonweave'],implementationRoute:'Anarchadia review → explicit approval → sandbox preview → keep or revert decision.'};
+    action.fields={...(action.fields||{}),problem:source,proposedChange:`Implement the requested feature: ${source}`,affectedSystems:Array.isArray(action.fields?.affectedSystems)?action.fields.affectedSystems:['civweave'],implementationRoute:'Anarchadia review → explicit approval → sandbox preview → keep or revert decision.'};
     if(!Array.isArray(action.acceptanceCriteria)||!action.acceptanceCriteria.length)action.acceptanceCriteria=['The requested feature can be inspected in a sandbox preview.','The current live interface remains unchanged until the preview is explicitly kept.','The user can revert the preview without losing the original request.'];
   }
   action.state='review';
@@ -50,7 +50,7 @@ function proposalFromAction(action){
     id:`proposal-${action.id}`,sourceActionId:action.id,kind:bug?'bugfix':'feature',title:clean(action.title,160)||deriveTitle(source),
     problem:clean(action.fields?.problem||action.fields?.report||source,5000),
     expected:clean(action.fields?.proposedChange||action.fields?.expected||`Implement the requested change: ${source}`,5000),
-    area:clean(action.fields?.affectedSurface||action.fields?.affectedSystems?.join(', ')||'Commonweave',240),
+    area:clean(action.fields?.affectedSurface||action.fields?.affectedSystems?.join(', ')||'Civweave',240),
     acceptance:Array.isArray(action.acceptanceCriteria)&&action.acceptanceCriteria.length?action.acceptanceCriteria.map(value=>clean(value,800)):['A sandbox preview demonstrates the requested change.','The user can keep or revert the preview explicitly.'],
     risk:clean(action.fields?.risk||'The preview is isolated. Keeping it selects a governed candidate; it does not silently publish production code.',3000),
     evidence:clean(action.fields?.evidence||source,3000),status:'review',stage:'intake',pipeline:[{time:now(),stage:'intake',note:'Merlin passed the request into review. No code generation has started.'}],
@@ -92,7 +92,7 @@ function revertPreview(id){
 }
 function toast(message){const node=document.querySelector?.('#ac-toast');if(!node)return;node.textContent=message;node.hidden=false;clearTimeout(node._ac165Timer);node._ac165Timer=setTimeout(()=>node.hidden=true,3200)}
 function manualSubmit(form){
-  const data=new FormData(form),acceptance=clean(data.get('acceptance'),5000).split(/\n+/).map(value=>value.trim()).filter(Boolean),item={id:uid('proposal'),kind:clean(data.get('kind'),40)||'feature',title:clean(data.get('title'),160),problem:clean(data.get('problem'),5000),expected:clean(data.get('expected'),5000),area:clean(data.get('area'),240)||'Commonweave',acceptance,risk:clean(data.get('risk'),3000),evidence:clean(data.get('evidence'),3000),status:'review',stage:'intake',pipeline:[{time:now(),stage:'intake',note:'Request submitted to review. Preview generation is waiting for explicit approval.'}],approval:{required:true,state:'review',reviewedAt:'',approvedAt:'',approvedBy:'local-user'},createdAt:now(),updatedAt:now(),voteSignal:false};
+  const data=new FormData(form),acceptance=clean(data.get('acceptance'),5000).split(/\n+/).map(value=>value.trim()).filter(Boolean),item={id:uid('proposal'),kind:clean(data.get('kind'),40)||'feature',title:clean(data.get('title'),160),problem:clean(data.get('problem'),5000),expected:clean(data.get('expected'),5000),area:clean(data.get('area'),240)||'Civweave',acceptance,risk:clean(data.get('risk'),3000),evidence:clean(data.get('evidence'),3000),status:'review',stage:'intake',pipeline:[{time:now(),stage:'intake',note:'Request submitted to review. Preview generation is waiting for explicit approval.'}],approval:{required:true,state:'review',reviewedAt:'',approvedAt:'',approvedBy:'local-user'},createdAt:now(),updatedAt:now(),voteSignal:false};
   const state=readState();state.proposals.unshift(item);record(state,'proposal-review-created',`${item.title}: manual request awaiting preview approval.`,item.id);writeState(state);globalThis.AnarchadiaCitizenConsoleV158?.setScreen?.('automation');openReview(item.id);return item;
 }
 function cardProposalId(card){return card.querySelector('[data-open-pipeline]')?.dataset.openPipeline||card.querySelector('[data-rerun]')?.dataset.rerun||''}
@@ -133,7 +133,7 @@ function patchMerlin(api){
   };
   Object.defineProperty(api,'__ac165ReviewFlow',{value:true});return api;
 }
-function patchAvailable(){patchMerlin(globalThis.CommonweaveGuideChatV153)}
+function patchAvailable(){patchMerlin(globalThis.CivweaveGuideChatV153)}
 function injectStyles(){if(!hasDOM||document.querySelector('#ac165-styles'))return;const style=document.createElement('style');style.id='ac165-styles';style.textContent='.ac165-review-body{display:grid;gap:12px;padding:18px;max-height:62vh;overflow:auto}.ac165-review-body p,.ac165-review-body li{color:#d9dbe5;line-height:1.5}.ac165-consent-note,.ac165-preview-note{margin:12px 18px;padding:12px;border-left:4px solid #8dff2b;background:rgba(141,255,43,.08);color:#dfffc8}.ac165-merlin-actions{display:flex;gap:8px;flex-wrap:wrap;padding:10px}.ac165-merlin-actions button,[data-ac165-state]{font:800 10px/1.2 system-ui;letter-spacing:.05em}[data-ac165-state]{display:block;color:#8dff2b;padding:4px 0}';document.head.append(style)}
 function captureSubmit(event){const form=event.target;if(form?.id!=='ac-request-form')return;event.preventDefault();event.stopImmediatePropagation();manualSubmit(form)}
 function captureClick(event){
@@ -144,7 +144,7 @@ function captureClick(event){
   if(target.dataset.preview){currentPreviewId=target.dataset.preview;setTimeout(decoratePreview,0);return}
   if(target.dataset.rerun){const item=proposal(target.dataset.rerun);if(item&&item.approval?.state!=='approved'&&!item.preview?.srcdoc){event.preventDefault();event.stopImmediatePropagation();openReview(item.id)}}
 }
-function boot(){injectStyles();ensureReviewDialog();document.addEventListener('submit',captureSubmit,true);document.addEventListener('click',captureClick,true);const observer=new MutationObserver(scheduleDecorate);observer.observe(document.documentElement,{childList:true,subtree:true});patchAvailable();importPendingActions();scheduleDecorate();addEventListener('commonweave:actions-changed',()=>{importPendingActions();scheduleDecorate()});addEventListener('storage',event=>{if([CONSOLE_KEY,ACTION_KEY].includes(event.key))scheduleDecorate()})}
+function boot(){injectStyles();ensureReviewDialog();document.addEventListener('submit',captureSubmit,true);document.addEventListener('click',captureClick,true);const observer=new MutationObserver(scheduleDecorate);observer.observe(document.documentElement,{childList:true,subtree:true});patchAvailable();importPendingActions();scheduleDecorate();addEventListener('civweave:actions-changed',()=>{importPendingActions();scheduleDecorate()});addEventListener('storage',event=>{if([CONSOLE_KEY,ACTION_KEY].includes(event.key))scheduleDecorate()})}
 if(hasDOM){document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot()}
 globalThis.AnarchadiaChangeReviewV165={version:VERSION,importAction,importPendingActions,latestReview,openReview,approveAndRun,selectPreview,revertPreview,manualSubmit,patchAvailable,explicitApproval};
 })();

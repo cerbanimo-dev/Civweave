@@ -1,18 +1,18 @@
 'use strict';
 (()=>{
 const VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205';
-if(self.CommonweaveCriticalBootV205)return;
+if(self.CivweaveCriticalBootV205)return;
 const nativeAddEventListener=self.addEventListener;
 const capturedInstallListeners=[];
 const updating=Boolean(self.registration?.active);
 const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205';
-const BASE_CACHE='commonweave-static-1.0.7-direct-family-r45-memory-credential-v191-five-system-chat-r46-weaveling-memory-direct-software-r38-v106-device-package-r41-no-native-dialog-direct-entry-r45-memory-credential-v191';
+const BASE_CACHE='civweave-static-1.0.7-direct-family-r45-memory-credential-v191-five-system-chat-r46-weaveling-memory-direct-software-r38-v106-device-package-r41-no-native-dialog-direct-entry-r45-memory-credential-v191';
 const EXTENSION_CACHE='cwext-working-campus-additions-v197-assistant-runtime-package';
 const BASE_EXPECTED_FILES=111;
 const EXTENSION_EXPECTED_FILES=53;
 const FETCH_TIMEOUT_MS=12000;
 const BASE_SENTINELS=['/index.html','/app/installed-entry-v146.html','/app/cabinets/living-school/living-school-cabinet-v151.mjs','/app/services/fellowfare/app.js','/app/anarchadia-console-v139.html'];
-const EXTENSION_SENTINELS=['/app/fast-interactive-runtime-v192.js','/app/context-plan-composer-v198.js','/app/themed-system-nav-v178.js','/app/cabinets/living-school/living-school-mutation-guard-v196.js','/extensions/commonweave-additions-v156.js'];
+const EXTENSION_SENTINELS=['/app/fast-interactive-runtime-v192.js','/app/context-plan-composer-v198.js','/app/themed-system-nav-v178.js','/app/cabinets/living-school/living-school-mutation-guard-v196.js','/extensions/civweave-additions-v156.js'];
 const CRITICAL_FILES=[
   '/app/cabinets/living-school/index.html',
   '/app/cabinets/living-school/living-school-cabinet-v151.css',
@@ -52,10 +52,10 @@ const CRITICAL_FILES=[
   '/app/mobile-regression-v170.js','/app/mobile-regression-v170.css',
   '/app/merlinites-semantic-planner-v164.js',
   '/app/pwa-v130.js',
-  '/extensions/commonweave-antigravity-live-source-guard-v167.js',
+  '/extensions/civweave-antigravity-live-source-guard-v167.js',
   '/app/assets/ai/moss-acorn.png',
   '/app/assets/ai/weaveling-compass.png',
-  '/app/assets/navigation/200-commonweave-nav.webp',
+  '/app/assets/navigation/200-civweave-nav.webp',
   '/app/assets/navigation/200-cerbanimo-nav.webp',
   '/app/assets/navigation/200-living-school-nav.webp',
   '/app/assets/navigation/200-fellowfare-nav.webp',
@@ -84,7 +84,7 @@ async function network(requestOrPath){
   const pathname=typeof requestOrPath==='string'?requestOrPath:new URL(requestOrPath.url).pathname;
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),FETCH_TIMEOUT_MS);
   try{
-    const headers=typeof requestOrPath==='string'?new Headers():new Headers(requestOrPath.headers);headers.set('x-commonweave-package','flat-core-repair');
+    const headers=typeof requestOrPath==='string'?new Headers():new Headers(requestOrPath.headers);headers.set('x-civweave-package','flat-core-repair');
     const target=typeof requestOrPath==='string'?requestOrPath:new Request(requestOrPath,{cache:'no-store',headers,signal:controller.signal});
     const response=typeof target==='string'?await fetch(target,{cache:'no-store',headers,signal:controller.signal}):await fetch(target);
     return wrongMime(response,pathname)?null:response;
@@ -115,7 +115,7 @@ async function criticalResponse(request){
   let response=await cache.match(pathname,{ignoreSearch:true,ignoreMethod:true});
   if(!response||wrongMime(response,pathname))response=await network(request)||await named(BASE_CACHE,pathname)||await named(EXTENSION_CACHE,pathname)||await caches.match(pathname,{ignoreSearch:true,ignoreMethod:true});
   if(response&&!wrongMime(response,pathname)){if(request.method==='GET')await cache.put(pathname,response.clone());return request.method==='HEAD'?head(response):response}
-  return new Response(`Flat Living School core asset unavailable: ${pathname}`,{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-commonweave-critical-boot':VERSION}});
+  return new Response(`Flat Living School core asset unavailable: ${pathname}`,{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-critical-boot':VERSION}});
 }
 nativeAddEventListener.call(self,'fetch',event=>{
   const request=event.request;if(!['GET','HEAD'].includes(request.method))return;
@@ -134,9 +134,9 @@ function finalize(){
   })()));
   nativeAddEventListener.call(self,'message',event=>{
     if(event.data?.type!=='GET_CRITICAL_BOOT_STATUS')return;
-    event.waitUntil((async()=>{const cache=await caches.open(CRITICAL_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=CRITICAL_FILES.filter(path=>!present.has(path)),full=await fullPackageStatus(),packet={type:'COMMONWEAVE_CRITICAL_BOOT_STATUS',version:VERSION,mode:'flat',updateInstall:updating,capturedInstallListeners:capturedInstallListeners.length,cache:CRITICAL_CACHE,ready:missing.length===0&&full.ready,present:CRITICAL_FILES.length-missing.length,total:CRITICAL_FILES.length,missing,fullPackage:full};event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)})());
+    event.waitUntil((async()=>{const cache=await caches.open(CRITICAL_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=CRITICAL_FILES.filter(path=>!present.has(path)),full=await fullPackageStatus(),packet={type:'CIVWEAVE_CRITICAL_BOOT_STATUS',version:VERSION,mode:'flat',updateInstall:updating,capturedInstallListeners:capturedInstallListeners.length,cache:CRITICAL_CACHE,ready:missing.length===0&&full.ready,present:CRITICAL_FILES.length-missing.length,total:CRITICAL_FILES.length,missing,fullPackage:full};event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)})());
   });
 }
 const api={version:VERSION,mode:'flat',cache:CRITICAL_CACHE,paths:CRITICAL_FILES.slice(),updating,capturedInstallListeners,finalize,fullPackageStatus};
-self.CommonweaveCriticalBootV199=api;self.CommonweaveCriticalBootV200=api;self.CommonweaveCriticalBootV201=api;self.CommonweaveCriticalBootV202=api;self.CommonweaveCriticalBootV203=api;self.CommonweaveCriticalBootV204=api;self.CommonweaveCriticalBootV205=api;
+self.CivweaveCriticalBootV199=api;self.CivweaveCriticalBootV200=api;self.CivweaveCriticalBootV201=api;self.CivweaveCriticalBootV202=api;self.CivweaveCriticalBootV203=api;self.CivweaveCriticalBootV204=api;self.CivweaveCriticalBootV205=api;
 })();

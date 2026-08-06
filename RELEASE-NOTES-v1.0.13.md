@@ -1,10 +1,10 @@
-# Commonweave v1.0.13
+# Civweave v1.0.13
 
 ## Canonical Working Campus core-only startup
 
 This release fixes two startup failures that persisted across Render and Cloudflare Pages:
 
-- Render logged `Document navigation interrupted script loading` from `commonweave-additions-v156.js`.
+- Render logged `Document navigation interrupted script loading` from `civweave-additions-v156.js`.
 - Cloudflare briefly painted the Working Campus, then left a black surface containing only the version marker.
 
 The canonical Working Campus was loading its own complete runtime and then automatically layering the global compatibility bundle over it. That second bundle introduced another guide, viewport controller, update controller, shared-tools loader, navigation observers, and additional settings paths during the same startup window.
@@ -22,7 +22,7 @@ v1.0.13 gives `/app/working-campus-v156.html` a strict core-only boundary:
 
 The five `working-campus-v156.part*.txt` runtime fragments are now release-pinned, network-first text assets with cached offline fallback. They can no longer be mixed across releases by the old cache-first policy.
 
-The release-version synchronizer advances the service-worker core cache namespace to the current Commonweave version, preventing v1.0.13 from inheriting the old `commonweave-shell-1.0.7-*` and `commonweave-runtime-1.0.7-*` lanes.
+The release-version synchronizer advances the service-worker core cache namespace to the current Civweave version, preventing v1.0.13 from inheriting the old `civweave-shell-1.0.7-*` and `civweave-runtime-1.0.7-*` lanes.
 
 ## Regression coverage
 

@@ -1,6 +1,6 @@
 # RC21.0 — Living World Foundation
 
-Commonweave now has a reusable living-world layer rather than a collection of inert destination placeholders.
+Civweave now has a reusable living-world layer rather than a collection of inert destination placeholders.
 
 ## Added
 
@@ -16,4 +16,4 @@ Commonweave now has a reusable living-world layer rather than a collection of in
 
 ## Compatibility
 
-The original Commonweave interface and all four applications remain available through Classic tools. Existing Town Square building hotspots and the Quad AI handoff remain intact.
+The original Civweave interface and all four applications remain available through Classic tools. Existing Town Square building hotspots and the Quad AI handoff remain intact.

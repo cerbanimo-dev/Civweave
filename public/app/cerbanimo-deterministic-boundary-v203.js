@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 const VERSION='1.0.7-cerbanimo-deterministic-boundary-v203';
-const SETTINGS_KEY='commonweave.universal-ai.v127';
-const PROFILES_KEY='commonweave-model-profiles-v1';
+const SETTINGS_KEY='civweave.universal-ai.v127';
+const PROFILES_KEY='civweave-model-profiles-v1';
 const LOCAL_PROVIDERS=new Set(['','bundled','packaged','reflex','minilm','local-reflex','smollm2','browser','deterministic']);
 const root=globalThis;
 let timer=0;
@@ -41,12 +41,12 @@ function isCerbanimoCall(args={}){
 function blockedResult(request={}){
   const provider=canonicalProvider(request?.config?.provider||request?.config?.route||selectedProvider());
   return{
-    schema:'commonweave-model-result-1.0',
+    schema:'civweave-model-result-1.0',
     requestId:String(request.requestId||`model-${Date.now().toString(36)}`),
-    purpose:String(request.purpose||'commonweave-guide-response-v141'),
+    purpose:String(request.purpose||'civweave-guide-response-v141'),
     status:'provider-error',
     requested:{provider,model:String(request?.config?.model||'')},
-    actual:{provider:'deterministic',model:'commonweave-deterministic-v175'},
+    actual:{provider:'deterministic',model:'civweave-deterministic-v175'},
     timing:{startedAt:new Date().toISOString(),completedAt:new Date().toISOString(),elapsedMs:0},
     events:[],diagnostics:['Cerbanimo deterministic mode blocked an external guide-model call.'],
     outputText:'',usage:{},stream:{requested:false,used:false},structured:{requested:false,valid:false,repairAttempts:0},fallback:{used:false},
@@ -54,12 +54,12 @@ function blockedResult(request={}){
   };
 }
 function patchModelRuntime(){
-  const runtime=root.CommonweaveModelRuntime;
+  const runtime=root.CivweaveModelRuntime;
   if(!runtime?.generate)return false;
   if(runtime.generate.__cerbanimoDeterministicBoundaryV203){runtimeSource=runtime;return true}
   const original=runtime.generate.bind(runtime);
   const guarded=async request=>{
-    const guideCall=/^commonweave-guide-response-v141/.test(String(request?.purpose||''));
+    const guideCall=/^civweave-guide-response-v141/.test(String(request?.purpose||''));
     if(guideCall&&requestSystem(request)==='cerbanimo'&&deterministicSelected())return blockedResult(request);
     return original(request);
   };
@@ -68,27 +68,27 @@ function patchModelRuntime(){
     __prior:{value:original},
   });
   const proxy=Object.freeze({...runtime,generate:guarded,cerbanimoDeterministicBoundaryRevision:VERSION});
-  try{root.CommonweaveModelRuntime=proxy}catch{return false}
-  runtimeSource=root.CommonweaveModelRuntime;
-  return root.CommonweaveModelRuntime===proxy;
+  try{root.CivweaveModelRuntime=proxy}catch{return false}
+  runtimeSource=root.CivweaveModelRuntime;
+  return root.CivweaveModelRuntime===proxy;
 }
 function localFallback(args={}){
   const text=String(args.text||'').trim();
-  const contracts=root.CommonweaveGuideContractsV141;
-  const ctx={schema:'commonweave.deterministic-context.v2',userMessage:text,guide:{name:'Kamiya',role:'Questwright and skilled-work guide',system:'cerbanimo',realm:'Cerbanimo'},routingAnswer:{system:'cerbanimo',mode:'Build',confidence:.9,evidence:['deterministic provider boundary'],provider:'deterministic'},recentConversation:Array.isArray(args.history)?args.history.slice(-12):[],requestedModel:{route:'deterministic',provider:'deterministic',model:'commonweave-deterministic-v175',endpoint:'',externalConsent:false}};
+  const contracts=root.CivweaveGuideContractsV141;
+  const ctx={schema:'civweave.deterministic-context.v2',userMessage:text,guide:{name:'Kamiya',role:'Questwright and skilled-work guide',system:'cerbanimo',realm:'Cerbanimo'},routingAnswer:{system:'cerbanimo',mode:'Build',confidence:.9,evidence:['deterministic provider boundary'],provider:'deterministic'},recentConversation:Array.isArray(args.history)?args.history.slice(-12):[],requestedModel:{route:'deterministic',provider:'deterministic',model:'civweave-deterministic-v175',endpoint:'',externalConsent:false}};
   const action=text&&contracts?.compose?.(text,'cerbanimo',ctx)||null;
   const missing=Array.isArray(action?.missingRequired)?action.missingRequired:[];
   const answer=action?(contracts?.answer?.(action)||'Kamiya created a Cerbanimo quest draft.'):"I’m Kamiya, Cerbanimo’s Questwright and skilled-work guide. Tell me what visible result should exist.";
-  return{response:{answer,choice:{mode:'Build',system:'cerbanimo',room:'',nextAction:missing.length?`Provide ${missing.join(' and ')}.`:action?.approval?.required?`Review and approve “${action.title}.”`:'Tell Kamiya what visible result should exist.'},assumptions:[],requiresConsent:Boolean(action?.approval?.required),confidence:.92,...(action?{approvalGate:{kind:'realm-action-approval',actionId:action.id,state:action.state,required:Boolean(action.approval?.required),label:action.approval?.label,missingRequired:missing}}:{})},provider:'deterministic',requestedProvider:'deterministic',model:'commonweave-action-contract-v141',action,context:ctx,fallbackFrom:null};
+  return{response:{answer,choice:{mode:'Build',system:'cerbanimo',room:'',nextAction:missing.length?`Provide ${missing.join(' and ')}.`:action?.approval?.required?`Review and approve “${action.title}.”`:'Tell Kamiya what visible result should exist.'},assumptions:[],requiresConsent:Boolean(action?.approval?.required),confidence:.92,...(action?{approvalGate:{kind:'realm-action-approval',actionId:action.id,state:action.state,required:Boolean(action.approval?.required),label:action.approval?.label,missingRequired:missing}}:{})},provider:'deterministic',requestedProvider:'deterministic',model:'civweave-action-contract-v141',action,context:ctx,fallbackFrom:null};
 }
 function patchAssistant(){
-  const api=root.CommonweaveAssistantV141;
+  const api=root.CivweaveAssistantV141;
   if(!api?.respond)return false;
   if(api.respond.__cerbanimoDeterministicBoundaryV203){assistantSource=api;return true}
   const original=api.respond.bind(api);
   const wrapped=async args=>{
     if(isCerbanimoCall(args)&&deterministicSelected()){
-      const deterministic=root.CommonweaveDeterministicModeV175;
+      const deterministic=root.CivweaveDeterministicModeV175;
       if(deterministic?.respond)return deterministic.respond({...args,systemId:'cerbanimo'});
       return localFallback({...args,systemId:'cerbanimo'});
     }
@@ -103,11 +103,11 @@ function patchAssistant(){
   return api.respond===wrapped;
 }
 function install(){
-  const runtimeChanged=root.CommonweaveModelRuntime!==runtimeSource;
-  const assistantChanged=root.CommonweaveAssistantV141!==assistantSource;
-  if(runtimeChanged||!root.CommonweaveModelRuntime?.generate?.__cerbanimoDeterministicBoundaryV203)patchModelRuntime();
-  if(assistantChanged||!root.CommonweaveAssistantV141?.respond?.__cerbanimoDeterministicBoundaryV203)patchAssistant();
-  return{version:VERSION,provider:selectedProvider(),runtimeGuarded:Boolean(root.CommonweaveModelRuntime?.generate?.__cerbanimoDeterministicBoundaryV203),assistantGuarded:Boolean(root.CommonweaveAssistantV141?.respond?.__cerbanimoDeterministicBoundaryV203)};
+  const runtimeChanged=root.CivweaveModelRuntime!==runtimeSource;
+  const assistantChanged=root.CivweaveAssistantV141!==assistantSource;
+  if(runtimeChanged||!root.CivweaveModelRuntime?.generate?.__cerbanimoDeterministicBoundaryV203)patchModelRuntime();
+  if(assistantChanged||!root.CivweaveAssistantV141?.respond?.__cerbanimoDeterministicBoundaryV203)patchAssistant();
+  return{version:VERSION,provider:selectedProvider(),runtimeGuarded:Boolean(root.CivweaveModelRuntime?.generate?.__cerbanimoDeterministicBoundaryV203),assistantGuarded:Boolean(root.CivweaveAssistantV141?.respond?.__cerbanimoDeterministicBoundaryV203)};
 }
 function stabilize(){
   install();
@@ -115,8 +115,8 @@ function stabilize(){
   timer=setInterval(install,500);
   return timer;
 }
-for(const eventName of ['commonweave:model-settings-saved','commonweave:model-config-changed','commonweave:guide-loader-reset','commonweave:fast-interactive-installed'])root.addEventListener?.(eventName,install);
+for(const eventName of ['civweave:model-settings-saved','civweave:model-config-changed','civweave:guide-loader-reset','civweave:fast-interactive-installed'])root.addEventListener?.(eventName,install);
 const api=Object.freeze({version:VERSION,install,stabilize,selectedProvider,deterministicSelected,status:install});
-root.CommonweaveCerbanimoDeterministicBoundaryV203=api;
+root.CivweaveCerbanimoDeterministicBoundaryV203=api;
 stabilize();
 })();

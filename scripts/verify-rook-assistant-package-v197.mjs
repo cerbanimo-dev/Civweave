@@ -26,8 +26,8 @@ assert.match(rook,/The request stayed private and no market record was created/,
 for(const forbidden of [
   'model-settings-controller-v173.js',
   'unified-ai-settings-v175.js',
-  'commonweave-model-profiles-v1',
-  'commonweave.universal-ai.v127',
+  'civweave-model-profiles-v1',
+  'civweave.universal-ai.v127',
 ])assert.ok(!worker.includes(forbidden),`assistant package repair must not initialize or rewrite settings through ${forbidden}`);
 
 console.log(JSON.stringify({

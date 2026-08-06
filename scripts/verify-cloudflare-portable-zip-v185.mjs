@@ -22,15 +22,15 @@ for (const token of [
 ]) assert(portableSource.includes(token), `Portable ZIP writer missing ${token}`);
 for (const token of [
   'withPortableZipFallback',
-  'COMMONWEAVE_PORTABLE_ZIP_SCRIPT',
-  'System zip is unavailable; using the dependency-free Commonweave ZIP writer.',
+  'CIVWEAVE_PORTABLE_ZIP_SCRIPT',
+  'System zip is unavailable; using the dependency-free Civweave ZIP writer.',
 ]) assert(cloudflareSource.includes(token), `Cloudflare build fallback missing ${token}`);
 
-const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'commonweave-portable-zip-test-'));
+const fixture = await fs.mkdtemp(path.join(os.tmpdir(), 'civweave-portable-zip-test-'));
 try {
   const bundle = path.join(fixture, 'bundle');
   await fs.mkdir(path.join(bundle, 'nested'), { recursive: true });
-  await fs.writeFile(path.join(bundle, 'hello.txt'), 'Commonweave portable ZIP\n');
+  await fs.writeFile(path.join(bundle, 'hello.txt'), 'Civweave portable ZIP\n');
   await fs.writeFile(path.join(bundle, 'nested', 'run.sh'), '#!/bin/sh\necho woven\n');
   await fs.chmod(path.join(bundle, 'nested', 'run.sh'), 0o755);
   const archivePath = path.join(fixture, 'fixture.zip');
@@ -58,13 +58,13 @@ if (build.status !== 0) {
   throw new Error(`Cloudflare build failed without system zip, status ${build.status}.`);
 }
 const output = `${build.stdout || ''}\n${build.stderr || ''}`;
-assert(output.includes('System zip is unavailable; using the dependency-free Commonweave ZIP writer.'), 'Cloudflare build did not enter its portable ZIP path.');
+assert(output.includes('System zip is unavailable; using the dependency-free Civweave ZIP writer.'), 'Cloudflare build did not enter its portable ZIP path.');
 assert(output.includes('All Cloudflare-hosted files are at or below 24 MiB.'), 'Cloudflare build did not complete its hosted-file audit.');
 for (const relative of [
-  'public/downloads/Commonweave-Mobile-Install-Kit.zip',
-  'public/downloads/commonweave-pocket-campus.cwseed',
-  '.cloudflare-pages/downloads/Commonweave-Mobile-Install-Kit.zip',
-  '.cloudflare-pages/downloads/commonweave-pocket-campus.cwseed',
+  'public/downloads/Civweave-Mobile-Install-Kit.zip',
+  'public/downloads/civweave-pocket-campus.cwseed',
+  '.cloudflare-pages/downloads/Civweave-Mobile-Install-Kit.zip',
+  '.cloudflare-pages/downloads/civweave-pocket-campus.cwseed',
 ]) {
   const value = await fs.readFile(path.join(root, relative));
   assert(value.readUInt32LE(0) === 0x04034b50, `${relative} is not a ZIP-compatible archive.`);

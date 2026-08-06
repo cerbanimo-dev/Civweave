@@ -11,7 +11,7 @@ const minimumBytes = 250_000_000;
 const expectedOid = 'cc63370efc2aca6d5307518b85162777132cc5b8d68eeb8154ea9b5fce09ad46';
 const soft = process.argv.includes('--soft');
 const checkOnly = process.argv.includes('--check');
-const skipPull = process.env.COMMONWEAVE_SKIP_LFS_PULL === '1' || process.env.CI === 'true';
+const skipPull = process.env.CIVWEAVE_SKIP_LFS_PULL === '1' || process.env.CI === 'true';
 
 async function inspect() {
   try {
@@ -46,7 +46,7 @@ function runGit(args) {
 
 function guidance(reason) {
   return [
-    `[Commonweave] SmolLM2 graph is ${reason}.`,
+    `[Civweave] SmolLM2 graph is ${reason}.`,
     'Run:',
     `  git lfs pull --include="${relativeModelPath}"`,
     `  git lfs checkout "${relativeModelPath}"`,
@@ -56,7 +56,7 @@ function guidance(reason) {
 async function main() {
   const before = await inspect();
   if (before.ready) {
-    console.log(`[Commonweave] SmolLM2 graph ready: ${before.bytes.toLocaleString()} bytes.`);
+    console.log(`[Civweave] SmolLM2 graph ready: ${before.bytes.toLocaleString()} bytes.`);
     return;
   }
 
@@ -85,7 +85,7 @@ async function main() {
     throw new Error(message);
   }
 
-  console.log('[Commonweave] Materializing the SmolLM2 graph from Git LFS…');
+  console.log('[Civweave] Materializing the SmolLM2 graph from Git LFS…');
   const pull = runGit(['lfs', 'pull', `--include=${relativeModelPath}`, '--exclude=']);
   if (pull.status !== 0) {
     const message = `${guidance(reason)}\n${String(pull.stderr || pull.stdout || 'git lfs pull failed').trim()}`;
@@ -116,7 +116,7 @@ async function main() {
     throw new Error(message);
   }
 
-  console.log(`[Commonweave] SmolLM2 graph materialized: ${after.bytes.toLocaleString()} bytes.`);
+  console.log(`[Civweave] SmolLM2 graph materialized: ${after.bytes.toLocaleString()} bytes.`);
 }
 
 main().catch(error => {

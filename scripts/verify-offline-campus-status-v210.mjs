@@ -33,11 +33,11 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'offline-campus-status-v210.js'});
 
-const api=sandbox.CommonweaveOfflineCampusStatusV210;
+const api=sandbox.CivweaveOfflineCampusStatusV210;
 assert(api?.version==='1.0.7-offline-campus-status-v210','Offline campus status repair API is missing.');
 
 const legacy=api.normalize({
-  type:'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',
+  type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
   revision:'lightweight-shell-v208',
   ready:false,
   completed:205,
@@ -51,7 +51,7 @@ assert(legacy.downloaded===186,'Legacy attempted count was still presented as do
 assert(legacy.ready===false,'A package with failed files was marked ready.');
 
 const current=api.normalize({
-  type:'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',
+  type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
   revision:'lightweight-shell-v210',
   ready:false,
   attempted:205,
@@ -62,7 +62,7 @@ const current=api.normalize({
 assert(current.downloaded===186&&current.attempted===205,'Current successful and attempted counts were not kept separate.');
 
 api.render({
-  type:'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',
+  type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
   revision:'lightweight-shell-v208',
   ready:false,
   completed:205,
@@ -76,7 +76,7 @@ assert(nodes.get('#offline-package-assets').textContent==='186/205 files · 205/
 assert(nodes.get('#download-offline-package').textContent==='Retry 19 missing files','Retry action label is incorrect.');
 
 const ready=api.render({
-  type:'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',
+  type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
   revision:'lightweight-shell-v210',
   ready:true,
   attempted:205,

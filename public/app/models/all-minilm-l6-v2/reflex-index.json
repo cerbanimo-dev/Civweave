@@ -1,16 +1,16 @@
 {
-  "schema": "commonweave.reflex-index.v2",
+  "schema": "civweave.reflex-index.v2",
   "entries": [
     {
       "id": "mutual-aid-food-network",
-      "system": "commonweave",
+      "system": "civweave",
       "mode": "Reflect",
       "label": "a multi-realm mutual-aid and local-food intention",
       "embeddingText": "organize friends into a mutual aid network, community care circle, local food system, shared pantry, community garden, food cooperative, buying club, produce exchange, neighbors helping neighbors",
       "keywords": ["mutual aid", "friends", "network", "local food", "food sources", "community garden", "shared pantry", "cooperative", "neighbors"],
       "clarify": "Which first pilot would matter most: shared pantry, produce exchange, garden, buying club, or meal rotation?",
       "routeHints": [
-        "Commonweave coordinates the whole intention.",
+        "Civweave coordinates the whole intention.",
         "Anarchadia holds participation, consent, responsibilities, and conflict handling.",
         "FellowFare maps food sources, tools, transport, storage, needs, and offers.",
         "Living School identifies the minimum knowledge the pilot requires.",
@@ -28,7 +28,7 @@
     },
     {
       "id": "prioritize-projects",
-      "system": "commonweave",
+      "system": "civweave",
       "mode": "Reflect",
       "label": "a priority decision across competing intentions",
       "embeddingText": "too many projects, overwhelmed, decide priorities, choose what deserves attention, coordinate multiple goals, plan next steps",

@@ -1,4 +1,4 @@
-# Commonweave RC22.1 — Grounded Resource Negotiation and Portfolio Intelligence
+# Civweave RC22.1 — Grounded Resource Negotiation and Portfolio Intelligence
 
 ## Added
 
@@ -14,4 +14,4 @@
 
 ## Safety boundaries
 
-Commonweave does not silently assign people, reserve canonical FellowFare inventory, reorder plans, pause intentions, or amend destination records. These operations remain local proposals or review-gated actions until a destination confirms them.
+Civweave does not silently assign people, reserve canonical FellowFare inventory, reorder plans, pause intentions, or amend destination records. These operations remain local proposals or review-gated actions until a destination confirms them.

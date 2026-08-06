@@ -2,10 +2,10 @@
 
 This pass establishes a realm-defining visual layer without replacing the working application flows.
 
-## Global Commonweave shell
+## Global Civweave shell
 
 - Replaces the tall `CABINET MODE` header and two text pills with a compact Thread Rail.
-- Keeps all five realms in fixed left-to-right positions: Commonweave, Living School, Cerbanimo, FellowFare, Anarchadia.
+- Keeps all five realms in fixed left-to-right positions: Civweave, Living School, Cerbanimo, FellowFare, Anarchadia.
 - Keeps the active realm in place and marks it instead of removing it from the dock.
 - Moves Weaveling into a dedicated compass control in the top rail.
 - Keeps AI settings as a separate compact control.
@@ -25,7 +25,7 @@ The artifact images identify realms in the global shell. Existing guide avatars 
 
 ## Realm-defining anchor treatments
 
-### Commonweave
+### Civweave
 
 Uses woven paths, pearl-like nodes, prismatic threads, asymmetrical rounded surfaces, and a low-opacity Weaveling presence. The settings and intention surfaces read as parts of a loom rather than a generic blue form stack.
 
@@ -53,6 +53,6 @@ This pass changes presentation and navigation composition only. It does not repl
 
 1. Capture the five anchor screens at common mobile widths and correct collisions or contrast failures.
 2. Replace remaining glyph-only realm-local navigation icons with canonical art or purpose-built transparent icons.
-3. Reshape the Commonweave intention overview into the full woven route map.
+3. Reshape the Civweave intention overview into the full woven route map.
 4. Propagate each anchor language into secondary rooms after the anchor screens are approved.
 5. Add screenshot regression coverage for the top rail, fixed realm dock, and one anchor screen per realm.

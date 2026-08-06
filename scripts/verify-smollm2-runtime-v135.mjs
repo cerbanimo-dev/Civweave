@@ -47,7 +47,7 @@ for(const required of [
   'git', 'lfs', 'pull', 'checkout',
   '272_737_275',
   'cc63370efc2aca6d5307518b85162777132cc5b8d68eeb8154ea9b5fce09ad46',
-  'COMMONWEAVE_SKIP_LFS_PULL',
+  'CIVWEAVE_SKIP_LFS_PULL',
   "process.env.CI === 'true'"
 ])assert(materializer.includes(required),`materializer missing ${required}`);
 assert(pkg.scripts?.postinstall?.includes('ensure-smollm2-model.mjs --soft'),'postinstall does not check/materialize SmolLM2');

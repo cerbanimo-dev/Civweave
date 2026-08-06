@@ -1,4 +1,4 @@
-# Commonweave 1.0.0-rc21.9 · Steward Actions and Intelligent Intervention
+# Civweave 1.0.0-rc21.9 · Steward Actions and Intelligent Intervention
 
 - Added an editable plan-negotiation studio for model-generated alternatives.
 - Added step-level accept, reject, edit, owner, duration, insertion, and removal controls.

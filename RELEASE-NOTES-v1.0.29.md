@@ -1,10 +1,10 @@
-# Commonweave v1.0.29 — Cabinet Interface Parity
+# Civweave v1.0.29 — Cabinet Interface Parity
 
-This release turns the five supplied cabinet/tablet artworks into the actual Commonweave Lite interface shells.
+This release turns the five supplied cabinet/tablet artworks into the actual Civweave Lite interface shells.
 
 ## Added
 
-- Dedicated projected workstation shells for Commonweave, Living School, Cerbanimo, FellowFare, and Anarchadia.
+- Dedicated projected workstation shells for Civweave, Living School, Cerbanimo, FellowFare, and Anarchadia.
 - Ledger-owned screen rectangles, cabinet assets, secondary accents, motifs, and physical control order.
 - All 59 canonical rooms and 117 capabilities now flow through the matching cabinet screen.
 - The five illustrated cabinet controls switch between the five systems using accessible shaped hit targets.
@@ -14,14 +14,14 @@ This release turns the five supplied cabinet/tablet artworks into the actual Com
   - neon industrial quest controls for Cerbanimo;
   - woven market ledgers for FellowFare;
   - highlighter-punk civic controls for Anarchadia;
-  - prismatic woven navigation for Commonweave.
-- Native Commonweave Lite forms for model setup, wish intake, clarification, skill posture, three-path generation, weave review, explicit activation, Passport sealing, and rewards display.
+  - prismatic woven navigation for Civweave.
+- Native Civweave Lite forms for model setup, wish intake, clarification, skill posture, three-path generation, weave review, explicit activation, Passport sealing, and rewards display.
 - A visible 17-step golden-path tracker generated from the canonical parity ledger.
 - Source-surface theme injection for forms, buttons, tables, panels, and focus states.
 
 ## Parity behavior
 
-The room and capability hierarchy is unchanged. The cabinet workstation is a renderer around the same canonical IDs used by Visual Commonweave. Clicking a capability can either use a native Lite form or open the existing mature working surface inside the same projected display while shared adapters are built.
+The room and capability hierarchy is unchanged. The cabinet workstation is a renderer around the same canonical IDs used by Visual Civweave. Clicking a capability can either use a native Lite form or open the existing mature working surface inside the same projected display while shared adapters are built.
 
 ## Consent
 

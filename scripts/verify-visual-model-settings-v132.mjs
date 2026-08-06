@@ -13,10 +13,10 @@ const css=await read('public/app/visual-model-settings-v132.css');
 const worker=await read('public/service-worker.js');
 
 for(const [name,html] of [['hub',hub],['realm',realm]]){
-  assert(html.includes('/app/shared/commonweave-model-runtime.js'),`${name} does not load the shared model runtime`);
+  assert(html.includes('/app/shared/civweave-model-runtime.js'),`${name} does not load the shared model runtime`);
   assert(html.includes('/app/visual-model-settings-v132.js?v=gemini-r2'),`${name} does not load the shared Visual settings controller`);
   assert(html.includes('/app/visual-model-settings-v132.css?v=gemini-r2'),`${name} does not load the Visual settings styles`);
-  assert(html.indexOf('commonweave-model-runtime.js')<html.indexOf('visual-model-settings-v132.js'),`${name} loads Visual settings before the model runtime`);
+  assert(html.indexOf('civweave-model-runtime.js')<html.indexOf('visual-model-settings-v132.js'),`${name} loads Visual settings before the model runtime`);
 }
 
 for(const required of [

@@ -2,7 +2,7 @@
 'use strict';
 const VERSION='1.0.31';
 const SHELLS_URL='/app/shared/cabinet-shells-v129.json';
-const DEFAULT_SYSTEM='commonweave';
+const DEFAULT_SYSTEM='civweave';
 const params=new URLSearchParams(location.search);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 let ledger=null,shells={};
@@ -22,9 +22,9 @@ function render(systemId=params.get('system')||DEFAULT_SYSTEM,roomId=params.get(
   $('#cv141-controls').innerHTML=(shell.controls||[]).map(control=>`<button type="button" data-system="${esc(control.system)}" class="${control.system===system.id?'is-active':''}" style="--x:${Number(control.x)}%;--y:${Number(control.y)}%;--size:${Number(control.size)}%" aria-label="Open ${esc(systemFor(control.system)?.name||control.system)}"></button>`).join('');
   syncAddress(system,room);
 }
-function leave(){const from=params.get('from');if(from==='lite'){const {system,room}=selected();location.assign(CommonweaveParity.liteUrl({systemId:system.id,roomId:room?.id||''}));return}if(history.length>1){history.back();return}location.assign('/loom/')}
+function leave(){const from=params.get('from');if(from==='lite'){const {system,room}=selected();location.assign(CivweaveParity.liteUrl({systemId:system.id,roomId:room?.id||''}));return}if(history.length>1){history.back();return}location.assign('/loom/')}
 document.addEventListener('click',event=>{const button=event.target.closest('[data-system]');if(!button)return;params.delete('capability');const system=systemFor(button.dataset.system),room=system?.rooms?.[0];render(system.id,room?.id||'')});
 $('#cv141-back').addEventListener('click',leave);
 addEventListener('popstate',()=>{const query=new URLSearchParams(location.search);for(const key of [...params.keys()])params.delete(key);for(const [key,value] of query)params.set(key,value);render(params.get('system')||DEFAULT_SYSTEM,params.get('room')||'')});
-(async()=>{try{[ledger,shells]=await Promise.all([CommonweaveParity.load(),fetch(SHELLS_URL,{cache:'force-cache'}).then(response=>response.ok?response.json():{systems:{}}).then(value=>value.systems||{})]);const {system,room}=selected();render(system.id,room?.id||'')}catch(error){const node=$('#cv141-error');node.hidden=false;node.textContent=`Visual cabinet could not open: ${error.message}`}})();
+(async()=>{try{[ledger,shells]=await Promise.all([CivweaveParity.load(),fetch(SHELLS_URL,{cache:'force-cache'}).then(response=>response.ok?response.json():{systems:{}}).then(value=>value.systems||{})]);const {system,room}=selected();render(system.id,room?.id||'')}catch(error){const node=$('#cv141-error');node.hidden=false;node.textContent=`Visual cabinet could not open: ${error.message}`}})();
 })();

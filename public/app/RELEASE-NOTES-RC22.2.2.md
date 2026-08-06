@@ -1,6 +1,6 @@
 # RC22.2.2 — Visual Gap Batch 1
 
-- Integrated the illustrated Commonweave Regional World Map.
+- Integrated the illustrated Civweave Regional World Map.
 - Integrated Crossroads Station as the first finished outer-district scene.
 - Integrated the Inside the Quad artwork and visible five-AI profile roster.
 - Integrated FellowFare Main Atrium artwork.

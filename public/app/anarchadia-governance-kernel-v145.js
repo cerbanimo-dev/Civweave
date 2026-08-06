@@ -1,12 +1,12 @@
-const SCHEMA='commonweave.anarchadia-governance.v145';
-const CHANGE_SCHEMA='commonweave.anarchadia-change-set.v1';
-const BALLOT_SCHEMA='commonweave.anarchadia-ballot.v1';
-const AUTH_SCHEMA='commonweave.anarchadia-execution-authorization.v1';
-const PACKET_SCHEMA='commonweave.anarchadia-execution-packet.v1';
-const CREDENTIAL_SCHEMA='commonweave.anarchadia-credential.v1';
-const OUTCOME_SCHEMA='commonweave.anarchadia-node-outcome.v1';
-const CONSENT_SCHEMA='commonweave.anarchadia-consent.v1';
-const DISSENT_SCHEMA='commonweave.anarchadia-dissent.v1';
+const SCHEMA='civweave.anarchadia-governance.v145';
+const CHANGE_SCHEMA='civweave.anarchadia-change-set.v1';
+const BALLOT_SCHEMA='civweave.anarchadia-ballot.v1';
+const AUTH_SCHEMA='civweave.anarchadia-execution-authorization.v1';
+const PACKET_SCHEMA='civweave.anarchadia-execution-packet.v1';
+const CREDENTIAL_SCHEMA='civweave.anarchadia-credential.v1';
+const OUTCOME_SCHEMA='civweave.anarchadia-node-outcome.v1';
+const CONSENT_SCHEMA='civweave.anarchadia-consent.v1';
+const DISSENT_SCHEMA='civweave.anarchadia-dissent.v1';
 export const GOVERNANCE_VERSION='1.0.0';
 export const CHOICES=['approve','reject','abstain','request-amendment'];
 export const CHANGE_STATES=['draft','rails-checked','deliberating','frozen','voting','outcome-declared','authorized','queued','prepared','released','verified','rolled-back','rejected','expired','withdrawn','contested'];
@@ -94,7 +94,7 @@ function changeHashPayload(change){
 }
 export async function hashChangeSet(change){return sha256(canonicalJson(changeHashPayload(change)))}
 export async function createChangeSet(input={}){
-  const change={schema:CHANGE_SCHEMA,id:input.id||id('change'),revision:1,title:String(input.title||'Untitled change').slice(0,160),request:String(input.request||'').slice(0,12000),area:String(input.area||'Commonweave').slice(0,100),baseCommit:String(input.baseCommit||'').trim(),targetBranch:String(input.targetBranch||'').trim(),files:cleanFiles(input.files),acceptance:(Array.isArray(input.acceptance)?input.acceptance:String(input.acceptance||'').split('\n')).map(x=>String(x).trim()).filter(Boolean).slice(0,40),rollback:String(input.rollback||'').slice(0,6000),risk:String(input.risk||'').slice(0,6000),consentRequirements:(input.consentRequirements||[]).map(x=>String(x).trim()).filter(Boolean).slice(0,30),railPolicyVersion:'anarchadia-rails.v145',state:'draft',rails:[],createdAt:now(),updatedAt:now()};
+  const change={schema:CHANGE_SCHEMA,id:input.id||id('change'),revision:1,title:String(input.title||'Untitled change').slice(0,160),request:String(input.request||'').slice(0,12000),area:String(input.area||'Civweave').slice(0,100),baseCommit:String(input.baseCommit||'').trim(),targetBranch:String(input.targetBranch||'').trim(),files:cleanFiles(input.files),acceptance:(Array.isArray(input.acceptance)?input.acceptance:String(input.acceptance||'').split('\n')).map(x=>String(x).trim()).filter(Boolean).slice(0,40),rollback:String(input.rollback||'').slice(0,6000),risk:String(input.risk||'').slice(0,6000),consentRequirements:(input.consentRequirements||[]).map(x=>String(x).trim()).filter(Boolean).slice(0,30),railPolicyVersion:'anarchadia-rails.v145',state:'draft',rails:[],createdAt:now(),updatedAt:now()};
   change.revisionHash=await hashChangeSet(change);return change;
 }
 export async function reviseChangeSet(change,patch={}){
@@ -135,7 +135,7 @@ export function transitionChangeSet(change,next){
   change.state=next;change.updatedAt=now();return change;
 }
 export function createGroup(input={}){
-  return {schema:'commonweave.anarchadia-group.v1',id:input.id||id('group'),name:String(input.name||'Unnamed group').slice(0,120),charter:String(input.charter||'').slice(0,8000),memberIds:[...new Set(input.memberIds||[])],procedure:{quorum:Number(input.quorum??0.5),threshold:Number(input.threshold??0.5),allowReplacement:input.allowReplacement!==false},createdAt:now(),status:'active'};
+  return {schema:'civweave.anarchadia-group.v1',id:input.id||id('group'),name:String(input.name||'Unnamed group').slice(0,120),charter:String(input.charter||'').slice(0,8000),memberIds:[...new Set(input.memberIds||[])],procedure:{quorum:Number(input.quorum??0.5),threshold:Number(input.threshold??0.5),allowReplacement:input.allowReplacement!==false},createdAt:now(),status:'active'};
 }
 export async function openBallot(change,input={}){
   if(!['frozen','voting'].includes(change.state))throw new Error('Freeze the exact change revision before opening a ballot.');
@@ -146,7 +146,7 @@ export async function openBallot(change,input={}){
   change.state='voting';change.updatedAt=now();return ballot;
 }
 function ballotVotePayload(ballot,actorId,choice,sequence,castAt,note=''){
-  return {schema:'commonweave.anarchadia-ballot-choice.v1',ballotId:ballot.id,changeSetId:ballot.changeSetId,revisionHash:ballot.revisionHash,snapshotHash:ballot.snapshotHash,actorId,choice,sequence,castAt,note};
+  return {schema:'civweave.anarchadia-ballot-choice.v1',ballotId:ballot.id,changeSetId:ballot.changeSetId,revisionHash:ballot.revisionHash,snapshotHash:ballot.snapshotHash,actorId,choice,sequence,castAt,note};
 }
 export async function castBallot(ballot,credential,privateKey,choice,note=''){
   if(ballot.status!=='open')throw new Error('Ballot is closed.');

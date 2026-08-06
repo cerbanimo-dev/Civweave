@@ -1,5 +1,5 @@
 {
-  "schema": "commonweave.cabinet-calibration.v1",
+  "schema": "civweave.cabinet-calibration.v1",
   "version": "1.0.31",
   "revision": "source-svg-r24",
   "sourceSize": {
@@ -7,7 +7,7 @@
     "height": 1672
   },
   "systems": {
-    "commonweave": {
+    "civweave": {
       "sourceSize": {
         "width": 941,
         "height": 1672
@@ -28,7 +28,7 @@
           "r": 42.34
         },
         {
-          "system": "commonweave",
+          "system": "civweave",
           "shape": "circle",
           "cx": 467.68,
           "cy": 1518.18,
@@ -71,7 +71,7 @@
           "r": 38.58
         },
         {
-          "system": "commonweave",
+          "system": "civweave",
           "shape": "circle",
           "cx": 469.2,
           "cy": 1495.8,
@@ -114,7 +114,7 @@
           "r": 36.23
         },
         {
-          "system": "commonweave",
+          "system": "civweave",
           "shape": "circle",
           "cx": 471.6,
           "cy": 1462,
@@ -157,7 +157,7 @@
           "r": 39.52
         },
         {
-          "system": "commonweave",
+          "system": "civweave",
           "shape": "circle",
           "cx": 469.1,
           "cy": 1518.2,
@@ -200,7 +200,7 @@
           "r": 44
         },
         {
-          "system": "commonweave",
+          "system": "civweave",
           "shape": "circle",
           "cx": 467.7,
           "cy": 1542.2,

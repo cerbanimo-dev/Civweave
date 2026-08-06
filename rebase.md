@@ -54,7 +54,7 @@ Record:
 Review redacted feedback packets, incidents, health-check failures, accessibility findings, storage and boot measurements, and fresh screenshots of:
 
 1. installer and recovery,
-2. Commonweave wish-to-plan flow,
+2. Civweave wish-to-plan flow,
 3. Living School learning loop,
 4. Cerbanimo plan-to-work loop,
 5. FellowFare need/offer loop,

@@ -12,7 +12,7 @@ function contextFor(runtime){
   const events=[];
   const context=vm.createContext({
     console,
-    CommonweaveModelRuntime:runtime,
+    CivweaveModelRuntime:runtime,
     performance:{now:()=>{tick+=7;return tick}},
     setInterval:()=>1,
     clearInterval:()=>{},
@@ -35,15 +35,15 @@ const frozenRuntime=Object.freeze({
 const {context,events}=contextFor(frozenRuntime);
 vm.runInContext(source,context,{filename:'fast-interactive-runtime-v192.js'});
 
-assert.ok(context.CommonweaveFastInteractiveV192,'the script must publish its runtime API');
-assert.equal(context.CommonweaveFastInteractiveV192.status().installed,true,'the fast runtime must install against a frozen model API');
-assert.notEqual(context.CommonweaveModelRuntime,frozenRuntime,'installation must replace the global reference with a proxy');
-assert.equal(Object.isFrozen(context.CommonweaveModelRuntime),true,'the proxy must remain immutable');
+assert.ok(context.CivweaveFastInteractiveV192,'the script must publish its runtime API');
+assert.equal(context.CivweaveFastInteractiveV192.status().installed,true,'the fast runtime must install against a frozen model API');
+assert.notEqual(context.CivweaveModelRuntime,frozenRuntime,'installation must replace the global reference with a proxy');
+assert.equal(Object.isFrozen(context.CivweaveModelRuntime),true,'the proxy must remain immutable');
 assert.equal(frozenRuntime.generate,originalGenerate,'the frozen source runtime must not be mutated');
-assert.equal(context.CommonweaveModelRuntime.generate.__commonweaveFastInteractiveV192,true,'the proxy generate method must be marked');
+assert.equal(context.CivweaveModelRuntime.generate.__civweaveFastInteractiveV192,true,'the proxy generate method must be marked');
 
-const result=await context.CommonweaveModelRuntime.generate({
-  purpose:'commonweave-guide-response-v141-merlin',
+const result=await context.CivweaveModelRuntime.generate({
+  purpose:'civweave-guide-response-v141-merlin',
   config:{provider:'gemini',timeoutMs:60000,maxTokens:9000,stream:true},
   messages:[],
 });
@@ -54,12 +54,12 @@ assert.equal(calls[0].config.stream,false,'guide calls must remain non-streaming
 assert.equal(calls[0].responseFormat,'json','guide calls must request structured JSON');
 assert.equal(calls[0].maxRepairAttempts,0,'guide calls must avoid a second repair call');
 assert.match(result.latency.revision,/frozen-runtime-proxy/,'the result must record the proxy revision');
-assert.ok(events.some(event=>event.type==='commonweave:fast-interactive-installed'),'the runtime must announce successful proxy installation');
+assert.ok(events.some(event=>event.type==='civweave:fast-interactive-installed'),'the runtime must announce successful proxy installation');
 
 const waiting=contextFor(undefined).context;
 vm.runInContext(source,waiting,{filename:'fast-interactive-runtime-v192-waiting.js'});
-assert.ok(waiting.CommonweaveFastInteractiveV192,'readiness must be published even before the model runtime arrives');
-assert.equal(waiting.CommonweaveFastInteractiveV192.status().mode,'waiting','an absent model runtime must wait without throwing');
+assert.ok(waiting.CivweaveFastInteractiveV192,'readiness must be published even before the model runtime arrives');
+assert.equal(waiting.CivweaveFastInteractiveV192.status().mode,'waiting','an absent model runtime must wait without throwing');
 
 assert.doesNotMatch(source,/runtime\.generate\s*=/,'the fast runtime must never mutate the frozen generate property');
 assert.match(critical,/(?:living-school-lesson-nav-v202|fellowfare-active-v203)-fast-runtime-proxy|fellowfare-active-v203-(?:cerbanimo-boundary-v204|parent-mobile-v205-cerbanimo-boundary-v204)(?:-memory-bridge-v205)?/,'critical boot revision must retain the frozen runtime proxy repair');
@@ -69,8 +69,8 @@ assert.match(worker,/service-worker-critical-v199\.js\?v=(?:fast-runtime-proxy-v
 for(const forbidden of [
   'model-settings-controller-v173.js',
   'unified-ai-settings-v175.js',
-  'commonweave-model-profiles-v1',
-  'commonweave.universal-ai.v127',
+  'civweave-model-profiles-v1',
+  'civweave.universal-ai.v127',
 ])assert.ok(!source.includes(forbidden),`fast runtime repair must not touch settings through ${forbidden}`);
 
 console.log(JSON.stringify({

@@ -1,4 +1,4 @@
-# Commonweave 1.0.0-rc21.7 · Conversational Replanning and Autonomous Stewardship
+# Civweave 1.0.0-rc21.7 · Conversational Replanning and Autonomous Stewardship
 
 - Added strategic alternative generation for faster, cheaper, safer, more accessible, and lower-labor plans.
 - Added before/after plan comparison data and review-gated adoption of alternatives.

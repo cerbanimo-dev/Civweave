@@ -17,7 +17,7 @@ has(installerSource,/const\s+ACTIVATION_TIMEOUT_MS\s*=\s*45000/,'Installer activ
 has(installerSource,/const\s+WORKER_SCRIPT_REVISION\s*=\s*['"]stable-entry-v217['"]/,'Stable entry worker revision is missing.');
 assert(installerSource.includes("url.searchParams.get('revision') === WORKER_SCRIPT_REVISION"),'Installer accepts a stale worker without the stable-entry revision.');
 for(const token of [
-  'COMMONWEAVE_PACKAGE_TIMEOUT',
+  'CIVWEAVE_PACKAGE_TIMEOUT',
   'recoverStalledRegistration',
   'registration-recovery',
   'navigator.serviceWorker.register(WORKER_URL',
@@ -101,19 +101,19 @@ const acceleratedInstaller=installerSource
   .replace(/const\s+REGISTRATION_TIMEOUT_MS\s*=\s*15000\s*;/,'const REGISTRATION_TIMEOUT_MS = 25;')
   .replace(/const\s+REGISTRATION_QUERY_TIMEOUT_MS\s*=\s*6000\s*;/,'const REGISTRATION_QUERY_TIMEOUT_MS = 25;')
   .replace(/const\s+ACTIVATION_TIMEOUT_MS\s*=\s*45000\s*;/,'const ACTIVATION_TIMEOUT_MS = 120;');
-const recoveryKey='commonweave.shell.registration-watchdog.v208';
+const recoveryKey='civweave.shell.registration-watchdog.v208';
 
 {
   const harness=makeInstallerContext({
     getRegistration:async()=>null,
     register:()=>new Promise(()=>{}),
     getRegistrations:async()=>[],
-    cacheNames:['cwknowledge-school-seeds-v2','commonweave-stale-package'],
+    cacheNames:['cwknowledge-school-seeds-v2','civweave-stale-package'],
   });
   vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-stall.js'});
   await delay(450);
   assert.match(harness.location.replaced||'',/registration-recovery=/,'A stalled registration did not trigger one automatic recovery reload.');
-  assert(harness.deleted.includes('commonweave-stale-package'),'Automatic recovery did not clear stale app caches.');
+  assert(harness.deleted.includes('civweave-stale-package'),'Automatic recovery did not clear stale app caches.');
   assert(!harness.deleted.includes('cwknowledge-school-seeds-v2'),'Automatic recovery deleted the protected knowledge cache.');
   assert.equal(harness.sessionStorage.getItem(recoveryKey),'1','Automatic recovery was not guarded as one-shot.');
 }
@@ -135,8 +135,8 @@ const recoveryKey='commonweave.shell.registration-watchdog.v208';
 {
   let registerCalls=0;
   const responses={
-    GET_DEVICE_PACKAGE_STATUS:{type:'COMMONWEAVE_DEVICE_PACKAGE',mode:'lightweight-shell',ready:true,missing:[],assetCount:10,presentCount:10},
-    GET_OFFLINE_PACKAGE_STATUS:{type:'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',ready:true,running:false,total:186,completed:186,failed:[],failedCount:0},
+    GET_DEVICE_PACKAGE_STATUS:{type:'CIVWEAVE_DEVICE_PACKAGE',mode:'lightweight-shell',ready:true,missing:[],assetCount:10,presentCount:10},
+    GET_OFFLINE_PACKAGE_STATUS:{type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',ready:true,running:false,total:186,completed:186,failed:[],failedCount:0},
   };
   const worker={
     state:'activated',
@@ -153,7 +153,7 @@ const recoveryKey='commonweave.shell.registration-watchdog.v208';
   await delay(120);
   assert.equal(registerCalls,0,'An already-current active worker was redundantly registered.');
   assert.equal(harness.nodes.get('#package-state').textContent,'ready','The reused current worker did not complete shell readiness.');
-  assert.equal(harness.nodes.get('#install-app').textContent,'Install Commonweave v1.0.7','The install button did not become available after current-worker reuse.');
+  assert.equal(harness.nodes.get('#install-app').textContent,'Install Civweave v1.0.7','The install button did not become available after current-worker reuse.');
 }
 
 {
@@ -164,9 +164,9 @@ const recoveryKey='commonweave.shell.registration-watchdog.v208';
   const makeElement=tag=>{const node=makeNode();node.tagName=tag.toUpperCase();return node};
   const document={
     readyState:'complete',documentElement:{},head:{append(){}},
-    body:{append(node){if(node.dataset?.commonweaveUpdateControl!==undefined)updateButton=node}},
+    body:{append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}},
     getElementById:()=>null,
-    querySelector:selector=>selector==='[data-commonweave-update-control]'?updateButton:null,
+    querySelector:selector=>selector==='[data-civweave-update-control]'?updateButton:null,
     createElement:makeElement,
   };
   class FakeMutationObserver{constructor(callback){this.callback=callback}observe(){}}
@@ -181,7 +181,7 @@ const recoveryKey='commonweave.shell.registration-watchdog.v208';
   context.window=context;
   context.globalThis=context;
   vm.runInNewContext(acceleratedUpdater,context,{filename:'installed-update-watchdog.js'});
-  await context.CommonweavePwaUpdateV204.checkForUpdates(true);
+  await context.CivweavePwaUpdateV204.checkForUpdates(true);
   assert.equal(updateButton.textContent,'Open updater','A stalled in-app update did not become a visible repair action.');
   assert.equal(updateButton.dataset.state,'error','A stalled in-app update did not leave checking state.');
 }

@@ -2,18 +2,18 @@
 'use strict';
 
 const VERSION='1.0.1-guide-identity-integrity-v216';
-const CHAT_KEY='commonweave.persistent-guide-chat.v214';
+const CHAT_KEY='civweave.persistent-guide-chat.v214';
 const ROOT_ID='cw-persistent-guide-chat-v215';
-const SYSTEMS=['commonweave','living-school','cerbanimo','fellowfare','anarchadia'];
+const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const GUIDE={
-  commonweave:{name:'Weaveling',role:'central mirror and orchestrator',avatar:'/app/assets/ai/weaveling.png',palette:'#ebe7dd'},
+  civweave:{name:'Weaveling',role:'central mirror and orchestrator',avatar:'/app/assets/ai/weaveling.png',palette:'#ebe7dd'},
   'living-school':{name:'Moss',role:'learning guide',avatar:'/app/assets/ai/moss.png',palette:'#59cf87'},
   cerbanimo:{name:'Kamiya',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/kamiya.png',palette:'#a66cff'},
   fellowfare:{name:'Rook',role:'quartermaster and exchange guide',avatar:'/app/assets/ai/rook.png',palette:'#f2a93b'},
   anarchadia:{name:'Merlin',role:'civic, feature-request, and automation guide',avatar:'/app/assets/ai/merlin.png',palette:'#ff4f9a'}
 };
 
-if(globalThis.CommonweaveGuideIdentityIntegrityV216?.version===VERSION)return;
+if(globalThis.CivweaveGuideIdentityIntegrityV216?.version===VERSION)return;
 
 const clean=value=>String(value??'').trim();
 const cleanSystem=value=>SYSTEMS.includes(clean(value).toLowerCase())?clean(value).toLowerCase():'';
@@ -27,14 +27,14 @@ let pendingIdentities=[];
 function detectPageSystem(){
   const query=cleanSystem(new URLSearchParams(location.search).get('system'));
   if(query)return query;
-  const declared=cleanSystem(document.documentElement?.dataset?.commonweaveSystem||document.body?.dataset?.commonweaveSystem||document.body?.dataset?.system);
+  const declared=cleanSystem(document.documentElement?.dataset?.civweaveSystem||document.body?.dataset?.civweaveSystem||document.body?.dataset?.system);
   if(declared)return declared;
   const path=location.pathname.toLowerCase(),host=location.hostname.toLowerCase();
   if(document.documentElement?.hasAttribute?.('data-living-school-cabinet')||path.includes('/cabinets/living-school/')||path.includes('living-school'))return'living-school';
   if(path.includes('cerbanimo')||path.split('/').includes('loom')||host==='cerbanimo.com'||host.startsWith('cerbanimo.'))return'cerbanimo';
   if(path.includes('fellowfare'))return'fellowfare';
   if(path.includes('anarchadia'))return'anarchadia';
-  return'commonweave';
+  return'civweave';
 }
 
 function migratePersistentThread(){
@@ -57,12 +57,12 @@ function migratePersistentThread(){
   state.identityIntegrityRevision='v216-explicit-responder-ownership';
   state.updatedAt=now();
   try{localStorage.setItem(CHAT_KEY,JSON.stringify(state))}catch{return{corrected:0}}
-  try{dispatchEvent(new CustomEvent('commonweave:guide-identity-migrated',{detail:{corrected,key:CHAT_KEY,at:now()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:guide-identity-migrated',{detail:{corrected,key:CHAT_KEY,at:now()}}))}catch{}
   return{corrected};
 }
 
 function identityBoundary(system){
-  const guide=GUIDE[system]||GUIDE.commonweave;
+  const guide=GUIDE[system]||GUIDE.civweave;
   return`Identity boundary: ${guide.name}, the ${guide.role}, is the only guide answering this turn. Never speak in another guide's first-person voice, use another guide's name as your own, or imitate another guide's signature role. A handoff changes the responding guide before generation; the receiving guide then answers in their own voice.`;
 }
 
@@ -70,7 +70,7 @@ function effectiveResponder(options={}){
   const requested=cleanSystem(options.systemId)||detectPageSystem();
   const explicit=cleanSystem(options.handoffSystem);
   const page=detectPageSystem();
-  const responding=explicit||(requested==='commonweave'&&page!=='commonweave'?page:requested);
+  const responding=explicit||(requested==='civweave'&&page!=='civweave'?page:requested);
   return{
     requested,
     responding,
@@ -159,7 +159,7 @@ function reconcilePersistentDom(){
   const rows=Array.isArray(state.messages)?state.messages.filter(row=>row?.role==='assistant'):[];
   const articles=[...root.querySelectorAll('.cwp215-message:not(.is-user)')];
   for(let index=0;index<Math.min(rows.length,articles.length);index++){
-    const row=rows[index],system=cleanSystem(row.responderSystem||row.guide)||'commonweave',guide=GUIDE[system],article=articles[index];
+    const row=rows[index],system=cleanSystem(row.responderSystem||row.guide)||'civweave',guide=GUIDE[system],article=articles[index];
     const image=article.querySelector('img');
     if(image&&image.getAttribute('src')!==guide.avatar){image.src=guide.avatar;image.alt=guide.name}
     const name=article.querySelector('.cwp215-meta b');
@@ -203,7 +203,7 @@ function wrapAssistant(assistant){
       identityIntegrity:VERSION
     };
     rememberResponseIdentity(enriched,{...identity,responding:actual});
-    try{dispatchEvent(new CustomEvent('commonweave:guide-response-identity',{detail:{requestedSystem:identity.requested,respondingSystem:actual,guide:GUIDE[actual].name,handedOff:identity.handedOff,reason:identity.reason,at:now()}}))}catch{}
+    try{dispatchEvent(new CustomEvent('civweave:guide-response-identity',{detail:{requestedSystem:identity.requested,respondingSystem:actual,guide:GUIDE[actual].name,handedOff:identity.handedOff,reason:identity.reason,at:now()}}))}catch{}
     return enriched;
   }
 
@@ -218,27 +218,27 @@ function wrapAssistant(assistant){
 }
 
 function ensureAssistantBoundary(){
-  if(!assistantValue&&globalThis.CommonweaveAssistantV141)assistantValue=globalThis.CommonweaveAssistantV141;
+  if(!assistantValue&&globalThis.CivweaveAssistantV141)assistantValue=globalThis.CivweaveAssistantV141;
   const wrapped=wrapAssistant(assistantValue);
   if(wrapped&&wrapped!==assistantValue)assistantValue=wrapped;
   return Boolean(assistantValue?.respond?.__guideIdentityIntegrityV216);
 }
 
 function installAssistantBoundary(){
-  const descriptor=Object.getOwnPropertyDescriptor(globalThis,'CommonweaveAssistantV141');
+  const descriptor=Object.getOwnPropertyDescriptor(globalThis,'CivweaveAssistantV141');
   if(descriptor&&!descriptor.configurable){
-    assistantValue=wrapAssistant(globalThis.CommonweaveAssistantV141);
-    try{globalThis.CommonweaveAssistantV141=assistantValue}catch{}
+    assistantValue=wrapAssistant(globalThis.CivweaveAssistantV141);
+    try{globalThis.CivweaveAssistantV141=assistantValue}catch{}
     return false;
   }
-  assistantValue=wrapAssistant(globalThis.CommonweaveAssistantV141);
-  Object.defineProperty(globalThis,'CommonweaveAssistantV141',{
+  assistantValue=wrapAssistant(globalThis.CivweaveAssistantV141);
+  Object.defineProperty(globalThis,'CivweaveAssistantV141',{
     configurable:true,
     enumerable:true,
     get:()=>assistantValue,
     set:value=>{
       assistantValue=wrapAssistant(value);
-      try{dispatchEvent(new CustomEvent('commonweave:guide-identity-boundary-installed',{detail:{version:VERSION,at:now()}}))}catch{}
+      try{dispatchEvent(new CustomEvent('civweave:guide-identity-boundary-installed',{detail:{version:VERSION,at:now()}}))}catch{}
     }
   });
   return true;
@@ -257,7 +257,7 @@ function onResponseIdentity(event){
   const detail=event?.detail||{};
   const system=cleanSystem(detail.respondingSystem);
   if(!detail.handedOff||!system)return;
-  queueMicrotask(()=>globalThis.CommonweavePersistentGuideChatV215?.switchGuide?.(system));
+  queueMicrotask(()=>globalThis.CivweavePersistentGuideChatV215?.switchGuide?.(system));
 }
 
 const migration=migratePersistentThread();
@@ -265,9 +265,9 @@ const storageBoundary=installStorageBoundary();
 const trapped=installAssistantBoundary();
 const domBoundary=installDomBoundary();
 stabilizeAssistantBoundary();
-addEventListener('commonweave:guide-response-identity',onResponseIdentity);
+addEventListener('civweave:guide-response-identity',onResponseIdentity);
 
-globalThis.CommonweaveGuideIdentityIntegrityV216=Object.freeze({
+globalThis.CivweaveGuideIdentityIntegrityV216=Object.freeze({
   version:VERSION,
   chatKey:CHAT_KEY,
   systems:[...SYSTEMS],
@@ -283,7 +283,7 @@ globalThis.CommonweaveGuideIdentityIntegrityV216=Object.freeze({
   destroy(){
     observer?.disconnect();
     observer=null;
-    removeEventListener('commonweave:guide-response-identity',onResponseIdentity);
+    removeEventListener('civweave:guide-response-identity',onResponseIdentity);
     if(stabilizationTimer){clearInterval(stabilizationTimer);stabilizationTimer=0}
   }
 });

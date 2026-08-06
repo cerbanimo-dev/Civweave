@@ -218,4 +218,4 @@ The supplied room art now maps to durable local records instead of information-o
 
 These records participate in selective exports and conflict-preserving imports.
 
-The canonical Anarchadia logo is shared by the Commonweave campus, standalone PWA, Rook surface, manifest icons, install assets, and offline caches.
+The canonical Anarchadia logo is shared by the Civweave campus, standalone PWA, Rook surface, manifest icons, install assets, and offline caches.

@@ -1,15 +1,15 @@
-export const CONTRACT_VERSION = "commonweave.cerbanimo-project.v1";
+export const CONTRACT_VERSION = "civweave.cerbanimo-project.v1";
 export const PROJECT_STATES = new Set([
   "not-started","drafting","ready-to-submit","sending","submitted","under-review",
   "revision-requested","accepted","rejected","handoff-failed","integration-unavailable"
 ]);
 export const RECEIPT_TYPES = new Set([
-  "commonweave:project-handoff-accepted","commonweave:project-handoff-rejected",
-  "commonweave:project-created","commonweave:project-linked","commonweave:project-status-returned",
-  "commonweave:project-evidence-submitted","commonweave:project-review-pending",
-  "commonweave:project-revision-requested","commonweave:project-accepted",
-  "commonweave:project-rejected","commonweave:project-unavailable",
-  "commonweave:project-integration-error"
+  "civweave:project-handoff-accepted","civweave:project-handoff-rejected",
+  "civweave:project-created","civweave:project-linked","civweave:project-status-returned",
+  "civweave:project-evidence-submitted","civweave:project-review-pending",
+  "civweave:project-revision-requested","civweave:project-accepted",
+  "civweave:project-rejected","civweave:project-unavailable",
+  "civweave:project-integration-error"
 ]);
 export const RECEIPT_EVENTS = new Set([
   "handoff-accepted","handoff-rejected","project-created","project-linked","status-returned",
@@ -17,18 +17,18 @@ export const RECEIPT_EVENTS = new Set([
   "project-unavailable","integration-error"
 ]);
 const DEFAULTS={
-  "commonweave:project-handoff-accepted":{event:"handoff-accepted",status:"submitted"},
-  "commonweave:project-handoff-rejected":{event:"handoff-rejected",status:"rejected"},
-  "commonweave:project-created":{event:"project-created",status:"submitted"},
-  "commonweave:project-linked":{event:"project-linked",status:"submitted"},
-  "commonweave:project-status-returned":{event:"status-returned"},
-  "commonweave:project-evidence-submitted":{event:"evidence-submitted",status:"under-review"},
-  "commonweave:project-review-pending":{event:"review-pending",status:"under-review"},
-  "commonweave:project-revision-requested":{event:"revision-requested",status:"revision-requested"},
-  "commonweave:project-accepted":{event:"project-accepted",status:"accepted"},
-  "commonweave:project-rejected":{event:"project-rejected",status:"rejected"},
-  "commonweave:project-unavailable":{event:"project-unavailable",status:"integration-unavailable"},
-  "commonweave:project-integration-error":{event:"integration-error",status:"integration-unavailable"}
+  "civweave:project-handoff-accepted":{event:"handoff-accepted",status:"submitted"},
+  "civweave:project-handoff-rejected":{event:"handoff-rejected",status:"rejected"},
+  "civweave:project-created":{event:"project-created",status:"submitted"},
+  "civweave:project-linked":{event:"project-linked",status:"submitted"},
+  "civweave:project-status-returned":{event:"status-returned"},
+  "civweave:project-evidence-submitted":{event:"evidence-submitted",status:"under-review"},
+  "civweave:project-review-pending":{event:"review-pending",status:"under-review"},
+  "civweave:project-revision-requested":{event:"revision-requested",status:"revision-requested"},
+  "civweave:project-accepted":{event:"project-accepted",status:"accepted"},
+  "civweave:project-rejected":{event:"project-rejected",status:"rejected"},
+  "civweave:project-unavailable":{event:"project-unavailable",status:"integration-unavailable"},
+  "civweave:project-integration-error":{event:"integration-error",status:"integration-unavailable"}
 };
 const ID=/^[a-zA-Z0-9][a-zA-Z0-9._:-]{2,159}$/;
 const clean=(value,limit=160)=>String(value??"").trim().slice(0,limit);
@@ -40,7 +40,7 @@ export function normalizeProjectStatus(value){
 }
 export function createProjectHandoffRequest({requestId,schoolId,moduleId="final-project",learnerId,projectRef,title,creativeIntention,project}){
   const request={
-    type:"commonweave:project-handoff-requested",contractVersion:CONTRACT_VERSION,
+    type:"civweave:project-handoff-requested",contractVersion:CONTRACT_VERSION,
     requestId:cleanId(requestId),schoolId:cleanId(schoolId),moduleId:cleanId(moduleId,"final-project"),
     learnerId:cleanId(learnerId,"local-learner"),projectRef:cleanId(projectRef),timestamp:new Date().toISOString(),
     sourceApplication:"living-school",title:clean(title,220)||"Living School final project",
@@ -51,7 +51,7 @@ export function createProjectHandoffRequest({requestId,schoolId,moduleId="final-
 }
 export function createProjectStatusRequest({requestId,schoolId,moduleId="final-project",learnerId,projectRef}){
   const request={
-    type:"commonweave:project-status-requested",contractVersion:CONTRACT_VERSION,
+    type:"civweave:project-status-requested",contractVersion:CONTRACT_VERSION,
     requestId:cleanId(requestId),schoolId:cleanId(schoolId),moduleId:cleanId(moduleId,"final-project"),
     learnerId:cleanId(learnerId,"local-learner"),projectRef:cleanId(projectRef),timestamp:new Date().toISOString(),sourceApplication:"living-school"
   };
@@ -71,7 +71,7 @@ export function normalizeProjectReceipt(payload={}){
   const status=payload.status?normalizeProjectStatus(payload.status):defaults.status||"integration-unavailable";
   if(status==="accepted"&&!payload.demo&&!payload.reviewId&&!payload.evidenceRef&&!payload.acceptedAt)return null;
   let projectUrl="";
-  try{const base=globalThis.location?.href||"https://commonweave.local/";const url=new URL(String(payload.projectUrl||""),base);if(["http:","https:"].includes(url.protocol))projectUrl=url.href;}catch{}
+  try{const base=globalThis.location?.href||"https://civweave.local/";const url=new URL(String(payload.projectUrl||""),base);if(["http:","https:"].includes(url.protocol))projectUrl=url.href;}catch{}
   const acknowledgedAt=clean(payload.acknowledgedAt,80)||new Date().toISOString();
   const statusRevision=revision(payload.statusRevision);
   const receiptId=cleanId(payload.receiptId)||cleanId(`receipt:${projectRef}:${status}:${statusRevision}`,`receipt:${projectRef}`);

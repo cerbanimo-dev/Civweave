@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
-const runtime=globalThis.CommonweaveCabinetCalibrationV144;
-const KEY=runtime?.key||'commonweave.cabinet-calibration.v144';
-const ORDER=['anarchadia','fellowfare','commonweave','living-school','cerbanimo'];
-const NAMES={anarchadia:'Anarchadia',fellowfare:'FellowFare',commonweave:'Commonweave','living-school':'Living School',cerbanimo:'Cerbanimo'};
+const runtime=globalThis.CivweaveCabinetCalibrationV144;
+const KEY=runtime?.key||'civweave.cabinet-calibration.v144';
+const ORDER=['anarchadia','fellowfare','civweave','living-school','cerbanimo'];
+const NAMES={anarchadia:'Anarchadia',fellowfare:'FellowFare',civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo'};
 const params=new URLSearchParams(location.search);
 const $=selector=>document.querySelector(selector);
 const clone=value=>JSON.parse(JSON.stringify(value));
-let shells={},state=clone(runtime?.current||runtime?.defaults||{systems:{}}),systemId=params.get('system')||'commonweave',selected=-1,drag=null,renderFrame=0;
+let shells={},state=clone(runtime?.current||runtime?.defaults||{systems:{}}),systemId=params.get('system')||'civweave',selected=-1,drag=null,renderFrame=0;
 function current(){return state.systems[systemId]}
 function artFor(){return shells[systemId]?.asset||`/app/assets/cabinets/${systemId}.webp`}
 function point(event){const svg=$('#cc144-overlay'),matrix=svg.getScreenCTM();if(!matrix)return{x:0,y:0};const source=typeof DOMPoint==='function'?new DOMPoint(event.clientX,event.clientY):svg.createSVGPoint();source.x=event.clientX;source.y=event.clientY;const p=source.matrixTransform(matrix.inverse());return{x:p.x,y:p.y}}
@@ -37,7 +37,7 @@ function save(){state.userModifiedAt=new Date().toISOString();state.revision='so
 function reset(){const defaults=runtime?.defaults?.systems?.[systemId];if(!defaults)return;state.systems[systemId]=clone(defaults);selected=-1;save();render();status(`${NAMES[systemId]} restored to shipped calibration.`)}
 function exported(){return JSON.stringify({...state,exportedAt:new Date().toISOString()},null,2)}
 async function copy(){try{await navigator.clipboard.writeText(exported());status('Calibration JSON copied.')}catch{status('Clipboard permission was unavailable. Use Export JSON instead.')}}
-function download(){const blob=new Blob([exported()],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='commonweave-cabinet-calibration-v144.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status('Calibration JSON exported.')}
+function download(){const blob=new Blob([exported()],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='civweave-cabinet-calibration-v144.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status('Calibration JSON exported.')}
 function fillSystems(){const select=$('#cc144-system');select.innerHTML=ORDER.map(id=>`<option value="${id}">${NAMES[id]}</option>`).join('');select.value=systemId;select.addEventListener('change',()=>{systemId=select.value;selected=-1;history.replaceState(null,'',`/app/cabinet-calibrator-v144.html?system=${encodeURIComponent(systemId)}`);render()})}
 $('#cc144-overlay').addEventListener('pointerdown',event=>{const target=event.target.closest('.cc144-hotspot');if(!target)return;event.preventDefault();select(target.dataset.index);const spot=current().hotspots[selected],p=point(event);drag={pointerId:event.pointerId,dx:p.x-spot.cx,dy:p.y-spot.cy};document.body.setPointerCapture?.(event.pointerId)});
 addEventListener('pointermove',event=>{if(!drag||event.pointerId!==drag.pointerId)return;event.preventDefault();const p=point(event),size=current().sourceSize||state.sourceSize,spot=current().hotspots[selected];spot.cx=Math.max(0,Math.min(size.width,rounded(p.x-drag.dx)));spot.cy=Math.max(0,Math.min(size.height,rounded(p.y-drag.dy)));scheduleRender()},{passive:false});

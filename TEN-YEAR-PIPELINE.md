@@ -1,4 +1,4 @@
-# Commonweave Ten-Year Agentic Pipeline
+# Civweave Ten-Year Agentic Pipeline
 
 **Epoch:** 2026 Q3–2036 Q2  
 **Fresh imprint:** `main` at `82a83a9244c3f0a00daebc4e664e75ad3560256e`  
@@ -34,7 +34,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2027-Q1: The Wish Becomes Work
 
-- [ ] **CW-2027Q1-01 · Commonweave intention loop** (`commonweave`): Converge the What-is-your-wish flow into a reviewable intention that decomposes learning, labor, materials, governance, and optional free-roam paths.
+- [ ] **CW-2027Q1-01 · Civweave intention loop** (`civweave`): Converge the What-is-your-wish flow into a reviewable intention that decomposes learning, labor, materials, governance, and optional free-roam paths.
 - [ ] **CW-2027Q1-02 · Shared guide runtime with realm adapters** (`agents`): Create one guide runtime for Weaveling, Moss, Kamiya, Rook, and Merlin with strict identity, capability, and handoff adapters.
 - [ ] **CW-2027Q1-03 · Cross-realm progress contract** (`state`): Define canonical intention, skill XP, Acorn, Button, co-token, credential, and story-chronicle contracts with per-realm ownership.
 
@@ -70,13 +70,13 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 - [ ] **CW-2028Q2-01 · Scheduled rebase II** (`rebase`): Re-imprint main, review convergence metrics, and promote only evidence-backed v2 assumptions.
 - [ ] **CW-2028Q2-02 · Single service-worker authority** (`offline`): Complete the move to one service worker driven by generated manifests, migration rules, and resumable package state.
-- [ ] **CW-2028Q2-03 · Commonweave v2 stability release** (`release`): Ship a stability release with stable entries, direct servers, canonical contracts, and a tested rollback package.
+- [ ] **CW-2028Q2-03 · Civweave v2 stability release** (`release`): Ship a stability release with stable entries, direct servers, canonical contracts, and a tested rollback package.
 
 ### 2028-Q3: Nearby Threads
 
 - [ ] **CW-2028Q3-01 · QR pairing and trusted peer graph** (`network`): Promote short-lived QR rendezvous, signed peer identity, trusted pairing, revocation, and node-card exchange.
-- [ ] **CW-2028Q3-02 · Shared-node discovery** (`network`): Discover approved Commonweave nodes through configured hosts and paired peers without blocking local startup.
-- [ ] **CW-2028Q3-03 · Network Commons interface** (`commonweave`): Provide a mobile-first place to pair, inspect trust, share node cards, and understand privacy boundaries.
+- [ ] **CW-2028Q3-02 · Shared-node discovery** (`network`): Discover approved Civweave nodes through configured hosts and paired peers without blocking local startup.
+- [ ] **CW-2028Q3-03 · Network Commons interface** (`civweave`): Provide a mobile-first place to pair, inspect trust, share node cards, and understand privacy boundaries.
 
 ### 2028-Q4: Federation Without Fog
 
@@ -134,7 +134,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 - [ ] **CW-2030Q4-01 · Native capability bridge** (`platform`): Add optional Android and desktop bridges for file access, notifications, background sync, camera, and local networking.
 - [ ] **CW-2030Q4-02 · Signed installers and update channels** (`release`): Create reproducible signed packages, stable/beta channels, rollback metadata, and offline verification.
-- [ ] **CW-2030Q4-03 · Device migration assistant** (`state`): Move a Commonweave installation, models, schools, credentials, and local state between devices with selective export.
+- [ ] **CW-2030Q4-03 · Device migration assistant** (`state`): Move a Civweave installation, models, schools, credentials, and local state between devices with selective export.
 
 ### 2031-Q1: Institutions Without a Center
 
@@ -180,18 +180,18 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 - [ ] **CW-2032Q3-01 · Project simulation sandbox** (`simulation`): Simulate schedules, dependencies, resource constraints, learning gaps, and failure modes before committing.
 - [ ] **CW-2032Q3-02 · Community capacity map** (`simulation`): Aggregate opt-in skills, resources, needs, and availability without exposing private individual data.
-- [ ] **CW-2032Q3-03 · Adaptive rails and revision engine** (`commonweave`): Use outcomes and constraints to suggest plan revisions while preserving user agency and abandoned-path history.
+- [ ] **CW-2032Q3-03 · Adaptive rails and revision engine** (`civweave`): Use outcomes and constraints to suggest plan revisions while preserving user agency and abandoned-path history.
 
 ### 2032-Q4: Open Doors, Strong Hinges
 
-- [ ] **CW-2032Q4-01 · External interchange formats** (`interop`): Map Commonweave tasks, credentials, calendars, contacts, documents, and ledgers to open formats.
+- [ ] **CW-2032Q4-01 · External interchange formats** (`interop`): Map Civweave tasks, credentials, calendars, contacts, documents, and ledgers to open formats.
 - [ ] **CW-2032Q4-02 · Connector capability boundary** (`interop`): Standardize read, draft, write, delete, and subscribe permissions for optional external connectors.
 - [ ] **CW-2032Q4-03 · Public developer SDK preview** (`developer-tools`): Expose stable contracts for realm adapters, tools, migrations, packages, and tests.
 
 ### 2033-Q1: Learning That Travels
 
 - [ ] **CW-2033Q1-01 · Verifiable competency records** (`living-school`): Issue portable, evidence-linked competency records without collapsing learning into a single score.
-- [ ] **CW-2033Q1-02 · Assessment and accreditation bridges** (`living-school`): Support external rubrics and accreditation mappings while retaining Commonweave’s local learning contracts.
+- [ ] **CW-2033Q1-02 · Assessment and accreditation bridges** (`living-school`): Support external rubrics and accreditation mappings while retaining Civweave’s local learning contracts.
 - [ ] **CW-2033Q1-03 · Peer teaching and validation market** (`living-school`): Connect teaching, review, Button rewards, reputation evidence, and anti-collusion controls.
 
 ### 2033-Q2: Rebase VII: Trust Over Time
@@ -242,7 +242,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2035-Q1: Software That Can Be Inherited
 
-- [ ] **CW-2035Q1-01 · Archival application profile** (`preservation`): Create a frozen, documented profile that can open exported Commonweave data without network services.
+- [ ] **CW-2035Q1-01 · Archival application profile** (`preservation`): Create a frozen, documented profile that can open exported Civweave data without network services.
 - [ ] **CW-2035Q1-02 · Web-platform deprecation migrations** (`platform`): Replace APIs likely to disappear and maintain a tracked dependency end-of-life calendar.
 - [ ] **CW-2035Q1-03 · Institutional succession toolkit** (`operations`): Document transfer of node, signing, archive, and governance responsibilities when maintainers leave.
 
@@ -250,7 +250,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 > **REBASE:** complete the first bundle using `rebase.md` before delivery continues.
 
-- [ ] **CW-2035Q2-01 · Scheduled rebase IX** (`rebase`): Decide from evidence whether Commonweave should refine the current runtime or perform a clean-room replatform.
+- [ ] **CW-2035Q2-01 · Scheduled rebase IX** (`rebase`): Decide from evidence whether Civweave should refine the current runtime or perform a clean-room replatform.
 - [ ] **CW-2035Q2-02 · Clean-room replatform prototype** (`platform`): Build a narrow golden-path prototype behind export/import boundaries if the decision record authorizes it.
 - [ ] **CW-2035Q2-03 · Compatibility bridge generator** (`compatibility`): Generate tested bridges between the current platform, archival profile, and any authorized successor.
 

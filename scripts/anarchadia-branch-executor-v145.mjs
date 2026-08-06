@@ -14,7 +14,7 @@ function run(command,args,cwd,options={}){
 }
 const packetPath=path.resolve(argument('--packet')||'');
 const repo=path.resolve(argument('--repo')||process.cwd());
-if(!packetPath)throw new Error('Usage: npm run anarchadia:execute -- --packet /path/to/execution.json [--repo /path/to/Commonweave]');
+if(!packetPath)throw new Error('Usage: npm run anarchadia:execute -- --packet /path/to/execution.json [--repo /path/to/Civweave]');
 const packet=JSON.parse(await fs.readFile(packetPath,'utf8'));
 const validation=await validateExecutionPacket(packet);
 if(!validation.valid)throw new Error(`Execution packet rejected:\n- ${validation.errors.join('\n- ')}`);
@@ -46,7 +46,7 @@ try{
   if(!staged)throw new Error('Authorized packet produced no file changes.');
   run('git',['-c','user.name=Anarchadia Branch Executor','-c','user.email=anarchadia@local.invalid','commit','-m',`Anarchadia governed change: ${changeSet.title}`],worktree);
   commitSha=run('git',['rev-parse','HEAD'],worktree,{capture:true});
-  const receipt={schema:'commonweave.anarchadia-execution-receipt.v1',packetId:packet.id,packetHash:packet.packetHash,changeSetId:changeSet.id,changeHash:changeSet.revisionHash,baseCommit:authorization.baseCommit,targetBranch:authorization.targetBranch,preparedCommit:commitSha,checks:['npm run check'],status:'prepared-local-branch',pushPerformed:false,mergePerformed:false,deployPerformed:false,preparedAt:new Date().toISOString()};
+  const receipt={schema:'civweave.anarchadia-execution-receipt.v1',packetId:packet.id,packetHash:packet.packetHash,changeSetId:changeSet.id,changeHash:changeSet.revisionHash,baseCommit:authorization.baseCommit,targetBranch:authorization.targetBranch,preparedCommit:commitSha,checks:['npm run check'],status:'prepared-local-branch',pushPerformed:false,mergePerformed:false,deployPerformed:false,preparedAt:new Date().toISOString()};
   const receiptPath=packetPath.replace(/\.json$/i,'')+'.receipt.json';
   await fs.writeFile(receiptPath,JSON.stringify(receipt,null,2),'utf8');
   console.log(JSON.stringify(receipt,null,2));

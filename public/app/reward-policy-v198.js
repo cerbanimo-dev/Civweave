@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 const VERSION='1.0.7-reward-policy-v198';
-const STATE_KEY='commonweave.reward-policy.v198';
-const LEDGER_KEY='commonweave.rewards.v156';
+const STATE_KEY='civweave.reward-policy.v198';
+const LEDGER_KEY='civweave.rewards.v156';
 const DAILY_CAP=3;
 const MODES=Object.freeze({
   deterministic:Object.freeze({multiplier:.5,dailyCap:DAILY_CAP,label:'Deterministic + local semantic'}),
@@ -28,9 +28,9 @@ const words=value=>clean(value).toLowerCase().match(/[a-z0-9][a-z0-9'’-]*/g)||
 const array=value=>Array.isArray(value)?value:[];
 function hash(value){let h=2166136261;for(const char of clean(value,24000)){h^=char.charCodeAt(0);h=Math.imul(h,16777619)}return(h>>>0).toString(36)}
 function normalizeMode(value){return String(value||'deterministic').toLowerCase()==='generative'?'generative':'deterministic'}
-function state(){const value=parse(globalThis.localStorage?.getItem?.(STATE_KEY),{});return{schema:'commonweave.reward-policy-state.v1',version:1,days:value.days&&typeof value.days==='object'?value.days:{},claims:Array.isArray(value.claims)?value.claims:[]}}
+function state(){const value=parse(globalThis.localStorage?.getItem?.(STATE_KEY),{});return{schema:'civweave.reward-policy-state.v1',version:1,days:value.days&&typeof value.days==='object'?value.days:{},claims:Array.isArray(value.claims)?value.claims:[]}}
 function save(value){globalThis.localStorage?.setItem?.(STATE_KEY,JSON.stringify(value));return value}
-function ledger(){const value=parse(globalThis.localStorage?.getItem?.(LEDGER_KEY),{});return Array.isArray(value)?{schema:'commonweave.rewards.v156',events:value}:value&&typeof value==='object'?{...value,events:Array.isArray(value.events)?value.events:[]}:{schema:'commonweave.rewards.v156',events:[]}}
+function ledger(){const value=parse(globalThis.localStorage?.getItem?.(LEDGER_KEY),{});return Array.isArray(value)?{schema:'civweave.rewards.v156',events:value}:value&&typeof value==='object'?{...value,events:Array.isArray(value.events)?value.events:[]}:{schema:'civweave.rewards.v156',events:[]}}
 function taskFingerprint(task={}){return hash([task.title,task.objective,task.deliverable,...array(task.evidence),...array(task.acceptanceCriteria)].map(value=>clean(value).toLowerCase().replace(/\s+/g,' ')).join('|'))}
 function proofText(submission={}){if(typeof submission==='string')return clean(submission);return clean([submission.text,submission.response,submission.note,submission.summary,...array(submission.proofs).map(item=>typeof item==='string'?item:item?.value||item?.label||item?.url),...array(submission.evidence).map(item=>typeof item==='string'?item:item?.value||item?.label||item?.url)].filter(Boolean).join(' '),20000)}
 function assessTask(task={},submission={}){
@@ -70,10 +70,10 @@ function claim({mode='deterministic',task={},submission={},baseRewards,activity=
   snapshot.claims.push(record);snapshot.claims=snapshot.claims.slice(-4000);
   if(normalized==='deterministic'){day.deterministicEligibleTasks=Number(day.deterministicEligibleTasks||0)+1;snapshot.days[dateKey]=day}
   save(snapshot);
-  const rewardSystem=clean(task.system||task.realm||(activity==='peer-model-review'?'commonweave':'commonweave'),80),skill=clean(task.skill||task.skillId||task.category||'general',180)||'general';
+  const rewardSystem=clean(task.system||task.realm||(activity==='peer-model-review'?'civweave':'civweave'),80),skill=clean(task.skill||task.skillId||task.category||'general',180)||'general';
   const currencyEvents=[['button',amounts.buttons],['acorn',amounts.acorns],['xp',amounts.skillXp]].filter(([,amount])=>amount>0).map(([currency,amount])=>({id:`${claimId}-${currency}`,type:'reward',currency,amount,skill:currency==='xp'?skill:undefined,system:rewardSystem,source:activity,sourceId:record.taskId||claimId,taskId:record.taskId,mode:normalized,claimId,phase:review?'peer-model-review':'verified-completion',createdAt:record.at,at:record.at,metadata:{rewardPolicy:VERSION,reviewBonus:review}}));
   appendLedger(currencyEvents);
-  try{globalThis.dispatchEvent?.(new CustomEvent('commonweave:rewards-changed',{detail:{claim:clone(record),events:clone(currencyEvents)}}));globalThis.dispatchEvent?.(new CustomEvent('commonweave:reward-policy-claimed',{detail:{claim:clone(record)}}))}catch{}
+  try{globalThis.dispatchEvent?.(new CustomEvent('civweave:rewards-changed',{detail:{claim:clone(record),events:clone(currencyEvents)}}));globalThis.dispatchEvent?.(new CustomEvent('civweave:reward-policy-claimed',{detail:{claim:clone(record)}}))}catch{}
   return{ok:true,claim:record,events:currencyEvents,assessment,remaining:remaining(normalized,date),promotion:PROMOTION};
 }
 function decorateTask(task={},mode='deterministic'){
@@ -81,6 +81,6 @@ function decorateTask(task={},mode='deterministic'){
 }
 function status(){return{version:VERSION,dailyDeterministicLimit:DAILY_CAP,modes:clone(MODES),reviewBonus:REVIEW_BONUS,promotion:PROMOTION,remainingDeterministicToday:remaining('deterministic')}}
 const api=Object.freeze({version:VERSION,STATE_KEY,LEDGER_KEY,DAILY_CAP,MODES,REVIEW_BONUS,PROMOTION,assessTask,taskFingerprint,quote,claim,remaining,decorateTask,status,resetForTests:()=>{globalThis.localStorage?.removeItem?.(STATE_KEY)}});
-globalThis.CommonweaveRewardPolicyV198=api;
-try{globalThis.dispatchEvent?.(new CustomEvent('commonweave:reward-policy-ready',{detail:status()}))}catch{}
+globalThis.CivweaveRewardPolicyV198=api;
+try{globalThis.dispatchEvent?.(new CustomEvent('civweave:reward-policy-ready',{detail:status()}))}catch{}
 })();

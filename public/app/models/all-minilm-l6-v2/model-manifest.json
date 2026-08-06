@@ -1,5 +1,5 @@
 {
-  "schema": "commonweave.semantic-model-package.v2",
+  "schema": "civweave.semantic-model-package.v2",
   "id": "Xenova/all-MiniLM-L6-v2",
   "localId": "all-minilm-l6-v2",
   "displayName": "MiniLM Semantic Reflex",
@@ -14,7 +14,7 @@
   "index": "/app/models/all-minilm-l6-v2/reflex-index.json",
   "vocabulary": "/app/models/all-minilm-l6-v2/vocab.txt",
   "optionalPrecomputedVectors": "/app/models/all-minilm-l6-v2/reflex-vectors.json",
-  "vectorCache": "indexeddb:commonweave-semantic-cache-v1/reflex-vectors",
+  "vectorCache": "indexeddb:civweave-semantic-cache-v1/reflex-vectors",
   "modelRoot": "/app/models/all-minilm-l6-v2",
   "wasmGraph": "/app/models/all-minilm-l6-v2/onnx/model_quantized.onnx",
   "remoteDownloadsAllowed": false,

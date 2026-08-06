@@ -2,7 +2,7 @@
 'use strict';
 const VERSION='1.0.26';
 const BUILD='1.0.26-loop-diagnostics-hotfix-2';
-const log=(kind,detail={})=>window.CommonweaveBootLog?.log(kind,detail)||console.info('[CW-BOOT]',kind,detail);
+const log=(kind,detail={})=>window.CivweaveBootLog?.log(kind,detail)||console.info('[CW-BOOT]',kind,detail);
 const container=navigator.serviceWorker;
 const originalAdd=container?.addEventListener;
 let suppressed=0;
@@ -27,7 +27,7 @@ script.onload=()=>{
 script.onerror=()=>{
   if(container&&originalAdd)container.addEventListener=originalAdd;
   log('safe-runtime-load-failed',{build:BUILD});
-  window.dispatchEvent(new ErrorEvent('error',{message:'The safe Commonweave runtime loader failed.'}));
+  window.dispatchEvent(new ErrorEvent('error',{message:'The safe Civweave runtime loader failed.'}));
 };
 document.head.append(script);
 })();

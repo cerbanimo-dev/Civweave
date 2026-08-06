@@ -1,4 +1,4 @@
-# Commonweave v1.0.28 — Parity Ledger Foundation
+# Civweave v1.0.28 — Parity Ledger Foundation
 
 This release establishes one canonical campus structure for both the illustrated world and the lightweight interface.
 
@@ -6,7 +6,7 @@ This release establishes one canonical campus structure for both the illustrated
 
 - A machine-readable parity ledger with 5 systems, 59 rooms, and 117 capabilities, stored losslessly in compressed source form and served as normal JSON.
 - Canonical capability IDs, consent classes, handoffs, reward behavior, source references, and renderer mappings.
-- Commonweave Lite at `/lite/`, organized by the same systems and rooms as Visual Commonweave.
+- Civweave Lite at `/lite/`, organized by the same systems and rooms as Visual Civweave.
 - A room-driven Visual realm shell that reads its scenes and capabilities from the parity ledger.
 - Working-source bridges at `/lite/source/<system>/` so mature service features remain reachable while they are migrated.
 - Ledger validation and host smoke tests.

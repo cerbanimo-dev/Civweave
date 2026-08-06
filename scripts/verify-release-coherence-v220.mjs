@@ -48,34 +48,34 @@ const sandbox={
   },
   responseLooksValid:response=>Boolean(response?.ok),
   caches:{open:async()=>({put:async()=>{runtimeWrites+=1}})},
-  RUNTIME_CACHE:'commonweave-runtime-test',
+  RUNTIME_CACHE:'civweave-runtime-test',
   cacheKey:pathname=>pathname,
   console
 };
 vm.createContext(sandbox);
 vm.runInContext(override,sandbox,{filename:'service-worker-release-coherence-v220.js'});
 
-const fresh=await sandbox.cacheFirst(new Request('https://commonweave.invalid/app/install-boundary-v146.js?v=canonical-core-only-v226'));
+const fresh=await sandbox.cacheFirst(new Request('https://civweave.invalid/app/install-boundary-v146.js?v=canonical-core-only-v226'));
 assert.equal(await fresh.text(),'fresh','Version-pinned boot code did not prefer the network.');
 assert.equal(fetchCalls,1);
 assert.equal(cachedCalls,0);
 assert.equal(runtimeWrites,1);
 
-const fragment=await sandbox.cacheFirst(new Request('https://commonweave.invalid/app/working-campus-v156.part1.txt?revision=canonical-campus-startup-v226'));
+const fragment=await sandbox.cacheFirst(new Request('https://civweave.invalid/app/working-campus-v156.part1.txt?revision=canonical-campus-startup-v226'));
 assert.equal(await fragment.text(),'fresh','Version-pinned campus fragment did not prefer the network.');
 assert.equal(fetchCalls,2);
 assert.equal(cachedCalls,0);
 assert.equal(runtimeWrites,2);
 
-const image=await sandbox.cacheFirst(new Request('https://commonweave.invalid/app/logos/commonweave-icon-192.png?v=1.0.13'));
+const image=await sandbox.cacheFirst(new Request('https://civweave.invalid/app/logos/civweave-icon-192.png?v=1.0.13'));
 assert.equal(await image.text(),'cached','Images should retain the cache-first offline path.');
 assert.equal(cachedCalls,1);
 
 networkAvailable=false;
-const fallback=await sandbox.cacheFirst(new Request('https://commonweave.invalid/app/working-campus-v156.part2.txt?revision=canonical-campus-startup-v226'));
+const fallback=await sandbox.cacheFirst(new Request('https://civweave.invalid/app/working-campus-v156.part2.txt?revision=canonical-campus-startup-v226'));
 assert.equal(await fallback.text(),'cached','Version-pinned campus fragment did not fall back to cache while offline.');
 assert.equal(cachedCalls,2);
-assert.equal(sandbox.self.CommonweaveReleaseCoherenceV220?.policy,'version-pinned-html-js-css-json-txt-network-first-cached-fallback');
+assert.equal(sandbox.self.CivweaveReleaseCoherenceV220?.policy,'version-pinned-html-js-css-json-txt-network-first-cached-fallback');
 
 console.log(JSON.stringify({
   ok:true,

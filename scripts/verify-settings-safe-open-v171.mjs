@@ -31,7 +31,7 @@ new Function(boundary);
 for(const token of [
   "VERSION='173.0-direct-settings-controller'",
   'const DEPENDENCIES=',
-  '/app/shared/commonweave-model-runtime.js',
+  '/app/shared/civweave-model-runtime.js',
   '/app/minilm-model-settings-v138.js',
   'function installDormantReflexStatus()',
   "controller.postMessage({type:'GET_MODEL_PACKAGE_STATUS'}",
@@ -39,11 +39,11 @@ for(const token of [
   "REFLEX_SCRIPT='/app/minilm-reflex-runtime-v138.js",
   'installDormantReflexStatus();',
   "mark('ready')",
-  'CommonweaveModelSettingsControllerV173={version:VERSION,open,ensure,ensureReflex,modelPackageStatus,settingsBoundary,facade:reflexStatusProxy,settingsFacade:facade}'
+  'CivweaveModelSettingsControllerV173={version:VERSION,open,ensure,ensureReflex,modelPackageStatus,settingsBoundary,facade:reflexStatusProxy,settingsFacade:facade}'
 ])assert(controller.includes(token),`Direct settings controller missing ${token}`);
 assert(!controller.includes("addEventListener('click'"),'The direct settings controller must not intercept application clicks.');
-assert(!controller.includes('CommonweaveFamilyAILoaderV105.openSettings='),'The settings controller still patches the chat loader.');
-assert(!controller.includes('CommonweaveFamilyShellV104.openSettings='),'The settings controller still patches the family shell.');
+assert(!controller.includes('CivweaveFamilyAILoaderV105.openSettings='),'The settings controller still patches the chat loader.');
+assert(!controller.includes('CivweaveFamilyShellV104.openSettings='),'The settings controller still patches the family shell.');
 const settingsDependencyBlock=controller.slice(controller.indexOf('const DEPENDENCIES='),controller.indexOf('const REFLEX_SCRIPT='));
 assert(!settingsDependencyBlock.includes('minilm-reflex-runtime'),'Opening settings still loads MiniLM.');
 
@@ -60,22 +60,22 @@ assert(!settingsRuntime.includes('new MutationObserver'),'The unified settings r
 assert(!settingsRuntime.includes("document.querySelectorAll('[data-unified-model-settings]')"),'The unified settings runtime still auto-binds forms outside its explicit mount path.');
 
 for(const token of [
-  "VERSION='1.0.4-inline-commonweave-r42-chat-only'",
-  "settingsOwner:'CommonweaveModelSettingsControllerV173'",
-  'CommonweaveModelSettingsControllerV173',
+  "VERSION='1.0.4-inline-civweave-r42-chat-only'",
+  "settingsOwner:'CivweaveModelSettingsControllerV173'",
+  'CivweaveModelSettingsControllerV173',
   'async function openSettings()'
 ])assert(loader.includes(token),`Chat loader cutover missing ${token}`);
 assert(!loader.includes('/app/minilm-model-settings-v138.js'),'Chat loader still owns the settings interface.');
 assert(!loader.includes('/app/model-settings-v133.css'),'Chat loader still owns settings styling.');
 assert(loader.includes('/app/minilm-reflex-runtime-v138.js'),'Chat lost its explicit semantic runtime dependency.');
-assert(loader.includes('CommonweaveModelSettingsControllerV173?.facade'),'Chat does not distinguish the dormant reflex status proxy from the real semantic runtime.');
+assert(loader.includes('CivweaveModelSettingsControllerV173?.facade'),'Chat does not distinguish the dormant reflex status proxy from the real semantic runtime.');
 
 for(const token of [
   "VERSION='1.0.4-direct-settings-v173'",
-  "settingsOwner:'CommonweaveModelSettingsControllerV173'",
-  'CommonweaveModelSettingsControllerV173',
+  "settingsOwner:'CivweaveModelSettingsControllerV173'",
+  'CivweaveModelSettingsControllerV173',
   'data-cwf-settings',
-  "const SYSTEM_ORDER=['commonweave','living-school','cerbanimo','fellowfare','anarchadia']"
+  "const SYSTEM_ORDER=['civweave','living-school','cerbanimo','fellowfare','anarchadia']"
 ])assert(family.includes(token),`Family shell cutover missing ${token}`);
 assert(!family.includes('const SETTINGS_SCRIPTS='),'Family shell still contains a settings dependency loader.');
 assert(!family.includes('/app/minilm-reflex-runtime-v138.js'),'Opening family settings can still reach MiniLM directly.');
@@ -89,8 +89,8 @@ for(const [name,html] of pages){
   assert(controllerIndex>=0,`${name} does not load the direct settings controller.`);
   if(loaderIndex>=0)assert(controllerIndex<loaderIndex,`${name} loads chat before the direct settings controller.`);
 }
-assert(workingPart.includes('CommonweaveModelSettingsControllerV173')&&!workingPart.includes('CommonweaveFamilyAILoaderV105.openSettings'),'Working Campus still routes settings through chat.');
-assert(fellowfareRuntime.includes('CommonweaveFamilyAILoaderV105?.openSettings'),'FellowFare compatibility call was unexpectedly removed before its chat-loader delegate was retained.');
+assert(workingPart.includes('CivweaveModelSettingsControllerV173')&&!workingPart.includes('CivweaveFamilyAILoaderV105.openSettings'),'Working Campus still routes settings through chat.');
+assert(fellowfareRuntime.includes('CivweaveFamilyAILoaderV105?.openSettings'),'FellowFare compatibility call was unexpectedly removed before its chat-loader delegate was retained.');
 
 for(const token of [
   "ADDITIONS_VERSION='v174-settings-single-owner-assets'",
@@ -119,18 +119,18 @@ for(const token of [
   'settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION'
 ])assert(worker.includes(token),`Installed-device cutover missing ${token}`);
 const extensionBlock=worker.slice(worker.indexOf('const EXTENSION_FILES=['),worker.indexOf('const BOUNDARY='));
-assert(!extensionBlock.includes('commonweave-settings-safe-open'),'The new extension cache still installs the retired settings interceptor.');
+assert(!extensionBlock.includes('civweave-settings-safe-open'),'The new extension cache still installs the retired settings interceptor.');
 
 for(const token of ['name="apiKey"','data-test-gemini','data-test-antigravity','data-package-state','data-benchmark'])assert(settingsRuntime.includes(token),`Unified settings lost ${token}`);
 
 console.log(JSON.stringify({
   ok:true,
   revision:'v174-settings-single-owner-assets',
-  settingsOwner:'CommonweaveModelSettingsControllerV173',
-  settingsRuntime:'CommonweaveModelSettingsV157',
+  settingsOwner:'CivweaveModelSettingsControllerV173',
+  settingsRuntime:'CivweaveModelSettingsV157',
   settingsEventOwnership:'controller-only',
-  chatOwner:'CommonweaveFamilyAILoaderV105',
-  settingsDependencies:['commonweave-model-runtime','unified-settings'],
+  chatOwner:'CivweaveFamilyAILoaderV105',
+  settingsDependencies:['civweave-model-runtime','unified-settings'],
   chatDependencies:['workspace','semantic-reflex','planner','assistant','core-loop'],
   miniLM:'dormant-until-explicit-benchmark-or-chat',
   entryPoints:pages.map(([name])=>name),

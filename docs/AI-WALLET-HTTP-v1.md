@@ -1,4 +1,4 @@
-# Commonweave hosted AI wallet HTTP boundary v1
+# Civweave hosted AI wallet HTTP boundary v1
 
 Status: foundation-only, disabled by default, no live payment processor or platform Gemini credential.
 
@@ -29,7 +29,7 @@ All wallet user routes require `Authorization: Bearer <CWAUTH1 session>`. A sess
 
 - `GET /api/ai/wallet`: returns the authenticated user's redacted wallet.
 - `POST /api/ai/wallet/capability`: issues a short-lived capability restricted to the session device, current plan, approved models, current wallet version, and request ceiling.
-- `POST /api/ai/wallet/reservations`: requires both the wallet session and `x-commonweave-ai-capability`; reserves the maximum possible request cost.
+- `POST /api/ai/wallet/reservations`: requires both the wallet session and `x-civweave-ai-capability`; reserves the maximum possible request cost.
 
 Reservations expire after fifteen minutes if the gateway never settles them. The expiry is longer than the current hosted-provider timeout and prevents abandoned holds from freezing a balance.
 
@@ -40,18 +40,18 @@ The client cannot credit, debit, cancel, or settle its own wallet.
 - `POST /api/ai/wallet/reservations/:id/settle`
 - `POST /api/ai/wallet/reservations/:id/cancel`
 
-Both require `x-commonweave-internal-secret`. Settlement is used after measured provider usage and cannot exceed the reserved maximum. Cancellation is reserved for the trusted gateway when preflight or provider execution fails before billable work completes.
+Both require `x-civweave-internal-secret`. Settlement is used after measured provider usage and cannot exceed the reserved maximum. Cancellation is reserved for the trusted gateway when preflight or provider execution fails before billable work completes.
 
 ## Canonical payment webhook
 
 `POST /api/ai/wallet/payments/webhook`
 
-This endpoint accepts Commonweave's canonical payment event, not a processor-specific Stripe, Google Play, or app-store payload. A future adapter must verify the processor's native signature and translate it into this schema.
+This endpoint accepts Civweave's canonical payment event, not a processor-specific Stripe, Google Play, or app-store payload. A future adapter must verify the processor's native signature and translate it into this schema.
 
 The raw body is signed with:
 
 ```text
-x-commonweave-payment-signature: t=<unix-seconds>,v1=<hex-hmac-sha256>
+x-civweave-payment-signature: t=<unix-seconds>,v1=<hex-hmac-sha256>
 HMAC input: <timestamp>.<raw request body>
 ```
 

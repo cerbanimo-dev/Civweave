@@ -9,7 +9,7 @@ const origin=`http://127.0.0.1:${PORT}`;
 const VERSION='1.0.30';
 const BUILD='1.0.30-offline-mesh-cabinet-runtime';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const dataDir=await mkdtemp(path.join(os.tmpdir(),'commonweave-v130-'));
+const dataDir=await mkdtemp(path.join(os.tmpdir(),'civweave-v130-'));
 const output=[];
 const child=spawn(process.execPath,['server-v130.mjs'],{cwd:root,env:{...process.env,HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});
 child.stdout.on('data',chunk=>output.push(chunk.toString()));child.stderr.on('data',chunk=>output.push(chunk.toString()));
@@ -24,26 +24,26 @@ try{
 
   const gatewayResponse=await fetch(`${origin}/`,{cache:'no-store'});const gateway=await gatewayResponse.text();
   assert(gatewayResponse.ok,`gateway returned ${gatewayResponse.status}`);
-  assert(gateway.includes('Install Commonweave'),'installer gateway missing');
+  assert(gateway.includes('Install Civweave'),'installer gateway missing');
   assert(gateway.includes('/install-v130.js'),'installer runtime missing');
-  assert(gateway.includes('/downloads/commonweave-pocket-campus.cwseed'),'campus seed link missing');
+  assert(gateway.includes('/downloads/civweave-pocket-campus.cwseed'),'campus seed link missing');
   assert(!gateway.includes('location.replace'),'installer gateway auto-redirects into the app');
 
   const manifest=await fetch(`${origin}/app/manifest.webmanifest`,{cache:'no-store'}).then(response=>response.json());
   assert(manifest.start_url.includes('/loom/'),'manifest start_url is not the local campus');
   assert(manifest.scope==='/','manifest does not cover the whole local campus');
-  assert(manifest.id==='/commonweave-local','manifest identity mismatch');
+  assert(manifest.id==='/civweave-local','manifest identity mismatch');
 
   const workerResponse=await fetch(`${origin}/service-worker.js`,{cache:'no-store'});const worker=await workerResponse.text();
   assert(workerResponse.ok,'root service worker failed');
   assert(workerResponse.headers.get('service-worker-allowed')==='/','root service worker scope header missing');
-  assert(worker.includes("commonweave-static-${VERSION}"),'versioned static cache missing');
+  assert(worker.includes("civweave-static-${VERSION}"),'versioned static cache missing');
   assert(worker.includes("'SKIP_WAITING'"),'explicit update activation missing');
-  assert(worker.includes('/app/assets/cabinets/commonweave.webp'),'cabinet assets are not precached');
+  assert(worker.includes('/app/assets/cabinets/civweave.webp'),'cabinet assets are not precached');
 
   const hubResponse=await fetch(`${origin}/loom/`,{cache:'no-store'});const hub=await hubResponse.text();
   assert(hubResponse.ok,`loom returned ${hubResponse.status}`);
-  assert(hubResponse.headers.get('x-commonweave-version')===VERSION,'loom version header missing');
+  assert(hubResponse.headers.get('x-civweave-version')===VERSION,'loom version header missing');
   assert(hub.includes('v1.0.30'),'visible v1.0.30 marker missing');
   assert(hub.includes('/app/v130-cabinet-launcher.js'),'mini cabinet launcher missing');
   assert(hub.includes('/app/pwa-v130.js'),'PWA bootstrap missing');
@@ -59,7 +59,7 @@ try{
   assert(launcher.includes('showModal'),'workstation is not opened as an overlay');
   assert(!launcher.includes('location.assign(workstationUrl'),'launcher still navigates away from the world');
 
-  const ledgerResponse=await fetch(`${origin}/app/shared/commonweave-parity-ledger.json`,{cache:'no-store'});const ledger=await ledgerResponse.json();
+  const ledgerResponse=await fetch(`${origin}/app/shared/civweave-parity-ledger.json`,{cache:'no-store'});const ledger=await ledgerResponse.json();
   assert(ledgerResponse.ok,'ledger failed');
   assert(ledger.version===VERSION,`ledger version ${ledger.version}`);
   assert(ledger.systems.length===5,'system count mismatch');
@@ -87,9 +87,9 @@ try{
   assert(baseCss.includes('contain:layout paint size'),'cabinet projection containment missing');
   assert(componentsCss.includes('overflow-wrap:anywhere'),'workstation overflow guard missing');
 
-  const seedStat=await stat(path.join(root,'public/downloads/commonweave-pocket-campus.cwseed'));
+  const seedStat=await stat(path.join(root,'public/downloads/civweave-pocket-campus.cwseed'));
   assert(seedStat.size>1024,'campus seed is empty');
-  const seed=await fetch(`${origin}/downloads/commonweave-pocket-campus.cwseed`,{cache:'no-store'});
+  const seed=await fetch(`${origin}/downloads/civweave-pocket-campus.cwseed`,{cache:'no-store'});
   assert(seed.status===200,`campus seed returned ${seed.status}`);
   await seed.body?.cancel();
 

@@ -15,7 +15,7 @@ Version three closes the gap between arranging an exchange and responsibly compl
 - Exchange Desk combines active agreements, due work, settlement readiness, and conversation.
 - Fellowfare agreement packs can be shared independently.
 - Full market backups now include agreements and ledger events.
-- `commonweave.exchange-bundle` export provides a versioned integration boundary.
+- `civweave.exchange-bundle` export provides a versioned integration boundary.
 - JSON Schema and bridge mapping documentation are included.
 - Existing v0.2 local data migrates automatically to the v0.3 storage model.
 
@@ -26,7 +26,7 @@ Version three closes the gap between arranging an exchange and responsibly compl
 - Evidence remains local unless the user exports a pack.
 - Repair history and contextual reviews remain tied to the exchange that produced them.
 - AI suggestions cannot alter the ledger without a human action.
-- Model API keys are removed from Fellowfare and Commonweave exports.
+- Model API keys are removed from Fellowfare and Civweave exports.
 
 ## Validation
 

@@ -24,8 +24,8 @@ new Function(boundary);
 for(const token of [
   "VERSION='183.0-settings-diagnostics-log-level'",
   "LOGGER_VERSION='1.0.7-settings-log-v183'",
-  "LEVEL_KEY='commonweave.log-level'",
-  "BUFFER_KEY='commonweave.log-buffer.v1'",
+  "LEVEL_KEY='civweave.log-level'",
+  "BUFFER_KEY='civweave.log-buffer.v1'",
   "off:0,error:1,warn:2,info:3,debug:4,trace:5",
   "new URLSearchParams(location.search).get('cwlog')",
   'MAX_ENTRIES=240',
@@ -46,7 +46,7 @@ for(const token of [
   "logger.debug('settings','open-first-paint'",
   "logger.error('settings','open-threw'",
   "result&&typeof result.then==='function'",
-  'globalThis.CommonweaveLogV183=logger'
+  'globalThis.CivweaveLogV183=logger'
 ])assert(delegation.includes(token),`Settings diagnostics missing ${token}`);
 
 for(const forbidden of [
@@ -65,15 +65,15 @@ assert(delegation.includes("event.stopImmediatePropagation()"),'Logged launcher 
 for(const token of [
   "EXTENSION_VERSION='working-campus-additions-v183-settings-diagnostics'",
   "SETTINGS_LOG_REVISION='settings-log-level-v183'",
-  "logLevelKey:'commonweave.log-level'",
-  "logBufferKey:'commonweave.log-buffer.v1'",
+  "logLevelKey:'civweave.log-level'",
+  "logBufferKey:'civweave.log-buffer.v1'",
   'persistentLogBuffer:true',
   'redactsSecrets:true'
 ])assert(additive.includes(token),`Additive package missing ${token}`);
 
 for(const token of [
   "ADDITIONS_REVISION='working-campus-additions-v183-settings-diagnostics'",
-  "AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r45'",
+  "AUTO_RESET_KEY='civweave.device-package.auto-reset.v106-r45'",
   '?cwlog=debug'
 ])assert(installer.includes(token),`Installer diagnostics delivery missing ${token}`);
 
@@ -86,8 +86,8 @@ for(const token of [
 for(const token of [
   "ADDITIONS_VERSION='v183-settings-diagnostics'",
   "SETTINGS_LOG_REVISION='v183-reusable-log-levels'",
-  "logLevelKey:'commonweave.log-level'",
-  "logBufferKey:'commonweave.log-buffer.v1'",
+  "logLevelKey:'civweave.log-level'",
+  "logBufferKey:'civweave.log-buffer.v1'",
   "diagnosticQueryParameter:'cwlog'"
 ])assert(boundary.includes(token),`Install boundary diagnostics marker missing ${token}`);
 

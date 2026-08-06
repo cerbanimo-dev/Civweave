@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 const VERSION='1.0.7-unified-settings-compat-v188';
-if(globalThis.CommonweaveUnifiedAISettingsCompatV188?.version===VERSION)return;
-function controller(){return globalThis.CommonweaveAISettingsCleanroomV188||globalThis.CommonweaveModelSettingsControllerV173||null;}
+if(globalThis.CivweaveUnifiedAISettingsCompatV188?.version===VERSION)return;
+function controller(){return globalThis.CivweaveAISettingsCleanroomV188||globalThis.CivweaveModelSettingsControllerV173||null;}
 const api=Object.freeze({
   version:VERSION,
   retiredRuntime:true,
@@ -15,6 +15,6 @@ const api=Object.freeze({
   readState(){return controller()?.readState?.()||{route:'deterministic',provider:'deterministic'};},
   renderInline(target){return controller()?.renderInline?.(target)||null;},
 });
-globalThis.CommonweaveUnifiedAISettingsCompatV188=api;
-if(!globalThis.CommonweaveUnifiedAISettingsV175)globalThis.CommonweaveUnifiedAISettingsV175=api;
+globalThis.CivweaveUnifiedAISettingsCompatV188=api;
+if(!globalThis.CivweaveUnifiedAISettingsV175)globalThis.CivweaveUnifiedAISettingsV175=api;
 })();

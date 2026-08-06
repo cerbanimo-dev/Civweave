@@ -24,9 +24,9 @@ assert(!/self\[['"]import['"]\s*\+\s*['"]Scripts['"]\]/.test(coreSource),'Retain
 assert(cleanupSource.includes("const REVISION='living-school-cleanroom-v218'"),'Living School cache retirement revision is missing.');
 
 let persisted=null;const self={};
-const context=vm.createContext({console,Date,Map,Set,Promise,Number,String,Array,Math,URL,self,VERSION:'1.0.7',OFFLINE_CACHE:'commonweave-offline-test',offlinePacket:()=>({}),offlineStatus:async()=>({}),downloadOfflinePackage:async()=>({}),writeOfflineMeta:async packet=>{persisted=packet;return packet},loadOfflineManifest:async()=>({seeds:[]}),readOfflineMeta:async()=>null,cacheOfflineAsset:async()=>{throw new Error('not used by metadata migration test')},discoverReferences:()=>[],TEXT_CONTENT:/text/,post:()=>{}});
+const context=vm.createContext({console,Date,Map,Set,Promise,Number,String,Array,Math,URL,self,VERSION:'1.0.7',OFFLINE_CACHE:'civweave-offline-test',offlinePacket:()=>({}),offlineStatus:async()=>({}),downloadOfflinePackage:async()=>({}),writeOfflineMeta:async packet=>{persisted=packet;return packet},loadOfflineManifest:async()=>({seeds:[]}),readOfflineMeta:async()=>null,cacheOfflineAsset:async()=>{throw new Error('not used by metadata migration test')},discoverReferences:()=>[],TEXT_CONTENT:/text/,post:()=>{}});
 vm.runInContext(overrideSource,context,{filename:'service-worker-offline-v211-override.js'});
-const api=self.CommonweaveOfflineCampusV211;
+const api=self.CivweaveOfflineCampusV211;
 assert(api?.revision==='offline-campus-seed-provenance-v211','v211 metadata migration API is unavailable.');
 const seeds=Array.from({length:11},(_,index)=>`/app/seed-${index}.html`),assets=Array.from({length:205},(_,index)=>`/app/discovered-${index}.js`),failedPaths=assets.slice(-19);
 const legacy={revision:'lightweight-shell-v208',ready:false,running:false,completed:205,total:205,assets,failed:failedPaths.map(pathname=>({pathname,message:`${pathname} is unavailable.`})),bytes:17*1024*1024};

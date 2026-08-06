@@ -16,8 +16,8 @@ let installPrompt = null;
 let toastTimer = null;
 let lastAiDraft = null;
 let exchangePreview = null;
-const commonweaveIntentRequests = new Set();
-let commonweaveCommunityRef = '';
+const civweaveIntentRequests = new Set();
+let civweaveCommunityRef = '';
 
 const NAV = [
   ['hall', 'Home Hall'],
@@ -299,8 +299,8 @@ let anarchadiaWorldEngine=null;
 function anarchadiaSceneImage(key){const asset=VISUAL_ASSETS[key];return matchMedia('(max-width: 760px) and (orientation: portrait)').matches?`assets/screens/${asset}-portrait.webp`:`assets/screens/${asset}-landscape.webp`;}
 function anarchadiaBounds(item){const values=matchMedia('(max-width: 760px) and (orientation: portrait)').matches?item.p:item.l;return {x:values[0],y:values[1],w:values[2],h:values[3]};}
 function ensureAnarchadiaWorldEngine(){
-  if(anarchadiaWorldEngine||!window.CommonweaveWorldEngine)return anarchadiaWorldEngine;
-  anarchadiaWorldEngine=new window.CommonweaveWorldEngine({
+  if(anarchadiaWorldEngine||!window.CivweaveWorldEngine)return anarchadiaWorldEngine;
+  anarchadiaWorldEngine=new window.CivweaveWorldEngine({
     storageKey:'anarchadia.world-state.v1',
     onNavigate:destination=>{location.hash=`#${destination}`;},
     onWorkspace:handoff=>{location.hash=handoff.workspace.startsWith('#')?handoff.workspace:`#${handoff.workspace}`;},
@@ -348,7 +348,7 @@ function visualScene(key, alt) {
       <a class="scene-tool" href="#hall" aria-label="Home Hall"><img src="../../ui-icons/home.svg" alt=""><span>Hall</span></a>
       <button class="scene-tool passport-tool" type="button" data-action="open-passport" aria-label="Passport"><img src="assets/passport/anarchadia-passport-blank.webp" alt=""><span>Passport</span></button>
       <button class="scene-tool" type="button" data-action="accessibility" aria-label="Accessibility"><img src="assets/icon-192.png" alt=""><span>Settings</span></button>
-      <button class="scene-tool" type="button" data-action="return-commonweave" aria-label="Return to Commonweave"><img src="../../ui-icons/back.svg" alt=""><span>Commonweave</span></button>
+      <button class="scene-tool" type="button" data-action="return-civweave" aria-label="Return to Civweave"><img src="../../ui-icons/back.svg" alt=""><span>Civweave</span></button>
     </nav>
     <div class="anarchadia-version-plaque"><img src="assets/icon-192.png" alt=""><span>v${APP_VERSION}</span></div>
   </section>`;
@@ -590,8 +590,8 @@ function governanceVoteControls(proposal) {
   const tally = governanceTally(proposal);
   const selected = proposal.localVote || proposal.governance?.myVote || '';
   const status = proposal.governance?.status || proposal.status || 'voting';
-  return `<div class="commonweave-vote">
-    <div class="tags"><span class="tag acid">Commonweave member vote</span><span class="tag">${esc(status)}</span><span class="tag cyan">${tally.approve} support</span><span class="tag rose">${tally.reject} concern</span><span class="tag">${tally.abstain} abstain</span></div>
+  return `<div class="civweave-vote">
+    <div class="tags"><span class="tag acid">Civweave member vote</span><span class="tag">${esc(status)}</span><span class="tag cyan">${tally.approve} support</span><span class="tag rose">${tally.reject} concern</span><span class="tag">${tally.abstain} abstain</span></div>
     <p class="disclaimer">One connected member may record one current choice. Numbers are operational signals, not proof of legitimacy or consent.</p>
     <div class="item-actions">
       <button class="btn small ${selected === 'approve' ? 'primary' : 'secondary'}" data-action="cast-governance-vote" data-id="${esc(proposal.id)}" data-choice="approve">Support plan</button>
@@ -886,7 +886,7 @@ async function handleImport(file) {
 let aiConfigMemory={provider:'deterministic'};
 try{
   sessionStorage.removeItem('anarchadia-ai-config');
-  const shared=window.CommonweaveModelRuntime?.readSharedConfig?.();
+  const shared=window.CivweaveModelRuntime?.readSharedConfig?.();
   if(shared){
     const providerMap={deterministic:'deterministic',hosted:'suite-bridge',gemini:'gemini','openai-compatible':'openai-compatible',ollama:'ollama',browser:'deterministic',manual:'deterministic'};
     aiConfigMemory={
@@ -896,7 +896,7 @@ try{
       baseUrl:shared.endpoint||'',
       apiKey:shared.apiKey||'',
       externalConsent:Boolean(shared.externalConsent),
-      commonweaveManaged:true
+      civweaveManaged:true
     };
   }
 }catch{}
@@ -979,18 +979,18 @@ function outcomeForm(proposal) {
     state.outcomes.unshift(record); closeModal(); await persist('outcome.declared',{outcomeId:record.id,proposalId:proposal.id});
     if(record.outcome==='adopted as declared'&&window.parent!==window){
       window.parent.postMessage({
-        type:'commonweave:handoff',
+        type:'civweave:handoff',
         source:'anarchadia',
         target:'cerbanimo',
         kind:'quest-board',
         title:`Community quest board · ${proposal.title}`,
         payload:{
-          schema:'commonweave.quest-board-handoff.v1',
+          schema:'civweave.quest-board-handoff.v1',
           proposal:{id:proposal.id,title:proposal.title,purpose:proposal.purpose},
           outcome:record,
           automaticEffect:false,
           manualReviewRequired:true,
-          authorityDisclaimer:'This is a community-declared outcome record. Commonweave does not certify ratification or authority.'
+          authorityDisclaimer:'This is a community-declared outcome record. Civweave does not certify ratification or authority.'
         }
       },location.origin);
     }
@@ -1328,23 +1328,23 @@ async function exitWipe() {
 
 async function castGovernanceVote(proposal, choice) {
   if (!proposal?.externalId || !['approve', 'reject', 'abstain'].includes(choice)) {
-    throw new Error('This proposal is not connected to a Commonweave vote.');
+    throw new Error('This proposal is not connected to a Civweave vote.');
   }
   proposal.localVote = choice;
   proposal.governance = {
     ...(proposal.governance || {}),
     myVote: choice,
     status: proposal.governance?.status || 'voting',
-    communityRef: proposal.governance?.communityRef || commonweaveCommunityRef
+    communityRef: proposal.governance?.communityRef || civweaveCommunityRef
   };
-  await persist('commonweave.vote-cast', {
+  await persist('civweave.vote-cast', {
     proposalId: proposal.id,
     externalId: proposal.externalId,
     choice
   });
   if (window.parent !== window) {
     window.parent.postMessage({
-      type: 'commonweave:governance-vote',
+      type: 'civweave:governance-vote',
       source: 'anarchadia',
       proposalId: proposal.externalId,
       communityRef: proposal.governance.communityRef,
@@ -1358,7 +1358,7 @@ async function handleAction(target) {
   const action=target.dataset.action;
   if(!action) return;
   if(action==='toggle-interface'){location.hash='#hall';render();return;}
-  if(action==='return-commonweave'){location.href='../../index.html?visual=1&build=1.0.20#square';return;}
+  if(action==='return-civweave'){location.href='../../index.html?visual=1&build=1.0.20#square';return;}
   if(action==='start-fixture'){state=syntheticFixture();ensureImprovementState();await saveWorkspace(state);location.hash='#hall';render();announce('Synthetic Lantern Commons loaded.');}
   else if(action==='start-blank') startBlank();
   else if(action==='open-import') document.querySelector('#import-file')?.click();
@@ -1438,8 +1438,8 @@ async function handleAction(target) {
 
 function passportSafeJson(key,fallback){try{return JSON.parse(localStorage.getItem(key)||'null')??fallback}catch{return fallback}}
 function passportIdentity(){
-  const vault=passportSafeJson('commonweave-identity-vault',{});
-  const pocket=passportSafeJson('commonweave-pocket-identity-v1',{});
+  const vault=passportSafeJson('civweave-identity-vault',{});
+  const pocket=passportSafeJson('civweave-pocket-identity-v1',{});
   const identity=vault?.identity||pocket?.identity||{};
   return {
     name:identity.displayName||identity.name||identity.alias||pocket?.profile?.name||'Local traveler',
@@ -1451,8 +1451,8 @@ function passportIdentity(){
   };
 }
 function passportIntentions(){
-  const all=passportSafeJson('commonweave.intentions.v2',[]);
-  const activeId=passportSafeJson('commonweave.active.intention.v1','')||localStorage.getItem('commonweave.active.intention.v1')||'';
+  const all=passportSafeJson('civweave.intentions.v2',[]);
+  const activeId=passportSafeJson('civweave.active.intention.v1','')||localStorage.getItem('civweave.active.intention.v1')||'';
   return (Array.isArray(all)?all:[]).filter(x=>!['complete','abandoned','cancelled'].includes(String(x.status||'').toLowerCase())).sort((a,b)=>(a.id===activeId?-1:0)-(b.id===activeId?-1:0)).slice(0,3);
 }
 function openAnarchadiaPassport(){
@@ -1475,7 +1475,7 @@ function openAnarchadiaPassport(){
     <div class="passport-field passport-next">${esc(nextStep?.system||'Choose next realm')}</div>
     <div class="passport-field passport-context">${esc(context)}</div>
   </div>
-  <div class="notice"><strong>Intention continuity is active.</strong> This passport reads the shared Commonweave intention ledger, so every realm can receive the same current purpose, decisions, next step, and journey context. Canonical records remain in their home realm.</div>`;
+  <div class="notice"><strong>Intention continuity is active.</strong> This passport reads the shared Civweave intention ledger, so every realm can receive the same current purpose, decisions, next step, and journey context. Canonical records remain in their home realm.</div>`;
   openModal('Anarchadia Passport · Intention Continuity',html,{wide:true});
 }
 
@@ -1523,13 +1523,13 @@ function saveAiConfig(){
   const config={provider:document.querySelector('#ai-provider').value,endpoint:document.querySelector('#ai-endpoint').value,model:document.querySelector('#ai-model').value,apiKey:document.querySelector('#ai-key').value,externalConsent:document.querySelector('#ai-consent').checked};
   if(config.provider==='gemini') config.baseUrl=config.endpoint||'https://generativelanguage.googleapis.com/v1beta';
   aiConfigMemory={...config};
-  if(window.CommonweaveModelRuntime){
+  if(window.CivweaveModelRuntime){
     const provider=config.provider==='suite-bridge'?'hosted':config.provider;
-    window.CommonweaveModelRuntime.saveSharedConfig({
+    window.CivweaveModelRuntime.saveSharedConfig({
       route:config.provider,provider,model:config.model,endpoint:config.endpoint||config.baseUrl||'',
       apiKey:config.apiKey,externalConsent:config.externalConsent,service:'anarchadia'
     });
-    if(config.apiKey)window.CommonweaveModelRuntime.saveSessionSecret(config,{apiKey:config.apiKey,externalConsent:config.externalConsent});
+    if(config.apiKey)window.CivweaveModelRuntime.saveSessionSecret(config,{apiKey:config.apiKey,externalConsent:config.externalConsent});
   }
   announce('AI configuration is active across this campus. Secrets remain in this tab.');
 }
@@ -1549,9 +1549,9 @@ window.addEventListener('hashchange',render);
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPrompt=event;render();});
 window.addEventListener('appinstalled',()=>{installPrompt=null;announce('Anarchadia installed for offline use.');render();});
 
-async function importCommonweaveProposal(payload={}) {
+async function importCivweaveProposal(payload={}) {
   if(!state) {
-    state=emptyState({communityName:'Candidate Commonweave community',mode:'candidate'});
+    state=emptyState({communityName:'Candidate Civweave community',mode:'candidate'});
   }
   const source=payload.plan||payload.quest||payload;
   const tasks=Array.isArray(source.tasks)?source.tasks:[];
@@ -1566,7 +1566,7 @@ async function importCommonweaveProposal(payload={}) {
       communityRef:String(payload.communityRef||payload.governance?.communityRef||existing.governance?.communityRef||'')
     };
     existing.status=existing.governance.status||existing.status;
-    await persist('commonweave.proposal-synced',{proposalId:existing.id,externalId});
+    await persist('civweave.proposal-synced',{proposalId:existing.id,externalId});
     if(!payload.silent)location.hash='#proposal-commons';
     return existing;
   }
@@ -1592,7 +1592,7 @@ async function importCommonweaveProposal(payload={}) {
     bindsNonparticipants:false,
     source:{
       system:'cerbanimo',
-      schema:String(payload.schema||'commonweave.cerbanimo-plan.v1'),
+      schema:String(payload.schema||'civweave.cerbanimo-plan.v1'),
       taskCount:tasks.length,
       automaticEffect:false,
       manualReviewRequired:true
@@ -1600,32 +1600,32 @@ async function importCommonweaveProposal(payload={}) {
     governance:{
       ...(payload.governance||{}),
       id:externalId||null,
-      communityRef:String(payload.communityRef||payload.governance?.communityRef||commonweaveCommunityRef||''),
+      communityRef:String(payload.communityRef||payload.governance?.communityRef||civweaveCommunityRef||''),
       status:String(payload.governance?.status||'voting'),
       tally:payload.governance?.tally||{approve:0,reject:0,abstain:0}
     },
     createdAt:nowIso()
   };
   state.proposals.unshift(record);
-  await persist('commonweave.proposal-imported',{proposalId:record.id,source:'cerbanimo'});
+  await persist('civweave.proposal-imported',{proposalId:record.id,source:'cerbanimo'});
   if(!payload.silent)location.hash='#proposal-commons';
   announce('Cerbanimo plan imported as a non-certifying proposal record.');
   return record;
 }
 
-async function applyCommonweaveGovernanceSync(message={}) {
-  commonweaveCommunityRef=String(message.communityRef||commonweaveCommunityRef||'').slice(0,120);
+async function applyCivweaveGovernanceSync(message={}) {
+  civweaveCommunityRef=String(message.communityRef||civweaveCommunityRef||'').slice(0,120);
   const plans=Array.isArray(message.plans)?message.plans.slice(0,100):[];
   for(const item of plans){
-    await importCommonweaveProposal({
+    await importCivweaveProposal({
       ...(item.payload||{}),
       id:String(item.id||''),
       title:item.title,
       summary:item.summary,
-      communityRef:commonweaveCommunityRef,
+      communityRef:civweaveCommunityRef,
       governance:{
         id:String(item.id||''),
-        communityRef:commonweaveCommunityRef,
+        communityRef:civweaveCommunityRef,
         status:String(item.status||'voting'),
         tally:item.tally||{approve:0,reject:0,abstain:0},
         myVote:item.myVote||''
@@ -1636,24 +1636,24 @@ async function applyCommonweaveGovernanceSync(message={}) {
   render();
 }
 
-async function receiveCommonweaveAiIntention(message={}) {
+async function receiveCivweaveAiIntention(message={}) {
   const requestId=String(message.requestId||'');
   const prompt=String(message.prompt||message.value||'').trim().slice(0,4000);
   const reply=(status,detail)=>{
     if(window.parent!==window)window.parent.postMessage({
-      type:'commonweave:ai-intention-receipt',
+      type:'civweave:ai-intention-receipt',
       service:'anarchadia',
       requestId,
       status,
       detail
     },location.origin);
   };
-  if(commonweaveIntentRequests.has(requestId)){
+  if(civweaveIntentRequests.has(requestId)){
     reply('accepted','Anarchadia already accepted this routed intention.');
     return;
   }
-  commonweaveIntentRequests.add(requestId);
-  sessionStorage.setItem('commonweave-anarchadia-intention',prompt);
+  civweaveIntentRequests.add(requestId);
+  sessionStorage.setItem('civweave-anarchadia-intention',prompt);
   location.hash='#ai';
   render();
   reply('accepted','Rook accepted the intention as an advisory, non-authoritative AI request in Anarchadia.');
@@ -1671,7 +1671,7 @@ async function receiveCommonweaveAiIntention(message={}) {
       }
     });
     render();
-    announce('Rook drafted the Commonweave intention. No governance record changed.');
+    announce('Rook drafted the Civweave intention. No governance record changed.');
     reply('delivered','Rook generated an advisory draft. It has no authority and was not applied to any record.');
   }catch(error){
     announce(`Routed AI request needs attention: ${error.message}`,'danger');
@@ -1684,7 +1684,7 @@ function isOllamaEndpoint(value='') {
   return endpoint.includes(':11434')||endpoint.includes('/api/chat')||endpoint.includes('/api/generate');
 }
 
-function applyCommonweaveContext(context={}) {
+function applyCivweaveContext(context={}) {
   const route=context.model?.route||'deterministic';
   const mapping={
     deterministic:{provider:'deterministic',model:'local-constitutional-linter',endpoint:''},
@@ -1698,44 +1698,44 @@ function applyCommonweaveContext(context={}) {
   const sharedModelKey=context.modelSettings?.sharedForThisSession
     ?String(context.modelSettings.apiKey||context.modelSettings.bearerToken||'').slice(0,500)
     :'';
-  commonweaveCommunityRef=String(context.governance?.communityRef||commonweaveCommunityRef||'').slice(0,120);
-  aiConfigMemory={...aiConfigMemory,...(mapping[route]||mapping.deterministic),...(sharedModelKey?{apiKey:sharedModelKey,externalConsent:true}:{}),commonweaveManaged:true};
-  document.documentElement.dataset.commonweave='connected';
+  civweaveCommunityRef=String(context.governance?.communityRef||civweaveCommunityRef||'').slice(0,120);
+  aiConfigMemory={...aiConfigMemory,...(mapping[route]||mapping.deterministic),...(sharedModelKey?{apiKey:sharedModelKey,externalConsent:true}:{}),civweaveManaged:true};
+  document.documentElement.dataset.civweave='connected';
   // The parent campus bar already exposes Rook and the shared-model status.
   // Remove the legacy floating suite badge so it never obscures room controls.
-  document.getElementById('commonweave-suite-badge')?.remove();
+  document.getElementById('civweave-suite-badge')?.remove();
 }
 
-window.__COMMONWEAVE_ANARCHADIA__={
+window.__CIVWEAVE_ANARCHADIA__={
   getState:()=>deepClone(state),
-  importProposal:importCommonweaveProposal,
-  applyContext:applyCommonweaveContext,
-  receiveAiIntention:receiveCommonweaveAiIntention
+  importProposal:importCivweaveProposal,
+  applyContext:applyCivweaveContext,
+  receiveAiIntention:receiveCivweaveAiIntention
 };
 
-function receiveCommonweaveNavigation(message){
-  if(String(message.contractVersion||'')!=='commonweave.navigation.v1'||String(message.sourceApplication||'')!=='commonweave')return;
+function receiveCivweaveNavigation(message){
+  if(String(message.contractVersion||'')!=='civweave.navigation.v1'||String(message.sourceApplication||'')!=='civweave')return;
   const object=String(message.object||''),id=String(message.id||'').slice(0,200),actionId=String(message.actionId||'').slice(0,200);
   let opened=false,detail='Anarchadia could not resolve that governance object.';
   if(object==='proposal'&&state){
     const proposal=state.proposals.find(item=>String(item.id)===id||String(item.externalId||'')===id);
-    if(proposal){sessionStorage.setItem('commonweave-anarchadia-selected-proposal',proposal.id);location.hash='#proposal-commons';render();opened=true;detail=`Opened proposal ${proposal.title||proposal.name||proposal.id}.`;}
+    if(proposal){sessionStorage.setItem('civweave-anarchadia-selected-proposal',proposal.id);location.hash='#proposal-commons';render();opened=true;detail=`Opened proposal ${proposal.title||proposal.name||proposal.id}.`;}
   }
-  if(window.parent!==window)window.parent.postMessage({type:'commonweave:navigation-receipt',contractVersion:'commonweave.navigation.v1',sourceApplication:'anarchadia',actionId,status:opened?'opened':'unavailable',detail},location.origin);
+  if(window.parent!==window)window.parent.postMessage({type:'civweave:navigation-receipt',contractVersion:'civweave.navigation.v1',sourceApplication:'anarchadia',actionId,status:opened?'opened':'unavailable',detail},location.origin);
 }
 
 window.addEventListener('message',event=>{
   if(event.origin!==location.origin||event.source!==window.parent||!event.data)return;
-  if(event.data.type==='commonweave:context')applyCommonweaveContext(event.data);
-  if(event.data.type==='commonweave:navigate-object')receiveCommonweaveNavigation(event.data);
-  if(event.data.type==='commonweave:governance-sync')applyCommonweaveGovernanceSync(event.data).catch(error=>announce(error.message,'danger'));
-  if(event.data.type==='commonweave:import-proposal')importCommonweaveProposal(event.data.payload||{}).catch(error=>announce(error.message,'danger'));
-  if(event.data.type==='commonweave:intention'){
+  if(event.data.type==='civweave:context')applyCivweaveContext(event.data);
+  if(event.data.type==='civweave:navigate-object')receiveCivweaveNavigation(event.data);
+  if(event.data.type==='civweave:governance-sync')applyCivweaveGovernanceSync(event.data).catch(error=>announce(error.message,'danger'));
+  if(event.data.type==='civweave:import-proposal')importCivweaveProposal(event.data.payload||{}).catch(error=>announce(error.message,'danger'));
+  if(event.data.type==='civweave:intention'){
     location.hash='#proposal-commons';
-    sessionStorage.setItem('commonweave-anarchadia-intention',String(event.data.value||''));
-    announce('Commonweave opened the proposal workspace. Nothing has been submitted.');
+    sessionStorage.setItem('civweave-anarchadia-intention',String(event.data.value||''));
+    announce('Civweave opened the proposal workspace. Nothing has been submitted.');
   }
-  if(event.data.type==='commonweave:ai-intention')receiveCommonweaveAiIntention(event.data);
+  if(event.data.type==='civweave:ai-intention')receiveCivweaveAiIntention(event.data);
 });
 
 async function init(){
@@ -1755,6 +1755,6 @@ async function init(){
     if(estimate&&estimate.percent>80)announce(`Local storage is ${estimate.percent}% full. Export a continuity bundle.`,'warn');
     if(navigator.storage?.persisted&&!(await navigator.storage.persisted())) requestPersistentStorage().catch(()=>false);
   }
-  if(window.parent!==window)window.parent.postMessage({type:'commonweave:ready',service:'anarchadia',version:APP_VERSION,communityRef:state?.meta?.communityRef||'',capabilities:['proposal-import','declared-outcome','quest-board-handoff','governance-vote','suite-model','ai-intention','object-navigation-v1']},location.origin);
+  if(window.parent!==window)window.parent.postMessage({type:'civweave:ready',service:'anarchadia',version:APP_VERSION,communityRef:state?.meta?.communityRef||'',capabilities:['proposal-import','declared-outcome','quest-board-handoff','governance-vote','suite-model','ai-intention','object-navigation-v1']},location.origin);
 }
 init();

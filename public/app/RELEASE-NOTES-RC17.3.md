@@ -1,4 +1,4 @@
-# Commonweave 1.0.0 RC17.3 · Anarchadia Civic Operations
+# Civweave 1.0.0 RC17.3 · Anarchadia Civic Operations
 
 RC17.3 audits the supplied Anarchadia room art for implied capabilities and promotes the most useful missing stations into durable local-first workflows. The illustrated hall remains the primary navigation layer, while the original Charter Forge remains available as the precision Workbench.
 
@@ -50,7 +50,7 @@ The new civic records participate in selective export and conflict-preserving im
 
 The current Anarchadia logo is now used consistently by:
 
-- Commonweave service cards and room headers
+- Civweave service cards and room headers
 - the standalone Anarchadia Workbench sidebar
 - the Rook advisory surface
 - standalone PWA icons and Apple touch icon

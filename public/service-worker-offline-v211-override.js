@@ -45,7 +45,7 @@ function v211Packet(meta = {}) {
     meta.downloaded ?? meta.successful ?? Math.max(0, attempted - failed.length)
   ) || 0));
   return {
-    type: 'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',
+    type: 'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
     mode: 'resumable-discovered-campus',
     version: VERSION,
     revision: V211_REVISION,
@@ -178,7 +178,7 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
       updatedAt: new Date().toISOString()
     });
     await writeOfflineMeta(packet);
-    post(event, { ...packet, type: running ? 'COMMONWEAVE_OFFLINE_PACKAGE_PROGRESS' : packet.type });
+    post(event, { ...packet, type: running ? 'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS' : packet.type });
     return packet;
   };
 
@@ -244,7 +244,7 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
   return progress(false, ready);
 };
 
-self.CommonweaveOfflineCampusV211 = {
+self.CivweaveOfflineCampusV211 = {
   revision: V211_REVISION,
   packet: v211Packet,
   migrateMeta: v211MigrateMeta

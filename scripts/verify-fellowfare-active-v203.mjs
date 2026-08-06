@@ -22,21 +22,21 @@ const [outerHtml,outerCss,parentTheme,mobileFlow,innerHtml,embedCss,themedNav,le
 const offlineManifest=JSON.parse(offlineManifestText);
 
 assert(outerHtml.includes('data-build="fellowfare-parent-mobile-v205"'),'Outer FellowFare cabinet did not rotate to the parent/mobile revision.');
-assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?commonweave=1&cabinet=1#market'),'Outer cabinet is not pointing at the active embedded FellowFare market.');
+assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1#market'),'Outer cabinet is not pointing at the active embedded FellowFare market.');
 assert(outerHtml.indexOf('/app/fellowfare-cabinet-v144.css')<outerHtml.indexOf('/app/fellowfare-parent-theme-v205.css'),'The complete FellowFare parent theme must load after the legacy cabinet stylesheet.');
 assert(outerHtml.indexOf('/app/fellowfare-cabinet-v144.js')<outerHtml.indexOf('/app/fellowfare-mobile-flow-v205.js'),'The mobile flow must layer on top of the working FellowFare cabinet runtime.');
 for(const token of ['--ffc-parchment-soft: #fff4d8','--ffc-blue: #1e4b64','color: var(--ffc-ink) !important','.ffc144-rook-log .ffc144-rook-message'])assert(outerCss.includes(token),`Outer active Rook contrast is missing ${token}`);
 
 for(const token of [
   '--cwf104-surface:var(--ff205-parchment)',
-  'html[data-commonweave-system="fellowfare"] .cwf104-head',
-  'html[data-commonweave-system="fellowfare"] .cwf104-tray',
-  'html[data-commonweave-system="fellowfare"] .ffc144-header',
-  'html[data-commonweave-system="fellowfare"] .ch142-control-band',
+  'html[data-civweave-system="fellowfare"] .cwf104-head',
+  'html[data-civweave-system="fellowfare"] .cwf104-tray',
+  'html[data-civweave-system="fellowfare"] .ffc144-header',
+  'html[data-civweave-system="fellowfare"] .ch142-control-band',
   'body.ffc144-mobile-flow .ffc144-frame',
   'background:linear-gradient(180deg,rgba(30,75,100,.98),rgba(20,47,63,.99))!important'
 ])assert(parentTheme.includes(token),`Complete FellowFare parent theme is missing ${token}`);
-for(const retired of ['#07131ded','#061019f7','#08151ef5'])assert(!parentTheme.includes(retired),`Commonweave default dark chrome leaked into the FellowFare parent override: ${retired}`);
+for(const retired of ['#07131ded','#061019f7','#08151ef5'])assert(!parentTheme.includes(retired),`Civweave default dark chrome leaked into the FellowFare parent override: ${retired}`);
 
 for(const token of [
   "const VERSION='fellowfare-mobile-flow-v205'",
@@ -77,7 +77,7 @@ for(const token of [
   '/app/fellowfare-parent-theme-v205.css',
   '/app/fellowfare-mobile-flow-v205.js'
 ])assert(outerHtml.includes(token),`FellowFare seed cannot discover ${token}`);
-assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?commonweave=1&cabinet=1#market'),'FellowFare seed cannot discover its embedded market.');
+assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1#market'),'FellowFare seed cannot discover its embedded market.');
 
 assert(critical.includes("const VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Compatibility coordinator lost the FellowFare parent/mobile or memory-bridge revision.');
 assert(critical.includes("const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Compatibility cache did not rotate for the mobile parent and memory bridge.');
@@ -90,7 +90,7 @@ for(const token of [
   '/app/themed-system-nav-v178.js',
   '/app/weaveling-memory-bridge-v191.js',
   'event.stopImmediatePropagation()',
-  'self.CommonweaveCriticalBootV205=api'
+  'self.CivweaveCriticalBootV205=api'
 ])assert(critical.includes(token),`Compatibility coordinator is missing ${token}`);
 
 for(const [name,source] of [['mobile flow',mobileFlow],['themed navigation',themedNav],['compatibility coordinator',critical],['active worker wrapper',workerWrapper],['retained worker core',workerCore]]){

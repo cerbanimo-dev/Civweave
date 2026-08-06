@@ -18,7 +18,7 @@ for(const token of [
   'multi-step planning',
   'research and source synthesis',
   'code generation',
-  'commonweave:gemini-task-tier-selected',
+  'civweave:gemini-task-tier-selected',
   'Automatic Gemini task routing',
 ])assert(routerSource.includes(token),`Gemini task router is missing ${token}`);
 
@@ -48,7 +48,7 @@ const runtime={
 const context={
   console,
   globalThis:null,
-  CommonweaveModelRuntime:runtime,
+  CivweaveModelRuntime:runtime,
   localStorage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value)},
   addEventListener:(name,fn)=>{const rows=listeners.get(name)||[];rows.push(fn);listeners.set(name,rows);},
   dispatchEvent:event=>{for(const fn of listeners.get(event.type)||[])fn(event);return true;},
@@ -61,7 +61,7 @@ context.globalThis=context;
 vm.createContext(context);
 vm.runInContext(routerSource,context,{filename:'gemini-task-tier-router-v213.js'});
 
-const routed=context.CommonweaveModelRuntime;
+const routed=context.CivweaveModelRuntime;
 assert.equal(routed.geminiTaskRouting.smallModel,'gemini-3.1-flash-lite');
 assert.equal(routed.geminiTaskRouting.complexModel,'gemini-3.5-flash-lite');
 assert.equal(profiles.interactive.model,'gemini-3.1-flash-lite');
@@ -71,7 +71,7 @@ await routed.generate({purpose:'chat',context:{userMessage:'Hello there',guide:{
 assert.equal(calls.at(-1).executionProfile,'interactive');
 assert.equal(calls.at(-1).config.model,'gemini-3.1-flash-lite');
 
-await routed.generate({purpose:'commonweave-guide-response-v141',context:{userMessage:'Make a project plan for a neighborhood tool library',guide:{system:'commonweave'}}});
+await routed.generate({purpose:'civweave-guide-response-v141',context:{userMessage:'Make a project plan for a neighborhood tool library',guide:{system:'civweave'}}});
 assert.equal(calls.at(-1).executionProfile,'agentic');
 assert.equal(calls.at(-1).config.model,'gemini-3.5-flash-lite');
 
@@ -79,10 +79,10 @@ await routed.generate({purpose:'source-discovery',requiresTools:true,prompt:'Res
 assert.equal(calls.at(-1).executionProfile,'agentic');
 assert.equal(calls.at(-1).config.model,'gemini-3.5-flash-lite');
 
-await routed.generate({purpose:'commonweave-guide-response-v141',context:{userMessage:'Generate the React code for a project dashboard',guide:{system:'cerbanimo'}}});
+await routed.generate({purpose:'civweave-guide-response-v141',context:{userMessage:'Generate the React code for a project dashboard',guide:{system:'cerbanimo'}}});
 assert.equal(calls.at(-1).config.model,'gemini-3.5-flash-lite');
 
-await routed.generate({purpose:'commonweave-guide-response-v141',context:{userMessage:'Write a patch for the voting interface',guide:{system:'anarchadia'}}});
+await routed.generate({purpose:'civweave-guide-response-v141',context:{userMessage:'Write a patch for the voting interface',guide:{system:'anarchadia'}}});
 assert.equal(calls.at(-1).config.model,'gemini-3.5-flash-lite');
 
 profiles.interactive={provider:'ollama',route:'ollama',model:'qwen',endpoint:'http://127.0.0.1:11434/api/chat'};

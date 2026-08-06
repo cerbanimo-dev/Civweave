@@ -1,6 +1,6 @@
 # Living School RC19.2 — First World Engine Room
 
-This release introduces the framework-neutral Commonweave World Engine and converts the Great Library from bespoke hotspot code into a data-driven world scene.
+This release introduces the framework-neutral Civweave World Engine and converts the Great Library from bespoke hotspot code into a data-driven world scene.
 
 ## World Engine foundation
 

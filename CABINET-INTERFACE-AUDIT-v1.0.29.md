@@ -23,7 +23,7 @@ Each system declares:
 
 The Lite renderer reconstructs the selected cabinet, projects its room and capability interface into the declared screen, and keeps room navigation, capability details, native forms, and working-source tools inside that boundary.
 
-## Native Commonweave flow
+## Native Civweave flow
 
 The cabinet workstation contains native local controls for:
 

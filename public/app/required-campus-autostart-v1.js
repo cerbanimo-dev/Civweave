@@ -35,7 +35,7 @@ function applyRequiredCampusLanguage() {
 }
 
 function latestStatus() {
-  return globalThis.CommonweaveOfflineCampusStatusV210?.last || null;
+  return globalThis.CivweaveOfflineCampusStatusV210?.last || null;
 }
 
 function campusIsReady() {

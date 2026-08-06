@@ -1,4 +1,4 @@
-# Commonweave RC19.1 — Cerbanimo Living World + Living School Visual Continuity
+# Civweave RC19.1 — Cerbanimo Living World + Living School Visual Continuity
 
 RC19.1 merges the RC19.0 Cerbanimo living-world polish line with the RC17.11 Living School visual-campus continuity line.
 

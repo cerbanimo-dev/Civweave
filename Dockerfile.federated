@@ -14,7 +14,7 @@ USER node
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=8787 \
-    COMMONWEAVE_APP_PORT=8788 \
+    CIVWEAVE_APP_PORT=8788 \
     DATA_DIR=/app/data
 
 VOLUME ["/app/data"]

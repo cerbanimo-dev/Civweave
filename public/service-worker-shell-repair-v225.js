@@ -73,7 +73,7 @@ self.addEventListener('message', event => {
   event.waitUntil(v225RepairShell().then(packet => post(event, packet)));
 });
 
-self.CommonweaveShellRepairV225 = Object.freeze({
+self.CivweaveShellRepairV225 = Object.freeze({
   revision: V225_REVISION,
   optionalAssets: [...V225_OPTIONAL_ASSETS],
   repair: v225RepairShell,

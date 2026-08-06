@@ -9,7 +9,7 @@ const origin=`http://127.0.0.1:${PORT}`;
 const VERSION='1.0.27';
 const BUILD='1.0.27-clean-slate-shell';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const dataDir=await mkdtemp(path.join(os.tmpdir(),'commonweave-v127-'));
+const dataDir=await mkdtemp(path.join(os.tmpdir(),'civweave-v127-'));
 const output=[];
 const child=spawn(process.execPath,['server-v127.mjs'],{cwd:root,env:{...process.env,HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});
 child.stdout.on('data',chunk=>output.push(chunk.toString()));child.stderr.on('data',chunk=>output.push(chunk.toString()));
@@ -24,13 +24,13 @@ try{
 
   const hubResponse=await fetch(`${origin}/loom/`,{cache:'no-store'});const hub=await hubResponse.text();
   assert(hubResponse.ok,`loom returned ${hubResponse.status}`);
-  assert(hubResponse.headers.get('x-commonweave-version')===VERSION,'loom version header missing');
+  assert(hubResponse.headers.get('x-civweave-version')===VERSION,'loom version header missing');
   assert(hub.includes('/app/loom-v127.js'),'clean hub runtime missing');
   assert(hub.includes('data-realm="living-school"'),'building routes missing');
   assert(!hub.includes('1.0.21'),'v1.0.21 marker survived in clean hub');
-  assert(!hub.includes('commonweave-pocket-campus.cwseed'),'seed download survived in clean hub');
+  assert(!hub.includes('civweave-pocket-campus.cwseed'),'seed download survived in clean hub');
   assert(!hub.includes('serviceWorker.register'),'clean hub registers a service worker');
-  assert(!hub.includes('commonweave-world.js'),'legacy world runtime survived in clean hub');
+  assert(!hub.includes('civweave-world.js'),'legacy world runtime survived in clean hub');
 
   const hubJs=await fetch(`${origin}/app/loom-v127.js`,{cache:'no-store'}).then(response=>response.text());
   assert(hubJs.includes('/loom/realm/'),'clean hub does not route buildings to isolated realms');
@@ -52,9 +52,9 @@ try{
     const response=await fetch(origin+legacy,{redirect:'manual',cache:'no-store'});assert(response.status===302,`${legacy} returned ${response.status}`);assert(response.headers.get('location')==='/loom/',`${legacy} redirected to ${response.headers.get('location')}`);
   }
 
-  const seed=await fetch(`${origin}/downloads/commonweave-pocket-campus.cwseed`,{redirect:'manual',cache:'no-store'});
+  const seed=await fetch(`${origin}/downloads/civweave-pocket-campus.cwseed`,{redirect:'manual',cache:'no-store'});
   assert(seed.status===204,`retired seed request returned ${seed.status}`);
-  assert(seed.headers.get('x-commonweave-seed-status')==='retired','retired seed marker missing');
+  assert(seed.headers.get('x-civweave-seed-status')==='retired','retired seed marker missing');
 
   await fetch(`${origin}/api/boot-log`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:'v127-smoke',detail:{source:'scripts/smoke-v127.mjs'}})});
   const logs=await fetch(`${origin}/api/boot-logs`,{cache:'no-store'}).then(response=>response.json());

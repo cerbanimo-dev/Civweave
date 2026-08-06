@@ -12,14 +12,14 @@ const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(ROOT, 'data'));
 const STATE_FILE = path.join(DATA_DIR, 'host-node-state.json');
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
-const HUB_NAME = clean(process.env.HUB_NAME || 'Commonweave Seed Node', 120);
+const HUB_NAME = clean(process.env.HUB_NAME || 'Civweave Seed Node', 120);
 const HUB_TOKEN = String(process.env.HUB_TOKEN || '').trim();
 const MAX_ENVELOPES = Math.max(100, Number(process.env.MAX_ENVELOPES || 5000));
-const KIT_FILE = path.join(MOBILE_DIR, 'Commonweave-Mobile-Install-Kit.zip');
+const KIT_FILE = path.join(MOBILE_DIR, 'Civweave-Mobile-Install-Kit.zip');
 const KIT_CHECKSUM_FILE = `${KIT_FILE}.sha256`;
 const STARTED_AT = new Date().toISOString();
-const APP_VERSION = '__COMMONWEAVE_APP_VERSION__';
-const VERSION = '__COMMONWEAVE_NODE_VERSION__';
+const APP_VERSION = '__CIVWEAVE_APP_VERSION__';
+const VERSION = '__CIVWEAVE_NODE_VERSION__';
 const clients = new Set();
 
 function now() { return new Date().toISOString(); }
@@ -31,7 +31,7 @@ function bearer(req) {
   return header.startsWith('Bearer ') ? header.slice(7).trim() : '';
 }
 function authorized(req) {
-  return !HUB_TOKEN || bearer(req) === HUB_TOKEN || req.headers['x-commonweave-hub-token'] === HUB_TOKEN;
+  return !HUB_TOKEN || bearer(req) === HUB_TOKEN || req.headers['x-civweave-hub-token'] === HUB_TOKEN;
 }
 function json(res, status, value, headers = {}) {
   const payload = Buffer.from(JSON.stringify(value));
@@ -99,7 +99,7 @@ try {
   const saved = JSON.parse(await fsp.readFile(STATE_FILE, 'utf8'));
   if (saved && typeof saved === 'object') Object.assign(state, saved);
 } catch (error) {
-  if (error.code !== 'ENOENT') console.warn('[Commonweave] State restore skipped:', error.message);
+  if (error.code !== 'ENOENT') console.warn('[Civweave] State restore skipped:', error.message);
 }
 let persistTimer = null;
 function persistSoon() {
@@ -111,7 +111,7 @@ function persistSoon() {
       await fsp.writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`);
       await fsp.rename(temporary, STATE_FILE);
     } catch (error) {
-      console.error('[Commonweave] State persistence failed:', error.message);
+      console.error('[Civweave] State persistence failed:', error.message);
     }
   }, 100);
 }
@@ -122,18 +122,18 @@ async function fileInfo(file) {
 }
 const kitInfo = await fileInfo(KIT_FILE);
 const releasePacket = base => ({
-  schema: 'commonweave.release.v1',
+  schema: 'civweave.release.v1',
   channel: 'stable',
   hostBuild: VERSION,
   appVersion: APP_VERSION,
   releasedAt: STARTED_AT,
-  installUrl: `${base}/downloads/Commonweave-Mobile-Install-Kit.zip`,
-  downloadUrl: `${base}/downloads/Commonweave-Mobile-Install-Kit.zip`,
+  installUrl: `${base}/downloads/Civweave-Mobile-Install-Kit.zip`,
+  downloadUrl: `${base}/downloads/Civweave-Mobile-Install-Kit.zip`,
   sha256: kitInfo.sha256,
   bytes: kitInfo.bytes,
   mandatory: false,
   localInstallRequired: true,
-  notes: 'Portable Commonweave mobile bootstrap and local-first node hub.'
+  notes: 'Portable Civweave mobile bootstrap and local-first node hub.'
 });
 
 function landingPage(base) {
@@ -142,9 +142,9 @@ function landingPage(base) {
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#07141f"><title>${html(HUB_NAME)}</title>
 <style>html,body{margin:0;min-height:100%;background:#07141f;color:#f4fffb;font-family:system-ui,sans-serif}body{display:grid;place-items:center;padding:24px}.card{width:min(720px,100%);box-sizing:border-box;border:1px solid #7ee5ff55;border-radius:24px;padding:28px;background:#0a1d29;box-shadow:0 24px 80px #0008}.eyebrow{letter-spacing:.12em;color:#93e8ff;font-size:.75rem}.actions{display:flex;flex-wrap:wrap;gap:12px;margin:22px 0}.actions a{padding:13px 18px;border-radius:12px;text-decoration:none;font-weight:800}.primary{background:#9af1dc;color:#06211b}.secondary{border:1px solid #9af1dc66;color:#eafff9}code{overflow-wrap:anywhere;color:#ffd978}small{color:#bcd4d7}</style>
-</head><body><main class="card"><div class="eyebrow">COMMONWEAVE PORTABLE NODE</div><h1>${html(HUB_NAME)}</h1>
-<p>This seed carries the compact mobile installer and a dependency-free node hub. The hub provides release metadata, live events, node registration, presence, and bounded relay envelopes. Commonweave data remains local-first.</p>
-<div class="actions"><a class="primary" href="/downloads/Commonweave-Mobile-Install-Kit.zip">Download mobile install kit</a><a class="secondary" href="/api/health">Node health</a></div>
+</head><body><main class="card"><div class="eyebrow">CIVWEAVE PORTABLE NODE</div><h1>${html(HUB_NAME)}</h1>
+<p>This seed carries the compact mobile installer and a dependency-free node hub. The hub provides release metadata, live events, node registration, presence, and bounded relay envelopes. Civweave data remains local-first.</p>
+<div class="actions"><a class="primary" href="/downloads/Civweave-Mobile-Install-Kit.zip">Download mobile install kit</a><a class="secondary" href="/api/health">Node health</a></div>
 <p><small>Kit SHA-256</small><br><code>${release.sha256}</code></p>
 <p><small>Start command</small><br><code>npm start</code></p></main></body></html>`;
 }
@@ -199,7 +199,7 @@ const server = http.createServer(async (req, res) => {
   try {
     if (pathname.startsWith('/api/')) {
       res.setHeader('access-control-allow-origin', '*');
-      res.setHeader('access-control-allow-headers', 'content-type, authorization, x-commonweave-hub-token, x-goog-api-key');
+      res.setHeader('access-control-allow-headers', 'content-type, authorization, x-civweave-hub-token, x-goog-api-key');
       res.setHeader('access-control-allow-methods', 'GET,POST,DELETE,OPTIONS');
       if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
     }
@@ -209,11 +209,11 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'content-length': page.length, 'cache-control': 'no-store' });
       return req.method === 'HEAD' ? res.end() : res.end(page);
     }
-    if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/downloads/Commonweave-Mobile-Install-Kit.zip') {
-      return sendFile(req, res, KIT_FILE, 'Commonweave-Mobile-Install-Kit.zip');
+    if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/downloads/Civweave-Mobile-Install-Kit.zip') {
+      return sendFile(req, res, KIT_FILE, 'Civweave-Mobile-Install-Kit.zip');
     }
-    if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/downloads/Commonweave-Mobile-Install-Kit.zip.sha256') {
-      return sendFile(req, res, KIT_CHECKSUM_FILE, 'Commonweave-Mobile-Install-Kit.zip.sha256');
+    if ((req.method === 'GET' || req.method === 'HEAD') && pathname === '/downloads/Civweave-Mobile-Install-Kit.zip.sha256') {
+      return sendFile(req, res, KIT_CHECKSUM_FILE, 'Civweave-Mobile-Install-Kit.zip.sha256');
     }
 
     const publicApi = ['/api/health', '/api/config', '/api/releases/current', '/api/events'];
@@ -238,13 +238,13 @@ const server = http.createServer(async (req, res) => {
     }
     if (pathname === '/api/config' && req.method === 'GET') {
       return json(res, 200, {
-        schema: 'commonweave.host-node-config.v1',
+        schema: 'civweave.host-node-config.v1',
         name: HUB_NAME,
         build: VERSION,
         baseUrl: origin(req),
         apiBase: `${origin(req)}/api`,
-        installUrl: `${origin(req)}/downloads/Commonweave-Mobile-Install-Kit.zip`,
-        downloadUrl: `${origin(req)}/downloads/Commonweave-Mobile-Install-Kit.zip`,
+        installUrl: `${origin(req)}/downloads/Civweave-Mobile-Install-Kit.zip`,
+        downloadUrl: `${origin(req)}/downloads/Civweave-Mobile-Install-Kit.zip`,
         release: releasePacket(origin(req)),
         tokenRequired: Boolean(HUB_TOKEN),
         features: ['mobile-kit-distribution', 'node-registration', 'heartbeat', 'relay-envelopes', 'presence', 'sse-events', 'release-broadcasts', 'gemini-agent-proxy']
@@ -273,8 +273,8 @@ const server = http.createServer(async (req, res) => {
       const prior = state.nodes[nodeId] || {};
       const node = {
         nodeId,
-        label: clean(input.label || prior.label || 'Commonweave node', 120),
-        system: clean(input.system || prior.system || 'commonweave', 60),
+        label: clean(input.label || prior.label || 'Civweave node', 120),
+        system: clean(input.system || prior.system || 'civweave', 60),
         capabilities: Array.isArray(input.capabilities) ? input.capabilities.map(value => clean(value, 80)).filter(Boolean).slice(0, 40) : (prior.capabilities || []),
         firstSeenAt: prior.firstSeenAt || timestamp,
         lastSeenAt: timestamp
@@ -302,7 +302,7 @@ const server = http.createServer(async (req, res) => {
         id: id('env'),
         from: clean(input.from, 180),
         to: clean(input.to || '*', 180),
-        kind: clean(input.kind || 'commonweave.object', 120),
+        kind: clean(input.kind || 'civweave.object', 120),
         payload: input.payload ?? null,
         createdAt: now(),
         acknowledgedBy: []
@@ -341,7 +341,7 @@ const server = http.createServer(async (req, res) => {
       if (!nodeId) return json(res, 400, { error: 'Presence nodeId is required.' });
       state.presence[nodeId] = {
         nodeId,
-        system: clean(input.system || 'commonweave', 60),
+        system: clean(input.system || 'civweave', 60),
         scene: clean(input.scene, 160),
         activity: clean(input.activity, 300),
         updatedAt: now()
@@ -358,12 +358,12 @@ const server = http.createServer(async (req, res) => {
 
     return json(res, 404, { error: 'Not found.' });
   } catch (error) {
-    console.error('[Commonweave] Request failed:', error);
+    console.error('[Civweave] Request failed:', error);
     return json(res, error.status || 500, { error: error.message || 'Request failed.' });
   }
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`[Commonweave] ${HUB_NAME} listening on http://${HOST}:${PORT}`);
-  console.log(`[Commonweave] Mobile kit ${kitInfo.bytes} bytes ${kitInfo.sha256}`);
+  console.log(`[Civweave] ${HUB_NAME} listening on http://${HOST}:${PORT}`);
+  console.log(`[Civweave] Mobile kit ${kitInfo.bytes} bytes ${kitInfo.sha256}`);
 });

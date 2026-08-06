@@ -7,7 +7,7 @@ for (const file of ['public/service-worker-core-v208.js', 'public/service-worker
   assert(source.includes("'/app/fullscreen-family-v104.html'"), file + ' does not protect the installed fullscreen URL');
   assert(source.includes("'/app/fullscreen-family-v104'"), file + ' does not protect the extensionless fullscreen URL');
   assert(source.includes('COMPAT_ENTRY_PATHS.has(url.pathname)'), file + ' does not route compatibility launches through stableAppEntry');
-  assert(source.includes("headers.set('x-commonweave-stable-entry', 'v219')"), file + ' lacks the v219 response marker');
+  assert(source.includes("headers.set('x-civweave-stable-entry', 'v219')"), file + ' lacks the v219 response marker');
   assert(!source.includes('LEGACY_ENTRY_PATHS.has(url.pathname)'), file + ' still uses the incomplete legacy-only set');
 }
 

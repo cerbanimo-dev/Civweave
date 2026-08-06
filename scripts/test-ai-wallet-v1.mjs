@@ -16,7 +16,7 @@ import {
 import { issueAiCapability, verifyAiCapability } from '../lib/ai-capability-token-v1.mjs';
 import { AiWalletService } from '../lib/ai-wallet-service-v1.mjs';
 
-const SECRET = 'commonweave-test-secret-that-is-longer-than-thirty-two-bytes';
+const SECRET = 'civweave-test-secret-that-is-longer-than-thirty-two-bytes';
 
 test('plan ladder begins at $5 and improves provider share in the midrange and high end', () => {
   assert.equal(AI_PLAN_CATALOG.thread.monthlyPriceCents, 500);
@@ -113,7 +113,7 @@ test('capabilities are short-lived, device-bound, model-bound, and cost-bound', 
 });
 
 test('file-backed wallet service persists credits idempotently and rotates wallet versions', async () => {
-  const directory = await mkdtemp(path.join(os.tmpdir(), 'commonweave-ai-wallet-'));
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'civweave-ai-wallet-'));
   const filePath = path.join(directory, 'wallets.json');
   const service = await new AiWalletService({ filePath, capabilitySecret: SECRET }).load();
   await service.credit({ userId: 'user:test', amountCents: 1800, sourceId: 'invoice:1', planId: 'weaver' });

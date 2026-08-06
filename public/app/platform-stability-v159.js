@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 const VERSION='1.0.4-platform-stability-v159';
-if(globalThis.CommonweavePlatformStabilityV159?.version===VERSION)return;
-const CHAT_STATE='commonweave.chat-dock.v159';
+if(globalThis.CivweavePlatformStabilityV159?.version===VERSION)return;
+const CHAT_STATE='civweave.chat-dock.v159';
 const nativeRaf=typeof globalThis.requestAnimationFrame==='function'?globalThis.requestAnimationFrame.bind(globalThis):(callback)=>setTimeout(()=>callback(performance.now()),16);
 const nativeCancel=typeof globalThis.cancelAnimationFrame==='function'?globalThis.cancelAnimationFrame.bind(globalThis):clearTimeout;
 if(!globalThis.requestAnimationFrame?.cw159Bound){const safe=callback=>nativeRaf(callback);safe.cw159Bound=true;globalThis.requestAnimationFrame=safe;globalThis.cancelAnimationFrame=id=>nativeCancel(id)}
@@ -41,7 +41,7 @@ function enhanceDialogs(){
   })
 }
 function wrapLoader(){
-  const api=globalThis.CommonweaveFamilyAILoaderV105;if(!api?.openChat||api.cw159Wrapped)return;
+  const api=globalThis.CivweaveFamilyAILoaderV105;if(!api?.openChat||api.cw159Wrapped)return;
   const original=api.openChat.bind(api);api.openChat=async(...args)=>{saveChatState(false);const result=await original(...args);enhanceBand(result||chatBand());setMinimized(false);return result};api.cw159Wrapped=true;
 }
 function patch(){ensureDock();enhanceBand(chatBand());enhanceDialogs();wrapLoader()}
@@ -49,11 +49,11 @@ function schedule(){if(scheduled)return;scheduled=true;globalThis.requestAnimati
 document.addEventListener('pointerdown',event=>{if(event.target.closest?.('[data-cwf-chat]'))saveChatState(false)},true);
 document.addEventListener('click',event=>{
   const minimize=event.target.closest?.('[data-cw159-chat-minimize]');if(minimize){event.preventDefault();event.stopImmediatePropagation();setMinimized(true);return}
-  const dock=event.target.closest?.('[data-cw159-chat-dock]');if(dock){event.preventDefault();event.stopImmediatePropagation();const band=chatBand();if(band){setMinimized(false);return}saveChatState(false);globalThis.CommonweaveFamilyAILoaderV105?.openChat?.('commonweave',{contextSystem:document.documentElement.dataset.commonweaveSystem||'commonweave'});return}
+  const dock=event.target.closest?.('[data-cw159-chat-dock]');if(dock){event.preventDefault();event.stopImmediatePropagation();const band=chatBand();if(band){setMinimized(false);return}saveChatState(false);globalThis.CivweaveFamilyAILoaderV105?.openChat?.('civweave',{contextSystem:document.documentElement.dataset.civweaveSystem||'civweave'});return}
   const close=event.target.closest?.('[data-cw159-close-dialog]');if(close){event.preventDefault();const dialog=close.closest('dialog');if(dialog?.open)dialog.close();return}
   if(event.target.closest?.('[data-cwf-chat]')){saveChatState(false);schedule()}
 },true);
 const observer=new MutationObserver(schedule);observer.observe(document.documentElement,{childList:true,subtree:true});
 document.readyState==='loading'?addEventListener('DOMContentLoaded',schedule,{once:true}):schedule();addEventListener('pageshow',schedule);
-globalThis.CommonweavePlatformStabilityV159={version:VERSION,setChatMinimized:setMinimized,patch:schedule};
+globalThis.CivweavePlatformStabilityV159={version:VERSION,setChatMinimized:setMinimized,patch:schedule};
 })();

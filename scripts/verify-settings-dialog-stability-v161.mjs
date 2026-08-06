@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const source=await readFile(path.join(root,'public/extensions/commonweave-device-credentials-v160.js'),'utf8');
+const source=await readFile(path.join(root,'public/extensions/civweave-device-credentials-v160.js'),'utf8');
 const boundary=await readFile(path.join(root,'public/app/install-boundary-v146.js'),'utf8');
 const worker=await readFile(path.join(root,'public/service-worker-v156.js'),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
@@ -97,8 +97,8 @@ const document={
 const windowRoot=new EventRoot();
 const localStorage=new MemoryStorage();
 const sessionStorage=new MemoryStorage({
-  'commonweave-model-session':JSON.stringify({apiKey:'stable-key'}),
-  'commonweave-model-secrets-v1':JSON.stringify({gemini:{apiKey:'stable-key'}})
+  'civweave-model-session':JSON.stringify({apiKey:'stable-key'}),
+  'civweave-model-secrets-v1':JSON.stringify({gemini:{apiKey:'stable-key'}})
 });
 const sandbox={
   console,setTimeout,clearTimeout,queueMicrotask:queueMicrotaskFake,
@@ -109,13 +109,13 @@ const sandbox={
 };
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
-vm.runInContext(source,sandbox,{filename:'commonweave-device-credentials-v160.js'});
+vm.runInContext(source,sandbox,{filename:'civweave-device-credentials-v160.js'});
 drain();
 assert(textWrites===2,`Initial settings patch performed ${textWrites} text rewrites instead of two bounded updates.`);
 assert(observerCallbacks===0,'The settings patch mutated the dialog while its observer was connected.');
 assert(form.button?.textContent==='Forget saved key','Forget saved key control was not installed.');
 
-sandbox.CommonweaveDeviceCredentialsV160.patchSettings();
+sandbox.CivweaveDeviceCredentialsV160.patchSettings();
 drain();
 assert(textWrites===2,'A second settings patch rewrote unchanged text and could retrigger the observer.');
 assert(observerCallbacks===0,'A second settings patch notified its own observer.');

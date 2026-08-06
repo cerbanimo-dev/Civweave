@@ -1,18 +1,18 @@
 (()=>{
 'use strict';
 
-const VERSION = '1.0.7';
-const ENTRY = '/app/?system=commonweave&installed=1';
+const VERSION = '1.0.17';
+const ENTRY = '/app/?system=civweave&installed=1';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
-const WORKER_SCRIPT_REVISION = 'compat-fullscreen-launch-v219';
+const WORKER_SCRIPT_REVISION = 'release-coherence-v226';
 const WORKER_URL = `/service-worker-v203.js?v=${WORKER_BUILD}&revision=${WORKER_SCRIPT_REVISION}`;
 const REGISTRATION_TIMEOUT_MS = 15000;
 const REGISTRATION_QUERY_TIMEOUT_MS = 6000;
 const ACTIVATION_TIMEOUT_MS = 45000;
-const WATCHDOG_RECOVERY_KEY = 'commonweave.shell.registration-watchdog.v208';
-const LEGACY_LIBRARY_CACHE = 'commonweave-knowledge-schools-v1';
+const WATCHDOG_RECOVERY_KEY = 'civweave.shell.registration-watchdog.v208';
+const LEGACY_LIBRARY_CACHE = 'civweave-knowledge-schools-v1';
 const LIBRARY_CACHE = 'cwknowledge-school-seeds-v2';
-const PROTECTED_CACHE_PREFIXES = ['cwknowledge-', 'cwupdate-', 'commonweave-model-'];
+const PROTECTED_CACHE_PREFIXES = ['cwknowledge-', 'cwupdate-', 'civweave-model-'];
 
 let installPrompt = null;
 let registration = null;
@@ -36,8 +36,8 @@ function withTimeout(promise, timeoutMs, message, phase = 'operation') {
       if (settled) return;
       settled = true;
       const error = new Error(message);
-      error.name = 'CommonweavePackageTimeoutError';
-      error.code = 'COMMONWEAVE_PACKAGE_TIMEOUT';
+      error.name = 'CivweavePackageTimeoutError';
+      error.code = 'CIVWEAVE_PACKAGE_TIMEOUT';
       error.phase = phase;
       reject(error);
     }, timeoutMs);
@@ -138,8 +138,8 @@ function guidance() {
   if (!button) return;
   if (standalone()) {
     button.disabled = false;
-    button.textContent = `Open Commonweave v${VERSION}`;
-    help(shellReady ? 'Commonweave is installed. The optional offline campus can be downloaded or refreshed separately.' : 'Checking the installed Commonweave shell…');
+    button.textContent = `Open Civweave v${VERSION}`;
+    help(shellReady ? 'Civweave is installed. The optional offline campus can be downloaded or refreshed separately.' : 'Checking the installed Civweave shell…');
     return;
   }
   if (shellError) {
@@ -155,10 +155,10 @@ function guidance() {
     return;
   }
   button.disabled = false;
-  button.textContent = `Install Commonweave v${VERSION}`;
-  if (installPrompt) help('The lightweight app shell is ready. Tap Install Commonweave now, then download the offline campus whenever useful.');
-  else if (isIOS()) help('The shell is ready. Tap Install Commonweave for Safari Add to Home Screen instructions.');
-  else help('The shell is ready. Tap Install Commonweave, or use your browser menu and choose Install app or Add to Home screen.');
+  button.textContent = `Install Civweave v${VERSION}`;
+  if (installPrompt) help('The lightweight app shell is ready. Tap Install Civweave now, then download the offline campus whenever useful.');
+  else if (isIOS()) help('The shell is ready. Tap Install Civweave for Safari Add to Home Screen instructions.');
+  else help('The shell is ready. Tap Install Civweave, or use your browser menu and choose Install app or Add to Home screen.');
 }
 
 function failShell(error) {
@@ -198,7 +198,7 @@ async function clearAppCaches() {
   await migrateKnowledgeCache();
   const keys = await caches.keys();
   await Promise.allSettled(keys.filter(key => !protectedCache(key) && (
-    key.startsWith('commonweave-') ||
+    key.startsWith('civweave-') ||
     key.startsWith('cwext-') ||
     key.startsWith('cwboot-') ||
     key.startsWith('cwimg-')
@@ -262,7 +262,7 @@ async function recoverStalledRegistration(error) {
   next.searchParams.set('registration-recovery', Date.now().toString(36));
   location.replace(next.href);
   const navigation = new Error(`Reloading after stalled ${phase}.`);
-  navigation.code = 'COMMONWEAVE_RECOVERY_RELOAD';
+  navigation.code = 'CIVWEAVE_RECOVERY_RELOAD';
   navigation.phase = phase;
   throw navigation;
 }
@@ -294,7 +294,7 @@ function streamWorker(worker, type, onPacket, idleTimeoutMs = 30000) {
       arm();
       const packet = event.data || {};
       onPacket?.(packet);
-      if (packet.type === 'COMMONWEAVE_OFFLINE_PACKAGE_STATUS' && !packet.running) {
+      if (packet.type === 'CIVWEAVE_OFFLINE_PACKAGE_STATUS' && !packet.running) {
         clearTimeout(timer);
         resolve(packet);
       }
@@ -325,19 +325,19 @@ async function waitForCurrentWorker(timeoutMs = ACTIVATION_TIMEOUT_MS) {
       return activeWorker;
     }
     const state = candidate?.state || registration?.active?.state || 'registering';
-    help(`Preparing the lightweight Commonweave shell · ${state}…`);
+    help(`Preparing the lightweight Civweave shell · ${state}…`);
     if (candidate?.state === 'redundant') throw new Error('The browser rejected the updated app shell.');
     await pause(180);
   }
   const error = new Error('App-shell activation timed out.');
-  error.code = 'COMMONWEAVE_PACKAGE_TIMEOUT';
+  error.code = 'CIVWEAVE_PACKAGE_TIMEOUT';
   error.phase = 'worker activation';
   throw error;
 }
 
 async function confirmShell(worker = activeWorker) {
   const status = await askWorker(worker, 'GET_DEVICE_PACKAGE_STATUS');
-  if (!status || status.type !== 'COMMONWEAVE_DEVICE_PACKAGE') throw new Error('The app worker did not return shell readiness.');
+  if (!status || status.type !== 'CIVWEAVE_DEVICE_PACKAGE') throw new Error('The app worker did not return shell readiness.');
   if (status.mode !== 'lightweight-shell') throw new Error('The browser activated an outdated full-package worker.');
   if (!status.ready) throw new Error(`${status.missing?.length || 'Some'} required shell files are missing.`);
   shellReady = true;
@@ -350,7 +350,7 @@ async function confirmShell(worker = activeWorker) {
 async function refreshOfflineStatus() {
   if (!activeWorker) return null;
   const status = await askWorker(activeWorker, 'GET_OFFLINE_PACKAGE_STATUS');
-  if (status?.type === 'COMMONWEAVE_OFFLINE_PACKAGE_STATUS') showOffline(status);
+  if (status?.type === 'CIVWEAVE_OFFLINE_PACKAGE_STATUS') showOffline(status);
   return status;
 }
 
@@ -396,11 +396,11 @@ async function prepareShell(options = {}) {
         registration = existing;
         exactCandidate.postMessage({ type: 'SKIP_WAITING' });
       } else {
-        help('Registering the lightweight Commonweave app shell…');
+        help('Registering the lightweight Civweave app shell…');
         registration = await withTimeout(
           navigator.serviceWorker.register(WORKER_URL, { scope: '/', updateViaCache: 'none' }),
           REGISTRATION_TIMEOUT_MS,
-          'Chrome did not finish registering the Commonweave app shell.',
+          'Chrome did not finish registering the Civweave app shell.',
           'service-worker registration'
         );
       }
@@ -410,7 +410,7 @@ async function prepareShell(options = {}) {
     await withTimeout(
       navigator.serviceWorker.ready,
       REGISTRATION_TIMEOUT_MS,
-      'Chrome did not finish activating the Commonweave app shell.',
+      'Chrome did not finish activating the Civweave app shell.',
       'service-worker readiness'
     );
     await confirmShell(worker);
@@ -418,13 +418,13 @@ async function prepareShell(options = {}) {
     await refreshOfflineStatus();
     if (options.manual) help('The app shell is current. Offline-campus files can be refreshed separately without blocking installation.');
   } catch (error) {
-    if (error?.code === 'COMMONWEAVE_PACKAGE_TIMEOUT') {
+    if (error?.code === 'CIVWEAVE_PACKAGE_TIMEOUT') {
       try {
         await recoverStalledRegistration(error);
       } catch (recoveryError) {
-        if (recoveryError?.code !== 'COMMONWEAVE_RECOVERY_RELOAD') failShell(recoveryError);
+        if (recoveryError?.code !== 'CIVWEAVE_RECOVERY_RELOAD') failShell(recoveryError);
       }
-    } else if (error?.code !== 'COMMONWEAVE_RECOVERY_RELOAD') {
+    } else if (error?.code !== 'CIVWEAVE_RECOVERY_RELOAD') {
       failShell(error);
     }
   } finally {
@@ -447,7 +447,7 @@ async function downloadOfflineCampus() {
   help('Downloading the optional campus pack. Individual failures are recorded and resumable; installation is already unblocked.');
   try {
     const status = await streamWorker(activeWorker, 'DOWNLOAD_OFFLINE_PACKAGE', packet => {
-      if (packet.type === 'COMMONWEAVE_OFFLINE_PACKAGE_PROGRESS' || packet.type === 'COMMONWEAVE_OFFLINE_PACKAGE_STATUS') showOffline(packet);
+      if (packet.type === 'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS' || packet.type === 'CIVWEAVE_OFFLINE_PACKAGE_STATUS') showOffline(packet);
     });
     showOffline(status);
     if (status.ready) help(`Offline campus ready: ${status.completed}/${status.total} files${status.bytes ? ` · ${formatBytes(status.bytes)}` : ''}.`);
@@ -476,7 +476,7 @@ async function installOrOpen() {
     installPrompt = null;
     await prompt.prompt();
     const choice = await prompt.userChoice.catch(() => null);
-    if (choice?.outcome === 'accepted') help('Commonweave installation accepted. The optional offline campus can continue downloading independently.');
+    if (choice?.outcome === 'accepted') help('Civweave installation accepted. The optional offline campus can continue downloading independently.');
     else guidance();
     return;
   }
@@ -492,7 +492,7 @@ addEventListener('beforeinstallprompt', event => {
 });
 addEventListener('appinstalled', () => {
   installPrompt = null;
-  help('Commonweave is installed. Download the optional offline campus whenever you want the full local copy.');
+  help('Civweave is installed. Download the optional offline campus whenever you want the full local copy.');
 });
 
 $('#install-app')?.addEventListener('click', installOrOpen);

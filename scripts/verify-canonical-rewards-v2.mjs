@@ -18,7 +18,7 @@ const context={console,crypto:webcrypto,TextEncoder,TextDecoder,indexedDB,Storag
 context.globalThis=context;vm.createContext(context);
 for(const path of sources)vm.runInContext(fs.readFileSync(new URL(path,ROOT),'utf8'),context,{filename:path});
 
-const api=context.CommonweaveCanonicalRewardsV2,receivers=context.CommonweaveRewardReceiversV2,surfaces=context.CommonweaveRewardSurfacesV2;
+const api=context.CivweaveCanonicalRewardsV2,receivers=context.CivweaveRewardReceiversV2,surfaces=context.CivweaveRewardSurfacesV2;
 assert.ok(api&&receivers&&surfaces,'reward runtimes did not boot');
 assert.equal(api.levelForXp(0),1);assert.equal(api.levelForXp(40),2);assert.equal(api.xpForLevel(3),160);
 const exact=api.normalizeRewardBundle({rewards:{skillXp:[{skillId:'Carpentry',amount:20},{skillId:'Planning',amount:5}],acorns:3,buttons:0,sourceKind:'learning'}});
@@ -33,7 +33,7 @@ const subsystemClaim={...api.readLedger(),totalXp:999999,skillXp:999999,acorns:9
 const passport=surfaces.calculatePassportFromLedger(subsystemClaim);
 assert.equal(passport.skillXp,100,'Passport trusted a subsystem total instead of summing ledger entries');
 assert.equal(passport.skills.carpentry.xp,95);assert.equal(passport.skills.planning.xp,5);assert.equal(passport.acorns,2);assert.equal(passport.buttons,5);
-assert.equal(passport.authority,'commonweave.reward-ledger.v2');assert.equal(passport.entries.length,7);
+assert.equal(passport.authority,'civweave.reward-ledger.v2');assert.equal(passport.entries.length,7);
 const tree=api.livingTreeProjection();assert.equal(tree.find(x=>x.skillId==='carpentry').level,2);
 const integrity=await api.verifyLedger();assert.equal(integrity.ok,true,JSON.stringify(integrity.errors));const tampered=api.readLedger();tampered.entries[0].amount=999;assert.equal((await api.verifyLedger(tampered)).ok,false,'tampering was not detected');
 console.log('canonical reward ledger v2 verified');

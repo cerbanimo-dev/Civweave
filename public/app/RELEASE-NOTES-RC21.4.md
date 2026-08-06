@@ -1,4 +1,4 @@
-# Commonweave 1.0.0 RC21.4 · Native Commit and Social World
+# Civweave 1.0.0 RC21.4 · Native Commit and Social World
 
 - Approved Quad handoffs now open destination-specific editable preview forms.
 - Commits create native Cerbanimo quests, Living School schools, FellowFare listings, and Anarchadia proposals.

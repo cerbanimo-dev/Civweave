@@ -12,7 +12,7 @@ const base='https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main';
 const soft=process.argv.includes('--soft');
 const checkOnly=process.argv.includes('--check');
 const verifyHashes=checkOnly||process.argv.includes('--verify-hash');
-const skip=process.env.COMMONWEAVE_SKIP_MODEL_PULL==='1';
+const skip=process.env.CIVWEAVE_SKIP_MODEL_PULL==='1';
 const files=[
   {name:'config.json',min:300},
   {name:'tokenizer_config.json',min:100},
@@ -32,7 +32,7 @@ async function valid(spec){
 async function download(spec){
   const target=path.join(modelRoot,spec.name),temp=`${target}.part`;
   await mkdir(path.dirname(target),{recursive:true});await rm(temp,{force:true});
-  const response=await fetch(`${base}/${spec.name}?download=true`,{redirect:'follow',headers:{'user-agent':'Commonweave/1.0.7-fixed-ort'}});
+  const response=await fetch(`${base}/${spec.name}?download=true`,{redirect:'follow',headers:{'user-agent':'Civweave/1.0.7-fixed-ort'}});
   if(!response.ok||!response.body)throw new Error(`${spec.name} returned ${response.status}`);
   await pipeline(Readable.fromWeb(response.body),createWriteStream(temp));
   const info=await stat(temp);
@@ -42,12 +42,12 @@ async function download(spec){
   await rename(temp,target);return info.size;
 }
 async function main(){
-  if(skip){console.log('[Commonweave] Fixed MiniLM model pull skipped by COMMONWEAVE_SKIP_MODEL_PULL.');return}
+  if(skip){console.log('[Civweave] Fixed MiniLM model pull skipped by CIVWEAVE_SKIP_MODEL_PULL.');return}
   const missing=[];for(const spec of files)if(!await valid(spec))missing.push(spec);
-  if(!missing.length){console.log(`[Commonweave] Fixed MiniLM ONNX package is ready${verifyHashes?' and hash-verified':' (fast size check)'}.`);return}
+  if(!missing.length){console.log(`[Civweave] Fixed MiniLM ONNX package is ready${verifyHashes?' and hash-verified':' (fast size check)'}.`);return}
   if(checkOnly)throw new Error(`Fixed MiniLM package incomplete: ${missing.map(item=>item.name).join(', ')}`);
-  console.log(`[Commonweave] Fetching ${missing.length} fixed MiniLM package file(s)…`);
-  for(const spec of missing){const bytes=await download(spec);console.log(`[Commonweave] Downloaded ${spec.name} (${bytes} bytes).`)}
-  console.log('[Commonweave] Fixed MiniLM ONNX package is ready.');
+  console.log(`[Civweave] Fetching ${missing.length} fixed MiniLM package file(s)…`);
+  for(const spec of missing){const bytes=await download(spec);console.log(`[Civweave] Downloaded ${spec.name} (${bytes} bytes).`)}
+  console.log('[Civweave] Fixed MiniLM ONNX package is ready.');
 }
-main().catch(error=>{if(soft){console.warn(`[Commonweave] Fixed MiniLM package remains optional: ${error.message}`);return}console.error(error);process.exitCode=1});
+main().catch(error=>{if(soft){console.warn(`[Civweave] Fixed MiniLM package remains optional: ${error.message}`);return}console.error(error);process.exitCode=1});

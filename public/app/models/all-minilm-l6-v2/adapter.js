@@ -1,7 +1,7 @@
 const ROOT='/app/models/all-minilm-l6-v2';
 const WORKER_URL=`${ROOT}/worker.js?v=device-package-r41-fixed-ort-wasm`;
-const MODEL_CACHE='commonweave-model-1.0.7-minilm-fixed-ort-r1';
-const CIRCUIT_KEY='commonweave.minilm.circuit.v2';
+const MODEL_CACHE='civweave-model-1.0.7-minilm-fixed-ort-r1';
+const CIRCUIT_KEY='civweave.minilm.circuit.v2';
 const FIXED_PROFILE=Object.freeze({device:'wasm',dtype:'q8',runtime:'onnxruntime-web'});
 const REQUIRED=[
   {url:`${ROOT}/config.json`,minBytes:300},
@@ -87,7 +87,7 @@ function stopWorker(error,{trip=false,profile=null}={}){
 export function shutdown(reason='MiniLM was stopped.'){stopWorker(Object.assign(new Error(reason),{code:'MINILM_STOPPED'}))}
 function activeWorker(){
   if(worker)return worker;
-  worker=new Worker(WORKER_URL,{type:'module',name:'commonweave-minilm-fixed-ort'});
+  worker=new Worker(WORKER_URL,{type:'module',name:'civweave-minilm-fixed-ort'});
   worker.addEventListener('message',event=>{
     const message=event.data||{};const task=pending.get(message.id);if(!task)return;
     if(message.type==='progress'){task.onProgress?.(message.progress||{});return}

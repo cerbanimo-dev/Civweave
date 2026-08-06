@@ -15,14 +15,14 @@ const version=versionText.trim();
 const semver=value=>value.split('.').map(Number);
 const atLeast=(value,floor)=>{const left=semver(value),right=semver(floor);return left.some((part,index)=>part>right[index]&&left.slice(0,index).every((prior,i)=>prior===right[i]))||left.every((part,index)=>part===right[index])};
 
-assert(atLeast(version,'1.0.11'),`Navigation redirect safety requires Commonweave 1.0.11 or newer; found ${version}.`);
+assert(atLeast(version,'1.0.11'),`Navigation redirect safety requires Civweave 1.0.11 or newer; found ${version}.`);
 assert(wrapper.includes(`/service-worker-navigation-safety-v224.js?v=${revision}`),'Active worker wrapper does not import navigation safety.');
 assert(wrapper.indexOf('/service-worker-navigation-safety-v224.js')>wrapper.indexOf('/service-worker-release-coherence-v220.js'),'Navigation safety must follow release coherence.');
 for(const token of [
   "redirect: 'follow'",
   "response.type === 'opaqueredirect'",
   "headers.delete('location')",
-  'x-commonweave-navigation-normalized',
+  'x-civweave-navigation-normalized',
   'follow-internally-normalize-before-respond-with'
 ])assert(source.includes(token),`Navigation safety is missing ${token}.`);
 assert.doesNotThrow(()=>new vm.Script(source,{filename:'service-worker-navigation-safety-v224.js'}));
@@ -37,7 +37,7 @@ function redirectedResponse(text){
   Object.defineProperty(response,'redirected',{value:true});
   return response;
 }
-function manualNavigation(url=`https://commonweave.invalid/app/working-campus-v156.html?installed=1&version=${version}`){
+function manualNavigation(url=`https://civweave.invalid/app/working-campus-v156.html?installed=1&version=${version}`){
   const request=new Request(url,{method:'GET',redirect:'manual'});
   Object.defineProperty(request,'mode',{value:'navigate'});
   return request;
@@ -47,7 +47,7 @@ const context={
   console,URL,Request,Response,Headers,
   self:{},
   RUNTIME_CACHE:`runtime-v${version}`,
-  cacheKey:pathname=>new Request(new URL(pathname,'https://commonweave.invalid').href),
+  cacheKey:pathname=>new Request(new URL(pathname,'https://civweave.invalid').href),
   withTimeout:promise=>Promise.resolve(promise),
   responseLooksValid:response=>Boolean(response?.ok),
   caches:{open:async()=>({put:async(_key,response)=>runtimeWrites.push(response)})},
@@ -64,7 +64,7 @@ assert.equal(lastFetchRequest.redirect,'follow','Internal navigation fetch did n
 assert.equal(fresh.redirected,false,'Fresh navigation response retained its redirected flag.');
 assert.equal(fresh.status,200);
 assert.equal(fresh.headers.get('location'),null,'Normalized navigation leaked a Location header.');
-assert.equal(fresh.headers.get('x-commonweave-navigation-normalized'),revision);
+assert.equal(fresh.headers.get('x-civweave-navigation-normalized'),revision);
 assert.equal(await fresh.text(),'fresh campus');
 assert.equal(runtimeWrites.length,1,'Normalized fresh navigation was not cached.');
 assert.equal(runtimeWrites[0].redirected,false,'Runtime cache stored a redirected response.');
@@ -79,7 +79,7 @@ cachedFactory=()=>({type:'opaqueredirect',status:0,headers:new Headers()});
 const rejected=await context.networkFirst(manualNavigation(),'/offline.html');
 assert.equal(rejected.status,503,'Unreadable opaqueredirect should be rejected instead of returned.');
 
-const stable=await context.stableAppEntry(manualNavigation('https://commonweave.invalid/app/installed-entry-v146.html'));
+const stable=await context.stableAppEntry(manualNavigation('https://civweave.invalid/app/installed-entry-v146.html'));
 assert.equal(stable.redirected,false,'Stable app entry retained its redirected flag.');
 assert.equal(stable.headers.get('location'),null);
 

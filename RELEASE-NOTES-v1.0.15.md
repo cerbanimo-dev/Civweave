@@ -1,4 +1,4 @@
-# Commonweave v1.0.15
+# Civweave v1.0.15
 
 ## Capability-based AI settings verification
 

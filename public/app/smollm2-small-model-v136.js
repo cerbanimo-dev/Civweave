@@ -3,24 +3,24 @@
 
 const MODEL_ID='HuggingFaceTB/SmolLM2-360M-Instruct';
 const MODEL_ADAPTER='/app/models/smollm2-360m-instruct/adapter.js';
-const CONTRACT_MARKER='COMMONWEAVE_SMALL_MODEL_CONTRACT_V1';
-const SYSTEMS=['commonweave','living-school','cerbanimo','fellowfare','anarchadia'];
+const CONTRACT_MARKER='CIVWEAVE_SMALL_MODEL_CONTRACT_V1';
+const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const MODES={
-  'commonweave':'Reflect',
+  'civweave':'Reflect',
   'living-school':'Learn',
   'cerbanimo':'Build',
   'fellowfare':'Acquire',
   'anarchadia':'Govern'
 };
 const LABELS={
-  'commonweave':'Commonweave',
+  'civweave':'Civweave',
   'living-school':'Living School',
   'cerbanimo':'Cerbanimo',
   'fellowfare':'FellowFare',
   'anarchadia':'Anarchadia'
 };
 const SYSTEM_ALIASES={
-  'commonweave':['commonweave','weaveling','reflect','reflection','orchestrate','orchestration','prioritize','priority','plan','planning','coordinate'],
+  'civweave':['civweave','weaveling','reflect','reflection','orchestrate','orchestration','prioritize','priority','plan','planning','coordinate'],
   'living-school':['living-school','living school','learn','learning','study','school','curriculum','lesson','research','practice','moss'],
   'cerbanimo':['cerbanimo','build','building','make','making','repair','implement','implementation','work','skilled labor','quest','kamiya'],
   'fellowfare':['fellowfare','fellow fare','acquire','acquisition','trade','exchange','resource','material','borrow','buy','sell','rook'],
@@ -207,22 +207,22 @@ function normalizeGuideResult(result,request){
   const context=findStructuredContext(request?.messages);
   const route=normalizeRoute(parsed);
   const contextSystem=canonicalSystem(context?.routingAnswer?.system);
-  const system=route.system||contextSystem||'commonweave';
+  const system=route.system||contextSystem||'civweave';
   const choiceNode=isObject(parsed?.choice)?parsed.choice:isObject(parsed?.route)?parsed.route:parsed;
   let answer=firstString(parsed,['answer','message','text','summary']);
   const schemaEcho=Boolean(parsed&&isSchemaEcho(parsed));
   if(schemaEcho&&!answer){
     answer=`The onboard model returned its response contract instead of a complete answer. The available routing context points to ${LABELS[system]}.`;
   }
-  if(!answer&&request?.purpose==='commonweave-guide-response'){
+  if(!answer&&request?.purpose==='civweave-guide-response'){
     answer=`The local model produced a partial response. The next useful route appears to be ${LABELS[system]}.`;
   }
-  if(request?.purpose!=='commonweave-guide-response'&&!request?.schema)return result;
+  if(request?.purpose!=='civweave-guide-response'&&!request?.schema)return result;
   const room=safeString(choiceNode?.room??choiceNode?.roomId??context?.routingAnswer?.room,200);
   const nextAction=route.nextAction||firstString(parsed,['nextAction','next_action','nextStep','step','recommendation'])||`Open ${LABELS[system]} and clarify the smallest visible next step.`;
   const assumptions=Array.isArray(parsed?.assumptions)?parsed.assumptions.map(item=>safeString(item,240)).filter(Boolean).slice(0,8):[];
-  if(schemaEcho)assumptions.unshift('The local model echoed the response contract; Commonweave recovered the route from supplied context.');
-  else if(route.path&&route.path!=='root')assumptions.unshift(`Commonweave normalized a nested local-model response from ${route.path}.`);
+  if(schemaEcho)assumptions.unshift('The local model echoed the response contract; Civweave recovered the route from supplied context.');
+  else if(route.path&&route.path!=='root')assumptions.unshift(`Civweave normalized a nested local-model response from ${route.path}.`);
   const normalized={
     answer:answer||`Route this request through ${LABELS[system]}.`,
     choice:{
@@ -243,13 +243,13 @@ function normalizeGuideResult(result,request){
       ...(result.structured||{}),
       requested:true,
       valid:true,
-      normalizedBy:'commonweave-small-model-contract-v1',
+      normalizedBy:'civweave-small-model-contract-v1',
       sourceShape:route.shape,
       schemaEchoRecovered:schemaEcho
     },
     diagnostics:[
       ...(Array.isArray(result.diagnostics)?result.diagnostics:[]),
-      schemaEcho?'Recovered a SmolLM2 schema echo using supplied Commonweave routing context.':'Normalized SmolLM2 output to the Commonweave guide envelope.'
+      schemaEcho?'Recovered a SmolLM2 schema echo using supplied Civweave routing context.':'Normalized SmolLM2 output to the Civweave guide envelope.'
     ]
   };
 }
@@ -257,10 +257,10 @@ function normalizeGuideResult(result,request){
 function guideContract(){
   return `${CONTRACT_MARKER}
 Do the user's task. Return data, not a description of a schema. Never output keys named "type", "properties", or "required".
-For a Commonweave guide response, output exactly one JSON object shaped like:
-{"answer":"one useful plain-language answer","choice":{"mode":"Reflect","system":"commonweave","room":"","nextAction":"one concrete next step"},"assumptions":[],"requiresConsent":false,"confidence":0.7}
+For a Civweave guide response, output exactly one JSON object shaped like:
+{"answer":"one useful plain-language answer","choice":{"mode":"Reflect","system":"civweave","room":"","nextAction":"one concrete next step"},"assumptions":[],"requiresConsent":false,"confidence":0.7}
 Allowed system and mode pairs:
-commonweave / Reflect = prioritize, coordinate, plan, or reflect
+civweave / Reflect = prioritize, coordinate, plan, or reflect
 living-school / Learn = learn, study, research, or practice
 cerbanimo / Build = make, repair, implement, or skilled work
 fellowfare / Acquire = obtain, trade, borrow, or exchange resources
@@ -274,7 +274,7 @@ Complete the requested task. When JSON is requested, output the JSON value itsel
 }
 
 function installRuntimeWrapper(){
-  const runtime=globalThis.CommonweaveModelRuntime;
+  const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate||runtime.__smallModelContractV136)return false;
   const previous=runtime.generate.bind(runtime);
   const wrapped=async request=>{
@@ -283,7 +283,7 @@ function installRuntimeWrapper(){
     const bundled=['bundled','packaged','smollm2','smollm2-360m-instruct','huggingfacetb/smollm2-360m-instruct'].includes(provider);
     let prepared=incoming;
     if(bundled){
-      const contract=incoming.purpose==='commonweave-guide-response'?guideContract():genericContract();
+      const contract=incoming.purpose==='civweave-guide-response'?guideContract():genericContract();
       const messages=Array.isArray(incoming.messages)?incoming.messages:[];
       if(!messages.some(item=>String(item?.content||'').includes(CONTRACT_MARKER))){
         prepared={...incoming,messages:[{role:'system',content:contract},...messages]};
@@ -292,7 +292,7 @@ function installRuntimeWrapper(){
     const result=await previous(prepared);
     return normalizeGuideResult(result,prepared);
   };
-  globalThis.CommonweaveModelRuntime={...runtime,generate:wrapped,__smallModelContractV136:true};
+  globalThis.CivweaveModelRuntime={...runtime,generate:wrapped,__smallModelContractV136:true};
   return true;
 }
 
@@ -303,12 +303,12 @@ async function adapter(){
 
 function benchmarkCases(){
   const routingPrompt=`${CONTRACT_MARKER}
-Route the request to exactly one Commonweave system.
+Route the request to exactly one Civweave system.
 Return one compact JSON object only:
 {"system":"living-school","mode":"Learn","nextAction":"short action"}
 Never output JSON Schema. Never add markdown.
 Use these exact pairs:
-commonweave / Reflect = prioritize, coordinate, plan, reflect
+civweave / Reflect = prioritize, coordinate, plan, reflect
 living-school / Learn = learn, study, research, practice
 cerbanimo / Build = make, repair, implement, skilled work
 fellowfare / Acquire = obtain, trade, borrow, exchange materials
@@ -322,7 +322,7 @@ Request: "Help our block vote on a shared rule." Answer: {"system":"anarchadia",
     ['build','Help me repair a broken community greenhouse vent and prove the work is complete.','cerbanimo'],
     ['exchange','We need twelve reclaimed boards and a way to borrow a trailer fairly.','fellowfare'],
     ['governance','Draft a proposal for how the neighborhood approves shared tool purchases.','anarchadia'],
-    ['reflection','I have too many projects and need to decide what deserves attention first.','commonweave']
+    ['reflection','I have too many projects and need to decide what deserves attention first.','civweave']
   ];
   return items.map(([id,text,system])=>({
     id,
@@ -341,7 +341,7 @@ function report(kind,detail={}){
       method:'POST',
       headers:{'content-type':'application/json'},
       body:JSON.stringify({
-        schema:'commonweave.boot-log.v1',
+        schema:'civweave.boot-log.v1',
         time:new Date().toISOString(),
         version:'1.0.30',
         build:'smollm2-contract-v136',
@@ -425,8 +425,8 @@ async function runBenchmark(form,button){
 }
 
 function installBenchmarkInterceptor(){
-  if(globalThis.__commonweaveSmolBenchmarkV136)return;
-  globalThis.__commonweaveSmolBenchmarkV136=true;
+  if(globalThis.__civweaveSmolBenchmarkV136)return;
+  globalThis.__civweaveSmolBenchmarkV136=true;
   document.addEventListener('click',event=>{
     const button=event.target.closest?.('[data-benchmark]');
     if(!button)return;
@@ -443,7 +443,7 @@ if(!installRuntimeWrapper()){
 }
 installBenchmarkInterceptor();
 
-globalThis.CommonweaveSmolLM2V136={
+globalThis.CivweaveSmolLM2V136={
   model:MODEL_ID,
   normalizeRoute,
   normalizeGuideResult,

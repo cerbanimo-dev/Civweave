@@ -1,10 +1,10 @@
 # RC21.2 · Actionable Quad
 
-Commonweave's central AI is now a bounded cross-system operator rather than a detached chat surface.
+Civweave's central AI is now a bounded cross-system operator rather than a detached chat surface.
 
 ## Added
 
-- Persistent Commonweave conversation thread across navigation and application handoffs.
+- Persistent Civweave conversation thread across navigation and application handoffs.
 - Live ecosystem search with record-aware open and explanation actions.
 - Journey creation from real Cerbanimo, Living School, FellowFare, and Anarchadia records.
 - Obligation-first guidance that surfaces urgent and review-stage work before suggesting new work.

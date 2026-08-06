@@ -1,4 +1,4 @@
-# Commonweave Host Node Hub v1.0.8
+# Civweave Host Node Hub v1.0.8
 
 - Repairs Anarchadia IndexedDB stores and first-run persistence.
 - Opens Anarchadia directly into its visual hall by default.

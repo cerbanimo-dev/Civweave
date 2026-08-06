@@ -1,4 +1,4 @@
-# Commonweave Agent Guide
+# Civweave Agent Guide
 
 This file applies to the entire repository. Every coding agent must read it before choosing an edit target.
 
@@ -14,7 +14,7 @@ Read its current `sites` map, identify the entry for the requested realm, and fo
 
 As of August 5, 2026, the dispatcher routes to:
 
-- Commonweave: `public/app/working-campus-v156.html`
+- Civweave: `public/app/working-campus-v156.html`
 - Living School: `public/app/cabinets/living-school/index.html`
 - Cerbanimo: `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1`
 - FellowFare: `public/app/fellowfare-cabinet-v144.html?cabinet=1`
@@ -47,7 +47,7 @@ Unless the task explicitly names one of these surfaces, do not implement current
 
 - `public/cabinet/`
 - root-level historical pages such as `public/cabinet-v*.html`
-- root-level historical pages such as `public/commonweave-v*.html`
+- root-level historical pages such as `public/civweave-v*.html`
 - `public/index_old.html` or files with backup, old, legacy, supplied, or similar archival naming
 - copied `www/app/` directories inside installer or release bundles
 - ZIP archives or extracted package mirrors
@@ -92,7 +92,7 @@ Many filenames are stable compatibility boundaries even when their internal buil
 
 `public/app/family-shell-v104.js` and `public/app/family-shell-v104.css` own shared cabinet chrome and family navigation. A realm-specific visual or behavior change should not be placed here unless it truly applies across the family.
 
-### Commonweave
+### Civweave
 
 Begin with `public/app/working-campus-v156.html`, then follow its loaded assets and runtimes.
 
@@ -157,7 +157,7 @@ When uncertain, stop wandering through similarly named rooms and return to the d
 
 ## Long-horizon agentic pipeline mode
 
-Use the decade pipeline when the task asks for the next best improvement, continuous improvement, roadmap execution, an agentic cycle, or another unscoped advancement of Commonweave. A specific user request remains more authoritative than the queue.
+Use the decade pipeline when the task asks for the next best improvement, continuous improvement, roadmap execution, an agentic cycle, or another unscoped advancement of Civweave. A specific user request remains more authoritative than the queue.
 
 Before choosing work in pipeline mode:
 

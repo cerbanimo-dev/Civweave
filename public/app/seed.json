@@ -1,20 +1,20 @@
 {
-  "schema": "commonweave.seed-manifest.v1",
+  "schema": "civweave.seed-manifest.v1",
   "version": "rc22.3.20-ai-uplift-v1.0.21",
   "generatedAt": "2026-07-31T23:59:30Z",
   "files": [
     {
-      "path": "COMMONWEAVE-LIVING-WORLD-NEXT.md",
+      "path": "CIVWEAVE-LIVING-WORLD-NEXT.md",
       "sha256": "2b2fd2c05704f7b0a04520ea068187c6f4a85850ab93ff2382b9e3d572845faf",
       "bytes": 1129
     },
     {
-      "path": "COMMONWEAVE-WORLD-ASSET-REPORT.json",
+      "path": "CIVWEAVE-WORLD-ASSET-REPORT.json",
       "sha256": "33024ad04a76887b10d4358dd694497443007c353db3389d7e9f2c988af40f9a",
       "bytes": 2170
     },
     {
-      "path": "COMMONWEAVE-WORLD-SCREEN-PLAN.md",
+      "path": "CIVWEAVE-WORLD-SCREEN-PLAN.md",
       "sha256": "470a34f5d3afa619009e70cd31c8e3b7aa81603d536c9ceed642cfef6f191ef8",
       "bytes": 902
     },
@@ -439,107 +439,107 @@
       "bytes": 691200
     },
     {
-      "path": "commonweave-actionable-quad.js",
+      "path": "civweave-actionable-quad.js",
       "sha256": "faa55f9c8357707bb32c54fbbe553ac3a5ffafa731837cf4e0fecc735bccabc2",
       "bytes": 7009
     },
     {
-      "path": "commonweave-adaptive-plan.js",
+      "path": "civweave-adaptive-plan.js",
       "sha256": "7357955642865f30e10e1ce52ba42e8244ab4736530026092700b2fd0a15deec",
       "bytes": 10706
     },
     {
-      "path": "commonweave-autonomous-steward.js",
+      "path": "civweave-autonomous-steward.js",
       "sha256": "0fc96eabf6f2896951f19280d7389a301f6e7d2b6c89467052d1d6ea535e2d69",
       "bytes": 11156
     },
     {
-      "path": "commonweave-handoff-consumer.js",
+      "path": "civweave-handoff-consumer.js",
       "sha256": "6c6e26efd4f7fb68274bd652f04c551aefec6887828200a1a7dc4f9fdc7e9745",
       "bytes": 17377
     },
     {
-      "path": "commonweave-intention-orchestrator.js",
+      "path": "civweave-intention-orchestrator.js",
       "sha256": "51a85522f0f10182b680a4c81fbf128416f72420cd83f9d9528f1440f8344f06",
       "bytes": 15619
     },
     {
-      "path": "commonweave-live-data.js",
+      "path": "civweave-live-data.js",
       "sha256": "54608c4758d4c26ef7ae309ae358af71b3c43d447de2a328f92d1ce3c007c205",
       "bytes": 7829
     },
     {
-      "path": "commonweave-living-world.js",
+      "path": "civweave-living-world.js",
       "sha256": "9ff1ca135484b1132954332358ac1b7a4787ce44a04fa01ebbad92ed8bfb60e8",
       "bytes": 14862
     },
     {
-      "path": "commonweave-merlin-chat.css",
+      "path": "civweave-merlin-chat.css",
       "sha256": "4454a6c83da5b76114304594750edc4fa928ab7f8b962fa2d323811c6d1e4ebc",
       "bytes": 6140
     },
     {
-      "path": "commonweave-model-steward.js",
+      "path": "civweave-model-steward.js",
       "sha256": "4fae6e3dea53a14667d932d5e93dd48e3e4c5f75e2dab54d741d699ffb494f4c",
       "bytes": 14987
     },
     {
-      "path": "commonweave-portfolio-dashboard.js",
+      "path": "civweave-portfolio-dashboard.js",
       "sha256": "42b9ca75224a18af9c076fa45ba5609b32a0a4bd51ac5bb1d29ca0b3293844e5",
       "bytes": 7172
     },
     {
-      "path": "commonweave-portfolio-intelligence.js",
+      "path": "civweave-portfolio-intelligence.js",
       "sha256": "2ecf24392f1fde7af5b3a2c5090c71add50561b67f79a411378358e2bfbf5ddf",
       "bytes": 14106
     },
     {
-      "path": "commonweave-predictive-dashboard.js",
+      "path": "civweave-predictive-dashboard.js",
       "sha256": "c179308e2d524e5bb098680417ac2a9ad80baca46729dbede524da0e62723f1e",
       "bytes": 5768
     },
     {
-      "path": "commonweave-predictive-portfolio.js",
+      "path": "civweave-predictive-portfolio.js",
       "sha256": "7d39c94818da899af7c6a1da26c9a6f29fbc374d5fac2e5dea14360511f54d1a",
       "bytes": 10898
     },
     {
-      "path": "commonweave-presence-ui.js",
+      "path": "civweave-presence-ui.js",
       "sha256": "ad59735854fff2f7f748f2f692a4ef91ad5ddca130688bcca3d2f26a71890bc0",
       "bytes": 5105
     },
     {
-      "path": "commonweave-presence.js",
+      "path": "civweave-presence.js",
       "sha256": "04bbb9f4144af8eab39338deed9761bff482ef2089fd8b6f191402a978728d34",
       "bytes": 2837
     },
     {
-      "path": "commonweave-steward-actions.js",
+      "path": "civweave-steward-actions.js",
       "sha256": "742c8d694757036331511990676de9acd5f939e9ad19602d4ae7688f2bef7916",
       "bytes": 10243
     },
     {
-      "path": "commonweave-steward-dashboard.js",
+      "path": "civweave-steward-dashboard.js",
       "sha256": "40f41171bd0c87069d1ed2f6fd1b0c5504e46b1aa97461df8ccb7d93bc9784ac",
       "bytes": 9439
     },
     {
-      "path": "commonweave-strategy-steward.js",
+      "path": "civweave-strategy-steward.js",
       "sha256": "f35ab9b27230887ab0f27dfb91ee89eb77db38a1b3c33fdad53ee09cb26aeee7",
       "bytes": 12603
     },
     {
-      "path": "commonweave-weaveling-steward.js",
+      "path": "civweave-weaveling-steward.js",
       "sha256": "3bd7e88336d020f0f716357be2ef1160c252441c6cd0d4a796b0512d1dfae7a4",
       "bytes": 15920
     },
     {
-      "path": "commonweave-world.css",
+      "path": "civweave-world.css",
       "sha256": "f83607676eda7d3e795054a435ae81fff36faa276bc9c1a77c519d7ec821fcda",
       "bytes": 27698
     },
     {
-      "path": "commonweave-world.js",
+      "path": "civweave-world.js",
       "sha256": "0e18fa30ed18b7dc348bc0daff404c5a6ff877b8a9d14b35aa5cf6a837c69018",
       "bytes": 67125
     },
@@ -564,107 +564,107 @@
       "bytes": 877614
     },
     {
-      "path": "logos/commonweave-adaptive-foreground-512.png",
+      "path": "logos/civweave-adaptive-foreground-512.png",
       "sha256": "03261e277307ac05588cb9c06b64d18b4b1b85eaca28052b91a5f2b4644c8593",
       "bytes": 335750
     },
     {
-      "path": "logos/commonweave-app-icon.png",
+      "path": "logos/civweave-app-icon.png",
       "sha256": "5386454137db187c57d01442a8208d5336beaf74349f95c45147571d1838e807",
       "bytes": 2755000
     },
     {
-      "path": "logos/commonweave-campus.webp",
+      "path": "logos/civweave-campus.webp",
       "sha256": "04e7b548fc7fa28476f1a272cb5292c36c008e32f23e13186317246140482a3e",
       "bytes": 437430
     },
     {
-      "path": "logos/commonweave-icon-1024.png",
+      "path": "logos/civweave-icon-1024.png",
       "sha256": "664c1e547550c497cc112fbf794249469450b8e5434a1b3911dde50206950c50",
       "bytes": 1559313
     },
     {
-      "path": "logos/commonweave-icon-128.png",
+      "path": "logos/civweave-icon-128.png",
       "sha256": "fd1808fecb3939b1af5cf8e1d8c402dcd7618be195b349d4947c74032191d4a3",
       "bytes": 35804
     },
     {
-      "path": "logos/commonweave-icon-144.png",
+      "path": "logos/civweave-icon-144.png",
       "sha256": "47ca7790e7d0ac07fac8c5fe068ad4013fe51f8c9d4616d05c931e9fc2c60e52",
       "bytes": 44424
     },
     {
-      "path": "logos/commonweave-icon-152.png",
+      "path": "logos/civweave-icon-152.png",
       "sha256": "ea1b7bced0e547f4ec088671740e0c91b807cbbd01a298aee7a8dcbda362b529",
       "bytes": 49051
     },
     {
-      "path": "logos/commonweave-icon-16.png",
+      "path": "logos/civweave-icon-16.png",
       "sha256": "c5634adf7ff93360fc6e5e92295a677308fe1e28d7e458f432553796cec8556d",
       "bytes": 965
     },
     {
-      "path": "logos/commonweave-icon-180.png",
+      "path": "logos/civweave-icon-180.png",
       "sha256": "1e7a9cfff8ce8b77bbe09f06293139da13371fb5602f073a2f7e127ff3660003",
       "bytes": 66179
     },
     {
-      "path": "logos/commonweave-icon-192.png",
+      "path": "logos/civweave-icon-192.png",
       "sha256": "7e780cfb67b3e0385a51688d54b644489ddbbc12246cf64ed4dafddcfda3d536",
       "bytes": 74618
     },
     {
-      "path": "logos/commonweave-icon-32.png",
+      "path": "logos/civweave-icon-32.png",
       "sha256": "87e4876a6c8e7591cccef152421dace3d280d28c9227a8f64e45072a7e4972c5",
       "bytes": 3147
     },
     {
-      "path": "logos/commonweave-icon-384.png",
+      "path": "logos/civweave-icon-384.png",
       "sha256": "a64d9e4278fd973355b66f5ba97f794ae7fbdd97bfa737968ca57afbfe32fe0e",
       "bytes": 268134
     },
     {
-      "path": "logos/commonweave-icon-48.png",
+      "path": "logos/civweave-icon-48.png",
       "sha256": "b289a1b254d55cf1d806a5d86d9285290efb1e6810be85de8aac8e23fbf976de",
       "bytes": 6321
     },
     {
-      "path": "logos/commonweave-icon-512.png",
+      "path": "logos/civweave-icon-512.png",
       "sha256": "685dddc768ea6882f49bd56b34f1f0e893e798e5dffa92c4d0e7c52889ff46d9",
       "bytes": 457666
     },
     {
-      "path": "logos/commonweave-icon-72.png",
+      "path": "logos/civweave-icon-72.png",
       "sha256": "ffddf648187344f52e82203a58fd4d29fa885765b773414248e6d0404879654f",
       "bytes": 12883
     },
     {
-      "path": "logos/commonweave-icon-96.png",
+      "path": "logos/civweave-icon-96.png",
       "sha256": "b3e86ad454e6b92f0df18b025c17ee7d0f6caca060ac19a91561f32579aa1ab6",
       "bytes": 21502
     },
     {
-      "path": "logos/commonweave-icon-maskable-192.png",
+      "path": "logos/civweave-icon-maskable-192.png",
       "sha256": "68a831d64f102184f72c2c82ac6f40d58b5efc67662c71277dae8945a831333f",
       "bytes": 65148
     },
     {
-      "path": "logos/commonweave-icon-maskable-512.png",
+      "path": "logos/civweave-icon-maskable-512.png",
       "sha256": "64f923a48b54ef9ce43a2c7f29463f21c91e7bbf2b277eafefd2ecebe6448a46",
       "bytes": 406206
     },
     {
-      "path": "logos/commonweave-title-screen.png",
+      "path": "logos/civweave-title-screen.png",
       "sha256": "060055e1ed7ee617ca284802e392311df539468f28434b6c5793eb7461ee36ad",
       "bytes": 469561
     },
     {
-      "path": "logos/commonweave-town-square.png",
+      "path": "logos/civweave-town-square.png",
       "sha256": "8c853208113199f70516ee69f367177cd3bece110a1d13f53506c51e58053f81",
       "bytes": 481314
     },
     {
-      "path": "logos/commonweave.webp",
+      "path": "logos/civweave.webp",
       "sha256": "0256b4635651777a54c12c95d77320c8816ae17abb5740e876014b14c4f344d3",
       "bytes": 1451990
     },
@@ -824,12 +824,12 @@
       "bytes": 499368
     },
     {
-      "path": "services/anarchadia/commonweave-handoff-consumer.js",
+      "path": "services/anarchadia/civweave-handoff-consumer.js",
       "sha256": "6c6e26efd4f7fb68274bd652f04c551aefec6887828200a1a7dc4f9fdc7e9745",
       "bytes": 17377
     },
     {
-      "path": "services/anarchadia/commonweave-presence.js",
+      "path": "services/anarchadia/civweave-presence.js",
       "sha256": "04bbb9f4144af8eab39338deed9761bff482ef2089fd8b6f191402a978728d34",
       "bytes": 2837
     },
@@ -904,7 +904,7 @@
       "bytes": 2639
     },
     {
-      "path": "services/anarchadia/shared/commonweave-model-runtime.js",
+      "path": "services/anarchadia/shared/civweave-model-runtime.js",
       "sha256": "24fbfa694aba9693d89f822a6880ba54f1f17b2129185b4ca2680391926d841f",
       "bytes": 59796
     },
@@ -1134,17 +1134,17 @@
       "bytes": 541878
     },
     {
-      "path": "services/cerbanimo/commonweave-bridge.js",
+      "path": "services/cerbanimo/civweave-bridge.js",
       "sha256": "69949ef0e1b7217891f16bcbfe95d894f9169f4ba0dc51bfb343cb3507d6a93d",
       "bytes": 57076
     },
     {
-      "path": "services/cerbanimo/commonweave-handoff-consumer.js",
+      "path": "services/cerbanimo/civweave-handoff-consumer.js",
       "sha256": "6c6e26efd4f7fb68274bd652f04c551aefec6887828200a1a7dc4f9fdc7e9745",
       "bytes": 17377
     },
     {
-      "path": "services/cerbanimo/commonweave-presence.js",
+      "path": "services/cerbanimo/civweave-presence.js",
       "sha256": "04bbb9f4144af8eab39338deed9761bff482ef2089fd8b6f191402a978728d34",
       "bytes": 2837
     },
@@ -1199,7 +1199,7 @@
       "bytes": 3956
     },
     {
-      "path": "services/cerbanimo/shared/commonweave-model-runtime.js",
+      "path": "services/cerbanimo/shared/civweave-model-runtime.js",
       "sha256": "24fbfa694aba9693d89f822a6880ba54f1f17b2129185b4ca2680391926d841f",
       "bytes": 59796
     },
@@ -1219,7 +1219,7 @@
       "bytes": 927
     },
     {
-      "path": "services/fellowfare/COMMONWEAVE_BRIDGE.md",
+      "path": "services/fellowfare/CIVWEAVE_BRIDGE.md",
       "sha256": "2e401d5140243d4298ad7bcda252042febdd770203e81f2d265c41ba0dd4cc3c",
       "bytes": 2594
     },
@@ -1399,12 +1399,12 @@
       "bytes": 594578
     },
     {
-      "path": "services/fellowfare/commonweave-handoff-consumer.js",
+      "path": "services/fellowfare/civweave-handoff-consumer.js",
       "sha256": "6c6e26efd4f7fb68274bd652f04c551aefec6887828200a1a7dc4f9fdc7e9745",
       "bytes": 17377
     },
     {
-      "path": "services/fellowfare/commonweave-presence.js",
+      "path": "services/fellowfare/civweave-presence.js",
       "sha256": "04bbb9f4144af8eab39338deed9761bff482ef2089fd8b6f191402a978728d34",
       "bytes": 2837
     },
@@ -1429,7 +1429,7 @@
       "bytes": 487
     },
     {
-      "path": "services/fellowfare/schemas/commonweave-exchange-bundle.schema.json",
+      "path": "services/fellowfare/schemas/civweave-exchange-bundle.schema.json",
       "sha256": "7c34b6a83abe3c6a7e91c5160175782726e942b29e6b0bf08609b7775469225c",
       "bytes": 7401
     },
@@ -1439,7 +1439,7 @@
       "bytes": 8068
     },
     {
-      "path": "services/fellowfare/shared/commonweave-model-runtime.js",
+      "path": "services/fellowfare/shared/civweave-model-runtime.js",
       "sha256": "24fbfa694aba9693d89f822a6880ba54f1f17b2129185b4ca2680391926d841f",
       "bytes": 59796
     },
@@ -1554,12 +1554,12 @@
       "bytes": 7844
     },
     {
-      "path": "services/living-school/commonweave-handoff-consumer.js",
+      "path": "services/living-school/civweave-handoff-consumer.js",
       "sha256": "6c6e26efd4f7fb68274bd652f04c551aefec6887828200a1a7dc4f9fdc7e9745",
       "bytes": 17377
     },
     {
-      "path": "services/living-school/commonweave-presence.js",
+      "path": "services/living-school/civweave-presence.js",
       "sha256": "04bbb9f4144af8eab39338deed9761bff482ef2089fd8b6f191402a978728d34",
       "bytes": 2837
     },
@@ -1629,12 +1629,12 @@
       "bytes": 3959
     },
     {
-      "path": "services/living-school/shared/commonweave-model-runtime.js",
+      "path": "services/living-school/shared/civweave-model-runtime.js",
       "sha256": "24fbfa694aba9693d89f822a6880ba54f1f17b2129185b4ca2680391926d841f",
       "bytes": 59796
     },
     {
-      "path": "services/living-school/shared/commonweave-reward-weave.js",
+      "path": "services/living-school/shared/civweave-reward-weave.js",
       "sha256": "fcef2a98459ef8203a2fff8b7f9da265907b0fdfbcac28826107a853ad881ae9",
       "bytes": 51999
     },
@@ -1889,27 +1889,27 @@
       "bytes": 10473
     },
     {
-      "path": "shared/commonweave-identity-sync.js",
+      "path": "shared/civweave-identity-sync.js",
       "sha256": "9e47b71bf49edaacac3805444974bbe8bc72d34256f080347dec667b9a655b75",
       "bytes": 2612
     },
     {
-      "path": "shared/commonweave-merlin-chat.js",
+      "path": "shared/civweave-merlin-chat.js",
       "sha256": "655dfae866fe1659d94e95cc9c994c8ca56811f55bc494229bbc785cdb0f6719",
       "bytes": 17583
     },
     {
-      "path": "shared/commonweave-model-runtime.js",
+      "path": "shared/civweave-model-runtime.js",
       "sha256": "e9160c192211ceee52ee2a68b4a73e2a9704a9d64032a21b62d71a39103287c8",
       "bytes": 61725
     },
     {
-      "path": "shared/commonweave-operations.js",
+      "path": "shared/civweave-operations.js",
       "sha256": "735b481815e2f66fcb235d5995164c38aea5cb3a433475a529b6a0111535a447",
       "bytes": 18839
     },
     {
-      "path": "shared/commonweave-reward-weave.js",
+      "path": "shared/civweave-reward-weave.js",
       "sha256": "fcef2a98459ef8203a2fff8b7f9da265907b0fdfbcac28826107a853ad881ae9",
       "bytes": 51999
     },
@@ -1924,7 +1924,7 @@
       "bytes": 19447
     },
     {
-      "path": "tools/commonweave_peer_relay.py",
+      "path": "tools/civweave_peer_relay.py",
       "sha256": "d3265eea5735bd40497b5d25b6584937683306cca261b1d58aa29d39e1cfb2fc",
       "bytes": 6832
     },

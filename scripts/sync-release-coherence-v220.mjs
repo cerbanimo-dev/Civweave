@@ -39,13 +39,13 @@ await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const REVISION='[^']+';/,`const REVISION='${boundaryRevision}';`,'install-boundary revision');
   source=replaceRequired(source,/const ADDITIONS_VERSION='[^']+';/,`const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`,'install-boundary additions revision');
   for(const token of [
-    "['/app/working-campus-v156.html','commonweave']",
+    "['/app/working-campus-v156.html','civweave']",
     "['/app/cabinets/living-school/index.html','living-school']",
     "['/app/realm-console-v140.html','cerbanimo']",
     "['/app/fellowfare-cabinet-v144.html','fellowfare']",
     "['/app/anarchadia-console-v139.html','anarchadia']",
-    "root.dataset.commonweaveCanonicalCore='only'",
-    "canonicalPolicy:'five-system-first-class-routes-commonweave-core-only'",
+    "root.dataset.civweaveCanonicalCore='only'",
+    "canonicalPolicy:'five-system-first-class-routes-civweave-core-only'",
     'canonicalSystemCount:5',
     'canonicalAutoScripts:0'
   ])if(!source.includes(token))throw new Error(`Five-system install boundary is missing ${token}.`);
@@ -81,17 +81,17 @@ await patch('public/app/persistent-guide-viewport-v216.js',source=>{
 });
 await patch('public/app/persistent-guide-chat-v215.js',source=>{
   source=source.replace('.cwp215-legacy-retired{display:none!important}.cwp215-working-campus-retired>.main{grid-template-columns:minmax(0,1fr)!important}.cwp215-working-campus-retired .main>.guide{display:none!important}','.cwp215-legacy-retired{display:none!important}');
-  source=source.replace("  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>form.dataset.commonweaveLegacyChatRetired='v215');","  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>{if(form.id==='weaveling-chat-form'&&form.closest('.app')){delete form.dataset.commonweaveLegacyChatRetired;return}form.dataset.commonweaveLegacyChatRetired='v215'});");
+  source=source.replace("  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>form.dataset.civweaveLegacyChatRetired='v215');","  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>{if(form.id==='weaveling-chat-form'&&form.closest('.app')){delete form.dataset.civweaveLegacyChatRetired;return}form.dataset.civweaveLegacyChatRetired='v215'});");
   source=source.replace("  const working=document.querySelector('.main>.guide #weaveling-chat-form')?.closest('.app');\n  if(working)working.classList.add('cwp215-working-campus-retired');","  const working=document.querySelector('.main>.guide #weaveling-chat-form')?.closest('.app');\n  if(working)working.classList.remove('cwp215-working-campus-retired');");
   source=source.replace("  if(!(form instanceof HTMLFormElement)||form.closest(`#${ROOT_ID}`)||!form.matches(LEGACY_FORM_SELECTOR))return;","  if(!(form instanceof HTMLFormElement)||form.closest(`#${ROOT_ID}`)||!form.matches(LEGACY_FORM_SELECTOR)||(form.id==='weaveling-chat-form'&&form.closest('.app')))return;");
   return source;
 });
-await patch('public/extensions/commonweave-additions-v156.js',source=>{
-  if(!source.includes('let commonweaveAdditionsNavigating=false;'))source=source.replace("let readyPromise=null,activeTab='mesh',noticeTimer=null;","let readyPromise=null,activeTab='mesh',noticeTimer=null;\nlet commonweaveAdditionsNavigating=false;\naddEventListener('pagehide',()=>{commonweaveAdditionsNavigating=true},{once:true});\naddEventListener('beforeunload',()=>{commonweaveAdditionsNavigating=true},{once:true});");
-  source=source.replace('document.head.append(script)',"(()=>{const head=document.head;if(commonweaveAdditionsNavigating||!head){resolve(false);return}head.append(script)})()");
+await patch('public/extensions/civweave-additions-v156.js',source=>{
+  if(!source.includes('let civweaveAdditionsNavigating=false;'))source=source.replace("let readyPromise=null,activeTab='mesh',noticeTimer=null;","let readyPromise=null,activeTab='mesh',noticeTimer=null;\nlet civweaveAdditionsNavigating=false;\naddEventListener('pagehide',()=>{civweaveAdditionsNavigating=true},{once:true});\naddEventListener('beforeunload',()=>{civweaveAdditionsNavigating=true},{once:true});");
+  source=source.replace('document.head.append(script)',"(()=>{const head=document.head;if(civweaveAdditionsNavigating||!head){resolve(false);return}head.append(script)})()");
   source=source.replace('document.body.append(tools)','document.body?.append(tools)');
   source=source.replace('document.body.append(dialog)','document.body?.append(dialog)');
-  source=source.replace("}catch(error){console.error('[Commonweave additions]',error)}","}catch(error){if(commonweaveAdditionsNavigating||document.hidden||!document.documentElement?.isConnected)return;console.error('[Commonweave additions]',error)}");
+  source=source.replace("}catch(error){console.error('[Civweave additions]',error)}","}catch(error){if(civweaveAdditionsNavigating||document.hidden||!document.documentElement?.isConnected)return;console.error('[Civweave additions]',error)}");
   return source;
 });
 
@@ -105,6 +105,6 @@ if(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')<wrapper.index
 const override=await readFile(path.join(root,'public/service-worker-release-coherence-v220.js'),'utf8');
 for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pinned-html-js-css-json-txt-network-first-cached-fallback'])if(!override.includes(token))throw new Error(`Release-coherence worker is missing ${token}.`);
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
-for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','commonweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
+for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
 console.log(JSON.stringify({ok:true,version,revision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,canonicalSystems:5,changed},null,2));

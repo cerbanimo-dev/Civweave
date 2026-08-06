@@ -44,7 +44,7 @@ async function configureRuntime() {
   env.allowLocalModels = true;
   env.localModelPath = MODEL_ROOT;
   env.useWasmCache = false;
-  env.cacheKey = `commonweave-smollm2-${BACKEND_VERSION}`;
+  env.cacheKey = `civweave-smollm2-${BACKEND_VERSION}`;
   if (env.backends?.onnx?.wasm) {
     env.backends.onnx.wasm.wasmPaths = { mjs: BACKEND_MJS, wasm: BACKEND_WASM };
     env.backends.onnx.wasm.numThreads = self.crossOriginIsolated ? Math.max(1, Math.min(4, navigator.hardwareConcurrency || 1)) : 1;

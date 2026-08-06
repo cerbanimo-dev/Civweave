@@ -2,8 +2,8 @@
 'use strict';
 const VERSION='1.0.31';
 const BUILD='1.0.31-cabinet-mode-v142';
-const SETTINGS_KEY='commonweave.universal-ai.v127';
-const CHAT_KEY='commonweave.weaveling-chat.v127';
+const SETTINGS_KEY='civweave.universal-ai.v127';
+const CHAT_KEY='civweave.weaveling-chat.v127';
 const MODES=['Reflect','Plan','Learn','Build','Acquire','Govern'];
 const REALMS={
   'living-school':{name:'Living School',copy:'Learning paths, curriculum, practice, reflection, and credentials.',image:'/app/assets/cabinets/living-school.webp'},
@@ -15,7 +15,7 @@ const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed=
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 let toastTimer=null;
 function report(kind,detail={}){
-  const event={schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:BUILD,kind:`v142-loom:${kind}`,url:location.href,detail};
+  const event={schema:'civweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:BUILD,kind:`v142-loom:${kind}`,url:location.href,detail};
   console.info('[CW142-LOOM]',event);
   try{fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(event),keepalive:true,cache:'no-store'}).catch(()=>{})}catch{}
   return event;
@@ -43,26 +43,26 @@ function chat(){
   const history=parse(localStorage.getItem(CHAT_KEY),[]),node=dialog('cw127-chat',`<section><header><div><small>WEAVELING’S COMPASS</small><h2>What is your wish?</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><div class="cw127-chat-log" aria-live="polite"></div><form class="cw127-chat-form"><textarea aria-label="Message Weaveling" maxlength="8000" placeholder="Share an intention, problem, or possibility…"></textarea><button type="submit">Send</button></form><menu><button type="button" data-settings>Universal AI settings</button><button type="button" data-clear>Clear conversation</button></menu></section>`);
   node.querySelector('[data-settings]').addEventListener('click',settings);
   node.querySelector('[data-clear]').addEventListener('click',()=>{localStorage.removeItem(CHAT_KEY);close(node);node.remove();report('chat-cleared');setTimeout(chat,0)});
-  if(!globalThis.CommonweaveAssistantV141?.attach?.(node))toast('Weaveling’s orchestration runtime has not loaded.');
+  if(!globalThis.CivweaveAssistantV141?.attach?.(node))toast('Weaveling’s orchestration runtime has not loaded.');
   show(node);setTimeout(()=>node.querySelector('textarea')?.focus(),60);report('dialog-opened',{dialog:'chat',history:Array.isArray(history)?history.length:0});
 }
 function intentions(){
-  if(globalThis.CommonweaveIntentionUI?.open){globalThis.CommonweaveIntentionUI.open();return}
+  if(globalThis.CivweaveIntentionUI?.open){globalThis.CivweaveIntentionUI.open();return}
   toast('The intention review controls have not loaded yet.');
 }
 function realms(){
   const cards=Object.entries(REALMS).map(([id,item])=>`<button class="cw127-card" data-realm="${id}" style="background-image:url('${item.image}')"><b>${item.name}</b><span>${item.copy}</span></button>`).join('');
   const node=dialog('cw127-realms',`<section><header><div><small>CABINET MODE</small><h2>Choose a cabinet</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><div class="cw127-card-grid">${cards}</div></section>`);show(node);report('dialog-opened',{dialog:'cabinets'});
 }
-function info(){const node=dialog('cw127-info',`<section><header><div><small>COMMONWEAVE v${VERSION}</small><h2>One intention, four working systems</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>Weaveling coordinates intentions. Moss turns knowledge gaps into learning. Kamiya turns work into quests. Rook creates needs, offers, and exchange drafts. Merlin turns civic changes into official requests, consent gates, and tested rails.</p><p>Cabinet Mode and Lite share the same parity ledger, consent rules, handoffs, and saved local state.</p><menu><a href="/lite/?system=commonweave">Open Lite mirror</a><a href="/diagnostics.html">Boot diagnostics</a></menu></section>`);show(node);report('dialog-opened',{dialog:'info'})}
-function version(){const node=dialog('cw127-version-dialog',`<section><header><div><small>RELEASE STATE</small><h2>Commonweave v${VERSION}</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>Build: <code>${BUILD}</code></p><p>This release keeps the main Commonweave hub, moves realm work into calibrated cabinets, and excludes the archived room-location image trees from downloadable builds.</p><menu><a href="/api/health" target="_blank" rel="noopener">Host health</a><a href="/diagnostics.html">Diagnostics</a></menu></section>`);show(node);report('dialog-opened',{dialog:'version'})}
-function enterRealm(id){if(!REALMS[id])return;report('cabinet-enter',{realm:id});location.assign(CommonweaveParity.cabinetUrl({systemId:id,from:'hub'}))}
+function info(){const node=dialog('cw127-info',`<section><header><div><small>CIVWEAVE v${VERSION}</small><h2>One intention, four working systems</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>Weaveling coordinates intentions. Moss turns knowledge gaps into learning. Kamiya turns work into quests. Rook creates needs, offers, and exchange drafts. Merlin turns civic changes into official requests, consent gates, and tested rails.</p><p>Cabinet Mode and Lite share the same parity ledger, consent rules, handoffs, and saved local state.</p><menu><a href="/lite/?system=civweave">Open Lite mirror</a><a href="/diagnostics.html">Boot diagnostics</a></menu></section>`);show(node);report('dialog-opened',{dialog:'info'})}
+function version(){const node=dialog('cw127-version-dialog',`<section><header><div><small>RELEASE STATE</small><h2>Civweave v${VERSION}</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>Build: <code>${BUILD}</code></p><p>This release keeps the main Civweave hub, moves realm work into calibrated cabinets, and excludes the archived room-location image trees from downloadable builds.</p><menu><a href="/api/health" target="_blank" rel="noopener">Host health</a><a href="/diagnostics.html">Diagnostics</a></menu></section>`);show(node);report('dialog-opened',{dialog:'version'})}
+function enterRealm(id){if(!REALMS[id])return;report('cabinet-enter',{realm:id});location.assign(CivweaveParity.cabinetUrl({systemId:id,from:'hub'}))}
 async function retireLegacy(){
   try{
     const registrations=await navigator.serviceWorker?.getRegistrations?.()||[];
     const old=registrations.filter(reg=>{const path=new URL(reg.scope).pathname;return path.startsWith('/app/')||path.startsWith('/campus/')||/\/services\//.test(path)});
     for(const reg of old){const result=await reg.unregister();report('legacy-worker-unregistered',{scope:reg.scope,result})}
-    const keys=await caches.keys(),stale=keys.filter(key=>key.startsWith('commonweave-pocket-campus-')||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));
+    const keys=await caches.keys(),stale=keys.filter(key=>key.startsWith('civweave-pocket-campus-')||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));
     for(const key of stale){const result=await caches.delete(key);report('legacy-cache-deleted',{key,result})}
   }catch(error){report('legacy-retirement-failed',{message:error.message})}
 }
@@ -71,16 +71,16 @@ document.addEventListener('click',event=>{
   const action=control.dataset.action,realm=control.dataset.realm;report('control-click',{action:action||null,realm:realm||null,tag:control.tagName});
   try{
     if(realm){enterRealm(realm);return}
-    const openCommonweaveCabinet=()=>location.assign(CommonweaveParity.cabinetUrl({systemId:'commonweave',from:'hub'}));
-    const handlers={home:()=>toast('You are already at the Commonweave Quad.'),chat,settings,intentions,realms,info,version,cabinet:openCommonweaveCabinet,lite:openCommonweaveCabinet};
+    const openCivweaveCabinet=()=>location.assign(CivweaveParity.cabinetUrl({systemId:'civweave',from:'hub'}));
+    const handlers={home:()=>toast('You are already at the Civweave Quad.'),chat,settings,intentions,realms,info,version,cabinet:openCivweaveCabinet,lite:openCivweaveCabinet};
     (handlers[action]||(()=>toast(`The ${action||'unknown'} control has no action yet.`)))();
   }catch(error){report('control-error',{action,realm,message:error.message});toast(`That control hit an error: ${error.message}`)}
 });
 addEventListener('error',event=>report('window-error',{message:event.message,filename:event.filename,line:event.lineno,column:event.colno}));
 addEventListener('unhandledrejection',event=>report('unhandled-rejection',{reason:event.reason?.message||String(event.reason)}));
-const mode=localStorage.getItem('commonweave.weaveling-mode')||MODES[new Date().getHours()%MODES.length],label=document.querySelector('#cw127-context-label');if(label)label.textContent=mode;
-localStorage.setItem('commonweave.host-build',BUILD);document.documentElement.dataset.commonweaveBuild=BUILD;report('page-ready',{navigationType:performance.getEntriesByType?.('navigation')?.[0]?.type||'unknown',controller:navigator.serviceWorker?.controller?.scriptURL||null,mode});
+const mode=localStorage.getItem('civweave.weaveling-mode')||MODES[new Date().getHours()%MODES.length],label=document.querySelector('#cw127-context-label');if(label)label.textContent=mode;
+localStorage.setItem('civweave.host-build',BUILD);document.documentElement.dataset.civweaveBuild=BUILD;report('page-ready',{navigationType:performance.getEntriesByType?.('navigation')?.[0]?.type||'unknown',controller:navigator.serviceWorker?.controller?.scriptURL||null,mode});
 const requestedPanel=new URLSearchParams(location.search).get('panel');if(requestedPanel==='settings')setTimeout(settings,30);else if(requestedPanel==='compass')setTimeout(chat,30);else if(requestedPanel==='routes')setTimeout(intentions,30);
 retireLegacy();
-globalThis.CommonweaveLoomV141={chat,settings,intentions,realms,dialog};
+globalThis.CivweaveLoomV141={chat,settings,intentions,realms,dialog};
 })();

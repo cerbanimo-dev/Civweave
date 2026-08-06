@@ -14,7 +14,7 @@ const INTERNAL_SECRET = 'internal-secret-abcdefghijklmnopqrstuvwxyz-123456';
 const CAPABILITY_SECRET = 'capability-secret-abcdefghijklmnopqrstuvwxyz-123456';
 
 async function createHarness({ requested = true } = {}) {
-  const directory = await mkdtemp(path.join(os.tmpdir(), 'commonweave-wallet-http-'));
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'civweave-wallet-http-'));
   const filePath = path.join(directory, 'wallet.json');
   const walletService = new AiWalletService({ filePath, capabilitySecret: CAPABILITY_SECRET });
   await walletService.load();
@@ -59,7 +59,7 @@ function session(userId = 'user:alpha', deviceId = 'device:phone') {
 }
 
 function paymentHeaders(raw, timestamp = Math.floor(Date.now() / 1000)) {
-  return { 'x-commonweave-payment-signature': signCanonicalPaymentEvent(raw, { secret: PAYMENT_SECRET, timestamp }) };
+  return { 'x-civweave-payment-signature': signCanonicalPaymentEvent(raw, { secret: PAYMENT_SECRET, timestamp }) };
 }
 
 test('wallet sessions expire and stay bound to one device', () => {
@@ -83,7 +83,7 @@ test('signed payment, authenticated wallet, capability, reservation, and interna
   const harness = await createHarness();
   try {
     const event = {
-      schema: 'commonweave.payment-event.v1',
+      schema: 'civweave.payment-event.v1',
       id: 'evt-subscription-1',
       provider: 'test-payments',
       type: 'subscription.paid',
@@ -120,7 +120,7 @@ test('signed payment, authenticated wallet, capability, reservation, and interna
 
     const reservation = await jsonRequest(harness.baseUrl, '/api/ai/wallet/reservations', {
       method: 'POST',
-      headers: { ...auth, 'x-commonweave-ai-capability': capability.body.capability },
+      headers: { ...auth, 'x-civweave-ai-capability': capability.body.capability },
       body: { reservationId: 'reservation:1', model: 'gemini-flash-lite', maxCostCents: 10, purpose: 'test generation' }
     });
     assert.equal(reservation.status, 201);
@@ -136,7 +136,7 @@ test('signed payment, authenticated wallet, capability, reservation, and interna
 
     const settled = await jsonRequest(harness.baseUrl, '/api/ai/wallet/reservations/reservation%3A1/settle', {
       method: 'POST',
-      headers: { 'x-commonweave-internal-secret': INTERNAL_SECRET },
+      headers: { 'x-civweave-internal-secret': INTERNAL_SECRET },
       body: { userId: 'user:alpha', actualCostCents: 4 }
     });
     assert.equal(settled.status, 200);
@@ -152,7 +152,7 @@ test('signed payment, authenticated wallet, capability, reservation, and interna
 test('webhook rejects tampering and stale signatures', async () => {
   const harness = await createHarness();
   try {
-    const event = { schema: 'commonweave.payment-event.v1', id: 'evt-2', provider: 'test-payments', type: 'subscription.paid', userId: 'user:alpha', planId: 'thread', grossCents: 500, netDistributableCents: 470 };
+    const event = { schema: 'civweave.payment-event.v1', id: 'evt-2', provider: 'test-payments', type: 'subscription.paid', userId: 'user:alpha', planId: 'thread', grossCents: 500, netDistributableCents: 470 };
     const raw = JSON.stringify(event);
     const tampered = `${raw} `;
     const bad = await jsonRequest(harness.baseUrl, '/api/ai/wallet/payments/webhook', { method: 'POST', headers: paymentHeaders(raw), body: tampered });
@@ -166,25 +166,25 @@ test('webhook rejects tampering and stale signatures', async () => {
 test('top-ups require a paid plan and refunds become debt without consuming reservations', async () => {
   const harness = await createHarness();
   try {
-    const topupOnly = { schema: 'commonweave.payment-event.v1', id: 'evt-topup-local', provider: 'test-payments', type: 'topup.paid', userId: 'user:local', grossCents: 500, netDistributableCents: 470 };
+    const topupOnly = { schema: 'civweave.payment-event.v1', id: 'evt-topup-local', provider: 'test-payments', type: 'topup.paid', userId: 'user:local', grossCents: 500, netDistributableCents: 470 };
     const rawTopupOnly = JSON.stringify(topupOnly);
     const rejected = await jsonRequest(harness.baseUrl, '/api/ai/wallet/payments/webhook', { method: 'POST', headers: paymentHeaders(rawTopupOnly), body: rawTopupOnly });
     assert.equal(rejected.status, 400);
 
-    const subscription = { schema: 'commonweave.payment-event.v1', id: 'evt-sub-3', provider: 'test-payments', type: 'subscription.paid', userId: 'user:alpha', planId: 'thread', grossCents: 500, netDistributableCents: 470 };
+    const subscription = { schema: 'civweave.payment-event.v1', id: 'evt-sub-3', provider: 'test-payments', type: 'subscription.paid', userId: 'user:alpha', planId: 'thread', grossCents: 500, netDistributableCents: 470 };
     const rawSubscription = JSON.stringify(subscription);
     await jsonRequest(harness.baseUrl, '/api/ai/wallet/payments/webhook', { method: 'POST', headers: paymentHeaders(rawSubscription), body: rawSubscription });
 
-    const topup = { schema: 'commonweave.payment-event.v1', id: 'evt-topup-3', provider: 'test-payments', type: 'topup.paid', userId: 'user:alpha', grossCents: 500, netDistributableCents: 470 };
+    const topup = { schema: 'civweave.payment-event.v1', id: 'evt-topup-3', provider: 'test-payments', type: 'topup.paid', userId: 'user:alpha', grossCents: 500, netDistributableCents: 470 };
     const rawTopup = JSON.stringify(topup);
     const topped = await jsonRequest(harness.baseUrl, '/api/ai/wallet/payments/webhook', { method: 'POST', headers: paymentHeaders(rawTopup), body: rawTopup });
     assert.equal(topped.body.applied.wallet.balanceCents, 450);
 
     const auth = { authorization: `Bearer ${session()}` };
     const capability = await jsonRequest(harness.baseUrl, '/api/ai/wallet/capability', { method: 'POST', headers: auth, body: { maxRequestCents: 10, models: ['gemini-flash-lite'] } });
-    await jsonRequest(harness.baseUrl, '/api/ai/wallet/reservations', { method: 'POST', headers: { ...auth, 'x-commonweave-ai-capability': capability.body.capability }, body: { reservationId: 'reservation:refund', model: 'gemini-flash-lite', maxCostCents: 10 } });
+    await jsonRequest(harness.baseUrl, '/api/ai/wallet/reservations', { method: 'POST', headers: { ...auth, 'x-civweave-ai-capability': capability.body.capability }, body: { reservationId: 'reservation:refund', model: 'gemini-flash-lite', maxCostCents: 10 } });
 
-    const refund = { schema: 'commonweave.payment-event.v1', id: 'evt-refund-3', provider: 'test-payments', type: 'payment.chargeback', userId: 'user:alpha', hostedAllowanceCents: 500 };
+    const refund = { schema: 'civweave.payment-event.v1', id: 'evt-refund-3', provider: 'test-payments', type: 'payment.chargeback', userId: 'user:alpha', hostedAllowanceCents: 500 };
     const rawRefund = JSON.stringify(refund);
     const refunded = await jsonRequest(harness.baseUrl, '/api/ai/wallet/payments/webhook', { method: 'POST', headers: paymentHeaders(rawRefund), body: rawRefund });
     assert.equal(refunded.status, 200);

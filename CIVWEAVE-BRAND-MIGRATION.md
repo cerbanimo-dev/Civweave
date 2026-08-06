@@ -16,4 +16,4 @@ Lowercase runtime namespaces, cache names, storage keys, JavaScript globals, rou
 
 ## Repository settings step
 
-After this pull request is merged, rename the GitHub repository from `Commonweave` to `Civweave` in **Settings → General → Repository name**. External deployment project names and custom domains should then be reviewed separately.
+After this pull request is merged, rename the GitHub repository from `Civweave` to `Civweave` in **Settings → General → Repository name**. External deployment project names and custom domains should then be reviewed separately.

@@ -12,7 +12,7 @@ class Storage {
 const context=vm.createContext({console,Date,Math,JSON,structuredClone,localStorage:new Storage(),dispatchEvent(){},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},setTimeout,clearTimeout});
 context.globalThis=context;
 for(const file of ['public/app/reward-policy-v198.js','public/app/context-plan-composer-v198.js'])vm.runInContext(fs.readFileSync(new URL(`../${file}`,import.meta.url),'utf8'),context,{filename:file});
-const policy=context.CommonweaveRewardPolicyV198,composer=context.CommonweaveContextPlanComposerV198;
+const policy=context.CivweaveRewardPolicyV198,composer=context.CivweaveContextPlanComposerV198;
 assert(policy&&composer,'v198 globals should install');
 assert.match(policy.PROMOTION.headline,/50% more rewards/i);
 assert.doesNotMatch(policy.PROMOTION.detail,/50% less/i);
@@ -39,7 +39,7 @@ const baseTask=index=>({...project.tasks[index%project.tasks.length],id:`det-${i
 for(let index=0;index<3;index++)assert.equal(policy.claim({mode:'deterministic',task:baseTask(index),submission:{text:'Attached prototype file, test log, and revision record showing the acceptance criteria were checked.'}}).ok,true);
 const capped=policy.claim({mode:'deterministic',task:baseTask(3),submission:{text:'Attached prototype file, test log, and revision record showing the acceptance criteria were checked.'}});
 assert.equal(capped.code,'DETERMINISTIC_DAILY_LIMIT');
-const ledger=JSON.parse(context.localStorage.getItem('commonweave.rewards.v156'));
+const ledger=JSON.parse(context.localStorage.getItem('civweave.rewards.v156'));
 assert(ledger.events.some(event=>event.currency==='xp'&&event.skill==='general'),'Skill XP must use the passport-compatible xp currency');
 assert(ledger.events.every(event=>event.createdAt&&event.system),'reward receipts need canonical timestamps and system provenance');
 assert.equal(policy.quote({mode:'deterministic',baseRewards:{buttons:4,acorns:4,skillXp:20}}).buttons,2);
@@ -64,14 +64,14 @@ const reflexRuntime={model:'Xenova/all-MiniLM-L6-v2',rank(){}};
 const deterministicContext=vm.createContext({
   console,Date,Math,JSON,structuredClone,
   localStorage:new Storage(),sessionStorage:new Storage(),
-  CommonweaveReflexRuntime:reflexRuntime,
+  CivweaveReflexRuntime:reflexRuntime,
   dispatchEvent(){},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},
   setInterval(){return 1},clearInterval(){},setTimeout(){return 1},clearTimeout(){}
 });
 deterministicContext.globalThis=deterministicContext;
 vm.runInContext(fs.readFileSync(new URL('../public/app/deterministic-mode-v175.js',import.meta.url),'utf8'),deterministicContext,{filename:'public/app/deterministic-mode-v175.js'});
-assert.equal(deterministicContext.CommonweaveReflexRuntime,reflexRuntime,'deterministic mode must preserve the real MiniLM reflex runtime');
-assert.equal(deterministicContext.CommonweaveDeterministicModeV175.semanticPlanning,'lazy-explicit');
-assert.equal(deterministicContext.CommonweaveDeterministicModeV175.route('Create a market request for borrowed tools').system,'fellowfare');
+assert.equal(deterministicContext.CivweaveReflexRuntime,reflexRuntime,'deterministic mode must preserve the real MiniLM reflex runtime');
+assert.equal(deterministicContext.CivweaveDeterministicModeV175.semanticPlanning,'lazy-explicit');
+assert.equal(deterministicContext.CivweaveDeterministicModeV175.route('Create a market request for borrowed tools').system,'fellowfare');
 
 console.log('v198 context planning and reward policy verification passed');

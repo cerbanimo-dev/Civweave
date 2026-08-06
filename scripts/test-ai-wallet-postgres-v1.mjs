@@ -6,7 +6,7 @@ import { verifyAiWalletSession } from '../lib/ai-wallet-auth-v1.mjs';
 
 const CAPABILITY_SECRET = 'capability-secret-abcdefghijklmnopqrstuvwxyz-123456';
 const AUTH_SECRET = 'auth-secret-abcdefghijklmnopqrstuvwxyz-123456';
-const snapshot = overrides => ({ schema: 'commonweave.ai-wallet.v1', walletId: '00000000-0000-4000-8000-000000000001', userId: 'user:postgres', planId: 'thread', balanceCents: 200, reservedCents: 0, debtCents: 0, dailySpentCents: 0, dailyWindow: '2026-08-05', walletVersion: '00000000-0000-4000-8000-000000000002', reservations: {}, updatedAt: '2026-08-05T03:00:00.000Z', ...overrides });
+const snapshot = overrides => ({ schema: 'civweave.ai-wallet.v1', walletId: '00000000-0000-4000-8000-000000000001', userId: 'user:postgres', planId: 'thread', balanceCents: 200, reservedCents: 0, debtCents: 0, dailySpentCents: 0, dailyWindow: '2026-08-05', walletVersion: '00000000-0000-4000-8000-000000000002', reservations: {}, updatedAt: '2026-08-05T03:00:00.000Z', ...overrides });
 
 test('Postgres adapter uses database functions and plan ceilings', async () => {
   const calls = []; let wallet = snapshot();
