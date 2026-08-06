@@ -7,23 +7,21 @@ const POLICY_PATH = path.join(ROOT, 'config', 'convergence-policy.json');
 const OUTPUT_PATH = path.join(ROOT, 'artifacts', 'convergence', 'runtime-inventory.json');
 const SUMMARY_PATH = path.join(ROOT, 'artifacts', 'convergence', 'runtime-inventory.md');
 
-const SCAN_ROOTS = [
-  'public/app',
-  'public/extensions',
-  'public',
-  'scripts',
-  'lib'
-];
-
-const RUNTIME_EXTENSIONS = new Set(['.html', '.js', '.mjs', '.cjs', '.css', '.json', '.webmanifest']);
+const SCAN_ROOTS = ['public', 'scripts', 'lib'];
+const RUNTIME_EXTENSIONS = new Set([
+  '.html', '.js', '.mjs', '.cjs', '.css', '.json', '.webmanifest', '.yaml', '.yml', '.toml'
+]);
 const SKIP_DIRECTORIES = new Set(['.git', 'node_modules', 'artifacts', 'dist', 'build', 'coverage']);
+const ROOT_RUNTIME_PATTERN = /^(?:package\.json|server(?:-[a-z0-9_.-]+)?\.mjs|render\.ya?ml|wrangler\.toml)$/i;
 const REFERENCE_PATTERNS = [
   /(?:src|href)\s*=\s*["']([^"'#?]+)(?:[?#][^"']*)?["']/g,
   /(?:import\s+(?:[^"']+?\s+from\s+)?|export\s+[^"']+?\s+from\s+)["']([^"']+)["']/g,
   /import\s*\(\s*["']([^"']+)["']\s*\)/g,
   /(?:fetch|register|Worker|SharedWorker)\s*\(\s*["']([^"']+)["']/g,
   /new\s+URL\s*\(\s*["']([^"']+)["']/g,
-  /["'](\/app\/[^"'#?]+|\/extensions\/[^"'#?]+|\/service-worker(?:-[^"'#?]+)?\.js)["']/g
+  /["'](\/app\/[^"'#?]+|\/extensions\/[^"'#?]+|\/service-worker(?:-[^"'#?]+)?\.js)["']/g,
+  /(?:^|[\s"'`])((?:public|scripts|lib)\/[a-z0-9_@./-]+\.(?:html?|css|js|mjs|cjs|json|webmanifest|ya?ml|toml))/gim,
+  /(?:^|[\s"'`])((?:server(?:-[a-z0-9_.-]+)?\.mjs))/gim
 ];
 
 function toPosix(value) {
@@ -60,6 +58,14 @@ async function walk(relativeDirectory, output) {
   }
 }
 
+async function collectRootRuntimeFiles(output) {
+  const entries = await fs.readdir(ROOT, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isFile() || !ROOT_RUNTIME_PATTERN.test(entry.name)) continue;
+    output.add(entry.name);
+  }
+}
+
 function resolveReference(fromFile, rawReference) {
   const reference = String(rawReference || '').trim();
   if (!reference || reference.startsWith('data:') || reference.startsWith('blob:')) return null;
@@ -72,6 +78,7 @@ function resolveReference(fromFile, rawReference) {
   if (clean.startsWith('/extensions/')) return `public${clean}`;
   if (clean.startsWith('/service-worker')) return `public${clean}`;
   if (clean.startsWith('/')) return `public${clean}`;
+  if (/^(?:public|scripts|lib)\//.test(clean) || /^server(?:-[a-z0-9_.-]+)?\.mjs$/i.test(clean)) return clean;
 
   const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(fromFile), clean));
   return resolved.startsWith('../') ? null : resolved;
@@ -110,6 +117,7 @@ function countBy(items, key) {
 const policy = JSON.parse(await fs.readFile(POLICY_PATH, 'utf8'));
 const files = new Set();
 for (const scanRoot of SCAN_ROOTS) await walk(scanRoot, files);
+await collectRootRuntimeFiles(files);
 
 for (const rootFile of ['package.json', ...policy.runtimeRoots]) {
   if (await pathExists(path.join(ROOT, rootFile))) files.add(rootFile);
@@ -182,7 +190,8 @@ const summary = [
   `Reachable runtime files: ${report.totals.reachable}`,
   `Version-suffixed runtime files: ${report.totals.versionSuffixed}`,
   '',
-  'The JSON artifact contains the complete file graph and is the deletion queue input.'
+  'The JSON artifact contains the complete file graph and is the deletion queue input.',
+  'Orphan classification is a review queue, not automatic deletion permission.'
 ].join('\n');
 await fs.writeFile(SUMMARY_PATH, `${summary}\n`, 'utf8');
 
