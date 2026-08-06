@@ -2,12 +2,17 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 import {webcrypto} from 'node:crypto';
 
-const [settingsSource,deviceSource,runtimeSource,workerSource]=await Promise.all([
+const [settingsSource,deviceSource,runtimeSource,legacyWorker,workerWrapper,workerCore,offlineManifestText,installBoundary]=await Promise.all([
   readFile('public/app/model-settings-controller-v173.js','utf8'),
   readFile('public/extensions/commonweave-device-credentials-v160.js','utf8'),
   readFile('public/app/shared/commonweave-model-runtime.js','utf8'),
   readFile('public/service-worker-v156.js','utf8'),
+  readFile('public/service-worker-v203.js','utf8'),
+  readFile('public/service-worker-core-v208.js','utf8'),
+  readFile('public/app/offline-package-v208.json','utf8'),
+  readFile('public/app/install-boundary-v146.js','utf8'),
 ]);
+const offlineManifest=JSON.parse(offlineManifestText);
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 class MemoryStorage{
   constructor(seed={}){this.values=new Map(Object.entries(seed))}
@@ -72,12 +77,19 @@ assert(runtimeConfig.externalConsent===true,'Real model runtime still considers 
 assert(runtimeConfig.provider==='gemini','Real model runtime did not preserve the Gemini route.');
 
 for(const forbidden of ['MutationObserver','setInterval('])assert(!deviceSource.includes(forbidden),`Credential repair introduced ${forbidden}.`);
-for(const token of ['working-campus-additions-v192-credential-usable','usable-key-and-consent-v192','restoresConsent:true','mirrorsRuntimeSecret:true'])assert(workerSource.includes(token),`Device package is missing ${token}.`);
+for(const token of ['restoresConsent:true','mirrorsRuntimeSecret:true'])assert(deviceSource.includes(token),`Credential bridge is missing ${token}.`);
+assert(legacyWorker.includes("importScripts('/service-worker-v203.js"),'Legacy registrations do not reach the active worker wrapper.');
+assert(workerWrapper.includes("importScripts('/service-worker-core-v208.js"),'Active worker wrapper does not load the retained offline core.');
+assert(workerCore.includes('discoverReferences')&&workerCore.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Offline campus no longer discovers or stores dependencies.');
+assert(offlineManifest.seeds.includes('/app/working-campus-v156.html'),'Offline campus no longer seeds the installed working campus.');
+assert(offlineManifest.includePrefixes.includes('/extensions/'),'Offline campus excludes extension runtimes.');
+assert(installBoundary.includes('/extensions/commonweave-device-credentials-v160.js'),'Installed surfaces no longer load the credential bridge.');
 
 console.log(JSON.stringify({
   ok:true,
   revision:'v192-credential-usable',
   reproduced:{keyPresent:true,consentLost:true},
   repaired:{keyPresent:true,consentRestored:true,fingerprintedSecret:true,runtimeUsable:true},
+  offlinePackaged:'discovered-through-working-campus-install-boundary',
   freezeBoundary:{observer:false,polling:false},
 },null,2));
