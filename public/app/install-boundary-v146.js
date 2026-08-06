@@ -17,6 +17,7 @@ const FALLBACK_PATHS=new Map([
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
 const LEGACY_SCRIPTS=[
+  '/app/system-routes-v227.js',
   '/app/release-version-v1.js',
   '/app/weaveling-memory-v191.js',
   '/app/weaveling-memory-bridge-v191.js',
