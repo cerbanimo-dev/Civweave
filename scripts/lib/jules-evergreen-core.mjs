@@ -93,9 +93,14 @@ const FAILURE_CONCLUSIONS = new Set([
   'stale'
 ]);
 
-export function classifyHealth(checkRuns = [], combinedStatus = {}) {
+export function classifyHealth(
+  checkRuns = [],
+  combinedStatus = {},
+  {requiredCheckNames = ['local-first']} = {}
+) {
   const failures = [];
   const pending = [];
+  const successfulNames = [];
   for (const check of checkRuns) {
     const name = String(check?.name || 'Unnamed check');
     if (check?.status !== 'completed') {
@@ -104,7 +109,8 @@ export function classifyHealth(checkRuns = [], combinedStatus = {}) {
     }
     const conclusion = String(check?.conclusion || '').toLowerCase();
     if (FAILURE_CONCLUSIONS.has(conclusion)) failures.push(name);
-    else if (!SUCCESS_CONCLUSIONS.has(conclusion)) pending.push(name);
+    else if (SUCCESS_CONCLUSIONS.has(conclusion)) successfulNames.push(name);
+    else pending.push(name);
   }
 
   for (const status of combinedStatus?.statuses || []) {
@@ -112,18 +118,40 @@ export function classifyHealth(checkRuns = [], combinedStatus = {}) {
     const state = String(status?.state || '').toLowerCase();
     if (state === 'failure' || state === 'error') failures.push(name);
     else if (state === 'pending') pending.push(name);
+    else if (state === 'success') successfulNames.push(name);
   }
 
   const checkCount = checkRuns.length + (combinedStatus?.statuses || []).length;
-  if (failures.length > 0) return {state: 'failure', failures: unique(failures), pending: unique(pending), checkCount};
-  if (checkCount === 0) return {state: 'no-checks', failures: [], pending: [], checkCount};
+  const result = (state, extra = {}) => ({
+    state,
+    failures: unique(failures),
+    pending: unique(pending),
+    successfulNames: unique(successfulNames),
+    checkCount,
+    ...extra
+  });
+
+  if (failures.length > 0) return result('failure');
+  if (checkCount === 0) return result('no-checks');
   if (pending.length > 0 || String(combinedStatus?.state || '').toLowerCase() === 'pending') {
-    return {state: 'pending', failures: [], pending: unique(pending), checkCount};
+    return result('pending');
   }
   if (String(combinedStatus?.state || '').toLowerCase() === 'failure') {
-    return {state: 'failure', failures: ['Combined commit status'], pending: [], checkCount};
+    failures.push('Combined commit status');
+    return result('failure');
   }
-  return {state: 'success', failures: [], pending: [], checkCount};
+
+  const successfulLower = new Set(successfulNames.map(name => name.toLowerCase()));
+  const missingRequired = requiredCheckNames
+    .map(name => String(name).trim())
+    .filter(Boolean)
+    .filter(name => !successfulLower.has(name.toLowerCase()));
+  if (missingRequired.length > 0) {
+    pending.push(...missingRequired.map(name => `Required check missing: ${name}`));
+    return result('pending', {missingRequired});
+  }
+
+  return result('success', {missingRequired: []});
 }
 
 export function verifySingleBundleCompletion(baseMarkdown, headMarkdown, bundleId) {
@@ -178,7 +206,7 @@ export function evaluateAutoMergePolicy({
     reasons.push('A review currently requests changes.');
   }
   if (!verifySingleBundleCompletion(baseRoadmap, headRoadmap, bundleId)) {
-    reasons.push('TEN-YEAR-PIPELINE.md must differ only by checking the selected bundle.');
+    reasons.push('TEN-YEAR-PIPELINE.md must differ from main only by checking the selected bundle.');
   }
 
   return {eligible: reasons.length === 0, reasons: unique(reasons)};

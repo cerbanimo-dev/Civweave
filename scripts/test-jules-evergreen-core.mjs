@@ -41,10 +41,25 @@ test('honors merged and open legacy pull-request overrides', () => {
 });
 
 test('classifies failing, pending, empty, and successful health', () => {
-  assert.equal(classifyHealth([], {statuses: []}).state, 'no-checks');
-  assert.equal(classifyHealth([{name: 'build', status: 'in_progress'}], {statuses: []}).state, 'pending');
-  assert.equal(classifyHealth([{name: 'build', status: 'completed', conclusion: 'failure'}], {statuses: []}).state, 'failure');
-  assert.equal(classifyHealth([{name: 'build', status: 'completed', conclusion: 'success'}], {state: 'success', statuses: []}).state, 'success');
+  const options = {requiredCheckNames: []};
+  assert.equal(classifyHealth([], {statuses: []}, options).state, 'no-checks');
+  assert.equal(classifyHealth([{name: 'build', status: 'in_progress'}], {statuses: []}, options).state, 'pending');
+  assert.equal(classifyHealth([{name: 'build', status: 'completed', conclusion: 'failure'}], {statuses: []}, options).state, 'failure');
+  assert.equal(classifyHealth([{name: 'build', status: 'completed', conclusion: 'success'}], {state: 'success', statuses: []}, options).state, 'success');
+});
+
+test('requires the trusted local-first check by default', () => {
+  const cloudflareOnly = classifyHealth([
+    {name: 'Cloudflare Pages', status: 'completed', conclusion: 'success'}
+  ], {state: 'success', statuses: []});
+  assert.equal(cloudflareOnly.state, 'pending');
+  assert.deepEqual(cloudflareOnly.missingRequired, ['local-first']);
+
+  const trusted = classifyHealth([
+    {name: 'Cloudflare Pages', status: 'completed', conclusion: 'success'},
+    {name: 'local-first', status: 'completed', conclusion: 'success'}
+  ], {state: 'success', statuses: []});
+  assert.equal(trusted.state, 'success');
 });
 
 test('counts launches in a rolling window', () => {

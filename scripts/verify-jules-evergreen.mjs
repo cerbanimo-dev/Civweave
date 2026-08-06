@@ -7,10 +7,21 @@ import {parsePipeline} from './lib/jules-evergreen-core.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => readFile(path.join(root, file), 'utf8');
 
-const [configText, roadmap, daemonSource, daemonWorkflow, syncWorkflow, documentation] = await Promise.all([
+const [
+  configText,
+  roadmap,
+  daemonSource,
+  coreSource,
+  julesApiSource,
+  daemonWorkflow,
+  syncWorkflow,
+  documentation
+] = await Promise.all([
   read('.github/jules-evergreen.json'),
   read('TEN-YEAR-PIPELINE.md'),
   read('scripts/jules-evergreen-daemon.mjs'),
+  read('scripts/lib/jules-evergreen-core.mjs'),
+  read('scripts/lib/jules-api-client.mjs'),
   read('.github/workflows/jules-evergreen-daemon.yml'),
   read('.github/workflows/sync-jules-evergreen-branch.yml'),
   read('docs/JULES-EVERGREEN.md')
@@ -29,11 +40,13 @@ assert.equal(config.autoMerge.method, 'squash');
 assert.ok(config.autoMerge.blockedPaths.includes('.github/workflows/'));
 assert.ok(config.autoMerge.blockedPaths.includes('scripts/jules-evergreen-daemon.mjs'));
 
-assert.match(daemonSource, /AUTO_CREATE_PR/);
+assert.match(julesApiSource, /AUTO_CREATE_PR/);
 assert.match(daemonSource, /evaluateAutoMergePolicy/);
 assert.match(daemonSource, /EVERGREEN_GITHUB_TOKEN/);
 assert.match(daemonSource, /mergePullRequest/);
-assert.match(daemonSource, /verifySingleBundleCompletion|TEN-YEAR-PIPELINE\.md must differ only/);
+assert.match(coreSource, /verifySingleBundleCompletion/);
+assert.match(coreSource, /Required check missing: \$\{name\}/);
+assert.match(coreSource, /requiredCheckNames = \['local-first'\]/);
 assert.doesNotMatch(daemonSource, /bypass_branch_protection|force:\s*true/);
 
 assert.match(daemonWorkflow, /cron: '\*\/5 \* \* \* \*'/);
@@ -52,4 +65,4 @@ assert.match(documentation, /EVERGREEN_GITHUB_TOKEN/);
 assert.match(documentation, /automatically squash-merges/i);
 assert.match(documentation, /does not bypass branch protection/i);
 
-console.log(`Jules evergreen verifier passed: ${bundles.length} bundles, quota, sensitive-path, and auto-merge gates intact.`);
+console.log(`Jules evergreen verifier passed: ${bundles.length} bundles, trusted-check, quota, sensitive-path, and auto-merge gates intact.`);
