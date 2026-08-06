@@ -1,8 +1,8 @@
-# Commonweave
+# Civweave
 
-Commonweave is an offline-first, installable family of five connected workstations:
+Civweave is an offline-first, installable family of five connected workstations:
 
-- Commonweave
+- Civweave
 - Living School
 - Cerbanimo
 - FellowFare
@@ -21,7 +21,7 @@ Agents and automated contributors must read [`AGENTS.md`](./AGENTS.md) before ed
 
 | System | Active entry |
 | --- | --- |
-| Commonweave | `public/app/working-campus-v156.html` |
+| Civweave | `public/app/working-campus-v156.html` |
 | Living School | `public/app/cabinets/living-school/index.html` |
 | Cerbanimo | `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1` |
 | FellowFare | `public/app/fellowfare-cabinet-v144.html?cabinet=1` |
@@ -61,11 +61,11 @@ Change one of those only when the task explicitly concerns that legacy surface, 
 The host has two related roles:
 
 1. `/` serves installation, updates, release metadata, and optional gateway APIs.
-2. The installed device package serves the Commonweave application family locally.
+2. The installed device package serves the Civweave application family locally.
 
 Within an installed package, `/loom/`, `/lite/`, and `/cabinetonly/` are compatibility aliases for the full-screen family entry. The public hosted origin may intentionally refuse to run application surfaces directly and instead require local installation.
 
-The built-in public host is:
+The current built-in public host retains its compatibility address until deployment infrastructure is renamed:
 
 `https://commonweave-host-node.onrender.com`
 
