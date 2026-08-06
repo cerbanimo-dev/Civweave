@@ -8,7 +8,23 @@
   <link rel="icon" href="/app/logos/civweave-symbol.svg" type="image/svg+xml">
   <style>html,body{width:100%;height:100%;margin:0;background:#061019}</style>
   <script src="/app/civweave-brand.js?v=1.0.0"></script>
-  <script src="/app/installed-entry-v146.js?v=1.0.9"></script>
+  <script>
+  (() => {
+    const params = new URLSearchParams(location.search);
+    const installRequired = params.get('install') === 'required' || params.has('installrequired');
+    if (installRequired) {
+      const installer = new URL('/app/index.html', location.origin);
+      for (const [key, value] of params) installer.searchParams.append(key, value);
+      installer.hash = location.hash;
+      location.replace(installer.href);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = '/app/installed-entry-v146.js?v=1.0.9';
+    script.async = false;
+    document.head.append(script);
+  })();
+  </script>
 </head>
 <body></body>
 </html>
