@@ -27,6 +27,18 @@ await patch('public/index.html',source=>{
   return source;
 });
 
+await patch('public/app/index.html',source=>{
+  source=replaceRequired(source,/<title>Install Civweave v\d+\.\d+\.\d+<\/title>/,`<title>Install Civweave v${version}</title>`,'installer title');
+  source=replaceRequired(source,/<span class="version">v\d+\.\d+\.\d+<\/span>/,`<span class="version">v${version}</span>`,'installer version badge');
+  source=replaceRequired(source,/Install Civweave v\d+\.\d+\.\d+\. The campus downloads automatically\./,`Install Civweave v${version}. The campus downloads automatically.`,'installer headline');
+  source=source.replace(/manifest\.webmanifest\?v=\d+\.\d+\.\d+/g,`manifest.webmanifest?v=${version}`);
+  source=source.replace(/civweave-brand\.js\?v=\d+\.\d+\.\d+/g,`civweave-brand.js?v=${version}`);
+  source=source.replace(/\d+\.\d+\.\d+-lightweight-shell-v208/g,`${version}-lightweight-shell-v208`);
+  source=source.replace(/\d+\.\d+\.\d+-offline-retry-loop-v211/g,`${version}-offline-retry-loop-v211`);
+  source=source.replace(/\d+\.\d+\.\d+-required-campus-v1/g,`${version}-required-campus-v1`);
+  return source;
+});
+
 await patch('public/app/manifest.webmanifest',source=>{
   const manifest=JSON.parse(source);
   manifest.name=`Commonweave v${version}`;
@@ -36,7 +48,6 @@ await patch('public/app/manifest.webmanifest',source=>{
 });
 
 await patch('public/install-v130.js',source=>replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'installer runtime version'));
-await patch('public/app/index.html',source=>replaceRequired(source,/installed-entry-v146\.js\?v=\d+\.\d+\.\d+/,`installed-entry-v146.js?v=${version}`,'stable app entry revision'));
 await patch('public/app/installed-entry-v146.html',source=>replaceRequired(source,/installed-entry-v146\.js\?v=\d+\.\d+\.\d+/,`installed-entry-v146.js?v=${version}`,'installed entry revision'));
 await patch('public/app/system-routes-v227.js',source=>replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'five-system route version'));
 await patch('public/app/themed-system-nav-v178.js',source=>{
