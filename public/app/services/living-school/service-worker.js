@@ -1,9 +1,6 @@
-/* District workers retire themselves. Commonweave's /app service worker owns the single offline and update channel. */
+'use strict';
+const CLEANUP='living-school-retired-scope-cleanup-v218';
 self.addEventListener('install',event=>event.waitUntil(self.skipWaiting()));
-self.addEventListener('activate',event=>event.waitUntil((async()=>{
-  const prefixes=['living-school-','cerbanimo-','fellowfare-','anarchadia-'];
-  const keys=await caches.keys();await Promise.all(keys.filter(key=>prefixes.some(prefix=>key.startsWith(prefix))).map(key=>caches.delete(key)));
-  await self.clients.claim();
-  const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});windows.forEach(client=>client.postMessage({type:'COMMONWEAVE_DISTRICT_WORKER_RETIRED'}));
-  await self.registration.unregister();
-})()));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const name of await caches.keys())if(/living.?school/i.test(name))await caches.delete(name);await self.clients.claim()})()));
+self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.mode==='navigate'&&url.pathname.startsWith('/app/services/living-school/'))event.respondWith(Response.redirect(new URL('/app/cabinets/living-school/index.html',self.location.origin),302))});
+self.LivingSchoolRetiredScopeCleanup=CLEANUP;

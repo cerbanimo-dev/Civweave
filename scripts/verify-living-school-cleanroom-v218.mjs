@@ -1,0 +1,83 @@
+import {readFile,readdir,stat} from 'node:fs/promises';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+import {fileURLToPath} from 'node:url';
+
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const read=relative=>readFile(path.join(root,relative),'utf8');
+const cabinetDir=path.join(root,'public/app/cabinets/living-school');
+const serviceDir=path.join(root,'public/app/services/living-school');
+const [index,runtime,core,renderSource,actionsSource,css,serviceIndex,serviceManifest]=await Promise.all([
+  read('public/app/cabinets/living-school/index.html'),
+  read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'),
+  read('public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'),
+  read('public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs'),
+  read('public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'),
+  read('public/app/cabinets/living-school/living-school-cleanroom-v218.css'),
+  read('public/app/services/living-school/index.html'),
+  read('public/app/services/living-school/manifest.webmanifest')
+]);
+
+assert(index.includes('data-living-school-runtime="cleanroom-v218"'),'Living School is not marked as the clean-room runtime.');
+assert(index.includes('id="living-school-root"'),'The canonical continuous surface is missing.');
+assert(index.includes('living-school-cleanroom-v218.mjs'),'The clean-room runtime is not loaded.');
+assert(index.includes('living-school-cleanroom-v218.css'),'The clean-room stylesheet is not loaded.');
+for(const retired of ['id="room"','data-room','ls-tray','ls-drawer','id="actions"','id="moss"','id="compass"','living-school-bootstrap-v194.js','living-school-flat-loader','living-school-workbench','living-school-interactions','living-school-paths','living-school-two-agent-relay','living-school-mutation-guard'])assert(!index.includes(retired),`Canonical HTML still contains retired surface token ${retired}.`);
+
+const cabinetFiles=(await readdir(cabinetDir)).filter(name=>/\.(?:js|mjs)$/.test(name));
+const activeFiles=new Set(['living-school-cleanroom-v218.mjs','living-school-cleanroom-core-v218.mjs','living-school-cleanroom-render-v218.mjs','living-school-cleanroom-actions-v218.mjs']);
+let listenerCount=0;
+const forbidden=[
+  ['room map',/\bconst\s+rooms\b|\bfunction\s+room\s*\(|\bstate\.room\b/],
+  ['room attributes',/data-room/],
+  ['room API',/setRoom/],
+  ['synthetic activation',/\.click\s*\(/],
+  ['indirect native bridge',/openNative/],
+  ['mutation observer',/MutationObserver/],
+  ['legacy drawer',/ls-drawer|action-list/],
+  ['legacy local tray',/ls-tray/],
+];
+for(const name of cabinetFiles){
+  const source=await read(`public/app/cabinets/living-school/${name}`);
+  listenerCount+=(source.match(/addEventListener\s*\(/g)||[]).length;
+  for(const [label,pattern] of forbidden)assert(!pattern.test(source),`${name} still contains ${label}.`);
+  if(!activeFiles.has(name))assert(source.length<1000&&source.includes('living-school-legacy-removed-v218'),`${name} is not a small explicit removal marker.`);
+}
+assert.equal(listenerCount,1,'Living School must contain exactly one page event-listener registration across every cabinet script.');
+assert.equal((runtime.match(/document\.addEventListener\('click',handleLivingSchoolClick,true\)/g)||[]).length,1,'The one listener must be the canonical delegated click controller.');
+assert(!/addEventListener\s*\(\s*['"](?:submit|change|pointer|touch|storage)/.test(runtime),'A second input or state listener was introduced.');
+assert(runtime.includes("controller:'single-delegated-click-handler'"),'The runtime does not expose its single-owner contract.');
+assert(runtime.includes('if(target.disabled||busy)return'),'The canonical controller lacks a re-entry lock.');
+assert(runtime.includes('dispatchCount+=1')&&runtime.includes('livingSchoolDispatchCount'),'Dispatches are not inspectable.');
+assert(core.includes('delete next.room')&&core.includes('delete next.currentRoom')&&core.includes('delete next.lastRoom'),'Legacy navigation fields are not removed during migration.');
+assert(core.includes("You are Moss, Living School learning guide"),'Moss does not own Living School generation.');
+assert(core.includes('never impersonate another Commonweave guide'),'Guide identity boundary is missing from curriculum generation.');
+
+const actionTokens=new Set([...index.matchAll(/data-ls-action="([^"]+)"/g),...renderSource.matchAll(/data-ls-action=\\?"([^"\\]+)\\?"/g)].map(match=>match[1]));
+assert(actionTokens.size>=15,'The clean-room surface lost expected direct actions.');
+for(const action of actionTokens)assert(actionsSource.includes(`'${action}':`),`Action ${action} is rendered without a canonical handler.`);
+assert(!/<button(?![^>]*type="button")[^>]*data-ls-action/i.test(index+renderSource),'Every actionable button must be explicitly non-submitting.');
+assert(css.includes('.lsc218-root')&&css.includes('touch-action:manipulation'),'The clean-room interaction styling is incomplete.');
+
+assert(serviceIndex.includes('http-equiv="refresh"')&&serviceIndex.includes('/app/cabinets/living-school/index.html'),'The retired service page does not route to the canonical surface.');
+assert(JSON.parse(serviceManifest).start_url==='/app/cabinets/living-school/index.html','The retired standalone manifest can still launch the old surface.');
+for(const name of ['index.inline.js','interface-surfaces.js','living-displays.js','visual-core.js','world-engine.js']){
+  const source=await read(`public/app/services/living-school/${name}`);
+  const size=(await stat(path.join(serviceDir,name))).size;
+  assert(size<1000,`${name} still carries legacy application logic.`);
+  assert(source.includes('living-school-service-surface-retired-v218'),`${name} is not an explicit retirement marker.`);
+  assert(!/addEventListener|MutationObserver|\.click\s*\(|data-room|setRoom/.test(source),`${name} still contains an interaction tripwire.`);
+}
+
+console.log(JSON.stringify({
+  ok:true,
+  revision:'living-school-cleanroom-v218',
+  pageEventListeners:listenerCount,
+  canonicalHandler:'handleLivingSchoolClick',
+  continuousSurface:true,
+  legacyNavigationLogic:false,
+  syntheticActivations:false,
+  mutationObservers:false,
+  retiredServiceSurface:true,
+  renderedActions:actionTokens.size
+},null,2));
