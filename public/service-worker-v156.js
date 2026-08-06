@@ -17,49 +17,15 @@
 
   self.addEventListener('message', event => {
     if (event.data?.type === 'GET_SHARED_IMAGE_STATUS') {
-      reply(event, {
-        type: 'COMMONWEAVE_SHARED_IMAGE_STATUS',
-        version: VERSION,
-        ready: true,
-        present: 0,
-        total: 0,
-        missing: [],
-        legacyBridge: true
-      });
+      reply(event, {type:'COMMONWEAVE_SHARED_IMAGE_STATUS',version:VERSION,ready:true,present:0,total:0,missing:[],legacyBridge:true});
     }
-
     if (event.data?.type === 'GET_CRITICAL_BOOT_STATUS') {
-      reply(event, {
-        type: 'COMMONWEAVE_CRITICAL_BOOT_STATUS',
-        version: VERSION,
-        mode: 'flat',
-        ready: true,
-        present: 0,
-        total: 0,
-        missing: [],
-        fullPackage: {
-          ready: true,
-          baseReady: true,
-          extensionsReady: true,
-          baseCount: 10,
-          extensionCount: 0
-        },
-        legacyBridge: true
-      });
+      reply(event, {type:'COMMONWEAVE_CRITICAL_BOOT_STATUS',version:VERSION,mode:'flat',ready:true,present:0,total:0,missing:[],fullPackage:{ready:true,baseReady:true,extensionsReady:true,baseCount:10,extensionCount:0},legacyBridge:true});
     }
-
     if (event.data?.type === 'GET_ADDITIONS_STATUS') {
-      reply(event, {
-        type: 'COMMONWEAVE_ADDITIONS_STATUS',
-        version: VERSION,
-        ready: true,
-        assetCount: 0,
-        presentCount: 0,
-        missing: [],
-        legacyBridge: true
-      });
+      reply(event, {type:'COMMONWEAVE_ADDITIONS_STATUS',version:VERSION,ready:true,assetCount:0,presentCount:0,missing:[],legacyBridge:true});
     }
   });
 })();
 
-importScripts('/service-worker-v203.js?v=1.0.9-lightweight-shell-v208-legacy-v156-bridge-v209');
+importScripts('/service-worker-v203.js?v=1.0.16-lightweight-shell-v208-legacy-v156-bridge-v209');

@@ -36,15 +36,26 @@ await patch('public/app/manifest.webmanifest',source=>{
   manifest.name=`Commonweave v${version}`;
   const start=new URL(manifest.start_url||'/app/', 'https://commonweave.invalid');
   start.searchParams.set('version',version);
-  manifest.start_url=`${start.pathname}${start.search}${start.hash}`;
   return `${JSON.stringify(manifest,null,2)}\n`;
 });
 
 await patch('public/install-v130.js',source=>replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'installer runtime version'));
 await patch('public/app/index.html',source=>replaceRequired(source,/installed-entry-v146\.js\?v=\d+\.\d+\.\d+/,`installed-entry-v146.js?v=${version}`,'stable app entry revision'));
 await patch('public/app/installed-entry-v146.html',source=>replaceRequired(source,/installed-entry-v146\.js\?v=\d+\.\d+\.\d+/,`installed-entry-v146.js?v=${version}`,'installed entry revision'));
+await patch('public/app/system-routes-v227.js',source=>replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'five-system route version'));
+await patch('public/app/themed-system-nav-v178.js',source=>{
+  source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+-five-system-navigation-v227';/,`const VERSION='${version}-five-system-navigation-v227';`,'themed navigation version');
+  source=source.replace(/version:'\d+\.\d+\.\d+'/g,`version:'${version}'`);
+  return source;
+});
+await patch('public/app/working-campus-v156.js',source=>source.replace(/system-routes-v227\.js\?v=\d+\.\d+\.\d+-five-system-route-contract-v227/,`system-routes-v227.js?v=${version}-five-system-route-contract-v227`));
+await patch('public/app/working-campus-v156.part4.txt',source=>source.replace(/version:'\d+\.\d+\.\d+'/g,`version:'${version}'`));
 await patch('public/service-worker-core-v208.js',source=>replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'service-worker core version'));
-await patch('public/service-worker-v203.js',source=>replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+-lightweight-shell-v208-retained-v218/,`service-worker-core-v208.js?v=${version}-lightweight-shell-v208-retained-v218`,'service-worker wrapper revision'));
+await patch('public/service-worker-v203.js',source=>{
+  source=replaceRequired(source,/system-routes-v227\.js\?v=\d+\.\d+\.\d+-five-system-route-contract-v227/,`system-routes-v227.js?v=${version}-five-system-route-contract-v227`,'worker route contract revision');
+  source=replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+-lightweight-shell-v208-retained-v218/,`service-worker-core-v208.js?v=${version}-lightweight-shell-v208-retained-v218`,'service-worker wrapper revision');
+  return source;
+});
 await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+-lightweight-shell-v208-legacy-v156-bridge-v209/,`service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`,'legacy worker bridge revision'));
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'install-boundary runtime version');

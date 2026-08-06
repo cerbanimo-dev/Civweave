@@ -3,93 +3,41 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 await import('./sync-release-version-assets.mjs');
-
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-
-const [versionText,packageText,indexHtml,manifestText,installRuntime,appIndex,installedEntry,installBoundary,releaseRuntime,workerCore,workerWrapper,legacyWorker,gateway,localServer,workingCampus,syncSource]=await Promise.all([
-  read('VERSION'),
-  read('package.json'),
-  read('public/index.html'),
-  read('public/app/manifest.webmanifest'),
-  read('public/install-v130.js'),
-  read('public/app/index.html'),
-  read('public/app/installed-entry-v146.html'),
-  read('public/app/install-boundary-v146.js'),
-  read('public/app/release-version-v1.js'),
-  read('public/service-worker-core-v208.js'),
-  read('public/service-worker-v203.js'),
-  read('public/service-worker-v156.js'),
-  read('server-gateway-v131.mjs'),
-  read('server-local-v131.mjs'),
-  read('public/app/working-campus-v156.html'),
-  read('scripts/sync-release-version-assets.mjs')
+const [versionText,packageText,indexHtml,manifestText,installRuntime,appIndex,installedEntry,routes,nav,installBoundary,releaseRuntime,workerCore,workerWrapper,legacyWorker,gateway,localServer,workingCampus,campusLoader,campusPart4,syncSource]=await Promise.all([
+  read('VERSION'),read('package.json'),read('public/index.html'),read('public/app/manifest.webmanifest'),read('public/install-v130.js'),read('public/app/index.html'),read('public/app/installed-entry-v146.html'),read('public/app/system-routes-v227.js'),read('public/app/themed-system-nav-v178.js'),read('public/app/install-boundary-v146.js'),read('public/app/release-version-v1.js'),read('public/service-worker-core-v208.js'),read('public/service-worker-v203.js'),read('public/service-worker-v156.js'),read('server-gateway-v131.mjs'),read('server-local-v131.mjs'),read('public/app/working-campus-v156.html'),read('public/app/working-campus-v156.js'),read('public/app/working-campus-v156.part4.txt'),read('scripts/sync-release-version-assets.mjs')
 ]);
-
-const version=versionText.trim();
-const pkg=JSON.parse(packageText);
-const manifest=JSON.parse(manifestText);
-
+const version=versionText.trim(),pkg=JSON.parse(packageText),manifest=JSON.parse(manifestText);
 assert(/^\d+\.\d+\.\d+$/.test(version),'VERSION must contain a semantic release version.');
-assert(pkg.version===version,`package.json ${pkg.version} does not match VERSION ${version}.`);
-
-for(const token of [
-  `<title>Install Commonweave v${version}</title>`,
-  `<span class="version">v${version}</span>`,
-  `Install Commonweave v${version}. The campus downloads automatically.`,
-  `/app/manifest.webmanifest?v=${version}`,
-  `/service-worker-v203.js?v=${version}-lightweight-shell-v208`,
-  `/install-v130.js?v=${version}-lightweight-shell-v208`,
-  `/app/offline-campus-status-v210.js?v=${version}-offline-retry-loop-v211`,
-  `/app/required-campus-autostart-v1.js?v=${version}-required-campus-v1`
-])assert(indexHtml.includes(token),`public/index.html is missing ${token}`);
-
-assert(manifest.name===`Commonweave v${version}`,'Manifest name does not match the canonical release.');
-assert(new URL(manifest.start_url,'https://commonweave.invalid').searchParams.get('version')===version,'Manifest start_url does not carry the canonical release.');
-assert(installRuntime.includes(`const VERSION = '${version}';`),'Installer runtime does not use the canonical release.');
-assert(appIndex.includes(`/app/installed-entry-v146.js?v=${version}`),'Stable app entry cache revision is stale.');
-assert(installedEntry.includes(`/app/installed-entry-v146.js?v=${version}`),'Installed entry cache revision is stale.');
-assert(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core does not use the canonical release.');
-assert(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-lightweight-shell-v208-retained-v218`),'Active worker wrapper is stale.');
+assert.equal(pkg.version,version);
+for(const token of [`<title>Install Commonweave v${version}</title>`,`<span class="version">v${version}</span>`,`Install Commonweave v${version}. The campus downloads automatically.`,`/app/manifest.webmanifest?v=${version}`,`/service-worker-v203.js?v=${version}-lightweight-shell-v208`,`/install-v130.js?v=${version}-lightweight-shell-v208`])assert(indexHtml.includes(token),`public/index.html is missing ${token}`);
+assert.equal(manifest.name,`Commonweave v${version}`);
+assert.equal(new URL(manifest.start_url,'https://commonweave.invalid').searchParams.get('version'),version);
+assert(installRuntime.includes(`const VERSION = '${version}';`),'Installer runtime is stale.');
+assert(appIndex.includes(`/app/installed-entry-v146.js?v=${version}`),'Stable app entry is stale.');
+assert(installedEntry.includes(`/app/installed-entry-v146.js?v=${version}`),'Installed entry is stale.');
+assert(routes.includes(`const VERSION='${version}';`),'Five-system route contract version is stale.');
+for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
+assert(nav.includes(`const VERSION='${version}-five-system-navigation-v227';`),'Themed navigation version is stale.');
+assert(nav.includes('ROUTES.navigate'),'Themed navigation bypasses the route contract.');
+assert(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core version is stale.');
+assert(workerWrapper.includes(`/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Worker route contract revision is stale.');
+assert(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-lightweight-shell-v208-retained-v218`),'Worker core revision is stale.');
+assert(workerWrapper.indexOf('/service-worker-canonical-navigation-v227.js')>workerWrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not the final worker policy.');
 assert(legacyWorker.includes(`/service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
-assert(installBoundary.includes(`const VERSION='${version}';`),'Install-boundary runtime version is stale.');
-assert(installBoundary.includes(`const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`),'Install-boundary legacy bundle cache key is stale.');
-assert(installBoundary.includes(`version:'${version}'`),'Install boundary does not expose the canonical release.');
-assert(
-  installBoundary.includes("const LEGACY_SCRIPTS=[")&&
-  installBoundary.includes("'/app/release-version-v1.js'")&&
-  installBoundary.includes("canonicalPolicy:'core-only-no-global-additions-no-redirect'")&&
-  installBoundary.includes('canonicalAutoScripts:0'),
-  'Install boundary does not keep visible-version synchronization on legacy pages while preserving canonical core-only startup.'
-);
-assert(
-  !installBoundary.includes("const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';")&&
-  !installBoundary.includes('addScript(RELEASE_VERSION_SCRIPT)'),
-  'Install boundary reintroduced the visible-version synchronizer into canonical Working Campus startup.'
-);
+for(const token of [`const VERSION='${version}';`,`const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`,`version:'${version}'`,"'/app/system-routes-v227.js'","canonicalPolicy:'five-system-first-class-routes-commonweave-core-only'",'canonicalSystemCount:5','canonicalAutoScripts:0'])assert(installBoundary.includes(token),`Install boundary is missing ${token}.`);
+assert(!installBoundary.includes("const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';")&&!installBoundary.includes('addScript(RELEASE_VERSION_SCRIPT)'),'Install boundary reintroduced the retired canonical version loader.');
 assert(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-commonweave-version]')"),'Visible-version synchronizer is incomplete.');
-assert(gateway.includes(`const VERSION = '${version}-render-installed-runtime-v132';`),'Gateway wrapper was not synchronized to the canonical release.');
-assert(localServer.includes(`"const VERSION = '${version}';"`)&&localServer.includes(`?build=${version}`),'Local server wrapper was not synchronized to the canonical release.');
+assert(gateway.includes(`const VERSION = '${version}-render-installed-runtime-v132';`),'Gateway wrapper version is stale.');
+assert(localServer.includes(`"const VERSION = '${version}';"`)&&localServer.includes(`?build=${version}`),'Local server version is stale.');
 assert(workingCampus.includes(`Commonweave Working Campus · v${version}`)&&workingCampus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
-
-for(const token of [
-  "await patch('public/index.html'",
-  "await patch('public/app/manifest.webmanifest'",
-  "await patch('public/service-worker-core-v208.js'",
-  "await patch('public/app/install-boundary-v146.js'",
-  "await patch('public/app/working-campus-v156.html'",
-  "await patch('server-gateway-v131.mjs'",
-  "await patch('server-local-v131.mjs'",
-  "install-boundary runtime version",
-  "install-boundary legacy additions revision"
-])assert(syncSource.includes(token),`Release synchronizer is missing ${token}.`);
-
-for(const [label,source] of [['installer page',indexHtml],['manifest',manifestText],['installer runtime',installRuntime],['stable app entry',appIndex],['installed entry',installedEntry],['install boundary',installBoundary],['worker core',workerCore],['worker wrapper',workerWrapper],['legacy worker',legacyWorker],['working campus',workingCampus]]){
-  const visibleReleasePattern=new RegExp(`(?:Commonweave v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
-  for(const match of source.matchAll(visibleReleasePattern)){
-    if(match[1]!==version)throw new Error(`${label} still exposes release ${match[1]} instead of ${version}.`);
-  }
+assert(campusLoader.includes(`system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Working Campus route loader version is stale.');
+assert(campusPart4.includes(`version:'${version}'`),'Working Campus realm travel version is stale.');
+for(const token of ["await patch('public/app/system-routes-v227.js'","await patch('public/app/themed-system-nav-v178.js'","await patch('public/app/working-campus-v156.js'","await patch('public/app/working-campus-v156.part4.txt'",'worker route contract revision','five-system route version'])assert(syncSource.includes(token),`Release synchronizer is missing ${token}.`);
+for(const [label,source] of [['installer',indexHtml],['manifest',manifestText],['installer runtime',installRuntime],['app entry',appIndex],['installed entry',installedEntry],['route contract',routes],['navigation',nav],['boundary',installBoundary],['worker core',workerCore],['worker wrapper',workerWrapper],['legacy worker',legacyWorker],['working campus',workingCampus],['campus loader',campusLoader],['campus travel',campusPart4]]){
+  const pattern=new RegExp(`(?:Commonweave v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
+  for(const match of source.matchAll(pattern))if(match[1]!==version)throw new Error(`${label} still exposes ${match[1]} instead of ${version}.`);
 }
-
-console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,installerVersion:true,manifestVersion:true,workerVersion:true,installBoundaryVersion:true,visibleVersionRuntime:true,visibleVersionScope:'legacy-only',canonicalCoreOnly:true,workingCampusVersion:true,gatewayVersion:true,localVersion:true,buildTimeSynchronization:true},null,2));
+console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,canonicalCoreOnly:true,legacyCompatibility:true,gatewayVersion:true,localVersion:true,buildTimeSynchronization:true},null,2));

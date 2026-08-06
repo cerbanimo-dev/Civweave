@@ -1,14 +1,23 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.15';
-const REVISION='canonical-core-only-v226';
+const VERSION='1.0.16';
+const REVISION='five-system-boundary-v227';
 const INSTALLER='/';
-const BOOT_KEY='commonweave.install-boundary.boot.v226';
+const BOOT_KEY='commonweave.install-boundary.boot.v227';
+const LEGACY_BOOT_KEY='commonweave.install-boundary.boot.v226';
 const DEV_KEY='commonweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION='v1.0.15-canonical-core-only-v226';
+const ADDITIONS_VERSION='v1.0.16-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/commonweave-additions-v156.css';
+const FALLBACK_PATHS=new Map([
+  ['/app/working-campus-v156.html','commonweave'],
+  ['/app/cabinets/living-school/index.html','living-school'],
+  ['/app/realm-console-v140.html','cerbanimo'],
+  ['/app/fellowfare-cabinet-v144.html','fellowfare'],
+  ['/app/anarchadia-console-v139.html','anarchadia']
+]);
 const LEGACY_SCRIPTS=[
+  '/app/system-routes-v227.js',
   '/app/release-version-v1.js',
   '/app/weaveling-memory-v191.js',
   '/app/weaveling-memory-bridge-v191.js',
@@ -42,18 +51,23 @@ function developer(){
   try{return localhost()&&sessionStorage.getItem(DEV_KEY)==='1'}catch{return false}
 }
 function embedded(){try{return window.top!==window.self}catch{return true}}
+function authorize(){
+  try{sessionStorage.setItem(BOOT_KEY,'1');sessionStorage.setItem(LEGACY_BOOT_KEY,'1')}catch{}
+}
 function explicitInstalled(){
   try{
-    if(params.get('installed')==='1'){sessionStorage.setItem(BOOT_KEY,'1');return true}
-    return sessionStorage.getItem(BOOT_KEY)==='1';
+    if(params.get('installed')==='1'){authorize();return true}
+    return sessionStorage.getItem(BOOT_KEY)==='1'||sessionStorage.getItem(LEGACY_BOOT_KEY)==='1';
   }catch{return params.get('installed')==='1'}
 }
-function canonicalAppSurface(){
-  const canonical=location.pathname==='/app/working-campus-v156.html';
-  if(canonical){try{sessionStorage.setItem(BOOT_KEY,'1')}catch{}}
-  return canonical;
+function systemSurface(){
+  const contract=globalThis.CommonweaveSystemRoutesV227;
+  const system=contract?.identify?.(location.pathname)||FALLBACK_PATHS.get(location.pathname)||'';
+  if(system)authorize();
+  return system;
 }
-function allowed(){return canonicalAppSurface()||installedDisplay()||explicitInstalled()||developer()||embedded()}
+function canonicalAppSurface(){return systemSurface()==='commonweave'}
+function allowed(){return Boolean(systemSurface())||installedDisplay()||explicitInstalled()||developer()||embedded()}
 function installerUrl(){
   const target=`${location.pathname}${location.search}${location.hash}`;
   const next=new URL(INSTALLER,location.origin);
@@ -82,29 +96,30 @@ function installAdditions(){
   return true;
 }
 function start(){
-  const root=document.documentElement;
+  const root=document.documentElement,system=systemSurface();
   if(!allowed()){
     if(root)root.dataset.installBoundary='blocked';
     location.replace(installerUrl());
     return;
   }
-  if(canonicalAppSurface()){
-    if(root){
-      root.dataset.installBoundary='canonical';
-      root.dataset.commonweaveCanonicalCore='only';
-    }
-    queueMicrotask(()=>dispatchEvent(new CustomEvent('commonweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION}})));
+  if(system){
+    root.dataset.installBoundary=system==='commonweave'?'canonical':'canonical-system';
+    root.dataset.commonweaveSystemRoute=system;
+  }else if(root)root.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
+  if(system==='commonweave'){
+    root.dataset.commonweaveCanonicalCore='only';
+    queueMicrotask(()=>dispatchEvent(new CustomEvent('commonweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system}})));
     return;
   }
-  if(root)root.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
   installAdditions();
 }
 
 start();
 
 globalThis.CommonweaveInstallBoundaryV146=Object.freeze({
-  version:'1.0.15',allowed,
+  version:'1.0.16',allowed,
   revision:REVISION,
+  systemSurface,
   canonicalAppSurface,
   installedDisplay,
   explicitInstalled,
@@ -113,7 +128,8 @@ globalThis.CommonweaveInstallBoundaryV146=Object.freeze({
   installerUrl,
   installAdditions,
   additionsVersion:ADDITIONS_VERSION,
-  canonicalPolicy:'core-only-no-global-additions-no-redirect',
+  canonicalPolicy:'five-system-first-class-routes-commonweave-core-only',
+  canonicalSystemCount:5,
   canonicalAutoScripts:0,
   onlineSelfHeal:true,
   missingAssetDetails:true
