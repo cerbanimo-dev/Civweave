@@ -1,4 +1,4 @@
-name: Verify Commonweave Clean-Room Settings
+name: Verify Civweave Clean-Room Settings
 
 on:
   push:
@@ -61,7 +61,7 @@ jobs:
           grep -q "revision=release-coherence-v220" .cloudflare-pages/app/installed-entry-v146.js
           grep -q "service-worker-core-v208.js?v=${release_version}-lightweight-shell-v208-retained-v218" .cloudflare-pages/service-worker-v203.js
           grep -q "service-worker-release-coherence-v220.js?v=release-coherence-v220" .cloudflare-pages/service-worker-v203.js
-          grep -q "Commonweave Working Campus · v${release_version}" .cloudflare-pages/app/working-campus-v156.html
+          grep -q "Civweave Working Campus · v${release_version}" .cloudflare-pages/app/working-campus-v156.html
           grep -q "<b class=\"version-chip\">v${release_version}</b>" .cloudflare-pages/app/working-campus-v156.html
           grep -q "version-pinned-text-network-first-cached-fallback" .cloudflare-pages/service-worker-release-coherence-v220.js
           ! grep -Eq "^[[:space:]]*importScripts\('/service-worker\.js" .cloudflare-pages/service-worker-v156.js
@@ -70,4 +70,4 @@ jobs:
           ! grep -q "PerformanceObserver" .cloudflare-pages/app/settings-delegation-v175.js
           ! grep -q "setInterval(" .cloudflare-pages/app/settings-delegation-v175.js
           ! grep -q "ensureRuntime" .cloudflare-pages/app/model-settings-controller-v173.js
-          ! grep -q "commonweave-model-runtime" .cloudflare-pages/app/model-settings-controller-v173.js
+          ! grep -q "civweave-model-runtime" .cloudflare-pages/app/model-settings-controller-v173.js

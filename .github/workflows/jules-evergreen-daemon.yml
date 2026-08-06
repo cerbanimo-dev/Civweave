@@ -17,7 +17,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: commonweave-jules-evergreen
+  group: civweave-jules-evergreen
   cancel-in-progress: false
 
 jobs:

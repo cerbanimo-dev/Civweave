@@ -1,4 +1,4 @@
-name: Verify Commonweave AI Settings Clean Room
+name: Verify Civweave AI Settings Clean Room
 
 on:
   push:
