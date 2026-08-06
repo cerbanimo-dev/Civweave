@@ -6,7 +6,8 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const version=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
 const revision='release-coherence-v220';
 const lifecycleRevision='document-lifecycle-v222';
-const campusRevision='campus-atomic-startup-v222';
+const campusRevision='canonical-campus-startup-v223';
+const boundaryRevision='canonical-campus-boundary-v223';
 if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('VERSION must contain a semantic release version.');
 
 const changed=[];
@@ -49,6 +50,30 @@ await patch('public/app/installed-entry-v146.js',source=>{
     'installed entry fallback release version'
   );
   if(!source.includes(`revision=${revision}`))throw new Error('Installed entry does not register the release-coherent worker.');
+  return source;
+});
+
+await patch('public/app/install-boundary-v146.js',source=>{
+  if(!source.includes('function canonicalAppSurface()')){
+    source=replaceTextRequired(
+      source,
+      'function allowed(){return installedDisplay()||explicitInstalled()||developer()||embedded()}',
+      "function canonicalAppSurface(){const canonical=location.pathname==='/app/working-campus-v156.html';if(canonical){try{sessionStorage.setItem(BOOT_KEY,'1')}catch{}}return canonical}\nfunction allowed(){return canonicalAppSurface()||installedDisplay()||explicitInstalled()||developer()||embedded()}",
+      'canonical Working Campus boundary allowance'
+    );
+  }
+  if(!source.includes('function startAdditions()')){
+    source=replaceTextRequired(
+      source,
+      "if(!allowed()){document.documentElement.dataset.installBoundary='blocked';location.replace(installerUrl())}else{document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';installAdditions()}",
+      "function startAdditions(){if(!canonicalAppSurface()){installAdditions();return}const launch=()=>installAdditions();if(document.documentElement.dataset.commonweaveCampusRuntime==='ready'){queueMicrotask(launch);return}addEventListener('commonweave:working-campus-runtime-ready',launch,{once:true})}\nif(!allowed()){document.documentElement.dataset.installBoundary='blocked';location.replace(installerUrl())}else{document.documentElement.dataset.installBoundary=canonicalAppSurface()?'canonical':installedDisplay()?'installed':developer()?'developer':'embedded';startAdditions()}",
+      'canonical Working Campus delayed additions boundary'
+    );
+  }
+  if(!source.includes(`boundaryRevision:'${boundaryRevision}'`)){
+    source=replaceRequired(source,/version:'\d+\.\d+\.\d+',allowed,/,`version:'${version}',allowed,canonicalAppSurface,boundaryRevision:'${boundaryRevision}',`,'install-boundary canonical release metadata');
+  }
+  for(const token of ['function canonicalAppSurface()','function startAdditions()','commonweave:working-campus-runtime-ready',`boundaryRevision:'${boundaryRevision}'`])if(!source.includes(token))throw new Error(`Install boundary is missing ${token}.`);
   return source;
 });
 
@@ -111,6 +136,6 @@ const lifecycle=await readFile(path.join(root,'public/app/document-lifecycle-v22
 for(const token of [lifecycleRevision,'pagehide','CommonweaveLifecycleMutationObserver'])if(!lifecycle.includes(token))throw new Error(`Document lifecycle guard is missing ${token}.`);
 if(lifecycle.includes("Object.defineProperty(document,'head'")||lifecycle.includes("Object.defineProperty(document,'body'"))throw new Error('Document lifecycle guard still overrides native document structure.');
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
-for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','commonweave:working-campus-runtime-ready'])if(!campus.includes(token))throw new Error(`Working Campus atomic loader is missing ${token}.`);
+for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','commonweave:working-campus-runtime-ready','document.documentElement===bootDocument'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,lifecycleRevision,campusRevision,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,lifecycleRevision,campusRevision,boundaryRevision,changed},null,2));

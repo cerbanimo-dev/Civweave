@@ -1,5 +1,13 @@
 # Commonweave Host Node Hub v1.0.10
 
+## Canonical Working Campus launch
+
+This release fixes the installed app flashing the Working Campus and then navigating back to the black installer/version surface.
+
+The shared install boundary could still reject `/app/working-campus-v156.html` when standalone detection or the `installed=1` query was unavailable during startup. It then redirected the live campus to `/` while the campus fragments and shared additions were loading. That produced the reported `Working Campus DOM was replaced before runtime evaluation` and `Document navigation interrupted script loading` errors.
+
+The canonical Working Campus route now authorizes itself, persists the installed-session boundary, and delays optional shared additions until the core campus runtime reports ready. The campus loader now distinguishes actual URL or document navigation from ordinary DOM updates.
+
 ## Visual runtime recovery
 
 This release repairs the failures found during live host-node testing.
@@ -22,3 +30,7 @@ This release repairs the failures found during live host-node testing.
 - Host-node clients now learn advertised capabilities before sending heartbeat traffic, preventing noisy 404 requests against older nodes.
 - Antigravity permission-denied responses no longer block the workflow. The runtime falls back to the configured interactive Gemini model, or Gemini 2.5 Flash, and clearly reports that the managed agent sandbox was unavailable.
 - All service-worker generations were advanced and the new icon assets were added to offline caches.
+
+## Versioning policy
+
+Every future pull request targeting `main` must advance `VERSION` to a strictly higher semantic version. The repository now verifies this automatically.
