@@ -1,5 +1,4 @@
 {
-  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "Commonweave v1.0.6",
   "short_name": "Commonweave",
   "description": "Five connected, offline-ready Commonweave systems with deterministic local operation and a non-modal AI settings layer.",
