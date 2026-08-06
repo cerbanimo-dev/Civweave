@@ -1,0 +1,40 @@
+name: Verify Version Bump
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  require-higher-version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require every change to advance Commonweave
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          base_version="$(git show "origin/${{ github.base_ref }}:VERSION" | tr -d '[:space:]')"
+          proposed_version="$(tr -d '[:space:]' < VERSION)"
+          node - "$base_version" "$proposed_version" <<'NODE'
+          const [base, proposed] = process.argv.slice(2);
+          const parse = value => {
+            const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(value);
+            if (!match) throw new Error(`Invalid semantic version: ${value}`);
+            return match.slice(1).map(Number);
+          };
+          const left = parse(base);
+          const right = parse(proposed);
+          const greater = right.some((value, index) => value > left[index] && right.slice(0, index).every((part, prior) => part === left[prior]));
+          if (!greater) {
+            console.error(`Every Commonweave PR must advance VERSION. Base is ${base}; proposed is ${proposed}.`);
+            process.exit(1);
+          }
+          console.log(`Commonweave version advances from ${base} to ${proposed}.`);
+          NODE
