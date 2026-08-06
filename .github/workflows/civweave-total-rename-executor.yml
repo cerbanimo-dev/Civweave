@@ -3,7 +3,9 @@ name: Execute Civweave total rename
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - brand/civweave-executor-trigger
     paths:
       - .github/workflows/civweave-total-rename-executor.yml
   schedule:
