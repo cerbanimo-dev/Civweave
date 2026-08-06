@@ -1,9 +1,13 @@
 {
   "version": "1.0.6",
-  "revision": "resumable-discovered-campus-v208",
-  "description": "Optional Commonweave campus pack. The service worker begins from these functional entry points, discovers their same-origin dependencies, and resumes individual failed files without blocking PWA installation.",
+  "revision": "resumable-discovered-campus-v208-reward-ledger-v2",
+  "description": "Commonweave campus pack. The service worker begins from these functional entry points and canonical reward runtimes, discovers their same-origin dependencies, and resumes individual failed files without invalidating the package.",
   "seeds": [
     "/app/installed-entry-v146.html",
+    "/app/cw-reward-ledger-v2.js",
+    "/app/cw-reward-receivers-v2.js",
+    "/app/cw-reward-legacy-bridge-v2.js",
+    "/app/cw-reward-surfaces-v2.js",
     "/app/fullscreen-family-v104.html",
     "/app/working-campus-v156.html",
     "/app/realm-console-v140.html",
