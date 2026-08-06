@@ -12,10 +12,12 @@ const [source,wrapper,versionText]=await Promise.all([
 ]);
 const revision='navigation-redirect-safety-v224';
 const version=versionText.trim();
+const semver=value=>value.split('.').map(Number);
+const atLeast=(value,floor)=>{const left=semver(value),right=semver(floor);return left.some((part,index)=>part>right[index]&&left.slice(0,index).every((prior,i)=>prior===right[i]))||left.every((part,index)=>part===right[index])};
 
-assert.equal(version,'1.0.11','Navigation redirect repair must ship as Commonweave v1.0.11.');
+assert(atLeast(version,'1.0.11'),`Navigation redirect safety requires Commonweave 1.0.11 or newer; found ${version}.`);
 assert(wrapper.includes(`/service-worker-navigation-safety-v224.js?v=${revision}`),'Active worker wrapper does not import navigation safety.');
-assert(wrapper.indexOf('/service-worker-navigation-safety-v224.js')>wrapper.indexOf('/service-worker-release-coherence-v220.js'),'Navigation safety must be the final response-policy override.');
+assert(wrapper.indexOf('/service-worker-navigation-safety-v224.js')>wrapper.indexOf('/service-worker-release-coherence-v220.js'),'Navigation safety must follow release coherence.');
 for(const token of [
   "redirect: 'follow'",
   "response.type === 'opaqueredirect'",
@@ -35,7 +37,7 @@ function redirectedResponse(text){
   Object.defineProperty(response,'redirected',{value:true});
   return response;
 }
-function manualNavigation(url='https://commonweave.invalid/app/working-campus-v156.html?installed=1&version=1.0.11'){
+function manualNavigation(url=`https://commonweave.invalid/app/working-campus-v156.html?installed=1&version=${version}`){
   const request=new Request(url,{method:'GET',redirect:'manual'});
   Object.defineProperty(request,'mode',{value:'navigate'});
   return request;
@@ -44,7 +46,7 @@ function manualNavigation(url='https://commonweave.invalid/app/working-campus-v1
 const context={
   console,URL,Request,Response,Headers,
   self:{},
-  RUNTIME_CACHE:'runtime-v1.0.11',
+  RUNTIME_CACHE:`runtime-v${version}`,
   cacheKey:pathname=>new Request(new URL(pathname,'https://commonweave.invalid').href),
   withTimeout:promise=>Promise.resolve(promise),
   responseLooksValid:response=>Boolean(response?.ok),
@@ -81,4 +83,4 @@ const stable=await context.stableAppEntry(manualNavigation('https://commonweave.
 assert.equal(stable.redirected,false,'Stable app entry retained its redirected flag.');
 assert.equal(stable.headers.get('location'),null);
 
-console.log(JSON.stringify({ok:true,version,revision,internalRedirectMode:lastFetchRequest.redirect,freshNormalized:true,cachedNormalized:true,opaqueRedirectRejected:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision,minimumVersion:'1.0.11',internalRedirectMode:lastFetchRequest.redirect,freshNormalized:true,cachedNormalized:true,opaqueRedirectRejected:true},null,2));
