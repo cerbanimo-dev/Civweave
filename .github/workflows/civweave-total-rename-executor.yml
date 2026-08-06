@@ -1,0 +1,77 @@
+name: Execute Civweave total rename
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/civweave-total-rename-executor.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: civweave-total-rename-executor
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Rewrite source, paths, and checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out the prepared migration branch
+        uses: actions/checkout@v4
+        with:
+          ref: brand/civweave-total-rename
+          fetch-depth: 0
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Rebase migration onto the triggering main commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git rebase origin/main
+
+      - name: Remove the one-shot executor from the generated branch
+        run: rm -f .github/workflows/civweave-total-rename-executor.yml
+
+      - name: Apply repository-wide Civweave replacement
+        run: python scripts/civweave-total-rename.py
+
+      - name: Verify generated JavaScript and repository checks
+        run: npm run check:syntax
+
+      - name: Prove the former identifier is absent
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -i 'commonweave'; then
+            echo 'Former identifier remains in a tracked path.' >&2
+            exit 1
+          fi
+          if git grep -I -n -i 'commonweave'; then
+            echo 'Former identifier remains in tracked text.' >&2
+            exit 1
+          fi
+
+      - name: Publish the generated migration branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --stat
+          if git diff --cached --quiet; then
+            echo 'No generated migration changes found.' >&2
+            exit 1
+          fi
+          version="$(tr -d '[:space:]' < VERSION)"
+          git commit -m "Publish Civweave v${version} with total identifier replacement"
+          git push --force-with-lease origin HEAD:brand/civweave-total-rename
