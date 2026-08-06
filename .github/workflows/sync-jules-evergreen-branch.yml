@@ -1,0 +1,34 @@
+name: Sync Jules Evergreen Branch
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-jules-evergreen-branch
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Point evergreen/jules-pipeline at current main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          MAIN_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n --arg sha "$MAIN_SHA" '{sha:$sha,force:true}')"
+          curl --fail-with-body --silent --show-error \
+            -X PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$REPOSITORY/git/refs/heads/evergreen/jules-pipeline" \
+            -d "$payload"

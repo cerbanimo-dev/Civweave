@@ -19,6 +19,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Verify Jules evergreen control plane when present
+        run: |
+          if [ -f scripts/verify-jules-evergreen.mjs ]; then
+            node --check scripts/lib/jules-evergreen-core.mjs
+            node --check scripts/lib/jules-api-client.mjs
+            node --check scripts/lib/github-evergreen-client.mjs
+            node --check scripts/jules-evergreen-daemon.mjs
+            node --check scripts/verify-jules-evergreen.mjs
+            node --test scripts/test-jules-evergreen-core.mjs
+            node scripts/verify-jules-evergreen.mjs
+          fi
       - name: Install JavaScript dependencies
         run: npm install --no-audit --no-fund
       - name: Verify clean-room AI settings
