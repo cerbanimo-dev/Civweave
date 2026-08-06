@@ -53,6 +53,8 @@ assert(installedEntry.includes(`/app/installed-entry-v146.js?v=${version}`),'Ins
 assert(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core does not use the canonical release.');
 assert(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-lightweight-shell-v208-retained-v218`),'Active worker wrapper is stale.');
 assert(legacyWorker.includes(`/service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
+assert(installBoundary.includes(`const VERSION='${version}';`),'Install-boundary runtime version is stale.');
+assert(installBoundary.includes(`const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`),'Install-boundary legacy bundle cache key is stale.');
 assert(installBoundary.includes(`version:'${version}'`),'Install boundary does not expose the canonical release.');
 assert(
   installBoundary.includes("const LEGACY_SCRIPTS=[")&&
@@ -75,16 +77,19 @@ for(const token of [
   "await patch('public/index.html'",
   "await patch('public/app/manifest.webmanifest'",
   "await patch('public/service-worker-core-v208.js'",
+  "await patch('public/app/install-boundary-v146.js'",
   "await patch('public/app/working-campus-v156.html'",
   "await patch('server-gateway-v131.mjs'",
-  "await patch('server-local-v131.mjs'"
+  "await patch('server-local-v131.mjs'",
+  "install-boundary runtime version",
+  "install-boundary legacy additions revision"
 ])assert(syncSource.includes(token),`Release synchronizer is missing ${token}.`);
 
-for(const [label,source] of [['installer page',indexHtml],['manifest',manifestText],['installer runtime',installRuntime],['stable app entry',appIndex],['installed entry',installedEntry],['worker core',workerCore],['worker wrapper',workerWrapper],['legacy worker',legacyWorker],['working campus',workingCampus]]){
-  const visibleReleasePattern=new RegExp(`(?:Commonweave v|const VERSION = '|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
+for(const [label,source] of [['installer page',indexHtml],['manifest',manifestText],['installer runtime',installRuntime],['stable app entry',appIndex],['installed entry',installedEntry],['install boundary',installBoundary],['worker core',workerCore],['worker wrapper',workerWrapper],['legacy worker',legacyWorker],['working campus',workingCampus]]){
+  const visibleReleasePattern=new RegExp(`(?:Commonweave v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
   for(const match of source.matchAll(visibleReleasePattern)){
     if(match[1]!==version)throw new Error(`${label} still exposes release ${match[1]} instead of ${version}.`);
   }
 }
 
-console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,installerVersion:true,manifestVersion:true,workerVersion:true,visibleVersionRuntime:true,visibleVersionScope:'legacy-only',canonicalCoreOnly:true,workingCampusVersion:true,gatewayVersion:true,localVersion:true,buildTimeSynchronization:true},null,2));
+console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,installerVersion:true,manifestVersion:true,workerVersion:true,installBoundaryVersion:true,visibleVersionRuntime:true,visibleVersionScope:'legacy-only',canonicalCoreOnly:true,workingCampusVersion:true,gatewayVersion:true,localVersion:true,buildTimeSynchronization:true},null,2));
