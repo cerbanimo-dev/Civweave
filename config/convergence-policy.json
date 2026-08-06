@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema": "commonweave.convergence-policy.v1",
+  "phase": "wave-0-lock",
+  "purpose": "Converge Commonweave onto one owner per runtime concern while preserving user data, domain contracts, offline operation, and the installed golden path.",
+  "activeDemolitionLane": {
+    "realm": "living-school",
+    "pullRequest": 178,
+    "allowedNewRuntimePaths": [
+      "public/app/cabinets/living-school/living-school-cleanroom-v218.mjs",
+      "public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs",
+      "public/app/cabinets/living-school/living-school-cleanroom-render-v218.mjs",
+      "public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs",
+      "public/app/cabinets/living-school/living-school-cleanroom-v218.css",
+      "scripts/verify-living-school-cleanroom-v218.mjs",
+      ".github/workflows/verify-living-school-cleanroom-v218.yml"
+    ]
+  },
+  "runtimeRoots": [
+    "package.json",
+    "render.yaml",
+    "wrangler.toml",
+    "public/index.html",
+    "public/_routes.json",
+    "public/offline.html",
+    "public/recover.html",
+    "public/app/app-manifest.json",
+    "public/app/fullscreen-family-v104.html",
+    "public/app/working-campus-v156.html",
+    "public/app/cabinets/living-school/index.html",
+    "public/app/realm-console-v140.html",
+    "public/app/fellowfare-cabinet-v144.html",
+    "public/app/anarchadia-console-v139.html",
+    "public/service-worker.js",
+    "server-gateway-v131.mjs",
+    "server-local-v131.mjs"
+  ],
+  "stableTargetEntries": {
+    "commonweave": "/app/entry/commonweave.html",
+    "living-school": "/app/entry/living-school.html",
+    "cerbanimo": "/app/entry/cerbanimo.html",
+    "fellowfare": "/app/entry/fellowfare.html",
+    "anarchadia": "/app/entry/anarchadia.html"
+  },
+  "allowedRuntimeDirectories": [
+    "public/app/realms/",
+    "public/app/shared/",
+    "public/app/compat/",
+    "public/app/migrations/",
+    "public/app/cabinets/living-school/"
+  ],
+  "protectedArchitectureFiles": [
+    "public/app/fullscreen-family-v104.html",
+    "public/app/family-shell-v104.js",
+    "public/service-worker.js",
+    "scripts/build-mobile-install-kit.mjs",
+    "server-gateway-v131.mjs"
+  ],
+  "forbiddenNewMechanisms": [
+    "synthetic-click-relay",
+    "mutation-observer-routing",
+    "hidden-launcher",
+    "runtime-source-rewrite",
+    "source-parsed-package-manifest",
+    "cross-realm-private-storage-read"
+  ],
+  "exitTargets": {
+    "activeEntriesPerRealm": 1,
+    "familyNavigationOwners": 1,
+    "settingsControllers": 1,
+    "guideRuntimes": 1,
+    "serviceWorkers": 1,
+    "packageManifests": 1,
+    "hiddenCompatibilityControls": 0,
+    "syntheticClickRelays": 0,
+    "mutationObserverRouters": 0,
+    "runtimeSourceRewrites": 0,
+    "sourceParsedPackageManifests": 0,
+    "directCrossRealmStorageReads": 0,
+    "minimumRuntimeFileReductionPercent": 40,
+    "minimumDeletedToAddedRuntimeLineRatio": 2
+  }
+}

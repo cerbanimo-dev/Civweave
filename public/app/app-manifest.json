@@ -1,0 +1,74 @@
+{
+  "schema": "commonweave.application-manifest.v1",
+  "release": "1.0.6",
+  "status": "convergence-baseline",
+  "dispatcher": "/app/fullscreen-family-v104.html",
+  "familyShell": {
+    "script": "/app/family-shell-v104.js",
+    "stylesheet": "/app/family-shell-v104.css",
+    "owns": [
+      "family-navigation",
+      "shared-guide-aperture",
+      "shared-ai-settings-aperture",
+      "mobile-viewport-and-keyboard-behavior"
+    ],
+    "mustNotOwn": [
+      "realm-private-storage",
+      "realm-domain-state",
+      "realm-rendering",
+      "realm-action-routing"
+    ]
+  },
+  "realms": {
+    "commonweave": {
+      "currentEntry": "/app/working-campus-v156.html",
+      "targetEntry": "/app/entry/commonweave.html",
+      "guide": "weaveling",
+      "stateAuthority": "intention-and-weave-store",
+      "adapter": null
+    },
+    "living-school": {
+      "currentEntry": "/app/cabinets/living-school/index.html",
+      "targetEntry": "/app/entry/living-school.html",
+      "guide": "moss",
+      "stateAuthority": "living-school-v151-migrated-store",
+      "adapter": null,
+      "activeDemolitionPullRequest": 178
+    },
+    "cerbanimo": {
+      "currentEntry": "/app/realm-console-v140.html?system=cerbanimo&cabinet=1",
+      "targetEntry": "/app/entry/cerbanimo.html",
+      "guide": "kamiya",
+      "stateAuthority": "cerbanimo-quest-store",
+      "adapter": null
+    },
+    "fellowfare": {
+      "currentEntry": "/app/fellowfare-cabinet-v144.html?cabinet=1",
+      "targetEntry": "/app/entry/fellowfare.html",
+      "guide": "rook",
+      "stateAuthority": "fellowfare-exchange-store",
+      "adapter": null
+    },
+    "anarchadia": {
+      "currentEntry": "/app/anarchadia-console-v139.html?cabinet=1",
+      "targetEntry": "/app/entry/anarchadia.html",
+      "guide": "merlin",
+      "stateAuthority": "anarchadia-governance-and-passport-projection",
+      "adapter": null
+    }
+  },
+  "sharedAuthorities": {
+    "aiSettings": "/app/model-settings-controller-v173.js",
+    "guideRuntime": "/app/assistant-runtime-v141.js",
+    "rewardLedger": "/app/cw-reward-ledger-v2.js",
+    "serviceWorker": "/service-worker.js"
+  },
+  "generationTargets": [
+    "dispatcher-routes",
+    "family-navigation-destinations",
+    "service-worker-precache",
+    "installer-package-manifest",
+    "route-smoke-test-matrix",
+    "documentation-route-table"
+  ]
+}
