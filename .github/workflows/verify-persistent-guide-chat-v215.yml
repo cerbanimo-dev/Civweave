@@ -6,6 +6,7 @@ on:
     paths:
       - public/app/install-boundary-v146.js
       - public/app/persistent-guide-chat-v215.js
+      - public/app/persistent-guide-viewport-v216.js
       - public/app/cabinets/living-school/index.html
       - public/app/cabinets/living-school/living-school-flat-loader-v213.js
       - public/app/cabinets/living-school/living-school-paths-v213.js
@@ -19,6 +20,7 @@ on:
     paths:
       - public/app/install-boundary-v146.js
       - public/app/persistent-guide-chat-v215.js
+      - public/app/persistent-guide-viewport-v216.js
       - public/app/cabinets/living-school/index.html
       - public/app/cabinets/living-school/living-school-flat-loader-v213.js
       - public/app/cabinets/living-school/living-school-paths-v213.js
@@ -45,9 +47,10 @@ jobs:
         run: |
           node --check public/app/install-boundary-v146.js
           node --check public/app/persistent-guide-chat-v215.js
+          node --check public/app/persistent-guide-viewport-v216.js
           node --check public/app/cabinets/living-school/living-school-flat-loader-v213.js
           node --check public/app/cabinets/living-school/living-school-paths-v213.js
           node --check public/app/cabinets/living-school/living-school-interactions-v213.js
           node --check scripts/verify-persistent-guide-chat-v215.mjs
-      - name: Verify one thread and direct Living School controls
+      - name: Verify one thread, keyboard-safe viewport, and direct Living School controls
         run: node scripts/verify-persistent-guide-chat-v215.mjs

@@ -6,10 +6,11 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
 const [
-  chat,boundary,livingIndex,loader,paths,interactions,
+  chat,viewport,boundary,livingIndex,loader,paths,interactions,
   commonweave,cerbanimo,fellowfare,anarchadia
 ]=await Promise.all([
   read('public/app/persistent-guide-chat-v215.js'),
+  read('public/app/persistent-guide-viewport-v216.js'),
   read('public/app/install-boundary-v146.js'),
   read('public/app/cabinets/living-school/index.html'),
   read('public/app/cabinets/living-school/living-school-flat-loader-v213.js'),
@@ -21,7 +22,7 @@ const [
   read('public/app/anarchadia-console-v139.html')
 ]);
 
-for(const source of [chat,boundary,loader,paths,interactions])new Function(source);
+for(const source of [chat,viewport,boundary,loader,paths,interactions])new Function(source);
 
 for(const token of [
   "const STORAGE_KEY='commonweave.persistent-guide-chat.v214'",
@@ -51,14 +52,33 @@ for(const retiredKey of [
 ])assert(!chat.includes(retiredKey),`Persistent chat reintroduced realm history key ${retiredKey}`);
 
 for(const token of [
+  "const VERSION='1.0.8-persistent-guide-viewport-v216'",
+  "const ROOT_ID='cw-persistent-guide-chat-v215'",
+  "const HEIGHT_VAR='--cwp215-visual-viewport-height'",
+  "const INSET_VAR='--cwp215-keyboard-inset'",
+  'globalThis.visualViewport',
+  'data-keyboard-open',
+  'keyboardOpen=activeInput',
+  "input?.scrollIntoView?.({block:'nearest',inline:'nearest'})",
+  "addEventListener('orientationchange',resetBaseline",
+  'CommonweavePersistentGuideViewportV216',
+])assert(viewport.includes(token),`Persistent guide viewport v216 is missing ${token}`);
+assert(viewport.includes('bottom:var(${INSET_VAR},0px)!important'),'Keyboard-open chat must anchor to the measured visual viewport inset.');
+assert(viewport.includes('max-height:calc(var(${HEIGHT_VAR},100dvh) - 4px)!important'),'Mobile keyboard-open chat must fit within the visible viewport height.');
+
+for(const token of [
   "const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js'",
-  "const ADDITIONS_VERSION='v215-guide-chat-notifications'",
-  'addScript(PERSISTENT_GUIDE_CHAT_SCRIPT)',
-  "const PERSISTENT_GUIDE_CHAT_REVISION='v215-one-thread-five-guide-notifications'",
+  "const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js'",
+  "const ADDITIONS_VERSION='v216-guide-chat-keyboard-viewport'",
+  'addScript(PERSISTENT_GUIDE_CHAT_SCRIPT);addScript(PERSISTENT_GUIDE_VIEWPORT_SCRIPT)',
+  "const PERSISTENT_GUIDE_CHAT_REVISION='v216-one-thread-five-guide-keyboard-safe'",
+  "const PERSISTENT_GUIDE_VIEWPORT_REVISION='v216-visual-viewport-keyboard-safe'",
   'persistentGuideChatSubmissionPipelines:1',
   'persistentGuideChatGuideCount:5',
   'persistentGuideChatAboveNavigation:true',
   'persistentGuideChatNotifications:true',
+  'persistentGuideChatKeyboardSafe:true',
+  'persistentGuideChatUsesVisualViewport:true',
   "rook:'amber'",
 ])assert(boundary.includes(token),`Install boundary is missing ${token}`);
 
@@ -84,11 +104,12 @@ for(const [name,html] of Object.entries({commonweave,cerbanimo,fellowfare,anarch
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'v215-one-thread-five-guide-notifications',
+  revision:'v216-one-thread-five-guide-keyboard-safe',
   sharedHistoryKey:'commonweave.persistent-guide-chat.v214',
   assistantSubmissionPipelines:1,
   guideCount:5,
   notificationPalettes:{weaveling:'pearl-silver',moss:'green',kamiya:'purple',rook:'amber',merlin:'pink'},
   chatAboveFiveSystemNavigation:true,
+  keyboardSafeViewport:{visualViewport:true,focusAware:true,orientationAware:true},
   livingSchool:{directController:true,duplicateGuideButtons:false,unfinishedMenuInteractive:false,staleRoomBridge:false},
 },null,2));
