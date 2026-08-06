@@ -27,15 +27,18 @@ jobs:
           node --check public/service-worker-core-v208.js
           node --check public/service-worker-release-coherence-v220.js
           node --check public/service-worker-navigation-safety-v224.js
+          node --check public/service-worker-shell-repair-v225.js
           node --check public/service-worker-critical-v199.js
           node --check public/app/document-lifecycle-v221.js
           node --check public/app/working-campus-v156.js
+          node --check public/app/installer-online-fallback-v225.js
           node --check public/app/fast-interactive-runtime-v192.js
           node --check public/app/weaveling-memory-bridge-v191.js
           node --check public/app/offline-campus-status-v210.js
           node --check scripts/verify-service-worker-evaluation-v189.mjs
           node --check scripts/verify-release-coherence-v220.mjs
           node --check scripts/verify-navigation-redirect-safety-v224.mjs
+          node --check scripts/verify-shell-self-repair-v225.mjs
           node --check scripts/verify-document-lifecycle-v221.mjs
           node --check scripts/verify-rook-assistant-package-v197.mjs
           node --check scripts/verify-fast-interactive-runtime-v202.mjs
@@ -48,6 +51,8 @@ jobs:
         run: node scripts/verify-release-coherence-v220.mjs
       - name: Verify redirected navigation response safety
         run: node scripts/verify-navigation-redirect-safety-v224.mjs
+      - name: Verify empty shell self-repair and online fallback
+        run: node scripts/verify-shell-self-repair-v225.mjs
       - name: Verify navigation-safe Working Campus boot
         run: node scripts/verify-document-lifecycle-v221.mjs
       - name: Verify offline campus downloaded counts
