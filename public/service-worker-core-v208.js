@@ -456,11 +456,24 @@ async function cacheFirst(request) {
   }
 }
 
+async function normalizeStableAppEntryResponse(response) {
+  const headers = new Headers(response.headers);
+  headers.delete('content-length');
+  headers.delete('content-encoding');
+  headers.delete('location');
+  if (!headers.get('content-type')) headers.set('content-type', 'text/html; charset=utf-8');
+  headers.set('cache-control', 'no-store');
+  headers.set('x-commonweave-stable-entry', 'v217');
+  const body = await response.clone().arrayBuffer();
+  return new Response(body, { status: 200, statusText: 'OK', headers });
+}
+
 async function stableAppEntry(request) {
   let response = await findCached('/app/index.html');
   if (!response) {
     try {
-      response = await fetchFresh('/app/index.html', 'stable-app-entry');
+      const fetched = await fetchFresh('/app/', 'stable-app-entry');
+      response = await normalizeStableAppEntryResponse(fetched);
       await (await caches.open(SHELL_CACHE)).put(cacheKey('/app/index.html'), response.clone());
     } catch {}
   }
@@ -470,9 +483,10 @@ async function stableAppEntry(request) {
       headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' }
     });
   }
+  const normalized = await normalizeStableAppEntryResponse(response);
   return request.method === 'HEAD'
-    ? new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers })
-    : response;
+    ? new Response(null, { status: normalized.status, statusText: normalized.statusText, headers: normalized.headers })
+    : normalized;
 }
 
 async function modelOnDemand(request) {

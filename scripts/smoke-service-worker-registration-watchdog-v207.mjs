@@ -14,7 +14,7 @@ const has=(source,pattern,message)=>assert.match(source,pattern,message);
 has(installerSource,/const\s+REGISTRATION_TIMEOUT_MS\s*=\s*15000/,'Installer registration deadline is missing.');
 has(installerSource,/const\s+REGISTRATION_QUERY_TIMEOUT_MS\s*=\s*6000/,'Installer registration-query deadline is missing.');
 has(installerSource,/const\s+ACTIVATION_TIMEOUT_MS\s*=\s*45000/,'Installer activation deadline is missing.');
-has(installerSource,/const\s+WORKER_SCRIPT_REVISION\s*=\s*['"]stable-entry-v216['"]/,'Stable entry worker revision is missing.');
+has(installerSource,/const\s+WORKER_SCRIPT_REVISION\s*=\s*['"]stable-entry-v217['"]/,'Stable entry worker revision is missing.');
 assert(installerSource.includes("url.searchParams.get('revision') === WORKER_SCRIPT_REVISION"),'Installer accepts a stale worker without the stable-entry revision.');
 for(const token of [
   'COMMONWEAVE_PACKAGE_TIMEOUT',
@@ -140,7 +140,7 @@ const recoveryKey='commonweave.shell.registration-watchdog.v208';
   };
   const worker={
     state:'activated',
-    scriptURL:'https://example.test/service-worker-v203.js?v=1.0.6-lightweight-shell-v208&revision=stable-entry-v216',
+    scriptURL:'https://example.test/service-worker-v203.js?v=1.0.6-lightweight-shell-v208&revision=stable-entry-v217',
     postMessage(message,ports){ports?.[0]?.deliver(responses[message.type]||null)},
   };
   const registration={scope:'https://example.test/',active:worker,waiting:null,installing:null,update:async()=>registration,unregister:async()=>true,addEventListener(){}};
