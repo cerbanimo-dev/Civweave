@@ -75,7 +75,9 @@ function rootScope(reg) {
 function workerMatches(worker) {
   try {
     const url = new URL(worker?.scriptURL || '');
-    return url.pathname === '/service-worker-v203.js' && url.searchParams.get('v') === WORKER_BUILD;
+    return url.pathname === '/service-worker-v203.js' &&
+      url.searchParams.get('v') === WORKER_BUILD &&
+      url.searchParams.get('revision') === WORKER_SCRIPT_REVISION;
   } catch {
     return false;
   }
