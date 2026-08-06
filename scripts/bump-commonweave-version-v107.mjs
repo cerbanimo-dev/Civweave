@@ -3,13 +3,10 @@ import {readFile,writeFile} from 'node:fs/promises';
 
 const OLD_VERSION='1.0.6';
 const NEW_VERSION='1.0.7';
-const SELF=new Set([
-  'scripts/bump-commonweave-version-v107.mjs',
-  '.github/workflows/bump-commonweave-version-v107.yml'
-]);
+const SELF='scripts/bump-commonweave-version-v107.mjs';
 
 const output=execFileSync('git',['grep','-Ilz','--fixed-strings',OLD_VERSION,'--','.'],{encoding:'utf8'});
-const files=output.split('\0').map(value=>value.trim()).filter(Boolean).filter(file=>!SELF.has(file));
+const files=output.split('\0').map(value=>value.trim()).filter(Boolean).filter(file=>file!==SELF&&!file.startsWith('.github/workflows/'));
 if(!files.length)throw new Error(`No tracked ${OLD_VERSION} references were found.`);
 
 let replacements=0;
