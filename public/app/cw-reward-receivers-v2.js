@@ -12,7 +12,17 @@ Use sourceKind "learning" for Living School and "doing" for Cerbanimo. Each skil
 const rewardProperty={type:'object',description:'Exact Commonweave ledger rewards. Skill amounts are absolute.',required:['skillXp','acorns','buttons','sourceKind'],properties:{skillXp:{type:'array',items:{type:'object',required:['skillId','amount'],properties:{skillId:{type:'string'},name:{type:'string'},amount:{type:'number',minimum:0},rationale:{type:'string'},parent:{type:'string'}}}},acorns:{type:'number'},buttons:{type:'number'},sourceKind:{type:'string',enum:['learning','doing','validation','exchange','correction']}}};
 function relevant(r={}){const text=`${r.purpose||''} ${r.systemId||''} ${JSON.stringify(r.context||{})} ${(r.messages||[]).map(x=>x?.content||'').join(' ')}`.toLowerCase();return/(living-school|cerbanimo|moss|kamiya|curriculum|lesson|module|assessment|task|quest|skill|reward|completion)/.test(text)}
 function schema(s){if(!s||s.type!=='object')return s;const n=copy(s);n.properties=n.properties||{};if(!n.properties.rewards)n.properties.rewards=copy(rewardProperty);n.required=[...new Set([...(Array.isArray(n.required)?n.required:[]),'rewards'])];return n}
-function normalizeTree(v,ctx={},visited=new WeakSet()){if(!v||typeof v!=='object'||visited.has(v))return v;visited.add(v);if('rewards'in v||'rewardXp'in v||'skillRewards'in v||Array.isArray(v.skillXp))v.rewards=api.normalizeRewardBundle(v,ctx);for(const x of Object.values(v))if(x&&typeof x==='object')normalizeTree(x,ctx,visited);return v}
+function normalizeTree(v,ctx={},visited=new WeakSet()){
+  if(!v||typeof v!=='object'||visited.has(v))return v;
+  visited.add(v);
+  if(Array.isArray(v))return v.map(item=>normalizeTree(item,ctx,visited));
+  if(v.schema==='commonweave.reward-contract.v2')return v;
+  const directReward=!('rewards'in v)&&Array.isArray(v.skillXp)&&('sourceKind'in v||'acorns'in v||'buttons'in v);
+  if(directReward)return api.normalizeRewardBundle(v,ctx);
+  if('rewards'in v||'rewardXp'in v||'skillRewards'in v)v.rewards=api.normalizeRewardBundle(v,ctx);
+  for(const [key,x] of Object.entries(v))if(key!=='rewards'&&x&&typeof x==='object')v[key]=normalizeTree(x,ctx,visited);
+  return v;
+}
 function contractGenerate(runtime){
   const original=runtime.generate.bind(runtime);
   const generate=async request=>{
