@@ -1,4 +1,4 @@
-name: Verify Commonweave v1.0.6 Clean-Room Settings
+name: Verify Commonweave v1.0.7 Clean-Room Settings
 
 on:
   push:
@@ -35,10 +35,10 @@ jobs:
           test -f .cloudflare-pages/app/settings-delegation-v175.js
           test -f .cloudflare-pages/service-worker-v156.js
           test -f .cloudflare-pages/service-worker-v203.js
-          grep -q "1.0.6-ai-settings-cleanroom-v188" .cloudflare-pages/app/model-settings-controller-v173.js
+          grep -q "1.0.7-ai-settings-cleanroom-v188" .cloudflare-pages/app/model-settings-controller-v173.js
           grep -q "188.0-ai-settings-cleanroom-delegation" .cloudflare-pages/app/settings-delegation-v175.js
           grep -q "legacy-v156-bridge-v209" .cloudflare-pages/service-worker-v156.js
-          grep -q "service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209" .cloudflare-pages/service-worker-v156.js
+          grep -q "service-worker-v203.js?v=1.0.7-lightweight-shell-v208-legacy-v156-bridge-v209" .cloudflare-pages/service-worker-v156.js
           grep -q "lightweight-shell-v208" .cloudflare-pages/service-worker-v203.js
           ! grep -Eq "^[[:space:]]*importScripts\('/service-worker\.js" .cloudflare-pages/service-worker-v156.js
           ! grep -Eq "^[[:space:]]*importScripts\('/service-worker-critical-v199\.js" .cloudflare-pages/service-worker-v156.js
