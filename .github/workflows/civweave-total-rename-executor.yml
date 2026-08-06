@@ -30,6 +30,7 @@ jobs:
         with:
           ref: brand/civweave-total-rename
           fetch-depth: 0
+          token: ${{ secrets.CODE_AUTOMATION_GITHUB_TOKEN || secrets.EVERGREEN_GITHUB_TOKEN || github.token }}
 
       - name: Use Node.js 22
         uses: actions/setup-node@v4
