@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0';
+const VERSION='1.0.1';
 const FULL_LOGO='/app/logos/civweave.svg';
 const SYMBOL_LOGO='/app/logos/civweave-symbol.svg';
+const SETTINGS_REPAIR='/app/ai-settings-device-repair-v228.js';
 const SKIP_TAGS=new Set(['SCRIPT','STYLE','NOSCRIPT','TEMPLATE','CODE','PRE']);
 const ATTRIBUTES=['alt','title','aria-label','placeholder','content','data-label'];
 
@@ -57,14 +58,27 @@ function brandTree(root){
   }
 }
 
+function loadSettingsRepair(){
+  if(globalThis.CivweaveAISettingsRepairV228)return true;
+  if(document.querySelector(`script[src^="${SETTINGS_REPAIR}"]`))return true;
+  const script=document.createElement('script');
+  script.src=`${SETTINGS_REPAIR}?v=${VERSION}`;
+  script.async=false;
+  script.dataset.civweaveBootstrap='ai-settings-v228';
+  document.head.append(script);
+  return true;
+}
+
 function apply(){
   document.title=brandText(document.title);
   brandTree(document.documentElement);
   document.documentElement.dataset.publicBrand='civweave';
+  loadSettingsRepair();
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});
 else apply();
+loadSettingsRepair();
 
 const observer=new MutationObserver(records=>{
   for(const record of records){
@@ -79,5 +93,5 @@ const observer=new MutationObserver(records=>{
 });
 observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTES.concat('src','value')});
 
-globalThis.CivweaveBrand=Object.freeze({version:VERSION,apply,fullLogo:FULL_LOGO,symbolLogo:SYMBOL_LOGO});
+globalThis.CivweaveBrand=Object.freeze({version:VERSION,apply,loadSettingsRepair,fullLogo:FULL_LOGO,symbolLogo:SYMBOL_LOGO,settingsRepair:SETTINGS_REPAIR});
 })();
