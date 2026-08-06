@@ -1,0 +1,41 @@
+name: Require stable worker revision v216
+
+on:
+  push:
+    branches: [agent/stable-entry-worker-v216]
+    paths:
+      - scripts/require-stable-worker-revision-v216.mjs
+      - .github/workflows/require-stable-worker-revision-v216.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/stable-entry-worker-v216
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Require the new worker revision
+        run: node scripts/require-stable-worker-revision-v216.mjs
+      - name: Validate installer and watchdog
+        run: |
+          node --check public/install-v130.js
+          node --check scripts/smoke-service-worker-registration-watchdog-v207.mjs
+          node scripts/smoke-service-worker-registration-watchdog-v207.mjs
+      - name: Commit revision alignment
+        run: |
+          git config user.name "cerbanimo-dev"
+          git config user.email "cerbanimo@gmail.com"
+          git add public/install-v130.js scripts/smoke-service-worker-registration-watchdog-v207.mjs
+          if git diff --cached --quiet; then
+            echo "Worker revision alignment is already current."
+            exit 0
+          fi
+          git commit -m "Require the stable entry worker revision"
+          git push origin HEAD:agent/stable-entry-worker-v216
