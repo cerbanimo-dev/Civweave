@@ -3,7 +3,7 @@
   "short_name": "Commonweave",
   "description": "Five connected, offline-ready Commonweave systems with deterministic local operation and a non-modal AI settings layer.",
   "id": "/commonweave-local",
-  "start_url": "/app/?system=commonweave&installed=1&version=1.0.9",
+  "start_url": "/app/working-campus-v156.html?installed=1&version=1.0.9",
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
@@ -18,10 +18,10 @@
     {"src":"/app/logos/commonweave-icon-maskable-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
   ],
   "shortcuts": [
-    {"name":"Commonweave","url":"/app/?system=commonweave&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"Living School","url":"/app/?system=living-school&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"Cerbanimo","url":"/app/?system=cerbanimo&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"FellowFare","url":"/app/?system=fellowfare&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
-    {"name":"Anarchadia","url":"/app/?system=anarchadia&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]}
+    {"name":"Commonweave","url":"/app/working-campus-v156.html?installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Living School","url":"/app/cabinets/living-school/index.html?cabinet=1&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Cerbanimo","url":"/app/realm-console-v140.html?system=cerbanimo&cabinet=1&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"FellowFare","url":"/app/fellowfare-cabinet-v144.html?cabinet=1&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]},
+    {"name":"Anarchadia","url":"/app/anarchadia-console-v139.html?cabinet=1&installed=1","icons":[{"src":"/app/logos/commonweave-icon-192.png","sizes":"192x192"}]}
   ]
 }
