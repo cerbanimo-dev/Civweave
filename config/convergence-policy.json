@@ -17,6 +17,7 @@
     ]
   },
   "runtimeRoots": [
+    "public/app/app-manifest.json",
     "public/app/fullscreen-family-v104.html",
     "public/app/working-campus-v156.html",
     "public/app/cabinets/living-school/index.html",
