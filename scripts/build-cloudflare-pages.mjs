@@ -31,6 +31,9 @@ const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
 const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
+await import('./sync-release-version-assets.mjs');
+await import('./sync-release-coherence-v220.mjs');
+
 function walkFiles(directory) {
   const files = [];
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
