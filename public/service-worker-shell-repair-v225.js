@@ -2,10 +2,16 @@
 'use strict';
 
 const V225_REVISION = 'shell-self-repair-v225';
+const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js'];
 const v225OriginalCacheShell = cacheShell;
 const v225OriginalShellStatus = shellStatus;
 let v225LastFailures = [];
 let v225RepairPromise = null;
+
+for (const pathname of V225_OPTIONAL_ASSETS) {
+  if (!OPTIONAL_SHELL_ASSETS.includes(pathname)) OPTIONAL_SHELL_ASSETS.push(pathname);
+  if (!SHELL_ASSETS.includes(pathname)) SHELL_ASSETS.push(pathname);
+}
 
 function v225FailureList(error) {
   const failures = Array.isArray(error?.failures) ? error.failures : [];
@@ -69,6 +75,7 @@ self.addEventListener('message', event => {
 
 self.CommonweaveShellRepairV225 = Object.freeze({
   revision: V225_REVISION,
+  optionalAssets: [...V225_OPTIONAL_ASSETS],
   repair: v225RepairShell,
   policy: 'activate-incomplete-retry-required-shell-and-report-paths'
 });
