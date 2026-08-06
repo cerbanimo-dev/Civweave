@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 const PORT=18806;
 const origin=`http://127.0.0.1:${PORT}`;
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const dataDir=await mkdtemp(path.join(os.tmpdir(),'commonweave-installer-recovery-v209-'));
+const dataDir=await mkdtemp(path.join(os.tmpdir(),'commonweave-installer-recovery-v218-'));
 const output=[];
 const child=spawn(process.execPath,['scripts/start-commonweave-v131.mjs'],{
   cwd:root,
@@ -37,13 +37,9 @@ async function expectRoute(route,{method='GET',headers={},contentType='',status=
 try{
   await wait();
   for(const route of [
-    '/service-worker-v156.js',
-    '/service-worker-v203.js',
-    '/app/offline-package-v208.json',
-    '/app/knowledge-school-installer-v1.css',
-    '/app/knowledge-school-seeds-v1.js',
-    '/app/knowledge-school-installer-v1.js',
-    '/app/pwa-update-controller-v204.js'
+    '/service-worker-v156.js','/service-worker-v203.js','/service-worker-core-v208.js','/service-worker-living-school-cleanroom-v218.js',
+    '/app/offline-package-v208.json','/app/knowledge-school-installer-v1.css','/app/knowledge-school-seeds-v1.js',
+    '/app/knowledge-school-installer-v1.js','/app/pwa-update-controller-v204.js'
   ])await expectRoute(route);
   for(const purpose of ['update-controls','shell-install','offline-manifest','offline-campus']){
     await expectRoute('/app/offline-package-v208.json',{headers:{'x-commonweave-package':purpose},contentType:'application/json'});
@@ -55,21 +51,29 @@ try{
   await expectRoute(`/downloads/knowledge-schools/${firstZip}`,{method:'HEAD',contentType:'application/zip'});
 
   const files={
-    active:await readFile(path.join(root,'public/service-worker-v203.js'),'utf8'),
+    wrapper:await readFile(path.join(root,'public/service-worker-v203.js'),'utf8'),
+    core:await readFile(path.join(root,'public/service-worker-core-v208.js'),'utf8'),
+    cleanroom:await readFile(path.join(root,'public/service-worker-living-school-cleanroom-v218.js'),'utf8'),
     legacy:await readFile(path.join(root,'public/service-worker-v156.js'),'utf8'),
     base:await readFile(path.join(root,'public/service-worker.js'),'utf8')
   };
   assert(files.base.includes('const BASE_PACKAGE_RECOVERY_REVISION='),'base worker recovery identifier is not isolated');
   assert(!files.base.includes('const PACKAGE_RECOVERY_REVISION='),'generic base worker recovery identifier still collides');
-  assert(files.active.includes("const BUILD = 'lightweight-shell-v208'"),'active worker is not the lightweight shell');
-  assert(!/importScripts\(/.test(files.active),'active lightweight worker imports the retired layered stack');
-  assert(files.active.includes('DOWNLOAD_OFFLINE_PACKAGE'),'active worker lacks resumable campus hydration');
+  const cleanImport="importScripts('/service-worker-living-school-cleanroom-v218.js";
+  const coreImport="importScripts('/service-worker-core-v208.js";
+  assert(files.wrapper.includes(cleanImport)&&files.wrapper.includes(coreImport),'active worker does not compose clean-room retirement with the retained lightweight core');
+  assert(files.wrapper.indexOf(cleanImport)<files.wrapper.indexOf(coreImport),'Living School cache retirement does not load before the generic core');
+  assert(files.core.includes("const BUILD = 'lightweight-shell-v208'"),'retained worker core is not the lightweight shell');
+  assert(!/importScripts\(/.test(files.core),'retained lightweight core imports the retired layered stack');
+  assert(files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained worker core lacks resumable campus hydration');
+  assert(files.cleanroom.includes("const REVISION='living-school-cleanroom-v218'"),'Living School worker retirement boundary is missing');
+  assert(files.cleanroom.includes('event.stopImmediatePropagation()'),'Living School requests are not isolated from generic cache handlers');
   assert(files.legacy.includes('legacy-v156-bridge-v209'),'legacy worker bridge revision is missing');
-  assert(files.legacy.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'legacy worker does not import the active lightweight worker');
+  assert(files.legacy.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'legacy worker does not import the active wrapper');
   assert(!/^[ \t]*importScripts\('\/service-worker\.js/m.test(files.legacy),'legacy bridge executes the retired base worker');
   assert(!/^[ \t]*importScripts\('\/service-worker-critical-v199\.js/m.test(files.legacy),'legacy bridge executes the retired critical coordinator');
   const bridgeBody=files.legacy.replace(/importScripts\('\/service-worker-v203\.js[^\n]+\);/,'');
-  new vm.Script(`${bridgeBody}\n${files.active}`,{filename:'commonweave-v209-bridged-lightweight-worker.js'});
+  new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.core}`,{filename:'commonweave-v218-bridged-cleanroom-worker.js'});
 
   const gateway=await readFile(path.join(root,'server-gateway-v131.mjs'),'utf8');
   for(const token of [
@@ -80,13 +84,8 @@ try{
     "pathname.startsWith('/downloads/knowledge-schools/')"
   ])assert(gateway.includes(token),`gateway recovery is missing ${token}`);
   console.log(JSON.stringify({
-    ok:true,
-    directInstallerAssets:7,
-    packagePurposeHeadersAccepted:4,
-    knowledgeCatalogServed:true,
-    knowledgeZipServed:firstZip,
-    workerGlobalCollision:false,
-    workerRevision:'v209-legacy-bridge-lightweight-shell'
+    ok:true,directInstallerAssets:9,packagePurposeHeadersAccepted:4,knowledgeCatalogServed:true,knowledgeZipServed:firstZip,
+    workerGlobalCollision:false,workerRevision:'v218-cleanroom-wrapper-retained-lightweight-core'
   },null,2));
 }catch(error){
   console.error(output.join(''));
