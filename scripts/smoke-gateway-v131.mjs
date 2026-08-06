@@ -1,58 +1,22 @@
-import {spawn} from 'node:child_process';
-import {mkdtemp,readFile,rm} from 'node:fs/promises';
-import os from 'node:os';
+import fsp from 'node:fs/promises';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
-const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.6',BUILD='1.0.6-install-only-fullscreen-family-gateway';
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),dataDir=await mkdtemp(path.join(os.tmpdir(),'commonweave-gateway-v106-')),output=[];
-const child=spawn(process.execPath,['scripts/start-commonweave-v131.mjs'],{cwd:root,env:{...process.env,RENDER:'true',HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});child.stdout.on('data',chunk=>output.push(chunk.toString()));child.stderr.on('data',chunk=>output.push(chunk.toString()));
-const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),assert=(condition,message)=>{if(!condition)throw new Error(message)};
-async function wait(){let last;for(let i=0;i<80;i+=1){try{const response=await fetch(`${origin}/api/health`,{cache:'no-store'});if(response.ok)return response.json();last=new Error(`health ${response.status}`)}catch(error){last=error}await sleep(200)}throw last||new Error('gateway did not start')}
-function requiredDeviceAssets(workerSource){const core=workerSource.match(/const CORE=(\[[\s\S]*?\]);\nconst DEVICE_REQUIRED=/),required=workerSource.match(/const DEVICE_REQUIRED=([^;]+);/);assert(core&&required,'service worker core package manifest could not be parsed');return Function(`"use strict";const CORE=${core[1]};return ${required[1]};`)()}
-try{
-  const health=await wait();assert(output.join('').includes('Starting gateway runtime.'),'environment-aware start did not select gateway on Render');assert(health.build===BUILD,`unexpected build ${health.build}`);assert(health.appVersion===VERSION,`unexpected version ${health.appVersion}`);assert(health.release?.localInstallRequired===true,'gateway does not require installation');
-  const rootResponse=await fetch(`${origin}/`,{cache:'no-store'}),rootHtml=await rootResponse.text();assert(rootResponse.ok,'gateway installer root failed');assert(rootHtml.includes('Install Commonweave v1.0.6.'),'gateway root is not the v1.0.6 installer');assert(rootHtml.includes('No native modal'),'gateway root does not describe the fixed settings layer');assert(rootHtml.includes('/app/logos/commonweave-app-icon.png'),'gateway root does not use the app icon');
-  for(const route of ['/loom/','/lite/','/app/realm-console-v140.html','/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html']){const response=await fetch(origin+route,{cache:'no-store'}),body=await response.json();assert(response.status===410,`${route} returned ${response.status}, expected 410`);assert(body.localInstallRequired===true,`${route} does not explain installation`)}
-  for(const route of ['/service-worker.js','/service-worker-v156.js','/app/manifest.webmanifest','/install-v130.js','/install-v130.css','/app/logos/commonweave-app-icon.png','/app/logos/commonweave-icon-192.png']){const response=await fetch(origin+route,{cache:'no-store'});assert(response.ok,`installer asset ${route} returned ${response.status}`)}
-  const packageHeaders={'x-commonweave-package':'install'},workerSource=await readFile(path.join(root,'public','service-worker.js'),'utf8'),requiredAssets=[...new Set(requiredDeviceAssets(workerSource))];
-  for(const forbidden of ['all-minilm-l6-v2','transformers.min.js','ort-wasm','minilm-reflex','minilm-model-settings','commonweave-settings-safe-open'])assert(!requiredAssets.some(route=>route.includes(forbidden)),`v1.0.6 package still includes ${forbidden}`);
-  for(const route of requiredAssets){const response=await fetch(origin+route,{cache:'no-store',headers:packageHeaders});assert(response.ok,`required core package asset ${route} returned ${response.status}`);await response.arrayBuffer()}
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
-  const controller=await fetch(`${origin}/app/model-settings-controller-v173.js`,{headers:packageHeaders}).then(response=>response.text());
-  for(const token of [
-    "VERSION='1.0.6-ai-settings-cleanroom-v188'",
-    "authority:'ai-settings-cleanroom-v188'",
-    "eventOwnership:'single-cleanroom-controller'",
-    "presentation:'cleanroom-v188'",
-    'providerRuntimeOnOpen:false',
-    'providerRuntimeAvailable:false',
-    'providerTestsAvailable:false',
-    'modelDiscoveryAvailable:false',
-    'singlePassOpen:true',
-    'function build()',
-    'function open(launcher)',
-    'function close(reason=',
-    'globalThis.CommonweaveAISettingsCleanroomV188=api',
-  ])assert(controller.includes(token),`clean-room settings controller missing ${token}`);
-  for(const forbidden of [
-    'MutationObserver','PerformanceObserver','setTimeout(','setInterval(','requestAnimationFrame(','requestIdleCallback(',
-    'commonweave-model-runtime','ensureRuntime','detectCapabilities','.generate(','new Worker(','navigator.gpu','showModal(',
-    "createElement('dialog')","createElement('script')",'document.body.style.overflow',
-  ])assert(!controller.includes(forbidden),`clean-room settings controller contains ${forbidden}`);
-  const openBlock=controller.slice(controller.indexOf('function open(launcher)'),controller.indexOf('function ensure()'));
-  for(const forbidden of ['await ','Promise','fetch(','.focus('])assert(!openBlock.includes(forbidden),`settings open path still performs ${forbidden}`);
-  for(const token of ['if(existing&&!existing.hidden)return existing','const layer=existing||build()','layer.hidden=false'])assert(openBlock.includes(token),`settings open path missing ${token}`);
+const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
+const sourcePath = path.join(scriptsDir, 'smoke-gateway-v131-base.mjs');
+const runtimePath = path.join(scriptsDir, '.smoke-gateway-v132.runtime.mjs');
+const VERSION = 'render-installed-runtime-v132';
+const before = "  for(const route of ['/loom/','/lite/','/app/realm-console-v140.html','/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html']){const response=await fetch(origin+route,{cache:'no-store'}),body=await response.json();assert(response.status===410,`${route} returned ${response.status}, expected 410`);assert(body.localInstallRequired===true,`${route} does not explain installation`)}";
+const after = "  for(const route of ['/loom/','/lite/']){const response=await fetch(origin+route,{cache:'no-store'}),body=await response.json();assert(response.status===410,`${route} returned ${response.status}, expected 410`);assert(body.localInstallRequired===true,`${route} does not explain installation`)}\n  for(const route of ['/app/','/app/index.html','/app/working-campus-v156.html','/app/realm-console-v140.html','/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html']){const response=await fetch(origin+route,{cache:'no-store'});assert(response.ok,`${route} returned ${response.status}, expected a public installed-runtime asset`);const type=String(response.headers.get('content-type')||'');assert(/text\\/html/i.test(type),`${route} returned unexpected content type ${type}`)}";
 
-  const settings=await fetch(`${origin}/app/unified-ai-settings-v175.js`,{headers:packageHeaders}).then(response=>response.text());
-  assert(settings.includes("VERSION='1.0.6-unified-settings-compat-v188'")&&settings.includes('retiredRuntime:true')&&settings.includes("authority:'ai-settings-cleanroom-v188'")&&!settings.includes('MutationObserver')&&!settings.includes('ensureRuntime')&&!settings.includes('detectCapabilities')&&!settings.includes('.generate('),'unified settings compatibility file is not inert');
-  const delegation=await fetch(`${origin}/app/settings-delegation-v175.js`,{headers:packageHeaders}).then(response=>response.text());
-  assert(delegation.includes("VERSION='188.0-ai-settings-cleanroom-delegation'")&&delegation.includes("document.addEventListener('click',onClick);")&&delegation.includes("listenerPhase:'bubble'")&&delegation.includes('listenerCount:1')&&delegation.includes('mutationObserver:false')&&delegation.includes('polling:false')&&delegation.includes('timers:false')&&!delegation.includes('MutationObserver')&&!delegation.includes('PerformanceObserver')&&!delegation.includes('setInterval(')&&!delegation.includes("addEventListener('click',onClick,true)"),'settings delegation is not the one-listener clean-room bridge');
-
-  const campus=await fetch(`${origin}/app/working-campus-v156.html`,{headers:packageHeaders}).then(response=>response.text());assert(campus.includes('/app/logos/commonweave-app-icon.png')&&campus.includes('v1.0.6')&&!campus.includes('/app/logos/commonweave.webp'),'Working Campus header is stale');
-  const campusCss=await fetch(`${origin}/app/working-campus-v156.css`,{headers:packageHeaders}).then(response=>response.text());assert(campusCss.includes('width:176px')&&campusCss.includes('grid-template-areas'),'Working Campus icon or header layout is stale');
-  for(const retired of ['/extensions/commonweave-settings-safe-open-v171.js','/extensions/commonweave-settings-safe-open-v172.js']){const response=await fetch(origin+retired,{headers:packageHeaders});assert(response.status===404,`${retired} still exists with status ${response.status}`)}
-  const sharedTools=await fetch(`${origin}/extensions/commonweave-additions-v156.js`,{headers:packageHeaders}).then(response=>response.text());assert(sharedTools.includes('Node & friends')&&sharedTools.includes('aiVault:false'),'Shared Tools regressed');
-  const packageLedger=await fetch(`${origin}/app/shared/commonweave-parity-ledger.json`,{cache:'no-store',headers:packageHeaders});assert(packageLedger.ok,`marked parity ledger returned ${packageLedger.status}`);const ledger=await packageLedger.json();assert(Array.isArray(ledger.systems)&&ledger.systems.length>=5,'parity ledger is missing systems');
-  const telemetry=await fetch(`${origin}/api/boot-log`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:'room-opened'})});assert(telemetry.status===204,`boot telemetry returned ${telemetry.status}`);
-  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsPresentation:'cleanroom-v188',nativeDialog:false,outsideTap:'safe-close',settingsTransformerWork:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,captureListener:false,mutationObserver:false,polling:false,timers:false,campusIconPixels:176},null,2));
-}catch(error){console.error(output.join(''));throw error}finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}
+let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+if (!source.includes(before)) {
+  throw new Error('Commonweave gateway smoke v132 could not find the legacy 410 assertion.');
+}
+source = source.replace(before, after);
+await fsp.writeFile(runtimePath, source, 'utf8');
+try {
+  await import(`${pathToFileURL(runtimePath).href}?build=${encodeURIComponent(VERSION)}`);
+} finally {
+  await fsp.unlink(runtimePath).catch(() => {});
+}
