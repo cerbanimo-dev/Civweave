@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - .github/workflows/civweave-total-rename-executor.yml
+  schedule:
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
