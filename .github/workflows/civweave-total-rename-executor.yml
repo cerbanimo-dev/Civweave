@@ -1,4 +1,5 @@
 name: Execute Civweave total rename
+# One-shot trigger refresh after installation on main.
 
 on:
   push:
