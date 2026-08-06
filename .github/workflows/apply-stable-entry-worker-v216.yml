@@ -1,0 +1,46 @@
+name: Apply stable entry worker v216
+
+on:
+  push:
+    branches: [agent/stable-entry-worker-v216]
+    paths:
+      - scripts/apply-stable-entry-worker-v216.mjs
+      - .github/workflows/apply-stable-entry-worker-v216.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/stable-entry-worker-v216
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch worker entry routing
+        run: node scripts/apply-stable-entry-worker-v216.mjs
+      - name: Validate workers
+        run: |
+          node --check public/install-v130.js
+          node --check public/service-worker-core-v208.js
+          node --check public/service-worker-v203.js
+          node --check public/service-worker.js
+          grep -q "lightweight-shell-v216-stable-entry-cache-route" public/install-v130.js
+          grep -q "LEGACY_ENTRY_PATHS" public/service-worker-core-v208.js
+          grep -q "stableAppEntry" public/service-worker-v203.js
+          grep -q "direct-entry-r46-stable-entry-cache-route-v216" public/service-worker.js
+      - name: Commit worker fix
+        run: |
+          git config user.name "cerbanimo-dev"
+          git config user.email "cerbanimo@gmail.com"
+          git add public/install-v130.js public/service-worker-core-v208.js public/service-worker-v203.js public/service-worker.js
+          if git diff --cached --quiet; then
+            echo "Worker entry routing is already current."
+            exit 0
+          fi
+          git commit -m "Serve legacy app entry from the stable worker cache"
+          git push origin HEAD:agent/stable-entry-worker-v216
