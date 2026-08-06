@@ -2,6 +2,7 @@
 'use strict';
 const REVISION='canonical-five-system-navigation-v227';
 const TIMEOUT_MS=9000;
+const ROUTE_SCRIPT='/app/system-routes-v227.js';
 const routes=self.CommonweaveSystemRoutesV227;
 const originalNetworkFirst=networkFirst;
 function canonical(request){return request.mode==='navigate'&&Boolean(routes?.identify?.(new URL(request.url).pathname))}
@@ -16,25 +17,23 @@ function packageRequest(request){
 async function normalize(response,request){
   if(!response||response.type==='opaqueredirect'||response.status===0||response.status>=300&&response.status<400)return null;
   const headers=new Headers(response.headers);
-  headers.delete('content-length');
-  headers.delete('content-encoding');
-  headers.delete('location');
-  headers.set('content-type',headers.get('content-type')||'text/html; charset=utf-8');
-  headers.set('x-commonweave-canonical-navigation',REVISION);
-  headers.set('cache-control','no-cache');
+  headers.delete('content-length');headers.delete('content-encoding');headers.delete('location');
+  headers.set('content-type',headers.get('content-type')||(request.mode==='navigate'?'text/html; charset=utf-8':'application/javascript; charset=utf-8'));
+  headers.set('x-commonweave-canonical-navigation',REVISION);headers.set('cache-control','no-cache');
   const body=request.method==='HEAD'?null:await response.clone().arrayBuffer();
   return new Response(body,{status:response.status,statusText:response.statusText,headers});
 }
 async function precacheCanonicalRoutes(){
   const cache=await caches.open(SHELL_CACHE),failures=[];
-  for(const route of routes?.routes?.()||[]){
+  const assets=[ROUTE_SCRIPT,...(routes?.routes?.()||[]).map(route=>route.pathname)];
+  for(const pathname of assets){
     try{
-      const request=new Request(new URL(route.pathname,self.location.origin).href,{method:'GET'});
-      const response=await withTimeout(fetch(packageRequest(route.pathname)),TIMEOUT_MS);
+      const request=new Request(new URL(pathname,self.location.origin).href,{method:'GET'});
+      const response=await withTimeout(fetch(packageRequest(pathname)),TIMEOUT_MS);
       const normalized=await normalize(response,request);
-      if(!normalized?.ok)throw new Error(`${route.pathname} returned ${response?.status||'no response'}`);
-      await cache.put(cacheKey(route.pathname),normalized.clone());
-    }catch(error){failures.push({pathname:route.pathname,message:error?.message||String(error)})}
+      if(!normalized?.ok)throw new Error(`${pathname} returned ${response?.status||'no response'}`);
+      await cache.put(cacheKey(pathname),normalized.clone());
+    }catch(error){failures.push({pathname,message:error?.message||String(error)})}
   }
   return failures;
 }
@@ -47,19 +46,15 @@ function recoveryPage(pathname){
 self.addEventListener('install',event=>{event.waitUntil(precacheCanonicalRoutes().catch(()=>[]))});
 networkFirst=async function canonicalFiveSystemNetworkFirst(request,fallbackPath='/offline.html'){
   if(!canonical(request))return originalNetworkFirst(request,fallbackPath);
-  const url=new URL(request.url),pathname=url.pathname;
+  const pathname=new URL(request.url).pathname;
   try{
     const response=await withTimeout(fetch(packageRequest(request)),TIMEOUT_MS);
     const normalized=await normalize(response,request);
-    if(normalized?.ok){
-      if(request.method==='GET')await(await caches.open(RUNTIME_CACHE)).put(cacheKey(pathname),normalized.clone());
-      return normalized;
-    }
+    if(normalized?.ok){if(request.method==='GET')await(await caches.open(RUNTIME_CACHE)).put(cacheKey(pathname),normalized.clone());return normalized}
   }catch{}
-  const cached=await findCached(pathname);
-  const normalized=await normalize(cached,request);
+  const cached=await findCached(pathname),normalized=await normalize(cached,request);
   if(normalized)return normalized;
   return recoveryPage(pathname);
 };
-self.CommonweaveCanonicalNavigationV227=Object.freeze({revision:REVISION,timeoutMs:TIMEOUT_MS,routes:routes?.routes?.().map(route=>route.pathname)||[],policy:'exact-route-network-first-exact-route-cache-never-launcher-fallback',packageHeader:true,precache:true});
+self.CommonweaveCanonicalNavigationV227=Object.freeze({revision:REVISION,timeoutMs:TIMEOUT_MS,routeScript:ROUTE_SCRIPT,routes:routes?.routes?.().map(route=>route.pathname)||[],policy:'exact-route-network-first-exact-route-cache-never-launcher-fallback',packageHeader:true,precache:true,precacheCount:6});
 })();
