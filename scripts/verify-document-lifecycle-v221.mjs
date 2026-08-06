@@ -23,10 +23,10 @@ assert.match(manifest.start_url,/^\/app\/working-campus-v156\.html\?/,'Installed
 assert(campusHtml.indexOf('/app/document-lifecycle-v221.js')<campusHtml.indexOf('/app/install-boundary-v146.js'),'Lifecycle guard must load before install-boundary additions.');
 assert(campusLoader.includes("cache:'no-store'"),'Working Campus fragments are not fetched fresh.');
 assert(!campusLoader.includes("cache:'force-cache'"),'Working Campus still forces stale fragment cache.');
-for(const token of ['campusReady()','pagehide','beforeunload','revision',"document.getElementById(id)"]){
+for(const token of ['campusReady()','pagehide','beforeunload','revision','document.getElementById(id)']){
   assert(campusLoader.includes(token),`Working Campus loader is missing ${token}.`);
 }
-for(const token of ['CommonweaveLifecycleMutationObserver',"addEventListener('pagehide',stop",'Object.defineProperty(document,\'head\'']){
+for(const token of ['CommonweaveLifecycleMutationObserver',"addEventListener('pagehide',stop","Object.defineProperty(document,'head'"]){
   assert(lifecycle.includes(token),`Document lifecycle guard is missing ${token}.`);
 }
 assert(pwa.includes('if(!document.documentElement?.isConnected||!document.head||!document.body)return null;'),'PWA update controller can mount into a detached document.');
