@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION = '1.0.6';
-const BUILD = 'lightweight-shell-v216-stable-entry-cache-route';
+const BUILD = 'lightweight-shell-v208';
 const SHELL_CACHE = `commonweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `commonweave-runtime-${VERSION}-${BUILD}`;
 const OFFLINE_CACHE = `commonweave-offline-${VERSION}-${BUILD}`;
