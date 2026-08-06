@@ -1,0 +1,36 @@
+name: Verify convergence guardrails
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  convergence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Parse convergence tools
+        run: |
+          node --check scripts/build-convergence-inventory.mjs
+          node --check scripts/verify-convergence-guardrails.mjs
+      - name: Build runtime inventory
+        run: node scripts/build-convergence-inventory.mjs
+      - name: Enforce convergence lock
+        run: node scripts/verify-convergence-guardrails.mjs
+      - name: Upload runtime inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: commonweave-runtime-inventory
+          path: artifacts/convergence/
+          if-no-files-found: error
