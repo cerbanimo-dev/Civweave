@@ -1,69 +1,121 @@
 (()=>{
 'use strict';
+
+const VERSION='1.0.13';
+const REVISION='canonical-core-only-v226';
 const INSTALLER='/';
-const BOOT_KEY='commonweave.install-boundary.boot.v219';
+const BOOT_KEY='commonweave.install-boundary.boot.v226';
 const DEV_KEY='commonweave.install-boundary.developer.v146';
-const MEMORY_SCRIPT='/app/weaveling-memory-v191.js';
-const MEMORY_BRIDGE_SCRIPT='/app/weaveling-memory-bridge-v191.js';
-const DETERMINISTIC_MODE_SCRIPT='/app/deterministic-mode-v175.js';
-const SETTINGS_CONTROLLER_SCRIPT='/app/model-settings-controller-v173.js';
-const SETTINGS_DELEGATION_SCRIPT='/app/settings-delegation-v175.js';
-const GEMINI_TASK_ROUTER_SCRIPT='/app/gemini-task-tier-router-v213.js';
-const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
-const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js';
-const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js';
-const ADDITIONS_SCRIPT='/extensions/commonweave-additions-v156.js';
+const ADDITIONS_VERSION='v1.0.13-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/commonweave-additions-v156.css';
-const SHARED_TOOLS_CLEANUP_SCRIPT='/app/shared-tools-cleanup-v175.js';
-const DEVICE_CREDENTIALS_SCRIPT='/extensions/commonweave-device-credentials-v160.js';
-const PROOF_PROGRESS_SCRIPT='/extensions/commonweave-proof-progress-v158.js';
-const GEMINI_INTERACTIONS_SCRIPT='/extensions/commonweave-gemini-interactions-v159.js';
-const LIVE_SOURCE_GUARD_SCRIPT='/extensions/commonweave-antigravity-live-source-guard-v167.js';
-const THEMED_SYSTEM_NAV_SCRIPT='/app/themed-system-nav-v178.js';
-const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
-const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';
-const ADDITIONS_VERSION='v216-guide-chat-keyboard-viewport';
-// Compatibility marker: const ADDITIONS_VERSION='v216-guide-identity-integrity'
-// Compatibility marker: ADDITIONS_VERSION='v215-guide-chat-notifications'
-// Compatibility marker: ADDITIONS_VERSION='v214-persistent-guide-chat'
-// Compatibility marker: ADDITIONS_VERSION='v213-gemini-task-tier-routing'
-// Compatibility marker: ADDITIONS_VERSION='v207-registration-watchdog'
-// Compatibility marker: ADDITIONS_VERSION='v204-visible-update-library-preservation'
-// Compatibility marker: ADDITIONS_VERSION='v191-memory-credential'
-// Compatibility marker: ADDITIONS_VERSION='v188-ai-settings-cleanroom'
-const PREVIOUS_ADDITIONS_VERSION='v215-guide-chat-notifications';
-const EARLIER_ADDITIONS_VERSION='v214-persistent-guide-chat';
-const FAST_CORE_COMPATIBILITY_REVISION='v216-v106-guide-chat-keyboard-viewport';
-const PACKAGE_RECOVERY_REVISION='v207-registration-update-deadlines';
-const SETTINGS_STABILITY_REVISION='v188-no-observer-no-polling-no-capture';
-const SETTINGS_CONTROLLER_REVISION='v188-single-cleanroom-authority-v191-credentials';
-// Compatibility marker: SETTINGS_CONTROLLER_REVISION='v188-single-cleanroom-authority'
-const SETTINGS_RUNTIME_REVISION='v188-provider-runtime-disconnected';
-const SETTINGS_LOG_REVISION='v188-diagnostics-runtime-retired';
-const CREDENTIAL_REVISION='v191-explicit-session-or-device';
-const MEMORY_REVISION='v191-working-and-long-term-local';
-const DETERMINISTIC_RUNTIME_REVISION='v175-deterministic-default';
-const GEMINI_TASK_ROUTING_REVISION='v213-small-3.1-flash-lite-complex-3.5-flash-lite';
-const GUIDE_IDENTITY_REVISION='v216-explicit-responder-ownership';
-const PERSISTENT_GUIDE_CHAT_REVISION='v216-one-thread-five-guide-keyboard-safe';
-// Compatibility marker: const PERSISTENT_GUIDE_CHAT_REVISION='v216-one-thread-explicit-guide-identity'
-const PERSISTENT_GUIDE_VIEWPORT_REVISION='v216-visual-viewport-keyboard-safe';
-const INTENTION_RESEARCH_REVISION='v163-latest-intention-agentic-research';
-const HUD_STABILITY_REVISION='v164-hud-observer-stability';
-const WORKFLOW_HANDOFF_REVISION='v165-reviewed-merlin-rook-proof-attachments';
-const TWO_AGENT_RELAY_REVISION='living-school-two-agent-youtube-v166';
-const LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167';
-const LOCAL_LAYOUT_REVISION='merlin-local-layout-fallback-v167';
+const LEGACY_SCRIPTS=[
+  '/app/release-version-v1.js',
+  '/app/weaveling-memory-v191.js',
+  '/app/weaveling-memory-bridge-v191.js',
+  '/app/deterministic-mode-v175.js',
+  '/app/model-settings-controller-v173.js',
+  '/app/settings-delegation-v175.js',
+  '/app/gemini-task-tier-router-v213.js',
+  '/app/guide-identity-integrity-v216.js',
+  '/app/persistent-guide-chat-v215.js',
+  '/app/persistent-guide-viewport-v216.js',
+  '/extensions/commonweave-antigravity-live-source-guard-v167.js',
+  '/extensions/commonweave-device-credentials-v160.js',
+  '/extensions/commonweave-additions-v156.js',
+  '/app/shared-tools-cleanup-v175.js',
+  '/extensions/commonweave-proof-progress-v158.js',
+  '/extensions/commonweave-gemini-interactions-v159.js',
+  '/app/themed-system-nav-v178.js',
+  '/app/pwa-update-controller-v204.js'
+];
 const params=new URLSearchParams(location.search);
-function installedDisplay(){return navigator.standalone===true||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||matchMedia('(display-mode: minimal-ui)').matches||matchMedia('(display-mode: window-controls-overlay)').matches}
+let unloading=false;
+addEventListener('pagehide',()=>{unloading=true},{once:true});
+addEventListener('beforeunload',()=>{unloading=true},{once:true});
+
+function installedDisplay(){
+  return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
+}
 function localhost(){return['localhost','127.0.0.1','::1'].includes(location.hostname)}
-function developer(){if(localhost()&&params.get('developer')==='1'){sessionStorage.setItem(DEV_KEY,'1');return true}return localhost()&&sessionStorage.getItem(DEV_KEY)==='1'}
+function developer(){
+  if(localhost()&&params.get('developer')==='1'){try{sessionStorage.setItem(DEV_KEY,'1')}catch{}return true}
+  try{return localhost()&&sessionStorage.getItem(DEV_KEY)==='1'}catch{return false}
+}
 function embedded(){try{return window.top!==window.self}catch{return true}}
-function explicitInstalled(){if(params.get('installed')==='1'){sessionStorage.setItem(BOOT_KEY,'1');return true}return sessionStorage.getItem(BOOT_KEY)==='1'}
-function allowed(){return installedDisplay()||explicitInstalled()||developer()||embedded()}
-function installerUrl(){const target=`${location.pathname}${location.search}${location.hash}`;const next=new URL(INSTALLER,location.origin);next.searchParams.set('install','required');next.searchParams.set('next',target.slice(0,1800));return next.href}
-function addScript(src){if(document.querySelector(`script[src^="${src}"]`))return;const script=document.createElement('script');script.src=`${src}?v=${ADDITIONS_VERSION}`;script.async=false;document.head.append(script)}
-function installAdditions(){if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=${ADDITIONS_VERSION}`;document.head.append(link)}addScript(RELEASE_VERSION_SCRIPT);addScript(MEMORY_SCRIPT);addScript(MEMORY_BRIDGE_SCRIPT);addScript(DETERMINISTIC_MODE_SCRIPT);addScript(SETTINGS_CONTROLLER_SCRIPT);addScript(SETTINGS_DELEGATION_SCRIPT);addScript(GEMINI_TASK_ROUTER_SCRIPT);addScript(GUIDE_IDENTITY_SCRIPT);addScript(PERSISTENT_GUIDE_CHAT_SCRIPT);addScript(PERSISTENT_GUIDE_VIEWPORT_SCRIPT);addScript(LIVE_SOURCE_GUARD_SCRIPT);addScript(DEVICE_CREDENTIALS_SCRIPT);addScript(ADDITIONS_SCRIPT);addScript(SHARED_TOOLS_CLEANUP_SCRIPT);addScript(PROOF_PROGRESS_SCRIPT);addScript(GEMINI_INTERACTIONS_SCRIPT);addScript(THEMED_SYSTEM_NAV_SCRIPT);addScript(PWA_UPDATE_SCRIPT)}
-if(!allowed()){document.documentElement.dataset.installBoundary='blocked';location.replace(installerUrl())}else{document.documentElement.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';installAdditions()}
-globalThis.CommonweaveInstallBoundaryV146={version:'1.0.9',allowed,installedDisplay,explicitInstalled,developer,embedded,installerUrl,installAdditions,additionsVersion:ADDITIONS_VERSION,previousAdditionsVersion:PREVIOUS_ADDITIONS_VERSION,earlierAdditionsVersion:EARLIER_ADDITIONS_VERSION,fastCoreCompatibilityRevision:FAST_CORE_COMPATIBILITY_REVISION,packageRecoveryRevision:PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,settingsStabilityRevision:SETTINGS_STABILITY_REVISION,settingsControllerRevision:SETTINGS_CONTROLLER_REVISION,settingsRuntimeRevision:SETTINGS_RUNTIME_REVISION,settingsLogRevision:SETTINGS_LOG_REVISION,credentialRevision:CREDENTIAL_REVISION,credentialPersistence:'explicit-session-or-device',automaticCredentialPersistence:false,memoryRevision:MEMORY_REVISION,memoryLocalOnly:true,logLevelKey:null,logBufferKey:null,diagnosticQueryParameter:null,deterministicRuntimeRevision:DETERMINISTIC_RUNTIME_REVISION,geminiTaskRoutingRevision:GEMINI_TASK_ROUTING_REVISION,geminiSmallModel:'gemini-3.1-flash-lite',geminiComplexModel:'gemini-3.5-flash-lite',guideIdentityRevision:GUIDE_IDENTITY_REVISION,guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',guideIdentityMigration:'realm-action-owner',persistentGuideChatRevision:PERSISTENT_GUIDE_CHAT_REVISION,persistentGuideViewportRevision:PERSISTENT_GUIDE_VIEWPORT_REVISION,persistentGuideChatHistory:'shared-v214-key',persistentGuideChatSubmissionPipelines:1,persistentGuideChatGuideCount:5,persistentGuideChatCurrentRealmPriority:true,persistentGuideChatThemedSwitching:true,persistentGuideChatAboveNavigation:true,persistentGuideChatNotifications:true,persistentGuideChatKeyboardSafe:true,persistentGuideChatUsesVisualViewport:true,persistentGuideChatNotificationPalettes:{weaveling:'pearl-silver',moss:'green',kamiya:'purple',rook:'amber',merlin:'pink'},intentionResearchRevision:INTENTION_RESEARCH_REVISION,hudStabilityRevision:HUD_STABILITY_REVISION,workflowHandoffRevision:WORKFLOW_HANDOFF_REVISION,twoAgentRelayRevision:TWO_AGENT_RELAY_REVISION,liveSourceProofRevision:LIVE_SOURCE_PROOF_REVISION,localLayoutRevision:LOCAL_LAYOUT_REVISION,themedSystemNavRevision:'v178',pwaUpdateRevision:'v207-registration-watchdog',knowledgeCache:'cwknowledge-school-seeds-v2',settingsPresentation:'cleanroom-v188',nativeDialog:false,legacySettingsCapture:false,settingsMutationObserver:false,settingsPolling:false,settingsTimers:false,settingsDiagnosticsRuntime:false,transformerActive:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,singlePassOpen:true,migrationOnDemand:false};
+function explicitInstalled(){
+  try{
+    if(params.get('installed')==='1'){sessionStorage.setItem(BOOT_KEY,'1');return true}
+    return sessionStorage.getItem(BOOT_KEY)==='1';
+  }catch{return params.get('installed')==='1'}
+}
+function canonicalAppSurface(){
+  const canonical=location.pathname==='/app/working-campus-v156.html';
+  if(canonical){try{sessionStorage.setItem(BOOT_KEY,'1')}catch{}}
+  return canonical;
+}
+function allowed(){return canonicalAppSurface()||installedDisplay()||explicitInstalled()||developer()||embedded()}
+function installerUrl(){
+  const target=`${location.pathname}${location.search}${location.hash}`;
+  const next=new URL(INSTALLER,location.origin);
+  next.searchParams.set('install','required');
+  next.searchParams.set('next',target.slice(0,1800));
+  return next.href;
+}
+function liveHead(){return!unloading&&document.documentElement?.isConnected&&document.head?.isConnected}
+function addScript(src){
+  if(!liveHead()||document.querySelector(`script[src^="${src}"]`))return false;
+  const script=document.createElement('script');
+  script.src=`${src}?v=${ADDITIONS_VERSION}`;
+  script.async=false;
+  document.head.append(script);
+  return true;
+}
+function installAdditions(){
+  if(canonicalAppSurface()||!liveHead())return false;
+  if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href=`${ADDITIONS_STYLE}?v=${ADDITIONS_VERSION}`;
+    document.head.append(link);
+  }
+  LEGACY_SCRIPTS.forEach(addScript);
+  return true;
+}
+function start(){
+  const root=document.documentElement;
+  if(!allowed()){
+    if(root)root.dataset.installBoundary='blocked';
+    location.replace(installerUrl());
+    return;
+  }
+  if(canonicalAppSurface()){
+    if(root){
+      root.dataset.installBoundary='canonical';
+      root.dataset.commonweaveCanonicalCore='only';
+    }
+    queueMicrotask(()=>dispatchEvent(new CustomEvent('commonweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION}})));
+    return;
+  }
+  if(root)root.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
+  installAdditions();
+}
+
+start();
+
+globalThis.CommonweaveInstallBoundaryV146=Object.freeze({
+  version:'1.0.13',allowed,
+  revision:REVISION,
+  canonicalAppSurface,
+  installedDisplay,
+  explicitInstalled,
+  developer,
+  embedded,
+  installerUrl,
+  installAdditions,
+  additionsVersion:ADDITIONS_VERSION,
+  canonicalPolicy:'core-only-no-global-additions-no-redirect',
+  canonicalAutoScripts:0,
+  onlineSelfHeal:true,
+  missingAssetDetails:true
+});
 })();

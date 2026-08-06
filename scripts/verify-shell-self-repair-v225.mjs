@@ -17,7 +17,9 @@ const [source,wrapper,indexHtml,installerFallback,versionText,packageText]=await
 const version=versionText.trim();
 const pkg=JSON.parse(packageText);
 const revision='shell-self-repair-v225';
-assert.equal(version,'1.0.12');
+const semver=value=>value.split('.').map(Number);
+const atLeast=(value,floor)=>{const left=semver(value),right=semver(floor);return left.some((part,index)=>part>right[index]&&left.slice(0,index).every((prior,i)=>prior===right[i]))||left.every((part,index)=>part===right[index])};
+assert(atLeast(version,'1.0.12'),`Shell self-repair requires Commonweave 1.0.12 or newer; found ${version}.`);
 assert.equal(pkg.version,version);
 assert(wrapper.includes(`/service-worker-shell-repair-v225.js?v=${revision}`),'Active worker wrapper does not import shell repair.');
 assert(wrapper.indexOf('/service-worker-shell-repair-v225.js')>wrapper.indexOf('/service-worker-navigation-safety-v224.js'),'Shell repair must be the final worker override.');
@@ -86,4 +88,4 @@ await repairPromise;
 assert(replies.at(-1)?.type==='COMMONWEAVE_DEVICE_PACKAGE','Explicit repair did not return package status.');
 assert.equal(replies.at(-1)?.ready,true);
 
-console.log(JSON.stringify({ok:true,version,revision,initialMissing:12,activatedIncomplete:true,retryAttempts:attempts,repaired:true,onlineFallback:true},null,2));
+console.log(JSON.stringify({ok:true,version,minimumVersion:'1.0.12',revision,initialMissing:12,activatedIncomplete:true,retryAttempts:attempts,repaired:true,onlineFallback:true},null,2));

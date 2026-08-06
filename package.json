@@ -1,6 +1,6 @@
 {
   "name": "commonweave-host-node-hub",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "private": true,
   "description": "Install-only Commonweave device package with deterministic local operation, local sovereignty, and optional connected AI providers.",
   "type": "module",

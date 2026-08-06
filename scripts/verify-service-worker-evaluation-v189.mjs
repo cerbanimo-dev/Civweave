@@ -43,6 +43,7 @@ function context(){
 function evaluate(source,name){const test=context();vm.runInContext(source,test.scope,{filename:name});return test.listeners}
 
 assert(legacy.includes("importScripts('/service-worker-v203.js"),'Legacy registrations no longer bridge to v203.');
+assert(wrapper.includes("/service-worker-release-coherence-v220.js?v=release-coherence-v226"),'Worker wrapper does not pin release coherence v226.');
 const orderedImports=[
   '/service-worker-living-school-cleanroom-v218.js',
   '/service-worker-core-v208.js',
@@ -69,14 +70,16 @@ assert(combined.filter(row=>row.type==='install').length>=2,'Combined worker los
 assert(combined.filter(row=>row.type==='fetch').length>=2,'Combined worker lost fetch listeners.');
 assert(combined.filter(row=>row.type==='message').length>=2,'Combined worker lost package and repair messaging.');
 assert(cleanup.includes('event.stopImmediatePropagation()'),'Living School requests are not isolated before the generic runtime cache.');
+assert(release.includes('working-campus-v156.part5.txt'),'Combined worker release policy omits campus source fragments.');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'v225-full-worker-stack',
+  revision:'v226-full-worker-stack',
   legacyBridge:true,
   duplicateGlobalConstCrash:false,
   cleanroomFetchBoundary:true,
   retainedOfflineCore:true,
+  campusFragmentCoherence:true,
   redirectSafety:true,
   shellSelfRepair:true,
   importLayers:orderedImports.length
