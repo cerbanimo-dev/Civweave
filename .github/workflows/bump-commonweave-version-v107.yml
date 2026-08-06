@@ -1,9 +1,9 @@
 name: Bump Commonweave to v1.0.7
 
 on:
-  push:
+  pull_request:
     branches:
-      - fix/living-school-cleanroom-v218
+      - main
     paths:
       - scripts/bump-commonweave-version-v107.mjs
       - .github/workflows/bump-commonweave-version-v107.yml
@@ -13,12 +13,13 @@ permissions:
 
 jobs:
   bump:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: fix/living-school-cleanroom-v218
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -32,4 +33,4 @@ jobs:
           git add -A
           git diff --cached --quiet && exit 1
           git commit -m "Bump Commonweave to v1.0.7"
-          git push origin HEAD:fix/living-school-cleanroom-v218
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
