@@ -25,7 +25,7 @@ function replaceRequired(source,pattern,replacement,label){
   return source.replace(pattern,replacement);
 }
 
-await patch('public/index.html',source=>replaceRequired(source,/revision=[A-Za-z0-9._-]+(?=['"])/,`revision=${revision}`,'installer worker registration revision'));
+await patch('public/app/index.html',source=>replaceRequired(source,/revision=[A-Za-z0-9._-]+(?=['"])/,`revision=${revision}`,'installer worker registration revision'));
 await patch('public/install-v130.js',source=>replaceRequired(source,/const WORKER_SCRIPT_REVISION = '[^']+';/,`const WORKER_SCRIPT_REVISION = '${revision}';`,'installer worker revision constant'));
 await patch('public/app/installed-entry-v146.js',source=>{
   source=replaceRequired(source,/params\.get\('version'\)\|\|'\d+\.\d+\.\d+';/,`params.get('version')||'${version}';`,'installed entry fallback release version');
