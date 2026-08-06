@@ -25,9 +25,9 @@ await patch('public/index.html',source=>{
   source=replaceRequired(source,/<span class="version">v\d+\.\d+\.\d+<\/span>/,`<span class="version">v${version}</span>`,'installer version badge');
   source=replaceRequired(source,/Install Commonweave v\d+\.\d+\.\d+\. The campus downloads automatically\./,`Install Commonweave v${version}. The campus downloads automatically.`,'installer headline');
   source=source.replace(/manifest\.webmanifest\?v=\d+\.\d+\.\d+/g,`manifest.webmanifest?v=${version}`);
-  source=source.replace(/(?:1\.0\.\d+)-lightweight-shell-v208/g,`${version}-lightweight-shell-v208`);
-  source=source.replace(/(?:1\.0\.\d+)-offline-retry-loop-v211/g,`${version}-offline-retry-loop-v211`);
-  source=source.replace(/(?:1\.0\.\d+)-required-campus-v1/g,`${version}-required-campus-v1`);
+  source=source.replace(/\d+\.\d+\.\d+-lightweight-shell-v208/g,`${version}-lightweight-shell-v208`);
+  source=source.replace(/\d+\.\d+\.\d+-offline-retry-loop-v211/g,`${version}-offline-retry-loop-v211`);
+  source=source.replace(/\d+\.\d+\.\d+-required-campus-v1/g,`${version}-required-campus-v1`);
   return source;
 });
 
@@ -78,7 +78,7 @@ await patch('scripts/smoke-gateway-v131-base.mjs',source=>{
   source=replaceRequired(source,/VERSION='\d+\.\d+\.\d+',BUILD='\d+\.\d+\.\d+-install-only-fullscreen-family-gateway'/,`VERSION='${version}',BUILD='${version}-install-only-fullscreen-family-gateway'`,'gateway smoke release constants');
   source=source.replace(/Install Commonweave v\d+\.\d+\.\d+\./g,`Install Commonweave v${version}.`);
   source=source.replace(/gateway root is not the v\d+\.\d+\.\d+ installer/g,`gateway root is not the v${version} installer`);
-  source=source.replace(/`v1\.0\.7 package still includes/g,``v${version} package still includes`);
+  source=source.replace(/v1\.0\.7 package still includes/g,`v${version} package still includes`);
   source=source.replace(/campus\.includes\('v\d+\.\d+\.\d+'\)/,`campus.includes('v${version}')`);
   return source;
 });
