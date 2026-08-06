@@ -1,5 +1,5 @@
 name: Execute Civweave total rename
-# Publishes source and asset changes first, then hands workflow edits to the trusted connector.
+# Launching the split source and workflow publication pass.
 
 on:
   push:
