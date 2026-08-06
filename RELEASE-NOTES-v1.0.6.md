@@ -1,4 +1,4 @@
-# Commonweave Host Node Hub v1.0.6
+# Commonweave Host Node Hub v1.0.7
 
 - Adds a canonical hosted campus seed at `/downloads/commonweave-pocket-campus.cwseed`.
 - Preserves `/field/commonweave/seed` as a compatibility alias.

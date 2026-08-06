@@ -18,7 +18,7 @@ const [pkgText,adapter,worker,manifestText,stage,materializer,serviceWorker,down
 ]);
 const pkg=JSON.parse(pkgText),manifest=JSON.parse(manifestText);
 
-assert(pkg.version==='1.0.6','fixed runtime branch is not aligned with Commonweave 1.0.6');
+assert(pkg.version==='1.0.7','fixed runtime branch is not aligned with Commonweave 1.0.7');
 assert(pkg.dependencies?.['onnxruntime-web']==='1.27.0','onnxruntime-web is not pinned to 1.27.0');
 assert(pkg.scripts?.prestart?.includes('stage-onnxruntime-web-assets.mjs'),'normal startup does not stage the fixed runtime');
 assert(pkg.scripts?.prestart?.includes('ensure-minilm-fixed-ort-model.mjs'),'normal startup does not materialize the fixed graph');
@@ -26,7 +26,7 @@ assert(pkg.scripts?.['build:release']?.startsWith('npm run minilm:fixed-model:pu
 const settingsBoundaryCheck=String(pkg.scripts?.check||'');
 assert(settingsBoundaryCheck.includes('verify-ai-settings-self-contained-v181.mjs')||settingsBoundaryCheck.includes('verify-ai-settings-freeze-boundary-v180.mjs'),'fixed runtime wiring dropped the settings freeze-boundary test');
 
-for(const token of ["loaderPolicy:'fixed'","runtime:'onnxruntime-web/wasm'",'/app/vendor/onnxruntime/ort.wasm.min.mjs','model_quantized.onnx','FIXED_PROFILE','device-package-r41-fixed-ort-wasm','commonweave-model-1.0.6-minilm-fixed-ort-r1'])assert(adapter.includes(token),`adapter missing ${token}`);
+for(const token of ["loaderPolicy:'fixed'","runtime:'onnxruntime-web/wasm'",'/app/vendor/onnxruntime/ort.wasm.min.mjs','model_quantized.onnx','FIXED_PROFILE','device-package-r41-fixed-ort-wasm','commonweave-model-1.0.7-minilm-fixed-ort-r1'])assert(adapter.includes(token),`adapter missing ${token}`);
 for(const retired of ['transformers.min.js','model_q4f16.onnx','navigator.gpu','selectProfile','includeWebGPU'])assert(!adapter.includes(retired),`adapter still contains model/backend selection: ${retired}`);
 assert(adapter.includes("if(!explicit)return{ready:false,dormant:true,reason:'explicit-activation-required'}"),'adapter can start outside explicit semantic-lab activation');
 

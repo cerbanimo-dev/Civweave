@@ -8,15 +8,15 @@ const CSS=['/app/cabinet-home-v142.css?v=inline-r43','/app/intention-ui-v138.css
 const PREREQUISITES=[
   ['/app/shared/commonweave-parity-runtime.js?v=1.0.4',()=>globalThis.CommonweaveParity],
   ['/app/shared/commonweave-model-runtime.js?v=1.0.4',()=>globalThis.CommonweaveModelRuntime],
-  ['/app/weaveling-memory-v191.js?v=1.0.6-v191',()=>globalThis.CommonweaveWeavelingMemoryV191],
+  ['/app/weaveling-memory-v191.js?v=1.0.7-v191',()=>globalThis.CommonweaveWeavelingMemoryV191],
   ['/app/intention-planner-v141.js?v=1.0.4',()=>globalThis.CommonweaveIntentionPlanner],
   ['/app/guide-contracts-v141.js?v=1.0.4',()=>globalThis.CommonweaveGuideContractsV141]
 ];
-const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.6-v192',()=>globalThis.CommonweaveFastInteractiveV192];
+const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.7-v192',()=>globalThis.CommonweaveFastInteractiveV192];
 const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.4',()=>globalThis.CommonweaveAssistantV141];
 const PATCHES=[
   ['/app/deterministic-mode-v175.js?v=deterministic-r1',()=>globalThis.CommonweaveDeterministicModeV175],
-  ['/app/weaveling-memory-bridge-v191.js?v=1.0.6-v191',()=>globalThis.CommonweaveWeavelingMemoryBridgeV191]
+  ['/app/weaveling-memory-bridge-v191.js?v=1.0.7-v191',()=>globalThis.CommonweaveWeavelingMemoryBridgeV191]
 ];
 const OPTIONAL=[
   ['/app/intention-ui-v138.js?v=1.0.4',()=>globalThis.CommonweaveIntentionUI],

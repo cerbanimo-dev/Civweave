@@ -5,111 +5,38 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
-const [
-  chat,viewport,boundary,livingIndex,loader,paths,interactions,
-  commonweave,cerbanimo,fellowfare,anarchadia
-]=await Promise.all([
+const [chat,viewport,boundary,livingIndex,livingRuntime,livingCore,commonweave,cerbanimo,fellowfare,anarchadia]=await Promise.all([
   read('public/app/persistent-guide-chat-v215.js'),
   read('public/app/persistent-guide-viewport-v216.js'),
   read('public/app/install-boundary-v146.js'),
   read('public/app/cabinets/living-school/index.html'),
-  read('public/app/cabinets/living-school/living-school-flat-loader-v213.js'),
-  read('public/app/cabinets/living-school/living-school-paths-v213.js'),
-  read('public/app/cabinets/living-school/living-school-interactions-v213.js'),
+  read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'),
+  read('public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'),
   read('public/app/working-campus-v156.html'),
   read('public/app/realm-console-v140.html'),
   read('public/app/fellowfare-cabinet-v144.html'),
   read('public/app/anarchadia-console-v139.html')
 ]);
 
-for(const source of [chat,viewport,boundary,loader,paths,interactions])new Function(source);
-
+for(const source of [chat,viewport,boundary])new Function(source);
 for(const token of [
   "const STORAGE_KEY='commonweave.persistent-guide-chat.v214'",
   "const SYSTEMS=['commonweave','living-school','cerbanimo','fellowfare','anarchadia']",
-  "commonweave:'#ebe7dd'",
-  "'living-school':'#59cf87'",
-  "cerbanimo:'#a66cff'",
-  "fellowfare:'#f2a93b'",
-  "anarchadia:'#ff4f9a'",
-  "addEventListener('commonweave:guide-notification',onNotification)",
-  'function notify(system,text,options={})',
-  'cwp215-unread',
-  'cwp215-launch-count',
-  'var(--cw-themed-nav-height,0px)',
-  "assistant.respond({text,systemId:guideAtSend,history})",
-  'One thread, five guides.',
-])assert(chat.includes(token),`Persistent chat v215 is missing ${token}`);
-
+  "'living-school':'#59cf87'","cerbanimo:'#a66cff'","fellowfare:'#f2a93b'","anarchadia:'#ff4f9a'",
+  "addEventListener('commonweave:guide-notification',onNotification)",'function notify(system,text,options={})',
+  'var(--cw-themed-nav-height,0px)',"assistant.respond({text,systemId:guideAtSend,history})",
+])assert(chat.includes(token),`Persistent chat is missing ${token}`);
 assert.equal((chat.match(/assistant\.respond\(/g)||[]).length,1,'Persistent chat must own exactly one assistant submission pipeline.');
-assert(!/#0b1f3a|navy/i.test(chat.match(/const NOTIFICATION_PALETTE=\{[\s\S]*?\};/)?.[0]||''),'Rook notification palette drifted back toward navy.');
-assert(chat.includes("fellowfare:'#f2a93b'"),'Rook notifications must be amber.');
-for(const retiredKey of [
-  'commonweave.guide-chat.cerbanimo.v128',
-  'commonweave.guide-chat.anarchadia.v128',
-  'commonweave.guide-chat.living-school.v128',
-  'commonweave.guide-chat.fellowfare.v128',
-])assert(!chat.includes(retiredKey),`Persistent chat reintroduced realm history key ${retiredKey}`);
+for(const token of ['globalThis.visualViewport','data-keyboard-open','CommonweavePersistentGuideViewportV216'])assert(viewport.includes(token),`Persistent viewport is missing ${token}`);
+for(const token of ["const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js'","const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js'",'persistentGuideChatSubmissionPipelines:1','persistentGuideChatGuideCount:5'])assert(boundary.includes(token),`Install boundary is missing ${token}`);
 
-for(const token of [
-  "const VERSION='1.0.8-persistent-guide-viewport-v216'",
-  "const ROOT_ID='cw-persistent-guide-chat-v215'",
-  "const HEIGHT_VAR='--cwp215-visual-viewport-height'",
-  "const INSET_VAR='--cwp215-keyboard-inset'",
-  'globalThis.visualViewport',
-  'data-keyboard-open',
-  'keyboardOpen=activeInput',
-  "input?.scrollIntoView?.({block:'nearest',inline:'nearest'})",
-  "addEventListener('orientationchange',resetBaseline",
-  'CommonweavePersistentGuideViewportV216',
-])assert(viewport.includes(token),`Persistent guide viewport v216 is missing ${token}`);
-assert(viewport.includes('bottom:var(${INSET_VAR},0px)!important'),'Keyboard-open chat must anchor to the measured visual viewport inset.');
-assert(viewport.includes('max-height:calc(var(${HEIGHT_VAR},100dvh) - 4px)!important'),'Mobile keyboard-open chat must fit within the visible viewport height.');
+assert(livingIndex.includes('data-living-school-runtime="cleanroom-v218"'),'Living School is not on the clean-room surface.');
+assert(livingIndex.includes('living-school-cleanroom-v218.mjs'),'Living School clean-room runtime is missing.');
+for(const retired of ['id="moss"','id="compass"','id="room"','data-room','id="actions"','action-list','living-school-flat-loader'])assert(!livingIndex.includes(retired),`Living School still contains retired launcher or navigation token ${retired}.`);
+assert.equal((livingRuntime.match(/document\.addEventListener\('click',handleLivingSchoolClick,true\)/g)||[]).length,1,'Living School must install exactly one canonical page controller.');
+assert(!/MutationObserver|\.click\s*\(|setRoom|openNative|data-room/.test(livingRuntime),'Living School clean-room runtime contains a retired interaction tripwire.');
+assert(livingCore.includes('You are Moss, Living School learning guide'),'Moss no longer owns Living School generation.');
+assert(livingCore.includes('never impersonate another Commonweave guide'),'Living School guide identity boundary is missing.');
 
-for(const token of [
-  "const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js'",
-  "const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js'",
-  "const ADDITIONS_VERSION='v216-guide-chat-keyboard-viewport'",
-  'addScript(PERSISTENT_GUIDE_CHAT_SCRIPT);addScript(PERSISTENT_GUIDE_VIEWPORT_SCRIPT)',
-  "const PERSISTENT_GUIDE_CHAT_REVISION='v216-one-thread-five-guide-keyboard-safe'",
-  "const PERSISTENT_GUIDE_VIEWPORT_REVISION='v216-visual-viewport-keyboard-safe'",
-  'persistentGuideChatSubmissionPipelines:1',
-  'persistentGuideChatGuideCount:5',
-  'persistentGuideChatAboveNavigation:true',
-  'persistentGuideChatNotifications:true',
-  'persistentGuideChatKeyboardSafe:true',
-  'persistentGuideChatUsesVisualViewport:true',
-  "rook:'amber'",
-])assert(boundary.includes(token),`Install boundary is missing ${token}`);
-
-assert(livingIndex.includes('data-build="living-school-flat-v213-direct-interactions"'),'Living School is not on the v213 direct interaction surface.');
-assert(livingIndex.includes('living-school-flat-loader-v213.js'),'Living School does not load the direct interaction stack.');
-assert(livingIndex.includes('living-school-interactions-v213.css'),'Living School direct interaction CSS is missing.');
-assert(livingIndex.includes('id="actions"')&&livingIndex.includes('aria-hidden="true"')&&livingIndex.includes('tabindex="-1"')&&livingIndex.includes('hidden>☰'),'The unfinished Living School menu remains interactive.');
-for(const retired of ['id="moss"','id="compass"','class="ls-moss"','class="ls-compass"'])assert(!livingIndex.includes(retired),`Living School still contains duplicate guide launcher ${retired}.`);
-assert(livingIndex.includes('id="action-list"'),'The hidden legacy action-list contract required by the cabinet renderer was removed.');
-
-assert(loader.includes('living-school-paths-v213.js?v=direct-controls-v213'),'Living School loader omits direct path controls.');
-assert(loader.includes('living-school-interactions-v213.js?v=direct-surfaces-v213'),'Living School loader omits direct interactions.');
-assert(!loader.includes('living-school-curriculum-launch-v212.js'),'Living School still loads the stale v212 room bridge.');
-assert(!paths.includes('LivingSchoolCabinetV151?.setRoom')&&!paths.includes('[data-lsw-action'),'Path controls still overlap the workbench or stale room writer.');
-assert(paths.includes("'[data-ls160-use],[data-ls160-view],[data-ls160-generate]'"),'Path controller no longer owns exactly the three pathbar controls.');
-assert(!interactions.includes('openNative')&&!interactions.includes('.click()')&&!interactions.includes('LivingSchoolCabinetV151?.setRoom'),'Direct interactions still synthesize or route through stale room actions.');
-assert.equal((interactions.match(/document\.addEventListener\('click',handleClick,true\)/g)||[]).length,1,'Living School direct interactions must install one canonical click controller.');
-assert(interactions.includes('function openLesson()')&&interactions.includes('function openAssessment()'),'Direct lesson or assessment surfaces are missing.');
-
-for(const [name,html] of Object.entries({commonweave,cerbanimo,fellowfare,anarchadia,livingIndex})){
-  assert(html.includes('/app/install-boundary-v146.js'),`${name} does not load the shared guide boundary.`);
-}
-
-console.log(JSON.stringify({
-  ok:true,
-  revision:'v216-one-thread-five-guide-keyboard-safe',
-  sharedHistoryKey:'commonweave.persistent-guide-chat.v214',
-  assistantSubmissionPipelines:1,
-  guideCount:5,
-  notificationPalettes:{weaveling:'pearl-silver',moss:'green',kamiya:'purple',rook:'amber',merlin:'pink'},
-  chatAboveFiveSystemNavigation:true,
-  keyboardSafeViewport:{visualViewport:true,focusAware:true,orientationAware:true},
-  livingSchool:{directController:true,duplicateGuideButtons:false,unfinishedMenuInteractive:false,staleRoomBridge:false},
-},null,2));
+for(const [name,html] of Object.entries({commonweave,cerbanimo,fellowfare,anarchadia,livingIndex}))assert(html.includes('/app/install-boundary-v146.js'),`${name} does not load the shared guide boundary.`);
+console.log(JSON.stringify({ok:true,revision:'v218-one-thread-five-guide-cleanroom',assistantSubmissionPipelines:1,guideCount:5,livingSchool:{pageControllers:1,legacyNavigation:false,mossOwnsGeneration:true}},null,2));

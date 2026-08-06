@@ -5,7 +5,7 @@ const root=process.cwd();
 const read=file=>fs.readFile(path.join(root,file),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
-const [outerHtml,outerCss,parentTheme,mobileFlow,innerHtml,embedCss,themedNav,worker,critical]=await Promise.all([
+const [outerHtml,outerCss,parentTheme,mobileFlow,innerHtml,embedCss,themedNav,legacyWorker,workerWrapper,workerCore,offlineManifestText,critical]=await Promise.all([
   read('public/app/fellowfare-cabinet-v144.html'),
   read('public/app/fellowfare-cabinet-v144.css'),
   read('public/app/fellowfare-parent-theme-v205.css'),
@@ -14,8 +14,12 @@ const [outerHtml,outerCss,parentTheme,mobileFlow,innerHtml,embedCss,themedNav,wo
   read('public/app/services/fellowfare/cabinet-embed.css'),
   read('public/app/themed-system-nav-v178.js'),
   read('public/service-worker-v156.js'),
+  read('public/service-worker-v203.js'),
+  read('public/service-worker-core-v208.js'),
+  read('public/app/offline-package-v208.json'),
   read('public/service-worker-critical-v199.js')
 ]);
+const offlineManifest=JSON.parse(offlineManifestText);
 
 assert(outerHtml.includes('data-build="fellowfare-parent-mobile-v205"'),'Outer FellowFare cabinet did not rotate to the parent/mobile revision.');
 assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?commonweave=1&cabinet=1#market'),'Outer cabinet is not pointing at the active embedded FellowFare market.');
@@ -60,13 +64,23 @@ assert(themedNav.includes('if(EMBEDDED)'),'The embedded realm switcher suppressi
 assert(themedNav.includes('target="_top"'),'Realm links can still recurse a cabinet inside its iframe.');
 assert(themedNav.includes("glow:'#4f8ca8'"),'FellowFare selected navigation accent is not ink blue.');
 
-const criticalImport="importScripts('/service-worker-critical-v199.js?v=memory-bridge-frozen-proxy-v205')";
-assert(worker.includes(criticalImport),'The active service worker does not request the current FellowFare parent/mobile critical coordinator.');
-assert(worker.indexOf(criticalImport)<worker.indexOf("importScripts('/service-worker.js"),'The critical coordinator must register before the base package fetch handlers.');
-assert(worker.includes("const FELLOWFARE_ACTIVE_REVISION='fellowfare-parent-mobile-v205'"),'Additions status does not expose the current FellowFare parent/mobile revision.');
-assert(!worker.includes('service-worker-fellowfare-active-v203.js'),'A third top-level worker import would break shared-scope evaluation.');
-assert(critical.includes("const VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Critical active-package coordinator lost the FellowFare parent/mobile or memory-bridge revision.');
-assert(critical.includes("const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Critical active-package cache did not rotate for the mobile parent and memory bridge.');
+assert(legacyWorker.includes("importScripts('/service-worker-v203.js"),'Legacy registrations do not reach the active worker wrapper.');
+const cleanIndex=workerWrapper.indexOf("importScripts('/service-worker-living-school-cleanroom-v218.js");
+const coreIndex=workerWrapper.indexOf("importScripts('/service-worker-core-v208.js");
+const retryIndex=workerWrapper.indexOf("importScripts('/service-worker-offline-v211-override.js");
+assert(cleanIndex>=0&&coreIndex>cleanIndex&&retryIndex>coreIndex,'Active worker composition order is incorrect.');
+assert(workerCore.includes('discoverReferences')&&workerCore.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Retained offline core no longer discovers or stores dependencies.');
+assert(offlineManifest.seeds.includes('/app/fellowfare-cabinet-v144.html'),'Offline campus no longer seeds the active FellowFare parent cabinet.');
+assert(offlineManifest.includePrefixes.includes('/app/'),'Offline campus excludes FellowFare app assets.');
+for(const token of [
+  '/app/fellowfare-cabinet-v144.css',
+  '/app/fellowfare-parent-theme-v205.css',
+  '/app/fellowfare-mobile-flow-v205.js'
+])assert(outerHtml.includes(token),`FellowFare seed cannot discover ${token}`);
+assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?commonweave=1&cabinet=1#market'),'FellowFare seed cannot discover its embedded market.');
+
+assert(critical.includes("const VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Compatibility coordinator lost the FellowFare parent/mobile or memory-bridge revision.');
+assert(critical.includes("const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Compatibility cache did not rotate for the mobile parent and memory bridge.');
 for(const token of [
   '/app/fellowfare-cabinet-v144.html',
   '/app/fellowfare-cabinet-v144.css',
@@ -77,11 +91,11 @@ for(const token of [
   '/app/weaveling-memory-bridge-v191.js',
   'event.stopImmediatePropagation()',
   'self.CommonweaveCriticalBootV205=api'
-])assert(critical.includes(token),`Critical active-package coordinator is missing ${token}`);
+])assert(critical.includes(token),`Compatibility coordinator is missing ${token}`);
 
-for(const [name,source] of [['mobile flow',mobileFlow],['themed navigation',themedNav],['critical package coordinator',critical],['active service worker',worker]]){
+for(const [name,source] of [['mobile flow',mobileFlow],['themed navigation',themedNav],['compatibility coordinator',critical],['active worker wrapper',workerWrapper],['retained worker core',workerCore]]){
   try{new Function(source)}catch(error){throw new Error(`${name} has invalid JavaScript: ${error.message}`)}
 }
 for(const [name,source] of [['outer CSS',outerCss],['parent theme CSS',parentTheme],['embed CSS',embedCss]])assert((source.match(/{/g)||[]).length===(source.match(/}/g)||[]).length,`${name} has unbalanced braces.`);
 
-console.log('FellowFare v205 verification passed: the full parent cabinet is parchment/amber/ink-blue, embedded platform navigation cannot recurse, phones use one dynamically measured page scroll, and the frozen-safe memory bridge is critically refreshed.');
+console.log('FellowFare v205 verification passed: the full parent cabinet is parchment/amber/ink-blue, embedded platform navigation cannot recurse, phones use one dynamically measured page scroll, and the active cabinet is retained through discovered offline-campus packaging.');

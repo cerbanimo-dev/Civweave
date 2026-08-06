@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-cerbanimo-deterministic-boundary-v203';
+const VERSION='1.0.7-cerbanimo-deterministic-boundary-v203';
 const SETTINGS_KEY='commonweave.universal-ai.v127';
 const PROFILES_KEY='commonweave-model-profiles-v1';
 const LOCAL_PROVIDERS=new Set(['','bundled','packaged','reflex','minilm','local-reflex','smollm2','browser','deterministic']);

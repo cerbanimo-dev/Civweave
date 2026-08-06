@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-ai-settings-cleanroom-v188';
+const VERSION='1.0.7-ai-settings-cleanroom-v188';
 const CREDENTIAL_REVISION='v191-explicit-device-persistence';
-const APP_VERSION='1.0.6';
+const APP_VERSION='1.0.7';
 if(globalThis.CommonweaveAISettingsCleanroomV188?.credentialRevision===CREDENTIAL_REVISION)return;
 
 const LAYER_ID='cw-ai-settings-cleanroom-v188';

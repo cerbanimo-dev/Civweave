@@ -294,8 +294,8 @@ await patch('public/service-worker-v203.js',source=>{
 
 await patch('public/index.html',source=>replaceRequired(
   source,
-  '<script src="/install-v130.js?v=1.0.6-update-library-v204"></script>',
-  '<script src="/install-v130.js?v=1.0.6-registration-watchdog-v207"></script>',
+  '<script src="/install-v130.js?v=1.0.7-update-library-v204"></script>',
+  '<script src="/install-v130.js?v=1.0.7-registration-watchdog-v207"></script>',
   'installer script cache buster'
 ));
 

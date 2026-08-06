@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.6-offline-campus-status-v210';
+const VERSION='1.0.7-offline-campus-status-v210';
 const WORKER_REVISION='offline-campus-seed-provenance-v211';
 const STATUS_TYPES=new Set([
   'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',

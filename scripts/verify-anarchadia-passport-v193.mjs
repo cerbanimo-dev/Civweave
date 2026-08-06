@@ -3,13 +3,16 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const root=new URL('../',import.meta.url);
-const [html,css,source,worker]=await Promise.all([
+const [html,css,source,legacyWorker,workerWrapper,workerCore,offlineManifestText]=await Promise.all([
   readFile(new URL('public/app/anarchadia-console-v139.html',root),'utf8'),
   readFile(new URL('public/app/anarchadia-passport-v193.css',root),'utf8'),
   readFile(new URL('public/app/anarchadia-passport-v193.js',root),'utf8'),
-  readFile(new URL('public/service-worker-v156.js',root),'utf8')
+  readFile(new URL('public/service-worker-v156.js',root),'utf8'),
+  readFile(new URL('public/service-worker-v203.js',root),'utf8'),
+  readFile(new URL('public/service-worker-core-v208.js',root),'utf8'),
+  readFile(new URL('public/app/offline-package-v208.json',root),'utf8')
 ]);
-
+const offlineManifest=JSON.parse(offlineManifestText);
 const must=(value,message)=>assert.ok(value,message);
 new vm.Script(source,{filename:'anarchadia-passport-v193.js'});
 
@@ -32,7 +35,12 @@ must(source.includes("Math.floor(Math.sqrt(total/40))+1"),'Passport must use the
 
 for(const token of ['@media(max-width:560px)','@media(prefers-reduced-motion:reduce)','ac-passport-wallet','ac-skill-list','ac-achievement-grid','ac-ownership-strip'])must(css.includes(token),`Passport styling is missing responsive/game UI token: ${token}`);
 
-for(const token of ['working-campus-additions-v193-passport-exposed','anarchadia-passport-expanded-v193','/app/anarchadia-passport-v193.css','/app/anarchadia-passport-v193.js'])must(worker.includes(token),`Offline package is missing Passport token: ${token}`);
+must(legacyWorker.includes("importScripts('/service-worker-v203.js"),'Legacy registrations do not reach the active worker wrapper.');
+must(workerWrapper.includes("importScripts('/service-worker-core-v208.js"),'Active worker wrapper does not load the retained offline core.');
+must(workerCore.includes('discoverReferences')&&workerCore.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Offline campus no longer discovers and stores page dependencies.');
+must(offlineManifest.seeds.includes('/app/anarchadia-console-v139.html'),'Offline campus no longer seeds the Anarchadia console.');
+must(offlineManifest.includePrefixes.includes('/app/'),'Offline campus no longer admits Passport assets under /app/.');
+for(const token of ['/app/anarchadia-passport-v193.css','/app/anarchadia-passport-v193.js'])must(html.includes(token),`Anarchadia seed cannot discover Passport asset: ${token}`);
 
 class Storage{
   constructor(){this.map=new Map()}
@@ -63,7 +71,7 @@ console.log(JSON.stringify({
   sections:['level','wallet','skills','weave-paths','chronicles','achievements','receipts','ownership'],
   canonicalRewardStore:'commonweave.rewards.v156',
   ledgerAuthority:'display-only',
-  offlinePackaged:true,
+  offlinePackaged:'discovered-from-anarchadia-seed',
   mobileResponsive:true,
   reducedMotion:true
 },null,2));

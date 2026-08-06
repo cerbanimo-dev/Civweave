@@ -1,12 +1,16 @@
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
-const [plannerSource,orchestratorSource,campusPart,workerSource]=await Promise.all([
+const [plannerSource,orchestratorSource,campusPart,legacyWorker,workerWrapper,workerCore,offlineManifestText]=await Promise.all([
   readFile('public/app/intention-planner-v141.js','utf8'),
   readFile('public/extensions/commonweave-weaveling-plan-json-v190.js','utf8'),
   readFile('public/app/working-campus-v156.part5.txt','utf8'),
   readFile('public/service-worker-v156.js','utf8'),
+  readFile('public/service-worker-v203.js','utf8'),
+  readFile('public/service-worker-core-v208.js','utf8'),
+  readFile('public/app/offline-package-v208.json','utf8'),
 ]);
+const offlineManifest=JSON.parse(offlineManifestText);
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 class MemoryStorage{constructor(seed={}){this.values=new Map(Object.entries(seed))}getItem(key){return this.values.has(key)?this.values.get(key):null}setItem(key,value){this.values.set(key,String(value))}removeItem(key){this.values.delete(key)}}
 const storage=new MemoryStorage({
@@ -69,5 +73,9 @@ assert(activation.planControl?.action==='activate'&&activation.plan?.state==='ac
 assert(captured.purpose==='commonweave-weaveling-intention-json-v190','Activation incorrectly made another model call.');
 assert(campusPart.includes('/extensions/commonweave-weaveling-plan-json-v190.js'),'Working Campus does not load the structured-plan orchestrator.');
 assert(campusPart.includes('syncPlanResult(result)'),'Working Campus does not synchronize model-authored plans into the visible workspace.');
-assert(workerSource.includes('/extensions/commonweave-weaveling-plan-json-v190.js'),'Installed package does not cache the structured-plan orchestrator.');
-console.log(JSON.stringify({ok:true,revision:'v190-weaveling-plan-json',provider:'gemini',schema:true,premisePreserved:true,ambiguityPreserved:true,workingContext:true,plainLanguageActivation:true,deterministicPlanner:'fallback-only-for-external-provider-failure'},null,2));
+assert(legacyWorker.includes("importScripts('/service-worker-v203.js"),'Legacy registrations do not reach the active worker wrapper.');
+assert(workerWrapper.includes("importScripts('/service-worker-core-v208.js"),'Active worker wrapper does not load the retained offline core.');
+assert(workerCore.includes('discoverReferences')&&workerCore.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Offline campus no longer discovers and stores seed dependencies.');
+assert(offlineManifest.seeds.includes('/app/working-campus-v156.html'),'Offline campus no longer seeds the Working Campus.');
+assert(offlineManifest.includePrefixes.includes('/extensions/'),'Offline campus excludes extension runtimes discovered from Working Campus.');
+console.log(JSON.stringify({ok:true,revision:'v190-weaveling-plan-json',provider:'gemini',schema:true,premisePreserved:true,ambiguityPreserved:true,workingContext:true,plainLanguageActivation:true,offlinePackaged:'discovered-from-working-campus',deterministicPlanner:'fallback-only-for-external-provider-failure'},null,2));

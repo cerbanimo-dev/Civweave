@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-unified-settings-compat-v188';
+const VERSION='1.0.7-unified-settings-compat-v188';
 if(globalThis.CommonweaveUnifiedAISettingsCompatV188?.version===VERSION)return;
 function controller(){return globalThis.CommonweaveAISettingsCleanroomV188||globalThis.CommonweaveModelSettingsControllerV173||null;}
 const api=Object.freeze({

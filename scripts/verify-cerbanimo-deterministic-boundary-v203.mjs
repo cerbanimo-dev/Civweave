@@ -13,7 +13,7 @@ const [boundary,consoleHtml,worker,critical]=await Promise.all([
   read('public/service-worker-critical-v199.js'),
 ]);
 
-assert(boundary.includes("VERSION='1.0.6-cerbanimo-deterministic-boundary-v203'"),'The Cerbanimo provider boundary revision is missing.');
+assert(boundary.includes("VERSION='1.0.7-cerbanimo-deterministic-boundary-v203'"),'The Cerbanimo provider boundary revision is missing.');
 assert(boundary.includes('DETERMINISTIC_PROVIDER_BOUNDARY'),'The hard external-call rejection is missing.');
 assert(boundary.includes("requestSystem(request)==='cerbanimo'"),'The model guard is not scoped to Cerbanimo guide calls.');
 assert(boundary.includes("deterministic?.respond"),'The assistant boundary does not route to the deterministic runtime.');

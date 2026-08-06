@@ -37,7 +37,7 @@ assert(workerSource.includes("const BUILD = 'lightweight-shell-v208'"),'Verified
 assert(workerSource.includes("const V211_REVISION = 'offline-campus-seed-provenance-v211'"),'Offline retry-loop repair is missing.');
 assert(updateWorkerSource.includes("const CACHE='cwupdate-visible-v207'"),'Update controls are not isolated in the v207 cache.');
 assert(boundarySource.includes("const ADDITIONS_VERSION='v207-registration-watchdog'"),'Installed pages do not cache-bust the v207 update controller.');
-assert(indexSource.includes('/install-v130.js?v=1.0.6-lightweight-shell-v208'),'Gateway does not load the lightweight installer.');
+assert(indexSource.includes('/install-v130.js?v=1.0.7-lightweight-shell-v208'),'Gateway does not load the lightweight installer.');
 assert(indexSource.includes('offline-retry-loop-v211'),'Gateway does not cache-bust the retry-loop repair.');
 assert(statusSource.includes('registration.update()'),'Offline status repair does not force-check the current worker.');
 
@@ -140,7 +140,7 @@ const recoveryKey='commonweave.shell.registration-watchdog.v208';
   };
   const worker={
     state:'activated',
-    scriptURL:'https://example.test/service-worker-v203.js?v=1.0.6-lightweight-shell-v208&revision=stable-entry-v217',
+    scriptURL:'https://example.test/service-worker-v203.js?v=1.0.7-lightweight-shell-v208&revision=stable-entry-v217',
     postMessage(message,ports){ports?.[0]?.deliver(responses[message.type]||null)},
   };
   const registration={scope:'https://example.test/',active:worker,waiting:null,installing:null,update:async()=>registration,unregister:async()=>true,addEventListener(){}};
@@ -153,7 +153,7 @@ const recoveryKey='commonweave.shell.registration-watchdog.v208';
   await delay(120);
   assert.equal(registerCalls,0,'An already-current active worker was redundantly registered.');
   assert.equal(harness.nodes.get('#package-state').textContent,'ready','The reused current worker did not complete shell readiness.');
-  assert.equal(harness.nodes.get('#install-app').textContent,'Install Commonweave v1.0.6','The install button did not become available after current-worker reuse.');
+  assert.equal(harness.nodes.get('#install-app').textContent,'Install Commonweave v1.0.7','The install button did not become available after current-worker reuse.');
 }
 
 {

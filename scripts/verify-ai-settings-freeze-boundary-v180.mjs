@@ -21,7 +21,7 @@ new Function(download);
 new Function(serviceWorker.replace(/^importScripts\([^\n]+\);/m,''));
 
 for(const token of [
-  "VERSION='1.0.6-settings-controller-v180'",
+  "VERSION='1.0.7-settings-controller-v180'",
   "const BOOTSTRAP_ID='cw-ai-settings-bootstrap-v180'",
   'function showBootstrap(generation)',
   'function afterPaint()',

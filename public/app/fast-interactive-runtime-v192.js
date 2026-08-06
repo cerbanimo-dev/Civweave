@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-fast-interactive-v192.1-frozen-runtime-proxy';
+const VERSION='1.0.7-fast-interactive-v192.1-frozen-runtime-proxy';
 const root=globalThis;
 const state={installed:false,mode:'waiting',lastError:''};
 let timer=0;

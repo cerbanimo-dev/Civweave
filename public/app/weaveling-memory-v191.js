@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-weaveling-memory-v191';
+const VERSION='1.0.7-weaveling-memory-v191';
 const WORKING_KEY='commonweave.weaveling-memory.working.v1';
 const LONG_KEY='commonweave.weaveling-memory.long.v1';
 const CAMPUS_KEY='commonweave.working-campus.v1';

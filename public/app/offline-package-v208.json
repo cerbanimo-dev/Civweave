@@ -1,5 +1,5 @@
 {
-  "version": "1.0.6",
+  "version": "1.0.7",
   "revision": "resumable-discovered-campus-v208",
   "description": "Commonweave campus pack. The service worker begins from these functional entry points and canonical reward runtimes, discovers their same-origin dependencies, and resumes individual failed files without invalidating the package.",
   "seeds": [

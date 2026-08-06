@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(rootDir, 'server-gateway-v131-base.mjs');
 const runtimePath = path.join(rootDir, '.commonweave-gateway-v132.loader.mjs');
-const VERSION = '1.0.6-render-installed-runtime-v132';
+const VERSION = '1.0.7-render-installed-runtime-v132';
 const before = "if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall) {";
 const after = "if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall && pathname !== '/app' && !pathname.startsWith('/app/')) {";
 
