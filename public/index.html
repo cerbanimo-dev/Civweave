@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07141f">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <title>Install Commonweave v1.0.7</title>
-  <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.7">
+  <title>Install Commonweave v1.0.9</title>
+  <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.9">
   <link rel="icon" href="/app/logos/commonweave-icon-192.png">
-  <link rel="stylesheet" href="/install-v130.css?v=1.0.7-lightweight-shell-v208">
+  <link rel="stylesheet" href="/install-v130.css?v=1.0.9-lightweight-shell-v208">
   <link rel="stylesheet" href="/app/knowledge-school-installer-v1.css?v=knowledge-schools-v2">
 </head>
 <body>
@@ -17,10 +17,10 @@
   <header class="gateway-header">
     <img src="/app/logos/commonweave-app-icon.png" alt="Commonweave">
     <div><small>INSTALLER · UPDATER · RECOVERY</small><h1>Commonweave</h1></div>
-    <span class="version">v1.0.7</span>
+    <span class="version">v1.0.9</span>
   </header>
   <section class="install-card" aria-labelledby="install-title">
-    <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install Commonweave v1.0.7. The campus downloads automatically.</h2><p>The browser installs the small Commonweave shell first, then automatically downloads the required functional campus as a resumable stream. One slow or missing room no longer freezes installation, and interrupted files can continue later. No native modal is involved.</p></div>
+    <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install Commonweave v1.0.9. The campus downloads automatically.</h2><p>The browser installs the small Commonweave shell first, then automatically downloads the required functional campus as a resumable stream. One slow or missing room no longer freezes installation, and interrupted files can continue later. No native modal is involved.</p></div>
     <div class="topology" aria-label="Commonweave topology"><article><b>1</b><strong>Install shell</strong><span>Fast, browser-native app installation.</span></article><i>→</i><article><b>2</b><strong>Download campus</strong><span>Starts automatically and resumes per file.</span></article><i>→</i><article><b>3</b><strong>Open anywhere</strong><span>The functional campus remains available offline.</span></article></div>
     <div class="gateway-actions"><button id="install-app" class="primary" type="button" disabled>Preparing app shell…</button><button id="check-update" class="secondary" type="button">Check release</button></div>
     <p id="install-help" class="install-help" role="status">Preparing the small app shell. The required campus download starts automatically; models and knowledge schools remain separate optional downloads.</p>
@@ -61,15 +61,15 @@
 (() => {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register(
-    '/service-worker-v203.js?v=1.0.7-lightweight-shell-v208&revision=compat-fullscreen-launch-v219',
+    '/service-worker-v203.js?v=1.0.9-lightweight-shell-v208&revision=compat-fullscreen-launch-v219',
     { scope: '/', updateViaCache: 'none' }
   ).catch(() => {});
 })();
 </script>
 <script src="/app/knowledge-school-seeds-v1.js?v=knowledge-schools-v2"></script>
-<script src="/install-v130.js?v=1.0.7-lightweight-shell-v208"></script>
-<script src="/app/offline-campus-status-v210.js?v=1.0.7-offline-retry-loop-v211"></script>
-<script src="/app/required-campus-autostart-v1.js?v=1.0.7-required-campus-v1"></script>
+<script src="/install-v130.js?v=1.0.9-lightweight-shell-v208"></script>
+<script src="/app/offline-campus-status-v210.js?v=1.0.9-offline-retry-loop-v211"></script>
+<script src="/app/required-campus-autostart-v1.js?v=1.0.9-required-campus-v1"></script>
 <script src="/app/knowledge-school-installer-v1.js?v=knowledge-schools-v2"></script>
 </body>
 </html>
