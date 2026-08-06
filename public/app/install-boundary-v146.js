@@ -1,12 +1,12 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.14';
+const VERSION='1.0.15';
 const REVISION='canonical-core-only-v226';
 const INSTALLER='/';
 const BOOT_KEY='commonweave.install-boundary.boot.v226';
 const DEV_KEY='commonweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION='v1.0.14-canonical-core-only-v226';
+const ADDITIONS_VERSION='v1.0.15-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/commonweave-additions-v156.css';
 const LEGACY_SCRIPTS=[
   '/app/release-version-v1.js',
@@ -103,7 +103,7 @@ function start(){
 start();
 
 globalThis.CommonweaveInstallBoundaryV146=Object.freeze({
-  version:'1.0.14',allowed,
+  version:'1.0.15',allowed,
   revision:REVISION,
   canonicalAppSurface,
   installedDisplay,
