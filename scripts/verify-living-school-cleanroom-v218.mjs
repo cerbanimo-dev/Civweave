@@ -19,9 +19,10 @@ const [index,runtime,core,renderSource,actionsSource,css,serviceIndex,serviceMan
 ]);
 
 assert(index.includes('data-living-school-runtime="cleanroom-v218"'),'Living School is not marked as the clean-room runtime.');
+assert(index.includes('data-living-school-revision="research-first-v218.1"'),'The research-first curriculum revision is not exposed.');
 assert(index.includes('id="living-school-root"'),'The canonical continuous surface is missing.');
-assert(index.includes('living-school-cleanroom-v218.mjs'),'The clean-room runtime is not loaded.');
-assert(index.includes('living-school-cleanroom-v218.css'),'The clean-room stylesheet is not loaded.');
+assert(index.includes('living-school-cleanroom-v218.mjs?v=research-first-v218.1'),'The research-first runtime cache revision is not loaded.');
+assert(index.includes('living-school-cleanroom-v218.css?v=research-first-v218.1'),'The research-first stylesheet cache revision is not loaded.');
 for(const retired of ['id="room"','data-room','ls-tray','ls-drawer','id="actions"','id="moss"','id="compass"','living-school-bootstrap-v194.js','living-school-flat-loader','living-school-workbench','living-school-interactions','living-school-paths','living-school-two-agent-relay','living-school-mutation-guard'])assert(!index.includes(retired),`Canonical HTML still contains retired surface token ${retired}.`);
 
 const cabinetFiles=(await readdir(cabinetDir)).filter(name=>/\.(?:js|mjs)$/.test(name));
@@ -50,14 +51,57 @@ assert(runtime.includes("controller:'single-delegated-click-handler'"),'The runt
 assert(runtime.includes('if(target.disabled||busy)return'),'The canonical controller lacks a re-entry lock.');
 assert(runtime.includes('dispatchCount+=1')&&runtime.includes('livingSchoolDispatchCount'),'Dispatches are not inspectable.');
 assert(core.includes('delete next.room')&&core.includes('delete next.currentRoom')&&core.includes('delete next.lastRoom'),'Legacy navigation fields are not removed during migration.');
-assert(core.includes("You are Moss, Living School learning guide"),'Moss does not own Living School generation.');
-assert(core.includes('never impersonate another Commonweave guide'),'Guide identity boundary is missing from curriculum generation.');
+assert(core.includes('You are Moss, Living School learning guide'),'Moss does not own Living School generation.');
+assert(core.includes('never impersonate another Commonweave guide')||core.includes('Never impersonate another guide'),'Guide identity boundary is missing from curriculum generation.');
+
+for(const token of [
+  "purpose:'living-school-live-source-research-v218.1'",
+  "purpose:'living-school-training-data-research-fallback-v218.1'",
+  'liveFetched===true',
+  'NO LIVE SOURCE FETCHED · MODEL-DERIVED AND UNVERIFIED',
+  'hasCurrentResearch',
+  'researchCapability',
+  'Use only supplied source IDs.',
+  'Every lesson block must include sourceIds when grounded',
+  'generated-unverified',
+  "formatContract:'living-school-module-contract-v218.1'"
+])assert(core.includes(token),`Research-first curriculum core is missing ${token}.`);
+
+for(const token of [
+  'summary','relevance','prerequisites','estimatedEffort','artifact','completionCriteria','learningObjectives',
+  'lessonBlocks','visualization','practice','quiz','badge','xp','navigation','cerbanimoQuest',
+  "questionsPerAttempt:3","type:'multiple-choice'","type:'multi-select'","type:'short-answer'"
+])assert(core.includes(token),`Living School module contract is missing ${token}.`);
+assert(core.includes('while(rows.length<count+2)'),'Quiz banks are not guaranteed to be larger than an attempt.');
+assert(core.includes("['network','flow','timeline','cycle','comparison','matrix','tree']"),'Supported visualization types are not constrained.');
+
+for(const token of [
+  "'research-sources':",
+  'await researchCapability(data.capability,{force:false})',
+  "'evaluate-assessment':",
+  'quizQuestions(module,progress)',
+  'Targeted review:',
+  "'prefill-practicum':"
+])assert(actionsSource.includes(token),`Canonical action layer is missing ${token}.`);
+
+for(const token of [
+  'Research sources',
+  'Research & regenerate curriculum',
+  'Research & generate curriculum',
+  'Concepts and definitions',
+  'Completion criteria',
+  'Visible rubric',
+  'mixed questions from a bank of',
+  'data-ls-action="inspect-visual-item"',
+  'data-ls-action="prefill-practicum"',
+  'provenanceFlag'
+])assert(renderSource.includes(token),`Visible curriculum surface is missing ${token}.`);
 
 const actionTokens=new Set([...index.matchAll(/data-ls-action="([^"]+)"/g),...renderSource.matchAll(/data-ls-action=\\?"([^"\\]+)\\?"/g)].map(match=>match[1]));
-assert(actionTokens.size>=15,'The clean-room surface lost expected direct actions.');
+assert(actionTokens.size>=18,'The clean-room surface lost expected direct actions.');
 for(const action of actionTokens)assert(actionsSource.includes(`'${action}':`),`Action ${action} is rendered without a canonical handler.`);
 assert(!/<button(?![^>]*type="button")[^>]*data-ls-action/i.test(index+renderSource),'Every actionable button must be explicitly non-submitting.');
-assert(css.includes('.lsc218-root')&&css.includes('touch-action:manipulation'),'The clean-room interaction styling is incomplete.');
+for(const token of ['.lsc218-root','touch-action:manipulation','.lsc218-research-status','.lsc218-contract-grid','.lsc218-visual','.lsc218-question','.lsc218-provenance'])assert(css.includes(token),`The clean-room interaction styling is missing ${token}.`);
 
 assert(serviceIndex.includes('http-equiv="refresh"')&&serviceIndex.includes('/app/cabinets/living-school/index.html'),'The retired service page does not route to the canonical surface.');
 assert(JSON.parse(serviceManifest).start_url==='/app/cabinets/living-school/index.html','The retired standalone manifest can still launch the old surface.');
@@ -71,10 +115,16 @@ for(const name of ['index.inline.js','interface-surfaces.js','living-displays.js
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'living-school-cleanroom-v218',
+  revision:'living-school-cleanroom-v218.1-research-first-curriculum',
   pageEventListeners:listenerCount,
   canonicalHandler:'handleLivingSchoolClick',
   continuousSurface:true,
+  researchBeforeGeneration:true,
+  explicitResearchControl:true,
+  paragraphProvenance:true,
+  completeModuleContract:true,
+  mixedQuizBank:true,
+  targetedRemediation:true,
   legacyNavigationLogic:false,
   syntheticActivations:false,
   mutationObservers:false,
