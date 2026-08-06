@@ -6,6 +6,29 @@ This file applies to the entire repository. Every coding agent must read it befo
 
 **Do not select code by folder name alone. Trace the live route from the current dispatcher.**
 
+## Convergence lock
+
+Commonweave is under the architectural convergence program defined in `CONVERGENCE.md` and `config/convergence-policy.json`.
+
+While the policy phase is `wave-0-lock`:
+
+- do not add new rooms, runtime stacks, storage authorities, guide launchers, settings layers, service workers, server variants, or version-suffixed app entrypoints
+- Living School PR #178 is the only active demolition lane
+- new canonical realm runtimes belong under `public/app/realms/<realm>/`
+- shared contracts belong under `public/app/shared/`
+- compatibility aliases and state migrations must be isolated under `public/app/compat/` or `public/app/migrations/`
+- never add synthetic click relays, mutation-observer routers, hidden guide launchers, runtime source rewriting, source-parsed package manifests, or direct cross-realm private-storage reads
+- update `public/app/app-manifest.json` whenever dispatcher or service-worker route ownership changes
+
+Run these checks for any runtime change:
+
+```bash
+node scripts/build-convergence-inventory.mjs
+node scripts/verify-convergence-guardrails.mjs
+```
+
+The convergence inventory identifies deletion candidates. It does not authorize deletion of user-state migrations without a reviewed migration path.
+
 For cabinet work, begin at:
 
 `public/app/fullscreen-family-v104.html`
