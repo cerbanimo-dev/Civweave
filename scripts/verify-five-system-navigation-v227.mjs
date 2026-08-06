@@ -77,8 +77,13 @@ for(const [system,pathname] of Object.entries(paths)){
   assert.equal(result.context.CommonweaveInstallBoundaryV146.systemSurface(),system,`${system} is not a first-class boundary surface.`);
   assert.equal(result.context.CommonweaveInstallBoundaryV146.allowed(),true,`${system} is not authorized intrinsically.`);
   assert.equal(result.root.dataset.commonweaveSystemRoute,system,`${system} route identity is not stamped.`);
-  if(system==='commonweave')assert.equal(result.appended.length,0,'Commonweave canonical startup injected legacy scripts.');
-  else assert.ok(result.appended.some(node=>String(node.src||'').includes('/app/system-routes-v227.js')),`${system} does not load the shared route contract before legacy navigation.`);
+  if(system==='commonweave'){
+    const sources=result.appended.map(node=>String(node.src||''));
+    const brandSources=sources.filter(source=>source.includes('/app/civweave-brand.js'));
+    const legacySources=sources.filter(source=>!source.includes('/app/civweave-brand.js'));
+    assert.equal(brandSources.length,1,'Civweave canonical startup must load exactly one branding bootstrap.');
+    assert.equal(legacySources.length,0,`Civweave canonical startup injected legacy scripts: ${legacySources.join(', ')}`);
+  }else assert.ok(result.appended.some(node=>String(node.src||'').includes('/app/system-routes-v227.js')),`${system} does not load the shared route contract before legacy navigation.`);
 }
 
 for(const [system,pathname] of Object.entries(paths)){
@@ -86,6 +91,7 @@ for(const [system,pathname] of Object.entries(paths)){
 }
 assert.match(boundarySource,/canonicalSystemCount:5/);
 assert.match(boundarySource,/five-system-first-class-routes-commonweave-core-only/);
+assert.match(boundarySource,/const BRAND_SCRIPT='\/app\/civweave-brand\.js'/);
 assert.match(navSource,/CommonweaveSystemRoutesV227/);
 assert.match(navSource,/ROUTES\.navigate/);
 assert.equal((navSource.match(/installed=1/g)||[]).length,5,'The five fallback navigation links are not independently authorized.');
@@ -113,4 +119,4 @@ assert.match(gatewayBase,/x-commonweave-package/,'Gateway no longer recognizes d
 assert.match(gatewayWrapper,/pathname !== '\/app'/,'Render wrapper no longer preserves application file delivery.');
 for(const [index,page] of pages.entries())assert.match(page,/\/app\/install-boundary-v146\.js/,`${Object.keys(paths)[index]} page lost the shared boundary.`);
 
-console.log(JSON.stringify({ok:true,version,revision:'five-system-navigation-v227',systems:Object.keys(paths),routeMatrix:25,boundaryIntrinsicAuthorization:true,workerPackageHeader:true,workerFallback:'exact-route-or-visible-recovery',launcherSubstitution:false,installerSubstitution:false},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'five-system-navigation-v227',systems:Object.keys(paths),routeMatrix:25,boundaryIntrinsicAuthorization:true,canonicalBrandBootstrap:true,canonicalLegacyScriptInjection:false,workerPackageHeader:true,workerFallback:'exact-route-or-visible-recovery',launcherSubstitution:false,installerSubstitution:false},null,2));
