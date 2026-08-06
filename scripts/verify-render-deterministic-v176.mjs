@@ -3,11 +3,12 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const [renderSource,packageSource]=await Promise.all([
+const [renderSource,packageSource,versionSource]=await Promise.all([
   readFile(path.join(root,'render.yaml'),'utf8'),
-  readFile(path.join(root,'package.json'),'utf8')
+  readFile(path.join(root,'package.json'),'utf8'),
+  readFile(path.join(root,'VERSION'),'utf8')
 ]);
-const pkg=JSON.parse(packageSource);
+const pkg=JSON.parse(packageSource),canonicalVersion=versionSource.trim();
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
 assert(/buildCommand:\s*\|[\s\S]*npm install --omit=dev --no-audit --no-fund[\s\S]*npm run build:release/.test(renderSource),'Render must install production dependencies and run the release build.');
@@ -16,7 +17,8 @@ for(const forbidden of ['stage-transformers-assets','ensure-minilm-model','@hugg
   assert(!renderSource.includes(forbidden),`Render configuration resurrected forbidden Transformers.js work: ${forbidden}`);
 }
 
-assert(pkg.version==='1.0.7','Render package must publish v1.0.7.');
+assert(/^\d+\.\d+\.\d+$/.test(canonicalVersion),'VERSION must contain a semantic release version.');
+assert(pkg.version===canonicalVersion,`Render package ${pkg.version} must match canonical Commonweave ${canonicalVersion}.`);
 assert(pkg.engines?.node==='22.x','Render Node version must be pinned to Node 22.');
 const productionDependencies=Object.entries(pkg.dependencies||{});
 assert(productionDependencies.length===1,'Normal npm install must contain exactly one approved production dependency.');
@@ -41,7 +43,7 @@ for(const name of ['check','build:release','start','prestart']){
 
 console.log(JSON.stringify({
   ok:true,
-  version:'1.0.7',
+  version:canonicalVersion,
   renderBuild:'npm install --omit=dev && npm run build:release',
   node:'22.x',
   normalDependencyCount:productionDependencies.length,
