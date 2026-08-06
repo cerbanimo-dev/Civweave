@@ -103,9 +103,9 @@ function start(){
 start();
 
 globalThis.CommonweaveInstallBoundaryV146=Object.freeze({
-  version:VERSION,
-  revision:REVISION,
+  version:'1.0.13',
   allowed,
+  revision:REVISION,
   canonicalAppSurface,
   installedDisplay,
   explicitInstalled,
