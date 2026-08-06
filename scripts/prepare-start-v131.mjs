@@ -1,4 +1,5 @@
 await import('./sync-release-version-assets.mjs');
+await import('./sync-release-coherence-v220.mjs');
 
 const isRender=process.env.RENDER==='true';
 if(isRender){
