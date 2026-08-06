@@ -6,7 +6,7 @@ const [versionText,builder,versionSync,coherenceSync,installedEntry,wrapper]=awa
   read('VERSION'),read('scripts/build-service-worker-v211.mjs'),read('scripts/sync-release-version-assets.mjs'),read('scripts/sync-release-coherence-v220.mjs'),read('public/app/installed-entry-v146.js'),read('public/service-worker-v203.js')
 ]);
 const version=versionText.trim();
-for(const [label,source] of [['worker builder',builder],['version synchronizer',versionSync],['coherence synchronizer',coherenceSync],['compatibility launcher',installedEntry]])new Function(source);
+new Function(installedEntry);
 for(const token of [
   "importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227')",
   "importScripts('/service-worker-core-v208.js?v=${version}-lightweight-shell-v208-retained-v218')",
@@ -24,4 +24,4 @@ assert(installedEntry.includes('routes.urlFor'),'Compatibility launcher bypasses
 assert(!installedEntry.includes('const sites={'),'Compatibility launcher reintroduced a duplicate route map.');
 assert(wrapper.indexOf('/app/system-routes-v227.js')<wrapper.indexOf('/service-worker-core-v208.js'),'Checked-in worker wrapper does not load route contract first.');
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Checked-in worker wrapper does not load canonical navigation last.');
-console.log(JSON.stringify({ok:true,version,revision:'navigation-generator-invariants-v227',singleRouteAuthority:true,builderRouteFirst:true,builderCanonicalLast:true,coherenceCannotDowngrade:true,compatibilityLauncherUsesContract:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'navigation-generator-invariants-v227',singleRouteAuthority:true,builderRouteFirst:true,builderCanonicalLast:true,coherenceCannotDowngrade:true,compatibilityLauncherUsesContract:true,moduleSyntaxCheckedByWorkflow:true},null,2));
