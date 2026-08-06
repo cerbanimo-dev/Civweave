@@ -46,7 +46,12 @@ await patch('public/app/installed-entry-v146.html',source=>replaceRequired(sourc
 await patch('public/service-worker-core-v208.js',source=>replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'service-worker core version'));
 await patch('public/service-worker-v203.js',source=>replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+-lightweight-shell-v208-retained-v218/,`service-worker-core-v208.js?v=${version}-lightweight-shell-v208-retained-v218`,'service-worker wrapper revision'));
 await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+-lightweight-shell-v208-legacy-v156-bridge-v209/,`service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`,'legacy worker bridge revision'));
-await patch('public/app/install-boundary-v146.js',source=>replaceRequired(source,/version:'\d+\.\d+\.\d+',allowed/,`version:'${version}',allowed`,'install-boundary release version'));
+await patch('public/app/install-boundary-v146.js',source=>{
+  source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'install-boundary runtime version');
+  source=replaceRequired(source,/const ADDITIONS_VERSION='v\d+\.\d+\.\d+-canonical-core-only-v226';/,`const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`,'install-boundary legacy additions revision');
+  source=replaceRequired(source,/version:'\d+\.\d+\.\d+',allowed/,`version:'${version}',allowed`,'install-boundary release version');
+  return source;
+});
 
 await patch('public/app/working-campus-v156.html',source=>{
   source=replaceRequired(source,/Commonweave Working Campus · v\d+\.\d+\.\d+/,`Commonweave Working Campus · v${version}`,'working-campus title');
@@ -79,7 +84,7 @@ await patch('scripts/smoke-gateway-v131-base.mjs',source=>{
   source=source.replace(/Install Commonweave v\d+\.\d+\.\d+\./g,`Install Commonweave v${version}.`);
   source=source.replace(/gateway root is not the v\d+\.\d+\.\d+ installer/g,`gateway root is not the v${version} installer`);
   source=source.replace(/v1\.0\.7 package still includes/g,`v${version} package still includes`);
-  source=source.replace(/campus\.includes\('v\d+\.\d+\.\d+'\)/,`campus.includes('v${version}')`);
+  source=source.replace(/campus\.includes\('v\d+\.\d+\.\d+'\)/,`campus.includes('${version}')`);
   return source;
 });
 
