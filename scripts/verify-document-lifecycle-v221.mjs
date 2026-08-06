@@ -8,11 +8,12 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [manifestText,campusHtml,campusLoader,lifecycle,pwa,viewport,guideChat,additions,workerCore]=await Promise.all([
+const [manifestText,campusHtml,campusLoader,lifecycle,installBoundary,pwa,viewport,guideChat,additions,workerCore]=await Promise.all([
   read('public/app/manifest.webmanifest'),
   read('public/app/working-campus-v156.html'),
   read('public/app/working-campus-v156.js'),
   read('public/app/document-lifecycle-v221.js'),
+  read('public/app/install-boundary-v146.js'),
   read('public/app/pwa-update-controller-v204.js'),
   read('public/app/persistent-guide-viewport-v216.js'),
   read('public/app/persistent-guide-chat-v215.js'),
@@ -23,10 +24,14 @@ const manifest=JSON.parse(manifestText);
 assert.match(manifest.start_url,/^\/app\/working-campus-v156\.html\?/,'Installed PWA still starts on the empty /app/ launcher.');
 assert(campusHtml.indexOf('/app/document-lifecycle-v221.js')<campusHtml.indexOf('/app/install-boundary-v146.js'),'Lifecycle guard must load before install-boundary additions.');
 assert(campusHtml.includes('/app/document-lifecycle-v221.js?v=document-lifecycle-v222'),'Working Campus does not request the safe lifecycle revision.');
-assert(campusHtml.includes('/app/working-campus-v156.js?v=campus-atomic-startup-v222'),'Working Campus does not request the atomic loader revision.');
+assert(campusHtml.includes('/app/working-campus-v156.js?v=canonical-campus-startup-v223'),'Working Campus does not request the canonical loader revision.');
 assert(campusLoader.includes("cache:'no-store'"),'Working Campus fragments are not fetched fresh.');
 assert(!campusLoader.includes("cache:'force-cache'"),'Working Campus still forces stale fragment cache.');
-for(const token of ['Promise.all(parts.map(fetchPart))','captureCampus()','sameCampus()','commonweave:working-campus-runtime-ready','commonweaveCampusRuntime'])assert(campusLoader.includes(token),`Working Campus loader is missing ${token}.`);
+for(const token of ['Promise.all(parts.map(fetchPart))','campusReady()','commonweave:working-campus-runtime-ready','commonweaveCampusRuntime','document.documentElement===bootDocument','location.href===bootUrl'])assert(campusLoader.includes(token),`Working Campus loader is missing ${token}.`);
+assert(!campusLoader.includes('sameCampus()'),'Working Campus still aborts on ordinary DOM identity changes.');
+for(const token of ['function canonicalAppSurface()','function startAdditions()','commonweave:working-campus-runtime-ready',"boundaryRevision:'canonical-campus-boundary-v223'"])assert(installBoundary.includes(token),`Install boundary is missing ${token}.`);
+assert(installBoundary.includes("location.pathname==='/app/working-campus-v156.html'"),'Canonical Working Campus is not explicitly authorized.');
+assert(installBoundary.indexOf('function startAdditions()')<installBoundary.indexOf("if(!allowed())"),'Delayed additions boundary is not installed before route enforcement.');
 for(const token of ['document-lifecycle-v222','CommonweaveLifecycleMutationObserver',"addEventListener('pagehide',stop"]){assert(lifecycle.includes(token),`Document lifecycle guard is missing ${token}.`)}
 assert(!lifecycle.includes("Object.defineProperty(document,'head'")&&!lifecycle.includes("Object.defineProperty(document,'body'"),'Lifecycle guard still overrides native document structure.');
 for(const token of ['v222-atomic-campus-update-handoff','commonweave:working-campus-runtime-ready','activateWaiting','setTimeout(queueAutomaticCheck,45000)'])assert(pwa.includes(token),`PWA update controller is missing ${token}.`);
@@ -43,5 +48,5 @@ const installBlock=workerCore.match(/self\.addEventListener\('install',[\s\S]*?\
 assert(installBlock.includes('event.waitUntil(cacheShell())'),'Service worker install does not cache the shell.');
 assert(!installBlock.includes('skipWaiting'),'Service worker still takes over active pages during installation.');
 assert(workerCore.includes("if (type === 'SKIP_WAITING')"),'Explicit update activation message was removed.');
-for(const [name,source] of [['campus loader',campusLoader],['lifecycle guard',lifecycle],['PWA update controller',pwa],['persistent viewport',viewport],['persistent guide chat',guideChat],['shared additions',additions]])assert.doesNotThrow(()=>new vm.Script(source,{filename:name}),`${name} does not compile after startup synchronization.`);
-console.log(JSON.stringify({ok:true,revision:'campus-atomic-startup-v222',directCampusStart:true,atomicFragments:true,nativeCampusPreserved:true,nonInterruptingWorker:true},null,2));
+for(const [name,source] of [['campus loader',campusLoader],['lifecycle guard',lifecycle],['install boundary',installBoundary],['PWA update controller',pwa],['persistent viewport',viewport],['persistent guide chat',guideChat],['shared additions',additions]])assert.doesNotThrow(()=>new vm.Script(source,{filename:name}),`${name} does not compile after startup synchronization.`);
+console.log(JSON.stringify({ok:true,revision:'canonical-campus-startup-v223',directCampusStart:true,canonicalBoundary:true,delayedAdditions:true,nonInterruptingWorker:true},null,2));
