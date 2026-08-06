@@ -2,9 +2,9 @@
 'use strict';
 
 const VERSION = '1.0.6';
-const ENTRY = '/app/installed-entry-v146.html?system=commonweave';
+const ENTRY = '/app/?system=commonweave&installed=1';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
-const WORKER_SCRIPT_REVISION = 'stable-entry-v217';
+const WORKER_SCRIPT_REVISION = 'deterministic-boot-v218';
 const WORKER_URL = `/service-worker-v203.js?v=${WORKER_BUILD}&revision=${WORKER_SCRIPT_REVISION}`;
 const REGISTRATION_TIMEOUT_MS = 15000;
 const REGISTRATION_QUERY_TIMEOUT_MS = 6000;
