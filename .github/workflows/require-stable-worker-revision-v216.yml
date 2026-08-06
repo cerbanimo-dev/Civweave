@@ -23,11 +23,13 @@ jobs:
           node-version: 22
       - name: Require the new worker revision
         run: node scripts/require-stable-worker-revision-v216.mjs
-      - name: Validate installer and watchdog
+      - name: Validate revision matching
         run: |
           node --check public/install-v130.js
           node --check scripts/smoke-service-worker-registration-watchdog-v207.mjs
-          node scripts/smoke-service-worker-registration-watchdog-v207.mjs
+          grep -q "const WORKER_SCRIPT_REVISION = 'stable-entry-v216'" public/install-v130.js
+          grep -q "url.searchParams.get('revision') === WORKER_SCRIPT_REVISION" public/install-v130.js
+          grep -q "revision=stable-entry-v216" scripts/smoke-service-worker-registration-watchdog-v207.mjs
       - name: Commit revision alignment
         run: |
           git config user.name "cerbanimo-dev"
