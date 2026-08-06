@@ -17,6 +17,13 @@
     ]
   },
   "runtimeRoots": [
+    "package.json",
+    "render.yaml",
+    "wrangler.toml",
+    "public/index.html",
+    "public/_routes.json",
+    "public/offline.html",
+    "public/recover.html",
     "public/app/app-manifest.json",
     "public/app/fullscreen-family-v104.html",
     "public/app/working-campus-v156.html",
