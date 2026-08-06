@@ -29,6 +29,11 @@ await api.issueRewardBundle({rewards:{skillXp:[{skillId:'Carpentry',amount:75}],
 await api.issueRewardBundle({rewards:{skillXp:[],acorns:-1,buttons:-3,sourceKind:'exchange'}},{sourceSystem:'fellowfare',sourceKind:'exchange',sourceId:'trade-1'});
 await api.issueRewardBundle({rewards:{skillXp:[{skillId:'Carpentry',amount:75}],buttons:8,sourceKind:'doing'}},{sourceSystem:'cerbanimo',sourceKind:'doing',sourceId:'task-1'});
 const p=api.project();assert.equal(p.skills.carpentry.xp,95);assert.equal(p.skills.carpentry.learningXp,20);assert.equal(p.skills.carpentry.doingXp,75);assert.equal(p.skills.carpentry.level,2);assert.equal(p.acorns,2);assert.equal(p.buttons,5);assert.equal(p.entries.length,7,'duplicate completion minted twice');
+const subsystemClaim={...api.readLedger(),totalXp:999999,skillXp:999999,acorns:999999,buttons:999999,balances:{acorns:999999,buttons:999999}};
+const passport=surfaces.calculatePassportFromLedger(subsystemClaim);
+assert.equal(passport.skillXp,100,'Passport trusted a subsystem total instead of summing ledger entries');
+assert.equal(passport.skills.carpentry.xp,95);assert.equal(passport.skills.planning.xp,5);assert.equal(passport.acorns,2);assert.equal(passport.buttons,5);
+assert.equal(passport.authority,'commonweave.reward-ledger.v2');assert.equal(passport.entries.length,7);
 const tree=api.livingTreeProjection();assert.equal(tree.find(x=>x.skillId==='carpentry').level,2);
 const integrity=await api.verifyLedger();assert.equal(integrity.ok,true,JSON.stringify(integrity.errors));const tampered=api.readLedger();tampered.entries[0].amount=999;assert.equal((await api.verifyLedger(tampered)).ok,false,'tampering was not detected');
 console.log('canonical reward ledger v2 verified');
