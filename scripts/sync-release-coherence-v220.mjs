@@ -5,7 +5,8 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const version=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
 const revision='release-coherence-v220';
-const lifecycleRevision='document-lifecycle-v221';
+const lifecycleRevision='document-lifecycle-v222';
+const campusRevision='campus-atomic-startup-v222';
 if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('VERSION must contain a semantic release version.');
 
 const changed=[];
@@ -33,15 +34,12 @@ await patch('public/index.html',source=>replaceRequired(
   'installer worker registration revision'
 ));
 
-await patch('public/install-v130.js',source=>{
-  source=replaceRequired(
-    source,
-    /const WORKER_SCRIPT_REVISION = '[^']+';/,
-    `const WORKER_SCRIPT_REVISION = '${revision}';`,
-    'installer worker revision constant'
-  );
-  return source;
-});
+await patch('public/install-v130.js',source=>replaceRequired(
+  source,
+  /const WORKER_SCRIPT_REVISION = '[^']+';/,
+  `const WORKER_SCRIPT_REVISION = '${revision}';`,
+  'installer worker revision constant'
+));
 
 await patch('public/app/installed-entry-v146.js',source=>{
   source=replaceRequired(
@@ -55,32 +53,42 @@ await patch('public/app/installed-entry-v146.js',source=>{
 });
 
 await patch('public/app/working-campus-v156.html',source=>{
-  const script=`<script src="/app/document-lifecycle-v221.js?v=${lifecycleRevision}"></script>\n`;
-  if(!source.includes('/app/document-lifecycle-v221.js')){
-    source=replaceTextRequired(source,'<script src="/app/install-boundary-v146.js',`${script}<script src="/app/install-boundary-v146.js`,'Working Campus install-boundary script');
+  const lifecycleScript=`<script src="/app/document-lifecycle-v221.js?v=${lifecycleRevision}"></script>`;
+  if(source.includes('/app/document-lifecycle-v221.js')){
+    source=source.replace(/<script src="\/app\/document-lifecycle-v221\.js\?v=[^"]+"><\/script>/,lifecycleScript);
+  }else{
+    source=replaceTextRequired(source,'<script src="/app/install-boundary-v146.js',`${lifecycleScript}\n<script src="/app/install-boundary-v146.js`,'Working Campus install-boundary script');
   }
+  source=replaceRequired(
+    source,
+    /\/app\/working-campus-v156\.js\?v=[^"]+/,
+    `/app/working-campus-v156.js?v=${campusRevision}`,
+    'Working Campus runtime revision'
+  );
   return source;
 });
 
 await patch('public/service-worker-core-v208.js',source=>{
-  if(source.includes("'/app/document-lifecycle-v221.js'"))return source;
-  return replaceTextRequired(
+  if(!source.includes("'/app/document-lifecycle-v221.js'")){
+    source=replaceTextRequired(
+      source,
+      "  '/app/installed-entry-v146.js',\n",
+      "  '/app/installed-entry-v146.js',\n  '/app/document-lifecycle-v221.js',\n",
+      'service-worker required shell entry list'
+    );
+  }
+  source=replaceRequired(
     source,
-    "  '/app/installed-entry-v146.js',\n",
-    "  '/app/installed-entry-v146.js',\n  '/app/document-lifecycle-v221.js',\n",
-    'service-worker required shell entry list'
+    /self\.addEventListener\('install', event => \{\n  event\.waitUntil\(\(async \(\) => \{\n    await cacheShell\(\);\n    await self\.skipWaiting\(\);\n  \}\)\(\)\);\n\}\);/,
+    "self.addEventListener('install', event => {\n  event.waitUntil(cacheShell());\n});",
+    'service-worker non-interrupting install policy'
   );
+  return source;
 });
 
 await patch('public/app/pwa-update-controller-v204.js',source=>{
-  if(!source.includes('campus-document-lifecycle-v221')){
-    source=replaceTextRequired(source,"const VERSION='v207-registration-watchdog';", "const VERSION='v207-registration-watchdog-campus-document-lifecycle-v221';",'PWA update lifecycle version');
-  }
-  if(!source.includes('if(!document.documentElement?.isConnected||!document.head||!document.body)return null;')){
-    source=replaceTextRequired(source,'function mount(){\n  installStyles();','function mount(){\n  if(!document.documentElement?.isConnected||!document.head||!document.body)return null;\n  installStyles();','PWA update mount guard');
-  }
-  if(!source.includes("addEventListener('pagehide',()=>{observer?.disconnect();button=null;},{once:true});")){
-    source=replaceTextRequired(source,"if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();", "addEventListener('pagehide',()=>{observer?.disconnect();button=null;},{once:true});\nif(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();",'PWA update teardown hook');
+  for(const token of ['v222-atomic-campus-update-handoff','commonweave:working-campus-runtime-ready','activateWaiting','setTimeout(queueAutomaticCheck,45000)']){
+    if(!source.includes(token))throw new Error(`PWA update controller is missing ${token}.`);
   }
   return source;
 });
@@ -96,6 +104,29 @@ await patch('public/app/persistent-guide-viewport-v216.js',source=>{
   return source;
 });
 
+await patch('public/app/persistent-guide-chat-v215.js',source=>{
+  source=source.replace(
+    '.cwp215-legacy-retired{display:none!important}.cwp215-working-campus-retired>.main{grid-template-columns:minmax(0,1fr)!important}.cwp215-working-campus-retired .main>.guide{display:none!important}',
+    '.cwp215-legacy-retired{display:none!important}'
+  );
+  source=source.replace(
+    "  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>form.dataset.commonweaveLegacyChatRetired='v215');",
+    "  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>{if(form.id==='weaveling-chat-form'&&form.closest('.app')){delete form.dataset.commonweaveLegacyChatRetired;return}form.dataset.commonweaveLegacyChatRetired='v215'});"
+  );
+  source=source.replace(
+    "  const working=document.querySelector('.main>.guide #weaveling-chat-form')?.closest('.app');\n  if(working)working.classList.add('cwp215-working-campus-retired');",
+    "  const working=document.querySelector('.main>.guide #weaveling-chat-form')?.closest('.app');\n  if(working)working.classList.remove('cwp215-working-campus-retired');"
+  );
+  source=source.replace(
+    "  if(!(form instanceof HTMLFormElement)||form.closest(`#${ROOT_ID}`)||!form.matches(LEGACY_FORM_SELECTOR))return;",
+    "  if(!(form instanceof HTMLFormElement)||form.closest(`#${ROOT_ID}`)||!form.matches(LEGACY_FORM_SELECTOR)||(form.id==='weaveling-chat-form'&&form.closest('.app')))return;"
+  );
+  for(const token of ["classList.remove('cwp215-working-campus-retired')","form.id==='weaveling-chat-form'&&form.closest('.app')"]){
+    if(!source.includes(token))throw new Error(`Persistent guide coexistence patch is missing ${token}.`);
+  }
+  return source;
+});
+
 await patch('public/extensions/commonweave-additions-v156.js',source=>{
   source=source.replace('document.head.append(script)',"(()=>{const head=document.head;if(!head){reject(new Error('Document navigation interrupted script loading.'));return}head.append(script)})()");
   source=source.replace('document.body.append(tools)','document.body?.append(tools)');
@@ -104,16 +135,13 @@ await patch('public/extensions/commonweave-additions-v156.js',source=>{
 });
 
 const wrapper=await readFile(path.join(root,'public/service-worker-v203.js'),'utf8');
-if(!wrapper.includes(`/service-worker-release-coherence-v220.js?v=${revision}`)){
-  throw new Error('The active worker wrapper does not import the release-coherence override.');
-}
+if(!wrapper.includes(`/service-worker-release-coherence-v220.js?v=${revision}`))throw new Error('The active worker wrapper does not import the release-coherence override.');
 const override=await readFile(path.join(root,'public/service-worker-release-coherence-v220.js'),'utf8');
-for(const token of ['version-pinned-text-network-first-cached-fallback','V220_BOOT_PATHS','v220CachedFirst']){
-  if(!override.includes(token))throw new Error(`Release-coherence worker is missing ${token}.`);
-}
+for(const token of ['version-pinned-text-network-first-cached-fallback','V220_BOOT_PATHS','v220CachedFirst'])if(!override.includes(token))throw new Error(`Release-coherence worker is missing ${token}.`);
 const lifecycle=await readFile(path.join(root,'public/app/document-lifecycle-v221.js'),'utf8');
-for(const token of ['document-lifecycle-v221','pagehide','CommonweaveLifecycleMutationObserver']){
-  if(!lifecycle.includes(token))throw new Error(`Document lifecycle guard is missing ${token}.`);
-}
+for(const token of [lifecycleRevision,'pagehide','CommonweaveLifecycleMutationObserver'])if(!lifecycle.includes(token))throw new Error(`Document lifecycle guard is missing ${token}.`);
+if(lifecycle.includes("Object.defineProperty(document,'head'")||lifecycle.includes("Object.defineProperty(document,'body'"))throw new Error('Document lifecycle guard still overrides native document structure.');
+const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
+for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','commonweave:working-campus-runtime-ready'])if(!campus.includes(token))throw new Error(`Working Campus atomic loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,lifecycleRevision,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,lifecycleRevision,campusRevision,changed},null,2));
