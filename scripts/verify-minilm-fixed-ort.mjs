@@ -5,8 +5,9 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-const [pkgText,adapter,worker,manifestText,stage,materializer,serviceWorker,downloadRuntime,mobileBuilder]=await Promise.all([
+const [pkgText,versionText,adapter,worker,manifestText,stage,materializer,serviceWorker,downloadRuntime,mobileBuilder]=await Promise.all([
   read('package.json'),
+  read('VERSION'),
   read('public/app/models/all-minilm-l6-v2/adapter.js'),
   read('public/app/models/all-minilm-l6-v2/worker.js'),
   read('public/app/models/all-minilm-l6-v2/model-manifest.json'),
@@ -16,9 +17,10 @@ const [pkgText,adapter,worker,manifestText,stage,materializer,serviceWorker,down
   read('public/extensions/commonweave-model-download-v157.js'),
   read('scripts/build-mobile-install-kit.mjs')
 ]);
-const pkg=JSON.parse(pkgText),manifest=JSON.parse(manifestText);
+const pkg=JSON.parse(pkgText),manifest=JSON.parse(manifestText),canonicalVersion=versionText.trim();
 
-assert(pkg.version==='1.0.7','fixed runtime branch is not aligned with Commonweave 1.0.7');
+assert(/^\d+\.\d+\.\d+$/.test(canonicalVersion),'VERSION must contain a semantic release version');
+assert(pkg.version===canonicalVersion,`package.json ${pkg.version} is not aligned with canonical Commonweave ${canonicalVersion}`);
 assert(pkg.dependencies?.['onnxruntime-web']==='1.27.0','onnxruntime-web is not pinned to 1.27.0');
 assert(pkg.scripts?.prestart?.includes('stage-onnxruntime-web-assets.mjs'),'normal startup does not stage the fixed runtime');
 assert(pkg.scripts?.prestart?.includes('ensure-minilm-fixed-ort-model.mjs'),'normal startup does not materialize the fixed graph');
@@ -26,7 +28,9 @@ assert(pkg.scripts?.['build:release']?.startsWith('npm run minilm:fixed-model:pu
 const settingsBoundaryCheck=String(pkg.scripts?.check||'');
 assert(settingsBoundaryCheck.includes('verify-ai-settings-self-contained-v181.mjs')||settingsBoundaryCheck.includes('verify-ai-settings-freeze-boundary-v180.mjs'),'fixed runtime wiring dropped the settings freeze-boundary test');
 
-for(const token of ["loaderPolicy:'fixed'","runtime:'onnxruntime-web/wasm'",'/app/vendor/onnxruntime/ort.wasm.min.mjs','model_quantized.onnx','FIXED_PROFILE','device-package-r41-fixed-ort-wasm','commonweave-model-1.0.7-minilm-fixed-ort-r1'])assert(adapter.includes(token),`adapter missing ${token}`);
+for(const token of ["loaderPolicy:'fixed'","runtime:'onnxruntime-web/wasm'",'/app/vendor/onnxruntime/ort.wasm.min.mjs','model_quantized.onnx','FIXED_PROFILE','device-package-r41-fixed-ort-wasm'])assert(adapter.includes(token),`adapter missing ${token}`);
+const modelCache=adapter.match(/const MODEL_CACHE='([^']+)'/)?.[1]||'';
+assert(/^commonweave-model-\d+\.\d+\.\d+-minilm-fixed-ort-r1$/.test(modelCache),'adapter model cache must remain a versioned fixed-ORT package key');
 for(const retired of ['transformers.min.js','model_q4f16.onnx','navigator.gpu','selectProfile','includeWebGPU'])assert(!adapter.includes(retired),`adapter still contains model/backend selection: ${retired}`);
 assert(adapter.includes("if(!explicit)return{ready:false,dormant:true,reason:'explicit-activation-required'}"),'adapter can start outside explicit semantic-lab activation');
 
@@ -76,9 +80,11 @@ assert(mobileBuilder.includes("modelPolicy: 'deferred'"),'mobile installer no lo
 console.log(JSON.stringify({
   ok:true,
   appVersion:pkg.version,
+  canonicalVersion,
   runtime:'onnxruntime-web/wasm',
   runtimeVersion:pkg.dependencies['onnxruntime-web'],
   graph:'model_quantized.onnx',
+  modelCache,
   threads:1,
   loaderRemoved:true,
   backendSelectionRemoved:true,
