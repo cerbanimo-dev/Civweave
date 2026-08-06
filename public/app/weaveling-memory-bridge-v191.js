@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-weaveling-memory-bridge-v205-frozen-runtime-proxy';
+const VERSION='1.0.7-weaveling-memory-bridge-v205-frozen-runtime-proxy';
 const MAX_MEMORY_ITEMS=6;
 let fastRuntimeInstalled=false;
 function api(){return globalThis.CommonweaveWeavelingMemoryV191;}

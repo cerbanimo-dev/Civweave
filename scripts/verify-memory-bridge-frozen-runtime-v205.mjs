@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 const [bridge,boundary,legacy,wrapper,core,cleanup,critical]=await Promise.all([
   readFile('public/app/weaveling-memory-bridge-v191.js','utf8'),readFile('public/app/cerbanimo-deterministic-boundary-v203.js','utf8'),readFile('public/service-worker-v156.js','utf8'),readFile('public/service-worker-v203.js','utf8'),readFile('public/service-worker-core-v208.js','utf8'),readFile('public/service-worker-living-school-cleanroom-v218.js','utf8'),readFile('public/service-worker-critical-v199.js','utf8')
 ]);
-assert(bridge.includes("VERSION='1.0.6-weaveling-memory-bridge-v205-frozen-runtime-proxy'"),'Frozen-runtime memory bridge revision is missing.');
+assert(bridge.includes("VERSION='1.0.7-weaveling-memory-bridge-v205-frozen-runtime-proxy'"),'Frozen-runtime memory bridge revision is missing.');
 assert(!/runtime\.generate\s*=|runtime\.fastMemoryRevision\s*=/.test(bridge),'Memory bridge mutates a frozen runtime directly.');
 assert(bridge.includes('const proxy=Object.freeze({...runtime,generate:wrapped,fastMemoryRevision:VERSION})'),'Immutable runtime proxy is missing.');
 assert(boundary.includes('DETERMINISTIC_PROVIDER_BOUNDARY'),'Cerbanimo deterministic provider boundary is missing.');

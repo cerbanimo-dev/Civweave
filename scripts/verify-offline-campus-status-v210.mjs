@@ -34,7 +34,7 @@ vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'offline-campus-status-v210.js'});
 
 const api=sandbox.CommonweaveOfflineCampusStatusV210;
-assert(api?.version==='1.0.6-offline-campus-status-v210','Offline campus status repair API is missing.');
+assert(api?.version==='1.0.7-offline-campus-status-v210','Offline campus status repair API is missing.');
 
 const legacy=api.normalize({
   type:'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',

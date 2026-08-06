@@ -23,7 +23,7 @@ new Function(boundary);
 
 for(const token of [
   "VERSION='183.0-settings-diagnostics-log-level'",
-  "LOGGER_VERSION='1.0.6-settings-log-v183'",
+  "LOGGER_VERSION='1.0.7-settings-log-v183'",
   "LEVEL_KEY='commonweave.log-level'",
   "BUFFER_KEY='commonweave.log-buffer.v1'",
   "off:0,error:1,warn:2,info:3,debug:4,trace:5",

@@ -11,7 +11,7 @@ for(const token of ['input.disabled=true','stopImmediatePropagation','MutationOb
 assert(boundary.includes('/extensions/commonweave-proof-progress-v158.js'),'Install boundary does not load proof progress.');
 const lightweightMode=legacyWorker.includes('legacy-v156-bridge-v209');
 if(lightweightMode){
-  assert(legacyWorker.includes("importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')"),'Legacy registrations do not reach the active worker wrapper.');
+  assert(legacyWorker.includes("importScripts('/service-worker-v203.js?v=1.0.7-lightweight-shell-v208-legacy-v156-bridge-v209')"),'Legacy registrations do not reach the active worker wrapper.');
   assert(wrapper.includes("importScripts('/service-worker-living-school-cleanroom-v218.js")&&wrapper.includes("importScripts('/service-worker-core-v208.js")&&wrapper.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper is incomplete.');
   assert(core.includes("const BUILD = 'lightweight-shell-v208'"),'Retained worker core is not the lightweight shell.');
   assert(core.includes('discoverReferences')&&core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Retained offline campus core lost discovery or hydration.');

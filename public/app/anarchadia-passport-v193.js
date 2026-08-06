@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-anarchadia-passport-v193';
+const VERSION='1.0.7-anarchadia-passport-v193';
 if(globalThis.AnarchadiaPassportV193?.version===VERSION)return;
 const KEYS={
   console:'commonweave.anarchadia.citizen-console.v139',

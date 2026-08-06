@@ -33,7 +33,7 @@ function requires(source,tokens,label){for(const token of tokens)assert(source.i
 function forbids(source,tokens,label){for(const token of tokens)assert(!source.includes(token),`${label} contains forbidden behavior: ${token}`)}
 
 requires(sources.controller,[
-  "VERSION='1.0.6-ai-settings-cleanroom-v188'","const LAYER_ID='cw-ai-settings-cleanroom-v188'","authority:'ai-settings-cleanroom-v188'",
+  "VERSION='1.0.7-ai-settings-cleanroom-v188'","const LAYER_ID='cw-ai-settings-cleanroom-v188'","authority:'ai-settings-cleanroom-v188'",
   "eventOwnership:'single-cleanroom-controller'","presentation:'cleanroom-v188'",'providerRuntimeOnOpen:false','providerRuntimeAvailable:false',
   'providerTestsAvailable:false','modelDiscoveryAvailable:false','singlePassOpen:true','function open(launcher)','function close(reason=',
   'globalThis.CommonweaveAISettingsCleanroomV188=api','globalThis.CommonweaveModelSettingsControllerV173=api'
@@ -45,13 +45,13 @@ requires(openBlock,['if(existing&&!existing.hidden)return existing','const layer
 
 requires(sources.delegation,["VERSION='188.0-ai-settings-cleanroom-delegation'","document.addEventListener('click',onClick);","listenerPhase:'bubble'",'listenerCount:1','mutationObserver:false','polling:false','timers:false','diagnosticsRuntime:false'],'delegation');
 forbids(sources.delegation,['MutationObserver','PerformanceObserver','setTimeout(','setInterval(',"addEventListener('click',onClick,true)","addEventListener('click',onClick,{capture:true",'longtask','commonweave.log-buffer.v1'],'delegation');
-requires(sources.unified,["VERSION='1.0.6-unified-settings-compat-v188'",'retiredRuntime:true',"authority:'ai-settings-cleanroom-v188'",'providerRuntimeOnOpen:false'],'unified compatibility shell');
+requires(sources.unified,["VERSION='1.0.7-unified-settings-compat-v188'",'retiredRuntime:true',"authority:'ai-settings-cleanroom-v188'",'providerRuntimeOnOpen:false'],'unified compatibility shell');
 forbids(sources.unified,['MutationObserver','setTimeout(','setInterval(','fetch(',"createElement('script')",'ensureRuntime','detectCapabilities','.generate('],'unified compatibility shell');
 requires(sources.boundary,["ADDITIONS_VERSION='v188-ai-settings-cleanroom'","SETTINGS_STABILITY_REVISION='v188-no-observer-no-polling-no-capture'","SETTINGS_CONTROLLER_REVISION='v188-single-cleanroom-authority'","SETTINGS_RUNTIME_REVISION='v188-provider-runtime-disconnected'","SETTINGS_LOG_REVISION='v188-diagnostics-runtime-retired'","settingsPresentation:'cleanroom-v188'",'settingsMutationObserver:false','settingsPolling:false','settingsTimers:false','settingsDiagnosticsRuntime:false','providerRuntimeOnOpen:false','providerTestsAvailable:false'],'install boundary');
 
 const bridgeMode=sources.additive.includes('legacy-v156-bridge-v209');
 if(bridgeMode){
-  requires(sources.additive,["importScripts('/service-worker-v203.js?v=1.0.6-lightweight-shell-v208-legacy-v156-bridge-v209')",'GET_SHARED_IMAGE_STATUS','GET_CRITICAL_BOOT_STATUS','GET_ADDITIONS_STATUS'],'legacy package bridge');
+  requires(sources.additive,["importScripts('/service-worker-v203.js?v=1.0.7-lightweight-shell-v208-legacy-v156-bridge-v209')",'GET_SHARED_IMAGE_STATUS','GET_CRITICAL_BOOT_STATUS','GET_ADDITIONS_STATUS'],'legacy package bridge');
   assert(!/^[ \t]*importScripts\('\/service-worker\.js/m.test(sources.additive),'legacy package bridge executes the retired base worker');
   assert(!/^[ \t]*importScripts\('\/service-worker-critical-v199\.js/m.test(sources.additive),'legacy package bridge executes the retired critical coordinator');
   const cleanImport="importScripts('/service-worker-living-school-cleanroom-v218.js";
@@ -64,7 +64,7 @@ if(bridgeMode){
   assert(!sources.installer.includes('GET_CRITICAL_BOOT_STATUS'),'installer still waits on the retired critical package coordinator');
   assert(!sources.installer.includes('GET_ADDITIONS_STATUS'),'installer still waits on the retired additive package');
 }else{
-  requires(sources.additive,["importScripts('/service-worker.js?v=1.0.6-base-r47-ai-settings-cleanroom')","EXTENSION_VERSION='working-campus-additions-v188-ai-settings-cleanroom'","SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188'","SETTINGS_RUNTIME_REVISION='provider-runtime-disconnected-v188'","SETTINGS_LOG_REVISION='diagnostics-runtime-retired-v188'","settingsPresentation:'cleanroom-v188'",'settingsMutationObserver:false','settingsPolling:false','settingsTimers:false','settingsDiagnosticsRuntime:false','providerRuntimeOnOpen:false','providerTestsAvailable:false'],'installed package refresh');
+  requires(sources.additive,["importScripts('/service-worker.js?v=1.0.7-base-r47-ai-settings-cleanroom')","EXTENSION_VERSION='working-campus-additions-v188-ai-settings-cleanroom'","SETTINGS_CONTROLLER_REVISION='single-cleanroom-authority-v188'","SETTINGS_RUNTIME_REVISION='provider-runtime-disconnected-v188'","SETTINGS_LOG_REVISION='diagnostics-runtime-retired-v188'","settingsPresentation:'cleanroom-v188'",'settingsMutationObserver:false','settingsPolling:false','settingsTimers:false','settingsDiagnosticsRuntime:false','providerRuntimeOnOpen:false','providerTestsAvailable:false'],'installed package refresh');
 }
 requires(sources.worker,["'/app/model-settings-controller-v173.js'","'/app/unified-ai-settings-v175.js'","'/app/settings-delegation-v175.js'"],'legacy core package compatibility');
 

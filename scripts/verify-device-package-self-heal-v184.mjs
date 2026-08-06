@@ -38,7 +38,7 @@ for(const token of [
   "if(pathname.startsWith('/app/'))return'/app/installed-entry-v146.html'"
 ])assert(worker.includes(token),`Core package self-heal missing ${token}`);
 
-assert(!worker.includes("return new Response('This asset is not part of the installed Commonweave v1.0.6 package.'"),'Generic cache-only dead-end response is still active.');
+assert(!worker.includes("return new Response('This asset is not part of the installed Commonweave v1.0.7 package.'"),'Generic cache-only dead-end response is still active.');
 const deviceOnlyBlock=worker.slice(worker.indexOf('async function deviceOnly'),worker.indexOf('async function modelOnDemand'));
 assert(deviceOnlyBlock.indexOf('networkRepair(request)')<deviceOnlyBlock.indexOf('fallbackCached'),'Device package does not try online repair before falling back.');
 assert(deviceOnlyBlock.includes('missingAssetResponse(url.pathname,fallback)'),'Missing asset response does not identify the requested path.');

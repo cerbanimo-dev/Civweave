@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.6-weaveling-plan-json-v190';
+const VERSION='1.0.7-weaveling-plan-json-v190';
 const INTENTIONS_KEY='commonweave.intentions.v127';
 const CAMPUS_KEY='commonweave.working-campus.v1';
 const HANDOFF_KEY='commonweave.realm-inbox.v1';

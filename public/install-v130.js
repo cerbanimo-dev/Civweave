@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION = '1.0.6';
+const VERSION = '1.0.7';
 const ENTRY = '/app/?system=commonweave&installed=1';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
 const WORKER_SCRIPT_REVISION = 'compat-fullscreen-launch-v219';

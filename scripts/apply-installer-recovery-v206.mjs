@@ -45,8 +45,8 @@ await patch('public/service-worker.js',source=>{
 await patch('public/service-worker-v156.js',source=>{
   source=replaceRequired(
     source,
-    "importScripts('/service-worker.js?v=1.0.6-base-r52-living-school-boot-v195');",
-    "importScripts('/service-worker.js?v=1.0.6-base-r53-isolated-recovery-v206');\n// Compatibility marker: importScripts('/service-worker.js?v=1.0.6-base-r52-living-school-boot-v195');",
+    "importScripts('/service-worker.js?v=1.0.7-base-r52-living-school-boot-v195');",
+    "importScripts('/service-worker.js?v=1.0.7-base-r53-isolated-recovery-v206');\n// Compatibility marker: importScripts('/service-worker.js?v=1.0.7-base-r52-living-school-boot-v195');",
     'base worker revision'
   );
   return source;
