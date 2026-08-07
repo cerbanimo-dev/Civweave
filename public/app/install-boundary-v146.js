@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.18';
+const VERSION='1.0.20';
 const REVISION='five-system-boundary-v227';
 const INSTALLER='/app/index.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const DEV_KEY='civweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION='v1.0.18-canonical-core-only-v226';
+const ADDITIONS_VERSION='v1.0.20-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
 const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
@@ -16,6 +16,8 @@ const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
 const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js';
 const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js';
 const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
+const ROUTE_CONTRACT='/app/system-routes-v227.js';
+const RELEASE_VERSION='/app/release-version-v1.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
   ['/app/cabinets/living-school/index.html','living-school'],
@@ -23,9 +25,10 @@ const FALLBACK_PATHS=new Map([
   ['/app/fellowfare-cabinet-v144.html','fellowfare'],
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
+const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR];
 const LEGACY_SCRIPTS=[
-  '/app/system-routes-v227.js',
-  '/app/release-version-v1.js',
+  ROUTE_CONTRACT,
+  RELEASE_VERSION,
   '/app/weaveling-memory-v191.js',
   '/app/weaveling-memory-bridge-v191.js',
   '/app/deterministic-mode-v175.js',
@@ -98,8 +101,18 @@ function installEarlyGuards(){
   addScript(AI_SETTINGS_BIND_GUARD);
   return true;
 }
+function installCanonicalSystemSupport(){
+  if(canonicalAppSurface()||!systemSurface()||!liveHead())return false;
+  CANONICAL_SYSTEM_SCRIPTS.forEach(addScript);
+  return true;
+}
+function installCanonicalSystemSupportWhenReady(){
+  if(document.body)return installCanonicalSystemSupport();
+  addEventListener('DOMContentLoaded',installCanonicalSystemSupport,{once:true});
+  return true;
+}
 function installAdditions(){
-  if(canonicalAppSurface()||!liveHead())return false;
+  if(systemSurface()||!liveHead())return false;
   if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
     const link=document.createElement('link');
     link.rel='stylesheet';
@@ -130,6 +143,11 @@ function start(){
     queueMicrotask(()=>dispatchEvent(new CustomEvent('civweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system}})));
     return;
   }
+  if(system){
+    root.dataset.civweaveCanonicalRealm='self-contained';
+    installCanonicalSystemSupportWhenReady();
+    return;
+  }
   installEarlyGuards();
   installAdditionsWhenReady();
 }
@@ -137,7 +155,7 @@ function start(){
 start();
 
 globalThis.CivweaveInstallBoundaryV146=Object.freeze({
-  version:'1.0.18',allowed,
+  version:'1.0.20',allowed,
   revision:REVISION,
   systemSurface,
   canonicalAppSurface,
@@ -147,6 +165,8 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   embedded,
   installerUrl,
   installEarlyGuards,
+  installCanonicalSystemSupport,
+  installCanonicalSystemSupportWhenReady,
   installAdditions,
   installAdditionsWhenReady,
   additionsVersion:ADDITIONS_VERSION,
@@ -154,6 +174,8 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalPolicy:'five-system-first-class-routes-civweave-core-only',
   canonicalSystemCount:5,
   canonicalAutoScripts:0,
+  canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
+  canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
   guideIdentityRevision:'v216-explicit-responder-ownership',
   guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
   guideIdentityMigration:'realm-action-owner',
