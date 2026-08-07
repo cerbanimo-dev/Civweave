@@ -34,6 +34,13 @@ const checks=[
     assert.match(guide,/One shared thread, two surfaces/);
     assert.equal((boundary.match(/PERSISTENT_GUIDE_CHAT_SCRIPT/g)||[]).length>=2,true);
   }],
+  ['late realm renders cannot erase the inline guide surface',()=>{
+    assert.match(guide,/function repairSurface\(\)/);
+    assert.match(guide,/surfaceObserver=new MutationObserver/);
+    assert.match(guide,/if\(!document\.getElementById\(ROOT_ID\)&&!canonicalNativeChat\(currentSystem\)\)buildInline\(\)/);
+    const repairBody=guide.match(/function repairSurface\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
+    assert.doesNotMatch(repairBody,/renderTranscript\(\)/,'repair observer must not mutate the transcript and trigger itself recursively');
+  }],
   ['Rook keeps the native workbench but shares the persistent thread',()=>{
     assert.match(guide,/if\(system==='fellowfare'\)return document\.querySelector\('\.ffc144-rook'\)/);
     assert.match(boundary,/FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);
