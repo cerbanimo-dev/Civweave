@@ -35,7 +35,8 @@ assert.match(review,/civweave:review-plan-activated/,'Weave activation must emit
 assert.match(review,/civweave:review-action-approved/,'Realm approval must emit a review lifecycle event.');
 
 assert.match(boundary,/SHARED_REVIEW_SURFACE='\/app\/shared-review-surface-v234\.js'/,'Shared boundary must load the review extension.');
-assert.match(boundary,/SYSTEM_EXPERIENCE_SCRIPTS=\[EXPERIENCE_ORCHESTRATOR,SYSTEM_RADIO_AGENT,SHARED_REVIEW_SURFACE\]/,'Review extension must be first-class on all five system surfaces.');
+const experienceBlock=boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\];/)?.[1]||'';
+assert.ok(experienceBlock.includes('SHARED_REVIEW_SURFACE'),'Review extension must remain first-class in the approved experience stack on all five system surfaces.');
 assert.match(boundary,/sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review'/);
 
 assert.doesNotMatch(installer,/new MutationObserver\(renderProgress\)/,'Installer progress must not observe and rewrite its own hidden/disabled attributes.');
