@@ -12,6 +12,7 @@ const paths={
   fellowfare:'/app/fellowfare-cabinet-v144.html',
   anarchadia:'/app/anarchadia-console-v139.html'
 };
+const experienceScripts=['/app/experience-orchestrator-v232.js','/app/system-radio-agent-v232.js'];
 const [routesSource,boundarySource,navSource,campusSource,campusPart4,workerWrapper,workerNavigation,gatewayBase,gatewayWrapper,...pages]=await Promise.all([
   read('public/app/system-routes-v227.js'),
   read('public/app/install-boundary-v146.js'),
@@ -77,14 +78,22 @@ for(const [system,pathname] of Object.entries(paths)){
   assert.equal(result.context.CivweaveInstallBoundaryV146.systemSurface(),system,`${system} is not a first-class boundary surface.`);
   assert.equal(result.context.CivweaveInstallBoundaryV146.allowed(),true,`${system} is not authorized intrinsically.`);
   assert.equal(result.root.dataset.civweaveSystemRoute,system,`${system} route identity is not stamped.`);
-  if(system==='civweave')assert.equal(result.appended.length,0,'Civweave canonical startup injected legacy scripts.');
-  else assert.ok(result.appended.some(node=>String(node.src||'').includes('/app/system-routes-v227.js')),`${system} does not load the shared route contract before legacy navigation.`);
+  for(const script of experienceScripts){
+    assert.ok(result.appended.some(node=>String(node.src||'').includes(script)),`${system} does not load ${script} from the shared experience boundary.`);
+  }
+  if(system==='civweave'){
+    assert.equal(result.appended.length,experienceScripts.length,'Civweave canonical startup must inject only the approved experience-layer scripts.');
+    assert.ok(result.appended.every(node=>experienceScripts.some(script=>String(node.src||'').includes(script))),'Civweave canonical startup injected a non-experience or legacy script.');
+  }else{
+    assert.ok(result.appended.some(node=>String(node.src||'').includes('/app/system-routes-v227.js')),`${system} does not load the shared route contract before compatibility navigation.`);
+  }
 }
 
 for(const [system,pathname] of Object.entries(paths)){
   assert.ok(boundarySource.includes(`['${pathname}','${system}']`),`Boundary fallback map is missing ${system}.`);
 }
 assert.match(boundarySource,/canonicalSystemCount:5/);
+assert.match(boundarySource,/canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS\.length/);
 assert.match(boundarySource,/five-system-first-class-routes-civweave-core-only/);
 assert.match(navSource,/CivweaveSystemRoutesV227/);
 assert.match(navSource,/ROUTES\.navigate/);
@@ -113,4 +122,4 @@ assert.match(gatewayBase,/x-civweave-package/,'Gateway no longer recognizes devi
 assert.match(gatewayWrapper,/pathname !== '\/app'/,'Render wrapper no longer preserves application file delivery.');
 for(const [index,page] of pages.entries())assert.match(page,/\/app\/install-boundary-v146\.js/,`${Object.keys(paths)[index]} page lost the shared boundary.`);
 
-console.log(JSON.stringify({ok:true,version,revision:'five-system-navigation-v227',systems:Object.keys(paths),routeMatrix:25,boundaryIntrinsicAuthorization:true,workerPackageHeader:true,workerFallback:'exact-route-or-visible-recovery',launcherSubstitution:false,installerSubstitution:false},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'five-system-navigation-v227',systems:Object.keys(paths),routeMatrix:25,boundaryIntrinsicAuthorization:true,experienceScripts,canonicalExperienceScriptCount:experienceScripts.length,workerPackageHeader:true,workerFallback:'exact-route-or-visible-recovery',launcherSubstitution:false,installerSubstitution:false},null,2));
