@@ -8,18 +8,24 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [manifestText,campusHtml,campusLoader,campusPart4,lifecycle,installBoundary,routes,additions,workerCore,releaseCoherence,wrapper,canonicalNavigation]=await Promise.all([
-  read('public/app/manifest.webmanifest'),read('public/app/working-campus-v156.html'),read('public/app/working-campus-v156.js'),read('public/app/working-campus-v156.part4.txt'),read('public/app/document-lifecycle-v221.js'),read('public/app/install-boundary-v146.js'),read('public/app/system-routes-v227.js'),read('public/extensions/civweave-additions-v156.js'),read('public/service-worker-core-v208.js'),read('public/service-worker-release-coherence-v220.js'),read('public/service-worker-v203.js'),read('public/service-worker-canonical-navigation-v227.js')
+const [manifestText,installedEntry,campusHtml,campusLoader,campusPart4,lifecycle,installBoundary,routes,additions,workerCore,releaseCoherence,wrapper,canonicalNavigation]=await Promise.all([
+  read('public/app/manifest.webmanifest'),read('public/app/installed-entry-v146.js'),read('public/app/working-campus-v156.html'),read('public/app/working-campus-v156.js'),read('public/app/working-campus-v156.part4.txt'),read('public/app/document-lifecycle-v221.js'),read('public/app/install-boundary-v146.js'),read('public/app/system-routes-v227.js'),read('public/extensions/civweave-additions-v156.js'),read('public/service-worker-core-v208.js'),read('public/service-worker-release-coherence-v220.js'),read('public/service-worker-v203.js'),read('public/service-worker-canonical-navigation-v227.js')
 ]);
 const manifest=JSON.parse(manifestText);
-assert.match(manifest.start_url,/^\/app\/working-campus-v156\.html\?/,'Installed PWA starts on the empty launcher.');
+assert.equal(manifest.start_url,'/app/installed-entry-v146.html?installed=1','Installed PWA no longer enters the updater-first launch boundary.');
+assert(installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"),'Installed entry no longer resolves the current release without cache.');
+assert(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('await registration.update()'),'Installed entry no longer refreshes the worker before routing.');
+assert(installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})")&&installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='),'Installed entry no longer activates the refreshed worker before route selection.');
 assert(campusHtml.indexOf('/app/document-lifecycle-v221.js')<campusHtml.indexOf('/app/install-boundary-v146.js'),'Lifecycle guard must load before boundary.');
 assert(campusHtml.includes('/app/document-lifecycle-v221.js?v=document-lifecycle-v222'),'Working Campus lifecycle revision is stale.');
-assert(campusHtml.includes('/app/install-boundary-v146.js?v=five-system-boundary-v227'),'Working Campus boundary revision is stale.');
+assert(campusHtml.includes('/app/install-boundary-v146.js?v=chat-convergence-v250'),'Working Campus boundary revision is stale.');
 assert(campusHtml.includes('/app/working-campus-v156.js?v=canonical-campus-startup-v227'),'Working Campus loader revision is stale.');
 for(const token of ["cache:'no-store'","redirect:'follow'","'x-civweave-package':'working-campus-v227'",'Promise.all(parts.map(fetchPart))','campusReady()','ensureRouteContract','civweave:working-campus-runtime-ready','document.documentElement===bootDocument','location.href===bootUrl',"policy:'canonical-core-only-five-system-routing'"])assert(campusLoader.includes(token),`Working Campus loader is missing ${token}.`);
 assert(!campusLoader.includes("cache:'force-cache'"),'Working Campus forces stale fragments.');
-for(const token of ["['/app/working-campus-v156.html','civweave']","['/app/cabinets/living-school/index.html','living-school']","['/app/realm-console-v140.html','cerbanimo']","['/app/fellowfare-cabinet-v144.html','fellowfare']","['/app/anarchadia-console-v139.html','anarchadia']","root.dataset.civweaveCanonicalCore='only'","canonicalPolicy:'five-system-first-class-routes-civweave-core-only'",'canonicalSystemCount:5','canonicalAutoScripts:0'])assert(installBoundary.includes(token),`Install boundary is missing ${token}.`);
+for(const token of ["['/app/working-campus-v156.html','civweave']","['/app/cabinets/living-school/index.html','living-school']","['/app/realm-console-v140.html','cerbanimo']","['/app/fellowfare-cabinet-v144.html','fellowfare']","['/app/anarchadia-console-v139.html','anarchadia']","root.dataset.civweaveCanonicalCore='only'","canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner'",'canonicalSystemCount:5','canonicalAutoScripts:0',"guideWorkspaceRevision:'v250-v242-canonical-owner'"])assert(installBoundary.includes(token),`Install boundary is missing ${token}.`);
+const experienceStart=installBoundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),experienceEnd=installBoundary.indexOf('];',experienceStart),experience=installBoundary.slice(experienceStart,experienceEnd);
+assert(experience.includes('GUIDE_WORKSPACE'),'Canonical boundary no longer boots the v242 workspace.');
+assert(!experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!experience.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'),'Canonical boundary restored a retired chat owner.');
 assert(!installBoundary.includes('function startAdditions()'),'Boundary contains delayed automatic additions.');
 const startBlock=installBoundary.match(/function start\(\)\{[\s\S]*?\n\}\n\nstart\(\);/)?.[0]||'';
 const additionCall=startBlock.includes('installAdditionsWhenReady();')?'installAdditionsWhenReady();':'installAdditions();';
@@ -35,10 +41,12 @@ assert(!additions.includes('Document navigation interrupted script loading.'),'S
 assert(workerCore.includes("'/app/document-lifecycle-v221.js'"),'Lifecycle guard is absent from shell.');
 const installBlock=workerCore.match(/self\.addEventListener\('install',[\s\S]*?\n\}\);/)?.[0]||'';
 assert(installBlock.includes('event.waitUntil(cacheShell())'),'Worker install does not cache shell.');
-assert(!installBlock.includes('skipWaiting'),'Worker takes over active pages during install.');
+assert(!installBlock.includes('skipWaiting'),'Core worker takes over active pages during its own install instead of leaving activation to the v250 wrapper.');
 for(const token of ['release-coherence-v226','working-campus-v156.part5.txt','version-pinned-html-js-css-json-txt-network-first-cached-fallback'])assert(releaseCoherence.includes(token),`Release coherence is missing ${token}.`);
+assert(wrapper.includes('/service-worker-chat-repair-v245.js?v=chat-convergence-v250'),'Worker wrapper lost the v250 stale-chat migration lane.');
+assert(wrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'v250 worker wrapper no longer activates the convergence worker promptly.');
 assert(wrapper.indexOf('/app/system-routes-v227.js')<wrapper.indexOf('/service-worker-core-v208.js'),'Worker route contract loads after core.');
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not final.');
 assert(canonicalNavigation.includes("headers.set('x-civweave-package',REVISION)")&&canonicalNavigation.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical worker navigation contract is incomplete.');
-for(const [name,source] of [['campus loader',campusLoader],['lifecycle guard',lifecycle],['install boundary',installBoundary],['route contract',routes],['shared additions',additions],['release coherence',releaseCoherence],['canonical navigation',canonicalNavigation]])assert.doesNotThrow(()=>new vm.Script(source,{filename:name}),`${name} does not compile.`);
-console.log(JSON.stringify({ok:true,revision:'canonical-campus-startup-v227',directCampusStart:true,canonicalSystems:5,civweaveCoreOnly:true,navigationErrorsSilent:true,campusFragmentsNetworkFirst:true,packageAuthenticatedNavigation:true,exactRouteFallback:true,nonInterruptingWorker:true},null,2));
+for(const [name,source] of [['installed entry',installedEntry],['campus loader',campusLoader],['lifecycle guard',lifecycle],['install boundary',installBoundary],['route contract',routes],['shared additions',additions],['release coherence',releaseCoherence],['canonical navigation',canonicalNavigation]])assert.doesNotThrow(()=>new vm.Script(source,{filename:name}),`${name} does not compile.`);
+console.log(JSON.stringify({ok:true,revision:'canonical-campus-startup-v227-v250',updaterFirstStart:true,directCampusStart:false,canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',civweaveCoreOnly:true,navigationErrorsSilent:true,campusFragmentsNetworkFirst:true,packageAuthenticatedNavigation:true,exactRouteFallback:true,nonInterruptingCoreWorker:true,v250WrapperActivation:true},null,2));
