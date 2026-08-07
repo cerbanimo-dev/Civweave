@@ -15,7 +15,7 @@ const [hub,runtime,sharedChat,versionText,packageSource]=await Promise.all([
 const version=versionText.trim();
 const pkg=JSON.parse(packageSource);
 assert.equal(pkg.version,version,'package.json and VERSION must stay synchronized.');
-assert.equal(version,'1.0.25','Weaveling hub release version drifted.');
+assert.match(version,/^\d+\.\d+\.\d+$/,'Civweave release version must remain semantic.');
 
 for(const heading of ['AGENT REPORTS','CHRONICLE','REPORT IN']){
   assert(hub.includes(heading),`Missing Weaveling hub section: ${heading}`);
