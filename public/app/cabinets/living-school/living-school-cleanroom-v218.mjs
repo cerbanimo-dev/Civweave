@@ -18,4 +18,4 @@ async function handleLivingSchoolClick(event){
 
 document.addEventListener('click',handleLivingSchoolClick,true);
 render();
-globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler-local-research-v243',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,legacyNavigation:false});
+globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'downloaded-knowledge-v243',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,legacyNavigation:false});
