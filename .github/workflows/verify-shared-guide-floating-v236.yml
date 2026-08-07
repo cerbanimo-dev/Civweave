@@ -5,6 +5,7 @@ on:
     paths:
       - 'public/app/install-boundary-v146.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/fellowfare-shared-guide-bridge-v236.js'
       - 'public/app/themed-system-nav-v178.js'
       - 'public/app/system-radio-agent-v233.js'
       - 'scripts/verify-shared-guide-floating-v236.mjs'
@@ -16,6 +17,7 @@ on:
     paths:
       - 'public/app/install-boundary-v146.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/fellowfare-shared-guide-bridge-v236.js'
       - 'public/app/themed-system-nav-v178.js'
       - 'public/app/system-radio-agent-v233.js'
       - 'scripts/verify-shared-guide-floating-v236.mjs'
@@ -33,6 +35,7 @@ jobs:
       - name: Check runtime syntax
         run: |
           node --check public/app/shared-guide-surface-v236.js
+          node --check public/app/fellowfare-shared-guide-bridge-v236.js
           node --check public/app/themed-system-nav-v178.js
           node --check public/app/install-boundary-v146.js
           node --check scripts/verify-shared-guide-floating-v236.mjs
