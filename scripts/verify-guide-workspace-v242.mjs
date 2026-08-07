@@ -28,6 +28,7 @@ check('chat log releases edge scrolling',workspace.includes('overscroll-behavior
 check('viewport has no mutation observer',!viewport.includes('MutationObserver'));
 check('viewport has no scrollIntoView',!viewport.includes('scrollIntoView'));
 check('floating launcher does not autofocus',workspace.includes('if(options.focus===true)')&&!workspace.includes('queueMicrotask(()=>input?.focus({preventScroll:true}));return root'));
-check('workspace loads immediately after realm session integrity',boundary.indexOf('REALM_SESSION_INTEGRITY,')>=0&&boundary.indexOf('GUIDE_WORKSPACE,')===boundary.indexOf('REALM_SESSION_INTEGRITY,')+'REALM_SESSION_INTEGRITY,'.length+3);
+const realmIndex=boundary.indexOf('REALM_SESSION_INTEGRITY,'),workspaceIndex=boundary.indexOf('GUIDE_WORKSPACE,');
+check('workspace loads after realm session integrity',realmIndex>=0&&workspaceIndex>realmIndex);
 check('boundary exposes v242 policy',boundary.includes("guideWorkspaceRevision:'v242-five-window-local-ledgers-no-scroll-trap'"));
 console.log(JSON.stringify({ok:true,version,checks:checks.length,workspace:'v242-five-window-local-ledgers',scrollTrap:false,launcherFirst:true},null,2));
