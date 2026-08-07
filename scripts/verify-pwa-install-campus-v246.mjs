@@ -5,20 +5,28 @@ import vm from 'node:vm';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const readBytes=path=>readFile(new URL(path,root));
-const [html,manifestText,bridge,autostart,statusRuntime,workerRepair,workerWrapper]=await Promise.all([
+const [html,manifestText,bridge,autostart,statusRuntime,workerRepair,workerWrapper,installedEntry]=await Promise.all([
   read('public/app/index.html'),
   read('public/app/manifest.webmanifest'),
   read('public/app/pwa-install-prompt-v246.js'),
   read('public/app/required-campus-autostart-v1.js'),
   read('public/app/offline-campus-status-v210.js'),
   read('public/service-worker-campus-completion-v246.js'),
-  read('public/service-worker-v203.js')
+  read('public/service-worker-v203.js'),
+  read('public/app/installed-entry-v146.js')
 ]);
 
 const manifest=JSON.parse(manifestText);
 assert.equal(manifest.display,'standalone');
 assert.equal(manifest.prefer_related_applications,false);
-assert.ok(manifest.start_url?.includes('/app/working-campus-v156.html'));
+assert.equal(manifest.start_url,'/app/installed-entry-v146.html?installed=1','installed PWA must launch through updater entry, never directly into a version-pinned campus');
+assert.ok((manifest.shortcuts||[]).every(shortcut=>String(shortcut.url||'').startsWith('/app/installed-entry-v146.html?')),'all installed shortcuts must pass through updater entry');
+assert.ok(!manifestText.includes('working-campus-v156.html?installed=1&version='),'manifest must not pin an installed launch to an old Working Campus release');
+assert.ok(installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"),'installed entry must resolve current release without cache');
+assert.ok(installedEntry.includes("updateViaCache:'none'"));
+assert.ok(installedEntry.includes('await registration.update()'));
+assert.ok(installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'installed entry must activate a waiting worker before routing');
+assert.ok(installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='),'worker refresh must finish before installed route selection');
 
 const any192=manifest.icons?.find(icon=>icon.sizes==='192x192'&&String(icon.purpose||'any').includes('any'));
 const any512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'any').includes('any'));
@@ -66,48 +74,21 @@ assert.ok(!autostart.includes('civweave.pwa.install-accepted'),'campus download 
 assert.ok(!autostart.includes("button.disabled=true"),'required campus autostart must never disable the install button');
 assert.ok(!html.includes('campusLaunchReady'),'installer must not gate app launch on the campus percentage');
 
-const sandbox={
-  console,
-  document:{querySelector:()=>null,documentElement:{dataset:{}}},
-  navigator:{serviceWorker:null},
-  addEventListener:()=>{},
-  dispatchEvent:()=>{},
-  CustomEvent:class CustomEvent{},
-  setTimeout:()=>0,
-  clearTimeout:()=>{}
-};
+const sandbox={console,document:{querySelector:()=>null,documentElement:{dataset:{}}},navigator:{serviceWorker:null},addEventListener:()=>{},dispatchEvent:()=>{},CustomEvent:class CustomEvent{},setTimeout:()=>0,clearTimeout:()=>{}};
 vm.createContext(sandbox);
 vm.runInContext(statusRuntime,sandbox,{filename:'offline-campus-status-v210.js'});
 const normalize=sandbox.CivweaveOfflineCampusStatusV210?.normalize;
 assert.equal(typeof normalize,'function');
-const legacy=normalize({
-  type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
-  revision:'offline-campus-current-graph-v238',
-  total:234,
-  discovered:234,
-  downloaded:217,
-  completed:217,
-  attempted:217,
-  running:false,
-  ready:false,
-  failed:[],
-  failedCount:0,
-  skipped:Array.from({length:17},(_,index)=>({pathname:`/retired-${index}.js`})),
-  skippedCount:17
-});
-assert.equal(legacy.total,217,'retired references must be removed from the current-campus denominator');
+const legacy=normalize({type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',revision:'offline-campus-current-graph-v238',total:234,discovered:234,downloaded:217,completed:217,attempted:217,running:false,ready:false,failed:[],failedCount:0,skipped:Array.from({length:17},(_,index)=>({pathname:`/retired-${index}.js`})),skippedCount:17});
+assert.equal(legacy.total,217,'retired references must be removed from current-campus denominator');
 assert.equal(legacy.downloaded,217);
-assert.equal(legacy.ready,true,'217 downloaded + 17 retired must complete a legacy 234-item ledger');
+assert.equal(legacy.ready,true,'217 downloaded + 17 retired must complete legacy 234-item ledger');
 
 assert.ok(workerRepair.includes('retired-references-do-not-block-current-campus-readiness'));
 assert.ok(workerRepair.includes('downloaded+skippedCount>=reportedTotal'));
 assert.ok(workerRepair.includes('writeOfflineMeta'),'worker must repair persisted completion metadata');
 assert.ok(workerWrapper.includes("importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246')"));
+assert.ok(workerWrapper.includes('chat-convergence-v250'),'worker wrapper must carry current convergence identity');
+assert.ok(workerWrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'new worker must activate immediately');
 
-console.log(JSON.stringify({
-  ok:true,
-  revision:'pwa-install-campus-v247',
-  manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},
-  retiredCampusLedger:true,
-  nativeInstallBridge:true
-},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v250',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first'},null,2));
