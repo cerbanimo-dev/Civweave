@@ -74,14 +74,25 @@ check(installRuntime.includes(`const VERSION = '${version}';`),'Installer runtim
 check(installRuntime.includes(`const WORKER_URL = \`/service-worker-v203.js?v=\${WORKER_BUILD}&revision=\${WORKER_SCRIPT_REVISION}\`;`),'Installer runtime no longer owns the versioned service-worker URL.');
 check(/navigator\.serviceWorker\.register\s*\(\s*WORKER_URL/.test(installRuntime),'Installer runtime no longer owns service-worker registration.');
 same(manifest.name,`Civweave v${version}`,'manifest name');
-same(new URL(manifest.start_url,'https://civweave.invalid').searchParams.get('version'),version,'manifest start URL version');
+const manifestStart=new URL(manifest.start_url,'https://civweave.invalid');
+same(manifestStart.pathname,'/app/installed-entry-v146.html','manifest updater start path');
+same(manifestStart.searchParams.get('installed'),'1','manifest installed authorization');
+same(manifestStart.searchParams.get('version'),null,'manifest start URL release pin');
+check((manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(shortcut=>new URL(shortcut.url,'https://civweave.invalid').pathname==='/app/installed-entry-v146.html'),'Manifest shortcuts no longer enter through the updater-first boundary.');
 check(installedEntryHtml.includes(`/app/installed-entry-v146.js?v=${version}`),'Installed entry HTML is stale.');
 for(const token of [
+  `const FALLBACK_VERSION='${version}';`,
   'authorize();',
+  "fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})",
+  "updateViaCache:'none'",
+  'await registration.update()',
+  "candidate.postMessage({type:'SKIP_WAITING'})",
+  'await refreshWorker(releaseVersion)',
   "const requested=params.get('system')||params.get('target')||'civweave';",
   'routes.urlFor(',
   "new URL('/app/working-campus-v156.html',location.origin)"
-])check(installedEntryRuntime.includes(token),`Direct browser launcher is missing ${token}`);
+])check(installedEntryRuntime.includes(token),`Updater-first installed entry is missing ${token}`);
+check(installedEntryRuntime.indexOf('await refreshWorker(releaseVersion)')<installedEntryRuntime.indexOf('const requested='),'Installed entry routes before refreshing the worker.');
 check(!installedEntryRuntime.includes("new URL('/app/index.html',location.origin)"),'Normal browser launcher still routes through the installer.');
 check(!installedEntryRuntime.includes("installer.searchParams.set('install','required')"),'Normal browser launcher still manufactures an install-required redirect.');
 check(routes.includes(`const VERSION='${version}';`),'Five-system route contract version is stale.');
@@ -90,20 +101,26 @@ check(nav.includes(`const VERSION='${version}-five-system-navigation-v227';`),'T
 check(nav.includes('ROUTES.navigate'),'Themed navigation bypasses the route contract.');
 check(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core version is stale.');
 check(workerWrapper.includes(`/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Worker route contract revision is stale.');
-check(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-lightweight-shell-v208-retained-v218`),'Worker core revision is stale.');
+check(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-chat-convergence-v250`),'Worker core revision is stale.');
 check(workerWrapper.includes('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238'),'Worker offline current-graph revision is stale.');
+check(workerWrapper.includes('/service-worker-chat-repair-v245.js?v=chat-convergence-v250'),'Worker lost the stale-chat cache migration lane.');
 check(workerWrapper.indexOf('/service-worker-canonical-navigation-v227.js')>workerWrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not the final worker policy.');
 check(legacyWorker.includes(`/service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
 for(const token of [
   `const VERSION='${version}';`,
+  "const REVISION='chat-convergence-v250';",
   "const INSTALLER='/app/index.html';",
-  `const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`,
-  `version:'${version}'`,
-  "canonicalPolicy:'five-system-first-class-routes-civweave-core-only'",
+  'const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;',
+  'version:VERSION,allowed',
+  "canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner'",
+  "guideWorkspaceRevision:'v250-v242-canonical-owner'",
   'canonicalSystemCount:5',
   'canonicalAutoScripts:0',
   "canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions'"
 ])check(installBoundary.includes(token),`Install boundary is missing ${token}.`);
+const experienceStart=installBoundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),experienceEnd=installBoundary.indexOf('];',experienceStart),experience=installBoundary.slice(experienceStart,experienceEnd);
+check(experience.includes('GUIDE_WORKSPACE'),'Canonical experience no longer boots the v242 workspace.');
+check(!experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!experience.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'),'Canonical experience restored a retired v215/v216 chat owner.');
 check(!installBoundary.includes("const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';")&&!installBoundary.includes('addScript(RELEASE_VERSION_SCRIPT)'),'Install boundary reintroduced the retired canonical version loader.');
 check(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-civweave-version]')"),'Visible-version synchronizer is incomplete.');
 check(versionConst(gateway,`${version}-render-installed-runtime-v132`),'Gateway wrapper version is stale.');
@@ -114,6 +131,8 @@ check(campusPart4.includes(`version:'${version}'`),'Working Campus realm travel 
 for(const token of [
   "await patch('public/index.html'",
   "await patch('public/app/index.html'",
+  "await patch('public/app/manifest.webmanifest'",
+  "manifest.start_url='/app/installed-entry-v146.html?installed=1';",
   "await patch('public/app/system-routes-v227.js'",
   "await patch('public/app/themed-system-nav-v178.js'",
   "await patch('public/app/working-campus-v156.js'",
@@ -121,7 +140,8 @@ for(const token of [
   'launcher entry revision',
   'installer title',
   'worker route contract revision',
-  'five-system route version'
+  'five-system route version',
+  'install-boundary release-aware additions revision'
 ])check(syncSource.includes(token),`Release synchronizer is missing ${token}.`);
 for(const [label,source] of [
   ['launcher',launcherHtml],
@@ -143,4 +163,4 @@ for(const [label,source] of [
   const pattern=new RegExp(`(?:(?:Civweave|Commonweave) v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
   for(const match of source.matchAll(pattern))if(match[1]!==version)throw new Error(`${label} still exposes ${match[1]} instead of ${version}.`);
 }
-console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,canonicalCoreOnly:true,legacyCompatibility:'noncanonical-only',gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,directCampusEntry:true,installerRecoveryOnly:true,installerRegistrationOwner:'install-v130.js'},null,2));
+console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,canonicalChatOwner:'guide-workspace-v242',legacyCompatibility:'noncanonical-only',gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,updaterFirstInstalledLaunch:true,manifestReleasePin:false,installerRecoveryOnly:true,installerRegistrationOwner:'install-v130.js'},null,2));
