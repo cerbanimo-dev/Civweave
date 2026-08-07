@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.36';
+const VERSION='1.0.43';
 const REVISION='five-system-boundary-v227';
 const INSTALLER='/app/index.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const DEV_KEY='civweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION='v1.0.36-radio-track-context-v241';
+const ADDITIONS_VERSION='v1.0.43-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
 const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
@@ -206,7 +206,7 @@ function start(){
 start();
 
 globalThis.CivweaveInstallBoundaryV146=Object.freeze({
-  version:'1.0.36',allowed,
+  version:'1.0.43',allowed,
   revision:REVISION,
   systemSurface,
   canonicalAppSurface,
