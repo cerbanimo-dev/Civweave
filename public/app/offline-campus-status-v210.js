@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.8-offline-campus-status-v210';
-const WORKER_REVISION='offline-campus-seed-provenance-v211';
+const VERSION='1.0.39-offline-campus-status-v210-retired-completion-v246';
+const WORKER_REVISION='offline-campus-current-graph-v238';
 const STATUS_TYPES=new Set([
   'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
   'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS'
@@ -13,20 +13,38 @@ const clamp=(value,min,max)=>Math.min(max,Math.max(min,Number.isFinite(value)?va
 function normalize(status={}){
   const failed=Array.isArray(status.failed)?status.failed:[];
   const skipped=Array.isArray(status.skipped)?status.skipped:[];
+  const assets=Array.isArray(status.assets)?status.assets.filter(Boolean):[];
   const failedCount=Math.max(0,Number(status.failedCount??failed.length)||0);
   const skippedCount=Math.max(0,Number(status.skippedCount??skipped.length)||0);
-  const total=Math.max(0,Number(status.total||Number(status.discovered||0)-skippedCount||0)||0);
+  const reportedTotal=Math.max(0,Number(status.total||0)||0);
+  const discovered=Math.max(0,Number(status.discovered||0)||0);
   const rawCompleted=Math.max(0,Number(status.completed||0)||0);
   const hasAttempted=status.attempted!==undefined&&status.attempted!==null&&Number.isFinite(Number(status.attempted));
   const legacyAttemptSemantics=!hasAttempted&&status.revision==='lightweight-shell-v208';
+  const rawDownloaded=Math.max(0,Number(status.downloaded??status.successful??(legacyAttemptSemantics?rawCompleted-failedCount:rawCompleted))||0);
+
+  let total=reportedTotal||Math.max(0,discovered-skippedCount)||assets.length;
+  const assetPaths=new Set(assets.map(String));
+  const skippedOverlap=skipped.reduce((count,entry)=>{
+    const path=String(entry?.pathname||'');
+    return count+(path&&assetPaths.has(path)?1:0);
+  },0);
+  const totalAlreadyExcludesSkipped=Boolean(skippedCount&&discovered&&total+skippedCount===discovered);
+  const legacyTotalIncludesSkipped=Boolean(skippedCount&&total&&!totalAlreadyExcludesSkipped&&(
+    (discovered&&discovered===total)||
+    skippedOverlap>0||
+    (!failedCount&&rawDownloaded+skippedCount>=total)
+  ));
+  if(legacyTotalIncludesSkipped){
+    const retirementCount=skippedOverlap||Math.min(skippedCount,total);
+    total=Math.max(rawDownloaded,total-retirementCount);
+  }
+
   const attempted=clamp(hasAttempted?Number(status.attempted):rawCompleted,0,total||Number.MAX_SAFE_INTEGER);
-  const downloaded=clamp(
-    Number(status.downloaded??status.successful??(legacyAttemptSemantics?rawCompleted-failedCount:rawCompleted)),
-    0,
-    total||Number.MAX_SAFE_INTEGER
-  );
-  const ready=Boolean(status.ready)&&failedCount===0&&(!total||downloaded>=total);
-  return{...status,failed,failedCount,skipped,skippedCount,total,attempted,downloaded,ready};
+  const downloaded=clamp(rawDownloaded,0,total||Number.MAX_SAFE_INTEGER);
+  const computedReady=!status.running&&failedCount===0&&total>0&&downloaded>=total;
+  const ready=(Boolean(status.ready)||computedReady)&&failedCount===0&&(!total||downloaded>=total);
+  return{...status,assets,failed,failedCount,skipped,skippedCount,total,attempted,downloaded,ready,retiredCount:skippedCount,legacyTotalIncludesSkipped};
 }
 
 function formatBytes(bytes){
@@ -46,15 +64,15 @@ function render(status){
   const requiredFailures=packet.failed.some(entry=>entry?.required===true||entry?.pathname==='package');
   if(state){
     if(packet.running)state.textContent='downloading';
-    else if(packet.ready)state.textContent=packet.skippedCount?`ready offline · ${packet.skippedCount} stale reference${packet.skippedCount===1?'':'s'} skipped`:'ready offline';
+    else if(packet.ready)state.textContent=packet.skippedCount?`ready offline · ${packet.skippedCount} retired reference${packet.skippedCount===1?'':'s'} skipped`:'ready offline';
     else if(packet.failedCount&&requiredFailures)state.textContent=`${packet.failedCount} required file${packet.failedCount===1?'':'s'} need retry`;
     else if(packet.failedCount)state.textContent=`${packet.failedCount} file${packet.failedCount===1?'':'s'} need retry`;
     else state.textContent=packet.downloaded?'partially downloaded':'not downloaded';
   }
   if(assets){
-    const count=packet.total?`${Math.min(packet.downloaded,packet.total)}/${packet.total} files`:'not measured';
+    const count=packet.total?`${Math.min(packet.downloaded,packet.total)}/${packet.total} current files`:'not measured';
     const checked=packet.failedCount&&packet.attempted>packet.downloaded?` · ${Math.min(packet.attempted,packet.total)}/${packet.total} checked`:'';
-    const skipped=packet.skippedCount?` · ${packet.skippedCount} stale skipped`:'';
+    const skipped=packet.skippedCount?` · ${packet.skippedCount} retired`:'';
     const size=formatBytes(packet.bytes);
     assets.textContent=`${count}${checked}${skipped}${size?` · ${size}`:''}`;
   }
