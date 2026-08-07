@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION='1.0.30';
-const REVISION='five-system-boundary-v236';
+const REVISION='five-system-boundary-v227';
 const INSTALLER='/app/index.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
@@ -32,7 +32,6 @@ const FALLBACK_PATHS=new Map([
 ]);
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR];
 const SYSTEM_EXPERIENCE_SCRIPTS=[
-  ROUTE_CONTRACT,
   EXPERIENCE_ORCHESTRATOR,
   GUIDE_IDENTITY_SCRIPT,
   PERSISTENT_GUIDE_CHAT_SCRIPT,
