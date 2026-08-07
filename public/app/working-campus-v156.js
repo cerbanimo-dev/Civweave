@@ -3,6 +3,8 @@
 const REVISION='canonical-campus-startup-v227';
 const BRAND_REVISION='main-brand-v231';
 const WEB_ENTRY_REVISION='web-install-entry-v232';
+const HUB_REVISION='weaveling-hub-v233';
+const HUB_SCRIPT='/app/weaveling-hub-v233.js';
 const routeScript='/app/system-routes-v227.js?v=1.0.22-five-system-route-contract-v227';
 const parts=['/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt'];
 const required=['conversation','weaveling-chat-form','weaveling-chat-input','workspace','view-title','state-label'];
@@ -79,6 +81,15 @@ function ensureRouteContract(){
     const script=document.createElement('script');script.src=routeScript;script.async=false;script.onload=ready;script.onerror=()=>reject(new Error('The five-system route contract could not load.'));document.head.append(script);
   });
 }
+function ensureHub(){
+  if(globalThis.CivweaveWeavelingHubV233)return Promise.resolve(true);
+  return new Promise((resolve,reject)=>{
+    const existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===HUB_SCRIPT);
+    const ready=()=>globalThis.CivweaveWeavelingHubV233?resolve(true):reject(new Error('The Weaveling observation hub loaded without becoming ready.'));
+    if(existing){existing.addEventListener('load',ready,{once:true});existing.addEventListener('error',()=>reject(new Error('The Weaveling observation hub could not load.')),{once:true});return}
+    const script=document.createElement('script');script.src=`${HUB_SCRIPT}?v=${HUB_REVISION}`;script.async=false;script.onload=ready;script.onerror=()=>reject(new Error('The Weaveling observation hub could not load.'));document.head.append(script);
+  });
+}
 async function fetchPart(pathname){
   const url=new URL(pathname,location.origin);
   url.searchParams.set('revision',REVISION);
@@ -91,12 +102,13 @@ async function boot(){
   installBrandPresentation();
   installWebEntryPrompt();
   if(!campusReady())throw new Error(`Working Campus DOM contract is incomplete: ${missingRequired().join(', ')||'campus root'}.`);
+  await ensureHub();
   await ensureRouteContract();
   const source=await Promise.all(parts.map(fetchPart));
   if(!liveDocument())throw new DOMException('Working Campus navigation interrupted startup.','AbortError');
   Function(source.join(''))();
   document.documentElement.dataset.civweaveCampusRuntime='ready';
-  dispatchEvent(new CustomEvent('civweave:working-campus-runtime-ready',{detail:{revision:REVISION,brandRevision:BRAND_REVISION,webEntryRevision:WEB_ENTRY_REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-core-only-five-system-routing'}}));
+  dispatchEvent(new CustomEvent('civweave:working-campus-runtime-ready',{detail:{revision:REVISION,brandRevision:BRAND_REVISION,webEntryRevision:WEB_ENTRY_REVISION,hubRevision:HUB_REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-core-only-five-system-routing'}}));
 }
 boot().catch(error=>{
   if(!active||error?.name==='AbortError')return;
