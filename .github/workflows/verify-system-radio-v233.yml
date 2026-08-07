@@ -5,8 +5,10 @@ on:
     paths:
       - 'public/app/system-radio-agent-v233.js'
       - 'public/app/radio-track-suggestions-v240.js'
+      - 'public/app/radio-track-map-v241.json'
       - 'public/app/radio-directory-v240/**'
       - 'public/app/install-boundary-v146.js'
+      - 'scripts/sync-radio-track-map-v241.mjs'
       - 'scripts/verify-system-radio-v233.mjs'
       - '.github/workflows/verify-system-radio-v233.yml'
       - 'VERSION'
@@ -17,8 +19,10 @@ on:
     paths:
       - 'public/app/system-radio-agent-v233.js'
       - 'public/app/radio-track-suggestions-v240.js'
+      - 'public/app/radio-track-map-v241.json'
       - 'public/app/radio-directory-v240/**'
       - 'public/app/install-boundary-v146.js'
+      - 'scripts/sync-radio-track-map-v241.mjs'
       - 'scripts/verify-system-radio-v233.mjs'
       - '.github/workflows/verify-system-radio-v233.yml'
       - 'VERSION'
@@ -37,6 +41,7 @@ jobs:
           node --check public/app/system-radio-agent-v233.js
           node --check public/app/radio-track-suggestions-v240.js
           node --check public/app/install-boundary-v146.js
+          node --check scripts/sync-radio-track-map-v241.mjs
           node --check scripts/verify-system-radio-v233.mjs
       - name: Verify radio contract
         run: node scripts/verify-system-radio-v233.mjs
