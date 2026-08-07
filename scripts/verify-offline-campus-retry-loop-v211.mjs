@@ -19,7 +19,7 @@ const workerPackage=`${wrapperSource}\n${coreSource}\n${overrideSource}`;
 assert(wrapperSource.includes("importScripts('/service-worker-living-school-cleanroom-v218.js"),'Generated worker omits the Living School clean-room boundary.');
 assert(wrapperSource.includes("importScripts('/service-worker-core-v208.js"),'Generated worker omits the retained lightweight core.');
 assert(wrapperSource.includes("importScripts('/service-worker-offline-v211-override.js"),'Generated worker omits the offline retry override.');
-assert(wrapperSource.includes('offline-campus-current-graph-v238'),'Generated worker does not cache-bust the current-graph repair.');
+assert(wrapperSource.includes('offline-campus-fast-background-v241'),'Generated worker does not cache-bust the fast background repair.');
 assert(wrapperSource.indexOf('service-worker-living-school-cleanroom-v218.js')<wrapperSource.indexOf('service-worker-core-v208.js'),'Living School retirement does not load before the generic core.');
 assert(wrapperSource.indexOf('service-worker-core-v208.js')<wrapperSource.indexOf('service-worker-offline-v211-override.js'),'Offline override does not load after the core globals.');
 assert(workerPackage.includes("const BUILD = 'lightweight-shell-v208'"),'Verified lightweight shell core is missing.');
