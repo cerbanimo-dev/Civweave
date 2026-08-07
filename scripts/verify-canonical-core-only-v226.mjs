@@ -25,7 +25,7 @@ const allowedExperienceSupport=[
   '/app/themed-system-nav-v178.js',
   '/app/campus-background-download-v241.js',
   '/app/system-radio-agent-v233.js',
-  '/app/radio-track-suggestions-v241.js',
+  '/app/radio-track-suggestions-v240.js',
   '/app/shared-review-surface-v234.js',
   '/app/shared-guide-surface-v236.js'
 ];
