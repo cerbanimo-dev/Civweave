@@ -2,6 +2,7 @@
 'use strict';
 const VERSION='1.0.35-regression-fixes-v243';
 const KAMIYA_AVATAR='/app/assets/ai/kamiya-welcoming-v243.png?v=1';
+const CHAT_ROOT='#cw-persistent-guide-chat-v215';
 if(globalThis.CivweaveRegressionFixesV243?.version===VERSION)return;
 
 function isOldKamiya(img){
@@ -28,7 +29,15 @@ function closeDialog(target,event){
   try{if(dialog.open)dialog.close();else dialog.removeAttribute('open')}catch{dialog.removeAttribute('open')}
   return true;
 }
-function onPointerUp(event){closeDialog(event.target,event)}
+function activateChatControl(target,event){
+  const control=target?.closest?.(`${CHAT_ROOT} [data-close],${CHAT_ROOT} [data-minimize]`);
+  if(!control)return false;
+  event?.preventDefault?.();
+  event?.stopImmediatePropagation?.();
+  queueMicrotask(()=>control.click());
+  return true;
+}
+function onPointerUp(event){if(closeDialog(event.target,event))return;activateChatControl(event.target,event)}
 function onClick(event){closeDialog(event.target,event)}
 
 const observer=new MutationObserver(records=>{
