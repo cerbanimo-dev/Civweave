@@ -26,7 +26,7 @@ const GUIDE=Object.freeze({
 if(globalThis.CivweaveSharedGuideSurfaceV236?.version===VERSION)return;
 
 const clean=(value,max=8000)=>String(value??'').trim().slice(0,max);
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 let currentSystem='';
 let transcriptObserver=null;
@@ -251,7 +251,6 @@ function repairSurface(){
   if(!document.getElementById(ROOT_ID)&&!canonicalNativeChat(currentSystem))buildInline();
   observeThread();
   observeNav();
-  renderTranscript();
   normalizeFloatingLayout();
   return true;
 }
