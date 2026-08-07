@@ -18,6 +18,7 @@ check('workspace has five canonical windows',workspace.includes("const SYSTEMS=[
 check('realm ledgers stay isolated',workspace.includes('readThread(activeWindow)')&&workspace.includes('Switching windows never mixes histories'));
 check('page launcher opens page realm directly',workspace.includes('openWindow(pageSystem)'));
 check('switchGuide maps to switchWindow',workspace.includes('switchGuide:(system,options={})=>switchWindow'));
+check('ordinary guide selection stays closed until explicitly opened',workspace.includes('open:options.open===true'));
 check('cross-context model turns explicitly select their guide',workspace.includes('handoffSystem:system!==pageSystem?system:undefined'));
 check('only explicit handoff fields create cross-realm packets',workspace.includes('explicitHandoffTarget')&&!workspace.includes('choice?.system,80'));
 check('workspace submission captures before retired page listener',workspace.includes("document.addEventListener('submit',onSubmitCapture,true)"));
@@ -27,7 +28,8 @@ check('floating chat outranks Working Campus header',workspace.includes('z-index
 check('chat log releases edge scrolling',workspace.includes('overscroll-behavior:auto!important'));
 check('viewport has no mutation observer',!viewport.includes('MutationObserver'));
 check('viewport has no scrollIntoView',!viewport.includes('scrollIntoView'));
-check('floating launcher does not autofocus',workspace.includes('if(options.focus===true)')&&!workspace.includes('queueMicrotask(()=>input?.focus({preventScroll:true}));return root'));
+check('floating launcher focus is opt-in only',workspace.includes('if(options.focus===true)queueMicrotask(()=>input?.focus({preventScroll:true}))'));
+check('workspace reports real open state to embedded surface',workspace.includes('open:workspaceOpen,minimized'));
 const realmIndex=boundary.indexOf('REALM_SESSION_INTEGRITY,'),workspaceIndex=boundary.indexOf('GUIDE_WORKSPACE,');
 check('workspace loads after realm session integrity',realmIndex>=0&&workspaceIndex>realmIndex);
 check('boundary exposes v242 policy',boundary.includes("guideWorkspaceRevision:'v242-five-window-local-ledgers-no-scroll-trap'"));
