@@ -22,6 +22,8 @@ source=source.replaceAll('1.0.7',releaseVersion);
 source=source.replace("const indexSource=await fs.readFile('public/index.html','utf8');","const indexSource=await fs.readFile('public/app/index.html','utf8');");
 source=source.replaceAll('context.window=context;','context.addEventListener=()=>{};context.removeEventListener=()=>{};context.window=context;');
 source=source.replace("location:{assigned:null,assign(url){this.assigned=String(url)},reload(){}}","location:{pathname:'/',assigned:null,assign(url){this.assigned=String(url)},reload(){}}");
+source=source.replace("readyState:'complete',documentElement:{},head:{append(){}}","readyState:'complete',documentElement:{isConnected:true,dataset:{}},head:{isConnected:true,append(){}}");
+source=source.replace("body:{append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}","body:{isConnected:true,append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}");
 
 const boundaryBefore=`assert(boundarySource.includes("const ADDITIONS_VERSION='${updaterVersion}'"),'Installed pages do not cache-bust the v207 update controller.');`;
 const boundaryAfter="assert(boundarySource.includes(\"const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'\"),'Installed boundary no longer names the shared update controller.');\nassert(boundarySource.includes('PWA_UPDATE_SCRIPT'),'Installed boundary no longer includes the shared update controller in its compatibility bundle.');\nassert.match(boundarySource,/const ADDITIONS_VERSION='v[^']+'/,'Installed boundary does not cache-bust shared additions.');";
