@@ -6,6 +6,7 @@ const ROOT=new URL('../',import.meta.url);
 const radioSource=fs.readFileSync(new URL('public/app/system-radio-agent-v233.js',ROOT),'utf8');
 const trackSource=fs.readFileSync(new URL('public/app/radio-track-suggestions-v241.js',ROOT),'utf8');
 const boundarySource=fs.readFileSync(new URL('public/app/install-boundary-v146.js',ROOT),'utf8');
+const trackMap=JSON.parse(fs.readFileSync(new URL('public/app/radio-track-map-v241.json',ROOT),'utf8'));
 const stationFiles={
   anarchadia:'public/app/radio-directory-v240/anarchadia.txt',
   cerbanimo:'public/app/radio-directory-v240/cerbanimo.txt',
@@ -57,6 +58,10 @@ assert.equal(sandbox.CivweaveRadioRecommendationAgentV232,radio,'v232 compatibil
 assert.equal(sandbox.CivweaveRadioTrackSuggestionsV240,tracks,'v240 compatibility alias must point to v241 runtime');
 assert.equal(radio.revision,'system-radio-agent-v233');
 assert.equal(tracks.revision,'radio-track-suggestions-v241');
+assert.equal(tracks.trackMapPath,'/app/radio-track-map-v241.json');
+assert.equal(trackMap.version,1);
+assert.equal(trackMap.revision,'radio-track-map-v241');
+assert.equal(typeof trackMap.systems,'object');
 
 const expectedIds={
   anarchadia:'2AsCLZiAPlUYHOcogllTia',
@@ -134,6 +139,8 @@ assert.match(radioSource,/scheduleEvaluation\('page_navigated',NAVIGATION_DEBOUN
 assert.match(radioSource,/scheduleEvaluation\(reason,PRESENTATION_DELAY_MS,true\)/,'each new document must force an initial recommendation');
 
 assert.match(trackSource,/fetch\(path,\{cache:'force-cache'\}\)/,'track suggestions must use the local/offline station directory');
+assert.match(trackSource,/fetch\(TRACK_MAP_PATH,\{cache:'force-cache'\}\)/,'exact Spotify IDs must come from the local/offline manifest');
+assert.match(trackSource,/mappedTrackId\(map,system,index\)/,'manifest IDs must map to the existing station order');
 assert.match(trackSource,/detail\.type==='RADIO_CTA_SHOWN'/,'track lookup must trigger from the existing Spotify station suggestion');
 assert.match(trackSource,/RADIO_TRACK_SUGGESTED/,'track suggestions must emit an observable event');
 assert.match(trackSource,/Random pull from this station/,'card must explain that the selected song is a station pull');
@@ -141,8 +148,8 @@ assert.match(trackSource,/Play in station ↗/,'exact track metadata must expose
 assert.match(trackSource,/Open station ↗/,'playlist-first fallback must remain available');
 assert.match(trackSource,/context=spotify:playlist:/,'contextual URLs must preserve playlist playback context');
 assert.doesNotMatch(trackSource,/open\.spotify\.com\/search\//,'v241 must never strand users in Spotify search');
-assert.match(trackSource,/registerAccessTokenProvider/,'runtime must permit an optional owner-authorized metadata resolver without requiring it');
-assert.match(trackSource,/\/playlists\/\$\{meta\.playlistId\}\/items\?limit=1&offset=/,'metadata resolver must address the selected item by playlist position');
+assert.doesNotMatch(trackSource,/api\.spotify\.com/,'ordinary radio playback must not require Spotify API access');
+assert.doesNotMatch(trackSource,/Authorization:/,'ordinary radio playback must not carry Spotify credentials');
 assert.match(trackSource,/THE SYLLABUS HAS UNIONIZED/,'snarky station labels must ship with the runtime');
 assert.match(trackSource,/NO KPI SURVIVED THE CHORUS/,'Cerbanimo label voice must remain distinct');
 assert.match(trackSource,/SURPLUS VALUE RETURNED TO SENDER/,'FellowFare label voice must remain distinct');
