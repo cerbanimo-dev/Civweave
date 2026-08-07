@@ -2,7 +2,9 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
-const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
+const root=new URL('../',import.meta.url);
+const read=path=>readFile(new URL(path,root),'utf8');
+const readBytes=path=>readFile(new URL(path,root));
 const [html,manifestText,bridge,autostart,statusRuntime,workerRepair,workerWrapper]=await Promise.all([
   read('public/app/index.html'),
   read('public/app/manifest.webmanifest'),
@@ -17,9 +19,40 @@ const manifest=JSON.parse(manifestText);
 assert.equal(manifest.display,'standalone');
 assert.equal(manifest.prefer_related_applications,false);
 assert.ok(manifest.start_url?.includes('/app/working-campus-v156.html'));
-assert.ok(manifest.icons?.some(icon=>icon.sizes==='192x192'&&String(icon.purpose||'any').includes('any')),'manifest must advertise a 192x192 app icon');
-assert.ok(manifest.icons?.some(icon=>icon.sizes==='512x512'&&String(icon.purpose||'any').includes('any')),'manifest must advertise a 512x512 app icon');
-assert.ok(manifest.icons?.some(icon=>String(icon.purpose||'').includes('maskable')),'manifest must retain a maskable icon');
+
+const any192=manifest.icons?.find(icon=>icon.sizes==='192x192'&&String(icon.purpose||'any').includes('any'));
+const any512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'any').includes('any'));
+const mask512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'').includes('maskable'));
+assert.ok(any192,'manifest must advertise a 192x192 app icon');
+assert.ok(any512,'manifest must advertise a 512x512 app icon');
+assert.ok(mask512,'manifest must retain a maskable 512x512 icon');
+assert.notEqual(any512.src,'/app/logos/civweave-canonical.png','malformed canonical display PNG must not be used for PWA installation');
+assert.ok((manifest.shortcuts||[]).every(shortcut=>(shortcut.icons||[]).every(icon=>icon.src!=='/app/logos/civweave-canonical.png')),'manifest shortcuts must not use malformed canonical display PNG');
+
+function localIconPath(src){
+  assert.match(src,/^\/app\/logos\/[A-Za-z0-9._-]+\.png$/,'install icon must be a local PNG');
+  return `public${src}`;
+}
+function pngDimensions(buffer,label){
+  const signature=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
+  assert.ok(buffer.length>=33,`${label} is too short to be a usable PNG`);
+  assert.ok(buffer.subarray(0,8).equals(signature),`${label} has an invalid PNG signature`);
+  assert.equal(buffer.toString('ascii',12,16),'IHDR',`${label} is missing its IHDR chunk`);
+  const width=buffer.readUInt32BE(16),height=buffer.readUInt32BE(20);
+  assert.ok(width>0&&height>0,`${label} has invalid PNG dimensions`);
+  assert.ok(buffer.includes(Buffer.from('IDAT')),`${label} is missing image data`);
+  assert.ok(buffer.includes(Buffer.from('IEND')),`${label} is missing its end chunk`);
+  return [width,height];
+}
+const [bytes192,bytes512,bytesMask512]=await Promise.all([
+  readBytes(localIconPath(any192.src)),
+  readBytes(localIconPath(any512.src)),
+  readBytes(localIconPath(mask512.src))
+]);
+assert.deepEqual(pngDimensions(bytes192,'192 install icon'),[192,192],'192 manifest declaration must match raw PNG pixels');
+assert.deepEqual(pngDimensions(bytes512,'512 install icon'),[512,512],'512 manifest declaration must match raw PNG pixels');
+assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 install icon'),[512,512],'maskable manifest declaration must match raw PNG pixels');
+assert.notDeepEqual(bytes192,bytes512,'192 and 512 install icons must not be the same mislabeled binary');
 
 const bridgeIndex=html.indexOf('/app/pwa-install-prompt-v246.js');
 const manifestIndex=html.indexOf('rel="manifest"');
@@ -71,4 +104,10 @@ assert.ok(workerRepair.includes('downloaded+skippedCount>=reportedTotal'));
 assert.ok(workerRepair.includes('writeOfflineMeta'),'worker must repair persisted completion metadata');
 assert.ok(workerWrapper.includes("importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246')"));
 
-console.log('PWA install + campus completion v246 verification passed.');
+console.log(JSON.stringify({
+  ok:true,
+  revision:'pwa-install-campus-v247',
+  manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},
+  retiredCampusLedger:true,
+  nativeInstallBridge:true
+},null,2));
