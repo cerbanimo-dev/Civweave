@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.35-working-campus-topbar-v243';
+const VERSION='1.0.36-working-campus-topbar-v243';
 const STYLE_ID='cw-working-campus-topbar-v243-style';
 const MAP_BUTTON_ID='cw-working-campus-map-v243';
 const MAP_EVENT='civweave:map-open-request';
