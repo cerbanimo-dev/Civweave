@@ -11,6 +11,9 @@
     "standalone",
     "minimal-ui"
   ],
+  "launch_handler": {
+    "client_mode": "navigate-new"
+  },
   "background_color": "#061019",
   "theme_color": "#061019",
   "orientation": "any",

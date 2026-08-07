@@ -21,7 +21,11 @@ for(const token of ["cache:'no-store'","redirect:'follow'","'x-civweave-package'
 assert(!campusLoader.includes("cache:'force-cache'"),'Working Campus forces stale fragments.');
 for(const token of ["['/app/working-campus-v156.html','civweave']","['/app/cabinets/living-school/index.html','living-school']","['/app/realm-console-v140.html','cerbanimo']","['/app/fellowfare-cabinet-v144.html','fellowfare']","['/app/anarchadia-console-v139.html','anarchadia']","root.dataset.civweaveCanonicalCore='only'","canonicalPolicy:'five-system-first-class-routes-civweave-core-only'",'canonicalSystemCount:5','canonicalAutoScripts:0'])assert(installBoundary.includes(token),`Install boundary is missing ${token}.`);
 assert(!installBoundary.includes('function startAdditions()'),'Boundary contains delayed automatic additions.');
-assert(installBoundary.indexOf("if(system==='civweave'){")<installBoundary.indexOf('installAdditions();'),'Civweave short-circuit occurs after legacy additions.');
+const startBlock=installBoundary.match(/function start\(\)\{[\s\S]*?\n\}\n\nstart\(\);/)?.[0]||'';
+const additionCall=startBlock.includes('installAdditionsWhenReady();')?'installAdditionsWhenReady();':'installAdditions();';
+assert(startBlock.includes("if(system==='civweave'){"),'Install boundary start() is missing the Civweave short-circuit.');
+assert(startBlock.includes(additionCall),'Install boundary start() is missing the realm additions handoff.');
+assert(startBlock.indexOf("if(system==='civweave'){")<startBlock.indexOf(additionCall),'Civweave short-circuit occurs after realm additions.');
 for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
 assert(campusPart4.includes('CivweaveSystemRoutesV227')&&campusPart4.includes('routes.navigate(id'),'Working Campus realm travel bypasses the route contract.');
 for(const token of ['document-lifecycle-v222','CivweaveLifecycleMutationObserver',"addEventListener('pagehide',stop"])assert(lifecycle.includes(token),`Lifecycle guard is missing ${token}.`);
