@@ -84,6 +84,14 @@ assert.equal(sanitized.placement,'toast','unapproved placements must be replaced
 const protectedDecision=await radio.agentDecision({...eligibleContext,activeSystem:'fellowfare',route:'/checkout',currentRoute:'/checkout'});
 assert.equal(protectedDecision.action,'suppress');
 assert.equal(protectedDecision.reason,'protected_flow');
+
+assert.match(radioSource,/const AUTO_DISMISS_MS=6000;/,'radio surface should live for about six seconds');
+assert.match(radioSource,/bottom:max\(14px,env\(safe-area-inset-bottom\)\)/,'radio surface should be pinned to the bottom-right safe area');
+assert.match(radioSource,/@keyframes cw-radio-progress-v232/,'radio surface should expose a left-to-right lifetime animation');
+assert.match(radioSource,/@keyframes cw-radio-out-v232/,'radio surface should slide out to the right');
+assert.match(radioSource,/scheduleAutoDismiss\(card\)/,'rendered radio cards should schedule their own timeout');
+assert.doesNotMatch(radioSource,/\[data-placement="transition-card"\]\s*\{[^}]*bottom:50%/,'agent placement must not pull the radio surface away from bottom-right');
+
 assert.match(boundarySource,/SYSTEM_EXPERIENCE_SCRIPTS=\[EXPERIENCE_ORCHESTRATOR,SYSTEM_RADIO_AGENT\]/);
 assert.match(boundarySource,/installSystemExperienceSupport\(\)/);
 
