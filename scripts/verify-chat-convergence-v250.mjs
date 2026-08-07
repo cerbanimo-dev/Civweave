@@ -22,7 +22,7 @@ for(const source of [installedEntry,boundary,workspace,viewport,shared,workerRep
 const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
-check('release is coherent v1.0.43',version==='1.0.43'&&pkg.version===version&&manifest.name.includes('v1.0.43'));
+check('release, package, and manifest versions agree',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version&&manifest.name===`Civweave v${version}`);
 check('installed launch enters updater first',manifest.start_url==='/app/installed-entry-v146.html?installed=1');
 check('all manifest shortcuts enter updater first',(manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(item=>String(item.url).startsWith('/app/installed-entry-v146.html?')));
 check('manifest has no frozen Working Campus version pin',!manifestText.includes('working-campus-v156.html?installed=1&version='));
