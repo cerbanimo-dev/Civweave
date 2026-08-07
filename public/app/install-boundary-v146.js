@@ -18,6 +18,8 @@ const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js';
 const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
 const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
+const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
+const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v232.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
   ['/app/cabinets/living-school/index.html','living-school'],
@@ -26,6 +28,7 @@ const FALLBACK_PATHS=new Map([
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR];
+const SYSTEM_EXPERIENCE_SCRIPTS=[EXPERIENCE_ORCHESTRATOR,SYSTEM_RADIO_AGENT];
 const LEGACY_SCRIPTS=[
   ROUTE_CONTRACT,
   RELEASE_VERSION,
@@ -101,6 +104,11 @@ function installEarlyGuards(){
   addScript(AI_SETTINGS_BIND_GUARD);
   return true;
 }
+function installSystemExperienceSupport(){
+  if(!systemSurface()||!liveHead())return false;
+  SYSTEM_EXPERIENCE_SCRIPTS.forEach(addScript);
+  return true;
+}
 function installCanonicalSystemSupport(){
   if(canonicalAppSurface()||!systemSurface()||!liveHead())return false;
   CANONICAL_SYSTEM_SCRIPTS.forEach(addScript);
@@ -137,6 +145,7 @@ function start(){
   if(system){
     root.dataset.installBoundary=system==='civweave'?'canonical':'canonical-system';
     root.dataset.civweaveSystemRoute=system;
+    installSystemExperienceSupport();
   }else if(root)root.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
   if(system==='civweave'){
     root.dataset.civweaveCanonicalCore='only';
@@ -165,6 +174,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   embedded,
   installerUrl,
   installEarlyGuards,
+  installSystemExperienceSupport,
   installCanonicalSystemSupport,
   installCanonicalSystemSupportWhenReady,
   installAdditions,
@@ -175,7 +185,9 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalSystemCount:5,
   canonicalAutoScripts:0,
   canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
+  canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
+  radioRecommendationRevision:'v232-deterministic-identity-context-agent',
   guideIdentityRevision:'v216-explicit-responder-ownership',
   guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
   guideIdentityMigration:'realm-action-owner',
