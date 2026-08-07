@@ -18,21 +18,33 @@ const lockboardHtml=read('public/app/asset-lockboard-v239.html');
 const lockboard=read('public/app/asset-lockboard-v239.js');
 const customizer=read('public/app/asset-customization-v239.js');
 const boundary=read('public/app/install-boundary-v146.js');
+const background=read('public/app/campus-background-download-v241.js');
 
 const checks=[
-  ['offline crawler is current-graph v238',()=>{
+  ['offline crawler keeps v238 graph identity with v241 fast background policy',()=>{
     assert.match(offline,/offline-campus-current-graph-v238/);
     assert.match(worker,/offline-campus-current-graph-v238/);
-    assert.match(offline,/const V211_BATCH_SIZE = 12/);
+    assert.match(worker,/policy=fast-background-v241/);
+    assert.match(offline,/const V211_POLICY = 'fast-background-v241'/);
+    assert.match(offline,/const V211_BATCH_SIZE = 16/);
   }],
   ['previous package assets never seed the next crawl',()=>{
     assert.match(offline,/const initialAssets = \[\.\.\.new Set\(\(manifest\.seeds \|\| \[\]\)\.filter\(Boolean\)\)\]/);
     assert.doesNotMatch(offline,/initialAssets[^\n]+previousAssets/);
     assert.match(offline,/stale-not-rediscovered/);
   }],
-  ['text graph refreshes while binary assets reuse cache',()=>{
-    assert.match(offline,/const preferNetwork = V211_DISCOVERY_TEXT\.test\(item\.pathname\)/);
+  ['same-release retries are cache-first while a new release refreshes discovery text',()=>{
+    assert.match(offline,/const preferNetwork = !sameRelease && V211_DISCOVERY_TEXT\.test\(item\.pathname\)/);
     assert.match(offline,/cacheOfflineAsset\(item\.pathname, \{ preferNetwork \}\)/);
+    assert.match(offline,/retry-ledger-retired/);
+  }],
+  ['campus can finish while canonical pages are in use',()=>{
+    assert.match(offline,/self\.clients\?\.matchAll\?\./);
+    assert.match(offline,/backgroundSafe: true/);
+    assert.match(background,/DOWNLOAD_OFFLINE_PACKAGE/);
+    assert.match(background,/height:4px/);
+    assert.match(boundary,/CAMPUS_BACKGROUND_DOWNLOAD='\/app\/campus-background-download-v241\.js'/);
+    assert.match(boundary,/v241-worker-owned-download-bottom-progress-rail/);
   }],
   ['installer runtime is the sole service-worker registration owner',()=>{
     assert.doesNotMatch(installerPage,/navigator\.serviceWorker\.register\s*\(/);

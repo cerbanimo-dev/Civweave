@@ -1,23 +1,18 @@
 {
-  "version": "1.0.7",
-  "revision": "resumable-discovered-campus-v208",
-  "description": "Civweave campus pack. The service worker begins from these functional entry points and canonical reward runtimes, discovers their same-origin dependencies, and resumes individual failed files without invalidating the package.",
+  "version": "1.0.33",
+  "revision": "canonical-background-campus-v241",
+  "description": "Civweave campus pack. The service worker starts from the installed entry, the five canonical system surfaces, and canonical reward runtimes; it discovers current same-origin dependencies and continues the resumable download while the PWA is in use.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
     "/app/cw-reward-receivers-v2.js",
     "/app/cw-reward-legacy-bridge-v2.js",
     "/app/cw-reward-surfaces-v2.js",
-    "/app/fullscreen-family-v104.html",
     "/app/working-campus-v156.html",
-    "/app/realm-console-v140.html",
     "/app/cabinets/living-school/index.html",
+    "/app/realm-console-v140.html",
     "/app/fellowfare-cabinet-v144.html",
-    "/app/anarchadia-console-v139.html",
-    "/app/services/fellowfare/cabinet.html",
-    "/app/services/anarchadia/workbench.html",
-    "/app/anarchadia-governance-v145.html",
-    "/app/anarchadia-sovereignty-v146.html"
+    "/app/anarchadia-console-v139.html"
   ],
   "includePrefixes": [
     "/app/",

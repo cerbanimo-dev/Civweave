@@ -17,6 +17,7 @@ const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js';
 const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js';
 const REALM_SESSION_INTEGRITY='/app/realm-session-integrity-v237.js';
 const THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js';
+const CAMPUS_BACKGROUND_DOWNLOAD='/app/campus-background-download-v241.js';
 const SHARED_GUIDE_SURFACE='/app/shared-guide-surface-v236.js';
 const FELLOWFARE_GUIDE_BRIDGE='/app/fellowfare-shared-guide-bridge-v236.js';
 const ASSET_CUSTOMIZATION='/app/asset-customization-v239.js';
@@ -43,6 +44,7 @@ const SYSTEM_EXPERIENCE_SCRIPTS=[
   PERSISTENT_GUIDE_VIEWPORT_SCRIPT,
   REALM_SESSION_INTEGRITY,
   THEMED_SYSTEM_NAV,
+  CAMPUS_BACKGROUND_DOWNLOAD,
   SYSTEM_RADIO_AGENT,
   RADIO_TRACK_SUGGESTIONS,
   SHARED_REVIEW_SURFACE,
@@ -224,6 +226,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
   canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
+  campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',
   radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
   radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels',
   radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',

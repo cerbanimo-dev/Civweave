@@ -56,6 +56,7 @@ try{
     '/service-worker-living-school-cleanroom-v218.js',
     '/service-worker-offline-v211-override.js',
     '/app/offline-package-v208.json',
+    '/app/campus-background-download-v241.js',
     '/app/knowledge-school-installer-v1.css',
     '/app/knowledge-school-seeds-v1.js',
     '/app/knowledge-school-installer-v1.js',
@@ -75,6 +76,7 @@ try{
     core:await readFile(path.join(root,'public/service-worker-core-v208.js'),'utf8'),
     cleanroom:await readFile(path.join(root,'public/service-worker-living-school-cleanroom-v218.js'),'utf8'),
     offline:await readFile(path.join(root,'public/service-worker-offline-v211-override.js'),'utf8'),
+    background:await readFile(path.join(root,'public/app/campus-background-download-v241.js'),'utf8'),
     legacy:await readFile(path.join(root,'public/service-worker-v156.js'),'utf8'),
     base:await readFile(path.join(root,'public/service-worker.js'),'utf8')
   };
@@ -85,25 +87,35 @@ try{
   const coreImport="importScripts('/service-worker-core-v208.js";
   const offlineImport="importScripts('/service-worker-offline-v211-override.js";
   assert(files.wrapper.includes(cleanImport)&&files.wrapper.includes(coreImport)&&files.wrapper.includes(offlineImport),'active worker does not compose all three maintained layers');
-  assert(files.wrapper.includes('offline-campus-current-graph-v238'),'active worker does not cache-bust the current-graph repair');
+  assert(files.wrapper.includes('offline-campus-current-graph-v238')&&files.wrapper.includes('policy=fast-background-v241'),'active worker does not cache-bust the v241 fast-background policy while preserving v238 identity');
   assert(files.wrapper.indexOf(cleanImport)<files.wrapper.indexOf(coreImport)&&files.wrapper.indexOf(coreImport)<files.wrapper.indexOf(offlineImport),'worker layer order is incorrect');
   assert(files.core.includes("const BUILD = 'lightweight-shell-v208'")&&files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained lightweight/offline core is incomplete');
   assert(!/importScripts\(/.test(files.core),'retained lightweight core imports the retired layered stack');
   assert(files.cleanroom.includes("const REVISION='living-school-cleanroom-v218'")&&files.cleanroom.includes('event.stopImmediatePropagation()'),'Living School worker retirement boundary is incomplete');
-  assert(files.offline.includes("const V211_REVISION = 'offline-campus-current-graph-v238'")&&files.offline.includes('stale-not-rediscovered')&&files.offline.includes('V211_BATCH_SIZE = 12'),'current-graph offline retry override is incomplete');
+  assert(
+    files.offline.includes("const V211_REVISION = 'offline-campus-current-graph-v238'")&&
+    files.offline.includes("const V211_POLICY = 'fast-background-v241'")&&
+    files.offline.includes('stale-not-rediscovered')&&
+    files.offline.includes('retry-ledger-retired')&&
+    files.offline.includes('V211_BATCH_SIZE = 16')&&
+    files.offline.includes('backgroundSafe: true'),
+    'fast-background current-graph offline retry override is incomplete'
+  );
+  assert(files.background.includes("DOWNLOAD_OFFLINE_PACKAGE")&&files.background.includes('height:4px')&&files.background.includes("navigator.serviceWorker.addEventListener('message'"),'canonical page background campus continuation is incomplete');
   assert(files.legacy.includes(expectedWorkerImport),`legacy worker does not import the active ${releaseVersion} wrapper`);
 
   const bridgeBody=files.legacy.replace(/importScripts\('\/service-worker-v203\.js[^\n]+\);/,'');
-  new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.core}\n${files.offline}`,{filename:'civweave-v238-bridged-cleanroom-worker.js'});
+  new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.core}\n${files.offline}`,{filename:'civweave-v241-bridged-cleanroom-worker.js'});
   console.log(JSON.stringify({
     ok:true,
     releaseVersion,
-    directInstallerAssets:10,
+    directInstallerAssets:11,
     packagePurposeHeadersAccepted:4,
     knowledgeCatalogServed:true,
     knowledgeZipServed:firstZip,
     workerGlobalCollision:false,
-    workerRevision:'v218-cleanroom-wrapper-retained-lightweight-core-current-graph-v238'
+    backgroundCampus:true,
+    workerRevision:'v218-cleanroom-wrapper-retained-lightweight-core-current-graph-v238-fast-background-v241'
   },null,2));
 }catch(error){
   console.error(output.join(''));

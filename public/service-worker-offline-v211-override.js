@@ -3,9 +3,11 @@
 'use strict';
 
 const V211_REVISION = 'offline-campus-current-graph-v238';
+const V211_POLICY = 'fast-background-v241';
 const V211_QUARANTINE_MS = 6 * 60 * 60 * 1000;
-const V211_BATCH_SIZE = 12;
+const V211_BATCH_SIZE = 16;
 const V211_DISCOVERY_TEXT = /\.(?:html?|css|m?js|json|webmanifest|md|txt)$/i;
+let v211DownloadPromise = null;
 
 function v211FailureStatus(error) {
   const direct = Number(error?.status || 0);
@@ -51,6 +53,7 @@ function v211Packet(meta = {}) {
     mode: 'resumable-current-campus-graph',
     version: VERSION,
     revision: V211_REVISION,
+    policy: V211_POLICY,
     cache: OFFLINE_CACHE,
     ready: Boolean(meta.ready) && failed.length === 0 && (!total || downloaded >= total),
     running: Boolean(meta.running),
@@ -68,6 +71,16 @@ function v211Packet(meta = {}) {
     updatedAt: meta.updatedAt || null,
     assets
   };
+}
+
+async function v211Broadcast(packet) {
+  try {
+    const windows = await self.clients?.matchAll?.({ type: 'window', includeUncontrolled: true }) || [];
+    for (const client of windows) {
+      try { client.postMessage(packet); } catch {}
+    }
+  } catch {}
+  return packet;
 }
 
 async function v211MigrateMeta(meta, manifest) {
@@ -94,8 +107,6 @@ async function v211MigrateMeta(meta, manifest) {
   const packet = v211Packet({
     ...meta,
     running: false,
-    // A revision change always forces one fresh current-graph crawl. Previous files stay cached
-    // and reusable, but old metadata is never allowed to declare a new release complete.
     ready: false,
     attempted: 0,
     downloaded: Math.min(previousAssets.length, legacyDownloaded),
@@ -109,12 +120,43 @@ async function v211MigrateMeta(meta, manifest) {
   return packet;
 }
 
+async function v211SanitizeRetryMeta(meta, manifest) {
+  if (!meta) return null;
+  const requiredSeeds = new Set((manifest.seeds || []).filter(Boolean));
+  const failed = (meta.failed || []).map(entry => v211FailureEntry(entry));
+  const requiredFailed = failed.filter(entry => entry.pathname === 'package' || requiredSeeds.has(entry.pathname));
+  const optionalFailed = failed.filter(entry => entry.pathname !== 'package' && !requiredSeeds.has(entry.pathname));
+  if (!optionalFailed.length) return v211Packet(meta);
+
+  const skippedByPath = new Map((meta.skipped || []).map(entry => [entry.pathname, v211SkippedEntry(entry)]));
+  for (const entry of optionalFailed) {
+    skippedByPath.set(entry.pathname, v211SkippedEntry({
+      ...entry,
+      reason: entry.status === 404 || entry.status === 410 ? 'not-found' : 'retry-ledger-retired',
+      retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString()
+    }));
+  }
+  const packet = v211Packet({
+    ...meta,
+    running: false,
+    ready: false,
+    failed: requiredFailed,
+    skipped: [...skippedByPath.values()],
+    updatedAt: new Date().toISOString()
+  });
+  await writeOfflineMeta(packet);
+  return packet;
+}
+
 offlinePacket = v211Packet;
 
 offlineStatus = async function offlineStatusV211() {
   const manifest = await loadOfflineManifest().catch(() => ({ seeds: [] }));
   const current = await readOfflineMeta();
-  if (current) return v211MigrateMeta(current, manifest);
+  if (current) {
+    const migrated = await v211MigrateMeta(current, manifest);
+    return v211SanitizeRetryMeta(migrated, manifest);
+  }
   return v211Packet({
     ready: false,
     running: false,
@@ -129,16 +171,18 @@ offlineStatus = async function offlineStatusV211() {
   });
 };
 
-downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
+async function v211DownloadOfflinePackage(event) {
   const manifest = await loadOfflineManifest();
   const previousRaw = await readOfflineMeta();
-  const previous = previousRaw ? await v211MigrateMeta(previousRaw, manifest) : null;
+  const migrated = previousRaw ? await v211MigrateMeta(previousRaw, manifest) : null;
+  const previous = migrated ? await v211SanitizeRetryMeta(migrated, manifest) : null;
   const maxAssets = Math.max(50, Math.min(1500, Number(manifest.maxAssets || 700)));
   const maxDepth = Math.max(1, Math.min(12, Number(manifest.maxDepth || 8)));
   const requiredSeeds = new Set((manifest.seeds || []).filter(Boolean));
   const skipped = new Map((previous?.skipped || []).map(entry => [entry.pathname, v211SkippedEntry(entry)]));
   const previousFailures = new Map((previous?.failed || []).map(entry => [entry.pathname, v211FailureEntry(entry)]));
   const previousAssets = new Set((previous?.assets || []).filter(Boolean));
+  const sameRelease = previous?.version === VERSION && previous?.revision === V211_REVISION;
   const now = Date.now();
 
   const activeSkip = pathname => {
@@ -152,8 +196,8 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
     return true;
   };
 
-  // Only the CURRENT manifest is authoritative. Old package assets remain available as cache
-  // hits, but they are not allowed to seed or perpetuate the next crawl.
+  // Only the CURRENT manifest is authoritative. Historical assets can satisfy cache hits,
+  // but they never nominate themselves for the next dependency graph.
   const initialAssets = [...new Set((manifest.seeds || []).filter(Boolean))];
   const queue = initialAssets.map(pathname => ({ pathname, depth: 0, required: true }));
   const queued = new Set(initialAssets);
@@ -178,7 +222,9 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
       updatedAt: new Date().toISOString()
     });
     await writeOfflineMeta(packet);
-    post(event, { ...packet, type: running ? 'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS' : packet.type });
+    const outbound = { ...packet, type: running ? 'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS' : packet.type };
+    post(event, outbound);
+    await v211Broadcast(outbound);
     return packet;
   };
 
@@ -191,9 +237,9 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
       processed.add(item.pathname);
       attempted += 1;
       try {
-        // Text/code defines the dependency graph, so refresh it when online. Binary assets are
-        // reused directly from any valid existing Civweave cache instead of redownloading.
-        const preferNetwork = V211_DISCOVERY_TEXT.test(item.pathname);
+        // First crawl of a new release refreshes text/code to discover the current graph.
+        // Same-release resumes are cache-first, so a retry does not redownload hundreds of files.
+        const preferNetwork = !sameRelease && V211_DISCOVERY_TEXT.test(item.pathname);
         const { response, contentLength } = await cacheOfflineAsset(item.pathname, { preferNetwork });
         bytes += contentLength;
         downloaded.add(item.pathname);
@@ -243,8 +289,6 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
     await progress(true, false);
   }
 
-  // Anything that belonged to the old package but was not rediscovered from the current graph
-  // is stale by definition. Report it as skipped once, never as a retry candidate.
   for (const pathname of previousAssets) {
     if (!pathname || queued.has(pathname) || requiredSeeds.has(pathname) || skipped.has(pathname)) continue;
     skipped.set(pathname, v211SkippedEntry({
@@ -258,14 +302,23 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
 
   const ready = queue.length === 0 && failed.size === 0;
   return progress(false, ready);
+}
+
+downloadOfflinePackage = function downloadOfflinePackageV211(event) {
+  if (v211DownloadPromise) return v211DownloadPromise;
+  v211DownloadPromise = v211DownloadOfflinePackage(event).finally(() => { v211DownloadPromise = null; });
+  return v211DownloadPromise;
 };
 
 self.CivweaveOfflineCampusV211 = {
   revision: V211_REVISION,
+  policy: V211_POLICY,
   batchSize: V211_BATCH_SIZE,
   currentGraphOnly: true,
+  backgroundSafe: true,
   packet: v211Packet,
-  migrateMeta: v211MigrateMeta
+  migrateMeta: v211MigrateMeta,
+  sanitizeRetryMeta: v211SanitizeRetryMeta
 };
 
 })();
