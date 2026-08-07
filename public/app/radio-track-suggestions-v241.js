@@ -5,6 +5,7 @@ const VERSION='1.1.0';
 const REVISION='radio-track-suggestions-v241';
 const PICK_KEY='civweave.radio.track-picks.v241';
 const TRACK_ID_CACHE_KEY='civweave.radio.spotify-track-ids.v241';
+const TRACK_MAP_PATH='/app/radio-track-map-v241.json';
 const CARD_ID='cw-radio-suggestion-v233';
 const DIRECTORY_PATHS=Object.freeze({
   civweave:'/app/radio-directory-v240/civweave.txt',
@@ -47,6 +48,7 @@ const TAGS=deepFreeze({
 });
 const SYSTEM_ALIASES=Object.freeze({living_school:'living-school'});
 const trackCache=new Map();
+let trackMapPromise=null;
 let accessTokenProvider=null;
 
 function deepFreeze(value){
@@ -102,6 +104,15 @@ function saveTrackId(system,position,id){
   return trackId;
 }
 function cachedTrackId(system,position){return spotifyTrackId(loadTrackIdCache()?.[system]?.[position]||'')}
+function mappedTrackId(map,system,position){return spotifyTrackId(map?.systems?.[system]?.tracks?.[position]||'')}
+async function loadTrackMap(){
+  if(!trackMapPromise){
+    trackMapPromise=fetch(TRACK_MAP_PATH,{cache:'force-cache'})
+      .then(response=>response.ok?response.json():{systems:{}})
+      .catch(()=>({systems:{}}));
+  }
+  return trackMapPromise;
+}
 function radioFor(systemId){
   const system=normalizeSystemId(systemId);
   return globalThis.CivweaveRadioRecommendationAgentV233?.registry?.[system]||null;
@@ -145,10 +156,14 @@ async function loadTracks(systemId){
   const system=normalizeSystemId(systemId),path=DIRECTORY_PATHS[system];
   if(!path)return[];
   if(!trackCache.has(system)){
-    trackCache.set(system,fetch(path,{cache:'force-cache'})
-      .then(response=>{if(!response.ok)throw new Error(`radio directory ${response.status}`);return response.text()})
-      .then(text=>text.split(/\r?\n/).map((line,index)=>parseTrackLine(line,index)).filter(Boolean))
-      .catch(error=>{trackCache.delete(system);console.warn('[Civweave Radio] station directory unavailable.',system,error);return[]}));
+    trackCache.set(system,Promise.all([
+      fetch(path,{cache:'force-cache'}).then(response=>{if(!response.ok)throw new Error(`radio directory ${response.status}`);return response.text()}),
+      loadTrackMap()
+    ]).then(([text,map])=>text.split(/\r?\n/).map((line,index)=>{
+      const parsed=parseTrackLine(line,index);if(!parsed)return null;
+      const id=parsed.spotifyTrackId||mappedTrackId(map,system,index);
+      return id?Object.freeze({...parsed,spotifyTrackId:id}):parsed;
+    }).filter(Boolean)).catch(error=>{trackCache.delete(system);console.warn('[Civweave Radio] station directory unavailable.',system,error);return[]}));
   }
   return trackCache.get(system);
 }
@@ -234,9 +249,9 @@ function start(){
   const existing=document.getElementById(CARD_ID);if(existing)decorate(existing.dataset.system||'');
   return true;
 }
-const api=Object.freeze({version:VERSION,revision:REVISION,directoryPaths:DIRECTORY_PATHS,tags:TAGS,normalizeSystemId,spotifyTrackId,parseTrackLine,playlistMeta,stationUrl,spotifyContextUrl,registerAccessTokenProvider,resolveTrackId,loadTracks,pickTrack,pickTag,decorate,start});
+const api=Object.freeze({version:VERSION,revision:REVISION,directoryPaths:DIRECTORY_PATHS,trackMapPath:TRACK_MAP_PATH,tags:TAGS,normalizeSystemId,spotifyTrackId,parseTrackLine,playlistMeta,stationUrl,spotifyContextUrl,registerAccessTokenProvider,resolveTrackId,loadTrackMap,loadTracks,pickTrack,pickTag,decorate,start});
 globalThis.CivweaveRadioTrackSuggestionsV241=api;
 globalThis.CivweaveRadioTrackSuggestionsV240=api;
 start();
-globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-suggestions-ready',{detail:{version:VERSION,revision:REVISION,systems:Object.keys(DIRECTORY_PATHS),playlistContext:true}}));
+globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-suggestions-ready',{detail:{version:VERSION,revision:REVISION,systems:Object.keys(DIRECTORY_PATHS),playlistContext:true,trackMapPath:TRACK_MAP_PATH}}));
 })();
