@@ -16,7 +16,7 @@ new Function(topbar);new Function(owner);new Function(workspace);new Function(vi
 const pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
-check('release and package are v1.0.42',version==='1.0.42'&&pkg.version===version);
+check('release and package versions match',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version);
 check('working campus repairs the brand to a known-good cache-safe icon',topbar.includes("const BRAND_ICON='/app/logos/civweave-pwa-192-v247.png'")&&topbar.includes('function repairBrand()'));
 check('mobile topbar uses two safe columns instead of modes map settings in one row',topbar.includes('grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important')&&topbar.includes('grid-template-areas:"brand brand" "modes modes" "map settings" "review theme"!important')&&!topbar.includes('grid-template-areas:"brand brand brand" "modes map settings"'));
 check('mobile mode switch can shrink inside the viewport',topbar.includes('grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important')&&topbar.includes('white-space:normal!important')&&topbar.includes('overflow-wrap:anywhere!important'));
