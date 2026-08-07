@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 const boundary=fs.readFileSync(new URL('../public/app/install-boundary-v146.js',import.meta.url),'utf8');
 const guide=fs.readFileSync(new URL('../public/app/shared-guide-surface-v236.js',import.meta.url),'utf8');
+const rookBridge=fs.readFileSync(new URL('../public/app/fellowfare-shared-guide-bridge-v236.js',import.meta.url),'utf8');
 const nav=fs.readFileSync(new URL('../public/app/themed-system-nav-v178.js',import.meta.url),'utf8');
 const radio=fs.readFileSync(new URL('../public/app/system-radio-agent-v233.js',import.meta.url),'utf8');
 const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),'utf8'));
@@ -33,8 +34,14 @@ const checks=[
     assert.match(guide,/One shared thread, two surfaces/);
     assert.equal((boundary.match(/PERSISTENT_GUIDE_CHAT_SCRIPT/g)||[]).length>=2,true);
   }],
-  ['Rook keeps the native prominent FellowFare chat',()=>{
+  ['Rook keeps the native workbench but shares the persistent thread',()=>{
     assert.match(guide,/if\(system==='fellowfare'\)return document\.querySelector\('\.ffc144-rook'\)/);
+    assert.match(boundary,/FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);
+    assert.match(boundary,/if\(system==='fellowfare'\)addScript\(FELLOWFARE_GUIDE_BRIDGE\)/);
+    assert.match(rookBridge,/SHARED_KEY='civweave\.persistent-guide-chat\.v214'/);
+    assert.match(rookBridge,/document\.addEventListener\('submit',onSubmit,true\)/);
+    assert.match(rookBridge,/CivweaveSharedGuideSurfaceV236/);
+    assert.match(rookBridge,/shared conversation/);
   }],
   ['radio and launcher sit above the bottom navigation',()=>{
     assert.match(guide,/#cw-radio-suggestion-v233\{z-index:2147483610!important/);
