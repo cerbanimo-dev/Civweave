@@ -57,9 +57,11 @@ jobs:
           grep -q "const VERSION = '${release_version}';" .cloudflare-pages/install-v130.js
           grep -q "const VERSION = '${release_version}';" .cloudflare-pages/service-worker-core-v208.js
           grep -q "const WORKER_SCRIPT_REVISION = 'release-coherence-v226';" .cloudflare-pages/install-v130.js
-          grep -q "revision=release-coherence-v226" .cloudflare-pages/app/index.html
+          ! grep -q "navigator.serviceWorker.register" .cloudflare-pages/app/index.html
+          grep -q "navigator.serviceWorker.register(WORKER_URL" .cloudflare-pages/install-v130.js
           grep -q "revision=release-coherence-v226" .cloudflare-pages/app/installed-entry-v146.js
           grep -q "service-worker-core-v208.js?v=${release_version}-lightweight-shell-v208-retained-v218" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238" .cloudflare-pages/service-worker-v203.js
           grep -q "service-worker-release-coherence-v220.js?v=release-coherence-v226" .cloudflare-pages/service-worker-v203.js
           grep -q "Civweave Working Campus · v${release_version}" .cloudflare-pages/app/working-campus-v156.html
           grep -q "<b class=\"version-chip\">v${release_version}</b>" .cloudflare-pages/app/working-campus-v156.html

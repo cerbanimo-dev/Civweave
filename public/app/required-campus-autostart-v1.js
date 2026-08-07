@@ -2,8 +2,10 @@
 'use strict';
 
 const STATUS_FALLBACK_MS = 8000;
+const INSTALLED_KEY = 'civweave.pwa.install-accepted.v1';
 const startedAt = Date.now();
 let autoStarted = false;
+let timer = 0;
 
 const $ = selector => document.querySelector(selector);
 
@@ -13,6 +15,32 @@ function replaceText(node, replacements) {
   let next = current;
   for (const [pattern, replacement] of replacements) next = next.replace(pattern, replacement);
   if (next !== current) node.textContent = next;
+}
+
+function installWaitingStyle() {
+  if (document.getElementById('cw-required-campus-wait-style-v238')) return;
+  const style = document.createElement('style');
+  style.id = 'cw-required-campus-wait-style-v238';
+  style.textContent = `
+#install-app.cw-campus-waiting{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+#install-app.cw-campus-waiting:before{content:"";width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:cw-campus-wait-spin .7s linear infinite}
+@keyframes cw-campus-wait-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){#install-app.cw-campus-waiting:before{animation-duration:1.8s}}
+`;
+  document.head?.append(style);
+}
+
+function installAssetLockboardLink() {
+  if (document.querySelector('[data-cw-asset-lockboard-link]')) return;
+  const actions = [...document.querySelectorAll('.status-card .card-actions')].at(-1);
+  if (!actions) return;
+  const link = document.createElement('a');
+  // Deliberately assembled at runtime so the required-campus dependency crawler does not
+  // treat the lockboard catalog and its every-image inventory as required offline cargo.
+  link.href = ['/app', 'asset-lockboard-v239.html'].join('/');
+  link.textContent = 'Visual asset lockboard';
+  link.dataset.cwAssetLockboardLink = 'v239';
+  actions.append(link);
 }
 
 function applyRequiredCampusLanguage() {
@@ -50,12 +78,33 @@ function campusIsRunning() {
   return /^downloading\b/i.test($('#offline-package-state')?.textContent || '');
 }
 
+function installAccepted() {
+  const standalone = navigator.standalone === true || ['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode => matchMedia(`(display-mode: ${mode})`).matches);
+  if (standalone) return true;
+  try { return localStorage.getItem(INSTALLED_KEY) === '1'; } catch { return false; }
+}
+
+function renderInstallWait() {
+  const button = $('#install-app');
+  if (!button) return;
+  const ready = campusIsReady();
+  if (installAccepted() && !ready) {
+    button.disabled = true;
+    button.classList.add('cw-campus-waiting');
+    button.textContent = 'Waiting for campus files…';
+    delete button.dataset.campusLaunchReady;
+    return;
+  }
+  button.classList.remove('cw-campus-waiting');
+}
+
 function statusHasSettled() {
   return Boolean(latestStatus()) || Date.now() - startedAt >= STATUS_FALLBACK_MS;
 }
 
 function tryAutoStart() {
   applyRequiredCampusLanguage();
+  renderInstallWait();
   if (autoStarted || campusIsReady() || campusIsRunning() || !statusHasSettled()) return;
 
   const button = $('#download-offline-package');
@@ -65,25 +114,37 @@ function tryAutoStart() {
   button.click();
 }
 
-function startWatching() {
-  const observer = new MutationObserver(tryAutoStart);
-  observer.observe(document.documentElement, {
-    subtree: true,
-    childList: true,
-    characterData: true,
-    attributes: true,
-    attributeFilter: ['disabled']
-  });
-
-  const timer = setInterval(() => {
-    tryAutoStart();
-    if (autoStarted || campusIsReady()) clearInterval(timer);
-  }, 250);
-
-  setTimeout(() => clearInterval(timer), 60000);
-  tryAutoStart();
+function stopTimer() {
+  if (!timer) return;
+  clearInterval(timer);
+  timer = 0;
 }
 
+function onStatus() {
+  tryAutoStart();
+  if (autoStarted || campusIsReady()) stopTimer();
+}
+
+function startWatching() {
+  installWaitingStyle();
+  installAssetLockboardLink();
+  addEventListener('civweave:offline-campus-status', onStatus);
+  navigator.serviceWorker?.addEventListener?.('controllerchange', onStatus);
+  addEventListener('appinstalled', onStatus);
+
+  timer = setInterval(onStatus, 500);
+  setTimeout(stopTimer, 60000);
+  onStatus();
+}
+
+function destroy() {
+  stopTimer();
+  removeEventListener('civweave:offline-campus-status', onStatus);
+  navigator.serviceWorker?.removeEventListener?.('controllerchange', onStatus);
+  removeEventListener('appinstalled', onStatus);
+}
+
+addEventListener('pagehide', destroy, { once: true });
 if (document.readyState === 'loading') addEventListener('DOMContentLoaded', startWatching, { once: true });
 else startWatching();
 

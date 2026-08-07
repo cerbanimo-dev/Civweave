@@ -2,8 +2,10 @@
 ;(() => {
 'use strict';
 
-const V211_REVISION = 'offline-campus-seed-provenance-v211';
+const V211_REVISION = 'offline-campus-current-graph-v238';
 const V211_QUARANTINE_MS = 6 * 60 * 60 * 1000;
+const V211_BATCH_SIZE = 12;
+const V211_DISCOVERY_TEXT = /\.(?:html?|css|m?js|json|webmanifest|md|txt)$/i;
 
 function v211FailureStatus(error) {
   const direct = Number(error?.status || 0);
@@ -46,7 +48,7 @@ function v211Packet(meta = {}) {
   ) || 0));
   return {
     type: 'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
-    mode: 'resumable-discovered-campus',
+    mode: 'resumable-current-campus-graph',
     version: VERSION,
     revision: V211_REVISION,
     cache: OFFLINE_CACHE,
@@ -77,8 +79,6 @@ async function v211MigrateMeta(meta, manifest) {
   const failed = (Array.isArray(meta.failed) ? meta.failed : []).map(entry => v211FailureEntry(entry));
   const requiredFailed = failed.filter(entry => entry.pathname === 'package' || requiredSeeds.has(entry.pathname));
   const optionalFailed = failed.filter(entry => entry.pathname !== 'package' && !requiredSeeds.has(entry.pathname));
-  const optionalPaths = new Set(optionalFailed.map(entry => entry.pathname));
-  const assets = [...new Set((Array.isArray(meta.assets) ? meta.assets : []).filter(pathname => pathname && !optionalPaths.has(pathname)))];
   const skippedByPath = new Map(inheritedSkipped.map(entry => [entry.pathname, entry]));
 
   for (const entry of optionalFailed) {
@@ -89,19 +89,18 @@ async function v211MigrateMeta(meta, manifest) {
     }));
   }
 
-  const rawAttempted = Math.max(0, Number(meta.attempted ?? meta.completed ?? 0) || 0);
-  const legacyDownloaded = Math.max(0, Number(
-    meta.downloaded ?? meta.successful ?? Math.max(0, rawAttempted - failed.length)
-  ) || 0);
-  const downloaded = Math.min(assets.length, legacyDownloaded);
+  const previousAssets = [...new Set((Array.isArray(meta.assets) ? meta.assets : []).filter(Boolean))];
+  const legacyDownloaded = Math.max(0, Number(meta.downloaded ?? meta.successful ?? meta.completed ?? 0) || 0);
   const packet = v211Packet({
     ...meta,
     running: false,
-    ready: requiredFailed.length === 0 && downloaded >= assets.length,
-    attempted: Math.min(assets.length, Math.max(downloaded, rawAttempted - optionalFailed.length)),
-    downloaded,
-    total: assets.length,
-    assets,
+    // A revision change always forces one fresh current-graph crawl. Previous files stay cached
+    // and reusable, but old metadata is never allowed to declare a new release complete.
+    ready: false,
+    attempted: 0,
+    downloaded: Math.min(previousAssets.length, legacyDownloaded),
+    total: previousAssets.length,
+    assets: previousAssets,
     failed: requiredFailed,
     skipped: [...skippedByPath.values()],
     updatedAt: new Date().toISOString()
@@ -138,6 +137,8 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
   const maxDepth = Math.max(1, Math.min(12, Number(manifest.maxDepth || 8)));
   const requiredSeeds = new Set((manifest.seeds || []).filter(Boolean));
   const skipped = new Map((previous?.skipped || []).map(entry => [entry.pathname, v211SkippedEntry(entry)]));
+  const previousFailures = new Map((previous?.failed || []).map(entry => [entry.pathname, v211FailureEntry(entry)]));
+  const previousAssets = new Set((previous?.assets || []).filter(Boolean));
   const now = Date.now();
 
   const activeSkip = pathname => {
@@ -151,15 +152,14 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
     return true;
   };
 
-  const previousAssets = (previous?.assets || []).filter(pathname => pathname && !activeSkip(pathname));
-  const initialAssets = [...new Set([...(manifest.seeds || []), ...previousAssets])];
-  const queue = initialAssets.map(pathname => ({ pathname, depth: 0, required: requiredSeeds.has(pathname) }));
+  // Only the CURRENT manifest is authoritative. Old package assets remain available as cache
+  // hits, but they are not allowed to seed or perpetuate the next crawl.
+  const initialAssets = [...new Set((manifest.seeds || []).filter(Boolean))];
+  const queue = initialAssets.map(pathname => ({ pathname, depth: 0, required: true }));
   const queued = new Set(initialAssets);
   const processed = new Set();
   const downloaded = new Set();
-  const previousFailures = new Map((previous?.failed || []).map(entry => [entry.pathname, v211FailureEntry(entry)]));
   const failed = new Map();
-  const refreshExisting = previous?.ready === true;
   let attempted = 0;
   let bytes = 0;
 
@@ -185,13 +185,16 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
   await progress(true, false);
 
   while (queue.length && processed.size < maxAssets) {
-    const batch = queue.splice(0, 4).filter(item => !processed.has(item.pathname));
+    const batch = queue.splice(0, V211_BATCH_SIZE).filter(item => !processed.has(item.pathname));
     if (!batch.length) continue;
     const results = await Promise.all(batch.map(async item => {
       processed.add(item.pathname);
       attempted += 1;
       try {
-        const { response, contentLength } = await cacheOfflineAsset(item.pathname, { preferNetwork: refreshExisting });
+        // Text/code defines the dependency graph, so refresh it when online. Binary assets are
+        // reused directly from any valid existing Civweave cache instead of redownloading.
+        const preferNetwork = V211_DISCOVERY_TEXT.test(item.pathname);
+        const { response, contentLength } = await cacheOfflineAsset(item.pathname, { preferNetwork });
         bytes += contentLength;
         downloaded.add(item.pathname);
         failed.delete(item.pathname);
@@ -240,12 +243,27 @@ downloadOfflinePackage = async function downloadOfflinePackageV211(event) {
     await progress(true, false);
   }
 
+  // Anything that belonged to the old package but was not rediscovered from the current graph
+  // is stale by definition. Report it as skipped once, never as a retry candidate.
+  for (const pathname of previousAssets) {
+    if (!pathname || queued.has(pathname) || requiredSeeds.has(pathname) || skipped.has(pathname)) continue;
+    skipped.set(pathname, v211SkippedEntry({
+      pathname,
+      message: 'This file belonged to an older campus graph and is no longer referenced by the current release.',
+      attempts: 1,
+      reason: 'stale-not-rediscovered',
+      retryAfter: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+    }));
+  }
+
   const ready = queue.length === 0 && failed.size === 0;
   return progress(false, ready);
 };
 
 self.CivweaveOfflineCampusV211 = {
   revision: V211_REVISION,
+  batchSize: V211_BATCH_SIZE,
+  currentGraphOnly: true,
   packet: v211Packet,
   migrateMeta: v211MigrateMeta
 };

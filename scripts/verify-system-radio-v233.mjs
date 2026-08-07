@@ -4,7 +4,18 @@ import assert from 'node:assert/strict';
 
 const ROOT=new URL('../',import.meta.url);
 const radioSource=fs.readFileSync(new URL('public/app/system-radio-agent-v233.js',ROOT),'utf8');
+const trackSource=fs.readFileSync(new URL('public/app/radio-track-suggestions-v240.js',ROOT),'utf8');
 const boundarySource=fs.readFileSync(new URL('public/app/install-boundary-v146.js',ROOT),'utf8');
+const stationFiles={
+  anarchadia:'public/app/radio-directory-v240/anarchadia.txt',
+  cerbanimo:'public/app/radio-directory-v240/cerbanimo.txt',
+  'living-school':'public/app/radio-directory-v240/living-school.txt',
+  fellowfare:'public/app/radio-directory-v240/fellowfare.txt',
+  civweave:'public/app/radio-directory-v240/civweave.txt'
+};
+const stationLines=Object.fromEntries(Object.entries(stationFiles).map(([system,path])=>[
+  system,fs.readFileSync(new URL(path,ROOT),'utf8').split(/\r?\n/).map(line=>line.trim()).filter(Boolean)
+]));
 
 class Store {
   constructor(){this.map=new Map()}
@@ -36,11 +47,15 @@ const sandbox={
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(radioSource,sandbox,{filename:'system-radio-agent-v233.js'});
+vm.runInContext(trackSource,sandbox,{filename:'radio-track-suggestions-v240.js'});
 
 const radio=sandbox.CivweaveRadioRecommendationAgentV233;
+const tracks=sandbox.CivweaveRadioTrackSuggestionsV240;
 assert.ok(radio,'v233 radio runtime must initialize');
+assert.ok(tracks,'v240 track suggestion runtime must initialize');
 assert.equal(sandbox.CivweaveRadioRecommendationAgentV232,radio,'v232 compatibility alias must point to v233 runtime');
 assert.equal(radio.revision,'system-radio-agent-v233');
+assert.equal(tracks.revision,'radio-track-suggestions-v240');
 
 const expectedIds={
   anarchadia:'2AsCLZiAPlUYHOcogllTia',
@@ -53,6 +68,22 @@ assert.deepEqual(Object.keys(radio.registry).sort(),Object.keys(expectedIds).sor
 for(const [system,id] of Object.entries(expectedIds)){
   assert.match(radio.registry[system].spotifyUrl,new RegExp(`/playlist/${id}(?:\\?|$)`),`${system} playlist changed`);
 }
+
+const expectedTrackCounts={anarchadia:40,cerbanimo:38,'living-school':50,fellowfare:43,civweave:29};
+for(const [system,count] of Object.entries(expectedTrackCounts)){
+  assert.equal(stationLines[system].length,count,`${system} radio directory count changed`);
+  assert.ok(stationLines[system].every(line=>line.includes(' - ')),`${system} contains a malformed radio directory line`);
+  assert.equal(tracks.directoryPaths[system],`/app/radio-directory-v240/${system}.txt`,`${system} directory path is not canonical`);
+  assert.ok(tracks.tags[system].length>=8,`${system} needs a healthy pool of episode-label tags`);
+}
+assert.equal(Object.values(expectedTrackCounts).reduce((sum,count)=>sum+count,0),200,'uploaded radio directory total changed');
+assert.ok(stationLines.anarchadia.includes('Dead Kennedys - Nazi Punks Fuck Off'));
+assert.ok(stationLines.cerbanimo.includes('The Coup - Ride The Fence'));
+assert.ok(stationLines['living-school'].includes('Billy Bragg - There Is Power in a Union'));
+assert.ok(stationLines.fellowfare.includes('Bob Marley & The Wailers - Redemption Song'));
+assert.ok(stationLines.civweave.includes('Fela Kuti - Water No Get Enemy'));
+assert.match(tracks.spotifySearchUrl('The Coup - Ride The Fence'),/^https:\/\/open\.spotify\.com\/search\//);
+assert.ok(tracks.pickTag('living-school'),'Living School must produce a label tag');
 
 const pageContext={
   activeSystem:'cerbanimo',currentRoute:'/app/realm-console-v140.html?room=workshop',route:'/app/realm-console-v140.html?room=workshop',
@@ -87,7 +118,20 @@ assert.match(radioSource,/dismiss\.addEventListener\('click',[\s\S]*snooze\(SNOO
 assert.match(radioSource,/scheduleEvaluation\('page_navigated',NAVIGATION_DEBOUNCE_MS\)/,'same-document navigation must re-evaluate radio');
 assert.match(radioSource,/scheduleEvaluation\(reason,PRESENTATION_DELAY_MS,true\)/,'each new document must force an initial recommendation');
 
-assert.match(boundarySource,/SYSTEM_RADIO_AGENT='\/app\/system-radio-agent-v233\.js'/,'install boundary must load v233');
-assert.match(boundarySource,/radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left'/,'boundary metadata must describe the active policy');
+assert.match(trackSource,/fetch\(path,\{cache:'force-cache'\}\)/,'track suggestions must use the local/offline station directory');
+assert.match(trackSource,/detail\.type==='RADIO_CTA_SHOWN'/,'track lookup must trigger from the existing Spotify station suggestion');
+assert.match(trackSource,/RADIO_TRACK_SUGGESTED/,'track suggestions must emit an observable event');
+assert.match(trackSource,/Random pull from this station/,'card must explain that the selected song is a station pull');
+assert.match(trackSource,/Find this track ↗/,'card must expose a direct Spotify track search');
+assert.match(trackSource,/Open station ↗/,'original realm station link must remain available');
+assert.match(trackSource,/THE SYLLABUS HAS UNIONIZED/,'snarky station labels must ship with the runtime');
+assert.match(trackSource,/NO KPI SURVIVED THE CHORUS/,'Cerbanimo label voice must remain distinct');
+assert.match(trackSource,/SURPLUS VALUE RETURNED TO SENDER/,'FellowFare label voice must remain distinct');
 
-console.log('Civweave system radio v233 per-page snooze contract verified.');
+assert.match(boundarySource,/SYSTEM_RADIO_AGENT='\/app\/system-radio-agent-v233\.js'/,'install boundary must load v233');
+assert.match(boundarySource,/RADIO_TRACK_SUGGESTIONS='\/app\/radio-track-suggestions-v240\.js'/,'install boundary must load v240 after the station agent');
+assert.ok(boundarySource.indexOf('SYSTEM_RADIO_AGENT,')<boundarySource.indexOf('RADIO_TRACK_SUGGESTIONS,'),'track decorator must load after the station card runtime');
+assert.match(boundarySource,/radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left'/,'boundary metadata must describe the active station policy');
+assert.match(boundarySource,/radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels'/,'boundary metadata must describe the random track policy');
+
+console.log('Civweave system radio v233 + v240 random station track contract verified.');

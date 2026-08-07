@@ -33,6 +33,7 @@ const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
+await import('./generate-asset-lockboard-catalog-v239.mjs');
 
 function walkFiles(directory) {
   const files = [];
@@ -155,7 +156,7 @@ cpSync(sourceDir, outputDir, {
 const outputOversized = oversizedFiles(outputDir);
 if (outputOversized.length) {
   throw new Error(
-    `Cloudflare Pages output contains ${outputOversized.length} file(s) above 24 MiB:\n- ${formatOversized(outputDir, outputOversized)}`,
+    `Cloudflare Pages output contains ${outputOversized.length} file(s) above 24 MiB:\n- ${formatOversized(outputDir, outputOversized)}\n`,
   );
 }
 

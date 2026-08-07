@@ -22,6 +22,7 @@ const allowedExperienceSupport=[
   '/app/realm-session-integrity-v237.js',
   '/app/themed-system-nav-v178.js',
   '/app/system-radio-agent-v233.js',
+  '/app/radio-track-suggestions-v240.js',
   '/app/shared-review-surface-v234.js',
   '/app/shared-guide-surface-v236.js'
 ];
@@ -69,4 +70,5 @@ assert.equal(api.persistentGuideChatGuideCount,5);
 assert.equal(api.persistentGuideChatThreadPolicy,'five-realm-local-ledgers-plus-explicit-handover');
 assert.equal(api.realmSessionIntegrityRevision,'v237-realm-local-memory-handover-state-repair');
 assert.equal(api.fellowfareGuideBridgeRevision,'v236-native-workbench-shared-thread');
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,realmLocalGuideThreads:true,fellowfareNativeSharedThread:true,legacyCompatibility:'noncanonical-only'},null,2));
+assert.equal(api.radioTrackSuggestionRevision,'v240-local-station-directory-random-pull-labels');
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,realmLocalGuideThreads:true,fellowfareNativeSharedThread:true,radioTrackSuggestions:true,legacyCompatibility:'noncanonical-only'},null,2));

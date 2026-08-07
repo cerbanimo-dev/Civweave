@@ -20,6 +20,7 @@ const experienceScripts=[
   '/app/realm-session-integrity-v237.js',
   '/app/themed-system-nav-v178.js',
   '/app/system-radio-agent-v233.js',
+  '/app/radio-track-suggestions-v240.js',
   '/app/shared-review-surface-v234.js',
   '/app/shared-guide-surface-v236.js'
 ];
@@ -105,6 +106,7 @@ for(const [system,pathname] of Object.entries(paths)){
 assert.match(boundarySource,/canonicalSystemCount:5/);
 assert.match(boundarySource,/canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS\.length/);
 assert.match(boundarySource,/five-system-first-class-routes-civweave-core-only/);
+assert.match(boundarySource,/radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels'/);
 assert.match(navSource,/CivweaveSystemRoutesV227/);
 assert.match(navSource,/ROUTES\.navigate/);
 assert.equal((navSource.match(/installed=1/g)||[]).length,5,'The five fallback navigation links are not independently authorized.');

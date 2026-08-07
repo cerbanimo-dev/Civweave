@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'public/app/system-radio-agent-v233.js'
+      - 'public/app/radio-track-suggestions-v240.js'
+      - 'public/app/radio-directory-v240/**'
       - 'public/app/install-boundary-v146.js'
       - 'scripts/verify-system-radio-v233.mjs'
       - '.github/workflows/verify-system-radio-v233.yml'
@@ -14,6 +16,8 @@ on:
       - main
     paths:
       - 'public/app/system-radio-agent-v233.js'
+      - 'public/app/radio-track-suggestions-v240.js'
+      - 'public/app/radio-directory-v240/**'
       - 'public/app/install-boundary-v146.js'
       - 'scripts/verify-system-radio-v233.mjs'
       - '.github/workflows/verify-system-radio-v233.yml'
@@ -31,6 +35,7 @@ jobs:
       - name: Check runtime syntax
         run: |
           node --check public/app/system-radio-agent-v233.js
+          node --check public/app/radio-track-suggestions-v240.js
           node --check public/app/install-boundary-v146.js
           node --check scripts/verify-system-radio-v233.mjs
       - name: Verify radio contract

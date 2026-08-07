@@ -63,15 +63,6 @@
   </section>
 </main>
 <script src="/app/civweave-brand.js?v=1.0.18"></script>
-<script>
-(() => {
-  if (!('serviceWorker' in navigator)) return;
-  navigator.serviceWorker.register(
-    '/service-worker-v203.js?v=1.0.18-lightweight-shell-v208&revision=release-coherence-v226',
-    { scope: '/', updateViaCache: 'none' }
-  ).catch(() => {});
-})();
-</script>
 <script src="/app/knowledge-school-seeds-v1.js?v=knowledge-schools-v2"></script>
 <script src="/install-v130.js?v=1.0.18-lightweight-shell-v208"></script>
 <script src="/app/installer-online-fallback-v225.js?v=shell-self-repair-v225"></script>
