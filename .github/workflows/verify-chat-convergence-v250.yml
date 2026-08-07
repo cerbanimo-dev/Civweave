@@ -6,8 +6,12 @@ on:
       - 'VERSION'
       - 'package.json'
       - 'public/_redirects'
+      - 'public/index.html'
       - 'public/app/manifest.webmanifest'
+      - 'public/app/installed-entry-v146.html'
       - 'public/app/installed-entry-v146.js'
+      - 'public/app/system-routes-v227.js'
+      - 'public/app/themed-system-nav-v178.js'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/guide-workspace-v242.js'
       - 'public/app/persistent-guide-viewport-v216.js'
@@ -34,6 +38,8 @@ jobs:
       - name: Syntax check canonical runtimes and generators
         run: |
           node --check public/app/installed-entry-v146.js
+          node --check public/app/system-routes-v227.js
+          node --check public/app/themed-system-nav-v178.js
           node --check public/app/install-boundary-v146.js
           node --check public/app/guide-workspace-v242.js
           node --check public/app/persistent-guide-viewport-v216.js
