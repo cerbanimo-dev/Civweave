@@ -4,7 +4,7 @@ const params=new URLSearchParams(location.search);
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const scriptUrl=(()=>{try{return new URL(document.currentScript?.src||'',location.href)}catch{return null}})();
-const releaseVersion=scriptUrl?.searchParams.get('v')||params.get('version')||'1.0.17';
+const releaseVersion=scriptUrl?.searchParams.get('v')||params.get('version')||'1.0.18';
 const workerUrl=`/service-worker-v203.js?v=${encodeURIComponent(releaseVersion)}-lightweight-shell-v208&revision=release-coherence-v226`;
 const routeUrl=`/app/system-routes-v227.js?v=${encodeURIComponent(releaseVersion)}-five-system-route-contract-v227`;
 const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);

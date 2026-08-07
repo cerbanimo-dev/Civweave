@@ -1,9 +1,9 @@
 {
-  "name": "Civweave v1.0.17",
+  "name": "Civweave v1.0.18",
   "short_name": "Civweave",
   "description": "Five connected, offline-ready Civweave systems with deterministic local operation and a non-modal AI settings layer.",
   "id": "/civweave-local",
-  "start_url": "/app/working-campus-v156.html?installed=1&version=1.0.17",
+  "start_url": "/app/working-campus-v156.html?installed=1&version=1.0.18",
   "scope": "/",
   "display": "standalone",
   "display_override": [
