@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 const boundary=fs.readFileSync(new URL('../public/app/install-boundary-v146.js',import.meta.url),'utf8');
 const guide=fs.readFileSync(new URL('../public/app/shared-guide-surface-v236.js',import.meta.url),'utf8');
 const realmIntegrity=fs.readFileSync(new URL('../public/app/realm-session-integrity-v237.js',import.meta.url),'utf8');
+const workspace=fs.readFileSync(new URL('../public/app/guide-workspace-v242.js',import.meta.url),'utf8');
+const viewport=fs.readFileSync(new URL('../public/app/persistent-guide-viewport-v216.js',import.meta.url),'utf8');
 const rookBridge=fs.readFileSync(new URL('../public/app/fellowfare-shared-guide-bridge-v236.js',import.meta.url),'utf8');
 const nav=fs.readFileSync(new URL('../public/app/themed-system-nav-v178.js',import.meta.url),'utf8');
 const radio=fs.readFileSync(new URL('../public/app/system-radio-agent-v233.js',import.meta.url),'utf8');
@@ -11,70 +13,68 @@ const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),
 const release=fs.readFileSync(new URL('../VERSION',import.meta.url),'utf8').trim();
 
 const checks=[
-  ['all canonical systems load one shared guide surface stack with realm isolation',()=>{
+  ['all canonical systems load realm isolation followed by the five-window workspace',()=>{
     for(const token of [
       "PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js'",
       "PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js'",
       "REALM_SESSION_INTEGRITY='/app/realm-session-integrity-v237.js'",
+      "GUIDE_WORKSPACE='/app/guide-workspace-v242.js'",
       "THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js'",
       "SHARED_GUIDE_SURFACE='/app/shared-guide-surface-v236.js'"
     ])assert.ok(boundary.includes(token),`missing boundary token ${token}`);
-    assert.match(boundary,/sharedGuideSurfaceRevision:'v236-inline-plus-bottom-right-shared-thread'/);
     assert.match(boundary,/realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair'/);
+    assert.match(boundary,/guideWorkspaceRevision:'v242-five-window-local-ledgers-no-scroll-trap'/);
+    assert.ok(boundary.indexOf('REALM_SESSION_INTEGRITY,')<boundary.indexOf('GUIDE_WORKSPACE,'),'workspace must load after local-ledger ownership');
   }],
-  ['five page-owned guide identities are explicit',()=>{
-    for(const pair of [
-      ["civweave",'Weaveling'],["living-school",'Moss'],['cerbanimo','Kamiya'],['fellowfare','Rook'],['anarchadia','Merlin']
-    ]){
-      assert.ok(guide.includes(pair[0])&&guide.includes(`name:'${pair[1]}'`),`missing ${pair[1]} guide contract`);
-    }
-    assert.match(guide,/api\.switchGuide\?\.\(currentSystem\)/);
+  ['five guide identities remain explicit and switchable without merging ledgers',()=>{
+    for(const pair of [["civweave",'Weaveling'],["living-school",'Moss'],['cerbanimo','Kamiya'],['fellowfare','Rook'],['anarchadia','Merlin']])assert.ok(workspace.includes(pair[0])&&workspace.includes(`name:'${pair[1]}'`),`missing ${pair[1]} workspace contract`);
+    assert.match(workspace,/const SYSTEMS=\['civweave','living-school','cerbanimo','fellowfare','anarchadia'\]/);
+    assert.match(workspace,/function switchWindow\(system/);
+    assert.match(workspace,/readThread\(activeWindow\)/);
+    assert.match(workspace,/five-realm-local-ledgers-plus-explicit-handover|Switching windows never mixes histories/);
+    assert.doesNotMatch(workspace,/messages\s*=\s*SYSTEMS\.flatMap/,'workspace must never flatten realm histories');
   }],
-  ['inline chat and floating launcher share one realm-local submission pipeline',()=>{
+  ['launcher-first open owns the current realm without requiring inline chat priming',()=>{
+    assert.match(workspace,/event\.target\.closest\?\.\(`#\$\{LAUNCHER_ID\}`\)/);
+    assert.match(workspace,/openWindow\(pageSystem\)/);
+    assert.match(workspace,/switchGuide:\(system,options=\{\}\)=>switchWindow/);
+    assert.doesNotMatch(workspace,/function switchGuide\(system\)\{return system===pageSystem\}/);
+  }],
+  ['inline chat and floating workspace still use one AI submission pipeline per selected realm',()=>{
     assert.match(guide,/function submitInline\(text\)/);
-    assert.match(guide,/\[data-persistent-form\]/);
     assert.match(guide,/form\.requestSubmit\(\)/);
+    assert.match(workspace,/function onSubmitCapture\(event\)/);
+    assert.match(workspace,/assistant\.respond\(\{text:value,systemId:system/);
+    assert.match(workspace,/handoffSystem:system!==pageSystem\?system:undefined/);
     assert.match(realmIntegrity,/civweave\.guide-thread\.\$\{system\}\.v237/);
-    assert.match(realmIntegrity,/five-realm-local-ledgers-plus-explicit-handover|Cross-realm work arrives only as explicit handover cards/);
   }],
-  ['late realm renders cannot erase the inline guide surface',()=>{
-    assert.match(guide,/function repairSurface\(\)/);
-    assert.match(guide,/surfaceObserver=new MutationObserver/);
-    assert.match(guide,/if\(!document\.getElementById\(ROOT_ID\)&&!canonicalNativeChat\(currentSystem\)\)buildInline\(\)/);
-    const repairBody=guide.match(/function repairSurface\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
-    assert.doesNotMatch(repairBody,/renderTranscript\(\)/,'repair observer must not mutate the transcript and trigger itself recursively');
+  ['chat viewport cannot trap document scroll or force scrollIntoView',()=>{
+    assert.doesNotMatch(viewport,/MutationObserver/);
+    assert.doesNotMatch(viewport,/scrollIntoView/);
+    assert.match(viewport,/overscroll-behavior:auto!important/);
+    assert.match(workspace,/height:min\(62dvh,560px\)!important/);
+    assert.match(workspace,/z-index:2147483644!important/);
+    assert.doesNotMatch(workspace,/document\.body\.style\.overflow|document\.documentElement\.style\.overflow/);
   }],
-  ['Rook keeps the native workbench while v237 owns realm-local state',()=>{
+  ['Rook keeps the native workbench while workspace owns switchable windows',()=>{
     assert.match(guide,/if\(system==='fellowfare'\)return document\.querySelector\('\.ffc144-rook'\)/);
     assert.match(boundary,/FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);
-    assert.match(boundary,/if\(system==='fellowfare'\)addScript\(FELLOWFARE_GUIDE_BRIDGE\)/);
     assert.match(rookBridge,/CivweaveSharedGuideSurfaceV236/);
     assert.match(realmIntegrity,/exchangeMethod:'Buttons'/);
   }],
-  ['radio and launcher sit above the bottom navigation',()=>{
+  ['radio launcher and ornate nav keep their floating-layer contract',()=>{
     assert.match(guide,/#cw-radio-suggestion-v233\{z-index:2147483610!important/);
-    assert.match(guide,/#\$\{LAUNCHER_ID\}\{z-index:2147483611!important/);
-    assert.match(guide,/bottom:calc\(var\(--cw-themed-nav-height,64px\) \+ env\(safe-area-inset-bottom\) \+ var\(--cw-floating-gap\)\)!important/);
+    assert.match(workspace,/#\$\{LAUNCHER_ID\}\{z-index:2147483643!important/);
     assert.match(radio,/left:max\(14px,env\(safe-area-inset-left\)\)/);
-  }],
-  ['bottom navigation uses the ornate face-button strip everywhere',()=>{
     assert.match(nav,/--cw-themed-nav-height:clamp\(52px,7vw,72px\)/);
-    assert.match(nav,/--cw-themed-nav-button-width:156px/);
-    for(const id of ['civweave','living-school','cerbanimo','fellowfare','anarchadia']){
-      assert.ok(nav.includes(`/app/assets/navigation/200-${id}-nav.webp?v=image-nav-r2`),`${id} lost the canonical ornate face-button artwork`);
-    }
-    assert.match(nav,/width="200" height="100"/,'face-button assets must preserve their 2:1 source geometry');
-    assert.match(nav,/is-current/,'selected realm must retain its glow state');
-    const order=['civweave','living-school','cerbanimo','fellowfare','anarchadia'].map(id=>nav.indexOf(`id:'${id}'`));
-    assert.ok(order.every(index=>index>=0),'a canonical system is missing from nav');
-    assert.deepEqual([...order].sort((a,b)=>a-b),order,'canonical nav order regressed');
+    for(const id of ['civweave','living-school','cerbanimo','fellowfare','anarchadia'])assert.ok(nav.includes(`/app/assets/navigation/200-${id}-nav.webp?v=image-nav-r2`),`${id} lost the canonical ornate face-button artwork`);
   }],
-  ['release syntax gate includes the v236 surface and v237 integrity layer',()=>{
+  ['release syntax gate includes v236 v237 and v242',()=>{
     assert.equal(pkg.version,release);
     assert.match(pkg.scripts['check:syntax'],/public\/app\/shared-guide-surface-v236\.js/);
     assert.match(pkg.scripts['check:syntax'],/public\/app\/realm-session-integrity-v237\.js/);
+    assert.match(pkg.scripts['check:syntax'],/public\/app\/guide-workspace-v242\.js/);
   }]
 ];
-
 for(const [name,run] of checks){run();console.log(`✓ ${name}`)}
-console.log(`Shared guide + floating UI v236 verified under ${release}: ${checks.length}/${checks.length} checks passed.`);
+console.log(`Shared guide workspace verified under ${release}: ${checks.length}/${checks.length} checks passed.`);

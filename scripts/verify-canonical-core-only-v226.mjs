@@ -20,6 +20,7 @@ const allowedExperienceSupport=[
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
   '/app/realm-session-integrity-v237.js',
+  '/app/guide-workspace-v242.js',
   '/app/themed-system-nav-v178.js',
   '/app/campus-background-download-v241.js',
   '/app/system-radio-agent-v233.js',
@@ -69,8 +70,11 @@ assert.equal(api.canonicalPolicy,'five-system-first-class-routes-civweave-core-o
 assert.equal(api.persistentGuideChatSubmissionPipelines,1);
 assert.equal(api.persistentGuideChatGuideCount,5);
 assert.equal(api.persistentGuideChatThreadPolicy,'five-realm-local-ledgers-plus-explicit-handover');
+assert.equal(api.persistentGuideChatWindowPolicy,'five-switchable-windows-current-realm-launcher');
 assert.equal(api.realmSessionIntegrityRevision,'v237-realm-local-memory-handover-state-repair');
+assert.equal(api.guideWorkspaceRevision,'v242-five-window-local-ledgers-no-scroll-trap');
+assert.equal(api.guideSurfaceOwnershipPolicy,'v242-page-realm-launcher-five-local-window-ledgers-handover-only-cross-realm');
 assert.equal(api.fellowfareGuideBridgeRevision,'v236-native-workbench-shared-thread');
 assert.equal(api.radioTrackSuggestionRevision,'v240-local-station-directory-random-pull-labels');
 assert.equal(api.campusBackgroundDownloadRevision,'v241-worker-owned-download-bottom-progress-rail');
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,realmLocalGuideThreads:true,fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,legacyCompatibility:'noncanonical-only'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,realmLocalGuideThreads:true,guideWorkspace:'v242-five-window',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,legacyCompatibility:'noncanonical-only'},null,2));

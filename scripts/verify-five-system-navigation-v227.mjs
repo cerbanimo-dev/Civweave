@@ -18,6 +18,7 @@ const experienceScripts=[
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
   '/app/realm-session-integrity-v237.js',
+  '/app/guide-workspace-v242.js',
   '/app/themed-system-nav-v178.js',
   '/app/campus-background-download-v241.js',
   '/app/system-radio-agent-v233.js',
@@ -41,99 +42,27 @@ for(const [label,source] of Object.entries({routesSource,boundarySource,navSourc
 
 function routeRuntime(pathname=paths.civweave){
   const session=new Map();
-  const context={
-    URL,URLSearchParams,Map,Object,String,Boolean,
-    location:{origin:'https://civweave.test',pathname,href:`https://civweave.test${pathname}`,assign(){},replace(){}},
-    sessionStorage:{setItem:(key,value)=>session.set(key,String(value)),getItem:key=>session.get(key)||null},
-    document:undefined
-  };
-  context.globalThis=context;
-  vm.runInNewContext(routesSource,context,{filename:'system-routes-v227.js'});
-  return{api:context.CivweaveSystemRoutesV227,session};
+  const context={URL,URLSearchParams,Map,Object,String,Boolean,location:{origin:'https://civweave.test',pathname,href:`https://civweave.test${pathname}`,assign(){},replace(){}},sessionStorage:{setItem:(key,value)=>session.set(key,String(value)),getItem:key=>session.get(key)||null},document:undefined};
+  context.globalThis=context;vm.runInNewContext(routesSource,context,{filename:'system-routes-v227.js'});return{api:context.CivweaveSystemRoutesV227,session};
 }
 const routeApi=routeRuntime().api;
 assert.equal(routeApi.version,version,'Route contract version does not match VERSION.');
 assert.equal(routeApi.routes().length,5,'Route contract must expose exactly five canonical systems.');
 assert.deepEqual(Object.fromEntries(routeApi.routes().map(route=>[route.id,route.pathname])),paths,'Canonical system route map drifted.');
-for(const [sourceId] of Object.entries(paths)){
-  for(const [targetId,targetPath] of Object.entries(paths)){
-    const url=routeApi.urlFor(targetId,{origin:'https://civweave.test',source:sourceId,version});
-    assert.equal(url.pathname,targetPath,`${sourceId} → ${targetId} changed destination.`);
-    assert.equal(url.searchParams.get('installed'),'1',`${sourceId} → ${targetId} lost installed authorization.`);
-    assert.equal(url.searchParams.get('navigation'),'five-system-route-contract-v227',`${sourceId} → ${targetId} lost route revision.`);
-    assert.notEqual(url.pathname,'/app/index.html',`${sourceId} → ${targetId} routes through the blank launcher.`);
-    assert.notEqual(url.pathname,'/',`${sourceId} → ${targetId} routes through the installer.`);
-  }
-}
+for(const [sourceId] of Object.entries(paths))for(const [targetId,targetPath] of Object.entries(paths)){const url=routeApi.urlFor(targetId,{origin:'https://civweave.test',source:sourceId,version});assert.equal(url.pathname,targetPath,`${sourceId} → ${targetId} changed destination.`);assert.equal(url.searchParams.get('installed'),'1',`${sourceId} → ${targetId} lost installed authorization.`);assert.equal(url.searchParams.get('navigation'),'five-system-route-contract-v227',`${sourceId} → ${targetId} lost route revision.`);assert.notEqual(url.pathname,'/app/index.html',`${sourceId} → ${targetId} routes through the blank launcher.`);assert.notEqual(url.pathname,'/',`${sourceId} → ${targetId} routes through the installer.`)}
 
 function boundaryRuntime(pathname){
-  const session=new Map(),appended=[],replaced=[];
-  const root={dataset:{},isConnected:true};
-  const head={isConnected:true,append:node=>appended.push(node),appendChild:node=>appended.push(node)};
-  const body={isConnected:true};
-  const document={documentElement:root,head,body,querySelector:()=>null,createElement:tag=>({tagName:tag.toUpperCase(),style:{}})};
-  const location={origin:'https://civweave.test',hostname:'civweave.test',pathname,search:'',hash:'',href:`https://civweave.test${pathname}`,replace:value=>replaced.push(String(value))};
-  const context={
-    URL,URLSearchParams,Map,Object,String,Boolean,document,location,
-    navigator:{standalone:false},matchMedia:()=>({matches:false}),
-    sessionStorage:{setItem:(key,value)=>session.set(key,String(value)),getItem:key=>session.get(key)||null},
-    addEventListener:()=>{},dispatchEvent:()=>true,CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},queueMicrotask:fn=>fn()
-  };
-  context.window=context;context.top=context;context.self=context;context.globalThis=context;
-  vm.runInNewContext(routesSource,context,{filename:'system-routes-v227.js'});
-  vm.runInNewContext(boundarySource,context,{filename:'install-boundary-v146.js'});
-  return{context,session,appended,replaced,root};
+  const session=new Map(),appended=[],replaced=[];const root={dataset:{},isConnected:true};const head={isConnected:true,append:node=>appended.push(node),appendChild:node=>appended.push(node)};const body={isConnected:true};const document={documentElement:root,head,body,querySelector:()=>null,createElement:tag=>({tagName:tag.toUpperCase(),style:{}})};const location={origin:'https://civweave.test',hostname:'civweave.test',pathname,search:'',hash:'',href:`https://civweave.test${pathname}`,replace:value=>replaced.push(String(value))};const context={URL,URLSearchParams,Map,Object,String,Boolean,document,location,navigator:{standalone:false},matchMedia:()=>({matches:false}),sessionStorage:{setItem:(key,value)=>session.set(key,String(value)),getItem:key=>session.get(key)||null},addEventListener:()=>{},dispatchEvent:()=>true,CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},queueMicrotask:fn=>fn()};context.window=context;context.top=context;context.self=context;context.globalThis=context;vm.runInNewContext(routesSource,context,{filename:'system-routes-v227.js'});vm.runInNewContext(boundarySource,context,{filename:'install-boundary-v146.js'});return{context,session,appended,replaced,root};
 }
 for(const [system,pathname] of Object.entries(paths)){
-  const result=boundaryRuntime(pathname);
-  assert.equal(result.replaced.length,0,`${system} redirects to the installer with empty session state.`);
-  assert.equal(result.context.CivweaveInstallBoundaryV146.systemSurface(),system,`${system} is not a first-class boundary surface.`);
-  assert.equal(result.context.CivweaveInstallBoundaryV146.allowed(),true,`${system} is not authorized intrinsically.`);
-  assert.equal(result.root.dataset.civweaveSystemRoute,system,`${system} route identity is not stamped.`);
-  for(const script of experienceScripts){
-    assert.ok(result.appended.some(node=>String(node.src||'').includes(script)),`${system} does not load ${script} from the shared experience boundary.`);
-  }
-  if(system==='civweave'){
-    assert.equal(result.appended.length,experienceScripts.length,'Civweave canonical startup must inject only the approved experience-layer scripts.');
-    assert.ok(result.appended.every(node=>experienceScripts.some(script=>String(node.src||'').includes(script))),'Civweave canonical startup injected a non-experience or legacy script.');
-  }else{
-    assert.ok(result.appended.some(node=>String(node.src||'').includes('/app/system-routes-v227.js')),`${system} does not load the shared route contract before compatibility navigation.`);
-  }
+  const result=boundaryRuntime(pathname);assert.equal(result.replaced.length,0,`${system} redirects to the installer with empty session state.`);assert.equal(result.context.CivweaveInstallBoundaryV146.systemSurface(),system,`${system} is not a first-class boundary surface.`);assert.equal(result.context.CivweaveInstallBoundaryV146.allowed(),true,`${system} is not authorized intrinsically.`);assert.equal(result.root.dataset.civweaveSystemRoute,system,`${system} route identity is not stamped.`);
+  for(const script of experienceScripts)assert.ok(result.appended.some(node=>String(node.src||'').includes(script)),`${system} does not load ${script} from the shared experience boundary.`);
+  if(system==='civweave'){assert.equal(result.appended.length,experienceScripts.length,'Civweave canonical startup must inject only the approved experience-layer scripts.');assert.ok(result.appended.every(node=>experienceScripts.some(script=>String(node.src||'').includes(script))),'Civweave canonical startup injected a non-experience or legacy script.')}else assert.ok(result.appended.some(node=>String(node.src||'').includes('/app/system-routes-v227.js')),`${system} does not load the shared route contract before compatibility navigation.`);
 }
-
-for(const [system,pathname] of Object.entries(paths)){
-  assert.ok(boundarySource.includes(`['${pathname}','${system}']`),`Boundary fallback map is missing ${system}.`);
-}
-assert.match(boundarySource,/canonicalSystemCount:5/);
-assert.match(boundarySource,/canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS\.length/);
-assert.match(boundarySource,/five-system-first-class-routes-civweave-core-only/);
-assert.match(boundarySource,/radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels'/);
-assert.match(boundarySource,/campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail'/);
-assert.match(navSource,/CivweaveSystemRoutesV227/);
-assert.match(navSource,/ROUTES\.navigate/);
-assert.equal((navSource.match(/installed=1/g)||[]).length,5,'The five fallback navigation links are not independently authorized.');
-assert.match(campusSource,/ensureRouteContract/);
-assert.match(campusSource,/x-civweave-package':'working-campus-v227/);
-assert.match(campusPart4,/CivweaveSystemRoutesV227/);
-assert.match(campusPart4,/routes\.navigate\(id/);
-assert.match(campusPart4,/searchParams\.set\('installed','1'\)/);
-
-const routeImport=workerWrapper.indexOf("importScripts('/app/system-routes-v227.js");
-const coreImport=workerWrapper.indexOf("importScripts('/service-worker-core-v208.js");
-const shellRepairImport=workerWrapper.indexOf("importScripts('/service-worker-shell-repair-v225.js");
-const canonicalImport=workerWrapper.indexOf("importScripts('/service-worker-canonical-navigation-v227.js");
-assert.ok(routeImport>=0&&routeImport<coreImport,'Worker does not load the route contract before the core.');
-assert.ok(canonicalImport>shellRepairImport,'Canonical navigation is not the final worker policy.');
-assert.match(workerNavigation,/headers\.set\('x-civweave-package',REVISION\)/);
-assert.match(workerNavigation,/exact-route-network-first-exact-route-cache-never-launcher-fallback/);
-assert.match(workerNavigation,/precacheCanonicalRoutes/);
-assert.doesNotMatch(workerNavigation,/stableAppEntry\(/);
-assert.doesNotMatch(workerNavigation,/findCached\('\/app\/index\.html'\)/);
-assert.doesNotMatch(workerNavigation,/findCached\('\/offline\.html'\)/);
-for(const pathname of Object.values(paths))assert.ok(routesSource.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
-
-assert.match(gatewayBase,/x-civweave-package/,'Gateway no longer recognizes device-package requests.');
-assert.match(gatewayWrapper,/pathname !== '\/app'/,'Render wrapper no longer preserves application file delivery.');
-for(const [index,page] of pages.entries())assert.match(page,/\/app\/install-boundary-v146\.js/,`${Object.keys(paths)[index]} page lost the shared boundary.`);
-
-console.log(JSON.stringify({ok:true,version,revision:'five-system-navigation-v227',systems:Object.keys(paths),routeMatrix:25,boundaryIntrinsicAuthorization:true,experienceScripts,canonicalExperienceScriptCount:experienceScripts.length,workerPackageHeader:true,workerFallback:'exact-route-or-visible-recovery',backgroundCampus:true,launcherSubstitution:false,installerSubstitution:false},null,2));
+for(const [system,pathname] of Object.entries(paths))assert.ok(boundarySource.includes(`['${pathname}','${system}']`),`Boundary fallback map is missing ${system}.`);
+assert.match(boundarySource,/canonicalSystemCount:5/);assert.match(boundarySource,/canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS\.length/);assert.match(boundarySource,/five-system-first-class-routes-civweave-core-only/);assert.match(boundarySource,/radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels'/);assert.match(boundarySource,/campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail'/);assert.match(boundarySource,/guideWorkspaceRevision:'v242-five-window-local-ledgers-no-scroll-trap'/);
+const realmIndex=experienceScripts.indexOf('/app/realm-session-integrity-v237.js'),workspaceIndex=experienceScripts.indexOf('/app/guide-workspace-v242.js');assert.equal(workspaceIndex,realmIndex+1,'Guide workspace must load immediately after realm-local thread ownership.');
+assert.match(navSource,/CivweaveSystemRoutesV227/);assert.match(navSource,/ROUTES\.navigate/);assert.equal((navSource.match(/installed=1/g)||[]).length,5,'The five fallback navigation links are not independently authorized.');assert.match(campusSource,/ensureRouteContract/);assert.match(campusSource,/x-civweave-package':'working-campus-v227/);assert.match(campusPart4,/CivweaveSystemRoutesV227/);assert.match(campusPart4,/routes\.navigate\(id/);assert.match(campusPart4,/searchParams\.set\('installed','1'\)/);
+const routeImport=workerWrapper.indexOf("importScripts('/app/system-routes-v227.js");const coreImport=workerWrapper.indexOf("importScripts('/service-worker-core-v208.js");const shellRepairImport=workerWrapper.indexOf("importScripts('/service-worker-shell-repair-v225.js");const canonicalImport=workerWrapper.indexOf("importScripts('/service-worker-canonical-navigation-v227.js");assert.ok(routeImport>=0&&routeImport<coreImport,'Worker does not load the route contract before the core.');assert.ok(canonicalImport>shellRepairImport,'Canonical navigation is not the final worker policy.');assert.match(workerNavigation,/headers\.set\('x-civweave-package',REVISION\)/);assert.match(workerNavigation,/exact-route-network-first-exact-route-cache-never-launcher-fallback/);assert.match(workerNavigation,/precacheCanonicalRoutes/);assert.doesNotMatch(workerNavigation,/stableAppEntry\(/);assert.doesNotMatch(workerNavigation,/findCached\('\/app\/index\.html'\)/);assert.doesNotMatch(workerNavigation,/findCached\('\/offline\.html'\)/);for(const pathname of Object.values(paths))assert.ok(routesSource.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
+assert.match(gatewayBase,/x-civweave-package/,'Gateway no longer recognizes device-package requests.');assert.match(gatewayWrapper,/pathname !== '\/app'/,'Render wrapper no longer preserves application file delivery.');for(const [index,page] of pages.entries())assert.match(page,/\/app\/install-boundary-v146\.js/,`${Object.keys(paths)[index]} page lost the shared boundary.`);
+console.log(JSON.stringify({ok:true,version,revision:'five-system-navigation-v227',systems:Object.keys(paths),routeMatrix:25,boundaryIntrinsicAuthorization:true,experienceScripts,canonicalExperienceScriptCount:experienceScripts.length,workerPackageHeader:true,workerFallback:'exact-route-or-visible-recovery',backgroundCampus:true,guideWorkspace:'v242',launcherSubstitution:false,installerSubstitution:false},null,2));
