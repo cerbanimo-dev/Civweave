@@ -14,6 +14,7 @@ const [routesSource,boundarySource,versionText]=await Promise.all([
 const version=versionText.trim();
 const systems={civweave:'/app/working-campus-v156.html','living-school':'/app/cabinets/living-school/index.html',cerbanimo:'/app/realm-console-v140.html',fellowfare:'/app/fellowfare-cabinet-v144.html',anarchadia:'/app/anarchadia-console-v139.html'};
 const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-version-v1.js','/app/ai-settings-bind-guard-v230.js','/app/ai-settings-device-repair-v229.js'];
+const allowedExperienceSupport=['/app/experience-orchestrator-v232.js','/app/system-radio-agent-v232.js'];
 function runBoundary(pathname){
   const appended=[],replaced=[],storage=new Map(),documentElement={isConnected:true,dataset:{}},head={isConnected:true,append:node=>appended.push(node)},body={isConnected:true};
   const document={documentElement,head,body,querySelector:()=>null,createElement:tag=>({tagName:String(tag).toUpperCase(),async:true,rel:'',href:'',src:''})};
@@ -31,15 +32,15 @@ for(const [system,pathname] of Object.entries(systems)){
   assert.equal(result.api.systemSurface(),system);
   assert.equal(result.api.allowed(),true);
   assert.equal(result.documentElement.dataset.civweaveSystemRoute,system);
+  const scriptPaths=result.appended.map(node=>{try{return new URL(String(node.src||''),'https://civweave.invalid').pathname}catch{return''}}).filter(Boolean);
   if(system==='civweave'){
-    assert.equal(result.appended.length,0,'Civweave auto-loaded global additions.');
+    assert.deepEqual(scriptPaths,allowedExperienceSupport,'Civweave startup drifted beyond the approved experience subsystem.');
     assert.equal(result.documentElement.dataset.installBoundary,'canonical');
     assert.equal(result.documentElement.dataset.civweaveCanonicalCore,'only');
   }else{
     assert.equal(result.documentElement.dataset.installBoundary,'canonical-system');
     assert.equal(result.documentElement.dataset.civweaveCanonicalRealm,'self-contained');
-    const scriptPaths=result.appended.map(node=>{try{return new URL(String(node.src||''),'https://civweave.invalid').pathname}catch{return''}}).filter(Boolean);
-    assert.deepEqual(scriptPaths,allowedCanonicalSupport,`${system} canonical support drifted into the legacy compatibility bundle.`);
+    assert.deepEqual(scriptPaths,[...allowedExperienceSupport,...allowedCanonicalSupport],`${system} canonical support drifted into the legacy compatibility bundle.`);
     assert(!scriptPaths.includes('/extensions/civweave-additions-v156.js'),`${system} reintroduced the post-paint shared-additions injector.`);
     assert(!scriptPaths.includes('/app/persistent-guide-chat-v215.js'),`${system} reintroduced the persistent-guide overlay during canonical startup.`);
     assert(!scriptPaths.includes('/app/pwa-update-controller-v204.js'),`${system} reintroduced the update overlay during canonical startup.`);
@@ -49,6 +50,7 @@ const api=runBoundary(systems.civweave).api;
 assert.equal(api.canonicalSystemCount,5);
 assert.equal(api.canonicalAutoScripts,0);
 assert.equal(api.canonicalSubsystemSupportScripts,4);
+assert.equal(api.canonicalExperienceScripts,2);
 assert.equal(api.canonicalSubsystemCompatibility,'route-version-settings-only-no-legacy-additions');
 assert.equal(api.canonicalPolicy,'five-system-first-class-routes-civweave-core-only');
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveAutoScripts:0,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,legacyCompatibility:'noncanonical-only'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,legacyCompatibility:'noncanonical-only'},null,2));
