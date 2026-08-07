@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.42-guide-workspace-v242-send-safe-v249';
+const VERSION='1.0.43-guide-workspace-v242-canonical-v250';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
@@ -35,6 +35,7 @@ let priorApi=null;
 let bodyObserver=null;
 let resizeFrame=0;
 let suppressClickUntil=0;
+let suppressedControl=null;
 
 function detectSystem(){
   const route=globalThis.CivweaveSystemRoutesV227?.identify?.(location.pathname);
@@ -60,7 +61,7 @@ function readWorkspace(){const value=parse(localStorage.getItem(STATE_KEY),{});r
 function saveWorkspace(){const previous=readWorkspace();try{localStorage.setItem(STATE_KEY,JSON.stringify({open:workspaceOpen,minimized,activeWindow,seen:previous.seen,updatedAt:now()}))}catch{}}
 function markSeen(system){const value=readWorkspace();value.seen={...value.seen,[system]:now()};value.open=workspaceOpen;value.minimized=minimized;value.activeWindow=activeWindow;try{localStorage.setItem(STATE_KEY,JSON.stringify(value))}catch{}}
 function hasUnread(system){if(system===activeWindow&&workspaceOpen)return false;const thread=readThread(system),seen=readWorkspace().seen?.[system]||'';return Boolean(Number(thread.unread||0)>0||(thread.updatedAt&&(!seen||thread.updatedAt>seen)))}
-function emitWorkspaceState(){try{dispatchEvent(new CustomEvent('civweave:guide-workspace-state',{detail:{version:VERSION,pageSystem,activeWindow,open:workspaceOpen,minimized,busy}}))}catch{}}
+function emitWorkspaceState(){try{dispatchEvent(new CustomEvent('civweave:guide-workspace-state',{detail:{version:VERSION,pageSystem,activeWindow,open:workspaceOpen,minimized,busy,canonicalOwner:true}}))}catch{}}
 
 function retireViewportTrap(){try{globalThis.CivweavePersistentGuideViewportV216?.destroy?.()}catch{}document.documentElement.dataset.civweaveGuideViewport='css-v242'}
 function installStyle(){
@@ -71,7 +72,7 @@ function installStyle(){
 #${ROOT_ID}.is-minimized [data-log],#${ROOT_ID}.is-minimized [data-persistent-form]{display:none!important}
 #${ROOT_ID} [data-log]{overscroll-behavior:auto!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch}
 #${ROOT_ID} textarea{touch-action:manipulation}
-#${ROOT_ID} [data-close],#${ROOT_ID} [data-minimize]{touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#${ROOT_ID} [data-close],#${ROOT_ID} [data-minimize],#${ROOT_ID} [data-cw242-window]{touch-action:manipulation;user-select:none;-webkit-user-select:none}
 #${LAUNCHER_ID}{z-index:2147483643!important;pointer-events:auto!important}
 #${ROOT_ID} .${SWITCHER_CLASS}{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:7px 8px;border-bottom:1px solid #ffffff20;background:#0003}
 #${ROOT_ID} .cw242-window{position:relative;min-width:0;display:grid;justify-items:center;gap:2px;padding:4px 2px;border:1px solid transparent;border-radius:10px;background:transparent;color:#bfc9d6;cursor:pointer}
@@ -106,34 +107,79 @@ function toggleMinimize(){workspaceOpen=true;minimized=!minimized;saveWorkspace(
 function switchWindow(system,{open=false}={}){if(!SYSTEMS.includes(system))return false;activeWindow=system;if(open)workspaceOpen=true;minimized=false;saveWorkspace();render();return true}
 function historyFor(system){return(readThread(system).messages||[]).slice(-24).filter(row=>!row.pending).map(row=>row.role==='handover'?{role:'system',text:`Handover from ${GUIDE[row.sourceSystem]?.name||row.sourceSystem}: ${clean(row.text,5000)}`}:{role:row.role==='user'?'user':'assistant',text:clean(row.text,5000)}).filter(row=>row.text)}
 function explicitHandoffTarget(result,source){const target=clean(result?.handoffSystem||result?.response?.handoffSystem||result?.response?.choice?.handoffSystem,80).toLowerCase();return SYSTEMS.includes(target)&&target!==source?target:''}
+function deterministicReply(system,text){
+  const guide=GUIDE[system]||GUIDE.civweave,value=clean(text,900);
+  if(system==='living-school')return`Moss kept your message locally. For “${value}”, name the smallest thing you need to understand, practice, or demonstrate next.`;
+  if(system==='cerbanimo')return`Kamiya kept your message locally. For “${value}”, define the concrete deliverable, what counts as done, and the first verifiable dependency.`;
+  if(system==='fellowfare')return`Rook kept your message locally. For “${value}”, name the exact need or offer, timing, acceptable substitutes, and exchange boundary.`;
+  if(system==='anarchadia')return`Merlin kept your message locally. For “${value}”, name the proposed change, who it affects, and the reversible test for success.`;
+  return`${guide.name} kept your message locally. For “${value}”, start with the outcome you want, then separate what must be learned, built, acquired, or agreed.`
+}
+async function fallbackReply(system,text){
+  try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.()}catch{}
+  const runtime=globalThis.CivweaveModelRuntime;
+  if(typeof runtime?.generate==='function'){
+    try{
+      const result=await runtime.generate({purpose:`${system}-guide-workspace-v250`,executionProfile:'interactive',messages:[{role:'system',content:`You are ${GUIDE[system].name}, ${GUIDE[system].role}. Give a useful, concise next response while preserving user control.`},...historyFor(system).slice(-10).map(row=>({role:row.role,content:row.text})),{role:'user',content:text}],deterministic:()=>deterministicReply(system,text),fallback:()=>deterministicReply(system,text)});
+      const answer=clean(result?.outputText,10000);if(answer)return{text:answer,provider:result?.actual?.provider||result?.fallback?.provider||result?.provider||'shared-model',model:result?.actual?.model||result?.model||''}
+    }catch{}
+  }
+  return{text:deterministicReply(system,text),provider:'deterministic-local',model:''}
+}
 
 async function submitActive(text){
   const value=clean(text,12000),system=activeWindow;if(!value||busy||!SYSTEMS.includes(system))return false;busy=true;ensureRoot();const button=root.querySelector('[data-send]');if(button)button.disabled=true;append(system,{role:'user',text:value});const pendingId=uid('pending');append(system,{id:pendingId,role:'assistant',guide:system,text:`${GUIDE[system].name} is thinking…`,pending:true});const input=root.querySelector('textarea');if(input)input.value='';render();
-  try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();const assistant=globalThis.CivweaveAssistantV141;if(!assistant?.respond)throw new Error('The shared assistant runtime is not ready.');const result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:historyFor(system)});const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),replacement={role:'assistant',guide:system,responderSystem:system,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:result?.model,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result)}catch(error){const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:`${GUIDE[system].name} could not complete this call: ${clean(error.message,800)}`,provider:'local-recovery'};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread)}finally{busy=false;if(button)button.disabled=false;render()}return true
+  try{
+    await globalThis.CivweaveFamilyAILoaderV105?.ensure?.();
+    const assistant=globalThis.CivweaveAssistantV141;
+    if(!assistant?.respond)throw new Error('The shared assistant runtime is not ready.');
+    const result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:historyFor(system)});
+    const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),replacement={role:'assistant',guide:system,responderSystem:system,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:result?.model,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result)
+  }catch{
+    const fallback=await fallbackReply(system,value),thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-workspace-v250'};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread)
+  }finally{busy=false;if(button)button.disabled=false;render()}return true
 }
 
 function onPointerDownCapture(event){
-  const closeControl=event.target.closest?.(`#${ROOT_ID} [data-close]`),minimizeControl=event.target.closest?.(`#${ROOT_ID} [data-minimize]`);
-  if(!closeControl&&!minimizeControl)return;
+  const switchControl=event.target.closest?.(`#${ROOT_ID} [data-cw242-window]`),closeControl=event.target.closest?.(`#${ROOT_ID} [data-close]`),minimizeControl=event.target.closest?.(`#${ROOT_ID} [data-minimize]`);
+  if(!switchControl&&!closeControl&&!minimizeControl)return;
   if(event.pointerType==='mouse'&&event.button!==0)return;
-  event.preventDefault();event.stopImmediatePropagation();suppressClickUntil=performance.now()+450;
+  event.preventDefault();event.stopImmediatePropagation();suppressClickUntil=performance.now()+500;suppressedControl=switchControl||closeControl||minimizeControl;
+  if(switchControl){switchWindow(switchControl.dataset.cw242Window,{open:true});return}
   const active=document.activeElement;if(active?.closest?.(`#${ROOT_ID},#cw-shared-guide-surface-v236`))active.blur?.();
   if(closeControl)closeWorkspace();else toggleMinimize()
 }
-function onClickCapture(event){if(performance.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();return}const windowButton=event.target.closest?.('[data-cw242-window]');if(windowButton){event.preventDefault();event.stopImmediatePropagation();switchWindow(windowButton.dataset.cw242Window,{open:true});return}if(event.target.closest?.(`#${ROOT_ID} [data-close]`)){event.preventDefault();event.stopImmediatePropagation();closeWorkspace();return}if(event.target.closest?.(`#${ROOT_ID} [data-minimize]`)){event.preventDefault();event.stopImmediatePropagation();toggleMinimize();return}const launch=event.target.closest?.(`#${LAUNCHER_ID}`);if(launch){event.preventDefault();event.stopImmediatePropagation();openWindow(pageSystem);return}if(root?.contains(event.target)||launcher?.contains(event.target))return;const trigger=event.target.closest?.('[data-cwf-chat],[data-open-guide-chat],[data-open-persistent-chat],#moss,#compass,.ls-moss,.ls-compass,[data-guide]');if(!trigger)return;const requested=clean(trigger.getAttribute?.('data-guide'),80).toLowerCase();const system=SYSTEMS.includes(requested)?requested:pageSystem;event.preventDefault();event.stopImmediatePropagation();openWindow(system)}
-function onSubmitCapture(event){const form=event.target?.closest?.(`#${ROOT_ID} [data-persistent-form]`);if(!form)return;event.preventDefault();event.stopImmediatePropagation();const input=form.querySelector('textarea'),text=clean(input?.value,12000);if(text)void submitActive(text)}
+function onClickCapture(event){
+  if(performance.now()<suppressClickUntil&&suppressedControl?.contains?.(event.target)){event.preventDefault();event.stopImmediatePropagation();return}
+  const windowButton=event.target.closest?.('[data-cw242-window]');if(windowButton){event.preventDefault();event.stopImmediatePropagation();switchWindow(windowButton.dataset.cw242Window,{open:true});return}
+  if(event.target.closest?.(`#${ROOT_ID} [data-close]`)){event.preventDefault();event.stopImmediatePropagation();closeWorkspace();return}
+  if(event.target.closest?.(`#${ROOT_ID} [data-minimize]`)){event.preventDefault();event.stopImmediatePropagation();toggleMinimize();return}
+  const launch=event.target.closest?.(`#${LAUNCHER_ID}`);if(launch){event.preventDefault();event.stopImmediatePropagation();openWindow(pageSystem);return}
+  if(root?.contains(event.target)||launcher?.contains(event.target))return;
+  const trigger=event.target.closest?.('[data-cwf-chat],[data-open-guide-chat],[data-open-persistent-chat],#moss,#compass,.ls-moss,.ls-compass,[data-guide]');if(!trigger)return;
+  const requested=clean(trigger.getAttribute?.('data-guide'),80).toLowerCase();const system=SYSTEMS.includes(requested)?requested:pageSystem;event.preventDefault();event.stopImmediatePropagation();openWindow(system)
+}
+function onSubmitCapture(event){
+  const target=event.target;
+  if(!(target instanceof HTMLFormElement))return;
+  const canonical=target.matches(`#${ROOT_ID} [data-persistent-form]`),workingCampus=pageSystem==='civweave'&&target.id==='weaveling-chat-form'&&Boolean(target.closest('.app'));
+  if(!canonical&&!workingCampus)return;
+  const input=target.querySelector('textarea,input[type="text"]'),text=clean(input?.value,12000);event.preventDefault();event.stopImmediatePropagation();if(!text)return;
+  if(workingCampus){if(input)input.value='';openWindow('civweave');void submitActive(text);return}
+  void submitActive(text)
+}
 function onThreadChanged(event){const system=event.detail?.system;if(!SYSTEMS.includes(system))return;queueMicrotask(()=>render({keepScroll:system!==activeWindow}))}
 function onBodyChange(records){if(records.some(record=>[...record.removedNodes].some(node=>node?.id===ROOT_ID||node?.id===LAUNCHER_ID))){queueMicrotask(()=>{ensureRoot();render({keepScroll:true})})}}
 function onResize(){if(resizeFrame)return;resizeFrame=requestAnimationFrame(()=>{resizeFrame=0;document.documentElement.style.setProperty('--cw242-visual-height',`${Math.round(globalThis.visualViewport?.height||innerHeight)}px`)})}
 
 function installApi(){
   priorApi=globalThis.CivweavePersistentGuideChatV215;
-  const api=Object.freeze({version:VERSION,realmIsolated:true,workspace:true,systems:[...SYSTEMS],readState:()=>({...readThread(activeWindow),open:workspaceOpen,minimized}),readThread,open:options=>openWindow(SYSTEMS.includes(options?.guide)?options.guide:pageSystem,options||{}),close:closeWorkspace,minimize:()=>{if(!minimized)toggleMinimize();return true},restore:()=>{if(minimized)toggleMinimize();return true},switchGuide:(system,options={})=>switchWindow(system,{open:options.open===true}),notify:(system,text,options={})=>{if(!SYSTEMS.includes(system)||!clean(text))return false;const thread=readThread(system);thread.messages.push({id:uid('msg'),at:now(),role:'assistant',guide:system,responderSystem:system,text:clean(text,6000),notification:true});if(system!==activeWindow||!workspaceOpen)thread.unread=Math.min(99,Number(thread.unread||0)+1);writeThread(system,thread);if(options.open)openWindow(system);return true},handover:(source,target,summary,need='')=>priorApi?.handover?.(source,target,summary,need)??false,submitText:async(text,system=activeWindow)=>{switchWindow(SYSTEMS.includes(system)?system:activeWindow,{open:workspaceOpen});return submitActive(text)},activeWindow:()=>activeWindow,pageSystem:()=>pageSystem,destroy(){document.removeEventListener('pointerdown',onPointerDownCapture,true);document.removeEventListener('click',onClickCapture,true);document.removeEventListener('submit',onSubmitCapture,true);removeEventListener('civweave:realm-guide-thread-changed',onThreadChanged);bodyObserver?.disconnect();globalThis.visualViewport?.removeEventListener('resize',onResize);removeEventListener('resize',onResize);document.getElementById(STYLE_ID)?.remove()}});
+  const api=Object.freeze({version:VERSION,realmIsolated:true,workspace:true,canonicalOwner:true,systems:[...SYSTEMS],readState:()=>({...readThread(activeWindow),open:workspaceOpen,minimized}),readThread,open:options=>openWindow(SYSTEMS.includes(options?.guide)?options.guide:pageSystem,options||{}),close:closeWorkspace,minimize:()=>{if(!minimized)toggleMinimize();return true},restore:()=>{if(minimized)toggleMinimize();return true},switchGuide:(system,options={})=>switchWindow(system,{open:options.open===true}),notify:(system,text,options={})=>{if(!SYSTEMS.includes(system)||!clean(text))return false;const thread=readThread(system);thread.messages.push({id:uid('msg'),at:now(),role:'assistant',guide:system,responderSystem:system,text:clean(text,6000),notification:true});if(system!==activeWindow||!workspaceOpen)thread.unread=Math.min(99,Number(thread.unread||0)+1);writeThread(system,thread);if(options.open)openWindow(system);return true},handover:(source,target,summary,need='')=>priorApi?.handover?.(source,target,summary,need)??false,submitText:async(text,system=activeWindow)=>{switchWindow(SYSTEMS.includes(system)?system:activeWindow,{open:workspaceOpen});return submitActive(text)},activeWindow:()=>activeWindow,pageSystem:()=>pageSystem,destroy(){document.removeEventListener('pointerdown',onPointerDownCapture,true);document.removeEventListener('click',onClickCapture,true);document.removeEventListener('submit',onSubmitCapture,true);removeEventListener('civweave:realm-guide-thread-changed',onThreadChanged);bodyObserver?.disconnect();globalThis.visualViewport?.removeEventListener('resize',onResize);removeEventListener('resize',onResize);document.getElementById(STYLE_ID)?.remove()}});
   globalThis.CivweavePersistentGuideChatV215=api;return api
 }
 
-function start(){pageSystem=detectSystem();const saved=readWorkspace();activeWindow=pageSystem;workspaceOpen=saved.open;minimized=saved.minimized;installStyle();retireViewportTrap();ensureRoot();installApi();document.addEventListener('pointerdown',onPointerDownCapture,true);document.addEventListener('click',onClickCapture,true);document.addEventListener('submit',onSubmitCapture,true);addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);bodyObserver=new MutationObserver(onBodyChange);bodyObserver.observe(document.body,{childList:true});globalThis.visualViewport?.addEventListener('resize',onResize,{passive:true});addEventListener('resize',onResize,{passive:true});onResize();render();document.documentElement.dataset.civweaveGuideWorkspace='v242';dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{version:VERSION,pageSystem,activeWindow,realmIsolated:true,windowCount:5,gestureSafe:true,sendSafe:true}}))}
+function start(){pageSystem=detectSystem();const saved=readWorkspace();activeWindow=pageSystem;workspaceOpen=saved.open;minimized=saved.minimized;installStyle();retireViewportTrap();ensureRoot();installApi();document.addEventListener('pointerdown',onPointerDownCapture,true);document.addEventListener('click',onClickCapture,true);document.addEventListener('submit',onSubmitCapture,true);addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);bodyObserver=new MutationObserver(onBodyChange);bodyObserver.observe(document.body,{childList:true});globalThis.visualViewport?.addEventListener('resize',onResize,{passive:true});addEventListener('resize',onResize,{passive:true});onResize();render();document.documentElement.dataset.civweaveGuideWorkspace='v250-canonical-owner';dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{version:VERSION,pageSystem,activeWindow,realmIsolated:true,windowCount:5,gestureSafe:true,sendSafe:true,canonicalOwner:true,transportFallback:true}}))}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 
-globalThis.CivweaveGuideWorkspaceV242=Object.freeze({version:VERSION,systems:[...SYSTEMS],detectSystem,readThread,openWindow,switchWindow,closeWorkspace,toggleMinimize,submitActive,state:()=>({pageSystem,activeWindow,open:workspaceOpen,minimized,busy})});
+globalThis.CivweaveGuideWorkspaceV242=Object.freeze({version:VERSION,systems:[...SYSTEMS],detectSystem,readThread,openWindow,switchWindow,closeWorkspace,toggleMinimize,submitActive,state:()=>({pageSystem,activeWindow,open:workspaceOpen,minimized,busy,canonicalOwner:true})});
 })();
