@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.20';
+const VERSION='1.0.30';
 const REVISION='five-system-boundary-v227';
 const INSTALLER='/app/index.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const DEV_KEY='civweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION='v1.0.20-canonical-core-only-v226';
+const ADDITIONS_VERSION='v1.0.30-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
 const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
@@ -15,6 +15,9 @@ const PLATFORM_STABILITY='/app/platform-stability-v159.js';
 const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
 const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js';
 const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js';
+const THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js';
+const SHARED_GUIDE_SURFACE='/app/shared-guide-surface-v236.js';
+const FELLOWFARE_GUIDE_BRIDGE='/app/fellowfare-shared-guide-bridge-v236.js';
 const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
 const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
@@ -29,7 +32,16 @@ const FALLBACK_PATHS=new Map([
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR];
-const SYSTEM_EXPERIENCE_SCRIPTS=[EXPERIENCE_ORCHESTRATOR,SYSTEM_RADIO_AGENT,SHARED_REVIEW_SURFACE];
+const SYSTEM_EXPERIENCE_SCRIPTS=[
+  EXPERIENCE_ORCHESTRATOR,
+  GUIDE_IDENTITY_SCRIPT,
+  PERSISTENT_GUIDE_CHAT_SCRIPT,
+  PERSISTENT_GUIDE_VIEWPORT_SCRIPT,
+  THEMED_SYSTEM_NAV,
+  SYSTEM_RADIO_AGENT,
+  SHARED_REVIEW_SURFACE,
+  SHARED_GUIDE_SURFACE
+];
 const LEGACY_SCRIPTS=[
   ROUTE_CONTRACT,
   RELEASE_VERSION,
@@ -50,7 +62,8 @@ const LEGACY_SCRIPTS=[
   '/app/shared-tools-cleanup-v175.js',
   '/extensions/civweave-proof-progress-v158.js',
   '/extensions/civweave-gemini-interactions-v159.js',
-  '/app/themed-system-nav-v178.js',
+  THEMED_SYSTEM_NAV,
+  SHARED_GUIDE_SURFACE,
   PWA_UPDATE_SCRIPT
 ];
 const params=new URLSearchParams(location.search);
@@ -106,8 +119,10 @@ function installEarlyGuards(){
   return true;
 }
 function installSystemExperienceSupport(){
-  if(!systemSurface()||!liveHead())return false;
+  const system=systemSurface();
+  if(!system||!liveHead())return false;
   SYSTEM_EXPERIENCE_SCRIPTS.forEach(addScript);
+  if(system==='fellowfare')addScript(FELLOWFARE_GUIDE_BRIDGE);
   return true;
 }
 function installCanonicalSystemSupport(){
@@ -165,7 +180,7 @@ function start(){
 start();
 
 globalThis.CivweaveInstallBoundaryV146=Object.freeze({
-  version:'1.0.20',allowed,
+  version:'1.0.30',allowed,
   revision:REVISION,
   systemSurface,
   canonicalAppSurface,
@@ -189,9 +204,13 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
   radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
+  radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',
   sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
+  sharedGuideSurfaceRevision:'v236-inline-plus-bottom-right-shared-thread',
+  fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',
   guideIdentityRevision:'v216-explicit-responder-ownership',
   guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
+  guideSurfaceOwnershipPolicy:'v236-page-system-owns-inline-and-launcher-guide',
   guideIdentityMigration:'realm-action-owner',
   persistentGuideChatSubmissionPipelines:1,
   persistentGuideChatGuideCount:5,
