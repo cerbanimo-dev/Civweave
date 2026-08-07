@@ -4,6 +4,7 @@
 const STATUS_FALLBACK_MS = 8000;
 const startedAt = Date.now();
 let autoStarted = false;
+let timer = 0;
 
 const $ = selector => document.querySelector(selector);
 
@@ -65,25 +66,35 @@ function tryAutoStart() {
   button.click();
 }
 
-function startWatching() {
-  const observer = new MutationObserver(tryAutoStart);
-  observer.observe(document.documentElement, {
-    subtree: true,
-    childList: true,
-    characterData: true,
-    attributes: true,
-    attributeFilter: ['disabled']
-  });
-
-  const timer = setInterval(() => {
-    tryAutoStart();
-    if (autoStarted || campusIsReady()) clearInterval(timer);
-  }, 250);
-
-  setTimeout(() => clearInterval(timer), 60000);
-  tryAutoStart();
+function stopTimer() {
+  if (!timer) return;
+  clearInterval(timer);
+  timer = 0;
 }
 
+function onStatus() {
+  tryAutoStart();
+  if (autoStarted || campusIsReady()) stopTimer();
+}
+
+function startWatching() {
+  addEventListener('civweave:offline-campus-status', onStatus);
+  navigator.serviceWorker?.addEventListener?.('controllerchange', onStatus);
+  addEventListener('appinstalled', onStatus);
+
+  timer = setInterval(onStatus, 500);
+  setTimeout(stopTimer, 60000);
+  onStatus();
+}
+
+function destroy() {
+  stopTimer();
+  removeEventListener('civweave:offline-campus-status', onStatus);
+  navigator.serviceWorker?.removeEventListener?.('controllerchange', onStatus);
+  removeEventListener('appinstalled', onStatus);
+}
+
+addEventListener('pagehide', destroy, { once: true });
 if (document.readyState === 'loading') addEventListener('DOMContentLoaded', startWatching, { once: true });
 else startWatching();
 
