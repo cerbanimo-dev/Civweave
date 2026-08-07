@@ -202,7 +202,7 @@ function installApi(){
     open:options=>openWindow(SYSTEMS.includes(options?.guide)?options.guide:pageSystem,options||{}),
     close:closeWorkspace,
     switchGuide:(system,options={})=>switchWindow(system,{open:options.open!==false}),
-    notify(system,text,options={})=>{if(!SYSTEMS.includes(system)||!clean(text))return false;const thread=readThread(system);thread.messages.push({id:uid('msg'),at:now(),role:'assistant',guide:system,responderSystem:system,text:clean(text,6000),notification:true});if(system!==activeWindow||!workspaceOpen)thread.unread=Math.min(99,Number(thread.unread||0)+1);writeThread(system,thread);if(options.open)openWindow(system);return true},
+    notify:(system,text,options={})=>{if(!SYSTEMS.includes(system)||!clean(text))return false;const thread=readThread(system);thread.messages.push({id:uid('msg'),at:now(),role:'assistant',guide:system,responderSystem:system,text:clean(text,6000),notification:true});if(system!==activeWindow||!workspaceOpen)thread.unread=Math.min(99,Number(thread.unread||0)+1);writeThread(system,thread);if(options.open)openWindow(system);return true},
     handover:(source,target,summary,need='')=>priorApi?.handover?.(source,target,summary,need)??false,
     submitText:async(text,system=activeWindow)=>{switchWindow(SYSTEMS.includes(system)?system:activeWindow);return submitActive(text)},
     activeWindow:()=>activeWindow,pageSystem:()=>pageSystem,
