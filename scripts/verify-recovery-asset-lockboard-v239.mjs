@@ -10,8 +10,11 @@ const read=path=>fs.readFileSync(resolve(root,path),'utf8');
 
 const offline=read('public/service-worker-offline-v211-override.js');
 const worker=read('public/service-worker-v203.js');
+const installerPage=read('public/app/index.html');
+const installRuntime=read('public/install-v130.js');
 const autostart=read('public/app/required-campus-autostart-v1.js');
 const campus=read('public/app/working-campus-v156.js');
+const lockboardHtml=read('public/app/asset-lockboard-v239.html');
 const lockboard=read('public/app/asset-lockboard-v239.js');
 const customizer=read('public/app/asset-customization-v239.js');
 const boundary=read('public/app/install-boundary-v146.js');
@@ -30,6 +33,10 @@ const checks=[
   ['text graph refreshes while binary assets reuse cache',()=>{
     assert.match(offline,/const preferNetwork = V211_DISCOVERY_TEXT\.test\(item\.pathname\)/);
     assert.match(offline,/cacheOfflineAsset\(item\.pathname, \{ preferNetwork \}\)/);
+  }],
+  ['installer runtime is the sole service-worker registration owner',()=>{
+    assert.doesNotMatch(installerPage,/navigator\.serviceWorker\.register\s*\(/);
+    assert.match(installRuntime,/navigator\.serviceWorker\.register\s*\(/);
   }],
   ['old installer-wide mutation observer is gone',()=>{
     assert.doesNotMatch(autostart,/new MutationObserver/);
@@ -61,6 +68,10 @@ const checks=[
     assert.match(lockboard,/slotLocks/);
     assert.match(lockboard,/pathOverrides/);
     assert.match(lockboard,/Exported/);
+  }],
+  ['lockboard previews stay literal even when a personal skin exists',()=>{
+    assert.doesNotMatch(lockboardHtml,/asset-customization-v239\.js/);
+    assert.match(lockboardHtml,/asset-lockboard-v239\.js/);
   }],
   ['personal customization is opt-in and path based',()=>{
     assert.match(customizer,/civweave\.asset-lockboard\.v239/);
