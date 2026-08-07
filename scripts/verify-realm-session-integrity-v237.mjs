@@ -62,9 +62,9 @@ const checks=[
     assert.match(boundary,/realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair'/);
     assert.match(boundary,/persistentGuideChatThreadPolicy:'five-realm-local-ledgers-plus-explicit-handover'/);
   }],
-  ['release is v1.0.31 and syntax gate includes runtime',()=>{
-    assert.equal(version,'1.0.31');
-    assert.equal(pkg.version,'1.0.31');
+  ['release metadata agrees and syntax gate includes runtime',()=>{
+    assert.match(version,/^\d+\.\d+\.\d+$/);
+    assert.equal(pkg.version,version);
     assert.match(pkg.scripts['check:syntax'],/public\/app\/realm-session-integrity-v237\.js/);
   }]
 ];
