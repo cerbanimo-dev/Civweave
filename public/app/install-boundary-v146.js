@@ -29,7 +29,7 @@ const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
 const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
-const RADIO_TRACK_SUGGESTIONS='/app/radio-track-suggestions-v241.js';
+const RADIO_TRACK_SUGGESTIONS='/app/radio-track-suggestions-v240.js';
 const SHARED_REVIEW_SURFACE='/app/shared-review-surface-v234.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
