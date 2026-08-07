@@ -12,7 +12,16 @@ const paths={
   fellowfare:'/app/fellowfare-cabinet-v144.html',
   anarchadia:'/app/anarchadia-console-v139.html'
 };
-const experienceScripts=['/app/experience-orchestrator-v232.js','/app/system-radio-agent-v233.js','/app/shared-review-surface-v234.js'];
+const experienceScripts=[
+  '/app/experience-orchestrator-v232.js',
+  '/app/guide-identity-integrity-v216.js',
+  '/app/persistent-guide-chat-v215.js',
+  '/app/persistent-guide-viewport-v216.js',
+  '/app/themed-system-nav-v178.js',
+  '/app/system-radio-agent-v233.js',
+  '/app/shared-review-surface-v234.js',
+  '/app/shared-guide-surface-v236.js'
+];
 const [routesSource,boundarySource,navSource,campusSource,campusPart4,workerWrapper,workerNavigation,gatewayBase,gatewayWrapper,...pages]=await Promise.all([
   read('public/app/system-routes-v227.js'),
   read('public/app/install-boundary-v146.js'),
