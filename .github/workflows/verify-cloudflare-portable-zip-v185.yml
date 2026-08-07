@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Install build dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
       - name: Syntax check portable release build
         run: |
           node --check scripts/portable-zip.mjs
