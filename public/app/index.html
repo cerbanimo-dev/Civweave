@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#07141f">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <title>Install Civweave v1.0.18</title>
+  <script src="/app/pwa-install-prompt-v246.js?v=pwa-install-v246"></script>
   <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.18">
   <link rel="icon" href="/app/logos/civweave-symbol.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/install-v130.css?v=1.0.18-lightweight-shell-v208">
@@ -24,7 +25,7 @@
   </header>
   <section class="install-card" aria-labelledby="install-title">
     <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install Civweave v1.0.18. The campus downloads automatically.</h2><p>You can open the online campus immediately. Installation prepares the small Civweave shell, then automatically downloads the required functional campus as a resumable stream. One slow or missing room no longer freezes access, and interrupted files can continue later. No native modal is involved.</p></div>
-    <div class="topology" aria-label="Civweave topology"><article><b>1</b><strong>Install shell</strong><span>Fast, browser-native app installation.</span></article><i>→</i><article><b>2</b><strong>Download campus</strong><span>Starts automatically and resumes per file.</span></article><i>→</i><article><b>3</b><strong>Launch fresh</strong><span>The completed offline campus opens as a fresh PWA session.</span></article></div>
+    <div class="topology" aria-label="Civweave topology"><article><b>1</b><strong>Install shell</strong><span>Real browser-native PWA installation.</span></article><i>→</i><article><b>2</b><strong>Download campus</strong><span>Starts automatically and resumes per file.</span></article><i>→</i><article><b>3</b><strong>Open Civweave</strong><span>Launch immediately while the campus continues downloading.</span></article></div>
 
     <div id="campus-install-progress" class="campus-install-progress" data-state="preparing" aria-live="polite">
       <div class="campus-progress-heading"><span>Offline campus</span><strong id="offline-package-state">checking</strong></div>
@@ -58,7 +59,7 @@
 
   <section class="gateway-grid">
     <article class="status-card"><small>VISIBLE UPDATES</small><h3>Update without re-downloading everything</h3><p>Release checks update the tiny shell first. The required campus download then starts automatically and reuses files already stored on the device.</p></article>
-    <article class="status-card"><small>FAILURE IS LOCAL</small><h3>One file no longer sinks the ship</h3><p>Campus files report their own failures and remain resumable. If anything misses, a compact retry control appears directly under the progress bar.</p></article>
+    <article class="status-card"><small>FAILURE IS LOCAL</small><h3>One file no longer sinks the ship</h3><p>Campus files report their own failures and remain resumable. Stale references are excluded from completion instead of holding the app at 92% forever.</p></article>
     <article class="status-card"><small>PORTABLE RECOVERY</small><h3>Carry the package another way</h3><div class="card-actions"><a href="/downloads/Civweave-Mobile-Install-Kit.zip">Mobile install kit</a><a href="/downloads/civweave-pocket-campus.cwseed">Pocket Campus seed</a><a href="/downloads/knowledge-schools/catalog.json">Knowledge school catalog</a></div></article>
   </section>
 </main>
@@ -69,109 +70,32 @@
 <script src="/app/offline-campus-status-v210.js?v=1.0.18-offline-retry-loop-v211"></script>
 <script src="/app/required-campus-autostart-v1.js?v=1.0.18-required-campus-v1"></script>
 <script>
-(() => {
+(()=>{
   'use strict';
-
-  const INSTALLED_KEY = 'civweave.pwa.install-accepted.v1';
-  const START_URL = '/app/working-campus-v156.html?installed=1&launch=offline-ready';
-  const $ = selector => document.querySelector(selector);
-  const standalone = () => navigator.standalone === true || ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay'].some(mode => matchMedia(`(display-mode: ${mode})`).matches);
-
-  let installAccepted = standalone() || localStorage.getItem(INSTALLED_KEY) === '1';
-
-  function numeric(value) {
-    const number = Number(value);
-    return Number.isFinite(number) && number > 0 ? number : 0;
+  const $=selector=>document.querySelector(selector);
+  const numeric=value=>{const number=Number(value);return Number.isFinite(number)&&number>0?number:0};
+  const latestStatus=()=>globalThis.CivweaveOfflineCampusStatusV210?.last||null;
+  function progressFromText(){const match=($('#offline-package-assets')?.textContent||'').match(/(\d+)\s*\/\s*(\d+)\s+files/i);return match?{complete:numeric(match[1]),total:numeric(match[2])}:{complete:0,total:0}}
+  function fallbackReady(){return /^ready offline\b/i.test($('#offline-package-state')?.textContent||'')}
+  function renderProgress(){
+    const status=latestStatus(),textProgress=progressFromText();
+    const box=$('#campus-install-progress'),track=$('#offline-campus-progress-track'),fill=$('#offline-campus-progress-fill'),percentNode=$('#offline-campus-progress-percent'),retry=$('#download-offline-package');
+    if(!box||!track||!fill||!percentNode)return;
+    const total=numeric(status?.total||status?.discovered||textProgress.total);
+    const complete=numeric(status?.downloaded??status?.completed??status?.attempted??textProgress.complete);
+    const failed=numeric(status?.failedCount||status?.failed?.length);
+    const ready=Boolean(status?.ready)||fallbackReady();
+    const running=Boolean(status?.running)||/^downloading\b/i.test($('#offline-package-state')?.textContent||'');
+    let percent=ready?100:(total?Math.floor(Math.min(complete,total)/total*100):0);
+    if(!ready&&percent>=100)percent=99;
+    fill.style.width=`${percent}%`;
+    percentNode.textContent=`${percent}%`;
+    track.setAttribute('aria-valuenow',String(percent));
+    box.dataset.state=ready?'ready':failed?'failed':running?'running':'preparing';
+    if(retry)retry.hidden=!(failed&&!running&&!ready);
   }
-
-  function latestStatus() {
-    return globalThis.CivweaveOfflineCampusStatusV210?.last || null;
-  }
-
-  function progressFromText() {
-    const match = ($('#offline-package-assets')?.textContent || '').match(/(\d+)\s*\/\s*(\d+)\s+files/i);
-    return match ? { complete: numeric(match[1]), total: numeric(match[2]) } : { complete: 0, total: 0 };
-  }
-
-  function fallbackReady() {
-    return /^ready offline\b/i.test($('#offline-package-state')?.textContent || '');
-  }
-
-  function renderProgress() {
-    const status = latestStatus();
-    const textProgress = progressFromText();
-    const box = $('#campus-install-progress');
-    const track = $('#offline-campus-progress-track');
-    const fill = $('#offline-campus-progress-fill');
-    const percentNode = $('#offline-campus-progress-percent');
-    const retry = $('#download-offline-package');
-    const install = $('#install-app');
-    if (!box || !track || !fill || !percentNode || !install) return;
-
-    const total = numeric(status?.total || status?.discovered || textProgress.total);
-    const complete = numeric(status?.downloaded ?? status?.completed ?? status?.attempted ?? textProgress.complete);
-    const failed = numeric(status?.failedCount || status?.failed?.length);
-    const ready = Boolean(status?.ready) || fallbackReady();
-    const running = Boolean(status?.running) || /^downloading\b/i.test($('#offline-package-state')?.textContent || '');
-    let percent = ready ? 100 : (total ? Math.floor(Math.min(complete, total) / total * 100) : 0);
-    if (!ready && percent >= 100) percent = 99;
-
-    fill.style.width = `${percent}%`;
-    percentNode.textContent = `${percent}%`;
-    track.setAttribute('aria-valuenow', String(percent));
-    box.dataset.state = ready ? 'ready' : failed ? 'failed' : running ? 'running' : 'preparing';
-
-    if (retry) retry.hidden = !(failed && !running && !ready);
-
-    if (ready && installAccepted) {
-      install.disabled = false;
-      install.textContent = 'Launch Civweave';
-      install.dataset.campusLaunchReady = '1';
-    } else if (install.dataset.campusLaunchReady === '1') {
-      delete install.dataset.campusLaunchReady;
-    }
-  }
-
-  function markInstalled() {
-    installAccepted = true;
-    try { localStorage.setItem(INSTALLED_KEY, '1'); } catch {}
-    queueMicrotask(renderProgress);
-  }
-
-  function launchFreshPwa(event) {
-    const install = $('#install-app');
-    if (install?.dataset.campusLaunchReady !== '1') return;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    install.disabled = true;
-    install.textContent = 'Relaunching Civweave…';
-
-    const target = new URL(START_URL, location.origin);
-    target.searchParams.set('restart', Date.now().toString(36));
-
-    let launched = null;
-    try { launched = window.open(target.href, 'civweave-pwa-relaunch'); } catch {}
-    if (!launched) {
-      location.replace(target.href);
-      return;
-    }
-
-    setTimeout(() => {
-      try { window.close(); } catch {}
-    }, 120);
-
-    setTimeout(() => {
-      if (!document.hidden && !window.closed) location.replace(target.href);
-    }, 650);
-  }
-
-  if (standalone()) markInstalled();
-  addEventListener('appinstalled', markInstalled);
-  addEventListener('civweave:offline-campus-status', renderProgress);
-  $('#install-app')?.addEventListener('click', launchFreshPwa, true);
-
-  setInterval(renderProgress, 750);
+  addEventListener('civweave:offline-campus-status',renderProgress);
+  setInterval(renderProgress,750);
   renderProgress();
 })();
 </script>
