@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 22
       - name: Install dependencies
-        run: nm install --no-audit --no-fund
+        run: npm install --no-audit --no-fund
       - name: Syntax check active runtime
         run: npm run check:syntax
       - name: Verify v1.0.6 settings layer
