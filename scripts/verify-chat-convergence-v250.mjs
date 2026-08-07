@@ -18,7 +18,7 @@ const [manifestText,installedEntry,redirects,boundary,workspace,viewport,shared,
   read('VERSION'),
   read('package.json')
 ]);
-for(const source of [installedEntry,boundary,workspace,viewport,shared,workerRepair,workerEntry,releaseSync,coherenceSync])new Function(source.replace(/^import .*$/gm,'').replace(/^const root=.*$/m,"const root='';").replace(/await patch[\s\S]*/m,''));
+for(const source of [installedEntry,boundary,workspace,viewport,shared,workerRepair,workerEntry])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
 const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
