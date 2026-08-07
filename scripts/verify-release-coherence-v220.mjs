@@ -18,8 +18,13 @@ const offlineImport="importScripts('/service-worker-offline-v211-override.js";
 const coherenceImport="importScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v226')";
 assert(wrapper.includes(coherenceImport),'Active worker wrapper does not import release coherence v226.');
 assert(wrapper.indexOf(coherenceImport)>wrapper.indexOf(offlineImport),'Release coherence must load after the retained core and offline override.');
-assert(entry.includes("document.currentScript?.src"),'Installed entry does not derive the canonical release from its versioned script URL.');
-assert(entry.includes('revision=release-coherence-v226'),'Installed entry does not refresh the v226 worker before redirecting.');
+assert(entry.includes("document.currentScript?.src"),'Installed entry does not derive an explicit release from a versioned script URL when one is supplied.');
+assert(entry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"),'Installed entry does not resolve the current release from a no-store manifest request.');
+assert(entry.includes("updateViaCache:'none'"),'Installed entry can still reuse HTTP-cached worker script bytes.');
+assert(entry.includes('await registration.update()'),'Installed entry does not explicitly refresh the worker before routing.');
+assert(entry.includes("revision=chat-convergence-v250"),'Installed entry does not register the v250 convergence worker before routing.');
+assert(entry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'Installed entry does not activate a waiting convergence worker before routing.');
+assert(entry.indexOf('await refreshWorker(releaseVersion)')<entry.indexOf('const requested='),'Installed entry routes before the v250 worker refresh completes.');
 assert(cloudflareBuild.includes("await import('./sync-release-version-assets.mjs')"),'Cloudflare build skips canonical release synchronization.');
 assert(cloudflareBuild.includes("await import('./sync-release-coherence-v220.mjs')"),'Cloudflare build skips release-coherence synchronization.');
 assert(prepareStart.includes("await import('./sync-release-coherence-v220.mjs')"),'Render/local startup skips release-coherence synchronization.');
@@ -55,13 +60,13 @@ const sandbox={
 vm.createContext(sandbox);
 vm.runInContext(override,sandbox,{filename:'service-worker-release-coherence-v220.js'});
 
-const fresh=await sandbox.cacheFirst(new Request('https://civweave.invalid/app/install-boundary-v146.js?v=canonical-core-only-v226'));
+const fresh=await sandbox.cacheFirst(new Request('https://civweave.invalid/app/install-boundary-v146.js?v=chat-convergence-v250'));
 assert.equal(await fresh.text(),'fresh','Version-pinned boot code did not prefer the network.');
 assert.equal(fetchCalls,1);
 assert.equal(cachedCalls,0);
 assert.equal(runtimeWrites,1);
 
-const fragment=await sandbox.cacheFirst(new Request('https://civweave.invalid/app/working-campus-v156.part1.txt?revision=canonical-campus-startup-v226'));
+const fragment=await sandbox.cacheFirst(new Request('https://civweave.invalid/app/working-campus-v156.part1.txt?revision=canonical-campus-startup-v227'));
 assert.equal(await fragment.text(),'fresh','Version-pinned campus fragment did not prefer the network.');
 assert.equal(fetchCalls,2);
 assert.equal(cachedCalls,0);
@@ -72,16 +77,17 @@ assert.equal(await image.text(),'cached','Images should retain the cache-first o
 assert.equal(cachedCalls,1);
 
 networkAvailable=false;
-const fallback=await sandbox.cacheFirst(new Request('https://civweave.invalid/app/working-campus-v156.part2.txt?revision=canonical-campus-startup-v226'));
+const fallback=await sandbox.cacheFirst(new Request('https://civweave.invalid/app/working-campus-v156.part2.txt?revision=canonical-campus-startup-v227'));
 assert.equal(await fallback.text(),'cached','Version-pinned campus fragment did not fall back to cache while offline.');
 assert.equal(cachedCalls,2);
 assert.equal(sandbox.self.CivweaveReleaseCoherenceV220?.policy,'version-pinned-html-js-css-json-txt-network-first-cached-fallback');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'release-coherence-v226',
-  installedEntryRefresh:true,
+  revision:'release-coherence-v226-v250-entry',
+  installedEntryRefresh:'chat-convergence-v250-before-routing',
   cloudflareVersionSync:true,
+  renderLocalVersionSync:true,
   versionedTextAndCampusFragments:'network-first-cached-fallback',
   images:'cache-first'
 },null,2));

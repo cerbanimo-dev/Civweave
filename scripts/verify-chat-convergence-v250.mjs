@@ -2,10 +2,14 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [manifestText,installedEntry,redirects,boundary,workspace,viewport,shared,workingPart5,workerRepair,workerEntry,releaseSync,coherenceSync,release,pkgText]=await Promise.all([
+const [manifestText,rawLauncher,installedEntryHtml,installedEntry,redirects,routesSource,navSource,boundary,workspace,viewport,shared,workingPart5,workerRepair,workerEntry,releaseSync,coherenceSync,release,pkgText]=await Promise.all([
   read('public/app/manifest.webmanifest'),
+  read('public/index.html'),
+  read('public/app/installed-entry-v146.html'),
   read('public/app/installed-entry-v146.js'),
   read('public/_redirects'),
+  read('public/app/system-routes-v227.js'),
+  read('public/app/themed-system-nav-v178.js'),
   read('public/app/install-boundary-v146.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/persistent-guide-viewport-v216.js'),
@@ -18,16 +22,23 @@ const [manifestText,installedEntry,redirects,boundary,workspace,viewport,shared,
   read('VERSION'),
   read('package.json')
 ]);
-for(const source of [installedEntry,boundary,workspace,viewport,shared,workerRepair,workerEntry])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
+for(const source of [installedEntry,routesSource,navSource,boundary,workspace,viewport,shared,workerRepair,workerEntry])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
 const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
-check('release is coherent v1.0.43',version==='1.0.43'&&pkg.version===version&&manifest.name.includes('v1.0.43'));
+check('release is coherent',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version&&manifest.name.includes(`v${version}`));
 check('installed launch enters updater first',manifest.start_url==='/app/installed-entry-v146.html?installed=1');
 check('all manifest shortcuts enter updater first',(manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(item=>String(item.url).startsWith('/app/installed-entry-v146.html?')));
 check('manifest has no frozen Working Campus version pin',!manifestText.includes('working-campus-v156.html?installed=1&version='));
 check('Cloudflare leaves updater HTML reachable',!redirects.split(/\r?\n/).includes('/app/installed-entry-v146.html /app/ 302'));
 check('extensionless installed entry normalizes to updater HTML',redirects.split(/\r?\n/).includes('/app/installed-entry-v146 /app/installed-entry-v146.html 302'));
+check('checked-in web launcher carries current release identity',rawLauncher.includes(`/app/civweave-brand.js?v=${version}`)&&rawLauncher.includes(`/app/installed-entry-v146.js?v=${version}`));
+check('checked-in updater HTML carries current installed-entry identity',installedEntryHtml.includes(`/app/installed-entry-v146.js?v=${version}`));
+check('checked-in updater runtime carries current fallback identity',installedEntry.includes(`const FALLBACK_VERSION='${version}';`)&&installedEntry.includes(`version:'${version}-chat-convergence-v250'`));
+check('checked-in route contract carries current release identity',routesSource.includes(`const VERSION='${version}';`));
+check('checked-in themed navigation carries current release identity',navSource.includes(`const VERSION='${version}-five-system-navigation-v227';`)&&navSource.includes(`version:'${version}'`));
+check('checked-in install boundary carries current release identity',boundary.includes(`const VERSION='${version}';`));
+check('checked-in worker requests current route and core identities',workerEntry.includes(`/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227`)&&workerEntry.includes(`/service-worker-core-v208.js?v=${version}-chat-convergence-v250`));
 check('installed entry resolves release with no-store manifest fetch',installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"));
 check('installed entry forces worker update checks',installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('await registration.update()'));
 check('installed entry activates waiting worker before route',installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})")&&installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='));
@@ -63,4 +74,4 @@ check('worker purge ignores stale query identities',workerRepair.includes('cache
 check('worker imports v250 chat repair',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250')"));
 check('worker skips waiting on install',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
 
-console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v250',checks:checks.length,installedLaunch:'updater-first',canonicalRuntime:'guide-workspace-v242',canonicalDuplicateChatOwners:0,embeddedSurfaceDelegates:true,cacheMigration:true,releaseGeneratorsPreserveConvergence:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v250',checks:checks.length,installedLaunch:'updater-first',canonicalRuntime:'guide-workspace-v242',canonicalDuplicateChatOwners:0,embeddedSurfaceDelegates:true,cacheMigration:true,checkedInReleaseIdentitiesCurrent:true,releaseGeneratorsPreserveConvergence:true},null,2));

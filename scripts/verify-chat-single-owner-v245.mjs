@@ -16,7 +16,7 @@ for(const source of [legacyOwner,viewport,workerRepair,workerEntry,workspace,bou
 const pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
-check('release and package are v1.0.43',version==='1.0.43'&&pkg.version===version);
+check('release and package are coherent',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version);
 check('v242 declares itself the canonical workspace owner',workspace.includes('workspace:true')&&workspace.includes('canonicalOwner:true')&&workspace.includes('submitText:async'));
 check('v242 owns persona taps directly on pointerdown',workspace.includes("const switchControl=event.target.closest?.(`#${ROOT_ID} [data-cw242-window]`)")&&workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"));
 check('v242 owns native full-chat submit directly',workspace.includes("target.matches(`#${ROOT_ID} [data-persistent-form]`)")&&workspace.includes("document.addEventListener('submit',onSubmitCapture,true)"));
