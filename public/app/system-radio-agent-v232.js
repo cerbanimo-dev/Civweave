@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0';
+const VERSION='1.0.1';
 const REVISION='system-radio-agent-v232';
 const SESSION_KEY='civweave.radio.session.v1';
 const MEMORY_KEY='civweave.radio.memory.v1';
@@ -10,6 +10,8 @@ const SYSTEM_COOLDOWN_MS=30*60*1000;
 const REENTRY_ELIGIBILITY_MS=45*60*1000;
 const MAX_SESSION_EXPOSURES=3;
 const PRESENTATION_DELAY_MS=1100;
+const AUTO_DISMISS_MS=6000;
+const EXIT_ANIMATION_MS=340;
 const DISMISS_BUTTON_LABEL='Dismiss radio recommendation';
 const ALLOWED_PLACEMENTS=new Set(['toast','transition-card','sidebar']);
 const FALLBACK_PATHS=new Map([
@@ -47,9 +49,12 @@ const SYSTEM_RADIO=deepFreeze({
     messages:[{id:'default',text:'Thinking big picture? Us too.'}]
   }
 });
+
 let decisionProvider=null;
 let interactionState={interacted:false,critical:false,lastInteractionAt:null};
 let renderToken='';
+let autoDismissTimer=0;
+let exitRemovalTimer=0;
 
 function deepFreeze(value){
   if(value&&typeof value==='object'&&!Object.isFrozen(value)){
@@ -74,7 +79,17 @@ function activeSystem(){
 function currentRoute(){return `${location.pathname}${location.search}${location.hash}`.slice(0,1800)}
 function loadSession(){
   const stored=parse(sessionStorage.getItem(SESSION_KEY),null);
-  return stored&&stored.sessionId?stored:{sessionId:uid(),activeSystem:'',currentRoute:'',lastShownSystem:'',lastShownAt:'',shownCount:0,dismissedThisSession:false,clickedSystems:[],exposureBySystem:{}};
+  return stored&&stored.sessionId?stored:{
+    sessionId:uid(),
+    activeSystem:'',
+    currentRoute:'',
+    lastShownSystem:'',
+    lastShownAt:'',
+    shownCount:0,
+    dismissedThisSession:false,
+    clickedSystems:[],
+    exposureBySystem:{}
+  };
 }
 function saveSession(value){sessionStorage.setItem(SESSION_KEY,JSON.stringify(value));return value}
 function loadMemory(){return parse(localStorage.getItem(MEMORY_KEY),{lastShownAtBySystem:{}})}
@@ -102,7 +117,9 @@ function emit(type,detail={}){
   return payload;
 }
 function analytics(name,properties){
-  globalThis.dispatchEvent?.(new CustomEvent('civweave:analytics',{detail:{name,properties,timestamp:iso(),source:REVISION}}));
+  globalThis.dispatchEvent?.(new CustomEvent('civweave:analytics',{
+    detail:{name,properties,timestamp:iso(),source:REVISION}
+  }));
 }
 function approvedCopy(radio,copyId){return radio.messages.find(message=>message.id===copyId)||radio.messages[0]}
 function protectedFlow(context){
@@ -141,12 +158,16 @@ function eligibility(context){
   const lastAnyShown=millis(context.lastTimeShown);
   const systemChanged=Boolean(context.previousSystem&&context.previousSystem!==context.activeSystem);
   const sessionEntry=!context.previousSystem&&context.reason==='session_started';
-  if(!systemChanged&&!sessionEntry&&lastAnyShown&&Date.now()-lastAnyShown<REENTRY_ELIGIBILITY_MS)return{eligible:false,reason:'recently_shown'};
+  if(!systemChanged&&!sessionEntry&&lastAnyShown&&Date.now()-lastAnyShown<REENTRY_ELIGIBILITY_MS){
+    return{eligible:false,reason:'recently_shown'};
+  }
   return{eligible:true,reason:systemChanged?'system_changed':sessionEntry?'session_started':'eligible_reentry'};
 }
 function defaultAgentDecision(context,gate){
   if(!gate.eligible)return{action:'suppress',messageVariant:'default',placement:'toast',reason:gate.reason};
-  if(gate.reason==='eligible_reentry'&&!context.userInteractionState.interacted)return{action:'suppress',messageVariant:'default',placement:'toast',reason:'awaiting_meaningful_interaction'};
+  if(gate.reason==='eligible_reentry'&&!context.userInteractionState.interacted){
+    return{action:'suppress',messageVariant:'default',placement:'toast',reason:'awaiting_meaningful_interaction'};
+  }
   return{
     action:'show',
     messageVariant:'default',
@@ -160,12 +181,22 @@ function sanitizeDecision(raw,radio,gate){
   const copyId=radio.messages.some(message=>message.id===requestedCopy)?requestedCopy:'default';
   const placement=ALLOWED_PLACEMENTS.has(raw?.placement)?raw.placement:'toast';
   if(!gate.eligible)return Object.freeze({action:'suppress',messageVariant:copyId,placement,reason:gate.reason});
-  return Object.freeze({action,messageVariant:copyId,placement,reason:String(raw?.reason||gate.reason).slice(0,80)});
+  return Object.freeze({
+    action,
+    messageVariant:copyId,
+    placement,
+    reason:String(raw?.reason||gate.reason).slice(0,80)
+  });
 }
 async function agentDecision(context){
   const gate=eligibility(context);
   const radio=verifiedRadio(context.activeSystem);
-  if(!radio)return Object.freeze({action:'suppress',messageVariant:'default',placement:'toast',reason:'no_approved_playlist'});
+  if(!radio)return Object.freeze({
+    action:'suppress',
+    messageVariant:'default',
+    placement:'toast',
+    reason:'no_approved_playlist'
+  });
   const agentInput=Object.freeze({
     activeSystem:context.activeSystem,
     currentRoute:context.currentRoute,
@@ -180,7 +211,11 @@ async function agentDecision(context){
     eligibility:gate
   });
   let raw;
-  try{raw=decisionProvider?await decisionProvider(agentInput):defaultAgentDecision(context,gate)}catch{raw={action:'suppress',reason:'agent_error'}}
+  try{
+    raw=decisionProvider?await decisionProvider(agentInput):defaultAgentDecision(context,gate);
+  }catch{
+    raw={action:'suppress',reason:'agent_error'};
+  }
   return sanitizeDecision(raw,radio,gate);
 }
 function claimPresentation(context){
@@ -193,21 +228,89 @@ function releasePresentation(){
   globalThis.CivweaveExperienceOrchestratorV232?.release?.(renderToken);
   renderToken='';
 }
+function clearSuggestionTimers(){
+  if(autoDismissTimer)clearTimeout(autoDismissTimer);
+  if(exitRemovalTimer)clearTimeout(exitRemovalTimer);
+  autoDismissTimer=0;
+  exitRemovalTimer=0;
+}
 function installStyle(){
   if(document.getElementById('cw-radio-style-v232'))return;
   const style=document.createElement('style');
   style.id='cw-radio-style-v232';
   style.textContent=`
-#cw-radio-suggestion-v232{position:fixed;z-index:2147482600;right:max(14px,env(safe-area-inset-right));bottom:max(82px,calc(env(safe-area-inset-bottom) + 76px));width:min(360px,calc(100vw - 28px));font:500 14px/1.35 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f8f8f4;background:color-mix(in srgb,#07162f 92%,transparent);border:1px solid #ffffff2b;border-radius:18px;box-shadow:0 18px 54px #0008;backdrop-filter:blur(16px);padding:16px 48px 16px 16px;animation:cw-radio-in-v232 .24s ease-out}
-#cw-radio-suggestion-v232[data-placement="transition-card"]{bottom:50%;transform:translateY(50%)}
-#cw-radio-suggestion-v232[data-placement="sidebar"]{top:max(88px,calc(env(safe-area-inset-top) + 72px));bottom:auto}
+#cw-radio-suggestion-v232{
+  --cw-radio-progress:linear-gradient(90deg,#9be7ff,#d7a5ff,#ff7bc8,#ffd36e);
+  position:fixed;
+  z-index:2147482600;
+  right:max(14px,env(safe-area-inset-right));
+  bottom:max(14px,env(safe-area-inset-bottom));
+  width:min(360px,calc(100vw - 28px));
+  overflow:hidden;
+  isolation:isolate;
+  font:500 14px/1.35 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:#f8f8f4;
+  background:color-mix(in srgb,#07162f 92%,transparent);
+  border:1px solid #ffffff2b;
+  border-radius:18px;
+  box-shadow:0 18px 54px #0008;
+  backdrop-filter:blur(16px);
+  padding:16px 48px 18px 16px;
+  animation:cw-radio-in-v232 .24s ease-out both;
+}
+#cw-radio-suggestion-v232[data-system="anarchadia"]{--cw-radio-progress:linear-gradient(90deg,#ff335f,#ff4fb8,#ffe14a)}
+#cw-radio-suggestion-v232[data-system="cerbanimo"]{--cw-radio-progress:linear-gradient(90deg,#9c58ff,#ff38c7,#45e7ff,#ffbf48)}
+#cw-radio-suggestion-v232[data-system="living-school"]{--cw-radio-progress:linear-gradient(90deg,#4fbb76,#44c9c6,#f5cf4f)}
+#cw-radio-suggestion-v232[data-system="fellowfare"]{--cw-radio-progress:linear-gradient(90deg,#d97849,#f1b94e,#50a679,#2f5c84)}
+#cw-radio-suggestion-v232[data-system="civweave"]{--cw-radio-progress:linear-gradient(90deg,#7adfff,#b88cff,#ff72bd,#ffd16a,#7ff0c9)}
+#cw-radio-suggestion-v232::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:var(--cw-radio-progress);
+  opacity:.12;
+  transform:scaleX(0);
+  transform-origin:left center;
+  animation:cw-radio-progress-v232 ${AUTO_DISMISS_MS}ms linear forwards;
+}
+#cw-radio-suggestion-v232::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:4px;
+  z-index:2;
+  pointer-events:none;
+  background:var(--cw-radio-progress);
+  transform:scaleX(0);
+  transform-origin:left center;
+  animation:cw-radio-progress-v232 ${AUTO_DISMISS_MS}ms linear forwards;
+}
+#cw-radio-suggestion-v232>*{position:relative;z-index:1}
 #cw-radio-suggestion-v232 .cw-radio-eyebrow{display:block;opacity:.82;margin:0 0 3px;font-size:12px;letter-spacing:.02em}
 #cw-radio-suggestion-v232 .cw-radio-title{display:block;font-size:18px;margin:0 0 12px}
 #cw-radio-suggestion-v232 .cw-radio-link{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;background:#f8f8f4;color:#07162f;text-decoration:none;font-weight:800}
-#cw-radio-suggestion-v232 .cw-radio-dismiss{position:absolute;right:9px;top:9px;width:34px;height:34px;border:0;border-radius:50%;background:#ffffff12;color:inherit;font-size:20px;cursor:pointer}
-@keyframes cw-radio-in-v232{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
-@media(max-width:560px){#cw-radio-suggestion-v232{left:14px;right:14px;width:auto;bottom:max(76px,calc(env(safe-area-inset-bottom) + 70px))}#cw-radio-suggestion-v232[data-placement="transition-card"]{bottom:max(76px,calc(env(safe-area-inset-bottom) + 70px));transform:none}}
-@media(prefers-reduced-motion:reduce){#cw-radio-suggestion-v232{animation:none}}
+#cw-radio-suggestion-v232 .cw-radio-dismiss{position:absolute;z-index:3;right:9px;top:9px;width:34px;height:34px;border:0;border-radius:50%;background:#ffffff12;color:inherit;font-size:20px;cursor:pointer}
+#cw-radio-suggestion-v232.is-exiting{pointer-events:none;animation:cw-radio-out-v232 ${EXIT_ANIMATION_MS}ms cubic-bezier(.4,0,1,1) forwards}
+@keyframes cw-radio-in-v232{from{opacity:0;transform:translate3d(28px,10px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+@keyframes cw-radio-progress-v232{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes cw-radio-out-v232{from{opacity:1;transform:translate3d(0,0,0)}to{opacity:0;transform:translate3d(calc(100% + 40px),0,0)}}
+@media(max-width:560px){
+  #cw-radio-suggestion-v232{
+    right:max(12px,env(safe-area-inset-right));
+    bottom:max(12px,env(safe-area-inset-bottom));
+    width:min(340px,calc(100vw - 24px));
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #cw-radio-suggestion-v232,
+  #cw-radio-suggestion-v232::before,
+  #cw-radio-suggestion-v232::after,
+  #cw-radio-suggestion-v232.is-exiting{animation:none}
+}
 `;
   document.head.append(style);
 }
@@ -216,20 +319,50 @@ function recordShown(context,decision,radio){
   session.lastShownSystem=context.activeSystem;
   session.lastShownAt=iso();
   session.shownCount=Number(session.shownCount||0)+1;
-  session.exposureBySystem={...(session.exposureBySystem||{}),[context.activeSystem]:Number(session.exposureBySystem?.[context.activeSystem]||0)+1};
+  session.exposureBySystem={
+    ...(session.exposureBySystem||{}),
+    [context.activeSystem]:Number(session.exposureBySystem?.[context.activeSystem]||0)+1
+  };
   saveSession(session);
   const memory=loadMemory();
-  memory.lastShownAtBySystem={...(memory.lastShownAtBySystem||{}),[context.activeSystem]:session.lastShownAt};
+  memory.lastShownAtBySystem={
+    ...(memory.lastShownAtBySystem||{}),
+    [context.activeSystem]:session.lastShownAt
+  };
   saveMemory(memory);
-  const props={system:context.activeSystem,copyVariant:decision.messageVariant,placement:decision.placement,sourceRoute:context.previousSystem?session.previousRoute||'':'',destinationRoute:context.currentRoute};
-  emit('RADIO_CTA_SHOWN',{system:context.activeSystem,copyId:decision.messageVariant,placement:decision.placement,reason:decision.reason});
+  const props={
+    system:context.activeSystem,
+    copyVariant:decision.messageVariant,
+    placement:decision.placement,
+    sourceRoute:context.previousSystem?session.previousRoute||'':'',
+    destinationRoute:context.currentRoute
+  };
+  emit('RADIO_CTA_SHOWN',{
+    system:context.activeSystem,
+    copyId:decision.messageVariant,
+    placement:decision.placement,
+    reason:decision.reason
+  });
   analytics('radio_impression',props);
   return props;
 }
 function removeSuggestion(reason='removed'){
+  clearSuggestionTimers();
   document.getElementById('cw-radio-suggestion-v232')?.remove();
   releasePresentation();
   emit('RADIO_CTA_HIDDEN',{reason});
+}
+function scheduleAutoDismiss(card){
+  clearSuggestionTimers();
+  autoDismissTimer=setTimeout(()=>{
+    autoDismissTimer=0;
+    if(!card?.isConnected)return;
+    card.classList.add('is-exiting');
+    exitRemovalTimer=setTimeout(()=>{
+      exitRemovalTimer=0;
+      if(card.isConnected)removeSuggestion('auto_timeout');
+    },EXIT_ANIMATION_MS);
+  },AUTO_DISMISS_MS);
 }
 function render(context,decision){
   const radio=verifiedRadio(context.activeSystem);
@@ -237,50 +370,82 @@ function render(context,decision){
   const copy=approvedCopy(radio,decision.messageVariant);
   removeSuggestion('replace');
   const claim=claimPresentation(context);
-  if(!claim.ok){emit('RADIO_CTA_SUPPRESSED',{system:context.activeSystem,reason:claim.reason});return false}
+  if(!claim.ok){
+    emit('RADIO_CTA_SUPPRESSED',{system:context.activeSystem,reason:claim.reason});
+    return false;
+  }
   renderToken=claim.token;
   installStyle();
+
   const card=document.createElement('aside');
   card.id='cw-radio-suggestion-v232';
   card.dataset.placement=decision.placement;
+  card.dataset.system=context.activeSystem;
   card.setAttribute('role','complementary');
   card.setAttribute('aria-label',radio.name);
+
   const eyebrow=document.createElement('span');
   eyebrow.className='cw-radio-eyebrow';
   eyebrow.textContent=copy.text;
+
   const title=document.createElement('strong');
   title.className='cw-radio-title';
   title.textContent=radio.name;
+
   const link=document.createElement('a');
   link.className='cw-radio-link';
   link.href=radio.spotifyUrl;
   link.target='_blank';
   link.rel='noopener noreferrer';
   link.textContent='Listen on Spotify ↗';
+
   const dismiss=document.createElement('button');
   dismiss.className='cw-radio-dismiss';
   dismiss.type='button';
   dismiss.setAttribute('aria-label',DISMISS_BUTTON_LABEL);
   dismiss.textContent='×';
+
   card.append(eyebrow,title,link,dismiss);
+
   link.addEventListener('click',()=>{
     const session=loadSession();
     session.clickedSystems=[...new Set([...(session.clickedSystems||[]),context.activeSystem])];
     saveSession(session);
-    emit('RADIO_CTA_CLICKED',{system:context.activeSystem,copyId:decision.messageVariant,placement:decision.placement});
-    analytics('radio_click',{system:context.activeSystem,copyVariant:decision.messageVariant,placement:decision.placement,destinationRoute:context.currentRoute});
+    emit('RADIO_CTA_CLICKED',{
+      system:context.activeSystem,
+      copyId:decision.messageVariant,
+      placement:decision.placement
+    });
+    analytics('radio_click',{
+      system:context.activeSystem,
+      copyVariant:decision.messageVariant,
+      placement:decision.placement,
+      destinationRoute:context.currentRoute
+    });
     queueMicrotask(()=>removeSuggestion('clicked'));
   },{once:true});
+
   dismiss.addEventListener('click',()=>{
     const session=loadSession();
     session.dismissedThisSession=true;
     saveSession(session);
-    emit('RADIO_CTA_DISMISSED',{system:context.activeSystem,copyId:decision.messageVariant,placement:decision.placement});
-    analytics('radio_dismiss',{system:context.activeSystem,copyVariant:decision.messageVariant,placement:decision.placement,destinationRoute:context.currentRoute});
+    emit('RADIO_CTA_DISMISSED',{
+      system:context.activeSystem,
+      copyId:decision.messageVariant,
+      placement:decision.placement
+    });
+    analytics('radio_dismiss',{
+      system:context.activeSystem,
+      copyVariant:decision.messageVariant,
+      placement:decision.placement,
+      destinationRoute:context.currentRoute
+    });
     removeSuggestion('dismissed');
   },{once:true});
+
   document.body.append(card);
   recordShown(context,decision,radio);
+  scheduleAutoDismiss(card);
   return true;
 }
 async function evaluate(context=contextSnapshot()){
@@ -293,7 +458,9 @@ async function evaluate(context=contextSnapshot()){
   return decision;
 }
 function registerDecisionProvider(provider){
-  if(provider!==null&&typeof provider!=='function')throw new TypeError('Radio decision provider must be a function or null.');
+  if(provider!==null&&typeof provider!=='function'){
+    throw new TypeError('Radio decision provider must be a function or null.');
+  }
   decisionProvider=provider;
   return Boolean(provider);
 }
@@ -301,7 +468,10 @@ function noteInteraction(event){
   if(event?.target?.closest?.('#cw-radio-suggestion-v232'))return;
   interactionState={...interactionState,interacted:true,lastInteractionAt:iso()};
 }
-function setCriticalInteraction(critical=true){interactionState={...interactionState,critical:Boolean(critical)};return interactionState.critical}
+function setCriticalInteraction(critical=true){
+  interactionState={...interactionState,critical:Boolean(critical)};
+  return interactionState.critical;
+}
 function start(){
   const system=activeSystem();
   if(!system||!verifiedRadio(system))return false;
@@ -315,29 +485,63 @@ function start(){
   session.activeSystem=system;
   session.currentRoute=currentRoute();
   saveSession(session);
-  if(firstSession)emit('SESSION_STARTED',{sessionId:session.sessionId,activeSystem:system,route:session.currentRoute});
+
+  if(firstSession){
+    emit('SESSION_STARTED',{sessionId:session.sessionId,activeSystem:system,route:session.currentRoute});
+  }
   if(changed){
     emit('SYSTEM_CONTEXT_CHANGED',{previousSystem,activeSystem:system,route:session.currentRoute});
-    analytics('system_switch',{system,sourceRoute:previousRoute,destinationRoute:session.currentRoute,previousSystem});
+    analytics('system_switch',{
+      system,
+      sourceRoute:previousRoute,
+      destinationRoute:session.currentRoute,
+      previousSystem
+    });
   }
-  emit('PAGE_NAVIGATED',{previousSystem,activeSystem:system,route:session.currentRoute,previousRoute});
+
+  emit('PAGE_NAVIGATED',{
+    previousSystem,
+    activeSystem:system,
+    route:session.currentRoute,
+    previousRoute
+  });
+
   const reason=changed?'system_changed':firstSession?'session_started':'page_navigated';
   const run=()=>evaluate(contextSnapshot({previousSystem,reason,session:loadSession()})).catch(error=>{
     console.warn('[Civweave Radio] recommendation evaluation failed safely.',error);
     emit('RADIO_CTA_SUPPRESSED',{system,reason:'evaluation_error'});
   });
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,PRESENTATION_DELAY_MS),{once:true});
-  else setTimeout(run,PRESENTATION_DELAY_MS);
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(run,PRESENTATION_DELAY_MS),{once:true});
+  }else{
+    setTimeout(run,PRESENTATION_DELAY_MS);
+  }
   return true;
 }
 
 document.addEventListener('pointerdown',noteInteraction,{capture:true,passive:true});
 document.addEventListener('keydown',noteInteraction,{capture:true});
+
 const api=Object.freeze({
-  version:VERSION,revision:REVISION,registry:SYSTEM_RADIO,normalizeSystemId,verifiedRadio,contextSnapshot,eligibility,agentDecision,evaluate,
-  registerDecisionProvider,setEnabled,preferences,setCriticalInteraction,start
+  version:VERSION,
+  revision:REVISION,
+  registry:SYSTEM_RADIO,
+  normalizeSystemId,
+  verifiedRadio,
+  contextSnapshot,
+  eligibility,
+  agentDecision,
+  evaluate,
+  registerDecisionProvider,
+  setEnabled,
+  preferences,
+  setCriticalInteraction,
+  start
 });
 globalThis.CivweaveRadioRecommendationAgentV232=api;
 start();
-globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-agent-ready',{detail:{version:VERSION,revision:REVISION,systems:Object.keys(SYSTEM_RADIO)}}));
+globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-agent-ready',{
+  detail:{version:VERSION,revision:REVISION,systems:Object.keys(SYSTEM_RADIO)}
+}));
 })();
