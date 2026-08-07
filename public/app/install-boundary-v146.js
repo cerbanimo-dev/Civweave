@@ -17,6 +17,7 @@ const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js';
 const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js';
 const THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js';
 const SHARED_GUIDE_SURFACE='/app/shared-guide-surface-v236.js';
+const FELLOWFARE_GUIDE_BRIDGE='/app/fellowfare-shared-guide-bridge-v236.js';
 const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
 const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
@@ -118,8 +119,10 @@ function installEarlyGuards(){
   return true;
 }
 function installSystemExperienceSupport(){
-  if(!systemSurface()||!liveHead())return false;
+  const system=systemSurface();
+  if(!system||!liveHead())return false;
   SYSTEM_EXPERIENCE_SCRIPTS.forEach(addScript);
+  if(system==='fellowfare')addScript(FELLOWFARE_GUIDE_BRIDGE);
   return true;
 }
 function installCanonicalSystemSupport(){
@@ -204,6 +207,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',
   sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
   sharedGuideSurfaceRevision:'v236-inline-plus-bottom-right-shared-thread',
+  fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',
   guideIdentityRevision:'v216-explicit-responder-ownership',
   guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
   guideSurfaceOwnershipPolicy:'v236-page-system-owns-inline-and-launcher-guide',
