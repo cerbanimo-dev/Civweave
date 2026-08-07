@@ -24,6 +24,7 @@ const allowedExperienceSupport=[
   '/app/shared-review-surface-v234.js',
   '/app/shared-guide-surface-v236.js'
 ];
+const fellowfareBridge='/app/fellowfare-shared-guide-bridge-v236.js';
 function runBoundary(pathname){
   const appended=[],replaced=[],storage=new Map(),documentElement={isConnected:true,dataset:{}},head={isConnected:true,append:node=>appended.push(node)},body={isConnected:true};
   const document={documentElement,head,body,querySelector:()=>null,createElement:tag=>({tagName:String(tag).toUpperCase(),async:true,rel:'',href:'',src:''})};
@@ -49,7 +50,8 @@ for(const [system,pathname] of Object.entries(systems)){
   }else{
     assert.equal(result.documentElement.dataset.installBoundary,'canonical-system');
     assert.equal(result.documentElement.dataset.civweaveCanonicalRealm,'self-contained');
-    assert.deepEqual(scriptPaths,[...allowedExperienceSupport,...allowedCanonicalSupport],`${system} canonical support drifted into the legacy compatibility bundle.`);
+    const realmBridge=system==='fellowfare'?[fellowfareBridge]:[];
+    assert.deepEqual(scriptPaths,[...allowedExperienceSupport,...realmBridge,...allowedCanonicalSupport],`${system} canonical support drifted into the legacy compatibility bundle.`);
     assert(!scriptPaths.includes('/extensions/civweave-additions-v156.js'),`${system} reintroduced the post-paint shared-additions injector.`);
     assert(!scriptPaths.includes('/app/pwa-update-controller-v204.js'),`${system} reintroduced the update overlay during canonical startup.`);
   }
@@ -63,4 +65,5 @@ assert.equal(api.canonicalSubsystemCompatibility,'route-version-settings-only-no
 assert.equal(api.canonicalPolicy,'five-system-first-class-routes-civweave-core-only');
 assert.equal(api.persistentGuideChatSubmissionPipelines,1);
 assert.equal(api.persistentGuideChatGuideCount,5);
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,legacyCompatibility:'noncanonical-only'},null,2));
+assert.equal(api.fellowfareGuideBridgeRevision,'v236-native-workbench-shared-thread');
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,fellowfareNativeSharedThread:true,legacyCompatibility:'noncanonical-only'},null,2));
