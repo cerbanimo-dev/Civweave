@@ -14,7 +14,7 @@ function canonicalize(packet={}){
   const skippedCount=Math.max(0,Number(packet.skippedCount??skipped.length)||0);
   const reportedTotal=Math.max(0,Number(packet.total||0)||0);
   const discovered=Math.max(0,Number(packet.discovered||0)||0);
-  const downloaded=Math.max(0,Number(packet.downloaded??packet.successful??packet.completed||0)||0);
+  const downloaded=Math.max(0,Number((packet.downloaded??packet.successful??packet.completed)||0)||0);
   const skippedPaths=new Set(skipped.map(entry=>String(entry?.pathname||'')).filter(Boolean));
   const skippedOverlap=assets.reduce((count,path)=>count+(skippedPaths.has(String(path))?1:0),0);
   const alreadyExcludesSkipped=Boolean(skippedCount&&discovered&&reportedTotal+skippedCount===discovered);
@@ -37,7 +37,7 @@ function canonicalize(packet={}){
     skippedCount,
     total,
     downloaded:Math.min(downloaded,total||downloaded),
-    completed:Math.min(Number(packet.completed??downloaded)||0,total||downloaded),
+    completed:Math.min(Number((packet.completed??downloaded)||0)||0,total||downloaded),
     ready:Boolean(packet.ready)||ready,
     completionRevision:REVISION,
     retiredReferencesAccounted:totalIncludesRetired?skippedCount:0
