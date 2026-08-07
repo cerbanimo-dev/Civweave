@@ -1,13 +1,15 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.36';
-const REVISION='five-system-boundary-v227';
+const VERSION='1.0.43';
+const REVISION='chat-convergence-v250';
+const params=new URLSearchParams(location.search);
+const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
 const INSTALLER='/app/index.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const DEV_KEY='civweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION='v1.0.36-canonical-core-only-v226';
+const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
 const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
@@ -42,8 +44,6 @@ const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_
 const SYSTEM_EXPERIENCE_SCRIPTS=[
   EXPERIENCE_ORCHESTRATOR,
   GUIDE_IDENTITY_SCRIPT,
-  PERSISTENT_GUIDE_CHAT_SCRIPT,
-  PERSISTENT_GUIDE_VIEWPORT_SCRIPT,
   REALM_SESSION_INTEGRITY,
   GUIDE_WORKSPACE,
   WORKING_CAMPUS_TOPBAR,
@@ -80,7 +80,6 @@ const LEGACY_SCRIPTS=[
   SHARED_GUIDE_SURFACE,
   PWA_UPDATE_SCRIPT
 ];
-const params=new URLSearchParams(location.search);
 let unloading=false;
 addEventListener('pagehide',()=>{unloading=true},{once:true});
 addEventListener('beforeunload',()=>{unloading=true},{once:true});
@@ -206,7 +205,7 @@ function start(){
 start();
 
 globalThis.CivweaveInstallBoundaryV146=Object.freeze({
-  version:'1.0.36',allowed,
+  version:VERSION,allowed,
   revision:REVISION,
   systemSurface,
   canonicalAppSurface,
@@ -225,7 +224,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   installAssetCustomizationIfConfigured,
   additionsVersion:ADDITIONS_VERSION,
   publicBrand:'Civweave',
-  canonicalPolicy:'five-system-first-class-routes-civweave-core-only',
+  canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner',
   canonicalSystemCount:5,
   canonicalAutoScripts:0,
   canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
@@ -236,22 +235,22 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels',
   radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',
   sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
-  sharedGuideSurfaceRevision:'v236-inline-plus-bottom-right-shared-thread',
+  sharedGuideSurfaceRevision:'v236-mirror-into-v242-canonical-thread',
   realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',
-  guideWorkspaceRevision:'v242-five-window-local-ledgers-no-scroll-trap',
+  guideWorkspaceRevision:'v250-v242-canonical-owner',
   workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract',
   mapLaunchRevision:'v243-register-route-handler-or-open-event',
   fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',
   assetCustomizationRevision:'v239-local-path-overrides-on-demand',
   guideIdentityRevision:'v216-explicit-responder-ownership',
   guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
-  guideSurfaceOwnershipPolicy:'v242-page-realm-launcher-five-local-window-ledgers-handover-only-cross-realm',
+  guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm',
   guideIdentityMigration:'realm-action-owner',
   persistentGuideChatSubmissionPipelines:1,
   persistentGuideChatGuideCount:5,
   persistentGuideChatThreadPolicy:'five-realm-local-ledgers-plus-explicit-handover',
   persistentGuideChatWindowPolicy:'five-switchable-windows-current-realm-launcher',
-  pwaUpdateRevision:'v207-registration-watchdog',
+  pwaUpdateRevision:'v250-installed-entry-every-launch',
   aiSettingsBindGuard:'v230-first-open-atomic-bind',
   aiSettingsPersistenceRepair:'v229-device-persistence',
   platformStabilityGuard:'v159-dom-ready-safe',
