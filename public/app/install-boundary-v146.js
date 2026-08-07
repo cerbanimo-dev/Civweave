@@ -9,6 +9,8 @@ const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const DEV_KEY='civweave.install-boundary.developer.v146';
 const ADDITIONS_VERSION='v1.0.18-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
+const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
+const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
 const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
 const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js';
 const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js';
@@ -27,6 +29,8 @@ const LEGACY_SCRIPTS=[
   '/app/weaveling-memory-bridge-v191.js',
   '/app/deterministic-mode-v175.js',
   '/app/model-settings-controller-v173.js',
+  AI_SETTINGS_BIND_GUARD,
+  AI_SETTINGS_REPAIR,
   '/app/settings-delegation-v175.js',
   '/app/gemini-task-tier-router-v213.js',
   GUIDE_IDENTITY_SCRIPT,
@@ -99,6 +103,11 @@ function installAdditions(){
   LEGACY_SCRIPTS.forEach(addScript);
   return true;
 }
+function installAdditionsWhenReady(){
+  if(document.body)return installAdditions();
+  addEventListener('DOMContentLoaded',installAdditions,{once:true});
+  return true;
+}
 function start(){
   const root=document.documentElement,system=systemSurface();
   if(!allowed()){
@@ -115,7 +124,7 @@ function start(){
     queueMicrotask(()=>dispatchEvent(new CustomEvent('civweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system}})));
     return;
   }
-  installAdditions();
+  installAdditionsWhenReady();
 }
 
 start();
@@ -131,6 +140,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   embedded,
   installerUrl,
   installAdditions,
+  installAdditionsWhenReady,
   additionsVersion:ADDITIONS_VERSION,
   publicBrand:'Civweave',
   canonicalPolicy:'five-system-first-class-routes-civweave-core-only',
@@ -142,6 +152,9 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   persistentGuideChatSubmissionPipelines:1,
   persistentGuideChatGuideCount:5,
   pwaUpdateRevision:'v207-registration-watchdog',
+  aiSettingsBindGuard:'v230-first-open-atomic-bind',
+  aiSettingsPersistenceRepair:'v229-device-persistence',
+  compatibilityDomReady:true,
   onlineSelfHeal:true,
   missingAssetDetails:true
 });
