@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+
+const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
+const [workspace,viewport,boundary,campusCss,release]=await Promise.all([
+  read('public/app/guide-workspace-v242.js'),
+  read('public/app/persistent-guide-viewport-v216.js'),
+  read('public/app/install-boundary-v146.js'),
+  read('public/app/working-campus-v156.css'),
+  read('VERSION')
+]);
+new Function(workspace);new Function(viewport);new Function(boundary);
+const version=release.trim();
+const checks=[];
+const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
+check('release is v1.0.34',version==='1.0.34');
+check('workspace has five canonical windows',workspace.includes("const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia']"));
+check('realm ledgers stay isolated',workspace.includes('readThread(activeWindow)')&&workspace.includes('Switching windows never mixes histories'));
+check('page launcher opens page realm directly',workspace.includes('openWindow(pageSystem)'));
+check('switchGuide maps to switchWindow',workspace.includes('switchGuide:(system,options={})=>switchWindow'));
+check('cross-context model turns explicitly select their guide',workspace.includes('handoffSystem:system!==pageSystem?system:undefined'));
+check('only explicit handoff fields create cross-realm packets',workspace.includes('explicitHandoffTarget')&&!workspace.includes('choice?.system,80'));
+check('workspace submission captures before retired page listener',workspace.includes("document.addEventListener('submit',onSubmitCapture,true)"));
+check('workspace does not lock document overflow',!/document\.(?:body|documentElement)\.style\.overflow/.test(workspace));
+check('mobile workspace leaves page visible',workspace.includes('height:min(62dvh,560px)!important'));
+check('floating chat outranks Working Campus header',workspace.includes('z-index:2147483644!important')&&campusCss.includes('.top{position:relative;z-index:2'));
+check('chat log releases edge scrolling',workspace.includes('overscroll-behavior:auto!important'));
+check('viewport has no mutation observer',!viewport.includes('MutationObserver'));
+check('viewport has no scrollIntoView',!viewport.includes('scrollIntoView'));
+check('floating launcher does not autofocus',workspace.includes('if(options.focus===true)')&&!workspace.includes('queueMicrotask(()=>input?.focus({preventScroll:true}));return root'));
+check('workspace loads immediately after realm session integrity',boundary.indexOf('REALM_SESSION_INTEGRITY,')>=0&&boundary.indexOf('GUIDE_WORKSPACE,')===boundary.indexOf('REALM_SESSION_INTEGRITY,')+'REALM_SESSION_INTEGRITY,'.length+3);
+check('boundary exposes v242 policy',boundary.includes("guideWorkspaceRevision:'v242-five-window-local-ledgers-no-scroll-trap'"));
+console.log(JSON.stringify({ok:true,version,checks:checks.length,workspace:'v242-five-window-local-ledgers',scrollTrap:false,launcherFirst:true},null,2));
