@@ -7,7 +7,7 @@ const INSTALLER='/app/index.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const DEV_KEY='civweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION='v1.0.36-canonical-core-only-v226';
+const ADDITIONS_VERSION='v1.0.36-radio-track-context-v241';
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
 const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
@@ -29,7 +29,7 @@ const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
 const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
-const RADIO_TRACK_SUGGESTIONS='/app/radio-track-suggestions-v240.js';
+const RADIO_TRACK_SUGGESTIONS='/app/radio-track-suggestions-v241.js';
 const SHARED_REVIEW_SURFACE='/app/shared-review-surface-v234.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
@@ -233,7 +233,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
   campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',
   radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
-  radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels',
+  radioTrackSuggestionRevision:'v241-playlist-context-track-links',
   radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',
   sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
   sharedGuideSurfaceRevision:'v236-inline-plus-bottom-right-shared-thread',
