@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.43';
+const VERSION='1.0.44';
 const REVISION='chat-convergence-v250';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
@@ -232,7 +232,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
   campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',
   radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
-  radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels',
+  radioTrackSuggestionRevision:'v241-playlist-context-track-links',
   radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',
   sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
   sharedGuideSurfaceRevision:'v236-mirror-into-v242-canonical-thread',
