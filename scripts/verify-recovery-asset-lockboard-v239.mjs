@@ -54,12 +54,15 @@ const checks=[
     assert.doesNotMatch(autostart,/new MutationObserver/);
     assert.match(autostart,/civweave:offline-campus-status/);
   }],
-  ['installed shell shows a campus waiting spinner',()=>{
-    assert.match(autostart,/Waiting for campus files…/);
-    assert.match(autostart,/cw-campus-waiting:before/);
+  ['required campus remains independent from PWA install availability',()=>{
+    assert.match(autostart,/function keepInstallIndependent\(\)/);
+    assert.match(autostart,/classList\.remove\('cw-campus-waiting'\)/);
+    assert.doesNotMatch(autostart,/Waiting for campus files…/);
+    assert.doesNotMatch(autostart,/button\.disabled\s*=\s*true/);
+    assert.doesNotMatch(autostart,/civweave\.pwa\.install-accepted/);
   }],
   ['asset lockboard link is runtime assembled to avoid crawl expansion',()=>{
-    assert.match(autostart,/\['\/app', 'asset-lockboard-v239\.html'\]\.join\('\/'\)/);
+    assert.match(autostart,/\['\/app','asset-lockboard-v239\.html'\]\.join\('\/'\)/);
   }],
   ['Working Campus repairs null or malformed persisted plans before runtime',()=>{
     assert.match(campus,/working-campus-state-repair-v238/);
