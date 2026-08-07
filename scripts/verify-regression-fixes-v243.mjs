@@ -5,15 +5,13 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [viewport,repairs,entry,localResearch,localActions,knowledge,build,stage,pkg]=await Promise.all([
+const [viewport,repairs,entry,localResearch,localActions,knowledge,pkg]=await Promise.all([
   read('public/app/persistent-guide-viewport-v216.js'),
   read('public/app/regression-fixes-v243.js'),
   read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'),
   read('public/app/living-school-local-research-v243.mjs'),
   read('public/app/living-school-cleanroom-actions-v243.mjs'),
   read('public/app/knowledge-school-runtime-v243.mjs'),
-  read('scripts/build-cloudflare-pages.mjs'),
-  read('scripts/stage-sqljs-assets.mjs'),
   read('package.json')
 ]);
 
@@ -31,12 +29,13 @@ assert(localActions.includes('await researchCapability(data.capability,{force:fa
 assert(localResearch.includes('searchDownloadedKnowledge'),'Downloaded knowledge is not queried.');
 assert(localResearch.includes("provenance:'knowledge-school-downloaded'"),'Downloaded-source provenance is missing.');
 assert(localResearch.includes('ARCHIVE VERIFIED · NOT LIVE-CHECKED'),'Downloaded references overstate or omit verification status.');
+assert(localResearch.includes('dependency-free cached SQLite passage search'),'Local research does not report the dependency-free reader.');
 
-for(const token of ['openSeed(slug)','DecompressionStream','initSqlJs','new Module.Database','sqlite_master','MATCH ?'])assert(knowledge.includes(token),`Offline knowledge reader is missing ${token}.`);
-assert(build.includes("await import('./stage-sqljs-assets.mjs')"),'Cloudflare build does not stage sql.js.');
-assert(stage.includes("'sql-wasm.js','sql-wasm.wasm'"),'sql.js staging omits a runtime asset.');
-const parsed=JSON.parse(pkg);
-assert.equal(parsed.dependencies?.['sql.js'],'1.14.1','Pinned sql.js dependency is missing.');
-assert(parsed.scripts?.prestart?.includes('stage-sqljs-assets.mjs'),'Local startup does not stage sql.js.');
+for(const token of ['openSeed(slug)','DecompressionStream','databaseBytes','findPassages','windows-1252','SQLite format 3','dependency-free-sqlite-byte-search'])assert(knowledge.includes(token),`Offline knowledge reader is missing ${token}.`);
+const parsed=JSON.parse(pkg),dependencies=Object.entries(parsed.dependencies||{});
+assert.equal(dependencies.length,1,'v243 must preserve Civweave’s single production dependency contract.');
+assert.equal(parsed.dependencies?.['onnxruntime-web'],'1.27.0','Pinned ONNX Runtime dependency changed unexpectedly.');
+assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
+assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second production runtime.');
 
-console.log(JSON.stringify({ok:true,revision:'v243',universalGuideRepair:true,proofDialogEscapes:true,pointerChatControls:true,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243',universalGuideRepair:true,proofDialogEscapes:true,pointerChatControls:true,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
