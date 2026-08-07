@@ -2,20 +2,21 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [topbar,owner,viewport,workerRepair,workerEntry,release,pkgText]=await Promise.all([
+const [topbar,owner,workspace,viewport,workerRepair,workerEntry,release,pkgText]=await Promise.all([
   read('public/app/working-campus-topbar-v243.js'),
   read('public/app/chat-single-owner-v245.js'),
+  read('public/app/guide-workspace-v242.js'),
   read('public/app/persistent-guide-viewport-v216.js'),
   read('public/service-worker-chat-repair-v245.js'),
   read('public/service-worker-v203.js'),
   read('VERSION'),
   read('package.json')
 ]);
-new Function(topbar);new Function(owner);new Function(viewport);new Function(workerRepair);new Function(workerEntry);
+new Function(topbar);new Function(owner);new Function(workspace);new Function(viewport);new Function(workerRepair);new Function(workerEntry);
 const pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
-check('release and package are v1.0.41',version==='1.0.41'&&pkg.version===version);
+check('release and package are v1.0.42',version==='1.0.42'&&pkg.version===version);
 check('working campus repairs the brand to a known-good cache-safe icon',topbar.includes("const BRAND_ICON='/app/logos/civweave-pwa-192-v247.png'")&&topbar.includes('function repairBrand()'));
 check('mobile topbar uses two safe columns instead of modes map settings in one row',topbar.includes('grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important')&&topbar.includes('grid-template-areas:"brand brand" "modes modes" "map settings" "review theme"!important')&&!topbar.includes('grid-template-areas:"brand brand brand" "modes map settings"'));
 check('mobile mode switch can shrink inside the viewport',topbar.includes('grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important')&&topbar.includes('white-space:normal!important')&&topbar.includes('overflow-wrap:anywhere!important'));
@@ -27,8 +28,12 @@ check('canonical and inline send are both owned at window capture',owner.include
 check('inline send becomes visible immediately instead of waiting for the model response',owner.includes('queueMicrotask(renderSharedNow)')&&owner.includes('CivweaveSharedGuideSurfaceV236?.renderTranscript'));
 check('shared chat has model-runtime plus deterministic recovery',owner.includes('CivweaveModelRuntime')&&owner.includes('deterministicReply')&&owner.includes('recoverFailedTurn'));
 check('chat interaction uses no synthetic clicks or requestSubmit relays',!owner.includes('.click()')&&!owner.includes('requestSubmit')&&!owner.includes('MouseEvent'));
+const internalGuard=workspace.indexOf('if(root?.contains(event.target)||launcher?.contains(event.target))return;');
+const legacyTrigger=workspace.indexOf("const trigger=event.target.closest?.('[data-cwf-chat]");
+check('canonical chat clicks bypass legacy data-guide routing before it can cancel Send',internalGuard>=0&&legacyTrigger>internalGuard&&workspace.includes("button data-send type=\"submit\"")&&workspace.includes("document.addEventListener('submit',onSubmitCapture,true)"));
+check('workspace advertises send-safe runtime',workspace.includes("sendSafe:true")&&workspace.includes('send-safe-v249'));
 check('viewport requests the v248 chat owner',viewport.includes('chat-owner-r2-mobile-v248'));
-for(const path of ['/app/chat-single-owner-v245.js','/app/persistent-guide-viewport-v216.js','/app/working-campus-topbar-v243.js','/app/working-campus-v156.css','/app/working-campus-v156.html'])check(`phone cache repair evicts ${path}`,workerRepair.includes(`'${path}'`));
-check('service worker activates the new cache repair revision',workerEntry.includes('mobile-chat-layout-v248')&&workerRepair.includes("const REVISION='mobile-chat-layout-v248'"));
+for(const path of ['/app/chat-single-owner-v245.js','/app/persistent-guide-viewport-v216.js','/app/guide-workspace-v242.js','/app/working-campus-topbar-v243.js','/app/working-campus-v156.css','/app/working-campus-v156.html'])check(`phone cache repair evicts ${path}`,workerRepair.includes(`'${path}'`));
+check('service worker activates the v249 chat-send cache repair',workerEntry.includes('chat-send-preventdefault-v249')&&workerRepair.includes("const REVISION='chat-send-preventdefault-v249'"));
 
-console.log(JSON.stringify({ok:true,version,revision:'mobile-chat-layout-v248',checks:checks.length,mobile:{topbarRows:'brand / modes / map+settings / review+theme',realmCards:'2-column then 1-column'},chat:{personaPointerOwner:true,fullSubmit:true,inlineSubmit:true,optimisticPaint:true,modelFallback:true}},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'chat-send-preventdefault-v249',checks:checks.length,mobile:{topbarRows:'brand / modes / map+settings / review+theme',realmCards:'2-column then 1-column'},chat:{personaPointerOwner:true,fullSubmit:true,inlineSubmit:true,nativeSubmitUnblocked:true,optimisticPaint:true,modelFallback:true}},null,2));
