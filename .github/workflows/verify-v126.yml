@@ -63,7 +63,7 @@ jobs:
           grep -q "service-worker-release-coherence-v220.js?v=release-coherence-v226" .cloudflare-pages/service-worker-v203.js
           grep -q "Civweave Working Campus · v${release_version}" .cloudflare-pages/app/working-campus-v156.html
           grep -q "<b class=\"version-chip\">v${release_version}</b>" .cloudflare-pages/app/working-campus-v156.html
-          grep -q "version-pinned-text-network-first-cached-fallback" .cloudflare-pages/service-worker-release-coherence-v220.js
+          grep -q "version-pinned-html-js-css-json-txt-network-first-cached-fallback" .cloudflare-pages/service-worker-release-coherence-v220.js
           ! grep -Eq "^[[:space:]]*importScripts\('/service-worker\.js" .cloudflare-pages/service-worker-v156.js
           ! grep -Eq "^[[:space:]]*importScripts\('/service-worker-critical-v199\.js" .cloudflare-pages/service-worker-v156.js
           ! grep -q "MutationObserver" .cloudflare-pages/app/settings-delegation-v175.js
