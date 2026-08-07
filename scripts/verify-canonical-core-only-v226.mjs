@@ -19,6 +19,7 @@ const allowedExperienceSupport=[
   '/app/guide-identity-integrity-v216.js',
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
+  '/app/realm-session-integrity-v237.js',
   '/app/themed-system-nav-v178.js',
   '/app/system-radio-agent-v233.js',
   '/app/shared-review-surface-v234.js',
@@ -65,5 +66,7 @@ assert.equal(api.canonicalSubsystemCompatibility,'route-version-settings-only-no
 assert.equal(api.canonicalPolicy,'five-system-first-class-routes-civweave-core-only');
 assert.equal(api.persistentGuideChatSubmissionPipelines,1);
 assert.equal(api.persistentGuideChatGuideCount,5);
+assert.equal(api.persistentGuideChatThreadPolicy,'five-realm-local-ledgers-plus-explicit-handover');
+assert.equal(api.realmSessionIntegrityRevision,'v237-realm-local-memory-handover-state-repair');
 assert.equal(api.fellowfareGuideBridgeRevision,'v236-native-workbench-shared-thread');
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,fellowfareNativeSharedThread:true,legacyCompatibility:'noncanonical-only'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,realmLocalGuideThreads:true,fellowfareNativeSharedThread:true,legacyCompatibility:'noncanonical-only'},null,2));
