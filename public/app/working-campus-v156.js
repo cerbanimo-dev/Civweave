@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const REVISION='canonical-campus-startup-v227';
-const routeScript='/app/system-routes-v227.js?v=1.0.17-five-system-route-contract-v227';
+const routeScript='/app/system-routes-v227.js?v=1.0.18-five-system-route-contract-v227';
 const parts=['/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt'];
 const required=['conversation','weaveling-chat-form','weaveling-chat-input','workspace','view-title','state-label'];
 const controller=new AbortController();

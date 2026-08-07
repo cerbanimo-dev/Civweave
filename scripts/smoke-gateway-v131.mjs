@@ -32,6 +32,11 @@ if (!source.includes(before)) {
   throw new Error('Civweave gateway smoke v132 could not find the legacy 410 assertion.');
 }
 source = source.replace(before, after);
+source = source.replace(
+  /  const rootResponse=await fetch\(`\$\{origin\}\/`,\{cache:'no-store'\}\),rootHtml=await rootResponse\.text\(\);assert\(rootResponse\.ok,'gateway installer root failed'\);assert\(rootHtml\.includes\('Install Civweave v\d+\.\d+\.\d+\.'\),'gateway root is not the v\d+\.\d+\.\d+ installer'\);assert\(rootHtml\.includes\('No native modal'\),'gateway root does not describe the fixed settings layer'\);assert\(rootHtml\.includes\('\/app\/logos\/civweave-app-icon\.png'\),'gateway root does not use the app icon'\);/,
+  "  const rootResponse=await fetch(`${origin}/`,{cache:'no-store'}),rootHtml=await rootResponse.text();assert(rootResponse.ok,'gateway launcher root failed');assert(rootHtml.includes('<title>Civweave</title>'),'gateway root is not the Civweave launcher');assert(rootHtml.includes(`/app/installed-entry-v146.js?v=${VERSION}`),'gateway root does not launch the current installed entry');\n  const installerResponse=await fetch(`${origin}/app/index.html`,{cache:'no-store'}),installerHtml=await installerResponse.text();assert(installerResponse.ok,'gateway installer failed');assert(installerHtml.includes(`Install Civweave v${VERSION}`),'gateway installer is not release-current');assert(installerHtml.includes('No native modal'),'gateway installer does not describe the fixed settings layer');assert(installerHtml.includes('/app/logos/civweave.svg'),'gateway installer does not use the Civweave logo');"
+);
+source = source.replace(/campus\.includes\('\d+\.\d+\.\d+'\)/,"campus.includes(VERSION)");
 await fsp.writeFile(runtimePath, source, 'utf8');
 try {
   await import(`${pathToFileURL(runtimePath).href}?build=${encodeURIComponent(VERSION)}`);
