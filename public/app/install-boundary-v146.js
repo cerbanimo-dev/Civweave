@@ -19,6 +19,8 @@ const REALM_SESSION_INTEGRITY='/app/realm-session-integrity-v237.js';
 const THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js';
 const SHARED_GUIDE_SURFACE='/app/shared-guide-surface-v236.js';
 const FELLOWFARE_GUIDE_BRIDGE='/app/fellowfare-shared-guide-bridge-v236.js';
+const ASSET_CUSTOMIZATION='/app/asset-customization-v239.js';
+const ASSET_CUSTOMIZATION_STORAGE='civweave.asset-lockboard.v239';
 const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
 const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
@@ -116,6 +118,16 @@ function addScript(src){
   document.head.append(script);
   return true;
 }
+function assetCustomizationConfigured(){
+  try{
+    const value=JSON.parse(localStorage.getItem(ASSET_CUSTOMIZATION_STORAGE)||'{}');
+    return value?.personalEnabled!==false&&value?.pathOverrides&&Object.keys(value.pathOverrides).length>0;
+  }catch{return false}
+}
+function installAssetCustomizationIfConfigured(){
+  if(!assetCustomizationConfigured())return false;
+  return addScript(ASSET_CUSTOMIZATION);
+}
 function installEarlyGuards(){
   addScript(PLATFORM_STABILITY);
   addScript(AI_SETTINGS_BIND_GUARD);
@@ -126,6 +138,7 @@ function installSystemExperienceSupport(){
   if(!system||!liveHead())return false;
   SYSTEM_EXPERIENCE_SCRIPTS.forEach(addScript);
   if(system==='fellowfare')addScript(FELLOWFARE_GUIDE_BRIDGE);
+  installAssetCustomizationIfConfigured();
   return true;
 }
 function installCanonicalSystemSupport(){
@@ -147,6 +160,7 @@ function installAdditions(){
     document.head.append(link);
   }
   LEGACY_SCRIPTS.forEach(addScript);
+  installAssetCustomizationIfConfigured();
   return true;
 }
 function installAdditionsWhenReady(){
@@ -198,6 +212,8 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   installCanonicalSystemSupportWhenReady,
   installAdditions,
   installAdditionsWhenReady,
+  assetCustomizationConfigured,
+  installAssetCustomizationIfConfigured,
   additionsVersion:ADDITIONS_VERSION,
   publicBrand:'Civweave',
   canonicalPolicy:'five-system-first-class-routes-civweave-core-only',
@@ -212,6 +228,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   sharedGuideSurfaceRevision:'v236-inline-plus-bottom-right-shared-thread',
   realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',
   fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',
+  assetCustomizationRevision:'v239-local-path-overrides-on-demand',
   guideIdentityRevision:'v216-explicit-responder-ownership',
   guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
   guideSurfaceOwnershipPolicy:'v237-page-realm-owns-local-thread-handover-only-cross-realm',
