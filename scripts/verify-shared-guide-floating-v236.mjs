@@ -3,20 +3,24 @@ import assert from 'node:assert/strict';
 
 const boundary=fs.readFileSync(new URL('../public/app/install-boundary-v146.js',import.meta.url),'utf8');
 const guide=fs.readFileSync(new URL('../public/app/shared-guide-surface-v236.js',import.meta.url),'utf8');
+const realmIntegrity=fs.readFileSync(new URL('../public/app/realm-session-integrity-v237.js',import.meta.url),'utf8');
 const rookBridge=fs.readFileSync(new URL('../public/app/fellowfare-shared-guide-bridge-v236.js',import.meta.url),'utf8');
 const nav=fs.readFileSync(new URL('../public/app/themed-system-nav-v178.js',import.meta.url),'utf8');
 const radio=fs.readFileSync(new URL('../public/app/system-radio-agent-v233.js',import.meta.url),'utf8');
 const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),'utf8'));
+const release=fs.readFileSync(new URL('../VERSION',import.meta.url),'utf8').trim();
 
 const checks=[
-  ['all canonical systems load one shared guide stack',()=>{
+  ['all canonical systems load one shared guide surface stack with realm isolation',()=>{
     for(const token of [
       "PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js'",
       "PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js'",
+      "REALM_SESSION_INTEGRITY='/app/realm-session-integrity-v237.js'",
       "THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js'",
       "SHARED_GUIDE_SURFACE='/app/shared-guide-surface-v236.js'"
     ])assert.ok(boundary.includes(token),`missing boundary token ${token}`);
     assert.match(boundary,/sharedGuideSurfaceRevision:'v236-inline-plus-bottom-right-shared-thread'/);
+    assert.match(boundary,/realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair'/);
   }],
   ['five page-owned guide identities are explicit',()=>{
     for(const pair of [
@@ -26,13 +30,12 @@ const checks=[
     }
     assert.match(guide,/api\.switchGuide\?\.\(currentSystem\)/);
   }],
-  ['inline chat and floating launcher share one persistent thread',()=>{
-    assert.match(guide,/STORAGE_KEY='civweave\.persistent-guide-chat\.v214'/);
+  ['inline chat and floating launcher share one realm-local submission pipeline',()=>{
     assert.match(guide,/function submitInline\(text\)/);
     assert.match(guide,/\[data-persistent-form\]/);
     assert.match(guide,/form\.requestSubmit\(\)/);
-    assert.match(guide,/One shared thread, two surfaces/);
-    assert.equal((boundary.match(/PERSISTENT_GUIDE_CHAT_SCRIPT/g)||[]).length>=2,true);
+    assert.match(realmIntegrity,/civweave\.guide-thread\.\$\{system\}\.v237/);
+    assert.match(realmIntegrity,/five-realm-local-ledgers-plus-explicit-handover|Cross-realm work arrives only as explicit handover cards/);
   }],
   ['late realm renders cannot erase the inline guide surface',()=>{
     assert.match(guide,/function repairSurface\(\)/);
@@ -41,14 +44,12 @@ const checks=[
     const repairBody=guide.match(/function repairSurface\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
     assert.doesNotMatch(repairBody,/renderTranscript\(\)/,'repair observer must not mutate the transcript and trigger itself recursively');
   }],
-  ['Rook keeps the native workbench but shares the persistent thread',()=>{
+  ['Rook keeps the native workbench while v237 owns realm-local state',()=>{
     assert.match(guide,/if\(system==='fellowfare'\)return document\.querySelector\('\.ffc144-rook'\)/);
     assert.match(boundary,/FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);
     assert.match(boundary,/if\(system==='fellowfare'\)addScript\(FELLOWFARE_GUIDE_BRIDGE\)/);
-    assert.match(rookBridge,/SHARED_KEY='civweave\.persistent-guide-chat\.v214'/);
-    assert.match(rookBridge,/document\.addEventListener\('submit',onSubmit,true\)/);
     assert.match(rookBridge,/CivweaveSharedGuideSurfaceV236/);
-    assert.match(rookBridge,/shared conversation/);
+    assert.match(realmIntegrity,/exchangeMethod:'Buttons'/);
   }],
   ['radio and launcher sit above the bottom navigation',()=>{
     assert.match(guide,/#cw-radio-suggestion-v233\{z-index:2147483610!important/);
@@ -68,11 +69,12 @@ const checks=[
     assert.ok(order.every(index=>index>=0),'a canonical system is missing from nav');
     assert.deepEqual([...order].sort((a,b)=>a-b),order,'canonical nav order regressed');
   }],
-  ['release syntax gate includes the v236 runtime',()=>{
-    assert.equal(pkg.version,'1.0.30');
+  ['release syntax gate includes the v236 surface and v237 integrity layer',()=>{
+    assert.equal(pkg.version,release);
     assert.match(pkg.scripts['check:syntax'],/public\/app\/shared-guide-surface-v236\.js/);
+    assert.match(pkg.scripts['check:syntax'],/public\/app\/realm-session-integrity-v237\.js/);
   }]
 ];
 
 for(const [name,run] of checks){run();console.log(`✓ ${name}`)}
-console.log(`Shared guide + floating UI v236 verified: ${checks.length}/${checks.length} checks passed.`);
+console.log(`Shared guide + floating UI v236 verified under ${release}: ${checks.length}/${checks.length} checks passed.`);
