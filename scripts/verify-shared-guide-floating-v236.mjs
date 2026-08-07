@@ -49,9 +49,14 @@ const checks=[
     assert.match(guide,/bottom:calc\(var\(--cw-themed-nav-height,64px\) \+ env\(safe-area-inset-bottom\) \+ var\(--cw-floating-gap\)\)!important/);
     assert.match(radio,/left:max\(14px,env\(safe-area-inset-left\)\)/);
   }],
-  ['bottom navigation is compact and in canonical realm order',()=>{
+  ['bottom navigation uses the ornate face-button strip everywhere',()=>{
     assert.match(nav,/--cw-themed-nav-height:clamp\(52px,7vw,72px\)/);
     assert.match(nav,/--cw-themed-nav-button-width:156px/);
+    for(const id of ['civweave','living-school','cerbanimo','fellowfare','anarchadia']){
+      assert.ok(nav.includes(`/app/assets/navigation/200-${id}-nav.webp?v=image-nav-r2`),`${id} lost the canonical ornate face-button artwork`);
+    }
+    assert.match(nav,/width="200" height="100"/,'face-button assets must preserve their 2:1 source geometry');
+    assert.match(nav,/is-current/,'selected realm must retain its glow state');
     const order=['civweave','living-school','cerbanimo','fellowfare','anarchadia'].map(id=>nav.indexOf(`id:'${id}'`));
     assert.ok(order.every(index=>index>=0),'a canonical system is missing from nav');
     assert.deepEqual([...order].sort((a,b)=>a-b),order,'canonical nav order regressed');
