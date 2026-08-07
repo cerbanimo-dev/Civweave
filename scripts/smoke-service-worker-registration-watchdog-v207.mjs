@@ -47,10 +47,12 @@ assert(workerSource.includes("const V211_REVISION = 'offline-campus-seed-provena
 const workerAssertionsAfter=`assert(workerWrapperSource.includes("importScripts('/service-worker-living-school-cleanroom-v218.js"),'Active worker wrapper omits Living School cache retirement.');
 assert(workerWrapperSource.includes("importScripts('/service-worker-core-v208.js"),'Active worker wrapper omits the retained lightweight core.');
 assert(workerWrapperSource.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper omits the offline retry override.');
+assert(workerWrapperSource.includes('offline-campus-current-graph-v238'),'Active worker wrapper omits the current-graph offline revision.');
 assert(workerWrapperSource.indexOf('service-worker-living-school-cleanroom-v218.js')<workerWrapperSource.indexOf('service-worker-core-v208.js'),'Living School retirement does not load before the retained core.');
 assert(workerWrapperSource.indexOf('service-worker-core-v208.js')<workerWrapperSource.indexOf('service-worker-offline-v211-override.js'),'Offline override does not load after the core globals.');
 assert(workerCoreSource.includes("const BUILD = 'lightweight-shell-v208'"),'Verified lightweight worker core is missing.');
-assert(offlineOverrideSource.includes("const V211_REVISION = 'offline-campus-seed-provenance-v211'"),'Offline retry-loop repair is missing.');
+assert(offlineOverrideSource.includes("const V211_REVISION = 'offline-campus-current-graph-v238'"),'Current-graph offline retry repair is missing.');
+assert(offlineOverrideSource.includes('stale-not-rediscovered'),'Current-graph repair does not retire stale package assets.');
 assert(livingSchoolWorkerSource.includes("const REVISION='living-school-cleanroom-v218'"),'Living School clean-room worker revision is missing.');`;
 if(!source.includes(workerAssertionsBefore))throw new Error('Watchdog verifier could not find direct worker assertions.');
 source=source.replace(workerAssertionsBefore,workerAssertionsAfter);
