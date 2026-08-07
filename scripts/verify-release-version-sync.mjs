@@ -74,7 +74,8 @@ check(installRuntime.includes(`const VERSION = '${version}';`),'Installer runtim
 check(installRuntime.includes(`const WORKER_URL = \`/service-worker-v203.js?v=\${WORKER_BUILD}&revision=\${WORKER_SCRIPT_REVISION}\`;`),'Installer runtime no longer owns the versioned service-worker URL.');
 check(/navigator\.serviceWorker\.register\s*\(\s*WORKER_URL/.test(installRuntime),'Installer runtime no longer owns service-worker registration.');
 same(manifest.name,`Civweave v${version}`,'manifest name');
-same(new URL(manifest.start_url,'https://civweave.invalid').searchParams.get('version'),version,'manifest start URL version');
+same(manifest.start_url,'/app/installed-entry-v146.html?installed=1','manifest updater-first start URL');
+check((manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(shortcut=>String(shortcut.url||'').startsWith('/app/installed-entry-v146.html?installed=1')),'Manifest shortcuts no longer enter through the updater-first installed entry.');
 check(installedEntryHtml.includes(`/app/installed-entry-v146.js?v=${version}`),'Installed entry HTML is stale.');
 for(const token of [
   'authorize();',
@@ -90,16 +91,17 @@ check(nav.includes(`const VERSION='${version}-five-system-navigation-v227';`),'T
 check(nav.includes('ROUTES.navigate'),'Themed navigation bypasses the route contract.');
 check(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core version is stale.');
 check(workerWrapper.includes(`/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Worker route contract revision is stale.');
-check(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-lightweight-shell-v208-retained-v218`),'Worker core revision is stale.');
+check(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-chat-convergence-v250`),'Worker core revision is stale.');
 check(workerWrapper.includes('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238'),'Worker offline current-graph revision is stale.');
 check(workerWrapper.indexOf('/service-worker-canonical-navigation-v227.js')>workerWrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not the final worker policy.');
 check(legacyWorker.includes(`/service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
 for(const token of [
   `const VERSION='${version}';`,
   "const INSTALLER='/app/index.html';",
-  `const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`,
-  `version:'${version}'`,
-  "canonicalPolicy:'five-system-first-class-routes-civweave-core-only'",
+  'const requestedRelease=',
+  'const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;',
+  'version:VERSION',
+  "canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner'",
   'canonicalSystemCount:5',
   'canonicalAutoScripts:0',
   "canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions'"
@@ -118,6 +120,7 @@ for(const token of [
   "await patch('public/app/themed-system-nav-v178.js'",
   "await patch('public/app/working-campus-v156.js'",
   "await patch('public/app/working-campus-v156.part4.txt'",
+  "manifest.start_url='/app/installed-entry-v146.html?installed=1'",
   'launcher entry revision',
   'installer title',
   'worker route contract revision',
@@ -143,4 +146,4 @@ for(const [label,source] of [
   const pattern=new RegExp(`(?:(?:Civweave|Commonweave) v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
   for(const match of source.matchAll(pattern))if(match[1]!==version)throw new Error(`${label} still exposes ${match[1]} instead of ${version}.`);
 }
-console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,canonicalCoreOnly:true,legacyCompatibility:'noncanonical-only',gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,directCampusEntry:true,installerRecoveryOnly:true,installerRegistrationOwner:'install-v130.js'},null,2));
+console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,canonicalCoreOnly:true,legacyCompatibility:'noncanonical-only',gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,directCampusEntry:true,installerRecoveryOnly:true,installerRegistrationOwner:'install-v130.js',installedLaunch:'updater-first-v250'},null,2));
