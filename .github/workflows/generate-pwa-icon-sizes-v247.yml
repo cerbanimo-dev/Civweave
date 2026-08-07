@@ -1,0 +1,72 @@
+name: Generate PWA icon sizes v247
+
+on:
+  push:
+    branches:
+      - fix/pwa-real-192-icon-v247
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/pwa-real-192-icon-v247
+          fetch-depth: 0
+      - name: Generate true-size Civweave PNG icons
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v magick >/dev/null 2>&1; then
+            IM=magick
+          elif command -v convert >/dev/null 2>&1; then
+            IM=convert
+          else
+            sudo apt-get update -qq
+            sudo apt-get install -y imagemagick
+            IM=convert
+          fi
+          source=public/app/logos/civweave-canonical.png
+          for path in public/app/logos/civweave-icon-*.png; do
+            name="$(basename "$path")"
+            if [[ "$name" =~ ^civweave-icon-([0-9]+)\.png$ ]]; then
+              size="${BASH_REMATCH[1]}"
+              "$IM" "$source" -filter Lanczos -resize "${size}x${size}!" "$path"
+            fi
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+          bad=[]
+          for path in Path('public/app/logos').glob('civweave-icon-*.png'):
+              stem=path.stem.removeprefix('civweave-icon-')
+              if not stem.isdigit():
+                  continue
+              expected=int(stem)
+              data=path.read_bytes()
+              if data[:8] != b'\x89PNG\r\n\x1a\n':
+                  bad.append((str(path),'not-png'))
+                  continue
+              width,height=struct.unpack('>II',data[16:24])
+              if (width,height)!=(expected,expected):
+                  bad.append((str(path),f'{width}x{height}'))
+          if bad:
+              raise SystemExit(f'icon dimensions wrong: {bad}')
+          PY
+      - name: Commit generated icon family
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "civweave-icon-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/app/logos/civweave-icon-*.png
+          if git diff --cached --quiet; then
+            echo "No icon changes needed."
+            exit 0
+          fi
+          git commit -m "Generate true-size Civweave PWA icons"
+          git push origin HEAD:fix/pwa-real-192-icon-v247
