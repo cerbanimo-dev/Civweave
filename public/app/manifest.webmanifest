@@ -22,7 +22,14 @@
     "education",
     "social"
   ],
+  "prefer_related_applications": false,
   "icons": [
+    {
+      "src": "/app/logos/civweave-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/app/logos/civweave-canonical.png",
       "sizes": "512x512",
@@ -30,7 +37,7 @@
       "purpose": "any"
     },
     {
-      "src": "/app/logos/civweave-canonical.png",
+      "src": "/app/logos/civweave-icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
