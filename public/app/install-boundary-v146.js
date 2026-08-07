@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.31';
+const VERSION='1.0.34';
 const REVISION='five-system-boundary-v227';
 const INSTALLER='/app/index.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const DEV_KEY='civweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION='v1.0.31-canonical-core-only-v226';
+const ADDITIONS_VERSION='v1.0.34-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
 const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
@@ -16,6 +16,7 @@ const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
 const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js';
 const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js';
 const REALM_SESSION_INTEGRITY='/app/realm-session-integrity-v237.js';
+const GUIDE_WORKSPACE='/app/guide-workspace-v242.js';
 const THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js';
 const CAMPUS_BACKGROUND_DOWNLOAD='/app/campus-background-download-v241.js';
 const SHARED_GUIDE_SURFACE='/app/shared-guide-surface-v236.js';
@@ -43,6 +44,7 @@ const SYSTEM_EXPERIENCE_SCRIPTS=[
   PERSISTENT_GUIDE_CHAT_SCRIPT,
   PERSISTENT_GUIDE_VIEWPORT_SCRIPT,
   REALM_SESSION_INTEGRITY,
+  GUIDE_WORKSPACE,
   THEMED_SYSTEM_NAV,
   CAMPUS_BACKGROUND_DOWNLOAD,
   SYSTEM_RADIO_AGENT,
@@ -65,6 +67,7 @@ const LEGACY_SCRIPTS=[
   PERSISTENT_GUIDE_CHAT_SCRIPT,
   PERSISTENT_GUIDE_VIEWPORT_SCRIPT,
   REALM_SESSION_INTEGRITY,
+  GUIDE_WORKSPACE,
   '/extensions/civweave-antigravity-live-source-guard-v167.js',
   '/extensions/civweave-device-credentials-v160.js',
   '/extensions/civweave-additions-v156.js',
@@ -201,7 +204,7 @@ function start(){
 start();
 
 globalThis.CivweaveInstallBoundaryV146=Object.freeze({
-  version:'1.0.31',allowed,
+  version:'1.0.34',allowed,
   revision:REVISION,
   systemSurface,
   canonicalAppSurface,
@@ -233,15 +236,17 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
   sharedGuideSurfaceRevision:'v236-inline-plus-bottom-right-shared-thread',
   realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',
+  guideWorkspaceRevision:'v242-five-window-local-ledgers-no-scroll-trap',
   fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',
   assetCustomizationRevision:'v239-local-path-overrides-on-demand',
   guideIdentityRevision:'v216-explicit-responder-ownership',
   guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
-  guideSurfaceOwnershipPolicy:'v237-page-realm-owns-local-thread-handover-only-cross-realm',
+  guideSurfaceOwnershipPolicy:'v242-page-realm-launcher-five-local-window-ledgers-handover-only-cross-realm',
   guideIdentityMigration:'realm-action-owner',
   persistentGuideChatSubmissionPipelines:1,
   persistentGuideChatGuideCount:5,
   persistentGuideChatThreadPolicy:'five-realm-local-ledgers-plus-explicit-handover',
+  persistentGuideChatWindowPolicy:'five-switchable-windows-current-realm-launcher',
   pwaUpdateRevision:'v207-registration-watchdog',
   aiSettingsBindGuard:'v230-first-open-atomic-bind',
   aiSettingsPersistenceRepair:'v229-device-persistence',
