@@ -1,6 +1,6 @@
 import{copy,state,VERSION}from'./living-school-cleanroom-core-v218.mjs';
 import{render}from'./living-school-cleanroom-render-v218.mjs';
-import{actions}from'./living-school-cleanroom-actions-v218.mjs';
+import{actions}from'../../living-school-cleanroom-actions-v243.mjs';
 
 let busy=false,dispatchCount=0;
 async function handleLivingSchoolClick(event){
@@ -18,4 +18,4 @@ async function handleLivingSchoolClick(event){
 
 document.addEventListener('click',handleLivingSchoolClick,true);
 render();
-globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,legacyNavigation:false});
+globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'downloaded-knowledge-v243',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,legacyNavigation:false});
