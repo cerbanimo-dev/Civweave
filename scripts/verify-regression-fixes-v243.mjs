@@ -5,8 +5,8 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [boundary,repairs,entry,localResearch,localActions,knowledge,build,stage,pkg]=await Promise.all([
-  read('public/app/install-boundary-v146.js'),
+const [viewport,repairs,entry,localResearch,localActions,knowledge,build,stage,pkg]=await Promise.all([
+  read('public/app/persistent-guide-viewport-v216.js'),
   read('public/app/regression-fixes-v243.js'),
   read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'),
   read('public/app/living-school-local-research-v243.mjs'),
@@ -17,8 +17,8 @@ const [boundary,repairs,entry,localResearch,localActions,knowledge,build,stage,p
   read('package.json')
 ]);
 
-assert(boundary.includes("const REGRESSION_FIXES='/app/regression-fixes-v243.js'"),'Global regression bundle is not registered.');
-assert((boundary.match(/REGRESSION_FIXES/g)||[]).length>=3,'Regression bundle is not loaded on both system and legacy surfaces.');
+assert(viewport.includes("const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r1'"),'Universal guide layer does not load the v243 interaction repair.');
+assert(viewport.includes('installRegressionFixes()'),'Universal guide layer does not activate the repair loader.');
 assert(repairs.includes("dialog button[data-close]")&&repairs.includes("control.type='button'"),'Proof dialog close controls are not repaired.');
 assert(repairs.includes("document.addEventListener('pointerup',onPointerUp,true)"),'Pointer-level chat/dialog repair is missing.');
 assert(repairs.includes("queueMicrotask(()=>control.click())"),'Chat controls do not bridge pointer input to the canonical click owner.');
@@ -39,4 +39,4 @@ const parsed=JSON.parse(pkg);
 assert.equal(parsed.dependencies?.['sql.js'],'1.14.1','Pinned sql.js dependency is missing.');
 assert(parsed.scripts?.prestart?.includes('stage-sqljs-assets.mjs'),'Local startup does not stage sql.js.');
 
-console.log(JSON.stringify({ok:true,revision:'v243',proofDialogEscapes:true,pointerChatControls:true,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243',universalGuideRepair:true,proofDialogEscapes:true,pointerChatControls:true,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,provenanceExplicit:true},null,2));
