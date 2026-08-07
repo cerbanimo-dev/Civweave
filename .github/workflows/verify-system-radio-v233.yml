@@ -1,0 +1,37 @@
+name: Verify System Radio v233
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/system-radio-agent-v233.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'scripts/verify-system-radio-v233.mjs'
+      - '.github/workflows/verify-system-radio-v233.yml'
+      - 'VERSION'
+      - 'package.json'
+  push:
+    branches:
+      - main
+    paths:
+      - 'public/app/system-radio-agent-v233.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'scripts/verify-system-radio-v233.mjs'
+      - '.github/workflows/verify-system-radio-v233.yml'
+      - 'VERSION'
+      - 'package.json'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check runtime syntax
+        run: |
+          node --check public/app/system-radio-agent-v233.js
+          node --check public/app/install-boundary-v146.js
+          node --check scripts/verify-system-radio-v233.mjs
+      - name: Verify radio contract
+        run: node scripts/verify-system-radio-v233.mjs
