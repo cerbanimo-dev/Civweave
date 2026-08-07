@@ -189,30 +189,42 @@ async function decorate(systemId){
   const label=document.createElement('span');label.className='cw-radio-pick-label-v241';label.textContent='Random pull from this station';
   const title=document.createElement('strong');title.className='cw-radio-track-v241';title.textContent=track.label;
   block.append(badge,label,title);
+
   const stationLink=card.querySelector?.('.cw-radio-link');
+  if(stationLink)stationLink.textContent='Open station ↗';
   const actions=document.createElement('div');actions.className='cw-radio-actions-v241';
-  const trackLink=document.createElement('a');trackLink.className='cw-radio-track-link-v241';
-  const updateTrackLink=id=>{
+  const trackLink=document.createElement('a');trackLink.className='cw-radio-track-link-v241';trackLink.target='_blank';trackLink.rel='noopener noreferrer';
+  let trackLinkMounted=false;
+  const mountContextLink=id=>{
     const resolved=spotifyTrackId(id||track.spotifyTrackId||cachedTrackId(system,track.position));
-    const enriched=resolved?{...track,spotifyTrackId:resolved}:track;
-    trackLink.href=spotifyContextUrl(enriched,system);
-    trackLink.textContent=resolved?'Play in station ↗':'Open station ↗';
-    trackLink.dataset.spotifyContextReady=resolved?'true':'false';
+    if(!resolved)return'';
+    trackLink.href=spotifyContextUrl({...track,spotifyTrackId:resolved},system);
+    trackLink.textContent='Play in station ↗';
+    trackLink.dataset.spotifyContextReady='true';
+    if(!trackLinkMounted){
+      if(stationLink?.parentNode===card){
+        card.insertBefore(actions,stationLink);actions.append(trackLink,stationLink);
+      }else{
+        actions.append(trackLink);block.after?.(actions);
+      }
+      trackLinkMounted=true;
+    }
     return resolved;
   };
-  updateTrackLink('');
-  trackLink.target='_blank';trackLink.rel='noopener noreferrer';
-  trackLink.addEventListener('click',()=>globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_CLICKED',revision:REVISION,system,track:track.label,position:track.position,spotifyTrackId:spotifyTrackId(trackLink.href),contextReady:trackLink.dataset.spotifyContextReady==='true',tag}})),{once:true});
+  trackLink.addEventListener('click',()=>globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_CLICKED',revision:REVISION,system,track:track.label,position:track.position,spotifyTrackId:spotifyTrackId(trackLink.href),contextReady:true,tag}})),{once:true});
+
   const radioTitle=card.querySelector?.('.cw-radio-title');
   if(radioTitle?.after)radioTitle.after(block);else card.insertBefore?.(block,stationLink||null);
-  if(stationLink){
-    stationLink.textContent='Open station ↗';
-    if(stationLink.parentNode===card){card.insertBefore(actions,stationLink);actions.append(trackLink,stationLink)}else actions.append(trackLink);
-  }else{actions.append(trackLink);block.after?.(actions)}
+  const initialId=mountContextLink('');
+  if(!initialId&&!stationLink){
+    const fallback=document.createElement('a');fallback.className='cw-radio-track-link-v241';fallback.href=stationUrl(system);fallback.target='_blank';fallback.rel='noopener noreferrer';fallback.textContent='Open station ↗';
+    block.after?.(fallback);
+  }
+
   card.dataset.radioTrackSuggestionRevision=REVISION;card.dataset.radioTrack=track.label;card.dataset.radioTrackPosition=String(track.position);
-  globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_SUGGESTED',revision:REVISION,system,track:track.label,position:track.position,spotifyTrackId:track.spotifyTrackId,contextReady:Boolean(track.spotifyTrackId),tag}}));
-  if(!track.spotifyTrackId&&accessTokenProvider){
-    resolveTrackId(system,track).then(id=>{if(id&&card.isConnected)updateTrackLink(id)});
+  globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_SUGGESTED',revision:REVISION,system,track:track.label,position:track.position,spotifyTrackId:initialId,contextReady:Boolean(initialId),tag}}));
+  if(!initialId&&accessTokenProvider){
+    resolveTrackId(system,track).then(id=>{if(id&&card.isConnected)mountContextLink(id)});
   }
   return track.label;
 }
