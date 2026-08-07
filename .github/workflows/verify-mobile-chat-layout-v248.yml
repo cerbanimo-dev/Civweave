@@ -7,6 +7,7 @@ on:
       - 'package.json'
       - 'public/app/chat-single-owner-v245.js'
       - 'public/app/persistent-guide-viewport-v216.js'
+      - 'public/app/guide-workspace-v242.js'
       - 'public/app/working-campus-topbar-v243.js'
       - 'public/app/working-campus-v156.css'
       - 'public/app/working-campus-v156.html'
@@ -28,6 +29,7 @@ jobs:
         run: |
           node --check public/app/chat-single-owner-v245.js
           node --check public/app/persistent-guide-viewport-v216.js
+          node --check public/app/guide-workspace-v242.js
           node --check public/app/working-campus-topbar-v243.js
           node --check public/service-worker-chat-repair-v245.js
           node --check public/service-worker-v203.js
