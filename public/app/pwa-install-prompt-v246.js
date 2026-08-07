@@ -6,13 +6,14 @@ const ENTRY='/app/?system=civweave&installed=1';
 let promptEvent=null;
 let installed=false;
 let prompting=false;
+let buttonObserver=null;
 
 function standalone(){
   return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
 }
 function help(message){
   const node=document.querySelector('#install-help');
-  if(node)node.textContent=message;
+  if(node&&node.textContent!==message)node.textContent=message;
 }
 function installButton(){return document.querySelector('#install-app')}
 function publish(type,detail={}){
@@ -20,16 +21,29 @@ function publish(type,detail={}){
 }
 function refreshButton(){
   const button=installButton();
-  if(!button||button.disabled)return;
+  if(!button||button.disabled||/reset app shell/i.test(button.textContent||''))return;
   if(standalone()){
-    button.textContent='Open Civweave';
+    if(button.textContent!=='Open Civweave')button.textContent='Open Civweave';
     help('Civweave is installed as an app. The campus can keep downloading in the background.');
     return;
   }
   if(promptEvent){
-    button.textContent='Install Civweave';
+    if(button.textContent!=='Install Civweave')button.textContent='Install Civweave';
     help('Civweave is ready for a real browser-native app install. Tap Install Civweave.');
+    return;
   }
+  if(!prompting){
+    if(button.textContent!=='Install Civweave')button.textContent='Install Civweave';
+    help('Waiting for Chrome to offer the real Civweave app-install prompt. Do not use Create shortcut: that only links back to the website.');
+  }
+}
+function observeButton(){
+  const button=installButton();
+  if(!button)return;
+  buttonObserver?.disconnect();
+  buttonObserver=new MutationObserver(()=>queueMicrotask(refreshButton));
+  buttonObserver.observe(button,{attributes:true,attributeFilter:['disabled'],childList:true,subtree:true});
+  refreshButton();
 }
 function capture(event){
   event.preventDefault();
@@ -59,7 +73,6 @@ async function ownInstallClick(event){
   event.stopImmediatePropagation();
   if(!prompt){
     help('Chrome has not offered a true Civweave app-install prompt yet. Do not use Create shortcut: that only links back to the website. Tap Check release or reload this installer after the shell is ready.');
-    button.textContent='Install prompt not ready';
     return;
   }
   prompting=true;
@@ -90,7 +103,8 @@ async function ownInstallClick(event){
 addEventListener('beforeinstallprompt',capture);
 addEventListener('appinstalled',onInstalled);
 document.addEventListener('click',ownInstallClick,true);
-addEventListener('DOMContentLoaded',refreshButton,{once:true});
+if(document.readyState==='loading')addEventListener('DOMContentLoaded',observeButton,{once:true});else observeButton();
+addEventListener('pagehide',()=>buttonObserver?.disconnect(),{once:true});
 
 const api=Object.freeze({
   version:VERSION,
