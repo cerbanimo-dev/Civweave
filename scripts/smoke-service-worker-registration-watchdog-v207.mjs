@@ -4,6 +4,7 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 
 const dir=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(dir,'..');
+await import('./sync-release-version-assets.mjs');
 const sourcePath=path.join(dir,'smoke-service-worker-registration-watchdog-v207-legacy.mjs');
 const runtimePath=path.join(dir,'.smoke-service-worker-registration-watchdog-v207.runtime.mjs');
 const installerPath=path.join(root,'public/install-v130.js');
@@ -26,7 +27,7 @@ source=source.replace("readyState:'complete',documentElement:{},head:{append(){}
 source=source.replace("body:{append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}","body:{isConnected:true,append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}");
 
 const boundaryBefore=`assert(boundarySource.includes("const ADDITIONS_VERSION='${updaterVersion}'"),'Installed pages do not cache-bust the v207 update controller.');`;
-const boundaryAfter="assert(boundarySource.includes(\"const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'\"),'Installed boundary no longer names the shared update controller.');\nassert(boundarySource.includes('PWA_UPDATE_SCRIPT'),'Installed boundary no longer includes the shared update controller in its compatibility bundle.');\nassert.match(boundarySource,/const ADDITIONS_VERSION='v[^']+'/,'Installed boundary does not cache-bust shared additions.');";
+const boundaryAfter="assert(boundarySource.includes(\"const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'\"),'Installed boundary no longer names the shared update controller.');\nassert(boundarySource.includes('PWA_UPDATE_SCRIPT'),'Installed boundary no longer retains the update controller for noncanonical compatibility surfaces.');\nassert(boundarySource.includes(\"canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions'\"),'Canonical realms no longer declare the minimal startup corridor.');\nassert.match(boundarySource,/const ADDITIONS_VERSION='v[^']+'/,'Installed boundary does not cache-bust shared additions.');";
 if(!source.includes(boundaryBefore))throw new Error('Watchdog verifier compatibility patch could not find the retired updater additions assertion.');
 source=source.replace(boundaryBefore,boundaryAfter);
 

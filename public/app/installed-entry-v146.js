@@ -4,7 +4,7 @@ const params=new URLSearchParams(location.search);
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const scriptUrl=(()=>{try{return new URL(document.currentScript?.src||'',location.href)}catch{return null}})();
-const releaseVersion=scriptUrl?.searchParams.get('v')||params.get('version')||'1.0.18';
+const releaseVersion=scriptUrl?.searchParams.get('v')||params.get('version')||'1.0.21';
 const workerUrl=`/service-worker-v203.js?v=${encodeURIComponent(releaseVersion)}-lightweight-shell-v208&revision=release-coherence-v226`;
 const routeUrl=`/app/system-routes-v227.js?v=${encodeURIComponent(releaseVersion)}-five-system-route-contract-v227`;
 const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
@@ -27,19 +27,12 @@ function ensureRoutes(){
 }
 async function boot(){
   refreshWorker().catch(()=>{});
-  if(explicitInstalled||installedDisplay())authorize();
-  const bootGranted=()=>{try{return sessionStorage.getItem(BOOT_KEY)==='1'||sessionStorage.getItem(LEGACY_BOOT_KEY)==='1'}catch{return explicitInstalled}};
-  if(!installedDisplay()&&!bootGranted()&&!localDeveloper()){
-    const installer=new URL('/app/index.html',location.origin);
-    installer.searchParams.set('install','required');
-    installer.searchParams.set('next',`${location.pathname}${location.search}${location.hash}`.slice(0,1800));
-    location.replace(installer.href);return;
-  }
+  authorize();
   const requested=params.get('system')||params.get('target')||'civweave';
   const aliases={hub:'civweave',cabinet:'civweave',cabinets:'civweave',cabinetonly:'civweave',lite:'civweave'};
   const system=aliases[requested]||requested;
   try{
-    const routes=await ensureRoutes();authorize();
+    const routes=await ensureRoutes();
     const destination=routes.urlFor(routes.routeFor(system)?system:'civweave',{origin:location.origin,version:releaseVersion,source:'installed-entry',developer:localDeveloper()});
     location.replace(destination.href);
   }catch{

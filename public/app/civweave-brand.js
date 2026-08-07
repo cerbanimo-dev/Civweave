@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1';
+const VERSION='1.0.2';
 const FULL_LOGO='/app/logos/civweave.svg';
 const SYMBOL_LOGO='/app/logos/civweave-symbol.svg';
 const SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
@@ -10,16 +10,16 @@ const ATTRIBUTES=['alt','title','aria-label','placeholder','content','data-label
 
 function brandText(value){
   if(typeof value!=='string'||!value)return value;
-  return value.replaceAll('CIVWEAVE','CIVWEAVE').replaceAll('Civweave','Civweave');
+  return value.replaceAll('COMMONWEAVE','CIVWEAVE').replaceAll('Commonweave','Civweave');
 }
 
 function brandImage(image){
   const source=image.getAttribute('src')||'';
-  if(/\/app\/logos\/civweave\.webp(?:[?#].*)?$/i.test(source)){
+  if(/\/app\/logos\/(?:commonweave|civweave)\.webp(?:[?#].*)?$/i.test(source)){
     image.setAttribute('src',FULL_LOGO);
     return;
   }
-  if(/\/app\/logos\/civweave-app-icon\.png(?:[?#].*)?$/i.test(source)){
+  if(/\/app\/logos\/(?:commonweave-app-icon|civweave-app-icon|civweave-icon-(?:\d+|maskable-\d+)|civweave-adaptive-foreground-512)\.png(?:[?#].*)?$/i.test(source)){
     image.setAttribute('src',SYMBOL_LOGO);
   }
 }
