@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   require-higher-version:
@@ -38,36 +38,3 @@ jobs:
           }
           console.log(`Civweave version advances from ${base} to ${proposed}.`);
           NODE
-
-  synchronize-release:
-    if: github.event.pull_request.head.ref == 'fix/civweave-post-rename-checks'
-    needs: require-higher-version
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Check out the repair branch
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
-          token: ${{ github.token }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Synchronize Civweave release surfaces
-        run: |
-          node scripts/sync-release-version-assets.mjs
-          node scripts/sync-release-coherence-v220.mjs
-      - name: Commit synchronized release assets
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if git diff --cached --quiet; then
-            echo 'Release surfaces are already synchronized.'
-            exit 0
-          fi
-          git commit -m "Synchronize Civweave v1.0.18 release assets"
-          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
