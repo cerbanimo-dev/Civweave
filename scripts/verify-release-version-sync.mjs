@@ -73,8 +73,14 @@ same(manifest.name,`Civweave v${version}`,'manifest name');
 same(new URL(manifest.start_url,'https://civweave.invalid').searchParams.get('version'),version,'manifest start URL version');
 check(installRuntime.includes(`const VERSION = '${version}';`),'Installer runtime is stale.');
 check(installedEntryHtml.includes(`/app/installed-entry-v146.js?v=${version}`),'Installed entry HTML is stale.');
-check(installedEntryRuntime.includes("new URL('/app/index.html',location.origin)"),'Browser launcher does not target the real installer.');
-check(installedEntryRuntime.includes("installer.searchParams.set('install','required')"),'Browser launcher does not preserve the install-required marker.');
+for(const token of [
+  'authorize();',
+  "const requested=params.get('system')||params.get('target')||'civweave';",
+  'routes.urlFor(',
+  "new URL('/app/working-campus-v156.html',location.origin)"
+])check(installedEntryRuntime.includes(token),`Direct browser launcher is missing ${token}`);
+check(!installedEntryRuntime.includes("new URL('/app/index.html',location.origin)"),'Normal browser launcher still routes through the installer.');
+check(!installedEntryRuntime.includes("installer.searchParams.set('install','required')"),'Normal browser launcher still manufactures an install-required redirect.');
 check(routes.includes(`const VERSION='${version}';`),'Five-system route contract version is stale.');
 for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])check(routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
 check(nav.includes(`const VERSION='${version}-five-system-navigation-v227';`),'Themed navigation version is stale.');
@@ -89,10 +95,10 @@ for(const token of [
   "const INSTALLER='/app/index.html';",
   `const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`,
   `version:'${version}'`,
-  "'/app/system-routes-v227.js'",
   "canonicalPolicy:'five-system-first-class-routes-civweave-core-only'",
   'canonicalSystemCount:5',
-  'canonicalAutoScripts:0'
+  'canonicalAutoScripts:0',
+  "canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions'"
 ])check(installBoundary.includes(token),`Install boundary is missing ${token}.`);
 check(!installBoundary.includes("const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';")&&!installBoundary.includes('addScript(RELEASE_VERSION_SCRIPT)'),'Install boundary reintroduced the retired canonical version loader.');
 check(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-civweave-version]')"),'Visible-version synchronizer is incomplete.');
@@ -130,7 +136,7 @@ for(const [label,source] of [
   ['campus loader',campusLoader],
   ['campus travel',campusPart4]
 ]){
-  const pattern=new RegExp(`(?:(?:Civweave|Civweave) v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
+  const pattern=new RegExp(`(?:(?:Civweave|Commonweave) v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
   for(const match of source.matchAll(pattern))if(match[1]!==version)throw new Error(`${label} still exposes ${match[1]} instead of ${version}.`);
 }
-console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,canonicalCoreOnly:true,legacyCompatibility:true,gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true},null,2));
+console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,canonicalCoreOnly:true,legacyCompatibility:'noncanonical-only',gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,directCampusEntry:true,installerRecoveryOnly:true},null,2));
