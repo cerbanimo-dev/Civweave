@@ -13,7 +13,7 @@ const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),
 const release=fs.readFileSync(new URL('../VERSION',import.meta.url),'utf8').trim();
 
 const checks=[
-  ['all canonical systems load realm isolation followed by the five-window workspace',()=>{
+  ['all canonical systems load realm isolation followed by the one five-window workspace',()=>{
     for(const token of [
       "PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js'",
       "PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js'",
@@ -23,15 +23,21 @@ const checks=[
       "SHARED_GUIDE_SURFACE='/app/shared-guide-surface-v236.js'"
     ])assert.ok(boundary.includes(token),`missing boundary token ${token}`);
     assert.match(boundary,/realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair'/);
-    assert.match(boundary,/guideWorkspaceRevision:'v242-five-window-local-ledgers-no-scroll-trap'/);
-    assert.ok(boundary.indexOf('REALM_SESSION_INTEGRITY,')<boundary.indexOf('GUIDE_WORKSPACE,'),'workspace must load after local-ledger ownership');
+    assert.match(boundary,/guideWorkspaceRevision:'v250-v242-canonical-owner'/);
+    const start=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),end=boundary.indexOf('];',start),experience=boundary.slice(start,end);
+    assert.match(experience,/REALM_SESSION_INTEGRITY/);
+    assert.match(experience,/GUIDE_WORKSPACE/);
+    assert.doesNotMatch(experience,/PERSISTENT_GUIDE_CHAT_SCRIPT/,'canonical experience must not boot retained v215');
+    assert.doesNotMatch(experience,/PERSISTENT_GUIDE_VIEWPORT_SCRIPT/,'canonical experience must not boot retained v216');
+    assert.ok(experience.indexOf('REALM_SESSION_INTEGRITY,')<experience.indexOf('GUIDE_WORKSPACE,'),'workspace must load after local-ledger ownership');
   }],
   ['five guide identities remain explicit and switchable without merging ledgers',()=>{
     for(const pair of [["civweave",'Weaveling'],["living-school",'Moss'],['cerbanimo','Kamiya'],['fellowfare','Rook'],['anarchadia','Merlin']])assert.ok(workspace.includes(pair[0])&&workspace.includes(`name:'${pair[1]}'`),`missing ${pair[1]} workspace contract`);
     assert.match(workspace,/const SYSTEMS=\['civweave','living-school','cerbanimo','fellowfare','anarchadia'\]/);
     assert.match(workspace,/function switchWindow\(system/);
     assert.match(workspace,/readThread\(activeWindow\)/);
-    assert.match(workspace,/five-realm-local-ledgers-plus-explicit-handover|Switching windows never mixes histories/);
+    assert.match(workspace,/Switching windows never mixes histories/);
+    assert.match(workspace,/canonicalOwner:true/);
     assert.doesNotMatch(workspace,/messages\s*=\s*SYSTEMS\.flatMap/,'workspace must never flatten realm histories');
   }],
   ['launcher-first open owns the current realm without requiring inline chat priming',()=>{
@@ -48,6 +54,7 @@ const checks=[
     assert.match(workspace,/submitText:async\(text,system=activeWindow\)/);
     assert.match(workspace,/assistant\.respond\(\{text:value,systemId:system/);
     assert.match(workspace,/handoffSystem:system!==pageSystem\?system:undefined/);
+    assert.match(workspace,/fallbackReply/);
     assert.match(realmIntegrity,/civweave\.guide-thread\.\$\{system\}\.v237/);
   }],
   ['inline and full composers cannot both receive taps',()=>{
@@ -57,9 +64,10 @@ const checks=[
     assert.match(workspace,/civweave:guide-workspace-state/);
     assert.doesNotMatch(guide,/input\.focus\(\)/);
   }],
-  ['chat viewport cannot trap document scroll or force scrollIntoView',()=>{
+  ['chat viewport cannot trap document scroll or install a second owner',()=>{
     assert.doesNotMatch(viewport,/MutationObserver/);
     assert.doesNotMatch(viewport,/scrollIntoView/);
+    assert.doesNotMatch(viewport,/CHAT_OWNER_REPAIR|chat-single-owner-v245\.js/);
     assert.match(viewport,/overscroll-behavior:auto!important/);
     assert.match(workspace,/height:min\(62dvh,560px\)!important/);
     assert.match(workspace,/z-index:2147483644!important/);

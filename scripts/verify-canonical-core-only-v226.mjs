@@ -17,8 +17,6 @@ const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-versio
 const allowedExperienceSupport=[
   '/app/experience-orchestrator-v232.js',
   '/app/guide-identity-integrity-v216.js',
-  '/app/persistent-guide-chat-v215.js',
-  '/app/persistent-guide-viewport-v216.js',
   '/app/realm-session-integrity-v237.js',
   '/app/guide-workspace-v242.js',
   '/app/working-campus-topbar-v243.js',
@@ -29,6 +27,7 @@ const allowedExperienceSupport=[
   '/app/shared-review-surface-v234.js',
   '/app/shared-guide-surface-v236.js'
 ];
+const retiredCanonicalChat=['/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js','/app/chat-single-owner-v245.js'];
 const fellowfareBridge='/app/fellowfare-shared-guide-bridge-v236.js';
 function runBoundary(pathname){
   const appended=[],replaced=[],storage=new Map(),documentElement={isConnected:true,dataset:{}},head={isConnected:true,append:node=>appended.push(node)},body={isConnected:true};
@@ -48,6 +47,7 @@ for(const [system,pathname] of Object.entries(systems)){
   assert.equal(result.api.allowed(),true);
   assert.equal(result.documentElement.dataset.civweaveSystemRoute,system);
   const scriptPaths=result.appended.map(node=>{try{return new URL(String(node.src||''),'https://civweave.invalid').pathname}catch{return''}}).filter(Boolean);
+  for(const retired of retiredCanonicalChat)assert.ok(!scriptPaths.includes(retired),`${system} booted retired canonical chat owner ${retired}.`);
   if(system==='civweave'){
     assert.deepEqual(scriptPaths,allowedExperienceSupport,'Civweave startup drifted beyond the approved experience subsystem.');
     assert.equal(result.documentElement.dataset.installBoundary,'canonical');
@@ -67,17 +67,18 @@ assert.equal(api.canonicalAutoScripts,0);
 assert.equal(api.canonicalSubsystemSupportScripts,4);
 assert.equal(api.canonicalExperienceScripts,allowedExperienceSupport.length);
 assert.equal(api.canonicalSubsystemCompatibility,'route-version-settings-only-no-legacy-additions');
-assert.equal(api.canonicalPolicy,'five-system-first-class-routes-civweave-core-only');
+assert.equal(api.canonicalPolicy,'five-system-first-class-routes-v242-canonical-chat-owner');
 assert.equal(api.persistentGuideChatSubmissionPipelines,1);
 assert.equal(api.persistentGuideChatGuideCount,5);
 assert.equal(api.persistentGuideChatThreadPolicy,'five-realm-local-ledgers-plus-explicit-handover');
 assert.equal(api.persistentGuideChatWindowPolicy,'five-switchable-windows-current-realm-launcher');
 assert.equal(api.realmSessionIntegrityRevision,'v237-realm-local-memory-handover-state-repair');
-assert.equal(api.guideWorkspaceRevision,'v242-five-window-local-ledgers-no-scroll-trap');
+assert.equal(api.guideWorkspaceRevision,'v250-v242-canonical-owner');
 assert.equal(api.workingCampusTopbarRevision,'v243-sticky-top-map-launch-contract');
 assert.equal(api.mapLaunchRevision,'v243-register-route-handler-or-open-event');
-assert.equal(api.guideSurfaceOwnershipPolicy,'v242-page-realm-launcher-five-local-window-ledgers-handover-only-cross-realm');
+assert.equal(api.guideSurfaceOwnershipPolicy,'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm');
 assert.equal(api.fellowfareGuideBridgeRevision,'v236-native-workbench-shared-thread');
 assert.equal(api.radioTrackSuggestionRevision,'v240-local-station-directory-random-pull-labels');
 assert.equal(api.campusBackgroundDownloadRevision,'v241-worker-owned-download-bottom-progress-rail');
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,realmLocalGuideThreads:true,guideWorkspace:'v242-five-window',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,legacyCompatibility:'noncanonical-only'},null,2));
+assert.equal(api.pwaUpdateRevision,'v250-installed-entry-every-launch');
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,canonicalChatOwner:'guide-workspace-v242',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,legacyCompatibility:'noncanonical-only'},null,2));

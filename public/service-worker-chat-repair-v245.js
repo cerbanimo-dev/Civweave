@@ -1,14 +1,24 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-send-preventdefault-v249';
+const REVISION='chat-convergence-v250';
 const CHAT_PATHS=new Set([
+  '/app/manifest.webmanifest',
+  '/app/installed-entry-v146.html',
+  '/app/installed-entry-v146.js',
+  '/app/install-boundary-v146.js',
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
   '/app/guide-workspace-v242.js',
   '/app/shared-guide-surface-v236.js',
   '/app/regression-fixes-v243.js',
   '/app/chat-single-owner-v245.js',
+  '/app/working-campus-v156.js',
+  '/app/working-campus-v156.part1.txt',
+  '/app/working-campus-v156.part2.txt',
+  '/app/working-campus-v156.part3.txt',
+  '/app/working-campus-v156.part4.txt',
+  '/app/working-campus-v156.part5.txt',
   '/app/working-campus-topbar-v243.js',
   '/app/working-campus-v156.css',
   '/app/working-campus-v156.html'

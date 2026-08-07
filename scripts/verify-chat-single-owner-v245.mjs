@@ -2,39 +2,37 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [owner,viewport,workerRepair,workerEntry,workspace,release,pkgText]=await Promise.all([
+const [legacyOwner,viewport,workerRepair,workerEntry,workspace,boundary,release,pkgText]=await Promise.all([
   read('public/app/chat-single-owner-v245.js'),
   read('public/app/persistent-guide-viewport-v216.js'),
   read('public/service-worker-chat-repair-v245.js'),
   read('public/service-worker-v203.js'),
   read('public/app/guide-workspace-v242.js'),
+  read('public/app/install-boundary-v146.js'),
   read('VERSION'),
   read('package.json')
 ]);
-new Function(owner);new Function(viewport);new Function(workerRepair);new Function(workerEntry);new Function(workspace);
+for(const source of [legacyOwner,viewport,workerRepair,workerEntry,workspace,boundary])new Function(source);
 const pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
-const semver=value=>String(value).split('.').map(Number);
-const atLeast=(value,floor)=>{const a=semver(value),b=semver(floor);for(let i=0;i<3;i+=1){if(a[i]>b[i])return true;if(a[i]<b[i])return false}return true};
 
-check('release preserves v1.0.41 mobile chat repair or newer',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version&&atLeast(version,'1.0.41'));
-check('v242 remains the canonical workspace API',workspace.includes('workspace:true')&&workspace.includes('submitText:async')&&workspace.includes('switchGuide:(system,options={})=>switchWindow'));
-check('owner normalizes legacy root residue into the canonical v242 form',owner.includes('.cwp215-switcher,.cwp215-guide,.cwp215-form,.cwp215-current')&&owner.includes('cw242-window-switcher')&&owner.includes('data-send type="submit"'));
-check('guide faces have pointer ownership before document legacy listeners',owner.includes("addEventListener('pointerdown',onPointerDownCapture,true)")&&owner.includes('[data-cw242-window]')&&owner.includes('activateSwitch'));
-check('compatibility clicks after touch switching are swallowed without synthetic activation',owner.includes('suppressSwitchClickUntil')&&owner.includes('suppressedSwitchControl')&&!owner.includes('.click()')&&!owner.includes('MouseEvent'));
-check('one window-capture submit owner handles full and inline chat',owner.includes("addEventListener('submit',onSubmitCapture,true)")&&owner.includes('data-persistent-form')&&owner.includes('data-cwsg-form')&&owner.includes('submitOwned(text,system'));
-check('inline full-chat control is owned by the same routing layer',owner.includes('data-cwsg-full')&&owner.includes("api.open?.({guide:system})"));
-check('shared send paints optimistic thread state immediately',owner.includes('queueMicrotask(renderSharedNow)')&&owner.includes('CivweaveSharedGuideSurfaceV236?.renderTranscript'));
-check('failed assistant turns fall back through the known-good model runtime lane',owner.includes('CivweaveModelRuntime')&&owner.includes("typeof runtime?.generate!=='function'")&&owner.includes('deterministicReply')&&owner.includes('recoverFailedTurn'));
-check('chat owner never uses requestSubmit or synthetic click relays',!owner.includes('requestSubmit')&&!owner.includes('.click()')&&!owner.includes('dispatchEvent(new MouseEvent'));
-check('inline Rook native chat remains unclaimed',!owner.includes('ffc144-rook'));
-const internalGuard=workspace.indexOf('if(root?.contains(event.target)||launcher?.contains(event.target))return;');
-const legacyTrigger=workspace.indexOf("const trigger=event.target.closest?.('[data-cwf-chat]");
-check('workspace does not reinterpret Send as the root data-guide trigger',internalGuard>=0&&legacyTrigger>internalGuard&&workspace.includes('send-safe-v249'));
-check('viewport loads v248 ownership repair after workspace readiness',viewport.includes("CHAT_OWNER_REPAIR='/app/chat-single-owner-v245.js?v=chat-owner-r2-mobile-v248'")&&viewport.includes("addEventListener('civweave:guide-workspace-ready',installChatOwnerRepair,{once:true})"));
-check('service worker imports v249 send cache repair',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=chat-send-preventdefault-v249')"));
-for(const path of ['/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js','/app/guide-workspace-v242.js','/app/shared-guide-surface-v236.js','/app/regression-fixes-v243.js','/app/chat-single-owner-v245.js','/app/working-campus-topbar-v243.js','/app/working-campus-v156.css','/app/working-campus-v156.html'])check(`cache repair includes ${path}`,workerRepair.includes(`'${path}'`));
-check('cache repair deletes stale entries even when old requests have query strings',workerRepair.includes('cache.delete(request,{ignoreSearch:true})'));
-check('cache repair runs on service-worker activation',workerRepair.includes("self.addEventListener('activate'"));
+check('release and package are v1.0.43',version==='1.0.43'&&pkg.version===version);
+check('v242 declares itself the canonical workspace owner',workspace.includes('workspace:true')&&workspace.includes('canonicalOwner:true')&&workspace.includes('submitText:async'));
+check('v242 owns persona taps directly on pointerdown',workspace.includes("const switchControl=event.target.closest?.(`#${ROOT_ID} [data-cw242-window]`)")&&workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"));
+check('v242 owns native full-chat submit directly',workspace.includes("target.matches(`#${ROOT_ID} [data-persistent-form]`)")&&workspace.includes("document.addEventListener('submit',onSubmitCapture,true)"));
+check('v242 owns the Working Campus embedded Weaveling composer before its bubble listener',workspace.includes("target.id==='weaveling-chat-form'")&&workspace.includes("openWindow('civweave');void submitActive(text)"));
+check('v242 has model-runtime plus deterministic recovery',workspace.includes('CivweaveModelRuntime')&&workspace.includes('deterministicReply')&&workspace.includes('fallbackReply'));
+check('v242 does not use synthetic click or requestSubmit relays',!workspace.includes('.click()')&&!workspace.includes('requestSubmit')&&!workspace.includes('MouseEvent'));
+const experienceStart=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),experienceEnd=boundary.indexOf('];',experienceStart),experience=boundary.slice(experienceStart,experienceEnd);
+check('canonical experience boot includes v242',experience.includes('GUIDE_WORKSPACE'));
+check('canonical experience boot excludes v215',!experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT'));
+check('canonical experience boot excludes viewport v216',!experience.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'));
+check('canonical experience boot uses release-aware cache identity',boundary.includes('requestedRelease')&&boundary.includes('chat-convergence-v250')&&!boundary.includes("ADDITIONS_VERSION='v1.0.36"));
+check('viewport no longer injects the v245 event owner',!viewport.includes('CHAT_OWNER_REPAIR')&&!viewport.includes('CivweaveChatSingleOwnerV245')&&!viewport.includes('chat-single-owner-v245.js'));
+check('retained v245 file is compatibility-only and not booted canonically',legacyOwner.includes('CivweaveChatSingleOwnerV245')&&!experience.includes('chat-single-owner-v245'));
+check('service worker imports v250 cache repair',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250')"));
+for(const path of ['/app/manifest.webmanifest','/app/installed-entry-v146.js','/app/install-boundary-v146.js','/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js','/app/guide-workspace-v242.js','/app/chat-single-owner-v245.js','/app/working-campus-v156.part5.txt'])check(`cache repair includes ${path}`,workerRepair.includes(`'${path}'`));
+check('cache repair deletes stale entries despite query strings',workerRepair.includes('cache.delete(request,{ignoreSearch:true})'));
+check('cache repair runs on worker activation',workerRepair.includes("self.addEventListener('activate'"));
 
-console.log(JSON.stringify({ok:true,version,revision:'chat-send-preventdefault-v249',checks:checks.length,canonicalOwner:'guide-workspace-v242 + v245 capture',pointerSwitch:true,inlineSubmit:true,nativeSubmitUnblocked:true,transportFallback:true,staleCachePurge:true,rookNativeUntouched:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v250',checks:checks.length,canonicalOwner:'guide-workspace-v242',canonicalDuplicateOwners:0,workingCampusDelegates:true,transportFallback:true,staleCachePurge:true},null,2));

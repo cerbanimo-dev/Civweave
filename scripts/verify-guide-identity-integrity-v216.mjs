@@ -36,16 +36,18 @@ for(const token of [
 for(const token of [
   "const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js'",
   "const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js'",
+  "const GUIDE_WORKSPACE='/app/guide-workspace-v242.js'",
   "guideIdentityRevision:'v216-explicit-responder-ownership'",
   "guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff'",
   "guideIdentityMigration:'realm-action-owner'"
 ])assert(boundary.includes(token),`Install boundary is missing ${token}`);
-assert.match(boundary,/const ADDITIONS_VERSION='v\d+\.\d+\.\d+-canonical-core-only-v226'/,'Install boundary does not cache-bust the compatibility bundle with the current release.');
-assert(
-  boundary.indexOf('GUIDE_IDENTITY_SCRIPT,')<boundary.indexOf('PERSISTENT_GUIDE_CHAT_SCRIPT,'),
-  'Identity integrity must load before the persistent chat reads its shared history.'
-);
-assert(chat.includes("const STORAGE_KEY='civweave.persistent-guide-chat.v214'"),'Persistent chat history key changed unexpectedly.');
+assert(boundary.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;'),'Install boundary does not use the release-aware v250 cache identity.');
+const expStart=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),expEnd=boundary.indexOf('];',expStart),experience=boundary.slice(expStart,expEnd);
+assert(experience.includes('GUIDE_IDENTITY_SCRIPT'),'Canonical experience no longer loads identity integrity.');
+assert(experience.includes('GUIDE_WORKSPACE'),'Canonical experience no longer loads the guide workspace.');
+assert(!experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT'),'Canonical experience must not boot the retained v215 compatibility runtime.');
+assert(experience.indexOf('GUIDE_IDENTITY_SCRIPT')<experience.indexOf('GUIDE_WORKSPACE'),'Identity integrity must load before the canonical workspace reads realm history.');
+assert(chat.includes("const STORAGE_KEY='civweave.persistent-guide-chat.v214'"),'Retained persistent chat compatibility history key changed unexpectedly.');
 assert(assistant.includes("if(systemId==='civweave'&&routedSystem!=='civweave')systemId=routedSystem"),'Verifier no longer covers the realm-handoff boundary.');
 
 const stored=new Map();
@@ -116,14 +118,6 @@ assert.equal(handedOff.requestedSystem,'civweave');
 assert.equal(handedOff.respondingSystem,'living-school');
 assert.equal(handedOff.respondingGuide,'Moss');
 assert.equal(handedOff.handedOff,true);
-assert.equal(sandbox.switchedGuide,'living-school','Persistent chat did not switch to the receiving guide.');
+assert.equal(sandbox.switchedGuide,'living-school','Compatibility chat API did not switch to the receiving guide.');
 
-localStorage.setItem('civweave.persistent-guide-chat.v214',JSON.stringify({
-  messages:[{role:'assistant',guide:'civweave',text:'Identity held.\n\nNext: Continue.',provider:'test-provider',model:'test-model'}]
-}));
-const corrected=JSON.parse(stored.get('civweave.persistent-guide-chat.v214'));
-assert.equal(corrected.messages[0].guide,'living-school','Fresh handoff response kept the sending guide avatar.');
-assert.equal(corrected.messages[0].responderSystem,'living-school','Fresh handoff response did not persist the receiving guide.');
-assert.equal(corrected.messages[0].identityCorrection,'v216-response-owner');
-
-console.log(JSON.stringify({ok:true,revision:'v216-explicit-responder-ownership',migratedGuide:migrated.messages[0].guide,handoffGuide:handedOff.respondingGuide,receivingGuideOwnsResponse:true,identityBoundary:true,patchLoadsBeforePersistentChat:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v216-identity-integrity-v250-canonical-workspace',canonicalChatOwner:'v242',v215CompatibilityOnly:true},null,2));

@@ -5,9 +5,10 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const version=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
 const revision='release-coherence-v226';
+const chatRevision='chat-convergence-v250';
 const lifecycleRevision='document-lifecycle-v222';
 const campusRevision='canonical-campus-startup-v227';
-const boundaryRevision='five-system-boundary-v227';
+const boundaryRevision='chat-convergence-v250';
 const routeRevision='five-system-route-contract-v227';
 if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('VERSION must contain a semantic release version.');
 
@@ -26,21 +27,23 @@ function replaceRequired(source,pattern,replacement,label){
 }
 
 await patch('public/app/index.html',source=>{
-  if(/navigator\.serviceWorker\.register\s*\(/.test(source))throw new Error('Installer page must not register a second service worker; install-v130.js owns registration and activation.');
+  if(/navigator\.serviceWorker\.register\s*\(/.test(source))throw new Error('Installer page must not register a second service worker; install-v130.js owns installer registration.');
   return source;
 });
 await patch('public/install-v130.js',source=>replaceRequired(source,/const WORKER_SCRIPT_REVISION = '[^']+';/,`const WORKER_SCRIPT_REVISION = '${revision}';`,'installer worker revision constant'));
 await patch('public/app/installed-entry-v146.js',source=>{
-  source=replaceRequired(source,/params\.get\('version'\)\|\|'\d+\.\d+\.\d+';/,`params.get('version')||'${version}';`,'installed entry fallback release version');
-  source=source.replace(/revision=[A-Za-z0-9._-]+(?=`;)/,`revision=${revision}`);
-  if(!source.includes(`revision=${revision}`))throw new Error('Installed entry does not register the release-coherent worker.');
+  source=replaceRequired(source,/const FALLBACK_VERSION='\d+\.\d+\.\d+';/,`const FALLBACK_VERSION='${version}';`,'installed entry fallback release version');
+  if(!source.includes("updateViaCache:'none'"))throw new Error('Installed entry must bypass HTTP cache when checking the active worker.');
+  if(!source.includes('await registration.update()'))throw new Error('Installed entry must explicitly request a worker update before routing.');
+  if(!source.includes("candidate.postMessage({type:'SKIP_WAITING'})"))throw new Error('Installed entry must activate a waiting worker before routing.');
+  if(!source.includes(`revision=${chatRevision}`))throw new Error('Installed entry does not register the chat-convergence worker.');
   return source;
 });
 
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='[^']+';/,`const VERSION='${version}';`,'install-boundary version');
-  source=replaceRequired(source,/const REVISION='[^']+';/,`const REVISION='${boundaryRevision}';`,'install-boundary revision');
-  source=replaceRequired(source,/const ADDITIONS_VERSION='[^']+';/,`const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`,'install-boundary additions revision');
+  if(!source.includes(`const REVISION='${boundaryRevision}';`))throw new Error('Install boundary must retain the chat-convergence revision.');
+  if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;'))throw new Error('Install boundary must derive experience cache identity from the requested release.');
   for(const token of [
     "['/app/working-campus-v156.html','civweave']",
     "['/app/cabinets/living-school/index.html','living-school']",
@@ -48,10 +51,15 @@ await patch('public/app/install-boundary-v146.js',source=>{
     "['/app/fellowfare-cabinet-v144.html','fellowfare']",
     "['/app/anarchadia-console-v139.html','anarchadia']",
     "root.dataset.civweaveCanonicalCore='only'",
-    "canonicalPolicy:'five-system-first-class-routes-civweave-core-only'",
+    "canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner'",
+    "guideWorkspaceRevision:'v250-v242-canonical-owner'",
+    "guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm'",
     'canonicalSystemCount:5',
     'canonicalAutoScripts:0'
   ])if(!source.includes(token))throw new Error(`Five-system install boundary is missing ${token}.`);
+  const start=source.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),end=source.indexOf('];',start),experience=source.slice(start,end);
+  if(!experience.includes('GUIDE_WORKSPACE'))throw new Error('Canonical system experience must boot the v242 workspace.');
+  if(experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')||experience.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'))throw new Error('Release coherence must not resurrect v215/v216 on canonical system surfaces.');
   if(source.includes('function startAdditions()'))throw new Error('Canonical boundary still contains delayed automatic additions.');
   return source;
 });
@@ -73,20 +81,17 @@ await patch('public/app/working-campus-v156.html',source=>{
 
 await patch('public/service-worker-core-v208.js',source=>{
   if(!source.includes("'/app/document-lifecycle-v221.js'"))source=source.replace("  '/app/installed-entry-v146.js',\n","  '/app/installed-entry-v146.js',\n  '/app/document-lifecycle-v221.js',\n");
-  if(!source.includes("event.waitUntil(cacheShell());"))source=replaceRequired(source,/self\.addEventListener\('install', event => \{\n  event\.waitUntil\(\(async \(\) => \{\n    await cacheShell\(\);\n    await self\.skipWaiting\(\);\n  \}\)\(\)\);\n\}\);/,"self.addEventListener('install', event => {\n  event.waitUntil(cacheShell());\n});",'service-worker non-interrupting install policy');
+  if(!source.includes("event.waitUntil(cacheShell());"))source=replaceRequired(source,/self\.addEventListener\('install', event => \{\n  event\.waitUntil\(\(async \(\) => \{\n    await cacheShell\(\);\n    await self\.skipWaiting\(\);\n  \}\)\(\)\);\n\}\);/,"self.addEventListener('install', event => {\n  event.waitUntil(cacheShell());\n});",'service-worker non-interrupting core install policy');
   return source;
 });
 
 await patch('public/app/persistent-guide-viewport-v216.js',source=>{
   if(!source.includes("addEventListener('pagehide',destroy,{once:true});"))source=source.replace("document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();","addEventListener('pagehide',destroy,{once:true});\ndocument.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();");
-  source=source.replace('  document.head.append(style);','  const head=document.head;if(!head)return false;head.append(style);return true;');
+  if(source.includes('CHAT_OWNER_REPAIR')||source.includes('chat-single-owner-v245.js'))throw new Error('Legacy viewport compatibility must not inject another chat owner.');
   return source;
 });
 await patch('public/app/persistent-guide-chat-v215.js',source=>{
-  source=source.replace('.cwp215-legacy-retired{display:none!important}.cwp215-working-campus-retired>.main{grid-template-columns:minmax(0,1fr)!important}.cwp215-working-campus-retired .main>.guide{display:none!important}','.cwp215-legacy-retired{display:none!important}');
-  source=source.replace("  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>form.dataset.civweaveLegacyChatRetired='v215');","  document.querySelectorAll(LEGACY_FORM_SELECTOR).forEach(form=>{if(form.id==='weaveling-chat-form'&&form.closest('.app')){delete form.dataset.civweaveLegacyChatRetired;return}form.dataset.civweaveLegacyChatRetired='v215'});");
-  source=source.replace("  const working=document.querySelector('.main>.guide #weaveling-chat-form')?.closest('.app');\n  if(working)working.classList.add('cwp215-working-campus-retired');","  const working=document.querySelector('.main>.guide #weaveling-chat-form')?.closest('.app');\n  if(working)working.classList.remove('cwp215-working-campus-retired');");
-  source=source.replace("  if(!(form instanceof HTMLFormElement)||form.closest(`#${ROOT_ID}`)||!form.matches(LEGACY_FORM_SELECTOR))return;","  if(!(form instanceof HTMLFormElement)||form.closest(`#${ROOT_ID}`)||!form.matches(LEGACY_FORM_SELECTOR)||(form.id==='weaveling-chat-form'&&form.closest('.app')))return;");
+  // v215 remains a retained compatibility file only. Do not make it canonical again here.
   return source;
 });
 await patch('public/extensions/civweave-additions-v156.js',source=>{
@@ -103,12 +108,14 @@ for(const token of [
   `/app/system-routes-v227.js?v=${version}-${routeRevision}`,
   '/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238',
   `/service-worker-release-coherence-v220.js?v=${revision}`,
-  '/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227'
+  '/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227',
+  `/service-worker-chat-repair-v245.js?v=${chatRevision}`,
+  "self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"
 ])if(!wrapper.includes(token))throw new Error(`The active worker wrapper is missing ${token}.`);
-if(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')<wrapper.indexOf('/service-worker-shell-repair-v225.js'))throw new Error('Canonical navigation must remain the final worker policy.');
+if(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')<wrapper.indexOf('/service-worker-shell-repair-v225.js'))throw new Error('Canonical navigation must remain the final navigation policy.');
 const override=await readFile(path.join(root,'public/service-worker-release-coherence-v220.js'),'utf8');
 for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pinned-html-js-css-json-txt-network-first-cached-fallback'])if(!override.includes(token))throw new Error(`Release-coherence worker is missing ${token}.`);
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,installerRegistrationOwner:'install-v130.js',offlineRevision:'offline-campus-current-graph-v238',canonicalSystems:5,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',offlineRevision:'offline-campus-current-graph-v238',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',changed},null,2));

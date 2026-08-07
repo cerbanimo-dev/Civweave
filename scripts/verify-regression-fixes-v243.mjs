@@ -17,19 +17,23 @@ const [viewport,repairs,workspace,sharedGuide,entry,localResearch,localActions,k
   read('package.json')
 ]);
 
-assert(viewport.includes("const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r2'"),'Universal guide layer does not load the cache-busted interaction repair.');
-assert(viewport.includes('installRegressionFixes()'),'Universal guide layer does not activate the repair loader.');
+assert(viewport.includes("const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r2'"),'Legacy viewport compatibility does not load the cache-busted proof/dialog interaction repair.');
+assert(viewport.includes('installRegressionFixes()'),'Legacy viewport compatibility does not activate the proof/dialog repair loader.');
+assert(!viewport.includes('CHAT_OWNER_REPAIR')&&!viewport.includes('chat-single-owner-v245.js'),'Viewport compatibility resurrects a second chat event owner.');
 assert(repairs.includes("dialog button[data-close]")&&repairs.includes("control.type='button'"),'Proof dialog close controls are not repaired.');
 assert(!repairs.includes("document.addEventListener('pointerup',onPointerUp,true)"),'Retired pointerup relay is still installed.');
 assert(!repairs.includes('queueMicrotask(()=>control.click())'),'Synthetic chat click relay is still present.');
 assert(repairs.includes('/app/assets/ai/kamiya-welcoming-v243.png'),'Kamiya does not use the refreshed avatar asset.');
 assert((await stat(path.join(root,'public/app/assets/ai/kamiya-welcoming-v243.png'))).size>1000,'Kamiya avatar asset is missing or empty.');
 
-assert(workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"),'Canonical workspace does not own pointer-down close/minimize gestures.');
-assert(workspace.includes('suppressClickUntil=performance.now()+450'),'Workspace does not suppress the compatibility click after a header gesture.');
+assert(workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"),'Canonical workspace does not own pointer-down gestures.');
+assert(workspace.includes('suppressClickUntil=performance.now()+500'),'Workspace does not suppress the targeted compatibility click after a handled pointer gesture.');
+assert(workspace.includes('suppressedControl=switchControl||closeControl||minimizeControl'),'Compatibility click suppression is not scoped to the control that owned pointerdown.');
 assert(workspace.includes('if(closeControl)closeWorkspace();else toggleMinimize()'),'Close/minimize gestures do not invoke canonical workspace state directly.');
+assert(workspace.includes("if(switchControl){switchWindow(switchControl.dataset.cw242Window,{open:true});return}"),'Persona pointer gesture does not invoke canonical workspace switching directly.');
 assert(workspace.includes("new CustomEvent('civweave:guide-workspace-state'"),'Workspace does not publish state for embedded-surface exclusivity.');
 assert(workspace.includes('submitText:async(text,system=activeWindow)'),'Canonical direct text submission API is missing.');
+assert(workspace.includes('canonicalOwner:true'),'Workspace does not advertise canonical ownership.');
 
 assert(sharedGuide.includes('await api.submitText(value,currentSystem)'),'Inline chat does not submit directly through the canonical chat API.');
 assert(!sharedGuide.includes('form.requestSubmit()'),'Inline chat still tunnels submission through the hidden floating form.');
@@ -53,4 +57,4 @@ assert.equal(parsed.dependencies?.['onnxruntime-web'],'1.27.0','Pinned ONNX Runt
 assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
 assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second production runtime.');
 
-console.log(JSON.stringify({ok:true,revision:'v243.1-gesture-safe',universalGuideRepair:true,proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243.1-proof-dialog-v250-chat-owner',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
