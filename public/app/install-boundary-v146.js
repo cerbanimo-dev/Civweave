@@ -19,7 +19,7 @@ const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
 const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
-const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v232.js';
+const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
   ['/app/cabinets/living-school/index.html','living-school'],
@@ -187,7 +187,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
   canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
-  radioRecommendationRevision:'v232-deterministic-identity-context-agent',
+  radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
   guideIdentityRevision:'v216-explicit-responder-ownership',
   guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
   guideIdentityMigration:'realm-action-owner',

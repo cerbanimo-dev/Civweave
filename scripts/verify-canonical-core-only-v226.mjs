@@ -14,7 +14,7 @@ const [routesSource,boundarySource,versionText]=await Promise.all([
 const version=versionText.trim();
 const systems={civweave:'/app/working-campus-v156.html','living-school':'/app/cabinets/living-school/index.html',cerbanimo:'/app/realm-console-v140.html',fellowfare:'/app/fellowfare-cabinet-v144.html',anarchadia:'/app/anarchadia-console-v139.html'};
 const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-version-v1.js','/app/ai-settings-bind-guard-v230.js','/app/ai-settings-device-repair-v229.js'];
-const allowedExperienceSupport=['/app/experience-orchestrator-v232.js','/app/system-radio-agent-v232.js'];
+const allowedExperienceSupport=['/app/experience-orchestrator-v232.js','/app/system-radio-agent-v233.js'];
 function runBoundary(pathname){
   const appended=[],replaced=[],storage=new Map(),documentElement={isConnected:true,dataset:{}},head={isConnected:true,append:node=>appended.push(node)},body={isConnected:true};
   const document={documentElement,head,body,querySelector:()=>null,createElement:tag=>({tagName:String(tag).toUpperCase(),async:true,rel:'',href:'',src:''})};

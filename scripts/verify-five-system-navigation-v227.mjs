@@ -12,7 +12,7 @@ const paths={
   fellowfare:'/app/fellowfare-cabinet-v144.html',
   anarchadia:'/app/anarchadia-console-v139.html'
 };
-const experienceScripts=['/app/experience-orchestrator-v232.js','/app/system-radio-agent-v232.js'];
+const experienceScripts=['/app/experience-orchestrator-v232.js','/app/system-radio-agent-v233.js'];
 const [routesSource,boundarySource,navSource,campusSource,campusPart4,workerWrapper,workerNavigation,gatewayBase,gatewayWrapper,...pages]=await Promise.all([
   read('public/app/system-routes-v227.js'),
   read('public/app/install-boundary-v146.js'),
