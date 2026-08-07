@@ -23,6 +23,11 @@ check('ordinary guide selection stays closed until explicitly opened',workspace.
 check('cross-context model turns explicitly select their guide',workspace.includes('handoffSystem:system!==pageSystem?system:undefined'));
 check('only explicit handoff fields create cross-realm packets',workspace.includes('explicitHandoffTarget')&&!workspace.includes('choice?.system,80'));
 check('workspace submission captures before retired page listener',workspace.includes("document.addEventListener('submit',onSubmitCapture,true)"));
+const internalGuard=workspace.indexOf('if(root?.contains(event.target)||launcher?.contains(event.target))return;');
+const legacyTrigger=workspace.indexOf("const trigger=event.target.closest?.('[data-cwf-chat]");
+check('internal chat controls bypass generic data-guide routing',internalGuard>=0&&legacyTrigger>internalGuard);
+check('send remains a native submit button',workspace.includes('<button data-send type="submit">Send</button>'));
+check('workspace reports send-safe runtime',workspace.includes('send-safe-v249')&&workspace.includes('sendSafe:true'));
 check('workspace does not lock document overflow',!/document\.(?:body|documentElement)\.style\.overflow/.test(workspace));
 check('mobile workspace leaves page visible',workspace.includes('height:min(62dvh,560px)!important'));
 check('floating chat outranks Working Campus base header',workspace.includes('z-index:2147483644!important')&&campusCss.includes('.top{position:relative;z-index:2'));
@@ -35,4 +40,4 @@ check('workspace reports real open state to embedded surface',workspace.includes
 const realmIndex=boundary.indexOf('REALM_SESSION_INTEGRITY,'),workspaceIndex=boundary.indexOf('GUIDE_WORKSPACE,');
 check('workspace loads after realm session integrity',realmIndex>=0&&workspaceIndex>realmIndex);
 check('boundary exposes v242 policy',boundary.includes("guideWorkspaceRevision:'v242-five-window-local-ledgers-no-scroll-trap'"));
-console.log(JSON.stringify({ok:true,version,checks:checks.length,workspace:'v242-five-window-local-ledgers',scrollTrap:false,launcherFirst:true,interactionRepair:'v243.1'},null,2));
+console.log(JSON.stringify({ok:true,version,checks:checks.length,workspace:'v242-five-window-local-ledgers-send-safe-v249',scrollTrap:false,launcherFirst:true,interactionRepair:'v243.1'},null,2));
