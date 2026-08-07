@@ -1,32 +1,46 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.2';
-const FULL_LOGO='/app/logos/civweave.svg';
-const SYMBOL_LOGO='/app/logos/civweave-symbol.svg';
+const VERSION='1.0.26-brand-canonical-v1';
+const CANONICAL_LOGO='/app/logos/civweave-canonical.png';
+const FULL_LOGO=CANONICAL_LOGO;
+const SYMBOL_LOGO=CANONICAL_LOGO;
 const SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
 const SKIP_TAGS=new Set(['SCRIPT','STYLE','NOSCRIPT','TEMPLATE','CODE','PRE']);
 const ATTRIBUTES=['alt','title','aria-label','placeholder','content','data-label'];
+const BRAND_ASSET=/(?:^|\/)(?:commonweave|civweave)(?:-symbol|-app-icon|-adaptive-foreground-512|-icon-(?:\d+|maskable-\d+))?\.(?:svg|png|webp)(?:[?#].*)?$/i;
 
 function brandText(value){
   if(typeof value!=='string'||!value)return value;
   return value.replaceAll('COMMONWEAVE','CIVWEAVE').replaceAll('Commonweave','Civweave');
 }
-
+function isBrandAsset(value){return typeof value==='string'&&BRAND_ASSET.test(value)}
 function brandImage(image){
   const source=image.getAttribute('src')||'';
-  if(/\/app\/logos\/(?:commonweave|civweave)\.webp(?:[?#].*)?$/i.test(source)){
-    image.setAttribute('src',FULL_LOGO);
-    return;
-  }
-  if(/\/app\/logos\/(?:commonweave-app-icon|civweave-app-icon|civweave-icon-(?:\d+|maskable-\d+)|civweave-adaptive-foreground-512)\.png(?:[?#].*)?$/i.test(source)){
-    image.setAttribute('src',SYMBOL_LOGO);
+  if(isBrandAsset(source)&&source!==CANONICAL_LOGO)image.setAttribute('src',CANONICAL_LOGO);
+  const srcset=image.getAttribute('srcset')||'';
+  if(srcset&&srcset.split(',').some(part=>isBrandAsset(part.trim().split(/\s+/)[0])))image.setAttribute('srcset',CANONICAL_LOGO);
+}
+function brandLink(link){
+  const rel=(link.getAttribute('rel')||'').toLowerCase();
+  if(!rel.split(/\s+/).some(value=>value==='icon'||value==='apple-touch-icon'))return;
+  const href=link.getAttribute('href')||'';
+  if(!href||isBrandAsset(href)){
+    link.setAttribute('href',CANONICAL_LOGO);
+    link.setAttribute('type','image/png');
   }
 }
-
+function brandMeta(meta){
+  const key=(meta.getAttribute('property')||meta.getAttribute('name')||'').toLowerCase();
+  if(!['og:image','twitter:image'].includes(key))return;
+  const content=meta.getAttribute('content')||'';
+  if(isBrandAsset(content))meta.setAttribute('content',CANONICAL_LOGO);
+}
 function brandElement(element){
   if(!(element instanceof Element))return;
   if(element instanceof HTMLImageElement)brandImage(element);
+  if(element instanceof HTMLLinkElement)brandLink(element);
+  if(element instanceof HTMLMetaElement)brandMeta(element);
   for(const name of ATTRIBUTES){
     if(!element.hasAttribute(name))continue;
     const current=element.getAttribute(name);
@@ -38,7 +52,6 @@ function brandElement(element){
     if(next!==element.value)element.value=next;
   }
 }
-
 function brandTree(root){
   if(!root)return;
   if(root.nodeType===Node.ELEMENT_NODE)brandElement(root);
@@ -57,7 +70,6 @@ function brandTree(root){
     node=walker.nextNode();
   }
 }
-
 function loadSettingsRepair(){
   if(globalThis.CivweaveAISettingsRepairV229)return true;
   if(document.querySelector(`script[src^="${SETTINGS_REPAIR}"]`))return true;
@@ -68,18 +80,15 @@ function loadSettingsRepair(){
   document.head.append(script);
   return true;
 }
-
 function apply(){
   document.title=brandText(document.title);
   brandTree(document.documentElement);
   document.documentElement.dataset.publicBrand='civweave';
   loadSettingsRepair();
 }
-
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});
 else apply();
 loadSettingsRepair();
-
 const observer=new MutationObserver(records=>{
   for(const record of records){
     if(record.type==='characterData'){
@@ -91,7 +100,6 @@ const observer=new MutationObserver(records=>{
     if(record.type==='attributes')brandElement(record.target);
   }
 });
-observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTES.concat('src','value')});
-
-globalThis.CivweaveBrand=Object.freeze({version:VERSION,apply,loadSettingsRepair,fullLogo:FULL_LOGO,symbolLogo:SYMBOL_LOGO,settingsRepair:SETTINGS_REPAIR});
+observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTES.concat('src','srcset','href','value')});
+globalThis.CivweaveBrand=Object.freeze({version:VERSION,apply,loadSettingsRepair,canonicalLogo:CANONICAL_LOGO,fullLogo:FULL_LOGO,symbolLogo:SYMBOL_LOGO,settingsRepair:SETTINGS_REPAIR});
 })();

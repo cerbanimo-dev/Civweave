@@ -1,13 +1,9 @@
 {
-  "schema": "civweave.icon-generation.v1",
-  "source": "civweave.webp",
-  "treatment": "tight-dark-centered-thread-mark",
-  "targetFill": {
-    "standard": "90-94%",
-    "maskable": "78%",
-    "adaptiveForeground": "92%"
-  },
-  "generatedAt": "2026-08-02T16:20:54.476Z",
+  "schema": "civweave.icon-generation.v2",
+  "source": "civweave-canonical.png",
+  "release": "1.0.26",
+  "treatment": "canonical-artwork-resize-only",
+  "targetFill": "100% source canvas; no crop, no dark tile, no substitute mark",
   "files": [
     "civweave-icon-16.png",
     "civweave-icon-32.png",
