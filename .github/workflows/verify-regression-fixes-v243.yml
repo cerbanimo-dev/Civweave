@@ -3,7 +3,7 @@ name: Verify regression fixes v243
 on:
   pull_request:
     paths:
-      - 'public/app/install-boundary-v146.js'
+      - 'public/app/persistent-guide-viewport-v216.js'
       - 'public/app/regression-fixes-v243.js'
       - 'public/app/assets/ai/kamiya-welcoming-v243.png'
       - 'public/app/knowledge-school-runtime-v243.mjs'
@@ -17,7 +17,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'public/app/install-boundary-v146.js'
+      - 'public/app/persistent-guide-viewport-v216.js'
       - 'public/app/regression-fixes-v243.js'
       - 'public/app/assets/ai/kamiya-welcoming-v243.png'
       - 'public/app/knowledge-school-runtime-v243.mjs'
@@ -42,6 +42,7 @@ jobs:
           node-version: 22
       - name: Parse changed runtimes
         run: |
+          node --check public/app/persistent-guide-viewport-v216.js
           node --check public/app/regression-fixes-v243.js
           node --check public/app/knowledge-school-runtime-v243.mjs
           node --check public/app/living-school-local-research-v243.mjs
