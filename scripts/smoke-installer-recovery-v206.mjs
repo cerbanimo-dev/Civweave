@@ -85,15 +85,16 @@ try{
   const coreImport="importScripts('/service-worker-core-v208.js";
   const offlineImport="importScripts('/service-worker-offline-v211-override.js";
   assert(files.wrapper.includes(cleanImport)&&files.wrapper.includes(coreImport)&&files.wrapper.includes(offlineImport),'active worker does not compose all three maintained layers');
+  assert(files.wrapper.includes('offline-campus-current-graph-v238'),'active worker does not cache-bust the current-graph repair');
   assert(files.wrapper.indexOf(cleanImport)<files.wrapper.indexOf(coreImport)&&files.wrapper.indexOf(coreImport)<files.wrapper.indexOf(offlineImport),'worker layer order is incorrect');
   assert(files.core.includes("const BUILD = 'lightweight-shell-v208'")&&files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained lightweight/offline core is incomplete');
   assert(!/importScripts\(/.test(files.core),'retained lightweight core imports the retired layered stack');
   assert(files.cleanroom.includes("const REVISION='living-school-cleanroom-v218'")&&files.cleanroom.includes('event.stopImmediatePropagation()'),'Living School worker retirement boundary is incomplete');
-  assert(files.offline.includes("const V211_REVISION = 'offline-campus-seed-provenance-v211'")&&files.offline.includes('CivweaveOfflineCampusV211'),'offline retry override is incomplete');
+  assert(files.offline.includes("const V211_REVISION = 'offline-campus-current-graph-v238'")&&files.offline.includes('stale-not-rediscovered')&&files.offline.includes('V211_BATCH_SIZE = 12'),'current-graph offline retry override is incomplete');
   assert(files.legacy.includes(expectedWorkerImport),`legacy worker does not import the active ${releaseVersion} wrapper`);
 
   const bridgeBody=files.legacy.replace(/importScripts\('\/service-worker-v203\.js[^\n]+\);/,'');
-  new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.core}\n${files.offline}`,{filename:'civweave-v218-bridged-cleanroom-worker.js'});
+  new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.core}\n${files.offline}`,{filename:'civweave-v238-bridged-cleanroom-worker.js'});
   console.log(JSON.stringify({
     ok:true,
     releaseVersion,
@@ -102,7 +103,7 @@ try{
     knowledgeCatalogServed:true,
     knowledgeZipServed:firstZip,
     workerGlobalCollision:false,
-    workerRevision:'v218-cleanroom-wrapper-retained-lightweight-core-v211-retry'
+    workerRevision:'v218-cleanroom-wrapper-retained-lightweight-core-current-graph-v238'
   },null,2));
 }catch(error){
   console.error(output.join(''));
