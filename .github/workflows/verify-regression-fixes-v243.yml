@@ -9,8 +9,6 @@ on:
       - 'public/app/knowledge-school-runtime-v243.mjs'
       - 'public/app/living-school-*-v243.mjs'
       - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
-      - 'scripts/stage-sqljs-assets.mjs'
-      - 'scripts/build-cloudflare-pages.mjs'
       - 'scripts/verify-regression-fixes-v243.mjs'
       - 'package.json'
       - '.github/workflows/verify-regression-fixes-v243.yml'
@@ -23,8 +21,6 @@ on:
       - 'public/app/knowledge-school-runtime-v243.mjs'
       - 'public/app/living-school-*-v243.mjs'
       - 'public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'
-      - 'scripts/stage-sqljs-assets.mjs'
-      - 'scripts/build-cloudflare-pages.mjs'
       - 'scripts/verify-regression-fixes-v243.mjs'
       - 'package.json'
 
@@ -48,8 +44,6 @@ jobs:
           node --check public/app/living-school-local-research-v243.mjs
           node --check public/app/living-school-cleanroom-actions-v243.mjs
           node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
-          node --check scripts/stage-sqljs-assets.mjs
-          node --check scripts/build-cloudflare-pages.mjs
           node --check scripts/verify-regression-fixes-v243.mjs
       - name: Verify regression contracts
         run: node scripts/verify-regression-fixes-v243.mjs
