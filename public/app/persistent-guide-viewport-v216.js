@@ -1,13 +1,12 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.41-persistent-guide-viewport-v216-chat-owner-v248';
+const VERSION='1.0.43-persistent-guide-viewport-v216-css-only-v250';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-persistent-guide-viewport-style-v216';
 const HEIGHT_VAR='--cwp215-visual-viewport-height';
 const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r2';
-const CHAT_OWNER_REPAIR='/app/chat-single-owner-v245.js?v=chat-owner-r2-mobile-v248';
 
 if(globalThis.CivweavePersistentGuideViewportV216?.version===VERSION)return;
 
@@ -28,26 +27,20 @@ function installRegressionFixes(){
   if(!document.head)return false;
   const script=document.createElement('script');script.src=REGRESSION_FIXES;script.async=false;document.head.append(script);return true;
 }
-function installChatOwnerRepair(){
-  if(globalThis.CivweaveChatSingleOwnerV245?.version?.includes('v248')||document.querySelector(`script[src^="${CHAT_OWNER_REPAIR.split('?')[0]}"]`))return true;
-  if(!document.head)return false;
-  const script=document.createElement('script');script.src=CHAT_OWNER_REPAIR;script.async=false;document.head.append(script);return true;
-}
-
 function apply(){
   frame=0;installStyle();const height=Math.max(1,Math.round(Number(globalThis.visualViewport?.height||innerHeight||document.documentElement.clientHeight||1)));document.documentElement.style.setProperty(HEIGHT_VAR,`${height}px`)
 }
 function schedule(){if(frame)return;frame=requestAnimationFrame(apply)}
 function boot(){
-  installStyle();installRegressionFixes();
-  addEventListener('civweave:guide-workspace-ready',installChatOwnerRepair,{once:true});
-  if(globalThis.CivweaveGuideWorkspaceV242?.workspace===true)installChatOwnerRepair();
-  apply();globalThis.visualViewport?.addEventListener('resize',schedule,{passive:true});addEventListener('resize',schedule,{passive:true});addEventListener('orientationchange',schedule,{passive:true});
-  try{dispatchEvent(new CustomEvent('civweave:persistent-guide-viewport-ready',{detail:{version:VERSION,visualViewport:Boolean(globalThis.visualViewport),scrollTrap:false,interactionRepair:'v248-full-inline-owner',at:new Date().toISOString()}}))}catch{}
+  installStyle();installRegressionFixes();apply();
+  globalThis.visualViewport?.addEventListener('resize',schedule,{passive:true});
+  addEventListener('resize',schedule,{passive:true});
+  addEventListener('orientationchange',schedule,{passive:true});
+  try{dispatchEvent(new CustomEvent('civweave:persistent-guide-viewport-ready',{detail:{version:VERSION,visualViewport:Boolean(globalThis.visualViewport),scrollTrap:false,interactionRepair:'v250-css-only-workspace-owned',at:new Date().toISOString()}}))}catch{}
 }
 function destroy(){globalThis.visualViewport?.removeEventListener('resize',schedule);removeEventListener('resize',schedule);removeEventListener('orientationchange',schedule);if(frame)cancelAnimationFrame(frame);frame=0;document.documentElement.style.removeProperty(HEIGHT_VAR);document.getElementById(STYLE_ID)?.remove()}
 
 addEventListener('pagehide',destroy,{once:true});document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 
-globalThis.CivweavePersistentGuideViewportV216=Object.freeze({version:VERSION,rootId:ROOT_ID,launcherId:LAUNCHER_ID,refresh:schedule,destroy,state:()=>({visualViewportHeight:globalThis.visualViewport?.height||innerHeight,scrollTrap:false,mutationObserver:false,autoScroll:false,interactionRepair:'v248-full-inline-owner',chatOwnerRepair:CHAT_OWNER_REPAIR})});
+globalThis.CivweavePersistentGuideViewportV216=Object.freeze({version:VERSION,rootId:ROOT_ID,launcherId:LAUNCHER_ID,refresh:schedule,destroy,state:()=>({visualViewportHeight:globalThis.visualViewport?.height||innerHeight,scrollTrap:false,mutationObserver:false,autoScroll:false,interactionRepair:'v250-css-only-workspace-owned',chatOwnerRepair:null})});
 })();
