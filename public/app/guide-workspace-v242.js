@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.35-guide-workspace-v242-gesture-safe-v244';
+const VERSION='1.0.42-guide-workspace-v242-send-safe-v249';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
@@ -19,7 +19,7 @@ const GUIDE={
 if(globalThis.CivweaveGuideWorkspaceV242?.version===VERSION)return;
 
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const now=()=>new Date().toISOString();
 const uid=prefix=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
@@ -120,7 +120,7 @@ function onPointerDownCapture(event){
   const active=document.activeElement;if(active?.closest?.(`#${ROOT_ID},#cw-shared-guide-surface-v236`))active.blur?.();
   if(closeControl)closeWorkspace();else toggleMinimize()
 }
-function onClickCapture(event){if(performance.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();return}const windowButton=event.target.closest?.('[data-cw242-window]');if(windowButton){event.preventDefault();event.stopImmediatePropagation();switchWindow(windowButton.dataset.cw242Window,{open:true});return}if(event.target.closest?.(`#${ROOT_ID} [data-close]`)){event.preventDefault();event.stopImmediatePropagation();closeWorkspace();return}if(event.target.closest?.(`#${ROOT_ID} [data-minimize]`)){event.preventDefault();event.stopImmediatePropagation();toggleMinimize();return}const launch=event.target.closest?.(`#${LAUNCHER_ID}`);if(launch){event.preventDefault();event.stopImmediatePropagation();openWindow(pageSystem);return}const trigger=event.target.closest?.('[data-cwf-chat],[data-open-guide-chat],[data-open-persistent-chat],#moss,#compass,.ls-moss,.ls-compass,[data-guide]');if(!trigger)return;const requested=clean(trigger.getAttribute?.('data-guide'),80).toLowerCase();const system=SYSTEMS.includes(requested)?requested:pageSystem;event.preventDefault();event.stopImmediatePropagation();openWindow(system)}
+function onClickCapture(event){if(performance.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();return}const windowButton=event.target.closest?.('[data-cw242-window]');if(windowButton){event.preventDefault();event.stopImmediatePropagation();switchWindow(windowButton.dataset.cw242Window,{open:true});return}if(event.target.closest?.(`#${ROOT_ID} [data-close]`)){event.preventDefault();event.stopImmediatePropagation();closeWorkspace();return}if(event.target.closest?.(`#${ROOT_ID} [data-minimize]`)){event.preventDefault();event.stopImmediatePropagation();toggleMinimize();return}const launch=event.target.closest?.(`#${LAUNCHER_ID}`);if(launch){event.preventDefault();event.stopImmediatePropagation();openWindow(pageSystem);return}if(root?.contains(event.target)||launcher?.contains(event.target))return;const trigger=event.target.closest?.('[data-cwf-chat],[data-open-guide-chat],[data-open-persistent-chat],#moss,#compass,.ls-moss,.ls-compass,[data-guide]');if(!trigger)return;const requested=clean(trigger.getAttribute?.('data-guide'),80).toLowerCase();const system=SYSTEMS.includes(requested)?requested:pageSystem;event.preventDefault();event.stopImmediatePropagation();openWindow(system)}
 function onSubmitCapture(event){const form=event.target?.closest?.(`#${ROOT_ID} [data-persistent-form]`);if(!form)return;event.preventDefault();event.stopImmediatePropagation();const input=form.querySelector('textarea'),text=clean(input?.value,12000);if(text)void submitActive(text)}
 function onThreadChanged(event){const system=event.detail?.system;if(!SYSTEMS.includes(system))return;queueMicrotask(()=>render({keepScroll:system!==activeWindow}))}
 function onBodyChange(records){if(records.some(record=>[...record.removedNodes].some(node=>node?.id===ROOT_ID||node?.id===LAUNCHER_ID))){queueMicrotask(()=>{ensureRoot();render({keepScroll:true})})}}
@@ -132,7 +132,7 @@ function installApi(){
   globalThis.CivweavePersistentGuideChatV215=api;return api
 }
 
-function start(){pageSystem=detectSystem();const saved=readWorkspace();activeWindow=pageSystem;workspaceOpen=saved.open;minimized=saved.minimized;installStyle();retireViewportTrap();ensureRoot();installApi();document.addEventListener('pointerdown',onPointerDownCapture,true);document.addEventListener('click',onClickCapture,true);document.addEventListener('submit',onSubmitCapture,true);addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);bodyObserver=new MutationObserver(onBodyChange);bodyObserver.observe(document.body,{childList:true});globalThis.visualViewport?.addEventListener('resize',onResize,{passive:true});addEventListener('resize',onResize,{passive:true});onResize();render();document.documentElement.dataset.civweaveGuideWorkspace='v242';dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{version:VERSION,pageSystem,activeWindow,realmIsolated:true,windowCount:5,gestureSafe:true}}))}
+function start(){pageSystem=detectSystem();const saved=readWorkspace();activeWindow=pageSystem;workspaceOpen=saved.open;minimized=saved.minimized;installStyle();retireViewportTrap();ensureRoot();installApi();document.addEventListener('pointerdown',onPointerDownCapture,true);document.addEventListener('click',onClickCapture,true);document.addEventListener('submit',onSubmitCapture,true);addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);bodyObserver=new MutationObserver(onBodyChange);bodyObserver.observe(document.body,{childList:true});globalThis.visualViewport?.addEventListener('resize',onResize,{passive:true});addEventListener('resize',onResize,{passive:true});onResize();render();document.documentElement.dataset.civweaveGuideWorkspace='v242';dispatchEvent(new CustomEvent('civweave:guide-workspace-ready',{detail:{version:VERSION,pageSystem,activeWindow,realmIsolated:true,windowCount:5,gestureSafe:true,sendSafe:true}}))}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 
 globalThis.CivweaveGuideWorkspaceV242=Object.freeze({version:VERSION,systems:[...SYSTEMS],detectSystem,readThread,openWindow,switchWindow,closeWorkspace,toggleMinimize,submitActive,state:()=>({pageSystem,activeWindow,open:workspaceOpen,minimized,busy})});
