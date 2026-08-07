@@ -23,7 +23,7 @@ const checks = [
   }],
   ['diagnostics is opt-in instead of auto-placed', () => {
     assert.match(css, /#diagnostics-button\{display:none;grid-area:diagnostics/);
-    assert.match(runtime, /data\.civweaveDiagnostics=enabled\?'true':'false'/);
+    assert.match(runtime, /dataset\.civweaveDiagnostics=enabled\?'true':'false'/);
     assert.match(runtime, /button\.hidden=!enabled/);
   }],
   ['old oversized brand injector is gone', () => {
