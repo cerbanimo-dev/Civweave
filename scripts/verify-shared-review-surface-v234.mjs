@@ -18,7 +18,8 @@ assert.match(review,/INTENTIONS_KEY='civweave\.intentions\.v127'/);
 assert.match(review,/ACTIONS_KEY='civweave\.realm-actions\.v141'/);
 assert.match(review,/REALM_INBOX_KEY='civweave\.realm-inbox\.v1'/);
 assert.match(review,/WORKING_KEY='civweave\.working-campus\.v1'/);
-assert.match(review,/querySelector\('\[data-gate\],\[data-cwf-gate\]'\)/,'Review extension must intercept both persistent and inline chat gate formats.');
+assert.match(review,/closest\('\[data-gate\],\[data-cwf-gate\]'\)/,'Review extension must intercept both persistent and inline chat gate formats.');
+assert.match(review,/document\.addEventListener\('click',onGateCapture,true\)/,'Review gates must be intercepted in capture phase before legacy page-local handlers.');
 for(const gate of ['open-plan','activate-plan','open-action','approve-action']){
   assert.ok(review.includes(`'${gate}'`),`Shared review surface lost ${gate}.`);
 }
