@@ -31,6 +31,11 @@ const boundaryAfter="assert(boundarySource.includes(\"const PWA_UPDATE_SCRIPT='/
 if(!source.includes(boundaryBefore))throw new Error('Watchdog verifier compatibility patch could not find the retired updater additions assertion.');
 source=source.replace(boundaryBefore,boundaryAfter);
 
+const statusBefore="assert(statusSource.includes('registration.update()'),'Offline status repair does not force-check the current worker.');";
+const statusAfter="assert(!statusSource.includes('registration.update()'),'Offline status reader must not compete with the installer update watchdog.');\nassert(!statusSource.includes('SKIP_WAITING'),'Offline status reader must not activate workers behind the installer watchdog.');\nassert(statusSource.includes('function currentWorker()'),'Offline status reader no longer discovers the current worker.');\nassert(statusSource.includes('civweave:offline-campus-status'),'Offline status reader no longer publishes normalized progress events.');";
+if(!source.includes(statusBefore))throw new Error('Watchdog verifier could not find the retired offline-status update assertion.');
+source=source.replace(statusBefore,statusAfter);
+
 const workerReadBefore="const workerSource=await fs.readFile('public/service-worker-v203.js','utf8');";
 const workerReadAfter="const workerWrapperSource=await fs.readFile('public/service-worker-v203.js','utf8');\nconst workerCoreSource=await fs.readFile('public/service-worker-core-v208.js','utf8');\nconst livingSchoolWorkerSource=await fs.readFile('public/service-worker-living-school-cleanroom-v218.js','utf8');\nconst offlineOverrideSource=await fs.readFile('public/service-worker-offline-v211-override.js','utf8');\nconst workerSource=workerWrapperSource+'\\n'+workerCoreSource+'\\n'+offlineOverrideSource;";
 if(!source.includes(workerReadBefore))throw new Error('Watchdog verifier could not find the direct worker read.');

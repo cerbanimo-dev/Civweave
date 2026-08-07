@@ -97,12 +97,18 @@
     return globalThis.CivweaveOfflineCampusStatusV210?.last || null;
   }
 
+  function progressFromText() {
+    const match = ($('#offline-package-assets')?.textContent || '').match(/(\d+)\s*\/\s*(\d+)\s+files/i);
+    return match ? { complete: numeric(match[1]), total: numeric(match[2]) } : { complete: 0, total: 0 };
+  }
+
   function fallbackReady() {
     return /^ready offline\b/i.test($('#offline-package-state')?.textContent || '');
   }
 
   function renderProgress() {
     const status = latestStatus();
+    const textProgress = progressFromText();
     const box = $('#campus-install-progress');
     const track = $('#offline-campus-progress-track');
     const fill = $('#offline-campus-progress-fill');
@@ -111,8 +117,8 @@
     const install = $('#install-app');
     if (!box || !track || !fill || !percentNode || !install) return;
 
-    const total = numeric(status?.total || status?.discovered);
-    const complete = numeric(status?.downloaded ?? status?.completed ?? status?.attempted);
+    const total = numeric(status?.total || status?.discovered || textProgress.total);
+    const complete = numeric(status?.downloaded ?? status?.completed ?? status?.attempted ?? textProgress.complete);
     const failed = numeric(status?.failedCount || status?.failed?.length);
     const ready = Boolean(status?.ready) || fallbackReady();
     const running = Boolean(status?.running) || /^downloading\b/i.test($('#offline-package-state')?.textContent || '');
@@ -171,18 +177,10 @@
 
   if (standalone()) markInstalled();
   addEventListener('appinstalled', markInstalled);
+  addEventListener('civweave:offline-campus-status', renderProgress);
   $('#install-app')?.addEventListener('click', launchFreshPwa, true);
 
-  const observer = new MutationObserver(renderProgress);
-  observer.observe(document.documentElement, {
-    subtree: true,
-    childList: true,
-    characterData: true,
-    attributes: true,
-    attributeFilter: ['disabled', 'hidden']
-  });
-
-  setInterval(renderProgress, 500);
+  setInterval(renderProgress, 750);
   renderProgress();
 })();
 </script>

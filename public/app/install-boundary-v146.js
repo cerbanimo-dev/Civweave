@@ -20,6 +20,7 @@ const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
 const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
+const SHARED_REVIEW_SURFACE='/app/shared-review-surface-v234.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
   ['/app/cabinets/living-school/index.html','living-school'],
@@ -28,7 +29,7 @@ const FALLBACK_PATHS=new Map([
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR];
-const SYSTEM_EXPERIENCE_SCRIPTS=[EXPERIENCE_ORCHESTRATOR,SYSTEM_RADIO_AGENT];
+const SYSTEM_EXPERIENCE_SCRIPTS=[EXPERIENCE_ORCHESTRATOR,SYSTEM_RADIO_AGENT,SHARED_REVIEW_SURFACE];
 const LEGACY_SCRIPTS=[
   ROUTE_CONTRACT,
   RELEASE_VERSION,
@@ -188,6 +189,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
   radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
+  sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
   guideIdentityRevision:'v216-explicit-responder-ownership',
   guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
   guideIdentityMigration:'realm-action-owner',

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.7-offline-campus-status-v210';
+const VERSION='1.0.8-offline-campus-status-v210';
 const WORKER_REVISION='offline-campus-seed-provenance-v211';
 const STATUS_TYPES=new Set([
   'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
@@ -68,6 +68,7 @@ function render(status){
   }
   document.documentElement.dataset.offlineCampusStatusRevision=VERSION;
   api.last=packet;
+  try{dispatchEvent(new CustomEvent('civweave:offline-campus-status',{detail:packet}))}catch{}
   return packet;
 }
 
@@ -85,22 +86,15 @@ function askWorker(worker,type,timeoutMs=6000){
   });
 }
 
-async function ensureCurrentWorker(){
+async function currentWorker(){
   const serviceWorker=typeof navigator!=='undefined'?navigator.serviceWorker:null;
   const controller=serviceWorker?.controller||null;
   const registration=await serviceWorker?.getRegistration?.('/').catch(()=>null);
-  if(!registration)return controller;
-  try{await registration.update()}catch{return controller}
-  if(registration.waiting)registration.waiting.postMessage({type:'SKIP_WAITING'});
-  const installing=registration.installing;
-  installing?.addEventListener('statechange',()=>{
-    if(installing.state==='installed')installing.postMessage({type:'SKIP_WAITING'});
-  });
-  return registration.active||controller;
+  return registration?.active||registration?.waiting||controller||null;
 }
 
 async function askCurrentStatus(){
-  const worker=await ensureCurrentWorker();
+  const worker=await currentWorker();
   const serviceWorker=typeof navigator!=='undefined'?navigator.serviceWorker:null;
   const packet=await askWorker(worker||serviceWorker?.controller,'GET_OFFLINE_PACKAGE_STATUS');
   if(STATUS_TYPES.has(packet?.type))render(packet);
