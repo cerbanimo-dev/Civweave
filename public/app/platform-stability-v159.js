@@ -16,7 +16,7 @@ function ensureDock(){
   if(!dock){dock=document.createElement('button');dock.id='cw159-chat-dock';dock.type='button';dock.dataset.cw159ChatDock='';dock.className='cw159-chat-dock';dock.innerHTML='<span aria-hidden="true">✦</span><b>Weaveling</b><small>Chat</small>';dock.setAttribute('aria-label','Open Weaveling chat')}
   const tray=document.getElementById('cwf104-tray');
   if(tray){tray.classList.add('cw159-has-chat-dock');if(dock.parentNode!==tray)tray.append(dock)}
-  else if(!dock.isConnected)document.body.append(dock);
+  else if(!dock.isConnected&&document.body)document.body.append(dock);
   return dock;
 }
 function setMinimized(minimized,{focus=true}={}){
@@ -55,5 +55,5 @@ document.addEventListener('click',event=>{
 },true);
 const observer=new MutationObserver(schedule);observer.observe(document.documentElement,{childList:true,subtree:true});
 document.readyState==='loading'?addEventListener('DOMContentLoaded',schedule,{once:true}):schedule();addEventListener('pageshow',schedule);
-globalThis.CivweavePlatformStabilityV159={version:VERSION,setChatMinimized:setMinimized,patch:schedule};
+globalThis.CivweavePlatformStabilityV159={version:VERSION,setChatMinimized:setMinimized,patch:schedule,domReadySafe:true};
 })();

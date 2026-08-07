@@ -49,8 +49,20 @@
   <script src="/app/platform-stability-v159.js?v=cleanroom-v218.1" defer></script>
   <script src="/app/platform-experience-v160.js?v=cleanroom-v218.1" defer></script>
   <script src="/app/model-settings-controller-v173.js?v=cleanroom-v218.1" defer></script>
+  <script src="/app/ai-settings-bind-guard-v230.js?v=first-open-v230" defer></script>
+  <script src="/app/ai-settings-device-repair-v229.js?v=device-persistence-v229" defer></script>
   <script src="/app/family-ai-loader-v105.js?v=cleanroom-v218.1" defer></script>
   <script src="/app/family-shell-v104.js?v=cleanroom-v218.1" defer></script>
-  <script type="module" src="/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=research-first-v218.1"></script>
+  <script type="module">
+  const host=document.getElementById('living-school-app')||document.body;
+  if(!document.getElementById('living-school-root')){
+    const root=document.createElement('section');
+    root.id='living-school-root';
+    root.className='lsc218-root';
+    root.setAttribute('aria-live','polite');
+    host?.append(root);
+  }
+  await import('/app/cabinets/living-school/living-school-cleanroom-v218.mjs?v=research-first-v218.1-dom-ready');
+  </script>
 </body>
 </html>
