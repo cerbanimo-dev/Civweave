@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 
 const ROOT=new URL('../',import.meta.url);
 const radioSource=fs.readFileSync(new URL('public/app/system-radio-agent-v233.js',ROOT),'utf8');
-const trackSource=fs.readFileSync(new URL('public/app/radio-track-suggestions-v240.js',ROOT),'utf8');
+const trackSource=fs.readFileSync(new URL('public/app/radio-track-suggestions-v241.js',ROOT),'utf8');
 const boundarySource=fs.readFileSync(new URL('public/app/install-boundary-v146.js',ROOT),'utf8');
 const stationFiles={
   anarchadia:'public/app/radio-directory-v240/anarchadia.txt',
@@ -47,15 +47,16 @@ const sandbox={
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(radioSource,sandbox,{filename:'system-radio-agent-v233.js'});
-vm.runInContext(trackSource,sandbox,{filename:'radio-track-suggestions-v240.js'});
+vm.runInContext(trackSource,sandbox,{filename:'radio-track-suggestions-v241.js'});
 
 const radio=sandbox.CivweaveRadioRecommendationAgentV233;
-const tracks=sandbox.CivweaveRadioTrackSuggestionsV240;
+const tracks=sandbox.CivweaveRadioTrackSuggestionsV241;
 assert.ok(radio,'v233 radio runtime must initialize');
-assert.ok(tracks,'v240 track suggestion runtime must initialize');
+assert.ok(tracks,'v241 track suggestion runtime must initialize');
 assert.equal(sandbox.CivweaveRadioRecommendationAgentV232,radio,'v232 compatibility alias must point to v233 runtime');
+assert.equal(sandbox.CivweaveRadioTrackSuggestionsV240,tracks,'v240 compatibility alias must point to v241 runtime');
 assert.equal(radio.revision,'system-radio-agent-v233');
-assert.equal(tracks.revision,'radio-track-suggestions-v240');
+assert.equal(tracks.revision,'radio-track-suggestions-v241');
 
 const expectedIds={
   anarchadia:'2AsCLZiAPlUYHOcogllTia',
@@ -67,6 +68,7 @@ const expectedIds={
 assert.deepEqual(Object.keys(radio.registry).sort(),Object.keys(expectedIds).sort());
 for(const [system,id] of Object.entries(expectedIds)){
   assert.match(radio.registry[system].spotifyUrl,new RegExp(`/playlist/${id}(?:\\?|$)`),`${system} playlist changed`);
+  assert.equal(tracks.playlistMeta(system).playlistId,id,`${system} playlist context ID drifted`);
 }
 
 const expectedTrackCounts={anarchadia:40,cerbanimo:38,'living-school':50,fellowfare:43,civweave:29};
@@ -82,7 +84,20 @@ assert.ok(stationLines.cerbanimo.includes('The Coup - Ride The Fence'));
 assert.ok(stationLines['living-school'].includes('Billy Bragg - There Is Power in a Union'));
 assert.ok(stationLines.fellowfare.includes('Bob Marley & The Wailers - Redemption Song'));
 assert.ok(stationLines.civweave.includes('Fela Kuti - Water No Get Enemy'));
-assert.match(tracks.spotifySearchUrl('The Coup - Ride The Fence'),/^https:\/\/open\.spotify\.com\/search\//);
+
+const testTrackId='6rqhFgbbKwnb9MLmUQDhG6';
+const enriched=tracks.parseTrackLine(`The Coup - Ride The Fence\tspotify:track:${testTrackId}`,7);
+assert.equal(enriched.label,'The Coup - Ride The Fence');
+assert.equal(enriched.position,7);
+assert.equal(enriched.spotifyTrackId,testTrackId);
+assert.equal(
+  tracks.spotifyContextUrl(enriched,'cerbanimo'),
+  `https://open.spotify.com/track/${testTrackId}?context=spotify:playlist:${expectedIds.cerbanimo}`,
+  'an enriched track must open inside its approved playlist context'
+);
+const legacy=tracks.parseTrackLine('The Coup - Ride The Fence',7);
+assert.equal(legacy.spotifyTrackId,'');
+assert.match(tracks.spotifyContextUrl(legacy,'cerbanimo'),new RegExp(`/playlist/${expectedIds.cerbanimo}(?:\\?|$)`),'legacy metadata must fall back to the approved station, never an isolated track search');
 assert.ok(tracks.pickTag('living-school'),'Living School must produce a label tag');
 
 const pageContext={
@@ -122,16 +137,19 @@ assert.match(trackSource,/fetch\(path,\{cache:'force-cache'\}\)/,'track suggesti
 assert.match(trackSource,/detail\.type==='RADIO_CTA_SHOWN'/,'track lookup must trigger from the existing Spotify station suggestion');
 assert.match(trackSource,/RADIO_TRACK_SUGGESTED/,'track suggestions must emit an observable event');
 assert.match(trackSource,/Random pull from this station/,'card must explain that the selected song is a station pull');
-assert.match(trackSource,/Find this track ↗/,'card must expose a direct Spotify track search');
-assert.match(trackSource,/Open station ↗/,'original realm station link must remain available');
+assert.match(trackSource,/Play in station ↗/,'exact track metadata must expose a playlist-context CTA');
+assert.match(trackSource,/Open station ↗/,'playlist-first fallback must remain available');
+assert.match(trackSource,/context=spotify:playlist:/,'contextual URLs must preserve playlist playback context');
+assert.doesNotMatch(trackSource,/open\.spotify\.com\/search\//,'v241 must never strand users in Spotify search');
+assert.match(trackSource,/registerAccessTokenProvider/,'runtime must permit an optional owner-authorized metadata resolver without requiring it');
+assert.match(trackSource,/\/playlists\/\$\{meta\.playlistId\}\/items\?limit=1&offset=/,'metadata resolver must address the selected item by playlist position');
 assert.match(trackSource,/THE SYLLABUS HAS UNIONIZED/,'snarky station labels must ship with the runtime');
 assert.match(trackSource,/NO KPI SURVIVED THE CHORUS/,'Cerbanimo label voice must remain distinct');
 assert.match(trackSource,/SURPLUS VALUE RETURNED TO SENDER/,'FellowFare label voice must remain distinct');
 
-assert.match(boundarySource,/SYSTEM_RADIO_AGENT='\/app\/system-radio-agent-v233\.js'/,'install boundary must load v233');
-assert.match(boundarySource,/RADIO_TRACK_SUGGESTIONS='\/app\/radio-track-suggestions-v240\.js'/,'install boundary must load v240 after the station agent');
+assert.match(boundarySource,/RADIO_TRACK_SUGGESTIONS='\/app\/radio-track-suggestions-v241\.js'/,'install boundary must load v241 after the station agent');
 assert.ok(boundarySource.indexOf('SYSTEM_RADIO_AGENT,')<boundarySource.indexOf('RADIO_TRACK_SUGGESTIONS,'),'track decorator must load after the station card runtime');
 assert.match(boundarySource,/radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left'/,'boundary metadata must describe the active station policy');
-assert.match(boundarySource,/radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels'/,'boundary metadata must describe the random track policy');
+assert.match(boundarySource,/radioTrackSuggestionRevision:'v241-playlist-context-track-links'/,'boundary metadata must describe playlist-context track links');
 
-console.log('Civweave system radio v233 + v240 random station track contract verified.');
+console.log('Civweave system radio v233 + v241 playlist-context track contract verified.');
