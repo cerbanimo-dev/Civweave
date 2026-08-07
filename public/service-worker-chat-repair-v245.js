@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const REVISION='mobile-chat-layout-v248';
+const REVISION='chat-send-preventdefault-v249';
 const CHAT_PATHS=new Set([
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
