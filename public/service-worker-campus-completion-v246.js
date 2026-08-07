@@ -2,6 +2,7 @@
 'use strict';
 
 const REVISION='campus-retired-completion-v246';
+const INSTALL_BRIDGE='/app/pwa-install-prompt-v246.js';
 const previousOfflineStatus=offlineStatus;
 const previousDownloadOfflinePackage=downloadOfflinePackage;
 
@@ -65,8 +66,18 @@ downloadOfflinePackage=function downloadOfflinePackageV246(event){
   });
 };
 
+self.addEventListener('install',event=>{
+  event.waitUntil((async()=>{
+    try{
+      const response=await fetch(INSTALL_BRIDGE,{cache:'no-store'});
+      if(response?.ok)await(await caches.open(RUNTIME_CACHE)).put(cacheKey(INSTALL_BRIDGE),response.clone());
+    }catch{}
+  })());
+});
+
 self.CivweaveCampusCompletionV246=Object.freeze({
   revision:REVISION,
+  installBridge:INSTALL_BRIDGE,
   canonicalize,
   policy:'retired-references-do-not-block-current-campus-readiness'
 });
