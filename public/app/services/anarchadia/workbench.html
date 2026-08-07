@@ -48,7 +48,7 @@
   </section>
   <div id="app" aria-live="polite"></div>
   <noscript>This local-first governance workbench requires JavaScript.</noscript>
-  <script src="/app/shared/commonweave-model-runtime.js"></script>
+  <script src="/app/shared/civweave-model-runtime.js"></script>
   <script type="module">
     import { loadWorkspace, saveWorkspace } from './src/store.js';
     import { emptyState, syntheticFixture } from './src/domain.js';
@@ -76,8 +76,8 @@
     }catch(error){launch.hidden=false;status.textContent=`Local storage needs attention: ${error.message}`}
     launch?.addEventListener('click',event=>{const button=event.target.closest('[data-start]');if(button)start(button.dataset.start)});
   </script>
-  <script src="commonweave-handoff-consumer.js" data-system="anarchadia"></script>
-  <script src="commonweave-presence.js"></script>
+  <script src="civweave-handoff-consumer.js" data-system="anarchadia"></script>
+  <script src="civweave-presence.js"></script>
   <script>
     document.querySelector('#cabinet-workbench-return').addEventListener('click',()=>location.replace('/app/anarchadia-console-v139.html?embed=1&system=anarchadia'));
   </script>

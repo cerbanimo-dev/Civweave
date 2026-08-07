@@ -22,7 +22,7 @@ async function v224NormalizeResponse(response, request) {
   headers.delete('content-length');
   headers.delete('content-encoding');
   headers.delete('location');
-  headers.set('x-commonweave-navigation-normalized', V224_REVISION);
+  headers.set('x-civweave-navigation-normalized', V224_REVISION);
   if (request.mode === 'navigate' && !headers.get('content-type')) {
     headers.set('content-type', 'text/html; charset=utf-8');
   }
@@ -69,19 +69,19 @@ networkFirst = async function navigationSafeNetworkFirst(request, fallbackPath =
     if (normalized) return normalized;
   }
 
-  return new Response('Commonweave could not load this room from the network or its offline package.', {
+  return new Response('Civweave could not load this room from the network or its offline package.', {
     status: 503,
     headers: {
       'content-type': 'text/plain; charset=utf-8',
       'cache-control': 'no-store',
-      'x-commonweave-navigation-normalized': V224_REVISION
+      'x-civweave-navigation-normalized': V224_REVISION
     }
   });
 };
 
 stableAppEntry = async function navigationSafeStableAppEntry(request) {
   const response = await v224OriginalStableAppEntry(request);
-  return await v224NormalizeResponse(response, request) || new Response('Commonweave launcher is unavailable.', {
+  return await v224NormalizeResponse(response, request) || new Response('Civweave launcher is unavailable.', {
     status: 503,
     headers: {'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store'}
   });
@@ -89,13 +89,13 @@ stableAppEntry = async function navigationSafeStableAppEntry(request) {
 
 cacheFirst = async function navigationSafeCacheFirst(request) {
   const response = await v224OriginalCacheFirst(request);
-  return await v224NormalizeResponse(response, request) || new Response(`Commonweave asset unavailable: ${new URL(request.url).pathname}`, {
+  return await v224NormalizeResponse(response, request) || new Response(`Civweave asset unavailable: ${new URL(request.url).pathname}`, {
     status: 503,
     headers: {'content-type': 'text/plain; charset=utf-8'}
   });
 };
 
-self.CommonweaveNavigationSafetyV224 = Object.freeze({
+self.CivweaveNavigationSafetyV224 = Object.freeze({
   revision: V224_REVISION,
   navigationTimeoutMs: V224_NAVIGATION_TIMEOUT_MS,
   policy: 'follow-internally-normalize-before-respond-with'

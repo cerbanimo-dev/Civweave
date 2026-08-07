@@ -1,4 +1,4 @@
-- [x] Commonweave is the installed first screen
+- [x] Civweave is the installed first screen
 - [x] Five underlying software sites render full-screen
 - [x] Exactly four labeled family buttons appear at the bottom
 - [x] Status dots and notification badges are derived from local state

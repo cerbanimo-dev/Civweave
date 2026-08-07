@@ -32,16 +32,16 @@ async function walk(directory){
 
 async function main(){
   if(!force&&await staged()){
-    console.log('[Commonweave] Transformers.js browser assets are already staged.');
+    console.log('[Civweave] Transformers.js browser assets are already staged.');
     return;
   }
   if(renderBuild&&!force){
-    console.log('[Commonweave] Render gateway build: skipping device-side Transformers.js staging; using committed Transformers.js assets.');
+    console.log('[Civweave] Render gateway build: skipping device-side Transformers.js staging; using committed Transformers.js assets.');
     return;
   }
   if(!await exists(source)){
     const message='@huggingface/transformers is not installed. Run npm install before staging the onboard model.';
-    if(soft){console.warn(`[Commonweave] ${message}`);return}
+    if(soft){console.warn(`[Civweave] ${message}`);return}
     throw new Error(message);
   }
 
@@ -82,7 +82,7 @@ async function main(){
   const wasmCount=backendFiles.filter(file=>file.endsWith('.wasm')).length;
   const loaderCount=backendFiles.filter(file=>file.endsWith('.mjs')).length;
   await fsp.writeFile(path.join(destination,'stage-manifest.json'),JSON.stringify({
-    schema:'commonweave.transformers-stage.v2',
+    schema:'civweave.transformers-stage.v2',
     package:'@huggingface/transformers',
     entry:'/app/vendor/transformers/transformers.min.js',
     backendRoot:'/app/vendor/transformers/wasm/',
@@ -93,7 +93,7 @@ async function main(){
     stagedAt:new Date().toISOString()
   },null,2));
 
-  console.log(`[Commonweave] Staged Transformers.js: ${copied.length} runtime files, ${loaderCount} backend loaders, ${wasmCount} WASM binaries.`);
+  console.log(`[Civweave] Staged Transformers.js: ${copied.length} runtime files, ${loaderCount} backend loaders, ${wasmCount} WASM binaries.`);
 }
 
 main().catch(error=>{console.error(error);process.exitCode=1});

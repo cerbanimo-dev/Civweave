@@ -61,13 +61,13 @@ assert(fallback.originalIndex===5&&fallback.nextSiblingSelector==='.ac-footer','
 assert(fallback.targetShell.includes('ac-merlin-chat'),'The device fallback does not contain the server-provided chat shell.');
 const moved=api.applyOperation(operation,root);
 assert(moved.ok&&display.children.indexOf(chat)===2,'The chat window was not moved above the passport.');
-assert(chat.dataset.commonweaveLocalLayout===operation.id,'The applied local override was not marked.');
+assert(chat.dataset.civweaveLocalLayout===operation.id,'The applied local override was not marked.');
 const restored=api.restoreFallback({operation,fallback},root);
 assert(restored.ok&&display.children.indexOf(chat)===5,'The saved server placement was not restored.');
-assert(!('commonweaveLocalLayout'in chat.dataset),'The local override marker survived restoration.');
+assert(!('civweaveLocalLayout'in chat.dataset),'The local override marker survived restoration.');
 
 for(const token of [
-  'commonweave.local-interface-overrides.v167','commonweave.server-layout-fallback.v1','targetShell','applySaved','KEEP ON THIS DEVICE','RESTORE SERVER LAYOUT','commonweave-local-layout-v167','A server-provided fallback copy is saved locally'
+  'civweave.local-interface-overrides.v167','civweave.server-layout-fallback.v1','targetShell','applySaved','KEEP ON THIS DEVICE','RESTORE SERVER LAYOUT','civweave-local-layout-v167','A server-provided fallback copy is saved locally'
 ])assert(runtime.includes(token),`Runtime is missing ${token}.`);
 assert(runtime.includes("system:'anarchadia',kind:'local-interface-change'"),'Merlin does not create a canonical Anarchadia local-interface action.');
 assert(runtime.includes('previewDocument(operation)'),'The request does not generate a live-page preview.');
@@ -77,7 +77,7 @@ assert(html.includes('family-shell-v104.css?v=merlinites-r1')&&html.includes('fa
 assert(html.indexOf('<script src="/app/model-settings-controller-v173.js')<html.indexOf('<script src="/app/family-ai-loader-v105.js'),'Anarchadia loads chat before the direct settings controller.');
 assert(worker.includes("EXTENSION_VERSION='working-campus-additions-v174-settings-single-owner-assets'"),'Installed package did not rotate to the single-owner settings cutover.');
 assert(worker.includes("SETTINGS_RUNTIME_REVISION='settings-runtime-v157.2-single-owner'"),'Service worker status does not report the single-owner settings runtime.');
-assert(worker.includes('/extensions/commonweave-antigravity-live-source-guard-v167.js'),'Installed package lost the Antigravity live-source guard.');
+assert(worker.includes('/extensions/civweave-antigravity-live-source-guard-v167.js'),'Installed package lost the Antigravity live-source guard.');
 assert(worker.includes("LIVE_SOURCE_PROOF_REVISION='antigravity-live-source-proof-v167'"),'Service worker status does not report live-source proof.');
 assert(worker.includes('/app/anarchadia-live-layout-v167.js'),'Installed cores do not receive the local layout runtime.');
 assert(worker.includes("LOCAL_LAYOUT_REVISION='merlin-local-layout-fallback-v167'"),'Service worker status does not report the local layout revision.');

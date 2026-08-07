@@ -4,7 +4,7 @@
     {
       "id": "weaveling",
       "name": "Weaveling",
-      "system": "commonweave",
+      "system": "civweave",
       "role": "Central intention guide who invokes the four bounded realm voices.",
       "sprite": "assets/ai/weaveling.png",
       "artifact": "assets/ai/weaveling-compass.png"

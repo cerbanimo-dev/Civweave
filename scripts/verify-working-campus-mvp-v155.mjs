@@ -17,13 +17,13 @@ const [host,html,css,loader,entry,...sources]=await Promise.all([
 ]);
 const source=sources.join(''),surface=`${html}\n${css}\n${source}`;
 for(const token of [
-  'Commonweave Working Campus','What is your wish?','Aptitude and learning choice',
+  'Civweave Working Campus','What is your wish?','Aptitude and learning choice',
   'Build reviewable weave','Activate weave','Guided rails','Free roam',
-  'commonweave.working-campus.v1','commonweave.intentions.v127',
-  'commonweave.realm-inbox.v1','commonweave.context.v1',
-  'commonweave.active-handoff.v1','commonweave.intention-weave.v1',
+  'civweave.working-campus.v1','civweave.intentions.v127',
+  'civweave.realm-inbox.v1','civweave.context.v1',
+  'civweave.active-handoff.v1','civweave.intention-weave.v1',
   'Google Gemini','gemini-3.5-flash-lite','Test Gemini','Test Antigravity',
-  'working-campus-antigravity-test','commonweave-model-profiles-v1',
+  'working-campus-antigravity-test','civweave-model-profiles-v1',
   '/app/assets/ai/weaveling.png','/app/assets/ai/moss.png','/app/assets/ai/kamiya.png',
   '/app/assets/ai/rook.png','/app/assets/ai/merlin.png'
 ])assert(surface.toLowerCase().includes(token.toLowerCase()),`Working Campus is missing ${token}`);
@@ -36,7 +36,7 @@ for(const route of [
 ])assert(host.includes(route)||source.includes(route),`Working Campus is missing route ${route}`);
 assert(host.includes('location.replace')&&!host.includes('<iframe'),'Compatibility host must remain direct and iframe-free.');
 assert(loader.includes("source.join('')")&&parts.every(file=>loader.includes('/app/'+path.basename(file))),'Working Campus loader does not assemble every cached source part.');
-assert(entry.includes("system==='commonweave'?'/app/fullscreen-family-v104.html?system=commonweave'"),'Installed entry does not boot the Working Campus.');
+assert(entry.includes("system==='civweave'?'/app/fullscreen-family-v104.html?system=civweave'"),'Installed entry does not boot the Working Campus.');
 new vm.Script(source,{filename:'working-campus-v156.js'});
 new vm.Script(loader,{filename:'working-campus-v156-loader.js'});
 console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'wish -> aptitude -> review -> activation -> realm handoffs',modelTests:['gemini','antigravity'],navigation:'direct full-screen',offlineState:'local canonical'},null,2));

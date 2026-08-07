@@ -11,19 +11,19 @@ const DATA_DIR = path.resolve(ROOT, process.env.DATA_DIR || './data');
 const FEDERATION_FILE = path.join(DATA_DIR, 'federation-state.json');
 const IDENTITY_FILE = path.join(DATA_DIR, 'federation-identity.json');
 const PORT = positiveInteger(process.env.PORT, 8787, 1, 65535);
-const APP_PORT = positiveInteger(process.env.COMMONWEAVE_APP_PORT, 8788, 1, 65535);
+const APP_PORT = positiveInteger(process.env.CIVWEAVE_APP_PORT, 8788, 1, 65535);
 const HOST = process.env.HOST || '0.0.0.0';
-const NODE_NAME = process.env.COMMONWEAVE_NODE_NAME || process.env.HUB_NAME || 'Commonweave Node';
-const NODE_DESCRIPTION = process.env.COMMONWEAVE_NODE_DESCRIPTION || 'A sovereign Commonweave community node.';
+const NODE_NAME = process.env.CIVWEAVE_NODE_NAME || process.env.HUB_NAME || 'Civweave Node';
+const NODE_DESCRIPTION = process.env.CIVWEAVE_NODE_DESCRIPTION || 'A sovereign Civweave community node.';
 const PUBLIC_URL = normalizeOrigin(process.env.PUBLIC_HOST_URL || `http://localhost:${PORT}`, 'PUBLIC_HOST_URL');
-const AUTO_ACCEPT = /^true$/i.test(process.env.COMMONWEAVE_AUTO_ACCEPT_PEERS || 'false');
-const ALLOW_UNAUTHENTICATED_ADMIN = /^true$/i.test(process.env.COMMONWEAVE_ALLOW_UNAUTHENTICATED_ADMIN || 'false');
-const ADMIN_TOKEN = String(process.env.COMMONWEAVE_FEDERATION_ADMIN_TOKEN || process.env.HUB_TOKEN || '').trim();
-const MAX_EVENTS = positiveInteger(process.env.COMMONWEAVE_MAX_FEDERATION_EVENTS, 5000, 100, 100000);
-const MAX_PENDING_PEERS = positiveInteger(process.env.COMMONWEAVE_MAX_PENDING_PEERS, 256, 1, 10000);
-const APP_ENTRY = process.env.COMMONWEAVE_APP_ENTRY || 'server-gateway-v131.mjs';
+const AUTO_ACCEPT = /^true$/i.test(process.env.CIVWEAVE_AUTO_ACCEPT_PEERS || 'false');
+const ALLOW_UNAUTHENTICATED_ADMIN = /^true$/i.test(process.env.CIVWEAVE_ALLOW_UNAUTHENTICATED_ADMIN || 'false');
+const ADMIN_TOKEN = String(process.env.CIVWEAVE_FEDERATION_ADMIN_TOKEN || process.env.HUB_TOKEN || '').trim();
+const MAX_EVENTS = positiveInteger(process.env.CIVWEAVE_MAX_FEDERATION_EVENTS, 5000, 100, 100000);
+const MAX_PENDING_PEERS = positiveInteger(process.env.CIVWEAVE_MAX_PENDING_PEERS, 256, 1, 10000);
+const APP_ENTRY = process.env.CIVWEAVE_APP_ENTRY || 'server-gateway-v131.mjs';
 const APP_ENTRY_PATH = path.isAbsolute(APP_ENTRY) ? APP_ENTRY : path.resolve(ROOT, APP_ENTRY);
-const CAPABILITIES = String(process.env.COMMONWEAVE_NODE_CAPABILITIES || 'release-distribution,node-discovery,federated-events,fellowfare.exchange,living-school.curricula,anarchadia.proposals,portable-proofs')
+const CAPABILITIES = String(process.env.CIVWEAVE_NODE_CAPABILITIES || 'release-distribution,node-discovery,federated-events,fellowfare.exchange,living-school.curricula,anarchadia.proposals,portable-proofs')
   .split(',').map(value => clean(value, 120)).filter(Boolean).slice(0, 64);
 const BUILD = '1.0.32-federation-v1.1';
 
@@ -86,7 +86,7 @@ function parseInbox(value, expectedOrigin) {
 }
 function normalizeNodeId(value) {
   const nodeId = clean(value, 160);
-  if (!/^cw:[A-Za-z0-9][A-Za-z0-9._:-]{7,156}$/.test(nodeId)) throw httpError('Invalid Commonweave node ID.');
+  if (!/^cw:[A-Za-z0-9][A-Za-z0-9._:-]{7,156}$/.test(nodeId)) throw httpError('Invalid Civweave node ID.');
   return nodeId;
 }
 function normalizePublicKey(value) {
@@ -124,16 +124,16 @@ function constantTimeEqual(left, right) {
 function adminAuthorized(req) {
   if (!ADMIN_TOKEN) return ALLOW_UNAUTHENTICATED_ADMIN;
   const candidate = bearer(req)
-    || clean(req.headers['x-commonweave-admin-token'], 1000)
-    || clean(req.headers['x-commonweave-hub-token'], 1000);
+    || clean(req.headers['x-civweave-admin-token'], 1000)
+    || clean(req.headers['x-civweave-hub-token'], 1000);
   return constantTimeEqual(candidate, ADMIN_TOKEN);
 }
 function requireAdmin(req, res) {
   if (adminAuthorized(req)) return true;
   if (!ADMIN_TOKEN && !ALLOW_UNAUTHENTICATED_ADMIN) {
-    json(res, 503, { error: 'Federation administration is disabled until COMMONWEAVE_FEDERATION_ADMIN_TOKEN is configured.' });
+    json(res, 503, { error: 'Federation administration is disabled until CIVWEAVE_FEDERATION_ADMIN_TOKEN is configured.' });
   } else {
-    json(res, 401, { error: 'Federation administrator authorization required.' }, { 'www-authenticate': 'Bearer realm="Commonweave Federation"' });
+    json(res, 401, { error: 'Federation administrator authorization required.' }, { 'www-authenticate': 'Bearer realm="Civweave Federation"' });
   }
   return false;
 }
@@ -151,7 +151,7 @@ async function loadIdentity() {
     const publicKey = normalizePublicKey(saved.publicKey);
     const privateKey = crypto.createPrivateKey(saved.privateKey);
     if (privateKey.asymmetricKeyType !== 'ed25519') throw new Error('Private key is not Ed25519.');
-    const probe = Buffer.from('commonweave-identity-check');
+    const probe = Buffer.from('civweave-identity-check');
     const signature = crypto.sign(null, probe, privateKey);
     if (!crypto.verify(null, probe, publicKey, signature)) throw new Error('Identity key pair does not match.');
     return { ...saved, nodeId, publicKey, privateKey: saved.privateKey };
@@ -173,7 +173,7 @@ async function loadIdentity() {
 const identity = await loadIdentity();
 
 const state = {
-  schema: 'commonweave.federation-state.v1',
+  schema: 'civweave.federation-state.v1',
   peers: {},
   events: [],
   blocked: [],
@@ -218,7 +218,7 @@ function persist() {
 }
 function profile() {
   return {
-    schema: 'commonweave.node-profile.v1',
+    schema: 'civweave.node-profile.v1',
     protocolVersion: '1.0',
     nodeId: identity.nodeId,
     name: NODE_NAME,
@@ -229,7 +229,7 @@ function profile() {
     keyFingerprint: publicKeyFingerprint(identity.publicKey),
     capabilities: CAPABILITIES,
     peerPolicy: AUTO_ACCEPT ? 'automatic' : 'approval-required',
-    software: { name: 'Commonweave', build: BUILD }
+    software: { name: 'Civweave', build: BUILD }
   };
 }
 function publicPeer(peer) {
@@ -248,8 +248,8 @@ function publicPeer(peer) {
   };
 }
 function validateProfile(input, expectedOrigin) {
-  if (!input || typeof input !== 'object' || Array.isArray(input)) throw httpError('Peer returned an invalid Commonweave profile.');
-  if (input.schema !== 'commonweave.node-profile.v1') throw httpError('Peer profile schema is not supported.');
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw httpError('Peer returned an invalid Civweave profile.');
+  if (input.schema !== 'civweave.node-profile.v1') throw httpError('Peer profile schema is not supported.');
   const nodeId = normalizeNodeId(input.nodeId);
   const baseUrl = normalizeOrigin(input.baseUrl, 'Peer baseUrl');
   if (expectedOrigin && baseUrl !== expectedOrigin) throw httpError('Peer profile baseUrl does not match the discovered origin.');
@@ -258,7 +258,7 @@ function validateProfile(input, expectedOrigin) {
     schema: input.schema,
     protocolVersion: clean(input.protocolVersion || '1.0', 20),
     nodeId,
-    name: clean(input.name || 'Unnamed Commonweave Node', 160),
+    name: clean(input.name || 'Unnamed Civweave Node', 160),
     description: clean(input.description || '', 500),
     baseUrl,
     inbox: parseInbox(input.inbox, baseUrl),
@@ -271,7 +271,7 @@ async function fetchProfile(baseUrl) {
   const normalized = normalizeOrigin(baseUrl, 'Peer URL');
   let response;
   try {
-    response = await fetch(`${normalized}/.well-known/commonweave`, {
+    response = await fetch(`${normalized}/.well-known/civweave`, {
       headers: { accept: 'application/json' },
       signal: AbortSignal.timeout(12000),
       redirect: 'error'
@@ -333,7 +333,7 @@ function createEvent(input) {
   const kind = clean(input.kind, 120);
   if (!kind) throw httpError('Federated event kind is required.');
   const unsigned = {
-    schema: 'commonweave.federated-event.v1',
+    schema: 'civweave.federated-event.v1',
     id: `event:${crypto.randomUUID()}`,
     origin: identity.nodeId,
     kind,
@@ -348,7 +348,7 @@ function validateIncomingEvent(input, senderNodeId) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw httpError('Federated event is required.');
   const allowed = new Set(['schema', 'id', 'origin', 'kind', 'visibility', 'subject', 'payload', 'createdAt', 'signature']);
   for (const key of Object.keys(input)) if (!allowed.has(key)) throw httpError(`Unsupported federated event field: ${key}`);
-  if (input.schema !== 'commonweave.federated-event.v1') throw httpError('Federated event schema is not supported.');
+  if (input.schema !== 'civweave.federated-event.v1') throw httpError('Federated event schema is not supported.');
   const id = clean(input.id, 180);
   if (!/^event:[A-Za-z0-9][A-Za-z0-9._:-]{7,176}$/.test(id)) throw httpError('Federated event ID is invalid.');
   const origin = normalizeNodeId(input.origin);
@@ -370,7 +370,7 @@ async function deliver(peer, event) {
   try {
     response = await fetch(peer.inbox, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-commonweave-sender': identity.nodeId },
+      headers: { 'content-type': 'application/json', 'x-civweave-sender': identity.nodeId },
       body: JSON.stringify({ sender: profile(), event }),
       signal: AbortSignal.timeout(15000),
       redirect: 'error'
@@ -405,19 +405,19 @@ async function mapLimit(items, limit, worker) {
 
 let app = null;
 let appExited = false;
-if (!/^true$/i.test(process.env.COMMONWEAVE_SKIP_APP || 'false')) {
-  await fsp.access(APP_ENTRY_PATH).catch(() => { throw new Error(`Commonweave application entry was not found: ${APP_ENTRY_PATH}`); });
+if (!/^true$/i.test(process.env.CIVWEAVE_SKIP_APP || 'false')) {
+  await fsp.access(APP_ENTRY_PATH).catch(() => { throw new Error(`Civweave application entry was not found: ${APP_ENTRY_PATH}`); });
   app = spawn(process.execPath, [APP_ENTRY_PATH], {
     env: { ...process.env, PORT: String(APP_PORT), HOST: '127.0.0.1', PUBLIC_HOST_URL: PUBLIC_URL },
     stdio: ['ignore', 'inherit', 'inherit']
   });
   app.on('error', error => {
     appExited = true;
-    console.error('Commonweave application process failed:', error.message);
+    console.error('Civweave application process failed:', error.message);
   });
   app.on('exit', code => {
     appExited = true;
-    if (code && code !== 0) console.error(`Commonweave application process exited with code ${code}`);
+    if (code && code !== 0) console.error(`Civweave application process exited with code ${code}`);
   });
 }
 function forwardedHeaders(req) {
@@ -431,7 +431,7 @@ function forwardedHeaders(req) {
   return headers;
 }
 function proxy(req, res) {
-  if (!app || appExited) return json(res, 502, { error: 'Commonweave application is unavailable.' });
+  if (!app || appExited) return json(res, 502, { error: 'Civweave application is unavailable.' });
   const upstream = http.request({
     hostname: '127.0.0.1',
     port: APP_PORT,
@@ -442,7 +442,7 @@ function proxy(req, res) {
     res.writeHead(upstreamRes.statusCode || 502, upstreamRes.headers);
     upstreamRes.pipe(res);
   });
-  upstream.on('error', error => json(res, 502, { error: 'Commonweave application is starting or unavailable.', detail: error.message }));
+  upstream.on('error', error => json(res, 502, { error: 'Civweave application is starting or unavailable.', detail: error.message }));
   req.pipe(upstream);
 }
 
@@ -450,7 +450,7 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
   const pathname = decodeURIComponent(url.pathname);
   try {
-    if (pathname === '/.well-known/commonweave' && req.method === 'GET') {
+    if (pathname === '/.well-known/civweave' && req.method === 'GET') {
       return json(res, 200, profile(), { 'access-control-allow-origin': '*' });
     }
     if (pathname === '/api/federation/health' && req.method === 'GET') {
@@ -537,7 +537,7 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/federation/inbox' && req.method === 'POST') {
       const input = await readBody(req);
       const sender = validateProfile(input.sender, normalizeOrigin(input.sender?.baseUrl, 'Sender baseUrl'));
-      const senderHeader = clean(req.headers['x-commonweave-sender'], 160);
+      const senderHeader = clean(req.headers['x-civweave-sender'], 160);
       if (senderHeader && senderHeader !== sender.nodeId) return json(res, 400, { error: 'Sender header does not match sender profile.' });
       if (sender.nodeId === identity.nodeId) return json(res, 409, { error: 'A node cannot deliver a federated event to itself.' });
       if (state.blocked.includes(sender.nodeId)) return json(res, 403, { error: 'Sender is blocked.' });
@@ -608,7 +608,7 @@ server.on('upgrade', (req, socket, head) => {
 
 server.listen(PORT, HOST, () => {
   if (!ADMIN_TOKEN && !ALLOW_UNAUTHENTICATED_ADMIN) {
-    console.warn('Federation admin API is locked. Set COMMONWEAVE_FEDERATION_ADMIN_TOKEN to manage peers and publish events.');
+    console.warn('Federation admin API is locked. Set CIVWEAVE_FEDERATION_ADMIN_TOKEN to manage peers and publish events.');
   }
   console.log(`${NODE_NAME} federated gateway listening on http://${HOST}:${PORT}`);
 });

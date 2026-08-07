@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 
 const [plannerSource,orchestratorSource,campusPart,legacyWorker,workerWrapper,workerCore,offlineManifestText]=await Promise.all([
   readFile('public/app/intention-planner-v141.js','utf8'),
-  readFile('public/extensions/commonweave-weaveling-plan-json-v190.js','utf8'),
+  readFile('public/extensions/civweave-weaveling-plan-json-v190.js','utf8'),
   readFile('public/app/working-campus-v156.part5.txt','utf8'),
   readFile('public/service-worker-v156.js','utf8'),
   readFile('public/service-worker-v203.js','utf8'),
@@ -14,9 +14,9 @@ const offlineManifest=JSON.parse(offlineManifestText);
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 class MemoryStorage{constructor(seed={}){this.values=new Map(Object.entries(seed))}getItem(key){return this.values.has(key)?this.values.get(key):null}setItem(key,value){this.values.set(key,String(value))}removeItem(key){this.values.delete(key)}}
 const storage=new MemoryStorage({
-  'commonweave.working-campus.v1':JSON.stringify({wish:'',profile:{skill:'learning',learning:'practice',collaboration:'solo',hours:'3-5',constraints:'Keep the premise ambiguous until the rules are chosen.'},plan:null,conversation:[]}),
-  'commonweave.intentions.v127':'[]',
-  'commonweave.realm-inbox.v1':'[]',
+  'civweave.working-campus.v1':JSON.stringify({wish:'',profile:{skill:'learning',learning:'practice',collaboration:'solo',hours:'3-5',constraints:'Keep the premise ambiguous until the rules are chosen.'},plan:null,conversation:[]}),
+  'civweave.intentions.v127':'[]',
+  'civweave.realm-inbox.v1':'[]',
 });
 let captured=null,activateCalls=0,openCalls=0;
 const sandbox={
@@ -27,12 +27,12 @@ const sandbox={
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(plannerSource,sandbox,{filename:'intention-planner-v141.js'});
-sandbox.CommonweaveIntentionUI={
-  activate(id){activateCalls++;const items=JSON.parse(storage.getItem('commonweave.intentions.v127')||'[]'),item=items.find(entry=>entry.id===id);if(!item)return{ok:false,error:'missing'};item.state='active';item.plan.state='active';storage.setItem('commonweave.intentions.v127',JSON.stringify(items));return{ok:true,item}},
-  review(id){const items=JSON.parse(storage.getItem('commonweave.intentions.v127')||'[]'),item=items.find(entry=>entry.id===id);if(!item)return{ok:false,error:'missing'};item.state='review';item.plan.state='review';storage.setItem('commonweave.intentions.v127',JSON.stringify(items));return{ok:true,item}},
+sandbox.CivweaveIntentionUI={
+  activate(id){activateCalls++;const items=JSON.parse(storage.getItem('civweave.intentions.v127')||'[]'),item=items.find(entry=>entry.id===id);if(!item)return{ok:false,error:'missing'};item.state='active';item.plan.state='active';storage.setItem('civweave.intentions.v127',JSON.stringify(items));return{ok:true,item}},
+  review(id){const items=JSON.parse(storage.getItem('civweave.intentions.v127')||'[]'),item=items.find(entry=>entry.id===id);if(!item)return{ok:false,error:'missing'};item.state='review';item.plan.state='review';storage.setItem('civweave.intentions.v127',JSON.stringify(items));return{ok:true,item}},
   open(){openCalls++;},
 };
-sandbox.CommonweaveModelRuntime={
+sandbox.CivweaveModelRuntime={
   async generate(request){captured=request;return{status:'success',outputJson:{
     title:'Write a book about a time looper meeting a time traveler in an infinite loop',
     wish:'Write a book about a time looper meeting a time traveler in an infinite loop',
@@ -46,16 +46,16 @@ sandbox.CommonweaveModelRuntime={
     confidence:.93,
   },actual:{provider:'gemini',model:'gemini-3.5-flash-lite'}}},
 };
-sandbox.CommonweaveAssistantV141={
+sandbox.CivweaveAssistantV141={
   selectedConfig:()=>({provider:'gemini',route:'gemini',model:'gemini-3.5-flash-lite',apiKey:'redacted',externalConsent:true}),
-  context:async()=>({currentContext:{systemId:'commonweave'},routingAnswer:{room:'commonweave.quad'}}),
+  context:async()=>({currentContext:{systemId:'civweave'},routingAnswer:{room:'civweave.quad'}}),
   respond:async()=>({response:{answer:'legacy route'},provider:'legacy',model:'legacy'}),
 };
-vm.runInContext(orchestratorSource,sandbox,{filename:'commonweave-weaveling-plan-json-v190.js'});
+vm.runInContext(orchestratorSource,sandbox,{filename:'civweave-weaveling-plan-json-v190.js'});
 const wish='I want to write a book about a time looper meeting a time traveler in an infinite? loop';
-const result=await sandbox.CommonweaveAssistantV141.respond({text:wish,systemId:'commonweave',history:[{role:'user',text:wish}]});
+const result=await sandbox.CivweaveAssistantV141.respond({text:wish,systemId:'civweave',history:[{role:'user',text:wish}]});
 assert(captured,'Gemini structured planning request was not made.');
-assert(captured.purpose==='commonweave-weaveling-intention-json-v190','Structured plan purpose was not selected.');
+assert(captured.purpose==='civweave-weaveling-intention-json-v190','Structured plan purpose was not selected.');
 assert(captured.schema?.properties?.paths?.items?.properties?.realm,'Plan JSON schema was not supplied to the provider.');
 assert(/Preserve the user's actual premise/.test(captured.messages?.[0]?.content||''),'System prompt does not protect the user premise.');
 assert(/ambiguity visible/.test(captured.messages?.[0]?.content||''),'System prompt does not preserve ambiguity as an assumption.');
@@ -65,13 +65,13 @@ assert(result.plan?.authoring?.mode==='model-structured-json','Plan is not marke
 assert(/meeting a time traveler/i.test(result.plan.title),'Model-authored premise was not preserved.');
 assert(!/anomaly eraser|pursued by/i.test(JSON.stringify(result.plan)),'Old canned anomaly-erasure premise leaked into the model-authored plan.');
 assert(result.plan.paths.every(path=>Array.isArray(path.progress)&&path.status==='ready'),'Generated paths are not normalized for Working Campus progress tracking.');
-const saved=JSON.parse(storage.getItem('commonweave.intentions.v127')||'[]');
+const saved=JSON.parse(storage.getItem('civweave.intentions.v127')||'[]');
 assert(saved.length===1&&saved[0].plan.id===result.plan.id,'Model-authored weave was not persisted canonically.');
-const activation=await sandbox.CommonweaveAssistantV141.respond({text:'Activate',systemId:'commonweave',history:[]});
+const activation=await sandbox.CivweaveAssistantV141.respond({text:'Activate',systemId:'civweave',history:[]});
 assert(activateCalls===1,'Plain-language Activate did not operate the latest saved weave.');
 assert(activation.planControl?.action==='activate'&&activation.plan?.state==='active','Activation response did not expose the active plan state.');
-assert(captured.purpose==='commonweave-weaveling-intention-json-v190','Activation incorrectly made another model call.');
-assert(campusPart.includes('/extensions/commonweave-weaveling-plan-json-v190.js'),'Working Campus does not load the structured-plan orchestrator.');
+assert(captured.purpose==='civweave-weaveling-intention-json-v190','Activation incorrectly made another model call.');
+assert(campusPart.includes('/extensions/civweave-weaveling-plan-json-v190.js'),'Working Campus does not load the structured-plan orchestrator.');
 assert(campusPart.includes('syncPlanResult(result)'),'Working Campus does not synchronize model-authored plans into the visible workspace.');
 assert(legacyWorker.includes("importScripts('/service-worker-v203.js"),'Legacy registrations do not reach the active worker wrapper.');
 assert(workerWrapper.includes("importScripts('/service-worker-core-v208.js"),'Active worker wrapper does not load the retained offline core.');

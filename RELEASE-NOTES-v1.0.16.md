@@ -1,8 +1,8 @@
-# Commonweave v1.0.16
+# Civweave v1.0.16
 
 ## Permanent five-system navigation contract
 
-Commonweave could open its home screen on Render, but navigation into Living School, Cerbanimo, FellowFare, or Anarchadia could be replaced by the dark compatibility launcher. Two independent causes shared the same trapdoor:
+Civweave could open its home screen on Render, but navigation into Living School, Cerbanimo, FellowFare, or Anarchadia could be replaced by the dark compatibility launcher. Two independent causes shared the same trapdoor:
 
 1. The install boundary treated only the Working Campus as an intrinsically authorized application surface. The other four systems depended on transient session state or query parameters.
 2. Service-worker navigation requests did not identify themselves as device-package requests to the install-only Render gateway. A rejected realm navigation could then fall through to a generic launcher or offline document.

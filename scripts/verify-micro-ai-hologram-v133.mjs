@@ -23,9 +23,9 @@ const [loom,realm,lite,settings,assistant,fallbackRuntime,adapter,hologram,worke
 const manifest=JSON.parse(await read('public/app/models/smollm2-360m-instruct/model-manifest.json'));
 
 for(const [name,html] of [['loom',loom],['realm',realm]]){
-  for(const required of ['commonweave-model-runtime.js','smollm2-fallback-runtime-v134.js','smollm2-small-model-v137.js','model-settings-v133.js','assistant-runtime-v133.js'])assert(html.includes(required),`${name} is missing ${required}`);
+  for(const required of ['civweave-model-runtime.js','smollm2-fallback-runtime-v134.js','smollm2-small-model-v137.js','model-settings-v133.js','assistant-runtime-v133.js'])assert(html.includes(required),`${name} is missing ${required}`);
   assert(!html.includes('visual-model-settings-v132.js'),`${name} still loads the superseded Visual model modal`);
-  assert(html.indexOf('commonweave-model-runtime.js')<html.indexOf('smollm2-fallback-runtime-v134.js'),`${name} fallback loads before the shared runtime`);
+  assert(html.indexOf('civweave-model-runtime.js')<html.indexOf('smollm2-fallback-runtime-v134.js'),`${name} fallback loads before the shared runtime`);
   assert(html.indexOf('smollm2-fallback-runtime-v134.js')<html.indexOf('model-settings-v133.js'),`${name} settings load before the fallback floor`);
   assert(html.indexOf('model-settings-v133.js')<html.indexOf('smollm2-small-model-v137.js'),`${name} route-lock contract loads before settings`);
   assert(html.indexOf('smollm2-small-model-v137.js')<html.indexOf('assistant-runtime-v133.js'),`${name} assistant loads before the route-lock contract`);
@@ -33,7 +33,7 @@ for(const [name,html] of [['loom',loom],['realm',realm]]){
 assert(loom.includes('weaveling-hologram-v133.css?v=heart-r8'),'the Quad does not load the latest hologram styling');
 for(const required of ['model-settings-v133.css','model-settings-v133.js','smollm2-small-model-v137.js','lite-model-settings-v133.js','smollm2-fallback-runtime-v134.js'])assert(lite.includes(required),`Lite is missing ${required}`);
 assert(lite.indexOf('model-settings-v131.js')<lite.indexOf('lite-model-settings-v133.js'),'Lite v133 override loads before the older renderer exists');
-assert(liteOverride.includes('commonweave.model-setup'),'Lite model setup is not overridden');
+assert(liteOverride.includes('civweave.model-setup'),'Lite model setup is not overridden');
 
 assert(settings.includes('<option value="bundled">Onboard SmolLM2 360M</option>'),'onboard SmolLM2 route is missing');
 assert(!settings.includes('<option value="deterministic"'),'deterministic route is still user-selectable');
@@ -45,7 +45,7 @@ assert(Number(manifest.parameterCount)>0&&Number(manifest.parameterCount)<=500_0
 assert(manifest.remoteDownloadsAllowed===false,'bundled model permits remote downloads');
 for(const required of ['new Worker','type: \'module\'','transformers-js-worker','benchmark','measuredLength','body-size','ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm','onnx-runtime-r10'])assert(adapter.includes(required),`local model adapter is missing ${required}`);
 
-for(const required of ['commonweave.structured-context.v1','routingQuestion','routingAnswer','responseContract','CommonweaveModelRuntime','modelRuntime.generate','RESPONSE_SCHEMA','outputJson','onboardFallback'])assert(assistant.includes(required),`assistant runtime is missing ${required}`);
+for(const required of ['civweave.structured-context.v1','routingQuestion','routingAnswer','responseContract','CivweaveModelRuntime','modelRuntime.generate','RESPONSE_SCHEMA','outputJson','onboardFallback'])assert(assistant.includes(required),`assistant runtime is missing ${required}`);
 assert(!assistant.includes('request.deterministic'),'assistant runtime still invokes the deterministic provider');
 assert(assistant.includes('event.stopImmediatePropagation()'),'assistant does not replace the legacy deterministic submit handler');
 for(const required of ['fallbackExpectation','degraded-mode local fallback','delete clean.deterministic','delete clean.fallback','request?.signal?.aborted','AbortError',"error?.code==='CANCELLED'",'bundled-smollm2'])assert(fallbackRuntime.includes(required),`fallback runtime is missing ${required}`);
@@ -73,7 +73,7 @@ console.log(JSON.stringify({
   parameters:manifest.parameterCount,
   deterministicRouteVisible:false,
   selectedProviderGeneration:true,
-  structuredContext:'commonweave.structured-context.v1',
+  structuredContext:'civweave.structured-context.v1',
   fallbackFloor:'bundled-smollm2',
   smallModelContract:'v137-route-lock',
   cancellationFallsThrough:false,

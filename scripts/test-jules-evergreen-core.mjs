@@ -65,21 +65,21 @@ test('requires the trusted local-first check by default', () => {
 test('counts launches in a rolling window', () => {
   const now = Date.parse('2026-08-06T20:00:00Z');
   const sessions = [
-    {title: '[Commonweave Evergreen] A', createTime: '2026-08-06T19:00:00Z'},
-    {title: '[Commonweave Evergreen] B', createTime: '2026-08-05T18:00:00Z'},
+    {title: '[Civweave Evergreen] A', createTime: '2026-08-06T19:00:00Z'},
+    {title: '[Civweave Evergreen] B', createTime: '2026-08-05T18:00:00Z'},
     {title: 'Other', createTime: '2026-08-06T19:00:00Z'}
   ];
-  assert.equal(countRecentManagedSessions(sessions, '[Commonweave Evergreen]', now, 24), 1);
+  assert.equal(countRecentManagedSessions(sessions, '[Civweave Evergreen]', now, 24), 1);
 });
 
 test('extracts only pull requests from the intended repository', () => {
-  assert.equal(parsePullRequestNumber('https://github.com/cerbanimo-dev/Commonweave/pull/42', 'cerbanimo-dev/Commonweave'), 42);
-  assert.equal(parsePullRequestNumber('https://github.com/other/Commonweave/pull/42', 'cerbanimo-dev/Commonweave'), null);
+  assert.equal(parsePullRequestNumber('https://github.com/cerbanimo-dev/Civweave/pull/42', 'cerbanimo-dev/Civweave'), 42);
+  assert.equal(parsePullRequestNumber('https://github.com/other/Civweave/pull/42', 'cerbanimo-dev/Civweave'), null);
 });
 
 test('builds a scoped prompt with conditional automatic merge', () => {
   const bundle = parsePipeline(ROADMAP)[2];
-  const prompt = buildSessionPrompt({bundle, repository: 'cerbanimo-dev/Commonweave', roadmapPath: 'TEN-YEAR-PIPELINE.md'});
+  const prompt = buildSessionPrompt({bundle, repository: 'cerbanimo-dev/Civweave', roadmapPath: 'TEN-YEAR-PIPELINE.md'});
   assert.match(prompt, /CW-2026Q3-03/);
   assert.match(prompt, /do not merge it yourself/i);
   assert.match(prompt, /squash-merge.*automatically/i);
@@ -100,8 +100,8 @@ test('allows a completed healthy ordinary PR and blocks control-plane self-modif
       mergeable: true,
       mergeable_state: 'clean',
       labels: [],
-      base: {ref: 'main', repo: {full_name: 'cerbanimo-dev/Commonweave'}},
-      head: {repo: {full_name: 'cerbanimo-dev/Commonweave'}}
+      base: {ref: 'main', repo: {full_name: 'cerbanimo-dev/Civweave'}},
+      head: {repo: {full_name: 'cerbanimo-dev/Civweave'}}
     },
     session: {state: 'COMPLETED'},
     health: {state: 'success', checkCount: 2},

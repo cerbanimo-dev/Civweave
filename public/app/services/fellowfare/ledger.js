@@ -241,13 +241,13 @@ export function createLedgerEvent(type, entityType, entityId, actorId = 'me', pa
   };
 }
 
-export function buildCommonweaveBundle(state, meta = {}) {
+export function buildCivweaveBundle(state, meta = {}) {
   const relevantPersonIds = new Set(['me']);
   for (const thread of state.threads || []) relevantPersonIds.add(thread.ownerId);
   for (const agreement of state.agreements || []) for (const participant of agreement.participants || []) relevantPersonIds.add(participant.personId);
   const people = [state.profile, ...(state.people || [])].filter((person) => relevantPersonIds.has(person.id));
   return {
-    format: 'commonweave.exchange-bundle',
+    format: 'civweave.exchange-bundle',
     schemaVersion: '1.0.0',
     exportedAt: meta.exportedAt || new Date().toISOString(),
     source: { app: 'Fellowfare', version: meta.version || state.version || '0.3.0', nodeId: meta.nodeId || state.profile?.id || 'local-node' },

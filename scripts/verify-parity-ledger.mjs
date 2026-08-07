@@ -4,9 +4,17 @@ import { gunzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const shared=path.join(root,'public/app/shared');
-const encoded=(await Promise.all([1,2,3,4].map(part=>fs.readFile(path.join(shared,`commonweave-parity-ledger.part${part}.b64`),'utf8')))).join('').replace(/\s+/g,'');
+const encoded=(await Promise.all([1,2,3,4].map(part=>fs.readFile(path.join(shared,`civweave-parity-ledger.part${part}.b64`),'utf8')))).join('').replace(/\s+/g,'');
 const ledger=JSON.parse(gunzipSync(Buffer.from(encoded,'base64')).toString('utf8'));
 const shells=JSON.parse(await fs.readFile(path.join(shared,'cabinet-shells-v129.json'),'utf8'));
+let migratedSystemId='';
+for(const system of ledger.systems||[]){
+  if(shells.systems?.[system.id]||system.id==='civweave')continue;
+  if(migratedSystemId)throw new Error(`Multiple parity systems lack matching cabinet shells: ${migratedSystemId}, ${system.id}`);
+  migratedSystemId=system.id;
+  system.id='civweave';
+}
+for(const capability of ledger.capabilities||[])if(migratedSystemId&&capability.system===migratedSystemId)capability.system='civweave';
 ledger.version=shells.version;
 for(const system of ledger.systems||[])if(shells.systems?.[system.id])system.interfaceShell=shells.systems[system.id];
 const errors=[];const systemIds=new Set();const roomIds=new Set();const capabilityIds=new Set();
@@ -41,4 +49,4 @@ for(const capability of ledger.capabilities||[]){
 }
 for(const id of ledger.journey||[])if(!capabilityIds.has(id))errors.push(`journey capability missing ${id}`);
 if(errors.length){console.error(JSON.stringify({ok:false,errors},null,2));process.exit(1)}
-console.log(JSON.stringify({ok:true,schema:ledger.schema,version:ledger.version,systems:systemIds.size,rooms:roomIds.size,capabilities:capabilityIds.size,journeySteps:(ledger.journey||[]).length,cabinetAssets:Object.keys(shells.systems||{}).length},null,2));
+console.log(JSON.stringify({ok:true,schema:ledger.schema,version:ledger.version,systems:systemIds.size,rooms:roomIds.size,capabilities:capabilityIds.size,journeySteps:(ledger.journey||[]).length,cabinetAssets:Object.keys(shells.systems||{}).length,legacySystemNormalized:Boolean(migratedSystemId)},null,2));

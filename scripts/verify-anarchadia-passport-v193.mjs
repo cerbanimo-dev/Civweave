@@ -28,7 +28,7 @@ must(!/ac-passport-expanded[^>]*hidden/i.test(html),'Expanded Passport must be v
 must(html.includes('Passport</b> · display only, never mints'),'The UI must state the Passport ledger boundary.');
 must(html.includes('Share awaits a canonical network supply ledger.'),'Ownership percentage must not be invented without canonical supply.');
 
-for(const token of ['commonweave.rewards.v156','commonweave.working-campus.v1','commonweave.intentions.v127','commonweave:rewards-changed','commonweave:proof-progress-synced','writesCanonicalLedgers:false'])must(source.includes(token),`Passport runtime is missing contract token: ${token}`);
+for(const token of ['civweave.rewards.v156','civweave.working-campus.v1','civweave.intentions.v127','civweave:rewards-changed','civweave:proof-progress-synced','writesCanonicalLedgers:false'])must(source.includes(token),`Passport runtime is missing contract token: ${token}`);
 must(!source.includes('localStorage.setItem('),'Passport runtime must not write or mint canonical ledger state.');
 must(source.includes("document.querySelectorAll('[data-passport-refresh]')"),'Every visible Passport refresh control must be bound.');
 must(source.includes("Math.floor(Math.sqrt(total/40))+1"),'Passport must use the canonical level curve.');
@@ -69,7 +69,7 @@ console.log(JSON.stringify({
   revision:'anarchadia-passport-expanded-v193',
   visibleByDefault:true,
   sections:['level','wallet','skills','weave-paths','chronicles','achievements','receipts','ownership'],
-  canonicalRewardStore:'commonweave.rewards.v156',
+  canonicalRewardStore:'civweave.rewards.v156',
   ledgerAuthority:'display-only',
   offlinePackaged:'discovered-from-anarchadia-seed',
   mobileResponsive:true,

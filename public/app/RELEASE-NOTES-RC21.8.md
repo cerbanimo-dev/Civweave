@@ -1,6 +1,6 @@
-# Commonweave 1.0.0-rc21.8 · Model-Guided Stewardship and Plan Negotiation
+# Civweave 1.0.0-rc21.8 · Model-Guided Stewardship and Plan Negotiation
 
-- Added a structured model replanner that uses the configured Commonweave model runtime and validates every response against a bounded JSON contract.
+- Added a structured model replanner that uses the configured Civweave model runtime and validates every response against a bounded JSON contract.
 - Added deterministic fallback generation when the configured model is unavailable, times out, or returns invalid structure.
 - Added multi-route negotiation sessions with assumptions, confidence, risks, tradeoffs, and follow-up revision support.
 - Added exact before-and-after graph impact data for added, removed, changed, and downstream-dependent steps.

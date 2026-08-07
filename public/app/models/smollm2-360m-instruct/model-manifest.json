@@ -1,10 +1,10 @@
 {
-  "schema": "commonweave.micro-model-package.v2",
+  "schema": "civweave.micro-model-package.v2",
   "id": "HuggingFaceTB/SmolLM2-360M-Instruct",
   "localId": "smollm2-360m-instruct",
   "displayName": "SmolLM2 360M Instruct",
   "parameterCount": 360000000,
-  "role": "onboard Commonweave guide and universal degraded-mode fallback",
+  "role": "onboard Civweave guide and universal degraded-mode fallback",
   "format": "transformers-js-local-onnx",
   "adapter": "/app/models/smollm2-360m-instruct/adapter.js",
   "worker": "/app/models/smollm2-360m-instruct/worker.js",

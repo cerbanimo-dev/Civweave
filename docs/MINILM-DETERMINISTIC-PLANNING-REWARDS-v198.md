@@ -44,7 +44,7 @@ User-facing copy is framed positively: **Generative models earn 50% more rewards
 
 A claim is rejected when it is trivial, lacks a deliverable, lacks inspectable evidence, has fewer than two acceptance criteria, falls below the complexity threshold, repeats a prior content fingerprint, consists only of a completion claim, exceeds the deterministic daily limit, or attempts a self-review bonus.
 
-The policy writes compatible Button, Acorn, and Skill XP events to `commonweave.rewards.v156` and stores claim/cap state in `commonweave.reward-policy.v198`.
+The policy writes compatible Button, Acorn, and Skill XP events to `civweave.rewards.v156` and stores claim/cap state in `civweave.reward-policy.v198`.
 
 ## Authority boundary
 

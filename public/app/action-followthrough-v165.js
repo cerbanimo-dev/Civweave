@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 const VERSION='1.0.4-action-followthrough-v165';
-if(globalThis.CommonweaveActionFollowthroughV165?.version===VERSION)return;
-const ACTION_KEY='commonweave.realm-actions.v141';
+if(globalThis.CivweaveActionFollowthroughV165?.version===VERSION)return;
+const ACTION_KEY='civweave.realm-actions.v141';
 const ACTIVE_STATES=new Set(['active','published','completed']);
 const PENDING_STATES=new Set(['draft','clarifying','review','funding']);
 const MATERIAL_TERMS=/\b(materials?|supplies|parts|components|equipment|tools?|lumber|wood|windows?|soil|seedlings?|hardware|fabric|paint|fasteners?|fixtures?)\b/i;
@@ -15,7 +15,7 @@ const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{retu
 const clean=(value,max=8000)=>String(value??'').trim().slice(0,max);
 const now=()=>new Date().toISOString();
 const actions=()=>{const value=parse(localStorage.getItem(ACTION_KEY),[]);return Array.isArray(value)?value:[]};
-function save(rows){localStorage.setItem(ACTION_KEY,JSON.stringify(rows.slice(0,120)));try{dispatchEvent(new CustomEvent('commonweave:actions-changed',{detail:{items:rows}}))}catch{}}
+function save(rows){localStorage.setItem(ACTION_KEY,JSON.stringify(rows.slice(0,120)));try{dispatchEvent(new CustomEvent('civweave:actions-changed',{detail:{items:rows}}))}catch{}}
 function latestPending(system){return actions().filter(item=>item?.system===system&&PENDING_STATES.has(item.state)).sort((a,b)=>(Date.parse(b.updatedAt||b.createdAt||0)||0)-(Date.parse(a.updatedAt||a.createdAt||0)||0))[0]||null}
 function explicitApproval(text){const value=clean(text,600);return value.length>0&&value.length<220&&APPROVAL_PATTERNS.some(pattern=>pattern.test(value))}
 function materialItems(text){
@@ -52,7 +52,7 @@ function canonicalFellowFareAnswer(action,result=null){
   if(ACTIVE_STATES.has(action?.state))return`Rook moved the approved ${noun} onto its active FellowFare route.`;
   return`Rook created a reviewable ${noun} and kept it private. Review the details, then approve it to publish.`;
 }
-function responsePacket(action,answer,{provider='local-contract',model='commonweave-explicit-approval-v165',approval=true}={}){
+function responsePacket(action,answer,{provider='local-contract',model='civweave-explicit-approval-v165',approval=true}={}){
   return{
     response:{answer,choice:{mode:'Acquire',system:'fellowfare',room:'',nextAction:approval&&action?.missingRequired?.length?`Provide ${action.missingRequired.join(' and ')}.`:approval&&!ACTIVE_STATES.has(action?.state)?`Review and approve “${action?.title||'the request'}.”`:''},assumptions:[],requiresConsent:approval&&!ACTIVE_STATES.has(action?.state),confidence:.99,approvalGate:approval&&!ACTIVE_STATES.has(action?.state)?approvalGate(action):null},
     requestedProvider:'local-contract',provider,model,action,context:null,fallbackFrom:null
@@ -62,13 +62,13 @@ function patchAssistant(api){
   if(!api?.respond||api.__cw165ActionFollowthrough)return api;
   const original=api.respond.bind(api);
   api.respond=async options=>{
-    const request={...(options||{})},system=request.systemId||'commonweave',text=clean(request.text,4000);
+    const request={...(options||{})},system=request.systemId||'civweave',text=clean(request.text,4000);
     if(system==='fellowfare'&&explicitApproval(text)){
       const pending=latestPending('fellowfare');
       if(pending){
         normalizeFellowFareAction(pending,pending.sourceText);
         if((pending.missingRequired||[]).length)return responsePacket(pending,canonicalFellowFareAnswer(pending),{approval:true});
-        const contracts=globalThis.CommonweaveGuideContractsV141;
+        const contracts=globalThis.CivweaveGuideContractsV141;
         if(!contracts?.approve)throw new Error('The saved FellowFare request could not reach its approval route.');
         const result=contracts.approve(pending.id),action=result?.action||pending;
         normalizeFellowFareAction(action,action.sourceText);
@@ -90,7 +90,7 @@ function patchAssistant(api){
   Object.defineProperty(api,'__cw165ActionFollowthrough',{value:true});
   return api;
 }
-function patchAvailable(){patchAssistant(globalThis.CommonweaveAssistantV141)}
+function patchAvailable(){patchAssistant(globalThis.CivweaveAssistantV141)}
 function patchLoader(loader){
   if(!loader?.ensure||loader.__cw165ActionFollowthrough)return loader;
   const ensure=loader.ensure.bind(loader);
@@ -99,8 +99,8 @@ function patchLoader(loader){
   Object.defineProperty(loader,'__cw165ActionFollowthrough',{value:true});
   return loader;
 }
-patchLoader(globalThis.CommonweaveFamilyAILoaderV105);
+patchLoader(globalThis.CivweaveFamilyAILoaderV105);
 patchAvailable();
-addEventListener('commonweave:guide-loader-reset',()=>setTimeout(()=>{patchLoader(globalThis.CommonweaveFamilyAILoaderV105);patchAvailable()},0));
-globalThis.CommonweaveActionFollowthroughV165={version:VERSION,explicitApproval,latestPending,normalizeFellowFareAction,patchAvailable,canonicalFellowFareAnswer};
+addEventListener('civweave:guide-loader-reset',()=>setTimeout(()=>{patchLoader(globalThis.CivweaveFamilyAILoaderV105);patchAvailable()},0));
+globalThis.CivweaveActionFollowthroughV165={version:VERSION,explicitApproval,latestPending,normalizeFellowFareAction,patchAvailable,canonicalFellowFareAnswer};
 })();

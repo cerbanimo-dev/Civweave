@@ -1,12 +1,12 @@
 'use strict';
 
-const VERSION = '1.0.7';
+const VERSION = '1.0.17';
 const BUILD = 'lightweight-shell-v208';
-const SHELL_CACHE = `commonweave-shell-${VERSION}-${BUILD}`;
-const RUNTIME_CACHE = `commonweave-runtime-${VERSION}-${BUILD}`;
-const OFFLINE_CACHE = `commonweave-offline-${VERSION}-${BUILD}`;
+const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
+const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
+const OFFLINE_CACHE = `civweave-offline-${VERSION}-${BUILD}`;
 const OFFLINE_MANIFEST_URL = '/app/offline-package-v208.json';
-const OFFLINE_META_URL = '/__commonweave/offline-package-v208.json';
+const OFFLINE_META_URL = '/__civweave/offline-package-v208.json';
 const FETCH_TIMEOUT_MS = 12000;
 
 const REQUIRED_SHELL_ASSETS = [
@@ -18,17 +18,18 @@ const REQUIRED_SHELL_ASSETS = [
   '/app/index.html',
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146.js',
+  '/app/document-lifecycle-v221.js',
   '/app/fullscreen-family-v104.html',
-  '/app/logos/commonweave-icon-192.png',
-  '/app/logos/commonweave-icon-512.png'
+  '/app/logos/civweave-icon-192.png',
+  '/app/logos/civweave-icon-512.png'
 ];
 
 const OPTIONAL_SHELL_ASSETS = [
   '/app/install-boundary-v146.js',
   '/app/offline-package-v208.json',
-  '/app/logos/commonweave-app-icon.png',
-  '/app/logos/commonweave-icon-maskable-192.png',
-  '/app/logos/commonweave-icon-maskable-512.png',
+  '/app/logos/civweave-app-icon.png',
+  '/app/logos/civweave-icon-maskable-192.png',
+  '/app/logos/civweave-icon-maskable-512.png',
   '/app/knowledge-school-installer-v1.css',
   '/app/knowledge-school-seeds-v1.js',
   '/app/knowledge-school-installer-v1.js'
@@ -44,15 +45,15 @@ const MODEL_PREFIXES = [
 const PRESERVED_CACHE_PREFIXES = [
   'cwknowledge-',
   'cwupdate-',
-  'commonweave-model-',
-  'commonweave-offline-'
+  'civweave-model-',
+  'civweave-offline-'
 ];
 
 const APP_CACHE_PREFIXES = [
-  'commonweave-static-',
-  'commonweave-runtime-',
-  'commonweave-shell-',
-  'commonweave-offline-',
+  'civweave-static-',
+  'civweave-runtime-',
+  'civweave-shell-',
+  'civweave-offline-',
   'cwext-',
   'cwboot-',
   'cwimg-'
@@ -107,7 +108,7 @@ function responseLooksValid(response, pathname) {
 }
 
 async function fetchFresh(pathname, purpose = 'runtime', timeoutMs = FETCH_TIMEOUT_MS) {
-  const headers = new Headers({ 'x-commonweave-package': purpose });
+  const headers = new Headers({ 'x-civweave-package': purpose });
   const request = new Request(new URL(pathname, self.location.origin).href, {
     method: 'GET',
     cache: 'no-store',
@@ -156,7 +157,7 @@ async function shellStatus() {
     if (!responseLooksValid(response, pathname)) optionalMissing.push(pathname);
   }
   return {
-    type: 'COMMONWEAVE_DEVICE_PACKAGE',
+    type: 'CIVWEAVE_DEVICE_PACKAGE',
     mode: 'lightweight-shell',
     version: VERSION,
     revision: BUILD,
@@ -284,7 +285,7 @@ function offlinePacket(meta = {}) {
   const failed = Array.isArray(meta.failed) ? meta.failed : [];
   const completed = Number(meta.completed || Math.max(0, assets.length - failed.length));
   return {
-    type: 'COMMONWEAVE_OFFLINE_PACKAGE_STATUS',
+    type: 'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
     mode: 'resumable-discovered-campus',
     version: VERSION,
     revision: BUILD,
@@ -345,7 +346,7 @@ async function downloadOfflinePackage(event) {
       updatedAt: new Date().toISOString()
     });
     await writeOfflineMeta(packet);
-    post(event, { ...packet, type: running ? 'COMMONWEAVE_OFFLINE_PACKAGE_PROGRESS' : packet.type });
+    post(event, { ...packet, type: running ? 'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS' : packet.type });
     return packet;
   };
 
@@ -391,7 +392,7 @@ async function downloadOfflinePackage(event) {
 
 async function migrateOfflineCaches() {
   const names = await caches.keys();
-  const legacy = names.filter(name => name.startsWith('commonweave-offline-') && name !== OFFLINE_CACHE);
+  const legacy = names.filter(name => name.startsWith('civweave-offline-') && name !== OFFLINE_CACHE);
   if (!legacy.length) return;
   const target = await caches.open(OFFLINE_CACHE);
   for (const name of legacy) {
@@ -435,7 +436,7 @@ async function networkFirst(request, fallbackPath = '/offline.html') {
   if (cached) return request.method === 'HEAD' ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers }) : cached;
   const fallback = await findCached(fallbackPath);
   if (fallback) return request.method === 'HEAD' ? new Response(null, { status: fallback.status, statusText: fallback.statusText, headers: fallback.headers }) : fallback;
-  return new Response('Commonweave is offline and this room has not been downloaded yet.', { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+  return new Response('Civweave is offline and this room has not been downloaded yet.', { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
 }
 
 async function cacheFirst(request) {
@@ -454,7 +455,7 @@ async function cacheFirst(request) {
     if (responseLooksValid(response, url.pathname) && request.method === 'GET') await (await caches.open(RUNTIME_CACHE)).put(cacheKey(url.pathname), response.clone());
     return request.method === 'HEAD' ? new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers }) : response;
   } catch {
-    return new Response(`Commonweave asset unavailable: ${url.pathname}`, { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+    return new Response(`Civweave asset unavailable: ${url.pathname}`, { status: 503, headers: { 'content-type': 'text/plain; charset=utf-8' } });
   }
 }
 
@@ -465,7 +466,7 @@ async function normalizeStableAppEntryResponse(response) {
   headers.delete('location');
   if (!headers.get('content-type')) headers.set('content-type', 'text/html; charset=utf-8');
   headers.set('cache-control', 'no-store');
-  headers.set('x-commonweave-stable-entry', 'v219');
+  headers.set('x-civweave-stable-entry', 'v219');
   const body = await response.clone().arrayBuffer();
   return new Response(body, { status: 200, statusText: 'OK', headers });
 }
@@ -480,7 +481,7 @@ async function stableAppEntry(request) {
     } catch {}
   }
   if (!response) {
-    return new Response('Commonweave launcher is unavailable.', {
+    return new Response('Civweave launcher is unavailable.', {
       status: 503,
       headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' }
     });
@@ -492,7 +493,7 @@ async function stableAppEntry(request) {
 }
 
 async function modelOnDemand(request) {
-  const cacheName = `commonweave-model-${VERSION}-on-demand-v208`;
+  const cacheName = `civweave-model-${VERSION}-on-demand-v208`;
   const cache = await caches.open(cacheName);
   const url = new URL(request.url);
   const cached = await cache.match(cacheKey(url.pathname), { ignoreSearch: true });
@@ -505,16 +506,13 @@ async function modelOnDemand(request) {
   } catch (error) {
     return new Response(`Local model asset unavailable: ${error?.message || error}`, {
       status: 503,
-      headers: { 'content-type': 'text/plain; charset=utf-8', 'x-commonweave-model-package': 'not-installed' }
+      headers: { 'content-type': 'text/plain; charset=utf-8', 'x-civweave-model-package': 'not-installed' }
     });
   }
 }
 
 self.addEventListener('install', event => {
-  event.waitUntil((async () => {
-    await cacheShell();
-    await self.skipWaiting();
-  })());
+  event.waitUntil(cacheShell());
 });
 
 self.addEventListener('activate', event => {
@@ -531,7 +529,7 @@ self.addEventListener('message', event => {
     return;
   }
   if (type === 'GET_VERSION') {
-    post(event, { type: 'COMMONWEAVE_VERSION', version: VERSION, revision: BUILD, installMode: 'lightweight-shell', offlinePackageOptional: true });
+    post(event, { type: 'CIVWEAVE_VERSION', version: VERSION, revision: BUILD, installMode: 'lightweight-shell', offlinePackageOptional: true });
     return;
   }
   if (type === 'GET_DEVICE_PACKAGE_STATUS') {
@@ -557,15 +555,15 @@ self.addEventListener('message', event => {
   }
   // Compatibility replies for older installer/status panels. These layers are now on-demand.
   if (type === 'GET_SHARED_IMAGE_STATUS') {
-    post(event, { type: 'COMMONWEAVE_SHARED_IMAGE_STATUS', version: BUILD, mode: 'on-demand', ready: true, present: 0, total: 0, missing: [] });
+    post(event, { type: 'CIVWEAVE_SHARED_IMAGE_STATUS', version: BUILD, mode: 'on-demand', ready: true, present: 0, total: 0, missing: [] });
     return;
   }
   if (type === 'GET_CRITICAL_BOOT_STATUS') {
-    post(event, { type: 'COMMONWEAVE_CRITICAL_BOOT_STATUS', version: BUILD, mode: 'on-demand', ready: true, present: 0, total: 0, missing: [], fullPackage: { ready: true, deferred: true } });
+    post(event, { type: 'CIVWEAVE_CRITICAL_BOOT_STATUS', version: BUILD, mode: 'on-demand', ready: true, present: 0, total: 0, missing: [], fullPackage: { ready: true, deferred: true } });
     return;
   }
   if (type === 'GET_ADDITIONS_STATUS') {
-    post(event, { type: 'COMMONWEAVE_ADDITIONS_STATUS', version: BUILD, mode: 'on-demand', ready: true, assetCount: 0, presentCount: 0, missing: [] });
+    post(event, { type: 'CIVWEAVE_ADDITIONS_STATUS', version: BUILD, mode: 'on-demand', ready: true, assetCount: 0, presentCount: 0, missing: [] });
   }
 });
 

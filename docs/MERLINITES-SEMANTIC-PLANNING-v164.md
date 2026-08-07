@@ -1,6 +1,6 @@
 # merlinites semantic planning v164
 
-`merlinites` is Commonweave's local semantic planning and review layer. It uses the installed `all-MiniLM-L6-v2` encoder to rank known structures, criteria, and evidence. It does not pretend that an encoder generates prose or proves real-world completion.
+`merlinites` is Civweave's local semantic planning and review layer. It uses the installed `all-MiniLM-L6-v2` encoder to rank known structures, criteria, and evidence. It does not pretend that an encoder generates prose or proves real-world completion.
 
 ## Authority boundary
 
@@ -14,11 +14,11 @@
 ## Planning flow
 
 1. Preserve the original deterministic weave.
-2. Add a `commonweave.merlinites-semantic-plan.v1` tree beside it.
+2. Add a `civweave.merlinites-semantic-plan.v1` tree beside it.
 3. Expand each path into bounded steps and atomic evidence-bearing actions.
 4. Stop at the configured maximum depth, currently three.
-5. Return the first unfinished leaf through `CommonweaveMerlinitesV164.nextAction(plan)`.
-6. Expand a later node independently with `CommonweaveMerlinitesV164.expandNode(node, { maxDepth })`.
+5. Return the first unfinished leaf through `CivweaveMerlinitesV164.nextAction(plan)`.
+6. Expand a later node independently with `CivweaveMerlinitesV164.expandNode(node, { maxDepth })`.
 
 The tree is generated lazily from existing path data. Original titles, steps, assumptions, states, and approval controls are not replaced.
 
@@ -49,7 +49,7 @@ The original reflex `match()` API remains unchanged. `merlinites` adds a separat
 ## Public API
 
 ```js
-const merlinites = globalThis.CommonweaveMerlinitesV164;
+const merlinites = globalThis.CivweaveMerlinitesV164;
 
 merlinites.enhancePlan(plan);
 await merlinites.refinePlan(plan, { text: plan.wish, semanticWaitMs: 600 });

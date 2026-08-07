@@ -1,4 +1,4 @@
-const DB='commonweave-anarchadia-governance-v145';
+const DB='civweave-anarchadia-governance-v145';
 const VERSION=1;
 const STATE='state';
 const KEYS='keys';

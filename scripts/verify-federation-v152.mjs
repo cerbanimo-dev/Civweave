@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const workspace = await fsp.mkdtemp(path.join(os.tmpdir(), 'commonweave-federation-'));
+const workspace = await fsp.mkdtemp(path.join(os.tmpdir(), 'civweave-federation-'));
 const processes = [];
 
 async function freePort() {
@@ -49,11 +49,11 @@ async function startNode(label) {
     env: {
       ...process.env,
       PORT: String(port),
-      COMMONWEAVE_APP_PORT: String(appPort),
-      COMMONWEAVE_APP_ENTRY: appEntry,
+      CIVWEAVE_APP_PORT: String(appPort),
+      CIVWEAVE_APP_ENTRY: appEntry,
       PUBLIC_HOST_URL: `http://127.0.0.1:${port}`,
-      COMMONWEAVE_NODE_NAME: `Federation Verification ${label}`,
-      COMMONWEAVE_FEDERATION_ADMIN_TOKEN: token,
+      CIVWEAVE_NODE_NAME: `Federation Verification ${label}`,
+      CIVWEAVE_FEDERATION_ADMIN_TOKEN: token,
       DATA_DIR: dataDir
     },
     stdio: ['ignore', 'pipe', 'pipe']
@@ -106,10 +106,10 @@ try {
   const unauthorized = await fetch(`http://127.0.0.1:${nodeA.port}/api/federation/status`);
   assert(unauthorized.status === 401, `Federation admin API should require a token, received ${unauthorized.status}.`);
 
-  const profileA = await (await fetch(`http://127.0.0.1:${nodeA.port}/.well-known/commonweave`)).json();
-  const profileB = await (await fetch(`http://127.0.0.1:${nodeB.port}/.well-known/commonweave`)).json();
-  assert(profileA.schema === 'commonweave.node-profile.v1', 'Node A discovery schema is missing or incorrect.');
-  assert(profileB.schema === 'commonweave.node-profile.v1', 'Node B discovery schema is missing or incorrect.');
+  const profileA = await (await fetch(`http://127.0.0.1:${nodeA.port}/.well-known/civweave`)).json();
+  const profileB = await (await fetch(`http://127.0.0.1:${nodeB.port}/.well-known/civweave`)).json();
+  assert(profileA.schema === 'civweave.node-profile.v1', 'Node A discovery schema is missing or incorrect.');
+  assert(profileB.schema === 'civweave.node-profile.v1', 'Node B discovery schema is missing or incorrect.');
   assert(profileA.nodeId !== profileB.nodeId, 'Independent nodes must have different identities.');
   assert(profileA.keyFingerprint?.startsWith('sha256:'), 'Node A did not advertise a signing-key fingerprint.');
 
@@ -124,7 +124,7 @@ try {
   await postAdmin(nodeB, `/api/federation/peers/${encodeURIComponent(profileA.nodeId)}/trust`, {});
 
   const publication = await postAdmin(nodeA, '/api/federation/events', {
-    kind: 'commonweave.test',
+    kind: 'civweave.test',
     subject: 'Two-node federation verification',
     payload: { ok: true },
     targets: [profileB.nodeId]
@@ -139,7 +139,7 @@ try {
 
   const duplicateResponse = await fetch(`http://127.0.0.1:${nodeB.port}/federation/inbox`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-commonweave-sender': profileA.nodeId },
+    headers: { 'content-type': 'application/json', 'x-civweave-sender': profileA.nodeId },
     body: JSON.stringify({ sender: profileA, event: publication.event })
   });
   const duplicate = await duplicateResponse.json();
@@ -151,14 +151,14 @@ try {
   tampered.payload = { ok: false };
   const tamperedResponse = await fetch(`http://127.0.0.1:${nodeB.port}/federation/inbox`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-commonweave-sender': profileA.nodeId },
+    headers: { 'content-type': 'application/json', 'x-civweave-sender': profileA.nodeId },
     body: JSON.stringify({ sender: profileA, event: tampered })
   });
   assert(tamperedResponse.status === 400, `Tampered event should fail signature verification, received ${tamperedResponse.status}.`);
 
   await postAdmin(nodeB, `/api/federation/peers/${encodeURIComponent(profileA.nodeId)}/block`, {});
   const blockedPublication = await postAdmin(nodeA, '/api/federation/events', {
-    kind: 'commonweave.test.blocked',
+    kind: 'civweave.test.blocked',
     subject: 'Blocked delivery verification',
     payload: { blocked: true },
     targets: [profileB.nodeId]
@@ -175,11 +175,11 @@ try {
     env: {
       ...process.env,
       PORT: String(retainedPort),
-      COMMONWEAVE_APP_PORT: String(retainedAppPort),
-      COMMONWEAVE_APP_ENTRY: nodeA.appEntry,
+      CIVWEAVE_APP_PORT: String(retainedAppPort),
+      CIVWEAVE_APP_ENTRY: nodeA.appEntry,
       PUBLIC_HOST_URL: `http://127.0.0.1:${retainedPort}`,
-      COMMONWEAVE_NODE_NAME: 'Federation Verification Node A Restarted',
-      COMMONWEAVE_FEDERATION_ADMIN_TOKEN: nodeA.token,
+      CIVWEAVE_NODE_NAME: 'Federation Verification Node A Restarted',
+      CIVWEAVE_FEDERATION_ADMIN_TOKEN: nodeA.token,
       DATA_DIR: nodeA.dataDir
     },
     stdio: ['ignore', 'pipe', 'pipe']
@@ -189,7 +189,7 @@ try {
   restarted.stderr.on('data', chunk => { nodeA.output += chunk; });
   processes[0] = nodeA;
   await waitFor(`http://127.0.0.1:${retainedPort}/api/federation/health`);
-  const restartedProfile = await (await fetch(`http://127.0.0.1:${retainedPort}/.well-known/commonweave`)).json();
+  const restartedProfile = await (await fetch(`http://127.0.0.1:${retainedPort}/.well-known/civweave`)).json();
   assert(restartedProfile.nodeId === retainedNodeId, 'Node identity did not survive restart.');
   assert(restartedProfile.keyFingerprint === retainedFingerprint, 'Node signing key did not survive restart.');
 

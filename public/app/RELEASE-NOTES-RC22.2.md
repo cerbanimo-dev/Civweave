@@ -1,4 +1,4 @@
-# Commonweave RC22.2 · Negotiated Commitments and Predictive Portfolio Stewardship
+# Civweave RC22.2 · Negotiated Commitments and Predictive Portfolio Stewardship
 
 - Added a reversible scenario simulator for prioritizing, pausing, delaying, and delegating intentions.
 - Added before-and-after portfolio forecasts for deadline risk, collisions, labor, energy, and released capacity.

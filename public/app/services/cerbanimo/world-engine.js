@@ -1,4 +1,4 @@
-/* Commonweave World Engine: Cerbanimo adapter, RC19.5
+/* Civweave World Engine: Cerbanimo adapter, RC19.5
  * Data-driven scenes with object actions, resident actors, ambient events, persistent state,
  * and a compatibility fallback to the legacy spatial hotspot renderer.
  */

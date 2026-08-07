@@ -3,7 +3,7 @@ name: Verify Weaveling Plan JSON v190
 on:
   pull_request:
     paths:
-      - 'public/extensions/commonweave-weaveling-plan-json-v190.js'
+      - 'public/extensions/civweave-weaveling-plan-json-v190.js'
       - 'public/app/working-campus-v156.part5.txt'
       - 'public/service-worker-v156.js'
       - 'scripts/verify-weaveling-plan-json-v190.mjs'
@@ -23,7 +23,7 @@ jobs:
           node-version: 22
       - name: Syntax check structured planning files
         run: |
-          node --check public/extensions/commonweave-weaveling-plan-json-v190.js
+          node --check public/extensions/civweave-weaveling-plan-json-v190.js
           node --check scripts/verify-weaveling-plan-json-v190.mjs
       - name: Verify Gemini-authored weave and plain-language activation
         run: node scripts/verify-weaveling-plan-json-v190.mjs

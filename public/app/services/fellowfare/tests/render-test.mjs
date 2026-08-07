@@ -81,5 +81,5 @@ if (!deskRender.env.elements.get('#detailDialog').open || !deskRender.env.elemen
 const actionButton={ dataset:{ledgerAction:'evidence',agreementId:'ag1',milestoneId:'ms1'}, closest(){return this;} };
 await deskRender.env.dispatch('click',actionButton);
 if (!deskRender.env.elements.get('#ledgerActionDialog').open) throw new Error('Ledger action dialog did not open');
-await renderRoute('profile','Commonweave bridge bundle');
+await renderRoute('profile','Civweave bridge bundle');
 console.log('Fellowfare route render tests passed.');

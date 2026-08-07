@@ -7,7 +7,7 @@ import {
   createAgreementFromProposal, normalizeAgreement, agreementProgress as ledgerProgress, deriveAgreementStatus,
   addMilestone as ledgerAddMilestone, completeMilestone as ledgerCompleteMilestone, addEvidence as ledgerAddEvidence,
   recordSettlement as ledgerRecordSettlement, openRepair as ledgerOpenRepair, resolveRepair as ledgerResolveRepair,
-  addReview as ledgerAddReview, advanceRecurringAgreement, createLedgerEvent, buildCommonweaveBundle, trustSnapshotFromReviews
+  addReview as ledgerAddReview, advanceRecurringAgreement, createLedgerEvent, buildCivweaveBundle, trustSnapshotFromReviews
 } from './ledger.js';
 
 const APP_VERSION = '0.4.1-cardinal-visual';
@@ -136,33 +136,33 @@ const starterState = {
 
 let state = loadState();
 const FF_PARAMS=new URLSearchParams(location.search);
-if(FF_PARAMS.get('visual')==='1'||FF_PARAMS.get('commonweave')==='1'){state.route='mall';localStorage.setItem('fellowfare.mall.scene.v1',localStorage.getItem('fellowfare.mall.scene.v1')||'atrium');}
+if(FF_PARAMS.get('visual')==='1'||FF_PARAMS.get('civweave')==='1'){state.route='mall';localStorage.setItem('fellowfare.mall.scene.v1',localStorage.getItem('fellowfare.mall.scene.v1')||'atrium');}
 let installPrompt = null;
 let activeComposerMode = 'need';
 let activeConversationThreadId = null;
-let commonweaveContext = null;
-const COMMONWEAVE_EMBEDDED = new URLSearchParams(location.search).get('commonweave') === '1' && window.parent !== window;
+let civweaveContext = null;
+const CIVWEAVE_EMBEDDED = new URLSearchParams(location.search).get('civweave') === '1' && window.parent !== window;
 
-function postToCommonweave(message) {
-  if (!COMMONWEAVE_EMBEDDED) return;
+function postToCivweave(message) {
+  if (!CIVWEAVE_EMBEDDED) return;
   window.parent.postMessage({ ...message, sourceApplication:'fellowfare', automaticEffect:false }, window.location.origin);
 }
 
-function commonweaveDeepLink(object, objectId) {
+function civweaveDeepLink(object, objectId) {
   return `/campus?app=fellowfare&object=${encodeURIComponent(object)}&id=${encodeURIComponent(objectId)}`;
 }
 
-function emitCommonweaveSignal({ signalId, kind, subjectType, subjectId, title, detail, state='human-action-required' }) {
-  postToCommonweave({
-    type:'commonweave:action-signal', contractVersion:'commonweave.action-signal.v1',
+function emitCivweaveSignal({ signalId, kind, subjectType, subjectId, title, detail, state='human-action-required' }) {
+  postToCivweave({
+    type:'civweave:action-signal', contractVersion:'civweave.action-signal.v1',
     signalId, kind, subjectType, subjectId, title, detail, state,
-    deepLink:commonweaveDeepLink(subjectType, subjectId)
+    deepLink:civweaveDeepLink(subjectType, subjectId)
   });
 }
 
-function handoffToCommonweave(target, kind, title, payload) {
-  postToCommonweave({ type:'commonweave:handoff', contractVersion:'commonweave.handoff.v1', target, kind, title, payload });
-  toast(`A reviewable ${target === 'cerbanimo' ? 'work' : target === 'living' ? 'learning' : 'governance'} handoff was sent to the Commonweave Loom.`);
+function handoffToCivweave(target, kind, title, payload) {
+  postToCivweave({ type:'civweave:handoff', contractVersion:'civweave.handoff.v1', target, kind, title, payload });
+  toast(`A reviewable ${target === 'cerbanimo' ? 'work' : target === 'living' ? 'learning' : 'governance'} handoff was sent to the Civweave Loom.`);
 }
 
 
@@ -614,7 +614,7 @@ function renderInbox() {
   }
   main.innerHTML = `
     <div class="page">
-      <div class="page-header"><div><p class="eyebrow">Agreements, proof, and conversation</p><h1>Exchange Desk</h1><p>Carry an arrangement from accepted proposal to fulfilled work, settlement, repair, and contextual trust.</p></div><button class="button button-ghost" data-export-commonweave>Export Commonweave bundle</button></div>
+      <div class="page-header"><div><p class="eyebrow">Agreements, proof, and conversation</p><h1>Exchange Desk</h1><p>Carry an arrangement from accepted proposal to fulfilled work, settlement, repair, and contextual trust.</p></div><button class="button button-ghost" data-export-civweave>Export Civweave bundle</button></div>
       <div class="stat-strip">
         <div class="stat-card"><strong>${activeAgreements.length}</strong><span>active agreements</span></div>
         <div class="stat-card"><strong>${dueMilestones.length}</strong><span>dated milestones</span></div>
@@ -710,7 +710,7 @@ function openAgreement(agreementId) {
         <button class="button button-secondary" data-ledger-action="milestone" data-agreement-id="${agreement.id}">Add milestone</button>
         <button class="button button-ghost" data-ledger-action="evidence" data-agreement-id="${agreement.id}">Add evidence</button>
         <button class="button button-ghost" data-share-agreement="${agreement.id}">Share agreement</button>
-        ${COMMONWEAVE_EMBEDDED ? `<button class="button button-ghost" data-handoff-work="${agreement.id}">Carry confirmed scope to Cerbanimo</button>` : ''}
+        ${CIVWEAVE_EMBEDDED ? `<button class="button button-ghost" data-handoff-work="${agreement.id}">Carry confirmed scope to Cerbanimo</button>` : ''}
         ${thread ? `<button class="button button-ghost" data-open-thread="${thread.id}">Open market thread</button>` : ''}
       </div>
     </section>
@@ -866,7 +866,7 @@ function submitLedgerAction(event) {
   if (action === 'repair') {
     ledgerOpenRepair(agreement, { issue:primary, requestedRemedy:secondary });
     appendLedgerEvent('repair.opened','agreement',agreement.id,{ issue:primary, requestedRemedy:secondary });
-    emitCommonweaveSignal({ signalId:`repair:${agreement.id}`, kind:'exchange-repair', subjectType:'repair', subjectId:agreement.id, title:`Repair requested · ${agreement.title}`, detail:`${primary}${secondary ? ` · Requested remedy: ${secondary}` : ''}` });
+    emitCivweaveSignal({ signalId:`repair:${agreement.id}`, kind:'exchange-repair', subjectType:'repair', subjectId:agreement.id, title:`Repair requested · ${agreement.title}`, detail:`${primary}${secondary ? ` · Requested remedy: ${secondary}` : ''}` });
   }
   if (action === 'review') {
     const target = agreement.participants.find((participant) => participant.personId !== 'me')?.personId || '';
@@ -898,7 +898,7 @@ function resolveAgreementRepair(agreementId) {
   if (note == null) return;
   ledgerResolveRepair(agreement, note.trim());
   appendLedgerEvent('repair.resolved','agreement',agreement.id,{ note:note.trim() });
-  emitCommonweaveSignal({ signalId:`repair:${agreement.id}`, kind:'exchange-repair', subjectType:'repair', subjectId:agreement.id, title:`Repair resolved · ${agreement.title}`, detail:note.trim(), state:'resolved' });
+  emitCivweaveSignal({ signalId:`repair:${agreement.id}`, kind:'exchange-repair', subjectType:'repair', subjectId:agreement.id, title:`Repair resolved · ${agreement.title}`, detail:note.trim(), state:'resolved' });
   saveState(); openAgreement(agreement.id); toast('Repair resolution recorded.');
 }
 
@@ -922,13 +922,13 @@ async function shareAgreement(agreementId) {
   downloadBlob(file,file.name); toast('Agreement pack downloaded.');
 }
 
-function exportCommonweaveBundle() {
-  const bundle = buildCommonweaveBundle(state,{ version:APP_VERSION, nodeId:state.profile.id });
-  downloadBlob(new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'}),`fellowfare-commonweave-bridge-${new Date().toISOString().slice(0,10)}.json`);
-  toast('Commonweave bridge bundle exported.');
+function exportCivweaveBundle() {
+  const bundle = buildCivweaveBundle(state,{ version:APP_VERSION, nodeId:state.profile.id });
+  downloadBlob(new Blob([JSON.stringify(bundle,null,2)],{type:'application/json'}),`fellowfare-civweave-bridge-${new Date().toISOString().slice(0,10)}.json`);
+  toast('Civweave bridge bundle exported.');
 }
 
-function commonweaveCoinLedger() {
+function civweaveCoinLedger() {
   try {
     const parsed=JSON.parse(localStorage.getItem('fellowfare.reward-ledger.v1.1')||localStorage.getItem('fellowfare.reward-ledger.v1')||'null');
     return parsed&&['fellowfare.coin-ledger.v1.1','fellowfare.coin-ledger.v1'].includes(parsed.schema)?parsed:null;
@@ -937,13 +937,13 @@ function commonweaveCoinLedger() {
 
 function rewardAccountBalance(ledger) {
   if(!ledger||!ledger.balances)return 0;
-  let identityId='';try{identityId=JSON.parse(localStorage.getItem('commonweave-identity-vault')||'null')?.identity?.identityId||''}catch{}
+  let identityId='';try{identityId=JSON.parse(localStorage.getItem('civweave-identity-vault')||'null')?.identity?.identityId||''}catch{}
   const ids=[identityId,state.profile.id,'me',state.profile.name,state.profile.initials].filter(Boolean);
   return ids.reduce((sum,key)=>sum+Number(ledger.balances[key]||0),0);
 }
 
 function renderProfile() {
-  const rewardLedger=commonweaveCoinLedger();
+  const rewardLedger=civweaveCoinLedger();
   const rewardBalance=rewardAccountBalance(rewardLedger);
   const pendingMint=(rewardLedger?.escrows||[]).filter(item=>['proposed','pending-validation','locked'].includes(item.status)).reduce((sum,item)=>sum+Number(item.amount||0),0);
   const mine = state.threads.filter((thread) => thread.ownerId === 'me');
@@ -983,7 +983,7 @@ function renderProfile() {
               <div class="stat-card"><strong>${(rewardLedger?.receipts||[]).filter(item=>item.kind==='level-up').reduce((sum,item)=>sum+Number(item.amount||0),0)}</strong><span>level-up coins</span></div>
               <div class="stat-card"><strong>${(rewardLedger?.receipts||[]).filter(item=>item.kind==='labor-mint'||item.kind==='escrow-release').reduce((sum,item)=>sum+Number(item.amount||0),0)}</strong><span>labor-mint coins</span></div>
             </div>
-            <div class="settings-list">${(rewardLedger?.receipts||[]).slice(0,8).map(item=>`<div class="setting-row"><span><strong>+${Number(item.amount||0)} · ${esc(String(item.kind||'reward').replaceAll('-',' '))}</strong><br><small>${esc(item.reason||'Commonweave reward receipt')}</small></span><code>${esc(String(item.sourceReceiptId||'').slice(0,12))}</code></div>`).join('')||'<div class="empty-state"><strong>No reward receipts yet.</strong><p>Validated lessons, work, and peer-review labor will arrive here.</p></div>'}</div>
+            <div class="settings-list">${(rewardLedger?.receipts||[]).slice(0,8).map(item=>`<div class="setting-row"><span><strong>+${Number(item.amount||0)} · ${esc(String(item.kind||'reward').replaceAll('-',' '))}</strong><br><small>${esc(item.reason||'Civweave reward receipt')}</small></span><code>${esc(String(item.sourceReceiptId||'').slice(0,12))}</code></div>`).join('')||'<div class="empty-state"><strong>No reward receipts yet.</strong><p>Validated lessons, work, and peer-review labor will arrive here.</p></div>'}</div>
           </section>
           <section class="panel" style="margin-top:1rem">
             <p class="eyebrow">Your market</p><h2>${mine.length} threads · ${myProposals.length} proposals · ${myAgreements.length} agreements</h2>
@@ -1005,7 +1005,7 @@ function renderProfile() {
             <div class="section-heading" style="margin-top:0"><div><h2>Local data controls</h2><p>Fellowfare keeps the complete exchange ledger on this device and requires no account.</p></div></div>
             <div class="action-grid">
               <button class="button button-ghost" data-export-pack>Download backup</button>
-              <button class="button button-ghost" data-export-commonweave>Commonweave bridge bundle</button>
+              <button class="button button-ghost" data-export-civweave>Civweave bridge bundle</button>
               <button class="button button-ghost" data-share-profile>Share profile card</button>
               <button class="button button-danger" data-reset-demo>Reset demo data</button>
               <button class="button button-ghost" data-install-help>Installation help</button>
@@ -1017,17 +1017,17 @@ function renderProfile() {
 }
 
 function getAISettings() {
-  const model = commonweaveContext?.model;
-  if (COMMONWEAVE_EMBEDDED && model) {
+  const model = civweaveContext?.model;
+  if (CIVWEAVE_EMBEDDED && model) {
     const route = String(model.route || 'deterministic');
     return {
       enabled: route !== 'deterministic',
-      provider: route === 'deterministic' ? 'deterministic' : 'commonweave-shared',
+      provider: route === 'deterministic' ? 'deterministic' : 'civweave-shared',
       route,
       model: String(model.model || ''),
       endpoint: String(model.endpoint || ''),
-      apiKey: String(commonweaveContext?.modelSettings?.apiKey || commonweaveContext?.modelSettings?.bearerToken || ''),
-      externalConsent: Boolean(commonweaveContext?.privacy?.secretsShared || route === 'hosted'),
+      apiKey: String(civweaveContext?.modelSettings?.apiKey || civweaveContext?.modelSettings?.bearerToken || ''),
+      externalConsent: Boolean(civweaveContext?.privacy?.secretsShared || route === 'hosted'),
       timeoutMs: 120000,
       sendArea: false
     };
@@ -1038,7 +1038,7 @@ function getAISettings() {
 }
 
 function aiProviderLabel(provider = getAISettings().provider) {
-  return ({ deterministic:'On-device deterministic Loom', 'commonweave-shared':'Commonweave shared mind', 'openai-compatible':'OpenAI-compatible / local model', gemini:'Gemini API' })[provider] || 'Fellowfare Loom';
+  return ({ deterministic:'On-device deterministic Loom', 'civweave-shared':'Civweave shared mind', 'openai-compatible':'OpenAI-compatible / local model', gemini:'Gemini API' })[provider] || 'Fellowfare Loom';
 }
 
 function friendlyAIError(error) {
@@ -1555,7 +1555,7 @@ function openThread(threadId) {
     }).join('')}</section>` : ''}
     ${assembly ? `<section class="detail-section"><h3>Assembly</h3>${renderAssemblyCard(assembly)}</section>` : ''}
     ${agreement ? `<section class="detail-section agreement-inline"><p class="eyebrow">Exchange ledger</p><h3>${agreementStatusLabel(agreement.status)}</h3><p>${agreementProgressForUI(agreement)}% fulfilled · ${esc(agreement.settlement.status)} · ${(agreement.evidence || []).length} evidence item${(agreement.evidence || []).length === 1 ? '' : 's'}</p><button class="button button-primary compact" data-open-agreement="${agreement.id}">Open agreement</button></section>` : ''}
-    ${COMMONWEAVE_EMBEDDED ? `<section class="detail-section commonweave-handoff-panel"><h3>Carry this through Commonweave</h3><div class="action-grid"><button class="button button-ghost compact" data-handoff-learning="${thread.id}">Turn a capability gap into learning</button>${thread.mode === 'collective' ? `<button class="button button-ghost compact" data-handoff-governance="${thread.id}">Turn collective demand into a proposal</button>` : ''}</div><p class="muted-copy">These create reviewable handoffs. They do not publish, enroll, ratify, or accept anything.</p></section>` : ''}
+    ${CIVWEAVE_EMBEDDED ? `<section class="detail-section civweave-handoff-panel"><h3>Carry this through Civweave</h3><div class="action-grid"><button class="button button-ghost compact" data-handoff-learning="${thread.id}">Turn a capability gap into learning</button>${thread.mode === 'collective' ? `<button class="button button-ghost compact" data-handoff-governance="${thread.id}">Turn collective demand into a proposal</button>` : ''}</div><p class="muted-copy">These create reviewable handoffs. They do not publish, enroll, ratify, or accept anything.</p></section>` : ''}
     ${renderThreadAIInsight(thread)}
     <section class="detail-section"><small>Posted ${formatRelative(thread.createdAt)} · ${thread.views} views · Stored on this device</small></section>`;
   if (!detailDialog.open) detailDialog.showModal();
@@ -1773,9 +1773,9 @@ function slug(text) {
 
 function mergeExchangeBundle(incoming) {
   if (!incoming || typeof incoming !== 'object') throw new Error('Invalid exchange bundle');
-  const allowed = ['fellowfare.pack','fellowfare.thread','fellowfare.agreement','commonweave.exchange-bundle'];
-  if (!allowed.includes(incoming.format)) throw new Error('Not a supported Fellowfare or Commonweave pack');
-  const source = incoming.format === 'commonweave.exchange-bundle' ? incoming.entities || {} : incoming;
+  const allowed = ['fellowfare.pack','fellowfare.thread','fellowfare.agreement','civweave.exchange-bundle'];
+  if (!allowed.includes(incoming.format)) throw new Error('Not a supported Fellowfare or Civweave pack');
+  const source = incoming.format === 'civweave.exchange-bundle' ? incoming.entities || {} : incoming;
   const threads = incoming.format === 'fellowfare.thread' ? [incoming.thread] : incoming.format === 'fellowfare.agreement' ? [incoming.thread].filter(Boolean) : source.threads || [];
   const agreements = incoming.format === 'fellowfare.agreement' ? [incoming.agreement] : source.agreements || incoming.agreements || [];
   let addedThreads = 0;
@@ -1810,7 +1810,7 @@ async function importPack(event) {
     toast(`${result.addedThreads} thread${result.addedThreads === 1 ? '' : 's'} and ${result.addedAgreements} agreement${result.addedAgreements === 1 ? '' : 's'} imported.`);
   } catch (error) {
     console.error(error);
-    toast('That file could not be imported as a Fellowfare or Commonweave exchange pack.', 'error');
+    toast('That file could not be imported as a Fellowfare or Civweave exchange pack.', 'error');
   }
 }
 
@@ -1891,7 +1891,7 @@ document.addEventListener('click', (event) => {
   }
   if (target.dataset.mallScene) { enterMallScene(target.dataset.mallScene); return; }
   if (target.dataset.mallAction) { runMallAction(target.dataset.mallAction); return; }
-  if (target.dataset.commonweaveReturn !== undefined) { location.href='../../index.html?visual=1&build=1.0.20#square'; return; }
+  if (target.dataset.civweaveReturn !== undefined) { location.href='../../index.html?visual=1&build=1.0.20#square'; return; }
   if (target.dataset.route) routeTo(target.dataset.route);
   if (target.dataset.openComposer) openComposer(target.dataset.openComposer);
   if (target.id === 'quickCreate' || target.id === 'mobileCreate') openComposer('need');
@@ -1907,18 +1907,18 @@ document.addEventListener('click', (event) => {
   if (target.dataset.shareAgreement) shareAgreement(target.dataset.shareAgreement);
   if (target.dataset.handoffWork) {
     const agreement = getAgreement(target.dataset.handoffWork);
-    if (agreement) handoffToCommonweave('cerbanimo','exchange-to-work',`Coordinate · ${agreement.title}`,{ agreement:{ id:agreement.id, title:agreement.title, category:agreement.category, terms:agreement.terms, milestones:agreement.milestones, participants:agreement.participants, status:agreement.status }, authority:{ fellowfare:'agreement, settlement, repair', cerbanimo:'work planning, proof, review' }, automaticEffect:false });
+    if (agreement) handoffToCivweave('cerbanimo','exchange-to-work',`Coordinate · ${agreement.title}`,{ agreement:{ id:agreement.id, title:agreement.title, category:agreement.category, terms:agreement.terms, milestones:agreement.milestones, participants:agreement.participants, status:agreement.status }, authority:{ fellowfare:'agreement, settlement, repair', cerbanimo:'work planning, proof, review' }, automaticEffect:false });
   }
   if (target.dataset.handoffLearning) {
     const thread = getThread(target.dataset.handoffLearning);
-    if (thread) handoffToCommonweave('living','market-skill-gap',`Learn for · ${thread.title}`,{ thread:{ id:thread.id, mode:thread.mode, title:thread.title, description:thread.description, category:thread.category }, prompt:`Build the smallest practical learning path that would help someone meet this need or offer this capability honestly: ${thread.title}.`, automaticEffect:false });
+    if (thread) handoffToCivweave('living','market-skill-gap',`Learn for · ${thread.title}`,{ thread:{ id:thread.id, mode:thread.mode, title:thread.title, description:thread.description, category:thread.category }, prompt:`Build the smallest practical learning path that would help someone meet this need or offer this capability honestly: ${thread.title}.`, automaticEffect:false });
   }
   if (target.dataset.handoffGovernance) {
     const thread = getThread(target.dataset.handoffGovernance);
     const assembly = state.assemblies.find((item) => item.threadId === target.dataset.handoffGovernance);
-    if (thread) handoffToCommonweave('anarchadia','collective-demand',`Govern · ${thread.title}`,{ thread:{ id:thread.id, title:thread.title, description:thread.description, category:thread.category, quantity:thread.quantity }, assembly:assembly || null, automaticEffect:false });
+    if (thread) handoffToCivweave('anarchadia','collective-demand',`Govern · ${thread.title}`,{ thread:{ id:thread.id, title:thread.title, description:thread.description, category:thread.category, quantity:thread.quantity }, assembly:assembly || null, automaticEffect:false });
   }
-  if (target.dataset.exportCommonweave !== undefined) exportCommonweaveBundle();
+  if (target.dataset.exportCivweave !== undefined) exportCivweaveBundle();
   if (target.dataset.saveThread) { event.stopPropagation(); toggleSave(target.dataset.saveThread); }
   if (target.dataset.closeDetail !== undefined) detailDialog.close();
   if (target.dataset.propose) openProposal(target.dataset.propose);
@@ -2018,73 +2018,73 @@ window.addEventListener('beforeinstallprompt', (event) => {
 window.addEventListener('appinstalled', () => toast('Fellowfare installed. It can now open from your home screen.'));
 window.addEventListener('hashchange', () => { const route = location.hash.replace('#',''); if (ROUTES.includes(route)) { state.route = route; render(); } });
 
-function postCommonweaveReady() {
-  postToCommonweave({
-    type:'commonweave:ready', service:'fellowfare', version:APP_VERSION,
-    capabilities:['market-threads','semantic-loom','assemblies','agreements','milestones','evidence','settlement-records','repair-paths','contextual-trust','commonweave-exchange-bundle']
+function postCivweaveReady() {
+  postToCivweave({
+    type:'civweave:ready', service:'fellowfare', version:APP_VERSION,
+    capabilities:['market-threads','semantic-loom','assemblies','agreements','milestones','evidence','settlement-records','repair-paths','contextual-trust','civweave-exchange-bundle']
   });
 }
 
-function openCommonweaveObject(objectType, objectId, actionId='') {
+function openCivweaveObject(objectType, objectId, actionId='') {
   let opened = false;
   if (objectType === 'thread' && getThread(objectId)) { openThread(objectId); opened = true; }
   if ((objectType === 'agreement' || objectType === 'repair') && getAgreement(objectId)) { routeTo('inbox'); setTimeout(() => openAgreement(objectId), 0); opened = true; }
   if (objectType === 'assembly' && state.assemblies.some((item) => item.id === objectId)) { routeTo('assemblies'); opened = true; }
-  postToCommonweave({ type:'commonweave:navigation-receipt', contractVersion:'commonweave.navigation.v1', actionId, objectType, objectId, status:opened ? 'opened' : 'unavailable', detail:opened ? `Opened Fellowfare ${objectType}.` : `Fellowfare could not find that ${objectType} on this device.` });
+  postToCivweave({ type:'civweave:navigation-receipt', contractVersion:'civweave.navigation.v1', actionId, objectType, objectId, status:opened ? 'opened' : 'unavailable', detail:opened ? `Opened Fellowfare ${objectType}.` : `Fellowfare could not find that ${objectType} on this device.` });
 }
 
-async function acceptCommonweaveIntention(message) {
+async function acceptCivweaveIntention(message) {
   const requestId = String(message.requestId || '');
   const prompt = String(message.prompt || message.value || '').slice(0,4000).trim();
   if (!requestId || !prompt) return;
-  postToCommonweave({ type:'commonweave:ai-intention-receipt', requestId, status:'accepted', detail:'Fellowfare accepted the intention and is preparing an editable market thread. No listing will be published.' });
+  postToCivweave({ type:'civweave:ai-intention-receipt', requestId, status:'accepted', detail:'Fellowfare accepted the intention and is preparing an editable market thread. No listing will be published.' });
   try {
     openComposer('need');
     document.querySelector('#naturalInput').value = prompt;
     await shapeDraft();
-    postToCommonweave({ type:'commonweave:ai-intention-receipt', requestId, status:'delivered', detail:'Fellowfare prepared an editable exchange-thread draft. Review every field before publishing.' });
+    postToCivweave({ type:'civweave:ai-intention-receipt', requestId, status:'delivered', detail:'Fellowfare prepared an editable exchange-thread draft. Review every field before publishing.' });
   } catch (error) {
-    postToCommonweave({ type:'commonweave:ai-intention-receipt', requestId, status:'failed', detail:`Fellowfare preserved the prompt but could not shape the draft: ${friendlyAIError(error)}` });
+    postToCivweave({ type:'civweave:ai-intention-receipt', requestId, status:'failed', detail:`Fellowfare preserved the prompt but could not shape the draft: ${friendlyAIError(error)}` });
   }
 }
 
 window.addEventListener('message', (event) => {
-  if (!COMMONWEAVE_EMBEDDED || event.origin !== window.location.origin || event.source !== window.parent || !event.data || typeof event.data !== 'object') return;
+  if (!CIVWEAVE_EMBEDDED || event.origin !== window.location.origin || event.source !== window.parent || !event.data || typeof event.data !== 'object') return;
   const message = event.data;
-  if (message.type === 'commonweave:context') {
-    commonweaveContext = message;
-    document.documentElement.classList.add('commonweave-embedded');
-    postCommonweaveReady();
+  if (message.type === 'civweave:context') {
+    civweaveContext = message;
+    document.documentElement.classList.add('civweave-embedded');
+    postCivweaveReady();
     if (state.route === 'loom' || state.route === 'profile') render();
     return;
   }
-  if (message.type === 'commonweave:ai-intention') void acceptCommonweaveIntention(message);
-  if (message.type === 'commonweave:navigate-object' && message.contractVersion === 'commonweave.navigation.v1') openCommonweaveObject(String(message.objectType || message.subjectType || ''), String(message.objectId || message.subjectId || ''), String(message.actionId || ''));
-  if (message.type === 'commonweave:exchange-import' && message.contractVersion === 'commonweave.exchange-import.v1') {
+  if (message.type === 'civweave:ai-intention') void acceptCivweaveIntention(message);
+  if (message.type === 'civweave:navigate-object' && message.contractVersion === 'civweave.navigation.v1') openCivweaveObject(String(message.objectType || message.subjectType || ''), String(message.objectId || message.subjectId || ''), String(message.actionId || ''));
+  if (message.type === 'civweave:exchange-import' && message.contractVersion === 'civweave.exchange-import.v1') {
     try {
       const result = mergeExchangeBundle(message.bundle);
-      localStorage.removeItem('commonweave.pending.fellowfare.exchange.v1');
+      localStorage.removeItem('civweave.pending.fellowfare.exchange.v1');
       render();
-      postToCommonweave({ type:'commonweave:exchange-import-receipt', contractVersion:'commonweave.exchange-import.v1', status:'reviewed', detail:`Imported ${result.addedThreads} threads and ${result.addedAgreements} agreements without overwriting local records.` });
+      postToCivweave({ type:'civweave:exchange-import-receipt', contractVersion:'civweave.exchange-import.v1', status:'reviewed', detail:`Imported ${result.addedThreads} threads and ${result.addedAgreements} agreements without overwriting local records.` });
     } catch (error) {
-      postToCommonweave({ type:'commonweave:exchange-import-receipt', contractVersion:'commonweave.exchange-import.v1', status:'failed', detail:String(error.message || error).slice(0,500) });
+      postToCivweave({ type:'civweave:exchange-import-receipt', contractVersion:'civweave.exchange-import.v1', status:'failed', detail:String(error.message || error).slice(0,500) });
     }
   }
 });
 
 initialize();
-if (COMMONWEAVE_EMBEDDED) {
-  document.documentElement.classList.add('commonweave-embedded');
+if (CIVWEAVE_EMBEDDED) {
+  document.documentElement.classList.add('civweave-embedded');
   try {
-    const pending = JSON.parse(localStorage.getItem('commonweave.pending.fellowfare.exchange.v1') || 'null');
+    const pending = JSON.parse(localStorage.getItem('civweave.pending.fellowfare.exchange.v1') || 'null');
     if (pending) {
       const result = mergeExchangeBundle(pending);
-      localStorage.removeItem('commonweave.pending.fellowfare.exchange.v1');
+      localStorage.removeItem('civweave.pending.fellowfare.exchange.v1');
       render();
-      toast(`${result.addedThreads} portable thread${result.addedThreads === 1 ? '' : 's'} restored from Commonweave.`);
+      toast(`${result.addedThreads} portable thread${result.addedThreads === 1 ? '' : 's'} restored from Civweave.`);
     }
-  } catch (error) { console.warn('Pending Commonweave exchange import was not applied', error); }
-  window.setTimeout(postCommonweaveReady, 60);
+  } catch (error) { console.warn('Pending Civweave exchange import was not applied', error); }
+  window.setTimeout(postCivweaveReady, 60);
 }
 
 window.addEventListener('storage',(event)=>{if(['fellowfare.reward-ledger.v1.1','fellowfare.reward-ledger.v1'].includes(event.key)&&location.hash.replace('#','')==='profile')renderProfile();});

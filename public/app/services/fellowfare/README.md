@@ -61,13 +61,13 @@ The v0.3 domain layer lives in `ledger.js` and covers:
 
 Evidence files are not uploaded or embedded. The MVP stores notes and references so users retain control of sensitive material.
 
-## Commonweave bridge
+## Civweave bridge
 
-Use **You → Commonweave bridge bundle** or **Exchange Desk → Export Commonweave bundle**.
+Use **You → Civweave bridge bundle** or **Exchange Desk → Export Civweave bundle**.
 
-The resulting `commonweave.exchange-bundle` follows `schemas/commonweave-exchange-bundle.schema.json`. Integration guidance is in `COMMONWEAVE_BRIDGE.md`.
+The resulting `civweave.exchange-bundle` follows `schemas/civweave-exchange-bundle.schema.json`. Integration guidance is in `CIVWEAVE_BRIDGE.md`.
 
-The bundle maps Fellowfare threads, proposals, assemblies, agreements, milestones, evidence, settlements, and reviews into domain-level Commonweave concepts. AI API keys are excluded.
+The bundle maps Fellowfare threads, proposals, assemblies, agreements, milestones, evidence, settlements, and reviews into domain-level Civweave concepts. AI API keys are excluded.
 
 ## Test suite
 

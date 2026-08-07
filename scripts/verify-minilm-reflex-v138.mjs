@@ -26,9 +26,9 @@ for(const [name,html] of [['loom',loom],['realm',realm],['lite',lite]]){
   assert(html.includes('intention-ui-v138.js'),`${name} does not load intention review UI`);
   assert(!html.includes('smollm2-fallback-runtime'),`${name} still loads SmolLM2 fallback`);
 }
-for(const required of ['conversationKind','Conversational message handled without semantic routing','No stored response pattern was used as finished dialogue','guidePrompt','semantic.score>=.42','normalizedBy:\'commonweave-reflex-v2\''])assert(runtime.includes(required),`reflex runtime missing ${required}`);
+for(const required of ['conversationKind','Conversational message handled without semantic routing','No stored response pattern was used as finished dialogue','guidePrompt','semantic.score>=.42','normalizedBy:\'civweave-reflex-v2\''])assert(runtime.includes(required),`reflex runtime missing ${required}`);
 assert(!runtime.includes('safe(entry?.answer'),'runtime still emits canned index answers');
-for(const required of ['CommonweaveAssistantV138','approvalGate','data-gate-action="activate"','CommonweaveIntentionUI','commonweave:intentions-changed'])assert(assistant.includes(required),`assistant missing ${required}`);
+for(const required of ['CivweaveAssistantV138','approvalGate','data-gate-action="activate"','CivweaveIntentionUI','civweave:intentions-changed'])assert(assistant.includes(required),`assistant missing ${required}`);
 for(const required of ['Onboard Semantic Reflex','Run reflex speed trial','warm?.ready===false','Semantic package incomplete'])assert(settings.includes(required),`settings missing ${required}`);
 for(const required of ["pipeline('feature-extraction'","['wasm','q8']","['webgpu','q4f16']",'verifyWasm','wasmMagic','onnx-r12'])assert(worker.includes(required),`worker missing ${required}`);
 assert(worker.indexOf("['wasm','q8']")<worker.indexOf("['webgpu','q4f16']"),'WASM is not attempted before WebGPU');
@@ -40,7 +40,7 @@ assert(pkg.scripts?.prestart?.includes('ensure-minilm-model.mjs'),'host startup 
 assert(!pkg.scripts?.prestart?.includes('--soft'),'host startup can silently accept an incomplete MiniLM package');
 
 const entries=Array.isArray(index.entries)?index.entries:[];
-assert(index.schema==='commonweave.reflex-index.v2','reflex index schema was not upgraded');
+assert(index.schema==='civweave.reflex-index.v2','reflex index schema was not upgraded');
 assert(entries.length>=10,'reflex index lost routing coverage');
 for(const entry of entries){
   assert(entry.label&&entry.clarify,`${entry.id} lacks routing metadata`);
@@ -48,11 +48,11 @@ for(const entry of entries){
   assert(!('nextAction'in entry),`${entry.id} still stores canned next-action prose`);
 }
 const mutual=entries.find(entry=>entry.id==='mutual-aid-food-network');
-assert(mutual?.system==='commonweave','mutual-aid network is not coordinated by Commonweave');
+assert(mutual?.system==='civweave','mutual-aid network is not coordinated by Civweave');
 assert(mutual?.routeHints?.length===5,'mutual-aid routing metadata does not span the coordinating weave');
 
 for(const required of ['time looper','time traveler','playable vertical slice','intention-activation','approvalGate','requiresExplicitActivation:true'])assert(planner.includes(required),`intention planner missing ${required}`);
-for(const required of ['activate(planId)','review(planId)','data-plan-id','commonweave:intentions-changed','CommonweaveIntentionUI={open,render,activate,review,state,items}'])assert(ui.includes(required),`intention UI missing ${required}`);
+for(const required of ['activate(planId)','review(planId)','data-plan-id','civweave:intentions-changed','CivweaveIntentionUI={open,render,activate,review,state,items}'])assert(ui.includes(required),`intention UI missing ${required}`);
 for(const required of ['.cw138-chat-gate','.cw138-activate','.cw138-chat-message'])assert(uiCss.includes(required),`intention UI CSS missing ${required}`);
 
 const storage=new Map();
@@ -60,20 +60,20 @@ const sandbox={console,Date,Math,localStorage:{getItem:key=>storage.has(key)?sto
 sandbox.globalThis=sandbox;
 vm.runInNewContext(planner,sandbox,{filename:'intention-planner-v138.js'});
 const selfLoveConversation=[{role:'user',text:'Learn to love myself'},{role:'user',text:'Not being touched by others unless there are clear intentions'},{role:'user',text:'Build me a plan to teach me to love myself'}];
-const selfLove=sandbox.CommonweaveIntentionPlanner.buildPlan({text:selfLoveConversation.at(-1).text,history:selfLoveConversation,context:{routingAnswer:{room:'commonweave.quad'}}});
+const selfLove=sandbox.CivweaveIntentionPlanner.buildPlan({text:selfLoveConversation.at(-1).text,history:selfLoveConversation,context:{routingAnswer:{room:'civweave.quad'}}});
 assert(selfLove.state==='review'&&selfLove.requiresExplicitActivation===true,'self-love weave bypasses review');
 assert(selfLove.paths.map(item=>item.realm).join(',')==='living-school,cerbanimo','self-love weave has the wrong paths');
 assert(selfLove.governance?.realm==='anarchadia','self-love weave lacks its consent layer');
 const gameText='let\'s make a plan to create a game about a time looper meeting a time traveler';
-const game=sandbox.CommonweaveIntentionPlanner.buildPlan({text:gameText,history:[{role:'user',text:gameText}],context:{routingAnswer:{room:'commonweave.quad'}}});
+const game=sandbox.CivweaveIntentionPlanner.buildPlan({text:gameText,history:[{role:'user',text:gameText}],context:{routingAnswer:{room:'civweave.quad'}}});
 assert(game.title==='Prototype a game about a time looper meeting a time traveler','game weave has a generic title');
 assert(game.paths.map(item=>item.realm).join(',')==='living-school,cerbanimo','game weave does not include design and build paths');
 assert(/looper/i.test(game.paths[0].purpose)&&/traveler/i.test(game.paths[0].purpose),'game learning path lost the temporal distinction');
 assert(/playable/i.test(game.paths[1].title),'game skilled path is not a playable prototype');
-const created=sandbox.CommonweaveIntentionPlanner.maybeCreate({text:gameText,history:[{role:'user',text:gameText}],context:{routingAnswer:{room:'commonweave.quad'}}});
+const created=sandbox.CivweaveIntentionPlanner.maybeCreate({text:gameText,history:[{role:'user',text:gameText}],context:{routingAnswer:{room:'civweave.quad'}}});
 assert(created?.response?.approvalGate?.kind==='intention-activation','plan response lacks a real activation gate');
 assert(created.response.approvalGate.planId===created.plan.id,'activation gate does not target the persisted weave');
-const saved=JSON.parse(storage.get('commonweave.intentions.v127'));
+const saved=JSON.parse(storage.get('civweave.intentions.v127'));
 assert(saved?.[0]?.kind==='weave-plan'&&saved[0].state==='review','reviewable game weave was not persisted');
 
 const wasmRuntime=await readFile(path.join(root,'public/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm'));

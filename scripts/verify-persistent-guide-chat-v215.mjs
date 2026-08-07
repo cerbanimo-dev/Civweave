@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
-const [chat,viewport,boundary,livingIndex,livingRuntime,livingCore,commonweave,cerbanimo,fellowfare,anarchadia]=await Promise.all([
+const [chat,viewport,boundary,livingIndex,livingRuntime,livingCore,civweave,cerbanimo,fellowfare,anarchadia]=await Promise.all([
   read('public/app/persistent-guide-chat-v215.js'),
   read('public/app/persistent-guide-viewport-v216.js'),
   read('public/app/install-boundary-v146.js'),
@@ -20,14 +20,14 @@ const [chat,viewport,boundary,livingIndex,livingRuntime,livingCore,commonweave,c
 
 for(const source of [chat,viewport,boundary])new Function(source);
 for(const token of [
-  "const STORAGE_KEY='commonweave.persistent-guide-chat.v214'",
-  "const SYSTEMS=['commonweave','living-school','cerbanimo','fellowfare','anarchadia']",
+  "const STORAGE_KEY='civweave.persistent-guide-chat.v214'",
+  "const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia']",
   "'living-school':'#59cf87'","cerbanimo:'#a66cff'","fellowfare:'#f2a93b'","anarchadia:'#ff4f9a'",
-  "addEventListener('commonweave:guide-notification',onNotification)",'function notify(system,text,options={})',
+  "addEventListener('civweave:guide-notification',onNotification)",'function notify(system,text,options={})',
   'var(--cw-themed-nav-height,0px)',"assistant.respond({text,systemId:guideAtSend,history})",
 ])assert(chat.includes(token),`Persistent chat is missing ${token}`);
 assert.equal((chat.match(/assistant\.respond\(/g)||[]).length,1,'Persistent chat must own exactly one assistant submission pipeline.');
-for(const token of ['globalThis.visualViewport','data-keyboard-open','CommonweavePersistentGuideViewportV216'])assert(viewport.includes(token),`Persistent viewport is missing ${token}`);
+for(const token of ['globalThis.visualViewport','data-keyboard-open','CivweavePersistentGuideViewportV216'])assert(viewport.includes(token),`Persistent viewport is missing ${token}`);
 for(const token of ["const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js'","const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js'",'persistentGuideChatSubmissionPipelines:1','persistentGuideChatGuideCount:5'])assert(boundary.includes(token),`Install boundary is missing ${token}`);
 
 assert(livingIndex.includes('data-living-school-runtime="cleanroom-v218"'),'Living School is not on the clean-room surface.');
@@ -36,7 +36,7 @@ for(const retired of ['id="moss"','id="compass"','id="room"','data-room','id="ac
 assert.equal((livingRuntime.match(/document\.addEventListener\('click',handleLivingSchoolClick,true\)/g)||[]).length,1,'Living School must install exactly one canonical page controller.');
 assert(!/MutationObserver|\.click\s*\(|setRoom|openNative|data-room/.test(livingRuntime),'Living School clean-room runtime contains a retired interaction tripwire.');
 assert(livingCore.includes('You are Moss, Living School learning guide'),'Moss no longer owns Living School generation.');
-assert(livingCore.includes('never impersonate another Commonweave guide'),'Living School guide identity boundary is missing.');
+assert(livingCore.includes('never impersonate another Civweave guide'),'Living School guide identity boundary is missing.');
 
-for(const [name,html] of Object.entries({commonweave,cerbanimo,fellowfare,anarchadia,livingIndex}))assert(html.includes('/app/install-boundary-v146.js'),`${name} does not load the shared guide boundary.`);
+for(const [name,html] of Object.entries({civweave,cerbanimo,fellowfare,anarchadia,livingIndex}))assert(html.includes('/app/install-boundary-v146.js'),`${name} does not load the shared guide boundary.`);
 console.log(JSON.stringify({ok:true,revision:'v218-one-thread-five-guide-cleanroom',assistantSubmissionPipelines:1,guideCount:5,livingSchool:{pageControllers:1,legacyNavigation:false,mossOwnsGeneration:true}},null,2));

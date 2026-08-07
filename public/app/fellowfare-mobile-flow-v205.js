@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='fellowfare-mobile-flow-v205';
-if(globalThis.CommonweaveFellowFareMobileFlowV205?.version===VERSION)return;
+if(globalThis.CivweaveFellowFareMobileFlowV205?.version===VERSION)return;
 
 const iframe=document.getElementById('ffc144-workbench');
 const shell=iframe?.closest('.ffc144-frame');
@@ -152,5 +152,5 @@ addEventListener('message',event=>{
 if(iframe?.contentDocument?.readyState==='complete')bindInner();
 else settle();
 
-globalThis.CommonweaveFellowFareMobileFlowV205={version:VERSION,measure:scheduleMeasure,rebind:bindInner,status:()=>({mobile:mobileQuery.matches,height:lastHeight,bound:Boolean(innerDocument())})};
+globalThis.CivweaveFellowFareMobileFlowV205={version:VERSION,measure:scheduleMeasure,rebind:bindInner,status:()=>({mobile:mobileQuery.matches,height:lastHeight,bound:Boolean(innerDocument())})};
 })();

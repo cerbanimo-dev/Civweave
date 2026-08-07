@@ -9,7 +9,7 @@
 - The offline kit is reached through a second invisible image region.
 - Host status and version appear as an in-world signal rather than a conventional marketing page.
 
-### Commonweave
+### Civweave
 
 - Town Square and every supplied district remain full-screen image scenes.
 - The conventional application shell is not user-visible.
@@ -31,7 +31,7 @@
 - Visual world entry is unconditional.
 - Search and detail workflows are projected against supplied Cerbanimo scene art.
 - The conventional app shell stays hidden.
-- The image dock routes among visual destinations and back to Commonweave.
+- The image dock routes among visual destinations and back to Civweave.
 
 ### Anarchadia
 

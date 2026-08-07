@@ -3,11 +3,11 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const required = ['index.html','styles.css','app.js','ai.js','ledger.js','sw.js','COMMONWEAVE_BRIDGE.md','schemas/commonweave-exchange-bundle.schema.json','manifest.webmanifest','../../logos/fellowfare-wordmark.png','../../logos/fellowfare.png','assets/icons/icon-192.png','assets/icons/icon-512.png','assets/icons/icon-maskable-512.png'];
+const required = ['index.html','styles.css','app.js','ai.js','ledger.js','sw.js','CIVWEAVE_BRIDGE.md','schemas/civweave-exchange-bundle.schema.json','manifest.webmanifest','../../logos/fellowfare-wordmark.png','../../logos/fellowfare.png','assets/icons/icon-192.png','assets/icons/icon-512.png','assets/icons/icon-maskable-512.png'];
 for (const file of required) await access(join(root, file));
 
-const bridgeSchema = JSON.parse(await readFile(join(root,'schemas/commonweave-exchange-bundle.schema.json'),'utf8'));
-if (bridgeSchema.properties?.format?.const !== 'commonweave.exchange-bundle') throw new Error('Bridge schema format marker missing');
+const bridgeSchema = JSON.parse(await readFile(join(root,'schemas/civweave-exchange-bundle.schema.json'),'utf8'));
+if (bridgeSchema.properties?.format?.const !== 'civweave.exchange-bundle') throw new Error('Bridge schema format marker missing');
 
 const manifest = JSON.parse(await readFile(join(root,'manifest.webmanifest'),'utf8'));
 if (manifest.display !== 'standalone') throw new Error('Manifest must use standalone display');
@@ -19,7 +19,7 @@ for (const id of ['main','composerDialog','detailDialog','proposalDialog','messa
   if (!html.includes(`id="${id}"`)) throw new Error(`Missing required UI element: ${id}`);
 }
 const app = await readFile(join(root,'app.js'),'utf8');
-for (const feature of ['submitThread','submitProposal','renderAssemblies','renderInbox','openAgreement','submitLedgerAction','exportCommonweaveBundle','renderLoom','runLoomAction','exportPack','importPack','registerServiceWorker']) {
+for (const feature of ['submitThread','submitProposal','renderAssemblies','renderInbox','openAgreement','submitLedgerAction','exportCivweaveBundle','renderLoom','runLoomAction','exportPack','importPack','registerServiceWorker']) {
   if (!app.includes(`function ${feature}`)) throw new Error(`Missing product flow: ${feature}`);
 }
 if (!app.includes('delete ai.apiKey')) throw new Error('Exported packs must strip remembered AI secrets');

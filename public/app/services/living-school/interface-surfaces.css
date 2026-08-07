@@ -173,7 +173,7 @@
   .school-cover,.school-cover-copy,.school-cover-progress,.learning-orientation,.orientation-next,
   .constellation-poster,.constellation-toolbar,.constellation-graph-shell,.constellation-detail,
   .diagnostic-card,.retrieval-card,.review-card,.misconception-card,.opportunity-card,.evidence-card,.intelligence-card,
-  .commonweave-pathway-banner,.moss-pathway-desk,.empty,[class*="-card"],[class*="-panel"],[class*="-poster"],[class*="-banner"]
+  .civweave-pathway-banner,.moss-pathway-desk,.empty,[class*="-card"],[class*="-panel"],[class*="-poster"],[class*="-banner"]
 ){
   min-width:0!important;max-width:100%!important;margin:.24rem 0!important;padding:.32rem!important;
   border:1px solid color-mix(in srgb,currentColor 22%,transparent)!important;border-radius:5px!important;
@@ -185,9 +185,9 @@
   font-size:.72em!important;line-height:1.1!important;letter-spacing:.04em!important;white-space:normal!important;
 }
 .ls-projected-workspace :where(.school-cover,.constellation-layout,.system-grid,.help-hero,.dashboard-hero){display:grid!important;grid-template-columns:1fr!important;gap:.3rem!important}
-.ls-projected-workspace :where(.school-cover h1,.commonweave-pathway-banner h3,.help-hero h2){font-size:clamp(1.05rem,2.5em,1.55rem)!important;line-height:1!important}
+.ls-projected-workspace :where(.school-cover h1,.civweave-pathway-banner h3,.help-hero h2){font-size:clamp(1.05rem,2.5em,1.55rem)!important;line-height:1!important}
 .ls-projected-workspace :where(.school-cover-progress,.orientation-next){display:grid!important;gap:.22rem!important;border-left:1px solid currentColor!important}
-.ls-projected-workspace :where(.action-row,.commonweave-learning-actions,.pocket-reward-actions){display:flex!important;flex-wrap:wrap!important;gap:.2rem!important}
+.ls-projected-workspace :where(.action-row,.civweave-learning-actions,.pocket-reward-actions){display:flex!important;flex-wrap:wrap!important;gap:.2rem!important}
 .ls-projected-workspace :where(.constellation-graph){width:100%!important;height:auto!important;max-height:18rem!important}
 .ls-projected-workspace :where(.constellation-legend,.academy-stat-grid,.pathway-strip){display:flex!important;gap:.2rem!important;overflow-x:auto!important;max-width:100%!important}
 .ls-projected-workspace :where(.pathway-step,.academy-stat){flex:0 0 min(9rem,78%)!important;min-height:0!important;padding:.25rem!important}

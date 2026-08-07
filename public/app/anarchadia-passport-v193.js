@@ -3,16 +3,16 @@
 const VERSION='1.0.7-anarchadia-passport-v193';
 if(globalThis.AnarchadiaPassportV193?.version===VERSION)return;
 const KEYS={
-  console:'commonweave.anarchadia.citizen-console.v139',
-  rewards:'commonweave.rewards.v156',
-  domain:'commonweave.domain.v156',
-  campus:'commonweave.working-campus.v1',
-  intentions:'commonweave.intentions.v127',
-  living:'commonweave.living-school.cabinet.v151',
+  console:'civweave.anarchadia.citizen-console.v139',
+  rewards:'civweave.rewards.v156',
+  domain:'civweave.domain.v156',
+  campus:'civweave.working-campus.v1',
+  intentions:'civweave.intentions.v127',
+  living:'civweave.living-school.cabinet.v151',
   cerbanimo:'cerbanimo.quest-engine.v144',
   fellowfare:'fellowfare.mvp.state.v3'
 };
-const WATCHED_EVENTS=['commonweave:rewards-changed','commonweave:reward-bridge','commonweave:domain-synced','commonweave:proof-progress-synced','commonweave:peer-review-recorded'];
+const WATCHED_EVENTS=['civweave:rewards-changed','civweave:reward-bridge','civweave:domain-synced','civweave:proof-progress-synced','civweave:peer-review-recorded'];
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const read=(key,fallback)=>parse(localStorage.getItem(key),fallback);
 const list=value=>Array.isArray(value)?value:[];
@@ -61,7 +61,7 @@ function activePlan(){
   const item=intentions.find(row=>row?.state==='active'||row?.plan?.state==='active')||intentions.find(row=>row?.kind==='weave-plan'&&row?.state==='review');
   return item?.plan||null;
 }
-function sourceLabel(system){return({'living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',commonweave:'Commonweave',anarchadia:'Anarchadia'}[system]||String(system||'Local ledger'));}
+function sourceLabel(system){return({'living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',civweave:'Civweave',anarchadia:'Anarchadia'}[system]||String(system||'Local ledger'));}
 function currencyMeta(currency){
   return({xp:{glyph:'✦',label:'Skill XP'},acorn:{glyph:'●',label:'Acorn'},button:{glyph:'⊙',label:'Button'},cotoken:{glyph:'⬡',label:'Cotoken'}}[currency]||{glyph:'◆',label:String(currency||'Reward')});
 }
@@ -105,7 +105,7 @@ function renderPaths(data){
   const host=document.getElementById('ac-passport-paths');if(!host)return;
   const paths=list(data.plan?.paths);
   setText('ac-passport-weave-state',data.plan?String(data.plan.state||'review').toUpperCase():'NO ACTIVE WEAVE');
-  if(!data.plan||!paths.length){host.innerHTML='<div class="ac-empty-passport">No active intention paths. Activate a reviewed weave in Commonweave and its learning, labor, materials, and civic routes will map here.</div>';return;}
+  if(!data.plan||!paths.length){host.innerHTML='<div class="ac-empty-passport">No active intention paths. Activate a reviewed weave in Civweave and its learning, labor, materials, and civic routes will map here.</div>';return;}
   host.innerHTML=paths.slice(0,6).map(path=>{
     const progress=pathProgress(path),proof=path.proofProgress||{},reason=proof.reason||path.completionCriteria||'Evidence has not been checked yet.';
     return `<article class="ac-path-card"><div class="ac-path-top"><small>${esc(sourceLabel(path.realm))}</small><b>${esc(path.status||data.plan.state||'ready')}</b></div><h4>${esc(path.title||'Untitled path')}</h4><p>${esc(path.purpose||'')}</p><div class="ac-path-meter" aria-label="${Math.round(progress)} percent complete"><span style="width:${progress}%"></span></div><div class="ac-path-proof">${Math.round(progress)}% · ${esc(proof.source?`${sourceLabel(proof.source)} proof: ${reason}`:reason)}</div></article>`;
@@ -160,7 +160,7 @@ function render(){
 }
 function queueRender(){if(queued)return;queued=true;(globalThis.requestAnimationFrame||setTimeout)(()=>{queued=false;render()});}
 function sync(){
-  try{globalThis.CommonweaveDomainBridgeV156?.syncCampus?.();globalThis.CommonweaveDomainBridgeV156?.syncRewards?.()}catch{}
+  try{globalThis.CivweaveDomainBridgeV156?.syncCampus?.();globalThis.CivweaveDomainBridgeV156?.syncRewards?.()}catch{}
   return render();
 }
 function openLedger(){globalThis.AnarchadiaCitizenConsoleV158?.setScreen?.('ledger')}

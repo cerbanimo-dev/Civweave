@@ -2,8 +2,8 @@
 'use strict';
 const VERSION='157.2-single-owner';
 const EVENT_OWNERSHIP='controller-only';
-const SETTINGS_KEY='commonweave.universal-ai.v127';
-const SESSION_KEY='commonweave-model-session';
+const SETTINGS_KEY='civweave.universal-ai.v127';
+const SESSION_KEY='civweave-model-session';
 const MODEL_ID='Xenova/all-MiniLM-L6-v2';
 const MANIFEST='/app/models/all-minilm-l6-v2/model-manifest.json';
 const GEMINI_ENDPOINT='https://generativelanguage.googleapis.com/v1beta';
@@ -11,7 +11,7 @@ const GEMINI_MODEL='gemini-3.5-flash-lite';
 const OLLAMA_ENDPOINT='http://127.0.0.1:11434/api/chat';
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-const runtime=()=>globalThis.CommonweaveModelRuntime||null;
+const runtime=()=>globalThis.CivweaveModelRuntime||null;
 const byName=(form,name)=>form.elements.namedItem(name);
 
 function providerName(value){
@@ -46,8 +46,8 @@ function readState(){
 }
 function markup({inline=false}={}){
   return`<form class="cw-ai-settings-form${inline?' cw-ai-inline-form':''}" data-unified-model-settings data-version="${VERSION}">
-    ${inline?'':`<header class="cw-ai-header"><div class="cw-ai-header-copy"><small>COMMONWEAVE MODEL ROUTES</small><h2>Choose how the guides think</h2><p>One shared form controls the Working Campus and the settings bar.</p></div><button class="cw-ai-close" type="button" data-close aria-label="Close settings">×</button></header>`}
-    ${inline?'<div class="cw-ai-inline-intro"><small>COMMONWEAVE MODEL ROUTES</small><h2>Choose how the guides think</h2></div>':''}
+    ${inline?'':`<header class="cw-ai-header"><div class="cw-ai-header-copy"><small>CIVWEAVE MODEL ROUTES</small><h2>Choose how the guides think</h2><p>One shared form controls the Working Campus and the settings bar.</p></div><button class="cw-ai-close" type="button" data-close aria-label="Close settings">×</button></header>`}
+    ${inline?'<div class="cw-ai-inline-intro"><small>CIVWEAVE MODEL ROUTES</small><h2>Choose how the guides think</h2></div>':''}
     <label class="cw-ai-route-field"><span>Primary route</span><select name="route">
       <option value="bundled">Onboard Semantic Reflex</option>
       <option value="gemini">Google Gemini</option>
@@ -57,7 +57,7 @@ function markup({inline=false}={}){
 
     <section class="cw-ai-route-panel" data-route-panel="bundled">
       <div class="cw-ai-panel-heading"><span class="cw-ai-orb is-local">✦</span><div><small>ON DEVICE</small><h3>MiniLM Semantic Reflex</h3></div></div>
-      <p>MiniLM routes and retrieves locally without generating tokens. Commonweave composes responses from canonical state, consent rules, and matched response patterns.</p>
+      <p>MiniLM routes and retrieves locally without generating tokens. Civweave composes responses from canonical state, consent rules, and matched response patterns.</p>
       <div class="cw-ai-package-state" data-package-state>Checking the local semantic package…</div>
       <div class="cw-ai-field-grid"><label>Semantic model<input value="${MODEL_ID}" readonly></label><label>Package manifest<input value="${MANIFEST}" readonly></label></div>
       <div class="cw-ai-fallback-contract"><b>Immediate fallback</b><span>A lexical reflex remains available in milliseconds. MiniLM improves matching after warmup and never blocks chat while loading.</span></div>
@@ -151,19 +151,19 @@ function persist(setup){
     if(setup.agenticConfig){modelRuntime.saveSharedConfig(setup.agenticConfig,{profile:'agentic',enabled:true});modelRuntime.saveSessionSecret(setup.agenticConfig,{apiKey:setup.key,externalConsent:setup.consent})}
     else modelRuntime.saveModelProfiles({agenticEnabled:false});
   }
-  dispatchEvent(new CustomEvent('commonweave:model-settings-saved',{detail:{version:VERSION,route:setup.route,interactive:setup.interactive,agentic:setup.agenticConfig,agenticEnabled:setup.agentic,hasSessionKey:Boolean(setup.key),savedAt:new Date().toISOString()}}));
+  dispatchEvent(new CustomEvent('civweave:model-settings-saved',{detail:{version:VERSION,route:setup.route,interactive:setup.interactive,agentic:setup.agenticConfig,agenticEnabled:setup.agentic,hasSessionKey:Boolean(setup.key),savedAt:new Date().toISOString()}}));
 }
 function missingSummary(result){return(result?.missing||[]).map(item=>`${item.url.split('/').at(-1)} (${item.status||'network'}, ${Number(item.length||0)} bytes)`).join(', ')}
 async function checkPackage(form){
   const status=form.querySelector('[data-package-state]');if(!status)return;
   status.textContent='Checking MiniLM, tokenizer, and local runtimes…';status.className='cw-ai-package-state';
-  try{const result=await globalThis.CommonweaveReflexRuntime?.status?.();if(!result)throw new Error('Reflex runtime has not loaded.');status.textContent=result.available?'MiniLM semantic retrieval is ready. A lexical reflex remains available before model warmup.':`Semantic package is incomplete: ${missingSummary(result)}`;status.className=`cw-ai-package-state ${result.available?'is-ready':'is-missing'}`}
+  try{const result=await globalThis.CivweaveReflexRuntime?.status?.();if(!result)throw new Error('Reflex runtime has not loaded.');status.textContent=result.available?'MiniLM semantic retrieval is ready. A lexical reflex remains available before model warmup.':`Semantic package is incomplete: ${missingSummary(result)}`;status.className=`cw-ai-package-state ${result.available?'is-ready':'is-missing'}`}
   catch(error){status.textContent=`Semantic package check failed: ${error.message}`;status.className='cw-ai-package-state is-missing'}
 }
 async function benchmark(form,button){
   const output=form.querySelector('[data-benchmark-output]'),status=form.querySelector('[data-test-status="bundled"]');button.disabled=true;output.hidden=false;status.textContent='Prewarming MiniLM and measuring five semantic matches…';
   const cases=[['mutual-aid','I wish I could get my friends to work together to form mutual aid networks and local food sources','mutual-aid-food-network'],['learning','I want to understand watershed testing and practice reading the results','learning-path'],['build','Repair a greenhouse vent and prove the work is complete','build-repair-project'],['exchange','Find reclaimed boards and borrow a trailer fairly','resource-exchange'],['governance','Draft how the neighborhood approves shared tool purchases','governance-proposal']].map(([id,text,expected])=>({id,text,expected}));
-  try{const packageState=await globalThis.CommonweaveReflexRuntime.status();if(!packageState?.available)throw new Error(`Semantic package incomplete: ${missingSummary(packageState)}`);const warmStart=performance.now();const warm=await globalThis.CommonweaveReflexRuntime.prewarm();if(warm?.ready===false)throw new Error(warm.error||'MiniLM failed to initialize.');const warmMs=Math.round(performance.now()-warmStart);const trial=await globalThis.CommonweaveReflexRuntime.benchmark(cases);let correct=0;const rows=trial.results.map((result,index)=>{const expected=cases[index].expected,actual=result.matches?.[0]?.id||'';if(actual===expected)correct+=1;return`<li class="${actual===expected?'is-pass':'is-fail'}"><b>${esc(result.id)}</b>: ${esc(actual||result.error||'no match')} · ${result.elapsedMs} ms · ${esc(result.device||'lexical')}</li>`}).join('');output.innerHTML=`<b>${correct}/5 semantic matches correct</b><p>Cold prewarm: ${warmMs} ms. Five warm queries: ${trial.elapsedMs} ms. Chat never waits for this model; the lexical reflex answers immediately.</p><ol>${rows}</ol>`;status.textContent=`Reflex trial complete: ${correct}/5 matches. Warm queries averaged ${Math.round(trial.elapsedMs/5)} ms.`;status.className=`cw-ai-test-status ${correct>=4?'is-ok':'is-error'}`}
+  try{const packageState=await globalThis.CivweaveReflexRuntime.status();if(!packageState?.available)throw new Error(`Semantic package incomplete: ${missingSummary(packageState)}`);const warmStart=performance.now();const warm=await globalThis.CivweaveReflexRuntime.prewarm();if(warm?.ready===false)throw new Error(warm.error||'MiniLM failed to initialize.');const warmMs=Math.round(performance.now()-warmStart);const trial=await globalThis.CivweaveReflexRuntime.benchmark(cases);let correct=0;const rows=trial.results.map((result,index)=>{const expected=cases[index].expected,actual=result.matches?.[0]?.id||'';if(actual===expected)correct+=1;return`<li class="${actual===expected?'is-pass':'is-fail'}"><b>${esc(result.id)}</b>: ${esc(actual||result.error||'no match')} · ${result.elapsedMs} ms · ${esc(result.device||'lexical')}</li>`}).join('');output.innerHTML=`<b>${correct}/5 semantic matches correct</b><p>Cold prewarm: ${warmMs} ms. Five warm queries: ${trial.elapsedMs} ms. Chat never waits for this model; the lexical reflex answers immediately.</p><ol>${rows}</ol>`;status.textContent=`Reflex trial complete: ${correct}/5 matches. Warm queries averaged ${Math.round(trial.elapsedMs/5)} ms.`;status.className=`cw-ai-test-status ${correct>=4?'is-ok':'is-error'}`}
   catch(error){output.innerHTML=`<b>Trial failed.</b><p>${esc(error.message)}</p>`;status.textContent=`Reflex trial failed: ${error.message}`;status.className='cw-ai-test-status is-error'}finally{button.disabled=false}
 }
 function extractKey(text){
@@ -181,7 +181,7 @@ async function testGemini(form,kind,button){
   try{
     if(setup.route!=='gemini')throw new Error('Select Google Gemini first.');if(!setup.key)throw new Error('Enter, paste, or import a Gemini API key first.');if(!setup.consent)throw new Error('Enable Gemini requests before testing.');if(!runtime()?.generate)throw new Error('The shared model runtime has not loaded.');
     const controller=new AbortController(),timeoutMs=kind==='antigravity'?60000:30000,timer=setTimeout(()=>controller.abort(),timeoutMs);
-    let result;try{const config=kind==='antigravity'?setup.agenticConfig:setup.interactive;if(kind==='antigravity'&&!config)throw new Error('Enable Antigravity before testing it.');result=await runtime().generate({purpose:`commonweave-${kind}-connection-test`,executionProfile:kind==='antigravity'?'agentic':'interactive',config:{...config,apiKey:setup.key,timeoutMs:timeoutMs-1000,maxTokens:48},signal:controller.signal,messages:[{role:'user',content:'Return the single word READY. Do not use tools.'}]})}finally{clearTimeout(timer)}
+    let result;try{const config=kind==='antigravity'?setup.agenticConfig:setup.interactive;if(kind==='antigravity'&&!config)throw new Error('Enable Antigravity before testing it.');result=await runtime().generate({purpose:`civweave-${kind}-connection-test`,executionProfile:kind==='antigravity'?'agentic':'interactive',config:{...config,apiKey:setup.key,timeoutMs:timeoutMs-1000,maxTokens:48},signal:controller.signal,messages:[{role:'user',content:'Return the single word READY. Do not use tools.'}]})}finally{clearTimeout(timer)}
     const actualModel=String(result?.actual?.model||'').toLowerCase(),actualProvider=String(result?.actual?.provider||'').toLowerCase();if(result?.status!=='success')throw new Error(result?.error?.message||`The test ended with status ${result?.status||'unknown'}.`);if(actualProvider!=='gemini')throw new Error(`The request fell through to ${actualProvider||'another provider'}.`);if(kind==='antigravity'&&!actualModel.includes('antigravity'))throw new Error('Gemini answered, but Antigravity was unavailable or fell back.');if(kind==='gemini'&&actualModel.includes('antigravity'))throw new Error('The interactive test unexpectedly used Antigravity.');
     status.textContent=kind==='antigravity'?`Antigravity answered directly as ${result.actual.model}.`:`Gemini answered directly as ${result.actual.model}.`;status.className='cw-ai-test-status is-ok';
   }catch(error){status.textContent=`Test failed: ${error.message}`;status.className='cw-ai-test-status is-error'}finally{button.disabled=false}
@@ -218,6 +218,6 @@ function mount(target){
   const form=bind(node.querySelector('form'));fill(form);
   return form;
 }
-globalThis.CommonweaveModelSettingsV157={version:VERSION,eventOwnership:EVENT_OWNERSHIP,open,mount,inlineMarkup:()=>`<section class="cw-ai-inline-card">${markup({inline:true})}</section>`,readState,model:MODEL_ID,manifest:MANIFEST};
-globalThis.CommonweaveModelSettingsV133=globalThis.CommonweaveModelSettingsV157;
+globalThis.CivweaveModelSettingsV157={version:VERSION,eventOwnership:EVENT_OWNERSHIP,open,mount,inlineMarkup:()=>`<section class="cw-ai-inline-card">${markup({inline:true})}</section>`,readState,model:MODEL_ID,manifest:MANIFEST};
+globalThis.CivweaveModelSettingsV133=globalThis.CivweaveModelSettingsV157;
 })();

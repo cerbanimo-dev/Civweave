@@ -14,7 +14,7 @@ const seedTemplatesDir = path.join(here, 'cwseed-node-hub');
 const packageJson = JSON.parse(await fs.readFile(path.join(repo, 'package.json'), 'utf8'));
 const workerPath = path.join(publicDir, 'service-worker.js');
 const boundaryPath = path.join(publicDir, 'app', 'install-boundary-v146.js');
-const additionsPath = path.join(publicDir, 'extensions', 'commonweave-additions-v156.js');
+const additionsPath = path.join(publicDir, 'extensions', 'civweave-additions-v156.js');
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 const nodeVersion = `${packageJson.version}-seed-node-v1`;
 
@@ -116,12 +116,12 @@ const dynamicExtensions = unique([...extensionPaths(boundarySource), ...extensio
 const requiredAssets = unique(['/service-worker.js', ...workerCore, ...dynamicExtensions]);
 requiredAssets.forEach(assertReleasePath);
 
-const work = await fs.mkdtemp(path.join(os.tmpdir(), 'commonweave-release-artifacts-'));
+const work = await fs.mkdtemp(path.join(os.tmpdir(), 'civweave-release-artifacts-'));
 try {
-  const seedRoot = path.join(work, 'seed', 'commonweave-seed');
+  const seedRoot = path.join(work, 'seed', 'civweave-seed');
   const seedMobileDir = path.join(seedRoot, 'mobile');
   const seedHubDir = path.join(seedRoot, 'node-hub');
-  const kitRoot = path.join(work, 'kit', 'commonweave-mobile-install-kit');
+  const kitRoot = path.join(work, 'kit', 'civweave-mobile-install-kit');
   await fs.mkdir(seedMobileDir, { recursive: true });
   await fs.mkdir(seedHubDir, { recursive: true });
   await fs.mkdir(kitRoot, { recursive: true });
@@ -131,15 +131,15 @@ try {
   for (const asset of requiredAssets) manifestEntries.push(await inspectAsset(asset));
 
   await fs.copyFile(path.join(mobileTemplatesDir, 'install-mobile.sh'), path.join(kitRoot, 'install-mobile.sh'));
-  await fs.copyFile(path.join(mobileTemplatesDir, 'serve-commonweave.py'), path.join(kitRoot, 'serve-commonweave.py'));
+  await fs.copyFile(path.join(mobileTemplatesDir, 'serve-civweave.py'), path.join(kitRoot, 'serve-civweave.py'));
   await fs.copyFile(path.join(mobileTemplatesDir, 'README.md'), path.join(kitRoot, 'README.md'));
   await fs.chmod(path.join(kitRoot, 'install-mobile.sh'), 0o755);
-  await fs.chmod(path.join(kitRoot, 'serve-commonweave.py'), 0o755);
+  await fs.chmod(path.join(kitRoot, 'serve-civweave.py'), 0o755);
 
   await fs.writeFile(path.join(kitRoot, 'core-assets.txt'), `${requiredAssets.join('\n')}\n`);
   await fs.writeFile(path.join(kitRoot, 'service-worker-core.txt'), `${workerCore.join('\n')}\n`);
   await fs.writeFile(path.join(kitRoot, 'core-assets.json'), `${JSON.stringify({
-    schema: 'commonweave.mobile-core.v2',
+    schema: 'civweave.mobile-core.v2',
     version: packageJson.version,
     generatedAt: new Date().toISOString(),
     entry: '/app/installed-entry-v146.html',
@@ -147,9 +147,9 @@ try {
     assets: manifestEntries
   }, null, 2)}\n`);
   await fs.writeFile(path.join(kitRoot, 'release.json'), `${JSON.stringify({
-    schema: 'commonweave.mobile-install-kit.v2',
+    schema: 'civweave.mobile-install-kit.v2',
     version: `${packageJson.version}-core-bootstrap`,
-    source: process.env.COMMONWEAVE_RELEASE_BASE_URL || 'https://commonweave-host-node.onrender.com',
+    source: process.env.CIVWEAVE_RELEASE_BASE_URL || 'https://civweave-host-node.onrender.com',
     assetManifest: 'core-assets.txt',
     entry: '/app/installed-entry-v146.html',
     modelPolicy: 'deferred',
@@ -162,11 +162,11 @@ try {
     ]
   }, null, 2)}\n`);
 
-  const seedPath = path.join(downloadsDir, 'commonweave-pocket-campus.cwseed');
-  const kitPath = path.join(downloadsDir, 'Commonweave-Mobile-Install-Kit.zip');
+  const seedPath = path.join(downloadsDir, 'civweave-pocket-campus.cwseed');
+  const kitPath = path.join(downloadsDir, 'Civweave-Mobile-Install-Kit.zip');
   await fs.rm(seedPath, { force: true });
   await fs.rm(kitPath, { force: true });
-  createZip(kitPath, path.join(work, 'kit'), 'commonweave-mobile-install-kit');
+  createZip(kitPath, path.join(work, 'kit'), 'civweave-mobile-install-kit');
 
   const kitInfo = await sha256(kitPath);
   await fs.writeFile(`${kitPath}.sha256`, `${kitInfo.sha256}  ${path.basename(kitPath)}\n`);
@@ -174,17 +174,17 @@ try {
   await fs.copyFile(`${kitPath}.sha256`, path.join(seedMobileDir, `${path.basename(kitPath)}.sha256`));
 
   await renderTemplate('server.mjs', path.join(seedHubDir, 'server.mjs'), {
-    '__COMMONWEAVE_APP_VERSION__': packageJson.version,
-    '__COMMONWEAVE_NODE_VERSION__': nodeVersion
+    '__CIVWEAVE_APP_VERSION__': packageJson.version,
+    '__CIVWEAVE_NODE_VERSION__': nodeVersion
   });
   await fs.copyFile(path.join(seedTemplatesDir, 'README.md'), path.join(seedHubDir, 'README.md'));
   await fs.copyFile(path.join(seedTemplatesDir, 'SEED-README.md'), path.join(seedRoot, 'README.md'));
   await fs.copyFile(path.join(seedTemplatesDir, 'render.yaml'), path.join(seedRoot, 'render.yaml'));
   await fs.writeFile(path.join(seedHubDir, 'package.json'), `${JSON.stringify({
-    name: 'commonweave-portable-node-hub',
+    name: 'civweave-portable-node-hub',
     version: nodeVersion,
     private: true,
-    description: 'Dependency-free Commonweave release, relay, presence, and node-registration hub.',
+    description: 'Dependency-free Civweave release, relay, presence, and node-registration hub.',
     type: 'module',
     engines: { node: '>=20' },
     scripts: { start: 'node server.mjs' }
@@ -195,7 +195,7 @@ try {
     hubFiles.push({ path: relative, ...(await sha256(path.join(seedRoot, relative))) });
   }
   await fs.writeFile(path.join(seedRoot, 'seed.json'), `${JSON.stringify({
-    schema: 'commonweave.portable-seed.v3',
+    schema: 'civweave.portable-seed.v3',
     version: nodeVersion,
     generatedAt: new Date().toISOString(),
     payloads: {
@@ -229,7 +229,7 @@ try {
     ]
   }, null, 2)}\n`);
 
-  createZip(seedPath, path.join(work, 'seed'), 'commonweave-seed');
+  createZip(seedPath, path.join(work, 'seed'), 'civweave-seed');
   const seedInfo = await sha256(seedPath);
   await fs.writeFile(`${seedPath}.sha256`, `${seedInfo.sha256}  ${path.basename(seedPath)}\n`);
 

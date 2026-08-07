@@ -1,4 +1,4 @@
-# Commonweave RC17.8 — Cerbanimo Spatial Parity Pass
+# Civweave RC17.8 — Cerbanimo Spatial Parity Pass
 
 Cerbanimo visual mode now adds a universal spatial search/command palette, live attention inbox, data-backed object lists, resumable local form drafts, richer project/mission/resource/community/activity close-ups, direct project selection, task inspection, and improved visual continuity.
 

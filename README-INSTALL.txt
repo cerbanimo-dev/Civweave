@@ -1,7 +1,7 @@
-COMMONWEAVE v1.0.27 IDENTITY + AI CONTROL FIX
+CIVWEAVE v1.0.27 IDENTITY + AI CONTROL FIX
 =============================================
 
-Copy the contents of this folder into the root of cerbanimo-dev/Commonweave,
+Copy the contents of this folder into the root of cerbanimo-dev/Civweave,
 preserving the directory structure, then commit and push.
 
 FILES REPLACED
@@ -36,8 +36,8 @@ POWERSHELL INSTALL
 ------------------
 From the extracted bundle folder:
 
-Copy-Item -Path .\public\* -Destination <PATH-TO-COMMONWEAVE>\public -Recurse -Force
-Set-Location <PATH-TO-COMMONWEAVE>
+Copy-Item -Path .\public\* -Destination <PATH-TO-CIVWEAVE>\public -Recurse -Force
+Set-Location <PATH-TO-CIVWEAVE>
 git add public/app
 git commit -m "Repair AI controls and update realm identities"
 git push origin main
@@ -48,6 +48,6 @@ node --check public/app/loom-v127.js
 node --check public/app/realm-v127.js
 
 After Render deploys, open:
-https://commonweave-host-node.onrender.com/loom/
+https://civweave-host-node.onrender.com/loom/
 
 A normal refresh should be enough because the HTML references the identity-ai-2 asset revision.

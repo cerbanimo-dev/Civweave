@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='1.0.4-cerbanimo-proof-attachments-v165';
-if(globalThis.CommonweaveCerbanimoProofAttachmentsV165?.version===VERSION)return;
+if(globalThis.CivweaveCerbanimoProofAttachmentsV165?.version===VERSION)return;
 const DB_NAME='cerbanimo-proof-files-v165';
 const DB_STORE='files';
 const META_KEY='cerbanimo.proof-attachments.v165';
@@ -15,7 +15,7 @@ const now=()=>new Date().toISOString();
 const uid=prefix=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`;
 let pendingTarget=null;
 let decorateQueued=false;
-function api(){return globalThis.CommonweaveCerbanimoQuestV144}
+function api(){return globalThis.CivweaveCerbanimoQuestV144}
 function metadata(){const value=parse(localStorage.getItem(META_KEY),{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}
 function writeMetadata(value){localStorage.setItem(META_KEY,JSON.stringify(value));try{dispatchEvent(new CustomEvent('cerbanimo:proof-attachments-changed',{detail:{attachments:value}}))}catch{}}
 function formatBytes(bytes){const value=Number(bytes)||0;if(value<1024)return`${value} B`;if(value<1024*1024)return`${(value/1024).toFixed(1)} KB`;return`${(value/1024/1024).toFixed(1)} MB`}
@@ -65,5 +65,5 @@ function captureClick(event){const control=event.target.closest?.('[data-cq-acti
 function captureSubmit(event){const form=event.target;if(!form?.matches?.('#cq144-dialog form[data-cq165-quest-id]'))return;const files=form.querySelector('input[name="proofFiles"]')?.files,link=clean(new FormData(form).get('proofLink'),2000),note=clean(new FormData(form).get('value'),12000);if(!files?.length&&!link&&note)return;event.preventDefault();event.stopImmediatePropagation();submitEnhanced(form).catch(error=>toast(error.message))}
 function boot(){injectStyles();ensureViewer();document.addEventListener('click',captureClick,true);document.addEventListener('submit',captureSubmit,true);const observer=new MutationObserver(scheduleDecorate);observer.observe(document.documentElement,{childList:true,subtree:true});addEventListener('cerbanimo:quest-engine-changed',scheduleDecorate);addEventListener('cerbanimo:proof-attachments-changed',scheduleDecorate);scheduleDecorate()}
 if(hasDOM){document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot()}
-globalThis.CommonweaveCerbanimoProofAttachmentsV165={version:VERSION,DB_NAME,META_KEY,validateFiles,validProofUrl,putFile,getFile,deleteFile,openAttachment,submitEnhanced,scheduleDecorate};
+globalThis.CivweaveCerbanimoProofAttachmentsV165={version:VERSION,DB_NAME,META_KEY,validateFiles,validProofUrl,putFile,getFile,deleteFile,openAttachment,submitEnhanced,scheduleDecorate};
 })();

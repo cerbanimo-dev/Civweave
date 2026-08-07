@@ -1,11 +1,11 @@
 (()=>{
 'use strict';
-const SETTINGS_KEY='commonweave.universal-ai.v127';
-const CHAT_KEY='commonweave.weaveling-chat.v127';
+const SETTINGS_KEY='civweave.universal-ai.v127';
+const CHAT_KEY='civweave.weaveling-chat.v127';
 const MODEL_ID='HuggingFaceTB/SmolLM2-360M-Instruct';
-const SYSTEM_IDS=['commonweave','living-school','cerbanimo','fellowfare','anarchadia'];
+const SYSTEM_IDS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const GUIDE_BY_SYSTEM={
-  commonweave:{name:'Weaveling',role:'central mirror and orchestrator',prompt:'Reflect the user’s intent, mark assumptions, select a useful route without claiming certainty, and end with a concrete next step. Preserve agency.'},
+  civweave:{name:'Weaveling',role:'central mirror and orchestrator',prompt:'Reflect the user’s intent, mark assumptions, select a useful route without claiming certainty, and end with a concrete next step. Preserve agency.'},
   'living-school':{name:'Moss',role:'learning guide',prompt:'Turn the request into a learnable progression. Distinguish explanation, practice, assessment, and credential evidence.'},
   cerbanimo:{name:'Kamiya',role:'questwright and skilled-work guide',prompt:'Turn work into transparent quests, checkpoints, proof, validation, and rewards. Be playful without hiding stakes or manipulating the user.'},
   fellowfare:{name:'Rook',role:'quartermaster and exchange guide',prompt:'Name needs and offers, clarify constraints, protect trust, and make logistics and fair exchange edges explicit.'},
@@ -27,17 +27,17 @@ const RESPONSE_SCHEMA={
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const normalizeArray=value=>Array.isArray(value)?value:[];
-const runtime=()=>globalThis.CommonweaveModelRuntime||null;
+const runtime=()=>globalThis.CivweaveModelRuntime||null;
 let ledgerPromise=null;
 
 function report(kind,detail={}){
-  try{fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:'1.0.30',build:'smollm2-onboard-r6',kind:`assistant-v134:${kind}`,url:location.href,detail}),keepalive:true,cache:'no-store'}).catch(()=>{})}catch{}
+  try{fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({schema:'civweave.boot-log.v1',time:new Date().toISOString(),version:'1.0.30',build:'smollm2-onboard-r6',kind:`assistant-v134:${kind}`,url:location.href,detail}),keepalive:true,cache:'no-store'}).catch(()=>{})}catch{}
 }
 
 function pathSystem(){
   const parts=location.pathname.split('/').filter(Boolean);
   const index=parts.indexOf('realm');
-  return index>=0&&SYSTEM_IDS.includes(parts[index+1])?parts[index+1]:'commonweave';
+  return index>=0&&SYSTEM_IDS.includes(parts[index+1])?parts[index+1]:'civweave';
 }
 
 function providerName(value){
@@ -59,15 +59,15 @@ function selectedConfig(){
 }
 
 async function ledger(){
-  if(!ledgerPromise)ledgerPromise=globalThis.CommonweaveParity?.load?.().catch(()=>null)||Promise.resolve(null);
+  if(!ledgerPromise)ledgerPromise=globalThis.CivweaveParity?.load?.().catch(()=>null)||Promise.resolve(null);
   return ledgerPromise;
 }
 
 async function currentEnvironment(systemId){
   const data=await ledger();
   const query=new URLSearchParams(location.search);
-  const saved=localStorage.getItem(`commonweave.realm-room.${systemId}`);
-  const roomId=systemId==='commonweave'?'commonweave.quad':query.get('room')||saved||data?.systems?.find?.(item=>item.id===systemId)?.roomIds?.[0]||'';
+  const saved=localStorage.getItem(`civweave.realm-room.${systemId}`);
+  const roomId=systemId==='civweave'?'civweave.quad':query.get('room')||saved||data?.systems?.find?.(item=>item.id===systemId)?.roomIds?.[0]||'';
   const room=data?.index?.rooms?.get?.(roomId)||data?.rooms?.find?.(item=>item.id===roomId)||null;
   return {systemId,roomId,roomLabel:room?.label||roomId||'The Quad',capabilityIds:normalizeArray(room?.capabilityIds),roomPurpose:room?.purpose||''};
 }
@@ -83,8 +83,8 @@ function matchedRoute(text,currentSystem){
   const scored=groups.map(group=>({...group,hits:group.words.filter(word=>lower.includes(word))})).sort((a,b)=>b.hits.length-a.hits.length);
   const winner=scored[0];
   if(winner?.hits.length)return {system:winner.system,mode:winner.mode,confidence:Math.min(.96,.58+winner.hits.length*.1),evidence:winner.hits};
-  if(/plan|steps|roadmap|what next|how do i/.test(lower))return {system:currentSystem||'commonweave',mode:'Plan',confidence:.68,evidence:['planning phrase']};
-  return {system:currentSystem||'commonweave',mode:'Reflect',confidence:.42,evidence:[]};
+  if(/plan|steps|roadmap|what next|how do i/.test(lower))return {system:currentSystem||'civweave',mode:'Plan',confidence:.68,evidence:['planning phrase']};
+  return {system:currentSystem||'civweave',mode:'Reflect',confidence:.42,evidence:[]};
 }
 
 async function compileContext({text,systemId,guideName,history}){
@@ -95,8 +95,8 @@ async function compileContext({text,systemId,guideName,history}){
   const destinationRoom=destinationSystem?.roomIds?.[0]||environment.roomId;
   const consequential=/\b(send|spend|transfer|publish|submit|approve|vote|delete|invite|assign|purchase|order|deploy|federate)\b/i.test(text);
   return {
-    schema:'commonweave.structured-context.v1',
-    routingQuestion:'Which canonical Commonweave system best owns the user’s next useful action?',
+    schema:'civweave.structured-context.v1',
+    routingQuestion:'Which canonical Civweave system best owns the user’s next useful action?',
     routingAnswer:{mode:route.mode,system:route.system,room:destinationRoom,confidence:route.confidence,evidence:route.evidence},
     userMessage:String(text),
     currentContext:environment,
@@ -106,16 +106,16 @@ async function compileContext({text,systemId,guideName,history}){
     requestedModel:selectedConfig(),
     onboardFallback:{model:MODEL_ID,expectation:'If the selected provider fails, answer locally with modest scope, explicit uncertainty, no invented tool use, and no claim that external actions occurred.'},
     consent:{consequentialActionDetected:consequential,rule:'Drafting may be automatic. Spending, transferring, publishing, submitting, voting, deleting, assigning, purchasing, deploying, or federating requires affirmative consent.'},
-    responseContract:{schema:'commonweave.guide-choice.v1',fields:['answer','choice.mode','choice.system','choice.room','choice.nextAction','assumptions','requiresConsent','confidence']}
+    responseContract:{schema:'civweave.guide-choice.v1',fields:['answer','choice.mode','choice.system','choice.room','choice.nextAction','assumptions','requiresConsent','confidence']}
   };
 }
 
 function prompts(context,systemId){
-  const guide=GUIDE_BY_SYSTEM[systemId]||GUIDE_BY_SYSTEM.commonweave;
-  const systemPrompt=`You are ${guide.name}, Commonweave’s ${guide.role}. ${guide.prompt}\n\nYou receive structured context produced by the application. Treat routing as evidence, not unquestionable truth. Return JSON only and satisfy the response contract. Do not claim that an action happened unless the context says it already happened. When requiresConsent is true, explain the proposed action but do not execute it.`;
+  const guide=GUIDE_BY_SYSTEM[systemId]||GUIDE_BY_SYSTEM.civweave;
+  const systemPrompt=`You are ${guide.name}, Civweave’s ${guide.role}. ${guide.prompt}\n\nYou receive structured context produced by the application. Treat routing as evidence, not unquestionable truth. Return JSON only and satisfy the response contract. Do not claim that an action happened unless the context says it already happened. When requiresConsent is true, explain the proposed action but do not execute it.`;
   return [
     {role:'system',content:systemPrompt},
-    {role:'user',content:`Structured context:\n${JSON.stringify(context)}\n\nRespond as JSON matching commonweave.guide-choice.v1.`}
+    {role:'user',content:`Structured context:\n${JSON.stringify(context)}\n\nRespond as JSON matching civweave.guide-choice.v1.`}
   ];
 }
 
@@ -152,12 +152,12 @@ function parseModelOutput(output,context){
 }
 
 async function respond({text,systemId=pathSystem(),guideName,history=[]}){
-  const guide=GUIDE_BY_SYSTEM[systemId]||GUIDE_BY_SYSTEM.commonweave;
+  const guide=GUIDE_BY_SYSTEM[systemId]||GUIDE_BY_SYSTEM.civweave;
   const context=await compileContext({text,systemId,guideName:guideName||guide.name,history});
   const modelRuntime=runtime();
   if(!modelRuntime?.generate)throw new Error('The shared model runtime has not loaded.');
   const config=selectedConfig();
-  const result=await modelRuntime.generate({purpose:'commonweave-guide-response',executionProfile:'interactive',config,messages:prompts(context,systemId),schema:RESPONSE_SCHEMA,maxRepairAttempts:1});
+  const result=await modelRuntime.generate({purpose:'civweave-guide-response',executionProfile:'interactive',config,messages:prompts(context,systemId),schema:RESPONSE_SCHEMA,maxRepairAttempts:1});
   if(!['success','fallback'].includes(result?.status))throw Object.assign(new Error(result?.error?.message||`The model request ended with ${result?.status||'an unknown status'}.`),{code:result?.error?.code,result});
   const response=parseModelOutput(result.outputJson||result.outputText,context);
   const fallbackUsed=result.status==='fallback'||Boolean(result.fallback?.used);
@@ -167,11 +167,11 @@ async function respond({text,systemId=pathSystem(),guideName,history=[]}){
 
 function storageForDialog(node){
   if(node.id==='cw127-chat')return CHAT_KEY;
-  return `commonweave.guide-chat.${pathSystem()}.v128`;
+  return `civweave.guide-chat.${pathSystem()}.v128`;
 }
 
 function initialFor(node,systemId){
-  const guide=GUIDE_BY_SYSTEM[systemId]||GUIDE_BY_SYSTEM.commonweave;
+  const guide=GUIDE_BY_SYSTEM[systemId]||GUIDE_BY_SYSTEM.civweave;
   return node.id==='cw127-chat'
     ?'I’m here. Tell me what you want to move toward. Your chosen AI gets the structured context first, and SmolLM2 stands underneath it as the onboard fallback.'
     :`I’m ${guide.name}, your ${guide.role}. What needs attention here?`;
@@ -193,8 +193,8 @@ async function handleSubmit(event,form,node){
   const input=form.querySelector('textarea,input[type="text"]');
   const text=input?.value.trim();
   if(!text)return;
-  const systemId=node.id==='cw127-chat'?'commonweave':pathSystem();
-  const guide=GUIDE_BY_SYSTEM[systemId]||GUIDE_BY_SYSTEM.commonweave;
+  const systemId=node.id==='cw127-chat'?'civweave':pathSystem();
+  const guide=GUIDE_BY_SYSTEM[systemId]||GUIDE_BY_SYSTEM.civweave;
   const key=storageForDialog(node);
   const stored=parse(localStorage.getItem(key),[]);
   const items=Array.isArray(stored)?stored:[];
@@ -237,7 +237,7 @@ function attach(node){
   const log=node.querySelector('.cw127-chat-log');
   if(!form||!log)return;
   node.dataset.smollm2AssistantAttached='true';
-  const systemId=node.id==='cw127-chat'?'commonweave':pathSystem();
+  const systemId=node.id==='cw127-chat'?'civweave':pathSystem();
   renderLog(node,storageForDialog(node),systemId);
   form.addEventListener('submit',event=>handleSubmit(event,form,node),true);
 }
@@ -251,5 +251,5 @@ function scan(){
 const observer=new MutationObserver(scan);
 observer.observe(document.documentElement,{childList:true,subtree:true});
 addEventListener('DOMContentLoaded',scan,{once:true});
-globalThis.CommonweaveAssistantV134={respond,compileContext,selectedConfig,model:MODEL_ID};
+globalThis.CivweaveAssistantV134={respond,compileContext,selectedConfig,model:MODEL_ID};
 })();

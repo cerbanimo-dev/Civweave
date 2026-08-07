@@ -1,10 +1,10 @@
-# Commonweave v1.0.11
+# Civweave v1.0.11
 
 ## Redirect-safe PWA navigation
 
 This release fixes service-worker navigation failures shared by Render and Cloudflare Pages.
 
-A browser navigation request reaches a service worker with redirect mode `manual`. The Commonweave worker could internally fetch or cache a response that had followed a host redirect, then return that response directly to the original manual navigation. Browsers reject that response before page JavaScript runs, producing:
+A browser navigation request reaches a service worker with redirect mode `manual`. The Civweave worker could internally fetch or cache a response that had followed a host redirect, then return that response directly to the original manual navigation. Browsers reject that response before page JavaScript runs, producing:
 
 > The FetchEvent resulted in a network error response: a redirected response was used for a request whose redirect mode is not "follow".
 

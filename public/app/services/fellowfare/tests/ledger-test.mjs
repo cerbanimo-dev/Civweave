@@ -1,7 +1,7 @@
 import {
   createAgreementFromProposal, normalizeAgreement, agreementProgress, addMilestone, completeMilestone,
   addEvidence, recordSettlement, openRepair, resolveRepair, addReview, advanceRecurringAgreement,
-  createLedgerEvent, buildCommonweaveBundle, trustSnapshotFromReviews
+  createLedgerEvent, buildCivweaveBundle, trustSnapshotFromReviews
 } from '../ledger.js';
 
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
@@ -34,8 +34,8 @@ agreement.recurrence={enabled:true,cadence:'monthly',nextAt:'2026-08-01T12:00:00
 advanceRecurringAgreement(agreement,'2026-08-01T12:00:00.000Z');
 assert(agreement.status === 'active' && agreement.settlement.status === 'pending' && agreementProgress(agreement) === 0, 'Recurring cycle should reset execution state without deleting terms');
 const event=createLedgerEvent('milestone.completed','agreement','a1','me',{milestoneId:'m1'},'2026-07-30T12:00:00.000Z');
-const bundle=buildCommonweaveBundle({version:'0.3.0',profile:{id:'me',settings:{ai:{apiKey:'secret'}}},people:[{id:'p1'}],threads:[thread],proposals:[proposal],assemblies:[],agreements:[agreement],ledgerEvents:[event]},{version:'0.3.0'});
-assert(bundle.format === 'commonweave.exchange-bundle' && bundle.entities.agreements.length === 1, 'Commonweave bundle should carry agreements');
-assert(!bundle.entities.people[0].settings?.ai?.apiKey, 'Commonweave bundle must strip model secrets');
+const bundle=buildCivweaveBundle({version:'0.3.0',profile:{id:'me',settings:{ai:{apiKey:'secret'}}},people:[{id:'p1'}],threads:[thread],proposals:[proposal],assemblies:[],agreements:[agreement],ledgerEvents:[event]},{version:'0.3.0'});
+assert(bundle.format === 'civweave.exchange-bundle' && bundle.entities.agreements.length === 1, 'Civweave bundle should carry agreements');
+assert(!bundle.entities.people[0].settings?.ai?.apiKey, 'Civweave bundle must strip model secrets');
 assert(bundle.mapping.evidence === 'proof.item' && bundle.events[0].type === 'milestone.completed', 'Bundle should publish semantic mappings and event history');
 console.log('Fellowfare exchange ledger tests passed.');

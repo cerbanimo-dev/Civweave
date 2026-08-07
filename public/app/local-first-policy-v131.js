@@ -1,9 +1,9 @@
 (()=>{
 'use strict';
-const INTENTIONS_KEY='commonweave.intentions.v127';
-const LINK_KEY='commonweave.chat-intention-link.v131';
-const DIAGNOSTICS_KEY='commonweave.local-diagnostics.v131';
-const CHAT_KEYS=/^commonweave\.(?:weaveling-chat\.v127|guide-chat\.[^.]+\.v128)$/;
+const INTENTIONS_KEY='civweave.intentions.v127';
+const LINK_KEY='civweave.chat-intention-link.v131';
+const DIAGNOSTICS_KEY='civweave.local-diagnostics.v131';
+const CHAT_KEYS=/^civweave\.(?:weaveling-chat\.v127|guide-chat\.[^.]+\.v128)$/;
 const nativeFetch=globalThis.fetch?.bind(globalThis);
 const nativeSetItem=Storage.prototype.setItem;
 const parse=(value,fallback)=>{try{const out=JSON.parse(value);return out==null?fallback:out}catch{return fallback}};
@@ -73,10 +73,10 @@ function sweep(){
   try{for(let i=0;i<localStorage.length;i+=1){const key=localStorage.key(i);if(key&&CHAT_KEYS.test(key)){const value=localStorage.getItem(key);nativeSetItem.call(localStorage,key,sanitizeChat(key,value))}}}catch{}
 }
 sweep();
-globalThis.CommonweaveLocalFirstPolicy={
+globalThis.CivweaveLocalFirstPolicy={
   diagnostics:()=>parse(localStorage.getItem(DIAGNOSTICS_KEY),[]),
   clearDiagnostics:()=>localStorage.removeItem(DIAGNOSTICS_KEY),
-  linkedPlan:chatKey=>localStorage.getItem(conversationLinkKey(chatKey||'commonweave.weaveling-chat.v127'))||'',
+  linkedPlan:chatKey=>localStorage.getItem(conversationLinkKey(chatKey||'civweave.weaveling-chat.v127'))||'',
   version:'1.0.31'
 };
 })();

@@ -1,11 +1,11 @@
-# Commonweave Host Node Setup Guide
+# Civweave Host Node Setup Guide
 
 ## What this package contains
 
 - `server.mjs`: dependency-free Node host-node backend and static server.
 - `public/index.html`: minimal installation landing page.
-- `public/app/`: the complete offline-first Commonweave PWA.
-- `public/downloads/Commonweave-Mobile-Install-Kit.zip`: downloadable offline install kit.
+- `public/app/`: the complete offline-first Civweave PWA.
+- `public/downloads/Civweave-Mobile-Install-Kit.zip`: downloadable offline install kit.
 - `render.yaml`: one-click Render Blueprint configuration.
 - `Dockerfile` and `docker-compose.yml`: container deployment.
 - `data/`: local JSON host-node state.
@@ -16,7 +16,7 @@ The backend exposes:
 
 - `GET /api/health`: health and basic node counts.
 - `GET /api/config`: connection information and feature declaration.
-- `POST /api/nodes/register`: register or refresh a local Commonweave node.
+- `POST /api/nodes/register`: register or refresh a local Civweave node.
 - `POST /api/nodes/heartbeat`: keep a node marked active.
 - `GET /api/nodes`: inspect known nodes.
 - `POST /api/envelopes`: publish a bounded relay envelope.
@@ -26,7 +26,7 @@ The backend exposes:
 - `GET /api/presence`: inspect recent presence.
 - `GET /api/events`: server-sent event stream for live node, presence, and envelope notices.
 
-This is a host and relay node, not a canonical cloud database. Commonweave remains local-first. The node stores only data explicitly sent to it.
+This is a host and relay node, not a canonical cloud database. Civweave remains local-first. The node stores only data explicitly sent to it.
 
 # Option A: Run locally with Node.js
 
@@ -138,7 +138,7 @@ Authorization: Bearer YOUR_TOKEN
 or:
 
 ```http
-X-Commonweave-Hub-Token: YOUR_TOKEN
+X-Civweave-Hub-Token: YOUR_TOKEN
 ```
 
 Health and public connection metadata remain accessible so the installer can find the node.
@@ -236,7 +236,7 @@ Do not set `PORT`; Render provides it.
 
 A free Render web service is suitable for testing installation and temporary relay behavior. Its filesystem is ephemeral. Node registrations, presence, and envelopes can disappear when the service restarts, redeploys, or spins down.
 
-The installed Commonweave PWA still retains its local-first browser data and continues working offline.
+The installed Civweave PWA still retains its local-first browser data and continues working offline.
 
 ### Paid web service with persistent disk
 
@@ -263,20 +263,20 @@ This host intentionally uses a small JSON state store. Before running multiple s
 3. The PWA opens with the node URL prefilled.
 4. User selects **Connect node**.
 5. The browser registers a stable local node ID and stores the host configuration locally.
-6. User selects **Install Commonweave**, or uses the browser's Install/Add to Home Screen command.
-7. User enters Commonweave. Heartbeats continue while the app is open.
+6. User selects **Install Civweave**, or uses the browser's Install/Add to Home Screen command.
+7. User enters Civweave. Heartbeats continue while the app is open.
 8. If the node goes offline, the installed app continues using its cached shell and local records.
 
 The saved connection record uses:
 
 ```text
-commonweave.host-node.v1
+civweave.host-node.v1
 ```
 
 The stable browser node ID uses:
 
 ```text
-commonweave.host-node-id.v1
+civweave.host-node-id.v1
 ```
 
 # Basic verification
@@ -321,9 +321,9 @@ curl "http://localhost:8787/api/envelopes?nodeId=test-node"
 
 ## Gemini Antigravity routing
 
-Hosted Commonweave pages send Antigravity interaction requests to the same-origin `/api/ai/gemini/interactions` proxy. The host forwards each request to Google and does not write the Gemini key to disk, logs, or host-node state. Keep the key session-only in the browser. Standard creative-model routing remains unchanged.
+Hosted Civweave pages send Antigravity interaction requests to the same-origin `/api/ai/gemini/interactions` proxy. The host forwards each request to Google and does not write the Gemini key to disk, logs, or host-node state. Keep the key session-only in the browser. Standard creative-model routing remains unchanged.
 
 
 ## Default public host and update broadcasts
 
-The built-in default host is `https://commonweave-host-node.onrender.com`. Connected clients listen for release events and periodically compare the current host build, app version, and install-kit SHA-256. Deploying a newer package automatically makes the new metadata available; `POST /api/releases/broadcast` immediately rebroadcasts the active release to connected clients.
+The built-in default host is `https://civweave-host-node.onrender.com`. Connected clients listen for release events and periodically compare the current host build, app version, and install-kit SHA-256. Deploying a newer package automatically makes the new metadata available; `POST /api/releases/broadcast` immediately rebroadcasts the active release to connected clients.

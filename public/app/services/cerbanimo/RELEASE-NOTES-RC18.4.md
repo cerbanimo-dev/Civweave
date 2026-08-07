@@ -7,4 +7,4 @@ Cerbanimo-only visual-mode pass.
 - Boundary decisions receive local receipts and preserve source authority metadata.
 - Rejected evidence exposes a correction cycle and corrected resubmission path.
 - Local evidence attachments gain preview/export controls for supported files.
-- Crossroads revision requests queue an outbound Commonweave envelope rather than mutating source records.
+- Crossroads revision requests queue an outbound Civweave envelope rather than mutating source records.

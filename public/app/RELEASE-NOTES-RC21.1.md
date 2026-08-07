@@ -1,6 +1,6 @@
 # RC21.1 — Live Data Weave
 
-Commonweave's living world now reads real local activity from all four applications instead of relying only on demonstration scene data.
+Civweave's living world now reads real local activity from all four applications instead of relying only on demonstration scene data.
 
 ## Added
 

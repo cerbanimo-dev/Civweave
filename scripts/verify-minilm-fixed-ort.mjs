@@ -17,13 +17,13 @@ const [pkgText,versionText,adapter,worker,manifestText,stage,materializer,servic
   read('scripts/stage-onnxruntime-web-assets.mjs'),
   read('scripts/ensure-minilm-fixed-ort-model.mjs'),
   read('public/service-worker.js'),
-  read('public/extensions/commonweave-model-download-v157.js'),
+  read('public/extensions/civweave-model-download-v157.js'),
   read('scripts/build-mobile-install-kit.mjs')
 ]);
 const pkg=JSON.parse(pkgText),manifest=JSON.parse(manifestText),canonicalVersion=versionText.trim();
 
 assert(/^\d+\.\d+\.\d+$/.test(canonicalVersion),'VERSION must contain a semantic release version');
-assert(pkg.version===canonicalVersion,`package.json ${pkg.version} is not aligned with canonical Commonweave ${canonicalVersion}`);
+assert(pkg.version===canonicalVersion,`package.json ${pkg.version} is not aligned with canonical Civweave ${canonicalVersion}`);
 assert(pkg.dependencies?.['onnxruntime-web']==='1.27.0','onnxruntime-web is not pinned to 1.27.0');
 assert(pkg.scripts?.prestart?.includes('stage-onnxruntime-web-assets.mjs'),'normal startup does not stage the fixed runtime');
 assert(pkg.scripts?.prestart?.includes('ensure-minilm-fixed-ort-model.mjs'),'normal startup does not materialize the fixed graph');
@@ -33,7 +33,7 @@ assert(settingsBoundaryCheck.includes('verify-ai-settings-self-contained-v181.mj
 
 for(const token of ["loaderPolicy:'fixed'","runtime:'onnxruntime-web/wasm'",'/app/vendor/onnxruntime/ort.wasm.min.mjs','model_quantized.onnx','FIXED_PROFILE','device-package-r41-fixed-ort-wasm'])assert(adapter.includes(token),`adapter missing ${token}`);
 const modelCache=adapter.match(/const MODEL_CACHE='([^']+)'/)?.[1]||'';
-assert(/^commonweave-model-\d+\.\d+\.\d+-minilm-fixed-ort-r1$/.test(modelCache),'adapter model cache must remain a versioned fixed-ORT package key');
+assert(/^civweave-model-\d+\.\d+\.\d+-minilm-fixed-ort-r1$/.test(modelCache),'adapter model cache must remain a versioned fixed-ORT package key');
 for(const retired of ['transformers.min.js','model_q4f16.onnx','navigator.gpu','selectProfile','includeWebGPU'])assert(!adapter.includes(retired),`adapter still contains model/backend selection: ${retired}`);
 assert(adapter.includes("if(!explicit)return{ready:false,dormant:true,reason:'explicit-activation-required'}"),'adapter can start outside explicit semantic-lab activation');
 
@@ -47,7 +47,7 @@ for(const token of [
   'createTokenizer',
   'wordPiece',
   'MAX_TOKENS=128',
-  "const VECTOR_DB='commonweave-semantic-cache-v1'",
+  "const VECTOR_DB='civweave-semantic-cache-v1'",
   'const INDEX_BATCH_SIZE=1',
   'async function ensureIndexVectors(id,state)',
   'yieldMs:16',
@@ -67,8 +67,8 @@ for(const token of ['MODEL_FILES','MODEL_CACHE','modelOnDemand','GET_MODEL_PACKA
 assert(serviceWorker.includes("'/app/anarchadia-sovereignty-kernel-v146.js'"),'service worker core lost the Anarchadia sovereignty kernel while adding the model corridor');
 assert(!serviceWorker.match(/const CORE=\[[\s\S]*model_quantized\.onnx/),'heavy model graph leaked into the core install list');
 
-for(const token of ["settingsHooks:false","automaticStartup:false","commonweave:open-semantic-lab",'fixed ONNX Runtime Web WASM'])assert(downloadRuntime.includes(token),`semantic-lab downloader missing ${token}`);
-for(const forbidden of ['commonweave:open-ai-settings','#settings-button','#model-chip'])assert(!downloadRuntime.includes(forbidden),`model download still hooks the settings lifecycle through ${forbidden}`);
+for(const token of ["settingsHooks:false","automaticStartup:false","civweave:open-semantic-lab",'fixed ONNX Runtime Web WASM'])assert(downloadRuntime.includes(token),`semantic-lab downloader missing ${token}`);
+for(const forbidden of ['civweave:open-ai-settings','#settings-button','#model-chip'])assert(!downloadRuntime.includes(forbidden),`model download still hooks the settings lifecycle through ${forbidden}`);
 
 assert(manifest.format==='onnxruntime-web-fixed-wasm','manifest does not identify the fixed WASM runtime');
 assert(manifest.behavior?.runtimeOwnsModelSelection===false,'manifest still delegates model selection to the runtime');

@@ -6,12 +6,12 @@
 - An absolute Living School logo path failed below `/app/services/`.
 - Existing clients sent heartbeat requests without checking host capabilities.
 - FellowFare hotspot percentages were mapped to the viewport instead of the cropped source image.
-- Commonweave could reveal its conventional substrate before the visual world formed.
+- Civweave could reveal its conventional substrate before the visual world formed.
 - Antigravity permission failures blocked background workflows.
 
 ## Repairs verified
 - Every standalone JavaScript and module file passes `node --check`.
-- Executable inline scripts in Commonweave, Living School, and Cerbanimo pass syntax checks.
+- Executable inline scripts in Civweave, Living School, and Cerbanimo pass syntax checks.
 - All five service-worker precache arrays contain no duplicate request and no missing local file.
 - Root and realm HTML/CSS asset references resolve to existing files.
 - Host health, configuration, registration, heartbeat, release, broadcast, seed, install-kit, and critical visual-image routes return successfully.

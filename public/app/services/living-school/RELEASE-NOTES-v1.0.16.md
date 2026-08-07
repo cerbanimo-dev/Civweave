@@ -1,4 +1,4 @@
-# Commonweave Host Node Hub v1.0.16
+# Civweave Host Node Hub v1.0.16
 
 ## Source-of-truth recovery
 - Rebuilt the current host from the intact v1.0.10 Render shell and the complete v1.0.15 Pocket Campus seed.

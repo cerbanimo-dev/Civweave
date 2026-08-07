@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download, verify, and batch-unpack Commonweave category-school seed ZIPs."""
+"""Download, verify, and batch-unpack Civweave category-school seed ZIPs."""
 from __future__ import annotations
 
 import argparse
@@ -11,7 +11,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-DEFAULT_BASE_URL = "https://commonweave-host-node.onrender.com/downloads/knowledge-schools/"
+DEFAULT_BASE_URL = "https://civweave-host-node.onrender.com/downloads/knowledge-schools/"
 
 
 def sha256_file(path: Path) -> str:
@@ -34,7 +34,7 @@ def safe_extract(archive: zipfile.ZipFile, destination: Path) -> None:
 def download(url: str, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".part")
-    request = urllib.request.Request(url, headers={"User-Agent": "CommonweaveKnowledgeSchoolInstaller/1.0"})
+    request = urllib.request.Request(url, headers={"User-Agent": "CivweaveKnowledgeSchoolInstaller/1.0"})
     try:
         with urllib.request.urlopen(request, timeout=120) as response, temporary.open("wb") as handle:
             shutil.copyfileobj(response, handle, length=1024 * 1024)
@@ -67,7 +67,7 @@ def main() -> int:
         downloaded.append(catalog_path)
 
     catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
-    if catalog.get("schema") != "commonweave.knowledge-school-catalog.v1":
+    if catalog.get("schema") != "civweave.knowledge-school-catalog.v1":
         raise RuntimeError("Unsupported knowledge-school catalog schema")
     by_slug = {record["school_slug"]: record for record in catalog["schools"]}
     if args.schools == "all":
@@ -99,7 +99,7 @@ def main() -> int:
                 raise RuntimeError(f"Checksum mismatch for {archive_path.name}")
             if archive_path.stat().st_size != int(record["zip_bytes"]):
                 raise RuntimeError(f"Size mismatch for {archive_path.name}")
-            target = destination / f"commonweave-school-{slug}"
+            target = destination / f"civweave-school-{slug}"
             if target.exists():
                 if not args.replace:
                     raise RuntimeError(f"Destination already exists: {target}; pass --replace to overwrite")

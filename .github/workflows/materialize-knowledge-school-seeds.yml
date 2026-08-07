@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       artifact_id:
-        description: Actions artifact containing commonweave-category-school-seeds
+        description: Actions artifact containing civweave-category-school-seeds
         required: true
         default: '8929365780'
   push:
@@ -46,17 +46,17 @@ jobs:
       - name: Copy optional school assets into public downloads
         run: |
           set -euo pipefail
-          source_dir="$(find build/knowledge-school-artifact -type d -name commonweave-category-school-seeds -print -quit)"
+          source_dir="$(find build/knowledge-school-artifact -type d -name civweave-category-school-seeds -print -quit)"
           test -n "${source_dir}"
           target=public/downloads/knowledge-schools
           mkdir -p "${target}/schools"
           rm -f "${target}/schools/"*.zip
           cp "${source_dir}/catalog.json" "${target}/catalog.json"
-          cp "${source_dir}/commonweave-school-catalog.sqlite" "${target}/commonweave-school-catalog.sqlite"
+          cp "${source_dir}/civweave-school-catalog.sqlite" "${target}/civweave-school-catalog.sqlite"
           cp "${source_dir}/RECONCILIATION.json" "${target}/RECONCILIATION.json"
           cp "${source_dir}/SHA256SUMS" "${target}/SHA256SUMS"
           cp "${source_dir}/schools/"*.zip "${target}/schools/"
-          test ! -e "${target}/commonweave-category-school-seeds.zip"
+          test ! -e "${target}/civweave-category-school-seeds.zip"
       - name: Verify optional school assets
         run: |
           node --check public/app/knowledge-school-seeds-v1.js
@@ -69,7 +69,7 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add public/downloads/knowledge-schools/catalog.json \
-            public/downloads/knowledge-schools/commonweave-school-catalog.sqlite \
+            public/downloads/knowledge-schools/civweave-school-catalog.sqlite \
             public/downloads/knowledge-schools/RECONCILIATION.json \
             public/downloads/knowledge-schools/SHA256SUMS \
             public/downloads/knowledge-schools/schools

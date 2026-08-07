@@ -11,15 +11,15 @@ const DATA_DIR = path.resolve(__dirname, process.env.DATA_DIR || './data');
 const STATE_FILE = path.join(DATA_DIR, 'host-node-state.json');
 const PORT = Number(process.env.PORT || 8787);
 const HOST = process.env.HOST || '0.0.0.0';
-const HUB_NAME = process.env.HUB_NAME || 'Commonweave Host Node';
+const HUB_NAME = process.env.HUB_NAME || 'Civweave Host Node';
 const HUB_TOKEN = String(process.env.HUB_TOKEN || '').trim();
 const MAX_ENVELOPES = Math.max(100, Number(process.env.MAX_ENVELOPES || 5000));
 const STARTED_AT = new Date().toISOString();
 const BUILD_VERSION = '1.0.21-ai-uplift';
 const APP_VERSION = 'rc22.3.20-ai-checkpoint';
-const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://commonweave-host-node.onrender.com';
-const INSTALL_KIT_PATH = path.join(PUBLIC_DIR, 'downloads', 'Commonweave-Mobile-Install-Kit.zip');
-const CAMPUS_SEED_PATH = path.join(PUBLIC_DIR, 'downloads', 'commonweave-pocket-campus.cwseed');
+const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://civweave-host-node.onrender.com';
+const INSTALL_KIT_PATH = path.join(PUBLIC_DIR, 'downloads', 'Civweave-Mobile-Install-Kit.zip');
+const CAMPUS_SEED_PATH = path.join(PUBLIC_DIR, 'downloads', 'civweave-pocket-campus.cwseed');
 const sseClients = new Set();
 let installKitSha256 = '';
 let installKitSize = 0;
@@ -33,10 +33,10 @@ try {
 function releasePacket(baseUrl = DEFAULT_PUBLIC_HOST) {
   const root = String(baseUrl || DEFAULT_PUBLIC_HOST).replace(/\/$/, '');
   return {
-    schema: 'commonweave.release.v1', channel: 'stable', hostBuild: BUILD_VERSION, appVersion: APP_VERSION,
+    schema: 'civweave.release.v1', channel: 'stable', hostBuild: BUILD_VERSION, appVersion: APP_VERSION,
     releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,
-    downloadUrl: `${root}/downloads/Commonweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,
-    bytes: installKitSize, mandatory: false, notes: 'Current stable Commonweave host-node and offline PWA release.'
+    downloadUrl: `${root}/downloads/Civweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,
+    bytes: installKitSize, mandatory: false, notes: 'Current stable Civweave host-node and offline PWA release.'
   };
 }
 
@@ -63,7 +63,7 @@ function requestOrigin(req, url) {
   const forwarded = cleanText(req.headers['x-forwarded-proto'], 20).split(',')[0].trim();
   const protocol = forwarded === 'https' ? 'https:' : forwarded === 'http' ? 'http:' : url.protocol;
   const host = cleanText(req.headers['x-forwarded-host'] || req.headers.host || url.host, 300).split(',')[0].trim();
-  if (host === 'commonweave-host-node.onrender.com') return 'https://commonweave-host-node.onrender.com';
+  if (host === 'civweave-host-node.onrender.com') return 'https://civweave-host-node.onrender.com';
   return `${protocol}//${host}`;
 }
 
@@ -102,7 +102,7 @@ function bearer(req) {
   return header.startsWith('Bearer ') ? header.slice(7).trim() : '';
 }
 function authorized(req) {
-  return !HUB_TOKEN || bearer(req) === HUB_TOKEN || req.headers['x-commonweave-hub-token'] === HUB_TOKEN;
+  return !HUB_TOKEN || bearer(req) === HUB_TOKEN || req.headers['x-civweave-hub-token'] === HUB_TOKEN;
 }
 async function body(req, limit = 512 * 1024) {
   const chunks = [];
@@ -235,14 +235,14 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url || '/', base);
   const pathname = decodeURIComponent(url.pathname);
   try {
-    if ((pathname === '/field/commonweave/seed' || pathname === '/downloads/commonweave-pocket-campus.cwseed') && req.method === 'GET') {
-      const served = await serveFile(req, res, '/downloads/commonweave-pocket-campus.cwseed');
+    if ((pathname === '/field/civweave/seed' || pathname === '/downloads/civweave-pocket-campus.cwseed') && req.method === 'GET') {
+      const served = await serveFile(req, res, '/downloads/civweave-pocket-campus.cwseed');
       if (served) return;
-      return json(res, 404, { error: 'Commonweave campus seed is not available on this host node.' });
+      return json(res, 404, { error: 'Civweave campus seed is not available on this host node.' });
     }
     if (pathname.startsWith('/api/')) {
       if (req.method === 'OPTIONS') {
-        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-commonweave-hub-token', 'access-control-allow-methods': 'GET,POST,OPTIONS' });
+        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-civweave-hub-token', 'access-control-allow-methods': 'GET,POST,OPTIONS' });
         return res.end();
       }
       res.setHeader('access-control-allow-origin', '*');
@@ -252,7 +252,7 @@ const server = http.createServer(async (req, res) => {
         return json(res, 200, { ok: true, name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, release: releasePacket(requestOrigin(req, url)), startedAt: STARTED_AT, now: now(), nodes: Object.keys(state.nodes).length, envelopes: state.envelopes.length, persistence: STATE_FILE });
       }
       if (pathname === '/api/config' && req.method === 'GET') {
-        return json(res, 200, { schema: 'commonweave.host-node-config.v1', name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, baseUrl: requestOrigin(req, url), apiBase: `${requestOrigin(req, url)}/api`, appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Commonweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/commonweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download'] });
+        return json(res, 200, { schema: 'civweave.host-node-config.v1', name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, baseUrl: requestOrigin(req, url), apiBase: `${requestOrigin(req, url)}/api`, appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Civweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/civweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download'] });
       }
       if (pathname === '/api/releases/current' && req.method === 'GET') {
         return json(res, 200, releasePacket(requestOrigin(req, url)));
@@ -283,8 +283,8 @@ data: ${JSON.stringify(release)}
         const existing = state.nodes[nodeId];
         const node = state.nodes[nodeId] = {
           nodeId,
-          label: cleanText(input.label || input.displayName || 'Commonweave node', 120),
-          system: cleanText(input.system || 'commonweave', 80),
+          label: cleanText(input.label || input.displayName || 'Civweave node', 120),
+          system: cleanText(input.system || 'civweave', 80),
           capabilities: Array.isArray(input.capabilities) ? input.capabilities.map(x => cleanText(x, 80)).filter(Boolean).slice(0, 32) : [],
           metadata: input.metadata && typeof input.metadata === 'object' ? input.metadata : {},
           firstSeenAt: existing?.firstSeenAt || now(),
@@ -305,7 +305,7 @@ data: ${JSON.stringify(release)}
         const input = await body(req);
         const envelope = {
           id: id('env'),
-          schema: cleanText(input.schema || 'commonweave.relay-envelope.v1', 100),
+          schema: cleanText(input.schema || 'civweave.relay-envelope.v1', 100),
           from: cleanText(input.from, 160),
           to: cleanText(input.to || '*', 160),
           kind: cleanText(input.kind || 'message', 100),
@@ -342,14 +342,14 @@ data: ${JSON.stringify(release)}
         const input = await body(req);
         const nodeId = cleanText(input.nodeId, 160);
         if (!nodeId) return json(res, 400, { error: 'nodeId required' });
-        state.presence[nodeId] = { nodeId, scene: cleanText(input.scene, 120), system: cleanText(input.system || 'commonweave', 80), activity: cleanText(input.activity, 240), visibility: cleanText(input.visibility || 'node', 40), updatedAt: now() };
+        state.presence[nodeId] = { nodeId, scene: cleanText(input.scene, 120), system: cleanText(input.system || 'civweave', 80), activity: cleanText(input.activity, 240), visibility: cleanText(input.visibility || 'node', 40), updatedAt: now() };
         prune(); schedulePersist(); emit('presence', state.presence[nodeId]);
         return json(res, 200, { ok: true, presence: state.presence[nodeId] });
       }
       if (pathname === '/api/presence' && req.method === 'GET') return json(res, 200, { presence: Object.values(state.presence) });
       return json(res, 404, { error: 'API route not found' });
     }
-    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/commonweave-icon-32.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }
+    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/civweave-icon-32.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }
     if (await serveFile(req, res, pathname)) return;
     json(res, 404, { error: 'Not found' });
   } catch (error) {

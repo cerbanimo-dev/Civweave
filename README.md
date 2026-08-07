@@ -49,7 +49,7 @@ The repository retains older interfaces for migration history, comparison, and c
 Do not edit these by default:
 
 - `public/cabinet/`
-- root-level historical pages such as `public/cabinet-v*.html`, `public/commonweave-v*.html`, `public/index_old.html`, and backup variants
+- root-level historical pages such as `public/cabinet-v*.html`, `public/civweave-v*.html`, `public/index_old.html`, and backup variants
 - copied `www/app/` trees inside installer or release bundles
 - ZIP contents and other generated package mirrors
 - `public/cabinetonly/index.html`, which is only a compatibility redirect
@@ -67,7 +67,7 @@ Within an installed package, `/loom/`, `/lite/`, and `/cabinetonly/` are compati
 
 The current built-in public host retains its compatibility address until deployment infrastructure is renamed:
 
-`https://commonweave-host-node.onrender.com`
+`https://civweave-host-node.onrender.com`
 
 ## Local development
 

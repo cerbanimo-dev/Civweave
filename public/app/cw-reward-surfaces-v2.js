@@ -1,12 +1,12 @@
 (()=>{
 'use strict';
-if(globalThis.CommonweaveRewardSurfacesV2)return;
-const api=globalThis.CommonweaveCanonicalRewardsV2;if(!api)throw Error('Canonical reward ledger must load before surfaces.');
+if(globalThis.CivweaveRewardSurfacesV2)return;
+const api=globalThis.CivweaveCanonicalRewardsV2;if(!api)throw Error('Canonical reward ledger must load before surfaces.');
 const V='2.0.0',TREE_KEY='living-school.skill-tree.v2';let queued=false,verifyTicket=0;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),num=v=>Number.isFinite(Number(v))?Number(v):0,fmt=v=>new Intl.NumberFormat(undefined,{maximumFractionDigits:1}).format(num(v));
 function setText(id,value){const node=document.getElementById(id);if(node)node.textContent=String(value)}
 function calculatePassportFromLedger(ledger=api.readLedger()){
-  const data={schema:'anarchadia.passport-ledger-projection.v2',authority:'commonweave.reward-ledger.v2',skillXp:0,acorns:0,buttons:0,skills:{},entries:Array.isArray(ledger?.entries)?ledger.entries:[],ledgerUpdatedAt:ledger?.updatedAt};
+  const data={schema:'anarchadia.passport-ledger-projection.v2',authority:'civweave.reward-ledger.v2',skillXp:0,acorns:0,buttons:0,skills:{},entries:Array.isArray(ledger?.entries)?ledger.entries:[],ledgerUpdatedAt:ledger?.updatedAt};
   for(const entry of data.entries){
     const amount=num(entry.amount);
     if(entry.assetType==='skill-xp'){
@@ -30,7 +30,7 @@ function calculatePassportFromLedger(ledger=api.readLedger()){
   data.buttons=Number(data.buttons.toFixed(2));
   return data;
 }
-function writeTree(){const skills=api.livingTreeProjection(),state={schema:'living-school.skill-tree.v2',authority:'commonweave.reward-ledger.v2',skills,updatedAt:new Date().toISOString()};localStorage.setItem(TREE_KEY,JSON.stringify(state));try{dispatchEvent(new CustomEvent('living-school:skill-tree-updated',{detail:state}))}catch{}return state}
+function writeTree(){const skills=api.livingTreeProjection(),state={schema:'living-school.skill-tree.v2',authority:'civweave.reward-ledger.v2',skills,updatedAt:new Date().toISOString()};localStorage.setItem(TREE_KEY,JSON.stringify(state));try{dispatchEvent(new CustomEvent('living-school:skill-tree-updated',{detail:state}))}catch{}return state}
 function renderTree(){const state=writeTree();for(const host of document.querySelectorAll('[data-living-tree-skills],[data-ls-skill-tree]')){host.innerHTML=state.skills.length?state.skills.map(row=>`<article class="ls-skill-tree-node" data-skill-id="${esc(row.skillId||row.id)}"><header><b>${esc(row.name)}</b><strong>LV ${row.level}</strong></header><small>${fmt(row.xp)} Skill XP · ${fmt(row.learningXp)} learning + ${fmt(row.doingXp)} doing</small><div class="ls-skill-tree-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(row.progress)}"><span style="width:${row.progress}%"></span></div><small>${fmt(row.remaining)} XP to level ${row.level+1}</small></article>`).join(''):'<div class="ls-empty">Complete a lesson or validated task to grow the Living Tree.</div>'}}
 function renderPassport(){
   if(!document.getElementById('ac-passport-wallet-xp'))return;
@@ -46,7 +46,7 @@ function queue(){if(queued)return;queued=true;(requestAnimationFrame||setTimeout
 const scripts=['/app/cw-reward-ledger-v2.js?v=2.0.0','/app/cw-reward-receivers-v2.js?v=2.0.0','/app/cw-reward-legacy-bridge-v2.js?v=2.0.0','/app/cw-reward-surfaces-v2.js?v=2.0.0'];
 function inject(frame){const apply=async()=>{try{const doc=frame.contentDocument;if(!doc?.documentElement||doc.querySelector('script[data-cw-rewards-v2="surfaces"]'))return;for(const src of scripts){const kind=src.includes('ledger')?'ledger':src.includes('receivers')?'receivers':src.includes('legacy-bridge')?'legacy-bridge':'surfaces';if(doc.querySelector(`script[data-cw-rewards-v2="${kind}"]`))continue;await new Promise((resolve,reject)=>{const s=doc.createElement('script');s.src=src;s.dataset.cwRewardsV2=kind;s.onload=resolve;s.onerror=reject;(doc.head||doc.documentElement).append(s)})}}catch{}};frame.addEventListener('load',apply);apply()}
 function frames(){const scan=root=>{if(root?.matches?.('iframe'))inject(root);root?.querySelectorAll?.('iframe').forEach(inject)};scan(document);new MutationObserver(records=>records.forEach(r=>[...r.addedNodes].forEach(n=>n?.nodeType===1&&scan(n)))).observe(document.documentElement,{childList:true,subtree:true})}
-function boot(){render();frames();addEventListener('commonweave:canonical-rewards-changed',queue);addEventListener('storage',e=>{if(e.key===api.storageKey)queue()});new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true})}
-globalThis.CommonweaveRewardSurfacesV2=Object.freeze({version:V,treeStorageKey:TREE_KEY,calculatePassportFromLedger,render,renderPassport,renderLivingTree:renderTree,writeLivingTreeProjection:writeTree});
+function boot(){render();frames();addEventListener('civweave:canonical-rewards-changed',queue);addEventListener('storage',e=>{if(e.key===api.storageKey)queue()});new MutationObserver(queue).observe(document.documentElement,{childList:true,subtree:true})}
+globalThis.CivweaveRewardSurfacesV2=Object.freeze({version:V,treeStorageKey:TREE_KEY,calculatePassportFromLedger,render,renderPassport,renderLivingTree:renderTree,writeLivingTreeProjection:writeTree});
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 })();

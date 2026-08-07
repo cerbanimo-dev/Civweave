@@ -8,13 +8,13 @@ import { fileURLToPath } from 'node:url';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..');
 const sharedDir = path.join(repoRoot, 'public', 'app', 'shared');
-const outputPath = path.join(sharedDir, 'commonweave-parity-ledger.json');
+const outputPath = path.join(sharedDir, 'civweave-parity-ledger.json');
 
 const encoded = (
   await Promise.all(
     [1, 2, 3, 4].map((part) =>
       fs.readFile(
-        path.join(sharedDir, `commonweave-parity-ledger.part${part}.b64`),
+        path.join(sharedDir, `civweave-parity-ledger.part${part}.b64`),
         'utf8',
       ),
     ),

@@ -3,7 +3,7 @@
 const MODEL_ID='HuggingFaceTB/SmolLM2-360M-Instruct';
 const LOCAL_ID='smollm2-360m-instruct';
 const ADAPTER_URL='/app/models/smollm2-360m-instruct/adapter.js';
-const RESULT_SCHEMA='commonweave-model-result-1.0';
+const RESULT_SCHEMA='civweave-model-result-1.0';
 const MAX_CONTEXT_CHARS=24000;
 let adapterPromise=null;
 
@@ -55,7 +55,7 @@ function failureSummary(failure){
 
 function expectation(request,failure,mode){
   return {
-    schema:'commonweave.fallback-expectation.v1',
+    schema:'civweave.fallback-expectation.v1',
     mode,
     purpose:safe(request?.purpose||'general assistance',160),
     primaryFailure:failureSummary(failure),
@@ -79,8 +79,8 @@ function localMessages(request,failure,mode,repair=null){
     conversation:compactMessages(request?.messages),
   };
   const system=mode==='primary'
-    ? 'You are SmolLM2, Commonweave’s onboard local guide. Use only the supplied conversation and structured context. Be genuinely helpful, but do not imply access to tools, networks, private data, or actions you did not perform. Follow the fallbackExpectation and requested schema exactly.'
-    : 'You are SmolLM2, Commonweave’s degraded-mode local fallback. A larger provider failed. Do not imitate that provider or hide the failure. Salvage the smallest safe and useful response from the supplied context. Follow the fallbackExpectation and requested schema exactly.';
+    ? 'You are SmolLM2, Civweave’s onboard local guide. Use only the supplied conversation and structured context. Be genuinely helpful, but do not imply access to tools, networks, private data, or actions you did not perform. Follow the fallbackExpectation and requested schema exactly.'
+    : 'You are SmolLM2, Civweave’s degraded-mode local fallback. A larger provider failed. Do not imitate that provider or hide the failure. Salvage the smallest safe and useful response from the supplied context. Follow the fallbackExpectation and requested schema exactly.';
   const messages=[{role:'system',content:system},{role:'user',content:JSON.stringify(packet)}];
   if(repair)messages.push({role:'assistant',content:safe(repair.output,6000)},{role:'user',content:`Your previous output was not valid JSON: ${safe(repair.error,500)}. Return only one valid JSON value matching requestedSchema. No prose or markdown.`});
   return messages;
@@ -96,7 +96,7 @@ function baseResult(request,started,mode,failure){
   return {
     schema:RESULT_SCHEMA,
     requestId:request?.requestId||uid(),
-    purpose:request?.purpose||'commonweave-onboard',
+    purpose:request?.purpose||'civweave-onboard',
     requested:{provider:providerOf(config),model:config.model||'',endpoint:config.endpoint||'',executionProfile:request?.executionProfile||'interactive'},
     actual:{provider:'bundled-smollm2',model:MODEL_ID},
     timing:{startedAt:new Date(started).toISOString(),completedAt:now(),elapsedMs:Date.now()-started},
@@ -145,7 +145,7 @@ function shouldFallback(result,error,request){
 }
 
 function install(){
-  const runtime=globalThis.CommonweaveModelRuntime;
+  const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate||runtime.__smollm2FallbackInstalled)return false;
   const primaryGenerate=runtime.generate.bind(runtime);
   const wrapped=async request=>{
@@ -169,9 +169,9 @@ function install(){
       throw localError;
     }
   };
-  globalThis.CommonweaveModelRuntime={...runtime,generate:wrapped,__smollm2FallbackInstalled:true};
-  globalThis.CommonweaveOnboardAI={model:MODEL_ID,localId:LOCAL_ID,adapter,status:async()=>{const engine=await adapter();return engine.status()},generate:generateLocal,expectation};
-  try{globalThis.dispatchEvent(new CustomEvent('commonweave:onboard-ai-ready',{detail:{model:MODEL_ID}}))}catch{}
+  globalThis.CivweaveModelRuntime={...runtime,generate:wrapped,__smollm2FallbackInstalled:true};
+  globalThis.CivweaveOnboardAI={model:MODEL_ID,localId:LOCAL_ID,adapter,status:async()=>{const engine=await adapter();return engine.status()},generate:generateLocal,expectation};
+  try{globalThis.dispatchEvent(new CustomEvent('civweave:onboard-ai-ready',{detail:{model:MODEL_ID}}))}catch{}
   return true;
 }
 

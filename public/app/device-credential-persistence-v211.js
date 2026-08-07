@@ -1,15 +1,15 @@
 (()=>{
 'use strict';
 const VERSION='211.0-live-device-credential-persistence';
-if(globalThis.CommonweaveDeviceCredentialPersistenceV211?.version===VERSION)return;
+if(globalThis.CivweaveDeviceCredentialPersistenceV211?.version===VERSION)return;
 
-const SETTINGS_KEY='commonweave.universal-ai.v127';
-const PROFILES_KEY='commonweave-model-profiles-v1';
-const SESSION_KEY='commonweave-model-session';
-const SECRET_KEY='commonweave-model-secrets-v1';
-const PERSIST_KEY='commonweave-model-persistent-secrets-v191';
-const LEGACY_PERSIST_KEY='commonweave-model-persistent-secrets-v160';
-const POLICY_KEY='commonweave-model-credential-policy-v191';
+const SETTINGS_KEY='civweave.universal-ai.v127';
+const PROFILES_KEY='civweave-model-profiles-v1';
+const SESSION_KEY='civweave-model-session';
+const SECRET_KEY='civweave-model-secrets-v1';
+const PERSIST_KEY='civweave-model-persistent-secrets-v191';
+const LEGACY_PERSIST_KEY='civweave-model-persistent-secrets-v160';
+const POLICY_KEY='civweave-model-credential-policy-v191';
 const SETTINGS_SELECTOR='[data-action="settings"],[data-settings],#lite-settings,[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings]';
 let pendingMode='';
 
@@ -18,7 +18,7 @@ const read=(storage,key,fallback='')=>{try{return storage?.getItem?.(key)??fallb
 const write=(storage,key,value)=>{try{storage?.setItem?.(key,String(value));return true}catch{return false}};
 const remove=(storage,key)=>{try{storage?.removeItem?.(key)}catch{}};
 const now=()=>new Date().toISOString();
-const runtime=()=>globalThis.CommonweaveModelRuntime||null;
+const runtime=()=>globalThis.CivweaveModelRuntime||null;
 
 function providerName(value){
   const provider=String(value||'').trim().toLowerCase();
@@ -84,11 +84,11 @@ function restore(){
   if(!record)return false;
   write(localStorage,POLICY_KEY,'device');
   if(record.legacy){
-    write(localStorage,PERSIST_KEY,JSON.stringify({schema:'commonweave.device-model-secret.v211',apiKey:record.apiKey,provider:record.provider,model:record.model,endpoint:record.endpoint,remoteConsent:record.remoteConsent,savedAt:record.savedAt||now(),credentialRevision:VERSION,migratedFrom:'v160'}));
+    write(localStorage,PERSIST_KEY,JSON.stringify({schema:'civweave.device-model-secret.v211',apiKey:record.apiKey,provider:record.provider,model:record.model,endpoint:record.endpoint,remoteConsent:record.remoteConsent,savedAt:record.savedAt||now(),credentialRevision:VERSION,migratedFrom:'v160'}));
     remove(localStorage,LEGACY_PERSIST_KEY);
   }
   const restored=mirrorRuntime(record);
-  if(restored)try{dispatchEvent(new CustomEvent('commonweave:model-credential-restored',{detail:{version:VERSION,provider:record.provider,remembered:true,at:now()}}))}catch{}
+  if(restored)try{dispatchEvent(new CustomEvent('civweave:model-credential-restored',{detail:{version:VERSION,provider:record.provider,remembered:true,at:now()}}))}catch{}
   return restored;
 }
 function forget(){
@@ -97,7 +97,7 @@ function forget(){
   write(localStorage,POLICY_KEY,'session');
   remove(sessionStorage,SESSION_KEY);
   remove(sessionStorage,SECRET_KEY);
-  try{dispatchEvent(new CustomEvent('commonweave:model-secret-forgotten',{detail:{version:VERSION,at:now()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:model-secret-forgotten',{detail:{version:VERSION,at:now()}}))}catch{}
   refreshForms();
   return status();
 }
@@ -119,7 +119,7 @@ function persistFromSession(mode=pendingMode){
   if(!apiKey)return false;
   const config=currentConfig();
   const record={
-    schema:'commonweave.device-model-secret.v211',
+    schema:'civweave.device-model-secret.v211',
     apiKey,
     provider:providerName(session.provider||config.provider),
     model:String(session.model||config.model||'').trim(),
@@ -179,7 +179,7 @@ function refreshForms(){
   document.querySelectorAll?.('form[data-unified-model-settings],form[data-cw-cleanroom-form]').forEach(decorate);
 }
 function patchSettingsApi(){
-  const api=globalThis.CommonweaveModelSettingsV157||globalThis.CommonweaveModelSettingsV133||globalThis.CommonweaveAISettingsCleanroomV188||globalThis.CommonweaveModelSettingsControllerV173;
+  const api=globalThis.CivweaveModelSettingsV157||globalThis.CivweaveModelSettingsV133||globalThis.CivweaveAISettingsCleanroomV188||globalThis.CivweaveModelSettingsControllerV173;
   if(!api||api.__deviceCredentialPersistenceV211)return api||null;
   try{
     if(typeof api.open==='function'){
@@ -210,7 +210,7 @@ patchSettingsApi();
 addEventListener('DOMContentLoaded',()=>{restore();patchSettingsApi();refreshForms()},{once:true});
 addEventListener('pageshow',()=>{restore();patchSettingsApi();refreshForms()});
 document.addEventListener('click',openSettings,true);
-addEventListener('commonweave:model-settings-saved',event=>{
+addEventListener('civweave:model-settings-saved',event=>{
   const route=providerName(event?.detail?.interactive?.provider||event?.detail?.route);
   const mode=pendingMode||read(localStorage,POLICY_KEY,'session');
   if(route==='deterministic')forget();
@@ -224,5 +224,5 @@ addEventListener('commonweave:model-settings-saved',event=>{
   });
 });
 
-globalThis.CommonweaveDeviceCredentialPersistenceV211=Object.freeze({version:VERSION,restore,forget,status,persistFromSession,decorate,refreshForms,patchSettingsApi,credentialPolicy:'explicit-session-or-device',storage:'browser-local-storage'});
+globalThis.CivweaveDeviceCredentialPersistenceV211=Object.freeze({version:VERSION,restore,forget,status,persistFromSession,decorate,refreshForms,patchSettingsApi,credentialPolicy:'explicit-session-or-device',storage:'browser-local-storage'});
 })();

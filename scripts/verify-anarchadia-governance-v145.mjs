@@ -11,7 +11,7 @@ for(const token of ['Consent, ballots, federation, release','People & nodes','Ch
 for(const token of ['createCredential','createChangeSet','openBallot','castBallot','recordConsent','createDissent','createNodeOutcome','issueExecutionAuthorization','createExecutionPacket','validateExecutionPacket'])assert(kernel.includes(`function ${token}`)||kernel.includes(`function ${token}(`)||kernel.includes(`async function ${token}`)||kernel.includes(`async function ${token}(`),`Kernel is missing ${token}`);
 for(const token of ['Exact immutable base commit','Branch-only target','Forbidden-code scan','Risk and consent declaration'])assert(kernel.includes(token),`Rails are missing ${token}`);
 assert(kernel.includes("executionMode:'branch-only'")&&kernel.includes("/^agent\\/anarchadia-/"),'Authorization is not branch-only.');
-assert(ui.includes('commonweave.anarchadia.citizen-console.v139')&&ui.includes('Import latest console preview'),'Citizen Console preview import is not wired.');
+assert(ui.includes('civweave.anarchadia.citizen-console.v139')&&ui.includes('Import latest console preview'),'Citizen Console preview import is not wired.');
 assert(ui.includes('request-amendment')&&ui.includes("action==='consent'")&&ui.includes("action==='dissent'"),'Consent, dissent, and amendment choices are incomplete.');
 assert(store.includes("const KEYS='keys'")&&store.includes('putPrivateKey')&&store.includes('getPrivateKey'),'Private signing keys are not isolated in IndexedDB.');
 assert(bridge.includes('GOVERNED UPDATE')&&bridge.includes('data-signal-vote')&&bridge.includes('vote-hub'),'Citizen Console bridge is incomplete.');

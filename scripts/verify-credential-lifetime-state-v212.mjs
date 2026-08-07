@@ -40,11 +40,11 @@ function boot(localSeed = {}, sessionSeed = {}) {
   sandbox.globalThis = sandbox;
   vm.createContext(sandbox);
   vm.runInContext(source, sandbox, { filename: 'model-settings-controller-v173.js' });
-  return { controller: sandbox.CommonweaveModelSettingsControllerV173, localStorage, sessionStorage };
+  return { controller: sandbox.CivweaveModelSettingsControllerV173, localStorage, sessionStorage };
 }
 
 const persistent = {
-  schema: 'commonweave.device-model-secret.v191',
+  schema: 'civweave.device-model-secret.v191',
   apiKey: 'AIza-device-test-key-not-real',
   provider: 'gemini',
   savedAt: '2026-08-05T00:00:00.000Z',
@@ -59,17 +59,17 @@ const retiredProfile = {
 };
 
 const remembered = boot({
-  'commonweave-model-persistent-secrets-v191': JSON.stringify(persistent),
-  'commonweave-model-profiles-v1': JSON.stringify(retiredProfile),
+  'civweave-model-persistent-secrets-v191': JSON.stringify(persistent),
+  'civweave-model-profiles-v1': JSON.stringify(retiredProfile),
 });
 const rememberedState = remembered.controller.readState();
 assert(rememberedState.remembered === true, 'Remembered credential was not detected.');
 assert(rememberedState.credentialMode === 'device', 'Retired MiniLM profile reset remembered lifetime to session.');
-assert(remembered.localStorage.getItem('commonweave-model-credential-policy-v191') === 'device', 'Restore did not keep the device policy canonical.');
+assert(remembered.localStorage.getItem('civweave-model-credential-policy-v191') === 'device', 'Restore did not keep the device policy canonical.');
 
 const sessionOnly = boot({
-  'commonweave-model-profiles-v1': JSON.stringify(retiredProfile),
-  'commonweave-model-credential-policy-v191': 'session',
+  'civweave-model-profiles-v1': JSON.stringify(retiredProfile),
+  'civweave-model-credential-policy-v191': 'session',
 });
 assert(sessionOnly.controller.readState().credentialMode === 'session', 'Session-only profile should remain session-only without a durable credential.');
 

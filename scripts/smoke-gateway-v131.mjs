@@ -11,7 +11,7 @@ const after = "  for(const route of ['/loom/','/lite/']){const response=await fe
 
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 if (!source.includes(before)) {
-  throw new Error('Commonweave gateway smoke v132 could not find the legacy 410 assertion.');
+  throw new Error('Civweave gateway smoke v132 could not find the legacy 410 assertion.');
 }
 source = source.replace(before, after);
 await fsp.writeFile(runtimePath, source, 'utf8');

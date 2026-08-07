@@ -1,4 +1,4 @@
-# Commonweave v1.0.32 · Cerbanimo Quest Engine Restoration
+# Civweave v1.0.32 · Cerbanimo Quest Engine Restoration
 
 Cerbanimo keeps its existing chat-first Cabinet Mode and regains the first major piece of its classic working machinery.
 
@@ -16,7 +16,7 @@ Cerbanimo keeps its existing chat-first Cabinet Mode and regains the first major
   - approved Kamiya quest drafts
   - generic Cabinet Mode quest records
   - the classic `cerbanimo-pocket-constellary-v0.6` store
-- Mirroring into the canonical Commonweave record store for cross-realm continuity
+- Mirroring into the canonical Civweave record store for cross-realm continuity
 
 ## Interface
 

@@ -2,7 +2,7 @@
 'use strict';
 const VERSION='1.0.31';
 const BUILD='1.0.31-guide-orchestration-v141';
-const SETTINGS_KEY='commonweave.universal-ai.v127';
+const SETTINGS_KEY='civweave.universal-ai.v127';
 const GUIDE_ART={
   'living-school':{image:'/app/assets/ai/moss.png',artifact:'/app/assets/ai/moss-acorn.png',role:'learning guide'},
   cerbanimo:{image:'/app/assets/ai/kamiya.png',artifact:'/app/assets/ai/kamiya-gift.png',role:'questwright and skilled-work guide'},
@@ -16,7 +16,7 @@ const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed=
 let ledger=null,realm=null,rooms=[],currentRoom=null,toastTimer=null;
 
 function report(kind,detail={}){
-  const event={schema:'commonweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:BUILD,kind:`v141-realm:${kind}`,url:location.href,detail:{realm:realmId,...detail}};
+  const event={schema:'civweave.boot-log.v1',time:new Date().toISOString(),version:VERSION,build:BUILD,kind:`v141-realm:${kind}`,url:location.href,detail:{realm:realmId,...detail}};
   console.info('[CW141-REALM]',event);
   try{fetch('/api/boot-log',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(event),keepalive:true,cache:'no-store'}).catch(()=>{})}catch{}
   return event;
@@ -43,7 +43,7 @@ function capabilityById(id){const capability=ledger?.index?.capabilities?.get?.(
 function roomUrl(roomId,capabilityId=''){const query=new URLSearchParams();query.set('room',roomId);if(capabilityId)query.set('capability',capabilityId);return `${location.pathname}?${query}`}
 function setRoom(roomId,{replace=false,openCapabilityId=''}={}){
   currentRoom=roomById(roomId);if(!currentRoom)return;
-  localStorage.setItem(`commonweave.realm-room.${realm.id}`,currentRoom.id);
+  localStorage.setItem(`civweave.realm-room.${realm.id}`,currentRoom.id);
   const image=document.querySelector('#cw127-realm-scene');if(image){image.src=currentRoom.visualAsset;image.alt=`${realm.name}: ${currentRoom.label}`}
   const status=document.querySelector('#cw127-realm-status');if(status)status.textContent=`${realm.name} · ${currentRoom.label} · ${currentRoom.capabilityIds.length} mapped capabilities`;
   history[replace?'replaceState':'pushState']({room:currentRoom.id,capability:openCapabilityId},'',roomUrl(currentRoom.id,openCapabilityId));
@@ -54,7 +54,7 @@ function renderNav(){
   if(!currentRoom||!rooms.length)return;
   const index=rooms.findIndex(room=>room.id===currentRoom.id),prev=rooms[(index-1+rooms.length)%rooms.length],next=rooms[(index+1)%rooms.length],guide=GUIDE_ART[realm.id];
   const nav=document.querySelector('#cw127-realm-nav');if(!nav)return;
-  nav.innerHTML=`<button data-room="${esc(prev.id)}" aria-label="Previous room: ${esc(prev.label)}"><img src="${esc(prev.visualAsset)}" alt=""><span>← ${esc(prev.label)}</span></button><button data-action="rooms" aria-label="Browse all rooms"><img src="/app/assets/generated/commonweave-navigation-icons/commonweave-realms.png" alt=""><span>Rooms</span></button><button data-action="room" aria-label="Open ${esc(currentRoom.label)} capabilities"><img src="${esc(currentRoom.visualAsset)}" alt=""><span>${esc(currentRoom.label)}</span></button><button data-action="guide" aria-label="Talk with ${esc(realm.guide)}"><img src="${esc(guide.artifact)}" alt=""><span>${esc(realm.guide)}</span></button><button data-room="${esc(next.id)}" aria-label="Next room: ${esc(next.label)}"><img src="${esc(next.visualAsset)}" alt=""><span>${esc(next.label)} →</span></button>`;
+  nav.innerHTML=`<button data-room="${esc(prev.id)}" aria-label="Previous room: ${esc(prev.label)}"><img src="${esc(prev.visualAsset)}" alt=""><span>← ${esc(prev.label)}</span></button><button data-action="rooms" aria-label="Browse all rooms"><img src="/app/assets/generated/civweave-navigation-icons/civweave-realms.png" alt=""><span>Rooms</span></button><button data-action="room" aria-label="Open ${esc(currentRoom.label)} capabilities"><img src="${esc(currentRoom.visualAsset)}" alt=""><span>${esc(currentRoom.label)}</span></button><button data-action="guide" aria-label="Talk with ${esc(realm.guide)}"><img src="${esc(guide.artifact)}" alt=""><span>${esc(realm.guide)}</span></button><button data-room="${esc(next.id)}" aria-label="Next room: ${esc(next.label)}"><img src="${esc(next.visualAsset)}" alt=""><span>${esc(next.label)} →</span></button>`;
 }
 function roomsDialog(){
   const node=dialog('cw128-rooms',`<section><header><div><small>${esc(realm.name.toUpperCase())}</small><h2>Choose a room</h2><p>Every room carries the same canonical IDs into Visual and Lite.</p></div><button class="cw127-close" data-close aria-label="Close">×</button></header><div class="cw127-card-grid">${rooms.map(room=>`<button class="cw127-card" data-open-room="${esc(room.id)}" style="background-image:url('${esc(room.visualAsset)}')"><b>${esc(room.label)}</b><span>${esc(room.purpose)}</span></button>`).join('')}</div></section>`);
@@ -62,7 +62,7 @@ function roomsDialog(){
 }
 function roomDialog(){
   const caps=(currentRoom?.capabilityIds||[]).map(capabilityById).filter(Boolean);
-  const node=dialog('cw128-room',`<section><header><div><small>${esc(realm.name.toUpperCase())} · ${esc(currentRoom.label.toUpperCase())}</small><h2>${esc(currentRoom.label)}</h2><p>${esc(currentRoom.purpose)}</p></div><button class="cw127-close" data-close aria-label="Close">×</button></header><div class="cw128-room-grid">${caps.map(capability=>`<article class="cw128-capability cw128-consent-${esc(capability.consent)}"><span class="cw128-chip">${esc(capability.consent)} consent</span><h3>${esc(capability.label)}</h3><p>${esc(capability.summary)}</p><footer><button data-capability="${esc(capability.id)}">Inspect</button>${capability.lite?.sourceRoute?`<button data-source="${esc(capability.id)}">Open tool</button>`:''}</footer></article>`).join('')||'<p>No capabilities are mapped to this room yet.</p>'}</div><menu><a href="${esc(CommonweaveParity.liteUrl({systemId:realm.id,roomId:currentRoom.id}))}">Open same room in Lite</a></menu></section>`);
+  const node=dialog('cw128-room',`<section><header><div><small>${esc(realm.name.toUpperCase())} · ${esc(currentRoom.label.toUpperCase())}</small><h2>${esc(currentRoom.label)}</h2><p>${esc(currentRoom.purpose)}</p></div><button class="cw127-close" data-close aria-label="Close">×</button></header><div class="cw128-room-grid">${caps.map(capability=>`<article class="cw128-capability cw128-consent-${esc(capability.consent)}"><span class="cw128-chip">${esc(capability.consent)} consent</span><h3>${esc(capability.label)}</h3><p>${esc(capability.summary)}</p><footer><button data-capability="${esc(capability.id)}">Inspect</button>${capability.lite?.sourceRoute?`<button data-source="${esc(capability.id)}">Open tool</button>`:''}</footer></article>`).join('')||'<p>No capabilities are mapped to this room yet.</p>'}</div><menu><a href="${esc(CivweaveParity.liteUrl({systemId:realm.id,roomId:currentRoom.id}))}">Open same room in Lite</a></menu></section>`);
   node.querySelectorAll('[data-capability]').forEach(button=>button.addEventListener('click',()=>openCapability(button.dataset.capability)));
   node.querySelectorAll('[data-source]').forEach(button=>button.addEventListener('click',()=>openSource(button.dataset.source)));
   show(node);report('dialog-opened',{dialog:'room',room:currentRoom.id});
@@ -70,7 +70,7 @@ function roomDialog(){
 function openCapability(id){
   const capability=capabilityById(id);if(!capability)return toast('Capability mapping is unavailable.');
   if(capability.room!==currentRoom.id){setRoom(capability.room,{openCapabilityId:id});return}
-  const node=dialog('cw128-capability',`<section><header><div><small>${esc(currentRoom.label.toUpperCase())} · ${esc(String(capability.consent||'').toUpperCase())} CONSENT</small><h2>${esc(capability.label)}</h2><p>${esc(capability.summary)}</p></div><button class="cw127-close" data-close aria-label="Close">×</button></header><div class="cw128-room-grid"><article class="cw128-capability"><h3>Parity record</h3><p><b>Canonical ID:</b> ${esc(capability.id)}</p><p><b>Operation:</b> ${esc(capability.operation)}</p><p><b>Source:</b> ${esc(capability.sourceStatus)}</p><p><b>Handoffs:</b> ${esc((capability.handoffs||[]).join(', ')||'none')}</p><p><b>Rewards:</b> ${esc((capability.rewards||[]).join(', ')||'none')}</p></article><article class="cw128-capability"><h3>Source references</h3><p>${(capability.sourceRefs||[]).map(esc).join('<br>')}</p></article></div><menu>${capability.lite?.sourceRoute?`<button type="button" data-source="${esc(capability.id)}">Open working surface</button>`:''}<a href="${esc(CommonweaveParity.liteUrl({systemId:realm.id,roomId:currentRoom.id,capabilityId:capability.id}))}">Open in Lite</a></menu></section>`);
+  const node=dialog('cw128-capability',`<section><header><div><small>${esc(currentRoom.label.toUpperCase())} · ${esc(String(capability.consent||'').toUpperCase())} CONSENT</small><h2>${esc(capability.label)}</h2><p>${esc(capability.summary)}</p></div><button class="cw127-close" data-close aria-label="Close">×</button></header><div class="cw128-room-grid"><article class="cw128-capability"><h3>Parity record</h3><p><b>Canonical ID:</b> ${esc(capability.id)}</p><p><b>Operation:</b> ${esc(capability.operation)}</p><p><b>Source:</b> ${esc(capability.sourceStatus)}</p><p><b>Handoffs:</b> ${esc((capability.handoffs||[]).join(', ')||'none')}</p><p><b>Rewards:</b> ${esc((capability.rewards||[]).join(', ')||'none')}</p></article><article class="cw128-capability"><h3>Source references</h3><p>${(capability.sourceRefs||[]).map(esc).join('<br>')}</p></article></div><menu>${capability.lite?.sourceRoute?`<button type="button" data-source="${esc(capability.id)}">Open working surface</button>`:''}<a href="${esc(CivweaveParity.liteUrl({systemId:realm.id,roomId:currentRoom.id,capabilityId:capability.id}))}">Open in Lite</a></menu></section>`);
   node.querySelector('[data-source]')?.addEventListener('click',()=>openSource(capability.id));show(node);history.replaceState({room:currentRoom.id,capability:id},'',roomUrl(currentRoom.id,id));report('capability-opened',{capability:id,consent:capability.consent});
 }
 function openSource(id){
@@ -87,19 +87,19 @@ function guide(){
   const art=GUIDE_ART[realm.id];
   const node=dialog('cw128-guide',`<section><header><div><small>${esc(realm.name.toUpperCase())}</small><h2>Talk with ${esc(realm.guide)}</h2><p>${esc(currentRoom.label)} is context, not the guide’s identity.</p></div><button class="cw127-close" data-close aria-label="Close">×</button></header><div class="cw127-chat-log" aria-live="polite"></div><form class="cw127-chat-form"><textarea maxlength="8000" placeholder="What needs attention in ${esc(realm.name)}?"></textarea><button type="submit">Send</button></form><menu><button type="button" data-room-map>Room capabilities</button><button type="button" data-settings>Universal AI settings</button></menu></section>`);
   node.querySelector('[data-settings]').addEventListener('click',settings);node.querySelector('[data-room-map]').addEventListener('click',roomDialog);
-  if(!globalThis.CommonweaveAssistantV141?.attach?.(node))toast(`${realm.guide}'s orchestration runtime has not loaded.`);
+  if(!globalThis.CivweaveAssistantV141?.attach?.(node))toast(`${realm.guide}'s orchestration runtime has not loaded.`);
   show(node);setTimeout(()=>node.querySelector('textarea')?.focus(),50);report('dialog-opened',{dialog:'guide',guide:realm.guide,room:currentRoom.id,role:art.role});
 }
 function info(){
-  const validation=CommonweaveParity.validate(ledger),node=dialog('cw128-info',`<section><header><div><small>PARITY LEDGER</small><h2>One campus, two renderers</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>${esc(ledger.purpose)}</p><div class="cw128-room-grid"><article class="cw128-capability"><h3>${validation.counts.rooms} rooms</h3><p>Visual and Lite use the same room IDs.</p></article><article class="cw128-capability"><h3>${validation.counts.capabilities} capabilities</h3><p>Each carries consent, source, handoffs, rewards, and renderer mappings.</p></article></div><menu><a href="${esc(CommonweaveParity.liteUrl({systemId:realm.id,roomId:currentRoom.id}))}">Open Lite mirror</a></menu></section>`);show(node);
+  const validation=CivweaveParity.validate(ledger),node=dialog('cw128-info',`<section><header><div><small>PARITY LEDGER</small><h2>One campus, two renderers</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>${esc(ledger.purpose)}</p><div class="cw128-room-grid"><article class="cw128-capability"><h3>${validation.counts.rooms} rooms</h3><p>Visual and Lite use the same room IDs.</p></article><article class="cw128-capability"><h3>${validation.counts.capabilities} capabilities</h3><p>Each carries consent, source, handoffs, rewards, and renderer mappings.</p></article></div><menu><a href="${esc(CivweaveParity.liteUrl({systemId:realm.id,roomId:currentRoom.id}))}">Open Lite mirror</a></menu></section>`);show(node);
 }
 function version(){const node=dialog('cw128-version',`<section><header><div><small>${esc(realm.name.toUpperCase())}</small><h2>v${VERSION}</h2></div><button class="cw127-close" data-close aria-label="Close">×</button></header><p>Build: <code>${BUILD}</code></p><p>Ledger: <code>${esc(ledger.schema)}</code></p><p>Room: <strong>${esc(currentRoom.label)}</strong></p></section>`);show(node)}
 function mountRealm(){
-  const guide=GUIDE_ART[realm.id];document.title=`${realm.name} · Commonweave`;document.documentElement.style.setProperty('--realm-accent',realm.accent);
+  const guide=GUIDE_ART[realm.id];document.title=`${realm.name} · Civweave`;document.documentElement.style.setProperty('--realm-accent',realm.accent);
   const logo=document.querySelector('#cw127-realm-logo');if(logo){logo.src=realm.logo;logo.alt=`${realm.name} logo`}
   const guideButton=document.querySelector('#cw127-realm-guide');if(guideButton){guideButton.querySelector('img').src=guide.image;guideButton.querySelector('img').alt=realm.guide}
-  const query=new URLSearchParams(location.search),saved=localStorage.getItem(`commonweave.realm-room.${realm.id}`);setRoom(query.get('room')||saved||rooms[0].id,{replace:true,openCapabilityId:query.get('capability')||''});
-  localStorage.setItem('commonweave.host-build',BUILD);document.documentElement.dataset.commonweaveBuild=BUILD;report('page-ready',{room:currentRoom.id,capabilities:ledger.capabilities.filter(item=>item.system===realm.id).length});
+  const query=new URLSearchParams(location.search),saved=localStorage.getItem(`civweave.realm-room.${realm.id}`);setRoom(query.get('room')||saved||rooms[0].id,{replace:true,openCapabilityId:query.get('capability')||''});
+  localStorage.setItem('civweave.host-build',BUILD);document.documentElement.dataset.civweaveBuild=BUILD;report('page-ready',{room:currentRoom.id,capabilities:ledger.capabilities.filter(item=>item.system===realm.id).length});
 }
 document.addEventListener('click',event=>{
   const control=event.target.closest('[data-action],[data-room]');if(!control)return;const action=control.dataset.action;
@@ -112,12 +112,12 @@ document.addEventListener('click',event=>{
     if(action==='settings'){settings();return}
     if(action==='info'){info();return}
     if(action==='version'){version();return}
-    if(action==='lite'){location.assign(CommonweaveParity.liteUrl({systemId:realm.id,roomId:currentRoom.id}));return}
+    if(action==='lite'){location.assign(CivweaveParity.liteUrl({systemId:realm.id,roomId:currentRoom.id}));return}
   }catch(error){report('control-error',{action,message:error.message});toast(`That control hit an error: ${error.message}`)}
 });
 addEventListener('popstate',event=>{const query=new URLSearchParams(location.search);setRoom(event.state?.room||query.get('room')||rooms[0].id,{replace:true,openCapabilityId:event.state?.capability||query.get('capability')||''})});
 addEventListener('error',event=>report('window-error',{message:event.message,filename:event.filename,line:event.lineno,column:event.colno}));
 addEventListener('unhandledrejection',event=>report('unhandled-rejection',{reason:event.reason?.message||String(event.reason)}));
-CommonweaveParity.load().then(value=>{ledger=value;realm=ledger.index.systems.get(realmId);if(!realm||realm.id==='commonweave')throw new Error(`Unknown realm ${realmId}`);rooms=realm.rooms;mountRealm()}).catch(error=>{const status=document.querySelector('#cw127-realm-status');if(status)status.textContent=`Parity ledger error: ${error.message}`;report('mount-error',{message:error.message})});
-globalThis.CommonweaveRealmV141={guide,dialog,roomDialog,openCapability,openSource,setRoom};
+CivweaveParity.load().then(value=>{ledger=value;realm=ledger.index.systems.get(realmId);if(!realm||realm.id==='civweave')throw new Error(`Unknown realm ${realmId}`);rooms=realm.rooms;mountRealm()}).catch(error=>{const status=document.querySelector('#cw127-realm-status');if(status)status.textContent=`Parity ledger error: ${error.message}`;report('mount-error',{message:error.message})});
+globalThis.CivweaveRealmV141={guide,dialog,roomDialog,openCapability,openSource,setRoom};
 })();

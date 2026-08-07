@@ -1,5 +1,5 @@
 {
-  "schema":"commonweave.version.v1",
+  "schema":"civweave.version.v1",
   "version":"1.0.24",
   "build":"1.0.24-contextual-guides",
   "channel":"main",

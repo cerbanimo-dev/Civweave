@@ -8,7 +8,7 @@ const clock=()=>Number(root.performance?.now?.())||Date.now();
 function dispatch(name,detail){try{root.dispatchEvent?.(new CustomEvent(name,{detail}))}catch{}}
 function optimizedRequest(request={}){
   const purpose=String(request?.purpose||'');
-  if(!/^commonweave-guide-response-v141/.test(purpose))return request;
+  if(!/^civweave-guide-response-v141/.test(purpose))return request;
   const config={...(request.config||{})};
   const provider=String(config.provider||config.route||'').toLowerCase();
   const configured=Number(config.timeoutMs)||Number(config.timeoutSeconds)*1000||0;
@@ -20,9 +20,9 @@ function optimizedRequest(request={}){
   return{...request,config,responseFormat:'json',maxRepairAttempts:0};
 }
 function install(){
-  const runtime=root.CommonweaveModelRuntime;
+  const runtime=root.CivweaveModelRuntime;
   if(!runtime?.generate){state.mode='waiting';return false}
-  if(runtime.generate.__commonweaveFastInteractiveV192){state.installed=true;state.mode='proxy';state.lastError='';return true}
+  if(runtime.generate.__civweaveFastInteractiveV192){state.installed=true;state.mode='proxy';state.lastError='';return true}
   try{
     const original=runtime.generate.bind(runtime);
     const wrapped=async request=>{
@@ -33,21 +33,21 @@ function install(){
       return{...result,latency:{...(result?.latency||{}),interactiveMs:Math.max(0,Math.round(clock()-started)),revision:VERSION}};
     };
     Object.defineProperties(wrapped,{
-      __commonweaveFastInteractiveV192:{value:true},
+      __civweaveFastInteractiveV192:{value:true},
       __prior:{value:original},
     });
     const proxy=Object.freeze({...runtime,generate:wrapped,fastInteractiveRevision:VERSION});
-    root.CommonweaveModelRuntime=proxy;
-    state.installed=root.CommonweaveModelRuntime===proxy&&Boolean(root.CommonweaveModelRuntime.generate.__commonweaveFastInteractiveV192);
+    root.CivweaveModelRuntime=proxy;
+    state.installed=root.CivweaveModelRuntime===proxy&&Boolean(root.CivweaveModelRuntime.generate.__civweaveFastInteractiveV192);
     state.mode=state.installed?'proxy':'fallback';
     state.lastError=state.installed?'':'The model runtime proxy could not be installed; guide calls will use the original runtime.';
-    dispatch('commonweave:fast-interactive-installed',{version:VERSION,installed:state.installed,mode:state.mode});
+    dispatch('civweave:fast-interactive-installed',{version:VERSION,installed:state.installed,mode:state.mode});
     return state.installed;
   }catch(error){
     state.installed=false;
     state.mode='fallback';
     state.lastError=String(error?.message||error||'Unknown fast-runtime installation error.');
-    dispatch('commonweave:fast-interactive-fallback',{version:VERSION,error:state.lastError});
+    dispatch('civweave:fast-interactive-fallback',{version:VERSION,error:state.lastError});
     return false;
   }
 }
@@ -61,8 +61,8 @@ function stabilize(){
   },25);
   return false;
 }
-function status(){return{version:VERSION,installed:state.installed,mode:state.mode,lastError:state.lastError,runtimeFrozen:Object.isFrozen(root.CommonweaveModelRuntime||{})}}
+function status(){return{version:VERSION,installed:state.installed,mode:state.mode,lastError:state.lastError,runtimeFrozen:Object.isFrozen(root.CivweaveModelRuntime||{})}}
 const api=Object.freeze({version:VERSION,install,stabilize,optimizedRequest,status});
-root.CommonweaveFastInteractiveV192=api;
+root.CivweaveFastInteractiveV192=api;
 try{stabilize()}catch(error){state.mode='fallback';state.lastError=String(error?.message||error||'Fast runtime could not start.')}
 })();

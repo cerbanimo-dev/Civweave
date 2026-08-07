@@ -1,13 +1,13 @@
-# Install a Federated Commonweave Node
+# Install a Federated Civweave Node
 
-A Commonweave app and a Commonweave node are different things:
+A Civweave app and a Civweave node are different things:
 
 - **App users** install the PWA from a node they trust.
-- **Node operators** run a server that distributes Commonweave and exchanges signed events with other approved nodes.
+- **Node operators** run a server that distributes Civweave and exchanges signed events with other approved nodes.
 
-A person can use Commonweave without operating a node.
+A person can use Civweave without operating a node.
 
-## Install the Commonweave app
+## Install the Civweave app
 
 Open the HTTPS address of a trusted node.
 
@@ -21,9 +21,9 @@ Open the node in Safari, tap **Share**, choose **Add to Home Screen**, and confi
 
 ### Windows, macOS, and desktop Linux
 
-Open the node in Chrome or Edge and choose the install icon in the address bar or the browser's **Install Commonweave** command.
+Open the node in Chrome or Edge and choose the install icon in the address bar or the browser's **Install Civweave** command.
 
-The installed PWA remains attached to that home node for releases and updates. Commonweave's local-first workspace remains on the device unless the user explicitly publishes a federated object.
+The installed PWA remains attached to that home node for releases and updates. Civweave's local-first workspace remains on the device unless the user explicitly publishes a federated object.
 
 ---
 
@@ -41,8 +41,8 @@ Docker Compose is the recommended path for a laptop, desktop, Raspberry Pi, NAS,
 ## 1. Clone the repository
 
 ```sh
-git clone https://github.com/cerbanimo-dev/Commonweave.git
-cd Commonweave
+git clone https://github.com/cerbanimo-dev/Civweave.git
+cd Civweave
 ```
 
 To test this PR before merge, check out its branch:
@@ -67,14 +67,14 @@ Edit `.env.federated`:
 
 ```dotenv
 PUBLIC_HOST_URL=https://weave.example.org
-COMMONWEAVE_NODE_NAME=Neighborhood Tool Library
-COMMONWEAVE_NODE_DESCRIPTION=Commonweave node for our local workshop and learning circle.
-COMMONWEAVE_PORT=8787
-COMMONWEAVE_FEDERATION_ADMIN_TOKEN=paste-the-random-token-here
-COMMONWEAVE_ALLOW_UNAUTHENTICATED_ADMIN=false
-COMMONWEAVE_AUTO_ACCEPT_PEERS=false
-COMMONWEAVE_MAX_FEDERATION_EVENTS=5000
-COMMONWEAVE_MAX_PENDING_PEERS=256
+CIVWEAVE_NODE_NAME=Neighborhood Tool Library
+CIVWEAVE_NODE_DESCRIPTION=Civweave node for our local workshop and learning circle.
+CIVWEAVE_PORT=8787
+CIVWEAVE_FEDERATION_ADMIN_TOKEN=paste-the-random-token-here
+CIVWEAVE_ALLOW_UNAUTHENTICATED_ADMIN=false
+CIVWEAVE_AUTO_ACCEPT_PEERS=false
+CIVWEAVE_MAX_FEDERATION_EVENTS=5000
+CIVWEAVE_MAX_PENDING_PEERS=256
 HUB_TOKEN=
 ```
 
@@ -99,7 +99,7 @@ Check public health and discovery:
 
 ```sh
 curl https://weave.example.org/api/federation/health
-curl https://weave.example.org/.well-known/commonweave
+curl https://weave.example.org/.well-known/civweave
 ```
 
 Check the protected administrator status:
@@ -187,7 +187,7 @@ curl -X POST "$NODE_A/api/federation/events" \
   -H "Authorization: Bearer $TOKEN_A" \
   -H 'Content-Type: application/json' \
   -d '{
-    "kind":"commonweave.hello",
+    "kind":"civweave.hello",
     "subject":"Hello from Alpha",
     "visibility":"federated",
     "payload":{"message":"The thread is connected."}
@@ -221,7 +221,7 @@ Open only the ports needed by the reverse proxy, usually 80 and 443. Keep port 8
 
 ## Render and similar container hosts
 
-Deploy using `Dockerfile.federated`, set `PUBLIC_HOST_URL` to the final HTTPS service URL, configure `COMMONWEAVE_FEDERATION_ADMIN_TOKEN` as a secret, and attach persistent storage at `/app/data`.
+Deploy using `Dockerfile.federated`, set `PUBLIC_HOST_URL` to the final HTTPS service URL, configure `CIVWEAVE_FEDERATION_ADMIN_TOKEN` as a secret, and attach persistent storage at `/app/data`.
 
 A host without persistent `/app/data` creates a new node identity after redeployment. That breaks existing key pins and requires every peer to verify and trust the replacement identity.
 
@@ -233,9 +233,9 @@ For local testing without Docker, use Node 22 or newer:
 
 ```sh
 export PORT=8787
-export COMMONWEAVE_APP_PORT=8788
+export CIVWEAVE_APP_PORT=8788
 export PUBLIC_HOST_URL=http://127.0.0.1:8787
-export COMMONWEAVE_FEDERATION_ADMIN_TOKEN="$(openssl rand -hex 32)"
+export CIVWEAVE_FEDERATION_ADMIN_TOKEN="$(openssl rand -hex 32)"
 export DATA_DIR="$PWD/data"
 node server-federated-v152.mjs
 ```
@@ -270,7 +270,7 @@ Restore the complete data directory before starting the replacement node. Keep t
 
 ## Rotate a compromised administrator token
 
-Change `COMMONWEAVE_FEDERATION_ADMIN_TOKEN` in `.env.federated`, then recreate the container:
+Change `CIVWEAVE_FEDERATION_ADMIN_TOKEN` in `.env.federated`, then recreate the container:
 
 ```sh
 docker compose --env-file .env.federated -f docker-compose.federated.yml up -d --force-recreate
@@ -295,11 +295,11 @@ Federation v1 does not yet have an automated key-rotation document. A replacemen
 
 ## `503 Federation administration is disabled`
 
-Set `COMMONWEAVE_FEDERATION_ADMIN_TOKEN` and restart the node. The public health and discovery routes remain available while administration is locked.
+Set `CIVWEAVE_FEDERATION_ADMIN_TOKEN` and restart the node. The public health and discovery routes remain available while administration is locked.
 
 ## `401 Federation administrator authorization required`
 
-Send the configured token in `Authorization: Bearer ...` or `X-Commonweave-Admin-Token`.
+Send the configured token in `Authorization: Bearer ...` or `X-Civweave-Admin-Token`.
 
 ## Peer remains pending
 
@@ -319,11 +319,11 @@ The data volume is not persistent or is mounted at the wrong path. Confirm `/app
 
 ## Container is healthy but the app surface returns 502
 
-Inspect container logs. The federation gateway is running, but the internal Commonweave application process failed or has not started.
+Inspect container logs. The federation gateway is running, but the internal Civweave application process failed or has not started.
 
 ## Discovery works locally but not from another node
 
-Check DNS, HTTPS, firewall rules, reverse-proxy routing, and `PUBLIC_HOST_URL`. Discovery redirects are rejected, so the exact origin must directly serve `/.well-known/commonweave`.
+Check DNS, HTTPS, firewall rules, reverse-proxy routing, and `PUBLIC_HOST_URL`. Discovery redirects are rejected, so the exact origin must directly serve `/.well-known/civweave`.
 
 ---
 
@@ -333,7 +333,7 @@ Check DNS, HTTPS, firewall rules, reverse-proxy routing, and `PUBLIC_HOST_URL`. 
 - A long federation administrator token is configured as a secret.
 - Unauthenticated administration is disabled.
 - `/app/data` is persistent and backed up.
-- `/.well-known/commonweave` is publicly reachable.
+- `/.well-known/civweave` is publicly reachable.
 - `/api/federation/health` reports `ok: true`.
 - Administrator status requires the token.
 - Peer fingerprints were compared outside the federation channel.

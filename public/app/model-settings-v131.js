@@ -1,6 +1,6 @@
 (()=>{
 "use strict";
-const MODEL_SESSION_KEY="commonweave-model-session";
+const MODEL_SESSION_KEY="civweave-model-session";
 const routeName=value=>{
   const provider=String(value||"deterministic").toLowerCase();
   if(["openai-compatible","openai","compatible"].includes(provider))return "compatible";
@@ -9,7 +9,7 @@ const routeName=value=>{
 };
 const modelState=()=>{
   const legacy=parse(localStorage.getItem(SETTINGS_KEY),{route:"deterministic",model:"Weaveling local planner",endpoint:"",consent:false,agenticEnabled:false});
-  const runtime=globalThis.CommonweaveModelRuntime;
+  const runtime=globalThis.CivweaveModelRuntime;
   let profiles={interactive:null,agentic:null,agenticEnabled:false};
   let resolved=null;
   try{profiles=runtime?.readModelProfiles?.()||profiles;resolved=runtime?.readSharedConfig?.("interactive")||null}catch{}
@@ -37,7 +37,7 @@ const modelState=()=>{
 };
 const previousRenderNative=renderNative;
 renderNative=function modelAwareRenderNative(capability){
-  if(capability.id!=="commonweave.model-setup")return previousRenderNative(capability);
+  if(capability.id!=="civweave.model-setup")return previousRenderNative(capability);
   const s=modelState();
   return `<section class="native-panel"><small class="kicker">COMPASS CALIBRATION</small><h2>Choose the model route</h2><p>This preference is shared by Weaveling and the four guides. Provider settings are local. API keys remain in this tab only.</p>
   <form data-native-form="model">
@@ -49,7 +49,7 @@ renderNative=function modelAwareRenderNative(capability){
     </select></label>
 
     <section class="model-route-panel" data-model-route-panel="deterministic" ${s.route==="deterministic"?"":"hidden"}>
-      <div class="provider-note">Runs inside Commonweave with the deterministic planning compiler. No prompt leaves the device.</div>
+      <div class="provider-note">Runs inside Civweave with the deterministic planning compiler. No prompt leaves the device.</div>
       <label>Planner label<input name="deterministicModel" maxlength="200" value="${esc(s.deterministicModel)}"></label>
     </section>
 
@@ -98,7 +98,7 @@ const sync=form=>{
   if(options)options.hidden=!(route==="gemini"&&form.querySelector("[data-antigravity-toggle]")?.checked);
 };
 const sessionKey=()=>{
-  try{const key=globalThis.CommonweaveModelRuntime?.readSharedConfig?.("interactive")?.apiKey;if(key)return key}catch{}
+  try{const key=globalThis.CivweaveModelRuntime?.readSharedConfig?.("interactive")?.apiKey;if(key)return key}catch{}
   return parse(sessionStorage.getItem(MODEL_SESSION_KEY),{})?.apiKey||"";
 };
 const fromForm=form=>{
@@ -130,7 +130,7 @@ const fromForm=form=>{
 };
 const save=form=>{
   const setup=fromForm(form);
-  const runtime=globalThis.CommonweaveModelRuntime;
+  const runtime=globalThis.CivweaveModelRuntime;
   localStorage.setItem(SETTINGS_KEY,JSON.stringify(setup.legacy));
   if(setup.apiKey||setup.externalConsent)sessionStorage.setItem(MODEL_SESSION_KEY,JSON.stringify({apiKey:setup.apiKey,remoteConsent:setup.externalConsent,provider:setup.interactive.provider,savedAt:new Date().toISOString()}));
   else if(["deterministic","ollama"].includes(setup.route))sessionStorage.removeItem(MODEL_SESSION_KEY);
@@ -145,7 +145,7 @@ const save=form=>{
   return setup;
 };
 const test=async(form,button)=>{
-  const runtime=globalThis.CommonweaveModelRuntime;
+  const runtime=globalThis.CivweaveModelRuntime;
   const setup=fromForm(form);
   const status=form.querySelector('[data-model-route-panel]:not([hidden]) [data-model-test-status]');
   if(!runtime){status.textContent="The shared model runtime has not loaded.";status.className="model-test-status is-error";return}

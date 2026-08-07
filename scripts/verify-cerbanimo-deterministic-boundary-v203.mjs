@@ -40,9 +40,9 @@ class MemoryStorage{
   removeItem(key){this.rows.delete(key)}
 }
 
-const profilesKey='commonweave-model-profiles-v1';
+const profilesKey='civweave-model-profiles-v1';
 const localStorage=new MemoryStorage({
-  [profilesKey]:JSON.stringify({interactive:{provider:'deterministic',route:'deterministic',model:'commonweave-deterministic-v188'}}),
+  [profilesKey]:JSON.stringify({interactive:{provider:'deterministic',route:'deterministic',model:'civweave-deterministic-v188'}}),
 });
 let modelCalls=0;
 let assistantCalls=0;
@@ -53,18 +53,18 @@ const sandbox={
   localStorage,
   URLSearchParams,
   Date,
-  location:{pathname:'/app/realm-console-v140.html',search:'?system=cerbanimo',hostname:'commonweave.test'},
+  location:{pathname:'/app/realm-console-v140.html',search:'?system=cerbanimo',hostname:'civweave.test'},
   setInterval(fn){sandbox.interval=fn;return 1},
   clearInterval(){},
   addEventListener(name,handler){listeners.set(name,handler)},
-  CommonweaveModelRuntime:Object.freeze({
+  CivweaveModelRuntime:Object.freeze({
     readSharedConfig(){return{provider:'gemini',route:'gemini',model:'gemini-3.5-flash-lite'}},
     async generate(){modelCalls+=1;return{status:'success',actual:{provider:'gemini',model:'gemini-3.5-flash-lite'}}},
   }),
-  CommonweaveAssistantV141:{
+  CivweaveAssistantV141:{
     async respond(){assistantCalls+=1;return{provider:'gemini',requestedProvider:'gemini'}},
   },
-  CommonweaveDeterministicModeV175:{
+  CivweaveDeterministicModeV175:{
     async respond(){deterministicCalls+=1;return{provider:'deterministic',requestedProvider:'deterministic'}},
   },
   globalThis:null,
@@ -73,14 +73,14 @@ sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(boundary,sandbox,{filename:'cerbanimo-deterministic-boundary-v203.js'});
 
-assert.equal(sandbox.CommonweaveCerbanimoDeterministicBoundaryV203.selectedProvider(),'deterministic','Stored deterministic mode did not outrank a stale Gemini runtime profile.');
-const localReply=await sandbox.CommonweaveAssistantV141.respond({systemId:'cerbanimo',text:'Build a garden bench'});
+assert.equal(sandbox.CivweaveCerbanimoDeterministicBoundaryV203.selectedProvider(),'deterministic','Stored deterministic mode did not outrank a stale Gemini runtime profile.');
+const localReply=await sandbox.CivweaveAssistantV141.respond({systemId:'cerbanimo',text:'Build a garden bench'});
 assert.equal(localReply.provider,'deterministic','Cerbanimo assistant did not route through deterministic mode.');
 assert.equal(assistantCalls,0,'Cerbanimo reached the original Gemini-capable assistant while deterministic mode was selected.');
 assert.equal(deterministicCalls,1,'The deterministic Cerbanimo runtime was not called exactly once.');
 
-const blocked=await sandbox.CommonweaveModelRuntime.generate({
-  purpose:'commonweave-guide-response-v141',
+const blocked=await sandbox.CivweaveModelRuntime.generate({
+  purpose:'civweave-guide-response-v141',
   context:{guide:{system:'cerbanimo'}},
   config:{provider:'gemini',model:'gemini-3.5-flash-lite'},
 });
@@ -88,10 +88,10 @@ assert.equal(blocked.error?.code,'DETERMINISTIC_PROVIDER_BOUNDARY','A direct Cer
 assert.equal(modelCalls,0,'The original Gemini generator ran while deterministic mode was selected.');
 
 localStorage.setItem(profilesKey,JSON.stringify({interactive:{provider:'gemini',route:'gemini',model:'gemini-3.5-flash-lite'}}));
-const remoteReply=await sandbox.CommonweaveAssistantV141.respond({systemId:'cerbanimo',text:'Hello'});
+const remoteReply=await sandbox.CivweaveAssistantV141.respond({systemId:'cerbanimo',text:'Hello'});
 assert.equal(remoteReply.provider,'gemini','Explicit Gemini mode no longer reaches the configured provider.');
 assert.equal(assistantCalls,1,'The original assistant was not restored for explicit Gemini mode.');
-await sandbox.CommonweaveModelRuntime.generate({purpose:'commonweave-guide-response-v141',context:{guide:{system:'cerbanimo'}},config:{provider:'gemini'}});
+await sandbox.CivweaveModelRuntime.generate({purpose:'civweave-guide-response-v141',context:{guide:{system:'cerbanimo'}},config:{provider:'gemini'}});
 assert.equal(modelCalls,1,'The model runtime remained blocked after the user explicitly selected Gemini.');
 
 console.log(JSON.stringify({

@@ -52,7 +52,7 @@ assert(runtime.includes('if(target.disabled||busy)return'),'The canonical contro
 assert(runtime.includes('dispatchCount+=1')&&runtime.includes('livingSchoolDispatchCount'),'Dispatches are not inspectable.');
 assert(core.includes('delete next.room')&&core.includes('delete next.currentRoom')&&core.includes('delete next.lastRoom'),'Legacy navigation fields are not removed during migration.');
 assert(core.includes('You are Moss, Living School learning guide'),'Moss does not own Living School generation.');
-assert(core.includes('never impersonate another Commonweave guide')||core.includes('Never impersonate another guide'),'Guide identity boundary is missing from curriculum generation.');
+assert(core.includes('never impersonate another Civweave guide')||core.includes('Never impersonate another guide'),'Guide identity boundary is missing from curriculum generation.');
 
 for(const token of [
   "purpose:'living-school-live-source-research-v218.1'",

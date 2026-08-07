@@ -36,4 +36,4 @@ for (const target of targets) {
   if (text !== before) await fsp.writeFile(target.path, text, 'utf8');
 }
 
-console.log(`Applied Commonweave ${CURRENT_VERSION} embedded version markers.`);
+console.log(`Applied Civweave ${CURRENT_VERSION} embedded version markers.`);

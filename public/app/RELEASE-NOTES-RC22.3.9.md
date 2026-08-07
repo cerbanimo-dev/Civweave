@@ -1,9 +1,9 @@
-# Commonweave Host Node Hub v1.0.9
+# Civweave Host Node Hub v1.0.9
 
 ## Cardinal visual-contract correction
 
 - Rebuilt the host landing page as an image-driven Town Square installation gateway.
-- Made supplied artwork the visible screen across Commonweave, Living School, Cerbanimo, Anarchadia, and FellowFare.
+- Made supplied artwork the visible screen across Civweave, Living School, Cerbanimo, Anarchadia, and FellowFare.
 - Replaced ordinary persistent menus with image-backed docks.
 - Hid hotspot labels while preserving semantic names and keyboard focus.
 - Removed user-facing legacy and classic launch paths.

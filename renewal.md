@@ -62,7 +62,7 @@ Read the archived epoch, its retrospective, the current AGENTS.md, the fresh imp
 the compatibility register, current screenshots, redacted feedback themes, incident reports,
 and current repository checks.
 
-Create a new ten-year Commonweave pipeline.
+Create a new ten-year Civweave pipeline.
 Use the archived pipeline only as a structural example.
 Treat current executable code and user evidence as the source of truth.
 Detail the first four quarters, keep later years adaptive, schedule annual rebases,

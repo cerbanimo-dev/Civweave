@@ -69,8 +69,8 @@ for(const token of [
   `/service-worker-v203.js?v=${version}-lightweight-shell-v208`,
   `/install-v130.js?v=${version}-lightweight-shell-v208`
 ])check(installerHtml.includes(token),`public/app/index.html is missing ${token}`);
-same(manifest.name,`Commonweave v${version}`,'manifest name');
-same(new URL(manifest.start_url,'https://commonweave.invalid').searchParams.get('version'),version,'manifest start URL version');
+same(manifest.name,`Civweave v${version}`,'manifest name');
+same(new URL(manifest.start_url,'https://civweave.invalid').searchParams.get('version'),version,'manifest start URL version');
 check(installRuntime.includes(`const VERSION = '${version}';`),'Installer runtime is stale.');
 check(installedEntryHtml.includes(`/app/installed-entry-v146.js?v=${version}`),'Installed entry HTML is stale.');
 check(installedEntryRuntime.includes("new URL('/app/index.html',location.origin)"),'Browser launcher does not target the real installer.');
@@ -90,15 +90,15 @@ for(const token of [
   `const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`,
   `version:'${version}'`,
   "'/app/system-routes-v227.js'",
-  "canonicalPolicy:'five-system-first-class-routes-commonweave-core-only'",
+  "canonicalPolicy:'five-system-first-class-routes-civweave-core-only'",
   'canonicalSystemCount:5',
   'canonicalAutoScripts:0'
 ])check(installBoundary.includes(token),`Install boundary is missing ${token}.`);
 check(!installBoundary.includes("const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';")&&!installBoundary.includes('addScript(RELEASE_VERSION_SCRIPT)'),'Install boundary reintroduced the retired canonical version loader.');
-check(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-commonweave-version]')"),'Visible-version synchronizer is incomplete.');
+check(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-civweave-version]')"),'Visible-version synchronizer is incomplete.');
 check(gateway.includes(`const VERSION = '${version}-render-installed-runtime-v132';`),'Gateway wrapper version is stale.');
 check(localServer.includes(`"const VERSION = '${version}';"`)&&localServer.includes(`?build=${version}`),'Local server version is stale.');
-check(workingCampus.includes(`Commonweave Working Campus · v${version}`)&&workingCampus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
+check(workingCampus.includes(`Civweave Working Campus · v${version}`)&&workingCampus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
 check(campusLoader.includes(`system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Working Campus route loader version is stale.');
 check(campusPart4.includes(`version:'${version}'`),'Working Campus realm travel version is stale.');
 for(const token of [
@@ -130,7 +130,7 @@ for(const [label,source] of [
   ['campus loader',campusLoader],
   ['campus travel',campusPart4]
 ]){
-  const pattern=new RegExp(`(?:(?:Commonweave|Civweave) v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
+  const pattern=new RegExp(`(?:(?:Civweave|Civweave) v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
   for(const match of source.matchAll(pattern))if(match[1]!==version)throw new Error(`${label} still exposes ${match[1]} instead of ${version}.`);
 }
 console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,canonicalCoreOnly:true,legacyCompatibility:true,gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true},null,2));

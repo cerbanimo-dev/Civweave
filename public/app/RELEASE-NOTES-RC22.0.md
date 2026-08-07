@@ -1,4 +1,4 @@
-# Commonweave 1.0.0-rc22.0 · Autonomous Intention Stewardship
+# Civweave 1.0.0-rc22.0 · Autonomous Intention Stewardship
 
 - Added conversational clarification before model-guided replanning when deadlines, budgets, accessibility needs, or team constraints are missing.
 - Added clarification sessions that preserve answers, stage reviewed constraint updates, and regenerate structured alternatives.
@@ -8,5 +8,5 @@
 - Added live gap filling from FellowFare, Living School, Cerbanimo, and Anarchadia records.
 - Added reviewed candidate-link handoffs instead of silent assignment of people, skills, resources, or evidence.
 - Added split and merge suggestions for overlapping or independently branching intentions.
-- Added selectable coordinated amendment batches and destination-response reconciliation back into the Commonweave plan.
+- Added selectable coordinated amendment batches and destination-response reconciliation back into the Civweave plan.
 - Preserved review gates for plan changes and canonical destination records.

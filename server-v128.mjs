@@ -4,13 +4,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(rootDir, 'server.mjs');
-const runtimePath = path.join(rootDir, '.commonweave-server-v128.runtime.mjs');
+const runtimePath = path.join(rootDir, '.civweave-server-v128.runtime.mjs');
 const VERSION = '1.0.28';
 const BUILD = '1.0.28-parity-ledger-foundation';
 let source = await fsp.readFile(sourcePath, 'utf8');
 
 function replaceRequired(before, after, label) {
-  if (!source.includes(before)) throw new Error(`Commonweave v1.0.28 patch could not find ${label}`);
+  if (!source.includes(before)) throw new Error(`Civweave v1.0.28 patch could not find ${label}`);
   source = source.replace(before, after);
 }
 replaceRequired("const BUILD_VERSION = '1.0.21-ai-uplift';", `const BUILD_VERSION = '${BUILD}';`, 'host build marker');
@@ -18,14 +18,14 @@ replaceRequired("const APP_VERSION = 'rc22.3.20-ai-checkpoint';", `const APP_VER
 source = source.replace("appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`", "appUrl: `${root}/loom/?setup=1&host=${encodeURIComponent(root)}`");
 source = source.replace("appUrl: `${requestOrigin(req, url)}/app/`", "appUrl: `${requestOrigin(req, url)}/loom/`");
 replaceRequired(
-String.raw`    if ((pathname === '/field/commonweave/seed' || pathname === '/downloads/commonweave-pocket-campus.cwseed') && req.method === 'GET') {
-      const served = await serveFile(req, res, '/downloads/commonweave-pocket-campus.cwseed');
+String.raw`    if ((pathname === '/field/civweave/seed' || pathname === '/downloads/civweave-pocket-campus.cwseed') && req.method === 'GET') {
+      const served = await serveFile(req, res, '/downloads/civweave-pocket-campus.cwseed');
       if (served) return;
-      return json(res, 404, { error: 'Commonweave campus seed is not available on this host node.' });
+      return json(res, 404, { error: 'Civweave campus seed is not available on this host node.' });
     }`,
-String.raw`    if ((pathname === '/field/commonweave/seed' || pathname === '/downloads/commonweave-pocket-campus.cwseed') && req.method === 'GET') {
+String.raw`    if ((pathname === '/field/civweave/seed' || pathname === '/downloads/civweave-pocket-campus.cwseed') && req.method === 'GET') {
       cwLog('legacy-seed-request-retired', { requestId, pathname }, req);
-      res.writeHead(204, { 'cache-control':'no-store', 'x-commonweave-version':CW_VERSION, 'x-commonweave-build':CW_BUILD, 'x-commonweave-seed-status':'retired' });
+      res.writeHead(204, { 'cache-control':'no-store', 'x-civweave-version':CW_VERSION, 'x-civweave-build':CW_BUILD, 'x-civweave-seed-status':'retired' });
       return res.end();
     }`,
 'legacy campus seed route');
@@ -51,7 +51,7 @@ function cwSafe(value, depth = 0) {
 }
 function cwLog(kind, detail = {}, req = null) {
   const entry = {
-    schema: 'commonweave.boot-log.v1', time: new Date().toISOString(), version: CW_VERSION, build: CW_BUILD,
+    schema: 'civweave.boot-log.v1', time: new Date().toISOString(), version: CW_VERSION, build: CW_BUILD,
     kind: String(kind || 'unknown').slice(0, 100), detail: cwSafe(detail),
     request: req ? { method:req.method, url:String(req.url||'').slice(0,1000), userAgent:String(req.headers['user-agent']||'').slice(0,300), referer:String(req.headers.referer||'').slice(0,1000), fetchDest:String(req.headers['sec-fetch-dest']||''), fetchMode:String(req.headers['sec-fetch-mode']||''), cacheControl:String(req.headers['cache-control']||''), serviceWorker:String(req.headers['service-worker']||'') } : null
   };
@@ -60,7 +60,7 @@ function cwLog(kind, detail = {}, req = null) {
 }
 function cwSend(res, status, text, type, requestId) {
   const payload = Buffer.from(text);
-  res.writeHead(status, {'content-type':type,'content-length':payload.length,'cache-control':'no-store, no-cache, must-revalidate','pragma':'no-cache','expires':'0','x-commonweave-version':CW_VERSION,'x-commonweave-build':CW_BUILD,'x-commonweave-request-id':requestId,'x-content-type-options':'nosniff'});
+  res.writeHead(status, {'content-type':type,'content-length':payload.length,'cache-control':'no-store, no-cache, must-revalidate','pragma':'no-cache','expires':'0','x-civweave-version':CW_VERSION,'x-civweave-build':CW_BUILD,'x-civweave-request-id':requestId,'x-content-type-options':'nosniff'});
   res.end(payload);
 }
 async function cwServeLoom(req, res, originalPathname, requestId) {
@@ -80,18 +80,18 @@ async function cwServeLoom(req, res, originalPathname, requestId) {
   if (liteSource) {
     const service = liteSource[1];
     let text = await fsp.readFile(path.join(PUBLIC_DIR, 'app', 'services', service, 'index.html'), 'utf8');
-    const injection = '<base href="/app/services/' + service + '/"><script>window.__COMMONWEAVE_LITE_SOURCE__=true;try{if(navigator.serviceWorker)navigator.serviceWorker.register=async()=>({scope:location.origin+"/lite/source-disabled/"})}catch{}</script>';
+    const injection = '<base href="/app/services/' + service + '/"><script>window.__CIVWEAVE_LITE_SOURCE__=true;try{if(navigator.serviceWorker)navigator.serviceWorker.register=async()=>({scope:location.origin+"/lite/source-disabled/"})}catch{}</script>';
     text = text.replace(/<head([^>]*)>/i, '<head$1>' + injection);
     cwLog('lite-source-served', { requestId, service, bytes:text.length }, req); cwSend(res, 200, text, 'text/html; charset=utf-8', requestId); return true;
   }
-  if (originalPathname === '/app/shared/commonweave-parity-ledger.json') {
+  if (originalPathname === '/app/shared/civweave-parity-ledger.json') {
     const { gunzipSync } = await import('node:zlib');
-    const encoded = (await Promise.all([1,2,3,4].map(part => fsp.readFile(path.join(PUBLIC_DIR, 'app', 'shared', 'commonweave-parity-ledger.part' + part + '.b64'), 'utf8')))).join('').replace(/\s+/g, '');
+    const encoded = (await Promise.all([1,2,3,4].map(part => fsp.readFile(path.join(PUBLIC_DIR, 'app', 'shared', 'civweave-parity-ledger.part' + part + '.b64'), 'utf8')))).join('').replace(/\s+/g, '');
     const text = gunzipSync(Buffer.from(encoded.trim(), 'base64')).toString('utf8');
     cwLog('parity-ledger-served', { requestId, bytes:text.length }, req); cwSend(res, 200, text, 'application/json; charset=utf-8', requestId); return true;
   }
   if (originalPathname === '/loom/version.json' || originalPathname === '/lite/version.json') {
-    cwSend(res, 200, JSON.stringify({schema:'commonweave.version.v1',version:CW_VERSION,build:CW_BUILD,channel:'main',parityLedger:'/app/shared/commonweave-parity-ledger.json',updatedAt:new Date().toISOString()},null,2), 'application/json; charset=utf-8', requestId); return true;
+    cwSend(res, 200, JSON.stringify({schema:'civweave.version.v1',version:CW_VERSION,build:CW_BUILD,channel:'main',parityLedger:'/app/shared/civweave-parity-ledger.json',updatedAt:new Date().toISOString()},null,2), 'application/json; charset=utf-8', requestId); return true;
   }
   return false;
 }
@@ -114,7 +114,7 @@ replaceRequired(
     || originalPathname === '/diagnostics.html'
     || originalPathname.startsWith('/api/boot-log');
   if (isTrackedPath) {
-    res.setHeader('x-commonweave-version', CW_VERSION); res.setHeader('x-commonweave-build', CW_BUILD); res.setHeader('x-commonweave-request-id', requestId);
+    res.setHeader('x-civweave-version', CW_VERSION); res.setHeader('x-civweave-build', CW_BUILD); res.setHeader('x-civweave-request-id', requestId);
     cwLog('http-request', { requestId, originalPathname }, req);
   }`,
   'request pathname declaration'
@@ -126,7 +126,7 @@ replaceRequired(
   "    if (await serveFile(req, res, pathname)) return;",
   String.raw`    if (req.method === 'GET' && (originalPathname === '/app' || originalPathname.startsWith('/app/') || originalPathname === '/campus' || originalPathname.startsWith('/campus/'))) {
       const isAsset = /\.(?:png|jpe?g|webp|svg|gif|avif|css|js|json|webmanifest|woff2?)$/i.test(originalPathname);
-      if (!isAsset) { cwLog('legacy-route-redirected', {requestId,from:originalPathname,to:'/loom/'}, req); res.writeHead(302,{location:'/loom/','cache-control':'no-store','x-commonweave-version':CW_VERSION,'x-commonweave-build':CW_BUILD}); return res.end(); }
+      if (!isAsset) { cwLog('legacy-route-redirected', {requestId,from:originalPathname,to:'/loom/'}, req); res.writeHead(302,{location:'/loom/','cache-control':'no-store','x-civweave-version':CW_VERSION,'x-civweave-build':CW_BUILD}); return res.end(); }
     }
     if (req.method === 'GET' && await cwServeLoom(req, res, originalPathname, requestId)) return;
     if (await serveFile(req, res, pathname)) return;`,

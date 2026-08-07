@@ -27,7 +27,7 @@ function retiredResponse(pathname){
   const body=module
     ? "export const active=false;export const replacement='/app/cabinets/living-school/index.html';export default {active,replacement};\n"
     : "(()=>{'use strict';globalThis.LivingSchoolLegacyRemovedV218={active:false,replacement:'/app/cabinets/living-school/index.html'};})();\n";
-  return new Response(body,{status:410,headers:{'content-type':module?'text/javascript; charset=utf-8':'application/javascript; charset=utf-8','cache-control':'no-store','x-commonweave-living-school':REVISION}});
+  return new Response(body,{status:410,headers:{'content-type':module?'text/javascript; charset=utf-8':'application/javascript; charset=utf-8','cache-control':'no-store','x-civweave-living-school':REVISION}});
 }
 async function evictRetired(){
   const names=await caches.keys();
@@ -70,5 +70,5 @@ self.addEventListener('fetch',event=>{
     event.respondWith(Promise.resolve(retiredResponse(url.pathname)));
   }
 });
-self.CommonweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,retired:[...RETIRED_PATHS]});
+self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,retired:[...RETIRED_PATHS]});
 })();

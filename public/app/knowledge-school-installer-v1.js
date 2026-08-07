@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const api=window.CommonweaveKnowledgeSchools;
+const api=window.CivweaveKnowledgeSchools;
 const list=document.querySelector('#knowledge-school-list');
 const help=document.querySelector('#knowledge-school-help');
 const stageButton=document.querySelector('#stage-knowledge-schools');
@@ -56,7 +56,7 @@ async function refreshStatus(options={}){
   if(!options.keepHelp){
     if(updates.length)setHelp(`${updates.length} saved school${updates.length===1?' has':'s have'} a newer package available. Only those updates will download.`);
     else if(saved.length)setHelp(`${saved.length} school${saved.length===1?' is':'s are'} saved offline${persistent?' in persistent browser storage':''}. App updates will preserve this library.`);
-    else setHelp('No schools are downloaded yet. The Commonweave app remains lean until you choose them.');
+    else setHelp('No schools are downloaded yet. The Civweave app remains lean until you choose them.');
   }
   refreshSelection();
   return rows;

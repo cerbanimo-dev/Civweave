@@ -1,23 +1,23 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.16-five-system-navigation-v227';
+const VERSION='1.0.17-five-system-navigation-v227';
 const NAV_ID='cw-themed-system-nav';
 const STYLE_ID='cw-themed-system-nav-style';
 const PATH=location.pathname;
 const QUERY=new URLSearchParams(location.search);
-const EMBEDDED=window.self!==window.top||(QUERY.get('commonweave')==='1'&&QUERY.get('cabinet')==='1');
-const ROUTES=globalThis.CommonweaveSystemRoutesV227;
+const EMBEDDED=window.self!==window.top||(QUERY.get('civweave')==='1'&&QUERY.get('cabinet')==='1');
+const ROUTES=globalThis.CivweaveSystemRoutesV227;
 
 const SYSTEMS=[
-  {id:'commonweave',label:'Commonweave',image:'/app/assets/navigation/200-commonweave-nav.webp?v=image-nav-r2',fallback:'/app/working-campus-v156.html?installed=1',glow:'#7fe7dc'},
+  {id:'civweave',label:'Civweave',image:'/app/assets/navigation/200-civweave-nav.webp?v=image-nav-r2',fallback:'/app/working-campus-v156.html?installed=1',glow:'#7fe7dc'},
   {id:'cerbanimo',label:'Cerbanimo',image:'/app/assets/navigation/200-cerbanimo-nav.webp?v=image-nav-r2',fallback:'/app/realm-console-v140.html?system=cerbanimo&cabinet=1&installed=1',glow:'#ff54d3'},
   {id:'living-school',label:'Living School',image:'/app/assets/navigation/200-living-school-nav.webp?v=image-nav-r2',fallback:'/app/cabinets/living-school/index.html?cabinet=1&installed=1',glow:'#9acb70'},
   {id:'fellowfare',label:'FellowFare',image:'/app/assets/navigation/200-fellowfare-nav.webp?v=image-nav-r2',fallback:'/app/fellowfare-cabinet-v144.html?cabinet=1&installed=1',glow:'#4f8ca8'},
   {id:'anarchadia',label:'Anarchadia',image:'/app/assets/navigation/200-anarchadia-nav.webp?v=image-nav-r2',fallback:'/app/anarchadia-console-v139.html?cabinet=1&installed=1',glow:'#ff2f87'}
 ];
 
-function href(item){return ROUTES?.urlFor?.(item.id,{version:'1.0.16',source:currentSystem()||'navigation'}).href||item.fallback}
+function href(item){return ROUTES?.urlFor?.(item.id,{version:'1.0.17',source:currentSystem()||'navigation'}).href||item.fallback}
 function clearEmbeddedCopy(){
   document.getElementById(NAV_ID)?.remove();
   document.getElementById(STYLE_ID)?.remove();
@@ -40,8 +40,8 @@ function currentSystem(){
   if(document.documentElement.hasAttribute('data-living-school-cabinet')||PATH.includes('/cabinets/living-school/'))return'living-school';
   if(PATH.includes('fellowfare'))return'fellowfare';
   if(PATH.includes('anarchadia'))return'anarchadia';
-  if(PATH.includes('realm-console-v140.html'))return explicit==='commonweave'?'commonweave':'cerbanimo';
-  if(PATH.includes('working-campus-v156.html'))return'commonweave';
+  if(PATH.includes('realm-console-v140.html'))return explicit==='civweave'?'civweave':'cerbanimo';
+  if(PATH.includes('working-campus-v156.html'))return'civweave';
   return'';
 }
 
@@ -84,7 +84,7 @@ function mount(){
   const nav=document.createElement('nav');
   nav.id=NAV_ID;
   nav.dataset.navigationRevision=VERSION;
-  nav.setAttribute('aria-label','Travel between Commonweave systems');
+  nav.setAttribute('aria-label','Travel between Civweave systems');
   nav.innerHTML=SYSTEMS.map(item=>{
     const selected=item.id===current;
     return `<a class="cw-themed-system-link${selected?' is-current':''}" data-system="${item.id}" href="${href(item)}" target="_top" aria-label="Open ${item.label}"${selected?' aria-current="page"':''} style="--system-glow:${item.glow}"><img src="${item.image}" alt="" width="200" height="100" draggable="false"></a>`;
@@ -93,7 +93,7 @@ function mount(){
     const link=event.target.closest('a[data-system]');
     if(!link||!ROUTES?.navigate)return;
     event.preventDefault();
-    ROUTES.navigate(link.dataset.system,{version:'1.0.16',source:current});
+    ROUTES.navigate(link.dataset.system,{version:'1.0.17',source:current});
   });
   document.body.append(nav);
 }

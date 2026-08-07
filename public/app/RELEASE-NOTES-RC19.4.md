@@ -1,6 +1,6 @@
 # Anarchadia RC19.4 — World Engine Migration
 
-All nine illustrated Anarchadia rooms now run through the Commonweave World Engine.
+All nine illustrated Anarchadia rooms now run through the Civweave World Engine.
 
 - Data-driven scenes replace room-specific hotspot rendering.
 - Existing portrait and landscape artwork remains responsive.

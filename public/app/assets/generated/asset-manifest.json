@@ -388,7 +388,7 @@
       "height": 274
     },
     {
-      "file": "commonweave-home.png",
+      "file": "civweave-home.png",
       "width": 263,
       "height": 272
     },
@@ -438,14 +438,14 @@
       "height": 257
     }
   ],
-  "commonweave-navigation-icons": [
+  "civweave-navigation-icons": [
     {
-      "file": "commonweave-home.png",
+      "file": "civweave-home.png",
       "width": 315,
       "height": 315
     },
     {
-      "file": "commonweave-route.png",
+      "file": "civweave-route.png",
       "width": 312,
       "height": 318
     },
@@ -455,29 +455,29 @@
       "height": 347
     },
     {
-      "file": "commonweave-journal.png",
+      "file": "civweave-journal.png",
       "width": 309,
       "height": 316
     },
     {
-      "file": "commonweave-passport.png",
+      "file": "civweave-passport.png",
       "width": 316,
       "height": 317
     },
     {
-      "file": "commonweave-realms.png",
+      "file": "civweave-realms.png",
       "width": 669,
       "height": 341
     }
   ],
-  "commonweave-navbar": [
+  "civweave-navbar": [
     {
       "file": "nav-orbit-left.png",
       "width": 190,
       "height": 217
     },
     {
-      "file": "commonweave-bottom-navbar.png",
+      "file": "civweave-bottom-navbar.png",
       "width": 1642,
       "height": 391
     },

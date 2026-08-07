@@ -1,4 +1,4 @@
-# Commonweave Pocket Campus RC22.3.11
+# Civweave Pocket Campus RC22.3.11
 
 ## Living Displays
 
@@ -12,11 +12,11 @@ Living School interface objects now react to real workflow state rather than act
 
 ## Merlin universal conversation
 
-Merlin, the android starfish wizard, is available throughout Commonweave as a universal chat.
+Merlin, the android starfish wizard, is available throughout Civweave as a universal chat.
 
 - Merlin uses the shared interactive language-model connection and streams ordinary conversational text.
 - Deterministic and manual providers are rejected for Merlin, and no deterministic fallback is supplied.
-- Merlin receives a filtered, read-only snapshot of local Commonweave, Living School, Cerbanimo, and FellowFare state.
+- Merlin receives a filtered, read-only snapshot of local Civweave, Living School, Cerbanimo, and FellowFare state.
 - Secret-like fields are removed before context is sent to the model.
 - Merlin can explain, summarize, critique, brainstorm, and generate drafts.
 - Merlin cannot navigate the user, move intentions, mutate tasks, approve work, or claim to operate platform state.

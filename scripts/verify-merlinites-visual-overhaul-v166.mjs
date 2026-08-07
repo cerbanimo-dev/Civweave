@@ -15,7 +15,7 @@ const shellFix = read('public/app/merlinites-shell-fix-v166.css');
 const settingsController = read('public/app/model-settings-controller-v173.js');
 const profiles = JSON.parse(read('public/app/assets/ai/profiles.json'));
 
-const expectedOrder = "['commonweave','living-school','cerbanimo','fellowfare','anarchadia']";
+const expectedOrder = "['civweave','living-school','cerbanimo','fellowfare','anarchadia']";
 assert(shell.includes(`const SYSTEM_ORDER=${expectedOrder}`), 'Global realm order is not fixed.');
 assert(shell.includes('SYSTEM_ORDER.map'), 'The global dock is not rendering all five realm positions.');
 assert(!shell.includes("filter(([id])=>id!==current)"), 'The active realm is still being removed from the dock.');
@@ -40,11 +40,11 @@ for (const profile of profiles.profiles) {
 }
 
 for (const token of [
-  'html[data-system="commonweave"]',
+  'html[data-system="civweave"]',
   'html[data-system="cerbanimo"]',
-  'html[data-commonweave-system="living-school"]',
-  'html[data-commonweave-system="fellowfare"]',
-  'html[data-commonweave-system="anarchadia"]'
+  'html[data-civweave-system="living-school"]',
+  'html[data-civweave-system="fellowfare"]',
+  'html[data-civweave-system="anarchadia"]'
 ]) {
   assert(shellCss.includes(token), `Missing realm-defining CSS for ${token}.`);
 }
@@ -55,15 +55,15 @@ assert(shellFix.includes('#gc153-launcher') && shellFix.includes('[data-weavelin
 assert(shellFix.includes('aspect-ratio:auto!important') && shellFix.includes('.ffc144-rook-form button'), 'Rook send control can still expand into the mobile workbench.');
 assert(shellFix.includes('.ls-room{position:relative!important') && shellFix.includes('.ls-recovery'), 'Living School lacks its visible mobile stage or startup recovery treatment.');
 assert(shell.includes('removeLegacyLaunchers') && shell.includes('restoreChatControl'), 'Family shell does not remove legacy launchers and restore the icon-only chat control.');
-assert(!shell.includes("button.textContent='Talk to Commonweave'"), 'Family shell still replaces the chat icon with collision-prone text.');
-assert(shell.includes("settingsOwner:'CommonweaveModelSettingsControllerV173'"), 'Family shell does not delegate settings to the direct controller.');
+assert(!shell.includes("button.textContent='Talk to Civweave'"), 'Family shell still replaces the chat icon with collision-prone text.');
+assert(shell.includes("settingsOwner:'CivweaveModelSettingsControllerV173'"), 'Family shell does not delegate settings to the direct controller.');
 assert(!shell.includes('async function ensureSettings()') && !shell.includes('SETTINGS_SCRIPTS'), 'Family shell still owns a retired settings loader.');
 assert(settingsController.includes("VERSION='173.0-direct-settings-controller'"), 'Direct settings controller revision is missing.');
-assert(settingsController.includes('/app/shared/commonweave-model-runtime.js') && settingsController.includes('/app/minilm-model-settings-v138.js'), 'Direct settings controller lost its bounded settings dependencies.');
+assert(settingsController.includes('/app/shared/civweave-model-runtime.js') && settingsController.includes('/app/minilm-model-settings-v138.js'), 'Direct settings controller lost its bounded settings dependencies.');
 const dependencyBlock=settingsController.slice(settingsController.indexOf('const DEPENDENCIES='),settingsController.indexOf('const REFLEX_SCRIPT='));
 assert(!dependencyBlock.includes('minilm-reflex-runtime'), 'Opening settings still starts MiniLM.');
 assert(!settingsController.includes("addEventListener('click'"), 'Direct settings controller still installs a global click interceptor.');
-assert(shell.includes('CommonweaveCodeRailsV169') && shell.includes('canGenerate:false'), 'Local code rails capability boundary is missing.');
+assert(shell.includes('CivweaveCodeRailsV169') && shell.includes('canGenerate:false'), 'Local code rails capability boundary is missing.');
 assert(shell.includes('machine-readable test') && shell.includes('imported LLM'), 'Local validation and imported-generation boundaries are not explained.');
 
 for (const file of [
@@ -94,7 +94,7 @@ const sandbox={
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(shell,sandbox);
-const validator=sandbox.CommonweaveCodeRailsV169;
+const validator=sandbox.CivweaveCodeRailsV169;
 assert(validator?.canGenerate===false, 'The onboard code rails runtime claims generation authority.');
 const descriptive=validator.validate({code:'const garden = true;',language:'javascript',criteria:['The garden feature works.']});
 assert(descriptive.status==='review'&&!descriptive.verified, 'Descriptive rails were incorrectly treated as deterministic proof.');
@@ -116,10 +116,10 @@ const textRoots=['.github','docs','public','scripts'];
 const pathPattern=new RegExp(`(^|[-_.])${oldSlug}([-_.]|$)`,'i');
 const contentPattern=new RegExp([
   `${oldSlug}-(?:r[0-9]|shell|semantic|visual)`,
-  `Commonweave${oldName}`,
+  `Civweave${oldName}`,
   `--${oldSlug}-`,
   `\\b${oldName}\\s+(?:visual|semantic|planning|shell|overhaul)\\b`,
-  `commonweave[.:]${oldSlug}-`,
+  `civweave[.:]${oldSlug}-`,
   `__${oldSlug}Semantic`,
   `${oldSlug}Feedback`
 ].join('|'),'i');

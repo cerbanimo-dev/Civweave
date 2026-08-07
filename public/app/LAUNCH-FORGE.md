@@ -1,10 +1,10 @@
-# Commonweave RC16: Launch Forge
+# Civweave RC16: Launch Forge
 
 RC16 is the release-hardening pass for the first invite-only hosted pilot. It adds survivability rather than another product branch.
 
 ## Launch model
 
-Commonweave remains local-first. Hosted infrastructure supplies optional continuity:
+Civweave remains local-first. Hosted infrastructure supplies optional continuity:
 
 - portable Weaver identity sessions
 - encrypted relay delivery
@@ -25,15 +25,15 @@ The hosted account is linked to a portable Weaver identity.
 4. Lost-device recovery consumes one single-use recovery code.
 5. Devices can be revoked without erasing their local files.
 
-The raw `oai-authenticated-user-email` header is no longer trusted by account storage. A trusted upstream may be enabled only with a matching `COMMONWEAVE_TRUSTED_AUTH_HEADER_SECRET`.
+The raw `oai-authenticated-user-email` header is no longer trusted by account storage. A trusted upstream may be enabled only with a matching `CIVWEAVE_TRUSTED_AUTH_HEADER_SECRET`.
 
 ## Pilot controls
 
 The hosted pilot defaults to invitation-only:
 
 ```env
-COMMONWEAVE_PILOT_MODE=1
-COMMONWEAVE_ALLOW_LOCAL_PREVIEW_ACCOUNTS=false
+CIVWEAVE_PILOT_MODE=1
+CIVWEAVE_ALLOW_LOCAL_PREVIEW_ACCOUNTS=false
 ```
 
 The operator console can create limited-use, expiring invitations. Only invitation hashes are stored.
@@ -105,14 +105,14 @@ Operators can review, resolve, dismiss, or escalate reports. Moderation never de
 Create and verify a D1 backup:
 
 ```bash
-python3 scripts/commonweave_d1_backup.py backup --database DB --remote
-python3 scripts/commonweave_d1_backup.py verify --input backups/<file>.sql
+python3 scripts/civweave_d1_backup.py backup --database DB --remote
+python3 scripts/civweave_d1_backup.py verify --input backups/<file>.sql
 ```
 
 Remote restore requires an explicit danger flag:
 
 ```bash
-python3 scripts/commonweave_d1_backup.py restore \
+python3 scripts/civweave_d1_backup.py restore \
   --database DB \
   --input backups/<file>.sql \
   --remote \
@@ -141,8 +141,8 @@ RC16 adds:
 - reproducible artifact assembly through `SOURCE_DATE_EPOCH`
 - an SPDX-style dependency inventory
 - a release-integrity manifest
-- optional HMAC signing with `COMMONWEAVE_RELEASE_SIGNING_KEY`
-- a production gate through `COMMONWEAVE_REQUIRE_SIGNED_RELEASE=1`
+- optional HMAC signing with `CIVWEAVE_RELEASE_SIGNING_KEY`
+- a production gate through `CIVWEAVE_REQUIRE_SIGNED_RELEASE=1`
 
 ## Recommended launch stages
 

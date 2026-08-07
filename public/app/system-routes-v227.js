@@ -1,10 +1,10 @@
 (()=>{
 'use strict';
-const VERSION='1.0.16';
+const VERSION='1.0.17';
 const REVISION='five-system-route-contract-v227';
-const BOOT_KEY='commonweave.install-boundary.boot.v227';
+const BOOT_KEY='civweave.install-boundary.boot.v227';
 const ROUTES=Object.freeze({
-  commonweave:Object.freeze({id:'commonweave',label:'Commonweave',pathname:'/app/working-campus-v156.html',params:Object.freeze({})}),
+  civweave:Object.freeze({id:'civweave',label:'Civweave',pathname:'/app/working-campus-v156.html',params:Object.freeze({})}),
   'living-school':Object.freeze({id:'living-school',label:'Living School',pathname:'/app/cabinets/living-school/index.html',params:Object.freeze({cabinet:'1'})}),
   cerbanimo:Object.freeze({id:'cerbanimo',label:'Cerbanimo',pathname:'/app/realm-console-v140.html',params:Object.freeze({system:'cerbanimo',cabinet:'1'})}),
   fellowfare:Object.freeze({id:'fellowfare',label:'FellowFare',pathname:'/app/fellowfare-cabinet-v144.html',params:Object.freeze({cabinet:'1'})}),
@@ -19,19 +19,19 @@ function normalizePathname(value){
 }
 function identify(value=globalThis.location?.pathname||'/'){
   let pathname=value;
-  try{pathname=new URL(String(value),globalThis.location?.origin||'https://commonweave.invalid').pathname}catch{}
+  try{pathname=new URL(String(value),globalThis.location?.origin||'https://civweave.invalid').pathname}catch{}
   return PATH_TO_ID.get(normalizePathname(pathname))||'';
 }
 function routeFor(id){return ROUTES[String(id||'').toLowerCase()]||null}
 function isCanonicalPath(value){return Boolean(identify(value))}
 function authorize(){
   try{globalThis.sessionStorage?.setItem(BOOT_KEY,'1')}catch{}
-  try{globalThis.sessionStorage?.setItem('commonweave.install-boundary.boot.v226','1')}catch{}
+  try{globalThis.sessionStorage?.setItem('civweave.install-boundary.boot.v226','1')}catch{}
   return true;
 }
 function urlFor(id,options={}){
-  const route=routeFor(id)||ROUTES.commonweave;
-  const origin=options.origin||globalThis.location?.origin||'https://commonweave.invalid';
+  const route=routeFor(id)||ROUTES.civweave;
+  const origin=options.origin||globalThis.location?.origin||'https://civweave.invalid';
   const url=new URL(route.pathname,origin);
   for(const [key,value] of Object.entries(route.params))url.searchParams.set(key,value);
   url.searchParams.set('installed','1');
@@ -50,9 +50,9 @@ function navigate(id,options={}){
 }
 function routes(){return Object.values(ROUTES)}
 const api=Object.freeze({version:VERSION,revision:REVISION,bootKey:BOOT_KEY,routeFor,routes,identify,isCanonicalPath,authorize,urlFor,navigate});
-globalThis.CommonweaveSystemRoutesV227=api;
+globalThis.CivweaveSystemRoutesV227=api;
 if(typeof document!=='undefined'&&identify()){
   authorize();
-  document.documentElement.dataset.commonweaveSystemRoute=identify();
+  document.documentElement.dataset.civweaveSystemRoute=identify();
 }
 })();

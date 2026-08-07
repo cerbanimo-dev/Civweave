@@ -3,40 +3,40 @@
 
 const MODEL_ID='HuggingFaceTB/SmolLM2-360M-Instruct';
 const MODEL_ADAPTER='/app/models/smollm2-360m-instruct/adapter.js';
-const CONTRACT_MARKER='COMMONWEAVE_SMALL_MODEL_CONTRACT_V2';
-const SYSTEMS=['commonweave','living-school','cerbanimo','fellowfare','anarchadia'];
+const CONTRACT_MARKER='CIVWEAVE_SMALL_MODEL_CONTRACT_V2';
+const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const MODES={
-  'commonweave':'Reflect',
+  'civweave':'Reflect',
   'living-school':'Learn',
   'cerbanimo':'Build',
   'fellowfare':'Acquire',
   'anarchadia':'Govern'
 };
 const LABELS={
-  'commonweave':'Commonweave',
+  'civweave':'Civweave',
   'living-school':'Living School',
   'cerbanimo':'Cerbanimo',
   'fellowfare':'FellowFare',
   'anarchadia':'Anarchadia'
 };
 const GUIDE_NAMES={
-  'commonweave':'Weaveling',
+  'civweave':'Weaveling',
   'living-school':'Moss',
   'cerbanimo':'Kamiya',
   'fellowfare':'Rook',
   'anarchadia':'Merlin'
 };
 const GUIDE_FOCUS={
-  'commonweave':'reflect, prioritize, coordinate multiple paths, and name the next concrete move',
+  'civweave':'reflect, prioritize, coordinate multiple paths, and name the next concrete move',
   'living-school':'explain, sequence practice, and define evidence of learning',
   'cerbanimo':'turn the work into a concrete build step, checkpoint, and proof of completion',
   'fellowfare':'clarify the resource need, exchange terms, logistics, and trust boundary',
   'anarchadia':'clarify the proposal, consent boundary, decision process, and next civic step'
 };
-const ROUTE_CODES={A:'anarchadia',B:'cerbanimo',C:'commonweave',D:'fellowfare',E:'living-school'};
+const ROUTE_CODES={A:'anarchadia',B:'cerbanimo',C:'civweave',D:'fellowfare',E:'living-school'};
 const SYSTEM_CODES=Object.fromEntries(Object.entries(ROUTE_CODES).map(([code,system])=>[system,code]));
 const SYSTEM_ALIASES={
-  'commonweave':['commonweave','weaveling','reflect','reflection','orchestrate','orchestration','prioritize','priority','plan','planning','coordinate'],
+  'civweave':['civweave','weaveling','reflect','reflection','orchestrate','orchestration','prioritize','priority','plan','planning','coordinate'],
   'living-school':['living-school','living school','learn','learning','study','school','curriculum','lesson','research','practice','moss'],
   'cerbanimo':['cerbanimo','build','building','make','making','repair','implement','implementation','work','skilled labor','quest','kamiya'],
   'fellowfare':['fellowfare','fellow fare','acquire','acquisition','trade','exchange','resource','material','borrow','buy','sell','rook'],
@@ -216,7 +216,7 @@ function normalizeAction(value){
 
 function compactGuideRequest(request){
   const context=findStructuredContext(request?.messages);
-  const lockedSystem=canonicalSystem(context?.routingAnswer?.system)||'commonweave';
+  const lockedSystem=canonicalSystem(context?.routingAnswer?.system)||'civweave';
   const guide=GUIDE_NAMES[lockedSystem];
   const userMessage=safeString(context?.userMessage||'',3000);
   const room=safeString(context?.currentContext?.roomLabel||context?.currentContext?.roomId||'',240);
@@ -224,7 +224,7 @@ function compactGuideRequest(request){
     .slice(-4)
     .map(item=>({role:item.role,text:safeString(item.text,500)}));
   const requiresConsent=Boolean(context?.consent?.consequentialActionDetected);
-  const systemPrompt=`${CONTRACT_MARKER}\nYou are ${guide}, Commonweave's local onboard guide for ${LABELS[lockedSystem]}.\nThe route is LOCKED to ${lockedSystem}. Do not choose or mention a different realm.\nYour job is to ${GUIDE_FOCUS[lockedSystem]}.\nReturn exactly one JSON object with these keys and no others:\n{"answer":"brief useful answer","nextAction":"one concrete imperative step","assumptions":[],"requiresConsent":false}\nUse only supplied context. Never claim network access, tool use, purchases, votes, messages, deployments, or writes occurred. If evidence is incomplete, say so briefly.`;
+  const systemPrompt=`${CONTRACT_MARKER}\nYou are ${guide}, Civweave's local onboard guide for ${LABELS[lockedSystem]}.\nThe route is LOCKED to ${lockedSystem}. Do not choose or mention a different realm.\nYour job is to ${GUIDE_FOCUS[lockedSystem]}.\nReturn exactly one JSON object with these keys and no others:\n{"answer":"brief useful answer","nextAction":"one concrete imperative step","assumptions":[],"requiresConsent":false}\nUse only supplied context. Never claim network access, tool use, purchases, votes, messages, deployments, or writes occurred. If evidence is incomplete, say so briefly.`;
   const userPayload={request:userMessage,currentRoom:room,recentConversation:recent,requiresConsent};
   return {
     ...request,
@@ -235,17 +235,17 @@ function compactGuideRequest(request){
       {role:'system',content:systemPrompt},
       {role:'user',content:JSON.stringify(userPayload)}
     ],
-    __commonweaveLockedSystem:lockedSystem,
-    __commonweaveOriginalContext:context
+    __civweaveLockedSystem:lockedSystem,
+    __civweaveOriginalContext:context
   };
 }
 
 function normalizeGuideResult(result,request){
   const actual=String(result?.actual?.provider||'').toLowerCase();
   if(!result||!['bundled-smollm2','bundled','smollm2'].includes(actual))return result;
-  if(request?.purpose!=='commonweave-guide-response'&&!request?.schema)return result;
-  const context=request?.__commonweaveOriginalContext||findStructuredContext(request?.messages);
-  const contextSystem=canonicalSystem(request?.__commonweaveLockedSystem||context?.routingAnswer?.system)||'commonweave';
+  if(request?.purpose!=='civweave-guide-response'&&!request?.schema)return result;
+  const context=request?.__civweaveOriginalContext||findStructuredContext(request?.messages);
+  const contextSystem=canonicalSystem(request?.__civweaveLockedSystem||context?.routingAnswer?.system)||'civweave';
   const parsed=parseJsonValue(result.outputJson??result.outputText);
   const action=normalizeAction(result.outputJson??result.outputText);
   const modelSystem=canonicalSystem(firstString(parsed,['system','realm','destination','target']));
@@ -253,10 +253,10 @@ function normalizeGuideResult(result,request){
     ?parsed.assumptions.map(item=>safeString(item,240)).filter(Boolean).slice(0,7)
     :[];
   if(modelSystem&&modelSystem!==contextSystem){
-    assumptions.unshift(`The local model suggested ${LABELS[modelSystem]}, but Commonweave kept the canonical route locked to ${LABELS[contextSystem]}.`);
+    assumptions.unshift(`The local model suggested ${LABELS[modelSystem]}, but Civweave kept the canonical route locked to ${LABELS[contextSystem]}.`);
   }
   if(action.schemaEcho){
-    assumptions.unshift('The local model echoed a schema; Commonweave recovered a bounded response from the supplied route context.');
+    assumptions.unshift('The local model echoed a schema; Civweave recovered a bounded response from the supplied route context.');
   }
   const answer=action.answer
     ||`The route is ${LABELS[contextSystem]}. I do not have enough local evidence for a more specific answer yet.`;
@@ -282,7 +282,7 @@ function normalizeGuideResult(result,request){
       ...(result.structured||{}),
       requested:true,
       valid:true,
-      normalizedBy:'commonweave-small-model-contract-v2',
+      normalizedBy:'civweave-small-model-contract-v2',
       routeLocked:true,
       lockedSystem:contextSystem,
       sourceShape:action.shape,
@@ -296,7 +296,7 @@ function normalizeGuideResult(result,request){
 }
 
 function installRuntimeWrapper(){
-  const runtime=globalThis.CommonweaveModelRuntime;
+  const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate||runtime.__smallModelContractV137)return false;
   const previous=runtime.generate.bind(runtime);
   const wrapped=async request=>{
@@ -304,7 +304,7 @@ function installRuntimeWrapper(){
     const provider=String(incoming.config?.provider||incoming.config?.route||'').toLowerCase();
     const bundled=['bundled','packaged','smollm2','smollm2-360m-instruct','huggingfacetb/smollm2-360m-instruct'].includes(provider);
     let prepared=incoming;
-    if(bundled&&incoming.purpose==='commonweave-guide-response'){
+    if(bundled&&incoming.purpose==='civweave-guide-response'){
       prepared=compactGuideRequest(incoming);
     }else if(bundled){
       const messages=Array.isArray(incoming.messages)?incoming.messages:[];
@@ -321,7 +321,7 @@ function installRuntimeWrapper(){
     const result=await previous(prepared);
     return normalizeGuideResult(result,prepared);
   };
-  globalThis.CommonweaveModelRuntime={...runtime,generate:wrapped,__smallModelContractV137:true};
+  globalThis.CivweaveModelRuntime={...runtime,generate:wrapped,__smallModelContractV137:true};
   return true;
 }
 
@@ -334,7 +334,7 @@ function classifierPrompt(text,order){
   const definitions={
     A:'Anarchadia: shared proposals, policy, approval, voting, or collective rules',
     B:'Cerbanimo: make, repair, implement, build, or other skilled work',
-    C:'Commonweave: prioritize, coordinate, reflect, or choose among multiple projects',
+    C:'Civweave: prioritize, coordinate, reflect, or choose among multiple projects',
     D:'FellowFare: obtain, borrow, trade, sell, or exchange physical resources',
     E:'Living School: learn, study, research, explain, or practice knowledge'
   };
@@ -351,7 +351,7 @@ function benchmarkCases(){
     {id:'build',text:'Help me repair a broken community greenhouse vent and prove the work is complete.',expected:'cerbanimo',order:['C','E','D','B','A']},
     {id:'exchange',text:'We need twelve reclaimed boards and a way to borrow a trailer fairly.',expected:'fellowfare',order:['E','D','A','B','C']},
     {id:'governance',text:'Draft a proposal for how the neighborhood approves shared tool purchases.',expected:'anarchadia',order:['D','B','C','E','A']},
-    {id:'reflection',text:'I have too many projects and need to decide what deserves attention first.',expected:'commonweave',order:['C','A','B','D','E']}
+    {id:'reflection',text:'I have too many projects and need to decide what deserves attention first.',expected:'civweave',order:['C','A','B','D','E']}
   ];
 }
 
@@ -361,7 +361,7 @@ function report(kind,detail={}){
       method:'POST',
       headers:{'content-type':'application/json'},
       body:JSON.stringify({
-        schema:'commonweave.boot-log.v1',
+        schema:'civweave.boot-log.v1',
         time:new Date().toISOString(),
         version:'1.0.30',
         build:'smollm2-route-lock-v137',
@@ -441,7 +441,7 @@ async function runBenchmark(form,button){
       });
     }
     const elapsedMs=Math.round(performance.now()-startedAt);
-    output.innerHTML=`<b>${routeCorrect}/${cases.length} realm selections correct · ${structuredActions}/${cases.length} bounded actions structured</b><p>Total trial time: ${(elapsedMs/1000).toFixed(1)} seconds. Production guide responses use the canonical Commonweave route lock even when the selector probe misses.</p><ol>${rows.join('')}</ol>`;
+    output.innerHTML=`<b>${routeCorrect}/${cases.length} realm selections correct · ${structuredActions}/${cases.length} bounded actions structured</b><p>Total trial time: ${(elapsedMs/1000).toFixed(1)} seconds. Production guide responses use the canonical Civweave route lock even when the selector probe misses.</p><ol>${rows.join('')}</ol>`;
     status.textContent=`Trial complete: ${routeCorrect}/${cases.length} realm selections correct and ${structuredActions}/${cases.length} route-locked actions structured.`;
     status.className=`cw-ai-test-status ${routeCorrect>=4&&structuredActions>=4?'is-ok':'is-error'}`;
     report('benchmark',{routeCorrect,structuredActions,total:cases.length,elapsedMs,results:telemetry});
@@ -456,8 +456,8 @@ async function runBenchmark(form,button){
 }
 
 function installBenchmarkInterceptor(){
-  if(globalThis.__commonweaveSmolBenchmarkV137)return;
-  globalThis.__commonweaveSmolBenchmarkV137=true;
+  if(globalThis.__civweaveSmolBenchmarkV137)return;
+  globalThis.__civweaveSmolBenchmarkV137=true;
   document.addEventListener('click',event=>{
     const button=event.target.closest?.('[data-benchmark]');
     if(!button)return;
@@ -472,7 +472,7 @@ function installBenchmarkInterceptor(){
 if(!installRuntimeWrapper())addEventListener('DOMContentLoaded',installRuntimeWrapper,{once:true});
 installBenchmarkInterceptor();
 
-globalThis.CommonweaveSmolLM2V137={
+globalThis.CivweaveSmolLM2V137={
   model:MODEL_ID,
   parseRouteCode,
   normalizeAction,

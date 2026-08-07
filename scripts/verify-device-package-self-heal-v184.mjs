@@ -28,17 +28,17 @@ for(const token of [
   'onlineSelfHeal:true',
   'missingAssetDetails:true',
   'async function networkRepair(request)',
-  "headers.set('x-commonweave-package','runtime-repair')",
+  "headers.set('x-civweave-package','runtime-repair')",
   'await cache.put(url.pathname,response.clone())',
   "event:'asset-repaired'",
   "event:'asset-fallback'",
   "event:'asset-missing'",
-  "'x-commonweave-missing-asset':pathname",
-  "'x-commonweave-package-recovery':PACKAGE_RECOVERY_REVISION",
+  "'x-civweave-missing-asset':pathname",
+  "'x-civweave-package-recovery':PACKAGE_RECOVERY_REVISION",
   "if(pathname.startsWith('/app/'))return'/app/installed-entry-v146.html'"
 ])assert(worker.includes(token),`Core package self-heal missing ${token}`);
 
-assert(!worker.includes("return new Response('This asset is not part of the installed Commonweave v1.0.7 package.'"),'Generic cache-only dead-end response is still active.');
+assert(!worker.includes("return new Response('This asset is not part of the installed Civweave v1.0.17 package.'"),'Generic cache-only dead-end response is still active.');
 const deviceOnlyBlock=worker.slice(worker.indexOf('async function deviceOnly'),worker.indexOf('async function modelOnDemand'));
 assert(deviceOnlyBlock.indexOf('networkRepair(request)')<deviceOnlyBlock.indexOf('fallbackCached'),'Device package does not try online repair before falling back.');
 assert(deviceOnlyBlock.includes('missingAssetResponse(url.pathname,fallback)'),'Missing asset response does not identify the requested path.');
@@ -48,12 +48,12 @@ for(const token of [
   "PACKAGE_RECOVERY_REVISION='device-package-self-heal-v184'",
   'onlineSelfHeal:true',
   'missingAssetDetails:true',
-  "'x-commonweave-missing-asset':url.pathname"
+  "'x-civweave-missing-asset':url.pathname"
 ])assert(additive.includes(token),`Additive package self-heal missing ${token}`);
 
 for(const token of [
   "ADDITIONS_REVISION='working-campus-additions-v184-package-self-heal'",
-  "AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r46'",
+  "AUTO_RESET_KEY='civweave.device-package.auto-reset.v106-r46'",
   'package self-repair',
   'tap Diagnostics to collect logs'
 ])assert(installer.includes(token),`Installer self-heal delivery missing ${token}`);
@@ -76,7 +76,7 @@ for(const token of [
   'data-package-recovery="v184"',
   'id="diagnostics-button"',
   'data-open-log-diagnostics',
-  "localStorage.setItem('commonweave.log-level','debug')",
+  "localStorage.setItem('civweave.log-level','debug')",
   "logger.setLevel('debug')",
   "document.querySelector('[data-cw-log-toggle]')"
 ])assert(campus.includes(token),`Working Campus diagnostics control missing ${token}`);

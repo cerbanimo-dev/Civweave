@@ -5,7 +5,7 @@ for (const file of ['public/service-worker-core-v208.js', 'public/service-worker
   const source = await fs.readFile(file, 'utf8');
   assert(source.includes('async function normalizeStableAppEntryResponse(response)'), file + ' lacks the stable-entry response normalizer');
   assert(source.includes("headers.delete('location')"), file + ' retains redirect headers');
-  assert(source.includes("headers.set('x-commonweave-stable-entry', 'v217')"), file + ' lacks the v217 marker');
+  assert(source.includes("headers.set('x-civweave-stable-entry', 'v217')"), file + ' lacks the v217 marker');
   assert(source.includes("const fetched = await fetchFresh('/app/', 'stable-app-entry')"), file + ' still fetches canonicalized index.html');
   assert(source.includes('const normalized = await normalizeStableAppEntryResponse(response);'), file + ' replays the cached response directly');
   assert(!source.includes("response = await fetchFresh('/app/index.html', 'stable-app-entry')"), file + ' still fetches the redirecting index.html URL');

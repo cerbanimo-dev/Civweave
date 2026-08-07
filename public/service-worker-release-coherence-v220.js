@@ -64,7 +64,7 @@ cacheFirst = async function releaseCoherentCacheFirst(request) {
   return v220CachedFirst(request);
 };
 
-self.CommonweaveReleaseCoherenceV220 = Object.freeze({
+self.CivweaveReleaseCoherenceV220 = Object.freeze({
   revision: V220_REVISION,
   networkTimeoutMs: V220_NETWORK_TIMEOUT_MS,
   versionKeys: [...V220_VERSION_KEYS],

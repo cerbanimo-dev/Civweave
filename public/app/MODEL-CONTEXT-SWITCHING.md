@@ -1,6 +1,6 @@
 # Model context switching
 
-Commonweave routes requests by task weight without permanently changing the user’s provider selection.
+Civweave routes requests by task weight without permanently changing the user’s provider selection.
 
 ## Gemini task tiers
 
@@ -24,19 +24,19 @@ Non-Gemini providers are not rewritten by the Gemini task-tier router.
 Callers can mark work explicitly, although the shared router also recognizes planning, research, code-generation, and agentic signals:
 
 ```js
-CommonweaveModelRuntime.generateInteractive({
+CivweaveModelRuntime.generateInteractive({
   purpose: "quick-answer",
   taskTier: "small",
   prompt,
 });
 
-CommonweaveModelRuntime.generate({
+CivweaveModelRuntime.generate({
   purpose: "project-plan",
   taskTier: "complex",
   prompt,
 });
 
-CommonweaveModelRuntime.generateAgentic({
+CivweaveModelRuntime.generateAgentic({
   purpose: "source-discovery",
   requiresTools: true,
   prompt,

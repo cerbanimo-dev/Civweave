@@ -1,4 +1,4 @@
-/* Commonweave v1.0.23 authoritative visual shell */
+/* Civweave v1.0.23 authoritative visual shell */
 html.cw-lean-visual-shell,html.cw-lean-visual-shell body{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#03060a!important}
 html.cw-lean-visual-shell body>*:not(.cw-recovery-stage):not(.cw-district-info):not(.cw-merlin-shell):not(script):not(style){display:none!important}
 html.cw-lean-visual-shell .cw-merlin-launcher{display:none!important}
@@ -25,8 +25,8 @@ html.cw-lean-visual-shell .cw-merlin-launcher{display:none!important}
 .cw-object-hotspot{position:absolute;z-index:8;border:0;background:transparent;color:transparent;padding:0;cursor:pointer;touch-action:manipulation}
 .cw-object-hotspot span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 .cw-object-hotspot:focus-visible{outline:4px solid #fff3a8;outline-offset:-4px;background:#fff2a814}
-.cw-commonweave-return,.cw-district-controls button{display:grid;place-items:center;border:1px solid #f1dc8c88;border-radius:50%;background:#061923df;box-shadow:0 8px 22px #000a;backdrop-filter:blur(9px)}
-.cw-commonweave-return{position:fixed;z-index:110;left:max(8px,env(safe-area-inset-left));top:max(8px,env(safe-area-inset-top));width:44px;height:44px;padding:7px}.cw-commonweave-return img{width:100%;height:100%}
+.cw-civweave-return,.cw-district-controls button{display:grid;place-items:center;border:1px solid #f1dc8c88;border-radius:50%;background:#061923df;box-shadow:0 8px 22px #000a;backdrop-filter:blur(9px)}
+.cw-civweave-return{position:fixed;z-index:110;left:max(8px,env(safe-area-inset-left));top:max(8px,env(safe-area-inset-top));width:44px;height:44px;padding:7px}.cw-civweave-return img{width:100%;height:100%}
 .cw-district-controls{position:fixed;z-index:110;right:max(8px,env(safe-area-inset-right));top:max(8px,env(safe-area-inset-top));display:flex;gap:5px;align-items:center}
 .cw-district-controls button{width:44px;height:44px;padding:5px}.cw-district-controls button:nth-child(2){width:58px;height:58px;padding:1px}.cw-district-controls img{width:100%;height:100%;object-fit:contain}.cw-district-controls [data-info] span{display:grid;place-items:center;width:27px;height:27px;border:2px solid #f4df95;border-radius:50%;font:900 18px Georgia;color:#fff4c8}
 .cw-district-dock{position:fixed;z-index:112;left:50%;bottom:max(6px,env(safe-area-inset-bottom));translate:-50% 0;width:min(94vw,560px);height:72px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;gap:3px;padding:8px 16px;box-sizing:border-box;border:2px solid #d8b86a;border-radius:34px;background:linear-gradient(120deg,#071a2d 0 14%,#e5d8b4 14% 18%,#715c8f 18% 23%,#2b7a78 23% 28%,#efe3c5 28% 72%,#2b7a78 72% 77%,#715c8f 77% 82%,#e5d8b4 82% 86%,#071a2d 86%);box-shadow:inset 0 0 0 3px #ffffff35,0 12px 28px #000c;isolation:isolate}

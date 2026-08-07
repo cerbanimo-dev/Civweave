@@ -1,4 +1,4 @@
-# Commonweave RC20.0 · FellowFare Mall Foundation
+# Civweave RC20.0 · FellowFare Mall Foundation
 
 - Reframes FellowFare as a navigable mutual-aid mall rather than a city.
 - Adds 31 functional visual scenes across four ground-floor wings, an upper gallery, rooftop, and service level.

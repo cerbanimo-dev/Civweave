@@ -1,4 +1,4 @@
-# Commonweave Host Node Hub v1.0.4
+# Civweave Host Node Hub v1.0.4
 
 - Removes first-open schema dependencies from native handoff commits.
 - Forces current visual-first entry points for all four realms.

@@ -12,7 +12,7 @@ const pagesOutput = resolve(repoRoot, ".cloudflare-pages");
 const projectName =
   process.env.CLOUDFLARE_PAGES_PROJECT ||
   process.argv[2] ||
-  "commonweave";
+  "civweave";
 
 function detectWrangler() {
   const localWranglerJs = resolve(
@@ -101,7 +101,7 @@ function includesNamedProject(output, name) {
 
 const wrangler = detectWrangler();
 
-console.log("Commonweave Cloudflare Pages setup");
+console.log("Civweave Cloudflare Pages setup");
 console.log(`Pages project: ${projectName}`);
 
 console.log("\n1/3 Checking Cloudflare authentication...");

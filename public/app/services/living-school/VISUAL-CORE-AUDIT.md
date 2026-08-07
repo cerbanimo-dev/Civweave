@@ -1,6 +1,6 @@
 # Living School Visual Core Audit
 
-Build: Commonweave Host Node Hub v1.0.11
+Build: Civweave Host Node Hub v1.0.11
 
 ## Installed visual system
 
@@ -10,7 +10,7 @@ Build: Commonweave Host Node Hub v1.0.11
 - 397 normalized touch targets.
 - 183 room-to-room links.
 - 156 links into existing Living School workspaces and exact panel IDs.
-- 58 direct actions, including settings, Ask Moss, journal, queue-state, Commonweave, FellowFare, and Cerbanimo actions.
+- 58 direct actions, including settings, Ask Moss, journal, queue-state, Civweave, FellowFare, and Cerbanimo actions.
 
 ## Geometry contract
 

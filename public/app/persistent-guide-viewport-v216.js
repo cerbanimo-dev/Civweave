@@ -9,7 +9,7 @@ const HEIGHT_VAR='--cwp215-visual-viewport-height';
 const INSET_VAR='--cwp215-keyboard-inset';
 const KEYBOARD_THRESHOLD=80;
 
-if(globalThis.CommonweavePersistentGuideViewportV216?.version===VERSION)return;
+if(globalThis.CivweavePersistentGuideViewportV216?.version===VERSION)return;
 
 let frame=0;
 let observer=null;
@@ -28,7 +28,7 @@ function installStyle(){
 #${LAUNCHER_ID}{bottom:max(calc(var(--cw-themed-nav-height,0px) + env(safe-area-inset-bottom) + 12px),calc(var(${INSET_VAR},0px) + 12px))!important}
 @media(max-width:680px){#${ROOT_ID}{max-height:min(calc(88dvh - var(--cw-themed-nav-height,0px)),calc(var(${HEIGHT_VAR},100dvh) - 8px))!important}#${ROOT_ID}[data-keyboard-open="true"]{max-height:calc(var(${HEIGHT_VAR},100dvh) - 4px)!important;border-radius:20px 20px 0 0}}
 `;
-  document.head.append(style);
+  const head=document.head;if(!head)return false;head.append(style);return true;
 }
 
 function isChatInput(node){
@@ -95,7 +95,7 @@ function boot(){
   document.addEventListener('focusout',onFocusOut,true);
   observer=new MutationObserver(schedule);
   observer.observe(document.documentElement,{childList:true,subtree:true});
-  try{dispatchEvent(new CustomEvent('commonweave:persistent-guide-viewport-ready',{detail:{version:VERSION,visualViewport:Boolean(globalThis.visualViewport),at:new Date().toISOString()}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:persistent-guide-viewport-ready',{detail:{version:VERSION,visualViewport:Boolean(globalThis.visualViewport),at:new Date().toISOString()}}))}catch{}
 }
 
 function destroy(){
@@ -111,9 +111,10 @@ function destroy(){
   document.getElementById(STYLE_ID)?.remove();
 }
 
+addEventListener('pagehide',destroy,{once:true});
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 
-globalThis.CommonweavePersistentGuideViewportV216=Object.freeze({
+globalThis.CivweavePersistentGuideViewportV216=Object.freeze({
   version:VERSION,
   rootId:ROOT_ID,
   launcherId:LAUNCHER_ID,

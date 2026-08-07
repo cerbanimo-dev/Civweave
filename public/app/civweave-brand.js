@@ -9,16 +9,16 @@ const ATTRIBUTES=['alt','title','aria-label','placeholder','content','data-label
 
 function brandText(value){
   if(typeof value!=='string'||!value)return value;
-  return value.replaceAll('COMMONWEAVE','CIVWEAVE').replaceAll('Commonweave','Civweave');
+  return value.replaceAll('CIVWEAVE','CIVWEAVE').replaceAll('Civweave','Civweave');
 }
 
 function brandImage(image){
   const source=image.getAttribute('src')||'';
-  if(/\/app\/logos\/commonweave\.webp(?:[?#].*)?$/i.test(source)){
+  if(/\/app\/logos\/civweave\.webp(?:[?#].*)?$/i.test(source)){
     image.setAttribute('src',FULL_LOGO);
     return;
   }
-  if(/\/app\/logos\/commonweave-app-icon\.png(?:[?#].*)?$/i.test(source)){
+  if(/\/app\/logos\/civweave-app-icon\.png(?:[?#].*)?$/i.test(source)){
     image.setAttribute('src',SYMBOL_LOGO);
   }
 }

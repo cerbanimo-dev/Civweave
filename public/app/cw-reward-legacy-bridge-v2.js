@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
-if(globalThis.CommonweaveRewardLegacyBridgeV2)return;
+if(globalThis.CivweaveRewardLegacyBridgeV2)return;
 const V='2.0.0';
-const canonical=()=>globalThis.CommonweaveCanonicalRewardsV2;
+const canonical=()=>globalThis.CivweaveCanonicalRewardsV2;
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 const number=value=>Number.isFinite(Number(value))?Number(value):0;
 const exactSkills=input=>{
@@ -73,9 +73,9 @@ function patch(runtime){
   return runtime;
 }
 function watch(){
-  let value=globalThis.CommonweaveRewardWeave;
+  let value=globalThis.CivweaveRewardWeave;
   try{
-    Object.defineProperty(globalThis,'CommonweaveRewardWeave',{configurable:true,enumerable:true,get:()=>value,set:next=>{value=patch(next)}});
+    Object.defineProperty(globalThis,'CivweaveRewardWeave',{configurable:true,enumerable:true,get:()=>value,set:next=>{value=patch(next)}});
     if(value)value=patch(value);
   }catch{if(value)patch(value)}
 }
@@ -101,8 +101,8 @@ function boot(){
   watch();
   scan();
   new MutationObserver(records=>records.forEach(record=>[...record.addedNodes].forEach(node=>node?.nodeType===1&&scan(node)))).observe(document.documentElement,{childList:true,subtree:true});
-  setInterval(()=>patch(globalThis.CommonweaveRewardWeave),1200);
+  setInterval(()=>patch(globalThis.CivweaveRewardWeave),1200);
 }
-globalThis.CommonweaveRewardLegacyBridgeV2=Object.freeze({version:V,exactSkills,prepareInput,patch});
+globalThis.CivweaveRewardLegacyBridgeV2=Object.freeze({version:V,exactSkills,prepareInput,patch});
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 })();

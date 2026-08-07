@@ -1,4 +1,4 @@
-# Commonweave Host Node Hub v1.0.15
+# Civweave Host Node Hub v1.0.15
 
 ## Contrast, Moss, Merlin cleanup, and Cerbanimo bridge correction
 

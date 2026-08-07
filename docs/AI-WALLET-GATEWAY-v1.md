@@ -1,18 +1,18 @@
-# Commonweave Hosted AI Wallet and Gateway v1
+# Civweave Hosted AI Wallet and Gateway v1
 
 Status: foundation branch only. No production payment or Gemini credentials are enabled by this change.
 
 ## Goal
 
-Let Commonweave offer prepaid hosted Gemini access without exposing the platform credential, permitting unlimited overages, or requiring every AI task to run through a large always-on application server.
+Let Civweave offer prepaid hosted Gemini access without exposing the platform credential, permitting unlimited overages, or requiring every AI task to run through a large always-on application server.
 
-Commonweave keeps three explicit execution lanes:
+Civweave keeps three explicit execution lanes:
 
-1. **Local**: MiniLM, WebGPU, Ollama, or another device model. No provider charge and no Commonweave inference request.
-2. **Bring your own key**: handled by Commonweave's current device credential and settings subsystem. The hosted wallet does not read, store, migrate, or authorize BYOK secrets.
-3. **Commonweave hosted**: the platform credential remains server-side. A small authorization gateway reserves wallet funds, enforces model and request limits, calls Gemini, then settles actual cost.
+1. **Local**: MiniLM, WebGPU, Ollama, or another device model. No provider charge and no Civweave inference request.
+2. **Bring your own key**: handled by Civweave's current device credential and settings subsystem. The hosted wallet does not read, store, migrate, or authorize BYOK secrets.
+3. **Civweave hosted**: the platform credential remains server-side. A small authorization gateway reserves wallet funds, enforces model and request limits, calls Gemini, then settles actual cost.
 
-Gemini Live may later use provider-supported short-lived ephemeral tokens so realtime media can travel directly between the device and Gemini after one Commonweave authorization call.
+Gemini Live may later use provider-supported short-lived ephemeral tokens so realtime media can travel directly between the device and Gemini after one Civweave authorization call.
 
 ## Initial plan ladder
 
@@ -33,7 +33,7 @@ These values are launch hypotheses, not permanent promises. Before release they 
 
 ## Hosted-wallet security invariants
 
-- The Commonweave platform Gemini credential is never delivered to browser, PWA, or native clients.
+- The Civweave platform Gemini credential is never delivered to browser, PWA, or native clients.
 - The hosted wallet never reads or persists the user's BYOK credential. Device credential policy remains owned by the current main-branch settings subsystem.
 - Hosted requests reserve the maximum allowed cost before contacting Gemini.
 - Settlement may charge less than the reservation, never more. A higher actual provider cost is a reconciliation fault and must stop the request family for investigation.
@@ -50,7 +50,7 @@ Contains the versioned plan catalog, subscription and top-up allocation calculat
 
 ### `lib/ai-capability-token-v1.mjs`
 
-Issues and verifies dependency-free HMAC-SHA256 Commonweave capability tokens. These are Commonweave gateway credentials, not Google credentials.
+Issues and verifies dependency-free HMAC-SHA256 Civweave capability tokens. These are Civweave gateway credentials, not Google credentials.
 
 ### `lib/ai-wallet-service-v1.mjs`
 
@@ -62,7 +62,7 @@ Provides the Neon-compatible transactional adapter for hosted multi-instance ope
 
 ## Request lifecycle
 
-1. Authenticate the Commonweave user and registered device.
+1. Authenticate the Civweave user and registered device.
 2. Estimate a conservative maximum provider cost from model, context, output ceiling, tools, grounding, and modality.
 3. Reserve that amount in the authoritative wallet.
 4. Issue or validate a short-lived device-bound capability.
@@ -118,4 +118,4 @@ If the provider response cannot be reconciled, cancel only when no provider work
 
 ## Deferred decisions
 
-The foundation intentionally does not choose a payment processor, persist personally identifying billing data, enable production Gemini credentials, expose public wallet mutation authority, or promise that the draft plan economics are profitable. Those decisions require current provider pricing, legal and tax review, and an authenticated Commonweave account model.
+The foundation intentionally does not choose a payment processor, persist personally identifying billing data, enable production Gemini credentials, expose public wallet mutation authority, or promise that the draft plan economics are profitable. Those decisions require current provider pricing, legal and tax review, and an authenticated Civweave account model.

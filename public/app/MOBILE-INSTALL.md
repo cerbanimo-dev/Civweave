@@ -1,6 +1,6 @@
-# Install Commonweave on Android
+# Install Civweave on Android
 
-The **Commonweave Mobile Install Kit** is a small, reproducible bootstrap bundle
+The **Civweave Mobile Install Kit** is a small, reproducible bootstrap bundle
 for the current five-system software package. It downloads exactly the files
 declared by the current service worker plus the active shared extensions.
 
@@ -10,7 +10,7 @@ remains device-side and downloads only after the user enables it.
 
 ## Install with Termux
 
-1. Download `Commonweave-Mobile-Install-Kit.zip` from the current Commonweave node.
+1. Download `Civweave-Mobile-Install-Kit.zip` from the current Civweave node.
 2. Install a maintained Termux build.
 3. Run:
 
@@ -19,8 +19,8 @@ termux-setup-storage
 pkg update
 pkg install -y python curl unzip
 cd ~/storage/downloads
-unzip -o Commonweave-Mobile-Install-Kit.zip
-cd commonweave-mobile-install-kit
+unzip -o Civweave-Mobile-Install-Kit.zip
+cd civweave-mobile-install-kit
 bash install-mobile.sh
 ```
 
@@ -38,7 +38,7 @@ Use the browser menu to choose **Install app** or **Add to Home screen**.
 
 ## Portable `.cwseed`
 
-`commonweave-pocket-campus.cwseed` is now a compact ZIP-compatible carrier rather
+`civweave-pocket-campus.cwseed` is now a compact ZIP-compatible carrier rather
 than a second copy of the full application. It contains:
 
 - the current mobile install kit and SHA-256 checksum
@@ -53,7 +53,7 @@ not the canonical data store.
 After extracting the seed:
 
 ```sh
-cd commonweave-seed/node-hub
+cd civweave-seed/node-hub
 npm start
 ```
 
@@ -68,15 +68,15 @@ and localStorage remain in the browser profile.
 ## Start and stop later
 
 ```sh
-bash "$PREFIX/var/lib/commonweave/start-commonweave.sh"
-bash "$PREFIX/var/lib/commonweave/stop-commonweave.sh"
+bash "$PREFIX/var/lib/civweave/start-civweave.sh"
+bash "$PREFIX/var/lib/civweave/stop-civweave.sh"
 ```
 
 ## Alternate node or port
 
 ```sh
-COMMONWEAVE_SOURCE_URL=https://your-node.example \
-COMMONWEAVE_PORT=8791 \
+CIVWEAVE_SOURCE_URL=https://your-node.example \
+CIVWEAVE_PORT=8791 \
 bash install-mobile.sh
 ```
 

@@ -39,4 +39,4 @@ jobs:
       - name: Verify two-node federation
         run: node scripts/verify-federation-v152.mjs
       - name: Build federated container
-        run: docker build -f Dockerfile.federated -t commonweave-federated:test .
+        run: docker build -f Dockerfile.federated -t civweave-federated:test .

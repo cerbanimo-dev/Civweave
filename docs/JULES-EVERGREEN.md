@@ -17,7 +17,7 @@ Every five minutes, the trusted workflow on `main`:
 
 ## Required setup
 
-1. Authorize the Google Labs Jules GitHub app for `cerbanimo-dev/Commonweave`.
+1. Authorize the Google Labs Jules GitHub app for `cerbanimo-dev/Civweave`.
 2. Create a Jules REST API key in Jules Settings.
 3. Add it to GitHub Actions as the repository secret `JULES_API_KEY`.
 4. Create a fine-grained GitHub token owned by the merge identity and add it as `EVERGREEN_GITHUB_TOKEN`.

@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const INTENTIONS_KEY='commonweave.intentions.v127';
-const PLAN_SCHEMA='commonweave.intention-weave.v1';
+const INTENTIONS_KEY='civweave.intentions.v127';
+const PLAN_SCHEMA='civweave.intention-weave.v1';
 const EXPLICIT_PLAN_TRIGGER=/\b(plan|roadmap|routine|program|curriculum|pathway|steps|practice schedule|daily practice|weekly practice|reviewable weave|set (?:an )?intention)\b|\bteach me\b|\bhelp me learn\b|\bcreate (?:me )?(?:a )?plan\b/i;
 const WISH_TRIGGER=/\b(i want|i wish|my wish|my goal|we want|we wish|let'?s|help me)\b/i;
 const RETRY_TRIGGER=/\b(retry|try again|one more time|rebuild|build that again|redo)\b/i;
@@ -16,7 +16,7 @@ const uid=prefix=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString
 const has=(text,pattern)=>pattern.test(text);
 
 function dispatchChanged(items){
-  try{dispatchEvent(new CustomEvent('commonweave:intentions-changed',{detail:{items}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:intentions-changed',{detail:{items}}))}catch{}
 }
 
 function userTurns(history,text){
@@ -74,12 +74,12 @@ function meaningfulPriorWish(turns){
 }
 
 function currentSystem(context={}){
-  return clean(context?.currentContext?.systemId||context?.guide?.system||context?.routingAnswer?.system||'commonweave');
+  return clean(context?.currentContext?.systemId||context?.guide?.system||context?.routingAnswer?.system||'civweave');
 }
 
 function shouldCreate({text,history,context,force=false}={}){
   if(force)return true;
-  if(currentSystem(context)!=='commonweave')return false;
+  if(currentSystem(context)!=='civweave')return false;
   const value=clean(text);
   if(!value)return false;
   if(EXPLICIT_PLAN_TRIGGER.test(value)||WISH_TRIGGER.test(value)||DIRECT_INTENTION_TRIGGER.test(value)||CORRECTION_TRIGGER.test(value))return true;
@@ -278,7 +278,7 @@ function buildPlan({text,history,context={}}={}){
     ],
     paths:paths.slice(0,3),governance:governanceLayer(signals),requiresExplicitActivation:true,
     reviewOptions:['Revise the governing intention','Remove or reorder a path','Edit assumptions or completion criteria','Activate only after the weave feels usable'],
-    routing:{system:'commonweave',room:context?.routingAnswer?.room||'commonweave.quad',mode:'Plan'}
+    routing:{system:'civweave',room:context?.routingAnswer?.room||'civweave.quad',mode:'Plan'}
   };
 }
 
@@ -314,8 +314,8 @@ function maybeCreate({text,history,context,force=false}={}){
   if(!shouldCreate({text,history,context,force}))return null;
   const built=buildPlan({text,history,context});const item=persist(built);const plan=item.plan;
   const approvalGate={kind:'intention-activation',planId:item.id,state:item.state||'review',required:true,actions:['review','revise','activate']};
-  return{item,plan,response:{answer:format(plan),choice:{mode:'Plan',system:'commonweave',room:plan.routing.room,nextAction:'Review, revise, or activate the saved weave.'},assumptions:plan.assumptions,requiresConsent:true,confidence:.97,approvalGate}};
+  return{item,plan,response:{answer:format(plan),choice:{mode:'Plan',system:'civweave',room:plan.routing.room,nextAction:'Review, revise, or activate the saved weave.'},assumptions:plan.assumptions,requiresConsent:true,confidence:.97,approvalGate}};
 }
 
-globalThis.CommonweaveIntentionPlanner={schema:PLAN_SCHEMA,triggers:{explicit:EXPLICIT_PLAN_TRIGGER,wish:WISH_TRIGGER,direct:DIRECT_INTENTION_TRIGGER,retry:RETRY_TRIGGER,correction:CORRECTION_TRIGGER},shouldCreate,activeIntentionTurns,buildPlan,maybeCreate,persist,restore,format};
+globalThis.CivweaveIntentionPlanner={schema:PLAN_SCHEMA,triggers:{explicit:EXPLICIT_PLAN_TRIGGER,wish:WISH_TRIGGER,direct:DIRECT_INTENTION_TRIGGER,retry:RETRY_TRIGGER,correction:CORRECTION_TRIGGER},shouldCreate,activeIntentionTurns,buildPlan,maybeCreate,persist,restore,format};
 })();

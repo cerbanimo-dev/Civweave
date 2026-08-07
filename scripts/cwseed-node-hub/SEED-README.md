@@ -1,8 +1,8 @@
-# Commonweave portable seed
+# Civweave portable seed
 
 This `.cwseed` is a ZIP-compatible carrier with two payloads:
 
-- `mobile/`: the compact Commonweave Mobile Install Kit and checksum
+- `mobile/`: the compact Civweave Mobile Install Kit and checksum
 - `node-hub/`: a dependency-free Node 20+ host, relay, presence, and release hub
 
 It intentionally does not duplicate the full visual application, retired room
@@ -21,6 +21,6 @@ Then open `http://localhost:8787`.
 
 ## Deploy to Render
 
-Commit the extracted `commonweave-seed/` directory as a repository root and use
+Commit the extracted `civweave-seed/` directory as a repository root and use
 the included top-level `render.yaml`. The service runs from `node-hub/` while
 serving the sibling mobile installer.

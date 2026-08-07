@@ -1,4 +1,4 @@
-# Commonweave AI Wallet Postgres Layer v1
+# Civweave AI Wallet Postgres Layer v1
 
 Status: isolated foundation branch. No production payment processor or Gemini credential is enabled.
 
@@ -10,7 +10,7 @@ This layer replaces the single-process JSON ledger with a transaction-safe Postg
 
 - `AI_WALLET_STORAGE=file` uses the atomic JSON development ledger.
 - `AI_WALLET_STORAGE=postgres` requires `AI_WALLET_DATABASE_URL` or `DATABASE_URL`.
-- With no explicit storage setting, a database URL selects Postgres; otherwise Commonweave uses the file ledger.
+- With no explicit storage setting, a database URL selects Postgres; otherwise Civweave uses the file ledger.
 - The Neon driver is loaded only when Postgres mode starts. Install `@neondatabase/serverless` on that host before enabling it.
 
 The wallet remains disabled unless `AI_WALLET_ENABLED=1` and all four independent wallet secrets contain at least 32 bytes.

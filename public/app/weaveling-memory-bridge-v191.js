@@ -3,16 +3,16 @@
 const VERSION='1.0.7-weaveling-memory-bridge-v205-frozen-runtime-proxy';
 const MAX_MEMORY_ITEMS=6;
 let fastRuntimeInstalled=false;
-function api(){return globalThis.CommonweaveWeavelingMemoryV191;}
-function response(answer,extra={}){return{response:{answer,choice:{mode:'Reflect',system:'commonweave',room:'commonweave.quad',nextAction:''},assumptions:[],requiresConsent:false,confidence:.99},provider:'commonweave-memory',requestedProvider:'commonweave-memory',model:VERSION,fallbackFrom:null,...extra};}
+function api(){return globalThis.CivweaveWeavelingMemoryV191;}
+function response(answer,extra={}){return{response:{answer,choice:{mode:'Reflect',system:'civweave',room:'civweave.quad',nextAction:''},assumptions:[],requiresConsent:false,confidence:.99},provider:'civweave-memory',requestedProvider:'civweave-memory',model:VERSION,fallbackFrom:null,...extra};}
 function installFastRuntime(){
-  const runtime=globalThis.CommonweaveModelRuntime;
+  const runtime=globalThis.CivweaveModelRuntime;
   if(!runtime?.generate)return false;
-  if(runtime.generate.__commonweaveFastMemoryV192||runtime.generate.__commonweaveFastInteractiveV192||runtime.generate.__cerbanimoDeterministicBoundaryV203){fastRuntimeInstalled=true;return true;}
+  if(runtime.generate.__civweaveFastMemoryV192||runtime.generate.__civweaveFastInteractiveV192||runtime.generate.__cerbanimoDeterministicBoundaryV203){fastRuntimeInstalled=true;return true;}
   const original=runtime.generate.bind(runtime);
   const wrapped=async request=>{
     const purpose=String(request?.purpose||'');
-    if(!/^commonweave-guide-response-v141/.test(purpose))return original(request);
+    if(!/^civweave-guide-response-v141/.test(purpose))return original(request);
     const config={...(request.config||{})};
     const provider=String(config.provider||config.route||'').toLowerCase();
     const configured=Number(config.timeoutMs)||Number(config.timeoutSeconds)*1000||0;
@@ -27,12 +27,12 @@ function installFastRuntime(){
     return{...result,latency:{...(result.latency||{}),interactiveMs:Math.round(performance.now()-started),revision:VERSION}};
   };
   Object.defineProperties(wrapped,{
-    __commonweaveFastMemoryV192:{value:true},
+    __civweaveFastMemoryV192:{value:true},
     __prior:{value:original},
   });
   const proxy=Object.freeze({...runtime,generate:wrapped,fastMemoryRevision:VERSION});
-  try{globalThis.CommonweaveModelRuntime=proxy}catch{return false;}
-  fastRuntimeInstalled=globalThis.CommonweaveModelRuntime===proxy;
+  try{globalThis.CivweaveModelRuntime=proxy}catch{return false;}
+  fastRuntimeInstalled=globalThis.CivweaveModelRuntime===proxy;
   return fastRuntimeInstalled;
 }
 function memoryTurn(memory,text){
@@ -41,13 +41,13 @@ function memoryTurn(memory,text){
 }
 function install(){
   installFastRuntime();
-  const assistant=globalThis.CommonweaveAssistantV141,memory=api();
+  const assistant=globalThis.CivweaveAssistantV141,memory=api();
   if(!assistant?.respond||!memory)return false;
   if(assistant.respond.__weavelingMemoryV192)return true;
   const prior=assistant.respond.bind(assistant);
   const wrapped=async args=>{
-    const text=String(args?.text||'').trim(),system=args?.systemId||'commonweave';
-    if(system!=='commonweave')return prior(args);
+    const text=String(args?.text||'').trim(),system=args?.systemId||'civweave';
+    if(system!=='civweave')return prior(args);
     const command=memory.handleCommand(text);
     if(command)return response(command.answer,{memoryCommand:memory.command(text)});
     memory.recordTurn(text,{role:'user'});
@@ -75,6 +75,6 @@ function stabilize(){
   installFastRuntime();
   return install();
 }
-globalThis.CommonweaveWeavelingMemoryBridgeV191=Object.freeze({version:VERSION,install,stabilize,installFastRuntime,maxMemoryItems:MAX_MEMORY_ITEMS,get fastRuntimeInstalled(){return fastRuntimeInstalled;}});
+globalThis.CivweaveWeavelingMemoryBridgeV191=Object.freeze({version:VERSION,install,stabilize,installFastRuntime,maxMemoryItems:MAX_MEMORY_ITEMS,get fastRuntimeInstalled(){return fastRuntimeInstalled;}});
 install();
 })();

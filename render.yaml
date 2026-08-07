@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: commonweave-host-node
+    name: civweave-host-node
     runtime: node
     plan: free
     buildCommand: |
@@ -13,7 +13,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: HUB_NAME
-        value: Commonweave Host Node
+        value: Civweave Host Node
       - key: DATA_DIR
         value: ./data
       - key: MAX_ENVELOPES

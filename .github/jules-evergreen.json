@@ -1,7 +1,7 @@
 {
   "roadmapPath": "TEN-YEAR-PIPELINE.md",
   "startingBranch": "main",
-  "sessionTitlePrefix": "[Commonweave Evergreen]",
+  "sessionTitlePrefix": "[Civweave Evergreen]",
   "maxConcurrentSessions": 1,
   "maxLaunchesPer24Hours": 10,
   "minimumMinutesBetweenLaunches": 30,
@@ -47,7 +47,7 @@
     "managed": {
       "name": "jules-evergreen",
       "color": "8250df",
-      "description": "Managed by the Commonweave Jules evergreen daemon"
+      "description": "Managed by the Civweave Jules evergreen daemon"
     },
     "ready": {
       "name": "jules-auto-merge-ready",

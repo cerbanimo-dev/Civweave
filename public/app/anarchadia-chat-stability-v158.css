@@ -1,7 +1,7 @@
 /* Anarchadia v158: persistent Merlin console and mobile stability pass. */
-html[data-commonweave-system="anarchadia"] #gc153-launcher{display:none!important}
-html[data-commonweave-system="anarchadia"] .ac-frame-noise{display:none!important}
-html[data-commonweave-system="anarchadia"] .ac-display{
+html[data-civweave-system="anarchadia"] #gc153-launcher{display:none!important}
+html[data-civweave-system="anarchadia"] .ac-frame-noise{display:none!important}
+html[data-civweave-system="anarchadia"] .ac-display{
   overflow:visible;
   background:
     radial-gradient(circle at 50% -10%,#ff2f8716,transparent 34rem),
@@ -9,13 +9,13 @@ html[data-commonweave-system="anarchadia"] .ac-display{
     repeating-linear-gradient(0deg,transparent 0 31px,#1fd8ff08 31px 32px),
     repeating-linear-gradient(90deg,transparent 0 31px,#1fd8ff06 31px 32px);
 }
-html[data-commonweave-system="anarchadia"] .ac-module,
-html[data-commonweave-system="anarchadia"] .ac-card,
-html[data-commonweave-system="anarchadia"] .ac-pipeline-card,
-html[data-commonweave-system="anarchadia"] .ac-ledger-entry{
+html[data-civweave-system="anarchadia"] .ac-module,
+html[data-civweave-system="anarchadia"] .ac-card,
+html[data-civweave-system="anarchadia"] .ac-pipeline-card,
+html[data-civweave-system="anarchadia"] .ac-ledger-entry{
   contain:layout paint;
 }
-html[data-commonweave-system="anarchadia"] button[disabled]{opacity:.5;cursor:wait}
+html[data-civweave-system="anarchadia"] button[disabled]{opacity:.5;cursor:wait}
 .ac-merlin-chat{
   position:relative;
   z-index:3;
@@ -56,8 +56,8 @@ html[data-commonweave-system="anarchadia"] button[disabled]{opacity:.5;cursor:wa
 .ac-merlin-status{grid-column:1/-1;color:#94a3ad;font:700 10px/1.3 ui-monospace,monospace;letter-spacing:.05em}
 .ac-toast{position:fixed;z-index:2147482500;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);max-width:min(92vw,620px);padding:10px 14px;border:1px solid #1fd8ff;background:#071017f5;color:#fff;box-shadow:0 12px 34px #000b}
 @media(max-width:720px){
-  html[data-commonweave-system="anarchadia"] .ac-display{box-shadow:inset 0 0 32px #000}
-  html[data-commonweave-system="anarchadia"] .ac-module{transition:none}
+  html[data-civweave-system="anarchadia"] .ac-display{box-shadow:inset 0 0 32px #000}
+  html[data-civweave-system="anarchadia"] .ac-module{transition:none}
   .ac-merlin-chat{grid-template-rows:auto minmax(170px,36vh) auto}
   .ac-merlin-head{align-items:flex-start}
   .ac-merlin-head img{width:44px;height:44px}
@@ -65,5 +65,5 @@ html[data-commonweave-system="anarchadia"] button[disabled]{opacity:.5;cursor:wa
   .ac-merlin-form button{min-height:44px}
 }
 @media(prefers-reduced-motion:reduce){
-  html[data-commonweave-system="anarchadia"] *{transition:none!important;scroll-behavior:auto!important}
+  html[data-civweave-system="anarchadia"] *{transition:none!important;scroll-behavior:auto!important}
 }

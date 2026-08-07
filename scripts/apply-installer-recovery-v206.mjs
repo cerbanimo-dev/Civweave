@@ -17,20 +17,20 @@ async function patch(path,transform){
 await patch('server-gateway-v131.mjs',source=>{
   source=replaceRequired(
     source,
-    "  const packageInstall = req.headers['x-commonweave-package'] === 'install';",
-    "  const packageInstall = ['install','update-controls'].includes(String(req.headers['x-commonweave-package'] || ''));",
+    "  const packageInstall = req.headers['x-civweave-package'] === 'install';",
+    "  const packageInstall = ['install','update-controls'].includes(String(req.headers['x-civweave-package'] || ''));",
     'package request classification'
   );
   source=replaceRequired(
     source,
-    "    || pathname === '/app/logos/commonweave-icon-maskable-512.png';",
-    "    || pathname === '/app/logos/commonweave-icon-maskable-512.png'\n    || pathname === '/app/knowledge-school-seeds-v1.js'\n    || pathname === '/app/knowledge-school-installer-v1.js'\n    || pathname === '/app/knowledge-school-installer-v1.css'\n    || pathname === '/app/pwa-update-controller-v204.js';",
+    "    || pathname === '/app/logos/civweave-icon-maskable-512.png';",
+    "    || pathname === '/app/logos/civweave-icon-maskable-512.png'\n    || pathname === '/app/knowledge-school-seeds-v1.js'\n    || pathname === '/app/knowledge-school-installer-v1.js'\n    || pathname === '/app/knowledge-school-installer-v1.css'\n    || pathname === '/app/pwa-update-controller-v204.js';",
     'installer asset allowlist'
   );
   source=replaceRequired(
     source,
-    "  if (gatewayRequest && (pathname === '/field/commonweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) { res.writeHead(302,{location:COMMONWEAVE_RELEASE_URL,'cache-control':'no-store'}); return res.end(); }",
-    "  const knowledgeSchoolDownload = pathname === '/downloads/knowledge-schools' || pathname.startsWith('/downloads/knowledge-schools/');\n  if (gatewayRequest && !knowledgeSchoolDownload && (pathname === '/field/commonweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) { res.writeHead(302,{location:COMMONWEAVE_RELEASE_URL,'cache-control':'no-store'}); return res.end(); }",
+    "  if (gatewayRequest && (pathname === '/field/civweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) { res.writeHead(302,{location:CIVWEAVE_RELEASE_URL,'cache-control':'no-store'}); return res.end(); }",
+    "  const knowledgeSchoolDownload = pathname === '/downloads/knowledge-schools' || pathname.startsWith('/downloads/knowledge-schools/');\n  if (gatewayRequest && !knowledgeSchoolDownload && (pathname === '/field/civweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) { res.writeHead(302,{location:CIVWEAVE_RELEASE_URL,'cache-control':'no-store'}); return res.end(); }",
     'knowledge-school download corridor'
   );
   return source;
@@ -77,8 +77,8 @@ await patch('public/install-v130.js',source=>{
   );
   source=replaceRequired(
     source,
-    "const AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r50';",
-    "const AUTO_RESET_KEY='commonweave.device-package.auto-reset.v106-r51';",
+    "const AUTO_RESET_KEY='civweave.device-package.auto-reset.v106-r50';",
+    "const AUTO_RESET_KEY='civweave.device-package.auto-reset.v106-r51';",
     'automatic recovery key'
   );
   return source;

@@ -792,18 +792,18 @@ class FieldHandler(SimpleHTTPRequestHandler):
         if path == "/field/health":
             self._health()
             return
-        if path == "/field/commonweave/status":
+        if path == "/field/civweave/status":
             if self._require_loopback_admin():
-                seed = ROOT / "commonweave-pocket-campus.cwseed"
-                self._json(200, {"ok": seed.is_file(), "available": seed.is_file(), "filename": seed.name, "bytes": seed.stat().st_size if seed.is_file() else 0, "downloadUrl": "/field/commonweave/seed" if seed.is_file() else None})
+                seed = ROOT / "civweave-pocket-campus.cwseed"
+                self._json(200, {"ok": seed.is_file(), "available": seed.is_file(), "filename": seed.name, "bytes": seed.stat().st_size if seed.is_file() else 0, "downloadUrl": "/field/civweave/seed" if seed.is_file() else None})
             return
-        if path == "/field/commonweave/seed":
+        if path == "/field/civweave/seed":
             if self._require_loopback_admin():
-                seed = ROOT / "commonweave-pocket-campus.cwseed"
+                seed = ROOT / "civweave-pocket-campus.cwseed"
                 if not seed.is_file():
                     self._json(404, {"ok": False, "error": "The installed Pocket Campus seed is missing. Re-run the mobile installer to restore it."})
                 else:
-                    self._file(200, seed, "application/zip", "commonweave-pocket-campus.cwseed")
+                    self._file(200, seed, "application/zip", "civweave-pocket-campus.cwseed")
             return
         if path == "/field/invite/status":
             if self._require_loopback_admin():

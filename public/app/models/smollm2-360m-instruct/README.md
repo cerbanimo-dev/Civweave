@@ -1,6 +1,6 @@
 # SmolLM2 360M onboard model
 
-This directory contains Commonweave's packaged `HuggingFaceTB/SmolLM2-360M-Instruct` model.
+This directory contains Civweave's packaged `HuggingFaceTB/SmolLM2-360M-Instruct` model.
 
 ## Roles
 
@@ -41,7 +41,7 @@ Open **AI settings → Onboard SmolLM2 360M → Run five-prompt trial**.
 The trial checks learning, skilled work, exchange, governance, and reflection prompts and reports:
 
 - valid JSON responses;
-- correct Commonweave route choices;
+- correct Civweave route choices;
 - execution backend;
 - per-prompt latency;
 - total elapsed time.

@@ -2,7 +2,7 @@ import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 
-const source=await readFile(new URL('../public/extensions/commonweave-domain-bridge-v156.js',import.meta.url),'utf8');
+const source=await readFile(new URL('../public/extensions/civweave-domain-bridge-v156.js',import.meta.url),'utf8');
 class Storage{
   constructor(){this.map=new Map()}
   getItem(key){return this.map.has(String(key))?this.map.get(String(key)):null}
@@ -20,12 +20,12 @@ const context={
   dispatchEvent:event=>events.push(event),addEventListener:()=>{},
   document:{hidden:false},setInterval:()=>0,clearInterval:()=>{},
   queueMicrotask:fn=>fn(),setTimeout,clearTimeout,Date,Math,JSON,structuredClone,
-  CommonweaveLocalMeshV146:{deviceId:async()=> 'local-device'}
+  CivweaveLocalMeshV146:{deviceId:async()=> 'local-device'}
 };
 context.globalThis=context;
 vm.createContext(context);
-vm.runInContext(source,context,{filename:'commonweave-domain-bridge-v156.js'});
-const bridge=context.CommonweaveDomainBridgeV156;
+vm.runInContext(source,context,{filename:'civweave-domain-bridge-v156.js'});
+const bridge=context.CivweaveDomainBridgeV156;
 assert.ok(bridge,'domain bridge should export its API');
 let balances=bridge.balances();
 assert.equal(balances.buttons,2,'local independent AI pass should mint two Buttons');

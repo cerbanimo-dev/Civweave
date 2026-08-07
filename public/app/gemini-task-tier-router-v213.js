@@ -4,15 +4,15 @@
 const VERSION='1.0.7-gemini-task-tier-router-v213';
 const SMALL_MODEL='gemini-3.1-flash-lite';
 const COMPLEX_MODEL='gemini-3.5-flash-lite';
-const SETTINGS_KEY='commonweave.universal-ai.v127';
-const PROFILES_KEY='commonweave-model-profiles-v1';
+const SETTINGS_KEY='civweave.universal-ai.v127';
+const PROFILES_KEY='civweave-model-profiles-v1';
 const NOTICE_ID='cw-gemini-task-tier-notice-v213';
 const STYLE_ID='cw-gemini-task-tier-style-v213';
-const ROUTER_FLAG='__commonweaveGeminiTaskTierRouterV213';
+const ROUTER_FLAG='__civweaveGeminiTaskTierRouterV213';
 let noticeTimer=null;
 const SETTINGS_SELECTOR='[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings],#settings-button,#model-chip';
 
-if(globalThis.CommonweaveGeminiTaskTierRouterV213?.version===VERSION)return;
+if(globalThis.CivweaveGeminiTaskTierRouterV213?.version===VERSION)return;
 
 const clean=(value,max=24000)=>String(value??'').trim().slice(0,max);
 const lower=value=>clean(value).toLowerCase();
@@ -71,7 +71,7 @@ function classify(runtime,request={}){
   if(planning)return{tier:'complex',reason:'multi-step planning'};
 
   const code=/\b(generate|write|create|implement|build|develop|refactor|debug|repair|fix|patch|modify|review)\b[\s\S]{0,80}\b(code|software|app|application|website|pwa|component|function|class|script|api|database|sql|html|css|javascript|typescript|python|react|node|service worker|pull request|commit|patch)\b|\b(code generation|generated code|implementation patch|software architecture|debugging|refactor)\b/.test(text);
-  if(code&&['cerbanimo','anarchadia','commonweave'].includes(system))return{tier:'complex',reason:`${system||'Commonweave'} code generation`};
+  if(code&&['cerbanimo','anarchadia','civweave'].includes(system))return{tier:'complex',reason:`${system||'Civweave'} code generation`};
 
   const complexPurpose=/\b(plan|planner|planning|research|agent|agentic|source|browse|automation|code|patch|implementation|architecture|curriculum-generation|content-generation|quest-generation|proposal-generation)\b/.test(lower(request.purpose));
   if(complexPurpose)return{tier:'complex',reason:'complex generation purpose'};
@@ -136,8 +136,8 @@ function installStyle(){
 }
 
 function disclose(decision,model,request={}){
-  const detail={schema:'commonweave.gemini-task-routing.v1',version:VERSION,tier:decision.tier,reason:decision.reason,model,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,purpose:clean(request.purpose,160),at:new Date().toISOString()};
-  try{dispatchEvent(new CustomEvent('commonweave:gemini-task-tier-selected',{detail}))}catch{}
+  const detail={schema:'civweave.gemini-task-routing.v1',version:VERSION,tier:decision.tier,reason:decision.reason,model,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,purpose:clean(request.purpose,160),at:new Date().toISOString()};
+  try{dispatchEvent(new CustomEvent('civweave:gemini-task-tier-selected',{detail}))}catch{}
   if(typeof document==='undefined'||decision.tier!=='complex')return detail;
   installStyle();
   let notice=document.getElementById(NOTICE_ID);
@@ -184,7 +184,7 @@ function wrapRuntime(runtime){
     const routed={...request,executionProfile:profile,taskTier:decision.tier,config:{...(request.config||{}),provider:'gemini',route:'gemini',model}};
     disclose(decision,model,routed);
     const result=await originalGenerate(routed);
-    return result&&typeof result==='object'?{...result,taskRouting:{schema:'commonweave.gemini-task-routing.v1',version:VERSION,tier:decision.tier,reason:decision.reason,model}}:result;
+    return result&&typeof result==='object'?{...result,taskRouting:{schema:'civweave.gemini-task-routing.v1',version:VERSION,tier:decision.tier,reason:decision.reason,model}}:result;
   };
 
   const wrapped=Object.freeze({
@@ -196,16 +196,16 @@ function wrapRuntime(runtime){
     geminiTaskRouting:Object.freeze({version:VERSION,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,classify:request=>classify(runtime,request),migrate:()=>migrateGeminiProfiles(runtime)}),
     [ROUTER_FLAG]:true,
   });
-  globalThis.CommonweaveModelRuntime=wrapped;
-  try{dispatchEvent(new CustomEvent('commonweave:gemini-task-router-ready',{detail:{version:VERSION,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,at:new Date().toISOString()}}))}catch{}
+  globalThis.CivweaveModelRuntime=wrapped;
+  try{dispatchEvent(new CustomEvent('civweave:gemini-task-router-ready',{detail:{version:VERSION,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,at:new Date().toISOString()}}))}catch{}
   return wrapped;
 }
 
-function install(){return wrapRuntime(globalThis.CommonweaveModelRuntime)}
+function install(){return wrapRuntime(globalThis.CivweaveModelRuntime)}
 
-addEventListener?.('commonweave:model-runtime-ready',install);
-addEventListener?.('commonweave:model-settings-saved',()=>{migrateStoredGeminiPolicy();patchSettings();queueMicrotask(()=>migrateGeminiProfiles(globalThis.CommonweaveModelRuntime))});
-addEventListener?.('commonweave:model-settings-opened',()=>queueMicrotask(patchSettings));
+addEventListener?.('civweave:model-runtime-ready',install);
+addEventListener?.('civweave:model-settings-saved',()=>{migrateStoredGeminiPolicy();patchSettings();queueMicrotask(()=>migrateGeminiProfiles(globalThis.CivweaveModelRuntime))});
+addEventListener?.('civweave:model-settings-opened',()=>queueMicrotask(patchSettings));
 if(typeof document!=='undefined'){
   document.addEventListener('click',event=>{if(event.target instanceof Element&&event.target.closest(SETTINGS_SELECTOR))queueMicrotask(patchSettings)});
   document.addEventListener('change',event=>{if(event.target?.name==='route')queueMicrotask(patchSettings)});
@@ -215,5 +215,5 @@ if(typeof document!=='undefined'){
 migrateStoredGeminiPolicy();
 install();
 
-globalThis.CommonweaveGeminiTaskTierRouterV213=Object.freeze({version:VERSION,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,classify:request=>classify(globalThis.CommonweaveModelRuntime||{},request),install,patchSettings,migrateStored:migrateStoredGeminiPolicy,migrate:()=>migrateGeminiProfiles(globalThis.CommonweaveModelRuntime)});
+globalThis.CivweaveGeminiTaskTierRouterV213=Object.freeze({version:VERSION,smallModel:SMALL_MODEL,complexModel:COMPLEX_MODEL,classify:request=>classify(globalThis.CivweaveModelRuntime||{},request),install,patchSettings,migrateStored:migrateStoredGeminiPolicy,migrate:()=>migrateGeminiProfiles(globalThis.CivweaveModelRuntime)});
 })();

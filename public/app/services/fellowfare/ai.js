@@ -262,15 +262,15 @@ async function directGemini(settings, system, user) {
 }
 
 export async function invokeModel(settingsInput, { task, context, schemaHint }) {
-  if (settingsInput?.provider === 'commonweave-shared') {
-    const runtime = globalThis.CommonweaveModelRuntime;
-    if (!runtime?.generate) throw new Error('The Commonweave model runtime is unavailable.');
+  if (settingsInput?.provider === 'civweave-shared') {
+    const runtime = globalThis.CivweaveModelRuntime;
+    if (!runtime?.generate) throw new Error('The Civweave model runtime is unavailable.');
     const route = String(settingsInput.route || 'deterministic');
     if (!settingsInput.enabled || route === 'deterministic') throw new Error('DETERMINISTIC_MODE');
     const provider = route === 'local-api'
       ? (/11434|\/api\/chat/i.test(String(settingsInput.endpoint || '')) ? 'ollama' : 'openai-compatible')
       : route === 'gguf' ? 'openai-compatible' : route;
-    const system = `You are Rook the Raven, FellowFare's exchange guide. Name the need or offer, ask what matters, show practical paths, call out costs and fairness plainly, recommend the cleanest flight path, and offer the next handoff. Be wry, warm, grounded, and delighted by salvage—never call it junk. No riddles when stakes are real. You are operating through FellowFare Loom, an economic coordination assistant inside Commonweave. Existing constraints remain binding: help people form clear, fair, consent-based exchanges; never publish, accept, spend, commit, rate, reveal private location, or make binding decisions; return JSON only; use concise plain language. ${schemaHint || ''}`;
+    const system = `You are Rook the Raven, FellowFare's exchange guide. Name the need or offer, ask what matters, show practical paths, call out costs and fairness plainly, recommend the cleanest flight path, and offer the next handoff. Be wry, warm, grounded, and delighted by salvage—never call it junk. No riddles when stakes are real. You are operating through FellowFare Loom, an economic coordination assistant inside Civweave. Existing constraints remain binding: help people form clear, fair, consent-based exchanges; never publish, accept, spend, commit, rate, reveal private location, or make binding decisions; return JSON only; use concise plain language. ${schemaHint || ''}`;
     const agenticTask = /(?:background|agent|research|search|source|url|web|youtube|market-scan|discovery)/i.test(String(task || ''));
     const runtimeGenerate = agenticTask && runtime.generateAgentic ? runtime.generateAgentic.bind(runtime) : (runtime.generateInteractive || runtime.generate).bind(runtime);
     const result = await runtimeGenerate({

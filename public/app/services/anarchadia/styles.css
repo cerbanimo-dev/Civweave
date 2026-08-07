@@ -398,11 +398,11 @@ body.show-hotspots .scene-hotspot-label { opacity:1; transform:translate(-50%,0)
 }
 
 /* RC17.2 visual-screen chrome and viewport repair.
-   The Commonweave campus bar is the sole header above illustrated rooms. */
+   The Civweave campus bar is the sole header above illustrated rooms. */
 html, body { min-height: 100%; overflow-x: hidden; }
 .shell { min-height: 100dvh; }
 .sidebar { height: 100dvh; }
-#commonweave-suite-badge { display: none !important; }
+#civweave-suite-badge { display: none !important; }
 
 .visual-main {
   max-width: none;

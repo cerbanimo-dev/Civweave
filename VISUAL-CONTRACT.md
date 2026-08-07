@@ -1,6 +1,6 @@
-# Commonweave Cardinal Visual Contract
+# Civweave Cardinal Visual Contract
 
-Commonweave is not a conventional web application decorated with scenery. The illustrated world is the application surface.
+Civweave is not a conventional web application decorated with scenery. The illustrated world is the application surface.
 
 ## Non-negotiable rules
 

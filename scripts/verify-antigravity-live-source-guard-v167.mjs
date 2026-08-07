@@ -27,9 +27,9 @@ const context={
 };
 context.globalThis=context;
 vm.createContext(context);
-vm.runInContext(fs.readFileSync(new URL('../public/extensions/commonweave-antigravity-live-source-guard-v167.js',import.meta.url),'utf8'),context);
+vm.runInContext(fs.readFileSync(new URL('../public/extensions/civweave-antigravity-live-source-guard-v167.js',import.meta.url),'utf8'),context);
 domReady();
-const guard=context.CommonweaveAntigravityLiveSourceGuardV167;
+const guard=context.CivweaveAntigravityLiveSourceGuardV167;
 assert.ok(guard);
 
 const good={
@@ -45,8 +45,8 @@ const verified=guard.enforcePayload(good,'youtube-scout');
 const parsed=JSON.parse(verified.steps.at(-1).content[0].text);
 assert.equal(parsed.modules[0].video.opened,true);
 assert.equal(parsed.sources[0].liveFetched,true);
-assert.equal(verified.commonweave_live_verification.searchUsed,true);
-assert.equal(verified.commonweave_live_verification.urlContextUsed,true);
+assert.equal(verified.civweave_live_verification.searchUsed,true);
+assert.equal(verified.civweave_live_verification.urlContextUsed,true);
 
 const direct={
   status:'completed',

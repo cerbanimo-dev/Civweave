@@ -46,12 +46,12 @@ function apply() {
   if (!failed()) return;
   if (installButton) {
     installButton.disabled = false;
-    installButton.textContent = 'Open Commonweave online';
-    installButton.dataset.commonweaveOnlineFallback = REVISION;
+    installButton.textContent = 'Open Civweave online';
+    installButton.dataset.civweaveOnlineFallback = REVISION;
   }
   if (updateButton) updateButton.textContent = 'Repair shell';
-  if (helpNode && !helpNode.dataset.commonweaveOnlineFallback) {
-    helpNode.dataset.commonweaveOnlineFallback = REVISION;
+  if (helpNode && !helpNode.dataset.civweaveOnlineFallback) {
+    helpNode.dataset.civweaveOnlineFallback = REVISION;
     helpNode.textContent = `${helpNode.textContent} Online launch is still available; offline shell repair can continue separately.`;
   }
 }
@@ -69,7 +69,7 @@ if (stateNode) observer.observe(stateNode, { childList: true, characterData: tru
 addEventListener('pagehide', () => observer.disconnect(), { once: true });
 apply();
 
-globalThis.CommonweaveInstallerOnlineFallbackV225 = Object.freeze({
+globalThis.CivweaveInstallerOnlineFallbackV225 = Object.freeze({
   revision: REVISION,
   campusUrl
 });

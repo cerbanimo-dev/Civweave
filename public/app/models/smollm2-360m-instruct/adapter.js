@@ -31,7 +31,7 @@ function packageError(message, cause) {
 function getWorker() {
   if (worker) return worker;
   try {
-    worker = new Worker(WORKER_URL, { type: 'module', name: 'commonweave-smollm2' });
+    worker = new Worker(WORKER_URL, { type: 'module', name: 'civweave-smollm2' });
   } catch (error) {
     throw packageError(`SmolLM2 could not start its module worker at ${WORKER_URL}.`, error);
   }

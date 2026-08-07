@@ -21,11 +21,11 @@ const sourceDir = resolve(repoRoot, "public");
 const outputDir = resolve(repoRoot, ".cloudflare-pages");
 const installerPath = resolve(
   sourceDir,
-  "downloads/Commonweave-Mobile-Install-Kit.zip",
+  "downloads/Civweave-Mobile-Install-Kit.zip",
 );
 const pocketCampusSeedPath = resolve(
   sourceDir,
-  "downloads/commonweave-pocket-campus.cwseed",
+  "downloads/civweave-pocket-campus.cwseed",
 );
 const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
 const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
@@ -63,31 +63,31 @@ function withPortableZipFallback(task) {
     throw new Error(`Portable ZIP writer not found: ${portableZipScript}`);
   }
 
-  const shimDir = mkdtempSync(join(tmpdir(), "commonweave-portable-zip-"));
+  const shimDir = mkdtempSync(join(tmpdir(), "civweave-portable-zip-"));
   const shimPath = join(shimDir, "zip");
   const previousPath = process.env.PATH;
-  const previousNode = process.env.COMMONWEAVE_NODE_BIN;
-  const previousScript = process.env.COMMONWEAVE_PORTABLE_ZIP_SCRIPT;
+  const previousNode = process.env.CIVWEAVE_NODE_BIN;
+  const previousScript = process.env.CIVWEAVE_PORTABLE_ZIP_SCRIPT;
   writeFileSync(
     shimPath,
-    '#!/bin/sh\nexec "$COMMONWEAVE_NODE_BIN" "$COMMONWEAVE_PORTABLE_ZIP_SCRIPT" "$@"\n',
+    '#!/bin/sh\nexec "$CIVWEAVE_NODE_BIN" "$CIVWEAVE_PORTABLE_ZIP_SCRIPT" "$@"\n',
     "utf8",
   );
   chmodSync(shimPath, 0o755);
   process.env.PATH = `${shimDir}${delimiter}${previousPath || ""}`;
-  process.env.COMMONWEAVE_NODE_BIN = process.execPath;
-  process.env.COMMONWEAVE_PORTABLE_ZIP_SCRIPT = portableZipScript;
-  console.log("System zip is unavailable; using the dependency-free Commonweave ZIP writer.");
+  process.env.CIVWEAVE_NODE_BIN = process.execPath;
+  process.env.CIVWEAVE_PORTABLE_ZIP_SCRIPT = portableZipScript;
+  console.log("System zip is unavailable; using the dependency-free Civweave ZIP writer.");
 
   try {
     return task();
   } finally {
     if (previousPath === undefined) delete process.env.PATH;
     else process.env.PATH = previousPath;
-    if (previousNode === undefined) delete process.env.COMMONWEAVE_NODE_BIN;
-    else process.env.COMMONWEAVE_NODE_BIN = previousNode;
-    if (previousScript === undefined) delete process.env.COMMONWEAVE_PORTABLE_ZIP_SCRIPT;
-    else process.env.COMMONWEAVE_PORTABLE_ZIP_SCRIPT = previousScript;
+    if (previousNode === undefined) delete process.env.CIVWEAVE_NODE_BIN;
+    else process.env.CIVWEAVE_NODE_BIN = previousNode;
+    if (previousScript === undefined) delete process.env.CIVWEAVE_PORTABLE_ZIP_SCRIPT;
+    else process.env.CIVWEAVE_PORTABLE_ZIP_SCRIPT = previousScript;
     rmSync(shimDir, { recursive: true, force: true });
   }
 }
@@ -95,11 +95,11 @@ function withPortableZipFallback(task) {
 function rebuildReleaseArtifacts() {
   runNodeScript(
     parityMaterializer,
-    "Commonweave parity ledger materialization failed.",
+    "Civweave parity ledger materialization failed.",
   );
   withPortableZipFallback(() => runNodeScript(
     resolve(scriptDir, "build-mobile-install-kit.mjs"),
-    "Commonweave release artifact rebuild failed.",
+    "Civweave release artifact rebuild failed.",
   ));
 }
 
@@ -162,6 +162,6 @@ if (outputOversized.length) {
 const installerBytes = statSync(installerPath).size;
 const seedBytes = statSync(pocketCampusSeedPath).size;
 console.log(
-  `Built .cloudflare-pages with mobile installer (${installerBytes} bytes) and portable Commonweave seed (${seedBytes} bytes).`,
+  `Built .cloudflare-pages with mobile installer (${installerBytes} bytes) and portable Civweave seed (${seedBytes} bytes).`,
 );
 console.log("All Cloudflare-hosted files are at or below 24 MiB.");

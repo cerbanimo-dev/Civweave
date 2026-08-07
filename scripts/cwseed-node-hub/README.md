@@ -1,4 +1,4 @@
-# Commonweave portable node hub
+# Civweave portable node hub
 
 This dependency-free Node 20+ hub serves the mobile install kit from the sibling
 `../mobile/` directory and provides the current lightweight host-node surfaces:
@@ -26,16 +26,16 @@ Optional environment variables:
 ```text
 PORT=8787
 HOST=0.0.0.0
-HUB_NAME=My Commonweave Node
+HUB_NAME=My Civweave Node
 HUB_TOKEN=a-long-random-secret
 DATA_DIR=/durable/path
 MAX_ENVELOPES=5000
 ```
 
 The hub expects the seed directory structure to remain intact because the mobile
-kit lives at `../mobile/Commonweave-Mobile-Install-Kit.zip`.
+kit lives at `../mobile/Civweave-Mobile-Install-Kit.zip`.
 
 ## Render
 
-Commit the extracted `commonweave-seed/` directory as a repository root. Its
+Commit the extracted `civweave-seed/` directory as a repository root. Its
 top-level `render.yaml` starts this folder while preserving access to `../mobile/`.

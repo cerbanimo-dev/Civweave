@@ -11,7 +11,7 @@ applyShell=function calibratedApplyShell(system){
 const previousRenderCabinetControls=renderCabinetControls;
 renderCabinetControls=function calibratedCabinetControls(system){
   const shell=system.interfaceShell||{};
-  const order=shell.controlOrder||["anarchadia","fellowfare","commonweave","living-school","cerbanimo"];
+  const order=shell.controlOrder||["anarchadia","fellowfare","civweave","living-school","cerbanimo"];
   if(!Array.isArray(shell.controls)||shell.controls.length!==order.length){
     previousRenderCabinetControls(system);
     return;

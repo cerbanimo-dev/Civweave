@@ -4,17 +4,17 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(rootDir, 'server.mjs');
-const runtimePath = path.join(rootDir, '.commonweave-gateway-v131.runtime.mjs');
-const VERSION = '1.0.7';
-const BUILD = '1.0.7-install-only-fullscreen-family-gateway';
+const runtimePath = path.join(rootDir, '.civweave-gateway-v131.runtime.mjs');
+const VERSION = '1.0.17';
+const BUILD = '1.0.17-install-only-fullscreen-family-gateway';
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
-function replaceRequired(before, after, label) { if (!source.includes(before)) throw new Error(`Commonweave gateway patch could not find ${label}`); source = source.replace(before, after); }
+function replaceRequired(before, after, label) { if (!source.includes(before)) throw new Error(`Civweave gateway patch could not find ${label}`); source = source.replace(before, after); }
 replaceRequired("import { fileURLToPath } from 'node:url';","import { fileURLToPath } from 'node:url';\nimport { AiWalletService } from './lib/ai-wallet-service-v1.mjs';\nimport { createAiWalletHttpHandler } from './lib/ai-wallet-http-v1.mjs';",'hosted AI wallet imports');
 replaceRequired("const BUILD_VERSION = '1.0.21-ai-uplift';",`const BUILD_VERSION = '${BUILD}';`,'host build marker');
 replaceRequired("const APP_VERSION = 'rc22.3.20-ai-checkpoint';",`const APP_VERSION = '${VERSION}';`,'app version marker');
-replaceRequired("const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://commonweave-host-node.onrender.com';","const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://commonweave-host-node.onrender.com';\nconst COMMONWEAVE_SOURCE_URL = process.env.COMMONWEAVE_SOURCE_URL || 'https://github.com/cerbanimo-dev/Commonweave';\nconst COMMONWEAVE_RELEASE_URL = process.env.COMMONWEAVE_RELEASE_URL || 'https://github.com/cerbanimo-dev/Commonweave/archive/refs/heads/main.zip';",'gateway release URLs');
+replaceRequired("const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://civweave-host-node.onrender.com';","const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://civweave-host-node.onrender.com';\nconst CIVWEAVE_SOURCE_URL = process.env.CIVWEAVE_SOURCE_URL || 'https://github.com/cerbanimo-dev/Civweave';\nconst CIVWEAVE_RELEASE_URL = process.env.CIVWEAVE_RELEASE_URL || 'https://github.com/cerbanimo-dev/Civweave/archive/refs/heads/main.zip';",'gateway release URLs');
 replaceRequired("let installKitSha256 = '';\nlet installKitSize = 0;\ntry {\n  const kit = await fsp.readFile(INSTALL_KIT_PATH);\n  installKitSha256 = crypto.createHash('sha256').update(kit).digest('hex');\n  installKitSize = kit.length;\n} catch (error) {\n  console.warn('Install kit metadata unavailable:', error.message);\n}","const installKitSha256 = '';\nconst installKitSize = 0;",'install kit startup hashing');
-replaceRequired("    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Commonweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Commonweave host-node and offline PWA release.'","    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: COMMONWEAVE_SOURCE_URL,\n    downloadUrl: COMMONWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin distributes the Commonweave v1.0.7 fixed-settings-layer device package.'",'release packet hosting fields');
+replaceRequired("    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Civweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Civweave host-node and offline PWA release.'","    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: CIVWEAVE_SOURCE_URL,\n    downloadUrl: CIVWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin distributes the Civweave v1.0.17 fixed-settings-layer device package.'",'release packet hosting fields');
 replaceRequired("} catch (error) {\n  if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);\n}",String.raw`} catch (error) {
   if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);
 }
@@ -35,7 +35,7 @@ if (AI_WALLET_REQUESTED) {
       queryTimeoutMs: Number(process.env.AI_WALLET_QUERY_TIMEOUT_MS || 10000)
     }).load();
   } catch (error) {
-    console.error('[Commonweave] Hosted AI wallet stayed disabled:', error.message);
+    console.error('[Civweave] Hosted AI wallet stayed disabled:', error.message);
   }
 }
 const aiWalletHttp = createAiWalletHttpHandler({
@@ -48,7 +48,7 @@ const aiWalletHttp = createAiWalletHttpHandler({
 });`,'host state restore and AI wallet setup');
 replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.raw`  const pathname = decodeURIComponent(url.pathname);
   const gatewayRequest = req.method === 'GET' || req.method === 'HEAD';
-  const packageInstall = Boolean(String(req.headers['x-commonweave-package'] || '').trim());
+  const packageInstall = Boolean(String(req.headers['x-civweave-package'] || '').trim());
   const installerSurface = pathname === '/'
     || pathname === '/index.html'
     || pathname === '/install-v130.js'
@@ -57,12 +57,12 @@ replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.ra
     || pathname === '/service-worker-v156.js'
     || pathname === '/service-worker-v203.js'
     || pathname === '/app/manifest.webmanifest'
-    || pathname === '/app/logos/commonweave.webp'
-    || pathname === '/app/logos/commonweave-app-icon.png'
-    || pathname === '/app/logos/commonweave-icon-192.png'
-    || pathname === '/app/logos/commonweave-icon-512.png'
-    || pathname === '/app/logos/commonweave-icon-maskable-192.png'
-    || pathname === '/app/logos/commonweave-icon-maskable-512.png'
+    || pathname === '/app/logos/civweave.webp'
+    || pathname === '/app/logos/civweave-app-icon.png'
+    || pathname === '/app/logos/civweave-icon-192.png'
+    || pathname === '/app/logos/civweave-icon-512.png'
+    || pathname === '/app/logos/civweave-icon-maskable-192.png'
+    || pathname === '/app/logos/civweave-icon-maskable-512.png'
     || pathname === '/app/knowledge-school-seeds-v1.js'
     || pathname === '/app/knowledge-school-installer-v1.js'
     || pathname === '/app/knowledge-school-installer-v1.css'
@@ -80,30 +80,30 @@ replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.ra
     || pathname.startsWith('/cabinetonly/')
     || pathname === '/campus'
     || pathname.startsWith('/campus/');
-  if (gatewayRequest && packageInstall && pathname === '/app/shared/commonweave-parity-ledger.json') {
+  if (gatewayRequest && packageInstall && pathname === '/app/shared/civweave-parity-ledger.json') {
     try {
       const { gunzipSync } = await import('node:zlib');
       const sharedDir = path.join(PUBLIC_DIR, 'app', 'shared');
-      const encoded = (await Promise.all([1,2,3,4].map(part => fsp.readFile(path.join(sharedDir,'commonweave-parity-ledger.part'+part+'.b64'),'utf8')))).join('').replace(/\s+/g,'');
+      const encoded = (await Promise.all([1,2,3,4].map(part => fsp.readFile(path.join(sharedDir,'civweave-parity-ledger.part'+part+'.b64'),'utf8')))).join('').replace(/\s+/g,'');
       const ledger = JSON.parse(gunzipSync(Buffer.from(encoded,'base64')).toString('utf8'));
       const payload = Buffer.from(JSON.stringify(ledger));
-      res.writeHead(200,{'content-type':'application/json; charset=utf-8','content-length':payload.length,'cache-control':'public, max-age=31536000, immutable','x-commonweave-device-package':'parity-ledger','x-commonweave-software-family':'1.0.7'});
+      res.writeHead(200,{'content-type':'application/json; charset=utf-8','content-length':payload.length,'cache-control':'public, max-age=31536000, immutable','x-civweave-device-package':'parity-ledger','x-civweave-software-family':'1.0.7'});
       return res.end(req.method === 'HEAD' ? undefined : payload);
-    } catch (error) { console.error('[Commonweave] Unable to reconstruct parity ledger:',error); return json(res,500,{error:'The Commonweave capability ledger could not be reconstructed for this device package.'}); }
+    } catch (error) { console.error('[Civweave] Unable to reconstruct parity ledger:',error); return json(res,500,{error:'The Civweave capability ledger could not be reconstructed for this device package.'}); }
   }
   if (gatewayRequest && packageInstall && (pathname === '/loom' || pathname === '/loom/' || pathname === '/loom/index.html' || pathname === '/lite' || pathname === '/lite/' || pathname === '/lite/index.html' || pathname === '/cabinetonly' || pathname === '/cabinetonly/' || pathname === '/cabinetonly/index.html')) {
     if (await serveFile(req,res,'/app/fullscreen-family-v104.html')) return;
-    return json(res,404,{error:'The full-screen Commonweave family entry is missing from this device package.'});
+    return json(res,404,{error:'The full-screen Civweave family entry is missing from this device package.'});
   }
   const knowledgeSchoolDownload = pathname === '/downloads/knowledge-schools' || pathname.startsWith('/downloads/knowledge-schools/');
-  if (gatewayRequest && !knowledgeSchoolDownload && (pathname === '/field/commonweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) { res.writeHead(302,{location:COMMONWEAVE_RELEASE_URL,'cache-control':'no-store'}); return res.end(); }
-  if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall) { return json(res,410,{error:'Installed runtime required',localInstallRequired:true,installUrl:requestOrigin(req,url)+'/',sourceUrl:COMMONWEAVE_SOURCE_URL,releaseUrl:COMMONWEAVE_RELEASE_URL,message:'This public origin distributes the complete device package but does not run the Commonweave software family in browser mode.'}); }
+  if (gatewayRequest && !knowledgeSchoolDownload && (pathname === '/field/civweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) { res.writeHead(302,{location:CIVWEAVE_RELEASE_URL,'cache-control':'no-store'}); return res.end(); }
+  if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall) { return json(res,410,{error:'Installed runtime required',localInstallRequired:true,installUrl:requestOrigin(req,url)+'/',sourceUrl:CIVWEAVE_SOURCE_URL,releaseUrl:CIVWEAVE_RELEASE_URL,message:'This public origin distributes the complete device package but does not run the Civweave software family in browser mode.'}); }
   if (pathname === '/api/boot-log' || pathname === '/api/boot-logs') { res.writeHead(204,{'cache-control':'no-store'}); return res.end(); }`,'request pathname declaration');
-replaceRequired("        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-commonweave-hub-token', 'access-control-allow-methods': 'GET,POST,OPTIONS' });","        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-commonweave-hub-token, x-commonweave-ai-capability, x-commonweave-internal-secret, x-commonweave-payment-signature', 'access-control-allow-methods': 'GET,POST,OPTIONS' });",'AI wallet CORS headers');
+replaceRequired("        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-civweave-hub-token', 'access-control-allow-methods': 'GET,POST,OPTIONS' });","        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-civweave-hub-token, x-civweave-ai-capability, x-civweave-internal-secret, x-civweave-payment-signature', 'access-control-allow-methods': 'GET,POST,OPTIONS' });",'AI wallet CORS headers');
 replaceRequired("      res.setHeader('access-control-allow-origin', '*');\n      if (!authorized(req)","      res.setHeader('access-control-allow-origin', '*');\n      if (await aiWalletHttp.handle(req, res, url)) return;\n      if (!authorized(req)",'AI wallet route boundary');
-replaceRequired("appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Commonweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/commonweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download']","appUrl: null, installUrl: `${requestOrigin(req, url)}/`, sourceUrl: COMMONWEAVE_SOURCE_URL, downloadUrl: COMMONWEAVE_RELEASE_URL, seedUrl: null, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising','hosted-ai-wallet-foundation'], aiWallet: aiWalletHttp.status()",'public config hosting fields');
+replaceRequired("appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Civweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/civweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download']","appUrl: null, installUrl: `${requestOrigin(req, url)}/`, sourceUrl: CIVWEAVE_SOURCE_URL, downloadUrl: CIVWEAVE_RELEASE_URL, seedUrl: null, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising','hosted-ai-wallet-foundation'], aiWallet: aiWalletHttp.status()",'public config hosting fields');
 replaceRequired("persistence: STATE_FILE });","persistence: STATE_FILE, aiWallet: aiWalletHttp.status() });",'health AI wallet status');
-replaceRequired("    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/commonweave-icon-32.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }","    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/commonweave-icon-192.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }",'favicon route');
+replaceRequired("    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/civweave-icon-32.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }","    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/civweave-icon-192.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }",'favicon route');
 replaceRequired("  try { await fsp.writeFile(STATE_FILE, JSON.stringify(state, null, 2)); } catch {}\n  process.exit(0);","  try { await fsp.writeFile(STATE_FILE, JSON.stringify(state, null, 2)); } catch {}\n  try { await aiWalletService?.flush?.(); } catch {}\n  process.exit(0);",'AI wallet shutdown flush');
 await fsp.writeFile(runtimePath,source,'utf8');
 try { await import(pathToFileURL(runtimePath).href+`?build=${VERSION}`); } finally { setTimeout(()=>fsp.unlink(runtimePath).catch(()=>{}),1000).unref?.(); }

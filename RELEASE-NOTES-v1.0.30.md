@@ -1,13 +1,13 @@
-# Commonweave v1.0.30
+# Civweave v1.0.30
 
 ## Offline-first mesh and cabinet runtime repair
 
-This release restores the intended separation between the Commonweave website and the installed local application.
+This release restores the intended separation between the Civweave website and the installed local application.
 
 ### Topology
 
 - `/` is the installer, updater, host-status, seed-download, and optional federation/trade gateway.
-- `/loom/` is the Visual Commonweave PWA.
+- `/loom/` is the Visual Civweave PWA.
 - `/lite/` is the accessible cabinet workstation renderer.
 - The installed PWA is designed to continue offline from its versioned local cache.
 - Host APIs, gossip, federation, release sharing, and wider trade remain optional network services.

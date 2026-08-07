@@ -10,9 +10,9 @@ const origin=`http://127.0.0.1:${PORT}`;
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const releaseVersion=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
 const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-lightweight-shell-v208-legacy-v156-bridge-v209')`;
-const dataDir=await mkdtemp(path.join(os.tmpdir(),'commonweave-installer-recovery-v218-'));
+const dataDir=await mkdtemp(path.join(os.tmpdir(),'civweave-installer-recovery-v218-'));
 const output=[];
-const child=spawn(process.execPath,['scripts/start-commonweave-v131.mjs'],{
+const child=spawn(process.execPath,['scripts/start-civweave-v131.mjs'],{
   cwd:root,
   env:{...process.env,RENDER:'true',HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},
   stdio:['ignore','pipe','pipe']
@@ -60,7 +60,7 @@ try{
     '/app/pwa-update-controller-v204.js'
   ])await expectRoute(route);
   for(const purpose of ['update-controls','shell-install','offline-manifest','offline-campus']){
-    await expectRoute('/app/offline-package-v208.json',{headers:{'x-commonweave-package':purpose},contentType:'application/json'});
+    await expectRoute('/app/offline-package-v208.json',{headers:{'x-civweave-package':purpose},contentType:'application/json'});
   }
   await expectRoute('/downloads/knowledge-schools/catalog.json',{contentType:'application/json'});
   const catalog=JSON.parse(await readFile(path.join(root,'public/downloads/knowledge-schools/catalog.json'),'utf8'));
@@ -87,11 +87,11 @@ try{
   assert(files.core.includes("const BUILD = 'lightweight-shell-v208'")&&files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained lightweight/offline core is incomplete');
   assert(!/importScripts\(/.test(files.core),'retained lightweight core imports the retired layered stack');
   assert(files.cleanroom.includes("const REVISION='living-school-cleanroom-v218'")&&files.cleanroom.includes('event.stopImmediatePropagation()'),'Living School worker retirement boundary is incomplete');
-  assert(files.offline.includes("const V211_REVISION = 'offline-campus-seed-provenance-v211'")&&files.offline.includes('CommonweaveOfflineCampusV211'),'offline retry override is incomplete');
+  assert(files.offline.includes("const V211_REVISION = 'offline-campus-seed-provenance-v211'")&&files.offline.includes('CivweaveOfflineCampusV211'),'offline retry override is incomplete');
   assert(files.legacy.includes(expectedWorkerImport),`legacy worker does not import the active ${releaseVersion} wrapper`);
 
   const bridgeBody=files.legacy.replace(/importScripts\('\/service-worker-v203\.js[^\n]+\);/,'');
-  new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.core}\n${files.offline}`,{filename:'commonweave-v218-bridged-cleanroom-worker.js'});
+  new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.core}\n${files.offline}`,{filename:'civweave-v218-bridged-cleanroom-worker.js'});
   console.log(JSON.stringify({
     ok:true,
     releaseVersion,

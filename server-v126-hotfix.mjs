@@ -4,13 +4,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(root, 'server-v126.mjs');
-const runtimePath = path.join(root, '.commonweave-server-v126-hotfix.runtime.mjs');
+const runtimePath = path.join(root, '.civweave-server-v126-hotfix.runtime.mjs');
 const HOTFIX_BUILD = '1.0.26-loop-diagnostics-hotfix-2';
 let source = await fsp.readFile(sourcePath, 'utf8');
 source = source.replaceAll('1.0.26-loop-diagnostics', HOTFIX_BUILD);
 
 function replaceRequired(before, after, label) {
-  if (!source.includes(before)) throw new Error(`Commonweave v1.0.26 hotfix could not find ${label}`);
+  if (!source.includes(before)) throw new Error(`Civweave v1.0.26 hotfix could not find ${label}`);
   source = source.replace(before, after);
 }
 
@@ -23,7 +23,7 @@ replaceRequired(
 replaceRequired(
   "cwBootLog('campus-runtime-served', { requestId, bytes: text.length }, req);",
   `const reloadCount = (text.match(/location\\.reload\\(\\)/g) || []).length;
-    text = text.replaceAll('location.reload()', "window.CommonweaveBootLog?.log('controllerchange-observed-no-reload',{controller:navigator.serviceWorker?.controller?.scriptURL||null,blockedBy:'${HOTFIX_BUILD}'})");
+    text = text.replaceAll('location.reload()', "window.CivweaveBootLog?.log('controllerchange-observed-no-reload',{controller:navigator.serviceWorker?.controller?.scriptURL||null,blockedBy:'${HOTFIX_BUILD}'})");
     const remainingReloads = (text.match(/location\\.reload\\(\\)/g) || []).length;
     cwBootLog('campus-runtime-sanitized', { requestId, reloadCount, remainingReloads, build: CW_DIAGNOSTIC_BUILD }, req);
     if (remainingReloads) throw new Error('Unsafe automatic reload survived runtime sanitization.');
