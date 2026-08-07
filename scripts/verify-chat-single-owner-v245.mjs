@@ -11,7 +11,7 @@ const [owner,viewport,workerRepair,workerEntry,workspace,release,pkgText]=await 
   read('VERSION'),
   read('package.json')
 ]);
-new Function(owner);new Function(viewport);new Function(workerRepair);new Function(workerEntry);
+new Function(owner);new Function(viewport);new Function(workerRepair);new Function(workerEntry);new Function(workspace);
 const pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 const semver=value=>String(value).split('.').map(Number);
@@ -28,10 +28,13 @@ check('shared send paints optimistic thread state immediately',owner.includes('q
 check('failed assistant turns fall back through the known-good model runtime lane',owner.includes('CivweaveModelRuntime')&&owner.includes("typeof runtime?.generate!=='function'")&&owner.includes('deterministicReply')&&owner.includes('recoverFailedTurn'));
 check('chat owner never uses requestSubmit or synthetic click relays',!owner.includes('requestSubmit')&&!owner.includes('.click()')&&!owner.includes('dispatchEvent(new MouseEvent'));
 check('inline Rook native chat remains unclaimed',!owner.includes('ffc144-rook'));
+const internalGuard=workspace.indexOf('if(root?.contains(event.target)||launcher?.contains(event.target))return;');
+const legacyTrigger=workspace.indexOf("const trigger=event.target.closest?.('[data-cwf-chat]");
+check('workspace does not reinterpret Send as the root data-guide trigger',internalGuard>=0&&legacyTrigger>internalGuard&&workspace.includes('send-safe-v249'));
 check('viewport loads v248 ownership repair after workspace readiness',viewport.includes("CHAT_OWNER_REPAIR='/app/chat-single-owner-v245.js?v=chat-owner-r2-mobile-v248'")&&viewport.includes("addEventListener('civweave:guide-workspace-ready',installChatOwnerRepair,{once:true})"));
-check('service worker imports v248 cache repair',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=mobile-chat-layout-v248')"));
+check('service worker imports v249 send cache repair',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=chat-send-preventdefault-v249')"));
 for(const path of ['/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js','/app/guide-workspace-v242.js','/app/shared-guide-surface-v236.js','/app/regression-fixes-v243.js','/app/chat-single-owner-v245.js','/app/working-campus-topbar-v243.js','/app/working-campus-v156.css','/app/working-campus-v156.html'])check(`cache repair includes ${path}`,workerRepair.includes(`'${path}'`));
 check('cache repair deletes stale entries even when old requests have query strings',workerRepair.includes('cache.delete(request,{ignoreSearch:true})'));
 check('cache repair runs on service-worker activation',workerRepair.includes("self.addEventListener('activate'"));
 
-console.log(JSON.stringify({ok:true,version,revision:'mobile-chat-layout-v248',checks:checks.length,canonicalOwner:'guide-workspace-v242 + v245 capture',pointerSwitch:true,inlineSubmit:true,transportFallback:true,staleCachePurge:true,rookNativeUntouched:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'chat-send-preventdefault-v249',checks:checks.length,canonicalOwner:'guide-workspace-v242 + v245 capture',pointerSwitch:true,inlineSubmit:true,nativeSubmitUnblocked:true,transportFallback:true,staleCachePurge:true,rookNativeUntouched:true},null,2));
