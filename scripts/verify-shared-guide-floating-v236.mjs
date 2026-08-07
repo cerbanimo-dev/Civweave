@@ -40,13 +40,22 @@ const checks=[
     assert.match(workspace,/switchGuide:\(system,options=\{\}\)=>switchWindow/);
     assert.doesNotMatch(workspace,/function switchGuide\(system\)\{return system===pageSystem\}/);
   }],
-  ['inline chat and floating workspace still use one AI submission pipeline per selected realm',()=>{
+  ['inline chat and floating workspace use one direct AI submission pipeline per selected realm',()=>{
     assert.match(guide,/function submitInline\(text\)/);
-    assert.match(guide,/form\.requestSubmit\(\)/);
-    assert.match(workspace,/function onSubmitCapture\(event\)/);
+    assert.match(guide,/await api\.submitText\(value,currentSystem\)/);
+    assert.doesNotMatch(guide,/form\.requestSubmit\(\)/);
+    assert.doesNotMatch(guide,/api\.open\?\.\(\{guide:currentSystem,prefill:value\}\)/);
+    assert.match(workspace,/submitText:async\(text,system=activeWindow\)/);
     assert.match(workspace,/assistant\.respond\(\{text:value,systemId:system/);
     assert.match(workspace,/handoffSystem:system!==pageSystem\?system:undefined/);
     assert.match(realmIntegrity,/civweave\.guide-thread\.\$\{system\}\.v237/);
+  }],
+  ['inline and full composers cannot both receive taps',()=>{
+    assert.match(guide,/function syncInlineVisibility\(/);
+    assert.match(guide,/setInlineInteractive\(false\)/);
+    assert.match(guide,/civweave:guide-workspace-state/);
+    assert.match(workspace,/civweave:guide-workspace-state/);
+    assert.doesNotMatch(guide,/input\.focus\(\)/);
   }],
   ['chat viewport cannot trap document scroll or force scrollIntoView',()=>{
     assert.doesNotMatch(viewport,/MutationObserver/);

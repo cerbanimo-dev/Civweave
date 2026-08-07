@@ -6,7 +6,7 @@ const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-persistent-guide-viewport-style-v216';
 const HEIGHT_VAR='--cwp215-visual-viewport-height';
-const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r1';
+const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r2';
 
 if(globalThis.CivweavePersistentGuideViewportV216?.version===VERSION)return;
 
@@ -32,10 +32,10 @@ function apply(){
   frame=0;installStyle();const height=Math.max(1,Math.round(Number(globalThis.visualViewport?.height||innerHeight||document.documentElement.clientHeight||1)));document.documentElement.style.setProperty(HEIGHT_VAR,`${height}px`)
 }
 function schedule(){if(frame)return;frame=requestAnimationFrame(apply)}
-function boot(){installStyle();installRegressionFixes();apply();globalThis.visualViewport?.addEventListener('resize',schedule,{passive:true});addEventListener('resize',schedule,{passive:true});addEventListener('orientationchange',schedule,{passive:true});try{dispatchEvent(new CustomEvent('civweave:persistent-guide-viewport-ready',{detail:{version:VERSION,visualViewport:Boolean(globalThis.visualViewport),scrollTrap:false,interactionRepair:'v243',at:new Date().toISOString()}}))}catch{}}
+function boot(){installStyle();installRegressionFixes();apply();globalThis.visualViewport?.addEventListener('resize',schedule,{passive:true});addEventListener('resize',schedule,{passive:true});addEventListener('orientationchange',schedule,{passive:true});try{dispatchEvent(new CustomEvent('civweave:persistent-guide-viewport-ready',{detail:{version:VERSION,visualViewport:Boolean(globalThis.visualViewport),scrollTrap:false,interactionRepair:'v243.1',at:new Date().toISOString()}}))}catch{}}
 function destroy(){globalThis.visualViewport?.removeEventListener('resize',schedule);removeEventListener('resize',schedule);removeEventListener('orientationchange',schedule);if(frame)cancelAnimationFrame(frame);frame=0;document.documentElement.style.removeProperty(HEIGHT_VAR);document.getElementById(STYLE_ID)?.remove()}
 
 addEventListener('pagehide',destroy,{once:true});document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 
-globalThis.CivweavePersistentGuideViewportV216=Object.freeze({version:VERSION,rootId:ROOT_ID,launcherId:LAUNCHER_ID,refresh:schedule,destroy,state:()=>({visualViewportHeight:globalThis.visualViewport?.height||innerHeight,scrollTrap:false,mutationObserver:false,autoScroll:false,interactionRepair:'v243'})});
+globalThis.CivweavePersistentGuideViewportV216=Object.freeze({version:VERSION,rootId:ROOT_ID,launcherId:LAUNCHER_ID,refresh:schedule,destroy,state:()=>({visualViewportHeight:globalThis.visualViewport?.height||innerHeight,scrollTrap:false,mutationObserver:false,autoScroll:false,interactionRepair:'v243.1'})});
 })();
