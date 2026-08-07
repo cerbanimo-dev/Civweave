@@ -1,8 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.0.35-regression-fixes-v243';
+const VERSION='1.0.35-regression-fixes-v243.1';
 const KAMIYA_AVATAR='/app/assets/ai/kamiya-welcoming-v243.png?v=1';
-const CHAT_ROOT='#cw-persistent-guide-chat-v215';
 if(globalThis.CivweaveRegressionFixesV243?.version===VERSION)return;
 
 function isOldKamiya(img){
@@ -29,15 +28,6 @@ function closeDialog(target,event){
   try{if(dialog.open)dialog.close();else dialog.removeAttribute('open')}catch{dialog.removeAttribute('open')}
   return true;
 }
-function activateChatControl(target,event){
-  const control=target?.closest?.(`${CHAT_ROOT} [data-close],${CHAT_ROOT} [data-minimize]`);
-  if(!control)return false;
-  event?.preventDefault?.();
-  event?.stopImmediatePropagation?.();
-  queueMicrotask(()=>control.click());
-  return true;
-}
-function onPointerUp(event){if(closeDialog(event.target,event))return;activateChatControl(event.target,event)}
 function onClick(event){closeDialog(event.target,event)}
 
 const observer=new MutationObserver(records=>{
@@ -48,14 +38,12 @@ const observer=new MutationObserver(records=>{
 });
 function start(){
   repairNode(document);
-  document.addEventListener('pointerup',onPointerUp,true);
   document.addEventListener('click',onClick,true);
   observer.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src']});
-  document.documentElement.dataset.civweaveRegressionFixes='v243';
+  document.documentElement.dataset.civweaveRegressionFixes='v243.1';
 }
 function destroy(){
   observer.disconnect();
-  document.removeEventListener('pointerup',onPointerUp,true);
   document.removeEventListener('click',onClick,true);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();

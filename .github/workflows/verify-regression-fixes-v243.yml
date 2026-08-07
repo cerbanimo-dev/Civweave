@@ -5,6 +5,8 @@ on:
     paths:
       - 'public/app/persistent-guide-viewport-v216.js'
       - 'public/app/regression-fixes-v243.js'
+      - 'public/app/guide-workspace-v242.js'
+      - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/assets/ai/kamiya-welcoming-v243.png'
       - 'public/app/knowledge-school-runtime-v243.mjs'
       - 'public/app/living-school-*-v243.mjs'
@@ -17,6 +19,8 @@ on:
     paths:
       - 'public/app/persistent-guide-viewport-v216.js'
       - 'public/app/regression-fixes-v243.js'
+      - 'public/app/guide-workspace-v242.js'
+      - 'public/app/shared-guide-surface-v236.js'
       - 'public/app/assets/ai/kamiya-welcoming-v243.png'
       - 'public/app/knowledge-school-runtime-v243.mjs'
       - 'public/app/living-school-*-v243.mjs'
@@ -40,6 +44,8 @@ jobs:
         run: |
           node --check public/app/persistent-guide-viewport-v216.js
           node --check public/app/regression-fixes-v243.js
+          node --check public/app/guide-workspace-v242.js
+          node --check public/app/shared-guide-surface-v236.js
           node --check public/app/knowledge-school-runtime-v243.mjs
           node --check public/app/living-school-local-research-v243.mjs
           node --check public/app/living-school-cleanroom-actions-v243.mjs

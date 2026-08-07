@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.30-shared-guide-surface-v236';
+const VERSION='1.0.35-shared-guide-surface-v236-single-surface-v244';
 const ROOT_ID='cw-shared-guide-surface-v236';
 const STYLE_ID='cw-shared-guide-surface-v236-style';
 const CHAT_ROOT_ID='cw-persistent-guide-chat-v215';
@@ -36,6 +36,8 @@ let observedNav=null;
 let surfaceObserver=null;
 let repairQueued=false;
 let mounted=false;
+let revealTimer=0;
+let fullChatWasOpen=false;
 
 function detectSystem(){
   const route=globalThis.CivweaveSystemRoutesV227?.identify?.(location.pathname);
@@ -111,6 +113,22 @@ function readThread(){
   try{return parse(localStorage.getItem(STORAGE_KEY),{})}catch{return{}}
 }
 
+function setInlineInteractive(visible){
+  const root=document.getElementById(ROOT_ID);if(!root)return false;
+  root.hidden=!visible;root.style.pointerEvents=visible?'':'none';root.style.display=visible?'':'none';
+  try{root.inert=!visible}catch{}
+  root.dataset.fullChatOpen=visible?'false':'true';
+  return true
+}
+function syncInlineVisibility(stateOverride=null){
+  const root=document.getElementById(ROOT_ID);if(!root)return false;
+  const api=globalThis.CivweavePersistentGuideChatV215,state=stateOverride||api?.readState?.()||{},fullOpen=Boolean(state.open);
+  if(revealTimer){clearTimeout(revealTimer);revealTimer=0}
+  if(fullOpen){fullChatWasOpen=true;setInlineInteractive(false);return true}
+  if(fullChatWasOpen){fullChatWasOpen=false;setInlineInteractive(false);revealTimer=setTimeout(()=>{revealTimer=0;const live=globalThis.CivweavePersistentGuideChatV215?.readState?.()||{};if(!live.open)setInlineInteractive(true)},500);return true}
+  setInlineInteractive(true);return true
+}
+
 function relevantMessages(system){
   const rows=Array.isArray(readThread()?.messages)?readThread().messages:[];
   const result=[];
@@ -151,7 +169,7 @@ function observeThread(){
   if(transcriptObserver&&transcriptTarget===log)return true;
   transcriptObserver?.disconnect();
   transcriptTarget=log;
-  transcriptObserver=new MutationObserver(renderTranscript);
+  transcriptObserver=new MutationObserver(()=>{renderTranscript();syncInlineVisibility()});
   transcriptObserver.observe(log,{childList:true,subtree:true,characterData:true});
   return true;
 }
@@ -159,20 +177,11 @@ function observeThread(){
 async function submitInline(text){
   const value=clean(text,8000);
   const api=globalThis.CivweavePersistentGuideChatV215;
-  if(!value||!api)return false;
-  const state=api.readState?.()||{};
-  const wasOpen=Boolean(state.open);
-  api.switchGuide?.(currentSystem);
-  api.open?.({guide:currentSystem,prefill:value});
-  const form=document.querySelector(`#${CHAT_ROOT_ID} [data-persistent-form]`);
-  const input=form?.querySelector('textarea');
-  if(!form||!input)return false;
-  input.value=value;
-  input.dispatchEvent(new Event('input',{bubbles:true}));
-  form.requestSubmit();
-  if(!wasOpen)queueMicrotask(()=>api.close?.());
+  if(!value||typeof api?.submitText!=='function')return false;
+  api.switchGuide?.(currentSystem,{open:false});
+  const sent=await api.submitText(value,currentSystem);
   renderTranscript();
-  return true;
+  return sent!==false;
 }
 
 function buildInline(){
@@ -190,13 +199,14 @@ function buildInline(){
       <header class="cwsg236-head"><div><small>${guide.label} guide</small><strong>Chat with ${guide.name}</strong><span>${guide.role}</span></div><button class="cwsg236-full" type="button" data-cwsg-full>Open full chat</button></header>
       <div class="cwsg236-log" data-cwsg-log role="log" aria-live="polite"></div>
       <form class="cwsg236-form" data-cwsg-form><textarea rows="2" maxlength="8000" required placeholder="${guide.placeholder}"></textarea><button class="cwsg236-send" type="submit">Send</button></form>
-      <div class="cwsg236-note">One shared thread, two surfaces. This inline chat and the bottom-right guide indicator use the same conversation and AI route.</div>
+      <div class="cwsg236-note">One shared thread. The inline composer hides whenever the full chat is open, so only one chat surface can receive taps at a time.</div>
     </div>`;
   const target=mountTarget();
   if(!target)return false;
   target.prepend(section);
   section.querySelector('[data-cwsg-full]').addEventListener('click',()=>{
     const api=globalThis.CivweavePersistentGuideChatV215;
+    setInlineInteractive(false);
     api?.switchGuide?.(currentSystem);
     api?.open?.({guide:currentSystem});
   });
@@ -206,12 +216,10 @@ function buildInline(){
     const form=event.currentTarget,input=form.querySelector('textarea'),button=form.querySelector('button[type="submit"]'),value=clean(input?.value,8000);
     if(!value)return;
     button.disabled=true;
-    const sent=await submitInline(value);
-    if(sent)input.value='';
-    button.disabled=false;
-    input.focus();
+    try{const sent=await submitInline(value);if(sent)input.value=''}finally{button.disabled=false}
   });
   renderTranscript();
+  syncInlineVisibility();
   return true;
 }
 
@@ -242,6 +250,7 @@ function ensureFloatingRuntime(){
   observeThread();
   observeNav();
   renderTranscript();
+  syncInlineVisibility();
   normalizeFloatingLayout();
 }
 
@@ -251,6 +260,7 @@ function repairSurface(){
   if(!document.getElementById(ROOT_ID)&&!canonicalNativeChat(currentSystem))buildInline();
   observeThread();
   observeNav();
+  syncInlineVisibility();
   normalizeFloatingLayout();
   return true;
 }
@@ -279,7 +289,8 @@ function mount(){
   buildInline();
   ensureFloatingRuntime();
   watchSurface();
-  addEventListener('civweave:persistent-guide-chat-ready',()=>{ownPageGuide();buildInline();observeThread();observeNav();renderTranscript()});
+  addEventListener('civweave:persistent-guide-chat-ready',()=>{ownPageGuide();buildInline();observeThread();observeNav();renderTranscript();syncInlineVisibility()});
+  addEventListener('civweave:guide-workspace-state',event=>syncInlineVisibility(event.detail||null));
   addEventListener('resize',normalizeFloatingLayout,{passive:true});
   document.documentElement.dataset.civweaveGuideSurface=VERSION;
 }
@@ -295,6 +306,7 @@ globalThis.CivweaveSharedGuideSurfaceV236=Object.freeze({
   normalizeFloatingLayout,
   ownPageGuide,
   submitInline,
+  syncInlineVisibility,
   repairSurface,
   mount
 });

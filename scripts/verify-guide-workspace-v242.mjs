@@ -29,10 +29,10 @@ check('floating chat outranks Working Campus base header',workspace.includes('z-
 check('chat log releases edge scrolling',workspace.includes('overscroll-behavior:auto!important'));
 check('viewport has no mutation observer',!viewport.includes('MutationObserver'));
 check('viewport has no scrollIntoView',!viewport.includes('scrollIntoView'));
-check('viewport loads the v243 interaction repair',viewport.includes("const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r1'"));
+check('viewport loads the v243 interaction repair',viewport.includes("const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r2'"));
 check('floating launcher focus is opt-in only',workspace.includes('if(options.focus===true)queueMicrotask(()=>input?.focus({preventScroll:true}))'));
 check('workspace reports real open state to embedded surface',workspace.includes('open:workspaceOpen,minimized'));
 const realmIndex=boundary.indexOf('REALM_SESSION_INTEGRITY,'),workspaceIndex=boundary.indexOf('GUIDE_WORKSPACE,');
 check('workspace loads after realm session integrity',realmIndex>=0&&workspaceIndex>realmIndex);
 check('boundary exposes v242 policy',boundary.includes("guideWorkspaceRevision:'v242-five-window-local-ledgers-no-scroll-trap'"));
-console.log(JSON.stringify({ok:true,version,checks:checks.length,workspace:'v242-five-window-local-ledgers',scrollTrap:false,launcherFirst:true,interactionRepair:'v243'},null,2));
+console.log(JSON.stringify({ok:true,version,checks:checks.length,workspace:'v242-five-window-local-ledgers',scrollTrap:false,launcherFirst:true,interactionRepair:'v243.1'},null,2));
