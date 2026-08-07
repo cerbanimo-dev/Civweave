@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 
 const ROOT=new URL('../',import.meta.url);
 const radioSource=fs.readFileSync(new URL('public/app/system-radio-agent-v233.js',ROOT),'utf8');
-const trackSource=fs.readFileSync(new URL('public/app/radio-track-suggestions-v241.js',ROOT),'utf8');
+const trackSource=fs.readFileSync(new URL('public/app/radio-track-suggestions-v240.js',ROOT),'utf8');
 const boundarySource=fs.readFileSync(new URL('public/app/install-boundary-v146.js',ROOT),'utf8');
 const trackMap=JSON.parse(fs.readFileSync(new URL('public/app/radio-track-map-v241.json',ROOT),'utf8'));
 const stationFiles={
@@ -48,14 +48,14 @@ const sandbox={
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
 vm.runInContext(radioSource,sandbox,{filename:'system-radio-agent-v233.js'});
-vm.runInContext(trackSource,sandbox,{filename:'radio-track-suggestions-v241.js'});
+vm.runInContext(trackSource,sandbox,{filename:'radio-track-suggestions-v240.js'});
 
 const radio=sandbox.CivweaveRadioRecommendationAgentV233;
 const tracks=sandbox.CivweaveRadioTrackSuggestionsV241;
 assert.ok(radio,'v233 radio runtime must initialize');
-assert.ok(tracks,'v241 track suggestion runtime must initialize');
+assert.ok(tracks,'v241 track suggestion revision must initialize from stable v240 file');
 assert.equal(sandbox.CivweaveRadioRecommendationAgentV232,radio,'v232 compatibility alias must point to v233 runtime');
-assert.equal(sandbox.CivweaveRadioTrackSuggestionsV240,tracks,'v240 compatibility alias must point to v241 runtime');
+assert.equal(sandbox.CivweaveRadioTrackSuggestionsV240,tracks,'stable v240 compatibility alias must point to v241 behavior');
 assert.equal(radio.revision,'system-radio-agent-v233');
 assert.equal(tracks.revision,'radio-track-suggestions-v241');
 assert.equal(tracks.trackMapPath,'/app/radio-track-map-v241.json');
@@ -147,16 +147,16 @@ assert.match(trackSource,/Random pull from this station/,'card must explain that
 assert.match(trackSource,/Play in station ↗/,'exact track metadata must expose a playlist-context CTA');
 assert.match(trackSource,/Open station ↗/,'playlist-first fallback must remain available');
 assert.match(trackSource,/context=spotify:playlist:/,'contextual URLs must preserve playlist playback context');
-assert.doesNotMatch(trackSource,/open\.spotify\.com\/search\//,'v241 must never strand users in Spotify search');
+assert.doesNotMatch(trackSource,/open\.spotify\.com\/search\//,'v241 behavior must never strand users in Spotify search');
 assert.doesNotMatch(trackSource,/api\.spotify\.com/,'ordinary radio playback must not require Spotify API access');
 assert.doesNotMatch(trackSource,/Authorization:/,'ordinary radio playback must not carry Spotify credentials');
 assert.match(trackSource,/THE SYLLABUS HAS UNIONIZED/,'snarky station labels must ship with the runtime');
 assert.match(trackSource,/NO KPI SURVIVED THE CHORUS/,'Cerbanimo label voice must remain distinct');
 assert.match(trackSource,/SURPLUS VALUE RETURNED TO SENDER/,'FellowFare label voice must remain distinct');
 
-assert.match(boundarySource,/RADIO_TRACK_SUGGESTIONS='\/app\/radio-track-suggestions-v241\.js'/,'install boundary must load v241 after the station agent');
+assert.match(boundarySource,/RADIO_TRACK_SUGGESTIONS='\/app\/radio-track-suggestions-v240\.js'/,'install boundary must keep the stable v240 script path');
 assert.ok(boundarySource.indexOf('SYSTEM_RADIO_AGENT,')<boundarySource.indexOf('RADIO_TRACK_SUGGESTIONS,'),'track decorator must load after the station card runtime');
 assert.match(boundarySource,/radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left'/,'boundary metadata must describe the active station policy');
-assert.match(boundarySource,/radioTrackSuggestionRevision:'v241-playlist-context-track-links'/,'boundary metadata must describe playlist-context track links');
+assert.match(boundarySource,/radioTrackSuggestionRevision:'v241-playlist-context-track-links'/,'boundary metadata must describe playlist-context track behavior');
 
-console.log('Civweave system radio v233 + v241 playlist-context track contract verified.');
+console.log('Civweave system radio v233 + stable-v240/v241 playlist-context track contract verified.');
