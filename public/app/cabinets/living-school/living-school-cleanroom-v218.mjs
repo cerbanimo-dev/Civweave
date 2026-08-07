@@ -1,6 +1,6 @@
 import{copy,state,VERSION}from'./living-school-cleanroom-core-v218.mjs';
 import{render}from'./living-school-cleanroom-render-v218.mjs';
-import{actions}from'./living-school-cleanroom-actions-v243.mjs';
+import{actions}from'../../living-school-cleanroom-actions-v243.mjs';
 
 let busy=false,dispatchCount=0;
 async function handleLivingSchoolClick(event){
