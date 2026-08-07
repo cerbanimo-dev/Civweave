@@ -24,7 +24,7 @@ function localPacket(capability,rows){
     schoolName:row.schoolName,
     table:row.table
   }));
-  return{mode:'local-downloaded',summary:`Retrieved ${sources.length} relevant passages from downloaded knowledge schools on this device.`,sources,provider:'local-knowledge-school',model:'cached SQLite + sql.js',flag:'DOWNLOADED LOCAL SOURCES',reason:''};
+  return{mode:'local-downloaded',summary:`Retrieved ${sources.length} relevant passages from downloaded knowledge schools on this device.`,sources,provider:'local-knowledge-school',model:'dependency-free cached SQLite passage search',flag:'DOWNLOADED LOCAL SOURCES',reason:''};
 }
 
 export async function researchCapability(capability,{force=false}={}){
