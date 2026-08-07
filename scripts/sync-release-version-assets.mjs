@@ -42,9 +42,15 @@ await patch('public/app/index.html',source=>{
 await patch('public/app/manifest.webmanifest',source=>{
   const manifest=JSON.parse(source);
   manifest.name=`Civweave v${version}`;
-  const start=new URL(manifest.start_url||'/app/', 'https://civweave.invalid');
-  start.searchParams.set('version',version);
-  manifest.start_url=`${start.pathname}${start.search}${start.hash}`;
+  manifest.start_url='/app/installed-entry-v146.html?installed=1';
+  if(Array.isArray(manifest.shortcuts))for(const shortcut of manifest.shortcuts){
+    const target=new URL(shortcut.url||'/app/installed-entry-v146.html','https://civweave.invalid');
+    const system=target.searchParams.get('system');
+    target.pathname='/app/installed-entry-v146.html';
+    target.search='?installed=1';
+    if(system)target.searchParams.set('system',system);
+    shortcut.url=`${target.pathname}${target.search}`;
+  }
   return `${JSON.stringify(manifest,null,2)}\n`;
 });
 
@@ -61,14 +67,13 @@ await patch('public/app/working-campus-v156.part4.txt',source=>source.replace(/v
 await patch('public/service-worker-core-v208.js',source=>replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'service-worker core version'));
 await patch('public/service-worker-v203.js',source=>{
   source=replaceRequired(source,/system-routes-v227\.js\?v=\d+\.\d+\.\d+-five-system-route-contract-v227/,`system-routes-v227.js?v=${version}-five-system-route-contract-v227`,'worker route contract revision');
-  source=replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+-lightweight-shell-v208-retained-v218/,`service-worker-core-v208.js?v=${version}-lightweight-shell-v208-retained-v218`,'service-worker wrapper revision');
+  source=replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+(?:-[^'\n]+)?/,`service-worker-core-v208.js?v=${version}-chat-convergence-v250`,'service-worker wrapper revision');
   return source;
 });
 await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+-lightweight-shell-v208-legacy-v156-bridge-v209/,`service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`,'legacy worker bridge revision'));
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'install-boundary runtime version');
-  source=replaceRequired(source,/const ADDITIONS_VERSION='v\d+\.\d+\.\d+-canonical-core-only-v226';/,`const ADDITIONS_VERSION='v${version}-canonical-core-only-v226';`,'install-boundary legacy additions revision');
-  source=replaceRequired(source,/version:'\d+\.\d+\.\d+',allowed/,`version:'${version}',allowed`,'install-boundary release version');
+  if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;'))throw new Error(`install-boundary release-aware additions revision was not found while synchronizing Civweave ${version}.`);
   return source;
 });
 
