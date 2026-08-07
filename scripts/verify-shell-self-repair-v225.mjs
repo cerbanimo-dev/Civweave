@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const [source,wrapper,indexHtml,installerFallback,canonicalNavigation,versionText,packageText]=await Promise.all([
-  readFile(path.join(root,'public/service-worker-shell-repair-v225.js'),'utf8'),readFile(path.join(root,'public/service-worker-v203.js'),'utf8'),readFile(path.join(root,'public/index.html'),'utf8'),readFile(path.join(root,'public/app/installer-online-fallback-v225.js'),'utf8'),readFile(path.join(root,'public/service-worker-canonical-navigation-v227.js'),'utf8'),readFile(path.join(root,'VERSION'),'utf8'),readFile(path.join(root,'package.json'),'utf8')
+  readFile(path.join(root,'public/service-worker-shell-repair-v225.js'),'utf8'),readFile(path.join(root,'public/service-worker-v203.js'),'utf8'),readFile(path.join(root,'public/app/index.html'),'utf8'),readFile(path.join(root,'public/app/installer-online-fallback-v225.js'),'utf8'),readFile(path.join(root,'public/service-worker-canonical-navigation-v227.js'),'utf8'),readFile(path.join(root,'VERSION'),'utf8'),readFile(path.join(root,'package.json'),'utf8')
 ]);
 const version=versionText.trim(),pkg=JSON.parse(packageText),revision='shell-self-repair-v225';
 assert.equal(pkg.version,version);
