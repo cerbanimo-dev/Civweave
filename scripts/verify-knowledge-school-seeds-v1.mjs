@@ -40,9 +40,9 @@ for(const relative of ['catalog.json','civweave-school-catalog.sqlite','RECONCIL
   const stat=await fs.stat(path.join(root,relative));if(!stat.isFile())throw new Error(`Missing knowledge-school support file: ${relative}`);
 }
 
-const [index,helper,installer,installRuntime,boundary,updateController,updateWorker,workerWrapper,workerCore,offlineOverride,cleanroomWorker]=await Promise.all([
+const [index,helper,installer,installRuntime,boundary,installedEntry,updateController,updateWorker,workerWrapper,workerCore,offlineOverride,cleanroomWorker]=await Promise.all([
   read('public/app/index.html'),read('public/app/knowledge-school-seeds-v1.js'),read('public/app/knowledge-school-installer-v1.js'),
-  read('public/install-v130.js'),read('public/app/install-boundary-v146.js'),read('public/app/pwa-update-controller-v204.js'),
+  read('public/install-v130.js'),read('public/app/install-boundary-v146.js'),read('public/app/installed-entry-v146.js'),read('public/app/pwa-update-controller-v204.js'),
   read('public/service-worker-update-v204.js'),read('public/service-worker-v203.js'),read('public/service-worker-core-v208.js'),
   read('public/service-worker-offline-v211-override.js'),read('public/service-worker-living-school-cleanroom-v218.js')
 ]);
@@ -52,13 +52,15 @@ if(helper.includes('serviceWorker.register'))throw new Error('Optional school st
 assertIncludes(installer,['neededSchools','Save selected library','Download ${needed.length}',"progress.phase==='cached'",'saved offline'],'knowledge installer');
 assertMatches(installRuntime,/const\s+LIBRARY_CACHE\s*=\s*['"]cwknowledge-school-seeds-v2['"]/, 'app installer protected library cache');
 assertIncludes(installRuntime,['migrateKnowledgeCache','protectedCache','waitForCurrentWorker'],'app installer runtime');
-assertIncludes(boundary,["const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'",'PWA_UPDATE_SCRIPT',"pwaUpdateRevision:'v207-registration-watchdog'", "campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail'"],'install boundary');
+assertIncludes(boundary,["const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'",'PWA_UPDATE_SCRIPT',"guideWorkspaceRevision:'v250-v242-canonical-owner'", "campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail'"],'install boundary');
+assertIncludes(installedEntry,["updateViaCache:'none'",'await registration.update()',"candidate.postMessage({type:'SKIP_WAITING'})","fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"],'updater-first installed entry');
+if(installedEntry.indexOf('await refreshWorker(releaseVersion)')>installedEntry.indexOf('const requested='))throw new Error('Installed entry routes before refreshing the worker.');
 assertIncludes(updateController,['data-civweave-update-control',"setState('Check updates'","setState('Restart to update'",'withTimeout(registration.update()','migrateKnowledgeCache',"const LIBRARY_CACHE='cwknowledge-school-seeds-v2'"],'installed update controller');
 assertIncludes(updateWorker,["const CACHE='cwupdate-visible-v207'","'/app/pwa-update-controller-v204.js'","knowledgeCache:'cwknowledge-school-seeds-v2'"],'update service-worker lane');
-assertIncludes(workerWrapper,["importScripts('/service-worker-living-school-cleanroom-v218.js","importScripts('/service-worker-core-v208.js","importScripts('/service-worker-offline-v211-override.js",'offline-campus-current-graph-v238','policy=fast-background-v241'],'active worker wrapper');
+assertIncludes(workerWrapper,["importScripts('/service-worker-living-school-cleanroom-v218.js","importScripts('/service-worker-core-v208.js","importScripts('/service-worker-offline-v211-override.js",'offline-campus-current-graph-v238','policy=fast-background-v241',"/service-worker-chat-repair-v245.js?v=chat-convergence-v250"],'active worker wrapper');
 if(!(workerWrapper.indexOf('service-worker-living-school-cleanroom-v218.js')<workerWrapper.indexOf('service-worker-core-v208.js')&&workerWrapper.indexOf('service-worker-core-v208.js')<workerWrapper.indexOf('service-worker-offline-v211-override.js')))throw new Error('Worker composition order is incorrect.');
 assertIncludes(workerCore,['lightweight-shell-v208',"'cwupdate-'",'DOWNLOAD_OFFLINE_PACKAGE'],'retained service-worker core');
 assertIncludes(offlineOverride,['offline-campus-current-graph-v238',"V211_POLICY = 'fast-background-v241'",'CivweaveOfflineCampusV211','stale-not-rediscovered','retry-ledger-retired','V211_BATCH_SIZE = 16','backgroundSafe: true'],'offline retry override');
 assertIncludes(cleanroomWorker,["const REVISION='living-school-cleanroom-v218'",'event.stopImmediatePropagation()'],'Living School cache boundary');
-for(const source of [helper,installer,installRuntime,boundary,updateController,updateWorker,workerWrapper,workerCore,offlineOverride,cleanroomWorker])new Function(source);
-console.log(JSON.stringify({schools:catalog.schools.length,articles:articleCount,compressedBytes,compressedMiB:Number((compressedBytes/1024/1024).toFixed(2)),largestSchoolMiB:Number((Math.max(...catalog.schools.map(school=>school.zip_bytes))/1024/1024).toFixed(2)),crossroads:catalog.reconciliation.crossroads_articles,knowledgeCache:'cwknowledge-school-seeds-v2',appUpdateControl:'visible-v207-registration-watchdog',workerComposition:'v218-cleanroom-plus-retained-core-plus-current-graph-v238-fast-background-v241',currentFilesSkipRedownload:true,backgroundCampus:true},null,2));
+for(const source of [helper,installer,installRuntime,boundary,installedEntry,updateController,updateWorker,workerWrapper,workerCore,offlineOverride,cleanroomWorker])new Function(source);
+console.log(JSON.stringify({schools:catalog.schools.length,articles:articleCount,compressedBytes,compressedMiB:Number((compressedBytes/1024/1024).toFixed(2)),largestSchoolMiB:Number((Math.max(...catalog.schools.map(school=>school.zip_bytes))/1024/1024).toFixed(2)),crossroads:catalog.reconciliation.crossroads_articles,knowledgeCache:'cwknowledge-school-seeds-v2',installedUpdateOwner:'installed-entry-v146',manualUpdateControl:'visible-v207-registration-watchdog',workerComposition:'v218-cleanroom-plus-retained-core-plus-current-graph-v238-fast-background-v241-v250-chat-migration',currentFilesSkipRedownload:true,backgroundCampus:true},null,2));
