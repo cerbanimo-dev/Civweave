@@ -4,7 +4,6 @@
 const VERSION='1.1.0';
 const REVISION='radio-track-suggestions-v241';
 const PICK_KEY='civweave.radio.track-picks.v241';
-const TRACK_ID_CACHE_KEY='civweave.radio.spotify-track-ids.v241';
 const TRACK_MAP_PATH='/app/radio-track-map-v241.json';
 const CARD_ID='cw-radio-suggestion-v233';
 const DIRECTORY_PATHS=Object.freeze({
@@ -49,7 +48,6 @@ const TAGS=deepFreeze({
 const SYSTEM_ALIASES=Object.freeze({living_school:'living-school'});
 const trackCache=new Map();
 let trackMapPromise=null;
-let accessTokenProvider=null;
 
 function deepFreeze(value){
   if(value&&typeof value==='object'&&!Object.isFrozen(value)){
@@ -93,17 +91,6 @@ function pickDifferent(list,last=''){
 }
 function loadPicks(){return parse(sessionStorage.getItem(PICK_KEY),{})}
 function savePicks(value){try{sessionStorage.setItem(PICK_KEY,JSON.stringify(value))}catch{}return value}
-function loadTrackIdCache(){try{return parse(localStorage.getItem(TRACK_ID_CACHE_KEY),{})}catch{return{}}}
-function saveTrackId(system,position,id){
-  const trackId=spotifyTrackId(id);if(!trackId)return'';
-  try{
-    const cache=loadTrackIdCache();
-    const next={...cache,[system]:{...(cache[system]||{}),[position]:trackId}};
-    localStorage.setItem(TRACK_ID_CACHE_KEY,JSON.stringify(next));
-  }catch{}
-  return trackId;
-}
-function cachedTrackId(system,position){return spotifyTrackId(loadTrackIdCache()?.[system]?.[position]||'')}
 function mappedTrackId(map,system,position){return spotifyTrackId(map?.systems?.[system]?.tracks?.[position]||'')}
 async function loadTrackMap(){
   if(!trackMapPromise){
@@ -127,30 +114,8 @@ function playlistMeta(systemId){
 function stationUrl(systemId){return playlistMeta(systemId)?.spotifyUrl||'https://open.spotify.com/'}
 function spotifyContextUrl(track,systemId){
   const meta=playlistMeta(systemId);if(!meta)return'https://open.spotify.com/';
-  const id=spotifyTrackId(track?.spotifyTrackId||cachedTrackId(meta.system,track?.position));
+  const id=spotifyTrackId(track?.spotifyTrackId||'');
   return id?`https://open.spotify.com/track/${id}?context=spotify:playlist:${meta.playlistId}`:meta.spotifyUrl;
-}
-function registerAccessTokenProvider(provider){accessTokenProvider=typeof provider==='function'?provider:null;return Boolean(accessTokenProvider)}
-async function accessToken(){
-  if(!accessTokenProvider)return'';
-  try{
-    const value=await accessTokenProvider();
-    return String(value?.access_token||value?.accessToken||value||'').trim();
-  }catch{return''}
-}
-async function resolveTrackId(systemId,track){
-  const meta=playlistMeta(systemId);if(!meta||!track)return'';
-  const known=spotifyTrackId(track.spotifyTrackId||cachedTrackId(meta.system,track.position));if(known)return known;
-  const token=await accessToken();if(!token)return'';
-  try{
-    const response=await fetch(`https://api.spotify.com/v1/playlists/${meta.playlistId}/items?limit=1&offset=${Math.max(0,Number(track.position)||0)}`,{
-      headers:{Authorization:`Bearer ${token}`}
-    });
-    if(!response.ok)return'';
-    const data=await response.json();
-    const item=data?.items?.[0]?.item||data?.items?.[0]?.track||null;
-    return saveTrackId(meta.system,track.position,item?.id||item?.uri||item?.external_urls?.spotify||'');
-  }catch{return''}
 }
 async function loadTracks(systemId){
   const system=normalizeSystemId(systemId),path=DIRECTORY_PATHS[system];
@@ -211,7 +176,7 @@ async function decorate(systemId){
   const trackLink=document.createElement('a');trackLink.className='cw-radio-track-link-v241';trackLink.target='_blank';trackLink.rel='noopener noreferrer';
   let trackLinkMounted=false;
   const mountContextLink=id=>{
-    const resolved=spotifyTrackId(id||track.spotifyTrackId||cachedTrackId(system,track.position));
+    const resolved=spotifyTrackId(id||track.spotifyTrackId||'');
     if(!resolved)return'';
     trackLink.href=spotifyContextUrl({...track,spotifyTrackId:resolved},system);
     trackLink.textContent='Play in station ↗';
@@ -238,9 +203,6 @@ async function decorate(systemId){
 
   card.dataset.radioTrackSuggestionRevision=REVISION;card.dataset.radioTrack=track.label;card.dataset.radioTrackPosition=String(track.position);
   globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_SUGGESTED',revision:REVISION,system,track:track.label,position:track.position,spotifyTrackId:initialId,contextReady:Boolean(initialId),tag}}));
-  if(!initialId&&accessTokenProvider){
-    resolveTrackId(system,track).then(id=>{if(id&&card.isConnected)mountContextLink(id)});
-  }
   return track.label;
 }
 function onRadioEvent(event){const detail=event?.detail||{};if(detail.type==='RADIO_CTA_SHOWN')decorate(detail.system)}
@@ -249,7 +211,7 @@ function start(){
   const existing=document.getElementById(CARD_ID);if(existing)decorate(existing.dataset.system||'');
   return true;
 }
-const api=Object.freeze({version:VERSION,revision:REVISION,directoryPaths:DIRECTORY_PATHS,trackMapPath:TRACK_MAP_PATH,tags:TAGS,normalizeSystemId,spotifyTrackId,parseTrackLine,playlistMeta,stationUrl,spotifyContextUrl,registerAccessTokenProvider,resolveTrackId,loadTrackMap,loadTracks,pickTrack,pickTag,decorate,start});
+const api=Object.freeze({version:VERSION,revision:REVISION,directoryPaths:DIRECTORY_PATHS,trackMapPath:TRACK_MAP_PATH,tags:TAGS,normalizeSystemId,spotifyTrackId,parseTrackLine,playlistMeta,stationUrl,spotifyContextUrl,loadTrackMap,loadTracks,pickTrack,pickTag,decorate,start});
 globalThis.CivweaveRadioTrackSuggestionsV241=api;
 globalThis.CivweaveRadioTrackSuggestionsV240=api;
 start();
