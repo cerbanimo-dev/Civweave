@@ -322,8 +322,7 @@ function start(){
   }
   emit('PAGE_NAVIGATED',{previousSystem,activeSystem:system,route:session.currentRoute,previousRoute});
   const reason=changed?'system_changed':firstSession?'session_started':'page_navigated';
-  const context=contextSnapshot({previousSystem,reason,session});
-  const run=()=>evaluate(context).catch(error=>{
+  const run=()=>evaluate(contextSnapshot({previousSystem,reason,session:loadSession()})).catch(error=>{
     console.warn('[Civweave Radio] recommendation evaluation failed safely.',error);
     emit('RADIO_CTA_SUPPRESSED',{system,reason:'evaluation_error'});
   });
