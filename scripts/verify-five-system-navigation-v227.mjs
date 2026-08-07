@@ -19,6 +19,7 @@ const experienceScripts=[
   '/app/persistent-guide-viewport-v216.js',
   '/app/realm-session-integrity-v237.js',
   '/app/themed-system-nav-v178.js',
+  '/app/campus-background-download-v241.js',
   '/app/system-radio-agent-v233.js',
   '/app/radio-track-suggestions-v240.js',
   '/app/shared-review-surface-v234.js',
@@ -107,6 +108,7 @@ assert.match(boundarySource,/canonicalSystemCount:5/);
 assert.match(boundarySource,/canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS\.length/);
 assert.match(boundarySource,/five-system-first-class-routes-civweave-core-only/);
 assert.match(boundarySource,/radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels'/);
+assert.match(boundarySource,/campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail'/);
 assert.match(navSource,/CivweaveSystemRoutesV227/);
 assert.match(navSource,/ROUTES\.navigate/);
 assert.equal((navSource.match(/installed=1/g)||[]).length,5,'The five fallback navigation links are not independently authorized.');
@@ -134,4 +136,4 @@ assert.match(gatewayBase,/x-civweave-package/,'Gateway no longer recognizes devi
 assert.match(gatewayWrapper,/pathname !== '\/app'/,'Render wrapper no longer preserves application file delivery.');
 for(const [index,page] of pages.entries())assert.match(page,/\/app\/install-boundary-v146\.js/,`${Object.keys(paths)[index]} page lost the shared boundary.`);
 
-console.log(JSON.stringify({ok:true,version,revision:'five-system-navigation-v227',systems:Object.keys(paths),routeMatrix:25,boundaryIntrinsicAuthorization:true,experienceScripts,canonicalExperienceScriptCount:experienceScripts.length,workerPackageHeader:true,workerFallback:'exact-route-or-visible-recovery',launcherSubstitution:false,installerSubstitution:false},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'five-system-navigation-v227',systems:Object.keys(paths),routeMatrix:25,boundaryIntrinsicAuthorization:true,experienceScripts,canonicalExperienceScriptCount:experienceScripts.length,workerPackageHeader:true,workerFallback:'exact-route-or-visible-recovery',backgroundCampus:true,launcherSubstitution:false,installerSubstitution:false},null,2));
