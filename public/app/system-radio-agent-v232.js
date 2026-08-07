@@ -1,9 +1,9 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.1';
+const VERSION='1.0.2';
 const REVISION='system-radio-agent-v232';
-const SESSION_KEY='civweave.radio.session.v1';
+const SESSION_KEY='civweave.radio.session.v2';
 const MEMORY_KEY='civweave.radio.memory.v1';
 const PREFS_KEY='civweave.radio.preferences.v1';
 const SYSTEM_COOLDOWN_MS=30*60*1000;
@@ -152,16 +152,20 @@ function eligibility(context){
   if(context.dismissalState.dismissedThisSession)return{eligible:false,reason:'dismissed_this_session'};
   if(protectedFlow(context))return{eligible:false,reason:'protected_flow'};
   if(context.sessionExposureCount>=MAX_SESSION_EXPOSURES)return{eligible:false,reason:'session_frequency_cap'};
+
+  const systemChanged=Boolean(context.previousSystem&&context.previousSystem!==context.activeSystem);
+  const sessionEntry=!context.previousSystem&&context.reason==='session_started';
+  if(systemChanged)return{eligible:true,reason:'system_changed'};
+  if(sessionEntry)return{eligible:true,reason:'session_started'};
+
   const memory=loadMemory();
   const lastSystemShown=millis(memory.lastShownAtBySystem?.[context.activeSystem]);
   if(lastSystemShown&&Date.now()-lastSystemShown<SYSTEM_COOLDOWN_MS)return{eligible:false,reason:'system_cooldown'};
   const lastAnyShown=millis(context.lastTimeShown);
-  const systemChanged=Boolean(context.previousSystem&&context.previousSystem!==context.activeSystem);
-  const sessionEntry=!context.previousSystem&&context.reason==='session_started';
-  if(!systemChanged&&!sessionEntry&&lastAnyShown&&Date.now()-lastAnyShown<REENTRY_ELIGIBILITY_MS){
+  if(lastAnyShown&&Date.now()-lastAnyShown<REENTRY_ELIGIBILITY_MS){
     return{eligible:false,reason:'recently_shown'};
   }
-  return{eligible:true,reason:systemChanged?'system_changed':sessionEntry?'session_started':'eligible_reentry'};
+  return{eligible:true,reason:'eligible_reentry'};
 }
 function defaultAgentDecision(context,gate){
   if(!gate.eligible)return{action:'suppress',messageVariant:'default',placement:'toast',reason:gate.reason};
