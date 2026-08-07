@@ -34,7 +34,6 @@ const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 await import('./generate-asset-lockboard-catalog-v239.mjs');
-await import('./stage-sqljs-assets.mjs');
 
 function walkFiles(directory) {
   const files = [];
