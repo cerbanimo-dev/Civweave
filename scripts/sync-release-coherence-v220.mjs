@@ -25,7 +25,10 @@ function replaceRequired(source,pattern,replacement,label){
   return source.replace(pattern,replacement);
 }
 
-await patch('public/app/index.html',source=>replaceRequired(source,/revision=[A-Za-z0-9._-]+(?=['"])/,`revision=${revision}`,'installer worker registration revision'));
+await patch('public/app/index.html',source=>{
+  if(/navigator\.serviceWorker\.register\s*\(/.test(source))throw new Error('Installer page must not register a second service worker; install-v130.js owns registration and activation.');
+  return source;
+});
 await patch('public/install-v130.js',source=>replaceRequired(source,/const WORKER_SCRIPT_REVISION = '[^']+';/,`const WORKER_SCRIPT_REVISION = '${revision}';`,'installer worker revision constant'));
 await patch('public/app/installed-entry-v146.js',source=>{
   source=replaceRequired(source,/params\.get\('version'\)\|\|'\d+\.\d+\.\d+';/,`params.get('version')||'${version}';`,'installed entry fallback release version');
@@ -98,6 +101,7 @@ await patch('public/extensions/civweave-additions-v156.js',source=>{
 const wrapper=await readFile(path.join(root,'public/service-worker-v203.js'),'utf8');
 for(const token of [
   `/app/system-routes-v227.js?v=${version}-${routeRevision}`,
+  '/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238',
   `/service-worker-release-coherence-v220.js?v=${revision}`,
   '/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227'
 ])if(!wrapper.includes(token))throw new Error(`The active worker wrapper is missing ${token}.`);
@@ -107,4 +111,4 @@ for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pin
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,canonicalSystems:5,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,installerRegistrationOwner:'install-v130.js',offlineRevision:'offline-campus-current-graph-v238',canonicalSystems:5,changed},null,2));
