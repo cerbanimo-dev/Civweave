@@ -15,8 +15,10 @@ const [owner,viewport,workerRepair,workerEntry,workspace,persistent,release,pkgT
 new Function(owner);new Function(viewport);new Function(workerRepair);new Function(workerEntry);
 const pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
+const semver=value=>String(value).split('.').map(Number);
+const atLeast=(value,floor)=>{const a=semver(value),b=semver(floor);for(let i=0;i<3;i+=1){if(a[i]>b[i])return true;if(a[i]<b[i])return false}return true};
 
-check('release advances to v1.0.38',version==='1.0.38'&&pkg.version===version);
+check('release preserves v1.0.38 chat ownership or newer',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version&&atLeast(version,'1.0.38'));
 check('v242 remains the canonical workspace API',workspace.includes('workspace:true')&&workspace.includes('submitText:async')&&workspace.includes('switchGuide:(system,options={})=>switchWindow'));
 check('legacy v215 and v242 can otherwise share one root id',persistent.includes("const ROOT_ID='cw-persistent-guide-chat-v215'")&&workspace.includes("const ROOT_ID='cw-persistent-guide-chat-v215'"));
 check('repair detects legacy v215 switcher and form residue',owner.includes('.cwp215-switcher,.cwp215-guide,.cwp215-form,.cwp215-current'));
