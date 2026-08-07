@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const REVISION='canonical-campus-startup-v227';
-const BRAND_REVISION='main-brand-v231';
+const BRAND_REVISION='compact-shell-v235';
 const WEB_ENTRY_REVISION='web-install-entry-v232';
 const HUB_REVISION='weaveling-hub-v233';
 const HUB_SCRIPT='/app/weaveling-hub-v233.js';
@@ -29,10 +29,10 @@ function installWebEntryPrompt(){
     style=document.createElement('style');
     style.id='cw-web-install-entry-style-v232';
     style.textContent=`
-#cw-web-install-entry-v232{position:relative;z-index:3;max-width:1180px;margin:12px auto 0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px 16px;border:1px solid #8af5d266;border-radius:20px;background:linear-gradient(135deg,#102a3ef2,#1e1737ed);box-shadow:0 14px 36px #0007,inset 0 0 28px #8af5d20d}
-#cw-web-install-entry-v232[hidden]{display:none!important}#cw-web-install-entry-v232 small{display:block;color:#8af5d2;font-weight:900;letter-spacing:.11em;text-transform:uppercase}#cw-web-install-entry-v232 strong{display:block;margin:2px 0 3px;font:700 20px/1.15 Georgia,serif}#cw-web-install-entry-v232 p{margin:0;color:#c6d1df;max-width:720px}
-#cw-web-install-entry-v232 .cw-web-install-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}#cw-web-install-entry-v232 a,#cw-web-install-entry-v232 button{min-height:44px;border-radius:13px;padding:10px 14px;font:800 13px/1 system-ui,sans-serif;text-decoration:none}#cw-web-install-entry-v232 a{border:1px solid #8af5d2aa;background:linear-gradient(135deg,#8af5d238,#ef8cff35);color:#fff}#cw-web-install-entry-v232 button{border:1px solid #ffffff2b;background:#ffffff0b;color:#dce6ef;cursor:pointer}
-@media(max-width:700px){#cw-web-install-entry-v232{grid-template-columns:1fr;margin-top:9px}#cw-web-install-entry-v232 .cw-web-install-actions{justify-content:stretch}#cw-web-install-entry-v232 a,#cw-web-install-entry-v232 button{flex:1;text-align:center}}
+#cw-web-install-entry-v232{position:relative;z-index:3;max-width:1180px;margin:7px auto;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:9px 11px;border:1px solid #8af5d255;border-radius:14px;background:linear-gradient(135deg,#102a3eea,#1e1737e8);box-shadow:0 8px 24px #0005,inset 0 0 18px #8af5d20a}
+#cw-web-install-entry-v232[hidden]{display:none!important}#cw-web-install-entry-v232 small{display:block;color:#8af5d2;font-size:8px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}#cw-web-install-entry-v232 strong{display:inline;margin-right:6px;font:700 14px/1.15 Georgia,serif}#cw-web-install-entry-v232 p{display:inline;margin:0;color:#c6d1df;font-size:10.5px;line-height:1.3}
+#cw-web-install-entry-v232 .cw-web-install-actions{display:flex;gap:5px;align-items:center;flex-wrap:nowrap;justify-content:flex-end}#cw-web-install-entry-v232 a,#cw-web-install-entry-v232 button{min-height:34px;border-radius:9px;padding:7px 9px;font:800 11px/1 system-ui,sans-serif;text-decoration:none;white-space:nowrap}#cw-web-install-entry-v232 a{border:1px solid #8af5d299;background:linear-gradient(135deg,#8af5d230,#ef8cff2e);color:#fff}#cw-web-install-entry-v232 button{border:1px solid #ffffff24;background:#ffffff0a;color:#dce6ef;cursor:pointer}
+@media(max-width:700px){#cw-web-install-entry-v232{grid-template-columns:1fr}#cw-web-install-entry-v232 .cw-web-install-actions{justify-content:stretch}#cw-web-install-entry-v232 a,#cw-web-install-entry-v232 button{flex:1;text-align:center}}
 `;
     document.head.append(style);
   }
@@ -57,20 +57,38 @@ function installBrandPresentation(){
   icon.href='/app/logos/civweave-symbol.svg';
   const brand=document.querySelector('#brand-home img');
   if(brand){brand.src='/app/logos/civweave-symbol.svg';brand.alt='Civweave';}
-  if(document.getElementById('cw-main-brand-v231'))return;
-  const style=document.createElement('style');
-  style.id='cw-main-brand-v231';
-  style.textContent=`
-#brand-home{grid-template-columns:220px minmax(0,1fr)!important;gap:20px!important}
-#brand-home img{width:220px!important;height:220px!important;object-fit:contain!important;filter:drop-shadow(0 0 22px #f4f4ef33)!important}
-.campus .realm-node{min-height:180px!important}
-.campus .realm-node img{width:118px!important;height:118px!important;object-fit:contain!important}
-.guide-head img{width:96px!important;height:96px!important;object-fit:contain!important}
-@media(max-width:800px){#brand-home{grid-template-columns:180px minmax(0,1fr)!important}#brand-home img{width:180px!important;height:180px!important}.campus .realm-node img{width:104px!important;height:104px!important}.campus .realm-node{min-height:168px!important}}
-@media(max-width:480px){#brand-home{grid-template-columns:140px minmax(0,1fr)!important}#brand-home img{width:140px!important;height:140px!important}.campus .realm-node img{width:88px!important;height:88px!important}.campus .realm-node{min-height:150px!important}.guide-head img{width:82px!important;height:82px!important}}
-`;
-  document.head.append(style);
   document.documentElement.dataset.civweaveBrandPresentation=BRAND_REVISION;
+}
+function installDiagnosticsPolicy(){
+  const params=new URLSearchParams(location.search);
+  let stored='';
+  try{stored=localStorage.getItem('civweave.log-level')||''}catch{}
+  const enabled=params.get('diagnostics')==='1'||params.get('cwlog')==='1'||stored==='debug';
+  document.documentElement.dataset.civweaveDiagnostics=enabled?'true':'false';
+  const button=document.getElementById('diagnostics-button');
+  if(button){button.hidden=!enabled;button.setAttribute('aria-hidden',enabled?'false':'true')}
+  return enabled;
+}
+function installCivweaveChatLauncherOwnership(){
+  const own=()=>{
+    try{return globalThis.CivweavePersistentGuideChatV215?.switchGuide?.('civweave')||false}catch{return false}
+  };
+  addEventListener('civweave:persistent-guide-chat-ready',()=>own());
+  document.addEventListener('click',event=>{
+    const target=event.target instanceof Element?event.target:null;
+    if(!target)return;
+    if(target.closest('#cwp215-launcher')){
+      const chat=globalThis.CivweavePersistentGuideChatV215;
+      if(!chat?.open)return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      chat.open({guide:'civweave'});
+      return;
+    }
+    if(target.closest('#cw-persistent-guide-chat-v215 [data-close]'))queueMicrotask(own);
+  },true);
+  own();
+  document.documentElement.dataset.civweaveChatLauncherOwner='civweave-v235';
 }
 function ensureRouteContract(){
   if(globalThis.CivweaveSystemRoutesV227){globalThis.CivweaveSystemRoutesV227.authorize();return Promise.resolve(true)}
@@ -100,6 +118,8 @@ async function fetchPart(pathname){
 async function boot(){
   if(document.readyState==='loading')await new Promise(resolve=>document.addEventListener('DOMContentLoaded',resolve,{once:true,signal:controller.signal}));
   installBrandPresentation();
+  installDiagnosticsPolicy();
+  installCivweaveChatLauncherOwnership();
   installWebEntryPrompt();
   if(!campusReady())throw new Error(`Working Campus DOM contract is incomplete: ${missingRequired().join(', ')||'campus root'}.`);
   await ensureHub();

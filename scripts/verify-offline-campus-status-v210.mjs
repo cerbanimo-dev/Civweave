@@ -34,7 +34,7 @@ vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'offline-campus-status-v210.js'});
 
 const api=sandbox.CivweaveOfflineCampusStatusV210;
-assert(api?.version==='1.0.7-offline-campus-status-v210','Offline campus status repair API is missing.');
+assert(api?.version==='1.0.8-offline-campus-status-v210','Offline campus status API is missing or stale.');
 
 const legacy=api.normalize({
   type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
@@ -90,15 +90,18 @@ assert(ready.ready===true,'Complete package was not marked ready.');
 assert(nodes.get('#offline-package-state').textContent==='ready offline','Ready state label is incorrect.');
 assert(nodes.get('#offline-package-assets').textContent==='205/205 files · 17 MB','Ready download count is incorrect.');
 assert(nodes.get('#download-offline-package').textContent==='Refresh offline campus','Ready action label is incorrect.');
-assert(serviceWorkerListeners.has('message'),'Status repair does not listen for worker progress.');
-assert(listeners.has('load'),'Status repair does not query the current worker after page load.');
+assert(serviceWorkerListeners.has('message'),'Status reader does not listen for worker progress.');
+assert(listeners.has('load'),'Status reader does not query the current worker after page load.');
+assert(!source.includes('registration.update(')&&!source.includes("postMessage({type:'SKIP_WAITING'"),'Status reader must remain read-only with respect to service-worker lifecycle.');
 
 console.log(JSON.stringify({
   ok:true,
   revision:'offline-campus-status-v210',
+  runtimeVersion:api.version,
   legacyAttempted:205,
   legacyDownloaded:186,
   failedCount:19,
   contradictoryCountRemoved:true,
-  liveWorkerProgressRepair:true
+  liveWorkerProgress:true,
+  lifecycleOwnership:'read-only-status-reader'
 },null,2));
