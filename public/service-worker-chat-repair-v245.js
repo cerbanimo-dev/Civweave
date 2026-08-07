@@ -1,14 +1,17 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-cache-single-owner-v245';
+const REVISION='mobile-chat-layout-v248';
 const CHAT_PATHS=new Set([
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
   '/app/guide-workspace-v242.js',
   '/app/shared-guide-surface-v236.js',
   '/app/regression-fixes-v243.js',
-  '/app/chat-single-owner-v245.js'
+  '/app/chat-single-owner-v245.js',
+  '/app/working-campus-topbar-v243.js',
+  '/app/working-campus-v156.css',
+  '/app/working-campus-v156.html'
 ]);
 
 async function purgeChatRuntimeCaches(){
