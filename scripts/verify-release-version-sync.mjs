@@ -7,6 +7,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const check=(condition,message)=>{if(!condition)throw new Error(message)};
 const same=(actual,expected,label)=>check(actual===expected,`${label}: expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}.`);
+const versionConst=(source,suffix='')=>new RegExp(`const\\s+VERSION\\s*=\\s*['"]([^'"]+)['"]`).exec(source)?.[1]===suffix;
 const [
   versionText,
   packageText,
@@ -105,8 +106,8 @@ for(const token of [
 ])check(installBoundary.includes(token),`Install boundary is missing ${token}.`);
 check(!installBoundary.includes("const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';")&&!installBoundary.includes('addScript(RELEASE_VERSION_SCRIPT)'),'Install boundary reintroduced the retired canonical version loader.');
 check(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-civweave-version]')"),'Visible-version synchronizer is incomplete.');
-check(gateway.includes(`const VERSION='${version}-render-installed-runtime-v132';`),'Gateway wrapper version is stale.');
-check(localServer.includes(`"const VERSION = '${version}';"`)&&localServer.includes(`?build=${version}`),'Local server version is stale.');
+check(versionConst(gateway,`${version}-render-installed-runtime-v132`),'Gateway wrapper version is stale.');
+check(new RegExp(`const\\s+VERSION\\s*=\\s*['"]${version.replaceAll('.','\\.')}['"]`).test(localServer)&&localServer.includes(`?build=${version}`),'Local server version is stale.');
 check(workingCampus.includes(`Civweave Working Campus · v${version}`)&&workingCampus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
 check(campusLoader.includes(`system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Working Campus route loader version is stale.');
 check(campusPart4.includes(`version:'${version}'`),'Working Campus realm travel version is stale.');
