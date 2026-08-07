@@ -26,6 +26,7 @@ const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
 const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
+const RADIO_TRACK_SUGGESTIONS='/app/radio-track-suggestions-v240.js';
 const SHARED_REVIEW_SURFACE='/app/shared-review-surface-v234.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
@@ -43,6 +44,7 @@ const SYSTEM_EXPERIENCE_SCRIPTS=[
   REALM_SESSION_INTEGRITY,
   THEMED_SYSTEM_NAV,
   SYSTEM_RADIO_AGENT,
+  RADIO_TRACK_SUGGESTIONS,
   SHARED_REVIEW_SURFACE,
   SHARED_GUIDE_SURFACE
 ];
@@ -223,6 +225,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
   radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
+  radioTrackSuggestionRevision:'v240-local-station-directory-random-pull-labels',
   radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',
   sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
   sharedGuideSurfaceRevision:'v236-inline-plus-bottom-right-shared-thread',
