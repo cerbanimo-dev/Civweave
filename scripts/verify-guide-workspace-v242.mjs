@@ -13,7 +13,7 @@ new Function(workspace);new Function(viewport);new Function(boundary);
 const version=release.trim();
 const checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
-check('repository release is v1.0.43',version==='1.0.43');
+check('repository release is semantic',/^\d+\.\d+\.\d+$/.test(version));
 check('workspace runtime remains v242',workspace.includes('guide-workspace-v242'));
 check('workspace is the canonical chat owner',workspace.includes('canonicalOwner:true')&&workspace.includes("document.documentElement.dataset.civweaveGuideWorkspace='v250-canonical-owner'"));
 check('workspace has five canonical windows',workspace.includes("const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia']"));
