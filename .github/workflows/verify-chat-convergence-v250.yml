@@ -1,0 +1,42 @@
+name: Verify Chat Convergence v250
+
+on:
+  pull_request:
+    paths:
+      - 'VERSION'
+      - 'package.json'
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/installed-entry-v146.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/guide-workspace-v242.js'
+      - 'public/app/persistent-guide-viewport-v216.js'
+      - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/working-campus-v156.part5.txt'
+      - 'public/service-worker-chat-repair-v245.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/verify-chat-convergence-v250.mjs'
+      - '.github/workflows/verify-chat-convergence-v250.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify-chat-convergence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check canonical runtimes
+        run: |
+          node --check public/app/installed-entry-v146.js
+          node --check public/app/install-boundary-v146.js
+          node --check public/app/guide-workspace-v242.js
+          node --check public/app/persistent-guide-viewport-v216.js
+          node --check public/app/shared-guide-surface-v236.js
+          node --check public/service-worker-chat-repair-v245.js
+          node --check public/service-worker-v203.js
+          node --check scripts/verify-chat-convergence-v250.mjs
+      - name: Verify one canonical chat runtime and updater-first launch
+        run: node scripts/verify-chat-convergence-v250.mjs
