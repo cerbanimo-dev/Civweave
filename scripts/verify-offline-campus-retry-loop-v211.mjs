@@ -19,7 +19,8 @@ const workerPackage=`${wrapperSource}\n${coreSource}\n${overrideSource}`;
 assert(wrapperSource.includes("importScripts('/service-worker-living-school-cleanroom-v218.js"),'Generated worker omits the Living School clean-room boundary.');
 assert(wrapperSource.includes("importScripts('/service-worker-core-v208.js"),'Generated worker omits the retained lightweight core.');
 assert(wrapperSource.includes("importScripts('/service-worker-offline-v211-override.js"),'Generated worker omits the offline retry override.');
-assert(wrapperSource.includes('offline-campus-fast-background-v241'),'Generated worker does not cache-bust the fast background repair.');
+assert(wrapperSource.includes('offline-campus-current-graph-v238'),'Generated worker lost the stable current-graph offline identity.');
+assert(wrapperSource.includes('policy=fast-background-v241'),'Generated worker does not cache-bust the v241 fast background behavior.');
 assert(wrapperSource.indexOf('service-worker-living-school-cleanroom-v218.js')<wrapperSource.indexOf('service-worker-core-v208.js'),'Living School retirement does not load before the generic core.');
 assert(wrapperSource.indexOf('service-worker-core-v208.js')<wrapperSource.indexOf('service-worker-offline-v211-override.js'),'Offline override does not load after the core globals.');
 assert(workerPackage.includes("const BUILD = 'lightweight-shell-v208'"),'Verified lightweight shell core is missing.');
@@ -37,7 +38,7 @@ assert(overrideSource.includes('let v211DownloadPromise = null'),'Worker does no
 assert(overrideSource.includes('self.clients?.matchAll?.'),'Worker does not broadcast progress across PWA navigation.');
 assert(overrideSource.includes('backgroundSafe: true'),'Worker does not publish background continuity support.');
 assert(backgroundSource.includes("activeWorker.postMessage({type:'DOWNLOAD_OFFLINE_PACKAGE',background:true"),'Canonical page runtime does not resume the worker-owned download.');
-assert(backgroundSource.includes("height:4px"),'Background progress UI is not the requested small bottom rail.');
+assert(backgroundSource.includes('height:4px'),'Background progress UI is not the requested small bottom rail.');
 assert(backgroundSource.includes("navigator.serviceWorker.addEventListener('message'"),'Background progress rail does not receive worker broadcasts.');
 assert(!/self\[['"]import['"]\s*\+\s*['"]Scripts['"]\]/.test(coreSource),'Retained core still depends on the temporary wrapper import.');
 assert(cleanupSource.includes("const REVISION='living-school-cleanroom-v218'"),'Living School cache retirement revision is missing.');
