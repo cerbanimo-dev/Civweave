@@ -40,8 +40,8 @@ for(const route of [
 ])assert(host.includes(route)||source.includes(route),`Working Campus is missing route ${route}`);
 assert(host.includes('location.replace')&&!host.includes('<iframe'),'Compatibility host must remain direct and iframe-free.');
 assert(loader.includes("source.join('')")&&parts.every(file=>loader.includes('/app/'+path.basename(file))),'Working Campus loader does not assemble every cached source part.');
-assert(entry.includes("system==='civweave'?'/app/fullscreen-family-v104.html?system=civweave'"),'Installed entry does not boot the Working Campus.');
+assert(entry.includes("const requested=params.get('system')||params.get('target')||'civweave'")&&entry.includes('routes.urlFor(')&&entry.includes("new URL('/app/working-campus-v156.html',location.origin)"),'Installed entry does not route Civweave through the canonical five-system contract with a direct Working Campus fallback.');
 new vm.Script(source,{filename:'working-campus-v156.js'});
 new vm.Script(loader,{filename:'working-campus-v156-loader.js'});
 new vm.Script(settings,{filename:'model-settings-controller-v173.js'});
-console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'wish -> aptitude -> review -> activation -> realm handoffs',aiSettings:'shared clean-room controller with Gemini defaults',providerTests:'retired from Working Campus',navigation:'direct full-screen',offlineState:'local canonical'},null,2));
+console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'wish -> aptitude -> review -> activation -> realm handoffs',aiSettings:'shared clean-room controller with Gemini defaults',providerTests:'retired from Working Campus',navigation:'canonical five-system route with direct Working Campus fallback',offlineState:'local canonical'},null,2));
