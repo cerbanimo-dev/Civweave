@@ -11,6 +11,7 @@ const ADDITIONS_VERSION='v1.0.18-canonical-core-only-v226';
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
 const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
+const PLATFORM_STABILITY='/app/platform-stability-v159.js';
 const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
 const PERSISTENT_GUIDE_CHAT_SCRIPT='/app/persistent-guide-chat-v215.js';
 const PERSISTENT_GUIDE_VIEWPORT_SCRIPT='/app/persistent-guide-viewport-v216.js';
@@ -92,6 +93,11 @@ function addScript(src){
   document.head.append(script);
   return true;
 }
+function installEarlyGuards(){
+  addScript(PLATFORM_STABILITY);
+  addScript(AI_SETTINGS_BIND_GUARD);
+  return true;
+}
 function installAdditions(){
   if(canonicalAppSurface()||!liveHead())return false;
   if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
@@ -124,6 +130,7 @@ function start(){
     queueMicrotask(()=>dispatchEvent(new CustomEvent('civweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system}})));
     return;
   }
+  installEarlyGuards();
   installAdditionsWhenReady();
 }
 
@@ -139,6 +146,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   developer,
   embedded,
   installerUrl,
+  installEarlyGuards,
   installAdditions,
   installAdditionsWhenReady,
   additionsVersion:ADDITIONS_VERSION,
@@ -154,6 +162,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   pwaUpdateRevision:'v207-registration-watchdog',
   aiSettingsBindGuard:'v230-first-open-atomic-bind',
   aiSettingsPersistenceRepair:'v229-device-persistence',
+  platformStabilityGuard:'v159-dom-ready-safe',
   compatibilityDomReady:true,
   onlineSelfHeal:true,
   missingAssetDetails:true
