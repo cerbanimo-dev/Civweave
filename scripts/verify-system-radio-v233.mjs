@@ -59,7 +59,9 @@ const pageContext={
   previousSystem:'cerbanimo',lastPlaylistShown:'cerbanimo',lastTimeShown:new Date().toISOString(),sessionExposureCount:999,
   snoozeUntil:0,snoozeRemainingMs:0,reason:'page_navigated'
 };
-assert.deepEqual(radio.eligibility(pageContext),{eligible:true,reason:'page_navigated'},'ordinary page navigation must always be eligible when awake');
+const awakeEligibility=radio.eligibility(pageContext);
+assert.equal(awakeEligibility.eligible,true,'ordinary page navigation must always be eligible when awake');
+assert.equal(awakeEligibility.reason,'page_navigated','ordinary page navigation must retain its navigation reason');
 
 radio.registerDecisionProvider(async()=>({action:'suppress',messageVariant:'default',placement:'toast',reason:'provider_suppress'}));
 const forced=await radio.agentDecision(pageContext);
