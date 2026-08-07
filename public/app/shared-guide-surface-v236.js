@@ -26,11 +26,15 @@ const GUIDE=Object.freeze({
 if(globalThis.CivweaveSharedGuideSurfaceV236?.version===VERSION)return;
 
 const clean=(value,max=8000)=>String(value??'').trim().slice(0,max);
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 let currentSystem='';
 let transcriptObserver=null;
+let transcriptTarget=null;
 let layoutObserver=null;
+let observedNav=null;
+let surfaceObserver=null;
+let repairQueued=false;
 let mounted=false;
 
 function detectSystem(){
@@ -142,11 +146,14 @@ function ownPageGuide(){
 }
 
 function observeThread(){
-  transcriptObserver?.disconnect();
   const log=document.querySelector(`#${CHAT_ROOT_ID} [data-log]`);
-  if(!log)return;
+  if(!log)return false;
+  if(transcriptObserver&&transcriptTarget===log)return true;
+  transcriptObserver?.disconnect();
+  transcriptTarget=log;
   transcriptObserver=new MutationObserver(renderTranscript);
   transcriptObserver.observe(log,{childList:true,subtree:true,characterData:true});
+  return true;
 }
 
 async function submitInline(text){
@@ -187,8 +194,7 @@ function buildInline(){
     </div>`;
   const target=mountTarget();
   if(!target)return false;
-  if(target.id==='weaveling-hub-v233')target.insertAdjacentElement('beforebegin',section);
-  else target.prepend(section);
+  target.prepend(section);
   section.querySelector('[data-cwsg-full]').addEventListener('click',()=>{
     const api=globalThis.CivweavePersistentGuideChatV215;
     api?.switchGuide?.(currentSystem);
@@ -218,11 +224,51 @@ function normalizeFloatingLayout(){
   document.documentElement.dataset.civweaveFloatingContract='v236';
 }
 
+function observeNav(){
+  if(!('ResizeObserver'in globalThis))return false;
+  if(!layoutObserver)layoutObserver=new ResizeObserver(normalizeFloatingLayout);
+  const nav=document.getElementById('cw-themed-system-nav');
+  if(!nav)return false;
+  if(observedNav!==nav){
+    if(observedNav)try{layoutObserver.unobserve(observedNav)}catch{}
+    observedNav=nav;
+    layoutObserver.observe(nav);
+  }
+  return true;
+}
+
 function ensureFloatingRuntime(){
   ownPageGuide();
   observeThread();
+  observeNav();
   renderTranscript();
   normalizeFloatingLayout();
+}
+
+function repairSurface(){
+  repairQueued=false;
+  if(!currentSystem||!document.documentElement?.isConnected)return false;
+  if(!document.getElementById(ROOT_ID)&&!canonicalNativeChat(currentSystem))buildInline();
+  observeThread();
+  observeNav();
+  renderTranscript();
+  normalizeFloatingLayout();
+  return true;
+}
+
+function scheduleRepair(){
+  if(repairQueued)return;
+  repairQueued=true;
+  queueMicrotask(repairSurface);
+}
+
+function watchSurface(){
+  if(surfaceObserver||!document.body)return false;
+  surfaceObserver=new MutationObserver(records=>{
+    if(records.some(record=>record.addedNodes.length||record.removedNodes.length))scheduleRepair();
+  });
+  surfaceObserver.observe(document.body,{childList:true,subtree:true});
+  return true;
 }
 
 function mount(){
@@ -233,13 +279,9 @@ function mount(){
   installStyle();
   buildInline();
   ensureFloatingRuntime();
-  addEventListener('civweave:persistent-guide-chat-ready',()=>{ownPageGuide();buildInline();observeThread();renderTranscript()});
+  watchSurface();
+  addEventListener('civweave:persistent-guide-chat-ready',()=>{ownPageGuide();buildInline();observeThread();observeNav();renderTranscript()});
   addEventListener('resize',normalizeFloatingLayout,{passive:true});
-  if('ResizeObserver'in globalThis){
-    layoutObserver=new ResizeObserver(normalizeFloatingLayout);
-    const nav=document.getElementById('cw-themed-system-nav');
-    if(nav)layoutObserver.observe(nav);
-  }
   document.documentElement.dataset.civweaveGuideSurface=VERSION;
 }
 
@@ -254,6 +296,7 @@ globalThis.CivweaveSharedGuideSurfaceV236=Object.freeze({
   normalizeFloatingLayout,
   ownPageGuide,
   submitInline,
+  repairSurface,
   mount
 });
 })();
