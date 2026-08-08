@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [manifestText,rawLauncher,installedEntryHtml,installedEntry,redirects,routesSource,navSource,boundary,workspace,viewport,shared,workingPart5,workerRepair,workerEntry,releaseSync,coherenceSync,release,pkgText]=await Promise.all([
+const [manifestText,rawLauncher,installedEntryHtml,installedEntry,redirects,routesSource,navSource,boundary,workspace,viewport,sharedLoader,sharedCore,workingPart5,workerRepair,workerEntry,releaseSync,coherenceSync,release,pkgText]=await Promise.all([
   read('public/app/manifest.webmanifest'),
   read('public/index.html'),
   read('public/app/installed-entry-v146.html'),
@@ -14,6 +14,7 @@ const [manifestText,rawLauncher,installedEntryHtml,installedEntry,redirects,rout
   read('public/app/guide-workspace-v242.js'),
   read('public/app/persistent-guide-viewport-v216.js'),
   read('public/app/shared-guide-surface-v236.js'),
+  read('public/app/shared-guide-surface-v236-core-v244.js'),
   read('public/app/working-campus-v156.part5.txt'),
   read('public/service-worker-chat-repair-v245.js'),
   read('public/service-worker-v203.js'),
@@ -22,7 +23,8 @@ const [manifestText,rawLauncher,installedEntryHtml,installedEntry,redirects,rout
   read('VERSION'),
   read('package.json')
 ]);
-for(const source of [installedEntry,routesSource,navSource,boundary,workspace,viewport,shared,workerRepair,workerEntry])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
+const shared=`${sharedLoader}\n${sharedCore}`;
+for(const source of [installedEntry,routesSource,navSource,boundary,workspace,viewport,sharedLoader,sharedCore,workerRepair,workerEntry])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
 const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
@@ -62,6 +64,7 @@ check('v242 has no synthetic click or requestSubmit relay',!workspace.includes('
 
 check('viewport compatibility file is css-only',viewport.includes('v250-css-only-workspace-owned'));
 check('viewport cannot inject v245 owner',!viewport.includes('CHAT_OWNER_REPAIR')&&!viewport.includes('chat-single-owner-v245.js')&&!viewport.includes('CivweaveChatSingleOwnerV245'));
+check('shared guide loader mounts canonical core',sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'));
 check('shared surface delegates to compatibility API',shared.includes('CivweavePersistentGuideChatV215')&&shared.includes('api.submitText(value,currentSystem)'));
 
 check('release version sync preserves updater-first manifest',releaseSync.includes("manifest.start_url='/app/installed-entry-v146.html?installed=1'")&&releaseSync.includes('chat-convergence-v250'));
@@ -74,4 +77,4 @@ check('worker purge ignores stale query identities',workerRepair.includes('cache
 check('worker imports v250 chat repair',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250')"));
 check('worker skips waiting on install',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
 
-console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v250',checks:checks.length,installedLaunch:'updater-first',canonicalRuntime:'guide-workspace-v242',canonicalDuplicateChatOwners:0,embeddedSurfaceDelegates:true,cacheMigration:true,checkedInReleaseIdentitiesCurrent:true,releaseGeneratorsPreserveConvergence:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v250',checks:checks.length,installedLaunch:'updater-first',canonicalRuntime:'guide-workspace-v242',canonicalDuplicateChatOwners:0,embeddedSurfaceDelegates:true,sharedGuideLoaderAware:true,cacheMigration:true,checkedInReleaseIdentitiesCurrent:true,releaseGeneratorsPreserveConvergence:true},null,2));
