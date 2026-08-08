@@ -35,16 +35,16 @@ jobs:
             '          if (truncated) emit(context, "repairing", { attempt: repairAttempts, reason: "structured-output-truncated", finishReason, maxTokens: repairConfig.maxTokens });',
             '          const repaired = await invokeAdapter(repairConfig, repairMessages(messages, outputText, validationErrors), { ...request, maxRepairAttempts: 0 }, context, controller.signal);',
           ].join('\n');
-          if(!runtime.includes(repairedLine)) throw new Error('Shared model runtime repair call did not match expected main.');
-          runtime=runtime.replace(repairedLine,replacement);
+          if(runtime.includes(repairedLine)) runtime=runtime.replace(repairedLine,replacement);
+          else if(!runtime.includes('reason: "structured-output-truncated"')) throw new Error('Shared model runtime repair call did not match expected main.');
           fs.writeFileSync(runtimePath,runtime);
 
           const livingPath='public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs';
           let living=fs.readFileSync(livingPath,'utf8');
           const oldCall="    const result=await runtime.generate({purpose:'living-school-research-grounded-curriculum-v218.1',executionProfile:'interactive',config,schema:curriculumSchema(),context:";
           const newCall="    const curriculumConfig={...config,maxTokens:Math.max(Number(config.maxTokens)||0,16384),temperature:Math.min(Number(config.temperature)||0.2,0.3)};\n    const result=await runtime.generate({purpose:'living-school-research-grounded-curriculum-v218.1',executionProfile:'interactive',config:curriculumConfig,schema:curriculumSchema(),context:";
-          if(!living.includes(oldCall)) throw new Error('Living School curriculum model call did not match expected main.');
-          living=living.replace(oldCall,newCall);
+          if(living.includes(oldCall)) living=living.replace(oldCall,newCall);
+          else if(!living.includes('config:curriculumConfig,schema:curriculumSchema()')) throw new Error('Living School curriculum model call did not match expected main.');
           fs.writeFileSync(livingPath,living);
 
           fs.writeFileSync('scripts/verify-structured-output-repair-v254.mjs',`import fs from 'node:fs';
@@ -68,37 +68,6 @@ jobs:
           console.log('Structured Output Repair v254: JSON mode, strict schema, fenced extraction, one bounded repair, and truncation-aware curriculum budget verified.');
           `);
 
-          fs.writeFileSync('.github/workflows/verify-structured-output-repair-v254.yml',`name: Verify Structured Output Repair v254
-
-          on:
-            pull_request:
-              paths:
-                - 'public/app/shared/civweave-model-runtime.js'
-                - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'
-                - 'scripts/verify-structured-output-repair-v254.mjs'
-                - '.github/workflows/verify-structured-output-repair-v254.yml'
-            push:
-              branches: [main]
-              paths:
-                - 'public/app/shared/civweave-model-runtime.js'
-                - 'public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'
-                - 'scripts/verify-structured-output-repair-v254.mjs'
-                - '.github/workflows/verify-structured-output-repair-v254.yml'
-
-          jobs:
-            verify:
-              runs-on: ubuntu-latest
-              steps:
-                - uses: actions/checkout@v4
-                - uses: actions/setup-node@v4
-                  with:
-                    node-version: '22'
-                - run: node --check public/app/shared/civweave-model-runtime.js
-                - run: node --check public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs
-                - run: node scripts/verify-structured-output-repair-v254.mjs
-                - run: node scripts/verify-living-school-cleanroom-v218.mjs
-          `);
-
           fs.writeFileSync('VERSION','1.0.50\n');
           const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
           pkg.version='1.0.50';
@@ -120,9 +89,12 @@ jobs:
           git diff --check
       - name: Commit materialized repair
         run: |
-          rm .github/workflows/apply-living-school-structured-output-v254.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
+          if git diff --cached --quiet; then
+            echo 'No materialized changes remain.'
+            exit 0
+          fi
           git commit -m 'Fix truncated Living School structured curriculum output'
           git push origin HEAD:fix/living-school-structured-output-v254
