@@ -37,33 +37,64 @@ async function handleLivingSchoolClick(event){
 }
 
 function chatCurriculumData(input={}){
-  const s=state(),rawLevel=clean(input.level,80).toLowerCase(),rawMode=clean(input.mode,80).toLowerCase();
+  const s=state(),newPath=input?.intent==='new'||input?.newPath===true||input?.replaceExisting===true,rawLevel=clean(input.level,80).toLowerCase(),rawMode=clean(input.mode,80).toLowerCase();
   return{
-    title:clean(input.title,240)||clean(s.school?.title||s.pathContext?.title,240),
-    capability:clean(input.capability,2400)||clean(s.school?.capability||s.pathContext?.capability,2400),
-    level:LEVELS.has(rawLevel)?rawLevel:LEVELS.has(clean(s.school?.level,80).toLowerCase())?clean(s.school.level,80).toLowerCase():'beginner',
-    count:Math.max(1,Math.min(8,Number(input.count||s.school?.modules?.length||4)||4)),
+    title:clean(input.title,240)||(newPath?'':clean(s.school?.title||s.pathContext?.title,240)),
+    capability:clean(input.capability,2400)||(newPath?'':clean(s.school?.capability||s.pathContext?.capability,2400)),
+    level:LEVELS.has(rawLevel)?rawLevel:newPath?'beginner':LEVELS.has(clean(s.school?.level,80).toLowerCase())?clean(s.school.level,80).toLowerCase():'beginner',
+    count:Math.max(1,Math.min(8,Number(input.count||(newPath?4:s.school?.modules?.length||4))||4)),
     mode:MODES.has(rawMode)?rawMode:MODES.has(clean(s.settings?.mode,80).toLowerCase())?clean(s.settings.mode,80).toLowerCase():'guided',
     modelRoute:clean(input.modelRoute,120)||clean(s.settings?.modelRoute,120)||'shared',
-    proof:clean(input.proof,3000)||clean(s.school?.proof||s.pathContext?.proof,3000)||'A working artifact, explanation, and independent receipt.'
+    proof:clean(input.proof,3000)||(newPath?'A working artifact, explanation, and independent receipt.':clean(s.school?.proof||s.pathContext?.proof,3000)||'A working artifact, explanation, and independent receipt.'),
+    intent:newPath?'new':'revise',
+    newPath,
+    replaceExisting:newPath
   };
+}
+
+function snapshotLearningState(){
+  const s=state();
+  return copy({school:s.school||null,progress:s.progress||{},activeModuleId:s.activeModuleId||'',pathContext:s.pathContext||null,research:s.research||null,sources:s.sources||[],visualInspection:s.visualInspection||null});
+}
+function restoreLearningState(snapshot){
+  if(!snapshot)return;
+  const s=state();
+  s.school=copy(snapshot.school);s.progress=copy(snapshot.progress||{});s.activeModuleId=snapshot.activeModuleId||'';s.pathContext=copy(snapshot.pathContext);s.research=copy(snapshot.research);s.sources=copy(snapshot.sources||[]);s.visualInspection=copy(snapshot.visualInspection);
+}
+function prepareNewPath(data){
+  const s=state(),snapshot=snapshotLearningState();
+  s.school=null;
+  s.progress={};
+  s.activeModuleId='';
+  s.pathContext={title:data.title,capability:data.capability,proof:data.proof,source:'moss-shared-chat-new-path'};
+  s.research=null;
+  s.sources=[];
+  s.visualInspection=null;
+  persist('living-school-new-path-replacement-started',{title:data.title,capability:data.capability,level:data.level,count:data.count,source:'moss-shared-chat'});
+  return snapshot;
 }
 
 async function generateCurriculumFromChat(input={}){
   if(busy)throw new Error('Living School is already processing another learning action.');
   const data=chatCurriculumData(input);
   if(!data.capability)throw new Error('Moss needs an observable capability before generating the curriculum.');
+  const previous=data.newPath?prepareNewPath(data):null;
   busy=true;markDispatch();
   document.documentElement.dataset.livingSchoolChatAction='generating-curriculum';
+  document.documentElement.dataset.livingSchoolPathIntent=data.intent;
   try{
-    const school=await generateCurriculumFromData(data,{source:'moss-shared-chat',onStage:(stage,detail)=>{
+    const school=await generateCurriculumFromData(data,{source:data.newPath?'moss-shared-chat-new-path':'moss-shared-chat',onStage:(stage,detail)=>{
       document.documentElement.dataset.livingSchoolChatStage=stage;
-      try{dispatchEvent(new CustomEvent('civweave:living-school-curriculum-stage',{detail:{stage,...detail,title:data.title,capability:data.capability}}))}catch{}
+      try{dispatchEvent(new CustomEvent('civweave:living-school-curriculum-stage',{detail:{stage,...detail,title:data.title,capability:data.capability,intent:data.intent}}))}catch{}
     }});
+    if(data.newPath)persist('living-school-new-path-replacement-completed',{schoolId:school.id,title:school.title,capability:school.capability,moduleCount:school.modules?.length||0,source:'moss-shared-chat'});
     render();
-    const result={school:copy(school),sourceCount:Number(state().sources?.length||0),research:copy(state().research||null),activeModuleId:state().activeModuleId};
-    try{dispatchEvent(new CustomEvent('civweave:living-school-curriculum-generated',{detail:{schoolId:school.id,title:school.title,moduleCount:school.modules.length,capability:school.capability,source:'moss-shared-chat'}}))}catch{}
+    const result={school:copy(school),sourceCount:Number(state().sources?.length||0),research:copy(state().research||null),activeModuleId:state().activeModuleId,intent:data.intent};
+    try{dispatchEvent(new CustomEvent('civweave:living-school-curriculum-generated',{detail:{schoolId:school.id,title:school.title,moduleCount:school.modules.length,capability:school.capability,source:data.newPath?'moss-shared-chat-new-path':'moss-shared-chat',intent:data.intent}}))}catch{}
     return result;
+  }catch(error){
+    if(data.newPath){restoreLearningState(previous);persist('living-school-new-path-replacement-rolled-back',{title:data.title,capability:data.capability,error:clean(error?.message||error,1000),source:'moss-shared-chat'});}
+    throw error;
   }finally{
     busy=false;
     document.documentElement.dataset.livingSchoolChatAction='idle';
@@ -74,5 +105,5 @@ async function generateCurriculumFromChat(input={}){
 sanitizeSavedHybridQuiz();
 document.addEventListener('click',handleLivingSchoolClick,true);
 render();
-globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'live-local-synthesis-source-links-v260',generationGuard:'source-prompt-v262+quiz-contract-v263',quizIntegrity:'ai-only-v263-short-answer-contract',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,generateCurriculumFromChat,normalizeChatCurriculum:chatCurriculumData,legacyNavigation:false});
-try{dispatchEvent(new CustomEvent('civweave:living-school-workbench-ready',{detail:{version:VERSION,chatCurriculumBridge:true,generationGuard:'source-prompt-v262+quiz-contract-v263',quizIntegrity:'ai-only-v263-short-answer-contract'}}))}catch{}
+globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'live-local-synthesis-source-links-v260',generationGuard:'source-prompt-v262+quiz-contract-v263',quizIntegrity:'ai-only-v263-short-answer-contract',chatPathIntent:'new-vs-revise-v264',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,generateCurriculumFromChat,normalizeChatCurriculum:chatCurriculumData,legacyNavigation:false});
+try{dispatchEvent(new CustomEvent('civweave:living-school-workbench-ready',{detail:{version:VERSION,chatCurriculumBridge:true,generationGuard:'source-prompt-v262+quiz-contract-v263',quizIntegrity:'ai-only-v263-short-answer-contract',chatPathIntent:'new-vs-revise-v264'}}))}catch{}

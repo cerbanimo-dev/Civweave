@@ -1,11 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.50-living-school-chat-workbench-v255';
+const VERSION='1.0.56-living-school-chat-workbench-v264';
 const STATE_KEY='civweave.living-school.cabinet.v151';
 const PENDING_KEY='civweave.living-school.chat-curriculum.pending.v255';
 const STRUCTURE=/\b(curriculum|course|syllabus|learning path|learning program|lesson plan|skill tree)\b/i;
 const BUILD=/\b(build|create|make|generate|draft|design|develop|structure|regenerate|rebuild|revise|update|convert)\b/i;
+const NEW_BUILD=/\b(build|create|make|generate|draft|design|develop|start)\b/i;
+const REVISE=/\b(revise|update|regenerate|rebuild|edit|change|modify|continue|add|remove|expand|deepen|shorten|simplify)\b/i;
 const FOLLOWUP=/\b(beginner\s*(?:to|-|through)\s*(?:mastery|advanced)|final\s+(?:boss|challenge)|boss\b|make\s+the\s+learning|learning\s+for)\b/i;
 const PRONOUN_BUILD=/^\s*(?:yes[,! ]*)?(?:let['’]?s\s+)?(?:go\s+ahead\s+and\s+)?(?:draft|build|make|generate|create|rebuild|revise|do)\s+(?:it|that|this)\s*[.!]?\s*$/i;
 const MUTATION_CLAIM=/(?:\b(?:i|we)(?:['’]ve|\s+have)\s+(?:drafted|created|built|generated|structured|saved|updated|revised|made)\b|\b(?:has\s+been|was)\s+(?:created|generated|built|saved|drafted|structured|revised)\b)/i;
@@ -51,6 +53,31 @@ function sentenceTail(value){
   return clean(value,1000).replace(/^[\s:,-]+/,'').split(/(?<=[.!?])\s+/)[0].replace(/[.!?]+$/,'').trim();
 }
 
+function normalizeLearningSubject(value){
+  let subject=sentenceTail(value);
+  subject=subject
+    .replace(/^how\s+(?:do|can|could|should|would)\s+(?:i|we)\s+/i,'')
+    .replace(/^how\s+to\s+/i,'')
+    .replace(/^learn(?:ing)?\s+(?:how\s+to\s+|to\s+)/i,'')
+    .replace(/^to\s+/i,'')
+    .replace(/^(?:about|on)\s+/i,'')
+    .trim();
+  return clean(subject,1200);
+}
+
+function explicitBuildSubject(text){
+  const value=clean(text,5000);
+  const patterns=[
+    /\b(?:build|create|make|generate|draft|design|develop|start|regenerate|rebuild)\s+(?:(?:me|us)\s+)?(?:(?:a|an|the|this|that|new)\s+)?(?:curriculum|course|syllabus|learning path|learning program|lesson plan|skill tree)\s*(?:(?:about|on|for|to learn|covering)\s+|[:,-]\s*)(.+)$/i,
+    /\b(?:curriculum|course|syllabus|learning path|learning program|lesson plan|skill tree)\s+(?:about|on|for|to learn|covering)\s+(.+)$/i
+  ];
+  for(const pattern of patterns){
+    const match=value.match(pattern);
+    if(match){const subject=normalizeLearningSubject(match[1]);if(subject&&subject.length>2)return subject}
+  }
+  return'';
+}
+
 function masteryChallenge(rows){
   const texts=[...rows].reverse().map(row=>row.text);
   const patterns=[
@@ -72,10 +99,22 @@ function userCapability(rows){
     for(const pattern of patterns){
       const match=row.text.match(pattern);if(!match)continue;
       const value=sentenceTail(match[1]).replace(/\s+(?:and|but)\s+(?:the\s+)?(?:boss|final\s+challenge)\b.*$/i,'').trim();
-      if(value&&value.length>3)return value;
+      if(value&&value.length>3)return normalizeLearningSubject(value)||value;
     }
   }
   return'';
+}
+
+function curriculumMode(options,rows,school){
+  const text=clean(options?.text,5000),subject=explicitBuildSubject(text);
+  if(subject)return'new';
+  if(/\bnew\s+(?:curriculum|course|syllabus|learning path|learning program|lesson plan|skill tree)\b/i.test(text))return'new';
+  if(!school?.title&&!school?.capability)return'new';
+  if(PRONOUN_BUILD.test(text))return'revise';
+  if(REVISE.test(text)&&recentStructure(rows))return'revise';
+  if(FOLLOWUP.test(text)&&recentStructure(rows))return'revise';
+  if(STRUCTURE.test(text)&&NEW_BUILD.test(text))return'new';
+  return'revise';
 }
 
 function moduleCount(rows,current){
@@ -97,23 +136,40 @@ function startLevel(rows,current){
 function titleCase(value){return clean(value,100).split(/\s+/).slice(0,8).map(word=>word?word[0].toUpperCase()+word.slice(1):word).join(' ')}
 
 function curriculumRequest(options={}){
-  const rows=rowsFor(options),s=state(),school=s?.school||{},path=s?.pathContext||{},challenge=masteryChallenge(rows);
-  const title=clean(school.title||path.title||quotedTitle(rows),240);
-  let capability=clean(challenge||school.capability||path.capability||userCapability(rows),2400);
+  const rows=rowsFor(options),s=state(),school=s?.school||{},path=s?.pathContext||{},intent=curriculumMode(options,rows,school),newPath=intent==='new';
+  const currentRow={role:'user',text:clean(options.text,5000)},subject=explicitBuildSubject(options.text),scopedRows=subject?[currentRow]:rows;
+  const challenge=newPath?(masteryChallenge([currentRow])||(!subject?masteryChallenge(rows):'')):masteryChallenge(rows);
+  let title='',capability='',proof='',level='beginner',count=4;
+  if(newPath){
+    capability=clean(challenge||subject||userCapability(scopedRows)||userCapability(rows),2400);
+    title=clean(subject?titleCase(subject):quotedTitle(rows),240)||titleCase(capability);
+    proof='A working artifact, explanation, and independent receipt.';
+    if(challenge&&!proof.toLowerCase().includes(challenge.toLowerCase()))proof=`${proof} Final mastery challenge: ${challenge}.`;
+    level=startLevel(scopedRows,'');
+    count=moduleCount(scopedRows,0);
+  }else{
+    title=clean(school.title||path.title||quotedTitle(rows),240);
+    capability=clean(challenge||school.capability||path.capability||userCapability(rows),2400);
+    proof=clean(school.proof||path.proof,3000)||'A working artifact, explanation, and independent receipt.';
+    if(challenge&&!proof.toLowerCase().includes(challenge.toLowerCase()))proof=`${proof} Final mastery challenge: ${challenge}.`;
+    level=startLevel(rows,school.level);
+    count=moduleCount(rows,school.modules?.length);
+  }
   if(!capability&&title)capability=`Demonstrate ${title} independently through observable practice and reviewable evidence.`;
   const finalTitle=title||titleCase(capability)||'Learning Path';
-  let proof=clean(school.proof||path.proof,3000)||'A working artifact, explanation, and independent receipt.';
-  if(challenge&&!proof.toLowerCase().includes(challenge.toLowerCase()))proof=`${proof} Final mastery challenge: ${challenge}.`;
   const mode=MODES.includes(clean(s?.settings?.mode,80).toLowerCase())?clean(s.settings.mode,80).toLowerCase():'guided';
   return{
     title:finalTitle,
     capability,
-    level:startLevel(rows,school.level),
-    count:moduleCount(rows,school.modules?.length),
+    level,
+    count,
     mode,
     modelRoute:clean(s?.settings?.modelRoute,120)||'shared',
     proof,
     masteryChallenge:challenge,
+    intent,
+    newPath,
+    replaceExisting:newPath,
     requestedAt:now(),
     sourceText:clean(options.text,4000)
   };
@@ -142,7 +198,7 @@ function generatedPacket(result,request){
   const fallbackText=generation.fallback?' The canonical local fallback completed after research because the selected shared generation route did not finish.':' The curriculum came through the canonical Moss research-and-generation pipeline.';
   const answer=`I built “${clean(school.title||request.title,240)}” in the Living School workbench, rather than pretending the curriculum exists inside chat. It now has ${modules.length||request.count} module${(modules.length||request.count)===1?'':'s'} starting at ${clean(school.level||request.level,80)} for the capability “${clean(school.capability||request.capability,500)}”.${researchText}${fallbackText}`;
   const next=first?.title?`Open Module 1: ${clean(first.title,180)}.`:'Review the generated curriculum in the Living School workbench.';
-  return packet(answer,next,{provider:'living-school-workbench',model:generation.model||generation.provider||'canonical-learning-workbench',action:{kind:'living-school-curriculum-generated',system:'living-school',state:'completed',schoolId:school.id||'',title:school.title||request.title,moduleCount:modules.length||request.count,capability:school.capability||request.capability,source:'moss-shared-chat'},workbench:{schoolId:school.id||'',moduleCount:modules.length||request.count,sourceCount}});
+  return packet(answer,next,{provider:'living-school-workbench',model:generation.model||generation.provider||'canonical-learning-workbench',action:{kind:'living-school-curriculum-generated',system:'living-school',state:'completed',schoolId:school.id||'',title:school.title||request.title,moduleCount:modules.length||request.count,capability:school.capability||request.capability,source:'moss-shared-chat',intent:request.intent||'revise'},workbench:{schoolId:school.id||'',moduleCount:modules.length||request.count,sourceCount}});
 }
 
 function clarificationPacket(request){
@@ -151,7 +207,7 @@ function clarificationPacket(request){
 
 function queuedPacket(request){
   try{localStorage.setItem(PENDING_KEY,JSON.stringify({...request,autoRun:true,queuedAt:now()}))}catch{}
-  return packet('I saved this as a Living School workbench request. I have not generated the curriculum yet because the Learning Workbench is not mounted on this page. When Living School opens, Moss will run the queued request through research and the canonical curriculum generator.','Open Living School to run the queued curriculum build.',{provider:'living-school-workbench-queue',action:{kind:'living-school-curriculum-queued',system:'living-school',state:'queued',title:request.title,capability:request.capability}});
+  return packet('I saved this as a Living School workbench request. I have not generated the curriculum yet because the Learning Workbench is not mounted on this page. When Living School opens, Moss will run the queued request through research and the canonical curriculum generator.','Open Living School to run the queued curriculum build.',{provider:'living-school-workbench-queue',action:{kind:'living-school-curriculum-queued',system:'living-school',state:'queued',title:request.title,capability:request.capability,intent:request.intent||'revise'}});
 }
 
 async function executeCurriculum(options={}){
@@ -162,10 +218,10 @@ async function executeCurriculum(options={}){
   try{
     const result=await workbench.generateCurriculumFromChat(request);
     try{localStorage.removeItem(PENDING_KEY)}catch{}
-    try{dispatchEvent(new CustomEvent('civweave:moss-workbench-action',{detail:{kind:'curriculum-generated',title:result?.school?.title||request.title,capability:request.capability,moduleCount:result?.school?.modules?.length||request.count}}))}catch{}
+    try{dispatchEvent(new CustomEvent('civweave:moss-workbench-action',{detail:{kind:'curriculum-generated',title:result?.school?.title||request.title,capability:request.capability,moduleCount:result?.school?.modules?.length||request.count,intent:request.intent}}))}catch{}
     return generatedPacket(result,request);
   }catch(error){
-    return packet(`I tried to build “${request.title}” in the Living School workbench, but the canonical generator stopped: ${clean(error?.message||error,1200)} I did not mark the curriculum as generated.`,'Review the capability or AI/research settings, then retry the curriculum build.',{provider:'living-school-workbench-error',action:{kind:'living-school-curriculum-generation-failed',system:'living-school',state:'failed',title:request.title,capability:request.capability,error:clean(error?.message||error,1000)}});
+    return packet(`I tried to build “${request.title}” in the Living School workbench, but the canonical generator stopped: ${clean(error?.message||error,1200)} I did not mark the curriculum as generated.`,'Review the capability or AI/research settings, then retry the curriculum build.',{provider:'living-school-workbench-error',action:{kind:'living-school-curriculum-generation-failed',system:'living-school',state:'failed',title:request.title,capability:request.capability,intent:request.intent,error:clean(error?.message||error,1000)}});
   }
 }
 
@@ -241,6 +297,6 @@ function start(){
   let ticks=0;const timer=setInterval(()=>{patchLoader(globalThis.CivweaveFamilyAILoaderV105);patchAvailable();consumePending();if(++ticks>=300)clearInterval(timer)},100);
 }
 
-globalThis.CivweaveLivingSchoolChatWorkbenchV255=Object.freeze({version:VERSION,curriculumIntent,curriculumRequest,executeCurriculum,guardFalseMutationClaim,patchAvailable,consumePending,pendingKey:PENDING_KEY,policy:'moss-chat-orchestrates-canonical-learning-workbench-no-false-materialization'});
+globalThis.CivweaveLivingSchoolChatWorkbenchV255=Object.freeze({version:VERSION,curriculumIntent,curriculumMode,explicitBuildSubject,curriculumRequest,executeCurriculum,guardFalseMutationClaim,patchAvailable,consumePending,pendingKey:PENDING_KEY,policy:'moss-chat-separates-new-learning-paths-from-active-path-revisions-v264'});
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
