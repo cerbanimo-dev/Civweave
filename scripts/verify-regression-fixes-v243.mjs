@@ -79,13 +79,17 @@ for(const token of [
   'Preserve each SOURCE_ID exactly',
   '600-1000 words of useful instruction per module',
   "purpose!=='living-school-quiz-delta-completion-v258'",
-  "quizDeltaMode:'single-module-iterative'",
+  "quizDeltaMode:forceSingle?'single-question-recovery':'single-module-iterative'",
   'Return exactly ${needed}',
   'questions.minItems=Math.max(1,count)',
-  'livingSchoolGenerationGuardRevision:REVISION'
+  'livingSchoolGenerationGuardRevision:REVISION',
+  'moduleNeedsDepth',
+  "purpose:'living-school-module-depth-expansion-v262'",
+  'moduleDepthRepair:true'
 ])assert(generationGuard.includes(token),`Living School generation guard is missing ${token}.`);
 assert(generationGuard.includes("purpose!=='living-school-live-source-research-v260'"),'Antigravity evidence-digest strengthening is missing.');
 assert(generationGuard.includes('800-2500 characters of useful source-grounded notes'),'Live research does not request enough source material for downstream curriculum synthesis.');
+assert(generationGuard.includes("forceSingle=true"),'Quiz delta completion cannot degrade to one-question recovery after a structured-output miss.');
 assert(!generationGuard.includes('fetch(source.url')&&!generationGuard.includes('fetch(source?.url'),'Curriculum generation guard must inject supplied source text rather than refetching sources.');
 
 assert(localResearch.includes('searchDownloadedKnowledge'),'Downloaded knowledge is not queried.');
@@ -101,4 +105,4 @@ assert.equal(parsed.dependencies?.['onnxruntime-web'],'1.27.0','Pinned ONNX Runt
 assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
 assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second production runtime.');
 
-console.log(JSON.stringify({ok:true,revision:'v243.5-source-prompt-iterative-quiz',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,sourceMaterialInjectedIntoPrompt:true,localPassagesInjectedIntoPrompt:true,liveEvidenceDigestStrengthened:true,iterativePerModuleQuizCompletion:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243.6-source-prompt-depth-iterative-quiz',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,sourceMaterialInjectedIntoPrompt:true,localPassagesInjectedIntoPrompt:true,liveEvidenceDigestStrengthened:true,moduleDepthRepair:true,iterativePerModuleQuizCompletion:true,singleQuestionQuizRecovery:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
