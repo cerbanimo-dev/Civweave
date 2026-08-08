@@ -76,6 +76,53 @@ function injectCurriculumSources(request){
   return next;
 }
 
+const lessonTextLength=module=>(Array.isArray(module?.lessonBlocks)?module.lessonBlocks:[]).reduce((sum,block)=>sum+clean(block?.content,12000).length,0);
+const moduleNeedsDepth=module=>(Array.isArray(module?.lessonBlocks)?module.lessonBlocks.length:0)<3||lessonTextLength(module)<3000;
+function lessonExpansionSchema(){return{type:'object',required:['moduleId','lessonBlocks'],properties:{moduleId:{type:'string'},lessonBlocks:{type:'array',items:{type:'object',required:['heading','content','sourceIds','provenance'],properties:{heading:{type:'string'},content:{type:'string'},sourceIds:{type:'array',items:{type:'string'}},provenance:{type:'string'}}}}}}}
+function sanitizeExpandedBlocks(output,knownSourceIds){
+  const blocks=Array.isArray(output?.lessonBlocks)?output.lessonBlocks:[];
+  return blocks.map((block,index)=>{
+    const content=clean(block?.content,10000);if(!content)return null;
+    const sourceIds=(Array.isArray(block?.sourceIds)?block.sourceIds:[]).map(value=>clean(value,180)).filter(value=>knownSourceIds.has(value)).slice(0,8);
+    return{id:clean(block?.id,160)||`expanded-lesson-${index+1}`,heading:clean(block?.heading,320)||`Lesson ${index+1}`,content,sourceIds,provenance:sourceIds.length?clean(block?.provenance,160)||'source-grounded':'generated-unverified'};
+  }).filter(Boolean).slice(0,6);
+}
+async function expandThinCurriculumModules(original,request,result){
+  if(result?.status!=='success'||!Array.isArray(result?.outputJson?.modules))return result;
+  const output=deepCopy(result.outputJson),knownSourceIds=new Set((Array.isArray(request?.context?.sources)?request.context.sources:[]).map(source=>clean(source?.id,180)).filter(Boolean));
+  let changed=false;
+  for(let index=0;index<output.modules.length;index++){
+    const module=output.modules[index];
+    if(!moduleNeedsDepth(module))continue;
+    const moduleId=clean(module?.id,180)||`module-${index+1}`;
+    const existing=(Array.isArray(module?.lessonBlocks)?module.lessonBlocks:[]).map(block=>({heading:clean(block?.heading,320),content:clean(block?.content,5000),sourceIds:(Array.isArray(block?.sourceIds)?block.sourceIds:[]).map(value=>clean(value,180)).filter(Boolean),provenance:clean(block?.provenance,160)}));
+    const expansionPrompt=[
+      `EXPAND ONE CURRICULUM MODULE ONLY: ${moduleId}`,
+      `Title: ${clean(module?.title,320)}`,
+      `Objective: ${clean(module?.objective,1800)}`,
+      `Learning objectives: ${clean(JSON.stringify(module?.learningObjectives||[]),3000)}`,
+      `Concepts: ${clean(JSON.stringify(module?.concepts||[]),5000)}`,
+      `Existing lesson blocks that must be preserved and deepened: ${clean(JSON.stringify(existing),14000)}`,
+      'Return 3-5 substantive lesson blocks totaling roughly 600-1000 words when the supplied evidence supports that depth.',
+      'Teach the material rather than merely outlining it. Include definitions, mechanisms, worked examples, practical implications, cautions or uncertainty, and transitions between ideas where appropriate.',
+      'Use only SOURCE_ID values already present in the source packet above. Do not invent sources, URLs, quotations, studies, dates, or claims.',
+      'Preserve all useful ideas from the existing lesson blocks but rewrite them into a coherent, richer lesson. Do not change the rest of the module.'
+    ].join('\n');
+    let expansionRequest={...request,purpose:'living-school-module-depth-expansion-v262',schema:lessonExpansionSchema(),context:{...(request.context||{}),moduleId,moduleIndex:index,depthExpansion:true},messages:Array.isArray(request.messages)?request.messages.map(message=>({...message})):[]};
+    expansionRequest=appendUserMessage(expansionRequest,expansionPrompt);
+    const expansion=await original(expansionRequest);
+    if(expansion?.status!=='success')continue;
+    const blocks=sanitizeExpandedBlocks(expansion.outputJson,knownSourceIds);
+    if(blocks.length<3)continue;
+    const expandedLength=blocks.reduce((sum,block)=>sum+block.content.length,0);
+    if(expandedLength<=lessonTextLength(module))continue;
+    output.modules[index]={...module,lessonBlocks:blocks};
+    changed=true;
+  }
+  if(!changed)return result;
+  return{...result,outputJson:output,outputText:JSON.stringify(output)};
+}
+
 function questionKey(question){return clean(question?.prompt,2400).toLowerCase().replace(/\s+/g,' ')}
 function validQuestionRows(output,moduleId){
   const modules=Array.isArray(output?.modules)?output.modules:[];
@@ -162,11 +209,12 @@ export async function installLivingSchoolGenerationGuard(){
     next=injectLocalSynthesisSources(next);
     next=injectCurriculumSources(next);
     if(next?.purpose==='living-school-quiz-delta-completion-v258')return completeQuizPerModule(originalGenerate,next);
+    if(next?.purpose==='living-school-research-grounded-curriculum-v218.1')return expandThinCurriculumModules(originalGenerate,next,await originalGenerate(next));
     return originalGenerate(next);
   };
   const wrapped=Object.freeze({...runtime,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),livingSchoolGenerationGuardRevision:REVISION});
   globalThis.CivweaveModelRuntime=wrapped;
-  const api=Object.freeze({installed:true,revision:REVISION,sourceMaterialPromptInjection:true,localPassagePromptInjection:true,liveEvidenceDigest:true,quizDeltaMode:'single-module-iterative-with-single-question-recovery'});
+  const api=Object.freeze({installed:true,revision:REVISION,sourceMaterialPromptInjection:true,localPassagePromptInjection:true,liveEvidenceDigest:true,moduleDepthRepair:true,quizDeltaMode:'single-module-iterative-with-single-question-recovery'});
   globalThis.CivweaveLivingSchoolGenerationGuardV262=api;
   try{dispatchEvent(new CustomEvent('civweave:living-school-generation-guard-ready',{detail:api}))}catch{}
   return api;
