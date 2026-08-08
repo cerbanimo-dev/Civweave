@@ -27,18 +27,22 @@ jobs:
           python <<'PY'
           from pathlib import Path
           import re
+
           old="v240-local-station-directory-random-pull-labels"
           new="v241-playlist-context-track-links"
           for name in ["public/app/install-boundary-v146.js","scripts/verify-five-system-navigation-v227.mjs","scripts/verify-canonical-core-only-v226.mjs"]:
               p=Path(name); text=p.read_text(); count=text.count(old)
               if count != 1: raise SystemExit(f"{name}: expected one old radio marker, found {count}")
               p.write_text(text.replace(old,new,1))
-          p=Path("scripts/sync-release-version-assets.mjs"); text=p.read_text()
-          fix=".replace(/version:'\\d+\\.\\d+\\.\\d+-chat-convergence-v250'/g,`version:'${version}-chat-convergence-v250'`)"
+
+          p=Path("scripts/sync-release-coherence-v220.mjs")
+          text=p.read_text()
+          fix="source=replaceRequired(source,/version:'\\d+\\.\\d+\\.\\d+-chat-convergence-v250'/,`version:'${version}-chat-convergence-v250'`,'installed entry exported release version');"
           if fix not in text:
-              anchor=".replace(/const FALLBACK_VERSION='\\d+\\.\\d+\\.\\d+'/g,`const FALLBACK_VERSION='${version}'`)"
-              if text.count(anchor) != 1: raise SystemExit("release-sync installed-entry anchor missing")
-              p.write_text(text.replace(anchor,anchor+"\n    "+fix,1))
+              anchor="source=replaceRequired(source,/const FALLBACK_VERSION='\\d+\\.\\d+\\.\\d+';/,`const FALLBACK_VERSION='${version}';`,'installed entry fallback release version');"
+              if text.count(anchor) != 1: raise SystemExit("release-coherence installed-entry anchor missing")
+              p.write_text(text.replace(anchor,anchor+"\n  "+fix,1))
+
           Path("VERSION").write_text("1.0.47\n")
           p=Path("package.json"); text=p.read_text()
           text,count=re.subn(r'(\"version\"\s*:\s*\")\d+\.\d+\.\d+(\")',r'\g<1>1.0.47\2',text,count=1)
