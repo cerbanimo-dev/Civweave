@@ -52,12 +52,13 @@ assert(localResearch.includes('searchDownloadedKnowledge'),'Downloaded knowledge
 assert(localResearch.includes("provenance:'knowledge-school-downloaded'"),'Downloaded-source provenance is missing.');
 assert(localResearch.includes('ARCHIVE VERIFIED · NOT LIVE-CHECKED'),'Downloaded references overstate or omit verification status.');
 assert(localResearch.includes('dependency-free cached SQLite passage search'),'Local research does not report the dependency-free reader.');
+assert(localResearch.includes('canonicalUrl'),'Downloaded research no longer carries canonical article links.');
 
-for(const token of ['openSeed(slug)','DecompressionStream','databaseBytes','findPassages','windows-1252','SQLite format 3','dependency-free-sqlite-byte-search'])assert(knowledge.includes(token),`Offline knowledge reader is missing ${token}.`);
+for(const token of ['openSeed(slug)','DecompressionStream','databaseBundle','extractArticleMetadata','canonicalNearHit','findPassages','windows-1252','SQLite format 3','dependency-free-sqlite-byte-search'])assert(knowledge.includes(token),`Offline knowledge reader is missing ${token}.`);
 const parsed=JSON.parse(pkg),dependencies=Object.entries(parsed.dependencies||{});
 assert.equal(dependencies.length,1,'v243 must preserve Civweave’s single production dependency contract.');
 assert.equal(parsed.dependencies?.['onnxruntime-web'],'1.27.0','Pinned ONNX Runtime dependency changed unexpectedly.');
 assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
 assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second production runtime.');
 
-console.log(JSON.stringify({ok:true,revision:'v243.1-proof-dialog-v250-chat-owner',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243.2-source-linked-local-research',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
