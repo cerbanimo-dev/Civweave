@@ -25,26 +25,24 @@ jobs:
 
           const runtimePath='public/app/shared/civweave-model-runtime.js';
           let runtime=fs.readFileSync(runtimePath,'utf8');
-          const oldRepair=`          repairAttempts += 1;
-          emit(context, "repairing", { attempt: repairAttempts, validationErrors: validationErrors.slice(0, 12) });
-          const repaired = await invokeAdapter({ ...config, stream: false }, repairMessages(messages, outputText, validationErrors), { ...request, maxRepairAttempts: 0 }, context, controller.signal);`;
-          const newRepair=`          repairAttempts += 1;
-          emit(context, "repairing", { attempt: repairAttempts, validationErrors: validationErrors.slice(0, 12) });
-          const finishReason = safeString(raw?.payload?.candidates?.[0]?.finishReason || raw?.payload?.finishReason || "", 80).toUpperCase();
-          const truncated = ["MAX_TOKENS", "MAX_OUTPUT_TOKENS"].includes(finishReason);
-          const repairConfig = truncated
-            ? { ...config, stream: false, maxTokens: Math.min(131072, Math.max(config.maxTokens * 2, 16384)) }
-            : { ...config, stream: false };
-          if (truncated) emit(context, "repairing", { attempt: repairAttempts, reason: "structured-output-truncated", finishReason, maxTokens: repairConfig.maxTokens });
-          const repaired = await invokeAdapter(repairConfig, repairMessages(messages, outputText, validationErrors), { ...request, maxRepairAttempts: 0 }, context, controller.signal);`;
-          if(!runtime.includes(oldRepair)) throw new Error('Shared model runtime repair block did not match expected main.');
-          runtime=runtime.replace(oldRepair,newRepair);
+          const repairedLine='          const repaired = await invokeAdapter({ ...config, stream: false }, repairMessages(messages, outputText, validationErrors), { ...request, maxRepairAttempts: 0 }, context, controller.signal);';
+          const replacement=[
+            '          const finishReason = safeString(raw?.payload?.candidates?.[0]?.finishReason || raw?.payload?.finishReason || "", 80).toUpperCase();',
+            '          const truncated = ["MAX_TOKENS", "MAX_OUTPUT_TOKENS"].includes(finishReason);',
+            '          const repairConfig = truncated',
+            '            ? { ...config, stream: false, maxTokens: Math.min(65536, Math.max(config.maxTokens * 2, 16384)) }',
+            '            : { ...config, stream: false };',
+            '          if (truncated) emit(context, "repairing", { attempt: repairAttempts, reason: "structured-output-truncated", finishReason, maxTokens: repairConfig.maxTokens });',
+            '          const repaired = await invokeAdapter(repairConfig, repairMessages(messages, outputText, validationErrors), { ...request, maxRepairAttempts: 0 }, context, controller.signal);',
+          ].join('\n');
+          if(!runtime.includes(repairedLine)) throw new Error('Shared model runtime repair call did not match expected main.');
+          runtime=runtime.replace(repairedLine,replacement);
           fs.writeFileSync(runtimePath,runtime);
 
           const livingPath='public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs';
           let living=fs.readFileSync(livingPath,'utf8');
-          const oldCall="const result=await runtime.generate({purpose:'living-school-research-grounded-curriculum-v218.1',executionProfile:'interactive',config,schema:curriculumSchema(),context:";
-          const newCall="const curriculumConfig={...config,maxTokens:Math.max(Number(config.maxTokens)||0,16384),temperature:Math.min(Number(config.temperature)||0.2,0.3)};\n    const result=await runtime.generate({purpose:'living-school-research-grounded-curriculum-v218.1',executionProfile:'interactive',config:curriculumConfig,schema:curriculumSchema(),context:";
+          const oldCall="    const result=await runtime.generate({purpose:'living-school-research-grounded-curriculum-v218.1',executionProfile:'interactive',config,schema:curriculumSchema(),context:";
+          const newCall="    const curriculumConfig={...config,maxTokens:Math.max(Number(config.maxTokens)||0,16384),temperature:Math.min(Number(config.temperature)||0.2,0.3)};\n    const result=await runtime.generate({purpose:'living-school-research-grounded-curriculum-v218.1',executionProfile:'interactive',config:curriculumConfig,schema:curriculumSchema(),context:";
           if(!living.includes(oldCall)) throw new Error('Living School curriculum model call did not match expected main.');
           living=living.replace(oldCall,newCall);
           fs.writeFileSync(livingPath,living);
