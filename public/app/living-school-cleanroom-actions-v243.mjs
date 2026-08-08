@@ -3,6 +3,41 @@ import {state,persist,toast,progressFor,fields,clean,generateSchool} from './cab
 import {researchCapability} from './living-school-local-research-v243.mjs';
 
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};
+const stage=(handler,name,detail={})=>{try{handler?.(name,detail)}catch{}};
+
+export async function generateCurriculumFromData(input={},options={}){
+  const data={
+    title:clean(input.title,240),
+    capability:clean(input.capability,2400),
+    level:clean(input.level,80)||'beginner',
+    count:input.count||4,
+    mode:clean(input.mode,80)||'guided',
+    modelRoute:clean(input.modelRoute,120)||'shared',
+    proof:clean(input.proof,3000)||'A working artifact, explanation, and independent receipt.'
+  };
+  if(!data.capability)throw new Error('Name an observable capability.');
+  const source=clean(options.source,120)||'living-school-workbench';
+  const before=state();
+  before.pathContext={...(before.pathContext||{}),title:data.title||before.school?.title||before.pathContext?.title||'',capability:data.capability,proof:data.proof,source};
+  persist('living-school-curriculum-requested',{source,title:data.title,capability:data.capability,level:data.level,count:Number(data.count)||4,mode:data.mode});
+
+  stage(options.onStage,'researching',{capability:data.capability});
+  const packet=await researchCapability(data.capability,{force:false});
+  persist('living-school-research-ready',{capability:data.capability,mode:packet.mode,sourceCount:packet.sources?.length||state().research?.sourceCount||0,reused:Boolean(packet.reused),source});
+
+  stage(options.onStage,'generating',{capability:data.capability,researchMode:packet.mode});
+  const s=state(),school=await generateSchool(data),old=s.school?.modules||[],nextProgress={};
+  school.modules.forEach((item,index)=>nextProgress[item.id]=s.progress[old[index]?.id]||progressFor(item.id));
+  s.school=school;
+  s.activeModuleId=school.modules[0].id;
+  s.progress=nextProgress;
+  s.settings={...s.settings,modelRoute:data.modelRoute,mode:data.mode};
+  s.visualInspection=null;
+  persist('curriculum-generated',{schoolId:school.id,researchMode:s.research?.mode||'none',sourceCount:s.sources.length,formatContract:school.generation.formatContract,fallback:school.generation.fallback,source});
+  toast(school.generation.fallback?`Moss built a complete local fallback after research: ${school.generation.error||'shared generation unavailable'}`:'Moss researched first and generated the formatted curriculum.');
+  stage(options.onStage,'complete',{schoolId:school.id,moduleCount:school.modules.length});
+  return school;
+}
 
 export const actions={...legacyActions,
   'research-sources':async target=>{
@@ -19,13 +54,6 @@ export const actions={...legacyActions,
     const data=fields(target,['title','capability','level','count','mode','modelRoute','proof']);
     if(!clean(data.capability))throw new Error('Name an observable capability.');
     busyLabel(target,state().school?'Researching before regeneration…':'Researching before generation…');
-    const packet=await researchCapability(data.capability,{force:false});
-    persist('living-school-research-ready',{capability:data.capability,mode:packet.mode,sourceCount:packet.sources?.length||state().research?.sourceCount||0,reused:Boolean(packet.reused)});
-    target.textContent=state().school?'Regenerating curriculum…':'Generating curriculum…';
-    const s=state(),school=await generateSchool(data),old=s.school?.modules||[],nextProgress={};
-    school.modules.forEach((item,index)=>nextProgress[item.id]=s.progress[old[index]?.id]||progressFor(item.id));
-    s.school=school;s.activeModuleId=school.modules[0].id;s.progress=nextProgress;s.settings={...s.settings,modelRoute:data.modelRoute,mode:data.mode};s.visualInspection=null;
-    persist('curriculum-generated',{schoolId:school.id,researchMode:s.research?.mode||'none',sourceCount:s.sources.length,formatContract:school.generation.formatContract,fallback:school.generation.fallback});
-    toast(school.generation.fallback?`Moss built a complete local fallback after research: ${school.generation.error||'shared generation unavailable'}`:'Moss researched first and generated the formatted curriculum.');
+    await generateCurriculumFromData(data,{source:'living-school-workbench',onStage:name=>{if(name==='generating')target.textContent=state().school?'Regenerating curriculum…':'Generating curriculum…'}});
   }
 };
