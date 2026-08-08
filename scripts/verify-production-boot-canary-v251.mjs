@@ -12,11 +12,31 @@ for(const target of targets)if(target.protocol!=='https:')throw new Error(`Produ
 
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const token=attempt=>`${Date.now()}-${attempt}-${Math.random().toString(36).slice(2)}`;
+function describeError(error){
+  if(!(error instanceof Error))return String(error);
+  const parts=[error.message];
+  let cause=error.cause;
+  const seen=new Set();
+  while(cause&&typeof cause==='object'&&!seen.has(cause)){
+    seen.add(cause);
+    const code=typeof cause.code==='string'?cause.code:'';
+    const message=typeof cause.message==='string'?cause.message:'';
+    const detail=[code,message].filter(Boolean).join(': ');
+    if(detail&&!parts.includes(detail))parts.push(detail);
+    cause=cause.cause;
+  }
+  return parts.join(' -> ');
+}
 
 async function get(base,path,attempt){
   const url=new URL(path,base);
   url.searchParams.set('deployment_canary',token(attempt));
-  const response=await fetch(url,{redirect:'follow',headers:{'cache-control':'no-cache, no-store, max-age=0','pragma':'no-cache','accept':'*/*'}});
+  let response;
+  try{
+    response=await fetch(url,{redirect:'follow',headers:{'cache-control':'no-cache, no-store, max-age=0','pragma':'no-cache','accept':'*/*'}});
+  }catch(error){
+    throw new Error(`${url.pathname} fetch failed: ${describeError(error)}`,{cause:error});
+  }
   if(!response.ok)throw new Error(`${url.pathname} returned HTTP ${response.status}`);
   return{url:response.url,text:await response.text(),headers:response.headers};
 }
@@ -60,7 +80,7 @@ async function probe(base,attempt){
 let last=[];
 for(let attempt=1;attempt<=attempts;attempt+=1){
   const settled=await Promise.all(targets.map(async base=>{
-    try{return{ok:true,result:await probe(base,attempt)}}catch(error){return{ok:false,base:base.origin,error:error instanceof Error?error.message:String(error)}}
+    try{return{ok:true,result:await probe(base,attempt)}}catch(error){return{ok:false,base:base.origin,error:describeError(error)}}
   }));
   const failures=settled.filter(row=>!row.ok);
   if(!failures.length){
