@@ -1,0 +1,40 @@
+name: Temporary Sync Release v1.0.51
+
+on:
+  push:
+    branches:
+      - fix/moss-curriculum-workbench
+    paths:
+      - 'VERSION'
+      - '.github/workflows/tmp-sync-release-v1.0.51.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: ${{ !contains(github.event.head_commit.message, '[release-sync]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/moss-curriculum-workbench
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Synchronize release files
+        run: |
+          node scripts/sync-release-version-assets.mjs
+          node scripts/sync-release-coherence-v220.mjs
+      - name: Commit synchronized release files
+        run: |
+          git config user.name 'civweave-release-sync'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Release files already synchronized.'
+            exit 0
+          fi
+          git commit -m 'Synchronize v1.0.51 release files [release-sync]'
+          git push origin HEAD:fix/moss-curriculum-workbench
