@@ -14,6 +14,7 @@ on:
       - 'public/app/installed-entry-v146.js'
       - 'public/service-worker-v203.js'
       - 'scripts/setup-cloudflare-node.mjs'
+      - 'scripts/verify-cloudflare-production-origin-v251.mjs'
       - 'scripts/verify-production-boot-canary-v251.mjs'
       - '.github/workflows/verify-production-boot-canary-v251.yml'
   workflow_dispatch:
@@ -36,16 +37,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Syntax check production canary
+      - name: Syntax check production canaries
         run: |
           node --check scripts/setup-cloudflare-node.mjs
+          node --check scripts/verify-cloudflare-production-origin-v251.mjs
           node --check scripts/verify-production-boot-canary-v251.mjs
-      - name: Verify stable production origin declarations
-        run: |
-          grep -q '"name": "commonweave"' wrangler.jsonc
-          grep -q 'Production URL: https://commonweave.pages.dev' CLOUDFLARE-SETUP.md
-          grep -q '"commonweave";' scripts/setup-cloudflare-node.mjs
-          ! grep -q 'Production URL: https://civweave.pages.dev' CLOUDFLARE-SETUP.md
+      - name: Verify stable Cloudflare production origin
+        run: node scripts/verify-cloudflare-production-origin-v251.mjs
       - name: Resolve expected production release
         id: expected
         shell: bash
