@@ -119,17 +119,20 @@ async function completeQuizPerModule(original,request){
   for(const module of modules){
     const moduleId=clean(module?.moduleId,180),target=Math.max(1,Number(module?.minimumAdditionalQuestions||0),Array.isArray(module?.missingTypes)?module.missingTypes.length:0);
     const collected=[],seen=new Set((Array.isArray(module?.existingQuestions)?module.existingQuestions:[]).map(questionKey).filter(Boolean));
-    const maxRounds=Math.min(7,Math.max(3,target+2));
+    const maxRounds=Math.min(8,Math.max(4,target+3));
+    let forceSingle=false;
     for(let round=1;round<=maxRounds;round++){
       const outstanding=missingTypes(module?.missingTypes,collected),remaining=Math.max(0,target-collected.length);
       if(remaining===0&&!outstanding.length)break;
-      const needed=Math.max(1,remaining,outstanding.length);
-      const oneModule={...module,minimumAdditionalQuestions:needed,missingTypes:outstanding};
-      let perRequest={...request,context:{...(request.context||{}),modules:[oneModule],quizDeltaMode:'single-module-iterative',quizDeltaRound:round},schema:exactQuizSchema(request.schema,needed)};
-      perRequest=appendUserMessage(perRequest,modulePrompt(oneModule,needed,outstanding,round));
+      const requestedTypes=forceSingle&&outstanding.length?[outstanding[0]]:outstanding;
+      const needed=forceSingle?1:Math.max(1,remaining,requestedTypes.length);
+      const oneModule={...module,minimumAdditionalQuestions:needed,missingTypes:requestedTypes};
+      let perRequest={...request,context:{...(request.context||{}),modules:[oneModule],quizDeltaMode:forceSingle?'single-question-recovery':'single-module-iterative',quizDeltaRound:round},schema:exactQuizSchema(request.schema,needed)};
+      perRequest=appendUserMessage(perRequest,modulePrompt(oneModule,needed,requestedTypes,round));
       const result=await original(perRequest);
       if(result?.status!=='success'){
         lastFailure=result;
+        forceSingle=true;
         continue;
       }
       lastSuccess=result;
@@ -139,9 +142,9 @@ async function completeQuizPerModule(original,request){
         if(!key||seen.has(key))continue;
         seen.add(key);collected.push(question);added+=1;
       }
-      if(!added)continue;
+      if(added<needed)forceSingle=true;
     }
-    combined.push({moduleId,questions:collected.slice(0,Math.max(target,collected.length))});
+    combined.push({moduleId,questions:collected});
   }
   if(!lastSuccess)return lastFailure||original(request);
   return{...lastSuccess,status:'success',outputJson:{modules:combined},outputText:JSON.stringify({modules:combined})};
@@ -163,7 +166,7 @@ export async function installLivingSchoolGenerationGuard(){
   };
   const wrapped=Object.freeze({...runtime,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),livingSchoolGenerationGuardRevision:REVISION});
   globalThis.CivweaveModelRuntime=wrapped;
-  const api=Object.freeze({installed:true,revision:REVISION,sourceMaterialPromptInjection:true,localPassagePromptInjection:true,liveEvidenceDigest:true,quizDeltaMode:'single-module-iterative'});
+  const api=Object.freeze({installed:true,revision:REVISION,sourceMaterialPromptInjection:true,localPassagePromptInjection:true,liveEvidenceDigest:true,quizDeltaMode:'single-module-iterative-with-single-question-recovery'});
   globalThis.CivweaveLivingSchoolGenerationGuardV262=api;
   try{dispatchEvent(new CustomEvent('civweave:living-school-generation-guard-ready',{detail:api}))}catch{}
   return api;
