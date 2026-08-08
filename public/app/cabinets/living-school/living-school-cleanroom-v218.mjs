@@ -2,8 +2,10 @@ import{copy,state,persist,VERSION,clean}from'./living-school-cleanroom-core-v218
 import{render}from'./living-school-cleanroom-render-v218.mjs?v=source-links-v260';
 import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=quiz-integrity-v261';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=source-prompt-quiz-delta-v262';
+import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=short-answer-rubric-v263';
 
 await installLivingSchoolGenerationGuard();
+await installLivingSchoolQuizContractGuardV263();
 
 let busy=false,dispatchCount=0;
 const LEVELS=new Set(['beginner','intermediate','advanced']);
@@ -72,5 +74,5 @@ async function generateCurriculumFromChat(input={}){
 sanitizeSavedHybridQuiz();
 document.addEventListener('click',handleLivingSchoolClick,true);
 render();
-globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'live-local-synthesis-source-links-v260',generationGuard:'source-prompt-quiz-delta-v262',quizIntegrity:'ai-only-v262-split-normalizers',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,generateCurriculumFromChat,normalizeChatCurriculum:chatCurriculumData,legacyNavigation:false});
-try{dispatchEvent(new CustomEvent('civweave:living-school-workbench-ready',{detail:{version:VERSION,chatCurriculumBridge:true,generationGuard:'source-prompt-quiz-delta-v262',quizIntegrity:'ai-only-v262-split-normalizers'}}))}catch{}
+globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'live-local-synthesis-source-links-v260',generationGuard:'source-prompt-v262+quiz-contract-v263',quizIntegrity:'ai-only-v263-short-answer-contract',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,generateCurriculumFromChat,normalizeChatCurriculum:chatCurriculumData,legacyNavigation:false});
+try{dispatchEvent(new CustomEvent('civweave:living-school-workbench-ready',{detail:{version:VERSION,chatCurriculumBridge:true,generationGuard:'source-prompt-v262+quiz-contract-v263',quizIntegrity:'ai-only-v263-short-answer-contract'}}))}catch{}
