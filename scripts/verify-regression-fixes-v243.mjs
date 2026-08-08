@@ -45,19 +45,26 @@ assert(sharedGuide.includes('syncInlineVisibility'),'Inline/full chat mutual exc
 assert(sharedGuide.includes("addEventListener('civweave:guide-workspace-state'"),'Inline surface does not react to canonical workspace state.');
 assert(!sharedGuide.includes('input.focus();'),'Inline Send still forces keyboard focus after submission.');
 
-assert(entry.includes("../../living-school-cleanroom-actions-v243.mjs"),'Living School is not routed through the local-source action adapter.');
+assert(entry.includes("../../living-school-cleanroom-actions-v243.mjs?v=quiz-integrity-v261"),'Living School is not cache-busting the AI-only quiz integrity adapter.');
+assert(entry.includes('sanitizeSavedHybridQuiz()'),'Living School does not sanitize saved mixed-provenance quiz banks at startup.');
+assert(entry.includes("quizIntegrity:'ai-only-v261'"),'Living School does not expose the AI-only quiz integrity revision.');
 assert(localActions.includes("packet.mode==='local-downloaded'"),'Living School actions do not recognize downloaded research.');
 assert(localActions.includes('await researchCapability(data.capability,{force:false})'),'Curriculum generation does not research before generation.');
+assert(localActions.includes('stripLegacyFallbackQuestions'),'AI curriculum generation does not strip deterministic quiz fillers.');
+assert(localActions.includes("provider==='deterministic'"),'Quiz completion does not distinguish the actual deterministic compiler from AI providers.');
+assert(!localActions.includes("data.modelRoute!=='shared'||school.generation?.fallback"),'Quiz integrity is still incorrectly gated on the literal shared route string.');
+assert(localActions.includes("quizIntegrity:'ai-only-complete'"),'Successful supplemental quiz completion is not marked AI-only.');
 assert(localResearch.includes('searchDownloadedKnowledge'),'Downloaded knowledge is not queried.');
 assert(localResearch.includes("provenance:'knowledge-school-downloaded'"),'Downloaded-source provenance is missing.');
 assert(localResearch.includes('ARCHIVE VERIFIED · NOT LIVE-CHECKED'),'Downloaded references overstate or omit verification status.');
 assert(localResearch.includes('dependency-free cached SQLite passage search'),'Local research does not report the dependency-free reader.');
+assert(localResearch.includes('canonicalUrl'),'Downloaded research no longer carries canonical article links.');
 
-for(const token of ['openSeed(slug)','DecompressionStream','databaseBytes','findPassages','windows-1252','SQLite format 3','dependency-free-sqlite-byte-search'])assert(knowledge.includes(token),`Offline knowledge reader is missing ${token}.`);
+for(const token of ['openSeed(slug)','DecompressionStream','databaseBundle','extractArticleMetadata','canonicalNearHit','findPassages','windows-1252','SQLite format 3','dependency-free-sqlite-byte-search'])assert(knowledge.includes(token),`Offline knowledge reader is missing ${token}.`);
 const parsed=JSON.parse(pkg),dependencies=Object.entries(parsed.dependencies||{});
 assert.equal(dependencies.length,1,'v243 must preserve Civweave’s single production dependency contract.');
 assert.equal(parsed.dependencies?.['onnxruntime-web'],'1.27.0','Pinned ONNX Runtime dependency changed unexpectedly.');
 assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
 assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second production runtime.');
 
-console.log(JSON.stringify({ok:true,revision:'v243.1-proof-dialog-v250-chat-owner',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243.3-ai-only-quiz-integrity',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,aiQuizFillersForbidden:true,savedHybridQuizSanitized:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));

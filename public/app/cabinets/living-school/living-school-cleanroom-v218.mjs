@@ -1,6 +1,6 @@
-import{copy,state,VERSION,clean}from'./living-school-cleanroom-core-v218.mjs';
-import{render}from'./living-school-cleanroom-render-v218.mjs';
-import{actions,generateCurriculumFromData}from'../../living-school-cleanroom-actions-v243.mjs?v=source-sanitize-gemini-v256';
+import{copy,state,persist,VERSION,clean}from'./living-school-cleanroom-core-v218.mjs';
+import{render}from'./living-school-cleanroom-render-v218.mjs?v=source-links-v260';
+import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=quiz-integrity-v261';
 
 let busy=false,dispatchCount=0;
 const LEVELS=new Set(['beginner','intermediate','advanced']);
@@ -9,6 +9,14 @@ const MODES=new Set(['guided','just-in-time','browse']);
 function markDispatch(){
   dispatchCount+=1;
   document.documentElement.dataset.livingSchoolDispatchCount=String(dispatchCount);
+}
+function sanitizeSavedHybridQuiz(){
+  const result=stripLegacyFallbackQuestions(state().school);
+  if(result.removed){
+    persist('living-school-hybrid-quiz-sanitized',{removed:result.removed,policy:'never-mix-deterministic-fillers-into-ai-curriculum'});
+    document.documentElement.dataset.livingSchoolQuizIntegrity='legacy-fillers-removed';
+  }else document.documentElement.dataset.livingSchoolQuizIntegrity='clean';
+  return result.removed;
 }
 
 async function handleLivingSchoolClick(event){
@@ -58,7 +66,8 @@ async function generateCurriculumFromChat(input={}){
   }
 }
 
+sanitizeSavedHybridQuiz();
 document.addEventListener('click',handleLivingSchoolClick,true);
 render();
-globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'downloaded-knowledge-v256-sanitized',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,generateCurriculumFromChat,normalizeChatCurriculum:chatCurriculumData,legacyNavigation:false});
-try{dispatchEvent(new CustomEvent('civweave:living-school-workbench-ready',{detail:{version:VERSION,chatCurriculumBridge:true}}))}catch{}
+globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'live-local-synthesis-source-links-v260',quizIntegrity:'ai-only-v261',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,generateCurriculumFromChat,normalizeChatCurriculum:chatCurriculumData,legacyNavigation:false});
+try{dispatchEvent(new CustomEvent('civweave:living-school-workbench-ready',{detail:{version:VERSION,chatCurriculumBridge:true,quizIntegrity:'ai-only-v261'}}))}catch{}

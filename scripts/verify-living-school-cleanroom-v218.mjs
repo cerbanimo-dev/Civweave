@@ -7,7 +7,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const cabinetDir=path.join(root,'public/app/cabinets/living-school');
 const serviceDir=path.join(root,'public/app/services/living-school');
-const [index,runtime,core,renderSource,actionsSource,css,serviceIndex,serviceManifest]=await Promise.all([
+const [index,runtime,core,renderSource,actionsSource,css,serviceIndex,serviceManifest,localResearch,knowledgeRuntime]=await Promise.all([
   read('public/app/cabinets/living-school/index.html'),
   read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'),
   read('public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'),
@@ -15,7 +15,9 @@ const [index,runtime,core,renderSource,actionsSource,css,serviceIndex,serviceMan
   read('public/app/cabinets/living-school/living-school-cleanroom-actions-v218.mjs'),
   read('public/app/cabinets/living-school/living-school-cleanroom-v218.css'),
   read('public/app/services/living-school/index.html'),
-  read('public/app/services/living-school/manifest.webmanifest')
+  read('public/app/services/living-school/manifest.webmanifest'),
+  read('public/app/living-school-local-research-v243.mjs'),
+  read('public/app/knowledge-school-runtime-v243.mjs')
 ]);
 
 assert(index.includes('data-living-school-runtime="cleanroom-v218"'),'Living School is not marked as the clean-room runtime.');
@@ -50,6 +52,7 @@ assert(!/addEventListener\s*\(\s*['"](?:submit|change|pointer|touch|storage)/.te
 assert(runtime.includes("controller:'single-delegated-click-handler'"),'The runtime does not expose its single-owner contract.');
 assert(runtime.includes('if(target.disabled||busy)return'),'The canonical controller lacks a re-entry lock.');
 assert(runtime.includes('dispatchCount+=1')&&runtime.includes('livingSchoolDispatchCount'),'Dispatches are not inspectable.');
+assert(runtime.includes('source-links-v260'),'The canonical runtime does not cache-bust the source-linked renderer.');
 assert(core.includes('delete next.room')&&core.includes('delete next.currentRoom')&&core.includes('delete next.lastRoom'),'Legacy navigation fields are not removed during migration.');
 assert(core.includes('You are Moss, Living School learning guide'),'Moss does not own Living School generation.');
 assert(core.includes('never impersonate another Civweave guide')||core.includes('Never impersonate another guide'),'Guide identity boundary is missing from curriculum generation.');
@@ -94,8 +97,29 @@ for(const token of [
   'mixed questions from a bank of',
   'data-ls-action="inspect-visual-item"',
   'data-ls-action="prefill-practicum"',
-  'provenanceFlag'
+  'provenanceFlag',
+  'Open referenced article',
+  'sourceChip(source)',
+  'target="_blank"',
+  'rel="noopener noreferrer"'
 ])assert(renderSource.includes(token),`Visible curriculum surface is missing ${token}.`);
+
+for(const token of [
+  'source-links-v260',
+  'canonicalUrl',
+  'linkProvenance',
+  'url:source.url',
+  'Every returned source must preserve its exact opened URL',
+  'Preserve supplied source IDs and URLs exactly'
+])assert(localResearch.includes(token),`Living School research adapter is missing source-link contract ${token}.`);
+for(const token of [
+  'extractArticleMetadata',
+  'canonicalNearHit',
+  'bestMetadataForPassage',
+  'canonicalUrl:url',
+  'archive-manifest-title-match',
+  'canonical-source-links'
+])assert(knowledgeRuntime.includes(token),`Knowledge-school reader is missing canonical-link recovery ${token}.`);
 
 const actionTokens=new Set([...index.matchAll(/data-ls-action="([^"]+)"/g),...renderSource.matchAll(/data-ls-action=\\?"([^"\\]+)\\?"/g)].map(match=>match[1]));
 assert(actionTokens.size>=18,'The clean-room surface lost expected direct actions.');
@@ -122,6 +146,8 @@ console.log(JSON.stringify({
   researchBeforeGeneration:true,
   explicitResearchControl:true,
   paragraphProvenance:true,
+  linkedSourceProvenance:true,
+  localCanonicalArticleLinks:true,
   completeModuleContract:true,
   mixedQuizBank:true,
   targetedRemediation:true,
