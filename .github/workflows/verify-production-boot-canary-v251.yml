@@ -1,0 +1,63 @@
+name: Verify Production Boot Canary v251
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'VERSION'
+      - 'package.json'
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/installed-entry-v146.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/verify-production-boot-canary-v251.mjs'
+      - '.github/workflows/verify-production-boot-canary-v251.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-boot-canary-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-production-boot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check production canary
+        run: node --check scripts/verify-production-boot-canary-v251.mjs
+      - name: Resolve expected production release
+        id: expected
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${GITHUB_BASE_REF}:refs/remotes/origin/${GITHUB_BASE_REF}"
+            version="$(git show "origin/${GITHUB_BASE_REF}:VERSION" | tr -d '[:space:]')"
+            attempts=2
+            delay=5000
+          else
+            version="$(tr -d '[:space:]' < VERSION)"
+            attempts=36
+            delay=15000
+          fi
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "attempts=$attempts" >> "$GITHUB_OUTPUT"
+          echo "delay=$delay" >> "$GITHUB_OUTPUT"
+      - name: Verify deployed manifest, updater, and worker bytes
+        env:
+          CIVWEAVE_EXPECTED_VERSION: ${{ steps.expected.outputs.version }}
+          CIVWEAVE_PRODUCTION_URLS: https://civweave.pages.dev,https://commonweave-host-node-9l1u.onrender.com
+          CIVWEAVE_PROBE_ATTEMPTS: ${{ steps.expected.outputs.attempts }}
+          CIVWEAVE_PROBE_DELAY_MS: ${{ steps.expected.outputs.delay }}
+        run: node scripts/verify-production-boot-canary-v251.mjs
