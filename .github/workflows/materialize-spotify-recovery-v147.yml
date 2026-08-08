@@ -1,0 +1,31 @@
+name: Materialize Spotify recovery v147
+on:
+  push:
+    branches:
+      - agent/spotify-playlist-track-links-v2
+    paths:
+      - VERSION
+permissions:
+  contents: write
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/spotify-playlist-track-links-v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/sync-release-version-assets.mjs
+      - run: node scripts/sync-release-coherence-v220.mjs
+      - name: Commit generated release assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Materialize Civweave 1.0.47 release assets"
+          git push
