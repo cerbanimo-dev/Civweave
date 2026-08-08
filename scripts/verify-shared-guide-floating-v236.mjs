@@ -2,7 +2,9 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 
 const boundary=fs.readFileSync(new URL('../public/app/install-boundary-v146.js',import.meta.url),'utf8');
-const guide=fs.readFileSync(new URL('../public/app/shared-guide-surface-v236.js',import.meta.url),'utf8');
+const guideLoader=fs.readFileSync(new URL('../public/app/shared-guide-surface-v236.js',import.meta.url),'utf8');
+const guideCore=fs.readFileSync(new URL('../public/app/shared-guide-surface-v236-core-v244.js',import.meta.url),'utf8');
+const guide=`${guideLoader}\n${guideCore}`;
 const realmIntegrity=fs.readFileSync(new URL('../public/app/realm-session-integrity-v237.js',import.meta.url),'utf8');
 const workspace=fs.readFileSync(new URL('../public/app/guide-workspace-v242.js',import.meta.url),'utf8');
 const viewport=fs.readFileSync(new URL('../public/app/persistent-guide-viewport-v216.js',import.meta.url),'utf8');
@@ -47,6 +49,7 @@ const checks=[
     assert.doesNotMatch(workspace,/function switchGuide\(system\)\{return system===pageSystem\}/);
   }],
   ['inline chat and floating workspace use one direct AI submission pipeline per selected realm',()=>{
+    assert.match(guideLoader,/shared-guide-surface-v236-core-v244\.js/);
     assert.match(guide,/function submitInline\(text\)/);
     assert.match(guide,/await api\.submitText\(value,currentSystem\)/);
     assert.doesNotMatch(guide,/form\.requestSubmit\(\)/);
