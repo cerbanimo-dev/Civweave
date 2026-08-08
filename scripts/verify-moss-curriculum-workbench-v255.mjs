@@ -22,8 +22,9 @@ assert.match(controller,/s\.progress=\{\};/,'new-path preparation must not inher
 assert.match(controller,/restoreLearningState\(previous\)/,'failed new-path generation must restore the previous learning state atomically');
 assert.match(loader,/living-school-chat-workbench-v255\.js\?v=1\.0\.56-v264-new-path-intent/,'shared guide loader must cache-bust the Moss new-path bridge');
 
+const emptyState=()=>({school:null,pathContext:null,settings:{modelRoute:'shared',mode:'guided'}});
 const store=new Map([
-  ['civweave.living-school.cabinet.v151',JSON.stringify({school:null,pathContext:null,settings:{modelRoute:'shared',mode:'guided'}})]
+  ['civweave.living-school.cabinet.v151',JSON.stringify(emptyState())]
 ]);
 const listeners=new Map();
 const sandbox={
@@ -92,12 +93,13 @@ assert.equal(revisionRequest.intent,'revise','explicit revision language must re
 assert.match(revisionRequest.capability,/meditate/i,'revision requests must still inherit the active capability');
 assert.equal(revisionRequest.count,5,'revision requests must retain the active module count');
 
+store.set('civweave.living-school.cabinet.v151',JSON.stringify(emptyState()));
 const guarded=api.guardFalseMutationClaim({response:{answer:"I've drafted the curriculum and created four levels.",choice:{}}},'none');
 assert.match(guarded.response.answer,/I have not changed the Living School workbench yet/,'chat must not claim a workbench mutation that did not happen');
 assert.match(guarded.response.choice.nextAction,/generate or revise the curriculum/i,'false mutation claims must redirect to the canonical workbench action');
 
 sandbox.LivingSchoolCleanroomV218={
-  getState:()=>({school:null,pathContext:null,settings:{modelRoute:'shared',mode:'guided'}}),
+  getState:()=>emptyState(),
   generateCurriculumFromChat:async data=>({
     school:{id:'school-test',title:data.title,capability:data.capability,level:data.level,modules:[{id:'module-1',title:'Noticing'}],generation:{provider:'gemini',model:'test-model',sourceCount:3,fallback:false}},
     sourceCount:3
