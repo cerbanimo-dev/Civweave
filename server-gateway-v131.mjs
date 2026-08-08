@@ -5,7 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(rootDir, 'server-gateway-v131-base.mjs');
 const runtimePath = path.join(rootDir, '.civweave-gateway-v132.loader.mjs');
-const VERSION = '1.0.51-render-installed-runtime-v133-device-direct-ai';
+const VERSION = '1.0.51-render-installed-runtime-v132';
 const before = "if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall) {";
 const after = "if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall && pathname !== '/app' && !pathname.startsWith('/app/')) {";
 const advertisedProxy = "features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising','hosted-ai-wallet-foundation']";
@@ -13,11 +13,11 @@ const deviceFirstFeatures = "features: ['install-only-pwa','device-package-distr
 
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 if (!source.includes(before)) {
-  throw new Error('Civweave gateway v133 could not find the legacy installed-runtime boundary.');
+  throw new Error('Civweave gateway v132 could not find the legacy installed-runtime boundary.');
 }
 source = source.replace(before, after);
 if (!source.includes(advertisedProxy)) {
-  throw new Error('Civweave gateway v133 could not find the obsolete Gemini proxy advertisement.');
+  throw new Error('Civweave gateway v132 could not find the obsolete Gemini proxy advertisement.');
 }
 source = source.replace(advertisedProxy, deviceFirstFeatures);
 await fsp.writeFile(runtimePath, source, 'utf8');
