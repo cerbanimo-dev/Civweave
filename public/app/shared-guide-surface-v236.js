@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.51-shared-guide-surface-v236-v256-mobile-scroll-gemini-fallback';
+const VERSION='1.0.51-shared-guide-surface-v236-v257-device-direct-gemini';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 function load(src,onload){
@@ -25,12 +25,14 @@ function loadStyle(href){
 }
 
 loadStyle('/app/mobile-guide-scroll-v256.css?v=1.0.51-v256');
-load('/extensions/civweave-gemini-interactions-v159.js?v=1.0.51-v256');
-load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.51-v256',()=>{
-  load('/app/shared-chat-face-icons-v255.js?v=1.0.51-v256',()=>{
+load('/app/gemini-device-direct-v257.js?v=1.0.51-v257',()=>{
+  load('/extensions/civweave-gemini-interactions-v159.js?v=1.0.51-v257');
+});
+load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.51-v257',()=>{
+  load('/app/shared-chat-face-icons-v255.js?v=1.0.51-v257',()=>{
     try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION}}))}catch{}
   });
-  load('/app/living-school-chat-workbench-v255.js?v=1.0.51-v256',()=>{
+  load('/app/living-school-chat-workbench-v255.js?v=1.0.51-v257',()=>{
     try{dispatchEvent(new CustomEvent('civweave:living-school-chat-workbench-ready',{detail:{version:VERSION}}))}catch{}
   });
 });
