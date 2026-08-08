@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='159.1-gemini-interactions-generatecontent-fallback-v256';
+const VERSION='159.2-gemini-explicit-proxy-routing-v257';
 const RUNTIME_NAME='CivweaveModelRuntime';
 const API_REVISION='2026-05-20';
 const DEFAULT_API_BASE='https://generativelanguage.googleapis.com/v1beta';
@@ -13,9 +13,12 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 let installedRuntime=null;
 
 function hostProxyBase(){
-  const connected=clean(parse(localStorage.getItem('civweave.host-node.v1'),{})?.baseUrl,2048).replace(/\/+$/,'');
-  const hostedHere=Boolean(location&&/^https?:$/.test(location.protocol)&&location.pathname.startsWith('/app/'));
-  return connected||(hostedHere?location.origin:'');
+  let saved={};
+  try{saved=parse(localStorage.getItem('civweave.host-node.v1'),{})}catch{}
+  const connected=clean(saved?.baseUrl,2048).replace(/\/+$/,'');
+  const features=Array.isArray(saved?.features)?saved.features.map(item=>clean(item,120).toLowerCase()):[];
+  const explicitlyAdvertised=saved?.geminiProxy===true||saved?.geminiAgentProxy===true||features.includes('gemini-agent-proxy');
+  return connected&&explicitlyAdvertised?connected:'';
 }
 function interactionUrl(config){
   const proxy=hostProxyBase();
@@ -75,7 +78,7 @@ async function pollInteraction(url,id,config,signal){
   return payload;
 }
 function baseResult(original,request,config,profile,elapsedMs){
-  return{schema:original.resultSchema||'civweave-model-result-1.0',runtimeVersion:`${original.version||'unknown'}+${VERSION}`,requestId:request.requestId||`gemini-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`,purpose:clean(request.purpose||'generation',120),executionProfile:profile,elapsedMs,requested:{provider:'gemini',model:config.model,endpoint:config.endpoint||DEFAULT_API_BASE},events:[],diagnostics:[`Standard Gemini used the Interactions transport (${VERSION}).`]};
+  return{schema:original.resultSchema||'civweave-model-result-1.0',runtimeVersion:`${original.version||'unknown'}+${VERSION}`,requestId:request.requestId||`gemini-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,9)}`,purpose:clean(request.purpose||'generation',120),executionProfile:profile,elapsedMs,requested:{provider:'gemini',model:config.model,endpoint:config.endpoint||DEFAULT_API_BASE},events:[],diagnostics:[`Standard Gemini used explicit proxy routing (${VERSION}).`]};
 }
 async function generateWithInteractions(original,request){
   const started=Date.now(),profile=executionProfile(original,request),config=effectiveConfig(original,request,profile),messages=Array.isArray(request.messages)?request.messages:[];
