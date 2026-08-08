@@ -5,17 +5,19 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [viewport,repairs,workspace,sharedGuide,entry,localResearch,localActions,knowledge,pkg]=await Promise.all([
+const [viewport,repairs,workspace,sharedLoader,sharedCore,entry,localResearch,localActions,knowledge,pkg]=await Promise.all([
   read('public/app/persistent-guide-viewport-v216.js'),
   read('public/app/regression-fixes-v243.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/shared-guide-surface-v236.js'),
+  read('public/app/shared-guide-surface-v236-core-v244.js'),
   read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'),
   read('public/app/living-school-local-research-v243.mjs'),
   read('public/app/living-school-cleanroom-actions-v243.mjs'),
   read('public/app/knowledge-school-runtime-v243.mjs'),
   read('package.json')
 ]);
+const sharedGuide=`${sharedLoader}\n${sharedCore}`;
 
 assert(viewport.includes("const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r2'"),'Legacy viewport compatibility does not load the cache-busted proof/dialog interaction repair.');
 assert(viewport.includes('installRegressionFixes()'),'Legacy viewport compatibility does not activate the proof/dialog repair loader.');
@@ -35,6 +37,7 @@ assert(workspace.includes("new CustomEvent('civweave:guide-workspace-state'"),'W
 assert(workspace.includes('submitText:async(text,system=activeWindow)'),'Canonical direct text submission API is missing.');
 assert(workspace.includes('canonicalOwner:true'),'Workspace does not advertise canonical ownership.');
 
+assert(sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'),'Shared guide loader no longer mounts the canonical inline implementation.');
 assert(sharedGuide.includes('await api.submitText(value,currentSystem)'),'Inline chat does not submit directly through the canonical chat API.');
 assert(!sharedGuide.includes('form.requestSubmit()'),'Inline chat still tunnels submission through the hidden floating form.');
 assert(!sharedGuide.includes("api.open?.({guide:currentSystem,prefill:value})"),'Inline chat still opens the full composer as a submission side effect.');
@@ -57,4 +60,4 @@ assert.equal(parsed.dependencies?.['onnxruntime-web'],'1.27.0','Pinned ONNX Runt
 assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
 assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second production runtime.');
 
-console.log(JSON.stringify({ok:true,revision:'v243.1-proof-dialog-v250-chat-owner',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243.1-proof-dialog-v250-chat-owner',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
