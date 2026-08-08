@@ -33,6 +33,7 @@ await patch('public/app/index.html',source=>{
 await patch('public/install-v130.js',source=>replaceRequired(source,/const WORKER_SCRIPT_REVISION = '[^']+';/,`const WORKER_SCRIPT_REVISION = '${revision}';`,'installer worker revision constant'));
 await patch('public/app/installed-entry-v146.js',source=>{
   source=replaceRequired(source,/const FALLBACK_VERSION='\d+\.\d+\.\d+';/,`const FALLBACK_VERSION='${version}';`,'installed entry fallback release version');
+  source=replaceRequired(source,/version:'\d+\.\d+\.\d+-chat-convergence-v250'/,`version:'${version}-chat-convergence-v250'`,'installed entry exported release version');
   if(!source.includes("updateViaCache:'none'"))throw new Error('Installed entry must bypass HTTP cache when checking the active worker.');
   if(!source.includes('await registration.update()'))throw new Error('Installed entry must explicitly request a worker update before routing.');
   if(!source.includes("candidate.postMessage({type:'SKIP_WAITING'})"))throw new Error('Installed entry must activate a waiting worker before routing.');

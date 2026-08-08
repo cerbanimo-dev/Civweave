@@ -80,7 +80,7 @@ assert.equal(api.workingCampusTopbarRevision,'v243-sticky-top-map-launch-contrac
 assert.equal(api.mapLaunchRevision,'v243-register-route-handler-or-open-event');
 assert.equal(api.guideSurfaceOwnershipPolicy,'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm');
 assert.equal(api.fellowfareGuideBridgeRevision,'v236-native-workbench-shared-thread');
-assert.equal(api.radioTrackSuggestionRevision,'v240-local-station-directory-random-pull-labels');
+assert.equal(api.radioTrackSuggestionRevision,'v241-playlist-context-track-links');
 assert.equal(api.campusBackgroundDownloadRevision,'v241-worker-owned-download-bottom-progress-rail');
 assert.equal(api.pwaUpdateRevision,'v250-installed-entry-every-launch');
 console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,canonicalChatOwner:'guide-workspace-v242',systemsMesh:'v251-five-system-non-privileged-event-contract',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,legacyCompatibility:'noncanonical-only'},null,2));
