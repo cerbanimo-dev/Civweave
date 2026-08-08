@@ -1,6 +1,6 @@
 import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs';
 import {state,persist,toast,progressFor,fields,clean,generateSchool} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
-import {researchCapability} from './living-school-local-research-v243.mjs?v=source-sanitize-v256';
+import {researchCapability} from './living-school-local-research-v243.mjs?v=research-ladder-v259';
 
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};
 const stage=(handler,name,detail={})=>{try{handler?.(name,detail)}catch{}};
@@ -141,7 +141,8 @@ export const actions={...legacyActions,
     const packet=await researchCapability(data.capability,{force:true});
     persist('living-school-research-completed',{capability:data.capability,mode:packet.mode,sourceCount:packet.sources?.length||0,provider:packet.provider,model:packet.model,flag:packet.flag});
     if(packet.mode==='live-agentic')toast(`Research complete: ${packet.sources.length} live sources.`);
-    else if(packet.mode==='local-downloaded')toast(`Research complete: ${packet.sources.length} clean downloaded local passages.`);
+    else if(packet.mode==='local-synthesized')toast(`Research complete: ${packet.sources.length} downloaded local passages synthesized into a source-grounded teaching brief.`);
+    else if(packet.mode==='local-downloaded')toast(`Research complete: ${packet.sources.length} clean downloaded local passages; AI synthesis was unavailable, so the raw local references will ground curriculum generation.`);
     else toast(`Research complete with ${String(packet.flag||packet.mode).toLowerCase()}.`);
   },
   'generate-curriculum':async target=>{
