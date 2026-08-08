@@ -1,6 +1,6 @@
 import{copy,state,VERSION,clean}from'./living-school-cleanroom-core-v218.mjs';
 import{render}from'./living-school-cleanroom-render-v218.mjs';
-import{actions,generateCurriculumFromData}from'../../living-school-cleanroom-actions-v243.mjs?v=source-sanitize-gemini-v256';
+import{actions,generateCurriculumFromData}from'../../living-school-cleanroom-actions-v243.mjs?v=ai-quiz-atomic-v258';
 
 let busy=false,dispatchCount=0;
 const LEVELS=new Set(['beginner','intermediate','advanced']);
