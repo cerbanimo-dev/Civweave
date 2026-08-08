@@ -49,13 +49,15 @@ const expectedSeeds=[
   '/app/cw-reward-receivers-v2.js',
   '/app/cw-reward-legacy-bridge-v2.js',
   '/app/cw-reward-surfaces-v2.js',
+  '/app/civweave-systems-mesh-v251.js',
   '/app/working-campus-v156.html',
   '/app/cabinets/living-school/index.html',
   '/app/realm-console-v140.html',
   '/app/fellowfare-cabinet-v144.html',
   '/app/anarchadia-console-v139.html'
 ];
-assert(JSON.stringify(manifest.seeds)===JSON.stringify(expectedSeeds),`Offline manifest must seed only installed entry + reward runtimes + five canonical systems; got ${manifest.seeds.length} seeds.`);
+assert(JSON.stringify(manifest.seeds)===JSON.stringify(expectedSeeds),`Offline manifest must seed exactly installed entry + reward runtimes + Systems Mesh + five canonical systems; got ${manifest.seeds.length} seeds.`);
+assert(manifest.revision==='canonical-background-campus-v241-systems-mesh-v251','Offline manifest does not identify the approved Systems Mesh seed revision.');
 for(const retired of ['/app/fullscreen-family-v104.html','/app/services/fellowfare/cabinet.html','/app/services/anarchadia/workbench.html','/app/anarchadia-governance-v145.html','/app/anarchadia-sovereignty-v146.html']){
   assert(!manifest.seeds.includes(retired),`Retired overlapping seed ${retired} returned to the required crawl.`);
 }
@@ -94,4 +96,4 @@ assert(requiredFailure.ready===false,'A required seed failure was incorrectly hi
 assert(requiredFailure.failedCount===1,'Required seed failure left the retry queue.');
 assert(requiredFailure.skippedCount===0,'Required seed failure was quarantined as optional.');
 
-console.log(JSON.stringify({ok:true,revision:'offline-campus-current-graph-v238',policy:api.policy,workerComposition:'v218-cleanroom-plus-retained-core-plus-fast-background-v241',canonicalSeeds:manifest.seeds.length,legacyCacheCandidates:migrated.total,staleReferencesSkipped:migrated.skippedCount,sameRevisionRetryGhostsRetired:sanitized.skippedCount,requiredFailuresPreserved:requiredFailure.failedCount,batchSize:api.batchSize,currentGraphOnly:api.currentGraphOnly,backgroundSafe:api.backgroundSafe},null,2));
+console.log(JSON.stringify({ok:true,revision:'offline-campus-current-graph-v238',policy:api.policy,workerComposition:'v218-cleanroom-plus-retained-core-plus-fast-background-v241',canonicalSeeds:manifest.seeds.length,systemsMeshSeed:true,legacyCacheCandidates:migrated.total,staleReferencesSkipped:migrated.skippedCount,sameRevisionRetryGhostsRetired:sanitized.skippedCount,requiredFailuresPreserved:requiredFailure.failedCount,batchSize:api.batchSize,currentGraphOnly:api.currentGraphOnly,backgroundSafe:api.backgroundSafe},null,2));
