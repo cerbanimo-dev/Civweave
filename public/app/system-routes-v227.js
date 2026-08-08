@@ -3,6 +3,7 @@
 const VERSION='1.0.18';
 const REVISION='five-system-route-contract-v227';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
+const SYSTEMS_MESH_RUNTIME='/app/civweave-systems-mesh-v251.js';
 const ROUTES=Object.freeze({
   civweave:Object.freeze({id:'civweave',label:'Civweave',pathname:'/app/working-campus-v156.html',params:Object.freeze({})}),
   'living-school':Object.freeze({id:'living-school',label:'Living School',pathname:'/app/cabinets/living-school/index.html',params:Object.freeze({cabinet:'1'})}),
@@ -49,10 +50,22 @@ function navigate(id,options={}){
   return url.href;
 }
 function routes(){return Object.values(ROUTES)}
-const api=Object.freeze({version:VERSION,revision:REVISION,bootKey:BOOT_KEY,routeFor,routes,identify,isCanonicalPath,authorize,urlFor,navigate});
+function installSystemsMeshRuntime(){
+  if(typeof document==='undefined'||!identify())return false;
+  if(globalThis.CivweaveSystemsMeshV251)return true;
+  const existing=[...document.scripts].find(script=>script.src&&new URL(script.src,globalThis.location?.href||'https://civweave.invalid').pathname===SYSTEMS_MESH_RUNTIME);
+  if(existing)return true;
+  const script=document.createElement('script');
+  script.src=`${SYSTEMS_MESH_RUNTIME}?v=${encodeURIComponent(VERSION)}-five-system-mesh-contract-v251`;
+  script.async=false;
+  (document.head||document.documentElement).append(script);
+  return true;
+}
+const api=Object.freeze({version:VERSION,revision:REVISION,bootKey:BOOT_KEY,routeFor,routes,identify,isCanonicalPath,authorize,urlFor,navigate,systemsMeshRuntime:SYSTEMS_MESH_RUNTIME,installSystemsMeshRuntime});
 globalThis.CivweaveSystemRoutesV227=api;
 if(typeof document!=='undefined'&&identify()){
   authorize();
   document.documentElement.dataset.civweaveSystemRoute=identify();
+  installSystemsMeshRuntime();
 }
 })();
