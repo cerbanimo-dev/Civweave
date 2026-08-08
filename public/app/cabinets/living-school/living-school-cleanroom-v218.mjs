@@ -1,6 +1,6 @@
 import{copy,state,persist,VERSION,clean}from'./living-school-cleanroom-core-v218.mjs';
 import{render}from'./living-school-cleanroom-render-v218.mjs?v=source-links-v260';
-import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=new-path-v264';
+import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=quiz-integrity-v261-new-path-v264';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=source-prompt-quiz-delta-v262';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=short-answer-rubric-v263';
 
