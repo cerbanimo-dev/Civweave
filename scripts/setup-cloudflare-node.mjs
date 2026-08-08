@@ -9,10 +9,14 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, "..");
 const buildScript = resolve(repoRoot, "scripts/build-cloudflare-pages.mjs");
 const pagesOutput = resolve(repoRoot, ".cloudflare-pages");
+// Keep the legacy Cloudflare project identifier stable. The public product is
+// Civweave, but existing installs and production traffic are origin-bound to
+// commonweave.pages.dev. Renaming the Pages project would create a different
+// origin rather than upgrading those installs.
 const projectName =
   process.env.CLOUDFLARE_PAGES_PROJECT ||
   process.argv[2] ||
-  "civweave";
+  "commonweave";
 
 function detectWrangler() {
   const localWranglerJs = resolve(
