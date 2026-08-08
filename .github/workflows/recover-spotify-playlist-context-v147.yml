@@ -21,23 +21,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Restore feature onto current mainline
+      - name: Patch current v251 release metadata
         shell: bash
         run: |
           set -euo pipefail
-          SOURCE=03465eeb121c9a51b44fa569e55ad95a9512304c
-          BASE="https://raw.githubusercontent.com/cerbanimo-dev/Civweave/$SOURCE"
-          for file in \
-            public/app/radio-track-suggestions-v240.js \
-            public/app/radio-track-map-v241.json \
-            scripts/sync-radio-track-map-v241.mjs \
-            scripts/verify-system-radio-v233.mjs \
-            .github/workflows/verify-system-radio-v233.yml
-          do
-            mkdir -p "$(dirname "$file")"
-            curl --fail --silent --show-error --location "$BASE/$file" --output "$file"
-          done
-
           python <<'PY'
           from pathlib import Path
           import re
@@ -51,17 +38,19 @@ jobs:
           ]:
               path=Path(name)
               text=path.read_text()
-              if old_radio not in text and new_radio not in text:
-                  raise SystemExit(f"Expected radio revision marker missing from {name}")
-              path.write_text(text.replace(old_radio,new_radio))
+              hits=text.count(old_radio)
+              if hits != 1:
+                  raise SystemExit(f"Expected exactly one old radio revision in {name}; found {hits}")
+              path.write_text(text.replace(old_radio,new_radio,1))
 
           sync=Path("scripts/sync-release-version-assets.mjs")
           text=sync.read_text()
           runtime_fix=".replace(/version:'\\d+\\.\\d+\\.\\d+-chat-convergence-v250'/g,`version:'${version}-chat-convergence-v250'`)"
           if runtime_fix not in text:
               anchor=".replace(/const FALLBACK_VERSION='\\d+\\.\\d+\\.\\d+'/g,`const FALLBACK_VERSION='${version}'`)"
-              if anchor not in text:
-                  raise SystemExit("Installed-entry FALLBACK_VERSION release-sync anchor missing")
+              hits=text.count(anchor)
+              if hits != 1:
+                  raise SystemExit(f"Expected one installed-entry release-sync anchor; found {hits}")
               text=text.replace(anchor,anchor+"\n    "+runtime_fix,1)
               sync.write_text(text)
 
@@ -73,17 +62,22 @@ jobs:
               raise SystemExit("package.json version field was not updated exactly once")
           package.write_text(ptext)
           PY
-
+      - name: Materialize official release surfaces
+        run: |
+          set -euo pipefail
           node scripts/sync-release-version-assets.mjs
           node scripts/sync-release-coherence-v220.mjs
+      - name: Verify recovered feature and current boundaries
+        run: |
+          set -euo pipefail
           node --check public/app/radio-track-suggestions-v240.js
           node --check scripts/sync-radio-track-map-v241.mjs
           node --check scripts/verify-system-radio-v233.mjs
           node scripts/verify-system-radio-v233.mjs
           node scripts/verify-five-system-navigation-v227.mjs
           node scripts/verify-canonical-core-only-v226.mjs
+          node scripts/verify-chat-convergence-v250.mjs
           git diff --check
-
       - name: Commit recovered release
         shell: bash
         run: |
