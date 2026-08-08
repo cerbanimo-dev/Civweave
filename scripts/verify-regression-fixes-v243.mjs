@@ -5,13 +5,15 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [viewport,repairs,workspace,sharedLoader,sharedCore,entry,localResearch,localActions,knowledge,pkg]=await Promise.all([
+const [viewport,repairs,workspace,sharedLoader,sharedCore,entry,core,generationGuard,localResearch,localActions,knowledge,pkg]=await Promise.all([
   read('public/app/persistent-guide-viewport-v216.js'),
   read('public/app/regression-fixes-v243.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/shared-guide-surface-v236.js'),
   read('public/app/shared-guide-surface-v236-core-v244.js'),
   read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'),
+  read('public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'),
+  read('public/app/living-school-generation-guard-v262.mjs'),
   read('public/app/living-school-local-research-v243.mjs'),
   read('public/app/living-school-cleanroom-actions-v243.mjs'),
   read('public/app/knowledge-school-runtime-v243.mjs'),
@@ -46,14 +48,50 @@ assert(sharedGuide.includes("addEventListener('civweave:guide-workspace-state'")
 assert(!sharedGuide.includes('input.focus();'),'Inline Send still forces keyboard focus after submission.');
 
 assert(entry.includes("../../living-school-cleanroom-actions-v243.mjs?v=quiz-integrity-v261"),'Living School is not cache-busting the AI-only quiz integrity adapter.');
+assert(entry.includes("../../living-school-generation-guard-v262.mjs?v=source-prompt-quiz-delta-v262"),'Living School does not load the source-injection and iterative quiz guard.');
+assert(entry.includes('await installLivingSchoolGenerationGuard()'),'Living School does not install the generation guard before actions run.');
 assert(entry.includes('sanitizeSavedHybridQuiz()'),'Living School does not sanitize saved mixed-provenance quiz banks at startup.');
-assert(entry.includes("quizIntegrity:'ai-only-v261'"),'Living School does not expose the AI-only quiz integrity revision.');
+assert(entry.includes("quizIntegrity:'ai-only-v262-split-normalizers'"),'Living School does not expose the split AI/deterministic quiz integrity revision.');
 assert(localActions.includes("packet.mode==='local-downloaded'"),'Living School actions do not recognize downloaded research.');
 assert(localActions.includes('await researchCapability(data.capability,{force:false})'),'Curriculum generation does not research before generation.');
 assert(localActions.includes('stripLegacyFallbackQuestions'),'AI curriculum generation does not strip deterministic quiz fillers.');
 assert(localActions.includes("provider==='deterministic'"),'Quiz completion does not distinguish the actual deterministic compiler from AI providers.');
 assert(!localActions.includes("data.modelRoute!=='shared'||school.generation?.fallback"),'Quiz integrity is still incorrectly gated on the literal shared route string.');
 assert(localActions.includes("quizIntegrity:'ai-only-complete'"),'Successful supplemental quiz completion is not marked AI-only.');
+
+const aiStart=core.indexOf('export function normalizeAIQuiz'),deterministicStart=core.indexOf('export function normalizeDeterministicQuiz'),moduleStart=core.indexOf('export function normalizeModule');
+assert(aiStart>=0&&deterministicStart>aiStart&&moduleStart>deterministicStart,'Living School does not expose physically separate AI and deterministic quiz normalizers.');
+const aiNormalizer=core.slice(aiStart,deterministicStart),deterministicNormalizer=core.slice(deterministicStart,moduleStart);
+assert(!aiNormalizer.includes('quizBank('),'AI quiz normalization can still reach the deterministic quiz bank.');
+assert(!aiNormalizer.includes('while(rows.length<count+2)'),'AI quiz normalization can still synthesize filler questions.');
+assert(aiNormalizer.includes('isDeterministicQuizQuestion'),'AI quiz normalization does not reject deterministic question provenance.');
+assert(deterministicNormalizer.includes('quizBank(')&&deterministicNormalizer.includes('while(rows.length<count+2)'),'Deterministic quiz normalization no longer owns its offline filler behavior.');
+assert(core.includes("quizMode==='deterministic'?normalizeDeterministicQuiz")&&core.includes(":normalizeAIQuiz(source.quiz,index)"),'Module normalization does not route quiz provenance explicitly.');
+assert(core.includes("const quizMode=provider==='deterministic'||next.school?.generation?.fallback?'deterministic':'ai'"),'Saved curriculum normalization does not select quiz behavior from actual generation provenance.');
+assert(core.includes("normalizeModule(item,index,data.capability,'ai')"),'Shared AI curriculum generation is not locked to the AI quiz normalizer.');
+assert(core.includes('refusing deterministic module padding'),'Shared AI generation can still silently pad missing modules with the deterministic compiler.');
+
+for(const token of [
+  "const REVISION='living-school-generation-guard-v262'",
+  "'CURRICULUM SOURCE MATERIAL'",
+  "'DOWNLOADED LOCAL SCHOOL PASSAGES'",
+  'The source material above is already in this prompt.',
+  'Preserve each SOURCE_ID exactly',
+  '600-1000 words of useful instruction per module',
+  "purpose!=='living-school-quiz-delta-completion-v258'",
+  "quizDeltaMode:forceSingle?'single-question-recovery':'single-module-iterative'",
+  'Return exactly ${needed}',
+  'questions.minItems=Math.max(1,count)',
+  'livingSchoolGenerationGuardRevision:REVISION',
+  'moduleNeedsDepth',
+  "purpose:'living-school-module-depth-expansion-v262'",
+  'moduleDepthRepair:true'
+])assert(generationGuard.includes(token),`Living School generation guard is missing ${token}.`);
+assert(generationGuard.includes("purpose!=='living-school-live-source-research-v260'"),'Antigravity evidence-digest strengthening is missing.');
+assert(generationGuard.includes('800-2500 characters of useful source-grounded notes'),'Live research does not request enough source material for downstream curriculum synthesis.');
+assert(generationGuard.includes("forceSingle=true"),'Quiz delta completion cannot degrade to one-question recovery after a structured-output miss.');
+assert(!generationGuard.includes('fetch(source.url')&&!generationGuard.includes('fetch(source?.url'),'Curriculum generation guard must inject supplied source text rather than refetching sources.');
+
 assert(localResearch.includes('searchDownloadedKnowledge'),'Downloaded knowledge is not queried.');
 assert(localResearch.includes("provenance:'knowledge-school-downloaded'"),'Downloaded-source provenance is missing.');
 assert(localResearch.includes('ARCHIVE VERIFIED · NOT LIVE-CHECKED'),'Downloaded references overstate or omit verification status.');
@@ -67,4 +105,4 @@ assert.equal(parsed.dependencies?.['onnxruntime-web'],'1.27.0','Pinned ONNX Runt
 assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
 assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second production runtime.');
 
-console.log(JSON.stringify({ok:true,revision:'v243.3-ai-only-quiz-integrity',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,aiQuizFillersForbidden:true,savedHybridQuizSanitized:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243.6-source-prompt-depth-iterative-quiz',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,sourceMaterialInjectedIntoPrompt:true,localPassagesInjectedIntoPrompt:true,liveEvidenceDigestStrengthened:true,moduleDepthRepair:true,iterativePerModuleQuizCompletion:true,singleQuestionQuizRecovery:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));

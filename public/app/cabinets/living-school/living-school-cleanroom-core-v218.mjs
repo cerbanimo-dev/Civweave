@@ -14,7 +14,7 @@ const progressLabel=document.getElementById('lsc218-progress-label');
 const progressBar=document.getElementById('lsc218-progress-bar');
 
 export const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
-export const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+export const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 export const now=()=>new Date().toISOString();
 export const uid=prefix=>`${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`;
 export const clip=(value,min,max)=>Math.max(min,Math.min(max,Number(value)||0));
@@ -27,6 +27,7 @@ const keyFor=value=>clean(value,1200).toLowerCase().replace(/\s+/g,' ').slice(0,
 const validHttp=value=>{try{return['http:','https:'].includes(new URL(value).protocol)}catch{return false}};
 const normalizeUse=value=>['core','supporting','counterpoint','example'].includes(clean(value,80).toLowerCase())?clean(value,80).toLowerCase():'supporting';
 const normalizeQuality=value=>['authoritative','practitioner','community','commercial','contested'].includes(clean(value,80).toLowerCase())?clean(value,80).toLowerCase():'supporting';
+const DETERMINISTIC_QUIZ_IDS=new Set(['mc-1','multi-1','short-1','scenario-1','short-2']);
 
 function conceptRows(values,title,capability){
   const fallback=[{term:title.split(' ')[0]||'Foundation',definition:`A key idea used to build ${capability}.`}];
@@ -35,14 +36,21 @@ function conceptRows(values,title,capability){
   return normalized.length?normalized.slice(0,8):fallback;
 }
 function quizBank(index,title,capability){
-  const prefix=`m${index+1}`;
+  const prefix=`m${index+1}`,provenance='deterministic-compiler';
   return[
-    {id:`${prefix}-mc-1`,type:'multiple-choice',prompt:`Which evidence best shows progress in ${title.toLowerCase()}?`,options:['A confident claim','A dated artifact with an explanation','A promise to try later','A copied definition'],answer:'A dated artifact with an explanation',explanation:'Inspectable evidence connects a claim to something another person can review.',concepts:[title]},
-    {id:`${prefix}-multi-1`,type:'multi-select',prompt:'Select every element that belongs in reviewable learning evidence.',options:['Artifact','Explanation','Revision note','Unsupported certainty'],answer:['Artifact','Explanation','Revision note'],explanation:'Evidence should reveal the work, the reasoning, and what changed after review.',concepts:['Evidence','Revision']},
-    {id:`${prefix}-short-1`,type:'short-answer',prompt:`Explain how ${title.toLowerCase()} advances the capability and name one artifact that would prove it.`,rubric:[{id:'principle',label:'Explain the principle',points:4,role:'principle',required:true},{id:'application',label:'Apply it to the capability',points:3,role:'application',required:true},{id:'evidence',label:'Name inspectable evidence',points:3,role:'evidence',required:true}],minWords:24,maxWords:260,concepts:[title,capability]},
-    {id:`${prefix}-scenario-1`,type:'multiple-choice',prompt:'A learner has a polished explanation but no artifact. What is the best next step?',options:['Pass the module','Create a small artifact and connect it to the explanation','Add more confidence','Skip practice'],answer:'Create a small artifact and connect it to the explanation',explanation:'The module contract requires observable work, not prose alone.',concepts:['Artifact']},
-    {id:`${prefix}-short-2`,type:'short-answer',prompt:'Name one uncertainty in this module and describe how you would verify or test it.',rubric:[{id:'uncertainty',label:'Names a real uncertainty',points:4,role:'principle',required:true},{id:'verification',label:'Provides a verification step',points:4,role:'action',required:true},{id:'limit',label:'Avoids overstating certainty',points:2,role:'evidence',required:true}],minWords:20,maxWords:220,concepts:['Uncertainty','Verification']}
+    {id:`${prefix}-mc-1`,type:'multiple-choice',prompt:`Which evidence best shows progress in ${title.toLowerCase()}?`,options:['A confident claim','A dated artifact with an explanation','A promise to try later','A copied definition'],answer:'A dated artifact with an explanation',explanation:'Inspectable evidence connects a claim to something another person can review.',concepts:[title],provenance},
+    {id:`${prefix}-multi-1`,type:'multi-select',prompt:'Select every element that belongs in reviewable learning evidence.',options:['Artifact','Explanation','Revision note','Unsupported certainty'],answer:['Artifact','Explanation','Revision note'],explanation:'Evidence should reveal the work, the reasoning, and what changed after review.',concepts:['Evidence','Revision'],provenance},
+    {id:`${prefix}-short-1`,type:'short-answer',prompt:`Explain how ${title.toLowerCase()} advances the capability and name one artifact that would prove it.`,rubric:[{id:'principle',label:'Explain the principle',points:4,role:'principle',required:true},{id:'application',label:'Apply it to the capability',points:3,role:'application',required:true},{id:'evidence',label:'Name inspectable evidence',points:3,role:'evidence',required:true}],minWords:24,maxWords:260,concepts:[title,capability],provenance},
+    {id:`${prefix}-scenario-1`,type:'multiple-choice',prompt:'A learner has a polished explanation but no artifact. What is the best next step?',options:['Pass the module','Create a small artifact and connect it to the explanation','Add more confidence','Skip practice'],answer:'Create a small artifact and connect it to the explanation',explanation:'The module contract requires observable work, not prose alone.',concepts:['Artifact'],provenance},
+    {id:`${prefix}-short-2`,type:'short-answer',prompt:'Name one uncertainty in this module and describe how you would verify or test it.',rubric:[{id:'uncertainty',label:'Names a real uncertainty',points:4,role:'principle',required:true},{id:'verification',label:'Provides a verification step',points:4,role:'action',required:true},{id:'limit',label:'Avoids overstating certainty',points:2,role:'evidence',required:true}],minWords:20,maxWords:220,concepts:['Uncertainty','Verification'],provenance}
   ];
+}
+export function isDeterministicQuizQuestion(question,index=-1){
+  const id=clean(question?.id,160),provenance=clean(question?.provenance,120).toLowerCase();
+  if(provenance==='deterministic-compiler'||/-fallback-\d+$/i.test(id))return true;
+  if(index<0)return false;
+  const match=id.match(/^m(\d+)-(.+)$/i);
+  return Boolean(match&&Number(match[1])===index+1&&DETERMINISTIC_QUIZ_IDS.has(match[2].toLowerCase()));
 }
 export function moduleFor(index,capability){
   const title=titles[index]||`Module ${index+1}`,next=titles[index+1]||'the next capability step';
@@ -73,8 +81,8 @@ export function moduleFor(index,capability){
     lesson,exercise,question:`How does ${title.toLowerCase()} support the capability, and what evidence would show that you used it well?`
   };
 }
-function normalizeQuiz(raw,index,title,capability){
-  const fallback=quizBank(index,title,capability),source=raw&&typeof raw==='object'?raw:{},count=clip(source.questionsPerAttempt||3,3,5);
+function normalizeQuizRows(raw,index){
+  const source=raw&&typeof raw==='object'?raw:{},count=clip(source.questionsPerAttempt||3,3,5);
   const rows=(Array.isArray(source.bank)?source.bank:[]).map((item,qIndex)=>{
     const type=['multiple-choice','multi-select','short-answer','scenario'].includes(clean(item?.type,40))?clean(item.type,40):'short-answer';
     const options=(Array.isArray(item?.options)?item.options:[]).map(value=>clean(value,300)).filter(Boolean).slice(0,8);
@@ -83,13 +91,22 @@ function normalizeQuiz(raw,index,title,capability){
       id:clean(item?.id,120)||`module-${index+1}-q-${qIndex+1}`,type:type==='scenario'?'multiple-choice':type,prompt:clean(item?.prompt,2200),
       options,answer,explanation:clean(item?.explanation,1800),concepts:(Array.isArray(item?.concepts)?item.concepts:[]).map(value=>clean(value,120)).filter(Boolean).slice(0,6),
       rubric:(Array.isArray(item?.rubric)?item.rubric:[]).map((criterion,cIndex)=>({id:clean(criterion?.id,80)||`criterion-${cIndex+1}`,label:clean(criterion?.label,300),points:clip(criterion?.points||1,1,10),role:clean(criterion?.role,80)||'evidence',required:criterion?.required!==false})).slice(0,6),
-      minWords:clip(item?.minWords||20,8,500),maxWords:clip(item?.maxWords||280,20,1200)
+      minWords:clip(item?.minWords||20,8,500),maxWords:clip(item?.maxWords||280,20,1200),provenance:clean(item?.provenance,120)
     };
   }).filter(item=>item.prompt);
-  while(rows.length<count+2)rows.push({...fallback[rows.length%fallback.length],id:`module-${index+1}-fallback-${rows.length+1}`});
-  return{questionsPerAttempt:count,passScore:clip(source.passScore||80,60,100),bank:rows.slice(0,12),remediation:clean(source.remediation,2400)||'Review the lesson blocks and revise the artifact before another attempt.'};
+  return{source,count,rows};
 }
-export function normalizeModule(item,index,capability){
+const quizEnvelope=(source,count,rows)=>({questionsPerAttempt:count,passScore:clip(source.passScore||80,60,100),bank:rows.slice(0,12),remediation:clean(source.remediation,2400)||'Review the lesson blocks and revise the artifact before another attempt.'});
+export function normalizeAIQuiz(raw,index){
+  const {source,count,rows}=normalizeQuizRows(raw,index);
+  return quizEnvelope(source,count,rows.filter(question=>!isDeterministicQuizQuestion(question,index)));
+}
+export function normalizeDeterministicQuiz(raw,index,title,capability){
+  const {source,count,rows}=normalizeQuizRows(raw,index),fallback=quizBank(index,title,capability);
+  while(rows.length<count+2)rows.push({...fallback[rows.length%fallback.length],id:`module-${index+1}-fallback-${rows.length+1}`,provenance:'deterministic-compiler'});
+  return quizEnvelope(source,count,rows);
+}
+export function normalizeModule(item,index,capability,quizMode='ai'){
   const fallback=moduleFor(index,capability),source=item&&typeof item==='object'?item:{};
   const lessonBlocks=(Array.isArray(source.lessonBlocks)?source.lessonBlocks:[]).map((block,bIndex)=>({
     id:clean(block?.id,120)||`module-${index+1}-lesson-${bIndex+1}`,heading:clean(block?.heading,300)||`Lesson block ${bIndex+1}`,
@@ -99,6 +116,7 @@ export function normalizeModule(item,index,capability){
   const concepts=conceptRows(source.concepts||fallback.concepts,source.title||fallback.title,capability);
   const practiceSource=source.practice&&typeof source.practice==='object'?source.practice:{};
   const visualizationSource=source.visualization&&typeof source.visualization==='object'?source.visualization:{};
+  const quiz=quizMode==='deterministic'?normalizeDeterministicQuiz(source.quiz,index,source.title||fallback.title,capability):normalizeAIQuiz(source.quiz,index);
   return{
     ...fallback,...source,id:clean(source.id,120)||`module-${index+1}`,title:clean(source.title,180)||fallback.title,
     summary:clean(source.summary,1800)||fallback.summary,objective:clean(source.objective,1200)||fallback.objective,relevance:clean(source.relevance,1800)||fallback.relevance,
@@ -109,7 +127,7 @@ export function normalizeModule(item,index,capability){
     concepts,lessonBlocks:lessonBlocks.length?lessonBlocks:fallback.lessonBlocks,
     visualization:{type:['network','flow','timeline','cycle','comparison','matrix','tree'].includes(clean(visualizationSource.type,40))?clean(visualizationSource.type,40):fallback.visualization.type,title:clean(visualizationSource.title,300)||fallback.visualization.title,caption:clean(visualizationSource.caption,1200)||fallback.visualization.caption,items:(Array.isArray(visualizationSource.items)?visualizationSource.items:fallback.visualization.items).map(row=>typeof row==='string'?{label:clean(row,200),detail:''}:{label:clean(row?.label||row?.title,200),detail:clean(row?.detail||row?.description,1200)}).filter(row=>row.label).slice(0,10)},
     practice:{prompt:clean(practiceSource.prompt||source.exercise,4000)||fallback.practice.prompt,steps:(Array.isArray(practiceSource.steps)?practiceSource.steps:fallback.practice.steps).map(value=>clean(value,700)).filter(Boolean).slice(0,10),deliverable:clean(practiceSource.deliverable||source.artifact,1200)||fallback.practice.deliverable,rubric:(Array.isArray(practiceSource.rubric)?practiceSource.rubric:fallback.practice.rubric).map(row=>({criterion:clean(row?.criterion||row?.label,300),weight:clip(row?.weight||row?.points||1,1,100)})).filter(row=>row.criterion).slice(0,8),completionCriteria:clean(practiceSource.completionCriteria,1600)||fallback.practice.completionCriteria},
-    quiz:normalizeQuiz(source.quiz,index,source.title||fallback.title,capability),
+    quiz,
     badge:{title:clean(source.badge?.title,240)||fallback.badge.title,description:clean(source.badge?.description,1000)||fallback.badge.description},
     xp:{domain:clean(source.xp?.domain,120)||fallback.xp.domain,amount:clip(source.xp?.amount||fallback.xp.amount,0,1000)},
     navigation:{entry:clean(source.navigation?.entry,300)||fallback.navigation.entry,next:clean(source.navigation?.next,120)||fallback.navigation.next},
@@ -142,8 +160,9 @@ export function normalizeState(value){
   next.settings={...base.settings,...(source.settings||{})};
   next.projectGate=gate.normalizeProjectGate?.(source.projectGate||freshGate())||source.projectGate||freshGate();
   if(next.school?.modules?.length){
-    const capability=next.school.capability||next.school.title||'the capability';
-    next.school={...next.school,modules:next.school.modules.map((item,index)=>normalizeModule(item,index,capability))};
+    const capability=next.school.capability||next.school.title||'the capability',provider=clean(next.school?.generation?.provider,80).toLowerCase();
+    const quizMode=provider==='deterministic'||next.school?.generation?.fallback?'deterministic':'ai';
+    next.school={...next.school,modules:next.school.modules.map((item,index)=>normalizeModule(item,index,capability,quizMode))};
     if(!next.school.modules.some(item=>item.id===next.activeModuleId))next.activeModuleId=next.school.modules[0].id;
   }else next.school=null;
   return next;
@@ -256,8 +275,9 @@ export async function generateSchool(data){
     const curriculumConfig={...config,maxTokens:Math.max(Number(config.maxTokens)||0,16384),temperature:Math.min(Number(config.temperature)||0.2,0.3)};
     const result=await runtime.generate({purpose:'living-school-research-grounded-curriculum-v218.1',executionProfile:'interactive',config:curriculumConfig,schema:curriculumSchema(),context:{capability:data.capability,level:data.level,mode:data.mode,moduleCount:count,proofContract:data.proof,research:currentState.research,sources,contentContract:{module:['title','summary','objective','relevance','prerequisites','estimated effort','artifact','completion criteria','learning objectives'],lesson:['concepts with definitions','multiple readable lesson blocks','paragraph-level sourceIds and provenance','worked application','uncertainty markers'],visualization:['type: network|flow|timeline|cycle|comparison|matrix|tree','title','caption','inspectable items'],practice:['prompt','steps','deliverable','weighted rubric','completion criteria'],quiz:['3-5 questions per attempt','bank at least two questions larger than attempt','mixed multiple-choice, multi-select, and short-answer','feedback and targeted remediation','visible short-answer rubrics'],rewards:['badge','skill XP domain and exact amount'],handoff:['Cerbanimo practice quest and proof contract']},constraints:['Use only supplied source IDs.','Never invent citations, URLs, quotations, dates, or access claims.','Every lesson block must include sourceIds when grounded, otherwise provenance must be generated-unverified.','Mark uncertainty explicitly.','Question banks must be larger than each attempt and include mixed question types.','Return exactly the requested number of modules.','Speak only as Moss and never impersonate another Civweave guide.']},messages:[{role:'system',content:'You are Moss, Living School learning guide. Build a source-aware curriculum as strict JSON. Teach in readable content blocks, not a thin outline. Every module must satisfy the complete Living School module contract. Preserve paragraph-level provenance. A claim without a supplied source ID must be labeled generated-unverified. Include practical artifacts, weighted rubrics, mixed quizzes, feedback, targeted remediation, a badge, exact Skill XP, navigation, and a Cerbanimo practice quest. Never impersonate another guide.'},{role:'user',content:`Create ${count} complete modules for this observable capability: ${data.capability}. Level: ${data.level}. Mode: ${data.mode}. Proof contract: ${data.proof||'working artifact plus reviewable evidence'}. Research mode: ${currentState.research?.mode||'unavailable'}.`} ]});
     if(result?.status!=='success'||!Array.isArray(result.outputJson?.modules)||!result.outputJson.modules.length)throw new Error(result?.error?.message||result?.error||'No curriculum modules returned.');
-    const output=result.outputJson,modules=output.modules.slice(0,count).map((item,index)=>normalizeModule(item,index,data.capability));
-    while(modules.length<count)modules.push(moduleFor(modules.length,data.capability));
+    const output=result.outputJson;
+    if(output.modules.length<count)throw new Error(`Shared AI returned ${output.modules.length}/${count} requested curriculum modules; refusing deterministic module padding.`);
+    const modules=output.modules.slice(0,count).map((item,index)=>normalizeModule(item,index,data.capability,'ai'));
     return{...fallback,title:clean(output.title||fallback.title,180),capability:clean(output.capability||fallback.capability,1200),proof:clean(output.proof||fallback.proof,2400),modules,generation:{provider:result.actual?.provider||result.provider||config.provider||'shared',model:result.actual?.model||result.model||config.model||'',generatedAt:now(),fallback:false,sourceCount:sources.length,researchMode:currentState.research?.mode||'none',formatContract:'living-school-module-contract-v218.1'}};
   }catch(error){return{...fallback,generation:{...fallback.generation,fallback:true,error:clean(error.message,500)}}}
 }
