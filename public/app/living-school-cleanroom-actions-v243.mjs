@@ -1,6 +1,6 @@
 import {actions as legacyActions} from './cabinets/living-school/living-school-cleanroom-actions-v218.mjs';
 import {state,persist,toast,progressFor,fields,clean,generateSchool} from './cabinets/living-school/living-school-cleanroom-core-v218.mjs';
-import {researchCapability} from './living-school-local-research-v243.mjs?v=research-ladder-v259';
+import {researchCapability} from './living-school-local-research-v243.mjs?v=research-links-v260';
 
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};
 const stage=(handler,name,detail={})=>{try{handler?.(name,detail)}catch{}};
