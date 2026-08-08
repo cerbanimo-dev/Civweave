@@ -90,6 +90,7 @@ assert.equal(revisionRequest.replaceExisting,false,'an explicit revision must st
 assert.equal(revisionRequest.pathMode,'revise','current-path edits must retain revision semantics');
 assert.match(revisionRequest.capability,/meditate/i,'revision requests must preserve the current curriculum capability unless a new path is explicitly requested');
 
+store.set(STATE_KEY,JSON.stringify({school:null,pathContext:null,settings:{modelRoute:'shared',mode:'guided'}}));
 const guarded=api.guardFalseMutationClaim({response:{answer:"I've drafted the curriculum and created four levels.",choice:{}}},'none');
 assert.match(guarded.response.answer,/I have not changed the Living School workbench yet/,'chat must not claim a workbench mutation that did not happen');
 assert.match(guarded.response.choice.nextAction,/generate or revise the curriculum/i,'false mutation claims must redirect to the canonical workbench action');
