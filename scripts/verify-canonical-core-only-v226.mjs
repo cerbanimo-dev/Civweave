@@ -16,6 +16,7 @@ const systems={civweave:'/app/working-campus-v156.html','living-school':'/app/ca
 const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-version-v1.js','/app/ai-settings-bind-guard-v230.js','/app/ai-settings-device-repair-v229.js'];
 const allowedExperienceSupport=[
   '/app/experience-orchestrator-v232.js',
+  '/app/civweave-systems-mesh-v251.js',
   '/app/guide-identity-integrity-v216.js',
   '/app/realm-session-integrity-v237.js',
   '/app/guide-workspace-v242.js',
@@ -68,6 +69,7 @@ assert.equal(api.canonicalSubsystemSupportScripts,4);
 assert.equal(api.canonicalExperienceScripts,allowedExperienceSupport.length);
 assert.equal(api.canonicalSubsystemCompatibility,'route-version-settings-only-no-legacy-additions');
 assert.equal(api.canonicalPolicy,'five-system-first-class-routes-v242-canonical-chat-owner');
+assert.equal(api.systemsMeshRevision,'v251-five-system-non-privileged-event-contract');
 assert.equal(api.persistentGuideChatSubmissionPipelines,1);
 assert.equal(api.persistentGuideChatGuideCount,5);
 assert.equal(api.persistentGuideChatThreadPolicy,'five-realm-local-ledgers-plus-explicit-handover');
@@ -81,4 +83,4 @@ assert.equal(api.fellowfareGuideBridgeRevision,'v236-native-workbench-shared-thr
 assert.equal(api.radioTrackSuggestionRevision,'v240-local-station-directory-random-pull-labels');
 assert.equal(api.campusBackgroundDownloadRevision,'v241-worker-owned-download-bottom-progress-rail');
 assert.equal(api.pwaUpdateRevision,'v250-installed-entry-every-launch');
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,canonicalChatOwner:'guide-workspace-v242',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,legacyCompatibility:'noncanonical-only'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,canonicalChatOwner:'guide-workspace-v242',systemsMesh:'v251-five-system-non-privileged-event-contract',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,legacyCompatibility:'noncanonical-only'},null,2));

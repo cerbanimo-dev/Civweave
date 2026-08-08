@@ -34,9 +34,10 @@ if(lightweightMode){
   assert(core.includes("const BUILD = 'lightweight-shell-v208'"),'Retained worker core is not the lightweight shell.');
   assert(core.includes('discoverReferences')&&core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Retained offline campus core lost discovery or hydration.');
   assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v238'")&&offline.includes("const V211_POLICY = 'fast-background-v241'")&&offline.includes('stale-not-rediscovered'),'Current-graph background retry repair is missing.');
-  assert(offlineManifest.revision==='canonical-background-campus-v241','Offline campus manifest is not the canonical background-download contract.');
-  assert(offlineManifest.seeds.length===10,'Offline campus manifest no longer has the canonical ten seed roots.');
+  assert(offlineManifest.revision==='canonical-background-campus-v241-systems-mesh-v251','Offline campus manifest is not the Systems Mesh canonical background-download contract.');
+  assert(offlineManifest.seeds.length===11,'Offline campus manifest no longer has the canonical eleven seed roots.');
   assert(offlineManifest.seeds.includes('/app/working-campus-v156.html'),'Offline campus no longer seeds the working campus.');
+  assert(offlineManifest.seeds.includes('/app/civweave-systems-mesh-v251.js'),'Offline campus no longer seeds the Civweave Systems Mesh runtime.');
   assert(offlineManifest.includePrefixes.includes('/extensions/'),'Offline campus excludes extension runtimes.');
   assert(workingCampus.includes('/app/install-boundary-v146.js'),'Working campus no longer loads proof progress through the install boundary.');
 }else{
@@ -114,5 +115,5 @@ console.log(JSON.stringify({
   completionAuthority:'accepted-realm-proof',
   realms:['living-school','cerbanimo','fellowfare'],
   planState:campus.plan.state,
-  offlinePackageMode:lightweightMode?'v218-wrapper-current-graph-v238-fast-background-v241':'layered-extension-package-v158'
+  offlinePackageMode:lightweightMode?'v218-wrapper-current-graph-v238-fast-background-v241-systems-mesh-v251':'layered-extension-package-v158'
 },null,2));
