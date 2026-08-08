@@ -1,73 +1,27 @@
 {
-  "name": "Civweave v1.0.45",
+  "id": "/app/working-campus-v156.html",
+  "name": "Civweave v1.0.46",
   "short_name": "Civweave",
-  "description": "Five connected, offline-ready Civweave systems with deterministic local operation and a non-modal AI settings layer.",
-  "id": "/civweave-local",
-  "start_url": "/app/installed-entry-v146.html?installed=1",
+  "description": "A local-first cooperative computing environment for learning, work, exchange, governance, and federation.",
+  "start_url": "/app/working-campus-v156.html?installed=1&version=1.0.46&source=pwa",
   "scope": "/",
   "display": "standalone",
-  "display_override": [
-    "window-controls-overlay",
-    "standalone",
-    "minimal-ui"
-  ],
-  "launch_handler": {
-    "client_mode": "navigate-new"
-  },
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#061019",
   "theme_color": "#061019",
   "orientation": "any",
-  "categories": [
-    "productivity",
-    "education",
-    "social"
-  ],
-  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/app/logos/civweave-pwa-192-v247.png",
+      "src": "/app/logos/civweave-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/app/logos/civweave-pwa-512-v247.png",
+      "src": "/app/logos/civweave-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/app/logos/civweave-pwa-maskable-512-v247.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Civweave",
-      "url": "/app/installed-entry-v146.html?installed=1&system=civweave",
-      "icons": [{"src":"/app/logos/civweave-pwa-512-v247.png","sizes":"512x512","type":"image/png"}]
-    },
-    {
-      "name": "Living School",
-      "url": "/app/installed-entry-v146.html?installed=1&system=living-school",
-      "icons": [{"src":"/app/logos/civweave-pwa-512-v247.png","sizes":"512x512","type":"image/png"}]
-    },
-    {
-      "name": "Cerbanimo",
-      "url": "/app/installed-entry-v146.html?installed=1&system=cerbanimo",
-      "icons": [{"src":"/app/logos/civweave-pwa-512-v247.png","sizes":"512x512","type":"image/png"}]
-    },
-    {
-      "name": "FellowFare",
-      "url": "/app/installed-entry-v146.html?installed=1&system=fellowfare",
-      "icons": [{"src":"/app/logos/civweave-pwa-512-v247.png","sizes":"512x512","type":"image/png"}]
-    },
-    {
-      "name": "Anarchadia",
-      "url": "/app/installed-entry-v146.html?installed=1&system=anarchadia",
-      "icons": [{"src":"/app/logos/civweave-pwa-512-v247.png","sizes":"512x512","type":"image/png"}]
+      "purpose": "any maskable"
     }
   ]
 }
