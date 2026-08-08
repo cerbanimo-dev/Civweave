@@ -113,6 +113,7 @@ async function generateSchoolWithAtomicSharedQuiz(data,options={}){
 }
 
 export async function generateCurriculumFromData(input={},options={}){
+  const replaceExisting=Boolean(options.replaceExisting||input.replaceExisting||clean(input.pathMode,40).toLowerCase()==='new');
   const data={
     title:clean(input.title,240),
     capability:clean(input.capability,2400),
@@ -124,27 +125,28 @@ export async function generateCurriculumFromData(input={},options={}){
   };
   if(!data.capability)throw new Error('Name an observable capability.');
   const source=clean(options.source,120)||'living-school-workbench';
-  const before=state();
-  before.pathContext={...(before.pathContext||{}),title:data.title||before.school?.title||before.pathContext?.title||'',capability:data.capability,proof:data.proof,source};
-  persist('living-school-curriculum-requested',{source,title:data.title,capability:data.capability,level:data.level,count:Number(data.count)||4,mode:data.mode,modelRoute:data.modelRoute});
+  const before=state(),previousSchoolId=clean(before.school?.id,180);
+  if(!replaceExisting)before.pathContext={...(before.pathContext||{}),title:data.title||before.school?.title||before.pathContext?.title||'',capability:data.capability,proof:data.proof,source,pathMode:'revise'};
+  persist('living-school-curriculum-requested',{source,title:data.title,capability:data.capability,level:data.level,count:Number(data.count)||4,mode:data.mode,modelRoute:data.modelRoute,pathMode:replaceExisting?'new':'revise',replaceExisting,previousSchoolId});
 
-  stage(options.onStage,'researching',{capability:data.capability});
+  stage(options.onStage,'researching',{capability:data.capability,pathMode:replaceExisting?'new':'revise'});
   const packet=await researchCapability(data.capability,{force:false});
-  persist('living-school-research-ready',{capability:data.capability,mode:packet.mode,sourceCount:packet.sources?.length||state().research?.sourceCount||0,reused:Boolean(packet.reused),source});
+  persist('living-school-research-ready',{capability:data.capability,mode:packet.mode,sourceCount:packet.sources?.length||state().research?.sourceCount||0,reused:Boolean(packet.reused),source,pathMode:replaceExisting?'new':'revise'});
 
-  stage(options.onStage,'generating',{capability:data.capability,researchMode:packet.mode});
-  const s=state(),school=await generateSchoolWithAtomicSharedQuiz(data,{source,onStage:options.onStage}),old=s.school?.modules||[],nextProgress={};
-  school.modules.forEach((item,index)=>nextProgress[item.id]=s.progress[old[index]?.id]||progressFor(item.id));
+  stage(options.onStage,'generating',{capability:data.capability,researchMode:packet.mode,pathMode:replaceExisting?'new':'revise'});
+  const s=state(),priorSchool=s.school||null,school=await generateSchoolWithAtomicSharedQuiz(data,{source,onStage:options.onStage}),old=replaceExisting?[]:(priorSchool?.modules||[]),nextProgress={};
+  school.modules.forEach((item,index)=>nextProgress[item.id]=replaceExisting?progressFor(item.id):(s.progress[old[index]?.id]||progressFor(item.id)));
   const generatedProvider=clean(school.generation?.provider,80).toLowerCase(),usedDeterministic=Boolean(school.generation?.fallback)||generatedProvider==='deterministic';
   const actualModelRoute=usedDeterministic?'deterministic':data.modelRoute;
   s.school=school;
   s.activeModuleId=school.modules[0].id;
   s.progress=nextProgress;
+  s.pathContext={...(replaceExisting?{}:(s.pathContext||{})),title:data.title||school.title||'',capability:data.capability,proof:data.proof,source,pathMode:replaceExisting?'new':'revise',replacedSchoolId:replaceExisting?clean(priorSchool?.id,180):clean(s.pathContext?.replacedSchoolId,180)};
   s.settings={...s.settings,modelRoute:actualModelRoute,mode:data.mode};
   s.visualInspection=null;
-  persist('curriculum-generated',{schoolId:school.id,researchMode:s.research?.mode||'none',sourceCount:s.sources.length,formatContract:school.generation.formatContract,fallback:Boolean(school.generation.fallback),generationError:clean(school.generation?.error,800),requestedModelRoute:data.modelRoute,actualModelRoute,generationProvider:generatedProvider,source});
-  toast(usedDeterministic?`Moss used the deterministic local compiler: ${school.generation.error||'the selected route did not produce an AI curriculum'}`:'Moss researched first and generated the formatted curriculum with shared AI.');
-  stage(options.onStage,'complete',{schoolId:school.id,moduleCount:school.modules.length,requestedModelRoute:data.modelRoute,actualModelRoute,generationProvider:generatedProvider,fallback:Boolean(school.generation?.fallback),deterministic:usedDeterministic});
+  persist('curriculum-generated',{schoolId:school.id,researchMode:s.research?.mode||'none',sourceCount:s.sources.length,formatContract:school.generation.formatContract,fallback:Boolean(school.generation.fallback),generationError:clean(school.generation?.error,800),requestedModelRoute:data.modelRoute,actualModelRoute,generationProvider:generatedProvider,source,pathMode:replaceExisting?'new':'revise',replacedSchoolId:replaceExisting?clean(priorSchool?.id,180):''});
+  toast(usedDeterministic?`Moss used the deterministic local compiler: ${school.generation.error||'the selected route did not produce an AI curriculum'}`:replaceExisting?'Moss researched first and generated a new learning path with shared AI.':'Moss researched first and generated the formatted curriculum with shared AI.');
+  stage(options.onStage,'complete',{schoolId:school.id,moduleCount:school.modules.length,requestedModelRoute:data.modelRoute,actualModelRoute,generationProvider:generatedProvider,fallback:Boolean(school.generation?.fallback),deterministic:usedDeterministic,pathMode:replaceExisting?'new':'revise',replacedSchoolId:replaceExisting?clean(priorSchool?.id,180):''});
   return school;
 }
 
@@ -164,6 +166,6 @@ export const actions={...legacyActions,
     const data=fields(target,['title','capability','level','count','mode','modelRoute','proof']);
     if(!clean(data.capability))throw new Error('Name an observable capability.');
     busyLabel(target,state().school?'Researching before regeneration…':'Researching before generation…');
-    await generateCurriculumFromData(data,{source:'living-school-workbench',onStage:name=>{if(name==='generating')target.textContent=state().school?'Regenerating curriculum…':'Generating curriculum…';if(name==='repairing-quiz')target.textContent='Completing missing AI quiz questions…'}});
+    await generateCurriculumFromData(data,{source:'living-school-workbench',replaceExisting:false,onStage:name=>{if(name==='generating')target.textContent=state().school?'Regenerating curriculum…':'Generating curriculum…';if(name==='repairing-quiz')target.textContent='Completing missing AI quiz questions…'}});
   }
 };
