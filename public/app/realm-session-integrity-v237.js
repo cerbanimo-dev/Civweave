@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.31-realm-session-integrity-v237';
+const VERSION='1.0.32-realm-session-integrity-v237-chat-controls-v253';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const LAUNCHER_ID='cwp215-launcher';
@@ -155,7 +155,7 @@ function openChat(options={}){const state=readThread(pageSystem);state.open=true
 function closeChat(){const state=readThread(pageSystem);state.open=false;writeThread(pageSystem,state);root.hidden=true;return true}
 function switchGuide(system){return system===pageSystem}
 function notify(system,text,options={}){if(!SYSTEMS.includes(system)||!clean(text))return false;const state=append(system,{role:'assistant',guide:system,text:clean(text,6000),notification:true});if(system!==pageSystem)state.unread=Math.min(99,Number(state.unread||0)+1);if(system===pageSystem&&options.open)openChat();return true}
-function onTrigger(event){const trigger=event.target.closest?.('[data-cwf-chat],[data-open-guide-chat],[data-open-persistent-chat],#moss,#compass,.ls-moss,.ls-compass,[data-guide]');if(!trigger)return;event.preventDefault();event.stopImmediatePropagation();openChat({guide:pageSystem})}
+function onTrigger(event){if(event.target.closest?.(`#${ROOT_ID},#${LAUNCHER_ID},#cw-shared-guide-surface-v236`))return;const trigger=event.target.closest?.('[data-cwf-chat],[data-open-guide-chat],[data-open-persistent-chat],#moss,#compass,.ls-moss,.ls-compass,[data-guide]');if(!trigger)return;event.preventDefault();event.stopImmediatePropagation();openChat({guide:pageSystem})}
 function historyFor(system){return readThread(system).messages.slice(-24).map(row=>row.role==='handover'?{role:'system',text:`Handover from ${GUIDE[row.sourceSystem]?.name||row.sourceSystem}: ${clean(row.text,5000)}`}:{role:row.role==='user'?'user':'assistant',text:clean(row.text,5000)}).filter(row=>row.text)}
 function handoffTarget(result,source){const explicit=clean(result?.handoffSystem||result?.response?.handoffSystem||result?.response?.choice?.handoffSystem,80).toLowerCase();if(SYSTEMS.includes(explicit)&&explicit!==source)return explicit;const choice=clean(result?.response?.choice?.system,80).toLowerCase();return SYSTEMS.includes(choice)&&choice!==source?choice:''}
 async function createHandover(source,target,result){
