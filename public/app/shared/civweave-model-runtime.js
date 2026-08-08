@@ -780,7 +780,13 @@
         while (validationErrors.length && repairAttempts < maxRepairAttempts) {
           repairAttempts += 1;
           emit(context, "repairing", { attempt: repairAttempts, validationErrors: validationErrors.slice(0, 12) });
-          const repaired = await invokeAdapter({ ...config, stream: false }, repairMessages(messages, outputText, validationErrors), { ...request, maxRepairAttempts: 0 }, context, controller.signal);
+          const finishReason = safeString(raw?.payload?.candidates?.[0]?.finishReason || raw?.payload?.finishReason || "", 80).toUpperCase();
+          const truncated = ["MAX_TOKENS", "MAX_OUTPUT_TOKENS"].includes(finishReason);
+          const repairConfig = truncated
+            ? { ...config, stream: false, maxTokens: Math.min(65536, Math.max(config.maxTokens * 2, 16384)) }
+            : { ...config, stream: false };
+          if (truncated) emit(context, "repairing", { attempt: repairAttempts, reason: "structured-output-truncated", finishReason, maxTokens: repairConfig.maxTokens });
+          const repaired = await invokeAdapter(repairConfig, repairMessages(messages, outputText, validationErrors), { ...request, maxRepairAttempts: 0 }, context, controller.signal);
           outputText = safeString(repaired.text, MAX_RESPONSE_BYTES);
           raw = { ...raw, ...repaired, diagnostics: [...(raw.diagnostics || []), ...(repaired.diagnostics || [])] };
           try {
