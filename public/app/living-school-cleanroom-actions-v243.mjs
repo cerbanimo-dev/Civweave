@@ -4,6 +4,29 @@ import {researchCapability} from './living-school-local-research-v243.mjs?v=sour
 
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};
 const stage=(handler,name,detail={})=>{try{handler?.(name,detail)}catch{}};
+const sharedQuizIssues=school=>{
+  if(!school||school.generation?.fallback||clean(school.generation?.provider,80).toLowerCase()==='deterministic')return[];
+  const issues=[];
+  for(const module of Array.isArray(school.modules)?school.modules:[]){
+    const quiz=module?.quiz&&typeof module.quiz==='object'?module.quiz:{},bank=Array.isArray(quiz.bank)?quiz.bank:[];
+    const count=Math.max(3,Math.min(5,Number(quiz.questionsPerAttempt||3)||3));
+    const aiBank=bank.filter(question=>!/-fallback-\d+$/i.test(clean(question?.id,160)));
+    const types=new Set(aiBank.map(question=>clean(question?.type,80).toLowerCase()));
+    if(aiBank.length<count+2)issues.push(`${module?.id||module?.title||'module'} has ${aiBank.length}/${count+2} AI questions`);
+    if(!types.has('multiple-choice')||!types.has('multi-select')||!types.has('short-answer'))issues.push(`${module?.id||module?.title||'module'} is missing the required mixed quiz types`);
+  }
+  return issues;
+};
+async function generateSchoolWithAtomicSharedQuiz(data,options={}){
+  let school=await generateSchool(data),issues=sharedQuizIssues(school);
+  if(data.modelRoute!=='shared'||school.generation?.fallback||!issues.length)return school;
+  persist('living-school-ai-quiz-contract-retry',{source:clean(options.source,120)||'living-school-workbench',schoolId:school.id,issues:issues.slice(0,12)});
+  stage(options.onStage,'repairing-quiz',{schoolId:school.id,issues:issues.slice(0,12)});
+  school=await generateSchool(data);
+  issues=sharedQuizIssues(school);
+  if(school.generation?.fallback||!issues.length)return school;
+  throw new Error(`Moss returned an incomplete shared-AI quiz bank twice, so Living School refused to mix deterministic template questions into an AI-generated quiz. ${issues.join('; ')}`);
+}
 
 export async function generateCurriculumFromData(input={},options={}){
   const data={
@@ -26,7 +49,7 @@ export async function generateCurriculumFromData(input={},options={}){
   persist('living-school-research-ready',{capability:data.capability,mode:packet.mode,sourceCount:packet.sources?.length||state().research?.sourceCount||0,reused:Boolean(packet.reused),source});
 
   stage(options.onStage,'generating',{capability:data.capability,researchMode:packet.mode});
-  const s=state(),school=await generateSchool(data),old=s.school?.modules||[],nextProgress={};
+  const s=state(),school=await generateSchoolWithAtomicSharedQuiz(data,{source,onStage:options.onStage}),old=s.school?.modules||[],nextProgress={};
   school.modules.forEach((item,index)=>nextProgress[item.id]=s.progress[old[index]?.id]||progressFor(item.id));
   const actualModelRoute=school.generation?.fallback?'deterministic':data.modelRoute;
   s.school=school;
@@ -55,6 +78,6 @@ export const actions={...legacyActions,
     const data=fields(target,['title','capability','level','count','mode','modelRoute','proof']);
     if(!clean(data.capability))throw new Error('Name an observable capability.');
     busyLabel(target,state().school?'Researching before regeneration…':'Researching before generation…');
-    await generateCurriculumFromData(data,{source:'living-school-workbench',onStage:name=>{if(name==='generating')target.textContent=state().school?'Regenerating curriculum…':'Generating curriculum…'}});
+    await generateCurriculumFromData(data,{source:'living-school-workbench',onStage:name=>{if(name==='generating')target.textContent=state().school?'Regenerating curriculum…':'Generating curriculum…';if(name==='repairing-quiz')target.textContent='Repairing incomplete AI quiz…'}});
   }
 };
