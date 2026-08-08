@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.51-shared-guide-surface-v236-v257-device-direct-gemini';
+const VERSION='1.0.56-shared-guide-surface-v236-v264-new-learning-path';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 function load(src,onload){
@@ -32,7 +32,7 @@ load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.51-v257',()=>{
   load('/app/shared-chat-face-icons-v255.js?v=1.0.51-v257',()=>{
     try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION}}))}catch{}
   });
-  load('/app/living-school-chat-workbench-v255.js?v=1.0.51-v257',()=>{
+  load('/app/living-school-chat-workbench-v255.js?v=1.0.56-v264-new-learning-path',()=>{
     try{dispatchEvent(new CustomEvent('civweave:living-school-chat-workbench-ready',{detail:{version:VERSION}}))}catch{}
   });
 });
