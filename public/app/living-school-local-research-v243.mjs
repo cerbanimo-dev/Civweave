@@ -8,7 +8,7 @@ const metadataBoundary=/(?:20\d{2}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z|http
 
 function readableScore(text,tokens){
   const normalized=String(text||'').toLowerCase(),words=normalized.match(/[a-z]{2,}/g)||[];
-  if(words.length<18)return-Infinity;
+  if(words.length<18)return -Infinity;
   const relevant=tokens.reduce((score,token)=>score+(normalized.includes(token)?80:0),0);
   const letters=(text.match(/[A-Za-z]/g)||[]).length,odd=(text.match(/[^\x20-\x7E\u00A0-\u024F]/g)||[]).length;
   return relevant+Math.min(words.length,180)+letters/40-odd*12;
@@ -38,14 +38,18 @@ function sanitizeRows(capability,rows){
   }
   return cleaned;
 }
+function localTitle(row,index){
+  const title=core.clean(row?.title,260),school=core.clean(row?.schoolName,180)||'Knowledge school';
+  return !title||/downloaded reference$/i.test(title)?`${school} · local passage ${index+1}`:title;
+}
 function localPacket(capability,rows){
   const key=keyFor(capability),cleanRows=sanitizeRows(capability,rows),sources=cleanRows.map((row,index)=>({
     id:core.uid('source'),
-    title:core.clean(row.title,260)||`${row.schoolName||'Knowledge school'} · local passage ${index+1}`,
+    title:localTitle(row,index),
     url:core.clean(row.url,1600),
     quality:'downloaded reference',
     use:'supporting',
-    notes:`Downloaded knowledge-school passage. Archive integrity was verified when downloaded; this content is not a live web check.\n\n${core.clean(row.notes,1400)}`,
+    notes:`Downloaded knowledge-school passage. Archive integrity was verified when downloaded; this content is not a live web check.\n\n${core.clean(row.notes,1200)}`,
     sourceType:'knowledge-school-local',
     at:core.now(),
     researchedBy:RESEARCHER,
