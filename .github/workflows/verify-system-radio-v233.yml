@@ -6,8 +6,10 @@ on:
       - 'public/app/system-radio-agent-v233.js'
       - 'public/app/radio-track-suggestions-v240.js'
       - 'public/app/radio-directory-v240/**'
+      - 'public/app/cabinets/living-school/index.html'
       - 'public/app/install-boundary-v146.js'
       - 'scripts/verify-system-radio-v233.mjs'
+      - 'scripts/verify-living-school-radio-v252.mjs'
       - '.github/workflows/verify-system-radio-v233.yml'
       - 'VERSION'
       - 'package.json'
@@ -18,8 +20,10 @@ on:
       - 'public/app/system-radio-agent-v233.js'
       - 'public/app/radio-track-suggestions-v240.js'
       - 'public/app/radio-directory-v240/**'
+      - 'public/app/cabinets/living-school/index.html'
       - 'public/app/install-boundary-v146.js'
       - 'scripts/verify-system-radio-v233.mjs'
+      - 'scripts/verify-living-school-radio-v252.mjs'
       - '.github/workflows/verify-system-radio-v233.yml'
       - 'VERSION'
       - 'package.json'
@@ -38,5 +42,8 @@ jobs:
           node --check public/app/radio-track-suggestions-v240.js
           node --check public/app/install-boundary-v146.js
           node --check scripts/verify-system-radio-v233.mjs
+          node --check scripts/verify-living-school-radio-v252.mjs
       - name: Verify radio contract
-        run: node scripts/verify-system-radio-v233.mjs
+        run: |
+          node scripts/verify-system-radio-v233.mjs
+          node scripts/verify-living-school-radio-v252.mjs
