@@ -3,6 +3,7 @@
 const REVISION='living-school-cleanroom-v218';
 const CANONICAL='/app/cabinets/living-school/index.html';
 const FRESH_PREFIX='/app/cabinets/living-school/living-school-cleanroom-';
+const GENERATION_GUARD='/app/living-school-generation-guard-v262.mjs';
 const SERVICE_PREFIX='/app/services/living-school/';
 const RETIRED_PATHS=new Set([
   '/app/cabinets/living-school/living-school-bootstrap-v194.js',
@@ -36,7 +37,7 @@ async function evictRetired(){
     const keys=await cache.keys();
     await Promise.all(keys.map(request=>{
       const pathname=new URL(request.url).pathname;
-      if(pathname===CANONICAL||pathname.startsWith(FRESH_PREFIX)||pathname.startsWith(SERVICE_PREFIX)||RETIRED_PATHS.has(pathname))return cache.delete(request);
+      if(pathname===CANONICAL||pathname===GENERATION_GUARD||pathname.startsWith(FRESH_PREFIX)||pathname.startsWith(SERVICE_PREFIX)||RETIRED_PATHS.has(pathname))return cache.delete(request);
       return false;
     }));
   }
@@ -60,7 +61,7 @@ self.addEventListener('fetch',event=>{
     event.respondWith(Response.redirect(new URL(CANONICAL,self.location.origin),302));
     return;
   }
-  if(url.pathname===CANONICAL||url.pathname.startsWith(FRESH_PREFIX)){
+  if(url.pathname===CANONICAL||url.pathname===GENERATION_GUARD||url.pathname.startsWith(FRESH_PREFIX)){
     event.stopImmediatePropagation();
     event.respondWith(fresh(request));
     return;
@@ -70,5 +71,5 @@ self.addEventListener('fetch',event=>{
     event.respondWith(Promise.resolve(retiredResponse(url.pathname)));
   }
 });
-self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,retired:[...RETIRED_PATHS]});
+self.CivweaveLivingSchoolCleanroomV218=Object.freeze({revision:REVISION,canonical:CANONICAL,generationGuard:GENERATION_GUARD,retired:[...RETIRED_PATHS]});
 })();
