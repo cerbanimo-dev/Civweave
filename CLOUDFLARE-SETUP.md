@@ -7,12 +7,16 @@ This guide installs and publishes the current Civweave static node to Cloudflare
 ```text
 Repository: cerbanimo-dev/Civweave
 Production branch: main
-Pages project: civweave
-Production URL: https://civweave.pages.dev
+Pages project: commonweave
+Stable production URL: https://commonweave.pages.dev
 Hosted source: public/
 Generated Pages output: .cloudflare-pages/
 Health endpoint: /api/health
 ```
+
+**Important infrastructure naming:** the product is Civweave, but the existing Cloudflare Pages project remains named `commonweave`. Keep that project identifier and origin stable. A Pages project rename or a new `civweave` project would create a different web origin and would not update PWAs installed from `commonweave.pages.dev`.
+
+**Install only from the stable production origin.** Do not install Civweave as a PWA from a hashed Pages preview such as `https://<deployment>.commonweave.pages.dev`. Cloudflare preview deployments are immutable snapshots. A PWA installed from one stays bound to that preview origin and cannot receive future `main` releases from `commonweave.pages.dev`.
 
 The build copies the complete `public/` tree, prepares required generated files, audits every hosted asset, and writes a fresh `.cloudflare-pages/` directory. Do not edit `.cloudflare-pages/` directly.
 
@@ -30,34 +34,17 @@ Install these first:
 - Git
 - Node.js 20 or newer
 - npm
-- A Cloudflare account with permission to create or deploy the `civweave` Pages project
+- A Cloudflare account with permission to deploy the existing `commonweave` Pages project
 
 The build is cross-platform. Windows uses PowerShell's built-in archive support. macOS and Linux use the system `zip` command.
 
 ## Fresh installation
 
-Clone the connected repository and enter it:
-
 ```bash
 git clone https://github.com/cerbanimo-dev/Civweave.git
 cd Civweave
-```
-
-Install dependencies:
-
-```bash
 npm install
-```
-
-Install Wrangler locally if it is not already present:
-
-```bash
 npm install --save-dev wrangler
-```
-
-Authenticate with Cloudflare:
-
-```bash
 npx wrangler login
 npx wrangler whoami
 ```
@@ -74,30 +61,28 @@ The setup helper:
 
 1. detects the local Wrangler installation;
 2. confirms Cloudflare authentication;
-3. reuses or creates the `civweave` Pages project;
+3. reuses the stable `commonweave` Pages project by default;
 4. builds the complete Pages output;
 5. audits all hosted assets against the 24 MiB project boundary;
 6. deploys the `main` production branch.
 
-A different existing Pages project can be selected explicitly:
+A different existing Pages project can still be selected explicitly for deliberate testing:
 
 ```bash
 node scripts/setup-cloudflare-node.mjs YOUR_PROJECT_NAME
 ```
 
+Do not use a temporary/preview project as the install origin for end users.
+
 ## Manual build and deployment
 
-Use the manual path when you want to inspect each stage.
-
-### 1. Audit the hosted source
+### 1. Audit hosted source
 
 ```bash
 node scripts/audit-cloudflare-assets.mjs
 ```
 
-This recursively scans `public/`, reports every file above 24 MiB, and separately lists files between 20 and 24 MiB.
-
-### 2. Build the Pages output
+### 2. Build Pages output
 
 ```bash
 node scripts/build-cloudflare-pages.mjs
@@ -112,16 +97,15 @@ All Cloudflare-hosted files are at or below 24 MiB.
 ### 3. Deploy production
 
 ```bash
-npx wrangler pages deploy .cloudflare-pages --project-name civweave --branch main --commit-dirty=true
+npx wrangler pages deploy .cloudflare-pages --project-name commonweave --branch main --commit-dirty=true
 ```
-
-Wrangler's Pages deployment command uploads the specified static directory and accepts both `--project-name` and `--branch`.
 
 ## Cloudflare dashboard settings
 
-For a Git-connected Pages project, use:
+For the Git-connected Pages project, use:
 
 ```text
+Project name: commonweave
 Repository: cerbanimo-dev/Civweave
 Production branch: main
 Build command: node scripts/build-cloudflare-pages.mjs
@@ -129,28 +113,30 @@ Build output directory: .cloudflare-pages
 Root directory: /
 ```
 
-The repository's root `wrangler.jsonc` identifies the project as `civweave` and points Pages at `.cloudflare-pages`.
+The repository's root `wrangler.jsonc` intentionally retains `commonweave` as the Cloudflare infrastructure project name while the application itself is branded Civweave.
 
 ## Publishing an update
-
-From the connected repository:
 
 ```bash
 git pull --ff-only origin main
 npm install
 node scripts/build-cloudflare-pages.mjs
-npx wrangler pages deploy .cloudflare-pages --project-name civweave --branch main --commit-dirty=true
+npx wrangler pages deploy .cloudflare-pages --project-name commonweave --branch main --commit-dirty=true
 ```
 
-Run the standalone audit first when adding or replacing large binary assets:
+After deployment, verify the **stable production origin**:
 
-```bash
-node scripts/audit-cloudflare-assets.mjs
+```text
+https://commonweave.pages.dev/
+https://commonweave.pages.dev/app/manifest.webmanifest
+https://commonweave.pages.dev/app/installed-entry-v146.js
+https://commonweave.pages.dev/service-worker-v203.js
+https://commonweave.pages.dev/api/health
 ```
+
+Do not use a hashed preview hostname for production verification or PWA installation.
 
 ## Local Pages preview
-
-Build first, then serve the exact generated output:
 
 ```bash
 node scripts/build-cloudflare-pages.mjs
@@ -159,39 +145,30 @@ npx wrangler pages dev .cloudflare-pages
 
 Wrangler normally serves the local Pages preview on port `8788`.
 
-## Production verification
-
-After deployment, check:
-
-```text
-https://civweave.pages.dev/
-https://civweave.pages.dev/api/health
-```
-
-PowerShell verification:
-
-```powershell
-Invoke-WebRequest https://civweave.pages.dev/ -UseBasicParsing
-Invoke-RestMethod https://civweave.pages.dev/api/health
-```
-
-Expected health behavior:
-
-- HTTP status `200`
-- JSON response
-- `ok` is `true`
-- service identifies the Civweave Cloudflare Pages node
-
 ## Safe working rules
 
 - Treat `public/` as the hosted source of truth.
 - Treat `.cloudflare-pages/` as generated output.
 - Pull from `origin/main` before publishing.
+- Keep `commonweave` as the production Pages project identifier unless intentionally performing a full-origin migration.
+- Never tell end users to install from a hashed `*.commonweave.pages.dev` preview deployment.
 - Do not force-reset a working folder that contains uncommitted assets.
 - Keep every hosted file below the repository's 24 MiB boundary.
 - Never commit Cloudflare credentials or API tokens.
 
 ## Common failures
+
+### `civweave.pages.dev` does not resolve
+
+That is not the production Pages origin. Use:
+
+```text
+https://commonweave.pages.dev
+```
+
+### A hashed preview still serves an old version
+
+That is expected for an immutable preview deployment. If a PWA was installed from that preview origin, uninstall that PWA and reinstall from the stable production origin `https://commonweave.pages.dev`.
 
 ### Wrangler is missing
 
@@ -208,16 +185,12 @@ npx wrangler whoami
 
 ### The build reports oversized assets
 
-The builder prints the complete list. Replace, optimize, or split every listed file, then rerun:
-
 ```bash
 node scripts/audit-cloudflare-assets.mjs
 node scripts/build-cloudflare-pages.mjs
 ```
 
 ### The build reports a missing required file
-
-Update the checkout and reinstall dependencies before rebuilding:
 
 ```bash
 git pull --ff-only origin main
@@ -227,16 +200,11 @@ node scripts/build-cloudflare-pages.mjs
 
 ### The local checkout is no longer connected to GitHub
 
-Do not overwrite the folder containing local work. Clone a fresh connected copy beside it, then copy only the intended local changes into the clean clone:
+Clone a fresh connected copy beside it rather than overwriting local work:
 
 ```bash
 git clone https://github.com/cerbanimo-dev/Civweave.git civweave-connected
 cd civweave-connected
-```
-
-Confirm the connection before deploying:
-
-```bash
 git remote -v
 git branch --show-current
 ```
