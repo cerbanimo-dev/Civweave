@@ -26,7 +26,7 @@ jobs:
         run: |
           set -euo pipefail
           SOURCE=03465eeb121c9a51b44fa569e55ad95a9512304c
-          git fetch origin "$SOURCE" || true
+          BASE="https://raw.githubusercontent.com/cerbanimo-dev/Civweave/$SOURCE"
           for file in \
             public/app/radio-track-suggestions-v240.js \
             public/app/radio-track-map-v241.json \
@@ -35,7 +35,7 @@ jobs:
             .github/workflows/verify-system-radio-v233.yml
           do
             mkdir -p "$(dirname "$file")"
-            git show "$SOURCE:$file" > "$file"
+            curl --fail --silent --show-error --location "$BASE/$file" --output "$file"
           done
 
           python <<'PY'
