@@ -57,7 +57,10 @@ jobs:
       - name: Verify deployed manifest, updater, and worker bytes
         env:
           CIVWEAVE_EXPECTED_VERSION: ${{ steps.expected.outputs.version }}
-          CIVWEAVE_PRODUCTION_URLS: https://civweave.pages.dev,https://commonweave-host-node-9l1u.onrender.com
+          # Temporary convergence inventory: keep the documented Civweave host,
+          # the legacy Commonweave production/preview hostnames seen in prior installs,
+          # and the confirmed Render production host until the live Pages owner is identified.
+          CIVWEAVE_PRODUCTION_URLS: https://civweave.pages.dev,https://commonweave.pages.dev,https://8adb94b4.commonweave.pages.dev,https://commonweave-host-node-9l1u.onrender.com
           CIVWEAVE_PROBE_ATTEMPTS: ${{ steps.expected.outputs.attempts }}
           CIVWEAVE_PROBE_DELAY_MS: ${{ steps.expected.outputs.delay }}
         run: node scripts/verify-production-boot-canary-v251.mjs
