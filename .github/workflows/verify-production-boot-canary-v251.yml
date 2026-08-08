@@ -8,9 +8,12 @@ on:
     paths:
       - 'VERSION'
       - 'package.json'
+      - 'wrangler.jsonc'
+      - 'CLOUDFLARE-SETUP.md'
       - 'public/app/manifest.webmanifest'
       - 'public/app/installed-entry-v146.js'
       - 'public/service-worker-v203.js'
+      - 'scripts/setup-cloudflare-node.mjs'
       - 'scripts/verify-production-boot-canary-v251.mjs'
       - '.github/workflows/verify-production-boot-canary-v251.yml'
   workflow_dispatch:
@@ -34,7 +37,15 @@ jobs:
         with:
           node-version: 22
       - name: Syntax check production canary
-        run: node --check scripts/verify-production-boot-canary-v251.mjs
+        run: |
+          node --check scripts/setup-cloudflare-node.mjs
+          node --check scripts/verify-production-boot-canary-v251.mjs
+      - name: Verify stable production origin declarations
+        run: |
+          grep -q '"name": "commonweave"' wrangler.jsonc
+          grep -q 'Production URL: https://commonweave.pages.dev' CLOUDFLARE-SETUP.md
+          grep -q '"commonweave";' scripts/setup-cloudflare-node.mjs
+          ! grep -q 'Production URL: https://civweave.pages.dev' CLOUDFLARE-SETUP.md
       - name: Resolve expected production release
         id: expected
         shell: bash
@@ -57,10 +68,7 @@ jobs:
       - name: Verify deployed manifest, updater, and worker bytes
         env:
           CIVWEAVE_EXPECTED_VERSION: ${{ steps.expected.outputs.version }}
-          # Temporary convergence inventory: keep the documented Civweave host,
-          # the legacy Commonweave production/preview hostnames seen in prior installs,
-          # and the confirmed Render production host until the live Pages owner is identified.
-          CIVWEAVE_PRODUCTION_URLS: https://civweave.pages.dev,https://commonweave.pages.dev,https://8adb94b4.commonweave.pages.dev,https://commonweave-host-node-9l1u.onrender.com
+          CIVWEAVE_PRODUCTION_URLS: https://commonweave.pages.dev,https://commonweave-host-node-9l1u.onrender.com
           CIVWEAVE_PROBE_ATTEMPTS: ${{ steps.expected.outputs.attempts }}
           CIVWEAVE_PROBE_DELAY_MS: ${{ steps.expected.outputs.delay }}
         run: node scripts/verify-production-boot-canary-v251.mjs
