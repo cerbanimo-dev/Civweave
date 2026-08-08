@@ -1,11 +1,24 @@
 (()=>{
 'use strict';
-const VERSION='257.0-device-owned-gemini-direct';
+const VERSION='257.1-device-owned-gemini-direct';
 if(globalThis.CivweaveGeminiDeviceDirectV257?.version===VERSION)return;
 const GOOGLE_ORIGIN='https://generativelanguage.googleapis.com';
 const GOOGLE_BASE='/v1beta/interactions';
 const PROXY_BASE='/api/ai/gemini/interactions';
+const HOST_KEY='civweave.host-node.v1';
 const nativeFetch=globalThis.fetch?.bind(globalThis);
+
+function retireProxyAdvertisement(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(HOST_KEY)||'null');
+    if(!saved||typeof saved!=='object')return false;
+    const features=Array.isArray(saved.features)?saved.features.filter(item=>String(item).toLowerCase()!=='gemini-agent-proxy'):saved.features;
+    const next={...saved,features,geminiProxy:false,geminiAgentProxy:false};
+    if(JSON.stringify(next)!==JSON.stringify(saved))localStorage.setItem(HOST_KEY,JSON.stringify(next));
+    return true;
+  }catch{return false}
+}
+retireProxyAdvertisement();
 if(!nativeFetch){globalThis.CivweaveGeminiDeviceDirectV257=Object.freeze({version:VERSION,installed:false});return}
 
 function targetUrl(input){
@@ -36,5 +49,5 @@ async function deviceFetch(input,init={}){
 }
 
 globalThis.fetch=deviceFetch;
-globalThis.CivweaveGeminiDeviceDirectV257=Object.freeze({version:VERSION,installed:true,googleOrigin:GOOGLE_ORIGIN,proxyPathRetired:PROXY_BASE});
+globalThis.CivweaveGeminiDeviceDirectV257=Object.freeze({version:VERSION,installed:true,googleOrigin:GOOGLE_ORIGIN,proxyPathRetired:PROXY_BASE,hostKey:HOST_KEY});
 })();
