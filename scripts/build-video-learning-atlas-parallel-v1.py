@@ -6,6 +6,7 @@ import gzip
 import importlib.util
 import json
 import os
+import re
 import sys
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -21,14 +22,106 @@ spec.loader.exec_module(base)
 
 WORKERS = max(2, min(int(os.environ.get('VIDEO_ATLAS_WORKERS', '8')), 16))
 
+# Use viewer-backed sources only. The PleIAs YouTube-Commons repository is excellent
+# archival material but its Dataset Viewer is currently unavailable. Common Pile's
+# filtered Creative Commons YouTube corpus exposes equivalent open video provenance
+# plus title, description and transcript text through the viewer API.
+base.SOURCES = [
+    {
+        'id': 'massive-yt-edu-queue',
+        'dataset': 'thepowerfuldeez/massive-yt-edu-queue',
+        'license': 'MIT metadata dataset; individual video rights vary',
+        'role': 'broad educational discovery',
+    },
+    {
+        'id': 'common-pile-youtube',
+        'dataset': 'common-pile/youtube_filtered',
+        'license': 'Creative Commons YouTube corpus; CC provenance retained per record',
+        'role': 'open title, description, transcript and provenance layer',
+    },
+    {
+        'id': 'howto-interlink7m',
+        'dataset': 'Awiny/Howto-Interlink7M',
+        'license': 'Apache-2.0 dataset; derived from HowTo100M source videos',
+        'role': 'practical procedural layer',
+        'upstream': 'HowTo100M',
+    },
+]
+
+_original_normalize = base.normalize_row
+_original_score = base.score
+
+
+def _metadata(value):
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, dict) else {}
+        except Exception:
+            return {}
+    return {}
+
+
+def normalize_row(source_id, row, query, rank):
+    if source_id != 'common-pile-youtube':
+        return _original_normalize(source_id, row, query, rank)
+    video_id = base.clean_text(row.get('id'), 20)
+    if not re.fullmatch(r'[\w-]{11}', video_id):
+        return None
+    metadata = _metadata(row.get('metadata'))
+    description = base.clean_text(row.get('description'), 1200)
+    transcript = base.clean_text(row.get('text'), 900)
+    digest = description or transcript
+    if description and transcript and transcript.lower() not in description.lower():
+        digest = base.clean_text(f'{description} Transcript excerpt: {transcript}', 1800)
+    return {
+        'video_id': video_id,
+        'url': base.clean_text(metadata.get('url'), 240) or base.youtube_url(video_id),
+        'title': base.clean_text(row.get('title'), 180),
+        'creator': base.clean_text(row.get('channel_id'), 160),
+        'duration_seconds': int(row.get('duration') or 0),
+        'language': 'en',
+        'catalog_description': digest,
+        'catalog_description_source': 'open YouTube description/transcript' if digest else None,
+        'source_datasets': [source_id],
+        'source_details': {
+            source_id: {
+                'license': base.clean_text(metadata.get('license'), 180) or 'Creative Commons',
+                'provenance': base.clean_text(metadata.get('provenance'), 180),
+                'published_time': base.clean_text(row.get('published_time'), 48),
+                'matched_query': query,
+                'result_rank': rank,
+            }
+        },
+    }
+
+
+def score(record, keyword_index=0):
+    points = _original_score(record, keyword_index)
+    if 'common-pile-youtube' in set(record.get('source_datasets') or []):
+        points += 28
+    return points
+
+
+base.normalize_row = normalize_row
+base.score = score
+
 
 def discover_parallel():
-    # Resolve dataset splits once before workers touch the shared split cache.
+    # Resolve dataset splits once before workers touch the shared split cache. Drop
+    # any unavailable source for this build rather than retrying it for every query.
+    available_sources = []
     for source in base.SOURCES:
         try:
             base._SPLITS[source['dataset']] = base.hf_split(source['dataset'])
+            available_sources.append(source)
         except Exception as exc:
             print(f"source split unavailable: {source['id']}: {exc}", flush=True)
+    base.SOURCES = available_sources
+    if not base.SOURCES:
+        raise RuntimeError('No Video Learning Atlas source has an available Dataset Viewer split.')
     discovered = {}
     failures = {}
     with ThreadPoolExecutor(max_workers=min(WORKERS, len(base.SCHOOLS))) as pool:
@@ -188,6 +281,7 @@ def build():
         'enrichment': enrichment,
         'sidecar': sidecar_meta,
         'workers': WORKERS,
+        'sources': [source['id'] for source in base.SOURCES],
     }, indent=2), flush=True)
 
 
