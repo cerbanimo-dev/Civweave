@@ -10,6 +10,11 @@ const requiredBoundary = "if (gatewayRequest && applicationSurface && !installer
 const forbiddenLiveAppRelaxation = "pathname !== '/app' && !pathname.startsWith('/app/')";
 const advertisedProxy = "features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising','hosted-ai-wallet-foundation']";
 const deviceFirstFeatures = "features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','release-advertising','hosted-ai-wallet-foundation']";
+const packageAssetBoundary = `if (gatewayRequest && packageInstall && applicationSurface) {
+    if (await serveFile(req,res,pathname)) return;
+    return json(res,404,{error:'Requested Civweave device-package asset was not found.',packageInstall:true,pathname});
+  }
+  ${requiredBoundary}`;
 
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 if (!source.includes(requiredBoundary)) {
@@ -27,7 +32,11 @@ if (!source.includes("const installerSurface = installerAssets.has(pathname);"))
 if (!source.includes(advertisedProxy)) {
   throw new Error('Civweave gateway v132 could not find the obsolete Gemini proxy advertisement.');
 }
+source = source.replace(requiredBoundary, packageAssetBoundary);
 source = source.replace(advertisedProxy, deviceFirstFeatures);
+if (!source.includes("if (gatewayRequest && packageInstall && applicationSurface)")) {
+  throw new Error('Civweave gateway v132 failed to install the explicit device-package asset path.');
+}
 await fsp.writeFile(runtimePath, source, 'utf8');
 try {
   await import(`${pathToFileURL(runtimePath).href}?build=${encodeURIComponent(VERSION)}`);
