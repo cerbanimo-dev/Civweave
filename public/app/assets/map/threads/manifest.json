@@ -1,0 +1,24 @@
+{
+  "schema": "civweave.map-thread-assets.v1",
+  "version": "1.0.0",
+  "format": "webp",
+  "assetCount": 55,
+  "assetRoot": "/app/assets/map/threads",
+  "colors": ["cyan", "gold", "green", "pink", "silver"],
+  "straightVariants": 3,
+  "curveVariants": 8,
+  "assets": [
+    "thread-curve-01-cyan.webp", "thread-curve-01-gold.webp", "thread-curve-01-green.webp", "thread-curve-01-pink.webp", "thread-curve-01-silver.webp",
+    "thread-curve-02-cyan.webp", "thread-curve-02-gold.webp", "thread-curve-02-green.webp", "thread-curve-02-pink.webp", "thread-curve-02-silver.webp",
+    "thread-curve-03-cyan.webp", "thread-curve-03-gold.webp", "thread-curve-03-green.webp", "thread-curve-03-pink.webp", "thread-curve-03-silver.webp",
+    "thread-curve-04-cyan.webp", "thread-curve-04-gold.webp", "thread-curve-04-green.webp", "thread-curve-04-pink.webp", "thread-curve-04-silver.webp",
+    "thread-curve-05-cyan.webp", "thread-curve-05-gold.webp", "thread-curve-05-green.webp", "thread-curve-05-pink.webp", "thread-curve-05-silver.webp",
+    "thread-curve-06-cyan.webp", "thread-curve-06-gold.webp", "thread-curve-06-green.webp", "thread-curve-06-pink.webp", "thread-curve-06-silver.webp",
+    "thread-curve-07-cyan.webp", "thread-curve-07-gold.webp", "thread-curve-07-green.webp", "thread-curve-07-pink.webp", "thread-curve-07-silver.webp",
+    "thread-curve-08-cyan.webp", "thread-curve-08-gold.webp", "thread-curve-08-green.webp", "thread-curve-08-pink.webp", "thread-curve-08-silver.webp",
+    "thread-straight-01-cyan.webp", "thread-straight-01-gold.webp", "thread-straight-01-green.webp", "thread-straight-01-pink.webp", "thread-straight-01-silver.webp",
+    "thread-straight-02-cyan.webp", "thread-straight-02-gold.webp", "thread-straight-02-green.webp", "thread-straight-02-pink.webp", "thread-straight-02-silver.webp",
+    "thread-straight-03-cyan.webp", "thread-straight-03-gold.webp", "thread-straight-03-green.webp", "thread-straight-03-pink.webp", "thread-straight-03-silver.webp"
+  ],
+  "notes": "Transparent map-thread tiles derived from the approved association-map art pack and optimized for offline PWA delivery."
+}
