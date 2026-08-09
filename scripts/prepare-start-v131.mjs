@@ -1,4 +1,4 @@
-await import('./apply-confidence-weighted-validation-v1.mjs');
+await import('./apply-confidence-weighted-validation-v1-safe.mjs');
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 
