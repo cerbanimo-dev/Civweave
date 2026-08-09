@@ -1,10 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-cerbanimo-learning-packs-v1';
+const VERSION='1.1.0-cerbanimo-learning-packs-v1';
 const RUNTIME='/app/shared/learning-pack-runtime-v1.mjs?v=learning-packs-v1';
-let runtimePromise=null,readyPromise=null;
+const RESOLVER='/app/shared/learning-pack-resolver-v1.mjs?v=learning-packs-v1';
+let runtimePromise=null,resolverPromise=null,readyPromise=null;
 const clean=(value,max=1200)=>String(value??'').trim().slice(0,max);
 function runtime(){if(!runtimePromise)runtimePromise=import(RUNTIME);return runtimePromise}
+function resolver(){if(!resolverPromise)resolverPromise=import(RESOLVER);return resolverPromise}
 async function ready(){
   if(!readyPromise)readyPromise=(async()=>{
     const packs=await runtime();
@@ -19,6 +21,8 @@ async function status(){const packs=await runtime();return packs.status()}
 async function catalog(){const packs=await runtime();return packs.catalog()}
 async function search(query,options={}){const packs=await ready();return packs.search(query,options)}
 async function find(itemId,options={}){const packs=await ready();return packs.findItem(itemId,options)}
+async function recommendPacks(query,options={}){const picker=await resolver();return picker.recommendPacks(query,{...options,audience:'cerbanimo'})}
+async function resolve(query,options={}){const picker=await resolver();return picker.resolve(query,{packLimit:2,resultLimit:20,...options,audience:'cerbanimo'})}
 async function templateToQuest(templateId,overrides={}){
   const packs=await ready(),input=packs.compileTaskTemplate(templateId,overrides);
   if(input.packMetadata?.requiresAdaptation&&!overrides.allowReferenceDraft)throw new Error('This labor reference must be adapted into a reviewed task template before Cerbanimo can create executable work from it.');
@@ -33,11 +37,18 @@ async function createQuest(templateId,overrides={}){
   try{dispatchEvent(new CustomEvent('civweave:cerbanimo-learning-pack-quest-created',{detail:{packTemplateId:templateId,questId:quest.id,title:quest.title,skillRefs:input.packMetadata?.skillRefs||[]}}))}catch{}
   return{ok:true,quest:result?.quest||quest,input};
 }
+async function createRecommendedQuest(query,overrides={}){
+  const resolution=await resolve(query,{kinds:['task-template'],includeLaborReferences:false,packLimit:Number(overrides.packLimit||2)});
+  const match=resolution.results.find(row=>row.kind==='task-template');
+  if(!match)throw new Error(`No executable learning-pack task template matched “${clean(query,300)}”.`);
+  const created=await createQuest(match.id,{...overrides,packId:match.packId});
+  return{...created,resolution,match};
+}
 async function laborTaskDraft(referenceId,taskId,options={}){
   const packs=await ready(),found=packs.findItem(referenceId,{packId:options.packId||'',kind:'labor-reference'});
   if(!found)throw new Error(`Labor reference ${clean(referenceId,180)} is not loaded.`);
   return packs.laborTaskDraft(found.item,taskId,{packId:found.packId});
 }
-globalThis.CivweaveCerbanimoLearningPacksV1=Object.freeze({version:VERSION,ready,catalog,status,stage,search,find,templateToQuest,createQuest,laborTaskDraft});
+globalThis.CivweaveCerbanimoLearningPacksV1=Object.freeze({version:VERSION,ready,catalog,status,stage,search,find,recommendPacks,resolve,templateToQuest,createQuest,createRecommendedQuest,laborTaskDraft});
 queueMicrotask(()=>ready().catch(error=>console.warn('[Cerbanimo learning packs]',error)));
 })();
