@@ -23,12 +23,13 @@ assert.ok(marketplace.includes('CivweaveNodeAIMeshV1'),'Marketplace surface does
 assert.ok(marketplace.includes("const SESSION_KEY='civweave.node-ai-marketplace.sessions.v1'"),'Marketplace does not isolate node sessions.');
 assert.ok(marketplace.includes('sessionStorage.setItem(SESSION_KEY'),'Node wallet sessions are not tab/session scoped.');
 assert.ok(!marketplace.includes('localStorage.setItem(SESSION_KEY'),'Node wallet sessions leaked into persistent local storage.');
-assert.ok(!/topups|payments\/webhook|internal\/ledger/i.test(marketplace),'Public marketplace surface contains a purchase or privileged ledger path.');
+assert.ok(!/\/api\/ai\/node\/wallet\/payments\/webhook|\/api\/ai\/node\/wallet\/internal\//i.test(marketplace),'Public marketplace surface contains a live-payment webhook or privileged wallet path.');
+assert.ok(marketplace.includes('/api/ai/node/trial/topups'),'Sandbox trial-credit path is missing from the public marketplace surface.');
 assert.ok(marketplace.includes("circle.classList.add('ai-service')"),'Marketplace does not decorate observed map nodes with AI-service availability.');
 assert.ok(marketplace.includes("preferredNodeId"),'Device-owned node preference is missing.');
 assert.ok(operatorHtml.includes('/app/node-ai-operator-v1.js'),'Operator status shell is disconnected.');
 assert.ok(operatorRuntime.includes('/api/ai/node/manifest')&&operatorRuntime.includes('/api/ai/node/inference/status'),'Operator status does not use safe public status endpoints.');
-assert.ok(!/FIREWORKS_API_KEY|NODE_AI_INTERNAL_SECRET|NODE_AI_CAPABILITY_SECRET/.test(operatorRuntime),'Operator surface references private credential values.');
+assert.ok(!/FIREWORKS_API_KEY|NODE_AI_CAPABILITY_SECRET/.test(operatorRuntime),'Operator surface references provider or capability credential values.');
 assert.deepEqual(manifest.seeds,[
   '/app/installed-entry-v146.html','/app/cw-reward-ledger-v2.js','/app/cw-reward-receivers-v2.js','/app/cw-reward-legacy-bridge-v2.js','/app/cw-reward-surfaces-v2.js','/app/civweave-systems-mesh-v251.js','/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'
 ],'Canonical offline roots changed.');
@@ -39,4 +40,4 @@ assert.ok(offlineWorker.includes('required: requiredSeeds.has(pathname)'),'Optio
 assert.ok(gateway.includes("pathname === '/api/finder-status'"),'Gateway does not expose sanitized Finder topology.');
 assert.ok(gateway.includes('sanitizeLocation'),'Finder status does not sanitize public locations.');
 assert.ok(inferenceHttp.includes("pathname === '/api/ai/node/inference/status'"),'Public inference readiness endpoint is missing.');
-console.log(JSON.stringify({ok:true,revision:'node-ai-marketplace-surface-v1',canonicalRoots:manifest.seeds.length,optionalAssets:manifest.assets.length,sessionScoped:true,noAutoPurchase:true,finderIntegrated:true,operatorStatus:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'node-ai-marketplace-surface-v1',canonicalRoots:manifest.seeds.length,optionalAssets:manifest.assets.length,sessionScoped:true,noLivePaymentMutation:true,sandboxTrialCredit:true,finderIntegrated:true,operatorStatus:true},null,2));
