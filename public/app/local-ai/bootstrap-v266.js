@@ -6,7 +6,7 @@ const files=[
   ['/app/local-ai/model-registry-v266.js?v=1.0.60-v267',()=>globalThis.CivweaveLocalModelRegistryV266],
   ['/app/local-ai/download-manager-v267.js?v=1.0.60-v267',()=>globalThis.CivweaveLocalModelDownloadV266?.version==='1.0.60-local-ai-download-v267'],
   ['/app/local-ai/runtime-v266.js?v=1.0.60-v267',()=>globalThis.CivweaveLocalModelRuntimeV266],
-  ['/app/local-ai/runtime-bridge-v266.js?v=1.0.60-v267',()=>globalThis.CivweaveLocalModelBridgeV266],
+  ['/app/local-ai/runtime-bridge-v266.js?v=1.0.60-v267',()=>globalThis.CivweaveLocalModelBridgeV266?.version==='1.0.60-local-ai-bridge-v267'],
   ['/app/local-ai/settings-panel-v267.js?v=1.0.60-v267',()=>globalThis.CivweaveLocalAISettingsV266?.version==='1.0.60-local-ai-settings-v267']
 ];
 function load(src,ready){if(ready?.())return Promise.resolve();return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveLocalAi='v267';script.onload=()=>ready?.()?resolve():reject(new Error(`${src} loaded without its expected runtime.`));script.onerror=()=>reject(new Error(`Could not load ${src}.`));document.head.append(script)})}
