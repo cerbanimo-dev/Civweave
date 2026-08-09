@@ -1,54 +1,29 @@
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
-
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [pulse,bootstrap,runtime,assistant]=await Promise.all([
-  read('public/app/local-ai/test-pulse-v269.js'),
-  read('public/app/local-ai/bootstrap-v266.js'),
-  read('public/app/local-ai/runtime-v266.js'),
-  read('public/app/assistant-runtime-v141.js')
-]);
-
-new Function(pulse);
-new Function(bootstrap);
-new Function(runtime);
-new Function(assistant);
-
-const checks=[];
-const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
-
-check('test pulse exposes an explicit Test model control',pulse.includes("running?'Testing model…':'Test model'")&&pulse.includes('dataset.localTestPulse'));
-check('test pulse renders raw model output',pulse.includes('Raw model output')&&pulse.includes('downloaded-local direct inference'));
-check('test pulse labels the orchestration bypass',pulse.includes('bypasses Weaveling')&&pulse.includes('no Weaveling contract'));
-check('test pulse invokes the downloaded local runtime directly',pulse.includes('CivweaveLocalModelRuntimeV266')&&pulse.includes('const output=await runtime.generate'));
-check('test pulse uses a tiny human-readable inference request',pulse.includes('maxNewTokens:64')&&pulse.includes('one short sentence'));
-check('test pulse reports direct provider identity',pulse.includes("provider:'downloaded-local-direct'"));
-check('test pulse never calls the assistant orchestrator',!pulse.includes('CivweaveAssistantV141')&&!pulse.includes('.respond('));
-check('test pulse never fabricates deterministic fallback output',!pulse.includes('local-contract')&&!pulse.includes('civweave-action-contract'));
-check('pulse DOM repair avoids rewriting identical markup',pulse.includes('node.dataset.pulseMarkup===html')&&pulse.includes('button.textContent!==label'));
-check('runtime itself talks to the local generative worker',runtime.includes("request('generate'")&&runtime.includes("new Worker(WORKER"));
+const [pulse,bootstrap,runtime,assistant]=await Promise.all([read('public/app/local-ai/test-pulse-v269.js'),read('public/app/local-ai/bootstrap-v266.js'),read('public/app/local-ai/runtime-v266.js'),read('public/app/assistant-runtime-v141.js')]);
+for(const source of [pulse,bootstrap,runtime,assistant])new Function(source);
+const checks=[];const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
+check('health pulse exposes Test model control',pulse.includes("running?'Testing model…':'Test model'")&&pulse.includes('dataset.localTestPulse'));
+check('health pulse renders PASS and staged failure',pulse.includes('Local inference health · PASS')&&pulse.includes('failed at'));
+check('health pulse shows TTFT and decode speed',pulse.includes('TTFT')&&pulse.includes('tok/s'));
+check('health pulse invokes downloaded runtime directly',pulse.includes('CivweaveLocalModelRuntimeV266')&&pulse.includes('const output=await runtime.generate'));
+check('health pulse uses short non-thinking request',pulse.includes('maxNewTokens:32')&&pulse.includes('thinking:false')&&pulse.includes('cedar 37'));
+check('health pulse reports direct provider identity',pulse.includes("provider:'downloaded-local-direct'"));
+check('health pulse persists measured device health',pulse.includes('civweave.local-ai.health.v274')&&pulse.includes('local-model-health'));
+check('health pulse never calls assistant orchestrator',!pulse.includes('CivweaveAssistantV141')&&!pulse.includes('.respond('));
+check('health pulse never fabricates deterministic fallback output',!pulse.includes('local-contract')&&!pulse.includes('civweave-action-contract'));
+check('runtime talks to local worker and carries timing diagnostics',runtime.includes("request('generate'")&&runtime.includes('new Worker(WORKER')&&runtime.includes('timingDiagnostics:true'));
 check('bootstrap loads pulse after settings panel',bootstrap.includes('test-pulse-v269.js')&&bootstrap.indexOf('settings-panel-v267.js')<bootstrap.indexOf('test-pulse-v269.js'));
 check('bootstrap advertises direct model testing',bootstrap.includes('directModelTest:true'));
-
 let capturedRequest=null,directCalls=0,clock=100;
-const context={
-  console,
-  document:{readyState:'loading',addEventListener(){}},
-  addEventListener(){},
-  queueMicrotask(){},
-  performance:{now(){clock+=12;return clock}},
-  CivweaveLocalModelRegistryV266:{byId:id=>id==='mock-local'?{id,label:'Mock Local',estimatedBytes:600_000_000}:null},
-  CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'mock-local'}),status:async()=>({available:true})},
-  CivweaveLocalModelRuntimeV266:{generate:async request=>{directCalls+=1;capturedRequest=request;return{id:'mock-local',label:'Mock Local',text:'A lantern beside 42 books.',elapsedMs:321}}}
-};
-context.globalThis=context;
-vm.createContext(context);
-vm.runInContext(pulse,context,{filename:'test-pulse-v269.js'});
+const context={console,document:{readyState:'loading',addEventListener(){}},addEventListener(){},dispatchEvent(){return true},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},queueMicrotask(){},localStorage:{getItem(){return null},setItem(){}},performance:{now(){clock+=12;return clock}},CivweaveLocalModelRegistryV266:{byId:id=>id==='mock-local'?{id,label:'Mock Local',estimatedBytes:600_000_000,healthTimeoutMs:360000,contextWindowTokens:40960,workingContextTokens:4096,generation:{nonThinkingTemperature:.7}}:null},CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'mock-local'}),status:async()=>({available:true})},CivweaveLocalModelRuntimeV266:{generate:async request=>{directCalls+=1;capturedRequest=request;return{id:'mock-local',label:'Mock Local',text:'cedar 37',elapsedMs:321,streamed:true,metrics:{ttftMs:120,tokensPerSecond:9.5,promptTokens:12,generatedTokens:4,contextWindowTokens:40960,workingContextTokens:4096}}}}};context.globalThis=context;vm.createContext(context);vm.runInContext(pulse,context,{filename:'test-pulse-v269.js'});
 const generated=await context.CivweaveLocalModelTestPulseV269.test('mock-local');
-check('mock pulse performs exactly one direct runtime generation',directCalls===1);
-check('mock pulse returns generated runtime text unchanged',generated.text==='A lantern beside 42 books.');
-check('mock pulse sends a short conversational user message',capturedRequest?.messages?.length===1&&capturedRequest.messages[0].role==='user'&&capturedRequest.maxNewTokens===64);
-check('mock pulse identifies direct downloaded-local provenance',generated.provider==='downloaded-local-direct'&&generated.model==='mock-local');
-
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v269',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,stableDomRepair:true,mockInference:true},null,2));
+check('mock health performs exactly one direct generation',directCalls===1);
+check('mock health returns generated text unchanged',generated.text==='cedar 37');
+check('mock health disables thinking with 32-token budget',capturedRequest?.messages?.length===1&&capturedRequest.messages[0].role==='user'&&capturedRequest.maxNewTokens===32&&capturedRequest.thinking===false);
+check('mock health enables direct streaming',capturedRequest.stream===true);
+check('mock health preserves measured metrics',generated.metrics.ttftMs===120&&generated.metrics.tokensPerSecond===9.5);
+check('mock health identifies downloaded-local provenance',generated.provider==='downloaded-local-direct'&&generated.model==='mock-local');
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v274-health',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,thinkingDisabled:true,stagedHealth:true,mockInference:true},null,2));
