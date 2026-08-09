@@ -35,6 +35,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Synchronize release assets
+        run: node scripts/sync-release-version-assets.mjs
       - name: Syntax check canonical runtimes and generators
         run: |
           node --check public/app/installed-entry-v146.js
