@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
@@ -30,4 +31,24 @@ check('runtime itself talks to the local generative worker',runtime.includes("re
 check('bootstrap loads pulse after settings panel',bootstrap.includes('test-pulse-v269.js')&&bootstrap.indexOf('settings-panel-v267.js')<bootstrap.indexOf('test-pulse-v269.js'));
 check('bootstrap advertises direct model testing',bootstrap.includes('directModelTest:true'));
 
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v269',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,stableDomRepair:true},null,2));
+let capturedRequest=null,directCalls=0,clock=100;
+const context={
+  console,
+  document:{readyState:'loading',addEventListener(){}},
+  addEventListener(){},
+  queueMicrotask(){},
+  performance:{now(){clock+=12;return clock}},
+  CivweaveLocalModelRegistryV266:{byId:id=>id==='mock-local'?{id,label:'Mock Local',estimatedBytes:600_000_000}:null},
+  CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'mock-local'}),status:async()=>({available:true})},
+  CivweaveLocalModelRuntimeV266:{generate:async request=>{directCalls+=1;capturedRequest=request;return{id:'mock-local',label:'Mock Local',text:'A lantern beside 42 books.',elapsedMs:321}}}
+};
+context.globalThis=context;
+vm.createContext(context);
+vm.runInContext(pulse,context,{filename:'test-pulse-v269.js'});
+const generated=await context.CivweaveLocalModelTestPulseV269.test('mock-local');
+check('mock pulse performs exactly one direct runtime generation',directCalls===1);
+check('mock pulse returns generated runtime text unchanged',generated.text==='A lantern beside 42 books.');
+check('mock pulse sends a short conversational user message',capturedRequest?.messages?.length===1&&capturedRequest.messages[0].role==='user'&&capturedRequest.maxNewTokens===64);
+check('mock pulse identifies direct downloaded-local provenance',generated.provider==='downloaded-local-direct'&&generated.model==='mock-local');
+
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v269',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,stableDomRepair:true,mockInference:true},null,2));
