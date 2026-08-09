@@ -1,6 +1,7 @@
 const REVISION='civweave-video-learning-contract-v1';
 export const FALLBACK_VIDEO_URL='https://www.youtube.com/watch?v=dQw4w9WgXcQ';
 const LOOKUP_URL='/downloads/knowledge-schools/video-atlases/lookup.json';
+const VIDEO_CACHE_NAME='cw-video-learning-atlas-v1';
 const clean=(value,max=6000)=>String(value??'').trim().slice(0,max);
 const copy=value=>{try{return structuredClone(value)}catch{return JSON.parse(JSON.stringify(value))}};
 const STOP=new Set(['about','after','again','also','been','being','build','could','does','doing','from','have','into','just','make','more','most','other','over','same','some','such','than','that','their','then','there','these','they','this','through','under','using','very','want','what','when','where','which','while','with','would','your']);
@@ -25,13 +26,27 @@ function normalizedVideo(value={}){
   if(!isYoutubeUrl(url))return null;
   return{url,title:clean(value?.title,240)||'Video companion',creator:clean(value?.creator||value?.channel,180),reason:clean(value?.reason||value?.relevance,600),source:clean(value?.source,120)||'generated'};
 }
+async function cachedLookupResponse(){
+  if(!('caches'in globalThis))return null;
+  try{
+    const cache=await caches.open(VIDEO_CACHE_NAME);
+    const absolute=typeof location!=='undefined'?new URL(LOOKUP_URL,location.origin).href:LOOKUP_URL;
+    return await cache.match(absolute)||await cache.match(LOOKUP_URL)||null;
+  }catch{return null}
+}
+async function networkLookupResponse(){
+  const controller=typeof AbortController==='function'?new AbortController():null;
+  const timeout=controller?setTimeout(()=>controller.abort(),4000):null;
+  try{return await fetch(LOOKUP_URL,{cache:'no-store',signal:controller?.signal})}finally{if(timeout)clearTimeout(timeout)}
+}
 async function loadLookup(){
   if(lookupPromise)return lookupPromise;
-  lookupPromise=fetch(LOOKUP_URL,{cache:'no-store'}).then(async response=>{
-    if(!response.ok)throw new Error(`Video atlas lookup unavailable (${response.status}).`);
-    const data=await response.json();
-    return Array.isArray(data?.records)?data.records:[];
-  }).catch(()=>[]);
+  lookupPromise=(async()=>{
+    let response=await cachedLookupResponse();
+    if(!response){try{response=await networkLookupResponse()}catch{return[]}}
+    if(!response?.ok)return[];
+    try{const data=await response.json();return Array.isArray(data?.records)?data.records:[]}catch{return[]}
+  })();
   return lookupPromise;
 }
 function relevanceScore(record,queryWords,schoolSlug=''){
@@ -132,7 +147,7 @@ export function installCerbanimoHarness(){
   setTimeout(()=>clearInterval(timer),12000);
   return{revision:REVISION,fallbackUrl:FALLBACK_VIDEO_URL};
 }
-const api=Object.freeze({revision:REVISION,FALLBACK_VIDEO_URL,LOOKUP_URL,isYoutubeUrl,youtubeEmbedUrl,resolveRelevantVideo,ensureModuleVideo,ensureLivingSchool,ensureCerbanimoAction,renderLivingSchoolEmbed,installCerbanimoHarness});
+const api=Object.freeze({revision:REVISION,FALLBACK_VIDEO_URL,LOOKUP_URL,VIDEO_CACHE_NAME,isYoutubeUrl,youtubeEmbedUrl,resolveRelevantVideo,ensureModuleVideo,ensureLivingSchool,ensureCerbanimoAction,renderLivingSchoolEmbed,installCerbanimoHarness});
 globalThis.CivweaveVideoLearningContractV1=api;
 try{dispatchEvent(new CustomEvent('civweave:video-learning-contract-ready',{detail:{revision:REVISION,fallbackUrl:FALLBACK_VIDEO_URL}}))}catch{}
 export default api;
