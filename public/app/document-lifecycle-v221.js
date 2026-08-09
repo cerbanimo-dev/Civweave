@@ -1,6 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='document-lifecycle-v273-local-ai-management';
+const LEGACY_ENTRY_REVISION='document-lifecycle-v269-ai-settings-entry';
 if(globalThis.CivweaveDocumentLifecycleV221?.version===VERSION)return;
 let active=true;
 const observers=new Set();
@@ -113,6 +114,7 @@ addEventListener('beforeunload',stop,{once:true});
 startEntryRepair();
 globalThis.CivweaveDocumentLifecycleV221=Object.freeze({
   version:VERSION,
+  legacyEntryRevision:LEGACY_ENTRY_REVISION,
   active:()=>active,
   head:()=>document.head,
   body:()=>document.body,
