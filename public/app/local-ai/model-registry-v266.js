@@ -3,14 +3,14 @@
 const VERSION='1.0.61-local-ai-registry-v268-capabilities';
 if(globalThis.CivweaveLocalModelRegistryV266?.version===VERSION)return;
 const HF='https://huggingface.co';
-const caps=value=>Object.freeze({interactive:true,structuredOutput:true,agenticReasoning:false,code:false,tools:false,externalResearch:false,vision:false,...value});
+const caps=value=>Object.freeze({interactive:true,structuredOutput:true,agenticReasoning:false,code:true,tools:false,externalResearch:false,vision:false,...value});
 const models=[
   {
     id:'qwen3-0.6b-q4f16',label:'Qwen 3 0.6B',tier:'Small',status:'stable',installable:true,recommended:'wide',
     provider:'huggingface',repo:'onnx-community/Qwen3-0.6B-ONNX',revision:'558750086ed49d78cb701ed6fa85af33fd16453f',
     task:'text-generation',dtype:'q4f16',device:'webgpu',runtime:'transformers-js-v3',estimatedBytes:610_000_000,
     license:'Apache-2.0',sourceModel:'Qwen/Qwen3-0.6B',
-    capabilities:caps({interactive:true,structuredOutput:true,agenticReasoning:false,code:false}),
+    capabilities:caps({interactive:true,structuredOutput:true,agenticReasoning:false,code:true}),
     artifacts:[
       ['config.json',500,true],['tokenizer.json',1_000_000,true],['tokenizer_config.json',500,true],
       ['generation_config.json',50,false],['chat_template.jinja',100,false],['onnx/model_q4f16.onnx',500_000_000,true]
@@ -43,7 +43,7 @@ const models=[
     id:'qwen3.5-0.8b-q4f16',label:'Qwen 3.5 0.8B',tier:'Experimental',status:'runtime-preview',installable:false,
     provider:'huggingface',repo:'onnx-community/Qwen3.5-0.8B-ONNX',revision:'d85632356b5aec5ecf43ff506b282d6ece81611f',
     task:'image-text-to-text',dtype:'q4f16',device:'webgpu',runtime:'transformers-js-next',estimatedBytes:560_000_000,
-    license:'Apache-2.0',capabilities:caps({interactive:true,structuredOutput:true,agenticReasoning:false,code:false,vision:true}),
+    license:'Apache-2.0',capabilities:caps({interactive:true,structuredOutput:true,agenticReasoning:false,code:true,vision:true}),
     reason:'Public ONNX/WebGPU artifacts exist, but the current Qwen3.5 browser instructions still target @huggingface/transformers@next. Civweave keeps this behind the preview gate until its pinned runtime and offline artifact manifest are verified together.'
   },
   {
