@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [topbar,workspace,viewport,boundary,workerRepair,workerEntry,manifestText,installedEntry,release,pkgText]=await Promise.all([
+const [topbarBridge,topbarBase,workspace,viewport,boundary,workerRepair,workerEntry,manifestText,installedEntry,release,pkgText]=await Promise.all([
   read('public/app/working-campus-topbar-v243.js'),
+  read('public/app/working-campus-topbar-v243-base.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/persistent-guide-viewport-v216.js'),
   read('public/app/install-boundary-v146.js'),
@@ -14,7 +15,8 @@ const [topbar,workspace,viewport,boundary,workerRepair,workerEntry,manifestText,
   read('VERSION'),
   read('package.json')
 ]);
-new Function(topbar);new Function(workspace);new Function(viewport);new Function(boundary);new Function(workerRepair);new Function(workerEntry);new Function(installedEntry);
+const topbar=`${topbarBridge}\n${topbarBase}`;
+new Function(topbarBridge);new Function(topbarBase);new Function(workspace);new Function(viewport);new Function(boundary);new Function(workerRepair);new Function(workerEntry);new Function(installedEntry);
 const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
@@ -25,6 +27,7 @@ check('mobile mode switch can shrink inside viewport',topbar.includes('white-spa
 check('mobile realm cards use a viewport-contained grid',topbar.includes('main.app>.campus')&&topbar.includes('grid-template-columns:repeat(2,minmax(0,1fr))!important'));
 check('very narrow phones stack realm cards',topbar.includes('@media(max-width:420px)')&&topbar.includes('grid-template-columns:1fr!important'));
 check('working campus clips accidental horizontal overflow',topbar.includes('overflow-x:clip'));
+check('canonical topbar bridge preserves mobile topbar implementation in base',topbarBridge.includes("BASE_TOPBAR='/app/working-campus-topbar-v243-base.js'")&&topbarBase.includes('working-campus-topbar-v243'));
 check('persona taps are owned directly by workspace pointerdown',workspace.includes('switchControl')&&workspace.includes('data-cw242-window')&&workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"));
 check('full chat send is owned directly by workspace capture',workspace.includes('data-persistent-form')&&workspace.includes("document.addEventListener('submit',onSubmitCapture,true)"));
 check('embedded Working Campus send delegates into workspace',workspace.includes("target.id==='weaveling-chat-form'")&&workspace.includes("openWindow('civweave');void submitActive(text)"));
