@@ -1,4 +1,4 @@
-import{resolveRelevantVideo,youtubeEmbedUrl,FALLBACK_VIDEO_URL}from'./video-learning-contract-v1.mjs?v=video-atlas-v1';
+import{resolveRelevantVideo,youtubeEmbedUrl,FALLBACK_VIDEO_URL,installCerbanimoHarness}from'./video-learning-contract-v1.mjs?v=video-atlas-v1';
 
 const REVISION='cerbanimo-video-task-contract-v1';
 const clean=(value,max=6000)=>String(value??'').trim().slice(0,max);
@@ -46,9 +46,10 @@ async function reconcile(){await ensureTaskVideos();renderTaskCards();}
 function install(){
   if(document.documentElement.dataset.cerbanimoVideoTaskContract===REVISION)return;
   document.documentElement.dataset.cerbanimoVideoTaskContract=REVISION;
+  installCerbanimoHarness();
   addEventListener('cerbanimo:quest-engine-changed',()=>queueMicrotask(reconcile));
   const observer=new MutationObserver(()=>queueMicrotask(renderTaskCards));observer.observe(document.documentElement,{subtree:true,childList:true});
   const timer=setInterval(()=>{if(engine()){clearInterval(timer);reconcile();}},100);setTimeout(()=>clearInterval(timer),10000);
 }
 install();
-globalThis.CerbanimoVideoTaskContractV1=Object.freeze({revision:REVISION,fallbackUrl:FALLBACK_VIDEO_URL,reconcile,ensureTaskVideos});
+globalThis.CerbanimoVideoTaskContractV1=Object.freeze({revision:REVISION,fallbackUrl:FALLBACK_VIDEO_URL,reconcile,ensureTaskVideos,aiHarness:true});
