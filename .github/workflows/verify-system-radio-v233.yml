@@ -10,6 +10,7 @@ on:
       - 'public/app/install-boundary-v146.js'
       - 'scripts/verify-system-radio-v233.mjs'
       - 'scripts/verify-living-school-radio-v252.mjs'
+      - 'scripts/verify-radio-bootstrap-priority-v267.mjs'
       - '.github/workflows/verify-system-radio-v233.yml'
       - 'VERSION'
       - 'package.json'
@@ -24,6 +25,7 @@ on:
       - 'public/app/install-boundary-v146.js'
       - 'scripts/verify-system-radio-v233.mjs'
       - 'scripts/verify-living-school-radio-v252.mjs'
+      - 'scripts/verify-radio-bootstrap-priority-v267.mjs'
       - '.github/workflows/verify-system-radio-v233.yml'
       - 'VERSION'
       - 'package.json'
@@ -43,7 +45,9 @@ jobs:
           node --check public/app/install-boundary-v146.js
           node --check scripts/verify-system-radio-v233.mjs
           node --check scripts/verify-living-school-radio-v252.mjs
+          node --check scripts/verify-radio-bootstrap-priority-v267.mjs
       - name: Verify radio contract
         run: |
           node scripts/verify-system-radio-v233.mjs
           node scripts/verify-living-school-radio-v252.mjs
+          node scripts/verify-radio-bootstrap-priority-v267.mjs
