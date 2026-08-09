@@ -28,6 +28,7 @@ const pocketCampusSeedPath = resolve(
   "downloads/civweave-pocket-campus.cwseed",
 );
 const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
+const transformerStage = resolve(scriptDir, "stage-transformers-assets.mjs");
 const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
@@ -124,6 +125,21 @@ if (!existsSync(sourceDir) || !statSync(sourceDir).isDirectory()) {
   throw new Error(`Static source directory not found: ${sourceDir}`);
 }
 
+runNodeScript(
+  transformerStage,
+  "Transformers.js staging failed. Cloudflare would otherwise publish downloadable model weights without the local inference runtime.",
+);
+
+for (const required of [
+  resolve(sourceDir, 'app/vendor/transformers/transformers.min.js'),
+  resolve(sourceDir, 'app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs'),
+  resolve(sourceDir, 'app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm'),
+]) {
+  if (!existsSync(required) || !statSync(required).isFile()) {
+    throw new Error(`Required local-AI runtime asset was not staged: ${relative(repoRoot, required)}`);
+  }
+}
+
 rebuildReleaseArtifacts();
 
 for (const [label, file] of [
@@ -165,4 +181,4 @@ const seedBytes = statSync(pocketCampusSeedPath).size;
 console.log(
   `Built .cloudflare-pages with mobile installer (${installerBytes} bytes) and portable Civweave seed (${seedBytes} bytes).`,
 );
-console.log("All Cloudflare-hosted files are at or below 24 MiB.");
+console.log("All Cloudflare-hosted files are at or below 24 MiB, including the staged local-AI runtime.");
