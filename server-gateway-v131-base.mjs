@@ -5,8 +5,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(rootDir, 'server.mjs');
 const runtimePath = path.join(rootDir, '.civweave-gateway-v131.runtime.mjs');
-const VERSION = '1.0.51';
-const BUILD = '1.0.51-install-only-fullscreen-family-gateway';
+const VERSION = '1.0.58';
+const BUILD = '1.0.58-install-only-fullscreen-family-gateway';
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 function replaceRequired(before, after, label) { if (!source.includes(before)) throw new Error(`Civweave gateway patch could not find ${label}`); source = source.replace(before, after); }
 replaceRequired("import { fileURLToPath } from 'node:url';","import { fileURLToPath } from 'node:url';\nimport { AiWalletService } from './lib/ai-wallet-service-v1.mjs';\nimport { createAiWalletHttpHandler } from './lib/ai-wallet-http-v1.mjs';",'hosted AI wallet imports');
@@ -14,7 +14,7 @@ replaceRequired("const BUILD_VERSION = '1.0.21-ai-uplift';",`const BUILD_VERSION
 replaceRequired("const APP_VERSION = 'rc22.3.20-ai-checkpoint';",`const APP_VERSION = '${VERSION}';`,'app version marker');
 replaceRequired("const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://civweave-host-node.onrender.com';","const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://civweave-host-node.onrender.com';\nconst CIVWEAVE_SOURCE_URL = process.env.CIVWEAVE_SOURCE_URL || 'https://github.com/cerbanimo-dev/Civweave';\nconst CIVWEAVE_RELEASE_URL = process.env.CIVWEAVE_RELEASE_URL || 'https://github.com/cerbanimo-dev/Civweave/archive/refs/heads/main.zip';",'gateway release URLs');
 replaceRequired("let installKitSha256 = '';\nlet installKitSize = 0;\ntry {\n  const kit = await fsp.readFile(INSTALL_KIT_PATH);\n  installKitSha256 = crypto.createHash('sha256').update(kit).digest('hex');\n  installKitSize = kit.length;\n} catch (error) {\n  console.warn('Install kit metadata unavailable:', error.message);\n}","const installKitSha256 = '';\nconst installKitSize = 0;",'install kit startup hashing');
-replaceRequired("    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Civweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Civweave host-node and offline PWA release.'","    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: CIVWEAVE_SOURCE_URL,\n    downloadUrl: CIVWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin distributes the Civweave v1.0.51 fixed-settings-layer device package.'",'release packet hosting fields');
+replaceRequired("    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Civweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Civweave host-node and offline PWA release.'","    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: CIVWEAVE_SOURCE_URL,\n    downloadUrl: CIVWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin distributes the Civweave v1.0.58 fixed-settings-layer device package.'",'release packet hosting fields');
 replaceRequired("} catch (error) {\n  if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);\n}",String.raw`} catch (error) {
   if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);
 }
@@ -49,29 +49,53 @@ const aiWalletHttp = createAiWalletHttpHandler({
 replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.raw`  const pathname = decodeURIComponent(url.pathname);
   const gatewayRequest = req.method === 'GET' || req.method === 'HEAD';
   const packageInstall = Boolean(String(req.headers['x-civweave-package'] || '').trim());
-  const installerSurface = pathname === '/'
-    || pathname === '/index.html'
-    || pathname === '/install-v130.js'
-    || pathname === '/install-v130.css'
-    || pathname === '/service-worker.js'
-    || pathname === '/service-worker-v156.js'
-    || pathname === '/service-worker-v203.js'
-    || pathname === '/app/manifest.webmanifest'
-    || pathname === '/app/logos/civweave.webp'
-    || pathname === '/app/logos/civweave-app-icon.png'
-    || pathname === '/app/logos/civweave-icon-192.png'
-    || pathname === '/app/logos/civweave-icon-512.png'
-    || pathname === '/app/logos/civweave-icon-maskable-192.png'
-    || pathname === '/app/logos/civweave-icon-maskable-512.png'
-    || pathname === '/app/knowledge-school-seeds-v1.js'
-    || pathname === '/app/knowledge-school-installer-v1.js'
-    || pathname === '/app/knowledge-school-installer-v1.css'
-    || pathname === '/app/offline-package-v208.json'
-    || pathname === '/app/offline-campus-status-v210.js'
-    || pathname === '/app/pwa-update-controller-v204.js';
+  const installerAssets = new Set([
+    '/',
+    '/index.html',
+    '/app/index.html',
+    '/install-v130.js',
+    '/install-v130.css',
+    '/service-worker.js',
+    '/service-worker-v156.js',
+    '/service-worker-v203.js',
+    '/service-worker-offline-runtime-boundary-v266.js',
+    '/service-worker-living-school-cleanroom-v218.js',
+    '/service-worker-core-v208.js',
+    '/service-worker-offline-v211-override.js',
+    '/service-worker-campus-completion-v246.js',
+    '/service-worker-release-coherence-v220.js',
+    '/service-worker-navigation-safety-v224.js',
+    '/service-worker-shell-repair-v225.js',
+    '/service-worker-canonical-navigation-v227.js',
+    '/service-worker-chat-repair-v245.js',
+    '/app/manifest.webmanifest',
+    '/app/civweave-brand.js',
+    '/app/pwa-install-prompt-v246.js',
+    '/app/installer-online-fallback-v225.js',
+    '/app/offline-campus-status-v210.js',
+    '/app/required-campus-autostart-v1.js',
+    '/app/knowledge-school-seeds-v1.js',
+    '/app/knowledge-school-installer-v1.js',
+    '/app/knowledge-school-installer-v1.css',
+    '/app/offline-package-v208.json',
+    '/app/pwa-update-controller-v204.js',
+    '/app/system-routes-v227.js',
+    '/app/logos/civweave-symbol.svg',
+    '/app/logos/civweave.webp',
+    '/app/logos/civweave-app-icon.png',
+    '/app/logos/civweave-icon-192.png',
+    '/app/logos/civweave-icon-512.png',
+    '/app/logos/civweave-icon-maskable-192.png',
+    '/app/logos/civweave-icon-maskable-512.png',
+    '/app/logos/civweave-pwa-192-v247.png',
+    '/app/logos/civweave-pwa-512-v247.png',
+    '/app/logos/civweave-pwa-maskable-512-v247.png'
+  ]);
+  const installerSurface = installerAssets.has(pathname);
   const applicationSurface = pathname === '/offline.html'
     || pathname === '/app'
     || pathname.startsWith('/app/')
+    || pathname.startsWith('/extensions/')
     || pathname === '/loom'
     || pathname.startsWith('/loom/')
     || pathname === '/lite'
