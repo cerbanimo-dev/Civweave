@@ -2,19 +2,24 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [topbar,boundary,workspace,campus,release,workflow]=await Promise.all([
+const [topbar,boundary,workspace,campus,release,manifest,pkg,workflow]=await Promise.all([
   read('public/app/working-campus-topbar-v243.js'),
   read('public/app/install-boundary-v146.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/working-campus-v156.js'),
   read('VERSION'),
+  read('public/app/manifest.webmanifest'),
+  read('package.json'),
   read('.github/workflows/verify-working-campus-topbar-v243.yml')
 ]);
 new Function(topbar);new Function(boundary);
 const version=release.trim();
+const manifestJson=JSON.parse(manifest);
+const packageJson=JSON.parse(pkg);
 const checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 check('repository release is semantic',/^\d+\.\d+\.\d+$/.test(version));
+check('release surfaces are coherent',version==='1.0.61'&&packageJson.version===version&&manifestJson.name===`Civweave v${version}`);
 check('topbar runtime remains v243',topbar.includes('working-campus-topbar-v243'));
 check('topbar runtime is syntax checked',workflow.includes('node --check public/app/working-campus-topbar-v243.js'));
 check('v243 is approved experience support',boundary.includes("const WORKING_CAMPUS_TOPBAR='/app/working-campus-topbar-v243.js'")&&boundary.includes('WORKING_CAMPUS_TOPBAR,')&&boundary.includes("workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract'"));
@@ -24,9 +29,13 @@ check('topbar stays above chat without sharing its paint layer',topbar.includes(
 check('chat workspace reserves measured topbar height',topbar.includes('--cw-working-campus-topbar-height')&&topbar.includes('#cw-persistent-guide-chat-v215{top:calc(var(--cw-working-campus-topbar-height'));
 check('topbar height uses targeted ResizeObserver',topbar.includes("'ResizeObserver'in globalThis")&&topbar.includes('resizeObserver.observe(header)')&&!topbar.includes('MutationObserver'));
 check('map button is a first-class header grid area',topbar.includes("MAP_BUTTON_ID='cw-working-campus-map-v243'")&&topbar.includes('grid-area:map')&&topbar.includes('<span>Map</span>'));
-check('map launch accepts direct runtime API',topbar.includes('globalThis.CivweaveMapSystem||globalThis.CivweaveMapV1||globalThis.CivweaveMap'));
-check('map launch accepts registration handshake',topbar.includes("MAP_READY_EVENT='civweave:map-ready'")&&topbar.includes('registerMap'));
-check('map launch accepts cancellable open request',topbar.includes("MAP_EVENT='civweave:map-open-request'")&&topbar.includes('cancelable:true'));
-check('map route is same-origin constrained',topbar.includes("url.origin===location.origin"));
-check('missing map runtime degrades visibly instead of dead-clicking',topbar.includes('Map button is ready. The incoming map runtime has not registered itself yet.'));
-console.log(JSON.stringify({ok:true,version,revision:'working-campus-topbar-v243',checks:checks.length,stickyTop:true,chatSafe:true,mapHandshake:['direct-api','register','event','same-origin-route']},null,2));
+check('federation finder v1.7.1 is exposed as the primary map surface',topbar.includes("FINDER_API_NAME='CivweaveFederationFinderV268'")&&topbar.includes("version:'1.7.1-launch-v268'")&&topbar.indexOf('if(openFederationFinder())return true')<topbar.indexOf('globalThis.CivweaveMapSystem||globalThis.CivweaveMapV1||globalThis.CivweaveMap'));
+check('finder defaults to the local v1.7.1 node host',topbar.includes("DEFAULT_FINDER_ORIGIN='http://localhost:8787'")&&topbar.includes("new URL('/finder'"));
+check('finder origin persists for custom or LAN node hosts',topbar.includes("FINDER_STORAGE='civweave.federation-finder.origin.v1'")&&topbar.includes('localStorage.setItem(FINDER_STORAGE,explicit)')&&topbar.includes('localStorage.setItem(FINDER_STORAGE,normalized)'));
+check('finder origin accepts only http or https',topbar.includes("url.protocol!=='http:'&&url.protocol!=='https:'"));
+check('map launch retains direct runtime fallback',topbar.includes('globalThis.CivweaveMapSystem||globalThis.CivweaveMapV1||globalThis.CivweaveMap'));
+check('map launch retains registration handshake fallback',topbar.includes("MAP_READY_EVENT='civweave:map-ready'")&&topbar.includes('registerMap'));
+check('map launch retains cancellable open request fallback',topbar.includes("MAP_EVENT='civweave:map-open-request'")&&topbar.includes('cancelable:true'));
+check('legacy map route remains same-origin constrained',topbar.includes("url.origin===location.origin"));
+check('finder failure degrades visibly instead of dead-clicking',topbar.includes('Federation Finder could not open and no fallback map runtime is registered.'));
+console.log(JSON.stringify({ok:true,version,revision:'working-campus-topbar-v243-federation-finder-v268',checks:checks.length,stickyTop:true,chatSafe:true,mapHandshake:['federation-finder-v1.7.1','direct-api-fallback','register-fallback','event-fallback','same-origin-route-fallback']},null,2));
