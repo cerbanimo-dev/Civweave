@@ -17,7 +17,7 @@
     "start:local": "node server-local-v131.mjs",
     "setup:local": "node scripts/stage-onnxruntime-web-assets.mjs && node scripts/ensure-minilm-fixed-ort-model.mjs && node scripts/prepare-start-v131.mjs",
     "dev": "node --watch server-v130.mjs",
-    "onnxruntime:stage": "npm run onnxruntime:stage",
+    "onnxruntime:stage": "node scripts/stage-onnxruntime-web-assets.mjs",
     "minilm:fixed-runtime:check": "node scripts/verify-minilm-fixed-ort.mjs",
     "minilm:fixed-model:pull": "node scripts/ensure-minilm-fixed-ort-model.mjs",
     "minilm:fixed-model:check": "node scripts/ensure-minilm-fixed-ort-model.mjs --check",
