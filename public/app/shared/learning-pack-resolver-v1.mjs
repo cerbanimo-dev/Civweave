@@ -1,6 +1,6 @@
 import * as packs from './learning-pack-runtime-v1.mjs?v=learning-packs-v1';
 
-const VERSION='1.1.0-learning-pack-resolver-v1';
+const VERSION='1.2.0-learning-pack-resolver-v1';
 const clean=(value,max=4000)=>String(value??'').trim().slice(0,max);
 const list=value=>Array.isArray(value)?value:[];
 const EXPANSIONS={
@@ -25,6 +25,8 @@ const score=(record,queryTokens)=>{
   const body=[record.id,record.title,record.packType,record.summary,...tags].map(value=>clean(value,2000).toLowerCase()).join(' ');
   return queryTokens.reduce((sum,token)=>sum+(tags.includes(token)?18:0)+(title.includes(token)?10:0)+(body.includes(token)?4:0),0);
 };
+
+export function expandedQuery(query){return tokens(query).join(' ')}
 
 export function scoreCatalogRecords(catalogRecords,query,{audience='',limit=3,includeUnavailable=true,packTypes=[]}={}){
   const queryTokens=tokens(query),wantedTypes=new Set(list(packTypes).map(value=>clean(value,80)));
@@ -55,9 +57,10 @@ export async function resolve(query,{audience='',packLimit=2,resultLimit=16,kind
     staged.push(record.id);
   }
   const wantedKinds=list(kinds).length?list(kinds):(includeLaborReferences?[]:['task-template','learning-unit','expert-guide']);
-  const results=packs.search(query,{kinds:wantedKinds,limit:resultLimit});
-  return{query:clean(query),audience,recommended,staged,results,loadedPacks:packs.loadedPacks().map(pack=>({id:pack.id,title:pack.title,packType:pack.packType}))};
+  const expanded=expandedQuery(query);
+  const results=packs.search(expanded,{kinds:wantedKinds,limit:resultLimit});
+  return{query:clean(query),expandedQuery:expanded,audience,recommended,staged,results,loadedPacks:packs.loadedPacks().map(pack=>({id:pack.id,title:pack.title,packType:pack.packType}))};
 }
 
 export const version=VERSION;
-export default Object.freeze({version:VERSION,scoreCatalogRecords,recommendPacks,resolve});
+export default Object.freeze({version:VERSION,expandedQuery,scoreCatalogRecords,recommendPacks,resolve});
