@@ -10,7 +10,6 @@ const source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').r
 for (const token of [
   "new URL('/app/index.html',location.origin)",
   "source','host-bootstrap'",
-  "<title>Install Civweave v${VERSION}</title>",
   'This hosted page is only the installer, updater, and recovery dock.',
   'pages are package-only at runtime',
   'will not silently substitute the live website',
