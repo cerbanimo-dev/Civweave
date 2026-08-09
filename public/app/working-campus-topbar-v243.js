@@ -1,12 +1,15 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.41-working-campus-topbar-v243-mobile-v248';
+const VERSION='1.0.62-working-campus-topbar-v243-federation-finder-v268';
 const STYLE_ID='cw-working-campus-topbar-v243-style';
 const MAP_BUTTON_ID='cw-working-campus-map-v243';
 const MAP_EVENT='civweave:map-open-request';
 const MAP_READY_EVENT='civweave:map-ready';
 const MAP_API_NAME='CivweaveMapLaunchV243';
+const FINDER_API_NAME='CivweaveFederationFinderV268';
+const FINDER_STORAGE='civweave.federation-finder.origin.v1';
+const DEFAULT_FINDER_ORIGIN='http://localhost:8787';
 const BRAND_ICON='/app/logos/civweave-pwa-192-v247.png';
 let header=null;
 let mapButton=null;
@@ -30,13 +33,42 @@ function normalizedRoute(value){
   const raw=clean(value);if(!raw)return'';
   try{const url=new URL(raw,location.origin);return url.origin===location.origin?`${url.pathname}${url.search}${url.hash}`:''}catch{return''}
 }
+function normalizeFinderOrigin(value){
+  const raw=clean(value);if(!raw)return'';
+  try{const url=new URL(raw,location.origin);if(url.protocol!=='http:'&&url.protocol!=='https:')return'';return url.origin}catch{return''}
+}
+function configuredFinderUrl(){
+  const params=new URLSearchParams(location.search);
+  const explicit=normalizeFinderOrigin(params.get('finder')||params.get('federationFinder')||'');
+  if(explicit){try{localStorage.setItem(FINDER_STORAGE,explicit)}catch{};return new URL('/finder',explicit).href}
+  let stored='';try{stored=normalizeFinderOrigin(localStorage.getItem(FINDER_STORAGE)||'')}catch{}
+  if(stored)return new URL('/finder',stored).href;
+  const localNode=['localhost','127.0.0.1','::1'].includes(location.hostname)&&location.port==='8787';
+  return new URL('/finder',localNode?location.origin:DEFAULT_FINDER_ORIGIN).href
+}
+function configureFinder(origin){
+  const normalized=normalizeFinderOrigin(origin);
+  if(!normalized)throw new Error('Federation Finder origin must be an http(s) node origin.');
+  try{localStorage.setItem(FINDER_STORAGE,normalized)}catch{}
+  return new URL('/finder',normalized).href
+}
+function openFederationFinder(){
+  const target=configuredFinderUrl();
+  try{
+    const opened=window.open(target,'civweave-federation-finder');
+    if(opened){try{opened.opener=null}catch{};return true}
+  }catch(error){console.warn('[Civweave] Federation Finder window could not open.',error)}
+  location.assign(target);
+  return true
+}
 function registerMap(detail={}){
   if(typeof detail.open==='function')mapOpenHandler=detail.open;
   const route=normalizedRoute(detail.route||detail.url||'');if(route)mapRoute=route;
-  if(mapButton){mapButton.dataset.mapState=(mapOpenHandler||mapRoute)?'ready':'waiting';mapButton.title=(mapOpenHandler||mapRoute)?'Open Civweave map':'Map system is wired and waiting for its runtime'}
-  return Boolean(mapOpenHandler||mapRoute)
+  if(mapButton){mapButton.dataset.mapState='ready';mapButton.title='Open Federation Finder'}
+  return true
 }
 function openMap(){
+  try{if(openFederationFinder())return true}catch(error){console.warn('[Civweave] Federation Finder launch failed.',error)}
   const direct=globalThis.CivweaveMapSystem||globalThis.CivweaveMapV1||globalThis.CivweaveMap;
   try{if(typeof direct?.open==='function'){direct.open({source:'working-campus',system:'civweave'});return true}}catch(error){console.warn('[Civweave] Map open handler failed.',error)}
   try{if(typeof mapOpenHandler==='function'){mapOpenHandler({source:'working-campus',system:'civweave'});return true}}catch(error){console.warn('[Civweave] Registered map open handler failed.',error)}
@@ -47,7 +79,7 @@ function openMap(){
   if(event.defaultPrevented||detail.handled)return true;
   if(typeof detail.open==='function'){registerMap({open:detail.open});return openMap()}
   const eventRoute=normalizedRoute(detail.route);if(eventRoute){mapRoute=eventRoute;location.assign(mapRoute);return true}
-  toast('Map button is ready. The incoming map runtime has not registered itself yet.');
+  toast('Federation Finder could not open and no fallback map runtime is registered.');
   return false
 }
 function syncHeaderHeight(){
@@ -94,19 +126,21 @@ function installMapButton(){
   header=document.querySelector('main.app>header.top');if(!header)return false;
   repairBrand();
   mapButton=document.getElementById(MAP_BUTTON_ID);
-  if(!mapButton){mapButton=document.createElement('button');mapButton.id=MAP_BUTTON_ID;mapButton.type='button';mapButton.className='pill map-pill';mapButton.dataset.mapState=(mapOpenHandler||mapRoute)?'ready':'waiting';mapButton.innerHTML='<span aria-hidden="true">⌖</span><span>Map</span>';mapButton.setAttribute('aria-label','Open Civweave map');const settings=header.querySelector('#settings-button');if(settings)header.insertBefore(mapButton,settings);else header.append(mapButton)}
+  if(!mapButton){mapButton=document.createElement('button');mapButton.id=MAP_BUTTON_ID;mapButton.type='button';mapButton.className='pill map-pill';mapButton.dataset.mapState='ready';mapButton.innerHTML='<span aria-hidden="true">⌖</span><span>Map</span>';mapButton.setAttribute('aria-label','Open Federation Finder map');const settings=header.querySelector('#settings-button');if(settings)header.insertBefore(mapButton,settings);else header.append(mapButton)}
   if(!mapButton.dataset.cw243Bound){mapButton.dataset.cw243Bound='true';mapButton.addEventListener('click',openMap)}
+  mapButton.dataset.mapState='ready';mapButton.title='Open Federation Finder';
   syncHeaderHeight();
   resizeObserver?.disconnect();
   if('ResizeObserver'in globalThis){resizeObserver=new ResizeObserver(syncHeaderHeight);resizeObserver.observe(header)}
   addEventListener('resize',syncHeaderHeight,{passive:true});
   globalThis.visualViewport?.addEventListener('resize',syncHeaderHeight,{passive:true});
-  document.documentElement.dataset.civweaveWorkingCampusTopbar='v243-mobile-v248';
+  document.documentElement.dataset.civweaveWorkingCampusTopbar='v243-mobile-v248-federation-finder-v268';
   return true
 }
 function start(){if(!isCivweave())return;installStyle();if(!installMapButton())queueMicrotask(installMapButton)}
 addEventListener(MAP_READY_EVENT,event=>registerMap(event.detail||{}));
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 
-globalThis[MAP_API_NAME]=Object.freeze({version:VERSION,event:MAP_EVENT,readyEvent:MAP_READY_EVENT,open:openMap,register:registerMap,state:()=>({route:mapRoute,handler:Boolean(mapOpenHandler),button:Boolean(mapButton),mobileContainment:'v248',brandIcon:BRAND_ICON})});
+globalThis[FINDER_API_NAME]=Object.freeze({version:'1.7.1-launch-v268',storageKey:FINDER_STORAGE,defaultOrigin:DEFAULT_FINDER_ORIGIN,url:configuredFinderUrl,configure:configureFinder,open:openFederationFinder});
+globalThis[MAP_API_NAME]=Object.freeze({version:VERSION,event:MAP_EVENT,readyEvent:MAP_READY_EVENT,open:openMap,register:registerMap,configureFinder,state:()=>({route:mapRoute,handler:Boolean(mapOpenHandler),button:Boolean(mapButton),finder:configuredFinderUrl(),finderVersion:'1.7.1',mobileContainment:'v248',brandIcon:BRAND_ICON})});
 })();
