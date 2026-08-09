@@ -34,6 +34,11 @@ function localAIManagementReady(){
     globalThis.CivweaveLocalModelBridgeV266?.patch
   );
 }
+function enhanceLocalAISettings(){
+  const panel=globalThis.CivweaveLocalAISettingsV266?.enhance?.()||null;
+  globalThis.CivweaveLocalModelTestPulseV269?.enhance?.(panel||undefined);
+  return panel;
+}
 function ensureAISettingsDelegation(){
   if(!active||typeof document==='undefined')return Promise.resolve(false);
   if(globalThis.CivweaveSettingsDelegationV188)return Promise.resolve(true);
@@ -66,7 +71,7 @@ function ensureAISettingsDelegation(){
 function ensureLocalAISettingsManagement(){
   if(!active||typeof document==='undefined')return Promise.resolve(false);
   if(localAIManagementReady()){
-    queueMicrotask(()=>globalThis.CivweaveLocalAISettingsV266?.enhance?.());
+    queueMicrotask(enhanceLocalAISettings);
     return Promise.resolve(true);
   }
   if(localAISettingsPromise)return localAISettingsPromise;
@@ -87,8 +92,8 @@ function ensureLocalAISettingsManagement(){
     if(!bootstrap?.ready)throw new Error('Downloaded local AI bootstrap did not become available.');
     const ready=await bootstrap.ready;
     if(!ready||!localAIManagementReady())throw new Error('Downloaded local AI management did not become ready.');
-    queueMicrotask(()=>globalThis.CivweaveLocalAISettingsV266?.enhance?.());
-    try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-mounted',{detail:{version:VERSION,bootstrapVersion:bootstrap.version||'',managementReady:true}}))}catch{}
+    queueMicrotask(enhanceLocalAISettings);
+    try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-mounted',{detail:{version:VERSION,bootstrapVersion:bootstrap.version||'',managementReady:true,pulseReady:Boolean(globalThis.CivweaveLocalModelTestPulseV269?.enhance)}}))}catch{}
     return true;
   })().catch(error=>{
     localAISettingsPromise=null;
@@ -121,6 +126,7 @@ globalThis.CivweaveDocumentLifecycleV221=Object.freeze({
   ensureAISettingsDelegation,
   ensureLocalAISettingsManagement,
   localAIManagementReady,
+  enhanceLocalAISettings,
   aiSettingsEntryRepair:'v273-canonical-delegation-local-management',
   stop
 });
