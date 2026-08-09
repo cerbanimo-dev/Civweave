@@ -38,11 +38,13 @@ async function wait(){
   throw last||new Error('gateway did not start');
 }
 
-async function expectRoute(route,{method='GET',headers={},contentType='',status=200}={}){
+async function expectRoute(route,{method='GET',headers={},contentType='',contentTypePattern=null,status=200}={}){
   const response=await fetch(origin+route,{method,headers,cache:'no-store',redirect:'manual'});
   assert(response.status===status,`${route} returned ${response.status}, expected ${status}`);
   assert(![301,302,307,308].includes(response.status),`${route} redirected instead of serving the expected boundary response`);
-  if(contentType)assert(String(response.headers.get('content-type')||'').includes(contentType),`${route} returned ${response.headers.get('content-type')||'no content type'}`);
+  const actualType=String(response.headers.get('content-type')||'');
+  if(contentType)assert(actualType.includes(contentType),`${route} returned ${actualType||'no content type'}`);
+  if(contentTypePattern)assert(contentTypePattern.test(actualType),`${route} returned ${actualType||'no content type'}`);
   if(method!=='HEAD')await response.arrayBuffer();
 }
 
@@ -65,7 +67,7 @@ try{
 
   const runtimeOnly='/app/campus-background-download-v241.js';
   await expectRoute(runtimeOnly,{status:410,contentType:'application/json'});
-  await expectRoute(runtimeOnly,{headers:{'x-civweave-package':'offline-campus'},contentType:'application/javascript'});
+  await expectRoute(runtimeOnly,{headers:{'x-civweave-package':'offline-campus'},contentTypePattern:/(?:application|text)\/javascript/i});
 
   for(const purpose of ['update-controls','shell-install','offline-manifest','offline-campus']){
     await expectRoute('/app/offline-package-v208.json',{headers:{'x-civweave-package':purpose},contentType:'application/json'});
@@ -116,6 +118,7 @@ try{
     releaseVersion,
     directInstallerAssets:installerAssets.length,
     runtimeOnlyAssetRequiresPackageMarker:true,
+    runtimeJavaScriptMime:'application-or-text-javascript',
     packagePurposeHeadersAccepted:4,
     knowledgeCatalogServed:true,
     knowledgeZipServed:firstZip,
