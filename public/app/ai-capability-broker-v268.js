@@ -1,12 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-ai-capability-broker-v268';
+const VERSION='1.0.65-ai-capability-broker-v269-diagnostics';
 if(globalThis.CivweaveAICapabilityBrokerV268?.version===VERSION)return;
 const SETTINGS_KEY='civweave.universal-ai.v127';
 const PROFILES_KEY='civweave-model-profiles-v1';
 const root=globalThis;
 const LOCAL_SEMANTIC=new Set(['bundled','packaged','reflex','minilm','local-reflex','semantic','semantic-local']);
 const GENERATIVE_LOCAL=new Set(['downloaded-local','smollm2','smollm3','qwen','browser']);
+const state={lastDecision:null,decisions:[]};
 const parse=(value,fallback={})=>{try{const parsed=JSON.parse(value);return parsed&&typeof parsed==='object'?parsed:fallback}catch{return fallback}};
 const clean=value=>String(value??'').trim().toLowerCase();
 function canonicalProvider(value){
@@ -33,16 +34,30 @@ function requestText(request={}){
   const text=messages.map(item=>typeof item==='string'?item:item?.content??item?.text??'').join('\n');
   return clean([request.purpose,request.task,request.instructions,request.systemId,request.realm,request.context?.userMessage,text].filter(Boolean).join('\n'));
 }
+function explicitCapabilities(request={}){
+  const explicit=request.capabilityRequirements&&typeof request.capabilityRequirements==='object'?request.capabilityRequirements:{};
+  return{
+    profile:clean(explicit.profile||''),
+    requiresTools:explicit.requiresTools===true,
+    externalResearch:explicit.externalResearch===true,
+    code:explicit.code===true,
+    structuredOutput:explicit.structuredOutput===true,
+    vision:explicit.vision===true,
+    planning:explicit.planning===true,
+  };
+}
 function requirements(request={}){
-  const explicitProfile=clean(request.executionProfile||request.profile||'interactive');
+  const explicit=explicitCapabilities(request);
+  const explicitProfile=clean(request.executionProfile||request.profile||explicit.profile||'interactive');
   const profile=explicitProfile==='agentic'||request.agentic===true||request.background===true?'agentic':'interactive';
   const text=requestText(request);
-  const requiresTools=Boolean(request.requiresTools||request.toolUse||request.webSearch||request.youtubeSearch||request.background&&/\b(search|research|browse|url|web|youtube|external source)\b/.test(text));
-  const externalResearch=Boolean(request.externalResearch||request.webSearch||request.youtubeSearch||/\b(live research|current web|web search|internet search|open urls?|youtube search)\b/.test(text));
-  const code=Boolean(request.code||/\b(code|software|javascript|typescript|python|react|node|api|database|sql|debug|refactor|patch|pull request)\b/.test(text));
-  const structuredOutput=Boolean(request.schema||request.responseFormat==='json'||request.responseFormat==='structured');
-  const vision=Boolean(request.vision||request.imageInput||request.multimodal);
-  return Object.freeze({profile,requiresTools,externalResearch,code,structuredOutput,vision});
+  const requiresTools=Boolean(explicit.requiresTools||request.requiresTools||request.toolUse||request.webSearch||request.youtubeSearch||request.background&&/\b(search|research|browse|url|web|youtube|external source)\b/.test(text));
+  const externalResearch=Boolean(explicit.externalResearch||request.externalResearch||request.webSearch||request.youtubeSearch||/\b(live research|current web|web search|internet search|open urls?|youtube search)\b/.test(text));
+  const code=Boolean(explicit.code||request.code||/\b(code|software|javascript|typescript|python|react|node|api|database|sql|debug|refactor|patch|pull request)\b/.test(text));
+  const structuredOutput=Boolean(explicit.structuredOutput||request.schema||request.responseFormat==='json'||request.responseFormat==='structured');
+  const vision=Boolean(explicit.vision||request.vision||request.imageInput||request.multimodal);
+  const planning=Boolean(explicit.planning||/\b(plan|planning|roadmap|milestone|architecture|work breakdown|curriculum|quest draft|reviewable weave)\b/.test(text));
+  return Object.freeze({profile,requiresTools,externalResearch,code,structuredOutput,vision,planning});
 }
 function activeLocalSpec(){
   const selection=root.CivweaveLocalModelDownloadV266?.selection?.();
@@ -61,6 +76,11 @@ function supportsLocalRequest(spec,request={}){
   if(need.profile==='interactive'&&cap.interactive===false)return{ok:false,reason:'active local model is not qualified for interactive generation',requirements:need};
   return{ok:true,reason:need.profile==='agentic'?'qualified local agentic reasoning':'qualified local interactive generation',requirements:need};
 }
+function remember(decision){
+  state.lastDecision=decision;
+  state.decisions=[decision,...state.decisions].slice(0,20);
+  return decision;
+}
 function decide(request={}){
   const spec=activeLocalSpec();
   const local=supportsLocalRequest(spec,request);
@@ -74,6 +94,7 @@ function decide(request={}){
     authority:'deterministic-contracts',
     at:new Date().toISOString(),
   });
+  remember(decision);
   try{root.dispatchEvent?.(new root.CustomEvent('civweave:ai-capability-decision',{detail:decision}))}catch{}
   return decision;
 }
@@ -86,7 +107,8 @@ const authority=Object.freeze({
   rewards:'deterministic-contracts',
   note:'Locality does not imply determinism. Determinism governs authority and consequences, not conversational intelligence.'
 });
-const api=Object.freeze({version:VERSION,canonicalProvider,selectedConfig,selectedProvider,requirements,activeLocalSpec,supportsLocalRequest,decide,authority});
+function diagnostics(){return Object.freeze({version:VERSION,lastDecision:state.lastDecision,decisions:[...state.decisions],authority});}
+const api=Object.freeze({version:VERSION,canonicalProvider,selectedConfig,selectedProvider,requirements,activeLocalSpec,supportsLocalRequest,decide,diagnostics,get lastDecision(){return state.lastDecision},authority});
 root.CivweaveAICapabilityBrokerV268=api;
-try{root.dispatchEvent?.(new root.CustomEvent('civweave:ai-capability-broker-ready',{detail:{version:VERSION,authority}}))}catch{}
+try{root.dispatchEvent?.(new root.CustomEvent('civweave:ai-capability-broker-ready',{detail:{version:VERSION,authority,diagnostics:true}}))}catch{}
 })();

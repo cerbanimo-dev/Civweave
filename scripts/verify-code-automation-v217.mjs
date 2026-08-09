@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const[browser,bridge,core,dispatch,monitor,verifyWorkflow,dispatchWorkflow,monitorWorkflow,docs]=await Promise.all([
- read('public/app/code-automation-orchestrator-v217.js'),read('public/app/weaveling-memory-bridge-v191.js'),read('scripts/lib/code-automation-core.mjs'),read('scripts/code-automation-jules-dispatch.mjs'),read('scripts/code-automation-monitor.mjs'),read('.github/workflows/verify-code-automation-v217.yml'),read('.github/workflows/code-automation-dispatch.yml'),read('.github/workflows/code-automation-monitor.yml'),read('docs/CODE-AUTOMATION-FLOW-v217.md')
+const[browser,bridge,spine,boundary,core,dispatch,monitor,verifyWorkflow,dispatchWorkflow,monitorWorkflow,docs]=await Promise.all([
+ read('public/app/code-automation-orchestrator-v217.js'),read('public/app/weaveling-memory-bridge-v191.js'),read('public/app/fast-interactive-runtime-v192.js'),read('public/app/cerbanimo-deterministic-boundary-v203.js'),read('scripts/lib/code-automation-core.mjs'),read('scripts/code-automation-jules-dispatch.mjs'),read('scripts/code-automation-monitor.mjs'),read('.github/workflows/verify-code-automation-v217.yml'),read('.github/workflows/code-automation-dispatch.yml'),read('.github/workflows/code-automation-monitor.yml'),read('docs/CODE-AUTOMATION-FLOW-v217.md')
 ]);
 assert.match(browser,/creator-project-plan/);
 assert.match(browser,/implementation-choice/);
@@ -13,7 +13,10 @@ assert.match(browser,/cerbanimo-dev\/civweave/i);
 assert.doesNotMatch(browser,/mergePullRequest|\/pulls\/[^`]*\/merge/);
 assert.match(bridge,/code-automation-orchestrator-v217\.js/);
 assert.match(bridge,/installCodeAutomation/);
-assert.match(bridge,/__cerbanimoDeterministicBoundaryV203/);
+assert.match(bridge,/CivweaveFastInteractiveV192/);
+assert.match(spine,/__civweaveRuntimeSpineV269:true/);
+assert.match(boundary,/consequentialActions:'deterministic-contracts'/);
+assert.doesNotMatch(boundary,/DETERMINISTIC_PROVIDER_BOUNDARY/);
 assert.match(core,/analyzeCodeIntent/);
 assert.match(core,/creator-led/);
 assert.match(core,/clarify-agency/);
@@ -35,4 +38,4 @@ assert.match(docs,/clear delegation is required/i);
 assert.match(docs,/exact commit/i);
 assert.match(docs,/head changes/i);
 assert.match(docs,/cerbanimo-dev\/Civweave/);
-console.log('Code intent and dual-gate automation v218 control plane verified.');
+console.log('Code intent and dual-gate automation v269 runtime-spine control plane verified.');

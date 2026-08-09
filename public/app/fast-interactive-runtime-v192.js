@@ -1,9 +1,11 @@
 (()=>{
 'use strict';
-const VERSION='1.0.7-fast-interactive-v192.1-frozen-runtime-proxy';
+const VERSION='1.0.65-runtime-spine-v269';
 const root=globalThis;
-const state={installed:false,mode:'waiting',lastError:''};
-let timer=0;
+if(root.CivweaveFastInteractiveV192?.version===VERSION)return;
+const middleware=new Map();
+const state={installed:false,mode:'waiting',lastError:'',baseVersion:'',calls:0,lastTrace:[],lastRequest:null};
+let base=null,proxy=null;
 const clock=()=>Number(root.performance?.now?.())||Date.now();
 function dispatch(name,detail){try{root.dispatchEvent?.(new CustomEvent(name,{detail}))}catch{}}
 function optimizedRequest(request={}){
@@ -19,50 +21,94 @@ function optimizedRequest(request={}){
   config.stream=false;
   return{...request,config,responseFormat:'json',maxRepairAttempts:0};
 }
+function ordered(){return[...middleware.values()].sort((a,b)=>(b.priority||0)-(a.priority||0)||a.id.localeCompare(b.id));}
+function register(id,hooks={},priority=0){
+  const key=String(id||'').trim();
+  if(!key)throw new Error('Runtime spine middleware requires an id.');
+  const record=Object.freeze({id:key,priority:Number(priority)||0,before:typeof hooks.before==='function'?hooks.before:null,handle:typeof hooks.handle==='function'?hooks.handle:null,after:typeof hooks.after==='function'?hooks.after:null});
+  middleware.set(key,record);
+  dispatch('civweave:runtime-spine-middleware',{version:VERSION,action:'register',id:key,priority:record.priority});
+  return()=>unregister(key);
+}
+function unregister(id){const removed=middleware.delete(String(id||''));if(removed)dispatch('civweave:runtime-spine-middleware',{version:VERSION,action:'unregister',id:String(id)});return removed;}
+function context(request,trace,states){return{version:VERSION,request,trace,states,baseRuntime:base,broker:root.CivweaveAICapabilityBrokerV268||null,spine:api};}
+async function generate(input={}){
+  if(!base?.generate)throw new Error('Civweave model runtime spine has no base generator.');
+  state.calls+=1;
+  let request=input&&typeof input==='object'?input:{};
+  const trace=[],states=Object.create(null),stack=ordered();
+  for(const item of stack){
+    if(!item.before)continue;
+    const started=clock();
+    const out=await item.before(request,context(request,trace,states));
+    if(out&&typeof out==='object'&&Object.prototype.hasOwnProperty.call(out,'request')){request=out.request||request;if(Object.prototype.hasOwnProperty.call(out,'state'))states[item.id]=out.state;}
+    else if(out&&typeof out==='object')request=out;
+    trace.push({id:item.id,phase:'before',ms:Math.max(0,Math.round(clock()-started))});
+  }
+  let result,handledBy='base-runtime';
+  for(const item of stack){
+    if(!item.handle)continue;
+    const started=clock();
+    const out=await item.handle(request,context(request,trace,states));
+    trace.push({id:item.id,phase:'handle',ms:Math.max(0,Math.round(clock()-started)),handled:Boolean(out?.handled)});
+    if(out?.handled){result=out.result;handledBy=item.id;break;}
+  }
+  if(handledBy==='base-runtime')result=await base.generate(request);
+  for(const item of [...stack].reverse()){
+    if(!item.after)continue;
+    const started=clock();
+    const out=await item.after(result,request,context(request,trace,states));
+    if(out!==undefined)result=out;
+    trace.push({id:item.id,phase:'after',ms:Math.max(0,Math.round(clock()-started))});
+  }
+  state.lastTrace=trace.slice(-40);
+  state.lastRequest={purpose:String(request.purpose||''),executionProfile:String(request.executionProfile||'interactive'),handledBy,at:new Date().toISOString()};
+  if(result&&typeof result==='object')return{...result,runtimeSpine:{schema:'civweave.ai-runtime-spine.v1',version:VERSION,handledBy,middleware:stack.map(item=>item.id),trace:state.lastTrace}};
+  return result;
+}
+function legacyBase(runtime){
+  if(!runtime?.generate)return runtime;
+  const prior=runtime.generate.__prior;
+  if(prior&&(runtime.generate.__civweaveFastInteractiveV192||runtime.generate.__civweaveFastMemoryV192))return Object.freeze({...runtime,generate:prior});
+  return runtime;
+}
 function install(){
-  const runtime=root.CivweaveModelRuntime;
-  if(!runtime?.generate){state.mode='waiting';return false}
-  if(runtime.generate.__civweaveFastInteractiveV192){state.installed=true;state.mode='proxy';state.lastError='';return true}
+  const current=root.CivweaveModelRuntime;
+  if(!current?.generate){state.mode='waiting';return false;}
+  if(current.__civweaveRuntimeSpineV269){proxy=current;state.installed=true;state.mode='spine';state.baseVersion=current.baseVersion||state.baseVersion;return true;}
   try{
-    const original=runtime.generate.bind(runtime);
-    const wrapped=async request=>{
-      const optimized=optimizedRequest(request);
-      if(optimized===request)return original(request);
-      const started=clock();
-      const result=await original(optimized);
-      return{...result,latency:{...(result?.latency||{}),interactiveMs:Math.max(0,Math.round(clock()-started)),revision:VERSION}};
-    };
-    Object.defineProperties(wrapped,{
-      __civweaveFastInteractiveV192:{value:true},
-      __prior:{value:original},
+    base=legacyBase(current);
+    state.baseVersion=String(base.version||'runtime');
+    proxy=Object.freeze({
+      ...base,
+      __civweaveRuntimeSpineV269:true,
+      baseVersion:state.baseVersion,
+      version:`${state.baseVersion}+spine-v269`,
+      generate,
+      generateInteractive:request=>generate({...request,executionProfile:'interactive'}),
+      generateAgentic:request=>generate({...request,executionProfile:'agentic'}),
+      runtimeSpineVersion:VERSION,
     });
-    const proxy=Object.freeze({...runtime,generate:wrapped,fastInteractiveRevision:VERSION});
     root.CivweaveModelRuntime=proxy;
-    state.installed=root.CivweaveModelRuntime===proxy&&Boolean(root.CivweaveModelRuntime.generate.__civweaveFastInteractiveV192);
-    state.mode=state.installed?'proxy':'fallback';
-    state.lastError=state.installed?'':'The model runtime proxy could not be installed; guide calls will use the original runtime.';
+    state.installed=root.CivweaveModelRuntime===proxy;
+    state.mode=state.installed?'spine':'fallback';
+    state.lastError=state.installed?'':'The model runtime spine could not become the active runtime.';
+    dispatch('civweave:runtime-spine-ready',{version:VERSION,installed:state.installed,baseVersion:state.baseVersion,middleware:ordered().map(item=>item.id)});
     dispatch('civweave:fast-interactive-installed',{version:VERSION,installed:state.installed,mode:state.mode});
     return state.installed;
   }catch(error){
-    state.installed=false;
-    state.mode='fallback';
-    state.lastError=String(error?.message||error||'Unknown fast-runtime installation error.');
-    dispatch('civweave:fast-interactive-fallback',{version:VERSION,error:state.lastError});
+    state.installed=false;state.mode='fallback';state.lastError=String(error?.message||error||'Unknown runtime spine installation error.');
+    dispatch('civweave:runtime-spine-fallback',{version:VERSION,error:state.lastError});
     return false;
   }
 }
-function stabilize(){
-  if(install())return true;
-  if(timer)return false;
-  let attempts=0;
-  timer=setInterval(()=>{
-    attempts+=1;
-    if(install()||attempts>=120){clearInterval(timer);timer=0}
-  },25);
-  return false;
-}
-function status(){return{version:VERSION,installed:state.installed,mode:state.mode,lastError:state.lastError,runtimeFrozen:Object.isFrozen(root.CivweaveModelRuntime||{})}}
-const api=Object.freeze({version:VERSION,install,stabilize,optimizedRequest,status});
+function stabilize(){return install();}
+function diagnostics(){return Object.freeze({version:VERSION,installed:state.installed,mode:state.mode,lastError:state.lastError,baseVersion:state.baseVersion,calls:state.calls,middleware:ordered().map(item=>item.id),lastTrace:[...state.lastTrace],lastRequest:state.lastRequest,runtimeFrozen:Object.isFrozen(root.CivweaveModelRuntime||{})});}
+function status(){return diagnostics();}
+const api=Object.freeze({version:VERSION,install,stabilize,optimizedRequest,register,unregister,diagnostics,status,base:()=>base,proxy:()=>proxy});
 root.CivweaveFastInteractiveV192=api;
-try{stabilize()}catch(error){state.mode='fallback';state.lastError=String(error?.message||error||'Fast runtime could not start.')}
+register('fast-interactive',{before(request){const next=optimizedRequest(request);return next===request?request:{request:next,state:{started:clock()}};},after(result,_request,ctx){const started=ctx.states['fast-interactive']?.started;if(started==null||!result||typeof result!=='object')return result;return{...result,latency:{...(result.latency||{}),interactiveMs:Math.max(0,Math.round(clock()-started)),revision:VERSION}};}},20);
+root.addEventListener?.('civweave:model-runtime-ready',install);
+root.addEventListener?.('pageshow',install);
+install();
 })();

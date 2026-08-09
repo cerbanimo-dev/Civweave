@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.9-weaveling-memory-bridge-v218-code-intent-loader';
+const VERSION='1.0.65-weaveling-memory-bridge-v269-runtime-spine';
 const MAX_MEMORY_ITEMS=6;
 const CODE_AUTOMATION_SCRIPT='/app/code-automation-orchestrator-v217.js?v=1.0.9-v218';
 let fastRuntimeInstalled=false;
@@ -8,30 +8,9 @@ let codeAutomationPromise=null;
 function api(){return globalThis.CivweaveWeavelingMemoryV191;}
 function response(answer,extra={}){return{response:{answer,choice:{mode:'Reflect',system:'civweave',room:'civweave.quad',nextAction:''},assumptions:[],requiresConsent:false,confidence:.99},provider:'civweave-memory',requestedProvider:'civweave-memory',model:VERSION,fallbackFrom:null,...extra};}
 function installFastRuntime(){
-  const runtime=globalThis.CivweaveModelRuntime;
-  if(!runtime?.generate)return false;
-  if(runtime.generate.__civweaveFastMemoryV192||runtime.generate.__civweaveFastInteractiveV192||runtime.generate.__cerbanimoDeterministicBoundaryV203){fastRuntimeInstalled=true;return true;}
-  const original=runtime.generate.bind(runtime);
-  const wrapped=async request=>{
-    const purpose=String(request?.purpose||'');
-    if(!/^civweave-guide-response-v141/.test(purpose))return original(request);
-    const config={...(request.config||{})};
-    const provider=String(config.provider||config.route||'').toLowerCase();
-    const configured=Number(config.timeoutMs)||Number(config.timeoutSeconds)*1000||0;
-    if(provider==='gemini')config.timeoutMs=Math.min(configured||10000,12000);
-    else if(provider==='hosted')config.timeoutMs=Math.min(configured||14000,18000);
-    const tokenLimit=Number(config.maxTokens||config.max_tokens)||0;
-    config.maxTokens=Math.min(tokenLimit||1400,1800);
-    config.stream=false;
-    const started=performance.now();
-    const result=await original({...request,config,responseFormat:'json',maxRepairAttempts:0});
-    if(!result||typeof result!=='object')return result;
-    return{...result,latency:{...(result.latency||{}),interactiveMs:Math.round(performance.now()-started),revision:VERSION}};
-  };
-  Object.defineProperties(wrapped,{__civweaveFastMemoryV192:{value:true},__prior:{value:original}});
-  const proxy=Object.freeze({...runtime,generate:wrapped,fastMemoryRevision:VERSION});
-  try{globalThis.CivweaveModelRuntime=proxy}catch{return false;}
-  fastRuntimeInstalled=globalThis.CivweaveModelRuntime===proxy;
+  const spine=globalThis.CivweaveFastInteractiveV192;
+  if(!spine?.install){fastRuntimeInstalled=false;return false;}
+  fastRuntimeInstalled=Boolean(spine.install());
   return fastRuntimeInstalled;
 }
 function memoryTurn(memory,text){
@@ -42,7 +21,7 @@ function install(){
   installFastRuntime();
   const assistant=globalThis.CivweaveAssistantV141,memory=api();
   if(!assistant?.respond||!memory)return false;
-  if(assistant.respond.__weavelingMemoryV192)return true;
+  if(assistant.respond.__weavelingMemoryV269)return true;
   const prior=assistant.respond.bind(assistant);
   const wrapped=async args=>{
     const text=String(args?.text||'').trim(),system=args?.systemId||'civweave';
@@ -63,7 +42,7 @@ function install(){
     if(answer)memory.recordTurn(answer,{role:'assistant',weaveId:result?.plan?.id});
     return result;
   };
-  wrapped.__weavelingMemoryV192=true;
+  wrapped.__weavelingMemoryV269=true;
   wrapped.__prior=prior;
   assistant.respond=wrapped;
   assistant.weavelingMemory=memory;
@@ -85,6 +64,7 @@ function installCodeAutomation(){
 }
 function stabilize(){installFastRuntime();const ready=install();installCodeAutomation();return ready;}
 globalThis.CivweaveWeavelingMemoryBridgeV191=Object.freeze({version:VERSION,install,stabilize,installFastRuntime,installCodeAutomation,maxMemoryItems:MAX_MEMORY_ITEMS,get fastRuntimeInstalled(){return fastRuntimeInstalled;}});
+globalThis.addEventListener?.('civweave:runtime-spine-ready',installFastRuntime);
 install();
 installCodeAutomation();
 })();
