@@ -1,0 +1,30 @@
+name: Verify Civweave Atlas v269
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/civweave-atlas-v269.html'
+      - 'public/app/civweave-atlas-v269.js'
+      - 'public/app/working-campus-topbar-v243.js'
+      - 'scripts/verify-civweave-atlas-v269.mjs'
+      - '.github/workflows/verify-civweave-atlas-v269.yml'
+  push:
+    paths:
+      - 'public/app/civweave-atlas-v269.html'
+      - 'public/app/civweave-atlas-v269.js'
+      - 'public/app/working-campus-topbar-v243.js'
+      - 'scripts/verify-civweave-atlas-v269.mjs'
+      - '.github/workflows/verify-civweave-atlas-v269.yml'
+
+jobs:
+  atlas-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify atlas contract
+        run: node --test scripts/verify-civweave-atlas-v269.mjs
+      - name: Check topbar syntax
+        run: node --check public/app/working-campus-topbar-v243.js
