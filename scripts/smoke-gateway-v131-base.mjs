@@ -3,7 +3,7 @@ import {mkdtemp,readFile,rm} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.51',BUILD='1.0.51-install-only-fullscreen-family-gateway';
+const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.58',BUILD='1.0.58-install-only-fullscreen-family-gateway';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),dataDir=await mkdtemp(path.join(os.tmpdir(),'civweave-gateway-v106-')),output=[];
 const child=spawn(process.execPath,['scripts/start-civweave-v131.mjs'],{cwd:root,env:{...process.env,RENDER:'true',HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});child.stdout.on('data',chunk=>output.push(chunk.toString()));child.stderr.on('data',chunk=>output.push(chunk.toString()));
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),assert=(condition,message)=>{if(!condition)throw new Error(message)};
@@ -11,11 +11,26 @@ async function wait(){let last;for(let i=0;i<80;i+=1){try{const response=await f
 function requiredDeviceAssets(workerSource){const core=workerSource.match(/const CORE=(\[[\s\S]*?\]);\nconst DEVICE_REQUIRED=/),required=workerSource.match(/const DEVICE_REQUIRED=([^;]+);/);assert(core&&required,'service worker core package manifest could not be parsed');return Function(`"use strict";const CORE=${core[1]};return ${required[1]};`)()}
 try{
   const health=await wait();assert(output.join('').includes('Starting gateway runtime.'),'environment-aware start did not select gateway on Render');assert(health.build===BUILD,`unexpected build ${health.build}`);assert(health.appVersion===VERSION,`unexpected version ${health.appVersion}`);assert(health.release?.localInstallRequired===true,'gateway does not require installation');
-  const rootResponse=await fetch(`${origin}/`,{cache:'no-store'}),rootHtml=await rootResponse.text();assert(rootResponse.ok,'gateway installer root failed');assert(rootHtml.includes('Install Civweave v1.0.51.'),'gateway root is not the v1.0.51 installer');assert(rootHtml.includes('No native modal'),'gateway root does not describe the fixed settings layer');assert(rootHtml.includes('/app/logos/civweave-app-icon.png'),'gateway root does not use the app icon');
+
+  const rootResponse=await fetch(`${origin}/`,{cache:'no-store'}),rootHtml=await rootResponse.text();
+  assert(rootResponse.ok,'gateway bootstrap root failed');
+  assert(rootHtml.includes("new URL('/app/index.html',location.origin)"),'gateway root is not installer-only bootstrap');
+  assert(rootHtml.includes("source','host-bootstrap'"),'gateway root does not identify host-bootstrap provenance');
+  assert(!rootHtml.includes("new URL('/app/working-campus-v156.html',location.origin)"),'gateway root still launches Working Campus directly');
+  assert(!rootHtml.includes("source','web-root'"),'gateway root still exposes retired live-runtime provenance');
+
+  const installerResponse=await fetch(`${origin}/app/index.html`,{cache:'no-store'}),installerHtml=await installerResponse.text();
+  assert(installerResponse.ok,'gateway installer page failed');
+  assert(installerHtml.includes(`Install Civweave v${VERSION}. The campus downloads before runtime opens.`),`gateway installer is not Civweave v${VERSION}`);
+  assert(installerHtml.includes('This hosted page is only the installer, updater, and recovery dock.'),'gateway installer does not define the hosted origin as a bootstrap/update surface');
+  assert(installerHtml.includes('pages are package-only at runtime'),'gateway installer lost the downloaded-runtime contract');
+  assert(installerHtml.includes('will not silently substitute the live website'),'gateway installer does not fail closed on missing local package files');
+  for(const forbidden of ['Open online campus','Open Civweave online','launch=online'])assert(!installerHtml.includes(forbidden),`gateway installer resurrected live-runtime fallback: ${forbidden}`);
+
   for(const route of ['/loom/','/lite/','/app/realm-console-v140.html','/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html']){const response=await fetch(origin+route,{cache:'no-store'}),body=await response.json();assert(response.status===410,`${route} returned ${response.status}, expected 410`);assert(body.localInstallRequired===true,`${route} does not explain installation`)}
   for(const route of ['/service-worker.js','/service-worker-v156.js','/app/manifest.webmanifest','/install-v130.js','/install-v130.css','/app/logos/civweave-app-icon.png','/app/logos/civweave-icon-192.png']){const response=await fetch(origin+route,{cache:'no-store'});assert(response.ok,`installer asset ${route} returned ${response.status}`)}
   const packageHeaders={'x-civweave-package':'install'},workerSource=await readFile(path.join(root,'public','service-worker.js'),'utf8'),requiredAssets=[...new Set(requiredDeviceAssets(workerSource))];
-  for(const forbidden of ['all-minilm-l6-v2','transformers.min.js','ort-wasm','minilm-reflex','minilm-model-settings','civweave-settings-safe-open'])assert(!requiredAssets.some(route=>route.includes(forbidden)),`v1.0.17 package still includes ${forbidden}`);
+  for(const forbidden of ['all-minilm-l6-v2','transformers.min.js','ort-wasm','minilm-reflex','minilm-model-settings','civweave-settings-safe-open'])assert(!requiredAssets.some(route=>route.includes(forbidden)),`v${VERSION} package still includes ${forbidden}`);
   for(const route of requiredAssets){const response=await fetch(origin+route,{cache:'no-store',headers:packageHeaders});assert(response.ok,`required core package asset ${route} returned ${response.status}`);await response.arrayBuffer()}
 
   const controller=await fetch(`${origin}/app/model-settings-controller-v173.js`,{headers:packageHeaders}).then(response=>response.text());
@@ -54,5 +69,5 @@ try{
   const sharedTools=await fetch(`${origin}/extensions/civweave-additions-v156.js`,{headers:packageHeaders}).then(response=>response.text());assert(sharedTools.includes('Node & friends')&&sharedTools.includes('aiVault:false'),'Shared Tools regressed');
   const packageLedger=await fetch(`${origin}/app/shared/civweave-parity-ledger.json`,{cache:'no-store',headers:packageHeaders});assert(packageLedger.ok,`marked parity ledger returned ${packageLedger.status}`);const ledger=await packageLedger.json();assert(Array.isArray(ledger.systems)&&ledger.systems.length>=5,'parity ledger is missing systems');
   const telemetry=await fetch(`${origin}/api/boot-log`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:'room-opened'})});assert(telemetry.status===204,`boot telemetry returned ${telemetry.status}`);
-  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsPresentation:'cleanroom-v188',nativeDialog:false,outsideTap:'safe-close',settingsTransformerWork:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,captureListener:false,mutationObserver:false,polling:false,timers:false,campusIconPixels:64,campusShell:'compact-v235'},null,2));
+  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,hostRole:'installer-update-recovery-only',canonicalRuntime:'downloaded-package-only',liveSiteFallback:false,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsPresentation:'cleanroom-v188',nativeDialog:false,outsideTap:'safe-close',settingsTransformerWork:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,captureListener:false,mutationObserver:false,polling:false,timers:false,campusIconPixels:64,campusShell:'compact-v235'},null,2));
 }catch(error){console.error(output.join(''));throw error}finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}
