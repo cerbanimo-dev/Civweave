@@ -17,8 +17,10 @@ new Function(campus.replace(/\}\)\(\);\s*$/,''));
 
 assert.match(lifecycle,/document-lifecycle-v273-local-ai-management/);
 assert.match(lifecycle,/ensureLocalAISettingsManagement/);
+assert.match(lifecycle,/enhanceLocalAISettings/);
 assert.match(lifecycle,/civweave:model-settings-opened/);
 assert.match(lifecycle,/CivweaveLocalAISettingsV266\?\.enhance/);
+assert.match(lifecycle,/CivweaveLocalModelTestPulseV269\?\.enhance/);
 assert.match(lifecycle,/CivweaveLocalModelDownloadV266\?\.status/);
 assert.match(lifecycle,/CivweaveLocalModelRegistryV266\?\.installable/);
 assert.match(lifecycle,/CivweaveLocalModelBridgeV266\?\.patch/);
@@ -42,7 +44,7 @@ assert.doesNotMatch(campus,/CivweaveLocalModelDownloadV266\?\.version!==/);
 assert.doesNotMatch(campus,/CivweaveLocalModelBridgeV266\?\.version!==/);
 
 const listeners=new Map();
-let bootstrapLoads=0,enhanceCalls=0,workerCalls=0,generateCalls=0;
+let bootstrapLoads=0,enhanceCalls=0,pulseEnhanceCalls=0,workerCalls=0,generateCalls=0;
 const scripts=[];
 const document={
   readyState:'loading',
@@ -56,7 +58,8 @@ const document={
         sandbox.CivweaveLocalModelDownloadV266={status(){},selection(){}};
         sandbox.CivweaveLocalModelRegistryV266={installable(){return[]}};
         sandbox.CivweaveLocalModelBridgeV266={patch(){return true}};
-        sandbox.CivweaveLocalAISettingsV266={version:'future-settings-version',enhance(){enhanceCalls+=1}};
+        sandbox.CivweaveLocalAISettingsV266={version:'future-settings-version',enhance(){enhanceCalls+=1;return{dataset:{localPanel:true}}}};
+        sandbox.CivweaveLocalModelTestPulseV269={version:'future-pulse-version',enhance(panel){assert.equal(panel?.dataset?.localPanel,true);pulseEnhanceCalls+=1}};
         sandbox.CivweaveLocalAIBootstrapV266={version:'future-bootstrap-version',ready:Promise.resolve(true)};
       }
       queueMicrotask(()=>script.onload?.());
@@ -91,6 +94,7 @@ await new Promise(resolve=>setTimeout(resolve,0));
 await new Promise(resolve=>setTimeout(resolve,0));
 assert.equal(bootstrapLoads,1,'Opening canonical AI settings should lazily load local management exactly once.');
 assert.ok(enhanceCalls>=1,'Opening canonical AI settings should mount the downloaded local AI panel.');
+assert.ok(pulseEnhanceCalls>=1,'Late-loaded Raw Model Pulse should mount after the local manager panel.');
 assert.equal(workerCalls,0,'Opening AI settings must not start a local inference Worker.');
 assert.equal(generateCalls,0,'Opening AI settings must not invoke model generation.');
 assert.equal(sandbox.CivweaveDocumentLifecycleV221.localAIManagementReady(),true,'Future-version local stack should qualify by capability.');
@@ -102,8 +106,9 @@ console.log(JSON.stringify({
   capabilityBasedReadiness:true,
   staleV267GateRemoved:true,
   managementControlsPreserved:true,
-  rawPulsePreserved:true,
+  rawPulseLateMount:true,
   inferenceDormantOnOpen:true,
   bootstrapLoads,
   enhanceCalls,
+  pulseEnhanceCalls,
 },null,2));
