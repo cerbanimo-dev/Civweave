@@ -82,6 +82,17 @@ await patch('public/app/install-boundary-v146.js',source=>{
   return source;
 });
 
+await patch('public/app/shared-guide-surface-v236.js',source=>{
+  source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+-shared-guide-surface-v236-v266-chat-failsafe';/,`const VERSION='${version}-shared-guide-surface-v236-v266-chat-failsafe';`,'shared-guide loader release identity');
+  source=source.replace(/\?v=\d+\.\d+\.\d+/g,`?v=${version}`);
+  return source;
+});
+await patch('public/app/family-ai-loader-v105.js',source=>{
+  source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+-inline-realm-guides-r46-fast-memory-v192';/,`const VERSION='${version}-inline-realm-guides-r46-fast-memory-v192';`,'family AI loader release identity');
+  source=source.replace(/\?v=\d+\.\d+\.\d+/g,`?v=${version}`);
+  return source;
+});
+
 await patch('public/app/working-campus-v156.html',source=>{
   source=replaceRequired(source,/Civweave Working Campus · v\d+\.\d+\.\d+/,`Civweave Working Campus · v${version}`,'working-campus title');
   source=replaceRequired(source,/<b class="version-chip">v\d+\.\d+\.\d+<\/b>/,`<b class="version-chip">v${version}</b>`,'working-campus version chip');
