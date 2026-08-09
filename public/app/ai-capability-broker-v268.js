@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.65-ai-capability-broker-v269-diagnostics';
+const VERSION='1.0.66-ai-capability-broker-v270-semantics';
 if(globalThis.CivweaveAICapabilityBrokerV268?.version===VERSION)return;
 const SETTINGS_KEY='civweave.universal-ai.v127';
 const PROFILES_KEY='civweave-model-profiles-v1';
@@ -37,6 +37,7 @@ function requestText(request={}){
 function explicitCapabilities(request={}){
   const explicit=request.capabilityRequirements&&typeof request.capabilityRequirements==='object'?request.capabilityRequirements:{};
   return{
+    declared:Object.keys(explicit).length>0,
     profile:clean(explicit.profile||''),
     requiresTools:explicit.requiresTools===true,
     externalResearch:explicit.externalResearch===true,
@@ -46,8 +47,19 @@ function explicitCapabilities(request={}){
     planning:explicit.planning===true,
   };
 }
-function requirements(request={}){
+function normalizeRequest(request={}){
+  if(!request||typeof request!=='object')return{};
   const explicit=explicitCapabilities(request);
+  if(explicit.declared)return request;
+  const service=clean(request.config?.service||request.service||'');
+  if(!['fellowfare','anarchadia'].includes(service)||request.requiresTools!==true)return request;
+  const text=requestText(request);
+  const strongToolEvidence=Boolean(request.webSearch||request.youtubeSearch||request.externalResearch||/\b(web|youtube|internet|browse|browser|https?:|urls?|external sources?|live sources?|live research|online search|remote tools?|tool calls?)\b/.test(text));
+  if(strongToolEvidence)return request;
+  return{...request,requiresTools:false,capabilityRequirements:{profile:request.executionProfile==='agentic'||request.agentic||request.background?'agentic':'interactive',requiresTools:false,externalResearch:false,structuredOutput:Boolean(request.schema||request.responseFormat==='json'||request.responseFormat==='structured')},capabilityNormalization:{schema:'civweave.ai-capability-normalization.v1',reason:'legacy realm marked agentic reasoning as tool use without tool evidence',service}};
+}
+function requirements(input={}){
+  const request=normalizeRequest(input),explicit=explicitCapabilities(request);
   const explicitProfile=clean(request.executionProfile||request.profile||explicit.profile||'interactive');
   const profile=explicitProfile==='agentic'||request.agentic===true||request.background===true?'agentic':'interactive';
   const text=requestText(request);
@@ -82,8 +94,8 @@ function remember(decision){
   return decision;
 }
 function decide(request={}){
-  const spec=activeLocalSpec();
-  const local=supportsLocalRequest(spec,request);
+  const normalized=normalizeRequest(request),spec=activeLocalSpec();
+  const local=supportsLocalRequest(spec,normalized);
   const decision=Object.freeze({
     schema:'civweave.ai-capability-decision.v1',version:VERSION,
     route:local.ok?'downloaded-local':'base-runtime',
@@ -91,6 +103,7 @@ function decide(request={}){
     model:local.ok?spec?.id||'':'',
     reason:local.reason,
     requirements:local.requirements,
+    normalization:normalized.capabilityNormalization||null,
     authority:'deterministic-contracts',
     at:new Date().toISOString(),
   });
@@ -108,7 +121,7 @@ const authority=Object.freeze({
   note:'Locality does not imply determinism. Determinism governs authority and consequences, not conversational intelligence.'
 });
 function diagnostics(){return Object.freeze({version:VERSION,lastDecision:state.lastDecision,decisions:[...state.decisions],authority});}
-const api=Object.freeze({version:VERSION,canonicalProvider,selectedConfig,selectedProvider,requirements,activeLocalSpec,supportsLocalRequest,decide,diagnostics,get lastDecision(){return state.lastDecision},authority});
+const api=Object.freeze({version:VERSION,canonicalProvider,selectedConfig,selectedProvider,normalizeRequest,requirements,activeLocalSpec,supportsLocalRequest,decide,diagnostics,get lastDecision(){return state.lastDecision},authority});
 root.CivweaveAICapabilityBrokerV268=api;
-try{root.dispatchEvent?.(new root.CustomEvent('civweave:ai-capability-broker-ready',{detail:{version:VERSION,authority,diagnostics:true}}))}catch{}
+try{root.dispatchEvent?.(new root.CustomEvent('civweave:ai-capability-broker-ready',{detail:{version:VERSION,authority,diagnostics:true,agenticToolSemantics:true}}))}catch{}
 })();
