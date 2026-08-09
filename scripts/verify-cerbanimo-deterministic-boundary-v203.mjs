@@ -6,20 +6,24 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [boundary,registry,bridge]=await Promise.all([
+const [broker,boundary,registry,bridge,bootstrap]=await Promise.all([
+  read('public/app/ai-capability-broker-v268.js'),
   read('public/app/cerbanimo-deterministic-boundary-v203.js'),
   read('public/app/local-ai/model-registry-v266.js'),
   read('public/app/local-ai/runtime-bridge-v266.js'),
+  read('public/app/local-ai/bootstrap-v266.js'),
 ]);
 
-assert(boundary.includes("VERSION='1.0.8-cerbanimo-capability-broker-v268'"),'The capability-broker authority boundary revision is missing.');
+assert(broker.includes("VERSION='1.0.0-ai-capability-broker-v268'"),'The shared AI capability broker revision is missing.');
+assert(boundary.includes("VERSION='1.0.8-cerbanimo-authority-boundary-v268'"),'The Cerbanimo authority boundary revision is missing.');
 assert(!boundary.includes('DETERMINISTIC_PROVIDER_BOUNDARY'),'The legacy hard provider rejection still exists.');
-assert(boundary.includes("root.CivweaveAICapabilityBrokerV268=api"),'The shared capability broker is not exposed.');
+assert(boundary.includes('/app/ai-capability-broker-v268.js'),'Cerbanimo does not load the shared capability broker.');
 assert(boundary.includes("consequentialActions:'deterministic-contracts'"),'Consequential authority is no longer explicit.');
 assert(registry.includes('agenticReasoning:true'),'No downloaded model declares bounded agentic reasoning capability.');
 assert(registry.includes('externalResearch:false'),'Downloaded models must explicitly deny live external research capability.');
 assert(bridge.includes("generateAgentic:request=>generate({...request,executionProfile:'agentic'})"),'Agentic requests still bypass the downloaded-model capability router.');
 assert(bridge.includes('civweave:local-model-route-skipped'),'Capability-based local escalation diagnostics are missing.');
+assert(bootstrap.indexOf('ai-capability-broker-v268.js')<bootstrap.indexOf('model-registry-v266.js'),'The local AI bootstrap must load the capability broker before model declarations.');
 
 class MemoryStorage{
   constructor(seed={}){this.rows=new Map(Object.entries(seed))}
@@ -46,13 +50,14 @@ const sandbox={
 };
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
+vm.runInContext(broker,sandbox,{filename:'ai-capability-broker-v268.js'});
 vm.runInContext(boundary,sandbox,{filename:'cerbanimo-deterministic-boundary-v203.js'});
 
 assert.equal(sandbox.CivweaveAICapabilityBrokerV268.selectedProvider(),'semantic-local','MiniLM was still collapsed into deterministic mode.');
 assert.equal(sandbox.CivweaveModelRuntime.generate,originalGenerate,'The authority boundary still wraps or replaces model generation.');
 assert.equal(sandbox.CivweaveAssistantV141.respond,originalRespond,'The authority boundary still hijacks guide conversation.');
-assert.equal(sandbox.CivweaveAICapabilityBrokerV268.legacyProviderWall,false,'The legacy provider wall remains enabled.');
-assert.equal(sandbox.CivweaveAICapabilityBrokerV268.authority.consequentialActions,'deterministic-contracts');
+assert.equal(sandbox.CivweaveCerbanimoDeterministicBoundaryV203.legacyProviderWall,false,'The legacy provider wall remains enabled.');
+assert.equal(sandbox.CivweaveCerbanimoDeterministicBoundaryV203.authority.consequentialActions,'deterministic-contracts');
 
 vm.runInContext(registry,sandbox,{filename:'model-registry-v266.js'});
 let selectedId='qwen3-1.7b-q4f16';
@@ -85,8 +90,12 @@ const smallAgent=await sandbox.CivweaveModelRuntime.generateAgentic({purpose:'co
 assert.equal(smallAgent.actual.provider,'base-runtime','The small model was incorrectly promoted to agentic reasoning.');
 assert.equal(baseCalls,2);
 
-const smallInteractive=await sandbox.CivweaveModelRuntime.generateInteractive({purpose:'civweave-guide-response-v141',messages:[{role:'user',content:'Hello'}]});
-assert.equal(smallInteractive.actual.provider,'downloaded-local','The small model lost ordinary interactive generation.');
+const backgroundDecision=sandbox.CivweaveAICapabilityBrokerV268.supportsLocalRequest(sandbox.CivweaveLocalModelRegistryV266.byId(selectedId),{background:true,messages:[{role:'user',content:'Analyze these local notes'}]});
+assert.equal(backgroundDecision.ok,false,'Background work without an explicit profile was incorrectly treated as interactive.');
+assert.equal(backgroundDecision.requirements.profile,'agentic');
+
+const smallInteractive=await sandbox.CivweaveModelRuntime.generateInteractive({purpose:'civweave-guide-response-v141',messages:[{role:'user',content:'Help me understand this JavaScript code'}]});
+assert.equal(smallInteractive.actual.provider,'downloaded-local','The small model lost ordinary interactive code conversation.');
 assert.equal(localCalls,2);
 
 const decision=sandbox.CivweaveAICapabilityBrokerV268.decide({executionProfile:'agentic',requiresTools:true});
@@ -95,11 +104,12 @@ assert.match(decision.reason,/tools/i);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'cerbanimo-capability-broker-v268',
+  revision:'ai-capability-broker-v268',
   localitySeparatedFromDeterminism:true,
   authorityBoundaryPreserved:true,
   localAgenticReasoning:true,
   toolTasksEscalate:true,
+  backgroundTasksAreAgentic:true,
   smallModelAgenticGate:true,
   interactiveLocalPreserved:true,
   localCalls,
