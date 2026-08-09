@@ -41,7 +41,7 @@ async function wait(){
 async function expectRoute(route,{method='GET',headers={},contentType='',status=200}={}){
   const response=await fetch(origin+route,{method,headers,cache:'no-store',redirect:'manual'});
   assert(response.status===status,`${route} returned ${response.status}, expected ${status}`);
-  assert(![301,302,307,308].includes(response.status),`${route} redirected instead of serving the package asset`);
+  assert(![301,302,307,308].includes(response.status),`${route} redirected instead of serving the expected boundary response`);
   if(contentType)assert(String(response.headers.get('content-type')||'').includes(contentType),`${route} returned ${response.headers.get('content-type')||'no content type'}`);
   if(method!=='HEAD')await response.arrayBuffer();
 }
@@ -49,19 +49,24 @@ async function expectRoute(route,{method='GET',headers={},contentType='',status=
 try{
   assert(/^\d+\.\d+\.\d+$/.test(releaseVersion),`Invalid canonical VERSION: ${releaseVersion}`);
   await wait();
-  for(const route of [
+  const installerAssets=[
     '/service-worker-v156.js',
     '/service-worker-v203.js',
     '/service-worker-core-v208.js',
     '/service-worker-living-school-cleanroom-v218.js',
     '/service-worker-offline-v211-override.js',
     '/app/offline-package-v208.json',
-    '/app/campus-background-download-v241.js',
     '/app/knowledge-school-installer-v1.css',
     '/app/knowledge-school-seeds-v1.js',
     '/app/knowledge-school-installer-v1.js',
     '/app/pwa-update-controller-v204.js'
-  ])await expectRoute(route);
+  ];
+  for(const route of installerAssets)await expectRoute(route);
+
+  const runtimeOnly='/app/campus-background-download-v241.js';
+  await expectRoute(runtimeOnly,{status:410,contentType:'application/json'});
+  await expectRoute(runtimeOnly,{headers:{'x-civweave-package':'offline-campus'},contentType:'application/javascript'});
+
   for(const purpose of ['update-controls','shell-install','offline-manifest','offline-campus']){
     await expectRoute('/app/offline-package-v208.json',{headers:{'x-civweave-package':purpose},contentType:'application/json'});
   }
@@ -109,7 +114,8 @@ try{
   console.log(JSON.stringify({
     ok:true,
     releaseVersion,
-    directInstallerAssets:11,
+    directInstallerAssets:installerAssets.length,
+    runtimeOnlyAssetRequiresPackageMarker:true,
     packagePurposeHeadersAccepted:4,
     knowledgeCatalogServed:true,
     knowledgeZipServed:firstZip,
