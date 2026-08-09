@@ -1,0 +1,22 @@
+name: Export Video Atlas Lookup Temp
+
+on:
+  push:
+    branches:
+      - agent/video-learning-atlas-v1
+    paths:
+      - .github/workflows/export-video-atlas-lookup-temp.yml
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video-atlas-lookup-temp
+          path: public/downloads/knowledge-schools/video-atlases/lookup.json
+          retention-days: 1
