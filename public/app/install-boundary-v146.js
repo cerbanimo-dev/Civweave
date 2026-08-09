@@ -129,6 +129,7 @@ function start(){
 
 start();
 
+const runtime=Object.freeze({canonicalPolicy:'five-system-first-class-routes-v266-downloaded-runtime-only',authorizationPolicy:'standalone-or-preauthorized-session-never-route-intrinsic',sourcePolicy:'current-downloaded-package-never-live-site-fallback'});
 globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   version:VERSION,
   revision:REVISION,
@@ -140,6 +141,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   runtimeCanonicalPolicy:'five-system-first-class-routes-v266-downloaded-runtime-only',
   runtimeAuthorizationPolicy:'standalone-or-preauthorized-session-never-route-intrinsic',
   runtimeSourcePolicy:'current-downloaded-package-never-live-site-fallback',
+  runtime,
   canonicalSystemCount:5,canonicalAutoScripts:0,canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',systemsMeshRevision:'v251-five-system-non-privileged-event-contract',campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',radioTrackSuggestionRevision:'v241-playlist-context-track-links',radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',sharedGuideSurfaceRevision:'v236-mirror-into-v242-canonical-thread',realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',guideWorkspaceRevision:'v250-v242-canonical-owner',workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract',mapLaunchRevision:'v243-register-route-handler-or-open-event',fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',assetCustomizationRevision:'v239-local-path-overrides-on-demand',guideIdentityRevision:'v216-explicit-responder-ownership',guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm',guideIdentityMigration:'realm-action-owner',persistentGuideChatSubmissionPipelines:1,persistentGuideChatGuideCount:5,persistentGuideChatThreadPolicy:'five-realm-local-ledgers-plus-explicit-handover',persistentGuideChatWindowPolicy:'five-switchable-windows-current-realm-launcher',pwaUpdateRevision:'v250-installed-entry-every-launch',aiSettingsBindGuard:'v230-first-open-atomic-bind',aiSettingsPersistenceRepair:'v229-device-persistence',platformStabilityGuard:'v159-dom-ready-safe',compatibilityDomReady:true,onlineSelfHeal:false,missingAssetDetails:true
 });
 })();
