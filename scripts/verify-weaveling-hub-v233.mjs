@@ -22,12 +22,8 @@ const pkg=JSON.parse(packageSource);
 assert.equal(pkg.version,version,'package.json and VERSION must stay synchronized.');
 assert.match(version,/^\d+\.\d+\.\d+$/,'Civweave release version must remain semantic.');
 
-for(const heading of ['AGENT REPORTS','CHRONICLE','REPORT IN']){
-  assert(hub.includes(heading),`Missing Weaveling hub section: ${heading}`);
-}
-for(const key of ['civweave.agent-reports.v1','civweave.chronicles.v1','civweave.user-updates.v1']){
-  assert(hub.includes(key),`Missing hub local contract: ${key}`);
-}
+for(const heading of ['AGENT REPORTS','CHRONICLE','REPORT IN'])assert(hub.includes(heading),`Missing Weaveling hub section: ${heading}`);
+for(const key of ['civweave.agent-reports.v1','civweave.chronicles.v1','civweave.user-updates.v1'])assert(hub.includes(key),`Missing hub local contract: ${key}`);
 assert(hub.includes("'/app/persistent-guide-chat-v215.js'"),'Hub must reuse the shared persistent guide chat runtime.');
 assert(hub.includes("'/app/persistent-guide-viewport-v216.js'"),'Hub must reuse the shared guide viewport runtime.');
 assert(hub.includes("'civweave:user-update-reported'"),'Reported updates must emit the shared user-update event.');
@@ -42,18 +38,21 @@ assert(sharedChat.includes("const LAUNCHER_ID='cwp215-launcher';"),'Shared guide
 assert(sharedChat.includes('#${LAUNCHER_ID}{'),'Shared guide chat launcher styling is unavailable.');
 assert(assistantRuntime.includes('globalThis.CivweaveIntentionPlanner?.maybeCreate'),'Assistant runtime must retain the canonical Weaveling intention-planner boundary.');
 
-const plannerIndex=sharedLoader.indexOf('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization');
-const materializationIndex=sharedLoader.indexOf('/app/weaveling-plan-materialization-v265.js?v=1.0.57-v265');
-const sharedCoreIndex=sharedLoader.indexOf('/app/shared-guide-surface-v236-core-v244.js?v=1.0.57-v265');
-assert(plannerIndex>=0,'Shared guide loader must guarantee the intention planner.');
+const plannerPath=`/app/intention-planner-v141.js?v=${version}-v265-review-materialization`;
+const materializationPath=`/app/weaveling-plan-materialization-v265.js?v=${version}-v265`;
+const sharedCorePath=`/app/shared-guide-surface-v236-core-v244.js?v=${version}-v266`;
+const scrollPath=`/app/weaveling-scroll-owner-v265.css?v=${version}-v265`;
+const plannerIndex=sharedLoader.indexOf(plannerPath);
+const materializationIndex=sharedLoader.indexOf(materializationPath);
+const sharedCoreIndex=sharedLoader.indexOf(sharedCorePath);
+assert(plannerIndex>=0,'Shared guide loader must guarantee the current-release intention planner.');
 assert(materializationIndex>plannerIndex,'Weaveling materialization must load after the canonical planner.');
 assert(sharedCoreIndex>materializationIndex,'Shared chat must not mount before Weaveling materialization is ready.');
 assert(sharedLoader.includes('readyCheck?.()'),'Preloaded planner dependencies must be recognized as ready instead of waiting forever for an already-fired load event.');
-assert(sharedLoader.includes('/app/weaveling-scroll-owner-v265.css?v=1.0.57-v265'),'Shared guide must install the Weaveling document-scroll ownership repair.');
+assert(sharedLoader.includes(scrollPath),'Shared guide must install the current-release Weaveling document-scroll ownership repair.');
+assert(sharedLoader.includes('/app/chat-runtime-failsafe-v266.js?v=chat-runtime-failsafe-v266'),'Shared guide must install the chat runtime failsafe before guide dependencies.');
 
-for(const marker of ["stage:'review'","view:'weave'",'civweave:working-campus-plan-built','civweave:weave-review-ready','approvalGate','Nothing is active yet','WEAVE GENERATED · REVIEW REQUIRED']){
-  assert(materialization.includes(marker),`Missing reviewable-weave materialization marker: ${marker}`);
-}
+for(const marker of ["stage:'review'","view:'weave'",'civweave:working-campus-plan-built','civweave:weave-review-ready','approvalGate','Nothing is active yet','WEAVE GENERATED · REVIEW REQUIRED'])assert(materialization.includes(marker),`Missing reviewable-weave materialization marker: ${marker}`);
 assert(materialization.includes("WORKING_KEY='civweave.working-campus.v1'"),'Chat-generated weave must materialize into the visible Working Campus state.');
 assert(materialization.includes("INTENTIONS_KEY='civweave.intentions.v127'"),'Review UI must stay linked to the canonical persisted intention record.');
 
@@ -67,21 +66,8 @@ const events=[];
 const sandbox={
   console,
   location:{pathname:'/app/working-campus-v156.html',href:'https://example.test/app/working-campus-v156.html',reload:()=>{}},
-  localStorage:{
-    getItem:key=>store.has(key)?store.get(key):null,
-    setItem:(key,value)=>store.set(key,String(value)),
-    removeItem:key=>store.delete(key)
-  },
-  document:{
-    readyState:'loading',
-    documentElement:{dataset:{civweaveSystemRoute:'civweave'}},
-    scripts:[],styleSheets:[],
-    getElementById:()=>null,
-    querySelector:()=>null,
-    createElement:tag=>({tagName:String(tag).toUpperCase(),dataset:{},setAttribute(){},addEventListener(){}}),
-    head:{append(){}},
-    body:{}
-  },
+  localStorage:{getItem:key=>store.has(key)?store.get(key):null,setItem:(key,value)=>store.set(key,String(value)),removeItem:key=>store.delete(key)},
+  document:{readyState:'loading',documentElement:{dataset:{civweaveSystemRoute:'civweave'}},scripts:[],styleSheets:[],getElementById:()=>null,querySelector:()=>null,createElement:tag=>({tagName:String(tag).toUpperCase(),dataset:{},setAttribute(){},addEventListener(){}}),head:{append(){}},body:{}},
   addEventListener:()=>{},
   dispatchEvent:event=>{events.push(event);return true},
   CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}},
@@ -93,11 +79,7 @@ const sandbox={
 };
 sandbox.globalThis=sandbox;
 sandbox.CivweaveIntentionPlanner={
-  maybeCreate:()=>({
-    plan:{id:'intention-test',title:'Community Garden',wish:'Help me create and manage a community garden',profile:{},paths:[{id:'learning'}]},
-    item:{id:'intention-test'},
-    response:{answer:'Drafted route.',choice:{mode:'Plan'},requiresConsent:true}
-  }),
+  maybeCreate:()=>({plan:{id:'intention-test',title:'Community Garden',wish:'Help me create and manage a community garden',profile:{},paths:[{id:'learning'}]},item:{id:'intention-test'},response:{answer:'Drafted route.',choice:{mode:'Plan'},requiresConsent:true}}),
   restore:()=>true
 };
 vm.runInNewContext(materialization,sandbox,{filename:'weaveling-plan-materialization-v265.js'});
@@ -114,12 +96,4 @@ assert.equal(generated.response.approvalGate.required,true,'Materialized plan mu
 assert(events.some(event=>event.type==='civweave:working-campus-plan-built'),'Materialization must emit the existing Working Campus plan-built event.');
 assert(events.some(event=>event.type==='civweave:weave-review-ready'),'Materialization must emit the explicit review-ready event.');
 
-console.log(JSON.stringify({
-  ok:true,
-  version,
-  revision:'weaveling-hub-v233+materialization-v265',
-  sections:['agent-reports','chronicle','report-in'],
-  chatLauncher:'persistent-guide-chat-v215',
-  reviewMaterialization:'working-campus-review-v265',
-  scrollOwner:'document-v265'
-},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'weaveling-hub-v233+materialization-v265+chat-failsafe-v266',sections:['agent-reports','chronicle','report-in'],chatLauncher:'persistent-guide-chat-v215',reviewMaterialization:'working-campus-review-v265',scrollOwner:'document-v265'},null,2));
