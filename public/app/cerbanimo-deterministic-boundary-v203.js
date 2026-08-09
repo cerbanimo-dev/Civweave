@@ -34,7 +34,8 @@ function requestText(request={}){
   return clean([request.purpose,request.task,request.instructions,request.systemId,request.realm,request.context?.userMessage,text].filter(Boolean).join('\n'));
 }
 function requirements(request={}){
-  const profile=clean(request.executionProfile||request.profile||'interactive')==='agentic'?'agentic':'interactive';
+  const explicitProfile=clean(request.executionProfile||request.profile||'interactive');
+  const profile=explicitProfile==='agentic'||request.agentic===true||request.background===true?'agentic':'interactive';
   const text=requestText(request);
   const requiresTools=Boolean(request.requiresTools||request.toolUse||request.webSearch||request.youtubeSearch||request.background&&/\b(search|research|browse|url|web|youtube|external source)\b/.test(text));
   const externalResearch=Boolean(request.externalResearch||request.webSearch||request.youtubeSearch||/\b(live research|current web|web search|internet search|open urls?|youtube search)\b/.test(text));
