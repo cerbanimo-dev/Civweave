@@ -56,7 +56,7 @@ assert(cerbanimoEntry.indexOf('cerbanimo-quest-engine-v144.js')<cerbanimoEntry.i
 for(const token of ['CivweaveCerbanimoLearningPacksV1','templateToQuest','createQuest','laborTaskDraft'])assert(cerbanimoAdapter.includes(token),`Cerbanimo pack adapter missing ${token}`);
 for(const token of ['CivweaveLivingSchoolLearningPacksV1','curriculumInput','generateCurriculum'])assert(livingAdapter.includes(token),`Living School pack adapter missing ${token}`);
 for(const token of ['record.module','moduleBuffer','sha256','bootstrapCore'])assert(seedRuntime.includes(token),`Offline pack seed runtime missing ${token}`);
-for(const token of ['occupation_data.json','task_statements.json','essential_skills.json','tasks_to_dwas.json','CC-BY-4.0','requires'])assert(builder.includes(token),`O*NET builder missing ${token}`);
+for(const token of ['occupation_data.json','task_statements.json','essential_skills.json','tasks_to_dwas.json','CC-BY-4.0','reference examples, not procedural instructions'])assert(builder.includes(token),`O*NET builder missing ${token}`);
 
 const fingerprint=crypto.createHash('sha256').update(JSON.stringify(coreModule.default)).digest('hex').slice(0,16);
 console.log('Learning-pack v1 contract passed.',{tasks:normalized.taskTemplates.length,learning:normalized.learningUnits.length,guides:normalized.expertGuides.length,coreFingerprint:fingerprint});
