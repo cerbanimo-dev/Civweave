@@ -18,16 +18,7 @@ for(const token of ['<title>Civweave</title>',`/app/civweave-brand.js?v=${versio
 check(!launcherHtml.includes("new URL('/app/working-campus-v156.html',location.origin)"),'Hosted root directly launches Working Campus instead of installer/update/recovery.');
 check(!launcherHtml.includes("source','web-root'"),'Hosted root still exposes retired live-runtime provenance.');
 
-for(const token of [
-  `<title>Install Civweave v${version}</title>`,
-  `<span class="version">v${version}</span>`,
-  `Install Civweave v${version}. The campus downloads before runtime opens.`,
-  'This hosted page is only the installer, updater, and recovery dock.',
-  'pages are package-only at runtime',
-  'will not silently substitute the live website',
-  `/app/manifest.webmanifest?v=${version}`,
-  `/install-v130.js?v=${version}-lightweight-shell-v208`
-])check(installerHtml.includes(token),`public/app/index.html is missing ${token}`);
+for(const token of [`<title>Install Civweave v${version}</title>`,`<span class="version">v${version}</span>`,`Install Civweave v${version}. The campus downloads before runtime opens.`,'This hosted page is only the installer, updater, and recovery dock.','pages are package-only at runtime','will not silently substitute the live website',`/app/manifest.webmanifest?v=${version}`,`/install-v130.js?v=${version}-lightweight-shell-v208`])check(installerHtml.includes(token),`public/app/index.html is missing ${token}`);
 for(const forbidden of ['Open online campus','launch=online','Open Civweave online'])check(!installerHtml.includes(forbidden),`Installer reintroduced live-runtime fallback text: ${forbidden}`);
 check(!/navigator\.serviceWorker\.register\s*\(/.test(installerHtml),'Installer page reintroduced a second service-worker registration owner.');
 check(installRuntime.includes(`const VERSION = '${version}';`),'Installer runtime is stale.');
@@ -52,21 +43,7 @@ for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-sch
 check(nav.includes(`const VERSION='${version}-five-system-navigation-v227';`),'Themed navigation version is stale.');
 check(nav.includes('ROUTES.navigate'),'Themed navigation bypasses explicit in-app route authorization.');
 
-for(const token of [
-  `const VERSION='${version}';`,
-  "const REVISION='chat-convergence-v250';",
-  "const RUNTIME_REVISION='downloaded-runtime-boundary-v266';",
-  "const INSTALLER='/app/index.html';",
-  'const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;',
-  "canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner'",
-  "runtimeCanonicalPolicy:'five-system-first-class-routes-v266-downloaded-runtime-only'",
-  "runtimeAuthorizationPolicy:'standalone-or-preauthorized-session-never-route-intrinsic'",
-  "runtimeSourcePolicy:'current-downloaded-package-never-live-site-fallback'",
-  "guideWorkspaceRevision:'v250-v242-canonical-owner'",
-  'canonicalSystemCount:5',
-  'canonicalAutoScripts:0',
-  'onlineSelfHeal:false'
-])check(installBoundary.includes(token),`Install boundary is missing ${token}.`);
+for(const token of [`const VERSION='${version}';`,"const REVISION='chat-convergence-v250';","const RUNTIME_REVISION='downloaded-runtime-boundary-v266';","const INSTALLER='/app/index.html';",'const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;',"canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner'","runtimeCanonicalPolicy:'five-system-first-class-routes-v266-downloaded-runtime-only'","runtimeAuthorizationPolicy:'standalone-or-preauthorized-session-never-route-intrinsic'","runtimeSourcePolicy:'current-downloaded-package-never-live-site-fallback'","guideWorkspaceRevision:'v250-v242-canonical-owner'",'canonicalSystemCount:5','canonicalAutoScripts:0','onlineSelfHeal:false'])check(installBoundary.includes(token),`Install boundary is missing ${token}.`);
 check(!/function systemSurface\(\)[\s\S]{0,300}authorize\(\)/.test(installBoundary),'Install-boundary route recognition implicitly authorizes a hosted runtime.');
 const experienceStart=installBoundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),experienceEnd=installBoundary.indexOf('];',experienceStart),experience=installBoundary.slice(experienceStart,experienceEnd);
 check(experience.includes('GUIDE_WORKSPACE'),'Canonical experience no longer boots the v242 workspace.');
@@ -74,7 +51,7 @@ check(!experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!experience.includes
 
 check(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core version is stale.');
 check(workerWrapper.includes(`/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Worker route contract revision is stale.');
-check(workerWrapper.includes(`/service-worker-offline-runtime-boundary-v266.js?v=${version}-downloaded-runtime-boundary-v266`),'Worker downloaded-runtime boundary revision is stale.');
+check(workerWrapper.includes(`/service-worker-offline-runtime-boundary-v266.js?v=${version}-downloaded-runtime-v266`),'Worker downloaded-runtime boundary cache key is stale.');
 check(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-chat-convergence-v250`),'Worker core revision is stale.');
 check(workerWrapper.includes('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238'),'Worker offline current-graph revision is stale.');
 check(workerWrapper.includes('/service-worker-canonical-navigation-v227.js?v=canonical-package-navigation-v266'),'Worker canonical package navigation revision is stale.');
@@ -82,9 +59,11 @@ check(workerWrapper.includes('/service-worker-chat-repair-v245.js?v=chat-converg
 check(workerWrapper.indexOf('/service-worker-offline-runtime-boundary-v266.js')<workerWrapper.indexOf('/service-worker-core-v208.js'),'Downloaded-runtime boundary must execute before generic service-worker core.');
 check(workerWrapper.indexOf('/service-worker-canonical-navigation-v227.js')>workerWrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical package navigation is not the final navigation policy.');
 for(const token of ['canonical-runtime-current-downloaded-package-only-no-live-site-fallback',"headers.set('x-civweave-runtime-source','downloaded-package')",'event.stopImmediatePropagation()','package-miss'])check(offlineRuntime.includes(token),`Downloaded-runtime worker is missing ${token}.`);
-for(const token of ['exact-route-current-package-first-no-live-network-runtime-fallback','runtimeNetworkFallback:false','currentPackage(pathname)'])check(canonicalNavigation.includes(token),`Canonical navigation is missing ${token}.`);
-const runtimeBranch=canonicalNavigation.slice(canonicalNavigation.indexOf('networkFirst=async function canonicalFiveSystemPackageFirst'),canonicalNavigation.indexOf('self.CivweaveCanonicalNavigationV227'));
-check(runtimeBranch.length>0&&!runtimeBranch.includes('fetch('),'Canonical runtime navigation can still fetch the hosted route.');
+for(const token of ['exact-route-current-package-first-no-live-network-runtime-fallback','runtimeNetworkFallback:false','currentPackage(pathname)',"canonicalHandler:'packageOnlyCanonical'"])check(canonicalNavigation.includes(token),`Canonical navigation is missing ${token}.`);
+const handlerStart=canonicalNavigation.indexOf('async function packageOnlyCanonical(request)'),handlerEnd=canonicalNavigation.indexOf("self.addEventListener('install'",handlerStart),canonicalHandler=canonicalNavigation.slice(handlerStart,handlerEnd);
+check(canonicalHandler.length>0&&!canonicalHandler.includes('fetch(')&&!canonicalHandler.includes('originalNetworkFirst'),'Canonical package-only handler can still reach the hosted network.');
+const wrapperStart=canonicalNavigation.indexOf('networkFirst=async function canonicalFiveSystemPackageFirst'),wrapperEnd=canonicalNavigation.indexOf('self.CivweaveCanonicalNavigationV227',wrapperStart),navigationWrapper=canonicalNavigation.slice(wrapperStart,wrapperEnd);
+check(navigationWrapper.includes('if(canonical(request))return packageOnlyCanonical(request);'),'Canonical navigation wrapper does not delegate to package-only handler before generic fallback.');
 check(legacyWorker.includes(`/service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
 
 check(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-civweave-version]')"),'Visible-version synchronizer is incomplete.');
@@ -94,20 +73,6 @@ check(workingCampus.includes(`Civweave Working Campus · v${version}`)&&workingC
 check(campusLoader.includes(`system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Working Campus route loader version is stale.');
 check(campusPart4.includes(`version:'${version}'`),'Working Campus realm travel version is stale.');
 
-for(const token of [
-  "await patch('public/index.html'",
-  'Hosted root must remain installer-only.',
-  'Hosted root must never launch Working Campus directly.',
-  "await patch('public/app/index.html'",
-  'Installer resurrected a live campus runtime fallback.',
-  "await patch('public/app/manifest.webmanifest'",
-  "manifest.start_url='/app/installed-entry-v146.html?installed=1';",
-  "await patch('public/app/system-routes-v227.js'",
-  "await patch('public/app/themed-system-nav-v178.js'",
-  "await patch('public/service-worker-offline-runtime-boundary-v266.js'",
-  'Downloaded runtime boundary must load before the general service-worker core.',
-  'Install boundary lost explicit runtime authorization.',
-  'Install boundary lost downloaded-package runtime policy.'
-])check(syncSource.includes(token),`Release synchronizer is missing regression fence ${token}.`);
+for(const token of ["await patch('public/index.html'",'Hosted root must remain installer-only.','Hosted root must never launch Working Campus directly.',"await patch('public/app/index.html'",'Installer resurrected a live campus runtime fallback.',"await patch('public/app/manifest.webmanifest'","manifest.start_url='/app/installed-entry-v146.html?installed=1';","await patch('public/app/system-routes-v227.js'","await patch('public/app/themed-system-nav-v178.js'","await patch('public/service-worker-offline-runtime-boundary-v266.js'",'Downloaded runtime boundary must load before the general service-worker core.','Install boundary lost explicit runtime authorization.','Install boundary lost downloaded-package runtime policy.'])check(syncSource.includes(token),`Release synchronizer is missing regression fence ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,hostedRoot:'installer-only',installerRecoveryOnly:true,updaterFirstInstalledLaunch:true,runtimeAuthorization:'standalone-or-preauthorized-session',canonicalRuntime:'downloaded-package-only',canonicalNetworkFallback:false,routeIntrinsicAuthorization:false,workerPackageNavigation:true,canonicalChatOwner:'guide-workspace-v242',gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,installerRegistrationOwner:'install-v130.js'},null,2));
+console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,hostedRoot:'installer-only',installerRecoveryOnly:true,updaterFirstInstalledLaunch:true,runtimeAuthorization:'standalone-or-preauthorized-session',canonicalRuntime:'downloaded-package-only',canonicalNetworkFallback:false,routeIntrinsicAuthorization:false,workerPackageNavigation:true,canonicalHandler:'packageOnlyCanonical',canonicalChatOwner:'guide-workspace-v242',gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,installerRegistrationOwner:'install-v130.js'},null,2));
