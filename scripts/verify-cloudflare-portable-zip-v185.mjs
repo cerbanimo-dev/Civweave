@@ -59,7 +59,7 @@ if (build.status !== 0) {
 }
 const output = `${build.stdout || ''}\n${build.stderr || ''}`;
 assert(output.includes('System zip is unavailable; using the dependency-free Civweave ZIP writer.'), 'Cloudflare build did not enter its portable ZIP path.');
-assert(output.includes('All Cloudflare-hosted files are at or below 24 MiB.'), 'Cloudflare build did not complete its hosted-file audit.');
+assert(output.includes('All Cloudflare-hosted files are at or below 24 MiB'), 'Cloudflare build did not complete its hosted-file audit.');
 for (const relative of [
   'public/downloads/Civweave-Mobile-Install-Kit.zip',
   'public/downloads/civweave-pocket-campus.cwseed',
