@@ -29,6 +29,7 @@ const pocketCampusSeedPath = resolve(
 );
 const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
 const transformerStage = resolve(scriptDir, "stage-transformers-assets.mjs");
+const finderStage = resolve(scriptDir, "stage-federation-finder-data-v274.mjs");
 const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
@@ -140,6 +141,11 @@ for (const required of [
   }
 }
 
+runNodeScript(
+  finderStage,
+  "Federation Finder atlas staging failed. Civweave will not publish an install that falsely claims the full contact atlas is available offline.",
+);
+
 rebuildReleaseArtifacts();
 
 for (const [label, file] of [
@@ -181,4 +187,4 @@ const seedBytes = statSync(pocketCampusSeedPath).size;
 console.log(
   `Built .cloudflare-pages with mobile installer (${installerBytes} bytes) and portable Civweave seed (${seedBytes} bytes).`,
 );
-console.log("All Cloudflare-hosted files are at or below 24 MiB, including the staged local-AI runtime.");
+console.log("All Cloudflare-hosted files are at or below 24 MiB, including the staged local-AI runtime and offline Federation Finder atlas.");
