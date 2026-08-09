@@ -205,10 +205,26 @@
     }
   ],
   "youtube_api_enrichment": {
-    "status": "not-run",
-    "reason": "No YOUTUBE_API_KEY/GOOGLE_API_KEY available."
+    "status": "success",
+    "requested_video_ids": 2728,
+    "returned_video_ids": 2659,
+    "missing_or_unavailable_video_ids": 69,
+    "requested_batches": 55,
+    "source": "YouTube Data API v3 videos.list",
+    "built_at": "2026-08-09T22:17:28Z"
   },
-  "youtube_metadata_sidecar": null,
+  "youtube_metadata_sidecar": {
+    "file": "youtube-metadata-current.json.gz",
+    "bytes": 1590637,
+    "human": "1553.36 KiB",
+    "sha256": "283dd4541c1d955d17240103d5561be6a75f07e3149d59edcb1cb7388f564454",
+    "records": 2659,
+    "requested_video_ids": 2728,
+    "missing_or_unavailable_video_ids": 69,
+    "built_at": "2026-08-09T22:17:28Z",
+    "expires_at": "2026-09-07T22:17:28Z",
+    "refresh_required_days": 30
+  },
   "discovery_failure_count": 0,
   "materializer": {
     "mode": "parallel-rate-conscious-school-search",
