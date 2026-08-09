@@ -19,7 +19,7 @@ new Function(bridge);
 new Function(bootstrap);
 new Function(worker);
 new Function(sw);
-new Function(cloudflare.replace(/^#!.*\n/,''));
+// build-cloudflare-pages.mjs is an ES module and is syntax-checked directly by the workflow.
 new Function(campus.replace(/\}\)\(\);\s*$/,''));
 
 const checks=[];
