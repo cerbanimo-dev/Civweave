@@ -11,6 +11,7 @@ const RELEASE='30.3';
 const PACK_ID='onet-labor-atlas-30-3';
 const FILE='onet-labor-atlas-30-3.json.gz';
 const BASE='https://www.onetcenter.org/dl_files/database/db_30_3_json';
+const LICENSE_URL='https://creativecommons.org/licenses/by/4.0/';
 const TABLES={
   occupations:`${BASE}/occupation_data.json`,
   tasks:`${BASE}/task_statements.json`,
@@ -58,7 +59,12 @@ const laborReferences=occupations.map((occupation,index)=>{
   const code=clean(field(occupation,'O*NET-SOC Code','ONET SOC Code','Occupation Code'),80);
   const occupationTasks=(tasksByOccupation.get(code)||[]).map((task,taskIndex)=>{
     const taskId=clean(field(task,'Task ID','TaskID'),120)||`${code}:task-${taskIndex+1}`;
-    return{id:taskId,text:clean(field(task,'Task','Task Statement','Task Description'),1800),taskType:clean(field(task,'Task Type','TaskType'),80),dwaRefs:(dwasByTask.get(taskId)||[]).map(row=>clean(field(row,'DWA ID','DWAID'),160)).filter(Boolean)};
+    return{
+      id:taskId,
+      text:clean(field(task,'Task','Task Statement','Task Description'),1800),
+      taskType:clean(field(task,'Task Type','TaskType'),80),
+      dwaRefs:(dwasByTask.get(taskId)||[]).map(row=>clean(field(row,'DWA Element ID','DWA ID','DWAID'),160)).filter(Boolean)
+    };
   }).filter(row=>row.text);
   const occupationSkills=(skillsByOccupation.get(code)||[]).map((skill,skillIndex)=>({
     id:clean(field(skill,'Element ID','ElementID'),160)||`${code}:skill-${skillIndex+1}`,
@@ -73,12 +79,18 @@ const pack={
   schema:'civweave.learning-pack.v1',id:PACK_ID,version:'1.0.0',title:`O*NET ${RELEASE} Labor Atlas`,packType:'reference',audience:['cerbanimo','living-school'],
   summary:`Normalized labor-reference data covering ${laborReferences.length.toLocaleString('en-US')} O*NET occupations and ${tasks.length.toLocaleString('en-US')} task statements. Occupational statements are reference examples, not procedural instructions; Civweave must adapt them through task-specific expert packs and current safety or qualification rules before execution.`,
   sourceRelease:RELEASE,generatedAt:new Date().toISOString(),
-  license:{id:'CC-BY-4.0',name:'Creative Commons Attribution 4.0 International',attribution:'This product includes information from the O*NET 30.3 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA), used under CC BY 4.0. O*NET® is a trademark of USDOL/ETA. Civweave modified the source data by restructuring it into a learning-pack labor atlas.'},
+  license:{
+    id:'CC-BY-4.0',
+    name:'Creative Commons Attribution 4.0 International',
+    url:LICENSE_URL,
+    attribution:'This product includes information from the O*NET 30.3 Database by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA). Used under the CC BY 4.0 license. O*NET® is a trademark of USDOL/ETA. Civweave has modified this information by restructuring source tables into a learning-pack labor atlas. USDOL/ETA has not approved, endorsed, or tested these modifications.',
+    modifications:'Civweave groups occupation records with their task statements and essential-skill ratings, retains task-to-DWA identifiers as crosswalk references, renames fields into the civweave.learning-pack.v1 schema, and adds Civweave safety metadata outside the source records.'
+  },
   sources:[
     {id:'onet-occupation-data',title:'O*NET 30.3 Occupation Data',kind:'official-dataset',url:TABLES.occupations,license:'CC-BY-4.0',note:'Normalized from the official O*NET JSON table.'},
     {id:'onet-task-statements',title:'O*NET 30.3 Task Statements',kind:'official-dataset',url:TABLES.tasks,license:'CC-BY-4.0',note:'Occupational task statements are descriptive reference data, not Civweave procedures.'},
     {id:'onet-essential-skills',title:'O*NET 30.3 Essential Skills',kind:'official-dataset',url:TABLES.skills,license:'CC-BY-4.0',note:'Essential-skill ratings retain source scale identifiers.'},
-    {id:'onet-task-dwas',title:'O*NET 30.3 Tasks to Detailed Work Activities',kind:'official-dataset',url:TABLES.taskDwas,license:'CC-BY-4.0',note:'Detailed Work Activity identifiers are retained as crosswalk references.'}
+    {id:'onet-task-dwas',title:'O*NET 30.3 Tasks to Detailed Work Activities',kind:'official-dataset',url:TABLES.taskDwas,license:'CC-BY-4.0',note:'Detailed Work Activity element identifiers are retained as crosswalk references.'}
   ],
   skills:[],expertGuides:[],taskTemplates:[],learningUnits:[],laborReferences
 };
