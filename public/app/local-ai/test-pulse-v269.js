@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.63-local-model-test-pulse-v269';
+const VERSION='1.0.64-local-model-test-pulse-v269';
 const PANEL='cw-local-ai-v266',RESULT='cw-local-model-test-result-v269',STYLE='cw-local-model-test-pulse-v269-style';
 if(globalThis.CivweaveLocalModelTestPulseV269?.version===VERSION)return;
 const R=()=>globalThis.CivweaveLocalModelRegistryV266;
