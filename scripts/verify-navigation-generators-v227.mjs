@@ -34,7 +34,7 @@ for(const token of [
   "runtimeCanonicalPolicy:'five-system-first-class-routes-v266-downloaded-runtime-only'",
   "guideWorkspaceRevision:'v250-v242-canonical-owner'",
   'canonicalSystemCount:5',
-  'Canonical navigation must remain the final navigation policy.',
+  'Canonical package navigation must remain the final navigation policy.',
   'Canonical runtime navigation contains a live network fetch.'
 ])assert(coherenceSync.includes(token),`Release coherence synchronizer is missing ${token}.`);
 assert(!coherenceSync.includes("const boundaryRevision='five-system-boundary-v227'"),'Release coherence can still restore the pre-v250 boundary.');
