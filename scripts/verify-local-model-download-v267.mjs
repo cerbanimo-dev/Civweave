@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [manager,settings,broker,spine,registry,runtime,bridge,bootstrap,worker,backgroundWorker,sw,cloudflare,campus,pulse,health]=await Promise.all([
-  read('public/app/local-ai/download-manager-v267.js'),read('public/app/local-ai/settings-panel-v267.js'),read('public/app/ai-capability-broker-v268.js'),read('public/app/fast-interactive-runtime-v192.js'),read('public/app/local-ai/model-registry-v266.js'),read('public/app/local-ai/runtime-v266.js'),read('public/app/local-ai/runtime-bridge-v266.js'),read('public/app/local-ai/bootstrap-v266.js'),read('public/app/local-ai/worker-v266.js'),read('public/service-worker-local-model-download-v267.js'),read('public/service-worker-v203.js'),read('scripts/build-cloudflare-pages.mjs'),read('public/app/working-campus-v156.part5.txt'),read('public/app/local-ai/test-pulse-v269.js'),read('scripts/verify-local-inference-health-v274.mjs')
+const [manager,settings,broker,spine,registry,runtime,bridge,bootstrap,worker,backgroundWorker,sw,cloudflare,campus,pulse]=await Promise.all([
+  read('public/app/local-ai/download-manager-v267.js'),read('public/app/local-ai/settings-panel-v267.js'),read('public/app/ai-capability-broker-v268.js'),read('public/app/fast-interactive-runtime-v192.js'),read('public/app/local-ai/model-registry-v266.js'),read('public/app/local-ai/runtime-v266.js'),read('public/app/local-ai/runtime-bridge-v266.js'),read('public/app/local-ai/bootstrap-v266.js'),read('public/app/local-ai/worker-v266.js'),read('public/service-worker-local-model-download-v267.js'),read('public/service-worker-v203.js'),read('scripts/build-cloudflare-pages.mjs'),read('public/app/working-campus-v156.part5.txt'),read('public/app/local-ai/test-pulse-v269.js')
 ]);
-for(const source of [manager,settings,broker,spine,registry,runtime,bridge,bootstrap,worker,backgroundWorker,sw,pulse,health])new Function(source);
+for(const source of [manager,settings,broker,spine,registry,runtime,bridge,bootstrap,worker,backgroundWorker,sw,pulse])new Function(source);
 new Function(campus.replace(/\}\)\(\);\s*$/,''));
 const checks=[];const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
 check('download manager exposes byte progress',manager.includes('bytesDownloaded')&&manager.includes('ReadableStream'));
@@ -35,7 +35,6 @@ check('Cloudflare build stages Transformers runtime',cloudflare.includes('stage-
 check('capability broker retains semantic local routing',broker.includes("return'semantic-local'")&&broker.includes("authority:'deterministic-contracts'"));
 check('runtime spine retains middleware path',spine.includes('if(out?.handled)')&&spine.includes("handledBy='base-runtime'"));
 check('Working Campus still attaches local bridge',campus.includes('if(localSelection.active){await ensureDownloadedLocalAISettings()')&&campus.includes('CivweaveLocalModelBridgeV266?.patch?.()'));
-
 const listeners=new Map();const context={console,globalThis:null,localStorage:{getItem:()=>null,setItem:()=>{}},addEventListener:(name,fn)=>{const rows=listeners.get(name)||[];rows.push(fn);listeners.set(name,rows)},dispatchEvent:()=>true,CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}}};context.globalThis=context;vm.createContext(context);vm.runInContext(broker,context,{filename:'ai-capability-broker-v268.js'});const capability=context.CivweaveAICapabilityBrokerV268;
 const localReasoning=capability.normalizeRequest({purpose:'threat-model',executionProfile:'agentic',background:true,requiresTools:true,config:{service:'anarchadia'},messages:[{role:'user',content:'Review this local charter diff for abuse paths.'}]});assert.equal(localReasoning.requiresTools,false);assert.equal(capability.requirements(localReasoning).profile,'agentic');
 const live=capability.normalizeRequest({purpose:'research',executionProfile:'agentic',background:true,requiresTools:true,config:{service:'fellowfare'},messages:[{role:'user',content:'Search the web for live external sources.'}]});assert.equal(live.requiresTools,true);checks.push('agentic/tool normalization executable cases');
