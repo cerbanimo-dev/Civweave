@@ -25,6 +25,7 @@ jobs:
           node --check scripts/test-node-ai-debt-availability-v1.mjs
           node --check scripts/node-ai-process-chaos-worker-v1.mjs
           node --check scripts/test-node-ai-process-chaos-v1.mjs
+          node --check scripts/test-node-ai-network-replay-v1.mjs
           node --check lib/node-ai-ledger-sqlite-v1.mjs
           node --check lib/node-ai-inference-gate-v1.mjs
           node --check lib/node-ai-inference-http-v1.mjs
@@ -32,6 +33,8 @@ jobs:
         run: node --test scripts/test-node-ai-debt-availability-v1.mjs
       - name: Run multi-process and SIGKILL economic chaos
         run: node --test scripts/test-node-ai-process-chaos-v1.mjs
+      - name: Verify lost-response HTTP replay boundary
+        run: node --test scripts/test-node-ai-network-replay-v1.mjs
       - name: Run deterministic chaos smoke
         run: node scripts/test-node-ai-chaos-fuzz-v1.mjs --seed=civweave-pr-smoke-v1 --runs=2 --operations=1000 --nodes=3 --users=6
       - name: Run 40k-operation economic chaos gate
@@ -58,5 +61,7 @@ jobs:
         run: node --test scripts/test-node-ai-debt-availability-v1.mjs
       - name: Run multi-process and SIGKILL chaos before soak
         run: node --test scripts/test-node-ai-process-chaos-v1.mjs
+      - name: Verify lost-response HTTP replay before soak
+        run: node --test scripts/test-node-ai-network-replay-v1.mjs
       - name: Run 240k-operation node economy soak
         run: node scripts/test-node-ai-chaos-fuzz-v1.mjs --seed=civweave-nightly-soak-v1 --runs=12 --operations=20000 --nodes=5 --users=10
