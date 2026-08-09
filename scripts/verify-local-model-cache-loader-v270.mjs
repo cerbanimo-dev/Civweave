@@ -3,21 +3,17 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [worker,runtime,bootstrap,bridge,assistant,spine]=await Promise.all([
+const [worker,runtime,bootstrap,bridge,assistant,spine,integrity]=await Promise.all([
   read('public/app/local-ai/worker-v266.js'),
   read('public/app/local-ai/runtime-v266.js'),
   read('public/app/local-ai/bootstrap-v266.js'),
   read('public/app/local-ai/runtime-bridge-v266.js'),
   read('public/app/assistant-runtime-v141.js'),
   read('public/app/fast-interactive-runtime-v192.js'),
+  read('public/app/local-ai/cache-integrity-v271.js'),
 ]);
 
-new Function(worker);
-new Function(runtime);
-new Function(bootstrap);
-new Function(bridge);
-new Function(assistant);
-new Function(spine);
+for(const source of [worker,runtime,bootstrap,bridge,assistant,spine,integrity])new Function(source);
 
 const checks=[];
 const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
@@ -26,10 +22,14 @@ check('Transformers 3 stays local-only',worker.includes('hf.env.allowLocalModels
 check('download cache adapter is installed',worker.includes('hf.env.customCache=cacheAdapter(cache,spec)')&&worker.includes('function cacheAdapter(cache,spec)'));
 check('local /models keys translate to pinned Hugging Face cache keys',worker.includes('const localPrefix=`/models/${spec.repo}/`')&&worker.includes('remotePrefix=pinnedRemoteRoot(spec)')&&worker.includes('await cache.match(remote)'));
 check('missing local artifact returns synthetic cache miss before SPA HTML fallback',worker.includes("status:404,statusText:'Downloaded model cache miss'"));
-check('cache miss error is actionable',worker.includes('Re-download this model while online before using it offline.'));
-check('runtime cache-busts repaired worker',runtime.includes("VERSION='1.0.66-local-ai-runtime-v270-cache-loader'")&&runtime.includes("worker-v266.js?v=1.0.66-v270"));
+check('cache miss error remains actionable',worker.includes('Open AI Settings and tap Resume'));
+check('worker rejects malformed cached JSON',worker.includes('async function validatedHit')&&worker.includes('JSON.parse(text)')&&worker.includes('await cache.delete(key)'));
+check('runtime cache-busts v271 worker',runtime.includes("VERSION='1.0.67-local-ai-runtime-v271-integrity-repair'")&&runtime.includes("worker-v266.js?v=1.0.67-v271"));
+check('runtime can auto-repair metadata integrity failures',runtime.includes('state?.repair?.metadataOnly')&&runtime.includes('manager?.repairMetadata')&&runtime.includes("code:error?.code||'LOCAL_MODEL_CACHE_REPAIR_FAILED'"));
 check('bootstrap preserves v269 runtime spine',bootstrap.includes("fast-interactive-runtime-v192.js?v=1.0.65-v269")&&bootstrap.includes("1.0.65-runtime-spine-v269")&&bootstrap.includes("runtime-bridge-v266.js?v=1.0.65-v269"));
-check('bootstrap loads repaired runtime and advertises cache resolution',bootstrap.includes("runtime-v266.js?v=1.0.66-v270")&&bootstrap.includes('cacheResolvedInference:true')&&bootstrap.includes('runtimeSpine:true'));
+check('bootstrap inserts v271 integrity layer before repaired runtime',bootstrap.indexOf('cache-integrity-v271.js')>bootstrap.indexOf('download-manager-v267.js')&&bootstrap.indexOf('cache-integrity-v271.js')<bootstrap.indexOf('runtime-v266.js?v=1.0.67-v271'));
+check('bootstrap advertises cache resolution and integrity repair',bootstrap.includes('cacheResolvedInference:true')&&bootstrap.includes('cacheIntegrityRepair:true')&&bootstrap.includes('runtimeSpine:true'));
+check('integrity layer parses cached JSON bodies instead of trusting headers',integrity.includes('JSON.parse(text)')&&integrity.includes("return broken(artifact,'invalid-json'")&&integrity.includes('await cache.delete(key)'));
 check('bridge registers downloaded-local middleware on runtime spine',bridge.includes("const MIDDLEWARE_ID='downloaded-local-v269'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
 check('assistant dynamically reads shared runtime',assistant.includes('const runtime=()=>globalThis.CivweaveModelRuntime||null')&&assistant.includes('await rt.generate'));
 check('runtime spine supports handled middleware before base runtime',spine.includes("handledBy='base-runtime'")&&spine.includes('if(out?.handled)')&&spine.includes("if(handledBy==='base-runtime')result=await base.generate(request)"));
@@ -70,4 +70,4 @@ await assert.rejects(()=>captured.hooks.handle({...request,messages:[{role:'syst
 assert.equal(baseCalls,0,'local inference failure must stay visible instead of silently substituting base provider');
 checks.push('local inference failure remains visible');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-cache-loader-v270-spine',checks:checks.length,features:{transformers3PinnedCacheAdapter:true,htmlShellParseRegressionBlocked:true,workerCacheBust:true,runtimeSpinePreserved:true,complexGuideDynamicRoute:true,noSilentBaseFallback:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-cache-loader-v270-v271-compatible',checks:checks.length,features:{transformers3PinnedCacheAdapter:true,htmlShellParseRegressionBlocked:true,malformedJsonBlocked:true,workerCacheBust:true,runtimeSpinePreserved:true,metadataAutoRepair:true,complexGuideDynamicRoute:true,noSilentBaseFallback:true}},null,2));
