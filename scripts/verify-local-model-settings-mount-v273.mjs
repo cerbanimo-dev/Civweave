@@ -3,15 +3,16 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [lifecycle,campus,settings,bootstrap,controller]=await Promise.all([
+const [lifecycle,campus,settings,bootstrap,controller,pulse]=await Promise.all([
   read('public/app/document-lifecycle-v221.js'),
   read('public/app/working-campus-v156.part5.txt'),
   read('public/app/local-ai/settings-panel-v267.js'),
   read('public/app/local-ai/bootstrap-v266.js'),
   read('public/app/model-settings-controller-v173.js'),
+  read('public/app/local-ai/test-pulse-v269.js'),
 ]);
 
-for(const source of [lifecycle,settings,bootstrap,controller])new Function(source);
+for(const source of [lifecycle,settings,bootstrap,controller,pulse])new Function(source);
 new Function(campus.replace(/\}\)\(\);\s*$/,''));
 
 assert.match(lifecycle,/document-lifecycle-v273-local-ai-management/);
@@ -24,8 +25,11 @@ assert.match(lifecycle,/CivweaveLocalModelBridgeV266\?\.patch/);
 assert.doesNotMatch(lifecycle,/new Worker\s*\(/);
 assert.doesNotMatch(lifecycle,/\.generate\s*\(/);
 
-for(const text of ['Downloaded local AI','Download','Resume','Use locally','Remove','Raw model pulse'])assert.ok(settings.toLowerCase().includes(text.toLowerCase()),`Local settings panel lost ${text}.`);
+for(const text of ['Downloaded local AI','Download','Resume','Use locally','Remove'])assert.ok(settings.toLowerCase().includes(text.toLowerCase()),`Local settings panel lost ${text}.`);
+assert.match(pulse,/Raw model pulse/i);
+assert.match(pulse,/Test model/);
 assert.match(bootstrap,/settings-panel-v267\.js/);
+assert.match(bootstrap,/test-pulse-v269\.js/);
 assert.match(controller,/civweave:model-settings-opened/);
 
 assert.match(campus,/bootstrap-v266\.js\?v=1\.0\.67-v271/);
@@ -98,6 +102,7 @@ console.log(JSON.stringify({
   capabilityBasedReadiness:true,
   staleV267GateRemoved:true,
   managementControlsPreserved:true,
+  rawPulsePreserved:true,
   inferenceDormantOnOpen:true,
   bootstrapLoads,
   enhanceCalls,
