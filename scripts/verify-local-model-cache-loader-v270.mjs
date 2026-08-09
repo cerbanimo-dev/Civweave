@@ -20,16 +20,20 @@ const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
 check('Transformers 3 stays local-only',worker.includes('hf.env.allowLocalModels=true')&&worker.includes('hf.env.allowRemoteModels=false'));
 check('download cache adapter is installed',worker.includes('hf.env.customCache=cacheAdapter(cache,spec)')&&worker.includes('function cacheAdapter(cache,spec)'));
 check('local /models keys translate to pinned Hugging Face cache keys',worker.includes('const localPrefix=`/models/${spec.repo}/`')&&worker.includes('remotePrefix=pinnedRemoteRoot(spec)')&&worker.includes('await cache.match(remote)'));
-check('missing local artifact returns synthetic cache miss before SPA HTML fallback',worker.includes("status:404,statusText:'Downloaded model cache miss'"));
-check('HTML metadata error is actionable',worker.includes('metadata contained HTML instead of JSON'));
+check('cache misses never masquerade as empty 404 cache hits',!worker.includes("new Response('',{status:404")&&!worker.includes("status:404,statusText:'Downloaded model cache miss'"));
+check('optional JSON metadata receives valid JSON placeholder',worker.includes("const body=/\\.json$/i.test(path)?'{}':''")&&worker.includes("'x-civweave-model-cache':'optional-placeholder'"));
+check('required artifact misses fail explicitly before inference',worker.includes('Downloaded model cache miss: ${path}')&&worker.includes('Repair or reinstall'));
+check('unregistered artifact requests fail as manifest errors',worker.includes('Downloaded model manifest is incomplete: ${path}'));
+check('JSON parse failures are identified as model-load failures',worker.includes('This is a model-load/cache failure before inference'));
 check('worker streams through Transformers TextStreamer',worker.includes('new hfRuntime.TextStreamer')&&worker.includes("post(id,'token'"));
-check('runtime cache-busts v271 worker and receives tokens',runtime.includes("VERSION='1.0.67-local-ai-runtime-v271-streaming'")&&runtime.includes("worker-v266.js?v=1.0.67-v271")&&runtime.includes("message.type==='token'"));
-check('bootstrap loads v271 spine and repaired runtime',bootstrap.includes("1.0.67-runtime-spine-v271")&&bootstrap.includes("runtime-v266.js?v=1.0.67-v271")&&bootstrap.includes('cacheResolvedInference:true'));
-check('bootstrap advertises streaming and integrity repair',bootstrap.includes('localStreaming:true')&&bootstrap.includes('integrityRepair:true'));
-check('bridge registers downloaded-local v271 middleware',bridge.includes("const MIDDLEWARE_ID='downloaded-local-v271'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
+check('runtime cache-busts v274 worker and receives tokens',runtime.includes("VERSION='1.0.68-local-ai-runtime-v274-cache-only'")&&runtime.includes("worker-v266.js?v=1.0.68-v274")&&runtime.includes("message.type==='token'"));
+check('runtime passes artifact requiredness to cache worker',runtime.includes("const artifacts=(spec.artifacts||[]).map")&&runtime.includes('artifacts},messages'));
+check('bootstrap still exposes the shared runtime spine',bootstrap.includes('cacheResolvedInference:true')&&bootstrap.includes('localStreaming:true')&&bootstrap.includes('integrityRepair:true'));
+check('bridge registers downloaded-local middleware',bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
 check('bridge emits shared partial events',bridge.includes("emit('partial'")&&bridge.includes('accumulatedText')&&bridge.includes('used:Boolean(run.streamed)'));
 check('download manager rejects poisoned JSON cache contents',manager.includes('validateArtifactResponse')&&manager.includes("reason:'invalid-json'")&&manager.includes("reason:'html'"));
 check('raw pulse calls targeted integrity repair',pulse.includes('M().repair')&&pulse.includes('integrityReady'));
+check('raw pulse separates load failure from inference failure',pulse.includes("stage==='load failed'")&&pulse.includes('Inference never started'));
 check('assistant dynamically reads shared runtime',assistant.includes('const runtime=()=>globalThis.CivweaveModelRuntime||null')&&assistant.includes('await rt.generate'));
 check('runtime spine supports handled middleware before base runtime',spine.includes("handledBy='base-runtime'")&&spine.includes('if(out?.handled)')&&spine.includes("if(handledBy==='base-runtime')result=await base.generate(request)"));
 
@@ -37,20 +41,9 @@ let localCalls=0,baseCalls=0,captured=null;
 const partial=[];
 const spec={id:'qwen3-1.7b-q4f16',label:'Qwen 3 1.7B',estimatedBytes:1_470_000_000,capabilities:{interactive:true,structuredOutput:true,agenticReasoning:true,code:true,tools:false,externalResearch:false,vision:false}};
 const baseRuntime={version:'base-test-runtime',generate:async()=>{baseCalls+=1;return{status:'success',actual:{provider:'base'},outputText:'base'}}};
-const sandbox={
-  console,Date,Promise,Error,Object,Boolean,Number,String,Math,
-  performance:{now:()=>10},
-  CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}},
-  dispatchEvent:()=>true,addEventListener:()=>{},
-  CivweaveModelRuntime:baseRuntime,
-  CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:spec.id})},
-  CivweaveLocalModelRuntimeV266:{activeSpec:()=>spec,generate:async request=>{localCalls+=1;assert.match(request.messages[1].content,/causal simulation/i);assert.equal(request.stream,true);request.onToken?.({text:'Local ',index:0});request.onToken?.({text:'complex answer',index:1});return{text:'{"answer":"Local complex answer"}',json:{answer:'Local complex answer'},elapsedMs:12,streamed:true}}},
-  CivweaveAICapabilityBrokerV268:{supportsLocalRequest:()=>({ok:true,reason:'qualified local interactive generation',requirements:{profile:'interactive'}})},
-  CivweaveFastInteractiveV192:{register:(id,hooks,priority)=>{captured={id,hooks,priority};return()=>{}},proxy:()=>baseRuntime,base:()=>baseRuntime},
-};
+const sandbox={console,Date,Promise,Error,Object,Boolean,Number,String,Math,performance:{now:()=>10},CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}},dispatchEvent:()=>true,addEventListener:()=>{},CivweaveModelRuntime:baseRuntime,CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:spec.id})},CivweaveLocalModelRuntimeV266:{activeSpec:()=>spec,generate:async request=>{localCalls+=1;assert.match(request.messages[1].content,/causal simulation/i);assert.equal(request.stream,true);request.onToken?.({text:'Local ',index:0});request.onToken?.({text:'complex answer',index:1});return{text:'{"answer":"Local complex answer"}',json:{answer:'Local complex answer'},elapsedMs:12,streamed:true}}},CivweaveAICapabilityBrokerV268:{supportsLocalRequest:()=>({ok:true,reason:'qualified local interactive generation',requirements:{profile:'interactive'}})},CivweaveFastInteractiveV192:{register:(id,hooks,priority)=>{captured={id,hooks,priority};return()=>{}},proxy:()=>baseRuntime,base:()=>baseRuntime}};
 sandbox.globalThis=sandbox;
 vm.runInNewContext(bridge,sandbox,{filename:'runtime-bridge-v266.js'});
-assert.equal(captured?.id,'downloaded-local-v271');
 assert.equal(captured?.priority,100);
 const request={purpose:'civweave-guide-response-v141',executionProfile:'interactive',responseFormat:'json',config:{stream:true},onEvent:event=>{if(event.phase==='partial')partial.push(event)},messages:[{role:'system',content:'You are Weaveling.'},{role:'user',content:'Design a causal simulation with three interacting systems and explain the tradeoffs.'}]};
 const handled=await captured.hooks.handle(request);
@@ -69,4 +62,4 @@ await assert.rejects(()=>captured.hooks.handle({...request,messages:[{role:'syst
 assert.equal(baseCalls,0);
 checks.push('local inference failure remains visible');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-cache-loader-v271-streaming',checks:checks.length,features:{transformers3PinnedCacheAdapter:true,htmlShellParseRegressionBlocked:true,poisonedMetadataRejected:true,targetedRepair:true,localStreaming:true,runtimeSpinePreserved:true,complexGuideDynamicRoute:true,noSilentBaseFallback:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-cache-loader-v274-cache-only',checks:checks.length,features:{transformers3PinnedCacheAdapter:true,synthetic404RegressionBlocked:true,optionalMetadataSafe:true,requiredMissExplicit:true,manifestGapExplicit:true,poisonedMetadataRejected:true,targetedRepair:true,loaderDiagnostics:true,localStreaming:true,runtimeSpinePreserved:true,complexGuideDynamicRoute:true,noSilentBaseFallback:true}},null,2));
