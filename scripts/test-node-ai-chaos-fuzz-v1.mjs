@@ -21,7 +21,8 @@ function random(seed){let s=seed32(seed);const next=()=>{s^=s<<13;s>>>=0;s^=s>>>
 const fee=(gross,bps)=>Math.floor(gross*bps/10000);
 const userModel=id=>({id,exists:false,balance:0,debt:0,res:new Map()});
 const reserved=u=>total([...u.res.values()].map(r=>r.max));
-const available=u=>Math.max(0,u.balance-reserved(u));
+const unreserved=u=>Math.max(0,u.balance-reserved(u));
+const available=u=>u.debt>0?0:unreserved(u);
 const mapPick=(m,rng)=>rng.pick([...m.values()]);
 const otherUser=(node,id,rng)=>rng.pick([...node.users.values()].filter(u=>u.id!==id))||node.users.get(id);
 function open(node){return new NodeAiLedger({databasePath:node.dbPath,nodeId:node.id,operatorId:node.operatorId,platformFeeBps:node.bps})}
@@ -35,7 +36,8 @@ function checkUser(node,u,ctx){
   assert.equal(w.balanceCents,u.balance,`${ctx}: balance`);
   assert.equal(w.debtCents,u.debt,`${ctx}: debt`);
   assert.equal(w.reservedCents,reserved(u),`${ctx}: reserved`);
-  assert.equal(w.availableCents,available(u),`${ctx}: available`);
+  assert.equal(w.unreservedCents,unreserved(u),`${ctx}: unreserved`);
+  assert.equal(w.availableCents,available(u),`${ctx}: spendable available`);
   assert.ok(w.balanceCents>=0&&w.debtCents>=0,`${ctx}: negative state`);
   assert.ok(w.reservedCents<=w.balanceCents,`${ctx}: unbacked reservation`);
   if(w.debtCents>0)assert.equal(w.availableCents,0,`${ctx}: debt with spendable credit`);
@@ -80,7 +82,7 @@ async function opAdjust(node,u,rng,state){
   }
   const amount=rng.int(1,5000),kind=rng.bool()?'topup.refunded':'payment.chargeback',id=`adj:${node.id}:${state.event++}`;
   if(!u.exists){await mustThrow(()=>node.ledger.debitAdjustment({userId:u.id,sourceId:id,amountCents:amount,eventType:kind,at:iso(state.now)}),'adjust no wallet');return 'reject-adjust-no-wallet'}
-  const recover=Math.min(available(u),amount),debt=amount-recover,result=node.ledger.debitAdjustment({userId:u.id,sourceId:id,amountCents:amount,eventType:kind,at:iso(state.now),metadata:{chaos:true}});
+  const recover=Math.min(unreserved(u),amount),debt=amount-recover,result=node.ledger.debitAdjustment({userId:u.id,sourceId:id,amountCents:amount,eventType:kind,at:iso(state.now),metadata:{chaos:true}});
   assert.equal(result.recoveredCents,recover);assert.equal(result.debtAddedCents,debt);u.balance-=recover;u.debt+=debt;node.sources.set(id,{id,userId:u.id});return `${kind} ${amount}`;
 }
 async function opReserve(node,u,rng,state){
