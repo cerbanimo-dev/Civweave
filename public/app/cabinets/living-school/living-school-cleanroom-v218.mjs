@@ -3,10 +3,12 @@ import{render}from'./living-school-cleanroom-render-v218.mjs?v=source-links-v260
 import{actions,generateCurriculumFromData,stripLegacyFallbackQuestions}from'../../living-school-cleanroom-actions-v243.mjs?v=quiz-integrity-v261';
 import{installLivingSchoolGenerationGuard}from'../../living-school-generation-guard-v262.mjs?v=source-prompt-quiz-delta-v262';
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=short-answer-rubric-v263';
+import{installLivingSchoolVideoGenerationGuardV1}from'../../living-school-video-generation-guard-v1.mjs?v=video-atlas-v1';
 import{ensureLivingSchool,renderLivingSchoolEmbed,FALLBACK_VIDEO_URL}from'../../video-learning-contract-v1.mjs?v=video-atlas-v1';
 
 await installLivingSchoolGenerationGuard();
 await installLivingSchoolQuizContractGuardV263();
+await installLivingSchoolVideoGenerationGuardV1();
 
 let busy=false,dispatchCount=0,videoContractBusy=false;
 const LEVELS=new Set(['beginner','intermediate','advanced']);
@@ -122,10 +124,8 @@ async function generateCurriculumFromChat(input={}){
 
 sanitizeSavedHybridQuiz();
 document.addEventListener('click',handleLivingSchoolClick,true);
-const videoObserver=new MutationObserver(()=>{renderLivingSchoolEmbed(document,state().school,state().activeModuleId);});
-videoObserver.observe(document.body,{childList:true,subtree:true});
-await applyVideoContract('startup');
+applyVideoContract('startup').catch(error=>console.warn('[Living School video contract]',error));
 render();
 queueMicrotask(()=>renderLivingSchoolEmbed(document,state().school,state().activeModuleId));
-globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'live-local-synthesis-source-links-v260',generationGuard:'source-prompt-v262+quiz-contract-v263+video-learning-contract-v1',quizIntegrity:'ai-only-v263-short-answer-contract',videoContract:'required-per-module',videoFallback:FALLBACK_VIDEO_URL,chatPathIntent:'new-vs-revise-v264',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,generateCurriculumFromChat,normalizeChatCurriculum:chatCurriculumData,legacyNavigation:false});
-try{dispatchEvent(new CustomEvent('civweave:living-school-workbench-ready',{detail:{version:VERSION,chatCurriculumBridge:true,generationGuard:'source-prompt-v262+quiz-contract-v263+video-learning-contract-v1',quizIntegrity:'ai-only-v263-short-answer-contract',videoContract:'required-per-module',videoFallback:FALLBACK_VIDEO_URL,chatPathIntent:'new-vs-revise-v264'}}))}catch{}
+globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'live-local-synthesis-source-links-v260',generationGuard:'source-prompt-v262+quiz-contract-v263+video-generation-guard-v1',quizIntegrity:'ai-only-v263-short-answer-contract',videoContract:'required-per-module',videoFallback:FALLBACK_VIDEO_URL,chatPathIntent:'new-vs-revise-v264',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,generateCurriculumFromChat,normalizeChatCurriculum:chatCurriculumData,legacyNavigation:false});
+try{dispatchEvent(new CustomEvent('civweave:living-school-workbench-ready',{detail:{version:VERSION,chatCurriculumBridge:true,generationGuard:'source-prompt-v262+quiz-contract-v263+video-generation-guard-v1',quizIntegrity:'ai-only-v263-short-answer-contract',videoContract:'required-per-module',videoFallback:FALLBACK_VIDEO_URL,chatPathIntent:'new-vs-revise-v264'}}))}catch{}
