@@ -38,20 +38,20 @@ const models=[
   {
     id:'qwen3.5-0.8b-q4f16',label:'Qwen 3.5 0.8B',tier:'Experimental',status:'runtime-preview',installable:false,
     provider:'huggingface',repo:'onnx-community/Qwen3.5-0.8B-ONNX',revision:'d85632356b5aec5ecf43ff506b282d6ece81611f',
-    task:'image-text-to-text',dtype:'q4f16',device:'webgpu',runtime:'transformers-js-v4-next',estimatedBytes:560_000_000,
-    license:'Apache-2.0',reason:'Public ONNX/WebGPU artifacts exist, but Qwen 3.5 currently needs the Transformers.js v4-next runtime. Held out of the stable downloader until that runtime is promoted.'
+    task:'image-text-to-text',dtype:'q4f16',device:'webgpu',runtime:'transformers-js-next',estimatedBytes:560_000_000,
+    license:'Apache-2.0',reason:'Public ONNX/WebGPU artifacts exist, but the current Qwen3.5 browser instructions still target @huggingface/transformers@next. Civweave keeps this behind the preview gate until its pinned runtime and offline artifact manifest are verified together.'
   },
   {
     id:'qwen3.5-2b-q4f16',label:'Qwen 3.5 2B',tier:'Experimental',status:'runtime-preview',installable:false,
     provider:'huggingface',repo:'onnx-community/Qwen3.5-2B-ONNX-OPT',revision:'main',
-    task:'image-text-to-text',dtype:'q4f16',device:'webgpu',runtime:'transformers-js-v4-next',estimatedBytes:1_400_000_000,
-    license:'Apache-2.0',reason:'Public browser ONNX builds exist, but this remains on the v4-next multimodal path rather than Civweave’s pinned stable runtime.'
+    task:'image-text-to-text',dtype:'q4f16',device:'webgpu',runtime:'transformers-js-next',estimatedBytes:1_400_000_000,
+    license:'Apache-2.0',reason:'Public browser ONNX builds exist, but the Qwen3.5 browser path is still documented against the Transformers.js @next channel. It remains preview-only until Civweave has a pinned, fully offline-tested multimodal manifest.'
   },
   {
     id:'gemma4-e2b-it-q4f16',label:'Gemma 4 E2B IT',tier:'Experimental',status:'runtime-preview',installable:false,
     provider:'huggingface',repo:'onnx-community/gemma-4-E2B-it-ONNX',revision:'main',
-    task:'any-to-any',dtype:'q4f16',device:'webgpu',runtime:'transformers-js-v4-next',estimatedBytes:2_000_000_000,
-    license:'Apache-2.0',reason:'A public Transformers.js ONNX conversion exists, but the multimodal graph/runtime path is intentionally isolated from the first stable text-only release.'
+    task:'any-to-any',dtype:'q4f16',device:'webgpu',runtime:'transformers-js-v4',estimatedBytes:2_000_000_000,
+    license:'Apache-2.0',reason:'The public Transformers.js conversion is compatible with the current package family, but Gemma 4 is a multimodal multi-graph package with external data chunks. Civweave holds it behind preview until every required q4f16 graph is pinned, measured, and device-tested.'
   }
 ].map(model=>Object.freeze({...model,artifacts:model.artifacts?.map(([path,minBytes,required])=>Object.freeze({path,minBytes,required}))||[]}));
 function byId(id){return models.find(model=>model.id===String(id||''))||null}
