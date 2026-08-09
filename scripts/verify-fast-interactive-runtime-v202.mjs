@@ -14,10 +14,9 @@ function contextFor(runtime){
     console,
     CivweaveModelRuntime:runtime,
     performance:{now:()=>{tick+=7;return tick}},
-    setInterval:()=>1,
-    clearInterval:()=>{},
     CustomEvent:class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}},
     dispatchEvent:event=>{events.push(event);return true},
+    addEventListener:()=>{},
   });
   return{context,events};
 }
@@ -35,35 +34,38 @@ const frozenRuntime=Object.freeze({
 const {context,events}=contextFor(frozenRuntime);
 vm.runInContext(source,context,{filename:'fast-interactive-runtime-v192.js'});
 
-assert.ok(context.CivweaveFastInteractiveV192,'the script must publish its runtime API');
-assert.equal(context.CivweaveFastInteractiveV192.status().installed,true,'the fast runtime must install against a frozen model API');
-assert.notEqual(context.CivweaveModelRuntime,frozenRuntime,'installation must replace the global reference with a proxy');
-assert.equal(Object.isFrozen(context.CivweaveModelRuntime),true,'the proxy must remain immutable');
+assert.ok(context.CivweaveFastInteractiveV192,'the script must publish its runtime spine API');
+assert.equal(context.CivweaveFastInteractiveV192.status().installed,true,'the runtime spine must install against a frozen model API');
+assert.notEqual(context.CivweaveModelRuntime,frozenRuntime,'installation must replace the global reference with a single immutable proxy');
+assert.equal(Object.isFrozen(context.CivweaveModelRuntime),true,'the runtime spine proxy must remain immutable');
 assert.equal(frozenRuntime.generate,originalGenerate,'the frozen source runtime must not be mutated');
-assert.equal(context.CivweaveModelRuntime.generate.__civweaveFastInteractiveV192,true,'the proxy generate method must be marked');
+assert.equal(context.CivweaveModelRuntime.__civweaveRuntimeSpineV269,true,'the proxy must advertise the v269 runtime spine');
+assert.deepEqual(context.CivweaveFastInteractiveV192.status().middleware,['fast-interactive'],'fast optimization must be registered as middleware.');
 
 const result=await context.CivweaveModelRuntime.generate({
   purpose:'civweave-guide-response-v141-merlin',
   config:{provider:'gemini',timeoutMs:60000,maxTokens:9000,stream:true},
   messages:[],
 });
-assert.equal(calls.length,1,'the original generator must be called exactly once');
+assert.equal(calls.length,1,'the base generator must be called exactly once');
 assert.equal(calls[0].config.timeoutMs,10000,'Gemini guide calls must retain the interactive timeout cap');
 assert.equal(calls[0].config.maxTokens,1800,'guide calls must retain the interactive token cap');
 assert.equal(calls[0].config.stream,false,'guide calls must remain non-streaming JSON calls');
 assert.equal(calls[0].responseFormat,'json','guide calls must request structured JSON');
 assert.equal(calls[0].maxRepairAttempts,0,'guide calls must avoid a second repair call');
-assert.match(result.latency.revision,/frozen-runtime-proxy/,'the result must record the proxy revision');
-assert.ok(events.some(event=>event.type==='civweave:fast-interactive-installed'),'the runtime must announce successful proxy installation');
+assert.match(result.latency.revision,/runtime-spine-v269/,'the result must record the spine revision');
+assert.equal(result.runtimeSpine.handledBy,'base-runtime');
+assert.ok(events.some(event=>event.type==='civweave:runtime-spine-ready'),'the runtime must announce successful spine installation');
 
 const waiting=contextFor(undefined).context;
 vm.runInContext(source,waiting,{filename:'fast-interactive-runtime-v192-waiting.js'});
 assert.ok(waiting.CivweaveFastInteractiveV192,'readiness must be published even before the model runtime arrives');
 assert.equal(waiting.CivweaveFastInteractiveV192.status().mode,'waiting','an absent model runtime must wait without throwing');
 
-assert.doesNotMatch(source,/runtime\.generate\s*=/,'the fast runtime must never mutate the frozen generate property');
-assert.match(critical,/(?:living-school-lesson-nav-v202|fellowfare-active-v203)-fast-runtime-proxy|fellowfare-active-v203-(?:cerbanimo-boundary-v204|parent-mobile-v205-cerbanimo-boundary-v204)(?:-memory-bridge-v205)?/,'critical boot revision must retain the frozen runtime proxy repair');
-assert.ok(critical.includes("'/app/fast-interactive-runtime-v192.js'"),'critical boot must refresh the corrected runtime');
+assert.doesNotMatch(source,/runtime\.generate\s*=/,'the runtime spine must never mutate the frozen generate property');
+assert.doesNotMatch(source,/setInterval\(/,'runtime installation must stay event-driven rather than polling.');
+assert.match(critical,/(?:living-school-lesson-nav-v202|fellowfare-active-v203)-fast-runtime-proxy|fellowfare-active-v203-(?:cerbanimo-boundary-v204|parent-mobile-v205-cerbanimo-boundary-v204)(?:-memory-bridge-v205)?/,'critical boot revision must retain the compatibility path');
+assert.ok(critical.includes("'/app/fast-interactive-runtime-v192.js'"),'critical boot must refresh the runtime spine compatibility path');
 assert.match(worker,/service-worker-critical-v199\.js\?v=(?:fast-runtime-proxy-v202|fellowfare-active-v203|fellowfare-parent-mobile-v205|memory-bridge-frozen-proxy-v205)/,'the registered worker must force an imported-script refresh');
 
 for(const forbidden of [
@@ -71,15 +73,16 @@ for(const forbidden of [
   'unified-ai-settings-v175.js',
   'civweave-model-profiles-v1',
   'civweave.universal-ai.v127',
-])assert.ok(!source.includes(forbidden),`fast runtime repair must not touch settings through ${forbidden}`);
+])assert.ok(!source.includes(forbidden),`runtime spine must not reach into settings through ${forbidden}`);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'fast-interactive-runtime-v202',
+  revision:'runtime-spine-v269',
   frozenRuntimeProxy:true,
+  singleRuntimeSpine:true,
   readinessBeforeInstall:true,
   guideOptimizationPreserved:true,
+  eventDrivenInstall:true,
   criticalRefresh:true,
-  combinedCriticalRevision:true,
   settingsBoundary:'untouched',
 },null,2));
