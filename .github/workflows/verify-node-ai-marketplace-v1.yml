@@ -6,6 +6,8 @@ on:
       - 'lib/node-ai-*.mjs'
       - 'lib/ai-wallet-*.mjs'
       - 'lib/ai-capability-token-v1.mjs'
+      - 'public/app/node-ai-mesh-v1.js'
+      - 'public/app/shared/civweave-node-ai-routing-v1.mjs'
       - 'scripts/test-node-ai-*.mjs'
       - '.env.ai-wallet.example'
       - 'config/node-ai-services.example.json'
@@ -33,11 +35,15 @@ jobs:
           node --check lib/node-ai-ledger-sqlite-v1.mjs
           node --check lib/node-ai-http-v1.mjs
           node --check lib/node-ai-inference-gate-v1.mjs
+          node --check lib/node-ai-inference-http-v1.mjs
+          node --check lib/node-ai-service-package-v1.mjs
           node --check lib/ai-capability-token-v1.mjs
           node --check lib/ai-wallet-service-v1.mjs
           node --check lib/ai-wallet-http-v1.mjs
+          node --check public/app/node-ai-mesh-v1.js
+          node --check public/app/shared/civweave-node-ai-routing-v1.mjs
       - name: Test node marketplace contracts
-        run: node --test scripts/test-node-ai-marketplace-v1.mjs scripts/test-node-ai-http-v1.mjs
+        run: node --test scripts/test-node-ai-marketplace-v1.mjs scripts/test-node-ai-http-v1.mjs scripts/test-node-ai-routing-v1.mjs scripts/test-node-ai-service-package-v1.mjs
       - name: Reject centralized wallet architecture
         run: |
           test ! -e lib/ai-wallet-postgres-v1.mjs
