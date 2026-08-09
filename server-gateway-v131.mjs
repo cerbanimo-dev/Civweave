@@ -8,8 +8,8 @@ const runtimePath = path.join(rootDir, '.civweave-gateway-v132.loader.mjs');
 const VERSION = '1.0.51-render-installed-runtime-v132';
 const before = "if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall) {";
 const after = "if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall && pathname !== '/app' && !pathname.startsWith('/app/')) {";
-const advertisedProxy = "features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising','hosted-ai-wallet-foundation']";
-const deviceFirstFeatures = "features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','release-advertising','hosted-ai-wallet-foundation']";
+const advertisedProxy = "features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising','node-ai-marketplace-v1']";
+const deviceFirstFeatures = "features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','release-advertising','node-ai-marketplace-v1']";
 
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 if (!source.includes(before)) {
