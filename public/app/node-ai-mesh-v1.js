@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-node-ai-mesh-v1';
+const VERSION='1.0.1-node-ai-mesh-v1';
 const SERVICE_KIND='civweave.node-ai.service-advert.v1';
 const SETTLEMENT_KIND='civweave.node-ai.settlement-batch.v1';
 const SETTLEMENT_BATCH_SCHEMA='civweave.node-ai-mesh-settlement-batch.v1';
@@ -75,8 +75,9 @@ async function listSettlementObjects(){
 }
 async function discover(options={}){
   const routing=await router();
-  const candidates=routing.extractNodeAiCandidates(await listServiceObjects(),options);
-  return {candidates,objects:await listServiceObjects()};
+  const objects=await listServiceObjects();
+  const candidates=routing.extractNodeAiCandidates(objects,options);
+  return {candidates,objects};
 }
 async function route(request={}){
   const routing=await router();
@@ -84,6 +85,45 @@ async function route(request={}){
   let localNodeId=request.localNodeId||null;
   if(!localNodeId)try{localNodeId=await (await ensureMesh()).deviceId()}catch{}
   return routing.routeNodeAiService({...request,candidates,localNodeId});
+}
+function resolveBaseUrl(selection,explicitBaseUrl=null){
+  const value=clean(explicitBaseUrl,4000)||clean(selection?.endpoints?.baseUrls?.[0],4000);
+  if(!value)throw new Error('Selected node does not advertise a reachable HTTP endpoint.');
+  const url=new URL(value,location.href);
+  if(!['http:','https:'].includes(url.protocol))throw new Error('Selected node endpoint must use HTTP or HTTPS.');
+  return url;
+}
+async function requestCapability({selection,sessionToken,deviceId,maxRetailCostCents,ttlSeconds=900,baseUrl=null}={}){
+  if(!selection?.nodeId||!selection?.serviceId)throw new TypeError('A selected node AI service is required.');
+  const token=clean(sessionToken,16000);if(!token)throw new TypeError('sessionToken is required.');
+  const device=clean(deviceId,180);if(!device)throw new TypeError('deviceId is required.');
+  if(!Number.isSafeInteger(maxRetailCostCents)||maxRetailCostCents<1)throw new TypeError('maxRetailCostCents must be a positive integer.');
+  const base=resolveBaseUrl(selection,baseUrl);
+  const path=clean(selection.endpoints?.capabilityPath,500)||'/api/ai/node/wallet/capability';
+  const response=await fetch(new URL(path,base),{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${token}`},body:JSON.stringify({deviceId:device,serviceIds:[selection.serviceId],maxRetailCostCents,ttlSeconds})});
+  const body=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(clean(body?.error,1000)||`Node capability request returned ${response.status}.`);
+  if(!body?.capability)throw new Error('Node capability endpoint did not return a capability.');
+  return{capability:body.capability,expiresInSeconds:body.expiresInSeconds||null,nodeId:selection.nodeId,serviceId:selection.serviceId,baseUrl:base.origin};
+}
+async function invoke({selection,capability,deviceId,request,requestId=null,baseUrl=null}={}){
+  if(!selection?.nodeId||!selection?.serviceId)throw new TypeError('A selected node AI service is required.');
+  const token=clean(capability,16000);if(!token)throw new TypeError('capability is required.');
+  const device=clean(deviceId,180);if(!device)throw new TypeError('deviceId is required.');
+  const base=resolveBaseUrl(selection,baseUrl);
+  const path=clean(selection.endpoints?.inferencePath,500)||'/api/ai/node/inference';
+  const response=await fetch(new URL(path,base),{method:'POST',headers:{'content-type':'application/json','x-civweave-ai-capability':token},body:JSON.stringify({serviceId:selection.serviceId,deviceId:device,requestId:clean(requestId,180)||undefined,request:clone(request)})});
+  const body=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(clean(body?.error,1000)||`Node inference returned ${response.status}.`);
+  dispatchEvent(new CustomEvent('civweave:node-ai-inference-complete',{detail:{nodeId:selection.nodeId,serviceId:selection.serviceId,retailCostCents:body.retailCostCents,at:now()}}));
+  return body;
+}
+async function routeAndInvoke({routing={},sessionToken,deviceId,maxRetailCostCents,request,requestId=null,baseUrl=null}={}){
+  const result=await route({...routing,maxRetailCostCents,requireHttpReachability:true});
+  if(!result.selected)throw new Error('No discovered node AI service satisfies this request.');
+  const authorization=await requestCapability({selection:result.selected,sessionToken,deviceId,maxRetailCostCents,baseUrl});
+  const response=await invoke({selection:result.selected,capability:authorization.capability,deviceId,request,requestId,baseUrl});
+  return{routing:result,authorization,response};
 }
 async function sync(baseUrl=gatewayUrl||location.origin){
   if(navigator.onLine===false)return{sent:0,received:0,offline:true};
@@ -112,7 +152,7 @@ async function start({baseUrl=location.origin,syncIntervalMs=DEFAULT_SYNC_MS,adv
 function stop(){if(syncTimer){clearInterval(syncTimer);syncTimer=null}if(onlineHandler){removeEventListener('online',onlineHandler);onlineHandler=null}if(meshUnsubscribe){try{meshUnsubscribe()}catch{}meshUnsubscribe=null}return true}
 function status(){return{version:VERSION,started:Boolean(syncTimer),baseUrl:gatewayUrl||null,serviceKind:SERVICE_KIND,settlementKind:SETTLEMENT_KIND,syncIntervalMs:DEFAULT_SYNC_MS}}
 
-const api=Object.freeze({version:VERSION,SERVICE_KIND,SETTLEMENT_KIND,SETTLEMENT_BATCH_SCHEMA,ensureMesh,publishManifest,publishManifestFromNode,publishSettlementBatch,listServiceObjects,listSettlementObjects,discover,route,sync,start,stop,status});
+const api=Object.freeze({version:VERSION,SERVICE_KIND,SETTLEMENT_KIND,SETTLEMENT_BATCH_SCHEMA,ensureMesh,publishManifest,publishManifestFromNode,publishSettlementBatch,listServiceObjects,listSettlementObjects,discover,route,resolveBaseUrl,requestCapability,invoke,routeAndInvoke,sync,start,stop,status});
 globalThis.CivweaveNodeAIMeshV1=api;
 dispatchEvent(new CustomEvent('civweave:node-ai-mesh-ready',{detail:status()}));
 })();
