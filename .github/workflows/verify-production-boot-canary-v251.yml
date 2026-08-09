@@ -16,6 +16,7 @@ on:
       - 'scripts/setup-cloudflare-node.mjs'
       - 'scripts/verify-cloudflare-production-origin-v251.mjs'
       - 'scripts/verify-production-boot-canary-v251.mjs'
+      - 'scripts/test-production-version-policy-v251.mjs'
       - '.github/workflows/verify-production-boot-canary-v251.yml'
   workflow_dispatch:
 
@@ -42,6 +43,9 @@ jobs:
           node --check scripts/setup-cloudflare-node.mjs
           node --check scripts/verify-cloudflare-production-origin-v251.mjs
           node --check scripts/verify-production-boot-canary-v251.mjs
+          node --check scripts/test-production-version-policy-v251.mjs
+      - name: Verify production version policy
+        run: node --test scripts/test-production-version-policy-v251.mjs
       - name: Verify stable Cloudflare production origin
         run: node scripts/verify-cloudflare-production-origin-v251.mjs
       - name: Resolve expected production release
@@ -54,18 +58,22 @@ jobs:
             version="$(git show "origin/${GITHUB_BASE_REF}:VERSION" | tr -d '[:space:]')"
             attempts=2
             delay=5000
+            allow_newer=true
           else
             version="$(tr -d '[:space:]' < VERSION)"
             attempts=36
             delay=15000
+            allow_newer=false
           fi
           test -n "$version"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "attempts=$attempts" >> "$GITHUB_OUTPUT"
           echo "delay=$delay" >> "$GITHUB_OUTPUT"
+          echo "allow_newer=$allow_newer" >> "$GITHUB_OUTPUT"
       - name: Verify deployed manifest, updater, and worker bytes
         env:
           CIVWEAVE_EXPECTED_VERSION: ${{ steps.expected.outputs.version }}
+          CIVWEAVE_ALLOW_NEWER_VERSION: ${{ steps.expected.outputs.allow_newer }}
           CIVWEAVE_PRODUCTION_URLS: https://commonweave.pages.dev,https://commonweave-host-node-9l1u.onrender.com
           CIVWEAVE_PROBE_ATTEMPTS: ${{ steps.expected.outputs.attempts }}
           CIVWEAVE_PROBE_DELAY_MS: ${{ steps.expected.outputs.delay }}
