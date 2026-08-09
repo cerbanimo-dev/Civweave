@@ -2,7 +2,8 @@
 """Enrich an already-built Civweave Video Learning Atlas with current YouTube API metadata.
 
 The API key is read only from YOUTUBE_API_KEY / GOOGLE_API_KEY. It is never written to
-output. Current YouTube API metadata is kept in a separate expiring gzip sidecar.
+output. Current YouTube API metadata is kept in a separate expiring gzip sidecar, with
+a small browser availability index used to exclude unavailable/non-embeddable videos.
 """
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ ROOT = Path(os.environ.get(
 LOOKUP = ROOT / "lookup.json"
 CATALOG = ROOT / "catalog.json"
 SIDECAR = ROOT / "youtube-metadata-current.json.gz"
+AVAILABILITY = ROOT / "youtube-availability-current.json"
 KEY = (os.environ.get("YOUTUBE_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
 USER_AGENT = "Civweave-Video-Atlas-Enricher/1.0 (+https://github.com/cerbanimo-dev/Civweave)"
 
@@ -128,6 +130,30 @@ def main():
     compressed = gzip.compress(raw, compresslevel=9, mtime=0)
     SIDECAR.write_bytes(compressed)
 
+    eligible = sorted(
+        video_id for video_id, row in records.items()
+        if bool(row.get("embeddable")) and str(row.get("privacy_status") or "").lower() == "public"
+    )
+    eligible_set = set(eligible)
+    ineligible = sorted(video_id for video_id in ids if video_id not in eligible_set)
+    availability_payload = {
+        "schema": "civweave.youtube-availability-index.v1",
+        "status": "current",
+        "built_at": iso(built_at),
+        "expires_at": iso(expires_at),
+        "refresh_required_days": 30,
+        "source_sidecar_file": SIDECAR.name,
+        "source_sidecar_sha256": sha256(compressed),
+        "catalog_video_ids": len(ids),
+        "returned_video_ids": len(records),
+        "eligible_count": len(eligible),
+        "ineligible_count": len(ineligible),
+        "eligible_video_ids": eligible,
+        "ineligible_video_ids": ineligible,
+    }
+    availability_raw = (json.dumps(availability_payload, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
+    AVAILABILITY.write_bytes(availability_raw)
+
     sidecar_meta = {
         "file": SIDECAR.name,
         "bytes": len(compressed),
@@ -150,6 +176,15 @@ def main():
         "built_at": iso(built_at),
     }
     catalog["youtube_metadata_sidecar"] = sidecar_meta
+    catalog["youtube_availability_index"] = {
+        "file": AVAILABILITY.name,
+        "bytes": len(availability_raw),
+        "sha256": sha256(availability_raw),
+        "eligible_video_ids": len(eligible),
+        "ineligible_video_ids": len(ineligible),
+        "built_at": iso(built_at),
+        "expires_at": iso(expires_at),
+    }
     CATALOG.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     sums = []
@@ -163,9 +198,12 @@ def main():
         "requested_video_ids": len(ids),
         "returned_video_ids": len(records),
         "missing_or_unavailable_video_ids": len(ids) - len(records),
+        "eligible_video_ids": len(eligible),
+        "ineligible_video_ids": len(ineligible),
         "requested_batches": requested_batches,
         "sidecar_bytes": len(compressed),
         "sidecar_sha256": sidecar_meta["sha256"],
+        "availability_bytes": len(availability_raw),
         "expires_at": sidecar_meta["expires_at"],
     }, indent=2))
 
