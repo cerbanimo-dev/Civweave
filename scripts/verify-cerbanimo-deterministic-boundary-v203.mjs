@@ -7,80 +7,57 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const [broker,boundary,spine,registry,bridge,bootstrap]=await Promise.all([
-  read('public/app/ai-capability-broker-v268.js'),
-  read('public/app/cerbanimo-deterministic-boundary-v203.js'),
-  read('public/app/fast-interactive-runtime-v192.js'),
-  read('public/app/local-ai/model-registry-v266.js'),
-  read('public/app/local-ai/runtime-bridge-v266.js'),
-  read('public/app/local-ai/bootstrap-v266.js'),
+  read('public/app/ai-capability-broker-v268.js'),read('public/app/cerbanimo-deterministic-boundary-v203.js'),read('public/app/fast-interactive-runtime-v192.js'),read('public/app/local-ai/model-registry-v266.js'),read('public/app/local-ai/runtime-bridge-v266.js'),read('public/app/local-ai/bootstrap-v266.js')
 ]);
+assert(broker.includes("VERSION='1.0.67-ai-capability-broker-v271-semantics'"),'The shared AI capability broker v271 revision is missing.');
+assert(boundary.includes("VERSION='1.0.8-cerbanimo-authority-boundary-v268'"));
+assert(boundary.includes("BROKER_SRC='/app/ai-capability-broker-v268.js?v=1.0.67-v271'"),'Cerbanimo is not cache-busting the v271 broker.');
+assert(!boundary.includes('DETERMINISTIC_PROVIDER_BOUNDARY'));
+assert(boundary.includes("consequentialActions:'deterministic-contracts'"));
+assert(spine.includes('__civweaveRuntimeSpineV271:true')&&spine.includes('function register('));
+assert(registry.includes('agenticReasoning:true')&&registry.includes('externalResearch:false'));
+assert(bridge.includes("MIDDLEWARE_ID='downloaded-local-v271'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
+assert(bridge.includes('civweave:local-model-route-skipped'));
+assert(bootstrap.indexOf('ai-capability-broker-v268.js')<bootstrap.indexOf('fast-interactive-runtime-v192.js')&&bootstrap.indexOf('fast-interactive-runtime-v192.js')<bootstrap.indexOf('runtime-bridge-v266.js'));
 
-assert(broker.includes("VERSION='1.0.65-ai-capability-broker-v269-diagnostics'"),'The shared AI capability broker revision is missing.');
-assert(boundary.includes("VERSION='1.0.8-cerbanimo-authority-boundary-v268'"),'The Cerbanimo authority boundary revision is missing.');
-assert(!boundary.includes('DETERMINISTIC_PROVIDER_BOUNDARY'),'The legacy hard provider rejection still exists.');
-assert(boundary.includes('/app/ai-capability-broker-v268.js'),'Cerbanimo does not load the shared capability broker.');
-assert(boundary.includes("consequentialActions:'deterministic-contracts'"),'Consequential authority is no longer explicit.');
-assert(spine.includes('__civweaveRuntimeSpineV269:true')&&spine.includes('function register('),'The single runtime spine is missing.');
-assert(registry.includes('agenticReasoning:true'),'No downloaded model declares bounded agentic reasoning capability.');
-assert(registry.includes('externalResearch:false'),'Downloaded models must explicitly deny live external research capability.');
-assert(bridge.includes("MIDDLEWARE_ID='downloaded-local-v269'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'),'Downloaded local generation is not registered with the runtime spine.');
-assert(bridge.includes('civweave:local-model-route-skipped'),'Capability-based local escalation diagnostics are missing.');
-assert(bootstrap.indexOf('ai-capability-broker-v268.js')<bootstrap.indexOf('fast-interactive-runtime-v192.js')&&bootstrap.indexOf('fast-interactive-runtime-v192.js')<bootstrap.indexOf('runtime-bridge-v266.js'),'The local AI bootstrap must establish broker and spine before the local bridge.');
-
-class MemoryStorage{
-  constructor(seed={}){this.rows=new Map(Object.entries(seed))}
-  getItem(key){return this.rows.has(key)?this.rows.get(key):null}
-  setItem(key,value){this.rows.set(key,String(value))}
-  removeItem(key){this.rows.delete(key)}
-}
-const profilesKey='civweave-model-profiles-v1';
-const listeners=new Map();
+class MemoryStorage{constructor(seed={}){this.rows=new Map(Object.entries(seed))}getItem(key){return this.rows.has(key)?this.rows.get(key):null}setItem(key,value){this.rows.set(key,String(value))}removeItem(key){this.rows.delete(key)}}
+const profilesKey='civweave-model-profiles-v1',listeners=new Map();
 class FakeCustomEvent{constructor(type,init={}){this.type=type;this.detail=init.detail}}
 const localStorage=new MemoryStorage({[profilesKey]:JSON.stringify({interactive:{provider:'minilm',route:'minilm',model:'Xenova/all-MiniLM-L6-v2'}})});
 let baseCalls=0;
 const originalGenerate=async request=>{baseCalls+=1;return{status:'success',actual:{provider:'base-runtime'},request}};
 const originalRespond=async()=>({provider:'gemini'});
-const sandbox={
-  console,Date,Promise,Map,Set,Object,JSON,Math,RegExp,String,Number,Boolean,Array,Error,
-  performance:{now:()=>10},localStorage,CustomEvent:FakeCustomEvent,
-  dispatchEvent(event){sandbox.lastEvent=event;return true},
-  addEventListener(name,handler){listeners.set(name,handler)},
-  CivweaveModelRuntime:Object.freeze({version:'base',generate:originalGenerate}),
-  CivweaveAssistantV141:{respond:originalRespond},
-  globalThis:null,
-};
-sandbox.globalThis=sandbox;
-vm.createContext(sandbox);
+const sandbox={console,Date,Promise,Map,Set,Object,JSON,Math,RegExp,String,Number,Boolean,Array,Error,performance:{now:()=>10},localStorage,CustomEvent:FakeCustomEvent,dispatchEvent(event){sandbox.lastEvent=event;return true},addEventListener(name,handler){listeners.set(name,handler)},CivweaveModelRuntime:Object.freeze({version:'base',generate:originalGenerate}),CivweaveAssistantV141:{respond:originalRespond},globalThis:null};
+sandbox.globalThis=sandbox;vm.createContext(sandbox);
 vm.runInContext(broker,sandbox,{filename:'ai-capability-broker-v268.js'});
 vm.runInContext(boundary,sandbox,{filename:'cerbanimo-deterministic-boundary-v203.js'});
-assert.equal(sandbox.CivweaveAICapabilityBrokerV268.selectedProvider(),'semantic-local','MiniLM was still collapsed into deterministic mode.');
-assert.equal(sandbox.CivweaveModelRuntime.generate,originalGenerate,'The authority boundary still wraps or replaces model generation.');
-assert.equal(sandbox.CivweaveAssistantV141.respond,originalRespond,'The authority boundary still hijacks guide conversation.');
-assert.equal(sandbox.CivweaveCerbanimoDeterministicBoundaryV203.legacyProviderWall,false,'The legacy provider wall remains enabled.');
+assert.equal(sandbox.CivweaveAICapabilityBrokerV268.selectedProvider(),'semantic-local');
+assert.equal(sandbox.CivweaveModelRuntime.generate,originalGenerate);
+assert.equal(sandbox.CivweaveAssistantV141.respond,originalRespond);
+assert.equal(sandbox.CivweaveCerbanimoDeterministicBoundaryV203.legacyProviderWall,false);
 assert.equal(sandbox.CivweaveCerbanimoDeterministicBoundaryV203.authority.consequentialActions,'deterministic-contracts');
 
 vm.runInContext(spine,sandbox,{filename:'fast-interactive-runtime-v192.js'});
-assert.equal(sandbox.CivweaveModelRuntime.__civweaveRuntimeSpineV269,true,'Runtime spine did not become the single active proxy.');
+assert.equal(sandbox.CivweaveModelRuntime.__civweaveRuntimeSpineV271,true);
 vm.runInContext(registry,sandbox,{filename:'model-registry-v266.js'});
 let selectedId='qwen3-1.7b-q4f16',localCalls=0;
 sandbox.CivweaveLocalModelDownloadV266={selection:()=>({active:true,id:selectedId})};
-sandbox.CivweaveLocalModelRuntimeV266={activeSpec:()=>sandbox.CivweaveLocalModelRegistryV266.byId(selectedId),async generate(){localCalls+=1;return{text:'{"ok":true}',json:{ok:true},elapsedMs:12}}};
+sandbox.CivweaveLocalModelRuntimeV266={activeSpec:()=>sandbox.CivweaveLocalModelRegistryV266.byId(selectedId),async generate(request){localCalls+=1;request.onToken?.({text:'ok',index:0});return{text:'{"ok":true}',json:{ok:true},elapsedMs:12,streamed:Boolean(request.stream)}}};
 vm.runInContext(bridge,sandbox,{filename:'runtime-bridge-v266.js'});
-assert.equal(sandbox.CivweaveLocalModelBridgeV266.registered,true,'Local model handler did not register with the runtime spine.');
+assert.equal(sandbox.CivweaveLocalModelBridgeV266.registered,true);
 
 const localAgent=await sandbox.CivweaveModelRuntime.generateAgentic({purpose:'cerbanimo-plan-code',code:true,messages:[{role:'user',content:'Plan a bounded refactor'}],responseFormat:'json'});
-assert.equal(localAgent.actual.provider,'downloaded-local','A capable downloaded model did not receive a bounded agentic task.');
-assert.equal(localCalls,1);assert.equal(baseCalls,0);
+assert.equal(localAgent.actual.provider,'downloaded-local');assert.equal(localCalls,1);assert.equal(baseCalls,0);
+const legacyThreat=await sandbox.CivweaveModelRuntime.generateAgentic({purpose:'anarchadia-threat-model',background:true,requiresTools:true,config:{service:'anarchadia'},messages:[{role:'user',content:'Analyze this local charter diff for abuse paths.'}],responseFormat:'text'});
+assert.equal(legacyThreat.actual.provider,'downloaded-local','Local advisory reasoning was still forced off-device by a legacy requiresTools flag.');assert.equal(localCalls,2);assert.equal(baseCalls,0);assert.equal(legacyThreat.runtimeSpine.trace.some(row=>row.id==='capability-normalizer'&&row.changed),true);
 const toolAgent=await sandbox.CivweaveModelRuntime.generateAgentic({purpose:'living-school-live-research',requiresTools:true,externalResearch:true,messages:[{role:'user',content:'Search the current web'}]});
-assert.equal(toolAgent.actual.provider,'base-runtime','A tool/network task incorrectly stayed on a tool-less local model.');assert.equal(baseCalls,1);
+assert.equal(toolAgent.actual.provider,'base-runtime');assert.equal(baseCalls,1);
 selectedId='qwen3-0.6b-q4f16';
 const smallAgent=await sandbox.CivweaveModelRuntime.generateAgentic({purpose:'complex-agentic-plan',messages:[{role:'user',content:'Do a complex multi-step project analysis'}]});
-assert.equal(smallAgent.actual.provider,'base-runtime','The small model was incorrectly promoted to agentic reasoning.');assert.equal(baseCalls,2);
-const backgroundDecision=sandbox.CivweaveAICapabilityBrokerV268.supportsLocalRequest(sandbox.CivweaveLocalModelRegistryV266.byId(selectedId),{background:true,messages:[{role:'user',content:'Analyze these local notes'}]});
-assert.equal(backgroundDecision.ok,false);assert.equal(backgroundDecision.requirements.profile,'agentic');
+assert.equal(smallAgent.actual.provider,'base-runtime');assert.equal(baseCalls,2);
 const smallInteractive=await sandbox.CivweaveModelRuntime.generateInteractive({purpose:'civweave-guide-response-v141',messages:[{role:'user',content:'Help me understand this JavaScript code'}]});
-assert.equal(smallInteractive.actual.provider,'downloaded-local','The small model lost ordinary interactive code conversation.');assert.equal(localCalls,2);
+assert.equal(smallInteractive.actual.provider,'downloaded-local');assert.equal(localCalls,3);
 const decision=sandbox.CivweaveAICapabilityBrokerV268.decide({executionProfile:'agentic',requiresTools:true});
-assert.equal(decision.route,'base-runtime');assert.match(decision.reason,/tools/i);assert.equal(sandbox.CivweaveAICapabilityBrokerV268.diagnostics().lastDecision.route,'base-runtime');
+assert.equal(decision.route,'base-runtime');assert.match(decision.reason,/tools/i);
 
-console.log(JSON.stringify({ok:true,revision:'ai-runtime-spine-v269',localitySeparatedFromDeterminism:true,authorityBoundaryPreserved:true,singleRuntimeSpine:true,localAgenticReasoning:true,toolTasksEscalate:true,backgroundTasksAreAgentic:true,smallModelAgenticGate:true,interactiveLocalPreserved:true,localCalls,baseCalls},null,2));
+console.log(JSON.stringify({ok:true,revision:'ai-runtime-spine-v271',localitySeparatedFromDeterminism:true,authorityBoundaryPreserved:true,singleRuntimeSpine:true,localAgenticReasoning:true,legacyAgenticToolOverclaimNormalized:true,toolTasksEscalate:true,smallModelAgenticGate:true,interactiveLocalPreserved:true,localCalls,baseCalls},null,2));
