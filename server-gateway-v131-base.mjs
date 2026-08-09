@@ -9,7 +9,7 @@ const VERSION = '1.0.51';
 const BUILD = '1.0.51-install-only-fullscreen-family-gateway';
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 function replaceRequired(before, after, label) { if (!source.includes(before)) throw new Error(`Civweave gateway patch could not find ${label}`); source = source.replace(before, after); }
-replaceRequired("import { fileURLToPath } from 'node:url';","import { fileURLToPath } from 'node:url';\nimport { AiWalletService } from './lib/ai-wallet-service-v1.mjs';\nimport { createAiWalletHttpHandler } from './lib/ai-wallet-http-v1.mjs';",'hosted AI wallet imports');
+replaceRequired("import { fileURLToPath } from 'node:url';","import { fileURLToPath } from 'node:url';\nimport { AiWalletService } from './lib/ai-wallet-service-v1.mjs';\nimport { createAiWalletHttpHandler } from './lib/ai-wallet-http-v1.mjs';",'node AI marketplace imports');
 replaceRequired("const BUILD_VERSION = '1.0.21-ai-uplift';",`const BUILD_VERSION = '${BUILD}';`,'host build marker');
 replaceRequired("const APP_VERSION = 'rc22.3.20-ai-checkpoint';",`const APP_VERSION = '${VERSION}';`,'app version marker');
 replaceRequired("const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://civweave-host-node.onrender.com';","const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://civweave-host-node.onrender.com';\nconst CIVWEAVE_SOURCE_URL = process.env.CIVWEAVE_SOURCE_URL || 'https://github.com/cerbanimo-dev/Civweave';\nconst CIVWEAVE_RELEASE_URL = process.env.CIVWEAVE_RELEASE_URL || 'https://github.com/cerbanimo-dev/Civweave/archive/refs/heads/main.zip';",'gateway release URLs');
@@ -19,23 +19,22 @@ replaceRequired("} catch (error) {\n  if (error.code !== 'ENOENT') console.warn(
   if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);
 }
 
-const AI_WALLET_REQUESTED = process.env.AI_WALLET_ENABLED === '1';
-const AI_WALLET_CAPABILITY_SECRET = String(process.env.AI_WALLET_CAPABILITY_SECRET || '').trim();
-const AI_WALLET_AUTH_SECRET = String(process.env.AI_WALLET_AUTH_SECRET || '').trim();
-const AI_WALLET_PAYMENT_SECRET = String(process.env.AI_WALLET_PAYMENT_SECRET || '').trim();
-const AI_WALLET_INTERNAL_SECRET = String(process.env.AI_WALLET_INTERNAL_SECRET || '').trim();
+const AI_WALLET_REQUESTED = process.env.NODE_AI_MARKETPLACE_ENABLED === '1' || process.env.AI_WALLET_ENABLED === '1';
+const AI_WALLET_CAPABILITY_SECRET = String(process.env.NODE_AI_CAPABILITY_SECRET || process.env.AI_WALLET_CAPABILITY_SECRET || '').trim();
+const AI_WALLET_AUTH_SECRET = String(process.env.NODE_AI_AUTH_SECRET || process.env.AI_WALLET_AUTH_SECRET || '').trim();
+const AI_WALLET_PAYMENT_SECRET = String(process.env.NODE_AI_PAYMENT_WEBHOOK_SECRET || process.env.AI_WALLET_PAYMENT_SECRET || '').trim();
+const AI_WALLET_INTERNAL_SECRET = String(process.env.NODE_AI_INTERNAL_SECRET || process.env.AI_WALLET_INTERNAL_SECRET || '').trim();
 let aiWalletService = null;
 if (AI_WALLET_REQUESTED) {
   try {
     aiWalletService = await new AiWalletService({
-      filePath: path.join(DATA_DIR, 'ai-wallet-ledger-v1.json'),
-      capabilitySecret: AI_WALLET_CAPABILITY_SECRET,
-      storage: process.env.AI_WALLET_STORAGE,
-      databaseUrl: process.env.AI_WALLET_DATABASE_URL || process.env.DATABASE_URL || '',
-      queryTimeoutMs: Number(process.env.AI_WALLET_QUERY_TIMEOUT_MS || 10000)
+      databasePath: process.env.NODE_AI_LEDGER_PATH || path.join(DATA_DIR, 'node-ai-ledger-v1.sqlite'),
+      nodeId: process.env.NODE_AI_NODE_ID,
+      operatorId: process.env.NODE_AI_OPERATOR_ID,
+      platformFeeBps: process.env.NODE_AI_PLATFORM_FEE_BPS
     }).load();
   } catch (error) {
-    console.error('[Civweave] Hosted AI wallet stayed disabled:', error.message);
+    console.error('[Civweave] Node AI marketplace stayed disabled:', error.message);
   }
 }
 const aiWalletHttp = createAiWalletHttpHandler({
@@ -45,7 +44,7 @@ const aiWalletHttp = createAiWalletHttpHandler({
   paymentSecret: AI_WALLET_PAYMENT_SECRET,
   internalSecret: AI_WALLET_INTERNAL_SECRET,
   capabilitySecret: AI_WALLET_CAPABILITY_SECRET
-});`,'host state restore and AI wallet setup');
+});`,'host state restore and node AI marketplace setup');
 replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.raw`  const pathname = decodeURIComponent(url.pathname);
   const gatewayRequest = req.method === 'GET' || req.method === 'HEAD';
   const packageInstall = Boolean(String(req.headers['x-civweave-package'] || '').trim());
@@ -99,11 +98,11 @@ replaceRequired("  const pathname = decodeURIComponent(url.pathname);",String.ra
   if (gatewayRequest && !knowledgeSchoolDownload && (pathname === '/field/civweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) { res.writeHead(302,{location:CIVWEAVE_RELEASE_URL,'cache-control':'no-store'}); return res.end(); }
   if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall) { return json(res,410,{error:'Installed runtime required',localInstallRequired:true,installUrl:requestOrigin(req,url)+'/',sourceUrl:CIVWEAVE_SOURCE_URL,releaseUrl:CIVWEAVE_RELEASE_URL,message:'This public origin distributes the complete device package but does not run the Civweave software family in browser mode.'}); }
   if (pathname === '/api/boot-log' || pathname === '/api/boot-logs') { res.writeHead(204,{'cache-control':'no-store'}); return res.end(); }`,'request pathname declaration');
-replaceRequired("        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-civweave-hub-token', 'access-control-allow-methods': 'GET,POST,OPTIONS' });","        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-civweave-hub-token, x-civweave-ai-capability, x-civweave-internal-secret, x-civweave-payment-signature', 'access-control-allow-methods': 'GET,POST,OPTIONS' });",'AI wallet CORS headers');
-replaceRequired("      res.setHeader('access-control-allow-origin', '*');\n      if (!authorized(req)","      res.setHeader('access-control-allow-origin', '*');\n      if (await aiWalletHttp.handle(req, res, url)) return;\n      if (!authorized(req)",'AI wallet route boundary');
-replaceRequired("appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Civweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/civweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download']","appUrl: null, installUrl: `${requestOrigin(req, url)}/`, sourceUrl: CIVWEAVE_SOURCE_URL, downloadUrl: CIVWEAVE_RELEASE_URL, seedUrl: null, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising','hosted-ai-wallet-foundation'], aiWallet: aiWalletHttp.status()",'public config hosting fields');
-replaceRequired("persistence: STATE_FILE });","persistence: STATE_FILE, aiWallet: aiWalletHttp.status() });",'health AI wallet status');
+replaceRequired("        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-civweave-hub-token', 'access-control-allow-methods': 'GET,POST,OPTIONS' });","        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-civweave-hub-token, x-civweave-ai-capability, x-civweave-internal-secret, x-civweave-payment-signature', 'access-control-allow-methods': 'GET,POST,OPTIONS' });",'node AI marketplace CORS headers');
+replaceRequired("      res.setHeader('access-control-allow-origin', '*');\n      if (!authorized(req)","      res.setHeader('access-control-allow-origin', '*');\n      if (await aiWalletHttp.handle(req, res, url)) return;\n      if (!authorized(req)",'node AI marketplace route boundary');
+replaceRequired("appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Civweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/civweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download']","appUrl: null, installUrl: `${requestOrigin(req, url)}/`, sourceUrl: CIVWEAVE_SOURCE_URL, downloadUrl: CIVWEAVE_RELEASE_URL, seedUrl: null, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','gemini-agent-proxy','release-advertising','node-ai-marketplace-v1'], aiWallet: aiWalletHttp.status()",'public config hosting fields');
+replaceRequired("persistence: STATE_FILE });","persistence: STATE_FILE, aiWallet: aiWalletHttp.status() });",'health node AI marketplace status');
 replaceRequired("    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/civweave-icon-32.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }","    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/civweave-icon-192.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }",'favicon route');
-replaceRequired("  try { await fsp.writeFile(STATE_FILE, JSON.stringify(state, null, 2)); } catch {}\n  process.exit(0);","  try { await fsp.writeFile(STATE_FILE, JSON.stringify(state, null, 2)); } catch {}\n  try { await aiWalletService?.flush?.(); } catch {}\n  process.exit(0);",'AI wallet shutdown flush');
+replaceRequired("  try { await fsp.writeFile(STATE_FILE, JSON.stringify(state, null, 2)); } catch {}\n  process.exit(0);","  try { await fsp.writeFile(STATE_FILE, JSON.stringify(state, null, 2)); } catch {}\n  try { await aiWalletService?.flush?.(); } catch {}\n  process.exit(0);",'node AI marketplace shutdown flush');
 await fsp.writeFile(runtimePath,source,'utf8');
 try { await import(pathToFileURL(runtimePath).href+`?build=${VERSION}`); } finally { setTimeout(()=>fsp.unlink(runtimePath).catch(()=>{}),1000).unref?.(); }
