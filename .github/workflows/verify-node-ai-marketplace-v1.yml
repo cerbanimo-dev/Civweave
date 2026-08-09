@@ -50,9 +50,10 @@ jobs:
       - name: Verify canonical bootstrap and offline carriage
         run: |
           grep -q "const NODE_AI_MESH_RUNTIME='/app/node-ai-mesh-v1.js'" public/app/install-boundary-v146.js
-          grep -q "SYSTEM_EXPERIENCE_SCRIPTS=.*" public/app/install-boundary-v146.js || true
           grep -q 'NODE_AI_MESH_RUNTIME' public/app/install-boundary-v146.js
-          node -e "const p=require('./public/app/offline-package-v208.json'); for(const f of ['/app/local-object-mesh-v146.js','/app/node-ai-mesh-v1.js','/app/shared/civweave-node-ai-routing-v1.mjs']) if(!p.seeds.includes(f)) throw new Error('missing offline seed '+f)"
+          grep -q "'/app/local-object-mesh-v146.js?v=node-ai-mesh-v1'" public/app/node-ai-mesh-v1.js
+          grep -q "const ROUTER_URL='/app/shared/civweave-node-ai-routing-v1.mjs'" public/app/node-ai-mesh-v1.js
+          node -e "const p=require('./public/app/offline-package-v208.json'); if(p.seeds.length!==11) throw new Error('canonical offline roots changed'); if(!p.includePrefixes.includes('/app/')) throw new Error('recursive app dependency discovery disabled')"
       - name: Reject centralized wallet architecture
         run: |
           test ! -e lib/ai-wallet-postgres-v1.mjs
