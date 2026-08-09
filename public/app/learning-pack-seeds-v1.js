@@ -16,9 +16,10 @@ function readReceipt(){try{return JSON.parse(localStorage.getItem(RECEIPT_KEY)||
 function writeReceipt(value){localStorage.setItem(RECEIPT_KEY,JSON.stringify(value))}
 function hex(bytes){return Array.from(new Uint8Array(bytes),value=>value.toString(16).padStart(2,'0')).join('')}
 async function sha256(buffer){return hex(await crypto.subtle.digest('SHA-256',buffer))}
-function packUrl(record){return new URL(`/downloads/learning-packs/${record.file}`,location.origin).href}
+function packUrl(record){return new URL(`/downloads/learning-packs/${record.file||`${record.id}.json`}`,location.origin).href}
 function cachedCurrent(response,record,receipt={}){
   if(!response)return false;
+  if(record.module)return response.headers.get('x-civweave-pack-module')===record.module;
   const expectedBytes=Number(record.bytes||0),cachedBytes=Number(response.headers.get('content-length')||receipt.bytes||0);
   const expectedSha=clean(record.sha256,128).toLowerCase(),cachedSha=clean(response.headers.get('x-civweave-sha256')||receipt.sha256,128).toLowerCase();
   return (!expectedBytes||cachedBytes===expectedBytes)&&Boolean(expectedSha)&&cachedSha===expectedSha;
@@ -39,7 +40,7 @@ async function status(catalog=null){
   const active=catalog||await loadCatalog(),cache=await caches.open(CACHE_NAME),receipt=readReceipt(),persistent=navigator.storage?.persisted?await navigator.storage.persisted().catch(()=>false):false,rows=[];
   for(const record of active.packs){
     const response=await cache.match(packUrl(record)),saved=receipt[record.id]||{},current=cachedCurrent(response,record,saved);
-    rows.push({id:record.id,title:record.title,packType:record.packType||'mixed',audience:record.audience||[],optional:record.optional!==false,generated:record.generated===true,available:record.available!==false,staged:Boolean(response),current,needs_update:Boolean(response)&&!current,bytes:Number(record.bytes||0),sha256:record.sha256||'',staged_at:saved.staged_at||null,persistent:Boolean(persistent)});
+    rows.push({id:record.id,title:record.title,packType:record.packType||'mixed',audience:record.audience||[],optional:record.optional!==false,generated:record.generated===true,bundled:record.bundled===true,available:Boolean(record.module)||record.available!==false,staged:Boolean(response),current,needs_update:Boolean(response)&&!current,bytes:Number(record.bytes||saved.bytes||0),sha256:record.sha256||saved.sha256||'',staged_at:saved.staged_at||null,persistent:Boolean(persistent)});
   }
   return rows;
 }
@@ -47,24 +48,35 @@ async function persistStorage(){
   if(!navigator.storage?.persist)return{supported:false,persisted:false};
   try{const existing=await navigator.storage.persisted?.();return{supported:true,persisted:Boolean(existing||await navigator.storage.persist())}}catch{return{supported:true,persisted:false}}
 }
+async function moduleBuffer(record){
+  const module=await import(record.module),pack=module.default||module.pack;
+  if(!pack||typeof pack!=='object')throw new Error(`${record.title} module did not export a learning pack.`);
+  return new TextEncoder().encode(`${JSON.stringify(pack)}\n`).buffer;
+}
 async function stage(ids,options={}){
   assertAvailable();
   const catalog=await loadCatalog(),byId=new Map(catalog.packs.map(record=>[record.id,record])),selected=unique(ids),unknown=selected.filter(id=>!byId.has(id));
   if(unknown.length)throw new Error(`Unknown learning packs: ${unknown.join(', ')}`);
-  const unavailable=selected.filter(id=>byId.get(id)?.available===false);if(unavailable.length)throw new Error(`These learning packs must be built or published before download: ${unavailable.join(', ')}`);
+  const unavailable=selected.filter(id=>byId.get(id)?.available===false&&!byId.get(id)?.module);if(unavailable.length)throw new Error(`These learning packs must be built or published before download: ${unavailable.join(', ')}`);
   const cache=await caches.open(CACHE_NAME),receipt=readReceipt(),totalBytes=selected.reduce((sum,id)=>sum+Number(byId.get(id)?.bytes||0),0);let completed=0,completedBytes=0;
   for(const id of selected){
     const record=byId.get(id),url=packUrl(record),existing=await cache.match(url);
-    if(cachedCurrent(existing,record,receipt[id])){completed++;completedBytes+=Number(record.bytes||0);options.onProgress?.({phase:'cached',record,completed,total:selected.length,completedBytes,totalBytes});continue}
-    options.onProgress?.({phase:'fetching',record,completed,total:selected.length,completedBytes,totalBytes});
-    const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error(`${record.title} download failed (${response.status}).`);
-    const buffer=await response.arrayBuffer();
-    if(record.bytes&&buffer.byteLength!==Number(record.bytes))throw new Error(`${record.title} size mismatch.`);
+    if(cachedCurrent(existing,record,receipt[id])){completed++;completedBytes+=Number(record.bytes||receipt[id]?.bytes||0);options.onProgress?.({phase:'cached',record,completed,total:selected.length,completedBytes,totalBytes});continue}
+    options.onProgress?.({phase:record.module?'materializing':'fetching',record,completed,total:selected.length,completedBytes,totalBytes});
+    let buffer;
+    if(record.module)buffer=await moduleBuffer(record);
+    else{
+      const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw new Error(`${record.title} download failed (${response.status}).`);
+      buffer=await response.arrayBuffer();
+      if(record.bytes&&buffer.byteLength!==Number(record.bytes))throw new Error(`${record.title} size mismatch.`);
+    }
     options.onProgress?.({phase:'verifying',record,completed,total:selected.length,completedBytes,totalBytes});
-    const actual=await sha256(buffer);if(actual!==clean(record.sha256,128).toLowerCase())throw new Error(`${record.title} checksum mismatch.`);
-    const headers={'Content-Type':record.contentType||'application/json','Content-Length':String(buffer.byteLength),'X-Civweave-SHA256':actual,'X-Civweave-Pack-Id':id,'X-Civweave-Pack-File':record.file};
+    const actual=await sha256(buffer);
+    if(!record.module&&actual!==clean(record.sha256,128).toLowerCase())throw new Error(`${record.title} checksum mismatch.`);
+    const headers={'Content-Type':record.contentType||'application/json','Content-Length':String(buffer.byteLength),'X-Civweave-SHA256':actual,'X-Civweave-Pack-Id':id,'X-Civweave-Pack-File':record.file||`${id}.json`};
+    if(record.module)headers['X-Civweave-Pack-Module']=record.module;
     await cache.put(url,new Response(buffer,{headers}));
-    receipt[id]={staged_at:new Date().toISOString(),sha256:actual,bytes:buffer.byteLength,url,file:record.file};writeReceipt(receipt);
+    receipt[id]={staged_at:new Date().toISOString(),sha256:actual,bytes:buffer.byteLength,url,file:record.file||`${id}.json`,module:record.module||''};writeReceipt(receipt);
     completed++;completedBytes+=buffer.byteLength;options.onProgress?.({phase:'stored',record,completed,total:selected.length,completedBytes,totalBytes});
   }
   const persistence=await persistStorage();options.onProgress?.({phase:'persistent',completed,total:selected.length,completedBytes,totalBytes,persistence});
