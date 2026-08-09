@@ -6,11 +6,17 @@ const bridgePath='public/app/living-school-chat-workbench-v255.js';
 const controllerPath='public/app/cabinets/living-school/living-school-cleanroom-v218.mjs';
 const actionsPath='public/app/living-school-cleanroom-actions-v243.mjs';
 const loaderPath='public/app/shared-guide-surface-v236.js';
+const deadlinePath='public/app/living-school-deadline-guard-v266.mjs';
+const quizGuardPath='public/app/living-school-quiz-contract-guard-v263.mjs';
+const progressPath='public/app/living-school-chat-progress-v266.js';
 
 const bridge=fs.readFileSync(bridgePath,'utf8');
 const controller=fs.readFileSync(controllerPath,'utf8');
 const actions=fs.readFileSync(actionsPath,'utf8');
 const loader=fs.readFileSync(loaderPath,'utf8');
+const deadlines=fs.readFileSync(deadlinePath,'utf8');
+const quizGuard=fs.readFileSync(quizGuardPath,'utf8');
+const progress=fs.readFileSync(progressPath,'utf8');
 
 assert.match(actions,/export async function generateCurriculumFromData/,'canonical action module must expose data-driven curriculum generation');
 assert.match(actions,/source:'living-school-workbench'/,'button generation must still use the same canonical generator');
@@ -20,8 +26,28 @@ assert.match(controller,/newPath=input\?\.intent==='new'/,'Living School cleanro
 assert.match(controller,/s\.school=null;/,'new-path preparation must sever the active school before canonical generation');
 assert.match(controller,/s\.progress=\{\};/,'new-path preparation must not inherit old module progress');
 assert.match(controller,/restoreLearningState\(previous\)/,'failed new-path generation must restore the previous learning state atomically');
-assert.match(loader,/living-school-chat-workbench-v255\.js\?v=1\.0\.57-v265-learning-pathway/,'shared guide loader must cache-bust the Moss pathway bridge');
+assert.match(controller,/installLivingSchoolDeadlineGuardV266/,'Living School must install provider deadlines after the generation/quiz guards');
+assert.match(controller,/await installLivingSchoolDeadlineGuardV266\(\)/,'Living School provider deadline guard must be active before workbench chat generation begins');
+assert.match(loader,/living-school-chat-workbench-v255\.js\?v=1\.0\.58-v266-bounded-learning-pathway/,'shared guide loader must cache-bust the bounded Moss pathway bridge');
+assert.match(loader,/living-school-chat-progress-v266\.js\?v=1\.0\.58-v266/,'shared guide loader must install visible Moss pipeline progress');
 assert.match(bridge,/learning pathway/,'Moss structure routing must recognize the natural phrase learning pathway');
+
+for(const token of [
+  "['living-school-live-source-research-v260',15000]",
+  "['living-school-research-grounded-curriculum-v218.1',30000]",
+  "['living-school-quiz-delta-completion-v258',10000]",
+  'livingSchoolDeadlineGuardRevision:REVISION',
+  'every-living-school-provider-call-has-a-hard-runtime-deadline-v266'
+])assert(deadlines.includes(token),`Living School deadline guard is missing ${token}.`);
+for(const token of [
+  "const PRIMARY_PURPOSE='living-school-quiz-contract-primary-v266'",
+  'const MAX_REPAIRS_PER_MODULE=3',
+  'purpose:PRIMARY_PURPOSE',
+  'nestedLegacyLoopBypassed:true',
+  'timeoutMs:Math.min(existing,timeoutMs)'
+])assert(quizGuard.includes(token),`Bounded quiz contract is missing ${token}.`);
+assert(!quizGuard.includes('attempts<12'),'Quiz repair must not restore the old twelve-attempt per-module loop.');
+for(const text of ['Moss is researching sources for the learning pathway…','Moss is generating the curriculum from the research packet…','Moss is completing the AI quiz contract…'])assert(progress.includes(text),`Moss pending turn does not surface pipeline stage: ${text}`);
 
 const emptyState=()=>({school:null,pathContext:null,settings:{modelRoute:'shared',mode:'guided'}});
 const store=new Map([
@@ -122,4 +148,4 @@ assert.equal(result.action.state,'completed');
 assert.equal(result.action.intent,'new');
 assert.equal(result.response.choice.system,'living-school');
 
-console.log('Moss curriculum workbench v255/v265 pathway verification passed.');
+console.log('Moss curriculum workbench v255/v266 bounded pathway verification passed.');
