@@ -21,7 +21,7 @@ permissions:
 
 concurrency:
   group: video-learning-atlas-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -60,7 +60,7 @@ jobs:
           enrichment=catalog.get('youtube_api_enrichment') or {}
           print('YouTube enrichment:', enrichment)
           PY
-      - name: Commit catalog bundles
+      - name: Commit catalog bundles on latest branch tip
         run: |
           set -euo pipefail
           git config user.name github-actions[bot]
@@ -71,4 +71,6 @@ jobs:
             exit 0
           fi
           git commit -m 'Build optional Video Learning Atlas bundles'
+          git fetch origin agent/video-learning-atlas-v1
+          git rebase origin/agent/video-learning-atlas-v1
           git push origin HEAD:agent/video-learning-atlas-v1
