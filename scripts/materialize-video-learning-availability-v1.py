@@ -19,16 +19,25 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def write_sums():
+    sums = []
+    for path in sorted(ROOT.iterdir()):
+        if path.is_file() and path.name != "SHA256SUMS":
+            sums.append(f"{sha256(path.read_bytes())}  {path.name}")
+    (ROOT / "SHA256SUMS").write_text("\n".join(sums) + "\n", encoding="utf-8")
+
+
 def main():
     catalog = json.loads(CATALOG.read_text(encoding="utf-8"))
     lookup = json.loads(LOOKUP.read_text(encoding="utf-8"))
     all_ids = sorted({str(row.get("video_id") or "").strip() for row in lookup.get("records", []) if row.get("video_id")})
 
     if not SIDECAR.exists():
+        built_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
         payload = {
             "schema": "civweave.youtube-availability-index.v1",
             "status": "not-available",
-            "built_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "built_at": built_at,
             "catalog_video_ids": len(all_ids),
             "eligible_video_ids": [],
             "ineligible_video_ids": [],
@@ -62,6 +71,18 @@ def main():
 
     raw = (json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
     OUTPUT.write_bytes(raw)
+    catalog["youtube_availability_index"] = {
+        "file": OUTPUT.name,
+        "status": payload["status"],
+        "bytes": len(raw),
+        "sha256": sha256(raw),
+        "eligible_video_ids": len(payload.get("eligible_video_ids") or []),
+        "ineligible_video_ids": len(payload.get("ineligible_video_ids") or []),
+        "built_at": payload.get("built_at"),
+        "expires_at": payload.get("expires_at"),
+    }
+    CATALOG.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    write_sums()
     print(json.dumps({
         "output": str(OUTPUT),
         "status": payload["status"],
