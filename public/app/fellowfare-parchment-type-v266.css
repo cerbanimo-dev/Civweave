@@ -1,0 +1,207 @@
+/* FellowFare parchment typography contract v266
+   Light parchment/cream surfaces always use FellowFare ink-blue, copper-brown,
+   or blue-brown text. Light cream text is reserved for dark blue/copper surfaces. */
+
+html[data-civweave-system="fellowfare"],
+body.ff-cabinet-embedded {
+  --ff-type-heading: #183e4a;
+  --ff-type-heading-soft: #254f5c;
+  --ff-type-secondary: #704326;
+  --ff-type-body: #4d5b59;
+  --ff-type-paper: #fff8e7;
+  --ff-type-parchment: #f3dfb1;
+  --ff-type-parchment-deep: #f1d59b;
+  --ff-type-cream-on-dark: #fff0c9;
+  --ff-type-soft-on-dark: #f1dbac;
+  --ff-type-amber-on-dark: #f2b84b;
+}
+
+/* Parent FellowFare chrome: headings on paper are blue, labels are brown. */
+html[data-civweave-system="fellowfare"] :is(
+  .cwf104-head,
+  .ffc144-header,
+  .ffc144-rook,
+  .ffc144-status,
+  .ch142-control-band,
+  dialog > section,
+  dialog > form,
+  .cw127-dialog > section,
+  .cw127-dialog > form
+) :is(h1,h2,h3,h4,h5,h6),
+html[data-civweave-system="fellowfare"] .cwf104-title b,
+html[data-civweave-system="fellowfare"] .ffc144-header .rc-brand b,
+html[data-civweave-system="fellowfare"] .ffc144-rook-head h1 {
+  color: var(--ff-type-heading) !important;
+  text-shadow: none !important;
+}
+
+html[data-civweave-system="fellowfare"] :is(
+  .cwf104-head,
+  .ffc144-header,
+  .ffc144-rook,
+  .ch142-control-band,
+  dialog > section,
+  dialog > form,
+  .cw127-dialog > section,
+  .cw127-dialog > form
+) :is(p,small),
+html[data-civweave-system="fellowfare"] .ffc144-status {
+  color: var(--ff-type-body) !important;
+  text-shadow: none !important;
+}
+
+html[data-civweave-system="fellowfare"] :is(
+  .cwf104-title small,
+  .ffc144-header .rc-brand small,
+  .ffc144-rook-head > div > small,
+  .ch142-control-band .eyebrow,
+  dialog .eyebrow
+) {
+  color: var(--ff-type-secondary) !important;
+  opacity: 1 !important;
+}
+
+html[data-civweave-system="fellowfare"] .ffc144-header .rc-status {
+  color: var(--ff-type-heading-soft) !important;
+}
+
+/* Parchment tabs stay dark; the selected tab becomes a true dark surface. */
+html[data-civweave-system="fellowfare"] .ffc144-tabs button {
+  color: var(--ff-type-heading) !important;
+}
+html[data-civweave-system="fellowfare"] .ffc144-tabs button[aria-current="page"] {
+  background: linear-gradient(145deg, #254f5c, #183e4a) !important;
+  color: var(--ff-type-cream-on-dark) !important;
+  border-color: var(--ff-type-secondary) !important;
+}
+
+/* Embedded workbench: this is the central anti-white-on-parchment rule. */
+body.ff-cabinet-embedded.ff-cardinal-visual .ff-world-projection,
+body.ff-cabinet-embedded.ff-cardinal-visual .ff-world-projection .page,
+body.ff-cabinet-embedded .dialog-frame {
+  color: var(--ff-type-body) !important;
+}
+
+body.ff-cabinet-embedded.ff-cardinal-visual .ff-world-projection :is(h1,h2,h3,h4,h5,h6),
+body.ff-cabinet-embedded .dialog-frame :is(h1,h2,h3,h4,h5,h6),
+body.ff-cabinet-embedded.ff-cardinal-visual .ff-world-projection :is(.price,.agreement-card-meta strong,.trust-row strong),
+body.ff-cabinet-embedded .dialog-frame :is(.field > span,.field legend) {
+  color: var(--ff-type-heading) !important;
+  text-shadow: none !important;
+}
+
+body.ff-cabinet-embedded.ff-cardinal-visual .ff-world-projection :is(
+  p,
+  small,
+  .lead,
+  .muted-copy,
+  .section-heading p,
+  .thread-card p,
+  .page-header p,
+  .loom-hero p,
+  .person-info small,
+  .agreement-card-meta,
+  .form-help
+),
+body.ff-cabinet-embedded .dialog-frame :is(p,small,.form-help,.field small) {
+  color: var(--ff-type-body) !important;
+  text-shadow: none !important;
+}
+
+body.ff-cabinet-embedded :is(
+  .eyebrow,
+  .proposal-preview label span,
+  .history-item span
+) {
+  color: var(--ff-type-secondary) !important;
+  text-shadow: none !important;
+}
+
+body.ff-cabinet-embedded.ff-cardinal-visual .ff-world-projection :is(
+  .hero-copy,
+  .panel,
+  .thread-card,
+  .profile-card,
+  .assembly-card,
+  .market-tools,
+  .stat-card,
+  .agreement-card,
+  .inbox-layout,
+  .match-card,
+  .suggestion-grid article,
+  .signal-board article,
+  .issue-list article,
+  .milestone-row,
+  .confirmation-row
+) {
+  color: var(--ff-type-body) !important;
+}
+
+body.ff-cabinet-embedded :is(.mode-label,.meta-pill,.source-chip,.recurring-badge,.evidence-kind) {
+  color: var(--ff-type-secondary) !important;
+}
+
+body.ff-cabinet-embedded :is(input,textarea,select,.search-box input) {
+  color: var(--ff-type-heading) !important;
+  caret-color: var(--ff-type-heading) !important;
+}
+body.ff-cabinet-embedded :is(input,textarea)::placeholder {
+  color: #65584d !important;
+  opacity: 1 !important;
+}
+
+/* Light buttons never borrow the cream text intended for dark controls. */
+body.ff-cabinet-embedded :is(.button-ghost,.filter-chip,.mode-chip,.icon-button) {
+  color: var(--ff-type-heading) !important;
+}
+body.ff-cabinet-embedded .button-secondary {
+  color: #33271d !important;
+}
+
+/* Explicit dark-surface exceptions. Cream is allowed here because the backing
+   surface is dark enough to carry it safely. */
+body.ff-cabinet-embedded :is(
+  .hero-side,
+  .loom-principle,
+  .provider-headline,
+  .settlement-card,
+  .repair-card,
+  .message.mine,
+  .toast
+) :is(h1,h2,h3,h4,h5,h6,strong,label),
+body.ff-cabinet-embedded :is(.button-primary,.bottom-nav .bottom-link:not(.is-active)) {
+  color: var(--ff-type-cream-on-dark) !important;
+}
+
+body.ff-cabinet-embedded :is(
+  .hero-side,
+  .loom-principle,
+  .provider-headline,
+  .settlement-card,
+  .repair-card,
+  .message.mine,
+  .toast
+) :is(p,small,span,time) {
+  color: var(--ff-type-soft-on-dark) !important;
+}
+
+body.ff-cabinet-embedded :is(.hero-side,.loom-principle,.provider-headline) .eyebrow {
+  color: var(--ff-type-amber-on-dark) !important;
+}
+
+/* Selected bottom navigation is amber, so it uses dark ink instead of cream. */
+body.ff-cabinet-embedded .bottom-nav .bottom-link.is-active {
+  color: #2b2118 !important;
+}
+
+/* Parent dark surfaces use cream only where the backing surface is truly dark. */
+html[data-civweave-system="fellowfare"] :is(
+  .cwf104-settings,
+  #cw159-chat-dock,
+  .ffc144-rook-settings,
+  .ffc144-rook-form button,
+  .ffc144-rook-actions button,
+  .ffc144-loading
+) {
+  color: var(--ff-type-cream-on-dark) !important;
+}
