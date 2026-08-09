@@ -1,16 +1,35 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-convergence-v250';
+const REVISION='chat-runtime-recovery-v266';
 const CHAT_PATHS=new Set([
   '/app/manifest.webmanifest',
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146.js',
   '/app/install-boundary-v146.js',
+  '/app/guide-identity-integrity-v216.js',
+  '/app/realm-session-integrity-v237.js',
+  '/app/guide-workspace-v242.js',
+  '/app/chat-runtime-failsafe-v266.js',
+  '/app/shared-guide-surface-v236.js',
+  '/app/shared-guide-surface-v236-core-v244.js',
+  '/app/shared-chat-face-icons-v255.js',
+  '/app/living-school-chat-workbench-v255.js',
+  '/app/family-ai-loader-v105.js',
+  '/app/assistant-runtime-v141.js',
+  '/app/guide-contracts-v141.js',
+  '/app/intention-planner-v141.js',
+  '/app/weaveling-plan-materialization-v265.js',
+  '/app/weaveling-memory-v191.js',
+  '/app/weaveling-memory-bridge-v191.js',
+  '/app/deterministic-mode-v175.js',
+  '/app/fast-interactive-runtime-v192.js',
+  '/app/shared/civweave-model-runtime.js',
+  '/app/shared/civweave-parity-runtime.js',
+  '/app/gemini-device-direct-v257.js',
+  '/extensions/civweave-gemini-interactions-v159.js',
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
-  '/app/guide-workspace-v242.js',
-  '/app/shared-guide-surface-v236.js',
   '/app/regression-fixes-v243.js',
   '/app/chat-single-owner-v245.js',
   '/app/working-campus-v156.js',
