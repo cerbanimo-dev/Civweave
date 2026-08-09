@@ -1,21 +1,22 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.62-working-campus-topbar-v243-federation-finder-v268';
+const VERSION='1.0.68-working-campus-topbar-v243-civweave-atlas-v269';
 const STYLE_ID='cw-working-campus-topbar-v243-style';
 const MAP_BUTTON_ID='cw-working-campus-map-v243';
 const MAP_EVENT='civweave:map-open-request';
 const MAP_READY_EVENT='civweave:map-ready';
 const MAP_API_NAME='CivweaveMapLaunchV243';
-const FINDER_API_NAME='CivweaveFederationFinderV268';
+const LEGACY_FINDER_API_NAME='CivweaveFederationFinderV268';
 const FINDER_STORAGE='civweave.federation-finder.origin.v1';
 const DEFAULT_FINDER_ORIGIN='http://localhost:8787';
+const ATLAS_ROUTE='/app/civweave-atlas-v269.html';
 const BRAND_ICON='/app/logos/civweave-pwa-192-v247.png';
 let header=null;
 let mapButton=null;
 let resizeObserver=null;
 let mapOpenHandler=null;
-let mapRoute='';
+let mapRoute=ATLAS_ROUTE;
 
 if(globalThis[MAP_API_NAME]?.version===VERSION)return;
 
@@ -38,13 +39,8 @@ function normalizeFinderOrigin(value){
   try{const url=new URL(raw,location.origin);if(url.protocol!=='http:'&&url.protocol!=='https:')return'';return url.origin}catch{return''}
 }
 function configuredFinderUrl(){
-  const params=new URLSearchParams(location.search);
-  const explicit=normalizeFinderOrigin(params.get('finder')||params.get('federationFinder')||'');
-  if(explicit){try{localStorage.setItem(FINDER_STORAGE,explicit)}catch{};return new URL('/finder',explicit).href}
   let stored='';try{stored=normalizeFinderOrigin(localStorage.getItem(FINDER_STORAGE)||'')}catch{}
-  if(stored)return new URL('/finder',stored).href;
-  const localNode=['localhost','127.0.0.1','::1'].includes(location.hostname)&&location.port==='8787';
-  return new URL('/finder',localNode?location.origin:DEFAULT_FINDER_ORIGIN).href
+  return stored?new URL('/finder',stored).href:new URL('/finder',DEFAULT_FINDER_ORIGIN).href
 }
 function configureFinder(origin){
   const normalized=normalizeFinderOrigin(origin);
@@ -52,23 +48,18 @@ function configureFinder(origin){
   try{localStorage.setItem(FINDER_STORAGE,normalized)}catch{}
   return new URL('/finder',normalized).href
 }
-function openFederationFinder(){
-  const target=configuredFinderUrl();
-  try{
-    const opened=window.open(target,'civweave-federation-finder');
-    if(opened){try{opened.opener=null}catch{};return true}
-  }catch(error){console.warn('[Civweave] Federation Finder window could not open.',error)}
-  location.assign(target);
-  return true
+function atlasUrl(){return new URL(ATLAS_ROUTE,location.origin).href}
+function openAtlas(){
+  try{location.assign(atlasUrl());return true}catch(error){console.warn('[Civweave] Civweave Atlas route could not open.',error);return false}
 }
 function registerMap(detail={}){
   if(typeof detail.open==='function')mapOpenHandler=detail.open;
   const route=normalizedRoute(detail.route||detail.url||'');if(route)mapRoute=route;
-  if(mapButton){mapButton.dataset.mapState='ready';mapButton.title='Open Federation Finder'}
+  if(mapButton){mapButton.dataset.mapState='ready';mapButton.title='Open Civweave Atlas'}
   return true
 }
 function openMap(){
-  try{if(openFederationFinder())return true}catch(error){console.warn('[Civweave] Federation Finder launch failed.',error)}
+  if(openAtlas())return true;
   const direct=globalThis.CivweaveMapSystem||globalThis.CivweaveMapV1||globalThis.CivweaveMap;
   try{if(typeof direct?.open==='function'){direct.open({source:'working-campus',system:'civweave'});return true}}catch(error){console.warn('[Civweave] Map open handler failed.',error)}
   try{if(typeof mapOpenHandler==='function'){mapOpenHandler({source:'working-campus',system:'civweave'});return true}}catch(error){console.warn('[Civweave] Registered map open handler failed.',error)}
@@ -79,7 +70,7 @@ function openMap(){
   if(event.defaultPrevented||detail.handled)return true;
   if(typeof detail.open==='function'){registerMap({open:detail.open});return openMap()}
   const eventRoute=normalizedRoute(detail.route);if(eventRoute){mapRoute=eventRoute;location.assign(mapRoute);return true}
-  toast('Federation Finder could not open and no fallback map runtime is registered.');
+  toast('Civweave Atlas could not open and no fallback map runtime is registered.');
   return false
 }
 function syncHeaderHeight(){
@@ -102,8 +93,8 @@ html[data-civweave-system-route="civweave"] body,html[data-civweave-system="civw
 html[data-civweave-system-route="civweave"] main.app,html[data-civweave-system="civweave"] main.app{max-width:100%;overflow-x:clip}
 html[data-civweave-system-route="civweave"] main.app>header.top,html[data-civweave-system="civweave"] main.app>header.top{position:sticky!important;top:max(6px,env(safe-area-inset-top))!important;z-index:2147483646!important;pointer-events:auto!important;isolation:isolate!important;overflow:visible!important;grid-template-columns:minmax(190px,1fr) auto auto auto auto auto!important;grid-template-areas:"brand modes map settings review theme"!important;box-shadow:0 10px 28px #0008!important;max-width:1180px!important;width:100%!important;min-width:0!important}
 html[data-civweave-system-route="civweave"] main.app>header.top>*,html[data-civweave-system="civweave"] main.app>header.top>*{pointer-events:auto!important;min-width:0}
-#${MAP_BUTTON_ID}{grid-area:map;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:38px;border-color:#8ee8ff66;background:linear-gradient(135deg,#8ee8ff18,#8af5d214)}
-#${MAP_BUTTON_ID}[data-map-state="ready"]{border-color:#8af5d299;box-shadow:inset 0 0 14px #8af5d214}
+#${MAP_BUTTON_ID}{grid-area:map;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:38px;border-color:#d8b76688;background:linear-gradient(135deg,#d8b7661c,#8af5d214)}
+#${MAP_BUTTON_ID}[data-map-state="ready"]{border-color:#d8b766bb;box-shadow:inset 0 0 14px #d8b76617}
 html[data-civweave-system-route="civweave"] #cw-persistent-guide-chat-v215,html[data-civweave-system="civweave"] #cw-persistent-guide-chat-v215{top:calc(var(--cw-working-campus-topbar-height,88px) + env(safe-area-inset-top) + 14px)!important;bottom:calc(var(--cw-themed-nav-height,58px) + env(safe-area-inset-bottom) + 10px)!important;height:auto!important;max-height:none!important;z-index:2147483644!important}
 html[data-civweave-system-route="civweave"] #cw-persistent-guide-chat-v215.is-minimized,html[data-civweave-system="civweave"] #cw-persistent-guide-chat-v215.is-minimized{top:auto!important;height:auto!important;max-height:min(38dvh,300px)!important}
 @media(max-width:960px){html[data-civweave-system-route="civweave"] main.app>header.top,html[data-civweave-system="civweave"] main.app>header.top{grid-template-columns:minmax(0,1fr) auto auto auto!important;grid-template-areas:"brand modes map settings" "brand review theme diagnostics"!important}}
@@ -126,21 +117,23 @@ function installMapButton(){
   header=document.querySelector('main.app>header.top');if(!header)return false;
   repairBrand();
   mapButton=document.getElementById(MAP_BUTTON_ID);
-  if(!mapButton){mapButton=document.createElement('button');mapButton.id=MAP_BUTTON_ID;mapButton.type='button';mapButton.className='pill map-pill';mapButton.dataset.mapState='ready';mapButton.innerHTML='<span aria-hidden="true">⌖</span><span>Map</span>';mapButton.setAttribute('aria-label','Open Federation Finder map');const settings=header.querySelector('#settings-button');if(settings)header.insertBefore(mapButton,settings);else header.append(mapButton)}
+  if(!mapButton){mapButton=document.createElement('button');mapButton.id=MAP_BUTTON_ID;mapButton.type='button';mapButton.className='pill map-pill';mapButton.dataset.mapState='ready';mapButton.innerHTML='<span aria-hidden="true">⌖</span><span>Atlas</span>';mapButton.setAttribute('aria-label','Open Civweave Atlas');const settings=header.querySelector('#settings-button');if(settings)header.insertBefore(mapButton,settings);else header.append(mapButton)}
+  else{const label=mapButton.querySelector('span:last-child');if(label)label.textContent='Atlas';mapButton.setAttribute('aria-label','Open Civweave Atlas')}
   if(!mapButton.dataset.cw243Bound){mapButton.dataset.cw243Bound='true';mapButton.addEventListener('click',openMap)}
-  mapButton.dataset.mapState='ready';mapButton.title='Open Federation Finder';
+  mapButton.dataset.mapState='ready';mapButton.title='Open Civweave Atlas';
   syncHeaderHeight();
   resizeObserver?.disconnect();
   if('ResizeObserver'in globalThis){resizeObserver=new ResizeObserver(syncHeaderHeight);resizeObserver.observe(header)}
   addEventListener('resize',syncHeaderHeight,{passive:true});
   globalThis.visualViewport?.addEventListener('resize',syncHeaderHeight,{passive:true});
-  document.documentElement.dataset.civweaveWorkingCampusTopbar='v243-mobile-v248-federation-finder-v268';
+  document.documentElement.dataset.civweaveWorkingCampusTopbar='v243-mobile-v248-civweave-atlas-v269';
   return true
 }
 function start(){if(!isCivweave())return;installStyle();if(!installMapButton())queueMicrotask(installMapButton)}
 addEventListener(MAP_READY_EVENT,event=>registerMap(event.detail||{}));
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 
-globalThis[FINDER_API_NAME]=Object.freeze({version:'1.7.1-launch-v268',storageKey:FINDER_STORAGE,defaultOrigin:DEFAULT_FINDER_ORIGIN,url:configuredFinderUrl,configure:configureFinder,open:openFederationFinder});
-globalThis[MAP_API_NAME]=Object.freeze({version:VERSION,event:MAP_EVENT,readyEvent:MAP_READY_EVENT,open:openMap,register:registerMap,configureFinder,state:()=>({route:mapRoute,handler:Boolean(mapOpenHandler),button:Boolean(mapButton),finder:configuredFinderUrl(),finderVersion:'1.7.1',mobileContainment:'v248',brandIcon:BRAND_ICON})});
+// Compatibility: callers that still hold the old Federation Finder API now land in the native Atlas.
+globalThis[LEGACY_FINDER_API_NAME]=Object.freeze({version:'1.8.0-native-atlas-v269',storageKey:FINDER_STORAGE,defaultOrigin:DEFAULT_FINDER_ORIGIN,url:atlasUrl,legacyFinderUrl:configuredFinderUrl,configure:configureFinder,open:openAtlas});
+globalThis[MAP_API_NAME]=Object.freeze({version:VERSION,event:MAP_EVENT,readyEvent:MAP_READY_EVENT,open:openMap,register:registerMap,configureFinder,state:()=>({route:ATLAS_ROUTE,handler:Boolean(mapOpenHandler),button:Boolean(mapButton),atlas:atlasUrl(),legacyFinder:configuredFinderUrl(),brandIcon:BRAND_ICON})});
 })();
