@@ -1,0 +1,49 @@
+name: Materialize Video Atlas Availability Temp
+
+on:
+  push:
+    branches:
+      - agent/video-learning-atlas-v1
+    paths:
+      - .github/workflows/materialize-video-atlas-availability-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/video-learning-atlas-v1
+          fetch-depth: 0
+      - name: Derive current embeddability index
+        run: python scripts/materialize-video-learning-availability-v1.py
+      - name: Validate and publish current index
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('public/downloads/knowledge-schools/video-atlases')
+          data=json.loads((root/'youtube-availability-current.json').read_text())
+          catalog=json.loads((root/'catalog.json').read_text())
+          meta=catalog['youtube_availability_index']
+          assert data['schema']=='civweave.youtube-availability-index.v1'
+          assert data['status']=='current'
+          assert data['eligible_count'] > 0
+          assert data['eligible_count'] + data['ineligible_count'] == data['catalog_video_ids']
+          assert meta['eligible_video_ids']==data['eligible_count']
+          assert meta['ineligible_video_ids']==data['ineligible_count']
+          print(json.dumps({'eligible':data['eligible_count'],'ineligible':data['ineligible_count'],'expires_at':data['expires_at'],'bytes':meta['bytes']},indent=2))
+          PY
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/downloads/knowledge-schools/video-atlases/youtube-availability-current.json \
+                  public/downloads/knowledge-schools/video-atlases/catalog.json \
+                  public/downloads/knowledge-schools/video-atlases/SHA256SUMS
+          git commit -m 'Publish current Video Atlas embeddability index'
+          git fetch origin agent/video-learning-atlas-v1
+          git rebase origin/agent/video-learning-atlas-v1
+          git push origin HEAD:agent/video-learning-atlas-v1
