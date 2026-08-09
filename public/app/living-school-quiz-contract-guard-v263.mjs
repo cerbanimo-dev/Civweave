@@ -1,11 +1,17 @@
-const REVISION='living-school-quiz-contract-guard-v263';
+const REVISION='living-school-quiz-contract-guard-v266-bounded';
 const QUIZ_PURPOSE='living-school-quiz-delta-completion-v258';
-const REPAIR_PURPOSE='living-school-quiz-question-contract-repair-v263';
+const PRIMARY_PURPOSE='living-school-quiz-contract-primary-v266';
+const REPAIR_PURPOSE='living-school-quiz-question-contract-repair-v266';
 const REQUIRED_TYPES=['multiple-choice','multi-select','short-answer'];
+const MAX_REPAIRS_PER_MODULE=3;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 
 function promptKey(question){return clean(question?.prompt,2400).toLowerCase().replace(/\s+/g,' ')}
 function typeOf(question){return clean(question?.type,80).toLowerCase()}
+function boundedConfig(config={},timeoutMs=10000){
+  const existing=Number(config?.timeoutMs);
+  return{...config,timeoutMs:Number.isFinite(existing)&&existing>0?Math.min(existing,timeoutMs):timeoutMs,maxTokens:Math.max(Number(config?.maxTokens)||0,4096),temperature:Math.min(Number(config?.temperature)||0.2,0.25)};
+}
 function rubricRows(question){
   return (Array.isArray(question?.rubric)?question.rubric:[]).map((row,index)=>({
     id:clean(row?.id,80)||`criterion-${index+1}`,
@@ -64,19 +70,18 @@ function repairPrompt(module,type,attempt){
     'The question must test the supplied module content, not generic learning-process boilerplate.',
     'Do not repeat or lightly paraphrase any existing question.',
     'Return exactly one module and exactly one question in the required JSON shape.',
-    `Attempt ${attempt}.`,
+    `Bounded repair attempt ${attempt} of ${MAX_REPAIRS_PER_MODULE}.`,
     `MODULE MATERIAL:\n${clean(JSON.stringify(compactModule(module)),26000)}`
   ].join('\n\n');
 }
 async function repairOne(baseGenerate,request,module,type,attempt){
-  const config={...(request?.config||{}),maxTokens:Math.max(Number(request?.config?.maxTokens)||0,4096),temperature:Math.min(Number(request?.config?.temperature)||0.2,0.2)};
   const result=await baseGenerate({
     ...request,
     purpose:REPAIR_PURPOSE,
     executionProfile:'interactive',
-    config,
+    config:boundedConfig(request?.config,9000),
     schema:repairSchema(clean(module?.moduleId,180),type),
-    maxRepairAttempts:2,
+    maxRepairAttempts:1,
     context:{capability:request?.context?.capability,level:request?.context?.level,proofContract:request?.context?.proofContract,quizContractRepair:true,module:compactModule(module),requiredType:type,requirements:['Return exactly one valid question.','Obey the type-specific schema exactly.','Do not invent curriculum content outside the supplied module.']},
     messages:[
       {role:'system',content:'You are Moss repairing one malformed or missing Living School quiz question. Return strict JSON only. The schema is a hard persistence contract, not a suggestion.'},
@@ -106,7 +111,7 @@ async function enforceQuizContract(baseGenerate,request,initial){
       seen.add(key);questions.push(question);
     }
     let attempts=0;
-    while((questions.length<target||missingTypes(module,questions).length)&&attempts<12){
+    while((questions.length<target||missingTypes(module,questions).length)&&attempts<MAX_REPAIRS_PER_MODULE){
       attempts+=1;
       const missing=missingTypes(module,questions);
       const type=missing[0]||REQUIRED_TYPES[(questions.length+attempts-1)%REQUIRED_TYPES.length];
@@ -118,7 +123,7 @@ async function enforceQuizContract(baseGenerate,request,initial){
     }
     combined.push({moduleId,questions:questions.slice(0,Math.max(target,questions.length))});
   }
-  return{...latest,status:'success',outputJson:{modules:combined},outputText:JSON.stringify({modules:combined}),livingSchoolQuizContract:{revision:REVISION,repairCalls,validatesBeforeCounting:true}};
+  return{...latest,status:'success',outputJson:{modules:combined},outputText:JSON.stringify({modules:combined}),livingSchoolQuizContract:{revision:REVISION,repairCalls,validatesBeforeCounting:true,boundedRepair:true,maxRepairsPerModule:MAX_REPAIRS_PER_MODULE,nestedLegacyLoopBypassed:true}};
 }
 
 export async function installLivingSchoolQuizContractGuardV263(){
@@ -127,10 +132,14 @@ export async function installLivingSchoolQuizContractGuardV263(){
   if(!runtime?.generate)throw new Error('The shared model runtime is unavailable for the Living School quiz contract guard.');
   if(runtime.livingSchoolQuizContractGuardRevision===REVISION)return runtime;
   const baseGenerate=runtime.generate.bind(runtime);
-  const generate=async request=>request?.purpose===QUIZ_PURPOSE?enforceQuizContract(baseGenerate,request,await baseGenerate(request)):baseGenerate(request);
+  const generate=async request=>{
+    if(request?.purpose!==QUIZ_PURPOSE)return baseGenerate(request);
+    const primary=await baseGenerate({...request,purpose:PRIMARY_PURPOSE,config:boundedConfig(request?.config,10000),context:{...(request?.context||{}),quizContractPrimary:true,nestedLegacyLoopBypassed:true}});
+    return enforceQuizContract(baseGenerate,request,primary);
+  };
   const wrapped=Object.freeze({...runtime,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),livingSchoolQuizContractGuardRevision:REVISION});
   globalThis.CivweaveModelRuntime=wrapped;
-  const api=Object.freeze({installed:true,revision:REVISION,validatesBeforeCounting:true,shortAnswerRubricRequired:true,typeSpecificRecoverySchema:true});
+  const api=Object.freeze({installed:true,revision:REVISION,validatesBeforeCounting:true,shortAnswerRubricRequired:true,typeSpecificRecoverySchema:true,boundedRepair:true,maxRepairsPerModule:MAX_REPAIRS_PER_MODULE,nestedLegacyLoopBypassed:true});
   globalThis.CivweaveLivingSchoolQuizContractGuardV263=api;
   try{dispatchEvent(new CustomEvent('civweave:living-school-quiz-contract-ready',{detail:api}))}catch{}
   return api;
