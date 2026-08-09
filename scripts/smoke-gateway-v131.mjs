@@ -4,42 +4,29 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(scriptsDir, 'smoke-gateway-v131-base.mjs');
-const runtimePath = path.join(scriptsDir, '.smoke-gateway-v132.runtime.mjs');
 const VERSION = 'render-installed-runtime-v132';
-const rootStart = "  const rootResponse=await fetch(`${origin}/`,{cache:'no-store'}),rootHtml=await rootResponse.text();";
-const routeStart = "  for(const route of ['/loom/'";
-const rootReplacement = `  const rootResponse=await fetch(\`${'${origin}'}/\`,{cache:'no-store'}),rootHtml=await rootResponse.text();
-  assert(rootResponse.ok,'gateway launcher root failed');
-  assert(rootHtml.includes('<title>Civweave</title>'),'gateway root is not the Civweave launcher');
-  assert(rootHtml.includes('/app/installed-entry-v146.js?v='),'gateway root does not load the installed-entry router');
-  assert(rootHtml.includes("new URL('/app/index.html'"),'gateway root does not route install-required sessions to the installer');
-  const installerResponse=await fetch(\`${'${origin}'}/app/index.html\`,{cache:'no-store'}),installerHtml=await installerResponse.text();
-  assert(installerResponse.ok,'gateway installer route failed');
-  assert(installerHtml.includes(\`Install Civweave v${'${VERSION}'}. The campus downloads automatically.\`),\`gateway installer is not Civweave v${'${VERSION}'}\`);
-  assert(installerHtml.includes('No native modal'),'gateway installer does not describe the fixed settings layer');
-  assert(installerHtml.includes('/app/logos/civweave.svg'),'gateway installer does not use the Civweave logo');`;
-const before = "  for(const route of ['/loom/','/lite/','/app/realm-console-v140.html','/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html']){const response=await fetch(origin+route,{cache:'no-store'}),body=await response.json();assert(response.status===410,`${route} returned ${response.status}, expected 410`);assert(body.localInstallRequired===true,`${route} does not explain installation`)}";
-const after = "  for(const route of ['/loom/','/lite/']){const response=await fetch(origin+route,{cache:'no-store'}),body=await response.json();assert(response.status===410,`${route} returned ${response.status}, expected 410`);assert(body.localInstallRequired===true,`${route} does not explain installation`)}\n  for(const route of ['/app/','/app/index.html','/app/working-campus-v156.html','/app/realm-console-v140.html','/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html']){const response=await fetch(origin+route,{cache:'no-store'});assert(response.ok,`${route} returned ${response.status}, expected a public installed-runtime asset`);const type=String(response.headers.get('content-type')||'');assert(/text\\/html/i.test(type),`${route} returned unexpected content type ${type}`)}";
+const source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 
-let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
-const rootIndex = source.indexOf(rootStart);
-const routeIndex = source.indexOf(routeStart, rootIndex + rootStart.length);
-if (rootIndex < 0 || routeIndex < 0) {
-  throw new Error('Civweave gateway smoke v132 could not find the legacy root-installer assertion.');
+for (const token of [
+  "new URL('/app/index.html',location.origin)",
+  "source','host-bootstrap'",
+  "<title>Install Civweave v${VERSION}</title>",
+  'This hosted page is only the installer, updater, and recovery dock.',
+  'pages are package-only at runtime',
+  'will not silently substitute the live website',
+  "for(const route of ['/loom/','/lite/','/app/realm-console-v140.html','/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html'])",
+  "response.status===410"
+]) {
+  if (!source.includes(token)) throw new Error(`Civweave gateway smoke v132 lost offline-runtime assertion: ${token}`);
 }
-source = `${source.slice(0, rootIndex)}${rootReplacement}\n${source.slice(routeIndex)}`;
-if (!source.includes(before)) {
-  throw new Error('Civweave gateway smoke v132 could not find the legacy 410 assertion.');
+for (const forbidden of [
+  'Open online campus',
+  'Open Civweave online',
+  'launch=online',
+  "expected a public installed-runtime asset",
+  "for(const route of ['/app/','/app/index.html','/app/working-campus-v156.html'"
+]) {
+  if (source.includes(forbidden)) throw new Error(`Civweave gateway smoke v132 refused retired live-runtime assertion: ${forbidden}`);
 }
-source = source.replace(before, after);
-source = source.replace(
-  /  const rootResponse=await fetch\(`\$\{origin\}\/`,\{cache:'no-store'\}\),rootHtml=await rootResponse\.text\(\);assert\(rootResponse\.ok,'gateway installer root failed'\);assert\(rootHtml\.includes\('Install Civweave v\d+\.\d+\.\d+\.'\),'gateway root is not the v\d+\.\d+\.\d+ installer'\);assert\(rootHtml\.includes\('No native modal'\),'gateway root does not describe the fixed settings layer'\);assert\(rootHtml\.includes\('\/app\/logos\/civweave-app-icon\.png'\),'gateway root does not use the app icon'\);/,
-  "  const rootResponse=await fetch(`${origin}/`,{cache:'no-store'}),rootHtml=await rootResponse.text();assert(rootResponse.ok,'gateway launcher root failed');assert(rootHtml.includes('<title>Civweave</title>'),'gateway root is not the Civweave launcher');assert(rootHtml.includes(`/app/installed-entry-v146.js?v=${VERSION}`),'gateway root does not launch the current installed entry');\n  const installerResponse=await fetch(`${origin}/app/index.html`,{cache:'no-store'}),installerHtml=await installerResponse.text();assert(installerResponse.ok,'gateway installer failed');assert(installerHtml.includes(`Install Civweave v${VERSION}`),'gateway installer is not release-current');assert(installerHtml.includes('No native modal'),'gateway installer does not describe the fixed settings layer');assert(installerHtml.includes('/app/logos/civweave.svg'),'gateway installer does not use the Civweave logo');"
-);
-source = source.replace(/campus\.includes\('\d+\.\d+\.\d+'\)/,"campus.includes(VERSION)");
-await fsp.writeFile(runtimePath, source, 'utf8');
-try {
-  await import(`${pathToFileURL(runtimePath).href}?build=${encodeURIComponent(VERSION)}`);
-} finally {
-  await fsp.unlink(runtimePath).catch(() => {});
-}
+
+await import(`${pathToFileURL(sourcePath).href}?build=${encodeURIComponent(VERSION)}`);
