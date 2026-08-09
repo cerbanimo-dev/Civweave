@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-learning-pack-seeds-v1';
+const VERSION='1.1.0-learning-pack-seeds-v1';
 const CATALOG_URL='/downloads/learning-packs/catalog.json';
 const CACHE_NAME='civweave-learning-packs-v1';
 const RECEIPT_KEY='civweave.learning-packs.v1';
@@ -19,7 +19,11 @@ async function sha256(buffer){return hex(await crypto.subtle.digest('SHA-256',bu
 function packUrl(record){return new URL(`/downloads/learning-packs/${record.file||`${record.id}.json`}`,location.origin).href}
 function cachedCurrent(response,record,receipt={}){
   if(!response)return false;
-  if(record.module)return response.headers.get('x-civweave-pack-module')===record.module;
+  if(record.module){
+    const moduleMatches=response.headers.get('x-civweave-pack-module')===record.module;
+    const exportMatches=(response.headers.get('x-civweave-pack-export')||'')===clean(record.export,160);
+    return moduleMatches&&exportMatches;
+  }
   const expectedBytes=Number(record.bytes||0),cachedBytes=Number(response.headers.get('content-length')||receipt.bytes||0);
   const expectedSha=clean(record.sha256,128).toLowerCase(),cachedSha=clean(response.headers.get('x-civweave-sha256')||receipt.sha256,128).toLowerCase();
   return (!expectedBytes||cachedBytes===expectedBytes)&&Boolean(expectedSha)&&cachedSha===expectedSha;
@@ -40,7 +44,7 @@ async function status(catalog=null){
   const active=catalog||await loadCatalog(),cache=await caches.open(CACHE_NAME),receipt=readReceipt(),persistent=navigator.storage?.persisted?await navigator.storage.persisted().catch(()=>false):false,rows=[];
   for(const record of active.packs){
     const response=await cache.match(packUrl(record)),saved=receipt[record.id]||{},current=cachedCurrent(response,record,saved);
-    rows.push({id:record.id,title:record.title,packType:record.packType||'mixed',audience:record.audience||[],optional:record.optional!==false,generated:record.generated===true,bundled:record.bundled===true,available:Boolean(record.module)||record.available!==false,staged:Boolean(response),current,needs_update:Boolean(response)&&!current,bytes:Number(record.bytes||saved.bytes||0),sha256:record.sha256||saved.sha256||'',staged_at:saved.staged_at||null,persistent:Boolean(persistent)});
+    rows.push({id:record.id,title:record.title,packType:record.packType||'mixed',audience:record.audience||[],tags:record.tags||[],optional:record.optional!==false,generated:record.generated===true,bundled:record.bundled===true,available:Boolean(record.module)||record.available!==false,staged:Boolean(response),current,needs_update:Boolean(response)&&!current,bytes:Number(record.bytes||saved.bytes||0),sha256:record.sha256||saved.sha256||'',staged_at:saved.staged_at||null,persistent:Boolean(persistent)});
   }
   return rows;
 }
@@ -49,8 +53,9 @@ async function persistStorage(){
   try{const existing=await navigator.storage.persisted?.();return{supported:true,persisted:Boolean(existing||await navigator.storage.persist())}}catch{return{supported:true,persisted:false}}
 }
 async function moduleBuffer(record){
-  const module=await import(record.module),pack=module.default||module.pack;
-  if(!pack||typeof pack!=='object')throw new Error(`${record.title} module did not export a learning pack.`);
+  const module=await import(record.module);
+  const pack=record.export?module[record.export]:(module.default||module.pack);
+  if(!pack||typeof pack!=='object')throw new Error(`${record.title} module did not export learning pack ${record.export||'default'}.`);
   return new TextEncoder().encode(`${JSON.stringify(pack)}\n`).buffer;
 }
 async function stage(ids,options={}){
@@ -74,9 +79,9 @@ async function stage(ids,options={}){
     const actual=await sha256(buffer);
     if(!record.module&&actual!==clean(record.sha256,128).toLowerCase())throw new Error(`${record.title} checksum mismatch.`);
     const headers={'Content-Type':record.contentType||'application/json','Content-Length':String(buffer.byteLength),'X-Civweave-SHA256':actual,'X-Civweave-Pack-Id':id,'X-Civweave-Pack-File':record.file||`${id}.json`};
-    if(record.module)headers['X-Civweave-Pack-Module']=record.module;
+    if(record.module){headers['X-Civweave-Pack-Module']=record.module;headers['X-Civweave-Pack-Export']=clean(record.export,160)}
     await cache.put(url,new Response(buffer,{headers}));
-    receipt[id]={staged_at:new Date().toISOString(),sha256:actual,bytes:buffer.byteLength,url,file:record.file||`${id}.json`,module:record.module||''};writeReceipt(receipt);
+    receipt[id]={staged_at:new Date().toISOString(),sha256:actual,bytes:buffer.byteLength,url,file:record.file||`${id}.json`,module:record.module||'',export:record.export||''};writeReceipt(receipt);
     completed++;completedBytes+=buffer.byteLength;options.onProgress?.({phase:'stored',record,completed,total:selected.length,completedBytes,totalBytes});
   }
   const persistence=await persistStorage();options.onProgress?.({phase:'persistent',completed,total:selected.length,completedBytes,totalBytes,persistence});
@@ -99,7 +104,8 @@ async function bootstrapCore(){
   try{
     const catalog=await loadCatalog(),core=catalog.packs.filter(record=>record.bundled===true&&record.autoStage!==false).map(record=>record.id);
     if(core.length)await stage(core);
-  }catch(error){console.warn('[Learning packs bootstrap]',error)}
+    return core;
+  }catch(error){console.warn('[Learning packs bootstrap]',error);return[]}
 }
 globalThis.CivweaveLearningPackSeedsV1=Object.freeze({version:VERSION,CATALOG_URL,CACHE_NAME,RECEIPT_KEY,loadCatalog,status,stage,remove,clear,openPack,packUrl,persistStorage,bootstrapCore});
 })();
