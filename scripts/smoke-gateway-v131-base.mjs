@@ -21,7 +21,7 @@ try{
 
   const installerResponse=await fetch(`${origin}/app/index.html`,{cache:'no-store'}),installerHtml=await installerResponse.text();
   assert(installerResponse.ok,'gateway installer page failed');
-  assert(installerHtml.includes(`Install Civweave v${VERSION}. The campus downloads before runtime opens.`),`gateway installer is not Civweave v${VERSION}`);
+  assert(installerHtml.includes(`<title>Install Civweave v${VERSION}</title>`),`gateway installer is not the v${VERSION} installer document`);
   assert(installerHtml.includes('This hosted page is only the installer, updater, and recovery dock.'),'gateway installer does not define the hosted origin as a bootstrap/update surface');
   assert(installerHtml.includes('pages are package-only at runtime'),'gateway installer lost the downloaded-runtime contract');
   assert(installerHtml.includes('will not silently substitute the live website'),'gateway installer does not fail closed on missing local package files');
