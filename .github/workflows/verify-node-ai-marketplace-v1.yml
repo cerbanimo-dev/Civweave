@@ -8,6 +8,8 @@ on:
       - 'lib/ai-capability-token-v1.mjs'
       - 'public/app/node-ai-mesh-v1.js'
       - 'public/app/shared/civweave-node-ai-routing-v1.mjs'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/offline-package-v208.json'
       - 'scripts/test-node-ai-*.mjs'
       - '.env.ai-wallet.example'
       - 'config/node-ai-services.example.json'
@@ -42,8 +44,15 @@ jobs:
           node --check lib/ai-wallet-http-v1.mjs
           node --check public/app/node-ai-mesh-v1.js
           node --check public/app/shared/civweave-node-ai-routing-v1.mjs
+          node --check public/app/install-boundary-v146.js
       - name: Test node marketplace contracts
         run: node --test scripts/test-node-ai-marketplace-v1.mjs scripts/test-node-ai-http-v1.mjs scripts/test-node-ai-routing-v1.mjs scripts/test-node-ai-service-package-v1.mjs
+      - name: Verify canonical bootstrap and offline carriage
+        run: |
+          grep -q "const NODE_AI_MESH_RUNTIME='/app/node-ai-mesh-v1.js'" public/app/install-boundary-v146.js
+          grep -q "SYSTEM_EXPERIENCE_SCRIPTS=.*" public/app/install-boundary-v146.js || true
+          grep -q 'NODE_AI_MESH_RUNTIME' public/app/install-boundary-v146.js
+          node -e "const p=require('./public/app/offline-package-v208.json'); for(const f of ['/app/local-object-mesh-v146.js','/app/node-ai-mesh-v1.js','/app/shared/civweave-node-ai-routing-v1.mjs']) if(!p.seeds.includes(f)) throw new Error('missing offline seed '+f)"
       - name: Reject centralized wallet architecture
         run: |
           test ! -e lib/ai-wallet-postgres-v1.mjs
