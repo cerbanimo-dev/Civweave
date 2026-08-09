@@ -1,7 +1,7 @@
 {
   "version": "1.0.33",
-  "revision": "canonical-background-campus-v241-systems-mesh-v251-node-ai-mesh-v1",
-  "description": "Civweave campus pack. The service worker starts from the installed entry, the five canonical system surfaces, canonical reward runtimes, the non-privileged systems mesh contract, and the node AI discovery/router contracts; it discovers current same-origin dependencies and continues the resumable download while the PWA is in use.",
+  "revision": "canonical-background-campus-v241-systems-mesh-v251",
+  "description": "Civweave campus pack. The service worker starts from the installed entry, the five canonical system surfaces, canonical reward runtimes, and the non-privileged systems mesh contract; it discovers current same-origin dependencies, including node AI mesh support loaded by the canonical install boundary, and continues the resumable download while the PWA is in use.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
@@ -9,9 +9,6 @@
     "/app/cw-reward-legacy-bridge-v2.js",
     "/app/cw-reward-surfaces-v2.js",
     "/app/civweave-systems-mesh-v251.js",
-    "/app/local-object-mesh-v146.js",
-    "/app/node-ai-mesh-v1.js",
-    "/app/shared/civweave-node-ai-routing-v1.mjs",
     "/app/working-campus-v156.html",
     "/app/cabinets/living-school/index.html",
     "/app/realm-console-v140.html",
