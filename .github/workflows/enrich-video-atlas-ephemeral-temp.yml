@@ -96,8 +96,13 @@ jobs:
           assert payload['requested_video_ids'] == enrichment['requested_video_ids']
           print(json.dumps({'records':meta['records'],'requested':enrichment['requested_video_ids'],'missing':enrichment['missing_or_unavailable_video_ids'],'bytes':meta['bytes'],'expires_at':meta['expires_at']}, indent=2))
           PY
+          git stash push --include-untracked -m "video-atlas-enrichment-${GITHUB_RUN_ID}" -- \
+            public/downloads/knowledge-schools/video-atlases/youtube-metadata-current.json.gz \
+            public/downloads/knowledge-schools/video-atlases/catalog.json \
+            public/downloads/knowledge-schools/video-atlases/SHA256SUMS
           git fetch origin agent/video-learning-atlas-v1
           git rebase origin/agent/video-learning-atlas-v1
+          git stash pop
           git rm -f ".video-atlas-ephemeral-public-${GITHUB_RUN_ID}.txt" ".video-atlas-ephemeral-ciphertext-${GITHUB_RUN_ID}.txt"
           git add public/downloads/knowledge-schools/video-atlases/youtube-metadata-current.json.gz \
                   public/downloads/knowledge-schools/video-atlases/catalog.json \
