@@ -1,7 +1,7 @@
 'use strict';
 
 (()=>{
-  const VERSION='1.0.60-local-model-background-v267';
+  const VERSION='1.0.67-local-model-background-v271-integrity';
   const PREFIX='cw-local-ai-v267::';
   const MODEL_CACHE='civweave-model-generative-v266';
   const META_CACHE='civweave-model-download-meta-v267';
@@ -29,6 +29,16 @@
       for(const client of windows)client.postMessage({type:'CIVWEAVE_LOCAL_MODEL_BACKGROUND',version:VERSION,...packet});
     }catch{}
   }
+  async function validateRecord(request,response){
+    const path=new URL(request.url).pathname,type=String(response.headers.get('content-type')||'').toLowerCase();
+    if(type.includes('text/html'))throw new Error(`${path} returned HTML instead of model data.`);
+    if(/\.json$/i.test(path)){
+      const text=await response.clone().text();
+      if(!text.trim())throw new Error(`${path} returned an empty JSON file.`);
+      try{JSON.parse(text)}catch{throw new Error(`${path} returned invalid JSON.`)}
+    }
+    return response;
+  }
   async function copyRecords(registration){
     const cache=await caches.open(MODEL_CACHE);
     const records=await registration.matchAll();
@@ -36,6 +46,7 @@
     for(const record of records){
       const response=await record.responseReady;
       if(!response?.ok)throw new Error(`${new URL(record.request.url).pathname} returned ${response?.status||0}`);
+      await validateRecord(record.request,response);
       bytes+=Number(response.headers.get('content-length')||0);
       await cache.put(record.request,response);
       copied+=1;
