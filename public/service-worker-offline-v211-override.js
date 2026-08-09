@@ -199,7 +199,8 @@ async function v211DownloadOfflinePackage(event) {
   // Only the CURRENT manifest is authoritative. Historical assets can satisfy cache hits,
   // but they never nominate themselves for the next dependency graph.
   const initialAssets = [...new Set((manifest.seeds || []).filter(Boolean))];
-  const queue = initialAssets.map(pathname => ({ pathname, depth: 0, required: true }));
+  for (const asset of (manifest.assets || []).filter(Boolean)) if (!initialAssets.includes(asset)) initialAssets.push(asset);
+  const queue = initialAssets.map(pathname => ({ pathname, depth: 0, required: requiredSeeds.has(pathname) }));
   const queued = new Set(initialAssets);
   const processed = new Set();
   const downloaded = new Set();
@@ -237,8 +238,6 @@ async function v211DownloadOfflinePackage(event) {
       processed.add(item.pathname);
       attempted += 1;
       try {
-        // First crawl of a new release refreshes text/code to discover the current graph.
-        // Same-release resumes are cache-first, so a retry does not redownload hundreds of files.
         const preferNetwork = !sameRelease && V211_DISCOVERY_TEXT.test(item.pathname);
         const { response, contentLength } = await cacheOfflineAsset(item.pathname, { preferNetwork });
         bytes += contentLength;
@@ -256,25 +255,13 @@ async function v211DownloadOfflinePackage(event) {
         const status = v211FailureStatus(error);
         const prior = previousFailures.get(item.pathname);
         const attempts = Math.max(1, Number(prior?.attempts || 0) + 1);
-        const entry = v211FailureEntry({
-          pathname: item.pathname,
-          message: error?.message || String(error),
-          status,
-          attempts,
-          required: item.required
-        }, attempts);
+        const entry = v211FailureEntry({ pathname: item.pathname, message: error?.message || String(error), status, attempts, required: item.required }, attempts);
         const permanent = status === 404 || status === 410;
         if (!item.required && (permanent || attempts >= 2)) {
           queued.delete(item.pathname);
           failed.delete(item.pathname);
-          skipped.set(item.pathname, v211SkippedEntry({
-            ...entry,
-            reason: permanent ? 'not-found' : 'repeated-unavailable',
-            retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString()
-          }));
-        } else {
-          failed.set(item.pathname, entry);
-        }
+          skipped.set(item.pathname, v211SkippedEntry({ ...entry, reason: permanent ? 'not-found' : 'repeated-unavailable', retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString() }));
+        } else failed.set(item.pathname, entry);
         return { item, references: [] };
       }
     }));
@@ -291,13 +278,7 @@ async function v211DownloadOfflinePackage(event) {
 
   for (const pathname of previousAssets) {
     if (!pathname || queued.has(pathname) || requiredSeeds.has(pathname) || skipped.has(pathname)) continue;
-    skipped.set(pathname, v211SkippedEntry({
-      pathname,
-      message: 'This file belonged to an older campus graph and is no longer referenced by the current release.',
-      attempts: 1,
-      reason: 'stale-not-rediscovered',
-      retryAfter: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
-    }));
+    skipped.set(pathname, v211SkippedEntry({ pathname, message: 'This file belonged to an older campus graph and is no longer referenced by the current release.', attempts: 1, reason: 'stale-not-rediscovered', retryAfter: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() }));
   }
 
   const ready = queue.length === 0 && failed.size === 0;

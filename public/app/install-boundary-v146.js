@@ -31,6 +31,7 @@ const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
 const SYSTEMS_MESH_RUNTIME='/app/civweave-systems-mesh-v251.js';
+const NODE_AI_MESH_RUNTIME='/app/node-ai-mesh-v1.js';
 const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
 const RADIO_TRACK_SUGGESTIONS='/app/radio-track-suggestions-v240.js';
 const SHARED_REVIEW_SURFACE='/app/shared-review-surface-v234.js';
@@ -49,6 +50,7 @@ const SYSTEM_EXPERIENCE_SCRIPTS=[
   SYSTEM_RADIO_AGENT,
   RADIO_TRACK_SUGGESTIONS,
   SYSTEMS_MESH_RUNTIME,
+  NODE_AI_MESH_RUNTIME,
   GUIDE_IDENTITY_SCRIPT,
   REALM_SESSION_INTEGRITY,
   GUIDE_WORKSPACE,
@@ -235,6 +237,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
   systemsMeshRevision:'v251-five-system-non-privileged-event-contract',
+  nodeAiMeshRevision:'v1-node-owned-service-discovery-routing',
   campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',
   radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
   radioTrackSuggestionRevision:'v241-playlist-context-track-links',
