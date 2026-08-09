@@ -8,7 +8,7 @@ const catalog=JSON.parse(fs.readFileSync(new URL('../public/downloads/learning-p
 const livingEntry=fs.readFileSync(new URL('../public/app/cabinets/living-school/index.html',import.meta.url),'utf8');
 const cerbanimoEntry=fs.readFileSync(new URL('../public/app/realm-console-v140.html',import.meta.url),'utf8');
 const cerbanimoAdapter=fs.readFileSync(new URL('../public/app/cerbanimo-learning-packs-v1.js',import.meta.url),'utf8');
-const livingAdapter=fs.readFileSync(new URL('../public/app/cabinets/living-school/living-school-learning-packs-v1.mjs',import.meta.url),'utf8');
+const livingAdapter=fs.readFileSync(new URL('../public/app/living-school-learning-packs-v1.mjs',import.meta.url),'utf8');
 const builder=fs.readFileSync(new URL('./build-learning-packs-v1.mjs',import.meta.url),'utf8');
 const seedRuntime=fs.readFileSync(new URL('../public/app/learning-pack-seeds-v1.js',import.meta.url),'utf8');
 
@@ -50,7 +50,7 @@ assert.ok(core?.available&&core?.bundled&&core?.module);
 const onet=catalog.packs.find(row=>row.id==='onet-labor-atlas-30-3');
 assert.ok(onet?.generated&&onet?.buildCommand);
 
-assert(livingEntry.includes('living-school-learning-packs-v1.mjs'),'Living School active entry does not load the pack adapter.');
+assert(livingEntry.includes('/app/living-school-learning-packs-v1.mjs'),'Living School active entry does not load the pack adapter.');
 assert(cerbanimoEntry.includes('/app/cerbanimo-learning-packs-v1.js'),'Cerbanimo active entry does not load the pack adapter.');
 assert(cerbanimoEntry.indexOf('cerbanimo-quest-engine-v144.js')<cerbanimoEntry.indexOf('cerbanimo-learning-packs-v1.js'),'Cerbanimo pack adapter must load after the quest engine.');
 for(const token of ['CivweaveCerbanimoLearningPacksV1','templateToQuest','createQuest','laborTaskDraft'])assert(cerbanimoAdapter.includes(token),`Cerbanimo pack adapter missing ${token}`);
