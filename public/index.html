@@ -11,12 +11,13 @@
   <script>
   (() => {
     'use strict';
-    const VERSION='1.0.58';
+    const RELEASE_SYNC_ENTRY='/app/installed-entry-v146.js?v=1.0.58';
+    const VERSION=new URL(RELEASE_SYNC_ENTRY,location.origin).searchParams.get('v')||'';
     const params=new URLSearchParams(location.search);
     const installer=new URL('/app/index.html',location.origin);
-    for(const [key,value] of params){if(key==='source')continue;installer.searchParams.append(key,value)}
+    for(const [key,value] of params){if(key==='source'||key==='version')continue;installer.searchParams.append(key,value)}
     installer.searchParams.set('source','host-bootstrap');
-    installer.searchParams.set('version',VERSION);
+    if(VERSION)installer.searchParams.set('version',VERSION);
     installer.hash=location.hash;
     location.replace(installer.href);
   })();
