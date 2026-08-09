@@ -1,21 +1,27 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-node-ai-mesh-v1';
+const VERSION='1.1.0-node-ai-mesh-v1';
 const SERVICE_KIND='civweave.node-ai.service-advert.v1';
 const SETTLEMENT_KIND='civweave.node-ai.settlement-batch.v1';
 const SETTLEMENT_BATCH_SCHEMA='civweave.node-ai-mesh-settlement-batch.v1';
 const ROUTER_URL='/app/shared/civweave-node-ai-routing-v1.mjs';
 const DEFAULT_SYNC_MS=90_000;
+const LEASE_KEY='civweave.node-ai-mesh.sync-lease.v1';
+const INSTANCE_ID=`node-ai-mesh:${globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
 let routerPromise=null;
 let meshPromise=null;
 let syncTimer=null;
 let onlineHandler=null;
+let pageHideHandler=null;
 let meshUnsubscribe=null;
 let gatewayUrl=null;
+let activeSyncMs=DEFAULT_SYNC_MS;
+let advertiseLocal=true;
 
 const now=()=>new Date().toISOString();
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 const clone=value=>value==null?value:structuredClone(value);
+const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 
 function loadScript(src,ready){
   if(ready?.())return Promise.resolve(ready());
@@ -125,6 +131,20 @@ async function routeAndInvoke({routing={},sessionToken,deviceId,maxRetailCostCen
   const response=await invoke({selection:result.selected,capability:authorization.capability,deviceId,request,requestId,baseUrl});
   return{routing:result,authorization,response};
 }
+function leaseTtl(){return Math.max(75_000,activeSyncMs*2.5)}
+function acquireLease(){
+  try{
+    const current=parse(localStorage.getItem(LEASE_KEY),null),time=Date.now();
+    if(current?.owner&&current.owner!==INSTANCE_ID&&Number(current.expiresAt)>time)return false;
+    const next={owner:INSTANCE_ID,expiresAt:time+leaseTtl(),updatedAt:now()};
+    localStorage.setItem(LEASE_KEY,JSON.stringify(next));
+    return parse(localStorage.getItem(LEASE_KEY),{})?.owner===INSTANCE_ID;
+  }catch{return true}
+}
+function releaseLease(){
+  try{const current=parse(localStorage.getItem(LEASE_KEY),null);if(current?.owner===INSTANCE_ID)localStorage.removeItem(LEASE_KEY)}catch{}
+}
+function jitter(ms){return Math.round(ms*(0.85+Math.random()*0.3))}
 async function sync(baseUrl=gatewayUrl||location.origin){
   if(navigator.onLine===false)return{sent:0,received:0,offline:true};
   const mesh=await ensureMesh();
@@ -133,26 +153,43 @@ async function sync(baseUrl=gatewayUrl||location.origin){
   return result;
 }
 async function tick(){
-  try{await publishManifestFromNode(gatewayUrl||location.origin)}catch{}
-  try{await sync(gatewayUrl||location.origin)}catch(error){dispatchEvent(new CustomEvent('civweave:node-ai-mesh-error',{detail:{message:error.message,at:now()}}))}
+  if(!acquireLease())return{leader:false};
+  if(advertiseLocal)try{await publishManifestFromNode(gatewayUrl||location.origin)}catch{}
+  try{return{leader:true,...await sync(gatewayUrl||location.origin)}}catch(error){dispatchEvent(new CustomEvent('civweave:node-ai-mesh-error',{detail:{message:error.message,at:now()}}));return{leader:true,error:error.message}}
+}
+function scheduleNext(){
+  if(syncTimer)clearTimeout(syncTimer);
+  syncTimer=setTimeout(async()=>{await tick();scheduleNext()},jitter(activeSyncMs));
 }
 async function start({baseUrl=location.origin,syncIntervalMs=DEFAULT_SYNC_MS,advertiseLocalNode=true}={}){
-  stop();gatewayUrl=String(baseUrl||location.origin);
+  stop();gatewayUrl=String(baseUrl||location.origin);advertiseLocal=advertiseLocalNode!==false;
+  activeSyncMs=Math.max(30_000,Math.min(15*60_000,Number(syncIntervalMs)||DEFAULT_SYNC_MS));
   const mesh=await ensureMesh();await router();
-  if(advertiseLocalNode)try{await publishManifestFromNode(gatewayUrl)}catch{}
-  await sync(gatewayUrl).catch(()=>({sent:0,received:0}));
-  const interval=Math.max(30_000,Math.min(15*60_000,Number(syncIntervalMs)||DEFAULT_SYNC_MS));
-  syncTimer=setInterval(tick,interval);
+  await tick();
+  scheduleNext();
   onlineHandler=()=>tick();addEventListener('online',onlineHandler);
+  pageHideHandler=()=>stop();addEventListener('pagehide',pageHideHandler,{once:true});
   meshUnsubscribe=mesh.subscribe(event=>{
     if(event?.type==='object-received'||event?.type==='gateway-sync')dispatchEvent(new CustomEvent('civweave:node-ai-discovery-changed',{detail:{event,at:now()}}));
   });
-  return{started:true,baseUrl:gatewayUrl,syncIntervalMs:interval};
+  return{started:true,baseUrl:gatewayUrl,syncIntervalMs:activeSyncMs,leader:acquireLease()};
 }
-function stop(){if(syncTimer){clearInterval(syncTimer);syncTimer=null}if(onlineHandler){removeEventListener('online',onlineHandler);onlineHandler=null}if(meshUnsubscribe){try{meshUnsubscribe()}catch{}meshUnsubscribe=null}return true}
-function status(){return{version:VERSION,started:Boolean(syncTimer),baseUrl:gatewayUrl||null,serviceKind:SERVICE_KIND,settlementKind:SETTLEMENT_KIND,syncIntervalMs:DEFAULT_SYNC_MS}}
+function stop(){
+  if(syncTimer){clearTimeout(syncTimer);syncTimer=null}
+  if(onlineHandler){removeEventListener('online',onlineHandler);onlineHandler=null}
+  if(pageHideHandler){removeEventListener('pagehide',pageHideHandler);pageHideHandler=null}
+  if(meshUnsubscribe){try{meshUnsubscribe()}catch{}meshUnsubscribe=null}
+  releaseLease();
+  return true
+}
+function status(){
+  let lease=null;try{lease=parse(localStorage.getItem(LEASE_KEY),null)}catch{}
+  return{version:VERSION,started:Boolean(syncTimer),baseUrl:gatewayUrl||null,serviceKind:SERVICE_KIND,settlementKind:SETTLEMENT_KIND,syncIntervalMs:activeSyncMs,leaseOwner:lease?.owner||null,leader:lease?.owner===INSTANCE_ID}
+}
+function autoStart(){start({baseUrl:location.origin,syncIntervalMs:DEFAULT_SYNC_MS,advertiseLocalNode:true}).catch(error=>dispatchEvent(new CustomEvent('civweave:node-ai-mesh-error',{detail:{message:error.message,phase:'auto-start',at:now()}})))}
 
 const api=Object.freeze({version:VERSION,SERVICE_KIND,SETTLEMENT_KIND,SETTLEMENT_BATCH_SCHEMA,ensureMesh,publishManifest,publishManifestFromNode,publishSettlementBatch,listServiceObjects,listSettlementObjects,discover,route,resolveBaseUrl,requestCapability,invoke,routeAndInvoke,sync,start,stop,status});
 globalThis.CivweaveNodeAIMeshV1=api;
 dispatchEvent(new CustomEvent('civweave:node-ai-mesh-ready',{detail:status()}));
+document.readyState==='loading'?addEventListener('DOMContentLoaded',autoStart,{once:true}):queueMicrotask(autoStart);
 })();
