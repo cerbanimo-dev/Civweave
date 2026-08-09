@@ -56,6 +56,11 @@ await patch('public/app/manifest.webmanifest',source=>{
 
 await patch('public/install-v130.js',source=>replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'installer runtime version'));
 await patch('public/app/installed-entry-v146.html',source=>replaceRequired(source,/installed-entry-v146\.js\?v=\d+\.\d+\.\d+/,`installed-entry-v146.js?v=${version}`,'installed entry revision'));
+await patch('public/app/installed-entry-v146.js',source=>{
+  source=replaceRequired(source,/const FALLBACK_VERSION='\d+\.\d+\.\d+';/,`const FALLBACK_VERSION='${version}';`,'installed-entry fallback version');
+  source=replaceRequired(source,/version:'\d+\.\d+\.\d+-chat-convergence-v250'/,`version:'${version}-chat-convergence-v250'`,'installed-entry exported version');
+  return source;
+});
 await patch('public/app/system-routes-v227.js',source=>replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'five-system route version'));
 await patch('public/app/themed-system-nav-v178.js',source=>{
   source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+-five-system-navigation-v227';/,`const VERSION='${version}-five-system-navigation-v227';`,'themed navigation version');
