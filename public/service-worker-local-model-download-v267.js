@@ -1,7 +1,7 @@
 'use strict';
 
 (()=>{
-  const VERSION='1.0.60-local-model-background-v267';
+  const VERSION='1.0.66-local-model-background-v270-integrity';
   const PREFIX='cw-local-ai-v267::';
   const MODEL_CACHE='civweave-model-generative-v266';
   const META_CACHE='civweave-model-download-meta-v267';
@@ -29,6 +29,17 @@
       for(const client of windows)client.postMessage({type:'CIVWEAVE_LOCAL_MODEL_BACKGROUND',version:VERSION,...packet});
     }catch{}
   }
+  async function validateRecord(record,response){
+    const pathname=new URL(record.request.url).pathname;
+    const type=String(response.headers.get('content-type')||'').toLowerCase();
+    if(type.includes('text/html'))throw new Error(`${pathname} returned HTML instead of model data.`);
+    if(/\.json$/i.test(pathname)){
+      const text=await response.clone().text();
+      const head=text.trimStart().slice(0,64).toLowerCase();
+      if(head.startsWith('<!doctype')||head.startsWith('<html'))throw new Error(`${pathname} returned HTML instead of JSON model metadata.`);
+      try{JSON.parse(text)}catch{throw new Error(`${pathname} returned invalid JSON model metadata.`)}
+    }
+  }
   async function copyRecords(registration){
     const cache=await caches.open(MODEL_CACHE);
     const records=await registration.matchAll();
@@ -36,6 +47,7 @@
     for(const record of records){
       const response=await record.responseReady;
       if(!response?.ok)throw new Error(`${new URL(record.request.url).pathname} returned ${response?.status||0}`);
+      await validateRecord(record,response);
       bytes+=Number(response.headers.get('content-length')||0);
       await cache.put(record.request,response);
       copied+=1;
@@ -46,10 +58,12 @@
     const info=parts(event.registration);if(!info)return;
     const registration=event.registration;
     let detail={status,modelId:info.modelId,revision:info.revision,downloaded:Number(registration.downloaded||0),downloadTotal:Number(registration.downloadTotal||0),failureReason:clean(registration.failureReason||'')};
-    if(status==='ready'){
-      const copied=await copyRecords(registration);
-      detail={...detail,...copied,downloaded:Number(registration.downloaded||copied.bytes||0)};
-    }
+    try{
+      if(status==='ready'){
+        const copied=await copyRecords(registration);
+        detail={...detail,...copied,downloaded:Number(registration.downloaded||copied.bytes||0)};
+      }
+    }catch(error){status='error';detail={...detail,status:'error',failureReason:clean(error?.message||error)};}
     await writeMeta(info.jobId,detail);
     await broadcast({jobId:info.jobId,...detail});
     try{await event.updateUI?.({title:status==='ready'?'Civweave local model ready':status==='aborted'?'Civweave model download cancelled':'Civweave model download needs attention'})}catch{}
