@@ -39,6 +39,6 @@
     "check": "npm run check:syntax && npm run test:ai-wallet && npm run test:ai-wallet-http && npm run test:ai-wallet-postgres && node scripts/verify-minilm-fixed-ort.mjs && node scripts/verify-five-system-navigation-v227.mjs && node scripts/verify-ai-settings-self-contained-v181.mjs && node scripts/verify-v106-settings-layer-v179.mjs && node scripts/verify-render-deterministic-v176.mjs && node scripts/verify-parity-ledger.mjs && node scripts/smoke-gateway-v131.mjs",
     "check:gateway": "npm run test:ai-wallet-http && npm run test:ai-wallet-postgres && node scripts/verify-five-system-navigation-v227.mjs && node scripts/verify-ai-settings-self-contained-v181.mjs && node scripts/verify-v106-settings-layer-v179.mjs && node scripts/verify-render-deterministic-v176.mjs && node scripts/verify-parity-ledger.mjs && node scripts/smoke-gateway-v131.mjs",
     "build:install": "bash scripts/build-install-artifacts.sh",
-    "build:release": "npm run transformer:stage && npm run minilm:fixed-model:pull && npm run check && npm run build:install"
+    "build:release": "npm run minilm:fixed-model:pull && npm run transformer:stage && npm run check && npm run build:install"
   }
 }
