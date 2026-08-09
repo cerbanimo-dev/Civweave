@@ -16,6 +16,8 @@ const systems={civweave:'/app/working-campus-v156.html','living-school':'/app/ca
 const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-version-v1.js','/app/ai-settings-bind-guard-v230.js','/app/ai-settings-device-repair-v229.js'];
 const allowedExperienceSupport=[
   '/app/experience-orchestrator-v232.js',
+  '/app/system-radio-agent-v233.js',
+  '/app/radio-track-suggestions-v240.js',
   '/app/civweave-systems-mesh-v251.js',
   '/app/guide-identity-integrity-v216.js',
   '/app/realm-session-integrity-v237.js',
@@ -23,8 +25,6 @@ const allowedExperienceSupport=[
   '/app/working-campus-topbar-v243.js',
   '/app/themed-system-nav-v178.js',
   '/app/campus-background-download-v241.js',
-  '/app/system-radio-agent-v233.js',
-  '/app/radio-track-suggestions-v240.js',
   '/app/shared-review-surface-v234.js',
   '/app/shared-guide-surface-v236.js'
 ];
