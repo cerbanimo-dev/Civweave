@@ -31,7 +31,8 @@ jobs:
     timeout-minutes: 45
     env:
       VIDEO_ATLAS_PER_SCHOOL: ${{ github.event.inputs.per_school || '250' }}
-      VIDEO_ATLAS_WORKERS: '8'
+      VIDEO_ATLAS_WORKERS: '4'
+      VIDEO_ATLAS_SEARCH_ROWS: '100'
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
     steps:
