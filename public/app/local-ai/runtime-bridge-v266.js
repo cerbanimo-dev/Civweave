@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='1.0.65-local-ai-bridge-v269-runtime-spine';
+const VERSION='1.0.66-local-ai-bridge-v270-streaming';
 if(globalThis.CivweaveLocalModelBridgeV266?.version===VERSION)return;
-const MIDDLEWARE_ID='downloaded-local-v269';
+const MIDDLEWARE_ID='downloaded-local-v270';
 const priorBridge=globalThis.CivweaveLocalModelBridgeV266;
 let original=priorBridge?.base?.()||null,patched=null,registered=false;
 const downloads=()=>globalThis.CivweaveLocalModelDownloadV266;
@@ -20,24 +20,26 @@ function routeDecision(request,spec){
   const profile=request.executionProfile||'interactive';
   return{useLocal:profile==='interactive',reason:profile==='interactive'?'legacy interactive local route':'agentic local routing requires the capability broker',requirements:{profile}};
 }
-function resultFrom(request,run,started,decision){
+function wantsStream(request={}){return Boolean(request.config?.stream??request.stream)}
+function resultFrom(request,run,started,decision,requestId,events){
   const spec=local().activeSpec();
   const structuredRequested=Boolean(request.schema||request.responseFormat==='json'||request.responseFormat==='structured');
   return{
-    schema:'civweave-model-result-1.0',requestId:`local-${Date.now().toString(36)}`,purpose:String(request?.purpose||'interactive'),status:'success',
+    schema:'civweave-model-result-1.0',requestId,purpose:String(request?.purpose||'interactive'),status:'success',
     requested:{provider:'downloaded-local',model:spec?.id||'local-model',endpoint:'',executionProfile:request?.executionProfile||'interactive'},actual:{provider:'downloaded-local',model:spec?.id||'local-model'},
     outputText:run.text||'',outputJson:run.json||null,usage:{inputTokens:0,outputTokens:0,totalTokens:0,costCents:0,remainingCents:0},
-    timing:{startedAt:new Date(Date.now()-(performance.now()-started)).toISOString(),completedAt:new Date().toISOString(),elapsedMs:run.elapsedMs||Math.round(performance.now()-started)},events:[],
-    diagnostics:[{code:'LOCAL_MODEL',message:'Generated entirely on this device from the explicitly selected downloaded model.'},{code:'CAPABILITY_ROUTE',message:decision.reason,requirements:decision.requirements||null}],
-    stream:{requested:false,used:false},structured:{requested:structuredRequested,valid:!structuredRequested||Boolean(run.json),repairAttempts:0},
+    timing:{startedAt:new Date(Date.now()-(performance.now()-started)).toISOString(),completedAt:new Date().toISOString(),elapsedMs:run.elapsedMs||Math.round(performance.now()-started)},events:events.slice(-120),
+    diagnostics:[{code:'LOCAL_MODEL',message:'Generated entirely on this device from the explicitly selected downloaded model.'},{code:'CAPABILITY_ROUTE',message:decision.reason,requirements:decision.requirements||null},{code:'LOCAL_STREAMING',message:run.streamed?'Downloaded-local text was streamed incrementally from the WebGPU worker.':'Downloaded-local generation returned as one completed result.'}],
+    stream:{requested:wantsStream(request),used:Boolean(run.streamed)},structured:{requested:structuredRequested,valid:!structuredRequested||Boolean(run.json),repairAttempts:0},
     capabilityRouting:{schema:'civweave.ai-capability-route.v1',route:'downloaded-local',reason:decision.reason,requirements:decision.requirements||null},
   };
 }
 async function runLocal(request,spec,decision){
-  const started=performance.now();
+  const started=performance.now(),requestId=`local-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,events=[];let accumulated='';
+  const emit=(phase,detail={})=>{const event={schema:'civweave-model-event-1.0',requestId,phase,provider:'downloaded-local',model:spec.id,purpose:String(request?.purpose||'interactive'),executionProfile:request.executionProfile||'interactive',at:new Date().toISOString(),...detail};events.push(event);try{request.onEvent?.(event)}catch{}try{dispatchEvent(new CustomEvent('civweave:model-event',{detail:event}))}catch{}return event};
   try{
-    const run=await local().generate({messages:request.messages||[],maxNewTokens:request.config?.maxTokens||request.maxTokens||1024,temperature:request.config?.temperature??request.temperature??.2,timeoutMs:timeoutFor(spec,request),onProgress:progress=>{const detail={phase:'local-model-progress',provider:'downloaded-local',model:spec.id,executionProfile:request.executionProfile||'interactive',...progress};try{request.onEvent?.(detail)}catch{}try{dispatchEvent(new CustomEvent('civweave:local-model-inference-progress',{detail}))}catch{}}});
-    const result=resultFrom(request,run,started,decision);
+    const run=await local().generate({messages:request.messages||[],maxNewTokens:request.config?.maxTokens||request.maxTokens||1024,temperature:request.config?.temperature??request.temperature??.2,timeoutMs:timeoutFor(spec,request),stream:wantsStream(request),onToken:token=>{const text=String(token?.text||'');if(!text)return;accumulated+=text;const event=emit('partial',{text,accumulatedText:accumulated,index:Number(token?.index)||0});try{dispatchEvent(new CustomEvent('civweave:local-model-token',{detail:event}))}catch{}},onProgress:progress=>{const detail={phase:'local-model-progress',provider:'downloaded-local',model:spec.id,executionProfile:request.executionProfile||'interactive',...progress};try{request.onProgress?.(detail)}catch{}try{dispatchEvent(new CustomEvent('civweave:local-model-inference-progress',{detail}))}catch{}}});
+    const result=resultFrom(request,run,started,decision,requestId,events);
     if(result.structured.requested&&!result.structured.valid)throw Object.assign(new Error('The downloaded local model did not return valid structured output for this request.'),{code:'LOCAL_MODEL_STRUCTURED_OUTPUT_FAILED',localResult:result});
     return result;
   }catch(error){const detail={message:String(error?.message||error),code:error?.code||'LOCAL_MODEL_FAILED',model:spec?.id||downloads()?.selection?.()?.id||'',executionProfile:request.executionProfile||'interactive'};try{dispatchEvent(new CustomEvent('civweave:local-model-error',{detail}))}catch{}throw error;}
@@ -55,7 +57,7 @@ function register(){
   if(!runtimeSpine?.register)return false;
   runtimeSpine.register(MIDDLEWARE_ID,middleware(),100);
   registered=true;patched=runtimeSpine.proxy?.()||globalThis.CivweaveModelRuntime;original=runtimeSpine.base?.()||original;
-  try{dispatchEvent(new CustomEvent('civweave:local-model-bridge-installed',{detail:{version:VERSION,mode:'runtime-spine',middleware:MIDDLEWARE_ID,selected:downloads()?.selection?.()||null,capabilityAware:Boolean(broker())}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:local-model-bridge-installed',{detail:{version:VERSION,mode:'runtime-spine',middleware:MIDDLEWARE_ID,selected:downloads()?.selection?.()||null,capabilityAware:Boolean(broker()),streaming:true}}))}catch{}
   return true;
 }
 async function legacyGenerate(request={}){
@@ -68,9 +70,9 @@ function patchLegacy(){
   const current=globalThis.CivweaveModelRuntime;if(!current?.generate)return false;if(current===patched)return true;
   if(!original)original=current;
   const base=original||current;
-  patched=Object.freeze({...current,__civweaveLocalBridgeV266:true,__civweaveLocalBridgeVersion:VERSION,baseVersion:base.version,version:`${base.version}+local-v269`,generate:legacyGenerate,generateInteractive:request=>legacyGenerate({...request,executionProfile:'interactive'}),generateAgentic:request=>legacyGenerate({...request,executionProfile:'agentic'})});
+  patched=Object.freeze({...current,__civweaveLocalBridgeV266:true,__civweaveLocalBridgeVersion:VERSION,baseVersion:base.version,version:`${base.version}+local-v270`,generate:legacyGenerate,generateInteractive:request=>legacyGenerate({...request,executionProfile:'interactive'}),generateAgentic:request=>legacyGenerate({...request,executionProfile:'agentic'})});
   globalThis.CivweaveModelRuntime=patched;
-  try{dispatchEvent(new CustomEvent('civweave:local-model-bridge-installed',{detail:{version:VERSION,mode:'legacy-wrapper-fallback',baseVersion:base.version,selected:downloads()?.selection?.()||null,capabilityAware:Boolean(broker())}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:local-model-bridge-installed',{detail:{version:VERSION,mode:'legacy-wrapper-fallback',baseVersion:base.version,selected:downloads()?.selection?.()||null,capabilityAware:Boolean(broker()),streaming:true}}))}catch{}
   return true;
 }
 function patch(){return register()||patchLegacy();}
@@ -80,6 +82,6 @@ addEventListener('civweave:local-model-selection',patch);
 addEventListener('civweave:cerbanimo-authority-boundary-ready',patch);
 addEventListener('pageshow',patch);
 patch();
-const api=Object.freeze({version:VERSION,patch,register,selected,routeDecision,middlewareId:MIDDLEWARE_ID,base:()=>original,patched:()=>patched,get registered(){return registered;}});
+const api=Object.freeze({version:VERSION,patch,register,selected,routeDecision,middlewareId:MIDDLEWARE_ID,base:()=>original,patched:()=>patched,get registered(){return registered;},streaming:true});
 globalThis.CivweaveLocalModelBridgeV266=api;
 })();
