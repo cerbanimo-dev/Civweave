@@ -11,6 +11,8 @@ const bridge=fs.readFileSync(bridgePath,'utf8');
 const controller=fs.readFileSync(controllerPath,'utf8');
 const actions=fs.readFileSync(actionsPath,'utf8');
 const loader=fs.readFileSync(loaderPath,'utf8');
+const version=fs.readFileSync('VERSION','utf8').trim();
+const versionPattern=version.replaceAll('.','\\.');
 
 assert.match(actions,/export async function generateCurriculumFromData/,'canonical action module must expose data-driven curriculum generation');
 assert.match(actions,/source:'living-school-workbench'/,'button generation must still use the same canonical generator');
@@ -20,7 +22,7 @@ assert.match(controller,/newPath=input\?\.intent==='new'/,'Living School cleanro
 assert.match(controller,/s\.school=null;/,'new-path preparation must sever the active school before canonical generation');
 assert.match(controller,/s\.progress=\{\};/,'new-path preparation must not inherit old module progress');
 assert.match(controller,/restoreLearningState\(previous\)/,'failed new-path generation must restore the previous learning state atomically');
-assert.match(loader,/living-school-chat-workbench-v255\.js\?v=1\.0\.57-v265-learning-pathway/,'shared guide loader must cache-bust the Moss pathway bridge');
+assert.match(loader,new RegExp(`living-school-chat-workbench-v255\\.js\\?v=${versionPattern}-v265-learning-pathway`),'shared guide loader must cache-bust the Moss pathway bridge with the current release');
 assert.match(bridge,/learning pathway/,'Moss structure routing must recognize the natural phrase learning pathway');
 
 const emptyState=()=>({school:null,pathContext:null,settings:{modelRoute:'shared',mode:'guided'}});
@@ -122,4 +124,4 @@ assert.equal(result.action.state,'completed');
 assert.equal(result.action.intent,'new');
 assert.equal(result.response.choice.system,'living-school');
 
-console.log('Moss curriculum workbench v255/v265 pathway verification passed.');
+console.log(`Moss curriculum workbench v255/v265 pathway verification passed for Civweave ${version}.`);
