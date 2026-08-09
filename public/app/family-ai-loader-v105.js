@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.4-inline-realm-guides-r46-fast-memory-v192';
+const VERSION='1.0.60-inline-realm-guides-r46-fast-memory-v192-local-ai-v266';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 const CIVWEAVE_CHAT_KEY='civweave.weaveling-chat.v127';
 const RETIRED_OVERLAY=['/app/guide-chat-v153.js','CivweaveGuideChatV153'];
@@ -21,7 +21,8 @@ const PATCHES=[
 const OPTIONAL=[
   ['/app/intention-ui-v138.js?v=1.0.4',()=>globalThis.CivweaveIntentionUI],
   ['/app/local-object-mesh-v146.js?v=1.0.4',()=>globalThis.CivweaveLocalMeshV146],
-  ['/app/core-loop-v152.js?v=1.0.4',()=>globalThis.CivweaveCoreLoopV152]
+  ['/app/core-loop-v152.js?v=1.0.4',()=>globalThis.CivweaveCoreLoopV152],
+  ['/app/local-ai/bootstrap-v266.js?v=1.0.60-v266',()=>globalThis.CivweaveLocalAIBootstrapV266]
 ];
 const LABEL={civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'};
 const GUIDE={
@@ -169,5 +170,5 @@ const observer=new MutationObserver(patch);observer.observe(document.documentEle
 function boot(){patch();const start=()=>ensure().catch(()=>{});if('requestIdleCallback'in globalThis)requestIdleCallback(start,{timeout:1500});else setTimeout(start,250)}
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 addEventListener('pageshow',event=>{if(event.persisted&&promise&&!globalThis.CivweaveAssistantV141)reset('restored page contained an incomplete Civweave load');patch();ensure().catch(()=>{})});
-globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,openChat,openSettings,reset,ensureBand,workspaceSnapshot,retiredOverlay:RETIRED_OVERLAY,settingsOwner:'CivweaveModelSettingsControllerV173',defaultProvider:'deterministic',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v192-prewarmed-no-mesh'};
+globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,openChat,openSettings,reset,ensureBand,workspaceSnapshot,retiredOverlay:RETIRED_OVERLAY,settingsOwner:'CivweaveModelSettingsControllerV173',defaultProvider:'deterministic',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v192-prewarmed-no-mesh',localModelPathway:'optional-v266'};
 })();
