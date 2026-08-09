@@ -20,7 +20,8 @@ assert.match(controller,/newPath=input\?\.intent==='new'/,'Living School cleanro
 assert.match(controller,/s\.school=null;/,'new-path preparation must sever the active school before canonical generation');
 assert.match(controller,/s\.progress=\{\};/,'new-path preparation must not inherit old module progress');
 assert.match(controller,/restoreLearningState\(previous\)/,'failed new-path generation must restore the previous learning state atomically');
-assert.match(loader,/living-school-chat-workbench-v255\.js\?v=1\.0\.56-v264-new-path-intent/,'shared guide loader must cache-bust the Moss new-path bridge');
+assert.match(loader,/living-school-chat-workbench-v255\.js\?v=1\.0\.57-v265-learning-pathway/,'shared guide loader must cache-bust the Moss pathway bridge');
+assert.match(bridge,/learning pathway/,'Moss structure routing must recognize the natural phrase learning pathway');
 
 const emptyState=()=>({school:null,pathContext:null,settings:{modelRoute:'shared',mode:'guided'}});
 const store=new Map([
@@ -49,6 +50,15 @@ const api=sandbox.CivweaveLivingSchoolChatWorkbenchV255;
 assert.ok(api,'bridge API must install');
 assert.equal(api.curriculumIntent("Let's build a curriculum",[]),true,'explicit curriculum build must route to workbench');
 assert.equal(api.curriculumIntent('Explain the difference between attention and awareness',[]),false,'ordinary questions must not silently create a curriculum');
+
+const woodsText='Can you make me a learning pathway for how to survive in the woods?';
+assert.equal(api.curriculumIntent(woodsText,[]),true,'natural learning pathway phrasing must route to the canonical workbench instead of generic Moss chat');
+const woodsRequest=api.curriculumRequest({text:woodsText,history:[]});
+assert.equal(woodsRequest.intent,'new','woods pathway must be a fresh learning path');
+assert.equal(woodsRequest.newPath,true,'woods pathway must carry the new-path flag');
+assert.equal(woodsRequest.replaceExisting,true,'woods pathway must replace the active single-school context rather than silently revise it');
+assert.equal(woodsRequest.capability,'survive in the woods','pathway subject must become the observable capability');
+assert.equal(woodsRequest.title,'Survive In The Woods','pathway subject must determine the new school title');
 
 const history=[
   {role:'user',text:"Let's draft it!"},
@@ -112,4 +122,4 @@ assert.equal(result.action.state,'completed');
 assert.equal(result.action.intent,'new');
 assert.equal(result.response.choice.system,'living-school');
 
-console.log('Moss curriculum workbench v255/v264 new-path verification passed.');
+console.log('Moss curriculum workbench v255/v265 pathway verification passed.');

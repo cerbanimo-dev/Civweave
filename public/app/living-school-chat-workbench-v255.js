@@ -1,10 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.56-living-school-chat-workbench-v264';
+const VERSION='1.0.57-living-school-chat-workbench-v265';
 const STATE_KEY='civweave.living-school.cabinet.v151';
 const PENDING_KEY='civweave.living-school.chat-curriculum.pending.v255';
-const STRUCTURE=/\b(curriculum|course|syllabus|learning path|learning program|lesson plan|skill tree)\b/i;
+const STRUCTURE=/\b(curriculum|course|syllabus|learning path|learning pathway|learning program|lesson plan|skill tree)\b/i;
 const BUILD=/\b(build|create|make|generate|draft|design|develop|structure|regenerate|rebuild|revise|update|convert)\b/i;
 const NEW_BUILD=/\b(build|create|make|generate|draft|design|develop|start)\b/i;
 const REVISE=/\b(revise|update|regenerate|rebuild|edit|change|modify|continue|add|remove|expand|deepen|shorten|simplify)\b/i;
@@ -68,8 +68,8 @@ function normalizeLearningSubject(value){
 function explicitBuildSubject(text){
   const value=clean(text,5000);
   const patterns=[
-    /\b(?:build|create|make|generate|draft|design|develop|start|regenerate|rebuild)\s+(?:(?:me|us)\s+)?(?:(?:a|an|the|this|that|new)\s+)?(?:curriculum|course|syllabus|learning path|learning program|lesson plan|skill tree)\s*(?:(?:about|on|for|to learn|covering)\s+|[:,-]\s*)(.+)$/i,
-    /\b(?:curriculum|course|syllabus|learning path|learning program|lesson plan|skill tree)\s+(?:about|on|for|to learn|covering)\s+(.+)$/i
+    /\b(?:build|create|make|generate|draft|design|develop|start|regenerate|rebuild)\s+(?:(?:me|us)\s+)?(?:(?:a|an|the|this|that|new)\s+)?(?:curriculum|course|syllabus|learning path|learning pathway|learning program|lesson plan|skill tree)\s*(?:(?:about|on|for|to learn|covering)\s+|[:,-]\s*)(.+)$/i,
+    /\b(?:curriculum|course|syllabus|learning path|learning pathway|learning program|lesson plan|skill tree)\s+(?:about|on|for|to learn|covering)\s+(.+)$/i
   ];
   for(const pattern of patterns){
     const match=value.match(pattern);
@@ -108,7 +108,7 @@ function userCapability(rows){
 function curriculumMode(options,rows,school){
   const text=clean(options?.text,5000),subject=explicitBuildSubject(text);
   if(subject)return'new';
-  if(/\bnew\s+(?:curriculum|course|syllabus|learning path|learning program|lesson plan|skill tree)\b/i.test(text))return'new';
+  if(/\bnew\s+(?:curriculum|course|syllabus|learning path|learning pathway|learning program|lesson plan|skill tree)\b/i.test(text))return'new';
   if(!school?.title&&!school?.capability)return'new';
   if(PRONOUN_BUILD.test(text))return'revise';
   if(REVISE.test(text)&&recentStructure(rows))return'revise';
@@ -297,6 +297,6 @@ function start(){
   let ticks=0;const timer=setInterval(()=>{patchLoader(globalThis.CivweaveFamilyAILoaderV105);patchAvailable();consumePending();if(++ticks>=300)clearInterval(timer)},100);
 }
 
-globalThis.CivweaveLivingSchoolChatWorkbenchV255=Object.freeze({version:VERSION,curriculumIntent,curriculumMode,explicitBuildSubject,curriculumRequest,executeCurriculum,guardFalseMutationClaim,patchAvailable,consumePending,pendingKey:PENDING_KEY,policy:'moss-chat-separates-new-learning-paths-from-active-path-revisions-v264'});
+globalThis.CivweaveLivingSchoolChatWorkbenchV255=Object.freeze({version:VERSION,curriculumIntent,curriculumMode,explicitBuildSubject,curriculumRequest,executeCurriculum,guardFalseMutationClaim,patchAvailable,consumePending,pendingKey:PENDING_KEY,policy:'moss-chat-recognizes-learning-pathway-and-separates-new-vs-revise-v265'});
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
