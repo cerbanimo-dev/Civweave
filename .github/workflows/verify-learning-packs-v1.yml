@@ -38,6 +38,7 @@ on:
 jobs:
   verify-learning-packs:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -54,5 +55,16 @@ jobs:
           node --check public/app/living-school-learning-packs-v1.mjs
           node --check scripts/build-learning-packs-v1.mjs
           node --check scripts/verify-learning-packs-v1.mjs
-      - name: Contract and route verification
+      - name: Build O*NET 30.3 Labor Atlas
+        run: node scripts/build-learning-packs-v1.mjs
+      - name: Contract, resolver, artifact, and route verification
         run: node scripts/verify-learning-packs-v1.mjs
+      - name: Preserve generated Labor Atlas test artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: onet-labor-atlas-30-3-test-build
+          path: |
+            public/downloads/learning-packs/onet-labor-atlas-30-3.json.gz
+            public/downloads/learning-packs/catalog.json
+          if-no-files-found: error
+          retention-days: 7
