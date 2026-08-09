@@ -39,7 +39,8 @@ assert.equal(context.CivweaveFastInteractiveV192.status().installed,true,'the ru
 assert.notEqual(context.CivweaveModelRuntime,frozenRuntime,'installation must replace the global reference with a single immutable proxy');
 assert.equal(Object.isFrozen(context.CivweaveModelRuntime),true,'the runtime spine proxy must remain immutable');
 assert.equal(frozenRuntime.generate,originalGenerate,'the frozen source runtime must not be mutated');
-assert.equal(context.CivweaveModelRuntime.__civweaveRuntimeSpineV269,true,'the proxy must advertise the v269 runtime spine');
+assert.equal(context.CivweaveModelRuntime.__civweaveRuntimeSpineV269,true,'the proxy must retain the v269 compatibility marker');
+assert.equal(context.CivweaveModelRuntime.__civweaveRuntimeSpineV271,true,'the proxy must advertise the current v271 runtime spine');
 assert.equal(context.CivweaveFastInteractiveV192.status().middleware.join(','),'fast-interactive','fast optimization must be registered as middleware.');
 
 const result=await context.CivweaveModelRuntime.generate({
@@ -53,7 +54,8 @@ assert.equal(calls[0].config.maxTokens,1800,'guide calls must retain the interac
 assert.equal(calls[0].config.stream,false,'guide calls must remain non-streaming JSON calls');
 assert.equal(calls[0].responseFormat,'json','guide calls must request structured JSON');
 assert.equal(calls[0].maxRepairAttempts,0,'guide calls must avoid a second repair call');
-assert.match(result.latency.revision,/runtime-spine-v269/,'the result must record the spine revision');
+assert.equal(result.latency.revision,context.CivweaveFastInteractiveV192.version,'the result must record the active spine revision rather than a frozen historical revision');
+assert.match(result.latency.revision,/runtime-spine-v271/,'the current result must record the v271 spine revision');
 assert.equal(result.runtimeSpine.handledBy,'base-runtime');
 assert.ok(events.some(event=>event.type==='civweave:runtime-spine-ready'),'the runtime must announce successful spine installation');
 
@@ -77,7 +79,7 @@ for(const forbidden of [
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'runtime-spine-v269',
+  revision:'runtime-spine-v271',
   frozenRuntimeProxy:true,
   singleRuntimeSpine:true,
   readinessBeforeInstall:true,
