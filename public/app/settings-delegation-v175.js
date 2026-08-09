@@ -1,7 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='269.0-ai-settings-canonical-entry';
-if(globalThis.CivweaveSettingsDelegationV188?.version===VERSION)return;
+const VERSION='188.0-ai-settings-cleanroom-delegation';
+const REVISION='269.0-ai-settings-canonical-entry';
+if(globalThis.CivweaveSettingsDelegationV188)return;
 const SELECTOR='[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings]';
 const DIAGNOSTIC_ID='cw-ai-routing-diagnostic-v269';
 function controller(){return globalThis.CivweaveAISettingsCleanroomV188||globalThis.CivweaveModelSettingsControllerV173||globalThis.CivweaveUnifiedAISettingsV175||null;}
@@ -40,7 +41,7 @@ function open(launcher){
   if(!active?.open)return null;
   const layer=active.open(launcher);
   queueMicrotask(patchRoutingDiagnostic);
-  try{dispatchEvent(new CustomEvent('civweave:ai-settings-entry-opened',{detail:{version:VERSION,launcherId:launcher?.id||'',controller:active.version||'cleanroom'}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:ai-settings-entry-opened',{detail:{version:VERSION,revision:REVISION,launcherId:launcher?.id||'',controller:active.version||'cleanroom'}}))}catch{}
   return layer;
 }
 function onClick(event){
@@ -51,9 +52,9 @@ function onClick(event){
   open(launcher);
 }
 document.addEventListener('click',onClick);
-addEventListener('civweave:model-settings-opened',()=>queueMicrotask(patchRoutingDiagnostic));
-addEventListener('civweave:ai-capability-decision',()=>queueMicrotask(patchRoutingDiagnostic));
-addEventListener('civweave:runtime-spine-ready',()=>queueMicrotask(patchRoutingDiagnostic));
+globalThis.addEventListener?.('civweave:model-settings-opened',()=>queueMicrotask(patchRoutingDiagnostic));
+globalThis.addEventListener?.('civweave:ai-capability-decision',()=>queueMicrotask(patchRoutingDiagnostic));
+globalThis.addEventListener?.('civweave:runtime-spine-ready',()=>queueMicrotask(patchRoutingDiagnostic));
 const inertLog=Object.freeze({
   version:'retired-by-ai-settings-cleanroom-v188',
   setLevel(){return'off';},
@@ -75,6 +76,7 @@ const inertLog=Object.freeze({
 globalThis.CivweaveLogV183=inertLog;
 globalThis.CivweaveSettingsDelegationV188=Object.freeze({
   version:VERSION,
+  revision:REVISION,
   selector:SELECTOR,
   listenerPhase:'bubble',
   listenerCount:1,
