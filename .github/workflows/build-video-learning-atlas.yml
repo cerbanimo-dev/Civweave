@@ -12,6 +12,7 @@ on:
       - agent/video-learning-atlas-v1
     paths:
       - scripts/build-video-learning-atlas-v1.py
+      - scripts/build-video-learning-atlas-parallel-v1.py
       - scripts/materialize-video-learning-lookup-v1.py
       - .github/workflows/build-video-learning-atlas.yml
       - .video-atlas-build-trigger
@@ -30,6 +31,7 @@ jobs:
     timeout-minutes: 45
     env:
       VIDEO_ATLAS_PER_SCHOOL: ${{ github.event.inputs.per_school || '250' }}
+      VIDEO_ATLAS_WORKERS: '8'
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
     steps:
@@ -38,12 +40,12 @@ jobs:
           ref: agent/video-learning-atlas-v1
           fetch-depth: 0
       - name: Build curated educational video catalogs
-        run: python scripts/build-video-learning-atlas-v1.py
+        run: python scripts/build-video-learning-atlas-parallel-v1.py
       - name: Materialize browser lookup
         run: python scripts/materialize-video-learning-lookup-v1.py
       - name: Validate generated catalogs
         run: |
-          python -m py_compile scripts/build-video-learning-atlas-v1.py scripts/materialize-video-learning-lookup-v1.py
+          python -m py_compile scripts/build-video-learning-atlas-v1.py scripts/build-video-learning-atlas-parallel-v1.py scripts/materialize-video-learning-lookup-v1.py
           python - <<'PY'
           import json, pathlib, zipfile
           root=pathlib.Path('public/downloads/knowledge-schools/video-atlases')
@@ -59,6 +61,7 @@ jobs:
               with zipfile.ZipFile(path) as archive: assert 'catalog.json' in archive.namelist()
           enrichment=catalog.get('youtube_api_enrichment') or {}
           print('YouTube enrichment:', enrichment)
+          print('Materializer:', catalog.get('materializer'))
           PY
       - name: Commit catalog bundles on latest branch tip
         run: |
