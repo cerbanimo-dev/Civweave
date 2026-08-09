@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+import {dirname,resolve} from 'node:path';
 
 const here=dirname(fileURLToPath(import.meta.url));
 const root=resolve(here,'..');
@@ -19,6 +19,7 @@ const lockboard=read('public/app/asset-lockboard-v239.js');
 const customizer=read('public/app/asset-customization-v239.js');
 const boundary=read('public/app/install-boundary-v146.js');
 const background=read('public/app/campus-background-download-v241.js');
+const runtimeBoundary=read('public/service-worker-offline-runtime-boundary-v266.js');
 
 const checks=[
   ['offline crawler keeps v238 graph identity with v241 fast background policy',()=>{
@@ -54,12 +55,14 @@ const checks=[
     assert.doesNotMatch(autostart,/new MutationObserver/);
     assert.match(autostart,/civweave:offline-campus-status/);
   }],
-  ['required campus remains independent from PWA install availability',()=>{
-    assert.match(autostart,/function keepInstallIndependent\(\)/);
-    assert.match(autostart,/classList\.remove\('cw-campus-waiting'\)/);
-    assert.doesNotMatch(autostart,/Waiting for campus files…/);
-    assert.doesNotMatch(autostart,/button\.disabled\s*=\s*true/);
+  ['required campus gates runtime opening without blocking native PWA installation',()=>{
+    assert.match(autostart,/function publishRuntimeGate\(\)/);
+    assert.match(autostart,/dataset\.campusLaunchReady/);
+    assert.match(autostart,/dataset\.civweaveDownloadedRuntime/);
+    assert.match(autostart,/civweave:downloaded-runtime-gate/);
+    assert.match(autostart,/CivweavePWAInstallV246\?\.refresh/);
     assert.doesNotMatch(autostart,/civweave\.pwa\.install-accepted/);
+    assert.match(runtimeBoundary,/canonical-runtime-current-downloaded-package-only-no-live-site-fallback/);
   }],
   ['asset lockboard link is runtime assembled to avoid crawl expansion',()=>{
     assert.match(autostart,/\['\/app','asset-lockboard-v239\.html'\]\.join\('\/'\)/);
@@ -108,4 +111,4 @@ assert.ok(catalog.slotCount>0,'asset catalog should contain source slots');
 assert.ok(catalog.assets.some(asset=>asset.path==='/app/assets/ai/merlin.png'),'Merlin should be selectable in the image inventory');
 assert.ok(catalog.assets.some(asset=>asset.path.includes('civweave')),'Civweave-branded assets should be selectable');
 console.log(`✓ generated catalog contains ${catalog.assetCount} images and ${catalog.slotCount} source slots`);
-console.log(`Recovery + asset lockboard v239 verified: ${checks.length+1}/${checks.length+1} checks passed.`);
+console.log(`Recovery + asset lockboard v239/v266 verified: ${checks.length+1}/${checks.length+1} checks passed.`);
