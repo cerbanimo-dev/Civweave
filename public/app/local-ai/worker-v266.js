@@ -58,22 +58,22 @@ async function ensure(spec,id){
   if(loaded?.id===spec.id&&tokenizer&&model)return{tokenizer,model,load:{coldStart:false,resident:true,runtimeLoadMs:0,gpuProbeMs:0,tokenizerLoadMs:0,modelLoadMs:0,warmupMs:0,coldStartMs:0,gpu:residentLoad?.gpu||null}};
   if(loading)return loading;
   loading=(async()=>{
-    const allStarted=clock();let stage='runtime';
+    const allStarted=clock();
     const runtimeStarted=clock();
     const hf=hfRuntime||(hfRuntime=await import(TRANSFORMERS));
     const runtimeLoadMs=Math.round(clock()-runtimeStarted);
     const cache=await caches.open(CACHE);await configureRuntime(hf,cache,spec);
-    phase(id,'checking-gpu',allStarted,{model:spec.id});stage='gpu';
+    phase(id,'checking-gpu',allStarted,{model:spec.id});
     const gpuStarted=clock(),gpu=await gpuProfile(),gpuProbeMs=Math.round(clock()-gpuStarted);
-    phase(id,'loading-tokenizer',allStarted,{model:spec.id,gpu});stage='tokenizer';
+    phase(id,'loading-tokenizer',allStarted,{model:spec.id,gpu});
     const tokenizerStarted=clock();
     tokenizer=await hf.AutoTokenizer.from_pretrained(spec.repo,{revision:spec.revision,progress_callback:progress=>phase(id,'loading-tokenizer',allStarted,{model:spec.id,...progress})});
     const tokenizerLoadMs=Math.round(clock()-tokenizerStarted);
-    phase(id,'loading-model',allStarted,{model:spec.id});stage='model';
+    phase(id,'loading-model',allStarted,{model:spec.id});
     const modelStarted=clock();
     model=await hf.AutoModelForCausalLM.from_pretrained(spec.repo,{revision:spec.revision,device:spec.device,dtype:spec.dtype,progress_callback:progress=>phase(id,'loading-model',allStarted,{model:spec.id,...progress})});
     const modelLoadMs=Math.round(clock()-modelStarted);
-    phase(id,'warming-model',allStarted,{model:spec.id});stage='warmup';
+    phase(id,'warming-model',allStarted,{model:spec.id});
     const warmStarted=clock();
     const warmInputs=tokenizer('a');
     await model.generate({...warmInputs,max_new_tokens:1,do_sample:false});
@@ -98,16 +98,15 @@ function makeStreamer(tok,id,requested,timing){
   });
 }
 async function generate(message,id){
-  const spec=message.spec,requestStarted=clock();let stage='load';
+  const spec=message.spec,requestStarted=clock();
   const instance=await ensure(spec,id),tok=instance.tokenizer,causal=instance.model;
-  stage='prompt';phase(id,'preparing-prompt',requestStarted,{model:spec.id,thinking:Boolean(message.thinking)});
+  phase(id,'preparing-prompt',requestStarted,{model:spec.id,thinking:Boolean(message.thinking)});
   const promptStarted=clock();
   const inputs=tok.apply_chat_template(message.messages||[],{add_generation_prompt:true,return_dict:true,enable_thinking:Boolean(message.thinking)});
   const promptPrepareMs=Math.round(clock()-promptStarted),promptTokens=promptTokenCount(inputs),contextWindowTokens=Number(spec.contextWindowTokens||0),workingContextTokens=Number(spec.workingContextTokens||0);
   const maxNewTokens=Math.max(8,Math.min(4096,Number(message.maxNewTokens||256)));
   if(contextWindowTokens&&promptTokens+maxNewTokens>contextWindowTokens)throw Object.assign(new Error(`Prompt is ${promptTokens.toLocaleString()} tokens and asks for ${maxNewTokens.toLocaleString()} more, beyond ${spec.label}'s ${contextWindowTokens.toLocaleString()}-token model window.`),{code:'LOCAL_MODEL_CONTEXT_EXCEEDED'});
   if(workingContextTokens&&promptTokens>workingContextTokens)phase(id,'context-warning',requestStarted,{model:spec.id,promptTokens,workingContextTokens,contextWindowTokens});
-  stage='generation';
   const generationStarted=clock(),timing={firstTokenAt:0,generatedTokens:0,chunkIndex:0,decoded:''};
   const streamer=makeStreamer(tok,id,Boolean(message.stream),timing);
   const temperature=Math.max(.01,Math.min(2,Number(message.temperature??(message.thinking?.6:.7))));
