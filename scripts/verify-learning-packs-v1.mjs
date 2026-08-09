@@ -1,12 +1,14 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
+import {gunzipSync} from 'node:zlib';
 
 const runtime=await import('../public/app/shared/learning-pack-runtime-v1.mjs');
 const coreModule=await import('../public/app/shared/core-practice-pack-v1.mjs');
 const expertLibrary=await import('../public/app/shared/expert-pack-library-v1.mjs');
 const resolver=await import('../public/app/shared/learning-pack-resolver-v1.mjs');
-const catalog=JSON.parse(fs.readFileSync(new URL('../public/downloads/learning-packs/catalog.json',import.meta.url),'utf8'));
+const catalogUrl=new URL('../public/downloads/learning-packs/catalog.json',import.meta.url);
+const catalog=JSON.parse(fs.readFileSync(catalogUrl,'utf8'));
 const livingEntry=fs.readFileSync(new URL('../public/app/cabinets/living-school/index.html',import.meta.url),'utf8');
 const cerbanimoEntry=fs.readFileSync(new URL('../public/app/realm-console-v140.html',import.meta.url),'utf8');
 const cerbanimoAdapter=fs.readFileSync(new URL('../public/app/cerbanimo-learning-packs-v1.js',import.meta.url),'utf8');
@@ -97,6 +99,32 @@ assert.ok(core?.available&&core?.bundled&&core?.module);
 const onet=catalog.packs.find(row=>row.id==='onet-labor-atlas-30-3');
 assert.ok(onet?.generated&&onet?.buildCommand);
 
+const atlasUrl=new URL('../public/downloads/learning-packs/onet-labor-atlas-30-3.json.gz',import.meta.url);
+let atlasStats=null;
+if(fs.existsSync(atlasUrl)){
+  const compressed=fs.readFileSync(atlasUrl);
+  const hash=crypto.createHash('sha256').update(compressed).digest('hex');
+  assert.equal(onet.available,true,'Generated Labor Atlas must become available in the catalog.');
+  assert.equal(onet.bytes,compressed.byteLength,'Catalog byte count does not match generated Labor Atlas.');
+  assert.equal(onet.sha256,hash,'Catalog SHA-256 does not match generated Labor Atlas.');
+  assert.match(onet.sha256,/^[a-f0-9]{64}$/);
+  const atlas=JSON.parse(gunzipSync(compressed).toString('utf8'));
+  assert.equal(atlas.schema,'civweave.learning-pack.v1');
+  assert.equal(atlas.id,'onet-labor-atlas-30-3');
+  assert.equal(atlas.sourceRelease,'30.3');
+  assert.ok(atlas.laborReferences.length>=1000,'Labor Atlas should cover the wide O*NET occupation set.');
+  const taskStatements=atlas.laborReferences.reduce((sum,row)=>sum+row.taskStatements.length,0);
+  const essentialSkillRows=atlas.laborReferences.reduce((sum,row)=>sum+row.essentialSkills.length,0);
+  const dwaRefs=atlas.laborReferences.reduce((sum,row)=>sum+row.taskStatements.reduce((taskSum,task)=>taskSum+(task.dwaRefs?.length||0),0),0);
+  assert.ok(taskStatements>=18000,'Labor Atlas lost too many O*NET task statements.');
+  assert.ok(essentialSkillRows>=17000,'Labor Atlas lost too many O*NET essential-skill rows.');
+  assert.ok(dwaRefs>=23000,'Labor Atlas lost too many task-to-DWA crosswalks.');
+  assert.equal(atlas.license?.id,'CC-BY-4.0');
+  assert.equal(atlas.license?.url,'https://creativecommons.org/licenses/by/4.0/');
+  assert.match(atlas.license?.attribution||'',/USDOL\/ETA has not approved, endorsed, or tested these modifications/);
+  atlasStats={compressedBytes:compressed.byteLength,occupations:atlas.laborReferences.length,taskStatements,essentialSkillRows,dwaRefs,sha256:hash};
+}
+
 assert(livingEntry.includes('/app/living-school-learning-packs-v1.mjs'),'Living School active entry does not load the pack adapter.');
 assert(cerbanimoEntry.includes('/app/cerbanimo-learning-packs-v1.js'),'Cerbanimo active entry does not load the pack adapter.');
 assert(cerbanimoEntry.indexOf('cerbanimo-quest-engine-v144.js')<cerbanimoEntry.indexOf('cerbanimo-learning-packs-v1.js'),'Cerbanimo pack adapter must load after the quest engine.');
@@ -106,4 +134,4 @@ for(const token of ['record.module','record.export','moduleBuffer','X-Civweave-P
 for(const token of ['occupation_data.json','task_statements.json','essential_skills.json','tasks_to_dwas.json','DWA Element ID','CC-BY-4.0','LICENSE_URL','reference examples, not procedural instructions','USDOL/ETA has not approved, endorsed, or tested these modifications'])assert(builder.includes(token),`O*NET builder missing ${token}`);
 
 const fingerprint=crypto.createHash('sha256').update(JSON.stringify({core:coreModule.default,experts:expertLibrary.expertPacks})).digest('hex').slice(0,16);
-console.log('Learning-pack v1 contract passed.',{coreTasks:normalized.taskTemplates.length,expertPacks:normalizedExperts.length,totalTasks,totalLearning,totalGuides,coreAndExpertFingerprint:fingerprint});
+console.log('Learning-pack v1 contract passed.',{coreTasks:normalized.taskTemplates.length,expertPacks:normalizedExperts.length,totalTasks,totalLearning,totalGuides,atlasStats,coreAndExpertFingerprint:fingerprint});
