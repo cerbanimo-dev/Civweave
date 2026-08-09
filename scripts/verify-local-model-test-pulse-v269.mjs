@@ -17,7 +17,7 @@ new Function(assistant);
 const checks=[];
 const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
 
-check('test pulse exposes an explicit Test model control',pulse.includes("button.textContent=running?'Testing model…':'Test model'"));
+check('test pulse exposes an explicit Test model control',pulse.includes("running?'Testing model…':'Test model'")&&pulse.includes('dataset.localTestPulse'));
 check('test pulse renders raw model output',pulse.includes('Raw model output')&&pulse.includes('downloaded-local direct inference'));
 check('test pulse labels the orchestration bypass',pulse.includes('bypasses Weaveling')&&pulse.includes('no Weaveling contract'));
 check('test pulse invokes the downloaded local runtime directly',pulse.includes('CivweaveLocalModelRuntimeV266')&&pulse.includes('const output=await runtime.generate'));
@@ -25,8 +25,9 @@ check('test pulse uses a tiny human-readable inference request',pulse.includes('
 check('test pulse reports direct provider identity',pulse.includes("provider:'downloaded-local-direct'"));
 check('test pulse never calls the assistant orchestrator',!pulse.includes('CivweaveAssistantV141')&&!pulse.includes('.respond('));
 check('test pulse never fabricates deterministic fallback output',!pulse.includes('local-contract')&&!pulse.includes('civweave-action-contract'));
+check('pulse DOM repair avoids rewriting identical markup',pulse.includes('node.dataset.pulseMarkup===html')&&pulse.includes('button.textContent!==label'));
 check('runtime itself talks to the local generative worker',runtime.includes("request('generate'")&&runtime.includes("new Worker(WORKER"));
 check('bootstrap loads pulse after settings panel',bootstrap.includes('test-pulse-v269.js')&&bootstrap.indexOf('settings-panel-v267.js')<bootstrap.indexOf('test-pulse-v269.js'));
 check('bootstrap advertises direct model testing',bootstrap.includes('directModelTest:true'));
 
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v269',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v269',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,stableDomRepair:true},null,2));
