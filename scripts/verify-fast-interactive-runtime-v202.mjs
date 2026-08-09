@@ -40,7 +40,7 @@ assert.notEqual(context.CivweaveModelRuntime,frozenRuntime,'installation must re
 assert.equal(Object.isFrozen(context.CivweaveModelRuntime),true,'the runtime spine proxy must remain immutable');
 assert.equal(frozenRuntime.generate,originalGenerate,'the frozen source runtime must not be mutated');
 assert.equal(context.CivweaveModelRuntime.__civweaveRuntimeSpineV269,true,'the proxy must advertise the v269 runtime spine');
-assert.deepEqual(context.CivweaveFastInteractiveV192.status().middleware,['fast-interactive'],'fast optimization must be registered as middleware.');
+assert.equal(context.CivweaveFastInteractiveV192.status().middleware.join(','),'fast-interactive','fast optimization must be registered as middleware.');
 
 const result=await context.CivweaveModelRuntime.generate({
   purpose:'civweave-guide-response-v141-merlin',
