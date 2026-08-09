@@ -1,0 +1,38 @@
+{
+  "schema": "civweave.learning-pack-catalog.v1",
+  "version": "1.0.0",
+  "updated": "2026-08-09",
+  "packs": [
+    {
+      "id": "civweave-core-practice-v1",
+      "title": "Civweave Core Practice Pack",
+      "packType": "mixed",
+      "audience": ["cerbanimo", "living-school"],
+      "file": "civweave-core-practice-v1.json",
+      "contentType": "application/json",
+      "optional": false,
+      "bundled": true,
+      "autoStage": true,
+      "available": true,
+      "module": "/app/shared/core-practice-pack-v1.mjs?v=learning-packs-v1",
+      "summary": "20 reusable task templates, 12 learning units, 10 expert guides, and shared skill references."
+    },
+    {
+      "id": "onet-labor-atlas-30-3",
+      "title": "O*NET 30.3 Labor Atlas",
+      "packType": "reference",
+      "audience": ["cerbanimo", "living-school"],
+      "file": "onet-labor-atlas-30-3.json.gz",
+      "contentType": "application/gzip",
+      "bytes": 0,
+      "sha256": "",
+      "optional": true,
+      "bundled": false,
+      "autoStage": false,
+      "available": false,
+      "generated": true,
+      "buildCommand": "node scripts/build-learning-packs-v1.mjs",
+      "summary": "Generated optional labor-reference pack from official O*NET 30.3 occupation, task, essential-skill, and task-to-DWA tables. Reference data requires task-specific adaptation."
+    }
+  ]
+}
