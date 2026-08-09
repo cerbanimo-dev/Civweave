@@ -13,12 +13,14 @@ const installPage=read('public/app/index.html');
 const builder=read('scripts/build-video-learning-atlas-v1.py');
 const workflow=read('.github/workflows/build-video-learning-atlas.yml');
 
-for(const [name,source] of [['shared contract',shared],['Living School generation guard',livingGuard],['Living School controller',living],['Cerbanimo task contract',cerbanimo]])assert(source.includes(fallback),`${name} does not preserve the required fallback URL.`);
+assert(shared.includes(fallback),'Shared contract does not preserve the required fallback URL.');
+for(const [name,source] of [['Living School generation guard',livingGuard],['Living School controller',living],['Cerbanimo task contract',cerbanimo]])assert(source.includes('FALLBACK_VIDEO_URL'),`${name} is not wired to the canonical fallback constant.`);
 assert(shared.includes("LOOKUP_URL='/downloads/knowledge-schools/video-atlases/lookup.json'"),'Shared contract does not read the generated atlas lookup.');
 assert(shared.includes('score>=6')||shared.includes('bestScore>=6'),'Shared contract lacks a relevance threshold before fallback.');
 assert(shared.includes('youtube-nocookie.com/embed'),'Shared contract does not produce privacy-enhanced embeds.');
 assert(livingGuard.includes("CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1'"),'Living School AI harness is not attached to curriculum generation.');
 assert(livingGuard.includes('await ensureLivingSchool(output)'),'Living School AI harness does not enforce a video on generated modules.');
+assert(livingGuard.includes('videoFallbackUrl:FALLBACK_VIDEO_URL'),'Living School AI prompt context does not carry the fallback contract.');
 assert(living.includes('installLivingSchoolVideoGenerationGuardV1'),'Living School cleanroom does not install the video generation harness.');
 assert(!living.includes('new MutationObserver'),'Living School cleanroom must remain observer-free.');
 assert(living.includes("applyVideoContract('startup').catch"),'Living School startup media reconciliation must remain non-blocking.');
