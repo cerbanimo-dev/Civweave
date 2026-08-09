@@ -36,14 +36,17 @@ check('settings shows percent progress bar',settings.includes('cw-model-progress
 check('settings leaves a persistent download dock outside modal',settings.includes('cw-local-ai-download-dock-v267')&&settings.includes('renderDock'));
 check('background service worker rejects HTML and invalid JSON before cache copy',backgroundWorker.includes('returned HTML instead of model data')&&backgroundWorker.includes('invalid JSON model metadata')&&backgroundWorker.indexOf('validateRecord(record,response)')<backgroundWorker.indexOf('cache.put(record.request,response)'));
 check('root service worker imports local model background worker',sw.includes('/service-worker-local-model-download-v267.js'));
-check('local inference worker preserves pinned cache adapter',localWorker.includes('hf.env.customCache=cacheAdapter(cache,spec)')&&localWorker.includes("status:404,statusText:'Downloaded model cache miss'"));
+check('local inference worker preserves pinned cache adapter without synthetic 404 cache hits',localWorker.includes('hf.env.customCache=cacheAdapter(cache,spec)')&&!localWorker.includes("status:404,statusText:'Downloaded model cache miss'")&&localWorker.includes('Downloaded model cache miss: ${path}'));
+check('local inference worker provides valid placeholders only for optional metadata',localWorker.includes("const body=/\\.json$/i.test(path)?'{}':''")&&localWorker.includes("'x-civweave-model-cache':'optional-placeholder'"));
 check('local inference worker constructs TextStreamer',localWorker.includes('new hfRuntime.TextStreamer')&&localWorker.includes('callback_function'));
 check('local inference worker emits incremental token messages',localWorker.includes("post(id,'token'")&&localWorker.includes('streamed:Boolean(streamer)'));
-check('local runtime preserves cache-resolved worker and carries token callbacks',runtime.includes("worker-v266.js?v=1.0.67-v271")&&runtime.includes("message.type==='token'")&&runtime.includes('task.onToken?.(message.token)')&&runtime.includes('stream:Boolean(stream)'));
+check('local runtime preserves cache-resolved worker and carries token callbacks',runtime.includes("worker-v266.js?v=1.0.68-v274")&&runtime.includes("message.type==='token'")&&runtime.includes('task.onToken?.(message.token)')&&runtime.includes('stream:Boolean(stream)'));
+check('local runtime passes artifact requiredness into the cache-only worker',runtime.includes('const artifacts=(spec.artifacts||[]).map')&&runtime.includes('required:item.required!==false'));
 check('local bridge emits shared partial model events',bridge.includes("emit('partial'")&&bridge.includes("'civweave:model-event'")&&bridge.includes('accumulatedText'));
 check('local bridge reports actual streaming use',bridge.includes("code:'LOCAL_STREAMING'")&&bridge.includes('used:Boolean(run.streamed)'));
 check('raw pulse repairs corrupt metadata before inference',pulse.includes('integrityReady')&&pulse.includes('M().repair')&&pulse.includes('invalid cached model metadata'));
 check('raw pulse streams visible direct model output',pulse.includes('onToken:token=>')&&pulse.includes('stream:true')&&pulse.includes('streaming directly from the local worker'));
+check('raw pulse distinguishes model load failure from inference failure',pulse.includes("stage==='load failed'")&&pulse.includes('Inference never started'));
 check('Cloudflare build stages Transformers runtime before copy',cloudflare.includes('stage-transformers-assets.mjs')&&cloudflare.includes('Required local-AI runtime asset was not staged'));
 check('Cloudflare build requires local inference entry and WebGPU wasm',cloudflare.includes('transformers.min.js')&&cloudflare.includes('ort-wasm-simd-threaded.jsep.wasm'));
 check('capability broker separates semantic-local from deterministic',broker.includes("return'semantic-local'")&&broker.includes("authority:'deterministic-contracts'"));
@@ -73,4 +76,4 @@ const explicit=capability.normalizeRequest({purpose:'market-scan',executionProfi
 assert.equal(explicit.requiresTools,true);
 checks.push('agentic/tool normalization executable cases');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-streaming-v271',checks:checks.length,features:{cacheResolvedInference:true,integrityValidation:true,targetedRepair:true,localStreaming:true,capabilityRouting:true,runtimeSpine:true,localAgenticReasoning:true,agenticToolSeparation:true,toolEscalation:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-streaming-v274-cache-only',checks:checks.length,features:{cacheResolvedInference:true,synthetic404RegressionBlocked:true,optionalMetadataSafe:true,integrityValidation:true,targetedRepair:true,loaderDiagnostics:true,localStreaming:true,capabilityRouting:true,runtimeSpine:true,localAgenticReasoning:true,agenticToolSeparation:true,toolEscalation:true}},null,2));
