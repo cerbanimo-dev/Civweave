@@ -32,6 +32,7 @@ const transformerStage = resolve(scriptDir, "stage-transformers-assets.mjs");
 const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
+await import('./apply-confidence-weighted-validation-v1.mjs');
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 await import('./generate-asset-lockboard-catalog-v239.mjs');
