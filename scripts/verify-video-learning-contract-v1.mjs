@@ -1,0 +1,36 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+
+const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
+const fallback='https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+const shared=read('public/app/video-learning-contract-v1.mjs');
+const livingGuard=read('public/app/living-school-video-generation-guard-v1.mjs');
+const living=read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs');
+const cerbanimo=read('public/app/cerbanimo-video-task-contract-v1.mjs');
+const realm=read('public/app/realm-console-v140.html');
+const installer=read('public/app/video-atlas-installer-v1.js');
+const installPage=read('public/app/index.html');
+const builder=read('scripts/build-video-learning-atlas-v1.py');
+const workflow=read('.github/workflows/build-video-learning-atlas.yml');
+
+for(const [name,source] of [['shared contract',shared],['Living School generation guard',livingGuard],['Living School controller',living],['Cerbanimo task contract',cerbanimo]])assert(source.includes(fallback),`${name} does not preserve the required fallback URL.`);
+assert(shared.includes("LOOKUP_URL='/downloads/knowledge-schools/video-atlases/lookup.json'"),'Shared contract does not read the generated atlas lookup.');
+assert(shared.includes('score>=6')||shared.includes('bestScore>=6'),'Shared contract lacks a relevance threshold before fallback.');
+assert(shared.includes('youtube-nocookie.com/embed'),'Shared contract does not produce privacy-enhanced embeds.');
+assert(livingGuard.includes("CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1'"),'Living School AI harness is not attached to curriculum generation.');
+assert(livingGuard.includes('await ensureLivingSchool(output)'),'Living School AI harness does not enforce a video on generated modules.');
+assert(living.includes('installLivingSchoolVideoGenerationGuardV1'),'Living School cleanroom does not install the video generation harness.');
+assert(!living.includes('new MutationObserver'),'Living School cleanroom must remain observer-free.');
+assert(living.includes("applyVideoContract('startup').catch"),'Living School startup media reconciliation must remain non-blocking.');
+assert(cerbanimo.includes('installCerbanimoHarness()'),'Cerbanimo does not install the AI response harness.');
+assert(cerbanimo.includes('for(const task of quest.tasks||[])'),'Cerbanimo does not reconcile every stored task.');
+assert(cerbanimo.includes("addEventListener('cerbanimo:quest-engine-changed'"),'Cerbanimo does not reconcile newly created or migrated tasks.');
+assert(realm.includes('/app/cerbanimo-video-task-contract-v1.mjs'),'Cerbanimo realm console does not load the task video contract.');
+assert(installer.includes("CATALOG_URL='/downloads/knowledge-schools/video-atlases/catalog.json'"),'Installer does not load the Video Learning Atlas catalog.');
+assert(installPage.includes('/app/video-atlas-installer-v1.js'),'Core learning download page does not offer Video Learning Atlas bundles.');
+for(const dataset of ['thepowerfuldeez/massive-yt-edu-queue','PleIAs/YouTube-Commons','Awiny/Howto-Interlink7M'])assert(builder.includes(dataset),`Builder is missing ${dataset}.`);
+assert(builder.includes('youtube-metadata-current.json.gz'),'Builder lacks the refreshable YouTube metadata sidecar.');
+assert(builder.includes('timedelta(days=29)'),'YouTube metadata sidecar does not expire before the 30-day refresh boundary.');
+assert(workflow.includes('YOUTUBE_API_KEY')&&workflow.includes('GOOGLE_API_KEY'),'Build workflow is not wired to YouTube/Google API credentials.');
+assert(workflow.includes('materialize-video-learning-lookup-v1.py'),'Build workflow does not materialize the browser lookup.');
+console.log('Video Learning Atlas contracts verified: catalogs, download surface, Living School per-module video invariant, Cerbanimo per-task video invariant, and required fallback are wired.');
