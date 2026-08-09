@@ -2,11 +2,52 @@ export const NODE_AI_ROUTING_SCHEMA = 'civweave.node-ai-routing.v1';
 export const NODE_AI_SERVICE_MANIFEST_SCHEMA = 'civweave.node-ai-service-manifest.v1';
 export const NODE_AI_SERVICE_ADVERT_KIND = 'civweave.node-ai.service-advert.v1';
 export const NODE_AI_SETTLEMENT_BATCH_KIND = 'civweave.node-ai.settlement-batch.v1';
+export const NODE_AI_SIGNED_RECEIPT_SCHEMA = 'civweave.node-ai-signed-receipt.v1';
 
 const clean = (value, max = 500) => String(value ?? '').trim().slice(0, max);
 const number = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
 const uniq = values => [...new Set((Array.isArray(values) ? values : []).map(value => clean(value, 180)).filter(Boolean))];
 const clamp = (value, min, max) => Math.max(min, Math.min(max, number(value, min)));
+
+export function canonicalNodeAiJson(value) {
+  const normalize = input => {
+    if (Array.isArray(input)) return input.map(normalize);
+    if (input && typeof input === 'object') return Object.fromEntries(Object.keys(input).sort().filter(key => input[key] !== undefined).map(key => [key, normalize(input[key])]));
+    if (typeof input === 'bigint') return input.toString();
+    return input;
+  };
+  return JSON.stringify(normalize(value));
+}
+function bytesFromBase64(value) {
+  const normalized = String(value || '').replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
+  if (typeof atob === 'function') return Uint8Array.from(atob(padded), char => char.charCodeAt(0));
+  if (globalThis.Buffer) return new Uint8Array(globalThis.Buffer.from(padded, 'base64'));
+  throw new Error('Base64 decoding is unavailable.');
+}
+function hex(bytes) { return [...bytes].map(byte => byte.toString(16).padStart(2, '0')).join(''); }
+async function importEd25519PublicKey(publicKey) {
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) throw new Error('Web Crypto is unavailable.');
+  const pem = clean(publicKey, 12000);
+  const match = /-----BEGIN PUBLIC KEY-----([\s\S]+?)-----END PUBLIC KEY-----/.exec(pem);
+  if (!match) throw new Error('Node receipt public key must be an Ed25519 SPKI PEM public key.');
+  const der = bytesFromBase64(match[1].replace(/\s+/g, ''));
+  return subtle.importKey('spki', der, { name: 'Ed25519' }, false, ['verify']);
+}
+export async function verifyNodeAiReceiptEnvelope(envelope, publicKey) {
+  if (envelope?.schema !== NODE_AI_SIGNED_RECEIPT_SCHEMA) throw new Error('Unsupported signed node receipt schema.');
+  if (envelope?.signature?.algorithm !== 'Ed25519') throw new Error('Unsupported node receipt signature algorithm.');
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) throw new Error('Web Crypto is unavailable.');
+  const payloadBytes = new TextEncoder().encode(canonicalNodeAiJson(envelope.payload));
+  const digest = new Uint8Array(await subtle.digest('SHA-256', payloadBytes));
+  if (hex(digest) !== clean(envelope.payloadHash, 128).toLowerCase()) throw new Error('Node receipt payload hash does not match.');
+  const key = await importEd25519PublicKey(publicKey);
+  const valid = await subtle.verify({ name: 'Ed25519' }, key, bytesFromBase64(envelope.signature?.value), payloadBytes);
+  if (!valid) throw new Error('Invalid node receipt signature.');
+  return structuredClone(envelope.payload);
+}
 
 function manifestFromObject(object) {
   if (!object || object.kind !== NODE_AI_SERVICE_ADVERT_KIND) return null;
