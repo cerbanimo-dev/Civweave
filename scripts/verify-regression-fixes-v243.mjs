@@ -5,106 +5,41 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [viewport,repairs,workspace,sharedLoader,sharedCore,entry,core,generationGuard,localResearch,localActions,knowledge,pkg]=await Promise.all([
-  read('public/app/persistent-guide-viewport-v216.js'),
-  read('public/app/regression-fixes-v243.js'),
-  read('public/app/guide-workspace-v242.js'),
-  read('public/app/shared-guide-surface-v236.js'),
-  read('public/app/shared-guide-surface-v236-core-v244.js'),
-  read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'),
-  read('public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'),
-  read('public/app/living-school-generation-guard-v262.mjs'),
-  read('public/app/living-school-local-research-v243.mjs'),
-  read('public/app/living-school-cleanroom-actions-v243.mjs'),
-  read('public/app/knowledge-school-runtime-v243.mjs'),
-  read('package.json')
+const [viewport,repairs,workspace,sharedLoader,sharedCore,entry,core,generationGuard,quizGuard,deadlineGuard,localResearch,localActions,knowledge,pkg]=await Promise.all([
+  read('public/app/persistent-guide-viewport-v216.js'),read('public/app/regression-fixes-v243.js'),read('public/app/guide-workspace-v242.js'),
+  read('public/app/shared-guide-surface-v236.js'),read('public/app/shared-guide-surface-v236-core-v244.js'),read('public/app/cabinets/living-school/living-school-cleanroom-v218.mjs'),
+  read('public/app/cabinets/living-school/living-school-cleanroom-core-v218.mjs'),read('public/app/living-school-generation-guard-v262.mjs'),read('public/app/living-school-quiz-contract-guard-v263.mjs'),read('public/app/living-school-deadline-guard-v266.mjs'),
+  read('public/app/living-school-local-research-v243.mjs'),read('public/app/living-school-cleanroom-actions-v243.mjs'),read('public/app/knowledge-school-runtime-v243.mjs'),read('package.json')
 ]);
 const sharedGuide=`${sharedLoader}\n${sharedCore}`;
 
-assert(viewport.includes("const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r2'"),'Legacy viewport compatibility does not load the cache-busted proof/dialog interaction repair.');
-assert(viewport.includes('installRegressionFixes()'),'Legacy viewport compatibility does not activate the proof/dialog repair loader.');
-assert(!viewport.includes('CHAT_OWNER_REPAIR')&&!viewport.includes('chat-single-owner-v245.js'),'Viewport compatibility resurrects a second chat event owner.');
-assert(repairs.includes("dialog button[data-close]")&&repairs.includes("control.type='button'"),'Proof dialog close controls are not repaired.');
-assert(!repairs.includes("document.addEventListener('pointerup',onPointerUp,true)"),'Retired pointerup relay is still installed.');
-assert(!repairs.includes('queueMicrotask(()=>control.click())'),'Synthetic chat click relay is still present.');
-assert(repairs.includes('/app/assets/ai/kamiya-welcoming-v243.png'),'Kamiya does not use the refreshed avatar asset.');
-assert((await stat(path.join(root,'public/app/assets/ai/kamiya-welcoming-v243.png'))).size>1000,'Kamiya avatar asset is missing or empty.');
+assert(viewport.includes("const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r2'"));assert(viewport.includes('installRegressionFixes()'));assert(!viewport.includes('CHAT_OWNER_REPAIR')&&!viewport.includes('chat-single-owner-v245.js'));
+assert(repairs.includes("dialog button[data-close]")&&repairs.includes("control.type='button'"));assert(!repairs.includes("document.addEventListener('pointerup',onPointerUp,true)"));assert(!repairs.includes('queueMicrotask(()=>control.click())');assert(repairs.includes('/app/assets/ai/kamiya-welcoming-v243.png'));assert((await stat(path.join(root,'public/app/assets/ai/kamiya-welcoming-v243.png'))).size>1000);
 
-assert(workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"),'Canonical workspace does not own pointer-down gestures.');
-assert(workspace.includes('suppressClickUntil=performance.now()+500'),'Workspace does not suppress the targeted compatibility click after a handled pointer gesture.');
-assert(workspace.includes('suppressedControl=switchControl||closeControl||minimizeControl'),'Compatibility click suppression is not scoped to the control that owned pointerdown.');
-assert(workspace.includes('if(closeControl)closeWorkspace();else toggleMinimize()'),'Close/minimize gestures do not invoke canonical workspace state directly.');
-assert(workspace.includes("if(switchControl){switchWindow(switchControl.dataset.cw242Window,{open:true});return}"),'Persona pointer gesture does not invoke canonical workspace switching directly.');
-assert(workspace.includes("new CustomEvent('civweave:guide-workspace-state'"),'Workspace does not publish state for embedded-surface exclusivity.');
-assert(workspace.includes('submitText:async(text,system=activeWindow)'),'Canonical direct text submission API is missing.');
-assert(workspace.includes('canonicalOwner:true'),'Workspace does not advertise canonical ownership.');
+assert(workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"));assert(workspace.includes('suppressClickUntil=performance.now()+500'));assert(workspace.includes('suppressedControl=switchControl||closeControl||minimizeControl'));assert(workspace.includes('if(closeControl)closeWorkspace();else toggleMinimize()'));assert(workspace.includes("if(switchControl){switchWindow(switchControl.dataset.cw242Window,{open:true});return}"));assert(workspace.includes("new CustomEvent('civweave:guide-workspace-state'"));assert(workspace.includes('submitText:async(text,system=activeWindow)'));assert(workspace.includes('canonicalOwner:true'));
+assert(sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'));assert(sharedGuide.includes('await api.submitText(value,currentSystem)'));assert(!sharedGuide.includes('form.requestSubmit()'));assert(!sharedGuide.includes("api.open?.({guide:currentSystem,prefill:value})"));assert(sharedGuide.includes('syncInlineVisibility'));assert(sharedGuide.includes("addEventListener('civweave:guide-workspace-state'"));assert(!sharedGuide.includes('input.focus();'));
 
-assert(sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'),'Shared guide loader no longer mounts the canonical inline implementation.');
-assert(sharedGuide.includes('await api.submitText(value,currentSystem)'),'Inline chat does not submit directly through the canonical chat API.');
-assert(!sharedGuide.includes('form.requestSubmit()'),'Inline chat still tunnels submission through the hidden floating form.');
-assert(!sharedGuide.includes("api.open?.({guide:currentSystem,prefill:value})"),'Inline chat still opens the full composer as a submission side effect.');
-assert(sharedGuide.includes('syncInlineVisibility'),'Inline/full chat mutual exclusion is missing.');
-assert(sharedGuide.includes("addEventListener('civweave:guide-workspace-state'"),'Inline surface does not react to canonical workspace state.');
-assert(!sharedGuide.includes('input.focus();'),'Inline Send still forces keyboard focus after submission.');
-
-assert(entry.includes("../../living-school-cleanroom-actions-v243.mjs?v=quiz-integrity-v261"),'Living School is not cache-busting the AI-only quiz integrity adapter.');
-assert(entry.includes("../../living-school-generation-guard-v262.mjs?v=source-prompt-quiz-delta-v262"),'Living School does not load the source-injection and iterative quiz guard.');
-assert(entry.includes("../../living-school-quiz-contract-guard-v263.mjs?v=short-answer-rubric-v263"),'Living School does not load the short-answer quiz contract guard.');
-assert(entry.includes('await installLivingSchoolGenerationGuard()'),'Living School does not install the generation guard before actions run.');
-assert(entry.includes('await installLivingSchoolQuizContractGuardV263()'),'Living School does not install the v263 quiz contract guard.');
-assert(entry.includes('sanitizeSavedHybridQuiz()'),'Living School does not sanitize saved mixed-provenance quiz banks at startup.');
-assert(entry.includes("quizIntegrity:'ai-only-v263-short-answer-contract'"),'Living School does not expose the current AI-only quiz integrity revision.');
-assert(localActions.includes("packet.mode==='local-downloaded'"),'Living School actions do not recognize downloaded research.');
-assert(localActions.includes('await researchCapability(data.capability,{force:false})'),'Curriculum generation does not research before generation.');
-assert(localActions.includes('stripLegacyFallbackQuestions'),'AI curriculum generation does not strip deterministic quiz fillers.');
-assert(localActions.includes("provider==='deterministic'"),'Quiz completion does not distinguish the actual deterministic compiler from AI providers.');
-assert(!localActions.includes("data.modelRoute!=='shared'||school.generation?.fallback"),'Quiz integrity is still incorrectly gated on the literal shared route string.');
-assert(localActions.includes("quizIntegrity:'ai-only-complete'"),'Successful supplemental quiz completion is not marked AI-only.');
+assert(entry.includes("../../living-school-cleanroom-actions-v243.mjs?v=quiz-integrity-v261"));
+assert(entry.includes("../../living-school-generation-guard-v262.mjs?v=source-prompt-quiz-delta-v262"));
+assert(entry.includes("../../living-school-quiz-contract-guard-v263.mjs?v=bounded-short-answer-v266"),'Living School must load the bounded quiz contract.');
+assert(entry.includes("../../living-school-deadline-guard-v266.mjs?v=provider-deadlines-v266"),'Living School must load provider deadlines.');
+assert(entry.includes('await installLivingSchoolGenerationGuard()'));assert(entry.includes('await installLivingSchoolQuizContractGuardV263()'));assert(entry.includes('await installLivingSchoolDeadlineGuardV266()'));assert(entry.includes('sanitizeSavedHybridQuiz()'));
+assert(entry.includes("quizIntegrity:'ai-only-v266-bounded-short-answer-contract'"));
+assert(localActions.includes("packet.mode==='local-downloaded'"));assert(localActions.includes('await researchCapability(data.capability,{force:false})'));assert(localActions.includes('stripLegacyFallbackQuestions'));assert(localActions.includes("provider==='deterministic'"));assert(!localActions.includes("data.modelRoute!=='shared'||school.generation?.fallback"));assert(localActions.includes("quizIntegrity:'ai-only-complete'"));
 
 const aiStart=core.indexOf('export function normalizeAIQuiz'),deterministicStart=core.indexOf('export function normalizeDeterministicQuiz'),moduleStart=core.indexOf('export function normalizeModule');
-assert(aiStart>=0&&deterministicStart>aiStart&&moduleStart>deterministicStart,'Living School does not expose physically separate AI and deterministic quiz normalizers.');
-const aiNormalizer=core.slice(aiStart,deterministicStart),deterministicNormalizer=core.slice(deterministicStart,moduleStart);
-assert(!aiNormalizer.includes('quizBank('),'AI quiz normalization can still reach the deterministic quiz bank.');
-assert(!aiNormalizer.includes('while(rows.length<count+2)'),'AI quiz normalization can still synthesize filler questions.');
-assert(aiNormalizer.includes('isDeterministicQuizQuestion'),'AI quiz normalization does not reject deterministic question provenance.');
-assert(deterministicNormalizer.includes('quizBank(')&&deterministicNormalizer.includes('while(rows.length<count+2)'),'Deterministic quiz normalization no longer owns its offline filler behavior.');
-assert(core.includes("quizMode==='deterministic'?normalizeDeterministicQuiz")&&core.includes(":normalizeAIQuiz(source.quiz,index)"),'Module normalization does not route quiz provenance explicitly.');
-assert(core.includes("const quizMode=provider==='deterministic'||next.school?.generation?.fallback?'deterministic':'ai'"),'Saved curriculum normalization does not select quiz behavior from actual generation provenance.');
-assert(core.includes("normalizeModule(item,index,data.capability,'ai')"),'Shared AI curriculum generation is not locked to the AI quiz normalizer.');
-assert(core.includes('refusing deterministic module padding'),'Shared AI generation can still silently pad missing modules with the deterministic compiler.');
+assert(aiStart>=0&&deterministicStart>aiStart&&moduleStart>deterministicStart);const aiNormalizer=core.slice(aiStart,deterministicStart),deterministicNormalizer=core.slice(deterministicStart,moduleStart);
+assert(!aiNormalizer.includes('quizBank('));assert(!aiNormalizer.includes('while(rows.length<count+2)'));assert(aiNormalizer.includes('isDeterministicQuizQuestion'));assert(deterministicNormalizer.includes('quizBank(')&&deterministicNormalizer.includes('while(rows.length<count+2)'));assert(core.includes("quizMode==='deterministic'?normalizeDeterministicQuiz")&&core.includes(":normalizeAIQuiz(source.quiz,index)"));assert(core.includes("const quizMode=provider==='deterministic'||next.school?.generation?.fallback?'deterministic':'ai'"));assert(core.includes("normalizeModule(item,index,data.capability,'ai')"));assert(core.includes('refusing deterministic module padding'));
 
-for(const token of [
-  "const REVISION='living-school-generation-guard-v262'",
-  "'CURRICULUM SOURCE MATERIAL'",
-  "'DOWNLOADED LOCAL SCHOOL PASSAGES'",
-  'The source material above is already in this prompt.',
-  'Preserve each SOURCE_ID exactly',
-  '600-1000 words of useful instruction per module',
-  "purpose!=='living-school-quiz-delta-completion-v258'",
-  "quizDeltaMode:forceSingle?'single-question-recovery':'single-module-iterative'",
-  'Return exactly ${needed}',
-  'questions.minItems=Math.max(1,count)',
-  'livingSchoolGenerationGuardRevision:REVISION',
-  'moduleNeedsDepth',
-  "purpose:'living-school-module-depth-expansion-v262'",
-  'moduleDepthRepair:true'
-])assert(generationGuard.includes(token),`Living School generation guard is missing ${token}.`);
-assert(generationGuard.includes("purpose!=='living-school-live-source-research-v260'"),'Antigravity evidence-digest strengthening is missing.');
-assert(generationGuard.includes('800-2500 characters of useful source-grounded notes'),'Live research does not request enough source material for downstream curriculum synthesis.');
-assert(generationGuard.includes("forceSingle=true"),'Quiz delta completion cannot degrade to one-question recovery after a structured-output miss.');
-assert(!generationGuard.includes('fetch(source.url')&&!generationGuard.includes('fetch(source?.url'),'Curriculum generation guard must inject supplied source text rather than refetching sources.');
+for(const token of ["const REVISION='living-school-generation-guard-v262'","'CURRICULUM SOURCE MATERIAL'","'DOWNLOADED LOCAL SCHOOL PASSAGES'",'The source material above is already in this prompt.','Preserve each SOURCE_ID exactly','600-1000 words of useful instruction per module',"purpose!=='living-school-quiz-delta-completion-v258'","quizDeltaMode:forceSingle?'single-question-recovery':'single-module-iterative'",'Return exactly ${needed}','questions.minItems=Math.max(1,count)','livingSchoolGenerationGuardRevision:REVISION','moduleNeedsDepth',"purpose:'living-school-module-depth-expansion-v262'",'moduleDepthRepair:true'])assert(generationGuard.includes(token),`Generation guard missing ${token}.`);
+assert(generationGuard.includes("purpose!=='living-school-live-source-research-v260'"));assert(generationGuard.includes('800-2500 characters of useful source-grounded notes'));assert(generationGuard.includes('forceSingle=true'));assert(!generationGuard.includes('fetch(source.url')&&!generationGuard.includes('fetch(source?.url'));
 
-assert(localResearch.includes('searchDownloadedKnowledge'),'Downloaded knowledge is not queried.');
-assert(localResearch.includes("provenance:'knowledge-school-downloaded'"),'Downloaded-source provenance is missing.');
-assert(localResearch.includes('ARCHIVE VERIFIED · NOT LIVE-CHECKED'),'Downloaded references overstate or omit verification status.');
-assert(localResearch.includes('dependency-free cached SQLite passage search'),'Local research does not report the dependency-free reader.');
-assert(localResearch.includes('canonicalUrl'),'Downloaded research no longer carries canonical article links.');
+for(const token of ["const REVISION='living-school-quiz-contract-guard-v266-bounded'","const PRIMARY_PURPOSE='living-school-quiz-contract-primary-v266'",'const MAX_REPAIRS_PER_MODULE=3','attempts<MAX_REPAIRS_PER_MODULE','nestedLegacyLoopBypassed:true',"if(type==='short-answer')return rubricRows(question).length>=2",'maxRepairAttempts:1'])assert(quizGuard.includes(token),`Bounded quiz guard missing ${token}.`);
+assert(!quizGuard.includes('attempts<12'),'Old twelve-attempt quiz repair loop must be unreachable.');
+for(const token of ["const REVISION='living-school-deadline-guard-v266'","['living-school-live-source-research-v260',15000]","['living-school-research-grounded-curriculum-v218.1',30000]","['living-school-quiz-delta-completion-v258',10000]",'livingSchoolDeadlineGuardRevision:REVISION'])assert(deadlineGuard.includes(token),`Deadline guard missing ${token}.`);
 
-for(const token of ['openSeed(slug)','DecompressionStream','databaseBundle','extractArticleMetadata','canonicalNearHit','findPassages','windows-1252','SQLite format 3','dependency-free-sqlite-byte-search'])assert(knowledge.includes(token),`Offline knowledge reader is missing ${token}.`);
-const parsed=JSON.parse(pkg),dependencies=Object.entries(parsed.dependencies||{});
-assert.equal(dependencies.length,1,'v243 must preserve Civweave’s single production dependency contract.');
-assert.equal(parsed.dependencies?.['onnxruntime-web'],'1.27.0','Pinned ONNX Runtime dependency changed unexpectedly.');
-assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
-assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second production runtime.');
+assert(localResearch.includes('searchDownloadedKnowledge'));assert(localResearch.includes("provenance:'knowledge-school-downloaded'"));assert(localResearch.includes('ARCHIVE VERIFIED · NOT LIVE-CHECKED'));assert(localResearch.includes('dependency-free cached SQLite passage search'));assert(localResearch.includes('canonicalUrl'));
+for(const token of ['openSeed(slug)','DecompressionStream','databaseBundle','extractArticleMetadata','canonicalNearHit','findPassages','windows-1252','SQLite format 3','dependency-free-sqlite-byte-search'])assert(knowledge.includes(token),`Offline knowledge reader missing ${token}.`);
+const parsed=JSON.parse(pkg),dependencies=Object.entries(parsed.dependencies||{});assert.equal(dependencies.length,1);assert.equal(parsed.dependencies?.['onnxruntime-web'],'1.27.0');assert(!('sql.js' in (parsed.dependencies||{})));assert(!String(parsed.scripts?.prestart||'').includes('sqljs'));
 
-console.log(JSON.stringify({ok:true,revision:'v243.7-short-answer-contract',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,sourceMaterialInjectedIntoPrompt:true,localPassagesInjectedIntoPrompt:true,liveEvidenceDigestStrengthened:true,moduleDepthRepair:true,iterativePerModuleQuizCompletion:true,singleQuestionQuizRecovery:true,shortAnswerContractGuard:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243.8-bounded-living-school-v266',singleInteractiveChatSurface:true,sourceMaterialInjectedIntoPrompt:true,moduleDepthRepair:true,boundedQuizRepair:true,maxQuizRepairsPerModule:3,providerDeadlines:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,provenanceExplicit:true},null,2));
