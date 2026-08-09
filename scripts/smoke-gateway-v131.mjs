@@ -19,13 +19,15 @@ for (const token of [
   if (!source.includes(token)) throw new Error(`Civweave gateway smoke v132 lost offline-runtime assertion: ${token}`);
 }
 for (const forbidden of [
-  'Open online campus',
-  'Open Civweave online',
-  'launch=online',
   "expected a public installed-runtime asset",
-  "for(const route of ['/app/','/app/index.html','/app/working-campus-v156.html'"
+  "for(const route of ['/app/','/app/index.html','/app/working-campus-v156.html'",
+  "location.assign('/app/working-campus-v156.html')",
+  "location.replace('/app/working-campus-v156.html')"
 ]) {
-  if (source.includes(forbidden)) throw new Error(`Civweave gateway smoke v132 refused retired live-runtime assertion: ${forbidden}`);
+  if (source.includes(forbidden)) throw new Error(`Civweave gateway smoke v132 refused retired live-runtime expectation: ${forbidden}`);
+}
+if (!source.includes("for(const forbidden of ['Open online campus','Open Civweave online','launch=online'])")) {
+  throw new Error('Civweave gateway smoke v132 must keep explicit negative assertions against live-runtime escape controls.');
 }
 
 await import(`${pathToFileURL(sourcePath).href}?build=${encodeURIComponent(VERSION)}`);
