@@ -1,7 +1,7 @@
 {
   "version": "1.0.33",
-  "revision": "canonical-background-campus-v241-systems-mesh-v251",
-  "description": "Civweave campus pack. The service worker starts from the installed entry, the five canonical system surfaces, canonical reward runtimes, and the non-privileged systems mesh contract; it discovers current same-origin dependencies and continues the resumable download while the PWA is in use.",
+  "revision": "canonical-background-campus-v241-systems-mesh-v251-federation-finder-v269",
+  "description": "Civweave campus pack. The service worker starts from the installed entry, the five canonical system surfaces, the local-first Federation Finder, canonical reward runtimes, and the non-privileged systems mesh contract; it discovers current same-origin dependencies and continues the resumable download while the PWA is in use.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
@@ -10,6 +10,9 @@
     "/app/cw-reward-surfaces-v2.js",
     "/app/civweave-systems-mesh-v251.js",
     "/app/working-campus-v156.html",
+    "/app/federation-finder-local-v269.html",
+    "/app/federation-finder-local-v269.js",
+    "/app/federation-finder-data/federation-seed-v269.json",
     "/app/cabinets/living-school/index.html",
     "/app/realm-console-v140.html",
     "/app/fellowfare-cabinet-v144.html",
