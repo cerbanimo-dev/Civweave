@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.0.60-local-ai-runtime-v266';
-const WORKER='/app/local-ai/worker-v266.js?v=1.0.60-v266';
+const VERSION='1.0.66-local-ai-runtime-v270-cache-loader';
+const WORKER='/app/local-ai/worker-v266.js?v=1.0.66-v270';
 if(globalThis.CivweaveLocalModelRuntimeV266?.version===VERSION)return;
 let worker=null,sequence=0;const pending=new Map();
 const registry=()=>globalThis.CivweaveLocalModelRegistryV266;
@@ -14,5 +14,5 @@ async function generate({messages=[],maxNewTokens=1024,temperature=.2,timeoutMs=
 function shutdown(){if(!worker)return false;worker.terminate();worker=null;for(const task of pending.values()){clearTimeout(task.timer);task.reject(new Error('Local model stopped.'))}pending.clear();return true}
 const api=Object.freeze({version:VERSION,activeSpec,ready,generate,shutdown});
 globalThis.CivweaveLocalModelRuntimeV266=api;
-dispatchEvent(new CustomEvent('civweave:local-model-runtime-ready',{detail:{version:VERSION,dormant:true}}));
+dispatchEvent(new CustomEvent('civweave:local-model-runtime-ready',{detail:{version:VERSION,dormant:true,cacheResolved:true}}));
 })();
