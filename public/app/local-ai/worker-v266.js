@@ -7,6 +7,15 @@ function post(id,type,payload={}){self.postMessage({id,type,...payload})}
 function extractGenerated(output){const row=Array.isArray(output)?output[0]:output;const generated=row?.generated_text;if(typeof generated==='string')return generated;if(Array.isArray(generated)){const last=generated.at(-1);return typeof last==='string'?last:clean(last?.content||last?.text)}return clean(row?.text||row?.content||generated)}
 function requestUrl(input){try{return typeof input==='string'?input:input?.url||String(input)}catch{return String(input||'')}}
 function pinnedRemoteRoot(spec){return `https://huggingface.co/${spec.repo}/resolve/${encodeURIComponent(spec.revision)}/`}
+async function validatedHit(cache,key,response){
+  if(!response?.ok)return null;
+  const type=String(response.headers.get('content-type')||'').toLowerCase();
+  if(type.includes('text/html')){try{await cache.delete(key)}catch{}return null}
+  if(/\.json(?:$|[?#])/i.test(key)){
+    try{const text=await response.clone().text();if(!text.trim())throw new Error('empty json');JSON.parse(text)}catch{try{await cache.delete(key)}catch{}return null}
+  }
+  return response.clone();
+}
 function cacheAdapter(cache,spec){
   const localPrefix=`/models/${spec.repo}/`,remotePrefix=pinnedRemoteRoot(spec);
   const miss=()=>new Response('',{status:404,statusText:'Downloaded model cache miss'});
@@ -14,19 +23,19 @@ function cacheAdapter(cache,spec){
     async match(request){
       const key=requestUrl(request);
       if(key.startsWith(localPrefix)){
-        const remote=remotePrefix+key.slice(localPrefix.length),hit=await cache.match(remote);
-        return hit?.ok?hit.clone():miss();
+        const remote=remotePrefix+key.slice(localPrefix.length),hit=await validatedHit(cache,remote,await cache.match(remote));
+        return hit||miss();
       }
       if(key.startsWith(remotePrefix)){
-        const hit=await cache.match(key);
-        return hit?.ok?hit.clone():miss();
+        const hit=await validatedHit(cache,key,await cache.match(key));
+        return hit||miss();
       }
-      try{const hit=await cache.match(request);return hit?.ok?hit.clone():undefined}catch{return undefined}
+      try{return await validatedHit(cache,key,await cache.match(request))||undefined}catch{return undefined}
     },
     put(request,response){return cache.put(request,response)}
   };
 }
-function friendlyError(error,spec){const raw=String(error?.message||error);if(raw.includes('/models/')&&(raw.includes('env.allowRemoteModels=false')||raw.includes('local_files_only=true')))return `Downloaded model cache miss for ${spec?.label||spec?.id||'the selected model'}. Re-download this model while online before using it offline.`;return raw}
+function friendlyError(error,spec){const raw=String(error?.message||error);if(/Unexpected (?:end of JSON input|token .*JSON)/i.test(raw))return `Downloaded model metadata is invalid for ${spec?.label||spec?.id||'the selected model'}. Civweave will repair the damaged metadata files when online.`;if(raw.includes('/models/')&&(raw.includes('env.allowRemoteModels=false')||raw.includes('local_files_only=true')))return `Downloaded model cache miss for ${spec?.label||spec?.id||'the selected model'}. Open AI Settings and tap Resume so Civweave can repair the missing files.`;return raw}
 async function configureRuntime(hf,cache,spec){
   hf.env.allowLocalModels=true;
   hf.env.allowRemoteModels=false;
