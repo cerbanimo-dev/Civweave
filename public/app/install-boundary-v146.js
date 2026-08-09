@@ -2,7 +2,8 @@
 'use strict';
 
 const VERSION='1.0.58';
-const REVISION='downloaded-runtime-boundary-v266';
+const REVISION='chat-convergence-v250';
+const RUNTIME_REVISION='downloaded-runtime-boundary-v266';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
 const INSTALLER='/app/index.html';
@@ -56,8 +57,8 @@ function developer(){
 }
 function embedded(){
   try{
-    if(window.top===window.self)return false;
-    if(!document.referrer)return false;
+    const framed=window.top!==window.self;
+    if(!framed||!document.referrer)return false;
     return new URL(document.referrer,location.href).origin===location.origin;
   }catch{return false}
 }
@@ -77,7 +78,10 @@ function allowed(){
 function installerUrl(){
   const target=`${location.pathname}${location.search}${location.hash}`;
   const next=new URL(INSTALLER,location.origin);
-  next.searchParams.set('install','required');next.searchParams.set('next',target.slice(0,1800));next.searchParams.set('source','runtime-boundary-v266');next.searchParams.set('version',requestedRelease);
+  next.searchParams.set('install','required');
+  next.searchParams.set('next',target.slice(0,1800));
+  next.searchParams.set('source','runtime-boundary-v266');
+  next.searchParams.set('version',requestedRelease);
   return next.href;
 }
 function liveHead(){return!unloading&&document.documentElement?.isConnected&&document.head?.isConnected}
@@ -108,10 +112,16 @@ function start(){
   }
   if(installedDisplay()||developer())authorize();
   if(system){
-    root.dataset.installBoundary=system==='civweave'?'canonical':'canonical-system';root.dataset.civweaveSystemRoute=system;root.dataset.civweaveRuntimeSource='downloaded-package';installSystemExperienceSupport();
+    root.dataset.installBoundary=system==='civweave'?'canonical':'canonical-system';
+    root.dataset.civweaveSystemRoute=system;
+    root.dataset.civweaveRuntimeSource='downloaded-package';
+    root.dataset.civweaveRuntimeRevision=RUNTIME_REVISION;
+    installSystemExperienceSupport();
   }else if(root)root.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
   if(system==='civweave'){
-    root.dataset.civweaveCanonicalCore='only';queueMicrotask(()=>dispatchEvent(new CustomEvent('civweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system,runtimeSource:'downloaded-package'}})));return;
+    root.dataset.civweaveCanonicalCore='only';
+    queueMicrotask(()=>dispatchEvent(new CustomEvent('civweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,runtimeRevision:RUNTIME_REVISION,system,runtimeSource:'downloaded-package'}})));
+    return;
   }
   if(system){root.dataset.civweaveCanonicalRealm='self-contained';installCanonicalSystemSupportWhenReady();return}
   installEarlyGuards();installAdditionsWhenReady();
@@ -120,6 +130,15 @@ function start(){
 start();
 
 globalThis.CivweaveInstallBoundaryV146=Object.freeze({
-  version:VERSION,revision:REVISION,allowed,systemSurface,canonicalAppSurface,installedDisplay,explicitInstalled,sessionAuthorized,developer,embedded,authorize,installerUrl,installEarlyGuards,installSystemExperienceSupport,installCanonicalSystemSupport,installCanonicalSystemSupportWhenReady,installAdditions,installAdditionsWhenReady,assetCustomizationConfigured,installAssetCustomizationIfConfigured,additionsVersion:ADDITIONS_VERSION,publicBrand:'Civweave',canonicalPolicy:'five-system-first-class-routes-v266-downloaded-runtime-only',runtimeAuthorizationPolicy:'standalone-or-preauthorized-session-never-route-intrinsic',runtimeSourcePolicy:'current-downloaded-package-never-live-site-fallback',canonicalSystemCount:5,canonicalAutoScripts:0,canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',systemsMeshRevision:'v251-five-system-non-privileged-event-contract',campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',radioTrackSuggestionRevision:'v241-playlist-context-track-links',radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',sharedGuideSurfaceRevision:'v236-mirror-into-v242-canonical-thread',realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',guideWorkspaceRevision:'v250-v242-canonical-owner',workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract',mapLaunchRevision:'v243-register-route-handler-or-open-event',fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',assetCustomizationRevision:'v239-local-path-overrides-on-demand',guideIdentityRevision:'v216-explicit-responder-ownership',guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm',guideIdentityMigration:'realm-action-owner',persistentGuideChatSubmissionPipelines:1,persistentGuideChatGuideCount:5,persistentGuideChatThreadPolicy:'five-realm-local-ledgers-plus-explicit-handover',persistentGuideChatWindowPolicy:'five-switchable-windows-current-realm-launcher',pwaUpdateRevision:'v250-installed-entry-every-launch',aiSettingsBindGuard:'v230-first-open-atomic-bind',aiSettingsPersistenceRepair:'v229-device-persistence',platformStabilityGuard:'v159-dom-ready-safe',compatibilityDomReady:true,onlineSelfHeal:false,missingAssetDetails:true
+  version:VERSION,
+  revision:REVISION,
+  runtimeRevision:RUNTIME_REVISION,
+  allowed,systemSurface,canonicalAppSurface,installedDisplay,explicitInstalled,sessionAuthorized,developer,embedded,authorize,installerUrl,installEarlyGuards,installSystemExperienceSupport,installCanonicalSystemSupport,installCanonicalSystemSupportWhenReady,installAdditions,installAdditionsWhenReady,assetCustomizationConfigured,installAssetCustomizationIfConfigured,
+  additionsVersion:ADDITIONS_VERSION,
+  publicBrand:'Civweave',
+  canonicalPolicy:'five-system-first-class-routes-v266-downloaded-runtime-only',
+  runtimeAuthorizationPolicy:'standalone-or-preauthorized-session-never-route-intrinsic',
+  runtimeSourcePolicy:'current-downloaded-package-never-live-site-fallback',
+  canonicalSystemCount:5,canonicalAutoScripts:0,canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',systemsMeshRevision:'v251-five-system-non-privileged-event-contract',campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',radioTrackSuggestionRevision:'v241-playlist-context-track-links',radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',sharedGuideSurfaceRevision:'v236-mirror-into-v242-canonical-thread',realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',guideWorkspaceRevision:'v250-v242-canonical-owner',workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract',mapLaunchRevision:'v243-register-route-handler-or-open-event',fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',assetCustomizationRevision:'v239-local-path-overrides-on-demand',guideIdentityRevision:'v216-explicit-responder-ownership',guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm',guideIdentityMigration:'realm-action-owner',persistentGuideChatSubmissionPipelines:1,persistentGuideChatGuideCount:5,persistentGuideChatThreadPolicy:'five-realm-local-ledgers-plus-explicit-handover',persistentGuideChatWindowPolicy:'five-switchable-windows-current-realm-launcher',pwaUpdateRevision:'v250-installed-entry-every-launch',aiSettingsBindGuard:'v230-first-open-atomic-bind',aiSettingsPersistenceRepair:'v229-device-persistence',platformStabilityGuard:'v159-dom-ready-safe',compatibilityDomReady:true,onlineSelfHeal:false,missingAssetDetails:true
 });
 })();
