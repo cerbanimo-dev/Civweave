@@ -30,12 +30,17 @@ assert.equal(school.modules[0].video.url,'https://www.youtube.com/watch?v=abcDEF
 assert.equal(school.modules[1].video.url,fallback);
 assert.equal(school.videoContract.requiredPerModule,1);
 
-const action={system:'cerbanimo',title:'Build an electronics demonstrator',fields:{objective:'Learn basic circuits'},checkpoints:['Wire a resistor and LED circuit','interdimensional snail choreography on Europa']};
-await contract.ensureCerbanimoAction(action);
-assert.equal(action.checkpointVideos.length,2);
-assert.equal(action.checkpointVideos[0].url,'https://www.youtube.com/watch?v=XYZ987abcde');
-assert.equal(action.checkpointVideos[1].url,fallback);
-assert.equal(action.videoContract.requiredPerTask,1);
+const electronicsAction={system:'cerbanimo',title:'Build an electronics demonstrator',fields:{objective:'Learn basic circuits'},checkpoints:['Wire a resistor and LED circuit']};
+await contract.ensureCerbanimoAction(electronicsAction);
+assert.equal(electronicsAction.checkpointVideos.length,1);
+assert.equal(electronicsAction.checkpointVideos[0].url,'https://www.youtube.com/watch?v=XYZ987abcde');
+assert.equal(electronicsAction.videoContract.requiredPerTask,1);
+
+const unmatchedAction={system:'cerbanimo',title:'Europa snail choreography',fields:{objective:'interdimensional mollusk dance notation'},checkpoints:['Map the speculative choreography']};
+await contract.ensureCerbanimoAction(unmatchedAction);
+assert.equal(unmatchedAction.checkpointVideos.length,1);
+assert.equal(unmatchedAction.checkpointVideos[0].url,fallback);
+assert.equal(unmatchedAction.checkpointVideos[0].source,'required-fallback');
 
 assert.equal(contract.youtubeEmbedUrl(fallback),'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ');
-console.log('Video Learning Contract behavior verified: relevant selection, exact fallback, Living School modules, Cerbanimo checkpoints, and embed URL.');
+console.log('Video Learning Contract behavior verified: relevant selection, exact fallback, Living School modules, Cerbanimo tasks, and embed URL.');
