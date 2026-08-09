@@ -1,7 +1,7 @@
 {
   "version": "1.0.33",
   "revision": "canonical-background-campus-v241-systems-mesh-v251",
-  "description": "Civweave campus pack. The service worker starts from the installed entry, the five canonical system surfaces, canonical reward runtimes, and the non-privileged systems mesh contract; it discovers current same-origin dependencies, including node AI mesh support loaded by the canonical install boundary, and continues the resumable download while the PWA is in use.",
+  "description": "Civweave campus pack. The service worker starts from the installed entry, the five canonical system surfaces, canonical reward runtimes, and the non-privileged systems mesh contract; it discovers current same-origin dependencies and also carries optional Federation Finder and node AI marketplace surfaces without promoting them to canonical roots.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
@@ -14,6 +14,19 @@
     "/app/realm-console-v140.html",
     "/app/fellowfare-cabinet-v144.html",
     "/app/anarchadia-console-v139.html"
+  ],
+  "assets": [
+    "/finder",
+    "/node-ai/operator",
+    "/app/federation-finder-local-v269.html",
+    "/app/federation-finder-local-v269.js",
+    "/app/federation-finder-data/federation-seed-v269.json",
+    "/app/local-object-mesh-v146.js",
+    "/app/node-ai-mesh-v1.js",
+    "/app/shared/civweave-node-ai-routing-v1.mjs",
+    "/app/node-ai-marketplace-surface-v1.js",
+    "/app/node-ai-operator-v1.html",
+    "/app/node-ai-operator-v1.js"
   ],
   "includePrefixes": ["/app/","/extensions/"],
   "excludePrefixes": ["/app/models/","/app/vendor/onnxruntime/","/app/services/living-school/visual-assets/","/app/services/cerbanimo/assets/visual/","/app/services/fellowfare/assets/mall/","/app/services/anarchadia/assets/screens/"],
