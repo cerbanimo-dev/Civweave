@@ -2,10 +2,11 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [manager,settings,broker,registry,bridge,bootstrap,worker,sw,cloudflare,campus]=await Promise.all([
+const [manager,settings,broker,spine,registry,bridge,bootstrap,worker,sw,cloudflare,campus]=await Promise.all([
   read('public/app/local-ai/download-manager-v267.js'),
   read('public/app/local-ai/settings-panel-v267.js'),
   read('public/app/ai-capability-broker-v268.js'),
+  read('public/app/fast-interactive-runtime-v192.js'),
   read('public/app/local-ai/model-registry-v266.js'),
   read('public/app/local-ai/runtime-bridge-v266.js'),
   read('public/app/local-ai/bootstrap-v266.js'),
@@ -15,15 +16,7 @@ const [manager,settings,broker,registry,bridge,bootstrap,worker,sw,cloudflare,ca
   read('public/app/working-campus-v156.part5.txt')
 ]);
 
-new Function(manager);
-new Function(settings);
-new Function(broker);
-new Function(registry);
-new Function(bridge);
-new Function(bootstrap);
-new Function(worker);
-new Function(sw);
-// build-cloudflare-pages.mjs is an ES module and is syntax-checked directly by the workflow.
+for(const source of [manager,settings,broker,spine,registry,bridge,bootstrap,worker,sw])new Function(source);
 new Function(campus.replace(/\}\)\(\);\s*$/,''));
 
 const checks=[];
@@ -45,16 +38,19 @@ check('Cloudflare build stages Transformers runtime before copy',cloudflare.incl
 check('Cloudflare build requires local inference entry and WebGPU wasm',cloudflare.includes('transformers.min.js')&&cloudflare.includes('ort-wasm-simd-threaded.jsep.wasm'));
 check('capability broker separates semantic-local from deterministic',broker.includes("return'semantic-local'")&&broker.includes("authority:'deterministic-contracts'"));
 check('capability broker distinguishes agentic reasoning from tools',broker.includes('agenticReasoning')&&broker.includes('requiresTools')&&broker.includes('externalResearch'));
+check('capability broker exposes routing diagnostics',broker.includes('function diagnostics()')&&broker.includes('lastDecision'));
+check('runtime spine exposes middleware registry',spine.includes('middleware=new Map()')&&spine.includes('function register(')&&spine.includes('__civweaveRuntimeSpineV269:true'));
 check('registry declares per-model capabilities',registry.includes('capabilities:caps')&&registry.includes('agenticReasoning:true')&&registry.includes('externalResearch:false'));
 check('small local model remains interactive but not agentic',registry.includes("id:'qwen3-0.6b-q4f16'")&&registry.includes('agenticReasoning:false'));
-check('local bridge marks downloaded model as actual provider',bridge.includes("provider:'downloaded-local'")&&bridge.includes('local-ai-bridge-v268'));
+check('local bridge marks downloaded model as actual provider',bridge.includes("provider:'downloaded-local'")&&bridge.includes('local-ai-bridge-v269-runtime-spine'));
 check('local bridge uses extended first-load timeout',bridge.includes('900000')&&bridge.includes('600000')&&bridge.includes('360000'));
-check('local bridge routes qualified agentic work locally',bridge.includes("generateAgentic:request=>generate({...request,executionProfile:'agentic'})")&&bridge.includes('routeDecision'));
-check('local bridge escalates unsupported capabilities through base runtime',bridge.includes('if(!decision.useLocal)')&&bridge.includes('return original.generate(request)'));
-check('bootstrap loads capability broker before registry',bootstrap.indexOf('ai-capability-broker-v268.js')<bootstrap.indexOf('model-registry-v266.js'));
-check('bootstrap pins v268 bridge while retaining v267 download manager and settings',bootstrap.includes('download-manager-v267.js')&&bootstrap.includes('local-ai-bridge-v268-capability-routing')&&bootstrap.includes('settings-panel-v267.js'));
+check('local bridge registers a runtime spine handler',bridge.includes("MIDDLEWARE_ID='downloaded-local-v269'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
+check('local bridge escalates unsupported capabilities through the spine base path',bridge.includes('if(!decision.useLocal)')&&bridge.includes('return null'));
+check('legacy local wrapper is fallback-only',bridge.includes("mode:'legacy-wrapper-fallback'")&&bridge.includes('if(register())return true'));
+check('bootstrap loads capability broker and runtime spine before local bridge',bootstrap.indexOf('ai-capability-broker-v268.js')<bootstrap.indexOf('fast-interactive-runtime-v192.js')&&bootstrap.indexOf('fast-interactive-runtime-v192.js')<bootstrap.indexOf('runtime-bridge-v266.js'));
+check('bootstrap retains v267 download manager and settings',bootstrap.includes('download-manager-v267.js')&&bootstrap.includes('local-ai-bridge-v269-runtime-spine')&&bootstrap.includes('settings-panel-v267.js'));
 check('Working Campus waits for local bootstrap before selected local chat',campus.includes('if(localSelection.active){await ensureDownloadedLocalAISettings()')&&campus.includes('CivweaveLocalModelBridgeV266?.patch?.()'));
 check('Working Campus refuses silent local-contract substitution',campus.includes("result?.provider==='local-contract'")&&campus.includes('did not substitute deterministic chat'));
 check('model chip surfaces active downloaded model',campus.includes('Local · ${label}')&&campus.includes('civweave:local-model-selection'));
 
-console.log(JSON.stringify({ok:true,revision:'local-model-capability-routing-v268',checks:checks.length,features:{byteProgress:true,backgroundFetch:true,foregroundFallback:true,capabilityRouting:true,localAgenticReasoning:true,toolEscalation:true,cloudflareRuntimeStaged:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-runtime-spine-v269',checks:checks.length,features:{byteProgress:true,backgroundFetch:true,foregroundFallback:true,capabilityRouting:true,runtimeSpine:true,localAgenticReasoning:true,toolEscalation:true,cloudflareRuntimeStaged:true}},null,2));
