@@ -38,6 +38,7 @@ export function extractNodeAiCandidates(objects, { nowMs = Date.now(), maxAgeMs 
         disclosures: structuredClone(service.disclosures || {}),
         privacy: structuredClone(manifest.privacy || {}),
         settlement: structuredClone(manifest.settlement || {}),
+        endpoints: structuredClone(manifest.metadata?.endpoints || {}),
         publicKey: manifest.publicKey || null,
         generatedAt: manifest.generatedAt || null,
         observedAt: Number.isFinite(observedAt) ? new Date(observedAt).toISOString() : null,
@@ -68,6 +69,7 @@ export function routeNodeAiService({
   preferredNodeIds = [],
   localNodeId = null,
   allowThirdPartyInference = true,
+  requireHttpReachability = false,
   latencyByNode = {},
   trustByNode = {},
   nowMs = Date.now(),
@@ -87,6 +89,7 @@ export function routeNodeAiService({
     const minimum = Number(candidate.billing?.minimumChargeCents || 0);
     if (maxMinimumChargeCents != null && Number.isFinite(minimum) && minimum > maxMinimumChargeCents) reasons.push('minimum charge exceeds preference');
     if (!allowThirdPartyInference && isThirdParty(candidate)) reasons.push('third-party inference not allowed');
+    if (requireHttpReachability && !(Array.isArray(candidate.endpoints?.baseUrls) && candidate.endpoints.baseUrls.length)) reasons.push('no advertised HTTP endpoint');
     const observedAt = Date.parse(candidate.observedAt || candidate.generatedAt || 0);
     const ageMs = Number.isFinite(observedAt) ? Math.max(0, nowMs - observedAt) : Number.POSITIVE_INFINITY;
     if (ageMs > maxAgeMs) reasons.push('service advert is stale');
