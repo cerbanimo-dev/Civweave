@@ -18,7 +18,7 @@ const [topbar,boundary,workspace,campus,release,manifest,pkg,workflow,finderHtml
   read('scripts/stage-federation-finder-data-v274.mjs'),
   read('scripts/build-cloudflare-pages.mjs')
 ]);
-new Function(topbar);new Function(finderRuntime);new Function(boundary);new Function(stager.replace(/^#![^\n]*\n/,''));
+new Function(topbar);new Function(finderRuntime);new Function(boundary);
 JSON.parse(seed);const offlineJson=JSON.parse(offlinePackage);
 const version=release.trim();
 const manifestJson=JSON.parse(manifest);
