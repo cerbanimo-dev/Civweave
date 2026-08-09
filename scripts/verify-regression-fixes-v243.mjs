@@ -102,7 +102,8 @@ assert(localResearch.includes('canonicalUrl'),'Downloaded research no longer car
 
 for(const token of ['openSeed(slug)','DecompressionStream','databaseBundle','extractArticleMetadata','canonicalNearHit','findPassages','windows-1252','SQLite format 3','dependency-free-sqlite-byte-search'])assert(knowledge.includes(token),`Offline knowledge reader is missing ${token}.`);
 const parsed=JSON.parse(pkg),dependencies=Object.entries(parsed.dependencies||{});
-assert.equal(dependencies.length,1,'v243 must preserve Civweave’s single production dependency contract.');
+assert.equal(dependencies.length,2,'v243 must preserve Civweave’s approved production dependency contract.');
+assert.equal(parsed.dependencies?.['@huggingface/transformers'],'3.8.1','Pinned Transformers dependency changed unexpectedly.');
 assert.equal(parsed.dependencies?.['onnxruntime-web'],'1.27.0','Pinned ONNX Runtime dependency changed unexpectedly.');
 assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
 assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second production runtime.');

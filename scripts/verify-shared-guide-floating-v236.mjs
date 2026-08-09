@@ -86,8 +86,13 @@ const checks=[
     assert.match(guide,/#cw-radio-suggestion-v233\{z-index:2147483610!important/);
     assert.match(workspace,/#\$\{LAUNCHER_ID\}\{z-index:2147483643!important/);
     assert.match(radio,/left:max\(14px,env\(safe-area-inset-left\)\)/);
-    assert.match(nav,/--cw-themed-nav-height:clamp\(52px,7vw,72px\)/);
-    for(const id of ['civweave','living-school','cerbanimo','fellowfare','anarchadia'])assert.ok(nav.includes(`/app/assets/navigation/200-${id}-nav.webp?v=image-nav-r2`),`${id} lost the canonical ornate face-button artwork`);
+    assert.match(nav,/--cw-themed-nav-height:clamp\(46\.8px,6\.3vw,64\.8px\)/);
+    assert.match(nav,/@media\(max-width:680px\)\{:root\{--cw-themed-nav-height:clamp\(45px,12\.6vw,59\.4px\)/);
+    assert.match(nav,/\.cw-themed-system-link:not\(\.is-current\)\{background:var\(--system-shade\)\}/);
+    for(const [id,shade] of [['civweave','#264646'],['living-school','#2d3e27'],['cerbanimo','#4a1d43'],['fellowfare','#182c37'],['anarchadia','#4a122e']]){
+      assert.ok(nav.includes(`/app/assets/navigation/200-${id}-nav.webp?v=image-nav-r2`),`${id} lost the canonical ornate face-button artwork`);
+      assert.ok(nav.includes(`shade:'${shade}'`),`${id} lost its dark inactive navigation tint`);
+    }
   }],
   ['release syntax gate includes v236 v237 and v242',()=>{
     assert.equal(pkg.version,release);
