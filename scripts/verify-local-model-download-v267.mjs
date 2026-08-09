@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [manager,settings,bridge,bootstrap,worker,sw,cloudflare,campus]=await Promise.all([
+const [manager,settings,broker,registry,bridge,bootstrap,worker,sw,cloudflare,campus]=await Promise.all([
   read('public/app/local-ai/download-manager-v267.js'),
   read('public/app/local-ai/settings-panel-v267.js'),
+  read('public/app/ai-capability-broker-v268.js'),
+  read('public/app/local-ai/model-registry-v266.js'),
   read('public/app/local-ai/runtime-bridge-v266.js'),
   read('public/app/local-ai/bootstrap-v266.js'),
   read('public/service-worker-local-model-download-v267.js'),
@@ -15,6 +17,8 @@ const [manager,settings,bridge,bootstrap,worker,sw,cloudflare,campus]=await Prom
 
 new Function(manager);
 new Function(settings);
+new Function(broker);
+new Function(registry);
 new Function(bridge);
 new Function(bootstrap);
 new Function(worker);
@@ -39,11 +43,18 @@ check('service worker copies fetched model responses into model cache',worker.in
 check('root service worker imports local model background worker',sw.includes('/service-worker-local-model-download-v267.js'));
 check('Cloudflare build stages Transformers runtime before copy',cloudflare.includes('stage-transformers-assets.mjs')&&cloudflare.includes('Required local-AI runtime asset was not staged'));
 check('Cloudflare build requires local inference entry and WebGPU wasm',cloudflare.includes('transformers.min.js')&&cloudflare.includes('ort-wasm-simd-threaded.jsep.wasm'));
-check('local bridge marks downloaded model as actual provider',bridge.includes("provider:'downloaded-local'")&&bridge.includes('local-ai-bridge-v267'));
+check('capability broker separates semantic-local from deterministic',broker.includes("return'semantic-local'")&&broker.includes("authority:'deterministic-contracts'"));
+check('capability broker distinguishes agentic reasoning from tools',broker.includes('agenticReasoning')&&broker.includes('requiresTools')&&broker.includes('externalResearch'));
+check('registry declares per-model capabilities',registry.includes('capabilities:caps')&&registry.includes('agenticReasoning:true')&&registry.includes('externalResearch:false'));
+check('small local model remains interactive but not agentic',registry.includes("id:'qwen3-0.6b-q4f16'")&&registry.includes('agenticReasoning:false'));
+check('local bridge marks downloaded model as actual provider',bridge.includes("provider:'downloaded-local'")&&bridge.includes('local-ai-bridge-v268'));
 check('local bridge uses extended first-load timeout',bridge.includes('900000')&&bridge.includes('600000')&&bridge.includes('360000'));
-check('bootstrap pins v267 manager, bridge and settings',bootstrap.includes('download-manager-v267.js')&&bootstrap.includes('local-ai-bridge-v267')&&bootstrap.includes('settings-panel-v267.js'));
-check('Working Campus waits for v267 local bootstrap before selected local chat',campus.includes('if(localSelection.active){await ensureDownloadedLocalAISettings()')&&campus.includes('CivweaveLocalModelBridgeV266?.patch?.()'));
+check('local bridge routes qualified agentic work locally',bridge.includes("generateAgentic:request=>generate({...request,executionProfile:'agentic'})")&&bridge.includes('routeDecision'));
+check('local bridge escalates unsupported capabilities through base runtime',bridge.includes('if(!decision.useLocal)')&&bridge.includes('return original.generate(request)'));
+check('bootstrap loads capability broker before registry',bootstrap.indexOf('ai-capability-broker-v268.js')<bootstrap.indexOf('model-registry-v266.js'));
+check('bootstrap pins v268 bridge while retaining v267 download manager and settings',bootstrap.includes('download-manager-v267.js')&&bootstrap.includes('local-ai-bridge-v268-capability-routing')&&bootstrap.includes('settings-panel-v267.js'));
+check('Working Campus waits for local bootstrap before selected local chat',campus.includes('if(localSelection.active){await ensureDownloadedLocalAISettings()')&&campus.includes('CivweaveLocalModelBridgeV266?.patch?.()'));
 check('Working Campus refuses silent local-contract substitution',campus.includes("result?.provider==='local-contract'")&&campus.includes('did not substitute deterministic chat'));
 check('model chip surfaces active downloaded model',campus.includes('Local · ${label}')&&campus.includes('civweave:local-model-selection'));
 
-console.log(JSON.stringify({ok:true,revision:'local-model-background-progress-v267',checks:checks.length,features:{byteProgress:true,backgroundFetch:true,foregroundFallback:true,localRouteEnforced:true,cloudflareRuntimeStaged:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-capability-routing-v268',checks:checks.length,features:{byteProgress:true,backgroundFetch:true,foregroundFallback:true,capabilityRouting:true,localAgenticReasoning:true,toolEscalation:true,cloudflareRuntimeStaged:true}},null,2));

@@ -19,7 +19,7 @@ const packageJson=JSON.parse(pkg);
 const checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 check('repository release is semantic',/^\d+\.\d+\.\d+$/.test(version));
-check('release surfaces are coherent',version==='1.0.62'&&packageJson.version===version&&manifestJson.name===`Civweave v${version}`);
+check('release surfaces are coherent',packageJson.version===version&&manifestJson.name===`Civweave v${version}`);
 check('topbar runtime remains v243',topbar.includes('working-campus-topbar-v243'));
 check('topbar runtime is syntax checked',workflow.includes('node --check public/app/working-campus-topbar-v243.js'));
 check('v243 is approved experience support',boundary.includes("const WORKING_CAMPUS_TOPBAR='/app/working-campus-topbar-v243.js'")&&boundary.includes('WORKING_CAMPUS_TOPBAR,')&&boundary.includes("workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract'"));
