@@ -71,7 +71,6 @@ function focusRevision(){
 
 function openReview(plan){
   const item=reviewItemFor(plan);
-  if(item&&!globalThis.CivweaveIntentionPlanner?.restore)return false;
   if(!item)try{globalThis.CivweaveIntentionPlanner?.restore?.(plan)}catch{}
   if(globalThis.CivweaveIntentionUI?.open){globalThis.CivweaveIntentionUI.open(plan.id);return true}
   try{
@@ -103,6 +102,7 @@ function renderReviewReady(plan){
 function patchPlanner(api=globalThis.CivweaveIntentionPlanner){
   if(!api?.maybeCreate)return false;
   if(api===patchedPlanner&&api.maybeCreate?.__cwMaterializeV265)return true;
+  if(api.maybeCreate?.__cwMaterializeV265){patchedPlanner=api;return true}
   const original=api.maybeCreate.bind(api);
   const wrapped=(options={})=>{
     const result=original(options);
@@ -119,7 +119,13 @@ function patchPlanner(api=globalThis.CivweaveIntentionPlanner){
     return result;
   };
   wrapped.__cwMaterializeV265=true;
-  try{api.maybeCreate=wrapped}catch{return false}
+  try{api.maybeCreate=wrapped}catch{}
+  if(api.maybeCreate!==wrapped){
+    try{
+      api={...api,maybeCreate:wrapped};
+      globalThis.CivweaveIntentionPlanner=api;
+    }catch{return false}
+  }
   patchedPlanner=api;
   return true;
 }
@@ -147,7 +153,7 @@ function ensurePlanner(){
     }
     const api=await waitForPlanner();
     patchPlanner(api);
-    return api;
+    return globalThis.CivweaveIntentionPlanner||api;
   })().catch(error=>{readyPromise=null;console.warn('[Civweave] Weaveling planner readiness failed:',error);throw error});
   return readyPromise;
 }
