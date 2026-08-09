@@ -11,6 +11,7 @@ const campusRevision='canonical-campus-startup-v227';
 const boundaryRevision='chat-convergence-v250';
 const routeRevision='five-system-route-contract-v227';
 const runtimeRevision='downloaded-runtime-boundary-v266';
+const runtimeWorkerCacheRevision='downloaded-runtime-v266';
 const canonicalRuntimeRevision='canonical-package-navigation-v266';
 if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('VERSION must contain a semantic release version.');
 
@@ -115,7 +116,7 @@ await patch('public/extensions/civweave-additions-v156.js',source=>{
 const wrapper=await readFile(path.join(root,'public/service-worker-v203.js'),'utf8');
 for(const token of [
   `/app/system-routes-v227.js?v=${version}-${routeRevision}`,
-  `/service-worker-offline-runtime-boundary-v266.js?v=${version}-${runtimeRevision}`,
+  `/service-worker-offline-runtime-boundary-v266.js?v=${version}-${runtimeWorkerCacheRevision}`,
   '/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238',
   `/service-worker-release-coherence-v220.js?v=${revision}`,
   `/service-worker-canonical-navigation-v227.js?v=${canonicalRuntimeRevision}`,
@@ -136,4 +137,4 @@ for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pin
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,runtimeRevision,canonicalRuntimeRevision,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',offlineRevision:'offline-campus-current-graph-v238',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',canonicalRuntime:'downloaded-package-only',canonicalNetworkFallback:false,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,runtimeRevision,runtimeWorkerCacheRevision,canonicalRuntimeRevision,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',offlineRevision:'offline-campus-current-graph-v238',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',canonicalRuntime:'downloaded-package-only',canonicalNetworkFallback:false,changed},null,2));
