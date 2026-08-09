@@ -231,5 +231,15 @@
     "workers": 4,
     "search_rows": 100,
     "planned_primary_searches": 33
+  },
+  "youtube_availability_index": {
+    "file": "youtube-availability-current.json",
+    "status": "current",
+    "bytes": 38652,
+    "sha256": "2bd062b1b90930b4fcbcb91cc4e6e17ab30d998ff22dda3ee127140132abc31c",
+    "eligible_video_ids": 2608,
+    "ineligible_video_ids": 120,
+    "built_at": "2026-08-09T22:17:28Z",
+    "expires_at": "2026-09-07T22:17:28Z"
   }
 }
