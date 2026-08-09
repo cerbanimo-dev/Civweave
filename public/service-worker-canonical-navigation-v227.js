@@ -31,12 +31,17 @@ function recoveryPage(pathname){
   const installer=new URL('/app/index.html',self.location.origin);installer.searchParams.set('repair','canonical-route');installer.searchParams.set('next',pathname);
   return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Civweave package repair</title><style>html,body{margin:0;min-height:100%;background:#07131e;color:#f5f7ff;font:16px/1.5 system-ui}main{max-width:42rem;margin:auto;padding:12vh 1.25rem}a{display:inline-block;padding:.8rem 1rem;border-radius:.8rem;background:#1c3559;color:#fff;text-decoration:none}</style></head><body><main><h1>Downloaded route unavailable</h1><p>Civweave did not substitute the hosted website. Finish or repair the local campus package, then try this route again.</p><a href="${installer.pathname}${installer.search}">Repair downloaded campus</a></main></body></html>`,{status:503,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-civweave-canonical-navigation':REVISION,'x-civweave-runtime-source':'package-miss'}})
 }
-self.addEventListener('install',event=>{event.waitUntil(precacheCanonicalRoutes().catch(()=>[]))});
-networkFirst=async function canonicalFiveSystemPackageFirst(request,fallbackPath='/offline.html'){
-  if(!canonical(request))return originalNetworkFirst(request,fallbackPath);
-  const pathname=new URL(request.url).pathname,cached=await currentPackage(pathname),normalized=await normalize(cached,request);
+async function packageOnlyCanonical(request){
+  const pathname=new URL(request.url).pathname;
+  const cached=await currentPackage(pathname);
+  const normalized=await normalize(cached,request);
   if(normalized)return normalized;
   return recoveryPage(pathname);
+}
+self.addEventListener('install',event=>{event.waitUntil(precacheCanonicalRoutes().catch(()=>[]))});
+networkFirst=async function canonicalFiveSystemPackageFirst(request,fallbackPath='/offline.html'){
+  if(canonical(request))return packageOnlyCanonical(request);
+  return originalNetworkFirst(request,fallbackPath);
 };
-self.CivweaveCanonicalNavigationV227=Object.freeze({revision:REVISION,routeScript:ROUTE_SCRIPT,routes:routes?.routes?.().map(route=>route.pathname)||[],policy:'exact-route-current-package-first-no-live-network-runtime-fallback',packageHeader:true,precache:true,precacheCount:6,runtimeNetworkFallback:false});
+self.CivweaveCanonicalNavigationV227=Object.freeze({revision:REVISION,routeScript:ROUTE_SCRIPT,routes:routes?.routes?.().map(route=>route.pathname)||[],policy:'exact-route-current-package-first-no-live-network-runtime-fallback',packageHeader:true,precache:true,precacheCount:6,runtimeNetworkFallback:false,canonicalHandler:'packageOnlyCanonical'});
 })();
