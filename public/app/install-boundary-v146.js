@@ -43,12 +43,11 @@ const FALLBACK_PATHS=new Map([
 ]);
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR];
 const SYSTEM_EXPERIENCE_SCRIPTS=[
-  // Keep station + exact-track suggestions independent of slower shared UX modules.
-  // The radio runtime safely falls back to standalone presentation until the
-  // orchestrator arrives, and the track decorator can decorate an existing card.
+  EXPERIENCE_ORCHESTRATOR,
+  // Keep station + exact-track suggestions directly behind the orchestrator so
+  // slower mesh/guide/workspace modules cannot starve the six-second radio UI.
   SYSTEM_RADIO_AGENT,
   RADIO_TRACK_SUGGESTIONS,
-  EXPERIENCE_ORCHESTRATOR,
   SYSTEMS_MESH_RUNTIME,
   GUIDE_IDENTITY_SCRIPT,
   REALM_SESSION_INTEGRITY,
