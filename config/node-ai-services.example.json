@@ -1,0 +1,26 @@
+{
+  "services": [
+    {
+      "id": "general",
+      "label": "General Intelligence",
+      "capabilities": ["chat", "planning", "structured-generation"],
+      "billing": { "currency": "USD", "unit": "node-credit-cent", "maxRequestCents": 25 },
+      "backend": {
+        "ownership": "node-operator",
+        "example": "OpenAI-compatible provider such as Fireworks, a local model server, or an operator-built model package"
+      },
+      "disclosures": { "modelMayChange": true }
+    },
+    {
+      "id": "code",
+      "label": "Agentic Code Forge",
+      "capabilities": ["agentic-code", "repository-tools", "test-execution"],
+      "billing": { "currency": "USD", "unit": "node-credit-cent", "maxRequestCents": 500 },
+      "backend": {
+        "ownership": "node-operator",
+        "example": "OpenHands, another compatible agent runtime, or an operator-built implementation agent"
+      },
+      "disclosures": { "requiresRepositoryAuthorization": true }
+    }
+  ]
+}
