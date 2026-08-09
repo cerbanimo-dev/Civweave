@@ -18,6 +18,7 @@ function optimizedRequest(request={}){
   else if(provider==='hosted')config.timeoutMs=Math.min(configured||12000,15000);
   const tokenLimit=Number(config.maxTokens||config.max_tokens)||0;
   config.maxTokens=Math.min(tokenLimit||1400,1800);
+  config.stream=false;
   return{...request,config,responseFormat:'json',maxRepairAttempts:0};
 }
 function ordered(){return[...middleware.values()].sort((a,b)=>(b.priority||0)-(a.priority||0)||a.id.localeCompare(b.id));}
@@ -107,7 +108,7 @@ function status(){return diagnostics();}
 const api=Object.freeze({version:VERSION,install,stabilize,optimizedRequest,register,unregister,diagnostics,status,base:()=>base,proxy:()=>proxy});
 root.CivweaveFastInteractiveV192=api;
 register('fast-interactive',{before(request){const next=optimizedRequest(request);return next===request?request:{request:next,state:{started:clock()}};},after(result,_request,ctx){const started=ctx.states['fast-interactive']?.started;if(started==null||!result||typeof result!=='object')return result;return{...result,latency:{...(result.latency||{}),interactiveMs:Math.max(0,Math.round(clock()-started)),revision:VERSION}};}},20);
-addEventListener?.('civweave:model-runtime-ready',install);
-addEventListener?.('pageshow',install);
+root.addEventListener?.('civweave:model-runtime-ready',install);
+root.addEventListener?.('pageshow',install);
 install();
 })();
