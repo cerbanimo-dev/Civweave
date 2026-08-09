@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.61-working-campus-topbar-v243-federation-finder-v268';
+const VERSION='1.0.62-working-campus-topbar-v243-federation-finder-v268';
 const STYLE_ID='cw-working-campus-topbar-v243-style';
 const MAP_BUTTON_ID='cw-working-campus-map-v243';
 const MAP_EVENT='civweave:map-open-request';
