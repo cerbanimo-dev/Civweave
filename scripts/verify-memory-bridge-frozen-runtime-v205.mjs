@@ -6,10 +6,12 @@ const [bridge,boundary,legacy,wrapper,core,cleanup,critical]=await Promise.all([
 assert(/const VERSION='[^']*weaveling-memory-bridge-v\d+-[^']*'/.test(bridge),'Current memory bridge revision is missing.');
 assert(!/runtime\.generate\s*=|runtime\.fastMemoryRevision\s*=/.test(bridge),'Memory bridge mutates a frozen runtime directly.');
 assert(bridge.includes('const proxy=Object.freeze({...runtime,generate:wrapped,fastMemoryRevision:VERSION})'),'Immutable runtime proxy is missing.');
-assert(boundary.includes('DETERMINISTIC_PROVIDER_BOUNDARY'),'Cerbanimo deterministic provider boundary is missing.');
+assert(boundary.includes('CivweaveAICapabilityBrokerV268'),'Cerbanimo capability broker is missing.');
+assert(!boundary.includes('DETERMINISTIC_PROVIDER_BOUNDARY'),'Legacy Cerbanimo hard provider rejection returned.');
+assert(boundary.includes("consequentialActions:'deterministic-contracts'"),'Cerbanimo consequence authority boundary is missing.');
 assert(critical.includes("'/app/weaveling-memory-bridge-v191.js'"),'Critical compatibility package lost the memory bridge.');
 assert(legacy.includes("importScripts('/service-worker-v203.js"),'Legacy registration no longer bridges to v203.');
 assert(wrapper.includes('/service-worker-living-school-cleanroom-v218.js')&&wrapper.includes('/service-worker-core-v208.js'),'v203 does not compose cache retirement with the retained core.');
 assert(core.includes("const BUILD = 'lightweight-shell-v208'")&&core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Retained lightweight/offline core is missing.');
 assert(cleanup.includes("const REVISION='living-school-cleanroom-v218'")&&cleanup.includes('event.stopImmediatePropagation()'),'Living School cache boundary is missing.');
-console.log(JSON.stringify({ok:true,revision:'memory-bridge-frozen-runtime-current',frozenRuntimeProxy:true,cerbanimoBoundaryComposition:true,criticalRefresh:true,installedWorkerMode:'v218-cleanroom-wrapper-retained-v208-core'},null,2));
+console.log(JSON.stringify({ok:true,revision:'memory-bridge-frozen-runtime-current',frozenRuntimeProxy:true,cerbanimoCapabilityBroker:true,deterministicConsequenceAuthority:true,criticalRefresh:true,installedWorkerMode:'v218-cleanroom-wrapper-retained-v208-core'},null,2));
