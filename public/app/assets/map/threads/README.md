@@ -1,10 +1,20 @@
 # Civweave map thread tiles
 
-Transparent, individually labelled tiles for the Civweave association/federation map.
+These transparent thread pieces are the visual vocabulary for Civweave's association and federation map.
 
-- `thread-straight-01..03-{cyan|gold|green|pink|silver}.webp`
-- `thread-curve-01..08-{cyan|gold|green|pink|silver}.webp`
+## Geometry
+- 8 curved thread tiles
+- 3 straight thread tiles
+- transparent WebP, individually labelled
+- runtime-tinted into five semantic colors
 
-These are shipping-optimized WebP derivatives of the approved PNG source pack. The line engine rotates and overlaps the tiles to trace connections. `manifest.json` is the canonical machine-readable inventory.
+The line engine chooses, rotates, overlaps, and tints these pieces while tracing a cubic path. Keeping one neutral raster per geometry gives the full five-color set at a fraction of the offline PWA weight.
 
-Color semantics are assigned by the runtime rather than baked into filenames: gold is normally trusted federation, cyan active people/relationships, green local/home-node, pink pending/invited, and silver discovery/data/blocked context.
+## Runtime color semantics
+- **gold**: trusted federation / node-to-node trust
+- **cyan**: active person or active relationship
+- **green**: local node / home-node relationship
+- **pink**: pending invitation or pending federation
+- **silver**: discovery, data trace, or blocked/read-only context
+
+These files are presentation assets. Federation state always comes from Civweave data and federation APIs, never from the art.
