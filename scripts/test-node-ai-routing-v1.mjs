@@ -7,7 +7,7 @@ import {
 } from '../public/app/shared/civweave-node-ai-routing-v1.mjs';
 
 const now = Date.parse('2026-08-09T20:00:00.000Z');
-const advert = ({ nodeId, serviceId, capabilities, minimumChargeCents = 1, maxRequestCents = 100, thirdPartyInference = false, updatedAt = '2026-08-09T19:59:00.000Z', revision = 1 }) => ({
+const advert = ({ nodeId, serviceId, capabilities, minimumChargeCents = 1, maxRequestCents = 100, thirdPartyInference = false, baseUrls = [], updatedAt = '2026-08-09T19:59:00.000Z', revision = 1 }) => ({
   schema: 'civweave.community-object.v1',
   id: `advert:${nodeId}`,
   revision,
@@ -23,6 +23,14 @@ const advert = ({ nodeId, serviceId, capabilities, minimumChargeCents = 1, maxRe
       displayName: nodeId,
       generatedAt: updatedAt,
       privacy: { thirdPartyInference },
+      metadata: {
+        endpoints: {
+          transports: baseUrls.length ? ['mesh', 'https'] : ['mesh'],
+          baseUrls,
+          capabilityPath: '/api/ai/node/wallet/capability',
+          inferencePath: '/api/ai/node/inference'
+        }
+      },
       services: [{
         id: serviceId,
         label: serviceId,
@@ -33,14 +41,15 @@ const advert = ({ nodeId, serviceId, capabilities, minimumChargeCents = 1, maxRe
   }
 });
 
-test('extracts fresh service candidates and ignores stale adverts', () => {
+test('extracts fresh service candidates, preserves reachability, and ignores stale adverts', () => {
   const candidates = extractNodeAiCandidates([
-    advert({ nodeId: 'node:a', serviceId: 'general', capabilities: ['chat'] }),
+    advert({ nodeId: 'node:a', serviceId: 'general', capabilities: ['chat'], baseUrls: ['https://node-a.example'] }),
     advert({ nodeId: 'node:stale', serviceId: 'old', capabilities: ['chat'], updatedAt: '2026-08-08T00:00:00.000Z' })
   ], { nowMs: now, maxAgeMs: 60 * 60 * 1000 });
   assert.equal(candidates.length, 1);
   assert.equal(candidates[0].nodeId, 'node:a');
   assert.equal(candidates[0].serviceId, 'general');
+  assert.deepEqual(candidates[0].endpoints.baseUrls, ['https://node-a.example']);
 });
 
 test('newest advert wins for the same node and service', () => {
@@ -62,6 +71,16 @@ test('routing rejects services that cannot satisfy capability, privacy, or retai
   assert.equal(result.selected.nodeId, 'node:local');
   assert.equal(result.rejected.length, 1);
   assert.equal(result.rejected[0].nodeId, 'node:cloud');
+});
+
+test('HTTP-required routing excludes mesh-only services', () => {
+  const candidates = extractNodeAiCandidates([
+    advert({ nodeId: 'node:mesh', serviceId: 'general', capabilities: ['chat'] }),
+    advert({ nodeId: 'node:https', serviceId: 'general', capabilities: ['chat'], baseUrls: ['https://node.example'] })
+  ], { nowMs: now });
+  const result = routeNodeAiService({ candidates, requiredCapabilities: ['chat'], requireHttpReachability: true, nowMs: now });
+  assert.equal(result.selected.nodeId, 'node:https');
+  assert.match(result.rejected[0].reasons.join(' '), /HTTP endpoint/);
 });
 
 test('explicit preference outranks latency while local execution wins absent a preference', () => {
