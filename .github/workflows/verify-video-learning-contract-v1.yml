@@ -14,8 +14,10 @@ on:
       - public/app/video-atlas-installer-v1.js
       - public/app/index.html
       - scripts/build-video-learning-atlas-v1.py
+      - scripts/build-video-learning-atlas-parallel-v1.py
       - scripts/materialize-video-learning-lookup-v1.py
       - scripts/verify-video-learning-contract-v1.mjs
+      - scripts/test-video-learning-contract-v1.mjs
       - .github/workflows/verify-video-learning-contract-v1.yml
 
 permissions:
@@ -37,6 +39,8 @@ jobs:
           node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
           node --check public/app/cerbanimo-video-task-contract-v1.mjs
           node --check public/app/video-atlas-installer-v1.js
-          python -m py_compile scripts/build-video-learning-atlas-v1.py scripts/materialize-video-learning-lookup-v1.py
+          python -m py_compile scripts/build-video-learning-atlas-v1.py scripts/build-video-learning-atlas-parallel-v1.py scripts/materialize-video-learning-lookup-v1.py
       - name: Verify cross-realm video invariants
         run: node scripts/verify-video-learning-contract-v1.mjs
+      - name: Exercise resolver and fallback behavior
+        run: node scripts/test-video-learning-contract-v1.mjs
