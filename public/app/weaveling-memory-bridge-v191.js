@@ -64,7 +64,7 @@ function installCodeAutomation(){
 }
 function stabilize(){installFastRuntime();const ready=install();installCodeAutomation();return ready;}
 globalThis.CivweaveWeavelingMemoryBridgeV191=Object.freeze({version:VERSION,install,stabilize,installFastRuntime,installCodeAutomation,maxMemoryItems:MAX_MEMORY_ITEMS,get fastRuntimeInstalled(){return fastRuntimeInstalled;}});
-addEventListener?.('civweave:runtime-spine-ready',installFastRuntime);
+globalThis.addEventListener?.('civweave:runtime-spine-ready',installFastRuntime);
 install();
 installCodeAutomation();
 })();
