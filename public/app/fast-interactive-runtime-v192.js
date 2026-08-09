@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.65-runtime-spine-v269';
+const VERSION='1.0.66-runtime-spine-v270';
 const root=globalThis;
 if(root.CivweaveFastInteractiveV192?.version===VERSION)return;
 const middleware=new Map();
@@ -37,6 +37,12 @@ async function generate(input={}){
   state.calls+=1;
   let request=input&&typeof input==='object'?input:{};
   const trace=[],states=Object.create(null),stack=ordered();
+  const normalizer=root.CivweaveAICapabilityBrokerV268?.normalizeRequest;
+  if(typeof normalizer==='function'){
+    const started=clock(),normalized=normalizer(request);
+    if(normalized&&typeof normalized==='object')request=normalized;
+    trace.push({id:'capability-normalizer',phase:'before',ms:Math.max(0,Math.round(clock()-started)),changed:Boolean(request?.capabilityNormalization)});
+  }
   for(const item of stack){
     if(!item.before)continue;
     const started=clock();
@@ -62,7 +68,7 @@ async function generate(input={}){
     trace.push({id:item.id,phase:'after',ms:Math.max(0,Math.round(clock()-started))});
   }
   state.lastTrace=trace.slice(-40);
-  state.lastRequest={purpose:String(request.purpose||''),executionProfile:String(request.executionProfile||'interactive'),handledBy,at:new Date().toISOString()};
+  state.lastRequest={purpose:String(request.purpose||''),executionProfile:String(request.executionProfile||'interactive'),handledBy,capabilityNormalization:request.capabilityNormalization||null,at:new Date().toISOString()};
   if(result&&typeof result==='object')return{...result,runtimeSpine:{schema:'civweave.ai-runtime-spine.v1',version:VERSION,handledBy,middleware:stack.map(item=>item.id),trace:state.lastTrace}};
   return result;
 }
@@ -82,8 +88,9 @@ function install(){
     proxy=Object.freeze({
       ...base,
       __civweaveRuntimeSpineV269:true,
+      __civweaveRuntimeSpineV270:true,
       baseVersion:state.baseVersion,
-      version:`${state.baseVersion}+spine-v269`,
+      version:`${state.baseVersion}+spine-v270`,
       generate,
       generateInteractive:request=>generate({...request,executionProfile:'interactive'}),
       generateAgentic:request=>generate({...request,executionProfile:'agentic'}),
@@ -93,7 +100,7 @@ function install(){
     state.installed=root.CivweaveModelRuntime===proxy;
     state.mode=state.installed?'spine':'fallback';
     state.lastError=state.installed?'':'The model runtime spine could not become the active runtime.';
-    dispatch('civweave:runtime-spine-ready',{version:VERSION,installed:state.installed,baseVersion:state.baseVersion,middleware:ordered().map(item=>item.id)});
+    dispatch('civweave:runtime-spine-ready',{version:VERSION,installed:state.installed,baseVersion:state.baseVersion,middleware:ordered().map(item=>item.id),capabilityNormalization:true});
     dispatch('civweave:fast-interactive-installed',{version:VERSION,installed:state.installed,mode:state.mode});
     return state.installed;
   }catch(error){
