@@ -3,7 +3,7 @@ import media from'./open-learning-media-cache-v1.mjs?v=open-media-cache-v1';
 const ROOT_ID='open-learning-media-cache';
 const state={busy:false,packs:[]};
 const $=selector=>document.querySelector(selector);
-const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const FALLBACK_PACKS=[
   {slug:'general-knowledge',name:'General Knowledge',kind:'core',default:true,description:'Broad history, geography, science, math, arts, health, civics, technology, and philosophy.',topics:['world-history','earth-geography','civics-society','biology-life','physics-foundations','chemistry-foundations','astronomy-space','mathematics-foundations','computing-basics','arts-culture','health-wellness','philosophy-ethics']},
   {slug:'digital-ai-literacy',name:'Digital & AI Literacy',kind:'extension',description:'AI-assisted creation, prompting, algorithms, critical thinking, and logic.',topics:['computing-basics','vibe-coding','prompt-engineering','pseudocoding','critical-thinking','logical-frameworks']},
