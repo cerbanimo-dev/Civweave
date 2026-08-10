@@ -24,94 +24,39 @@ jobs:
           ref: agent/open-learning-media-harvest-v1
           fetch-depth: 0
 
-      - name: Sync current main and prepare release version
+      - name: Sync current main
         run: |
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git fetch origin main
           git merge --no-edit origin/main
-          python - <<'PY'
-          import json, subprocess
-          from pathlib import Path
-          main_version=subprocess.check_output(['git','show','origin/main:VERSION'],text=True).strip()
-          major,minor,patch=[int(x) for x in main_version.split('.')]
-          release=f'{major}.{minor}.{patch+1}'
-          Path('VERSION').write_text(release+'\n')
-          package=Path('package.json'); data=json.loads(package.read_text()); data['version']=release; package.write_text(json.dumps(data,indent=2)+'\n')
-          manifest=Path('public/app/manifest.webmanifest'); m=json.loads(manifest.read_text()); m['name']=f'Civweave v{release}'; manifest.write_text(json.dumps(m,indent=2)+'\n')
-          print(f'Prepared Civweave {release} beyond main {main_version}')
-          PY
 
-      - name: Fold byte-range playback into the reproducible finalizer
+      - name: Advance release patch beyond main
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          path=Path('scripts/finalize-open-learning-media-launch-v1.py')
-          text=path.read_text()
-          start=text.index('    fetch_with_media = """')
-          end=text.index('    text = replace_once(text, fetch_marker, fetch_with_media, "open media cache fetch route")',start)
-          replacement='''    fetch_with_media = """self.addEventListener('fetch', event => {
-            const request = event.request;
-            if (!['GET', 'HEAD'].includes(request.method)) return;
-            const url = new URL(request.url);
-            if (url.origin === self.location.origin && url.pathname.startsWith(OPEN_MEDIA_ROUTE_PREFIX)) {
-              event.respondWith((async () => {
-                const cache = await caches.open(OPEN_MEDIA_CACHE);
-                const cached = await cache.match(new Request(url.href, { method: 'GET' }));
-                if (!cached) return new Response('Open learning media is not cached on this device.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
-                const baseHeaders = new Headers(cached.headers);
-                baseHeaders.set('accept-ranges', 'bytes');
-                const range = request.headers.get('range');
-                if (request.method === 'HEAD') return new Response(null, { status: cached.status, statusText: cached.statusText, headers: baseHeaders });
-                if (!range) return new Response(cached.body, { status: cached.status, statusText: cached.statusText, headers: baseHeaders });
-                const blob = await cached.blob();
-                const total = blob.size;
-                const match = /^bytes=(\\d*)-(\\d*)$/.exec(range.trim());
-                const invalid = () => {
-                  const headers = new Headers(baseHeaders);
-                  headers.set('content-range', `bytes */${total}`);
-                  headers.set('content-length', '0');
-                  return new Response(null, { status: 416, headers });
-                };
-                if (!match || !total || (!match[1] && !match[2])) return invalid();
-                let start;
-                let end;
-                if (!match[1]) {
-                  const suffix = Number(match[2]);
-                  if (!Number.isSafeInteger(suffix) || suffix <= 0) return invalid();
-                  start = Math.max(0, total - suffix);
-                  end = total - 1;
-                } else {
-                  start = Number(match[1]);
-                  end = match[2] ? Number(match[2]) : total - 1;
-                }
-                if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || end < start || start >= total) return invalid();
-                end = Math.min(end, total - 1);
-                const partial = blob.slice(start, end + 1, cached.headers.get('content-type') || 'application/octet-stream');
-                const headers = new Headers(baseHeaders);
-                headers.set('content-range', `bytes ${start}-${end}/${total}`);
-                headers.set('content-length', String(partial.size));
-                return new Response(partial, { status: 206, headers });
-              })());
-              return;
-            }"""
-'''
-          text=text[:start]+replacement+text[end:]
-          path.write_text(text)
-          PY
+          set -euo pipefail
+          MAIN_VERSION="$(git show origin/main:VERSION)"
+          IFS=. read -r MAJOR MINOR PATCH <<< "$MAIN_VERSION"
+          RELEASE="$MAJOR.$MINOR.$((PATCH + 1))"
+          printf '%s\n' "$RELEASE" > VERSION
+          node -e "const fs=require('fs');const v=process.argv[1];const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version=v;fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\\n');const m=JSON.parse(fs.readFileSync('public/app/manifest.webmanifest','utf8'));m.name='Civweave v'+v;fs.writeFileSync('public/app/manifest.webmanifest',JSON.stringify(m,null,2)+'\\n');" "$RELEASE"
+          echo "Prepared Civweave $RELEASE beyond main $MAIN_VERSION"
 
-      - name: Apply launch finalizer twice to prove idempotency
+      - name: Apply reproducible launch finalizers
         run: |
+          set -euo pipefail
           python scripts/finalize-open-learning-media-launch-v1.py
+          python scripts/finalize-open-learning-media-range-v1.py
           git diff --binary > /tmp/open-media-first.diff
           python scripts/finalize-open-learning-media-launch-v1.py
+          python scripts/finalize-open-learning-media-range-v1.py
           git diff --binary > /tmp/open-media-second.diff
           cmp /tmp/open-media-first.diff /tmp/open-media-second.diff
 
       - name: Validate launch service
         run: |
-          python -m py_compile scripts/finalize-open-learning-media-launch-v1.py scripts/harvest-open-learning-media-v1.py scripts/filter-open-learning-media-relevance-v1.py scripts/filter-open-learning-media-pedagogy-v1.py scripts/filter-open-learning-media-selection-v1.py scripts/test-open-learning-media-harvest-v1.py
+          set -euo pipefail
+          python -m py_compile scripts/finalize-open-learning-media-launch-v1.py scripts/finalize-open-learning-media-range-v1.py scripts/harvest-open-learning-media-v1.py scripts/filter-open-learning-media-relevance-v1.py scripts/filter-open-learning-media-pedagogy-v1.py scripts/filter-open-learning-media-selection-v1.py scripts/test-open-learning-media-harvest-v1.py
           node --check public/app/open-learning-media-cache-v1.mjs
           node --check public/app/open-learning-media-installer-v1.mjs
           node --check public/app/video-learning-contract-v1.mjs
