@@ -13,6 +13,6 @@ function style(){if(document.getElementById(STYLE))return;const s=document.creat
 #${ROOT}:not(.is-minimized) [data-send]{min-height:46px!important}
 #${ROOT}.is-minimized{top:auto!important;bottom:max(2px,env(safe-area-inset-bottom))!important;height:auto!important;max-height:none!important}
 }`;document.head.append(s)}
-style();viewport();visualViewport?.addEventListener('resize',viewport,{passive:true});visualViewport?.addEventListener('scroll',viewport,{passive:true});addEventListener('resize',viewport,{passive:true});
+style();viewport();globalThis.visualViewport?.addEventListener('resize',viewport,{passive:true});globalThis.visualViewport?.addEventListener('scroll',viewport,{passive:true});addEventListener('resize',viewport,{passive:true});
 globalThis.CivweaveChatFullscreenV295=Object.freeze({version:VERSION,fullScreenMobile:true,keyboardVisualViewport:true,viewport});
 })();
