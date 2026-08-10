@@ -98,10 +98,6 @@ function withPortableZipFallback(task) {
 }
 
 function rebuildReleaseArtifacts() {
-  runNodeScript(
-    parityMaterializer,
-    "Civweave parity ledger materialization failed.",
-  );
   withPortableZipFallback(() => runNodeScript(
     resolve(scriptDir, "build-mobile-install-kit.mjs"),
     "Civweave release artifact rebuild failed.",
@@ -143,6 +139,10 @@ for (const required of [
   }
 }
 
+runNodeScript(
+  parityMaterializer,
+  "Civweave parity ledger materialization failed.",
+);
 runNodeScript(
   preliveMetadata,
   "Civweave pre-live storage/integrity metadata generation failed.",
