@@ -30,9 +30,11 @@ The runtime fails closed for new origin downloads when the harvested catalog is 
 | Profile | Nominal budget | Automatic caching |
 |---|---:|---|
 | Minimal | 96 MiB | Off |
-| Learning Path | 384 MiB | On, compact items only |
+| Learning Path | 448 MiB | On, compact items only |
 | Outage Ready | 1 GiB | On |
 | Archive | 3 GiB | On, larger items allowed |
+
+The nominal Learning Path budget is 448 MiB so the launch Focus Pack can contain one smallest-known approved item from each of the five required launch topics. This is a ceiling, not a reservation: constrained devices still use the smaller browser-quota-derived limit and may report skipped pack items.
 
 The effective budget is additionally bounded by browser storage quota. The media cache will use no more than roughly 45% of the reported quota and evicts least-recently-used unpinned media before exceeding its budget.
 

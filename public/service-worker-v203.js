@@ -1,8 +1,8 @@
-// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + retained lightweight shell core + installer-state-machines-v280 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-convergence-v250 + local-model-background-v267
+// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + retained lightweight shell core + installer-state-machines-v280 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-convergence-v250 + local-model-background-v267 + open-learning-media-v1
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.62-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
-importScripts('/service-worker-core-v208.js?v=1.0.62-chat-convergence-v250');
+importScripts('/service-worker-core-v208.js?v=1.0.62-chat-convergence-v250-open-learning-media-v1');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');

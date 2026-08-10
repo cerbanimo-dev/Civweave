@@ -36,7 +36,7 @@ function waitForControllerChange(timeout=4500){
 async function refreshWorker(releaseVersion){
   if(!('serviceWorker'in navigator))return null;
   try{
-    const workerUrl=`/service-worker-v203.js?v=${encodeURIComponent(releaseVersion)}-lightweight-shell-v208&revision=chat-convergence-v250`;
+    const workerUrl=`/service-worker-v203.js?v=${encodeURIComponent(releaseVersion)}-lightweight-shell-v208&revision=open-learning-media-v1`;
     let registration=await navigator.serviceWorker.register(workerUrl,{scope:'/',updateViaCache:'none'});
     await registration.update();
     registration=await navigator.serviceWorker.getRegistration('/')||registration;

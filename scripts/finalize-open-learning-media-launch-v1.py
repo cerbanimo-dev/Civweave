@@ -71,12 +71,12 @@ def harden_service_worker_core() -> None:
         "const FETCH_TIMEOUT_MS = 12000;\nconst OPEN_MEDIA_ROUTE_PREFIX = '/__civweave_open_media__/';\nconst OPEN_MEDIA_CACHE = 'cw-open-learning-media-v1';",
         "open media route constants",
     )
-    text = replace_once(
-        text,
-        "const OPTIONAL_SHELL_ASSETS = [\n  '/app/install-boundary-v146.js',",
-        "const OPTIONAL_SHELL_ASSETS = [\n  '/app/open-learning-media-cache-v1.mjs',\n  '/app/open-learning-media-installer-v1.mjs',\n  '/downloads/knowledge-schools/open-learning-media/lookup.json',\n  '/downloads/knowledge-schools/open-learning-media/harvest-policy.json',\n  '/app/install-boundary-v146.js',",
-        "open media optional shell assets",
-    )
+    if "'/app/open-learning-media-cache-v1.mjs'" not in text:
+        marker = "const OPTIONAL_SHELL_ASSETS = [\n  '/app/install-boundary-v146.js',"
+        replacement = "const OPTIONAL_SHELL_ASSETS = [\n  '/app/open-learning-media-cache-v1.mjs',\n  '/app/open-learning-media-installer-v1.mjs',\n  '/downloads/knowledge-schools/open-learning-media/lookup.json',\n  '/downloads/knowledge-schools/open-learning-media/harvest-policy.json',\n  '/app/install-boundary-v146.js',"
+        if marker not in text:
+            raise RuntimeError("open media optional shell assets: expected marker not found")
+        text = text.replace(marker, replacement, 1)
     text = replace_once(
         text,
         "const PRESERVED_CACHE_PREFIXES = [\n  'cwknowledge-',",
@@ -93,8 +93,39 @@ def harden_service_worker_core() -> None:
       const cache = await caches.open(OPEN_MEDIA_CACHE);
       const cached = await cache.match(new Request(url.href, { method: 'GET' }));
       if (!cached) return new Response('Open learning media is not cached on this device.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
-      if (request.method === 'HEAD') return new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers });
-      return cached;
+      const baseHeaders = new Headers(cached.headers);
+      baseHeaders.set('accept-ranges', 'bytes');
+      const range = request.headers.get('range');
+      if (request.method === 'HEAD') return new Response(null, { status: cached.status, statusText: cached.statusText, headers: baseHeaders });
+      if (!range) return new Response(cached.body, { status: cached.status, statusText: cached.statusText, headers: baseHeaders });
+      const blob = await cached.blob();
+      const total = blob.size;
+      const match = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+      const invalid = () => {
+        const headers = new Headers(baseHeaders);
+        headers.set('content-range', `bytes */${total}`);
+        headers.set('content-length', '0');
+        return new Response(null, { status: 416, headers });
+      };
+      if (!match || !total || (!match[1] && !match[2])) return invalid();
+      let start;
+      let end;
+      if (!match[1]) {
+        const suffix = Number(match[2]);
+        if (!Number.isSafeInteger(suffix) || suffix <= 0) return invalid();
+        start = Math.max(0, total - suffix);
+        end = total - 1;
+      } else {
+        start = Number(match[1]);
+        end = match[2] ? Number(match[2]) : total - 1;
+      }
+      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || end < start || start >= total) return invalid();
+      end = Math.min(end, total - 1);
+      const partial = blob.slice(start, end + 1, cached.headers.get('content-type') || 'application/octet-stream');
+      const headers = new Headers(baseHeaders);
+      headers.set('content-range', `bytes ${start}-${end}/${total}`);
+      headers.set('content-length', String(partial.size));
+      return new Response(partial, { status: 206, headers });
     })());
     return;
   }"""
@@ -173,7 +204,8 @@ def harden_media_runtime() -> None:
         text = text.replace(marker, helper + marker, 1)
     text = text.replace("if(automaticCache){const policy=await storagePolicy();", "if(automaticCache&&automaticNetworkAllowed()){const policy=await storagePolicy();", 1)
 
-    start = text.index("export async function prefetchTopic(")
+    prefetch_marker = "function compactFileBytes(" if "function compactFileBytes(" in text else "export async function prefetchTopic("
+    start = text.index(prefetch_marker)
     end = text.index("function safeManifestRecord(", start)
     text = text[:start] + """function compactFileBytes(record){const files=(record?.files||[]).filter(file=>file?.url&&playableFile(file)).map(file=>Number(file?.bytes)||0).filter(bytes=>bytes>0);return files.length?Math.min(...files):Number.MAX_SAFE_INTEGER}
 export async function prefetchTopic(topicSlug,{limit=1,pinned=false}={}){const lookup=await loadLookup();const records=(lookup.topics?.[topicSlug]||[]).filter(isRedistributable).map(record=>({...record,topicSlug})).sort((a,b)=>compactFileBytes(a)-compactFileBytes(b)||Number(b.quality_score||0)-Number(a.quality_score||0));const results=[];let successes=0,attempts=0;const maxAttempts=Math.max(6,limit*5);for(const record of records){if(successes>=limit||attempts>=maxAttempts)break;attempts++;try{results.push({ok:true,record:await cacheRecord(record,{automatic:false,pinned})});successes++}catch(error){results.push({ok:false,recordKey:recordKey(record),error:error.message})}}return results}
@@ -190,7 +222,8 @@ export async function prefetchFocusPack({limitPerTopic=1,pinned=false}={}){const
     text = text[:start] + """async function finishTransfer(transferId,message){const transfer=incomingTransfers.get(transferId);if(!transfer)return;incomingTransfers.delete(transferId);try{await transfer.writer.close();await transfer.putPromise;if(transfer.received!==transfer.expectedBytes)throw new Error(`Mesh media byte-count verification failed: expected ${transfer.expectedBytes}, received ${transfer.received}.`);const hash=transfer.hasher.digestHex();if(hash!==transfer.expectedHash||hash!==message.contentHash)throw new Error('Mesh media SHA-256 verification failed.');const r=transfer.record;const stored={recordKey:r.recordKey,provider:'mesh',providerId:r.recordKey,topicSlug:r.topicSlug||'',title:r.title||'Open learning media',description:'',sourceUrl:'',fileUrl:'',mime:r.mime||'application/octet-stream',bytes:transfer.received,contentHash:hash,license:r.license,attribution:r.attribution,cachePolicy:'MESH_REDISTRIBUTABLE',qualityScore:0,cachedAt:now(),lastAccessAt:now(),origin:'mesh',pinned:false};await recordPut(stored);emit('mesh-receive-complete',{recordKey:r.recordKey,hash,bytes:transfer.received});resolveTransferWaiter(hash,null,stored);announceSoon()}catch(error){try{const cache=await mediaCache();await cache.delete(syntheticRequest(transfer.record.recordKey))}catch{}resolveTransferWaiter(transfer.expectedHash,error);emit('mesh-receive-error',{recordKey:transfer.record.recordKey,error:error.message})}}
 """ + text[end:]
 
-    start = text.index("function handleBinary(")
+    binary_marker = "async function handleBinary(" if "async function handleBinary(" in text else "function handleBinary("
+    start = text.index(binary_marker)
     end = text.index("async function handleMediaMessage(", start)
     text = text[:start] + """async function handleBinary(session,data){for(const transfer of incomingTransfers.values()){if(transfer.sessionId!==session.id||!transfer.pendingBinary)continue;const bytes=data instanceof Uint8Array?data:new Uint8Array(data);transfer.pendingBinary=false;if(transfer.received+bytes.byteLength>transfer.expectedBytes){const error=new Error('Peer sent more media bytes than advertised.');incomingTransfers.delete(transfer.transferId);await transfer.writer.abort(error).catch(()=>{});transfer.putPromise.catch(()=>{});try{const cache=await mediaCache();await cache.delete(syntheticRequest(transfer.record.recordKey))}catch{}resolveTransferWaiter(transfer.expectedHash,error);emit('mesh-receive-error',{recordKey:transfer.record.recordKey,error:error.message});return true}transfer.hasher.update(bytes);transfer.received+=bytes.byteLength;await transfer.writer.write(bytes);return true}return false}
 """ + text[end:]

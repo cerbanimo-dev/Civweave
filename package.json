@@ -1,10 +1,12 @@
 {
   "name": "civweave-host-node-hub",
-  "version": "1.0.76",
+  "version": "1.0.77",
   "private": true,
   "description": "Install-only Civweave device package with deterministic local operation, local sovereignty, and optional connected AI providers.",
   "type": "module",
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@huggingface/transformers": "3.8.1",
     "onnxruntime-web": "1.27.0"
@@ -48,6 +50,7 @@
     "check": "npm run check:syntax && npm run test:node-ai-marketplace && npm run test:node-ai-http && npm run test:node-ai-routing && npm run test:node-ai-service-package && npm run test:node-ai-marketplace-surface && npm run test:node-ai-fireworks && npm run test:node-ai-trial-commerce && npm run test:node-ai-trial-surface && npm run test:node-ai-debt-availability && npm run test:node-ai-process-chaos && npm run test:node-ai-network-replay && node scripts/verify-minilm-fixed-ort.mjs && node scripts/verify-five-system-navigation-v227.mjs && node scripts/verify-ai-settings-self-contained-v181.mjs && node scripts/verify-v106-settings-layer-v179.mjs && node scripts/verify-render-deterministic-v176.mjs && node scripts/verify-parity-ledger.mjs && node scripts/smoke-gateway-v131.mjs",
     "check:gateway": "npm run test:node-ai-http && npm run test:node-ai-service-package && npm run test:node-ai-trial-commerce && npm run test:node-ai-trial-surface && npm run test:node-ai-debt-availability && npm run test:node-ai-network-replay && node scripts/verify-five-system-navigation-v227.mjs && node scripts/verify-ai-settings-self-contained-v181.mjs && node scripts/verify-v106-settings-layer-v179.mjs && node scripts/verify-render-deterministic-v176.mjs && node scripts/verify-parity-ledger.mjs && node scripts/smoke-gateway-v131.mjs",
     "build:install": "bash scripts/build-install-artifacts.sh",
-    "build:release": "npm run minilm:fixed-model:pull && npm run transformer:stage && npm run check && npm run build:install"
+    "build:release": "npm run minilm:fixed-model:pull && npm run transformer:stage && npm run check && npm run build:install",
+    "test:open-learning-media": "node scripts/test-open-learning-media-runtime-v1.mjs && python scripts/test-open-learning-media-harvest-v1.py"
   }
 }

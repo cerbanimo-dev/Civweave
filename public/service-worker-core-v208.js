@@ -8,6 +8,8 @@ const OFFLINE_CACHE = `civweave-offline-${VERSION}-${BUILD}`;
 const OFFLINE_MANIFEST_URL = '/app/offline-package-v208.json';
 const OFFLINE_META_URL = '/__civweave/offline-package-v208.json';
 const FETCH_TIMEOUT_MS = 12000;
+const OPEN_MEDIA_ROUTE_PREFIX = '/__civweave_open_media__/';
+const OPEN_MEDIA_CACHE = 'cw-open-learning-media-v1';
 
 const REQUIRED_SHELL_ASSETS = [
   '/index.html',
@@ -25,6 +27,11 @@ const REQUIRED_SHELL_ASSETS = [
 ];
 
 const OPTIONAL_SHELL_ASSETS = [
+  '/app/open-learning-media-cache-v1.mjs',
+  '/app/open-learning-media-installer-v1.mjs',
+  '/downloads/knowledge-schools/open-learning-media/lookup.json',
+  '/downloads/knowledge-schools/open-learning-media/harvest-policy.json',
+  '/downloads/knowledge-schools/open-learning-media/revocations.json',
   '/app/install-boundary-v146.js',
   '/app/offline-package-v208.json',
   '/app/logos/civweave-app-icon.png',
@@ -43,6 +50,7 @@ const MODEL_PREFIXES = [
 ];
 
 const PRESERVED_CACHE_PREFIXES = [
+  'cw-open-learning-media-',
   'cwknowledge-',
   'cwupdate-',
   'civweave-model-',
@@ -571,6 +579,47 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   if (!['GET', 'HEAD'].includes(request.method)) return;
   const url = new URL(request.url);
+  if (url.origin === self.location.origin && url.pathname.startsWith(OPEN_MEDIA_ROUTE_PREFIX)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(OPEN_MEDIA_CACHE);
+      const cached = await cache.match(new Request(url.href, { method: 'GET' }));
+      if (!cached) return new Response('Open learning media is not cached on this device.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+      const baseHeaders = new Headers(cached.headers);
+      baseHeaders.set('accept-ranges', 'bytes');
+      const range = request.headers.get('range');
+      if (request.method === 'HEAD') return new Response(null, { status: cached.status, statusText: cached.statusText, headers: baseHeaders });
+      if (!range) return new Response(cached.body, { status: cached.status, statusText: cached.statusText, headers: baseHeaders });
+      const blob = await cached.blob();
+      const total = blob.size;
+      const match = /^bytes=(\d*)-(\d*)$/.exec(range.trim());
+      const invalid = () => {
+        const headers = new Headers(baseHeaders);
+        headers.set('content-range', `bytes */${total}`);
+        headers.set('content-length', '0');
+        return new Response(null, { status: 416, headers });
+      };
+      if (!match || !total || (!match[1] && !match[2])) return invalid();
+      let start;
+      let end;
+      if (!match[1]) {
+        const suffix = Number(match[2]);
+        if (!Number.isSafeInteger(suffix) || suffix <= 0) return invalid();
+        start = Math.max(0, total - suffix);
+        end = total - 1;
+      } else {
+        start = Number(match[1]);
+        end = match[2] ? Number(match[2]) : total - 1;
+      }
+      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || end < start || start >= total) return invalid();
+      end = Math.min(end, total - 1);
+      const partial = blob.slice(start, end + 1, cached.headers.get('content-type') || 'application/octet-stream');
+      const headers = new Headers(baseHeaders);
+      headers.set('content-range', `bytes ${start}-${end}/${total}`);
+      headers.set('content-length', String(partial.size));
+      return new Response(partial, { status: 206, headers });
+    })());
+    return;
+  }
   if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
   if (WORKER_PATHS.has(url.pathname)) {
     event.respondWith(fetch(request, { cache: 'no-store' }));
