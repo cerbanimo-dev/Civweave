@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='document-lifecycle-v273-local-ai-management';
+const VERSION='document-lifecycle-v274-phone-ledger';
 const LEGACY_ENTRY_REVISION='document-lifecycle-v269-ai-settings-entry';
 if(globalThis.CivweaveDocumentLifecycleV221?.version===VERSION)return;
 let active=true;
@@ -9,8 +9,10 @@ const NativeMutationObserver=globalThis.MutationObserver;
 const AI_SETTINGS_SELECTOR='[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings]';
 const AI_SETTINGS_DELEGATION='/app/settings-delegation-v175.js?v=1.0.65-ai-settings-entry-v269';
 const LOCAL_AI_BOOTSTRAP='/app/local-ai/bootstrap-v266.js?v=1.0.67-v271';
+const PHONE_LEDGER_BOOTSTRAP='/app/phone-ledger-bootstrap-v1.js?v=phone-ledger-r1';
 let settingsDelegationPromise=null;
 let localAISettingsPromise=null;
+let phoneLedgerPromise=null;
 if(typeof NativeMutationObserver==='function'){
   globalThis.MutationObserver=class CivweaveLifecycleMutationObserver extends NativeMutationObserver{
     constructor(callback){
@@ -102,10 +104,46 @@ function ensureLocalAISettingsManagement(){
   });
   return localAISettingsPromise;
 }
+function ensurePhoneLedger(){
+  if(!active||typeof document==='undefined')return Promise.resolve(false);
+  if(globalThis.CivweavePhoneLedgerV1?.ready)return globalThis.CivweavePhoneLedgerV1.ready();
+  if(phoneLedgerPromise)return phoneLedgerPromise;
+  phoneLedgerPromise=new Promise((resolve,reject)=>{
+    const pathname=new URL(PHONE_LEDGER_BOOTSTRAP,location.href).pathname;
+    const existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===pathname);
+    const finish=()=>{
+      const ledger=globalThis.CivweavePhoneLedgerV1;
+      if(!ledger?.ready){reject(new Error('Phone ledger bootstrap loaded without becoming ready.'));return}
+      Promise.resolve(ledger.ready()).then(resolve,reject);
+    };
+    if(existing){
+      if(globalThis.CivweavePhoneLedgerV1?.ready)return finish();
+      existing.addEventListener('load',finish,{once:true});
+      existing.addEventListener('error',()=>reject(new Error('Phone ledger bootstrap could not load.')),{once:true});
+      return;
+    }
+    const script=document.createElement('script');
+    script.src=PHONE_LEDGER_BOOTSTRAP;
+    script.async=false;
+    script.dataset.civweavePhoneLedger='v1';
+    script.onload=finish;
+    script.onerror=()=>reject(new Error('Phone ledger bootstrap could not load.'));
+    document.head.append(script);
+  }).catch(error=>{
+    phoneLedgerPromise=null;
+    try{dispatchEvent(new CustomEvent('civweave:phone-ledger-unavailable',{detail:{version:VERSION,message:String(error?.message||error)}}))}catch{}
+    return false;
+  });
+  return phoneLedgerPromise;
+}
 function startEntryRepair(){
   if(typeof document==='undefined')return;
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>ensureAISettingsDelegation(),{once:true});
-  else queueMicrotask(()=>ensureAISettingsDelegation());
+  const start=()=>{
+    ensureAISettingsDelegation();
+    ensurePhoneLedger();
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
+  else queueMicrotask(start);
 }
 function stop(){
   if(!active)return;
@@ -125,9 +163,11 @@ globalThis.CivweaveDocumentLifecycleV221=Object.freeze({
   body:()=>document.body,
   ensureAISettingsDelegation,
   ensureLocalAISettingsManagement,
+  ensurePhoneLedger,
   localAIManagementReady,
   enhanceLocalAISettings,
   aiSettingsEntryRepair:'v273-canonical-delegation-local-management',
+  phoneLedgerEntryRepair:'v274-installed-device-ledger',
   stop
 });
 })();
