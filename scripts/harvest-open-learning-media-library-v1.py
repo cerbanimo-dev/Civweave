@@ -15,6 +15,14 @@ LEGACY_PATH = ROOT / "scripts/harvest-open-learning-media-v1.py"
 # topical material and too little explicit teaching material. The canonical concepts,
 # aliases, pack membership, and quality gates remain registry-driven.
 DISCOVERY_REFINEMENTS = {
+    "earth-geography": [
+        "map reading educational film",
+        "map reading land navigation",
+        "world geography educational video",
+        "physical geography educational video",
+        "free maps free knowledge",
+        "open mapping geography",
+    ],
     "civics-society": [
         "civics lesson government",
         "government explained civics",
