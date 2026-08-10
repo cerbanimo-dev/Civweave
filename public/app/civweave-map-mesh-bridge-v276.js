@@ -7,6 +7,7 @@ const NODE_STALE_MS=6*60*60*1000;
 const NODE_EXPIRES_MS=24*60*60*1000;
 const RUNTIMES=[
   ['/app/civweave-map-storage-v1.js','CivweaveMapStorageV1'],
+  ['/app/civweave-map-bootstrap-v1.js','CivweaveMapBootstrapV1'],
   ['/app/civweave-map-offline-v1.js','CivweaveMapOfflineV1'],
   ['/app/civweave-map-coverage-v277.js','CivweaveMapCoverageV277'],
   ['/app/civweave-map-ui-v1.js','CivweaveMapUIV1']
@@ -53,7 +54,7 @@ async function publishSelectedPublicNode(){
 async function start(){
   const mesh=globalThis.CivweaveMapMeshV276;if(!mesh)return false;await mesh.start({baseUrl:gateway(),intervalMs:120000});await apply();
   const runtimes={};for(const [path,name] of RUNTIMES){try{runtimes[name]=await ensureRuntime(path,name)}catch(error){console.warn('[Civweave Map v1]',error)}}
-  try{await runtimes.CivweaveMapOfflineV1?.start?.()}catch{}try{await runtimes.CivweaveMapCoverageV277?.start?.()}catch{}try{await runtimes.CivweaveMapUIV1?.mount?.()}catch{}
+  try{await runtimes.CivweaveMapBootstrapV1?.start?.()}catch{}try{await runtimes.CivweaveMapOfflineV1?.start?.()}catch{}try{await runtimes.CivweaveMapCoverageV277?.start?.()}catch{}try{await runtimes.CivweaveMapUIV1?.mount?.()}catch{}
   addEventListener('civweave:map-knowledge-changed',()=>apply().catch(()=>{}));addEventListener('civweave:map-pack-published',()=>apply().catch(()=>{}));const syncButton=document.getElementById('syncNode');syncButton?.addEventListener('click',()=>{if(publishTimer)clearTimeout(publishTimer);publishTimer=setTimeout(()=>publishSelectedPublicNode().catch(()=>{}),1600)});return true;
 }
 function boot(){if(globalThis.CivweaveMapMeshV276&&globalThis.CivweaveMapService)return start().catch(()=>{});let ticks=0;const timer=setInterval(()=>{if(globalThis.CivweaveMapMeshV276&&globalThis.CivweaveMapService){clearInterval(timer);start().catch(()=>{})}else if(++ticks>240)clearInterval(timer)},50)}
