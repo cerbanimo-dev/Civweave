@@ -316,11 +316,23 @@ def peertube_files(detail: dict) -> list[dict]:
         url = clean_text(obj.get("fileDownloadUrl") or obj.get("fileUrl") or obj.get("url"), 1600)
         if not url or url in seen:
             return
+        resolution = obj.get("resolution") or {}
+        resolution_label = clean_text(resolution.get("label"), 80)
+        try:
+            resolution_id = int(resolution.get("id"))
+        except (TypeError, ValueError):
+            resolution_id = None
+        if resolution_id == 0 or "audio" in resolution_label.lower():
+            return
+        mime = peertube_file_mime(obj, url)
+        if not mime.startswith("video/"):
+            return
         seen.add(url)
         out.append({
             "url": url,
+            "mime": mime,
             "bytes": int(obj.get("size") or 0),
-            "resolution": clean_text((obj.get("resolution") or {}).get("label"), 80),
+            "resolution": resolution_label,
             "fps": obj.get("fps"),
             "role": role,
         })

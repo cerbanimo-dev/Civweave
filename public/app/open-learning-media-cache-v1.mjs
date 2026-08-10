@@ -94,7 +94,7 @@ export function recordKey(record){return`${clean(record?.provider,80)}:${clean(r
 function isRedistributable(record){return record?.cache_policy==='MESH_REDISTRIBUTABLE'&&licenseAllowed(record?.license)&&!isRevoked(record)&&Array.isArray(record?.files)&&record.files.length>0}
 function safeRemoteUrl(value){try{const url=new URL(clean(value,1800));return url.protocol==='https:'?url.href:''}catch{return''}}
 function fileMime(file){const explicit=clean(file?.mime,120);if(explicit)return explicit;const url=clean(file?.url,1200).toLowerCase();if(url.includes('.webm'))return'video/webm';if(url.includes('.mp4'))return'video/mp4';if(url.includes('.ogv')||url.includes('.ogg'))return'video/ogg';return'application/octet-stream'}
-function playableFile(file){const mime=fileMime(file);return mime.startsWith('video/')&&!/\.m3u8(?:$|\?)/i.test(clean(file?.url,1200))}
+function playableFile(file){const mime=fileMime(file),resolution=clean(file?.resolution,80).toLowerCase();return mime.startsWith('video/')&&!resolution.includes('audio')&&!/\.m3u8(?:$|\?)/i.test(clean(file?.url,1200))}
 export function chooseFile(record,{maxBytes=Infinity,preferSmall=true}={}){
   const files=(Array.isArray(record?.files)?record.files:[]).filter(file=>safeRemoteUrl(file?.url)&&playableFile(file));
   if(!files.length)return null;

@@ -42,8 +42,9 @@ def downloadable(record: dict) -> bool:
     for file in record.get("files") or []:
         url = str(file.get("url") or "")
         mime = str(file.get("mime") or "").lower()
+        resolution = str(file.get("resolution") or "").lower()
         parsed = urlparse(url)
-        if parsed.scheme == "https" and parsed.netloc and mime.startswith("video/") and int(file.get("bytes") or 0) > 0:
+        if parsed.scheme == "https" and parsed.netloc and mime.startswith("video/") and "audio" not in resolution and int(file.get("bytes") or 0) > 0:
             return True
     return False
 
