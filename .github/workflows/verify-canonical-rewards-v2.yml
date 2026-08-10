@@ -31,6 +31,8 @@ jobs:
           node --check public/app/shared/civweave-contribution-mesh-v1.js
           node --check public/app/shared/civweave-contribution-security-v1.js
           node --check public/app/shared/civweave-contribution-ship-guard-v1.js
+          node --check public/app/contribution-security-settings-entry-v1.js
+          node --check public/app/contribution-security-v1.js
           node --check public/app/phone-ledger-bootstrap-v1.js
           node --check public/app/local-first-policy-v131.js
           node --check public/app/document-lifecycle-v221.js
@@ -66,7 +68,7 @@ jobs:
           const manifest=JSON.parse(fs.readFileSync('public/app/offline-package-v208.json','utf8'));
           const required=['/app/cw-reward-ledger-v2.js','/app/cw-reward-receivers-v2.js','/app/cw-reward-legacy-bridge-v2.js','/app/cw-reward-surfaces-v2.js'];
           for(const path of required){if(!manifest.seeds.includes(path))throw new Error(`Offline package omits ${path}`)}
-          const phoneLedger=['/app/local-first-policy-v131.js','/app/local-object-mesh-v146.js','/app/shared/civweave-contribution-mesh-v1.js','/app/shared/civweave-contribution-security-v1.js','/app/shared/civweave-contribution-ship-guard-v1.js','/app/phone-ledger-bootstrap-v1.js'];
+          const phoneLedger=['/app/local-first-policy-v131.js','/app/local-object-mesh-v146.js','/app/shared/civweave-contribution-mesh-v1.js','/app/shared/civweave-contribution-security-v1.js','/app/shared/civweave-contribution-ship-guard-v1.js','/app/contribution-security-settings-entry-v1.js','/app/contribution-security-v1.html','/app/contribution-security-v1.js','/app/phone-ledger-bootstrap-v1.js'];
           for(const path of phoneLedger){if(!manifest.assets.includes(path))throw new Error(`Offline package omits ${path}`)}
           if(manifest.phoneLedgerRevision!=='phone-ledger-r3-ship-security')throw new Error('Offline package is not pinned to the ship-secured phone-ledger revision');
           console.log('canonical rewards and ship-secured hostless phone contribution ledger are seeded for offline use');
