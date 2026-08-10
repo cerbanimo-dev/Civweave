@@ -54,7 +54,12 @@ jobs:
           python scripts/finalize-open-learning-media-range-v1.py
           python scripts/finalize-open-learning-media-safety-v1.py
           git diff --binary > /tmp/open-media-second.diff
-          cmp /tmp/open-media-first.diff /tmp/open-media-second.diff
+          if ! cmp -s /tmp/open-media-first.diff /tmp/open-media-second.diff; then
+            echo '::group::Finalizer idempotency delta'
+            diff -u /tmp/open-media-first.diff /tmp/open-media-second.diff | head -n 500 || true
+            echo '::endgroup::'
+            exit 1
+          fi
 
       - name: Validate launch service
         run: |
