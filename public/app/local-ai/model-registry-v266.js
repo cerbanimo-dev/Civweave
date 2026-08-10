@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.61-local-ai-registry-v268-capabilities';
+const VERSION='1.0.72-local-ai-registry-v272-runtime-metadata';
 if(globalThis.CivweaveLocalModelRegistryV266?.version===VERSION)return;
 const HF='https://huggingface.co';
 const caps=value=>Object.freeze({interactive:true,structuredOutput:true,agenticReasoning:false,code:true,tools:false,externalResearch:false,vision:false,...value});
@@ -13,7 +13,7 @@ const models=[
     capabilities:caps({interactive:true,structuredOutput:true,agenticReasoning:false,code:true}),
     artifacts:[
       ['config.json',500,true],['tokenizer.json',1_000_000,true],['tokenizer_config.json',500,true],
-      ['generation_config.json',50,false],['chat_template.jinja',100,false],['onnx/model_q4f16.onnx',500_000_000,true]
+      ['generation_config.json',50,true],['chat_template.jinja',100,false],['onnx/model_q4f16.onnx',500_000_000,true]
     ]
   },
   {
@@ -24,7 +24,7 @@ const models=[
     capabilities:caps({interactive:true,structuredOutput:true,agenticReasoning:true,code:true}),
     artifacts:[
       ['config.json',500,true],['tokenizer.json',1_000_000,true],['tokenizer_config.json',500,true],
-      ['generation_config.json',50,false],['chat_template.jinja',100,false],['onnx/model_q4f16.onnx',1_300_000_000,true]
+      ['generation_config.json',50,true],['chat_template.jinja',100,false],['onnx/model_q4f16.onnx',1_300_000_000,true]
     ]
   },
   {
@@ -35,7 +35,7 @@ const models=[
     capabilities:caps({interactive:true,structuredOutput:true,agenticReasoning:true,code:true}),
     artifacts:[
       ['config.json',500,true],['tokenizer.json',1_000_000,true],['tokenizer_config.json',500,true],
-      ['generation_config.json',50,false],['chat_template.jinja',100,false],['special_tokens_map.json',50,false],
+      ['generation_config.json',50,true],['chat_template.jinja',100,false],['special_tokens_map.json',50,true],
       ['onnx/model_q4f16.onnx',100_000,true],['onnx/model_q4f16.onnx_data',2_000_000_000,true]
     ]
   },
@@ -68,5 +68,5 @@ function experimental(){return models.filter(model=>!model.installable)}
 function capable(request={}){const broker=globalThis.CivweaveAICapabilityBrokerV268;return installable().filter(model=>broker?.supportsLocalRequest?.(model,request)?.ok)}
 const api=Object.freeze({version:VERSION,host:HF,models:Object.freeze(models),byId,directUrl,installable,experimental,capable});
 globalThis.CivweaveLocalModelRegistryV266=api;
-dispatchEvent(new CustomEvent('civweave:local-model-registry-ready',{detail:{version:VERSION,count:models.length,installable:installable().length,capabilityAware:true}}));
+dispatchEvent(new CustomEvent('civweave:local-model-registry-ready',{detail:{version:VERSION,count:models.length,installable:installable().length,capabilityAware:true,runtimeMetadataRequired:true}}));
 })();
