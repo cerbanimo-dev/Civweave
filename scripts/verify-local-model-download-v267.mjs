@@ -39,7 +39,8 @@ check('root service worker imports local model background worker',sw.includes('/
 check('local inference worker preserves pinned cache adapter',localWorker.includes('hf.env.customCache=cacheAdapter(cache,spec)')&&localWorker.includes("status:404,statusText:'Downloaded model cache miss'"));
 check('local inference worker constructs TextStreamer',localWorker.includes('new hfRuntime.TextStreamer')&&localWorker.includes('callback_function'));
 check('local inference worker emits incremental token messages',localWorker.includes("post(id,'token'")&&localWorker.includes('streamed:Boolean(streamer)'));
-check('local runtime preserves cache-resolved worker and carries token callbacks',runtime.includes("worker-v266.js?v=1.0.67-v271")&&runtime.includes("message.type==='token'")&&runtime.includes('task.onToken?.(message.token)')&&runtime.includes('stream:Boolean(stream)'));
+check('local runtime preserves cache-resolved worker and carries token callbacks',runtime.includes("WORKER='/app/local-ai/worker-v266.js?v=")&&runtime.includes("message.type==='token'")&&runtime.includes('task.onToken?.(message.token)')&&runtime.includes('stream:Boolean(stream)'));
+check('local runtime repairs strengthened metadata integrity before inference',runtime.includes('manager.repair')&&runtime.includes("state.state?.status==='ready'")&&runtime.includes('repair:true,onProgress'));
 check('local bridge emits shared partial model events',bridge.includes("emit('partial'")&&bridge.includes("'civweave:model-event'")&&bridge.includes('accumulatedText'));
 check('local bridge reports actual streaming use',bridge.includes("code:'LOCAL_STREAMING'")&&bridge.includes('used:Boolean(run.streamed)'));
 check('raw pulse repairs corrupt metadata before inference',pulse.includes('integrityReady')&&pulse.includes('M().repair')&&pulse.includes('invalid cached model metadata'));
@@ -73,4 +74,4 @@ const explicit=capability.normalizeRequest({purpose:'market-scan',executionProfi
 assert.equal(explicit.requiresTools,true);
 checks.push('agentic/tool normalization executable cases');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-streaming-v271',checks:checks.length,features:{cacheResolvedInference:true,integrityValidation:true,targetedRepair:true,localStreaming:true,capabilityRouting:true,runtimeSpine:true,localAgenticReasoning:true,agenticToolSeparation:true,toolEscalation:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-streaming-v272-json-repair',checks:checks.length,features:{cacheResolvedInference:true,integrityValidation:true,targetedRepair:true,runtimeMetadataRepair:true,localStreaming:true,capabilityRouting:true,runtimeSpine:true,localAgenticReasoning:true,agenticToolSeparation:true,toolEscalation:true}},null,2));
