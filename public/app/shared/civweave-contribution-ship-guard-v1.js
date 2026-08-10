@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0';
+const VERSION='1.0.1';
 const SECURITY_PROTOCOL='civweave.contribution-security.v1';
 const OBJECT_KIND='civweave.contribution.mesh-envelope.v1';
 const inner=globalThis.CivweaveContributionMeshV1;
@@ -43,7 +43,7 @@ async function requestWalletFreeze(walletId,{reason='suspected-key-compromise',e
 async function freezeCommittee(requestRow){
   const request=requestRow.envelope.event,p=request.payload||{},anchor=await anchorByHash(p.policyHash);
   if(!anchor||!(await inner.security.verifyPolicyAnchor(anchor)).ok)throw new Error('freeze policy anchor is unavailable');
-  const committee=await inner.security.committeeFor(request.hash,Date.parse(request.createdAt),[p.walletId],anchor);
+  const committee=await inner.security.committeeFor(request.hash,{at:Date.parse(request.createdAt),excludeRootIds:[p.walletId],anchor});
   if(!committee.safe)throw new Error('wallet freeze committee is not safely formed');
   return{anchor,committee};
 }
@@ -127,7 +127,14 @@ async function quarantineOversizedContributionState(){
     const db=await openDb(inner.DB_NAME);
     try{
       const tx=db.transaction('events','readwrite'),store=tx.objectStore('events'),rows=await req(store.getAll()),skew=Number(inner.security.defaults?.maxClockSkewMs||5*60*1000);
-      for(const row of rows){const bytes=encoder.encode(JSON.stringify(row.envelope||{})).byteLength,created=Date.parse(row.envelope?.event?.createdAt||'');if(bytes<=max&&(!Number.isFinite(created)||created-Date.now()<=skew))continue;row.status='rejected';row.reason=bytes>max?'ship-guard: oversized contribution envelope':'ship-guard: future-dated contribution envelope';store.put(row);summary.meshRowsRejected+=1}
+      for(const row of rows){
+        const bytes=encoder.encode(JSON.stringify(row.envelope||{})).byteLength,created=Date.parse(row.envelope?.event?.createdAt||'');
+        const invalidTime=!Number.isFinite(created),futureTime=Number.isFinite(created)&&created-Date.now()>skew,oversized=bytes>max;
+        if(!oversized&&!invalidTime&&!futureTime)continue;
+        row.status='rejected';
+        row.reason=oversized?'ship-guard: oversized contribution envelope':invalidTime?'ship-guard: invalid contribution timestamp':'ship-guard: future-dated contribution envelope';
+        store.put(row);summary.meshRowsRejected+=1;
+      }
       await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('mesh quarantine aborted'))});
     }finally{db.close()}
   }catch{}
