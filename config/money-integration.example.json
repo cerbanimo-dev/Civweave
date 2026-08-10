@@ -1,0 +1,34 @@
+{
+  "schema": "civweave.money-edge.config.v1",
+  "liveMoneyEnabled": false,
+  "emergencyStop": false,
+  "provider": {
+    "id": "",
+    "mode": "sandbox",
+    "credentialsPresent": false,
+    "webhookVerificationReady": false,
+    "refundsReady": false,
+    "reconciliationReady": false
+  },
+  "compliance": {
+    "approved": false,
+    "jurisdictionApproved": false,
+    "kycAmlReady": false,
+    "taxReportingReady": false,
+    "termsApproved": false,
+    "jurisdictions": []
+  },
+  "policy": {
+    "sandboxAllowed": true,
+    "maxInternalAmount": {
+      "BUTTON": 500,
+      "ACORN": 100
+    },
+    "maxExternalAmount": 1000
+  },
+  "notes": [
+    "Do not place provider secrets in this file.",
+    "Live money stays disabled until every readiness gate is explicitly satisfied.",
+    "External settlement may buy or transfer existing contribution assets but may not mint Buttons or Acorns."
+  ]
+}
