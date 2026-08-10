@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='document-lifecycle-v273-local-ai-management';
+const VERSION='document-lifecycle-v274-local-ai-json-repair';
 const LEGACY_ENTRY_REVISION='document-lifecycle-v269-ai-settings-entry';
 if(globalThis.CivweaveDocumentLifecycleV221?.version===VERSION)return;
 let active=true;
@@ -8,7 +8,8 @@ const observers=new Set();
 const NativeMutationObserver=globalThis.MutationObserver;
 const AI_SETTINGS_SELECTOR='[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings]';
 const AI_SETTINGS_DELEGATION='/app/settings-delegation-v175.js?v=1.0.65-ai-settings-entry-v269';
-const LOCAL_AI_BOOTSTRAP='/app/local-ai/bootstrap-v266.js?v=1.0.67-v271';
+const LOCAL_AI_BOOTSTRAP='/app/local-ai/bootstrap-v266.js?v=1.0.72-v272';
+const LOCAL_AI_BOOTSTRAP_VERSION='1.0.72-local-ai-bootstrap-v272-json-repair';
 let settingsDelegationPromise=null;
 let localAISettingsPromise=null;
 if(typeof NativeMutationObserver==='function'){
@@ -27,6 +28,7 @@ if(typeof NativeMutationObserver==='function'){
 }
 function localAIManagementReady(){
   return Boolean(
+    globalThis.CivweaveLocalAIBootstrapV266?.version===LOCAL_AI_BOOTSTRAP_VERSION&&
     globalThis.CivweaveLocalAISettingsV266?.enhance&&
     globalThis.CivweaveLocalModelDownloadV266?.status&&
     globalThis.CivweaveLocalModelDownloadV266?.selection&&
@@ -77,19 +79,19 @@ function ensureLocalAISettingsManagement(){
   if(localAISettingsPromise)return localAISettingsPromise;
   localAISettingsPromise=(async()=>{
     let bootstrap=globalThis.CivweaveLocalAIBootstrapV266;
-    if(!bootstrap?.ready){
+    if(bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION||!bootstrap?.ready){
       await new Promise((resolve,reject)=>{
         const script=document.createElement('script');
-        script.src=`${LOCAL_AI_BOOTSTRAP}&settings-mount=v273`;
+        script.src=`${LOCAL_AI_BOOTSTRAP}&settings-mount=v274`;
         script.async=false;
-        script.dataset.civweaveLocalAiSettings='v273';
+        script.dataset.civweaveLocalAiSettings='v274';
         script.onload=()=>resolve(true);
         script.onerror=()=>reject(new Error('Downloaded local AI management could not load.'));
         document.head.append(script);
       });
       bootstrap=globalThis.CivweaveLocalAIBootstrapV266;
     }
-    if(!bootstrap?.ready)throw new Error('Downloaded local AI bootstrap did not become available.');
+    if(bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION||!bootstrap?.ready)throw new Error('Downloaded local AI bootstrap did not become available.');
     const ready=await bootstrap.ready;
     if(!ready||!localAIManagementReady())throw new Error('Downloaded local AI management did not become ready.');
     queueMicrotask(enhanceLocalAISettings);
@@ -127,7 +129,7 @@ globalThis.CivweaveDocumentLifecycleV221=Object.freeze({
   ensureLocalAISettingsManagement,
   localAIManagementReady,
   enhanceLocalAISettings,
-  aiSettingsEntryRepair:'v273-canonical-delegation-local-management',
+  aiSettingsEntryRepair:'v274-canonical-delegation-local-json-repair',
   stop
 });
 })();
