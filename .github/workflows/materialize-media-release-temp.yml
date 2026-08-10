@@ -1,0 +1,67 @@
+name: Materialize Media Release Temp
+
+on:
+  push:
+    branches:
+      - agent/general-knowledge-video-packs-v1
+    paths:
+      - .github/workflows/materialize-media-release-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Materialize Civweave 1.0.90
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          version='1.0.90'
+          Path('VERSION').write_text(version+'\n',encoding='utf-8')
+          pkg_path=Path('package.json')
+          pkg=json.loads(pkg_path.read_text(encoding='utf-8'))
+          pkg['version']=version
+          pkg_path.write_text(json.dumps(pkg,indent=2)+'\n',encoding='utf-8')
+          lock_path=Path('package-lock.json')
+          lock=json.loads(lock_path.read_text(encoding='utf-8'))
+          lock['version']=version
+          if isinstance(lock.get('packages'),dict) and isinstance(lock['packages'].get(''),dict):
+              lock['packages']['']['version']=version
+          lock_path.write_text(json.dumps(lock,indent=2)+'\n',encoding='utf-8')
+          contract_path=Path('config/release-contract.json')
+          contract=json.loads(contract_path.read_text(encoding='utf-8'))
+          contract['canonical']['current']={'version':version,'path':f'releases/{version}','status':'current'}
+          contract_path.write_text(json.dumps(contract,indent=2)+'\n',encoding='utf-8')
+          PY
+          node scripts/materialize-canonical-release.mjs
+      - name: Verify downloader and integrated release contracts
+        run: |
+          set -euo pipefail
+          node --check public/app/open-learning-media-cache-v1.mjs
+          node --check public/app/open-learning-media-installer-v1.mjs
+          python scripts/test-open-learning-media-packs-v1.py
+          node scripts/test-open-learning-media-runtime-v1.mjs
+          python scripts/test-open-learning-media-harvest-v1.py
+          if [ -f scripts/test-video-learning-contract-v1.mjs ]; then node scripts/test-video-learning-contract-v1.mjs; fi
+          if [ -f scripts/verify-video-learning-contract-v1.mjs ]; then node scripts/verify-video-learning-contract-v1.mjs; fi
+          if [ -f scripts/verify-learning-pack-shelf-v1.mjs ]; then node scripts/verify-learning-pack-shelf-v1.mjs; fi
+          npm run test:map:v1
+          npm run check:release-discipline
+          grep -F '/app/open-learning-media-installer-v1.mjs?v=general-knowledge-packs-v1' public/app/index.html
+      - name: Commit release
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add VERSION package.json package-lock.json config/release-contract.json public releases/1.0.90 scripts/smoke-gateway-v131-base.mjs scripts/verify-device-package-self-heal-v184.mjs
+          git commit -m 'Release general knowledge media packs as Civweave 1.0.90'
+          git pull --rebase origin agent/general-knowledge-video-packs-v1
+          git push origin HEAD:agent/general-knowledge-video-packs-v1
