@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION='1.0.0';
-const REVISION='campus-background-download-v241';
+const REVISION='campus-background-download-v280';
 const STATUS_TYPES=new Set(['CIVWEAVE_OFFLINE_PACKAGE_STATUS','CIVWEAVE_OFFLINE_PACKAGE_PROGRESS']);
 const ROOT_ID='cw-campus-background-v241';
 const STYLE_ID='cw-campus-background-style-v241';
@@ -20,7 +20,7 @@ function installStyle(){
 #${ROOT_ID}{
   position:fixed;z-index:2147483598;left:0;right:0;bottom:0;height:4px;
   pointer-events:none;overflow:hidden;background:#ffffff18;opacity:1;
-  transition:opacity .24s ease,height .2s ease;background .2s ease;
+  transition:opacity .24s ease,height .2s ease,background .2s ease;
 }
 #${ROOT_ID}[hidden]{display:none!important}
 #${ROOT_ID} .cw-campus-fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left center;
@@ -28,7 +28,8 @@ function installStyle(){
   transition:transform .2s ease-out}
 #${ROOT_ID}[data-state="retry"]{height:5px;background:#ffbd4a33}
 #${ROOT_ID}[data-state="retry"] .cw-campus-fill{background:linear-gradient(90deg,#ff9d42,#ffd36e)}
-#${ROOT_ID}[data-state="offline"] .cw-campus-fill{background:linear-gradient(90deg,#7f8aa6,#c7cbd5)}
+#${ROOT_ID}[data-state="offline"],#${ROOT_ID}[data-state="paused"]{background:#9ba4bb26}
+#${ROOT_ID}[data-state="offline"] .cw-campus-fill,#${ROOT_ID}[data-state="paused"] .cw-campus-fill{background:linear-gradient(90deg,#7f8aa6,#c7cbd5)}
 #${ROOT_ID}.is-complete{opacity:0}
 @media(prefers-reduced-motion:reduce){#${ROOT_ID},#${ROOT_ID} .cw-campus-fill{transition:none}}
 `;
@@ -55,8 +56,10 @@ function normalize(status={}){
   const total=Math.max(0,Number(status.total||0)||0);
   const attempted=Math.max(0,Number(status.attempted??status.completed??0)||0);
   const downloaded=Math.max(0,Math.min(total||Number.MAX_SAFE_INTEGER,Number(status.downloaded??status.successful??status.completed??0)||0));
+  const paused=Boolean(status.paused);
+  const running=Boolean(status.running)&&!paused;
   const ready=Boolean(status.ready)&&failedCount===0&&(!total||downloaded>=total);
-  return{...status,failed,failedCount,total,attempted,downloaded,ready};
+  return{...status,failed,failedCount,total,attempted,downloaded,running,paused,ready};
 }
 
 function render(status){
@@ -83,6 +86,9 @@ function render(status){
         setTimeout(()=>{if(lastStatus?.ready)root.hidden=true},260);
       }
     },COMPLETE_HIDE_MS);
+  }else if(packet.paused){
+    root.dataset.state='paused';
+    root.title=`Campus ${packet.downloaded}/${packet.total||'?'} · paused`;
   }else if(packet.failedCount){
     root.dataset.state='retry';
     root.title=`Campus ${packet.downloaded}/${packet.total||'?'} · ${packet.failedCount} file${packet.failedCount===1?'':'s'} waiting for retry`;
@@ -120,7 +126,7 @@ function scheduleRetry(delay=1600){
   if(retryTimer)clearTimeout(retryTimer);
   retryTimer=setTimeout(()=>{
     retryTimer=0;
-    if(navigator.onLine!==false)resume('scheduled_retry');
+    if(navigator.onLine!==false&&!lastStatus?.paused)resume('scheduled_retry');
   },delay);
 }
 
@@ -131,7 +137,7 @@ async function resume(reason='page_opened'){
 
   const status=await askWorker(activeWorker,'GET_OFFLINE_PACKAGE_STATUS');
   if(STATUS_TYPES.has(status?.type))render(status);
-  if(status?.ready)return true;
+  if(status?.ready||status?.paused)return true;
 
   downloadActive=true;
   const channel=new MessageChannel();
@@ -141,7 +147,7 @@ async function resume(reason='page_opened'){
     if(packet.type==='CIVWEAVE_OFFLINE_PACKAGE_STATUS'&&!packet.running){
       downloadActive=false;
       try{channel.port1.close()}catch{}
-      if(!packet.ready&&navigator.onLine!==false)scheduleRetry(2200);
+      if(!packet.ready&&!packet.paused&&navigator.onLine!==false)scheduleRetry(2200);
     }
   };
   try{
