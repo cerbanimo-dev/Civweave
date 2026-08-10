@@ -40,11 +40,12 @@ for(const relative of ['catalog.json','civweave-school-catalog.sqlite','RECONCIL
   const stat=await fs.stat(path.join(root,relative));if(!stat.isFile())throw new Error(`Missing knowledge-school support file: ${relative}`);
 }
 
-const [index,helper,installer,installRuntime,boundary,installedEntry,updateController,updateWorker,workerWrapper,workerCore,offlineOverride,cleanroomWorker]=await Promise.all([
+const [index,helper,installer,installRuntime,boundary,installedEntry,updateController,updateWorker,workerWrapper,workerCore,installerStateWorker,integrityWorker,offlineOverride,storageGuard,cleanroomWorker]=await Promise.all([
   read('public/app/index.html'),read('public/app/knowledge-school-seeds-v1.js'),read('public/app/knowledge-school-installer-v1.js'),
   read('public/install-v130.js'),read('public/app/install-boundary-v146.js'),read('public/app/installed-entry-v146.js'),read('public/app/pwa-update-controller-v204.js'),
   read('public/service-worker-update-v204.js'),read('public/service-worker-v203.js'),read('public/service-worker-core-v208.js'),
-  read('public/service-worker-offline-v211-override.js'),read('public/service-worker-living-school-cleanroom-v218.js')
+  read('public/service-worker-installer-state-v280.js'),read('public/service-worker-shell-integrity-v281.js'),read('public/service-worker-offline-v211-override.js'),
+  read('public/app/installer-storage-guard-v281.js'),read('public/service-worker-living-school-cleanroom-v218.js')
 ]);
 assertIncludes(index,['knowledge-school-list','knowledge-school-seeds-v1.js','knowledge-school-installer-v1.js','Download once. Keep it through updates.'],'installer page');
 assertIncludes(helper,["CACHE_NAME='cwknowledge-school-seeds-v2'","LEGACY_CACHE_NAMES=['civweave-knowledge-schools-v1']",'migrateLegacyCaches','cachedCurrent','navigator.storage.persist()','async function save(',"phase:'cached'"],'knowledge helper');
@@ -57,10 +58,29 @@ assertIncludes(installedEntry,["updateViaCache:'none'",'await registration.updat
 if(installedEntry.indexOf('await refreshWorker(releaseVersion)')>installedEntry.indexOf('const requested='))throw new Error('Installed entry routes before refreshing the worker.');
 assertIncludes(updateController,['data-civweave-update-control',"setState('Check updates'","setState('Restart to update'",'withTimeout(registration.update()','migrateKnowledgeCache',"const LIBRARY_CACHE='cwknowledge-school-seeds-v2'"],'installed update controller');
 assertIncludes(updateWorker,["const CACHE='cwupdate-visible-v207'","'/app/pwa-update-controller-v204.js'","knowledgeCache:'cwknowledge-school-seeds-v2'"],'update service-worker lane');
-assertIncludes(workerWrapper,["importScripts('/service-worker-living-school-cleanroom-v218.js","importScripts('/service-worker-core-v208.js","importScripts('/service-worker-offline-v211-override.js",'offline-campus-current-graph-v238','policy=fast-background-v241',"/service-worker-chat-repair-v245.js?v=chat-convergence-v250"],'active worker wrapper');
-if(!(workerWrapper.indexOf('service-worker-living-school-cleanroom-v218.js')<workerWrapper.indexOf('service-worker-core-v208.js')&&workerWrapper.indexOf('service-worker-core-v208.js')<workerWrapper.indexOf('service-worker-offline-v211-override.js')))throw new Error('Worker composition order is incorrect.');
+assertIncludes(workerWrapper,[
+  "importScripts('/service-worker-living-school-cleanroom-v218.js",
+  "importScripts('/service-worker-core-v208.js",
+  "importScripts('/service-worker-installer-state-v280.js",
+  "importScripts('/service-worker-shell-integrity-v281.js",
+  "importScripts('/service-worker-offline-v211-override.js",
+  'offline-campus-current-graph-v280','policy=resumable-pause-v280',
+  "/service-worker-chat-repair-v245.js?v=chat-convergence-v250"
+],'active worker wrapper');
+if(!(
+  workerWrapper.indexOf('service-worker-living-school-cleanroom-v218.js')<workerWrapper.indexOf('service-worker-core-v208.js')&&
+  workerWrapper.indexOf('service-worker-core-v208.js')<workerWrapper.indexOf('service-worker-installer-state-v280.js')&&
+  workerWrapper.indexOf('service-worker-installer-state-v280.js')<workerWrapper.indexOf('service-worker-shell-integrity-v281.js')&&
+  workerWrapper.indexOf('service-worker-shell-integrity-v281.js')<workerWrapper.indexOf('service-worker-offline-v211-override.js')
+))throw new Error('Hardened worker composition order is incorrect.');
 assertIncludes(workerCore,['lightweight-shell-v208',"'cwupdate-'",'DOWNLOAD_OFFLINE_PACKAGE'],'retained service-worker core');
-assertIncludes(offlineOverride,['offline-campus-current-graph-v238',"V211_POLICY = 'fast-background-v241'",'CivweaveOfflineCampusV211','stale-not-rediscovered','retry-ledger-retired','V211_BATCH_SIZE = 16','backgroundSafe: true'],'offline retry override');
+assertIncludes(installerStateWorker,["'/app/installer-storage-guard-v281.js'","'/app/required-campus-autostart-v1.js'",'shellRequired: true'],'installer state worker');
+assertIncludes(integrityWorker,["crypto.subtle.digest('SHA-256'",'STAGING_CACHE','lastKnownGoodCache','Integrity mismatch'],'shell integrity worker');
+assertIncludes(offlineOverride,[
+  'offline-campus-current-graph-v280',"V211_POLICY = 'resumable-pause-v280'","V211_SYNC_TAG = 'civweave-campus-resume-v280'",
+  'CivweaveOfflineCampusV211','stale-not-rediscovered','retry-ledger-retired','V211_BATCH_SIZE = 16','downloadedAssets','pauseSupported: true','resumablePerFile: true','backgroundSafe: true'
+],'offline retry override');
+assertIncludes(storageGuard,['navigator.storage','requiredFreeBytes',"civweaveStorageState='insufficient'"],'campus storage guard');
 assertIncludes(cleanroomWorker,["const REVISION='living-school-cleanroom-v218'",'event.stopImmediatePropagation()'],'Living School cache boundary');
-for(const source of [helper,installer,installRuntime,boundary,installedEntry,updateController,updateWorker,workerWrapper,workerCore,offlineOverride,cleanroomWorker])new Function(source);
-console.log(JSON.stringify({schools:catalog.schools.length,articles:articleCount,compressedBytes,compressedMiB:Number((compressedBytes/1024/1024).toFixed(2)),largestSchoolMiB:Number((Math.max(...catalog.schools.map(school=>school.zip_bytes))/1024/1024).toFixed(2)),crossroads:catalog.reconciliation.crossroads_articles,knowledgeCache:'cwknowledge-school-seeds-v2',installedUpdateOwner:'installed-entry-v146',manualUpdateControl:'visible-v207-registration-watchdog',workerComposition:'v218-cleanroom-plus-retained-core-plus-current-graph-v238-fast-background-v241-v250-chat-migration',currentFilesSkipRedownload:true,backgroundCampus:true},null,2));
+for(const source of [helper,installer,installRuntime,boundary,installedEntry,updateController,updateWorker,workerWrapper,workerCore,installerStateWorker,integrityWorker,offlineOverride,storageGuard,cleanroomWorker])new Function(source);
+console.log(JSON.stringify({schools:catalog.schools.length,articles:articleCount,compressedBytes,compressedMiB:Number((compressedBytes/1024/1024).toFixed(2)),largestSchoolMiB:Number((Math.max(...catalog.schools.map(school=>school.zip_bytes))/1024/1024).toFixed(2)),crossroads:catalog.reconciliation.crossroads_articles,knowledgeCache:'cwknowledge-school-seeds-v2',installedUpdateOwner:'installed-entry-v146',manualUpdateControl:'visible-v207-registration-watchdog',workerComposition:'v281-integrity-v280-resumable-campus-v250-chat-migration',currentFilesSkipRedownload:true,backgroundCampus:true,storagePreflight:true,shellIntegrity:true},null,2));
