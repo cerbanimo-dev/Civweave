@@ -6,13 +6,15 @@ import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
 
 await import('./sync-release-version-assets.mjs');
+await import('./sync-release-coherence-v220.mjs');
+await import('./generate-prelive-metadata-v281.mjs');
 
 const PORT=18806;
 const origin=`http://127.0.0.1:${PORT}`;
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const releaseVersion=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
 const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-lightweight-shell-v208-legacy-v156-bridge-v209')`;
-const dataDir=await mkdtemp(path.join(os.tmpdir(),'civweave-installer-recovery-v218-'));
+const dataDir=await mkdtemp(path.join(os.tmpdir(),'civweave-installer-recovery-v281-'));
 const output=[];
 const child=spawn(process.execPath,['scripts/start-civweave-v131.mjs'],{
   cwd:root,
@@ -54,8 +56,13 @@ try{
     '/service-worker-v203.js',
     '/service-worker-core-v208.js',
     '/service-worker-living-school-cleanroom-v218.js',
+    '/service-worker-installer-state-v280.js',
+    '/service-worker-shell-integrity-v281.js',
     '/service-worker-offline-v211-override.js',
+    '/app/shell-integrity-v281.json',
     '/app/offline-package-v208.json',
+    '/app/installer-state-machine-v280.js',
+    '/app/installer-storage-guard-v281.js',
     '/app/campus-background-download-v241.js',
     '/app/knowledge-school-installer-v1.css',
     '/app/knowledge-school-seeds-v1.js',
@@ -75,8 +82,11 @@ try{
     wrapper:await readFile(path.join(root,'public/service-worker-v203.js'),'utf8'),
     core:await readFile(path.join(root,'public/service-worker-core-v208.js'),'utf8'),
     cleanroom:await readFile(path.join(root,'public/service-worker-living-school-cleanroom-v218.js'),'utf8'),
+    installer:await readFile(path.join(root,'public/service-worker-installer-state-v280.js'),'utf8'),
+    integrity:await readFile(path.join(root,'public/service-worker-shell-integrity-v281.js'),'utf8'),
     offline:await readFile(path.join(root,'public/service-worker-offline-v211-override.js'),'utf8'),
     background:await readFile(path.join(root,'public/app/campus-background-download-v241.js'),'utf8'),
+    storage:await readFile(path.join(root,'public/app/installer-storage-guard-v281.js'),'utf8'),
     legacy:await readFile(path.join(root,'public/service-worker-v156.js'),'utf8'),
     base:await readFile(path.join(root,'public/service-worker.js'),'utf8')
   };
@@ -85,37 +95,46 @@ try{
 
   const cleanImport="importScripts('/service-worker-living-school-cleanroom-v218.js";
   const coreImport="importScripts('/service-worker-core-v208.js";
+  const installerImport="importScripts('/service-worker-installer-state-v280.js";
+  const integrityImport="importScripts('/service-worker-shell-integrity-v281.js";
   const offlineImport="importScripts('/service-worker-offline-v211-override.js";
-  assert(files.wrapper.includes(cleanImport)&&files.wrapper.includes(coreImport)&&files.wrapper.includes(offlineImport),'active worker does not compose all three maintained layers');
-  assert(files.wrapper.includes('offline-campus-current-graph-v238')&&files.wrapper.includes('policy=fast-background-v241'),'active worker does not cache-bust the v241 fast-background policy while preserving v238 identity');
-  assert(files.wrapper.indexOf(cleanImport)<files.wrapper.indexOf(coreImport)&&files.wrapper.indexOf(coreImport)<files.wrapper.indexOf(offlineImport),'worker layer order is incorrect');
+  for(const token of [cleanImport,coreImport,installerImport,integrityImport,offlineImport])assert(files.wrapper.includes(token),`active worker is missing ${token}`);
+  assert(files.wrapper.includes('offline-campus-current-graph-v280')&&files.wrapper.includes('policy=resumable-pause-v280'),'active worker does not carry the v280 resumable campus policy');
+  assert(files.wrapper.indexOf(cleanImport)<files.wrapper.indexOf(coreImport)&&files.wrapper.indexOf(coreImport)<files.wrapper.indexOf(installerImport)&&files.wrapper.indexOf(installerImport)<files.wrapper.indexOf(integrityImport)&&files.wrapper.indexOf(integrityImport)<files.wrapper.indexOf(offlineImport),'worker hardening layer order is incorrect');
   assert(files.core.includes("const BUILD = 'lightweight-shell-v208'")&&files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained lightweight/offline core is incomplete');
   assert(!/importScripts\(/.test(files.core),'retained lightweight core imports the retired layered stack');
   assert(files.cleanroom.includes("const REVISION='living-school-cleanroom-v218'")&&files.cleanroom.includes('event.stopImmediatePropagation()'),'Living School worker retirement boundary is incomplete');
+  assert(files.installer.includes("'/app/installer-storage-guard-v281.js'"),'installer state worker does not pin the storage guard');
+  assert(files.integrity.includes("crypto.subtle.digest('SHA-256'")&&files.integrity.includes('STAGING_CACHE')&&files.integrity.includes('lastKnownGoodCache'),'verified shell staging/last-known-good fallback is incomplete');
   assert(
-    files.offline.includes("const V211_REVISION = 'offline-campus-current-graph-v238'")&&
-    files.offline.includes("const V211_POLICY = 'fast-background-v241'")&&
-    files.offline.includes('stale-not-rediscovered')&&
-    files.offline.includes('retry-ledger-retired')&&
-    files.offline.includes('V211_BATCH_SIZE = 16')&&
+    files.offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'")&&
+    files.offline.includes("const V211_POLICY = 'resumable-pause-v280'")&&
+    files.offline.includes("const V211_SYNC_TAG = 'civweave-campus-resume-v280'")&&
+    files.offline.includes('downloadedAssets')&&
+    files.offline.includes('joinedExisting: true')&&
+    files.offline.includes('pauseSupported: true')&&
+    files.offline.includes('resumablePerFile: true')&&
     files.offline.includes('backgroundSafe: true'),
-    'fast-background current-graph offline retry override is incomplete'
+    'resumable current-graph offline retry override is incomplete'
   );
-  assert(files.background.includes("DOWNLOAD_OFFLINE_PACKAGE")&&files.background.includes('height:4px')&&files.background.includes("navigator.serviceWorker.addEventListener('message'"),'canonical page background campus continuation is incomplete');
+  assert(files.background.includes('DOWNLOAD_OFFLINE_PACKAGE')&&files.background.includes('height:4px')&&files.background.includes("navigator.serviceWorker.addEventListener('message'"),'canonical page background campus continuation is incomplete');
+  assert(files.storage.includes('requiredFreeBytes')&&files.storage.includes('navigator.storage'),'installer storage preflight is incomplete');
   assert(files.legacy.includes(expectedWorkerImport),`legacy worker does not import the active ${releaseVersion} wrapper`);
 
   const bridgeBody=files.legacy.replace(/importScripts\('\/service-worker-v203\.js[^\n]+\);/,'');
-  new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.core}\n${files.offline}`,{filename:'civweave-v241-bridged-cleanroom-worker.js'});
+  new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.core}\n${files.installer}\n${files.integrity}\n${files.offline}`,{filename:'civweave-v281-bridged-worker.js'});
   console.log(JSON.stringify({
     ok:true,
     releaseVersion,
-    directInstallerAssets:11,
+    directInstallerAssets:17,
     packagePurposeHeadersAccepted:4,
     knowledgeCatalogServed:true,
     knowledgeZipServed:firstZip,
     workerGlobalCollision:false,
     backgroundCampus:true,
-    workerRevision:'v218-cleanroom-wrapper-retained-lightweight-core-current-graph-v238-fast-background-v241'
+    storagePreflight:true,
+    shellIntegrity:true,
+    workerRevision:'v281-integrity-v280-resumable-campus'
   },null,2));
 }catch(error){
   console.error(output.join(''));

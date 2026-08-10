@@ -5,6 +5,8 @@ import {fileURLToPath,pathToFileURL} from 'node:url';
 const dir=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(dir,'..');
 await import('./sync-release-version-assets.mjs');
+await import('./sync-release-coherence-v220.mjs');
+await import('./generate-prelive-metadata-v281.mjs');
 const sourcePath=path.join(dir,'smoke-service-worker-registration-watchdog-v207-legacy.mjs');
 const runtimePath=path.join(dir,'.smoke-service-worker-registration-watchdog-v207.runtime.mjs');
 const installerPath=path.join(root,'public/install-v130.js');
@@ -37,7 +39,7 @@ if(!source.includes(statusBefore))throw new Error('Watchdog verifier could not f
 source=source.replace(statusBefore,statusAfter);
 
 const workerReadBefore="const workerSource=await fs.readFile('public/service-worker-v203.js','utf8');";
-const workerReadAfter="const workerWrapperSource=await fs.readFile('public/service-worker-v203.js','utf8');\nconst workerCoreSource=await fs.readFile('public/service-worker-core-v208.js','utf8');\nconst livingSchoolWorkerSource=await fs.readFile('public/service-worker-living-school-cleanroom-v218.js','utf8');\nconst offlineOverrideSource=await fs.readFile('public/service-worker-offline-v211-override.js','utf8');\nconst workerSource=workerWrapperSource+'\\n'+workerCoreSource+'\\n'+offlineOverrideSource;";
+const workerReadAfter="const workerWrapperSource=await fs.readFile('public/service-worker-v203.js','utf8');\nconst workerCoreSource=await fs.readFile('public/service-worker-core-v208.js','utf8');\nconst livingSchoolWorkerSource=await fs.readFile('public/service-worker-living-school-cleanroom-v218.js','utf8');\nconst installerStateWorkerSource=await fs.readFile('public/service-worker-installer-state-v280.js','utf8');\nconst integrityWorkerSource=await fs.readFile('public/service-worker-shell-integrity-v281.js','utf8');\nconst offlineOverrideSource=await fs.readFile('public/service-worker-offline-v211-override.js','utf8');\nconst workerSource=workerWrapperSource+'\\n'+workerCoreSource+'\\n'+installerStateWorkerSource+'\\n'+integrityWorkerSource+'\\n'+offlineOverrideSource;";
 if(!source.includes(workerReadBefore))throw new Error('Watchdog verifier could not find the direct worker read.');
 source=source.replace(workerReadBefore,workerReadAfter);
 
@@ -46,13 +48,22 @@ assert(workerSource.includes("const BUILD = 'lightweight-shell-v208'"),'Verified
 assert(workerSource.includes("const V211_REVISION = 'offline-campus-seed-provenance-v211'"),'Offline retry-loop repair is missing.');`;
 const workerAssertionsAfter=`assert(workerWrapperSource.includes("importScripts('/service-worker-living-school-cleanroom-v218.js"),'Active worker wrapper omits Living School cache retirement.');
 assert(workerWrapperSource.includes("importScripts('/service-worker-core-v208.js"),'Active worker wrapper omits the retained lightweight core.');
+assert(workerWrapperSource.includes("importScripts('/service-worker-installer-state-v280.js"),'Active worker wrapper omits the installer-state asset pin.');
+assert(workerWrapperSource.includes("importScripts('/service-worker-shell-integrity-v281.js"),'Active worker wrapper omits shell integrity.');
 assert(workerWrapperSource.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper omits the offline retry override.');
-assert(workerWrapperSource.includes('offline-campus-current-graph-v238'),'Active worker wrapper omits the current-graph offline revision.');
+assert(workerWrapperSource.includes('offline-campus-current-graph-v280'),'Active worker wrapper omits the resumable current-graph offline revision.');
+assert(workerWrapperSource.includes('policy=resumable-pause-v280'),'Active worker wrapper omits the resumable/pause policy.');
 assert(workerWrapperSource.includes("/service-worker-chat-repair-v245.js?v=chat-convergence-v250"),'Active worker wrapper omits the v250 stale-chat cache migration.');
 assert(workerWrapperSource.indexOf('service-worker-living-school-cleanroom-v218.js')<workerWrapperSource.indexOf('service-worker-core-v208.js'),'Living School retirement does not load before the retained core.');
-assert(workerWrapperSource.indexOf('service-worker-core-v208.js')<workerWrapperSource.indexOf('service-worker-offline-v211-override.js'),'Offline override does not load after the core globals.');
+assert(workerWrapperSource.indexOf('service-worker-core-v208.js')<workerWrapperSource.indexOf('service-worker-installer-state-v280.js'),'Installer-state pin does not load after the core globals.');
+assert(workerWrapperSource.indexOf('service-worker-installer-state-v280.js')<workerWrapperSource.indexOf('service-worker-shell-integrity-v281.js'),'Integrity does not see the final required shell asset list.');
+assert(workerWrapperSource.indexOf('service-worker-shell-integrity-v281.js')<workerWrapperSource.indexOf('service-worker-offline-v211-override.js'),'Offline override does not load after verified shell staging.');
 assert(workerCoreSource.includes("const BUILD = 'lightweight-shell-v208'"),'Verified lightweight worker core is missing.');
-assert(offlineOverrideSource.includes("const V211_REVISION = 'offline-campus-current-graph-v238'"),'Current-graph offline retry repair is missing.');
+assert(installerStateWorkerSource.includes("'/app/installer-storage-guard-v281.js'"),'Installer-state worker does not pin the storage guard.');
+assert(integrityWorkerSource.includes("crypto.subtle.digest('SHA-256'")&&integrityWorkerSource.includes('lastKnownGoodCache'),'Verified shell integrity/last-known-good policy is missing.');
+assert(offlineOverrideSource.includes("const V211_REVISION = 'offline-campus-current-graph-v280'"),'Resumable current-graph offline retry repair is missing.');
+assert(offlineOverrideSource.includes("const V211_POLICY = 'resumable-pause-v280'"),'Resumable campus policy is missing.');
+assert(offlineOverrideSource.includes('downloadedAssets')&&offlineOverrideSource.includes('pauseSupported: true'),'Per-file resume/pause contract is missing.');
 assert(offlineOverrideSource.includes('stale-not-rediscovered'),'Current-graph repair does not retire stale package assets.');
 assert(livingSchoolWorkerSource.includes("const REVISION='living-school-cleanroom-v218'"),'Living School clean-room worker revision is missing.');`;
 if(!source.includes(workerAssertionsBefore))throw new Error('Watchdog verifier could not find direct worker assertions.');

@@ -3,12 +3,13 @@ import {mkdtemp,readFile,rm} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+await import('./stage-maplibre-v275.mjs');
 const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.51',BUILD='1.0.51-install-only-fullscreen-family-gateway';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),dataDir=await mkdtemp(path.join(os.tmpdir(),'civweave-gateway-v106-')),output=[];
 const child=spawn(process.execPath,['scripts/start-civweave-v131.mjs'],{cwd:root,env:{...process.env,RENDER:'true',HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});child.stdout.on('data',chunk=>output.push(chunk.toString()));child.stderr.on('data',chunk=>output.push(chunk.toString()));
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),assert=(condition,message)=>{if(!condition)throw new Error(message)};
 async function wait(){let last;for(let i=0;i<80;i+=1){try{const response=await fetch(`${origin}/api/health`,{cache:'no-store'});if(response.ok)return response.json();last=new Error(`health ${response.status}`)}catch(error){last=error}await sleep(200)}throw last||new Error('gateway did not start')}
-function requiredDeviceAssets(workerSource){const core=workerSource.match(/const CORE=(\[[\s\S]*?\]);\nconst DEVICE_REQUIRED=/),required=workerSource.match(/const DEVICE_REQUIRED=([^;]+);/);assert(core&&required,'service worker core package manifest could not be parsed');return Function(`"use strict";const CORE=${core[1]};return ${required[1]};`)()}
+function requiredDeviceAssets(workerSource){const core=workerSource.match(/const CORE=(\[[\s\S]*?\]);\nconst DEVICE_REQUIRED=/),mapCore=workerSource.match(/const MAP_CORE=(\[[\s\S]*?\]);\nconst CORE=/),required=workerSource.match(/const DEVICE_REQUIRED=([^;]+);/);assert(core&&required,'service worker core package manifest could not be parsed');const declarations=[`const CORE=${core[1]};`];if(mapCore)declarations.push(`const MAP_CORE=${mapCore[1]};`);return Function(`"use strict";${declarations.join('')}return ${required[1]};`)()}
 try{
   const health=await wait();assert(output.join('').includes('Starting gateway runtime.'),'environment-aware start did not select gateway on Render');assert(health.build===BUILD,`unexpected build ${health.build}`);assert(health.appVersion===VERSION,`unexpected version ${health.appVersion}`);assert(health.release?.localInstallRequired===true,'gateway does not require installation');
   const rootResponse=await fetch(`${origin}/`,{cache:'no-store'}),rootHtml=await rootResponse.text();assert(rootResponse.ok,'gateway installer root failed');assert(rootHtml.includes('Install Civweave v1.0.51.'),'gateway root is not the v1.0.51 installer');assert(rootHtml.includes('No native modal'),'gateway root does not describe the fixed settings layer');assert(rootHtml.includes('/app/logos/civweave-app-icon.png'),'gateway root does not use the app icon');

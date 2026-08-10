@@ -7,12 +7,14 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
 const releaseVersion=(await read('VERSION')).trim();
 const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-lightweight-shell-v208-legacy-v156-bridge-v209')`;
-const [source,boundary,legacyWorker,wrapper,core,offline,workingCampus,manifestText,css]=await Promise.all([
+const [source,boundary,legacyWorker,wrapper,core,installerState,integrity,offline,workingCampus,manifestText,css]=await Promise.all([
   read('public/extensions/civweave-proof-progress-v158.js'),
   read('public/app/install-boundary-v146.js'),
   read('public/service-worker-v156.js'),
   read('public/service-worker-v203.js'),
   read('public/service-worker-core-v208.js'),
+  read('public/service-worker-installer-state-v280.js'),
+  read('public/service-worker-shell-integrity-v281.js'),
   read('public/service-worker-offline-v211-override.js'),
   read('public/app/working-campus-v156.html'),
   read('public/app/offline-package-v208.json'),
@@ -29,11 +31,14 @@ assert(boundary.includes('/extensions/civweave-proof-progress-v158.js'),'Install
 const lightweightMode=legacyWorker.includes('legacy-v156-bridge-v209');
 if(lightweightMode){
   assert(legacyWorker.includes(expectedWorkerImport),`Legacy registrations do not reach the active ${releaseVersion} worker wrapper.`);
-  assert(wrapper.includes("importScripts('/service-worker-living-school-cleanroom-v218.js")&&wrapper.includes("importScripts('/service-worker-core-v208.js")&&wrapper.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper is incomplete.');
-  assert(wrapper.includes('offline-campus-current-graph-v238')&&wrapper.includes('policy=fast-background-v241'),'Active worker wrapper does not load the fast background current-graph repair.');
+  assert(wrapper.includes("importScripts('/service-worker-living-school-cleanroom-v218.js")&&wrapper.includes("importScripts('/service-worker-core-v208.js")&&wrapper.includes("importScripts('/service-worker-installer-state-v280.js")&&wrapper.includes("importScripts('/service-worker-shell-integrity-v281.js")&&wrapper.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper is incomplete.');
+  assert(wrapper.includes('offline-campus-current-graph-v280')&&wrapper.includes('policy=resumable-pause-v280'),'Active worker wrapper does not load the resumable current-graph repair.');
   assert(core.includes("const BUILD = 'lightweight-shell-v208'"),'Retained worker core is not the lightweight shell.');
   assert(core.includes('discoverReferences')&&core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Retained offline campus core lost discovery or hydration.');
-  assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v238'")&&offline.includes("const V211_POLICY = 'fast-background-v241'")&&offline.includes('stale-not-rediscovered'),'Current-graph background retry repair is missing.');
+  assert(installerState.includes("'/app/installer-storage-guard-v281.js'"),'Installer state layer no longer pins the storage preflight guard.');
+  assert(integrity.includes("crypto.subtle.digest('SHA-256'")&&integrity.includes('lastKnownGoodCache'),'Shell integrity/last-known-good fallback is missing.');
+  assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'")&&offline.includes("const V211_POLICY = 'resumable-pause-v280'")&&offline.includes('stale-not-rediscovered'),'Current-graph resumable retry repair is missing.');
+  assert(offline.includes('downloadedAssets')&&offline.includes('pauseSupported: true')&&offline.includes('resumablePerFile: true'),'Per-file resumability contract is missing.');
   assert(offlineManifest.revision==='canonical-background-campus-v241-systems-mesh-v251','Offline campus manifest is not the Systems Mesh canonical background-download contract.');
   assert(offlineManifest.seeds.length===11,'Offline campus manifest no longer has the canonical eleven seed roots.');
   assert(offlineManifest.seeds.includes('/app/working-campus-v156.html'),'Offline campus no longer seeds the working campus.');
@@ -115,5 +120,5 @@ console.log(JSON.stringify({
   completionAuthority:'accepted-realm-proof',
   realms:['living-school','cerbanimo','fellowfare'],
   planState:campus.plan.state,
-  offlinePackageMode:lightweightMode?'v218-wrapper-current-graph-v238-fast-background-v241-systems-mesh-v251':'layered-extension-package-v158'
+  offlinePackageMode:lightweightMode?'v218-wrapper-v281-integrity-v280-resumable-campus-v251-systems-mesh':'layered-extension-package-v158'
 },null,2));
