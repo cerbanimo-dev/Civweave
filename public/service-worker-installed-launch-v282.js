@@ -3,6 +3,11 @@
 
 const V282_REVISION='installed-pwa-launch-v282';
 const V282_ENTRY_PATH='/app/installed-entry-v146.html';
+const V282_INSTALLER_GUARD='/app/installer-online-fallback-v225.js';
+
+for(const assets of [REQUIRED_SHELL_ASSETS,SHELL_ASSETS]){
+  if(Array.isArray(assets)&&!assets.includes(V282_INSTALLER_GUARD))assets.push(V282_INSTALLER_GUARD);
+}
 
 async function v282InstalledAppEntry(request){
   let response=await findCached(V282_ENTRY_PATH);
@@ -39,6 +44,7 @@ stableAppEntry=v282InstalledAppEntry;
 self.CivweaveInstalledLaunchV282=Object.freeze({
   revision:V282_REVISION,
   entryPath:V282_ENTRY_PATH,
+  installerGuard:V282_INSTALLER_GUARD,
   policy:'installed-entry-never-installer-substitution'
 });
 })();
