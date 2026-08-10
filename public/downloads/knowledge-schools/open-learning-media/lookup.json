@@ -1,0 +1,2254 @@
+{
+  "schema": "civweave.open-learning-media-lookup.v1",
+  "built_at": "2026-08-10T02:22:16Z",
+  "relevance_gate": {
+    "schema": "civweave.open-learning-media-relevance-gate.v1",
+    "policy": "Provider search is discovery only; title/description must independently meet a topic-specific deterministic threshold."
+  },
+  "pedagogy_gate": {
+    "schema": "civweave.open-learning-media-pedagogy-gate.v1",
+    "policy": "Require a strong conceptual anchor in the title, or a strong description anchor plus explicit educational intent; reject clickbait description-only matches."
+  },
+  "selection_gate": {
+    "schema": "civweave.open-learning-media-selection-gate.v1",
+    "policy": "Strong topic anchors in titles are accepted; description-only anchors additionally require an instructional title before automatic selection."
+  },
+  "topics": {
+    "vibe-coding": [
+      {
+        "provider": "peertube",
+        "provider_id": "f398c8fb-3928-488f-aaed-ea8176ee124b",
+        "title": "Vibe coding a website with Silex and Claude Code | x5 timelapse",
+        "description": "The template code: https://gitlab.com/lexoyo/silex_retro-web-haven # Retro Web Haven – retro 90s-inspired website template Vibe coded with [Silex](https://www.silex.me) and Claude Code System prompt for Claude when building Silex websites...",
+        "source_url": "https://video.silex.me/videos/watch/f398c8fb-3928-488f-aaed-ea8176ee124b",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.silex.me/download/streaming-playlists/hls/videos/f398c8fb-3928-488f-aaed-ea8176ee124b-1440-fragmented.mp4",
+            "bytes": 18416370,
+            "resolution": "1440p",
+            "fps": 16,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "lexoyo",
+          "source_title": "Vibe coding a website with Silex and Claude Code | x5 timelapse",
+          "source_url": "https://video.silex.me/videos/watch/f398c8fb-3928-488f-aaed-ea8176ee124b",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 15,
+            "evidence": [
+              "vibe coding",
+              "programming context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "\\bvibe cod(?:e|ing)\\b",
+              "\\b(?:claude code|github copilot|codeium|cursor)\\b"
+            ],
+            "strong_description_matches": [
+              "\\b(?:claude code|github copilot|codeium|cursor)\\b"
+            ],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 59
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 59
+          }
+        }
+      },
+      {
+        "provider": "internet-archive",
+        "provider_id": "is-vibe-coding-hurting-open-source-big-cosmic-desktop-roadmap-linux-weekly-news",
+        "title": "Is Vibe Coding Hurting Open Source? Big Cosmic Desktop Roadmap Linux Weekly News",
+        "description": "Links: Vibe coding is killing open source? https://www.404media.co/vibe-coding-is-killing-open-source-software-researchers-argue/ System76 details a big Cosmic Roadmap https://blog.system76.com/post/cosmic-epoch-2-and-3-roadmap Steam machine and Frame delayed https://www.gamingonlinux.com/2026/02/steam-machine-steam-frame-faq-ram-and-storage-crisis-to-blame-for-no-pricing-or-dates/ More EU moves away from big tech https://www.euractiv.com/news/commission-trials-european-open-source-communications-software/ https://www.techradar.com/pro/another-european-government-agency-is-preparing-to-ditch-microsoft-if-needed SUSE proposes to better structure the openSUSE project https://linuxiac.com/suse-vp-jeff-mahoney-publishes-draft-governance-proposal-for-opensuse/ Linux From Scratch drops System V Init https://linuxiac.com/linux-from-scratch-drops-system-v-init-calls-decision-regrettable/ GIMP wants GPU acceleration https://www.phoronix.com/news/GIMP-Post-3.2-Features Sudo maintainer calls for financial sponsors https://www.millert.dev/",
+        "source_url": "https://archive.org/details/is-vibe-coding-hurting-open-source-big-cosmic-desktop-roadmap-linux-weekly-news",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "CC-BY-SA",
+          "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+          "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by-sa/4.0/",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://archive.org/download/is-vibe-coding-hurting-open-source-big-cosmic-desktop-roadmap-linux-weekly-news/Is%20Vibe%20coding%20hurting%20open%20source_%20Big%20Cosmic%20desktop%20roadmap%20-%20Linux%20Weekly%20News.mp4",
+            "bytes": 135342337,
+            "provider_sha1": "fbf5c19b272fd23cfee914ce4303c6360c0a4d0b",
+            "provider_md5": "4f41caab47a6a44ddf9e208af10bf182",
+            "format": "MPEG4",
+            "role": "original"
+          }
+        ],
+        "quality_score": 84,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "the linux experiment",
+          "source_title": "Is Vibe Coding Hurting Open Source? Big Cosmic Desktop Roadmap Linux Weekly News",
+          "source_url": "https://archive.org/details/is-vibe-coding-hurting-open-source-big-cosmic-desktop-roadmap-linux-weekly-news",
+          "license": "CC-BY-SA",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 15,
+            "evidence": [
+              "vibe coding",
+              "programming context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "\\bvibe cod(?:e|ing)\\b"
+            ],
+            "strong_description_matches": [
+              "\\bvibe cod(?:e|ing)\\b"
+            ],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 39
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 39
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Free AI Coding Assistant – Cline.AI Setup Guide.webm",
+        "title": "Free AI Coding Assistant – Cline.AI Setup Guide",
+        "description": "Free Discovery Call: http://andreasmdesign.com/start AI Mastery (Skool): https://www.skool.com/ai-mastery AI Brand Mastery (Skool+): https://www.skool.com/ai-brand-mastery-lab-1488",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Free_AI_Coding_Assistant_%E2%80%93_Cline.AI_Setup_Guide.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Free_AI_Coding_Assistant_%E2%80%93_Cline.AI_Setup_Guide.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 19019675,
+            "provider_sha1": "f599bc00d5ba01ed4ce2ecc46127bba16c46c31c",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "DREWSKII",
+          "source_title": "Free AI Coding Assistant – Cline.AI Setup Guide",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Free_AI_Coding_Assistant_%E2%80%93_Cline.AI_Setup_Guide.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 12,
+            "evidence": [
+              "AI coding assistant",
+              "programming context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "\\bai (?:coding|code) assistant\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant).webm",
+        "title": "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "description": "In this video, we'll walk you through the process of setting up and using Cline with Open Router. Whether you're a beginner or an experienced user, this step-by-step tutorial will help you understand how to configure Cline for seamless connectivity and enhanced functionality. What You'll Learn: ✅ What is Cline and how it works with Open Router ✅ Step-by-step configuration guide ✅ Tips for optimizing performance ✅ Troubleshooting common issues If you find this video helpful, don't forget to like, subscribe, and hit the notification bell for more tech tutorials! Got questions? Drop them in the comments below, and we'll be happy to help! Cline #OpenRouter #TechTutorial #NetworkConfiguration #RouterSetup #TechGuide #HowTo #TechSupport",
+        "source_url": "https://commons.wikimedia.org/wiki/File:How_to_Use_Cline_with_Open_Router_in_VS_Code_%E2%80%93_Step-by-step_guide_(free_AI_coding_assistant).webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/4/4b/How_to_Use_Cline_with_Open_Router_in_VS_Code_%E2%80%93_Step-by-step_guide_%28free_AI_coding_assistant%29.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 25263462,
+            "provider_sha1": "f1b30119b3b01dbf209af9176bc8824c7fb27e2a",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Coding Ape",
+          "source_title": "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+          "source_url": "https://commons.wikimedia.org/wiki/File:How_to_Use_Cline_with_Open_Router_in_VS_Code_%E2%80%93_Step-by-step_guide_(free_AI_coding_assistant).webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 12,
+            "evidence": [
+              "AI coding assistant",
+              "programming context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "\\bai (?:coding|code) assistant\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
+        "title": "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "description": "*Note: Kenton has just released Cloudflare OS today: https://x.com/KentonVarda/status/2084990137180590572 This talk was recorded a month prior to launch.* Claude needed a strikethrough the slide app did not have, so it added one to the app. Asked...",
+        "source_url": "https://video.ut0pia.org/videos/watch/9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.ut0pia.org/download/web-videos/9ae8f786-436e-4740-b5a3-7b7574ed4fc6-0.mp4",
+            "bytes": 17550742,
+            "resolution": "Audio only",
+            "fps": 0,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/9ae8f786-436e-4740-b5a3-7b7574ed4fc6-1080-fragmented.mp4",
+            "bytes": 89849511,
+            "resolution": "1080p",
+            "fps": 60,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/9ae8f786-436e-4740-b5a3-7b7574ed4fc6-720-fragmented.mp4",
+            "bytes": 57610775,
+            "resolution": "720p",
+            "fps": 60,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Bleme",
+          "source_title": "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+          "source_url": "https://video.ut0pia.org/videos/watch/9ae8f786-436e-4740-b5a3-7b7574ed4fc6",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 15,
+            "evidence": [
+              "vibe coding",
+              "programming context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "\\bvibe cod(?:e|ing)\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
+        "title": "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "description": "In this debut episode of The BMad Code Podcast, I sit down with Marten Angner, a 26-year UX veteran, digital product manager, and the creator of the Whiteport Design Studio (WDS), the first official community module in the BMad Method ecosystem. ...",
+        "source_url": "https://video.ut0pia.org/videos/watch/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.ut0pia.org/download/web-videos/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe-0.mp4",
+            "bytes": 67058153,
+            "resolution": "Audio only",
+            "fps": 0,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe-2160-fragmented.mp4",
+            "bytes": 2187969975,
+            "resolution": "2160p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe-720-fragmented.mp4",
+            "bytes": 485728739,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Bleme",
+          "source_title": "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+          "source_url": "https://video.ut0pia.org/videos/watch/5fa9b1f3-190f-45d5-8fa0-54d7f339e0fe",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 15,
+            "evidence": [
+              "vibe coding",
+              "programming context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "\\bvibe cod(?:e|ing)\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "internet-archive",
+        "provider_id": "midnight-coder-20260202-0rB_m1B3F4I",
+        "title": "Visual Basic 6.0 Demos, Vibe Coding and Updates About Me.",
+        "description": "Originally published on YouTube channel 'Midnight Coder' by Ronen Blumberg. YouTube URL: https://www.youtube.com/watch?v=0rB_m1B3F4I Original upload date: 2026-02-02 Duration: 55:16 --- hi in this video i talk about how i started recently with vb6 and i demo some apps i made in vb6 and i talk about what's up with me recently... #basic #vb6 #visualbasic #visualbasic6 #retroprogramming #vlog #demo https://basic-israel.org",
+        "source_url": "https://archive.org/details/midnight-coder-20260202-0rB_m1B3F4I",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC-BY",
+          "url": "https://creativecommons.org/licenses/by/4.0/",
+          "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/4.0/",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://archive.org/download/midnight-coder-20260202-0rB_m1B3F4I/Visual%20Basic%206.0%20Demos,%20Vibe%20Coding%20and%20Updates%20About%20Me..mp4",
+            "bytes": 453966354,
+            "provider_sha1": "860b6a07d0a53b1a3f947e225e2fb3772a99baac",
+            "provider_md5": "83f39bcaabf5f8c19cf2d882b96befc2",
+            "format": "MPEG4",
+            "role": "original"
+          }
+        ],
+        "quality_score": 85,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Midnight Coder - Ronen Blumberg",
+          "source_title": "Visual Basic 6.0 Demos, Vibe Coding and Updates About Me.",
+          "source_url": "https://archive.org/details/midnight-coder-20260202-0rB_m1B3F4I",
+          "license": "CC-BY",
+          "license_url": "https://creativecommons.org/licenses/by/4.0/"
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 15,
+            "evidence": [
+              "vibe coding",
+              "programming context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "\\bvibe cod(?:e|ing)\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Wikimania 2026 – Building a Wikimedia tool with agentic AI.webm",
+        "title": "Wikimania 2026 – Building a Wikimedia tool with agentic AI",
+        "description": "This workshop demonstrates how to go **from idea to working, deployed tool in under two hours**, using Agentic AI (Claude Code). The workshop is aimed at **people with programming experience**, to encourage them to experiment with agentic AI coding (which has made a great leap in capability in Nov 2025, and became much better at producing useful code). It is **not** aimed at encouraging people with **no understanding of programming** to \"just vibe code\". The goal is to generate the idea for the tool right there in the room in the first 10 minutes or so, but I will also prepare a couple of ideas of my own in case there's no creative energy in the room.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2026_%E2%80%93_Building_a_Wikimedia_tool_with_agentic_AI.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "CC BY-SA 4.0",
+          "url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/8/82/Wikimania_2026_%E2%80%93_Building_a_Wikimedia_tool_with_agentic_AI.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 350398372,
+            "provider_sha1": "d9247daab48c3491d5cb53ecdb712dc6f8491adc",
+            "role": "original"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Asaf Bartov",
+          "source_title": "Wikimania 2026 – Building a Wikimedia tool with agentic AI",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2026_%E2%80%93_Building_a_Wikimedia_tool_with_agentic_AI.webm",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 15,
+            "evidence": [
+              "vibe coding",
+              "programming context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [],
+            "strong_description_matches": [
+              "\\bvibe cod(?:e|ing)\\b",
+              "\\b(?:claude code|github copilot|codeium|cursor)\\b"
+            ],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 32
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-description-anchor-plus-instructional-title",
+            "pedagogy_score": 32
+          }
+        }
+      },
+      {
+        "provider": "internet-archive",
+        "provider_id": "pyconza2025_gen-ai-prototyping-with-google-tools-from-stitch-to-ai-studio",
+        "title": "Gen AI prototyping with Google Tools from Stitch to AI studio",
+        "description": "Speaker Brandon T. Bande Track Education Type Short Talk (25 minutes) Talk Url: https://2025.za.pycon.org/talks/249-gen-ai-prototyping-with-google-tools-from-stitch-to-ai-studio/ Abstract Vibe coding is okay when you are building for yourself. How about when a customer reaches out to you to build something for them? This is not often talked about when people talk about using generative AI for development. In this talk I will share on how I use the Google provided tools for MOST of my Generative AI assisted product development. Using brand identity and my own requirements gathering , I am able to use Gemini 2.5 for documentation , requirements analysis , the Stich for editable UI designs , AI Studio for prototyping and Cursor and Google's Jules for product building ( I could use Firebase Studio but as of now I cannot handle certain aspects with it). This talk will showcase my process and share a few oops moments that helped me finetune my process. I will wrap up with the common things to avoid before deployment for solutions that I have built for mobile and web - which includes obvious pointers to AI usage which might devalue my work. This talk will be ideal for enthusiasts to mid level developers , resonate with senior developers and vibe coders , whilst its tone will help create room for discussions during tea breaks. In the same talk , I will share on how AI has helped me overcome impostor syndrome too by enabling me to build using the knowledge that I have whilst teaching me the need to understanding the basics to reduce technical debt associated with vibe coding. ========================== Sponsors of PyCon Africa 2025 ========================== Platinum sponsor: Valkey: https://valkey.io/ Regional Diamond: Thinkst Canary: https://thinkst.com/ Amazon Web Services (A",
+        "source_url": "https://archive.org/details/pyconza2025_gen-ai-prototyping-with-google-tools-from-stitch-to-ai-studio",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC-BY",
+          "url": "http://creativecommons.org/licenses/by/3.0/",
+          "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://archive.org/download/pyconza2025_gen-ai-prototyping-with-google-tools-from-stitch-to-ai-studio/Gen_AI_prototyping_with_Google_Tools_from_Stitch_to_AI_studio-%5BQAs0XbuRTTc%5D.mp4",
+            "bytes": 32094238,
+            "provider_sha1": "cac15d5f6b2b3c9479d7b0ea8fc59da6b3190573",
+            "provider_md5": "db4fa62b554189c1827fcd3455b1ffca",
+            "format": "MPEG4",
+            "role": "original"
+          }
+        ],
+        "quality_score": 85,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Brandon T. Bande",
+          "source_title": "Gen AI prototyping with Google Tools from Stitch to AI studio",
+          "source_url": "https://archive.org/details/pyconza2025_gen-ai-prototyping-with-google-tools-from-stitch-to-ai-studio",
+          "license": "CC-BY",
+          "license_url": "http://creativecommons.org/licenses/by/3.0/"
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 22,
+            "evidence": [
+              "vibe coding",
+              "generative AI",
+              "programming context",
+              "AI coding tool"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [],
+            "strong_description_matches": [
+              "\\bvibe cod(?:e|ing)\\b",
+              "\\b(?:claude code|github copilot|codeium|cursor)\\b"
+            ],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 32
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-description-anchor-plus-instructional-title",
+            "pedagogy_score": 32
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "59cbbe78-8c41-4293-adb4-49e9b642a06e",
+        "title": "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News",
+        "description": "Head to https://squarespace.com/thelinuxexperiment to save 10% off your first purchase of a website or domain using code thelinuxexperiment Grab a brand new laptop or desktop running Linux: https://www.tuxedocomputers.com/en# 👏 SUPPORT TH...",
+        "source_url": "https://tilvids.com/videos/watch/59cbbe78-8c41-4293-adb4-49e9b642a06e",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://tilvids.com/download/streaming-playlists/hls/videos/59cbbe78-8c41-4293-adb4-49e9b642a06e-720-fragmented.mp4",
+            "bytes": 135342337,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tilvids.com/download/streaming-playlists/hls/videos/59cbbe78-8c41-4293-adb4-49e9b642a06e-360-fragmented.mp4",
+            "bytes": 71721567,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tilvids.com/download/streaming-playlists/hls/videos/59cbbe78-8c41-4293-adb4-49e9b642a06e-144-fragmented.mp4",
+            "bytes": 34839275,
+            "resolution": "144p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "The Linux Experiment",
+          "source_title": "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News",
+          "source_url": "https://tilvids.com/videos/watch/59cbbe78-8c41-4293-adb4-49e9b642a06e",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 15,
+            "evidence": [
+              "vibe coding",
+              "programming context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "\\bvibe cod(?:e|ing)\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 31
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 31
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "0ca769b0-ec52-4f9e-a741-d1c7f55874e7",
+        "title": "Vibe Coding my Toy Image Sharing App with OpenAI GPT-5",
+        "description": "",
+        "source_url": "https://video.typesafe.org/videos/watch/0ca769b0-ec52-4f9e-a741-d1c7f55874e7",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.typesafe.org/download/streaming-playlists/hls/videos/0ca769b0-ec52-4f9e-a741-d1c7f55874e7-1774-fragmented.mp4",
+            "bytes": 25152882,
+            "resolution": "1774p",
+            "fps": 60,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.typesafe.org/download/streaming-playlists/hls/videos/0ca769b0-ec52-4f9e-a741-d1c7f55874e7-1440-fragmented.mp4",
+            "bytes": 18395678,
+            "resolution": "1440p",
+            "fps": 60,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.typesafe.org/download/streaming-playlists/hls/videos/0ca769b0-ec52-4f9e-a741-d1c7f55874e7-1080-fragmented.mp4",
+            "bytes": 13491127,
+            "resolution": "1080p",
+            "fps": 60,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.typesafe.org/download/streaming-playlists/hls/videos/0ca769b0-ec52-4f9e-a741-d1c7f55874e7-720-fragmented.mp4",
+            "bytes": 7958929,
+            "resolution": "720p",
+            "fps": 60,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://video.typesafe.org/download/streaming-playlists/hls/videos/0ca769b0-ec52-4f9e-a741-d1c7f55874e7-480-fragmented.mp4",
+            "bytes": 5026487,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 82,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "mp",
+          "source_title": "Vibe Coding my Toy Image Sharing App with OpenAI GPT-5",
+          "source_url": "https://video.typesafe.org/videos/watch/0ca769b0-ec52-4f9e-a741-d1c7f55874e7",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "vibe-coding": {
+            "score": 15,
+            "evidence": [
+              "vibe coding",
+              "programming context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "vibe-coding": {
+            "strong_title_matches": [
+              "\\bvibe cod(?:e|ing)\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 31
+          }
+        },
+        "selection": {
+          "vibe-coding": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 31
+          }
+        }
+      }
+    ],
+    "prompt-engineering": [
+      {
+        "provider": "internet-archive",
+        "provider_id": "effective-prompt-engineering-for-python-programmers",
+        "title": "Effective prompt engineering for Python programmers",
+        "description": "Talk page: https://2023.za.pycon.org/talks/36-effective-prompt-engineering-for-python-programmers/ Speaker: Diana Pholo Track: Teaching and Learning with Python Type: Remote Talk Room: Talk Room 2 (Remote Talks) Time: Oct 05 (Thu): 14:15 Duration: 0:45 The world of technology is witnessing a transformation powered by Large Language Models (LLMs) like ChatGPT and Bing AI. These marvels of AI are reshaping how we interact with machines as they can comprehend and generate human-like text. But to get the most out of these models, you must learn to ask the right question. Prompt engineering is the art of crafting specific instructions for LLMs. It molds the language model's responses, making them more accurate, relevant, and actionable. Our session will delve into the essence of prompt engineering, addressing its significance for programmers and its role in improving model outputs and reducing biases. We'll explore a variety of prompt types, and offer practical tips for optimisation. Additionally, we'll navigate through real-world case studies, showcasing the tangible impact of prompt engineering on programming tasks. If you're intrigued by the potential of LLMs and eager to harness their power effectively, this presentation is your gateway to unlocking their true potential in your projects. URLs: Slides (pdf): https://2023.za.pycon.org/media/pages_files/Effective_Prompt_Engineering_Slides.pdf Sponsors: Platinum: Python Software Foundation: https://www.python.org/psf/membership Patron: Thinkst Canary: https://canary.tools/ Afrolabs: http://www.afrolabs.co.za/",
+        "source_url": "https://archive.org/details/effective-prompt-engineering-for-python-programmers",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC-BY",
+          "url": "http://creativecommons.org/licenses/by/3.0/",
+          "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://archive.org/download/effective-prompt-engineering-for-python-programmers/Effective%20prompt%20engineering%20for%20Python%20programmers.mp4",
+            "bytes": 580905223,
+            "provider_sha1": "ebd1c7e46bed5cb7e512a8b6424c718074391870",
+            "provider_md5": "0631f39b2b51c5762a446b84e1f8f4f9",
+            "format": "MPEG4",
+            "role": "original"
+          }
+        ],
+        "quality_score": 85,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Diana Pholo",
+          "source_title": "Effective prompt engineering for Python programmers",
+          "source_url": "https://archive.org/details/effective-prompt-engineering-for-python-programmers",
+          "license": "CC-BY",
+          "license_url": "http://creativecommons.org/licenses/by/3.0/"
+        },
+        "relevance": {
+          "prompt-engineering": {
+            "score": 18,
+            "evidence": [
+              "prompt engineering",
+              "prompting",
+              "generative-model context"
+            ]
+          }
+        },
+        "pedagogy": {
+          "prompt-engineering": {
+            "strong_title_matches": [
+              "\\bprompt engineering\\b"
+            ],
+            "strong_description_matches": [
+              "\\bprompt engineering\\b"
+            ],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "prompt-engineering": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "4b2119a7-f258-4ec5-ba71-8ef71b92135e",
+        "title": "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "description": "This is the story of the prompt design to generate an antifascist aesthics & logo with KI. For more information about the project visit: https://antifagenki.wordpress.com/ Also check out: https://antifaki.uber.space/antifascist-logo-generat...",
+        "source_url": "https://stream.udk-berlin.de/videos/watch/4b2119a7-f258-4ec5-ba71-8ef71b92135e",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1440.mp4",
+            "bytes": 34026255,
+            "resolution": "1440p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1080.mp4",
+            "bytes": 23922454,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-720.mp4",
+            "bytes": 18990791,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-480.mp4",
+            "bytes": 14976136,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-240.mp4",
+            "bytes": 11339708,
+            "resolution": "240p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-0.mp4",
+            "bytes": 8739371,
+            "resolution": "Audio only",
+            "fps": 0,
+            "role": "web-video"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1440-fragmented.mp4",
+            "bytes": 19189138,
+            "resolution": "1440p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1080-fragmented.mp4",
+            "bytes": 15066973,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-720-fragmented.mp4",
+            "bytes": 10135222,
+            "resolution": "720p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-480-fragmented.mp4",
+            "bytes": 6119487,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-240-fragmented.mp4",
+            "bytes": 2483823,
+            "resolution": "240p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-0-fragmented.mp4",
+            "bytes": 8753153,
+            "resolution": "Audio only",
+            "fps": 0,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "t.lehnen",
+          "source_title": "This is a story of the prompt design to generate an antifascist aesthetics logo",
+          "source_url": "https://stream.udk-berlin.de/videos/watch/4b2119a7-f258-4ec5-ba71-8ef71b92135e",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "prompt-engineering": {
+            "score": 12,
+            "evidence": [
+              "prompt design",
+              "prompting"
+            ]
+          }
+        },
+        "pedagogy": {
+          "prompt-engineering": {
+            "strong_title_matches": [
+              "\\bprompt design\\b"
+            ],
+            "strong_description_matches": [
+              "\\bprompt design\\b"
+            ],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 39
+          }
+        },
+        "selection": {
+          "prompt-engineering": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 39
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
+        "title": "Il Prompt Engineering",
+        "description": "Esempi di prompt professionali e di applicazioni pratiche, in diverse aree professionali Area: Dummies Relatore: Lorenzo Bargnani (Invisible farm, https://www.invisiblefarm.it/)",
+        "source_url": "https://video.linux.it/videos/watch/6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://video.linux.it/download/videos/6ba45fd5-b858-4b6d-9e39-7dda75036aa6-1080.mp4",
+            "bytes": 149932433,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "web-video"
+          },
+          {
+            "url": "https://video.linux.it/download/videos/6ba45fd5-b858-4b6d-9e39-7dda75036aa6-720.mp4",
+            "bytes": 103875374,
+            "resolution": "720p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "LUGMan",
+          "source_title": "Il Prompt Engineering",
+          "source_url": "https://video.linux.it/videos/watch/6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "prompt-engineering": {
+            "score": 15,
+            "evidence": [
+              "prompt engineering",
+              "prompting"
+            ]
+          }
+        },
+        "pedagogy": {
+          "prompt-engineering": {
+            "strong_title_matches": [
+              "\\bprompt engineering\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 31
+          }
+        },
+        "selection": {
+          "prompt-engineering": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 31
+          }
+        }
+      }
+    ],
+    "pseudocoding": [
+      {
+        "provider": "peertube",
+        "provider_id": "075eb8b6-ee85-46c3-b2b9-e157b7cbda27",
+        "title": "Pseudo-code et description des algorithmes",
+        "description": "Bienvenu dans le cours en ligne d'objet 1. Dans cette vidéo, nous introduirons le pseudo-code et la description des algorithmes. Si vous avez des questions, n'hésitez pas à les envoyer par MIO. Nous y répondrons durant les cours en ligne su...",
+        "source_url": "https://video.libreti.net/videos/watch/075eb8b6-ee85-46c3-b2b9-e157b7cbda27",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "Attribution",
+          "url": "",
+          "evidence": "PeerTube API licence id 1: Attribution",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://video.libreti.net/download/web-videos/075eb8b6-ee85-46c3-b2b9-e157b7cbda27-1080.mp4",
+            "bytes": 420444419,
+            "resolution": "1080p",
+            "fps": 25,
+            "role": "web-video"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Godefroy",
+          "source_title": "Pseudo-code et description des algorithmes",
+          "source_url": "https://video.libreti.net/videos/watch/075eb8b6-ee85-46c3-b2b9-e157b7cbda27",
+          "license": "Attribution",
+          "license_url": ""
+        },
+        "relevance": {
+          "pseudocoding": {
+            "score": 12,
+            "evidence": [
+              "pseudocode"
+            ]
+          }
+        },
+        "pedagogy": {
+          "pseudocoding": {
+            "strong_title_matches": [
+              "\\bpseudo[- ]?code\\b"
+            ],
+            "strong_description_matches": [
+              "\\bpseudo[- ]?code\\b"
+            ],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 39
+          }
+        },
+        "selection": {
+          "pseudocoding": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 39
+          }
+        }
+      },
+      {
+        "provider": "internet-archive",
+        "provider_id": "lca2019-Open_CS_education_resources_for_schools_how_hard_could_it_be",
+        "title": "Open CS education resources for schools - how hard could it be?",
+        "description": "Tim Bell https://2019.linux.conf.au/schedule/presentation/255/ Computational Thinking and related topics are appearing in school curricula around the world. There are many barriers to adoption, and one significant one is supporting teachers to find relevant and easy-to-deploy teaching material. This talk will describe experiences with two on-line open resources that have been developed at the University of Canterbury: CS Unplugged, and the CS Field Guide. We will look at principles used to design the resources, and challenges included making it relevant for different cultures, curricula and languages. linux.conf.au is a conference about the Linux operating system, and all aspects of the thriving ecosystem of Free and Open Source Software that has grown up around it. Run since 1999, in a different Australian or New Zealand city each year, by a team of local volunteers, LCA invites more than 500 people to learn from the people who shape the future of Open Source. For more information on the conference see https://linux.conf.au/ #linux.conf.au #linux #foss #opensource",
+        "source_url": "https://archive.org/details/lca2019-Open_CS_education_resources_for_schools_how_hard_could_it_be",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC-BY",
+          "url": "http://creativecommons.org/licenses/by/4.0/",
+          "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/4.0/",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://archive.org/download/lca2019-Open_CS_education_resources_for_schools_how_hard_could_it_be/Open_CS_education_resources_for_schools_how_hard_could_it_be.webm",
+            "bytes": 818007163,
+            "provider_sha1": "b4d4a11546a116dcd1a4e2e73e59f5c39d2bfc29",
+            "provider_md5": "f4244566171ee78e0e4ad890d1da9af4",
+            "format": "WebM",
+            "role": "original"
+          },
+          {
+            "url": "https://archive.org/download/lca2019-Open_CS_education_resources_for_schools_how_hard_could_it_be/Open_CS_education_resources_for_schools_how_hard_could_it_be.ogv",
+            "bytes": 234959084,
+            "provider_sha1": "64784cd7e7a02d1fb355c07552cdb72d146767d8",
+            "provider_md5": "b3b83e4654832eef987f5913ba95bb18",
+            "format": "Ogg Video",
+            "role": "derivative"
+          },
+          {
+            "url": "https://archive.org/download/lca2019-Open_CS_education_resources_for_schools_how_hard_could_it_be/Open_CS_education_resources_for_schools_how_hard_could_it_be.mp4",
+            "bytes": 324707604,
+            "provider_sha1": "366183bd10e65238c9887b378393e5788dab7905",
+            "provider_md5": "9963f73c597b091d81f0d5bacf9b4dc1",
+            "format": "h.264",
+            "role": "derivative"
+          }
+        ],
+        "quality_score": 85,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Tim Bell",
+          "source_title": "Open CS education resources for schools - how hard could it be?",
+          "source_url": "https://archive.org/details/lca2019-Open_CS_education_resources_for_schools_how_hard_could_it_be",
+          "license": "CC-BY",
+          "license_url": "http://creativecommons.org/licenses/by/4.0/"
+        },
+        "relevance": {
+          "pseudocoding": {
+            "score": 9,
+            "evidence": [
+              "computational thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "pseudocoding": {
+            "strong_title_matches": [],
+            "strong_description_matches": [
+              "\\bcomputational thinking\\b"
+            ],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 24
+          }
+        },
+        "selection": {
+          "pseudocoding": {
+            "reason": "strong-description-anchor-plus-instructional-title",
+            "pedagogy_score": 24
+          }
+        }
+      }
+    ],
+    "critical-thinking": [
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015.webm",
+        "title": "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
+        "description": "From the conference program : Many instructors in academia approach using Wikipedia in the classroom with apprehension or completely ban its use due to the fact that \"anyone can edit Wikipedia\". However, students as well as faculty often find themselves using Wikipedia to do basic research and learn more about a given topic. Instead of discouraging students from using Wikipedia, it is important to teach students how to best incorporate Wikipedia into their research. Learning how Wikipedia works and how to effectively use Wikipedia is a skill that students will be able to use outside of the classroom and take into the workplace. This session will discuss how Wikipedia can be used to teach research and critical thinking skills by providing students will the tools necessary to evaluate Wikipedia articles. There are a variety of assignments, some of which only require part of a class session that can be used to teach students about Wikipedia. This includes designing assignments to assist students in understanding what makes a \"good\" Wikipedia article by having students review references listed and asking them to determine the creditability of sources used. It can also include asking students to review an article and discuss how well the topic is covered and if there are gaps, asking students to edit the article and thereby improve the quality of Wikipedia. Assignments can also take the form of looking at how information is presented in an online community driven website. Students can be tasked with reviewing the talk page and the history of the article to determine how the article was developed over time. By discussing what information was included in the first iteration of the article, students are able to see how an article can improve over time and see how edits from an ",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Teaching_Research_%26_Critical_Thinking_Skills_Through_Wikipedia_at_WikiConference_USA_2015.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "PUBLIC-DOMAIN",
+          "label": "Public domain",
+          "url": "",
+          "evidence": "Public domain | Public domain | pd |",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/1/13/Teaching_Research_%26_Critical_Thinking_Skills_Through_Wikipedia_at_WikiConference_USA_2015.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 241649518,
+            "provider_sha1": "ab5c60aade4454585fd52e63ed76d619451e7f4d",
+            "role": "original"
+          }
+        ],
+        "quality_score": 91,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "US National Archives",
+          "source_title": "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Teaching_Research_%26_Critical_Thinking_Skills_Through_Wikipedia_at_WikiConference_USA_2015.webm",
+          "license": "Public domain",
+          "license_url": ""
+        },
+        "relevance": {
+          "critical-thinking": {
+            "score": 12,
+            "evidence": [
+              "critical thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "critical-thinking": {
+            "strong_title_matches": [
+              "\\bcritical thinking\\b"
+            ],
+            "strong_description_matches": [
+              "\\bcritical thinking\\b"
+            ],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 45
+          }
+        },
+        "selection": {
+          "critical-thinking": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 45
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Wikimania 2024 - Dilijan - Day 4 - Media literacy as tool to reach for the Collaboration of Open.webm",
+        "title": "Wikimania 2024 - Dilijan - Day 4 - Media literacy as tool to reach for the Collaboration of Open",
+        "description": "Promoting Wikimedia and Wikipedia editing among our main target groups in educational programmes has been sometimes more and sometimes less successful. Until we open up to elaborate on a specific area - media literacy. In that moment our activities and programming became an answer for the diverse set of needs among our partners and participants. And through that channel we found a common language and became an important stakeholder in the field of media literacy education and lifelong learning within the country. We have the perfect playground available, where we can provide real time experiences on some of the phenomena.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2024_-_Dilijan_-_Day_4_-_Media_literacy_as_tool_to_reach_for_the_Collaboration_of_Open.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "CC BY-SA 4.0",
+          "url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/d/d0/Wikimania_2024_-_Dilijan_-_Day_4_-_Media_literacy_as_tool_to_reach_for_the_Collaboration_of_Open.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 161015046,
+            "provider_sha1": "4e63127ccee6148d2c4f9bb42475f0ecef69b983",
+            "role": "original"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Lucie Schubert (WMCZ), Pavel Bednařík (WMCZ), Klára Joklová (WMCZ)",
+          "source_title": "Wikimania 2024 - Dilijan - Day 4 - Media literacy as tool to reach for the Collaboration of Open",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2024_-_Dilijan_-_Day_4_-_Media_literacy_as_tool_to_reach_for_the_Collaboration_of_Open.webm",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+        },
+        "relevance": {
+          "critical-thinking": {
+            "score": 9,
+            "evidence": [
+              "media literacy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "critical-thinking": {
+            "strong_title_matches": [
+              "\\bmedia literacy\\b"
+            ],
+            "strong_description_matches": [
+              "\\bmedia literacy\\b"
+            ],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "critical-thinking": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia.webm",
+        "title": "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
+        "description": "This interactive workshop presents two open, browser-based tools created specifically for Wikipedia: WikiAnalyzer v2 and WikiDebate. Rather than focusing on the technology itself, the session centers on what can be done with it to develop critical thinking, analyze bias, and better understand how we construct inferences and reasoning. The workshop is grounded in a key premise: technology is not neutral. Just as humans have cognitive and cultural biases, artificial intelligence systems can reproduce, amplify, or obscure them. Therefore, the goal is not to promote blind trust in AI, but to create space to question it, analyze it, and understand its limitations. WikiAnalyzer v2 makes structural patterns in Wikipedia articles visible through indicators such as lexical diversity, reference density, and edit distribution. WikiDebate models arguments as structured networks of claims and evidence, allowing participants to visualize how inferences are constructed and to evaluate the coherence of reasoning beyond ideological positions. During the workshop, participants will compare AI-generated responses with Wikipedia articles, identify patterns of bias, and reflect on how we reason, what we consider reliable, and why. By the end of the session, participants will have a replicable framework to foster critical thinking, bias awareness, and digital literacy, using Wikipedia as a living knowledge system.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2026_%E2%80%93_WikiAnalyzer_v2_%26_WikiDebate_Open_AI_Tools_to_Teach_Critical_Thinking_and_Bias_Detection_through_Wikipedia.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "CC BY-SA 4.0",
+          "url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/d/d5/Wikimania_2026_%E2%80%93_WikiAnalyzer_v2_%26_WikiDebate_Open_AI_Tools_to_Teach_Critical_Thinking_and_Bias_Detection_through_Wikipedia.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 268793859,
+            "provider_sha1": "dc26d2cb0174f4d06a28677b3918f22672c969d8",
+            "role": "original"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Carla Constanza Paredes Herrera, Daniela Ávila",
+          "source_title": "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2026_%E2%80%93_WikiAnalyzer_v2_%26_WikiDebate_Open_AI_Tools_to_Teach_Critical_Thinking_and_Bias_Detection_through_Wikipedia.webm",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+        },
+        "relevance": {
+          "critical-thinking": {
+            "score": 15,
+            "evidence": [
+              "critical thinking",
+              "bias/misinformation"
+            ]
+          }
+        },
+        "pedagogy": {
+          "critical-thinking": {
+            "strong_title_matches": [
+              "\\bcritical thinking\\b"
+            ],
+            "strong_description_matches": [
+              "\\bcritical thinking\\b"
+            ],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "critical-thinking": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Lisa Loving about media literacy and how you can report for your community.webm",
+        "title": "Lisa Loving about media literacy and how you can report for your community",
+        "description": "2026-01-03 interview with Lisa Loving about media literacy and how you can report for your community",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Lisa_Loving_about_media_literacy_and_how_you_can_report_for_your_community.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "CC BY-SA 4.0",
+          "url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/6/64/Lisa_Loving_about_media_literacy_and_how_you_can_report_for_your_community.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 636734774,
+            "provider_sha1": "dd155c78c81040e689594a615818611b04bb02e7",
+            "role": "original"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "DavidMCEddy",
+          "source_title": "Lisa Loving about media literacy and how you can report for your community",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Lisa_Loving_about_media_literacy_and_how_you_can_report_for_your_community.webm",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+        },
+        "relevance": {
+          "critical-thinking": {
+            "score": 9,
+            "evidence": [
+              "media literacy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "critical-thinking": {
+            "strong_title_matches": [
+              "\\bmedia literacy\\b"
+            ],
+            "strong_description_matches": [
+              "\\bmedia literacy\\b"
+            ],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 39
+          }
+        },
+        "selection": {
+          "critical-thinking": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 39
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Media literacy to counter political polarization per Ahmed Al-Rawi.webm",
+        "title": "Media literacy to counter political polarization per Ahmed Al-Rawi",
+        "description": "Media literacy to counter political polarization: Interview with Simon Fraser University professor Ahmed Al-Rawi about media and conflict.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Media_literacy_to_counter_political_polarization_per_Ahmed_Al-Rawi.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "CC BY-SA 4.0",
+          "url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/e/e4/Media_literacy_to_counter_political_polarization_per_Ahmed_Al-Rawi.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 491369943,
+            "provider_sha1": "14c999fb49ecd6a50269fdef617b6b676f797497",
+            "role": "original"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "DavidMCEddy",
+          "source_title": "Media literacy to counter political polarization per Ahmed Al-Rawi",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Media_literacy_to_counter_political_polarization_per_Ahmed_Al-Rawi.webm",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+        },
+        "relevance": {
+          "critical-thinking": {
+            "score": 9,
+            "evidence": [
+              "media literacy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "critical-thinking": {
+            "strong_title_matches": [
+              "\\bmedia literacy\\b"
+            ],
+            "strong_description_matches": [
+              "\\bmedia literacy\\b"
+            ],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 39
+          }
+        },
+        "selection": {
+          "critical-thinking": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 39
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Media literacy to dispel myths and improve public policy.webm",
+        "title": "Media literacy to dispel myths and improve public policy",
+        "description": "Media literacy to dispel myths and improve public policy per Sacred Heart University communications professor Bill Yousman.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Media_literacy_to_dispel_myths_and_improve_public_policy.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "CC BY-SA 4.0",
+          "url": "https://creativecommons.org/licenses/by-sa/4.0",
+          "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Media_literacy_to_dispel_myths_and_improve_public_policy.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 698754979,
+            "provider_sha1": "16577536cb5c9d497649d26948a2ab1f330e199d",
+            "role": "original"
+          }
+        ],
+        "quality_score": 88,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "DavidMCEddy",
+          "source_title": "Media literacy to dispel myths and improve public policy",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Media_literacy_to_dispel_myths_and_improve_public_policy.webm",
+          "license": "CC BY-SA 4.0",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+        },
+        "relevance": {
+          "critical-thinking": {
+            "score": 9,
+            "evidence": [
+              "media literacy"
+            ]
+          }
+        },
+        "pedagogy": {
+          "critical-thinking": {
+            "strong_title_matches": [
+              "\\bmedia literacy\\b"
+            ],
+            "strong_description_matches": [
+              "\\bmedia literacy\\b"
+            ],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 39
+          }
+        },
+        "selection": {
+          "critical-thinking": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 39
+          }
+        }
+      }
+    ],
+    "logical-frameworks": [
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Complexity Science- 3 Systems Thinking.webm",
+        "title": "Complexity Science- 3 Systems Thinking",
+        "description": "A brief introduction to systems thinking. For full courses, transcriptions and downloads please see: http://www.complexityacademy.io Transcription: System thinking is a way of describing the world in a more holistic manner based upon the model of a system, but lets start from the beginning. We can understand the world as things, that is parts or components and their relations, that is how they are connected or fit together. So take a car for example, it is made up of parts, car parts such as engine, wheels and so on and these parts are put together or organized in a specific way so as to make them function as a vehicle of transportation. Now we call a group of things that are not organized in this way a set. So we would call a group of cups on a table a set of cups because unlike the parts to our car they have not been designed to serve some collective function. Because the group of cups is simple the sum of its parts we would describe them by describing the individual properties of the each cup and this would tell us everything we needed to know about them. This approach to describing thing is called analysis or reductionism, reductionism is the traditional approach taken within modern science that tries to describe complex phenomena in terms of their individual parts. Now take the human body that is highly organized through a complex set of relations between its parts. Out of the arrangement of these parts in a specific way we get the overall functioning of a living organism. Because the parts are so strongly defined by their connections and function within the body as an entirety, to properly describe the parts we need to first understand the functioning of the whole body. This approach to describing things that is that we can best describe things by understanding th",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Complexity_Science-_3_Systems_Thinking.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Complexity_Science-_3_Systems_Thinking.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 19012920,
+            "provider_sha1": "f4f8355c09b10525b9a667741509b7a408736c7e",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Complexity Academy",
+          "source_title": "Complexity Science- 3 Systems Thinking",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Complexity_Science-_3_Systems_Thinking.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 9,
+            "evidence": [
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "\\bsystems thinking\\b"
+            ],
+            "strong_description_matches": [
+              "\\bsystems thinking\\b"
+            ],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "internet-archive",
+        "provider_id": "youtube-hmAFk-I7-uQ",
+        "title": "A Communist's Guide to Logical Fallacies",
+        "description": "Unofficial /leftypol/ Discord: https://discord.gg/dGCZtQC Learn some more logical fallacies here: https://yourlogicalfallacyis.com/ Source: https://www.youtube.com/watch?v=hmAFk-I7-uQ Uploader: DANOV",
+        "source_url": "https://archive.org/details/youtube-hmAFk-I7-uQ",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC-BY",
+          "url": "https://creativecommons.org/licenses/by/3.0/",
+          "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/3.0/",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://archive.org/download/youtube-hmAFk-I7-uQ/A_Communist_s_Guide_to_Logical_Fallacies-hmAFk-I7-uQ.mp4",
+            "bytes": 14186623,
+            "provider_sha1": "3ec788c6d564548108353167dcafa28940892a51",
+            "provider_md5": "82f18892cbe078abc052c04441a04a63",
+            "format": "MPEG4",
+            "role": "original"
+          },
+          {
+            "url": "https://archive.org/download/youtube-hmAFk-I7-uQ/A_Communist_s_Guide_to_Logical_Fallacies-hmAFk-I7-uQ.ogv",
+            "bytes": 30274835,
+            "provider_sha1": "262c97a1f2739e3bf42798d09cf085ec873ef2d0",
+            "provider_md5": "6ae2e66f13c02e46c3959a17a6956e36",
+            "format": "Ogg Video",
+            "role": "derivative"
+          }
+        ],
+        "quality_score": 85,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "DANOV",
+          "source_title": "A Communist's Guide to Logical Fallacies",
+          "source_url": "https://archive.org/details/youtube-hmAFk-I7-uQ",
+          "license": "CC-BY",
+          "license_url": "https://creativecommons.org/licenses/by/3.0/"
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 10,
+            "evidence": [
+              "logical fallacies"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "\\blogical fallac(?:y|ies)\\b"
+            ],
+            "strong_description_matches": [
+              "\\blogical fallac(?:y|ies)\\b"
+            ],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 44
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 44
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "a4e1b73a-57fe-4460-9f0a-39d75cda843f",
+        "title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
+        "description": "Software development is at the core a human activity - and the created artifacts are among the most complex humankind has ever produced. Systems thinking helps to merge high technical sophistication with high human sophistication when developing s...",
+        "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080.mp4",
+            "bytes": 3160911997,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480.mp4",
+            "bytes": 306127830,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360.mp4",
+            "bytes": 241335269,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080-fragmented.mp4",
+            "bytes": 811473511,
+            "resolution": "1080p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480-fragmented.mp4",
+            "bytes": 304518584,
+            "resolution": "480p",
+            "fps": 30,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360-fragmented.mp4",
+            "bytes": 239725747,
+            "resolution": "360p",
+            "fps": 30,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Eberhard Wolff",
+          "source_title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
+          "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 9,
+            "evidence": [
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "\\bsystems thinking\\b"
+            ],
+            "strong_description_matches": [
+              "\\bsystems thinking\\b"
+            ],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 39
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 39
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Systems Thinking 10- System Dynamics.webm",
+        "title": "Systems Thinking 10- System Dynamics",
+        "description": "For full courses please see: http://www.complexityacademy.io In this video we give an overview to the area of system dynamics, a branch of systems theory that tries to model and understand the dynamic behavior of complex systems over time.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_10-_System_Dynamics.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Systems_Thinking_10-_System_Dynamics.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 58933114,
+            "provider_sha1": "304f3519e8fab4c59cb32a777fe227c71511359a",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Complexity Academy",
+          "source_title": "Systems Thinking 10- System Dynamics",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_10-_System_Dynamics.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 9,
+            "evidence": [
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "\\bsystems thinking\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Systems Thinking 8- Emergence.webm",
+        "title": "Systems Thinking 8- Emergence",
+        "description": "For full courses please see: http://www.complexityacademy.io This video presents the ideas of emergence, phase transitions and strong vs. weak emergence. According to Wikipedia, emergence is conceived as a process whereby larger entities, patterns, and regularities arise through interactions among smaller or simpler entities that themselves do not exhibit such properties. In the previous section we discussed how synergistic relations give rise to the phenomena of two or more elements having a greater combined output or effect than the simple product of each in isolation. This process where by the interaction between elements gives rise to something that is greater than the sum of their parts is called emergence. So where as when we were talking about synergies we simply said that the combined effect was greater than its parts in isolation. The concept of emergence though implies that what is created out of these synergic relations is not just quantitatively different it is in fact qualitatively different. That is to say none of the elements that contribute to the emergence of this new phenomena have its qualities when taken in isolation. There are many examples of this but maybe the simples is the example of water, water is made up of hydrogen and oxygen atoms, neither of these two elements that make up the system have the property or quality of wetness, but when we combine them we get a substance called water that has the quality of being wet, this property of wetness has emerged out of the interaction of the systems elements and it only exists on the systems level. Another often sited example of emergence is the phenomena of life, biological systems such as a plant cell consist of a set of inanimate molecules none of which in isolation have the property of life, but i",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_8-_Emergence.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Systems_Thinking_8-_Emergence.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 58547528,
+            "provider_sha1": "1c96e238db9aaec3efc9340fc88162dd6b9c7277",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Complexity Academy",
+          "source_title": "Systems Thinking 8- Emergence",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_8-_Emergence.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 9,
+            "evidence": [
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "\\bsystems thinking\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "peertube",
+        "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
+        "title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "description": "We already learnt about nonlinear thinking in [episode 137](https://software-architektur.tv/2022/10/07/folge137.html) of Software Architektur im Stream, when Diana Montalion talked with Eberhard Wolff about this important topic. But what about ...",
+        "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "Attribution - Share Alike",
+          "url": "",
+          "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
+            "bytes": 1911000052,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
+            "bytes": 260879888,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
+            "bytes": 225051511,
+            "resolution": "360p",
+            "fps": 24,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-0.mp4",
+            "bytes": 147441922,
+            "resolution": "Audio only",
+            "fps": 0,
+            "role": "web-video"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
+            "bytes": 540467455,
+            "resolution": "1080p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
+            "bytes": 260480450,
+            "resolution": "480p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
+            "bytes": 224646233,
+            "resolution": "360p",
+            "fps": 24,
+            "role": "streaming-file"
+          },
+          {
+            "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-0-fragmented.mp4",
+            "bytes": 147587684,
+            "resolution": "Audio only",
+            "fps": 0,
+            "role": "streaming-file"
+          }
+        ],
+        "quality_score": 87,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Eberhard Wolff",
+          "source_title": "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+          "source_url": "https://tube.tchncs.de/videos/watch/9c1ad801-5330-43ea-8ae9-65d96914f173",
+          "license": "Attribution - Share Alike",
+          "license_url": ""
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 9,
+            "evidence": [
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "\\bsystems thinking\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "internet-archive",
+        "provider_id": "youtube-JpMBZ8KQrbc",
+        "title": "The Open Decision Framework How to make everybody happy",
+        "description": "by Damien Clochard At: FOSDEM 2018 Room: K.4.201 Scheduled start: 2018-02-04 15:30:00+01 Source: https://www.youtube.com/watch?v=JpMBZ8KQrbc Uploader: FOSDEM",
+        "source_url": "https://archive.org/details/youtube-JpMBZ8KQrbc",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC-BY",
+          "url": "https://creativecommons.org/licenses/by/3.0/",
+          "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/3.0/",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://archive.org/download/youtube-JpMBZ8KQrbc/The_Open_Decision_Framework_How_to_make_everybody_happy-JpMBZ8KQrbc.mp4",
+            "bytes": 35638354,
+            "provider_sha1": "2b517400450057028940b12196e5671fb26dbc2d",
+            "provider_md5": "837ed291d2dfe0ddd11d10b4f9016b9e",
+            "format": "MPEG4",
+            "role": "original"
+          },
+          {
+            "url": "https://archive.org/download/youtube-JpMBZ8KQrbc/The_Open_Decision_Framework_How_to_make_everybody_happy-JpMBZ8KQrbc.ogv",
+            "bytes": 101235873,
+            "provider_sha1": "a879cb8345364cdeb56ebf2a00c4b83a4ee012a7",
+            "provider_md5": "0f7619fe6e6403ac9725339c3185ce66",
+            "format": "Ogg Video",
+            "role": "derivative"
+          }
+        ],
+        "quality_score": 85,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "FOSDEM",
+          "source_title": "The Open Decision Framework How to make everybody happy",
+          "source_url": "https://archive.org/details/youtube-JpMBZ8KQrbc",
+          "license": "CC-BY",
+          "license_url": "https://creativecommons.org/licenses/by/3.0/"
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 9,
+            "evidence": [
+              "decision framework"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "\\bdecision framework(?:s)?\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "internet-archive",
+        "provider_id": "20220304-code-for-canada-systems-thinking-through-changes-cc-by-sa-1920x-912",
+        "title": "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
+        "description": "With Code for Canada, the Systems Changes Learning Circle conducted the first educational workshop based on the contextural action learning approach under development, for the Canadian Digital Service. The presentation outlining the basic ideas and guiding questions was scheduled for a quick 60 minutes. After lunch, the participants convened for 3 hours in three parallel breakout groups, discussions guided by templates provided in the workbook. The session is more fully described at http://systemschanges.com/online/presentations/20220304_cfc . These materials are released under a Creative Commons Sharealike license.",
+        "source_url": "https://archive.org/details/20220304-code-for-canada-systems-thinking-through-changes-cc-by-sa-1920x-912",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY-SA",
+          "label": "CC-BY-SA",
+          "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+          "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by-sa/4.0/",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": true
+        },
+        "files": [
+          {
+            "url": "https://archive.org/download/20220304-code-for-canada-systems-thinking-through-changes-cc-by-sa-1920x-912/20220304_CodeForCanada_SystemsThinkingThroughChanges_CC-BY-SA_1920x912.m4v",
+            "bytes": 133371528,
+            "provider_sha1": "048fb956af4e966bb0b9a1569a5b0c46518413dd",
+            "provider_md5": "7d96face9d8bcf1b928b1ae6237ed3f8",
+            "format": "MPEG4",
+            "role": "original"
+          },
+          {
+            "url": "https://archive.org/download/20220304-code-for-canada-systems-thinking-through-changes-cc-by-sa-1920x-912/20220304_CodeForCanada_SystemsThinkingThroughChanges_CC-BY-SA_1920x912.mp4",
+            "bytes": 200563693,
+            "provider_sha1": "a3667e1114e1c9b0c49901ccac3ac991b597b489",
+            "provider_md5": "b07a58e8c97b9beb89432a5ae85386a6",
+            "format": "h.264",
+            "role": "derivative"
+          }
+        ],
+        "quality_score": 84,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "David Ing",
+          "source_title": "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
+          "source_url": "https://archive.org/details/20220304-code-for-canada-systems-thinking-through-changes-cc-by-sa-1920x-912",
+          "license": "CC-BY-SA",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 9,
+            "evidence": [
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "\\bsystems thinking\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": true,
+            "clickbait_title": false,
+            "pedagogy_score": 36
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 36
+          }
+        }
+      },
+      {
+        "provider": "wikimedia-commons",
+        "provider_id": "File:Systems Thinking 11- Homeostasis.webm",
+        "title": "Systems Thinking 11- Homeostasis",
+        "description": "For full courses please see: http://www.complexityacademy.io The word Homeostasis derives from the Greek word meaning homos or \"similar\" and stasis meaning \"standing still\". It is the state of a system in which variables are regulated so that internal conditions remain stable and relatively constant, despite changes within the systems environment.",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_11-_Homeostasis.webm",
+        "cache_policy": "MESH_REDISTRIBUTABLE",
+        "license": {
+          "spdx": "CC-BY",
+          "label": "CC BY 3.0",
+          "url": "https://creativecommons.org/licenses/by/3.0",
+          "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+          "commercial_use": true,
+          "derivatives": true,
+          "share_alike": false
+        },
+        "files": [
+          {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Systems_Thinking_11-_Homeostasis.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+            "mime": "video/webm",
+            "bytes": 13163838,
+            "provider_sha1": "46ec4b5fa89e8fe81298e382157e5d4cd6b7900c",
+            "role": "original"
+          }
+        ],
+        "quality_score": 89,
+        "content_hash": null,
+        "hash_state": "compute-on-cache",
+        "attribution": {
+          "creator": "Complexity Academy",
+          "source_title": "Systems Thinking 11- Homeostasis",
+          "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_11-_Homeostasis.webm",
+          "license": "CC BY 3.0",
+          "license_url": "https://creativecommons.org/licenses/by/3.0"
+        },
+        "relevance": {
+          "logical-frameworks": {
+            "score": 9,
+            "evidence": [
+              "systems thinking"
+            ]
+          }
+        },
+        "pedagogy": {
+          "logical-frameworks": {
+            "strong_title_matches": [
+              "\\bsystems thinking\\b"
+            ],
+            "strong_description_matches": [],
+            "educational_intent": false,
+            "clickbait_title": false,
+            "pedagogy_score": 31
+          }
+        },
+        "selection": {
+          "logical-frameworks": {
+            "reason": "strong-topic-anchor-in-title",
+            "pedagogy_score": 31
+          }
+        }
+      }
+    ]
+  }
+}

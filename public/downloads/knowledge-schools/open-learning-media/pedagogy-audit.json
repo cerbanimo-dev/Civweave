@@ -1,0 +1,281 @@
+{
+  "schema": "civweave.open-learning-media-pedagogy-audit.v1",
+  "built_at": "2026-08-10T02:22:16Z",
+  "before": 75,
+  "after": 54,
+  "rejected": 21,
+  "topics": {
+    "vibe-coding": {
+      "name": "Vibe Coding",
+      "school_slug": "technology",
+      "records": 14,
+      "mesh_redistributable": 14,
+      "providers": {
+        "peertube": 7,
+        "internet-archive": 3,
+        "wikimedia-commons": 4
+      },
+      "top_titles": [
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse",
+        "Is Vibe Coding Hurting Open Source? Big Cosmic Desktop Roadmap Linux Weekly News",
+        "Free AI Coding Assistant – Cline.AI Setup Guide",
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Visual Basic 6.0 Demos, Vibe Coding and Updates About Me.",
+        "Wikimania 2026 – Building a Wikimedia tool with agentic AI",
+        "Gen AI prototyping with Google Tools from Stitch to AI studio",
+        "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News"
+      ]
+    },
+    "prompt-engineering": {
+      "name": "Prompt Engineering",
+      "school_slug": "technology",
+      "records": 6,
+      "mesh_redistributable": 4,
+      "providers": {
+        "internet-archive": 3,
+        "peertube": 3
+      },
+      "top_titles": [
+        "Effective prompt engineering for Python programmers",
+        "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Il Prompt Engineering",
+        "AI Ppt Vdo",
+        "Machine Learning nella Scuola: Concetti Base e Applicazioni",
+        "Language Tools For Creators by Paco Xander Nathan"
+      ]
+    },
+    "pseudocoding": {
+      "name": "Pseudocoding and Algorithm Design",
+      "school_slug": "technology",
+      "records": 5,
+      "mesh_redistributable": 5,
+      "providers": {
+        "peertube": 1,
+        "wikimedia-commons": 1,
+        "internet-archive": 3
+      },
+      "top_titles": [
+        "Pseudo-code et description des algorithmes",
+        "Deadlocks and the Dining Philosophers Problem",
+        "Open CS education resources for schools - how hard could it be?",
+        "CLOUDS Andres Colubri",
+        "CLOUDS Daniel Shiffman"
+      ]
+    },
+    "critical-thinking": {
+      "name": "Critical Thinking",
+      "school_slug": "philosophy-and-religion",
+      "records": 8,
+      "mesh_redistributable": 8,
+      "providers": {
+        "wikimedia-commons": 6,
+        "internet-archive": 2
+      },
+      "top_titles": [
+        "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
+        "Wikimania 2024 - Dilijan - Day 4 - Media literacy as tool to reach for the Collaboration of Open",
+        "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
+        "Lisa Loving about media literacy and how you can report for your community",
+        "Media literacy to counter political polarization per Ahmed Al-Rawi",
+        "Media literacy to dispel myths and improve public policy",
+        "What is Gaslighting?",
+        "DOUGLAS MACGREGOR: Netanyahu Is Facing a Test Nobody Saw Coming...End of Israel!"
+      ]
+    },
+    "logical-frameworks": {
+      "name": "Logical Frameworks",
+      "school_slug": "philosophy-and-religion",
+      "records": 22,
+      "mesh_redistributable": 22,
+      "providers": {
+        "internet-archive": 10,
+        "wikimedia-commons": 8,
+        "peertube": 4
+      },
+      "top_titles": [
+        "Complexity Science- 3 Systems Thinking",
+        "A Communist's Guide to Logical Fallacies",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
+        "Systems Thinking 10- System Dynamics",
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "The Open Decision Framework How to make everybody happy",
+        "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
+        "Systems Thinking 11- Homeostasis",
+        "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)"
+      ]
+    }
+  },
+  "rejected_samples": [
+    {
+      "provider": "internet-archive",
+      "title": "BREAKING: Drones just struck IDF convoy carrying Netanyahu…ENTIRE ISRAEL IN SHOCK - OPTM",
+      "source_url": "https://archive.org/details/youtube-i3aBr0OG2Xk",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "BREAKING: Netanyahu FLEE Tel Aviv Hours After MASKED IDF Soldiers Attack Gov’t Office",
+      "source_url": "https://archive.org/details/youtube-mMWy8hr80kw",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
+      "source_url": "https://archive.org/details/youtube-KuGk2ATA5Ec",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Berpikir kritis seperti mengupas bawang",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Berpikir_kritis_seperti_mengupas_bawang.webm",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "The Truth About the Murder of Mary Phagan - Jake Shields Interview - FightBack Podcast",
+      "source_url": "https://archive.org/details/the-truth-about-the-murder-of-mary-phagan-fight-back",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Kobi Gaan - Documentaries",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Kobi_Gaan_-_Documentaries.webm",
+      "relevance_topics": [
+        "logical-frameworks"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Dr. William E. Rees",
+      "source_url": "https://archive.org/details/dr.-william-e.-rees-09-24-2025",
+      "relevance_topics": [
+        "logical-frameworks"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Fighting Disinformation",
+      "source_url": "https://archive.org/details/the-fight-against-disinformation-05-13-2023-1",
+      "relevance_topics": [
+        "logical-frameworks"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "The Dunning-Kruger Effect",
+      "source_url": "https://archive.org/details/the-dunning-kruger-effect-1080p",
+      "relevance_topics": [
+        "logical-frameworks"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Ben Shapiro Makes a Fool of Himself in BBC Interview",
+      "source_url": "https://archive.org/details/youtube-LfWVL0Ng7c",
+      "relevance_topics": [
+        "logical-frameworks"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Non-linear Thinking with Diana Montalion",
+      "source_url": "https://tube.tchncs.de/videos/watch/5fceeafb-7430-4623-a584-115bdc10ee32",
+      "relevance_topics": [
+        "logical-frameworks"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Evals Are Broken, Use Them Anyway — Ara Khan, Cline",
+      "source_url": "https://video.ut0pia.org/videos/watch/2e537227-fd85-4f65-93b8-3656ed3a4814",
+      "relevance_topics": [
+        "prompt-engineering"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Stop AI Agent Hallucinations: 5 Techniques + Production Patterns - Elizabeth Fuentes, AWS",
+      "source_url": "https://video.ut0pia.org/videos/watch/38c6282c-9fbb-4948-870d-0a2e862a7aec",
+      "relevance_topics": [
+        "prompt-engineering"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Comment les vidéos Devoxx France sont préparées et mise en ligne sur YouTube",
+      "source_url": "https://video.ut0pia.org/videos/watch/18133a4f-995a-4a03-965d-54ce943c4490",
+      "relevance_topics": [
+        "prompt-engineering"
+      ]
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Generative AI explained in 2 minutes",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Generative_AI_explained_in_2_minutes.webm",
+      "relevance_topics": [
+        "prompt-engineering"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Prompt to Pipeline: Building with Google's Gen Media Stack — Paige & Guillaume, Google DeepMind",
+      "source_url": "https://video.ut0pia.org/videos/watch/cc527630-78b8-4501-98f1-9a09a03126d1",
+      "relevance_topics": [
+        "prompt-engineering"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "The Future of Evals: From LLM as a Judge to Agent as a Judge — Aparna Dhinakaran, Arize AI",
+      "source_url": "https://video.ut0pia.org/videos/watch/f680e649-d065-4866-b8b6-34dc52751dfc",
+      "relevance_topics": [
+        "prompt-engineering"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "CLOUDS Aaron Koblin",
+      "source_url": "https://archive.org/details/clouds-aaron-koblin",
+      "relevance_topics": [
+        "pseudocoding"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "CLOUDS: Pittsburgh Premiere (excerpt)",
+      "source_url": "https://archive.org/details/clouds-pittsburgh-premiere-excerpt",
+      "relevance_topics": [
+        "pseudocoding"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Athens: PERspectives (2022) - Project Promotion [English]",
+      "source_url": "https://video.igem.org/videos/watch/b3350ac8-b7d7-4076-b9c1-113b6263d6d1",
+      "relevance_topics": [
+        "pseudocoding"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Ian & Jay Space Out 2025-06-08",
+      "source_url": "https://archive.org/details/ian-and-jay-space-out-2025-06-08",
+      "relevance_topics": [
+        "vibe-coding"
+      ]
+    }
+  ]
+}

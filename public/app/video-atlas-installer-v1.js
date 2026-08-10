@@ -59,4 +59,5 @@ async function init(){
   }catch(error){total.textContent='Video atlas build pending';stateNode.textContent=error?.message||String(error);stageButton.textContent='Video catalogs unavailable';}
 }
 init();
+import('/app/open-learning-media-installer-v1.mjs?v=open-media-cache-v1').catch(error=>console.warn('[Civweave] Open Learning Media installer unavailable.',error));
 })();

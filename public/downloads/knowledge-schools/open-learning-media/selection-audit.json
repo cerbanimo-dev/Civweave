@@ -1,0 +1,280 @@
+{
+  "schema": "civweave.open-learning-media-selection-audit.v1",
+  "built_at": "2026-08-10T02:22:16Z",
+  "before": 54,
+  "after": 32,
+  "rejected": 22,
+  "topics": {
+    "vibe-coding": {
+      "name": "Vibe Coding",
+      "school_slug": "technology",
+      "records": 11,
+      "mesh_redistributable": 11,
+      "providers": {
+        "peertube": 5,
+        "internet-archive": 3,
+        "wikimedia-commons": 3
+      },
+      "top_titles": [
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse",
+        "Is Vibe Coding Hurting Open Source? Big Cosmic Desktop Roadmap Linux Weekly News",
+        "Free AI Coding Assistant – Cline.AI Setup Guide",
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Visual Basic 6.0 Demos, Vibe Coding and Updates About Me.",
+        "Wikimania 2026 – Building a Wikimedia tool with agentic AI",
+        "Gen AI prototyping with Google Tools from Stitch to AI studio",
+        "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News"
+      ]
+    },
+    "prompt-engineering": {
+      "name": "Prompt Engineering",
+      "school_slug": "technology",
+      "records": 4,
+      "mesh_redistributable": 3,
+      "providers": {
+        "internet-archive": 1,
+        "peertube": 3
+      },
+      "top_titles": [
+        "Effective prompt engineering for Python programmers",
+        "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Il Prompt Engineering",
+        "Machine Learning nella Scuola: Concetti Base e Applicazioni"
+      ]
+    },
+    "pseudocoding": {
+      "name": "Pseudocoding and Algorithm Design",
+      "school_slug": "technology",
+      "records": 2,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 1,
+        "internet-archive": 1
+      },
+      "top_titles": [
+        "Pseudo-code et description des algorithmes",
+        "Open CS education resources for schools - how hard could it be?"
+      ]
+    },
+    "critical-thinking": {
+      "name": "Critical Thinking",
+      "school_slug": "philosophy-and-religion",
+      "records": 6,
+      "mesh_redistributable": 6,
+      "providers": {
+        "wikimedia-commons": 6
+      },
+      "top_titles": [
+        "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
+        "Wikimania 2024 - Dilijan - Day 4 - Media literacy as tool to reach for the Collaboration of Open",
+        "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
+        "Lisa Loving about media literacy and how you can report for your community",
+        "Media literacy to counter political polarization per Ahmed Al-Rawi",
+        "Media literacy to dispel myths and improve public policy"
+      ]
+    },
+    "logical-frameworks": {
+      "name": "Logical Frameworks",
+      "school_slug": "philosophy-and-religion",
+      "records": 9,
+      "mesh_redistributable": 9,
+      "providers": {
+        "wikimedia-commons": 4,
+        "internet-archive": 3,
+        "peertube": 2
+      },
+      "top_titles": [
+        "Complexity Science- 3 Systems Thinking",
+        "A Communist's Guide to Logical Fallacies",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
+        "Systems Thinking 10- System Dynamics",
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "The Open Decision Framework How to make everybody happy",
+        "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
+        "Systems Thinking 11- Homeostasis"
+      ]
+    }
+  },
+  "rejected_samples": [
+    {
+      "provider": "internet-archive",
+      "title": "What is Gaslighting?",
+      "source_url": "https://archive.org/details/what-is-gaslighting-11-20-2024",
+      "reasons": {
+        "critical-thinking": "description-only-without-instructional-title",
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "DOUGLAS MACGREGOR: Netanyahu Is Facing a Test Nobody Saw Coming...End of Israel!",
+      "source_url": "https://archive.org/details/youtube-TbAoYS16JMA",
+      "reasons": {
+        "critical-thinking": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Dal_visibile_all%27invisibile-_considerazioni_sul_ruolo_del_sillogismo_fisiognomico_nella_logica_di_Avicenna_(M%C3%A9diHAL_4631072).webm",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Diego Fontanive ESC2017",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Diego_Fontanive_ESC2017.webm",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Systems Paradigm 2- Systems Awareness",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Paradigm_2-_Systems_Awareness.webm",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "Revolution Now! with Peter Joseph | Ep #21| April 7th 2021",
+      "source_url": "https://videos.trom.tf/videos/watch/20e34378-146e-4702-9bb4-7f0ece23e530",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Wikimania 2024 - Tbilisi - Day 3 - Parsoid is coming! How do I keep up - Wikitext in 2024.",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2024_-_Tbilisi_-_Day_3_-_Parsoid_is_coming!_How_do_I_keep_up_-_Wikitext_in_2024..webm",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "Buchtipp: Lisa Schaefer",
+      "source_url": "https://tube.tchncs.de/videos/watch/7e118c70-d449-4ce5-988a-ed677e348663",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Bulletproof Publishers - Season 1 Episode 3",
+      "source_url": "https://archive.org/details/season-1-episode-3",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "World leader Fangruida, mentor of mankind, great sun-great genius (Malik. R)2020v.1.2",
+      "source_url": "https://archive.org/details/dsc-00509_202112",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem",
+      "source_url": "https://archive.org/details/img-20211113132247-1-1",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "World Leder Fangruida Bio. 2020v. 3.3 Revision",
+      "source_url": "https://archive.org/details/world-leder-fangruida-bio.-2020v.-3.3-revision",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "A New HOPE (2022): Hacking Comprehension: Overcoming Limitations to Better Understand the World",
+      "source_url": "https://archive.org/details/youtube-rzMe3ljWI6U",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Legacy VPS to Edge: Migrating 200 Domains Off a Compromised Server",
+      "source_url": "https://archive.org/details/novcog-legacy-vps-to-edge",
+      "reasons": {
+        "logical-frameworks": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "AI Ppt Vdo",
+      "source_url": "https://archive.org/details/ai-ppt-vdowww.cbitss.inartificial-intelligence-course-in-chandigarh",
+      "reasons": {
+        "prompt-engineering": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Language Tools For Creators by Paco Xander Nathan",
+      "source_url": "https://archive.org/details/fossy2023_Language_Tools_For_Creators",
+      "reasons": {
+        "prompt-engineering": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Deadlocks and the Dining Philosophers Problem",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Deadlocks_and_the_Dining_Philosophers_Problem.webm",
+      "reasons": {
+        "pseudocoding": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "CLOUDS Andres Colubri",
+      "source_url": "https://archive.org/details/clouds-andres-colubri",
+      "reasons": {
+        "pseudocoding": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "CLOUDS Daniel Shiffman",
+      "source_url": "https://archive.org/details/clouds-daniel-shiffman",
+      "reasons": {
+        "pseudocoding": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Wikimania 2026 – Wikipedia Mobile Apps THE destination for knowledge lovers in a mobile-first world",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2026_%E2%80%93_Wikipedia_Mobile_Apps_THE_destination_for_knowledge_lovers_in_a_mobile-first_world.webm",
+      "reasons": {
+        "vibe-coding": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "Extending sqlc: augmented generation of repositories in Go",
+      "source_url": "https://cuddly.tube/videos/watch/db430af2-c151-402d-87f8-19fc2f6b5446",
+      "reasons": {
+        "vibe-coding": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "Survivre à l'« AI Slopageddon » : comment l'IA ébranle l'Open Source - Raphaël Semeteys - JdLL2026",
+      "source_url": "https://videos-libr.es/videos/watch/0e0e76d0-92ef-4863-8319-c642e1c645ff",
+      "reasons": {
+        "vibe-coding": "description-only-without-instructional-title"
+      }
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "schema": "civweave.open-learning-media-harvest-summary.v1",
+  "built_at": "2026-08-10T02:22:16Z",
+  "records": 32,
+  "mesh_redistributable": 31,
+  "download_candidates": 70,
+  "providers": {
+    "internet-archive": {
+      "records": 8,
+      "mesh_redistributable": 8,
+      "download_candidates": 13
+    },
+    "peertube": {
+      "records": 11,
+      "mesh_redistributable": 10,
+      "download_candidates": 44
+    },
+    "wikimedia-commons": {
+      "records": 13,
+      "mesh_redistributable": 13,
+      "download_candidates": 13
+    }
+  },
+  "focus_topics": {
+    "vibe-coding": {
+      "name": "Vibe Coding",
+      "school_slug": "technology",
+      "records": 11,
+      "mesh_redistributable": 11,
+      "providers": {
+        "peertube": 5,
+        "internet-archive": 3,
+        "wikimedia-commons": 3
+      },
+      "top_titles": [
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse",
+        "Is Vibe Coding Hurting Open Source? Big Cosmic Desktop Roadmap Linux Weekly News",
+        "Free AI Coding Assistant – Cline.AI Setup Guide",
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Visual Basic 6.0 Demos, Vibe Coding and Updates About Me.",
+        "Wikimania 2026 – Building a Wikimedia tool with agentic AI",
+        "Gen AI prototyping with Google Tools from Stitch to AI studio",
+        "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News"
+      ]
+    },
+    "prompt-engineering": {
+      "name": "Prompt Engineering",
+      "school_slug": "technology",
+      "records": 4,
+      "mesh_redistributable": 3,
+      "providers": {
+        "internet-archive": 1,
+        "peertube": 3
+      },
+      "top_titles": [
+        "Effective prompt engineering for Python programmers",
+        "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Il Prompt Engineering",
+        "Machine Learning nella Scuola: Concetti Base e Applicazioni"
+      ]
+    },
+    "pseudocoding": {
+      "name": "Pseudocoding and Algorithm Design",
+      "school_slug": "technology",
+      "records": 2,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 1,
+        "internet-archive": 1
+      },
+      "top_titles": [
+        "Pseudo-code et description des algorithmes",
+        "Open CS education resources for schools - how hard could it be?"
+      ]
+    },
+    "critical-thinking": {
+      "name": "Critical Thinking",
+      "school_slug": "philosophy-and-religion",
+      "records": 6,
+      "mesh_redistributable": 6,
+      "providers": {
+        "wikimedia-commons": 6
+      },
+      "top_titles": [
+        "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
+        "Wikimania 2024 - Dilijan - Day 4 - Media literacy as tool to reach for the Collaboration of Open",
+        "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
+        "Lisa Loving about media literacy and how you can report for your community",
+        "Media literacy to counter political polarization per Ahmed Al-Rawi",
+        "Media literacy to dispel myths and improve public policy"
+      ]
+    },
+    "logical-frameworks": {
+      "name": "Logical Frameworks",
+      "school_slug": "philosophy-and-religion",
+      "records": 9,
+      "mesh_redistributable": 9,
+      "providers": {
+        "wikimedia-commons": 4,
+        "internet-archive": 3,
+        "peertube": 2
+      },
+      "top_titles": [
+        "Complexity Science- 3 Systems Thinking",
+        "A Communist's Guide to Logical Fallacies",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
+        "Systems Thinking 10- System Dynamics",
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "The Open Decision Framework How to make everybody happy",
+        "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
+        "Systems Thinking 11- Homeostasis"
+      ]
+    }
+  },
+  "failures": 0,
+  "records_before_relevance_gate": 332,
+  "rejected_by_relevance_gate": 257,
+  "relevance_gate": {
+    "schema": "civweave.open-learning-media-relevance-gate.v1",
+    "policy": "Provider search is discovery only; title/description must independently meet a topic-specific deterministic threshold."
+  },
+  "records_before_pedagogy_gate": 75,
+  "rejected_by_pedagogy_gate": 21,
+  "pedagogy_gate": {
+    "schema": "civweave.open-learning-media-pedagogy-gate.v1",
+    "policy": "Require a strong conceptual anchor in the title, or a strong description anchor plus explicit educational intent; reject clickbait description-only matches."
+  },
+  "records_before_selection_gate": 54,
+  "rejected_by_selection_gate": 22,
+  "selection_gate": {
+    "schema": "civweave.open-learning-media-selection-gate.v1",
+    "policy": "Strong topic anchors in titles are accepted; description-only anchors additionally require an instructional title before automatic selection."
+  }
+}
