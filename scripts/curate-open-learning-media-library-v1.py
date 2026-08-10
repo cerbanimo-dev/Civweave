@@ -39,6 +39,21 @@ def compact(r):
     keys=["provider","provider_id","title","description","source_url","cache_policy","license","files","quality_score","content_hash","hash_state","attribution","relevance","pedagogy","selection"]
     return {k:(r.get(k) or [] if k=="files" else r.get(k)) for k in keys}
 
+
+def downloader_ready(record):
+    if not record.get("mesh_redistributable"):
+        return False
+    for file in record.get("files") or []:
+        url=str(file.get("url") or "")
+        mime=str(file.get("mime") or "").lower()
+        try:
+            size=int(file.get("bytes") or 0)
+        except (TypeError, ValueError):
+            size=0
+        if url.startswith("https://") and mime.startswith("video/") and size>0:
+            return True
+    return False
+
 def main():
     registry=json.loads(REGISTRY_PATH.read_text(encoding="utf-8")); topic_list=list(registry.get("topics") or [])
     topics={t["slug"]:t for t in topic_list}; packs=list(registry.get("packs") or [])
@@ -89,7 +104,7 @@ def main():
 
     lookup={slug:[] for slug in topics}
     for r in kept:
-        if not r.get("mesh_redistributable"): continue
+        if not downloader_ready(r): continue
         for m in r.get("topic_matches") or []:
             slug=m.get("topic_slug")
             if slug in lookup: lookup[slug].append(compact(r))
@@ -97,20 +112,20 @@ def main():
 
     providers={}
     for provider in sorted({r.get("provider") for r in kept if r.get("provider")}):
-        subset=[r for r in kept if r.get("provider")==provider]; providers[provider]={"records":len(subset),"mesh_redistributable":sum(bool(r.get("mesh_redistributable")) for r in subset),"download_candidates":sum(len(r.get("files") or []) for r in subset)}
+        subset=[r for r in kept if r.get("provider")==provider]; providers[provider]={"records":len(subset),"mesh_redistributable":sum(downloader_ready(r) for r in subset),"download_candidates":sum(len(r.get("files") or []) for r in subset)}
 
     topic_stats={}
     for slug,t in topics.items():
         subset=[r for r in kept if slug in (r.get("selection") or {})]; ordered=sorted(subset,key=lambda r:(-int(((r.get("selection") or {}).get(slug) or {}).get("pedagogy_score") or 0),-int(r.get("quality_score") or 0)))
-        topic_stats[slug]={"name":t["name"],"school_slug":t["school_slug"],"required":bool(t.get("required")),"records":len(subset),"mesh_redistributable":sum(bool(r.get("mesh_redistributable")) for r in subset),"providers":dict(Counter(r.get("provider") for r in subset)),"top_titles":[r.get("title") for r in ordered[:10]]}
+        topic_stats[slug]={"name":t["name"],"school_slug":t["school_slug"],"required":bool(t.get("required")),"records":len(subset),"mesh_redistributable":sum(downloader_ready(r) for r in subset),"providers":dict(Counter(r.get("provider") for r in subset)),"top_titles":[r.get("title") for r in ordered[:10]]}
 
     pack_stats={}; minimum=float(registry.get("minimum_pack_topic_coverage") or .6)
     for p in packs:
         slugs=[s for s in p.get("topics") or [] if s in topics]; covered=[s for s in slugs if topic_stats[s]["mesh_redistributable"]>0]; coverage=len(covered)/len(slugs) if slugs else 0
-        record_keys={f"{r.get('provider')}:{r.get('provider_id')}" for r in kept if r.get("mesh_redistributable") and any(s in (r.get("selection") or {}) for s in slugs)}
+        record_keys={f"{r.get('provider')}:{r.get('provider_id')}" for r in kept if downloader_ready(r) and any(s in (r.get("selection") or {}) for s in slugs)}
         pack_stats[p["slug"]]={"name":p["name"],"kind":p.get("kind") or "extension","description":p.get("description") or "","topics":slugs,"covered_topics":covered,"coverage":round(coverage,4),"records":len(record_keys),"available":bool(slugs) and coverage>=(1.0 if p.get("default") else minimum)}
 
-    catalog.update({"record_count_before_relevance_gate":len(before),"record_count_before_pedagogy_gate":len(relevant),"record_count_before_selection_gate":len(pedagogical),"record_count":len(kept),"rejected_by_relevance_gate":len(before)-len(relevant),"rejected_by_pedagogy_gate":len(relevant)-len(pedagogical),"rejected_by_selection_gate":len(pedagogical)-len(kept),"mesh_redistributable_count":sum(bool(r.get("mesh_redistributable")) for r in kept),"download_candidate_count":sum(len(r.get("files") or []) for r in kept),"providers":providers,"focus_topics":topic_stats,"topic_stats":topic_stats,"packs":pack_stats,"pack_registry_revision":registry.get("revision"),"records":kept})
+    catalog.update({"record_count_before_relevance_gate":len(before),"record_count_before_pedagogy_gate":len(relevant),"record_count_before_selection_gate":len(pedagogical),"record_count":len(kept),"rejected_by_relevance_gate":len(before)-len(relevant),"rejected_by_pedagogy_gate":len(relevant)-len(pedagogical),"rejected_by_selection_gate":len(pedagogical)-len(kept),"mesh_redistributable_count":sum(downloader_ready(r) for r in kept),"download_candidate_count":sum(len(r.get("files") or []) for r in kept),"providers":providers,"focus_topics":topic_stats,"topic_stats":topic_stats,"packs":pack_stats,"pack_registry_revision":registry.get("revision"),"records":kept})
     summary.update({"records_before_relevance_gate":len(before),"records_before_pedagogy_gate":len(relevant),"records_before_selection_gate":len(pedagogical),"records":len(kept),"rejected_by_relevance_gate":len(before)-len(relevant),"rejected_by_pedagogy_gate":len(relevant)-len(pedagogical),"rejected_by_selection_gate":len(pedagogical)-len(kept),"mesh_redistributable":catalog["mesh_redistributable_count"],"download_candidates":catalog["download_candidate_count"],"providers":providers,"focus_topics":topic_stats,"topic_stats":topic_stats,"packs":pack_stats,"pack_registry_revision":registry.get("revision"),"relevance_gate":{"schema":"civweave.open-learning-media-relevance-gate.v3","policy":"Registry aliases/concepts must independently support topic relevance; ambiguous one-word craft/science anchors require an instructional title signal."},"pedagogy_gate":{"schema":"civweave.open-learning-media-pedagogy-gate.v3","policy":"Require topic evidence plus explicit instructional intent; recognize documentary and museum/gallery teaching formats while rejecting clickbait and entertainment-shaped titles."},"selection_gate":{"schema":"civweave.open-learning-media-selection-gate.v3","policy":"Automatic selection requires instructional evidence alongside the topic anchor, favoring explicit tutorials, lectures, overviews, courses, demonstrations, documentaries, and museum/gallery talks."}})
 
     public_packs=[{"slug":p["slug"],"name":p["name"],"kind":p.get("kind") or "extension","default":bool(p.get("default")),"description":p.get("description") or "","topics":[s for s in p.get("topics") or [] if s in topics],"coverage":pack_stats[p["slug"]]["coverage"],"available":pack_stats[p["slug"]]["available"]} for p in packs]

@@ -54,6 +54,21 @@ def compact(record):
     return {key: record.get(key) for key in keys}
 
 
+
+def downloader_ready(record):
+    if not record.get("mesh_redistributable"):
+        return False
+    for file in record.get("files") or []:
+        url=str(file.get("url") or "")
+        mime=str(file.get("mime") or "").lower()
+        try:
+            size=int(file.get("bytes") or 0)
+        except (TypeError, ValueError):
+            size=0
+        if url.startswith("https://") and mime.startswith("video/") and size>0:
+            return True
+    return False
+
 def main():
     registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
     topics = {topic["slug"]: topic for topic in registry["topics"]}
@@ -105,18 +120,18 @@ def main():
             "school_slug": topic["school_slug"],
             "required": bool(topic.get("required")),
             "records": len(subset),
-            "mesh_redistributable": sum(bool(r.get("mesh_redistributable")) for r in subset),
+            "mesh_redistributable": sum(downloader_ready(r) for r in subset),
             "providers": dict(Counter(r.get("provider") for r in subset)),
             "top_titles": [r.get("title") for r in subset[:10]],
         }
-        lookup_topics[slug] = [compact(r) for r in subset if r.get("mesh_redistributable")]
+        lookup_topics[slug] = [compact(r) for r in subset if downloader_ready(r)]
 
     providers = {}
     for provider in sorted({r.get("provider") for r in kept if r.get("provider")}):
         subset = [r for r in kept if r.get("provider") == provider]
         providers[provider] = {
             "records": len(subset),
-            "mesh_redistributable": sum(bool(r.get("mesh_redistributable")) for r in subset),
+            "mesh_redistributable": sum(downloader_ready(r) for r in subset),
             "download_candidates": sum(len(r.get("files") or []) for r in subset),
         }
 
@@ -127,7 +142,7 @@ def main():
         slugs = [slug for slug in pack.get("topics") or [] if slug in topics]
         covered = [slug for slug in slugs if topic_stats[slug]["mesh_redistributable"] > 0]
         coverage = len(covered) / len(slugs) if slugs else 0
-        keys = {record_key(r) for r in kept if r.get("mesh_redistributable") and any(slug in (r.get("selection") or {}) for slug in slugs)}
+        keys = {record_key(r) for r in kept if downloader_ready(r) and any(slug in (r.get("selection") or {}) for slug in slugs)}
         available = bool(slugs) and coverage >= (1.0 if pack.get("default") else minimum)
         pack_stats[pack["slug"]] = {
             "name": pack["name"], "kind": pack.get("kind") or "extension", "description": pack.get("description") or "",
@@ -138,7 +153,7 @@ def main():
             "description": pack.get("description") or "", "topics": slugs, "coverage": round(coverage, 4), "available": available,
         })
 
-    mesh_count = sum(bool(r.get("mesh_redistributable")) for r in kept)
+    mesh_count = sum(downloader_ready(r) for r in kept)
     download_count = sum(len(r.get("files") or []) for r in kept)
     catalog.update({
         "records_before_title_quality_gate": len(before), "rejected_by_title_quality_gate": len(before) - len(kept),

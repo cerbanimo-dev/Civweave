@@ -23,6 +23,13 @@ DISCOVERY_REFINEMENTS = {
         "free maps free knowledge",
         "open mapping geography",
     ],
+    "biology-life": [
+        "cell biology educational film",
+        "biology educational film",
+        "genetics biology educational film",
+        "molecular biology lesson",
+        "ecology biology educational video",
+    ],
     "civics-society": [
         "civics lesson government",
         "government explained civics",
