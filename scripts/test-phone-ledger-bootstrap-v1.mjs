@@ -21,6 +21,18 @@ test('phone ledger is browser-local and does not require a host node', async () 
   assert.doesNotMatch(source, /NODE_AI_LEDGER_PATH|AI_WALLET_DATABASE_URL|@neondatabase|Postgres/i);
 });
 
+test('phone ledger is required in the lightweight install shell', async () => {
+  const core = await read('public/service-worker-core-v208.js');
+  const start = core.indexOf('const REQUIRED_SHELL_ASSETS = [');
+  const end = core.indexOf('];', start);
+  assert.ok(start >= 0 && end > start, 'required shell asset block must exist');
+  const required = core.slice(start, end);
+
+  for (const asset of [TRANSPORT, CONTRIBUTION, PHONE_BOOT]) {
+    assert.ok(required.includes(`'${asset}'`), `required lightweight shell omits ${asset}`);
+  }
+});
+
 test('installed entry creates the ledger runtime before navigation begins', async () => {
   const html = await read('public/app/installed-entry-v146.html');
   const transport = html.indexOf(TRANSPORT);
