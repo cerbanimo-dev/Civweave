@@ -1,0 +1,32 @@
+name: Verify federation locality map v275
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/federation-finder-map-v275.html'
+      - 'public/app/civweave-map-service-v275.js'
+      - 'public/finder/index.html'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/stage-maplibre-v275.mjs'
+      - 'scripts/prepare-start-v131.mjs'
+      - 'scripts/test-federation-map-v275.mjs'
+      - '.github/workflows/verify-federation-map-v275.yml'
+  push:
+    branches:
+      - 'agent/real-locality-map-service-v2'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check map runtime
+        run: |
+          node --check public/app/civweave-map-service-v275.js
+          node --check scripts/stage-maplibre-v275.mjs
+          node --check scripts/prepare-start-v131.mjs
+      - name: Verify locality map contract
+        run: node --test scripts/test-federation-map-v275.mjs
