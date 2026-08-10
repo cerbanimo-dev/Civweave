@@ -5,20 +5,24 @@ import vm from 'node:vm';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const readBytes=path=>readFile(new URL(path,root));
-const [html,manifestText,bridge,autostart,statusRuntime,workerRepair,workerWrapper,installedEntry]=await Promise.all([
+const [html,rootHtml,manifestText,assetlinksText,bridge,autostart,statusRuntime,workerRepair,workerWrapper,installedEntry,gateway]=await Promise.all([
   read('public/app/index.html'),
+  read('public/index.html'),
   read('public/app/manifest.webmanifest'),
+  read('public/.well-known/assetlinks.json'),
   read('public/app/pwa-install-prompt-v246.js'),
   read('public/app/required-campus-autostart-v1.js'),
   read('public/app/offline-campus-status-v210.js'),
   read('public/service-worker-campus-completion-v246.js'),
   read('public/service-worker-v203.js'),
-  read('public/app/installed-entry-v146.js')
+  read('public/app/installed-entry-v146.js'),
+  read('server/gateway.mjs')
 ]);
 
 const manifest=JSON.parse(manifestText);
 assert.equal(manifest.display,'standalone');
 assert.equal(manifest.prefer_related_applications,false);
+assert.equal(manifest.id,'/civweave-local','PWA id must remain stable while install origins converge');
 assert.equal(manifest.start_url,'/app/installed-entry-v146.html?installed=1','installed PWA must launch through updater entry, never directly into a version-pinned campus');
 assert.ok((manifest.shortcuts||[]).every(shortcut=>String(shortcut.url||'').startsWith('/app/installed-entry-v146.html?')),'all installed shortcuts must pass through updater entry');
 assert.ok(!manifestText.includes('working-campus-v156.html?installed=1&version='),'manifest must not pin an installed launch to an old Working Campus release');
@@ -27,6 +31,30 @@ assert.ok(installedEntry.includes("updateViaCache:'none'"));
 assert.ok(installedEntry.includes('await registration.update()'));
 assert.ok(installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'installed entry must activate a waiting worker before routing');
 assert.ok(installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='),'worker refresh must finish before installed route selection');
+
+const canonicalOrigin='https://commonweave.pages.dev';
+const hostNodeOrigin='https://civweave-host-node.onrender.com';
+const canonicalManifest=`${canonicalOrigin}/app/manifest.webmanifest`;
+const hostNodeManifest=`${hostNodeOrigin}/app/manifest.webmanifest`;
+const related=manifest.related_applications||[];
+assert.ok(related.some(app=>app.platform==='webapp'&&app.url===canonicalManifest),'manifest must describe the canonical Cloudflare PWA for installed-related-app discovery');
+assert.ok(related.some(app=>app.platform==='webapp'&&app.url===hostNodeManifest),'manifest must describe the legacy Render PWA for migration discovery');
+const assetlinks=JSON.parse(assetlinksText);
+const querySites=new Set(assetlinks.filter(entry=>(entry.relation||[]).includes('delegate_permission/common.query_webapk')).map(entry=>entry.target?.site));
+assert.ok(querySites.has(canonicalManifest),'asset links must let the canonical manifest query a related installed PWA');
+assert.ok(querySites.has(hostNodeManifest),'asset links must let the Render manifest query a related installed PWA');
+assert.ok(rootHtml.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'root entry must know the canonical PWA origin');
+assert.ok(rootHtml.includes(`const HOST_NODE_ORIGIN='${hostNodeOrigin}'`),'root entry must recognize the Render host node as an alternate install origin');
+assert.ok(rootHtml.includes("target.searchParams.set('host',HOST_NODE_ORIGIN)"),'Render-to-Cloudflare handoff must retain host-node discovery');
+assert.ok(bridge.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'native install bridge must pin one canonical install origin');
+assert.ok(bridge.includes('rerouteAlternateInstall()'),'native installer must reroute alternate origins before accepting a prompt');
+assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer must discover related legacy/canonical installs when the browser supports it');
+assert.ok(bridge.includes("dataset.civweaveLegacyRenderInstall"),'related Render install state must be exposed to the app');
+assert.ok(gateway.includes(canonicalOrigin),'Render gateway must advertise the canonical install origin');
+assert.ok(gateway.includes('CIVWEAVE_INSTALL_ORIGIN'),'Render gateway runtime must replace self-referential install URLs');
+assert.ok(gateway.includes('releasePacketNeedle'),'Render release metadata must converge on the canonical installer');
+assert.ok(gateway.includes('runtimeGateNeedle'),'installed-runtime recovery must point back to the canonical installer');
+assert.ok(gateway.includes('configNeedle'),'public host-node config must point back to the canonical installer');
 
 const any192=manifest.icons?.find(icon=>icon.sizes==='192x192'&&String(icon.purpose||'any').includes('any'));
 const any512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'any').includes('any'));
@@ -94,4 +122,4 @@ assert.ok(workerWrapper.includes('policy=resumable-pause-v280'));
 assert.ok(workerWrapper.includes('chat-convergence-v250'),'worker wrapper must carry current convergence identity');
 assert.ok(workerWrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'new worker must activate immediately');
 
-console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v250',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first'},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v281-single-origin',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first',canonicalInstallOrigin:canonicalOrigin,relatedInstallDiscovery:true},null,2));
