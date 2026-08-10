@@ -32,7 +32,7 @@ assert(workerPackage.includes("const BUILD = 'lightweight-shell-v208'"),'Verifie
 assert(workerPackage.includes("const LIBRARY_CACHE='cwknowledge-school-seeds-v2'")||workerPackage.includes('cwknowledge-'),'Protected knowledge storage markers are missing from the worker package.');
 
 assert(installerStateSource.includes('installer-state-machines-v280'),'Installer state revision is missing.');
-assert(installerStateSource.includes('PAUSE_OFFLINE_PACKAGE'),'Installer state cannot request a campus pause.');
+assert(installerStateSource.includes("'/app/installer-state-machine-v280.js'")&&installerStateSource.includes('shellRequired: true'),'Installer state worker does not require the page-side resumable state machine in the shell.');
 assert(overrideSource.includes("const V211_REVISION = 'offline-campus-current-graph-v280'"),'v280 current-graph retry repair is missing from the worker package.');
 assert(overrideSource.includes("const V211_POLICY = 'resumable-pause-v280'"),'Resumable campus policy marker is missing.');
 assert(overrideSource.includes("const V211_SYNC_TAG = 'civweave-campus-resume-v280'"),'Background resume sync tag is missing.');
