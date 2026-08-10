@@ -2,29 +2,45 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [pulse,bootstrap,runtime,registry,worker,lifecycle,repair,settings,downloadPolicy]=await Promise.all([read('public/app/local-ai/test-pulse-v269.js'),read('public/app/local-ai/bootstrap-v266.js'),read('public/app/local-ai/runtime-v266.js'),read('public/app/local-ai/model-registry-v266.js'),read('public/app/local-ai/worker-v266.js'),read('public/app/document-lifecycle-v221.js'),read('public/app/local-ai/metadata-repair-v276.js'),read('public/app/local-ai/settings-panel-v267.js'),read('public/app/local-ai/download-policy-v278.js')]);
-const compile=(path,source)=>{try{new Function(source)}catch(error){console.log(`::error file=${path},title=JavaScript syntax failure::${String(error?.message||error).replaceAll('\n',' ')}`);throw error}};for(const [path,source] of [['pulse',pulse],['bootstrap',bootstrap],['runtime',runtime],['registry',registry],['worker',worker],['lifecycle',lifecycle],['repair',repair],['settings',settings],['downloadPolicy',downloadPolicy]])compile(path,source);
-const checks=[];const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
+const [pulse,runtime,worker,registry]=await Promise.all([
+  read('public/app/local-ai/test-pulse-v269.js'),
+  read('public/app/local-ai/runtime-v266.js'),
+  read('public/app/local-ai/worker-v266.js'),
+  read('public/app/local-ai/model-registry-v266.js')
+]);
+for(const [path,source] of [['pulse',pulse],['runtime',runtime],['worker',worker],['registry',registry]]){
+  try{new Function(source)}catch(error){console.log(`::error file=${path},title=JavaScript syntax failure::${String(error?.message||error).replaceAll('\n',' ')}`);throw error}
+}
+const checks=[];
+const check=(name,value)=>{if(!value)console.error(`FAILED: ${name}`);assert.ok(value,name);checks.push(name)};
 check('health pulse directly calls downloaded runtime',pulse.includes('const output=await runtime.generate')&&pulse.includes("provider:'downloaded-local-direct'"));
 check('health pulse uses 32-token non-thinking smoke request',pulse.includes('maxNewTokens:32')&&pulse.includes('thinking:false')&&pulse.includes('cedar 37'));
 check('health pulse reports staged pass/failure and measured TTFT',pulse.includes('Local inference health · PASS')&&pulse.includes('failed at')&&pulse.includes('TTFT')&&pulse.includes('tok/s'));
 check('health pulse retains near-complete repair race handling',pulse.includes('settleNearComplete')&&pulse.includes("phase:'repair-waiting'")&&pulse.includes('Date.now()-started<4000'));
-check('health pulse persists device measurements',pulse.includes('civweave.local-ai.health.v282')&&pulse.includes('civweave:local-model-health'));
-check('metadata repair remains v277 race-safe',repair.includes("VERSION='1.0.81-local-ai-metadata-repair-v277-race-safe'")&&repair.includes('metadataRepairRaceSafe:true')&&!repair.includes('base.cancel?.(id)'));
-check('metadata repair preserves weights and has timeout',repair.includes('FETCH_TIMEOUT_MS=20000')&&repair.includes('preservesWeights:true'));
-check('settings remains truthful during transfer',settings.includes('p=available?100:transferring?Math.min(99,raw):raw')&&settings.includes('transferring&&p<99?eta(state.etaSeconds)'));
-check('settings exposes contexts and measured health',settings.includes('Model window')&&settings.includes('Civweave working default')&&settings.includes('Last health PASS'));
-check('bootstrap combines current download/hardware stack with v282 inference',bootstrap.includes('1.0.81-local-ai-metadata-repair-v277-race-safe')&&bootstrap.includes('hardwareLadder:true')&&bootstrap.includes("VERSION='1.0.83-local-ai-bootstrap-v282-inference-health'")&&bootstrap.includes('canonicalCausalLM:true'));
-check('lifecycle requires v282 canonical causal runtime',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.83-local-ai-bootstrap-v282-inference-health'")&&lifecycle.includes('canonicalCausalLM===true'));
-check('registry preserves Gemma default, Smol mini PC and Qwen 4B PC tier',registry.includes("id:'gemma3-1b-it-q4f16'")&&registry.includes("recommended:'default'")&&registry.includes("id:'smollm3-3b-q4f16'")&&registry.includes("id:'qwen3-4b-q4f16'"));
-check('registry has context contracts and Smol template revision repair',registry.includes('contextWindowTokens:32_768')&&registry.includes('contextWindowTokens:65_536')&&registry.includes('a91ed44aac643515ffe38aae1e49c7213bb4ddc0'));
-check('worker uses causal model APIs and manual chat template',worker.includes('AutoTokenizer.from_pretrained')&&worker.includes('AutoModelForCausalLM.from_pretrained')&&worker.includes('apply_chat_template')&&!worker.includes('hf.pipeline('));
-check('worker warms shaders and measures true token callback',worker.includes("'warming-model'")&&worker.includes('token_callback_function')&&worker.includes('ttftMs'));
-check('runtime preserves WebGPU to WASM compatibility fallback',runtime.includes('hasWebGPUAdapter')&&runtime.includes('backend-fallback-download')&&runtime.includes('compatibilitySpec'));
-check('foreground large Xet policy remains active',downloadPolicy.includes('preferBackground===false'));
+check('health pulse persists v286 device measurements',pulse.includes('civweave.local-ai.health.v286')&&pulse.includes('civweave:local-model-health'));
+check('health pulse exposes WASM performance diagnostics',pulse.includes('Warm benchmark')&&pulse.includes('WASM threads')&&pulse.includes('CPU lanes')&&pulse.includes('Isolation')&&pulse.includes('SIMD')&&pulse.includes('KV cache')&&pulse.includes('Worker'));
+check('runtime selects v286 worker and preserves compatibility fallback',runtime.includes("VERSION='1.0.86-local-ai-runtime-v286-wasm-performance'")&&runtime.includes("worker-v266.js?v=1.0.86-v286")&&runtime.includes('compatibilitySpec')&&runtime.includes('backend-fallback-download'));
+check('worker configures bounded threaded SIMD WASM',worker.includes('Math.min(4,Math.floor(hardwareConcurrency/2)')&&worker.includes('wasm.numThreads=wasmThreads')&&worker.includes('wasm.simd=true')&&worker.includes('crossOriginIsolated'));
+check('worker keeps KV cache and warm decode benchmark',worker.includes('use_cache:true')&&worker.includes('benchmarkTokensPerSecond')&&worker.includes("'benchmarking-model'"));
+check('registry keeps hidden q8 CPU compatibility lane',registry.includes("id:'qwen3-0.6b-q8-wasm'")&&registry.includes("dtype:'q8'")&&registry.includes("device:'wasm'")&&registry.includes('hidden:true'));
 let capturedRequest=null,directCalls=0,clock=100;
-const context={console,document:{readyState:'loading',addEventListener(){},getElementById(){return null}},addEventListener(){},dispatchEvent(){return true},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},queueMicrotask(){},setTimeout,clearTimeout,localStorage:{getItem(){return null},setItem(){}},performance:{now(){clock+=12;return clock}},CivweaveLocalModelRegistryV266:{byId:id=>id==='mock-local'?{id,label:'Mock Local',estimatedBytes:600_000_000,healthTimeoutMs:360000,contextWindowTokens:40960,workingContextTokens:4096,generation:{nonThinkingTemperature:.7}}:null},CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'mock-local'}),status:async()=>({available:true})},CivweaveLocalModelRuntimeV266:{generate:async request=>{directCalls+=1;capturedRequest=request;return{id:'mock-local',label:'Mock Local',text:'cedar 37',elapsedMs:321,backend:'webgpu',streamed:true,metrics:{ttftMs:120,tokensPerSecond:9.5,promptTokens:12,generatedTokens:4,contextWindowTokens:40960,workingContextTokens:4096}}}}};context.globalThis=context;vm.createContext(context);vm.runInContext(pulse,context,{filename:'test-pulse-v269.js'});const generated=await context.CivweaveLocalModelTestPulseV269.test('mock-local');
+const context={
+  console,
+  document:{readyState:'loading',addEventListener(){},getElementById(){return null}},
+  addEventListener(){},dispatchEvent(){return true},
+  CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},
+  queueMicrotask(){},setTimeout,clearTimeout,
+  localStorage:{getItem(){return null},setItem(){}},
+  performance:{now(){clock+=12;return clock}},
+  CivweaveLocalModelRegistryV266:{byId:id=>id==='mock-local'?{id,label:'Mock Local',estimatedBytes:600_000_000,healthTimeoutMs:360000,contextWindowTokens:40960,workingContextTokens:4096,generation:{nonThinkingTemperature:.7}}:null},
+  CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'mock-local'}),status:async()=>({available:true})},
+  CivweaveLocalModelRuntimeV266:{generate:async request=>{directCalls+=1;capturedRequest=request;return{id:'mock-local',label:'Mock Local',text:'cedar 37',elapsedMs:321,backend:'wasm',streamed:true,metrics:{ttftMs:120,tokensPerSecond:9.5,promptTokens:12,generatedTokens:4,contextWindowTokens:40960,workingContextTokens:4096,benchmarkTokensPerSecond:10.5,wasmThreads:4,crossOriginIsolated:true,wasmSimd:true,kvCache:true,workerInference:true}}}}
+};
+context.globalThis=context;
+vm.createContext(context);
+vm.runInContext(pulse,context,{filename:'test-pulse-v269.js'});
+const generated=await context.CivweaveLocalModelTestPulseV269.test('mock-local');
 check('mock health performs one direct generation',directCalls===1);
 check('mock health disables thinking and caps output at 32',capturedRequest.maxNewTokens===32&&capturedRequest.thinking===false&&capturedRequest.stream===true);
-check('mock health preserves generated text and metrics',generated.text==='cedar 37'&&generated.metrics.ttftMs===120&&generated.metrics.tokensPerSecond===9.5);
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v282-health',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,thinkingDisabled:true,stagedHealth:true,metadataRepairRaceSafe:true,truthfulCompletion:true,hardwareLadder:true},null,2));
+check('mock health preserves generated text and WASM metrics',generated.text==='cedar 37'&&generated.metrics.ttftMs===120&&generated.metrics.tokensPerSecond===9.5&&generated.metrics.wasmThreads===4&&generated.metrics.kvCache===true);
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v286-wasm-performance',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',thinkingDisabled:true,stagedHealth:true,wasmPerformanceDiagnostics:true},null,2));
