@@ -87,5 +87,5 @@ async function boot(){
   }
 }
 boot();
-globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.63-phone-ledger-r1',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker,givePhoneLedgerBootWindow});
+globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.62-chat-convergence-v250',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker,givePhoneLedgerBootWindow,phoneLedger:'v1'});
 })();
