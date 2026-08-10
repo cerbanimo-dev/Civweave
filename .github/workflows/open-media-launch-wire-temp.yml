@@ -24,6 +24,25 @@ jobs:
           ref: agent/open-learning-media-harvest-v1
           fetch-depth: 0
 
+      - name: Sync current main and prepare release version
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git fetch origin main
+          git merge --no-edit origin/main
+          python - <<'PY'
+          import json, re, subprocess
+          from pathlib import Path
+          main_version=subprocess.check_output(['git','show','origin/main:VERSION'],text=True).strip()
+          major,minor,patch=[int(x) for x in main_version.split('.')]
+          release=f'{major}.{minor}.{patch+1}'
+          Path('VERSION').write_text(release+'\n')
+          package=Path('package.json'); data=json.loads(package.read_text()); data['version']=release; package.write_text(json.dumps(data,indent=2)+'\n')
+          manifest=Path('public/app/manifest.webmanifest'); m=json.loads(manifest.read_text()); m['name']=f'Civweave v{release}'; manifest.write_text(json.dumps(m,indent=2)+'\n')
+          print(f'Prepared Civweave {release} beyond main {main_version}')
+          PY
+
       - name: Apply launch finalizer
         run: python scripts/finalize-open-learning-media-launch-v1.py
 
@@ -40,6 +59,7 @@ jobs:
           node scripts/test-open-learning-media-runtime-v1.mjs
           node scripts/test-video-learning-contract-v1.mjs
           python scripts/test-open-learning-media-harvest-v1.py
+          test "$(cat VERSION)" != "$(git show origin/main:VERSION)"
 
       - name: Commit launch service
         run: |
@@ -49,5 +69,4 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -A
           git commit -m 'Wire launch-ready Open Learning Media service'
-          git pull --rebase origin agent/open-learning-media-harvest-v1
           git push origin HEAD:agent/open-learning-media-harvest-v1
