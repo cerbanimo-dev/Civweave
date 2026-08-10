@@ -15,7 +15,7 @@ const [lifecycle,campus,settings,bootstrap,controller,pulse]=await Promise.all([
 for(const source of [lifecycle,settings,bootstrap,controller,pulse])new Function(source);
 new Function(campus.replace(/\}\)\(\);\s*$/,''));
 
-assert.match(lifecycle,/document-lifecycle-v273-local-ai-management/);
+assert.match(lifecycle,/document-lifecycle-v274-local-ai-json-repair/);
 assert.match(lifecycle,/ensureLocalAISettingsManagement/);
 assert.match(lifecycle,/enhanceLocalAISettings/);
 assert.match(lifecycle,/civweave:model-settings-opened/);
