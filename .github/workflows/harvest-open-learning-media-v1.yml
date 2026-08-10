@@ -13,7 +13,6 @@ on:
       - scripts/curate-open-learning-media-library-v1.py
       - scripts/filter-open-learning-media-title-quality-v1.py
       - scripts/test-open-learning-media-harvest-v1.py
-      - scripts/test-open-learning-media-packs-v1.py
       - ops/triggers/open-learning-media-harvest.trigger
   schedule:
     - cron: '17 5 * * 1'
