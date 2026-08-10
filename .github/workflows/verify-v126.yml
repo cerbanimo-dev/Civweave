@@ -48,9 +48,13 @@ jobs:
           test -f .cloudflare-pages/app/settings-delegation-v175.js
           test -f .cloudflare-pages/app/installed-entry-v146.js
           test -f .cloudflare-pages/app/manifest.webmanifest
+          test -f .cloudflare-pages/app/installer-storage-guard-v281.js
+          test -f .cloudflare-pages/app/shell-integrity-v281.json
           test -f .cloudflare-pages/service-worker-v156.js
           test -f .cloudflare-pages/service-worker-v203.js
           test -f .cloudflare-pages/service-worker-core-v208.js
+          test -f .cloudflare-pages/service-worker-installer-state-v280.js
+          test -f .cloudflare-pages/service-worker-shell-integrity-v281.js
           test -f .cloudflare-pages/service-worker-release-coherence-v220.js
           grep -q "1.0.7-ai-settings-cleanroom-v188" .cloudflare-pages/app/model-settings-controller-v173.js
           grep -q "188.0-ai-settings-cleanroom-delegation" .cloudflare-pages/app/settings-delegation-v175.js
@@ -66,9 +70,15 @@ jobs:
           grep -q "updateViaCache:'none'" .cloudflare-pages/app/installed-entry-v146.js
           grep -q "await registration.update()" .cloudflare-pages/app/installed-entry-v146.js
           grep -q "service-worker-core-v208.js?v=${release_version}-chat-convergence-v250" .cloudflare-pages/service-worker-v203.js
-          grep -q "service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-installer-state-v280.js?v=installer-state-machines-v280" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-shell-integrity-v281.js?v=shell-integrity-v281" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280" .cloudflare-pages/service-worker-v203.js
           grep -q "service-worker-release-coherence-v220.js?v=release-coherence-v226" .cloudflare-pages/service-worker-v203.js
           grep -q "service-worker-chat-repair-v245.js?v=chat-convergence-v250" .cloudflare-pages/service-worker-v203.js
+          grep -q "crypto.subtle.digest('SHA-256'" .cloudflare-pages/service-worker-shell-integrity-v281.js
+          grep -q "installer-storage-guard-v281.js" .cloudflare-pages/service-worker-installer-state-v280.js
+          grep -q '"revision": "shell-integrity-v281"' .cloudflare-pages/app/shell-integrity-v281.json
+          grep -q '"revision": "campus-storage-budget-v281"' .cloudflare-pages/app/offline-package-v208.json
           grep -q "Civweave Working Campus · v${release_version}" .cloudflare-pages/app/working-campus-v156.html
           grep -q "<b class=\"version-chip\">v${release_version}</b>" .cloudflare-pages/app/working-campus-v156.html
           grep -q "version-pinned-html-js-css-json-txt-network-first-cached-fallback" .cloudflare-pages/service-worker-release-coherence-v220.js
