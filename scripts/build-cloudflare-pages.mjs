@@ -27,10 +27,10 @@ const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
 const transformerStage = resolve(scriptDir, "stage-transformers-assets.mjs");
 const mapRuntimeStage = resolve(scriptDir, "stage-maplibre-v275.mjs");
 const mapPackageBuilder = resolve(scriptDir, "build-civweave-map-v1.mjs");
+const validationSafe = resolve(scriptDir, "apply-confidence-weighted-validation-v1-safe.mjs");
 const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
-await import('./apply-confidence-weighted-validation-v1-safe.mjs');
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 await import('./generate-asset-lockboard-catalog-v239.mjs');
@@ -86,6 +86,8 @@ function formatOversized(directory, files) {
 }
 if (!existsSync(sourceDir) || !statSync(sourceDir).isDirectory()) throw new Error(`Static source directory not found: ${sourceDir}`);
 
+if (existsSync(validationSafe)) runNodeScript(validationSafe,"Confidence-weighted validation transform failed.");
+else console.log('[Civweave] Confidence-weighted validation transform is not present on this branch; current main supplies it at merge time.');
 runNodeScript(transformerStage,"Transformers.js staging failed. Cloudflare would otherwise publish downloadable model weights without the local inference runtime.");
 for (const required of [
   resolve(sourceDir, 'app/vendor/transformers/transformers.min.js'),
