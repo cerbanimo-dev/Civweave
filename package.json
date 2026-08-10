@@ -14,7 +14,7 @@
     "start": "node scripts/start-civweave-v131.mjs",
     "prestart:local": "node scripts/stage-onnxruntime-web-assets.mjs && node scripts/stage-transformers-assets.mjs --force && node scripts/ensure-minilm-fixed-ort-model.mjs && node scripts/prepare-start-v131.mjs",
     "start:local": "node server-local-v131.mjs",
-    "setup:local": "node scripts/stage-onnxruntime-web-assets.mjs && node scripts/ensure-minilm-fixed-ort-model.mjs && node scripts/prepare-start-v131.mjs",
+    "setup:local": "node scripts/stage-onnxruntime-web-assets.mjs && node scripts/stage-transformers-assets.mjs --force && node scripts/ensure-minilm-fixed-ort-model.mjs && node scripts/prepare-start-v131.mjs",
     "dev": "node --watch server-v130.mjs",
     "onnxruntime:stage": "node scripts/stage-onnxruntime-web-assets.mjs",
     "minilm:fixed-runtime:check": "node scripts/verify-minilm-fixed-ort.mjs",
