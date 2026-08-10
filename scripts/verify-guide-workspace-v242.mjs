@@ -32,7 +32,7 @@ check('paired partner invitations are explicit',workspace.includes('data-peer-pa
 check('shared history uses direct-consent mesh objects',workspace.includes("const SHARED_KIND='civweave.shared-chat-thread.v1'")&&workspace.includes("consent:'direct'")&&workspace.includes('audience:thread.peerIds'));
 check('shared snapshots exclude action payloads',workspace.includes('sanitizedSharedThread')&&!/sanitizedSharedThread[\s\S]{0,1200}approvalGate/.test(workspace));
 check('mesh and gateway transports are both used',workspace.includes('runtime.flushSession')&&workspace.includes('runtime.syncGateway'));
-check('incoming shared histories merge by message id',workspace.includes('const messages=new Map')&&workspace.includes("messages.set(row.id"));
+check('incoming shared histories merge by message id',workspace.includes('messages=new Map')&&workspace.includes("messages.set(row.id"));
 check('workspace maintains legacy realm mirror',workspace.includes('mirrorLegacy')&&workspace.includes('writeLegacy'));
 check('page launcher opens page realm directly',workspace.includes('openWindow(pageSystem)'));
 check('persona pointer switching stays capture-owned',workspace.includes('switchControl')&&workspace.includes('data-cw242-window')&&workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"));
