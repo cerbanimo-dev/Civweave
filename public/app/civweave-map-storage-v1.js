@@ -42,6 +42,7 @@ function sourceKey(packId){return `civweave-cache:${encodeURIComponent(clean(pac
 async function getPack(packId){const db=await openDb(),tx=db.transaction(PACK_STORE,'readonly');return requestPromise(tx.objectStore(PACK_STORE).get(clean(packId,220)))}
 async function putPack(row){const db=await openDb(),tx=db.transaction(PACK_STORE,'readwrite');tx.objectStore(PACK_STORE).put(row);await txDone(tx);return row}
 async function putChunk(packId,index,data){const db=await openDb(),tx=db.transaction(CHUNK_STORE,'readwrite');tx.objectStore(CHUNK_STORE).put({key:`${packId}:${index}`,packId,index,data});await txDone(tx)}
+async function getChunk(packId,index){const db=await openDb(),tx=db.transaction(CHUNK_STORE,'readonly'),result=await requestPromise(tx.objectStore(CHUNK_STORE).get(`${packId}:${index}`));return result}
 async function listPacks(){
   const db=await openDb(),tx=db.transaction(PACK_STORE,'readonly'),rows=await requestPromise(tx.objectStore(PACK_STORE).getAll());
   return rows.sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))||Date.parse(b.lastAccess||b.cachedAt||0)-Date.parse(a.lastAccess||a.cachedAt||0));
@@ -69,9 +70,9 @@ async function estimate(){
   return{mapBytes,usage,quota,budgetBytes:override||dynamic,freeBytes:quota!=null&&usage!=null?Math.max(0,quota-usage):null,packs:rows.length,pinned:rows.filter(row=>row.pinned).length,chunkSize:CHUNK_SIZE};
 }
 async function prune({reserveBytes=0}={}){
-  const reserve=Math.max(0,Math.trunc(Number(reserveBytes)||0));let rows=await listPacks(),stats=await estimate();const removed=[];
+  const reserve=Math.max(0,Math.trunc(Number(reserveBytes)||0));let stats=await estimate();const removed=[];
   const over=()=>stats.mapBytes+reserve>stats.budgetBytes||(stats.freeBytes!=null&&stats.freeBytes<reserve+16*1024*1024);
-  const candidates=rows.filter(row=>!row.pinned).sort((a,b)=>Date.parse(a.lastAccess||a.cachedAt||0)-Date.parse(b.lastAccess||b.cachedAt||0));
+  const candidates=(await listPacks()).filter(row=>!row.pinned).sort((a,b)=>Date.parse(a.lastAccess||a.cachedAt||0)-Date.parse(b.lastAccess||b.cachedAt||0));
   for(const row of candidates){if(!over())break;await removePack(row.packId,{reason:'lru-prune'});removed.push(row.packId);stats=await estimate()}
   return{removed,stats,room:!over()};
 }
@@ -105,9 +106,8 @@ async function importResponse(pack,response,{maxBytes=1024*1024*1024,expectedSha
 async function getBytes(packId,offset,length){
   const id=clean(packId,220),start=Math.max(0,Math.trunc(Number(offset)||0)),size=Math.max(0,Math.trunc(Number(length)||0));const row=await getPack(id);if(!row||row.status!=='ready')throw new Error(`Map pack ${id} is not available offline.`);if(start+size>Number(row.bytes))throw new RangeError('Requested PMTiles byte range exceeds the cached archive.');if(size===0)return{data:new ArrayBuffer(0)};
   const first=Math.floor(start/CHUNK_SIZE),last=Math.floor((start+size-1)/CHUNK_SIZE),out=new Uint8Array(size);let written=0;
-  const db=await openDb(),tx=db.transaction(CHUNK_STORE,'readonly'),store=tx.objectStore(CHUNK_STORE);
   for(let index=first;index<=last;index++){
-    const chunk=await requestPromise(store.get(`${id}:${index}`));if(!chunk?.data)throw new Error(`Cached map chunk ${index} is missing.`);const bytes=chunk.data instanceof ArrayBuffer?new Uint8Array(chunk.data):new Uint8Array(chunk.data.buffer||chunk.data);const chunkStart=index*CHUNK_SIZE;const from=Math.max(start,chunkStart)-chunkStart;const to=Math.min(start+size,chunkStart+bytes.byteLength)-chunkStart;out.set(bytes.subarray(from,to),written);written+=to-from;
+    const chunk=await getChunk(id,index);if(!chunk?.data)throw new Error(`Cached map chunk ${index} is missing.`);const bytes=chunk.data instanceof ArrayBuffer?new Uint8Array(chunk.data):new Uint8Array(chunk.data.buffer||chunk.data);const chunkStart=index*CHUNK_SIZE;const from=Math.max(start,chunkStart)-chunkStart;const to=Math.min(start+size,chunkStart+bytes.byteLength)-chunkStart;out.set(bytes.subarray(from,to),written);written+=to-from;
   }
   touch(id).catch(()=>{});return{data:out.buffer};
 }
