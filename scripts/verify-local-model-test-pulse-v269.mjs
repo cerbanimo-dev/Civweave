@@ -26,7 +26,7 @@ const checks=[];
 const check=(name,value)=>{if(!value)console.log(`::error file=scripts/verify-local-model-test-pulse-v269.mjs,title=Local model verifier::${name}`);assert.ok(value,name);checks.push(name)};
 
 check('test pulse exposes an explicit Test model control',pulse.includes("running?'Testing model…':'Test model'")&&pulse.includes('dataset.localTestPulse'));
-check('test pulse renders raw model output',pulse.includes('Raw model output')&&pulse.includes('downloaded-local direct inference'));
+check('test pulse renders raw model output',pulse.includes('Raw model output')&&pulse.includes('Direct path: CivweaveLocalModelRuntimeV266.generate()'));
 check('test pulse labels the orchestration bypass',pulse.includes('bypasses Weaveling')&&pulse.includes('no Weaveling contract'));
 check('test pulse invokes the downloaded local runtime directly',pulse.includes('CivweaveLocalModelRuntimeV266')&&pulse.includes('const output=await runtime.generate'));
 check('test pulse uses a tiny human-readable inference request',pulse.includes('maxNewTokens:64')&&pulse.includes('one short sentence'));
@@ -39,13 +39,17 @@ check('runtime itself talks to the local generative worker',runtimeUsesWorker);
 check('bootstrap loads pulse after settings panel',bootstrap.includes('test-pulse-v269.js')&&bootstrap.indexOf('settings-panel-v267.js')<bootstrap.indexOf('test-pulse-v269.js'));
 check('bootstrap advertises direct model testing',bootstrap.includes('directModelTest:true'));
 
-check('all installable generation JSON metadata is required',((registry.match(/\['generation_config\.json',50,true\]/g)||[]).length===3));
+check('all runtime generation JSON metadata is required',((registry.match(/\['generation_config\.json',50,true\]/g)||[]).length>=4));
 check('SmolLM special-token JSON metadata is required',registry.includes("['special_tokens_map.json',50,true]"));
 check('runtime repairs a previously-ready install before inference',runtime.includes("state.state?.status==='ready'")&&runtime.includes('manager.repair')&&runtime.includes('repair:true,onProgress'));
 check('worker recognizes the empty JSON cache-miss signature',worker.includes('Unexpected end of JSON input')&&worker.includes('missing, truncated, or invalid'));
 check('test pulse recognizes the empty JSON cache-miss signature',pulse.includes('Unexpected end of JSON input')&&pulse.includes('missing, truncated, or invalid'));
-check('bootstrap pins the repaired registry runtime and pulse together',bootstrap.includes('1.0.72-local-ai-registry-v272-runtime-metadata')&&bootstrap.includes('1.0.72-local-ai-runtime-v272-json-repair')&&bootstrap.includes('1.0.72-local-model-test-pulse-v272-json-repair'));
-check('settings lifecycle refuses a stale local AI bootstrap',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.72-local-ai-bootstrap-v272-json-repair'")&&lifecycle.includes('bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION'));
+check('registry includes hidden CPU compatibility runtime',registry.includes("id:'qwen3-0.6b-q8-wasm'")&&registry.includes("dtype:'q8'")&&registry.includes("device:'wasm'")&&registry.includes("['onnx/model_quantized.onnx',600_000_000,true]"));
+check('runtime probes actual WebGPU adapter instead of navigator.gpu presence only',runtime.includes('navigator.gpu.requestAdapter()')&&runtime.includes('hasWebGPUAdapter'));
+check('runtime downloads compatibility artifacts and retries on adapter failure',runtime.includes('backend-fallback-download')&&runtime.includes('compatibilitySpec')&&runtime.includes('backendFailure(error)'));
+check('worker permits CPU/WASM and probes WebGPU only when requested',worker.includes("if(spec.device!=='webgpu')return 'wasm'")&&worker.includes('requestAdapter()')&&!worker.includes("if(!self.navigator?.gpu)throw new Error('WebGPU is unavailable in this worker.');"));
+check('bootstrap pins backend-fallback registry runtime and bridge',bootstrap.includes('1.0.73-local-ai-registry-v275-backend-fallback')&&bootstrap.includes('1.0.73-local-ai-runtime-v275-backend-fallback')&&bootstrap.includes('1.0.73-local-ai-bridge-v275-backend-fallback')&&bootstrap.includes('backendFallback:true'));
+check('settings lifecycle refuses stale pre-fallback bootstrap',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.73-local-ai-bootstrap-v275-backend-fallback'")&&lifecycle.includes('bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION'));
 
 let capturedRequest=null,directCalls=0,clock=100;
 const context={
@@ -67,4 +71,4 @@ check('mock pulse returns generated runtime text unchanged',generated.text==='A 
 check('mock pulse sends a short conversational user message',capturedRequest?.messages?.length===1&&capturedRequest.messages[0].role==='user'&&capturedRequest.maxNewTokens===64);
 check('mock pulse identifies direct downloaded-local provenance',generated.provider==='downloaded-local-direct'&&generated.model==='mock-local');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v272-json-repair',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,stableDomRepair:true,mockInference:true,jsonMetadataRepair:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v275-backend-fallback',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,stableDomRepair:true,mockInference:true,jsonMetadataRepair:true,backendFallback:true},null,2));
