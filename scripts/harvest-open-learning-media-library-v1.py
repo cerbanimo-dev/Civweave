@@ -11,6 +11,24 @@ ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "config/open-learning-media-packs-v1.json"
 LEGACY_PATH = ROOT / "scripts/harvest-open-learning-media-v1.py"
 
+# Discovery-only refinements for subjects where broad search phrases produce too much
+# topical material and too little explicit teaching material. The canonical concepts,
+# aliases, pack membership, and quality gates remain registry-driven.
+DISCOVERY_REFINEMENTS = {
+    "civics-society": [
+        "civics lesson government",
+        "government explained civics",
+        "democracy civics lesson",
+        "parliament government introduction",
+    ],
+    "arts-culture": [
+        "art history lecture introduction",
+        "visual arts lesson basics",
+        "art history explained",
+        "museum art history lecture",
+    ],
+}
+
 def load_module(path: Path, name: str):
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
@@ -27,6 +45,11 @@ def main() -> None:
     slugs = [t.get("slug") for t in topics]
     if len(slugs) != len(set(slugs)):
         raise SystemExit("Open Learning Media pack registry contains duplicate topic slugs.")
+
+    for topic in topics:
+        refined = DISCOVERY_REFINEMENTS.get(topic.get("slug"))
+        if refined:
+            topic["queries"] = refined
 
     legacy = load_module(LEGACY_PATH, "civweave_open_media_harvest_v1")
     legacy.FOCUS_TOPICS = topics
