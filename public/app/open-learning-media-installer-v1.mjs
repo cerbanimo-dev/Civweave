@@ -5,8 +5,13 @@ const state={busy:false};
 const $=selector=>document.querySelector(selector);
 const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 
+function ensureRoot(){
+  let root=document.getElementById(ROOT_ID);if(root)return root;
+  root=document.createElement('section');root.id=ROOT_ID;root.className='knowledge-card';root.setAttribute('aria-label','Open Learning Media cache');
+  const marker=document.querySelector('.gateway-grid');if(marker)marker.insertAdjacentElement('beforebegin',root);else(document.querySelector('.gateway')||document.body)?.append(root);return root;
+}
 function installMarkup(){
-  const root=document.getElementById(ROOT_ID);if(!root||root.dataset.bound==='1')return root;
+  const root=ensureRoot();if(!root||root.dataset.bound==='1')return root;
   root.dataset.bound='1';
   root.innerHTML=`
     <div class="knowledge-school-copy">
