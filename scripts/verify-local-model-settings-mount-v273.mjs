@@ -16,7 +16,7 @@ const [lifecycle,campus,settings,bootstrap,controller,pulse,registry]=await Prom
 for(const source of [lifecycle,settings,bootstrap,controller,pulse,registry])new Function(source);
 new Function(campus.replace(/\}\)\(\);\s*$/,''));
 
-assert.match(lifecycle,/document-lifecycle-v277-phone-1b-tier/);
+assert.match(lifecycle,/document-lifecycle-v277-race-safe-phone-1b-tier/);
 assert.match(lifecycle,/ensureLocalAISettingsManagement/);
 assert.match(lifecycle,/enhanceLocalAISettings/);
 assert.match(lifecycle,/civweave:model-settings-opened/);
@@ -24,20 +24,28 @@ assert.match(lifecycle,/CivweaveLocalAISettingsV266\?\.enhance/);
 assert.match(lifecycle,/CivweaveLocalModelTestPulseV269\?\.enhance/);
 assert.match(lifecycle,/CivweaveLocalModelDownloadV266\?\.status/);
 assert.match(lifecycle,/metadataOnlyRepair===true/);
+assert.match(lifecycle,/metadataRepairRaceSafe===true/);
+assert.match(lifecycle,/truthfulCompletion===true/);
+assert.match(lifecycle,/phone1BTier:true/);
 assert.match(lifecycle,/CivweaveLocalModelRegistryV266\?\.installable/);
 assert.match(lifecycle,/CivweaveLocalModelBridgeV266\?\.patch/);
-assert.match(lifecycle,/1\.0\.80-local-ai-bootstrap-v277-phone-1b-tier/);
+assert.match(lifecycle,/1\.0\.81-local-ai-bootstrap-v277-race-safe-phone-1b-tier/);
 assert.doesNotMatch(lifecycle,/new Worker\s*\(/);
 assert.doesNotMatch(lifecycle,/\.generate\s*\(/);
 
 for(const text of ['Downloaded local AI','Download','Resume','Use locally','Remove'])assert.ok(settings.toLowerCase().includes(text.toLowerCase()),`Local settings panel lost ${text}.`);
+assert.match(settings,/1\.0\.81-local-ai-settings-v277-progress-truth/);
+assert.match(settings,/truthfulCompletion:true/);
 assert.match(pulse,/Raw model pulse/i);
 assert.match(pulse,/Test model/);
+assert.match(pulse,/raceSafeRepair:true/);
 assert.match(bootstrap,/settings-panel-v267\.js/);
 assert.match(bootstrap,/test-pulse-v269\.js/);
 assert.match(bootstrap,/metadata-repair-v276\.js/);
 assert.match(bootstrap,/backendFallback:true/);
 assert.match(bootstrap,/metadataOnlyRepair:true/);
+assert.match(bootstrap,/metadataRepairRaceSafe:true/);
+assert.match(bootstrap,/truthfulCompletion:true/);
 assert.match(bootstrap,/phone1BTier:true/);
 assert.match(controller,/civweave:model-settings-opened/);
 
@@ -70,12 +78,12 @@ const document={
       scripts.push(script);
       if(String(script.src||'').includes('/app/local-ai/bootstrap-v266.js')){
         bootstrapLoads+=1;
-        sandbox.CivweaveLocalModelDownloadV266={status(){},selection(){},metadataOnlyRepair:true};
+        sandbox.CivweaveLocalModelDownloadV266={status(){},selection(){},metadataOnlyRepair:true,metadataRepairRaceSafe:true};
         sandbox.CivweaveLocalModelRegistryV266={installable(){return[]}};
         sandbox.CivweaveLocalModelBridgeV266={patch(){return true}};
-        sandbox.CivweaveLocalAISettingsV266={version:'future-settings-version',enhance(){enhanceCalls+=1;return{dataset:{localPanel:true}}}};
-        sandbox.CivweaveLocalModelTestPulseV269={version:'future-pulse-version',enhance(panel){assert.equal(panel?.dataset?.localPanel,true);pulseEnhanceCalls+=1}};
-        sandbox.CivweaveLocalAIBootstrapV266={version:'1.0.80-local-ai-bootstrap-v277-phone-1b-tier',ready:Promise.resolve(true)};
+        sandbox.CivweaveLocalAISettingsV266={version:'1.0.81-local-ai-settings-v277-progress-truth',truthfulCompletion:true,enhance(){enhanceCalls+=1;return{dataset:{localPanel:true}}}};
+        sandbox.CivweaveLocalModelTestPulseV269={version:'1.0.81-local-model-test-pulse-v277-race-safe',raceSafeRepair:true,enhance(panel){assert.equal(panel?.dataset?.localPanel,true);pulseEnhanceCalls+=1}};
+        sandbox.CivweaveLocalAIBootstrapV266={version:'1.0.81-local-ai-bootstrap-v277-race-safe-phone-1b-tier',ready:Promise.resolve(true)};
       }
       queueMicrotask(()=>script.onload?.());
       return script;
@@ -112,11 +120,11 @@ assert.ok(enhanceCalls>=1,'Opening canonical AI settings should mount the downlo
 assert.ok(pulseEnhanceCalls>=1,'Late-loaded Raw Model Pulse should mount after the local manager panel.');
 assert.equal(workerCalls,0,'Opening AI settings must not start a local inference Worker.');
 assert.equal(generateCalls,0,'Opening AI settings must not invoke model generation.');
-assert.equal(sandbox.CivweaveDocumentLifecycleV221.localAIManagementReady(),true,'Pinned phone-1B local stack should qualify when its capabilities are mounted.');
+assert.equal(sandbox.CivweaveDocumentLifecycleV221.localAIManagementReady(),true,'Race-safe phone-1B local stack should qualify when its capabilities are mounted.');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-model-settings-mount-v277-phone-1b-tier',
+  revision:'local-model-settings-mount-v277-race-safe-phone-1b-tier',
   canonicalSettingsMount:true,
   pinnedBootstrapReadiness:true,
   managementControlsPreserved:true,
@@ -124,6 +132,8 @@ console.log(JSON.stringify({
   inferenceDormantOnOpen:true,
   backendFallbackBootstrap:true,
   metadataOnlyRepair:true,
+  metadataRepairRaceSafe:true,
+  truthfulCompletion:true,
   phone1BTier:true,
   defaultPhoneModel:'gemma3-1b-it-q4f16',
   bootstrapLoads,
