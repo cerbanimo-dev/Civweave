@@ -59,6 +59,21 @@ async function previousShellCache() {
     .sort(compareVersionsDesc)[0] || null;
 }
 
+findCached = async function findCachedV281(pathname) {
+  const key = cacheKey(pathname);
+  for (const name of [SHELL_CACHE, RUNTIME_CACHE, OFFLINE_CACHE]) {
+    const response = await (await caches.open(name)).match(key, { ignoreSearch: true });
+    if (responseLooksValid(response, pathname)) return response;
+  }
+  if (!lastKnownGoodCache) lastKnownGoodCache = await previousShellCache();
+  if (lastKnownGoodCache) {
+    const fallback = await (await caches.open(lastKnownGoodCache)).match(key, { ignoreSearch: true });
+    if (responseLooksValid(fallback, pathname)) return fallback;
+  }
+  const response = await caches.match(key, { ignoreSearch: true });
+  return responseLooksValid(response, pathname) ? response : null;
+};
+
 cacheShell = async function cacheShellV281() {
   const integrity = await loadIntegrityManifest();
   await caches.delete(STAGING_CACHE);
@@ -113,7 +128,8 @@ shellStatus = async function shellStatusV281() {
     ...packet,
     integrityRevision: REVISION,
     integrityRequired: !localDevelopmentHost(),
-    lastKnownGoodCache
+    lastKnownGoodCache,
+    fallbackPolicy: 'current-caches-then-last-known-good-shell'
   };
 };
 
@@ -136,6 +152,7 @@ self.CivweaveShellIntegrityV281 = Object.freeze({
   revision: REVISION,
   integrityUrl: INTEGRITY_URL,
   stagingCache: STAGING_CACHE,
+  fallbackPolicy: 'current-caches-then-last-known-good-shell',
   get lastKnownGoodCache() { return lastKnownGoodCache; }
 });
 })();
