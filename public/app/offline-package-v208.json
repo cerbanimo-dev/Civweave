@@ -1,8 +1,8 @@
 {
   "version": "1.0.34",
   "revision": "canonical-background-campus-v241-systems-mesh-v251",
-  "phoneLedgerRevision": "phone-ledger-r5-validator-review",
-  "description": "Civweave campus pack. The installed PWA is a first-class contribution mesh node with an on-device secure wallet, guardian recovery, signed federation policy anchors, earned root-diverse validator committees, explicit evidence review before honest validator mint witnessing, committee-certified canonical reward mints and transfers, committee-certified wallet freezes, fail-closed partition limits, contribution-state quarantine, offline security controls, and external offramps disabled by default. Non-genesis validator eligibility is derived from committee-certified contribution history, contribution diversity, locked certified Button bonds, independent attestations, recovery readiness, and objective protocol behavior rather than self-reported counters.",
+  "phoneLedgerRevision": "phone-ledger-r6-contribution-gateway",
+  "description": "Civweave campus pack. The installed PWA is a first-class contribution mesh node with an on-device secure wallet, guardian recovery, signed federation policy anchors, earned root-diverse validator committees, explicit evidence review before honest validator mint witnessing, committee-certified canonical reward mints and transfers, committee-certified wallet freezes, fail-closed partition limits, contribution-state quarantine, offline security controls, and opt-in contribution gateways. Gateway settlement can exchange already-earned Buttons or Acorns for independently verified external value, but external value has no contribution-currency mint authority. Base USDC verification is available with testnet enabled first and mainnet requiring explicit local opt-in; hosted-provider credentials remain server-side.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
@@ -37,6 +37,7 @@
     "/app/shared/civweave-validator-committee-v2.js",
     "/app/shared/civweave-validator-review-gate-v1.js",
     "/app/shared/civweave-contribution-ship-guard-v1.js",
+    "/app/shared/civweave-contribution-gateway-v1.js",
     "/app/shared/civweave-canonical-reward-mesh-bridge-v1.js",
     "/app/contribution-security-settings-entry-v1.js",
     "/app/contribution-security-v1.html",
