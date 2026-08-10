@@ -7,24 +7,24 @@ const INSTALLER_STATE_ASSETS = [
   '/app/required-campus-autostart-v1.js',
   '/app/campus-background-download-v241.js',
   '/app/shared/civweave-contribution-security-v1.js',
-  '/app/shared/civweave-contribution-ship-guard-v1.js'
+  '/app/shared/civweave-contribution-ship-guard-v1.js',
+  '/app/contribution-security-settings-entry-v1.js',
+  '/app/contribution-security-v1.html',
+  '/app/contribution-security-v1.js'
 ];
 try {
   for (const asset of INSTALLER_STATE_ASSETS) {
-    if (Array.isArray(REQUIRED_SHELL_ASSETS) && !REQUIRED_SHELL_ASSETS.includes(asset)) {
-      REQUIRED_SHELL_ASSETS.push(asset);
-    }
-    if (Array.isArray(SHELL_ASSETS) && !SHELL_ASSETS.includes(asset)) {
-      SHELL_ASSETS.push(asset);
-    }
+    if (Array.isArray(REQUIRED_SHELL_ASSETS) && !REQUIRED_SHELL_ASSETS.includes(asset)) REQUIRED_SHELL_ASSETS.push(asset);
+    if (Array.isArray(SHELL_ASSETS) && !SHELL_ASSETS.includes(asset)) SHELL_ASSETS.push(asset);
   }
 } catch {}
 
 self.CivweaveInstallerStateWorkerV280 = Object.freeze({
-  revision: 'installer-state-machines-v280-security-r2',
+  revision: 'installer-state-machines-v280-security-r3',
   assets: INSTALLER_STATE_ASSETS.slice(),
   shellRequired: true,
   contributionSecurityRequired: true,
-  walletContainmentRequired: true
+  walletContainmentRequired: true,
+  contributionSecuritySettingsRequired: true
 });
 })();
