@@ -26,7 +26,7 @@ function cacheAdapter(cache,spec){
     put(request,response){return cache.put(request,response)}
   };
 }
-function friendlyError(error,spec){const raw=String(error?.message||error);if(raw.includes('/models/')&&(raw.includes('env.allowRemoteModels=false')||raw.includes('local_files_only=true')))return `Downloaded model cache miss for ${spec?.label||spec?.id||'the selected model'}. Re-download this model while online before using it offline.`;if(/Unexpected token\s*['"]?<|<!doctype|not valid JSON/i.test(raw))return `Downloaded model metadata contained HTML instead of JSON for ${spec?.label||spec?.id||'the selected model'}. Resume the model once so Civweave can repair only the bad metadata file.`;return raw}
+function friendlyError(error,spec){const raw=String(error?.message||error);if(raw.includes('/models/')&&(raw.includes('env.allowRemoteModels=false')||raw.includes('local_files_only=true')))return `Downloaded model cache miss for ${spec?.label||spec?.id||'the selected model'}. Re-download this model while online before using it offline.`;if(/Unexpected end of JSON input|Unexpected token\s*['"]?<|<!doctype|not valid JSON/i.test(raw))return `Downloaded model metadata is missing, truncated, or invalid for ${spec?.label||spec?.id||'the selected model'}. Civweave now treats runtime JSON metadata as required and repairs only the missing or invalid metadata file. Reopen model settings while online, then test the model again.\n\nTransport detail: ${raw}`;return raw}
 async function configureRuntime(hf,cache,spec){
   hf.env.allowLocalModels=true;
   hf.env.allowRemoteModels=false;
