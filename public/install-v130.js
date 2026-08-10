@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION = '1.0.96';
+const VERSION = '1.0.97';
 const ENTRY = '/app/?system=civweave&installed=1';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
 const WORKER_SCRIPT_REVISION = 'release-coherence-v226';
@@ -152,6 +152,11 @@ function guidance() {
     button.disabled = true;
     button.textContent = 'Preparing app shell…';
     help('Preparing only the small installable shell. The campus pack no longer blocks installation.');
+    return;
+  }
+  const nativeInstall = globalThis.CivweavePWAInstallV246;
+  if (nativeInstall) {
+    nativeInstall.refresh?.();
     return;
   }
   button.disabled = false;
@@ -485,17 +490,18 @@ async function installOrOpen() {
     : 'Open the browser menu and choose Install app or Add to Home screen. The lightweight shell is ready.');
 }
 
-addEventListener('beforeinstallprompt', event => {
-  event.preventDefault();
-  installPrompt = event;
-  guidance();
-});
-addEventListener('appinstalled', () => {
-  installPrompt = null;
-  help('Civweave is installed. Download the optional offline campus whenever you want the full local copy.');
-});
-
-$('#install-app')?.addEventListener('click', installOrOpen);
+if (!globalThis.CivweavePWAInstallV246) {
+  addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    installPrompt = event;
+    guidance();
+  });
+  addEventListener('appinstalled', () => {
+    installPrompt = null;
+    help('Civweave is installed. Download the optional offline campus whenever you want the full local copy.');
+  });
+  $('#install-app')?.addEventListener('click', installOrOpen);
+}
 $('#check-update')?.addEventListener('click', () => prepareShell({ manual: true }));
 $('#download-offline-package')?.addEventListener('click', downloadOfflineCampus);
 
