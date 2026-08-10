@@ -23,7 +23,7 @@ on:
       - 'agent/civweave-map-v1-launch'
 
 concurrency:
-  group: civweave-map-v1-${{ github.event.pull_request.number || github.ref }}
+  group: civweave-map-v1-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
