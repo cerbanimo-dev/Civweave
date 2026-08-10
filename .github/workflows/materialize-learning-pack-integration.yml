@@ -47,11 +47,12 @@ jobs:
           NODE
       - name: Build Labor Atlas verification artifact
         run: node scripts/build-learning-packs-v1.mjs
-      - name: Verify generated release
-        run: |
-          node scripts/verify-release-contract.mjs
-          node scripts/verify-canonical-launch-release.mjs
-          node scripts/verify-learning-packs-v1.mjs
+      - name: Verify release contract
+        run: node scripts/verify-release-contract.mjs
+      - name: Verify canonical release
+        run: node scripts/verify-canonical-launch-release.mjs
+      - name: Verify learning packs
+        run: node scripts/verify-learning-packs-v1.mjs
       - name: Commit generated release assets
         shell: bash
         run: |
