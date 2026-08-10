@@ -1,0 +1,594 @@
+{
+  "schema": "civweave.open-learning-media-relevance-audit.v1",
+  "built_at": "2026-08-10T02:11:38Z",
+  "before": 329,
+  "after": 74,
+  "rejected": 255,
+  "topics": {
+    "vibe-coding": {
+      "name": "Vibe Coding",
+      "school_slug": "technology",
+      "records": 15,
+      "mesh_redistributable": 14,
+      "providers": {
+        "internet-archive": 4,
+        "peertube": 7,
+        "wikimedia-commons": 4
+      },
+      "top_titles": [
+        "Gen AI prototyping with Google Tools from Stitch to AI studio",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Wikimania 2026 – Building a Wikimedia tool with agentic AI",
+        "Wikimania 2026 – Wikipedia Mobile Apps THE destination for knowledge lovers in a mobile-first world",
+        "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News",
+        "Survivre à l'« AI Slopageddon » : comment l'IA ébranle l'Open Source - Raphaël Semeteys - JdLL2026"
+      ]
+    },
+    "prompt-engineering": {
+      "name": "Prompt Engineering",
+      "school_slug": "technology",
+      "records": 12,
+      "mesh_redistributable": 10,
+      "providers": {
+        "peertube": 8,
+        "internet-archive": 3,
+        "wikimedia-commons": 1
+      },
+      "top_titles": [
+        "Evals Are Broken, Use Them Anyway — Ara Khan, Cline",
+        "AI Ppt Vdo",
+        "Machine Learning nella Scuola: Concetti Base e Applicazioni",
+        "Language Tools For Creators by Paco Xander Nathan",
+        "Stop AI Agent Hallucinations: 5 Techniques + Production Patterns - Elizabeth Fuentes, AWS",
+        "Il Prompt Engineering",
+        "Generating novel images using CLIP in Python",
+        "This is a story of the prompt design to generate an antifascist aesthetics logo"
+      ]
+    },
+    "pseudocoding": {
+      "name": "Pseudocoding and Algorithm Design",
+      "school_slug": "technology",
+      "records": 7,
+      "mesh_redistributable": 4,
+      "providers": {
+        "wikimedia-commons": 1,
+        "peertube": 2,
+        "internet-archive": 4
+      },
+      "top_titles": [
+        "Deadlocks and the Dining Philosophers Problem",
+        "Pseudo-code et description des algorithmes",
+        "CLOUDS Andres Colubri",
+        "Open CS education resources for schools - how hard could it be?",
+        "CLOUDS Aaron Koblin",
+        "CLOUDS: Pittsburgh Premiere (excerpt)",
+        "Athens: PERspectives (2022) - Project Promotion [English]"
+      ]
+    },
+    "critical-thinking": {
+      "name": "Critical Thinking",
+      "school_slug": "philosophy-and-religion",
+      "records": 13,
+      "mesh_redistributable": 13,
+      "providers": {
+        "internet-archive": 6,
+        "wikimedia-commons": 7
+      },
+      "top_titles": [
+        "BREAKING: Drones just struck IDF convoy carrying Netanyahu…ENTIRE ISRAEL IN SHOCK - OPTM",
+        "BREAKING: Netanyahu FLEE Tel Aviv Hours After MASKED IDF Soldiers Attack Gov’t Office",
+        "Iran just destroyed US ships in strait of Hormuz - 10 million barrels incinerated — OPTM",
+        "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
+        "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
+        "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
+        "Berpikir kritis seperti mengupas bawang",
+        "The Truth About the Murder of Mary Phagan - Jake Shields Interview - FightBack Podcast"
+      ]
+    },
+    "logical-frameworks": {
+      "name": "Logical Frameworks",
+      "school_slug": "philosophy-and-religion",
+      "records": 28,
+      "mesh_redistributable": 25,
+      "providers": {
+        "internet-archive": 14,
+        "wikimedia-commons": 9,
+        "peertube": 5
+      },
+      "top_titles": [
+        "World leader Fangruida, mentor of mankind, great sun-great genius (Malik. R)2020v.1.2",
+        "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem",
+        "World Leder Fangruida Bio. 2020v. 3.3 Revision",
+        "Kobi Gaan - Documentaries",
+        "Dr. William E. Rees",
+        "A New HOPE (2022): Hacking Comprehension: Overcoming Limitations to Better Understand the World",
+        "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)",
+        "Diego Fontanive ESC2017"
+      ]
+    }
+  },
+  "rejected_samples": [
+    {
+      "provider": "wikimedia-commons",
+      "title": "Artemis II Orion Mission Evaluation Room During Translunar Injection Burn (jsc2026m000330)",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Artemis II Orion Mission Evaluation Room Team During Splashdown (jsc2026m000354)",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "B-roll of the Orion Mission Evaluation Room (MER) team working during Orion’s closest approach to the Moon (jsc2026m000346v)",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Orion Mission Evaluation Room (MER) B-Roll (jsc2025m000832)",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Thirsty Burglar Gets Stuck On Store Roof Trying To Break in",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Tripoli ARG, 31st MEU return from U S 5th, 7th Fleet deployment (1017218)",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "peertube",
+      "title": "A hub extracts. A mesh circulates. That's the entire argument. #SystemsChange #",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "peertube",
+      "title": "Audio evidence of of Putin`s Adviser Glazyev involvement in war in Ukraine (2016)",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "peertube",
+      "title": "Chest‑Cam Evidence Shows Israeli Intelligence Direct a Targeted Gaza Assassination on Dec 14 2025",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "peertube",
+      "title": "How to graphically win an argument - with data and LibreOffice calc",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "peertube",
+      "title": "Russian evidence for \"Nazism in Ukraine\"",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "peertube",
+      "title": "Video evidence on the 22 May 2026 aerial hit on Starobilsk",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Debunking common myths about transgender youth (Gender Analysis)",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Fiesta Nacional del Maiz - Ministerio de Cultura de la Nación (Arg)",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Iran, Shiraz, Arg of Karim Khan - 2021 4K - ارگ کریم خان زند، شیراز، ایران",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "N1 FITNESS PODCAST 131- Becoming A Critical Thinker - Interview with Dr. Mike Israetel",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "جنگ نخواهد شد و مذاکره نخواهیم کرد",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "peertube",
+      "title": "15. Mark Burgman - University of Hawaiʻi",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "peertube",
+      "title": "A Preliminary User Experience Evaluation Of MISP (Work In Progress) - Borce Stojkovski",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "peertube",
+      "title": "Cambridge Evidence TAP OpenGL interactive visualiser",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "peertube",
+      "title": "DÉBAT Salon Agriculture 2022: Avez-vous un ARGUMENT contre le VEGANISME, ou seulement des EXCUSES ?",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "peertube",
+      "title": "Esprit critique - La pertinence de l'argument",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "peertube",
+      "title": "Evaluating Open Source Software for Enterprise Use",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "peertube",
+      "title": "Evidence-Informed Note-Making Debunking Myths about Knowledge Management - Dr. Stefan T. Siegel (1080p, h264)",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "peertube",
+      "title": "FOSS4G 2021 The status of GIS teaching in South African secondary schools including an ......",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "peertube",
+      "title": "FOSS4GE 2025 | Modeling ecosystem services in Armenia using InVEST: a scenario-based approach ...",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "peertube",
+      "title": "Is Life But a Dream? What the Simulation Argument Means for an Afterlife",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "peertube",
+      "title": "No evidence looping until the ghost ate my RAM - Phasmophobia",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "peertube",
+      "title": "Riad Kobaissi lays bare Hariri's argument | رياض قبيسي يُعرّي سعد الحريري",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "peertube",
+      "title": "Security tool evaluations with MITRE ATT&CK - Francis Duff",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Anthony Nadler on how conservative media are different",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Concerns about media, especially in Germany",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Expose media lies and have fun doing it",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Final evaluation, by Amélie Charles",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Gource visualization video of Argüman development, an argument map software",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Gource visualization video of Argüman development, an argument map software (sped-up)",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "LC - Qualitative Evaluation Methods and Tools - 2022-04-29",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Let's agree to disagree and seek common ground",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Reconstruction of Arg-e Bam Citadel • A City Reborn • Bam • IRAN",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Reflection - 54830842689",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Reflection on Elliptical Pool Table",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "“Calaix de la Ciència” la ciència com a argument de venda",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Defending our Military",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Interview with Brian Klaas",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "peertube",
+      "title": "02.05 L'évolution du logiciel libre à l'heure du cloud",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "peertube",
+      "title": "10.06.2026 - Révolte de l'enseignement, BXL - 06",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "peertube",
+      "title": "Akademy 2020 - David Edmundson - How to Win an Argument with a Maintainer",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "peertube",
+      "title": "L'art d'évaluer l'open source ： regards croisés d'experts du libre",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "peertube",
+      "title": "President Volodymyr Zelensky on Dec. 12 recorded a video from Kupiansk, one of the hottest parts of the frontline.",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "peertube",
+      "title": "Александра Архипова, «Как устроены паники о цифровом влиянии в прошлом и настоящем»",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "peertube",
+      "title": "Александра Архипова, «Почему мы распространяем фейковые новости?»",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "peertube",
+      "title": "Александра Бочавер, «В Интернете как на Диком Западе»",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "peertube",
+      "title": "Арестович — президент для 4 млн украинцев. На кого рассчитано интервью у Собчак?",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "peertube",
+      "title": "Борис Козловский, «Новые медиа и старая неправда»",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "peertube",
+      "title": "Василий Гатов, «Постправда и фейкньюс»",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "peertube",
+      "title": "Илья Бер, «Журналистские фейки и фейлы. Откуда они берутся?»",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "peertube",
+      "title": "Он «всё знает», но это не точно. Разбираем феномен Дмитрия Гордона",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Modern Viking Music : Tragedy of a Misunderstood Art",
+      "original_topic": "critical-thinking",
+      "matched_query": "source evaluation"
+    },
+    {
+      "provider": "peertube",
+      "title": "The Car King Part 18 - Lightning and Ruby's Argument",
+      "original_topic": "critical-thinking",
+      "matched_query": "argument analysis"
+    },
+    {
+      "provider": "peertube",
+      "title": "\"Dur dur d'être bébé\" 🍼 par Jordi Jordan 🍼",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "peertube",
+      "title": "@LouisVuitton la grosse honte par Daphnéblt",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "peertube",
+      "title": "A message from Zohran Mamdhani",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "peertube",
+      "title": "President Obama, Halloween, all tricks and no treats.",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "peertube",
+      "title": "RTS : la coupe du monde la plus mercantile de l'histoire",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "peertube",
+      "title": "Sortir de la dépendance numérique pour atteindre une vraie indépendance.",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "peertube",
+      "title": "Team for the Planet devient mondial Team for the Planet goes global Team for the Planet se vuelve mundial Team […]",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "BREAKING: US Bombs Iran’s Nuclear Sites — What Happened Next SHOCKED Everyone!",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "1952 Stevenson Ad",
+      "original_topic": "logical-frameworks",
+      "matched_query": "logical fallacies"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Considerations for Developing Data Sharing Agreements for Your Health Department- Data to Care",
+      "original_topic": "logical-frameworks",
+      "matched_query": "decision framework"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Egyptian President Sadat's Remarks at the Camp David Agreement, 17 September 1978",
+      "original_topic": "logical-frameworks",
+      "matched_query": "decision framework"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Israeli Prime Minister Begin's remarks at the Camp David Agreement, 17 September 1978",
+      "original_topic": "logical-frameworks",
+      "matched_query": "decision framework"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "NASA Astronaut Chris Williams- Thinking Like a Scientist (Chris Williams Thinking Science)",
+      "original_topic": "logical-frameworks",
+      "matched_query": "systems thinking"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "President Carter's Remarks at the Camp David Agreement, 17 September 1978",
+      "original_topic": "logical-frameworks",
+      "matched_query": "decision framework"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "The Basics of the CDSi Logic Specification",
+      "original_topic": "logical-frameworks",
+      "matched_query": "formal logic"
+    },
+    {
+      "provider": "peertube",
+      "title": "Blind to Russia’s true state, Putin sees escalation as logical | Fabrice Pothier",
+      "original_topic": "logical-frameworks",
+      "matched_query": "logical reasoning"
+    },
+    {
+      "provider": "peertube",
+      "title": "Proposition Politique n1 Centre National du Recyclage",
+      "original_topic": "logical-frameworks",
+      "matched_query": "propositional logic"
+    },
+    {
+      "provider": "peertube",
+      "title": "Story behind decision to strip Zelenskyy of Poland’s highest state honor | Anatomy of Disinformation",
+      "original_topic": "logical-frameworks",
+      "matched_query": "decision framework"
+    },
+    {
+      "provider": "peertube",
+      "title": "Time - Prepositional phrase & Ago - Adverbial phrase",
+      "original_topic": "logical-frameworks",
+      "matched_query": "propositional logic"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Complexity Science- 4 Systems Theory",
+      "original_topic": "logical-frameworks",
+      "matched_query": "systems thinking"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Internal Market Council, 1957th meeting",
+      "original_topic": "logical-frameworks",
+      "matched_query": "decision framework"
+    }
+  ]
+}

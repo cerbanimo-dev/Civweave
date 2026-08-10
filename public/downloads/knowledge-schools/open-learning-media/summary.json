@@ -1,148 +1,136 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-08-10T02:06:00Z",
-  "records": 329,
-  "mesh_redistributable": 299,
-  "download_candidates": 770,
+  "built_at": "2026-08-10T02:11:38Z",
+  "records": 74,
+  "mesh_redistributable": 65,
+  "download_candidates": 164,
   "providers": {
-    "wikimedia-commons": {
-      "records": 109,
-      "mesh_redistributable": 109,
-      "download_candidates": 109
+    "internet-archive": {
+      "records": 30,
+      "mesh_redistributable": 23,
+      "download_candidates": 47
     },
     "peertube": {
-      "records": 180,
-      "mesh_redistributable": 157,
-      "download_candidates": 588
+      "records": 22,
+      "mesh_redistributable": 20,
+      "download_candidates": 95
     },
-    "internet-archive": {
-      "records": 40,
-      "mesh_redistributable": 33,
-      "download_candidates": 73
+    "wikimedia-commons": {
+      "records": 22,
+      "mesh_redistributable": 22,
+      "download_candidates": 22
     }
   },
   "focus_topics": {
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
-      "queries": [
-        "vibe coding",
-        "AI coding assistant",
-        "AI pair programming",
-        "LLM coding",
-        "coding with generative AI"
-      ],
-      "concepts": [
-        "vibe coding",
-        "AI-assisted programming",
-        "code generation",
-        "software iteration"
-      ],
-      "records": 75,
-      "mesh_redistributable": 74,
+      "records": 15,
+      "mesh_redistributable": 14,
       "providers": {
-        "wikimedia-commons": 31,
-        "peertube": 40,
-        "internet-archive": 4
-      }
+        "internet-archive": 4,
+        "peertube": 7,
+        "wikimedia-commons": 4
+      },
+      "top_titles": [
+        "Gen AI prototyping with Google Tools from Stitch to AI studio",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse",
+        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Wikimania 2026 – Building a Wikimedia tool with agentic AI",
+        "Wikimania 2026 – Wikipedia Mobile Apps THE destination for knowledge lovers in a mobile-first world",
+        "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News",
+        "Survivre à l'« AI Slopageddon » : comment l'IA ébranle l'Open Source - Raphaël Semeteys - JdLL2026"
+      ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
-      "queries": [
-        "prompt engineering",
-        "LLM prompting",
-        "prompt design",
-        "few shot prompting",
-        "AI prompt patterns"
-      ],
-      "concepts": [
-        "prompt engineering",
-        "LLM prompting",
-        "prompt patterns",
-        "evaluation"
-      ],
-      "records": 54,
-      "mesh_redistributable": 50,
+      "records": 12,
+      "mesh_redistributable": 10,
       "providers": {
-        "wikimedia-commons": 16,
-        "peertube": 34,
-        "internet-archive": 4
-      }
+        "peertube": 8,
+        "internet-archive": 3,
+        "wikimedia-commons": 1
+      },
+      "top_titles": [
+        "Evals Are Broken, Use Them Anyway — Ara Khan, Cline",
+        "AI Ppt Vdo",
+        "Machine Learning nella Scuola: Concetti Base e Applicazioni",
+        "Language Tools For Creators by Paco Xander Nathan",
+        "Stop AI Agent Hallucinations: 5 Techniques + Production Patterns - Elizabeth Fuentes, AWS",
+        "Il Prompt Engineering",
+        "Generating novel images using CLIP in Python",
+        "This is a story of the prompt design to generate an antifascist aesthetics logo"
+      ]
     },
     "pseudocoding": {
       "name": "Pseudocoding and Algorithm Design",
       "school_slug": "technology",
-      "queries": [
-        "pseudocode",
-        "pseudocode algorithms",
-        "algorithm design",
-        "programming flowchart",
-        "computational thinking"
-      ],
-      "concepts": [
-        "pseudocode",
-        "algorithms",
-        "flowcharts",
-        "computational thinking"
-      ],
-      "records": 47,
-      "mesh_redistributable": 38,
+      "records": 7,
+      "mesh_redistributable": 4,
       "providers": {
-        "wikimedia-commons": 11,
-        "peertube": 30,
-        "internet-archive": 6
-      }
+        "wikimedia-commons": 1,
+        "peertube": 2,
+        "internet-archive": 4
+      },
+      "top_titles": [
+        "Deadlocks and the Dining Philosophers Problem",
+        "Pseudo-code et description des algorithmes",
+        "CLOUDS Andres Colubri",
+        "Open CS education resources for schools - how hard could it be?",
+        "CLOUDS Aaron Koblin",
+        "CLOUDS: Pittsburgh Premiere (excerpt)",
+        "Athens: PERspectives (2022) - Project Promotion [English]"
+      ]
     },
     "critical-thinking": {
       "name": "Critical Thinking",
       "school_slug": "philosophy-and-religion",
-      "queries": [
-        "critical thinking",
-        "argument analysis",
-        "source evaluation",
-        "media literacy",
-        "evidence reasoning"
-      ],
-      "concepts": [
-        "critical thinking",
-        "argument analysis",
-        "source evaluation",
-        "evidence"
-      ],
-      "records": 80,
-      "mesh_redistributable": 72,
+      "records": 13,
+      "mesh_redistributable": 13,
       "providers": {
-        "wikimedia-commons": 30,
-        "peertube": 40,
-        "internet-archive": 10
-      }
+        "internet-archive": 6,
+        "wikimedia-commons": 7
+      },
+      "top_titles": [
+        "BREAKING: Drones just struck IDF convoy carrying Netanyahu…ENTIRE ISRAEL IN SHOCK - OPTM",
+        "BREAKING: Netanyahu FLEE Tel Aviv Hours After MASKED IDF Soldiers Attack Gov’t Office",
+        "Iran just destroyed US ships in strait of Hormuz - 10 million barrels incinerated — OPTM",
+        "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
+        "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
+        "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
+        "Berpikir kritis seperti mengupas bawang",
+        "The Truth About the Murder of Mary Phagan - Jake Shields Interview - FightBack Podcast"
+      ]
     },
     "logical-frameworks": {
       "name": "Logical Frameworks",
       "school_slug": "philosophy-and-religion",
-      "queries": [
-        "formal logic",
-        "propositional logic",
-        "logical reasoning",
-        "logical fallacies",
-        "decision framework",
-        "systems thinking"
-      ],
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "records": 81,
-      "mesh_redistributable": 73,
+      "records": 28,
+      "mesh_redistributable": 25,
       "providers": {
-        "wikimedia-commons": 23,
-        "internet-archive": 18,
-        "peertube": 40
-      }
+        "internet-archive": 14,
+        "wikimedia-commons": 9,
+        "peertube": 5
+      },
+      "top_titles": [
+        "World leader Fangruida, mentor of mankind, great sun-great genius (Malik. R)2020v.1.2",
+        "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem",
+        "World Leder Fangruida Bio. 2020v. 3.3 Revision",
+        "Kobi Gaan - Documentaries",
+        "Dr. William E. Rees",
+        "A New HOPE (2022): Hacking Comprehension: Overcoming Limitations to Better Understand the World",
+        "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)",
+        "Diego Fontanive ESC2017"
+      ]
     }
   },
-  "failures": 0
+  "failures": 0,
+  "records_before_relevance_gate": 329,
+  "rejected_by_relevance_gate": 255,
+  "relevance_gate": {
+    "schema": "civweave.open-learning-media-relevance-gate.v1",
+    "policy": "Provider search is discovery only; title/description must independently meet a topic-specific deterministic threshold."
+  }
 }
