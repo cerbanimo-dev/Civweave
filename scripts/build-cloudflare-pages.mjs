@@ -99,7 +99,8 @@ for (const required of [
   resolve(sourceDir, 'app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm'),
   resolve(sourceDir, 'app/vendor/transformers-v4/transformers.min.js'),
   resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.mjs'),
-  resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.wasm'),
+  resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.wasm.part0'),
+  resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.wasm.part1'),
 ]) {
   if (!existsSync(required) || !statSync(required).isFile()) throw new Error(`Required local-AI runtime asset was not staged: ${relative(repoRoot, required)}`);
 }
@@ -144,4 +145,4 @@ const installerBytes = statSync(installerPath).size;
 const seedBytes = statSync(pocketCampusSeedPath).size;
 const mapBytes = statSync(mapPackagePath).size;
 console.log(`Built .cloudflare-pages with mobile installer (${installerBytes} bytes), portable Civweave seed (${seedBytes} bytes), and Civweave Map v1 (${mapBytes} bytes).`);
-console.log("All Cloudflare-hosted files are at or below 24 MiB, including both local AI runtimes and Map v1 runtimes.");
+console.log("All Cloudflare-hosted files are at or below 24 MiB, including the split Gemma 4 runtime and Map v1 runtimes.");
