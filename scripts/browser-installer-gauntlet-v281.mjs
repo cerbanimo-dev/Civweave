@@ -11,6 +11,7 @@ const publicDir=path.join(root,'public');
 const host='127.0.0.1';
 const port=4173;
 const base=`http://${host}:${port}`;
+const OFFLINE_FETCH_DELAY_MS=250;
 
 const contentTypes={
   '.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8',
@@ -34,7 +35,7 @@ const server=http.createServer(async(req,res)=>{
     if(stat.isDirectory())file=path.join(file,'index.html');
     const body=await fs.readFile(file);
     const purpose=String(req.headers['x-civweave-package']||'');
-    if(/^offline-campus/.test(purpose))await new Promise(resolve=>setTimeout(resolve,35));
+    if(/^offline-campus/.test(purpose))await new Promise(resolve=>setTimeout(resolve,OFFLINE_FETCH_DELAY_MS));
     res.writeHead(200,{
       'content-type':contentTypes[path.extname(file).toLowerCase()]||'application/octet-stream',
       'cache-control':'no-store',
@@ -54,32 +55,30 @@ try{
   const page=await context.newPage();
   await page.goto(`${base}/app/index.html`,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>document.querySelector('#package-state')?.textContent?.trim()==='ready',{timeout:60000});
-  await page.waitForFunction(()=>/Pause download|Refresh offline campus/.test(document.querySelector('#download-offline-package')?.textContent||''),{timeout:60000});
+  await page.waitForFunction(()=>document.querySelector('#download-offline-package')?.textContent?.trim()==='Pause download',{timeout:60000});
 
   const firstAction=(await page.textContent('#download-offline-package'))?.trim()||'';
-  assert.ok(['Pause download','Refresh offline campus'].includes(firstAction),`unexpected campus action: ${firstAction}`);
+  assert.equal(firstAction,'Pause download','fresh browser gauntlet must catch the campus while it is still downloading');
 
-  if(firstAction==='Pause download'){
-    await page.click('#download-offline-package');
-    await page.waitForFunction(()=>document.querySelector('#download-offline-package')?.textContent?.trim()==='Resume download',{timeout:30000});
-    assert.equal((await page.textContent('#offline-package-state'))?.trim(),'paused');
+  await page.click('#download-offline-package');
+  await page.waitForFunction(()=>document.querySelector('#download-offline-package')?.textContent?.trim()==='Resume download',{timeout:30000});
+  assert.equal((await page.textContent('#offline-package-state'))?.trim(),'paused');
 
-    await page.close();
-    const reopened=await context.newPage();
-    await reopened.goto(`${base}/app/index.html`,{waitUntil:'domcontentloaded'});
-    await reopened.waitForFunction(()=>document.querySelector('#download-offline-package')?.textContent?.trim()==='Resume download',{timeout:30000});
-    assert.equal((await reopened.textContent('#offline-package-state'))?.trim(),'paused','manual pause must survive a page restart');
+  await page.close();
+  const reopened=await context.newPage();
+  await reopened.goto(`${base}/app/index.html`,{waitUntil:'domcontentloaded'});
+  await reopened.waitForFunction(()=>document.querySelector('#download-offline-package')?.textContent?.trim()==='Resume download',{timeout:30000});
+  assert.equal((await reopened.textContent('#offline-package-state'))?.trim(),'paused','manual pause must survive a page restart');
 
-    await reopened.click('#download-offline-package');
-    await reopened.waitForFunction(()=>document.querySelector('#download-offline-package')?.textContent?.trim()==='Pause download',{timeout:30000});
-    await context.setOffline(true);
-    const offlineShell=await reopened.evaluate(()=>fetch('/app/index.html').then(response=>response.ok).catch(()=>false));
-    assert.equal(offlineShell,true,'cached installer shell must remain readable offline');
-    await context.setOffline(false);
-    await reopened.click('#download-offline-package');
-    await reopened.waitForFunction(()=>document.querySelector('#download-offline-package')?.textContent?.trim()==='Resume download',{timeout:30000});
-    await reopened.close();
-  }
+  await reopened.click('#download-offline-package');
+  await reopened.waitForFunction(()=>document.querySelector('#download-offline-package')?.textContent?.trim()==='Pause download',{timeout:30000});
+  await context.setOffline(true);
+  const offlineShell=await reopened.evaluate(()=>fetch('/app/index.html').then(response=>response.ok).catch(()=>false));
+  assert.equal(offlineShell,true,'cached installer shell must remain readable offline');
+  await context.setOffline(false);
+  await reopened.click('#download-offline-package');
+  await reopened.waitForFunction(()=>document.querySelector('#download-offline-package')?.textContent?.trim()==='Resume download',{timeout:30000});
+  await reopened.close();
   await context.close();
 
   const lowStorage=await browser.newContext({serviceWorkers:'allow'});
@@ -98,7 +97,14 @@ try{
   assert.notEqual((await lowPage.textContent('#offline-package-state'))?.trim(),'downloading','low-storage preflight must block campus autostart');
   await lowStorage.close();
 
-  console.log('browser installer gauntlet v281: ok');
+  console.log(JSON.stringify({
+    ok:true,
+    revision:'browser-installer-gauntlet-v281',
+    offlineFetchDelayMs:OFFLINE_FETCH_DELAY_MS,
+    pauseRestartResume:true,
+    offlineShell:true,
+    lowStorageBlocked:true
+  },null,2));
 }finally{
   await browser.close();
   await new Promise(resolve=>server.close(resolve));
