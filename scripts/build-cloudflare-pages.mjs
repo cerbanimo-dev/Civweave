@@ -35,6 +35,7 @@ const installerResumeSmoke = resolve(scriptDir, "smoke-installer-resume-state-v2
 const installerHardeningSmoke = resolve(scriptDir, "smoke-installer-hardening-v281.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
+await import('./apply-confidence-weighted-validation-v1-safe.mjs');
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 await import('./generate-asset-lockboard-catalog-v239.mjs');
