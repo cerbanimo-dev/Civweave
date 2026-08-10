@@ -1,0 +1,148 @@
+{
+  "schema": "civweave.open-learning-media-harvest-summary.v1",
+  "built_at": "2026-08-10T02:06:00Z",
+  "records": 329,
+  "mesh_redistributable": 299,
+  "download_candidates": 770,
+  "providers": {
+    "wikimedia-commons": {
+      "records": 109,
+      "mesh_redistributable": 109,
+      "download_candidates": 109
+    },
+    "peertube": {
+      "records": 180,
+      "mesh_redistributable": 157,
+      "download_candidates": 588
+    },
+    "internet-archive": {
+      "records": 40,
+      "mesh_redistributable": 33,
+      "download_candidates": 73
+    }
+  },
+  "focus_topics": {
+    "vibe-coding": {
+      "name": "Vibe Coding",
+      "school_slug": "technology",
+      "queries": [
+        "vibe coding",
+        "AI coding assistant",
+        "AI pair programming",
+        "LLM coding",
+        "coding with generative AI"
+      ],
+      "concepts": [
+        "vibe coding",
+        "AI-assisted programming",
+        "code generation",
+        "software iteration"
+      ],
+      "records": 75,
+      "mesh_redistributable": 74,
+      "providers": {
+        "wikimedia-commons": 31,
+        "peertube": 40,
+        "internet-archive": 4
+      }
+    },
+    "prompt-engineering": {
+      "name": "Prompt Engineering",
+      "school_slug": "technology",
+      "queries": [
+        "prompt engineering",
+        "LLM prompting",
+        "prompt design",
+        "few shot prompting",
+        "AI prompt patterns"
+      ],
+      "concepts": [
+        "prompt engineering",
+        "LLM prompting",
+        "prompt patterns",
+        "evaluation"
+      ],
+      "records": 54,
+      "mesh_redistributable": 50,
+      "providers": {
+        "wikimedia-commons": 16,
+        "peertube": 34,
+        "internet-archive": 4
+      }
+    },
+    "pseudocoding": {
+      "name": "Pseudocoding and Algorithm Design",
+      "school_slug": "technology",
+      "queries": [
+        "pseudocode",
+        "pseudocode algorithms",
+        "algorithm design",
+        "programming flowchart",
+        "computational thinking"
+      ],
+      "concepts": [
+        "pseudocode",
+        "algorithms",
+        "flowcharts",
+        "computational thinking"
+      ],
+      "records": 47,
+      "mesh_redistributable": 38,
+      "providers": {
+        "wikimedia-commons": 11,
+        "peertube": 30,
+        "internet-archive": 6
+      }
+    },
+    "critical-thinking": {
+      "name": "Critical Thinking",
+      "school_slug": "philosophy-and-religion",
+      "queries": [
+        "critical thinking",
+        "argument analysis",
+        "source evaluation",
+        "media literacy",
+        "evidence reasoning"
+      ],
+      "concepts": [
+        "critical thinking",
+        "argument analysis",
+        "source evaluation",
+        "evidence"
+      ],
+      "records": 80,
+      "mesh_redistributable": 72,
+      "providers": {
+        "wikimedia-commons": 30,
+        "peertube": 40,
+        "internet-archive": 10
+      }
+    },
+    "logical-frameworks": {
+      "name": "Logical Frameworks",
+      "school_slug": "philosophy-and-religion",
+      "queries": [
+        "formal logic",
+        "propositional logic",
+        "logical reasoning",
+        "logical fallacies",
+        "decision framework",
+        "systems thinking"
+      ],
+      "concepts": [
+        "formal logic",
+        "logical reasoning",
+        "decision frameworks",
+        "systems thinking"
+      ],
+      "records": 81,
+      "mesh_redistributable": 73,
+      "providers": {
+        "wikimedia-commons": 23,
+        "internet-archive": 18,
+        "peertube": 40
+      }
+    }
+  },
+  "failures": 0
+}
