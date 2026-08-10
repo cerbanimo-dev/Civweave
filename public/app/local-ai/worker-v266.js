@@ -4,6 +4,8 @@ const TRANSFORMERS='/app/vendor/transformers/transformers.min.js';
 let pipe=null,loaded=null,loading=null,hfRuntime=null;
 const clean=(value,max=200000)=>String(value??'').slice(0,max);
 function post(id,type,payload={}){self.postMessage({id,type,...payload})}
+function contentText(value){if(typeof value==='string')return value;if(Array.isArray(value))return value.map(x=>typeof x==='string'?x:clean(x?.text||x?.content||'',12000)).filter(Boolean).join('\n');return clean(value?.text||value?.content||value||'',20000)}
+function normalizeMessages(messages){return (Array.isArray(messages)?messages:[]).map(row=>({role:['system','assistant','user'].includes(String(row?.role))?String(row.role):'user',content:contentText(row?.content??row?.text)})).filter(row=>row.content.trim())}
 function extractGenerated(output){const row=Array.isArray(output)?output[0]:output;const generated=row?.generated_text;if(typeof generated==='string')return generated;if(Array.isArray(generated)){const last=generated.at(-1);return typeof last==='string'?last:clean(last?.content||last?.text)}return clean(row?.text||row?.content||generated)}
 function requestUrl(input){try{return typeof input==='string'?input:input?.url||String(input)}catch{return String(input||'')}}
 function pinnedRemoteRoot(spec){return `https://huggingface.co/${spec.repo}/resolve/${encodeURIComponent(spec.revision)}/`}
@@ -13,40 +15,43 @@ function cacheAdapter(cache,spec){
   return{
     async match(request){
       const key=requestUrl(request);
-      if(key.startsWith(localPrefix)){
-        const remote=remotePrefix+key.slice(localPrefix.length),hit=await cache.match(remote);
-        return hit?.ok?hit.clone():miss();
-      }
-      if(key.startsWith(remotePrefix)){
-        const hit=await cache.match(key);
-        return hit?.ok?hit.clone():miss();
-      }
+      if(key.startsWith(localPrefix)){const remote=remotePrefix+key.slice(localPrefix.length),hit=await cache.match(remote);return hit?.ok?hit.clone():miss()}
+      if(key.startsWith(remotePrefix)){const hit=await cache.match(key);return hit?.ok?hit.clone():miss()}
       try{const hit=await cache.match(request);return hit?.ok?hit.clone():undefined}catch{return undefined}
     },
     put(request,response){return cache.put(request,response)}
   };
 }
 function friendlyError(error,spec){const raw=String(error?.message||error);if(raw.includes('/models/')&&(raw.includes('env.allowRemoteModels=false')||raw.includes('local_files_only=true')))return `Downloaded model cache miss for ${spec?.label||spec?.id||'the selected model'}. Re-download this model while online before using it offline.`;if(/Unexpected end of JSON input|Unexpected token\s*['"]?<|<!doctype|not valid JSON/i.test(raw))return `Downloaded model metadata is missing, truncated, or invalid for ${spec?.label||spec?.id||'the selected model'}. Civweave now treats runtime JSON metadata as required and repairs only the missing or invalid metadata file. Reopen model settings while online, then test the model again.\n\nTransport detail: ${raw}`;if(/Failed to get GPU adapter|WebGPU adapter|no available backend|WebGPU is unavailable/i.test(raw))return `This browser did not provide a usable WebGPU adapter. Civweave can use its CPU/WASM compatibility model instead; browser launch flags such as --enable-unsafe-webgpu cannot be enabled by a web app.\n\nBackend detail: ${raw}`;return raw}
-async function verifyBackend(spec){
-  if(spec.device!=='webgpu')return 'wasm';
-  if(!self.navigator?.gpu?.requestAdapter)throw new Error('WebGPU is unavailable in this worker.');
-  let adapter=null;try{adapter=await self.navigator.gpu.requestAdapter()}catch(error){throw new Error(`Failed to get GPU adapter: ${clean(error?.message||error,1000)}`)}
-  if(!adapter)throw new Error('Failed to get GPU adapter.');
-  return 'webgpu';
-}
-async function configureRuntime(hf,cache,spec){
-  hf.env.allowLocalModels=true;
-  hf.env.allowRemoteModels=false;
-  hf.env.useBrowserCache=false;
-  hf.env.useCustomCache=true;
-  hf.env.customCache=cacheAdapter(cache,spec);
-  if(hf.env.backends?.onnx?.wasm)hf.env.backends.onnx.wasm.wasmPaths='/app/vendor/transformers/wasm/';
-}
+async function verifyBackend(spec){if(spec.device!=='webgpu')return 'wasm';if(!self.navigator?.gpu?.requestAdapter)throw new Error('WebGPU is unavailable in this worker.');let adapter=null;try{adapter=await self.navigator.gpu.requestAdapter()}catch(error){throw new Error(`Failed to get GPU adapter: ${clean(error?.message||error,1000)}`)}if(!adapter)throw new Error('Failed to get GPU adapter.');return 'webgpu'}
+async function configureRuntime(hf,cache,spec){hf.env.allowLocalModels=true;hf.env.allowRemoteModels=false;hf.env.useBrowserCache=false;hf.env.useCustomCache=true;hf.env.customCache=cacheAdapter(cache,spec);if(hf.env.backends?.onnx?.wasm)hf.env.backends.onnx.wasm.wasmPaths='/app/vendor/transformers/wasm/'}
 async function ensure(spec,id){const loadKey=`${spec.id}:${spec.device||'wasm'}:${spec.dtype||''}`;if(loaded?.key===loadKey&&pipe)return pipe;if(loading)return loading;loading=(async()=>{const backend=await verifyBackend(spec);const hf=hfRuntime||(hfRuntime=await import(TRANSFORMERS));const cache=await caches.open(CACHE);await configureRuntime(hf,cache,spec);post(id,'progress',{progress:{phase:'loading-runtime',model:spec.id,backend}});const options={revision:spec.revision,dtype:spec.dtype,progress_callback:progress=>post(id,'progress',{progress:{phase:'loading-model',model:spec.id,backend,...progress}})};if(spec.device==='webgpu')options.device='webgpu';pipe=await hf.pipeline(spec.task,spec.repo,options);loaded={key:loadKey,id:spec.id,repo:spec.repo,revision:spec.revision,backend,dtype:spec.dtype};return pipe})().finally(()=>{loading=null});return loading}
-function parseJsonLoose(text){const source=clean(text).replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();for(let start=0;start<source.length;start++){if(source[start]!=='{'&&source[start]!=='[')continue;const open=source[start],close=open==='{'?'}':']';let depth=0,quoted=false,escaped=false;for(let i=start;i<source.length;i++){const c=source[i];if(quoted){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c==='"')quoted=false;continue}if(c==='"'){quoted=true;continue}if(c===open)depth++;else if(c===close&&--depth===0){try{return JSON.parse(source.slice(start,i+1))}catch{break}}}}return null}
-function makeStreamer(generator,id,requested){
-  if(!requested||!hfRuntime?.TextStreamer||!generator?.tokenizer)return null;
-  let index=0;
-  return new hfRuntime.TextStreamer(generator.tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:text=>{const value=clean(text,12000);if(value)post(id,'token',{token:{text:value,index:index++}})}});
+function countTokenValue(value){if(Array.isArray(value))return value.length;if(value?.data&&Number.isFinite(value.data.length))return value.data.length;if(Array.isArray(value?.input_ids))return value.input_ids.flat(Infinity).length;if(value?.input_ids?.data&&Number.isFinite(value.input_ids.data.length))return value.input_ids.data.length;if(Array.isArray(value?.dims)&&value.dims.length)return Number(value.dims.at(-1))||0;return 0}
+function tokenCount(tokenizer,messages){const rows=normalizeMessages(messages);try{if(typeof tokenizer?.apply_chat_template==='function'){const ids=tokenizer.apply_chat_template(rows,{tokenize:true,add_generation_prompt:true});const count=countTokenValue(ids);if(count)return count}}catch{}try{if(typeof tokenizer?.encode==='function'){const source=rows.map(row=>`${row.role}: ${row.content}`).join('\n');const count=countTokenValue(tokenizer.encode(source));if(count)return count}}catch{}return Math.max(1,Math.ceil(rows.reduce((n,row)=>n+row.role.length+row.content.length,0)/3.6))}
+function tokenCountText(tokenizer,value){const source=clean(value);try{if(typeof tokenizer?.encode==='function'){const count=countTokenValue(tokenizer.encode(source));if(count)return count}}catch{}return Math.max(1,Math.ceil(source.length/3.6))}
+function digest(rows,maxChars=1800){let out='Earlier conversation digest (extractive; newer turns below are authoritative):';for(const row of rows){const line=`\n${row.role}: ${row.content.replace(/\s+/g,' ').trim().slice(0,220)}`;if(out.length+line.length>maxChars)break;out+=line}return out}
+function trimContent(row,maxChars){return {...row,content:row.content.length>maxChars?`${row.content.slice(0,Math.max(80,maxChars-24))}\n[context compacted]`:row.content}}
+function compactContext(tokenizer,messages,budget){
+  const normalized=normalizeMessages(messages),before=tokenCount(tokenizer,normalized),limit=Math.max(768,Number(budget)||4096);if(before<=limit)return{messages:normalized,inputTokens:before,originalTokens:before,budget:limit,droppedMessages:0,compacted:false};
+  const systems=normalized.filter(row=>row.role==='system'),dialogue=normalized.filter(row=>row.role!=='system'),recentCount=6,dropped=dialogue.slice(0,Math.max(0,dialogue.length-recentCount)),recent=dialogue.slice(-recentCount),compiled=[];
+  if(systems.length)compiled.push({role:'system',content:systems.map(row=>row.content).join('\n\n').slice(0,7000)});
+  if(dropped.length)compiled.push({role:'system',content:digest(dropped)});
+  compiled.push(...recent);
+  let count=tokenCount(tokenizer,compiled);
+  while(count>limit&&compiled.length>4){const removable=compiled.findIndex((row,index)=>index>0&&index<compiled.length-2&&row.role!=='system');if(removable<0)break;compiled.splice(removable,1);count=tokenCount(tokenizer,compiled)}
+  if(count>limit){for(let i=0;i<compiled.length&&count>limit;i++){const row=compiled[i],lastUser=i===compiled.length-1&&row.role==='user',floor=lastUser?900:320;if(row.content.length>floor){const ratio=Math.max(.25,limit/count),target=Math.max(floor,Math.floor(row.content.length*ratio));compiled[i]=trimContent(row,target);count=tokenCount(tokenizer,compiled)}}}
+  if(count>limit&&compiled[0]?.role==='system'){compiled[0]=trimContent(compiled[0],1200);count=tokenCount(tokenizer,compiled)}
+  return{messages:compiled,inputTokens:count,originalTokens:before,budget:limit,droppedMessages:Math.max(0,normalized.length-compiled.length),compacted:true};
 }
-self.addEventListener('message',async event=>{const message=event.data||{},id=message.id;if(!id)return;try{if(message.type==='shutdown'){pipe=null;loaded=null;post(id,'done',{result:{shutdown:true}});return}if(message.type!=='generate')throw new Error(`Unsupported local-model worker request: ${message.type}`);const generator=await ensure(message.spec,id);const options={max_new_tokens:Math.max(16,Math.min(4096,Number(message.maxNewTokens||1024))),do_sample:Number(message.temperature||0)>0,temperature:Math.max(.01,Math.min(2,Number(message.temperature||.2))),top_p:.95};const streamer=makeStreamer(generator,id,Boolean(message.stream));if(streamer)options.streamer=streamer;post(id,'progress',{progress:{phase:'generating',model:message.spec.id,backend:loaded?.backend||message.spec.device||'wasm',streaming:Boolean(streamer)}});const output=await generator(message.messages||[],options);const text=extractGenerated(output),json=parseJsonLoose(text);post(id,'done',{result:{text,json,model:loaded,backend:loaded?.backend||message.spec.device||'wasm',streamed:Boolean(streamer),streamRequested:Boolean(message.stream)}})}catch(error){post(id,'error',{error:{message:friendlyError(error,message.spec),name:error?.name||'Error',stack:clean(error?.stack,4000)}})}});
+function parseJsonLoose(text){const source=clean(text).replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();for(let start=0;start<source.length;start++){if(source[start]!=='{'&&source[start]!=='[')continue;const open=source[start],close=open==='{'?'}':']';let depth=0,quoted=false,escaped=false;for(let i=start;i<source.length;i++){const c=source[i];if(quoted){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c==='"')quoted=false;continue}if(c==='"'){quoted=true;continue}if(c===open)depth++;else if(c===close&&--depth===0){try{return JSON.parse(source.slice(start,i+1))}catch{break}}}}return null}
+function openStructure(text){const source=clean(text),stack=[];let quote='',escaped=false;for(let i=0;i<source.length;i++){const c=source[i];if(quote){if(escaped){escaped=false;continue}if(c==='\\'){escaped=true;continue}if(c===quote)quote='';continue}if(c==='"'||c==="'"){quote=c;continue}if(c==='{'||c==='['||c==='(')stack.push(c);else if(c==='}'||c===']'||c===')'){const want=c==='}'?'{':c===']'?'[':'(';if(stack.at(-1)===want)stack.pop()}}const fences=(source.match(/```/g)||[]).length;return Boolean(stack.length||quote||fences%2)}
+function makeStreamer(generator,id,requested){if(!requested||!hfRuntime?.TextStreamer||!generator?.tokenizer)return null;let index=0;return new hfRuntime.TextStreamer(generator.tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:text=>{const value=clean(text,12000);if(value)post(id,'token',{token:{text:value,index:index++}})}})}
+self.addEventListener('message',async event=>{const message=event.data||{},id=message.id;if(!id)return;try{
+  if(message.type==='shutdown'){pipe=null;loaded=null;post(id,'done',{result:{shutdown:true}});return}
+  if(message.type!=='generate')throw new Error(`Unsupported local-model worker request: ${message.type}`);
+  const generator=await ensure(message.spec,id),context=compactContext(generator.tokenizer,message.messages||[],message.promptTokenBudget),requestedMax=Math.max(16,Math.min(4096,Number(message.maxNewTokens||384))),options={max_new_tokens:requestedMax,do_sample:Number(message.temperature||0)>0,temperature:Math.max(.01,Math.min(2,Number(message.temperature||.2))),top_p:.95};
+  const streamer=makeStreamer(generator,id,Boolean(message.stream));if(streamer)options.streamer=streamer;
+  post(id,'progress',{progress:{phase:'generating',model:message.spec.id,backend:loaded?.backend||message.spec.device||'wasm',streaming:Boolean(streamer),promptTokens:context.inputTokens,originalPromptTokens:context.originalTokens,promptTokenBudget:context.budget,contextCompacted:context.compacted,droppedMessages:context.droppedMessages}});
+  const output=await generator(context.messages,options),text=extractGenerated(output),json=parseJsonLoose(text),outputTokens=tokenCountText(generator.tokenizer,text),margin=Math.max(4,Math.ceil(requestedMax*.04)),nearTokenLimit=outputTokens>=requestedMax-margin,structurallyIncomplete=openStructure(text),completionReason=nearTokenLimit?'length':'stop';
+  post(id,'done',{result:{text,json,model:loaded,backend:loaded?.backend||message.spec.device||'wasm',streamed:Boolean(streamer),streamRequested:Boolean(message.stream),context:{inputTokens:context.inputTokens,originalTokens:context.originalTokens,promptTokenBudget:context.budget,compacted:context.compacted,droppedMessages:context.droppedMessages,usedMessages:context.messages.length},completion:{requestedMaxTokens:requestedMax,generatedTokens:outputTokens,nearTokenLimit,completionReason,endedWithEOS:null,structurallyIncomplete}}});
+}catch(error){post(id,'error',{error:{message:friendlyError(error,message.spec),name:error?.name||'Error',stack:clean(error?.stack,4000)}})}});
