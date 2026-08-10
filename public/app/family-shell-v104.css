@@ -142,3 +142,345 @@ html[data-civweave-system="anarchadia"] .ac-merlin-head img{filter:drop-shadow(5
   html[data-civweave-system="anarchadia"] .ac-passport:before{display:none}
 }
 @media(prefers-reduced-motion:reduce){html[data-civweave-system="anarchadia"] .ac-console-bar,html[data-civweave-system="anarchadia"] .ac-module,html[data-civweave-system="fellowfare"] .ffc144-rook-settings{transform:none!important}}
+
+/* shared family header overhaul v267
+   One semantic header, five realm skins. Keep the actions familiar while giving
+   every injected control a real touch target and a stable place to live. */
+:root{
+  --cwf267-head-bg:
+    radial-gradient(circle at 78% 0,#ae7dff18,transparent 32%),
+    linear-gradient(180deg,#08182bea,#06111df8);
+  --cwf267-head-line:linear-gradient(90deg,#7fe7dc,#ae7dff,#e7c66b,#7fe7dc);
+  --cwf267-tool-bg:radial-gradient(circle at 34% 24%,#dffcff1c,transparent 24%),linear-gradient(150deg,#153450,#081a2d);
+  --cwf267-tool-border:#8de8df66;
+  --cwf267-tool-ink:#effcff;
+  --cwf267-tool-shadow:inset 0 0 18px #71dfd818,0 5px 14px #0008;
+  --cwf267-tool-radius:50%;
+  --cwf267-status-bg:#081723c9;
+}
+html[data-civweave-system="living-school"]{
+  --cwf267-head-bg:
+    radial-gradient(circle at 15% 0,#e0bd6115,transparent 27%),
+    linear-gradient(180deg,#183c2eea,#0d241bf8);
+  --cwf267-head-line:linear-gradient(90deg,#9acb70,#e0bd61,#4fb5a3,#9acb70);
+  --cwf267-tool-bg:linear-gradient(145deg,#2b553e,#162f24);
+  --cwf267-tool-border:#d8c77e88;
+  --cwf267-tool-ink:#fff3cf;
+  --cwf267-tool-shadow:inset 0 0 0 1px #0a1a1250,3px 4px 0 #08140da0;
+  --cwf267-tool-radius:17px 6px 17px 6px;
+  --cwf267-status-bg:#132d22e8;
+}
+html[data-civweave-system="cerbanimo"]{
+  --cwf267-head-bg:
+    radial-gradient(circle at 82% -5%,#ff54d31f,transparent 31%),
+    radial-gradient(circle at 8% 0,#65c8ff18,transparent 29%),
+    linear-gradient(180deg,#10091fea,#070611fa);
+  --cwf267-head-line:linear-gradient(90deg,#65c8ff,#ff54d3,#8f5dff,#f0bd58,#65c8ff);
+  --cwf267-tool-bg:linear-gradient(145deg,#191637,#09091c);
+  --cwf267-tool-border:#65c8ff77;
+  --cwf267-tool-ink:#f5efff;
+  --cwf267-tool-shadow:inset 0 -3px 0 #0007,inset 0 0 16px #ff54d313,0 0 15px #65c8ff16;
+  --cwf267-tool-radius:5px;
+  --cwf267-status-bg:#0c0b20e8;
+}
+html[data-civweave-system="fellowfare"]{
+  --cwf267-head-bg:
+    radial-gradient(circle at 82% 0,#70c7a617,transparent 31%),
+    linear-gradient(100deg,#25160eea,#112631f2 58%,#12342cf5);
+  --cwf267-head-line:repeating-linear-gradient(90deg,#d89f58 0 28px,#f2ddb3 28px 56px,#70c7a6 56px 84px);
+  --cwf267-tool-bg:radial-gradient(circle at 35% 30%,#f4dfb724,transparent 25%),linear-gradient(145deg,#264e42,#172c29);
+  --cwf267-tool-border:#d89f58aa;
+  --cwf267-tool-ink:#f7e8c9;
+  --cwf267-tool-shadow:inset 0 0 0 2px #0b171755,3px 4px 0 #080d10b5;
+  --cwf267-tool-radius:50%;
+  --cwf267-status-bg:#1e271fe8;
+}
+html[data-civweave-system="anarchadia"]{
+  --cwf267-head-bg:
+    radial-gradient(circle at 76% -10%,#ff2f871f,transparent 36%),
+    linear-gradient(180deg,#09121bea,#04080dfa);
+  --cwf267-head-line:linear-gradient(92deg,#ff2f87 0 28%,#1fd8ff 28% 57%,#ffc21a 57% 78%,#ff2f87 78%);
+  --cwf267-tool-bg:linear-gradient(145deg,#151c25,#070c11);
+  --cwf267-tool-border:#ff2f8799;
+  --cwf267-tool-ink:#f8f2ec;
+  --cwf267-tool-shadow:3px 4px 0 #000b,0 0 13px #1fd8ff14;
+  --cwf267-tool-radius:4px 13px 5px 10px;
+  --cwf267-status-bg:#0a1118e8;
+}
+
+/* The old four-column grid could never safely contain status + chat + settings
+   plus the dynamically injected review and appearance controls. */
+#cwf104-head.cwf104-head{
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  gap:7px;
+  overflow:visible;
+  isolation:isolate;
+  background:var(--cwf267-head-bg);
+  border-bottom-color:color-mix(in srgb,var(--cwf104-accent) 38%,#ffffff18);
+}
+#cwf104-head.cwf104-head:after{
+  height:3px;
+  opacity:.96;
+  background:var(--cwf267-head-line);
+  box-shadow:0 0 12px color-mix(in srgb,var(--cwf104-accent) 34%,transparent);
+}
+#cwf104-head > .cwf104-realm-mark{
+  flex:0 0 34px;
+  width:34px;
+  height:34px;
+}
+#cwf104-head > .cwf104-title{
+  flex:1 1 auto;
+  min-width:64px;
+  overflow:hidden;
+}
+
+/* Status is deliberately an instrument, not a fake button. */
+#cwf104-head > .cwf104-head-state{
+  position:relative;
+  z-index:3;
+  flex:0 0 auto;
+  min-width:44px;
+  min-height:36px;
+  height:36px;
+  margin:0;
+  padding:0 9px;
+  display:grid;
+  grid-auto-flow:column;
+  place-items:center;
+  gap:6px;
+  border:1px solid color-mix(in srgb,var(--cwf267-tool-border) 66%,transparent);
+  border-radius:999px;
+  background:var(--cwf267-status-bg);
+  color:var(--cwf267-tool-ink);
+  box-shadow:inset 0 0 12px #0002;
+  pointer-events:none;
+}
+#cwf104-head > .cwf104-head-state .cwf104-dot{
+  width:9px;
+  height:9px;
+  margin:0;
+  box-shadow:0 0 0 3px #ffffff0a,0 0 12px currentColor;
+}
+
+/* Every real header action now owns an independent, non-overlapping touch box. */
+#cwf104-head > :is(.cwf104-chat,.cwf104-settings,[data-cw160-theme],[data-cw160-review]){
+  position:relative;
+  z-index:4;
+  flex:0 0 44px;
+  width:44px;
+  min-width:44px;
+  max-width:44px;
+  height:44px;
+  min-height:44px;
+  max-height:44px;
+  margin:0;
+  padding:0;
+  display:grid;
+  place-items:center;
+  overflow:visible;
+  border:1px solid var(--cwf267-tool-border);
+  border-radius:var(--cwf267-tool-radius);
+  background:var(--cwf267-tool-bg);
+  color:var(--cwf267-tool-ink);
+  box-shadow:var(--cwf267-tool-shadow);
+  cursor:pointer;
+  pointer-events:auto;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  text-decoration:none;
+  line-height:1;
+  transform:none;
+  filter:none;
+  transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease,filter .14s ease;
+}
+#cwf104-head > :is(.cwf104-chat,.cwf104-settings,[data-cw160-theme],[data-cw160-review]):hover{
+  transform:translateY(-1px);
+  border-color:color-mix(in srgb,var(--cwf104-accent) 76%,#fff 24%);
+  filter:brightness(1.08);
+}
+#cwf104-head > :is(.cwf104-chat,.cwf104-settings,[data-cw160-theme],[data-cw160-review]):active{
+  transform:translateY(1px) scale(.97);
+  filter:brightness(.96);
+}
+#cwf104-head > :is(.cwf104-chat,.cwf104-settings,[data-cw160-theme],[data-cw160-review]):focus-visible{
+  outline:2px solid color-mix(in srgb,var(--cwf104-accent) 80%,#fff 20%);
+  outline-offset:2px;
+}
+
+/* Weaveling stays the global chat affordance, but now reads as a deliberate control. */
+#cwf104-head > .cwf104-chat img{
+  display:block;
+  width:31px;
+  height:31px;
+  object-fit:contain;
+  pointer-events:none;
+  filter:drop-shadow(0 0 7px color-mix(in srgb,var(--cwf104-accent) 54%,transparent));
+}
+#cwf104-head > .cwf104-settings span{
+  display:block;
+  pointer-events:none;
+  font-size:20px;
+  line-height:1;
+  text-shadow:0 0 10px color-mix(in srgb,var(--cwf104-accent) 42%,transparent);
+}
+
+/* Appearance keeps its live text/ARIA semantics; the header presents it as a glyph. */
+#cwf104-head > [data-cw160-theme]{
+  font-size:0;
+}
+#cwf104-head > [data-cw160-theme]::before{
+  content:"◐";
+  font:800 21px/1 system-ui,sans-serif;
+}
+html[data-civweave-theme="dark"] #cwf104-head > [data-cw160-theme]::before{content:"☾"}
+html[data-civweave-theme="light"] #cwf104-head > [data-cw160-theme]::before{content:"☀"}
+
+/* Review remains data-backed and clickable. The count is the loud part; its label
+   and current item remain available to assistive tech and the button title. */
+#cwf104-head > [data-cw160-review]{
+  grid-template-columns:1fr;
+  gap:0;
+  text-align:center;
+  font-size:0;
+}
+#cwf104-head > [data-cw160-review][hidden]{display:none!important}
+#cwf104-head > [data-cw160-review]::before{
+  content:"✓";
+  font:900 18px/1 system-ui,sans-serif;
+}
+#cwf104-head > [data-cw160-review] > [data-cw160-review-label],
+#cwf104-head > [data-cw160-review] > [data-cw160-review-title]{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0 0 0 0)!important;
+  clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+#cwf104-head > [data-cw160-review] [data-cw160-review-count]{
+  position:absolute;
+  top:-5px;
+  right:-5px;
+  z-index:2;
+  min-width:18px;
+  width:auto;
+  height:18px;
+  padding:0 5px;
+  display:grid;
+  place-items:center;
+  border:2px solid #071018;
+  border-radius:999px;
+  background:#ffc65b;
+  color:#171006;
+  box-shadow:0 2px 7px #0008;
+  font:950 9px/1 Inter,system-ui,sans-serif;
+}
+
+/* Realm-specific visual grammar. Semantics and hit boxes stay identical. */
+html[data-civweave-system="living-school"] #cwf104-head > .cwf104-realm-mark{
+  border-radius:5px 15px 5px 15px;
+  clip-path:none;
+  box-shadow:inset 0 0 13px #9acb7020,3px 3px 0 #09170f99;
+}
+html[data-civweave-system="cerbanimo"] #cwf104-head > :is(.cwf104-chat,.cwf104-settings,[data-cw160-theme],[data-cw160-review]){
+  background:
+    linear-gradient(135deg,transparent 0 8px,#65c8ff12 8px 9px,transparent 9px),
+    var(--cwf267-tool-bg);
+  box-shadow:inset 0 0 0 1px #ff54d31a,var(--cwf267-tool-shadow);
+}
+html[data-civweave-system="fellowfare"] #cwf104-head > :is(.cwf104-chat,.cwf104-settings,[data-cw160-theme],[data-cw160-review]){
+  border-width:2px;
+}
+html[data-civweave-system="anarchadia"] #cwf104-head > :is(.cwf104-chat,.cwf104-settings,[data-cw160-theme],[data-cw160-review]):nth-last-child(odd){
+  border-color:#1fd8ffaa;
+}
+html[data-civweave-system="anarchadia"] #cwf104-head > .cwf104-head-state{
+  border-style:dashed;
+}
+html[data-civweave-system="anarchadia"] #cwf104-head > .cwf104-settings span{
+  color:#ffc21a;
+}
+
+/* Compact phones keep all semantics without wrapping into a second header row. */
+@media(max-width:620px){
+  #cwf104-head.cwf104-head{
+    gap:5px;
+    padding-left:max(7px,env(safe-area-inset-left));
+    padding-right:max(7px,env(safe-area-inset-right));
+  }
+  #cwf104-head > .cwf104-realm-mark{
+    flex-basis:32px;
+    width:32px;
+    height:32px;
+  }
+  #cwf104-head > .cwf104-title{
+    min-width:48px;
+  }
+  #cwf104-head > .cwf104-title small{
+    font-size:7px;
+    letter-spacing:.12em;
+  }
+  #cwf104-head > .cwf104-title b{
+    font-size:14px;
+  }
+  #cwf104-head > .cwf104-head-state{
+    flex:0 0 34px;
+    width:34px;
+    min-width:34px;
+    height:34px;
+    min-height:34px;
+    padding:0;
+  }
+  #cwf104-head > .cwf104-head-state [data-cwf-current-state]{
+    position:absolute;
+    width:1px;
+    height:1px;
+    overflow:hidden;
+    clip:rect(0 0 0 0);
+    clip-path:inset(50%);
+  }
+  #cwf104-head > :is(.cwf104-chat,.cwf104-settings,[data-cw160-theme],[data-cw160-review]){
+    flex-basis:40px;
+    width:40px;
+    min-width:40px;
+    max-width:40px;
+    height:40px;
+    min-height:40px;
+    max-height:40px;
+  }
+  #cwf104-head > .cwf104-chat img{width:28px;height:28px}
+  #cwf104-head > .cwf104-settings span{font-size:18px}
+  #cwf104-head > [data-cw160-theme]::before{font-size:19px}
+}
+@media(max-width:380px){
+  #cwf104-head.cwf104-head{gap:4px}
+  #cwf104-head > .cwf104-title small{display:none}
+  #cwf104-head > .cwf104-title b{font-size:13px}
+  #cwf104-head > .cwf104-title{min-width:38px}
+  #cwf104-head > .cwf104-head-state{
+    flex-basis:30px;
+    width:30px;
+    min-width:30px;
+  }
+  #cwf104-head > :is(.cwf104-chat,.cwf104-settings,[data-cw160-theme],[data-cw160-review]){
+    flex-basis:38px;
+    width:38px;
+    min-width:38px;
+    max-width:38px;
+    height:38px;
+    min-height:38px;
+    max-height:38px;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #cwf104-head > :is(.cwf104-chat,.cwf104-settings,[data-cw160-theme],[data-cw160-review]){
+    transition:none;
+  }
+}
