@@ -11,6 +11,7 @@ on:
       - 'public/app/node-ai-operator-v1.html'
       - 'public/app/federation-finder-local-v269.html'
       - 'scripts/test-node-money-edge-v1.mjs'
+      - 'scripts/test-node-money-edge-registration-v1.mjs'
       - 'scripts/test-node-ai-live-commerce-v1.mjs'
       - 'scripts/verify-node-money-edge-surface-v1.mjs'
       - '.github/workflows/verify-node-money-edge-v1.yml'
@@ -23,6 +24,7 @@ on:
       - 'lib/ai-wallet-service-v1.mjs'
       - 'public/app/node-ai-live-*.js'
       - 'scripts/test-node-money-edge-v1.mjs'
+      - 'scripts/test-node-money-edge-registration-v1.mjs'
       - 'scripts/test-node-ai-live-commerce-v1.mjs'
       - 'scripts/verify-node-money-edge-surface-v1.mjs'
 
@@ -47,6 +49,7 @@ jobs:
       - name: Exercise money edge and node trust boundary
         run: |
           node --test scripts/test-node-money-edge-v1.mjs
+          node --test scripts/test-node-money-edge-registration-v1.mjs
           node --test scripts/test-node-ai-live-commerce-v1.mjs
           node scripts/verify-node-money-edge-surface-v1.mjs
       - name: Preserve existing node-economy safety gates
