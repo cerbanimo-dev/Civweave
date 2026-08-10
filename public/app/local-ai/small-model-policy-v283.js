@@ -31,10 +31,11 @@ function structure(textValue){
 }
 function looksAbrupt(textValue){const s=text(textValue).trim();if(!s)return true;return /(?:[,;:\\([{]|\b(?:and|or|because|therefore|with|to|of|the|a|an))\s*$/i.test(s)}
 function validateCompletion(run={},textValue='',options={}){
-  const s=structure(textValue),completion=run.completion||{},near=Boolean(completion.nearTokenLimit||completion.completionReason==='length'),structured=Boolean(options.structured),jsonValid=options.jsonValid!==false;
+  const s=structure(textValue),completion=run.completion||{},near=Boolean(completion.nearTokenLimit||completion.completionReason==='length'),structured=Boolean(options.structured),jsonValid=options.jsonValid!==false,abrupt=looksAbrupt(textValue);
   if(near)return{clipped:true,reason:'token-limit',structure:s};
   if(s.incomplete)return{clipped:true,reason:'open-structure',structure:s};
-  if(structured&&!jsonValid&&looksAbrupt(textValue))return{clipped:true,reason:'structured-abrupt',structure:s};
+  if(structured&&!jsonValid&&abrupt)return{clipped:true,reason:'structured-abrupt',structure:s};
+  if(!structured&&abrupt)return{clipped:true,reason:'abrupt-text',structure:s};
   return{clipped:false,reason:'complete',structure:s};
 }
 function continuationPrompt({structured=false}={}){return structured?'Continue exactly where the previous response stopped. Do not restart or repeat any earlier text. Finish only the incomplete structured output and close every open structure.':'Continue exactly where the previous response stopped. Do not restart, summarize, or repeat any earlier text. Finish only the incomplete answer.'}
