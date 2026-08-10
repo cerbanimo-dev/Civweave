@@ -19,7 +19,7 @@ concurrency:
 jobs:
   harvest:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,8 +28,8 @@ jobs:
 
       - name: Harvest rights-cleared learning media metadata
         env:
-          OPEN_MEDIA_RESULTS_PER_QUERY: '16'
-          OPEN_MEDIA_WORKERS: '4'
+          OPEN_MEDIA_RESULTS_PER_QUERY: '8'
+          OPEN_MEDIA_WORKERS: '6'
         run: python scripts/harvest-open-learning-media-v1.py
 
       - name: Validate generated catalog
