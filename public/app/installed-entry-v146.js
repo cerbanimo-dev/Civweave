@@ -50,6 +50,16 @@ async function refreshWorker(releaseVersion){
     return registration;
   }catch{return null}
 }
+async function givePhoneLedgerBootWindow(timeout=1200){
+  const ledger=globalThis.CivweavePhoneLedgerV1;
+  if(!ledger?.ready)return null;
+  try{
+    return await Promise.race([
+      ledger.ready(),
+      new Promise(resolve=>setTimeout(()=>resolve(null),timeout)),
+    ]);
+  }catch{return null}
+}
 function ensureRoutes(releaseVersion){
   if(globalThis.CivweaveSystemRoutesV227)return Promise.resolve(globalThis.CivweaveSystemRoutesV227);
   const routeUrl=`/app/system-routes-v227.js?v=${encodeURIComponent(releaseVersion)}-five-system-route-contract-v227`;
@@ -64,6 +74,7 @@ async function boot(){
   authorize();
   const releaseVersion=await resolveReleaseVersion();
   await refreshWorker(releaseVersion);
+  await givePhoneLedgerBootWindow();
   const requested=params.get('system')||params.get('target')||'civweave';
   const aliases={hub:'civweave',cabinet:'civweave',cabinets:'civweave',cabinetonly:'civweave',lite:'civweave'};
   const system=aliases[requested]||requested;
@@ -76,5 +87,5 @@ async function boot(){
   }
 }
 boot();
-globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.62-chat-convergence-v250',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker});
+globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.62-chat-convergence-v250',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker,givePhoneLedgerBootWindow,phoneLedger:'v1'});
 })();

@@ -3,6 +3,7 @@
 const INTENTIONS_KEY='civweave.intentions.v127';
 const LINK_KEY='civweave.chat-intention-link.v131';
 const DIAGNOSTICS_KEY='civweave.local-diagnostics.v131';
+const PHONE_LEDGER_BOOTSTRAP='/app/phone-ledger-bootstrap-v1.js';
 const CHAT_KEYS=/^civweave\.(?:weaveling-chat\.v127|guide-chat\.[^.]+\.v128)$/;
 const nativeFetch=globalThis.fetch?.bind(globalThis);
 const nativeSetItem=Storage.prototype.setItem;
@@ -72,11 +73,30 @@ Storage.prototype.setItem=function(key,value){
 function sweep(){
   try{for(let i=0;i<localStorage.length;i+=1){const key=localStorage.key(i);if(key&&CHAT_KEYS.test(key)){const value=localStorage.getItem(key);nativeSetItem.call(localStorage,key,sanitizeChat(key,value))}}}catch{}
 }
+function bootPhoneLedger(){
+  if(typeof document==='undefined'||globalThis.CivweavePhoneLedgerV1)return;
+  try{
+    const existing=[...document.scripts].find(script=>{
+      if(!script.src)return false;
+      return new URL(script.src,location.href).pathname===PHONE_LEDGER_BOOTSTRAP;
+    });
+    if(existing)return;
+    const script=document.createElement('script');
+    script.src=PHONE_LEDGER_BOOTSTRAP;
+    script.async=false;
+    script.dataset.civweavePhoneLedgerBootstrap='1';
+    document.head.append(script);
+  }catch(error){
+    localDiagnostic('phone-ledger-bootstrap-failed',{error:String(error?.message||error)});
+  }
+}
 sweep();
+bootPhoneLedger();
 globalThis.CivweaveLocalFirstPolicy={
   diagnostics:()=>parse(localStorage.getItem(DIAGNOSTICS_KEY),[]),
   clearDiagnostics:()=>localStorage.removeItem(DIAGNOSTICS_KEY),
   linkedPlan:chatKey=>localStorage.getItem(conversationLinkKey(chatKey||'civweave.weaveling-chat.v127'))||'',
-  version:'1.0.31'
+  phoneLedgerBootstrap:PHONE_LEDGER_BOOTSTRAP,
+  version:'1.0.32'
 };
 })();

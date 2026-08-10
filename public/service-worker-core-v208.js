@@ -19,6 +19,9 @@ const REQUIRED_SHELL_ASSETS = [
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146.js',
   '/app/document-lifecycle-v221.js',
+  '/app/local-object-mesh-v146.js',
+  '/app/shared/civweave-contribution-mesh-v1.js',
+  '/app/phone-ledger-bootstrap-v1.js',
   '/app/fullscreen-family-v104.html',
   '/app/logos/civweave-icon-192.png',
   '/app/logos/civweave-icon-512.png'

@@ -10,6 +10,7 @@ const read=path=>fs.readFileSync(resolve(root,path),'utf8');
 
 const offline=read('public/service-worker-offline-v211-override.js');
 const worker=read('public/service-worker-v203.js');
+const installerState=read('public/service-worker-installer-state-v280.js');
 const installerPage=read('public/app/index.html');
 const installRuntime=read('public/install-v130.js');
 const autostart=read('public/app/required-campus-autostart-v1.js');
@@ -21,12 +22,17 @@ const boundary=read('public/app/install-boundary-v146.js');
 const background=read('public/app/campus-background-download-v241.js');
 
 const checks=[
-  ['offline crawler keeps v238 graph identity with v241 fast background policy',()=>{
-    assert.match(offline,/offline-campus-current-graph-v238/);
-    assert.match(worker,/offline-campus-current-graph-v238/);
-    assert.match(worker,/policy=fast-background-v241/);
-    assert.match(offline,/const V211_POLICY = 'fast-background-v241'/);
+  ['offline crawler uses v280 resumable current-graph policy',()=>{
+    assert.match(offline,/offline-campus-current-graph-v280/);
+    assert.match(worker,/offline-campus-current-graph-v280/);
+    assert.match(worker,/policy=resumable-pause-v280/);
+    assert.match(worker,/installer-state-machines-v280/);
+    assert.match(installerState,/PAUSE_OFFLINE_PACKAGE/);
+    assert.match(offline,/const V211_POLICY = 'resumable-pause-v280'/);
+    assert.match(offline,/const V211_SYNC_TAG = 'civweave-campus-resume-v280'/);
     assert.match(offline,/const V211_BATCH_SIZE = 16/);
+    assert.match(offline,/resumablePerFile: true/);
+    assert.match(offline,/pauseSupported: true/);
   }],
   ['previous package assets never seed the next crawl',()=>{
     assert.match(offline,/const initialAssets = \[\.\.\.new Set\(\(manifest\.seeds \|\| \[\]\)\.filter\(Boolean\)\)\]/);
