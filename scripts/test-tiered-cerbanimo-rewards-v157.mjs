@@ -1,3 +1,4 @@
+import './apply-confidence-weighted-validation-v1-safe.mjs';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
@@ -11,8 +12,8 @@ class Storage{
 }
 class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}}
 const localStorage=new Storage(),sessionStorage=new Storage(),events=[];
-const questState={schema:'cerbanimo.quest-engine.v144',version:1,quests:[{id:'quest-1',title:'Build the proof',skillTags:['javascript'],tasks:[{id:'task-1',title:'Implement the slice',status:'completed',skillTags:['javascript'],updatedAt:'2026-08-04T10:00:00.000Z',review:{state:'accepted',note:'AI validation passed',at:'2026-08-04T10:00:00.000Z'}}]}]};
-const reviewStore={schema:'cerbanimo.ai-review-store.v156',byTask:{'quest-1:task-1':{questId:'quest-1',taskId:'task-1',state:'accepted',validator:'ai',provider:'gemini',model:'gemini-3.5-flash-lite',requestId:'local-review-1',confidence:.94,at:'2026-08-04T10:00:00.000Z'}}};
+const questState={schema:'cerbanimo.quest-engine.v144',version:1,quests:[{id:'quest-1',title:'Build the proof',skillTags:['javascript'],tasks:[{id:'task-1',title:'Implement the slice',status:'completed',skillTags:['javascript'],updatedAt:'2026-08-09T20:00:00.000Z',review:{state:'accepted',note:'AI validation passed',provider:'gemini',model:'gemini-3.5-flash-lite',requestId:'local-review-1',confidence:.94,score:.95,rubricThreshold:.6,at:'2026-08-09T20:00:00.000Z'}}]}]};
+const reviewStore={schema:'cerbanimo.ai-review-store.v156',byTask:{'quest-1:task-1':{questId:'quest-1',taskId:'task-1',state:'accepted',validator:'ai',provider:'gemini',model:'gemini-3.5-flash-lite',requestId:'local-review-1',confidence:.94,score:.95,rubricThreshold:.6,at:'2026-08-09T20:00:00.000Z'}}};
 localStorage.setItem('cerbanimo.quest-engine.v144',JSON.stringify(questState));
 localStorage.setItem('cerbanimo.ai-reviews.v156',JSON.stringify(reviewStore));
 const context={
@@ -28,25 +29,24 @@ vm.runInContext(source,context,{filename:'civweave-domain-bridge-v156.js'});
 const bridge=context.CivweaveDomainBridgeV156;
 assert.ok(bridge,'domain bridge should export its API');
 let balances=bridge.balances();
-assert.equal(balances.buttons,2,'local independent AI pass should mint two Buttons');
-assert.equal(balances.acorns,1,'local independent AI pass should mint one Acorn');
+assert.equal(balances.buttons,0,'local validation alone must not mint Buttons');
+assert.equal(balances.acorns,1,'qualified local evidence can still mint one Acorn');
 assert.equal(balances.cotokens,0,'local validation must not mint a Cotoken');
-assert.equal(balances.xp.javascript,25,'local independent AI pass should mint main skill XP');
-const peerObject=(id,validatorId)=>({id,kind:'cerbanimo.validation.receipt.v156',origin:{nodeId:validatorId},payload:{projectId:'quest-1',taskId:'task-1',validatorId,validation:{pass:true,decision:'pass',provider:'gemini',model:'gemini-3.5-flash-lite',requestId:`request-${validatorId}`,confidence:.9,fallbackUsed:false}}});
+assert.equal(balances.xp.javascript,25,'qualified local evidence should mint main skill XP');
+const peerObject=(id,validatorId)=>({id,kind:'cerbanimo.validation.receipt.v156',origin:{nodeId:validatorId},payload:{projectId:'quest-1',taskId:'task-1',validatorId,validation:{pass:true,decision:'pass',provider:'gemini',model:'gemini-3.5-flash-lite',requestId:`request-${validatorId}`,confidence:.95,score:.96,rubricThreshold:.6,evidenceFamily:'peer-model',fallbackUsed:false}}});
 let result=await bridge.recordPeerReview(peerObject('receipt-1','peer-one'));
 assert.equal(result.accepted,true);
 balances=bridge.balances();
-assert.equal(balances.cotokens,0,'one peer AI pass must not mint a Cotoken');
-assert.equal(balances.xp.javascript,25,'one peer AI pass must not mint bonus XP');
+assert.equal(balances.buttons,2,'a sufficiently strong independent device should unlock Button payout after weighted verification');
+assert.equal(balances.cotokens,1,'weighted confidence plus cross-device evidence should unlock the bonus without a fixed peer count');
+assert.equal(balances.xp.javascript,35,'weighted payout eligibility should add ten bonus XP');
 result=await bridge.recordPeerReview(peerObject('receipt-1-replay','peer-one'));
-assert.equal(result.accepted,false,'the same validator must not count twice');
-result=await bridge.recordPeerReview(peerObject('receipt-2','peer-two'));
-assert.equal(result.accepted,true);
-balances=bridge.balances();
-assert.equal(balances.cotokens,1,'two distinct peer AI passes should mint one Cotoken');
-assert.equal(balances.xp.javascript,35,'two distinct peer AI passes should add ten bonus XP');
+assert.equal(result.accepted,false,'the same validator must not stack confidence twice');
 const before=JSON.stringify(bridge.rewardLedger());
-await bridge.recordPeerReview(peerObject('receipt-2-replay','peer-two'));
+await bridge.recordPeerReview(peerObject('receipt-1-replay-2','peer-one'));
 assert.equal(JSON.stringify(bridge.rewardLedger()),before,'replayed peer receipts must not mint again');
-assert.equal(bridge.peerReviewStatus('quest-1','task-1').passingCount,2);
-console.log(JSON.stringify({ok:true,local:{buttons:2,acorns:1,mainXp:25,cotokens:0},twoDistinctPeers:{cotokens:1,bonusXp:10},idempotent:true},null,2));
+const validation=bridge.taskValidationStatus(questState.quests[0],questState.quests[0].tasks[0]);
+assert.equal(validation.verifiedPass,true);
+assert.equal(validation.crossDeviceSatisfied,true);
+assert.equal(validation.diversity.satisfied,true);
+console.log(JSON.stringify({ok:true,local:{buttons:0,acorns:1,mainXp:25,cotokens:0},weightedCrossDevice:{buttons:2,cotokens:1,bonusXp:10},idempotent:true},null,2));
