@@ -29,12 +29,12 @@ assert(boundary.includes('/extensions/civweave-proof-progress-v158.js'),'Install
 const lightweightMode=legacyWorker.includes('legacy-v156-bridge-v209');
 if(lightweightMode){
   assert(legacyWorker.includes(expectedWorkerImport),`Legacy registrations do not reach the active ${releaseVersion} worker wrapper.`);
-  assert(wrapper.includes("importScripts('/service-worker-living-school-cleanroom-v218.js")&&wrapper.includes("importScripts('/service-worker-core-v208.js")&&wrapper.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper is incomplete.');
-  assert(wrapper.includes('offline-campus-current-graph-v238')&&wrapper.includes('policy=fast-background-v241'),'Active worker wrapper does not load the fast background current-graph repair.');
+  assert(wrapper.includes("importScripts('/service-worker-living-school-cleanroom-v218.js")&&wrapper.includes("importScripts('/service-worker-core-v208.js")&&wrapper.includes("importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280'")&&wrapper.includes("importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280'"),'Active worker wrapper is incomplete.');
   assert(core.includes("const BUILD = 'lightweight-shell-v208'"),'Retained worker core is not the lightweight shell.');
   assert(core.includes('discoverReferences')&&core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Retained offline campus core lost discovery or hydration.');
-  assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v238'")&&offline.includes("const V211_POLICY = 'fast-background-v241'")&&offline.includes('stale-not-rediscovered'),'Current-graph background retry repair is missing.');
+  assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'")&&offline.includes("const V211_POLICY = 'resumable-pause-v280'")&&offline.includes("const V211_SYNC_TAG = 'civweave-campus-resume-v280'")&&offline.includes('stale-not-rediscovered')&&offline.includes('resumablePerFile: true')&&offline.includes('pauseSupported: true'),'Current-graph resumable retry repair is missing.');
   assert(offlineManifest.revision==='canonical-background-campus-v241-systems-mesh-v251','Offline campus manifest is not the Systems Mesh canonical background-download contract.');
+  assert(offlineManifest.phoneLedgerRevision==='phone-ledger-r1','Offline campus manifest lost the phone-ledger extension revision.');
   assert(offlineManifest.seeds.length===11,'Offline campus manifest no longer has the canonical eleven seed roots.');
   assert(offlineManifest.seeds.includes('/app/working-campus-v156.html'),'Offline campus no longer seeds the working campus.');
   assert(offlineManifest.seeds.includes('/app/civweave-systems-mesh-v251.js'),'Offline campus no longer seeds the Civweave Systems Mesh runtime.');
@@ -115,5 +115,5 @@ console.log(JSON.stringify({
   completionAuthority:'accepted-realm-proof',
   realms:['living-school','cerbanimo','fellowfare'],
   planState:campus.plan.state,
-  offlinePackageMode:lightweightMode?'v218-wrapper-current-graph-v238-fast-background-v241-systems-mesh-v251':'layered-extension-package-v158'
+  offlinePackageMode:lightweightMode?'v218-wrapper-v280-resumable-campus-systems-mesh-v251-phone-ledger':'layered-extension-package-v158'
 },null,2));
