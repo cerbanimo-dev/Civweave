@@ -92,6 +92,19 @@ for (const file of ['cloudflare/core/src/index.mjs', 'cloudflare/node-cloud/src/
   assert.equal(result.status, 0, `${file} syntax failed: ${result.stderr || result.stdout}`);
 }
 
+const coreModule = await import(new URL('cloudflare/core/src/index.mjs', root));
+const nodeModule = await import(new URL('cloudflare/node-cloud/src/index.mjs', root));
+const normalized = coreModule.normalizeNodeRecord({ nodeId: 'Seed East', publicOrigin: 'https://seed-east.nodes.commonweave.earth', capabilities: ['relay', 'relay', 'discovery'] });
+assert.equal(normalized.nodeId, 'seed-east');
+assert.deepEqual(normalized.capabilities, ['relay', 'discovery']);
+assert.equal(nodeModule.nodeIdFromHostname('seed-east.nodes.commonweave.earth'), 'seed-east');
+assert.equal(nodeModule.nodeIdFromHostname('nodes.commonweave.earth'), null);
+const cloudManifest = nodeModule.buildCloudNodeManifest('seed-east', { displayName: 'Seed East' });
+assert.equal(cloudManifest.runtime, 'cloudflare-durable-object-v1');
+assert.equal(cloudManifest.publicOrigin, 'https://seed-east.nodes.commonweave.earth');
+assert.equal(cloudManifest.security.stripePlatformSecretPresent, false);
+assert.equal(cloudManifest.security.cerbanimoSigningPrivateKeyPresent, false);
+
 console.log(JSON.stringify({
   ok: true,
   schema: topology.schema,
@@ -103,5 +116,6 @@ console.log(JSON.stringify({
   durableObjectPerNode: true,
   raspberryPiTunnel: true,
   communitySecretsDistributed: false,
-  cloudflareMoneyEdgeLive: false
+  cloudflareMoneyEdgeLive: false,
+  moduleContractsExercised: true
 }, null, 2));
