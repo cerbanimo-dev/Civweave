@@ -2,8 +2,9 @@ import assert from'node:assert/strict';
 import fs from'node:fs';
 import path from'node:path';
 import{fileURLToPath}from'node:url';
-import{licenseAllowed,chooseFile,scoreRecord,sha256HexForBytes,POLICY_PRESETS}from'../public/app/open-learning-media-cache-v1.mjs';
+import media,{licenseAllowed,chooseFile,scoreRecord,sha256HexForBytes}from'../public/app/open-learning-media-cache-v1.mjs';
 
+const{POLICY_PRESETS}=media;
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 assert.equal(sha256HexForBytes(new TextEncoder().encode('abc')),'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
 assert.equal(licenseAllowed({spdx:'CC-BY'}),true);
