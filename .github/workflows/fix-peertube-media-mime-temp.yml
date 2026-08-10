@@ -1,0 +1,60 @@
+name: Fix PeerTube Media MIME Temp
+
+on:
+  push:
+    branches:
+      - agent/general-knowledge-video-packs-v1
+    paths:
+      - .github/workflows/fix-peertube-media-mime-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Preserve MIME metadata for PeerTube downloads
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('scripts/harvest-open-learning-media-v1.py')
+          text=path.read_text(encoding='utf-8')
+          anchor='''def peertube_files(detail: dict) -> list[dict]:\n    out, seen = [], set()\n    def add(obj: dict, role: str):\n'''
+          replacement='''def peertube_file_mime(obj: dict, url: str) -> str:\n    explicit = clean_text(obj.get("mimeType") or obj.get("mime") or obj.get("type"), 120).lower()\n    if explicit.startswith("video/"):\n        return explicit\n    suffix = Path(urllib.parse.urlparse(url).path.lower()).suffix\n    return {\n        ".mp4": "video/mp4",\n        ".m4v": "video/mp4",\n        ".webm": "video/webm",\n        ".ogv": "video/ogg",\n        ".ogg": "video/ogg",\n        ".mov": "video/quicktime",\n        ".mkv": "video/x-matroska",\n    }.get(suffix, "")\n\n\ndef peertube_files(detail: dict) -> list[dict]:\n    out, seen = [], set()\n    def add(obj: dict, role: str):\n'''
+          if 'def peertube_file_mime(' not in text:
+              if anchor not in text:
+                  raise SystemExit('PeerTube file parser anchor not found')
+              text=text.replace(anchor,replacement,1)
+          old='''        out.append({\n            "url": url,\n            "bytes": int(obj.get("size") or 0),\n            "resolution": clean_text((obj.get("resolution") or {}).get("label"), 80),\n'''
+          new='''        mime = peertube_file_mime(obj, url)\n        if not mime.startswith("video/"):\n            return\n        out.append({\n            "url": url,\n            "mime": mime,\n            "bytes": int(obj.get("size") or 0),\n            "resolution": clean_text((obj.get("resolution") or {}).get("label"), 80),\n'''
+          if '"mime": mime,' not in text:
+              if old not in text:
+                  raise SystemExit('PeerTube output record anchor not found')
+              text=text.replace(old,new,1)
+          path.write_text(text,encoding='utf-8')
+          PY
+          python -m py_compile scripts/harvest-open-learning-media-v1.py
+          python - <<'PY'
+          import importlib.util
+          spec=importlib.util.spec_from_file_location('harvester','scripts/harvest-open-learning-media-v1.py')
+          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+          assert mod.peertube_file_mime({}, 'https://example.test/video/file.mp4') == 'video/mp4'
+          assert mod.peertube_file_mime({}, 'https://example.test/video/file.webm?x=1') == 'video/webm'
+          assert mod.peertube_file_mime({'mimeType':'video/mp4'}, 'https://example.test/no-extension') == 'video/mp4'
+          assert mod.peertube_file_mime({}, 'https://example.test/no-extension') == ''
+          PY
+      - name: Commit provider repair
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scripts/harvest-open-learning-media-v1.py
+          git commit -m 'Preserve PeerTube download MIME metadata'
+          git pull --rebase origin agent/general-knowledge-video-packs-v1
+          git push origin HEAD:agent/general-knowledge-video-packs-v1
