@@ -2,12 +2,31 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(here,'..');
 const read=relative=>fs.readFile(path.join(root,relative),'utf8');
 const exists=relative=>fs.stat(path.join(root,relative)).then(stat=>stat.isFile()).catch(()=>false);
+const syntaxTargets=[
+  'public/app/installer-state-machine-v280.js',
+  'public/app/installer-storage-guard-v281.js',
+  'public/app/required-campus-autostart-v1.js',
+  'public/app/campus-background-download-v241.js',
+  'public/service-worker-installer-state-v280.js',
+  'public/service-worker-shell-integrity-v281.js',
+  'public/service-worker-offline-v211-override.js',
+  'public/service-worker-v203.js',
+  'scripts/generate-prelive-metadata-v281.mjs',
+  'scripts/smoke-installer-resume-state-v280.mjs',
+  'scripts/browser-installer-gauntlet-v281.mjs'
+];
+for(const relative of syntaxTargets){
+  const result=spawnSync(process.execPath,['--check',path.join(root,relative)],{encoding:'utf8'});
+  assert.equal(result.status,0,`${relative} failed syntax check:\n${result.stderr||result.stdout||''}`);
+}
+
 const version=(await read('VERSION')).trim();
 const pkg=JSON.parse(await read('package.json'));
 const manifest=JSON.parse(await read('public/app/manifest.webmanifest'));
@@ -58,6 +77,7 @@ for(const [pathname,expected] of Object.entries(integrity.assets||{})){
 console.log(JSON.stringify({
   ok:true,
   version,
+  syntaxTargets:syntaxTargets.length,
   integrityAssets:integrity.requiredAssetCount,
   campusEstimatedBytes:offline.preflight.estimatedBytes,
   campusRequiredFreeBytes:offline.preflight.requiredFreeBytes,
