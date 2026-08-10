@@ -22,10 +22,11 @@ DISCOVERY_REFINEMENTS = {
         "parliament government introduction",
     ],
     "arts-culture": [
-        "art history lecture introduction",
-        "visual arts lesson basics",
-        "art history explained",
-        "museum art history lecture",
+        "Baroque Art Rembrandt",
+        "art history documentary",
+        "art history course",
+        "visual arts tutorial",
+        "Krita digital painting tutorial",
     ],
 }
 
