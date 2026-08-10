@@ -19,14 +19,21 @@ const [html,manifestText,bridge,autostart,statusRuntime,workerRepair,workerWrapp
 const manifest=JSON.parse(manifestText);
 assert.equal(manifest.display,'standalone');
 assert.equal(manifest.prefer_related_applications,false);
-assert.equal(manifest.start_url,'/app/installed-entry-v146.html?installed=1','installed PWA must launch through updater entry, never directly into a version-pinned campus');
-assert.ok((manifest.shortcuts||[]).every(shortcut=>String(shortcut.url||'').startsWith('/app/installed-entry-v146.html?')),'all installed shortcuts must pass through updater entry');
+assert.equal(manifest.start_url,'/app/installed-entry-v146.html?installed=1','installed PWA must launch through the installed-entry boundary, never directly into a version-pinned campus');
+assert.ok((manifest.shortcuts||[]).every(shortcut=>String(shortcut.url||'').startsWith('/app/installed-entry-v146.html?')),'all installed shortcuts must pass through installed entry');
 assert.ok(!manifestText.includes('working-campus-v156.html?installed=1&version='),'manifest must not pin an installed launch to an old Working Campus release');
-assert.ok(installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"),'installed entry must resolve current release without cache');
+assert.ok(installedEntry.includes("const LOCAL_ROUTES=Object.freeze({"),'installed entry must carry an on-device canonical route map');
+assert.ok(installedEntry.includes("bootPolicy:'local-first-no-host-gate-v283'"),'installed entry must advertise the local-first boot contract');
+assert.ok(installedEntry.includes("location.replace(localDestination(system,releaseVersion).href)"),'installed entry must route directly to the local canonical system');
+const bootBlock=installedEntry.slice(installedEntry.indexOf('function boot(){'),installedEntry.indexOf('boot();'));
+assert.ok(!bootBlock.includes('refreshWorker('),'installed boot must not await a service-worker update');
+assert.ok(!bootBlock.includes('resolveReleaseVersion('),'installed boot must not fetch release metadata before routing');
+assert.ok(!bootBlock.includes('fetch('),'installed boot must not depend on the download hub or network');
+assert.ok(installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store',signal:controller.signal})"),'explicit release refresh helper must remain no-store and bounded');
 assert.ok(installedEntry.includes("updateViaCache:'none'"));
 assert.ok(installedEntry.includes('await registration.update()'));
-assert.ok(installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'installed entry must activate a waiting worker before routing');
-assert.ok(installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='),'worker refresh must finish before installed route selection');
+assert.ok(installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'explicit worker refresh must still activate a waiting worker');
+assert.ok(bridge.includes("const ENTRY='/app/installed-entry-v146.html?installed=1&system=civweave&source=installer-open'"),'Open Civweave must target installed entry rather than the installer/download hub');
 
 const any192=manifest.icons?.find(icon=>icon.sizes==='192x192'&&String(icon.purpose||'any').includes('any'));
 const any512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'any').includes('any'));
@@ -94,4 +101,4 @@ assert.ok(workerWrapper.includes('policy=resumable-pause-v280'));
 assert.ok(workerWrapper.includes('chat-convergence-v250'),'worker wrapper must carry current convergence identity');
 assert.ok(workerWrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'new worker must activate immediately');
 
-console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v250',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first'},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v283-local-first',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'local-first-through-installed-entry',hubBootDependency:false},null,2));

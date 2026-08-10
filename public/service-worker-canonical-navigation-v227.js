@@ -1,6 +1,6 @@
 ;(()=>{
 'use strict';
-const REVISION='canonical-five-system-navigation-v227';
+const REVISION='canonical-five-system-navigation-v227-local-first-hotfix';
 const TIMEOUT_MS=9000;
 const ROUTE_SCRIPT='/app/system-routes-v227.js';
 const routes=self.CivweaveSystemRoutesV227;
@@ -41,20 +41,38 @@ function recoveryPage(pathname){
   const system=routes?.identify?.(pathname)||'civweave';
   const home=routes?.urlFor?.('civweave',{origin:self.location.origin}).href||'/app/working-campus-v156.html?installed=1';
   const retry=new URL(pathname,self.location.origin);retry.searchParams.set('installed','1');retry.searchParams.set('navigation',REVISION);
-  return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Civweave navigation recovery</title><style>html,body{margin:0;min-height:100%;background:#07131e;color:#f5f7ff;font:16px/1.5 system-ui}main{max-width:42rem;margin:auto;padding:12vh 1.25rem}a{display:inline-block;margin:.5rem .5rem 0 0;padding:.8rem 1rem;border-radius:.8rem;background:#1c3559;color:#fff;text-decoration:none}</style></head><body><main><h1>${system} could not open yet</h1><p>The requested system was not available from the network or this device package. Civweave did not substitute the installer or another system.</p><a href="${retry.pathname}${retry.search}">Retry this system</a><a href="${home}">Open Civweave</a></main></body></html>`,{status:503,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-civweave-canonical-navigation':REVISION}});
+  return new Response(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Civweave navigation recovery</title><style>html,body{margin:0;min-height:100%;background:#07131e;color:#f5f7ff;font:16px/1.5 system-ui}main{max-width:42rem;margin:auto;padding:12vh 1.25rem}a{display:inline-block;margin:.5rem .5rem 0 0;padding:.8rem 1rem;border-radius:.8rem;background:#1c3559;color:#fff;text-decoration:none}</style></head><body><main><h1>${system} could not open yet</h1><p>The requested system was not available from this device package or the network. Civweave did not substitute the installer or another system.</p><a href="${retry.pathname}${retry.search}">Retry this system</a><a href="${home}">Open Civweave</a></main></body></html>`,{status:503,headers:{'content-type':'text/html; charset=utf-8','cache-control':'no-store','x-civweave-canonical-navigation':REVISION}});
 }
 self.addEventListener('install',event=>{event.waitUntil(precacheCanonicalRoutes().catch(()=>[]))});
 networkFirst=async function canonicalFiveSystemNetworkFirst(request,fallbackPath='/offline.html'){
   if(!canonical(request))return originalNetworkFirst(request,fallbackPath);
   const pathname=new URL(request.url).pathname;
+
+  // Installed canonical system surfaces are local-first. A dead hub must never
+  // sit in front of a usable on-device campus.
+  const cached=await findCached(pathname);
+  const cachedNormalized=await normalize(cached,request);
+  if(cachedNormalized)return cachedNormalized;
+
+  // Network is a repair/fill path only when this exact canonical route is not
+  // already present on-device.
   try{
     const response=await withTimeout(fetch(packageRequest(request)),TIMEOUT_MS);
     const normalized=await normalize(response,request);
     if(normalized?.ok){if(request.method==='GET')await(await caches.open(RUNTIME_CACHE)).put(cacheKey(pathname),normalized.clone());return normalized}
   }catch{}
-  const cached=await findCached(pathname),normalized=await normalize(cached,request);
-  if(normalized)return normalized;
   return recoveryPage(pathname);
 };
-self.CivweaveCanonicalNavigationV227=Object.freeze({revision:REVISION,timeoutMs:TIMEOUT_MS,routeScript:ROUTE_SCRIPT,routes:routes?.routes?.().map(route=>route.pathname)||[],policy:'exact-route-network-first-exact-route-cache-never-launcher-fallback',packageHeader:true,precache:true,precacheCount:6});
+self.CivweaveCanonicalNavigationV227=Object.freeze({
+  revision:REVISION,
+  timeoutMs:TIMEOUT_MS,
+  routeScript:ROUTE_SCRIPT,
+  routes:routes?.routes?.().map(route=>route.pathname)||[],
+  policy:'exact-route-network-first-exact-route-cache-never-launcher-fallback',
+  effectivePolicy:'exact-route-cache-first-network-fill-never-launcher-fallback',
+  localFirst:true,
+  packageHeader:true,
+  precache:true,
+  precacheCount:6
+});
 })();

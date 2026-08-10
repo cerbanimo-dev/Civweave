@@ -12,10 +12,18 @@ const [manifestText,installedEntry,campusHtml,campusLoader,campusPart4,lifecycle
   read('public/app/manifest.webmanifest'),read('public/app/installed-entry-v146.js'),read('public/app/working-campus-v156.html'),read('public/app/working-campus-v156.js'),read('public/app/working-campus-v156.part4.txt'),read('public/app/document-lifecycle-v221.js'),read('public/app/install-boundary-v146.js'),read('public/app/system-routes-v227.js'),read('public/extensions/civweave-additions-v156.js'),read('public/service-worker-core-v208.js'),read('public/service-worker-release-coherence-v220.js'),read('public/service-worker-v203.js'),read('public/service-worker-canonical-navigation-v227.js')
 ]);
 const manifest=JSON.parse(manifestText);
-assert.equal(manifest.start_url,'/app/installed-entry-v146.html?installed=1','Installed PWA no longer enters the updater-first launch boundary.');
-assert(installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"),'Installed entry no longer resolves the current release without cache.');
-assert(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('await registration.update()'),'Installed entry no longer refreshes the worker before routing.');
-assert(installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})")&&installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='),'Installed entry no longer activates the refreshed worker before route selection.');
+assert.equal(manifest.start_url,'/app/installed-entry-v146.html?installed=1','Installed PWA no longer enters the stable installed-entry launch boundary.');
+assert(installedEntry.includes("bootPolicy:'local-first-no-host-gate-v283'"),'Installed entry lost the local-first boot policy.');
+assert(installedEntry.includes('const LOCAL_ROUTES=Object.freeze({'),'Installed entry lost its boot-safe canonical route mirror.');
+assert(installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store',signal:controller.signal})"),'Explicit installed-entry release refresh no longer bypasses cache with a bounded request.');
+assert(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('await registration.update()'),'Explicit installed-entry worker refresh is no longer fresh.');
+assert(installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'Explicit installed-entry update helper no longer activates a refreshed worker.');
+const bootStart=installedEntry.indexOf('function boot(){'),bootEnd=installedEntry.indexOf('boot();'),boot=installedEntry.slice(bootStart,bootEnd);
+assert(bootStart>=0&&bootEnd>bootStart,'Installed entry boot function is missing.');
+assert(boot.includes('location.replace(localDestination(system,releaseVersion).href)'),'Installed entry no longer routes directly to the on-device canonical system.');
+assert(!boot.includes('resolveReleaseVersion('),'Installed boot again waits for release metadata.');
+assert(!boot.includes('refreshWorker('),'Installed boot again waits for worker update.');
+assert(!boot.includes('fetch('),'Installed boot again depends on network access.');
 assert(campusHtml.indexOf('/app/document-lifecycle-v221.js')<campusHtml.indexOf('/app/install-boundary-v146.js'),'Lifecycle guard must load before boundary.');
 assert(campusHtml.includes('/app/document-lifecycle-v221.js?v=document-lifecycle-v222'),'Working Campus lifecycle compatibility URL is stale.');
 assert(campusHtml.includes('/app/install-boundary-v146.js?v=chat-convergence-v250'),'Working Campus boundary revision is stale.');
@@ -35,6 +43,7 @@ assert(startBlock.indexOf("if(system==='civweave'){")<startBlock.indexOf(additio
 for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
 assert(campusPart4.includes('CivweaveSystemRoutesV227')&&campusPart4.includes('routes.navigate(id'),'Working Campus realm travel bypasses the route contract.');
 for(const token of ['document-lifecycle-v269-ai-settings-entry','CivweaveLifecycleMutationObserver',"addEventListener('pagehide',stop",'ensureAISettingsDelegation',"/app/settings-delegation-v175.js?v=1.0.65-ai-settings-entry-v269"])assert(lifecycle.includes(token),`Lifecycle guard is missing ${token}.`);
+assert(lifecycle.includes('scheduleLocalAISettingsManagement')&&lifecycle.includes('v283-ai-settings-first-paint-idle-mount'),'Lifecycle guard lost the AI Settings first-paint/deferred-management protection.');
 assert(!lifecycle.includes("Object.defineProperty(document,'head'")&&!lifecycle.includes("Object.defineProperty(document,'body'"),'Lifecycle guard overrides native document structure.');
 assert(additions.includes('civweaveAdditionsNavigating'),'Shared additions do not track navigation teardown.');
 assert(!additions.includes('Document navigation interrupted script loading.'),'Shared additions emit the reported navigation error.');
@@ -47,6 +56,7 @@ assert(wrapper.includes('/service-worker-chat-repair-v245.js?v=chat-convergence-
 assert(wrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'v250 worker wrapper no longer activates the convergence worker promptly.');
 assert(wrapper.indexOf('/app/system-routes-v227.js')<wrapper.indexOf('/service-worker-core-v208.js'),'Worker route contract loads after core.');
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not final.');
-assert(canonicalNavigation.includes("headers.set('x-civweave-package',REVISION)")&&canonicalNavigation.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical worker navigation contract is incomplete.');
+assert(canonicalNavigation.includes("headers.set('x-civweave-package',REVISION)")&&canonicalNavigation.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical worker navigation compatibility contract is incomplete.');
+assert(canonicalNavigation.includes("effectivePolicy:'exact-route-cache-first-network-fill-never-launcher-fallback'")&&canonicalNavigation.includes('localFirst:true'),'Canonical worker navigation lost the local-first effective policy.');
 for(const [name,source] of [['installed entry',installedEntry],['campus loader',campusLoader],['lifecycle guard',lifecycle],['install boundary',installBoundary],['route contract',routes],['shared additions',additions],['release coherence',releaseCoherence],['canonical navigation',canonicalNavigation]])assert.doesNotThrow(()=>new vm.Script(source,{filename:name}),`${name} does not compile.`);
-console.log(JSON.stringify({ok:true,revision:'canonical-campus-startup-v269',updaterFirstStart:true,directCampusStart:false,canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',civweaveCoreOnly:true,aiSettingsEntryRepair:true,navigationErrorsSilent:true,campusFragmentsNetworkFirst:true,packageAuthenticatedNavigation:true,exactRouteFallback:true,nonInterruptingCoreWorker:true,v250WrapperActivation:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'canonical-campus-startup-v283-local-first',installedEntryBoot:'local-first-no-host-gate',explicitUpdater:true,directCampusStart:true,canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',civweaveCoreOnly:true,aiSettingsEntryRepair:true,aiSettingsFirstPaint:true,navigationErrorsSilent:true,campusFragmentsNetworkFirst:true,packageAuthenticatedNavigation:true,exactRouteFallback:true,canonicalNavigationLocalFirst:true,nonInterruptingCoreWorker:true,v250WrapperActivation:true},null,2));

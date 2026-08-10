@@ -29,21 +29,23 @@ const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
 check('release is coherent',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version&&manifest.name.includes(`v${version}`));
-check('installed launch enters updater first',manifest.start_url==='/app/installed-entry-v146.html?installed=1');
-check('all manifest shortcuts enter updater first',(manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(item=>String(item.url).startsWith('/app/installed-entry-v146.html?')));
+check('installed launch enters installed-entry boundary',manifest.start_url==='/app/installed-entry-v146.html?installed=1');
+check('all manifest shortcuts enter installed-entry boundary',(manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(item=>String(item.url).startsWith('/app/installed-entry-v146.html?')));
 check('manifest has no frozen Working Campus version pin',!manifestText.includes('working-campus-v156.html?installed=1&version='));
-check('Cloudflare leaves updater HTML reachable',!redirects.split(/\r?\n/).includes('/app/installed-entry-v146.html /app/ 302'));
-check('extensionless installed entry normalizes to updater HTML',redirects.split(/\r?\n/).includes('/app/installed-entry-v146 /app/installed-entry-v146.html 302'));
+check('Cloudflare leaves installed-entry HTML reachable',!redirects.split(/\r?\n/).includes('/app/installed-entry-v146.html /app/ 302'));
+check('extensionless installed entry normalizes to installed-entry HTML',redirects.split(/\r?\n/).includes('/app/installed-entry-v146 /app/installed-entry-v146.html 302'));
 check('checked-in web launcher carries current release identity',rawLauncher.includes(`/app/civweave-brand.js?v=${version}`)&&rawLauncher.includes(`/app/installed-entry-v146.js?v=${version}`));
-check('checked-in updater HTML carries current installed-entry identity',installedEntryHtml.includes(`/app/installed-entry-v146.js?v=${version}`));
-check('checked-in updater runtime carries current fallback identity',installedEntry.includes(`const FALLBACK_VERSION='${version}';`)&&installedEntry.includes(`version:'${version}-chat-convergence-v250'`));
+check('checked-in installed-entry HTML carries current installed-entry identity',installedEntryHtml.includes(`/app/installed-entry-v146.js?v=${version}`));
+check('checked-in installed-entry runtime carries current fallback identity',installedEntry.includes(`const FALLBACK_VERSION='${version}';`)&&installedEntry.includes(`version:'${version}-chat-convergence-v250'`));
+check('installed entry declares local-first boot policy',installedEntry.includes("bootPolicy:'local-first-no-host-gate-v283'")&&installedEntry.includes('const LOCAL_ROUTES=Object.freeze({'));
 check('checked-in route contract carries current release identity',routesSource.includes(`const VERSION='${version}';`));
 check('checked-in themed navigation carries current release identity',navSource.includes(`const VERSION='${version}-five-system-navigation-v227';`)&&navSource.includes(`version:'${version}'`));
 check('checked-in install boundary carries current release identity',boundary.includes(`const VERSION='${version}';`));
 check('checked-in worker requests current route and core identities',workerEntry.includes(`/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227`)&&workerEntry.includes(`/service-worker-core-v208.js?v=${version}-chat-convergence-v250`));
-check('installed entry resolves release with no-store manifest fetch',installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"));
-check('installed entry forces worker update checks',installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('await registration.update()'));
-check('installed entry activates waiting worker before route',installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})")&&installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='));
+check('explicit release helper is bounded no-store',installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store',signal:controller.signal})"));
+check('explicit worker refresh remains available',installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('await registration.update()')&&installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})"));
+const bootStart=installedEntry.indexOf('function boot(){'),bootEnd=installedEntry.indexOf('boot();'),bootBlock=installedEntry.slice(bootStart,bootEnd);
+check('installed boot routes locally without release fetch',bootStart>=0&&bootEnd>bootStart&&bootBlock.includes("const requested=params.get('system')||params.get('target')||'civweave';")&&bootBlock.includes('location.replace(localDestination(system,releaseVersion).href)')&&!bootBlock.includes('refreshWorker(')&&!bootBlock.includes('resolveReleaseVersion(')&&!bootBlock.includes('fetch('));
 
 const expStart=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),expEnd=boundary.indexOf('];',expStart),experience=boundary.slice(expStart,expEnd);
 check('canonical experience includes v242 workspace',experience.includes('GUIDE_WORKSPACE'));
@@ -67,7 +69,7 @@ check('viewport cannot inject v245 owner',!viewport.includes('CHAT_OWNER_REPAIR'
 check('shared guide loader mounts canonical core',sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'));
 check('shared surface delegates to compatibility API',shared.includes('CivweavePersistentGuideChatV215')&&shared.includes('api.submitText(value,currentSystem)'));
 
-check('release version sync preserves updater-first manifest',releaseSync.includes("manifest.start_url='/app/installed-entry-v146.html?installed=1'")&&releaseSync.includes('chat-convergence-v250'));
+check('release version sync preserves installed-entry manifest',releaseSync.includes("manifest.start_url='/app/installed-entry-v146.html?installed=1'")&&releaseSync.includes('chat-convergence-v250'));
 check('release coherence generator preserves v250 boundary instead of rebuilding v227 chat stack',coherenceSync.includes("const chatRevision='chat-convergence-v250'")&&coherenceSync.includes("const boundaryRevision='chat-convergence-v250'")&&coherenceSync.includes('Release coherence must not resurrect v215/v216'));
 check('release coherence generator recognizes installed-entry fallback constant',coherenceSync.includes("const FALLBACK_VERSION='\\d+\\.\\d+\\.\\d+'"));
 check('release coherence generator does not write canonical-core-only-v226 additions identity',!coherenceSync.includes("const ADDITIONS_VERSION='v${version}-canonical-core-only-v226'"));
@@ -77,4 +79,4 @@ check('worker purge ignores stale query identities',workerRepair.includes('cache
 check('worker imports v250 chat repair',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250')"));
 check('worker skips waiting on install',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
 
-console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v250',checks:checks.length,installedLaunch:'updater-first',canonicalRuntime:'guide-workspace-v242',canonicalDuplicateChatOwners:0,embeddedSurfaceDelegates:true,sharedGuideLoaderAware:true,cacheMigration:true,checkedInReleaseIdentitiesCurrent:true,releaseGeneratorsPreserveConvergence:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v250-local-first-entry',checks:checks.length,installedLaunch:'local-first-through-installed-entry',canonicalRuntime:'guide-workspace-v242',canonicalDuplicateChatOwners:0,embeddedSurfaceDelegates:true,sharedGuideLoaderAware:true,cacheMigration:true,checkedInReleaseIdentitiesCurrent:true,releaseGeneratorsPreserveConvergence:true,hubBootDependency:false},null,2));

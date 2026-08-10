@@ -8,6 +8,7 @@ if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('VERSION must contain a sema
 const required=[
   'public/app/system-routes-v227.js',
   'public/service-worker-living-school-cleanroom-v218.js',
+  'public/service-worker-code-coherence-v288.js',
   'public/service-worker-core-v208.js',
   'public/service-worker-installed-launch-v282.js',
   'public/service-worker-installer-state-v280.js',
@@ -22,35 +23,19 @@ const required=[
   'public/service-worker-local-model-download-v267.js'
 ];
 for(const relative of required)await readFile(path.join(root,relative),'utf8');
-const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + retained lightweight shell core + installed-pwa-launch-v282 + installer-state-machines-v280 + shell-integrity-v281 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-convergence-v250 + local-model-background-v267
-'use strict';
-importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227');
-importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
-importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250');
-importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v282');
-importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
-importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
-importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280');
-importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');
-importScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v226');
-importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224');
-importScripts('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225');
-importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227');
-importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250');
-importScripts('/service-worker-local-model-download-v267.js?v=${version}-local-model-background-v267');
-self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
-`;
+const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + code-coherence-v288 + retained lightweight shell core + installed-pwa-launch-v282 + installer-state-machines-v280 + shell-integrity-v281 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-convergence-v250 + local-model-background-v267\n'use strict';\nimportScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227');\nimportScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');\nimportScripts('/service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288');\nimportScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250');\nimportScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v282');\nimportScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');\nimportScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');\nimportScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280');\nimportScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');\nimportScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v226');\nimportScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224');\nimportScripts('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225');\nimportScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227');\nimportScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250');\nimportScripts('/service-worker-local-model-download-v267.js?v=${version}-local-model-background-v267');\nself.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});\n`;
 await writeFile(path.join(root,'public/service-worker-v203.js'),output,'utf8');
 console.log(JSON.stringify({
   ok:true,
   version,
   output:'public/service-worker-v203.js',
-  imports:14,
+  imports:15,
   installedLaunch:'installed-pwa-launch-v282',
   offlineRevision:'offline-campus-current-graph-v280',
   offlinePolicy:'resumable-pause-v280',
   shellIntegrity:'shell-integrity-v281',
   installerState:'installer-state-machines-v280',
+  codeCoherence:'v288',
   canonicalNavigationFinalPolicy:true,
   routeContractFirst:true
 },null,2));

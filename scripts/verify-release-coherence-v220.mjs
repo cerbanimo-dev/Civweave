@@ -19,12 +19,19 @@ const coherenceImport="importScripts('/service-worker-release-coherence-v220.js?
 assert(wrapper.includes(coherenceImport),'Active worker wrapper does not import release coherence v226.');
 assert(wrapper.indexOf(coherenceImport)>wrapper.indexOf(offlineImport),'Release coherence must load after the retained core and offline override.');
 assert(entry.includes("document.currentScript?.src"),'Installed entry does not derive an explicit release from a versioned script URL when one is supplied.');
-assert(entry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"),'Installed entry does not resolve the current release from a no-store manifest request.');
-assert(entry.includes("updateViaCache:'none'"),'Installed entry can still reuse HTTP-cached worker script bytes.');
-assert(entry.includes('await registration.update()'),'Installed entry does not explicitly refresh the worker before routing.');
-assert(entry.includes("revision=chat-convergence-v250"),'Installed entry does not register the v250 convergence worker before routing.');
-assert(entry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'Installed entry does not activate a waiting convergence worker before routing.');
-assert(entry.indexOf('await refreshWorker(releaseVersion)')<entry.indexOf('const requested='),'Installed entry routes before the v250 worker refresh completes.');
+assert(entry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store',signal:controller.signal})"),'Explicit installed-entry release refresh helper is no longer a bounded no-store manifest request.');
+assert(entry.includes("updateViaCache:'none'"),'Explicit installed-entry worker refresh can still reuse HTTP-cached worker script bytes.');
+assert(entry.includes('await registration.update()'),'Explicit installed-entry update helper no longer refreshes the worker.');
+assert(entry.includes("revision=chat-convergence-v250"),'Explicit installed-entry update helper no longer targets the v250 convergence worker.');
+assert(entry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'Explicit installed-entry update helper no longer activates a waiting convergence worker.');
+assert(entry.includes("bootPolicy:'local-first-no-host-gate-v283'"),'Installed entry lost the local-first boot policy marker.');
+assert(entry.includes('const LOCAL_ROUTES=Object.freeze({'),'Installed entry lost its boot-safe canonical route mirror.');
+const bootStart=entry.indexOf('function boot(){'),bootEnd=entry.indexOf('boot();'),boot=entry.slice(bootStart,bootEnd);
+assert(bootStart>=0&&bootEnd>bootStart,'Installed entry boot function is missing.');
+assert(boot.includes('location.replace(localDestination(system,releaseVersion).href)'),'Installed entry no longer routes directly to an on-device canonical system.');
+assert(!boot.includes('resolveReleaseVersion('),'Installed entry boot is again gated by release metadata resolution.');
+assert(!boot.includes('refreshWorker('),'Installed entry boot is again gated by worker refresh.');
+assert(!boot.includes('fetch('),'Installed entry boot is again gated by network access.');
 assert(cloudflareBuild.includes("await import('./sync-release-version-assets.mjs')"),'Cloudflare build skips canonical release synchronization.');
 assert(cloudflareBuild.includes("await import('./sync-release-coherence-v220.mjs')"),'Cloudflare build skips release-coherence synchronization.');
 assert(prepareStart.includes("await import('./sync-release-coherence-v220.mjs')"),'Render/local startup skips release-coherence synchronization.');
@@ -84,8 +91,9 @@ assert.equal(sandbox.self.CivweaveReleaseCoherenceV220?.policy,'version-pinned-h
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'release-coherence-v226-v250-entry',
-  installedEntryRefresh:'chat-convergence-v250-before-routing',
+  revision:'release-coherence-v226-v283-local-first-entry',
+  installedEntryBoot:'local-first-no-host-gate',
+  explicitUpdateHelper:'bounded-no-store-v250-refresh',
   cloudflareVersionSync:true,
   renderLocalVersionSync:true,
   versionedTextAndCampusFragments:'network-first-cached-fallback',

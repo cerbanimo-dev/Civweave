@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v246';
-const ENTRY='/app/?system=civweave&installed=1';
+const VERSION='pwa-install-prompt-v246-local-boot-hotfix';
+const ENTRY='/app/installed-entry-v146.html?installed=1&system=civweave&source=installer-open';
 let promptEvent=null;
 let installed=false;
 let prompting=false;
@@ -108,6 +108,7 @@ addEventListener('pagehide',()=>buttonObserver?.disconnect(),{once:true});
 
 const api=Object.freeze({
   version:VERSION,
+  entry:ENTRY,
   available:()=>Boolean(promptEvent),
   peek:()=>promptEvent,
   consume(){const value=promptEvent;promptEvent=null;return value},
