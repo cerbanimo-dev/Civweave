@@ -27,11 +27,13 @@ assert(contract.includes('resolveRelevantMedia'));
 assert(contract.includes("kind:'open-media'"));
 const offline=JSON.parse(fs.readFileSync(path.join(root,'public/app/offline-package-v208.json'),'utf8'));
 for(const asset of ['/app/open-learning-media-cache-v1.mjs','/downloads/knowledge-schools/open-learning-media/lookup.json','/downloads/knowledge-schools/open-learning-media/harvest-policy.json'])assert(offline.assets.includes(asset),asset);
-const installer=fs.readFileSync(path.join(root,'public/app/index.html'),'utf8');
-assert(installer.includes('id="open-learning-media-cache"'));
-assert(installer.includes('/app/open-learning-media-installer-v1.mjs'));
+const atlasInstaller=fs.readFileSync(path.join(root,'public/app/video-atlas-installer-v1.js'),'utf8');
+assert(atlasInstaller.includes('/app/open-learning-media-installer-v1.mjs'));
+const mediaInstaller=fs.readFileSync(path.join(root,'public/app/open-learning-media-installer-v1.mjs'),'utf8');
+assert(mediaInstaller.includes("ROOT_ID='open-learning-media-cache'"));
+assert(mediaInstaller.includes('ensureRoot'));
 for(const surface of ['public/app/cabinets/living-school/index.html','public/app/realm-console-v140.html','public/app/working-campus-v156.html']){
   const html=fs.readFileSync(path.join(root,surface),'utf8');
   assert(html.includes('/app/open-learning-media-cache-v1.mjs'),surface);
 }
-console.log('Open Learning Media runtime verified: license gate, streaming SHA-256, storage tiers, mesh protocol, offline metadata, installer controls, and realm wiring.');
+console.log('Open Learning Media runtime verified: license gate, streaming SHA-256, storage tiers, mesh protocol, offline metadata, self-mounting installer, and realm wiring.');
