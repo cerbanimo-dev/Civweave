@@ -1,6 +1,5 @@
 // GENERATED: five-system route contract v227 + living-school clean-room cache boundary + retained lightweight shell core + installer-state-machines-v280 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-convergence-v250 + local-model-background-v267
 'use strict';
-// Compatibility marker: the imported V211 retry engine still stores metadata as /service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238&policy=fast-background-v241; the v280 wrapper adds pause/resume installation policy without rewriting that internal ledger format.
 importScripts('/app/system-routes-v227.js?v=1.0.62-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
 importScripts('/service-worker-core-v208.js?v=1.0.62-chat-convergence-v250');
