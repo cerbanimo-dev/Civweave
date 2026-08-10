@@ -6,6 +6,8 @@ import vm from 'node:vm';
 const js=await readFile(new URL('../public/app/civweave-map-service-v275.js',import.meta.url),'utf8');
 const mesh=await readFile(new URL('../public/app/civweave-map-mesh-v276.js',import.meta.url),'utf8');
 const bridge=await readFile(new URL('../public/app/civweave-map-mesh-bridge-v276.js',import.meta.url),'utf8');
+const coverage=await readFile(new URL('../public/app/civweave-map-coverage-v277.js',import.meta.url),'utf8');
+const scoring=await import(new URL('../public/app/shared/civweave-map-coverage-scoring-v1.mjs',import.meta.url));
 const objectMesh=await readFile(new URL('../public/app/local-object-mesh-v146.js',import.meta.url),'utf8');
 const html=await readFile(new URL('../public/app/federation-finder-map-v275.html',import.meta.url),'utf8');
 const route=await readFile(new URL('../public/finder/index.html',import.meta.url),'utf8');
@@ -18,6 +20,7 @@ test('map runtime JavaScript parses',()=>{
   assert.doesNotThrow(()=>new vm.Script(js,{filename:'civweave-map-service-v275.js'}));
   assert.doesNotThrow(()=>new vm.Script(mesh,{filename:'civweave-map-mesh-v276.js'}));
   assert.doesNotThrow(()=>new vm.Script(bridge,{filename:'civweave-map-mesh-bridge-v276.js'}));
+  assert.doesNotThrow(()=>new vm.Script(coverage,{filename:'civweave-map-coverage-v277.js'}));
 });
 
 test('finder uses real vector locality provider and MapLibre renderer',()=>{
@@ -74,12 +77,49 @@ test('Finder ingests received locality knowledge and republishes only public nod
   has(bridge,/civweave:map-knowledge-changed/,'newly received WWW knowledge should refresh the map live');
 });
 
-test('finder route and offline package carry v275/v276 map stack',()=>{
+test('coverage negotiator publishes bounded needs and heals from ranked peer packs',()=>{
+  has(bridge,/civweave-map-coverage-v277\.js/,'the Finder bridge should load the coverage negotiator');
+  has(coverage,/MIN_AUTO_ZOOM=5/,'automatic requests should stay local rather than requesting planet-scale packs');
+  has(coverage,/publishRegionNeed/,'missing viewport coverage should publish a region need');
+  has(coverage,/mesh\.sync\(\)/,'a new need should immediately exchange over the WWW when available');
+  has(coverage,/rankCandidates/,'peer packs should be ranked before download');
+  has(coverage,/mesh\.pullMapPack/,'the best eligible peer pack should be cached');
+  has(coverage,/civweave:map-offline-coverage-ready/,'successful healing should emit a coverage-ready event');
+  has(coverage,/failureBlocked/,'failed peer packs should use retry backoff');
+  has(coverage,/saveData/,'Data Saver should suppress automatic heavy pulls');
+});
+
+test('coverage scoring prioritizes complete, verified, efficient packs',()=>{
+  const need={bbox:[-76,43,-75,44],minZoom:8,maxZoom:8,formats:['pmtiles'],maxBytes:100*1024*1024};
+  const good={packId:'good',format:'pmtiles',bbox:[-77,42,-74,45],minZoom:0,maxZoom:14,bytes:20*1024*1024,sha256:'a'.repeat(64),generatedAt:new Date().toISOString(),originFingerprint:'signed-peer'};
+  const partial={packId:'partial',format:'pmtiles',bbox:[-75.4,43,-75,44],minZoom:0,maxZoom:14,bytes:8*1024*1024,sha256:'b'.repeat(64),generatedAt:new Date().toISOString(),originFingerprint:'signed-peer'};
+  const unhashed={packId:'unhashed',format:'pmtiles',bbox:[-77,42,-74,45],minZoom:0,maxZoom:14,bytes:4*1024*1024,sha256:'',generatedAt:new Date().toISOString(),originFingerprint:'signed-peer'};
+  const ranked=scoring.rankPacks(need,[partial,unhashed,good],{good:{trusted:true,latencyMs:120}});
+  assert.equal(ranked[0].pack.packId,'good');
+  assert.equal(ranked[0].eligible,true);
+  assert.equal(ranked.find(row=>row.pack.packId==='partial').eligible,false);
+  assert.equal(ranked.find(row=>row.pack.packId==='unhashed').eligible,false);
+  assert.equal(scoring.coverageRatio(need.bbox,good.bbox),1);
+});
+
+test('coverage scoring uses size, provenance and observed latency as tie breakers',()=>{
+  const need={bbox:[-76,43,-75,44],minZoom:8,maxZoom:8,formats:['pmtiles'],maxBytes:120*1024*1024};
+  const base={format:'pmtiles',bbox:[-77,42,-74,45],minZoom:0,maxZoom:14,sha256:'c'.repeat(64),generatedAt:new Date().toISOString(),originFingerprint:'signed-peer'};
+  const small={...base,packId:'small',bytes:12*1024*1024};
+  const large={...base,packId:'large',bytes:90*1024*1024};
+  const ranked=scoring.rankPacks(need,[large,small],{small:{trusted:true,latencyMs:80},large:{trusted:false,latencyMs:2200}});
+  assert.equal(ranked[0].pack.packId,'small');
+  assert.equal(scoring.cachedPackSatisfies(need,{...small,cachedAt:new Date().toISOString()}),true);
+});
+
+test('finder route and offline package carry v275/v277 map stack',()=>{
   has(route,/federation-finder-map-v275\.html/);
   assert.ok(offline.assets.includes('/app/federation-finder-map-v275.html'));
   assert.ok(offline.assets.includes('/app/civweave-map-service-v275.js'));
   assert.ok(offline.assets.includes('/app/civweave-map-mesh-v276.js'));
   assert.ok(offline.assets.includes('/app/civweave-map-mesh-bridge-v276.js'));
+  assert.ok(offline.assets.includes('/app/civweave-map-coverage-v277.js'));
+  assert.ok(offline.assets.includes('/app/shared/civweave-map-coverage-scoring-v1.mjs'));
   assert.ok(offline.assets.includes('/app/vendor/maplibre-v5.13.0/maplibre-gl.js'));
   has(prep,/stage-maplibre-v275\.mjs/,'startup preparation should vendor the renderer');
 });
