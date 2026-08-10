@@ -1,0 +1,41 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "civweave-core",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-08-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    {
+      "pattern": "api.commonweave.earth",
+      "custom_domain": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "civweave-core",
+      "database_id": "__CIVWEAVE_CORE_D1_ID__",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PACKAGES",
+      "bucket_name": "civweave-distribution"
+    }
+  ],
+  "vars": {
+    "CIVWEAVE_PLATFORM_FEE_BPS": "1500",
+    "CIVWEAVE_MONEY_LIVE_ENABLED": "false"
+  },
+  "observability": {
+    "enabled": true
+  }
+
+  // Worker secrets, set in Cloudflare and never committed:
+  // STRIPE_SECRET_KEY
+  // STRIPE_CONNECT_WEBHOOK_SECRET
+  // NODE_FABRIC_BINDING_TOKEN
+  //
+  // No host node receives any of these values.
+}
