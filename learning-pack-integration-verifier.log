@@ -1,17 +1,17 @@
-file:///home/runner/work/Civweave/Civweave/public/app/shared/learning-pack-resolver-v1.mjs:39
-    .sort((a,b)=>b.score-a.score||Number(b.autoStage!==false)-Number(a.autoStage!==false)||String(a.title).localeCompare(String(b.title)));
-                                                                                                                                         ^
-
-SyntaxError: missing ) after argument list
-    at compileSourceTextModule (node:internal/modules/esm/utils:346:16)
-    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:110:18)
-    at #translate (node:internal/modules/esm/loader:559:20)
-    at afterLoad (node:internal/modules/esm/loader:612:29)
-    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:617:12)
-    at #createModuleJob (node:internal/modules/esm/loader:640:36)
-    at #getJobFromResolveResult (node:internal/modules/esm/loader:353:34)
-    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:321:41)
-    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:680:25)
-
-Node.js v22.23.1
-exit_code=1
+Learning-pack v1 contract passed. {
+  coreTasks: 20,
+  expertPacks: 9,
+  totalTasks: 74,
+  totalLearning: 39,
+  totalGuides: 19,
+  atlasStats: {
+    compressedBytes: 863068,
+    occupations: 1016,
+    taskStatements: 18796,
+    essentialSkillRows: 17880,
+    dwaRefs: 23850,
+    sha256: 'fe62e9e398790356a92ed62e3dae9aaa7ea570f5411ef326b86853a52095cdfb'
+  },
+  coreAndExpertFingerprint: 'ce95a0dd5728800f'
+}
+exit_code=0

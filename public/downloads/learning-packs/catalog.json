@@ -1,7 +1,7 @@
 {
   "schema": "civweave.learning-pack-catalog.v1",
   "version": "1.1.0",
-  "updated": "2026-08-10T09:03:54.817Z",
+  "updated": "2026-08-10T09:04:59.026Z",
   "packs": [
     {
       "id": "civweave-core-practice-v1",
@@ -306,7 +306,7 @@
       "file": "onet-labor-atlas-30-3.json.gz",
       "contentType": "application/gzip",
       "bytes": 863068,
-      "sha256": "cf2f5071bd7f12ce5dd119fb8a30a8c8f8af245e8d1f1198ea9300a5b6fad60b",
+      "sha256": "fe62e9e398790356a92ed62e3dae9aaa7ea570f5411ef326b86853a52095cdfb",
       "optional": true,
       "bundled": false,
       "autoStage": false,
@@ -315,7 +315,7 @@
       "buildCommand": "node scripts/build-learning-packs-v1.mjs",
       "summary": "Generated optional labor-reference pack from official O*NET 30.3 occupation, task, essential-skill, and task-to-DWA tables. Reference data requires task-specific adaptation.",
       "sourceRelease": "30.3",
-      "generatedAt": "2026-08-10T09:03:54.667Z",
+      "generatedAt": "2026-08-10T09:04:58.856Z",
       "counts": {
         "occupations": 1016,
         "taskStatements": 18796,
