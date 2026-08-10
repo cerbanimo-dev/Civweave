@@ -1,13 +1,14 @@
-
 ;(() => {
 'use strict';
 
-const V211_REVISION = 'offline-campus-current-graph-v238';
-const V211_POLICY = 'fast-background-v241';
+const V211_REVISION = 'offline-campus-current-graph-v280';
+const V211_POLICY = 'resumable-pause-v280';
+const V211_SYNC_TAG = 'civweave-campus-resume-v280';
 const V211_QUARANTINE_MS = 6 * 60 * 60 * 1000;
 const V211_BATCH_SIZE = 16;
 const V211_DISCOVERY_TEXT = /\.(?:html?|css|m?js|json|webmanifest|md|txt)$/i;
 let v211DownloadPromise = null;
+let v211PauseRequested = false;
 
 function v211FailureStatus(error) {
   const direct = Number(error?.status || 0);
@@ -43,11 +44,13 @@ function v211Packet(meta = {}) {
   const assets = [...new Set((Array.isArray(meta.assets) ? meta.assets : []).filter(Boolean))];
   const failed = (Array.isArray(meta.failed) ? meta.failed : []).map(entry => v211FailureEntry(entry));
   const skipped = (Array.isArray(meta.skipped) ? meta.skipped : []).map(v211SkippedEntry);
+  const downloadedAssets = [...new Set((Array.isArray(meta.downloadedAssets) ? meta.downloadedAssets : []).filter(Boolean))];
   const total = Math.max(0, Number(meta.total ?? assets.length) || 0);
   const attempted = Math.max(0, Number(meta.attempted ?? meta.completed ?? 0) || 0);
   const downloaded = Math.max(0, Math.min(total || Number.MAX_SAFE_INTEGER, Number(
-    meta.downloaded ?? meta.successful ?? Math.max(0, attempted - failed.length)
+    meta.downloaded ?? meta.successful ?? downloadedAssets.length ?? Math.max(0, attempted - failed.length)
   ) || 0));
+  const paused = Boolean(meta.paused);
   return {
     type: 'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
     mode: 'resumable-current-campus-graph',
@@ -56,11 +59,17 @@ function v211Packet(meta = {}) {
     policy: V211_POLICY,
     cache: OFFLINE_CACHE,
     ready: Boolean(meta.ready) && failed.length === 0 && (!total || downloaded >= total),
-    running: Boolean(meta.running),
+    running: Boolean(meta.running) && !paused,
+    paused,
+    interrupted: Boolean(meta.interrupted),
+    resumeSupported: true,
+    resumeStrategy: 'per-file-checkpoint',
+    syncTag: V211_SYNC_TAG,
     completed: downloaded,
     attempted,
     downloaded,
     successful: downloaded,
+    downloadedAssets,
     total,
     discovered: assets.length + skipped.length,
     failed,
@@ -107,6 +116,8 @@ async function v211MigrateMeta(meta, manifest) {
   const packet = v211Packet({
     ...meta,
     running: false,
+    paused: Boolean(meta.paused),
+    interrupted: Boolean(meta.running && !meta.paused),
     ready: false,
     attempted: 0,
     downloaded: Math.min(previousAssets.length, legacyDownloaded),
@@ -155,11 +166,24 @@ offlineStatus = async function offlineStatusV211() {
   const current = await readOfflineMeta();
   if (current) {
     const migrated = await v211MigrateMeta(current, manifest);
-    return v211SanitizeRetryMeta(migrated, manifest);
+    let packet = await v211SanitizeRetryMeta(migrated, manifest);
+    if (packet.running && !v211DownloadPromise) {
+      packet = v211Packet({
+        ...packet,
+        running: false,
+        paused: false,
+        interrupted: true,
+        updatedAt: new Date().toISOString()
+      });
+      await writeOfflineMeta(packet);
+    }
+    return packet;
   }
   return v211Packet({
     ready: false,
     running: false,
+    paused: false,
+    interrupted: false,
     attempted: 0,
     downloaded: 0,
     total: manifest.seeds?.length || 0,
@@ -183,7 +207,9 @@ async function v211DownloadOfflinePackage(event) {
   const previousFailures = new Map((previous?.failed || []).map(entry => [entry.pathname, v211FailureEntry(entry)]));
   const previousAssets = new Set((previous?.assets || []).filter(Boolean));
   const sameRelease = previous?.version === VERSION && previous?.revision === V211_REVISION;
+  const previousDownloadedAssets = sameRelease ? (previous?.downloadedAssets || []) : [];
   const now = Date.now();
+  v211PauseRequested = false;
 
   const activeSkip = pathname => {
     const entry = skipped.get(pathname);
@@ -196,25 +222,27 @@ async function v211DownloadOfflinePackage(event) {
     return true;
   };
 
-  // Only the CURRENT manifest is authoritative. Historical assets can satisfy cache hits,
-  // but they never nominate themselves for the next dependency graph.
   const initialAssets = [...new Set((manifest.seeds || []).filter(Boolean))];
   for (const asset of (manifest.assets || []).filter(Boolean)) if (!initialAssets.includes(asset)) initialAssets.push(asset);
   const queue = initialAssets.map(pathname => ({ pathname, depth: 0, required: requiredSeeds.has(pathname) }));
   const queued = new Set(initialAssets);
   const processed = new Set();
-  const downloaded = new Set();
+  const downloaded = new Set(previousDownloadedAssets);
   const failed = new Map();
   let attempted = 0;
   let bytes = 0;
 
-  const progress = async (running = true, ready = false) => {
+  const progress = async (running = true, ready = false, extra = {}) => {
     const assets = [...queued];
+    const downloadedAssets = assets.filter(pathname => downloaded.has(pathname));
     const packet = v211Packet({
       ready,
       running,
+      paused: Boolean(extra.paused),
+      interrupted: Boolean(extra.interrupted),
       attempted,
-      downloaded: downloaded.size,
+      downloaded: downloadedAssets.length,
+      downloadedAssets,
       total: assets.length,
       assets,
       failed: [...failed.values()],
@@ -232,6 +260,7 @@ async function v211DownloadOfflinePackage(event) {
   await progress(true, false);
 
   while (queue.length && processed.size < maxAssets) {
+    if (v211PauseRequested) break;
     const batch = queue.splice(0, V211_BATCH_SIZE).filter(item => !processed.has(item.pathname));
     if (!batch.length) continue;
     const results = await Promise.all(batch.map(async item => {
@@ -252,6 +281,7 @@ async function v211DownloadOfflinePackage(event) {
         }
         return { item, references };
       } catch (error) {
+        downloaded.delete(item.pathname);
         const status = v211FailureStatus(error);
         const prior = previousFailures.get(item.pathname);
         const attempts = Math.max(1, Number(prior?.attempts || 0) + 1);
@@ -273,6 +303,7 @@ async function v211DownloadOfflinePackage(event) {
         queue.push({ pathname, depth: result.item.depth + 1, required: requiredSeeds.has(pathname) });
       }
     }
+    if (v211PauseRequested) break;
     await progress(true, false);
   }
 
@@ -282,24 +313,69 @@ async function v211DownloadOfflinePackage(event) {
   }
 
   const ready = queue.length === 0 && failed.size === 0;
-  return progress(false, ready);
+  const paused = !ready && v211PauseRequested;
+  return progress(false, ready, { paused });
+}
+
+async function v211FollowActiveDownload(event) {
+  const active = v211DownloadPromise;
+  if (!active) return null;
+  const current = await offlineStatus();
+  post(event, { ...current, type: 'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS', running: true, paused: false, joinedExisting: true });
+  const finalPacket = await active;
+  post(event, finalPacket);
+  return finalPacket;
 }
 
 downloadOfflinePackage = function downloadOfflinePackageV211(event) {
-  if (v211DownloadPromise) return v211DownloadPromise;
-  v211DownloadPromise = v211DownloadOfflinePackage(event).finally(() => { v211DownloadPromise = null; });
+  if (v211DownloadPromise) return v211FollowActiveDownload(event);
+  v211PauseRequested = false;
+  v211DownloadPromise = v211DownloadOfflinePackage(event).finally(() => {
+    v211DownloadPromise = null;
+    v211PauseRequested = false;
+  });
   return v211DownloadPromise;
 };
+
+self.addEventListener('message', event => {
+  if (event.data?.type !== 'PAUSE_OFFLINE_PACKAGE') return;
+  v211PauseRequested = true;
+  event.waitUntil((async () => {
+    const current = await offlineStatus();
+    if (!v211DownloadPromise) {
+      const packet = v211Packet({ ...current, running: false, paused: true, interrupted: false, updatedAt: new Date().toISOString() });
+      await writeOfflineMeta(packet);
+      post(event, packet);
+      await v211Broadcast(packet);
+      return;
+    }
+    post(event, { ...current, type: 'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS', running: true, paused: false, pauseRequested: true });
+  })());
+});
+
+self.addEventListener('sync', event => {
+  if (event.tag !== V211_SYNC_TAG) return;
+  event.waitUntil((async () => {
+    const status = await offlineStatus();
+    if (status.ready || status.paused || v211DownloadPromise) return status;
+    return downloadOfflinePackage(event);
+  })());
+});
 
 self.CivweaveOfflineCampusV211 = {
   revision: V211_REVISION,
   policy: V211_POLICY,
+  syncTag: V211_SYNC_TAG,
   batchSize: V211_BATCH_SIZE,
   currentGraphOnly: true,
   backgroundSafe: true,
+  resumablePerFile: true,
+  pauseSupported: true,
   packet: v211Packet,
   migrateMeta: v211MigrateMeta,
-  sanitizeRetryMeta: v211SanitizeRetryMeta
+  sanitizeRetryMeta: v211SanitizeRetryMeta,
+  pause() { v211PauseRequested = true; },
+  get running() { return Boolean(v211DownloadPromise); }
 };
 
 })();
