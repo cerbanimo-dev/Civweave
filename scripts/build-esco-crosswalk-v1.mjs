@@ -11,7 +11,7 @@ const PACK_ID='esco-skill-crosswalk-v1';
 const FILE='esco-skill-crosswalk-v1.json.gz';
 const ESCO_API='https://ec.europa.eu/esco/api/search';
 const CLASSIFICATION_RELEASE='1.2.1';
-const API_VERSION_CANDIDATES=[process.env.ESCO_VERSION,'1.2.1','1.2.0'].filter(Boolean);
+const EXPLICIT_API_VERSION=String(process.env.ESCO_VERSION||'').trim();
 const ONET_CROSSWALK='https://esco.ec.europa.eu/system/files/2023-08/ONET_%28Occupations%29_0_updated.csv';
 const ATTRIBUTION='This service uses the ESCO classification of the European Commission.';
 const USER_AGENT='Civweave ESCO crosswalk builder/1.0';
@@ -71,18 +71,19 @@ async function fetchJson(url,label){
   }
   throw lastError||new Error(`${label} request failed.`);
 }
-async function findWorkingApiVersion(){
-  const probe='communication';
-  for(const selectedVersion of API_VERSION_CANDIDATES){
-    const url=new URL(ESCO_API);url.searchParams.set('text',probe);url.searchParams.set('language','en');url.searchParams.set('type','skill');url.searchParams.set('limit','2');url.searchParams.set('full','true');url.searchParams.set('viewObsolete','false');url.searchParams.set('selectedVersion',selectedVersion);
-    try{const json=await fetchJson(url,`ESCO ${selectedVersion} probe`);if(deepCandidates(json).length)return selectedVersion}catch(error){console.warn(`[ESCO] ${selectedVersion} probe failed: ${error.message}`)}
-  }
-  throw new Error(`No supported ESCO API release was reachable from candidates: ${API_VERSION_CANDIDATES.join(', ')}`);
+function escoSearchUrl(query,{limit=12}={}){
+  const url=new URL(ESCO_API);url.searchParams.set('text',query);url.searchParams.set('language','en');url.searchParams.set('limit',String(limit));url.searchParams.set('full','true');url.searchParams.set('viewObsolete','false');
+  if(EXPLICIT_API_VERSION)url.searchParams.set('selectedVersion',EXPLICIT_API_VERSION);
+  return url;
 }
-async function searchEsco(query,selectedVersion,cache){
+async function resolveApiSelection(){
+  const selection=EXPLICIT_API_VERSION||'latest-default',json=await fetchJson(escoSearchUrl('communication',{limit:5}),`ESCO ${selection} probe`);
+  if(!deepCandidates(json).length)throw new Error(`ESCO ${selection} probe returned no skill concepts.`);
+  return selection;
+}
+async function searchEsco(query,apiSelection,cache){
   const key=normalized(query);if(!key)return[];if(cache.has(key))return cache.get(key);
-  const url=new URL(ESCO_API);url.searchParams.set('text',query);url.searchParams.set('language','en');url.searchParams.set('type','skill');url.searchParams.set('limit','12');url.searchParams.set('full','true');url.searchParams.set('viewObsolete','false');url.searchParams.set('selectedVersion',selectedVersion);
-  const json=await fetchJson(url,`ESCO skill search for ${query}`),rows=[];
+  const json=await fetchJson(escoSearchUrl(query),`ESCO skill search for ${query}`),rows=[];
   for(const raw of deepCandidates(json)){const row=candidateRecord(raw);if(row&&!rows.some(existing=>existing.uri===row.uri))rows.push(row)}
   cache.set(key,rows);await sleep(35);return rows;
 }
@@ -95,18 +96,18 @@ function scoreCandidate(skill,candidate){
   }
   return best;
 }
-async function buildSkillMappings(skills,selectedVersion){
+async function buildSkillMappings(skills,apiSelection){
   const cache=new Map(),accepted=[],review=[],unresolved=[];
   for(let index=0;index<skills.length;index++){
     const skill=skills[index],queries=[skill.label,...skill.aliases].filter(Boolean).slice(0,3),candidateMap=new Map();
-    for(const query of queries)for(const row of await searchEsco(query,selectedVersion,cache))candidateMap.set(row.uri,row);
+    for(const query of queries)for(const row of await searchEsco(query,apiSelection,cache))candidateMap.set(row.uri,row);
     const ranked=[...candidateMap.values()].map(candidate=>({candidate,match:scoreCandidate(skill,candidate)})).sort((a,b)=>b.match.score-a.match.score);
     const exact=ranked.find(row=>row.match.exact);
     if(exact){
       const confidence=exact.match.kind==='label'?1:.98;
-      accepted.push({from:{scheme:'civweave',id:skill.id,label:skill.label},to:{scheme:'esco-skill',id:exact.candidate.id,uri:exact.candidate.uri,label:exact.candidate.label},relation:'exact',confidence,status:'accepted',provenance:{source:'esco-web-service-api',method:exact.match.kind==='label'?'normalized-label-exact':'normalized-alias-exact',query:exact.match.target,apiSelectedVersion:selectedVersion,classificationRelease:CLASSIFICATION_RELEASE,officialConcept:true,officialMapping:false,humanValidated:false,usDolValidated:false}});
+      accepted.push({from:{scheme:'civweave',id:skill.id,label:skill.label},to:{scheme:'esco-skill',id:exact.candidate.id,uri:exact.candidate.uri,label:exact.candidate.label},relation:'exact',confidence,status:'accepted',provenance:{source:'esco-web-service-api',method:exact.match.kind==='label'?'normalized-label-exact':'normalized-alias-exact',query:exact.match.target,apiSelectedVersion:apiSelection,classificationRelease:CLASSIFICATION_RELEASE,officialConcept:true,officialMapping:false,humanValidated:false,usDolValidated:false}});
     }else if(ranked[0]&&ranked[0].match.score>=.45){
-      const best=ranked[0];review.push({from:{scheme:'civweave',id:skill.id,label:skill.label},to:{scheme:'esco-skill',id:best.candidate.id,uri:best.candidate.uri,label:best.candidate.label},relation:'close',confidence:Number(Math.min(.89,.5+best.match.score*.39).toFixed(3)),status:'review',provenance:{source:'esco-web-service-api',method:'lexical-candidate',query:best.match.target,tokenJaccard:Number(best.match.score.toFixed(3)),apiSelectedVersion:selectedVersion,classificationRelease:CLASSIFICATION_RELEASE,officialConcept:true,officialMapping:false,humanValidated:false,usDolValidated:false}});
+      const best=ranked[0];review.push({from:{scheme:'civweave',id:skill.id,label:skill.label},to:{scheme:'esco-skill',id:best.candidate.id,uri:best.candidate.uri,label:best.candidate.label},relation:'close',confidence:Number(Math.min(.89,.5+best.match.score*.39).toFixed(3)),status:'review',provenance:{source:'esco-web-service-api',method:'lexical-candidate',query:best.match.target,tokenJaccard:Number(best.match.score.toFixed(3)),apiSelectedVersion:apiSelection,classificationRelease:CLASSIFICATION_RELEASE,officialConcept:true,officialMapping:false,humanValidated:false,usDolValidated:false}});
     }else unresolved.push({id:skill.id,label:skill.label,aliases:skill.aliases,packIds:skill.packIds});
     process.stdout.write(`\rESCO skills ${index+1}/${skills.length}`);
   }
@@ -154,8 +155,8 @@ const [coreModule,expertModule]=await Promise.all([
 ]);
 const authoredPacks=[...collectPackExports(coreModule),...collectPackExports(expertModule)],authoredSkills=mergeSkills(authoredPacks);
 if(authoredSkills.length<20)throw new Error(`Only ${authoredSkills.length} authored Civweave skills were discovered.`);
-const apiSelectedVersion=await findWorkingApiVersion();
-console.log(`Using ESCO API selectedVersion=${apiSelectedVersion} for ${authoredSkills.length} authored Civweave skills.`);
+const apiSelectedVersion=await resolveApiSelection();
+console.log(`Using ESCO API ${apiSelectedVersion} semantics for ${authoredSkills.length} authored Civweave skills.`);
 const skillResult=await buildSkillMappings(authoredSkills,apiSelectedVersion),occupationResult=await buildOccupationMappings();
 const skillMappings=[...skillResult.accepted,...skillResult.review];
 const escoSkills=[...new Map(skillMappings.map(row=>[row.to.id,{id:`esco-skill:${row.to.id}`,label:row.to.label,aliases:[],externalRefs:[{scheme:'esco',id:row.to.id,uri:row.to.uri}]}])).values()];
@@ -166,7 +167,7 @@ const pack={
   sourceRelease:`ESCO classification ${CLASSIFICATION_RELEASE}; API ${apiSelectedVersion}`,generatedAt,
   license:{id:'EC-REUSE/CC-BY-4.0',name:'European Commission reuse / CC BY 4.0 where applicable',url:'https://commission.europa.eu/legal-notice_en',attribution:ATTRIBUTION,modifications:'Civweave queries official ESCO skill concepts, generates separately identified Civweave-to-ESCO lexical mappings, and restructures the official ESCO-O*NET occupation crosswalk into a local interoperability pack. Generated Civweave skill mappings are not European Commission or U.S. Department of Labor validations.'},
   sources:[
-    {id:'esco-web-service-api',title:'ESCO Web Services API',kind:'official-api',url:'https://ec.europa.eu/esco/api',license:'European Commission reuse',note:`Queried in English with selectedVersion=${apiSelectedVersion}. ESCO concept URIs are preserved as external identifiers.`},
+    {id:'esco-web-service-api',title:'ESCO Web Services API',kind:'official-api',url:'https://ec.europa.eu/esco/api',license:'European Commission reuse',note:`Queried in English using ${apiSelectedVersion==='latest-default'?'the API default latest dataset':'selectedVersion='+apiSelectedVersion}. ESCO concept URIs are preserved as external identifiers.`},
     {id:'esco-official-onet-crosswalk',title:'Official O*NET-ESCO Occupation Crosswalk',kind:'official-crosswalk',url:ONET_CROSSWALK,license:'European Commission reuse',note:'Official occupation mappings are retained with their relation type. Related matches remain review-only in Civweave.'}
   ],
   skills:escoSkills,expertGuides:[],taskTemplates:[],learningUnits:[],laborReferences:[],
