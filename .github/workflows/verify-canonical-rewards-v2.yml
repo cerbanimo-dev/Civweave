@@ -25,8 +25,20 @@ jobs:
           node --check public/app/cw-reward-receivers-v2.js
           node --check public/app/cw-reward-legacy-bridge-v2.js
           node --check public/app/cw-reward-surfaces-v2.js
+          node --check lib/contribution-ledger-v1.mjs
+          node --check lib/contribution-mesh-v1.mjs
+          node --check public/app/shared/civweave-contribution-mesh-v1.js
+          node --check scripts/test-contribution-ledger-v1.mjs
+          node --check scripts/test-contribution-mesh-v1.mjs
+          node --check scripts/test-contribution-browser-adapter-v1.mjs
           node --check scripts/verify-canonical-rewards-v2.mjs
           node --check scripts/verify-reward-model-contract-v2.mjs
+      - name: Verify contribution currency invariants
+        run: node --test scripts/test-contribution-ledger-v1.mjs
+      - name: Verify contribution mesh invariants
+        run: node --test scripts/test-contribution-mesh-v1.mjs
+      - name: Verify browser mesh identity compatibility
+        run: node --test scripts/test-contribution-browser-adapter-v1.mjs
       - name: Verify ledger, Passport, prompts, and receivers
         run: |
           node scripts/verify-canonical-rewards-v2.mjs
@@ -38,5 +50,6 @@ jobs:
           const manifest=JSON.parse(fs.readFileSync('public/app/offline-package-v208.json','utf8'));
           const required=['/app/cw-reward-ledger-v2.js','/app/cw-reward-receivers-v2.js','/app/cw-reward-legacy-bridge-v2.js','/app/cw-reward-surfaces-v2.js'];
           for(const path of required){if(!manifest.seeds.includes(path))throw new Error(`Offline package omits ${path}`)}
-          console.log('canonical reward runtimes are seeded for offline use');
+          if(!manifest.assets.includes('/app/shared/civweave-contribution-mesh-v1.js'))throw new Error('Offline package omits contribution mesh runtime');
+          console.log('canonical reward and contribution mesh runtimes are seeded for offline use');
           NODE
