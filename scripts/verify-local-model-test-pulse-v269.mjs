@@ -13,7 +13,7 @@ const [pulse,bootstrap,runtime,assistant,registry,worker,lifecycle]=await Promis
   read('public/app/document-lifecycle-v221.js')
 ]);
 
-const compile=(path,source)=>{try{new Function(source)}catch(error){console.error(`::error file=${path},title=JavaScript syntax failure::${String(error?.message||error).replaceAll('\n',' ')}`);throw error}};
+const compile=(path,source)=>{try{new Function(source)}catch(error){console.log(`::error file=${path},title=JavaScript syntax failure::${String(error?.message||error).replaceAll('\n',' ')}`);throw error}};
 compile('public/app/local-ai/test-pulse-v269.js',pulse);
 compile('public/app/local-ai/bootstrap-v266.js',bootstrap);
 compile('public/app/local-ai/runtime-v266.js',runtime);
@@ -23,7 +23,7 @@ compile('public/app/local-ai/worker-v266.js',worker);
 compile('public/app/document-lifecycle-v221.js',lifecycle);
 
 const checks=[];
-const check=(name,value)=>{if(!value)console.error(`::error file=scripts/verify-local-model-test-pulse-v269.mjs,title=Local model verifier::${name}`);assert.ok(value,name);checks.push(name)};
+const check=(name,value)=>{if(!value)console.log(`::error file=scripts/verify-local-model-test-pulse-v269.mjs,title=Local model verifier::${name}`);assert.ok(value,name);checks.push(name)};
 
 check('test pulse exposes an explicit Test model control',pulse.includes("running?'Testing model…':'Test model'")&&pulse.includes('dataset.localTestPulse'));
 check('test pulse renders raw model output',pulse.includes('Raw model output')&&pulse.includes('downloaded-local direct inference'));
