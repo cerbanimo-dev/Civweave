@@ -11,6 +11,7 @@ on:
 permissions:
   contents: write
 
+# retry: source-shape resilient finalizer
 jobs:
   apply:
     runs-on: ubuntu-latest
@@ -25,7 +26,6 @@ jobs:
           python scripts/finalize-open-learning-media-topic-inference-v1.py
           node --check public/app/open-learning-media-cache-v1.mjs
           python scripts/finalize-open-learning-media-topic-inference-v1.py
-          git diff --exit-code public/app/open-learning-media-cache-v1.mjs || true
       - name: Commit runtime patch
         run: |
           set -euo pipefail
