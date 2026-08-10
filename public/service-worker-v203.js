@@ -1,8 +1,9 @@
-// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + retained lightweight shell core + installer-state-machines-v280 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-convergence-v250 + local-model-background-v267
+// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + retained lightweight shell core + shell-integrity-v281 + installer-state-machines-v280 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-convergence-v250 + local-model-background-v267
 'use strict';
-importScripts('/app/system-routes-v227.js?v=1.0.62-five-system-route-contract-v227');
+importScripts('/app/system-routes-v227.js?v=1.0.75-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
-importScripts('/service-worker-core-v208.js?v=1.0.62-chat-convergence-v250');
+importScripts('/service-worker-core-v208.js?v=1.0.75-chat-convergence-v250');
+importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');
@@ -11,5 +12,5 @@ importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-s
 importScripts('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225');
 importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227');
 importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250');
-importScripts('/service-worker-local-model-download-v267.js?v=1.0.62-local-model-background-v267');
+importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
