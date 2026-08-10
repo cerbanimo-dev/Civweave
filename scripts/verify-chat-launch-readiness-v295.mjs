@@ -21,7 +21,7 @@ assert.match(orchestrator,/CivweaveLocalChatOwnerV295\?\.submit/);
 assert.match(orchestrator,/CivweaveSettingsParityV295\?\.open/);
 
 assert.match(fullscreen,/height:var\(--cw295-vv-height,100dvh\)!important/);
-assert.match(fullscreen,/visualViewport\?\.addEventListener\('resize',viewport/);
+assert.match(fullscreen,/globalThis\.visualViewport\?\.addEventListener\('resize',viewport/);
 assert.match(fullscreen,/textarea\{min-height:58px/);
 
 for(const id of ['civweave','living-school','cerbanimo','fellowfare','anarchadia'])assert.ok(store.includes(`'${id}'`),`saved-chat store lost ${id}`);
