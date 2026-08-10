@@ -46,6 +46,13 @@ function help(message){
   if(node&&node.textContent!==message)node.textContent=message;
 }
 function installButton(){return document.querySelector('#install-app')}
+function setButton(disabled,text){
+  const button=installButton();
+  if(!button)return null;
+  if(button.disabled!==Boolean(disabled))button.disabled=Boolean(disabled);
+  if(text!=null&&button.textContent!==text)button.textContent=text;
+  return button;
+}
 function publish(type,detail={}){
   try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,standalone:standalone(),installed,installAccepted,installVerified,canonicalOrigin:CANONICAL_ORIGIN,...detail}}))}catch{}
 }
@@ -75,22 +82,14 @@ async function discoverRelatedInstalls(){
   return [...relatedApps];
 }
 function setFinalizingUi(){
-  const button=installButton();
-  if(button){
-    button.disabled=true;
-    button.textContent='Finishing Android install…';
-  }
+  setButton(true,'Finishing Android install…');
   help('Chrome accepted the install. Android may need a few seconds to mint and register the Civweave app. Keeping this page open while that finishes.');
 }
 function markCommitted(){
   installed=true;
   installAccepted=true;
   installVerified=true;
-  const button=installButton();
-  if(button){
-    button.disabled=false;
-    button.textContent='Open Civweave';
-  }
+  setButton(false,'Open Civweave');
   help('Civweave is registered as an installed app. You can open it now while the required campus continues downloading.');
   publish('civweave:pwa-install-committed',{committed:true});
 }
@@ -119,11 +118,7 @@ async function waitForCommittedInstall(timeoutMs=COMMIT_VERIFY_TIMEOUT_MS){
     }
     installed=false;
     installVerified=false;
-    const button=installButton();
-    if(button){
-      button.disabled=false;
-      button.textContent='Check / retry install';
-    }
+    setButton(false,'Check / retry install');
     help('Chrome accepted the install request, but Civweave is not registered as an installed app yet. Tap Check / retry install. If Android is still finishing the WebAPK it will be detected; otherwise the installer will reload and offer a clean retry.');
     publish('civweave:pwa-install-commit-timeout',{committed:false});
     return false;
@@ -134,14 +129,12 @@ function refreshButton(){
   const button=installButton();
   if(!button||/reset app shell/i.test(button.textContent||''))return;
   if(!canonicalInstallOrigin()&&!standalone()){
-    button.disabled=false;
-    button.textContent='Open canonical installer';
+    setButton(false,'Open canonical installer');
     help('Civweave installs into one canonical app home. This host node will hand installation to that home instead of creating a second copy.');
     return;
   }
   if(standalone()||installVerified){
-    button.disabled=false;
-    if(button.textContent!=='Open Civweave')button.textContent='Open Civweave';
+    setButton(false,'Open Civweave');
     help('Civweave is installed as an app. The campus can keep downloading in the background.');
     return;
   }
@@ -150,19 +143,17 @@ function refreshButton(){
       setFinalizingUi();
       return;
     }
-    button.disabled=false;
-    button.textContent='Check / retry install';
+    setButton(false,'Check / retry install');
     help('The Android install was accepted but has not been verified yet. Check it before starting another install.');
     return;
   }
   if(promptEvent){
-    button.disabled=false;
-    if(button.textContent!=='Install Civweave')button.textContent='Install Civweave';
+    setButton(false,'Install Civweave');
     help('Civweave is ready for a real browser-native app install. Tap Install Civweave.');
     return;
   }
   if(!prompting){
-    if(button.textContent!=='Install Civweave')button.textContent='Install Civweave';
+    setButton(false,'Install Civweave');
     help('Waiting for Chrome to offer the real Civweave app-install prompt. Do not use Create shortcut: that only links back to the website.');
   }
 }
@@ -195,8 +186,7 @@ function onInstalled(){
   waitForCommittedInstall();
 }
 async function verifyOrRetry(){
-  const button=installButton();
-  if(button){button.disabled=true;button.textContent='Checking install…'}
+  setButton(true,'Checking install…');
   await discoverRelatedInstalls();
   if(installVerified){
     markCommitted();
@@ -237,8 +227,7 @@ async function ownInstallClick(event){
   }
   prompting=true;
   promptEvent=null;
-  button.disabled=true;
-  button.textContent='Opening app install…';
+  setButton(true,'Opening app install…');
   try{
     await prompt.prompt();
     const choice=await prompt.userChoice.catch(()=>null);
@@ -250,14 +239,12 @@ async function ownInstallClick(event){
     }else{
       installAccepted=false;
       help('Civweave app installation was dismissed. Reload this installer when you want Chrome to offer the native install again.');
-      button.disabled=false;
-      button.textContent='Reload to install';
+      setButton(false,'Reload to install');
     }
   }catch(error){
     installAccepted=false;
     help(`The native Civweave install prompt could not open: ${error?.message||error}. Reload this installer and try again.`);
-    button.disabled=false;
-    button.textContent='Reload to install';
+    setButton(false,'Reload to install');
   }finally{
     prompting=false;
   }
