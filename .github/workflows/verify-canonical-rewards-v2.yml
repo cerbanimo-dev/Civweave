@@ -30,12 +30,15 @@ jobs:
           node --check public/app/shared/civweave-contribution-mesh-v1.js
           node --check scripts/test-contribution-ledger-v1.mjs
           node --check scripts/test-contribution-mesh-v1.mjs
+          node --check scripts/test-contribution-browser-adapter-v1.mjs
           node --check scripts/verify-canonical-rewards-v2.mjs
           node --check scripts/verify-reward-model-contract-v2.mjs
       - name: Verify contribution currency invariants
         run: node --test scripts/test-contribution-ledger-v1.mjs
       - name: Verify contribution mesh invariants
         run: node --test scripts/test-contribution-mesh-v1.mjs
+      - name: Verify browser mesh identity compatibility
+        run: node --test scripts/test-contribution-browser-adapter-v1.mjs
       - name: Verify ledger, Passport, prompts, and receivers
         run: |
           node scripts/verify-canonical-rewards-v2.mjs
