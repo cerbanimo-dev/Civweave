@@ -42,8 +42,15 @@ assert len(general["topics"]) >= 12
 assert float(general["coverage"]) == 1.0
 
 practical = published_packs["practical-life"]
-assert "emergency-preparedness" in practical["topics"]
-assert "first-aid-basics" not in practical["topics"]
+expected_practical = {
+    "personal-finance",
+    "cooking-food-safety",
+    "health-wellness",
+    "computing-basics",
+    "statistics-data-literacy",
+}
+assert set(practical["topics"]) == expected_practical
+assert "emergency-preparedness" not in practical["topics"]
 
 print(json.dumps({
     "topics": len(topics),
