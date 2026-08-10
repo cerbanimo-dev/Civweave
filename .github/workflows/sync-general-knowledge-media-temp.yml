@@ -1,0 +1,89 @@
+name: Sync General Knowledge Media Temp
+
+on:
+  push:
+    branches:
+      - agent/general-knowledge-video-packs-v1
+    paths:
+      - .github/workflows/sync-general-knowledge-media-temp.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Merge current main and materialize next canonical release
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git fetch origin main
+          git merge --no-edit origin/main
+          MAIN_VERSION="$(git show origin/main:VERSION | tr -d '\r\n')"
+          NEXT_VERSION="$(python - "$MAIN_VERSION" <<'PY'
+          import sys
+          major,minor,patch=map(int,sys.argv[1].split('.'))
+          print(f'{major}.{minor}.{patch+1}')
+          PY
+          )"
+          printf '%s\n' "$NEXT_VERSION" > VERSION
+          npm version "$NEXT_VERSION" --no-git-tag-version --allow-same-version
+          python - "$NEXT_VERSION" <<'PY'
+          import json,sys
+          from pathlib import Path
+          version=sys.argv[1]
+          path=Path('config/release-contract.json')
+          data=json.loads(path.read_text(encoding='utf-8'))
+          data['canonical']['current']={'version':version,'path':f'releases/{version}','status':'current'}
+          path.write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')
+          PY
+          npm run release:materialize
+          echo "NEXT_VERSION=$NEXT_VERSION" >> "$GITHUB_ENV"
+
+      - name: Verify general knowledge media and current platform contracts
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            scripts/harvest-open-learning-media-v1.py \
+            scripts/harvest-open-learning-media-library-v1.py \
+            scripts/curate-open-learning-media-library-v1.py \
+            scripts/filter-open-learning-media-title-quality-v1.py \
+            scripts/test-open-learning-media-harvest-v1.py \
+            scripts/test-open-learning-media-packs-v1.py \
+            scripts/finalize-open-learning-media-topic-inference-v1.py
+          node --check public/app/open-learning-media-cache-v1.mjs
+          node --check public/app/open-learning-media-installer-v1.mjs
+          node --check scripts/test-open-learning-media-runtime-v1.mjs
+          python scripts/finalize-open-learning-media-topic-inference-v1.py
+          git diff --exit-code public/app/open-learning-media-cache-v1.mjs
+          python scripts/test-open-learning-media-harvest-v1.py
+          python scripts/test-open-learning-media-packs-v1.py
+          node scripts/test-open-learning-media-runtime-v1.mjs
+          node scripts/test-video-learning-contract-v1.mjs
+          npm run test:map:v1
+          node scripts/verify-learning-pack-shelf-v1.mjs
+          npm run check:release-discipline
+
+      - name: Commit and push synchronized release
+        run: |
+          set -euo pipefail
+          git add \
+            VERSION package.json package-lock.json config/release-contract.json \
+            public/index.html public/app/index.html public/app/manifest.webmanifest \
+            public/install-v130.js public/app/installed-entry-v146.html public/app/installed-entry-v146.js \
+            public/app/system-routes-v227.js public/app/themed-system-nav-v178.js \
+            public/app/working-campus-v156.js public/app/working-campus-v156.part4.txt \
+            public/app/working-campus-v156.html public/app/install-boundary-v146.js \
+            public/service-worker-core-v208.js public/service-worker-v203.js public/service-worker-v156.js \
+            scripts/smoke-gateway-v131-base.mjs scripts/verify-device-package-self-heal-v184.mjs \
+            "releases/$NEXT_VERSION"
+          git commit -m "Release general knowledge media packs as Civweave $NEXT_VERSION"
+          git push origin HEAD:agent/general-knowledge-video-packs-v1
