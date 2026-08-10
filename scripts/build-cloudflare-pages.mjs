@@ -30,6 +30,9 @@ const pocketCampusSeedPath = resolve(
 const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
 const transformerStage = resolve(scriptDir, "stage-transformers-assets.mjs");
 const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
+const preliveMetadata = resolve(scriptDir, "generate-prelive-metadata-v281.mjs");
+const installerResumeSmoke = resolve(scriptDir, "smoke-installer-resume-state-v280.mjs");
+const installerHardeningSmoke = resolve(scriptDir, "smoke-installer-hardening-v281.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
 await import('./sync-release-version-assets.mjs');
@@ -139,6 +142,19 @@ for (const required of [
     throw new Error(`Required local-AI runtime asset was not staged: ${relative(repoRoot, required)}`);
   }
 }
+
+runNodeScript(
+  preliveMetadata,
+  "Civweave pre-live storage/integrity metadata generation failed.",
+);
+runNodeScript(
+  installerResumeSmoke,
+  "Civweave resumable installer smoke test failed.",
+);
+runNodeScript(
+  installerHardeningSmoke,
+  "Civweave pre-live installer hardening smoke test failed.",
+);
 
 rebuildReleaseArtifacts();
 
