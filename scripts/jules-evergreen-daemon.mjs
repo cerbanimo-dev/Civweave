@@ -34,7 +34,7 @@ export async function runEvergreenDaemon({env = process.env, now = new Date()} =
   if (!env.GITHUB_REPOSITORY) throw new Error('GITHUB_REPOSITORY is required.');
 
   const config = JSON.parse(await readFile(configPath, 'utf8'));
-  const roadmapPath = config.roadmapPath || 'TEN-YEAR-PIPELINE.md';
+  const roadmapPath = config.roadmapPath || 'docs/roadmap/ten-year-pipeline.md';
   const roadmap = await readFile(path.join(root, roadmapPath), 'utf8');
   const bundles = parsePipeline(roadmap);
   const titlePrefix = config.sessionTitlePrefix || '[Civweave Evergreen]';
@@ -76,7 +76,7 @@ export async function runEvergreenDaemon({env = process.env, now = new Date()} =
 
   const activeSessions = detailedSessions.filter(isActiveSession);
   const activeManagedPullRequests = monitorResults.filter(result => result.open);
-  if (selection.kind === 'complete') return summary.finish('Every roadmap bundle is complete. Follow renewal.md.');
+  if (selection.kind === 'complete') return summary.finish('Every roadmap bundle is complete. Follow docs/roadmap/renewal.md.');
   if (selection.kind === 'claimed') {
     return summary.finish(`${selection.bundle.id} is currently claimed by PR #${selection.override.pullRequest}.`);
   }

@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 const [wranglerText,setup,docs]=await Promise.all([
   readFile(new URL('../wrangler.jsonc',import.meta.url),'utf8'),
   readFile(new URL('./setup-cloudflare-node.mjs',import.meta.url),'utf8'),
-  readFile(new URL('../CLOUDFLARE-SETUP.md',import.meta.url),'utf8')
+  readFile(new URL('../docs/operations/cloudflare-setup.md',import.meta.url),'utf8')
 ]);
 const wrangler=JSON.parse(wranglerText);
 assert.equal(wrangler.name,'commonweave','Wrangler must target the existing commonweave Pages project.');

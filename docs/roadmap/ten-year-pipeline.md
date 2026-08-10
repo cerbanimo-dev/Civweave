@@ -40,9 +40,9 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2027-Q2: Rebase I: After the First Convergence
 
-> **REBASE:** complete the first bundle using `rebase.md` before delivery continues.
+> **REBASE:** complete the first bundle using `docs/roadmap/rebase.md` before delivery continues.
 
-- [ ] **CW-2027Q2-01 · Scheduled rebase I** (`rebase`): Follow `rebase.md` against the fresh main branch and rewrite the next four detailed quarters from current evidence.
+- [ ] **CW-2027Q2-01 · Scheduled rebase I** (`rebase`): Follow `docs/roadmap/rebase.md` against the fresh main branch and rewrite the next four detailed quarters from current evidence.
 - [ ] **CW-2027Q2-02 · Direct server normalization** (`server`): Replace source-patched startup with one direct local companion server and one direct public gateway server.
 - [ ] **CW-2027Q2-03 · Compatibility window register** (`compatibility`): Create a machine-readable register for route aliases, storage readers, API versions, browser floors, and removal dates.
 
@@ -66,7 +66,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2028-Q2: Rebase II: Platform v2
 
-> **REBASE:** complete the first bundle using `rebase.md` before delivery continues.
+> **REBASE:** complete the first bundle using `docs/roadmap/rebase.md` before delivery continues.
 
 - [ ] **CW-2028Q2-01 · Scheduled rebase II** (`rebase`): Re-imprint main, review convergence metrics, and promote only evidence-backed v2 assumptions.
 - [ ] **CW-2028Q2-02 · Single service-worker authority** (`offline`): Complete the move to one service worker driven by generated manifests, migration rules, and resumable package state.
@@ -92,7 +92,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2029-Q2: Rebase III: Intelligence Contracts
 
-> **REBASE:** complete the first bundle using `rebase.md` before delivery continues.
+> **REBASE:** complete the first bundle using `docs/roadmap/rebase.md` before delivery continues.
 
 - [ ] **CW-2029Q2-01 · Scheduled rebase III** (`rebase`): Re-imprint the platform after one year of federation and local-model evidence.
 - [ ] **CW-2029Q2-02 · Provider-neutral AI contract** (`ai`): Define streaming, tool, context, budget, privacy, failure, and fallback semantics across local and hosted providers.
@@ -118,7 +118,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2030-Q2: Rebase IV: Ledger Truth
 
-> **REBASE:** complete the first bundle using `rebase.md` before delivery continues.
+> **REBASE:** complete the first bundle using `docs/roadmap/rebase.md` before delivery continues.
 
 - [ ] **CW-2030Q2-01 · Scheduled rebase IV** (`rebase`): Re-imprint after cooperative production and audit ledger growth.
 - [ ] **CW-2030Q2-02 · Ledger audit and portable export** (`state`): Produce complete, user-owned exports with schema maps, receipt chains, and verification tools.
@@ -144,7 +144,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2031-Q2: Rebase V: Protocol v3
 
-> **REBASE:** complete the first bundle using `rebase.md` before delivery continues.
+> **REBASE:** complete the first bundle using `docs/roadmap/rebase.md` before delivery continues.
 
 - [ ] **CW-2031Q2-01 · Scheduled rebase V** (`rebase`): Re-imprint identity, federation, and organization assumptions before protocol v3.
 - [ ] **CW-2031Q2-02 · Protocol v3 and migration bridges** (`federation`): Ship a simplified federation protocol with formal envelopes, capability negotiation, and bridge tooling.
@@ -170,7 +170,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2032-Q2: Rebase VI: The Agents Are Audited
 
-> **REBASE:** complete the first bundle using `rebase.md` before delivery continues.
+> **REBASE:** complete the first bundle using `docs/roadmap/rebase.md` before delivery continues.
 
 - [ ] **CW-2032Q2-01 · Scheduled rebase VI** (`rebase`): Re-imprint the agent system from observed failures, reviews, and user corrections.
 - [ ] **CW-2032Q2-02 · Agent evaluation and red-team suite** (`quality`): Test instruction following, identity integrity, data boundaries, destructive action refusal, and recovery.
@@ -196,7 +196,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2033-Q2: Rebase VII: Trust Over Time
 
-> **REBASE:** complete the first bundle using `rebase.md` before delivery continues.
+> **REBASE:** complete the first bundle using `docs/roadmap/rebase.md` before delivery continues.
 
 - [ ] **CW-2033Q2-01 · Scheduled rebase VII** (`rebase`): Re-imprint credentials, federation trust, and long-lived cryptography.
 - [ ] **CW-2033Q2-02 · Crypto-agility layer** (`security`): Make signatures, hashes, and key formats replaceable without binding the platform to one algorithm forever.
@@ -222,7 +222,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2034-Q2: Rebase VIII: A New Platform Floor
 
-> **REBASE:** complete the first bundle using `rebase.md` before delivery continues.
+> **REBASE:** complete the first bundle using `docs/roadmap/rebase.md` before delivery continues.
 
 - [ ] **CW-2034Q2-01 · Scheduled rebase VIII** (`rebase`): Re-imprint browser, device, accessibility, spatial, and native assumptions.
 - [ ] **CW-2034Q2-02 · Runtime modernization program** (`platform`): Replace aging APIs and build layers through measured strangler migrations rather than parallel permanent stacks.
@@ -248,7 +248,7 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2035-Q2: Rebase IX: Replatform or Refine
 
-> **REBASE:** complete the first bundle using `rebase.md` before delivery continues.
+> **REBASE:** complete the first bundle using `docs/roadmap/rebase.md` before delivery continues.
 
 - [ ] **CW-2035Q2-01 · Scheduled rebase IX** (`rebase`): Decide from evidence whether Civweave should refine the current runtime or perform a clean-room replatform.
 - [ ] **CW-2035Q2-02 · Clean-room replatform prototype** (`platform`): Build a narrow golden-path prototype behind export/import boundaries if the decision record authorizes it.
@@ -274,8 +274,8 @@ Every bundle must name the canonical owner, duplicate owners removed, data and i
 
 ### 2036-Q2: Rebase X: Renew the Loom
 
-> **RENEW:** close the epoch using `renewal.md`.
+> **RENEW:** close the epoch using `docs/roadmap/renewal.md`.
 
 - [ ] **CW-2036Q2-01 · Scheduled rebase X** (`rebase`): Perform the final fresh imprint and reconcile every remaining bundle, compatibility promise, and support profile.
 - [ ] **CW-2036Q2-02 · First-decade retrospective** (`renewal`): Summarize what shipped, what failed, what users actually used, what was preserved, and what should end.
-- [ ] **CW-2036Q2-03 · Generate the 2036–2046 pipeline** (`renewal`): Follow `renewal.md` to create a new ten-year pipeline using this one as a structural example and fresh evidence as the source of truth.
+- [ ] **CW-2036Q2-03 · Generate the 2036–2046 pipeline** (`renewal`): Follow `docs/roadmap/renewal.md` to create a new ten-year pipeline using this one as a structural example and fresh evidence as the source of truth.

@@ -12,7 +12,7 @@ const [finderHtml,finderRuntime,marketplace,operatorHtml,operatorRuntime,offline
   read('public/app/node-ai-operator-v1.js'),
   read('public/app/offline-package-v208.json'),
   read('public/service-worker-offline-v211-override.js'),
-  read('server/compat/server-gateway-v131.mjs'),
+  read('releases/1.0.81/server/server-gateway-v131.mjs'),
   read('lib/node-ai-inference-http-v1.mjs')
 ]);
 const manifest=JSON.parse(offlineManifest);

@@ -79,7 +79,7 @@ test('extracts only pull requests from the intended repository', () => {
 
 test('builds a scoped prompt with conditional automatic merge', () => {
   const bundle = parsePipeline(ROADMAP)[2];
-  const prompt = buildSessionPrompt({bundle, repository: 'cerbanimo-dev/Civweave', roadmapPath: 'TEN-YEAR-PIPELINE.md'});
+  const prompt = buildSessionPrompt({bundle, repository: 'cerbanimo-dev/Civweave', roadmapPath: 'docs/roadmap/ten-year-pipeline.md'});
   assert.match(prompt, /CW-2026Q3-03/);
   assert.match(prompt, /do not merge it yourself/i);
   assert.match(prompt, /squash-merge.*automatically/i);
@@ -112,8 +112,8 @@ test('allows a completed healthy ordinary PR and blocks control-plane self-modif
     blockedPaths: ['.github/workflows/', 'scripts/jules-evergreen-daemon.mjs'],
     blockedLabels: ['do-not-merge']
   };
-  assert.equal(evaluateAutoMergePolicy({...base, changedFiles: [{filename: 'public/app/feedback-lifeboat.js'}, {filename: 'TEN-YEAR-PIPELINE.md'}]}).eligible, true);
-  const blocked = evaluateAutoMergePolicy({...base, changedFiles: [{filename: 'scripts/jules-evergreen-daemon.mjs'}, {filename: 'TEN-YEAR-PIPELINE.md'}]});
+  assert.equal(evaluateAutoMergePolicy({...base, changedFiles: [{filename: 'public/app/feedback-lifeboat.js'}, {filename: 'docs/roadmap/ten-year-pipeline.md'}]}).eligible, true);
+  const blocked = evaluateAutoMergePolicy({...base, changedFiles: [{filename: 'scripts/jules-evergreen-daemon.mjs'}, {filename: 'docs/roadmap/ten-year-pipeline.md'}]});
   assert.equal(blocked.eligible, false);
   assert.match(blocked.reasons.join(' '), /Sensitive path/);
 });

@@ -1,1 +1,0 @@
-docs/contracts/install-only-local-mesh-architecture.md

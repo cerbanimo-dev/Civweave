@@ -1,1 +1,0 @@
-docs/contracts/civweave-systems-mesh.md

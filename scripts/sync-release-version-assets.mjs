@@ -90,15 +90,15 @@ await patch('public/app/working-campus-v156.html',source=>{
   return source;
 });
 
-await patch('server/compat/server-gateway-v131-base.mjs',source=>{
+await patch(`releases/${version}/server/server-gateway-v131-base.mjs`,source=>{
   source=replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'gateway base version');
   source=replaceRequired(source,/const BUILD = '\d+\.\d+\.\d+-install-only-fullscreen-family-gateway';/,`const BUILD = '${version}-install-only-fullscreen-family-gateway';`,'gateway build version');
   source=source.replace(/Civweave v\d+\.\d+\.\d+ fixed-settings-layer device package/g,`Civweave v${version} fixed-settings-layer device package`);
   return source;
 });
 
-await patch('server/compat/server-gateway-v131.mjs',source=>source.replace(/const VERSION = '\d+\.\d+\.\d+-render-installed-runtime-v132';/,`const VERSION = '${version}-render-installed-runtime-v132';`));
-await patch('server/compat/server-local-v131.mjs',source=>{
+await patch(`releases/${version}/server/server-gateway-v131.mjs`,source=>source.replace(/const VERSION = '\d+\.\d+\.\d+-render-installed-runtime-v132';/,`const VERSION = '${version}-render-installed-runtime-v132';`));
+await patch(`releases/${version}/server/server-local-v131.mjs`,source=>{
   source=source.replace(/Civweave local v\d+\.\d+\.\d+ patch/g,`Civweave local v${version} patch`);
   source=source.replace(/,"const VERSION = '\d+\.\d+\.\d+';",'local version marker'/,`,"const VERSION = '${version}';",'local version marker'`);
   source=source.replace(/,"const BUILD = '\d+\.\d+\.\d+-settings-layer-local-runtime';",'local build marker'/,`,"const BUILD = '${version}-settings-layer-local-runtime';",'local build marker'`);
@@ -119,4 +119,4 @@ await patch('scripts/smoke-gateway-v131-base.mjs',source=>{
 
 await patch('scripts/verify-device-package-self-heal-v184.mjs',source=>source.replace(/v1\.0\.7/g,`v${version}`).replace(/1\.0\.7/g,version));
 
-console.log(JSON.stringify({ok:true,version,serverTargets:'server/compat',changed},null,2));
+console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,changed},null,2));

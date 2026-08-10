@@ -18,7 +18,7 @@ const [
   documentation
 ] = await Promise.all([
   read('.github/jules-evergreen.json'),
-  read('TEN-YEAR-PIPELINE.md'),
+  read('docs/roadmap/ten-year-pipeline.md'),
   read('scripts/jules-evergreen-daemon.mjs'),
   read('scripts/lib/jules-evergreen-core.mjs'),
   read('scripts/lib/jules-api-client.mjs'),
