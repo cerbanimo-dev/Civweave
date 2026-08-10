@@ -6,8 +6,8 @@ import vm from 'node:vm';
 import {Sha256Stream,sha256Hex} from '../public/app/shared/civweave-sha256-stream-v1.mjs';
 
 const read=relative=>readFile(new URL(`../${relative}`,import.meta.url),'utf8');
-const [storage,offline,ui,mesh,bridge,coverage,bootstrap,serviceWorker,stage,prepare,cloudflare,builder,installBuild,html,offlinePackageText,manifestText]=await Promise.all([
-  read('public/app/civweave-map-storage-v1.js'),read('public/app/civweave-map-offline-v1.js'),read('public/app/civweave-map-ui-v1.js'),read('public/app/civweave-map-mesh-v276.js'),read('public/app/civweave-map-mesh-bridge-v276.js'),read('public/app/civweave-map-coverage-v277.js'),read('public/app/civweave-map-bootstrap-v1.js'),read('public/service-worker.js'),read('scripts/stage-maplibre-v275.mjs'),read('scripts/prepare-start-v131.mjs'),read('scripts/build-cloudflare-pages.mjs'),read('scripts/build-civweave-map-v1.mjs'),read('scripts/build-install-artifacts.sh'),read('public/app/federation-finder-map-v275.html'),read('public/app/offline-package-v208.json'),read('public/app/civweave-map-v1-manifest.json')
+const [storage,offline,ui,mesh,bridge,coverage,bootstrap,serviceWorker,stage,prepare,cloudflare,builder,installBuild,mobileBuilder,html,offlinePackageText,manifestText]=await Promise.all([
+  read('public/app/civweave-map-storage-v1.js'),read('public/app/civweave-map-offline-v1.js'),read('public/app/civweave-map-ui-v1.js'),read('public/app/civweave-map-mesh-v276.js'),read('public/app/civweave-map-mesh-bridge-v276.js'),read('public/app/civweave-map-coverage-v277.js'),read('public/app/civweave-map-bootstrap-v1.js'),read('public/service-worker.js'),read('scripts/stage-maplibre-v275.mjs'),read('scripts/prepare-start-v131.mjs'),read('scripts/build-cloudflare-pages.mjs'),read('scripts/build-civweave-map-v1.mjs'),read('scripts/build-install-artifacts.sh'),read('scripts/build-mobile-install-kit.mjs'),read('public/app/federation-finder-map-v275.html'),read('public/app/offline-package-v208.json'),read('public/app/civweave-map-v1-manifest.json')
 ]);
 const offlinePackage=JSON.parse(offlinePackageText),manifest=JSON.parse(manifestText);
 const has=(text,pattern,message)=>assert.match(text,pattern,message);
@@ -31,6 +31,7 @@ test('PMTiles downloads are streamed, chunked, verified, and random-access reada
   has(storage,/new Sha256Stream\(\)/,'Downloads should hash incrementally');
   has(storage,/getBytes\(packId,offset,length\)/,'Cached PMTiles should expose byte-range reads');
   has(storage,/getKey:\(\)=>sourceKey\(id\)/,'Cached PMTiles should expose a PMTiles Source key');
+  has(storage,/async function getChunk\(packId,index\)/,'Each awaited chunk read should own a safe IndexedDB transaction');
   assert.equal((storage.match(/\.arrayBuffer\(\)/g)||[]).length,1,'Only the explicitly bounded legacy fallback may buffer a whole response');
   has(storage,/FALLBACK_BUFFER_LIMIT=16\*1024\*1024/,'Non-streaming fallback must stay tightly bounded');
 });
@@ -85,11 +86,14 @@ test('Map v1 exposes coverage, storage, basemap, attribution, and diagnostics UI
   has(offline,/selfTest/,'Runtime should expose a launch self-check');
 });
 
-test('device package and standalone package share one Map v1 asset contract',()=>{
+test('device package, mobile kit, and standalone package share one Map v1 asset contract',()=>{
   assert.equal(manifest.name,'Civweave Map');assert.equal(manifest.version,'1.0.0');assert.equal(manifest.offlineFirst,true);
   assert.equal(offlinePackage.revision,'canonical-background-campus-v241-systems-mesh-v251','canonical campus revision must not drift');
   for(const asset of ['/app/civweave-map-storage-v1.js','/app/civweave-map-offline-v1.js','/app/civweave-map-ui-v1.js','/app/civweave-map-bootstrap-v1.js','/app/shared/civweave-sha256-stream-v1.mjs','/app/vendor/pmtiles-v4.4.1/pmtiles.js'])assert.ok(offlinePackage.assets.includes(asset),`${asset} should be in the offline package`);
   has(serviceWorker,/const MAP_CORE=\[/,'Service worker should define a Map v1 install boundary');
+  has(mobileBuilder,/extractArray\(workerSource, 'MAP_CORE'\)/,'Mobile installer must hydrate the Map v1 service-worker boundary');
+  has(mobileBuilder,/deviceCore = unique\(\[\.\.\.workerCore, \.\.\.workerMapCore\]\)/,'Mobile installer must combine system and map device cores');
+  has(mobileBuilder,/mapPackage: 'Civweave Map v1'/,'Mobile release metadata should identify the map package');
   for(const asset of manifest.assets.filter(asset=>asset!=='/app/local-object-mesh-v146.js')){const escaped=asset.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');if(!asset.startsWith('/finder/'))has(serviceWorker,new RegExp(escaped),'Map v1 runtime asset should be device-installed')}
   has(serviceWorker,/pathname==='\/finder'/,'Finder should have an offline navigation fallback');
   has(builder,/Civweave-Map-v1\.zip/,'Standalone package builder should emit the named v1 archive');
