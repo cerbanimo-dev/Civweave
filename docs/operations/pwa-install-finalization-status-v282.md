@@ -1,0 +1,1 @@
+Branch status: Android WebAPK finalization hardening prepared for review. The installer verifies the canonical Cloudflare PWA registration after prompt acceptance and offers a clean retry if Android does not register it.
