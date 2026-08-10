@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v3",
-  "built_at": "2026-08-10T09:33:38Z",
-  "before": 827,
-  "after": 369,
-  "rejected": 458,
+  "built_at": "2026-08-10T13:56:52Z",
+  "before": 848,
+  "after": 376,
+  "rejected": 472,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -48,17 +48,18 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 7,
+      "records": 10,
+      "mesh_redistributable": 8,
       "providers": {
         "peertube": 4,
-        "wikimedia-commons": 5
+        "wikimedia-commons": 6
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
@@ -70,23 +71,23 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 12,
-      "mesh_redistributable": 5,
+      "records": 16,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 9,
-        "wikimedia-commons": 3
+        "peertube": 15,
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
-        "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
-        "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
-        "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954"
+        "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
+        "Dr Becks (Rebecca) Spake: Virtual Ecology",
+        "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
+        "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
       ]
     },
     "physics-foundations": {
@@ -101,10 +102,10 @@
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
+        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -115,7 +116,7 @@
       "school_slug": "science",
       "required": true,
       "records": 19,
-      "mesh_redistributable": 18,
+      "mesh_redistributable": 17,
       "providers": {
         "wikimedia-commons": 7,
         "peertube": 11,
@@ -127,8 +128,8 @@
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "How to Understand Mendeleev's Periodic Table of 1869",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
         "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
         "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
@@ -189,9 +190,9 @@
       "top_titles": [
         "Niklaus Wirth on Teaching Computer Science",
         "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
         "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
-        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
       ]
     },
     "arts-culture": {
@@ -199,7 +200,7 @@
       "school_slug": "arts",
       "required": true,
       "records": 9,
-      "mesh_redistributable": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 6,
         "internet-archive": 2,
@@ -271,15 +272,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 2,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -316,11 +315,12 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 6,
+      "records": 7,
       "mesh_redistributable": 6,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
@@ -328,7 +328,8 @@
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
         "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
       ]
     },
     "personal-finance": {
@@ -694,7 +695,32 @@
     },
     {
       "provider": "wikimedia-commons",
-      "title": "Wikidata Workshop - Practical part, UM professors - Maastricht University - 15 October 2024",
+      "title": "Continental scale carbon stocks of individual trees in African drylands (SVS5031 - Approved final exportmp4)",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Continental scale carbon stocks of individual trees in African drylands (SVS5031 - tree counting carbon 1080p60)",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Continental scale carbon stocks of individual trees in African drylands (SVS5031 - tree counting carbon 2160p60)",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "NASA + The Smithsonian- Biodiversity (SVS14700)",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Male Polyphylla fullo beetle running on the ground in Dnipro by baby-bear.org",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Travel Deep Inside a Leaf - Annotated Version - California Academy of Sciences",
       "topic_slug": "biology-life"
     },
     {
@@ -703,8 +729,18 @@
       "topic_slug": "biology-life"
     },
     {
-      "provider": "internet-archive",
-      "title": "The World ledaer,Great sun---Fangruida/ Cord Rossi 2020v1.3 2021 v1.2 modified version)",
+      "provider": "peertube",
+      "title": "Chemist Hans Clevers replaces worn-down body parts with organoids created outside the body",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "peertube",
+      "title": "Discover Baby Animal Names 🐾 ｜ Fun and Educational Videos for Kids 🎉",
+      "topic_slug": "biology-life"
+    },
+    {
+      "provider": "peertube",
+      "title": "Hans Clevers: Extra footage 2",
       "topic_slug": "biology-life"
     },
     {
@@ -859,17 +895,17 @@
     },
     {
       "provider": "peertube",
-      "title": "Civic tech et bien commun - Sophie Gautier",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
       "title": "Liam Keel explains history of My Little Pony on 15th Anniversary of MLP: FiM - October 10th 2025.",
       "topic_slug": "civics-society"
     },
     {
       "provider": "peertube",
       "title": "Sad moment for our fundamental rights",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
+      "title": "Civic tech et bien commun - Sophie Gautier",
       "topic_slug": "civics-society"
     },
     {
@@ -914,17 +950,17 @@
     },
     {
       "provider": "peertube",
+      "title": "Finding a Job after your PhD",
+      "topic_slug": "climate-environment"
+    },
+    {
+      "provider": "peertube",
       "title": "FOSS4GE 2025 | Earth observation from Jupyter",
       "topic_slug": "climate-environment"
     },
     {
       "provider": "peertube",
       "title": "#knowledgeRepresentation #programming #agents #software Braidenburg's Vehicles #lispygopherclimate",
-      "topic_slug": "climate-environment"
-    },
-    {
-      "provider": "peertube",
-      "title": "Finding a Job after your PhD",
       "topic_slug": "climate-environment"
     },
     {
@@ -1148,6 +1184,31 @@
       "topic_slug": "critical-thinking"
     },
     {
+      "provider": "internet-archive",
+      "title": "\"I Think, Therefore I Am\"",
+      "topic_slug": "critical-thinking"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Indictment of Donald Trump",
+      "topic_slug": "critical-thinking"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Interview with Brian Klaas",
+      "topic_slug": "critical-thinking"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Irregular Warfare in Ukraine",
+      "topic_slug": "critical-thinking"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Jehovah's Witness Convention (2025)",
+      "topic_slug": "critical-thinking"
+    },
+    {
       "provider": "peertube",
       "title": "Александра Архипова, «Как устроены паники о цифровом влиянии в прошлом и настоящем»",
       "topic_slug": "critical-thinking"
@@ -1170,11 +1231,6 @@
     {
       "provider": "peertube",
       "title": "Василий Гатов, «Постправда и фейкньюс»",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Faith v Evidence (Cognitive Dissonance)",
       "topic_slug": "critical-thinking"
     },
     {
@@ -1276,61 +1332,6 @@
       "provider": "peertube",
       "title": "Sketching the Gallery of Madame Liu Tsong",
       "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Fun programming 86: Drawing shapes with your mouse",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Electron Configuration Diagrams | Properties of Matter | Chemistry | FuseSchool",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "peertube",
-      "title": "Inkscape Beginner Tutorial: Simple Icon Drawings",
-      "topic_slug": "drawing-design"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "After 60 Years, Nuclear Power for Spaceflight is Still Tried and True",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "An Ocean in Bloom (SVS14648 - NHQ 2024 0724 AnOceanInBloom PROMO3 Vertical)",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "An Ocean in Bloom (SVS14648 - NHQ 2024 0724 AnOceanInBloom PROMO3)",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Collective Minds & Machines Exploration Challenge Hangout",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "NASA Earth- Powering America's Future (SVS14789 NASAEarth Social)",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "NASA Earth- Powering America's Future (SVS14789 NASAEarthPoweringAmericasFuture)",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "The HoloGlobe Project (Version 3) (SVS155)",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "peertube",
-      "title": "Mumbai, India's Transforming MEGACITY",
-      "topic_slug": "earth-geography"
     }
   ]
 }

@@ -1,24 +1,24 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-08-10T09:33:38Z",
-  "records": 146,
-  "mesh_redistributable": 106,
-  "download_candidates": 244,
+  "built_at": "2026-08-10T13:56:52Z",
+  "records": 152,
+  "mesh_redistributable": 105,
+  "download_candidates": 236,
   "providers": {
     "internet-archive": {
-      "records": 6,
-      "mesh_redistributable": 6,
-      "download_candidates": 15
+      "records": 5,
+      "mesh_redistributable": 0,
+      "download_candidates": 14
     },
     "peertube": {
-      "records": 97,
-      "mesh_redistributable": 57,
-      "download_candidates": 186
+      "records": 103,
+      "mesh_redistributable": 61,
+      "download_candidates": 178
     },
     "wikimedia-commons": {
-      "records": 43,
-      "mesh_redistributable": 43,
-      "download_candidates": 43
+      "records": 44,
+      "mesh_redistributable": 44,
+      "download_candidates": 44
     }
   },
   "focus_topics": {
@@ -65,17 +65,18 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 3,
-        "wikimedia-commons": 4
+        "wikimedia-commons": 5
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
         "An introduction to Parliament"
@@ -85,35 +86,36 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 2,
+      "records": 14,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 8
+        "peertube": 14
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
-        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
-        "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
-        "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
-        "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 2 91974"
+        "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
+        "Dr Becks (Rebecca) Spake: Virtual Ecology",
+        "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
+        "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 3,
+      "records": 6,
+      "mesh_redistributable": 2,
       "providers": {
         "peertube": 5,
-        "wikimedia-commons": 2
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
@@ -126,7 +128,7 @@
       "school_slug": "science",
       "required": true,
       "records": 19,
-      "mesh_redistributable": 18,
+      "mesh_redistributable": 17,
       "providers": {
         "wikimedia-commons": 7,
         "peertube": 11,
@@ -199,9 +201,9 @@
       "top_titles": [
         "Niklaus Wirth on Teaching Computer Science",
         "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
         "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
-        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
       ]
     },
     "arts-culture": {
@@ -209,7 +211,7 @@
       "school_slug": "arts",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 5,
         "internet-archive": 2,
@@ -280,15 +282,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 2,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -534,11 +534,11 @@
     }
   },
   "failures": 0,
-  "records_before_relevance_gate": 827,
-  "records_before_pedagogy_gate": 369,
-  "records_before_selection_gate": 207,
-  "rejected_by_relevance_gate": 458,
-  "rejected_by_pedagogy_gate": 162,
+  "records_before_relevance_gate": 848,
+  "records_before_pedagogy_gate": 376,
+  "records_before_selection_gate": 215,
+  "rejected_by_relevance_gate": 472,
+  "rejected_by_pedagogy_gate": 161,
   "rejected_by_selection_gate": 52,
   "topic_stats": {
     "world-history": {
@@ -584,17 +584,18 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 3,
-        "wikimedia-commons": 4
+        "wikimedia-commons": 5
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
         "An introduction to Parliament"
@@ -604,35 +605,36 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 2,
+      "records": 14,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 8
+        "peertube": 14
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
-        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
-        "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
-        "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
-        "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 2 91974"
+        "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
+        "Dr Becks (Rebecca) Spake: Virtual Ecology",
+        "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
+        "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 3,
+      "records": 6,
+      "mesh_redistributable": 2,
       "providers": {
         "peertube": 5,
-        "wikimedia-commons": 2
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
@@ -645,7 +647,7 @@
       "school_slug": "science",
       "required": true,
       "records": 19,
-      "mesh_redistributable": 18,
+      "mesh_redistributable": 17,
       "providers": {
         "wikimedia-commons": 7,
         "peertube": 11,
@@ -718,9 +720,9 @@
       "top_titles": [
         "Niklaus Wirth on Teaching Computer Science",
         "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
         "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
-        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
       ]
     },
     "arts-culture": {
@@ -728,7 +730,7 @@
       "school_slug": "arts",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 5,
         "internet-archive": 2,
@@ -799,15 +801,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 2,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -1086,7 +1086,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 69,
+      "records": 70,
       "available": true
     },
     "digital-ai-literacy": {
@@ -1110,7 +1110,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 18,
+      "records": 17,
       "available": true
     },
     "practical-life": {
@@ -1150,7 +1150,7 @@
         "photography-video"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 14,
       "available": true
     },
     "civic-media-literacy": {
@@ -1171,7 +1171,7 @@
         "climate-environment"
       ],
       "coverage": 0.8,
-      "records": 10,
+      "records": 11,
       "available": true
     },
     "deep-science": {
@@ -1193,7 +1193,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 28,
+      "records": 30,
       "available": true
     },
     "humanities-culture": {
@@ -1216,7 +1216,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8333,
-      "records": 27,
+      "records": 26,
       "available": true
     }
   },
@@ -1233,8 +1233,8 @@
     "schema": "civweave.open-learning-media-selection-gate.v3",
     "policy": "Automatic selection requires instructional evidence alongside the topic anchor, favoring explicit tutorials, lectures, overviews, courses, demonstrations, documentaries, and museum/gallery talks."
   },
-  "records_before_title_quality_gate": 155,
-  "rejected_by_title_quality_gate": 9,
+  "records_before_title_quality_gate": 163,
+  "rejected_by_title_quality_gate": 11,
   "rejected_topic_links_by_title_quality_gate": 13,
   "title_quality_gate": {
     "schema": "civweave.open-learning-media-title-quality-gate.v1",

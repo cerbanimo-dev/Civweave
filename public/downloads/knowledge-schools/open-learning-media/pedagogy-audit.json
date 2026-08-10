@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-pedagogy-audit.v3",
-  "built_at": "2026-08-10T09:33:38Z",
-  "before": 369,
-  "after": 207,
-  "rejected": 162,
+  "built_at": "2026-08-10T13:56:52Z",
+  "before": 376,
+  "after": 215,
+  "rejected": 161,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -48,17 +48,18 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 7,
+      "records": 10,
+      "mesh_redistributable": 8,
       "providers": {
         "peertube": 4,
-        "wikimedia-commons": 5
+        "wikimedia-commons": 6
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
@@ -70,23 +71,23 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 12,
-      "mesh_redistributable": 5,
+      "records": 16,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 9,
-        "wikimedia-commons": 3
+        "peertube": 15,
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
-        "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
-        "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
-        "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954"
+        "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
+        "Dr Becks (Rebecca) Spake: Virtual Ecology",
+        "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
+        "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
       ]
     },
     "physics-foundations": {
@@ -101,10 +102,10 @@
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
+        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -115,7 +116,7 @@
       "school_slug": "science",
       "required": true,
       "records": 19,
-      "mesh_redistributable": 18,
+      "mesh_redistributable": 17,
       "providers": {
         "wikimedia-commons": 7,
         "peertube": 11,
@@ -127,8 +128,8 @@
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "How to Understand Mendeleev's Periodic Table of 1869",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
         "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
         "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
@@ -189,9 +190,9 @@
       "top_titles": [
         "Niklaus Wirth on Teaching Computer Science",
         "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
         "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
-        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
       ]
     },
     "arts-culture": {
@@ -199,7 +200,7 @@
       "school_slug": "arts",
       "required": true,
       "records": 9,
-      "mesh_redistributable": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 6,
         "internet-archive": 2,
@@ -271,15 +272,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 2,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -316,11 +315,12 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 6,
+      "records": 7,
       "mesh_redistributable": 6,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
@@ -328,7 +328,8 @@
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
         "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
       ]
     },
     "personal-finance": {
@@ -660,21 +661,35 @@
     },
     {
       "provider": "peertube",
-      "title": "Nature vs Nurture： Behaviorism or Genetics？",
+      "title": "Human Impacts on Biodiversity ｜ Ecology and Environment ｜ Biology ｜ FuseSchool",
       "relevance_topics": [
         "biology-life"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Cybernetic Genetics - Abandoned",
+      "title": "The media ecology of source code access",
       "relevance_topics": [
         "biology-life"
       ]
     },
     {
       "provider": "peertube",
-      "title": "Biota Talks #1 - Chloroplast-Derived Cell-Free Systems: Advancing Plant Synthetic Biology through Rapid Prototyping",
+      "title": "HainanU-China: Improving the micro-ecology of the skin (2023) - Project Promotion [English]",
+      "relevance_topics": [
+        "biology-life"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Paris_Bettencourt: A synthetic biology toolkit to interface genetic circuits wit... (2022) - Project Promotion [English]",
+      "relevance_topics": [
+        "biology-life"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Paris_Bettencourt: A synthetic biology toolkit to interface genetic circuits with... (2022) - Project Promotion [French]",
       "relevance_topics": [
         "biology-life"
       ]
@@ -975,42 +990,7 @@
     },
     {
       "provider": "peertube",
-      "title": "Guerilla Media : Les Contradictions du Fact-Checking | Avec Le Canard Réfractaire et Igor Galligo",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
-      "provider": "peertube",
       "title": "Tuto IA - Vera, l'appli de fact checking par simple appel ou message sur Whatsapp. Simple et top !!",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "BREAKING: Netanyahu FLEE Tel Aviv Hours After MASKED IDF Soldiers Attack Gov’t Office",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Iran just destroyed US ships in strait of Hormuz - 10 million barrels incinerated — OPTM",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Saudi's Just Received Terrible News! US Can’t Believe What Yemen Just Did – Yemen Out of Control!",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
       "relevance_topics": [
         "critical-thinking"
       ]
@@ -1018,6 +998,13 @@
     {
       "provider": "peertube",
       "title": "Fake News:l debunking; Fact checking",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Guerilla Media : Les Contradictions du Fact-Checking | Avec Le Canard Réfractaire et Igor Galligo",
       "relevance_topics": [
         "critical-thinking"
       ]
@@ -1088,6 +1075,13 @@
     {
       "provider": "peertube",
       "title": "FOSS4GE 2025 | fAIr - Community AI Assisted Mapping Roadmap",
+      "relevance_topics": [
+        "earth-geography"
+      ]
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Mapping community libraries, public libraries and museums in Uganda; Leveraging openstreetmap for knowledge access",
       "relevance_topics": [
         "earth-geography"
       ]
@@ -1648,6 +1642,13 @@
     {
       "provider": "peertube",
       "title": "History of the World, Part II Trailer",
+      "relevance_topics": [
+        "world-history"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "PAN AM CORPORATE FILM HISTORY OF COMMUNICATIONS & IBM PANAMAC COMPUTER SYSTEM 41294",
       "relevance_topics": [
         "world-history"
       ]

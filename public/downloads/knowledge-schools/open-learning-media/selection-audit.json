@@ -1,8 +1,8 @@
 {
   "schema": "civweave.open-learning-media-selection-audit.v3",
-  "built_at": "2026-08-10T09:33:38Z",
-  "before": 207,
-  "after": 155,
+  "built_at": "2026-08-10T13:56:52Z",
+  "before": 215,
+  "after": 163,
   "rejected": 52,
   "topics": {
     "world-history": {
@@ -48,17 +48,18 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 7,
+      "records": 10,
+      "mesh_redistributable": 8,
       "providers": {
         "peertube": 4,
-        "wikimedia-commons": 5
+        "wikimedia-commons": 6
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
@@ -70,23 +71,23 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 12,
-      "mesh_redistributable": 5,
+      "records": 16,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 9,
-        "wikimedia-commons": 3
+        "peertube": 15,
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
-        "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
-        "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
-        "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954"
+        "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
+        "Dr Becks (Rebecca) Spake: Virtual Ecology",
+        "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
+        "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
       ]
     },
     "physics-foundations": {
@@ -101,10 +102,10 @@
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
+        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -115,7 +116,7 @@
       "school_slug": "science",
       "required": true,
       "records": 19,
-      "mesh_redistributable": 18,
+      "mesh_redistributable": 17,
       "providers": {
         "wikimedia-commons": 7,
         "peertube": 11,
@@ -127,8 +128,8 @@
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "How to Understand Mendeleev's Periodic Table of 1869",
         "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "How to Understand Mendeleev's Periodic Table of 1869",
         "The (truly) Periodic Table",
         "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
         "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
@@ -189,9 +190,9 @@
       "top_titles": [
         "Niklaus Wirth on Teaching Computer Science",
         "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
         "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
-        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
       ]
     },
     "arts-culture": {
@@ -199,7 +200,7 @@
       "school_slug": "arts",
       "required": true,
       "records": 9,
-      "mesh_redistributable": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 6,
         "internet-archive": 2,
@@ -271,15 +272,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 2,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -316,11 +315,12 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 6,
+      "records": 7,
       "mesh_redistributable": 6,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
@@ -328,7 +328,8 @@
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 11- Homeostasis",
         "Systems Thinking 8- Emergence",
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "Systems_Thinking_ Using_Aristotle's_Model_Of_Causality_To_Understand_Systemic_Behavior_"
       ]
     },
     "personal-finance": {
@@ -565,7 +566,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 72,
+      "records": 74,
       "available": true
     },
     "digital-ai-literacy": {
@@ -589,7 +590,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 18,
+      "records": 17,
       "available": true
     },
     "practical-life": {
@@ -629,7 +630,7 @@
         "photography-video"
       ],
       "coverage": 1.0,
-      "records": 17,
+      "records": 15,
       "available": true
     },
     "civic-media-literacy": {
@@ -650,7 +651,7 @@
         "climate-environment"
       ],
       "coverage": 0.8,
-      "records": 12,
+      "records": 13,
       "available": true
     },
     "deep-science": {
@@ -672,7 +673,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 29,
+      "records": 32,
       "available": true
     },
     "humanities-culture": {
@@ -695,7 +696,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8333,
-      "records": 29,
+      "records": 28,
       "available": true
     }
   },
@@ -736,16 +737,15 @@
       }
     },
     {
-      "provider": "peertube",
-      "title": "What Are Alcohols？ ｜ Organic Chemistry ｜ Chemistry ｜ FuseSchool",
+      "provider": "wikimedia-commons",
+      "title": "Fish stocking of the Dnieper in Dnipro 2020 01",
       "reasons": {
-        "biology-life": "insufficient-automatic-instructional-evidence",
-        "physics-foundations": "insufficient-automatic-instructional-evidence"
+        "biology-life": "insufficient-automatic-instructional-evidence"
       }
     },
     {
-      "provider": "peertube",
-      "title": "What Is The Water Cycle ｜ Environmental Chemistry ｜ Chemistry｜ FuseSchool",
+      "provider": "wikimedia-commons",
+      "title": "Fish stocking of the Dnieper in Dnipro 2020 02",
       "reasons": {
         "biology-life": "insufficient-automatic-instructional-evidence"
       }
@@ -781,13 +781,6 @@
     {
       "provider": "wikimedia-commons",
       "title": "What is the Federal Circuit (video)",
-      "reasons": {
-        "civics-society": "insufficient-automatic-instructional-evidence"
-      }
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "How laws are made (UK)",
       "reasons": {
         "civics-society": "insufficient-automatic-instructional-evidence"
       }
@@ -906,13 +899,6 @@
     },
     {
       "provider": "internet-archive",
-      "title": "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem",
-      "reasons": {
-        "logical-frameworks": "insufficient-automatic-instructional-evidence"
-      }
-    },
-    {
-      "provider": "internet-archive",
       "title": "World Leder Fangruida Bio. 2020v. 3.3 Revision",
       "reasons": {
         "logical-frameworks": "insufficient-automatic-instructional-evidence"
@@ -983,6 +969,13 @@
     },
     {
       "provider": "peertube",
+      "title": "What Are Alcohols？ ｜ Organic Chemistry ｜ Chemistry ｜ FuseSchool",
+      "reasons": {
+        "physics-foundations": "insufficient-automatic-instructional-evidence"
+      }
+    },
+    {
+      "provider": "peertube",
       "title": "THE NATURE OF COLOR 1946 EDUCATIONAL FILM with DR. IRA M. FREEMAN in KODACHROME PH61744",
       "reasons": {
         "physics-foundations": "insufficient-automatic-instructional-evidence"
@@ -1039,7 +1032,14 @@
     },
     {
       "provider": "internet-archive",
-      "title": "Open CS education resources for schools - how hard could it be?",
+      "title": "CLOUDS Aaron Koblin",
+      "reasons": {
+        "pseudocoding": "insufficient-automatic-instructional-evidence"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "CLOUDS Andres Colubri",
       "reasons": {
         "pseudocoding": "insufficient-automatic-instructional-evidence"
       }

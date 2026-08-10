@@ -1,24 +1,24 @@
 {
   "schema": "civweave.open-learning-media-catalog.v1",
-  "built_at": "2026-08-10T09:33:38Z",
-  "record_count": 146,
-  "mesh_redistributable_count": 106,
-  "download_candidate_count": 244,
+  "built_at": "2026-08-10T13:56:52Z",
+  "record_count": 152,
+  "mesh_redistributable_count": 105,
+  "download_candidate_count": 236,
   "providers": {
     "internet-archive": {
-      "records": 6,
-      "mesh_redistributable": 6,
-      "download_candidates": 15
+      "records": 5,
+      "mesh_redistributable": 0,
+      "download_candidates": 14
     },
     "peertube": {
-      "records": 97,
-      "mesh_redistributable": 57,
-      "download_candidates": 186
+      "records": 103,
+      "mesh_redistributable": 61,
+      "download_candidates": 178
     },
     "wikimedia-commons": {
-      "records": 43,
-      "mesh_redistributable": 43,
-      "download_candidates": 43
+      "records": 44,
+      "mesh_redistributable": 44,
+      "download_candidates": 44
     }
   },
   "focus_topics": {
@@ -65,17 +65,18 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 3,
-        "wikimedia-commons": 4
+        "wikimedia-commons": 5
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
         "An introduction to Parliament"
@@ -85,35 +86,36 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 2,
+      "records": 14,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 8
+        "peertube": 14
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
-        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
-        "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
-        "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
-        "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 2 91974"
+        "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
+        "Dr Becks (Rebecca) Spake: Virtual Ecology",
+        "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
+        "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 3,
+      "records": 6,
+      "mesh_redistributable": 2,
       "providers": {
         "peertube": 5,
-        "wikimedia-commons": 2
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
@@ -126,7 +128,7 @@
       "school_slug": "science",
       "required": true,
       "records": 19,
-      "mesh_redistributable": 18,
+      "mesh_redistributable": 17,
       "providers": {
         "wikimedia-commons": 7,
         "peertube": 11,
@@ -199,9 +201,9 @@
       "top_titles": [
         "Niklaus Wirth on Teaching Computer Science",
         "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
         "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
-        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
       ]
     },
     "arts-culture": {
@@ -209,7 +211,7 @@
       "school_slug": "arts",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 5,
         "internet-archive": 2,
@@ -280,15 +282,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 2,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -574,6 +574,7 @@
       "files": [
         {
           "url": "https://share.tube/download/videos/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 81264990,
           "resolution": "1080p",
           "fps": 30,
@@ -581,6 +582,7 @@
         },
         {
           "url": "https://share.tube/download/videos/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1-720.mp4",
+          "mime": "video/mp4",
           "bytes": 56268775,
           "resolution": "720p",
           "fps": 30,
@@ -588,6 +590,7 @@
         },
         {
           "url": "https://share.tube/download/videos/fd00c4bd-d0fd-4924-b7a9-94b5221b8bb1-480.mp4",
+          "mime": "video/mp4",
           "bytes": 38119069,
           "resolution": "480p",
           "fps": 30,
@@ -682,6 +685,7 @@
       "files": [
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/40e74153-ae60-46ed-946a-545b97e83dd9-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 53835981,
           "resolution": "1080p",
           "fps": 30,
@@ -689,6 +693,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/40e74153-ae60-46ed-946a-545b97e83dd9-720.mp4",
+          "mime": "video/mp4",
           "bytes": 33740261,
           "resolution": "720p",
           "fps": 30,
@@ -696,6 +701,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/40e74153-ae60-46ed-946a-545b97e83dd9-360.mp4",
+          "mime": "video/mp4",
           "bytes": 21231343,
           "resolution": "360p",
           "fps": 30,
@@ -703,6 +709,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/40e74153-ae60-46ed-946a-545b97e83dd9-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 74402506,
           "resolution": "1080p",
           "fps": 30,
@@ -710,6 +717,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/40e74153-ae60-46ed-946a-545b97e83dd9-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 47269168,
           "resolution": "720p",
           "fps": 30,
@@ -717,6 +725,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/40e74153-ae60-46ed-946a-545b97e83dd9-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 27261010,
           "resolution": "360p",
           "fps": 30,
@@ -811,6 +820,7 @@
       "files": [
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/0fefe46b-15c9-4a69-83ce-f722d28491b4-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 49353237,
           "resolution": "1080p",
           "fps": 30,
@@ -818,6 +828,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/0fefe46b-15c9-4a69-83ce-f722d28491b4-720.mp4",
+          "mime": "video/mp4",
           "bytes": 31480967,
           "resolution": "720p",
           "fps": 30,
@@ -825,6 +836,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/0fefe46b-15c9-4a69-83ce-f722d28491b4-360.mp4",
+          "mime": "video/mp4",
           "bytes": 16187974,
           "resolution": "360p",
           "fps": 30,
@@ -832,6 +844,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/0fefe46b-15c9-4a69-83ce-f722d28491b4-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 57583795,
           "resolution": "1080p",
           "fps": 30,
@@ -839,6 +852,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/0fefe46b-15c9-4a69-83ce-f722d28491b4-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 40372255,
           "resolution": "720p",
           "fps": 30,
@@ -846,6 +860,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/0fefe46b-15c9-4a69-83ce-f722d28491b4-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 21620511,
           "resolution": "360p",
           "fps": 30,
@@ -1267,6 +1282,7 @@
       "files": [
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/2e1bbf79-68c0-4ebc-8598-1298258183ef-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 48799002,
           "resolution": "1080p",
           "fps": 30,
@@ -1274,6 +1290,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/2e1bbf79-68c0-4ebc-8598-1298258183ef-720.mp4",
+          "mime": "video/mp4",
           "bytes": 31897781,
           "resolution": "720p",
           "fps": 30,
@@ -1281,6 +1298,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/2e1bbf79-68c0-4ebc-8598-1298258183ef-360.mp4",
+          "mime": "video/mp4",
           "bytes": 16559402,
           "resolution": "360p",
           "fps": 30,
@@ -1288,6 +1306,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/2e1bbf79-68c0-4ebc-8598-1298258183ef-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 48642208,
           "resolution": "1080p",
           "fps": 30,
@@ -1295,6 +1314,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/2e1bbf79-68c0-4ebc-8598-1298258183ef-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 31735579,
           "resolution": "720p",
           "fps": 30,
@@ -1302,6 +1322,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/2e1bbf79-68c0-4ebc-8598-1298258183ef-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 16393840,
           "resolution": "360p",
           "fps": 30,
@@ -1395,6 +1416,7 @@
       "files": [
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/6efece70-20fa-4a68-88fe-85dad69c9ba7-1440.mp4",
+          "mime": "video/mp4",
           "bytes": 143550861,
           "resolution": "1440p",
           "fps": 30,
@@ -1402,6 +1424,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/6efece70-20fa-4a68-88fe-85dad69c9ba7-720.mp4",
+          "mime": "video/mp4",
           "bytes": 68109179,
           "resolution": "720p",
           "fps": 30,
@@ -1409,6 +1432,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/web-videos/6efece70-20fa-4a68-88fe-85dad69c9ba7-360.mp4",
+          "mime": "video/mp4",
           "bytes": 38328142,
           "resolution": "360p",
           "fps": 30,
@@ -1416,6 +1440,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/6efece70-20fa-4a68-88fe-85dad69c9ba7-1440-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 143155591,
           "resolution": "1440p",
           "fps": 30,
@@ -1423,6 +1448,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/6efece70-20fa-4a68-88fe-85dad69c9ba7-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 67710173,
           "resolution": "720p",
           "fps": 30,
@@ -1430,6 +1456,7 @@
         },
         {
           "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/6efece70-20fa-4a68-88fe-85dad69c9ba7-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 37921612,
           "resolution": "360p",
           "fps": 30,
@@ -1791,6 +1818,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/2626cdaf-e341-4c3b-8719-724da79c9a55-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 399380281,
           "resolution": "1080p",
           "fps": 30,
@@ -1798,16 +1826,10 @@
         },
         {
           "url": "https://diler.tube/download/web-videos/2626cdaf-e341-4c3b-8719-724da79c9a55-480.mp4",
+          "mime": "video/mp4",
           "bytes": 188912108,
           "resolution": "480p",
           "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://diler.tube/download/web-videos/2626cdaf-e341-4c3b-8719-724da79c9a55-0.mp4",
-          "bytes": 99782567,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "web-video"
         }
       ],
@@ -1895,6 +1917,7 @@
       "files": [
         {
           "url": "https://video.blender.org/download/web-videos/ff427260-9631-40d9-bd39-65f21f95e9ad-720.mp4",
+          "mime": "video/mp4",
           "bytes": 12138747,
           "resolution": "720p",
           "fps": 25,
@@ -2126,7 +2149,7 @@
         "genetics",
         "ecology"
       ],
-      "matched_query": "cell biology",
+      "matched_query": "cell biology educational film",
       "title": "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
       "description": "This talk examines the engineering challenges of building foundation models for single-cell biology from a non-biologist’s perspective. Speakers: - Akram Baharlouei (Altos Labs): Machine learning engineer at Altos Labs working on foundation model...",
       "creator": "Bleme",
@@ -2148,14 +2171,8 @@
       "download_enabled": true,
       "files": [
         {
-          "url": "https://video.ut0pia.org/download/web-videos/6dd957a0-fb41-4248-80e3-ac3b74c72158-0.mp4",
-          "bytes": 13860200,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "web-video"
-        },
-        {
           "url": "https://video.ut0pia.org/download/streaming-playlists/hls/videos/6dd957a0-fb41-4248-80e3-ac3b74c72158-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 41423487,
           "resolution": "720p",
           "fps": 25,
@@ -2219,6 +2236,307 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "c2ce6b57-72d5-4d0e-9539-3ec2d25abc67",
+      "topic_slug": "biology-life",
+      "topic_name": "Biology & Life",
+      "school_slug": "science",
+      "concepts": [
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
+      ],
+      "matched_query": "biology educational film",
+      "title": "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+      "description": "Want to support this channel and help us preserve old films? Visit https://www.patreon.com/PeriscopeFilm Visit our website www.PeriscopeFilm.com This 1960 color educational film from Encyclopedia Britannica Films (Unit 5 in their biology program)...",
+      "creator": "amal",
+      "language": "en",
+      "duration_seconds": 934,
+      "source_url": "https://peertube.dngr.us/videos/watch/c2ce6b57-72d5-4d0e-9539-3ec2d25abc67",
+      "source_host": "peertube.dngr.us",
+      "license": {
+        "spdx": "CC0",
+        "label": "Public Domain Dedication",
+        "url": "",
+        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "amal",
+        "source_title": "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+        "source_url": "https://peertube.dngr.us/videos/watch/c2ce6b57-72d5-4d0e-9539-3ec2d25abc67",
+        "license": "Public Domain Dedication",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "biology-life",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 55,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 32,
+      "relevance": {
+        "biology-life": {
+          "score": 20,
+          "evidence": [
+            "biology",
+            "genetics",
+            "biology",
+            "genetics"
+          ]
+        }
+      },
+      "pedagogy": {
+        "biology-life": {
+          "strong_title_matches": [
+            "biology",
+            "genetics"
+          ],
+          "strong_description_matches": [
+            "biology"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 55
+        }
+      },
+      "selection": {
+        "biology-life": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 55
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "f38b2ae2-b316-489f-bfd9-f5fb8053c925",
+      "topic_slug": "biology-life",
+      "topic_name": "Biology & Life",
+      "school_slug": "science",
+      "concepts": [
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
+      ],
+      "matched_query": "biology educational film",
+      "title": "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+      "description": "This presentation dives deep into the journey of the Hydro Guardian! We'll explore the educational and human practices that shaped and refined our project. We were thrilled to engage with stakeholders through interviews, as this allowed us to gain...",
+      "creator": "iGEM Teams",
+      "language": "en",
+      "duration_seconds": 498,
+      "source_url": "https://video.igem.org/videos/watch/f38b2ae2-b316-489f-bfd9-f5fb8053c925",
+      "source_host": "video.igem.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/f38b2ae2-b316-489f-bfd9-f5fb8053c925-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 179939165,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/f38b2ae2-b316-489f-bfd9-f5fb8053c925-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 33928655,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/f38b2ae2-b316-489f-bfd9-f5fb8053c925-240-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 10810452,
+          "resolution": "240p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "iGEM Teams",
+        "source_title": "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "source_url": "https://video.igem.org/videos/watch/f38b2ae2-b316-489f-bfd9-f5fb8053c925",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "biology-life",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "biology-life": {
+          "score": 10,
+          "evidence": [
+            "biology",
+            "biology"
+          ]
+        }
+      },
+      "pedagogy": {
+        "biology-life": {
+          "strong_title_matches": [
+            "biology"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 48
+        }
+      },
+      "selection": {
+        "biology-life": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "93ff2046-d427-4f4b-8590-9de10877c4e6",
+      "topic_slug": "biology-life",
+      "topic_name": "Biology & Life",
+      "school_slug": "science",
+      "concepts": [
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
+      ],
+      "matched_query": "biology educational film",
+      "title": "Synthetic Biology Community Education and Outreach via iGEM in Macau",
+      "description": "We would like to highlight our iGEM team educational efforts in the Macau community. We plan to show our educational activities, such as visits to local high schools, hosting summer camp students, informational exchanges with community business le...",
+      "creator": "iGEM Teams",
+      "language": "en",
+      "duration_seconds": 605,
+      "source_url": "https://video.igem.org/videos/watch/93ff2046-d427-4f4b-8590-9de10877c4e6",
+      "source_host": "video.igem.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/93ff2046-d427-4f4b-8590-9de10877c4e6-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 145355657,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/93ff2046-d427-4f4b-8590-9de10877c4e6-480-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 40189332,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/93ff2046-d427-4f4b-8590-9de10877c4e6-240-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 13723685,
+          "resolution": "240p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "iGEM Teams",
+        "source_title": "Synthetic Biology Community Education and Outreach via iGEM in Macau",
+        "source_url": "https://video.igem.org/videos/watch/93ff2046-d427-4f4b-8590-9de10877c4e6",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "biology-life",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "biology-life": {
+          "score": 10,
+          "evidence": [
+            "biology",
+            "biology"
+          ]
+        }
+      },
+      "pedagogy": {
+        "biology-life": {
+          "strong_title_matches": [
+            "biology"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 48
+        }
+      },
+      "selection": {
+        "biology-life": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "d662a523-23bb-47dc-99bc-539ff4692291",
       "topic_slug": "biology-life",
       "topic_name": "Biology & Life",
@@ -2229,7 +2547,7 @@
         "genetics",
         "ecology"
       ],
-      "matched_query": "cell biology",
+      "matched_query": "cell biology educational film",
       "title": "The Cell High School Biology",
       "description": "",
       "creator": "nathalie.nabouletsaint_pee",
@@ -2252,6 +2570,7 @@
       "files": [
         {
           "url": "https://peertube.lyceeconnecte.fr/download/web-videos/d662a523-23bb-47dc-99bc-539ff4692291-360.mp4",
+          "mime": "video/mp4",
           "bytes": 31912634,
           "resolution": "360p",
           "fps": 30,
@@ -2309,6 +2628,453 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "7867e428-7250-4766-bb86-80cb0cc40c61",
+      "topic_slug": "biology-life",
+      "topic_name": "Biology & Life",
+      "school_slug": "science",
+      "concepts": [
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
+      ],
+      "matched_query": "ecology biology educational video",
+      "title": "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
+      "description": "**Title:** DECOLOGY: The Perfect Combination of Decolorize and Ecology **Description:** Taiwan's textile industry ranks third in the world in terms of output, making it a main global supplier of functional fabrics. However, massive production ine...",
+      "creator": "iGEM Teams",
+      "language": "en",
+      "duration_seconds": 880,
+      "source_url": "https://video.igem.org/videos/watch/7867e428-7250-4766-bb86-80cb0cc40c61",
+      "source_host": "video.igem.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "iGEM Teams",
+        "source_title": "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
+        "source_url": "https://video.igem.org/videos/watch/7867e428-7250-4766-bb86-80cb0cc40c61",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "biology-life",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 47,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 30,
+      "relevance": {
+        "biology-life": {
+          "score": 10,
+          "evidence": [
+            "ecology",
+            "ecology"
+          ]
+        }
+      },
+      "pedagogy": {
+        "biology-life": {
+          "strong_title_matches": [
+            "ecology"
+          ],
+          "strong_description_matches": [
+            "ecology"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 47
+        }
+      },
+      "selection": {
+        "biology-life": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 47
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "8360bf94-521f-4f6d-a337-5a232bdd6691",
+      "topic_slug": "biology-life",
+      "topic_name": "Biology & Life",
+      "school_slug": "science",
+      "concepts": [
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
+      ],
+      "matched_query": "ecology biology educational video",
+      "title": "Dr Becks (Rebecca) Spake: Virtual Ecology",
+      "description": "Dr Becks Spake discusses virtual ecology at the Workshop on Foundational AI to forecast ecosystem resilience at Pembroke College. 24th Nov 2025.",
+      "creator": "Energy and Environment Group",
+      "language": "en",
+      "duration_seconds": 1294,
+      "source_url": "https://watch.eeg.cl.cam.ac.uk/videos/watch/8360bf94-521f-4f6d-a337-5a232bdd6691",
+      "source_host": "watch.eeg.cl.cam.ac.uk",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://watch.eeg.cl.cam.ac.uk/download/web-videos/8360bf94-521f-4f6d-a337-5a232bdd6691-2160.mp4",
+          "mime": "video/mp4",
+          "bytes": 1940063693,
+          "resolution": "2160p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://watch.eeg.cl.cam.ac.uk/download/web-videos/8360bf94-521f-4f6d-a337-5a232bdd6691-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 420896501,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://watch.eeg.cl.cam.ac.uk/download/streaming-playlists/hls/videos/8360bf94-521f-4f6d-a337-5a232bdd6691-2160-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 1939566719,
+          "resolution": "2160p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://watch.eeg.cl.cam.ac.uk/download/streaming-playlists/hls/videos/8360bf94-521f-4f6d-a337-5a232bdd6691-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 420339919,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Energy and Environment Group",
+        "source_title": "Dr Becks (Rebecca) Spake: Virtual Ecology",
+        "source_url": "https://watch.eeg.cl.cam.ac.uk/videos/watch/8360bf94-521f-4f6d-a337-5a232bdd6691",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "biology-life",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "biology-life": {
+          "score": 10,
+          "evidence": [
+            "ecology",
+            "ecology"
+          ]
+        }
+      },
+      "pedagogy": {
+        "biology-life": {
+          "strong_title_matches": [
+            "ecology"
+          ],
+          "strong_description_matches": [
+            "ecology"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "biology-life": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "f520301a-bb66-4e1a-9200-fb3f80c496a8",
+      "topic_slug": "biology-life",
+      "topic_name": "Biology & Life",
+      "school_slug": "science",
+      "concepts": [
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
+      ],
+      "matched_query": "ecology biology educational video",
+      "title": "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
+      "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visit our website www.PeriscopeFilm.com \"This Vital Earth\" (1948) is the seco...",
+      "creator": "amal",
+      "language": "en",
+      "duration_seconds": 563,
+      "source_url": "https://peertube.dngr.us/videos/watch/f520301a-bb66-4e1a-9200-fb3f80c496a8",
+      "source_host": "peertube.dngr.us",
+      "license": {
+        "spdx": "CC0",
+        "label": "Public Domain Dedication",
+        "url": "",
+        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "amal",
+        "source_title": "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
+        "source_url": "https://peertube.dngr.us/videos/watch/f520301a-bb66-4e1a-9200-fb3f80c496a8",
+        "license": "Public Domain Dedication",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "biology-life",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 39,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 32,
+      "relevance": {
+        "biology-life": {
+          "score": 10,
+          "evidence": [
+            "ecology",
+            "ecology"
+          ]
+        }
+      },
+      "pedagogy": {
+        "biology-life": {
+          "strong_title_matches": [
+            "ecology"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 39
+        }
+      },
+      "selection": {
+        "biology-life": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 39
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "2b15077c-af5b-40f9-803f-8f1ac5ee74c0",
+      "topic_slug": "biology-life",
+      "topic_name": "Biology & Life",
+      "school_slug": "science",
+      "concepts": [
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
+      ],
+      "matched_query": "biology educational film",
+      "title": "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
+      "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
+      "creator": "amal",
+      "language": "en",
+      "duration_seconds": 768,
+      "source_url": "https://peertube.dngr.us/videos/watch/2b15077c-af5b-40f9-803f-8f1ac5ee74c0",
+      "source_host": "peertube.dngr.us",
+      "license": {
+        "spdx": "CC0",
+        "label": "Public Domain Dedication",
+        "url": "",
+        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "amal",
+        "source_title": "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
+        "source_url": "https://peertube.dngr.us/videos/watch/2b15077c-af5b-40f9-803f-8f1ac5ee74c0",
+        "license": "Public Domain Dedication",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "biology-life",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 39,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 32,
+      "relevance": {
+        "biology-life": {
+          "score": 10,
+          "evidence": [
+            "biology",
+            "biology"
+          ]
+        }
+      },
+      "pedagogy": {
+        "biology-life": {
+          "strong_title_matches": [
+            "biology"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 39
+        }
+      },
+      "selection": {
+        "biology-life": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 39
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "55e0b157-dd20-4e2f-b950-7eaf984457c7",
+      "topic_slug": "biology-life",
+      "topic_name": "Biology & Life",
+      "school_slug": "science",
+      "concepts": [
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
+      ],
+      "matched_query": "biology educational film",
+      "title": "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
+      "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
+      "creator": "amal",
+      "language": "en",
+      "duration_seconds": 1285,
+      "source_url": "https://peertube.dngr.us/videos/watch/55e0b157-dd20-4e2f-b950-7eaf984457c7",
+      "source_host": "peertube.dngr.us",
+      "license": {
+        "spdx": "CC0",
+        "label": "Public Domain Dedication",
+        "url": "",
+        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "amal",
+        "source_title": "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b",
+        "source_url": "https://peertube.dngr.us/videos/watch/55e0b157-dd20-4e2f-b950-7eaf984457c7",
+        "license": "Public Domain Dedication",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "biology-life",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 39,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 32,
+      "relevance": {
+        "biology-life": {
+          "score": 10,
+          "evidence": [
+            "biology",
+            "biology"
+          ]
+        }
+      },
+      "pedagogy": {
+        "biology-life": {
+          "strong_title_matches": [
+            "biology"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 39
+        }
+      },
+      "selection": {
+        "biology-life": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 39
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "81223f74-7a6e-4299-809f-782ea7f0cc05",
       "topic_slug": "biology-life",
       "topic_name": "Biology & Life",
@@ -2319,7 +3085,7 @@
         "genetics",
         "ecology"
       ],
-      "matched_query": "biology basics",
+      "matched_query": "molecular biology lesson",
       "title": "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
       "description": "This summer webinar series will focus on how to create an iGEM project. In the first weeks, we will go from ideation to finding and designing DNA sequences. We will introduce some of the basics of how to model systems and various molecular biology...",
       "creator": "iGEM Foundation",
@@ -2403,7 +3169,7 @@
         "genetics",
         "ecology"
       ],
-      "matched_query": "biology basics",
+      "matched_query": "molecular biology lesson",
       "title": "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
       "description": "This summer webinar series will focus on how to create an iGEM project. In the first weeks, we will go from ideation to finding and designing DNA sequences. We will introduce some of the basics of how to model systems and various molecular biology...",
       "creator": "iGEM Foundation",
@@ -2487,7 +3253,7 @@
         "genetics",
         "ecology"
       ],
-      "matched_query": "biology basics",
+      "matched_query": "molecular biology lesson",
       "title": "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
       "description": "This summer webinar series will focus on how to create an iGEM project. In the first weeks, we will go from ideation to finding and designing DNA sequences. We will introduce some of the basics of how to model systems and various molecular biology...",
       "creator": "iGEM Foundation",
@@ -2561,7 +3327,7 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "97923c26-2262-4f07-ba77-1b1cc42fd264",
+      "provider_id": "ff2d4b33-ab9b-4baa-868d-4095cf05836d",
       "topic_slug": "biology-life",
       "topic_name": "Biology & Life",
       "school_slug": "science",
@@ -2571,19 +3337,19 @@
         "genetics",
         "ecology"
       ],
-      "matched_query": "genetics ecology biology",
-      "title": "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-      "description": "Want to support this channel and help us preserve old films? Visit https://www.patreon.com/PeriscopeFilm Browse our products on Amazon: https://amzn.to/2YILTSD This color educational film directed by E.D. Holden and photographed by Freeman Brown ...",
-      "creator": "amal",
-      "language": "en",
-      "duration_seconds": 1328,
-      "source_url": "https://peertube.dngr.us/videos/watch/97923c26-2262-4f07-ba77-1b1cc42fd264",
-      "source_host": "peertube.dngr.us",
+      "matched_query": "molecular biology lesson",
+      "title": "Basic Molecular Biology/Designing DNA sequences - 2021 iGEM Engineering Webinars",
+      "description": "This part of an Engineering Summer Webinar series by the iGEM Engineering Committee. More info here: https://2021.igem.org/Engineering/Webinars",
+      "creator": "iGEM Foundation",
+      "language": null,
+      "duration_seconds": 4227,
+      "source_url": "https://video.igem.org/videos/watch/ff2d4b33-ab9b-4baa-868d-4095cf05836d",
+      "source_host": "video.igem.org",
       "license": {
-        "spdx": "CC0",
-        "label": "Public Domain Dedication",
+        "spdx": "CC-BY",
+        "label": "Attribution",
         "url": "",
-        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
+        "evidence": "PeerTube API licence id 1: Attribution",
         "commercial_use": true,
         "derivatives": true,
         "share_alike": false
@@ -2595,10 +3361,10 @@
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
-        "creator": "amal",
-        "source_title": "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "source_url": "https://peertube.dngr.us/videos/watch/97923c26-2262-4f07-ba77-1b1cc42fd264",
-        "license": "Public Domain Dedication",
+        "creator": "iGEM Foundation",
+        "source_title": "Basic Molecular Biology/Designing DNA sequences - 2021 iGEM Engineering Webinars",
+        "source_url": "https://video.igem.org/videos/watch/ff2d4b33-ab9b-4baa-868d-4095cf05836d",
+        "license": "Attribution",
         "license_url": ""
       },
       "topic_matches": [
@@ -2610,184 +3376,20 @@
           "relevance_score": 10
         }
       ],
-      "quality_score": 32,
+      "quality_score": 30,
       "relevance": {
         "biology-life": {
           "score": 10,
           "evidence": [
-            "genetics",
-            "genetics"
+            "biology",
+            "biology"
           ]
         }
       },
       "pedagogy": {
         "biology-life": {
           "strong_title_matches": [
-            "genetics"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 27
-        }
-      },
-      "selection": {
-        "biology-life": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 27
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "4b6b13c7-4f71-405c-bd7f-6d960b5730ef",
-      "topic_slug": "biology-life",
-      "topic_name": "Biology & Life",
-      "school_slug": "science",
-      "concepts": [
-        "biology",
-        "cells",
-        "genetics",
-        "ecology"
-      ],
-      "matched_query": "genetics ecology biology",
-      "title": "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954",
-      "description": "Want to support this channel and help us preserve old films? Visit https://www.patreon.com/PeriscopeFilm Visit our website www.PeriscopeFilm.com Part 2: https://youtu.be/MwPeXnAFqnc “The Thread of Life” dates to 1960 and was part of the Bell Sci...",
-      "creator": "amal",
-      "language": "en",
-      "duration_seconds": 1430,
-      "source_url": "https://peertube.dngr.us/videos/watch/4b6b13c7-4f71-405c-bd7f-6d960b5730ef",
-      "source_host": "peertube.dngr.us",
-      "license": {
-        "spdx": "CC0",
-        "label": "Public Domain Dedication",
-        "url": "",
-        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "amal",
-        "source_title": "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954",
-        "source_url": "https://peertube.dngr.us/videos/watch/4b6b13c7-4f71-405c-bd7f-6d960b5730ef",
-        "license": "Public Domain Dedication",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "biology-life",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 27,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 32,
-      "relevance": {
-        "biology-life": {
-          "score": 10,
-          "evidence": [
-            "genetics",
-            "genetics"
-          ]
-        }
-      },
-      "pedagogy": {
-        "biology-life": {
-          "strong_title_matches": [
-            "genetics"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 27
-        }
-      },
-      "selection": {
-        "biology-life": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 27
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "357be82f-ab15-42a7-b00f-32518a0996d8",
-      "topic_slug": "biology-life",
-      "topic_name": "Biology & Life",
-      "school_slug": "science",
-      "concepts": [
-        "biology",
-        "cells",
-        "genetics",
-        "ecology"
-      ],
-      "matched_query": "genetics ecology biology",
-      "title": "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 2 91974",
-      "description": "Want to support this channel and help us preserve old films? Visit https://www.patreon.com/PeriscopeFilm Visit our website www.PeriscopeFilm.com Part 1: https://youtu.be/Vj25VZGMGGM “The Thread of Life” dates to 1960 and was part of the Bell Sci...",
-      "creator": "amal",
-      "language": "en",
-      "duration_seconds": 1567,
-      "source_url": "https://peertube.dngr.us/videos/watch/357be82f-ab15-42a7-b00f-32518a0996d8",
-      "source_host": "peertube.dngr.us",
-      "license": {
-        "spdx": "CC0",
-        "label": "Public Domain Dedication",
-        "url": "",
-        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "amal",
-        "source_title": "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 2 91974",
-        "source_url": "https://peertube.dngr.us/videos/watch/357be82f-ab15-42a7-b00f-32518a0996d8",
-        "license": "Public Domain Dedication",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "biology-life",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 27,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 32,
-      "relevance": {
-        "biology-life": {
-          "score": 10,
-          "evidence": [
-            "genetics",
-            "genetics"
-          ]
-        }
-      },
-      "pedagogy": {
-        "biology-life": {
-          "strong_title_matches": [
-            "genetics"
+            "biology"
           ],
           "strong_description_matches": [],
           "educational_intent": true,
@@ -2812,12 +3414,12 @@
       "topic_name": "Chemistry Foundations",
       "school_slug": "science",
       "concepts": [
-        "biology",
-        "cells",
-        "genetics",
-        "ecology"
+        "physics",
+        "forces",
+        "motion",
+        "energy"
       ],
-      "matched_query": "biology basics",
+      "matched_query": "physics basics",
       "title": "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
       "description": "Learn the basics about Mendeleev and the Periodic Table. Who is Mendeleev and what did his periodic table look like? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
       "creator": "FuseSchool - Global Education",
@@ -3099,12 +3701,12 @@
       "topic_name": "Chemistry Foundations",
       "school_slug": "science",
       "concepts": [
-        "biology",
-        "cells",
-        "genetics",
-        "ecology"
+        "physics",
+        "forces",
+        "motion",
+        "energy"
       ],
-      "matched_query": "biology basics",
+      "matched_query": "physics basics",
       "title": "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
       "description": "Learn the basics about radioactive isotopes? how they are created? and what chemical reactions are created? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
       "creator": "FuseSchool - Global Education",
@@ -3268,6 +3870,98 @@
         "chemistry-foundations": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 59
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
+      "topic_slug": "chemistry-foundations",
+      "topic_name": "Chemistry Foundations",
+      "school_slug": "science",
+      "concepts": [
+        "chemistry",
+        "atoms",
+        "periodic table",
+        "reactions"
+      ],
+      "matched_query": "chemistry basics",
+      "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+      "description": "Learn the basics about Energy Levels and Electron Configuration. Where do you find energy levels? How do you recognize electron configuration? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
+      "creator": "FuseSchool - Global Education",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC BY 3.0",
+        "url": "https://creativecommons.org/licenses/by/3.0",
+        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 8378497,
+          "provider_sha1": "f62d94001b90600c258ba108c8f7e164016779ad",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "FuseSchool - Global Education",
+        "source_title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
+        "license": "CC BY 3.0",
+        "license_url": "https://creativecommons.org/licenses/by/3.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "chemistry-foundations",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 89,
+      "relevance": {
+        "chemistry-foundations": {
+          "score": 10,
+          "evidence": [
+            "chemistry",
+            "chemistry"
+          ]
+        }
+      },
+      "pedagogy": {
+        "chemistry-foundations": {
+          "strong_title_matches": [
+            "chemistry"
+          ],
+          "strong_description_matches": [
+            "chemistry"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "chemistry-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
         }
       }
     },
@@ -3631,6 +4325,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 7276195,
           "resolution": "1080p",
           "fps": 25,
@@ -3638,6 +4333,7 @@
         },
         {
           "url": "https://diler.tube/download/web-videos/76846280-2d75-4397-8802-56d7a8ee2e14-480.mp4",
+          "mime": "video/mp4",
           "bytes": 4512470,
           "resolution": "480p",
           "fps": 25,
@@ -3729,6 +4425,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/4ffb0edf-813c-4ccb-8ff3-e6ae9be3ab51-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 10157813,
           "resolution": "1080p",
           "fps": 25,
@@ -3736,6 +4433,7 @@
         },
         {
           "url": "https://diler.tube/download/web-videos/4ffb0edf-813c-4ccb-8ff3-e6ae9be3ab51-480.mp4",
+          "mime": "video/mp4",
           "bytes": 6686295,
           "resolution": "480p",
           "fps": 25,
@@ -3826,6 +4524,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/bc66e23d-05b6-4142-823e-1b7ee0a5b398-360.mp4",
+          "mime": "video/mp4",
           "bytes": 9248917,
           "resolution": "360p",
           "fps": 25,
@@ -3916,6 +4615,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/f441883a-beb3-428d-b67e-2075851bac21-360.mp4",
+          "mime": "video/mp4",
           "bytes": 10884480,
           "resolution": "360p",
           "fps": 25,
@@ -4008,6 +4708,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/1f190973-1576-456d-ad81-fe43cf77751e-360.mp4",
+          "mime": "video/mp4",
           "bytes": 7982585,
           "resolution": "360p",
           "fps": 24,
@@ -4100,6 +4801,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/a15dd01b-e31a-4cd8-b7dc-562388d809bd-360.mp4",
+          "mime": "video/mp4",
           "bytes": 7963362,
           "resolution": "360p",
           "fps": 25,
@@ -4194,6 +4896,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/38c2e666-76b9-47f3-ab15-2a2b8bedb664-360.mp4",
+          "mime": "video/mp4",
           "bytes": 8614003,
           "resolution": "360p",
           "fps": 25,
@@ -4286,6 +4989,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/a6f7a371-a382-495c-a8cd-34b6cc45a69e-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 13589774,
           "resolution": "1080p",
           "fps": 25,
@@ -4293,6 +4997,7 @@
         },
         {
           "url": "https://diler.tube/download/web-videos/a6f7a371-a382-495c-a8cd-34b6cc45a69e-480.mp4",
+          "mime": "video/mp4",
           "bytes": 7287358,
           "resolution": "480p",
           "fps": 25,
@@ -4387,6 +5092,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/aec56f25-9201-447f-acd4-23fa7132499d-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 23991902,
           "resolution": "1080p",
           "fps": 30,
@@ -4394,6 +5100,7 @@
         },
         {
           "url": "https://diler.tube/download/web-videos/aec56f25-9201-447f-acd4-23fa7132499d-480.mp4",
+          "mime": "video/mp4",
           "bytes": 12353281,
           "resolution": "480p",
           "fps": 30,
@@ -4486,6 +5193,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/0d790aa2-05a8-4302-bf6d-4ebce174c0fb-360.mp4",
+          "mime": "video/mp4",
           "bytes": 8734133,
           "resolution": "360p",
           "fps": 25,
@@ -4755,6 +5463,7 @@
       "files": [
         {
           "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 446658800,
           "resolution": "1080p",
           "fps": 30,
@@ -4762,6 +5471,7 @@
         },
         {
           "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 273190887,
           "resolution": "720p",
           "fps": 30,
@@ -4769,16 +5479,10 @@
         },
         {
           "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 164171737,
           "resolution": "480p",
           "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://apertatube.net/download/streaming-playlists/hls/videos/385cf1c7-f24f-4c76-b2ab-5867a2306875-0-fragmented.mp4",
-          "bytes": 32281041,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "streaming-file"
         }
       ],
@@ -4880,6 +5584,96 @@
         "creator": "UK Parliament",
         "source_title": "An introduction to Parliament",
         "source_url": "https://commons.wikimedia.org/wiki/File:An_introduction_to_Parliament.webm",
+        "license": "CC BY 3.0",
+        "license_url": "https://creativecommons.org/licenses/by/3.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "civics-society",
+          "school_slug": "society-and-social-sciences",
+          "selection_reason": "topic-description-anchor-plus-instructional-title",
+          "pedagogy_score": 36,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 89,
+      "relevance": {
+        "civics-society": {
+          "score": 10,
+          "evidence": [
+            "government",
+            "government"
+          ]
+        }
+      },
+      "pedagogy": {
+        "civics-society": {
+          "strong_title_matches": [],
+          "strong_description_matches": [
+            "government"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "civics-society": {
+          "reason": "topic-description-anchor-plus-instructional-title",
+          "pedagogy_score": 36
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Elections and voting explained (UK).webm",
+      "topic_slug": "civics-society",
+      "topic_name": "Civics & Society",
+      "school_slug": "society-and-social-sciences",
+      "concepts": [
+        "civics",
+        "government",
+        "democracy",
+        "institutions"
+      ],
+      "matched_query": "parliament government introduction",
+      "title": "Elections and voting explained (UK)",
+      "description": "Discover how elections work in the UK and take a closer look at the General Election, exploring: our right to vote, how candidates and parties gain votes and what happens once elected. If you are a teacher, this animation is a quick and easy way to introduce the General Election with secondary students studying subjects such as Citizenship or Government & Politics. This is just one chapter of the ‘An Introduction to Parliament’ video. Find the full video, along with further chapters, such as Parliament’s Structure and Your Voice, here: https://www.youtube.com/watch?v=RAMbIz3Y2JA",
+      "creator": "UK Parliament",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC BY 3.0",
+        "url": "https://creativecommons.org/licenses/by/3.0",
+        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/2/26/Elections_and_voting_explained_%28UK%29.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 7768739,
+          "provider_sha1": "d9fb26a96fbab6fda2f8774fea28f96a52241d1b",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "UK Parliament",
+        "source_title": "Elections and voting explained (UK)",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Elections_and_voting_explained_(UK).webm",
         "license": "CC BY 3.0",
         "license_url": "https://creativecommons.org/licenses/by/3.0"
       },
@@ -5409,16 +6203,10 @@
       "files": [
         {
           "url": "https://gnulinux.tube/download/streaming-playlists/hls/videos/a6ef600b-0be0-4ec7-89f1-e5c953a0a8ce-352-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 17681191,
           "resolution": "360p",
           "fps": 24,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://gnulinux.tube/download/streaming-playlists/hls/videos/a6ef600b-0be0-4ec7-89f1-e5c953a0a8ce-0-fragmented.mp4",
-          "bytes": 15300023,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "streaming-file"
         }
       ],
@@ -5508,6 +6296,7 @@
       "files": [
         {
           "url": "https://tube.sbcloud.cc/download/streaming-playlists/hls/videos/ada53935-7f08-4375-a479-dc0dfe929ddf-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 277826832,
           "resolution": "480p",
           "fps": 30,
@@ -5565,6 +6354,136 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "a2f660c8-fd90-4e6e-a154-254b846b21bc",
+      "topic_slug": "computing-basics",
+      "topic_name": "Computing Basics",
+      "school_slug": "technology",
+      "concepts": [
+        "computing",
+        "computer science",
+        "internet",
+        "digital systems"
+      ],
+      "matched_query": "computer science basics",
+      "title": "Uncertainty at Scale - how Computer Science hinders Climate Science",
+      "description": "\"Computer science is a powerful tool for enabling data-driven advances in global ecology and conservation,\" says PhD student Patrick Ferris. \"But the amplification cuts two ways, as mechanisation can also compound problems inherent with just how u...",
+      "creator": "Energy and Environment Group",
+      "language": "en",
+      "duration_seconds": 537,
+      "source_url": "https://watch.eeg.cl.cam.ac.uk/videos/watch/a2f660c8-fd90-4e6e-a154-254b846b21bc",
+      "source_host": "watch.eeg.cl.cam.ac.uk",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://watch.eeg.cl.cam.ac.uk/download/web-videos/a2f660c8-fd90-4e6e-a154-254b846b21bc-1080.mp4",
+          "mime": "video/mp4",
+          "bytes": 38715277,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://watch.eeg.cl.cam.ac.uk/download/streaming-playlists/hls/videos/a2f660c8-fd90-4e6e-a154-254b846b21bc-1080-fragmented.mp4",
+          "mime": "video/mp4",
+          "bytes": 38547075,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Energy and Environment Group",
+        "source_title": "Uncertainty at Scale - how Computer Science hinders Climate Science",
+        "source_url": "https://watch.eeg.cl.cam.ac.uk/videos/watch/a2f660c8-fd90-4e6e-a154-254b846b21bc",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "computing-basics",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44,
+          "relevance_score": 10
+        },
+        {
+          "topic_slug": "climate-environment",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "climate-environment": {
+          "score": 10,
+          "evidence": [
+            "climate science",
+            "climate science"
+          ]
+        },
+        "computing-basics": {
+          "score": 10,
+          "evidence": [
+            "computer science",
+            "computer science"
+          ]
+        }
+      },
+      "pedagogy": {
+        "climate-environment": {
+          "strong_title_matches": [
+            "climate science"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        },
+        "computing-basics": {
+          "strong_title_matches": [
+            "computer science"
+          ],
+          "strong_description_matches": [
+            "computer science"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "climate-environment": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36
+        },
+        "computing-basics": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "1b6d1127-6826-4d5d-9284-69bdd8f3e965",
       "topic_slug": "computing-basics",
       "topic_name": "Computing Basics",
@@ -5597,14 +6516,8 @@
       "download_enabled": true,
       "files": [
         {
-          "url": "https://phpc.tv/download/web-videos/1b6d1127-6826-4d5d-9284-69bdd8f3e965-0.mp4",
-          "bytes": 57328408,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "web-video"
-        },
-        {
           "url": "https://phpc.tv/download/streaming-playlists/hls/videos/1b6d1127-6826-4d5d-9284-69bdd8f3e965-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 224389837,
           "resolution": "1080p",
           "fps": 25,
@@ -5612,6 +6525,7 @@
         },
         {
           "url": "https://phpc.tv/download/streaming-playlists/hls/videos/1b6d1127-6826-4d5d-9284-69bdd8f3e965-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 140473817,
           "resolution": "720p",
           "fps": 25,
@@ -5619,6 +6533,7 @@
         },
         {
           "url": "https://phpc.tv/download/streaming-playlists/hls/videos/1b6d1127-6826-4d5d-9284-69bdd8f3e965-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 84001733,
           "resolution": "480p",
           "fps": 25,
@@ -5626,6 +6541,7 @@
         },
         {
           "url": "https://phpc.tv/download/streaming-playlists/hls/videos/1b6d1127-6826-4d5d-9284-69bdd8f3e965-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 58702202,
           "resolution": "360p",
           "fps": 25,
@@ -5633,6 +6549,7 @@
         },
         {
           "url": "https://phpc.tv/download/streaming-playlists/hls/videos/1b6d1127-6826-4d5d-9284-69bdd8f3e965-240-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 32540599,
           "resolution": "240p",
           "fps": 25,
@@ -5640,16 +6557,10 @@
         },
         {
           "url": "https://phpc.tv/download/streaming-playlists/hls/videos/1b6d1127-6826-4d5d-9284-69bdd8f3e965-144-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 15786785,
           "resolution": "144p",
           "fps": 25,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://phpc.tv/download/streaming-playlists/hls/videos/1b6d1127-6826-4d5d-9284-69bdd8f3e965-0-fragmented.mp4",
-          "bytes": 57467490,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "streaming-file"
         }
       ],
@@ -5802,119 +6713,6 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "a2f660c8-fd90-4e6e-a154-254b846b21bc",
-      "topic_slug": "computing-basics",
-      "topic_name": "Computing Basics",
-      "school_slug": "technology",
-      "concepts": [
-        "computing",
-        "computer science",
-        "internet",
-        "digital systems"
-      ],
-      "matched_query": "computer science basics",
-      "title": "Uncertainty at Scale - how Computer Science hinders Climate Science",
-      "description": "\"Computer science is a powerful tool for enabling data-driven advances in global ecology and conservation,\" says PhD student Patrick Ferris. \"But the amplification cuts two ways, as mechanisation can also compound problems inherent with just how u...",
-      "creator": "Energy and Environment Group",
-      "language": "en",
-      "duration_seconds": 537,
-      "source_url": "https://watch.eeg.cl.cam.ac.uk/videos/watch/a2f660c8-fd90-4e6e-a154-254b846b21bc",
-      "source_host": "watch.eeg.cl.cam.ac.uk",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Energy and Environment Group",
-        "source_title": "Uncertainty at Scale - how Computer Science hinders Climate Science",
-        "source_url": "https://watch.eeg.cl.cam.ac.uk/videos/watch/a2f660c8-fd90-4e6e-a154-254b846b21bc",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "computing-basics",
-          "school_slug": "technology",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 34,
-          "relevance_score": 10
-        },
-        {
-          "topic_slug": "climate-environment",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 26,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 29,
-      "relevance": {
-        "climate-environment": {
-          "score": 10,
-          "evidence": [
-            "climate science",
-            "climate science"
-          ]
-        },
-        "computing-basics": {
-          "score": 10,
-          "evidence": [
-            "computer science",
-            "computer science"
-          ]
-        }
-      },
-      "pedagogy": {
-        "climate-environment": {
-          "strong_title_matches": [
-            "climate science"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 26
-        },
-        "computing-basics": {
-          "strong_title_matches": [
-            "computer science"
-          ],
-          "strong_description_matches": [
-            "computer science"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 34
-        }
-      },
-      "selection": {
-        "climate-environment": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 26
-        },
-        "computing-basics": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 34
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
       "provider": "wikimedia-commons",
       "provider_id": "File:EU Health and Food Safety - Audit and Non-Audit work explained.webm",
       "topic_slug": "cooking-food-safety",
@@ -6039,6 +6837,7 @@
       "files": [
         {
           "url": "https://video.igem.org/download/streaming-playlists/hls/videos/aaed6e8a-d857-4dc3-b45b-727caaf3f8e7-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 152181093,
           "resolution": "1080p",
           "fps": 30,
@@ -6046,6 +6845,7 @@
         },
         {
           "url": "https://video.igem.org/download/streaming-playlists/hls/videos/aaed6e8a-d857-4dc3-b45b-727caaf3f8e7-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 59343498,
           "resolution": "480p",
           "fps": 30,
@@ -6053,16 +6853,10 @@
         },
         {
           "url": "https://video.igem.org/download/streaming-playlists/hls/videos/aaed6e8a-d857-4dc3-b45b-727caaf3f8e7-240-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 19787264,
           "resolution": "240p",
           "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/aaed6e8a-d857-4dc3-b45b-727caaf3f8e7-0-fragmented.mp4",
-          "bytes": 14492658,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "streaming-file"
         }
       ],
@@ -6503,6 +7297,7 @@
       "files": [
         {
           "url": "https://video.igem.org/download/streaming-playlists/hls/videos/ce6724e4-d416-42ae-9d5f-110472adf0f8-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 33627061,
           "resolution": "1080p",
           "fps": 30,
@@ -6510,6 +7305,7 @@
         },
         {
           "url": "https://video.igem.org/download/streaming-playlists/hls/videos/ce6724e4-d416-42ae-9d5f-110472adf0f8-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 14330153,
           "resolution": "480p",
           "fps": 30,
@@ -6517,16 +7313,10 @@
         },
         {
           "url": "https://video.igem.org/download/streaming-playlists/hls/videos/ce6724e4-d416-42ae-9d5f-110472adf0f8-240-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 6210022,
           "resolution": "240p",
           "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/ce6724e4-d416-42ae-9d5f-110472adf0f8-0-fragmented.mp4",
-          "bytes": 12850664,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "streaming-file"
         }
       ],
@@ -6706,6 +7496,7 @@
       "files": [
         {
           "url": "https://peertube.opencloud.lu/download/web-videos/baf9c9e5-ff09-4dcd-a156-a4ed9a1d1dea-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 130328137,
           "resolution": "1080p",
           "fps": 24,
@@ -6713,6 +7504,7 @@
         },
         {
           "url": "https://peertube.opencloud.lu/download/web-videos/baf9c9e5-ff09-4dcd-a156-a4ed9a1d1dea-720.mp4",
+          "mime": "video/mp4",
           "bytes": 109655881,
           "resolution": "720p",
           "fps": 24,
@@ -6720,6 +7512,7 @@
         },
         {
           "url": "https://peertube.opencloud.lu/download/web-videos/baf9c9e5-ff09-4dcd-a156-a4ed9a1d1dea-480.mp4",
+          "mime": "video/mp4",
           "bytes": 65367743,
           "resolution": "480p",
           "fps": 24,
@@ -7072,6 +7865,7 @@
       "files": [
         {
           "url": "https://video.blender.org/download/web-videos/3b17dd85-497b-4421-a855-e584b7da38e7-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 60483932,
           "resolution": "1080p",
           "fps": 30,
@@ -7079,6 +7873,7 @@
         },
         {
           "url": "https://video.blender.org/download/web-videos/3b17dd85-497b-4421-a855-e584b7da38e7-720.mp4",
+          "mime": "video/mp4",
           "bytes": 41694529,
           "resolution": "720p",
           "fps": 30,
@@ -7086,6 +7881,7 @@
         },
         {
           "url": "https://video.blender.org/download/web-videos/3b17dd85-497b-4421-a855-e584b7da38e7-480.mp4",
+          "mime": "video/mp4",
           "bytes": 30629074,
           "resolution": "480p",
           "fps": 30,
@@ -7093,6 +7889,7 @@
         },
         {
           "url": "https://video.blender.org/download/web-videos/3b17dd85-497b-4421-a855-e584b7da38e7-360.mp4",
+          "mime": "video/mp4",
           "bytes": 25824984,
           "resolution": "360p",
           "fps": 30,
@@ -7100,6 +7897,7 @@
         },
         {
           "url": "https://video.blender.org/download/web-videos/3b17dd85-497b-4421-a855-e584b7da38e7-240.mp4",
+          "mime": "video/mp4",
           "bytes": 21878386,
           "resolution": "240p",
           "fps": 30,
@@ -7377,6 +8175,7 @@
       "files": [
         {
           "url": "https://videos.qwast-gis.com/download/web-videos/ba7baa17-7a0e-432c-ba49-c2cfb1f0096d-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 94650564,
           "resolution": "1080p",
           "fps": 25,
@@ -7384,6 +8183,7 @@
         },
         {
           "url": "https://videos.qwast-gis.com/download/web-videos/ba7baa17-7a0e-432c-ba49-c2cfb1f0096d-720.mp4",
+          "mime": "video/mp4",
           "bytes": 56385146,
           "resolution": "720p",
           "fps": 25,
@@ -7391,6 +8191,7 @@
         },
         {
           "url": "https://videos.qwast-gis.com/download/web-videos/ba7baa17-7a0e-432c-ba49-c2cfb1f0096d-480.mp4",
+          "mime": "video/mp4",
           "bytes": 38747855,
           "resolution": "480p",
           "fps": 25,
@@ -7580,14 +8381,8 @@
       "download_enabled": true,
       "files": [
         {
-          "url": "https://urbanists.video/download/web-videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-0.mp4",
-          "bytes": 25112068,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "web-video"
-        },
-        {
           "url": "https://urbanists.video/download/streaming-playlists/hls/videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 57410335,
           "resolution": "720p",
           "fps": 30,
@@ -7595,6 +8390,7 @@
         },
         {
           "url": "https://urbanists.video/download/streaming-playlists/hls/videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 37134359,
           "resolution": "480p",
           "fps": 30,
@@ -7602,6 +8398,7 @@
         },
         {
           "url": "https://urbanists.video/download/streaming-playlists/hls/videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 30086575,
           "resolution": "360p",
           "fps": 30,
@@ -7609,6 +8406,7 @@
         },
         {
           "url": "https://urbanists.video/download/streaming-playlists/hls/videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-240-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 23438926,
           "resolution": "240p",
           "fps": 30,
@@ -7616,6 +8414,7 @@
         },
         {
           "url": "https://urbanists.video/download/streaming-playlists/hls/videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-144-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 18866097,
           "resolution": "144p",
           "fps": 30,
@@ -7707,6 +8506,7 @@
       "files": [
         {
           "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 333684675,
           "resolution": "720p",
           "fps": 30,
@@ -7714,6 +8514,7 @@
         },
         {
           "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 186076391,
           "resolution": "480p",
           "fps": 30,
@@ -7721,6 +8522,7 @@
         },
         {
           "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 155856944,
           "resolution": "360p",
           "fps": 30,
@@ -7728,16 +8530,10 @@
         },
         {
           "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-240-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 120216224,
           "resolution": "240p",
           "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-0-fragmented.mp4",
-          "bytes": 94086085,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "streaming-file"
         }
       ],
@@ -7920,6 +8716,7 @@
       "files": [
         {
           "url": "https://videos.qwast-gis.com/download/web-videos/4d2af8ba-1d61-4728-b68d-02ba1848fc79-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 23433396,
           "resolution": "1080p",
           "fps": 25,
@@ -7927,6 +8724,7 @@
         },
         {
           "url": "https://videos.qwast-gis.com/download/web-videos/4d2af8ba-1d61-4728-b68d-02ba1848fc79-720.mp4",
+          "mime": "video/mp4",
           "bytes": 10700629,
           "resolution": "720p",
           "fps": 25,
@@ -7934,16 +8732,10 @@
         },
         {
           "url": "https://videos.qwast-gis.com/download/web-videos/4d2af8ba-1d61-4728-b68d-02ba1848fc79-480.mp4",
+          "mime": "video/mp4",
           "bytes": 7698864,
           "resolution": "480p",
           "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://videos.qwast-gis.com/download/web-videos/4d2af8ba-1d61-4728-b68d-02ba1848fc79-0.mp4",
-          "bytes": 3089604,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "web-video"
         }
       ],
@@ -8201,6 +8993,7 @@
       "files": [
         {
           "url": "https://video.osgeo.org/download/streaming-playlists/hls/videos/1d792038-9185-42d5-a70d-86488ecf651e-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 77320889,
           "resolution": "1080p",
           "fps": 30,
@@ -8208,6 +9001,7 @@
         },
         {
           "url": "https://video.osgeo.org/download/streaming-playlists/hls/videos/1d792038-9185-42d5-a70d-86488ecf651e-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 54645543,
           "resolution": "720p",
           "fps": 30,
@@ -8382,6 +9176,7 @@
       "files": [
         {
           "url": "https://video.gamerstavern.online/download/streaming-playlists/hls/videos/1122173a-fe5a-4f38-a15e-060851f179bb-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 117582018,
           "resolution": "1080p",
           "fps": 60,
@@ -8389,6 +9184,7 @@
         },
         {
           "url": "https://video.gamerstavern.online/download/streaming-playlists/hls/videos/1122173a-fe5a-4f38-a15e-060851f179bb-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 26861726,
           "resolution": "360p",
           "fps": 30,
@@ -8478,6 +9274,7 @@
       "files": [
         {
           "url": "https://share.tube/download/videos/0f5b118a-e441-42e7-bf27-45762522ca95-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 117854217,
           "resolution": "1080p",
           "fps": 60,
@@ -8485,6 +9282,7 @@
         },
         {
           "url": "https://share.tube/download/videos/0f5b118a-e441-42e7-bf27-45762522ca95-720.mp4",
+          "mime": "video/mp4",
           "bytes": 63816790,
           "resolution": "720p",
           "fps": 60,
@@ -8492,6 +9290,7 @@
         },
         {
           "url": "https://share.tube/download/videos/0f5b118a-e441-42e7-bf27-45762522ca95-480.mp4",
+          "mime": "video/mp4",
           "bytes": 41372233,
           "resolution": "480p",
           "fps": 30,
@@ -8582,6 +9381,7 @@
       "files": [
         {
           "url": "https://toobnix.org/download/web-videos/afab2272-06c3-4aa8-90e7-166092657a75-720.mp4",
+          "mime": "video/mp4",
           "bytes": 83196569,
           "resolution": "720p",
           "fps": 30,
@@ -8589,6 +9389,7 @@
         },
         {
           "url": "https://toobnix.org/download/web-videos/afab2272-06c3-4aa8-90e7-166092657a75-480.mp4",
+          "mime": "video/mp4",
           "bytes": 68145840,
           "resolution": "480p",
           "fps": 30,
@@ -8596,6 +9397,7 @@
         },
         {
           "url": "https://toobnix.org/download/web-videos/afab2272-06c3-4aa8-90e7-166092657a75-360.mp4",
+          "mime": "video/mp4",
           "bytes": 61109516,
           "resolution": "360p",
           "fps": 30,
@@ -8603,20 +9405,15 @@
         },
         {
           "url": "https://toobnix.org/download/web-videos/afab2272-06c3-4aa8-90e7-166092657a75-240.mp4",
+          "mime": "video/mp4",
           "bytes": 53936818,
           "resolution": "240p",
           "fps": 30,
           "role": "web-video"
         },
         {
-          "url": "https://toobnix.org/download/web-videos/afab2272-06c3-4aa8-90e7-166092657a75-0.mp4",
-          "bytes": 44595293,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "web-video"
-        },
-        {
           "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 82753519,
           "resolution": "720p",
           "fps": 30,
@@ -8624,6 +9421,7 @@
         },
         {
           "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 67700446,
           "resolution": "480p",
           "fps": 30,
@@ -8631,6 +9429,7 @@
         },
         {
           "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 60662722,
           "resolution": "360p",
           "fps": 30,
@@ -8638,16 +9437,10 @@
         },
         {
           "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-240-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 53490932,
           "resolution": "240p",
           "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://toobnix.org/download/streaming-playlists/hls/videos/afab2272-06c3-4aa8-90e7-166092657a75-0-fragmented.mp4",
-          "bytes": 44652691,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "streaming-file"
         }
       ],
@@ -9143,6 +9936,7 @@
       "files": [
         {
           "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/4c128773-325c-4746-985e-521d2855451c-720.mp4",
+          "mime": "video/mp4",
           "bytes": 17134048,
           "resolution": "720p",
           "fps": 30,
@@ -9150,20 +9944,15 @@
         },
         {
           "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/4c128773-325c-4746-985e-521d2855451c-480.mp4",
+          "mime": "video/mp4",
           "bytes": 10109544,
           "resolution": "480p",
           "fps": 30,
           "role": "web-video"
         },
         {
-          "url": "https://tube-langues-vivantes.apps.education.fr/download/web-videos/4c128773-325c-4746-985e-521d2855451c-0.mp4",
-          "bytes": 2489502,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "web-video"
-        },
-        {
           "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/4c128773-325c-4746-985e-521d2855451c-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 17087926,
           "resolution": "720p",
           "fps": 30,
@@ -9171,6 +9960,7 @@
         },
         {
           "url": "https://tube-langues-vivantes.apps.education.fr/download/streaming-playlists/hls/videos/4c128773-325c-4746-985e-521d2855451c-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 10061814,
           "resolution": "480p",
           "fps": 30,
@@ -9953,6 +10743,7 @@
       "files": [
         {
           "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 3160911997,
           "resolution": "1080p",
           "fps": 30,
@@ -9960,6 +10751,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480.mp4",
+          "mime": "video/mp4",
           "bytes": 306127830,
           "resolution": "480p",
           "fps": 30,
@@ -9967,6 +10759,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360.mp4",
+          "mime": "video/mp4",
           "bytes": 241335269,
           "resolution": "360p",
           "fps": 30,
@@ -9974,6 +10767,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 811473511,
           "resolution": "1080p",
           "fps": 30,
@@ -9981,6 +10775,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 304518584,
           "resolution": "480p",
           "fps": 30,
@@ -9988,6 +10783,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 239725747,
           "resolution": "360p",
           "fps": 30,
@@ -10350,6 +11146,7 @@
       "files": [
         {
           "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 1911000052,
           "resolution": "1080p",
           "fps": 24,
@@ -10357,6 +11154,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480.mp4",
+          "mime": "video/mp4",
           "bytes": 260879888,
           "resolution": "480p",
           "fps": 24,
@@ -10364,20 +11162,15 @@
         },
         {
           "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360.mp4",
+          "mime": "video/mp4",
           "bytes": 225051511,
           "resolution": "360p",
           "fps": 24,
           "role": "web-video"
         },
         {
-          "url": "https://tube.tchncs.de/download/web-videos/9c1ad801-5330-43ea-8ae9-65d96914f173-0.mp4",
-          "bytes": 147441922,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "web-video"
-        },
-        {
           "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 540467455,
           "resolution": "1080p",
           "fps": 24,
@@ -10385,6 +11178,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 260480450,
           "resolution": "480p",
           "fps": 24,
@@ -10392,16 +11186,10 @@
         },
         {
           "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 224646233,
           "resolution": "360p",
           "fps": 24,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/9c1ad801-5330-43ea-8ae9-65d96914f173-0-fragmented.mp4",
-          "bytes": 147587684,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "streaming-file"
         }
       ],
@@ -10489,6 +11277,7 @@
       "files": [
         {
           "url": "https://tube.sbcloud.cc/download/streaming-playlists/hls/videos/e0408dc6-5438-4206-b763-8479601f9183-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 2092658603,
           "resolution": "1080p",
           "fps": 30,
@@ -10587,6 +11376,7 @@
       "files": [
         {
           "url": "https://videos.trom.tf/download/streaming-playlists/hls/videos/65b65650-2b35-492d-84d7-1e516dc721a5-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 149771389,
           "resolution": "1080p",
           "fps": 25,
@@ -10594,6 +11384,7 @@
         },
         {
           "url": "https://videos.trom.tf/download/streaming-playlists/hls/videos/65b65650-2b35-492d-84d7-1e516dc721a5-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 112530337,
           "resolution": "720p",
           "fps": 25,
@@ -10688,6 +11479,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/6d5ef824-df67-4eb1-8275-75e8bfb755a2-360.mp4",
+          "mime": "video/mp4",
           "bytes": 6825911,
           "resolution": "360p",
           "fps": 30,
@@ -10780,6 +11572,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/cf8641b0-88ee-498e-86eb-65b3028bea60-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 27362351,
           "resolution": "1080p",
           "fps": 30,
@@ -10787,6 +11580,7 @@
         },
         {
           "url": "https://diler.tube/download/web-videos/cf8641b0-88ee-498e-86eb-65b3028bea60-480.mp4",
+          "mime": "video/mp4",
           "bytes": 17790338,
           "resolution": "480p",
           "fps": 30,
@@ -10880,6 +11674,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/3f64a5b6-787d-41b2-8397-3d4289be110f-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 108621773,
           "resolution": "1080p",
           "fps": 30,
@@ -10887,6 +11682,7 @@
         },
         {
           "url": "https://diler.tube/download/web-videos/3f64a5b6-787d-41b2-8397-3d4289be110f-480.mp4",
+          "mime": "video/mp4",
           "bytes": 22627112,
           "resolution": "480p",
           "fps": 30,
@@ -10979,6 +11775,7 @@
       "files": [
         {
           "url": "https://videos.trom.tf/download/streaming-playlists/hls/videos/6a2c633d-cea5-4c61-87db-3479b4fef231-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 176185194,
           "resolution": "1080p",
           "fps": 25,
@@ -10986,6 +11783,7 @@
         },
         {
           "url": "https://videos.trom.tf/download/streaming-playlists/hls/videos/6a2c633d-cea5-4c61-87db-3479b4fef231-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 127228375,
           "resolution": "720p",
           "fps": 25,
@@ -11078,6 +11876,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/46b1e473-a4a6-4dd3-a5f5-9a1e547e270e-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 17608509,
           "resolution": "1080p",
           "fps": 30,
@@ -11085,6 +11884,7 @@
         },
         {
           "url": "https://diler.tube/download/web-videos/46b1e473-a4a6-4dd3-a5f5-9a1e547e270e-480.mp4",
+          "mime": "video/mp4",
           "bytes": 10084994,
           "resolution": "480p",
           "fps": 30,
@@ -11175,6 +11975,7 @@
       "files": [
         {
           "url": "https://p.eertu.be/download/streaming-playlists/hls/videos/b356b20b-d97b-4727-acc3-3b5ee5c17bb9-450-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 67491768,
           "resolution": "450p",
           "fps": 30,
@@ -11266,6 +12067,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/871b3ca9-e913-4a7d-a5b9-bcbfa9a6636a-322.mp4",
+          "mime": "video/mp4",
           "bytes": 6161032,
           "resolution": "360p",
           "fps": 25,
@@ -11356,6 +12158,7 @@
       "files": [
         {
           "url": "https://videos.fsci.in/download/web-videos/19c695b9-cb67-44ba-9f4c-330d18ae626b-720.mp4",
+          "mime": "video/mp4",
           "bytes": 71062212,
           "resolution": "720p",
           "fps": 30,
@@ -11363,6 +12166,7 @@
         },
         {
           "url": "https://videos.fsci.in/download/web-videos/19c695b9-cb67-44ba-9f4c-330d18ae626b-480.mp4",
+          "mime": "video/mp4",
           "bytes": 72232253,
           "resolution": "480p",
           "fps": 30,
@@ -11370,6 +12174,7 @@
         },
         {
           "url": "https://videos.fsci.in/download/web-videos/19c695b9-cb67-44ba-9f4c-330d18ae626b-360.mp4",
+          "mime": "video/mp4",
           "bytes": 51776085,
           "resolution": "360p",
           "fps": 30,
@@ -11377,16 +12182,10 @@
         },
         {
           "url": "https://videos.fsci.in/download/web-videos/19c695b9-cb67-44ba-9f4c-330d18ae626b-240.mp4",
+          "mime": "video/mp4",
           "bytes": 35935627,
           "resolution": "240p",
           "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://videos.fsci.in/download/web-videos/19c695b9-cb67-44ba-9f4c-330d18ae626b-0.mp4",
-          "bytes": 21321807,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "web-video"
         }
       ],
@@ -11474,6 +12273,7 @@
       "files": [
         {
           "url": "https://videos.fsci.in/download/web-videos/74870bc5-f745-4e72-9ae4-4cd50b954e38-720.mp4",
+          "mime": "video/mp4",
           "bytes": 21251337,
           "resolution": "720p",
           "fps": 30,
@@ -11481,6 +12281,7 @@
         },
         {
           "url": "https://videos.fsci.in/download/web-videos/74870bc5-f745-4e72-9ae4-4cd50b954e38-480.mp4",
+          "mime": "video/mp4",
           "bytes": 22780496,
           "resolution": "480p",
           "fps": 30,
@@ -11488,6 +12289,7 @@
         },
         {
           "url": "https://videos.fsci.in/download/web-videos/74870bc5-f745-4e72-9ae4-4cd50b954e38-360.mp4",
+          "mime": "video/mp4",
           "bytes": 16924530,
           "resolution": "360p",
           "fps": 30,
@@ -11495,16 +12297,10 @@
         },
         {
           "url": "https://videos.fsci.in/download/web-videos/74870bc5-f745-4e72-9ae4-4cd50b954e38-240.mp4",
+          "mime": "video/mp4",
           "bytes": 12636749,
           "resolution": "240p",
           "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://videos.fsci.in/download/web-videos/74870bc5-f745-4e72-9ae4-4cd50b954e38-0.mp4",
-          "bytes": 8224746,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "web-video"
         }
       ],
@@ -11855,6 +12651,7 @@
       "files": [
         {
           "url": "https://communitymedia.video/download/streaming-playlists/hls/videos/8d6c1bba-f4c0-4fca-ab42-84a298c65064-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 207389562,
           "resolution": "360p",
           "fps": 30,
@@ -11862,6 +12659,7 @@
         },
         {
           "url": "https://communitymedia.video/download/streaming-playlists/hls/videos/8d6c1bba-f4c0-4fca-ab42-84a298c65064-240-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 155918518,
           "resolution": "240p",
           "fps": 30,
@@ -11953,6 +12751,7 @@
       "files": [
         {
           "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-720.mp4",
+          "mime": "video/mp4",
           "bytes": 45722677,
           "resolution": "720p",
           "fps": 30,
@@ -11960,6 +12759,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-480.mp4",
+          "mime": "video/mp4",
           "bytes": 38045937,
           "resolution": "480p",
           "fps": 30,
@@ -11967,6 +12767,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/web-videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-360.mp4",
+          "mime": "video/mp4",
           "bytes": 33093299,
           "resolution": "360p",
           "fps": 30,
@@ -11974,6 +12775,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 46792840,
           "resolution": "720p",
           "fps": 30,
@@ -11981,6 +12783,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 37630151,
           "resolution": "480p",
           "fps": 30,
@@ -11988,6 +12791,7 @@
         },
         {
           "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/8ed23ff5-53e0-45fe-8f45-e8af4f1ca2b9-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 32676797,
           "resolution": "360p",
           "fps": 30,
@@ -12347,6 +13151,7 @@
       "files": [
         {
           "url": "https://tube.p3x.de/download/streaming-playlists/hls/videos/b9deb198-5d92-4cc8-a475-41ac9d56e925-540-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 12270602,
           "resolution": "540p",
           "fps": 25,
@@ -12834,132 +13639,6 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
-      "topic_slug": "physics-foundations",
-      "topic_name": "Physics Foundations",
-      "school_slug": "science",
-      "concepts": [
-        "biology",
-        "cells",
-        "genetics",
-        "ecology"
-      ],
-      "matched_query": "biology basics",
-      "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-      "description": "Learn the basics about Energy Levels and Electron Configuration. Where do you find energy levels? How do you recognize electron configuration? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
-      "creator": "FuseSchool - Global Education",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 8378497,
-          "provider_sha1": "f62d94001b90600c258ba108c8f7e164016779ad",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "FuseSchool - Global Education",
-        "source_title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "physics-foundations",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 64,
-          "relevance_score": 20
-        },
-        {
-          "topic_slug": "chemistry-foundations",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "chemistry-foundations": {
-          "score": 10,
-          "evidence": [
-            "chemistry",
-            "chemistry"
-          ]
-        },
-        "physics-foundations": {
-          "score": 20,
-          "evidence": [
-            "physics",
-            "energy",
-            "physics",
-            "energy"
-          ]
-        }
-      },
-      "pedagogy": {
-        "chemistry-foundations": {
-          "strong_title_matches": [
-            "chemistry"
-          ],
-          "strong_description_matches": [
-            "chemistry"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 56
-        },
-        "physics-foundations": {
-          "strong_title_matches": [
-            "energy"
-          ],
-          "strong_description_matches": [
-            "physics",
-            "energy"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 64
-        }
-      },
-      "selection": {
-        "chemistry-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
-        },
-        "physics-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 64
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
       "provider_id": "816a526f-039e-4b23-b3de-be75bc98bcdd",
       "topic_slug": "physics-foundations",
@@ -12994,6 +13673,7 @@
       "files": [
         {
           "url": "https://tube.sbcloud.cc/download/streaming-playlists/hls/videos/816a526f-039e-4b23-b3de-be75bc98bcdd-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 174713047,
           "resolution": "1080p",
           "fps": 30,
@@ -13424,6 +14104,7 @@
       "files": [
         {
           "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1440.mp4",
+          "mime": "video/mp4",
           "bytes": 34026255,
           "resolution": "1440p",
           "fps": 30,
@@ -13431,6 +14112,7 @@
         },
         {
           "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 23922454,
           "resolution": "1080p",
           "fps": 30,
@@ -13438,6 +14120,7 @@
         },
         {
           "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-720.mp4",
+          "mime": "video/mp4",
           "bytes": 18990791,
           "resolution": "720p",
           "fps": 30,
@@ -13445,6 +14128,7 @@
         },
         {
           "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-480.mp4",
+          "mime": "video/mp4",
           "bytes": 14976136,
           "resolution": "480p",
           "fps": 30,
@@ -13452,20 +14136,15 @@
         },
         {
           "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-240.mp4",
+          "mime": "video/mp4",
           "bytes": 11339708,
           "resolution": "240p",
           "fps": 30,
           "role": "web-video"
         },
         {
-          "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-0.mp4",
-          "bytes": 8739371,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "web-video"
-        },
-        {
           "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1440-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 19189138,
           "resolution": "1440p",
           "fps": 30,
@@ -13473,6 +14152,7 @@
         },
         {
           "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1080-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 15066973,
           "resolution": "1080p",
           "fps": 30,
@@ -13480,6 +14160,7 @@
         },
         {
           "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 10135222,
           "resolution": "720p",
           "fps": 30,
@@ -13487,6 +14168,7 @@
         },
         {
           "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 6119487,
           "resolution": "480p",
           "fps": 30,
@@ -13494,16 +14176,10 @@
         },
         {
           "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-240-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 2483823,
           "resolution": "240p",
           "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-0-fragmented.mp4",
-          "bytes": 8753153,
-          "resolution": "Audio only",
-          "fps": 0,
           "role": "streaming-file"
         }
       ],
@@ -13541,99 +14217,6 @@
           ],
           "strong_description_matches": [
             "prompt design"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 56
-        }
-      },
-      "selection": {
-        "prompt-engineering": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "effective-prompt-engineering-for-python-programmers",
-      "topic_slug": "prompt-engineering",
-      "topic_name": "Prompt Engineering",
-      "school_slug": "technology",
-      "concepts": [
-        "prompt engineering",
-        "LLM prompting",
-        "prompt patterns",
-        "evaluation"
-      ],
-      "matched_query": "prompt engineering",
-      "title": "Effective prompt engineering for Python programmers",
-      "description": "Talk page: https://2023.za.pycon.org/talks/36-effective-prompt-engineering-for-python-programmers/ Speaker: Diana Pholo Track: Teaching and Learning with Python Type: Remote Talk Room: Talk Room 2 (Remote Talks) Time: Oct 05 (Thu): 14:15 Duration: 0:45 The world of technology is witnessing a transformation powered by Large Language Models (LLMs) like ChatGPT and Bing AI. These marvels of AI are reshaping how we interact with machines as they can comprehend and generate human-like text. But to get the most out of these models, you must learn to ask the right question. Prompt engineering is the art of crafting specific instructions for LLMs. It molds the language model's responses, making them more accurate, relevant, and actionable. Our session will delve into the essence of prompt engineering, addressing its significance for programmers and its role in improving model outputs and reducing biases. We'll explore a variety of prompt types, and offer practical tips for optimisation. Additionally, we'll navigate through real-world case studies, showcasing the tangible impact of prompt engineering on programming tasks. If you're intrigued by the potential of LLMs and eager to harness their power effectively, this presentation is your gateway to unlocking their true potential in your projects. URLs: Slides (pdf): https://2023.za.pycon.org/media/pages_files/Effective_Prompt_Engineering_Slides.pdf Sponsors: Platinum: Python Software Foundation: https://www.python.org/psf/membership Patron: Thinkst Canary: https://canary.tools/ Afrolabs: http://www.afrolabs.co.za/",
-      "creator": "Diana Pholo",
-      "language": "eng",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/effective-prompt-engineering-for-python-programmers",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC-BY",
-        "url": "http://creativecommons.org/licenses/by/3.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/effective-prompt-engineering-for-python-programmers/Effective%20prompt%20engineering%20for%20Python%20programmers.mp4",
-          "bytes": 580905223,
-          "provider_sha1": "ebd1c7e46bed5cb7e512a8b6424c718074391870",
-          "provider_md5": "0631f39b2b51c5762a446b84e1f8f4f9",
-          "format": "MPEG4",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Diana Pholo",
-        "source_title": "Effective prompt engineering for Python programmers",
-        "source_url": "https://archive.org/details/effective-prompt-engineering-for-python-programmers",
-        "license": "CC-BY",
-        "license_url": "http://creativecommons.org/licenses/by/3.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "prompt-engineering",
-          "school_slug": "technology",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 85,
-      "relevance": {
-        "prompt-engineering": {
-          "score": 10,
-          "evidence": [
-            "prompt engineering",
-            "prompt engineering"
-          ]
-        }
-      },
-      "pedagogy": {
-        "prompt-engineering": {
-          "strong_title_matches": [
-            "prompt engineering"
-          ],
-          "strong_description_matches": [
-            "prompt engineering"
           ],
           "educational_intent": true,
           "instructional_title": true,
@@ -13949,6 +14532,7 @@
       "files": [
         {
           "url": "https://tube.kockatoo.org/download/streaming-playlists/hls/videos/28780678-085f-4a41-be57-650a21a419e6-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 2942648,
           "resolution": "720p",
           "fps": 25,
@@ -13956,6 +14540,7 @@
         },
         {
           "url": "https://tube.kockatoo.org/download/streaming-playlists/hls/videos/28780678-085f-4a41-be57-650a21a419e6-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 2163470,
           "resolution": "480p",
           "fps": 25,
@@ -13963,6 +14548,7 @@
         },
         {
           "url": "https://tube.kockatoo.org/download/streaming-playlists/hls/videos/28780678-085f-4a41-be57-650a21a419e6-360-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 1814021,
           "resolution": "360p",
           "fps": 25,
@@ -14233,6 +14819,7 @@
       "files": [
         {
           "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/299634be-daa9-4367-a7d1-be64654c90f8-720-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 33531343,
           "resolution": "720p",
           "fps": 30,
@@ -14240,6 +14827,7 @@
         },
         {
           "url": "https://video.fraxoweb.com/download/streaming-playlists/hls/videos/299634be-daa9-4367-a7d1-be64654c90f8-480-fragmented.mp4",
+          "mime": "video/mp4",
           "bytes": 22983026,
           "resolution": "480p",
           "fps": 30,
@@ -14500,6 +15088,7 @@
       "files": [
         {
           "url": "https://diler.tube/download/web-videos/8c8552a4-1e47-45f5-82a6-d81f6cf086df-1080.mp4",
+          "mime": "video/mp4",
           "bytes": 18835591,
           "resolution": "1080p",
           "fps": 30,
@@ -14507,6 +15096,7 @@
         },
         {
           "url": "https://diler.tube/download/web-videos/8c8552a4-1e47-45f5-82a6-d81f6cf086df-480.mp4",
+          "mime": "video/mp4",
           "bytes": 11262039,
           "resolution": "480p",
           "fps": 30,
@@ -14644,11 +15234,11 @@
       }
     }
   ],
-  "record_count_before_relevance_gate": 827,
-  "record_count_before_pedagogy_gate": 369,
-  "record_count_before_selection_gate": 207,
-  "rejected_by_relevance_gate": 458,
-  "rejected_by_pedagogy_gate": 162,
+  "record_count_before_relevance_gate": 848,
+  "record_count_before_pedagogy_gate": 376,
+  "record_count_before_selection_gate": 215,
+  "rejected_by_relevance_gate": 472,
+  "rejected_by_pedagogy_gate": 161,
   "rejected_by_selection_gate": 52,
   "topic_stats": {
     "world-history": {
@@ -14694,17 +15284,18 @@
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 3,
-        "wikimedia-commons": 4
+        "wikimedia-commons": 5
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
+        "Elections and voting explained (UK)",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
         "An introduction to Parliament"
@@ -14714,35 +15305,36 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 2,
+      "records": 14,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 8
+        "peertube": 14
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
+        "\" DNA: MOLECULE OF HEREDITY \" 1960 ENCYCLOPEDIA BRITANNICA BIOLOGY / GENETICS FILM XD43904",
+        "Learning, Adapting, and Engaging: Hydro Guardian's Educational and Human Practices in Synthetic Biology",
+        "Synthetic Biology Community Education and Outreach via iGEM in Macau",
         "The Cell High School Biology",
-        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
-        "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
-        "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
-        "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 2 91974"
+        "CSMU-Taiwan: DECOLOGY: The Perfect Combination of Decolorize and Ecology (2023) - Team Presentation [English]",
+        "Dr Becks (Rebecca) Spake: Virtual Ecology",
+        "\" THIS VITAL EARTH \" 1948 ECOLOGY EDUCATIONAL FILM TOPSOIL, PLANTS, ANIMALS & ECOSYSTEMS GG47065",
+        "“A STORT OF DISCOVERY - WHY PLANTS BEND TOWARDS LIGHT” 1966 BIOLOGY EDUCATIONAL FILM XD72254a",
+        "” SEASHORE ODDITIES ” 1942 MARINE BIOLOGY EDUCATIONAL FILM JELLYFISH & STARFISH XD86905b"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 7,
-      "mesh_redistributable": 3,
+      "records": 6,
+      "mesh_redistributable": 2,
       "providers": {
         "peertube": 5,
-        "wikimedia-commons": 2
+        "wikimedia-commons": 1
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
@@ -14755,7 +15347,7 @@
       "school_slug": "science",
       "required": true,
       "records": 19,
-      "mesh_redistributable": 18,
+      "mesh_redistributable": 17,
       "providers": {
         "wikimedia-commons": 7,
         "peertube": 11,
@@ -14828,9 +15420,9 @@
       "top_titles": [
         "Niklaus Wirth on Teaching Computer Science",
         "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
         "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
-        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python",
-        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
       ]
     },
     "arts-culture": {
@@ -14838,7 +15430,7 @@
       "school_slug": "arts",
       "required": true,
       "records": 8,
-      "mesh_redistributable": 8,
+      "mesh_redistributable": 6,
       "providers": {
         "peertube": 5,
         "internet-archive": 2,
@@ -14909,15 +15501,13 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 3,
-      "mesh_redistributable": 2,
+      "records": 2,
+      "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2,
-        "internet-archive": 1
+        "peertube": 2
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -15196,7 +15786,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 69,
+      "records": 70,
       "available": true
     },
     "digital-ai-literacy": {
@@ -15220,7 +15810,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 18,
+      "records": 17,
       "available": true
     },
     "practical-life": {
@@ -15260,7 +15850,7 @@
         "photography-video"
       ],
       "coverage": 1.0,
-      "records": 16,
+      "records": 14,
       "available": true
     },
     "civic-media-literacy": {
@@ -15281,7 +15871,7 @@
         "climate-environment"
       ],
       "coverage": 0.8,
-      "records": 10,
+      "records": 11,
       "available": true
     },
     "deep-science": {
@@ -15303,7 +15893,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 28,
+      "records": 30,
       "available": true
     },
     "humanities-culture": {
@@ -15326,12 +15916,12 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8333,
-      "records": 27,
+      "records": 26,
       "available": true
     }
   },
   "pack_registry_revision": "general-knowledge-packs-v1",
-  "records_before_title_quality_gate": 155,
-  "rejected_by_title_quality_gate": 9,
+  "records_before_title_quality_gate": 163,
+  "rejected_by_title_quality_gate": 11,
   "rejected_topic_links_by_title_quality_gate": 13
 }
