@@ -112,8 +112,10 @@ const workerSource = await fs.readFile(workerPath, 'utf8');
 const boundarySource = await fs.readFile(boundaryPath, 'utf8');
 const additionsSource = await fs.readFile(additionsPath, 'utf8');
 const workerCore = extractArray(workerSource, 'CORE');
+const workerMapCore = extractArray(workerSource, 'MAP_CORE');
+const deviceCore = unique([...workerCore, ...workerMapCore]);
 const dynamicExtensions = unique([...extensionPaths(boundarySource), ...extensionPaths(additionsSource)]);
-const requiredAssets = unique(['/service-worker.js', ...workerCore, ...dynamicExtensions]);
+const requiredAssets = unique(['/service-worker.js', ...deviceCore, ...dynamicExtensions]);
 requiredAssets.forEach(assertReleasePath);
 
 const work = await fs.mkdtemp(path.join(os.tmpdir(), 'civweave-release-artifacts-'));
@@ -137,12 +139,13 @@ try {
   await fs.chmod(path.join(kitRoot, 'serve-civweave.py'), 0o755);
 
   await fs.writeFile(path.join(kitRoot, 'core-assets.txt'), `${requiredAssets.join('\n')}\n`);
-  await fs.writeFile(path.join(kitRoot, 'service-worker-core.txt'), `${workerCore.join('\n')}\n`);
+  await fs.writeFile(path.join(kitRoot, 'service-worker-core.txt'), `${deviceCore.join('\n')}\n`);
   await fs.writeFile(path.join(kitRoot, 'core-assets.json'), `${JSON.stringify({
     schema: 'civweave.mobile-core.v2',
     version: packageJson.version,
     generatedAt: new Date().toISOString(),
     entry: '/app/installed-entry-v146.html',
+    mapPackage: 'Civweave Map v1',
     modelPolicy: 'deferred',
     assets: manifestEntries
   }, null, 2)}\n`);
@@ -152,6 +155,7 @@ try {
     source: process.env.CIVWEAVE_RELEASE_BASE_URL || 'https://civweave-host-node.onrender.com',
     assetManifest: 'core-assets.txt',
     entry: '/app/installed-entry-v146.html',
+    mapPackage: 'Civweave Map v1',
     modelPolicy: 'deferred',
     excludes: [
       'optional MiniLM ONNX graphs',
@@ -239,7 +243,7 @@ try {
     }
   }
 
-  console.log(`Indexed ${manifestEntries.length} current core files for mobile hydration.`);
+  console.log(`Indexed ${manifestEntries.length} current device-package files for mobile hydration, including ${workerMapCore.length} Civweave Map v1 assets.`);
   console.log(`Seed (mobile kit + node hub): ${(seedInfo.bytes / 1024).toFixed(1)} KiB ${seedInfo.sha256}`);
   console.log(`Kit (Cloudflare Pages): ${(kitInfo.bytes / 1024).toFixed(1)} KiB ${kitInfo.sha256}`);
 } finally {
