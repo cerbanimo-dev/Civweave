@@ -63,28 +63,26 @@ jobs:
 
           harvest=Path('scripts/harvest-open-learning-media-library-v1.py')
           text=harvest.read_text(encoding='utf-8')
-          if '"biology-life": [' not in text.split('DISCOVERY_REFINEMENTS = {',1)[1].split('}',1)[0]:
+          refinements=text.split('DISCOVERY_REFINEMENTS = {',1)[1].split('\n}\n',1)[0]
+          if '"biology-life": [' not in refinements:
               anchor='''    "civics-society": [\n'''
               addition='''    "biology-life": [\n        "cell biology educational film",\n        "biology educational film",\n        "genetics biology educational film",\n        "molecular biology lesson",\n        "ecology biology educational video",\n    ],\n'''
               if anchor not in text:
                   raise SystemExit('biology discovery insertion anchor missing')
               text=text.replace(anchor,addition+anchor,1)
           harvest.write_text(text,encoding='utf-8')
-
-          workflow=Path('.github/workflows/harvest-open-learning-media-v1.yml')
-          text=workflow.read_text(encoding='utf-8')
-          text=text.replace('      - scripts/test-open-learning-media-packs-v1.py\n','')
-          workflow.write_text(text,encoding='utf-8')
           PY
           python -m py_compile scripts/curate-open-learning-media-library-v1.py scripts/filter-open-learning-media-title-quality-v1.py scripts/harvest-open-learning-media-library-v1.py scripts/test-open-learning-media-packs-v1.py
-      - name: Commit repair and remove temporary workflows
+      - name: Commit data-generator repair
         run: |
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git rm -f .github/workflows/fix-open-media-downloader-temp.yml
-          git rm -f .github/workflows/sync-general-knowledge-media-temp.yml || true
-          git add scripts/curate-open-learning-media-library-v1.py scripts/filter-open-learning-media-title-quality-v1.py scripts/harvest-open-learning-media-library-v1.py .github/workflows/harvest-open-learning-media-v1.yml
+          git add scripts/curate-open-learning-media-library-v1.py scripts/filter-open-learning-media-title-quality-v1.py scripts/harvest-open-learning-media-library-v1.py
+          if git diff --cached --quiet; then
+            echo 'Generator repair already applied.'
+            exit 0
+          fi
           git commit -m 'Make media pack coverage downloader-ready'
           git pull --rebase origin agent/general-knowledge-video-packs-v1
           git push origin HEAD:agent/general-knowledge-video-packs-v1
