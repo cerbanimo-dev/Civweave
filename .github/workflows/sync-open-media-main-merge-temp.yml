@@ -1,0 +1,139 @@
+name: Sync Open Media With Current Main Temp
+
+on:
+  push:
+    branches:
+      - agent/open-learning-media-harvest-v1
+    paths:
+      - .github/workflows/sync-open-media-main-merge-temp.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-open-media-current-main-temp
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/open-learning-media-harvest-v1
+          fetch-depth: 0
+
+      - name: Merge current main and materialize next canonical release
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          FEATURE_HEAD="$(git rev-parse HEAD)"
+          echo "$FEATURE_HEAD" > /tmp/feature-head
+          git fetch origin main
+          MAIN_VERSION="$(git show origin/main:VERSION | tr -d '\r\n')"
+          echo "Current main: $MAIN_VERSION"
+
+          git merge --no-commit --no-ff -X theirs origin/main
+          if git ls-files -u | grep -q .; then
+            echo 'Unresolved merge entries remain:'
+            git ls-files -u
+            exit 1
+          fi
+
+          OFFLINE_PACKAGE_REVISION="$(node -e "const fs=require('fs');console.log(JSON.parse(fs.readFileSync('public/app/offline-package-v208.json','utf8')).revision)")"
+          export MAIN_VERSION OFFLINE_PACKAGE_REVISION
+
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+
+          major, minor, patch = [int(part) for part in os.environ['MAIN_VERSION'].split('.')]
+          release = f'{major}.{minor}.{patch + 1}'
+          Path('VERSION').write_text(release + '\n')
+
+          package_path = Path('package.json')
+          package = json.loads(package_path.read_text())
+          package['version'] = release
+          package_path.write_text(json.dumps(package, indent=2) + '\n')
+
+          lock_path = Path('package-lock.json')
+          if lock_path.exists():
+              lock = json.loads(lock_path.read_text())
+              lock['version'] = release
+              if isinstance(lock.get('packages'), dict) and isinstance(lock['packages'].get(''), dict):
+                  lock['packages']['']['version'] = release
+              lock_path.write_text(json.dumps(lock, indent=2) + '\n')
+
+          contract_path = Path('config/release-contract.json')
+          contract = json.loads(contract_path.read_text())
+          contract.setdefault('canonical', {}).setdefault('current', {})['version'] = release
+          contract['canonical']['current']['path'] = f'releases/{release}'
+          contract['canonical']['current']['status'] = 'current'
+          contract_path.write_text(json.dumps(contract, indent=2) + '\n')
+          print(f'Preparing canonical Civweave {release}.')
+          PY
+
+          python scripts/fix-open-learning-media-finalizer-idempotency-v1.py
+          python scripts/finalize-open-learning-media-launch-v1.py
+          python scripts/finalize-open-learning-media-range-v1.py
+          python scripts/finalize-open-learning-media-safety-v1.py
+          python scripts/fix-open-learning-media-learning-path-budget-v1.py
+
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          path = Path('public/app/offline-package-v208.json')
+          data = json.loads(path.read_text())
+          data['revision'] = os.environ['OFFLINE_PACKAGE_REVISION']
+          path.write_text(json.dumps(data, indent=2) + '\n')
+          print('Restored current main offline-package revision:', data['revision'])
+          PY
+
+          node scripts/materialize-canonical-release.mjs
+
+          # A GitHub Actions token cannot push workflow-file changes. Keep the pre-sync
+          # workflow tree for the tested merge commit; the GitHub connector reconciles
+          # it to current main plus the two Open Media workflows immediately afterward.
+          git checkout "$FEATURE_HEAD" -- .github/workflows
+
+      - name: Verify integrated launch contracts
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            scripts/harvest-open-learning-media-v1.py \
+            scripts/filter-open-learning-media-relevance-v1.py \
+            scripts/filter-open-learning-media-pedagogy-v1.py \
+            scripts/filter-open-learning-media-selection-v1.py \
+            scripts/test-open-learning-media-harvest-v1.py \
+            scripts/finalize-open-learning-media-launch-v1.py \
+            scripts/finalize-open-learning-media-range-v1.py \
+            scripts/finalize-open-learning-media-safety-v1.py
+          node --check public/app/open-learning-media-cache-v1.mjs
+          node --check public/app/open-learning-media-installer-v1.mjs
+          node --check public/app/video-learning-contract-v1.mjs
+          node --check public/service-worker-core-v208.js
+          node --check public/service-worker-v203.js
+          python scripts/test-open-learning-media-harvest-v1.py
+          node scripts/test-open-learning-media-runtime-v1.mjs
+          node scripts/test-video-learning-contract-v1.mjs
+          node scripts/verify-release-contract.mjs
+          node scripts/verify-stale-release-identities.mjs
+          node scripts/verify-root-hygiene.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-release-version-sync.mjs
+          node scripts/test-civweave-map-v1.mjs
+          node scripts/test-federation-map-v275.mjs
+          node scripts/verify-pwa-install-campus-v246.mjs
+          node scripts/smoke-service-worker-registration-watchdog-v207.mjs
+          node scripts/smoke-installer-recovery-v206.mjs
+          node scripts/verify-service-worker-evaluation-v189.mjs
+          node scripts/verify-knowledge-school-seeds-v1.mjs
+
+      - name: Commit and push tested integration
+        run: |
+          set -euo pipefail
+          git add -A
+          git commit -m "Sync current Civweave release architecture into Open Learning Media"
+          git push origin HEAD:agent/open-learning-media-harvest-v1
