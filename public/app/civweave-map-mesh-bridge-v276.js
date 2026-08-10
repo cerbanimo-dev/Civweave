@@ -1,11 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.75-civweave-map-mesh-bridge-v276';
+const VERSION='1.0.75-civweave-map-mesh-bridge-v277';
 const GATEWAY_KEY='civweave.map-mesh.gateway.v1';
+const COVERAGE_RUNTIME='/app/civweave-map-coverage-v277.js';
 let appliedIds=new Set();
 let applying=false;
 let publishTimer=null;
+let coveragePromise=null;
 
 const clean=(value,max=1000)=>String(value??'').trim().slice(0,max);
 const norm=value=>String(value??'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
@@ -14,6 +16,16 @@ function gateway(){
   const mapStored=parse(localStorage.getItem(GATEWAY_KEY),'');
   const aiBase=globalThis.CivweaveNodeAIMeshV1?.status?.()?.baseUrl||'';
   return clean(mapStored||aiBase||location.origin,4000);
+}
+function ensureCoverageRuntime(){
+  if(globalThis.CivweaveMapCoverageV277)return Promise.resolve(globalThis.CivweaveMapCoverageV277);
+  if(coveragePromise)return coveragePromise;
+  coveragePromise=new Promise((resolve,reject)=>{
+    const existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===COVERAGE_RUNTIME);
+    if(existing){let ticks=0;const timer=setInterval(()=>{if(globalThis.CivweaveMapCoverageV277){clearInterval(timer);resolve(globalThis.CivweaveMapCoverageV277)}else if(++ticks>160){clearInterval(timer);reject(new Error('Map coverage runtime did not become ready.'))}},50);return}
+    const script=document.createElement('script');script.src=`${COVERAGE_RUNTIME}?v=1.0.75`;script.async=false;script.onload=()=>resolve(globalThis.CivweaveMapCoverageV277);script.onerror=()=>reject(new Error('Could not load automatic map coverage runtime.'));document.head.append(script);
+  }).catch(error=>{coveragePromise=null;throw error});
+  return coveragePromise;
 }
 function mapRow(feature,index=0){
   const coords=feature?.geometry?.coordinates;if(!Array.isArray(coords)||coords.length<2)return null;
@@ -69,6 +81,8 @@ async function start(){
   const mesh=globalThis.CivweaveMapMeshV276;if(!mesh)return false;
   await mesh.start({baseUrl:gateway(),intervalMs:120000});
   await apply();
+  await ensureCoverageRuntime().catch(()=>null);
+  globalThis.CivweaveMapCoverageV277?.start?.().catch?.(()=>{});
   addEventListener('civweave:map-knowledge-changed',()=>apply().catch(()=>{}));
   addEventListener('civweave:map-pack-published',()=>apply().catch(()=>{}));
   const syncButton=document.getElementById('syncNode');
@@ -80,6 +94,6 @@ function boot(){
   let ticks=0;const timer=setInterval(()=>{if(globalThis.CivweaveMapMeshV276&&globalThis.CivweaveMapService){clearInterval(timer);start().catch(()=>{})}else if(++ticks>240)clearInterval(timer)},50);
 }
 
-globalThis.CivweaveMapMeshBridgeV276=Object.freeze({version:VERSION,apply,publishSelectedPublicNode,start,gateway});
+globalThis.CivweaveMapMeshBridgeV276=Object.freeze({version:VERSION,apply,publishSelectedPublicNode,ensureCoverageRuntime,start,gateway});
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):queueMicrotask(boot);
 })();
