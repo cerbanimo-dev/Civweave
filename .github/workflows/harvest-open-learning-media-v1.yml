@@ -7,6 +7,7 @@ on:
     paths:
       - scripts/harvest-open-learning-media-v1.py
       - scripts/filter-open-learning-media-relevance-v1.py
+      - scripts/filter-open-learning-media-pedagogy-v1.py
       - .open-learning-media-harvest-trigger
   workflow_dispatch:
 
@@ -34,6 +35,7 @@ jobs:
         run: |
           python scripts/harvest-open-learning-media-v1.py
           python scripts/filter-open-learning-media-relevance-v1.py
+          python scripts/filter-open-learning-media-pedagogy-v1.py
 
       - name: Validate generated catalog
         run: |
@@ -44,9 +46,10 @@ jobs:
           summary = json.loads((root / 'summary.json').read_text())
           catalog = json.loads((root / 'catalog.json').read_text())
           policy = json.loads((root / 'harvest-policy.json').read_text())
-          audit = json.loads((root / 'relevance-audit.json').read_text())
-          assert summary['records'] == catalog['record_count'] == audit['after'] > 0
-          assert audit['before'] >= audit['after']
+          relevance_audit = json.loads((root / 'relevance-audit.json').read_text())
+          pedagogy_audit = json.loads((root / 'pedagogy-audit.json').read_text())
+          assert summary['records'] == catalog['record_count'] == pedagogy_audit['after'] > 0
+          assert relevance_audit['before'] >= relevance_audit['after'] >= pedagogy_audit['after']
           assert summary['mesh_redistributable'] > 0
           assert policy['accepted_default_licenses'] == ['PUBLIC-DOMAIN', 'CC0', 'CC-BY', 'CC-BY-SA']
           required = {'vibe-coding','prompt-engineering','pseudocoding','critical-thinking','logical-frameworks'}
@@ -58,6 +61,7 @@ jobs:
               assert info['top_titles'], (slug, info)
           for record in catalog['records']:
               assert record.get('relevance'), record.get('title')
+              assert record.get('pedagogy'), record.get('title')
               assert record.get('topic_matches'), record.get('title')
               if record.get('mesh_redistributable'):
                   assert record['license']['spdx'] in policy['accepted_default_licenses']
