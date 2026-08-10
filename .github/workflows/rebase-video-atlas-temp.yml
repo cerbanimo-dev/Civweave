@@ -1,0 +1,69 @@
+name: Rebase Video Atlas Temp
+
+on:
+  push:
+    branches:
+      - agent/video-learning-atlas-v1
+    paths:
+      - .github/workflows/rebase-video-atlas-temp.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rebase-video-atlas-temp
+  cancel-in-progress: true
+
+jobs:
+  rebase-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/video-learning-atlas-v1
+          fetch-depth: 0
+
+      - name: Merge current main and synchronize version
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git fetch origin main
+          git merge --no-edit origin/main
+          base_version="$(git show origin/main:VERSION | tr -d '[:space:]')"
+          next_version="$(node -e 'const v=process.argv[1].split(".").map(Number); if(v.length!==3||v.some(Number.isNaN)) process.exit(2); v[2]++; process.stdout.write(v.join("."));' "$base_version")"
+          printf '%s\n' "$next_version" > VERSION
+          node - "$next_version" <<'NODE'
+          const fs=require('fs');
+          const next=process.argv[2];
+          const pkgPath='package.json';
+          let pkg=fs.readFileSync(pkgPath,'utf8');
+          pkg=pkg.replace(/("version"\s*:\s*")[^"]+("\s*,)/, `$1${next}$2`);
+          fs.writeFileSync(pkgPath,pkg);
+          const manifestPath='public/app/manifest.webmanifest';
+          let manifest=fs.readFileSync(manifestPath,'utf8');
+          manifest=manifest.replace(/("name"\s*:\s*"Civweave v)[^"]+("\s*,)/, `$1${next}$2`);
+          fs.writeFileSync(manifestPath,manifest);
+          NODE
+          echo "Rebased Video Learning Atlas onto main and advanced Civweave ${base_version} -> ${next_version}."
+
+      - name: Verify atlas contracts after merge
+        run: |
+          set -euo pipefail
+          node --check public/app/video-learning-contract-v1.mjs
+          node --check public/app/living-school-video-generation-guard-v1.mjs
+          node --check public/app/cabinets/living-school/living-school-cleanroom-v218.mjs
+          node --check public/app/cerbanimo-video-task-contract-v1.mjs
+          node --check public/app/video-atlas-installer-v1.js
+          python -m py_compile scripts/build-video-learning-atlas-v1.py scripts/build-video-learning-atlas-parallel-v1.py scripts/materialize-video-learning-lookup-v1.py scripts/materialize-video-learning-availability-v1.py scripts/enrich-video-learning-atlas-youtube-v1.py
+          node scripts/verify-video-learning-contract-v1.mjs
+          node scripts/test-video-learning-contract-v1.mjs
+
+      - name: Commit repaired branch and remove temporary workflow
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/rebase-video-atlas-temp.yml
+          git add VERSION package.json public/app/manifest.webmanifest
+          git commit -m 'Rebase Video Learning Atlas onto current main'
+          git push origin HEAD:agent/video-learning-atlas-v1
