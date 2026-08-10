@@ -1,6 +1,7 @@
 {
   "version": "1.0.34",
-  "revision": "canonical-background-campus-v241-systems-mesh-v251-phone-ledger-r1",
+  "revision": "canonical-background-campus-v241-systems-mesh-v251",
+  "phoneLedgerRevision": "phone-ledger-r1",
   "description": "Civweave campus pack. The installed PWA is a first-class contribution mesh node: it keeps the signed contribution ledger on-device in IndexedDB, boots without a host node, and syncs through the existing local object mesh when peers or gateways are available. The package also carries the five canonical system surfaces, canonical reward runtimes, Federation Finder locality map, opportunistic WWW map exchange, automatic peer-ranked offline coverage healing, and node AI marketplace surfaces without promoting optional host nodes to ledger authority.",
   "seeds": [
     "/app/installed-entry-v146.html",
