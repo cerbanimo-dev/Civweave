@@ -1,12 +1,14 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-cerbanimo-learning-packs-v1';
+const VERSION='1.2.0-cerbanimo-learning-packs-v1';
 const RUNTIME='/app/shared/learning-pack-runtime-v1.mjs?v=learning-packs-v1';
 const RESOLVER='/app/shared/learning-pack-resolver-v1.mjs?v=learning-packs-v1';
-let runtimePromise=null,resolverPromise=null,readyPromise=null;
+const SHELF='/app/shared/learning-pack-shelf-v1.mjs?v=learning-pack-shelf-v1';
+let runtimePromise=null,resolverPromise=null,shelfPromise=null,readyPromise=null;
 const clean=(value,max=1200)=>String(value??'').trim().slice(0,max);
 function runtime(){if(!runtimePromise)runtimePromise=import(RUNTIME);return runtimePromise}
 function resolver(){if(!resolverPromise)resolverPromise=import(RESOLVER);return resolverPromise}
+function shelf(){if(!shelfPromise)shelfPromise=import(SHELF);return shelfPromise}
 async function ready(){
   if(!readyPromise)readyPromise=(async()=>{
     const packs=await runtime();
@@ -17,6 +19,7 @@ async function ready(){
   return readyPromise;
 }
 async function stage(packIds,options={}){const packs=await runtime();return packs.stage(packIds,options)}
+async function remove(packIds){const packs=await runtime();return packs.remove(packIds)}
 async function status(){const packs=await runtime();return packs.status()}
 async function catalog(){const packs=await runtime();return packs.catalog()}
 async function search(query,options={}){const packs=await ready();return packs.search(query,options)}
@@ -49,6 +52,7 @@ async function laborTaskDraft(referenceId,taskId,options={}){
   if(!found)throw new Error(`Labor reference ${clean(referenceId,180)} is not loaded.`);
   return packs.laborTaskDraft(found.item,taskId,{packId:found.packId});
 }
-globalThis.CivweaveCerbanimoLearningPacksV1=Object.freeze({version:VERSION,ready,catalog,status,stage,search,find,recommendPacks,resolve,templateToQuest,createQuest,createRecommendedQuest,laborTaskDraft});
-queueMicrotask(()=>ready().catch(error=>console.warn('[Cerbanimo learning packs]',error)));
+const api=Object.freeze({version:VERSION,ready,catalog,status,stage,remove,search,find,recommendPacks,resolve,templateToQuest,createQuest,createRecommendedQuest,laborTaskDraft});
+globalThis.CivweaveCerbanimoLearningPacksV1=api;
+queueMicrotask(()=>ready().then(async()=>{const ui=await shelf();ui.mountLearningPackShelf({audience:'cerbanimo',adapter:api})}).catch(error=>console.warn('[Cerbanimo learning packs]',error)));
 })();

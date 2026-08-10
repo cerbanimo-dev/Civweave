@@ -1,7 +1,8 @@
 import * as packs from './shared/learning-pack-runtime-v1.mjs?v=learning-packs-v1';
 import * as resolver from './shared/learning-pack-resolver-v1.mjs?v=learning-packs-v1';
+import {mountLearningPackShelf} from './shared/learning-pack-shelf-v1.mjs?v=learning-pack-shelf-v1';
 
-const VERSION='1.1.0-living-school-learning-packs-v1';
+const VERSION='1.2.0-living-school-learning-packs-v1';
 let readyPromise=null;
 const clean=(value,max=1200)=>String(value??'').trim().slice(0,max);
 
@@ -16,6 +17,7 @@ async function ready(){
 export async function catalog(){return packs.catalog()}
 export async function status(){return packs.status()}
 export async function stage(packIds,options={}){return packs.stage(packIds,options)}
+export async function remove(packIds){return packs.remove(packIds)}
 export async function search(query,options={}){await ready();return packs.search(query,options)}
 export async function find(itemId,options={}){await ready();return packs.findItem(itemId,options)}
 export async function recommendPacks(query,options={}){return resolver.recommendPacks(query,{...options,audience:'living-school'})}
@@ -35,7 +37,7 @@ export async function generateRecommendedCurriculum(query,overrides={}){
   const generated=await generateCurriculum(match.id,{...overrides,packId:match.packId});
   return{...generated,resolution,match};
 }
-const api=Object.freeze({version:VERSION,ready,catalog,status,stage,search,find,recommendPacks,resolve,curriculumInput,generateCurriculum,generateRecommendedCurriculum});
+const api=Object.freeze({version:VERSION,ready,catalog,status,stage,remove,search,find,recommendPacks,resolve,curriculumInput,generateCurriculum,generateRecommendedCurriculum});
 globalThis.CivweaveLivingSchoolLearningPacksV1=api;
-queueMicrotask(()=>ready().catch(error=>console.warn('[Living School learning packs]',error)));
+queueMicrotask(()=>ready().then(()=>mountLearningPackShelf({audience:'living-school',adapter:api})).catch(error=>console.warn('[Living School learning packs]',error)));
 export default api;

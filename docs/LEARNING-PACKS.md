@@ -16,7 +16,7 @@ The shared runtime is `public/app/shared/learning-pack-runtime-v1.mjs`.
 
 ## Current authored library
 
-The locally bundled authored library now contains 74 reusable task templates, 39 learning units, and 19 expert guides before any large external reference pack is installed.
+The locally bundled authored library contains 74 reusable task templates, 39 learning units, and 19 expert guides before any large external reference pack is installed.
 
 The mandatory `civweave-core-practice-v1` starter contributes 20 task templates, 12 learning units, and 10 general expert guides.
 
@@ -44,9 +44,29 @@ Cerbanimo can call `createRecommendedQuest(query)` to resolve the best expert pa
 
 Living School can call `generateRecommendedCurriculum(query)` to resolve the best expert pack, select a learning unit, compile it into the existing curriculum request shape, and hand it to the existing Moss curriculum workbench.
 
+## Learning Pack Shelf
+
+`public/app/shared/learning-pack-shelf-v1.mjs` is one shared, realm-aware browser for the pack catalog. `learning-pack-shelf-v1.css` gives the same controller a Cerbanimo treatment or Living School treatment without creating separate storage or routing systems.
+
+The shelf provides:
+
+- catalog search and core/expert/reference filters;
+- offline-ready, update, optional, bundled, and unavailable states from the canonical device status API;
+- verified offline add/update and optional-pack removal through the existing cache runtime;
+- pack-content browsing after a pack is staged;
+- Cerbanimo `Start task` actions only for authored task templates;
+- Living School `Learn this` actions only for learning units;
+- expert-guide browsing in both realms;
+- explicit reference-only treatment for occupational records;
+- mobile safe-area layout, Escape close, and keyboard focus containment.
+
+The launcher mounts from the existing realm adapters. The active realm HTML entries do not need a second shelf-specific boot path.
+
 ## Safety boundary
 
 A labor task statement becomes a guarded draft with `requiresAdaptation: true`. It has no executable steps. Cerbanimo's adapter will not create an executable quest from a reference that lacks reviewed work steps.
+
+The shelf preserves this boundary visually and behaviorally: labor-reference cards return before executable action buttons are created, and reference packs carry an explicit adaptation notice. Browsing an occupation is therefore not equivalent to starting work.
 
 The authored General Labor & Logistics expert pack is also guarded. It covers ordinary receiving, cycle counts, pick-and-pack, work-area readiness, simple assembly from supplied instructions, and shift handoff, but includes explicit stop conditions for dangerous goods, hazardous energy, regulated equipment, unknown materials, missing instructions, or work beyond the user's training and authorization.
 
@@ -78,12 +98,10 @@ Occupational task statements remain descriptive reference examples. They are nev
 
 ## Realm APIs
 
-Cerbanimo exposes `globalThis.CivweaveCerbanimoLearningPacksV1` with `ready`, `catalog`, `status`, `stage`, `search`, `find`, `recommendPacks`, `resolve`, `templateToQuest`, `createQuest`, `createRecommendedQuest`, and `laborTaskDraft`.
+Cerbanimo exposes `globalThis.CivweaveCerbanimoLearningPacksV1` with `ready`, `catalog`, `status`, `stage`, `remove`, `search`, `find`, `recommendPacks`, `resolve`, `templateToQuest`, `createQuest`, `createRecommendedQuest`, and `laborTaskDraft`.
 
-Living School exposes `globalThis.CivweaveLivingSchoolLearningPacksV1` with `ready`, `catalog`, `status`, `stage`, `search`, `find`, `recommendPacks`, `resolve`, `curriculumInput`, `generateCurriculum`, and `generateRecommendedCurriculum`.
+Living School exposes `globalThis.CivweaveLivingSchoolLearningPacksV1` with `ready`, `catalog`, `status`, `stage`, `remove`, `search`, `find`, `recommendPacks`, `resolve`, `curriculumInput`, `generateCurriculum`, and `generateRecommendedCurriculum`.
 
 ## Next data layers
 
-The contract is intentionally source-neutral. Future generated packs can add ESCO skill/occupation crosswalks, BLS training/outlook metadata, safety references, trade-specific expert packs, or community-authored packs without creating a second task or curriculum engine.
-
-A future visual pack shelf only needs to read the catalog and call the same APIs. Pack installation, routing, quest generation, curriculum generation, and labor-reference safety boundaries remain below the UI layer.
+The contract is intentionally source-neutral. The next useful data layer is an ESCO skill/occupation crosswalk so authored packs, O*NET occupations, Living School competencies, and Cerbanimo task templates can share more normalized skill identifiers. After that, BLS training/outlook metadata, safety references, trade-specific expert packs, and community-authored packs can plug into the same runtime without creating a second task or curriculum engine.
