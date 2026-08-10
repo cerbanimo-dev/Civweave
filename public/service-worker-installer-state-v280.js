@@ -6,7 +6,8 @@ const INSTALLER_STATE_ASSETS = [
   '/app/offline-campus-status-v210.js',
   '/app/required-campus-autostart-v1.js',
   '/app/campus-background-download-v241.js',
-  '/app/shared/civweave-contribution-security-v1.js'
+  '/app/shared/civweave-contribution-security-v1.js',
+  '/app/shared/civweave-contribution-ship-guard-v1.js'
 ];
 try {
   for (const asset of INSTALLER_STATE_ASSETS) {
@@ -20,9 +21,10 @@ try {
 } catch {}
 
 self.CivweaveInstallerStateWorkerV280 = Object.freeze({
-  revision: 'installer-state-machines-v280-security-r1',
+  revision: 'installer-state-machines-v280-security-r2',
   assets: INSTALLER_STATE_ASSETS.slice(),
   shellRequired: true,
-  contributionSecurityRequired: true
+  contributionSecurityRequired: true,
+  walletContainmentRequired: true
 });
 })();
