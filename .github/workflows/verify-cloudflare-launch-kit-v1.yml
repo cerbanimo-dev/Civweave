@@ -1,0 +1,36 @@
+name: Verify Cloudflare Launch Kit v1
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/**'
+      - 'config/launch-topology-v1.json'
+      - 'config/host-node-transports-v1.json'
+      - 'docs/operations/launch-kit-cloudflare-node-fabric-v1.md'
+      - 'scripts/verify-cloudflare-launch-kit-v1.mjs'
+      - '.github/workflows/verify-cloudflare-launch-kit-v1.yml'
+      - 'wrangler.jsonc'
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/**'
+      - 'config/launch-topology-v1.json'
+      - 'config/host-node-transports-v1.json'
+      - 'docs/operations/launch-kit-cloudflare-node-fabric-v1.md'
+      - 'scripts/verify-cloudflare-launch-kit-v1.mjs'
+      - '.github/workflows/verify-cloudflare-launch-kit-v1.yml'
+      - 'wrangler.jsonc'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify dual-plane launch kit
+        run: node scripts/verify-cloudflare-launch-kit-v1.mjs
