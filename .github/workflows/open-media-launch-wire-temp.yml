@@ -42,9 +42,10 @@ jobs:
           node -e "const fs=require('fs');const v=process.argv[1];const p=JSON.parse(fs.readFileSync('package.json','utf8'));p.version=v;fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\\n');const m=JSON.parse(fs.readFileSync('public/app/manifest.webmanifest','utf8'));m.name='Civweave v'+v;fs.writeFileSync('public/app/manifest.webmanifest',JSON.stringify(m,null,2)+'\\n');" "$RELEASE"
           echo "Prepared Civweave $RELEASE beyond main $MAIN_VERSION"
 
-      - name: Apply reproducible launch finalizers
+      - name: Apply reproducible launch finalizers twice
         run: |
           set -euo pipefail
+          python scripts/fix-open-learning-media-finalizer-idempotency-v1.py
           python scripts/finalize-open-learning-media-launch-v1.py
           python scripts/finalize-open-learning-media-range-v1.py
           python scripts/finalize-open-learning-media-safety-v1.py
@@ -58,7 +59,7 @@ jobs:
       - name: Validate launch service
         run: |
           set -euo pipefail
-          python -m py_compile scripts/finalize-open-learning-media-launch-v1.py scripts/finalize-open-learning-media-range-v1.py scripts/finalize-open-learning-media-safety-v1.py scripts/harvest-open-learning-media-v1.py scripts/filter-open-learning-media-relevance-v1.py scripts/filter-open-learning-media-pedagogy-v1.py scripts/filter-open-learning-media-selection-v1.py scripts/test-open-learning-media-harvest-v1.py
+          python -m py_compile scripts/fix-open-learning-media-finalizer-idempotency-v1.py scripts/finalize-open-learning-media-launch-v1.py scripts/finalize-open-learning-media-range-v1.py scripts/finalize-open-learning-media-safety-v1.py scripts/harvest-open-learning-media-v1.py scripts/filter-open-learning-media-relevance-v1.py scripts/filter-open-learning-media-pedagogy-v1.py scripts/filter-open-learning-media-selection-v1.py scripts/test-open-learning-media-harvest-v1.py
           node --check public/app/open-learning-media-cache-v1.mjs
           node --check public/app/open-learning-media-installer-v1.mjs
           node --check public/app/video-learning-contract-v1.mjs
