@@ -34,7 +34,8 @@ check('test pulse reports direct provider identity',pulse.includes("provider:'do
 check('test pulse never calls the assistant orchestrator',!pulse.includes('CivweaveAssistantV141')&&!pulse.includes('.respond('));
 check('test pulse never fabricates deterministic fallback output',!pulse.includes('local-contract')&&!pulse.includes('civweave-action-contract'));
 check('pulse DOM repair avoids rewriting identical markup',pulse.includes('node.dataset.pulseMarkup===html')&&pulse.includes('button.textContent!==label'));
-check('runtime itself talks to the local generative worker',runtime.includes("request('generate'")&&runtime.includes('new Worker(WORKER')));
+const runtimeUsesWorker=runtime.includes("request('generate'")&&runtime.includes('new Worker(WORKER');
+check('runtime itself talks to the local generative worker',runtimeUsesWorker);
 check('bootstrap loads pulse after settings panel',bootstrap.includes('test-pulse-v269.js')&&bootstrap.indexOf('settings-panel-v267.js')<bootstrap.indexOf('test-pulse-v269.js'));
 check('bootstrap advertises direct model testing',bootstrap.includes('directModelTest:true'));
 
