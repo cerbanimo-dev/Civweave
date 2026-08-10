@@ -25,6 +25,7 @@ on:
       - 'scripts/build-civweave-map-v1.mjs'
       - 'scripts/build-cloudflare-pages.mjs'
       - 'scripts/build-install-artifacts.sh'
+      - 'scripts/build-mobile-install-kit.mjs'
       - 'scripts/test-federation-map-v275.mjs'
       - 'scripts/test-civweave-map-v1.mjs'
       - '.github/workflows/verify-federation-map-v275.yml'
@@ -33,9 +34,14 @@ on:
       - 'agent/real-locality-map-service-v2'
       - 'agent/civweave-map-v1-launch'
 
+concurrency:
+  group: federation-map-v275-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
