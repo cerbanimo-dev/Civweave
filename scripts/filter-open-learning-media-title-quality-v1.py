@@ -12,7 +12,7 @@ REGISTRY_PATH = Path("config/open-learning-media-packs-v1.json")
 
 TITLE_ANCHORS = {
     "world-history": r"\b(?:history|historical|civilization|civilisation|ancient|medieval|renaissance|world war)\b",
-    "earth-geography": r"\b(?:geograph|map\b|mapping|latitude|longitude|landform|contour|topograph|cartograph)",
+    "earth-geography": r"\b(?:geograph|maps?\b|mapping|latitude|longitude|landform|contour|topograph|cartograph)",
     "civics-society": r"\b(?:civics?|government|parliament|democra|election|voting|constitution|citizen)",
     "biology-life": r"\b(?:biology|biological|cell\b|cells\b|genetic|dna\b|ecolog|organism|chromosome|molecular biology)",
     "physics-foundations": r"\b(?:physics|physical science|force\b|forces\b|motion|mechanic|electricity|energy|space flight)",
