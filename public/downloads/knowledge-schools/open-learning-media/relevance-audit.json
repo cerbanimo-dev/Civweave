@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v3",
-  "built_at": "2026-08-10T08:57:05Z",
-  "before": 812,
-  "after": 356,
-  "rejected": 456,
+  "built_at": "2026-08-10T09:33:38Z",
+  "before": 827,
+  "after": 369,
+  "rejected": 458,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -25,17 +25,23 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 1,
+      "records": 11,
+      "mesh_redistributable": 8,
       "providers": {
-        "wikimedia-commons": 1,
-        "peertube": 3
+        "wikimedia-commons": 3,
+        "peertube": 8
       },
       "top_titles": [
-        "OpenRefine Beginners Tutorial by Emma Carroll",
+        "Come and learn how free maps, free knowledge can help care for the world",
+        "How to use Mergin Maps in Academia",
+        "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
+        "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
+        "Topographical maps for all!",
+        "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
+        "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
       ]
     },
     "civics-society": {
@@ -95,10 +101,10 @@
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -121,8 +127,8 @@
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "The (truly) Periodic Table",
         "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
         "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
@@ -265,13 +271,16 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
+        "peertube": 2,
         "internet-archive": 1
       },
       "top_titles": [
-        "Effective prompt engineering for Python programmers"
+        "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
+        "Il Prompt Engineering"
       ]
     },
     "pseudocoding": {
@@ -307,17 +316,19 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1,
-        "wikimedia-commons": 3
+        "wikimedia-commons": 4,
+        "peertube": 2
       },
       "top_titles": [
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Complexity Science- 3 Systems Thinking",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 11- Homeostasis",
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
@@ -692,18 +703,13 @@
       "topic_slug": "biology-life"
     },
     {
+      "provider": "internet-archive",
+      "title": "The World ledaer,Great sun---Fangruida/ Cord Rossi 2020v1.3 2021 v1.2 modified version)",
+      "topic_slug": "biology-life"
+    },
+    {
       "provider": "peertube",
       "title": "Vaccine Controversy | What is Myth and Truth? | Is Vaccination Good? | Autism and Vaccines",
-      "topic_slug": "biology-life"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "OPPOSING MICROTUBULE MOTORS CONTROL MOTILITY, MORPHOLOGY, AND CARGO SEGREGATION DURING ER-TO-GOLGI TRANSPORT.",
-      "topic_slug": "biology-life"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "TACC3-ch-TOG track the growing tips of microtubules independently of clathrin and Aurora-A phosphorylation",
       "topic_slug": "biology-life"
     },
     {
@@ -1168,7 +1174,7 @@
     },
     {
       "provider": "internet-archive",
-      "title": "WHY IS THE MEDIA SILENT ABOUT THIS IN ISRAEL?",
+      "title": "Faith v Evidence (Cognitive Dissonance)",
       "topic_slug": "critical-thinking"
     },
     {
@@ -1288,12 +1294,32 @@
     },
     {
       "provider": "wikimedia-commons",
-      "title": "Leica Multistation MS60 Totalstation mit Laserscanner",
+      "title": "After 60 Years, Nuclear Power for Spaceflight is Still Tried and True",
       "topic_slug": "earth-geography"
     },
     {
       "provider": "wikimedia-commons",
-      "title": "SeaWiFS East Coast Zoom (SVS167)",
+      "title": "An Ocean in Bloom (SVS14648 - NHQ 2024 0724 AnOceanInBloom PROMO3 Vertical)",
+      "topic_slug": "earth-geography"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "An Ocean in Bloom (SVS14648 - NHQ 2024 0724 AnOceanInBloom PROMO3)",
+      "topic_slug": "earth-geography"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Collective Minds & Machines Exploration Challenge Hangout",
+      "topic_slug": "earth-geography"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "NASA Earth- Powering America's Future (SVS14789 NASAEarth Social)",
+      "topic_slug": "earth-geography"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "NASA Earth- Powering America's Future (SVS14789 NASAEarthPoweringAmericasFuture)",
       "topic_slug": "earth-geography"
     },
     {
@@ -1304,21 +1330,6 @@
     {
       "provider": "peertube",
       "title": "Mumbai, India's Transforming MEGACITY",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Die Weltkarte von Mercator",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Nature and the Human Spirit - Wasfia Nazreen",
-      "topic_slug": "earth-geography"
-    },
-    {
-      "provider": "peertube",
-      "title": "FOSS4G 2021 - GeoRasterLayer for Leaflet: Truly Server-Free GeoTIFF Visualization",
       "topic_slug": "earth-geography"
     }
   ]

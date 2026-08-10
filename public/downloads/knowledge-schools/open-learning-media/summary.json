@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-08-10T08:57:05Z",
-  "records": 144,
-  "mesh_redistributable": 103,
-  "download_candidates": 223,
+  "built_at": "2026-08-10T09:33:38Z",
+  "records": 146,
+  "mesh_redistributable": 106,
+  "download_candidates": 244,
   "providers": {
     "internet-archive": {
       "records": 6,
@@ -11,14 +11,14 @@
       "download_candidates": 15
     },
     "peertube": {
-      "records": 96,
-      "mesh_redistributable": 55,
-      "download_candidates": 166
+      "records": 97,
+      "mesh_redistributable": 57,
+      "download_candidates": 186
     },
     "wikimedia-commons": {
-      "records": 42,
-      "mesh_redistributable": 42,
-      "download_candidates": 42
+      "records": 43,
+      "mesh_redistributable": 43,
+      "download_candidates": 43
     }
   },
   "focus_topics": {
@@ -42,38 +42,42 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 1,
+      "records": 11,
+      "mesh_redistributable": 8,
       "providers": {
-        "wikimedia-commons": 1,
-        "peertube": 3
+        "wikimedia-commons": 3,
+        "peertube": 8
       },
       "top_titles": [
-        "OpenRefine Beginners Tutorial by Emma Carroll",
+        "Come and learn how free maps, free knowledge can help care for the world",
+        "How to use Mergin Maps in Academia",
+        "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
+        "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
+        "Topographical maps for all!",
+        "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
+        "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
       ]
     },
     "civics-society": {
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 7,
+      "records": 7,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 4,
-        "wikimedia-commons": 5
+        "peertube": 3,
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "When Code Became a Weapon - Crypto Wars Explained",
         "An introduction to Parliament"
       ]
     },
@@ -81,42 +85,38 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 12,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 9,
-        "wikimedia-commons": 3
+        "peertube": 8
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
         "The Cell High School Biology",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
         "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
         "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
         "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954"
+        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954",
+        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 2 91974"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 4,
+      "records": 7,
+      "mesh_redistributable": 3,
       "providers": {
-        "wikimedia-commons": 3,
-        "peertube": 5
+        "peertube": 5,
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
       ]
@@ -149,17 +149,16 @@
       "name": "Astronomy & Space",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 5,
+      "records": 7,
+      "mesh_redistributable": 4,
       "providers": {
         "peertube": 5,
-        "wikimedia-commons": 3
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "MOUNT WILSON OBSERVATORY 1950s ASTRONOMY EDUCATIONAL FILM \"REALM OF THE GALAXIES\" 65524",
         "Solar System explained by simpleshow foundation",
         "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
-        "Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024",
         "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Animation Using Constraints Example Solar System",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 1 XD99775a",
@@ -209,10 +208,10 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 9,
+      "records": 8,
       "mesh_redistributable": 8,
       "providers": {
-        "peertube": 6,
+        "peertube": 5,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
@@ -224,8 +223,7 @@
         "Rain Effect - Krita digital-painting tutorial",
         "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-        "Tutorial: Grayscale to Color - Krita Digital Painting - Character design",
-        "TRADE AND TRANSPORTATION 1958 DOCUMENTARY FILM 89344"
+        "Tutorial: Grayscale to Color - Krita Digital Painting - Character design"
       ]
     },
     "health-wellness": {
@@ -282,13 +280,16 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
+        "peertube": 2,
         "internet-archive": 1
       },
       "top_titles": [
-        "Effective prompt engineering for Python programmers"
+        "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
+        "Il Prompt Engineering"
       ]
     },
     "pseudocoding": {
@@ -324,32 +325,33 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1,
-        "wikimedia-commons": 3
+        "wikimedia-commons": 4,
+        "peertube": 2
       },
       "top_titles": [
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Complexity Science- 3 Systems Thinking",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 11- Homeostasis",
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
       "name": "Personal Finance",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
         "GnuCash for Personal Finance - Getting Started and Basics",
         "GnuCash for Personal Finance - Split Transactions",
-        "Saving a Windows 8 Tablet with Debian Linux!",
         "“WISE BUYING” 1950 HOME ECONOMICS FILM SHOPPING, BUDGETING AND MANAGING FINANCES XD11974"
       ]
     },
@@ -411,15 +413,14 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 4,
+      "records": 4,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
-        "[Tech Maid] Mesecons Basics",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "Karnaugh Map - Sum of Products Explained"
       ]
@@ -442,31 +443,26 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
-      "providers": {
-        "peertube": 1
-      },
-      "top_titles": [
-        "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]"
-      ]
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
     },
     "drawing-design": {
       "name": "Drawing & Design",
       "school_slug": "arts",
       "required": false,
-      "records": 7,
-      "mesh_redistributable": 6,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "How to use the Artisan Charcoal brush pack for Painter",
         "Inkscape Beginner Tutorial | Icon Drawing with Basic Shapes",
-        "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "How to use the Sketch Essentials brush pack",
-        "Direct ballpen training - video capture test",
+        "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "Learn Grease Pencil 2D Animation in Blender 2.8 Alpha 2",
         "Tutorial- a Comic strip from A to Z with Krita"
       ]
@@ -538,12 +534,12 @@
     }
   },
   "failures": 0,
-  "records_before_relevance_gate": 812,
-  "records_before_pedagogy_gate": 356,
-  "records_before_selection_gate": 194,
-  "rejected_by_relevance_gate": 456,
+  "records_before_relevance_gate": 827,
+  "records_before_pedagogy_gate": 369,
+  "records_before_selection_gate": 207,
+  "rejected_by_relevance_gate": 458,
   "rejected_by_pedagogy_gate": 162,
-  "rejected_by_selection_gate": 50,
+  "rejected_by_selection_gate": 52,
   "topic_stats": {
     "world-history": {
       "name": "World History",
@@ -565,38 +561,42 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 1,
+      "records": 11,
+      "mesh_redistributable": 8,
       "providers": {
-        "wikimedia-commons": 1,
-        "peertube": 3
+        "wikimedia-commons": 3,
+        "peertube": 8
       },
       "top_titles": [
-        "OpenRefine Beginners Tutorial by Emma Carroll",
+        "Come and learn how free maps, free knowledge can help care for the world",
+        "How to use Mergin Maps in Academia",
+        "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
+        "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
+        "Topographical maps for all!",
+        "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
+        "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
       ]
     },
     "civics-society": {
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 7,
+      "records": 7,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 4,
-        "wikimedia-commons": 5
+        "peertube": 3,
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "When Code Became a Weapon - Crypto Wars Explained",
         "An introduction to Parliament"
       ]
     },
@@ -604,42 +604,38 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 12,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 9,
-        "wikimedia-commons": 3
+        "peertube": 8
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
         "The Cell High School Biology",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
         "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
         "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
         "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954"
+        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954",
+        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 2 91974"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 4,
+      "records": 7,
+      "mesh_redistributable": 3,
       "providers": {
-        "wikimedia-commons": 3,
-        "peertube": 5
+        "peertube": 5,
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
       ]
@@ -672,17 +668,16 @@
       "name": "Astronomy & Space",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 5,
+      "records": 7,
+      "mesh_redistributable": 4,
       "providers": {
         "peertube": 5,
-        "wikimedia-commons": 3
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "MOUNT WILSON OBSERVATORY 1950s ASTRONOMY EDUCATIONAL FILM \"REALM OF THE GALAXIES\" 65524",
         "Solar System explained by simpleshow foundation",
         "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
-        "Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024",
         "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Animation Using Constraints Example Solar System",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 1 XD99775a",
@@ -732,10 +727,10 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 9,
+      "records": 8,
       "mesh_redistributable": 8,
       "providers": {
-        "peertube": 6,
+        "peertube": 5,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
@@ -747,8 +742,7 @@
         "Rain Effect - Krita digital-painting tutorial",
         "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-        "Tutorial: Grayscale to Color - Krita Digital Painting - Character design",
-        "TRADE AND TRANSPORTATION 1958 DOCUMENTARY FILM 89344"
+        "Tutorial: Grayscale to Color - Krita Digital Painting - Character design"
       ]
     },
     "health-wellness": {
@@ -805,13 +799,16 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
+        "peertube": 2,
         "internet-archive": 1
       },
       "top_titles": [
-        "Effective prompt engineering for Python programmers"
+        "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
+        "Il Prompt Engineering"
       ]
     },
     "pseudocoding": {
@@ -847,32 +844,33 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1,
-        "wikimedia-commons": 3
+        "wikimedia-commons": 4,
+        "peertube": 2
       },
       "top_titles": [
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Complexity Science- 3 Systems Thinking",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 11- Homeostasis",
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
       "name": "Personal Finance",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
         "GnuCash for Personal Finance - Getting Started and Basics",
         "GnuCash for Personal Finance - Split Transactions",
-        "Saving a Windows 8 Tablet with Debian Linux!",
         "“WISE BUYING” 1950 HOME ECONOMICS FILM SHOPPING, BUDGETING AND MANAGING FINANCES XD11974"
       ]
     },
@@ -934,15 +932,14 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 4,
+      "records": 4,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
-        "[Tech Maid] Mesecons Basics",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "Karnaugh Map - Sum of Products Explained"
       ]
@@ -965,31 +962,26 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
-      "providers": {
-        "peertube": 1
-      },
-      "top_titles": [
-        "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]"
-      ]
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
     },
     "drawing-design": {
       "name": "Drawing & Design",
       "school_slug": "arts",
       "required": false,
-      "records": 7,
-      "mesh_redistributable": 6,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "How to use the Artisan Charcoal brush pack for Painter",
         "Inkscape Beginner Tutorial | Icon Drawing with Basic Shapes",
-        "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "How to use the Sketch Essentials brush pack",
-        "Direct ballpen training - video capture test",
+        "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "Learn Grease Pencil 2D Animation in Blender 2.8 Alpha 2",
         "Tutorial- a Comic strip from A to Z with Krita"
       ]
@@ -1094,7 +1086,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 65,
+      "records": 69,
       "available": true
     },
     "digital-ai-literacy": {
@@ -1118,7 +1110,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 15,
+      "records": 18,
       "available": true
     },
     "practical-life": {
@@ -1140,24 +1132,20 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 17,
+      "records": 16,
       "available": true
     },
     "maker-creative": {
-      "name": "Maker & Creative Studio",
+      "name": "Creative Studio",
       "kind": "extension",
-      "description": "Hands-on repair and creative production spanning electronics, wood, textiles, drawing, and camera craft.",
+      "description": "Creative production through art, drawing and design, photography, and video craft.",
       "topics": [
-        "electronics-basics",
-        "woodworking-basics",
-        "sewing-textiles",
+        "arts-culture",
         "drawing-design",
         "photography-video"
       ],
       "covered_topics": [
-        "electronics-basics",
-        "woodworking-basics",
-        "sewing-textiles",
+        "arts-culture",
         "drawing-design",
         "photography-video"
       ],
@@ -1183,7 +1171,7 @@
         "climate-environment"
       ],
       "coverage": 0.8,
-      "records": 12,
+      "records": 10,
       "available": true
     },
     "deep-science": {
@@ -1205,7 +1193,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 29,
+      "records": 28,
       "available": true
     },
     "humanities-culture": {
@@ -1228,7 +1216,7 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8333,
-      "records": 22,
+      "records": 27,
       "available": true
     }
   },
@@ -1244,5 +1232,12 @@
   "selection_gate": {
     "schema": "civweave.open-learning-media-selection-gate.v3",
     "policy": "Automatic selection requires instructional evidence alongside the topic anchor, favoring explicit tutorials, lectures, overviews, courses, demonstrations, documentaries, and museum/gallery talks."
+  },
+  "records_before_title_quality_gate": 155,
+  "rejected_by_title_quality_gate": 9,
+  "rejected_topic_links_by_title_quality_gate": 13,
+  "title_quality_gate": {
+    "schema": "civweave.open-learning-media-title-quality-gate.v1",
+    "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary."
   }
 }

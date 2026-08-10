@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-packs.v1",
-  "built_at": "2026-08-10T08:57:05Z",
+  "built_at": "2026-08-10T09:33:38Z",
   "revision": "general-knowledge-packs-v1",
   "default_pack": "general-knowledge",
   "packs": [
@@ -62,14 +62,12 @@
     },
     {
       "slug": "maker-creative",
-      "name": "Maker & Creative Studio",
+      "name": "Creative Studio",
       "kind": "extension",
       "default": false,
-      "description": "Hands-on repair and creative production spanning electronics, wood, textiles, drawing, and camera craft.",
+      "description": "Creative production through art, drawing and design, photography, and video craft.",
       "topics": [
-        "electronics-basics",
-        "woodworking-basics",
-        "sewing-textiles",
+        "arts-culture",
         "drawing-design",
         "photography-video"
       ],
@@ -155,7 +153,9 @@
         "geography",
         "maps",
         "landforms",
-        "human geography"
+        "human geography",
+        "cartography",
+        "geospatial data"
       ],
       "hints": [
         "Earth & Geography",
@@ -165,10 +165,15 @@
         "map reading",
         "coordinates",
         "geography",
+        "maps",
+        "mapping",
+        "geospatial",
         "geography",
         "maps",
         "landforms",
-        "human geography"
+        "human geography",
+        "cartography",
+        "geospatial data"
       ],
       "required": true
     },

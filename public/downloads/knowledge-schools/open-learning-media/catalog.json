@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-catalog.v1",
-  "built_at": "2026-08-10T08:57:05Z",
-  "record_count": 144,
-  "mesh_redistributable_count": 103,
-  "download_candidate_count": 223,
+  "built_at": "2026-08-10T09:33:38Z",
+  "record_count": 146,
+  "mesh_redistributable_count": 106,
+  "download_candidate_count": 244,
   "providers": {
     "internet-archive": {
       "records": 6,
@@ -11,14 +11,14 @@
       "download_candidates": 15
     },
     "peertube": {
-      "records": 96,
-      "mesh_redistributable": 55,
-      "download_candidates": 166
+      "records": 97,
+      "mesh_redistributable": 57,
+      "download_candidates": 186
     },
     "wikimedia-commons": {
-      "records": 42,
-      "mesh_redistributable": 42,
-      "download_candidates": 42
+      "records": 43,
+      "mesh_redistributable": 43,
+      "download_candidates": 43
     }
   },
   "focus_topics": {
@@ -42,38 +42,42 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 1,
+      "records": 11,
+      "mesh_redistributable": 8,
       "providers": {
-        "wikimedia-commons": 1,
-        "peertube": 3
+        "wikimedia-commons": 3,
+        "peertube": 8
       },
       "top_titles": [
-        "OpenRefine Beginners Tutorial by Emma Carroll",
+        "Come and learn how free maps, free knowledge can help care for the world",
+        "How to use Mergin Maps in Academia",
+        "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
+        "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
+        "Topographical maps for all!",
+        "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
+        "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
       ]
     },
     "civics-society": {
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 7,
+      "records": 7,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 4,
-        "wikimedia-commons": 5
+        "peertube": 3,
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "When Code Became a Weapon - Crypto Wars Explained",
         "An introduction to Parliament"
       ]
     },
@@ -81,42 +85,38 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 12,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 9,
-        "wikimedia-commons": 3
+        "peertube": 8
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
         "The Cell High School Biology",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
         "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
         "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
         "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954"
+        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954",
+        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 2 91974"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 4,
+      "records": 7,
+      "mesh_redistributable": 3,
       "providers": {
-        "wikimedia-commons": 3,
-        "peertube": 5
+        "peertube": 5,
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
       ]
@@ -149,17 +149,16 @@
       "name": "Astronomy & Space",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 5,
+      "records": 7,
+      "mesh_redistributable": 4,
       "providers": {
         "peertube": 5,
-        "wikimedia-commons": 3
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "MOUNT WILSON OBSERVATORY 1950s ASTRONOMY EDUCATIONAL FILM \"REALM OF THE GALAXIES\" 65524",
         "Solar System explained by simpleshow foundation",
         "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
-        "Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024",
         "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Animation Using Constraints Example Solar System",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 1 XD99775a",
@@ -209,10 +208,10 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 9,
+      "records": 8,
       "mesh_redistributable": 8,
       "providers": {
-        "peertube": 6,
+        "peertube": 5,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
@@ -224,8 +223,7 @@
         "Rain Effect - Krita digital-painting tutorial",
         "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-        "Tutorial: Grayscale to Color - Krita Digital Painting - Character design",
-        "TRADE AND TRANSPORTATION 1958 DOCUMENTARY FILM 89344"
+        "Tutorial: Grayscale to Color - Krita Digital Painting - Character design"
       ]
     },
     "health-wellness": {
@@ -282,13 +280,16 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
+        "peertube": 2,
         "internet-archive": 1
       },
       "top_titles": [
-        "Effective prompt engineering for Python programmers"
+        "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
+        "Il Prompt Engineering"
       ]
     },
     "pseudocoding": {
@@ -324,32 +325,33 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1,
-        "wikimedia-commons": 3
+        "wikimedia-commons": 4,
+        "peertube": 2
       },
       "top_titles": [
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Complexity Science- 3 Systems Thinking",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 11- Homeostasis",
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
       "name": "Personal Finance",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
         "GnuCash for Personal Finance - Getting Started and Basics",
         "GnuCash for Personal Finance - Split Transactions",
-        "Saving a Windows 8 Tablet with Debian Linux!",
         "“WISE BUYING” 1950 HOME ECONOMICS FILM SHOPPING, BUDGETING AND MANAGING FINANCES XD11974"
       ]
     },
@@ -411,15 +413,14 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 4,
+      "records": 4,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
-        "[Tech Maid] Mesecons Basics",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "Karnaugh Map - Sum of Products Explained"
       ]
@@ -442,31 +443,26 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
-      "providers": {
-        "peertube": 1
-      },
-      "top_titles": [
-        "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]"
-      ]
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
     },
     "drawing-design": {
       "name": "Drawing & Design",
       "school_slug": "arts",
       "required": false,
-      "records": 7,
-      "mesh_redistributable": 6,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "How to use the Artisan Charcoal brush pack for Painter",
         "Inkscape Beginner Tutorial | Icon Drawing with Basic Shapes",
-        "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "How to use the Sketch Essentials brush pack",
-        "Direct ballpen training - video capture test",
+        "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "Learn Grease Pencil 2D Animation in Blender 2.8 Alpha 2",
         "Tutorial- a Comic strip from A to Z with Krita"
       ]
@@ -1490,90 +1486,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "7dc35598-a04e-4159-88ec-9968952cb7e8",
-      "topic_slug": "arts-culture",
-      "topic_name": "Arts & Culture",
-      "school_slug": "arts",
-      "concepts": [
-        "art history",
-        "visual arts",
-        "music",
-        "culture",
-        "visual culture",
-        "artmaking"
-      ],
-      "matched_query": "visual arts tutorial",
-      "title": "TRADE AND TRANSPORTATION 1958 DOCUMENTARY FILM 89344",
-      "description": "Presented by United World Films and distributed by United Education and Visual Arts, this 1958 black-and-white film, “The Way We Live,” takes a look at “Making a Living Around the World — Trade and Transportation.” The film opens on “Main Street” ...",
-      "creator": "amal",
-      "language": "en",
-      "duration_seconds": 1079,
-      "source_url": "https://peertube.dngr.us/videos/watch/7dc35598-a04e-4159-88ec-9968952cb7e8",
-      "source_host": "peertube.dngr.us",
-      "license": {
-        "spdx": "CC0",
-        "label": "Public Domain Dedication",
-        "url": "",
-        "evidence": "PeerTube API licence id 7: Public Domain Dedication",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "amal",
-        "source_title": "TRADE AND TRANSPORTATION 1958 DOCUMENTARY FILM 89344",
-        "source_url": "https://peertube.dngr.us/videos/watch/7dc35598-a04e-4159-88ec-9968952cb7e8",
-        "license": "Public Domain Dedication",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "arts-culture",
-          "school_slug": "arts",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 15,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 32,
-      "relevance": {
-        "arts-culture": {
-          "score": 10,
-          "evidence": [
-            "visual arts",
-            "visual arts"
-          ]
-        }
-      },
-      "pedagogy": {
-        "arts-culture": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "visual arts"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 15
-        }
-      },
-      "selection": {
-        "arts-culture": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 15
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
       "provider_id": "92b9e228-8e10-484b-8263-b18abd20a627",
       "topic_slug": "astronomy-space",
       "topic_name": "Astronomy & Space",
@@ -1840,96 +1752,6 @@
         "astronomy-space": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 45
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024.webm",
-      "topic_slug": "astronomy-space",
-      "topic_name": "Astronomy & Space",
-      "school_slug": "science",
-      "concepts": [
-        "biology",
-        "cells",
-        "genetics",
-        "ecology"
-      ],
-      "matched_query": "biology basics",
-      "title": "Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024",
-      "description": "Video of the practical part of the Wikidata workshop at Maastricht University on 15 October 2024. This video covers The (very) basics of Wikidata: A first look at what Wikidata is and how it works, both technically and socially (Wikidata community), A look at some projects that illustrate how Wikidata can be relevant for research, science and cultural heritage (GLAM) Topics covered include: 1) Wikidata basics What is Wikidata? What are the principles of Wikidata? How are things described in Wikidata? Who builds Wikidata? - The Wikidata community 2) Wikidata for research, science and cultural heritage To what extent is Wikidata used throughout science, research and GLAM? Six anecd a tic cases Scientometrics - Scholia Life sciences Astronomy Language technology / AI / LLMs GLAM – KB collection highlights Representation of (female) scientists This video is part of the workshop Navigating the World of Wikidata for Research, Science, and Cultural Heritage at Maastricht University on 15 October 2024. is a recording of the presentation File:Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024.pdf has a separate subtitles (closed captions) file : TimedText:Wikidata_Workshop_-_Theoretical_part_-_Maastricht_University_-_15_October_2024.webm.en.srt The video for the practical part of this workshop (related to professors of Maastricht University) is available here . Additional links, workshop materials and recordings All workshop materials can be downloaded from Zenodo: https://zenodo.org/records/13837957 - for the slidedecks(.pptx and .pdf) and the handout for participants (.docx and .pdf) https://zenodo.org/records/13984149 - for the subtitled video registration (.webm), the audio transcription (.txt) and the closed captions / subtitles file (.srt) of th",
-      "creator": "Olaf Janssen",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Wikidata_Workshop_-_Theoretical_part_-_Maastricht_University_-_15_October_2024.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 4.0",
-        "url": "https://creativecommons.org/licenses/by/4.0",
-        "evidence": "CC BY 4.0 | Creative Commons Attribution 4.0 | cc-by-4.0 | https://creativecommons.org/licenses/by/4.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/7/79/Wikidata_Workshop_-_Theoretical_part_-_Maastricht_University_-_15_October_2024.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 126270281,
-          "provider_sha1": "e5c1d55c4d05d1e064e3a5f58cf5ef3f793dd8ff",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Olaf Janssen",
-        "source_title": "Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Wikidata_Workshop_-_Theoretical_part_-_Maastricht_University_-_15_October_2024.webm",
-        "license": "CC BY 4.0",
-        "license_url": "https://creativecommons.org/licenses/by/4.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "astronomy-space",
-          "school_slug": "science",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "astronomy-space": {
-          "score": 10,
-          "evidence": [
-            "astronomy",
-            "astronomy"
-          ]
-        }
-      },
-      "pedagogy": {
-        "astronomy-space": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "astronomy"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "astronomy-space": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
         }
       }
     },
@@ -2984,10 +2806,10 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "6cac4def-efd6-4d61-81c3-e1925c5e65aa",
-      "topic_slug": "biology-life",
-      "topic_name": "Biology & Life",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Mendeleev and the Periodic Table - Chemistry for All - The Fuse School.webm",
+      "topic_slug": "chemistry-foundations",
+      "topic_name": "Chemistry Foundations",
       "school_slug": "science",
       "concepts": [
         "biology",
@@ -2996,88 +2818,6 @@
         "ecology"
       ],
       "matched_query": "biology basics",
-      "title": "ATGC Indian High School Workshop - Intro to SynBio II",
-      "description": "Basics of Synthetic Biology by Swetha Nagarajan, Rishabh Deo Singh and Shrute Kannapan",
-      "creator": "igem_community",
-      "language": "en",
-      "duration_seconds": 3998,
-      "source_url": "https://video.igem.org/videos/watch/6cac4def-efd6-4d61-81c3-e1925c5e65aa",
-      "source_host": "video.igem.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "igem_community",
-        "source_title": "ATGC Indian High School Workshop - Intro to SynBio II",
-        "source_url": "https://video.igem.org/videos/watch/6cac4def-efd6-4d61-81c3-e1925c5e65aa",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "biology-life",
-          "school_slug": "science",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 27,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 30,
-      "relevance": {
-        "biology-life": {
-          "score": 10,
-          "evidence": [
-            "biology",
-            "biology"
-          ]
-        }
-      },
-      "pedagogy": {
-        "biology-life": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "biology"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 27
-        }
-      },
-      "selection": {
-        "biology-life": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 27
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Mendeleev and the Periodic Table - Chemistry for All - The Fuse School.webm",
-      "topic_slug": "chemistry-foundations",
-      "topic_name": "Chemistry Foundations",
-      "school_slug": "science",
-      "concepts": [
-        "physics",
-        "forces",
-        "motion",
-        "energy"
-      ],
-      "matched_query": "physics basics",
       "title": "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
       "description": "Learn the basics about Mendeleev and the Periodic Table. Who is Mendeleev and what did his periodic table look like? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
       "creator": "FuseSchool - Global Education",
@@ -3122,31 +2862,10 @@
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 84,
           "relevance_score": 20
-        },
-        {
-          "topic_slug": "biology-life",
-          "school_slug": "science",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        },
-        {
-          "topic_slug": "physics-foundations",
-          "school_slug": "science",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
         }
       ],
       "quality_score": 89,
       "relevance": {
-        "biology-life": {
-          "score": 10,
-          "evidence": [
-            "biology",
-            "biology"
-          ]
-        },
         "chemistry-foundations": {
           "score": 20,
           "evidence": [
@@ -3155,27 +2874,9 @@
             "chemistry",
             "periodic table"
           ]
-        },
-        "physics-foundations": {
-          "score": 10,
-          "evidence": [
-            "physics",
-            "physics"
-          ]
         }
       },
       "pedagogy": {
-        "biology-life": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "biology"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        },
         "chemistry-foundations": {
           "strong_title_matches": [
             "chemistry",
@@ -3190,31 +2891,12 @@
           "clickbait_title": false,
           "non_instructional_title": false,
           "pedagogy_score": 84
-        },
-        "physics-foundations": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "physics"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
         }
       },
       "selection": {
-        "biology-life": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
-        },
         "chemistry-foundations": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 84
-        },
-        "physics-foundations": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
         }
       }
     },
@@ -3417,12 +3099,12 @@
       "topic_name": "Chemistry Foundations",
       "school_slug": "science",
       "concepts": [
-        "physics",
-        "forces",
-        "motion",
-        "energy"
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
       ],
-      "matched_query": "physics basics",
+      "matched_query": "biology basics",
       "title": "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
       "description": "Learn the basics about radioactive isotopes? how they are created? and what chemical reactions are created? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
       "creator": "FuseSchool - Global Education",
@@ -3467,31 +3149,10 @@
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 64,
           "relevance_score": 24
-        },
-        {
-          "topic_slug": "biology-life",
-          "school_slug": "science",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        },
-        {
-          "topic_slug": "physics-foundations",
-          "school_slug": "science",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
         }
       ],
       "quality_score": 89,
       "relevance": {
-        "biology-life": {
-          "score": 10,
-          "evidence": [
-            "biology",
-            "biology"
-          ]
-        },
         "chemistry-foundations": {
           "score": 24,
           "evidence": [
@@ -3500,27 +3161,9 @@
             "chemistry",
             "reactions"
           ]
-        },
-        "physics-foundations": {
-          "score": 10,
-          "evidence": [
-            "physics",
-            "physics"
-          ]
         }
       },
       "pedagogy": {
-        "biology-life": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "biology"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        },
         "chemistry-foundations": {
           "strong_title_matches": [
             "chemistry"
@@ -3534,31 +3177,12 @@
           "clickbait_title": false,
           "non_instructional_title": false,
           "pedagogy_score": 64
-        },
-        "physics-foundations": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "physics"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
         }
       },
       "selection": {
-        "biology-life": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
-        },
         "chemistry-foundations": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 64
-        },
-        "physics-foundations": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
         }
       }
     },
@@ -3644,127 +3268,6 @@
         "chemistry-foundations": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 59
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
-      "topic_slug": "chemistry-foundations",
-      "topic_name": "Chemistry Foundations",
-      "school_slug": "science",
-      "concepts": [
-        "biology",
-        "cells",
-        "genetics",
-        "ecology"
-      ],
-      "matched_query": "biology basics",
-      "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-      "description": "Learn the basics about Energy Levels and Electron Configuration. Where do you find energy levels? How do you recognize electron configuration? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
-      "creator": "FuseSchool - Global Education",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 8378497,
-          "provider_sha1": "f62d94001b90600c258ba108c8f7e164016779ad",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "FuseSchool - Global Education",
-        "source_title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "chemistry-foundations",
-          "school_slug": "science",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56,
-          "relevance_score": 10
-        },
-        {
-          "topic_slug": "biology-life",
-          "school_slug": "science",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "biology-life": {
-          "score": 10,
-          "evidence": [
-            "biology",
-            "biology"
-          ]
-        },
-        "chemistry-foundations": {
-          "score": 10,
-          "evidence": [
-            "chemistry",
-            "chemistry"
-          ]
-        }
-      },
-      "pedagogy": {
-        "biology-life": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "biology"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        },
-        "chemistry-foundations": {
-          "strong_title_matches": [
-            "chemistry"
-          ],
-          "strong_description_matches": [
-            "chemistry"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 56
-        }
-      },
-      "selection": {
-        "biology-life": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
-        },
-        "chemistry-foundations": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 56
         }
       }
     },
@@ -5422,96 +4925,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "wikimedia-commons",
-      "provider_id": "File:Introduction to Cyfraith Cymru Law Wales.webm",
-      "topic_slug": "civics-society",
-      "topic_name": "Civics & Society",
-      "school_slug": "society-and-social-sciences",
-      "concepts": [
-        "civics",
-        "government",
-        "democracy",
-        "institutions"
-      ],
-      "matched_query": "parliament government introduction",
-      "title": "Introduction to Cyfraith Cymru Law Wales",
-      "description": "The Counsel General for Wales introduces a new Welsh Government hosted website, in collaboration with Westlaw UK, on Welsh law in a devolved Wales. http://law.gov.wales/ Published: 6 Oct 2015.",
-      "creator": "Welsh Government / Llywodraeth Cymru Institution:Senedd Cymru – Welsh Parliament",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Introduction_to_Cyfraith_Cymru_Law_Wales.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/9/95/Introduction_to_Cyfraith_Cymru_Law_Wales.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 36481735,
-          "provider_sha1": "984c9f1eb0be09d4824aa1ca82f0e6d5817e85f9",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Welsh Government / Llywodraeth Cymru Institution:Senedd Cymru – Welsh Parliament",
-        "source_title": "Introduction to Cyfraith Cymru Law Wales",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Introduction_to_Cyfraith_Cymru_Law_Wales.webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "civics-society",
-          "school_slug": "society-and-social-sciences",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "civics-society": {
-          "score": 10,
-          "evidence": [
-            "government",
-            "government"
-          ]
-        }
-      },
-      "pedagogy": {
-        "civics-society": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "government"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "civics-society": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
       "provider_id": "File:This is Trade and Investment. This is Wales. Welsh Government video.webm",
       "topic_slug": "civics-society",
       "topic_name": "Civics & Society",
@@ -5660,117 +5073,6 @@
         }
       ],
       "quality_score": 89,
-      "relevance": {
-        "civics-society": {
-          "score": 10,
-          "evidence": [
-            "government",
-            "government"
-          ]
-        }
-      },
-      "pedagogy": {
-        "civics-society": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "government"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "civics-society": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "409132f4-a2b6-47b2-ac01-b3aea4091426",
-      "topic_slug": "civics-society",
-      "topic_name": "Civics & Society",
-      "school_slug": "society-and-social-sciences",
-      "concepts": [
-        "civics",
-        "government",
-        "democracy",
-        "institutions"
-      ],
-      "matched_query": "government explained civics",
-      "title": "When Code Became a Weapon - Crypto Wars Explained",
-      "description": "During the Cold War, the US government tried to stop the export of strong cryptography. In this video we'll dive into the history and explain what happened to cause this and why it was eventually overturned. The ability to use strong encryption wa...",
-      "creator": "Jonah",
-      "language": "en",
-      "duration_seconds": 603,
-      "source_url": "https://neat.tube/videos/watch/409132f4-a2b6-47b2-ac01-b3aea4091426",
-      "source_host": "neat.tube",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://neat.tube/download/streaming-playlists/hls/videos/409132f4-a2b6-47b2-ac01-b3aea4091426-1080-fragmented.mp4",
-          "bytes": 95413145,
-          "resolution": "1080p",
-          "fps": 24,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://neat.tube/download/streaming-playlists/hls/videos/409132f4-a2b6-47b2-ac01-b3aea4091426-720-fragmented.mp4",
-          "bytes": 86303358,
-          "resolution": "720p",
-          "fps": 24,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://neat.tube/download/streaming-playlists/hls/videos/409132f4-a2b6-47b2-ac01-b3aea4091426-480-fragmented.mp4",
-          "bytes": 54542838,
-          "resolution": "480p",
-          "fps": 24,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://neat.tube/download/streaming-playlists/hls/videos/409132f4-a2b6-47b2-ac01-b3aea4091426-240-fragmented.mp4",
-          "bytes": 23148186,
-          "resolution": "240p",
-          "fps": 24,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Jonah",
-        "source_title": "When Code Became a Weapon - Crypto Wars Explained",
-        "source_url": "https://neat.tube/videos/watch/409132f4-a2b6-47b2-ac01-b3aea4091426",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "civics-society",
-          "school_slug": "society-and-social-sciences",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 87,
       "relevance": {
         "civics-society": {
           "score": 10,
@@ -7738,130 +7040,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "248c90fc-1123-4999-ab89-dcbfacb9bb71",
-      "topic_slug": "drawing-design",
-      "topic_name": "Drawing & Design",
-      "school_slug": "arts",
-      "concepts": [
-        "drawing",
-        "sketching",
-        "design fundamentals"
-      ],
-      "matched_query": "sketching drawing tutorial",
-      "title": "Direct ballpen training - video capture test",
-      "description": "My first attempt at recording when I'm sketching with a ballpoint pen. I couldn't say that I was relaxed enough when I started recording, as I had problems with video, focus, camera shake, light, saving the recording, resolution, etc.",
-      "creator": "Shichimi − David Revoy on Peertube",
-      "language": "en",
-      "duration_seconds": 154,
-      "source_url": "https://peertube.touhoppai.moe/videos/watch/248c90fc-1123-4999-ab89-dcbfacb9bb71",
-      "source_host": "peertube.touhoppai.moe",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://peertube.touhoppai.moe/download/web-videos/248c90fc-1123-4999-ab89-dcbfacb9bb71-1080.mp4",
-          "bytes": 77938692,
-          "resolution": "1080p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://peertube.touhoppai.moe/download/web-videos/248c90fc-1123-4999-ab89-dcbfacb9bb71-720.mp4",
-          "bytes": 27446819,
-          "resolution": "720p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://peertube.touhoppai.moe/download/web-videos/248c90fc-1123-4999-ab89-dcbfacb9bb71-360.mp4",
-          "bytes": 10180955,
-          "resolution": "360p",
-          "fps": 25,
-          "role": "web-video"
-        },
-        {
-          "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/248c90fc-1123-4999-ab89-dcbfacb9bb71-1080-fragmented.mp4",
-          "bytes": 60446435,
-          "resolution": "1080p",
-          "fps": 25,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/248c90fc-1123-4999-ab89-dcbfacb9bb71-720-fragmented.mp4",
-          "bytes": 27424189,
-          "resolution": "720p",
-          "fps": 25,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://peertube.touhoppai.moe/download/streaming-playlists/hls/videos/248c90fc-1123-4999-ab89-dcbfacb9bb71-360-fragmented.mp4",
-          "bytes": 10158729,
-          "resolution": "360p",
-          "fps": 25,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Shichimi − David Revoy on Peertube",
-        "source_title": "Direct ballpen training - video capture test",
-        "source_url": "https://peertube.touhoppai.moe/videos/watch/248c90fc-1123-4999-ab89-dcbfacb9bb71",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "drawing-design",
-          "school_slug": "arts",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "drawing-design": {
-          "score": 10,
-          "evidence": [
-            "sketching",
-            "sketching"
-          ]
-        }
-      },
-      "pedagogy": {
-        "drawing-design": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "sketching"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "drawing-design": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
       "provider_id": "3b17dd85-497b-4421-a855-e584b7da38e7",
       "topic_slug": "drawing-design",
       "topic_name": "Drawing & Design",
@@ -8068,7 +7246,7 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "wikimedia-commons",
-      "provider_id": "File:OpenRefine Beginners Tutorial by Emma Carroll.webm",
+      "provider_id": "File:Come and learn how free maps, free knowledge can help care for the world.webm",
       "topic_slug": "earth-geography",
       "topic_name": "Earth & Geography",
       "school_slug": "geography",
@@ -8076,15 +7254,17 @@
         "geography",
         "maps",
         "landforms",
-        "human geography"
+        "human geography",
+        "cartography",
+        "geospatial data"
       ],
-      "matched_query": "physical geography",
-      "title": "OpenRefine Beginners Tutorial by Emma Carroll",
-      "description": "A tutorial on using OpenRefine, an open source software used to edit spreadsheets and upload data easily to Wikidata. This tutorial will cover the basics of using OpenRefine. Contents include: opening and uploading a spreadsheet onto OpenRefine, reconciling data, building a schema and uploading data from the spreadsheet onto Wikidata. This tutorial was created by Emma Carroll, a physical geography student employed as a Wikidata intern at the University of Edinburgh for three months through Equate Scotland's scheme to give paid placements to Women in STEM students in industry.",
-      "creator": "Emma Carroll",
+      "matched_query": "free maps free knowledge",
+      "title": "Come and learn how free maps, free knowledge can help care for the world",
+      "description": "Come and learn how free maps, free knowledge can help care for the world (with a little help from drones) In this session, together with the Humanitarian OpenStreetMap Team (HOT), we will show how open mapping technologies, free knowledge platforms, and even low-cost drones can be used to help preserve the planet. This session shares the knowledge generated from the HotOSM project supported by Wikimedia Mexico and wants to showcase the following ideas: How technology changes and that the documentation on Wikimedia Commons also changes over time. How we can build bridges and foster collaboration across free and open knowledge sister communities. How this initiative provides a practical, replicable model that can be adapted by Wikimedia communities worldwide to document and protect their own environments.",
+      "creator": "ProtoplasmaKid, Mar Marín",
       "language": null,
       "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:OpenRefine_Beginners_Tutorial_by_Emma_Carroll.webm",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Come_and_learn_how_free_maps,_free_knowledge_can_help_care_for_the_world.webm",
       "source_host": "commons.wikimedia.org",
       "license": {
         "spdx": "CC-BY-SA",
@@ -8100,19 +7280,19 @@
       "download_enabled": true,
       "files": [
         {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/9/9a/OpenRefine_Beginners_Tutorial_by_Emma_Carroll.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "url": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Come_and_learn_how_free_maps%2C_free_knowledge_can_help_care_for_the_world.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
           "mime": "video/webm",
-          "bytes": 19503176,
-          "provider_sha1": "a28af889ec6b54fabb7385c50bab270aa88ca38b",
+          "bytes": 226282225,
+          "provider_sha1": "a79f04f97bab248e1d79a5aee100dcbe7e2eefee",
           "role": "original"
         }
       ],
       "content_hash": null,
       "hash_state": "compute-on-cache",
       "attribution": {
-        "creator": "Emma Carroll",
-        "source_title": "OpenRefine Beginners Tutorial by Emma Carroll",
-        "source_url": "https://commons.wikimedia.org/wiki/File:OpenRefine_Beginners_Tutorial_by_Emma_Carroll.webm",
+        "creator": "ProtoplasmaKid, Mar Marín",
+        "source_title": "Come and learn how free maps, free knowledge can help care for the world",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Come_and_learn_how_free_maps,_free_knowledge_can_help_care_for_the_world.webm",
         "license": "CC BY-SA 4.0",
         "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
       },
@@ -8120,8 +7300,8 @@
         {
           "topic_slug": "earth-geography",
           "school_slug": "geography",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 44,
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 64,
           "relevance_score": 20
         }
       ],
@@ -8130,21 +7310,566 @@
         "earth-geography": {
           "score": 20,
           "evidence": [
-            "physical geography",
-            "geography",
-            "geography"
+            "maps",
+            "mapping",
+            "maps"
           ]
         }
       },
       "pedagogy": {
         "earth-geography": {
-          "strong_title_matches": [],
+          "strong_title_matches": [
+            "maps"
+          ],
           "strong_description_matches": [
-            "physical geography",
-            "geography"
+            "maps",
+            "mapping"
           ],
           "educational_intent": true,
           "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 64
+        }
+      },
+      "selection": {
+        "earth-geography": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 64
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "ba7baa17-7a0e-432c-ba49-c2cfb1f0096d",
+      "topic_slug": "earth-geography",
+      "topic_name": "Earth & Geography",
+      "school_slug": "geography",
+      "concepts": [
+        "geography",
+        "maps",
+        "landforms",
+        "human geography",
+        "cartography",
+        "geospatial data"
+      ],
+      "matched_query": "free maps free knowledge",
+      "title": "How to use Mergin Maps in Academia",
+      "description": "Mergin Maps is a mobile app for collecting, storing, and synchronizing data with students, built on QGIS. The Mergin Maps University Program offers a free Academic Plan for lecturers and students. This plan includes 5 GB of storage, a free book fo...",
+      "creator": "hansakwast",
+      "language": "en",
+      "duration_seconds": 1079,
+      "source_url": "https://videos.qwast-gis.com/videos/watch/ba7baa17-7a0e-432c-ba49-c2cfb1f0096d",
+      "source_host": "videos.qwast-gis.com",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://videos.qwast-gis.com/download/web-videos/ba7baa17-7a0e-432c-ba49-c2cfb1f0096d-1080.mp4",
+          "bytes": 94650564,
+          "resolution": "1080p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://videos.qwast-gis.com/download/web-videos/ba7baa17-7a0e-432c-ba49-c2cfb1f0096d-720.mp4",
+          "bytes": 56385146,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://videos.qwast-gis.com/download/web-videos/ba7baa17-7a0e-432c-ba49-c2cfb1f0096d-480.mp4",
+          "bytes": 38747855,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "hansakwast",
+        "source_title": "How to use Mergin Maps in Academia",
+        "source_url": "https://videos.qwast-gis.com/videos/watch/ba7baa17-7a0e-432c-ba49-c2cfb1f0096d",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "earth-geography",
+          "school_slug": "geography",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "earth-geography": {
+          "score": 10,
+          "evidence": [
+            "maps",
+            "maps"
+          ]
+        }
+      },
+      "pedagogy": {
+        "earth-geography": {
+          "strong_title_matches": [
+            "maps"
+          ],
+          "strong_description_matches": [
+            "maps"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "earth-geography": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability.webm",
+      "topic_slug": "earth-geography",
+      "topic_name": "Earth & Geography",
+      "school_slug": "geography",
+      "concepts": [
+        "geography",
+        "maps",
+        "landforms",
+        "human geography",
+        "cartography",
+        "geospatial data"
+      ],
+      "matched_query": "open mapping geography",
+      "title": "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
+      "description": "OpenStreetMap (OSM), often called the \"Wikipedia of maps,\" is a powerful tool for knowledge sharing, community engagement, and open data collaboration. This session will explore how OSM contributes to inclusivity by making geographic data accessible to all, supports impactful projects such as disaster response and local development, and promotes sustainability through open and community-driven mapping efforts. Participants will learn how OSM complements Wikimedia projects like Wikidata and Wikipedia, empowering communities to document their environments and preserve local knowledge. Through real-world examples, we will highlight how mapping can bridge knowledge gaps, enhance representation, and create lasting social change. Whether you're a beginner or an experienced Wikimedian, join us to discover how you can contribute to a more inclusive and sustainable world through open mapping.",
+      "creator": "Abdoul",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:WIKIMANIA_Day_4_Meru_-_OpenStreetMap_Mapping_for_Inclusion,_Impact,_and_Sustainability.webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "CC BY-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0",
+        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/a/a6/WIKIMANIA_Day_4_Meru_-_OpenStreetMap_Mapping_for_Inclusion%2C_Impact%2C_and_Sustainability.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 384696259,
+          "provider_sha1": "3e140c8e7e59d45327360ad8106e56d198e81a58",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Abdoul",
+        "source_title": "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
+        "source_url": "https://commons.wikimedia.org/wiki/File:WIKIMANIA_Day_4_Meru_-_OpenStreetMap_Mapping_for_Inclusion,_Impact,_and_Sustainability.webm",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "earth-geography",
+          "school_slug": "geography",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 52,
+          "relevance_score": 20
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "earth-geography": {
+          "score": 20,
+          "evidence": [
+            "maps",
+            "mapping",
+            "maps"
+          ]
+        }
+      },
+      "pedagogy": {
+        "earth-geography": {
+          "strong_title_matches": [
+            "mapping"
+          ],
+          "strong_description_matches": [
+            "maps",
+            "mapping"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 52
+        }
+      },
+      "selection": {
+        "earth-geography": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 52
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "03f6e77f-53c3-4d2f-84f2-eff1303d6b4c",
+      "topic_slug": "earth-geography",
+      "topic_name": "Earth & Geography",
+      "school_slug": "geography",
+      "concepts": [
+        "geography",
+        "maps",
+        "landforms",
+        "human geography",
+        "cartography",
+        "geospatial data"
+      ],
+      "matched_query": "open mapping geography",
+      "title": "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
+      "description": "A thumbnail overview of the TeenMaptivist project: training the next generation of OpenStreetMappers. Originally published by OSM US under a CC license: https://youtube.com/watch?v=Niplx02Je2w",
+      "creator": "Ian R Buck",
+      "language": "en",
+      "duration_seconds": 872,
+      "source_url": "https://urbanists.video/videos/watch/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c",
+      "source_host": "urbanists.video",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://urbanists.video/download/web-videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-0.mp4",
+          "bytes": 25112068,
+          "resolution": "Audio only",
+          "fps": 0,
+          "role": "web-video"
+        },
+        {
+          "url": "https://urbanists.video/download/streaming-playlists/hls/videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-720-fragmented.mp4",
+          "bytes": 57410335,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://urbanists.video/download/streaming-playlists/hls/videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-480-fragmented.mp4",
+          "bytes": 37134359,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://urbanists.video/download/streaming-playlists/hls/videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-360-fragmented.mp4",
+          "bytes": 30086575,
+          "resolution": "360p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://urbanists.video/download/streaming-playlists/hls/videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-240-fragmented.mp4",
+          "bytes": 23438926,
+          "resolution": "240p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://urbanists.video/download/streaming-playlists/hls/videos/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c-144-fragmented.mp4",
+          "bytes": 18866097,
+          "resolution": "144p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Ian R Buck",
+        "source_title": "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
+        "source_url": "https://urbanists.video/videos/watch/03f6e77f-53c3-4d2f-84f2-eff1303d6b4c",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "earth-geography",
+          "school_slug": "geography",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "earth-geography": {
+          "score": 10,
+          "evidence": [
+            "mapping"
+          ]
+        }
+      },
+      "pedagogy": {
+        "earth-geography": {
+          "strong_title_matches": [
+            "mapping"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 48
+        }
+      },
+      "selection": {
+        "earth-geography": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
+      "topic_slug": "earth-geography",
+      "topic_name": "Earth & Geography",
+      "school_slug": "geography",
+      "concepts": [
+        "geography",
+        "maps",
+        "landforms",
+        "human geography",
+        "cartography",
+        "geospatial data"
+      ],
+      "matched_query": "free maps free knowledge",
+      "title": "Topographical maps for all!",
+      "description": "LibrePlanet 2023 videos Presented by: Anonymous Anaximander c. 610 – c. 546 BC) was a pre-Socratic Greek philosopher who lived in Miletus, a city of Ionia (in modern-day Turkey). He belonged to the Milesian school and learned the teachings of hi...",
+      "creator": "Free Software Foundation",
+      "language": "en",
+      "duration_seconds": 2827,
+      "source_url": "https://framatube.org/videos/watch/4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
+      "source_host": "framatube.org",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-720-fragmented.mp4",
+          "bytes": 333684675,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-480-fragmented.mp4",
+          "bytes": 186076391,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-360-fragmented.mp4",
+          "bytes": 155856944,
+          "resolution": "360p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-240-fragmented.mp4",
+          "bytes": 120216224,
+          "resolution": "240p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://framatube.org/download/streaming-playlists/hls/videos/4fc624f0-3b2a-4a2f-9765-e1559cb86a69-0-fragmented.mp4",
+          "bytes": 94086085,
+          "resolution": "Audio only",
+          "fps": 0,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Free Software Foundation",
+        "source_title": "Topographical maps for all!",
+        "source_url": "https://framatube.org/videos/watch/4fc624f0-3b2a-4a2f-9765-e1559cb86a69",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "earth-geography",
+          "school_slug": "geography",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "earth-geography": {
+          "score": 10,
+          "evidence": [
+            "maps",
+            "maps"
+          ]
+        }
+      },
+      "pedagogy": {
+        "earth-geography": {
+          "strong_title_matches": [
+            "maps"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 48
+        }
+      },
+      "selection": {
+        "earth-geography": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response.webm",
+      "topic_slug": "earth-geography",
+      "topic_name": "Earth & Geography",
+      "school_slug": "geography",
+      "concepts": [
+        "geography",
+        "maps",
+        "landforms",
+        "human geography",
+        "cartography",
+        "geospatial data"
+      ],
+      "matched_query": "open mapping geography",
+      "title": "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
+      "description": "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response. Laura Nic Lochlainn, European Programme for Intervention Epidemiology Training (EPIET), explains why the difficulty in rapidly locating villages of Ebola cases and their contacts is often due to: villages with similar names in different chiefdoms, villages with alternate names and missing locations of recent villages and satellite villages. The aim of the project was to improve mapping within the Tonkolli district by mobilising local people in order to obtain reliable geographical information to trace Ebola cases and their contacts. Through the groups findings she explains how they required modest investment to gather large-scale geographic and population data rapidly. Benefits stem from the ability to use locally-appropriate technology in genuine partnership with local people and could be used for future emergencies to improve response efforts. Slides are available to download here: http://f1000research.com/slides/1000060 This video is part of an F1000Research channel that includes posters, slides and videos from the MSF Scientific Day meetings in the UK and India. To see more please visit: http://f1000research.com/msf/sciday-uk15 .",
+      "creator": "F1000Research",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Mobilisation_of_local_people_and_technology_in_mapping_for_the_Sierra_Leone_Ebola_epidemic_response.webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC BY 3.0",
+        "url": "https://creativecommons.org/licenses/by/3.0",
+        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Mobilisation_of_local_people_and_technology_in_mapping_for_the_Sierra_Leone_Ebola_epidemic_response.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 42822677,
+          "provider_sha1": "be0ddd2de72988521271316bef79432c0893e9c0",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "F1000Research",
+        "source_title": "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Mobilisation_of_local_people_and_technology_in_mapping_for_the_Sierra_Leone_Ebola_epidemic_response.webm",
+        "license": "CC BY 3.0",
+        "license_url": "https://creativecommons.org/licenses/by/3.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "earth-geography",
+          "school_slug": "geography",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 89,
+      "relevance": {
+        "earth-geography": {
+          "score": 10,
+          "evidence": [
+            "mapping"
+          ]
+        }
+      },
+      "pedagogy": {
+        "earth-geography": {
+          "strong_title_matches": [
+            "mapping"
+          ],
+          "strong_description_matches": [
+            "mapping"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
           "clickbait_title": false,
           "non_instructional_title": false,
           "pedagogy_score": 44
@@ -8152,7 +7877,122 @@
       },
       "selection": {
         "earth-geography": {
-          "reason": "topic-description-anchor-plus-instructional-title",
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "4d2af8ba-1d61-4728-b68d-02ba1848fc79",
+      "topic_slug": "earth-geography",
+      "topic_name": "Earth & Geography",
+      "school_slug": "geography",
+      "concepts": [
+        "geography",
+        "maps",
+        "landforms",
+        "human geography",
+        "cartography",
+        "geospatial data"
+      ],
+      "matched_query": "map reading land navigation",
+      "title": "Map Themes in QGIS and Mergin Maps",
+      "description": "In this tutorial, we show you how to use Map Themes to create a seamless transition between different background maps and layer styles directly on your mobile device. You will learn how to define custom symbology for your survey layers and configu...",
+      "creator": "hansakwast",
+      "language": "en",
+      "duration_seconds": 212,
+      "source_url": "https://videos.qwast-gis.com/videos/watch/4d2af8ba-1d61-4728-b68d-02ba1848fc79",
+      "source_host": "videos.qwast-gis.com",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://videos.qwast-gis.com/download/web-videos/4d2af8ba-1d61-4728-b68d-02ba1848fc79-1080.mp4",
+          "bytes": 23433396,
+          "resolution": "1080p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://videos.qwast-gis.com/download/web-videos/4d2af8ba-1d61-4728-b68d-02ba1848fc79-720.mp4",
+          "bytes": 10700629,
+          "resolution": "720p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://videos.qwast-gis.com/download/web-videos/4d2af8ba-1d61-4728-b68d-02ba1848fc79-480.mp4",
+          "bytes": 7698864,
+          "resolution": "480p",
+          "fps": 25,
+          "role": "web-video"
+        },
+        {
+          "url": "https://videos.qwast-gis.com/download/web-videos/4d2af8ba-1d61-4728-b68d-02ba1848fc79-0.mp4",
+          "bytes": 3089604,
+          "resolution": "Audio only",
+          "fps": 0,
+          "role": "web-video"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "hansakwast",
+        "source_title": "Map Themes in QGIS and Mergin Maps",
+        "source_url": "https://videos.qwast-gis.com/videos/watch/4d2af8ba-1d61-4728-b68d-02ba1848fc79",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "earth-geography",
+          "school_slug": "geography",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 44,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "earth-geography": {
+          "score": 10,
+          "evidence": [
+            "maps",
+            "maps"
+          ]
+        }
+      },
+      "pedagogy": {
+        "earth-geography": {
+          "strong_title_matches": [
+            "maps"
+          ],
+          "strong_description_matches": [
+            "maps"
+          ],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "earth-geography": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 44
         }
       }
@@ -8168,9 +8008,11 @@
         "geography",
         "maps",
         "landforms",
-        "human geography"
+        "human geography",
+        "cartography",
+        "geospatial data"
       ],
-      "matched_query": "map reading latitude longitude",
+      "matched_query": "map reading land navigation",
       "title": "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
       "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
       "creator": "amal",
@@ -8249,9 +8091,11 @@
         "geography",
         "maps",
         "landforms",
-        "human geography"
+        "human geography",
+        "cartography",
+        "geospatial data"
       ],
-      "matched_query": "map reading latitude longitude",
+      "matched_query": "map reading land navigation",
       "title": "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
       "description": "Join this channel to get access to perks: https://www.youtube.com/channel/UCddem5RlB3bQe99wyY49g0g/join Want to learn more about Periscope Film and get access to exclusive swag? Join us on Patreon. Visit https://www.patreon.com/PeriscopeFilm Visi...",
       "creator": "amal",
@@ -8322,6 +8166,105 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
+      "provider_id": "1d792038-9185-42d5-a70d-86488ecf651e",
+      "topic_slug": "earth-geography",
+      "topic_name": "Earth & Geography",
+      "school_slug": "geography",
+      "concepts": [
+        "geography",
+        "maps",
+        "landforms",
+        "human geography",
+        "cartography",
+        "geospatial data"
+      ],
+      "matched_query": "free maps free knowledge",
+      "title": "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
+      "description": "OpenDroneMap is an ecosystem of free and open source software to collect, process, analyze and display aerial data. In this talk we will present an exciting overview of what's new in the ecosystem, where the project is headed and how you can benef...",
+      "creator": "osgeo",
+      "language": "en",
+      "duration_seconds": 1257,
+      "source_url": "https://video.osgeo.org/videos/watch/1d792038-9185-42d5-a70d-86488ecf651e",
+      "source_host": "video.osgeo.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "",
+        "evidence": "PeerTube API licence id 1: Attribution",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://video.osgeo.org/download/streaming-playlists/hls/videos/1d792038-9185-42d5-a70d-86488ecf651e-1080-fragmented.mp4",
+          "bytes": 77320889,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://video.osgeo.org/download/streaming-playlists/hls/videos/1d792038-9185-42d5-a70d-86488ecf651e-720-fragmented.mp4",
+          "bytes": 54645543,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "osgeo",
+        "source_title": "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap",
+        "source_url": "https://video.osgeo.org/videos/watch/1d792038-9185-42d5-a70d-86488ecf651e",
+        "license": "Attribution",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "earth-geography",
+          "school_slug": "geography",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 88,
+      "relevance": {
+        "earth-geography": {
+          "score": 10,
+          "evidence": [
+            "maps",
+            "maps"
+          ]
+        }
+      },
+      "pedagogy": {
+        "earth-geography": {
+          "strong_title_matches": [
+            "maps"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": false,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "earth-geography": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 36
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
       "provider_id": "4aefb5b9-8a51-4b45-827a-66e1cf71fdd6",
       "topic_slug": "earth-geography",
       "topic_name": "Earth & Geography",
@@ -8330,9 +8273,11 @@
         "geography",
         "maps",
         "landforms",
-        "human geography"
+        "human geography",
+        "cartography",
+        "geospatial data"
       ],
-      "matched_query": "map reading latitude longitude",
+      "matched_query": "map reading land navigation",
       "title": "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144",
       "description": "Want to support this channel and help us preserve old films? Visit https://www.patreon.com/PeriscopeFilm This WWII era educational film from the U.S. Army Signal Corps gives an overview of \"Map Reading\", providing lessons on elevation, logical co...",
       "creator": "amal",
@@ -8604,95 +8549,6 @@
     {
       "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
-      "provider_id": "9534cc48-5fa0-470e-99c3-50cad15bab55",
-      "topic_slug": "electronics-basics",
-      "topic_name": "Electronics Basics",
-      "school_slug": "technology",
-      "concepts": [
-        "electronics",
-        "circuits",
-        "soldering"
-      ],
-      "matched_query": "electronics basics",
-      "title": "[Tech Maid] Mesecons Basics",
-      "description": "Mesecons is a electronics mod for voxel game engine Minetest, primarily aimed for use with default Minetest game and it's derivatives. This video will guide you through basics of this mod and tell you how to make super fast 3x3 door. Check out ...",
-      "creator": "Laika",
-      "language": "en",
-      "duration_seconds": 330,
-      "source_url": "https://video.hardlimit.com/videos/watch/9534cc48-5fa0-470e-99c3-50cad15bab55",
-      "source_host": "video.hardlimit.com",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://video.hardlimit.com/download/streaming-playlists/hls/videos/9534cc48-5fa0-470e-99c3-50cad15bab55-1080-fragmented.mp4",
-          "bytes": 85805721,
-          "resolution": "1080p",
-          "fps": 60,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Laika",
-        "source_title": "[Tech Maid] Mesecons Basics",
-        "source_url": "https://video.hardlimit.com/videos/watch/9534cc48-5fa0-470e-99c3-50cad15bab55",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "electronics-basics",
-          "school_slug": "technology",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "electronics-basics": {
-          "score": 10,
-          "evidence": [
-            "electronics",
-            "electronics"
-          ]
-        }
-      },
-      "pedagogy": {
-        "electronics-basics": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "electronics"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "electronics-basics": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
       "provider_id": "afab2272-06c3-4aa8-90e7-166092657a75",
       "topic_slug": "electronics-basics",
       "topic_name": "Electronics Basics",
@@ -8821,12 +8677,6 @@
             "electronics",
             "electronics"
           ]
-        },
-        "mathematics-foundations": {
-          "score": 10,
-          "evidence": [
-            "equations"
-          ]
         }
       },
       "pedagogy": {
@@ -8840,17 +8690,6 @@
           "clickbait_title": false,
           "non_instructional_title": false,
           "pedagogy_score": 36
-        },
-        "mathematics-foundations": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "equations"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 24
         }
       },
       "selection": {
@@ -9988,6 +9827,495 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Complexity Science- 3 Systems Thinking.webm",
+      "topic_slug": "logical-frameworks",
+      "topic_name": "Logic & Systems Thinking",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "formal logic",
+        "logical reasoning",
+        "decision frameworks",
+        "systems thinking"
+      ],
+      "matched_query": "systems thinking",
+      "title": "Complexity Science- 3 Systems Thinking",
+      "description": "A brief introduction to systems thinking. For full courses, transcriptions and downloads please see: http://www.complexityacademy.io Transcription: System thinking is a way of describing the world in a more holistic manner based upon the model of a system, but lets start from the beginning. We can understand the world as things, that is parts or components and their relations, that is how they are connected or fit together. So take a car for example, it is made up of parts, car parts such as engine, wheels and so on and these parts are put together or organized in a specific way so as to make them function as a vehicle of transportation. Now we call a group of things that are not organized in this way a set. So we would call a group of cups on a table a set of cups because unlike the parts to our car they have not been designed to serve some collective function. Because the group of cups is simple the sum of its parts we would describe them by describing the individual properties of the each cup and this would tell us everything we needed to know about them. This approach to describing thing is called analysis or reductionism, reductionism is the traditional approach taken within modern science that tries to describe complex phenomena in terms of their individual parts. Now take the human body that is highly organized through a complex set of relations between its parts. Out of the arrangement of these parts in a specific way we get the overall functioning of a living organism. Because the parts are so strongly defined by their connections and function within the body as an entirety, to properly describe the parts we need to first understand the functioning of the whole body. This approach to describing things that is that we can best describe things by understanding th",
+      "creator": "Complexity Academy",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Complexity_Science-_3_Systems_Thinking.webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC BY 3.0",
+        "url": "https://creativecommons.org/licenses/by/3.0",
+        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Complexity_Science-_3_Systems_Thinking.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 19012920,
+          "provider_sha1": "f4f8355c09b10525b9a667741509b7a408736c7e",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Complexity Academy",
+        "source_title": "Complexity Science- 3 Systems Thinking",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Complexity_Science-_3_Systems_Thinking.webm",
+        "license": "CC BY 3.0",
+        "license_url": "https://creativecommons.org/licenses/by/3.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "logical-frameworks",
+          "school_slug": "philosophy-and-religion",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 89,
+      "relevance": {
+        "logical-frameworks": {
+          "score": 10,
+          "evidence": [
+            "systems thinking",
+            "systems thinking"
+          ]
+        }
+      },
+      "pedagogy": {
+        "logical-frameworks": {
+          "strong_title_matches": [
+            "systems thinking"
+          ],
+          "strong_description_matches": [
+            "systems thinking"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "a4e1b73a-57fe-4460-9f0a-39d75cda843f",
+      "topic_slug": "logical-frameworks",
+      "topic_name": "Logic & Systems Thinking",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "formal logic",
+        "logical reasoning",
+        "decision frameworks",
+        "systems thinking"
+      ],
+      "matched_query": "systems thinking",
+      "title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
+      "description": "Software development is at the core a human activity - and the created artifacts are among the most complex humankind has ever produced. Systems thinking helps to merge high technical sophistication with high human sophistication when developing s...",
+      "creator": "Eberhard Wolff",
+      "language": "en",
+      "duration_seconds": 3520,
+      "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
+      "source_host": "tube.tchncs.de",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080.mp4",
+          "bytes": 3160911997,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480.mp4",
+          "bytes": 306127830,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube.tchncs.de/download/web-videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360.mp4",
+          "bytes": 241335269,
+          "resolution": "360p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-1080-fragmented.mp4",
+          "bytes": 811473511,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-480-fragmented.mp4",
+          "bytes": 304518584,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/a4e1b73a-57fe-4460-9f0a-39d75cda843f-360-fragmented.mp4",
+          "bytes": 239725747,
+          "resolution": "360p",
+          "fps": 30,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Eberhard Wolff",
+        "source_title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
+        "source_url": "https://tube.tchncs.de/videos/watch/a4e1b73a-57fe-4460-9f0a-39d75cda843f",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "logical-frameworks",
+          "school_slug": "philosophy-and-religion",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "logical-frameworks": {
+          "score": 10,
+          "evidence": [
+            "systems thinking",
+            "systems thinking"
+          ]
+        }
+      },
+      "pedagogy": {
+        "logical-frameworks": {
+          "strong_title_matches": [
+            "systems thinking"
+          ],
+          "strong_description_matches": [
+            "systems thinking"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Systems Thinking 10- System Dynamics.webm",
+      "topic_slug": "logical-frameworks",
+      "topic_name": "Logic & Systems Thinking",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "formal logic",
+        "logical reasoning",
+        "decision frameworks",
+        "systems thinking"
+      ],
+      "matched_query": "systems thinking",
+      "title": "Systems Thinking 10- System Dynamics",
+      "description": "For full courses please see: http://www.complexityacademy.io In this video we give an overview to the area of system dynamics, a branch of systems theory that tries to model and understand the dynamic behavior of complex systems over time.",
+      "creator": "Complexity Academy",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_10-_System_Dynamics.webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC BY 3.0",
+        "url": "https://creativecommons.org/licenses/by/3.0",
+        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Systems_Thinking_10-_System_Dynamics.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 58933114,
+          "provider_sha1": "304f3519e8fab4c59cb32a777fe227c71511359a",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Complexity Academy",
+        "source_title": "Systems Thinking 10- System Dynamics",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_10-_System_Dynamics.webm",
+        "license": "CC BY 3.0",
+        "license_url": "https://creativecommons.org/licenses/by/3.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "logical-frameworks",
+          "school_slug": "philosophy-and-religion",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 89,
+      "relevance": {
+        "logical-frameworks": {
+          "score": 10,
+          "evidence": [
+            "systems thinking",
+            "systems thinking"
+          ]
+        }
+      },
+      "pedagogy": {
+        "logical-frameworks": {
+          "strong_title_matches": [
+            "systems thinking"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 48
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Systems Thinking 11- Homeostasis.webm",
+      "topic_slug": "logical-frameworks",
+      "topic_name": "Logic & Systems Thinking",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "formal logic",
+        "logical reasoning",
+        "decision frameworks",
+        "systems thinking"
+      ],
+      "matched_query": "systems thinking",
+      "title": "Systems Thinking 11- Homeostasis",
+      "description": "For full courses please see: http://www.complexityacademy.io The word Homeostasis derives from the Greek word meaning homos or \"similar\" and stasis meaning \"standing still\". It is the state of a system in which variables are regulated so that internal conditions remain stable and relatively constant, despite changes within the systems environment.",
+      "creator": "Complexity Academy",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_11-_Homeostasis.webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC BY 3.0",
+        "url": "https://creativecommons.org/licenses/by/3.0",
+        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Systems_Thinking_11-_Homeostasis.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 13163838,
+          "provider_sha1": "46ec4b5fa89e8fe81298e382157e5d4cd6b7900c",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Complexity Academy",
+        "source_title": "Systems Thinking 11- Homeostasis",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_11-_Homeostasis.webm",
+        "license": "CC BY 3.0",
+        "license_url": "https://creativecommons.org/licenses/by/3.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "logical-frameworks",
+          "school_slug": "philosophy-and-religion",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 89,
+      "relevance": {
+        "logical-frameworks": {
+          "score": 10,
+          "evidence": [
+            "systems thinking",
+            "systems thinking"
+          ]
+        }
+      },
+      "pedagogy": {
+        "logical-frameworks": {
+          "strong_title_matches": [
+            "systems thinking"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 48
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Systems Thinking 8- Emergence.webm",
+      "topic_slug": "logical-frameworks",
+      "topic_name": "Logic & Systems Thinking",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "formal logic",
+        "logical reasoning",
+        "decision frameworks",
+        "systems thinking"
+      ],
+      "matched_query": "systems thinking",
+      "title": "Systems Thinking 8- Emergence",
+      "description": "For full courses please see: http://www.complexityacademy.io This video presents the ideas of emergence, phase transitions and strong vs. weak emergence. According to Wikipedia, emergence is conceived as a process whereby larger entities, patterns, and regularities arise through interactions among smaller or simpler entities that themselves do not exhibit such properties. In the previous section we discussed how synergistic relations give rise to the phenomena of two or more elements having a greater combined output or effect than the simple product of each in isolation. This process where by the interaction between elements gives rise to something that is greater than the sum of their parts is called emergence. So where as when we were talking about synergies we simply said that the combined effect was greater than its parts in isolation. The concept of emergence though implies that what is created out of these synergic relations is not just quantitatively different it is in fact qualitatively different. That is to say none of the elements that contribute to the emergence of this new phenomena have its qualities when taken in isolation. There are many examples of this but maybe the simples is the example of water, water is made up of hydrogen and oxygen atoms, neither of these two elements that make up the system have the property or quality of wetness, but when we combine them we get a substance called water that has the quality of being wet, this property of wetness has emerged out of the interaction of the systems elements and it only exists on the systems level. Another often sited example of emergence is the phenomena of life, biological systems such as a plant cell consist of a set of inanimate molecules none of which in isolation have the property of life, but i",
+      "creator": "Complexity Academy",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_8-_Emergence.webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC BY 3.0",
+        "url": "https://creativecommons.org/licenses/by/3.0",
+        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Systems_Thinking_8-_Emergence.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 58547528,
+          "provider_sha1": "1c96e238db9aaec3efc9340fc88162dd6b9c7277",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Complexity Academy",
+        "source_title": "Systems Thinking 8- Emergence",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_8-_Emergence.webm",
+        "license": "CC BY 3.0",
+        "license_url": "https://creativecommons.org/licenses/by/3.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "logical-frameworks",
+          "school_slug": "philosophy-and-religion",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 89,
+      "relevance": {
+        "logical-frameworks": {
+          "score": 10,
+          "evidence": [
+            "systems thinking",
+            "systems thinking"
+          ]
+        }
+      },
+      "pedagogy": {
+        "logical-frameworks": {
+          "strong_title_matches": [
+            "systems thinking"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 48
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 48
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
       "provider_id": "9c1ad801-5330-43ea-8ae9-65d96914f173",
       "topic_slug": "logical-frameworks",
@@ -10122,278 +10450,6 @@
         "logical-frameworks": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 48
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Complexity Science- 3 Systems Thinking.webm",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logic & Systems Thinking",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "systems thinking",
-      "title": "Complexity Science- 3 Systems Thinking",
-      "description": "A brief introduction to systems thinking. For full courses, transcriptions and downloads please see: http://www.complexityacademy.io Transcription: System thinking is a way of describing the world in a more holistic manner based upon the model of a system, but lets start from the beginning. We can understand the world as things, that is parts or components and their relations, that is how they are connected or fit together. So take a car for example, it is made up of parts, car parts such as engine, wheels and so on and these parts are put together or organized in a specific way so as to make them function as a vehicle of transportation. Now we call a group of things that are not organized in this way a set. So we would call a group of cups on a table a set of cups because unlike the parts to our car they have not been designed to serve some collective function. Because the group of cups is simple the sum of its parts we would describe them by describing the individual properties of the each cup and this would tell us everything we needed to know about them. This approach to describing thing is called analysis or reductionism, reductionism is the traditional approach taken within modern science that tries to describe complex phenomena in terms of their individual parts. Now take the human body that is highly organized through a complex set of relations between its parts. Out of the arrangement of these parts in a specific way we get the overall functioning of a living organism. Because the parts are so strongly defined by their connections and function within the body as an entirety, to properly describe the parts we need to first understand the functioning of the whole body. This approach to describing things that is that we can best describe things by understanding th",
-      "creator": "Complexity Academy",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Complexity_Science-_3_Systems_Thinking.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Complexity_Science-_3_Systems_Thinking.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 19012920,
-          "provider_sha1": "f4f8355c09b10525b9a667741509b7a408736c7e",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Complexity Academy",
-        "source_title": "Complexity Science- 3 Systems Thinking",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Complexity_Science-_3_Systems_Thinking.webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 10,
-          "evidence": [
-            "systems thinking",
-            "systems thinking"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [
-            "systems thinking"
-          ],
-          "strong_description_matches": [
-            "systems thinking"
-          ],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 44
-        }
-      },
-      "selection": {
-        "logical-frameworks": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Systems Thinking 10- System Dynamics.webm",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logic & Systems Thinking",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "systems thinking",
-      "title": "Systems Thinking 10- System Dynamics",
-      "description": "For full courses please see: http://www.complexityacademy.io In this video we give an overview to the area of system dynamics, a branch of systems theory that tries to model and understand the dynamic behavior of complex systems over time.",
-      "creator": "Complexity Academy",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_10-_System_Dynamics.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Systems_Thinking_10-_System_Dynamics.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 58933114,
-          "provider_sha1": "304f3519e8fab4c59cb32a777fe227c71511359a",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Complexity Academy",
-        "source_title": "Systems Thinking 10- System Dynamics",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_10-_System_Dynamics.webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 10,
-          "evidence": [
-            "systems thinking",
-            "systems thinking"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [
-            "systems thinking"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "logical-frameworks": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Systems Thinking 8- Emergence.webm",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logic & Systems Thinking",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "systems thinking",
-      "title": "Systems Thinking 8- Emergence",
-      "description": "For full courses please see: http://www.complexityacademy.io This video presents the ideas of emergence, phase transitions and strong vs. weak emergence. According to Wikipedia, emergence is conceived as a process whereby larger entities, patterns, and regularities arise through interactions among smaller or simpler entities that themselves do not exhibit such properties. In the previous section we discussed how synergistic relations give rise to the phenomena of two or more elements having a greater combined output or effect than the simple product of each in isolation. This process where by the interaction between elements gives rise to something that is greater than the sum of their parts is called emergence. So where as when we were talking about synergies we simply said that the combined effect was greater than its parts in isolation. The concept of emergence though implies that what is created out of these synergic relations is not just quantitatively different it is in fact qualitatively different. That is to say none of the elements that contribute to the emergence of this new phenomena have its qualities when taken in isolation. There are many examples of this but maybe the simples is the example of water, water is made up of hydrogen and oxygen atoms, neither of these two elements that make up the system have the property or quality of wetness, but when we combine them we get a substance called water that has the quality of being wet, this property of wetness has emerged out of the interaction of the systems elements and it only exists on the systems level. Another often sited example of emergence is the phenomena of life, biological systems such as a plant cell consist of a set of inanimate molecules none of which in isolation have the property of life, but i",
-      "creator": "Complexity Academy",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_8-_Emergence.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Systems_Thinking_8-_Emergence.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 58547528,
-          "provider_sha1": "1c96e238db9aaec3efc9340fc88162dd6b9c7277",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Complexity Academy",
-        "source_title": "Systems Thinking 8- Emergence",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Thinking_8-_Emergence.webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 10,
-          "evidence": [
-            "systems thinking",
-            "systems thinking"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [
-            "systems thinking"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "logical-frameworks": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36
         }
       }
     },
@@ -11484,110 +11540,6 @@
         "personal-finance": {
           "strong_title_matches": [
             "personal finance"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true,
-          "instructional_title": false,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "personal-finance": {
-          "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "b7cfe633-8cb0-408f-a1e1-d7aefa30d3b0",
-      "topic_slug": "personal-finance",
-      "topic_name": "Personal Finance",
-      "school_slug": "everyday-life",
-      "concepts": [
-        "budgeting",
-        "saving",
-        "credit",
-        "personal finance"
-      ],
-      "matched_query": "saving credit finance",
-      "title": "Saving a Windows 8 Tablet with Debian Linux!",
-      "description": "Can Debian Linux save a forgotten 2 in 1 tablet from the Windows 8 era? In this video, we take a look at the classic ASUS Transformer Book T100. First, we check out the hardware and suffer through the original Windows 8 bloatware. After a quick failed attempt with MX Linux, we successfully get Debian installed and running! Stick around to see how it handles modern web browsing and whether this budget Intel Atom chip can actually handle some classic gaming (spoiler: Half-Life time!). If you love retro tech restoration, Linux experimentation, and hardware tinkering, make sure to hit that subscribe button! ❤️ Want to support the channel? If you enjoy the videos and want to help me keep making more, consider supporting on Patreon: https://www.patreon.com/DevWithZachary Every bit of support goes a long way, thank you! 📱 Follow Me Online: Discord: https://discord.gg/QdT9yCrKmV Main Channel: https://www.youtube.com/@devwithzachary Travel: https://www.youtube.com/@FlyWithZachary Peertube: https://tube.devwithzachary.com/ Mastodon: https://social.devwithzachary.com/@zachary TikTok: https://www.tiktok.com/@devwithzachary LinkedIn: https://www.linkedin.com/in/zachary-mg-powell/ 🔗 All Links: https://devwithzachary.com ⏱️ Timestamps: 00:00 Intro 00:19 Asus Transformer Book T100 03:12 Look around the device 04:54 Windows 8 Bloat 06:37 Lets install MX Linux 07:07 Take 2... lets install Debian! 08:56 Exploring the Install 10:37 Browser Performance 13:00 Gaming (Half Life) 13:58 Final Thoughts",
-      "creator": "DevWithZachary",
-      "language": "en",
-      "duration_seconds": 929,
-      "source_url": "https://tube.devwithzachary.com/videos/watch/b7cfe633-8cb0-408f-a1e1-d7aefa30d3b0",
-      "source_host": "tube.devwithzachary.com",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://tube.devwithzachary.com/download/streaming-playlists/hls/videos/b7cfe633-8cb0-408f-a1e1-d7aefa30d3b0-1080-fragmented.mp4",
-          "bytes": 366837050,
-          "resolution": "1080p",
-          "fps": 60,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://tube.devwithzachary.com/download/streaming-playlists/hls/videos/b7cfe633-8cb0-408f-a1e1-d7aefa30d3b0-720-fragmented.mp4",
-          "bytes": 175881232,
-          "resolution": "720p",
-          "fps": 60,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://tube.devwithzachary.com/download/streaming-playlists/hls/videos/b7cfe633-8cb0-408f-a1e1-d7aefa30d3b0-480-fragmented.mp4",
-          "bytes": 96911707,
-          "resolution": "480p",
-          "fps": 30,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "DevWithZachary",
-        "source_title": "Saving a Windows 8 Tablet with Debian Linux!",
-        "source_url": "https://tube.devwithzachary.com/videos/watch/b7cfe633-8cb0-408f-a1e1-d7aefa30d3b0",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "personal-finance",
-          "school_slug": "everyday-life",
-          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "personal-finance": {
-          "score": 10,
-          "evidence": [
-            "saving",
-            "saving"
-          ]
-        }
-      },
-      "pedagogy": {
-        "personal-finance": {
-          "strong_title_matches": [
-            "saving"
           ],
           "strong_description_matches": [],
           "educational_intent": true,
@@ -12882,6 +12834,132 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
+      "provider": "wikimedia-commons",
+      "provider_id": "File:Energy Levels and Electron Configuration - Chemistry for All - FuseSchool.webm",
+      "topic_slug": "physics-foundations",
+      "topic_name": "Physics Foundations",
+      "school_slug": "science",
+      "concepts": [
+        "biology",
+        "cells",
+        "genetics",
+        "ecology"
+      ],
+      "matched_query": "biology basics",
+      "title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+      "description": "Learn the basics about Energy Levels and Electron Configuration. Where do you find energy levels? How do you recognize electron configuration? Find out more in this video! This Open Educational Resource is free of charge, under a Creative Commons License: Attribution-NonCommercial CC BY-NC ( View License Deed: https://creativecommons.org/licenses/by-nc/4.0/ ). You are allowed to download the video for nonprofit, educational use. If you would like to modify the video, please contact us: info@fuseschool.org SUBSCRIBE to the Fuse School YouTube channel for many more educational videos. Our teachers and animators come together to make fun & easy-to-understand videos in Chemistry, Biology, Physics, Maths & ICT. This video is part of 'Chemistry for All' - a Chemistry Education project by our Charity Fuse Foundation - the organisation behind The Fuse School. These videos can be used in a flipped classroom model or as a revision aid. Find our other Chemistry videos here: https://www.youtube.com/playlist?list=PLW0gavSzhMlReKGMVfUt6YuNQsO0bqSMV Twitter: https://twitter.com/fuseSchool Access a deeper Learning Experience in the Fuse School platform and app: www.fuseschool.org Follow us: https://www.youtube.com/fuseschool Friend us: http://www.facebook.com/fuseschool",
+      "creator": "FuseSchool - Global Education",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
+      "source_host": "commons.wikimedia.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC BY 3.0",
+        "url": "https://creativecommons.org/licenses/by/3.0",
+        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+          "mime": "video/webm",
+          "bytes": 8378497,
+          "provider_sha1": "f62d94001b90600c258ba108c8f7e164016779ad",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "FuseSchool - Global Education",
+        "source_title": "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Energy_Levels_and_Electron_Configuration_-_Chemistry_for_All_-_FuseSchool.webm",
+        "license": "CC BY 3.0",
+        "license_url": "https://creativecommons.org/licenses/by/3.0"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "physics-foundations",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 64,
+          "relevance_score": 20
+        },
+        {
+          "topic_slug": "chemistry-foundations",
+          "school_slug": "science",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 89,
+      "relevance": {
+        "chemistry-foundations": {
+          "score": 10,
+          "evidence": [
+            "chemistry",
+            "chemistry"
+          ]
+        },
+        "physics-foundations": {
+          "score": 20,
+          "evidence": [
+            "physics",
+            "energy",
+            "physics",
+            "energy"
+          ]
+        }
+      },
+      "pedagogy": {
+        "chemistry-foundations": {
+          "strong_title_matches": [
+            "chemistry"
+          ],
+          "strong_description_matches": [
+            "chemistry"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        },
+        "physics-foundations": {
+          "strong_title_matches": [
+            "energy"
+          ],
+          "strong_description_matches": [
+            "physics",
+            "energy"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 64
+        }
+      },
+      "selection": {
+        "chemistry-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        },
+        "physics-foundations": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 64
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
       "provider_id": "816a526f-039e-4b23-b3de-be75bc98bcdd",
       "topic_slug": "physics-foundations",
@@ -13312,6 +13390,174 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "4b2119a7-f258-4ec5-ba71-8ef71b92135e",
+      "topic_slug": "prompt-engineering",
+      "topic_name": "Prompt Engineering",
+      "school_slug": "technology",
+      "concepts": [
+        "prompt engineering",
+        "LLM prompting",
+        "prompt patterns",
+        "evaluation"
+      ],
+      "matched_query": "prompt design",
+      "title": "This is a story of the prompt design to generate an antifascist aesthetics logo",
+      "description": "This is the story of the prompt design to generate an antifascist aesthics & logo with KI. For more information about the project visit: https://antifagenki.wordpress.com/ Also check out: https://antifaki.uber.space/antifascist-logo-generat...",
+      "creator": "t.lehnen",
+      "language": "de",
+      "duration_seconds": 335,
+      "source_url": "https://stream.udk-berlin.de/videos/watch/4b2119a7-f258-4ec5-ba71-8ef71b92135e",
+      "source_host": "stream.udk-berlin.de",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1440.mp4",
+          "bytes": 34026255,
+          "resolution": "1440p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1080.mp4",
+          "bytes": 23922454,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-720.mp4",
+          "bytes": 18990791,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-480.mp4",
+          "bytes": 14976136,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-240.mp4",
+          "bytes": 11339708,
+          "resolution": "240p",
+          "fps": 30,
+          "role": "web-video"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/web-videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-0.mp4",
+          "bytes": 8739371,
+          "resolution": "Audio only",
+          "fps": 0,
+          "role": "web-video"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1440-fragmented.mp4",
+          "bytes": 19189138,
+          "resolution": "1440p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-1080-fragmented.mp4",
+          "bytes": 15066973,
+          "resolution": "1080p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-720-fragmented.mp4",
+          "bytes": 10135222,
+          "resolution": "720p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-480-fragmented.mp4",
+          "bytes": 6119487,
+          "resolution": "480p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-240-fragmented.mp4",
+          "bytes": 2483823,
+          "resolution": "240p",
+          "fps": 30,
+          "role": "streaming-file"
+        },
+        {
+          "url": "https://stream.udk-berlin.de/download/streaming-playlists/hls/videos/4b2119a7-f258-4ec5-ba71-8ef71b92135e-0-fragmented.mp4",
+          "bytes": 8753153,
+          "resolution": "Audio only",
+          "fps": 0,
+          "role": "streaming-file"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "t.lehnen",
+        "source_title": "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "source_url": "https://stream.udk-berlin.de/videos/watch/4b2119a7-f258-4ec5-ba71-8ef71b92135e",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "prompt-engineering",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 87,
+      "relevance": {
+        "prompt-engineering": {
+          "score": 10,
+          "evidence": [
+            "prompt design"
+          ]
+        }
+      },
+      "pedagogy": {
+        "prompt-engineering": {
+          "strong_title_matches": [
+            "prompt design"
+          ],
+          "strong_description_matches": [
+            "prompt design"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "prompt-engineering": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
       "provider": "internet-archive",
       "provider_id": "effective-prompt-engineering-for-python-programmers",
       "topic_slug": "prompt-engineering",
@@ -13367,7 +13613,7 @@
           "topic_slug": "prompt-engineering",
           "school_slug": "technology",
           "selection_reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44,
+          "pedagogy_score": 56,
           "relevance_score": 10
         }
       ],
@@ -13390,16 +13636,98 @@
             "prompt engineering"
           ],
           "educational_intent": true,
-          "instructional_title": false,
+          "instructional_title": true,
           "clickbait_title": false,
           "non_instructional_title": false,
-          "pedagogy_score": 44
+          "pedagogy_score": 56
         }
       },
       "selection": {
         "prompt-engineering": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
-          "pedagogy_score": 44
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "peertube",
+      "provider_id": "6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
+      "topic_slug": "prompt-engineering",
+      "topic_name": "Prompt Engineering",
+      "school_slug": "technology",
+      "concepts": [
+        "prompt engineering",
+        "LLM prompting",
+        "prompt patterns",
+        "evaluation"
+      ],
+      "matched_query": "prompt engineering",
+      "title": "Il Prompt Engineering",
+      "description": "Esempi di prompt professionali e di applicazioni pratiche, in diverse aree professionali Area: Dummies Relatore: Lorenzo Bargnani (Invisible farm, https://www.invisiblefarm.it/)",
+      "creator": "LUGMan",
+      "language": "it",
+      "duration_seconds": 1738,
+      "source_url": "https://video.linux.it/videos/watch/6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
+      "source_host": "video.linux.it",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "Attribution - Share Alike",
+        "url": "",
+        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "LINK_ONLY",
+      "mesh_redistributable": false,
+      "download_enabled": false,
+      "files": [],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "LUGMan",
+        "source_title": "Il Prompt Engineering",
+        "source_url": "https://video.linux.it/videos/watch/6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
+        "license": "Attribution - Share Alike",
+        "license_url": ""
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "prompt-engineering",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 38,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 29,
+      "relevance": {
+        "prompt-engineering": {
+          "score": 10,
+          "evidence": [
+            "prompt engineering",
+            "prompt engineering"
+          ]
+        }
+      },
+      "pedagogy": {
+        "prompt-engineering": {
+          "strong_title_matches": [
+            "prompt engineering"
+          ],
+          "strong_description_matches": [],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 38
+        }
+      },
+      "selection": {
+        "prompt-engineering": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 38
         }
       }
     },
@@ -13582,116 +13910,6 @@
         "pseudocoding": {
           "reason": "topic-title-anchor-plus-instructional-evidence",
           "pedagogy_score": 44
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "3e619905-0d24-4f58-8b3c-622368ec1219",
-      "topic_slug": "sewing-textiles",
-      "topic_name": "Sewing & Textiles",
-      "school_slug": "arts",
-      "concepts": [
-        "sewing",
-        "textiles",
-        "mending"
-      ],
-      "matched_query": "textile sewing repair",
-      "title": "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]",
-      "description": "**Title:** Textile Fighters - An Integrated Enzymatic Route to Degrade PET in Textiles **Description:** Our project aims to address the recycling challenge of PET in textiles through enzymatic degradation. We engineered the recombinant enzyme Thermobifida fusca cutinase (TfCut2), expressed in Escherichia coli BL21. Guided by rational mutagenesis and machine learning approaches, we engineered and evaluated six TfCut2 variants with the potential for enhanced degradation performance compared to the wildtype. To improve accessibility of the textile substrate, we apply mechanical disintegration and chemical pre-treatment, followed by enzymatic treatment using cellulases for the cotton fraction and TfCut2 variants for PET. Ultimately, the process seeks to degrade blended textiles into the monomer terephthalic acid (TPA), which can then be repolymerized into PET textiles, enabling closed-loop recycling for sustainable management. [Wiki](https://2025.igem.wiki/gems-taiwan) | [Official Page](https://teams.igem.org/5729)",
-      "creator": "iGEM Teams",
-      "language": "en",
-      "duration_seconds": 813,
-      "source_url": "https://video.igem.org/videos/watch/3e619905-0d24-4f58-8b3c-622368ec1219",
-      "source_host": "video.igem.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/3e619905-0d24-4f58-8b3c-622368ec1219-1080-fragmented.mp4",
-          "bytes": 71236979,
-          "resolution": "1080p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/3e619905-0d24-4f58-8b3c-622368ec1219-480-fragmented.mp4",
-          "bytes": 31563489,
-          "resolution": "480p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/3e619905-0d24-4f58-8b3c-622368ec1219-240-fragmented.mp4",
-          "bytes": 12744821,
-          "resolution": "240p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://video.igem.org/download/streaming-playlists/hls/videos/3e619905-0d24-4f58-8b3c-622368ec1219-0-fragmented.mp4",
-          "bytes": 13297081,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "iGEM Teams",
-        "source_title": "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]",
-        "source_url": "https://video.igem.org/videos/watch/3e619905-0d24-4f58-8b3c-622368ec1219",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "sewing-textiles",
-          "school_slug": "arts",
-          "selection_reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "sewing-textiles": {
-          "score": 10,
-          "evidence": [
-            "textiles",
-            "textiles"
-          ]
-        }
-      },
-      "pedagogy": {
-        "sewing-textiles": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "textiles"
-          ],
-          "educational_intent": true,
-          "instructional_title": true,
-          "clickbait_title": false,
-          "non_instructional_title": false,
-          "pedagogy_score": 36
-        }
-      },
-      "selection": {
-        "sewing-textiles": {
-          "reason": "topic-description-anchor-plus-instructional-title",
-          "pedagogy_score": 36
         }
       }
     },
@@ -14426,12 +14644,12 @@
       }
     }
   ],
-  "record_count_before_relevance_gate": 812,
-  "record_count_before_pedagogy_gate": 356,
-  "record_count_before_selection_gate": 194,
-  "rejected_by_relevance_gate": 456,
+  "record_count_before_relevance_gate": 827,
+  "record_count_before_pedagogy_gate": 369,
+  "record_count_before_selection_gate": 207,
+  "rejected_by_relevance_gate": 458,
   "rejected_by_pedagogy_gate": 162,
-  "rejected_by_selection_gate": 50,
+  "rejected_by_selection_gate": 52,
   "topic_stats": {
     "world-history": {
       "name": "World History",
@@ -14453,38 +14671,42 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 1,
+      "records": 11,
+      "mesh_redistributable": 8,
       "providers": {
-        "wikimedia-commons": 1,
-        "peertube": 3
+        "wikimedia-commons": 3,
+        "peertube": 8
       },
       "top_titles": [
-        "OpenRefine Beginners Tutorial by Emma Carroll",
+        "Come and learn how free maps, free knowledge can help care for the world",
+        "How to use Mergin Maps in Academia",
+        "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
+        "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
+        "Topographical maps for all!",
+        "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
+        "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
       ]
     },
     "civics-society": {
       "name": "Civics & Society",
       "school_slug": "society-and-social-sciences",
       "required": true,
-      "records": 9,
-      "mesh_redistributable": 7,
+      "records": 7,
+      "mesh_redistributable": 5,
       "providers": {
-        "peertube": 4,
-        "wikimedia-commons": 5
+        "peertube": 3,
+        "wikimedia-commons": 4
       },
       "top_titles": [
         "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
         "How UK Parliament holds government to account",
         "Democracy in the Dark: Protecting Your Digital Rights",
         "An introduction to Parliament",
-        "Introduction to Cyfraith Cymru Law Wales",
         "This is Trade and Investment. This is Wales. Welsh Government video",
         "UK Parliament structure explained",
-        "When Code Became a Weapon - Crypto Wars Explained",
         "An introduction to Parliament"
       ]
     },
@@ -14492,42 +14714,38 @@
       "name": "Biology & Life",
       "school_slug": "science",
       "required": true,
-      "records": 12,
-      "mesh_redistributable": 5,
+      "records": 8,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 9,
-        "wikimedia-commons": 3
+        "peertube": 8
       },
       "top_titles": [
         "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
         "The Cell High School Biology",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
         "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
         "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
         "WISCONSIN CERTIFIED SEEDS 1953 SMALL GRAIN AGRICULTURE GENETICS SEED PRODUCTION & BREEDING 12894",
-        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954"
+        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 1 91954",
+        "“ THE THREAD OF LIFE \" 1960 HUMAN & PLANT GENETICS, CHROMOSOMES & DNA DOCUMENTARY PART 2 91974"
       ]
     },
     "physics-foundations": {
       "name": "Physics Foundations",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 4,
+      "records": 7,
+      "mesh_redistributable": 3,
       "providers": {
-        "wikimedia-commons": 3,
-        "peertube": 5
+        "peertube": 5,
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
-        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
       ]
@@ -14560,17 +14778,16 @@
       "name": "Astronomy & Space",
       "school_slug": "science",
       "required": true,
-      "records": 8,
-      "mesh_redistributable": 5,
+      "records": 7,
+      "mesh_redistributable": 4,
       "providers": {
         "peertube": 5,
-        "wikimedia-commons": 3
+        "wikimedia-commons": 2
       },
       "top_titles": [
         "MOUNT WILSON OBSERVATORY 1950s ASTRONOMY EDUCATIONAL FILM \"REALM OF THE GALAXIES\" 65524",
         "Solar System explained by simpleshow foundation",
         "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
-        "Wikidata Workshop - Theoretical part - Maastricht University - 15 October 2024",
         "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
         "Animation Using Constraints Example Solar System",
         "“ COSMONAUTS AND ASTRONOMY ” COLD WAR ERA RUSSIAN FILM SOVIET MANNED SPACE PROGRAM PART 1 XD99775a",
@@ -14620,10 +14837,10 @@
       "name": "Arts & Culture",
       "school_slug": "arts",
       "required": true,
-      "records": 9,
+      "records": 8,
       "mesh_redistributable": 8,
       "providers": {
-        "peertube": 6,
+        "peertube": 5,
         "internet-archive": 2,
         "wikimedia-commons": 1
       },
@@ -14635,8 +14852,7 @@
         "Rain Effect - Krita digital-painting tutorial",
         "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "Overview of my Krita Digital Painting Workflow − end 2022 (commented tutorial)",
-        "Tutorial: Grayscale to Color - Krita Digital Painting - Character design",
-        "TRADE AND TRANSPORTATION 1958 DOCUMENTARY FILM 89344"
+        "Tutorial: Grayscale to Color - Krita Digital Painting - Character design"
       ]
     },
     "health-wellness": {
@@ -14693,13 +14909,16 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
+        "peertube": 2,
         "internet-archive": 1
       },
       "top_titles": [
-        "Effective prompt engineering for Python programmers"
+        "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
+        "Il Prompt Engineering"
       ]
     },
     "pseudocoding": {
@@ -14735,32 +14954,33 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1,
-        "wikimedia-commons": 3
+        "wikimedia-commons": 4,
+        "peertube": 2
       },
       "top_titles": [
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Complexity Science- 3 Systems Thinking",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 11- Homeostasis",
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
       "name": "Personal Finance",
       "school_slug": "everyday-life",
       "required": false,
-      "records": 4,
-      "mesh_redistributable": 3,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
-        "peertube": 4
+        "peertube": 3
       },
       "top_titles": [
         "GnuCash for Personal Finance - Getting Started and Basics",
         "GnuCash for Personal Finance - Split Transactions",
-        "Saving a Windows 8 Tablet with Debian Linux!",
         "“WISE BUYING” 1950 HOME ECONOMICS FILM SHOPPING, BUDGETING AND MANAGING FINANCES XD11974"
       ]
     },
@@ -14822,15 +15042,14 @@
       "name": "Electronics Basics",
       "school_slug": "technology",
       "required": false,
-      "records": 5,
-      "mesh_redistributable": 4,
+      "records": 4,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 5
+        "peertube": 4
       },
       "top_titles": [
         "Mesecons Tutorial - Basic Circuits",
         "Mesecons Tutorial - Basic Circuits",
-        "[Tech Maid] Mesecons Basics",
         "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
         "Karnaugh Map - Sum of Products Explained"
       ]
@@ -14853,31 +15072,26 @@
       "name": "Sewing & Textiles",
       "school_slug": "arts",
       "required": false,
-      "records": 1,
-      "mesh_redistributable": 1,
-      "providers": {
-        "peertube": 1
-      },
-      "top_titles": [
-        "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]"
-      ]
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
     },
     "drawing-design": {
       "name": "Drawing & Design",
       "school_slug": "arts",
       "required": false,
-      "records": 7,
-      "mesh_redistributable": 6,
+      "records": 6,
+      "mesh_redistributable": 5,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "How to use the Artisan Charcoal brush pack for Painter",
         "Inkscape Beginner Tutorial | Icon Drawing with Basic Shapes",
-        "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "How to use the Sketch Essentials brush pack",
-        "Direct ballpen training - video capture test",
+        "Overview of my Krita Digital Painting Workflow − end of 2022 (commented tutorial)",
         "Learn Grease Pencil 2D Animation in Blender 2.8 Alpha 2",
         "Tutorial- a Comic strip from A to Z with Krita"
       ]
@@ -14982,7 +15196,7 @@
         "philosophy-ethics"
       ],
       "coverage": 1.0,
-      "records": 65,
+      "records": 69,
       "available": true
     },
     "digital-ai-literacy": {
@@ -15006,7 +15220,7 @@
         "logical-frameworks"
       ],
       "coverage": 1.0,
-      "records": 15,
+      "records": 18,
       "available": true
     },
     "practical-life": {
@@ -15028,24 +15242,20 @@
         "statistics-data-literacy"
       ],
       "coverage": 1.0,
-      "records": 17,
+      "records": 16,
       "available": true
     },
     "maker-creative": {
-      "name": "Maker & Creative Studio",
+      "name": "Creative Studio",
       "kind": "extension",
-      "description": "Hands-on repair and creative production spanning electronics, wood, textiles, drawing, and camera craft.",
+      "description": "Creative production through art, drawing and design, photography, and video craft.",
       "topics": [
-        "electronics-basics",
-        "woodworking-basics",
-        "sewing-textiles",
+        "arts-culture",
         "drawing-design",
         "photography-video"
       ],
       "covered_topics": [
-        "electronics-basics",
-        "woodworking-basics",
-        "sewing-textiles",
+        "arts-culture",
         "drawing-design",
         "photography-video"
       ],
@@ -15071,7 +15281,7 @@
         "climate-environment"
       ],
       "coverage": 0.8,
-      "records": 12,
+      "records": 10,
       "available": true
     },
     "deep-science": {
@@ -15093,7 +15303,7 @@
         "climate-environment"
       ],
       "coverage": 1.0,
-      "records": 29,
+      "records": 28,
       "available": true
     },
     "humanities-culture": {
@@ -15116,9 +15326,12 @@
         "philosophy-ethics"
       ],
       "coverage": 0.8333,
-      "records": 22,
+      "records": 27,
       "available": true
     }
   },
-  "pack_registry_revision": "general-knowledge-packs-v1"
+  "pack_registry_revision": "general-knowledge-packs-v1",
+  "records_before_title_quality_gate": 155,
+  "rejected_by_title_quality_gate": 9,
+  "rejected_topic_links_by_title_quality_gate": 13
 }

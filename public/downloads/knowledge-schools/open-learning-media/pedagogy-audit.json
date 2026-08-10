@@ -1,8 +1,8 @@
 {
   "schema": "civweave.open-learning-media-pedagogy-audit.v3",
-  "built_at": "2026-08-10T08:57:05Z",
-  "before": 356,
-  "after": 194,
+  "built_at": "2026-08-10T09:33:38Z",
+  "before": 369,
+  "after": 207,
   "rejected": 162,
   "topics": {
     "world-history": {
@@ -25,17 +25,23 @@
       "name": "Earth & Geography",
       "school_slug": "geography",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 1,
+      "records": 11,
+      "mesh_redistributable": 8,
       "providers": {
-        "wikimedia-commons": 1,
-        "peertube": 3
+        "wikimedia-commons": 3,
+        "peertube": 8
       },
       "top_titles": [
-        "OpenRefine Beginners Tutorial by Emma Carroll",
+        "Come and learn how free maps, free knowledge can help care for the world",
+        "How to use Mergin Maps in Academia",
+        "WIKIMANIA Day 4 Meru - OpenStreetMap Mapping for Inclusion, Impact, and Sustainability",
+        "TeenMaptivists： Open Mapping in High School ~ Steven Johnson",
+        "Topographical maps for all!",
+        "Mobilisation of local people and technology in mapping for the Sierra Leone Ebola epidemic response",
+        "Map Themes in QGIS and Mergin Maps",
         "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
         "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574",
-        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144"
+        "FOSS4G 2022 | Aerial Images to Maps: Technological Advancements with OpenDroneMap"
       ]
     },
     "civics-society": {
@@ -95,10 +101,10 @@
       },
       "top_titles": [
         "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "Richard Feynman's Story of Particle Physics - 1973 Lecture",
         "Physics Of Crystals by LesBrown",
         "“SCIENCE FOR SPACE AGE: FORCES” 1964 BASIC PHYSICS EDUCATIONAL FILM XD72264a",
-        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875a",
         "\" BASIC PHYSICS OF SPACE FLIGHT \" 1970s SOVIET SPACE PROGRAM KONSTANTIN TSIOLKOVSKY R2 XD99875b"
@@ -121,8 +127,8 @@
         "Chemical Reactions GCSE Chemistry",
         "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
         "“ METALS AND NON-METALS \" 1964 CHEMISTRY & PERIODIC TABLE OF ELEMENTS EDUCATIONAL FILM XD72264b",
-        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "How to Understand Mendeleev's Periodic Table of 1869",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
         "The (truly) Periodic Table",
         "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
         "How To Balance Equations - Part 1 ｜ Chemical Calculations ｜ Chemistry ｜ FuseSchool"
@@ -265,13 +271,16 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 1,
-      "mesh_redistributable": 1,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
+        "peertube": 2,
         "internet-archive": 1
       },
       "top_titles": [
-        "Effective prompt engineering for Python programmers"
+        "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
+        "Il Prompt Engineering"
       ]
     },
     "pseudocoding": {
@@ -307,17 +316,19 @@
       "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "peertube": 1,
-        "wikimedia-commons": 3
+        "wikimedia-commons": 4,
+        "peertube": 2
       },
       "top_titles": [
-        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "Complexity Science- 3 Systems Thinking",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
-        "Systems Thinking 8- Emergence"
+        "Systems Thinking 11- Homeostasis",
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz"
       ]
     },
     "personal-finance": {
@@ -970,22 +981,8 @@
       ]
     },
     {
-      "provider": "wikimedia-commons",
-      "title": "Berpikir kritis seperti mengupas bawang",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
       "provider": "peertube",
       "title": "Tuto IA - Vera, l'appli de fact checking par simple appel ou message sur Whatsapp. Simple et top !!",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "BREAKING: Drones just struck IDF convoy carrying Netanyahu…ENTIRE ISRAEL IN SHOCK - OPTM",
       "relevance_topics": [
         "critical-thinking"
       ]
@@ -998,15 +995,29 @@
       ]
     },
     {
-      "provider": "peertube",
-      "title": "Fake News:l debunking; Fact checking",
+      "provider": "internet-archive",
+      "title": "Iran just destroyed US ships in strait of Hormuz - 10 million barrels incinerated — OPTM",
       "relevance_topics": [
         "critical-thinking"
       ]
     },
     {
       "provider": "internet-archive",
-      "title": "Orwellian Thought Crime - The UK and Free Speech | Bob | Speakers Corner",
+      "title": "Saudi's Just Received Terrible News! US Can’t Believe What Yemen Just Did – Yemen Out of Control!",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
+      "relevance_topics": [
+        "critical-thinking"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "Fake News:l debunking; Fact checking",
       "relevance_topics": [
         "critical-thinking"
       ]
@@ -1019,6 +1030,55 @@
       ]
     },
     {
+      "provider": "wikimedia-commons",
+      "title": "86th Security Forces Land Navigation Spot (1017757)",
+      "relevance_topics": [
+        "earth-geography"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "FOSS4G 2021 -Mobilizing an Open Mapping Initiative on Social Media Platforms with the LGBT Community",
+      "relevance_topics": [
+        "earth-geography"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "FOSS4G 2022 | Analysis of Free and open Land Cover maps for agricultural land use planning at the…",
+      "relevance_topics": [
+        "earth-geography"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "FOSS4G 2022 | Liberate your QGIS projects out of office with Mergin Maps",
+      "relevance_topics": [
+        "earth-geography"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "FOSS4G 2022 | Openness - a Strategic Choice",
+      "relevance_topics": [
+        "earth-geography"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "FOSS4G 2022 | YouthMappers: a global youth movement on open mapping for humanitarian and…",
+      "relevance_topics": [
+        "earth-geography"
+      ]
+    },
+    {
+      "provider": "peertube",
+      "title": "FOSS4GE 2025 | Community led Open Mapping Solutions: addressing humanitarian needs from start ...",
+      "relevance_topics": [
+        "earth-geography"
+      ]
+    },
+    {
       "provider": "peertube",
       "title": "FOSS4GE 2025 | Comparing 545 Million Years of Sea-Level Change: New insights from the ...",
       "relevance_topics": [
@@ -1026,8 +1086,8 @@
       ]
     },
     {
-      "provider": "wikimedia-commons",
-      "title": "Wait… women from that half of the world are really only 0.83% of Wikidata humans- I can do something about that!",
+      "provider": "peertube",
+      "title": "FOSS4GE 2025 | fAIr - Community AI Assisted Mapping Roadmap",
       "relevance_topics": [
         "earth-geography"
       ]
@@ -1205,27 +1265,6 @@
       "title": "Rosa Parks - Civil Rights Activist | Mini Bio | BIO",
       "relevance_topics": [
         "law-rights-basics"
-      ]
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Systems Thinking 11- Homeostasis",
-      "relevance_topics": [
-        "logical-frameworks"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Non-linear Thinking with Diana Montalion",
-      "relevance_topics": [
-        "logical-frameworks"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
-      "relevance_topics": [
-        "logical-frameworks"
       ]
     },
     {
@@ -1492,34 +1531,6 @@
       "title": "Wings For This Man - Tuskegee Airmen, African American Airmen, Ronald Reagan 24810 HD",
       "relevance_topics": [
         "physics-foundations"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Evals Are Broken, Use Them Anyway — Ara Khan, Cline",
-      "relevance_topics": [
-        "prompt-engineering"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Stop AI Agent Hallucinations: 5 Techniques + Production Patterns - Elizabeth Fuentes, AWS",
-      "relevance_topics": [
-        "prompt-engineering"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "This is a story of the prompt design to generate an antifascist aesthetics logo",
-      "relevance_topics": [
-        "prompt-engineering"
-      ]
-    },
-    {
-      "provider": "peertube",
-      "title": "Il Prompt Engineering",
-      "relevance_topics": [
-        "prompt-engineering"
       ]
     },
     {
