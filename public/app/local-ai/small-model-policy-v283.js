@@ -7,7 +7,7 @@ const text=value=>String(value??'');
 function purposeText(request={}){return [request.purpose,request.executionProfile,request.responseFormat,request.config?.service,request.config?.purpose].filter(Boolean).join(' ').toLowerCase()}
 function profile(spec={},request={}){
   const purpose=purposeText(request),structured=Boolean(request.schema||request.responseFormat==='json'||request.responseFormat==='structured'),code=/code|patch|diff|program|script|implementation|refactor/.test(purpose),agentic=String(request.executionProfile||'interactive')==='agentic';
-  const fallbackBudget=Number(spec.estimatedBytes||0)<=950_000_000?4096:Number(spec.estimatedBytes||0)<=1_650_000_000?4096:2048;
+  const fallbackBudget=Number(spec.estimatedBytes||0)<=1_650_000_000?4096:2048;
   const promptTokenBudget=Math.max(768,Number(spec.workingContextTokens||fallbackBudget));
   const explicit=Number(request.config?.maxTokens||request.maxTokens||0);
   const defaultSlice=structured||code||agentic?384:256;
@@ -18,22 +18,22 @@ function profile(spec={},request={}){
   return Object.freeze({promptTokenBudget,initialSlice,continuationSlice,totalMax,maxPasses:4,structured,code,agentic});
 }
 function structure(textValue){
-  const source=text(textValue),stack=[];let quote='',escaped=false;
+  const source=text(textValue),stack=[];let quoted=false,escaped=false;
   for(let i=0;i<source.length;i++){
     const c=source[i];
-    if(quote){if(escaped){escaped=false;continue}if(c==='\\'){escaped=true;continue}if(c===quote)quote='';continue}
-    if(c==='"'||c==="'"){quote=c;continue}
+    if(quoted){if(escaped){escaped=false;continue}if(c==='\\'){escaped=true;continue}if(c==='"')quoted=false;continue}
+    if(c==='"'){quoted=true;continue}
     if(c==='{'||c==='['||c==='(')stack.push(c);
     else if(c==='}'||c===']'||c===')'){const want=c==='}'?'{':c===']'?'[':'(';if(stack.at(-1)===want)stack.pop()}
   }
   const fences=(source.match(/```/g)||[]).length;
-  return{openBrackets:stack.length,openQuote:Boolean(quote),openFence:Boolean(fences%2),incomplete:Boolean(stack.length||quote||fences%2)};
+  return{openBrackets:stack.length,openQuote:quoted,openFence:Boolean(fences%2),incomplete:Boolean(stack.length||quoted||fences%2)};
 }
 function looksAbrupt(textValue){const s=text(textValue).trim();if(!s)return true;return /(?:[,;:\\([{]|\b(?:and|or|because|therefore|with|to|of|the|a|an))\s*$/i.test(s)}
 function validateCompletion(run={},textValue='',options={}){
   const s=structure(textValue),completion=run.completion||{},near=Boolean(completion.nearTokenLimit||completion.completionReason==='length'),structured=Boolean(options.structured),jsonValid=options.jsonValid!==false;
   if(near)return{clipped:true,reason:'token-limit',structure:s};
-  if(completion.structurallyIncomplete||s.incomplete)return{clipped:true,reason:'open-structure',structure:s};
+  if(s.incomplete)return{clipped:true,reason:'open-structure',structure:s};
   if(structured&&!jsonValid&&looksAbrupt(textValue))return{clipped:true,reason:'structured-abrupt',structure:s};
   return{clipped:false,reason:'complete',structure:s};
 }
