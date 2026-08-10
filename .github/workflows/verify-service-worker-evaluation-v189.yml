@@ -37,10 +37,12 @@ jobs:
           node --check public/service-worker.js
           node --check public/service-worker-v156.js
           node --check public/service-worker-v203.js
+          node --check public/service-worker-code-coherence-v288.js
           node --check public/service-worker-core-v208.js
           node --check public/service-worker-installed-launch-v282.js
           node --check public/service-worker-installer-state-v280.js
           node --check public/service-worker-shell-integrity-v281.js
+          node --check public/service-worker-shell-repair-v293.js
           node --check public/service-worker-offline-v211-override.js
           node --check public/service-worker-campus-completion-v246.js
           node --check public/service-worker-release-coherence-v220.js
@@ -53,6 +55,7 @@ jobs:
           node --check scripts/sync-release-version-assets.mjs
           node --check scripts/sync-release-coherence-v220.mjs
           node --check scripts/generate-prelive-metadata-v281.mjs
+          node --check scripts/verify-installed-shell-repair-v293.mjs
           node --check scripts/verify-five-system-navigation-v227.mjs
           node --check scripts/verify-navigation-generators-v227.mjs
           node --check scripts/verify-service-worker-evaluation-v189.mjs
@@ -84,6 +87,8 @@ jobs:
         run: node scripts/verify-navigation-redirect-safety-v224.mjs
       - name: Verify empty shell self-repair and online fallback
         run: node scripts/verify-shell-self-repair-v225.mjs
+      - name: Verify installed shell in-place repair
+        run: node scripts/verify-installed-shell-repair-v293.mjs
       - name: Verify all five canonical boundary surfaces
         run: node scripts/verify-canonical-core-only-v226.mjs
       - name: Verify navigation-safe Working Campus boot
