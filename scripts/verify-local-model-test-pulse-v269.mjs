@@ -3,14 +3,15 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [pulse,bootstrap,runtime,assistant,registry,worker,lifecycle]=await Promise.all([
+const [pulse,bootstrap,runtime,assistant,registry,worker,lifecycle,metadataRepair]=await Promise.all([
   read('public/app/local-ai/test-pulse-v269.js'),
   read('public/app/local-ai/bootstrap-v266.js'),
   read('public/app/local-ai/runtime-v266.js'),
   read('public/app/assistant-runtime-v141.js'),
   read('public/app/local-ai/model-registry-v266.js'),
   read('public/app/local-ai/worker-v266.js'),
-  read('public/app/document-lifecycle-v221.js')
+  read('public/app/document-lifecycle-v221.js'),
+  read('public/app/local-ai/metadata-repair-v276.js')
 ]);
 
 const compile=(path,source)=>{try{new Function(source)}catch(error){console.log(`::error file=${path},title=JavaScript syntax failure::${String(error?.message||error).replaceAll('\n',' ')}`);throw error}};
@@ -21,6 +22,7 @@ compile('public/app/assistant-runtime-v141.js',assistant);
 compile('public/app/local-ai/model-registry-v266.js',registry);
 compile('public/app/local-ai/worker-v266.js',worker);
 compile('public/app/document-lifecycle-v221.js',lifecycle);
+compile('public/app/local-ai/metadata-repair-v276.js',metadataRepair);
 
 const checks=[];
 const check=(name,value)=>{if(!value)console.log(`::error file=scripts/verify-local-model-test-pulse-v269.mjs,title=Local model verifier::${name}`);assert.ok(value,name);checks.push(name)};
@@ -48,8 +50,12 @@ check('registry includes hidden CPU compatibility runtime',registry.includes("id
 check('runtime probes actual WebGPU adapter instead of navigator.gpu presence only',runtime.includes('navigator.gpu.requestAdapter()')&&runtime.includes('hasWebGPUAdapter'));
 check('runtime downloads compatibility artifacts and retries on adapter failure',runtime.includes('backend-fallback-download')&&runtime.includes('compatibilitySpec')&&runtime.includes('backendFailure(error)'));
 check('worker permits CPU/WASM and probes WebGPU only when requested',worker.includes("if(spec.device!=='webgpu')return 'wasm'")&&worker.includes('requestAdapter()')&&!worker.includes("if(!self.navigator?.gpu)throw new Error('WebGPU is unavailable in this worker.');"));
-check('bootstrap pins backend-fallback registry runtime and bridge',bootstrap.includes('1.0.73-local-ai-registry-v275-backend-fallback')&&bootstrap.includes('1.0.73-local-ai-runtime-v275-backend-fallback')&&bootstrap.includes('1.0.73-local-ai-bridge-v275-backend-fallback')&&bootstrap.includes('backendFallback:true'));
-check('settings lifecycle refuses stale pre-fallback bootstrap',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.73-local-ai-bootstrap-v275-backend-fallback'")&&lifecycle.includes('bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION'));
+check('metadata repair wrapper only fast-repairs non-ONNX metadata',metadataRepair.includes("!/^onnx\\//i.test")&&metadataRepair.includes('missing.every(artifact=>metadataPath(artifact.path))')&&metadataRepair.includes('return base.repair(id,{onProgress})'));
+check('metadata repair preserves cached model weights',metadataRepair.includes('preservesWeights:true')&&metadataRepair.includes('metadataOnlyRepair:true'));
+check('metadata repair cancels stale foreground repair before writing metadata',metadataRepair.includes('await base.cancel?.(id)'));
+check('bootstrap loads metadata repair immediately after download manager',bootstrap.includes('metadata-repair-v276.js')&&bootstrap.indexOf('download-manager-v267.js')<bootstrap.indexOf('metadata-repair-v276.js')&&bootstrap.indexOf('metadata-repair-v276.js')<bootstrap.indexOf('runtime-v266.js'));
+check('bootstrap advertises metadata-only repair',bootstrap.includes('metadataOnlyRepair:true'));
+check('settings lifecycle refuses stale pre-v276 bootstrap',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.80-local-ai-bootstrap-v276-metadata-repair'")&&lifecycle.includes('metadataOnlyRepair===true')&&lifecycle.includes('bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION'));
 
 let capturedRequest=null,directCalls=0,clock=100;
 const context={
@@ -71,4 +77,4 @@ check('mock pulse returns generated runtime text unchanged',generated.text==='A 
 check('mock pulse sends a short conversational user message',capturedRequest?.messages?.length===1&&capturedRequest.messages[0].role==='user'&&capturedRequest.maxNewTokens===64);
 check('mock pulse identifies direct downloaded-local provenance',generated.provider==='downloaded-local-direct'&&generated.model==='mock-local');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v275-backend-fallback',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,stableDomRepair:true,mockInference:true,jsonMetadataRepair:true,backendFallback:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v276-metadata-repair',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,stableDomRepair:true,mockInference:true,jsonMetadataRepair:true,metadataOnlyRepair:true,backendFallback:true},null,2));
