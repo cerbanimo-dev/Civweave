@@ -6,7 +6,7 @@ let mounted=false;
 let refreshTimer=null;
 const now=()=>new Date().toISOString();
 const clean=(value,max=1000)=>String(value??'').trim().slice(0,max);
-const esc=value=>clean(value,2000).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=value=>clean(value,2000).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const fmtBytes=value=>{const bytes=Math.max(0,Number(value)||0);if(bytes<1024)return`${bytes} B`;const units=['KiB','MiB','GiB'];let n=bytes/1024,i=0;while(n>=1024&&i<units.length-1){n/=1024;i++}return`${n>=100?n.toFixed(0):n>=10?n.toFixed(1):n.toFixed(2)} ${units[i]}`};
 const fmtAge=value=>{const ms=Date.now()-Date.parse(value||0);if(!Number.isFinite(ms)||ms<0)return'';if(ms<60000)return'just now';if(ms<3600000)return`${Math.floor(ms/60000)}m ago`;if(ms<86400000)return`${Math.floor(ms/3600000)}h ago`;return`${Math.floor(ms/86400000)}d ago`};
 function storage(){return globalThis.CivweaveMapStorageV1}
