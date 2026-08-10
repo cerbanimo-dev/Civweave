@@ -24,7 +24,7 @@ replaceRequired(
 );
 replaceRequired(
   "assert(/working-campus-additions-v19[12]-(?:memory-credential|credential-usable)/.test(additiveWorker),'Additive cache did not retain or advance the memory/credential package.');",
-  "if(lightweightBridge){\n  assert(additiveWorker.includes('legacy-v156-bridge-v209'),'Legacy v156 registration no longer identifies the direct lightweight bridge.');\n  assert(/service-worker-v203\\.js\\?v=1\\.0\\.\\d+-lightweight-shell-v208-legacy-v156-bridge-v209/.test(additiveWorker),'Legacy v156 registration does not rotate through the active lightweight shell.');\n}else{\n  assert(/working-campus-additions-v19[12]-(?:memory-credential|credential-usable)/.test(additiveWorker),'Additive cache did not retain or advance the memory/credential package.');\n}",
+  "if(lightweightBridge){\n  assert(additiveWorker.includes('legacy-v156-bridge-v209'),'Legacy v156 registration no longer identifies the direct lightweight bridge.');\n  assert(/service-worker-v203\\.js\\?v=1\\.0\\.\\d+-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209/.test(additiveWorker),'Legacy v156 registration does not rotate through the active v288 code-coherent lightweight shell.');\n}else{\n  assert(/working-campus-additions-v19[12]-(?:memory-credential|credential-usable)/.test(additiveWorker),'Additive cache did not retain or advance the memory/credential package.');\n}",
   'additive package revision assertion'
 );
 

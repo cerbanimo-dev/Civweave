@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
 const releaseVersion=(await read('VERSION')).trim();
-const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-lightweight-shell-v208-legacy-v156-bridge-v209')`;
+const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209')`;
 const [source,boundary,legacyWorker,wrapper,core,installerState,integrity,offline,workingCampus,manifestText,css]=await Promise.all([
   read('public/extensions/civweave-proof-progress-v158.js'),
   read('public/app/install-boundary-v146.js'),
@@ -31,7 +31,7 @@ assert(boundary.includes('/extensions/civweave-proof-progress-v158.js'),'Install
 const lightweightMode=legacyWorker.includes('legacy-v156-bridge-v209');
 if(lightweightMode){
   assert(legacyWorker.includes(expectedWorkerImport),`Legacy registrations do not reach the active ${releaseVersion} worker wrapper.`);
-  assert(wrapper.includes("importScripts('/service-worker-living-school-cleanroom-v218.js")&&wrapper.includes("importScripts('/service-worker-core-v208.js")&&wrapper.includes("importScripts('/service-worker-installer-state-v280.js")&&wrapper.includes("importScripts('/service-worker-shell-integrity-v281.js")&&wrapper.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper is incomplete.');
+  assert(wrapper.includes("importScripts('/service-worker-living-school-cleanroom-v218.js")&&wrapper.includes("importScripts('/service-worker-code-coherence-v288.js")&&wrapper.includes("importScripts('/service-worker-core-v208.js")&&wrapper.includes("importScripts('/service-worker-installer-state-v280.js")&&wrapper.includes("importScripts('/service-worker-shell-integrity-v281.js")&&wrapper.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper is incomplete.');
   assert(wrapper.includes('offline-campus-current-graph-v280')&&wrapper.includes('policy=resumable-pause-v280'),'Active worker wrapper does not load the resumable current-graph repair.');
   assert(core.includes("const BUILD = 'lightweight-shell-v208'"),'Retained worker core is not the lightweight shell.');
   assert(core.includes('discoverReferences')&&core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Retained offline campus core lost discovery or hydration.');
@@ -120,5 +120,5 @@ console.log(JSON.stringify({
   completionAuthority:'accepted-realm-proof',
   realms:['living-school','cerbanimo','fellowfare'],
   planState:campus.plan.state,
-  offlinePackageMode:lightweightMode?'v218-wrapper-v281-integrity-v280-resumable-campus-v251-systems-mesh':'layered-extension-package-v158'
+  offlinePackageMode:lightweightMode?'v218-wrapper-v288-code-coherence-v281-integrity-v280-resumable-campus-v251-systems-mesh':'layered-extension-package-v158'
 },null,2));

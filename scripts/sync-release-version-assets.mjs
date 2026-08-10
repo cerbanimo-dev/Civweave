@@ -75,7 +75,7 @@ await patch('public/service-worker-v203.js',source=>{
   source=replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+(?:-[^'\n]+)?/,`service-worker-core-v208.js?v=${version}-chat-convergence-v250`,'service-worker wrapper revision');
   return source;
 });
-await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+-lightweight-shell-v208-legacy-v156-bridge-v209/,`service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`,'legacy worker bridge revision'));
+await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+(?:-code-coherence-v288)?-lightweight-shell-v208-legacy-v156-bridge-v209/,`service-worker-v203.js?v=${version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209`,'legacy worker bridge revision'));
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'install-boundary runtime version');
   if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;'))throw new Error(`install-boundary release-aware additions revision was not found while synchronizing Civweave ${version}.`);
