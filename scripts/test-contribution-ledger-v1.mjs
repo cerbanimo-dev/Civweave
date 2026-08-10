@@ -46,9 +46,15 @@ test('weighted validation rewards strong evidence and penalizes strong failures'
     passingValidation('c1', 'model', 'd3', 'model', 'model-read'),
     passingValidation('c1', 'weak-fail', 'd4', 'peer', 'artifact-2', { rubricScore: 0.69, confidence: 0.8 }),
   ]);
-  assert.ok(aggregate.confidence > 0.9, `expected high confidence, got ${aggregate.confidence}`);
+  assert.ok(aggregate.confidence > 0.8, `expected mint-grade accumulated confidence, got ${aggregate.confidence}`);
   assert.equal(aggregate.evidenceDiversity, 3);
   assert.equal(aggregate.passingDevices, 3);
+
+  const weakPasses = aggregateValidations([
+    passingValidation('c1', 'weak-a', 'd1', 'model', 'model-read', { rubricScore: 0.71, confidence: 0.55, calibration: 0.55 }),
+    passingValidation('c1', 'weak-b', 'd2', 'peer', 'artifact', { rubricScore: 0.72, confidence: 0.55, calibration: 0.55 }),
+  ]);
+  assert.ok(weakPasses.confidence < 0.5, `weak passing evidence must accumulate rather than normalize to certainty: ${weakPasses.confidence}`);
 
   const strongFailure = aggregateValidations([
     passingValidation('c1', 'pass', 'd1', 'human', 'artifact'),
