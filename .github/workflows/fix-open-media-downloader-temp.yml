@@ -1,0 +1,90 @@
+name: Fix Open Media Downloader Temp
+
+on:
+  push:
+    branches:
+      - agent/general-knowledge-video-packs-v1
+    paths:
+      - .github/workflows/fix-open-media-downloader-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Make pack coverage mean downloader-ready
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          helper = '''def downloader_ready(record):
+              if not record.get("mesh_redistributable"):
+                  return False
+              for file in record.get("files") or []:
+                  url=str(file.get("url") or "")
+                  mime=str(file.get("mime") or "").lower()
+                  try:
+                      size=int(file.get("bytes") or 0)
+                  except (TypeError, ValueError):
+                      size=0
+                  if url.startswith("https://") and mime.startswith("video/") and size>0:
+                      return True
+              return False
+          '''
+
+          for name in [
+              'scripts/curate-open-learning-media-library-v1.py',
+              'scripts/filter-open-learning-media-title-quality-v1.py',
+          ]:
+              path=Path(name)
+              text=path.read_text(encoding='utf-8')
+              if 'def downloader_ready(record):' not in text:
+                  marker='\ndef main():'
+                  if marker not in text:
+                      raise SystemExit(f'{name}: main marker missing')
+                  text=text.replace(marker, '\n\n'+helper+marker, 1)
+              replacements={
+                  'if not r.get("mesh_redistributable"): continue':'if not downloader_ready(r): continue',
+                  'sum(bool(r.get("mesh_redistributable")) for r in subset)':'sum(downloader_ready(r) for r in subset)',
+                  'if r.get("mesh_redistributable") and any':'if downloader_ready(r) and any',
+                  'sum(bool(r.get("mesh_redistributable")) for r in kept)':'sum(downloader_ready(r) for r in kept)',
+                  'if r.get("mesh_redistributable")]':'if downloader_ready(r)]',
+              }
+              for old,new in replacements.items():
+                  text=text.replace(old,new)
+              path.write_text(text,encoding='utf-8')
+
+          harvest=Path('scripts/harvest-open-learning-media-library-v1.py')
+          text=harvest.read_text(encoding='utf-8')
+          if '"biology-life": [' not in text.split('DISCOVERY_REFINEMENTS = {',1)[1].split('}',1)[0]:
+              anchor='''    "civics-society": [\n'''
+              addition='''    "biology-life": [\n        "cell biology educational film",\n        "biology educational film",\n        "genetics biology educational film",\n        "molecular biology lesson",\n        "ecology biology educational video",\n    ],\n'''
+              if anchor not in text:
+                  raise SystemExit('biology discovery insertion anchor missing')
+              text=text.replace(anchor,addition+anchor,1)
+          harvest.write_text(text,encoding='utf-8')
+
+          workflow=Path('.github/workflows/harvest-open-learning-media-v1.yml')
+          text=workflow.read_text(encoding='utf-8')
+          text=text.replace('      - scripts/test-open-learning-media-packs-v1.py\n','')
+          workflow.write_text(text,encoding='utf-8')
+          PY
+          python -m py_compile scripts/curate-open-learning-media-library-v1.py scripts/filter-open-learning-media-title-quality-v1.py scripts/harvest-open-learning-media-library-v1.py scripts/test-open-learning-media-packs-v1.py
+      - name: Commit repair and remove temporary workflows
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git rm -f .github/workflows/fix-open-media-downloader-temp.yml
+          git rm -f .github/workflows/sync-general-knowledge-media-temp.yml || true
+          git add scripts/curate-open-learning-media-library-v1.py scripts/filter-open-learning-media-title-quality-v1.py scripts/harvest-open-learning-media-library-v1.py .github/workflows/harvest-open-learning-media-v1.yml
+          git commit -m 'Make media pack coverage downloader-ready'
+          git pull --rebase origin agent/general-knowledge-video-packs-v1
+          git push origin HEAD:agent/general-knowledge-video-packs-v1
