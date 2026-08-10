@@ -11,7 +11,7 @@ The core pack is a launch invariant: every topic must retain at least one select
 ## Extension packs
 
 - **Digital & AI Literacy**: computing basics, vibe coding, prompt engineering, pseudocoding, critical thinking/media literacy, and logic/systems thinking.
-- **Practical Life**: personal finance, cooking and food safety, emergency preparedness, home maintenance, and career/work skills.
+- **Practical Life**: personal finance, cooking and food safety, health and wellness, computing basics, and statistics/data literacy.
 - **Maker & Creative Studio**: electronics, woodworking, sewing/textiles, drawing/design, and photography/video.
 - **Civic & Media Literacy**: critical thinking, civics, statistics/data literacy, climate/environment, and law/rights.
 - **Deep Science**: biology, physics, chemistry, astronomy, and climate/environment.
@@ -33,7 +33,7 @@ The curation pipeline applies three deterministic gates:
 
 Required topics fail closed if they lose redistributable coverage. Extension packs must meet the configured minimum topic-coverage ratio before publication. Individual extension-only topics can therefore disappear temporarily without blocking the entire weekly harvest.
 
-Practical Life deliberately uses emergency-preparedness material rather than treating an open video catalog as a source of medical diagnosis or treatment guidance.
+Emergency preparedness, home maintenance, and career/work skills remain active discovery lanes in the registry, but they are not advertised as part of the installable Practical Life pack until they earn enough strict, redistributable coverage. This preserves useful future expansion without weakening the current quality and rights gates.
 
 ## Installation behavior
 
