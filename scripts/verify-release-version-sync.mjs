@@ -102,7 +102,8 @@ check(nav.includes('ROUTES.navigate'),'Themed navigation bypasses the route cont
 check(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core version is stale.');
 check(workerWrapper.includes(`/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Worker route contract revision is stale.');
 check(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-chat-convergence-v250`),'Worker core revision is stale.');
-check(workerWrapper.includes('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238'),'Worker offline current-graph revision is stale.');
+check(workerWrapper.includes('/service-worker-installer-state-v280.js?v=installer-state-machines-v280'),'Worker installer state machine revision is stale.');
+check(workerWrapper.includes('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280'),'Worker offline current-graph revision is stale.');
 check(workerWrapper.includes('/service-worker-chat-repair-v245.js?v=chat-convergence-v250'),'Worker lost the stale-chat cache migration lane.');
 check(workerWrapper.indexOf('/service-worker-canonical-navigation-v227.js')>workerWrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not the final worker policy.');
 check(legacyWorker.includes(`/service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
