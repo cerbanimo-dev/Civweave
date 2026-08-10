@@ -24,7 +24,7 @@ jobs:
       - name: Materialize prelaunch discipline pass
         run: |
           set -euo pipefail
-          node scripts/migrations/prelaunch-repo-discipline-v1.mjs
+          node scripts/migrations/prelaunch-repo-discipline-v2.mjs
           node scripts/sync-release-version-assets.mjs
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
           rm -f .github/workflows/materialize-prelaunch-repo-discipline.yml
