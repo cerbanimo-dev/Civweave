@@ -60,11 +60,20 @@ assert(Number(record.bytes)===bytes.byteLength,'ESCO bridge catalog byte count d
 assert(record.sha256===sha256(bytes),'ESCO bridge catalog checksum does not match artifact.');
 assert(record.optional===true&&record.bundled===false&&record.autoStage===false,'ESCO bridge must stay optional and non-auto-staged.');
 
-const runtime=await fs.readFile(path.join(ROOT,'public','app','shared','skill-crosswalk-v1.mjs'),'utf8');
+const [runtime,cerbanimo,livingSchool]=await Promise.all([
+  fs.readFile(path.join(ROOT,'public','app','shared','skill-crosswalk-v1.mjs'),'utf8'),
+  fs.readFile(path.join(ROOT,'public','app','cerbanimo-learning-packs-v1.js'),'utf8'),
+  fs.readFile(path.join(ROOT,'public','app','living-school-learning-packs-v1.mjs'),'utf8')
+]);
 assert(runtime.includes("DEFAULT_MIN_CONFIDENCE=.9"),'Runtime canonical threshold must remain explicit.');
 assert(runtime.includes("clean(row.status,40)!=='accepted'"),'Runtime must exclude review mappings by default.');
 assert(runtime.includes("packs.stage([PACK_ID])"),'Runtime installation must use the existing learning-pack cache.');
 assert(runtime.includes("packs.remove([PACK_ID])"),'Runtime removal must use the existing learning-pack cache.');
+assert(runtime.includes("if(!current.staged){if(!stage)return null"),'Ordinary normalization must not auto-download the optional bridge.');
+assert(cerbanimo.includes("normalizeSkillRefs(skillRefs,{stage:false")&&livingSchool.includes("normalizeSkillRefs(skillRefs,{stage:false"),'Both realms must enrich only from an already staged crosswalk during ordinary work.');
+assert(cerbanimo.includes('normalizedSkillRefs')&&livingSchool.includes('normalizedSkillRefs'),'Both realms must retain normalized skill identities in generated inputs/events.');
+assert(cerbanimo.includes('installSkillCrosswalk')&&livingSchool.includes('installSkillCrosswalk'),'Both realms must expose an explicit crosswalk install action.');
+assert(cerbanimo.includes('mapOnetOccupation')&&livingSchool.includes('mapOnetOccupation'),'Both realms must share the same occupation bridge.');
 
 console.log('ESCO Skill Crosswalk v1 contract passed.',{
   authoredCivweaveSkills:authored.size,
@@ -72,5 +81,6 @@ console.log('ESCO Skill Crosswalk v1 contract passed.',{
   reviewSkillMappings:skillMappings.filter(row=>row.status==='review').length,
   unresolvedCivweaveSkills:unresolved.length,
   officialOccupationMappings:occupationMappings.length,
-  artifactBytes:bytes.byteLength
+  artifactBytes:bytes.byteLength,
+  realmEnrichment:true
 });
