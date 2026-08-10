@@ -1,0 +1,106 @@
+name: Sync Open Learning Media With Main Temp
+
+on:
+  push:
+    branches:
+      - agent/open-learning-media-harvest-v1
+    paths:
+      - .github/workflows/sync-open-media-main-temp.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-open-media-main-temp
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/open-learning-media-harvest-v1
+          fetch-depth: 0
+
+      - name: Merge current main and resolve shared release files semantically
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          FEATURE_HEAD="$(git rev-parse HEAD)"
+          cp package.json /tmp/open-media-package.json
+          cp public/app/manifest.webmanifest /tmp/open-media-manifest.json
+          cp public/app/offline-package-v208.json /tmp/open-media-offline.json
+          git fetch origin main
+          set +e
+          git merge --no-commit --no-ff origin/main
+          MERGE_STATUS=$?
+          set -e
+          echo "git merge status: $MERGE_STATUS"
+
+          git checkout origin/main -- VERSION package.json public/app/manifest.webmanifest public/app/offline-package-v208.json
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+
+          main_version = subprocess.check_output(['git','show','origin/main:VERSION'], text=True).strip()
+          major, minor, patch = [int(part) for part in main_version.split('.')]
+          release = f'{major}.{minor}.{patch + 1}'
+          Path('VERSION').write_text(release + '\n')
+
+          main_package = json.loads(Path('package.json').read_text())
+          feature_package = json.loads(Path('/tmp/open-media-package.json').read_text())
+          main_package['version'] = release
+          if 'test:open-learning-media' in feature_package.get('scripts', {}):
+              main_package.setdefault('scripts', {})['test:open-learning-media'] = feature_package['scripts']['test:open-learning-media']
+          Path('package.json').write_text(json.dumps(main_package, indent=2) + '\n')
+
+          manifest = json.loads(Path('public/app/manifest.webmanifest').read_text())
+          manifest['name'] = f'Civweave v{release}'
+          Path('public/app/manifest.webmanifest').write_text(json.dumps(manifest, indent=2) + '\n')
+
+          main_offline = json.loads(Path('public/app/offline-package-v208.json').read_text())
+          feature_offline = json.loads(Path('/tmp/open-media-offline.json').read_text())
+          seen = set(main_offline.get('assets', []))
+          for asset in feature_offline.get('assets', []):
+              if asset not in seen:
+                  main_offline.setdefault('assets', []).append(asset)
+                  seen.add(asset)
+          revision = str(main_offline.get('revision') or 'civweave-offline')
+          if 'open-learning-media-v1' not in revision:
+              revision += '-open-learning-media-v1'
+          main_offline['revision'] = revision
+          Path('public/app/offline-package-v208.json').write_text(json.dumps(main_offline, indent=2) + '\n')
+          print(f'Semantically resolved shared launch files for Civweave {release}.')
+          PY
+
+          # Runner token cannot alter workflow files. Preserve the feature branch workflow tree;
+          # the connector will reconcile the two map workflows after this tested merge is pushed.
+          git checkout "$FEATURE_HEAD" -- .github/workflows
+          git add -A
+          if git ls-files -u | grep -q .; then
+            echo 'Unresolved merge entries remain:'
+            git ls-files -u
+            exit 1
+          fi
+
+      - name: Verify merged Open Learning Media and map contracts
+        run: |
+          set -euo pipefail
+          node --check public/app/open-learning-media-cache-v1.mjs
+          node --check public/app/video-learning-contract-v1.mjs
+          node --check public/service-worker-core-v208.js
+          node scripts/test-open-learning-media-runtime-v1.mjs
+          node scripts/test-video-learning-contract-v1.mjs
+          python scripts/test-open-learning-media-harvest-v1.py
+          node scripts/test-civweave-map-v1.mjs
+          node scripts/test-federation-map-v275.mjs
+          test "$(cat VERSION)" != "$(git show origin/main:VERSION)"
+
+      - name: Commit tested main sync without workflow changes
+        run: |
+          set -euo pipefail
+          git commit -m 'Sync current main into launch-ready Open Learning Media branch'
+          git push origin HEAD:agent/open-learning-media-harvest-v1
