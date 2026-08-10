@@ -40,9 +40,12 @@ const runtimeUsesWorker=runtime.includes("request('generate'")&&runtime.includes
 check('runtime itself talks to the local generative worker',runtimeUsesWorker);
 check('bootstrap loads pulse after settings panel',bootstrap.includes('test-pulse-v269.js')&&bootstrap.indexOf('settings-panel-v267.js')<bootstrap.indexOf('test-pulse-v269.js'));
 check('bootstrap advertises direct model testing',bootstrap.includes('directModelTest:true'));
+check('bootstrap advertises phone 1B tier',bootstrap.includes('phone1BTier:true'));
 
-check('all runtime generation JSON metadata is required',((registry.match(/\['generation_config\.json',50,true\]/g)||[]).length>=4));
+check('all runtime generation JSON metadata is required',((registry.match(/\['generation_config\.json',[0-9_]+,true\]/g)||[]).length>=5));
 check('SmolLM special-token JSON metadata is required',registry.includes("['special_tokens_map.json',50,true]"));
+check('Gemma 3 1B direct package includes external q4f16 data',registry.includes("id:'gemma3-1b-it-q4f16'")&&registry.includes("repo:'onnx-community/gemma-3-1b-it-ONNX'")&&registry.includes("['onnx/model_q4f16.onnx_data',700_000_000,true]"));
+check('Gemma 3 1B is the standard default tier',registry.includes("id:'gemma3-1b-it-q4f16',label:'Gemma 3 1B IT',tier:'Standard'")&&registry.includes("recommended:'default'"));
 check('runtime repairs a previously-ready install before inference',runtime.includes("state.state?.status==='ready'")&&runtime.includes('manager.repair')&&runtime.includes('repair:true,onProgress'));
 check('worker recognizes the empty JSON cache-miss signature',worker.includes('Unexpected end of JSON input')&&worker.includes('missing, truncated, or invalid'));
 check('test pulse recognizes the empty JSON cache-miss signature',pulse.includes('Unexpected end of JSON input')&&pulse.includes('missing, truncated, or invalid'));
@@ -55,7 +58,7 @@ check('metadata repair preserves cached model weights',metadataRepair.includes('
 check('metadata repair cancels stale foreground repair before writing metadata',metadataRepair.includes('await base.cancel?.(id)'));
 check('bootstrap loads metadata repair immediately after download manager',bootstrap.includes('metadata-repair-v276.js')&&bootstrap.indexOf('download-manager-v267.js')<bootstrap.indexOf('metadata-repair-v276.js')&&bootstrap.indexOf('metadata-repair-v276.js')<bootstrap.indexOf('runtime-v266.js'));
 check('bootstrap advertises metadata-only repair',bootstrap.includes('metadataOnlyRepair:true'));
-check('settings lifecycle refuses stale pre-v276 bootstrap',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.80-local-ai-bootstrap-v276-metadata-repair'")&&lifecycle.includes('metadataOnlyRepair===true')&&lifecycle.includes('bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION'));
+check('settings lifecycle refuses stale pre-v277 bootstrap',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.80-local-ai-bootstrap-v277-phone-1b-tier'")&&lifecycle.includes('metadataOnlyRepair===true')&&lifecycle.includes('bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION'));
 
 let capturedRequest=null,directCalls=0,clock=100;
 const context={
@@ -77,4 +80,4 @@ check('mock pulse returns generated runtime text unchanged',generated.text==='A 
 check('mock pulse sends a short conversational user message',capturedRequest?.messages?.length===1&&capturedRequest.messages[0].role==='user'&&capturedRequest.maxNewTokens===64);
 check('mock pulse identifies direct downloaded-local provenance',generated.provider==='downloaded-local-direct'&&generated.model==='mock-local');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v276-metadata-repair',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,stableDomRepair:true,mockInference:true,jsonMetadataRepair:true,metadataOnlyRepair:true,backendFallback:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v277-phone-1b-tier',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,stableDomRepair:true,mockInference:true,jsonMetadataRepair:true,metadataOnlyRepair:true,backendFallback:true,phone1BTier:true},null,2));
