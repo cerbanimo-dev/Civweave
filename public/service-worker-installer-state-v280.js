@@ -10,6 +10,7 @@ const INSTALLER_STATE_ASSETS = [
   '/app/shared/civweave-validator-committee-v2.js',
   '/app/shared/civweave-validator-review-gate-v1.js',
   '/app/shared/civweave-contribution-ship-guard-v1.js',
+  '/app/shared/civweave-contribution-gateway-v1.js',
   '/app/shared/civweave-canonical-reward-mesh-bridge-v1.js',
   '/app/contribution-security-settings-entry-v1.js',
   '/app/contribution-security-v1.html',
@@ -23,13 +24,14 @@ try {
 } catch {}
 
 self.CivweaveInstallerStateWorkerV280 = Object.freeze({
-  revision: 'installer-state-machines-v280-security-r5-validator-review',
+  revision: 'installer-state-machines-v280-security-r6-contribution-gateway',
   assets: INSTALLER_STATE_ASSETS.slice(),
   shellRequired: true,
   contributionSecurityRequired: true,
   validatorCommitteeV2Required: true,
   validatorReviewGateRequired: true,
   walletContainmentRequired: true,
+  contributionGatewayRequired: true,
   canonicalRewardMeshBridgeRequired: true,
   contributionSecuritySettingsRequired: true
 });
