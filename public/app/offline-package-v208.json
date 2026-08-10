@@ -30,6 +30,7 @@
     "/app/federation-finder-local-v269.js",
     "/app/federation-finder-data/federation-seed-v269.json",
     "/app/local-object-mesh-v146.js",
+    "/app/shared/civweave-contribution-mesh-v1.js",
     "/app/node-ai-mesh-v1.js",
     "/app/shared/civweave-node-ai-routing-v1.mjs",
     "/app/node-ai-marketplace-surface-v1.js",
