@@ -1,4 +1,9 @@
-await import('./apply-confidence-weighted-validation-v1-safe.mjs');
+try{
+  await import('./apply-confidence-weighted-validation-v1-safe.mjs');
+}catch(error){
+  if(error?.code!=='ERR_MODULE_NOT_FOUND')throw error;
+  console.log('[Civweave] Confidence-weighted validation transform is not present on this branch; current main supplies it at merge time.');
+}
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 await import('./stage-maplibre-v275.mjs');
