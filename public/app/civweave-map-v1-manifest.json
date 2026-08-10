@@ -1,0 +1,62 @@
+{
+  "schema": "civweave.map.package/v1",
+  "name": "Civweave Map",
+  "version": "1.0.0",
+  "entry": "/app/federation-finder-map-v275.html",
+  "route": "/finder",
+  "offlineFirst": true,
+  "description": "Federated locality map with real vector cartography, public Civweave node discovery, signed WWW map exchange, and peer-healed offline PMTiles coverage.",
+  "renderers": {
+    "maplibre": "5.13.0",
+    "pmtiles": "4.4.1",
+    "pmtilesSpec": 3
+  },
+  "storage": {
+    "engine": "IndexedDB chunk store",
+    "chunkBytes": 1048576,
+    "defaultBudgetBytes": 268435456,
+    "streamingVerification": "SHA-256",
+    "eviction": "unpinned LRU",
+    "persistentStorageRequest": true
+  },
+  "coverage": {
+    "automatic": true,
+    "regionNeedExchange": true,
+    "networkAware": true,
+    "dataSaverAware": true,
+    "defaultAutomaticDownloadBytes": 100663296,
+    "peerRanking": ["viewport coverage", "zoom fit", "freshness", "signed provenance", "size", "latency"]
+  },
+  "nodeFreshness": {
+    "staleAfterMs": 21600000,
+    "expiresAfterMs": 86400000
+  },
+  "privacy": {
+    "deviceLocation": "session-only",
+    "deviceLocationPublished": false,
+    "federatedData": "explicitly public locality and node metadata only"
+  },
+  "assets": [
+    "/finder",
+    "/app/federation-finder-map-v275.html",
+    "/app/civweave-map-service-v275.js",
+    "/app/civweave-map-mesh-v276.js",
+    "/app/civweave-map-mesh-bridge-v276.js",
+    "/app/civweave-map-coverage-v277.js",
+    "/app/civweave-map-storage-v1.js",
+    "/app/civweave-map-offline-v1.js",
+    "/app/civweave-map-ui-v1.js",
+    "/app/shared/civweave-map-coverage-scoring-v1.mjs",
+    "/app/shared/civweave-sha256-stream-v1.mjs",
+    "/app/local-object-mesh-v146.js",
+    "/app/federation-finder-data/federation-seed-v269.json",
+    "/app/vendor/maplibre-v5.13.0/maplibre-gl.js",
+    "/app/vendor/maplibre-v5.13.0/maplibre-gl.css",
+    "/app/vendor/pmtiles-v4.4.1/pmtiles.js"
+  ],
+  "generatedAtlas": "/app/federation-finder-data/atlas-v274/manifest.json",
+  "distribution": {
+    "archive": "/downloads/Civweave-Map-v1.zip",
+    "checksum": "/downloads/Civweave-Map-v1.zip.sha256"
+  }
+}
