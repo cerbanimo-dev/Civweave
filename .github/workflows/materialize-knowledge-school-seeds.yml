@@ -11,7 +11,7 @@ on:
     branches:
       - agent/optional-knowledge-school-seeds
     paths:
-      - .knowledge-school-materialize-trigger
+      - ops/triggers/knowledge-school-materialize.trigger
 
 permissions:
   contents: write

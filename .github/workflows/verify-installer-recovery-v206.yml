@@ -23,7 +23,7 @@ on:
     branches:
       - agent/repair-installer-worker-410-v206
     paths:
-      - .installer-recovery-materialize-v206
+      - ops/triggers/installer-recovery-materialize-v206.trigger
 
 permissions:
   contents: write
