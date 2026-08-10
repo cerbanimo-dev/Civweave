@@ -16,7 +16,7 @@ assert(!boundary.includes('DETERMINISTIC_PROVIDER_BOUNDARY'));
 assert(boundary.includes("consequentialActions:'deterministic-contracts'"));
 assert(spine.includes('__civweaveRuntimeSpineV271:true')&&spine.includes('function register('));
 assert(registry.includes('agenticReasoning:true')&&registry.includes('externalResearch:false'));
-assert(bridge.includes("MIDDLEWARE_ID='downloaded-local-v271'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
+assert(bridge.includes("MIDDLEWARE_ID='downloaded-local-v275'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
 assert(bridge.includes('civweave:local-model-route-skipped'));
 assert(bootstrap.indexOf('ai-capability-broker-v268.js')<bootstrap.indexOf('fast-interactive-runtime-v192.js')&&bootstrap.indexOf('fast-interactive-runtime-v192.js')<bootstrap.indexOf('runtime-bridge-v266.js'));
 
@@ -60,4 +60,4 @@ assert.equal(smallInteractive.actual.provider,'downloaded-local');assert.equal(l
 const decision=sandbox.CivweaveAICapabilityBrokerV268.decide({executionProfile:'agentic',requiresTools:true});
 assert.equal(decision.route,'base-runtime');assert.match(decision.reason,/tools/i);
 
-console.log(JSON.stringify({ok:true,revision:'ai-runtime-spine-v271',localitySeparatedFromDeterminism:true,authorityBoundaryPreserved:true,singleRuntimeSpine:true,localAgenticReasoning:true,legacyAgenticToolOverclaimNormalized:true,toolTasksEscalate:true,smallModelAgenticGate:true,interactiveLocalPreserved:true,localCalls,baseCalls},null,2));
+console.log(JSON.stringify({ok:true,revision:'ai-runtime-spine-v275-backend-fallback',localitySeparatedFromDeterminism:true,authorityBoundaryPreserved:true,singleRuntimeSpine:true,localAgenticReasoning:true,legacyAgenticToolOverclaimNormalized:true,toolTasksEscalate:true,smallModelAgenticGate:true,interactiveLocalPreserved:true,localCalls,baseCalls},null,2));
