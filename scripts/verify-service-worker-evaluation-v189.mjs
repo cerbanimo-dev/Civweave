@@ -65,8 +65,9 @@ const coreListeners=evaluate(core,'lightweight-core-worker.js');
 assert(cleanupListeners.some(row=>row.type==='install')&&cleanupListeners.some(row=>row.type==='fetch'),'Clean-room worker boundary did not register install and fetch protection.');
 assert(coherenceListeners.some(row=>row.type==='install')&&coherenceListeners.some(row=>row.type==='fetch'),'Code coherence worker did not register install and fetch protection.');
 assert(coreListeners.some(row=>row.type==='install')&&coreListeners.some(row=>row.type==='fetch'),'Retained worker core did not register install and fetch behavior.');
-assert(coherence.includes("current-version-code-cache-first-network-refresh-legacy-offline-fallback"),'Code coherence policy marker drifted.');
+assert(coherence.includes("network-first-current-version-cache-legacy-offline-fallback"),'Code coherence policy marker drifted.');
 assert(coherence.includes('event.stopImmediatePropagation()'),'Code coherence no longer owns eligible executable app requests before the generic cache layer.');
+assert(coherence.indexOf('const response = await cwCodeFetch(request)')<coherence.indexOf('const current = await cache.match'),'Code coherence no longer attempts a fresh executable response before cached fallback.');
 for(const pathname of ['/app/document-lifecycle-v221.js','/app/working-campus-v156.part5.txt','/app/local-ai/bootstrap-v266.js','/app/local-ai/settings-panel-v267.js'])assert(coherence.includes(`'${pathname}'`),`Code coherence critical set is missing ${pathname}.`);
 const combinedSource=[routes,cleanup,coherence,core,installerState,integrity,offline,campusCompletion,release,navigation,shellRepair,canonical,chatRepair,localModel].join('\n');
 const combined=evaluate(combinedSource,'combined-civweave-worker.js');
@@ -82,4 +83,4 @@ assert(release.includes('working-campus-v156.part5.txt'),'Release policy omits c
 assert(canonical.includes("headers.set('x-civweave-package',REVISION)"),'Canonical navigation does not authenticate package requests.');
 assert(canonical.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical navigation fallback policy drifted.');
 for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
-console.log(JSON.stringify({ok:true,revision:'v288-code-coherence-worker-stack',legacyBridge:true,duplicateGlobalConstCrash:false,cleanroomFetchBoundary:true,codeCoherence:true,retainedOfflineCore:true,installerState:true,shellIntegrity:true,resumableCampus:'v280',campusFragmentCoherence:true,redirectSafety:true,shellSelfRepair:true,canonicalPackageNavigation:true,canonicalSystems:5,importLayers:orderedImports.length},null,2));
+console.log(JSON.stringify({ok:true,revision:'v288-code-coherence-worker-stack',legacyBridge:true,duplicateGlobalConstCrash:false,cleanroomFetchBoundary:true,codeCoherence:'network-first',retainedOfflineCore:true,installerState:true,shellIntegrity:true,resumableCampus:'v280',campusFragmentCoherence:true,redirectSafety:true,shellSelfRepair:true,canonicalPackageNavigation:true,canonicalSystems:5,importLayers:orderedImports.length},null,2));
