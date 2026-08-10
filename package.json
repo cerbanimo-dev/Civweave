@@ -1,6 +1,6 @@
 {
   "name": "civweave-host-node-hub",
-  "version": "1.0.75",
+  "version": "1.0.77",
   "private": true,
   "description": "Install-only Civweave device package with deterministic local operation, local sovereignty, and optional connected AI providers.",
   "type": "module",
@@ -26,6 +26,8 @@
     "transformer:model:check": "node scripts/ensure-minilm-model.mjs --check",
     "transformer:lab:check": "npm run transformer:install && npm run transformer:stage && npm run transformer:model:pull && npm run transformer:model:check && node scripts/verify-minilm-local-v131.mjs",
     "finder:stage": "node scripts/stage-federation-finder-data-v274.mjs",
+    "map:v1:build": "node scripts/build-civweave-map-v1.mjs",
+    "test:map:v1": "node --test scripts/test-civweave-map-v1.mjs",
     "anarchadia:execute": "node scripts/anarchadia-branch-executor-v145.mjs",
     "anarchadia:fork": "node scripts/anarchadia-local-fork-executor-v146.mjs",
     "test:anarchadia-governance": "node --test scripts/test-anarchadia-governance-v145.mjs",
