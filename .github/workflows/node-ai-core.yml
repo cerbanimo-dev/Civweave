@@ -1,0 +1,45 @@
+name: Verify Node AI core
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lib/node-ai-*.mjs'
+      - 'lib/ai-wallet-*.mjs'
+      - 'lib/ai-capability-token-v1.mjs'
+      - 'public/node-ai/**'
+      - 'scripts/test-node-ai-marketplace-v1.mjs'
+      - 'scripts/test-node-ai-http-v1.mjs'
+      - 'scripts/test-node-ai-service-package-v1.mjs'
+      - 'scripts/test-node-ai-trial-commerce-v1.mjs'
+      - 'package.json'
+      - '.github/workflows/node-ai-core.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/node-ai-*.mjs'
+      - 'lib/ai-wallet-*.mjs'
+      - 'lib/ai-capability-token-v1.mjs'
+      - 'public/node-ai/**'
+      - 'scripts/test-node-ai-marketplace-v1.mjs'
+      - 'scripts/test-node-ai-http-v1.mjs'
+      - 'scripts/test-node-ai-service-package-v1.mjs'
+      - 'scripts/test-node-ai-trial-commerce-v1.mjs'
+      - 'package.json'
+      - '.github/workflows/node-ai-core.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node-ai-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify node-owned marketplace and inference contracts
+        run: npm run check:node-ai
