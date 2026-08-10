@@ -106,6 +106,15 @@ try{
   assert.equal((await page.textContent('#offline-package-state'))?.trim(),'paused');
   phase('pause confirmed');
 
+  const installedLaunch=await context.newPage();
+  await installedLaunch.goto(`${base}/app/installed-entry-v146.html?installed=1&system=civweave`,{waitUntil:'domcontentloaded'});
+  await installedLaunch.waitForURL(url=>new URL(url).pathname==='/app/working-campus-v156.html',{timeout:30000});
+  const installedLaunchPath=new URL(installedLaunch.url()).pathname;
+  assert.equal(installedLaunchPath,'/app/working-campus-v156.html','installed PWA entry must route to Working Campus');
+  assert.notEqual(installedLaunchPath,'/app/index.html','installed PWA entry must never substitute the installer');
+  phase('installed entry bypassed installer');
+  await installedLaunch.close();
+
   await page.close();
   const reopened=await context.newPage();
   await reopened.goto(`${base}/app/index.html`,{waitUntil:'domcontentloaded'});
@@ -143,9 +152,10 @@ try{
 
   console.log(JSON.stringify({
     ok:true,
-    revision:'browser-installer-gauntlet-v281',
+    revision:'browser-installer-gauntlet-v282',
     offlineFetchDelayMs:OFFLINE_FETCH_DELAY_MS,
     hardTimeoutMs:HARD_TIMEOUT_MS,
+    installedLaunch:true,
     pauseRestartResume:true,
     offlineShell:true,
     lowStorageBlocked:true
