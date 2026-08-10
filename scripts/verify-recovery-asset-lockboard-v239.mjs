@@ -27,7 +27,8 @@ const checks=[
     assert.match(worker,/offline-campus-current-graph-v280/);
     assert.match(worker,/policy=resumable-pause-v280/);
     assert.match(worker,/installer-state-machines-v280/);
-    assert.match(installerState,/PAUSE_OFFLINE_PACKAGE/);
+    assert.match(installerState,/\/app\/installer-state-machine-v280\.js/);
+    assert.match(installerState,/shellRequired: true/);
     assert.match(offline,/const V211_POLICY = 'resumable-pause-v280'/);
     assert.match(offline,/const V211_SYNC_TAG = 'civweave-campus-resume-v280'/);
     assert.match(offline,/const V211_BATCH_SIZE = 16/);
