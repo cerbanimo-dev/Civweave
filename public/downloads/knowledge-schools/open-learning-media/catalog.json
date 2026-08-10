@@ -1,36 +1,36 @@
 {
   "schema": "civweave.open-learning-media-catalog.v1",
-  "built_at": "2026-08-10T02:16:27Z",
-  "record_count": 53,
-  "mesh_redistributable_count": 49,
-  "download_candidate_count": 125,
+  "built_at": "2026-08-10T02:22:16Z",
+  "record_count": 32,
+  "mesh_redistributable_count": 31,
+  "download_candidate_count": 70,
   "providers": {
     "internet-archive": {
-      "records": 19,
-      "mesh_redistributable": 16,
-      "download_candidates": 32
+      "records": 8,
+      "mesh_redistributable": 8,
+      "download_candidates": 13
     },
     "peertube": {
-      "records": 15,
-      "mesh_redistributable": 14,
-      "download_candidates": 74
+      "records": 11,
+      "mesh_redistributable": 10,
+      "download_candidates": 44
     },
     "wikimedia-commons": {
-      "records": 19,
-      "mesh_redistributable": 19,
-      "download_candidates": 19
+      "records": 13,
+      "mesh_redistributable": 13,
+      "download_candidates": 13
     }
   },
   "focus_topics": {
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
-      "records": 14,
-      "mesh_redistributable": 14,
+      "records": 11,
+      "mesh_redistributable": 11,
       "providers": {
-        "peertube": 7,
+        "peertube": 5,
         "internet-archive": 3,
-        "wikimedia-commons": 4
+        "wikimedia-commons": 3
       },
       "top_titles": [
         "Vibe coding a website with Silex and Claude Code | x5 timelapse",
@@ -48,46 +48,40 @@
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
-      "records": 6,
-      "mesh_redistributable": 4,
+      "records": 4,
+      "mesh_redistributable": 3,
       "providers": {
-        "internet-archive": 3,
+        "internet-archive": 1,
         "peertube": 3
       },
       "top_titles": [
         "Effective prompt engineering for Python programmers",
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
         "Il Prompt Engineering",
-        "AI Ppt Vdo",
-        "Machine Learning nella Scuola: Concetti Base e Applicazioni",
-        "Language Tools For Creators by Paco Xander Nathan"
+        "Machine Learning nella Scuola: Concetti Base e Applicazioni"
       ]
     },
     "pseudocoding": {
       "name": "Pseudocoding and Algorithm Design",
       "school_slug": "technology",
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 2,
+      "mesh_redistributable": 2,
       "providers": {
         "peertube": 1,
-        "wikimedia-commons": 1,
-        "internet-archive": 2
+        "internet-archive": 1
       },
       "top_titles": [
         "Pseudo-code et description des algorithmes",
-        "Deadlocks and the Dining Philosophers Problem",
-        "Open CS education resources for schools - how hard could it be?",
-        "CLOUDS Andres Colubri"
+        "Open CS education resources for schools - how hard could it be?"
       ]
     },
     "critical-thinking": {
       "name": "Critical Thinking",
       "school_slug": "philosophy-and-religion",
-      "records": 8,
-      "mesh_redistributable": 8,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
-        "wikimedia-commons": 6,
-        "internet-archive": 2
+        "wikimedia-commons": 6
       },
       "top_titles": [
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
@@ -95,32 +89,29 @@
         "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
         "Lisa Loving about media literacy and how you can report for your community",
         "Media literacy to counter political polarization per Ahmed Al-Rawi",
-        "Media literacy to dispel myths and improve public policy",
-        "What is Gaslighting?",
-        "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM"
+        "Media literacy to dispel myths and improve public policy"
       ]
     },
     "logical-frameworks": {
       "name": "Logical Frameworks",
       "school_slug": "philosophy-and-religion",
-      "records": 22,
-      "mesh_redistributable": 20,
+      "records": 9,
+      "mesh_redistributable": 9,
       "providers": {
-        "internet-archive": 10,
-        "wikimedia-commons": 8,
-        "peertube": 4
+        "wikimedia-commons": 4,
+        "internet-archive": 3,
+        "peertube": 2
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
+        "A Communist's Guide to Logical Fallacies",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 8- Emergence",
         "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "The Open Decision Framework How to make everybody happy",
         "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
-        "Systems Thinking 11- Homeostasis",
-        "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)",
-        "Diego Fontanive ESC2017"
+        "Systems Thinking 11- Homeostasis"
       ]
     }
   },
@@ -182,15 +173,9 @@
         {
           "topic_slug": "critical-thinking",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 12,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 45,
-          "strong_title_matches": [
-            "\\bcritical thinking\\b"
-          ],
-          "strong_description_matches": [
-            "\\bcritical thinking\\b"
-          ],
-          "educational_intent": true
+          "relevance_score": 12
         }
       ],
       "quality_score": 91,
@@ -212,6 +197,12 @@
           ],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 45
+        }
+      },
+      "selection": {
+        "critical-thinking": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 45
         }
       }
@@ -271,15 +262,9 @@
         {
           "topic_slug": "critical-thinking",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 44,
-          "strong_title_matches": [
-            "\\bmedia literacy\\b"
-          ],
-          "strong_description_matches": [
-            "\\bmedia literacy\\b"
-          ],
-          "educational_intent": true
+          "relevance_score": 9
         }
       ],
       "quality_score": 88,
@@ -301,6 +286,12 @@
           ],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "critical-thinking": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 44
         }
       }
@@ -360,15 +351,9 @@
         {
           "topic_slug": "critical-thinking",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 15,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 44,
-          "strong_title_matches": [
-            "\\bcritical thinking\\b"
-          ],
-          "strong_description_matches": [
-            "\\bcritical thinking\\b"
-          ],
-          "educational_intent": true
+          "relevance_score": 15
         }
       ],
       "quality_score": 88,
@@ -391,6 +376,12 @@
           ],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "critical-thinking": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 44
         }
       }
@@ -450,15 +441,9 @@
         {
           "topic_slug": "critical-thinking",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39,
-          "strong_title_matches": [
-            "\\bmedia literacy\\b"
-          ],
-          "strong_description_matches": [
-            "\\bmedia literacy\\b"
-          ],
-          "educational_intent": false
+          "relevance_score": 9
         }
       ],
       "quality_score": 88,
@@ -480,6 +465,12 @@
           ],
           "educational_intent": false,
           "clickbait_title": false,
+          "pedagogy_score": 39
+        }
+      },
+      "selection": {
+        "critical-thinking": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39
         }
       }
@@ -539,15 +530,9 @@
         {
           "topic_slug": "critical-thinking",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39,
-          "strong_title_matches": [
-            "\\bmedia literacy\\b"
-          ],
-          "strong_description_matches": [
-            "\\bmedia literacy\\b"
-          ],
-          "educational_intent": false
+          "relevance_score": 9
         }
       ],
       "quality_score": 88,
@@ -569,6 +554,12 @@
           ],
           "educational_intent": false,
           "clickbait_title": false,
+          "pedagogy_score": 39
+        }
+      },
+      "selection": {
+        "critical-thinking": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39
         }
       }
@@ -628,15 +619,9 @@
         {
           "topic_slug": "critical-thinking",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39,
-          "strong_title_matches": [
-            "\\bmedia literacy\\b"
-          ],
-          "strong_description_matches": [
-            "\\bmedia literacy\\b"
-          ],
-          "educational_intent": false
+          "relevance_score": 9
         }
       ],
       "quality_score": 88,
@@ -660,213 +645,11 @@
           "clickbait_title": false,
           "pedagogy_score": 39
         }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "what-is-gaslighting-11-20-2024",
-      "topic_slug": "critical-thinking",
-      "topic_name": "Critical Thinking",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "critical thinking",
-        "argument analysis",
-        "source evaluation",
-        "evidence"
-      ],
-      "matched_query": "media literacy",
-      "title": "What is Gaslighting?",
-      "description": "\"Bullshit!\" In this short documentary, Simon Whistler explains one of the most misunderstood terms being used in today's social media environment. (somewhat) Related Topics: ▪ Understanding Language ▪ Information Warfare ▪ 31 Logical Fallacies ▪ Dunning-Kruger Effect ▪ The Algorithm Effect ▪ Improving Media Literacy ▪ Everything We Don't Know ▪ Humans Think in Stories ▪ Fighting Fake News ▪ Clicks, Likes & Shares? ▪ How Fascism Works ▪ Echo Chamber",
-      "creator": "Simon Whistler",
-      "language": "eng",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/what-is-gaslighting-11-20-2024",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "PUBLIC-DOMAIN",
-        "url": "https://creativecommons.org/publicdomain/mark/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/publicdomain/mark/1.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
       },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/what-is-gaslighting-11-20-2024/What%20is%20Gaslighting%2011-20-2024.mp4",
-          "bytes": 98542999,
-          "provider_sha1": "e2c4714254c3ffdd79c201cbbb8751c5496489ba",
-          "provider_md5": "df55c8889f7f86abf64a55eb58924f4f",
-          "format": "MPEG4",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Simon Whistler",
-        "source_title": "What is Gaslighting?",
-        "source_url": "https://archive.org/details/what-is-gaslighting-11-20-2024",
-        "license": "PUBLIC-DOMAIN",
-        "license_url": "https://creativecommons.org/publicdomain/mark/1.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "critical-thinking",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bmedia literacy\\b"
-          ],
-          "educational_intent": true
-        },
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 10,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\blogical fallac(?:y|ies)\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
+      "selection": {
         "critical-thinking": {
-          "score": 9,
-          "evidence": [
-            "media literacy"
-          ]
-        },
-        "logical-frameworks": {
-          "score": 10,
-          "evidence": [
-            "logical fallacies"
-          ]
-        }
-      },
-      "pedagogy": {
-        "critical-thinking": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bmedia literacy\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        },
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\blogical fallac(?:y|ies)\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "youtube-nONZnnwomx8",
-      "topic_slug": "critical-thinking",
-      "topic_name": "Critical Thinking",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "critical thinking",
-        "argument analysis",
-        "source evaluation",
-        "evidence"
-      ],
-      "matched_query": "critical thinking",
-      "title": "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM",
-      "description": "NOTICE: Every Like, Share and Subscribtion Bring The Palestinian Story To The Mainstream Against The Lies of The Legacy Media. Help Us Reach More People! It's our commitment to uphold integrity and credibility in all our endeavors. OpenMindedThinker is dedicated to providing factual, well-researched information and news stories, and we take great care to avoid spreading misinformation. We encourage our viewers to approach our videos with an open mind, understanding that our primary goal is to stimulate critical thinking and foster intellectual curiosity. All our videos are aimed at Educating, Informing, Reporting, Reviewing, Criticizing & Ranking everything In The Global News Arena. Copyright Disclaimer: Under Section 107 of the Copyright Act 1976, allowance is made for fair use for purposes such as criticism, comment, news reporting, teaching, scholarship, and research. Thank you for joining us on this journey of exploration and learning.",
-      "creator": "OPTM",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/youtube-nONZnnwomx8",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC-BY",
-        "url": "https://creativecommons.org/licenses/by/3.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/youtube-nONZnnwomx8/nONZnnwomx8.webm",
-          "bytes": 92470655,
-          "provider_sha1": "f4ce6eb61ecf9834643ac715a0413582f9592066",
-          "provider_md5": "5895585acb286d48263e8fb0aa2ec205",
-          "format": "WebM",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/youtube-nONZnnwomx8/nONZnnwomx8.mp4",
-          "bytes": 80294283,
-          "provider_sha1": "270f3400cc446014b03793b27a1fcdda867e6b41",
-          "provider_md5": "75b12ec2c047aefc177ea11948917e89",
-          "format": "h.264",
-          "role": "derivative"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "OPTM",
-        "source_title": "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM",
-        "source_url": "https://archive.org/details/youtube-nONZnnwomx8",
-        "license": "CC-BY",
-        "license_url": "https://creativecommons.org/licenses/by/3.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "critical-thinking",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 19,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bcritical thinking\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 85,
-      "relevance": {
-        "critical-thinking": {
-          "score": 19,
-          "evidence": [
-            "critical thinking",
-            "credibility",
-            "bias/misinformation"
-          ]
-        }
-      },
-      "pedagogy": {
-        "critical-thinking": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bcritical thinking\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
+          "reason": "strong-topic-anchor-in-title",
+          "pedagogy_score": 39
         }
       }
     },
@@ -925,15 +708,9 @@
         {
           "topic_slug": "logical-frameworks",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 44,
-          "strong_title_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "strong_description_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "educational_intent": true
+          "relevance_score": 9
         }
       ],
       "quality_score": 89,
@@ -955,6 +732,110 @@
           ],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "strong-topic-anchor-in-title",
+          "pedagogy_score": 44
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "internet-archive",
+      "provider_id": "youtube-hmAFk-I7-uQ",
+      "topic_slug": "logical-frameworks",
+      "topic_name": "Logical Frameworks",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "formal logic",
+        "logical reasoning",
+        "decision frameworks",
+        "systems thinking"
+      ],
+      "matched_query": "logical fallacies",
+      "title": "A Communist's Guide to Logical Fallacies",
+      "description": "Unofficial /leftypol/ Discord: https://discord.gg/dGCZtQC Learn some more logical fallacies here: https://yourlogicalfallacyis.com/ Source: https://www.youtube.com/watch?v=hmAFk-I7-uQ Uploader: DANOV",
+      "creator": "DANOV",
+      "language": null,
+      "duration_seconds": 0,
+      "source_url": "https://archive.org/details/youtube-hmAFk-I7-uQ",
+      "source_host": "archive.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC-BY",
+        "url": "https://creativecommons.org/licenses/by/3.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://archive.org/download/youtube-hmAFk-I7-uQ/A_Communist_s_Guide_to_Logical_Fallacies-hmAFk-I7-uQ.mp4",
+          "bytes": 14186623,
+          "provider_sha1": "3ec788c6d564548108353167dcafa28940892a51",
+          "provider_md5": "82f18892cbe078abc052c04441a04a63",
+          "format": "MPEG4",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/youtube-hmAFk-I7-uQ/A_Communist_s_Guide_to_Logical_Fallacies-hmAFk-I7-uQ.ogv",
+          "bytes": 30274835,
+          "provider_sha1": "262c97a1f2739e3bf42798d09cf085ec873ef2d0",
+          "provider_md5": "6ae2e66f13c02e46c3959a17a6956e36",
+          "format": "Ogg Video",
+          "role": "derivative"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "DANOV",
+        "source_title": "A Communist's Guide to Logical Fallacies",
+        "source_url": "https://archive.org/details/youtube-hmAFk-I7-uQ",
+        "license": "CC-BY",
+        "license_url": "https://creativecommons.org/licenses/by/3.0/"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "logical-frameworks",
+          "school_slug": "philosophy-and-religion",
+          "selection_reason": "strong-topic-anchor-in-title",
+          "pedagogy_score": 44,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 85,
+      "relevance": {
+        "logical-frameworks": {
+          "score": 10,
+          "evidence": [
+            "logical fallacies"
+          ]
+        }
+      },
+      "pedagogy": {
+        "logical-frameworks": {
+          "strong_title_matches": [
+            "\\blogical fallac(?:y|ies)\\b"
+          ],
+          "strong_description_matches": [
+            "\\blogical fallac(?:y|ies)\\b"
+          ],
+          "educational_intent": true,
+          "clickbait_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 44
         }
       }
@@ -1049,15 +930,9 @@
         {
           "topic_slug": "logical-frameworks",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39,
-          "strong_title_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "strong_description_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "educational_intent": false
+          "relevance_score": 9
         }
       ],
       "quality_score": 87,
@@ -1079,6 +954,12 @@
           ],
           "educational_intent": false,
           "clickbait_title": false,
+          "pedagogy_score": 39
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39
         }
       }
@@ -1138,13 +1019,9 @@
         {
           "topic_slug": "logical-frameworks",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36,
-          "strong_title_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true
+          "relevance_score": 9
         }
       ],
       "quality_score": 89,
@@ -1164,6 +1041,12 @@
           "strong_description_matches": [],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36
         }
       }
@@ -1223,13 +1106,9 @@
         {
           "topic_slug": "logical-frameworks",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36,
-          "strong_title_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true
+          "relevance_score": 9
         }
       ],
       "quality_score": 89,
@@ -1249,6 +1128,12 @@
           "strong_description_matches": [],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36
         }
       }
@@ -1357,13 +1242,9 @@
         {
           "topic_slug": "logical-frameworks",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36,
-          "strong_title_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true
+          "relevance_score": 9
         }
       ],
       "quality_score": 87,
@@ -1383,6 +1264,12 @@
           "strong_description_matches": [],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36
         }
       }
@@ -1451,13 +1338,9 @@
         {
           "topic_slug": "logical-frameworks",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36,
-          "strong_title_matches": [
-            "\\bdecision framework(?:s)?\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true
+          "relevance_score": 9
         }
       ],
       "quality_score": 85,
@@ -1477,6 +1360,12 @@
           "strong_description_matches": [],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36
         }
       }
@@ -1545,13 +1434,9 @@
         {
           "topic_slug": "logical-frameworks",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36,
-          "strong_title_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true
+          "relevance_score": 9
         }
       ],
       "quality_score": 84,
@@ -1571,6 +1456,12 @@
           "strong_description_matches": [],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36
         }
       }
@@ -1630,13 +1521,9 @@
         {
           "topic_slug": "logical-frameworks",
           "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 31,
-          "strong_title_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": false
+          "relevance_score": 9
         }
       ],
       "quality_score": 89,
@@ -1658,1240 +1545,11 @@
           "clickbait_title": false,
           "pedagogy_score": 31
         }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072).webm",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "logical reasoning",
-      "title": "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)",
-      "description": "The lecture, entitled \"From the visible to the invisible: considerations on the role of the physiognomic syllogism in Avicenna's logic\", is part of the \"Medieval Lectures on Prognostication\" organized by Alessandro Palazzo at the University of Trento. The presentation aims to analyze the logical foundations of a particular type of inferential reasoning already presented by Aristotle at the end of the Early Analytics (B27), the physiognomic syllogism, and the link between logic and medicine that Avicenna establishes as the basis for the validity of this syllogism.",
-      "creator": "Silvia Di Vincenzo / Centre Paul Albert-Février / National Center for Scientific Research / Aix-Marseille University",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Dal_visibile_all%27invisibile-_considerazioni_sul_ruolo_del_sillogismo_fisiognomico_nella_logica_di_Avicenna_(M%C3%A9diHAL_4631072).webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "Public domain",
-        "url": "",
-        "evidence": "Public domain | Public domain | pd |",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
       },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Dal_visibile_all%27invisibile-_considerazioni_sul_ruolo_del_sillogismo_fisiognomico_nella_logica_di_Avicenna_%28M%C3%A9diHAL_4631072%29.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 213895131,
-          "provider_sha1": "df5879273bf9964f22e9ebb7d678a62e3c0553f5",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Silvia Di Vincenzo / Centre Paul Albert-Février / National Center for Scientific Research / Aix-Marseille University",
-        "source_title": "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Dal_visibile_all%27invisibile-_considerazioni_sul_ruolo_del_sillogismo_fisiognomico_nella_logica_di_Avicenna_(M%C3%A9diHAL_4631072).webm",
-        "license": "Public domain",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 10,
-          "pedagogy_score": 25,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bsyllogism(?:s)?\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 91,
-      "relevance": {
+      "selection": {
         "logical-frameworks": {
-          "score": 10,
-          "evidence": [
-            "syllogism",
-            "logic/reasoning"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bsyllogism(?:s)?\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 25
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Diego Fontanive ESC2017.webm",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "logical reasoning",
-      "title": "Diego Fontanive ESC2017",
-      "description": "Meta-Memetic Thinking and Skepticism as a Meme \" Diego Fontanive European Skeptics Congress www.ecso.org Diego Fontanive, born in Venice, Italy, 1973, has a background in Political Science, Sociology, Critical Thinking and Psychology. His main concern and field of research are the flawed systems such as for example religion, ideologies, dogmatic thinking and unquestioned common sense, that reduce our ability to think properly, therefore resulting in irrational psychological suffering, logical fallacies, biased cognitive approaches, meta-ignorance regarding our epistemic acceptances and various social iniquities. After becoming familiar with the contradictions embedded within the decaying, fallacious and conditioned structures of society, it became important for him to inquire, study and explain how all systems that come from ideologies, not just religions, fragment and warp our cognitive and psycho-social understanding of reality. Diego is a speaker and writer as well he is the founder and president of the organization EOF Project. He is also the creator and tutor of the critical thinking course 'All In the Mind' (different levels) for the Cambridge e-Learning Institute, Cambridge, UK. He is also board director of AAI (Atheist Alliance International) which is recognised by the United Nations. He wrote numerous articles for prominent members of the psychological community, sociological institutions, social science conferences and the U.N. Recent speeches and published articles involved the University of St, Cloud, Minnesota, US, (‘Survive and Thrive’ organisation related to the State University of St. Cloud), with a publication about the relevance of logical thinking throughout the aftermath of a cardiac arrest and a speech/publication at the conference ‘7th EIO conferen",
-      "creator": "ESC European Skeptics Congress",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Diego_Fontanive_ESC2017.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Diego_Fontanive_ESC2017.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 214195198,
-          "provider_sha1": "d675addefe4897bf538949142f28366d37c3c0d9",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "ESC European Skeptics Congress",
-        "source_title": "Diego Fontanive ESC2017",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Diego_Fontanive_ESC2017.webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 10,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\blogical fallac(?:y|ies)\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 10,
-          "evidence": [
-            "logical fallacies"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\blogical fallac(?:y|ies)\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Systems Paradigm 2- Systems Awareness.webm",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "systems thinking",
-      "title": "Systems Paradigm 2- Systems Awareness",
-      "description": "Systems thinking is, in its most generalized sense, a way of seeing the world. Before anything it places great emphasis on the question of how do we see the world, that is to say, our subjective interpretation of events. In this video we will talk about the importance of self-awareness within the system thinking paradigm. For full courses, transcriptions and downloads please see: http://www.complexityacademy.io",
-      "creator": "Complexity Academy",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Paradigm_2-_Systems_Awareness.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC BY 3.0",
-        "url": "https://creativecommons.org/licenses/by/3.0",
-        "evidence": "CC BY 3.0 | Creative Commons Attribution 3.0 | cc-by-3.0 | https://creativecommons.org/licenses/by/3.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Systems_Paradigm_2-_Systems_Awareness.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 13876616,
-          "provider_sha1": "e61e5f1c1e17ecbbe9b88180ffdbf197cdfe2e60",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Complexity Academy",
-        "source_title": "Systems Paradigm 2- Systems Awareness",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Paradigm_2-_Systems_Awareness.webm",
-        "license": "CC BY 3.0",
-        "license_url": "https://creativecommons.org/licenses/by/3.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 89,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 9,
-          "evidence": [
-            "systems thinking"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "20e34378-146e-4702-9bb4-7f0ece23e530",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "systems thinking",
-      "title": "Revolution Now! with Peter Joseph | Ep #21| April 7th 2021",
-      "description": "In this episode, systems thinking and the societal ignorance of its necessity is discussed, along with an overview of Peter's upcoming lecture “On the Future of Civilization”. Transcript: https://www.revolutionnow.live/episodes/episode21-stayca...",
-      "creator": "Simon Gramstrup",
-      "language": "en",
-      "duration_seconds": 1824,
-      "source_url": "https://videos.trom.tf/videos/watch/20e34378-146e-4702-9bb4-7f0ece23e530",
-      "source_host": "videos.trom.tf",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "Attribution",
-        "url": "",
-        "evidence": "PeerTube API licence id 1: Attribution",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://videos.trom.tf/download/streaming-playlists/hls/videos/20e34378-146e-4702-9bb4-7f0ece23e530-720-fragmented.mp4",
-          "bytes": 54057165,
-          "resolution": "720p",
-          "fps": 24,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://videos.trom.tf/download/streaming-playlists/hls/videos/20e34378-146e-4702-9bb4-7f0ece23e530-0-fragmented.mp4",
-          "bytes": 29573539,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Simon Gramstrup",
-        "source_title": "Revolution Now! with Peter Joseph | Ep #21| April 7th 2021",
-        "source_url": "https://videos.trom.tf/videos/watch/20e34378-146e-4702-9bb4-7f0ece23e530",
-        "license": "Attribution",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 9,
-          "evidence": [
-            "systems thinking"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Wikimania 2024 - Tbilisi - Day 3 - Parsoid is coming! How do I keep up - Wikitext in 2024..webm",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "decision framework",
-      "title": "Wikimania 2024 - Tbilisi - Day 3 - Parsoid is coming! How do I keep up - Wikitext in 2024.",
-      "description": "Wikitext has a chance to evolve in 2024, as the Content Transform Team begins to deploy the next-generation Parsoid wikitext parser for article views on many Foundation wikis. This talk describes how to opt-in to an early look at the new parser and outlines the testing tools and decision framework used to guide deployment timing and ensure wiki content is unbroken. We’ll survey useful tools to check and migrate content on Wikimedia and 3rd-party wikis. With our new parser comes opportunities for new wikitext features, and we’ll touch on a few of those as well!",
-      "creator": "C. Scott Ananian",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2024_-_Tbilisi_-_Day_3_-_Parsoid_is_coming!_How_do_I_keep_up_-_Wikitext_in_2024..webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/2/2c/Wikimania_2024_-_Tbilisi_-_Day_3_-_Parsoid_is_coming%21_How_do_I_keep_up_-_Wikitext_in_2024..webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 147637795,
-          "provider_sha1": "a1e9cbc29304c6e4e01388931a156c461dbf488b",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "C. Scott Ananian",
-        "source_title": "Wikimania 2024 - Tbilisi - Day 3 - Parsoid is coming! How do I keep up - Wikitext in 2024.",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2024_-_Tbilisi_-_Day_3_-_Parsoid_is_coming!_How_do_I_keep_up_-_Wikitext_in_2024..webm",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bdecision framework(?:s)?\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 9,
-          "evidence": [
-            "decision framework"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bdecision framework(?:s)?\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "7e118c70-d449-4ce5-988a-ed677e348663",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "systems thinking",
-      "title": "Buchtipp: Lisa Schaefer",
-      "description": "Diana Montalion Learning Systems Thinking Essential Non-Linear Skills and Practices for Software Professionals https://genialokal.de/Produkt/Diana-Montalion/Learning-Systems-Thinking_lid_52368689.html",
-      "creator": "Eberhard Wolff",
-      "language": "de",
-      "duration_seconds": 60,
-      "source_url": "https://tube.tchncs.de/videos/watch/7e118c70-d449-4ce5-988a-ed677e348663",
-      "source_host": "tube.tchncs.de",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://tube.tchncs.de/download/web-videos/7e118c70-d449-4ce5-988a-ed677e348663-1080.mp4",
-          "bytes": 66504598,
-          "resolution": "1080p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/web-videos/7e118c70-d449-4ce5-988a-ed677e348663-480.mp4",
-          "bytes": 7143797,
-          "resolution": "480p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/web-videos/7e118c70-d449-4ce5-988a-ed677e348663-360.mp4",
-          "bytes": 5396071,
-          "resolution": "360p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/web-videos/7e118c70-d449-4ce5-988a-ed677e348663-0.mp4",
-          "bytes": 2400682,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "web-video"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/7e118c70-d449-4ce5-988a-ed677e348663-1080-fragmented.mp4",
-          "bytes": 21458701,
-          "resolution": "1080p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/7e118c70-d449-4ce5-988a-ed677e348663-480-fragmented.mp4",
-          "bytes": 7120219,
-          "resolution": "480p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/7e118c70-d449-4ce5-988a-ed677e348663-360-fragmented.mp4",
-          "bytes": 5372293,
-          "resolution": "360p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://tube.tchncs.de/download/streaming-playlists/hls/videos/7e118c70-d449-4ce5-988a-ed677e348663-0-fragmented.mp4",
-          "bytes": 2403008,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Eberhard Wolff",
-        "source_title": "Buchtipp: Lisa Schaefer",
-        "source_url": "https://tube.tchncs.de/videos/watch/7e118c70-d449-4ce5-988a-ed677e348663",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 9,
-          "evidence": [
-            "systems thinking"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bsystems thinking\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "dsc-00509_202112",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "formal logic",
-      "title": "World leader Fangruida, mentor of mankind, great sun-great genius (Malik. R)2020v.1.2",
-      "description": "World leader, international leader Fangruida, human mentor, great natural scientist, philosopher, thinker, sociologist, anthropologist, religious scientist, cosmologist, geologist, biologist, physicist, astronaut Scientists, mathematical logicians, architects, electromechanical engineering experts, medical scientists, virologists, educators, economists, pharmacologists, composers, writers. Fang Ruida once said that there are no supermen and super geniuses in the world, only farmers and craftsmen who work hard and selflessly forever. Fang Ruida was young and intelligent, and could write poetry and invent at a few years old. The difference between him and ordinary people is mainly two-way thinking, mathematical logic and formal logic, and hybrid logic thinking. You can open the bow from left to right, two-pronged or multi-pronged. He can study multi-disciplinary and multi-professional knowledge at the same time. First, mathematics, physics, physics, physics, agriculture, industry, law and business, and then literature, history, philosophy, and economics education. There is a big explosion of modern scientific and cultural information, a big explosion of knowledge, even geniuses cannot be exhausted. This requires wide-ranging to focus on one point, not inferior to the rest, instead of blooming everywhere, without center and focus, without a target, and in the end, the result is half the result, without any innovation or breakthrough. This is the enemy and taboo of study and research. Especially in the field of natural sciences, a little difficulty can lose your life and energy. Many people go to school for life and have no achievements. The key is to uselessness. People in the world don't need to be all-rounders. Broad and broad is important, but more important than this i",
-      "creator": "Malik.R",
-      "language": "eng",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/dsc-00509_202112",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "PUBLIC-DOMAIN",
-        "url": "http://creativecommons.org/publicdomain/mark/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/mark/1.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/dsc-00509_202112/M4H00505.MP4",
-          "bytes": 10536233,
-          "provider_sha1": "f6c818378f2cc1fb662b6d95e8cc6a5b7e08fa23",
-          "provider_md5": "a4accac58c8e8fb44d500d849e68b1e7",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/dsc-00509_202112/M4H00488.MP4",
-          "bytes": 26703934,
-          "provider_sha1": "a47e6b6545a71140eaaa5961143af29b8de54a02",
-          "provider_md5": "91674d7ff40f3770b25284c0076772e7",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/dsc-00509_202112/M4H00505.mp4",
-          "bytes": 825660,
-          "provider_sha1": "b87b7069390e0fc09f383563750cf1bbc95f6d4e",
-          "provider_md5": "de397ae2cb6c2f0857087a9f71201c84",
-          "format": "h.264",
-          "role": "derivative"
-        },
-        {
-          "url": "https://archive.org/download/dsc-00509_202112/M4H00488.mp4",
-          "bytes": 2044824,
-          "provider_sha1": "ef78adacba055339f62c27be3efd2f03a68aa729",
-          "provider_md5": "7f7c8de7bf8e5346a15131c15096bc89",
-          "format": "h.264",
-          "role": "derivative"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Malik.R",
-        "source_title": "World leader Fangruida, mentor of mankind, great sun-great genius (Malik. R)2020v.1.2",
-        "source_url": "https://archive.org/details/dsc-00509_202112",
-        "license": "PUBLIC-DOMAIN",
-        "license_url": "http://creativecommons.org/publicdomain/mark/1.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 15,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bformal logic\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 15,
-          "evidence": [
-            "formal logic",
-            "logic/reasoning"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bformal logic\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "img-20211113132247-1-1",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "formal logic",
-      "title": "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem",
-      "description": "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem World leader and international leader Fang Ruida: one of the ideal candidates for the next Secretary- General of the United Nations. Fang Ruida is a great scientist, philosopher, thinker, sociologist, anthropologist, economist, international relations scientist, political scientist, medical scientist, virologist, physicist cosmologist, military engineering expert, for international relations, diplomacy, International politics, international affairs, world economy , World culture, world religions, world history, etc. He also has deep attainments and rich social practice experience. He has worked with dozens of countries in the world Exchanges, footprints all over the world. Europe, America, Russia, Britain, France, Germany, Italy, Japan, Canada, Australia, India, Pakistan, Arabia, Africa, Middle East, etc. World leader, international leader, great sun — Fangruida-scientist, philosopher, thinker, religious scientist, sociologist, medical scientist, virologist, physicist, cosmologist, economist, writer, Composer World leaders, international leaders, great scientists, philosophers, thinkers, religious scientists, sociologists, medical scientists, virologists, pharmacists, and cosmologists Fangruida Fangruida (born in Shanghai on May 14, 1949, studied at a university at home and abroad forfurther studies. At a young age, he showed extraordinary genius and superior intelligence, super strong thinking ability, mathematical logic, formal logic, compound logic, multidimensional logic, Beyond the structure and function of ordinary people's thinking. When I was young, I studied in various schools and started to invent",
-      "creator": "Pele.S",
-      "language": "eng",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/img-20211113132247-1-1",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "PUBLIC-DOMAIN",
-        "url": "http://creativecommons.org/publicdomain/mark/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/mark/1.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/img-20211113132247-1-1/VID20211230154530.mp4",
-          "bytes": 2606821,
-          "provider_sha1": "8b5a9537a325e9722b998111db3c8cd944f7af30",
-          "provider_md5": "a15711092e35fb1f3738a7920797713c",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/img-20211113132247-1-1/VID20211230160433.mp4",
-          "bytes": 3040336,
-          "provider_sha1": "844a93d2655c6230a749a41d246d2eb0adedbc81",
-          "provider_md5": "932bdffcadf19b4d228b5e6789a6bb87",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/img-20211113132247-1-1/VID20211230160030%20(1).mp4",
-          "bytes": 3926181,
-          "provider_sha1": "3e7db75a9c99eed1c56e1fcd17e58d5ff9c46799",
-          "provider_md5": "d72b392986bf977be214619c6cec8a6a",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/img-20211113132247-1-1/VID20211230160504.mp4",
-          "bytes": 4853253,
-          "provider_sha1": "a17dbd3e61772d0d99493020483bec7eeddc5635",
-          "provider_md5": "371f93f013e02ae100e63855b92a6a57",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/img-20211113132247-1-1/VID20211230161001.mp4",
-          "bytes": 5660603,
-          "provider_sha1": "2f1add27021ea8206c7d0ed16ce75d7e217fcb50",
-          "provider_md5": "4d01de1c998bbc06db4d9058bd935cc7",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/img-20211113132247-1-1/VID20211230160908.mp4",
-          "bytes": 5927144,
-          "provider_sha1": "ac018b8ab877c3d23512181a4bd4718741b6fc55",
-          "provider_md5": "6ab5ff94cb9a1d9f4968d4a7a157a8d0",
-          "format": "MPEG4",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Pele.S",
-        "source_title": "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem",
-        "source_url": "https://archive.org/details/img-20211113132247-1-1",
-        "license": "PUBLIC-DOMAIN",
-        "license_url": "http://creativecommons.org/publicdomain/mark/1.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 15,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bformal logic\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 15,
-          "evidence": [
-            "formal logic",
-            "logic/reasoning"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bformal logic\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "world-leder-fangruida-bio.-2020v.-3.3-revision",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "formal logic",
-      "title": "World Leder Fangruida Bio. 2020v. 3.3 Revision",
-      "description": "World leader, international leader, great sun — Fangruida-scientist, philosopher, thinker, religious scientist, sociologist, medical scientist, virologist, physicist, cosmologist, economist, writer, Composer World leaders, international leaders, great scientists, philosophers, thinkers, religious scientists, sociologists, medical scientists, virologists, pharmacists, and cosmologists Fangruida Fangruida (born in Shanghai on May 14, 1949, studied at a university at home and abroad for further studies. At a young age, he showed extraordinary genius and superior intelligence, super strong thinking ability, mathematical logic, formal logic, compound logic, multidimensional logic, Beyond the structure and function of ordinary people's thinking. When I was young, I studied in various schools and started to invent and create at the age of 6, 7 years old, small airplanes, cars, small rockets, small ships and small motorboats, small pistols, small butterflies, small dragonflies Wait, 5 years old to write poetry, 6 years old to paint and compose music, 10 years old He began to study university courses in mathematics, physics and chemistry. The world called him a child prodigy. He has systematically completed his doctoral program in his 20s, covering subjects and majors such as mathematics, physics, chemistry, biology, agriculture, medicine and engineering. Studying and working in Europe, the United States, Russia, Britain, France, Germany, Japan, Italy, Canada, Australia, India, and Barry, etc., have become more powerful and have worked hard to learn and have achieved fruitful results.",
-      "creator": "mike .F",
-      "language": "eng",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/world-leder-fangruida-bio.-2020v.-3.3-revision",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "PUBLIC-DOMAIN",
-        "url": "http://creativecommons.org/publicdomain/mark/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/mark/1.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/world-leder-fangruida-bio.-2020v.-3.3-revision/M4H00393.MP4",
-          "bytes": 41537417,
-          "provider_sha1": "2e2a9bcf94a09b08ee43772188e32f5d0cca919d",
-          "provider_md5": "96f4e07ed86328f8bc302b3a16895dc6",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/world-leder-fangruida-bio.-2020v.-3.3-revision/M4H00393.mp4",
-          "bytes": 3284025,
-          "provider_sha1": "45aebc3840068ab8a032a5816e9c4faf971590be",
-          "provider_md5": "132d4e30e39b688466b9b6221b6e95b0",
-          "format": "h.264",
-          "role": "derivative"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "mike .F",
-        "source_title": "World Leder Fangruida Bio. 2020v. 3.3 Revision",
-        "source_url": "https://archive.org/details/world-leder-fangruida-bio.-2020v.-3.3-revision",
-        "license": "PUBLIC-DOMAIN",
-        "license_url": "http://creativecommons.org/publicdomain/mark/1.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 15,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bformal logic\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 15,
-          "evidence": [
-            "formal logic",
-            "logic/reasoning"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bformal logic\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "youtube-rzMe3ljWI6U",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "logical reasoning",
-      "title": "A New HOPE (2022): Hacking Comprehension: Overcoming Limitations to Better Understand the World",
-      "description": "Sunday, July 24, 2022: 3:00 pm (DAC 206): We see the world differently - literally. Our brains hallucinate reality before our \"eyes\" and certain cognitive biases can coerce certain realities to be conjured over others. No wonder we can't agree on what color the dress or these crocs are. But it gets more complex: humans are subjected to hundreds of cognitive biases and logical reasoning errors, plus we have decades of built-up priors, limitations on time and attention, and we're not all operating from the same sets of information. So what would we have to do in order to, at the very least, \"get on the same page\" on high-impact political and social issues? How can we hack comprehension to enable more free, informed, and less biased decisions? The Society Library is a nonprofit organization working to map all points of view on complex social and political issues, but once they have all this information, the trick becomes: how do you get people to understand it all? This talk is about the design challenges and ethical conundrums of compressing complex knowledge and making it comprehendible across various dimensions. Jamie Joyce Source: https://www.youtube.com/watch?v=rzMe3ljWI6U Uploader: Channel2600",
-      "creator": "Channel2600",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/youtube-rzMe3ljWI6U",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC-BY",
-        "url": "https://creativecommons.org/licenses/by/3.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/youtube-rzMe3ljWI6U/rzMe3ljWI6U.mkv",
-          "bytes": 169029460,
-          "provider_sha1": "994b14c5697cf75dd8dd0e4740b90ddbd262983b",
-          "provider_md5": "ce79f86837364e1d76e41094787db048",
-          "format": "Matroska",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/youtube-rzMe3ljWI6U/rzMe3ljWI6U.mp4",
-          "bytes": 296279939,
-          "provider_sha1": "d6dff400190d51fd23b1972d07cfaafcf4659adc",
-          "provider_md5": "2a9bcdbd68c671f9f9b76897bfe0837d",
-          "format": "h.264",
-          "role": "derivative"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Channel2600",
-        "source_title": "A New HOPE (2022): Hacking Comprehension: Overcoming Limitations to Better Understand the World",
-        "source_url": "https://archive.org/details/youtube-rzMe3ljWI6U",
-        "license": "CC-BY",
-        "license_url": "https://creativecommons.org/licenses/by/3.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 13,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\blogical reasoning\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 85,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 13,
-          "evidence": [
-            "logical reasoning",
-            "logic/reasoning"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\blogical reasoning\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "novcog-legacy-vps-to-edge",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "decision framework",
-      "title": "Legacy VPS to Edge: Migrating 200 Domains Off a Compromised Server",
-      "description": "I had a giant VPS that had drifted across multiple hosts and control panels for years — until it was crippled, expensive, and compromised. This is the full capstone of moving roughly 200 domains, 60 virtual hosts and 80 mailboxes off it and onto edge compute. Covered: the one primitive that makes migration safe, the disposition framework for every domain, why your web archive is poisoned after a breach, why mailbox count is not live mail, and the go/no-go gate that decides when a server is actually safe to switch off. If you self-host — or you're thinking about it — this is the decision framework, not the runbook. 👉 If you want the deeper version of this — the frameworks, the post-mortems, and the builds behind them — that's what the Hidden State Drift Mastermind is for. Start at ⏱️ Chapters 0:00 Legacy VPS → Edge 0:52 One box, one blast radius 1:17 Part 1 — The Method 1:27 A worker route runs before the origin 2:07 Every domain gets a disposition 2:41 Part 2 — The Lessons 2:52 Lesson 1 — Verify, don't assume 3:27 Lesson 2 — Your archive is poisoned 3:56 Lesson 3 — Mailbox count is not live mail 4:32 Lesson 4 — The cutover order is forced 5:04 Operational gotchas 5:44 Part 3 — In Practice 5:52 Network value — smart, not spin 6:19 Design languages as infrastructure 6:55 The gate — what done means 7:33 Outcome 8:02 The real cost is the drift 🔗 Links",
-      "creator": "NovCog",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/novcog-legacy-vps-to-edge",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC-BY",
-        "url": "https://creativecommons.org/licenses/by/4.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/4.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/novcog-legacy-vps-to-edge/video.mp4",
-          "bytes": 15524603,
-          "provider_sha1": "79ec378fbd4ff83e032fd8ac849c149e68fb8f81",
-          "provider_md5": "f415302a2ac90d1cd2e94c94842ff28b",
-          "format": "MPEG4",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "NovCog",
-        "source_title": "Legacy VPS to Edge: Migrating 200 Domains Off a Compromised Server",
-        "source_url": "https://archive.org/details/novcog-legacy-vps-to-edge",
-        "license": "CC-BY",
-        "license_url": "https://creativecommons.org/licenses/by/4.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 9,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bdecision framework(?:s)?\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 85,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 9,
-          "evidence": [
-            "decision framework"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bdecision framework(?:s)?\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "fox-news-propaganda-11-27-2023",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "logical fallacies",
-      "title": "Fox News Propaganda",
-      "description": "Rainbow Bridge Explosion ▪ The Bulwark's Charlie Sykes & Will Saletan discuss Fox News blaming a terrorist attack on President Joe Biden's policies, only to learn their reporting was wrong - conversation published on November 27th, 2023. Research Library: ▪ 31 Logical Fallacies ▪ Dunning-Kruger Effect ▪ Humans Think in Stories ▪ Everything We Don't Know ▪ Understanding Language ▪ Echo Chamber ▪ \"Bullshit!\" ▪ Gaslighting",
-      "creator": "The Bulwark",
-      "language": "eng",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/fox-news-propaganda-11-27-2023",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "PUBLIC-DOMAIN",
-        "url": "https://creativecommons.org/publicdomain/mark/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/publicdomain/mark/1.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "The Bulwark",
-        "source_title": "Fox News Propaganda",
-        "source_url": "https://archive.org/details/fox-news-propaganda-11-27-2023",
-        "license": "PUBLIC-DOMAIN",
-        "license_url": "https://creativecommons.org/publicdomain/mark/1.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 10,
-          "pedagogy_score": 14,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\blogical fallac(?:y|ies)\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 29,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 10,
-          "evidence": [
-            "logical fallacies"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\blogical fallac(?:y|ies)\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 14
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "the-butterfly-effect-06-19-2024",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "logical fallacies",
-      "title": "The Butterfly Effect",
-      "description": "Is it real? \"When people talk about the butterfly effect, they miss a large part of what makes chaos theory so incredible.\" ~ Simon Clark June 19th, 2024 Research Material: ▪ Everything We Don't Know ▪ Algorithms & Echo Chambers ▪ The Dunning-Kruger Effect ▪ The Science of Science ▪ Jevons Paradox ▪ 31 Logical Fallacies ▪ The Algorithm Effect ▪ Echo Chamber",
-      "creator": "Simon Clark",
-      "language": "eng",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/the-butterfly-effect-06-19-2024",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "PUBLIC-DOMAIN",
-        "url": "https://creativecommons.org/publicdomain/mark/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/publicdomain/mark/1.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Simon Clark",
-        "source_title": "The Butterfly Effect",
-        "source_url": "https://archive.org/details/the-butterfly-effect-06-19-2024",
-        "license": "PUBLIC-DOMAIN",
-        "license_url": "https://creativecommons.org/publicdomain/mark/1.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "relevance_score": 10,
-          "pedagogy_score": 14,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\blogical fallac(?:y|ies)\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 29,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 10,
-          "evidence": [
-            "logical fallacies"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\blogical fallac(?:y|ies)\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 14
+          "reason": "strong-topic-anchor-in-title",
+          "pedagogy_score": 31
         }
       }
     },
@@ -2951,15 +1609,9 @@
         {
           "topic_slug": "prompt-engineering",
           "school_slug": "technology",
-          "relevance_score": 18,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 44,
-          "strong_title_matches": [
-            "\\bprompt engineering\\b"
-          ],
-          "strong_description_matches": [
-            "\\bprompt engineering\\b"
-          ],
-          "educational_intent": true
+          "relevance_score": 18
         }
       ],
       "quality_score": 85,
@@ -2983,6 +1635,12 @@
           ],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 44
+        }
+      },
+      "selection": {
+        "prompt-engineering": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 44
         }
       }
@@ -3119,15 +1777,9 @@
         {
           "topic_slug": "prompt-engineering",
           "school_slug": "technology",
-          "relevance_score": 12,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39,
-          "strong_title_matches": [
-            "\\bprompt design\\b"
-          ],
-          "strong_description_matches": [
-            "\\bprompt design\\b"
-          ],
-          "educational_intent": false
+          "relevance_score": 12
         }
       ],
       "quality_score": 87,
@@ -3150,6 +1802,12 @@
           ],
           "educational_intent": false,
           "clickbait_title": false,
+          "pedagogy_score": 39
+        }
+      },
+      "selection": {
+        "prompt-engineering": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39
         }
       }
@@ -3216,13 +1874,9 @@
         {
           "topic_slug": "prompt-engineering",
           "school_slug": "technology",
-          "relevance_score": 15,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 31,
-          "strong_title_matches": [
-            "\\bprompt engineering\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": false
+          "relevance_score": 15
         }
       ],
       "quality_score": 87,
@@ -3245,93 +1899,11 @@
           "clickbait_title": false,
           "pedagogy_score": 31
         }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "ai-ppt-vdowww.cbitss.inartificial-intelligence-course-in-chandigarh",
-      "topic_slug": "prompt-engineering",
-      "topic_name": "Prompt Engineering",
-      "school_slug": "technology",
-      "concepts": [
-        "prompt engineering",
-        "LLM prompting",
-        "prompt patterns",
-        "evaluation"
-      ],
-      "matched_query": "prompt engineering",
-      "title": "AI Ppt Vdo",
-      "description": "An AI Course in Chandigarh is designed to help students, graduates, and working professionals build practical skills in Artificial Intelligence and Machine Learning. The course covers industry-relevant technologies such as Python programming, Machine Learning, Deep Learning, Natural Language Processing (NLP), Computer Vision, Generative AI, and Prompt Engineering. Learners gain hands-on experience through live projects, case studies, and real-world applications to prepare for high-demand AI careers.",
-      "creator": "Cbitss",
-      "language": "eng",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/ai-ppt-vdowww.cbitss.inartificial-intelligence-course-in-chandigarh",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "PUBLIC-DOMAIN",
-        "label": "PUBLIC-DOMAIN",
-        "url": "https://creativecommons.org/publicdomain/mark/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/publicdomain/mark/1.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
       },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/ai-ppt-vdowww.cbitss.inartificial-intelligence-course-in-chandigarh/AI%20ppt%20vdo.mp4",
-          "bytes": 61680883,
-          "provider_sha1": "9f3d82aaba450be4c9470341dd7cd7042440418e",
-          "provider_md5": "244cf0dd8d14bded902cc1e58c54b5ba",
-          "format": "MPEG4",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Cbitss",
-        "source_title": "AI Ppt Vdo",
-        "source_url": "https://archive.org/details/ai-ppt-vdowww.cbitss.inartificial-intelligence-course-in-chandigarh",
-        "license": "PUBLIC-DOMAIN",
-        "license_url": "https://creativecommons.org/publicdomain/mark/1.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "prompt-engineering",
-          "school_slug": "technology",
-          "relevance_score": 18,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bprompt engineering\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
+      "selection": {
         "prompt-engineering": {
-          "score": 18,
-          "evidence": [
-            "prompt engineering",
-            "prompting",
-            "generative-model context"
-          ]
-        }
-      },
-      "pedagogy": {
-        "prompt-engineering": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bprompt engineering\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
+          "reason": "strong-topic-anchor-in-title",
+          "pedagogy_score": 31
         }
       }
     },
@@ -3382,13 +1954,9 @@
         {
           "topic_slug": "prompt-engineering",
           "school_slug": "technology",
-          "relevance_score": 18,
+          "selection_reason": "strong-description-anchor-plus-instructional-title",
           "pedagogy_score": 15,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bprompt engineering\\b"
-          ],
-          "educational_intent": true
+          "relevance_score": 18
         }
       ],
       "quality_score": 32,
@@ -3412,84 +1980,11 @@
           "clickbait_title": false,
           "pedagogy_score": 15
         }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "fossy2023_Language_Tools_For_Creators",
-      "topic_slug": "prompt-engineering",
-      "topic_name": "Prompt Engineering",
-      "school_slug": "technology",
-      "concepts": [
-        "prompt engineering",
-        "LLM prompting",
-        "prompt patterns",
-        "evaluation"
-      ],
-      "matched_query": "prompt engineering",
-      "title": "Language Tools For Creators by Paco Xander Nathan",
-      "description": "There's been an explosion in the space of language models, generative AI, and other machine learning related to natural language. Going \"beyond the headlines\", this talk shows how to leverage open source libraries in Python to work with text and image content, from the perspective of an author, editor, or illustrator. We'll look at how to leverage advanced and \"AI-adjacent\" tooling such as language models, data annotation, graph technologies, interactive visualizations, etc., for assisting creators to understand the content better and collaborate more effectively. For example: What are the themes discussed? Who are the characters? What are the relationships between the characters? Where was concept \"XYZZY\" first introduced? Did the \"Blarg\" character actually purchase a quantum transmogrifier before its first use in the story? How do the themes within the content map to the beats in the story arc? What is the \"concept density\" per chapter, in terms of the pace of new ideas being introduced? How can language models help suggest or refine the prompt engineering used for illustrating a story? Where are illustrations needed? These approaches apply in the production of fiction, as well as games, movie scripts, plays, documentaries, and various non-fiction as well. We'll review an example: development of an ebook in the style of Japanese Light Novels (a cli-fy novel \"Latent Space\") where artists experimented with collages using components from generative AI, prompts needed to be tracked, themes images needed to be aligned with text themes, and so on. Python provides a wide range of available tooling (`spaCy`, `argilla`, `huggingface`, `pyvis`, and so on) as well as data infrastructure tooling to support content work at scale. Speaker: Paco Xander Nathan",
-      "creator": "",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/fossy2023_Language_Tools_For_Creators",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC-BY-SA",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by-sa/4.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
       },
-      "cache_policy": "LINK_ONLY",
-      "mesh_redistributable": false,
-      "download_enabled": false,
-      "files": [],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "",
-        "source_title": "Language Tools For Creators by Paco Xander Nathan",
-        "source_url": "https://archive.org/details/fossy2023_Language_Tools_For_Creators",
-        "license": "CC-BY-SA",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "prompt-engineering",
-          "school_slug": "technology",
-          "relevance_score": 18,
-          "pedagogy_score": 14,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bprompt engineering\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 23,
-      "relevance": {
+      "selection": {
         "prompt-engineering": {
-          "score": 18,
-          "evidence": [
-            "prompt engineering",
-            "prompting",
-            "generative-model context"
-          ]
-        }
-      },
-      "pedagogy": {
-        "prompt-engineering": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bprompt engineering\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 14
+          "reason": "strong-description-anchor-plus-instructional-title",
+          "pedagogy_score": 15
         }
       }
     },
@@ -3548,15 +2043,9 @@
         {
           "topic_slug": "pseudocoding",
           "school_slug": "technology",
-          "relevance_score": 12,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39,
-          "strong_title_matches": [
-            "\\bpseudo[- ]?code\\b"
-          ],
-          "strong_description_matches": [
-            "\\bpseudo[- ]?code\\b"
-          ],
-          "educational_intent": false
+          "relevance_score": 12
         }
       ],
       "quality_score": 88,
@@ -3580,91 +2069,11 @@
           "clickbait_title": false,
           "pedagogy_score": 39
         }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Deadlocks and the Dining Philosophers Problem.webm",
-      "topic_slug": "pseudocoding",
-      "topic_name": "Pseudocoding and Algorithm Design",
-      "school_slug": "technology",
-      "concepts": [
-        "pseudocode",
-        "algorithms",
-        "flowcharts",
-        "computational thinking"
-      ],
-      "matched_query": "algorithm design",
-      "title": "Deadlocks and the Dining Philosophers Problem",
-      "description": "In this video we will cover the “Dining Philosophers” problem. The “Dining Philosophers” problem is an example problem to demonstrate concurrent algorithm design. A group of philosophers sit around a table and alternate between thinking and eating using the forks on their left and right. The forks represent a shared resource between the pair of philosophers on either side of them. Philosophers need both forks to eat and only one philosopher can use a fork at a time. If the philosophers were to simply take forks as they needed them a situation could occur where a circle of philosophers are each holding one fork and waiting on another philosopher to give up a fork. This is referred to as a “deadlock”. A simple solution to this problem is to add a waiter, who represents a lock, that the philosophers need exclusive access to before picking up either of their forks. Once a philosopher has exclusive access to the waiter’s attention they have that attention until the philosopher has successfully picked up both forks. When a philosopher has exclusive access to the waiter they will succeed in picking up their forks either because both forks are available, and no other philosophers have the waiter's attention, or they will wait with the waiter’s attention for the philosophers on either side of them to give up their forks. This solution of using a central arbitrator to manage access prevents a circular cycle of philosophers holding one fork while waiting on another philosopher for their other fork that causes a deadlock. This solution is fair because all of the philosophers have equal access to the waiter. However, it can be inefficient because philosophers have to wait for the waiter even when both of their forks are available. Reference: Dining philosophers image: bdesham - http",
-      "creator": "Argosopentech",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Deadlocks_and_the_Dining_Philosophers_Problem.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
       },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/b/be/Deadlocks_and_the_Dining_Philosophers_Problem.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 4980674,
-          "provider_sha1": "2fd81f00c4d400271fdf5fe2c788660787c97be4",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Argosopentech",
-        "source_title": "Deadlocks and the Dining Philosophers Problem",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Deadlocks_and_the_Dining_Philosophers_Problem.webm",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "pseudocoding",
-          "school_slug": "technology",
-          "relevance_score": 12,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\balgorithm design\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
+      "selection": {
         "pseudocoding": {
-          "score": 12,
-          "evidence": [
-            "algorithm design",
-            "algorithm"
-          ]
-        }
-      },
-      "pedagogy": {
-        "pseudocoding": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\balgorithm design\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
+          "reason": "strong-topic-anchor-in-title",
+          "pedagogy_score": 39
         }
       }
     },
@@ -3740,13 +2149,9 @@
         {
           "topic_slug": "pseudocoding",
           "school_slug": "technology",
-          "relevance_score": 9,
+          "selection_reason": "strong-description-anchor-plus-instructional-title",
           "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bcomputational thinking\\b"
-          ],
-          "educational_intent": true
+          "relevance_score": 9
         }
       ],
       "quality_score": 85,
@@ -3768,99 +2173,10 @@
           "clickbait_title": false,
           "pedagogy_score": 24
         }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "clouds-andres-colubri",
-      "topic_slug": "pseudocoding",
-      "topic_name": "Pseudocoding and Algorithm Design",
-      "school_slug": "technology",
-      "concepts": [
-        "pseudocode",
-        "algorithms",
-        "flowcharts",
-        "computational thinking"
-      ],
-      "matched_query": "computational thinking",
-      "title": "CLOUDS Andres Colubri",
-      "description": "Andres Colubri: Interview Excerpts from CLOUDS (2014) Artist, Programmer This video presents excerpts of raw interview footage from CLOUDS (2014). Directed by Jae Minard and James George, CLOUDS is an interactive, generative, computational documentary that allows the viewer to explore different perspectives on the intersection of code and culture. Filmed using the RGBD 3D cinema format and created entirely with open-source software, CLOUDS uses a data-driven story engine to present an endless, ever-changing conversation about the role of computational thinking in contemporary arts and design. More information is at cloudsdocumentary.com. Andres Colubri (@codeanticode) develops computer applications for visualization in biology and media arts. He works as a research associate at the Harvard Sabeti Lab and designer at Fathom Information Design in collaboration with Ben Fry as one of the principal developers of Processing, a Java-based open source programming language. [2014 Biography] 00:05 1. make an egg 00:28 2. protein folding 1 00:49 3. protein folding 2 01:06 4. examples of the impossible 01:16 5. sharing code 01:40 6. Reaching higher 01:54 7. DNA computing 1 02:28 8. DNA computing 2 03:12 9. probability 03:38 10. fuzzy systems 04:11 11. soft systems 1 04:33 12. soft systems 2 05:12 13. modeling complex systems 05:51 14. an overly complex model 06:37 15. modeling the human being 07:11 16. Less beautiful than it could be 07:46 17. correct is beautiful 08:07 18. seeing molecules 08:50 19. Computational lens 09:41 20. camera distorts reality Directors: Jae Minard and James George Executive Producer: Golan Levin (CMU) Producer: Winslow Porter Design Director: Bradley G Munkowitz",
-      "creator": "Jae Minard and James George",
-      "language": "eng",
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/clouds-andres-colubri",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC-BY-SA",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by-sa/4.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
       },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/clouds-andres-colubri/CLOUDS_andres_colubri.mov",
-          "bytes": 178908794,
-          "provider_sha1": "6464cd7aed899c390c1e102cefe2a547a0a9580c",
-          "provider_md5": "86cae8eb27a906b56a5142acad106de5",
-          "format": "QuickTime",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/clouds-andres-colubri/CLOUDS_andres_colubri.mp4",
-          "bytes": 58835637,
-          "provider_sha1": "8c9db819bc79abfc9514e99134a63ce07d760d8d",
-          "provider_md5": "43880861e75df1a6eb17f1dd123695f8",
-          "format": "h.264",
-          "role": "derivative"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Jae Minard and James George",
-        "source_title": "CLOUDS Andres Colubri",
-        "source_url": "https://archive.org/details/clouds-andres-colubri",
-        "license": "CC-BY-SA",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "pseudocoding",
-          "school_slug": "technology",
-          "relevance_score": 12,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bcomputational thinking\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 84,
-      "relevance": {
+      "selection": {
         "pseudocoding": {
-          "score": 12,
-          "evidence": [
-            "computational thinking",
-            "programming context"
-          ]
-        }
-      },
-      "pedagogy": {
-        "pseudocoding": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bcomputational thinking\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
+          "reason": "strong-description-anchor-plus-instructional-title",
           "pedagogy_score": 24
         }
       }
@@ -3920,16 +2236,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 15,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 59,
-          "strong_title_matches": [
-            "\\bvibe cod(?:e|ing)\\b",
-            "\\b(?:claude code|github copilot|codeium|cursor)\\b"
-          ],
-          "strong_description_matches": [
-            "\\b(?:claude code|github copilot|codeium|cursor)\\b"
-          ],
-          "educational_intent": false
+          "relevance_score": 15
         }
       ],
       "quality_score": 88,
@@ -3953,6 +2262,12 @@
           ],
           "educational_intent": false,
           "clickbait_title": false,
+          "pedagogy_score": 59
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 59
         }
       }
@@ -4013,15 +2328,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 15,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39,
-          "strong_title_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "strong_description_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "educational_intent": false
+          "relevance_score": 15
         }
       ],
       "quality_score": 84,
@@ -4044,6 +2353,12 @@
           ],
           "educational_intent": false,
           "clickbait_title": false,
+          "pedagogy_score": 39
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 39
         }
       }
@@ -4103,13 +2418,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 12,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36,
-          "strong_title_matches": [
-            "\\bai (?:coding|code) assistant\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true
+          "relevance_score": 12
         }
       ],
       "quality_score": 89,
@@ -4130,6 +2441,12 @@
           "strong_description_matches": [],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36
         }
       }
@@ -4189,13 +2506,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 12,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36,
-          "strong_title_matches": [
-            "\\bai (?:coding|code) assistant\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true
+          "relevance_score": 12
         }
       ],
       "quality_score": 89,
@@ -4216,6 +2529,12 @@
           "strong_description_matches": [],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36
         }
       }
@@ -4289,13 +2608,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 15,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36,
-          "strong_title_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true
+          "relevance_score": 15
         }
       ],
       "quality_score": 88,
@@ -4316,6 +2631,12 @@
           "strong_description_matches": [],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36
         }
       }
@@ -4389,13 +2710,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 15,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36,
-          "strong_title_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true
+          "relevance_score": 15
         }
       ],
       "quality_score": 88,
@@ -4416,6 +2733,12 @@
           "strong_description_matches": [],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36
         }
       }
@@ -4476,13 +2799,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 15,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36,
-          "strong_title_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": true
+          "relevance_score": 15
         }
       ],
       "quality_score": 85,
@@ -4503,6 +2822,12 @@
           "strong_description_matches": [],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 36
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 36
         }
       }
@@ -4562,14 +2887,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 15,
+          "selection_reason": "strong-description-anchor-plus-instructional-title",
           "pedagogy_score": 32,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bvibe cod(?:e|ing)\\b",
-            "\\b(?:claude code|github copilot|codeium|cursor)\\b"
-          ],
-          "educational_intent": true
+          "relevance_score": 15
         }
       ],
       "quality_score": 88,
@@ -4591,6 +2911,12 @@
           ],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 32
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "strong-description-anchor-plus-instructional-title",
           "pedagogy_score": 32
         }
       }
@@ -4651,14 +2977,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 22,
+          "selection_reason": "strong-description-anchor-plus-instructional-title",
           "pedagogy_score": 32,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bvibe cod(?:e|ing)\\b",
-            "\\b(?:claude code|github copilot|codeium|cursor)\\b"
-          ],
-          "educational_intent": true
+          "relevance_score": 22
         }
       ],
       "quality_score": 85,
@@ -4682,6 +3003,12 @@
           ],
           "educational_intent": true,
           "clickbait_title": false,
+          "pedagogy_score": 32
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "strong-description-anchor-plus-instructional-title",
           "pedagogy_score": 32
         }
       }
@@ -4755,13 +3082,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 15,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 31,
-          "strong_title_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": false
+          "relevance_score": 15
         }
       ],
       "quality_score": 87,
@@ -4782,6 +3105,12 @@
           "strong_description_matches": [],
           "educational_intent": false,
           "clickbait_title": false,
+          "pedagogy_score": 31
+        }
+      },
+      "selection": {
+        "vibe-coding": {
+          "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 31
         }
       }
@@ -4869,13 +3198,9 @@
         {
           "topic_slug": "vibe-coding",
           "school_slug": "technology",
-          "relevance_score": 15,
+          "selection_reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 31,
-          "strong_title_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "strong_description_matches": [],
-          "educational_intent": false
+          "relevance_score": 15
         }
       ],
       "quality_score": 82,
@@ -4898,395 +3223,19 @@
           "clickbait_title": false,
           "pedagogy_score": 31
         }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "wikimedia-commons",
-      "provider_id": "File:Wikimania 2026 – Wikipedia Mobile Apps THE destination for knowledge lovers in a mobile-first world.webm",
-      "topic_slug": "vibe-coding",
-      "topic_name": "Vibe Coding",
-      "school_slug": "technology",
-      "concepts": [
-        "vibe coding",
-        "AI-assisted programming",
-        "code generation",
-        "software iteration"
-      ],
-      "matched_query": "vibe coding",
-      "title": "Wikimania 2026 – Wikipedia Mobile Apps THE destination for knowledge lovers in a mobile-first world",
-      "description": "Attendees to this interactive session will explore recent and upcoming innovations on the Wikipedia apps. Mobile Apps team members will provide a brief introduction: explaining how mobile apps fit into the larger reader strategy, demographic insights of Wikipedia app users (e.g. Country and Language) and sharing a few examples of recent experiments that measurably moved the needle for readers vs those that did not. Then workshop participants will form small groups and pick from a list of early stage ideas via dot voting and collaboratively build out the concept (vibe coding, live designing, story boarding).. Each group will give their creation a score of impact and reasoning and share it with the wider group. Participants will also have the opportunity to add other reader focused ideas to the team’s backlog. The session will demonstrate the unique capabilities of rapid native mobile app development, surface community perspectives on how the apps can better capture and retain new generations of learners on mobile devices.",
-      "creator": "Haley Nordeen, Jaz Tanner",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2026_%E2%80%93_Wikipedia_Mobile_Apps_THE_destination_for_knowledge_lovers_in_a_mobile-first_world.webm",
-      "source_host": "commons.wikimedia.org",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "CC BY-SA 4.0",
-        "url": "https://creativecommons.org/licenses/by-sa/4.0",
-        "evidence": "CC BY-SA 4.0 | Creative Commons Attribution-Share Alike 4.0 | cc-by-sa-4.0 | https://creativecommons.org/licenses/by-sa/4.0",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
       },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Wikimania_2026_%E2%80%93_Wikipedia_Mobile_Apps_THE_destination_for_knowledge_lovers_in_a_mobile-first_world.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-          "mime": "video/webm",
-          "bytes": 259553223,
-          "provider_sha1": "93bf3f744368f6d04f6de777d084c01fb26d3236",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Haley Nordeen, Jaz Tanner",
-        "source_title": "Wikimania 2026 – Wikipedia Mobile Apps THE destination for knowledge lovers in a mobile-first world",
-        "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2026_%E2%80%93_Wikipedia_Mobile_Apps_THE_destination_for_knowledge_lovers_in_a_mobile-first_world.webm",
-        "license": "CC BY-SA 4.0",
-        "license_url": "https://creativecommons.org/licenses/by-sa/4.0"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "vibe-coding",
-          "school_slug": "technology",
-          "relevance_score": 15,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 88,
-      "relevance": {
+      "selection": {
         "vibe-coding": {
-          "score": 15,
-          "evidence": [
-            "vibe coding",
-            "programming context"
-          ]
-        }
-      },
-      "pedagogy": {
-        "vibe-coding": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "db430af2-c151-402d-87f8-19fc2f6b5446",
-      "topic_slug": "vibe-coding",
-      "topic_name": "Vibe Coding",
-      "school_slug": "technology",
-      "concepts": [
-        "vibe coding",
-        "AI-assisted programming",
-        "code generation",
-        "software iteration"
-      ],
-      "matched_query": "coding with generative AI",
-      "title": "Extending sqlc: augmented generation of repositories in Go",
-      "description": "This talk explores how to bridge sqlc (SQL-compiler)'s type-safe generated queries with a clean service architecture using Crush coding agent. It is open source and built entirely in Go. Sqlc generates strongly typed database access, but us...",
-      "creator": "Go Devroom @ FOSDEM",
-      "language": "en",
-      "duration_seconds": 1374,
-      "source_url": "https://cuddly.tube/videos/watch/db430af2-c151-402d-87f8-19fc2f6b5446",
-      "source_host": "cuddly.tube",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://cuddly.tube/download/web-videos/db430af2-c151-402d-87f8-19fc2f6b5446-1080.mp4",
-          "bytes": 115790434,
-          "resolution": "1080p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://cuddly.tube/download/web-videos/db430af2-c151-402d-87f8-19fc2f6b5446-720.mp4",
-          "bytes": 90379860,
-          "resolution": "720p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://cuddly.tube/download/web-videos/db430af2-c151-402d-87f8-19fc2f6b5446-480.mp4",
-          "bytes": 71474013,
-          "resolution": "480p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://cuddly.tube/download/web-videos/db430af2-c151-402d-87f8-19fc2f6b5446-360.mp4",
-          "bytes": 62153534,
-          "resolution": "360p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://cuddly.tube/download/web-videos/db430af2-c151-402d-87f8-19fc2f6b5446-240.mp4",
-          "bytes": 53920598,
-          "resolution": "240p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://cuddly.tube/download/web-videos/db430af2-c151-402d-87f8-19fc2f6b5446-144.mp4",
-          "bytes": 48216869,
-          "resolution": "144p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://cuddly.tube/download/web-videos/db430af2-c151-402d-87f8-19fc2f6b5446-0.mp4",
-          "bytes": 42172420,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "web-video"
-        },
-        {
-          "url": "https://cuddly.tube/download/streaming-playlists/hls/videos/db430af2-c151-402d-87f8-19fc2f6b5446-1080-fragmented.mp4",
-          "bytes": 115345508,
-          "resolution": "1080p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://cuddly.tube/download/streaming-playlists/hls/videos/db430af2-c151-402d-87f8-19fc2f6b5446-720-fragmented.mp4",
-          "bytes": 69720751,
-          "resolution": "720p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://cuddly.tube/download/streaming-playlists/hls/videos/db430af2-c151-402d-87f8-19fc2f6b5446-480-fragmented.mp4",
-          "bytes": 50787575,
-          "resolution": "480p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://cuddly.tube/download/streaming-playlists/hls/videos/db430af2-c151-402d-87f8-19fc2f6b5446-360-fragmented.mp4",
-          "bytes": 41450744,
-          "resolution": "360p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://cuddly.tube/download/streaming-playlists/hls/videos/db430af2-c151-402d-87f8-19fc2f6b5446-240-fragmented.mp4",
-          "bytes": 33208000,
-          "resolution": "240p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://cuddly.tube/download/streaming-playlists/hls/videos/db430af2-c151-402d-87f8-19fc2f6b5446-144-fragmented.mp4",
-          "bytes": 27516271,
-          "resolution": "144p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://cuddly.tube/download/streaming-playlists/hls/videos/db430af2-c151-402d-87f8-19fc2f6b5446-0-fragmented.mp4",
-          "bytes": 22044550,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "Go Devroom @ FOSDEM",
-        "source_title": "Extending sqlc: augmented generation of repositories in Go",
-        "source_url": "https://cuddly.tube/videos/watch/db430af2-c151-402d-87f8-19fc2f6b5446",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "vibe-coding",
-          "school_slug": "technology",
-          "relevance_score": 8,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\b(?:coding|code) agent(?:s)?\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "vibe-coding": {
-          "score": 8,
-          "evidence": [
-            "programming context",
-            "AI coding tool"
-          ]
-        }
-      },
-      "pedagogy": {
-        "vibe-coding": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\b(?:coding|code) agent(?:s)?\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "peertube",
-      "provider_id": "0e0e76d0-92ef-4863-8319-c642e1c645ff",
-      "topic_slug": "vibe-coding",
-      "topic_name": "Vibe Coding",
-      "school_slug": "technology",
-      "concepts": [
-        "vibe coding",
-        "AI-assisted programming",
-        "code generation",
-        "software iteration"
-      ],
-      "matched_query": "AI coding assistant",
-      "title": "Survivre à l'« AI Slopageddon » : comment l'IA ébranle l'Open Source - Raphaël Semeteys - JdLL2026",
-      "description": "Plan prévisionel car les choses bougent vite dans ce domaine et il sera probablement nécessaire d'ajuster le contenu d'ici quelques mois. ### 1. Introduction : l'ère du « Vibe Coding » * **Définition :** distinction entre l'assistance au cod...",
-      "creator": "JdLL",
-      "language": "fr",
-      "duration_seconds": 3342,
-      "source_url": "https://videos-libr.es/videos/watch/0e0e76d0-92ef-4863-8319-c642e1c645ff",
-      "source_host": "videos-libr.es",
-      "license": {
-        "spdx": "CC-BY-SA",
-        "label": "Attribution - Share Alike",
-        "url": "",
-        "evidence": "PeerTube API licence id 2: Attribution - Share Alike",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": true
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://videos-libr.es/download/web-videos/0e0e76d0-92ef-4863-8319-c642e1c645ff-720.mp4",
-          "bytes": 196418376,
-          "resolution": "720p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://videos-libr.es/download/web-videos/0e0e76d0-92ef-4863-8319-c642e1c645ff-360.mp4",
-          "bytes": 114276047,
-          "resolution": "360p",
-          "fps": 30,
-          "role": "web-video"
-        },
-        {
-          "url": "https://videos-libr.es/download/web-videos/0e0e76d0-92ef-4863-8319-c642e1c645ff-0.mp4",
-          "bytes": 54038961,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "web-video"
-        },
-        {
-          "url": "https://videos-libr.es/download/streaming-playlists/hls/videos/0e0e76d0-92ef-4863-8319-c642e1c645ff-720-fragmented.mp4",
-          "bytes": 195291462,
-          "resolution": "720p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://videos-libr.es/download/streaming-playlists/hls/videos/0e0e76d0-92ef-4863-8319-c642e1c645ff-360-fragmented.mp4",
-          "bytes": 113051728,
-          "resolution": "360p",
-          "fps": 30,
-          "role": "streaming-file"
-        },
-        {
-          "url": "https://videos-libr.es/download/streaming-playlists/hls/videos/0e0e76d0-92ef-4863-8319-c642e1c645ff-0-fragmented.mp4",
-          "bytes": 54206925,
-          "resolution": "Audio only",
-          "fps": 0,
-          "role": "streaming-file"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "JdLL",
-        "source_title": "Survivre à l'« AI Slopageddon » : comment l'IA ébranle l'Open Source - Raphaël Semeteys - JdLL2026",
-        "source_url": "https://videos-libr.es/videos/watch/0e0e76d0-92ef-4863-8319-c642e1c645ff",
-        "license": "Attribution - Share Alike",
-        "license_url": ""
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "vibe-coding",
-          "school_slug": "technology",
-          "relevance_score": 15,
-          "pedagogy_score": 24,
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "educational_intent": true
-        }
-      ],
-      "quality_score": 87,
-      "relevance": {
-        "vibe-coding": {
-          "score": 15,
-          "evidence": [
-            "vibe coding",
-            "programming context"
-          ]
-        }
-      },
-      "pedagogy": {
-        "vibe-coding": {
-          "strong_title_matches": [],
-          "strong_description_matches": [
-            "\\bvibe cod(?:e|ing)\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 24
+          "reason": "strong-topic-anchor-in-title",
+          "pedagogy_score": 31
         }
       }
     }
   ],
-  "record_count_before_relevance_gate": 329,
-  "rejected_by_relevance_gate": 254,
+  "record_count_before_relevance_gate": 332,
+  "rejected_by_relevance_gate": 257,
   "record_count_before_pedagogy_gate": 75,
-  "rejected_by_pedagogy_gate": 22
+  "rejected_by_pedagogy_gate": 21,
+  "record_count_before_selection_gate": 54,
+  "rejected_by_selection_gate": 22
 }

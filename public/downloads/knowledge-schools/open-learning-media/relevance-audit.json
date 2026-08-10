@@ -1,15 +1,15 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v1",
-  "built_at": "2026-08-10T02:16:27Z",
-  "before": 329,
+  "built_at": "2026-08-10T02:22:16Z",
+  "before": 332,
   "after": 75,
-  "rejected": 254,
+  "rejected": 257,
   "topics": {
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
       "records": 15,
-      "mesh_redistributable": 14,
+      "mesh_redistributable": 15,
       "providers": {
         "internet-archive": 4,
         "peertube": 7,
@@ -50,17 +50,18 @@
     "pseudocoding": {
       "name": "Pseudocoding and Algorithm Design",
       "school_slug": "technology",
-      "records": 7,
-      "mesh_redistributable": 4,
+      "records": 8,
+      "mesh_redistributable": 7,
       "providers": {
         "wikimedia-commons": 1,
         "peertube": 2,
-        "internet-archive": 4
+        "internet-archive": 5
       },
       "top_titles": [
         "Deadlocks and the Dining Philosophers Problem",
         "Pseudo-code et description des algorithmes",
         "CLOUDS Andres Colubri",
+        "CLOUDS Daniel Shiffman",
         "Open CS education resources for schools - how hard could it be?",
         "CLOUDS Aaron Koblin",
         "CLOUDS: Pittsburgh Premiere (excerpt)",
@@ -70,28 +71,28 @@
     "critical-thinking": {
       "name": "Critical Thinking",
       "school_slug": "philosophy-and-religion",
-      "records": 14,
+      "records": 13,
       "mesh_redistributable": 13,
       "providers": {
-        "internet-archive": 7,
+        "internet-archive": 6,
         "wikimedia-commons": 7
       },
       "top_titles": [
         "BREAKING: Drones just struck IDF convoy carrying Netanyahu…ENTIRE ISRAEL IN SHOCK - OPTM",
         "BREAKING: Netanyahu FLEE Tel Aviv Hours After MASKED IDF Soldiers Attack Gov’t Office",
-        "Iran just destroyed US ships in strait of Hormuz - 10 million barrels incinerated — OPTM",
-        "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM",
+        "DOUGLAS MACGREGOR: Netanyahu Is Facing a Test Nobody Saw Coming...End of Israel!",
+        "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
         "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
         "Berpikir kritis seperti mengupas bawang",
-        "Orwellian Thought Crime - The UK and Free Speech | Bob | Speakers Corner"
+        "The Truth About the Murder of Mary Phagan - Jake Shields Interview - FightBack Podcast"
       ]
     },
     "logical-frameworks": {
       "name": "Logical Frameworks",
       "school_slug": "philosophy-and-religion",
       "records": 28,
-      "mesh_redistributable": 26,
+      "mesh_redistributable": 28,
       "providers": {
         "internet-archive": 14,
         "wikimedia-commons": 9,
@@ -364,6 +365,12 @@
     },
     {
       "provider": "internet-archive",
+      "title": "Defending our Military",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "internet-archive",
       "title": "Interview with Brian Klaas",
       "original_topic": "critical-thinking",
       "matched_query": "critical thinking"
@@ -457,6 +464,12 @@
       "title": "The Car King Part 18 - Lightning and Ruby's Argument",
       "original_topic": "critical-thinking",
       "matched_query": "argument analysis"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Journalist Mark Taylor-Canfield on Norman Goldman Show - Seattle May Day \"Riots\" (Again)",
+      "original_topic": "critical-thinking",
+      "matched_query": "media literacy"
     },
     {
       "provider": "peertube",
@@ -577,18 +590,6 @@
       "title": "Complexity Science- 4 Systems Theory",
       "original_topic": "logical-frameworks",
       "matched_query": "systems thinking"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Internal Market Council, 1957th meeting",
-      "original_topic": "logical-frameworks",
-      "matched_query": "decision framework"
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Pouring coastal water on Wikidata - Can we add more-",
-      "original_topic": "logical-frameworks",
-      "matched_query": "decision framework"
     }
   ]
 }

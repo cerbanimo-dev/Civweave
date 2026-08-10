@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-pedagogy-audit.v1",
-  "built_at": "2026-08-10T02:16:27Z",
+  "built_at": "2026-08-10T02:22:16Z",
   "before": 75,
-  "after": 53,
-  "rejected": 22,
+  "after": 54,
+  "rejected": 21,
   "topics": {
     "vibe-coding": {
       "name": "Vibe Coding",
@@ -49,18 +49,19 @@
     "pseudocoding": {
       "name": "Pseudocoding and Algorithm Design",
       "school_slug": "technology",
-      "records": 4,
-      "mesh_redistributable": 4,
+      "records": 5,
+      "mesh_redistributable": 5,
       "providers": {
         "peertube": 1,
         "wikimedia-commons": 1,
-        "internet-archive": 2
+        "internet-archive": 3
       },
       "top_titles": [
         "Pseudo-code et description des algorithmes",
         "Deadlocks and the Dining Philosophers Problem",
         "Open CS education resources for schools - how hard could it be?",
-        "CLOUDS Andres Colubri"
+        "CLOUDS Andres Colubri",
+        "CLOUDS Daniel Shiffman"
       ]
     },
     "critical-thinking": {
@@ -80,14 +81,14 @@
         "Media literacy to counter political polarization per Ahmed Al-Rawi",
         "Media literacy to dispel myths and improve public policy",
         "What is Gaslighting?",
-        "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM"
+        "DOUGLAS MACGREGOR: Netanyahu Is Facing a Test Nobody Saw Coming...End of Israel!"
       ]
     },
     "logical-frameworks": {
       "name": "Logical Frameworks",
       "school_slug": "philosophy-and-religion",
       "records": 22,
-      "mesh_redistributable": 20,
+      "mesh_redistributable": 22,
       "providers": {
         "internet-archive": 10,
         "wikimedia-commons": 8,
@@ -95,6 +96,7 @@
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
+        "A Communist's Guide to Logical Fallacies",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 8- Emergence",
@@ -102,8 +104,7 @@
         "The Open Decision Framework How to make everybody happy",
         "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
         "Systems Thinking 11- Homeostasis",
-        "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)",
-        "Diego Fontanive ESC2017"
+        "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)"
       ]
     }
   },
@@ -126,8 +127,8 @@
     },
     {
       "provider": "internet-archive",
-      "title": "Iran just destroyed US ships in strait of Hormuz - 10 million barrels incinerated — OPTM",
-      "source_url": "https://archive.org/details/youtube-6YK20kDQQuM",
+      "title": "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
+      "source_url": "https://archive.org/details/youtube-KuGk2ATA5Ec",
       "relevance_topics": [
         "critical-thinking"
       ]
@@ -136,14 +137,6 @@
       "provider": "wikimedia-commons",
       "title": "Berpikir kritis seperti mengupas bawang",
       "source_url": "https://commons.wikimedia.org/wiki/File:Berpikir_kritis_seperti_mengupas_bawang.webm",
-      "relevance_topics": [
-        "critical-thinking"
-      ]
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Orwellian Thought Crime - The UK and Free Speech | Bob | Speakers Corner",
-      "source_url": "https://archive.org/details/youtube-na7qaeDZIcs",
       "relevance_topics": [
         "critical-thinking"
       ]
@@ -182,8 +175,8 @@
     },
     {
       "provider": "internet-archive",
-      "title": "The Social Dilemma",
-      "source_url": "https://archive.org/details/the-social-dilemma-06-27-2025",
+      "title": "The Dunning-Kruger Effect",
+      "source_url": "https://archive.org/details/the-dunning-kruger-effect-1080p",
       "relevance_topics": [
         "logical-frameworks"
       ]
