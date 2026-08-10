@@ -17,16 +17,21 @@ Agents and automated contributors must read [`AGENTS.md`](./AGENTS.md) before ed
 
 ## Repository map
 
-The repository root is a control surface, not an archive. Keep root files limited to runtime entrypoints, tool-required configuration, and a small set of stable pointers/contracts.
+The repository root is a control surface, not an archive. Keep root files limited to runtime entrypoints, tool-required configuration, and stable compatibility pointers.
 
 - [`docs/`](./docs/) - current engineering and product documentation.
-- [`docs/history/`](./docs/history/) - versioned release notes, audits, design backlogs, and other historical records.
+- [`docs/contracts/`](./docs/contracts/) - stable architecture and behavior contracts.
+- [`docs/operations/`](./docs/operations/) - installation, hosting, and deployment guidance.
+- [`docs/roadmap/`](./docs/roadmap/) - long-horizon pipeline, rebase, and renewal procedures.
+- [`docs/history/`](./docs/history/) - versioned release notes, audits, design backlogs, inventories, and other historical records.
+- [`server/`](./server/) - stable server entrypoints; versioned compatibility implementations live under `server/compat/`.
+- [`archive/runtime/`](./archive/runtime/) - historical server wrappers retained for provenance.
 - [`ops/triggers/`](./ops/triggers/) - workflow sentinel files used to deliberately trigger materialization or recovery jobs.
 - [`scripts/`](./scripts/) - verification, migration, packaging, and maintenance tools.
 - [`.github/workflows/`](./.github/workflows/) - CI and automation definitions.
 - [`RELEASE-NOTES.md`](./RELEASE-NOTES.md) - stable pointer to the historical release-note collection.
 
-Do not add new versioned Markdown reports or hidden trigger files to the repository root. `scripts/verify-root-hygiene.mjs` and the root-hygiene workflow enforce this boundary.
+Do not add new versioned Markdown reports, hidden trigger files, or full versioned server implementations to the repository root. `scripts/verify-root-hygiene.mjs` and the root-hygiene workflow enforce this boundary. Legacy root server names may exist only as lightweight compatibility pointers.
 
 ## Current cabinet entry map
 
@@ -51,6 +56,7 @@ These filenames are versioned compatibility boundaries. The route table above is
 - `public/app/services/<realm>/` - mature embedded realm tools and internal surfaces used by cabinet parents.
 - `public/app/shared/` - shared contracts, parity state, and cross-realm runtime code.
 - `public/extensions/` - optional cross-cutting capabilities loaded by the installed package.
+- `server/` - stable host, local, development, and federated runtime entrypoints.
 - `scripts/` and `.github/workflows/` - verification, packaging, and release automation.
 
 Before changing a cabinet, inspect the newest commits touching its active entry and follow its imports, scripts, stylesheets, iframes, and service-worker references. Recent work may have moved one realm without moving the others.
@@ -66,8 +72,9 @@ Do not edit these by default:
 - copied `www/app/` trees inside installer or release bundles
 - ZIP contents and other generated package mirrors
 - `public/cabinetonly/index.html`, which is only a compatibility redirect
+- `server/compat/` and `archive/runtime/` unless the task explicitly concerns compatibility or migration behavior
 
-Change one of those only when the task explicitly concerns that legacy surface, redirect, or generated artifact. Canonical source changes belong in `public/app/` first. Regenerate packages afterward rather than hand-editing their copies.
+Change one of those only when the task explicitly concerns that legacy surface, redirect, or generated artifact. Canonical source changes belong in `public/app/` or a stable `server/` entrypoint first. Regenerate packages afterward rather than hand-editing their copies.
 
 ## Host and installed-runtime topology
 
@@ -105,7 +112,7 @@ npm run build:install
 
 For LAN use, the server binds to `0.0.0.0` by default. Full PWA installation and service workers require HTTPS or `localhost`; a plain LAN IP may not receive every browser installation capability.
 
-See `HOST-NODE-SETUP-GUIDE.md` for local, Docker, LAN, and Render setup.
+See [`docs/operations/host-node-setup.md`](./docs/operations/host-node-setup.md) for local, Docker, LAN, and Render setup.
 
 ## Development rule of thumb
 

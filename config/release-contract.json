@@ -1,0 +1,12 @@
+{
+  "schema": "civweave.release-contract.v1",
+  "offlineCampus": {
+    "revision": "offline-campus-current-graph-v280",
+    "policy": "resumable-pause-v280",
+    "syncTag": "civweave-campus-resume-v280"
+  },
+  "node": {
+    "major": 22,
+    "engine": "22.x"
+  }
+}

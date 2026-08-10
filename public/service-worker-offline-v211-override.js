@@ -371,6 +371,7 @@ self.CivweaveOfflineCampusV211 = {
   backgroundSafe: true,
   resumablePerFile: true,
   pauseSupported: true,
+  resumeSupported: true,
   packet: v211Packet,
   migrateMeta: v211MigrateMeta,
   sanitizeRetryMeta: v211SanitizeRetryMeta,

@@ -1,21 +1,17 @@
 # Civweave documentation
 
-This directory is the default home for repository documentation. The repository root is reserved for runtime entrypoints, tool-required configuration, stable pointers, and a small number of executable contracts whose exact root path is still consumed by code or packaging.
+The repository root is a control surface, not a document archive. Current knowledge lives here behind stable folders and indexes.
 
 ## Current documentation
 
-Current architecture, subsystem, and operational documents live directly in `docs/` until a domain grows large enough to deserve its own folder.
-
-## Historical documentation
-
-Version-specific records belong under [`history/`](./history/):
-
-- [`history/releases/`](./history/releases/) - versioned release notes.
-- [`history/audits/`](./history/audits/) - point-in-time audits and recovery reports.
-- [`history/design/`](./history/design/) - versioned design backlogs and retired design snapshots.
+- [`contracts/`](./contracts/) contains architecture and behavior contracts consumed by people, verifiers, and packaging.
+- [`operations/`](./operations/) contains installation, hosting, deployment, and operator guidance.
+- [`migrations/`](./migrations/) contains naming and structural migration records.
+- [`roadmap/`](./roadmap/) contains the long-horizon pipeline plus its rebase and renewal procedures.
+- [`history/`](./history/) contains point-in-time releases, audits, design snapshots, and inventories.
 
 ## Operational sentinels
 
 Workflow touch files are not documentation. They live in [`../ops/triggers/`](../ops/triggers/) so CI can watch explicit paths without accumulating hidden files at repository root.
 
-Before adding a root document, run `node scripts/verify-root-hygiene.mjs`. In almost every case, add the document here and link to it instead.
+Before adding a root document, run `node scripts/verify-root-hygiene.mjs`. Root Markdown is intentionally limited to `README.md`, `AGENTS.md`, and the stable `RELEASE-NOTES.md` pointer.
