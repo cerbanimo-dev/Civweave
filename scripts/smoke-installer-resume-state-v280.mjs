@@ -1,0 +1,75 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+const here=path.dirname(fileURLToPath(import.meta.url));
+const root=path.resolve(here,'..');
+const read=relative=>fs.readFileSync(path.join(root,relative),'utf8');
+const files={
+  worker:read('public/service-worker-offline-v211-override.js'),
+  controller:read('public/app/installer-state-machine-v280.js'),
+  autostart:read('public/app/required-campus-autostart-v1.js'),
+  entry:read('public/service-worker-v203.js'),
+  shell:read('public/service-worker-installer-state-v280.js')
+};
+
+assert.match(files.worker,/PAUSE_OFFLINE_PACKAGE/);
+assert.match(files.worker,/downloadedAssets/);
+assert.match(files.worker,/joinedExisting/);
+assert.match(files.worker,/interrupted:\s*true/);
+assert.match(files.worker,/civweave-campus-resume-v280/);
+assert.match(files.controller,/Pause download/);
+assert.match(files.controller,/Resume download/);
+assert.match(files.controller,/calculating storage/);
+assert.match(files.controller,/needs repair/);
+assert.match(files.controller,/addEventListener\('click',onCampusButton,true\)/);
+assert.match(files.autostart,/campusIsPaused/);
+assert.match(files.autostart,/installer-state-machine-v280/);
+assert.match(files.entry,/service-worker-installer-state-v280/);
+assert.match(files.entry,/resumable-pause-v280/);
+assert.match(files.shell,/required-campus-autostart-v1\.js/);
+
+const listeners={};
+const context={
+  VERSION:'1.0.51',
+  OFFLINE_CACHE:'test-offline-cache',
+  offlinePacket(){},
+  offlineStatus:async()=>({}),
+  downloadOfflinePackage:async()=>({}),
+  loadOfflineManifest:async()=>({seeds:[]}),
+  readOfflineMeta:async()=>null,
+  writeOfflineMeta:async value=>value,
+  cacheOfflineAsset:async()=>({response:{headers:{get:()=>''},clone(){return this}},contentLength:0}),
+  TEXT_CONTENT:/text/,
+  discoverReferences:()=>[],
+  post(){},
+  self:{
+    clients:{matchAll:async()=>[]},
+    addEventListener(type,fn){(listeners[type]??=[]).push(fn)}
+  },
+  console
+};
+vm.createContext(context);
+vm.runInContext(files.worker,context,{filename:'service-worker-offline-v211-override.js'});
+const api=context.self.CivweaveOfflineCampusV211;
+assert.equal(api.pauseSupported,true);
+assert.equal(api.resumablePerFile,true);
+assert.equal(api.syncTag,'civweave-campus-resume-v280');
+const paused=api.packet({
+  running:true,
+  paused:true,
+  total:10,
+  downloaded:4,
+  downloadedAssets:['a','b','c','d'],
+  assets:['a','b','c','d','e','f','g','h','i','j']
+});
+assert.equal(paused.paused,true);
+assert.equal(paused.running,false);
+assert.equal(paused.downloaded,4);
+assert.equal(paused.resumeSupported,true);
+assert.ok((listeners.message||[]).length>=1);
+assert.ok((listeners.sync||[]).length>=1);
+
+console.log('installer resume state v280 smoke: ok');
