@@ -94,7 +94,7 @@ try{
   assert(files.core.includes("const BUILD = 'lightweight-shell-v208'")&&files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained lightweight/offline core is incomplete');
   assert(!/importScripts\(/.test(files.core),'retained lightweight core imports the retired layered stack');
   assert(files.cleanroom.includes("const REVISION='living-school-cleanroom-v218'")&&files.cleanroom.includes('event.stopImmediatePropagation()'),'Living School worker retirement boundary is incomplete');
-  assert(files.installerState.includes('installer-state-machines-v280')&&files.installerState.includes('PAUSE_OFFLINE_PACKAGE'),'resumable installer state layer is incomplete');
+  assert(files.installerState.includes('installer-state-machines-v280')&&files.installerState.includes("'/app/installer-state-machine-v280.js'")&&files.installerState.includes('shellRequired: true'),'worker-side installer state layer is incomplete');
   assert(
     files.offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'")&&
     files.offline.includes("const V211_POLICY = 'resumable-pause-v280'")&&
