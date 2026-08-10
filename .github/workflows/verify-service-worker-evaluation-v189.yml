@@ -38,6 +38,7 @@ jobs:
           node --check public/service-worker-v156.js
           node --check public/service-worker-v203.js
           node --check public/service-worker-core-v208.js
+          node --check public/service-worker-installed-launch-v282.js
           node --check public/service-worker-installer-state-v280.js
           node --check public/service-worker-shell-integrity-v281.js
           node --check public/service-worker-offline-v211-override.js
