@@ -68,16 +68,14 @@ jobs:
               if asset not in seen:
                   main_offline.setdefault('assets', []).append(asset)
                   seen.add(asset)
-          revision = str(main_offline.get('revision') or 'civweave-offline')
-          if 'open-learning-media-v1' not in revision:
-              revision += '-open-learning-media-v1'
-          main_offline['revision'] = revision
+          # Map v1 owns this canonical revision string. Preserve current main verbatim;
+          # Open Learning Media extends only the asset union, not the revision contract.
           Path('public/app/offline-package-v208.json').write_text(json.dumps(main_offline, indent=2) + '\n')
-          print(f'Semantically resolved shared launch files for Civweave {release}.')
+          print(f'Semantically resolved shared launch files for Civweave {release}; canonical offline revision preserved.')
           PY
 
           # Runner token cannot alter workflow files. Preserve the feature branch workflow tree;
-          # the connector will reconcile the two map workflows after this tested merge is pushed.
+          # the connector will reconcile current-main map workflows after this tested merge is pushed.
           git checkout "$FEATURE_HEAD" -- .github/workflows
           git add -A
           if git ls-files -u | grep -q .; then
