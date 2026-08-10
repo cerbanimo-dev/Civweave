@@ -1,0 +1,49 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "civweave-node-cloud",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-08-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    {
+      "pattern": "nodes.commonweave.earth/*",
+      "zone_name": "commonweave.earth"
+    },
+    {
+      "pattern": "*.nodes.commonweave.earth/*",
+      "zone_name": "commonweave.earth"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "NODES",
+        "class_name": "CivweaveCloudNode"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["CivweaveCloudNode"]
+    }
+  ],
+  "services": [
+    {
+      "binding": "CORE",
+      "service": "civweave-core"
+    }
+  ],
+  "vars": {
+    "NODE_DOMAIN": "nodes.commonweave.earth"
+  },
+  "observability": {
+    "enabled": true
+  }
+
+  // Central fabric secrets only, never distributed to community/physical nodes:
+  // NODE_FABRIC_OPERATOR_TOKEN
+  // NODE_FABRIC_BINDING_TOKEN
+  //
+  // This Worker intentionally has no Stripe platform key and no Cerbanimo money-edge private key.
+}

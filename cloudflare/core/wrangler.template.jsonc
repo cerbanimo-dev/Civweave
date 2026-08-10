@@ -1,0 +1,65 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "civweave-core",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-08-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    {
+      "pattern": "api.commonweave.earth",
+      "custom_domain": true
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "civweave-core",
+      "database_id": "__CIVWEAVE_CORE_D1_ID__",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PACKAGES",
+      "bucket_name": "civweave-distribution"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "IDENTITY",
+        "class_name": "CivweaveCoreIdentity"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["CivweaveCoreIdentity"]
+    }
+  ],
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
+  "vars": {
+    "NODE_DOMAIN": "nodes.commonweave.earth",
+    "CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core",
+    "CIVWEAVE_PLATFORM_FEE_BPS": "1500",
+    "CIVWEAVE_MONEY_MAX_TOPUP_CENTS": "10000",
+    "CIVWEAVE_MONEY_LIVE_ENABLED": "false",
+    "CIVWEAVE_MONEY_EMERGENCY_STOP": "false",
+    "CIVWEAVE_MONEY_COMPLIANCE_APPROVED": "false",
+    "CIVWEAVE_MONEY_JURISDICTION_APPROVED": "false",
+    "CIVWEAVE_MONEY_KYC_AML_READY": "false",
+    "CIVWEAVE_MONEY_TAX_REPORTING_READY": "false",
+    "CIVWEAVE_MONEY_TERMS_APPROVED": "false"
+  },
+  "observability": {
+    "enabled": true
+  }
+
+  // Cloudflare Worker secrets, never committed or distributed to host nodes:
+  // STRIPE_SECRET_KEY
+  // STRIPE_CONNECT_WEBHOOK_SECRET
+  // NODE_FABRIC_BINDING_TOKEN
+}
