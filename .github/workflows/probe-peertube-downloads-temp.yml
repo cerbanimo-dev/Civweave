@@ -1,0 +1,51 @@
+name: Probe PeerTube Downloads Temp
+
+on:
+  push:
+    branches:
+      - agent/general-knowledge-video-packs-v1
+    paths:
+      - .github/workflows/probe-peertube-downloads-temp.yml
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v5
+      - name: Probe representative PeerTube detail records
+        run: |
+          python - <<'PY'
+          import importlib.util, json, urllib.parse
+          spec=importlib.util.spec_from_file_location('h','scripts/harvest-open-learning-media-v1.py')
+          h=importlib.util.module_from_spec(spec); spec.loader.exec_module(h)
+          for query in ['mathematics basics algebra','computer science basics','prompt engineering']:
+              params=[('search',query),('count','4'),('nsfw','false'),('sort','-publishedAt')]
+              for lid in sorted(h.PEERTUBE_LICENSES): params.append(('licenceOneOf',str(lid)))
+              search=h.request_json('https://sepiasearch.org/api/v1/search/videos?'+urllib.parse.urlencode(params))
+              print('\nQUERY',query)
+              for item in (search.get('data') or [])[:4]:
+                  uuid=h.clean_text(item.get('uuid'),100); url=h.clean_text(item.get('url'),1200)
+                  detail=h.peertube_detail(url,uuid)
+                  files=detail.get('files') or []
+                  playlists=detail.get('streamingPlaylists') or []
+                  sample_files=[]
+                  for obj in files[:2]:
+                      sample_files.append({k:obj.get(k) for k in ['fileUrl','fileDownloadUrl','size','mimeType','resolution']})
+                  playlist_files=[]
+                  for p in playlists[:1]:
+                      for obj in (p.get('files') or [])[:2]:
+                          playlist_files.append({k:obj.get(k) for k in ['fileUrl','fileDownloadUrl','size','mimeType','resolution']})
+                  print(json.dumps({
+                      'name':item.get('name'),
+                      'url':url,
+                      'uuid':uuid,
+                      'searchLicence':item.get('licence'),
+                      'detailFound':bool(detail),
+                      'downloadEnabled':detail.get('downloadEnabled'),
+                      'detailLicence':detail.get('licence'),
+                      'files':sample_files,
+                      'playlistFiles':playlist_files,
+                      'parsedFiles':h.peertube_files(detail)[:2],
+                  },ensure_ascii=False))
+          PY
