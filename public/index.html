@@ -11,6 +11,19 @@
   <script>
   (() => {
     'use strict';
+    const CANONICAL_ORIGIN='https://commonweave.pages.dev';
+    const HOST_NODE_ORIGIN='https://civweave-host-node.onrender.com';
+    const localDevelopment=['localhost','127.0.0.1','::1'].includes(location.hostname);
+    const cloudflarePreview=location.hostname.endsWith('.commonweave.pages.dev')&&location.origin!==CANONICAL_ORIGIN;
+    if(!localDevelopment&&location.origin!==CANONICAL_ORIGIN&&(location.origin===HOST_NODE_ORIGIN||cloudflarePreview)){
+      const target=new URL('/app/index.html',CANONICAL_ORIGIN);
+      for(const [key,value] of new URL(location.href).searchParams){if(key!=='install_origin')target.searchParams.append(key,value)}
+      if(location.origin===HOST_NODE_ORIGIN&&!target.searchParams.has('host'))target.searchParams.set('host',HOST_NODE_ORIGIN);
+      target.searchParams.set('install_origin','canonical');
+      target.hash=location.hash;
+      location.replace(target.href);
+      return;
+    }
     const LEGACY_ENTRY='/app/installed-entry-v146.js?v=1.0.96';
     const VERSION=new URL(LEGACY_ENTRY,location.origin).searchParams.get('v')||'';
     const params=new URLSearchParams(location.search);
