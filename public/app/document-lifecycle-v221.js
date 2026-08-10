@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='document-lifecycle-v275-local-ai-backend-fallback';
+const VERSION='document-lifecycle-v276-local-ai-metadata-repair';
 const LEGACY_ENTRY_REVISION='document-lifecycle-v269-ai-settings-entry';
 if(globalThis.CivweaveDocumentLifecycleV221?.version===VERSION)return;
 let active=true;
@@ -8,8 +8,8 @@ const observers=new Set();
 const NativeMutationObserver=globalThis.MutationObserver;
 const AI_SETTINGS_SELECTOR='[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings]';
 const AI_SETTINGS_DELEGATION='/app/settings-delegation-v175.js?v=1.0.65-ai-settings-entry-v269';
-const LOCAL_AI_BOOTSTRAP='/app/local-ai/bootstrap-v266.js?v=1.0.73-v275';
-const LOCAL_AI_BOOTSTRAP_VERSION='1.0.73-local-ai-bootstrap-v275-backend-fallback';
+const LOCAL_AI_BOOTSTRAP='/app/local-ai/bootstrap-v266.js?v=1.0.80-v276';
+const LOCAL_AI_BOOTSTRAP_VERSION='1.0.80-local-ai-bootstrap-v276-metadata-repair';
 let settingsDelegationPromise=null;
 let localAISettingsPromise=null;
 if(typeof NativeMutationObserver==='function'){
@@ -32,6 +32,7 @@ function localAIManagementReady(){
     globalThis.CivweaveLocalAISettingsV266?.enhance&&
     globalThis.CivweaveLocalModelDownloadV266?.status&&
     globalThis.CivweaveLocalModelDownloadV266?.selection&&
+    globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&
     globalThis.CivweaveLocalModelRegistryV266?.installable&&
     globalThis.CivweaveLocalModelBridgeV266?.patch
   );
@@ -82,9 +83,9 @@ function ensureLocalAISettingsManagement(){
     if(bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION||!bootstrap?.ready){
       await new Promise((resolve,reject)=>{
         const script=document.createElement('script');
-        script.src=`${LOCAL_AI_BOOTSTRAP}&settings-mount=v275`;
+        script.src=`${LOCAL_AI_BOOTSTRAP}&settings-mount=v276`;
         script.async=false;
-        script.dataset.civweaveLocalAiSettings='v275';
+        script.dataset.civweaveLocalAiSettings='v276';
         script.onload=()=>resolve(true);
         script.onerror=()=>reject(new Error('Downloaded local AI management could not load.'));
         document.head.append(script);
@@ -95,7 +96,7 @@ function ensureLocalAISettingsManagement(){
     const ready=await bootstrap.ready;
     if(!ready||!localAIManagementReady())throw new Error('Downloaded local AI management did not become ready.');
     queueMicrotask(enhanceLocalAISettings);
-    try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-mounted',{detail:{version:VERSION,bootstrapVersion:bootstrap.version||'',managementReady:true,pulseReady:Boolean(globalThis.CivweaveLocalModelTestPulseV269?.enhance)}}))}catch{}
+    try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-mounted',{detail:{version:VERSION,bootstrapVersion:bootstrap.version||'',managementReady:true,pulseReady:Boolean(globalThis.CivweaveLocalModelTestPulseV269?.enhance),metadataOnlyRepair:true}}))}catch{}
     return true;
   })().catch(error=>{
     localAISettingsPromise=null;
@@ -129,7 +130,7 @@ globalThis.CivweaveDocumentLifecycleV221=Object.freeze({
   ensureLocalAISettingsManagement,
   localAIManagementReady,
   enhanceLocalAISettings,
-  aiSettingsEntryRepair:'v275-canonical-delegation-local-backend-fallback',
+  aiSettingsEntryRepair:'v276-canonical-delegation-local-metadata-repair',
   stop
 });
 })();
