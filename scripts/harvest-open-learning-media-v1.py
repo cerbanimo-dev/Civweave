@@ -294,6 +294,22 @@ def peertube_detail(source_url: str, uuid: str) -> dict:
         return {}
 
 
+def peertube_file_mime(obj: dict, url: str) -> str:
+    explicit = clean_text(obj.get("mimeType") or obj.get("mime") or obj.get("type"), 120).lower()
+    if explicit.startswith("video/"):
+        return explicit
+    suffix = Path(urllib.parse.urlparse(url).path.lower()).suffix
+    return {
+        ".mp4": "video/mp4",
+        ".m4v": "video/mp4",
+        ".webm": "video/webm",
+        ".ogv": "video/ogg",
+        ".ogg": "video/ogg",
+        ".mov": "video/quicktime",
+        ".mkv": "video/x-matroska",
+    }.get(suffix, "")
+
+
 def peertube_files(detail: dict) -> list[dict]:
     out, seen = [], set()
     def add(obj: dict, role: str):
