@@ -37,9 +37,10 @@
     "federatedData": "explicitly public locality and node metadata only"
   },
   "assets": [
-    "/finder",
+    "/finder/index.html",
     "/app/federation-finder-map-v275.html",
     "/app/civweave-map-service-v275.js",
+    "/app/civweave-map-bootstrap-v1.js",
     "/app/civweave-map-mesh-v276.js",
     "/app/civweave-map-mesh-bridge-v276.js",
     "/app/civweave-map-coverage-v277.js",
