@@ -8,6 +8,7 @@ const PACK_STORE='packs';
 const CHUNK_STORE='chunks';
 const CHUNK_SIZE=1024*1024;
 const BUDGET_KEY='civweave.map.storage-budget.v1';
+const ACTIVE_KEY='civweave.map.active-offline-pack.v1';
 const DEFAULT_BUDGET=256*1024*1024;
 const FALLBACK_BUFFER_LIMIT=16*1024*1024;
 let dbPromise=null;
@@ -70,15 +71,15 @@ async function estimate(){
   return{mapBytes,usage,quota,budgetBytes:override||dynamic,freeBytes:quota!=null&&usage!=null?Math.max(0,quota-usage):null,packs:rows.length,pinned:rows.filter(row=>row.pinned).length,chunkSize:CHUNK_SIZE};
 }
 async function prune({reserveBytes=0}={}){
-  const reserve=Math.max(0,Math.trunc(Number(reserveBytes)||0));let stats=await estimate();const removed=[];
+  const reserve=Math.max(0,Math.trunc(Number(reserveBytes)||0));let stats=await estimate();const removed=[];const active=clean(localStorage.getItem(ACTIVE_KEY)||'',220);
   const over=()=>stats.mapBytes+reserve>stats.budgetBytes||(stats.freeBytes!=null&&stats.freeBytes<reserve+16*1024*1024);
-  const candidates=(await listPacks()).filter(row=>!row.pinned).sort((a,b)=>Date.parse(a.lastAccess||a.cachedAt||0)-Date.parse(b.lastAccess||b.cachedAt||0));
+  const candidates=(await listPacks()).filter(row=>!row.pinned&&row.packId!==active).sort((a,b)=>Date.parse(a.lastAccess||a.cachedAt||0)-Date.parse(b.lastAccess||b.cachedAt||0));
   for(const row of candidates){if(!over())break;await removePack(row.packId,{reason:'lru-prune'});removed.push(row.packId);stats=await estimate()}
-  return{removed,stats,room:!over()};
+  return{removed,stats,room:!over(),activeProtected:active||null};
 }
 async function ensureRoom(bytes){
   const requested=Math.max(0,Math.trunc(Number(bytes)||0));const result=await prune({reserveBytes:requested});
-  if(!result.room)throw new DOMException('Not enough map storage space. Unpin or remove a downloaded region first.','QuotaExceededError');
+  if(!result.room)throw new DOMException('Not enough map storage space. Unpin or stop using a downloaded region before adding another.','QuotaExceededError');
   return result;
 }
 async function writeBuffered(packId,reader,maxBytes,hasher){
