@@ -1,0 +1,74 @@
+name: Materialize Learning Pack Shelf release
+
+on:
+  push:
+    branches:
+      - agent/learning-pack-shelf-v1
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.repository == 'cerbanimo-dev/Civweave'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Align package version
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const version=fs.readFileSync('VERSION','utf8').trim();
+          const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+          pkg.version=version;
+          fs.writeFileSync('package.json',JSON.stringify(pkg,null,2)+'\n');
+          NODE
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Point canonical index at materialized release
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const version=fs.readFileSync('VERSION','utf8').trim();
+          const file='config/release-contract.json';
+          const contract=JSON.parse(fs.readFileSync(file,'utf8'));
+          contract.canonical.current={version,path:`releases/${version}`,status:'current'};
+          fs.writeFileSync(file,JSON.stringify(contract,null,2)+'\n');
+          NODE
+      - name: Verify canonical release
+        run: |
+          node scripts/verify-release-contract.mjs
+          node scripts/verify-canonical-launch-release.mjs
+      - name: Verify learning pack shelf with generated atlas
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp public/downloads/learning-packs/catalog.json /tmp/learning-pack-catalog.json
+          node scripts/build-learning-packs-v1.mjs
+          node scripts/verify-learning-packs-v1.mjs
+          node scripts/verify-learning-pack-shelf-v1.mjs
+          cp /tmp/learning-pack-catalog.json public/downloads/learning-packs/catalog.json
+          rm -f public/downloads/learning-packs/onet-labor-atlas-30-3.json.gz
+      - name: Commit generated 1.0.87 release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'civweave-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'Canonical release already materialized.'
+            exit 0
+          fi
+          git commit -m 'Materialize Civweave 1.0.87 Learning Pack Shelf release'
+          git push origin HEAD:${GITHUB_REF_NAME}
