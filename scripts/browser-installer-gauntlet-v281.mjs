@@ -12,7 +12,12 @@ const host='127.0.0.1';
 const port=4173;
 const base=`http://${host}:${port}`;
 const OFFLINE_FETCH_DELAY_MS=250;
+const HARD_TIMEOUT_MS=180000;
 const phase=name=>console.log(`[browser-gauntlet-v281] ${name}`);
+const hardTimeout=setTimeout(()=>{
+  console.error(`[browser-gauntlet-v281] hard timeout after ${HARD_TIMEOUT_MS} ms`);
+  process.exit(124);
+},HARD_TIMEOUT_MS);
 
 const contentTypes={
   '.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8',
@@ -110,11 +115,14 @@ try{
     ok:true,
     revision:'browser-installer-gauntlet-v281',
     offlineFetchDelayMs:OFFLINE_FETCH_DELAY_MS,
+    hardTimeoutMs:HARD_TIMEOUT_MS,
     pauseRestartResume:true,
     offlineShell:true,
     lowStorageBlocked:true
   },null,2));
 }finally{
-  await browser.close();
-  await new Promise(resolve=>server.close(resolve));
+  clearTimeout(hardTimeout);
+  await browser.close().catch(()=>{});
+  server.closeAllConnections?.();
+  await new Promise(resolve=>server.close(()=>resolve()));
 }
