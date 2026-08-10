@@ -12,6 +12,7 @@ on:
       - scripts/harvest-open-learning-media-v1.py
       - scripts/harvest-open-learning-media-library-v1.py
       - scripts/curate-open-learning-media-library-v1.py
+      - scripts/filter-open-learning-media-title-quality-v1.py
       - scripts/test-open-learning-media-harvest-v1.py
       - scripts/test-open-learning-media-packs-v1.py
       - scripts/test-open-learning-media-runtime-v1.mjs
@@ -47,6 +48,7 @@ on:
       - config/open-learning-media-packs-v1.json
       - scripts/harvest-open-learning-media-library-v1.py
       - scripts/curate-open-learning-media-library-v1.py
+      - scripts/filter-open-learning-media-title-quality-v1.py
       - scripts/test-open-learning-media-packs-v1.py
       - scripts/test-open-learning-media-runtime-v1.mjs
       - scripts/finalize-open-learning-media-topic-inference-v1.py
@@ -67,7 +69,7 @@ jobs:
       - name: Syntax check Open Learning Media service
         run: |
           set -euo pipefail
-          python -m py_compile scripts/harvest-open-learning-media-v1.py scripts/harvest-open-learning-media-library-v1.py scripts/curate-open-learning-media-library-v1.py scripts/test-open-learning-media-harvest-v1.py scripts/test-open-learning-media-packs-v1.py scripts/finalize-open-learning-media-topic-inference-v1.py scripts/fix-open-learning-media-learning-path-budget-v1.py scripts/fix-open-learning-media-finalizer-idempotency-v1.py scripts/finalize-open-learning-media-launch-v1.py scripts/finalize-open-learning-media-range-v1.py scripts/finalize-open-learning-media-safety-v1.py
+          python -m py_compile scripts/harvest-open-learning-media-v1.py scripts/harvest-open-learning-media-library-v1.py scripts/curate-open-learning-media-library-v1.py scripts/filter-open-learning-media-title-quality-v1.py scripts/test-open-learning-media-harvest-v1.py scripts/test-open-learning-media-packs-v1.py scripts/finalize-open-learning-media-topic-inference-v1.py scripts/fix-open-learning-media-learning-path-budget-v1.py scripts/fix-open-learning-media-finalizer-idempotency-v1.py scripts/finalize-open-learning-media-launch-v1.py scripts/finalize-open-learning-media-range-v1.py scripts/finalize-open-learning-media-safety-v1.py
           node --check public/app/open-learning-media-cache-v1.mjs
           node --check public/app/open-learning-media-installer-v1.mjs
           node --check public/app/video-learning-contract-v1.mjs
