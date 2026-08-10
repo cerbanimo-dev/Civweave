@@ -6,8 +6,6 @@ on:
       - agent/open-learning-media-harvest-v1
     paths:
       - .github/workflows/open-media-launch-wire-temp.yml
-      - scripts/fix-open-learning-media-finalizer-idempotency-v1.py
-      - scripts/fix-open-learning-media-learning-path-budget-v1.py
 
 permissions:
   contents: write
@@ -81,10 +79,11 @@ jobs:
           python scripts/test-open-learning-media-harvest-v1.py
           test "$(cat VERSION)" != "$(git show origin/main:VERSION)"
 
-      - name: Commit launch service
+      - name: Commit tested service changes only
         run: |
           set -euo pipefail
-          rm -f .github/workflows/open-media-launch-wire-temp.yml
+          git restore --source=HEAD -- .github/workflows
+          find scripts -type d -name __pycache__ -prune -exec rm -rf {} +
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -A
