@@ -4,13 +4,15 @@ on:
   push:
     branches:
       - main
-      - agent/open-learning-media-harvest-v1
+      - 'agent/open-learning-media-*'
+      - 'agent/general-knowledge-video-packs-*'
     paths:
+      - config/open-learning-media-packs-v1.json
       - scripts/harvest-open-learning-media-v1.py
-      - scripts/filter-open-learning-media-relevance-v1.py
-      - scripts/filter-open-learning-media-pedagogy-v1.py
-      - scripts/filter-open-learning-media-selection-v1.py
+      - scripts/harvest-open-learning-media-library-v1.py
+      - scripts/curate-open-learning-media-library-v1.py
       - scripts/test-open-learning-media-harvest-v1.py
+      - scripts/test-open-learning-media-packs-v1.py
       - ops/triggers/open-learning-media-harvest.trigger
   schedule:
     - cron: '17 5 * * 1'
@@ -26,25 +28,25 @@ concurrency:
 jobs:
   harvest:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Harvest rights-cleared learning media metadata
+      - name: Harvest rights-cleared general and extension media metadata
         env:
-          OPEN_MEDIA_RESULTS_PER_QUERY: '8'
-          OPEN_MEDIA_WORKERS: '6'
+          OPEN_MEDIA_RESULTS_PER_QUERY: '6'
+          OPEN_MEDIA_WORKERS: '8'
         run: |
           set -euo pipefail
-          python scripts/harvest-open-learning-media-v1.py
-          python scripts/filter-open-learning-media-relevance-v1.py
-          python scripts/filter-open-learning-media-pedagogy-v1.py
-          python scripts/filter-open-learning-media-selection-v1.py
+          python scripts/harvest-open-learning-media-library-v1.py
+          python scripts/curate-open-learning-media-library-v1.py
 
-      - name: Validate generated catalog before publication
-        run: python scripts/test-open-learning-media-harvest-v1.py
+      - name: Validate generated catalog and pack coverage before publication
+        run: |
+          python scripts/test-open-learning-media-harvest-v1.py
+          python scripts/test-open-learning-media-packs-v1.py
 
       - name: Commit validated catalog refresh
         run: |
@@ -56,7 +58,7 @@ jobs:
             echo 'Harvest produced no catalog diff.'
             exit 0
           fi
-          git commit -m 'Refresh open learning media catalog'
+          git commit -m 'Expand open learning media catalog'
           TARGET_REF="${GITHUB_REF_NAME:-main}"
           git pull --rebase origin "$TARGET_REF"
           git push origin "HEAD:$TARGET_REF"
