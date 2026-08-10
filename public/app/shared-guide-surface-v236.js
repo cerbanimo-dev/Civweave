@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.57-shared-guide-surface-v236-v265-orchestration-materialization';
+const VERSION='1.0.85-shared-guide-surface-v236-stream-thinking-v249';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 function load(src,onload,readyCheck){
@@ -35,6 +35,7 @@ function loadStyle(href){
 
 loadStyle('/app/mobile-guide-scroll-v256.css?v=1.0.57-v256');
 loadStyle('/app/weaveling-scroll-owner-v265.css?v=1.0.57-v265');
+load('/app/guide-stream-thinking-v249.js?v=1.0.85-v249',null,()=>Boolean(globalThis.CivweaveGuideStreamThinkingV249));
 load('/app/gemini-device-direct-v257.js?v=1.0.57-v257',()=>{
   load('/extensions/civweave-gemini-interactions-v159.js?v=1.0.57-v257',null,()=>Boolean(globalThis.CivweaveGeminiInteractionsV159));
 },()=>Boolean(globalThis.CivweaveGeminiDeviceDirectV257));
@@ -51,5 +52,5 @@ load('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization',()=>{
   },()=>Boolean(globalThis.CivweaveWeavelingPlanMaterializationV265));
 },()=>Boolean(globalThis.CivweaveIntentionPlanner));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,plannerMaterialization:'v265',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,plannerMaterialization:'v265',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249'});
 })();
