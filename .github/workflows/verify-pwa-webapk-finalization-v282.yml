@@ -1,0 +1,31 @@
+name: Verify PWA WebAPK Finalization v282
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/pwa-install-prompt-v246.js'
+      - 'scripts/verify-pwa-webapk-finalization-v282.mjs'
+      - '.github/workflows/verify-pwa-webapk-finalization-v282.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/pwa-install-prompt-v246.js'
+      - 'scripts/verify-pwa-webapk-finalization-v282.mjs'
+      - '.github/workflows/verify-pwa-webapk-finalization-v282.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-pwa-webapk-finalization-v282.mjs
+      - run: node --check public/app/pwa-install-prompt-v246.js
