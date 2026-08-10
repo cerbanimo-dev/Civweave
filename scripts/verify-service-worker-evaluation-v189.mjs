@@ -68,7 +68,7 @@ assert(combined.filter(row=>row.type==='fetch').length>=2,'Combined worker lost 
 assert(combined.filter(row=>row.type==='message').length>=3,'Combined worker lost package, pause, or repair messaging.');
 assert(cleanup.includes('event.stopImmediatePropagation()'),'Living School requests are not isolated before generic caching.');
 assert(installedLaunch.includes("policy:'installed-entry-never-installer-substitution'"),'Installed launch worker can substitute the installer again.');
-assert(installedLaunch.includes("V282_INSTALLER_GUARD='/app/installer-online-fallback-v225.js'"),'Installed launch click guard is not retained by the shell.');
+assert(shellRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js']"),'Installer launch guard is no longer retained by the shell repair cache lane.');
 assert(integrity.includes("crypto.subtle.digest('SHA-256'"),'Integrity worker no longer verifies SHA-256.');
 assert(integrity.includes('lastKnownGoodCache'),'Integrity worker no longer retains a previous shell cache.');
 assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'"),'Offline worker revision drifted from v280.');
@@ -77,4 +77,4 @@ assert(release.includes('working-campus-v156.part5.txt'),'Release policy omits c
 assert(canonical.includes("headers.set('x-civweave-package',REVISION)"),'Canonical navigation does not authenticate package requests.');
 assert(canonical.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical navigation fallback policy drifted.');
 for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
-console.log(JSON.stringify({ok:true,revision:'v282-installed-launch-worker-stack',legacyBridge:true,duplicateGlobalConstCrash:false,cleanroomFetchBoundary:true,retainedOfflineCore:true,installedLaunch:true,installerState:true,shellIntegrity:true,resumableCampus:'v280',campusFragmentCoherence:true,redirectSafety:true,shellSelfRepair:true,canonicalPackageNavigation:true,canonicalSystems:5,importLayers:orderedImports.length},null,2));
+console.log(JSON.stringify({ok:true,revision:'v282-installed-launch-worker-stack',legacyBridge:true,duplicateGlobalConstCrash:false,cleanroomFetchBoundary:true,retainedOfflineCore:true,installedLaunch:true,installerGuardOfflineCached:true,installerState:true,shellIntegrity:true,resumableCampus:'v280',campusFragmentCoherence:true,redirectSafety:true,shellSelfRepair:true,canonicalPackageNavigation:true,canonicalSystems:5,importLayers:orderedImports.length},null,2));
