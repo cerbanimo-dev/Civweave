@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.0';
+const VERSION='1.1.0';
 const TRANSPORT_PATH='/app/local-object-mesh-v146.js';
 const CONTRIBUTION_PATH='/app/shared/civweave-contribution-mesh-v1.js';
+const SECURITY_PATH='/app/shared/civweave-contribution-security-v1.js';
 const listeners=new Set();
 const now=()=>new Date().toISOString();
 
@@ -14,20 +15,11 @@ function emit(type,detail={}){
 }
 
 function browserSupport(){
-  return Boolean(
-    globalThis.indexedDB&&
-    globalThis.crypto?.subtle&&
-    globalThis.document
-  );
+  return Boolean(globalThis.indexedDB&&globalThis.crypto?.subtle&&globalThis.document);
 }
 
 function scriptFor(path){
-  try{
-    return [...document.scripts].find((script)=>{
-      if(!script.src)return false;
-      return new URL(script.src,location.href).pathname===path;
-    })||null;
-  }catch{return null}
+  try{return [...document.scripts].find((script)=>script.src&&new URL(script.src,location.href).pathname===path)||null}catch{return null}
 }
 
 function waitForGlobal(name,{timeout=10000,interval=25}={}){
@@ -35,42 +27,53 @@ function waitForGlobal(name,{timeout=10000,interval=25}={}){
   return new Promise((resolve,reject)=>{
     const started=Date.now();
     const timer=setInterval(()=>{
-      if(globalThis[name]){
-        clearInterval(timer);
-        resolve(globalThis[name]);
-        return;
-      }
-      if(Date.now()-started>=timeout){
-        clearInterval(timer);
-        reject(new Error(`${name} did not become ready`));
-      }
+      if(globalThis[name]){clearInterval(timer);resolve(globalThis[name]);return}
+      if(Date.now()-started>=timeout){clearInterval(timer);reject(new Error(`${name} did not become ready`))}
+    },interval);
+  });
+}
+
+function waitForSecurity({timeout=10000,interval=25}={}){
+  if(globalThis.CivweaveContributionMeshV1?.security)return Promise.resolve(globalThis.CivweaveContributionMeshV1);
+  return new Promise((resolve,reject)=>{
+    const started=Date.now();
+    const timer=setInterval(()=>{
+      const contribution=globalThis.CivweaveContributionMeshV1;
+      if(contribution?.security){clearInterval(timer);resolve(contribution);return}
+      if(Date.now()-started>=timeout){clearInterval(timer);reject(new Error('contribution security did not become ready'))}
     },interval);
   });
 }
 
 async function ensureScript(path,globalName){
   if(globalThis[globalName])return globalThis[globalName];
-
-  const existing=scriptFor(path);
-  if(!existing){
+  if(!scriptFor(path)){
     const script=document.createElement('script');
     script.src=path;
     script.async=false;
     script.dataset.civweavePhoneLedger='1';
     document.head.append(script);
   }
-
   return waitForGlobal(globalName);
+}
+
+async function ensureSecurity(){
+  if(globalThis.CivweaveContributionMeshV1?.security)return globalThis.CivweaveContributionMeshV1;
+  if(!scriptFor(SECURITY_PATH)){
+    const script=document.createElement('script');
+    script.src=SECURITY_PATH;
+    script.async=false;
+    script.dataset.civweavePhoneLedgerSecurity='1';
+    document.head.append(script);
+  }
+  return waitForSecurity();
 }
 
 async function ensureRuntime(){
   await ensureScript(TRANSPORT_PATH,'CivweaveLocalMeshV146');
-  const contribution=await ensureScript(
-    CONTRIBUTION_PATH,
-    'CivweaveContributionMeshV1'
-  );
+  const contribution=await ensureScript(CONTRIBUTION_PATH,'CivweaveContributionMeshV1');
   await contribution.ready();
-  return contribution;
+  return ensureSecurity();
 }
 
 async function snapshot(){
@@ -79,9 +82,11 @@ async function snapshot(){
   const wallet=await contribution.walletIdentity();
   const events=await contribution.activeEvents();
   const frontier=await contribution.frontier();
+  const security=await contribution.security.launchStatus();
   return {
     version:VERSION,
     ready:true,
+    valueReady:Boolean(security.readyForContributionValue),
     role:'phone-ledger-node',
     storage:'indexeddb',
     hostRequired:false,
@@ -90,89 +95,61 @@ async function snapshot(){
     walletId:wallet.walletId,
     eventCount:events.length,
     frontier,
+    security:{
+      version:contribution.securityVersion,
+      transferMode:security.transferMode,
+      blockers:security.blockers,
+      recoveryReady:security.recovery.recoveryReady,
+      eligibleValidatorRoots:security.eligibleValidatorRoots,
+      policyHash:security.policyHash,
+      externalOfframpsEnabled:false,
+      storage:security.storage,
+    },
   };
 }
 
 async function sync(){
   const contribution=await ensureRuntime();
   const result=await contribution.syncFromLocalMesh();
-  emit('sync',result);
-  return result;
+  const security=await contribution.security.launchStatus();
+  emit('sync',{...result,security});
+  return{...result,security};
 }
 
-async function exportBundle(){
-  return (await ensureRuntime()).exportBundle();
-}
-
-async function importBundle(bundle,options={}){
-  const contribution=await ensureRuntime();
-  const result=await contribution.importBundle(bundle,options);
-  emit('bundle-imported',{count:result.length});
-  return result;
-}
-
-function subscribe(listener){
-  listeners.add(listener);
-  return()=>listeners.delete(listener);
-}
+async function exportBundle(){return(await ensureRuntime()).exportBundle()}
+async function importBundle(bundle,options={}){const contribution=await ensureRuntime(),result=await contribution.importBundle(bundle,options);emit('bundle-imported',{count:result.length});return result}
+async function securityStatus(){return(await ensureRuntime()).security.launchStatus()}
+async function securityApi(){return(await ensureRuntime()).security}
+function subscribe(listener){listeners.add(listener);return()=>listeners.delete(listener)}
 
 async function boot(){
   if(!browserSupport()){
-    const status={
-      version:VERSION,
-      ready:false,
-      role:'phone-ledger-node',
-      storage:'indexeddb',
-      hostRequired:false,
-      reason:'required browser storage or WebCrypto APIs are unavailable',
-    };
+    const status={version:VERSION,ready:false,valueReady:false,role:'phone-ledger-node',storage:'indexeddb',hostRequired:false,reason:'required browser storage or WebCrypto APIs are unavailable'};
     emit('unsupported',status);
     return status;
   }
-
   const status=await snapshot();
   emit('ready',status);
   return status;
 }
 
 const readyPromise=boot().catch((error)=>{
-  const status={
-    version:VERSION,
-    ready:false,
-    role:'phone-ledger-node',
-    storage:'indexeddb',
-    hostRequired:false,
-    reason:String(error?.message||error),
-  };
+  const status={version:VERSION,ready:false,valueReady:false,role:'phone-ledger-node',storage:'indexeddb',hostRequired:false,reason:String(error?.message||error)};
   emit('error',status);
   return status;
 });
 
 const api=Object.freeze({
-  version:VERSION,
-  role:'phone-ledger-node',
-  storage:'indexeddb',
-  hostRequired:false,
-  transportPath:TRANSPORT_PATH,
-  contributionPath:CONTRIBUTION_PATH,
-  ready:()=>readyPromise,
-  snapshot,
-  sync,
-  exportBundle,
-  importBundle,
-  subscribe,
+  version:VERSION,role:'phone-ledger-node',storage:'indexeddb',hostRequired:false,
+  transportPath:TRANSPORT_PATH,contributionPath:CONTRIBUTION_PATH,securityPath:SECURITY_PATH,
+  ready:()=>readyPromise,snapshot,sync,exportBundle,importBundle,securityStatus,securityApi,subscribe,
 });
 
 globalThis.CivweavePhoneLedgerV1=api;
 
 try{
-  globalThis.addEventListener('online',()=>{
-    sync().catch((error)=>emit('sync-error',{error:String(error?.message||error)}));
-  });
-  document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState!=='visible')return;
-    sync().catch(()=>{});
-  });
+  globalThis.addEventListener('online',()=>{sync().catch((error)=>emit('sync-error',{error:String(error?.message||error)}))});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')sync().catch(()=>{})});
 }catch{}
 
 })();
