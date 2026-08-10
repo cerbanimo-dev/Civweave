@@ -294,17 +294,45 @@ def peertube_detail(source_url: str, uuid: str) -> dict:
         return {}
 
 
+def peertube_file_mime(obj: dict, url: str) -> str:
+    explicit = clean_text(obj.get("mimeType") or obj.get("mime") or obj.get("type"), 120).lower()
+    if explicit.startswith("video/"):
+        return explicit
+    suffix = Path(urllib.parse.urlparse(url).path.lower()).suffix
+    return {
+        ".mp4": "video/mp4",
+        ".m4v": "video/mp4",
+        ".webm": "video/webm",
+        ".ogv": "video/ogg",
+        ".ogg": "video/ogg",
+        ".mov": "video/quicktime",
+        ".mkv": "video/x-matroska",
+    }.get(suffix, "")
+
+
 def peertube_files(detail: dict) -> list[dict]:
     out, seen = [], set()
     def add(obj: dict, role: str):
         url = clean_text(obj.get("fileDownloadUrl") or obj.get("fileUrl") or obj.get("url"), 1600)
         if not url or url in seen:
             return
+        resolution = obj.get("resolution") or {}
+        resolution_label = clean_text(resolution.get("label"), 80)
+        try:
+            resolution_id = int(resolution.get("id"))
+        except (TypeError, ValueError):
+            resolution_id = None
+        if resolution_id == 0 or "audio" in resolution_label.lower():
+            return
+        mime = peertube_file_mime(obj, url)
+        if not mime.startswith("video/"):
+            return
         seen.add(url)
         out.append({
             "url": url,
+            "mime": mime,
             "bytes": int(obj.get("size") or 0),
-            "resolution": clean_text((obj.get("resolution") or {}).get("label"), 80),
+            "resolution": resolution_label,
             "fps": obj.get("fps"),
             "role": role,
         })

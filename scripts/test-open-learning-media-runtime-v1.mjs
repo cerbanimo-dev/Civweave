@@ -2,7 +2,7 @@ import assert from'node:assert/strict';
 import fs from'node:fs';
 import path from'node:path';
 import{fileURLToPath}from'node:url';
-import media,{licenseAllowed,chooseFile,scoreRecord,sha256HexForBytes}from'../public/app/open-learning-media-cache-v1.mjs';
+import media,{licenseAllowed,chooseFile,scoreRecord,inferTopicSlug,sha256HexForBytes}from'../public/app/open-learning-media-cache-v1.mjs';
 
 const{POLICY_PRESETS,MIN_RELEVANCE_SCORE}=media;
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -24,7 +24,7 @@ assert(scoreRecord(vibe,'vibe coding an app','vibe-coding')>=MIN_RELEVANCE_SCORE
 assert(scoreRecord(unrelated,'vibe coding an app','')<MIN_RELEVANCE_SCORE);
 
 const mediaSource=fs.readFileSync(path.join(root,'public/app/open-learning-media-cache-v1.mjs'),'utf8');
-for(const token of ['body.tee()','cw-media-manifest','cw-media-request','cw-media-start','cw-media-chunk','cw-media-end','Mesh media SHA-256 verification failed','catalog is stale','MESH_REDISTRIBUTABLE','MIN_RELEVANCE_SCORE=18','automaticNetworkAllowed','peerReceiveChains','trustworthy file size','REVOCATIONS_URL','loadRevocations','unsolicited media transfer rejected','slice(0,512)','safeRemoteUrl','non-video content type'])assert(mediaSource.includes(token),token);
+for(const token of ['body.tee()','cw-media-manifest','cw-media-request','cw-media-start','cw-media-chunk','cw-media-end','Mesh media SHA-256 verification failed','catalog is stale','MESH_REDISTRIBUTABLE','MIN_RELEVANCE_SCORE=18','automaticNetworkAllowed','peerReceiveChains','trustworthy file size','REVOCATIONS_URL','loadRevocations','unsolicited media transfer rejected','slice(0,512)','safeRemoteUrl','non-video content type','topic_meta','inferTopicSlug'])assert(mediaSource.includes(token),token);
 const contract=fs.readFileSync(path.join(root,'public/app/video-learning-contract-v1.mjs'),'utf8');
 assert(contract.includes("open-learning-media-cache-v1.mjs"));
 assert(contract.includes('resolveRelevantMedia'));
@@ -43,6 +43,8 @@ const mediaInstaller=fs.readFileSync(path.join(root,'public/app/open-learning-me
 assert(mediaInstaller.includes("ROOT_ID='open-learning-media-cache'"));
 assert(mediaInstaller.includes('ensureRoot'));
 assert(mediaInstaller.includes('navigator.storage?.persist?.()'));
+assert(mediaInstaller.includes('data-media-pack'));
+assert(mediaInstaller.includes('General knowledge outage pack'));
 for(const surface of ['public/app/cabinets/living-school/index.html','public/app/realm-console-v140.html','public/app/working-campus-v156.html']){
   const html=fs.readFileSync(path.join(root,surface),'utf8');
   assert(html.includes('/app/open-learning-media-cache-v1.mjs'),surface);
@@ -58,8 +60,12 @@ assert(worker.includes('status: 206'));
 assert(worker.includes('status: 416'));
 assert(worker.includes("'/downloads/knowledge-schools/open-learning-media/revocations.json'"));
 
-// The default Learning Path budget must be able to hold at least the smallest approved item in every launch focus topic.
 const lookup=JSON.parse(fs.readFileSync(path.join(root,'public/downloads/knowledge-schools/open-learning-media/lookup.json'),'utf8'));
+assert.equal(inferTopicSlug('cell biology genetics lesson',lookup),'biology-life');
+assert.equal(inferTopicSlug('budgeting and personal finance basics',lookup),'personal-finance');
+assert.equal(inferTopicSlug('woodworking hand tools tutorial',lookup),'woodworking-basics');
+
+// The default Learning Path budget must be able to hold at least the smallest approved item in every original launch focus topic.
 const focus=['vibe-coding','prompt-engineering','pseudocoding','critical-thinking','logical-frameworks'];
 let minimumFocusPackBytes=0;
 for(const slug of focus){
@@ -68,4 +74,4 @@ for(const slug of focus){
   minimumFocusPackBytes+=Math.min(...sizes);
 }
 assert(minimumFocusPackBytes<=POLICY_PRESETS['learning-path'].budgetBytes,`smallest five-topic focus pack ${minimumFocusPackBytes} exceeds Learning Path budget ${POLICY_PRESETS['learning-path'].budgetBytes}`);
-console.log(`Open Learning Media runtime verified: rights gate, streaming SHA-256, relevance floor, bounded storage, ${minimumFocusPackBytes} byte five-topic focus floor, requested-only serialized mesh, revocation kill switch, safe URL/MIME validation, range-aware offline playback, persistent-storage request, and realm wiring.`);
+console.log(`Open Learning Media runtime verified: rights gate, streaming SHA-256, generated-topic inference, relevance floor, bounded storage, ${minimumFocusPackBytes} byte five-topic focus floor, requested-only serialized mesh, revocation kill switch, safe URL/MIME validation, range-aware offline playback, persistent-storage request, pack controls, and realm wiring.`);

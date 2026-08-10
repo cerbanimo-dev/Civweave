@@ -94,7 +94,7 @@ export function recordKey(record){return`${clean(record?.provider,80)}:${clean(r
 function isRedistributable(record){return record?.cache_policy==='MESH_REDISTRIBUTABLE'&&licenseAllowed(record?.license)&&!isRevoked(record)&&Array.isArray(record?.files)&&record.files.length>0}
 function safeRemoteUrl(value){try{const url=new URL(clean(value,1800));return url.protocol==='https:'?url.href:''}catch{return''}}
 function fileMime(file){const explicit=clean(file?.mime,120);if(explicit)return explicit;const url=clean(file?.url,1200).toLowerCase();if(url.includes('.webm'))return'video/webm';if(url.includes('.mp4'))return'video/mp4';if(url.includes('.ogv')||url.includes('.ogg'))return'video/ogg';return'application/octet-stream'}
-function playableFile(file){const mime=fileMime(file);return mime.startsWith('video/')&&!/\.m3u8(?:$|\?)/i.test(clean(file?.url,1200))}
+function playableFile(file){const mime=fileMime(file),resolution=clean(file?.resolution,80).toLowerCase();return mime.startsWith('video/')&&!resolution.includes('audio')&&!/\.m3u8(?:$|\?)/i.test(clean(file?.url,1200))}
 export function chooseFile(record,{maxBytes=Infinity,preferSmall=true}={}){
   const files=(Array.isArray(record?.files)?record.files:[]).filter(file=>safeRemoteUrl(file?.url)&&playableFile(file));
   if(!files.length)return null;
@@ -106,11 +106,13 @@ export function chooseFile(record,{maxBytes=Infinity,preferSmall=true}={}){
   })[0]||null;
 }
 function words(value){return clean(value,16000).toLowerCase().split(/[^a-z0-9]+/).filter(word=>word.length>2)}
-function topicHintScore(query,slug){const hay=clean(query,4000).toLowerCase();let score=0;for(const hint of TOPIC_HINTS[slug]||[])if(hay.includes(hint))score+=hint.includes(' ')?8:3;return score}
-export function scoreRecord(record,query,topicSlug=''){
+function topicHintsFor(slug,lookup=null){const dynamic=Array.isArray(lookup?.topic_meta?.[slug]?.hints)?lookup.topic_meta[slug].hints:[];return[...new Set([...(TOPIC_HINTS[slug]||[]),...dynamic].map(value=>clean(value,180).toLowerCase()).filter(Boolean))]}
+function topicHintScore(query,slug,lookup=null){const hay=clean(query,4000).toLowerCase();let score=0;for(const hint of topicHintsFor(slug,lookup))if(hay.includes(hint))score+=hint.includes(' ')?8:3;return score}
+export function inferTopicSlug(query,lookup){let bestSlug='',bestHint=0;for(const slug of Object.keys(lookup?.topics||{})){const hint=topicHintScore(query,slug,lookup);if(hint>bestHint){bestHint=hint;bestSlug=slug}}return bestHint>0?bestSlug:''}
+export function scoreRecord(record,query,topicSlug='',lookup=null){
   const queryWords=[...new Set(words(query))].slice(0,32);if(!queryWords.length)return topicSlug?30:0;
   const title=new Set(words(record?.title)),body=new Set(words(`${record?.description||''} ${record?.attribution?.creator||''}`));
-  let score=topicSlug?topicHintScore(query,topicSlug)+8:0;
+  let score=topicSlug?topicHintScore(query,topicSlug,lookup)+8:0;
   for(const word of queryWords){if(title.has(word))score+=6;else if(body.has(word))score+=2}
   score+=Math.min(10,Math.round((Number(record?.quality_score)||0)/10));
   return score;
@@ -196,7 +198,7 @@ export async function cacheRecord(record,{automatic=false,pinned=false,force=fal
 export async function uncache(recordKeyValue){const row=await recordGet(recordKeyValue);if(!row)return false;const cache=await mediaCache();await cache.delete(syntheticRequest(recordKeyValue));await recordDelete(recordKeyValue);const old=objectUrls.get(recordKeyValue);if(old){URL.revokeObjectURL(old);objectUrls.delete(recordKeyValue)}emit('uncached',{recordKey:recordKeyValue});return true}
 export async function clearCache(){const rows=await recordsAll();for(const row of rows)await uncache(row.recordKey);return rows.length}
 export async function cachedPlayback(recordKeyValue){const row=await recordGet(recordKeyValue);if(!row)return null;if(isRevoked(row)){await uncache(recordKeyValue);emit('revoked-cache-removed',{recordKey:recordKeyValue,contentHash:row.contentHash});return null}let url=syntheticRequest(recordKeyValue).url;if(!globalThis.navigator?.serviceWorker?.controller){let blobUrl=objectUrls.get(recordKeyValue);if(!blobUrl){const cache=await mediaCache(),response=await cache.match(syntheticRequest(recordKeyValue));if(!response)return null;blobUrl=URL.createObjectURL(await response.blob());objectUrls.set(recordKeyValue,blobUrl)}url=blobUrl}await touch(row);return{kind:'open-media',url,title:row.title,creator:row.attribution?.creator||'',reason:'Playing from the local Open Learning Media cache.',source:'civweave-open-learning-media-cache',mime:row.mime,local:true,recordKey:row.recordKey,contentHash:row.contentHash,license:row.license,attribution:row.attribution}}
-function candidatesForQuery(lookup,query,{schoolSlug='',topicSlug=''}={}){let inferred=topicSlug;if(!inferred){let bestSlug='',bestHint=0;for(const slug of Object.keys(lookup.topics||{})){const hint=topicHintScore(query,slug);if(hint>bestHint){bestHint=hint;bestSlug=slug}}if(bestHint>0)inferred=bestSlug}const source=inferred?(lookup.topics?.[inferred]||[]):flattenLookup(lookup);return source.map(record=>({...record,topicSlug:inferred||record.topicSlug,recordKey:recordKey(record),_score:scoreRecord(record,query,inferred)})).filter(record=>isRedistributable(record)&&record._score>=MIN_RELEVANCE_SCORE).sort((a,b)=>b._score-a._score||Number(b.quality_score||0)-Number(a.quality_score||0))}
+function candidatesForQuery(lookup,query,{schoolSlug='',topicSlug=''}={}){const inferred=topicSlug||inferTopicSlug(query,lookup);const source=inferred?(lookup.topics?.[inferred]||[]):flattenLookup(lookup);return source.map(record=>({...record,topicSlug:inferred||record.topicSlug,recordKey:recordKey(record),_score:scoreRecord(record,query,inferred,lookup)})).filter(record=>isRedistributable(record)&&record._score>=MIN_RELEVANCE_SCORE).sort((a,b)=>b._score-a._score||Number(b.quality_score||0)-Number(a.quality_score||0))}
 async function peerForRecordKey(key){for(const[peerId,manifest]of peerInventory){const item=manifest.items?.find?.(entry=>entry.recordKey===key);if(item)return{peerId,item,sessionId:manifest.sessionId}}return null}
 function automaticNetworkAllowed(){const connection=globalThis.navigator?.connection||globalThis.navigator?.mozConnection||globalThis.navigator?.webkitConnection;return!connection?.saveData&&!['slow-2g','2g'].includes(connection?.effectiveType)}
 export async function resolveOpenMedia(query,{schoolSlug='',topicSlug='',automaticCache=true}={}){
@@ -232,7 +234,7 @@ export async function warmup(){if(warmPromise)return warmPromise;warmPromise=(as
 export function health(){return status()}
 function revokeObjectUrls(){for(const url of objectUrls.values())try{URL.revokeObjectURL(url)}catch{};objectUrls.clear()}
 try{globalThis.addEventListener?.('pagehide',revokeObjectUrls,{once:false})}catch{}
-const api=Object.freeze({revision:REVISION,LOOKUP_URL,POLICY_URL,REVOCATIONS_URL,CACHE_NAME,DB_NAME,FOCUS_TOPICS,POLICY_PRESETS,MIN_RELEVANCE_SCORE,licenseAllowed,recordKey,chooseFile,scoreRecord,sha256HexForBytes,loadLookup,loadHarvestPolicy,loadRevocations,isRevoked,catalogFresh,storagePolicy,setStoragePolicy,effectiveBudgetBytes,cacheRecord,uncache,clearCache,cachedPlayback,resolveOpenMedia,prefetchTopic,prefetchFocusPack,fetchFromMesh,status,health,subscribe,warmup,bytesLabel});
+const api=Object.freeze({revision:REVISION,LOOKUP_URL,POLICY_URL,REVOCATIONS_URL,CACHE_NAME,DB_NAME,FOCUS_TOPICS,POLICY_PRESETS,MIN_RELEVANCE_SCORE,licenseAllowed,recordKey,chooseFile,inferTopicSlug,scoreRecord,sha256HexForBytes,loadLookup,loadHarvestPolicy,loadRevocations,isRevoked,catalogFresh,storagePolicy,setStoragePolicy,effectiveBudgetBytes,cacheRecord,uncache,clearCache,cachedPlayback,resolveOpenMedia,prefetchTopic,prefetchFocusPack,fetchFromMesh,status,health,subscribe,warmup,bytesLabel});
 globalThis.CivweaveOpenLearningMediaCacheV1=api;
 if(typeof window!=='undefined'&&typeof document!=='undefined')warmup().catch(error=>emit('startup-error',{error:error.message}));
 export default api;
