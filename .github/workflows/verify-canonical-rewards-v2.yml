@@ -29,11 +29,14 @@ jobs:
           node --check lib/contribution-mesh-v1.mjs
           node --check lib/contribution-security-v1.mjs
           node --check lib/contribution-validator-committee-v2.mjs
+          node --check lib/contribution-gateway-v1.mjs
+          node --check lib/contribution-provider-gateway-v1.mjs
           node --check public/app/shared/civweave-contribution-mesh-v1.js
           node --check public/app/shared/civweave-contribution-security-v1.js
           node --check public/app/shared/civweave-validator-committee-v2.js
           node --check public/app/shared/civweave-validator-review-gate-v1.js
           node --check public/app/shared/civweave-contribution-ship-guard-v1.js
+          node --check public/app/shared/civweave-contribution-gateway-v1.js
           node --check public/app/shared/civweave-canonical-reward-mesh-bridge-v1.js
           node --check public/app/contribution-security-settings-entry-v1.js
           node --check public/app/contribution-security-v1.js
@@ -45,6 +48,9 @@ jobs:
           node --check scripts/test-contribution-mesh-v1.mjs
           node --check scripts/test-contribution-security-v1.mjs
           node --check scripts/test-contribution-validator-committee-v2.mjs
+          node --check scripts/test-contribution-gateway-v1.mjs
+          node --check scripts/test-contribution-provider-gateway-v1.mjs
+          node --check scripts/test-contribution-gateway-browser-v1.mjs
           node --check scripts/test-contribution-security-browser-v1.mjs
           node --check scripts/test-contribution-browser-committee-v2.mjs
           node --check scripts/test-canonical-reward-mesh-bridge-v1.mjs
@@ -60,13 +66,19 @@ jobs:
         run: node --test scripts/test-contribution-security-v1.mjs
       - name: Verify earned validator committee v2 invariants
         run: node --test scripts/test-contribution-validator-committee-v2.mjs
+      - name: Verify Base USDC contribution gateway invariants
+        run: node --test scripts/test-contribution-gateway-v1.mjs
+      - name: Verify provider-neutral contribution gateway invariants
+        run: node --test scripts/test-contribution-provider-gateway-v1.mjs
+      - name: Verify browser gateway finality and balance guards
+        run: node --test scripts/test-contribution-gateway-browser-v1.mjs
       - name: Verify browser contribution security, explicit validator review, and containment
         run: node --test scripts/test-contribution-security-browser-v1.mjs
       - name: Verify browser earned committee and canonical reward bridge
         run: node --test scripts/test-contribution-browser-committee-v2.mjs scripts/test-canonical-reward-mesh-bridge-v1.mjs
       - name: Verify browser mesh identity compatibility
         run: node --test scripts/test-contribution-browser-adapter-v1.mjs
-      - name: Verify hostless validator-review phone ledger boot
+      - name: Verify hostless gateway phone ledger boot
         run: node --test scripts/test-phone-ledger-bootstrap-v1.mjs
       - name: Verify ledger, Passport, prompts, and receivers
         run: |
@@ -79,8 +91,8 @@ jobs:
           const manifest=JSON.parse(fs.readFileSync('public/app/offline-package-v208.json','utf8'));
           const required=['/app/cw-reward-ledger-v2.js','/app/cw-reward-receivers-v2.js','/app/cw-reward-legacy-bridge-v2.js','/app/cw-reward-surfaces-v2.js'];
           for(const path of required){if(!manifest.seeds.includes(path))throw new Error(`Offline package omits ${path}`)}
-          const phoneLedger=['/app/local-first-policy-v131.js','/app/local-object-mesh-v146.js','/app/shared/civweave-contribution-mesh-v1.js','/app/shared/civweave-contribution-security-v1.js','/app/shared/civweave-validator-committee-v2.js','/app/shared/civweave-validator-review-gate-v1.js','/app/shared/civweave-contribution-ship-guard-v1.js','/app/shared/civweave-canonical-reward-mesh-bridge-v1.js','/app/contribution-security-settings-entry-v1.js','/app/contribution-security-v1.html','/app/contribution-security-v1.js','/app/phone-ledger-bootstrap-v1.js'];
+          const phoneLedger=['/app/local-first-policy-v131.js','/app/local-object-mesh-v146.js','/app/shared/civweave-contribution-mesh-v1.js','/app/shared/civweave-contribution-security-v1.js','/app/shared/civweave-validator-committee-v2.js','/app/shared/civweave-validator-review-gate-v1.js','/app/shared/civweave-contribution-ship-guard-v1.js','/app/shared/civweave-contribution-gateway-v1.js','/app/shared/civweave-canonical-reward-mesh-bridge-v1.js','/app/contribution-security-settings-entry-v1.js','/app/contribution-security-v1.html','/app/contribution-security-v1.js','/app/phone-ledger-bootstrap-v1.js'];
           for(const path of phoneLedger){if(!manifest.assets.includes(path))throw new Error(`Offline package omits ${path}`)}
-          if(manifest.phoneLedgerRevision!=='phone-ledger-r5-validator-review')throw new Error('Offline package is not pinned to validator-review phone-ledger revision');
-          console.log('canonical rewards and validator-review-gated hostless phone contribution ledger are seeded for offline use');
+          if(manifest.phoneLedgerRevision!=='phone-ledger-r6-contribution-gateway')throw new Error('Offline package is not pinned to contribution-gateway phone-ledger revision');
+          console.log('canonical rewards and gateway-gated hostless phone contribution ledger are seeded for offline use');
           NODE
