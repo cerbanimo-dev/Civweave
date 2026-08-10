@@ -1,6 +1,7 @@
 ;(()=>{
 'use strict';
 
+// Installed launches are an app-shell boundary, never an installer fallback.
 const V282_REVISION='installed-pwa-launch-v282';
 const V282_ENTRY_PATH='/app/installed-entry-v146.html';
 
