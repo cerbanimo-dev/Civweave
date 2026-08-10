@@ -1,0 +1,54 @@
+name: Prepare Guide Stream Release
+
+on:
+  push:
+    branches: ['fix/weaveling-stream-thinking-v249-r2']
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/weaveling-stream-thinking-v249-r2
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Materialize Civweave 1.0.85
+        run: |
+          set -euo pipefail
+          printf '1.0.85\n' > VERSION
+          npm pkg set version=1.0.85
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from 'node:fs/promises';
+          const path='config/release-contract.json';
+          const value=JSON.parse(await readFile(path,'utf8'));
+          value.canonical.current={version:'1.0.85',path:'releases/1.0.85',status:'current'};
+          await writeFile(path,JSON.stringify(value,null,2)+'\n');
+          NODE
+          node scripts/materialize-canonical-release.mjs
+          cat > docs/history/releases/RELEASE-NOTES-v1.0.85.md <<'EOF'
+          # Civweave 1.0.85
+
+          ## Guide streaming and thinking visibility
+
+          - Interactive Weaveling/realm-guide model calls now request token streaming.
+          - Downloaded-local partial tokens render into the active chat instead of leaving the user on a static thinking placeholder.
+          - `<think>...</think>` reasoning is presented in a distinct Thinking disclosure while generation is active.
+          - Thinking collapses automatically when the final answer arrives and remains expandable with the completed assistant turn.
+          - Structured guide JSON streams the `answer` field when it becomes available rather than exposing raw JSON in chat.
+          - The canonical `guide-workspace-v242` remains the sole chat submission owner.
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add VERSION package.json config/release-contract.json releases/1.0.85 docs/history/releases/RELEASE-NOTES-v1.0.85.md public scripts
+          if ! git diff --cached --quiet; then
+            git commit -m 'Materialize Civweave 1.0.85 guide streaming release'
+            git push origin HEAD:fix/weaveling-stream-thinking-v249-r2
+          fi
