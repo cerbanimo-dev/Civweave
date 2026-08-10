@@ -6,7 +6,7 @@ let mounted=false;
 let refreshTimer=null;
 const now=()=>new Date().toISOString();
 const clean=(value,max=1000)=>String(value??'').trim().slice(0,max);
-const esc=value=>clean(value,2000).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const esc=value=>clean(value,2000).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 const fmtBytes=value=>{const bytes=Math.max(0,Number(value)||0);if(bytes<1024)return`${bytes} B`;const units=['KiB','MiB','GiB'];let n=bytes/1024,i=0;while(n>=1024&&i<units.length-1){n/=1024;i++}return`${n>=100?n.toFixed(0):n>=10?n.toFixed(1):n.toFixed(2)} ${units[i]}`};
 const fmtAge=value=>{const ms=Date.now()-Date.parse(value||0);if(!Number.isFinite(ms)||ms<0)return'';if(ms<60000)return'just now';if(ms<3600000)return`${Math.floor(ms/60000)}m ago`;if(ms<86400000)return`${Math.floor(ms/3600000)}h ago`;return`${Math.floor(ms/86400000)}d ago`};
 function storage(){return globalThis.CivweaveMapStorageV1}
@@ -45,10 +45,15 @@ async function refreshStorage(){
 }
 function setCoverage(text){const el=document.getElementById('coverageStatus');if(el)el.textContent=clean(text,700)}
 function refreshCoverageButton(){const button=document.getElementById('coverageToggle'),c=coverage();if(button&&c){const on=c.autoEnabled();button.textContent=`Auto coverage ${on?'on':'paused'}`;button.classList.toggle('active',on)}}
-async function persistStorage(){
+async function refreshPersistenceButton(){
   const button=document.getElementById('mapPersistStorage');if(!button)return;
-  if(!navigator.storage?.persist){button.textContent='Storage managed by browser';return}
-  try{const already=await navigator.storage.persisted?.();const granted=already||await navigator.storage.persist();button.textContent=granted?'Maps kept offline':'Browser may reclaim maps';button.classList.toggle('active',granted)}catch{button.textContent='Storage permission unavailable'}
+  if(!navigator.storage?.persisted){button.textContent='Storage managed by browser';button.disabled=true;return}
+  try{const granted=await navigator.storage.persisted();button.textContent=granted?'Maps kept offline':'Keep maps';button.classList.toggle('active',granted)}catch{button.textContent='Keep maps'}
+}
+async function requestPersistentStorage(){
+  const button=document.getElementById('mapPersistStorage');if(!button)return;
+  if(!navigator.storage?.persist){button.textContent='Storage managed by browser';button.disabled=true;return}
+  try{const already=await navigator.storage.persisted?.(),granted=already||await navigator.storage.persist();button.textContent=granted?'Maps kept offline':'Browser may reclaim maps';button.classList.toggle('active',granted)}catch{button.textContent='Storage permission unavailable'}
 }
 async function selfTest(){
   const button=document.getElementById('mapSelfTest');if(button){button.disabled=true;button.textContent='Checking…'}
@@ -57,19 +62,19 @@ async function selfTest(){
     setCoverage(result?.ready?`Map v1 check passed · offline renderer, PMTiles, and storage are ready.`:`Map v1 check needs attention · ${failed.join(', ')||'runtime incomplete'}.`);
   }catch(error){setCoverage(`Map v1 check failed · ${error.message}`)}finally{if(button){button.disabled=false;button.textContent='Run map check'}}
 }
-function scheduleRefresh(delay=80){if(refreshTimer)clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>{refreshStorage().catch(()=>{});refreshCoverageButton()},delay)}
+function scheduleRefresh(delay=80){if(refreshTimer)clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>{refreshStorage().catch(()=>{});refreshCoverageButton();refreshPersistenceButton().catch(()=>{})},delay)}
 async function mount(){
   if(mounted)return true;const wrap=section();if(!wrap)return false;mounted=true;
   const mode=document.getElementById('basemapMode');if(mode){mode.value=offline()?.mode?.()||'auto';mode.addEventListener('change',()=>offline()?.setMode?.(mode.value))}
   document.getElementById('coverageToggle')?.addEventListener('click',()=>{const c=coverage();if(c)c.setAutoEnabled(!c.autoEnabled());refreshCoverageButton()});
-  document.getElementById('mapPersistStorage')?.addEventListener('click',persistStorage);
+  document.getElementById('mapPersistStorage')?.addEventListener('click',requestPersistentStorage);
   document.getElementById('mapSelfTest')?.addEventListener('click',selfTest);
   for(const event of ['civweave:map-pack-cached','civweave:map-pack-removed','civweave:map-pack-pin-changed','civweave:map-basemap-changed','civweave:map-offline-coverage-ready'])addEventListener(event,()=>scheduleRefresh());
   addEventListener('civweave:map-coverage-status',event=>setCoverage(event.detail?.message||''));
-  await refreshStorage();refreshCoverageButton();persistStorage().catch(()=>{});
+  await refreshStorage();refreshCoverageButton();await refreshPersistenceButton();
   dispatchEvent(new CustomEvent('civweave:map-v1-ui-ready',{detail:{version:VERSION,at:now()}}));return true;
 }
 function boot(){if(document.getElementById('panel'))mount().catch(()=>{});else{let ticks=0;const timer=setInterval(()=>{if(document.getElementById('panel')){clearInterval(timer);mount().catch(()=>{})}else if(++ticks>200)clearInterval(timer)},50)}}
 
-globalThis.CivweaveMapUIV1=Object.freeze({version:VERSION,mount,refreshStorage,selfTest});document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):queueMicrotask(boot);
+globalThis.CivweaveMapUIV1=Object.freeze({version:VERSION,mount,refreshStorage,selfTest,requestPersistentStorage});document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):queueMicrotask(boot);
 })();
