@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-civweave-map="v275-maplibre-openfreemap">
+<html lang="en" data-civweave-map="v275-maplibre-openfreemap-v276-www-mesh">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -18,7 +18,7 @@
 </head>
 <body>
 <div class="app">
-<header class="top"><button id="back" class="btn" type="button">← Civweave</button><div class="brand"><small>Real locality + federation/node overlay</small><strong>Federation Finder</strong></div><button id="mobileToggle" class="btn mobile-toggle" type="button">Finder</button><div id="status" class="status">Loading locality map…</div></header>
+<header class="top"><button id="back" class="btn" type="button">← Civweave</button><div class="brand"><small>Real locality + federation/node overlay + WWW mesh</small><strong>Federation Finder</strong></div><button id="mobileToggle" class="btn mobile-toggle" type="button">Finder</button><div id="status" class="status">Loading locality map…</div></header>
 <div class="layout">
 <aside id="panel" class="panel open">
 <h2>Find people in place</h2><p>Search Civweave contacts first, then real-world places. The map itself comes from OpenStreetMap vector data rather than a hand-drawn world silhouette.</p>
@@ -27,17 +27,19 @@
 <div class="stats"><div class="stat"><strong id="featureCount">0</strong><small>Mapped</small></div><div class="stat"><strong id="atlasCount">0</strong><small>Atlas</small></div><div class="stat"><strong id="nodeCount">0</strong><small>Nodes</small></div></div>
 <div class="legend"><span><i class="dot" style="background:var(--gold)"></i>Federation</span><span><i class="dot" style="background:var(--cyan)"></i>Organization</span><span><i class="dot" style="background:var(--pink)"></i>Civweave node</span><span><i class="dot" style="background:var(--violet)"></i>Cluster</span></div>
 <h3>Map skin</h3><div class="field"><label for="theme">Creative cartography</label><select id="theme"><option value="weave">Commonweave Atlas</option><option value="midnight">Midnight Threads</option><option value="parchment">Parchment Fieldbook</option></select></div><p>These are live vector styles, so roads, water, parks, labels, and overlays can inherit realm-specific looks later.</p>
-<h3>Your locality</h3><div class="row"><button id="locate" class="btn primary" type="button">◎ Locate me</button></div><p id="locationStatus">Precise device location is used only in this session and is not saved.</p>
+<h3>Your locality</h3><div class="row"><button id="locate" class="btn primary" type="button">◎ Locate me</button></div><p id="locationStatus">Precise device location is used only in this session and is not saved or published to the mesh.</p>
 <div id="results" class="results"><div class="empty">Search a place or contact, or locate yourself to see nearby mapped contacts.</div></div>
 <h3>Selected</h3><div id="detail" class="card"><strong>No contact selected</strong><small>Tap a map point or a search result.</small></div>
-<h3>Node discovery</h3><div class="field"><label for="nodeEndpoint">Node Host endpoint</label><input id="nodeEndpoint" placeholder="http://127.0.0.1:8787"></div><div class="row"><button id="syncNode" class="btn" type="button">Discover node</button><button id="openNode" class="btn" type="button">Open console</button></div><p>The finder reads the node's public <code>/api/finder-status</code> location only. Pairing and privileged actions remain in the node console.</p>
-<div class="note">Locality search is deliberately submit-only, cached, and provider-switchable. This avoids turning the public OpenStreetMap Nominatim endpoint into an autocomplete firehose. A self-hosted geocoder can replace it without changing the UI.</div>
+<h3>Node discovery</h3><div class="field"><label for="nodeEndpoint">Node Host endpoint</label><input id="nodeEndpoint" placeholder="http://127.0.0.1:8787"></div><div class="row"><button id="syncNode" class="btn" type="button">Discover node</button><button id="openNode" class="btn" type="button">Open console</button></div><p>The finder reads the node's public <code>/api/finder-status</code> location only. Public node-location records can then propagate through the signed federation mesh. Pairing and privileged actions remain in the node console.</p>
+<div class="note">When the WWW is reachable, signed locality batches and map-pack manifests synchronize through Civweave's existing HTTP envelope mesh. Large PMTiles regions are advertised by URL + content hash and fetched directly from peers instead of being stuffed into relay messages. Session-only device GPS is never auto-published.</div>
 </aside>
 <main class="mapwrap"><div id="map" class="map" role="application" aria-label="Interactive Civweave locality, federation and node map"></div><div id="provider" class="provider-badge">Loading vector map provider…</div></main>
 </div></div>
 <script src="/app/vendor/maplibre-v5.13.0/maplibre-gl.js"></script>
 <script>if(!window.maplibregl){document.write('<script src="https://unpkg.com/maplibre-gl@5.13.0/dist/maplibre-gl.js" crossorigin="anonymous"><\\/script>')}</script>
-<script src="/app/civweave-map-service-v275.js?v=1.0.74"></script>
+<script src="/app/civweave-map-service-v275.js?v=1.0.75"></script>
+<script src="/app/civweave-map-mesh-v276.js?v=1.0.75"></script>
+<script src="/app/civweave-map-mesh-bridge-v276.js?v=1.0.75"></script>
 <script>
 (()=>{const toggle=document.getElementById('mobileToggle'),panel=document.getElementById('panel');toggle?.addEventListener('click',()=>panel?.classList.toggle('open'));if(matchMedia('(max-width:760px)').matches)panel?.classList.remove('open')})();
 </script>
