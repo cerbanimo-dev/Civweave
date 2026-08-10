@@ -1,13 +1,21 @@
 {
   "provider": "stripe-connect-direct-v1",
+  "infrastructureAuthority": "cloudflare-core",
+  "moneyEdgeUrl": "https://api.commonweave.earth",
   "operatorAccountModel": "configurable-controller-v1",
   "chargeModel": "direct-charge",
   "operatorPayouts": "stripe-connected-account-native",
   "currency": "USD",
+  "platformFeeBps": 1500,
   "liveMoneyEnabled": false,
   "emergencyStop": false,
   "platformFeeAuthority": "cerbanimo-money-edge",
-  "platformFeeEnv": "CIVWEAVE_MONEY_PLATFORM_FEE_BPS",
+  "platformFeeEnv": "CIVWEAVE_PLATFORM_FEE_BPS",
+  "durableState": {
+    "financialLedger": "cloudflare-d1",
+    "signingIdentity": "cloudflare-sqlite-durable-object",
+    "packageStorage": "cloudflare-r2"
+  },
   "registration": {
     "mode": "proof-of-key-short-lived-grant",
     "sharedSecretRequired": false,
@@ -19,11 +27,11 @@
       "callback-origin",
       "receipt-public-key"
     ],
-    "callbackPolicy": "https-public-internet-only",
+    "callbackPolicy": "dedicated-https-subdomain-of-nodes.commonweave.earth",
     "singleUse": true
   },
   "trustBootstrap": {
-    "moneyEdgeUrl": "https://commonweave-host-node-9l1u.onrender.com",
+    "moneyEdgeUrl": "https://api.commonweave.earth",
     "firstUse": "https-fetch-fingerprint-and-pin",
     "rotation": "reject-unannounced-key-change"
   },
@@ -35,18 +43,13 @@
     "provider-terms"
   ],
   "moneyEdgeSecrets": {
-    "requiredExternal": [
+    "cloudflareWorkerSecrets": [
       "STRIPE_SECRET_KEY",
-      "STRIPE_CONNECT_WEBHOOK_SECRET"
+      "STRIPE_CONNECT_WEBHOOK_SECRET",
+      "NODE_FABRIC_BINDING_TOKEN"
     ],
-    "generatedLocallyOnPersistentStorage": [
-      "money-edge-ed25519-signing-key",
-      "money-edge-admin-secret"
-    ],
-    "optionalMigrationOverrides": [
-      "CIVWEAVE_MONEY_EDGE_PRIVATE_KEY",
-      "CIVWEAVE_MONEY_EDGE_ADMIN_SECRET",
-      "CIVWEAVE_MONEY_EDGE_KEY_ID"
+    "generatedInsideDurableObject": [
+      "money-edge-ed25519-signing-key"
     ]
   },
   "nodeBootstrap": {
