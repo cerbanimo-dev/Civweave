@@ -1,126 +1,124 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-08-10T02:11:38Z",
-  "records": 74,
-  "mesh_redistributable": 65,
-  "download_candidates": 164,
+  "built_at": "2026-08-10T02:16:27Z",
+  "records": 53,
+  "mesh_redistributable": 49,
+  "download_candidates": 125,
   "providers": {
     "internet-archive": {
-      "records": 30,
-      "mesh_redistributable": 23,
-      "download_candidates": 47
+      "records": 19,
+      "mesh_redistributable": 16,
+      "download_candidates": 32
     },
     "peertube": {
-      "records": 22,
-      "mesh_redistributable": 20,
-      "download_candidates": 95
+      "records": 15,
+      "mesh_redistributable": 14,
+      "download_candidates": 74
     },
     "wikimedia-commons": {
-      "records": 22,
-      "mesh_redistributable": 22,
-      "download_candidates": 22
+      "records": 19,
+      "mesh_redistributable": 19,
+      "download_candidates": 19
     }
   },
   "focus_topics": {
     "vibe-coding": {
       "name": "Vibe Coding",
       "school_slug": "technology",
-      "records": 15,
+      "records": 14,
       "mesh_redistributable": 14,
       "providers": {
-        "internet-archive": 4,
         "peertube": 7,
+        "internet-archive": 3,
         "wikimedia-commons": 4
       },
       "top_titles": [
-        "Gen AI prototyping with Google Tools from Stitch to AI studio",
-        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
         "Vibe coding a website with Silex and Claude Code | x5 timelapse",
+        "Is Vibe Coding Hurting Open Source? Big Cosmic Desktop Roadmap Linux Weekly News",
+        "Free AI Coding Assistant – Cline.AI Setup Guide",
+        "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
+        "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
         "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
+        "Visual Basic 6.0 Demos, Vibe Coding and Updates About Me.",
         "Wikimania 2026 – Building a Wikimedia tool with agentic AI",
-        "Wikimania 2026 – Wikipedia Mobile Apps THE destination for knowledge lovers in a mobile-first world",
-        "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News",
-        "Survivre à l'« AI Slopageddon » : comment l'IA ébranle l'Open Source - Raphaël Semeteys - JdLL2026"
+        "Gen AI prototyping with Google Tools from Stitch to AI studio",
+        "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News"
       ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
-      "records": 12,
-      "mesh_redistributable": 10,
+      "records": 6,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 8,
         "internet-archive": 3,
-        "wikimedia-commons": 1
+        "peertube": 3
       },
       "top_titles": [
-        "Evals Are Broken, Use Them Anyway — Ara Khan, Cline",
+        "Effective prompt engineering for Python programmers",
+        "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Il Prompt Engineering",
         "AI Ppt Vdo",
         "Machine Learning nella Scuola: Concetti Base e Applicazioni",
-        "Language Tools For Creators by Paco Xander Nathan",
-        "Stop AI Agent Hallucinations: 5 Techniques + Production Patterns - Elizabeth Fuentes, AWS",
-        "Il Prompt Engineering",
-        "Generating novel images using CLIP in Python",
-        "This is a story of the prompt design to generate an antifascist aesthetics logo"
+        "Language Tools For Creators by Paco Xander Nathan"
       ]
     },
     "pseudocoding": {
       "name": "Pseudocoding and Algorithm Design",
       "school_slug": "technology",
-      "records": 7,
+      "records": 4,
       "mesh_redistributable": 4,
       "providers": {
+        "peertube": 1,
         "wikimedia-commons": 1,
-        "peertube": 2,
-        "internet-archive": 4
+        "internet-archive": 2
       },
       "top_titles": [
-        "Deadlocks and the Dining Philosophers Problem",
         "Pseudo-code et description des algorithmes",
-        "CLOUDS Andres Colubri",
+        "Deadlocks and the Dining Philosophers Problem",
         "Open CS education resources for schools - how hard could it be?",
-        "CLOUDS Aaron Koblin",
-        "CLOUDS: Pittsburgh Premiere (excerpt)",
-        "Athens: PERspectives (2022) - Project Promotion [English]"
+        "CLOUDS Andres Colubri"
       ]
     },
     "critical-thinking": {
       "name": "Critical Thinking",
       "school_slug": "philosophy-and-religion",
-      "records": 13,
-      "mesh_redistributable": 13,
+      "records": 8,
+      "mesh_redistributable": 8,
       "providers": {
-        "internet-archive": 6,
-        "wikimedia-commons": 7
+        "wikimedia-commons": 6,
+        "internet-archive": 2
       },
       "top_titles": [
-        "BREAKING: Drones just struck IDF convoy carrying Netanyahu…ENTIRE ISRAEL IN SHOCK - OPTM",
-        "BREAKING: Netanyahu FLEE Tel Aviv Hours After MASKED IDF Soldiers Attack Gov’t Office",
-        "Iran just destroyed US ships in strait of Hormuz - 10 million barrels incinerated — OPTM",
-        "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
-        "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
-        "Berpikir kritis seperti mengupas bawang",
-        "The Truth About the Murder of Mary Phagan - Jake Shields Interview - FightBack Podcast"
+        "Wikimania 2024 - Dilijan - Day 4 - Media literacy as tool to reach for the Collaboration of Open",
+        "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
+        "Lisa Loving about media literacy and how you can report for your community",
+        "Media literacy to counter political polarization per Ahmed Al-Rawi",
+        "Media literacy to dispel myths and improve public policy",
+        "What is Gaslighting?",
+        "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM"
       ]
     },
     "logical-frameworks": {
       "name": "Logical Frameworks",
       "school_slug": "philosophy-and-religion",
-      "records": 28,
-      "mesh_redistributable": 25,
+      "records": 22,
+      "mesh_redistributable": 20,
       "providers": {
-        "internet-archive": 14,
-        "wikimedia-commons": 9,
-        "peertube": 5
+        "internet-archive": 10,
+        "wikimedia-commons": 8,
+        "peertube": 4
       },
       "top_titles": [
-        "World leader Fangruida, mentor of mankind, great sun-great genius (Malik. R)2020v.1.2",
-        "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem",
-        "World Leder Fangruida Bio. 2020v. 3.3 Revision",
-        "Kobi Gaan - Documentaries",
-        "Dr. William E. Rees",
-        "A New HOPE (2022): Hacking Comprehension: Overcoming Limitations to Better Understand the World",
+        "Complexity Science- 3 Systems Thinking",
+        "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
+        "Systems Thinking 10- System Dynamics",
+        "Systems Thinking 8- Emergence",
+        "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
+        "The Open Decision Framework How to make everybody happy",
+        "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
+        "Systems Thinking 11- Homeostasis",
         "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)",
         "Diego Fontanive ESC2017"
       ]
@@ -128,9 +126,15 @@
   },
   "failures": 0,
   "records_before_relevance_gate": 329,
-  "rejected_by_relevance_gate": 255,
+  "rejected_by_relevance_gate": 254,
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v1",
     "policy": "Provider search is discovery only; title/description must independently meet a topic-specific deterministic threshold."
+  },
+  "records_before_pedagogy_gate": 75,
+  "rejected_by_pedagogy_gate": 22,
+  "pedagogy_gate": {
+    "schema": "civweave.open-learning-media-pedagogy-gate.v1",
+    "policy": "Require a strong conceptual anchor in the title, or a strong description anchor plus explicit educational intent; reject clickbait description-only matches."
   }
 }

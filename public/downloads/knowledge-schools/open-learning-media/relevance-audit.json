@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v1",
-  "built_at": "2026-08-10T02:11:38Z",
+  "built_at": "2026-08-10T02:16:27Z",
   "before": 329,
-  "after": 74,
-  "rejected": 255,
+  "after": 75,
+  "rejected": 254,
   "topics": {
     "vibe-coding": {
       "name": "Vibe Coding",
@@ -39,11 +39,11 @@
       "top_titles": [
         "Evals Are Broken, Use Them Anyway — Ara Khan, Cline",
         "AI Ppt Vdo",
+        "Effective prompt engineering for Python programmers",
         "Machine Learning nella Scuola: Concetti Base e Applicazioni",
         "Language Tools For Creators by Paco Xander Nathan",
         "Stop AI Agent Hallucinations: 5 Techniques + Production Patterns - Elizabeth Fuentes, AWS",
         "Il Prompt Engineering",
-        "Generating novel images using CLIP in Python",
         "This is a story of the prompt design to generate an antifascist aesthetics logo"
       ]
     },
@@ -70,28 +70,28 @@
     "critical-thinking": {
       "name": "Critical Thinking",
       "school_slug": "philosophy-and-religion",
-      "records": 13,
+      "records": 14,
       "mesh_redistributable": 13,
       "providers": {
-        "internet-archive": 6,
+        "internet-archive": 7,
         "wikimedia-commons": 7
       },
       "top_titles": [
         "BREAKING: Drones just struck IDF convoy carrying Netanyahu…ENTIRE ISRAEL IN SHOCK - OPTM",
         "BREAKING: Netanyahu FLEE Tel Aviv Hours After MASKED IDF Soldiers Attack Gov’t Office",
         "Iran just destroyed US ships in strait of Hormuz - 10 million barrels incinerated — OPTM",
-        "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
+        "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM",
         "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
         "Berpikir kritis seperti mengupas bawang",
-        "The Truth About the Murder of Mary Phagan - Jake Shields Interview - FightBack Podcast"
+        "Orwellian Thought Crime - The UK and Free Speech | Bob | Speakers Corner"
       ]
     },
     "logical-frameworks": {
       "name": "Logical Frameworks",
       "school_slug": "philosophy-and-religion",
       "records": 28,
-      "mesh_redistributable": 25,
+      "mesh_redistributable": 26,
       "providers": {
         "internet-archive": 14,
         "wikimedia-commons": 9,
@@ -364,12 +364,6 @@
     },
     {
       "provider": "internet-archive",
-      "title": "Defending our Military",
-      "original_topic": "critical-thinking",
-      "matched_query": "critical thinking"
-    },
-    {
-      "provider": "internet-archive",
       "title": "Interview with Brian Klaas",
       "original_topic": "critical-thinking",
       "matched_query": "critical thinking"
@@ -587,6 +581,12 @@
     {
       "provider": "wikimedia-commons",
       "title": "Internal Market Council, 1957th meeting",
+      "original_topic": "logical-frameworks",
+      "matched_query": "decision framework"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Pouring coastal water on Wikidata - Can we add more-",
       "original_topic": "logical-frameworks",
       "matched_query": "decision framework"
     }
