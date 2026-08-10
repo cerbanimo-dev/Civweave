@@ -24,13 +24,19 @@ assert(scoreRecord(vibe,'vibe coding an app','vibe-coding')>=MIN_RELEVANCE_SCORE
 assert(scoreRecord(unrelated,'vibe coding an app','')<MIN_RELEVANCE_SCORE);
 
 const mediaSource=fs.readFileSync(path.join(root,'public/app/open-learning-media-cache-v1.mjs'),'utf8');
-for(const token of ['body.tee()','cw-media-manifest','cw-media-request','cw-media-start','cw-media-chunk','cw-media-end','Mesh media SHA-256 verification failed','catalog is stale','MESH_REDISTRIBUTABLE','MIN_RELEVANCE_SCORE=18','automaticNetworkAllowed','peerReceiveChains','trustworthy file size'])assert(mediaSource.includes(token),token);
+for(const token of ['body.tee()','cw-media-manifest','cw-media-request','cw-media-start','cw-media-chunk','cw-media-end','Mesh media SHA-256 verification failed','catalog is stale','MESH_REDISTRIBUTABLE','MIN_RELEVANCE_SCORE=18','automaticNetworkAllowed','peerReceiveChains','trustworthy file size','REVOCATIONS_URL','loadRevocations','unsolicited media transfer rejected','slice(0,512)','safeRemoteUrl','non-video content type'])assert(mediaSource.includes(token),token);
 const contract=fs.readFileSync(path.join(root,'public/app/video-learning-contract-v1.mjs'),'utf8');
 assert(contract.includes("open-learning-media-cache-v1.mjs"));
 assert(contract.includes('resolveRelevantMedia'));
 assert(contract.includes("kind:'open-media'"));
+assert(contract.includes('safeExternalUrl'));
+assert(contract.includes('safePlayableUrl'));
 const offline=JSON.parse(fs.readFileSync(path.join(root,'public/app/offline-package-v208.json'),'utf8'));
-for(const asset of ['/app/open-learning-media-cache-v1.mjs','/downloads/knowledge-schools/open-learning-media/lookup.json','/downloads/knowledge-schools/open-learning-media/harvest-policy.json'])assert(offline.assets.includes(asset),asset);
+for(const asset of ['/app/open-learning-media-cache-v1.mjs','/downloads/knowledge-schools/open-learning-media/lookup.json','/downloads/knowledge-schools/open-learning-media/harvest-policy.json','/downloads/knowledge-schools/open-learning-media/revocations.json'])assert(offline.assets.includes(asset),asset);
+const revocations=JSON.parse(fs.readFileSync(path.join(root,'public/downloads/knowledge-schools/open-learning-media/revocations.json'),'utf8'));
+assert.equal(revocations.schema,'civweave.open-learning-media-revocations.v1');
+assert(Array.isArray(revocations.record_keys));
+assert(Array.isArray(revocations.content_hashes));
 const atlasInstaller=fs.readFileSync(path.join(root,'public/app/video-atlas-installer-v1.js'),'utf8');
 assert(atlasInstaller.includes('/app/open-learning-media-installer-v1.mjs'));
 const mediaInstaller=fs.readFileSync(path.join(root,'public/app/open-learning-media-installer-v1.mjs'),'utf8');
@@ -50,6 +56,7 @@ assert(worker.includes("'accept-ranges', 'bytes'"));
 assert(worker.includes("'content-range'"));
 assert(worker.includes('status: 206'));
 assert(worker.includes('status: 416'));
+assert(worker.includes("'/downloads/knowledge-schools/open-learning-media/revocations.json'"));
 
 // The default Learning Path budget must be able to hold at least the smallest approved item in every launch focus topic.
 const lookup=JSON.parse(fs.readFileSync(path.join(root,'public/downloads/knowledge-schools/open-learning-media/lookup.json'),'utf8'));
@@ -61,4 +68,4 @@ for(const slug of focus){
   minimumFocusPackBytes+=Math.min(...sizes);
 }
 assert(minimumFocusPackBytes<=POLICY_PRESETS['learning-path'].budgetBytes,`smallest five-topic focus pack ${minimumFocusPackBytes} exceeds Learning Path budget ${POLICY_PRESETS['learning-path'].budgetBytes}`);
-console.log(`Open Learning Media runtime verified: rights gate, streaming SHA-256, relevance floor, bounded storage, ${minimumFocusPackBytes} byte five-topic focus floor, serialized mesh, range-aware offline route, persistent-storage request, and realm wiring.`);
+console.log(`Open Learning Media runtime verified: rights gate, streaming SHA-256, relevance floor, bounded storage, ${minimumFocusPackBytes} byte five-topic focus floor, requested-only serialized mesh, revocation kill switch, safe URL/MIME validation, range-aware offline playback, persistent-storage request, and realm wiring.`);
