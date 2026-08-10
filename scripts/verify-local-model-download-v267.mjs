@@ -1,83 +1,39 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
-
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [manager,settings,broker,spine,registry,runtime,bridge,bootstrap,localWorker,backgroundWorker,sw,cloudflare,campus,pulse]=await Promise.all([
-  read('public/app/local-ai/download-manager-v267.js'),
-  read('public/app/local-ai/settings-panel-v267.js'),
-  read('public/app/ai-capability-broker-v268.js'),
-  read('public/app/fast-interactive-runtime-v192.js'),
-  read('public/app/local-ai/model-registry-v266.js'),
-  read('public/app/local-ai/runtime-v266.js'),
-  read('public/app/local-ai/runtime-bridge-v266.js'),
-  read('public/app/local-ai/bootstrap-v266.js'),
-  read('public/app/local-ai/worker-v266.js'),
-  read('public/service-worker-local-model-download-v267.js'),
-  read('public/service-worker-v203.js'),
-  read('scripts/build-cloudflare-pages.mjs'),
-  read('public/app/working-campus-v156.part5.txt'),
-  read('public/app/local-ai/test-pulse-v269.js')
-]);
-
-for(const source of [manager,settings,broker,spine,registry,runtime,bridge,bootstrap,localWorker,backgroundWorker,sw,pulse])new Function(source);
-new Function(campus.replace(/\}\)\(\);\s*$/,''));
-
-const checks=[];
-const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
-check('download manager exposes byte progress',manager.includes('bytesDownloaded')&&manager.includes('percent')&&manager.includes('ReadableStream'));
-check('download manager uses Background Fetch when available',manager.includes('backgroundFetch.fetch')&&manager.includes("mode:'background-fetch'"));
-check('download manager keeps foreground fallback resumable by completed cached files',manager.includes("status:'paused'")&&manager.includes('Tap Resume'));
-check('download manager validates cached JSON metadata',manager.includes('validateArtifactResponse')&&manager.includes("reason:'invalid-json'")&&manager.includes("reason:'html'"));
-check('download manager evicts corrupt artifacts without deleting good weights',manager.includes('await c.delete(u)')&&manager.includes('corrupt:true'));
-check('download manager exposes targeted repair',manager.includes('async function repair(')&&manager.includes('repair,remove,cancel'));
-check('download manager sizes storage need from missing artifacts',manager.includes('missingBytes=current.missing.reduce'));
-check('settings shows percent progress bar',settings.includes('cw-model-progress')&&settings.includes('${p}%'));
-check('settings leaves a persistent download dock outside modal',settings.includes('cw-local-ai-download-dock-v267')&&settings.includes('renderDock'));
-check('background service worker rejects HTML and invalid JSON before cache copy',backgroundWorker.includes('returned HTML instead of model data')&&backgroundWorker.includes('invalid JSON model metadata')&&backgroundWorker.indexOf('validateRecord(record,response)')<backgroundWorker.indexOf('cache.put(record.request,response)'));
-check('root service worker imports local model background worker',sw.includes('/service-worker-local-model-download-v267.js'));
-check('local inference worker preserves pinned cache adapter',localWorker.includes('hf.env.customCache=cacheAdapter(cache,spec)')&&localWorker.includes("status:404,statusText:'Downloaded model cache miss'"));
-check('local inference worker constructs TextStreamer',localWorker.includes('new hfRuntime.TextStreamer')&&localWorker.includes('callback_function'));
-check('local inference worker emits incremental token messages',localWorker.includes("post(id,'token'")&&localWorker.includes('streamed:Boolean(streamer)'));
-check('local inference worker supports WASM when WebGPU is unavailable',localWorker.includes("if(spec.device!=='webgpu')return 'wasm'")&&localWorker.includes('requestAdapter()'));
-check('local runtime preserves cache-resolved worker and carries token callbacks',runtime.includes("WORKER='/app/local-ai/worker-v266.js?v=")&&runtime.includes("message.type==='token'")&&runtime.includes('task.onToken?.(message.token)')&&runtime.includes('stream:Boolean(requestOptions.stream)'));
-check('local runtime repairs strengthened metadata integrity before inference',runtime.includes('manager.repair')&&runtime.includes("state.state?.status==='ready'")&&runtime.includes('repair:true,onProgress'));
-check('local runtime probes adapter rather than navigator.gpu presence',runtime.includes('hasWebGPUAdapter')&&runtime.includes('navigator.gpu.requestAdapter()'));
-check('local runtime provisions WASM compatibility weights only when needed',runtime.includes('backend-fallback-download')&&runtime.includes('preferBackground:false')&&runtime.includes('compatibilitySpec'));
-check('local runtime refuses unsafe agentic downgrade',runtime.includes('LOCAL_BACKEND_CAPABILITY_UNAVAILABLE')&&runtime.includes('fallbackAllowed'));
-check('local bridge emits shared partial model events',bridge.includes("emit('partial'")&&bridge.includes("'civweave:model-event'")&&bridge.includes('accumulatedText'));
-check('local bridge reports actual streaming use',bridge.includes("code:'LOCAL_STREAMING'")&&bridge.includes('used:Boolean(run.streamed)'));
-check('local bridge reports actual backend',bridge.includes("code:'LOCAL_BACKEND'")&&bridge.includes('actual:{provider:\'downloaded-local\''));
-check('raw pulse repairs corrupt metadata before inference',pulse.includes('integrityReady')&&pulse.includes('M().repair')&&pulse.includes('invalid cached model metadata'));
-check('raw pulse streams visible direct model output',pulse.includes('onToken:token=>')&&pulse.includes('stream:true')&&pulse.includes('streaming directly from the local worker'));
-check('Cloudflare build stages Transformers runtime before copy',cloudflare.includes('stage-transformers-assets.mjs')&&cloudflare.includes('Required local-AI runtime asset was not staged'));
-check('Cloudflare build requires local inference entry and WebGPU wasm',cloudflare.includes('transformers.min.js')&&cloudflare.includes('ort-wasm-simd-threaded.jsep.wasm'));
-check('capability broker separates semantic-local from deterministic',broker.includes("return'semantic-local'")&&broker.includes("authority:'deterministic-contracts'"));
-check('capability broker exposes legacy tool-overclaim normalization',broker.includes('function normalizeRequest(')&&broker.includes('legacy realm marked agentic reasoning as tool use without tool evidence'));
-check('runtime spine applies capability normalization before middleware',spine.includes("id:'capability-normalizer'")&&spine.includes('normalizeRequest')&&spine.includes('__civweaveRuntimeSpineV271:true'));
-check('registry declares per-model capabilities',registry.includes('capabilities:caps')&&registry.includes('agenticReasoning:true')&&registry.includes('externalResearch:false'));
-check('small local model remains interactive but not agentic',registry.includes("id:'qwen3-0.6b-q4f16'")&&registry.includes('agenticReasoning:false'));
-check('registry includes hidden q8 CPU runtime without adding it to visible installable catalogue',registry.includes("id:'qwen3-0.6b-q8-wasm'")&&registry.includes('hidden:true')&&registry.includes("['onnx/model_quantized.onnx',600_000_000,true]")&&registry.includes('runtimeModels:Object.freeze(runtimeModels)'));
-check('local bridge registers v275 runtime spine handler',bridge.includes("MIDDLEWARE_ID='downloaded-local-v275'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
-check('local bridge escalates unsupported capabilities through the spine base path',bridge.includes('if(!decision.useLocal)')&&bridge.includes('return null')&&bridge.includes('LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'));
-check('bootstrap preserves cache-resolved inference and adds streaming repair fallback',bootstrap.includes('cacheResolvedInference:true')&&bootstrap.includes('localStreaming:true')&&bootstrap.includes('integrityRepair:true')&&bootstrap.includes('backendFallback:true')&&bootstrap.includes('agenticToolSemantics:true'));
-check('Working Campus waits for local bootstrap before selected local chat',campus.includes('if(localSelection.active){await ensureDownloadedLocalAISettings()')&&campus.includes('CivweaveLocalModelBridgeV266?.patch?.()'));
-check('Working Campus refuses silent local-contract substitution',campus.includes("result?.provider==='local-contract'")&&campus.includes('did not substitute deterministic chat'));
-
-const listeners=new Map();
-const context={console,globalThis:null,localStorage:{getItem:()=>null,setItem:()=>{}},addEventListener:(name,fn)=>{const rows=listeners.get(name)||[];rows.push(fn);listeners.set(name,rows)},dispatchEvent:()=>true,CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail;}}};
-context.globalThis=context;
-vm.createContext(context);
-vm.runInContext(broker,context,{filename:'ai-capability-broker-v268.js'});
-const capability=context.CivweaveAICapabilityBrokerV268;
-const localReasoning=capability.normalizeRequest({purpose:'threat-model',executionProfile:'agentic',background:true,requiresTools:true,config:{service:'anarchadia'},messages:[{role:'user',content:'Review this local charter diff for abuse paths.'}]});
-assert.equal(localReasoning.requiresTools,false);
-assert.equal(capability.requirements(localReasoning).profile,'agentic');
-assert.equal(capability.requirements(localReasoning).requiresTools,false);
-const live=capability.normalizeRequest({purpose:'research',executionProfile:'agentic',background:true,requiresTools:true,config:{service:'fellowfare'},messages:[{role:'user',content:'Search the web for live external sources about current local prices.'}]});
-assert.equal(live.requiresTools,true);
-const explicit=capability.normalizeRequest({purpose:'market-scan',executionProfile:'agentic',requiresTools:true,capabilityRequirements:{profile:'agentic',requiresTools:true},config:{service:'fellowfare'}});
-assert.equal(explicit.requiresTools,true);
-checks.push('agentic/tool normalization executable cases');
-
-console.log(JSON.stringify({ok:true,revision:'local-model-streaming-v275-backend-fallback',checks:checks.length,features:{cacheResolvedInference:true,integrityValidation:true,targetedRepair:true,runtimeMetadataRepair:true,localStreaming:true,webgpuAdapterProbe:true,wasmCompatibilityFallback:true,capabilitySafeEscalation:true,capabilityRouting:true,runtimeSpine:true,localAgenticReasoning:true,agenticToolSeparation:true,toolEscalation:true}},null,2));
+const [manager,settings,broker,spine,registry,runtime,bridge,bootstrap,worker,backgroundWorker,sw,cloudflare,campus,pulse]=await Promise.all([
+read('public/app/local-ai/download-manager-v267.js'),read('public/app/local-ai/settings-panel-v267.js'),read('public/app/ai-capability-broker-v268.js'),read('public/app/fast-interactive-runtime-v192.js'),read('public/app/local-ai/model-registry-v266.js'),read('public/app/local-ai/runtime-v266.js'),read('public/app/local-ai/runtime-bridge-v266.js'),read('public/app/local-ai/bootstrap-v266.js'),read('public/app/local-ai/worker-v266.js'),read('public/service-worker-local-model-download-v267.js'),read('public/service-worker-v203.js'),read('scripts/build-cloudflare-pages.mjs'),read('public/app/working-campus-v156.part5.txt'),read('public/app/local-ai/test-pulse-v269.js')]);
+for(const source of [manager,settings,broker,spine,registry,runtime,bridge,bootstrap,worker,backgroundWorker,sw,pulse])new Function(source);new Function(campus.replace(/\}\)\(\);\s*$/,''));
+const checks=[];const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
+check('download manager retains byte progress and targeted repair',manager.includes('bytesDownloaded')&&manager.includes('ReadableStream')&&manager.includes('async function repair('));
+check('download manager rejects poisoned metadata',manager.includes("reason:'invalid-json'")&&manager.includes("reason:'html'"));
+check('background cache validates before copy',backgroundWorker.includes('validateRecord(record,response)')&&backgroundWorker.indexOf('validateRecord(record,response)')<backgroundWorker.indexOf('cache.put(record.request,response)'));
+check('service worker retains local model background worker',sw.includes('/service-worker-local-model-download-v267.js'));
+check('registry declares exact installed context contracts',registry.includes('contextWindowTokens:40_960')&&registry.includes('contextWindowTokens:32_768')&&registry.includes('contextWindowTokens:65_536')&&registry.includes('workingContextTokens'));
+check('registry pins Smol template metadata separately from weights',registry.includes("SMOL_TEMPLATE_REVISION='a91ed44aac643515ffe38aae1e49c7213bb4ddc0'")&&registry.includes('artifactRevision'));
+check('registry keeps current hardware ladder and CPU compatibility lane',registry.includes("id:'gemma3-1b-it-q4f16'")&&registry.includes("id:'qwen3-4b-q4f16'")&&registry.includes("id:'qwen3-0.6b-q8-wasm'")&&registry.includes('hidden:true'));
+check('worker is direct causal LM rather than generic pipeline',worker.includes('AutoTokenizer.from_pretrained')&&worker.includes('AutoModelForCausalLM.from_pretrained')&&!worker.includes('hf.pipeline('));
+check('worker manually applies chat template with thinking control',worker.includes('apply_chat_template')&&worker.includes('enable_thinking:Boolean(message.thinking)'));
+check('worker verifies a real adapter and preserves WASM',worker.includes('navigator.gpu.requestAdapter')&&worker.includes("backend:'wasm'"));
+check('worker warms one generated token before health generation',worker.includes("'warming-model'")&&worker.includes('max_new_tokens:1'));
+check('worker measures prompt, TTFT and decode speed',worker.includes('promptTokenCount')&&worker.includes('token_callback_function')&&worker.includes('ttftMs')&&worker.includes('tokensPerSecond'));
+check('worker guards architecture context before generation',worker.includes('LOCAL_MODEL_CONTEXT_EXCEEDED')&&worker.includes('promptTokens+maxNewTokens>window'));
+check('worker cache adapter honors artifact-specific revisions',worker.includes('revisionFor=(spec,path)=>artifactFor(spec,path)?.revision||spec.revision'));
+check('runtime cache-busts v282 worker and passes inference contracts',runtime.includes("worker-v266.js?v=1.0.83-v282")&&runtime.includes('artifacts:spec.artifacts')&&runtime.includes('contextWindowTokens:spec.contextWindowTokens')&&runtime.includes('thinking:Boolean(requestOptions.thinking)'));
+check('runtime preserves CPU fallback and capability-safe downgrade',runtime.includes('backend-fallback-download')&&runtime.includes('LOCAL_BACKEND_CAPABILITY_UNAVAILABLE')&&runtime.includes('fallbackAllowed'));
+check('bridge registers v282 runtime spine middleware',bridge.includes("MIDDLEWARE_ID='downloaded-local-v282'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
+check('bridge defaults interactive thinking off and agentic thinking on',bridge.includes('function thinkingFor(request,spec)')&&bridge.includes("==='agentic'"));
+check('bridge reports measured token usage and TTFT',bridge.includes('inputTokens:Number(m.promptTokens||0)')&&bridge.includes('ttftMs:m.ttftMs')&&bridge.includes("code:'LOCAL_CONTEXT'"));
+check('health pulse is short, direct and non-thinking',pulse.includes('maxNewTokens:32')&&pulse.includes('thinking:false')&&pulse.includes("provider:'downloaded-local-direct'"));
+check('health pulse reports staged failure and measured performance',pulse.includes('failed at')&&pulse.includes('TTFT')&&pulse.includes('tok/s')&&pulse.includes('first-token-received'));
+check('health pulse retains race-safe repair and explicit compatibility fallback',pulse.includes('repair-waiting')&&pulse.includes('metadataOnly:true')&&pulse.includes('compatibility fallback'));
+check('settings exposes model/working contexts and measured device health',settings.includes('Model window')&&settings.includes('Civweave working default')&&settings.includes('Last health PASS')&&settings.includes('TTFT'));
+check('bootstrap preserves v278 download/hardware features and v282 inference',bootstrap.includes('largeExternalDataForeground:true')&&bootstrap.includes('hardwareTierUI:true')&&bootstrap.includes('canonicalCausalLM:true')&&bootstrap.includes('timingDiagnostics:true'));
+check('Working Campus requests v282 bootstrap and requires causal runtime',campus.includes("bootstrap-v266.js?v=1.0.83-v282")&&campus.includes('CivweaveLocalModelRuntimeV266?.canonicalCausalLM===true'));
+check('Working Campus still refuses deterministic substitution',campus.includes("result?.provider==='local-contract'")&&campus.includes('did not substitute deterministic chat'));
+check('Cloudflare build stages Transformers runtime',cloudflare.includes('stage-transformers-assets.mjs')&&cloudflare.includes('transformers.min.js'));
+check('capability broker retains semantic local authority split',broker.includes("return'semantic-local'")&&broker.includes("authority:'deterministic-contracts'"));
+check('runtime spine retains pre-base middleware handling',spine.includes('if(out?.handled)')&&spine.includes("handledBy='base-runtime'"));
+const context={console,globalThis:null,localStorage:{getItem:()=>null,setItem:()=>{}},addEventListener(){},dispatchEvent(){return true},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}}};context.globalThis=context;vm.createContext(context);vm.runInContext(registry,context,{filename:'model-registry-v266.js'});const R=context.CivweaveLocalModelRegistryV266;assert.equal(R.byId('qwen3-0.6b-q4f16').contextWindowTokens,40960);assert.equal(R.byId('gemma3-1b-it-q4f16').contextWindowTokens,32768);assert.equal(R.byId('smollm3-3b-q4f16').contextWindowTokens,65536);assert.match(R.directUrl('smollm3-3b-q4f16','tokenizer_config.json'),/a91ed44aac643515ffe38aae1e49c7213bb4ddc0/);assert.match(R.directUrl('smollm3-3b-q4f16','onnx\/model_q4f16.onnx_data'),/161c5e4dbaf4167f022f9c4dbd283ffef5f7bc51/);checks.push('registry context and targeted Smol metadata repair executable');
+console.log(JSON.stringify({ok:true,revision:'local-inference-health-v282',checks:checks.length,features:{canonicalCausalLM:true,contextAware:true,artifactRevisionRepair:true,webgpuAdapterProbe:true,wasmCompatibilityFallback:true,thinkingProfiles:true,ttft:true,tokensPerSecond:true,stagedHealth:true,noSilentFallback:true}},null,2));

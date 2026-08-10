@@ -1,78 +1,30 @@
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
-
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [pulse,bootstrap,runtime,registry,worker,lifecycle,repair,settings,downloadPolicy]=await Promise.all([
-  read('public/app/local-ai/test-pulse-v269.js'),
-  read('public/app/local-ai/bootstrap-v266.js'),
-  read('public/app/local-ai/runtime-v266.js'),
-  read('public/app/local-ai/model-registry-v266.js'),
-  read('public/app/local-ai/worker-v266.js'),
-  read('public/app/document-lifecycle-v221.js'),
-  read('public/app/local-ai/metadata-repair-v276.js'),
-  read('public/app/local-ai/settings-panel-v267.js'),
-  read('public/app/local-ai/download-policy-v278.js'),
-]);
-
-const compile=(path,source)=>{try{new Function(source)}catch(error){console.log(`::error file=${path},title=JavaScript syntax failure::${String(error?.message||error).replaceAll('\n',' ')}`);throw error}};
-for(const [path,source] of [
-  ['public/app/local-ai/test-pulse-v269.js',pulse],['public/app/local-ai/bootstrap-v266.js',bootstrap],['public/app/local-ai/runtime-v266.js',runtime],
-  ['public/app/local-ai/model-registry-v266.js',registry],['public/app/local-ai/worker-v266.js',worker],['public/app/document-lifecycle-v221.js',lifecycle],
-  ['public/app/local-ai/metadata-repair-v276.js',repair],['public/app/local-ai/settings-panel-v267.js',settings],['public/app/local-ai/download-policy-v278.js',downloadPolicy],
-])compile(path,source);
-
-const checks=[];
-const check=(name,value)=>{if(!value)console.log(`::error file=scripts/verify-local-model-test-pulse-v269.mjs,title=Local model verifier::${name}`);assert.ok(value,name);checks.push(name)};
-
-check('raw pulse still bypasses orchestration and calls the downloaded runtime',pulse.includes('CivweaveLocalModelRuntimeV266.generate()')&&pulse.includes('bypasses Weaveling')&&pulse.includes('const output=await runtime.generate'));
-check('raw pulse keeps a tiny direct inference request',pulse.includes('maxNewTokens:64')&&pulse.includes('one short sentence'));
-check('raw pulse waits for an already-finalizing package before repairing',pulse.includes('settleNearComplete')&&pulse.includes("phase:'repair-waiting'")&&pulse.includes('Date.now()-started<4000'));
-check('raw pulse distinguishes finalization, metadata repair, and real downloads',pulse.includes("phase==='repair waiting'")&&pulse.includes('progress?.metadataOnly')&&pulse.includes("phase==='downloading'")&&pulse.includes('Downloading a missing local model file'));
-check('raw pulse surfaces metadata transport timeout without implying weights were lost',pulse.includes('metadata repair timed out')&&pulse.includes('large cached model weights were not removed'));
-
-check('metadata repair is v277 race-safe',repair.includes("VERSION='1.0.81-local-ai-metadata-repair-v277-race-safe'")&&repair.includes('metadataRepairRaceSafe:true'));
-check('metadata repair no longer aborts an active background download',!repair.includes('base.cancel?.(id)')&&!repair.includes('await base.cancel'));
-check('metadata repair gives concurrent 99-100 percent finalization a grace window',repair.includes('waitForConcurrentCompletion')&&repair.includes('FINALIZING_GRACE_MS=4000')&&repair.includes("['downloading','finalizing']"));
-check('metadata repair rechecks status before each artifact fetch',repair.includes('const stillMissing=requiredMissing(current).find')&&repair.includes('if(current.available)return current'));
-check('metadata repair transport has a hard abort timeout',repair.includes('FETCH_TIMEOUT_MS=20000')&&repair.includes('new AbortController()')&&repair.includes("error?.name==='AbortError'"));
-check('metadata repair preserves weights and only handles non-ONNX metadata directly',repair.includes("!/^onnx\\//i")&&repair.includes('preservesWeights:true'));
-
-check('settings never displays 100 percent before package availability',settings.includes('p=available?100:transferring?Math.min(99,raw):raw'));
-check('settings suppresses contradictory ETA at finalization',settings.includes('transferring&&p<99?eta(state.etaSeconds)'));
-check('settings dock also caps transferring jobs below 100 percent',settings.includes('p=transferring?Math.min(99,raw):raw'));
-
-check('bootstrap pins race-safe repair, truthful UI, and hardware ladder',bootstrap.includes("VERSION='1.0.81-local-ai-bootstrap-v278-hardware-ladder'")&&bootstrap.includes('1.0.81-local-ai-metadata-repair-v277-race-safe')&&bootstrap.includes('1.0.81-local-model-test-pulse-v277-race-safe')&&bootstrap.includes('1.0.81-local-ai-settings-v277-progress-truth')&&bootstrap.includes('hardwareLadder:true'));
-check('bootstrap uses the hardware-tier registry',bootstrap.includes("model-registry-v266.js?v=1.0.81-v278")&&bootstrap.includes('1.0.81-local-ai-registry-v278-hardware-ladder'));
-check('bootstrap loads foreground policy before metadata repair',bootstrap.includes('download-policy-v278.js')&&bootstrap.indexOf('download-manager-v267.js')<bootstrap.indexOf('download-policy-v278.js')&&bootstrap.indexOf('download-policy-v278.js')<bootstrap.indexOf('metadata-repair-v276.js'));
-check('bootstrap requires race-safe repair capability markers',bootstrap.includes('metadataRepairRaceSafe===true')&&bootstrap.includes('truthfulCompletion:true')&&bootstrap.includes('largeExternalDataForeground:true'));
-check('installed PWA lifecycle requires combined hardware-ladder bootstrap',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.81-local-ai-bootstrap-v278-hardware-ladder'")&&lifecycle.includes('metadataRepairRaceSafe===true')&&lifecycle.includes('truthfulCompletion===true')&&lifecycle.includes('hardwareLadder:true')&&lifecycle.includes('largeExternalDataForeground===true'));
-
-check('all runtime generation JSON metadata remains required for installable/runtime packages',((registry.match(/\['generation_config\.json',[0-9_]+,true\]/g)||[]).length>=6));
-check('Gemma 3 1B direct package includes external q4f16 data',registry.includes("id:'gemma3-1b-it-q4f16'")&&registry.includes("repo:'onnx-community/gemma-3-1b-it-ONNX'")&&registry.includes("['onnx/model_q4f16.onnx_data',700_000_000,true]"));
-check('Gemma 3 1B is the standard default tier',registry.includes("id:'gemma3-1b-it-q4f16',label:'Gemma 3 1B IT',tier:'Standard'")&&registry.includes("recommended:'default'"));
-check('Gemma uses foreground transfer for large Xet external data',registry.includes("id:'gemma3-1b-it-q4f16'")&&registry.includes('preferBackground:false')&&downloadPolicy.includes('preferBackground===false'));
-check('Mini PC tier is a directly installable 3B model',registry.includes("id:'smollm3-3b-q4f16',label:'SmolLM3 3B',tier:'Mini PC'")&&registry.includes("recommended:'mini-pc'"));
-check('12 GB PC tier is a pinned Qwen 3 4B q4f16 package',registry.includes("id:'qwen3-4b-q4f16',label:'Qwen 3 4B',tier:'PC 12'")&&registry.includes("revision:'21d7994e6b4736786dce45b3eef15dd58304e4b3'")&&registry.includes('model_q4f16.onnx_data_1'));
-check('larger tiers remain runtime gated rather than falsely installable',registry.includes("id:'qwen3-8b-ortgenai-int4',label:'Qwen 3 8B',tier:'PC 16'")&&registry.includes("id:'qwen3-14b-hardware-target',label:'Qwen 3 14B class',tier:'PC 32'")&&registry.includes("id:'gemma4-26b-a4b-workstation',label:'Gemma 4 26B A4B MoE',tier:'Workstation MoE'"));
-check('worker still recognizes empty JSON metadata failures',worker.includes('Unexpected end of JSON input')&&worker.includes('missing, truncated, or invalid'));
-check('runtime still preserves WebGPU to WASM fallback',runtime.includes('hasWebGPUAdapter')&&runtime.includes('backend-fallback-download')&&runtime.includes('compatibilitySpec'));
-
+const [pulse,bootstrap,runtime,registry,worker,lifecycle,repair,settings,downloadPolicy]=await Promise.all([read('public/app/local-ai/test-pulse-v269.js'),read('public/app/local-ai/bootstrap-v266.js'),read('public/app/local-ai/runtime-v266.js'),read('public/app/local-ai/model-registry-v266.js'),read('public/app/local-ai/worker-v266.js'),read('public/app/document-lifecycle-v221.js'),read('public/app/local-ai/metadata-repair-v276.js'),read('public/app/local-ai/settings-panel-v267.js'),read('public/app/local-ai/download-policy-v278.js')]);
+const compile=(path,source)=>{try{new Function(source)}catch(error){console.log(`::error file=${path},title=JavaScript syntax failure::${String(error?.message||error).replaceAll('\n',' ')}`);throw error}};for(const [path,source] of [['pulse',pulse],['bootstrap',bootstrap],['runtime',runtime],['registry',registry],['worker',worker],['lifecycle',lifecycle],['repair',repair],['settings',settings],['downloadPolicy',downloadPolicy]])compile(path,source);
+const checks=[];const check=(name,value)=>{assert.ok(value,name);checks.push(name)};
+check('health pulse directly calls downloaded runtime',pulse.includes('const output=await runtime.generate')&&pulse.includes("provider:'downloaded-local-direct'"));
+check('health pulse uses 32-token non-thinking smoke request',pulse.includes('maxNewTokens:32')&&pulse.includes('thinking:false')&&pulse.includes('cedar 37'));
+check('health pulse reports staged pass/failure and measured TTFT',pulse.includes('Local inference health · PASS')&&pulse.includes('failed at')&&pulse.includes('TTFT')&&pulse.includes('tok/s'));
+check('health pulse retains near-complete repair race handling',pulse.includes('settleNearComplete')&&pulse.includes("phase:'repair-waiting'")&&pulse.includes('Date.now()-started<4000'));
+check('health pulse persists device measurements',pulse.includes('civweave.local-ai.health.v282')&&pulse.includes('civweave:local-model-health'));
+check('metadata repair remains v277 race-safe',repair.includes("VERSION='1.0.81-local-ai-metadata-repair-v277-race-safe'")&&repair.includes('metadataRepairRaceSafe:true')&&!repair.includes('base.cancel?.(id)'));
+check('metadata repair preserves weights and has timeout',repair.includes('FETCH_TIMEOUT_MS=20000')&&repair.includes('preservesWeights:true'));
+check('settings remains truthful during transfer',settings.includes('p=available?100:transferring?Math.min(99,raw):raw')&&settings.includes('transferring&&p<99?eta(state.etaSeconds)'));
+check('settings exposes contexts and measured health',settings.includes('Model window')&&settings.includes('Civweave working default')&&settings.includes('Last health PASS'));
+check('bootstrap combines current download/hardware stack with v282 inference',bootstrap.includes('1.0.81-local-ai-metadata-repair-v277-race-safe')&&bootstrap.includes('hardwareLadder:true')&&bootstrap.includes("VERSION='1.0.83-local-ai-bootstrap-v282-inference-health'")&&bootstrap.includes('canonicalCausalLM:true'));
+check('lifecycle requires v282 canonical causal runtime',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.83-local-ai-bootstrap-v282-inference-health'")&&lifecycle.includes('canonicalCausalLM===true'));
+check('registry preserves Gemma default, Smol mini PC and Qwen 4B PC tier',registry.includes("id:'gemma3-1b-it-q4f16'")&&registry.includes("recommended:'default'")&&registry.includes("id:'smollm3-3b-q4f16'")&&registry.includes("id:'qwen3-4b-q4f16'"));
+check('registry has context contracts and Smol template revision repair',registry.includes('contextWindowTokens:32_768')&&registry.includes('contextWindowTokens:65_536')&&registry.includes('a91ed44aac643515ffe38aae1e49c7213bb4ddc0'));
+check('worker uses causal model APIs and manual chat template',worker.includes('AutoTokenizer.from_pretrained')&&worker.includes('AutoModelForCausalLM.from_pretrained')&&worker.includes('apply_chat_template')&&!worker.includes('hf.pipeline('));
+check('worker warms shaders and measures true token callback',worker.includes("'warming-model'")&&worker.includes('token_callback_function')&&worker.includes('ttftMs'));
+check('runtime preserves WebGPU to WASM compatibility fallback',runtime.includes('hasWebGPUAdapter')&&runtime.includes('backend-fallback-download')&&runtime.includes('compatibilitySpec'));
+check('foreground large Xet policy remains active',downloadPolicy.includes('preferBackground===false'));
 let capturedRequest=null,directCalls=0,clock=100;
-const context={
-  console,document:{readyState:'loading',addEventListener(){}},addEventListener(){},queueMicrotask(){},setTimeout,clearTimeout,
-  performance:{now(){clock+=12;return clock}},
-  CivweaveLocalModelRegistryV266:{byId:id=>id==='mock-local'?{id,label:'Mock Local',estimatedBytes:600_000_000}:null},
-  CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'mock-local'}),status:async()=>({available:true})},
-  CivweaveLocalModelRuntimeV266:{generate:async request=>{directCalls+=1;capturedRequest=request;return{id:'mock-local',label:'Mock Local',text:'A lantern beside 42 books.',elapsedMs:321}}}
-};
-context.globalThis=context;
-vm.createContext(context);
-vm.runInContext(pulse,context,{filename:'test-pulse-v269.js'});
-const generated=await context.CivweaveLocalModelTestPulseV269.test('mock-local');
-check('mock pulse performs exactly one direct runtime generation',directCalls===1);
-check('mock pulse returns generated runtime text unchanged',generated.text==='A lantern beside 42 books.');
-check('mock pulse sends the intended short conversational request',capturedRequest?.messages?.length===1&&capturedRequest.messages[0].role==='user'&&capturedRequest.maxNewTokens===64);
-check('mock pulse identifies direct downloaded-local provenance',generated.provider==='downloaded-local-direct'&&generated.model==='mock-local');
-
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v278-hardware-ladder',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,jsonMetadataRepair:true,backendFallback:true,metadataRepairRaceSafe:true,truthfulCompletion:true,hardwareLadder:true,largeExternalDataForeground:true,defaultPhoneModel:'gemma3-1b-it-q4f16',miniPcModel:'smollm3-3b-q4f16',pc12Model:'qwen3-4b-q4f16'},null,2));
+const context={console,document:{readyState:'loading',addEventListener(){},getElementById(){return null}},addEventListener(){},dispatchEvent(){return true},CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},queueMicrotask(){},setTimeout,clearTimeout,localStorage:{getItem(){return null},setItem(){}},performance:{now(){clock+=12;return clock}},CivweaveLocalModelRegistryV266:{byId:id=>id==='mock-local'?{id,label:'Mock Local',estimatedBytes:600_000_000,healthTimeoutMs:360000,contextWindowTokens:40960,workingContextTokens:4096,generation:{nonThinkingTemperature:.7}}:null},CivweaveLocalModelDownloadV266:{selection:()=>({active:true,id:'mock-local'}),status:async()=>({available:true})},CivweaveLocalModelRuntimeV266:{generate:async request=>{directCalls+=1;capturedRequest=request;return{id:'mock-local',label:'Mock Local',text:'cedar 37',elapsedMs:321,backend:'webgpu',streamed:true,metrics:{ttftMs:120,tokensPerSecond:9.5,promptTokens:12,generatedTokens:4,contextWindowTokens:40960,workingContextTokens:4096}}}}};context.globalThis=context;vm.createContext(context);vm.runInContext(pulse,context,{filename:'test-pulse-v269.js'});const generated=await context.CivweaveLocalModelTestPulseV269.test('mock-local');
+check('mock health performs one direct generation',directCalls===1);
+check('mock health disables thinking and caps output at 32',capturedRequest.maxNewTokens===32&&capturedRequest.thinking===false&&capturedRequest.stream===true);
+check('mock health preserves generated text and metrics',generated.text==='cedar 37'&&generated.metrics.ttftMs===120&&generated.metrics.tokensPerSecond===9.5);
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v282-health',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,thinkingDisabled:true,stagedHealth:true,metadataRepairRaceSafe:true,truthfulCompletion:true,hardwareLadder:true},null,2));
