@@ -33,6 +33,7 @@ function installMarkup(){
   return root;
 }
 function setBusy(value,message=''){state.busy=value;for(const button of document.querySelectorAll('#open-media-focus-pack,#open-media-outage-pack,#open-media-clear,[data-media-policy]'))button.disabled=value;if(message&&$('#open-media-help'))$('#open-media-help').textContent=message}
+async function requestPersistence(){try{return Boolean(await navigator.storage?.persist?.())}catch{return false}}
 async function render(){
   const root=installMarkup();if(!root)return;
   const status=await media.status();
@@ -44,9 +45,10 @@ async function render(){
 async function downloadPack(limitPerTopic){
   setBusy(true,`Caching ${limitPerTopic===1?'focus':'outage'} pack. Each file is streamed, SHA-256 verified, and stored locally.`);
   try{
+    const persistent=await requestPersistence();
     const result=await media.prefetchFocusPack({limitPerTopic});
     const flat=Object.values(result).flat(),ok=flat.filter(item=>item.ok).length,failed=flat.length-ok;
-    $('#open-media-help').textContent=`Media pack complete: ${ok} cached${failed?` · ${failed} skipped or unavailable`:''}. Cached copies can be served to paired Civweave nodes when their licenses permit redistribution.`;
+    $('#open-media-help').textContent=`Media pack complete: ${ok} cached${failed?` · ${failed} skipped or unavailable`:''}. ${persistent?'The browser granted durable storage.':'Storage remains browser-managed; Civweave will still protect its own cache lane during updates.'} Cached copies can be served to paired Civweave nodes when their licenses permit redistribution.`;
   }catch(error){$('#open-media-help').textContent=`Media pack stopped safely: ${error.message}`}
   finally{setBusy(false);await render()}
 }
