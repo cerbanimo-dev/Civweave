@@ -1,0 +1,66 @@
+name: Materialize Prelaunch Repository Discipline
+
+on:
+  push:
+    branches:
+      - agent/prelaunch-repo-discipline
+    paths:
+      - ops/triggers/prelaunch-repo-discipline.trigger
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/prelaunch-repo-discipline
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Materialize structural migration
+        run: |
+          set -euo pipefail
+          node scripts/migrations/prelaunch-repo-discipline-v1.mjs
+          node scripts/sync-release-version-assets.mjs
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          node scripts/verify-release-contract.mjs
+          node scripts/verify-root-hygiene.mjs
+          node scripts/verify-version-policy.mjs --self-test
+          rm -f .github/workflows/materialize-prelaunch-repo-discipline.yml
+          rm -f ops/triggers/prelaunch-repo-discipline.trigger
+      - name: Commit materialized tree
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m 'Harden prelaunch repository discipline'
+          git push origin HEAD:agent/prelaunch-repo-discipline
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Production dependency audit
+        id: audit
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+      - name: Run repository checks
+        id: checks
+        continue-on-error: true
+        run: npm run check
+      - name: Re-run launch coherence checks
+        id: coherence
+        continue-on-error: true
+        run: |
+          node scripts/smoke-installer-recovery-v206.mjs
+          node scripts/smoke-service-worker-registration-watchdog-v207.mjs
+          node scripts/verify-release-version-sync.mjs
+      - name: Fail on unresolved launch blockers
+        if: steps.audit.outcome != 'success' || steps.checks.outcome != 'success' || steps.coherence.outcome != 'success'
+        run: |
+          echo "audit=${{ steps.audit.outcome }} checks=${{ steps.checks.outcome }} coherence=${{ steps.coherence.outcome }}"
+          exit 1
