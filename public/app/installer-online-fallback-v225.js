@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION = 'installer-online-fallback-v225';
+const REVISION = 'installer-online-fallback-v225-installed-launch-v282';
 const stateNode = document.getElementById('package-state');
 const installButton = document.getElementById('install-app');
 const updateButton = document.getElementById('check-update');
@@ -11,6 +11,18 @@ function releaseVersion() {
   const visible = document.querySelector('.version')?.textContent || '';
   const match = visible.match(/\d+\.\d+\.\d+/);
   return match?.[0] || '1.0.12';
+}
+
+function installedDisplay() {
+  return navigator.standalone === true || ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay'].some(mode => matchMedia(`(display-mode: ${mode})`).matches);
+}
+
+function installedEntryUrl() {
+  const url = new URL('/app/installed-entry-v146.html', location.origin);
+  url.searchParams.set('installed', '1');
+  url.searchParams.set('system', 'civweave');
+  url.searchParams.set('source', 'installer-open');
+  return url.href;
 }
 
 function campusUrl() {
@@ -23,6 +35,10 @@ function campusUrl() {
 
 function failed() {
   return String(stateNode?.textContent || '').trim().toLowerCase() === 'failed';
+}
+
+function openInstalled() {
+  location.assign(installedEntryUrl());
 }
 
 function openCampus() {
@@ -43,10 +59,14 @@ function ensureOnlineButton() {
 
 function apply() {
   ensureOnlineButton();
+  if (installedDisplay() && installButton && !failed()) {
+    installButton.disabled = false;
+    installButton.dataset.civweaveInstalledLaunch = 'installed-pwa-launch-v282';
+  }
   if (!failed()) return;
   if (installButton) {
     installButton.disabled = false;
-    installButton.textContent = 'Open Civweave online';
+    installButton.textContent = installedDisplay() ? 'Open Civweave' : 'Open Civweave online';
     installButton.dataset.civweaveOnlineFallback = REVISION;
   }
   if (updateButton) updateButton.textContent = 'Repair shell';
@@ -58,7 +78,14 @@ function apply() {
 
 document.addEventListener('click', event => {
   const target = event.target instanceof Element ? event.target.closest('#install-app') : null;
-  if (!target || !failed()) return;
+  if (!target) return;
+  if (installedDisplay()) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openInstalled();
+    return;
+  }
+  if (!failed()) return;
   event.preventDefault();
   event.stopImmediatePropagation();
   openCampus();
@@ -71,6 +98,7 @@ apply();
 
 globalThis.CivweaveInstallerOnlineFallbackV225 = Object.freeze({
   revision: REVISION,
+  installedEntryUrl,
   campusUrl
 });
 

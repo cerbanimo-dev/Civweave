@@ -45,21 +45,40 @@ try {
   await fs.rm(fixture, { recursive: true, force: true });
 }
 
+// Simulate a machine with no system `zip`, but keep unrelated build tools available.
+// The previous verifier reduced PATH to Node's directory, which also hid `tar` and
+// caused Transformers.js package extraction to fail before the ZIP fallback was tested.
 const nodeOnlyPath = path.dirname(process.execPath);
-const build = spawnSync(process.execPath, ['scripts/build-cloudflare-pages.mjs'], {
-  cwd: root,
-  encoding: 'utf8',
-  env: { ...process.env, PATH: nodeOnlyPath },
-  maxBuffer: 20 * 1024 * 1024,
-});
-if (build.status !== 0) {
-  process.stdout.write(build.stdout || '');
-  process.stderr.write(build.stderr || '');
-  throw new Error(`Cloudflare build failed without system zip, status ${build.status}.`);
+const tarLocator = process.platform === 'win32' ? 'where' : 'which';
+const tarProbe = spawnSync(tarLocator, ['tar'], { encoding: 'utf8' });
+assert(!tarProbe.error && tarProbe.status === 0, 'Portable ZIP verifier requires tar for dependency staging.');
+const tarExecutable = String(tarProbe.stdout || '').split(/\r?\n/).map(value => value.trim()).find(Boolean);
+assert(tarExecutable, 'Portable ZIP verifier could not resolve the tar executable.');
+const restrictedTools = await fs.mkdtemp(path.join(os.tmpdir(), 'civweave-no-system-zip-'));
+try {
+  if (process.platform === 'win32') {
+    await fs.writeFile(path.join(restrictedTools, 'tar.cmd'), `@"${tarExecutable}" %*\r\n`, 'utf8');
+  } else {
+    await fs.symlink(tarExecutable, path.join(restrictedTools, 'tar'));
+  }
+  const restrictedPath = `${restrictedTools}${path.delimiter}${nodeOnlyPath}`;
+  const build = spawnSync(process.execPath, ['scripts/build-cloudflare-pages.mjs'], {
+    cwd: root,
+    encoding: 'utf8',
+    env: { ...process.env, PATH: restrictedPath },
+    maxBuffer: 20 * 1024 * 1024,
+  });
+  if (build.status !== 0) {
+    process.stdout.write(build.stdout || '');
+    process.stderr.write(build.stderr || '');
+    throw new Error(`Cloudflare build failed without system zip, status ${build.status}.`);
+  }
+  const output = `${build.stdout || ''}\n${build.stderr || ''}`;
+  assert(output.includes('System zip is unavailable; using the dependency-free Civweave ZIP writer.'), 'Cloudflare build did not enter its portable ZIP path.');
+  assert(output.includes('All Cloudflare-hosted files are at or below 24 MiB'), 'Cloudflare build did not complete its hosted-file audit.');
+} finally {
+  await fs.rm(restrictedTools, { recursive: true, force: true });
 }
-const output = `${build.stdout || ''}\n${build.stderr || ''}`;
-assert(output.includes('System zip is unavailable; using the dependency-free Civweave ZIP writer.'), 'Cloudflare build did not enter its portable ZIP path.');
-assert(output.includes('All Cloudflare-hosted files are at or below 24 MiB'), 'Cloudflare build did not complete its hosted-file audit.');
 for (const relative of [
   'public/downloads/Civweave-Mobile-Install-Kit.zip',
   'public/downloads/civweave-pocket-campus.cwseed',
@@ -75,6 +94,7 @@ console.log(JSON.stringify({
   revision: 'v185-cloudflare-portable-zip',
   systemZipRequired: false,
   cloudflareBuildSimulatedWithoutZip: true,
+  tarPreservedDuringNoZipSimulation: true,
   mobileInstallKitBuilt: true,
   pocketCampusSeedBuilt: true,
   pagesOutputBuilt: true,
