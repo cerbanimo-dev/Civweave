@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-packs.v1",
-  "built_at": "2026-08-10T08:15:43Z",
+  "built_at": "2026-08-10T08:57:05Z",
   "revision": "general-knowledge-packs-v1",
   "default_pack": "general-knowledge",
   "packs": [
@@ -49,15 +49,15 @@
       "name": "Practical Life",
       "kind": "extension",
       "default": false,
-      "description": "Everyday competence for money, food, first aid, home upkeep, and work.",
+      "description": "Everyday competence for money, food safety, health, computing basics, and understanding data.",
       "topics": [
         "personal-finance",
         "cooking-food-safety",
-        "first-aid-basics",
-        "home-maintenance",
-        "career-work-skills"
+        "health-wellness",
+        "computing-basics",
+        "statistics-data-literacy"
       ],
-      "coverage": 0.6,
+      "coverage": 1.0,
       "available": true
     },
     {
@@ -89,7 +89,7 @@
         "climate-environment",
         "law-rights-basics"
       ],
-      "coverage": 1.0,
+      "coverage": 0.8,
       "available": true
     },
     {
@@ -122,7 +122,7 @@
         "philosophy-ethics",
         "law-rights-basics"
       ],
-      "coverage": 1.0,
+      "coverage": 0.8333,
       "available": true
     }
   ],
@@ -341,7 +341,9 @@
         "art history",
         "visual arts",
         "music",
-        "culture"
+        "culture",
+        "visual culture",
+        "artmaking"
       ],
       "hints": [
         "Arts & Culture",
@@ -350,10 +352,18 @@
         "fine arts",
         "music history",
         "art and culture",
+        "baroque art",
+        "renaissance art",
+        "artmaking",
+        "digital painting",
+        "painting tutorial",
+        "art tutorial",
         "art history",
         "visual arts",
         "music",
-        "culture"
+        "culture",
+        "visual culture",
+        "artmaking"
       ],
       "required": true
     },
@@ -561,22 +571,26 @@
       ],
       "required": false
     },
-    "first-aid-basics": {
-      "name": "First Aid Basics",
-      "school_slug": "health-medicine-and-disease",
+    "emergency-preparedness": {
+      "name": "Emergency Preparedness",
+      "school_slug": "everyday-life",
       "concepts": [
-        "first aid",
-        "emergency response",
-        "basic care"
+        "emergency preparedness",
+        "disaster readiness",
+        "emergency planning",
+        "fire safety"
       ],
       "hints": [
-        "First Aid Basics",
-        "first aid",
-        "basic first aid",
-        "emergency first aid",
-        "first aid",
-        "emergency response",
-        "basic care"
+        "Emergency Preparedness",
+        "emergency preparedness",
+        "disaster preparedness",
+        "emergency kit",
+        "emergency planning",
+        "fire safety",
+        "emergency preparedness",
+        "disaster readiness",
+        "emergency planning",
+        "fire safety"
       ],
       "required": false
     },
