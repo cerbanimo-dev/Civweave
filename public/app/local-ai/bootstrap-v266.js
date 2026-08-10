@@ -1,6 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='1.0.83-local-ai-bootstrap-v282-inference-health';
+const YIELD_REVISION='v283-yield-between-settings-modules';
 if(globalThis.CivweaveLocalAIBootstrapV266?.version===VERSION)return;
 const files=[
   ['/app/ai-capability-broker-v268.js?v=1.0.67-v271',()=>globalThis.CivweaveAICapabilityBrokerV268?.version==='1.0.67-ai-capability-broker-v271-semantics'],
@@ -16,6 +17,7 @@ const files=[
   ['/app/local-ai/test-pulse-v269.js?v=1.0.83-v282',()=>globalThis.CivweaveLocalModelTestPulseV269?.version==='1.0.83-local-model-test-pulse-v282-health']
 ];
 function load(src,ready){if(ready?.())return Promise.resolve();return new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveLocalAi='v282';script.onload=()=>ready?.()?resolve():reject(new Error(`${src} loaded without its expected runtime.`));script.onerror=()=>reject(new Error(`Could not load ${src}.`));document.head.append(script)})}
-const ready=(async()=>{for(const [src,test] of files)await load(src,test);dispatchEvent(new CustomEvent('civweave:local-ai-ready',{detail:{version:VERSION,byteProgress:true,backgroundFetch:true,capabilityRouting:true,localAgenticReasoning:true,directModelTest:true,runtimeSpine:true,cacheResolvedInference:true,localStreaming:true,integrityRepair:true,runtimeMetadataRequired:true,metadataOnlyRepair:true,metadataRepairRaceSafe:true,truthfulCompletion:true,backendFallback:true,agenticToolSemantics:true,phone1BTier:true,hardwareLadder:true,directDownloads:true,largeExternalDataForeground:true,hardwareTierUI:true,canonicalCausalLM:true,contextAware:true,timingDiagnostics:true,thinkingProfiles:true,artifactRevisionRepair:true}}));return true})().catch(error=>{console.warn('[civweave local ai]',error);dispatchEvent(new CustomEvent('civweave:local-ai-unavailable',{detail:{version:VERSION,message:String(error?.message||error)}}));return false});
-globalThis.CivweaveLocalAIBootstrapV266=Object.freeze({version:VERSION,ready});
+function yieldToUI(){if(typeof globalThis.requestAnimationFrame!=='function')return Promise.resolve();return new Promise(resolve=>globalThis.requestAnimationFrame(()=>{if(typeof globalThis.setTimeout==='function')globalThis.setTimeout(resolve,0);else queueMicrotask(resolve)}))}
+const ready=(async()=>{for(const [src,test] of files){await load(src,test);await yieldToUI()}dispatchEvent(new CustomEvent('civweave:local-ai-ready',{detail:{version:VERSION,byteProgress:true,backgroundFetch:true,capabilityRouting:true,localAgenticReasoning:true,directModelTest:true,runtimeSpine:true,cacheResolvedInference:true,localStreaming:true,integrityRepair:true,runtimeMetadataRequired:true,metadataOnlyRepair:true,metadataRepairRaceSafe:true,truthfulCompletion:true,backendFallback:true,agenticToolSemantics:true,phone1BTier:true,hardwareLadder:true,directDownloads:true,largeExternalDataForeground:true,hardwareTierUI:true,canonicalCausalLM:true,contextAware:true,timingDiagnostics:true,thinkingProfiles:true,artifactRevisionRepair:true,uiYieldBetweenModules:true}}));return true})().catch(error=>{console.warn('[civweave local ai]',error);dispatchEvent(new CustomEvent('civweave:local-ai-unavailable',{detail:{version:VERSION,message:String(error?.message||error)}}));return false});
+globalThis.CivweaveLocalAIBootstrapV266=Object.freeze({version:VERSION,yieldRevision:YIELD_REVISION,ready});
 })();
