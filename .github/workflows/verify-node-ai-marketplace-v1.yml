@@ -24,7 +24,7 @@ on:
       - 'config/node-ai-services.example.json'
       - 'docs/NODE-AI-MARKETPLACE-v1.md'
       - 'package.json'
-      - 'server-gateway-v131*.mjs'
+      - 'server/compat/server-gateway-v131*.mjs'
       - '.github/workflows/verify-node-ai-marketplace-v1.yml'
   workflow_dispatch:
 
@@ -59,7 +59,7 @@ jobs:
           node --check public/app/shared/civweave-node-ai-routing-v1.mjs
           node --check public/service-worker-offline-v211-override.js
           node --check scripts/stage-federation-finder-data-v274.mjs
-          node --check server-gateway-v131.mjs
+          node --check server/compat/server-gateway-v131.mjs
       - name: Test node marketplace contracts
         run: node --test scripts/test-node-ai-marketplace-v1.mjs scripts/test-node-ai-http-v1.mjs scripts/test-node-ai-routing-v1.mjs scripts/test-node-ai-service-package-v1.mjs scripts/test-node-ai-marketplace-surface-v1.mjs scripts/test-node-ai-fireworks-package-v1.mjs
       - name: Verify canonical bootstrap and offline carriage
@@ -74,4 +74,4 @@ jobs:
           test ! -e lib/ai-wallet-postgres-v1.mjs
           test ! -e db/migrations/001-ai-wallet-ledger.sql
           test ! -e scripts/test-ai-wallet-postgres-v1.mjs
-          ! grep -RniE 'AI_WALLET_DATABASE_URL|@neondatabase/serverless|PostgresAiWallet|providerReserveCents|providerShareBps|AI_PLAN_CATALOG' lib server-gateway-v131*.mjs .env.ai-wallet.example package.json --exclude='test-node-ai-marketplace-v1.mjs' --exclude='test-node-ai-http-v1.mjs'
+          ! grep -RniE 'AI_WALLET_DATABASE_URL|@neondatabase/serverless|PostgresAiWallet|providerReserveCents|providerShareBps|AI_PLAN_CATALOG' lib server/compat/server-gateway-v131*.mjs .env.ai-wallet.example package.json --exclude='test-node-ai-marketplace-v1.mjs' --exclude='test-node-ai-http-v1.mjs'

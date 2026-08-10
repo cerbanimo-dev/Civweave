@@ -24,8 +24,10 @@ const [
   workerCore,
   workerWrapper,
   legacyWorker,
-  gateway,
-  localServer,
+  gatewayEntry,
+  localEntry,
+  gatewayCompat,
+  localCompat,
   workingCampus,
   campusLoader,
   campusPart4,
@@ -46,8 +48,10 @@ const [
   read('public/service-worker-core-v208.js'),
   read('public/service-worker-v203.js'),
   read('public/service-worker-v156.js'),
-  read('server-gateway-v131.mjs'),
-  read('server-local-v131.mjs'),
+  read('server/gateway.mjs'),
+  read('server/local.mjs'),
+  read('server/compat/server-gateway-v131.mjs'),
+  read('server/compat/server-local-v131.mjs'),
   read('public/app/working-campus-v156.html'),
   read('public/app/working-campus-v156.js'),
   read('public/app/working-campus-v156.part4.txt'),
@@ -126,8 +130,10 @@ check(experience.includes('GUIDE_WORKSPACE'),'Canonical experience no longer boo
 check(!experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!experience.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'),'Canonical experience restored a retired v215/v216 chat owner.');
 check(!installBoundary.includes("const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';")&&!installBoundary.includes('addScript(RELEASE_VERSION_SCRIPT)'),'Install boundary reintroduced the retired canonical version loader.');
 check(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-civweave-version]')"),'Visible-version synchronizer is incomplete.');
-check(versionConst(gateway,`${version}-render-installed-runtime-v132`),'Gateway wrapper version is stale.');
-check(new RegExp(`const\\s+VERSION\\s*=\\s*['"]${version.replaceAll('.','\\.')}['"]`).test(localServer)&&localServer.includes(`?build=${version}`),'Local server version is stale.');
+check(gatewayEntry.includes("server/compat/server-gateway-v131.mjs"),'Stable gateway entry no longer targets the compatibility implementation.');
+check(localEntry.includes("server/compat/server-local-v131.mjs"),'Stable local entry no longer targets the compatibility implementation.');
+check(versionConst(gatewayCompat,`${version}-render-installed-runtime-v132`),'Gateway compatibility wrapper version is stale.');
+check(new RegExp(`const\\s+VERSION\\s*=\\s*['"]${version.replaceAll('.','\\.')}['"]`).test(localCompat)&&localCompat.includes(`?build=${version}`),'Local compatibility server version is stale.');
 check(workingCampus.includes(`Civweave Working Campus · v${version}`)&&workingCampus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
 check(campusLoader.includes(`system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Working Campus route loader version is stale.');
 check(campusPart4.includes(`version:'${version}'`),'Working Campus realm travel version is stale.');
@@ -166,4 +172,4 @@ for(const [label,source] of [
   const pattern=new RegExp(`(?:(?:Civweave|Commonweave) v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
   for(const match of source.matchAll(pattern))if(match[1]!==version)throw new Error(`${label} still exposes ${match[1]} instead of ${version}.`);
 }
-console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,offlineRevision:'offline-campus-current-graph-v280',offlinePolicy:'resumable-pause-v280',shellIntegrity:'shell-integrity-v281',canonicalChatOwner:'guide-workspace-v242',legacyCompatibility:'noncanonical-only',gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,updaterFirstInstalledLaunch:true,manifestReleasePin:false,installerRecoveryOnly:true,installerRegistrationOwner:'install-v130.js'},null,2));
+console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,offlineRevision:'offline-campus-current-graph-v280',offlinePolicy:'resumable-pause-v280',shellIntegrity:'shell-integrity-v281',canonicalChatOwner:'guide-workspace-v242',legacyCompatibility:'noncanonical-only',gatewayStableEntry:true,localStableEntry:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,updaterFirstInstalledLaunch:true,manifestReleasePin:false,installerRecoveryOnly:true,installerRegistrationOwner:'install-v130.js'},null,2));

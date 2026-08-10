@@ -79,16 +79,19 @@ vm.createContext(sandbox);
 vm.runInContext(statusRuntime,sandbox,{filename:'offline-campus-status-v210.js'});
 const normalize=sandbox.CivweaveOfflineCampusStatusV210?.normalize;
 assert.equal(typeof normalize,'function');
-const legacy=normalize({type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',revision:'offline-campus-current-graph-v238',total:234,discovered:234,downloaded:217,completed:217,attempted:217,running:false,ready:false,failed:[],failedCount:0,skipped:Array.from({length:17},(_,index)=>({pathname:`/retired-${index}.js`})),skippedCount:17});
-assert.equal(legacy.total,217,'retired references must be removed from current-campus denominator');
-assert.equal(legacy.downloaded,217);
-assert.equal(legacy.ready,true,'217 downloaded + 17 retired must complete legacy 234-item ledger');
+assert.equal(sandbox.CivweaveOfflineCampusStatusV210?.workerRevision,'offline-campus-current-graph-v280');
+const current=normalize({type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',revision:'offline-campus-current-graph-v280',total:234,discovered:234,downloaded:217,completed:217,attempted:217,running:false,ready:false,failed:[],failedCount:0,skipped:Array.from({length:17},(_,index)=>({pathname:`/retired-${index}.js`})),skippedCount:17});
+assert.equal(current.total,217,'retired references must be removed from current-campus denominator');
+assert.equal(current.downloaded,217);
+assert.equal(current.ready,true,'217 downloaded + 17 retired must complete a 234-item current graph ledger');
 
 assert.ok(workerRepair.includes('retired-references-do-not-block-current-campus-readiness'));
 assert.ok(workerRepair.includes('downloaded+skippedCount>=reportedTotal'));
 assert.ok(workerRepair.includes('writeOfflineMeta'),'worker must repair persisted completion metadata');
 assert.ok(workerWrapper.includes("importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246')"));
+assert.ok(workerWrapper.includes('offline-campus-current-graph-v280'));
+assert.ok(workerWrapper.includes('policy=resumable-pause-v280'));
 assert.ok(workerWrapper.includes('chat-convergence-v250'),'worker wrapper must carry current convergence identity');
 assert.ok(workerWrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'new worker must activate immediately');
 
-console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v250',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first'},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v250',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first'},null,2));

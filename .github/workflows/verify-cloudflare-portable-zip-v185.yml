@@ -10,15 +10,19 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: cloudflare-portable-zip-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   portable-zip:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 24
+          node-version: '22'
       - name: Install Pages build dependencies
         run: npm install --ignore-scripts
       - name: Syntax check portable release build
