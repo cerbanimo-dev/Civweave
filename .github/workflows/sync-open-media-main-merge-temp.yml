@@ -93,11 +93,6 @@ jobs:
 
           node scripts/materialize-canonical-release.mjs
 
-          # A GitHub Actions token cannot push workflow-file changes. Keep the pre-sync
-          # workflow tree for the tested merge commit; the GitHub connector reconciles
-          # it to current main plus the two Open Media workflows immediately afterward.
-          git checkout "$FEATURE_HEAD" -- .github/workflows
-
       - name: Verify integrated launch contracts
         run: |
           set -euo pipefail
@@ -134,6 +129,11 @@ jobs:
       - name: Commit and push tested integration
         run: |
           set -euo pipefail
+          FEATURE_HEAD="$(cat /tmp/feature-head)"
+          # The runner token cannot push workflow-file changes. Restore the pre-sync
+          # workflow tree only after validation; the connector reconciles it to current
+          # main plus Open Media workflows immediately after this merge commit lands.
+          git checkout "$FEATURE_HEAD" -- .github/workflows
           git add -A
           git commit -m "Sync current Civweave release architecture into Open Learning Media"
           git push origin HEAD:agent/open-learning-media-harvest-v1
