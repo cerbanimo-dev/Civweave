@@ -12,7 +12,7 @@ jobs:
   materialize:
     if: github.repository == 'cerbanimo-dev/Civweave'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v5
         with:
@@ -45,6 +45,8 @@ jobs:
           contract.canonical.current={version,path:`releases/${version}`,status:'current'};
           fs.writeFileSync(file,JSON.stringify(contract,null,2)+'\n');
           NODE
+      - name: Build Labor Atlas verification artifact
+        run: node scripts/build-learning-packs-v1.mjs
       - name: Verify generated release
         run: |
           node scripts/verify-release-contract.mjs
