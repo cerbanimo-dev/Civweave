@@ -7,6 +7,8 @@ on:
       - 'public/app/civweave-map-service-v275.js'
       - 'public/app/civweave-map-mesh-v276.js'
       - 'public/app/civweave-map-mesh-bridge-v276.js'
+      - 'public/app/civweave-map-coverage-v277.js'
+      - 'public/app/shared/civweave-map-coverage-scoring-v1.mjs'
       - 'public/app/local-object-mesh-v146.js'
       - 'public/finder/index.html'
       - 'public/app/offline-package-v208.json'
@@ -31,7 +33,9 @@ jobs:
           node --check public/app/civweave-map-service-v275.js
           node --check public/app/civweave-map-mesh-v276.js
           node --check public/app/civweave-map-mesh-bridge-v276.js
+          node --check public/app/civweave-map-coverage-v277.js
+          node --check public/app/shared/civweave-map-coverage-scoring-v1.mjs
           node --check scripts/stage-maplibre-v275.mjs
           node --check scripts/prepare-start-v131.mjs
-      - name: Verify locality map and WWW mesh contract
+      - name: Verify locality map, WWW mesh, and coverage-healing contracts
         run: node --test scripts/test-federation-map-v275.mjs
