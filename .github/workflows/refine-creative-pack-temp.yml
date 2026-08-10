@@ -1,0 +1,44 @@
+name: Refine Creative Pack Temp
+
+on:
+  push:
+    branches:
+      - agent/general-knowledge-video-packs-v1
+    paths:
+      - .github/workflows/refine-creative-pack-temp.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Refine creative pack
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path('config/open-learning-media-packs-v1.json')
+          data=json.loads(path.read_text(encoding='utf-8'))
+          pack=next(p for p in data['packs'] if p['slug']=='maker-creative')
+          pack['name']='Creative Studio'
+          pack['topics']=['arts-culture','drawing-design','photography-video']
+          pack['description']='Creative production through art, drawing and design, photography, and video craft.'
+          path.write_text(json.dumps(data,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
+          PY
+      - name: Commit pack refinement
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add config/open-learning-media-packs-v1.json
+          git commit -m 'Narrow creative media pack to strong shelves'
+          git pull --rebase origin agent/general-knowledge-video-packs-v1
+          git push origin HEAD:agent/general-knowledge-video-packs-v1
