@@ -107,13 +107,15 @@ check(nav.includes('ROUTES.navigate'),'Themed navigation bypasses the route cont
 check(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core version is stale.');
 check(workerWrapper.includes(`/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Worker route contract revision is stale.');
 check(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-chat-convergence-v250`),'Worker core revision is stale.');
+check(workerWrapper.includes('/service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288'),'Worker code coherence layer is missing.');
+check(workerWrapper.indexOf('/service-worker-code-coherence-v288.js')<workerWrapper.indexOf('/service-worker-core-v208.js'),'Worker code coherence does not precede generic app caching.');
 check(workerWrapper.includes('/service-worker-installer-state-v280.js?v=installer-state-machines-v280'),'Worker installer state layer is missing.');
 check(workerWrapper.includes('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281'),'Worker shell integrity layer is missing.');
 check(workerWrapper.includes('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280'),'Worker offline resumable-current-graph revision is stale.');
 check(workerWrapper.includes('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246'),'Worker campus completion layer is missing.');
 check(workerWrapper.includes('/service-worker-chat-repair-v245.js?v=chat-convergence-v250'),'Worker lost the stale-chat cache migration lane.');
 check(workerWrapper.indexOf('/service-worker-canonical-navigation-v227.js')>workerWrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not the final navigation policy.');
-check(legacyWorker.includes(`/service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
+check(legacyWorker.includes(`/service-worker-v203.js?v=${version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
 for(const token of [
   `const VERSION='${version}';`,
   "const REVISION='chat-convergence-v250';",
@@ -152,7 +154,8 @@ for(const token of [
   'installer title',
   'worker route contract revision',
   'five-system route version',
-  'install-boundary release-aware additions revision'
+  'install-boundary release-aware additions revision',
+  'code-coherence-v288'
 ])check(syncSource.includes(token),`Release synchronizer is missing ${token}.`);
 for(const [label,source] of [
   ['launcher',launcherHtml],
@@ -174,4 +177,4 @@ for(const [label,source] of [
   const pattern=new RegExp(`(?:(?:Civweave|Commonweave) v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
   for(const match of source.matchAll(pattern))if(match[1]!==version)throw new Error(`${label} still exposes ${match[1]} instead of ${version}.`);
 }
-console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,offlineRevision:'offline-campus-current-graph-v280',offlinePolicy:'resumable-pause-v280',shellIntegrity:'shell-integrity-v281',canonicalChatOwner:'guide-workspace-v242',legacyCompatibility:'noncanonical-only',gatewayStableEntry:true,localStableEntry:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,updaterFirstInstalledLaunch:true,manifestReleasePin:false,installerRecoveryOnly:true,installerRegistrationOwner:'install-v130.js'},null,2));
+console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,codeCoherence:'v288',offlineRevision:'offline-campus-current-graph-v280',offlinePolicy:'resumable-pause-v280',shellIntegrity:'shell-integrity-v281',canonicalChatOwner:'guide-workspace-v242',legacyCompatibility:'noncanonical-only',gatewayStableEntry:true,localStableEntry:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,updaterFirstInstalledLaunch:true,manifestReleasePin:false,installerRecoveryOnly:true,installerRegistrationOwner:'install-v130.js'},null,2));
