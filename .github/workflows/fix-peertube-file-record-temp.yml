@@ -1,0 +1,75 @@
+name: Fix PeerTube File Record Temp
+
+on:
+  push:
+    branches:
+      - agent/general-knowledge-video-packs-v1
+    paths:
+      - .github/workflows/fix-peertube-file-record-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Store real video MIME and reject audio-only renditions
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          harvester=Path('scripts/harvest-open-learning-media-v1.py')
+          text=harvester.read_text(encoding='utf-8')
+          old='''    def add(obj: dict, role: str):\n        url = clean_text(obj.get("fileDownloadUrl") or obj.get("fileUrl") or obj.get("url"), 1600)\n        if not url or url in seen:\n            return\n        seen.add(url)\n        out.append({\n            "url": url,\n            "bytes": int(obj.get("size") or 0),\n            "resolution": clean_text((obj.get("resolution") or {}).get("label"), 80),\n            "fps": obj.get("fps"),\n            "role": role,\n        })\n'''
+          new='''    def add(obj: dict, role: str):\n        url = clean_text(obj.get("fileDownloadUrl") or obj.get("fileUrl") or obj.get("url"), 1600)\n        if not url or url in seen:\n            return\n        resolution = obj.get("resolution") or {}\n        resolution_label = clean_text(resolution.get("label"), 80)\n        try:\n            resolution_id = int(resolution.get("id"))\n        except (TypeError, ValueError):\n            resolution_id = None\n        if resolution_id == 0 or "audio" in resolution_label.lower():\n            return\n        mime = peertube_file_mime(obj, url)\n        if not mime.startswith("video/"):\n            return\n        seen.add(url)\n        out.append({\n            "url": url,\n            "mime": mime,\n            "bytes": int(obj.get("size") or 0),\n            "resolution": resolution_label,\n            "fps": obj.get("fps"),\n            "role": role,\n        })\n'''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit('PeerTube add() block not found')
+              text=text.replace(old,new,1)
+          harvester.write_text(text,encoding='utf-8')
+
+          runtime=Path('public/app/open-learning-media-cache-v1.mjs')
+          text=runtime.read_text(encoding='utf-8')
+          old="function playableFile(file){const mime=fileMime(file);return mime.startsWith('video/')&&!/\\.m3u8(?:$|\\?)/i.test(clean(file?.url,1200))}"
+          new="function playableFile(file){const mime=fileMime(file),resolution=clean(file?.resolution,80).toLowerCase();return mime.startsWith('video/')&&!resolution.includes('audio')&&!/\\.m3u8(?:$|\\?)/i.test(clean(file?.url,1200))}"
+          if new not in text:
+              if old not in text:
+                  raise SystemExit('runtime playableFile anchor not found')
+              text=text.replace(old,new,1)
+          runtime.write_text(text,encoding='utf-8')
+
+          test=Path('scripts/test-open-learning-media-packs-v1.py')
+          text=test.read_text(encoding='utf-8')
+          old='''        mime = str(file.get("mime") or "").lower()\n        parsed = urlparse(url)\n        if parsed.scheme == "https" and parsed.netloc and mime.startswith("video/") and int(file.get("bytes") or 0) > 0:\n            return True\n'''
+          new='''        mime = str(file.get("mime") or "").lower()\n        resolution = str(file.get("resolution") or "").lower()\n        parsed = urlparse(url)\n        if parsed.scheme == "https" and parsed.netloc and mime.startswith("video/") and "audio" not in resolution and int(file.get("bytes") or 0) > 0:\n            return True\n'''
+          if new not in text:
+              if old not in text:
+                  raise SystemExit('downloader-ready test anchor not found')
+              text=text.replace(old,new,1)
+          test.write_text(text,encoding='utf-8')
+          PY
+          python -m py_compile scripts/harvest-open-learning-media-v1.py scripts/test-open-learning-media-packs-v1.py
+          node --check public/app/open-learning-media-cache-v1.mjs
+          python - <<'PY'
+          import importlib.util
+          spec=importlib.util.spec_from_file_location('h','scripts/harvest-open-learning-media-v1.py')
+          h=importlib.util.module_from_spec(spec); spec.loader.exec_module(h)
+          detail={'files':[{'fileDownloadUrl':'https://example.test/a-360.mp4','size':1234,'resolution':{'id':360,'label':'360p'}},{'fileDownloadUrl':'https://example.test/a-0.mp4','size':4321,'resolution':{'id':0,'label':'Audio only'}}]}
+          parsed=h.peertube_files(detail)
+          assert parsed == [{'url':'https://example.test/a-360.mp4','mime':'video/mp4','bytes':1234,'resolution':'360p','fps':None,'role':'web-video'}], parsed
+          PY
+      - name: Commit downloader record repair
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scripts/harvest-open-learning-media-v1.py public/app/open-learning-media-cache-v1.mjs scripts/test-open-learning-media-packs-v1.py
+          git commit -m 'Fix PeerTube downloader file metadata'
+          git pull --rebase origin agent/general-knowledge-video-packs-v1
+          git push origin HEAD:agent/general-knowledge-video-packs-v1
