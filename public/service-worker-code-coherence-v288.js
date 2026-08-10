@@ -82,15 +82,6 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const cache = await caches.open(CW_CODE_COHERENCE_CACHE);
     const key = cwCodeKey(url.pathname);
-    const cached = await cache.match(key, { ignoreSearch: true });
-    if (cwCodeValid(cached, url.pathname)) {
-      if (request.method === 'GET') {
-        cwCodeFetch(request).then(response => cache.put(key, response.clone())).catch(() => {});
-      }
-      return request.method === 'HEAD'
-        ? new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers })
-        : cached;
-    }
     try {
       const response = await cwCodeFetch(request);
       if (request.method === 'GET') await cache.put(key, response.clone());
@@ -98,6 +89,12 @@ self.addEventListener('fetch', event => {
         ? new Response(null, { status: response.status, statusText: response.statusText, headers: response.headers })
         : response;
     } catch {
+      const current = await cache.match(key, { ignoreSearch: true });
+      if (cwCodeValid(current, url.pathname)) {
+        return request.method === 'HEAD'
+          ? new Response(null, { status: current.status, statusText: current.statusText, headers: current.headers })
+          : current;
+      }
       const fallback = await caches.match(key, { ignoreSearch: true });
       if (cwCodeValid(fallback, url.pathname)) {
         return request.method === 'HEAD'
@@ -113,5 +110,5 @@ self.CivweaveCodeCoherenceV288 = Object.freeze({
   version: CW_CODE_COHERENCE_VERSION,
   cache: CW_CODE_COHERENCE_CACHE,
   critical: CW_CODE_CRITICAL.slice(),
-  policy: 'current-version-code-cache-first-network-refresh-legacy-offline-fallback'
+  policy: 'network-first-current-version-cache-legacy-offline-fallback'
 });
