@@ -12,7 +12,7 @@ const clamp=value=>Math.max(0,Math.min(1,Number(value)||0));
 
 async function rawPackResponse(){
   const store=globalThis.CivweaveLearningPackSeedsV1;
-  if(!store?.openPack){await packs.bootstrapCore();}
+  if(!store?.openPack)await packs.bootstrapCore();
   const active=globalThis.CivweaveLearningPackSeedsV1;
   return active?.openPack?active.openPack(PACK_ID):null;
 }
@@ -66,19 +66,22 @@ function accepted(row,{minConfidence=DEFAULT_MIN_CONFIDENCE,includeReview=false}
   return clamp(row.confidence)>=Math.max(0,Math.min(1,Number(minConfidence)||0));
 }
 function order(rows){return [...rows].sort((a,b)=>clamp(b.confidence)-clamp(a.confidence)||String(a.to?.label||'').localeCompare(String(b.to?.label||'')))}
-export async function resolveSkill(skillRef,options={}){
-  await load({stage:options.stage===true});
+function resolveIndexedSkill(skillRef,options={}){
   const id=clean(typeof skillRef==='string'?skillRef:skillRef?.id,220);if(!id)return null;
   const candidates=order(state.skillByFrom.get(id)||[]),matches=candidates.filter(row=>accepted(row,options));
   return{id,label:clean(typeof skillRef==='object'?skillRef?.label:'',300),canonical:matches[0]?copy(matches[0].to):null,matches:copy(matches),candidates:copy(options.includeCandidates===false?matches:candidates),source:state.meta?copy(state.meta):null};
 }
+export async function resolveSkill(skillRef,options={}){
+  await load({stage:options.stage===true});
+  return resolveIndexedSkill(skillRef,options);
+}
 export async function resolveSkills(skillRefs,options={}){
   await load({stage:options.stage===true});
-  const output=[];for(const value of list(skillRefs)){const resolved=await resolveSkill(value,{...options,stage:false});if(resolved)output.push(resolved)}return output;
+  return list(skillRefs).map(value=>resolveIndexedSkill(value,options)).filter(Boolean);
 }
 export async function normalizeSkillRefs(skillRefs,options={}){
   const resolved=await resolveSkills(skillRefs,options),refs=[];
-  for(const row of resolved){refs.push(row.id);if(row.canonical?.id)refs.push(row.canonical.id);if(options.includeUris&&row.canonical?.uri)refs.push(row.canonical.uri)}
+  for(const row of resolved){refs.push(row.id);if(row.canonical?.id)refs.push(`esco-skill:${row.canonical.id}`);if(options.includeUris&&row.canonical?.uri)refs.push(row.canonical.uri)}
   return{refs:[...new Set(refs)],resolved};
 }
 export async function mapOnetOccupation(onetCode,options={}){
