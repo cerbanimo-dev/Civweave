@@ -25,6 +25,7 @@ const mapPackagePath = resolve(sourceDir,"downloads/Civweave-Map-v1.zip");
 const mapChecksumPath = resolve(sourceDir,"downloads/Civweave-Map-v1.zip.sha256");
 const parityMaterializer = resolve(scriptDir, "materialize-parity-ledger.mjs");
 const transformerStage = resolve(scriptDir, "stage-transformers-assets.mjs");
+const transformerV4Stage = resolve(scriptDir, "stage-transformers-v4-assets.mjs");
 const mapRuntimeStage = resolve(scriptDir, "stage-maplibre-v275.mjs");
 const mapPackageBuilder = resolve(scriptDir, "build-civweave-map-v1.mjs");
 const validationSafe = resolve(scriptDir, "apply-confidence-weighted-validation-v1-safe.mjs");
@@ -91,10 +92,14 @@ if (!existsSync(sourceDir) || !statSync(sourceDir).isDirectory()) throw new Erro
 if (existsSync(validationSafe)) runNodeScript(validationSafe,"Confidence-weighted validation transform failed.");
 else console.log('[Civweave] Confidence-weighted validation transform is not present on this branch; current main supplies it at merge time.');
 runNodeScript(transformerStage,"Transformers.js staging failed. Cloudflare would otherwise publish downloadable model weights without the local inference runtime.");
+runNodeScript(transformerV4Stage,"Transformers.js 4.2 Gemma 4 staging failed. Gemma 4 downloads must never be published without their isolated inference runtime.");
 for (const required of [
   resolve(sourceDir, 'app/vendor/transformers/transformers.min.js'),
   resolve(sourceDir, 'app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs'),
   resolve(sourceDir, 'app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm'),
+  resolve(sourceDir, 'app/vendor/transformers-v4/transformers.min.js'),
+  resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.mjs'),
+  resolve(sourceDir, 'app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.wasm'),
 ]) {
   if (!existsSync(required) || !statSync(required).isFile()) throw new Error(`Required local-AI runtime asset was not staged: ${relative(repoRoot, required)}`);
 }
@@ -139,4 +144,4 @@ const installerBytes = statSync(installerPath).size;
 const seedBytes = statSync(pocketCampusSeedPath).size;
 const mapBytes = statSync(mapPackagePath).size;
 console.log(`Built .cloudflare-pages with mobile installer (${installerBytes} bytes), portable Civweave seed (${seedBytes} bytes), and Civweave Map v1 (${mapBytes} bytes).`);
-console.log("All Cloudflare-hosted files are at or below 24 MiB, including local AI and Map v1 runtimes.");
+console.log("All Cloudflare-hosted files are at or below 24 MiB, including both local AI runtimes and Map v1 runtimes.");
