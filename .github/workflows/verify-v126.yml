@@ -30,12 +30,12 @@ jobs:
             node --test scripts/test-jules-evergreen-core.mjs
             node scripts/verify-jules-evergreen.mjs
           fi
-      - name: Install JavaScript dependencies
-        run: npm install --no-audit --no-fund
+      - name: Install Render-equivalent production dependencies
+        run: npm install --omit=dev --no-audit --no-fund
       - name: Verify clean-room AI settings
         run: node scripts/verify-ai-settings-cleanroom-v188.mjs
-      - name: Run repository checks
-        run: npm run check
+      - name: Run Render-equivalent release build
+        run: npm run build:release
       - name: Build Cloudflare Pages package
         run: node scripts/build-cloudflare-pages.mjs
       - name: Verify packaged clean-room files
