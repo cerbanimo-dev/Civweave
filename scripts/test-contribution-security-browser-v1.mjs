@@ -60,18 +60,38 @@ test('shipping limits block high offline value, unrecovered wallets and unbounde
   assert.match(source, /offline-value-limit/);
 });
 
-test('installed and offline packages carry the security runtime before phone ledger boot', async () => {
+test('ship guard adds committee-certified wallet containment and contribution-state quarantine', async () => {
+  const source = await read('public/app/shared/civweave-contribution-ship-guard-v1.js');
+  assert.match(source, /WalletFreezeRequested/);
+  assert.match(source, /WalletFreezeWitnessed/);
+  assert.match(source, /WalletSecurityFrozen/);
+  assert.match(source, /freezeCommittee/);
+  assert.match(source, /evidence\.witnesses\.length<evidence\.committee\.quorum/);
+  assert.match(source, /wallet is committee-frozen and cannot create transfers/);
+  assert.match(source, /wallet is committee-frozen and cannot gain transfer witnesses/);
+  assert.match(source, /wallet is committee-frozen and cannot gain finality/);
+  assert.match(source, /quarantineOversizedContributionState/);
+  assert.match(source, /ship-guard: oversized contribution envelope/);
+  assert.match(source, /ship-guard: future-dated contribution envelope/);
+  assert.match(source, /local-wallet-frozen/);
+});
+
+test('installed and offline packages carry security and containment before phone ledger boot', async () => {
   const html = await read('public/app/installed-entry-v146.html');
   const mesh = html.indexOf('/app/shared/civweave-contribution-mesh-v1.js');
   const security = html.indexOf('/app/shared/civweave-contribution-security-v1.js');
+  const guard = html.indexOf('/app/shared/civweave-contribution-ship-guard-v1.js');
   const phone = html.indexOf('/app/phone-ledger-bootstrap-v1.js');
-  assert.ok(mesh >= 0 && security > mesh && phone > security);
+  assert.ok(mesh >= 0 && security > mesh && guard > security && phone > guard);
 
   const installerState = await read('public/service-worker-installer-state-v280.js');
   assert.match(installerState, /civweave-contribution-security-v1\.js/);
+  assert.match(installerState, /civweave-contribution-ship-guard-v1\.js/);
   assert.match(installerState, /contributionSecurityRequired:\s*true/);
+  assert.match(installerState, /walletContainmentRequired:\s*true/);
 
   const manifest = JSON.parse(await read('public/app/offline-package-v208.json'));
-  assert.equal(manifest.phoneLedgerRevision, 'phone-ledger-r2-security');
+  assert.equal(manifest.phoneLedgerRevision, 'phone-ledger-r3-ship-security');
   assert.ok(manifest.assets.includes('/app/shared/civweave-contribution-security-v1.js'));
+  assert.ok(manifest.assets.includes('/app/shared/civweave-contribution-ship-guard-v1.js'));
 });
