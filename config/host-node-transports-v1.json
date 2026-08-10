@@ -1,0 +1,55 @@
+{
+  "schema": "civweave.host-node-transports.v1",
+  "defaultProtocol": "civweave.node.v1",
+  "moneyEdgeAuthority": "https://api.commonweave.earth",
+  "profiles": {
+    "cloudflare-www": {
+      "runtime": "cloudflare-durable-object-v2",
+      "publicHttps": true,
+      "localCompute": false,
+      "state": "sqlite-durable-object",
+      "operatorSecretDistribution": "none"
+    },
+    "raspberry-pi-public": {
+      "runtime": "node22-local",
+      "publicHttps": true,
+      "transport": "cloudflare-tunnel",
+      "state": "local-sqlite",
+      "localCompute": true,
+      "privateIdentity": "generated-on-node",
+      "operatorSecretDistribution": "none"
+    },
+    "local-server-public": {
+      "runtime": "node22-local",
+      "publicHttps": true,
+      "transport": "cloudflare-tunnel",
+      "state": "local-sqlite",
+      "localCompute": true,
+      "privateIdentity": "generated-on-node",
+      "operatorSecretDistribution": "none"
+    },
+    "private-edge": {
+      "runtime": "device-local",
+      "publicHttps": false,
+      "transport": "cloudflare-relay-websocket",
+      "state": "local-first",
+      "localCompute": true,
+      "privateIdentity": "generated-on-node",
+      "operatorSecretDistribution": "none",
+      "availability": "relay-phase"
+    }
+  },
+  "centralOnlySecrets": [
+    "STRIPE_SECRET_KEY",
+    "STRIPE_CONNECT_WEBHOOK_SECRET",
+    "NODE_FABRIC_BINDING_TOKEN",
+    "NODE_FABRIC_OPERATOR_TOKEN"
+  ],
+  "forbiddenOnCommunityNodes": [
+    "STRIPE_SECRET_KEY",
+    "STRIPE_CONNECT_WEBHOOK_SECRET",
+    "CIVWEAVE_MONEY_EDGE_PRIVATE_KEY",
+    "NODE_FABRIC_BINDING_TOKEN",
+    "NODE_FABRIC_OPERATOR_TOKEN"
+  ]
+}
