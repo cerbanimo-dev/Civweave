@@ -45,6 +45,11 @@ const worker=fs.readFileSync(path.join(root,'public/service-worker-core-v208.js'
 assert(worker.includes("'cw-open-learning-media-'"));
 assert(worker.includes("OPEN_MEDIA_ROUTE_PREFIX = '/__civweave_open_media__/'"));
 assert(worker.includes("OPEN_MEDIA_CACHE = 'cw-open-learning-media-v1'"));
+assert(worker.includes("request.headers.get('range')"));
+assert(worker.includes("'accept-ranges', 'bytes'"));
+assert(worker.includes("'content-range'"));
+assert(worker.includes('status: 206'));
+assert(worker.includes('status: 416'));
 
 // The default Learning Path budget must be able to hold at least the smallest approved item in every launch focus topic.
 const lookup=JSON.parse(fs.readFileSync(path.join(root,'public/downloads/knowledge-schools/open-learning-media/lookup.json'),'utf8'));
@@ -56,4 +61,4 @@ for(const slug of focus){
   minimumFocusPackBytes+=Math.min(...sizes);
 }
 assert(minimumFocusPackBytes<=POLICY_PRESETS['learning-path'].budgetBytes,`smallest five-topic focus pack ${minimumFocusPackBytes} exceeds Learning Path budget ${POLICY_PRESETS['learning-path'].budgetBytes}`);
-console.log(`Open Learning Media runtime verified: rights gate, streaming SHA-256, relevance floor, bounded storage, ${minimumFocusPackBytes} byte five-topic focus floor, serialized mesh, offline route, persistent-storage request, and realm wiring.`);
+console.log(`Open Learning Media runtime verified: rights gate, streaming SHA-256, relevance floor, bounded storage, ${minimumFocusPackBytes} byte five-topic focus floor, serialized mesh, range-aware offline route, persistent-storage request, and realm wiring.`);
