@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [versionText,builder,versionSync,coherenceSync,installedEntry,installedLaunch,installerFallback,manifestText,wrapper]=await Promise.all([
-  read('VERSION'),read('scripts/build-service-worker-v211.mjs'),read('scripts/sync-release-version-assets.mjs'),read('scripts/sync-release-coherence-v220.mjs'),read('public/app/installed-entry-v146.js'),read('public/service-worker-installed-launch-v282.js'),read('public/app/installer-online-fallback-v225.js'),read('public/app/manifest.webmanifest'),read('public/service-worker-v203.js')
+const [versionText,builder,versionSync,coherenceSync,installedEntry,installedLaunch,installerFallback,manifestText,shellRepair,wrapper]=await Promise.all([
+  read('VERSION'),read('scripts/build-service-worker-v211.mjs'),read('scripts/sync-release-version-assets.mjs'),read('scripts/sync-release-coherence-v220.mjs'),read('public/app/installed-entry-v146.js'),read('public/service-worker-installed-launch-v282.js'),read('public/app/installer-online-fallback-v225.js'),read('public/app/manifest.webmanifest'),read('public/service-worker-shell-repair-v225.js'),read('public/service-worker-v203.js')
 ]);
 const version=versionText.trim();
 const manifest=JSON.parse(manifestText);
@@ -40,7 +40,7 @@ assert(!installedEntry.includes('const sites={'),'Compatibility launcher reintro
 assert.equal(new URL(manifest.start_url,'https://civweave.invalid').pathname,'/app/installed-entry-v146.html','PWA manifest no longer launches through the installed bootstrap.');
 assert(installedLaunch.includes("const V282_ENTRY_PATH='/app/installed-entry-v146.html'"),'Worker launch boundary no longer serves the installed bootstrap.');
 assert(installedLaunch.includes("policy:'installed-entry-never-installer-substitution'"),'Worker launch boundary can regress to installer substitution.');
-assert(installedLaunch.includes("V282_INSTALLER_GUARD='/app/installer-online-fallback-v225.js'"),'Installer launch guard is not retained in the required shell.');
+assert(shellRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js']"),'Installer launch guard is no longer retained in the offline shell cache lane.');
 assert(installerFallback.includes("url = new URL('/app/installed-entry-v146.html'"),'Installed Open button no longer targets the installed bootstrap.');
 assert(installerFallback.includes('if (installedDisplay())')&&installerFallback.includes('event.stopImmediatePropagation()'),'Installed Open button no longer preempts the legacy /app/ click handler.');
 assert(wrapper.indexOf('/app/system-routes-v227.js')<wrapper.indexOf('/service-worker-core-v208.js'),'Checked-in worker wrapper does not load route contract first.');
@@ -50,4 +50,4 @@ assert(wrapper.indexOf('/service-worker-core-v208.js')<wrapper.indexOf('/service
 assert(wrapper.indexOf('/service-worker-installer-state-v280.js')<wrapper.indexOf('/service-worker-shell-integrity-v281.js'),'Checked-in worker wrapper does not load shell integrity after finalizing required assets.');
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Checked-in worker wrapper does not load canonical navigation after shell repair.');
 assert(wrapper.includes("/service-worker-chat-repair-v245.js?v=chat-convergence-v250"),'Checked-in worker wrapper lost the v250 stale-chat migration lane.');
-console.log(JSON.stringify({ok:true,version,revision:'navigation-generator-invariants-v282',singleRouteAuthority:true,builderRouteFirst:true,builderIntegrityOrder:true,builderCanonicalAfterRepair:true,coherenceCannotDowngrade:true,coherenceCannotRestoreRetiredChatOwners:true,compatibilityLauncherUsesContract:true,updaterFirstEntry:true,installedLaunchNeverInstaller:true,installerOpenPreempted:true,moduleSyntaxCheckedByWorkflow:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'navigation-generator-invariants-v282',singleRouteAuthority:true,builderRouteFirst:true,builderIntegrityOrder:true,builderCanonicalAfterRepair:true,coherenceCannotDowngrade:true,coherenceCannotRestoreRetiredChatOwners:true,compatibilityLauncherUsesContract:true,updaterFirstEntry:true,installedLaunchNeverInstaller:true,installerOpenPreempted:true,installerGuardOfflineCached:true,moduleSyntaxCheckedByWorkflow:true},null,2));
