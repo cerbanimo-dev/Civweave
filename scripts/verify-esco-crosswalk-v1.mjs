@@ -38,13 +38,17 @@ for(const row of skillMappings){
     assert(Number(row.confidence)<.9,'Review skill candidates must stay below the canonical acceptance threshold.');
   }
 }
+const relationCounts=new Map();
 for(const row of occupationMappings){
   assert(row.from?.scheme==='onet'&&/^\d{2}-\d{4}\.\d{2}$/.test(row.from?.id||''),'Official occupation mapping must originate from an O*NET-SOC code.');
   assert(row.to?.scheme==='esco-occupation'&&/data\.europa\.eu\/esco\/occupation\//i.test(row.to?.uri||''),'Official occupation mapping must target an ESCO occupation URI.');
   assert(row.provenance?.source==='esco-official-onet-crosswalk'&&row.provenance?.officialMapping===true,'Occupation mappings must retain official ESCO-O*NET provenance.');
+  assert(['exact','narrow','broad','close','related'].includes(row.relation),'Occupation relation must be an explicit ESCO crosswalk relation.');
+  relationCounts.set(row.relation,(relationCounts.get(row.relation)||0)+1);
   if(row.relation==='related')assert(row.status==='review'&&!row.provenance?.usDolValidated,'Related occupation matches must remain review-only.');
   else assert(row.status==='accepted'&&row.provenance?.humanValidated===true&&row.provenance?.qualityAssured===true&&row.provenance?.usDolValidated===true,'Quality-assured official occupation mappings must retain validation provenance.');
 }
+assert(relationCounts.size>=2,'Official ESCO-O*NET parser collapsed all occupation mappings into one fallback relation.');
 
 const [coreModule,expertModule]=await Promise.all([
   import(pathToFileURL(path.join(ROOT,'public','app','shared','core-practice-pack-v1.mjs')).href),
@@ -81,6 +85,7 @@ console.log('ESCO Skill Crosswalk v1 contract passed.',{
   reviewSkillMappings:skillMappings.filter(row=>row.status==='review').length,
   unresolvedCivweaveSkills:unresolved.length,
   officialOccupationMappings:occupationMappings.length,
+  occupationRelations:Object.fromEntries(relationCounts),
   artifactBytes:bytes.byteLength,
   realmEnrichment:true
 });
