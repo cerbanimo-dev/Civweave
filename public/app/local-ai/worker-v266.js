@@ -24,6 +24,26 @@ function friendlyError(error,spec,stage='inference'){
   if(/shader|device lost|out of memory|allocation|buffer/i.test(raw))return `${spec?.label||spec?.id||'The selected model'} reached a WebGPU/device limit during ${stage}. ${raw}`;
   return raw;
 }
+function runtimeProfile(hf){
+  const hardwareConcurrency=Math.max(1,Number(self.navigator?.hardwareConcurrency||1));
+  const isolated=Boolean(self.crossOriginIsolated);
+  const requestedThreads=Math.max(1,Math.min(4,Math.floor(hardwareConcurrency/2)||1));
+  const wasmThreads=isolated?requestedThreads:1;
+  const wasm=hf.env.backends?.onnx?.wasm||null;
+  if(wasm){
+    wasm.wasmPaths='/app/vendor/transformers/wasm/';
+    wasm.numThreads=wasmThreads;
+    wasm.simd=true;
+  }
+  return{
+    crossOriginIsolated:isolated,
+    hardwareConcurrency,
+    wasmThreads,
+    wasmSimd:Boolean(wasm?.simd),
+    workerInference:true,
+    threadedWasmEligible:Boolean(isolated&&wasmThreads>1)
+  };
+}
 async function backendProfile(spec){
   if(spec.device!=='webgpu')return{backend:'wasm',gpu:null};
   if(!self.navigator?.gpu?.requestAdapter)throw new Error('WebGPU is unavailable in this worker.');
@@ -32,14 +52,43 @@ async function backendProfile(spec){
   const info=adapter.info||{};
   return{backend:'webgpu',gpu:{available:true,shaderF16:Boolean(adapter.features?.has?.('shader-f16')),vendor:clean(info.vendor||'',120),architecture:clean(info.architecture||'',120),device:clean(info.device||'',120),description:clean(info.description||'',180),maxBufferSize:Number(adapter.limits?.maxBufferSize||0),maxStorageBufferBindingSize:Number(adapter.limits?.maxStorageBufferBindingSize||0)}};
 }
-async function configureRuntime(hf,cache,spec){hf.env.allowLocalModels=true;hf.env.allowRemoteModels=false;hf.env.useBrowserCache=false;hf.env.useCustomCache=true;hf.env.customCache=cacheAdapter(cache,spec);if(hf.env.backends?.onnx?.wasm)hf.env.backends.onnx.wasm.wasmPaths='/app/vendor/transformers/wasm/'}
+async function configureRuntime(hf,cache,spec){
+  hf.env.allowLocalModels=true;
+  hf.env.allowRemoteModels=false;
+  hf.env.useBrowserCache=false;
+  hf.env.useCustomCache=true;
+  hf.env.customCache=cacheAdapter(cache,spec);
+  return runtimeProfile(hf);
+}
+const promptTokenCount=inputs=>Number(inputs?.input_ids?.dims?.at?.(-1)||inputs?.input_ids?.tolist?.()?.[0]?.length||0);
+const generatedIds=(sequences,count)=>{try{return sequences?.tolist?.()?.[0]?.slice(count)||[]}catch{return[]}};
+function makeStreamer(id,requested,timing){if(!hfRuntime?.TextStreamer||!tokenizer)return null;return new hfRuntime.TextStreamer(tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:text=>{const value=clean(text,12000);if(!value)return;timing.decoded+=value;if(requested)post(id,'token',{token:{text:value,index:timing.index++}})},token_callback_function:tokens=>{if(!timing.firstTokenAt)timing.firstTokenAt=now();timing.generatedTokens+=Math.max(1,tokens?.length||1)}})}
+async function warmBenchmark(id,started,profile){
+  const benchmarkStarted=now();
+  phase(id,'benchmarking-model',started,{model:loaded?.id||'',backend:profile.backend,targetTokens:10});
+  const inputs=tokenizer('Civweave local inference benchmark');
+  const promptTokens=promptTokenCount(inputs);
+  const timing={firstTokenAt:0,generatedTokens:0,index:0,decoded:''};
+  const streamer=makeStreamer(id,false,timing);
+  const options={...inputs,max_new_tokens:10,min_new_tokens:10,do_sample:false,use_cache:true,return_dict_in_generate:true};
+  if(streamer)options.streamer=streamer;
+  const output=await model.generate(options);
+  const completed=now(),ids=generatedIds(output?.sequences,promptTokens),tokens=ids.length||timing.generatedTokens||10;
+  const benchmarkMs=Math.max(1,Math.round(completed-benchmarkStarted));
+  const benchmarkTtftMs=timing.firstTokenAt?Math.round(timing.firstTokenAt-benchmarkStarted):null;
+  const benchmarkDecodeMs=Math.max(1,completed-(timing.firstTokenAt||benchmarkStarted));
+  const benchmarkTokensPerSecond=Number((tokens/(benchmarkDecodeMs/1000)).toFixed(2));
+  return{benchmarkMs,benchmarkTtftMs,benchmarkTokens:tokens,benchmarkTokensPerSecond};
+}
 async function ensure(spec,id){
   const key=`${spec.id}:${spec.device||'wasm'}:${spec.dtype||''}`;
-  if(loaded?.key===key&&tokenizer&&model)return{coldStart:false,coldStartMs:0,tokenizerLoadMs:0,modelLoadMs:0,warmupMs:0,backend:loaded.backend,gpu:loaded.gpu};
+  if(loaded?.key===key&&tokenizer&&model)return{coldStart:false,coldStartMs:0,tokenizerLoadMs:0,modelLoadMs:0,warmupMs:0,backend:loaded.backend,gpu:loaded.gpu,...loaded.runtime,...loaded.benchmark};
   if(loading)return loading;
   loading=(async()=>{
     const started=now();phase(id,'loading-runtime',started,{model:spec.id});
-    const hf=hfRuntime||(hfRuntime=await import(TRANSFORMERS)),cache=await caches.open(CACHE);await configureRuntime(hf,cache,spec);
+    const hf=hfRuntime||(hfRuntime=await import(TRANSFORMERS)),cache=await caches.open(CACHE);
+    const runtime=await configureRuntime(hf,cache,spec);
+    phase(id,'runtime-profile',started,{model:spec.id,...runtime});
     phase(id,'checking-backend',started,{model:spec.id,requestedBackend:spec.device||'wasm'});const profile=await backendProfile(spec);
     phase(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend,gpu:profile.gpu});const tokenizerStarted=now();
     tokenizer=await hf.AutoTokenizer.from_pretrained(spec.repo,{revision:spec.revision,progress_callback:p=>phase(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend,...p})});
@@ -48,17 +97,19 @@ async function ensure(spec,id){
     model=await hf.AutoModelForCausalLM.from_pretrained(spec.repo,{revision:spec.revision,device:spec.device||profile.backend,dtype:spec.dtype,progress_callback:p=>phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,...p})});
     const modelLoadMs=Math.round(now()-modelStarted);
     phase(id,'warming-model',started,{model:spec.id,backend:profile.backend});const warmStarted=now();
-    await model.generate({...tokenizer('a'),max_new_tokens:1,do_sample:false});
-    const warmupMs=Math.round(now()-warmStarted),coldStartMs=Math.round(now()-started);
-    loaded={key,id:spec.id,repo:spec.repo,revision:spec.revision,backend:profile.backend,dtype:spec.dtype,gpu:profile.gpu};
-    const metrics={coldStart:true,coldStartMs,tokenizerLoadMs,modelLoadMs,warmupMs,backend:profile.backend,gpu:profile.gpu};phase(id,'model-ready',started,{model:spec.id,...metrics});return metrics;
+    await model.generate({...tokenizer('a'),max_new_tokens:1,do_sample:false,use_cache:true});
+    const warmupMs=Math.round(now()-warmStarted);
+    loaded={key,id:spec.id,repo:spec.repo,revision:spec.revision,backend:profile.backend,dtype:spec.dtype,gpu:profile.gpu,runtime,benchmark:null};
+    const benchmark=await warmBenchmark(id,started,profile);
+    loaded.benchmark=benchmark;
+    const coldStartMs=Math.round(now()-started);
+    const metrics={coldStart:true,coldStartMs,tokenizerLoadMs,modelLoadMs,warmupMs,backend:profile.backend,gpu:profile.gpu,...runtime,...benchmark};
+    phase(id,'model-ready',started,{model:spec.id,...metrics});
+    return metrics;
   })().catch(error=>{try{model?.dispose?.()}catch{}tokenizer=null;model=null;loaded=null;throw error}).finally(()=>{loading=null});
   return loading;
 }
 function parseJsonLoose(text){const source=clean(text).replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();for(let start=0;start<source.length;start++){if(source[start]!=='{'&&source[start]!=='[')continue;const open=source[start],close=open==='{'?'}':']';let depth=0,quoted=false,escaped=false;for(let i=start;i<source.length;i++){const c=source[i];if(quoted){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c==='"')quoted=false;continue}if(c==='"'){quoted=true;continue}if(c===open)depth++;else if(c===close&&--depth===0){try{return JSON.parse(source.slice(start,i+1))}catch{break}}}}return null}
-const promptTokenCount=inputs=>Number(inputs?.input_ids?.dims?.at?.(-1)||inputs?.input_ids?.tolist?.()?.[0]?.length||0);
-const generatedIds=(sequences,count)=>{try{return sequences?.tolist?.()?.[0]?.slice(count)||[]}catch{return[]}};
-function makeStreamer(id,requested,timing){if(!hfRuntime?.TextStreamer||!tokenizer)return null;return new hfRuntime.TextStreamer(tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:text=>{const value=clean(text,12000);if(!value)return;timing.decoded+=value;if(requested)post(id,'token',{token:{text:value,index:timing.index++}})},token_callback_function:tokens=>{if(!timing.firstTokenAt)timing.firstTokenAt=now();timing.generatedTokens+=Math.max(1,tokens?.length||1)}})}
 async function generate(message,id){
   const spec=message.spec,requestStarted=now(),load=await ensure(spec,id);
   phase(id,'preparing-prompt',requestStarted,{model:spec.id,backend:load.backend,thinking:Boolean(message.thinking)});const prepStarted=now();
@@ -67,10 +118,10 @@ async function generate(message,id){
   if(window&&promptTokens+maxNewTokens>window){const error=new Error(`Prompt is ${promptTokens.toLocaleString()} tokens and asks for ${maxNewTokens.toLocaleString()} output tokens, beyond ${spec.label}'s ${window.toLocaleString()}-token model window.`);error.code='LOCAL_MODEL_CONTEXT_EXCEEDED';throw error}
   if(working&&promptTokens>working)phase(id,'context-warning',requestStarted,{model:spec.id,promptTokens,workingContextTokens:working,contextWindowTokens:window});
   const timing={firstTokenAt:0,generatedTokens:0,index:0,decoded:''},generationStarted=now(),streamer=makeStreamer(id,Boolean(message.stream),timing),temperature=Math.max(.01,Math.min(2,Number(message.temperature??.7)));
-  phase(id,'generating',requestStarted,{model:spec.id,backend:load.backend,streaming:Boolean(message.stream),thinking:Boolean(message.thinking),promptTokens,maxNewTokens,contextWindowTokens:window,workingContextTokens:working});
-  const options={...inputs,max_new_tokens:maxNewTokens,do_sample:true,temperature,top_k:Number(spec.generation?.topK||20),return_dict_in_generate:true};if(streamer)options.streamer=streamer;
+  phase(id,'generating',requestStarted,{model:spec.id,backend:load.backend,streaming:Boolean(message.stream),thinking:Boolean(message.thinking),promptTokens,maxNewTokens,contextWindowTokens:window,workingContextTokens:working,wasmThreads:load.wasmThreads,crossOriginIsolated:load.crossOriginIsolated,wasmSimd:load.wasmSimd});
+  const options={...inputs,max_new_tokens:maxNewTokens,do_sample:true,temperature,top_k:Number(spec.generation?.topK||20),use_cache:true,return_dict_in_generate:true};if(streamer)options.streamer=streamer;
   const output=await model.generate(options),completed=now(),ids=generatedIds(output?.sequences,promptTokens);let text='';try{text=clean(tokenizer.decode(ids,{skip_special_tokens:true})).trim()}catch{}if(!text)text=clean(timing.decoded).trim();
   const tokenCount=ids.length||timing.generatedTokens,generationMs=Math.round(completed-generationStarted),ttftMs=timing.firstTokenAt?Math.round(timing.firstTokenAt-generationStarted):null,decodeMs=Math.max(1,completed-(timing.firstTokenAt||generationStarted)),tokensPerSecond=tokenCount?Number((tokenCount/(decodeMs/1000)).toFixed(2)):0;
-  return{text,json:parseJsonLoose(text),model:{id:spec.id,repo:spec.repo,revision:spec.revision},backend:load.backend,streamed:Boolean(message.stream&&streamer),streamRequested:Boolean(message.stream),metrics:{...load,promptPrepareMs,promptTokens,contextWindowTokens:window,workingContextTokens:working,maxNewTokens,thinking:Boolean(message.thinking),generationMs,ttftMs,generatedTokens:tokenCount,tokensPerSecond,totalMs:Math.round(completed-requestStarted)}};
+  return{text,json:parseJsonLoose(text),model:{id:spec.id,repo:spec.repo,revision:spec.revision},backend:load.backend,streamed:Boolean(message.stream&&streamer),streamRequested:Boolean(message.stream),metrics:{...load,promptPrepareMs,promptTokens,contextWindowTokens:window,workingContextTokens:working,maxNewTokens,thinking:Boolean(message.thinking),generationMs,ttftMs,prefillAndFirstTokenMs:ttftMs,decodeMs:Math.round(decodeMs),generatedTokens:tokenCount,tokensPerSecond,totalMs:Math.round(completed-requestStarted),kvCache:true}};
 }
 self.addEventListener('message',async event=>{const message=event.data||{},id=message.id;if(!id)return;try{if(message.type==='shutdown'){try{model?.dispose?.()}catch{}tokenizer=null;model=null;loaded=null;post(id,'done',{result:{shutdown:true}});return}if(message.type!=='generate')throw new Error(`Unsupported local-model worker request: ${message.type}`);post(id,'done',{result:await generate(message,id)})}catch(error){post(id,'error',{error:{message:friendlyError(error,message.spec,error?.code==='LOCAL_MODEL_CONTEXT_EXCEEDED'?'context check':'inference'),name:error?.name||'Error',code:error?.code||'LOCAL_MODEL_FAILED',stack:clean(error?.stack,4000)}})}});
