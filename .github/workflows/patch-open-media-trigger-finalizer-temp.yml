@@ -1,0 +1,58 @@
+name: Patch Open Media Trigger Finalizer Temp
+
+on:
+  push:
+    branches:
+      - agent/open-learning-media-harvest-v1
+    paths:
+      - .github/workflows/patch-open-media-trigger-finalizer-temp.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/open-learning-media-harvest-v1
+          fetch-depth: 0
+
+      - name: Repair reproducible harvester trigger path
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('scripts/finalize-open-learning-media-launch-v1.py')
+          text=path.read_text()
+          old='.open-learning-media-harvest-trigger'
+          new='ops/triggers/open-learning-media-harvest.trigger'
+          if old in text:
+              text=text.replace(old,new)
+          if old in text:
+              raise SystemExit('legacy root trigger remains in launch finalizer')
+          if new not in text:
+              raise SystemExit('ops-scoped trigger is missing from launch finalizer')
+          path.write_text(text)
+          PY
+
+      - name: Verify hygiene and service contracts
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/finalize-open-learning-media-launch-v1.py
+          node scripts/verify-root-hygiene.mjs
+          node scripts/test-open-learning-media-runtime-v1.mjs
+          node scripts/test-video-learning-contract-v1.mjs
+          python scripts/test-open-learning-media-harvest-v1.py
+
+      - name: Commit finalizer repair only
+        run: |
+          set -euo pipefail
+          git restore --source=HEAD -- .github/workflows
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add scripts/finalize-open-learning-media-launch-v1.py
+          git commit -m 'Keep Open Media harvest trigger out of repository root'
+          git push origin HEAD:agent/open-learning-media-harvest-v1
