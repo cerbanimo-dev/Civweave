@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v1",
-  "built_at": "2026-08-10T02:22:16Z",
+  "built_at": "2026-08-10T07:29:22Z",
   "before": 332,
-  "after": 75,
-  "rejected": 257,
+  "after": 76,
+  "rejected": 256,
   "topics": {
     "vibe-coding": {
       "name": "Vibe Coding",
@@ -29,22 +29,22 @@
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
-      "records": 12,
-      "mesh_redistributable": 10,
+      "records": 13,
+      "mesh_redistributable": 12,
       "providers": {
         "peertube": 8,
-        "internet-archive": 3,
+        "internet-archive": 4,
         "wikimedia-commons": 1
       },
       "top_titles": [
         "Evals Are Broken, Use Them Anyway — Ara Khan, Cline",
         "AI Ppt Vdo",
         "Effective prompt engineering for Python programmers",
-        "Machine Learning nella Scuola: Concetti Base e Applicazioni",
         "Language Tools For Creators by Paco Xander Nathan",
+        "Machine Learning nella Scuola: Concetti Base e Applicazioni",
         "Stop AI Agent Hallucinations: 5 Techniques + Production Patterns - Elizabeth Fuentes, AWS",
         "Il Prompt Engineering",
-        "This is a story of the prompt design to generate an antifascist aesthetics logo"
+        "Generating novel images using CLIP in Python"
       ]
     },
     "pseudocoding": {
@@ -71,20 +71,20 @@
     "critical-thinking": {
       "name": "Critical Thinking",
       "school_slug": "philosophy-and-religion",
-      "records": 13,
-      "mesh_redistributable": 13,
+      "records": 12,
+      "mesh_redistributable": 12,
       "providers": {
-        "internet-archive": 6,
+        "internet-archive": 5,
         "wikimedia-commons": 7
       },
       "top_titles": [
         "BREAKING: Drones just struck IDF convoy carrying Netanyahu…ENTIRE ISRAEL IN SHOCK - OPTM",
         "BREAKING: Netanyahu FLEE Tel Aviv Hours After MASKED IDF Soldiers Attack Gov’t Office",
-        "DOUGLAS MACGREGOR: Netanyahu Is Facing a Test Nobody Saw Coming...End of Israel!",
-        "Trump Just Received Terrible News! Washington Can’t Believe What Iran Just Did – Brilliant Move!",
+        "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM",
         "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
         "Berpikir kritis seperti mengupas bawang",
+        "Orwellian Thought Crime - The UK and Free Speech | Bob | Speakers Corner",
         "The Truth About the Murder of Mary Phagan - Jake Shields Interview - FightBack Podcast"
       ]
     },
@@ -92,7 +92,7 @@
       "name": "Logical Frameworks",
       "school_slug": "philosophy-and-religion",
       "records": 28,
-      "mesh_redistributable": 28,
+      "mesh_redistributable": 27,
       "providers": {
         "internet-archive": 14,
         "wikimedia-commons": 9,
@@ -215,21 +215,9 @@
     },
     {
       "provider": "peertube",
-      "title": "15. Mark Burgman - University of Hawaiʻi",
-      "original_topic": "critical-thinking",
-      "matched_query": "evidence reasoning"
-    },
-    {
-      "provider": "peertube",
       "title": "A Preliminary User Experience Evaluation Of MISP (Work In Progress) - Borce Stojkovski",
       "original_topic": "critical-thinking",
       "matched_query": "source evaluation"
-    },
-    {
-      "provider": "peertube",
-      "title": "Cambridge Evidence TAP OpenGL interactive visualiser",
-      "original_topic": "critical-thinking",
-      "matched_query": "evidence reasoning"
     },
     {
       "provider": "peertube",
@@ -365,12 +353,6 @@
     },
     {
       "provider": "internet-archive",
-      "title": "Defending our Military",
-      "original_topic": "critical-thinking",
-      "matched_query": "critical thinking"
-    },
-    {
-      "provider": "internet-archive",
       "title": "Interview with Brian Klaas",
       "original_topic": "critical-thinking",
       "matched_query": "critical thinking"
@@ -455,6 +437,12 @@
     },
     {
       "provider": "internet-archive",
+      "title": "MEHDI HASAN: THIS VIDEO HAS GONE VIRAL IN AMERICA!",
+      "original_topic": "critical-thinking",
+      "matched_query": "critical thinking"
+    },
+    {
+      "provider": "internet-archive",
       "title": "Modern Viking Music : Tragedy of a Misunderstood Art",
       "original_topic": "critical-thinking",
       "matched_query": "source evaluation"
@@ -466,10 +454,16 @@
       "matched_query": "argument analysis"
     },
     {
-      "provider": "internet-archive",
-      "title": "Journalist Mark Taylor-Canfield on Norman Goldman Show - Seattle May Day \"Riots\" (Again)",
+      "provider": "peertube",
+      "title": "15. Mark Burgman - University of Hawaiʻi",
       "original_topic": "critical-thinking",
-      "matched_query": "media literacy"
+      "matched_query": "evidence reasoning"
+    },
+    {
+      "provider": "peertube",
+      "title": "Cambridge Evidence TAP OpenGL interactive visualiser",
+      "original_topic": "critical-thinking",
+      "matched_query": "evidence reasoning"
     },
     {
       "provider": "peertube",
@@ -590,6 +584,12 @@
       "title": "Complexity Science- 4 Systems Theory",
       "original_topic": "logical-frameworks",
       "matched_query": "systems thinking"
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Internal Market Council, 1957th meeting",
+      "original_topic": "logical-frameworks",
+      "matched_query": "decision framework"
     }
   ]
 }

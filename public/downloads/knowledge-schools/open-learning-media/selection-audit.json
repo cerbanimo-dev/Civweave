@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-selection-audit.v1",
-  "built_at": "2026-08-10T02:22:16Z",
+  "built_at": "2026-08-10T07:29:22Z",
   "before": 54,
   "after": 32,
   "rejected": 22,
@@ -82,36 +82,27 @@
       "mesh_redistributable": 9,
       "providers": {
         "wikimedia-commons": 4,
-        "internet-archive": 3,
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 3
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "A Communist's Guide to Logical Fallacies",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 8- Emergence",
         "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "The Open Decision Framework How to make everybody happy",
         "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
-        "Systems Thinking 11- Homeostasis"
+        "Systems Thinking 11- Homeostasis",
+        "20220509 ST ON Intention Attention Design Systems Changes Learning Khan"
       ]
     }
   },
   "rejected_samples": [
     {
       "provider": "internet-archive",
-      "title": "What is Gaslighting?",
-      "source_url": "https://archive.org/details/what-is-gaslighting-11-20-2024",
-      "reasons": {
-        "critical-thinking": "description-only-without-instructional-title",
-        "logical-frameworks": "description-only-without-instructional-title"
-      }
-    },
-    {
-      "provider": "internet-archive",
-      "title": "DOUGLAS MACGREGOR: Netanyahu Is Facing a Test Nobody Saw Coming...End of Israel!",
-      "source_url": "https://archive.org/details/youtube-TbAoYS16JMA",
+      "title": "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM",
+      "source_url": "https://archive.org/details/youtube-nONZnnwomx8",
       "reasons": {
         "critical-thinking": "description-only-without-instructional-title"
       }
@@ -166,8 +157,8 @@
     },
     {
       "provider": "internet-archive",
-      "title": "Bulletproof Publishers - Season 1 Episode 3",
-      "source_url": "https://archive.org/details/season-1-episode-3",
+      "title": "What is Gaslighting?",
+      "source_url": "https://archive.org/details/what-is-gaslighting-11-20-2024",
       "reasons": {
         "logical-frameworks": "description-only-without-instructional-title"
       }
@@ -216,6 +207,14 @@
       "provider": "internet-archive",
       "title": "AI Ppt Vdo",
       "source_url": "https://archive.org/details/ai-ppt-vdowww.cbitss.inartificial-intelligence-course-in-chandigarh",
+      "reasons": {
+        "prompt-engineering": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Generating novel images using CLIP in Python",
+      "source_url": "https://archive.org/details/generating-novel-images-using-clip-in-python",
       "reasons": {
         "prompt-engineering": "description-only-without-instructional-title"
       }

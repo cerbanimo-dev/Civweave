@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-08-10T02:22:16Z",
+  "built_at": "2026-08-10T07:29:22Z",
   "records": 32,
   "mesh_redistributable": 31,
   "download_candidates": 70,
@@ -99,31 +99,31 @@
       "mesh_redistributable": 9,
       "providers": {
         "wikimedia-commons": 4,
-        "internet-archive": 3,
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 3
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "A Communist's Guide to Logical Fallacies",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 8- Emergence",
         "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "The Open Decision Framework How to make everybody happy",
         "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
-        "Systems Thinking 11- Homeostasis"
+        "Systems Thinking 11- Homeostasis",
+        "20220509 ST ON Intention Attention Design Systems Changes Learning Khan"
       ]
     }
   },
   "failures": 0,
   "records_before_relevance_gate": 332,
-  "rejected_by_relevance_gate": 257,
+  "rejected_by_relevance_gate": 256,
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v1",
     "policy": "Provider search is discovery only; title/description must independently meet a topic-specific deterministic threshold."
   },
-  "records_before_pedagogy_gate": 75,
-  "rejected_by_pedagogy_gate": 21,
+  "records_before_pedagogy_gate": 76,
+  "rejected_by_pedagogy_gate": 22,
   "pedagogy_gate": {
     "schema": "civweave.open-learning-media-pedagogy-gate.v1",
     "policy": "Require a strong conceptual anchor in the title, or a strong description anchor plus explicit educational intent; reject clickbait description-only matches."

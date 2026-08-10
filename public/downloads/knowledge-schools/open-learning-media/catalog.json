@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-catalog.v1",
-  "built_at": "2026-08-10T02:22:16Z",
+  "built_at": "2026-08-10T07:29:22Z",
   "record_count": 32,
   "mesh_redistributable_count": 31,
   "download_candidate_count": 70,
@@ -99,19 +99,19 @@
       "mesh_redistributable": 9,
       "providers": {
         "wikimedia-commons": 4,
-        "internet-archive": 3,
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 3
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
-        "A Communist's Guide to Logical Fallacies",
         "Systems Thinking in Large-Scale Modeling with Xin Yao - OOP Special",
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 8- Emergence",
         "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
         "The Open Decision Framework How to make everybody happy",
         "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
-        "Systems Thinking 11- Homeostasis"
+        "Systems Thinking 11- Homeostasis",
+        "20220509 ST ON Intention Attention Design Systems Changes Learning Khan"
       ]
     }
   },
@@ -729,104 +729,6 @@
           ],
           "strong_description_matches": [
             "\\bsystems thinking\\b"
-          ],
-          "educational_intent": true,
-          "clickbait_title": false,
-          "pedagogy_score": 44
-        }
-      },
-      "selection": {
-        "logical-frameworks": {
-          "reason": "strong-topic-anchor-in-title",
-          "pedagogy_score": 44
-        }
-      }
-    },
-    {
-      "schema": "civweave.open-learning-media-node.v1",
-      "provider": "internet-archive",
-      "provider_id": "youtube-hmAFk-I7-uQ",
-      "topic_slug": "logical-frameworks",
-      "topic_name": "Logical Frameworks",
-      "school_slug": "philosophy-and-religion",
-      "concepts": [
-        "formal logic",
-        "logical reasoning",
-        "decision frameworks",
-        "systems thinking"
-      ],
-      "matched_query": "logical fallacies",
-      "title": "A Communist's Guide to Logical Fallacies",
-      "description": "Unofficial /leftypol/ Discord: https://discord.gg/dGCZtQC Learn some more logical fallacies here: https://yourlogicalfallacyis.com/ Source: https://www.youtube.com/watch?v=hmAFk-I7-uQ Uploader: DANOV",
-      "creator": "DANOV",
-      "language": null,
-      "duration_seconds": 0,
-      "source_url": "https://archive.org/details/youtube-hmAFk-I7-uQ",
-      "source_host": "archive.org",
-      "license": {
-        "spdx": "CC-BY",
-        "label": "CC-BY",
-        "url": "https://creativecommons.org/licenses/by/3.0/",
-        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/3.0/",
-        "commercial_use": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "cache_policy": "MESH_REDISTRIBUTABLE",
-      "mesh_redistributable": true,
-      "download_enabled": true,
-      "files": [
-        {
-          "url": "https://archive.org/download/youtube-hmAFk-I7-uQ/A_Communist_s_Guide_to_Logical_Fallacies-hmAFk-I7-uQ.mp4",
-          "bytes": 14186623,
-          "provider_sha1": "3ec788c6d564548108353167dcafa28940892a51",
-          "provider_md5": "82f18892cbe078abc052c04441a04a63",
-          "format": "MPEG4",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/youtube-hmAFk-I7-uQ/A_Communist_s_Guide_to_Logical_Fallacies-hmAFk-I7-uQ.ogv",
-          "bytes": 30274835,
-          "provider_sha1": "262c97a1f2739e3bf42798d09cf085ec873ef2d0",
-          "provider_md5": "6ae2e66f13c02e46c3959a17a6956e36",
-          "format": "Ogg Video",
-          "role": "derivative"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-on-cache",
-      "attribution": {
-        "creator": "DANOV",
-        "source_title": "A Communist's Guide to Logical Fallacies",
-        "source_url": "https://archive.org/details/youtube-hmAFk-I7-uQ",
-        "license": "CC-BY",
-        "license_url": "https://creativecommons.org/licenses/by/3.0/"
-      },
-      "topic_matches": [
-        {
-          "topic_slug": "logical-frameworks",
-          "school_slug": "philosophy-and-religion",
-          "selection_reason": "strong-topic-anchor-in-title",
-          "pedagogy_score": 44,
-          "relevance_score": 10
-        }
-      ],
-      "quality_score": 85,
-      "relevance": {
-        "logical-frameworks": {
-          "score": 10,
-          "evidence": [
-            "logical fallacies"
-          ]
-        }
-      },
-      "pedagogy": {
-        "logical-frameworks": {
-          "strong_title_matches": [
-            "\\blogical fallac(?:y|ies)\\b"
-          ],
-          "strong_description_matches": [
-            "\\blogical fallac(?:y|ies)\\b"
           ],
           "educational_intent": true,
           "clickbait_title": false,
@@ -1550,6 +1452,102 @@
         "logical-frameworks": {
           "reason": "strong-topic-anchor-in-title",
           "pedagogy_score": 31
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
+      "provider": "internet-archive",
+      "provider_id": "20220509-st-on-intention-attention-design-systems-changes-learning-khan",
+      "topic_slug": "logical-frameworks",
+      "topic_name": "Logical Frameworks",
+      "school_slug": "philosophy-and-religion",
+      "concepts": [
+        "formal logic",
+        "logical reasoning",
+        "decision frameworks",
+        "systems thinking"
+      ],
+      "matched_query": "systems thinking",
+      "title": "20220509 ST ON Intention Attention Design Systems Changes Learning Khan",
+      "description": "Systems Changes Learning (SCL) is a body of work that offers an updated way of thinking about and responding to change. The three premises of SCL dramatically reposition how we look and understand changes: as rhythms over time that might shift, in accord with the natures of the systems involved. What could we learn from mapping the SCL premises to designing? This presentation will explore the potential influence that Systems Changes Learning could have on designing and designers, in philosophies, in methods, and in practices. As a core member of the SCL Circle, Zaid will extend the framing of “humility” - from his Major Research Project “ Responding to Complexity with Humility ” (2020) - as a lens through which to examine and explore new modes of designing. An overarching theme that Zaid examines critically is designing with a bias-towards-(intended)-action, as compared to SCL’s bias-towards-attention. Rather than presuming “interventions” pursuing an idealized end, Zaid wonders what designing would be like if attention was drawn to the nature of rhythmic shifts over time. Could we recontextualize the role and value of designers with our communities by \"humbling designing\", or \"designing with humility\"? Taken even further, could this recasting of designing offer opportunities to reconnect the humble features of mainstream philosophies, or perhaps spiritual traditions with designing? In parallel with the SCL pursuit of critically rethinking systems thinking, is there an opportunity to rethink designing? This session was originally announced at https://wiki.st-on.org/2022-05-09",
+      "creator": "David Ing",
+      "language": "eng",
+      "duration_seconds": 0,
+      "source_url": "https://archive.org/details/20220509-st-on-intention-attention-design-systems-changes-learning-khan",
+      "source_host": "archive.org",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "CC-BY-SA",
+        "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by-sa/4.0/",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://archive.org/download/20220509-st-on-intention-attention-design-systems-changes-learning-khan/20220509_ST-ON_IntentionAttentionDesignSystemsChangesLearning_Khan.m4v",
+          "bytes": 753235661,
+          "provider_sha1": "24149a7f0a66a4096e8f52db02c7eda36a3f80ab",
+          "provider_md5": "8d480fce22520a7b384d5882263a0759",
+          "format": "MPEG4",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/20220509-st-on-intention-attention-design-systems-changes-learning-khan/20220509_ST-ON_IntentionAttentionDesignSystemsChangesLearning_Khan.mp4",
+          "bytes": 596647972,
+          "provider_sha1": "e8db456fbf2abb9819f521961cc50f04c33e7980",
+          "provider_md5": "e285c287e2f0c13a03a151094f821ffc",
+          "format": "h.264",
+          "role": "derivative"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "David Ing",
+        "source_title": "20220509 ST ON Intention Attention Design Systems Changes Learning Khan",
+        "source_url": "https://archive.org/details/20220509-st-on-intention-attention-design-systems-changes-learning-khan",
+        "license": "CC-BY-SA",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "logical-frameworks",
+          "school_slug": "philosophy-and-religion",
+          "selection_reason": "strong-description-anchor-plus-instructional-title",
+          "pedagogy_score": 24,
+          "relevance_score": 9
+        }
+      ],
+      "quality_score": 84,
+      "relevance": {
+        "logical-frameworks": {
+          "score": 9,
+          "evidence": [
+            "systems thinking"
+          ]
+        }
+      },
+      "pedagogy": {
+        "logical-frameworks": {
+          "strong_title_matches": [],
+          "strong_description_matches": [
+            "\\bsystems thinking\\b"
+          ],
+          "educational_intent": true,
+          "clickbait_title": false,
+          "pedagogy_score": 24
+        }
+      },
+      "selection": {
+        "logical-frameworks": {
+          "reason": "strong-description-anchor-plus-instructional-title",
+          "pedagogy_score": 24
         }
       }
     },
@@ -3233,9 +3231,9 @@
     }
   ],
   "record_count_before_relevance_gate": 332,
-  "rejected_by_relevance_gate": 257,
-  "record_count_before_pedagogy_gate": 75,
-  "rejected_by_pedagogy_gate": 21,
+  "rejected_by_relevance_gate": 256,
+  "record_count_before_pedagogy_gate": 76,
+  "rejected_by_pedagogy_gate": 22,
   "record_count_before_selection_gate": 54,
   "rejected_by_selection_gate": 22
 }
