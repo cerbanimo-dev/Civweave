@@ -1,1 +1,1 @@
-prelaunch-repo-discipline-v1
+prelaunch-repo-discipline-v2
