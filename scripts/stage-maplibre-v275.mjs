@@ -10,7 +10,7 @@ const ROOT=resolve(HERE,'..');
 const ASSETS=[
   {path:'public/app/vendor/maplibre-v5.13.0/maplibre-gl.js',url:'https://unpkg.com/maplibre-gl@5.13.0/dist/maplibre-gl.js',minBytes:500000},
   {path:'public/app/vendor/maplibre-v5.13.0/maplibre-gl.css',url:'https://unpkg.com/maplibre-gl@5.13.0/dist/maplibre-gl.css',minBytes:20000},
-  {path:'public/app/vendor/pmtiles-v4.4.1/pmtiles.js',url:'https://unpkg.com/pmtiles@4.4.1/dist/pmtiles.js',minBytes:50000}
+  {path:'public/app/vendor/pmtiles-v4.4.1/pmtiles.js',url:'https://unpkg.com/pmtiles@4.4.1/dist/pmtiles.js',minBytes:15000}
 ];
 async function valid(path,minBytes){if(!existsSync(path))return false;try{return(await readFile(path)).byteLength>=minBytes}catch{return false}}
 async function fetchAsset(asset){
