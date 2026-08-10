@@ -45,6 +45,8 @@ assert.match(integrityWorker,/crypto\.subtle\.digest\('SHA-256'/);
 assert.match(integrityWorker,/STAGING_CACHE/);
 assert.match(integrityWorker,/lastKnownGoodCache/);
 assert.match(integrityWorker,/Integrity mismatch/);
+assert.match(integrityWorker,/findCached = async function findCachedV281/);
+assert.match(integrityWorker,/current-caches-then-last-known-good-shell/);
 assert.match(storageGuard,/storage\?\.persist\?\./);
 assert.match(storageGuard,/storage\?\.estimate\?\./);
 assert.match(storageGuard,/requiredFreeBytes/);
@@ -82,5 +84,6 @@ console.log(JSON.stringify({
   campusEstimatedBytes:offline.preflight.estimatedBytes,
   campusRequiredFreeBytes:offline.preflight.requiredFreeBytes,
   storageGuard:true,
-  lastKnownGoodShell:true
+  lastKnownGoodShell:true,
+  deterministicFallback:true
 },null,2));
