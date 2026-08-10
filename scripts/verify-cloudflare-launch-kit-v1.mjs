@@ -37,6 +37,7 @@ const nodeWrangler = parseJsonc(nodeWranglerText);
 assert.equal(topology.schema, 'civweave.launch-topology.v1');
 assert.equal(topology.platformFeeBps, 1500, 'Cerbanimo launch fee must be 15%');
 assert.equal(topology.backbone.worker, 'civweave-core');
+assert.equal(topology.backbone.storage.signingIdentity, 'cloudflare-durable-object');
 assert.equal(topology.cloudNodeFabric.worker, 'civweave-node-cloud');
 assert.equal(topology.cloudNodeFabric.containsStripePlatformSecret, false);
 assert.equal(topology.cloudNodeFabric.containsCerbanimoSigningPrivateKey, false);
@@ -50,6 +51,8 @@ assert.equal(coreWrangler.name, 'civweave-core');
 assert.equal(coreWrangler.main, 'src/index.mjs');
 assert.ok(coreWrangler.d1_databases?.some(binding => binding.binding === 'DB' && binding.database_name === 'civweave-core'));
 assert.ok(coreWrangler.r2_buckets?.some(binding => binding.binding === 'PACKAGES' && binding.bucket_name === 'civweave-distribution'));
+assert.ok(coreWrangler.durable_objects?.bindings?.some(binding => binding.name === 'IDENTITY' && binding.class_name === 'CivweaveCoreIdentity'));
+assert.ok(coreWrangler.migrations?.some(item => item.new_sqlite_classes?.includes('CivweaveCoreIdentity')));
 assert.equal(coreWrangler.vars.CIVWEAVE_PLATFORM_FEE_BPS, '1500');
 assert.equal(coreWrangler.vars.CIVWEAVE_MONEY_LIVE_ENABLED, 'false');
 
@@ -65,6 +68,9 @@ for (const forbidden of ['STRIPE_SECRET_KEY', 'STRIPE_CONNECT_WEBHOOK_SECRET', '
 }
 
 assert.ok(coreSource.includes('/api/stripe/webhook'));
+assert.ok(coreSource.includes('/api/trust'));
+assert.ok(coreSource.includes('export class CivweaveCoreIdentity'));
+assert.ok(coreSource.includes("generateKey({ name: 'Ed25519' }"));
 assert.ok(coreSource.includes('verifyStripeWebhook'));
 assert.ok(coreSource.includes('env.DB.prepare'));
 assert.ok(coreSource.includes('env.PACKAGES.get'));
@@ -97,6 +103,7 @@ const nodeModule = await import(new URL('cloudflare/node-cloud/src/index.mjs', r
 const normalized = coreModule.normalizeNodeRecord({ nodeId: 'Seed East', publicOrigin: 'https://seed-east.nodes.commonweave.earth', capabilities: ['relay', 'relay', 'discovery'] });
 assert.equal(normalized.nodeId, 'seed-east');
 assert.deepEqual(normalized.capabilities, ['relay', 'discovery']);
+assert.equal(typeof coreModule.CivweaveCoreIdentity, 'function');
 assert.equal(nodeModule.nodeIdFromHostname('seed-east.nodes.commonweave.earth'), 'seed-east');
 assert.equal(nodeModule.nodeIdFromHostname('nodes.commonweave.earth'), null);
 const cloudManifest = nodeModule.buildCloudNodeManifest('seed-east', { displayName: 'Seed East' });
@@ -111,6 +118,7 @@ console.log(JSON.stringify({
   platformFeeBps: topology.platformFeeBps,
   canonicalPagesPreserved: true,
   coreWorker: coreWrangler.name,
+  persistentCoreTrustRoot: true,
   nodeFabricWorker: nodeWrangler.name,
   wildcardNodeRoute: true,
   durableObjectPerNode: true,
