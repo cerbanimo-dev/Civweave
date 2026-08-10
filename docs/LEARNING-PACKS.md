@@ -96,12 +96,39 @@ The generated pack preserves O*NET's CC BY 4.0 attribution, identifies Civweave'
 
 Occupational task statements remain descriptive reference examples. They are never converted directly into a safe procedure. A selected statement first becomes a guarded, zero-step draft and must be adapted through a task-specific expert pack, current workplace instructions, and any applicable qualification or safety requirements.
 
+## ESCO skill normalization bridge
+
+Run:
+
+```bash
+node scripts/build-esco-crosswalk-v1.mjs
+```
+
+The generated `esco-skill-crosswalk-v1` pack is an optional interoperability layer rather than a replacement skill taxonomy. It gives authored Civweave skill IDs stable links into ESCO while preserving the Civweave IDs already used by tasks, learning units, guides, rewards, and evidence.
+
+The builder queries the official European Commission ESCO Web Services API in English using the API's default latest dataset unless `ESCO_VERSION` is explicitly supplied. ESCO URIs are retained as the external concept identifiers. The artifact records the current ESCO classification release separately from the API selection semantics so a portal release number is never silently treated as an API version token.
+
+Civweave-generated skill mappings follow a strict provenance rule:
+
+- a normalized exact preferred-label match may be accepted automatically;
+- a normalized exact authored-alias match may be accepted automatically at slightly lower confidence;
+- non-exact lexical candidates remain `review` mappings below the canonical threshold;
+- generated skill mappings never claim European Commission, human-review, or U.S. Department of Labor validation.
+
+The same artifact also ingests the European Commission's official O*NET-to-ESCO occupation crosswalk. Official relation types and validation provenance are retained. `related` occupation matches stay review-only; quality-assured exact, narrow, broad, and close mappings may participate in the occupation bridge.
+
+`public/app/shared/skill-crosswalk-v1.mjs` resolves only `accepted` mappings at confidence 0.90 or above by default. Review candidates can be requested explicitly for inspection. The bridge can return a small skill graph, normalize a list of Civweave skill refs, or map an O*NET-SOC occupation to ESCO occupations.
+
+The pack is not auto-staged. If it is installed, Cerbanimo quest inputs and Living School curriculum inputs keep their original `skillRefs` and gain `normalizedSkillRefs` plus compact crosswalk metadata. If it is not installed, both realms continue using their existing Civweave skill IDs without a network request or generation failure.
+
+The bridge uses the same verified learning-pack cache, checksum receipts, install/remove lifecycle, and optional-download controls as every other external pack. The required ESCO attribution statement is retained in the generated artifact.
+
 ## Realm APIs
 
-Cerbanimo exposes `globalThis.CivweaveCerbanimoLearningPacksV1` with `ready`, `catalog`, `status`, `stage`, `remove`, `search`, `find`, `recommendPacks`, `resolve`, `templateToQuest`, `createQuest`, `createRecommendedQuest`, and `laborTaskDraft`.
+Cerbanimo exposes `globalThis.CivweaveCerbanimoLearningPacksV1` with the existing pack APIs plus `skillCrosswalkStatus`, `installSkillCrosswalk`, `removeSkillCrosswalk`, `normalizeSkills`, and `mapOnetOccupation`. Quest inputs are enriched only when accepted crosswalk mappings are already available offline.
 
-Living School exposes `globalThis.CivweaveLivingSchoolLearningPacksV1` with `ready`, `catalog`, `status`, `stage`, `remove`, `search`, `find`, `recommendPacks`, `resolve`, `curriculumInput`, `generateCurriculum`, and `generateRecommendedCurriculum`.
+Living School exposes `globalThis.CivweaveLivingSchoolLearningPacksV1` with the same crosswalk lifecycle and normalization helpers alongside the curriculum APIs. Curriculum inputs are enriched only when accepted crosswalk mappings are already available offline.
 
 ## Next data layers
 
-The contract is intentionally source-neutral. The next useful data layer is an ESCO skill/occupation crosswalk so authored packs, O*NET occupations, Living School competencies, and Cerbanimo task templates can share more normalized skill identifiers. After that, BLS training/outlook metadata, safety references, trade-specific expert packs, and community-authored packs can plug into the same runtime without creating a second task or curriculum engine.
+The next useful labor layer is BLS training, education, wage, and outlook metadata keyed through normalized occupation identities. Safety references, trade-specific expert packs, and community-authored packs can then attach to the same skill/occupation graph without creating a second task or curriculum engine.
