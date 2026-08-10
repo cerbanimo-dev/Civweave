@@ -24,7 +24,7 @@ same(manifestStart.pathname,'/app/installed-entry-v146.html','manifest installed
 same(manifestStart.searchParams.get('installed'),'1','manifest installed authorization');
 check((manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(shortcut=>new URL(shortcut.url,'https://civweave.invalid').pathname==='/app/installed-entry-v146.html'),'Manifest shortcuts no longer enter through the installed boundary.');
 check(installedEntryHtml.includes(`/app/installed-entry-v146.js?v=${version}`),'Installed entry HTML is stale.');
-for(const token of [`const FALLBACK_VERSION='${version}';`,"const LOCAL_ROUTES=Object.freeze({","civweave:'/app/working-campus-v156.html'","'living-school':'/app/cabinets/living-school/index.html'","cerbanimo:'/app/realm-console-v140.html'","fellowfare:'/app/fellowfare-cabinet-v144.html'","anarchadia:'/app/anarchadia-console-v139.html'","fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})","updateViaCache:'none'",'await registration.update()'])check(installedEntryRuntime.includes(token),`Local-first installed entry is missing ${token}`);
+for(const token of [`const FALLBACK_VERSION='${version}';`,"const LOCAL_ROUTES=Object.freeze({","civweave:'/app/working-campus-v156.html'","'living-school':'/app/cabinets/living-school/index.html'","cerbanimo:'/app/realm-console-v140.html'","fellowfare:'/app/fellowfare-cabinet-v144.html'","anarchadia:'/app/anarchadia-console-v139.html'","fetch(`/app/manifest.webmanifest?boot=${Date.now()}`","cache:'no-store'","AbortController","updateViaCache:'none'",'await registration.update()'])check(installedEntryRuntime.includes(token),`Local-first installed entry is missing ${token}`);
 const bootBlock=installedEntryRuntime.match(/function boot\(\)\{[\s\S]*?\n\}/)?.[0]||'';
 check(!bootBlock.includes('await resolveReleaseVersion'),'Installed boot waits on manifest/network release resolution.');
 check(!bootBlock.includes('await refreshWorker'),'Installed boot waits on worker refresh.');
@@ -43,7 +43,7 @@ check(workerWrapper.indexOf('/service-worker-canonical-navigation-v227.js')>work
 check(legacyWorker.includes(`/service-worker-v203.js?v=${version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
 check(codeCoherence.includes("network-first-current-version-cache-legacy-offline-fallback"),'Code coherence policy is stale.');
 check(codeCoherence.includes("'/app/local-ai/bootstrap-v266.js'")&&codeCoherence.includes("'/app/local-ai/settings-panel-v267.js'"),'Critical local-AI executable coherence assets are missing.');
-for(const token of [`const VERSION='${version}';`,"const REVISION='chat-convergence-v250';","const INSTALLER='/app/index.html';",'canonicalSystemCount:5'])check(installBoundary.includes(token),`Install boundary is missing ${token}`);
+for(const token of [`const VERSION='${version}';`,"const REVISION='chat-convergence-v250';","const INSTALLER='/app/index.html';",'canonicalSystemCount:5'])check(installBoundary.includes(token),`Install boundary is missing ${token}.`);
 const versionSelectedCanonicalLoader=source=>/readFile\s*\(\s*path\.join\s*\(\s*root\s*,\s*['"]VERSION['"]/.test(source)&&/path\.join\s*\(\s*root\s*,\s*['"]releases['"]\s*,\s*version\s*,\s*['"]server['"]\s*\)/.test(source);
 check(versionSelectedCanonicalLoader(gatewayEntry),'Stable gateway entry no longer selects VERSION canonical implementation.');
 check(versionSelectedCanonicalLoader(localEntry),'Stable local entry no longer selects VERSION canonical implementation.');
@@ -52,5 +52,5 @@ check(new RegExp(`const\\s+VERSION\\s*=\\s*['"]${version.replaceAll('.','\\.')}[
 check(workingCampus.includes(`Civweave Working Campus · v${version}`)&&workingCampus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
 check(campusLoader.includes(`system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Working Campus route loader version is stale.');
 check(campusPart4.includes(`version:'${version}'`),'Working Campus realm travel version is stale.');
-for(const token of ["manifest.start_url='/app/installed-entry-v146.html?installed=1';","await patch('public/app/system-routes-v227.js'",'worker route contract revision','code-coherence-v288'])check(syncSource.includes(token),`Release synchronizer is missing ${token}`);
+for(const token of ["manifest.start_url='/app/installed-entry-v146.html?installed=1';","await patch('public/app/system-routes-v227.js'",'worker route contract revision','code-coherence-v288'])check(syncSource.includes(token),`Release synchronizer is missing ${token}.`);
 console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,localFirstInstalledLaunch:true,networkBeforeLocalRoute:false,codeCoherence:'v288',offlineRevision:'offline-campus-current-graph-v280',offlinePolicy:'resumable-pause-v280',gatewayStableEntry:true,localStableEntry:true,buildTimeSynchronization:true},null,2));

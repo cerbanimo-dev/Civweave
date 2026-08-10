@@ -35,7 +35,7 @@ for(const token of ["const LOCAL_ROUTES=Object.freeze({","civweave:'/app/working
 assert(!bootBlock.includes('await resolveReleaseVersion'),'Installed boot still waits on a manifest/network version fetch.');
 assert(!bootBlock.includes('await refreshWorker'),'Installed boot still waits on service-worker update work.');
 assert(!bootBlock.includes('await ensureRoutes'),'Installed boot still waits on the route script.');
-assert(installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"),'Explicit update helper lost bounded no-store version resolution.');
+assert(installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`")&&installedEntry.includes("cache:'no-store'")&&installedEntry.includes('AbortController'),'Explicit update helper lost bounded no-store version resolution.');
 assert(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('await registration.update()'),'Explicit update helper lost service-worker refresh capability.');
 assert.equal(new URL(manifest.start_url,'https://civweave.invalid').pathname,'/app/installed-entry-v146.html','PWA manifest no longer launches through the installed bootstrap.');
 assert(installedLaunch.includes("const V282_ENTRY_PATH='/app/installed-entry-v146.html'"),'Worker launch boundary no longer serves the installed bootstrap.');
