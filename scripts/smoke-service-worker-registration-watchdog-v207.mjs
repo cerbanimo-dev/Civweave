@@ -53,7 +53,7 @@ assert(workerWrapperSource.indexOf('service-worker-living-school-cleanroom-v218.
 assert(workerWrapperSource.indexOf('service-worker-core-v208.js')<workerWrapperSource.indexOf('service-worker-installer-state-v280.js'),'Installer state does not load after the retained core.');
 assert(workerWrapperSource.indexOf('service-worker-installer-state-v280.js')<workerWrapperSource.indexOf('service-worker-offline-v211-override.js'),'Offline override does not load after installer state.');
 assert(workerCoreSource.includes("const BUILD = 'lightweight-shell-v208'"),'Verified lightweight worker core is missing.');
-assert(installerStateSource.includes('installer-state-machines-v280')&&installerStateSource.includes('PAUSE_OFFLINE_PACKAGE'),'Resumable installer state machine is incomplete.');
+assert(installerStateSource.includes('installer-state-machines-v280')&&installerStateSource.includes("'/app/installer-state-machine-v280.js'")&&installerStateSource.includes('shellRequired: true'),'Worker-side installer state shell contract is incomplete.');
 assert(offlineOverrideSource.includes("const V211_REVISION = 'offline-campus-current-graph-v280'"),'Current-graph offline retry repair is missing.');
 assert(offlineOverrideSource.includes("const V211_POLICY = 'resumable-pause-v280'"),'Resumable offline policy is missing.');
 assert(offlineOverrideSource.includes('stale-not-rediscovered'),'Current-graph repair does not retire stale package assets.');
