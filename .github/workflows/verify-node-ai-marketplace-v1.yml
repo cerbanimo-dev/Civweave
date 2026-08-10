@@ -17,14 +17,30 @@ on:
       - 'public/app/shared/civweave-node-ai-routing-v1.mjs'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/offline-package-v208.json'
-      - 'public/service-worker-offline-v211-override.js'
       - 'scripts/stage-federation-finder-data-v274.mjs'
       - 'scripts/test-node-ai-*.mjs'
       - '.env.ai-wallet.example'
       - 'config/node-ai-services.example.json'
       - 'docs/NODE-AI-MARKETPLACE-v1.md'
       - 'package.json'
-      - 'server-gateway-v131*.mjs'
+      - 'server/gateway.mjs'
+      - 'releases/**/server/**'
+      - '.github/workflows/verify-node-ai-marketplace-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/node-ai-*.mjs'
+      - 'lib/ai-wallet-*.mjs'
+      - 'public/app/node-ai-*'
+      - 'public/app/federation-finder-*'
+      - 'public/finder/**'
+      - 'public/node-ai/**'
+      - 'public/app/install-boundary-v146.js'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/test-node-ai-*.mjs'
+      - 'package.json'
+      - 'server/gateway.mjs'
+      - 'releases/**/server/**'
       - '.github/workflows/verify-node-ai-marketplace-v1.yml'
   workflow_dispatch:
 
@@ -36,8 +52,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Check node marketplace syntax
@@ -57,9 +73,8 @@ jobs:
           node --check public/app/node-ai-operator-v1.js
           node --check public/app/federation-finder-local-v269.js
           node --check public/app/shared/civweave-node-ai-routing-v1.mjs
-          node --check public/service-worker-offline-v211-override.js
           node --check scripts/stage-federation-finder-data-v274.mjs
-          node --check server-gateway-v131.mjs
+          node scripts/check-canonical-server-syntax.mjs
       - name: Test node marketplace contracts
         run: node --test scripts/test-node-ai-marketplace-v1.mjs scripts/test-node-ai-http-v1.mjs scripts/test-node-ai-routing-v1.mjs scripts/test-node-ai-service-package-v1.mjs scripts/test-node-ai-marketplace-surface-v1.mjs scripts/test-node-ai-fireworks-package-v1.mjs
       - name: Verify canonical bootstrap and offline carriage
@@ -74,4 +89,4 @@ jobs:
           test ! -e lib/ai-wallet-postgres-v1.mjs
           test ! -e db/migrations/001-ai-wallet-ledger.sql
           test ! -e scripts/test-ai-wallet-postgres-v1.mjs
-          ! grep -RniE 'AI_WALLET_DATABASE_URL|@neondatabase/serverless|PostgresAiWallet|providerReserveCents|providerShareBps|AI_PLAN_CATALOG' lib server-gateway-v131*.mjs .env.ai-wallet.example package.json --exclude='test-node-ai-marketplace-v1.mjs' --exclude='test-node-ai-http-v1.mjs'
+          ! grep -RniE 'AI_WALLET_DATABASE_URL|@neondatabase/serverless|PostgresAiWallet|providerReserveCents|providerShareBps|AI_PLAN_CATALOG' lib "releases/$(cat VERSION)/server" .env.ai-wallet.example package.json --exclude='test-node-ai-marketplace-v1.mjs' --exclude='test-node-ai-http-v1.mjs'

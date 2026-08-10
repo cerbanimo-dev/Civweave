@@ -3,8 +3,10 @@ name: Federation v1 check
 on:
   pull_request:
     paths:
-      - 'server-federated-v152.mjs'
+      - 'server/federated.mjs'
+      - 'releases/**/server/**'
       - 'scripts/verify-federation-v152.mjs'
+      - 'scripts/check-canonical-server-syntax.mjs'
       - 'Dockerfile.federated'
       - 'docker-compose.federated.yml'
       - '.dockerignore'
@@ -12,30 +14,29 @@ on:
   push:
     branches: [main]
     paths:
-      - 'server-federated-v152.mjs'
+      - 'server/federated.mjs'
+      - 'releases/**/server/**'
       - 'scripts/verify-federation-v152.mjs'
+      - 'scripts/check-canonical-server-syntax.mjs'
       - 'Dockerfile.federated'
       - 'docker-compose.federated.yml'
       - '.dockerignore'
       - '.github/workflows/federation-v1-check.yml'
 
-concurrency:
-  group: federation-v1-${{ github.ref }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Check federation syntax
-        run: |
-          node --check server-federated-v152.mjs
-          node --check scripts/verify-federation-v152.mjs
+      - name: Check canonical server syntax
+        run: node scripts/check-canonical-server-syntax.mjs
       - name: Verify two-node federation
         run: node scripts/verify-federation-v152.mjs
       - name: Build federated container
