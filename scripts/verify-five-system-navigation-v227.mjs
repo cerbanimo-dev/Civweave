@@ -36,8 +36,8 @@ const [routesSource,boundarySource,navSource,campusSource,campusPart4,workerWrap
   read('public/app/working-campus-v156.part4.txt'),
   read('public/service-worker-v203.js'),
   read('public/service-worker-canonical-navigation-v227.js'),
-  read('server/compat/server-gateway-v131-base.mjs'),
-  read('server/compat/server-gateway-v131.mjs'),
+  read('releases/1.0.81/server/server-gateway-v131-base.mjs'),
+  read('releases/1.0.81/server/server-gateway-v131.mjs'),
   ...Object.values(paths).map(path=>read(`public${path}`))
 ]);
 for(const [label,source] of Object.entries({routesSource,boundarySource,navSource,campusSource,workerNavigation}))new Function(source);

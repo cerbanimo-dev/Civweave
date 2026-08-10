@@ -1,1 +1,0 @@
-docs/contracts/visual-contract.md

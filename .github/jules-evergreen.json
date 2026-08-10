@@ -1,5 +1,5 @@
 {
-  "roadmapPath": "TEN-YEAR-PIPELINE.md",
+  "roadmapPath": "docs/roadmap/ten-year-pipeline.md",
   "startingBranch": "main",
   "sessionTitlePrefix": "[Civweave Evergreen]",
   "maxConcurrentSessions": 1,
@@ -27,8 +27,8 @@
       ".github/CODEOWNERS",
       ".github/jules-evergreen.json",
       "AGENTS.md",
-      "rebase.md",
-      "renewal.md",
+      "docs/roadmap/rebase.md",
+      "docs/roadmap/renewal.md",
       "scripts/jules-evergreen-daemon.mjs",
       "scripts/lib/jules-api-client.mjs",
       "scripts/lib/github-evergreen-client.mjs",

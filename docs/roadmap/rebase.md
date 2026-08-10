@@ -21,7 +21,7 @@ The epoch schedules one rebase during Q2 of each year from 2027 through 2036. An
 
 A rebase pull request must update:
 
-- `TEN-YEAR-PIPELINE.md`,
+- `docs/roadmap/ten-year-pipeline.md`,
 - any compatibility dates or required-reading paths that changed.
 
 It must append a rebase record containing the old imprint, new imprint, changed cycles, retired bundles, and evidence summary.

@@ -25,4 +25,5 @@ jobs:
       - run: node scripts/verify-release-contract.mjs
       - run: node scripts/verify-stale-release-identities.mjs
       - run: node scripts/verify-root-hygiene.mjs
+      - run: node scripts/verify-canonical-launch-release.mjs
       - run: node scripts/verify-version-policy.mjs --self-test

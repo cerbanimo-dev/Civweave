@@ -1,29 +1,17 @@
-import {readFile,readdir} from 'node:fs/promises';
+import {lstat,readdir} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const entries=await readdir(root,{withFileTypes:true});
 const allowedRootMarkdown=new Set(['AGENTS.md','README.md','RELEASE-NOTES.md']);
-const rootFiles=entries.filter(entry=>entry.isFile()).map(entry=>entry.name);
-const unexpectedMarkdown=rootFiles.filter(name=>/\.md$/i.test(name)&&!allowedRootMarkdown.has(name));
-const rootSentinels=rootFiles.filter(name=>/^\..*(?:trigger|materialize|watchdog)/i.test(name));
-const displacedArtifacts=rootFiles.filter(name=>name==='README-INSTALL.txt'||name==='FILE-INVENTORY.json');
-const versionedServers=rootFiles.filter(name=>/^server(?:-[a-z-]+)?-v\d+\.mjs$/i.test(name));
-const nonPointerServers=[];
-for(const name of versionedServers){
-  const source=await readFile(path.join(root,name),'utf8');
-  const pointer=source.length<=512&&source.includes('Compatibility pointer.')&&(/server\//.test(source)||/archive\/runtime\//.test(source));
-  if(!pointer)nonPointerServers.push(name);
-}
 const failures=[];
-if(unexpectedMarkdown.length)failures.push(`Unexpected root Markdown: ${unexpectedMarkdown.sort().join(', ')}. Put documentation under docs/.`);
-if(rootSentinels.length)failures.push(`Root workflow sentinels are forbidden: ${rootSentinels.sort().join(', ')}. Put sentinels in ops/triggers/.`);
-if(displacedArtifacts.length)failures.push(`Root inventory/install artifacts are forbidden as regular files: ${displacedArtifacts.sort().join(', ')}. Store content under docs/ and keep only lightweight pointers when compatibility requires them.`);
-if(nonPointerServers.length)failures.push(`Full versioned server implementations are forbidden at root: ${nonPointerServers.sort().join(', ')}. Keep only <=512-byte compatibility pointer stubs and store implementations under server/compat/ or archive/runtime/.`);
-if(failures.length){
-  console.error('Root hygiene check failed.');
-  for(const failure of failures)console.error(`- ${failure}`);
-  process.exit(1);
-}
-console.log(JSON.stringify({ok:true,allowedRootMarkdown:[...allowedRootMarkdown].sort(),compatibilityServerPointers:versionedServers.sort(),sentinelDirectory:'ops/triggers',serverEntryDirectory:'server',docsDirectory:'docs'},null,2));
+const markdown=entries.filter(e=>e.isFile()&&/\.md$/i.test(e.name)&&!allowedRootMarkdown.has(e.name)).map(e=>e.name);
+if(markdown.length)failures.push('Unexpected root Markdown: '+markdown.sort().join(', '));
+const rootServers=entries.filter(e=>e.isFile()&&/^server.*\.mjs$/i.test(e.name)).map(e=>e.name);
+if(rootServers.length)failures.push('Root server implementations/pointers are forbidden: '+rootServers.sort().join(', '));
+const symlinks=[];for(const e of entries){if((await lstat(path.join(root,e.name))).isSymbolicLink())symlinks.push(e.name)}
+if(symlinks.length)failures.push('Root compatibility symlinks are forbidden: '+symlinks.sort().join(', '));
+if(entries.some(e=>e.isDirectory()&&e.name==='archive'))failures.push('archive/ is forbidden; Git history is the archive.');
+try{await lstat(path.join(root,'server','compat'));failures.push('server/compat is forbidden; use releases/{VERSION}/server.')}catch(error){if(error.code!=='ENOENT')throw error}
+if(failures.length){console.error('Root hygiene check failed.');for(const failure of failures)console.error('- '+failure);process.exit(1)}
+console.log(JSON.stringify({ok:true,allowedRootMarkdown:[...allowedRootMarkdown].sort(),rootServerFiles:0,compatibilityPointers:0,archiveDirectory:false,canonicalReleaseDirectory:'releases'},null,2));

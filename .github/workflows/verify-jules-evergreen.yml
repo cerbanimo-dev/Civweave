@@ -14,7 +14,7 @@ on:
       - 'scripts/test-jules-evergreen-core.mjs'
       - 'scripts/verify-jules-evergreen.mjs'
       - 'docs/JULES-EVERGREEN.md'
-      - 'TEN-YEAR-PIPELINE.md'
+      - 'docs/roadmap/ten-year-pipeline.md'
   workflow_dispatch:
 
 permissions:

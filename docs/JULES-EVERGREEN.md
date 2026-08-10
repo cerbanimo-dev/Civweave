@@ -1,6 +1,6 @@
 # Jules Evergreen Control Plane
 
-The evergreen control plane turns `TEN-YEAR-PIPELINE.md` into a cautious, continuous Jules work queue that can automatically merge ordinary, fully validated bundles.
+The evergreen control plane turns `docs/roadmap/ten-year-pipeline.md` into a cautious, continuous Jules work queue that can automatically merge ordinary, fully validated bundles.
 
 ## What it does
 
@@ -49,7 +49,7 @@ A Jules pull request is merged only when all of these are true:
 - no review requests changes,
 - no blocking label is present,
 - no sensitive control-plane, workflow, migration, database, wallet, governance, economic, or paid-service path is touched,
-- `TEN-YEAR-PIPELINE.md` differs from `main` only by checking the selected bundle,
+- `docs/roadmap/ten-year-pipeline.md` differs from `main` only by checking the selected bundle,
 - the head SHA has not moved while the daemon prepares the merge, and
 - the dedicated merge token is available.
 
@@ -70,7 +70,7 @@ The merge endpoint still obeys branch protection and repository rules. The daemo
 
 Older work began before bundle IDs existed. `.github/jules-evergreen.json` maps those bundles to their historical pull requests. A merged mapped PR counts as completed, an open mapped PR claims the bundle, and a closed unmerged mapped PR releases it back to the queue.
 
-Future implementation pull requests must update their own checkbox in `TEN-YEAR-PIPELINE.md`. Any other roadmap edit blocks automatic merge.
+Future implementation pull requests must update their own checkbox in `docs/roadmap/ten-year-pipeline.md`. Any other roadmap edit blocks automatic merge.
 
 ## Current Jules API assumptions
 

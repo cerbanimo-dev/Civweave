@@ -44,7 +44,7 @@ async function startNode(label) {
   const port = await freePort();
   const appPort = await freePort();
   const token = `test-token-${label.toLowerCase()}`;
-  const child = spawn(process.execPath, ['server-federated-v152.mjs'], {
+  const child = spawn(process.execPath, ['server/federated.mjs'], {
     cwd: root,
     env: {
       ...process.env,
@@ -170,7 +170,7 @@ try {
   const retainedPort = nodeA.port;
   const retainedAppPort = nodeA.appPort;
   await stopNode(nodeA);
-  const restarted = spawn(process.execPath, ['server-federated-v152.mjs'], {
+  const restarted = spawn(process.execPath, ['server/federated.mjs'], {
     cwd: root,
     env: {
       ...process.env,

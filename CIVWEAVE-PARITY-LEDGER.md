@@ -1,1 +1,0 @@
-docs/contracts/civweave-parity-ledger.md

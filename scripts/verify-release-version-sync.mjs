@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 await import('./sync-release-version-assets.mjs');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
+const canonicalVersion=(await read('VERSION')).trim();
 const check=(condition,message)=>{if(!condition)throw new Error(message)};
 const same=(actual,expected,label)=>check(actual===expected,`${label}: expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}.`);
 const versionConst=(source,suffix='')=>new RegExp(`const\\s+VERSION\\s*=\\s*['"]([^'"]+)['"]`).exec(source)?.[1]===suffix;
@@ -50,8 +51,8 @@ const [
   read('public/service-worker-v156.js'),
   read('server/gateway.mjs'),
   read('server/local.mjs'),
-  read('server/compat/server-gateway-v131.mjs'),
-  read('server/compat/server-local-v131.mjs'),
+  read(`releases/${canonicalVersion}/server/server-gateway-v131.mjs`),
+  read(`releases/${canonicalVersion}/server/server-local-v131.mjs`),
   read('public/app/working-campus-v156.html'),
   read('public/app/working-campus-v156.js'),
   read('public/app/working-campus-v156.part4.txt'),
@@ -130,10 +131,11 @@ check(experience.includes('GUIDE_WORKSPACE'),'Canonical experience no longer boo
 check(!experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!experience.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'),'Canonical experience restored a retired v215/v216 chat owner.');
 check(!installBoundary.includes("const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';")&&!installBoundary.includes('addScript(RELEASE_VERSION_SCRIPT)'),'Install boundary reintroduced the retired canonical version loader.');
 check(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-civweave-version]')"),'Visible-version synchronizer is incomplete.');
-check(gatewayEntry.includes("server/compat/server-gateway-v131.mjs"),'Stable gateway entry no longer targets the compatibility implementation.');
-check(localEntry.includes("server/compat/server-local-v131.mjs"),'Stable local entry no longer targets the compatibility implementation.');
-check(versionConst(gatewayCompat,`${version}-render-installed-runtime-v132`),'Gateway compatibility wrapper version is stale.');
-check(new RegExp(`const\\s+VERSION\\s*=\\s*['"]${version.replaceAll('.','\\.')}['"]`).test(localCompat)&&localCompat.includes(`?build=${version}`),'Local compatibility server version is stale.');
+const versionSelectedCanonicalLoader=source=>/readFile\s*\(\s*path\.join\s*\(\s*root\s*,\s*['"]VERSION['"]/.test(source)&&/path\.join\s*\(\s*root\s*,\s*['"]releases['"]\s*,\s*version\s*,\s*['"]server['"]\s*\)/.test(source);
+check(versionSelectedCanonicalLoader(gatewayEntry),'Stable gateway entry no longer selects the VERSION canonical implementation.');
+check(versionSelectedCanonicalLoader(localEntry),'Stable local entry no longer selects the VERSION canonical implementation.');
+check(versionConst(gatewayCompat,`${version}-render-installed-runtime-v132`),'Gateway canonical wrapper version is stale.');
+check(new RegExp(`const\\s+VERSION\\s*=\\s*['"]${version.replaceAll('.','\\.')}['"]`).test(localCompat)&&localCompat.includes(`?build=${version}`),'Local canonical server version is stale.');
 check(workingCampus.includes(`Civweave Working Campus · v${version}`)&&workingCampus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
 check(campusLoader.includes(`system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Working Campus route loader version is stale.');
 check(campusPart4.includes(`version:'${version}'`),'Working Campus realm travel version is stale.');

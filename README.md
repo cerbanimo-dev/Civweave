@@ -24,7 +24,7 @@ The repository root is a control surface, not an archive. Keep root files limite
 - [`docs/operations/`](./docs/operations/) - installation, hosting, and deployment guidance.
 - [`docs/roadmap/`](./docs/roadmap/) - long-horizon pipeline, rebase, and renewal procedures.
 - [`docs/history/`](./docs/history/) - versioned release notes, audits, design backlogs, inventories, and other historical records.
-- [`server/`](./server/) - stable server entrypoints; versioned compatibility implementations live under `server/compat/`.
+- [`server/`](./server/) - stable server entrypoints; versioned compatibility implementations live under `releases/1.0.81/server/`.
 - [`archive/runtime/`](./archive/runtime/) - historical server wrappers retained for provenance.
 - [`ops/triggers/`](./ops/triggers/) - workflow sentinel files used to deliberately trigger materialization or recovery jobs.
 - [`scripts/`](./scripts/) - verification, migration, packaging, and maintenance tools.
@@ -72,7 +72,7 @@ Do not edit these by default:
 - copied `www/app/` trees inside installer or release bundles
 - ZIP contents and other generated package mirrors
 - `public/cabinetonly/index.html`, which is only a compatibility redirect
-- `server/compat/` and `archive/runtime/` unless the task explicitly concerns compatibility or migration behavior
+- `releases/1.0.81/server/` and `archive/runtime/` unless the task explicitly concerns compatibility or migration behavior
 
 Change one of those only when the task explicitly concerns that legacy surface, redirect, or generated artifact. Canonical source changes belong in `public/app/` or a stable `server/` entrypoint first. Regenerate packages afterward rather than hand-editing their copies.
 
@@ -117,3 +117,10 @@ See [`docs/operations/host-node-setup.md`](./docs/operations/host-node-setup.md)
 ## Development rule of thumb
 
 **Trace from the active dispatcher, edit the referenced source, verify the route, then regenerate downstream packages.** This keeps the living cabinet from being patched in one room while workers repaint an abandoned hallway elsewhere in the repository.
+
+## Canonical release storage
+
+- `releases/1.0.79/` is the first immutable Civweave launch snapshot and launch baseline.
+- The executable release selected by `VERSION` lives at `releases/{VERSION}/`; stable `server/*.mjs` entrypoints select that stored release directly.
+- New shipping versions must materialize their release directory with `npm run release:materialize` before they can pass the canonical launch gate.
+- Root server aliases, root symlinks, `releases/1.0.81/server/`, and a live `archive/` directory are forbidden. Git history is the archive.

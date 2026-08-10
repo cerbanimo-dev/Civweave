@@ -87,7 +87,7 @@ The service applications remain the working implementation sources during migrat
 - `public/app/assets/cabinets/*.webp` (direct validated cabinet assets)
 - `public/app/lite-v129.html` with split `lite-v129-*` style and runtime files
 - `public/app/lite-source-v129.css`
-- `server-v129.mjs`
+- `releases/1.0.81/server/launch-archived.mjs`
 - native Civweave wish-to-weave forms and an in-screen working-source workspace
 
 ## Files introduced in v1.0.28
@@ -98,7 +98,7 @@ The service applications remain the working implementation sources during migrat
 - `public/app/realm-v128.html` / `.js`
 - `scripts/verify-parity-ledger.mjs`
 - `scripts/smoke-v128.mjs`
-- `server-v128.mjs`
+- `releases/1.0.81/server/launch-archived.mjs`
 
 ## Source baselines
 
