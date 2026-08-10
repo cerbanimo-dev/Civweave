@@ -15,15 +15,21 @@ on:
       - 'scripts/build-civweave-map-v1.mjs'
       - 'scripts/build-cloudflare-pages.mjs'
       - 'scripts/build-install-artifacts.sh'
+      - 'scripts/build-mobile-install-kit.mjs'
       - 'scripts/test-civweave-map-v1.mjs'
       - '.github/workflows/verify-civweave-map-v1.yml'
   push:
     branches:
       - 'agent/civweave-map-v1-launch'
 
+concurrency:
+  group: civweave-map-v1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   package:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
