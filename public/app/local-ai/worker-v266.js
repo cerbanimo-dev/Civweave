@@ -1,8 +1,10 @@
 'use strict';
 const CACHE='civweave-model-generative-v266';
+const RUNTIME_CACHE='civweave-local-runtime-v287';
 const TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js';
 const WASM_V3='/app/vendor/transformers/wasm/';
 const runtimeModules=new Map();
+const wasmBinaryCache=new Map();
 let hfRuntime=null,tokenizer=null,model=null,loaded=null,loading=null;
 const clean=(value,max=200000)=>String(value??'').slice(0,max);
 const now=()=>performance.now();
@@ -24,6 +26,7 @@ function friendlyError(error,spec,stage='inference'){
   const raw=String(error?.message||error);
   if(raw.includes('/models/')&&(raw.includes('env.allowRemoteModels=false')||raw.includes('local_files_only=true')))return `Downloaded model cache miss for ${spec?.label||spec?.id||'the selected model'} during ${stage}. Resume this model while online so Civweave can fetch only the missing artifact.`;
   if(/Unexpected end of JSON input|Unexpected token\s*['"]?<|<!doctype|not valid JSON/i.test(raw))return `Downloaded model metadata is missing, truncated, or invalid for ${spec?.label||spec?.id||'the selected model'} during ${stage}. Reopen model settings while online so Civweave can repair only the bad metadata artifact.\n\nTransport detail: ${raw}`;
+  if(/Gemma 4 runtime chunk/i.test(raw))return `The Gemma 4 browser runtime is incomplete on this device. Open Civweave online once and test the model so the split ONNX runtime can be cached for offline use.\n\nRuntime detail: ${raw}`;
   if(/shader-f16/i.test(raw))return `${spec?.label||spec?.id||'The selected model'} requires WebGPU shader-f16 support for its mobile q2f16 graph. Civweave can step down to a compatible local tier when the request permits it.\n\nBackend detail: ${raw}`;
   if(/Failed to get GPU adapter|WebGPU adapter|no available backend|WebGPU is unavailable/i.test(raw))return `This browser did not provide a usable WebGPU adapter during ${stage}. Civweave can use its local fallback ladder when the request allows it.\n\nBackend detail: ${raw}`;
   if(/shader|device lost|out of memory|allocation|buffer/i.test(raw))return `${spec?.label||spec?.id||'The selected model'} reached a WebGPU/device limit during ${stage}. ${raw}`;
@@ -34,6 +37,30 @@ async function importRuntime(spec){
   if(runtimeModules.has(asset))return runtimeModules.get(asset);
   const promise=import(asset).catch(error=>{runtimeModules.delete(asset);throw error});
   runtimeModules.set(asset,promise);
+  return promise;
+}
+async function runtimeChunk(path){
+  const cache=globalThis.caches?await caches.open(RUNTIME_CACHE):null;
+  const hit=cache?await cache.match(path):null;
+  if(hit?.ok)return new Uint8Array(await hit.arrayBuffer());
+  const response=await fetch(path,{cache:'no-store'});
+  if(!response.ok)throw new Error(`Gemma 4 runtime chunk ${path} returned HTTP ${response.status}.`);
+  if(cache)try{await cache.put(path,response.clone())}catch{}
+  return new Uint8Array(await response.arrayBuffer());
+}
+async function splitWasmBinary(spec){
+  const chunks=Array.isArray(spec?.wasmChunks)?spec.wasmChunks.filter(Boolean):[];
+  if(!chunks.length)return null;
+  const key=chunks.join('|');
+  if(wasmBinaryCache.has(key))return wasmBinaryCache.get(key);
+  const promise=(async()=>{
+    const parts=[];let total=0;
+    for(const path of chunks){const bytes=await runtimeChunk(path);if(!bytes.byteLength)throw new Error(`Gemma 4 runtime chunk ${path} was empty.`);parts.push(bytes);total+=bytes.byteLength}
+    const merged=new Uint8Array(total);let offset=0;
+    for(const part of parts){merged.set(part,offset);offset+=part.byteLength}
+    return merged;
+  })().catch(error=>{wasmBinaryCache.delete(key);throw error});
+  wasmBinaryCache.set(key,promise);
   return promise;
 }
 function runtimeProfile(hf,spec){
@@ -73,7 +100,15 @@ async function configureRuntime(hf,cache,spec){
   hf.env.useBrowserCache=false;
   hf.env.useCustomCache=true;
   hf.env.customCache=cacheAdapter(cache,spec);
-  return runtimeProfile(hf,spec);
+  const profile=runtimeProfile(hf,spec),wasm=hf.env.backends?.onnx?.wasm||null;
+  if(wasm&&spec.wasmChunks?.length){
+    const binary=await splitWasmBinary(spec);
+    wasm.wasmBinary=binary;
+    profile.wasmBinaryBytes=binary?.byteLength||0;
+    profile.wasmChunkCount=spec.wasmChunks.length;
+    profile.wasmBinaryCached=true;
+  }
+  return profile;
 }
 const promptTokenCount=inputs=>Number(inputs?.input_ids?.dims?.at?.(-1)||inputs?.input_ids?.tolist?.()?.[0]?.length||0);
 const generatedIds=(sequences,count)=>{try{return sequences?.tolist?.()?.[0]?.slice(count)||[]}catch{return[]}};
