@@ -2,19 +2,23 @@ name: Verify Living School boot v195
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
 
 permissions:
   contents: read
+
+concurrency:
+  group: living-school-boot-v195-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   living-school-boot:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Parse Living School runtime
