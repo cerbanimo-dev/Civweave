@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-civweave-federation-map="v274-offline-atlas-node-ai-v1">
+<html lang="en" data-civweave-federation-map="v274-offline-atlas-node-ai-v1-live-money">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -26,6 +26,7 @@
 <div class="legend"><span><i class="dot" style="background:var(--gold)"></i>Federation / network hubs</span><span><i class="dot" style="background:var(--cyan)"></i>Public organizations</span><span><i class="dot" style="background:var(--pink)"></i>Saved or observed Civweave nodes</span><span><i class="dot" style="background:var(--green)"></i>Your current location</span><span><i class="dot" style="background:var(--violet)"></i>Halo = node advertises AI service</span></div>
 
 <h3>Node AI marketplace</h3><div id="nodeAiServices"><div class="note">Looking for signed AI service adverts… Discovery never purchases compute.</div></div>
+<h3>Live node credits</h3><div id="nodeLiveCredits"><div class="note">Live checkout appears only for paired nodes that explicitly enable real payments.</div></div>
 
 <h3>Location discovery</h3><div class="field"><label for="locationInput">Place or coordinates</label><input id="locationInput" placeholder="Watertown, NY or 43.97,-75.91" autocomplete="off"></div><div class="row"><button id="locate" class="btn primary" type="button">Use device location</button><button id="resolveLocation" class="btn" type="button">Find locally</button></div><p id="locationStatus">Location stays in this Finder session unless you deliberately export a pairing handoff.</p><div id="nearby" class="list"></div>
 
@@ -43,4 +44,5 @@
 <script src="/app/local-object-mesh-v146.js?v=1.0.70-node-ai-marketplace"></script>
 <script src="/app/node-ai-mesh-v1.js?v=1.0.70-node-ai-marketplace"></script>
 <script src="/app/node-ai-marketplace-surface-v1.js?v=1.0.70"></script>
+<script src="/app/node-ai-live-marketplace-v1.js?v=1.0.86"></script>
 </body></html>
