@@ -1,191 +1,74 @@
 # Civweave Agent Guide
 
-This file applies to the entire repository. Every coding agent must read it before choosing an edit target.
+This file applies to the entire repository.
 
 ## Prime directive
 
-**Do not select code by folder name alone. Trace the live route from the current dispatcher.**
+**Preserve the core-first architecture. Do not resurrect retired frontend shells, compatibility layers, package-enforcement lists, or version-chain bootstraps.**
 
-For cabinet work, begin at:
+The canonical browser entry is `public/app/index.html`. It directly loads exactly:
 
-`public/app/fullscreen-family-v104.html`
+- `public/app/core.css`
+- `public/app/core.js`
 
-Read its current `sites` map, identify the entry for the requested realm, and follow that entry's imported scripts, stylesheets, modules, iframes, and service-worker references. The dispatcher and the newest commits touching those referenced files define the current implementation.
+The canonical service worker is `public/service-worker.js`. The canonical server entry is `server.mjs`.
 
-As of August 5, 2026, the dispatcher routes to:
+## Runtime ownership
 
-- Civweave: `public/app/working-campus-v156.html`
-- Living School: `public/app/cabinets/living-school/index.html`
-- Cerbanimo: `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1`
-- FellowFare: `public/app/fellowfare-cabinet-v144.html?cabinet=1`
-- Anarchadia: `public/app/anarchadia-console-v139.html?cabinet=1`
+Normal navigation stays inside the core runtime. The four realm views are states of the same application, selected with `?system=`:
 
-Treat this list as an orientation aid, not permission to skip checking the dispatcher. Versioned entry files can move.
+- `living-school`
+- `cerbanimo`
+- `fellowfare`
+- `anarchadia`
 
-## Source-of-truth hierarchy
+Do not add a second shell, iframe parent, family dispatcher, realm-console wrapper, recovery page, or navigation injection layer around them.
 
-When several copies appear to implement the same feature, use this order:
+Feature code may be loaded lazily when a feature is actually requested. A feature module must not become a prerequisite for booting, installing, or opening another feature.
 
-1. The entry referenced by `public/app/fullscreen-family-v104.html`.
-2. Files directly loaded or imported by that entry.
-3. Active embedded surfaces under `public/app/services/<realm>/`.
-4. Shared runtime and contracts under `public/app/shared/`, plus shared cabinet shell files under `public/app/`.
-5. Packaging and cache declarations that copy or retain those canonical files.
-6. Historical, backup, generated, and installer-mirror copies only when an explicit task targets them.
+## Preserved state contracts
 
-The current cabinet architecture is intentionally mixed while realms are migrated:
+The clean runtime intentionally continues reading/writing these existing browser-state contracts so users do not lose current work:
 
-- `public/app/cabinets/<realm>/` contains newer modular cabinet implementations. Living School currently uses this structure.
-- Active parent cabinet and console files for other realms remain directly under `public/app/`.
-- Mature tools embedded by those parents live under `public/app/services/<realm>/`.
+- `civweave.working-campus.v1`
+- `civweave.intentions.v127`
+- `civweave.realm-inbox.v1`
 
-Do not force every realm into one structure as part of an unrelated repair.
+Those storage-key names are data compatibility, not permission to restore the retired working-campus runtime.
 
-## Paths that are not normal edit targets
+## Local AI
 
-Unless the task explicitly names one of these surfaces, do not implement current cabinet behavior in:
+`public/app/local-ai/` and `public/app/models/` are optional current modules. They are cold at normal boot. Release builds may stage Transformers runtime assets so a downloaded model can be invoked when requested, but model/runtime assets must not be added to the mandatory core package or service-worker boot list.
 
-- `public/cabinet/`
-- root-level historical pages such as `public/cabinet-v*.html`
-- root-level historical pages such as `public/civweave-v*.html`
-- `public/index_old.html` or files with backup, old, legacy, supplied, or similar archival naming
-- copied `www/app/` directories inside installer or release bundles
-- ZIP archives or extracted package mirrors
-- `public/cabinetonly/index.html`, which is a redirect rather than the cabinet implementation
+## Public tree policy
 
-Do not hand-edit generated installer copies to make a source bug appear fixed. Fix canonical files under `public/app/`, update package manifests or cache lists where necessary, run verification, and regenerate the package.
+`public/` is allowlisted. Do not copy archived, generated, cabinet, recovery, installer-mirror, or historical versioned frontend trees back into it. The release builder intentionally copies only the canonical public core and generated current download artifacts.
 
-## Required investigation before editing
+The standalone `public/finder/` and `public/node-ai/` modules are preserved as current independent surfaces. They must remain independent of core boot.
 
-For any cabinet or cross-realm task:
+## Packaging
 
-1. Read `public/app/fullscreen-family-v104.html`.
-2. Inspect recent commits affecting the active entry and its dependencies.
-3. Search the repository for every reference to the file, version marker, route, DOM ID, storage key, and service-worker cache entry you expect to change.
-4. Determine whether the visible surface is a parent page, an embedded `services/<realm>/` page, or both.
-5. Confirm whether installer, service-worker, verifier, and workflow files retain exact filename lists.
-6. Edit the smallest canonical surface that owns the behavior.
+`scripts/build-mobile-install-kit.mjs` owns the mandatory offline core. Its file list must stay small and explicit. Never derive mandatory files by parsing the service worker or by recursively copying the public tree.
 
-Useful local commands include:
-
-```bash
-git log --date=short --name-status -- public/app public/extensions public/service-worker* scripts .github/workflows
-git log -n 20 --oneline -- public/app/fullscreen-family-v104.html
-rg "exact-file-name|version-marker|storage-key|element-id" public scripts .github
-```
-
-If recent commits and an older document disagree, prefer the active route and current code. Update documentation when the disagreement could mislead another worker.
-
-## Versioned-file rules
-
-Many filenames are stable compatibility boundaries even when their internal build markers advance.
-
-- Do not create a higher-numbered file merely because you changed it.
-- Preserve the current filename unless the task or release process requires a version bump.
-- When a filename changes, update every caller, redirect, verifier, workflow path filter, service-worker cache list, installer manifest, and documentation reference in the same change.
-- Search for the old filename after the edit. Remaining references must be intentional.
-- Keep query-string cache revisions coherent with the actual files being loaded.
-
-## Cabinet ownership boundaries
-
-### Shared family shell
-
-`public/app/family-shell-v104.js` and `public/app/family-shell-v104.css` own shared cabinet chrome and family navigation. A realm-specific visual or behavior change should not be placed here unless it truly applies across the family.
-
-### Civweave
-
-Begin with `public/app/working-campus-v156.html`, then follow its loaded assets and runtimes.
-
-### Living School
-
-Begin with `public/app/cabinets/living-school/index.html`. Its modular cabinet code, styles, bootstrap, and loaders belong under `public/app/cabinets/living-school/`. Supporting learning engines and mature service modules may live under `public/app/services/living-school/`.
-
-Do not patch an older flat Living School page just because it contains similar labels.
-
-### Cerbanimo
-
-Begin with `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1`, then trace Cerbanimo-specific routes, engines, and service surfaces from that console.
-
-### FellowFare
-
-Begin with `public/app/fellowfare-cabinet-v144.html?cabinet=1`. The parent cabinet and the embedded market under `public/app/services/fellowfare/` can both affect the visible result. Inspect both before changing layout, scrolling, navigation, or Rook behavior.
-
-### Anarchadia
-
-Begin with `public/app/anarchadia-console-v139.html?cabinet=1`, then follow governance, sovereignty, and embedded service dependencies from that entry.
-
-## Cross-cutting constraints
-
-Preserve these architectural expectations unless the task explicitly changes them:
-
-- Offline-first operation is primary.
-- Hosted services widen capability but must not become mandatory for basic local work.
-- Shared AI settings have one owning runtime. Do not add duplicate settings listeners, loaders, or overlays.
-- The global five-system navigation belongs to the family shell. Embedded realm pages should not create a second competing switcher.
-- Canonical cross-realm state and capability semantics live in shared contracts and parity code, not in visually convenient duplicates.
-- Generated installer assets follow source changes; they do not lead them.
+`scripts/build-cloudflare-pages.mjs` owns the static release allowlist. Do not replace it with an unrestricted `cp public` operation.
 
 ## Verification
 
-Run the narrowest relevant verifier while developing, then the repository checks appropriate to the change.
-
-For broad runtime changes:
+For runtime or packaging changes run:
 
 ```bash
-npm run check
-```
-
-For installer or packaged-runtime changes, run the relevant installer verifier and then:
-
-```bash
+npm run check:core
 npm run build:install
 ```
 
-For documentation-only changes, verify every named path against the current branch and inspect the Markdown diff.
+For broad backend/domain changes also run the relevant focused tests or `npm run check`.
 
-A task is not complete when only a legacy copy works. Confirm the route reached from `fullscreen-family-v104.html` uses the changed code.
+A frontend task is not complete if it requires any retired entry filename, versioned compatibility shell, injected bootstrap, duplicate settings runtime, or multiple simultaneously rendered frontend layers.
 
-## Commit and pull-request hygiene
+## Long-horizon agentic pipeline
 
-- Keep unrelated legacy cleanup out of feature repairs.
-- Name the active surface in the commit or pull-request summary.
-- Explain whether the change affects the parent cabinet, embedded service, shared shell, package cache, or several of these.
-- List the verification performed.
-- When a migration intentionally retires an old path, say so and update this file plus the README.
+`TEN-YEAR-PIPELINE.md` remains a planning queue, but architecture references written before the core reset are historical. If a pipeline item conflicts with this guide or the current canonical entry, reinterpret the item against the current core rather than recreating the old path.
 
-When uncertain, stop wandering through similarly named rooms and return to the dispatcher. It is the map pinned to the front door.
+Explicit user instructions outrank the pipeline. Human approval remains required for merge, destructive data migration, paid-service activation, and high-stakes governance or economic actions.
 
-## Long-horizon agentic pipeline mode
-
-Use the decade pipeline when the task asks for the next best improvement, continuous improvement, roadmap execution, an agentic cycle, or another unscoped advancement of Civweave. A specific user request remains more authoritative than the queue.
-
-Before choosing work in pipeline mode:
-
-1. Read `TEN-YEAR-PIPELINE.md`.
-2. Select the first unchecked bundle whose preceding bundles are checked.
-3. Implement exactly that bundle.
-4. Check the bundle in the same branch only after its implementation, migration, compatibility, and verification gates pass.
-5. Follow `rebase.md` when the selected bundle is a scheduled rebase.
-6. Follow `renewal.md` when the final renewal bundle is reached.
-
-The priority order is:
-
-1. explicit user instruction,
-2. security, privacy, data preservation, and recovery,
-3. the active architectural convergence lock and executable ownership evidence,
-4. the selected pipeline bundle,
-5. later roadmap ideas.
-
-Pipeline rules:
-
-- One bundle per branch and pull request.
-- Default to a draft pull request.
-- Do not merge or push directly to `main`.
-- Do not skip forward because a later bundle is more interesting.
-- Do not duplicate work already present on current `main` or in a valid open pull request.
-- Do not mark a bundle complete until every gate passes.
-- Preserve completed bundle IDs and history. Rebases may rewrite unfinished work only.
-- A scheduled rebase is planning-only. Do not hide production feature changes inside it.
-- When the queue is exhausted, create the next epoch from fresh screenshots, redacted feedback, incidents, measurements, and current code. The old plan is a structural example, not the source of truth.
-
-The pipeline coordinates work. It does not grant authority. Human approval remains required for merge, compatibility removal, destructive migration, paid-service activation, and high-stakes governance or economic actions.
+Default automated work to a branch and draft pull request. Do not push directly to `main` unless the user supplies the repository's explicit direct-to-main authorization phrase.

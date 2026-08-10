@@ -1,4 +1,0 @@
-
-.cw-pwa-state{position:fixed;z-index:31;left:max(10px,env(safe-area-inset-left));bottom:max(76px,calc(env(safe-area-inset-bottom) + 68px));max-width:210px;min-height:30px;padding:5px 9px;border:1px solid #72d9c766;border-radius:999px;background:#031018dc;color:#dffdf7;font:800 9px/1.2 system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(8px);cursor:pointer}
-.cw-pwa-state.is-update{border-color:#ffd36a;background:#4c350be8;color:#fff2bd;box-shadow:0 0 14px #ffd36a55}
-@media(max-width:620px){.cw-pwa-state{bottom:max(66px,calc(env(safe-area-inset-bottom) + 58px));max-width:150px;font-size:8px}}

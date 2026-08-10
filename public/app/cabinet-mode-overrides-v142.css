@@ -1,4 +1,0 @@
-.room-preview-cabinet{display:grid;place-items:center;isolation:isolate;background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--accent) 28%,transparent),transparent 36%),linear-gradient(145deg,color-mix(in srgb,var(--panel-2) 92%,#000),color-mix(in srgb,var(--accent-2) 13%,var(--panel)))}
-.room-preview-cabinet::before{content:"CABINET MODE";position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:68%;padding:9px 5px;border:1px solid color-mix(in srgb,var(--accent) 60%,white 12%);border-radius:999px;color:color-mix(in srgb,var(--accent) 82%,white);font:900 clamp(9px,2.4cqw,12px)/1 system-ui;letter-spacing:.16em;text-align:center;box-shadow:0 0 22px color-mix(in srgb,var(--accent) 25%,transparent),inset 0 0 18px #0007}
-.room-preview-cabinet::after{background:linear-gradient(180deg,transparent 8%,color-mix(in srgb,var(--panel) 92%,transparent))}
-.cabinet-controls button{height:var(--control-size)!important;touch-action:manipulation}

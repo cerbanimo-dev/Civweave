@@ -1,98 +1,54 @@
 # Civweave
 
-Civweave is an offline-first, installable family of five connected workstations:
+Civweave is a local-first five-system workspace: Civweave plus Living School, Cerbanimo, FellowFare, and Anarchadia.
 
-- Civweave
-- Living School
-- Cerbanimo
-- FellowFare
-- Anarchadia
+## Core runtime
 
-The public host is deliberately small. It distributes and updates the device package, exposes optional network services, and keeps the installed software capable of operating locally.
+The browser has one canonical entry:
 
-> [!IMPORTANT]
-> **Cabinet development currently lives under `public/app/`.** Start with `public/app/fullscreen-family-v104.html`, then follow the exact file it routes to for the realm you are changing. Do not choose a folder because its name merely sounds current.
+```text
+public/app/index.html
+  ├─ core.css
+  └─ core.js
+```
 
-Agents and automated contributors must read [`AGENTS.md`](./AGENTS.md) before editing this repository.
+Realm navigation is application state inside that runtime. The core can create a reviewable intention weave, materialize realm handoffs into local state, install as a PWA, and operate offline without loading legacy realm shells.
 
-## Current cabinet entry map
+The core deliberately preserves current intention/workspace storage contracts so the runtime cleanup does not erase user work.
 
-`public/app/fullscreen-family-v104.html` is the active installed cabinet-family dispatcher. On the current `main` branch it opens:
+## Optional modules
 
-| System | Active entry |
-| --- | --- |
-| Civweave | `public/app/working-campus-v156.html` |
-| Living School | `public/app/cabinets/living-school/index.html` |
-| Cerbanimo | `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1` |
-| FellowFare | `public/app/fellowfare-cabinet-v144.html?cabinet=1` |
-| Anarchadia | `public/app/anarchadia-console-v139.html?cabinet=1` |
+Current local-model code and model metadata live under `public/app/local-ai/` and `public/app/models/`. They are not loaded at boot. Release builds may stage Transformers runtime files so local generation is available when explicitly requested.
 
-These filenames are versioned compatibility boundaries. The route table above is more authoritative than an older page, similarly named directory, generated installer copy, or historical release note.
+`public/finder/` and `public/node-ai/` remain independent current surfaces and are not part of core boot.
 
-## Where current work belongs
-
-- `public/app/fullscreen-family-v104.html` - canonical installed family dispatcher.
-- `public/app/family-shell-v104.js` and `public/app/family-shell-v104.css` - shared cabinet chrome and navigation behavior.
-- `public/app/cabinets/<realm>/` - modular cabinet implementations. Living School is currently developed here.
-- `public/app/*-cabinet-v*`, `public/app/*-console-v*`, and `public/app/working-campus-v*` - active realm parent surfaces referenced by the dispatcher.
-- `public/app/services/<realm>/` - mature embedded realm tools and internal surfaces used by cabinet parents.
-- `public/app/shared/` - shared contracts, parity state, and cross-realm runtime code.
-- `public/extensions/` - optional cross-cutting capabilities loaded by the installed package.
-- `scripts/` and `.github/workflows/` - verification, packaging, and release automation.
-
-Before changing a cabinet, inspect the newest commits touching its active entry and follow its imports, scripts, stylesheets, iframes, and service-worker references. Recent work may have moved one realm without moving the others.
-
-## Legacy and generated paths
-
-The repository retains older interfaces for migration history, comparison, and compatibility. They are not automatically valid edit targets.
-
-Do not edit these by default:
-
-- `public/cabinet/`
-- root-level historical pages such as `public/cabinet-v*.html`, `public/civweave-v*.html`, `public/index_old.html`, and backup variants
-- copied `www/app/` trees inside installer or release bundles
-- ZIP contents and other generated package mirrors
-- `public/cabinetonly/index.html`, which is only a compatibility redirect
-
-Change one of those only when the task explicitly concerns that legacy surface, redirect, or generated artifact. Canonical source changes belong in `public/app/` first. Regenerate packages afterward rather than hand-editing their copies.
-
-## Host and installed-runtime topology
-
-The host has two related roles:
-
-1. `/` serves installation, updates, release metadata, and optional gateway APIs.
-2. The installed device package serves the Civweave application family locally.
-
-Within an installed package, `/loom/`, `/lite/`, and `/cabinetonly/` are compatibility aliases for the full-screen family entry. The public hosted origin may intentionally refuse to run application surfaces directly and instead require local installation.
-
-The current built-in public host retains its compatibility address until deployment infrastructure is renamed:
-
-`https://civweave-host-node.onrender.com`
-
-## Local development
-
-Requires Node.js 22.
+## Run
 
 ```bash
+npm install
 npm start
 ```
 
-Useful checks:
+The server entry is `server.mjs`.
+
+## Verify
 
 ```bash
-npm run check
+npm run check:core
 ```
 
-Build install artifacts only after canonical source changes and verification:
+The core verifier enforces one canonical stylesheet, one canonical script, `/app/` PWA start, direct server startup, and absence of retired boot/package-enforcement references.
+
+## Build
 
 ```bash
 npm run build:install
+npm run build:release
+node scripts/build-cloudflare-pages.mjs
 ```
 
-For LAN use, the server binds to `0.0.0.0` by default. Full PWA installation and service workers require HTTPS or `localhost`; a plain LAN IP may not receive every browser installation capability.
+The mobile install kit contains only the explicit mandatory core. It does not recursively package the historical application tree.
 
-See `HOST-NODE-SETUP-GUIDE.md` for local, Docker, LAN, and Render setup.
+## Architecture rule
 
-## Development rule of thumb
-
-**Trace from the active dispatcher, edit the referenced source, verify the route, then regenerate downstream packages.** This keeps the living cabinet from being patched in one room while workers repaint an abandoned hallway elsewhere in the repository.
+Do not restore `working-campus-v*`, `installed-entry-v*`, family-shell, realm-console, install-boundary, recovery injection, service-worker patch stacks, or equivalent layered boot mechanisms as canonical runtime dependencies. Add capabilities to the core or load them lazily as isolated modules.
