@@ -3,6 +3,7 @@
 
 const REVISION='installer-storage-guard-v281';
 const MANIFEST_URL='/app/offline-package-v208.json';
+const TEST_OVERRIDE_KEY='__CivweaveStorageTestOverrideV281';
 let preparing=false;
 let bypass=false;
 let lastPreflight=null;
@@ -18,6 +19,12 @@ function formatBytes(bytes){
   return`${(value/(1024*1024*1024)).toFixed(value>=10*1024*1024*1024?0:1)} GB`;
 }
 
+function localTestOverride(){
+  if(!['localhost','127.0.0.1','::1'].includes(location.hostname))return null;
+  const value=globalThis[TEST_OVERRIDE_KEY];
+  return value&&typeof value==='object'?value:null;
+}
+
 async function loadBudget(){
   try{
     const response=await fetch(`${MANIFEST_URL}?storage-preflight=${Date.now()}`,{cache:'no-store'});
@@ -31,6 +38,17 @@ async function loadBudget(){
 }
 
 async function storageSnapshot(requestPersistence=false){
+  const override=localTestOverride();
+  if(override){
+    const usage=numeric(override.usage),quota=numeric(override.quota);
+    return{
+      persistent:Boolean(override.persistent),
+      usage,
+      quota,
+      available:quota?Math.max(0,quota-usage):0,
+      testOverride:true
+    };
+  }
   const storage=navigator.storage;
   let persistent=false;
   try{persistent=Boolean(await storage?.persisted?.())}catch{}
