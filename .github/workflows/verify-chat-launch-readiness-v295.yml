@@ -1,0 +1,28 @@
+name: Verify chat launch readiness v295
+
+on:
+  push:
+    branches:
+      - main
+      - 'launch/**'
+    paths:
+      - 'public/app/experience-orchestrator-v232.js'
+      - 'public/app/*-v295.js'
+      - 'scripts/verify-chat-launch-readiness-v295.mjs'
+      - '.github/workflows/verify-chat-launch-readiness-v295.yml'
+  pull_request:
+    paths:
+      - 'public/app/experience-orchestrator-v232.js'
+      - 'public/app/*-v295.js'
+      - 'scripts/verify-chat-launch-readiness-v295.mjs'
+      - '.github/workflows/verify-chat-launch-readiness-v295.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-chat-launch-readiness-v295.mjs
