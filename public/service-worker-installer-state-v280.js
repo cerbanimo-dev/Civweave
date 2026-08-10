@@ -4,7 +4,8 @@
 const INSTALLER_STATE_ASSETS = [
   '/app/installer-state-machine-v280.js',
   '/app/offline-campus-status-v210.js',
-  '/app/required-campus-autostart-v1.js'
+  '/app/required-campus-autostart-v1.js',
+  '/app/campus-background-download-v241.js'
 ];
 try {
   for (const asset of INSTALLER_STATE_ASSETS) {
