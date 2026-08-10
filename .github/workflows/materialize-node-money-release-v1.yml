@@ -1,0 +1,44 @@
+name: Materialize Civweave 1.0.88 node money release
+
+on:
+  push:
+    branches: [agent/launch-node-money-edge-v1-r2]
+    paths:
+      - 'VERSION'
+      - '.github/workflows/materialize-node-money-release-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/launch-node-money-edge-v1-r2
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Materialize canonical 1.0.88 release
+        run: |
+          test "$(tr -d '[:space:]' < VERSION)" = "1.0.88"
+          node scripts/materialize-canonical-release.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-release-contract.mjs
+          node scripts/verify-release-version-sync.mjs
+          node scripts/check-canonical-server-syntax.mjs
+      - name: Commit generated canonical release
+        run: |
+          set -euo pipefail
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No generated release changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Materialize Civweave 1.0.88 live settlement release"
+          git push origin HEAD:agent/launch-node-money-edge-v1-r2

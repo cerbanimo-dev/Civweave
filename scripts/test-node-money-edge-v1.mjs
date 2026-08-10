@@ -66,7 +66,7 @@ test('live node money edge registers a signed node, creates direct checkout, and
     assert.equal(provider.checkoutCalls[0].accountId,'acct_node_1');
     assert.equal(provider.checkoutCalls[0].applicationFeeCents,50);
 
-    const settled=await service.handleProviderEvent({id:'evt_checkout_1',type:'checkout.session.completed',data:{object:{id:'cs_live_1',payment_status:'paid'}}});
+    const settled=await service.handleProviderEvent({id:'evt_checkout_1',type:'checkout.session.completed',account:'acct_node_1',livemode:true,data:{object:{id:'cs_live_1',payment_status:'paid'}}});
     assert.equal(settled.applied,true);
     assert.equal(delivered.length,1);
     assert.equal(delivered[0].schema,NODE_MONEY_EVENT_SCHEMA);
@@ -81,7 +81,7 @@ test('live node money edge registers a signed node, creates direct checkout, and
     const refundSig=signNodeMoneyEdgeRequest(refundBody,{privateKey:nodeKeys.privateKey,keyId:'node-key',timestamp:1_700_000_000});
     const refund=await service.refundTopUp({nodeId:'node-1',topupId:topup.topupId,amountCents:400},refundBody,refundSig);
     assert.equal(refund.status,'succeeded');
-    await service.handleProviderEvent({id:'evt_refund_1',type:'charge.refunded',data:{object:{id:'ch_1',amount_refunded:400}}});
+    await service.handleProviderEvent({id:'evt_refund_1',type:'charge.refunded',account:'acct_node_1',livemode:true,data:{object:{id:'ch_1',amount_refunded:400}}});
     assert.equal(delivered.at(-1).type,'topup.refunded');
     assert.equal(delivered.at(-1).userCreditCents,400);
   }finally{service.close();rmSync(dir,{recursive:true,force:true});}
@@ -112,8 +112,12 @@ test('Stripe direct-charge adapter puts checkout and refund calls on the connect
   assert.equal(refundReq.options.headers['stripe-account'],'acct_node_1');
   assert.equal(refundReq.form.get('refund_application_fee'),'true');
 
-  const raw=Buffer.from(JSON.stringify({id:'evt_1',type:'checkout.session.completed'}));
+  const raw=Buffer.from(JSON.stringify({id:'evt_1',type:'checkout.session.completed',account:'acct_node_1',livemode:true}));
   const timestamp=1_700_000_000;
   const signature=crypto.createHmac('sha256','whsec_test_value').update(`${timestamp}.`).update(raw).digest('hex');
-  assert.deepEqual(provider.verifyWebhook(raw,`t=${timestamp},v1=${signature}`),{id:'evt_1',type:'checkout.session.completed'});
+  assert.deepEqual(provider.verifyWebhook(raw,`t=${timestamp},v1=${signature}`),{id:'evt_1',type:'checkout.session.completed',account:'acct_node_1',livemode:true});
+
+  const wrongModeRaw=Buffer.from(JSON.stringify({id:'evt_wrong_mode',type:'checkout.session.completed',account:'acct_node_1',livemode:false}));
+  const wrongModeSignature=crypto.createHmac('sha256','whsec_test_value').update(`${timestamp}.`).update(wrongModeRaw).digest('hex');
+  assert.throws(()=>provider.verifyWebhook(wrongModeRaw,`t=${timestamp},v1=${wrongModeSignature}`),/livemode does not match/i);
 });
