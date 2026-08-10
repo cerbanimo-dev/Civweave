@@ -1,0 +1,71 @@
+name: Harvest Open Learning Media v1
+
+on:
+  push:
+    branches:
+      - agent/open-learning-media-harvest-v1
+    paths:
+      - scripts/harvest-open-learning-media-v1.py
+      - .open-learning-media-harvest-trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: open-learning-media-harvest-v1
+  cancel-in-progress: true
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/open-learning-media-harvest-v1
+          fetch-depth: 0
+
+      - name: Harvest rights-cleared learning media metadata
+        env:
+          OPEN_MEDIA_RESULTS_PER_QUERY: '16'
+          OPEN_MEDIA_WORKERS: '4'
+        run: python scripts/harvest-open-learning-media-v1.py
+
+      - name: Validate generated catalog
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('public/downloads/knowledge-schools/open-learning-media')
+          summary = json.loads((root / 'summary.json').read_text())
+          catalog = json.loads((root / 'catalog.json').read_text())
+          policy = json.loads((root / 'harvest-policy.json').read_text())
+          assert summary['records'] == catalog['record_count'] > 0
+          assert summary['mesh_redistributable'] > 0
+          assert policy['accepted_default_licenses'] == ['PUBLIC-DOMAIN', 'CC0', 'CC-BY', 'CC-BY-SA']
+          required = {'vibe-coding','prompt-engineering','pseudocoding','critical-thinking','logical-frameworks'}
+          assert required <= set(summary['focus_topics'])
+          for slug in required:
+              assert summary['focus_topics'][slug]['records'] > 0, (slug, summary['focus_topics'][slug])
+          for record in catalog['records']:
+              if record.get('mesh_redistributable'):
+                  assert record['license']['spdx'] in policy['accepted_default_licenses']
+                  assert record['download_enabled'] is True
+                  assert record['files']
+          print(json.dumps(summary, indent=2))
+          PY
+
+      - name: Commit harvested catalog
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/downloads/knowledge-schools/open-learning-media
+          if git diff --cached --quiet; then
+            echo 'Harvest produced no catalog diff.'
+            exit 0
+          fi
+          git commit -m 'Harvest open learning media catalog'
+          git pull --rebase origin agent/open-learning-media-harvest-v1
+          git push origin HEAD:agent/open-learning-media-harvest-v1
