@@ -105,7 +105,7 @@ async function importResponse(pack,response,{maxBytes=1024*1024*1024,expectedSha
   }catch(error){await removePack(packId,{reason:'failed-import'}).catch(()=>{});throw error}
 }
 async function getBytes(packId,offset,length){
-  const id=clean(packId,220),start=Math.max(0,Math.trunc(Number(offset)||0)),size=Math.max(0,Math.trunc(Number(length)||0));const row=await getPack(id);if(!row||row.status!=='ready')throw new Error(`Map pack ${id} is not available offline.`);if(start+size>Number(row.bytes))throw new RangeError('Requested PMTiles byte range exceeds the cached archive.');if(size===0)return{data:new ArrayBuffer(0)};
+  const id=clean(packId,220),start=Math.max(0,Math.trunc(Number(offset)||0)),requested=Math.max(0,Math.trunc(Number(length)||0));const row=await getPack(id);if(!row||row.status!=='ready')throw new Error(`Map pack ${id} is not available offline.`);const total=Math.max(0,Number(row.bytes)||0);if(start>total)throw new RangeError('Requested PMTiles byte range starts beyond the cached archive.');const size=Math.min(requested,Math.max(0,total-start));if(size===0)return{data:new ArrayBuffer(0)};
   const first=Math.floor(start/CHUNK_SIZE),last=Math.floor((start+size-1)/CHUNK_SIZE),out=new Uint8Array(size);let written=0;
   for(let index=first;index<=last;index++){
     const chunk=await getChunk(id,index);if(!chunk?.data)throw new Error(`Cached map chunk ${index} is missing.`);const bytes=chunk.data instanceof ArrayBuffer?new Uint8Array(chunk.data):new Uint8Array(chunk.data.buffer||chunk.data);const chunkStart=index*CHUNK_SIZE;const from=Math.max(start,chunkStart)-chunkStart;const to=Math.min(start+size,chunkStart+bytes.byteLength)-chunkStart;out.set(bytes.subarray(from,to),written);written+=to-from;
