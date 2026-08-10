@@ -49,7 +49,7 @@ const cleanupListeners=evaluate(cleanup,'living-school-cleanroom-worker.js');
 const coreListeners=evaluate(core,'lightweight-core-worker.js');
 assert(cleanupListeners.some(row=>row.type==='install')&&cleanupListeners.some(row=>row.type==='fetch'),'Clean-room worker boundary did not register install and fetch protection.');
 assert(coreListeners.some(row=>row.type==='install')&&coreListeners.some(row=>row.type==='fetch'),'Retained worker core did not register install and fetch behavior.');
-assert(installerState.includes('installer-state-machines-v280')&&installerState.includes('PAUSE_OFFLINE_PACKAGE'),'Resumable installer state machine is incomplete.');
+assert(installerState.includes('installer-state-machines-v280')&&installerState.includes("'/app/installer-state-machine-v280.js'")&&installerState.includes('shellRequired: true'),'Worker-side installer state shell contract is incomplete.');
 assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'")&&offline.includes("const V211_POLICY = 'resumable-pause-v280'"),'Resumable campus worker is incomplete.');
 const combinedSource=[routes,cleanup,core,installerState,offline,release,navigation,shellRepair,canonical].join('\n');
 const combined=evaluate(combinedSource,'combined-civweave-worker.js');
