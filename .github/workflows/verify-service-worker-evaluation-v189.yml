@@ -13,7 +13,7 @@ permissions:
 jobs:
   evaluate-workers:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -68,6 +68,7 @@ jobs:
           node --check scripts/verify-offline-campus-retry-loop-v211.mjs
           node --check scripts/smoke-installer-resume-state-v280.mjs
           node --check scripts/smoke-installer-hardening-v281.mjs
+          node --check scripts/browser-installer-gauntlet-v281.mjs
       - name: Verify all 25 system-to-system routes
         run: node scripts/verify-five-system-navigation-v227.mjs
       - name: Verify generators preserve the route architecture
@@ -94,6 +95,12 @@ jobs:
         run: node scripts/smoke-installer-resume-state-v280.mjs
       - name: Verify pre-live storage and shell integrity
         run: node scripts/smoke-installer-hardening-v281.mjs
+      - name: Install Chromium launch harness
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Run real-browser installer gauntlet
+        run: node scripts/browser-installer-gauntlet-v281.mjs
       - name: Verify Rook assistant runtime packaging
         run: node scripts/verify-rook-assistant-package-v197.mjs
       - name: Verify frozen fast-runtime proxy and critical refresh
