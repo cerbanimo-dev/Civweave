@@ -19,10 +19,12 @@ check('health pulse reports staged pass/failure and measured TTFT',pulse.include
 check('health pulse retains near-complete repair race handling',pulse.includes('settleNearComplete')&&pulse.includes("phase:'repair-waiting'")&&pulse.includes('Date.now()-started<4000'));
 check('health pulse persists v286 device measurements',pulse.includes('civweave.local-ai.health.v286')&&pulse.includes('civweave:local-model-health'));
 check('health pulse exposes WASM performance diagnostics',pulse.includes('Warm benchmark')&&pulse.includes('WASM threads')&&pulse.includes('CPU lanes')&&pulse.includes('Isolation')&&pulse.includes('SIMD')&&pulse.includes('KV cache')&&pulse.includes('Worker'));
-check('runtime selects v286 worker and preserves compatibility fallback',runtime.includes("VERSION='1.0.86-local-ai-runtime-v286-wasm-performance'")&&runtime.includes("worker-v266.js?v=1.0.86-v286")&&runtime.includes('compatibilitySpec')&&runtime.includes('backend-fallback-download'));
+check('runtime selects v287 worker and preserves compatibility plus tier fallback',runtime.includes("VERSION='1.0.87-local-ai-runtime-v287-gemma4-mobile'")&&runtime.includes("worker-v266.js?v=1.0.87-v287")&&runtime.includes('compatibilitySpec')&&runtime.includes('backend-fallback-download')&&runtime.includes('installedTierFallbacks'));
 check('worker configures bounded threaded SIMD WASM',worker.includes('Math.min(4,Math.floor(hardwareConcurrency/2)')&&worker.includes('wasm.numThreads=wasmThreads')&&worker.includes('wasm.simd=true')&&worker.includes('crossOriginIsolated'));
 check('worker keeps KV cache and warm decode benchmark',worker.includes('use_cache:true')&&worker.includes('benchmarkTokensPerSecond')&&worker.includes("'benchmarking-model'"));
+check('worker supports text-only Gemma v4 without replacing v3',worker.includes('runtimeModules=new Map()')&&worker.includes('if(spec.textOnly)modelOptions.textOnly=true')&&worker.includes("TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js'"));
 check('registry keeps hidden q8 CPU compatibility lane',registry.includes("id:'qwen3-0.6b-q8-wasm'")&&registry.includes("dtype:'q8'")&&registry.includes("device:'wasm'")&&registry.includes('hidden:true'));
+check('registry includes Gemma E2B and E4B mobile tiers',registry.includes("id:'gemma4-e2b-it-q2f16-mobile'")&&registry.includes("id:'gemma4-e4b-it-q2f16-mobile'"));
 let capturedRequest=null,directCalls=0,clock=100;
 const context={
   console,
@@ -43,4 +45,4 @@ const generated=await context.CivweaveLocalModelTestPulseV269.test('mock-local')
 check('mock health performs one direct generation',directCalls===1);
 check('mock health disables thinking and caps output at 32',capturedRequest.maxNewTokens===32&&capturedRequest.thinking===false&&capturedRequest.stream===true);
 check('mock health preserves generated text and WASM metrics',generated.text==='cedar 37'&&generated.metrics.ttftMs===120&&generated.metrics.tokensPerSecond===9.5&&generated.metrics.wasmThreads===4&&generated.metrics.kvCache===true);
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v286-wasm-performance',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',thinkingDisabled:true,stagedHealth:true,wasmPerformanceDiagnostics:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v287-gemma4-mobile',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',thinkingDisabled:true,stagedHealth:true,wasmPerformanceDiagnostics:true,gemma4Mobile:true,tierFallback:true},null,2));
