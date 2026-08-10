@@ -28,6 +28,13 @@ jobs:
           test "$(tr -d '[:space:]' < VERSION)" = "1.0.88"
           npm version 1.0.88 --no-git-tag-version --allow-same-version
           node scripts/materialize-canonical-release.mjs
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const file='config/release-contract.json';
+          const contract=JSON.parse(fs.readFileSync(file,'utf8'));
+          contract.canonical.current={version:'1.0.88',path:'releases/1.0.88',status:'current'};
+          fs.writeFileSync(file,JSON.stringify(contract,null,2)+'\n');
+          NODE
           node scripts/verify-canonical-launch-release.mjs
           node scripts/verify-release-contract.mjs
           node scripts/verify-release-version-sync.mjs
