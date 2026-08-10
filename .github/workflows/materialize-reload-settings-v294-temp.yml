@@ -24,6 +24,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Align package release version
+        shell: bash
+        run: npm pkg set "version=$(tr -d '[:space:]' < VERSION)"
       - name: Materialize canonical release
         run: node scripts/materialize-canonical-release.mjs
       - name: Commit generated release state
