@@ -47,16 +47,18 @@ jobs:
           set -euo pipefail
           python scripts/finalize-open-learning-media-launch-v1.py
           python scripts/finalize-open-learning-media-range-v1.py
+          python scripts/finalize-open-learning-media-safety-v1.py
           git diff --binary > /tmp/open-media-first.diff
           python scripts/finalize-open-learning-media-launch-v1.py
           python scripts/finalize-open-learning-media-range-v1.py
+          python scripts/finalize-open-learning-media-safety-v1.py
           git diff --binary > /tmp/open-media-second.diff
           cmp /tmp/open-media-first.diff /tmp/open-media-second.diff
 
       - name: Validate launch service
         run: |
           set -euo pipefail
-          python -m py_compile scripts/finalize-open-learning-media-launch-v1.py scripts/finalize-open-learning-media-range-v1.py scripts/harvest-open-learning-media-v1.py scripts/filter-open-learning-media-relevance-v1.py scripts/filter-open-learning-media-pedagogy-v1.py scripts/filter-open-learning-media-selection-v1.py scripts/test-open-learning-media-harvest-v1.py
+          python -m py_compile scripts/finalize-open-learning-media-launch-v1.py scripts/finalize-open-learning-media-range-v1.py scripts/finalize-open-learning-media-safety-v1.py scripts/harvest-open-learning-media-v1.py scripts/filter-open-learning-media-relevance-v1.py scripts/filter-open-learning-media-pedagogy-v1.py scripts/filter-open-learning-media-selection-v1.py scripts/test-open-learning-media-harvest-v1.py
           node --check public/app/open-learning-media-cache-v1.mjs
           node --check public/app/open-learning-media-installer-v1.mjs
           node --check public/app/video-learning-contract-v1.mjs
