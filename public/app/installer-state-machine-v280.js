@@ -70,9 +70,8 @@ function campusFromGlobal(){
 function renderInstallation(){
   const node=ensureStateRow('installation-state','Installation','#package-state');
   if(!node)return;
-  if(standalone()||installObserved)node.textContent='installed';
-  else if(installAvailable||/^install civweave/i.test($('#install-app')?.textContent||''))node.textContent='ready to install';
-  else node.textContent='browser-managed';
+  const text=standalone()||installObserved?'installed':installAvailable||/^install civweave/i.test($('#install-app')?.textContent||'')?'ready to install':'browser-managed';
+  if(node.textContent!==text)node.textContent=text;
 }
 
 function detectShellPhase(){
@@ -99,7 +98,7 @@ async function measureStorage(){
   const node=ensureStateRow('storage-state','Storage',null);
   storagePhase='measuring';
   storageText='calculating storage…';
-  if(node)node.textContent=storageText;
+  if(node&&node.textContent!==storageText)node.textContent=storageText;
   try{
     const estimate=await navigator.storage?.estimate?.();
     const usage=numeric(estimate?.usage);
@@ -116,7 +115,7 @@ async function measureStorage(){
     storageText='browser-managed storage';
     storagePhase='unavailable';
   }
-  if(node)node.textContent=storageText;
+  if(node&&node.textContent!==storageText)node.textContent=storageText;
   document.documentElement.dataset.civweaveStorageState=storagePhase;
 }
 
@@ -156,22 +155,26 @@ function renderCampus(input=campusFromGlobal()||{}){
     if(assets.textContent!==text)assets.textContent=text;
   }
 
-  if(fill)fill.style.width=`${percent}%`;
-  if(percentNode)percentNode.textContent=`${percent}%`;
-  if(track)track.setAttribute('aria-valuenow',String(percent));
-  if(box)box.dataset.state=packet.ready?'ready':packet.paused?'paused':packet.failedCount?'failed':packet.running?'running':'preparing';
+  if(fill&&fill.style.width!==`${percent}%`)fill.style.width=`${percent}%`;
+  if(percentNode&&percentNode.textContent!==`${percent}%`)percentNode.textContent=`${percent}%`;
+  if(track&&track.getAttribute('aria-valuenow')!==String(percent))track.setAttribute('aria-valuenow',String(percent));
+  const boxState=packet.ready?'ready':packet.paused?'paused':packet.failedCount?'failed':packet.running?'running':'preparing';
+  if(box&&box.dataset.state!==boxState)box.dataset.state=boxState;
 
   if(button){
-    button.hidden=false;
-    button.disabled=!shellReady()||pausing;
-    if(pausing)button.textContent='Pausing…';
-    else if(packet.running)button.textContent='Pause download';
-    else if(packet.ready)button.textContent='Refresh offline campus';
-    else if(packet.paused||packet.interrupted||packet.failedCount||downloaded)button.textContent='Resume download';
-    else button.textContent='Download offline campus';
+    const shouldDisable=!shellReady()||pausing;
+    let text='Download offline campus';
+    if(pausing)text='Pausing…';
+    else if(packet.running)text='Pause download';
+    else if(packet.ready)text='Refresh offline campus';
+    else if(packet.paused||packet.interrupted||packet.failedCount||downloaded)text='Resume download';
+    if(button.hidden)button.hidden=false;
+    if(button.disabled!==shouldDisable)button.disabled=shouldDisable;
+    if(button.textContent!==text)button.textContent=text;
   }
 
-  document.documentElement.dataset.civweaveCampusState=packet.ready?'complete':packet.running?'downloading':packet.paused?'paused':packet.interrupted?'interrupted':downloaded?'partial':'absent';
+  const campusState=packet.ready?'complete':packet.running?'downloading':packet.paused?'paused':packet.interrupted?'interrupted':downloaded?'partial':'absent';
+  if(document.documentElement.dataset.civweaveCampusState!==campusState)document.documentElement.dataset.civweaveCampusState=campusState;
   renderHelp();
   return packet;
 }
@@ -180,8 +183,8 @@ function renderInstallButton(){
   const button=$('#install-app');
   if(!button)return;
   if(standalone()||installObserved){
-    if(shellPhase==='needs-repair')button.textContent='Repair shell';
-    else button.textContent='Open Civweave';
+    const text=shellPhase==='needs-repair'?'Repair shell':'Open Civweave';
+    if(button.textContent!==text)button.textContent=text;
   }
 }
 
@@ -234,7 +237,6 @@ async function pauseCampus(){
   renderCampus(campusStatus||{});
   const packet=await askWorker('PAUSE_OFFLINE_PACKAGE',8000);
   if(STATUS_TYPES.has(packet?.type))renderCampus(packet);
-  // The active batch may need to finish before the final paused packet arrives.
   setTimeout(()=>refreshCampusStatus(),220);
   setTimeout(()=>{if(pausing){pausing=false;refreshCampusStatus()}},12000);
 }
@@ -254,8 +256,6 @@ function onCampusButton(event){
     pauseCampus();
     return;
   }
-  // Synthetic clicks are used by the required-campus autostarter. A deliberate pause
-  // survives page reloads and must only be resumed by a real user click.
   if(packet.paused&&!event.isTrusted){
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -264,7 +264,7 @@ function onCampusButton(event){
   }
   pausing=false;
   registerResumeSync();
-  if(button)button.disabled=false;
+  if(button&&button.disabled)button.disabled=false;
 }
 
 function reconcile(){
