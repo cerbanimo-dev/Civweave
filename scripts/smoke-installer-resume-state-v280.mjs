@@ -11,6 +11,7 @@ const files={
   worker:read('public/service-worker-offline-v211-override.js'),
   controller:read('public/app/installer-state-machine-v280.js'),
   autostart:read('public/app/required-campus-autostart-v1.js'),
+  background:read('public/app/campus-background-download-v241.js'),
   entry:read('public/service-worker-v203.js'),
   shell:read('public/service-worker-installer-state-v280.js')
 };
@@ -27,9 +28,14 @@ assert.match(files.controller,/needs repair/);
 assert.match(files.controller,/addEventListener\('click',onCampusButton,true\)/);
 assert.match(files.autostart,/campusIsPaused/);
 assert.match(files.autostart,/installer-state-machine-v280/);
+assert.match(files.background,/status\?\.ready\|\|status\?\.paused/);
+assert.match(files.background,/!packet\.ready&&!packet\.paused/);
+assert.match(files.background,/!lastStatus\?\.paused/);
+assert.match(files.background,/data-state="paused"/);
 assert.match(files.entry,/service-worker-installer-state-v280/);
 assert.match(files.entry,/resumable-pause-v280/);
 assert.match(files.shell,/required-campus-autostart-v1\.js/);
+assert.match(files.shell,/campus-background-download-v241\.js/);
 
 const listeners={};
 const context={
