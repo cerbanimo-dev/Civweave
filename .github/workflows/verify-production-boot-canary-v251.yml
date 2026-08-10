@@ -9,7 +9,7 @@ on:
       - 'VERSION'
       - 'package.json'
       - 'wrangler.jsonc'
-      - 'CLOUDFLARE-SETUP.md'
+      - 'docs/operations/cloudflare-setup.md'
       - 'public/app/manifest.webmanifest'
       - 'public/app/installed-entry-v146.js'
       - 'public/service-worker-v203.js'
