@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='document-lifecycle-v274-phone-ledger';
+const VERSION='document-lifecycle-v273-local-ai-management';
 const LEGACY_ENTRY_REVISION='document-lifecycle-v269-ai-settings-entry';
 if(globalThis.CivweaveDocumentLifecycleV221?.version===VERSION)return;
 let active=true;
