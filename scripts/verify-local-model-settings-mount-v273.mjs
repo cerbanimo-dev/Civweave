@@ -3,19 +3,20 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [lifecycle,campus,settings,bootstrap,controller,pulse]=await Promise.all([
+const [lifecycle,campus,settings,bootstrap,controller,pulse,registry]=await Promise.all([
   read('public/app/document-lifecycle-v221.js'),
   read('public/app/working-campus-v156.part5.txt'),
   read('public/app/local-ai/settings-panel-v267.js'),
   read('public/app/local-ai/bootstrap-v266.js'),
   read('public/app/model-settings-controller-v173.js'),
   read('public/app/local-ai/test-pulse-v269.js'),
+  read('public/app/local-ai/model-registry-v266.js'),
 ]);
 
-for(const source of [lifecycle,settings,bootstrap,controller,pulse])new Function(source);
+for(const source of [lifecycle,settings,bootstrap,controller,pulse,registry])new Function(source);
 new Function(campus.replace(/\}\)\(\);\s*$/,''));
 
-assert.match(lifecycle,/document-lifecycle-v276-local-ai-metadata-repair/);
+assert.match(lifecycle,/document-lifecycle-v277-phone-1b-tier/);
 assert.match(lifecycle,/ensureLocalAISettingsManagement/);
 assert.match(lifecycle,/enhanceLocalAISettings/);
 assert.match(lifecycle,/civweave:model-settings-opened/);
@@ -25,7 +26,7 @@ assert.match(lifecycle,/CivweaveLocalModelDownloadV266\?\.status/);
 assert.match(lifecycle,/metadataOnlyRepair===true/);
 assert.match(lifecycle,/CivweaveLocalModelRegistryV266\?\.installable/);
 assert.match(lifecycle,/CivweaveLocalModelBridgeV266\?\.patch/);
-assert.match(lifecycle,/1\.0\.80-local-ai-bootstrap-v276-metadata-repair/);
+assert.match(lifecycle,/1\.0\.80-local-ai-bootstrap-v277-phone-1b-tier/);
 assert.doesNotMatch(lifecycle,/new Worker\s*\(/);
 assert.doesNotMatch(lifecycle,/\.generate\s*\(/);
 
@@ -37,7 +38,16 @@ assert.match(bootstrap,/test-pulse-v269\.js/);
 assert.match(bootstrap,/metadata-repair-v276\.js/);
 assert.match(bootstrap,/backendFallback:true/);
 assert.match(bootstrap,/metadataOnlyRepair:true/);
+assert.match(bootstrap,/phone1BTier:true/);
 assert.match(controller,/civweave:model-settings-opened/);
+
+assert.match(registry,/id:'gemma3-1b-it-q4f16'/);
+assert.match(registry,/repo:'onnx-community\/gemma-3-1b-it-ONNX'/);
+assert.match(registry,/revision:'a7fa005d133fd9fc99e78b812f450742ad37426d'/);
+assert.match(registry,/\['onnx\/model_q4f16\.onnx_data',700_000_000,true\]/);
+assert.match(registry,/tier:'Standard'/);
+assert.match(registry,/recommended:'default'/);
+assert.match(registry,/id:'qwen3-1\.7b-q4f16',label:'Qwen 3 1\.7B',tier:'Large'/);
 
 assert.match(campus,/bootstrap-v266\.js\?v=1\.0\.67-v271/);
 assert.match(campus,/CivweaveLocalModelDownloadV266\?\.status/);
@@ -65,7 +75,7 @@ const document={
         sandbox.CivweaveLocalModelBridgeV266={patch(){return true}};
         sandbox.CivweaveLocalAISettingsV266={version:'future-settings-version',enhance(){enhanceCalls+=1;return{dataset:{localPanel:true}}}};
         sandbox.CivweaveLocalModelTestPulseV269={version:'future-pulse-version',enhance(panel){assert.equal(panel?.dataset?.localPanel,true);pulseEnhanceCalls+=1}};
-        sandbox.CivweaveLocalAIBootstrapV266={version:'1.0.80-local-ai-bootstrap-v276-metadata-repair',ready:Promise.resolve(true)};
+        sandbox.CivweaveLocalAIBootstrapV266={version:'1.0.80-local-ai-bootstrap-v277-phone-1b-tier',ready:Promise.resolve(true)};
       }
       queueMicrotask(()=>script.onload?.());
       return script;
@@ -102,11 +112,11 @@ assert.ok(enhanceCalls>=1,'Opening canonical AI settings should mount the downlo
 assert.ok(pulseEnhanceCalls>=1,'Late-loaded Raw Model Pulse should mount after the local manager panel.');
 assert.equal(workerCalls,0,'Opening AI settings must not start a local inference Worker.');
 assert.equal(generateCalls,0,'Opening AI settings must not invoke model generation.');
-assert.equal(sandbox.CivweaveDocumentLifecycleV221.localAIManagementReady(),true,'Pinned metadata-repair local stack should qualify when its capabilities are mounted.');
+assert.equal(sandbox.CivweaveDocumentLifecycleV221.localAIManagementReady(),true,'Pinned phone-1B local stack should qualify when its capabilities are mounted.');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-model-settings-mount-v276-metadata-repair',
+  revision:'local-model-settings-mount-v277-phone-1b-tier',
   canonicalSettingsMount:true,
   pinnedBootstrapReadiness:true,
   managementControlsPreserved:true,
@@ -114,6 +124,8 @@ console.log(JSON.stringify({
   inferenceDormantOnOpen:true,
   backendFallbackBootstrap:true,
   metadataOnlyRepair:true,
+  phone1BTier:true,
+  defaultPhoneModel:'gemma3-1b-it-q4f16',
   bootstrapLoads,
   enhanceCalls,
   pulseEnhanceCalls,
