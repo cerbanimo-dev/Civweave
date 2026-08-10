@@ -21,8 +21,8 @@ const jsonResponse=(body,status=200)=>new Response(JSON.stringify(body),{status,
 function liveConfig(){return{liveMoneyEnabled:true,emergencyStop:false,complianceApproved:true,jurisdictionApproved:true,kycAmlReady:true,taxReportingReady:true,termsApproved:true};}
 
 class FakeDirectProvider{
-  constructor(){this.id='stripe-connect-direct-v1';this.mode='live';this.credentialsPresent=true;this.webhookVerificationReady=true;this.refundsReady=true;this.reconciliationReady=true;this.operatorPayouts='stripe-connected-account-native';this.checkoutCalls=[];this.refunds=[];}
-  async createStandardAccount(){return{id:'acct_node_1'}}
+  constructor(){this.id='stripe-connect-direct-v1';this.mode='live';this.credentialsPresent=true;this.webhookVerificationReady=true;this.refundsReady=true;this.reconciliationReady=true;this.operatorPayouts='stripe-connected-account-native';this.checkoutCalls=[];this.refunds=[];this.accountCreates=0;}
+  async createStandardAccount(){this.accountCreates+=1;return{id:'acct_node_1'}}
   async createAccountLink(){return{url:'https://connect.stripe.test/onboard',expires_at:2_000_000_000}}
   async retrieveAccount(){return{id:'acct_node_1',charges_enabled:true,payouts_enabled:true,details_submitted:true,requirements:{currently_due:[],past_due:[]}}}
   async createTopUpCheckout(input){this.checkoutCalls.push(input);return{id:'cs_live_1',url:'https://checkout.stripe.test/cs_live_1'}}
@@ -31,13 +31,13 @@ class FakeDirectProvider{
   async refundTopUp(input){this.refunds.push(input);return{id:'re_1',amount:input.amountCents,status:'succeeded'}}
 }
 
-test('live node money edge registers a signed node, creates direct checkout, and settles into the node wallet event lane',async()=>{
+test('money edge issues a short-lived identity-bound grant, owns the platform fee, and rejects grant replay',async()=>{
   const dir=mkdtempSync(path.join(os.tmpdir(),'cw-money-edge-'));
   const nodeKeys=pemPair(),edgeKeys=pemPair(),provider=new FakeDirectProvider();
   const delivered=[];
   const fetchImpl=async(url,options={})=>{
     const u=new URL(url);
-    if(u.origin==='https://node.example'&&u.pathname==='/api/ai/node/manifest')return jsonResponse({manifest:{nodeId:'node-1',operatorId:'operator-1',publicKey:nodeKeys.publicKey,platformFee:{basisPoints:500}}});
+    if(u.origin==='https://node.example'&&u.pathname==='/api/ai/node/manifest')return jsonResponse({manifest:{nodeId:'node-1',operatorId:'operator-1',publicKey:nodeKeys.publicKey,platformFee:{basisPoints:9999}}});
     if(u.origin==='https://node.example'&&u.pathname==='/api/ai/node/live/challenge'){
       const body=JSON.parse(String(options.body||'{}'));
       return jsonResponse({nodeId:body.nodeId,signature:challengeSignature({nodeId:body.nodeId,challenge:body.challenge,privateKey:nodeKeys.privateKey})});
@@ -50,12 +50,24 @@ test('live node money edge registers a signed node, creates direct checkout, and
     }
     throw new Error(`unexpected fetch ${u.href}`);
   };
-  const service=new NodeMoneyEdgeService({databasePath:path.join(dir,'edge.sqlite'),provider,privateKey:edgeKeys.privateKey,keyId:'edge-key',config:liveConfig(),fetchImpl,now:()=>1_700_000_000_000});
+  const service=new NodeMoneyEdgeService({databasePath:path.join(dir,'edge.sqlite'),provider,privateKey:edgeKeys.privateKey,keyId:'edge-key',platformFeeBps:500,config:liveConfig(),fetchImpl,now:()=>1_700_000_000_000});
   try{
     assert.equal(service.readiness().liveReady,true);
-    const registration=await service.registerNode({nodeId:'node-1',operatorId:'operator-1',callbackUrl:'https://node.example',email:'operator@example.test',country:'US'});
+    assert.equal(service.readiness().platformFeeBps,500);
+    const trust=service.trustDocument();
+    assert.equal(trust.algorithm,'Ed25519');
+    assert.equal(trust.fingerprint,crypto.createHash('sha256').update(String(edgeKeys.publicKey).trim()).digest('hex'));
+
+    const enrollment=await service.createEnrollmentGrant({nodeId:'node-1',operatorId:'operator-1',callbackUrl:'https://node.example'});
+    assert.equal(enrollment.platformFeeBps,500,'Cerbanimo fee must come from the money edge, not the node manifest');
+    assert.equal(enrollment.singleUse,true);
+    const registration=await service.registerNode({nodeId:'node-1',operatorId:'operator-1',callbackUrl:'https://node.example',enrollmentGrant:enrollment.token,email:'operator@example.test',country:'US'});
     assert.equal(registration.connectedAccountId,'acct_node_1');
+    assert.equal(registration.platformFeeBps,500);
     assert.equal(registration.operatorPayouts,'stripe-connected-account-native');
+    assert.equal(provider.accountCreates,1);
+    await assert.rejects(()=>service.registerNode({nodeId:'node-1',operatorId:'operator-1',callbackUrl:'https://node.example',enrollmentGrant:enrollment.token}),/already used/i);
+    assert.equal(provider.accountCreates,1,'grant replay must not create another Stripe account');
 
     const input={nodeId:'node-1',userId:'user-1',grossCents:1000,currency:'USD',idempotencyKey:'topup-key-1',successUrl:'https://node.example/app/federation-finder-local-v269.html?paid=1',cancelUrl:'https://node.example/app/federation-finder-local-v269.html?cancel=1'};
     const raw=Buffer.from(JSON.stringify(input));
@@ -73,6 +85,9 @@ test('live node money edge registers a signed node, creates direct checkout, and
     assert.equal(delivered[0].type,'topup.paid');
     assert.equal(delivered[0].grossCents,1000);
     assert.equal(delivered[0].processorFeeCents,59);
+    assert.equal(delivered[0].platformFeeBps,500);
+    assert.equal(delivered[0].platformFeeCents,50);
+    assert.equal(delivered[0].metadata.feeAuthority,'cerbanimo-money-edge');
     assert.equal(delivered[0].userCreditCents,1000);
     assert.equal(delivered[0].mintEffect,0);
     assert.equal(delivered[0].supplyEffect,0);

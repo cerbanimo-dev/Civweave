@@ -1,15 +1,31 @@
 {
   "provider": "stripe-connect-direct-v1",
-  "operatorAccountType": "standard",
+  "operatorAccountModel": "configurable-controller-v1",
   "chargeModel": "direct-charge",
   "operatorPayouts": "stripe-connected-account-native",
   "currency": "USD",
   "liveMoneyEnabled": false,
   "emergencyStop": false,
+  "platformFeeAuthority": "cerbanimo-money-edge",
+  "platformFeeEnv": "CIVWEAVE_MONEY_PLATFORM_FEE_BPS",
   "registration": {
-    "inviteRequired": true,
+    "mode": "proof-of-key-short-lived-grant",
+    "sharedSecretRequired": false,
+    "grantTtlSeconds": 600,
+    "grantStorage": "sha256-only",
+    "grantBinding": [
+      "node-id",
+      "operator-id",
+      "callback-origin",
+      "receipt-public-key"
+    ],
     "callbackPolicy": "https-public-internet-only",
-    "inviteStorageOnNode": false
+    "singleUse": true
+  },
+  "trustBootstrap": {
+    "moneyEdgeUrl": "https://commonweave-host-node-9l1u.onrender.com",
+    "firstUse": "https-fetch-fingerprint-and-pin",
+    "rotation": "reject-unannounced-key-change"
   },
   "requiredOperationalApprovals": [
     "compliance",
@@ -18,25 +34,33 @@
     "tax-reporting-readiness",
     "provider-terms"
   ],
-  "secrets": {
-    "moneyEdgeOnly": [
+  "moneyEdgeSecrets": {
+    "requiredExternal": [
       "STRIPE_SECRET_KEY",
-      "STRIPE_CONNECT_WEBHOOK_SECRET",
+      "STRIPE_CONNECT_WEBHOOK_SECRET"
+    ],
+    "generatedLocallyOnPersistentStorage": [
+      "money-edge-ed25519-signing-key",
+      "money-edge-admin-secret"
+    ],
+    "optionalMigrationOverrides": [
       "CIVWEAVE_MONEY_EDGE_PRIVATE_KEY",
       "CIVWEAVE_MONEY_EDGE_ADMIN_SECRET",
-      "CIVWEAVE_MONEY_EDGE_REGISTRATION_SECRET"
-    ],
-    "nodeOnly": [
-      "NODE_AI_RECEIPT_PRIVATE_KEY",
-      "NODE_AI_INTERNAL_SECRET",
-      "NODE_AI_AUTH_SECRET"
-    ],
-    "ephemeralOperatorInput": [
-      "money-edge registration invitation"
-    ],
-    "publicPins": [
-      "NODE_AI_RECEIPT_PUBLIC_KEY",
-      "CIVWEAVE_MONEY_EDGE_PUBLIC_KEY"
+      "CIVWEAVE_MONEY_EDGE_KEY_ID"
     ]
+  },
+  "nodeBootstrap": {
+    "manualCerbanimoSecretsRequired": false,
+    "manualStripeSecretsRequired": false,
+    "generatedLocallyOnFirstStart": [
+      "node-id",
+      "operator-id",
+      "receipt-ed25519-keypair",
+      "auth-secret",
+      "internal-operator-secret",
+      "capability-secret",
+      "legacy-payment-webhook-secret"
+    ],
+    "persistentState": "DATA_DIR/node-ai-bootstrap-v1.json"
   }
 }

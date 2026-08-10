@@ -4,12 +4,17 @@ on:
   pull_request:
     paths:
       - 'lib/node-money-edge-*.mjs'
+      - 'lib/node-ai-bootstrap-v1.mjs'
+      - 'lib/node-ai-operator-session-v1.mjs'
       - 'lib/node-ai-live-commerce-v1.mjs'
       - 'lib/ai-wallet-http-v1.mjs'
       - 'lib/ai-wallet-service-v1.mjs'
       - 'public/app/node-ai-live-*.js'
+      - 'public/app/node-ai-operator-*.js'
       - 'public/app/node-ai-operator-v1.html'
       - 'public/app/federation-finder-local-v269.html'
+      - 'scripts/test-node-zero-secret-bootstrap-v1.mjs'
+      - 'scripts/test-node-operator-session-v1.mjs'
       - 'scripts/test-node-money-edge-v1.mjs'
       - 'scripts/test-node-money-edge-registration-v1.mjs'
       - 'scripts/test-node-money-edge-stripe-configurable-v1.mjs'
@@ -20,10 +25,15 @@ on:
     branches: [main]
     paths:
       - 'lib/node-money-edge-*.mjs'
+      - 'lib/node-ai-bootstrap-v1.mjs'
+      - 'lib/node-ai-operator-session-v1.mjs'
       - 'lib/node-ai-live-commerce-v1.mjs'
       - 'lib/ai-wallet-http-v1.mjs'
       - 'lib/ai-wallet-service-v1.mjs'
       - 'public/app/node-ai-live-*.js'
+      - 'public/app/node-ai-operator-*.js'
+      - 'scripts/test-node-zero-secret-bootstrap-v1.mjs'
+      - 'scripts/test-node-operator-session-v1.mjs'
       - 'scripts/test-node-money-edge-v1.mjs'
       - 'scripts/test-node-money-edge-registration-v1.mjs'
       - 'scripts/test-node-money-edge-stripe-configurable-v1.mjs'
@@ -41,16 +51,24 @@ jobs:
       - name: Syntax check live node money path
         run: |
           node --check lib/node-money-edge-stripe-v1.mjs
+          node --check lib/node-money-edge-bootstrap-v1.mjs
           node --check lib/node-money-edge-v1.mjs
           node --check lib/node-money-edge-http-v1.mjs
+          node --check lib/node-ai-bootstrap-v1.mjs
+          node --check lib/node-ai-operator-session-v1.mjs
           node --check lib/node-ai-live-commerce-v1.mjs
           node --check lib/ai-wallet-http-v1.mjs
           node --check lib/ai-wallet-service-v1.mjs
           node --check public/app/node-ai-live-marketplace-v1.js
+          node --check public/app/node-ai-operator-local-session-v1.js
           node --check public/app/node-ai-live-operator-v1.js
           node --check scripts/test-node-money-edge-stripe-configurable-v1.mjs
+          node --check scripts/test-node-zero-secret-bootstrap-v1.mjs
+          node --check scripts/test-node-operator-session-v1.mjs
       - name: Exercise money edge and node trust boundary
         run: |
+          node --test scripts/test-node-zero-secret-bootstrap-v1.mjs
+          node --test scripts/test-node-operator-session-v1.mjs
           node --test scripts/test-node-money-edge-stripe-configurable-v1.mjs
           node --test scripts/test-node-money-edge-v1.mjs
           node --test scripts/test-node-money-edge-registration-v1.mjs
