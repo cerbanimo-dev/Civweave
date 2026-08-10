@@ -2,9 +2,11 @@
 'use strict';
 
 const STATUS_FALLBACK_MS=8000;
+const STATE_CONTROLLER_URL='/app/installer-state-machine-v280.js?v=installer-state-machines-v280';
 const startedAt=Date.now();
 let autoStarted=false;
 let timer=0;
+let controllerPromise=null;
 
 const $=selector=>document.querySelector(selector);
 
@@ -14,6 +16,27 @@ function replaceText(node,replacements){
   let next=current;
   for(const [pattern,replacement] of replacements)next=next.replace(pattern,replacement);
   if(next!==current)node.textContent=next;
+}
+
+function loadStateController(){
+  if(globalThis.CivweaveInstallerStateV280)return Promise.resolve(globalThis.CivweaveInstallerStateV280);
+  if(controllerPromise)return controllerPromise;
+  controllerPromise=new Promise(resolve=>{
+    const existing=document.querySelector('script[data-cw-installer-state-v280]');
+    if(existing){
+      existing.addEventListener('load',()=>resolve(globalThis.CivweaveInstallerStateV280||null),{once:true});
+      existing.addEventListener('error',()=>resolve(null),{once:true});
+      return;
+    }
+    const script=document.createElement('script');
+    script.src=STATE_CONTROLLER_URL;
+    script.async=false;
+    script.dataset.cwInstallerStateV280='true';
+    script.addEventListener('load',()=>resolve(globalThis.CivweaveInstallerStateV280||null),{once:true});
+    script.addEventListener('error',()=>resolve(null),{once:true});
+    document.head.append(script);
+  });
+  return controllerPromise;
 }
 
 function installAssetLockboardLink(){
@@ -53,8 +76,13 @@ function campusIsReady(){
 }
 function campusIsRunning(){
   const status=latestStatus();
-  if(status?.running)return true;
+  if(status?.running&&!status?.paused)return true;
   return /^downloading\b/i.test($('#offline-package-state')?.textContent||'');
+}
+function campusIsPaused(){
+  const status=latestStatus();
+  if(status?.paused)return true;
+  return /^paused\b/i.test($('#offline-package-state')?.textContent||'');
 }
 function statusHasSettled(){return Boolean(latestStatus())||Date.now()-startedAt>=STATUS_FALLBACK_MS}
 
@@ -68,7 +96,7 @@ function keepInstallIndependent(){
 function tryAutoStart(){
   applyRequiredCampusLanguage();
   keepInstallIndependent();
-  if(autoStarted||campusIsReady()||campusIsRunning()||!statusHasSettled())return;
+  if(autoStarted||campusIsReady()||campusIsRunning()||campusIsPaused()||!statusHasSettled())return;
   const button=$('#download-offline-package');
   if(!button||button.disabled)return;
   autoStarted=true;
@@ -78,9 +106,10 @@ function tryAutoStart(){
 function stopTimer(){if(timer){clearInterval(timer);timer=0}}
 function onStatus(){
   tryAutoStart();
-  if(autoStarted||campusIsReady())stopTimer();
+  if(autoStarted||campusIsReady()||campusIsPaused())stopTimer();
 }
-function startWatching(){
+async function startWatching(){
+  await loadStateController();
   installAssetLockboardLink();
   addEventListener('civweave:offline-campus-status',onStatus);
   navigator.serviceWorker?.addEventListener?.('controllerchange',onStatus);
