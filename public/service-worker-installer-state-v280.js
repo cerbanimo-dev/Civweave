@@ -7,7 +7,9 @@ const INSTALLER_STATE_ASSETS = [
   '/app/required-campus-autostart-v1.js',
   '/app/campus-background-download-v241.js',
   '/app/shared/civweave-contribution-security-v1.js',
+  '/app/shared/civweave-validator-committee-v2.js',
   '/app/shared/civweave-contribution-ship-guard-v1.js',
+  '/app/shared/civweave-canonical-reward-mesh-bridge-v1.js',
   '/app/contribution-security-settings-entry-v1.js',
   '/app/contribution-security-v1.html',
   '/app/contribution-security-v1.js'
@@ -20,11 +22,13 @@ try {
 } catch {}
 
 self.CivweaveInstallerStateWorkerV280 = Object.freeze({
-  revision: 'installer-state-machines-v280-security-r3',
+  revision: 'installer-state-machines-v280-security-r4-qualified-committees',
   assets: INSTALLER_STATE_ASSETS.slice(),
   shellRequired: true,
   contributionSecurityRequired: true,
+  validatorCommitteeV2Required: true,
   walletContainmentRequired: true,
+  canonicalRewardMeshBridgeRequired: true,
   contributionSecuritySettingsRequired: true
 });
 })();
