@@ -6,6 +6,11 @@
   "currency": "USD",
   "liveMoneyEnabled": false,
   "emergencyStop": false,
+  "registration": {
+    "inviteRequired": true,
+    "callbackPolicy": "https-public-internet-only",
+    "inviteStorageOnNode": false
+  },
   "requiredOperationalApprovals": [
     "compliance",
     "jurisdiction",
@@ -18,12 +23,16 @@
       "STRIPE_SECRET_KEY",
       "STRIPE_CONNECT_WEBHOOK_SECRET",
       "CIVWEAVE_MONEY_EDGE_PRIVATE_KEY",
-      "CIVWEAVE_MONEY_EDGE_ADMIN_SECRET"
+      "CIVWEAVE_MONEY_EDGE_ADMIN_SECRET",
+      "CIVWEAVE_MONEY_EDGE_REGISTRATION_SECRET"
     ],
     "nodeOnly": [
       "NODE_AI_RECEIPT_PRIVATE_KEY",
       "NODE_AI_INTERNAL_SECRET",
       "NODE_AI_AUTH_SECRET"
+    ],
+    "ephemeralOperatorInput": [
+      "money-edge registration invitation"
     ],
     "publicPins": [
       "NODE_AI_RECEIPT_PUBLIC_KEY",
