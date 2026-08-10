@@ -24,152 +24,24 @@ jobs:
           ref: agent/open-learning-media-harvest-v1
           fetch-depth: 0
 
-      - name: Wire and harden launch service
+      - name: Apply launch finalizer
+        run: python scripts/finalize-open-learning-media-launch-v1.py
+
+      - name: Validate launch service
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          import json
-
-          def insert_before(path, marker, insertion):
-              p=Path(path); s=p.read_text()
-              if insertion.strip() in s: return
-              assert marker in s, (path, marker)
-              p.write_text(s.replace(marker,insertion+marker,1))
-
-          # Start one shared media/cache layer wherever Civweave can pair or generate lessons/tasks.
-          insert_before('public/app/working-campus-v156.html','</body>',
-              '<script src="/app/local-object-mesh-v146.js?v=open-media-cache-v1" defer></script>\n'
-              '<script type="module" src="/app/open-learning-media-cache-v1.mjs?v=open-media-cache-v1"></script>\n')
-          insert_before('public/app/cabinets/living-school/index.html','  <script type="module">\n  const host=',
-              '  <script src="/app/local-object-mesh-v146.js?v=open-media-cache-v1" defer></script>\n'
-              '  <script type="module" src="/app/open-learning-media-cache-v1.mjs?v=open-media-cache-v1"></script>\n')
-          insert_before('public/app/realm-console-v140.html','<script type="module" src="/app/cerbanimo-video-task-contract-v1.mjs?v=video-atlas-v1"></script>',
-              '<script type="module" src="/app/open-learning-media-cache-v1.mjs?v=open-media-cache-v1"></script>\n')
-
-          # Required offline metadata/runtime, optional media bytes.
-          manifest=Path('public/app/offline-package-v208.json')
-          data=json.loads(manifest.read_text())
-          data['revision']='canonical-background-campus-v241-open-learning-media-v1'
-          for asset in [
-              '/app/open-learning-media-cache-v1.mjs',
-              '/app/open-learning-media-installer-v1.mjs',
-              '/downloads/knowledge-schools/open-learning-media/lookup.json',
-              '/downloads/knowledge-schools/open-learning-media/harvest-policy.json',
-              '/downloads/knowledge-schools/open-learning-media/summary.json',
-          ]:
-              if asset not in data['assets']: data['assets'].append(asset)
-          manifest.write_text(json.dumps(data,indent=2)+'\n')
-
-          # Protect optional media across app-shell upgrades and serve it from a same-origin synthetic route.
-          sw=Path('public/service-worker-core-v208.js')
-          s=sw.read_text()
-          preserve="const PRESERVED_CACHE_PREFIXES = [\n  'cwknowledge-',"
-          if "'cw-open-learning-media-'," not in s:
-              assert preserve in s
-              s=s.replace(preserve,"const PRESERVED_CACHE_PREFIXES = [\n  'cw-open-learning-media-',\n  'cwknowledge-',",1)
-          version_marker="const FETCH_TIMEOUT_MS = 12000;"
-          route_constants="const OPEN_MEDIA_ROUTE_PREFIX = '/__civweave_open_media__/';\nconst OPEN_MEDIA_CACHE = 'cw-open-learning-media-v1';"
-          if route_constants not in s:
-              assert version_marker in s
-              s=s.replace(version_marker,version_marker+'\n'+route_constants,1)
-          fetch_marker="self.addEventListener('fetch', event => {\n  const request = event.request;\n  if (!['GET', 'HEAD'].includes(request.method)) return;\n  const url = new URL(request.url);"
-          route_handler="""self.addEventListener('fetch', event => {\n  const request = event.request;\n  if (!['GET', 'HEAD'].includes(request.method)) return;\n  const url = new URL(request.url);\n  if (url.origin === self.location.origin && url.pathname.startsWith(OPEN_MEDIA_ROUTE_PREFIX)) {\n    event.respondWith((async () => {\n      const cache = await caches.open(OPEN_MEDIA_CACHE);\n      const cached = await cache.match(new Request(url.href, { method: 'GET' }));\n      if (!cached) return new Response('Open learning media is not cached on this device.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });\n      if (request.method === 'HEAD') return new Response(null, { status: cached.status, statusText: cached.statusText, headers: cached.headers });\n      return cached;\n    })());\n    return;\n  }"""
-          if 'url.pathname.startsWith(OPEN_MEDIA_ROUTE_PREFIX)' not in s:
-              assert fetch_marker in s
-              s=s.replace(fetch_marker,route_handler,1)
-          sw.write_text(s)
-
-          cache=Path('public/app/open-learning-media-cache-v1.mjs')
-          s=cache.read_text()
-          if 'const MIN_RELEVANCE_SCORE=18;' not in s:
-              s=s.replace('const AUTOMATIC_ITEM_MAX_BYTES=48*1024*1024;','const AUTOMATIC_ITEM_MAX_BYTES=48*1024*1024;\nconst MIN_RELEVANCE_SCORE=18;',1)
-
-          # Quota budget must never exceed the browser-reported quota fraction.
-          old="export async function effectiveBudgetBytes(){const policy=await storagePolicy();let budget=policy.budgetBytes;try{const estimate=await navigator.storage?.estimate?.();const quota=Number(estimate?.quota)||0;if(quota>0)budget=Math.min(budget,Math.max(64*1024*1024,Math.floor(quota*0.45)))}catch{}return budget}"
-          new="export async function effectiveBudgetBytes(){const policy=await storagePolicy();let budget=policy.budgetBytes;try{const estimate=await navigator.storage?.estimate?.();const quota=Number(estimate?.quota)||0;if(quota>0)budget=Math.min(budget,Math.max(1,Math.floor(quota*0.45)))}catch{}return budget}"
-          if old in s: s=s.replace(old,new,1)
-          assert new in s
-
-          # Stream + hash with bounded storage, trustworthy size reservation and orphan cleanup.
-          start=s.index('export async function cacheRecord(')
-          end=s.index('export async function uncache(',start)
-          s=s[:start]+"""export async function cacheRecord(record,{automatic=false,pinned=false,force=false}={}){\n  await warmup();if(!isRedistributable(record))throw new Error('Media record is not approved for the redistributable cache.');\n  const key=recordKey(record),existing=await recordGet(key);if(existing&&!force)return touch(existing);\n  const lookup=await loadLookup();if(!catalogFresh(lookup)&&!force)throw new Error('Open Learning Media catalog is stale; refusing a new network download until metadata refreshes.');\n  const policy=await storagePolicy();const automaticLimit=Math.min(AUTOMATIC_ITEM_MAX_BYTES,policy.maxAutomaticItemBytes||AUTOMATIC_ITEM_MAX_BYTES);const file=chooseFile(record,{maxBytes:automatic?automaticLimit:Infinity,preferSmall:true});if(!file)throw new Error('No browser-playable direct media file is available.');\n  const advertisedBytes=Math.max(0,Number(file.bytes)||0);if(automatic&&advertisedBytes>automaticLimit)throw new Error(`Automatic cache skipped ${bytesLabel(advertisedBytes)} item above the ${bytesLabel(automaticLimit)} per-item cap.`);\n  emit('download-start',{recordKey:key,title:record.title,bytes:advertisedBytes,automatic});\n  const cache=await mediaCache(),request=syntheticRequest(key);\n  try{\n    const response=await fetch(file.url,{cache:'no-store'});if(!response.ok||!response.body)throw new Error(`Media origin returned ${response.status}.`);\n    const headerBytes=Math.max(0,Number(response.headers.get('content-length'))||0),reserveBytes=Math.max(advertisedBytes,headerBytes);\n    if(!reserveBytes)throw new Error('Media origin did not provide a trustworthy file size; refusing unbounded local caching.');\n    if(automatic&&reserveBytes>automaticLimit)throw new Error(`Automatic cache skipped ${bytesLabel(reserveBytes)} item above the ${bytesLabel(automaticLimit)} per-item cap.`);\n    await ensureRoom(reserveBytes,key);\n    const[cacheStream,hashStream]=response.body.tee();const headers=new Headers(response.headers);if(!headers.get('content-type'))headers.set('content-type',fileMime(file));\n    const putPromise=cache.put(request,new Response(cacheStream,{status:200,statusText:'OK',headers}));const hashResult=await streamHash(hashStream);await putPromise;\n    if(hashResult.bytes>reserveBytes)await ensureRoom(hashResult.bytes,key);\n    const stored=normalizedStoredRecord({...record,topicSlug:record.topicSlug},file,hashResult.hash,hashResult.bytes,headers.get('content-type'),{origin:'internet',pinned});await recordPut(stored);emit('download-complete',{recordKey:key,hash:stored.contentHash,bytes:stored.bytes,title:stored.title});announceSoon();return stored;\n  }catch(error){await cache.delete(request).catch(()=>false);emit('download-error',{recordKey:key,title:record.title,error:error.message});throw error}\n}\n"""+s[end:]
-
-          # Same-origin cached playback avoids materializing a whole video blob when a controlling SW exists.
-          start=s.index('export async function cachedPlayback(')
-          end=s.index('function candidatesForQuery(',start)
-          s=s[:start]+"""export async function cachedPlayback(recordKeyValue){const row=await recordGet(recordKeyValue);if(!row)return null;let url=syntheticRequest(recordKeyValue).url;if(!globalThis.navigator?.serviceWorker?.controller){let blobUrl=objectUrls.get(recordKeyValue);if(!blobUrl){const cache=await mediaCache(),response=await cache.match(syntheticRequest(recordKeyValue));if(!response)return null;blobUrl=URL.createObjectURL(await response.blob());objectUrls.set(recordKeyValue,blobUrl)}url=blobUrl}await touch(row);return{kind:'open-media',url,title:row.title,creator:row.attribution?.creator||'',reason:'Playing from the local Open Learning Media cache.',source:'civweave-open-learning-media-cache',mime:row.mime,local:true,recordKey:row.recordKey,contentHash:row.contentHash,license:row.license,attribution:row.attribution}}\n"""+s[end:]
-
-          # A narrow launch catalog must clear a real relevance floor before it can supersede YouTube.
-          s=s.replace('.filter(record=>isRedistributable(record)).sort((a,b)=>b._score-a._score||Number(b.quality_score||0)-Number(a.quality_score||0))','.filter(record=>isRedistributable(record)&&record._score>=MIN_RELEVANCE_SCORE).sort((a,b)=>b._score-a._score||Number(b.quality_score||0)-Number(a.quality_score||0))',1)
-          assert 'record._score>=MIN_RELEVANCE_SCORE' in s
-          if 'function automaticNetworkAllowed()' not in s:
-              marker='export async function resolveOpenMedia(query,{schoolSlug=\'\',topicSlug=\'\',automaticCache=true}={}){'
-              helper="function automaticNetworkAllowed(){const connection=globalThis.navigator?.connection||globalThis.navigator?.mozConnection||globalThis.navigator?.webkitConnection;return!connection?.saveData&&!['slow-2g','2g'].includes(connection?.effectiveType)}\n"
-              assert marker in s
-              s=s.replace(marker,helper+marker,1)
-          s=s.replace('if(automaticCache){const policy=await storagePolicy();','if(automaticCache&&automaticNetworkAllowed()){const policy=await storagePolicy();',1)
-
-          # Pack downloads prefer the smallest high-confidence variants and retry alternate sources.
-          start=s.index('export async function prefetchTopic(')
-          end=s.index('function safeManifestRecord(',start)
-          s=s[:start]+"""function compactFileBytes(record){const files=(record?.files||[]).filter(file=>file?.url&&playableFile(file)).map(file=>Number(file?.bytes)||0).filter(bytes=>bytes>0);return files.length?Math.min(...files):Number.MAX_SAFE_INTEGER}\nexport async function prefetchTopic(topicSlug,{limit=1,pinned=false}={}){const lookup=await loadLookup();const records=(lookup.topics?.[topicSlug]||[]).filter(isRedistributable).map(record=>({...record,topicSlug})).sort((a,b)=>compactFileBytes(a)-compactFileBytes(b)||Number(b.quality_score||0)-Number(a.quality_score||0));const results=[];let successes=0,attempts=0;const maxAttempts=Math.max(6,limit*5);for(const record of records){if(successes>=limit||attempts>=maxAttempts)break;attempts++;try{results.push({ok:true,record:await cacheRecord(record,{automatic:false,pinned})});successes++}catch(error){results.push({ok:false,recordKey:recordKey(record),error:error.message})}}return results}\nexport async function prefetchFocusPack({limitPerTopic=1,pinned=false}={}){const results={};for(const slug of FOCUS_TOPICS)results[slug]=await prefetchTopic(slug,{limit:limitPerTopic,pinned});return results}\n"""+s[end:]
-
-          # Serialize both directions on each RTC channel and validate peer-advertised size/hash before writing.
-          maps="const peerInventory=new Map();\nconst incomingTransfers=new Map();"
-          if 'const peerSendChains=new Map();' not in s:
-              assert maps in s
-              s=s.replace(maps,"const peerInventory=new Map();\nconst peerSendChains=new Map();\nconst peerReceiveChains=new Map();\nconst incomingTransfers=new Map();",1)
-          start=s.index('async function acceptStart(')
-          end=s.index('async function finishTransfer(',start)
-          s=s[:start]+"""async function acceptStart(session,message){const row=message.record||{},peerKey=session.peerId||session.id,manifest=peerInventory.get(peerKey),advertised=manifest?.items?.find?.(entry=>entry.recordKey===row.recordKey&&entry.contentHash===row.contentHash);if(!advertised||!row.recordKey||!row.contentHash||!licenseAllowed(row.license)||clean(advertised.license?.spdx,80).toUpperCase()!==clean(row.license?.spdx,80).toUpperCase()){sendJson(session.channel,{type:'cw-media-reject',recordKey:row.recordKey,contentHash:row.contentHash,error:'media manifest or license rejected'});return}const expectedBytes=Math.max(0,Number(row.bytes)||0);if(!expectedBytes||expectedBytes!==Math.max(0,Number(advertised.bytes)||0)){sendJson(session.channel,{type:'cw-media-reject',recordKey:row.recordKey,contentHash:row.contentHash,error:'media byte count is missing or does not match the advertised manifest'});return}try{await ensureRoom(expectedBytes,row.recordKey)}catch(error){sendJson(session.channel,{type:'cw-media-reject',recordKey:row.recordKey,contentHash:row.contentHash,error:error.message});return}const stream=new TransformStream(),writer=stream.writable.getWriter(),hasher=new Sha256(),cache=await mediaCache(),request=syntheticRequest(row.recordKey);const headers=new Headers({'content-type':row.mime||'application/octet-stream','content-length':String(expectedBytes)});const putPromise=cache.put(request,new Response(stream.readable,{status:200,headers}));incomingTransfers.set(message.transferId,{transferId:message.transferId,sessionId:session.id,record:row,writer,hasher,received:0,putPromise,expectedHash:row.contentHash,expectedBytes,pendingBinary:false});emit('mesh-receive-start',{peerId:session.peerId,recordKey:row.recordKey,bytes:expectedBytes})}\n"""+s[end:]
-          start=s.index('async function finishTransfer(')
-          end=s.index('function resolveTransferWaiter(',start)
-          s=s[:start]+"""async function finishTransfer(transferId,message){const transfer=incomingTransfers.get(transferId);if(!transfer)return;incomingTransfers.delete(transferId);try{await transfer.writer.close();await transfer.putPromise;if(transfer.received!==transfer.expectedBytes)throw new Error(`Mesh media byte-count verification failed: expected ${transfer.expectedBytes}, received ${transfer.received}.`);const hash=transfer.hasher.digestHex();if(hash!==transfer.expectedHash||hash!==message.contentHash)throw new Error('Mesh media SHA-256 verification failed.');const r=transfer.record;const stored={recordKey:r.recordKey,provider:'mesh',providerId:r.recordKey,topicSlug:r.topicSlug||'',title:r.title||'Open learning media',description:'',sourceUrl:'',fileUrl:'',mime:r.mime||'application/octet-stream',bytes:transfer.received,contentHash:hash,license:r.license,attribution:r.attribution,cachePolicy:'MESH_REDISTRIBUTABLE',qualityScore:0,cachedAt:now(),lastAccessAt:now(),origin:'mesh',pinned:false};await recordPut(stored);emit('mesh-receive-complete',{recordKey:r.recordKey,hash,bytes:transfer.received});resolveTransferWaiter(hash,null,stored);announceSoon()}catch(error){try{const cache=await mediaCache();await cache.delete(syntheticRequest(transfer.record.recordKey))}catch{}resolveTransferWaiter(transfer.expectedHash,error);emit('mesh-receive-error',{recordKey:transfer.record.recordKey,error:error.message})}}\n"""+s[end:]
-          start=s.index('function handleBinary(')
-          end=s.index('async function handleMediaMessage(',start)
-          s=s[:start]+"""async function handleBinary(session,data){for(const transfer of incomingTransfers.values()){if(transfer.sessionId!==session.id||!transfer.pendingBinary)continue;const bytes=data instanceof Uint8Array?data:new Uint8Array(data);transfer.pendingBinary=false;if(transfer.received+bytes.byteLength>transfer.expectedBytes){const error=new Error('Peer sent more media bytes than advertised.');incomingTransfers.delete(transfer.transferId);await transfer.writer.abort(error).catch(()=>{});transfer.putPromise.catch(()=>{});try{const cache=await mediaCache();await cache.delete(syntheticRequest(transfer.record.recordKey))}catch{}resolveTransferWaiter(transfer.expectedHash,error);emit('mesh-receive-error',{recordKey:transfer.record.recordKey,error:error.message});return true}transfer.hasher.update(bytes);transfer.received+=bytes.byteLength;await transfer.writer.write(bytes);return true}return false}\n"""+s[end:]
-          s=s.replace("if(typeof data!=='string'){handleBinary(session,data);return}","if(typeof data!=='string'){await handleBinary(session,data);return}",1)
-          old="if(message.type==='cw-media-request'){sendMedia(session,message).catch(error=>sendJson(session.channel,{type:'cw-media-reject',contentHash:message.contentHash,recordKey:message.recordKey,error:error.message}));return}"
-          new="if(message.type==='cw-media-request'){const prior=peerSendChains.get(session.id)||Promise.resolve();const next=prior.catch(()=>{}).then(()=>sendMedia(session,message)).catch(error=>sendJson(session.channel,{type:'cw-media-reject',contentHash:message.contentHash,recordKey:message.recordKey,error:error.message})).finally(()=>{if(peerSendChains.get(session.id)===next)peerSendChains.delete(session.id)});peerSendChains.set(session.id,next);return}"
-          if old in s: s=s.replace(old,new,1)
-          assert new in s
-          old_listener="channel.addEventListener('message',event=>handleMediaMessage(session,event.data).catch(error=>emit('mesh-protocol-error',{error:error.message})));"
-          new_listener="channel.addEventListener('message',event=>{const prior=peerReceiveChains.get(session.id)||Promise.resolve();const next=prior.catch(()=>{}).then(()=>handleMediaMessage(session,event.data)).catch(error=>emit('mesh-protocol-error',{error:error.message})).finally(()=>{if(peerReceiveChains.get(session.id)===next)peerReceiveChains.delete(session.id)});peerReceiveChains.set(session.id,next)});"
-          if old_listener in s: s=s.replace(old_listener,new_listener,1)
-          assert new_listener in s
-
-          # Report durable-storage state and expose the relevance floor for diagnostics.
-          start=s.index('export async function status()')
-          end=s.index('export function subscribe(',start)
-          s=s[:start]+"""export async function status(){const rows=await recordsAll(),policy=await storagePolicy(),budget=await effectiveBudgetBytes();let lookup=null;try{lookup=await loadLookup()}catch{}let estimate=null,persistentStorage=false;try{estimate=await navigator.storage?.estimate?.();persistentStorage=Boolean(await navigator.storage?.persisted?.())}catch{}return{revision:REVISION,records:rows.length,bytes:rows.reduce((sum,row)=>sum+(Number(row.bytes)||0),0),budgetBytes:budget,policy,quotaBytes:Number(estimate?.quota)||0,usageBytes:Number(estimate?.usage)||0,persistentStorage,catalogBuiltAt:lookup?.built_at||null,catalogFresh:Boolean(lookup&&catalogFresh(lookup)),catalogAgeMs:lookup?catalogAgeMs(lookup):Infinity,minimumRelevanceScore:MIN_RELEVANCE_SCORE,meshPeers:peerInventory.size,meshItems:[...peerInventory.values()].reduce((sum,item)=>sum+(item.items?.length||0),0)}}\n"""+s[end:]
-          s=s.replace('POLICY_PRESETS,licenseAllowed','POLICY_PRESETS,MIN_RELEVANCE_SCORE,licenseAllowed',1)
-          cache.write_text(s)
-
-          package=Path('package.json')
-          pdata=json.loads(package.read_text())
-          pdata.setdefault('scripts',{})['test:open-learning-media']='node scripts/test-open-learning-media-runtime-v1.mjs && python scripts/test-open-learning-media-harvest-v1.py'
-          package.write_text(json.dumps(pdata,indent=2)+'\n')
-
-          Path('.github/workflows/verify-open-learning-media-v1.yml').write_text('''name: Verify Open Learning Media v1\n\non:\n  push:\n    branches: [main, agent/open-learning-media-harvest-v1]\n    paths:\n      - scripts/harvest-open-learning-media-v1.py\n      - scripts/filter-open-learning-media-relevance-v1.py\n      - scripts/filter-open-learning-media-pedagogy-v1.py\n      - scripts/filter-open-learning-media-selection-v1.py\n      - scripts/test-open-learning-media-harvest-v1.py\n      - scripts/test-open-learning-media-runtime-v1.mjs\n      - public/app/open-learning-media-cache-v1.mjs\n      - public/app/open-learning-media-installer-v1.mjs\n      - public/app/video-learning-contract-v1.mjs\n      - public/app/video-atlas-installer-v1.js\n      - public/app/offline-package-v208.json\n      - public/service-worker-core-v208.js\n      - public/app/working-campus-v156.html\n      - public/app/cabinets/living-school/index.html\n      - public/app/realm-console-v140.html\n      - public/downloads/knowledge-schools/open-learning-media/**\n      - .github/workflows/verify-open-learning-media-v1.yml\n  pull_request:\n    paths:\n      - scripts/harvest-open-learning-media-v1.py\n      - scripts/filter-open-learning-media-relevance-v1.py\n      - scripts/filter-open-learning-media-pedagogy-v1.py\n      - scripts/filter-open-learning-media-selection-v1.py\n      - scripts/test-open-learning-media-harvest-v1.py\n      - scripts/test-open-learning-media-runtime-v1.mjs\n      - public/app/open-learning-media-cache-v1.mjs\n      - public/app/open-learning-media-installer-v1.mjs\n      - public/app/video-learning-contract-v1.mjs\n      - public/app/video-atlas-installer-v1.js\n      - public/app/offline-package-v208.json\n      - public/service-worker-core-v208.js\n      - public/app/working-campus-v156.html\n      - public/app/cabinets/living-school/index.html\n      - public/app/realm-console-v140.html\n      - public/downloads/knowledge-schools/open-learning-media/**\n      - .github/workflows/verify-open-learning-media-v1.yml\n\njobs:\n  verify:\n    runs-on: ubuntu-latest\n    timeout-minutes: 8\n    steps:\n      - uses: actions/checkout@v4\n      - name: Syntax check service\n        run: |\n          python -m py_compile scripts/harvest-open-learning-media-v1.py scripts/filter-open-learning-media-relevance-v1.py scripts/filter-open-learning-media-pedagogy-v1.py scripts/filter-open-learning-media-selection-v1.py scripts/test-open-learning-media-harvest-v1.py\n          node --check public/app/open-learning-media-cache-v1.mjs\n          node --check public/app/open-learning-media-installer-v1.mjs\n          node --check public/app/video-learning-contract-v1.mjs\n          node --check scripts/test-open-learning-media-runtime-v1.mjs\n      - name: Verify harvested seed contracts\n        run: python scripts/test-open-learning-media-harvest-v1.py\n      - name: Verify cache mesh and launch wiring\n        run: node scripts/test-open-learning-media-runtime-v1.mjs\n      - name: Verify required-video compatibility\n        run: node scripts/test-video-learning-contract-v1.mjs\n''')
-
-          Path('.github/workflows/harvest-open-learning-media-v1.yml').write_text('''name: Harvest Open Learning Media v1\n\non:\n  push:\n    branches: [main, agent/open-learning-media-harvest-v1]\n    paths:\n      - scripts/harvest-open-learning-media-v1.py\n      - scripts/filter-open-learning-media-relevance-v1.py\n      - scripts/filter-open-learning-media-pedagogy-v1.py\n      - scripts/filter-open-learning-media-selection-v1.py\n      - .open-learning-media-harvest-trigger\n  schedule:\n    - cron: '17 5 * * 1'\n  workflow_dispatch:\n\npermissions:\n  contents: write\n\nconcurrency:\n  group: open-learning-media-harvest-v1\n  cancel-in-progress: true\n\njobs:\n  harvest:\n    runs-on: ubuntu-latest\n    timeout-minutes: 20\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          fetch-depth: 0\n      - name: Harvest rights-cleared learning media metadata\n        env:\n          OPEN_MEDIA_RESULTS_PER_QUERY: '8'\n          OPEN_MEDIA_WORKERS: '6'\n        run: |\n          python scripts/harvest-open-learning-media-v1.py\n          python scripts/filter-open-learning-media-relevance-v1.py\n          python scripts/filter-open-learning-media-pedagogy-v1.py\n          python scripts/filter-open-learning-media-selection-v1.py\n      - name: Validate generated catalog\n        run: python scripts/test-open-learning-media-harvest-v1.py\n      - name: Commit harvested catalog\n        run: |\n          set -euo pipefail\n          git config user.name github-actions[bot]\n          git config user.email 41898282+github-actions[bot]@users.noreply.github.com\n          git add public/downloads/knowledge-schools/open-learning-media\n          if git diff --cached --quiet; then echo 'Harvest produced no catalog diff.'; exit 0; fi\n          git commit -m 'Refresh open learning media catalog'\n          TARGET_REF="${GITHUB_REF_NAME:-main}"\n          git pull --rebase origin "$TARGET_REF"\n          git push origin "HEAD:$TARGET_REF"\n''')
-          PY
-
-      - name: Validate launch wiring
-        run: |
+          python -m py_compile scripts/finalize-open-learning-media-launch-v1.py scripts/harvest-open-learning-media-v1.py scripts/filter-open-learning-media-relevance-v1.py scripts/filter-open-learning-media-pedagogy-v1.py scripts/filter-open-learning-media-selection-v1.py scripts/test-open-learning-media-harvest-v1.py
           node --check public/app/open-learning-media-cache-v1.mjs
           node --check public/app/open-learning-media-installer-v1.mjs
           node --check public/app/video-learning-contract-v1.mjs
+          node --check public/service-worker-core-v208.js
+          node --check public/service-worker-v203.js
+          node --check public/install-v130.js
+          node --check public/app/installed-entry-v146.js
           node scripts/test-open-learning-media-runtime-v1.mjs
           node scripts/test-video-learning-contract-v1.mjs
           python scripts/test-open-learning-media-harvest-v1.py
-          grep -q "cw-open-learning-media-" public/service-worker-core-v208.js
-          grep -q "OPEN_MEDIA_ROUTE_PREFIX" public/service-worker-core-v208.js
-          grep -q "MIN_RELEVANCE_SCORE=18" public/app/open-learning-media-cache-v1.mjs
-          grep -q "peerReceiveChains" public/app/open-learning-media-cache-v1.mjs
 
-      - name: Commit launch service and remove temporary workflow
+      - name: Commit launch service
         run: |
           set -euo pipefail
           rm -f .github/workflows/open-media-launch-wire-temp.yml
