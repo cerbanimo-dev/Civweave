@@ -12,6 +12,7 @@ on:
       - 'scripts/stage-transformers-assets.mjs'
       - 'scripts/build-cloudflare-pages.mjs'
       - 'scripts/verify-local-model-download-v267.mjs'
+      - 'scripts/verify-embedded-local-primary-v280.mjs'
       - 'package.json'
       - '.github/workflows/verify-local-model-download-v267.yml'
   push:
@@ -26,6 +27,7 @@ on:
       - 'scripts/stage-transformers-assets.mjs'
       - 'scripts/build-cloudflare-pages.mjs'
       - 'scripts/verify-local-model-download-v267.mjs'
+      - 'scripts/verify-embedded-local-primary-v280.mjs'
       - 'package.json'
 
 jobs:
@@ -47,13 +49,17 @@ jobs:
           node --check public/app/local-ai/worker-v266.js
           node --check public/app/local-ai/test-pulse-v269.js
           node --check public/app/local-ai/settings-panel-v267.js
+          node --check public/app/local-ai/primary-route-v280.js
           node --check public/app/local-ai/bootstrap-v266.js
           node --check public/service-worker-local-model-download-v267.js
           node --check public/service-worker-v203.js
           node --check scripts/build-cloudflare-pages.mjs
           node --check scripts/verify-local-model-download-v267.mjs
+          node --check scripts/verify-embedded-local-primary-v280.mjs
       - name: Contract verifier
-        run: node scripts/verify-local-model-download-v267.mjs
+        run: |
+          node scripts/verify-local-model-download-v267.mjs
+          node scripts/verify-embedded-local-primary-v280.mjs
       - name: Install browser runtime dependency
         run: npm install --ignore-scripts
       - name: Stage Transformers.js runtime
