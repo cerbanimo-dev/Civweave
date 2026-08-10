@@ -1,0 +1,64 @@
+{
+  "schema": "civweave.launch-topology.v1",
+  "platformFeeBps": 1500,
+  "canonicalInstallOrigin": "https://commonweave.pages.dev",
+  "backbone": {
+    "provider": "cloudflare",
+    "staticProject": "commonweave",
+    "worker": "civweave-core",
+    "publicApiOrigin": "https://api.commonweave.earth",
+    "roles": [
+      "canonical-site-and-installer",
+      "node-directory",
+      "trust-root",
+      "package-distribution",
+      "stripe-webhook-ingress",
+      "money-edge-authority"
+    ],
+    "storage": {
+      "registry": "cloudflare-d1",
+      "packages": "cloudflare-r2",
+      "signingIdentity": "cloudflare-durable-object"
+    }
+  },
+  "cloudNodeFabric": {
+    "provider": "cloudflare",
+    "worker": "civweave-node-cloud",
+    "domain": "nodes.commonweave.earth",
+    "wildcardDomain": "*.nodes.commonweave.earth",
+    "state": "one-sqlite-durable-object-per-node",
+    "roles": [
+      "public-www-host-node",
+      "seed-peer",
+      "discovery",
+      "pairing",
+      "relay",
+      "service-catalog",
+      "websocket-presence"
+    ],
+    "containsStripePlatformSecret": false,
+    "containsCerbanimoSigningPrivateKey": false
+  },
+  "physicalNodeFabric": {
+    "protocol": "civweave.node.v1",
+    "modes": [
+      "cloudflare-tunnel-public-server",
+      "cloudflare-relay-private-node"
+    ],
+    "supportedExamples": [
+      "raspberry-pi",
+      "desktop",
+      "nas",
+      "home-server"
+    ],
+    "privateIdentityGeneratedLocally": true,
+    "manualCerbanimoSecretsRequired": false,
+    "manualStripeSecretsRequired": false
+  },
+  "transition": {
+    "renderFallbackDiscoverable": true,
+    "renderIsAuthority": false,
+    "cloudflareMoneyEdgeLive": false,
+    "conditionForRemovingRenderFallback": "Cloudflare D1 money-edge parity, reconciliation, refund/dispute, and recovery tests are green"
+  }
+}
