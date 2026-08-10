@@ -81,8 +81,8 @@ async function start(){
   const mesh=globalThis.CivweaveMapMeshV276;if(!mesh)return false;
   await mesh.start({baseUrl:gateway(),intervalMs:120000});
   await apply();
-  await ensureCoverageRuntime().catch(()=>null);
-  globalThis.CivweaveMapCoverageV277?.start?.().catch?.(()=>{});
+  const coverage=await ensureCoverageRuntime().catch(()=>null);
+  try{await coverage?.start?.()}catch{}
   addEventListener('civweave:map-knowledge-changed',()=>apply().catch(()=>{}));
   addEventListener('civweave:map-pack-published',()=>apply().catch(()=>{}));
   const syncButton=document.getElementById('syncNode');
