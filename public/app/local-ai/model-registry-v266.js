@@ -1,9 +1,10 @@
 (()=>{
 'use strict';
-const VERSION='1.0.72-local-ai-registry-v272-runtime-metadata';
+const VERSION='1.0.73-local-ai-registry-v275-backend-fallback';
 if(globalThis.CivweaveLocalModelRegistryV266?.version===VERSION)return;
 const HF='https://huggingface.co';
 const caps=value=>Object.freeze({interactive:true,structuredOutput:true,agenticReasoning:false,code:true,tools:false,externalResearch:false,vision:false,...value});
+const freezeModel=model=>Object.freeze({...model,capabilities:model.capabilities||caps(),artifacts:model.artifacts?.map(([path,minBytes,required])=>Object.freeze({path,minBytes,required}))||[]});
 const models=[
   {
     id:'qwen3-0.6b-q4f16',label:'Qwen 3 0.6B',tier:'Small',status:'stable',installable:true,recommended:'wide',
@@ -60,13 +61,27 @@ const models=[
     license:'Apache-2.0',capabilities:caps({interactive:true,structuredOutput:true,agenticReasoning:true,code:true,vision:true}),
     reason:'The public Transformers.js conversion is compatible with the current package family, but Gemma 4 is a multimodal multi-graph package with external data chunks. Civweave holds it behind preview until every required q4f16 graph is pinned, measured, and device-tested.'
   }
-].map(model=>Object.freeze({...model,capabilities:model.capabilities||caps(),artifacts:model.artifacts?.map(([path,minBytes,required])=>Object.freeze({path,minBytes,required}))||[]}));
-function byId(id){return models.find(model=>model.id===String(id||''))||null}
+].map(freezeModel);
+const runtimeModels=[
+  {
+    id:'qwen3-0.6b-q8-wasm',label:'Qwen 3 0.6B CPU compatibility',tier:'Compatibility',status:'stable',installable:true,hidden:true,
+    provider:'huggingface',repo:'onnx-community/Qwen3-0.6B-ONNX',revision:'558750086ed49d78cb701ed6fa85af33fd16453f',
+    task:'text-generation',dtype:'q8',device:'wasm',runtime:'transformers-js-v3',estimatedBytes:660_000_000,
+    license:'Apache-2.0',sourceModel:'Qwen/Qwen3-0.6B',
+    capabilities:caps({interactive:true,structuredOutput:true,agenticReasoning:false,code:true}),
+    artifacts:[
+      ['config.json',500,true],['tokenizer.json',1_000_000,true],['tokenizer_config.json',500,true],
+      ['generation_config.json',50,true],['chat_template.jinja',100,false],['onnx/model_quantized.onnx',600_000_000,true]
+    ]
+  }
+].map(freezeModel);
+function byId(id){return [...models,...runtimeModels].find(model=>model.id===String(id||''))||null}
 function directUrl(modelOrId,path){const model=typeof modelOrId==='string'?byId(modelOrId):modelOrId;if(!model)throw new Error('Unknown Civweave local model.');const clean=String(path||'').replace(/^\/+/, '');return `${HF}/${model.repo}/resolve/${encodeURIComponent(model.revision)}/${clean}`}
 function installable(){return models.filter(model=>model.installable)}
 function experimental(){return models.filter(model=>!model.installable)}
+function cpuFallback(){return runtimeModels[0]||null}
 function capable(request={}){const broker=globalThis.CivweaveAICapabilityBrokerV268;return installable().filter(model=>broker?.supportsLocalRequest?.(model,request)?.ok)}
-const api=Object.freeze({version:VERSION,host:HF,models:Object.freeze(models),byId,directUrl,installable,experimental,capable});
+const api=Object.freeze({version:VERSION,host:HF,models:Object.freeze(models),runtimeModels:Object.freeze(runtimeModels),byId,directUrl,installable,experimental,cpuFallback,capable});
 globalThis.CivweaveLocalModelRegistryV266=api;
-dispatchEvent(new CustomEvent('civweave:local-model-registry-ready',{detail:{version:VERSION,count:models.length,installable:installable().length,capabilityAware:true,runtimeMetadataRequired:true}}));
+dispatchEvent(new CustomEvent('civweave:local-model-registry-ready',{detail:{version:VERSION,count:models.length,installable:installable().length,capabilityAware:true,runtimeMetadataRequired:true,backendFallback:true}}));
 })();
