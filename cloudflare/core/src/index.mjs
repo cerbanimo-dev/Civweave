@@ -60,6 +60,49 @@ async function constantSecretEqual(left, right) {
   return diff === 0;
 }
 
+export class CivweaveCoreIdentity {
+  constructor(state, env) {
+    this.state = state;
+    this.env = env;
+  }
+
+  async identity() {
+    let stored = await this.state.storage.get('identity');
+    if (stored?.privateJwk?.d && stored?.publicJwk?.x) return stored;
+    const pair = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+    const privateJwk = await crypto.subtle.exportKey('jwk', pair.privateKey);
+    const exportedPublic = await crypto.subtle.exportKey('jwk', pair.publicKey);
+    const publicJwk = { kty: exportedPublic.kty, crv: exportedPublic.crv, x: exportedPublic.x };
+    const fingerprint = hex(await sha256(JSON.stringify(publicJwk)));
+    stored = {
+      schema: 'civweave.core-signing-identity.v1',
+      keyId: `cerbanimo-core-${fingerprint.slice(0, 12)}`,
+      algorithm: 'Ed25519',
+      publicJwk,
+      privateJwk,
+      fingerprint,
+      createdAt: nowIso()
+    };
+    await this.state.storage.put('identity', stored);
+    return stored;
+  }
+
+  async fetch(request) {
+    const url = new URL(request.url);
+    const identity = await this.identity();
+    if (request.method === 'GET' && url.pathname === '/trust') {
+      return json({ schema: 'civweave.money-edge-trust.v1', keyId: identity.keyId, algorithm: identity.algorithm, publicKeyJwk: identity.publicJwk, fingerprint: identity.fingerprint });
+    }
+    if (request.method === 'POST' && url.pathname === '/internal/sign') {
+      const raw = await request.arrayBuffer();
+      const privateKey = await crypto.subtle.importKey('jwk', identity.privateJwk, { name: 'Ed25519' }, false, ['sign']);
+      const signature = await crypto.subtle.sign({ name: 'Ed25519' }, privateKey, raw);
+      return json({ keyId: identity.keyId, signature: btoa(String.fromCharCode(...new Uint8Array(signature))).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/g, '') });
+    }
+    return json({ ok: false, error: 'not-found' }, 404);
+  }
+}
+
 export async function verifyStripeWebhook({ rawBody, signatureHeader, secret, now = Date.now(), toleranceSeconds = 300 }) {
   if (!secret) return { ok: false, reason: 'webhook-secret-missing' };
   const parts = String(signatureHeader || '').split(',').map(part => part.trim());
@@ -106,7 +149,12 @@ async function handleStripeWebhook(request, env) {
 async function routeApi(request, env) {
   const url = new URL(request.url);
   if (request.method === 'GET' && url.pathname === '/api/health') {
-    return json({ schema: CORE_SCHEMA, ok: true, bindings: { d1: Boolean(env.DB), r2: Boolean(env.PACKAGES), assets: Boolean(env.ASSETS) }, liveMoneyEnabled: false, platformFeeBps: Number(env.CIVWEAVE_PLATFORM_FEE_BPS || 1500) });
+    return json({ schema: CORE_SCHEMA, ok: true, bindings: { d1: Boolean(env.DB), r2: Boolean(env.PACKAGES), identity: Boolean(env.IDENTITY) }, liveMoneyEnabled: false, platformFeeBps: Number(env.CIVWEAVE_PLATFORM_FEE_BPS || 1500) });
+  }
+  if (request.method === 'GET' && url.pathname === '/api/trust') {
+    if (!env.IDENTITY) return json({ ok: false, error: 'identity-binding-missing' }, 503);
+    const id = env.IDENTITY.idFromName('cerbanimo-core');
+    return env.IDENTITY.get(id).fetch('https://identity.internal/trust');
   }
   if (request.method === 'GET' && url.pathname === '/api/launch-topology') return json({ ...launchTopology, platformFeeBps: Number(env.CIVWEAVE_PLATFORM_FEE_BPS || 1500) });
   if (request.method === 'GET' && url.pathname === '/api/nodes') return json({ schema: 'civweave.node-directory.v1', nodes: await listNodes(env, url.searchParams.get('limit')) });
@@ -139,7 +187,6 @@ export default {
   async fetch(request, env) {
     const api = await routeApi(request, env);
     if (api) return api;
-    if (env.ASSETS) return env.ASSETS.fetch(request);
     return json({ ok: false, error: 'not-found' }, 404);
   }
 };
