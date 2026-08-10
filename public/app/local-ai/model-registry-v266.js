@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.73-local-ai-registry-v275-backend-fallback';
+const VERSION='1.0.80-local-ai-registry-v277-phone-1b-tier';
 if(globalThis.CivweaveLocalModelRegistryV266?.version===VERSION)return;
 const HF='https://huggingface.co';
 const caps=value=>Object.freeze({interactive:true,structuredOutput:true,agenticReasoning:false,code:true,tools:false,externalResearch:false,vision:false,...value});
@@ -18,7 +18,19 @@ const models=[
     ]
   },
   {
-    id:'qwen3-1.7b-q4f16',label:'Qwen 3 1.7B',tier:'Standard',status:'stable',installable:true,recommended:'default',
+    id:'gemma3-1b-it-q4f16',label:'Gemma 3 1B IT',tier:'Standard',status:'stable',installable:true,recommended:'default',
+    provider:'huggingface',repo:'onnx-community/gemma-3-1b-it-ONNX',revision:'a7fa005d133fd9fc99e78b812f450742ad37426d',
+    task:'text-generation',dtype:'q4f16',device:'webgpu',runtime:'transformers-js-v3',estimatedBytes:790_000_000,
+    license:'Gemma',sourceModel:'google/gemma-3-1b-it',
+    capabilities:caps({interactive:true,structuredOutput:true,agenticReasoning:false,code:true}),
+    artifacts:[
+      ['config.json',1_000,true],['tokenizer.json',20_000_000,true],['tokenizer_config.json',1_000,true],
+      ['generation_config.json',100,true],['chat_template.jinja',500,false],['special_tokens_map.json',100,true],
+      ['onnx/model_q4f16.onnx',400_000,true],['onnx/model_q4f16.onnx_data',700_000_000,true]
+    ]
+  },
+  {
+    id:'qwen3-1.7b-q4f16',label:'Qwen 3 1.7B',tier:'Large',status:'stable',installable:true,recommended:'capable',
     provider:'huggingface',repo:'onnx-community/Qwen3-1.7B-ONNX',revision:'e1da89f753284b95bd0971c64524f52edc5eb6e3',
     task:'text-generation',dtype:'q4f16',device:'webgpu',runtime:'transformers-js-v3',estimatedBytes:1_470_000_000,
     license:'Apache-2.0',sourceModel:'Qwen/Qwen3-1.7B',
@@ -83,5 +95,5 @@ function cpuFallback(){return runtimeModels[0]||null}
 function capable(request={}){const broker=globalThis.CivweaveAICapabilityBrokerV268;return installable().filter(model=>broker?.supportsLocalRequest?.(model,request)?.ok)}
 const api=Object.freeze({version:VERSION,host:HF,models:Object.freeze(models),runtimeModels:Object.freeze(runtimeModels),byId,directUrl,installable,experimental,cpuFallback,capable});
 globalThis.CivweaveLocalModelRegistryV266=api;
-dispatchEvent(new CustomEvent('civweave:local-model-registry-ready',{detail:{version:VERSION,count:models.length,installable:installable().length,capabilityAware:true,runtimeMetadataRequired:true,backendFallback:true}}));
+dispatchEvent(new CustomEvent('civweave:local-model-registry-ready',{detail:{version:VERSION,count:models.length,installable:installable().length,capabilityAware:true,runtimeMetadataRequired:true,backendFallback:true,phone1BTier:true}}));
 })();
