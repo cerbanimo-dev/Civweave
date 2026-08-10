@@ -5,6 +5,9 @@ on:
     paths:
       - 'public/app/federation-finder-map-v275.html'
       - 'public/app/civweave-map-service-v275.js'
+      - 'public/app/civweave-map-mesh-v276.js'
+      - 'public/app/civweave-map-mesh-bridge-v276.js'
+      - 'public/app/local-object-mesh-v146.js'
       - 'public/finder/index.html'
       - 'public/app/offline-package-v208.json'
       - 'scripts/stage-maplibre-v275.mjs'
@@ -26,7 +29,9 @@ jobs:
       - name: Syntax check map runtime
         run: |
           node --check public/app/civweave-map-service-v275.js
+          node --check public/app/civweave-map-mesh-v276.js
+          node --check public/app/civweave-map-mesh-bridge-v276.js
           node --check scripts/stage-maplibre-v275.mjs
           node --check scripts/prepare-start-v131.mjs
-      - name: Verify locality map contract
+      - name: Verify locality map and WWW mesh contract
         run: node --test scripts/test-federation-map-v275.mjs
