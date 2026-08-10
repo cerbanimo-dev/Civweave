@@ -1,0 +1,63 @@
+name: Verify Money Integration Edge v1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'lib/contribution-money-edge-v1.mjs'
+      - 'lib/contribution-gateway-v1.mjs'
+      - 'lib/contribution-provider-gateway-v1.mjs'
+      - 'lib/contribution-validator-committee-v2.mjs'
+      - 'scripts/test-contribution-money-edge-v1.mjs'
+      - 'config/money-integration.example.json'
+      - 'docs/finance/money-integration-sprint-v1.md'
+      - '.github/workflows/verify-money-integration-edge-v1.yml'
+      - 'VERSION'
+      - 'package.json'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/contribution-money-edge-v1.mjs'
+      - 'lib/contribution-gateway-v1.mjs'
+      - 'lib/contribution-provider-gateway-v1.mjs'
+      - 'lib/contribution-validator-committee-v2.mjs'
+      - 'scripts/test-contribution-money-edge-v1.mjs'
+      - 'config/money-integration.example.json'
+      - 'docs/finance/money-integration-sprint-v1.md'
+      - '.github/workflows/verify-money-integration-edge-v1.yml'
+      - 'VERSION'
+      - 'package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  money-edge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax
+        run: |
+          node --check lib/contribution-money-edge-v1.mjs
+          node --check lib/contribution-gateway-v1.mjs
+          node --check lib/contribution-provider-gateway-v1.mjs
+          node --check lib/contribution-validator-committee-v2.mjs
+          node --check scripts/test-contribution-money-edge-v1.mjs
+      - name: Money-edge protocol and lifecycle suite
+        run: node --test scripts/test-contribution-money-edge-v1.mjs
+      - name: Fail-closed configuration contract
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const config=JSON.parse(fs.readFileSync('config/money-integration.example.json','utf8'));
+          if(config.liveMoneyEnabled!==false)throw new Error('Example money configuration must ship with live money disabled.');
+          if(config.emergencyStop!==false)throw new Error('Emergency stop example must be explicit, not omitted.');
+          if(config.provider?.credentialsPresent!==false)throw new Error('Provider credentials must not be represented as present in the repository example.');
+          if(!config.notes?.some(note=>/may not mint Buttons or Acorns/i.test(note)))throw new Error('Zero-mint invariant is missing from the money config contract.');
+          console.log('money integration edge is sandbox-first and fail-closed');
+          NODE
