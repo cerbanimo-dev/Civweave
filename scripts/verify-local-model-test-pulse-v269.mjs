@@ -3,7 +3,7 @@ import vm from 'node:vm';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [pulse,bootstrap,runtime,registry,worker,lifecycle,repair,settings]=await Promise.all([
+const [pulse,bootstrap,runtime,registry,worker,lifecycle,repair,settings,downloadPolicy]=await Promise.all([
   read('public/app/local-ai/test-pulse-v269.js'),
   read('public/app/local-ai/bootstrap-v266.js'),
   read('public/app/local-ai/runtime-v266.js'),
@@ -12,13 +12,14 @@ const [pulse,bootstrap,runtime,registry,worker,lifecycle,repair,settings]=await 
   read('public/app/document-lifecycle-v221.js'),
   read('public/app/local-ai/metadata-repair-v276.js'),
   read('public/app/local-ai/settings-panel-v267.js'),
+  read('public/app/local-ai/download-policy-v278.js'),
 ]);
 
 const compile=(path,source)=>{try{new Function(source)}catch(error){console.log(`::error file=${path},title=JavaScript syntax failure::${String(error?.message||error).replaceAll('\n',' ')}`);throw error}};
 for(const [path,source] of [
   ['public/app/local-ai/test-pulse-v269.js',pulse],['public/app/local-ai/bootstrap-v266.js',bootstrap],['public/app/local-ai/runtime-v266.js',runtime],
   ['public/app/local-ai/model-registry-v266.js',registry],['public/app/local-ai/worker-v266.js',worker],['public/app/document-lifecycle-v221.js',lifecycle],
-  ['public/app/local-ai/metadata-repair-v276.js',repair],['public/app/local-ai/settings-panel-v267.js',settings],
+  ['public/app/local-ai/metadata-repair-v276.js',repair],['public/app/local-ai/settings-panel-v267.js',settings],['public/app/local-ai/download-policy-v278.js',downloadPolicy],
 ])compile(path,source);
 
 const checks=[];
@@ -41,15 +42,19 @@ check('settings never displays 100 percent before package availability',settings
 check('settings suppresses contradictory ETA at finalization',settings.includes('transferring&&p<99?eta(state.etaSeconds)'));
 check('settings dock also caps transferring jobs below 100 percent',settings.includes('p=transferring?Math.min(99,raw):raw'));
 
-check('bootstrap pins race-safe repair, truthful UI, and phone tier',bootstrap.includes("VERSION='1.0.81-local-ai-bootstrap-v277-race-safe-phone-1b-tier'")&&bootstrap.includes('1.0.81-local-ai-metadata-repair-v277-race-safe')&&bootstrap.includes('1.0.81-local-model-test-pulse-v277-race-safe')&&bootstrap.includes('1.0.81-local-ai-settings-v277-progress-truth')&&bootstrap.includes('phone1BTier:true'));
-check('bootstrap uses the Gemma phone-tier registry',bootstrap.includes("model-registry-v266.js?v=1.0.80-v277")&&bootstrap.includes('1.0.80-local-ai-registry-v277-phone-1b-tier'));
-check('bootstrap requires race-safe repair capability markers',bootstrap.includes('metadataRepairRaceSafe===true')&&bootstrap.includes('truthfulCompletion:true'));
-check('installed PWA lifecycle requires combined race-safe phone bootstrap',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.81-local-ai-bootstrap-v277-race-safe-phone-1b-tier'")&&lifecycle.includes('metadataRepairRaceSafe===true')&&lifecycle.includes('truthfulCompletion===true')&&lifecycle.includes('phone1BTier:true'));
+check('bootstrap pins race-safe repair, truthful UI, and hardware ladder',bootstrap.includes("VERSION='1.0.81-local-ai-bootstrap-v278-hardware-ladder'")&&bootstrap.includes('1.0.81-local-ai-metadata-repair-v277-race-safe')&&bootstrap.includes('1.0.81-local-model-test-pulse-v277-race-safe')&&bootstrap.includes('1.0.81-local-ai-settings-v277-progress-truth')&&bootstrap.includes('hardwareLadder:true'));
+check('bootstrap uses the hardware-tier registry',bootstrap.includes("model-registry-v266.js?v=1.0.81-v278")&&bootstrap.includes('1.0.81-local-ai-registry-v278-hardware-ladder'));
+check('bootstrap loads foreground policy before metadata repair',bootstrap.includes('download-policy-v278.js')&&bootstrap.indexOf('download-manager-v267.js')<bootstrap.indexOf('download-policy-v278.js')&&bootstrap.indexOf('download-policy-v278.js')<bootstrap.indexOf('metadata-repair-v276.js'));
+check('bootstrap requires race-safe repair capability markers',bootstrap.includes('metadataRepairRaceSafe===true')&&bootstrap.includes('truthfulCompletion:true')&&bootstrap.includes('largeExternalDataForeground:true'));
+check('installed PWA lifecycle requires combined hardware-ladder bootstrap',lifecycle.includes("LOCAL_AI_BOOTSTRAP_VERSION='1.0.81-local-ai-bootstrap-v278-hardware-ladder'")&&lifecycle.includes('metadataRepairRaceSafe===true')&&lifecycle.includes('truthfulCompletion===true')&&lifecycle.includes('hardwareLadder:true')&&lifecycle.includes('largeExternalDataForeground===true'));
 
-check('all runtime generation JSON metadata remains required for five installable/runtime packages',((registry.match(/\['generation_config\.json',[0-9_]+,true\]/g)||[]).length>=5));
+check('all runtime generation JSON metadata remains required for installable/runtime packages',((registry.match(/\['generation_config\.json',[0-9_]+,true\]/g)||[]).length>=6));
 check('Gemma 3 1B direct package includes external q4f16 data',registry.includes("id:'gemma3-1b-it-q4f16'")&&registry.includes("repo:'onnx-community/gemma-3-1b-it-ONNX'")&&registry.includes("['onnx/model_q4f16.onnx_data',700_000_000,true]"));
 check('Gemma 3 1B is the standard default tier',registry.includes("id:'gemma3-1b-it-q4f16',label:'Gemma 3 1B IT',tier:'Standard'")&&registry.includes("recommended:'default'"));
-check('Qwen 3 1.7B remains the large tier',registry.includes("id:'qwen3-1.7b-q4f16',label:'Qwen 3 1.7B',tier:'Large'"));
+check('Gemma uses foreground transfer for large Xet external data',registry.includes("id:'gemma3-1b-it-q4f16'")&&registry.includes('preferBackground:false')&&downloadPolicy.includes('preferBackground===false'));
+check('Mini PC tier is a directly installable 3B model',registry.includes("id:'smollm3-3b-q4f16',label:'SmolLM3 3B',tier:'Mini PC'")&&registry.includes("recommended:'mini-pc'"));
+check('12 GB PC tier is a pinned Qwen 3 4B q4f16 package',registry.includes("id:'qwen3-4b-q4f16',label:'Qwen 3 4B',tier:'PC 12'")&&registry.includes("revision:'21d7994e6b4736786dce45b3eef15dd58304e4b3'")&&registry.includes('model_q4f16.onnx_data_1'));
+check('larger tiers remain runtime gated rather than falsely installable',registry.includes("id:'qwen3-8b-ortgenai-int4',label:'Qwen 3 8B',tier:'PC 16'")&&registry.includes("id:'qwen3-14b-hardware-target',label:'Qwen 3 14B class',tier:'PC 32'")&&registry.includes("id:'gemma4-26b-a4b-workstation',label:'Gemma 4 26B A4B MoE',tier:'Workstation MoE'"));
 check('worker still recognizes empty JSON metadata failures',worker.includes('Unexpected end of JSON input')&&worker.includes('missing, truncated, or invalid'));
 check('runtime still preserves WebGPU to WASM fallback',runtime.includes('hasWebGPUAdapter')&&runtime.includes('backend-fallback-download')&&runtime.includes('compatibilitySpec'));
 
@@ -70,4 +75,4 @@ check('mock pulse returns generated runtime text unchanged',generated.text==='A 
 check('mock pulse sends the intended short conversational request',capturedRequest?.messages?.length===1&&capturedRequest.messages[0].role==='user'&&capturedRequest.maxNewTokens===64);
 check('mock pulse identifies direct downloaded-local provenance',generated.provider==='downloaded-local-direct'&&generated.model==='mock-local');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v277-race-safe-phone-1b-tier',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,jsonMetadataRepair:true,backendFallback:true,metadataRepairRaceSafe:true,truthfulCompletion:true,phone1BTier:true,defaultPhoneModel:'gemma3-1b-it-q4f16'},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v278-hardware-ladder',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',assistantBypass:true,jsonMetadataRepair:true,backendFallback:true,metadataRepairRaceSafe:true,truthfulCompletion:true,hardwareLadder:true,largeExternalDataForeground:true,defaultPhoneModel:'gemma3-1b-it-q4f16',miniPcModel:'smollm3-3b-q4f16',pc12Model:'qwen3-4b-q4f16'},null,2));
