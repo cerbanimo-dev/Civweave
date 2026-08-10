@@ -6,6 +6,7 @@ on:
       - agent/open-learning-media-harvest-v1
     paths:
       - .github/workflows/open-media-launch-wire-temp.yml
+      - scripts/fix-open-learning-media-finalizer-idempotency-v1.py
 
 permissions:
   contents: write
