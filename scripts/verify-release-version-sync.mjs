@@ -131,8 +131,9 @@ check(experience.includes('GUIDE_WORKSPACE'),'Canonical experience no longer boo
 check(!experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!experience.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'),'Canonical experience restored a retired v215/v216 chat owner.');
 check(!installBoundary.includes("const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';")&&!installBoundary.includes('addScript(RELEASE_VERSION_SCRIPT)'),'Install boundary reintroduced the retired canonical version loader.');
 check(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-civweave-version]')"),'Visible-version synchronizer is incomplete.');
-check(gatewayEntry.includes("readFile(path.join(root,'VERSION')")&&gatewayEntry.includes("path.join(root,'releases',version,'server')"),'Stable gateway entry no longer selects the VERSION canonical implementation.');
-check(localEntry.includes("readFile(path.join(root,'VERSION')")&&localEntry.includes("path.join(root,'releases',version,'server')"),'Stable local entry no longer selects the VERSION canonical implementation.');
+const versionSelectedCanonicalLoader=source=>/readFile\s*\(\s*path\.join\s*\(\s*root\s*,\s*['"]VERSION['"]/.test(source)&&/path\.join\s*\(\s*root\s*,\s*['"]releases['"]\s*,\s*version\s*,\s*['"]server['"]\s*\)/.test(source);
+check(versionSelectedCanonicalLoader(gatewayEntry),'Stable gateway entry no longer selects the VERSION canonical implementation.');
+check(versionSelectedCanonicalLoader(localEntry),'Stable local entry no longer selects the VERSION canonical implementation.');
 check(versionConst(gatewayCompat,`${version}-render-installed-runtime-v132`),'Gateway canonical wrapper version is stale.');
 check(new RegExp(`const\\s+VERSION\\s*=\\s*['"]${version.replaceAll('.','\\.')}['"]`).test(localCompat)&&localCompat.includes(`?build=${version}`),'Local canonical server version is stale.');
 check(workingCampus.includes(`Civweave Working Campus · v${version}`)&&workingCampus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
