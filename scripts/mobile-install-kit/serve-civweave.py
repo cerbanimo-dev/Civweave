@@ -47,6 +47,9 @@ class CivweaveHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "same-origin")
         self.send_header("Cross-Origin-Resource-Policy", "same-origin")
+        self.send_header("Cross-Origin-Opener-Policy", "same-origin")
+        self.send_header("Cross-Origin-Embedder-Policy", "credentialless")
+        self.send_header("Permissions-Policy", "cross-origin-isolated=(self)")
         super().end_headers()
 
     def do_GET(self) -> None:
