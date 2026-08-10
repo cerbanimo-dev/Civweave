@@ -374,7 +374,7 @@ on:
       - scripts/filter-open-learning-media-relevance-v1.py
       - scripts/filter-open-learning-media-pedagogy-v1.py
       - scripts/filter-open-learning-media-selection-v1.py
-      - .open-learning-media-harvest-trigger
+      - ops/triggers/open-learning-media-harvest.trigger
   schedule:
     - cron: '17 5 * * 1'
   workflow_dispatch:
