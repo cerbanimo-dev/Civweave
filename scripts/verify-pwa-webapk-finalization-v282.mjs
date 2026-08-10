@@ -3,9 +3,10 @@ import {readFile} from 'node:fs/promises';
 
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
-const [manifestText,bridge]=await Promise.all([
+const [manifestText,bridge,installerHtml]=await Promise.all([
   read('public/app/manifest.webmanifest'),
-  read('public/app/pwa-install-prompt-v246.js')
+  read('public/app/pwa-install-prompt-v246.js'),
+  read('public/app/index.html')
 ]);
 const manifest=JSON.parse(manifestText);
 const canonical='https://commonweave.pages.dev/app/manifest.webmanifest';
@@ -22,5 +23,7 @@ assert.ok(bridge.includes("button.textContent='Finishing Android install…'")||
 assert.ok(bridge.includes("setButton(false,'Check / retry install')"),'stalled WebAPK minting must surface a retry path');
 assert.ok(bridge.includes("location.replace(current.href)"),'retry must reacquire a fresh beforeinstallprompt event');
 assert.ok(!bridge.includes("if(choice?.outcome==='accepted'){\n      installed=true;"),'prompt acceptance must not be treated as committed installation');
+assert.ok(installerHtml.includes('/app/pwa-install-prompt-v246.js?v=pwa-install-finalize-v282'),'installer HTML must use a fresh cache key for the v282 install bridge');
+assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v246.js?v=pwa-install-v246"'),'installer HTML must not keep the stale v246 install-bridge cache key');
 new Function(bridge);
-console.log(JSON.stringify({ok:true,revision:'pwa-webapk-finalization-v282',canonical,render,commitVerification:true,retry:true,syntax:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-webapk-finalization-v282',canonical,render,commitVerification:true,retry:true,cacheKey:'pwa-install-finalize-v282',syntax:true},null,2));
