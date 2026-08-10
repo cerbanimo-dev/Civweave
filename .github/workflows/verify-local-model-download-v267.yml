@@ -13,6 +13,7 @@ on:
       - 'scripts/build-cloudflare-pages.mjs'
       - 'scripts/verify-local-model-download-v267.mjs'
       - 'scripts/verify-embedded-local-primary-v280.mjs'
+      - 'scripts/verify-small-model-fast-path-v281.mjs'
       - 'package.json'
       - '.github/workflows/verify-local-model-download-v267.yml'
   push:
@@ -28,6 +29,7 @@ on:
       - 'scripts/build-cloudflare-pages.mjs'
       - 'scripts/verify-local-model-download-v267.mjs'
       - 'scripts/verify-embedded-local-primary-v280.mjs'
+      - 'scripts/verify-small-model-fast-path-v281.mjs'
       - 'package.json'
 
 jobs:
@@ -44,6 +46,7 @@ jobs:
           node --check public/app/ai-capability-broker-v268.js
           node --check public/app/fast-interactive-runtime-v192.js
           node --check public/app/local-ai/download-manager-v267.js
+          node --check public/app/local-ai/small-model-policy-v281.js
           node --check public/app/local-ai/runtime-v266.js
           node --check public/app/local-ai/runtime-bridge-v266.js
           node --check public/app/local-ai/worker-v266.js
@@ -56,10 +59,12 @@ jobs:
           node --check scripts/build-cloudflare-pages.mjs
           node --check scripts/verify-local-model-download-v267.mjs
           node --check scripts/verify-embedded-local-primary-v280.mjs
+          node --check scripts/verify-small-model-fast-path-v281.mjs
       - name: Contract verifier
         run: |
           node scripts/verify-local-model-download-v267.mjs
           node scripts/verify-embedded-local-primary-v280.mjs
+          node scripts/verify-small-model-fast-path-v281.mjs
       - name: Install browser runtime dependency
         run: npm install --ignore-scripts
       - name: Stage Transformers.js runtime
