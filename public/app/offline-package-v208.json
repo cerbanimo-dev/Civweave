@@ -1,6 +1,6 @@
 {
-  "version": "1.0.34",
-  "revision": "canonical-background-campus-v241-systems-mesh-v251-locality-map-v275",
+  "version": "1.0.33",
+  "revision": "canonical-background-campus-v241-systems-mesh-v251",
   "description": "Civweave campus pack. The service worker starts from the installed entry, the five canonical system surfaces, canonical reward runtimes, and the non-privileged systems mesh contract; it discovers current same-origin dependencies and also carries the Federation Finder locality map and node AI marketplace surfaces without promoting them to canonical roots.",
   "seeds": [
     "/app/installed-entry-v146.html",
