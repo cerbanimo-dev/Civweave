@@ -77,10 +77,11 @@ async function main(){
   function requireToken(source,required,label){if(!source.includes(required))throw new Error(`${label} is missing ${required}`)}
 
   async function probe(base,attempt){
-    const [manifestResponse,entryResponse,workerResponse]=await Promise.all([
+    const [manifestResponse,entryResponse,workerResponse,settingsResponse]=await Promise.all([
       get(base,'/app/manifest.webmanifest',attempt),
       get(base,'/app/installed-entry-v146.js',attempt),
-      get(base,'/service-worker-v203.js',attempt)
+      get(base,'/service-worker-v203.js',attempt),
+      get(base,'/app/local-ai/settings-panel-v267.js',attempt)
     ]);
     let manifest;
     try{manifest=JSON.parse(manifestResponse.text)}catch{throw new Error('manifest.webmanifest did not return JSON')}
@@ -102,6 +103,11 @@ async function main(){
     requireToken(worker,"/service-worker-chat-repair-v245.js?v=chat-convergence-v250",'service worker');
     requireToken(worker,"self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})",'service worker');
 
+    const settings=settingsResponse.text;
+    requireToken(settings,"cacheIntegrityOnDemand:true",'local AI settings');
+    requireToken(settings,"openPath:'snapshot-first-v287'",'local AI settings');
+    requireToken(settings,'Large cached weights are not inspected while the menu is opening.','local AI settings');
+
     return{
       base:base.origin,
       expected,
@@ -110,7 +116,9 @@ async function main(){
       manifest:new URL(manifestResponse.url).pathname,
       installedEntry:new URL(entryResponse.url).pathname,
       serviceWorker:new URL(workerResponse.url).pathname,
-      chatRevision:'chat-convergence-v250'
+      localAISettings:new URL(settingsResponse.url).pathname,
+      chatRevision:'chat-convergence-v250',
+      mobileAISettingsRevision:'snapshot-first-v287'
     };
   }
 
