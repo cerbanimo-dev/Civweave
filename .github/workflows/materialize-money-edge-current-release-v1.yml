@@ -1,0 +1,89 @@
+name: Materialize Money Edge Current Release v1
+
+on:
+  push:
+    branches: [agent/money-integration-edge-v1-current]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify money-edge source before release generation
+        run: |
+          node --check lib/contribution-money-edge-v1.mjs
+          node --check lib/contribution-gateway-v1.mjs
+          node --check lib/contribution-provider-gateway-v1.mjs
+          node --check lib/contribution-validator-committee-v2.mjs
+          node --test scripts/test-contribution-money-edge-v1.mjs
+      - name: Advance exactly one patch release from current head
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const current=fs.readFileSync('VERSION','utf8').trim();
+          const parts=current.split('.').map(Number);
+          if(parts.length!==3||parts.some(n=>!Number.isInteger(n)))throw new Error(`Invalid current VERSION ${current}`);
+          const version=`${parts[0]}.${parts[1]}.${parts[2]+1}`;
+          fs.writeFileSync('VERSION',version+'\n');
+          const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+          pkg.version=version;
+          pkg.scripts={...pkg.scripts,'test:money-edge':'node --test scripts/test-contribution-money-edge-v1.mjs'};
+          fs.writeFileSync('package.json',JSON.stringify(pkg,null,2)+'\n');
+          const contract=JSON.parse(fs.readFileSync('config/release-contract.json','utf8'));
+          contract.canonical.current={version,path:`releases/${version}`,status:'current'};
+          fs.writeFileSync('config/release-contract.json',JSON.stringify(contract,null,2)+'\n');
+          fs.writeFileSync('.money-edge-target-version',version+'\n');
+          console.log(`Money-edge release target: ${current} -> ${version}`);
+          NODE
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Write release note
+        run: |
+          version="$(tr -d '[:space:]' < .money-edge-target-version)"
+          mkdir -p docs/history/releases
+          cat > "docs/history/releases/RELEASE-NOTES-v${version}.md" <<EOF
+          # Civweave ${version}
+
+          Civweave ${version} establishes the fail-closed money-integration edge without enabling live money movement.
+
+          - Adds a provider-neutral money edge that reserves existing Buttons or Acorns before external settlement.
+          - Requires verified external settlement before the corresponding internal transfer can gain finality.
+          - Carries Base/Base-Sepolia USDC proof primitives and a hosted-provider receipt verification boundary.
+          - Adds idempotency, receipt replay prevention, reconciliation, cancellation, dispute hooks, refund/reconciliation capability gates, and an emergency stop.
+          - Separates structural integrationDoorReady from operational liveReady.
+          - Ships live money disabled and rejects any money-edge result with mint authority or non-zero mint/supply effect.
+          - Keeps provider credentials, webhook secrets, KYC/AML decisions, tax-reporting readiness, jurisdiction approval, and provider terms outside source control as explicit live-activation gates.
+
+          This release gets Civweave to the software boundary for selecting and sandboxing a real money provider. It does not activate real USD or USDC movement.
+          EOF
+      - name: Verify generated release
+        run: |
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-release-contract.mjs
+          node scripts/verify-release-version-sync.mjs
+          node scripts/check-canonical-server-syntax.mjs
+          node --test scripts/test-contribution-money-edge-v1.mjs
+      - name: Commit generated release to sprint branch
+        run: |
+          version="$(tr -d '[:space:]' < .money-edge-target-version)"
+          rm -f .money-edge-target-version
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add VERSION package.json config/release-contract.json "releases/${version}" public scripts/smoke-gateway-v131-base.mjs "docs/history/releases/RELEASE-NOTES-v${version}.md"
+          if git diff --cached --quiet; then
+            echo 'No generated release changes to commit.'
+            exit 0
+          fi
+          git commit -m "Materialize Civweave ${version} money integration edge"
+          git push origin HEAD:agent/money-integration-edge-v1-current
