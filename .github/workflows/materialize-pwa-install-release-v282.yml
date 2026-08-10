@@ -1,0 +1,76 @@
+name: Materialize PWA Install Release v282
+
+on:
+  push:
+    branches:
+      - agent/pwa-install-finalize-v282
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/pwa-install-finalize-v282
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Advance canonical release to 1.0.97
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const VERSION = '1.0.97';
+          fs.writeFileSync('VERSION', `${VERSION}\n`);
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.version = VERSION;
+          fs.writeFileSync('package.json', `${JSON.stringify(pkg, null, 2)}\n`);
+          if (fs.existsSync('package-lock.json')) {
+            const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+            lock.version = VERSION;
+            if (lock.packages?.['']) lock.packages[''].version = VERSION;
+            fs.writeFileSync('package-lock.json', `${JSON.stringify(lock, null, 2)}\n`);
+          }
+          const contract = JSON.parse(fs.readFileSync('config/release-contract.json', 'utf8'));
+          contract.canonical.current = { version: VERSION, path: `releases/${VERSION}`, status: 'current' };
+          fs.writeFileSync('config/release-contract.json', `${JSON.stringify(contract, null, 2)}\n`);
+          NODE
+      - name: Make the v282 bridge the sole native-install owner
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const file = 'public/install-v130.js';
+          let source = fs.readFileSync(file, 'utf8');
+          const guidanceBefore = `  button.disabled = false;\n  button.textContent = \`Install Civweave v\${VERSION}\`;\n  if (installPrompt) help('The lightweight app shell is ready. Tap Install Civweave now, then download the offline campus whenever useful.');\n  else if (isIOS()) help('The shell is ready. Tap Install Civweave for Safari Add to Home Screen instructions.');\n  else help('The shell is ready. Tap Install Civweave, or use your browser menu and choose Install app or Add to Home screen.');`;
+          const guidanceAfter = `  const nativeInstall = globalThis.CivweavePWAInstallV246;\n  if (nativeInstall) {\n    nativeInstall.refresh?.();\n    return;\n  }\n  button.disabled = false;\n  button.textContent = \`Install Civweave v\${VERSION}\`;\n  if (installPrompt) help('The lightweight app shell is ready. Tap Install Civweave now, then download the offline campus whenever useful.');\n  else if (isIOS()) help('The shell is ready. Tap Install Civweave for Safari Add to Home Screen instructions.');\n  else help('The shell is ready. Tap Install Civweave, or use your browser menu and choose Install app or Add to Home screen.');`;
+          if (!source.includes(guidanceBefore)) throw new Error('install-v130 guidance ownership block not found');
+          source = source.replace(guidanceBefore, guidanceAfter);
+          const lifecycleBefore = `addEventListener('beforeinstallprompt', event => {\n  event.preventDefault();\n  installPrompt = event;\n  guidance();\n});\naddEventListener('appinstalled', () => {\n  installPrompt = null;\n  help('Civweave is installed. Download the optional offline campus whenever you want the full local copy.');\n});\n\n$('#install-app')?.addEventListener('click', installOrOpen);`;
+          const lifecycleAfter = `if (!globalThis.CivweavePWAInstallV246) {\n  addEventListener('beforeinstallprompt', event => {\n    event.preventDefault();\n    installPrompt = event;\n    guidance();\n  });\n  addEventListener('appinstalled', () => {\n    installPrompt = null;\n    help('Civweave is installed. Download the optional offline campus whenever you want the full local copy.');\n  });\n  $('#install-app')?.addEventListener('click', installOrOpen);\n}`;
+          if (!source.includes(lifecycleBefore)) throw new Error('install-v130 lifecycle ownership block not found');
+          source = source.replace(lifecycleBefore, lifecycleAfter);
+          fs.writeFileSync(file, source);
+          NODE
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Verify canonical release and Android install flow
+        run: |
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-pwa-webapk-finalization-v282.mjs
+          node --check public/app/pwa-install-prompt-v246.js
+          node --check public/install-v130.js
+      - name: Commit materialized release
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No materialization changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Civweave 1.0.97: Android PWA install finalization'
+          git push origin HEAD:agent/pwa-install-finalize-v282
