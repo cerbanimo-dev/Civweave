@@ -23,14 +23,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - name: Install archive and Pages build dependencies
-        run: |
-          if ! command -v tar >/dev/null 2>&1; then
-            sudo apt-get update
-            sudo apt-get install -y tar
-          fi
-          tar --version
-          npm install --ignore-scripts
+      - name: Install Pages build dependencies
+        run: npm install --ignore-scripts
       - name: Syntax check portable release build
         run: |
           node --check scripts/portable-zip.mjs
