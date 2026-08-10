@@ -18,6 +18,8 @@ on:
       - scripts/finalize-open-learning-media-launch-v1.py
       - scripts/finalize-open-learning-media-range-v1.py
       - scripts/finalize-open-learning-media-safety-v1.py
+      - scripts/verify-root-hygiene.mjs
+      - ops/triggers/open-learning-media-harvest.trigger
       - public/app/open-learning-media-cache-v1.mjs
       - public/app/open-learning-media-installer-v1.mjs
       - public/app/video-learning-contract-v1.mjs
@@ -32,6 +34,7 @@ on:
       - public/app/installed-entry-v146.js
       - public/downloads/knowledge-schools/open-learning-media/**
       - docs/open-learning-media-service-v1.md
+      - .github/workflows/harvest-open-learning-media-v1.yml
       - .github/workflows/verify-open-learning-media-v1.yml
   pull_request:
     branches:
@@ -48,6 +51,8 @@ on:
       - scripts/finalize-open-learning-media-launch-v1.py
       - scripts/finalize-open-learning-media-range-v1.py
       - scripts/finalize-open-learning-media-safety-v1.py
+      - scripts/verify-root-hygiene.mjs
+      - ops/triggers/open-learning-media-harvest.trigger
       - public/app/open-learning-media-cache-v1.mjs
       - public/app/open-learning-media-installer-v1.mjs
       - public/app/video-learning-contract-v1.mjs
@@ -62,6 +67,7 @@ on:
       - public/app/installed-entry-v146.js
       - public/downloads/knowledge-schools/open-learning-media/**
       - docs/open-learning-media-service-v1.md
+      - .github/workflows/harvest-open-learning-media-v1.yml
       - .github/workflows/verify-open-learning-media-v1.yml
 
 jobs:
@@ -83,6 +89,9 @@ jobs:
           node --check public/install-v130.js
           node --check public/app/installed-entry-v146.js
           node --check scripts/test-open-learning-media-runtime-v1.mjs
+
+      - name: Verify repository hygiene boundary
+        run: node scripts/verify-root-hygiene.mjs
 
       - name: Verify harvested seed contracts
         run: python scripts/test-open-learning-media-harvest-v1.py
