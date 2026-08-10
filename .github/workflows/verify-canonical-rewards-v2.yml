@@ -27,13 +27,17 @@ jobs:
           node --check public/app/cw-reward-surfaces-v2.js
           node --check lib/contribution-ledger-v1.mjs
           node --check lib/contribution-mesh-v1.mjs
+          node --check lib/contribution-security-v1.mjs
           node --check public/app/shared/civweave-contribution-mesh-v1.js
+          node --check public/app/shared/civweave-contribution-security-v1.js
           node --check public/app/phone-ledger-bootstrap-v1.js
           node --check public/app/local-first-policy-v131.js
           node --check public/app/document-lifecycle-v221.js
           node --check public/app/installed-entry-v146.js
           node --check scripts/test-contribution-ledger-v1.mjs
           node --check scripts/test-contribution-mesh-v1.mjs
+          node --check scripts/test-contribution-security-v1.mjs
+          node --check scripts/test-contribution-security-browser-v1.mjs
           node --check scripts/test-contribution-browser-adapter-v1.mjs
           node --check scripts/test-phone-ledger-bootstrap-v1.mjs
           node --check scripts/verify-canonical-rewards-v2.mjs
@@ -42,9 +46,13 @@ jobs:
         run: node --test scripts/test-contribution-ledger-v1.mjs
       - name: Verify contribution mesh invariants
         run: node --test scripts/test-contribution-mesh-v1.mjs
+      - name: Verify ship security, recovery, validator committees, and partition policy
+        run: node --test scripts/test-contribution-security-v1.mjs
+      - name: Verify browser contribution security packaging and fail-closed contracts
+        run: node --test scripts/test-contribution-security-browser-v1.mjs
       - name: Verify browser mesh identity compatibility
         run: node --test scripts/test-contribution-browser-adapter-v1.mjs
-      - name: Verify hostless phone ledger boot
+      - name: Verify hostless secure phone ledger boot
         run: node --test scripts/test-phone-ledger-bootstrap-v1.mjs
       - name: Verify ledger, Passport, prompts, and receivers
         run: |
@@ -57,7 +65,8 @@ jobs:
           const manifest=JSON.parse(fs.readFileSync('public/app/offline-package-v208.json','utf8'));
           const required=['/app/cw-reward-ledger-v2.js','/app/cw-reward-receivers-v2.js','/app/cw-reward-legacy-bridge-v2.js','/app/cw-reward-surfaces-v2.js'];
           for(const path of required){if(!manifest.seeds.includes(path))throw new Error(`Offline package omits ${path}`)}
-          const phoneLedger=['/app/local-first-policy-v131.js','/app/local-object-mesh-v146.js','/app/shared/civweave-contribution-mesh-v1.js','/app/phone-ledger-bootstrap-v1.js'];
+          const phoneLedger=['/app/local-first-policy-v131.js','/app/local-object-mesh-v146.js','/app/shared/civweave-contribution-mesh-v1.js','/app/shared/civweave-contribution-security-v1.js','/app/phone-ledger-bootstrap-v1.js'];
           for(const path of phoneLedger){if(!manifest.assets.includes(path))throw new Error(`Offline package omits ${path}`)}
-          console.log('canonical rewards and hostless phone contribution ledger are seeded for offline use');
+          if(manifest.phoneLedgerRevision!=='phone-ledger-r2-security')throw new Error('Offline package is not pinned to the secure phone-ledger revision');
+          console.log('canonical rewards and secure hostless phone contribution ledger are seeded for offline use');
           NODE
