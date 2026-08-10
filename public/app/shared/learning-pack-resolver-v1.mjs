@@ -35,7 +35,7 @@ export function scoreCatalogRecords(catalogRecords,query,{audience='',limit=3,in
     if(wantedTypes.size&&!wantedTypes.has(record.packType))return false;
     if(!includeUnavailable&&record.available===false&&!record.module)return false;
     return true;
-  }).map(record=>({...record,score:queryTokens.length?score(record,queryTokens):(record.autoStage!==false?1:0)}).filter(record=>record.score>0)
+  }).map(record=>({...record,score:queryTokens.length?score(record,queryTokens):(record.autoStage!==false?1:0)})).filter(record=>record.score>0)
     .sort((a,b)=>b.score-a.score||Number(b.autoStage!==false)-Number(a.autoStage!==false)||String(a.title).localeCompare(String(b.title)));
   return rows.slice(0,Math.max(1,Math.min(12,Number(limit)||3)));
 }
