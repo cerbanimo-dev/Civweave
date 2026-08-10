@@ -1,0 +1,72 @@
+{
+  "schema": "civweave.launch-topology.v1",
+  "platformFeeBps": 1500,
+  "canonicalInstallOrigin": "https://commonweave.pages.dev",
+  "backbone": {
+    "provider": "cloudflare",
+    "staticProject": "commonweave",
+    "worker": "civweave-core",
+    "publicApiOrigin": "https://api.commonweave.earth",
+    "roles": [
+      "canonical-site-and-installer",
+      "node-directory",
+      "trust-root",
+      "package-distribution",
+      "stripe-connect-authority",
+      "stripe-webhook-authority",
+      "money-edge-authority"
+    ],
+    "storage": {
+      "registry": "cloudflare-d1",
+      "payments": "cloudflare-d1",
+      "packages": "cloudflare-r2",
+      "signingIdentity": "cloudflare-durable-object"
+    },
+    "moneyEdgeAuthority": true,
+    "liveMoneyDefault": false
+  },
+  "cloudNodeFabric": {
+    "provider": "cloudflare",
+    "worker": "civweave-node-cloud",
+    "domain": "nodes.commonweave.earth",
+    "wildcardDomain": "*.nodes.commonweave.earth",
+    "state": "one-sqlite-durable-object-per-node",
+    "roles": [
+      "public-www-host-node",
+      "seed-peer",
+      "discovery",
+      "pairing",
+      "relay",
+      "service-catalog",
+      "websocket-presence",
+      "stripe-connect-enrollment"
+    ],
+    "containsStripePlatformSecret": false,
+    "containsCerbanimoSigningPrivateKey": false
+  },
+  "physicalNodeFabric": {
+    "protocol": "civweave.node.v1",
+    "moneyEdgeUrl": "https://api.commonweave.earth",
+    "modes": [
+      "cloudflare-tunnel-public-server",
+      "cloudflare-relay-private-node"
+    ],
+    "supportedExamples": [
+      "raspberry-pi",
+      "desktop",
+      "nas",
+      "home-server"
+    ],
+    "privateIdentityGeneratedLocally": true,
+    "manualCerbanimoSecretsRequired": false,
+    "manualStripeSecretsRequired": false
+  },
+  "transition": {
+    "renderFallbackDiscoverable": true,
+    "renderIsAuthority": false,
+    "renderMoneyEdgeEnabled": false,
+    "cloudflareMoneyEdgeAuthority": true,
+    "cloudflareMoneyEdgeLive": false,
+    "conditionForLiveMoney": "Cloudflare core deployed with D1 migrations, Stripe sandbox secrets, webhook switched, and sandbox end-to-end checks green"
+  }
+}
