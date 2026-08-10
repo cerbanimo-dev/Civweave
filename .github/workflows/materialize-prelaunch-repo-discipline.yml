@@ -26,7 +26,7 @@ jobs:
       - name: Materialize structural migration
         run: |
           set -euo pipefail
-          node scripts/migrations/prelaunch-repo-discipline-v1.mjs
+          node scripts/migrations/prelaunch-repo-discipline-v2.mjs
           node scripts/sync-release-version-assets.mjs
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
           node scripts/verify-release-contract.mjs
