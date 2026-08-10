@@ -262,32 +262,11 @@ def harden_video_contract() -> None:
 
 
 def bump_worker_revision() -> None:
-    # Force existing installed PWAs to fetch the service-worker core containing the media route.
+    # Canonical release versioning owns worker cache-busting and registration identities.
     path = Path("public/service-worker-v203.js")
     text = path.read_text()
     if "open-learning-media-v1" not in text.splitlines()[0]:
         text = text.replace("local-model-background-v267", "local-model-background-v267 + open-learning-media-v1", 1)
-    text = text.replace(
-        "importScripts('/service-worker-core-v208.js?v=1.0.62-chat-convergence-v250');",
-        "importScripts('/service-worker-core-v208.js?v=1.0.62-chat-convergence-v250-open-learning-media-v1');",
-        1,
-    )
-    path.write_text(text)
-
-    path = Path("public/install-v130.js")
-    text = path.read_text().replace(
-        "const WORKER_SCRIPT_REVISION = 'release-coherence-v226';",
-        "const WORKER_SCRIPT_REVISION = 'open-learning-media-v1';",
-        1,
-    )
-    path.write_text(text)
-
-    path = Path("public/app/installed-entry-v146.js")
-    text = path.read_text().replace(
-        "&revision=chat-convergence-v250`",
-        "&revision=open-learning-media-v1`",
-        1,
-    )
     path.write_text(text)
 
 

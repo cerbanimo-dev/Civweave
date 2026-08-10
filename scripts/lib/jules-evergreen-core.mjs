@@ -206,7 +206,7 @@ export function evaluateAutoMergePolicy({
     reasons.push('A review currently requests changes.');
   }
   if (!verifySingleBundleCompletion(baseRoadmap, headRoadmap, bundleId)) {
-    reasons.push('TEN-YEAR-PIPELINE.md must differ from main only by checking the selected bundle.');
+    reasons.push('docs/roadmap/ten-year-pipeline.md must differ from main only by checking the selected bundle.');
   }
 
   return {eligible: reasons.length === 0, reasons: unique(reasons)};

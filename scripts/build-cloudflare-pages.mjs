@@ -29,6 +29,9 @@ const mapRuntimeStage = resolve(scriptDir, "stage-maplibre-v275.mjs");
 const mapPackageBuilder = resolve(scriptDir, "build-civweave-map-v1.mjs");
 const validationSafe = resolve(scriptDir, "apply-confidence-weighted-validation-v1-safe.mjs");
 const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
+const preliveMetadata = resolve(scriptDir, "generate-prelive-metadata-v281.mjs");
+const installerResumeSmoke = resolve(scriptDir, "smoke-installer-resume-state-v280.mjs");
+const installerHardeningSmoke = resolve(scriptDir, "smoke-installer-hardening-v281.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
 await import('./sync-release-version-assets.mjs');
@@ -75,7 +78,6 @@ function withPortableZipFallback(task) {
   }
 }
 function rebuildReleaseArtifacts() {
-  runNodeScript(parityMaterializer,"Civweave parity ledger materialization failed.");
   withPortableZipFallback(() => runNodeScript(resolve(scriptDir, "build-mobile-install-kit.mjs"),"Civweave release artifact rebuild failed."));
 }
 function oversizedFiles(directory) {
@@ -106,6 +108,10 @@ for (const required of [
   if (!existsSync(required) || !statSync(required).isFile()) throw new Error(`Required Civweave Map v1 runtime was not staged: ${relative(repoRoot, required)}`);
 }
 runNodeScript(mapPackageBuilder,"Civweave Map v1 package build failed.");
+runNodeScript(parityMaterializer,"Civweave parity ledger materialization failed.");
+runNodeScript(preliveMetadata,"Civweave pre-live storage/integrity metadata generation failed.");
+runNodeScript(installerResumeSmoke,"Civweave resumable installer smoke test failed.");
+runNodeScript(installerHardeningSmoke,"Civweave pre-live installer hardening smoke test failed.");
 rebuildReleaseArtifacts();
 
 for (const [label, file] of [

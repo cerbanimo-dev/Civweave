@@ -35,7 +35,7 @@ export function deployedVersionFromManifest(manifest){
 async function main(){
   const expected=String(process.env.CIVWEAVE_EXPECTED_VERSION||'').trim();
   const allowNewer=/^(?:1|true|yes)$/i.test(String(process.env.CIVWEAVE_ALLOW_NEWER_VERSION||''));
-  const rawTargets=String(process.env.CIVWEAVE_PRODUCTION_URLS||'https://civweave.pages.dev,https://commonweave-host-node-9l1u.onrender.com');
+  const rawTargets=String(process.env.CIVWEAVE_PRODUCTION_URLS||'https://commonweave.pages.dev,https://commonweave-host-node-9l1u.onrender.com');
   const attempts=Math.max(1,Number.parseInt(process.env.CIVWEAVE_PROBE_ATTEMPTS||'1',10)||1);
   const delayMs=Math.max(0,Number.parseInt(process.env.CIVWEAVE_PROBE_DELAY_MS||'15000',10)||0);
 

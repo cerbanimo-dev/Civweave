@@ -3,10 +3,12 @@
 
 const STATUS_FALLBACK_MS=8000;
 const STATE_CONTROLLER_URL='/app/installer-state-machine-v280.js?v=installer-state-machines-v280';
+const STORAGE_GUARD_URL='/app/installer-storage-guard-v281.js?v=installer-storage-guard-v281';
 const startedAt=Date.now();
 let autoStarted=false;
 let timer=0;
 let controllerPromise=null;
+let storageGuardPromise=null;
 
 const $=selector=>document.querySelector(selector);
 
@@ -37,6 +39,27 @@ function loadStateController(){
     document.head.append(script);
   });
   return controllerPromise;
+}
+
+function loadStorageGuard(){
+  if(globalThis.CivweaveInstallerStorageGuardV281)return Promise.resolve(globalThis.CivweaveInstallerStorageGuardV281);
+  if(storageGuardPromise)return storageGuardPromise;
+  storageGuardPromise=new Promise(resolve=>{
+    const existing=document.querySelector('script[data-cw-installer-storage-v281]');
+    if(existing){
+      existing.addEventListener('load',()=>resolve(globalThis.CivweaveInstallerStorageGuardV281||null),{once:true});
+      existing.addEventListener('error',()=>resolve(null),{once:true});
+      return;
+    }
+    const script=document.createElement('script');
+    script.src=STORAGE_GUARD_URL;
+    script.async=false;
+    script.dataset.cwInstallerStorageV281='true';
+    script.addEventListener('load',()=>resolve(globalThis.CivweaveInstallerStorageGuardV281||null),{once:true});
+    script.addEventListener('error',()=>resolve(null),{once:true});
+    document.head.append(script);
+  });
+  return storageGuardPromise;
 }
 
 function installAssetLockboardLink(){
@@ -110,6 +133,7 @@ function onStatus(){
 }
 async function startWatching(){
   await loadStateController();
+  await loadStorageGuard();
   installAssetLockboardLink();
   addEventListener('civweave:offline-campus-status',onStatus);
   navigator.serviceWorker?.addEventListener?.('controllerchange',onStatus);

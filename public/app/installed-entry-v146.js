@@ -3,7 +3,7 @@
 const params=new URLSearchParams(location.search);
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
-const FALLBACK_VERSION='1.0.62';
+const FALLBACK_VERSION='1.0.83';
 const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
 const legacyEntry=/^\/app\/installed-entry-v146(?:\.html)?$/.test(location.pathname);
 const explicitInstalled=params.get('installed')==='1'||legacyEntry;
@@ -36,7 +36,7 @@ function waitForControllerChange(timeout=4500){
 async function refreshWorker(releaseVersion){
   if(!('serviceWorker'in navigator))return null;
   try{
-    const workerUrl=`/service-worker-v203.js?v=${encodeURIComponent(releaseVersion)}-lightweight-shell-v208&revision=open-learning-media-v1`;
+    const workerUrl=`/service-worker-v203.js?v=${encodeURIComponent(releaseVersion)}-lightweight-shell-v208&revision=chat-convergence-v250`;
     let registration=await navigator.serviceWorker.register(workerUrl,{scope:'/',updateViaCache:'none'});
     await registration.update();
     registration=await navigator.serviceWorker.getRegistration('/')||registration;
@@ -76,5 +76,5 @@ async function boot(){
   }
 }
 boot();
-globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.62-chat-convergence-v250',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker});
+globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.83-chat-convergence-v250',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker});
 })();

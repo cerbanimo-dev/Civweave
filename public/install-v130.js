@@ -1,10 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION = '1.0.51';
+const VERSION = '1.0.83';
 const ENTRY = '/app/?system=civweave&installed=1';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
-const WORKER_SCRIPT_REVISION = 'open-learning-media-v1';
+const WORKER_SCRIPT_REVISION = 'release-coherence-v226';
 const WORKER_URL = `/service-worker-v203.js?v=${WORKER_BUILD}&revision=${WORKER_SCRIPT_REVISION}`;
 const REGISTRATION_TIMEOUT_MS = 15000;
 const REGISTRATION_QUERY_TIMEOUT_MS = 6000;

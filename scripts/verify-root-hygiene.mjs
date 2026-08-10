@@ -1,45 +1,17 @@
-import {readdir} from 'node:fs/promises';
+import {lstat,readdir} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const entries=await readdir(root,{withFileTypes:true});
-
-// Root Markdown is opt-in. Two versioned documents remain grandfathered because
-// executable verifiers/runtime packaging currently consume their exact root paths.
-const allowedRootMarkdown=new Set([
-  'AGENTS.md',
-  'CIVWEAVE-BRAND-MIGRATION.md',
-  'CIVWEAVE-PARITY-LEDGER.md',
-  'CIVWEAVE-SYSTEMS-MESH-v251.md',
-  'CIVWEAVE-TOTAL-RENAME.md',
-  'CLOUDFLARE-SETUP.md',
-  'HOST-NODE-SETUP-GUIDE.md',
-  'INSTALL-ONLY-LOCAL-MESH-ARCHITECTURE-v1.0.33.md',
-  'README.md',
-  'RELEASE-NOTES.md',
-  'TEN-YEAR-PIPELINE.md',
-  'VISUAL-CONTRACT.md',
-  'rebase.md',
-  'renewal.md'
-]);
-
-const rootFiles=entries.filter(entry=>entry.isFile()).map(entry=>entry.name);
-const unexpectedMarkdown=rootFiles.filter(name=>/\.md$/i.test(name)&&!allowedRootMarkdown.has(name));
-const rootSentinels=rootFiles.filter(name=>/^\..*(?:trigger|materialize|watchdog)/i.test(name));
-
+const allowedRootMarkdown=new Set(['AGENTS.md','README.md','RELEASE-NOTES.md']);
 const failures=[];
-if(unexpectedMarkdown.length){
-  failures.push(`Unexpected root Markdown: ${unexpectedMarkdown.sort().join(', ')}. Put general docs in docs/ and versioned records in docs/history/.`);
-}
-if(rootSentinels.length){
-  failures.push(`Root workflow sentinels are forbidden: ${rootSentinels.sort().join(', ')}. Put sentinels in ops/triggers/.`);
-}
-
-if(failures.length){
-  console.error('Root hygiene check failed.');
-  for(const failure of failures)console.error(`- ${failure}`);
-  process.exit(1);
-}
-
-console.log(JSON.stringify({ok:true,allowedRootMarkdown:[...allowedRootMarkdown].sort(),sentinelDirectory:'ops/triggers'},null,2));
+const markdown=entries.filter(e=>e.isFile()&&/\.md$/i.test(e.name)&&!allowedRootMarkdown.has(e.name)).map(e=>e.name);
+if(markdown.length)failures.push('Unexpected root Markdown: '+markdown.sort().join(', '));
+const rootServers=entries.filter(e=>e.isFile()&&/^server.*\.mjs$/i.test(e.name)).map(e=>e.name);
+if(rootServers.length)failures.push('Root server implementations/pointers are forbidden: '+rootServers.sort().join(', '));
+const symlinks=[];for(const e of entries){if((await lstat(path.join(root,e.name))).isSymbolicLink())symlinks.push(e.name)}
+if(symlinks.length)failures.push('Root compatibility symlinks are forbidden: '+symlinks.sort().join(', '));
+if(entries.some(e=>e.isDirectory()&&e.name==='archive'))failures.push('archive/ is forbidden; Git history is the archive.');
+try{await lstat(path.join(root,'server','compat'));failures.push('server/compat is forbidden; use releases/{VERSION}/server.')}catch(error){if(error.code!=='ENOENT')throw error}
+if(failures.length){console.error('Root hygiene check failed.');for(const failure of failures)console.error('- '+failure);process.exit(1)}
+console.log(JSON.stringify({ok:true,allowedRootMarkdown:[...allowedRootMarkdown].sort(),rootServerFiles:0,compatibilityPointers:0,archiveDirectory:false,canonicalReleaseDirectory:'releases'},null,2));

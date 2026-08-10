@@ -175,12 +175,12 @@ Use the decade pipeline when the task asks for the next best improvement, contin
 
 Before choosing work in pipeline mode:
 
-1. Read `TEN-YEAR-PIPELINE.md`.
+1. Read `docs/roadmap/ten-year-pipeline.md`.
 2. Select the first unchecked bundle whose preceding bundles are checked.
 3. Implement exactly that bundle.
 4. Check the bundle in the same branch only after its implementation, migration, compatibility, and verification gates pass.
-5. Follow `rebase.md` when the selected bundle is a scheduled rebase.
-6. Follow `renewal.md` when the final renewal bundle is reached.
+5. Follow `docs/roadmap/rebase.md` when the selected bundle is a scheduled rebase.
+6. Follow `docs/roadmap/renewal.md` when the final renewal bundle is reached.
 
 The priority order is:
 
@@ -203,3 +203,11 @@ Pipeline rules:
 - When the queue is exhausted, create the next epoch from fresh screenshots, redacted feedback, incidents, measurements, and current code. The old plan is a structural example, not the source of truth.
 
 The pipeline coordinates work. It does not grant authority. Human approval remains required for merge, compatibility removal, destructive migration, paid-service activation, and high-stakes governance or economic actions.
+
+
+## Canonical release storage
+
+- `releases/1.0.79/` is the first immutable Civweave launch snapshot and launch baseline.
+- The executable release selected by `VERSION` lives at `releases/{VERSION}/`; stable `server/*.mjs` entrypoints select that stored release directly.
+- New shipping versions must materialize their release directory with `npm run release:materialize` before they can pass the canonical launch gate.
+- Root server aliases, root symlinks, `releases/1.0.81/server/`, and a live `archive/` directory are forbidden. Git history is the archive.

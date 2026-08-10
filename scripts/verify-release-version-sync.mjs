@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 await import('./sync-release-version-assets.mjs');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
+const canonicalVersion=(await read('VERSION')).trim();
 const check=(condition,message)=>{if(!condition)throw new Error(message)};
 const same=(actual,expected,label)=>check(actual===expected,`${label}: expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}.`);
 const versionConst=(source,suffix='')=>new RegExp(`const\\s+VERSION\\s*=\\s*['"]([^'"]+)['"]`).exec(source)?.[1]===suffix;
@@ -24,8 +25,10 @@ const [
   workerCore,
   workerWrapper,
   legacyWorker,
-  gateway,
-  localServer,
+  gatewayEntry,
+  localEntry,
+  gatewayCompat,
+  localCompat,
   workingCampus,
   campusLoader,
   campusPart4,
@@ -46,8 +49,10 @@ const [
   read('public/service-worker-core-v208.js'),
   read('public/service-worker-v203.js'),
   read('public/service-worker-v156.js'),
-  read('server-gateway-v131.mjs'),
-  read('server-local-v131.mjs'),
+  read('server/gateway.mjs'),
+  read('server/local.mjs'),
+  read(`releases/${canonicalVersion}/server/server-gateway-v131.mjs`),
+  read(`releases/${canonicalVersion}/server/server-local-v131.mjs`),
   read('public/app/working-campus-v156.html'),
   read('public/app/working-campus-v156.js'),
   read('public/app/working-campus-v156.part4.txt'),
@@ -102,9 +107,12 @@ check(nav.includes('ROUTES.navigate'),'Themed navigation bypasses the route cont
 check(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core version is stale.');
 check(workerWrapper.includes(`/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Worker route contract revision is stale.');
 check(workerWrapper.includes(`/service-worker-core-v208.js?v=${version}-chat-convergence-v250`),'Worker core revision is stale.');
-check(workerWrapper.includes('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v238'),'Worker offline current-graph revision is stale.');
+check(workerWrapper.includes('/service-worker-installer-state-v280.js?v=installer-state-machines-v280'),'Worker installer state layer is missing.');
+check(workerWrapper.includes('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281'),'Worker shell integrity layer is missing.');
+check(workerWrapper.includes('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280'),'Worker offline resumable-current-graph revision is stale.');
+check(workerWrapper.includes('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246'),'Worker campus completion layer is missing.');
 check(workerWrapper.includes('/service-worker-chat-repair-v245.js?v=chat-convergence-v250'),'Worker lost the stale-chat cache migration lane.');
-check(workerWrapper.indexOf('/service-worker-canonical-navigation-v227.js')>workerWrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not the final worker policy.');
+check(workerWrapper.indexOf('/service-worker-canonical-navigation-v227.js')>workerWrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not the final navigation policy.');
 check(legacyWorker.includes(`/service-worker-v203.js?v=${version}-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
 for(const token of [
   `const VERSION='${version}';`,
@@ -123,8 +131,11 @@ check(experience.includes('GUIDE_WORKSPACE'),'Canonical experience no longer boo
 check(!experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!experience.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'),'Canonical experience restored a retired v215/v216 chat owner.');
 check(!installBoundary.includes("const RELEASE_VERSION_SCRIPT='/app/release-version-v1.js';")&&!installBoundary.includes('addScript(RELEASE_VERSION_SCRIPT)'),'Install boundary reintroduced the retired canonical version loader.');
 check(releaseRuntime.includes("fetch('/app/manifest.webmanifest'")&&releaseRuntime.includes("querySelectorAll('.version,.version-chip,[data-civweave-version]')"),'Visible-version synchronizer is incomplete.');
-check(versionConst(gateway,`${version}-render-installed-runtime-v132`),'Gateway wrapper version is stale.');
-check(new RegExp(`const\\s+VERSION\\s*=\\s*['"]${version.replaceAll('.','\\.')}['"]`).test(localServer)&&localServer.includes(`?build=${version}`),'Local server version is stale.');
+const versionSelectedCanonicalLoader=source=>/readFile\s*\(\s*path\.join\s*\(\s*root\s*,\s*['"]VERSION['"]/.test(source)&&/path\.join\s*\(\s*root\s*,\s*['"]releases['"]\s*,\s*version\s*,\s*['"]server['"]\s*\)/.test(source);
+check(versionSelectedCanonicalLoader(gatewayEntry),'Stable gateway entry no longer selects the VERSION canonical implementation.');
+check(versionSelectedCanonicalLoader(localEntry),'Stable local entry no longer selects the VERSION canonical implementation.');
+check(versionConst(gatewayCompat,`${version}-render-installed-runtime-v132`),'Gateway canonical wrapper version is stale.');
+check(new RegExp(`const\\s+VERSION\\s*=\\s*['"]${version.replaceAll('.','\\.')}['"]`).test(localCompat)&&localCompat.includes(`?build=${version}`),'Local canonical server version is stale.');
 check(workingCampus.includes(`Civweave Working Campus · v${version}`)&&workingCampus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
 check(campusLoader.includes(`system-routes-v227.js?v=${version}-five-system-route-contract-v227`),'Working Campus route loader version is stale.');
 check(campusPart4.includes(`version:'${version}'`),'Working Campus realm travel version is stale.');
@@ -163,4 +174,4 @@ for(const [label,source] of [
   const pattern=new RegExp(`(?:(?:Civweave|Commonweave) v|const VERSION = '|const VERSION='|version:'|version=)(\\d+\\.\\d+\\.\\d+)`,'g');
   for(const match of source.matchAll(pattern))if(match[1]!==version)throw new Error(`${label} still exposes ${match[1]} instead of ${version}.`);
 }
-console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,canonicalChatOwner:'guide-workspace-v242',legacyCompatibility:'noncanonical-only',gatewayVersion:true,localVersion:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,updaterFirstInstalledLaunch:true,manifestReleasePin:false,installerRecoveryOnly:true,installerRegistrationOwner:'install-v130.js'},null,2));
+console.log(JSON.stringify({ok:true,version,packageVersion:pkg.version,canonicalSystems:5,routeMatrixVersioned:true,workerPackageNavigation:true,offlineRevision:'offline-campus-current-graph-v280',offlinePolicy:'resumable-pause-v280',shellIntegrity:'shell-integrity-v281',canonicalChatOwner:'guide-workspace-v242',legacyCompatibility:'noncanonical-only',gatewayStableEntry:true,localStableEntry:true,buildTimeSynchronization:true,browserInstallerLoopGuard:true,updaterFirstInstalledLaunch:true,manifestReleasePin:false,installerRecoveryOnly:true,installerRegistrationOwner:'install-v130.js'},null,2));

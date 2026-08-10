@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION='1.0.39-offline-campus-status-v210-retired-completion-v246';
-const WORKER_REVISION='offline-campus-current-graph-v238';
+const WORKER_REVISION='offline-campus-current-graph-v280';
 const STATUS_TYPES=new Set([
   'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
   'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS'

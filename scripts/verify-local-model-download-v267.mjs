@@ -39,9 +39,15 @@ check('root service worker imports local model background worker',sw.includes('/
 check('local inference worker preserves pinned cache adapter',localWorker.includes('hf.env.customCache=cacheAdapter(cache,spec)')&&localWorker.includes("status:404,statusText:'Downloaded model cache miss'"));
 check('local inference worker constructs TextStreamer',localWorker.includes('new hfRuntime.TextStreamer')&&localWorker.includes('callback_function'));
 check('local inference worker emits incremental token messages',localWorker.includes("post(id,'token'")&&localWorker.includes('streamed:Boolean(streamer)'));
-check('local runtime preserves cache-resolved worker and carries token callbacks',runtime.includes("worker-v266.js?v=1.0.67-v271")&&runtime.includes("message.type==='token'")&&runtime.includes('task.onToken?.(message.token)')&&runtime.includes('stream:Boolean(stream)'));
+check('local inference worker supports WASM when WebGPU is unavailable',localWorker.includes("if(spec.device!=='webgpu')return 'wasm'")&&localWorker.includes('requestAdapter()'));
+check('local runtime preserves cache-resolved worker and carries token callbacks',runtime.includes("WORKER='/app/local-ai/worker-v266.js?v=")&&runtime.includes("message.type==='token'")&&runtime.includes('task.onToken?.(message.token)')&&runtime.includes('stream:Boolean(requestOptions.stream)'));
+check('local runtime repairs strengthened metadata integrity before inference',runtime.includes('manager.repair')&&runtime.includes("state.state?.status==='ready'")&&runtime.includes('repair:true,onProgress'));
+check('local runtime probes adapter rather than navigator.gpu presence',runtime.includes('hasWebGPUAdapter')&&runtime.includes('navigator.gpu.requestAdapter()'));
+check('local runtime provisions WASM compatibility weights only when needed',runtime.includes('backend-fallback-download')&&runtime.includes('preferBackground:false')&&runtime.includes('compatibilitySpec'));
+check('local runtime refuses unsafe agentic downgrade',runtime.includes('LOCAL_BACKEND_CAPABILITY_UNAVAILABLE')&&runtime.includes('fallbackAllowed'));
 check('local bridge emits shared partial model events',bridge.includes("emit('partial'")&&bridge.includes("'civweave:model-event'")&&bridge.includes('accumulatedText'));
 check('local bridge reports actual streaming use',bridge.includes("code:'LOCAL_STREAMING'")&&bridge.includes('used:Boolean(run.streamed)'));
+check('local bridge reports actual backend',bridge.includes("code:'LOCAL_BACKEND'")&&bridge.includes('actual:{provider:\'downloaded-local\''));
 check('raw pulse repairs corrupt metadata before inference',pulse.includes('integrityReady')&&pulse.includes('M().repair')&&pulse.includes('invalid cached model metadata'));
 check('raw pulse streams visible direct model output',pulse.includes('onToken:token=>')&&pulse.includes('stream:true')&&pulse.includes('streaming directly from the local worker'));
 check('Cloudflare build stages Transformers runtime before copy',cloudflare.includes('stage-transformers-assets.mjs')&&cloudflare.includes('Required local-AI runtime asset was not staged'));
@@ -51,9 +57,10 @@ check('capability broker exposes legacy tool-overclaim normalization',broker.inc
 check('runtime spine applies capability normalization before middleware',spine.includes("id:'capability-normalizer'")&&spine.includes('normalizeRequest')&&spine.includes('__civweaveRuntimeSpineV271:true'));
 check('registry declares per-model capabilities',registry.includes('capabilities:caps')&&registry.includes('agenticReasoning:true')&&registry.includes('externalResearch:false'));
 check('small local model remains interactive but not agentic',registry.includes("id:'qwen3-0.6b-q4f16'")&&registry.includes('agenticReasoning:false'));
-check('local bridge registers v271 runtime spine handler',bridge.includes("MIDDLEWARE_ID='downloaded-local-v271'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
-check('local bridge escalates unsupported capabilities through the spine base path',bridge.includes('if(!decision.useLocal)')&&bridge.includes('return null'));
-check('bootstrap preserves cache-resolved inference and adds streaming repair',bootstrap.includes('cacheResolvedInference:true')&&bootstrap.includes('localStreaming:true')&&bootstrap.includes('integrityRepair:true')&&bootstrap.includes('agenticToolSemantics:true'));
+check('registry includes hidden q8 CPU runtime without adding it to visible installable catalogue',registry.includes("id:'qwen3-0.6b-q8-wasm'")&&registry.includes('hidden:true')&&registry.includes("['onnx/model_quantized.onnx',600_000_000,true]")&&registry.includes('runtimeModels:Object.freeze(runtimeModels)'));
+check('local bridge registers v275 runtime spine handler',bridge.includes("MIDDLEWARE_ID='downloaded-local-v275'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
+check('local bridge escalates unsupported capabilities through the spine base path',bridge.includes('if(!decision.useLocal)')&&bridge.includes('return null')&&bridge.includes('LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'));
+check('bootstrap preserves cache-resolved inference and adds streaming repair fallback',bootstrap.includes('cacheResolvedInference:true')&&bootstrap.includes('localStreaming:true')&&bootstrap.includes('integrityRepair:true')&&bootstrap.includes('backendFallback:true')&&bootstrap.includes('agenticToolSemantics:true'));
 check('Working Campus waits for local bootstrap before selected local chat',campus.includes('if(localSelection.active){await ensureDownloadedLocalAISettings()')&&campus.includes('CivweaveLocalModelBridgeV266?.patch?.()'));
 check('Working Campus refuses silent local-contract substitution',campus.includes("result?.provider==='local-contract'")&&campus.includes('did not substitute deterministic chat'));
 
@@ -73,4 +80,4 @@ const explicit=capability.normalizeRequest({purpose:'market-scan',executionProfi
 assert.equal(explicit.requiresTools,true);
 checks.push('agentic/tool normalization executable cases');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-streaming-v271',checks:checks.length,features:{cacheResolvedInference:true,integrityValidation:true,targetedRepair:true,localStreaming:true,capabilityRouting:true,runtimeSpine:true,localAgenticReasoning:true,agenticToolSeparation:true,toolEscalation:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-streaming-v275-backend-fallback',checks:checks.length,features:{cacheResolvedInference:true,integrityValidation:true,targetedRepair:true,runtimeMetadataRepair:true,localStreaming:true,webgpuAdapterProbe:true,wasmCompatibilityFallback:true,capabilitySafeEscalation:true,capabilityRouting:true,runtimeSpine:true,localAgenticReasoning:true,agenticToolSeparation:true,toolEscalation:true}},null,2));
