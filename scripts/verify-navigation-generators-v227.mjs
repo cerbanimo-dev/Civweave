@@ -13,7 +13,7 @@ new Function(installerFallback);
 for(const token of[
   "importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227')",
   "importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250')",
-  "importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v282')",
+  "importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery')",
   "importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280')",
   "importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281')",
   "importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280')",
@@ -39,15 +39,17 @@ assert(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes
 assert(!installedEntry.includes('const sites={'),'Compatibility launcher reintroduced a duplicate route map.');
 assert.equal(new URL(manifest.start_url,'https://civweave.invalid').pathname,'/app/installed-entry-v146.html','PWA manifest no longer launches through the installed bootstrap.');
 assert(installedLaunch.includes("const V282_ENTRY_PATH='/app/installed-entry-v146.html'"),'Worker launch boundary no longer serves the installed bootstrap.');
-assert(installedLaunch.includes("policy:'installed-entry-never-installer-substitution'"),'Worker launch boundary can regress to installer substitution.');
+assert(installedLaunch.includes("const V282_CAMPUS_PATH='/app/working-campus-v156.html'"),'Worker launch boundary lost the Working Campus recovery path.');
+assert(installedLaunch.includes("policy:'installed-entry-then-working-campus-never-installer-substitution'"),'Worker launch boundary can regress to installer substitution or lose campus recovery.');
 assert(shellRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js']"),'Installer launch guard is no longer retained in the offline shell cache lane.');
 assert(installerFallback.includes("url = new URL('/app/installed-entry-v146.html'"),'Installed Open button no longer targets the installed bootstrap.');
 assert(installerFallback.includes('if (installedDisplay())')&&installerFallback.includes('event.stopImmediatePropagation()'),'Installed Open button no longer preempts the legacy /app/ click handler.');
 assert(wrapper.indexOf('/app/system-routes-v227.js')<wrapper.indexOf('/service-worker-core-v208.js'),'Checked-in worker wrapper does not load route contract first.');
 assert(wrapper.indexOf('/service-worker-core-v208.js')<wrapper.indexOf('/service-worker-installed-launch-v282.js'),'Checked-in worker wrapper does not load installed launch after the core.');
+assert(wrapper.includes("/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery"),'Checked-in worker wrapper lost the v294 installed launch cache-bust.');
 assert(wrapper.indexOf('/service-worker-installed-launch-v282.js')<wrapper.indexOf('/service-worker-navigation-safety-v224.js'),'Navigation safety must wrap the corrected installed launch handler.');
 assert(wrapper.indexOf('/service-worker-core-v208.js')<wrapper.indexOf('/service-worker-installer-state-v280.js'),'Checked-in worker wrapper does not load installer state after the core.');
 assert(wrapper.indexOf('/service-worker-installer-state-v280.js')<wrapper.indexOf('/service-worker-shell-integrity-v281.js'),'Checked-in worker wrapper does not load shell integrity after finalizing required assets.');
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Checked-in worker wrapper does not load canonical navigation after shell repair.');
 assert(wrapper.includes("/service-worker-chat-repair-v245.js?v=chat-convergence-v250"),'Checked-in worker wrapper lost the v250 stale-chat migration lane.');
-console.log(JSON.stringify({ok:true,version,revision:'navigation-generator-invariants-v282',singleRouteAuthority:true,builderRouteFirst:true,builderIntegrityOrder:true,builderCanonicalAfterRepair:true,coherenceCannotDowngrade:true,coherenceCannotRestoreRetiredChatOwners:true,compatibilityLauncherUsesContract:true,updaterFirstEntry:true,installedLaunchNeverInstaller:true,installerOpenPreempted:true,installerGuardOfflineCached:true,moduleSyntaxCheckedByWorkflow:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'navigation-generator-invariants-v294',singleRouteAuthority:true,builderRouteFirst:true,builderIntegrityOrder:true,builderCanonicalAfterRepair:true,coherenceCannotDowngrade:true,coherenceCannotRestoreRetiredChatOwners:true,compatibilityLauncherUsesContract:true,updaterFirstEntry:true,installedLaunchCampusRecovery:true,installedLaunchNeverInstaller:true,installerOpenPreempted:true,installerGuardOfflineCached:true,moduleSyntaxCheckedByWorkflow:true},null,2));
