@@ -1,14 +1,27 @@
 {
   "schema": "civweave.learning-pack-catalog.v1",
   "version": "1.1.0",
-  "updated": "2026-08-09",
+  "updated": "2026-08-10T09:03:54.817Z",
   "packs": [
     {
       "id": "civweave-core-practice-v1",
       "title": "Civweave Core Practice Pack",
       "packType": "mixed",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["general", "practice", "task", "learning", "quality", "research", "software", "design", "operations"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "general",
+        "practice",
+        "task",
+        "learning",
+        "quality",
+        "research",
+        "software",
+        "design",
+        "operations"
+      ],
       "file": "civweave-core-practice-v1.json",
       "contentType": "application/json",
       "optional": false,
@@ -22,8 +35,20 @@
       "id": "civweave-expert-software-v1",
       "title": "Software & Product Engineering",
       "packType": "expert",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["software", "coding", "programming", "debugging", "api", "release", "testing", "product"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "software",
+        "coding",
+        "programming",
+        "debugging",
+        "api",
+        "release",
+        "testing",
+        "product"
+      ],
       "file": "civweave-expert-software-v1.json",
       "contentType": "application/json",
       "optional": true,
@@ -38,8 +63,21 @@
       "id": "civweave-expert-design-v1",
       "title": "Visual, UI & Media Production",
       "packType": "expert",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["design", "visual", "ui", "ux", "image", "icon", "layout", "responsive", "media"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "design",
+        "visual",
+        "ui",
+        "ux",
+        "image",
+        "icon",
+        "layout",
+        "responsive",
+        "media"
+      ],
       "file": "civweave-expert-design-v1.json",
       "contentType": "application/json",
       "optional": true,
@@ -54,8 +92,20 @@
       "id": "civweave-expert-research-v1",
       "title": "Research, Writing & Knowledge Curation",
       "packType": "expert",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["research", "writing", "sources", "citations", "knowledge", "taxonomy", "fact-check", "brief"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "research",
+        "writing",
+        "sources",
+        "citations",
+        "knowledge",
+        "taxonomy",
+        "fact-check",
+        "brief"
+      ],
       "file": "civweave-expert-research-v1.json",
       "contentType": "application/json",
       "optional": true,
@@ -70,8 +120,20 @@
       "id": "civweave-expert-operations-v1",
       "title": "Operations & Administration",
       "packType": "expert",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["operations", "admin", "workflow", "sop", "scheduling", "records", "procurement", "coordination"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "operations",
+        "admin",
+        "workflow",
+        "sop",
+        "scheduling",
+        "records",
+        "procurement",
+        "coordination"
+      ],
       "file": "civweave-expert-operations-v1.json",
       "contentType": "application/json",
       "optional": true,
@@ -86,8 +148,20 @@
       "id": "civweave-expert-data-v1",
       "title": "Data, Metrics & Analysis",
       "packType": "expert",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["data", "analysis", "csv", "metrics", "dashboard", "validation", "analytics", "quality"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "data",
+        "analysis",
+        "csv",
+        "metrics",
+        "dashboard",
+        "validation",
+        "analytics",
+        "quality"
+      ],
       "file": "civweave-expert-data-v1.json",
       "contentType": "application/json",
       "optional": true,
@@ -102,8 +176,20 @@
       "id": "civweave-expert-service-v1",
       "title": "Service, Support & Community",
       "packType": "expert",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["support", "service", "customer", "community", "onboarding", "feedback", "faq", "moderation"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "support",
+        "service",
+        "customer",
+        "community",
+        "onboarding",
+        "feedback",
+        "faq",
+        "moderation"
+      ],
       "file": "civweave-expert-service-v1.json",
       "contentType": "application/json",
       "optional": true,
@@ -118,8 +204,21 @@
       "id": "civweave-expert-learning-v1",
       "title": "Learning Design & Assessment",
       "packType": "expert",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["learning", "education", "lesson", "quiz", "assessment", "rubric", "curriculum", "teaching", "practicum"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "learning",
+        "education",
+        "lesson",
+        "quiz",
+        "assessment",
+        "rubric",
+        "curriculum",
+        "teaching",
+        "practicum"
+      ],
       "file": "civweave-expert-learning-v1.json",
       "contentType": "application/json",
       "optional": true,
@@ -134,8 +233,20 @@
       "id": "civweave-expert-project-v1",
       "title": "Project & Product Coordination",
       "packType": "expert",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["project", "product", "planning", "backlog", "dependencies", "decision", "release", "retrospective"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "project",
+        "product",
+        "planning",
+        "backlog",
+        "dependencies",
+        "decision",
+        "release",
+        "retrospective"
+      ],
       "file": "civweave-expert-project-v1.json",
       "contentType": "application/json",
       "optional": true,
@@ -150,8 +261,21 @@
       "id": "civweave-expert-labor-v1",
       "title": "General Labor & Logistics",
       "packType": "expert",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["labor", "logistics", "inventory", "warehouse", "receiving", "packing", "assembly", "workplace", "safety"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "labor",
+        "logistics",
+        "inventory",
+        "warehouse",
+        "receiving",
+        "packing",
+        "assembly",
+        "workplace",
+        "safety"
+      ],
       "file": "civweave-expert-labor-v1.json",
       "contentType": "application/json",
       "optional": true,
@@ -166,19 +290,38 @@
       "id": "onet-labor-atlas-30-3",
       "title": "O*NET 30.3 Labor Atlas",
       "packType": "reference",
-      "audience": ["cerbanimo", "living-school"],
-      "tags": ["labor", "occupation", "tasks", "skills", "work", "reference", "onet"],
+      "audience": [
+        "cerbanimo",
+        "living-school"
+      ],
+      "tags": [
+        "labor",
+        "occupation",
+        "tasks",
+        "skills",
+        "work",
+        "reference",
+        "onet"
+      ],
       "file": "onet-labor-atlas-30-3.json.gz",
       "contentType": "application/gzip",
-      "bytes": 0,
-      "sha256": "",
+      "bytes": 863068,
+      "sha256": "cf2f5071bd7f12ce5dd119fb8a30a8c8f8af245e8d1f1198ea9300a5b6fad60b",
       "optional": true,
       "bundled": false,
       "autoStage": false,
-      "available": false,
+      "available": true,
       "generated": true,
       "buildCommand": "node scripts/build-learning-packs-v1.mjs",
-      "summary": "Generated optional labor-reference pack from official O*NET 30.3 occupation, task, essential-skill, and task-to-DWA tables. Reference data requires task-specific adaptation."
+      "summary": "Generated optional labor-reference pack from official O*NET 30.3 occupation, task, essential-skill, and task-to-DWA tables. Reference data requires task-specific adaptation.",
+      "sourceRelease": "30.3",
+      "generatedAt": "2026-08-10T09:03:54.667Z",
+      "counts": {
+        "occupations": 1016,
+        "taskStatements": 18796,
+        "essentialSkillRows": 17880,
+        "taskDwaRows": 23850
+      }
     }
   ]
 }
