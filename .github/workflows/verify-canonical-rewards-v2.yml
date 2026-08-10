@@ -25,8 +25,12 @@ jobs:
           node --check public/app/cw-reward-receivers-v2.js
           node --check public/app/cw-reward-legacy-bridge-v2.js
           node --check public/app/cw-reward-surfaces-v2.js
+          node --check lib/contribution-ledger-v1.mjs
+          node --check scripts/test-contribution-ledger-v1.mjs
           node --check scripts/verify-canonical-rewards-v2.mjs
           node --check scripts/verify-reward-model-contract-v2.mjs
+      - name: Verify contribution currency invariants
+        run: node --test scripts/test-contribution-ledger-v1.mjs
       - name: Verify ledger, Passport, prompts, and receivers
         run: |
           node scripts/verify-canonical-rewards-v2.mjs
