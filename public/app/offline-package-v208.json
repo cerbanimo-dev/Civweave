@@ -2,7 +2,7 @@
   "version": "1.0.34",
   "revision": "canonical-background-campus-v241-systems-mesh-v251",
   "phoneLedgerRevision": "phone-ledger-r3-ship-security",
-  "description": "Civweave campus pack. The installed PWA is a first-class contribution mesh node with an on-device secure wallet, guardian recovery, signed federation policy anchors, root-diverse validator committees, committee-certified mints and transfers, committee-certified wallet freezes, fail-closed partition limits, contribution-state quarantine, and external offramps disabled by default. The package also carries the five canonical system surfaces, canonical reward runtimes, Federation Finder locality map, opportunistic WWW map exchange, automatic peer-ranked offline coverage healing, and node AI marketplace surfaces without promoting optional host nodes to ledger authority.",
+  "description": "Civweave campus pack. The installed PWA is a first-class contribution mesh node with an on-device secure wallet, guardian recovery, signed federation policy anchors, root-diverse validator committees, committee-certified mints and transfers, committee-certified wallet freezes, fail-closed partition limits, contribution-state quarantine, offline security controls, and external offramps disabled by default. The package also carries the five canonical system surfaces, canonical reward runtimes, Federation Finder locality map, opportunistic WWW map exchange, automatic peer-ranked offline coverage healing, and node AI marketplace surfaces without promoting optional host nodes to ledger authority.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
@@ -35,6 +35,9 @@
     "/app/shared/civweave-contribution-mesh-v1.js",
     "/app/shared/civweave-contribution-security-v1.js",
     "/app/shared/civweave-contribution-ship-guard-v1.js",
+    "/app/contribution-security-settings-entry-v1.js",
+    "/app/contribution-security-v1.html",
+    "/app/contribution-security-v1.js",
     "/app/phone-ledger-bootstrap-v1.js",
     "/app/node-ai-mesh-v1.js",
     "/app/shared/civweave-node-ai-routing-v1.mjs",
