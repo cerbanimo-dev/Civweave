@@ -106,7 +106,7 @@ node scripts/build-esco-crosswalk-v1.mjs
 
 The generated `esco-skill-crosswalk-v1` pack is an optional interoperability layer rather than a replacement skill taxonomy. It gives authored Civweave skill IDs stable links into ESCO while preserving the Civweave IDs already used by tasks, learning units, guides, rewards, and evidence.
 
-The builder queries the official European Commission ESCO Web Services API in English using the API's default latest dataset unless `ESCO_VERSION` is explicitly supplied. ESCO URIs are retained as the external concept identifiers. The artifact records the current ESCO classification release separately from the API selection semantics so a portal release number is never silently treated as an API version token.
+The builder queries the official European Commission ESCO Web Services API in English. When `ESCO_VERSION` is not supplied, it deliberately omits `selectedVersion` and records that fact as `api-default`; the Commission currently documents that web-API default as ESCO v1.0.9. The overall ESCO classification release is tracked separately and is currently v1.2.1. If `ESCO_VERSION` is explicitly supplied, the artifact records that selected API version instead. This separation prevents a portal/classification release number from being silently treated as an API version token.
 
 Civweave-generated skill mappings follow a strict provenance rule:
 
