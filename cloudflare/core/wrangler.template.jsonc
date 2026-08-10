@@ -24,6 +24,20 @@
       "bucket_name": "civweave-distribution"
     }
   ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "IDENTITY",
+        "class_name": "CivweaveCoreIdentity"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["CivweaveCoreIdentity"]
+    }
+  ],
   "vars": {
     "CIVWEAVE_PLATFORM_FEE_BPS": "1500",
     "CIVWEAVE_MONEY_LIVE_ENABLED": "false"
@@ -37,5 +51,6 @@
   // STRIPE_CONNECT_WEBHOOK_SECRET
   // NODE_FABRIC_BINDING_TOKEN
   //
+  // The Ed25519 core signing identity is generated inside the IDENTITY Durable Object.
   // No host node receives any of these values.
 }
