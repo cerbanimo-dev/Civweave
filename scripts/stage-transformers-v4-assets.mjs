@@ -1,6 +1,7 @@
 import fsp from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import { gunzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
@@ -45,6 +46,72 @@ function run(command,args,options={}){
   if(result.status!==0)throw new Error(`${command} ${args.join(' ')} failed (${result.status}).\n${result.stderr||result.stdout||''}`.trim());
   return result;
 }
+function tarText(buffer,start,length){
+  return buffer.subarray(start,start+length).toString('utf8').replace(/\0.*$/s,'').trim();
+}
+function tarOctal(buffer,start,length){
+  const text=tarText(buffer,start,length).replace(/\s/g,'');
+  return text?Number.parseInt(text,8):0;
+}
+function parsePax(data){
+  const fields={};
+  let offset=0;
+  while(offset<data.length){
+    const space=data.indexOf(0x20,offset);
+    if(space<0)break;
+    const length=Number.parseInt(data.subarray(offset,space).toString('ascii'),10);
+    if(!Number.isFinite(length)||length<=0||offset+length>data.length)break;
+    const record=data.subarray(space+1,offset+length).toString('utf8').replace(/\n$/,'');
+    const equal=record.indexOf('=');
+    if(equal>0)fields[record.slice(0,equal)]=record.slice(equal+1);
+    offset+=length;
+  }
+  return fields;
+}
+function safeArchivePath(name){
+  const normalized=String(name||'').replace(/\\/g,'/').replace(/^\.\/+/,'');
+  if(!normalized.startsWith('package/'))throw new Error(`Archive entry escaped package/: ${name}`);
+  const relative=normalized.slice('package/'.length);
+  if(!relative)return '';
+  if(relative.split('/').some(part=>!part||part==='.'||part==='..'))throw new Error(`Unsafe archive path: ${name}`);
+  return relative;
+}
+async function extractNpmTgz(archive,extractDir){
+  const tar=gunzipSync(await fsp.readFile(archive));
+  let offset=0,pax={},longPath='';
+  while(offset+512<=tar.length){
+    const header=tar.subarray(offset,offset+512);
+    if(header.every(byte=>byte===0))break;
+    const name=tarText(header,0,100);
+    const prefix=tarText(header,345,155);
+    const size=tarOctal(header,124,12);
+    const type=String.fromCharCode(header[156]||48);
+    const dataStart=offset+512,dataEnd=dataStart+size;
+    if(dataEnd>tar.length)throw new Error(`Truncated tar entry: ${name}`);
+    const data=tar.subarray(dataStart,dataEnd);
+    if(type==='x'||type==='g'){
+      pax={...pax,...parsePax(data)};
+    }else if(type==='L'){
+      longPath=data.toString('utf8').replace(/\0.*$/s,'').trim();
+    }else{
+      const archiveName=pax.path||longPath||[prefix,name].filter(Boolean).join('/');
+      pax={};longPath='';
+      const relative=safeArchivePath(archiveName);
+      if(relative){
+        const target=path.resolve(extractDir,'package',relative);
+        const packageRoot=path.resolve(extractDir,'package');
+        if(target!==packageRoot&&!target.startsWith(`${packageRoot}${path.sep}`))throw new Error(`Unsafe archive path: ${archiveName}`);
+        if(type==='5'){
+          await fsp.mkdir(target,{recursive:true});
+        }else if(type==='0'||type==='\0'){
+          await fsp.mkdir(path.dirname(target),{recursive:true});
+          await fsp.writeFile(target,data);
+        }
+      }
+    }
+    offset=dataStart+Math.ceil(size/512)*512;
+  }
+}
 async function packAndExtract(npm,spec,temp,folder){
   const packDir=path.join(temp,`${folder}-pack`),extractDir=path.join(temp,`${folder}-extract`);
   await fsp.mkdir(packDir,{recursive:true});await fsp.mkdir(extractDir,{recursive:true});
@@ -53,7 +120,7 @@ async function packAndExtract(npm,spec,temp,folder){
   if(!archiveName)throw new Error(`npm pack did not return an archive name for ${spec}.`);
   const archive=path.resolve(packDir,archiveName);
   if(!await exists(archive))throw new Error(`Packed archive was not found for ${spec}: ${archive}`);
-  try{run('tar',['-xzf',archive,'-C',extractDir])}catch(error){throw new Error(`A tar-compatible extractor is required to stage ${spec}. ${error?.message||error}`)}
+  await extractNpmTgz(archive,extractDir);
   const packageRoot=path.join(extractDir,'package');if(!await exists(packageRoot))throw new Error(`${spec} archive did not contain package/.`);return packageRoot;
 }
 async function splitWasm(source){
