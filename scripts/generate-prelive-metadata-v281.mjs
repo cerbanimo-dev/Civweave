@@ -8,6 +8,7 @@ const root = path.resolve(here, '..');
 const publicDir = path.join(root, 'public');
 const version = (await fs.readFile(path.join(root, 'VERSION'), 'utf8')).trim();
 const workerPath = path.join(publicDir, 'service-worker-core-v208.js');
+const installerWorkerPath = path.join(publicDir, 'service-worker-installer-state-v280.js');
 const offlineManifestPath = path.join(publicDir, 'app', 'offline-package-v208.json');
 const integrityPath = path.join(publicDir, 'app', 'shell-integrity-v281.json');
 const DISCOVERABLE_EXTENSION = /\.(?:html?|css|m?js|json|webmanifest|md|txt|png|webp|jpe?g|gif|svg|avif|ico|woff2?|ttf|otf)$/i;
@@ -15,12 +16,12 @@ const MIN_SAFETY_BYTES = 64 * 1024 * 1024;
 
 if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error(`Invalid VERSION: ${version}`);
 
-function extractStringArray(source, name) {
+function extractStringArray(source, name, label) {
   const match = source.match(new RegExp(`const\\s+${name}\\s*=\\s*\\[(.*?)\\];`, 's'));
-  if (!match) throw new Error(`Could not locate ${name} in service-worker-core-v208.js.`);
+  if (!match) throw new Error(`Could not locate ${name} in ${label}.`);
   const value = Function(`"use strict"; return [${match[1]}];`)();
   if (!Array.isArray(value) || value.some(item => typeof item !== 'string')) {
-    throw new Error(`${name} must be a string array.`);
+    throw new Error(`${name} in ${label} must be a string array.`);
   }
   return value;
 }
@@ -58,8 +59,14 @@ function isCandidate(urlPath, manifest) {
   return DISCOVERABLE_EXTENSION.test(urlPath);
 }
 
-const workerSource = await fs.readFile(workerPath, 'utf8');
-const requiredShellAssets = extractStringArray(workerSource, 'REQUIRED_SHELL_ASSETS');
+const [workerSource, installerWorkerSource] = await Promise.all([
+  fs.readFile(workerPath, 'utf8'),
+  fs.readFile(installerWorkerPath, 'utf8')
+]);
+const requiredShellAssets = [...new Set([
+  ...extractStringArray(workerSource, 'REQUIRED_SHELL_ASSETS', 'service-worker-core-v208.js'),
+  ...extractStringArray(installerWorkerSource, 'INSTALLER_STATE_ASSETS', 'service-worker-installer-state-v280.js')
+])];
 const hashes = {};
 for (const pathname of requiredShellAssets) {
   const local = path.join(publicDir, pathname.replace(/^\/+/, ''));
