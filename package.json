@@ -1,6 +1,6 @@
 {
   "name": "civweave-host-node-hub",
-  "version": "1.0.85",
+  "version": "1.0.86",
   "private": true,
   "description": "Install-only Civweave device package with deterministic local operation, local sovereignty, and optional connected AI providers.",
   "type": "module",
@@ -57,7 +57,8 @@
     "check:release-discipline": "node scripts/verify-release-contract.mjs && node scripts/verify-root-hygiene.mjs && node scripts/verify-version-policy.mjs --self-test && node scripts/verify-canonical-launch-release.mjs",
     "release:materialize": "node scripts/materialize-canonical-release.mjs",
     "check:canonical-release": "node scripts/verify-canonical-launch-release.mjs",
-    "test:open-learning-media": "node scripts/test-open-learning-media-runtime-v1.mjs && python scripts/test-open-learning-media-harvest-v1.py"
+    "test:open-learning-media": "node scripts/test-open-learning-media-runtime-v1.mjs && python scripts/test-open-learning-media-harvest-v1.py",
+    "test:money-edge": "node --test scripts/test-contribution-money-edge-v1.mjs"
   },
   "overrides": {
     "sharp": "0.35.3"
