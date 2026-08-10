@@ -9,7 +9,6 @@ const NativeMutationObserver=globalThis.MutationObserver;
 const AI_SETTINGS_SELECTOR='[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings]';
 const AI_SETTINGS_DELEGATION='/app/settings-delegation-v175.js?v=1.0.65-ai-settings-entry-v269';
 const LOCAL_AI_BOOTSTRAP='/app/local-ai/bootstrap-v266.js?v=1.0.72-v272';
-const LOCAL_AI_BOOTSTRAP_VERSION='1.0.72-local-ai-bootstrap-v272-json-repair';
 let settingsDelegationPromise=null;
 let localAISettingsPromise=null;
 if(typeof NativeMutationObserver==='function'){
@@ -28,7 +27,6 @@ if(typeof NativeMutationObserver==='function'){
 }
 function localAIManagementReady(){
   return Boolean(
-    globalThis.CivweaveLocalAIBootstrapV266?.version===LOCAL_AI_BOOTSTRAP_VERSION&&
     globalThis.CivweaveLocalAISettingsV266?.enhance&&
     globalThis.CivweaveLocalModelDownloadV266?.status&&
     globalThis.CivweaveLocalModelDownloadV266?.selection&&
@@ -79,7 +77,7 @@ function ensureLocalAISettingsManagement(){
   if(localAISettingsPromise)return localAISettingsPromise;
   localAISettingsPromise=(async()=>{
     let bootstrap=globalThis.CivweaveLocalAIBootstrapV266;
-    if(bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION||!bootstrap?.ready){
+    if(!bootstrap?.ready){
       await new Promise((resolve,reject)=>{
         const script=document.createElement('script');
         script.src=`${LOCAL_AI_BOOTSTRAP}&settings-mount=v274`;
@@ -91,7 +89,7 @@ function ensureLocalAISettingsManagement(){
       });
       bootstrap=globalThis.CivweaveLocalAIBootstrapV266;
     }
-    if(bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION||!bootstrap?.ready)throw new Error('Downloaded local AI bootstrap did not become available.');
+    if(!bootstrap?.ready)throw new Error('Downloaded local AI bootstrap did not become available.');
     const ready=await bootstrap.ready;
     if(!ready||!localAIManagementReady())throw new Error('Downloaded local AI management did not become ready.');
     queueMicrotask(enhanceLocalAISettings);
