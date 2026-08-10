@@ -15,7 +15,7 @@ on:
       - scripts/build-video-learning-atlas-parallel-v1.py
       - scripts/materialize-video-learning-lookup-v1.py
       - .github/workflows/build-video-learning-atlas.yml
-      - .video-atlas-build-trigger
+      - ops/triggers/video-atlas-build.trigger
 
 permissions:
   contents: write

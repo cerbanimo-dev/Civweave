@@ -86,6 +86,20 @@ Many filenames are stable compatibility boundaries even when their internal buil
 - Search for the old filename after the edit. Remaining references must be intentional.
 - Keep query-string cache revisions coherent with the actual files being loaded.
 
+## Root hygiene
+
+Treat the repository root as a control surface, not a storage location.
+
+- New general documentation belongs under `docs/`.
+- Versioned release notes, audits, design backlogs, and retired implementation records belong under `docs/history/` in the appropriate category.
+- Workflow touch/sentinel files belong under `ops/triggers/`, never as hidden files at `/`.
+- Keep only runtime entrypoints, tool-required configuration, stable pointer documents, and explicitly grandfathered executable contracts at the root.
+- Do not add a new root Markdown file simply because it is convenient for one release.
+- If an executable contract genuinely must remain at root because code or packaging consumes that exact path, document that exception in `scripts/verify-root-hygiene.mjs` rather than weakening the rule.
+- Run `node scripts/verify-root-hygiene.mjs` after changing root layout, docs placement, or workflow sentinels.
+
+The root-hygiene workflow rejects unapproved root Markdown and root-level trigger/materialize/watchdog sentinels. Prefer adding an index or link to a folder over adding another root artifact.
+
 ## Cabinet ownership boundaries
 
 ### Shared family shell

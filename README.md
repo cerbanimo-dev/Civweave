@@ -15,6 +15,19 @@ The public host is deliberately small. It distributes and updates the device pac
 
 Agents and automated contributors must read [`AGENTS.md`](./AGENTS.md) before editing this repository.
 
+## Repository map
+
+The repository root is a control surface, not an archive. Keep root files limited to runtime entrypoints, tool-required configuration, and a small set of stable pointers/contracts.
+
+- [`docs/`](./docs/) - current engineering and product documentation.
+- [`docs/history/`](./docs/history/) - versioned release notes, audits, design backlogs, and other historical records.
+- [`ops/triggers/`](./ops/triggers/) - workflow sentinel files used to deliberately trigger materialization or recovery jobs.
+- [`scripts/`](./scripts/) - verification, migration, packaging, and maintenance tools.
+- [`.github/workflows/`](./.github/workflows/) - CI and automation definitions.
+- [`RELEASE-NOTES.md`](./RELEASE-NOTES.md) - stable pointer to the historical release-note collection.
+
+Do not add new versioned Markdown reports or hidden trigger files to the repository root. `scripts/verify-root-hygiene.mjs` and the root-hygiene workflow enforce this boundary.
+
 ## Current cabinet entry map
 
 `public/app/fullscreen-family-v104.html` is the active installed cabinet-family dispatcher. On the current `main` branch it opens:
@@ -81,6 +94,7 @@ Useful checks:
 
 ```bash
 npm run check
+node scripts/verify-root-hygiene.mjs
 ```
 
 Build install artifacts only after canonical source changes and verification:
