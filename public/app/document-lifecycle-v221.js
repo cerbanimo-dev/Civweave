@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='document-lifecycle-v278-hardware-ladder-download-policy';
+const VERSION='document-lifecycle-v281-small-model-fast-path';
 const LEGACY_ENTRY_REVISION='document-lifecycle-v269-ai-settings-entry';
 if(globalThis.CivweaveDocumentLifecycleV221?.version===VERSION)return;
 let active=true;
@@ -8,8 +8,8 @@ const observers=new Set();
 const NativeMutationObserver=globalThis.MutationObserver;
 const AI_SETTINGS_SELECTOR='[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings]';
 const AI_SETTINGS_DELEGATION='/app/settings-delegation-v175.js?v=1.0.65-ai-settings-entry-v269';
-const LOCAL_AI_BOOTSTRAP='/app/local-ai/bootstrap-v266.js?v=1.0.81-v278';
-const LOCAL_AI_BOOTSTRAP_VERSION='1.0.81-local-ai-bootstrap-v278-hardware-ladder';
+const LOCAL_AI_BOOTSTRAP='/app/local-ai/bootstrap-v266.js?v=1.0.83-v281';
+const LOCAL_AI_BOOTSTRAP_VERSION='1.0.83-local-ai-bootstrap-v281-small-model-fast-path';
 let settingsDelegationPromise=null;
 let localAISettingsPromise=null;
 if(typeof NativeMutationObserver==='function'){
@@ -37,7 +37,10 @@ function localAIManagementReady(){
     globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&
     globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true&&
     globalThis.CivweaveLocalModelRegistryV266?.installable&&
-    globalThis.CivweaveLocalModelBridgeV266?.patch
+    globalThis.CivweaveLocalModelRuntimeV266?.smallModelFastPath===true&&
+    globalThis.CivweaveLocalModelBridgeV266?.patch&&
+    globalThis.CivweaveLocalModelBridgeV266?.continuationValidation===true&&
+    globalThis.CivweaveLocalSmallModelPolicyV281?.validateCompletion
   );
 }
 function enhanceLocalAISettings(){
@@ -86,9 +89,9 @@ function ensureLocalAISettingsManagement(){
     if(bootstrap?.version!==LOCAL_AI_BOOTSTRAP_VERSION||!bootstrap?.ready){
       await new Promise((resolve,reject)=>{
         const script=document.createElement('script');
-        script.src=`${LOCAL_AI_BOOTSTRAP}&settings-mount=v278`;
+        script.src=`${LOCAL_AI_BOOTSTRAP}&settings-mount=v281`;
         script.async=false;
-        script.dataset.civweaveLocalAiSettings='v278';
+        script.dataset.civweaveLocalAiSettings='v281';
         script.onload=()=>resolve(true);
         script.onerror=()=>reject(new Error('Downloaded local AI management could not load.'));
         document.head.append(script);
@@ -99,7 +102,7 @@ function ensureLocalAISettingsManagement(){
     const ready=await bootstrap.ready;
     if(!ready||!localAIManagementReady())throw new Error('Downloaded local AI management did not become ready.');
     queueMicrotask(enhanceLocalAISettings);
-    try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-mounted',{detail:{version:VERSION,bootstrapVersion:bootstrap.version||'',managementReady:true,pulseReady:Boolean(globalThis.CivweaveLocalModelTestPulseV269?.enhance),metadataOnlyRepair:true,metadataRepairRaceSafe:true,truthfulCompletion:true,phone1BTier:true,hardwareLadder:true,largeExternalDataForeground:true}}))}catch{}
+    try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-mounted',{detail:{version:VERSION,bootstrapVersion:bootstrap.version||'',managementReady:true,pulseReady:Boolean(globalThis.CivweaveLocalModelTestPulseV269?.enhance),metadataOnlyRepair:true,metadataRepairRaceSafe:true,truthfulCompletion:true,phone1BTier:true,hardwareLadder:true,largeExternalDataForeground:true,smallModelFastPath:true,tokenizerAwareContext:true,continuationValidation:true}}))}catch{}
     return true;
   })().catch(error=>{
     localAISettingsPromise=null;
@@ -133,7 +136,7 @@ globalThis.CivweaveDocumentLifecycleV221=Object.freeze({
   ensureLocalAISettingsManagement,
   localAIManagementReady,
   enhanceLocalAISettings,
-  aiSettingsEntryRepair:'v278-hardware-ladder-download-policy',
+  aiSettingsEntryRepair:'v281-small-model-fast-path',
   stop
 });
 })();
