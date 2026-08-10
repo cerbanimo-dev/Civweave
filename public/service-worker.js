@@ -3,7 +3,7 @@ const VERSION='1.0.7';
 const CACHE_REVISION='direct-family-r45-memory-credential-v191';
 const GUIDE_REVISION='five-system-chat-r46-weaveling-memory';
 const CABINET_REVISION='direct-software-r38-v106';
-const DEVICE_REVISION='device-package-r41-no-native-dialog';
+const DEVICE_REVISION='device-package-r42-civweave-map-v1';
 const CALIBRATION_REVISION='marketing-only-r1';
 const INSTALL_REVISION='direct-entry-r45-memory-credential-v191';
 const LEDGER_HYDRATION_REVISION='direct-software-r35';
@@ -30,6 +30,25 @@ const MODEL_FILES=new Set([
   '/app/vendor/onnxruntime/ort-wasm-simd-threaded.wasm'
 ]);
 const ARCHIVED_LOCATION_PREFIXES=['/app/services/living-school/visual-assets/','/app/services/cerbanimo/assets/visual/','/app/services/fellowfare/assets/mall/','/app/services/anarchadia/assets/screens/'];
+const MAP_CORE=[
+  '/finder/index.html',
+  '/app/federation-finder-map-v275.html',
+  '/app/civweave-map-v1-manifest.json',
+  '/app/civweave-map-service-v275.js',
+  '/app/civweave-map-bootstrap-v1.js',
+  '/app/civweave-map-mesh-v276.js',
+  '/app/civweave-map-mesh-bridge-v276.js',
+  '/app/civweave-map-coverage-v277.js',
+  '/app/civweave-map-storage-v1.js',
+  '/app/civweave-map-offline-v1.js',
+  '/app/civweave-map-ui-v1.js',
+  '/app/shared/civweave-map-coverage-scoring-v1.mjs',
+  '/app/shared/civweave-sha256-stream-v1.mjs',
+  '/app/federation-finder-data/federation-seed-v269.json',
+  '/app/vendor/maplibre-v5.13.0/maplibre-gl.js',
+  '/app/vendor/maplibre-v5.13.0/maplibre-gl.css',
+  '/app/vendor/pmtiles-v4.4.1/pmtiles.js'
+];
 const CORE=[
   '/index.html','/install-v130.css','/install-v130.js','/offline.html',
   '/app/manifest.webmanifest','/app/installed-entry-v146.html','/app/installed-entry-v146.js','/app/install-boundary-v146.js','/app/local-object-mesh-v146.js','/app/local-first-policy-v131.js',
@@ -48,15 +67,15 @@ const CORE=[
   '/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png',
   '/app/assets/ai/weaveling.png','/app/assets/ai/moss.png','/app/assets/ai/kamiya.png','/app/assets/ai/rook.png','/app/assets/ai/merlin.png'
 ];
-const DEVICE_REQUIRED=[...CORE];
+const DEVICE_REQUIRED=[...CORE,...MAP_CORE];
 async function cacheRequired(cache,url){const response=await fetch(url,{cache:'no-store',headers:{'x-civweave-package':'install'}});if(!response.ok)throw new Error(`Device package asset ${url} returned ${response.status}`);await cache.put(url,response.clone());return true}
-async function packageStatus(){const cache=await caches.open(STATIC_CACHE),keys=await cache.keys(),required=[...new Set(DEVICE_REQUIRED)],present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=required.filter(url=>!present.has(url));return{type:'CIVWEAVE_DEVICE_PACKAGE',ready:missing.length===0,version:VERSION,revision:INSTALL_REVISION,deviceRevision:DEVICE_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,memoryRevision:MEMORY_REVISION,credentialPersistence:'explicit-session-or-device',packageRecoveryRevision:BASE_PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,defaultProvider:'deterministic',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,transformerActive:false,providerRuntimeOnOpen:false,singlePassOpen:true,migrationOnDemand:true,modelOnDemand:true,modelCache:MODEL_CACHE,cache:STATIC_CACHE,assetCount:required.length,presentCount:required.length-missing.length,missing}}
+async function packageStatus(){const cache=await caches.open(STATIC_CACHE),keys=await cache.keys(),required=[...new Set(DEVICE_REQUIRED)],present=new Set(keys.map(request=>new URL(request.url).pathname)),missing=required.filter(url=>!present.has(url));return{type:'CIVWEAVE_DEVICE_PACKAGE',ready:missing.length===0,version:VERSION,revision:INSTALL_REVISION,deviceRevision:DEVICE_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,memoryRevision:MEMORY_REVISION,credentialPersistence:'explicit-session-or-device',packageRecoveryRevision:BASE_PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,defaultProvider:'deterministic',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,transformerActive:false,providerRuntimeOnOpen:false,singlePassOpen:true,migrationOnDemand:true,modelOnDemand:true,modelCache:MODEL_CACHE,cache:STATIC_CACHE,assetCount:required.length,presentCount:required.length-missing.length,missing,mapPackage:'Civweave Map v1'} }
 async function modelPackageStatus(){const cache=await caches.open(MODEL_CACHE),keys=await cache.keys(),present=new Set(keys.map(request=>new URL(request.url).pathname)),required=[...MODEL_FILES],missing=required.filter(url=>!present.has(url));return{type:'CIVWEAVE_MODEL_PACKAGE',ready:missing.length===0,version:VERSION,runtime:'onnxruntime-web/wasm',executionProvider:'wasm',threads:1,cache:MODEL_CACHE,assetCount:required.length,presentCount:required.length-missing.length,missing}}
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(STATIC_CACHE);try{for(const url of [...new Set(DEVICE_REQUIRED)])await cacheRequired(cache,url);await self.skipWaiting()}catch(error){await caches.delete(STATIC_CACHE);console.error('[Civweave] Core package installation failed:',error);throw error}})()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{const keys=await caches.keys();const stale=keys.filter(key=>(key.startsWith('civweave-')&&key!==STATIC_CACHE&&key!==RUNTIME_CACHE&&key!==MODEL_CACHE)||/^(living-school|cerbanimo|fellowfare|anarchadia)-/.test(key));await Promise.all(stale.map(key=>caches.delete(key)));await self.clients.claim()})()));
 self.addEventListener('message',event=>{
   if(event.data?.type==='SKIP_WAITING')self.skipWaiting();
-  if(event.data?.type==='GET_VERSION'){const packet={type:'CIVWEAVE_VERSION',version:VERSION,revision:`${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}-${INSTALL_REVISION}`,localFirstRevision:CACHE_REVISION,guideRevision:GUIDE_REVISION,cabinetRevision:CABINET_REVISION,deviceRevision:DEVICE_REVISION,calibrationRevision:CALIBRATION_REVISION,installRevision:INSTALL_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,memoryRevision:MEMORY_REVISION,credentialPersistence:'explicit-session-or-device',packageRecoveryRevision:BASE_PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,defaultProvider:'deterministic',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,transformerActive:false,providerRuntimeOnOpen:false,singlePassOpen:true,migrationOnDemand:true,modelOnDemand:true,modelRuntime:'onnxruntime-web/wasm'};event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}
+  if(event.data?.type==='GET_VERSION'){const packet={type:'CIVWEAVE_VERSION',version:VERSION,revision:`${CACHE_REVISION}-${GUIDE_REVISION}-${CABINET_REVISION}-${DEVICE_REVISION}-${INSTALL_REVISION}`,localFirstRevision:CACHE_REVISION,guideRevision:GUIDE_REVISION,cabinetRevision:CABINET_REVISION,deviceRevision:DEVICE_REVISION,calibrationRevision:CALIBRATION_REVISION,installRevision:INSTALL_REVISION,ledgerHydrationRevision:LEDGER_HYDRATION_REVISION,aiRevision:AI_REVISION,memoryRevision:MEMORY_REVISION,credentialPersistence:'explicit-session-or-device',packageRecoveryRevision:BASE_PACKAGE_RECOVERY_REVISION,onlineSelfHeal:true,missingAssetDetails:true,defaultProvider:'deterministic',settingsPresentation:'self-contained-fixed-layer',nativeDialog:false,transformerActive:false,providerRuntimeOnOpen:false,singlePassOpen:true,migrationOnDemand:true,modelOnDemand:true,modelRuntime:'onnxruntime-web/wasm',mapPackage:'Civweave Map v1'};event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}
   if(event.data?.type==='GET_DEVICE_PACKAGE_STATUS')event.waitUntil(packageStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}));
   if(event.data?.type==='GET_MODEL_PACKAGE_STATUS')event.waitUntil(modelPackageStatus().then(packet=>{event.ports?.[0]?.postMessage(packet);event.source?.postMessage?.(packet)}));
 });
@@ -110,7 +129,7 @@ async function modelOnDemand(request){
   }catch(error){return new Response(`Local model asset unavailable: ${error.message}`,{status:503,headers:{'content-type':'text/plain; charset=utf-8','cache-control':'no-store','x-civweave-model-package':'not-installed'}})}
 }
 async function injectNavigationPolicy(response,pathname=''){const type=response.headers.get('content-type')||'';if(!type.includes('text/html'))return response;const text=await response.text(),scripts=[];if(!text.includes('/app/install-boundary-v146.js'))scripts.push('<script src="/app/install-boundary-v146.js?v=1.0.7"></script>');if(pathname.includes('anarchadia')&&!text.includes('/app/anarchadia-local-sovereignty-v146.js'))scripts.push('<script src="/app/anarchadia-local-sovereignty-v146.js?v=1.0.7"></script><script src="/app/anarchadia-sovereignty-bridge-v146.js?v=1.0.7"></script>');if(!scripts.length)return new Response(text,{status:response.status,statusText:response.statusText,headers:response.headers});const insertion=scripts.join(''),html=/<\/head>/i.test(text)?text.replace(/<\/head>/i,insertion+'</head>'):text.replace(/<\/body>/i,insertion+'</body>');const headers=new Headers(response.headers);headers.delete('content-length');headers.set('x-civweave-install-boundary','v146');if(pathname.includes('anarchadia'))headers.set('x-civweave-local-sovereignty','v146');return new Response(html,{status:response.status,statusText:response.statusText,headers})}
-function navigationFallback(url){const pathname=url.pathname;if(pathname.includes('installed-entry-v146'))return'/app/installed-entry-v146.html';if(pathname.includes('working-campus-v156'))return'/app/working-campus-v156.html';if(pathname.includes('fullscreen-family-v104'))return'/app/fullscreen-family-v104.html';if(pathname.endsWith('/services/fellowfare/cabinet.html'))return'/app/services/fellowfare/cabinet.html';if(pathname.includes('fellowfare-cabinet'))return'/app/fellowfare-cabinet-v144.html';if(pathname.includes('/app/cabinets/living-school/'))return'/app/cabinets/living-school/index.html';if(pathname.includes('anarchadia-console'))return'/app/anarchadia-console-v139.html';if(pathname.includes('realm-console'))return'/app/realm-console-v140.html';if(pathname.includes('anarchadia-sovereignty'))return'/app/anarchadia-sovereignty-v146.html';if(pathname.includes('anarchadia-governance'))return'/app/anarchadia-governance-v145.html';if(pathname.includes('cabinet-mode')||pathname.includes('cabinet-only')||pathname.includes('cabinet-visual')||pathname.startsWith('/loom')||pathname.startsWith('/lite')||pathname.startsWith('/cabinetonly'))return'/app/fullscreen-family-v104.html';if(CORE.includes(pathname)&&pathname.endsWith('.html'))return pathname;if(pathname.startsWith('/app/'))return'/app/installed-entry-v146.html';return'/app/installed-entry-v146.html'}
+function navigationFallback(url){const pathname=url.pathname;if(pathname==='/finder'||pathname==='/finder/'||pathname==='/finder/index.html')return'/app/federation-finder-map-v275.html';if(pathname.includes('installed-entry-v146'))return'/app/installed-entry-v146.html';if(pathname.includes('working-campus-v156'))return'/app/working-campus-v156.html';if(pathname.includes('fullscreen-family-v104'))return'/app/fullscreen-family-v104.html';if(pathname.endsWith('/services/fellowfare/cabinet.html'))return'/app/services/fellowfare/cabinet.html';if(pathname.includes('fellowfare-cabinet'))return'/app/fellowfare-cabinet-v144.html';if(pathname.includes('/app/cabinets/living-school/'))return'/app/cabinets/living-school/index.html';if(pathname.includes('anarchadia-console'))return'/app/anarchadia-console-v139.html';if(pathname.includes('realm-console'))return'/app/realm-console-v140.html';if(pathname.includes('anarchadia-sovereignty'))return'/app/anarchadia-sovereignty-v146.html';if(pathname.includes('anarchadia-governance'))return'/app/anarchadia-governance-v145.html';if(pathname.includes('cabinet-mode')||pathname.includes('cabinet-only')||pathname.includes('cabinet-visual')||pathname.startsWith('/loom')||pathname.startsWith('/lite')||pathname.startsWith('/cabinetonly'))return'/app/fullscreen-family-v104.html';if(DEVICE_REQUIRED.includes(pathname)&&pathname.endsWith('.html'))return pathname;if(pathname.startsWith('/app/'))return'/app/installed-entry-v146.html';return'/app/installed-entry-v146.html'}
 self.addEventListener('fetch',event=>{
   const request=event.request;if(!['GET','HEAD'].includes(request.method))return;
   const url=new URL(request.url);if(url.origin!==self.location.origin)return;
@@ -120,5 +139,5 @@ self.addEventListener('fetch',event=>{
   if(url.pathname==='/'||url.pathname==='/index.html'||url.pathname.startsWith('/downloads/'))return;
   if(MODEL_FILES.has(url.pathname)){event.respondWith(modelOnDemand(request));return}
   if(request.mode==='navigate'){event.respondWith((async()=>injectNavigationPolicy(await deviceOnly(request,navigationFallback(url)),url.pathname))());return}
-  if(url.pathname.startsWith('/app/')||url.pathname.startsWith('/loom/')||url.pathname.startsWith('/lite/')||url.pathname.startsWith('/cabinetonly/')||url.pathname==='/offline.html'){event.respondWith(deviceOnly(request));return}
+  if(url.pathname.startsWith('/app/')||url.pathname.startsWith('/finder/')||url.pathname.startsWith('/loom/')||url.pathname.startsWith('/lite/')||url.pathname.startsWith('/cabinetonly/')||url.pathname==='/offline.html'){event.respondWith(deviceOnly(request));return}
 });
