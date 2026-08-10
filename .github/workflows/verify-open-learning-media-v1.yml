@@ -1,0 +1,34 @@
+name: Verify Open Learning Media v1
+
+on:
+  push:
+    branches:
+      - agent/open-learning-media-harvest-v1
+    paths:
+      - scripts/harvest-open-learning-media-v1.py
+      - scripts/filter-open-learning-media-relevance-v1.py
+      - scripts/filter-open-learning-media-pedagogy-v1.py
+      - scripts/filter-open-learning-media-selection-v1.py
+      - scripts/test-open-learning-media-harvest-v1.py
+      - public/downloads/knowledge-schools/open-learning-media/**
+      - .github/workflows/verify-open-learning-media-v1.yml
+  pull_request:
+    paths:
+      - scripts/harvest-open-learning-media-v1.py
+      - scripts/filter-open-learning-media-relevance-v1.py
+      - scripts/filter-open-learning-media-pedagogy-v1.py
+      - scripts/filter-open-learning-media-selection-v1.py
+      - scripts/test-open-learning-media-harvest-v1.py
+      - public/downloads/knowledge-schools/open-learning-media/**
+      - .github/workflows/verify-open-learning-media-v1.yml
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check harvest pipeline
+        run: python -m py_compile scripts/harvest-open-learning-media-v1.py scripts/filter-open-learning-media-relevance-v1.py scripts/filter-open-learning-media-pedagogy-v1.py scripts/filter-open-learning-media-selection-v1.py scripts/test-open-learning-media-harvest-v1.py
+      - name: Verify harvested seed contracts
+        run: python scripts/test-open-learning-media-harvest-v1.py
