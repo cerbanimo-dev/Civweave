@@ -1,89 +1,341 @@
 {
-  "schema": "civweave.open-learning-media-selection-audit.v1",
-  "built_at": "2026-08-10T07:29:22Z",
-  "before": 54,
-  "after": 32,
-  "rejected": 22,
+  "schema": "civweave.open-learning-media-selection-audit.v2",
+  "built_at": "2026-08-10T08:15:43Z",
+  "before": 308,
+  "after": 256,
+  "rejected": 52,
   "topics": {
-    "vibe-coding": {
-      "name": "Vibe Coding",
-      "school_slug": "technology",
-      "records": 11,
-      "mesh_redistributable": 11,
+    "world-history": {
+      "name": "World History",
+      "school_slug": "history",
+      "required": true,
+      "records": 5,
+      "mesh_redistributable": 3,
       "providers": {
-        "peertube": 5,
-        "internet-archive": 3,
+        "wikimedia-commons": 1,
+        "peertube": 4
+      },
+      "top_titles": [
+        "Malcolm Harris on Palo Alto- A History of California, Capitalism, and the World (RSM Speaker Series)",
+        "Civilization｜ Learn B2 English Noun – Discuss world history fluently.",
+        "History of the World, Part II Trailer",
+        "\" REFRESHMENT THROUGH THE YEARS \" 1939 HISTORY OF COCA COLA DOCUMENTARY 1939 WORLD'S FAIR 72162",
+        "PAN AM CORPORATE FILM HISTORY OF COMMUNICATIONS & IBM PANAMAC COMPUTER SYSTEM 41294"
+      ]
+    },
+    "earth-geography": {
+      "name": "Earth & Geography",
+      "school_slug": "geography",
+      "required": true,
+      "records": 4,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 3,
+        "wikimedia-commons": 1
+      },
+      "top_titles": [
+        "U.S. ARMY WWII ERA MAP READING: ELEVATION, SLOPE, CONTOURING, PROFILE & VISIBILITY FILM 17144",
+        "OpenRefine Beginners Tutorial by Emma Carroll",
+        "\" AIR NAVIGATION MAP READING \" WWII ROYAL AIR FORCE NAVIGATOR TRAINING FILM GG44145",
+        "\" HOW TO GO PLACES \" 1954 CHEVROLET ROAD TRIP INSTRUCTIONAL FILM MAP READING w/ GALE STORM 88574"
+      ]
+    },
+    "civics-society": {
+      "name": "Civics & Society",
+      "school_slug": "society-and-social-sciences",
+      "required": true,
+      "records": 10,
+      "mesh_redistributable": 4,
+      "providers": {
+        "peertube": 9,
+        "wikimedia-commons": 1
+      },
+      "top_titles": [
+        "\"150K Protest in Prague Against Babis's Government: Demands for Stronger Democracy & Tough Stance on Russia.\"",
+        "\" DEMOCRACY \" 1945 EDUCATIONAL FILM U.S. GOVERNMENT ELECTIONS & VOTING FREEDOM OF SPEECH 66634",
+        "Test - Trace - Protect - How Contact Tracing works - Welsh Government video",
+        "FOSS4G 2022 | Crowdsourcing the Future of Government Data: OpenStreetMap in the Public Domain",
+        "WORLD WAR II ANTI-DISCRIMINATION & RACE RELATIONS U.S. GOVERNMENT MOVIE 76064",
+        "The Future of Democracy @ Horsham Skeptics in the Pub, May 2017",
+        "MANPOWER (1943) - Government Film , Rosie the Riveter , Women in WWII 3363",
+        "WOMEN IN WWII INDUSTRY & WAR EFFORT \"MANPOWER\" U.S. GOVERNMENT FILM 45244",
+        "“HERITAGE” 1940S CIVICS, TOLERANCE, AND ANTI-TOTALITARIANISM CARTOON SOCIAL GUIDANCE FILM 70094",
+        "An introduction to Parliament"
+      ]
+    },
+    "biology-life": {
+      "name": "Biology & Life",
+      "school_slug": "science",
+      "required": true,
+      "records": 19,
+      "mesh_redistributable": 10,
+      "providers": {
+        "peertube": 16,
         "wikimedia-commons": 3
       },
       "top_titles": [
-        "Vibe coding a website with Silex and Claude Code | x5 timelapse",
-        "Is Vibe Coding Hurting Open Source? Big Cosmic Desktop Roadmap Linux Weekly News",
+        "From Tokens to Cells: Foundation Models for Single-Cell Biology - Akram Baharlouei, Altos Labs",
+        "The Human Genome Project | Genetics | Biology | FuseSchool",
+        "Week #2B-1: DNA Parts & Basic Molecular Biology - DNA Parts",
+        "Week #2B-2: DNA parts & Basic Molecular Biology - Part Collections",
+        "Week #2B-3: DNA Parts & Basic Molecular Biology - Basic Techniques",
+        "Nature vs Nurture： Behaviorism or Genetics？",
+        "Cybernetic Genetics - Abandoned",
+        "The Cell High School Biology",
+        "Biota Talks #1 - Chloroplast-Derived Cell-Free Systems: Advancing Plant Synthetic Biology through Rapid Prototyping",
+        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School"
+      ]
+    },
+    "physics-foundations": {
+      "name": "Physics Foundations",
+      "school_slug": "science",
+      "required": true,
+      "records": 16,
+      "mesh_redistributable": 12,
+      "providers": {
+        "peertube": 12,
+        "wikimedia-commons": 4
+      },
+      "top_titles": [
+        "ENERGY AND ITS TRANSFORMATIONS 1930s EDUCATIONAL FILM PHYSICS & ELECTRICITY 56624",
+        "Physics Of Crystals by LesBrown",
+        "Inertia ｜ Forces and Motion ｜ Physics ｜ FuseSchool",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "Belorechensk Struggles with Power Outage: Lack of Electricity & Water Causes Chaos",
+        "Ukrainian Drones Strike Key Electricity Hub to Crimea",
+        "Electricity generating exercise bike build log",
+        "Ruvival-eng: Rural Energy Systems",
+        "Drone Attack on Thermal Power Plant in Oryol Leaves City Without Energy",
+        "Power Strike Leaves Millions Without Energy in Occupied Regions"
+      ]
+    },
+    "chemistry-foundations": {
+      "name": "Chemistry Foundations",
+      "school_slug": "science",
+      "required": true,
+      "records": 21,
+      "mesh_redistributable": 20,
+      "providers": {
+        "wikimedia-commons": 7,
+        "internet-archive": 1,
+        "peertube": 13
+      },
+      "top_titles": [
+        "Mendeleev and the Periodic Table - Chemistry for All - The Fuse School",
+        "Chemical Reactions GCSE Chemistry",
+        "Electron Configuration of the First 20 Elements of Periodic Table - Chemistry for All - FuseSchool",
+        "The (truly) Periodic Table",
+        "What are Radioactive isotopes (radionuclides) - Chemistry for All - The Fuse School",
+        "Chemistry - Challenges and Solutions ★ \"Lost\" Annenberg Media Series",
+        "How to Understand Mendeleev's Periodic Table of 1869",
+        "Energy Levels and Electron Configuration - Chemistry for All - FuseSchool",
+        "Environmental Impacts of Detergents ｜ Environmental Chemistry ｜ Chemistry ｜ FuseSchool",
+        "Global Warming - Evaluating the Evidence ｜ Environmental Chemistry ｜ Chemistry ｜ FuseSchool"
+      ]
+    },
+    "astronomy-space": {
+      "name": "Astronomy & Space",
+      "school_slug": "science",
+      "required": true,
+      "records": 16,
+      "mesh_redistributable": 12,
+      "providers": {
+        "peertube": 10,
+        "wikimedia-commons": 6
+      },
+      "top_titles": [
+        "MOUNT WILSON OBSERVATORY 1950s ASTRONOMY EDUCATIONAL FILM \"REALM OF THE GALAXIES\" 65524",
+        "Asteroid Bennu's Journey, the formation of our Solar system and the early Earth, NASA",
+        "Solar System explained by simpleshow foundation",
+        "Chandra X-ray Image & DSS Optical Image of NGC galaxies (2006-galaxies)",
+        "Solar System Resource Page (SVS20391)",
+        "Science in English Podcast : The Solar System",
+        "The Royal Society - Astronomy by microscope？ ｜ The Royal Society",
+        "Animation Using Constraints Example Solar System",
+        "Hubble Science- Planetary Missions, Fossils of our Solar System (SVS14267)",
+        "NASA's Stunning Discoveries on Jupiter's Largest Moons | Our Solar System's Moons Supercut"
+      ]
+    },
+    "mathematics-foundations": {
+      "name": "Mathematics Foundations",
+      "school_slug": "mathematics",
+      "required": true,
+      "records": 16,
+      "mesh_redistributable": 16,
+      "providers": {
+        "peertube": 13,
+        "wikimedia-commons": 3
+      },
+      "top_titles": [
+        "Professor Dave Explains Math (all of it) - Part I - Basics, Algebra, Geometry",
+        "Universal Algebra and Lattice Theory - Lecture 1: Introduction and background",
+        "Vartika: Inside nowadays Mathematics (Part 4)",
+        "Algebraic Notation - Introduction To Algebra ｜ Algebra ｜ Maths ｜ FuseSchool",
+        "Sketches and Conjectures ｜ How to Make Conjecture ｜ What Are Conjecture Geometry Tutoring Video #001",
+        "Universal Algebra and Lattice Theory - Lecture 5: Posets and lattices",
+        "Boolean Algebra with very early Wikilambda",
+        "Distance between skew lines (applying formulae) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy",
+        "Area & Volume of Solids, General formula ｜ Mensuration ｜ Odiya Geometry Class X ｜ Khan Academy",
+        "Distance between parallel lines (intuition) ｜ 3D Geometry ｜ Grade 12 ｜ Math ｜ Khan Academy"
+      ]
+    },
+    "computing-basics": {
+      "name": "Computing Basics",
+      "school_slug": "technology",
+      "required": true,
+      "records": 5,
+      "mesh_redistributable": 4,
+      "providers": {
+        "peertube": 4,
+        "internet-archive": 1
+      },
+      "top_titles": [
+        "Niklaus Wirth on Teaching Computer Science",
+        "What is Computer Science",
+        "Richard Feynman Computer Science Lecture - Hardware, Software and Heuristics",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science",
+        "Learn How Computers Work Between Silicon and Assembly: Build a CPU with Python"
+      ]
+    },
+    "arts-culture": {
+      "name": "Arts & Culture",
+      "school_slug": "arts",
+      "required": true,
+      "records": 1,
+      "mesh_redistributable": 1,
+      "providers": {
+        "peertube": 1
+      },
+      "top_titles": [
+        "Balancing the New and the Ancient: LRNZ on Modern Design Meets Roman Art History"
+      ]
+    },
+    "health-wellness": {
+      "name": "Health & Wellness",
+      "school_slug": "health-medicine-and-disease",
+      "required": true,
+      "records": 10,
+      "mesh_redistributable": 7,
+      "providers": {
+        "wikimedia-commons": 5,
+        "peertube": 5
+      },
+      "top_titles": [
+        "InFocus- National Nutrition Month (956246)",
+        "Diabetes and Nutrition in the Latino Community",
+        "Secretary Kennedy's Statement on Nutrition in Medical Schools",
+        "Maternal, Infant and Early Childhood Nutrition — The Thousand Day Window of Opportunity",
+        "Joshua Rosenthal Interviews Deepak Chopra on Health & Wellness in America",
+        "3 out of 5 Healthy Breakfast Lesson Plan: Nutrition Made Fun!",
+        "Peptides to Innovation: Unlocking the Future of Health and Nutrition with ALEBBRIGE",
+        "\"TOMMY'S DAY\" 1946 HEALTH, HYGIENE, NUTRITION & EXERCISE EDUCATIONAL FILM 47754",
+        "\" THE HUMAN BODY / THE BRAIN\" 1968 BRAIN FUNCTION & HUMAN ANATOMY EDUCATIONAL FILM XD75764",
+        "1930s NUTRITION AND HEALTH FOR AIRLINE PILOTS & FLYING CADETS PROMOTIONAL FILM 87204"
+      ]
+    },
+    "philosophy-ethics": {
+      "name": "Philosophy & Ethics",
+      "school_slug": "philosophy-and-religion",
+      "required": true,
+      "records": 15,
+      "mesh_redistributable": 12,
+      "providers": {
+        "wikimedia-commons": 6,
+        "peertube": 9
+      },
+      "top_titles": [
+        "2017 Public Health Ethics Forum",
+        "Ethics of AI in Digital Medicine – Explanation why transparent explainable AI is important",
+        "The Philosophy of Antifa",
+        "Make Code that sucks less 🌬️ Bloatware and suckless philosophy",
+        "Corso di Philosophy for children (1)",
+        "René Descartes- Meditations on First Philosophy. First Meditation.",
+        "Philosophy of Free Software",
+        "Alternative Paradigms： Care Ethics and Feminine Ethics",
+        "The Philosophy of William James",
+        "DEBATE Religious Freedom, Conquest, Slavery & Sexual Ethics - Dr Javad T. Hashmi Vs Daniel Haqiqatjou"
+      ]
+    },
+    "vibe-coding": {
+      "name": "Vibe Coding",
+      "school_slug": "technology",
+      "required": true,
+      "records": 4,
+      "mesh_redistributable": 4,
+      "providers": {
+        "wikimedia-commons": 2,
+        "peertube": 2
+      },
+      "top_titles": [
         "Free AI Coding Assistant – Cline.AI Setup Guide",
         "How to Use Cline with Open Router in VS Code – Step-by-step guide (free AI coding assistant)",
         "Gadgets: Personal app vibe coding that is actually safe — Kenton Varda, Cloudflare",
-        "Vibe Coding Is Killing UX. A 26-Year UX Vet Has the Fix. | The BMad Code Podcast",
-        "Visual Basic 6.0 Demos, Vibe Coding and Updates About Me.",
-        "Wikimania 2026 – Building a Wikimedia tool with agentic AI",
-        "Gen AI prototyping with Google Tools from Stitch to AI studio",
-        "Is Vibe coding hurting open source_ Big Cosmic desktop roadmap - Linux Weekly News"
+        "Vibe coding a website with Silex and Claude Code | x5 timelapse"
       ]
     },
     "prompt-engineering": {
       "name": "Prompt Engineering",
       "school_slug": "technology",
-      "records": 4,
-      "mesh_redistributable": 3,
+      "required": true,
+      "records": 3,
+      "mesh_redistributable": 2,
       "providers": {
         "internet-archive": 1,
-        "peertube": 3
+        "peertube": 2
       },
       "top_titles": [
         "Effective prompt engineering for Python programmers",
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
-        "Il Prompt Engineering",
-        "Machine Learning nella Scuola: Concetti Base e Applicazioni"
+        "Il Prompt Engineering"
       ]
     },
     "pseudocoding": {
-      "name": "Pseudocoding and Algorithm Design",
+      "name": "Pseudocoding & Algorithm Design",
       "school_slug": "technology",
-      "records": 2,
-      "mesh_redistributable": 2,
+      "required": true,
+      "records": 5,
+      "mesh_redistributable": 4,
       "providers": {
-        "peertube": 1,
-        "internet-archive": 1
+        "wikimedia-commons": 4,
+        "peertube": 1
       },
       "top_titles": [
-        "Pseudo-code et description des algorithmes",
-        "Open CS education resources for schools - how hard could it be?"
+        "Dijkstra s algorithm explained",
+        "Graphs- Dijkstra's Algorithm",
+        "Lloyd algorithm on Surface",
+        "Mean Shift algorithm",
+        "Tsinghua-A: Algorithm-based Antibody Drugs Design for Various Animal Species (2023) - Project Promotion [English]"
       ]
     },
     "critical-thinking": {
-      "name": "Critical Thinking",
+      "name": "Critical Thinking & Media Literacy",
       "school_slug": "philosophy-and-religion",
-      "records": 6,
+      "required": true,
+      "records": 7,
       "mesh_redistributable": 6,
       "providers": {
-        "wikimedia-commons": 6
+        "wikimedia-commons": 1,
+        "peertube": 6
       },
       "top_titles": [
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
-        "Wikimania 2024 - Dilijan - Day 4 - Media literacy as tool to reach for the Collaboration of Open",
-        "Wikimania 2026 – WikiAnalyzer v2 & WikiDebate Open AI Tools to Teach Critical Thinking and Bias Detection through Wikipedia",
-        "Lisa Loving about media literacy and how you can report for your community",
-        "Media literacy to counter political polarization per Ahmed Al-Rawi",
-        "Media literacy to dispel myths and improve public policy"
+        "The Facts about Fact Checking: Crash Course Navigating Digital Information #2",
+        "Guerilla Media : Les Contradictions du Fact-Checking | Avec Le Canard Réfractaire et Igor Galligo",
+        "Vérifier l’info : le fact-checking - Samuel Etienne / Aude WTFake - La Collab' de l'info",
+        "AE VS Etienne AGRI Youtubeurre | Fact Checking de son Fact checking de PETA",
+        "Tuto IA - Vera, l'appli de fact checking par simple appel ou message sur Whatsapp. Simple et top !!",
+        "Fake News:l debunking; Fact checking"
       ]
     },
     "logical-frameworks": {
-      "name": "Logical Frameworks",
+      "name": "Logic & Systems Thinking",
       "school_slug": "philosophy-and-religion",
-      "records": 9,
-      "mesh_redistributable": 9,
+      "required": true,
+      "records": 6,
+      "mesh_redistributable": 6,
       "providers": {
         "wikimedia-commons": 4,
-        "peertube": 2,
-        "internet-archive": 3
+        "peertube": 2
       },
       "top_titles": [
         "Complexity Science- 3 Systems Thinking",
@@ -91,74 +343,599 @@
         "Systems Thinking 10- System Dynamics",
         "Systems Thinking 8- Emergence",
         "Learning Systems Thinking with Diana Montalion and Lisa Moritz",
-        "The Open Decision Framework How to make everybody happy",
-        "Systems Thinking through Changes: An action learning guide | Canadian Digital Service | 2022-03-042",
-        "Systems Thinking 11- Homeostasis",
-        "20220509 ST ON Intention Attention Design Systems Changes Learning Khan"
+        "Systems Thinking 11- Homeostasis"
       ]
+    },
+    "personal-finance": {
+      "name": "Personal Finance",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 13,
+      "mesh_redistributable": 11,
+      "providers": {
+        "peertube": 13
+      },
+      "top_titles": [
+        "GnuCash for Personal Finance - Reconciliation",
+        "GnuCash for Personal Finance - Getting Started and Basics",
+        "GnuCash for Personal Finance - Split Transactions",
+        "Firefly III personal finance",
+        "Firefly III personal finance",
+        "GnuCash for Personal Finance - Tracking Stocks and Mutual Funds",
+        "Saving PocketBook annotations across EPUB metadata edits",
+        "EmacsConf 2021: Budgeting, Project Monitoring and Invoicing with Org Mode - Adolfo Villafiorita",
+        "EmacsConf 2021: Budgeting, Project Monitoring and Invoicing with Org Mode - Adolfo Villafiorita",
+        "Saving a Windows 8 Tablet with Debian Linux!"
+      ]
+    },
+    "cooking-food-safety": {
+      "name": "Cooking & Food Safety",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 14,
+      "mesh_redistributable": 10,
+      "providers": {
+        "wikimedia-commons": 4,
+        "peertube": 10
+      },
+      "top_titles": [
+        "Gear Up for Food Safety",
+        "HunanU: AptAbt: Aptamer-based antibiotic biosensor for ensuring food safety (2025) - Team Presentation [English]",
+        "EU Health and Food Safety - Audit and Non-Audit work explained",
+        "HunanU: AptAbt: Aptamer-Based Antibiotic Biosensor for Ensuring Food Safety (2025) - Project Promotion [English]",
+        "Pressure Cooking Fun, Part 1",
+        "Food Safety During Power Outages",
+        "Food Safety Video",
+        "\" COOKING TERMS AND WHAT THEY MEAN \" 1949 KITCHEN / HOME ECONOMICS TEACHING FILM GG24515",
+        "AptAbt: Aptamer-Based Antibiotic Biosensor for Ensuring Food Safety",
+        "Cooking with Agents in VS Code — Liam Hampton, Microsoft"
+      ]
+    },
+    "first-aid-basics": {
+      "name": "First Aid Basics",
+      "school_slug": "health-medicine-and-disease",
+      "required": false,
+      "records": 11,
+      "mesh_redistributable": 4,
+      "providers": {
+        "peertube": 7,
+        "wikimedia-commons": 4
+      },
+      "top_titles": [
+        "AFCM-Egypt: SONG-H and basic first aid tips for burns (2024) [Arabic]",
+        "Psychological First Aid- Addressing Mental Health Distress During Disasters",
+        "\" DANGER IS YOUR COMPANION \" 1940s AMERICAN RED CROSS BASIC FIRST AID & AUTO ACCIDENT FILM 58904",
+        "-27t FIRST AID and MEDICAL kit Provisioning on our CATAMARAN - Sailing uh Sisu",
+        "\"FIRST AID\" 1938 U.S. ARMY SIGNAL CORPS COMBAT FIRST AID TRAINING FILM 68444",
+        "“ ESSENTIALS OF FIRST AID ” U.S. NAVY WWII TRAINING FILM TOURNIQUETS & BASIC MEDICAL CARE XD46194",
+        "18th Security Forces TCCC Training (1016454)",
+        "\" FIRST AID FOR BATTLE INJURIES \" WORLD WAR II INFANTRY TRAINING FILM GUNSHOT VICTIM 17194",
+        "“ BURNS: EMERGENCY PROCEDURES ” FIRST AID TRAINING FILM CHEMICAL & ELECTRICAL BURNS XD47944",
+        "“FIRST AID ON THE SPOT\" 1980s FIRST AID CLASSROOM & WORKPLACE INJURY EDUCATIONAL FILM XD51404"
+      ]
+    },
+    "home-maintenance": {
+      "name": "Home Maintenance",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
+    },
+    "career-work-skills": {
+      "name": "Career & Work Skills",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 0,
+      "mesh_redistributable": 0,
+      "providers": {},
+      "top_titles": []
+    },
+    "electronics-basics": {
+      "name": "Electronics Basics",
+      "school_slug": "technology",
+      "required": false,
+      "records": 8,
+      "mesh_redistributable": 7,
+      "providers": {
+        "peertube": 8
+      },
+      "top_titles": [
+        "soldering a circuit only using components from the mystery box of electronics!",
+        "A Tipping Point! Yihua 706-II Soldering Station Test and Teardown",
+        "1958 \"ABOVE AND BEYOND\" NASA SOLDER & SOLDERING TECHNIQUES ELECTRONICS INSTRUCTIONAL FILM XD48824",
+        "A Power Supply for a Vintage Weller Soldering Iron",
+        "Mesecons Tutorial - Basic Circuits",
+        "EmacsConf 2025: Basic Calc functionality for engineering or electronics - Christopher Howard",
+        "Mesecons Tutorial - Basic Circuits",
+        "[Tech Maid] Mesecons Basics"
+      ]
+    },
+    "woodworking-basics": {
+      "name": "Woodworking Basics",
+      "school_slug": "everyday-life",
+      "required": false,
+      "records": 5,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 5
+      },
+      "top_titles": [
+        "Woodworking Design Rejected! Learning Amazon's Other Content Policy",
+        "Making of_ Torture Garden sign _ Raised logo with lightbulbs _ Woodworking _ DIY",
+        "1949 U.S. NAVY TRAINING FILM BENDING OAK TECHNIQUES WOODWORKING NORFOLK NAVAL SHIPYARD 95474",
+        "FURNITURE CRAFTSMEN 1940s WOODWORKING & CHAIR MANUFACTURE FILM 47974",
+        "Jenga Block guitar collab with @bigdguitars #guitar #diy #woodworking"
+      ]
+    },
+    "sewing-textiles": {
+      "name": "Sewing & Textiles",
+      "school_slug": "arts",
+      "required": false,
+      "records": 5,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 5
+      },
+      "top_titles": [
+        "Textile Fighters - An Integrated Enzymatic Route to Degrade PET in Textiles",
+        "Sewing With Rarity an ASMR Roleplay (Season Finale)💟",
+        "“ SINGER SEWING MACHINES ” 1940’S SINGER CO. PROMO FILM ELIZABETHPORT, NJ SEAMSTRESSES XD50284",
+        "Behind the scenes: Sewing watermelon shorts",
+        "Lessons learned from sewing a Christmas Shirt (McCall’s M6044)"
+      ]
+    },
+    "drawing-design": {
+      "name": "Drawing & Design",
+      "school_slug": "arts",
+      "required": false,
+      "records": 15,
+      "mesh_redistributable": 13,
+      "providers": {
+        "peertube": 11,
+        "wikimedia-commons": 4
+      },
+      "top_titles": [
+        "05 PrismChart: Drawing Tools 1 - Lines, Shapes & Properties",
+        "Fun programming 86: Drawing shapes with your mouse",
+        "How to use the Artisan Charcoal brush pack for Painter",
+        "Drawing a Kirin (2022)",
+        "Sketching a Raptor with a Novelty Pencil",
+        "Sketching at the Coffee Shop",
+        "Sketching at the Lo-Fi Bar and Lounge",
+        "Sketching the Gallery of Madame Liu Tsong",
+        "Inkscape Beginner Tutorial | Icon Drawing with Basic Shapes",
+        "How to use the Sketch Essentials brush pack"
+      ]
+    },
+    "photography-video": {
+      "name": "Photography & Video",
+      "school_slug": "arts",
+      "required": false,
+      "records": 9,
+      "mesh_redistributable": 4,
+      "providers": {
+        "wikimedia-commons": 3,
+        "peertube": 6
+      },
+      "top_titles": [
+        "Basics of fine-art photography (textbook presentation)",
+        "Basics of photography – how you learn to shoot better photos",
+        "Basics of photography – how you learn to shoot better photos",
+        "Shutter Speed explained",
+        "Photography - Obsolete Beats (Full EP 2018)",
+        "U.S. NAVY 1950s BASIC PHOTOGRAPHY & MOTION PICTURE CAMERAS TRAINING FILM 88594",
+        "U.S. NAVY 1950s BASIC PHOTOGRAPHY & MOTION PICTURE CAMERAS TRAINING FILM 88594a",
+        "\"PHOTOGRAPHY IN THE USAF \" MISSILE LAUNCH FAILURE ANALYSIS AT VANDENBERG AIR FORCE BASE GG28355",
+        "” PHOTOGRAPHY FOR NEWSPAPERS ” 1948 HIGH SCHOOL NEWSPAPER PHOTO JOURNALIST & EDITOR FILM XD42404"
+      ]
+    },
+    "statistics-data-literacy": {
+      "name": "Statistics & Data Literacy",
+      "school_slug": "mathematics",
+      "required": false,
+      "records": 9,
+      "mesh_redistributable": 9,
+      "providers": {
+        "peertube": 8,
+        "wikimedia-commons": 1
+      },
+      "top_titles": [
+        "Quick Statistics and Visual Overview of Data in LabPlot",
+        "Online Seminar_ FOSSR Building the Italian Online Probability Panel",
+        "Another year of HackerOne statistics Roeland Douma",
+        "National Sovereignty in Geosciences - Statistics and DataRisks and opportunities for Brazil in the Digital Era (IBGE)",
+        "Refik Anadol \"Quantum Memories Probability,\" 2021 – 4 min excerpt",
+        "Richard Feynman - The Character of Physical Law - Part 6 Probability and Uncertainty (full version)",
+        "Sampling-from-a-probability-distribution",
+        "Let's Play - Downwell (Part 14) Statistics and Combo Icons",
+        "Data literacy : comment former les citoyens et les agents publics à l’usage des données"
+      ]
+    },
+    "climate-environment": {
+      "name": "Climate & Environment",
+      "school_slug": "science",
+      "required": false,
+      "records": 7,
+      "mesh_redistributable": 5,
+      "providers": {
+        "wikimedia-commons": 3,
+        "internet-archive": 2,
+        "peertube": 2
+      },
+      "top_titles": [
+        "The Australian Institute of Marine Science (AIMS) is researching the current and possible future impacts of climate change on tropical marine ecosystems",
+        "Political Interference with Climate Science",
+        "Welcome to Climate Change and Health – From Science to Practice",
+        "Climate Change: Science, Policy, Action",
+        "NASA Summer 2023 Temperature Media Resources (SVS14407 - Is Climate Change the Same as Global Warming - Horizontal Video)",
+        "Quatermass And The Pit (1967) predicts reaction to climate change",
+        "Uncertainty at Scale - how Computer Science hinders Climate Science"
+      ]
+    },
+    "law-rights-basics": {
+      "name": "Law & Rights Basics",
+      "school_slug": "society-and-social-sciences",
+      "required": false,
+      "records": 5,
+      "mesh_redistributable": 2,
+      "providers": {
+        "peertube": 5
+      },
+      "top_titles": [
+        "Civil Rights Act of 1964 | Rosa Parks and Martin Luther King",
+        "Rosa Parks - Civil Rights Activist | Mini Bio | BIO",
+        "\" ANARCHY USA \" 1966 ANTI-CIVIL RIGHTS MOVEMENT / COMMUNIST CONSPIRACY DOCUMENTARY PART 1 XD73244a",
+        "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 1) SM10115a",
+        "“ SIT IN ” 1960 CIVIL RIGHTS NEWS FILM SEGREGATION IN NASHVILLE, TENNESSEE (PART 2) SM10115b"
+      ]
+    }
+  },
+  "packs": {
+    "general-knowledge": {
+      "name": "General Knowledge",
+      "kind": "core",
+      "description": "A broad offline-ready foundation across history, geography, civics, science, mathematics, technology, arts, health, and philosophy.",
+      "topics": [
+        "world-history",
+        "earth-geography",
+        "civics-society",
+        "biology-life",
+        "physics-foundations",
+        "chemistry-foundations",
+        "astronomy-space",
+        "mathematics-foundations",
+        "computing-basics",
+        "arts-culture",
+        "health-wellness",
+        "philosophy-ethics"
+      ],
+      "covered_topics": [
+        "world-history",
+        "earth-geography",
+        "civics-society",
+        "biology-life",
+        "physics-foundations",
+        "chemistry-foundations",
+        "astronomy-space",
+        "mathematics-foundations",
+        "computing-basics",
+        "arts-culture",
+        "health-wellness",
+        "philosophy-ethics"
+      ],
+      "coverage": 1.0,
+      "records": 96,
+      "available": true
+    },
+    "digital-ai-literacy": {
+      "name": "Digital & AI Literacy",
+      "kind": "extension",
+      "description": "AI-assisted creation, prompting, algorithmic thinking, critical evaluation, and logical systems.",
+      "topics": [
+        "computing-basics",
+        "vibe-coding",
+        "prompt-engineering",
+        "pseudocoding",
+        "critical-thinking",
+        "logical-frameworks"
+      ],
+      "covered_topics": [
+        "computing-basics",
+        "vibe-coding",
+        "prompt-engineering",
+        "pseudocoding",
+        "critical-thinking",
+        "logical-frameworks"
+      ],
+      "coverage": 1.0,
+      "records": 26,
+      "available": true
+    },
+    "practical-life": {
+      "name": "Practical Life",
+      "kind": "extension",
+      "description": "Everyday competence for money, food, first aid, home upkeep, and work.",
+      "topics": [
+        "personal-finance",
+        "cooking-food-safety",
+        "first-aid-basics",
+        "home-maintenance",
+        "career-work-skills"
+      ],
+      "covered_topics": [
+        "personal-finance",
+        "cooking-food-safety",
+        "first-aid-basics"
+      ],
+      "coverage": 0.6,
+      "records": 25,
+      "available": true
+    },
+    "maker-creative": {
+      "name": "Maker & Creative Studio",
+      "kind": "extension",
+      "description": "Hands-on repair and creative production spanning electronics, wood, textiles, drawing, and camera craft.",
+      "topics": [
+        "electronics-basics",
+        "woodworking-basics",
+        "sewing-textiles",
+        "drawing-design",
+        "photography-video"
+      ],
+      "covered_topics": [
+        "electronics-basics",
+        "woodworking-basics",
+        "sewing-textiles",
+        "drawing-design",
+        "photography-video"
+      ],
+      "coverage": 1.0,
+      "records": 28,
+      "available": true
+    },
+    "civic-media-literacy": {
+      "name": "Civic & Media Literacy",
+      "kind": "extension",
+      "description": "Evidence, data, rights, climate, government, and resilient information habits.",
+      "topics": [
+        "critical-thinking",
+        "civics-society",
+        "statistics-data-literacy",
+        "climate-environment",
+        "law-rights-basics"
+      ],
+      "covered_topics": [
+        "critical-thinking",
+        "civics-society",
+        "statistics-data-literacy",
+        "climate-environment",
+        "law-rights-basics"
+      ],
+      "coverage": 1.0,
+      "records": 26,
+      "available": true
+    },
+    "deep-science": {
+      "name": "Deep Science",
+      "kind": "extension",
+      "description": "A denser science pathway spanning living systems, matter, forces, Earth systems, and space.",
+      "topics": [
+        "biology-life",
+        "physics-foundations",
+        "chemistry-foundations",
+        "astronomy-space",
+        "climate-environment"
+      ],
+      "covered_topics": [
+        "biology-life",
+        "physics-foundations",
+        "chemistry-foundations",
+        "astronomy-space",
+        "climate-environment"
+      ],
+      "coverage": 1.0,
+      "records": 53,
+      "available": true
+    },
+    "humanities-culture": {
+      "name": "Humanities & Culture",
+      "kind": "extension",
+      "description": "Human societies, places, art, civic life, and philosophical traditions.",
+      "topics": [
+        "world-history",
+        "earth-geography",
+        "arts-culture",
+        "civics-society",
+        "philosophy-ethics",
+        "law-rights-basics"
+      ],
+      "covered_topics": [
+        "world-history",
+        "earth-geography",
+        "arts-culture",
+        "civics-society",
+        "philosophy-ethics",
+        "law-rights-basics"
+      ],
+      "coverage": 1.0,
+      "records": 23,
+      "available": true
     }
   },
   "rejected_samples": [
     {
+      "provider": "peertube",
+      "title": "TRADE AND TRANSPORTATION 1958 DOCUMENTARY FILM 89344",
+      "reasons": {
+        "arts-culture": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "How Long Does it Take to Get to the Moon, Mars, Jupiter",
+      "reasons": {
+        "astronomy-space": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "How long does it take to get to the Moon? Mars? Jupiter?",
+      "reasons": {
+        "astronomy-space": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "A timelapse of the Milky Way's movement against the backdrop of the Assy-Turgen Observatory at an altitude of 2,750 m. Kazakhstan",
+      "reasons": {
+        "astronomy-space": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "SINGULARITY - Painterly Space Adventure",
+      "reasons": {
+        "astronomy-space": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "President Toni Preckwinkle today launched the Cook County Works Youth Employment Program",
+      "reasons": {
+        "career-work-skills": "description-only-without-instructional-title"
+      }
+    },
+    {
       "provider": "internet-archive",
-      "title": "Israel PANICS as Iran hits gathering of scientists at top-secret Dimona nuclear site - OPTM",
-      "source_url": "https://archive.org/details/youtube-nONZnnwomx8",
+      "title": "1104 Sutton Road",
+      "reasons": {
+        "career-work-skills": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "Costa_Rica: CINDE´s visit (2022) [English]",
+      "reasons": {
+        "career-work-skills": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "What Is a Molecule?",
+      "reasons": {
+        "chemistry-foundations": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "What is the Federal Circuit (video)",
+      "reasons": {
+        "civics-society": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "What is Juneteenth? | All About Holidays for Kids",
+      "reasons": {
+        "civics-society": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "What Is Privacy?",
+      "reasons": {
+        "civics-society": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "FOSS4GE 2025 | Evaluating Matrix Factorization Techniques for Thematic Mapping of Wilderness ...",
+      "reasons": {
+        "climate-environment": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "Your App Lives on a Network: Networking for Web Developers - Wim Godden - PHP UK Conference 2019",
+      "reasons": {
+        "computing-basics": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "SubCat-Peking: Production of Natural Food Preservatives Containing Lysozyme and ... (2025) - Team Presentation [English]",
+      "reasons": {
+        "cooking-food-safety": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "EMI 4 - La propagation des rumeurs (Education aux Médias)",
       "reasons": {
         "critical-thinking": "description-only-without-instructional-title"
       }
     },
     {
       "provider": "wikimedia-commons",
-      "title": "Dal visibile all'invisibile- considerazioni sul ruolo del sillogismo fisiognomico nella logica di Avicenna (MédiHAL 4631072)",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Dal_visibile_all%27invisibile-_considerazioni_sul_ruolo_del_sillogismo_fisiognomico_nella_logica_di_Avicenna_(M%C3%A9diHAL_4631072).webm",
+      "title": "Role of Wikipedia in education",
       "reasons": {
-        "logical-frameworks": "description-only-without-instructional-title"
+        "critical-thinking": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Chaos&Evolutions David Revoy",
+      "reasons": {
+        "drawing-design": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "MCMXXVIII",
+      "reasons": {
+        "earth-geography": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "CyberSaturday: SMD for terrified beginners by Kliment Yanev",
+      "reasons": {
+        "electronics-basics": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "Your LG and Samsung TV's are, basically, spying on you",
+      "reasons": {
+        "electronics-basics": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Run. Hide. Fight.",
+      "reasons": {
+        "first-aid-basics": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Acute pyelonephritis",
+      "reasons": {
+        "first-aid-basics": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Transitional Cell Carcinoma",
+      "reasons": {
+        "first-aid-basics": "description-only-without-instructional-title"
       }
     },
     {
       "provider": "wikimedia-commons",
       "title": "Diego Fontanive ESC2017",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Diego_Fontanive_ESC2017.webm",
-      "reasons": {
-        "logical-frameworks": "description-only-without-instructional-title"
-      }
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Systems Paradigm 2- Systems Awareness",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Systems_Paradigm_2-_Systems_Awareness.webm",
-      "reasons": {
-        "logical-frameworks": "description-only-without-instructional-title"
-      }
-    },
-    {
-      "provider": "peertube",
-      "title": "Revolution Now! with Peter Joseph | Ep #21| April 7th 2021",
-      "source_url": "https://videos.trom.tf/videos/watch/20e34378-146e-4702-9bb4-7f0ece23e530",
-      "reasons": {
-        "logical-frameworks": "description-only-without-instructional-title"
-      }
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Wikimania 2024 - Tbilisi - Day 3 - Parsoid is coming! How do I keep up - Wikitext in 2024.",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2024_-_Tbilisi_-_Day_3_-_Parsoid_is_coming!_How_do_I_keep_up_-_Wikitext_in_2024..webm",
-      "reasons": {
-        "logical-frameworks": "description-only-without-instructional-title"
-      }
-    },
-    {
-      "provider": "peertube",
-      "title": "Buchtipp: Lisa Schaefer",
-      "source_url": "https://tube.tchncs.de/videos/watch/7e118c70-d449-4ce5-988a-ed677e348663",
-      "reasons": {
-        "logical-frameworks": "description-only-without-instructional-title"
-      }
-    },
-    {
-      "provider": "internet-archive",
-      "title": "What is Gaslighting?",
-      "source_url": "https://archive.org/details/what-is-gaslighting-11-20-2024",
       "reasons": {
         "logical-frameworks": "description-only-without-instructional-title"
       }
@@ -166,7 +943,6 @@
     {
       "provider": "internet-archive",
       "title": "World leader Fangruida, mentor of mankind, great sun-great genius (Malik. R)2020v.1.2",
-      "source_url": "https://archive.org/details/dsc-00509_202112",
       "reasons": {
         "logical-frameworks": "description-only-without-instructional-title"
       }
@@ -174,7 +950,6 @@
     {
       "provider": "internet-archive",
       "title": "World leader international leader Fang Ruida: one of the ideal candidates for the next Secretary-General of the United Nations (Pele.) 2019v1.2 /2020 v.3.4 Bethlehem",
-      "source_url": "https://archive.org/details/img-20211113132247-1-1",
       "reasons": {
         "logical-frameworks": "description-only-without-instructional-title"
       }
@@ -182,39 +957,118 @@
     {
       "provider": "internet-archive",
       "title": "World Leder Fangruida Bio. 2020v. 3.3 Revision",
-      "source_url": "https://archive.org/details/world-leder-fangruida-bio.-2020v.-3.3-revision",
       "reasons": {
         "logical-frameworks": "description-only-without-instructional-title"
       }
     },
     {
-      "provider": "internet-archive",
-      "title": "A New HOPE (2022): Hacking Comprehension: Overcoming Limitations to Better Understand the World",
-      "source_url": "https://archive.org/details/youtube-rzMe3ljWI6U",
+      "provider": "wikimedia-commons",
+      "title": "Lösa ekvationssystem med substitution del 3",
       "reasons": {
-        "logical-frameworks": "description-only-without-instructional-title"
+        "mathematics-foundations": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "Modeling for SynBio: from ODEs to Gene expression",
+      "reasons": {
+        "mathematics-foundations": "description-only-without-instructional-title"
       }
     },
     {
       "provider": "internet-archive",
-      "title": "Legacy VPS to Edge: Migrating 200 Domains Off a Compromised Server",
-      "source_url": "https://archive.org/details/novcog-legacy-vps-to-edge",
+      "title": "Agenda 21 AI Surrealmageddon Machines! - by Bienvenido Bones Bañez, Jr. In Poetry of the Emanations 12 🇺🇸👁️, International Authors, New York, United States of America 🇺🇸",
       "reasons": {
-        "logical-frameworks": "description-only-without-instructional-title"
+        "philosophy-ethics": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Artificial Intelligence Pandemonium by Human Mortal Sovereign! - Bienvenido Bones Bañez Jr. Poetry in Emanations 12, International Authors, New York, United States of America 🇺🇸",
+      "reasons": {
+        "philosophy-ethics": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "GLOBE Observer Clouds- Getting Started CNZGfeVaCHU",
+      "reasons": {
+        "photography-video": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "What Is Reality- (Official Film)",
+      "reasons": {
+        "photography-video": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Азы фотоискусства (презентация учебника)",
+      "reasons": {
+        "photography-video": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Complexity Science- 11 Complexity Economics",
+      "reasons": {
+        "physics-foundations": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Electric Current. What is it-",
+      "reasons": {
+        "physics-foundations": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "LSM-YSZ SOFC Composite Cathode Reconstruction (FIB-SEM)",
+      "reasons": {
+        "physics-foundations": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "LSM-YSZ Solid Oxide Fuel Cell FIB-SEM Reconstruction",
+      "reasons": {
+        "physics-foundations": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Photoelectric Effect. And the Einstein's Formula.",
+      "reasons": {
+        "physics-foundations": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Spherical Magnet Through an Aluminum Tube, Part 1",
+      "reasons": {
+        "physics-foundations": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "wikimedia-commons",
+      "title": "Simpleshow foundation What is Graphene",
+      "reasons": {
+        "physics-foundations": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "THE NATURE OF COLOR 1946 EDUCATIONAL FILM with DR. IRA M. FREEMAN in KODACHROME PH61744",
+      "reasons": {
+        "physics-foundations": "description-only-without-instructional-title"
       }
     },
     {
       "provider": "internet-archive",
       "title": "AI Ppt Vdo",
-      "source_url": "https://archive.org/details/ai-ppt-vdowww.cbitss.inartificial-intelligence-course-in-chandigarh",
-      "reasons": {
-        "prompt-engineering": "description-only-without-instructional-title"
-      }
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Generating novel images using CLIP in Python",
-      "source_url": "https://archive.org/details/generating-novel-images-using-clip-in-python",
       "reasons": {
         "prompt-engineering": "description-only-without-instructional-title"
       }
@@ -222,7 +1076,13 @@
     {
       "provider": "internet-archive",
       "title": "Language Tools For Creators by Paco Xander Nathan",
-      "source_url": "https://archive.org/details/fossy2023_Language_Tools_For_Creators",
+      "reasons": {
+        "prompt-engineering": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "peertube",
+      "title": "Machine Learning nella Scuola: Concetti Base e Applicazioni",
       "reasons": {
         "prompt-engineering": "description-only-without-instructional-title"
       }
@@ -230,49 +1090,43 @@
     {
       "provider": "wikimedia-commons",
       "title": "Deadlocks and the Dining Philosophers Problem",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Deadlocks_and_the_Dining_Philosophers_Problem.webm",
       "reasons": {
         "pseudocoding": "description-only-without-instructional-title"
       }
     },
     {
       "provider": "internet-archive",
-      "title": "CLOUDS Andres Colubri",
-      "source_url": "https://archive.org/details/clouds-andres-colubri",
+      "title": "Open CS education resources for schools - how hard could it be?",
       "reasons": {
         "pseudocoding": "description-only-without-instructional-title"
-      }
-    },
-    {
-      "provider": "internet-archive",
-      "title": "CLOUDS Daniel Shiffman",
-      "source_url": "https://archive.org/details/clouds-daniel-shiffman",
-      "reasons": {
-        "pseudocoding": "description-only-without-instructional-title"
-      }
-    },
-    {
-      "provider": "wikimedia-commons",
-      "title": "Wikimania 2026 – Wikipedia Mobile Apps THE destination for knowledge lovers in a mobile-first world",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Wikimania_2026_%E2%80%93_Wikipedia_Mobile_Apps_THE_destination_for_knowledge_lovers_in_a_mobile-first_world.webm",
-      "reasons": {
-        "vibe-coding": "description-only-without-instructional-title"
       }
     },
     {
       "provider": "peertube",
-      "title": "Extending sqlc: augmented generation of repositories in Go",
-      "source_url": "https://cuddly.tube/videos/watch/db430af2-c151-402d-87f8-19fc2f6b5446",
+      "title": "GEMS-Taiwan: Textile Fighters - An Integrated Enzymatic Route to Degrade PET in ... (2025) - Team Presentation [English]",
       "reasons": {
-        "vibe-coding": "description-only-without-instructional-title"
+        "sewing-textiles": "description-only-without-instructional-title"
       }
     },
     {
       "provider": "peertube",
       "title": "Survivre à l'« AI Slopageddon » : comment l'IA ébranle l'Open Source - Raphaël Semeteys - JdLL2026",
-      "source_url": "https://videos-libr.es/videos/watch/0e0e76d0-92ef-4863-8319-c642e1c645ff",
       "reasons": {
         "vibe-coding": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "Gen AI prototyping with Google Tools from Stitch to AI studio",
+      "reasons": {
+        "vibe-coding": "description-only-without-instructional-title"
+      }
+    },
+    {
+      "provider": "internet-archive",
+      "title": "El Mundo Moderno: Historia Global desde 1760 a 1910. Parte Uno",
+      "reasons": {
+        "world-history": "description-only-without-instructional-title"
       }
     }
   ]
