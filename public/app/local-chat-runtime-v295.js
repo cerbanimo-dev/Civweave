@@ -1,0 +1,19 @@
+(()=>{
+'use strict';
+const VERSION='1.0.97-local-chat-runtime-v295',SEL='civweave.local-ai.selection.v266',HEALTH='civweave.local-ai.health.v286',BOOT='/app/local-ai/bootstrap-v266.js?v=1.0.91-v288-chat-v295';
+if(globalThis.CivweaveLocalChatRuntimeV295?.version===VERSION)return;
+const parse=(v,d)=>{try{return JSON.parse(v)??d}catch{return d}},clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
+function selected(){const live=globalThis.CivweaveLocalModelDownloadV266?.selection?.();if(live?.active&&live.id)return live;const x=parse(localStorage.getItem(SEL),{});return x?.active&&x.id?x:null}
+function health(id){const all=globalThis.CivweaveLocalModelTestPulseV269?.health?.()||parse(localStorage.getItem(HEALTH),{});return all?.[id]||{}}
+function budget(id){const m=health(id).metrics||{},tps=Math.max(0,Number(m.tokensPerSecond||m.benchmarkTokensPerSecond||0)),maxNewTokens=tps?Math.round(clamp(tps*30,48,128)):64,cold=Math.max(0,Number(m.coldStartMs||0)),timeoutMs=Math.round(clamp(Math.max(60000,cold*1.4+45000),60000,120000));return{maxNewTokens,timeoutMs,tps}}
+function load(src,ready){if(ready?.())return Promise.resolve(true);const path=new URL(src,location.href).pathname,old=[...document.scripts].find(x=>x.src&&new URL(x.src,location.href).pathname===path);if(old)return new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(new Error(`${path} did not become ready.`)),15000),done=()=>{clearTimeout(t);ready?.()?resolve(true):reject(new Error(`${path} loaded without becoming ready.`))};old.addEventListener('load',done,{once:true});old.addEventListener('error',()=>reject(new Error(`Could not load ${path}.`)),{once:true});queueMicrotask(()=>{if(ready?.()){clearTimeout(t);resolve(true)}})});return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=()=>ready?.()?resolve(true):reject(new Error(`${path} loaded without becoming ready.`));s.onerror=()=>reject(new Error(`Could not load ${path}.`));document.head.append(s)})}
+async function ready(){if(globalThis.CivweaveLocalModelRuntimeV266?.generate&&globalThis.CivweaveLocalModelDownloadV266?.selection)return true;await load(BOOT,()=>Boolean(globalThis.CivweaveLocalAIBootstrapV266?.ready));return Boolean(await globalThis.CivweaveLocalAIBootstrapV266?.ready)&&Boolean(globalThis.CivweaveLocalModelRuntimeV266?.generate)}
+async function generate({systemPrompt,messages,onToken,onProgress}){
+ const pick=selected();if(!pick)throw Object.assign(new Error('No downloaded local model is selected.'),{code:'LOCAL_MODEL_NOT_SELECTED'});if(!await ready())throw new Error('The downloaded local runtime did not become ready.');
+ const runtime=globalThis.CivweaveLocalModelRuntimeV266,spec=globalThis.CivweaveLocalModelRegistryV266?.byId?.(pick.id)||runtime.activeSpec?.()||{},b=budget(pick.id);let timedOut=false,timer=0;
+ const request=runtime.generate({messages:[{role:'system',content:systemPrompt},...messages],maxNewTokens:b.maxNewTokens,promptTokenBudget:Math.min(1024,Math.max(640,Number(spec.workingContextTokens||1024))),temperature:spec.generation?.nonThinkingTemperature??.7,thinking:false,timeoutMs:b.timeoutMs,stream:true,executionProfile:'interactive',onToken,onProgress});
+ const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>{timedOut=true;reject(Object.assign(new Error('Local interactive generation exceeded its mobile time budget.'),{code:'LOCAL_CHAT_BUDGET_TIMEOUT'}))},b.timeoutMs+1500)});
+ try{return await Promise.race([request,timeout])}catch(error){if(timedOut||error?.code==='LOCAL_MODEL_TIMEOUT'||error?.code==='LOCAL_CHAT_BUDGET_TIMEOUT')try{runtime.shutdown?.()}catch{}throw error}finally{clearTimeout(timer)}
+}
+globalThis.CivweaveLocalChatRuntimeV295=Object.freeze({version:VERSION,downloadedLocalDirect:true,thinkingDisabled:true,streaming:true,boundedRecovery:true,selected,budget,ready,generate});
+})();
