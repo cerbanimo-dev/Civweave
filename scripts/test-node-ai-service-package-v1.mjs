@@ -7,6 +7,7 @@ import { AiWalletService } from '../lib/ai-wallet-service-v1.mjs';
 import { issueAiCapability } from '../lib/ai-capability-token-v1.mjs';
 import { createNodeAiInferenceHttpHandler } from '../lib/node-ai-inference-http-v1.mjs';
 import { loadNodeAiServicePackage } from '../lib/node-ai-service-package-v1.mjs';
+import { verifyNodeReceipt } from '../lib/node-ai-marketplace-v1.mjs';
 
 const CAPABILITY_SECRET = 'node-capability-secret-abcdefghijklmnopqrstuvwxyz-123456';
 const services = [{ id: 'general', label: 'General', capabilities: ['chat', 'planning'], billing: { maxRequestCents: 25 }, backend: { ownership: 'node-operator' } }];
@@ -77,7 +78,8 @@ test('node loads a local operator service package and executes it through a capa
   assert.deepEqual(res.payload.output, { echo: 'hello mesh' });
   assert.equal(res.payload.retailCostCents, 4);
   assert.equal(res.payload.wallet.balanceCents, 1996);
-  assert.equal(res.payload.receipt.backend.package, 'operator-custom');
+  const verifiedReceipt = verifyNodeReceipt(res.payload.receipt, { publicKey: node.manifest.publicKey });
+  assert.equal(verifiedReceipt.backend.package, 'operator-custom');
 
   const lowCapability = issueAiCapability({
     userId: 'user:1',
