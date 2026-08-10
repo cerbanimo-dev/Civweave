@@ -13,6 +13,8 @@ PACKS = json.loads((ROOT / "packs.json").read_text(encoding="utf-8"))
 topics = {topic["slug"]: topic for topic in REGISTRY["topics"]}
 required = {slug for slug, topic in topics.items() if topic.get("required")}
 assert len(topics) >= 30
+assert "emergency-preparedness" in topics
+assert "first-aid-basics" not in topics
 assert required <= set(SUMMARY["topic_stats"])
 assert required <= set(LOOKUP["topics"])
 assert LOOKUP["pack_registry_revision"] == REGISTRY["revision"]
@@ -38,6 +40,10 @@ general = published_packs["general-knowledge"]
 assert general["default"] is True
 assert len(general["topics"]) >= 12
 assert float(general["coverage"]) == 1.0
+
+practical = published_packs["practical-life"]
+assert "emergency-preparedness" in practical["topics"]
+assert "first-aid-basics" not in practical["topics"]
 
 print(json.dumps({
     "topics": len(topics),
