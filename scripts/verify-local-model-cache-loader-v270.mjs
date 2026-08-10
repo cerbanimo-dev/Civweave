@@ -21,11 +21,12 @@ check('Transformers 3 stays local-only',worker.includes('hf.env.allowLocalModels
 check('download cache adapter is installed',worker.includes('hf.env.customCache=cacheAdapter(cache,spec)')&&worker.includes('function cacheAdapter(cache,spec)'));
 check('local /models keys translate to pinned Hugging Face cache keys',worker.includes('const localPrefix=`/models/${spec.repo}/`')&&worker.includes('remotePrefix=pinnedRemoteRoot(spec)')&&worker.includes('await cache.match(remote)'));
 check('missing local artifact returns synthetic cache miss before SPA HTML fallback',worker.includes("status:404,statusText:'Downloaded model cache miss'"));
-check('HTML metadata error is actionable',worker.includes('metadata contained HTML instead of JSON'));
+check('JSON metadata failures are actionable',worker.includes('missing, truncated, or invalid')&&worker.includes('Unexpected end of JSON input')&&worker.includes('Transport detail'));
 check('worker streams through Transformers TextStreamer',worker.includes('new hfRuntime.TextStreamer')&&worker.includes("post(id,'token'"));
-check('runtime cache-busts v271 worker and receives tokens',runtime.includes("VERSION='1.0.67-local-ai-runtime-v271-streaming'")&&runtime.includes("worker-v266.js?v=1.0.67-v271")&&runtime.includes("message.type==='token'"));
-check('bootstrap loads v271 spine and repaired runtime',bootstrap.includes("1.0.67-runtime-spine-v271")&&bootstrap.includes("runtime-v266.js?v=1.0.67-v271")&&bootstrap.includes('cacheResolvedInference:true'));
-check('bootstrap advertises streaming and integrity repair',bootstrap.includes('localStreaming:true')&&bootstrap.includes('integrityRepair:true'));
+check('runtime cache-busts repaired worker and receives tokens',runtime.includes("VERSION='1.0.72-local-ai-runtime-v272-json-repair'")&&runtime.includes("worker-v266.js?v=1.0.72-v272")&&runtime.includes("message.type==='token'"));
+check('runtime repairs previously-ready metadata before inference',runtime.includes('manager.repair')&&runtime.includes("state.state?.status==='ready'")&&runtime.includes('repair:true,onProgress'));
+check('bootstrap loads v271 spine and v272 repaired runtime',bootstrap.includes("1.0.67-runtime-spine-v271")&&bootstrap.includes("runtime-v266.js?v=1.0.72-v272")&&bootstrap.includes('cacheResolvedInference:true'));
+check('bootstrap advertises streaming, integrity repair, and runtime metadata requirements',bootstrap.includes('localStreaming:true')&&bootstrap.includes('integrityRepair:true')&&bootstrap.includes('runtimeMetadataRequired:true'));
 check('bridge registers downloaded-local v271 middleware',bridge.includes("const MIDDLEWARE_ID='downloaded-local-v271'")&&bridge.includes('runtimeSpine.register(MIDDLEWARE_ID,middleware(),100)'));
 check('bridge emits shared partial events',bridge.includes("emit('partial'")&&bridge.includes('accumulatedText')&&bridge.includes('used:Boolean(run.streamed)'));
 check('download manager rejects poisoned JSON cache contents',manager.includes('validateArtifactResponse')&&manager.includes("reason:'invalid-json'")&&manager.includes("reason:'html'"));
@@ -69,4 +70,4 @@ await assert.rejects(()=>captured.hooks.handle({...request,messages:[{role:'syst
 assert.equal(baseCalls,0);
 checks.push('local inference failure remains visible');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-cache-loader-v271-streaming',checks:checks.length,features:{transformers3PinnedCacheAdapter:true,htmlShellParseRegressionBlocked:true,poisonedMetadataRejected:true,targetedRepair:true,localStreaming:true,runtimeSpinePreserved:true,complexGuideDynamicRoute:true,noSilentBaseFallback:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-cache-loader-v272-json-repair',checks:checks.length,features:{transformers3PinnedCacheAdapter:true,htmlShellParseRegressionBlocked:true,emptyJsonParseRegressionBlocked:true,poisonedMetadataRejected:true,targetedRepair:true,runtimeMetadataRepair:true,localStreaming:true,runtimeSpinePreserved:true,complexGuideDynamicRoute:true,noSilentBaseFallback:true}},null,2));
