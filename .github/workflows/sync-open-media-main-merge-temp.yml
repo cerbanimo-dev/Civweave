@@ -42,6 +42,10 @@ jobs:
             exit 1
           fi
 
+          # These two files are owned by the canonical installer/release machinery.
+          # Open Media no longer needs to override their worker-registration revision.
+          git checkout origin/main -- public/install-v130.js public/app/installed-entry-v146.js
+
           OFFLINE_PACKAGE_REVISION="$(node -e "const fs=require('fs');console.log(JSON.parse(fs.readFileSync('public/app/offline-package-v208.json','utf8')).revision)")"
           export MAIN_VERSION OFFLINE_PACKAGE_REVISION
 
