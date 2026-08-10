@@ -56,7 +56,7 @@ async function main(){
     if(!archiveName)throw new Error(`npm pack did not return an archive name for ${PACKAGE}@${VERSION}.`);
     const archive=path.resolve(temp,archiveName);
     if(!await exists(archive))throw new Error(`Packed Transformers.js archive was not found: ${archive}`);
-    run('tar',['-xzf',archive,'-C',temp]);
+    try{run('tar',['-xzf',archive,'-C',temp])}catch(error){throw new Error(`A tar-compatible extractor is required to stage ${PACKAGE}@${VERSION}. ${error?.message||error}`)}
     const source=path.join(temp,'package','dist');
     if(!await exists(source))throw new Error(`Transformers.js ${VERSION} package did not contain dist/.`);
 
@@ -82,13 +82,9 @@ async function main(){
     const entry=candidates.find(name=>copied.includes(name));
     if(!entry)throw new Error(`Transformers.js ${VERSION} was packed, but no browser entry was found in dist/.`);
     if(entry!=='transformers.min.js')await fsp.copyFile(path.join(destination,entry),path.join(destination,'transformers.min.js'));
-    const requiredBackendFiles=['ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm'];
-    const missing=requiredBackendFiles.filter(name=>!backendFiles.includes(name)&&!awaitableFalse());
-    // The expression above intentionally avoids a second async pass inside filter; verify below instead.
-    for(const name of requiredBackendFiles){
+    for(const name of ['ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm']){
       if(!await exists(path.join(backendDestination,name)))throw new Error(`Transformers.js ${VERSION} backend staging is incomplete. Missing ${name}.`);
     }
-    void missing;
     await fsp.writeFile(manifestPath,JSON.stringify({
       schema:'civweave.transformers-stage.v3',
       package:PACKAGE,
@@ -105,9 +101,6 @@ async function main(){
     await fsp.rm(temp,{recursive:true,force:true});
   }
 }
-
-// Used only to keep synchronous Array#filter out of the async existence check above.
-function awaitableFalse(){return false}
 
 main().catch(error=>{
   if(soft){console.warn(`[Civweave] Gemma 4 runtime staging skipped: ${error?.message||error}`);return}
