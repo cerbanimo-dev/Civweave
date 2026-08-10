@@ -1,14 +1,14 @@
 {
   "schema": "civweave.open-learning-media-catalog.v1",
-  "built_at": "2026-08-10T13:56:52Z",
-  "record_count": 152,
+  "built_at": "2026-08-10T14:16:41Z",
+  "record_count": 153,
   "mesh_redistributable_count": 105,
-  "download_candidate_count": 236,
+  "download_candidate_count": 237,
   "providers": {
     "internet-archive": {
-      "records": 5,
+      "records": 6,
       "mesh_redistributable": 0,
-      "download_candidates": 14
+      "download_candidates": 15
     },
     "peertube": {
       "records": 103,
@@ -282,13 +282,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -14234,6 +14236,99 @@
     },
     {
       "schema": "civweave.open-learning-media-node.v1",
+      "provider": "internet-archive",
+      "provider_id": "effective-prompt-engineering-for-python-programmers",
+      "topic_slug": "prompt-engineering",
+      "topic_name": "Prompt Engineering",
+      "school_slug": "technology",
+      "concepts": [
+        "prompt engineering",
+        "LLM prompting",
+        "prompt patterns",
+        "evaluation"
+      ],
+      "matched_query": "prompt engineering",
+      "title": "Effective prompt engineering for Python programmers",
+      "description": "Talk page: https://2023.za.pycon.org/talks/36-effective-prompt-engineering-for-python-programmers/ Speaker: Diana Pholo Track: Teaching and Learning with Python Type: Remote Talk Room: Talk Room 2 (Remote Talks) Time: Oct 05 (Thu): 14:15 Duration: 0:45 The world of technology is witnessing a transformation powered by Large Language Models (LLMs) like ChatGPT and Bing AI. These marvels of AI are reshaping how we interact with machines as they can comprehend and generate human-like text. But to get the most out of these models, you must learn to ask the right question. Prompt engineering is the art of crafting specific instructions for LLMs. It molds the language model's responses, making them more accurate, relevant, and actionable. Our session will delve into the essence of prompt engineering, addressing its significance for programmers and its role in improving model outputs and reducing biases. We'll explore a variety of prompt types, and offer practical tips for optimisation. Additionally, we'll navigate through real-world case studies, showcasing the tangible impact of prompt engineering on programming tasks. If you're intrigued by the potential of LLMs and eager to harness their power effectively, this presentation is your gateway to unlocking their true potential in your projects. URLs: Slides (pdf): https://2023.za.pycon.org/media/pages_files/Effective_Prompt_Engineering_Slides.pdf Sponsors: Platinum: Python Software Foundation: https://www.python.org/psf/membership Patron: Thinkst Canary: https://canary.tools/ Afrolabs: http://www.afrolabs.co.za/",
+      "creator": "Diana Pholo",
+      "language": "eng",
+      "duration_seconds": 0,
+      "source_url": "https://archive.org/details/effective-prompt-engineering-for-python-programmers",
+      "source_host": "archive.org",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "cache_policy": "MESH_REDISTRIBUTABLE",
+      "mesh_redistributable": true,
+      "download_enabled": true,
+      "files": [
+        {
+          "url": "https://archive.org/download/effective-prompt-engineering-for-python-programmers/Effective%20prompt%20engineering%20for%20Python%20programmers.mp4",
+          "bytes": 580905223,
+          "provider_sha1": "ebd1c7e46bed5cb7e512a8b6424c718074391870",
+          "provider_md5": "0631f39b2b51c5762a446b84e1f8f4f9",
+          "format": "MPEG4",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-on-cache",
+      "attribution": {
+        "creator": "Diana Pholo",
+        "source_title": "Effective prompt engineering for Python programmers",
+        "source_url": "https://archive.org/details/effective-prompt-engineering-for-python-programmers",
+        "license": "CC-BY",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "topic_matches": [
+        {
+          "topic_slug": "prompt-engineering",
+          "school_slug": "technology",
+          "selection_reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56,
+          "relevance_score": 10
+        }
+      ],
+      "quality_score": 85,
+      "relevance": {
+        "prompt-engineering": {
+          "score": 10,
+          "evidence": [
+            "prompt engineering",
+            "prompt engineering"
+          ]
+        }
+      },
+      "pedagogy": {
+        "prompt-engineering": {
+          "strong_title_matches": [
+            "prompt engineering"
+          ],
+          "strong_description_matches": [
+            "prompt engineering"
+          ],
+          "educational_intent": true,
+          "instructional_title": true,
+          "clickbait_title": false,
+          "non_instructional_title": false,
+          "pedagogy_score": 56
+        }
+      },
+      "selection": {
+        "prompt-engineering": {
+          "reason": "topic-title-anchor-plus-instructional-evidence",
+          "pedagogy_score": 56
+        }
+      }
+    },
+    {
+      "schema": "civweave.open-learning-media-node.v1",
       "provider": "peertube",
       "provider_id": "6ba45fd5-b858-4b6d-9e39-7dda75036aa6",
       "topic_slug": "prompt-engineering",
@@ -15234,11 +15329,11 @@
       }
     }
   ],
-  "record_count_before_relevance_gate": 848,
-  "record_count_before_pedagogy_gate": 376,
-  "record_count_before_selection_gate": 215,
-  "rejected_by_relevance_gate": 472,
-  "rejected_by_pedagogy_gate": 161,
+  "record_count_before_relevance_gate": 847,
+  "record_count_before_pedagogy_gate": 379,
+  "record_count_before_selection_gate": 217,
+  "rejected_by_relevance_gate": 468,
+  "rejected_by_pedagogy_gate": 162,
   "rejected_by_selection_gate": 52,
   "topic_stats": {
     "world-history": {
@@ -15501,13 +15596,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -15921,7 +16018,7 @@
     }
   },
   "pack_registry_revision": "general-knowledge-packs-v1",
-  "records_before_title_quality_gate": 163,
-  "rejected_by_title_quality_gate": 11,
-  "rejected_topic_links_by_title_quality_gate": 13
+  "records_before_title_quality_gate": 165,
+  "rejected_by_title_quality_gate": 12,
+  "rejected_topic_links_by_title_quality_gate": 14
 }

@@ -1,9 +1,9 @@
 {
   "schema": "civweave.open-learning-media-relevance-audit.v3",
-  "built_at": "2026-08-10T13:56:52Z",
-  "before": 848,
-  "after": 376,
-  "rejected": 472,
+  "built_at": "2026-08-10T14:16:41Z",
+  "before": 847,
+  "after": 379,
+  "rejected": 468,
   "topics": {
     "world-history": {
       "name": "World History",
@@ -272,13 +272,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -300,15 +302,17 @@
       "name": "Critical Thinking & Media Literacy",
       "school_slug": "philosophy-and-religion",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 2,
       "providers": {
         "wikimedia-commons": 1,
-        "peertube": 1
+        "peertube": 1,
+        "internet-archive": 1
       },
       "top_titles": [
         "Teaching Research & Critical Thinking Skills Through Wikipedia at WikiConference USA 2015",
-        "The Facts about Fact Checking: Crash Course Navigating Digital Information #2"
+        "The Facts about Fact Checking: Crash Course Navigating Digital Information #2",
+        "TAM 2014 - Steven Novella - How to Think Like a Skeptical Neurologist"
       ]
     },
     "logical-frameworks": {
@@ -895,17 +899,17 @@
     },
     {
       "provider": "peertube",
+      "title": "Civic tech et bien commun - Sophie Gautier",
+      "topic_slug": "civics-society"
+    },
+    {
+      "provider": "peertube",
       "title": "Liam Keel explains history of My Little Pony on 15th Anniversary of MLP: FiM - October 10th 2025.",
       "topic_slug": "civics-society"
     },
     {
       "provider": "peertube",
       "title": "Sad moment for our fundamental rights",
-      "topic_slug": "civics-society"
-    },
-    {
-      "provider": "peertube",
-      "title": "Civic tech et bien commun - Sophie Gautier",
       "topic_slug": "civics-society"
     },
     {
@@ -1185,27 +1189,7 @@
     },
     {
       "provider": "internet-archive",
-      "title": "\"I Think, Therefore I Am\"",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Indictment of Donald Trump",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Interview with Brian Klaas",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Irregular Warfare in Ukraine",
-      "topic_slug": "critical-thinking"
-    },
-    {
-      "provider": "internet-archive",
-      "title": "Jehovah's Witness Convention (2025)",
+      "title": "Lecture by Yuval Noah Harari",
       "topic_slug": "critical-thinking"
     },
     {
@@ -1231,6 +1215,11 @@
     {
       "provider": "peertube",
       "title": "Василий Гатов, «Постправда и фейкньюс»",
+      "topic_slug": "critical-thinking"
+    },
+    {
+      "provider": "internet-archive",
+      "title": "JUST IN: American Flight Attendant’s Secret Gesture at 30,000 Feet GOES VIRAL!",
       "topic_slug": "critical-thinking"
     },
     {
@@ -1331,6 +1320,21 @@
     {
       "provider": "peertube",
       "title": "Sketching the Gallery of Madame Liu Tsong",
+      "topic_slug": "drawing-design"
+    },
+    {
+      "provider": "peertube",
+      "title": "Fun programming 86: Drawing shapes with your mouse",
+      "topic_slug": "drawing-design"
+    },
+    {
+      "provider": "peertube",
+      "title": "Electron Configuration Diagrams | Properties of Matter | Chemistry | FuseSchool",
+      "topic_slug": "drawing-design"
+    },
+    {
+      "provider": "peertube",
+      "title": "Inkscape Beginner Tutorial: Simple Icon Drawings",
       "topic_slug": "drawing-design"
     }
   ]

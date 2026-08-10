@@ -1,10 +1,10 @@
 {
   "schema": "civweave.open-learning-media-title-quality-audit.v1",
-  "built_at": "2026-08-10T13:56:52Z",
-  "records_before": 163,
-  "records_after": 152,
-  "rejected_records": 11,
-  "rejected_topic_links": 13,
+  "built_at": "2026-08-10T14:16:41Z",
+  "records_before": 165,
+  "records_after": 153,
+  "rejected_records": 12,
+  "rejected_topic_links": 14,
   "rejected_samples": [
     {
       "provider": "peertube",
@@ -53,6 +53,12 @@
       "provider_id": "409132f4-a2b6-47b2-ac01-b3aea4091426",
       "title": "When Code Became a Weapon - Crypto Wars Explained",
       "topic_slug": "civics-society"
+    },
+    {
+      "provider": "internet-archive",
+      "provider_id": "youtube-zGpsd6orUm0",
+      "title": "TAM 2014 - Steven Novella - How to Think Like a Skeptical Neurologist",
+      "topic_slug": "critical-thinking"
     },
     {
       "provider": "peertube",
@@ -346,13 +352,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },

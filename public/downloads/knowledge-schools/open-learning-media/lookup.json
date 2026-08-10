@@ -1,6 +1,6 @@
 {
   "schema": "civweave.open-learning-media-lookup.v1",
-  "built_at": "2026-08-10T13:56:52Z",
+  "built_at": "2026-08-10T14:16:41Z",
   "pack_registry_revision": "general-knowledge-packs-v1",
   "relevance_gate": {
     "schema": "civweave.open-learning-media-relevance-gate.v3",

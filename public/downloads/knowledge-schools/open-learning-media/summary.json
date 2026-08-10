@@ -1,14 +1,14 @@
 {
   "schema": "civweave.open-learning-media-harvest-summary.v1",
-  "built_at": "2026-08-10T13:56:52Z",
-  "records": 152,
+  "built_at": "2026-08-10T14:16:41Z",
+  "records": 153,
   "mesh_redistributable": 105,
-  "download_candidates": 236,
+  "download_candidates": 237,
   "providers": {
     "internet-archive": {
-      "records": 5,
+      "records": 6,
       "mesh_redistributable": 0,
-      "download_candidates": 14
+      "download_candidates": 15
     },
     "peertube": {
       "records": 103,
@@ -282,13 +282,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -534,11 +536,11 @@
     }
   },
   "failures": 0,
-  "records_before_relevance_gate": 848,
-  "records_before_pedagogy_gate": 376,
-  "records_before_selection_gate": 215,
-  "rejected_by_relevance_gate": 472,
-  "rejected_by_pedagogy_gate": 161,
+  "records_before_relevance_gate": 847,
+  "records_before_pedagogy_gate": 379,
+  "records_before_selection_gate": 217,
+  "rejected_by_relevance_gate": 468,
+  "rejected_by_pedagogy_gate": 162,
   "rejected_by_selection_gate": 52,
   "topic_stats": {
     "world-history": {
@@ -801,13 +803,15 @@
       "name": "Prompt Engineering",
       "school_slug": "technology",
       "required": true,
-      "records": 2,
+      "records": 3,
       "mesh_redistributable": 1,
       "providers": {
-        "peertube": 2
+        "peertube": 2,
+        "internet-archive": 1
       },
       "top_titles": [
         "This is a story of the prompt design to generate an antifascist aesthetics logo",
+        "Effective prompt engineering for Python programmers",
         "Il Prompt Engineering"
       ]
     },
@@ -1233,9 +1237,9 @@
     "schema": "civweave.open-learning-media-selection-gate.v3",
     "policy": "Automatic selection requires instructional evidence alongside the topic anchor, favoring explicit tutorials, lectures, overviews, courses, demonstrations, documentaries, and museum/gallery talks."
   },
-  "records_before_title_quality_gate": 163,
-  "rejected_by_title_quality_gate": 11,
-  "rejected_topic_links_by_title_quality_gate": 13,
+  "records_before_title_quality_gate": 165,
+  "rejected_by_title_quality_gate": 12,
+  "rejected_topic_links_by_title_quality_gate": 14,
   "title_quality_gate": {
     "schema": "civweave.open-learning-media-title-quality-gate.v1",
     "policy": "Automatic topic selection must be visibly anchored in the media title using a topic-specific vocabulary."
