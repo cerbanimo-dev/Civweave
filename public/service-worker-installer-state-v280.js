@@ -8,6 +8,7 @@ const INSTALLER_STATE_ASSETS = [
   '/app/campus-background-download-v241.js',
   '/app/shared/civweave-contribution-security-v1.js',
   '/app/shared/civweave-validator-committee-v2.js',
+  '/app/shared/civweave-validator-review-gate-v1.js',
   '/app/shared/civweave-contribution-ship-guard-v1.js',
   '/app/shared/civweave-canonical-reward-mesh-bridge-v1.js',
   '/app/contribution-security-settings-entry-v1.js',
@@ -22,11 +23,12 @@ try {
 } catch {}
 
 self.CivweaveInstallerStateWorkerV280 = Object.freeze({
-  revision: 'installer-state-machines-v280-security-r4-qualified-committees',
+  revision: 'installer-state-machines-v280-security-r5-validator-review',
   assets: INSTALLER_STATE_ASSETS.slice(),
   shellRequired: true,
   contributionSecurityRequired: true,
   validatorCommitteeV2Required: true,
+  validatorReviewGateRequired: true,
   walletContainmentRequired: true,
   canonicalRewardMeshBridgeRequired: true,
   contributionSecuritySettingsRequired: true
