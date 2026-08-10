@@ -19,45 +19,27 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: Strengthen geography map discovery
+      - name: Strengthen geography map vocabulary
         run: |
           set -euo pipefail
           python - <<'PY'
           import json
           from pathlib import Path
-
           registry_path=Path('config/open-learning-media-packs-v1.json')
           data=json.loads(registry_path.read_text(encoding='utf-8'))
           geo=next(t for t in data['topics'] if t['slug']=='earth-geography')
           geo['aliases']=list(dict.fromkeys([*(geo.get('aliases') or []),'maps','mapping','geospatial']))
           geo['concepts']=list(dict.fromkeys([*(geo.get('concepts') or []),'cartography','geospatial data']))
           registry_path.write_text(json.dumps(data,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8')
-
-          harvest_path=Path('scripts/harvest-open-learning-media-library-v1.py')
-          text=harvest_path.read_text(encoding='utf-8')
-          old='''        "map reading latitude longitude",\n    ],'''
-          new='''        "map reading latitude longitude",\n        "free maps free knowledge",\n        "open mapping geography",\n    ],'''
-          if '"free maps free knowledge"' not in text:
-              if old not in text:
-                  raise SystemExit('geography discovery anchor not found')
-              text=text.replace(old,new,1)
-          harvest_path.write_text(text,encoding='utf-8')
-          PY
-          python -m py_compile scripts/harvest-open-learning-media-library-v1.py
-          python - <<'PY'
-          import json
-          data=json.load(open('config/open-learning-media-packs-v1.json'))
-          geo=next(t for t in data['topics'] if t['slug']=='earth-geography')
           assert {'maps','mapping','geospatial'} <= set(geo['aliases'])
-          text=open('scripts/harvest-open-learning-media-library-v1.py').read()
-          assert 'free maps free knowledge' in text and 'open mapping geography' in text
           PY
-      - name: Commit geography discovery seed
+      - name: Commit geography vocabulary
         run: |
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add config/open-learning-media-packs-v1.json scripts/harvest-open-learning-media-library-v1.py
-          git commit -m 'Add open mapping geography media seed'
+          git add config/open-learning-media-packs-v1.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Recognize open mapping geography media'
           git pull --rebase origin agent/general-knowledge-video-packs-v1
           git push origin HEAD:agent/general-knowledge-video-packs-v1
