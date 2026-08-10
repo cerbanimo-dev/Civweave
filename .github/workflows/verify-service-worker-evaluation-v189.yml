@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   evaluate-workers:
@@ -16,9 +16,31 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Materialize 1.0.94 repair release on its branch
+        if: github.event_name == 'pull_request' && github.head_ref == 'fix/installed-shell-repair-v293'
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from 'node:fs/promises';
+          const version=(await readFile('VERSION','utf8')).trim();
+          const pkg=JSON.parse(await readFile('package.json','utf8'));
+          if(pkg.version!==version){pkg.version=version;await writeFile('package.json',JSON.stringify(pkg,null,2)+'\n')}
+          const contract=JSON.parse(await readFile('config/release-contract.json','utf8'));
+          contract.canonical.current={version,path:`releases/${version}`,status:'current'};
+          await writeFile('config/release-contract.json',JSON.stringify(contract,null,2)+'\n');
+          NODE
+          node scripts/materialize-canonical-release.mjs
+          if ! git diff --quiet || [ -n "$(git ls-files --others --exclude-standard)" ]; then
+            git config user.name "civweave-release-bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add VERSION package.json config/release-contract.json public releases scripts
+            git commit -m "Materialize Civweave 1.0.94 installed shell repair"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
       - name: Synchronize release assets
         run: |
           node scripts/sync-release-version-assets.mjs
