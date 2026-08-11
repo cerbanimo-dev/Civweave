@@ -8,4 +8,6 @@ The `Download offline campus` action is the sole opt-in boundary. It records `ci
 
 The legacy `required-campus-autostart-v1.js` path remains as an inert compatibility shim so stale cached installer HTML cannot resurrect automatic downloading. Recovery keeps the installer storage guard and current service-worker recovery layers intact.
 
+The service-worker registration watchdog also begins only after an explicit shell action such as Install or Check release. Once registration has been requested, stalled-registration recovery, one-shot reload protection, and current-worker reuse retain their existing guarantees.
+
 Browser regression coverage must prove zero offline-campus package traffic on initial installer load, after shell-only release preparation, and after opening Working Campus on a fresh device. Traffic is expected only after the explicit offline-campus action.
