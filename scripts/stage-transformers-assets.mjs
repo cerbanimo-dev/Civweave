@@ -8,7 +8,8 @@ const destination=path.join(root,'public','app','vendor','transformers');
 const backendDestination=path.join(destination,'wasm');
 const soft=process.argv.includes('--soft');
 const force=process.argv.includes('--force');
-const renderBuild=process.env.RENDER==='true';
+const hosted=process.env.RENDER==='true'||process.env.CF_PAGES==='1'||process.env.CLOUDFLARE_PAGES==='1';
+const explicitHostedStage=process.env.CIVWEAVE_STAGE_DEVICE_AI_ON_HOST==='1';
 
 async function exists(target){try{await fsp.access(target);return true}catch{return false}}
 async function staged(){
@@ -31,12 +32,12 @@ async function walk(directory){
 }
 
 async function main(){
-  if(!force&&await staged()){
-    console.log('[Civweave] Transformers.js browser assets are already staged.');
+  if(hosted&&!explicitHostedStage){
+    console.log('[Civweave] Hosted gateway: skipping device-side Transformers.js staging. Local model runtimes are installed on demand by the device.');
     return;
   }
-  if(renderBuild&&!force){
-    console.log('[Civweave] Render gateway build: skipping device-side Transformers.js staging; using committed Transformers.js assets.');
+  if(!force&&await staged()){
+    console.log('[Civweave] Transformers.js browser assets are already staged.');
     return;
   }
   if(!await exists(source)){
