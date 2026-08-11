@@ -184,22 +184,25 @@ export class CivweaveAnchorRegistry {
     const anchor = { schema: ANCHOR_SCHEMA, anchorId, nodeId, recipientId: grant.recipientId, displayName: clean(input.displayName || grant.displayName || 'Local Anchor', 160), deviceClass: clean(input.deviceClass || 'personal-computer', 80), signingPublicKey, keyFingerprint, state: 'active', pairedAt: nowIso(now), lastProofAt: null, lastCheckpointId: null, recoveryCoverageBps: 0, proofCount: 0 };
     await this.state.storage.put(`${anchorPrefix(nodeId)}${anchorId}`, anchor);
     await this.state.storage.put(key, { ...grant, consumedAt: nowIso(now), anchorId });
+    const priorCheckpoint = await this.latestCheckpoint(nodeId);
+    if (priorCheckpoint) await this.publishCheckpoint({ ...priorCheckpoint, checkpointId: '', createdAt: '', source: 'anchor-pairing-continuity-refresh' });
     return { anchor: publicAnchor(anchor), paired: true, idempotent: false };
   }
   async publishCheckpoint(input) {
-    const nodeId = await this.ensureNode(input.nodeId), now = Date.now(), recoveryCoverageBps = Math.max(0, Math.min(10000, Number(input.recoveryCoverageBps ?? 10000) || 0));
+    const nodeId = await this.ensureNode(input.nodeId), prior = await this.latestCheckpoint(nodeId), now = Date.now(), source = clean(input.source || 'cloudflare-host-snapshot', 120), passiveRefresh = source === 'cloudflare-node-daily-snapshot', recoveryCoverageBps = Math.max(0, Math.min(10000, Number(input.recoveryCoverageBps ?? prior?.recoveryCoverageBps ?? 10000) || 0));
+    const carriedEnvelope = clean(input.stateEnvelope || prior?.stateEnvelope, ANCHOR_POLICY.maxOpaqueStateChars) || null;
     const body = {
       schema: ANCHOR_CHECKPOINT_SCHEMA,
       checkpointId: clean(input.checkpointId, 220) || `checkpoint:${crypto.randomUUID()}`,
       nodeId,
       createdAt: clean(input.createdAt, 100) || nowIso(now),
-      source: clean(input.source || 'cloudflare-host-snapshot', 120),
-      nodeManifest: input.nodeManifest && typeof input.nodeManifest === 'object' ? input.nodeManifest : null,
-      capacitySnapshot: input.capacitySnapshot && typeof input.capacitySnapshot === 'object' ? input.capacitySnapshot : null,
-      ledgerFrontier: input.ledgerFrontier && typeof input.ledgerFrontier === 'object' ? input.ledgerFrontier : null,
-      softwareManifest: input.softwareManifest && typeof input.softwareManifest === 'object' ? input.softwareManifest : null,
-      stateEnvelope: clean(input.stateEnvelope, ANCHOR_POLICY.maxOpaqueStateChars) || null,
-      stateEnvelopeFormat: clean(input.stateEnvelopeFormat || (input.stateEnvelope ? 'opaque-encrypted' : 'none'), 80),
+      source,
+      nodeManifest: input.nodeManifest && typeof input.nodeManifest === 'object' ? input.nodeManifest : prior?.nodeManifest || null,
+      capacitySnapshot: input.capacitySnapshot && typeof input.capacitySnapshot === 'object' ? input.capacitySnapshot : prior?.capacitySnapshot || null,
+      ledgerFrontier: passiveRefresh && prior?.ledgerFrontier ? prior.ledgerFrontier : input.ledgerFrontier && typeof input.ledgerFrontier === 'object' ? input.ledgerFrontier : prior?.ledgerFrontier || null,
+      softwareManifest: input.softwareManifest && typeof input.softwareManifest === 'object' ? input.softwareManifest : prior?.softwareManifest || null,
+      stateEnvelope: carriedEnvelope,
+      stateEnvelopeFormat: clean(input.stateEnvelopeFormat || prior?.stateEnvelopeFormat || (carriedEnvelope ? 'opaque-encrypted' : 'none'), 80),
       recoveryCoverageBps,
     };
     const continuityAnchors = (await this.anchors(nodeId)).filter(anchor => anchor.state === 'active').map(anchor => ({ anchorId: anchor.anchorId, keyFingerprint: anchor.keyFingerprint, signingPublicKey: anchor.signingPublicKey, pairedAt: anchor.pairedAt }));
