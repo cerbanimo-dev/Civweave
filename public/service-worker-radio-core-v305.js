@@ -79,7 +79,7 @@ cacheShell = async function cacheShellWithRadioCoreV305() {
   const radio = await v305CacheRadioCore();
   return {
     ...base,
-    radioCore: 'verified',
+    radioCore: 'required-cached',
     radioRevision: V305_REVISION,
     radioRequiredAssetCount: radio.assetCount
   };
