@@ -70,6 +70,24 @@
 <script>
 (()=>{
   'use strict';
+  const button=document.querySelector('#download-offline-package');
+  let requested=false;
+  function loadController(){
+    if(requested||globalThis.CivweaveInstallerStateV280)return;
+    requested=true;
+    const script=document.createElement('script');
+    script.src='/app/installer-state-machine-v280.js?v=installer-state-machines-v280-lazy';
+    script.async=true;
+    script.dataset.cwInstallerStateV280='lazy';
+    document.head.append(script);
+  }
+  button?.addEventListener('pointerdown',loadController,{capture:true,passive:true});
+  button?.addEventListener('click',loadController,{capture:true});
+})();
+</script>
+<script>
+(()=>{
+  'use strict';
   const $=selector=>document.querySelector(selector);
   const numeric=value=>{const number=Number(value);return Number.isFinite(number)&&number>0?number:0};
   const latestStatus=()=>globalThis.CivweaveOfflineCampusStatusV210?.last||null;
