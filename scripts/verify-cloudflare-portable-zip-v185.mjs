@@ -46,8 +46,6 @@ try {
 }
 
 // Simulate a machine with no system `zip`, but keep unrelated build tools available.
-// The previous verifier reduced PATH to Node's directory, which also hid `tar` and
-// caused Transformers.js package extraction to fail before the ZIP fallback was tested.
 const nodeOnlyPath = path.dirname(process.execPath);
 const tarLocator = process.platform === 'win32' ? 'where' : 'which';
 const tarProbe = spawnSync(tarLocator, ['tar'], { encoding: 'utf8' });
@@ -69,9 +67,8 @@ try {
     maxBuffer: 20 * 1024 * 1024,
   });
   if (build.status !== 0) {
-    process.stdout.write(build.stdout || '');
-    process.stderr.write(build.stderr || '');
-    throw new Error(`Cloudflare build failed without system zip, status ${build.status}.`);
+    const detail = [build.stdout, build.stderr].filter(Boolean).join('\n').trim();
+    throw new Error(`Cloudflare build failed without system zip, status ${build.status}.${detail ? `\n${detail.slice(-12000)}` : ''}`);
   }
   const output = `${build.stdout || ''}\n${build.stderr || ''}`;
   assert(output.includes('System zip is unavailable; using the dependency-free Civweave ZIP writer.'), 'Cloudflare build did not enter its portable ZIP path.');

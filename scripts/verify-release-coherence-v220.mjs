@@ -22,9 +22,9 @@ assert(entry.includes("document.currentScript?.src"),'Installed entry does not d
 assert(entry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"),'Installed entry does not resolve the current release from a no-store manifest request.');
 assert(entry.includes("updateViaCache:'none'"),'Installed entry can still reuse HTTP-cached worker script bytes.');
 assert(entry.includes('await registration.update()'),'Installed entry does not explicitly refresh the worker before routing.');
-assert(entry.includes("revision=chat-convergence-v250"),'Installed entry does not register the v250 convergence worker before routing.');
+assert(entry.includes("revision=chat-convergence-v251-legacy-purge"),'Installed entry does not register the v251 legacy-purge worker before routing.');
 assert(entry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'Installed entry does not activate a waiting convergence worker before routing.');
-assert(entry.indexOf('await refreshWorker(releaseVersion)')<entry.indexOf('const requested='),'Installed entry routes before the v250 worker refresh completes.');
+assert(entry.indexOf('await refreshWorker(releaseVersion)')<entry.indexOf('const requested='),'Installed entry routes before the v251 worker refresh completes.');
 assert(cloudflareBuild.includes("await import('./sync-release-version-assets.mjs')"),'Cloudflare build skips canonical release synchronization.');
 assert(cloudflareBuild.includes("await import('./sync-release-coherence-v220.mjs')"),'Cloudflare build skips release-coherence synchronization.');
 assert(prepareStart.includes("await import('./sync-release-coherence-v220.mjs')"),'Render/local startup skips release-coherence synchronization.');
@@ -84,8 +84,8 @@ assert.equal(sandbox.self.CivweaveReleaseCoherenceV220?.policy,'version-pinned-h
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'release-coherence-v226-v250-entry',
-  installedEntryRefresh:'chat-convergence-v250-before-routing',
+  revision:'release-coherence-v226-v251-purge-entry',
+  installedEntryRefresh:'chat-convergence-v251-legacy-purge-before-routing',
   cloudflareVersionSync:true,
   renderLocalVersionSync:true,
   versionedTextAndCampusFragments:'network-first-cached-fallback',
