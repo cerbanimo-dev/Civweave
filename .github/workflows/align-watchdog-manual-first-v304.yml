@@ -27,15 +27,16 @@ jobs:
           p=Path('scripts/smoke-service-worker-registration-watchdog-v207.mjs')
           s=p.read_text()
           anchor="source=source.replace(\"body:{append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}\",\"body:{isConnected:true,append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}\");"
-          addition="""
-source=source.replace("vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-stall.js'});\\n  await delay(450);","vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-stall.js'});\\n  harness.nodes.get('#check-update').click();\\n  await delay(450);");
-source=source.replace("vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-repeat.js'});\\n  await delay(120);","vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-repeat.js'});\\n  harness.nodes.get('#check-update').click();\\n  await delay(120);");
-source=source.replace("vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-current.js'});\\n  await delay(120);","vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-current.js'});\\n  harness.nodes.get('#check-update').click();\\n  await delay(120);");
-""".strip()
+          patches=[
+              ("vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-stall.js'});\\n  await delay(450);", "vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-stall.js'});\\n  harness.nodes.get('#check-update').click();\\n  await delay(450);"),
+              ("vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-repeat.js'});\\n  await delay(120);", "vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-repeat.js'});\\n  harness.nodes.get('#check-update').click();\\n  await delay(120);"),
+              ("vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-current.js'});\\n  await delay(120);", "vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-current.js'});\\n  harness.nodes.get('#check-update').click();\\n  await delay(120);")
+          ]
           if anchor not in s:
               raise SystemExit('watchdog compatibility anchor not found')
+          insertion='\n'.join("source=source.replace(%r,%r);" % pair for pair in patches)
           if "install-watchdog-stall.js'});\\n  harness.nodes.get('#check-update').click()" not in s:
-              s=s.replace(anchor,anchor+'\n'+addition)
+              s=s.replace(anchor,anchor+'\n'+insertion)
           p.write_text(s)
           PY
       - name: Verify watchdog and manual-first contracts
