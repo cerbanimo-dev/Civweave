@@ -1,0 +1,153 @@
+#!/usr/bin/env node
+import http from 'node:http';
+import fsp from 'node:fs/promises';
+import path from 'node:path';
+import crypto from 'node:crypto';
+
+const PAIR_DOMAIN = 'civweave.anchor-pair.v1';
+const SYNC_DOMAIN = 'civweave.anchor-sync.v1';
+const PROOF_DOMAIN = 'civweave.anchor-storage-proof.v1';
+const RECOVERY_DOMAIN = 'civweave.anchor-recovery-claim.v1';
+const DEFAULT_PORT = 8791;
+const DEFAULT_INTERVAL_MS = 6 * 60 * 60 * 1000;
+
+const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
+const args = process.argv.slice(2);
+const option = name => { const index = args.indexOf(name); return index >= 0 ? args[index + 1] : ''; };
+const flag = name => args.includes(name);
+const nodeOrigin = clean(option('--node'), 2000).replace(/\/$/, '');
+const pairingGrant = clean(option('--pair'), 2000);
+const dataDir = path.resolve(option('--data-dir') || path.join(process.cwd(), '.civweave-anchor'));
+const port = Math.max(1, Math.min(65535, Number(option('--port')) || DEFAULT_PORT));
+const intervalMs = Math.max(60_000, (Number(option('--interval-hours')) || 6) * 60 * 60 * 1000);
+const once = flag('--once');
+
+if (!nodeOrigin) {
+  console.error('Usage: node scripts/civweave-hub-anchor-v1.mjs --node https://<hub>.nodes.commonweave.earth [--pair <grant>] [--once]');
+  process.exit(2);
+}
+const parsedOrigin = new URL(nodeOrigin);
+if (parsedOrigin.protocol !== 'https:' && !['localhost', '127.0.0.1', '::1'].includes(parsedOrigin.hostname)) throw new Error('Anchor cloud node must use HTTPS outside local development.');
+
+const stateFile = path.join(dataDir, 'anchor-state.json');
+const checkpointFile = path.join(dataDir, 'latest-checkpoint.json');
+const trustFile = path.join(dataDir, 'anchor-registry-trust.json');
+let lastSync = { ok: false, at: null, error: 'not-synced-yet' };
+
+function canonical(value) {
+  if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
+  if (value && typeof value === 'object') return `{${Object.keys(value).sort().map(key => `${JSON.stringify(key)}:${canonical(value[key])}`).join(',')}}`;
+  return JSON.stringify(value);
+}
+async function atomicJson(file, value, mode = 0o600) {
+  await fsp.mkdir(path.dirname(file), { recursive: true });
+  const temporary = `${file}.${process.pid}.tmp`;
+  await fsp.writeFile(temporary, JSON.stringify(value, null, 2), { mode });
+  await fsp.rename(temporary, file); await fsp.chmod(file, mode).catch(() => {});
+}
+async function readJson(file, fallback = null) { try { return JSON.parse(await fsp.readFile(file, 'utf8')); } catch (error) { if (error.code === 'ENOENT') return fallback; throw error; } }
+function publicPem(keyObject) { return keyObject.export({ type: 'spki', format: 'pem' }).toString(); }
+async function loadOrCreateState() {
+  const prior = await readJson(stateFile);
+  if (prior?.privateKey && prior?.signingPublicKey) return prior;
+  const pair = crypto.generateKeyPairSync('ed25519');
+  const created = {
+    schema: 'civweave.local-anchor-state.v1',
+    anchorId: null, nodeId: null, nodeOrigin,
+    signingPublicKey: publicPem(pair.publicKey),
+    privateKey: pair.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+    createdAt: new Date().toISOString(), pairedAt: null,
+  };
+  await atomicJson(stateFile, created); return created;
+}
+function sign(state, message) { return crypto.sign(null, Buffer.from(message), crypto.createPrivateKey(state.privateKey)).toString('base64url'); }
+async function requestJson(pathname, init = {}) {
+  const response = await fetch(new URL(pathname, nodeOrigin), { ...init, headers: { accept: 'application/json', ...(init.headers || {}) } });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) throw Object.assign(new Error(payload.error || `Hub returned HTTP ${response.status}`), { status: response.status, payload });
+  return payload;
+}
+async function resolveNodeId() {
+  const envelope = await requestJson('/api/ai/node/manifest');
+  const nodeId = clean(envelope?.manifest?.nodeId || envelope?.nodeId, 180);
+  if (!nodeId) throw new Error('Hub manifest did not expose a nodeId.');
+  return nodeId;
+}
+async function pairAnchor(state) {
+  if (state.anchorId) return state;
+  if (!pairingGrant) throw new Error('This device is not paired. Create an Anchor pairing grant on the hub and restart with --pair <grant>.');
+  const nodeId = state.nodeId || await resolveNodeId();
+  const signature = sign(state, `${PAIR_DOMAIN}\n${nodeId}\n${pairingGrant}`);
+  const result = await requestJson('/api/node/anchor/pair', {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({
+      grant: pairingGrant,
+      signingPublicKey: state.signingPublicKey,
+      signature,
+      displayName: option('--name') || `${process.env.COMPUTERNAME || process.env.HOSTNAME || 'Local'} Civweave Anchor`,
+      deviceClass: option('--device-class') || 'personal-computer',
+    })
+  });
+  const next = { ...state, nodeId, anchorId: result.anchor?.anchorId, pairedAt: new Date().toISOString() };
+  if (!next.anchorId) throw new Error('Pairing succeeded without returning an anchorId.');
+  await atomicJson(stateFile, next); return next;
+}
+async function syncOnce(state) {
+  const startedAt = new Date().toISOString();
+  try {
+    const timestamp = Date.now(), signature = sign(state, `${SYNC_DOMAIN}\n${state.nodeId}\n${state.anchorId}\n${timestamp}`);
+    const result = await requestJson('/api/node/anchor/sync', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ anchorId: state.anchorId, timestamp, signature }) });
+    if (!result.checkpoint?.checkpointId || !result.challenge?.challengeId) throw new Error('Hub returned an incomplete Anchor sync envelope.');
+    const trust = await requestJson('/api/node/anchor/trust');
+    await atomicJson(checkpointFile, result.checkpoint); await atomicJson(trustFile, trust, 0o644);
+    const stored = await readJson(checkpointFile);
+    if (stored?.checkpointId !== result.challenge.checkpointId || stored?.checkpointHash !== result.challenge.checkpointHash) throw new Error('Stored checkpoint did not survive local write/read verification.');
+    const challenge = result.challenge;
+    const proofMessage = `${PROOF_DOMAIN}\n${challenge.challengeId}\n${state.nodeId}\n${state.anchorId}\n${challenge.checkpointId}\n${challenge.checkpointHash}\n${challenge.nonce}`;
+    const proof = await requestJson('/api/node/anchor/proof', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ anchorId: state.anchorId, challengeId: challenge.challengeId, signature: sign(state, proofMessage), recoveryCoverageBps: Number(stored.recoveryCoverageBps || 0) }) });
+    lastSync = { ok: true, at: new Date().toISOString(), checkpointId: stored.checkpointId, checkpointHash: stored.checkpointHash, health: proof.health || null };
+    console.log(JSON.stringify({ event: 'civweave-anchor-synced', nodeId: state.nodeId, anchorId: state.anchorId, checkpointId: stored.checkpointId, startedAt, completedAt: lastSync.at }));
+    return lastSync;
+  } catch (error) {
+    lastSync = { ok: false, at: new Date().toISOString(), error: String(error?.message || error) };
+    console.error(JSON.stringify({ event: 'civweave-anchor-sync-failed', nodeId: state.nodeId, anchorId: state.anchorId, error: lastSync.error }));
+    return lastSync;
+  }
+}
+async function recoveryClaim(state, input = {}) {
+  const checkpoint = await readJson(checkpointFile); if (!checkpoint) throw new Error('No local recovery checkpoint has been stored yet.');
+  const trust = await readJson(trustFile);
+  const replacementOrigin = clean(input.replacementOrigin, 2000);
+  const claim = {
+    schema: 'civweave.anchor-recovery-claim.v1', nodeId: state.nodeId, anchorId: state.anchorId,
+    checkpointId: checkpoint.checkpointId, checkpointHash: checkpoint.checkpointHash,
+    replacementOrigin: replacementOrigin || null,
+    ledgerFrontier: input.ledgerFrontier && typeof input.ledgerFrontier === 'object' ? input.ledgerFrontier : checkpoint.ledgerFrontier || null,
+    createdAt: new Date().toISOString(),
+  };
+  return { ...claim, signingPublicKey: state.signingPublicKey, signature: sign(state, `${RECOVERY_DOMAIN}\n${canonical(claim)}`), checkpoint, registryTrust: trust };
+}
+function localServer(state) {
+  return http.createServer(async (req, res) => {
+    const url = new URL(req.url || '/', `http://127.0.0.1:${port}`);
+    const send = (status, payload) => { const body = Buffer.from(JSON.stringify(payload, null, 2)); res.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'content-length': body.length, 'cache-control': 'no-store' }); res.end(body); };
+    try {
+      if (req.method === 'GET' && url.pathname === '/health') return send(200, { schema: 'civweave.local-anchor-health.v1', ok: true, nodeId: state.nodeId, anchorId: state.anchorId, lastSync, dataDir });
+      if (req.method === 'GET' && url.pathname === '/recovery') return send(200, { checkpoint: await readJson(checkpointFile), registryTrust: await readJson(trustFile), lastSync });
+      if (req.method === 'POST' && url.pathname === '/sync') return send(200, await syncOnce(state));
+      if (req.method === 'POST' && url.pathname === '/recovery/claim') {
+        const chunks = []; for await (const chunk of req) chunks.push(chunk);
+        const input = chunks.length ? JSON.parse(Buffer.concat(chunks).toString('utf8')) : {};
+        return send(200, await recoveryClaim(state, input));
+      }
+      return send(404, { ok: false, error: 'not-found' });
+    } catch (error) { return send(500, { ok: false, error: String(error?.message || error) }); }
+  });
+}
+
+let state = await loadOrCreateState(); state = await pairAnchor(state);
+const server = localServer(state); server.listen(port, '127.0.0.1', () => console.log(JSON.stringify({ event: 'civweave-anchor-listening', url: `http://127.0.0.1:${port}`, nodeId: state.nodeId, anchorId: state.anchorId })));
+await syncOnce(state);
+if (once) { server.close(); process.exit(lastSync.ok ? 0 : 1); }
+const timer = setInterval(() => void syncOnce(state), intervalMs); timer.unref?.();
+process.on('SIGINT', () => { clearInterval(timer); server.close(() => process.exit(0)); });
+process.on('SIGTERM', () => { clearInterval(timer); server.close(() => process.exit(0)); });
