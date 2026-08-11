@@ -1,3 +1,124 @@
+/* confidence-weighted-validation-v1 */
+(()=>{
+'use strict';
+if(globalThis.CivweaveValidationConfidenceV1)return;
+const VERSION='civweave.validation-confidence.v1';
+const POLICY=Object.freeze({
+  passThreshold:.88,
+  failThreshold:.12,
+  minEvidenceFamilies:2,
+  contributionScale:2.2,
+  maxExpressedConfidence:.95,
+  minMaterialContribution:.05,
+  minCrossDeviceContribution:.18,
+  weights:Object.freeze({
+    'deterministic-test':.98,
+    'deterministic-rubric':.92,
+    'artifact-inspection':.84,
+    'human-review':.88,
+    'model-rubric':.80,
+    'semantic-model':.74,
+    'peer-model':.76,
+    unknown:.55,
+  }),
+});
+const clamp01=value=>Math.max(0,Math.min(1,Number(value)||0));
+const sigmoid=value=>1/(1+Math.exp(-value));
+const clean=value=>String(value??'').trim();
+const familyFor=evidence=>{
+  const explicit=clean(evidence.family||evidence.evidenceFamily).toLowerCase();
+  if(explicit)return explicit;
+  const provenance=clean(evidence.provenance||evidence.authority||evidence.type).toLowerCase();
+  if(/deterministic.*test|objective|unit|integration|test-result/.test(provenance))return'deterministic-test';
+  if(/deterministic.*rubric|rubric-assisted|rubric/.test(provenance)&&!/model/.test(provenance))return'deterministic-rubric';
+  if(/artifact|evidence-check|proof|inspection/.test(provenance))return'artifact-inspection';
+  if(/human|witness|manual-review/.test(provenance))return'human-review';
+  if(/model.*rubric|rubric.*model/.test(provenance))return'model-rubric';
+  if(/peer/.test(provenance)&&/model|ai/.test(provenance))return'peer-model';
+  if(/model|ai|gemini|openai|ollama|local-model/.test(provenance))return'semantic-model';
+  return'unknown';
+};
+const weightFor=(evidence,policy=POLICY)=>policy.weights[familyFor(evidence)]??policy.weights.unknown;
+function normalizedScore(value){
+  const score=Number(value);
+  if(!Number.isFinite(score))return null;
+  return clamp01(score>1?score/100:score);
+}
+function calibrationFor(evidence){
+  const explicit=Number(evidence.calibrationWeight??evidence.sourceReliability??evidence.reliability);
+  return Number.isFinite(explicit)?Math.max(.2,Math.min(1,explicit)):1;
+}
+function rubricStrength(evidence){
+  const score=normalizedScore(evidence.rubricScore??evidence.score);
+  const threshold=normalizedScore(evidence.rubricThreshold??evidence.threshold);
+  if(score===null)return .55;
+  const target=threshold===null?.6:threshold;
+  const span=Math.max(.001,target,1-target);
+  const distance=Math.abs(score-target)/span;
+  const margin=Math.tanh(3.5*distance);
+  const stated=String(evidence.verdict||evidence.decision||'').toLowerCase();
+  const scoreDirection=score>=target?'pass':'fail';
+  const consistent=!stated||stated===scoreDirection||stated==='accepted'&&scoreDirection==='pass'||stated==='rejected'&&scoreDirection==='fail';
+  return (.2+.8*margin)*(consistent?1:.2);
+}
+function verdictSign(evidence){
+  const verdict=String(evidence.verdict||evidence.decision||'').toLowerCase();
+  if(evidence.pass===true||['pass','accepted','approve','approved','verified-pass'].includes(verdict))return 1;
+  if(evidence.pass===false||['fail','rejected','reject','denied','verified-fail'].includes(verdict))return -1;
+  const score=normalizedScore(evidence.rubricScore??evidence.score);
+  const threshold=normalizedScore(evidence.rubricThreshold??evidence.threshold)??.6;
+  if(score!==null)return score>=threshold?1:-1;
+  return 0;
+}
+function aggregate(evidenceRows=[],options={}){
+  const policy={...POLICY,...(options.policy||{}),weights:{...POLICY.weights,...(options.policy?.weights||{})}};
+  const contributorDeviceId=clean(options.contributorDeviceId);
+  const seenPrincipals=new Set(),familyCounts=new Map(),deviceCounts=new Map(),groupCounts=new Map(),families=new Set(),positiveDevices=new Set();
+  const contributions=[];
+  let signedEvidence=0;
+  for(const [index,raw] of (Array.isArray(evidenceRows)?evidenceRows:[]).entries()){
+    const evidence=raw&&typeof raw==='object'?raw:{};
+    const sign=verdictSign(evidence);
+    if(!sign)continue;
+    const principal=clean(evidence.validatorId||evidence.identityId||evidence.principalId||evidence.sourceId||`anonymous:${index}`);
+    const family=familyFor(evidence),deviceId=clean(evidence.deviceId||evidence.validatorDeviceId||evidence.originDeviceId),correlationId=clean(evidence.correlationId||evidence.sourceGroup||evidence.dependencyGroup);
+    const duplicatePrincipal=principal&&!principal.startsWith('anonymous:')&&seenPrincipals.has(principal);
+    if(principal&&!principal.startsWith('anonymous:'))seenPrincipals.add(principal);
+    const sameFamily=familyCounts.get(family)||0,sameDevice=deviceId?(deviceCounts.get(deviceId)||0):0,sameGroup=correlationId?(groupCounts.get(correlationId)||0):0;
+    familyCounts.set(family,sameFamily+1);if(deviceId)deviceCounts.set(deviceId,sameDevice+1);if(correlationId)groupCounts.set(correlationId,sameGroup+1);
+    const expressed=Math.max(.05,Math.min(policy.maxExpressedConfidence,Number(evidence.confidence??evidence.expressedConfidence??.65)||.65));
+    const provenanceWeight=weightFor(evidence,policy),calibrationWeight=calibrationFor(evidence);
+    const margin=rubricStrength(evidence);
+    const independence=duplicatePrincipal?0:(1/(1+.45*sameFamily))*(deviceId?1/(1+.25*sameDevice):.92)*(correlationId?1/(1+.35*sameGroup):1);
+    const contribution=sign*provenanceWeight*calibrationWeight*expressed*margin*independence;
+    if(Math.abs(contribution)>=policy.minMaterialContribution)families.add(family);
+    if(sign>0&&deviceId&&contribution>=policy.minCrossDeviceContribution)positiveDevices.add(deviceId);
+    signedEvidence+=contribution;
+    contributions.push({
+      id:clean(evidence.id)||`evidence:${index+1}`,family,principal:principal||null,deviceId:deviceId||null,correlationId:correlationId||null,verdict:sign>0?'pass':'fail',
+      provider:clean(evidence.provider)||null,model:clean(evidence.model)||null,provenance:clean(evidence.provenance||evidence.authority||evidence.type)||null,
+      provenanceWeight:Number(provenanceWeight.toFixed(4)),calibrationWeight:Number(calibrationWeight.toFixed(4)),expressedConfidence:Number(expressed.toFixed(4)),rubricStrength:Number(margin.toFixed(4)),
+      independence:Number(independence.toFixed(4)),contribution:Number(contribution.toFixed(6)),duplicatePrincipal,
+    });
+  }
+  const passConfidence=clamp01(sigmoid(signedEvidence*policy.contributionScale));
+  const diversity={families:[...families],familyCount:families.size,required:policy.minEvidenceFamilies,satisfied:families.size>=policy.minEvidenceFamilies};
+  const verifiedPass=passConfidence>=policy.passThreshold&&diversity.satisfied;
+  const verifiedFail=passConfidence<=policy.failThreshold&&diversity.satisfied;
+  const decision=verifiedPass?'verified-pass':verifiedFail?'verified-fail':passConfidence>=.5?'provisional-pass':'provisional-fail';
+  const crossDeviceSatisfied=contributorDeviceId?([...positiveDevices].some(id=>id!==contributorDeviceId)):false;
+  return{
+    schema:VERSION,decision,passConfidence:Number(passConfidence.toFixed(6)),failConfidence:Number((1-passConfidence).toFixed(6)),
+    signedEvidence:Number(signedEvidence.toFixed(6)),verifiedPass,verifiedFail,diversity,crossDeviceSatisfied,
+    contributorDeviceId:contributorDeviceId||null,positiveDeviceIds:[...positiveDevices],contributions,
+  };
+}
+function payoutEligibility(result,{requireCrossDevice=true}={}){
+  const validation=result||{};
+  return{claimVerified:Boolean(validation.verifiedPass),crossDeviceSatisfied:Boolean(validation.crossDeviceSatisfied),eligible:Boolean(validation.verifiedPass&&(!requireCrossDevice||validation.crossDeviceSatisfied))};
+}
+globalThis.CivweaveValidationConfidenceV1=Object.freeze({VERSION,POLICY,aggregate,payoutEligibility,familyFor,rubricStrength,verdictSign,calibrationFor});
+})();
 /* Civweave Reward Weave browser runtime v1.1. Generated from app/reward-weave.ts. */
 (()=>{const exports={};
 "use strict";
@@ -253,7 +374,8 @@ function createPacket(submission, input) {
         subjectId: submission.subjectId, subjectTitle: submission.subjectTitle, contributorId: submission.contributorId, contributorIdentityId: input?.contributorIdentityId,
         contributorDeviceId: input?.contributorDeviceId, rubric: [...new Set(submission.skills.flatMap((skill) => skill.evidenceRubric))].slice(0, 16), evidenceSummary: submission.evidenceSummary,
         evidenceRefs: submission.evidenceRefs, evidenceArtifacts: submissionArtifacts(submission), skillClaims: submission.skills.map((skill) => ({ slug: skill.slug, name: skill.name, xp: skill.baseXp, rationale: skill.xpRationale })),
-        threshold: Math.max(1, submission.validationThreshold), attempt: Math.max(1, Number(submission.attempt || 1)), requestMode: input?.mode || "automatic", status: "open", supersedesPacketId: input?.supersedesPacketId,
+        threshold: Math.max(1, Number(submission.validationThreshold || 1)), thresholdMode: "weighted-confidence", confidencePolicy: { passThreshold: .88, failThreshold: .12, minEvidenceFamilies: 2, crossDevicePayout: true },
+        attempt: Math.max(1, Number(submission.attempt || 1)), requestMode: input?.mode || "automatic", status: "open", supersedesPacketId: input?.supersedesPacketId,
         nonce: rewardId("nonce"), createdAt: now(), expiresAt: new Date(Date.now() + 14 * 86400000).toISOString() };
 }
 function submitRewardAchievement(state, submission, identity) {
@@ -308,45 +430,105 @@ function receiptInspectedEvidence(receipt, packet) {
         return false;
     return packet.evidenceArtifacts.every((artifact) => checks.some((check) => check.contentHash === artifact.contentHash && check.inspected));
 }
+function validationConfidenceApi() {
+    const api = globalThis.CivweaveValidationConfidenceV1;
+    if (!api) throw new Error("Weighted validation confidence runtime is unavailable.");
+    return api;
+}
+function receiptRubricScore(receipt) {
+    const direct = Number(receipt.rubricScore ?? receipt.score);
+    if (Number.isFinite(direct)) return direct > 1 ? direct / 100 : direct;
+    const rows = Array.isArray(receipt.rubricScores) ? receipt.rubricScores : [];
+    if (!rows.length) return receipt.verdict === "pass" ? 1 : 0;
+    const ratios = rows.map((row) => {
+        const earned = Number(row.earned ?? row.score);
+        const possible = Number(row.points ?? row.possible ?? 1);
+        if (Number.isFinite(earned) && Number.isFinite(possible) && possible > 0) return Math.max(0, Math.min(1, earned / possible));
+        return row.met === true ? 1 : row.met === false ? 0 : null;
+    }).filter((value) => value !== null);
+    return ratios.length ? ratios.reduce((sum, value) => sum + value, 0) / ratios.length : receipt.verdict === "pass" ? 1 : 0;
+}
+function receiptEvidenceFamily(receipt) {
+    if (receipt.evidenceFamily) return String(receipt.evidenceFamily);
+    const provider = String(receipt.provider || "").toLowerCase();
+    const provenance = String(receipt.provenance || receipt.authority || receipt.validatorType || "").toLowerCase();
+    if (/deterministic.*test|unit|integration/.test(provenance)) return "deterministic-test";
+    if (/deterministic|rubric-assisted/.test(provenance) || provider === "deterministic") return "deterministic-rubric";
+    if (Array.isArray(receipt.rubricScores) && receipt.rubricScores.length && (provider || receipt.model)) return "model-rubric";
+    if (receipt.relationship === "independent" && (provider || receipt.model)) return "peer-model";
+    if (provider || receipt.model) return "semantic-model";
+    return "human-review";
+}
+function acceptedEvidenceReceipt(receipt) {
+    return receipt.acceptedForEvidence === true || receipt.acceptedForQuorum === true;
+}
+function validationEvidenceRows(state, packet) {
+    const accepted = state.validation.receipts.filter((item) => item.packetId === packet.id && acceptedEvidenceReceipt(item));
+    const rows = accepted.map((receipt) => ({
+        id: receipt.id, validatorId: validatorPrincipal(receipt), deviceId: receipt.signature?.deviceId || receipt.deviceId,
+        family: receiptEvidenceFamily(receipt), provenance: receipt.provenance || receipt.authority || receipt.validatorType || receiptEvidenceFamily(receipt),
+        provider: receipt.provider, model: receipt.model, verdict: receipt.verdict, confidence: receipt.confidence,
+        score: receiptRubricScore(receipt), threshold: Number(receipt.rubricThreshold ?? .6),
+        calibrationWeight: receipt.calibrationWeight ?? receipt.sourceReliability ?? receipt.reliability,
+        correlationId: receipt.correlationId || receipt.requestId || receipt.signature?.requestId,
+    }));
+    const artifactCandidates = accepted.filter((receipt) => receipt.verdict === "pass" && receiptInspectedEvidence(receipt, packet));
+    if (packet.evidenceArtifacts.length && artifactCandidates.length) {
+        const strongest = [...artifactCandidates].sort((a, b) => Number(b.confidence || 0) - Number(a.confidence || 0))[0];
+        rows.push({ id: `artifact-inspection:${strongest.id}`, validatorId: `artifact-inspection:${strongest.id}`,
+            deviceId: strongest.signature?.deviceId || strongest.deviceId, family: "artifact-inspection", provenance: "signed-artifact-inspection",
+            verdict: "pass", confidence: Math.min(.95, Math.max(.75, Number(strongest.confidence || .85))), score: 1, threshold: .6,
+            calibrationWeight: .92, correlationId: strongest.id });
+    }
+    return rows;
+}
+function validationResultForPacket(state, packet) {
+    return validationConfidenceApi().aggregate(validationEvidenceRows(state, packet), { contributorDeviceId: packet.contributorDeviceId || "" });
+}
 function recordValidationReceipt(state, receipt) {
     const next = cloneState(state);
-    if (next.validation.receipts.some((item) => item.id === receipt.id))
-        return next;
+    if (next.validation.receipts.some((item) => item.id === receipt.id)) return next;
     const packet = next.validation.packets.find((item) => item.id === receipt.packetId);
-    if (!packet)
-        throw new Error("Validation packet not found.");
+    if (!packet) throw new Error("Validation packet not found.");
     const principal = validatorPrincipal(receipt);
-    const duplicateValidator = next.validation.receipts.some((item) => item.packetId === receipt.packetId && validatorPrincipal(item) === principal);
+    const duplicateValidator = next.validation.receipts.some((item) => item.packetId === receipt.packetId && validatorPrincipal(item) === principal && acceptedEvidenceReceipt(item));
     const selfIdentity = Boolean(packet.contributorIdentityId && packet.contributorIdentityId === principal);
     const selfAccount = packet.contributorId === receipt.validatorId;
     const verified = receipt.integrity === "verified" && Boolean(receipt.signature?.identityId && receipt.signature?.deviceId && receipt.signature?.value);
-    const complete = receipt.reason.trim().length >= 24 && receiptCoversRubric(receipt, packet) && receiptInspectedEvidence(receipt, packet);
-    const accepted = !duplicateValidator && !selfIdentity && !selfAccount && receipt.relationship === "independent" && receipt.verdict === "pass" && verified && complete && packet.status === "open";
-    next.validation.receipts.unshift({ ...receipt, acceptedForQuorum: accepted });
+    const passComplete = receipt.verdict !== "pass" || (receiptCoversRubric(receipt, packet) && receiptInspectedEvidence(receipt, packet));
+    const failComplete = receipt.verdict !== "fail" || Boolean((receipt.rubricScores || []).length || (receipt.evidenceChecks || []).length);
+    const complete = String(receipt.reason || "").trim().length >= 24 && passComplete && failComplete;
+    const openForEvidence = packet.status === "open" || packet.status === "verified-awaiting-cross-device";
+    const accepted = !duplicateValidator && !selfIdentity && !selfAccount && receipt.relationship === "independent" && ["pass", "fail"].includes(receipt.verdict) && verified && complete && openForEvidence;
+    next.validation.receipts.unshift({ ...receipt, evidenceFamily: receiptEvidenceFamily(receipt), acceptedForEvidence: accepted, acceptedForQuorum: accepted });
     return rebuildCanonicalLedgers(next);
 }
 function recordThresholdReceipt(state, threshold) {
     const next = cloneState(state);
-    if (next.validation.thresholdReceipts.some((item) => item.id === threshold.id))
-        return next;
     const packet = next.validation.packets.find((item) => item.id === threshold.packetId && item.requestId === threshold.requestId && item.submissionId === threshold.submissionId);
-    if (!packet)
-        throw new Error("Threshold packet not found.");
-    const accepted = next.validation.receipts.filter((item) => threshold.verdictReceiptIds.includes(item.id) && item.packetId === packet.id && item.acceptedForQuorum && item.verdict === "pass");
-    if (threshold.outcome === "pass" && accepted.length < packet.threshold)
-        throw new Error("Threshold receipt does not reference enough accepted verdicts.");
-    next.validation.thresholdReceipts.unshift({ ...threshold, verdictReceiptIds: [...new Set(accepted.map((item) => item.id))], integrity: "derived-from-verified-verdicts" });
+    if (!packet) throw new Error("Threshold packet not found.");
+    const result = validationResultForPacket(next, packet);
+    const outcome = threshold.outcome || (result.verifiedFail ? "fail" : "pass");
+    if (outcome === "pass" && !result.verifiedPass) throw new Error("Weighted confidence has not reached the verified-pass boundary.");
+    if (outcome === "fail" && !result.verifiedFail) throw new Error("Weighted confidence has not reached the verified-fail boundary.");
+    const accepted = next.validation.receipts.filter((item) => item.packetId === packet.id && acceptedEvidenceReceipt(item));
+    const payout = validationConfidenceApi().payoutEligibility(result, { requireCrossDevice: true });
+    const normalized = { ...threshold, verdictReceiptIds: [...new Set(accepted.map((item) => item.id))], thresholdMode: "weighted-confidence", threshold: result.passConfidence,
+        outcome, confidence: result.passConfidence, diversity: result.diversity, crossDeviceSatisfied: result.crossDeviceSatisfied, payoutEligible: payout.eligible,
+        confidenceAudit: result, integrity: "derived-from-weighted-confidence" };
+    const index = next.validation.thresholdReceipts.findIndex((item) => item.id === threshold.id);
+    if (index >= 0) next.validation.thresholdReceipts[index] = normalized; else next.validation.thresholdReceipts.unshift(normalized);
     return rebuildCanonicalLedgers(next);
 }
 /** Legacy bridge retained without synthetic validators. It settles only when real accepted receipts already exist. */
 function forceThresholdReceipt(state, submissionId, externalReceiptId) {
-    const packet = state.validation.packets.find((item) => item.submissionId === submissionId && item.status === "open");
-    if (!packet)
-        return cloneState(state);
-    const accepted = state.validation.receipts.filter((item) => item.packetId === packet.id && item.acceptedForQuorum && item.verdict === "pass");
-    if (accepted.length < packet.threshold)
-        return cloneState(state);
-    return recordThresholdReceipt(state, { schema: exports.THRESHOLD_PROTOCOL, id: externalReceiptId, packetId: packet.id, requestId: packet.requestId, submissionId, verdictReceiptIds: accepted.map((item) => item.id), threshold: packet.threshold, outcome: "pass", integrity: "derived-from-verified-verdicts", createdAt: now() });
+    const next = cloneState(state);
+    const packet = next.validation.packets.find((item) => item.submissionId === submissionId && (item.status === "open" || item.status === "verified-awaiting-cross-device"));
+    if (!packet) return next;
+    const result = validationResultForPacket(next, packet);
+    if (!result.verifiedPass) return next;
+    return recordThresholdReceipt(next, { schema: exports.THRESHOLD_PROTOCOL, id: externalReceiptId, packetId: packet.id, requestId: packet.requestId, submissionId,
+        verdictReceiptIds: [], thresholdMode: "weighted-confidence", threshold: result.passConfidence, outcome: "pass", integrity: "derived-from-weighted-confidence", createdAt: now() });
 }
 function ensureSkill(state, skill) {
     const slug = canonicalSkillSlug(skill.slug || skill.name);
@@ -413,16 +595,22 @@ function payCoin(state, input) {
         authority: authority("fellowfare", key, input.derivedFrom || [input.sourceReceiptId]), createdAt: now() });
 }
 function thresholdForPacket(state, packet) {
-    const accepted = state.validation.receipts.filter((item) => item.packetId === packet.id && item.acceptedForQuorum && item.verdict === "pass");
-    const blocking = state.validation.receipts.some((item) => item.packetId === packet.id && item.relationship === "independent" && item.verdict === "fail" && item.confidence >= 0.8);
-    if (blocking || accepted.length < packet.threshold)
-        return null;
     let receipt = state.validation.thresholdReceipts.find((item) => item.packetId === packet.id && item.outcome === "pass");
-    if (!receipt) {
-        receipt = { schema: exports.THRESHOLD_PROTOCOL, id: `threshold:${packet.requestId}`, packetId: packet.id, requestId: packet.requestId, submissionId: packet.submissionId,
-            verdictReceiptIds: accepted.slice(0, packet.threshold).map((item) => item.id), threshold: packet.threshold, outcome: "pass", integrity: "derived-from-verified-verdicts", createdAt: now() };
-        state.validation.thresholdReceipts.push(receipt);
+    if (receipt && packet.status === "settled" && receipt.integrity !== "derived-from-weighted-confidence") {
+        receipt.legacyGrandfathered = true; receipt.payoutEligible = true; receipt.crossDeviceSatisfied = true; return receipt;
     }
+    const result = validationResultForPacket(state, packet);
+    packet.validationConfidence = result;
+    if (result.verifiedFail) { packet.status = "rejected"; return null; }
+    if (!result.verifiedPass) { if (packet.status === "verified-awaiting-cross-device") packet.status = "open"; return null; }
+    const accepted = state.validation.receipts.filter((item) => item.packetId === packet.id && acceptedEvidenceReceipt(item));
+    const payout = validationConfidenceApi().payoutEligibility(result, { requireCrossDevice: true });
+    const normalized = { schema: exports.THRESHOLD_PROTOCOL, id: receipt?.id || `threshold:${packet.requestId}`, packetId: packet.id, requestId: packet.requestId, submissionId: packet.submissionId,
+        verdictReceiptIds: accepted.map((item) => item.id), thresholdMode: "weighted-confidence", threshold: result.passConfidence, outcome: "pass",
+        confidence: result.passConfidence, diversity: result.diversity, crossDeviceSatisfied: result.crossDeviceSatisfied, payoutEligible: payout.eligible,
+        confidenceAudit: result, integrity: "derived-from-weighted-confidence", createdAt: receipt?.createdAt || now() };
+    if (receipt) Object.assign(receipt, normalized); else { receipt = normalized; state.validation.thresholdReceipts.push(receipt); }
+    packet.status = payout.eligible ? "settled" : "verified-awaiting-cross-device";
     return receipt;
 }
 /** Rebuilds every canonical balance from submissions plus accepted signed verdicts. Imported totals never outrank their source receipts. */
@@ -436,62 +624,31 @@ function rebuildCanonicalLedgers(state) {
     next.validation.completedSubmissionIds = [];
     next.validation.thresholdReceipts = next.validation.thresholdReceipts || [];
     next.validation.processedExchangeIds = next.validation.processedExchangeIds || [];
-    for (const credit of next.co.credits) {
-        if (credit.status === "vested")
-            credit.status = "proposed";
-        delete credit.vestedAt;
-        credit.shareBps = Math.max(1, Number(credit.shareBps || 10000));
-    }
+    for (const credit of next.co.credits) { if (credit.status === "vested") credit.status = "proposed"; delete credit.vestedAt; credit.shareBps = Math.max(1, Number(credit.shareBps || 10000)); }
     const submissions = [...next.validation.submissions].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-    for (const submission of submissions)
-        awardXp(next, submission, "base", `Completed ${submission.subjectTitle}`, [submission.id]);
-    for (const packet of next.validation.packets.filter((item) => item.status === "open" || item.status === "settled")) {
-        if (packet.status === "open" && Date.parse(packet.expiresAt) <= Date.now()) {
-            packet.status = "expired";
-            continue;
-        }
-        const threshold = thresholdForPacket(next, packet);
-        if (!threshold)
-            continue;
-        packet.status = "settled";
-        if (!next.validation.completedSubmissionIds.includes(packet.submissionId))
-            next.validation.completedSubmissionIds.push(packet.submissionId);
-        const submission = next.validation.submissions.find((item) => item.id === packet.submissionId);
-        if (!submission)
-            continue;
-        awardXp(next, submission, "validation-bonus", `Validated ${submission.subjectTitle}`, [threshold.id, ...threshold.verdictReceiptIds]);
+    for (const submission of submissions) awardXp(next, submission, "base", `Completed ${submission.subjectTitle}`, [submission.id]);
+    for (const packet of next.validation.packets.filter((item) => ["open", "settled", "verified-awaiting-cross-device"].includes(item.status))) {
+        if (packet.status === "open" && Date.parse(packet.expiresAt) <= Date.now()) { packet.status = "expired"; continue; }
+        const threshold = thresholdForPacket(next, packet); if (!threshold) continue;
+        if (!next.validation.completedSubmissionIds.includes(packet.submissionId)) next.validation.completedSubmissionIds.push(packet.submissionId);
+        const submission = next.validation.submissions.find((item) => item.id === packet.submissionId); if (!submission) continue;
+        const payoutEligible = threshold.payoutEligible !== false;
+        if (payoutEligible) awardXp(next, submission, "validation-bonus", `Validated ${submission.subjectTitle}`, [threshold.id, ...threshold.verdictReceiptIds]);
         const mint = next.fellowfare.escrows.find((item) => item.submissionId === submission.id);
         if (mint) {
-            mint.status = "minted";
             mint.validationReceiptIds = threshold.verdictReceiptIds;
-            mint.releasedAt = threshold.createdAt;
-            if (mint.amount > 0)
-                payCoin(next, { accountId: mint.beneficiaryId, amount: mint.amount, kind: "labor-mint", sourceReceiptId: mint.id, reason: `Proof-of-human-labor mint for ${submission.subjectTitle}`, derivedFrom: [threshold.id, ...threshold.verdictReceiptIds] });
+            if (payoutEligible) { mint.status = "minted"; mint.releasedAt = threshold.createdAt; if (mint.amount > 0) payCoin(next, { accountId: mint.beneficiaryId, amount: mint.amount, kind: "labor-mint", sourceReceiptId: mint.id, reason: `Proof-of-human-labor mint for ${submission.subjectTitle}`, derivedFrom: [threshold.id, ...threshold.verdictReceiptIds] }); }
+            else { mint.status = "validated-awaiting-cross-device"; delete mint.releasedAt; }
         }
-        const credits = next.co.credits.filter((item) => item.submissionId === submission.id);
-        const shares = normalizedShares(submission);
-        const collaborative = shares.length > 1;
-        for (const credit of credits) {
-            const share = shares.find((item) => item.contributorId === credit.contributorId);
-            const allocationSigned = !collaborative || Boolean(share?.signedAt && share?.signatureRef);
-            credit.status = allocationSigned ? "vested" : "disputed";
-            if (allocationSigned)
-                credit.vestedAt = threshold.createdAt;
-            else
-                delete credit.vestedAt;
-        }
-        const xp = submission.skills.reduce((sum, skill) => sum + Number(skill.baseXp || 0), 0);
-        const coinAmount = mint?.amount || 0;
-        const coAmount = credits.filter((credit) => credit.status === "vested").reduce((sum, credit) => sum + credit.amount, 0);
-        next.chronicle.entries.push({ id: `chronicle:${submission.id}`, submissionId: submission.id, title: `${submission.subjectTitle} validated`,
-            story: `${submission.contributorName} completed ${submission.subjectTitle}, earned ${xp} canonical base XP plus ${xp} validation XP in Living School${coinAmount ? `, triggered a ${coinAmount}-coin proof-of-human-labor mint in Fellowfare` : ""}${coAmount ? `, and vested ${coAmount} Cerbanimo Co effort credits` : ""}${credits.some((credit) => credit.status === "disputed") ? ", while unsigned collaborative Co allocations remain disputed" : ""}.`,
+        const credits = next.co.credits.filter((item) => item.submissionId === submission.id), shares = normalizedShares(submission), collaborative = shares.length > 1;
+        for (const credit of credits) { const share = shares.find((item) => item.contributorId === credit.contributorId), allocationSigned = !collaborative || Boolean(share?.signedAt && share?.signatureRef); credit.status = allocationSigned ? "vested" : "disputed"; if (allocationSigned) credit.vestedAt = threshold.createdAt; else delete credit.vestedAt; }
+        const coinAmount = payoutEligible ? (mint?.amount || 0) : 0, coAmount = credits.filter((credit) => credit.status === "vested").reduce((sum, credit) => sum + credit.amount, 0);
+        next.chronicle.entries.push({ id: `chronicle:${submission.id}`, submissionId: submission.id, title: `${submission.subjectTitle} verified`,
+            story: `${submission.contributorName} completed ${submission.subjectTitle}; calibrated evidence reached ${(Number(threshold.confidence || 1) * 100).toFixed(1)}% pass confidence across ${threshold.diversity?.familyCount || "legacy"} evidence families${payoutEligible ? `, releasing validation bonus XP${coinAmount ? ` and a ${coinAmount}-coin proof-of-human-labor mint` : ""}` : ", while Button/bonus payout remains locked until independent cross-device evidence arrives"}${coAmount ? `, and vested ${coAmount} Cerbanimo Co effort credits` : ""}.`,
             receiptRefs: [threshold.id, ...threshold.verdictReceiptIds, ...(mint ? [mint.id] : []), ...credits.map((item) => item.id)], authority: authority("civweave", `chronicle:${submission.id}`, [threshold.id]), createdAt: threshold.createdAt });
     }
-    for (const receipt of next.validation.receipts.filter((item) => item.acceptedForQuorum))
-        payCoin(next, { accountId: validatorPrincipal(receipt), amount: receipt.relationship === "reciprocal" ? 1 : next.fellowfare.issuancePolicy.validatorBounty,
-            kind: "validator-bounty", sourceReceiptId: receipt.id, reason: `Useful independent validation labor`, derivedFrom: [receipt.id] });
-    touch(next);
-    return next;
+    for (const receipt of next.validation.receipts.filter((item) => acceptedEvidenceReceipt(item))) payCoin(next, { accountId: validatorPrincipal(receipt), amount: receipt.relationship === "reciprocal" ? 1 : next.fellowfare.issuancePolicy.validatorBounty, kind: "validator-bounty", sourceReceiptId: receipt.id, reason: "Useful independent validation labor", derivedFrom: [receipt.id] });
+    touch(next); return next;
 }
 function touch(state) { const updatedAt = now(); state.living.updatedAt = updatedAt; state.fellowfare.updatedAt = updatedAt; state.co.updatedAt = updatedAt; state.validation.updatedAt = updatedAt; state.chronicle.updatedAt = updatedAt; }
 function uniqueBy(items, key) { const map = new Map(); for (const item of items)
@@ -537,11 +694,12 @@ function ownershipProjection(state, endeavorId) {
     return [...byContributor.entries()].map(([contributorId, amount]) => ({ contributorId, amount, percentage: total ? Number(((amount / total) * 100).toFixed(2)) : 0 })).sort((a, b) => b.amount - a.amount);
 }
 function rewardSummary(state, accountId = "local-user") {
-    const pendingMint = state.fellowfare.escrows.filter((item) => ["pending-validation", "locked"].includes(item.status)).reduce((sum, item) => sum + item.amount, 0);
+    const pendingMint = state.fellowfare.escrows.filter((item) => ["pending-validation", "locked", "validated-awaiting-cross-device"].includes(item.status)).reduce((sum, item) => sum + item.amount, 0);
     return { totalXp: state.living.xpReceipts.reduce((sum, item) => sum + item.amount, 0), skillCount: Object.keys(state.living.skills).filter((slug) => state.living.skills[slug].status !== "merged").length,
         highestLevel: Math.max(1, ...Object.values(state.living.skills).map((skill) => skill.level)), coins: Number(state.fellowfare.balances[accountId] || 0),
-        pendingValidations: state.validation.packets.filter((packet) => packet.status === "open").length, lockedEscrow: pendingMint, pendingMint,
-        vestedCo: state.co.credits.filter((item) => item.status === "vested" && item.contributorId === accountId).reduce((sum, item) => sum + item.amount, 0) };
+        pendingValidations: state.validation.packets.filter((packet) => ["open", "verified-awaiting-cross-device"].includes(packet.status)).length,
+        awaitingCrossDevicePayout: state.validation.packets.filter((packet) => packet.status === "verified-awaiting-cross-device").length,
+        lockedEscrow: pendingMint, pendingMint, vestedCo: state.co.credits.filter((item) => item.status === "vested" && item.contributorId === accountId).reduce((sum, item) => sum + item.amount, 0) };
 }
 function recordExternalCoinReward(state, input) {
     const next = cloneState(state);

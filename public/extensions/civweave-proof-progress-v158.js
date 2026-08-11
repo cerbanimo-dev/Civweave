@@ -1,3 +1,4 @@
+/* confidence-weighted-validation-v1 */
 (()=>{
 'use strict';
 if(globalThis.CivweaveProofProgressV158)return;
@@ -42,16 +43,8 @@ function livingCompletion(plan,path){
   if(identifiers(school).length&&!related(school,plan,path))return{complete:false,source:'living-school',reason:'The current curriculum belongs to another weave.'};
   const modules=list(school.modules);
   if(!modules.length)return{complete:false,source:'living-school',reason:'The curriculum has no modules to verify.'};
-  const passed=modules.filter(module=>{
-    const progress=state.progress?.[module.id]||{};
-    return progress.assessmentPassed===true||progress.verified===true||COMPLETE.has(clean(progress.status));
-  });
-  return{
-    complete:passed.length===modules.length,
-    source:'living-school',
-    proofIds:passed.map(module=>module.id),
-    reason:passed.length===modules.length?'Every curriculum module has accepted learning evidence.':`${passed.length}/${modules.length} curriculum modules have accepted evidence.`
-  };
+  const passed=modules.filter(module=>{const progress=state.progress?.[module.id]||{},weighted=progress.validationConfidence;if(weighted?.schema==='civweave.validation-confidence.v1')return weighted.verifiedPass===true;return progress.assessmentPassed===true||progress.verified===true||COMPLETE.has(clean(progress.status));});
+  return{complete:passed.length===modules.length,source:'living-school',proofIds:passed.map(module=>module.id),reason:passed.length===modules.length?'Every curriculum module has weighted, accepted learning evidence.':`${passed.length}/${modules.length} curriculum modules have accepted evidence.`};
 }
 function cerbanimoCompletion(plan,path){
   const state=read(KEYS.cerbanimo,{}),quests=list(state.quests);

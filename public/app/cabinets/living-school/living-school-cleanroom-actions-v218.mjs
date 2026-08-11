@@ -1,3 +1,5 @@
+/* confidence-weighted-validation-v1 */
+import '../../shared/civweave-validation-confidence-v1.js';
 import * as rubric from '../../services/living-school/modules/rubric-engine.mjs';
 import * as gate from '../../services/living-school/modules/project-gate.mjs';
 import * as bridge from '../../services/living-school/modules/cerbanimo-bridge.mjs';
@@ -14,6 +16,18 @@ const sameSet=(left,right)=>{
   const a=[...(Array.isArray(left)?left:[])].map(String).sort(),b=[...(Array.isArray(right)?right:[])].map(String).sort();
   return a.length===b.length&&a.every((value,index)=>value===b[index]);
 };
+const confidenceApi=()=>{const api=globalThis.CivweaveValidationConfidenceV1;if(!api)throw new Error('Weighted validation confidence runtime is unavailable.');return api};
+const validationForAssessment=(module,progress,results,score,threshold)=>{
+  const correlationId=`assessment:${module.id}`;
+  const evidence=results.map(result=>({id:`question:${result.questionId}`,validatorId:`question:${module.id}:${result.questionId}`,family:result.authority==='deterministic-test'?'deterministic-test':/model/.test(String(result.authority||''))?'model-rubric':'deterministic-rubric',provenance:result.authority||'deterministic-rubric',verdict:result.passed?'pass':'fail',confidence:Number(result.confidence)||.8,score:Number(result.score||0)/100,threshold:Number(result.rubricThreshold??.6),correlationId}));
+  evidence.push({id:`module-score:${module.id}`,validatorId:`module-score:${module.id}`,family:'deterministic-rubric',provenance:'module-pass-score-rubric',verdict:score>=threshold?'pass':'fail',confidence:.92,score:score/100,threshold:threshold/100,correlationId});
+  if(progress.lessonComplete&&progress.note)evidence.push({id:`lesson-artifact:${module.id}`,validatorId:`lesson-artifact:${module.id}`,family:'artifact-inspection',provenance:'learner-lesson-artifact',verdict:'pass',confidence:.82,score:1,threshold:.6,correlationId:`lesson:${module.id}`});
+  return confidenceApi().aggregate(evidence);
+};
+const validationForFinal=(evaluation,gateReceipt,finalId)=>confidenceApi().aggregate([
+  {id:`final-rubric:${finalId}`,validatorId:`final-rubric:${finalId}`,family:/model/.test(String(evaluation.authority||''))?'model-rubric':'deterministic-rubric',provenance:evaluation.authority||'deterministic-rubric',verdict:evaluation.ok&&!evaluation.uncertain?'pass':'fail',confidence:Number(evaluation.confidence)||.75,score:Number(evaluation.score||0)/100,threshold:.6,correlationId:finalId},
+  {id:`cerbanimo-receipt:${gateReceipt?.receiptId||finalId}`,validatorId:`cerbanimo-receipt:${gateReceipt?.receiptId||finalId}`,family:'artifact-inspection',provenance:'accepted-cerbanimo-project-receipt',verdict:gateReceipt?'pass':'fail',confidence:.9,score:gateReceipt?1:0,threshold:.6,correlationId:gateReceipt?.receiptId||finalId}
+]);
 const busyLabel=(target,label)=>{target.disabled=true;target.textContent=label};
 
 export const actions={
@@ -70,27 +84,27 @@ export const actions={
       const response=quizAnswer(scope,index,question.type);
       if(question.type==='multiple-choice'){
         const ok=String(response)===String(question.answer);
-        results.push({questionId:question.id,type:question.type,response,score:ok?100:0,passed:ok,feedback:ok?'Correct.':question.explanation||'Review this concept.',concepts:question.concepts||[]});
+        results.push({questionId:question.id,type:question.type,response,score:ok?100:0,passed:ok,confidence:.995,authority:'deterministic-test',rubricThreshold:.5,feedback:ok?'Correct.':question.explanation||'Review this concept.',concepts:question.concepts||[]});
       }else if(question.type==='multi-select'){
         const ok=sameSet(response,question.answer);
-        results.push({questionId:question.id,type:question.type,response,score:ok?100:0,passed:ok,feedback:ok?'Correct.':question.explanation||'Review every applicable element.',concepts:question.concepts||[]});
+        results.push({questionId:question.id,type:question.type,response,score:ok?100:0,passed:ok,confidence:.995,authority:'deterministic-test',rubricThreshold:.5,feedback:ok?'Correct.':question.explanation||'Review every applicable element.',concepts:question.concepts||[]});
       }else{
         const answer=clean(response,12000);
         const evaluation=rubric.evaluateShortAnswer?.({prompt:question.prompt,response:answer,lessonExcerpt:(module.lessonBlocks||[]).map(block=>block.content).join('\n'),criteria:question.rubric?.length?question.rubric:[{id:'principle',label:'Explain the principle',points:4,role:'principle',required:true},{id:'application',label:'Apply it',points:3,role:'application',required:true},{id:'evidence',label:'Name evidence',points:3,role:'evidence',required:true}],minWords:question.minWords||20,maxWords:question.maxWords||280})||{ok:answer.split(/\s+/).length>=20,uncertain:false,score:75,feedback:'Local review.'};
-        results.push({questionId:question.id,type:question.type,response:answer,score:Number(evaluation.score||0),passed:Boolean(evaluation.ok&&!evaluation.uncertain),uncertain:Boolean(evaluation.uncertain),feedback:evaluation.feedback||'',concepts:question.concepts||[]});
+        results.push({questionId:question.id,type:question.type,response:answer,score:Number(evaluation.score||0),passed:Boolean(evaluation.ok&&!evaluation.uncertain),uncertain:Boolean(evaluation.uncertain),confidence:Number(evaluation.confidence||.65),authority:evaluation.authority||'deterministic-rubric-assisted',rubricThreshold:.6,feedback:evaluation.feedback||'',concepts:question.concepts||[]});
       }
     }
     const unanswered=results.some(result=>Array.isArray(result.response)?!result.response.length:!clean(result.response,12000));
     const score=Math.round(results.reduce((sum,result)=>sum+Number(result.score||0),0)/Math.max(1,results.length));
-    const threshold=Number(module.quiz?.passScore||80),passed=!unanswered&&score>=threshold&&!results.some(result=>result.uncertain);
+    const threshold=Number(module.quiz?.passScore||80),validation=validationForAssessment(module,progress,results,score,threshold),passed=!unanswered&&validation.verifiedPass&&!results.some(result=>result.uncertain);
     const missed=[...new Set(results.filter(result=>!result.passed).flatMap(result=>result.concepts||[]))].filter(Boolean);
     const feedback=passed
       ?`Passed with ${score}%. The artifact and mixed-format check are ready for the next module.`
       :`${unanswered?'Answer every question. ':''}${missed.length?`Targeted review: ${missed.join(', ')}. `:''}${module.quiz?.remediation||'Review the lesson blocks and revise the artifact before trying again.'}`;
-    const first=passed&&!progress.assessmentPassed,attempt={id:uid('attempt'),questionIds:questions.map(question=>question.id),results,score,passed,feedback,at:now()};
-    s.progress[module.id]={...progress,assessmentPassed:passed,attempts:[...(progress.attempts||[]),attempt].slice(-12),evidence:[...(progress.evidence||[]),{id:uid('evidence'),type:'mixed-assessment',detail:attempt,at:now()}].slice(-50)};
+    const first=passed&&!progress.assessmentPassed,attempt={id:uid('attempt'),questionIds:questions.map(question=>question.id),results,score,passed,validation,feedback,at:now()};
+    s.progress[module.id]={...progress,assessmentPassed:passed,validationConfidence:validation,attempts:[...(progress.attempts||[]),attempt].slice(-12),evidence:[...(progress.evidence||[]),{id:uid('evidence'),type:'mixed-assessment',detail:attempt,at:now()}].slice(-50)};
     if(first)award(Number(module.xp?.amount||15),`Module assessment passed: ${module.xp?.domain||'learning'}`,module.id);
-    persist('assessment-evaluated',{moduleId:module.id,passed,score,questionCount:questions.length,missed});
+    persist('assessment-evaluated',{moduleId:module.id,passed,score,confidence:validation.passConfidence,decision:validation.decision,evidenceFamilies:validation.diversity.familyCount,questionCount:questions.length,missed});
     toast(passed?'Assessment passed.':`Saved for targeted revision: ${missed.join(', ')||'review the module evidence'}.`);
   },
   'add-source':async target=>{
@@ -131,7 +145,7 @@ export const actions={
     const s=state();if(!(gate.canUnlockFinalTest?.(s.projectGate)||Boolean(s.projectGate?.status==='accepted'&&s.projectGate?.lastReceipt)))throw new Error('An accepted Cerbanimo receipt is required.');
     const answer=clean(field('finalAnswer',formFor(target)),16000);if(!answer)throw new Error('Write the final explanation.');
     const evaluation=rubric.evaluateShortAnswer?.({prompt:'Explain capability, evidence, uncertainty, and revision.',response:answer,lessonExcerpt:`Capability: ${s.school?.capability||''}. Artifact: ${s.practicum?.artifact||''}.`,criteria:[{id:'capability',label:'Capability',points:3,role:'principle',required:true},{id:'evidence',label:'Evidence',points:4,role:'evidence',required:true},{id:'limits',label:'Limits',points:3,role:'action',required:true}],minWords:30,maxWords:420})||{ok:answer.split(/\s+/).length>=30,uncertain:false,score:80,feedback:'Local final review.'};
-    const passed=evaluation.ok&&!evaluation.uncertain,first=passed&&!s.final?.passed;s.final={id:uid('final'),answer,score:Number(evaluation.score||0),passed,feedback:evaluation.feedback,receiptId:s.projectGate.lastReceipt?.receiptId,at:now()};
+    const finalId=uid('final'),validation=validationForFinal(evaluation,s.projectGate.lastReceipt,finalId),passed=validation.verifiedPass&&!evaluation.uncertain,first=passed&&!s.final?.passed;s.final={id:finalId,answer,score:Number(evaluation.score||0),passed,validationConfidence:validation,feedback:evaluation.feedback,receiptId:s.projectGate.lastReceipt?.receiptId,at:now()};
     if(first)award(25,'Final competency passed',s.final.id);persist('final-assessment-evaluated',{passed});toast(passed?'Final competency passed.':'Saved for revision.');
   },
   'issue-credential':async()=>{
