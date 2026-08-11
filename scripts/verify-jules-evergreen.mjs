@@ -14,7 +14,6 @@ const [
   coreSource,
   julesApiSource,
   daemonWorkflow,
-  syncWorkflow,
   documentation
 ] = await Promise.all([
   read('.github/jules-evergreen.json'),
@@ -23,7 +22,6 @@ const [
   read('scripts/lib/jules-evergreen-core.mjs'),
   read('scripts/lib/jules-api-client.mjs'),
   read('.github/workflows/jules-evergreen-daemon.yml'),
-  read('.github/workflows/sync-jules-evergreen-branch.yml'),
   read('docs/JULES-EVERGREEN.md')
 ]);
 
@@ -56,13 +54,10 @@ assert.match(daemonWorkflow, /secrets\.EVERGREEN_GITHUB_TOKEN/);
 assert.doesNotMatch(daemonWorkflow, /pull_request_target/);
 assert.doesNotMatch(daemonWorkflow, /contents: write/);
 
-assert.match(syncWorkflow, /branches:\s*\n\s*- main/);
-assert.match(syncWorkflow, /evergreen\/jules-pipeline/);
-assert.match(syncWorkflow, /contents: write/);
-assert.doesNotMatch(syncWorkflow, /secrets\.JULES_API_KEY/);
-
 assert.match(documentation, /EVERGREEN_GITHUB_TOKEN/);
 assert.match(documentation, /automatically squash-merges/i);
 assert.match(documentation, /does not bypass branch protection/i);
+assert.match(documentation, /uses `main` directly as its trusted baseline/i);
+assert.match(documentation, /Do not maintain a deployment-watched mirror of `main`/i);
 
-console.log(`Jules evergreen verifier passed: ${bundles.length} bundles, trusted-check, quota, sensitive-path, and auto-merge gates intact.`);
+console.log(`Jules evergreen verifier passed: ${bundles.length} bundles, trusted-main baseline, trusted-check, quota, sensitive-path, and auto-merge gates intact.`);
