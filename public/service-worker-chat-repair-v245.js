@@ -1,7 +1,8 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-runtime-repair-v299';
+const REVISION='chat-convergence-v250';
+const RUNTIME_REPAIR='chat-runtime-repair-v299';
 const CHAT_PATHS=new Set([
   '/app/manifest.webmanifest',
   '/app/installed-entry-v146.html',
@@ -43,7 +44,7 @@ async function purgeChatRuntimeCaches(){
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,deleted,paths:[...CHAT_PATHS]};
+  return{revision:REVISION,runtimeRepair:RUNTIME_REPAIR,deleted,paths:[...CHAT_PATHS]};
 }
 
 self.addEventListener('activate',event=>{
@@ -57,5 +58,5 @@ self.addEventListener('message',event=>{
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,paths:[...CHAT_PATHS],purge:purgeChatRuntimeCaches});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,runtimeRepair:RUNTIME_REPAIR,paths:[...CHAT_PATHS],purge:purgeChatRuntimeCaches});
 })();
