@@ -11,7 +11,6 @@ permissions:
 
 jobs:
   materialize:
-    if: ${{ !contains(github.event.head_commit.message, 'Materialize O*NET core atlas') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,10 +22,31 @@ jobs:
           node-version: 22
       - name: Build official O*NET 30.3 Labor Atlas
         run: node scripts/build-learning-packs-v1.mjs
-      - name: Commit generated core artifact
+      - name: Mark O*NET and ESCO as core-managed infrastructure
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs/promises';
+          const path='public/downloads/learning-packs/catalog.json';
+          const catalog=JSON.parse(await fs.readFile(path,'utf8'));
+          for(const id of ['onet-labor-atlas-30-3','esco-skill-crosswalk-v1']){
+            const row=catalog.packs.find(item=>item.id===id);
+            if(!row)throw new Error(`Missing ${id}`);
+            row.optional=false;
+            row.autoStage=false;
+            row.coreInfrastructure=true;
+            row.hiddenFromShelf=true;
+            row.managedBy='labor-intelligence-core-v1';
+          }
+          const atlas=catalog.packs.find(row=>row.id==='onet-labor-atlas-30-3');
+          atlas.summary='Core O*NET 30.3 labor-reference atlas used lazily for occupational context in Cerbanimo work, Living School capability generation, and FellowFare labor requests. Reference data requires task-specific adaptation.';
+          const esco=catalog.packs.find(row=>row.id==='esco-skill-crosswalk-v1');
+          esco.summary='Core ESCO interoperability bridge used lazily to normalize Civweave skills and connect O*NET occupations to ESCO identities. Fuzzy candidates remain review-only.';
+          await fs.writeFile(path,`${JSON.stringify(catalog,null,2)}\n`);
+          NODE
+      - name: Commit generated core artifact and metadata
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add public/downloads/learning-packs/onet-labor-atlas-30-3.json.gz public/downloads/learning-packs/catalog.json
-          git commit -m 'Materialize O*NET core atlas [skip ci]'
+          git commit -m 'Materialize core labor infrastructure [skip ci]'
           git push origin HEAD:feat/core-labor-intelligence-v1
