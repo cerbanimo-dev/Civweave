@@ -9,9 +9,23 @@ This sample lives inside the Cloudflare core Worker and is deliberately separate
 - The SDK pins Stripe API `2026-07-29.dahlia`, so the code does **not** set `apiVersion` manually.
 - Every Stripe request is issued through one `Stripe` client. In Cloudflare the client uses `Stripe.createFetchHttpClient()` so outbound requests still go through the SDK while using the Worker Fetch runtime.
 
+## Safety gate
+
+The sample code is bundled into the core Worker but **disabled by default**:
+
+```text
+STRIPE_CONNECT_SAMPLE_ENABLED=false
+```
+
+This is intentional. The sample provider console is a compact integration lab, not the production Civweave provider-auth surface. Publishing it unauthenticated on the public Worker would expose account/product creation controls.
+
+For a sandbox or local test deployment, explicitly set `STRIPE_CONNECT_SAMPLE_ENABLED=true`. Do not enable the sample on the public production Worker until its provider routes are placed behind the final Civweave operator authentication/authorization layer.
+
+The existing real-money gates remain independent and fail-closed. Enabling the sample does **not** enable live money.
+
 ## Required secrets
 
-Add these as GitHub **repository secrets**. The deployment workflow copies them into the `civweave-core` Worker when present.
+Add these as GitHub **repository secrets** when the corresponding Stripe integration is ready. The deployment workflow copies them into the `civweave-core` Worker when present.
 
 - `STRIPE_SECRET_KEY`
   - **PLACEHOLDER:** start with a Stripe test-mode key (`sk_test_...`).
@@ -22,7 +36,7 @@ Add these as GitHub **repository secrets**. The deployment workflow copies them 
 
 The existing `CIVWEAVE_PLATFORM_FEE_BPS=1500` Worker variable makes the sample application fee 15%.
 
-## What is deployed
+## Sample routes when enabled
 
 Provider UI:
 
@@ -149,6 +163,8 @@ Do not replace the existing money-edge snapshot webhook with the thin Account V2
 
 Keeping the signing secrets and endpoints separate reduces the chance of parsing one payload style as the other.
 
-## Safety state
+## Production path
+
+The sample deliberately stops short of becoming the public provider-management UI. The production integration should reuse these Stripe operations behind Civweave's authenticated operator surface, use an opaque storefront identifier instead of an `acct_...` URL, and keep current Stripe account status as the source of truth rather than copying requirements into application state.
 
 The existing Civweave launch flags remain fail-closed. Adding this sample does not set `CIVWEAVE_MONEY_LIVE_ENABLED=true` and does not mark compliance, jurisdiction, KYC/AML, tax, or provider-terms gates as approved.
