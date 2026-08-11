@@ -6,6 +6,7 @@ export const NODE_MONEY_CHALLENGE_DOMAIN = 'civweave.node-live-challenge.v1';
 export const NODE_MONEY_REQUEST_DOMAIN = 'civweave.node-money-edge-request.v1';
 export const MONEY_EDGE_EVENT_DOMAIN = 'civweave.money-edge-event.v1';
 export const NODE_MONEY_ENROLLMENT_SCHEMA = 'civweave.node-money-enrollment-grant.v1';
+export const TOPUP_ECONOMY = Object.freeze({ systemBps: 7000, hostBps: 2500, cerbanimoBps: 500 });
 
 const enc = new TextEncoder();
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
@@ -124,24 +125,46 @@ function safeReturnUrl(value, expectedOrigin) {
   }
   return url.href;
 }
+export function splitTopupServiceNet(serviceNetCents) {
+  const net = integer(serviceNetCents, 'serviceNetCents', 0, 50_000_000);
+  const systemReserveCents = Math.floor(net * TOPUP_ECONOMY.systemBps / 10_000);
+  const hostShareCents = Math.floor(net * TOPUP_ECONOMY.hostBps / 10_000);
+  return Object.freeze({
+    serviceNetCents: net,
+    systemReserveCents,
+    hostShareCents,
+    cerbanimoShareCents: net - systemReserveCents - hostShareCents,
+  });
+}
+function proportional(total, part, whole) {
+  if (!whole || !total || !part) return 0;
+  return Math.max(0, Math.min(total, Math.floor(total * part / whole)));
+}
 function publicTopup(row) {
   if (!row) return null;
   return Object.freeze({
-    schema: 'civweave.node-money-topup.v1',
+    schema: 'civweave.node-money-topup.v2',
     topupId: row.topup_id,
     nodeId: row.node_id,
     userId: row.user_id,
     grossCents: Number(row.gross_cents),
     currency: row.currency,
-    platformFeeCents: Number(row.platform_fee_cents),
     processorFeeCents: Number(row.processor_fee_cents || 0),
-    userCreditCents: Number(row.user_credit_cents),
+    serviceNetCents: Number(row.service_net_cents || 0),
+    systemReserveCents: Number(row.system_reserve_cents || row.user_credit_cents || 0),
+    hostShareCents: Number(row.host_share_cents || 0),
+    cerbanimoShareCents: Number(row.cerbanimo_share_cents || row.platform_fee_cents || 0),
+    platformFeeCents: Number(row.cerbanimo_share_cents || row.platform_fee_cents || 0),
+    userCreditCents: Number(row.system_reserve_cents || row.user_credit_cents || 0),
+    hostTransferId: row.stripe_transfer_id || null,
     status: row.status,
     checkoutUrl: row.checkout_url || null,
     createdAt: row.created_at,
     settledAt: row.settled_at || null,
     refundedCents: Number(row.refunded_cents || 0),
-    disputedCents: Number(row.disputed_cents || 0)
+    refundedGrossCents: Number(row.refunded_gross_cents || 0),
+    disputedCents: Number(row.disputed_cents || 0),
+    disputedGrossCents: Number(row.disputed_gross_cents || 0)
   });
 }
 
@@ -152,7 +175,7 @@ export class CloudflareMoneyEdge {
     this.fetch = fetchImpl;
     this.now = now;
     this.nodeDomain = clean(env.NODE_DOMAIN || 'nodes.commonweave.earth', 255);
-    this.platformFeeBps = integer(env.CIVWEAVE_PLATFORM_FEE_BPS ?? 1500, 'CIVWEAVE_PLATFORM_FEE_BPS', 0, 10000);
+    this.platformFeeBps = integer(env.CIVWEAVE_PLATFORM_FEE_BPS ?? TOPUP_ECONOMY.cerbanimoBps, 'CIVWEAVE_PLATFORM_FEE_BPS', 0, 10000);
     this.maxTopupCents = integer(env.CIVWEAVE_MONEY_MAX_TOPUP_CENTS ?? 100000, 'CIVWEAVE_MONEY_MAX_TOPUP_CENTS', 100, 5000000);
     this.signatureToleranceSeconds = integer(env.CIVWEAVE_MONEY_SIGNATURE_TOLERANCE_SECONDS ?? 300, 'signature tolerance', 30, 3600);
     this.enrollmentTtlSeconds = integer(env.CIVWEAVE_MONEY_ENROLLMENT_TTL_SECONDS ?? 600, 'enrollment TTL', 60, 3600);
@@ -186,7 +209,9 @@ export class CloudflareMoneyEdge {
       provider: this.provider.id,
       providerMode: this.provider.mode,
       operatorPayouts: this.provider.operatorPayouts,
-      platformFeeBps: this.platformFeeBps,
+      platformFeeBps: TOPUP_ECONOMY.cerbanimoBps,
+      topupEconomy: TOPUP_ECONOMY,
+      fundsModel: 'platform-reserve-separate-transfer',
       enrollment: 'proof-of-key-short-lived-grant',
       callbackPolicy: `dedicated-subdomain-of-${this.nodeDomain}`,
       integrationDoorReady: structuralBlockers.length === 0,
@@ -294,14 +319,15 @@ export class CloudflareMoneyEdge {
     await this.db.prepare(`INSERT INTO money_edge_enrollment_grants
       (grant_hash,node_id,operator_id,callback_origin,receipt_public_key,platform_fee_bps,created_at,expires_at,consumed_at)
       VALUES(?1,?2,?3,?4,?5,?6,?7,?8,NULL)`)
-      .bind(grantHash, id, operator, proof.origin, proof.publicKey, this.platformFeeBps, createdAt, expiresAt).run();
+      .bind(grantHash, id, operator, proof.origin, proof.publicKey, TOPUP_ECONOMY.cerbanimoBps, createdAt, expiresAt).run();
     return Object.freeze({
       schema: NODE_MONEY_ENROLLMENT_SCHEMA,
       token,
       nodeId: id,
       operatorId: operator,
       callbackOrigin: proof.origin,
-      platformFeeBps: this.platformFeeBps,
+      platformFeeBps: TOPUP_ECONOMY.cerbanimoBps,
+      topupEconomy: TOPUP_ECONOMY,
       expiresAt
     });
   }
@@ -326,40 +352,19 @@ export class CloudflareMoneyEdge {
     const id = required(nodeId, 'nodeId', 180);
     const operator = required(operatorId, 'operatorId', 180);
     const proof = await this.probeNode({ nodeId: id, operatorId: operator, callbackUrl });
-    const grant = await this.consumeGrant({
-      token: enrollmentGrant,
-      nodeId: id,
-      operatorId: operator,
-      callbackOrigin: proof.origin,
-      publicKey: proof.publicKey
-    });
+    const grant = await this.consumeGrant({ token: enrollmentGrant, nodeId: id, operatorId: operator, callbackOrigin: proof.origin, publicKey: proof.publicKey });
     const existing = await this.node(id);
     if (existing && (existing.operator_id !== operator || existing.receipt_public_key !== proof.publicKey)) {
       throw Object.assign(new Error('Existing node registration belongs to a different operator identity.'), { status: 409 });
     }
-    const accountId = existing?.connected_account_id || (await this.provider.createConnectedAccount({
-      nodeId: id,
-      operatorId: operator,
-      email,
-      country
-    })).id;
+    const accountId = existing?.connected_account_id || (await this.provider.createConnectedAccount({ nodeId: id, operatorId: operator, email, country })).id;
     const at = iso(this.now());
     await this.db.prepare(`INSERT INTO money_edge_nodes
       (node_id,operator_id,connected_account_id,callback_origin,receipt_public_key,platform_fee_bps,created_at,updated_at)
       VALUES(?1,?2,?3,?4,?5,?6,?7,?8)
-      ON CONFLICT(node_id) DO UPDATE SET
-        operator_id=excluded.operator_id,
-        connected_account_id=excluded.connected_account_id,
-        callback_origin=excluded.callback_origin,
-        receipt_public_key=excluded.receipt_public_key,
-        platform_fee_bps=excluded.platform_fee_bps,
-        updated_at=excluded.updated_at`)
-      .bind(id, operator, accountId, proof.origin, proof.publicKey, Number(grant.platform_fee_bps), existing?.created_at || at, at).run();
-    const link = await this.provider.createAccountLink({
-      accountId,
-      refreshUrl: `${proof.origin}/app/node-ai-operator-v1.html?money=refresh`,
-      returnUrl: `${proof.origin}/app/node-ai-operator-v1.html?money=return`
-    });
+      ON CONFLICT(node_id) DO UPDATE SET operator_id=excluded.operator_id,connected_account_id=excluded.connected_account_id,callback_origin=excluded.callback_origin,receipt_public_key=excluded.receipt_public_key,platform_fee_bps=excluded.platform_fee_bps,updated_at=excluded.updated_at`)
+      .bind(id, operator, accountId, proof.origin, proof.publicKey, TOPUP_ECONOMY.cerbanimoBps, existing?.created_at || at, at).run();
+    const link = await this.provider.createAccountLink({ accountId, refreshUrl: `${proof.origin}/app/node-ai-operator-v1.html?money=refresh`, returnUrl: `${proof.origin}/app/node-ai-operator-v1.html?money=return` });
     return Object.freeze({
       schema: NODE_MONEY_EDGE_SCHEMA,
       authority: 'cloudflare-core',
@@ -368,7 +373,8 @@ export class CloudflareMoneyEdge {
       connectedAccountId: accountId,
       onboardingUrl: link.url,
       onboardingExpiresAt: link.expires_at ? new Date(Number(link.expires_at) * 1000).toISOString() : null,
-      platformFeeBps: Number(grant.platform_fee_bps),
+      platformFeeBps: TOPUP_ECONOMY.cerbanimoBps,
+      topupEconomy: TOPUP_ECONOMY,
       operatorPayouts: this.provider.operatorPayouts,
       enrollment: 'proof-of-key-short-lived-grant'
     });
@@ -383,7 +389,9 @@ export class CloudflareMoneyEdge {
       nodeId: node.node_id,
       operatorId: node.operator_id,
       connectedAccountId: node.connected_account_id,
-      platformFeeBps: Number(node.platform_fee_bps),
+      platformFeeBps: TOPUP_ECONOMY.cerbanimoBps,
+      topupEconomy: TOPUP_ECONOMY,
+      fundsModel: 'platform-reserve-separate-transfer',
       chargesEnabled: Boolean(account?.charges_enabled),
       payoutsEnabled: Boolean(account?.payouts_enabled),
       detailsSubmitted: Boolean(account?.details_submitted),
@@ -399,9 +407,7 @@ export class CloudflareMoneyEdge {
     const node = await this.verifyNodeRequest(nodeId, raw, signatureHeader);
     if (bool(this.env.CIVWEAVE_MONEY_EMERGENCY_STOP)) throw Object.assign(new Error('Money edge emergency stop is active.'), { status: 503 });
     const readiness = this.readiness();
-    if (this.provider.mode === 'live' && !readiness.liveReady) {
-      throw Object.assign(new Error(`Live node money is blocked: ${readiness.operationalBlockers.join(', ')}`), { status: 503 });
-    }
+    if (this.provider.mode === 'live' && !readiness.liveReady) throw Object.assign(new Error(`Live node money is blocked: ${readiness.operationalBlockers.join(', ')}`), { status: 503 });
     const userId = required(input.userId, 'userId', 180);
     const gross = integer(input.grossCents, 'grossCents', 1, this.maxTopupCents);
     const currency = clean(input.currency || 'USD', 12).toUpperCase();
@@ -412,18 +418,15 @@ export class CloudflareMoneyEdge {
     const prior = await this.db.prepare('SELECT * FROM money_edge_topups WHERE idempotency_key=?1').bind(idempotencyKey).first();
     let topup = prior;
     if (prior) {
-      if (prior.node_id !== nodeId || prior.user_id !== userId || Number(prior.gross_cents) !== gross) {
-        throw Object.assign(new Error('Top-up idempotency key was reused for a different request.'), { status: 409 });
-      }
+      if (prior.node_id !== nodeId || prior.user_id !== userId || Number(prior.gross_cents) !== gross) throw Object.assign(new Error('Top-up idempotency key was reused for a different request.'), { status: 409 });
       if (prior.checkout_url) return publicTopup(prior);
     } else {
       const topupId = `topup:${crypto.randomUUID()}`;
       const at = iso(this.now());
-      const platformFeeCents = Math.floor(gross * Number(node.platform_fee_bps) / 10000);
       await this.db.prepare(`INSERT INTO money_edge_topups
         (topup_id,idempotency_key,node_id,user_id,gross_cents,currency,platform_fee_cents,processor_fee_cents,user_credit_cents,status,created_at,updated_at,refunded_cents,disputed_cents)
-        VALUES(?1,?2,?3,?4,?5,?6,?7,0,?8,'creating-checkout',?9,?10,0,0)`)
-        .bind(topupId, idempotencyKey, nodeId, userId, gross, currency, platformFeeCents, gross, at, at).run();
+        VALUES(?1,?2,?3,?4,?5,?6,0,0,0,'creating-checkout',?7,?8,0,0)`)
+        .bind(topupId, idempotencyKey, nodeId, userId, gross, currency, at, at).run();
       topup = await this.topupById(topupId);
     }
     const hashedIdempotency = (await sha256Hex(idempotencyKey)).slice(0, 48);
@@ -433,12 +436,11 @@ export class CloudflareMoneyEdge {
       userId,
       topupId: topup.topup_id,
       grossCents: gross,
-      applicationFeeCents: Number(topup.platform_fee_cents),
       currency: currency.toLowerCase(),
       successUrl,
       cancelUrl,
       idempotencyKey: `civweave-${hashedIdempotency}`,
-      displayName: `Civweave node credit · ${nodeId}`
+      displayName: `Civweave compute credit · ${nodeId}`
     });
     const at = iso(this.now());
     await this.db.prepare(`UPDATE money_edge_topups SET stripe_session_id=?1,checkout_url=?2,status='checkout-pending',updated_at=?3 WHERE topup_id=?4`)
@@ -508,14 +510,28 @@ export class CloudflareMoneyEdge {
       grossCents: Number(topup.gross_cents),
       currency: topup.currency.toLowerCase()
     });
-    if (Number(verified.applicationFeeCents) !== Number(topup.platform_fee_cents)) {
-      throw Object.assign(new Error('Stripe application fee does not match the Cerbanimo fee policy.'), { status: 409 });
+    const serviceNet = Math.max(0, Math.min(Number(topup.gross_cents), Number(verified.netCents ?? Number(topup.gross_cents) - Number(verified.processorFeeCents || 0))));
+    const split = splitTopupServiceNet(serviceNet);
+    let transfer = null;
+    if (split.hostShareCents > 0) {
+      transfer = await this.provider.createHostTransfer({
+        accountId: node.connected_account_id,
+        amountCents: split.hostShareCents,
+        currency: topup.currency.toLowerCase(),
+        sourceTransaction: verified.chargeId,
+        transferGroup: `civweave-topup:${topup.topup_id}`,
+        idempotencyKey: `civweave-host-${(await sha256Hex(topup.topup_id)).slice(0, 48)}`,
+        metadata: { civweave_topup_id: topup.topup_id, civweave_node_id: topup.node_id, civweave_split: 'host-25' }
+      });
     }
     const at = iso(this.now());
     await this.db.prepare(`UPDATE money_edge_topups SET
-      processor_fee_cents=?1,stripe_payment_intent_id=?2,stripe_charge_id=?3,stripe_balance_transaction_id=?4,
-      status='settled',settled_at=?5,updated_at=?6 WHERE topup_id=?7`)
-      .bind(Number(verified.processorFeeCents || 0), verified.paymentIntentId, verified.chargeId, verified.balanceTransactionId, at, at, topup.topup_id).run();
+      processor_fee_cents=?1,service_net_cents=?2,system_reserve_cents=?3,host_share_cents=?4,cerbanimo_share_cents=?5,
+      platform_fee_cents=?6,user_credit_cents=?7,stripe_transfer_id=?8,stripe_payment_intent_id=?9,stripe_charge_id=?10,stripe_balance_transaction_id=?11,
+      status='settled',settled_at=?12,updated_at=?13 WHERE topup_id=?14`)
+      .bind(Number(verified.processorFeeCents || 0), split.serviceNetCents, split.systemReserveCents, split.hostShareCents, split.cerbanimoShareCents,
+        split.cerbanimoShareCents, split.systemReserveCents, transfer?.id || null, verified.paymentIntentId, verified.chargeId, verified.balanceTransactionId,
+        at, at, topup.topup_id).run();
     const current = await this.topupById(topup.topup_id);
     const payload = Object.freeze({
       schema: NODE_MONEY_EVENT_SCHEMA,
@@ -525,16 +541,23 @@ export class CloudflareMoneyEdge {
       type: 'topup.paid',
       grossCents: Number(current.gross_cents),
       processorFeeCents: Number(current.processor_fee_cents),
-      platformFeeBps: Number(node.platform_fee_bps),
-      platformFeeCents: Number(current.platform_fee_cents),
-      userCreditCents: Number(current.user_credit_cents),
+      serviceNetCents: Number(current.service_net_cents),
+      systemReserveCents: Number(current.system_reserve_cents),
+      hostShareCents: Number(current.host_share_cents),
+      cerbanimoShareCents: Number(current.cerbanimo_share_cents),
+      platformFeeBps: TOPUP_ECONOMY.cerbanimoBps,
+      platformFeeCents: Number(current.cerbanimo_share_cents),
+      userCreditCents: Number(current.system_reserve_cents),
       externalAccountId: node.connected_account_id,
       metadata: {
         topupId: current.topup_id,
         stripeSessionId: current.stripe_session_id,
         stripeChargeId: current.stripe_charge_id,
+        stripeTransferId: current.stripe_transfer_id,
         feeAuthority: 'cerbanimo-money-edge',
-        infrastructureAuthority: 'cloudflare-core'
+        infrastructureAuthority: 'cloudflare-core',
+        fundsModel: 'platform-reserve-separate-transfer',
+        split: '70-system-25-host-5-cerbanimo'
       },
       mintEffect: 0,
       supplyEffect: 0
@@ -544,33 +567,59 @@ export class CloudflareMoneyEdge {
     return publicTopup(current);
   }
 
+  async reverseHostShare(topup, { grossAmountCents, kind, eventId } = {}) {
+    const gross = Number(topup.gross_cents || 0), hostShare = Number(topup.host_share_cents || 0);
+    if (!topup.stripe_transfer_id || gross <= 0 || hostShare <= 0) return 0;
+    const column = kind === 'dispute' ? 'host_dispute_reversed_cents' : 'host_refund_reversed_cents';
+    const otherColumn = kind === 'dispute' ? 'host_refund_reversed_cents' : 'host_dispute_reversed_cents';
+    const current = Number(topup[column] || 0), other = Number(topup[otherColumn] || 0);
+    const target = Math.min(proportional(hostShare, grossAmountCents, gross), Math.max(0, hostShare - other));
+    const delta = Math.max(0, target - current);
+    if (!delta) return 0;
+    await this.provider.reverseHostTransfer({
+      transferId: topup.stripe_transfer_id,
+      amountCents: delta,
+      idempotencyKey: `civweave-${kind}-host-${(await sha256Hex(`${eventId}:${topup.topup_id}:${delta}`)).slice(0, 48)}`,
+      metadata: { civweave_topup_id: topup.topup_id, civweave_reason: kind }
+    });
+    return delta;
+  }
+
   async handleRefund(event, charge) {
     const topup = await this.topupByCharge(required(charge.id, 'Stripe charge ID', 220));
     if (!topup) return { ignored: true, reason: 'unknown-charge' };
-    const cumulative = Math.min(Number(charge.amount_refunded || 0), Number(topup.user_credit_cents));
-    const delta = cumulative - Number(topup.refunded_cents || 0);
-    if (delta <= 0) return { ignored: true, reason: 'refund-already-applied' };
+    const gross = Number(topup.gross_cents || 0);
+    const cumulativeGross = Math.min(Number(charge.amount_refunded || 0), gross);
+    const grossDelta = cumulativeGross - Number(topup.refunded_gross_cents || 0);
+    if (grossDelta <= 0) return { ignored: true, reason: 'refund-already-applied' };
+    const maxRefundCredit = Math.max(0, Number(topup.user_credit_cents || 0) - Number(topup.disputed_cents || 0));
+    const cumulativeCredit = Math.min(proportional(Number(topup.user_credit_cents || 0), cumulativeGross, gross), maxRefundCredit);
+    const creditDelta = Math.max(0, cumulativeCredit - Number(topup.refunded_cents || 0));
+    const hostDelta = await this.reverseHostShare(topup, { grossAmountCents: cumulativeGross, kind: 'refund', eventId: event.id });
     const at = iso(this.now());
-    await this.db.prepare('UPDATE money_edge_topups SET refunded_cents=?1,updated_at=?2 WHERE topup_id=?3')
-      .bind(cumulative, at, topup.topup_id).run();
+    await this.db.prepare('UPDATE money_edge_topups SET refunded_gross_cents=?1,refunded_cents=?2,host_refund_reversed_cents=host_refund_reversed_cents+?3,updated_at=?4 WHERE topup_id=?5')
+      .bind(cumulativeGross, cumulativeCredit, hostDelta, at, topup.topup_id).run();
     const current = await this.topupById(topup.topup_id);
-    const node = await this.node(current.node_id);
-    const payload = Object.freeze({
-      schema: NODE_MONEY_EVENT_SCHEMA,
-      id: event.id,
-      provider: this.provider.id,
-      userId: current.user_id,
-      type: 'topup.refunded',
-      amountCents: delta,
-      userCreditCents: delta,
-      externalAccountId: node.connected_account_id,
-      metadata: { topupId: current.topup_id, stripeChargeId: charge.id, cumulativeRefundCents: cumulative },
-      mintEffect: 0,
-      supplyEffect: 0
-    });
-    const delivery = await this.enqueueDelivery(event.id, current, payload);
-    await this.deliver(delivery);
-    return { applied: true, topup: publicTopup(current), deltaCents: delta };
+    if (creditDelta > 0) {
+      const node = await this.node(current.node_id);
+      const payload = Object.freeze({
+        schema: NODE_MONEY_EVENT_SCHEMA,
+        id: event.id,
+        provider: this.provider.id,
+        userId: current.user_id,
+        type: 'topup.refunded',
+        grossRefundCents: grossDelta,
+        amountCents: creditDelta,
+        userCreditCents: creditDelta,
+        externalAccountId: node.connected_account_id,
+        metadata: { topupId: current.topup_id, stripeChargeId: charge.id, cumulativeRefundGrossCents: cumulativeGross, hostShareReversedCents: hostDelta },
+        mintEffect: 0,
+        supplyEffect: 0
+      });
+      const delivery = await this.enqueueDelivery(event.id, current, payload);
+      await this.deliver(delivery);
+    }
+    return { applied: true, topup: publicTopup(current), grossDeltaCents: grossDelta, creditDeltaCents: creditDelta, hostShareReversedCents: hostDelta };
   }
 
   async handleDispute(event, dispute) {
@@ -578,30 +627,38 @@ export class CloudflareMoneyEdge {
     if (!chargeId) return { ignored: true, reason: 'dispute-charge-missing' };
     const topup = await this.topupByCharge(chargeId);
     if (!topup) return { ignored: true, reason: 'unknown-charge' };
-    const cumulative = Math.min(Number(dispute.amount || 0), Number(topup.user_credit_cents));
-    const delta = cumulative - Number(topup.disputed_cents || 0);
-    if (delta <= 0) return { ignored: true, reason: 'dispute-already-applied' };
+    const gross = Number(topup.gross_cents || 0);
+    const cumulativeGross = Math.min(Number(dispute.amount || 0), gross);
+    const grossDelta = cumulativeGross - Number(topup.disputed_gross_cents || 0);
+    if (grossDelta <= 0) return { ignored: true, reason: 'dispute-already-applied' };
+    const maxDisputeCredit = Math.max(0, Number(topup.user_credit_cents || 0) - Number(topup.refunded_cents || 0));
+    const cumulativeCredit = Math.min(proportional(Number(topup.user_credit_cents || 0), cumulativeGross, gross), maxDisputeCredit);
+    const creditDelta = Math.max(0, cumulativeCredit - Number(topup.disputed_cents || 0));
+    const hostDelta = await this.reverseHostShare(topup, { grossAmountCents: cumulativeGross, kind: 'dispute', eventId: event.id });
     const at = iso(this.now());
-    await this.db.prepare('UPDATE money_edge_topups SET disputed_cents=?1,updated_at=?2 WHERE topup_id=?3')
-      .bind(cumulative, at, topup.topup_id).run();
+    await this.db.prepare('UPDATE money_edge_topups SET disputed_gross_cents=?1,disputed_cents=?2,host_dispute_reversed_cents=host_dispute_reversed_cents+?3,updated_at=?4 WHERE topup_id=?5')
+      .bind(cumulativeGross, cumulativeCredit, hostDelta, at, topup.topup_id).run();
     const current = await this.topupById(topup.topup_id);
-    const node = await this.node(current.node_id);
-    const payload = Object.freeze({
-      schema: NODE_MONEY_EVENT_SCHEMA,
-      id: event.id,
-      provider: this.provider.id,
-      userId: current.user_id,
-      type: 'payment.chargeback',
-      amountCents: delta,
-      userCreditCents: delta,
-      externalAccountId: node.connected_account_id,
-      metadata: { topupId: current.topup_id, stripeChargeId: chargeId, disputeId: dispute.id },
-      mintEffect: 0,
-      supplyEffect: 0
-    });
-    const delivery = await this.enqueueDelivery(event.id, current, payload);
-    await this.deliver(delivery);
-    return { applied: true, topup: publicTopup(current), deltaCents: delta };
+    if (creditDelta > 0) {
+      const node = await this.node(current.node_id);
+      const payload = Object.freeze({
+        schema: NODE_MONEY_EVENT_SCHEMA,
+        id: event.id,
+        provider: this.provider.id,
+        userId: current.user_id,
+        type: 'payment.chargeback',
+        grossDisputeCents: grossDelta,
+        amountCents: creditDelta,
+        userCreditCents: creditDelta,
+        externalAccountId: node.connected_account_id,
+        metadata: { topupId: current.topup_id, stripeChargeId: chargeId, disputeId: dispute.id, hostShareReversedCents: hostDelta },
+        mintEffect: 0,
+        supplyEffect: 0
+      });
+      const delivery = await this.enqueueDelivery(event.id, current, payload);
+      await this.deliver(delivery);
+    }
+    return { applied: true, topup: publicTopup(current), grossDeltaCents: grossDelta, creditDeltaCents: creditDelta, hostShareReversedCents: hostDelta };
   }
 
   async handleProviderEvent(event) {
@@ -620,22 +677,14 @@ export class CloudflareMoneyEdge {
     const topup = await this.topupById(topupId);
     if (!topup || topup.node_id !== node.node_id) throw Object.assign(new Error('Top-up is not owned by this node.'), { status: 404 });
     if (!topup.stripe_charge_id || topup.status !== 'settled') throw Object.assign(new Error('Top-up is not settled and refundable.'), { status: 400 });
-    const remaining = Number(topup.gross_cents) - Number(topup.refunded_cents || 0);
+    const remaining = Number(topup.gross_cents) - Number(topup.refunded_gross_cents || 0);
     const amount = integer(amountCents, 'amountCents', 1, remaining);
     const refund = await this.provider.refundTopUp({
-      accountId: node.connected_account_id,
       chargeId: topup.stripe_charge_id,
       amountCents: amount,
-      idempotencyKey: `civweave-refund-${(await sha256Hex(`${topupId}:${amount}:${topup.refunded_cents || 0}`)).slice(0, 48)}`
+      idempotencyKey: `civweave-refund-${(await sha256Hex(`${topupId}:${amount}:${topup.refunded_gross_cents || 0}`)).slice(0, 48)}`
     });
-    return Object.freeze({
-      schema: NODE_MONEY_EDGE_SCHEMA,
-      authority: 'cloudflare-core',
-      topupId,
-      refundId: refund.id,
-      amountCents: amount,
-      status: refund.status || 'pending-webhook'
-    });
+    return Object.freeze({ schema: NODE_MONEY_EDGE_SCHEMA, authority: 'cloudflare-core', topupId, refundId: refund.id, amountCents: amount, status: refund.status || 'pending-webhook' });
   }
 }
 
