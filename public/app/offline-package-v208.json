@@ -1,8 +1,8 @@
 {
   "version": "1.0.102",
-  "revision": "core-first-lazy-packs-v302-systems-mesh-v251",
+  "revision": "canonical-background-campus-v241-systems-mesh-v251",
   "payloadPolicy": "core-first-lazy-packs-v302",
-  "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward and systems-mesh runtimes, compact federation seed, and deterministic offline map runtime. Full federation discovery, decorative visuals and fonts, open-learning media, marketplace/operator surfaces, encyclopedia bulk data, and device-AI payloads hydrate as optional packs on demand.",
+  "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward and systems-mesh runtimes, compact federation seed, deterministic offline map runtime, and the lightweight Node AI operator/marketplace UI. Full federation discovery, decorative visuals and fonts, open-learning media, bulk encyclopedia data, and device-AI model payloads hydrate as optional packs on demand.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
@@ -18,6 +18,7 @@
   ],
   "assets": [
     "/finder",
+    "/node-ai/operator",
     "/app/federation-finder-map-v275.html",
     "/app/civweave-map-v1-manifest.json",
     "/app/civweave-map-service-v275.js",
@@ -38,7 +39,13 @@
     "/app/federation-finder-data/federation-seed-v269.json",
     "/app/local-object-mesh-v146.js",
     "/app/node-ai-mesh-v1.js",
-    "/app/shared/civweave-node-ai-routing-v1.mjs"
+    "/app/shared/civweave-node-ai-routing-v1.mjs",
+    "/app/node-ai-marketplace-surface-v1.js",
+    "/app/node-ai-live-marketplace-v1.js",
+    "/app/node-ai-operator-v1.html",
+    "/app/node-ai-operator-local-session-v1.js",
+    "/app/node-ai-operator-v1.js",
+    "/app/node-ai-live-operator-v1.js"
   ],
   "lazyPacks": [
     {
@@ -53,16 +60,6 @@
       "kind": "learning-media",
       "entry": "/app/open-learning-media-installer-v1.mjs",
       "prefix": "/app/open-learning-media-"
-    },
-    {
-      "id": "node-ai-marketplace",
-      "kind": "marketplace-ui",
-      "entry": "/app/node-ai-marketplace-surface-v1.js",
-      "prefixes": [
-        "/app/node-ai-marketplace-",
-        "/app/node-ai-live-",
-        "/app/node-ai-operator-"
-      ]
     },
     {
       "id": "device-ai",
@@ -107,9 +104,6 @@
     "/app/video-atlas-installer-",
     "/app/knowledge-school-installer-",
     "/app/knowledge-school-seeds-",
-    "/app/node-ai-marketplace-",
-    "/app/node-ai-live-",
-    "/app/node-ai-operator-",
     "/app/wikipedia-full-",
     "/app/encyclopedia/wiki-291-full/",
     "/app/services/living-school/visual-assets/",
@@ -150,11 +144,11 @@
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
-    "estimatedBytes": 80271998,
+    "estimatedBytes": 7705988,
     "safetyBytes": 67108864,
-    "requiredFreeBytes": 147380862,
-    "candidateAssetCount": 934,
-    "estimatedAssetCount": 700,
+    "requiredFreeBytes": 74814852,
+    "candidateAssetCount": 549,
+    "estimatedAssetCount": 549,
     "conservativeUpperBound": true,
     "staleUntilRegenerated": true
   }

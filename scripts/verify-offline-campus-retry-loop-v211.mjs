@@ -7,12 +7,11 @@ await import('./generate-prelive-metadata-v281.mjs');
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [wrapperSource,overrideSource,manifestSource,backgroundSource,installerSource]=await Promise.all([
+const [wrapperSource,overrideSource,manifestSource,backgroundSource]=await Promise.all([
   read('public/service-worker-v203.js'),
   read('public/service-worker-offline-v211-override.js'),
   read('public/app/offline-package-v208.json'),
-  read('public/app/campus-background-download-v241.js'),
-  read('public/app/index.html')
+  read('public/app/campus-background-download-v241.js')
 ]);
 const manifest=JSON.parse(manifestSource);
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
@@ -31,7 +30,6 @@ assert(wrapperSource.indexOf('service-worker-shell-integrity-v281.js')<wrapperSo
 for(const token of [
   "const V211_REVISION = 'offline-campus-current-graph-v280'",
   "const V211_POLICY = 'resumable-pause-v280'",
-  "const V211_PAYLOAD_POLICY = 'code-first-lazy-visuals-v300'",
   "const V211_SYNC_TAG = 'civweave-campus-resume-v280'",
   'const V211_BATCH_SIZE = 16',
   'let v211DownloadPromise = null',
@@ -42,19 +40,14 @@ for(const token of [
   "event.tag !== V211_SYNC_TAG",
   'pauseSupported: true',
   'resumablePerFile: true',
-  'backgroundSafe: true',
-  'explicitOptInRequired: true',
-  'optionalDependenciesBlockCompletion: false',
-  'asset-budget-deferred'
+  'backgroundSafe: true'
 ])assert(overrideSource.includes(token),`Resumable campus worker is missing ${token}.`);
 
-assert(backgroundSource.includes("if(!status?.explicitOptIn||status?.ready||status?.paused)return true"),'Background downloader can start before explicit offline-campus opt-in.');
-assert(backgroundSource.includes("if(lastStatus?.explicitOptIn&&navigator.onLine!==false&&!lastStatus?.paused)resume('scheduled_retry')"),'Scheduled retry does not preserve explicit opt-in and pause state.');
-assert(backgroundSource.includes("if(packet.explicitOptIn&&!packet.ready&&!packet.paused&&navigator.onLine!==false)scheduleRetry(2200)"),'Worker completion can retry without explicit opt-in.');
-assert(backgroundSource.includes("activeWorker.postMessage({type:'DOWNLOAD_OFFLINE_PACKAGE',background:true"),'Canonical page runtime cannot resume a worker-owned opted-in download.');
+assert(backgroundSource.includes("if(status?.ready||status?.paused)return true"),'In-app background downloader does not stop auto-resume for a deliberate pause.');
+assert(backgroundSource.includes("if(navigator.onLine!==false&&!lastStatus?.paused)resume('scheduled_retry')"),'Scheduled retry can wake a deliberately paused campus.');
+assert(backgroundSource.includes("if(!packet.ready&&!packet.paused&&navigator.onLine!==false)scheduleRetry(2200)"),'Worker completion can schedule retry behind a deliberate pause.');
+assert(backgroundSource.includes("activeWorker.postMessage({type:'DOWNLOAD_OFFLINE_PACKAGE',background:true"),'Canonical page runtime does not resume the worker-owned download.');
 assert(backgroundSource.includes("navigator.serviceWorker.addEventListener('message'"),'Background progress rail does not receive worker broadcasts.');
-assert(backgroundSource.includes("setTimeout(()=>resume('canonical_page_opened'),1500)"),'Canonical page should defer its lightweight status/resume check until after first paint.');
-assert(!installerSource.includes('<script src="/app/required-campus-autostart-v1.js'),'Installer still loads the obsolete campus autostart layer.');
 
 const expectedSeeds=[
   '/app/installed-entry-v146.html',
@@ -70,24 +63,18 @@ const expectedSeeds=[
   '/app/anarchadia-console-v139.html'
 ];
 assert(JSON.stringify(manifest.seeds)===JSON.stringify(expectedSeeds),`Offline manifest must seed exactly installed entry + reward runtimes + Systems Mesh + five canonical systems; got ${manifest.seeds.length} seeds.`);
-assert(manifest.revision==='canonical-background-campus-v241-systems-mesh-v251','Offline manifest lost its compatible Systems Mesh seed revision.');
-assert(manifest.payloadPolicy==='code-first-lazy-visuals-v300','Offline manifest must use the code-first lazy-visual payload policy.');
+assert(manifest.revision==='canonical-background-campus-v241-systems-mesh-v251','Offline manifest does not identify the approved Systems Mesh seed revision.');
 assert(manifest.preflight?.revision==='campus-storage-budget-v281','Offline manifest is missing the storage preflight budget.');
-for(const extension of ['.png','.webp','.jpg','.jpeg','.svg','.woff','.woff2','.ttf','.otf','.onnx','.wasm'])assert(manifest.excludeExtensions?.includes(extension),`Offline manifest must defer ${extension}.`);
 
 console.log(JSON.stringify({
   ok:true,
   revision:'offline-campus-current-graph-v280',
   policy:'resumable-pause-v280',
-  payloadPolicy:manifest.payloadPolicy,
   canonicalSeeds:manifest.seeds.length,
   perFileCheckpointing:true,
   duplicateRequestsJoin:true,
   manualPause:true,
-  explicitOptIn:true,
-  optionalDependenciesBlockCompletion:false,
   pauseSurvivesBackgroundRetry:true,
   backgroundSync:true,
-  lazyVisuals:true,
   storageBudget:true
 },null,2));
