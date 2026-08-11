@@ -46,7 +46,7 @@ async function issueCapacitySession(env, member, domain) {
     origin: `https://${clean(member?.nodeId, 180)}.${domain}`
   });
   if (!payload.nodeId || !payload.userId) throw Object.assign(new Error('Capacity session cannot be issued without nodeId and userId.'), { status: 500 });
-  const payloadText = JSON.stringify(payload), encoded = b64url(enc.encode(payloadText));
+  const encoded = b64url(enc.encode(JSON.stringify(payload)));
   const signature = await crypto.subtle.sign('HMAC', await hmacKey(env), enc.encode(`${SESSION_DOMAIN}\n${encoded}`));
   return Object.freeze({
     schema: SESSION_DOMAIN,
@@ -177,11 +177,13 @@ async function handleValidation(request, env, nodeId) {
               score: { type: 'number', minimum: 0, maximum: 1 },
               note: { type: 'string' }
             },
-            required: ['criterion', 'met', 'score', 'note']
+            required: ['criterion', 'met', 'score', 'note'],
+            additionalProperties: false
           }
         }
       },
-      required: ['verdict', 'confidence', 'reason', 'rubricScores']
+      required: ['verdict', 'confidence', 'reason', 'rubricScores'],
+      additionalProperties: false
     };
     const result = await env.AI.run(VALIDATION_MODEL, {
       messages: [
@@ -191,7 +193,7 @@ async function handleValidation(request, env, nodeId) {
         },
         { role: 'user', content: prompt }
       ],
-      response_format: { type: 'json_schema', schema },
+      response_format: { type: 'json_schema', json_schema: schema },
       max_tokens: 220,
       temperature: 0.1
     });
