@@ -1,7 +1,7 @@
 {
   "schema": "civweave.host-node-transports.v1",
   "defaultProtocol": "civweave.node.v1",
-  "moneyEdgeAuthority": "https://api.commonweave.earth",
+  "moneyEdgeAuthority": "https://civweave-core.glaedn.workers.dev",
   "profiles": {
     "cloudflare-www": {
       "runtime": "cloudflare-durable-object-v2",
