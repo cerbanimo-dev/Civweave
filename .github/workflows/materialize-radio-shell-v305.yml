@@ -1,0 +1,57 @@
+name: Materialize radio shell guarantee v305
+
+on:
+  push:
+    branches:
+      - agent/guarantee-radio-shell-v305
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/guarantee-radio-shell-v305
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Advance release identity
+        run: |
+          printf '1.0.105\n' > VERSION
+          npm version 1.0.105 --no-git-tag-version
+      - name: Materialize canonical release
+        run: |
+          node scripts/materialize-canonical-release.mjs
+          node scripts/build-service-worker-v211.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+      - name: Advance canonical current release
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const path='config/release-contract.json';
+          const contract=JSON.parse(fs.readFileSync(path,'utf8'));
+          contract.canonical.current={version:'1.0.105',path:'releases/1.0.105',status:'current'};
+          fs.writeFileSync(path,JSON.stringify(contract,null,2)+'\n');
+          NODE
+      - name: Verify radio and release contracts
+        run: |
+          node scripts/verify-radio-shell-guarantee-v305.mjs
+          node scripts/verify-system-radio-v233.mjs
+          node scripts/verify-living-school-radio-v252.mjs
+          node scripts/verify-radio-bootstrap-priority-v267.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-release-contract.mjs
+          node scripts/verify-release-version-sync.mjs
+      - name: Commit generated release and remove helper workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/materialize-radio-shell-v305.yml
+          git add -A
+          git commit -m "Materialize Civweave 1.0.105 radio shell guarantee"
+          git push origin HEAD:agent/guarantee-radio-shell-v305
