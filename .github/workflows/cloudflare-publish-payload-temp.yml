@@ -25,15 +25,18 @@ jobs:
         run: node scripts/build-cloudflare-pages.mjs
       - name: Measure publish payload
         run: |
-          set -euo pipefail
-          echo '--- total ---'
-          du -sb .cloudflare-pages
-          find .cloudflare-pages -type f | wc -l
-          echo '--- top level ---'
-          du -sb .cloudflare-pages/* | sort -nr | head -30
-          echo '--- app children ---'
-          du -sb .cloudflare-pages/app/* | sort -nr | head -40
-          echo '--- downloads children ---'
-          du -sb .cloudflare-pages/downloads/* | sort -nr | head -50
-          echo '--- largest files ---'
-          find .cloudflare-pages -type f -printf '%s %p\n' | sort -nr | head -60
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('.cloudflare-pages')
+          files=[p for p in root.rglob('*') if p.is_file()]
+          total=sum(p.stat().st_size for p in files)
+          print('TOTAL_BYTES',total)
+          print('FILE_COUNT',len(files))
+          for group in ['app','downloads','app/vendor','app/services','app/assets','app/federation-finder-data','downloads/knowledge-schools']:
+              base=root/group
+              subset=[p for p in base.rglob('*') if p.is_file()] if base.exists() else []
+              print('GROUP',group,sum(p.stat().st_size for p in subset),len(subset))
+          print('TOP_FILES')
+          for p in sorted(files,key=lambda p:p.stat().st_size,reverse=True)[:80]:
+              print(p.stat().st_size,p.relative_to(root))
+          PY
