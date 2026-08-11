@@ -3,6 +3,7 @@
 
 const V211_REVISION = 'offline-campus-current-graph-v280';
 const V211_POLICY = 'resumable-pause-v280';
+const V211_PAYLOAD_POLICY = 'code-first-lazy-visuals-v300';
 const V211_SYNC_TAG = 'civweave-campus-resume-v280';
 const V211_QUARANTINE_MS = 6 * 60 * 60 * 1000;
 const V211_BATCH_SIZE = 16;
@@ -35,7 +36,7 @@ function v211SkippedEntry(entry) {
     message: String(source.message || 'Unavailable discovered reference.'),
     status: Number(source.status || 0),
     attempts: Math.max(1, Number(source.attempts || 1) || 1),
-    reason: String(source.reason || 'repeated-unavailable'),
+    reason: String(source.reason || 'optional-unavailable'),
     retryAfter: source.retryAfter || new Date(Date.now() + V211_QUARANTINE_MS).toISOString()
   };
 }
@@ -57,6 +58,7 @@ function v211Packet(meta = {}) {
     version: VERSION,
     revision: V211_REVISION,
     policy: V211_POLICY,
+    payloadPolicy: V211_PAYLOAD_POLICY,
     cache: OFFLINE_CACHE,
     ready: Boolean(meta.ready) && failed.length === 0 && (!total || downloaded >= total),
     running: Boolean(meta.running) && !paused,
@@ -94,7 +96,7 @@ async function v211Broadcast(packet) {
 
 async function v211MigrateMeta(meta, manifest) {
   if (!meta) return null;
-  if (meta.revision === V211_REVISION) return v211Packet(meta);
+  if (meta.revision === V211_REVISION && meta.payloadPolicy === V211_PAYLOAD_POLICY) return v211Packet(meta);
 
   const requiredSeeds = new Set((manifest.seeds || []).filter(Boolean));
   const inheritedSkipped = (Array.isArray(meta.skipped) ? meta.skipped : []).map(v211SkippedEntry);
@@ -106,7 +108,7 @@ async function v211MigrateMeta(meta, manifest) {
   for (const entry of optionalFailed) {
     skippedByPath.set(entry.pathname, v211SkippedEntry({
       ...entry,
-      reason: entry.status === 404 || entry.status === 410 ? 'not-found' : 'legacy-repeated-unavailable',
+      reason: entry.status === 404 || entry.status === 410 ? 'not-found' : 'legacy-optional-unavailable',
       retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString()
     }));
   }
@@ -143,7 +145,7 @@ async function v211SanitizeRetryMeta(meta, manifest) {
   for (const entry of optionalFailed) {
     skippedByPath.set(entry.pathname, v211SkippedEntry({
       ...entry,
-      reason: entry.status === 404 || entry.status === 410 ? 'not-found' : 'retry-ledger-retired',
+      reason: entry.status === 404 || entry.status === 410 ? 'not-found' : 'optional-unavailable',
       retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString()
     }));
   }
@@ -206,7 +208,7 @@ async function v211DownloadOfflinePackage(event) {
   const skipped = new Map((previous?.skipped || []).map(entry => [entry.pathname, v211SkippedEntry(entry)]));
   const previousFailures = new Map((previous?.failed || []).map(entry => [entry.pathname, v211FailureEntry(entry)]));
   const previousAssets = new Set((previous?.assets || []).filter(Boolean));
-  const sameRelease = previous?.version === VERSION && previous?.revision === V211_REVISION;
+  const sameRelease = previous?.version === VERSION && previous?.revision === V211_REVISION && previous?.payloadPolicy === V211_PAYLOAD_POLICY;
   const previousDownloadedAssets = sameRelease ? (previous?.downloadedAssets || []) : [];
   const now = Date.now();
   v211PauseRequested = false;
@@ -286,19 +288,34 @@ async function v211DownloadOfflinePackage(event) {
         const prior = previousFailures.get(item.pathname);
         const attempts = Math.max(1, Number(prior?.attempts || 0) + 1);
         const entry = v211FailureEntry({ pathname: item.pathname, message: error?.message || String(error), status, attempts, required: item.required }, attempts);
-        const permanent = status === 404 || status === 410;
-        if (!item.required && (permanent || attempts >= 2)) {
+        if (!item.required) {
           queued.delete(item.pathname);
           failed.delete(item.pathname);
-          skipped.set(item.pathname, v211SkippedEntry({ ...entry, reason: permanent ? 'not-found' : 'repeated-unavailable', retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString() }));
-        } else failed.set(item.pathname, entry);
+          skipped.set(item.pathname, v211SkippedEntry({
+            ...entry,
+            reason: status === 404 || status === 410 ? 'not-found' : 'optional-unavailable',
+            retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString()
+          }));
+        } else {
+          failed.set(item.pathname, entry);
+        }
         return { item, references: [] };
       }
     }));
 
     for (const result of results) {
       for (const pathname of result.references) {
-        if (queued.size >= maxAssets || queued.has(pathname) || activeSkip(pathname)) continue;
+        if (queued.has(pathname) || activeSkip(pathname)) continue;
+        if (queued.size >= maxAssets) {
+          skipped.set(pathname, v211SkippedEntry({
+            pathname,
+            message: 'Deferred because the code-first campus asset budget was reached. This dependency can load on demand at runtime.',
+            attempts: 1,
+            reason: 'asset-budget-deferred',
+            retryAfter: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+          }));
+          continue;
+        }
         queued.add(pathname);
         queue.push({ pathname, depth: result.item.depth + 1, required: requiredSeeds.has(pathname) });
       }
@@ -365,6 +382,7 @@ self.addEventListener('sync', event => {
 self.CivweaveOfflineCampusV211 = {
   revision: V211_REVISION,
   policy: V211_POLICY,
+  payloadPolicy: V211_PAYLOAD_POLICY,
   syncTag: V211_SYNC_TAG,
   batchSize: V211_BATCH_SIZE,
   currentGraphOnly: true,
@@ -372,6 +390,7 @@ self.CivweaveOfflineCampusV211 = {
   resumablePerFile: true,
   pauseSupported: true,
   resumeSupported: true,
+  optionalDependenciesBlockCompletion: false,
   packet: v211Packet,
   migrateMeta: v211MigrateMeta,
   sanitizeRetryMeta: v211SanitizeRetryMeta,
