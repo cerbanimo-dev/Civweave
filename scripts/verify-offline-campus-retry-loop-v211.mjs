@@ -43,9 +43,10 @@ for(const token of [
   'backgroundSafe: true'
 ])assert(overrideSource.includes(token),`Resumable campus worker is missing ${token}.`);
 
+assert(backgroundSource.includes("const OPT_IN_KEY='civweave.offline-campus.explicit-opt-in.v304'"),'In-app background downloader lost the explicit campus opt-in boundary.');
 assert(backgroundSource.includes("if(status?.ready||status?.paused)return true"),'In-app background downloader does not stop auto-resume for a deliberate pause.');
-assert(backgroundSource.includes("if(navigator.onLine!==false&&!lastStatus?.paused)resume('scheduled_retry')"),'Scheduled retry can wake a deliberately paused campus.');
-assert(backgroundSource.includes("if(!packet.ready&&!packet.paused&&navigator.onLine!==false)scheduleRetry(2200)"),'Worker completion can schedule retry behind a deliberate pause.');
+assert(backgroundSource.includes("if(optedIn()&&navigator.onLine!==false&&!lastStatus?.paused)resume('scheduled_retry')"),'Scheduled retry is not gated by both explicit opt-in and pause state.');
+assert(backgroundSource.includes("if(optedIn()&&!packet.ready&&!packet.paused&&navigator.onLine!==false)scheduleRetry(2200)"),'Worker completion can schedule retry without honoring explicit opt-in and deliberate pause.');
 assert(backgroundSource.includes("activeWorker.postMessage({type:'DOWNLOAD_OFFLINE_PACKAGE',background:true"),'Canonical page runtime does not resume the worker-owned download.');
 assert(backgroundSource.includes("navigator.serviceWorker.addEventListener('message'"),'Background progress rail does not receive worker broadcasts.');
 
@@ -74,6 +75,7 @@ console.log(JSON.stringify({
   perFileCheckpointing:true,
   duplicateRequestsJoin:true,
   manualPause:true,
+  explicitOptInRequired:true,
   pauseSurvivesBackgroundRetry:true,
   backgroundSync:true,
   storageBudget:true
