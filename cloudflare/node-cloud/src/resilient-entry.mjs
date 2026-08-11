@@ -91,6 +91,7 @@ async function publicAnchorRoute(request, env, nodeId) {
   if (request.method === 'GET' && url.pathname === '/api/node/anchor/status') return json(await anchorJson(env, `/status?nodeId=${encodeURIComponent(nodeId)}`), 200, headers);
   if (request.method === 'GET' && url.pathname === '/api/node/anchor/stipends') {
     const recipientId = clean(url.searchParams.get('recipientId'), 240);
+    if (!recipientId) return json({ ok: false, error: 'recipientId-required' }, 400, headers);
     return json(await anchorJson(env, `/stipends?recipientId=${encodeURIComponent(recipientId)}`), 200, headers);
   }
   const body = request.method === 'POST' ? await request.text() : '';
@@ -173,8 +174,8 @@ export default {
   },
   async scheduled(controller, env, ctx) {
     const domain = env.NODE_DOMAIN || 'nodes.commonweave.earth';
-    const refresh = refreshKnownNodes(env, ctx, domain);
-    ctx.waitUntil(refresh.then(() => anchorJson(env, '/stipends/run-all', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ now: controller.scheduledTime || Date.now() }) })).catch(error => console.error(JSON.stringify({ event: 'anchor-scheduled-failure', error: String(error?.message || error) }))));
+    const payouts = anchorJson(env, '/stipends/run-all', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ now: controller.scheduledTime || Date.now() }) });
+    ctx.waitUntil(payouts.then(() => refreshKnownNodes(env, ctx, domain)).catch(error => console.error(JSON.stringify({ event: 'anchor-scheduled-failure', error: String(error?.message || error) }))));
     if (typeof base.scheduled === 'function') ctx.waitUntil(Promise.resolve(base.scheduled(controller, env, ctx)));
   }
 };
