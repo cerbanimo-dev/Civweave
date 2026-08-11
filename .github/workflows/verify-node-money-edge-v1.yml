@@ -3,6 +3,7 @@ name: Verify Node Money Edge v1
 on:
   pull_request:
     paths:
+      - 'cloudflare/core/**'
       - 'lib/node-money-edge-*.mjs'
       - 'lib/node-ai-bootstrap-v1.mjs'
       - 'lib/node-ai-operator-session-v1.mjs'
@@ -24,6 +25,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'cloudflare/core/**'
       - 'lib/node-money-edge-*.mjs'
       - 'lib/node-ai-bootstrap-v1.mjs'
       - 'lib/node-ai-operator-session-v1.mjs'
@@ -39,6 +41,7 @@ on:
       - 'scripts/test-node-money-edge-stripe-configurable-v1.mjs'
       - 'scripts/test-node-ai-live-commerce-v1.mjs'
       - 'scripts/verify-node-money-edge-surface-v1.mjs'
+      - '.github/workflows/verify-node-money-edge-v1.yml'
 
 jobs:
   verify:

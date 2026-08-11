@@ -9,8 +9,10 @@ on:
       - 'lib/node-ai-bootstrap-v1.mjs'
       - '.env.ai-wallet.example'
       - 'docs/operations/launch-kit-cloudflare-node-fabric-v1.md'
+      - 'docs/finance/stripe-connect-v2-sample.md'
       - 'scripts/prepare-cloudflare-launch-kit-v1.mjs'
       - 'scripts/verify-cloudflare-launch-kit-v1.mjs'
+      - 'scripts/verify-stripe-connect-v2-sample.mjs'
       - '.github/workflows/verify-cloudflare-launch-kit-v1.yml'
   push:
     branches: [main]
@@ -21,8 +23,10 @@ on:
       - 'lib/node-ai-bootstrap-v1.mjs'
       - '.env.ai-wallet.example'
       - 'docs/operations/launch-kit-cloudflare-node-fabric-v1.md'
+      - 'docs/finance/stripe-connect-v2-sample.md'
       - 'scripts/prepare-cloudflare-launch-kit-v1.mjs'
       - 'scripts/verify-cloudflare-launch-kit-v1.mjs'
+      - 'scripts/verify-stripe-connect-v2-sample.mjs'
       - '.github/workflows/verify-cloudflare-launch-kit-v1.yml'
 
 permissions:
@@ -36,5 +40,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Install Stripe SDK used by the Worker sample
+        run: npm install --prefix cloudflare/core --omit=dev --no-audit --no-fund
       - name: Verify Cloudflare authority and node fabric
         run: node scripts/verify-cloudflare-launch-kit-v1.mjs
+      - name: Verify Stripe Connect v2 sample
+        run: node scripts/verify-stripe-connect-v2-sample.mjs

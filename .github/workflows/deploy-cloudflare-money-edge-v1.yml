@@ -9,6 +9,7 @@ on:
       - 'cloudflare/node-cloud/**'
       - 'scripts/prepare-cloudflare-launch-kit-v1.mjs'
       - 'scripts/verify-cloudflare-launch-kit-v1.mjs'
+      - 'scripts/verify-stripe-connect-v2-sample.mjs'
       - '.github/workflows/deploy-cloudflare-money-edge-v1.yml'
 
 permissions:
@@ -27,6 +28,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
       STRIPE_CONNECT_WEBHOOK_SECRET: ${{ secrets.STRIPE_CONNECT_WEBHOOK_SECRET }}
+      STRIPE_CONNECT_THIN_WEBHOOK_SECRET: ${{ secrets.STRIPE_CONNECT_THIN_WEBHOOK_SECRET }}
       NODE_FABRIC_BINDING_TOKEN: ${{ secrets.NODE_FABRIC_BINDING_TOKEN }}
       NODE_FABRIC_OPERATOR_TOKEN: ${{ secrets.NODE_FABRIC_OPERATOR_TOKEN }}
     steps:
@@ -35,6 +37,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+
+      - name: Install Stripe SDK used by the core Worker
+        run: npm install --prefix cloudflare/core --omit=dev --no-audit --no-fund
 
       - name: Require Cloudflare deployment credentials
         shell: bash
@@ -45,8 +50,12 @@ jobs:
           npx --yes wrangler@latest --version
           npx --yes wrangler@latest whoami
 
-      - name: Verify money-edge source before deployment
-        run: node scripts/verify-cloudflare-launch-kit-v1.mjs
+      - name: Verify money-edge and Connect sample source before deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/verify-cloudflare-launch-kit-v1.mjs
+          node scripts/verify-stripe-connect-v2-sample.mjs
 
       - name: Resolve Cloudflare resources
         id: resources
@@ -151,6 +160,7 @@ jobs:
           }
           put_secret STRIPE_SECRET_KEY "${STRIPE_SECRET_KEY:-}"
           put_secret STRIPE_CONNECT_WEBHOOK_SECRET "${STRIPE_CONNECT_WEBHOOK_SECRET:-}"
+          put_secret STRIPE_CONNECT_THIN_WEBHOOK_SECRET "${STRIPE_CONNECT_THIN_WEBHOOK_SECRET:-}"
           if [ -z "${NODE_FABRIC_BINDING_TOKEN:-}" ]; then
             NODE_FABRIC_BINDING_TOKEN="$(node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))")"
             echo 'Generated a fresh internal node-fabric binding token for this deployment.'
@@ -217,5 +227,6 @@ jobs:
       - name: Publish deployment URLs
         run: |
           echo "Money edge: ${{ steps.deploy_core.outputs.core_url }}"
+          echo "Stripe Connect V2 sample is compiled but disabled by default (STRIPE_CONNECT_SAMPLE_ENABLED=false)."
           echo "Node fabric: ${{ steps.deploy_nodes.outputs.node_url }}"
           echo "R2 enabled: ${{ steps.resources.outputs.r2_ready }}"
