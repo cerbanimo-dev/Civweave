@@ -10,6 +10,9 @@ on:
 permissions:
   contents: read
 
+env:
+  PAYLOAD_PROFILE_REVISION: minimal-transformers-v2
+
 jobs:
   profile:
     runs-on: ubuntu-latest
@@ -38,6 +41,7 @@ jobs:
           test -f .cloudflare-pages/app/vendor/transformers-v4/transformers.min.js
           test -f .cloudflare-pages/app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.wasm.part0
           test ! -f .cloudflare-pages/app/vendor/transformers-v4/transformers.node.cjs
+          test ! -f .cloudflare-pages/app/vendor/transformers-v4/transformers.web.js
       - name: Measure publish payload
         run: |
           python - <<'PY'
