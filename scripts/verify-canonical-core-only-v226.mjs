@@ -6,10 +6,11 @@ import {fileURLToPath} from 'node:url';
 
 await import('./sync-release-version-assets.mjs');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const read=file=>readFile(path.join(root,file),'utf8');
 const [routesSource,boundarySource,versionText]=await Promise.all([
-  readFile(path.join(root,'public/app/system-routes-v227.js'),'utf8'),
-  readFile(path.join(root,'public/app/install-boundary-v146.js'),'utf8'),
-  readFile(path.join(root,'VERSION'),'utf8')
+  read('public/app/system-routes-v227.js'),
+  read('public/app/install-boundary-v146.js'),
+  read('VERSION')
 ]);
 const version=versionText.trim();
 const systems={civweave:'/app/working-campus-v156.html','living-school':'/app/cabinets/living-school/index.html',cerbanimo:'/app/realm-console-v140.html',fellowfare:'/app/fellowfare-cabinet-v144.html',anarchadia:'/app/anarchadia-console-v139.html'};
@@ -72,10 +73,10 @@ assert.equal(api.canonicalSubsystemCompatibility,'route-version-settings-only-no
 assert.equal(api.canonicalPolicy,'five-system-first-class-routes-v242-canonical-chat-owner');
 assert.equal(api.systemsMeshRevision,'v251-five-system-non-privileged-event-contract');
 assert.equal(api.nodeAiMeshRevision,'v1-node-owned-service-discovery-routing');
-assert.equal(api.persistentGuideChatSubmissionPipelines,1);
-assert.equal(api.persistentGuideChatGuideCount,5);
-assert.equal(api.persistentGuideChatThreadPolicy,'five-realm-local-ledgers-plus-explicit-handover');
-assert.equal(api.persistentGuideChatWindowPolicy,'five-switchable-windows-current-realm-launcher');
+assert.equal(api.guideWorkspaceSubmissionPipelines,1);
+assert.equal(api.guideWorkspaceGuideCount,5);
+assert.equal(api.guideWorkspaceThreadPolicy,'five-realm-local-ledgers-plus-explicit-handover');
+assert.equal(api.guideWorkspaceWindowPolicy,'five-switchable-windows-current-realm-launcher');
 assert.equal(api.realmSessionIntegrityRevision,'v237-realm-local-memory-handover-state-repair');
 assert.equal(api.guideWorkspaceRevision,'v250-v242-canonical-owner');
 assert.equal(api.workingCampusTopbarRevision,'v243-sticky-top-map-launch-contract');
