@@ -70,7 +70,7 @@ assert.match(runtime266,/backend-quarantined/);
 assert.match(bootstrap,/REVISION='1\.0\.91-local-ai-bootstrap-v288-component-coherence'/);
 assert.match(bootstrap,/runtime-v266\.js\?v=1\.0\.88-v299-stage-fallback/);
 assert.match(bootstrap,/stalledWebGPUFallback===true/);
-assert.match(bootstrap,/componentCompatibility:'capability-contract-v299'/);
+assert.match(bootstrap,/componentCompatibility:'capability-contract-v288'/);
 
 for(const name of ['Weaveling','Moss','Kamiya','Rook','Merlin'])assert.ok(localOwner.includes(name),`local owner lost ${name}`);
 assert.match(localOwner,/fifoQueue:true/);
