@@ -25,6 +25,7 @@ async function staged(){
   if(!await exists(manifestPath))return false;
   try{
     const manifest=JSON.parse(await fsp.readFile(manifestPath,'utf8'));
+    if(manifest.schema!=='civweave.transformers-stage.v6'||manifest.purpose!=='gemma4-mobile-browser-runtime-only')return false;
     if(manifest.package!==PACKAGE||manifest.version!==VERSION||manifest.backendPackage!==ORT_PACKAGE||manifest.backendVersion!==ORT_VERSION)return false;
     if(!Array.isArray(manifest.wasmChunks)||manifest.wasmChunks.length<2)return false;
     const required=[path.join(destination,'transformers.min.js'),path.join(backendDestination,ORT_MJS),...manifest.wasmChunks.map(name=>path.join(backendDestination,name))];
@@ -126,7 +127,7 @@ async function splitWasm(source){
 }
 
 async function main(){
-  if(!force&&await staged()){console.log(`[Civweave] Transformers.js ${VERSION} + ONNX Runtime Web ${ORT_VERSION} Gemma 4 runtime is already staged.`);return}
+  if(!force&&await staged()){console.log(`[Civweave] Transformers.js ${VERSION} + ONNX Runtime Web ${ORT_VERSION} minimal Gemma 4 runtime is already staged.`);return}
   const temp=await fsp.mkdtemp(path.join(os.tmpdir(),'civweave-transformers-v4-'));
   try{
     const npm=process.platform==='win32'?'npm.cmd':'npm';
