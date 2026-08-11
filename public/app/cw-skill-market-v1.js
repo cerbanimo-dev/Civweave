@@ -1,0 +1,225 @@
+(()=>{
+'use strict';
+if(globalThis.CivweaveSkillMarketV1)return;
+const api=globalThis.CivweaveCanonicalRewardsV2;
+if(!api)throw Error('Civweave canonical reward ledger v2 must load before the skill market.');
+
+const VERSION='1.0.0';
+const SNAPSHOT_SCHEMA='civweave.skill-market-snapshot.v1';
+const PING_SCHEMA='civweave.skill-market-ping.v1';
+const PING_KEY='civweave.skill-market.last-ping.v1';
+const clean=(value,max=180)=>String(value??'').trim().slice(0,max);
+const num=value=>Number.isFinite(Number(value))?Number(value):0;
+const round=value=>Number(num(value).toFixed(4));
+const now=()=>new Date().toISOString();
+const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
+const copy=value=>JSON.parse(JSON.stringify(value));
+
+function currencyForIntent(intent){
+  const normalized=clean(intent,40).toLowerCase();
+  if(['labor','labour','work','doing','hire','commission'].includes(normalized))return 'button';
+  if(['learning','learn','teaching','teaching-session','lesson','mentoring','education'].includes(normalized))return 'acorn';
+  return '';
+}
+
+function currencyLabel(assetType,amount=1){
+  const count=Math.abs(num(amount));
+  if(assetType==='button')return count===1?'Button':'Buttons';
+  if(assetType==='acorn')return count===1?'Acorn':'Acorns';
+  return clean(assetType)||'units';
+}
+
+function sourceKey(entry){
+  return [clean(entry.accountId),clean(entry.sourceSystem),clean(entry.sourceKind),clean(entry.sourceId)].join('::');
+}
+
+function identityAccountId(){
+  const vault=parse(localStorage.getItem('civweave-identity-vault'),null);
+  return clean(vault?.identity?.identityId||vault?.identity?.passportId||vault?.passport?.id||'');
+}
+
+function resolveAccountId(ledger,requested=''){
+  if(clean(requested))return clean(requested);
+  const ids=[...new Set((ledger?.entries||[]).map(entry=>clean(entry.accountId)).filter(Boolean))];
+  const identity=identityAccountId();
+  if(identity&&ids.includes(identity))return identity;
+  if(ids.includes('passport:local'))return 'passport:local';
+  if(ids.length===1)return ids[0];
+  return identity||ids[0]||'passport:local';
+}
+
+function currentHeldForAccount(entries,accountId){
+  const result={buttons:0,acorns:0};
+  for(const entry of entries){
+    if(clean(entry.accountId)!==accountId)continue;
+    if(entry.assetType==='button')result.buttons+=num(entry.amount);
+    if(entry.assetType==='acorn')result.acorns+=num(entry.amount);
+  }
+  result.buttons=round(result.buttons);
+  result.acorns=round(result.acorns);
+  return result;
+}
+
+function groupValidatedSources(entries,accountId){
+  const groups=new Map();
+  for(const entry of entries){
+    if(clean(entry.accountId)!==accountId)continue;
+    const key=sourceKey(entry);
+    if(!groups.has(key))groups.set(key,{key,entries:[],sourceSystem:clean(entry.sourceSystem),sourceKind:clean(entry.sourceKind).toLowerCase(),sourceId:clean(entry.sourceId),accountId});
+    groups.get(key).entries.push(entry);
+  }
+  return [...groups.values()];
+}
+
+function isEarnedToken(entry,sourceKind){
+  if(num(entry.amount)<=0)return false;
+  if(entry.assetType==='button')return ['doing','validation'].includes(sourceKind);
+  if(entry.assetType==='acorn')return ['learning','validation'].includes(sourceKind);
+  return false;
+}
+
+function buildSnapshot(ledger=api.readLedger(),options={}){
+  const entries=Array.isArray(ledger?.entries)?ledger.entries:[];
+  const accountId=resolveAccountId(ledger,options.accountId);
+  const skills={};
+  const sources=groupValidatedSources(entries,accountId);
+
+  for(const group of sources){
+    const skillEntries=group.entries.filter(entry=>entry.assetType==='skill-xp'&&num(entry.amount)>0);
+    const tokenEntries=group.entries.filter(entry=>isEarnedToken(entry,group.sourceKind));
+    if(!skillEntries.length||!tokenEntries.length)continue;
+
+    const totalsBySkill=new Map();
+    for(const entry of skillEntries){
+      const skillId=api.skillSlug(entry.skillId||entry.skillName||'general-practice');
+      const row=totalsBySkill.get(skillId)||{skillId,name:clean(entry.skillName||entry.skillId||skillId,120)||skillId,xp:0,learningXp:0,doingXp:0,validatorIds:new Set(),evidenceHashes:new Set()};
+      const amount=num(entry.amount);
+      row.xp+=amount;
+      if(group.sourceKind==='learning')row.learningXp+=amount;
+      if(group.sourceKind==='doing')row.doingXp+=amount;
+      for(const validatorId of entry.validatorIds||[])if(clean(validatorId))row.validatorIds.add(clean(validatorId));
+      if(clean(entry.evidenceHash))row.evidenceHashes.add(clean(entry.evidenceHash));
+      totalsBySkill.set(skillId,row);
+    }
+    const totalXp=[...totalsBySkill.values()].reduce((sum,row)=>sum+row.xp,0);
+    if(totalXp<=0)continue;
+    const buttonPool=tokenEntries.filter(entry=>entry.assetType==='button').reduce((sum,entry)=>sum+num(entry.amount),0);
+    const acornPool=tokenEntries.filter(entry=>entry.assetType==='acorn').reduce((sum,entry)=>sum+num(entry.amount),0);
+    const sourceTimestamp=group.entries.map(entry=>Date.parse(entry.createdAt||0)).filter(Number.isFinite).sort((a,b)=>b-a)[0]||0;
+
+    for(const sourceSkill of totalsBySkill.values()){
+      const share=sourceSkill.xp/totalXp;
+      const row=skills[sourceSkill.skillId]||(skills[sourceSkill.skillId]={
+        skillId:sourceSkill.skillId,name:sourceSkill.name,validatedButtons:0,validatedAcorns:0,
+        pairedSkillXp:0,learningXp:0,doingXp:0,validatedSources:0,externallyValidatedSources:0,
+        validatorIds:[],lastValidatedAt:''
+      });
+      row.validatedButtons+=buttonPool*share;
+      row.validatedAcorns+=acornPool*share;
+      row.pairedSkillXp+=sourceSkill.xp;
+      row.learningXp+=sourceSkill.learningXp;
+      row.doingXp+=sourceSkill.doingXp;
+      row.validatedSources+=1;
+      const external=sourceSkill.validatorIds.size>0||sourceSkill.evidenceHashes.size>0||group.entries.some(entry=>(entry.validatorIds||[]).length||entry.evidenceHash);
+      if(external)row.externallyValidatedSources+=1;
+      row.validatorIds=[...new Set([...row.validatorIds,...sourceSkill.validatorIds])];
+      if(sourceTimestamp&&(!row.lastValidatedAt||sourceTimestamp>Date.parse(row.lastValidatedAt)))row.lastValidatedAt=new Date(sourceTimestamp).toISOString();
+    }
+  }
+
+  for(const row of Object.values(skills)){
+    row.validatedButtons=round(row.validatedButtons);
+    row.validatedAcorns=round(row.validatedAcorns);
+    row.pairedSkillXp=round(row.pairedSkillXp);
+    row.learningXp=round(row.learningXp);
+    row.doingXp=round(row.doingXp);
+    row.validatorCount=row.validatorIds.length;
+  }
+
+  const head=entries.at(-1);
+  return {
+    schema:SNAPSHOT_SCHEMA,version:1,authority:'civweave.reward-ledger.v2',accountId,
+    ledgerUpdatedAt:ledger?.updatedAt||'',ledgerEntryCount:entries.length,ledgerHeadHash:clean(head?.hash,180),
+    currentHeld:currentHeldForAccount(entries,accountId),skills,
+    accountingPolicy:{
+      buttonMeaning:'historically earned from labor/doing sources paired to this skill',
+      acornMeaning:'historically earned from learning sources paired to this skill',
+      allocation:'source token grants are allocated across same-source skills in proportion to exact positive Skill XP',
+      spendsDoNotReduceHistory:true,
+      excludedSourceKinds:['exchange','transfer','escrow','release','reversal','correction','migration']
+    },
+    calculatedAt:clean(options.calculatedAt||now(),80)
+  };
+}
+
+function proofForSkill(skillId,snapshot=buildSnapshot()){
+  const id=api.skillSlug(skillId||'general-practice');
+  const row=snapshot.skills?.[id];
+  return row?copy(row):{skillId:id,name:clean(skillId,120)||id,validatedButtons:0,validatedAcorns:0,pairedSkillXp:0,learningXp:0,doingXp:0,validatedSources:0,externallyValidatedSources:0,validatorIds:[],validatorCount:0,lastValidatedAt:''};
+}
+
+function quoteSkill({intent,skillId,amount}={}){
+  const currency=currencyForIntent(intent);
+  if(!currency)throw Error('Skill requests must declare labor or learning intent.');
+  const units=Math.max(0,num(amount));
+  return {schema:'civweave.skill-market-quote.v1',intent:currency==='button'?'labor':'learning',skillId:api.skillSlug(skillId||'general-practice'),currency,units:round(units),label:`${round(units)} ${currencyLabel(currency,units)}`};
+}
+
+function readPingStore(){
+  const value=parse(localStorage.getItem(PING_KEY),null);
+  return value?.schema==='civweave.skill-market-ping-store.v1'&&value.accounts&&typeof value.accounts==='object'?value:{schema:'civweave.skill-market-ping-store.v1',accounts:{},updatedAt:''};
+}
+
+function writePing(snapshot,{hubId='',pingedAt=now(),integrity='verified'}={}){
+  const store=readPingStore();
+  const ping={
+    schema:PING_SCHEMA,version:1,authority:snapshot.authority,accountId:snapshot.accountId,hubId:clean(hubId,180)||undefined,
+    pingedAt:clean(pingedAt,80),ledgerUpdatedAt:snapshot.ledgerUpdatedAt,ledgerEntryCount:snapshot.ledgerEntryCount,
+    ledgerHeadHash:snapshot.ledgerHeadHash,integrity,skills:copy(snapshot.skills),currentHeld:copy(snapshot.currentHeld),accountingPolicy:copy(snapshot.accountingPolicy)
+  };
+  store.accounts[snapshot.accountId]=ping;store.updatedAt=ping.pingedAt;
+  localStorage.setItem(PING_KEY,JSON.stringify(store));
+  try{dispatchEvent(new CustomEvent('civweave:skill-market-ping',{detail:copy(ping)}))}catch{}
+  return ping;
+}
+
+function lastPing(accountId=''){
+  const store=readPingStore();
+  const requested=clean(accountId);
+  if(requested&&store.accounts[requested])return copy(store.accounts[requested]);
+  const ledger=api.readLedger(),resolved=resolveAccountId(ledger,requested);
+  return store.accounts[resolved]?copy(store.accounts[resolved]):null;
+}
+
+async function recordPing(options={}){
+  const ledger=api.readLedger();
+  const integrity=await api.verifyLedger(ledger);
+  if(!integrity.ok)throw Object.assign(new Error('Canonical reward ledger failed integrity checks; skill history was not advertised.'),{integrity});
+  const snapshot=buildSnapshot(ledger,{accountId:options.accountId});
+  return writePing(snapshot,{hubId:options.hubId,pingedAt:options.pingedAt||now(),integrity:'verified'});
+}
+
+function peerAdvertisement(ping=lastPing(),options={}){
+  if(!ping)return null;
+  const requestedSkills=Array.isArray(options.skills)&&options.skills.length?new Set(options.skills.map(api.skillSlug)):null;
+  const skills=Object.fromEntries(Object.entries(ping.skills||{}).filter(([id])=>!requestedSkills||requestedSkills.has(id)).map(([id,row])=>[id,{
+    skillId:row.skillId,name:row.name,validatedButtons:row.validatedButtons,validatedAcorns:row.validatedAcorns,
+    pairedSkillXp:row.pairedSkillXp,validatedSources:row.validatedSources,externallyValidatedSources:row.externallyValidatedSources,lastValidatedAt:row.lastValidatedAt
+  }]));
+  return {schema:'civweave.skill-market-peer-advertisement.v1',hubId:clean(options.hubId||ping.hubId,180)||undefined,accountId:ping.accountId,pingedAt:ping.pingedAt,ledgerHeadHash:ping.ledgerHeadHash,integrity:ping.integrity,skills};
+}
+
+function handlePingEvent(event){
+  const detail=event?.detail||{};
+  recordPing({hubId:detail.hubId||detail.nodeId||'',pingedAt:detail.pingedAt||detail.timestamp||now()}).catch(error=>console.warn('Skill-market ping was not recorded',error));
+}
+
+for(const eventName of ['civweave:hub-ping','civweave:peer-ping-sent','civweave:mesh-presence-ping'])addEventListener(eventName,handlePingEvent);
+
+const market=Object.freeze({
+  version:VERSION,snapshotSchema:SNAPSHOT_SCHEMA,pingSchema:PING_SCHEMA,pingStorageKey:PING_KEY,
+  currencyForIntent,currencyLabel,resolveAccountId,buildSnapshot,proofForSkill,quoteSkill,lastPing,recordPing,peerAdvertisement
+});
+globalThis.CivweaveSkillMarketV1=market;
+try{dispatchEvent(new CustomEvent('civweave:skill-market-ready',{detail:{version:VERSION}}))}catch{}
+})();
