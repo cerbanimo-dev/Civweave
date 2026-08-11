@@ -36,6 +36,15 @@ jobs:
         run: npm version 1.0.104 --no-git-tag-version
       - name: Materialize canonical release
         run: node scripts/materialize-canonical-release.mjs
+      - name: Advance canonical current release
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const path='config/release-contract.json';
+          const contract=JSON.parse(fs.readFileSync(path,'utf8'));
+          contract.canonical.current={version:'1.0.104',path:'releases/1.0.104',status:'current'};
+          fs.writeFileSync(path,JSON.stringify(contract,null,2)+'\n');
+          NODE
       - name: Verify generated installer metadata
         run: |
           node scripts/smoke-installer-hardening-v281.mjs
