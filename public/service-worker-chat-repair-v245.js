@@ -2,11 +2,19 @@
 'use strict';
 
 const REVISION='chat-convergence-v250';
+const RUNTIME_REPAIR='chat-runtime-repair-v299';
 const CHAT_PATHS=new Set([
   '/app/manifest.webmanifest',
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146.js',
   '/app/install-boundary-v146.js',
+  '/app/experience-orchestrator-v232.js',
+  '/app/chat-fullscreen-v295.js',
+  '/app/local-chat-runtime-v295.js',
+  '/app/local-chat-owner-v295.js',
+  '/app/local-ai/bootstrap-v266.js',
+  '/app/local-ai/runtime-v266.js',
+  '/app/local-ai/worker-v266.js',
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
   '/app/guide-workspace-v242.js',
@@ -36,7 +44,7 @@ async function purgeChatRuntimeCaches(){
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,deleted,paths:[...CHAT_PATHS]};
+  return{revision:REVISION,runtimeRepair:RUNTIME_REPAIR,deleted,paths:[...CHAT_PATHS]};
 }
 
 self.addEventListener('activate',event=>{
@@ -50,5 +58,5 @@ self.addEventListener('message',event=>{
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,paths:[...CHAT_PATHS],purge:purgeChatRuntimeCaches});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,runtimeRepair:RUNTIME_REPAIR,paths:[...CHAT_PATHS],purge:purgeChatRuntimeCaches});
 })();
