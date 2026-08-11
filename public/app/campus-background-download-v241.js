@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION='1.0.0';
-const REVISION='campus-background-download-v280';
+const REVISION='campus-background-download-v300-explicit-opt-in';
 const STATUS_TYPES=new Set(['CIVWEAVE_OFFLINE_PACKAGE_STATUS','CIVWEAVE_OFFLINE_PACKAGE_PROGRESS']);
 const ROOT_ID='cw-campus-background-v241';
 const STYLE_ID='cw-campus-background-style-v241';
@@ -59,12 +59,13 @@ function normalize(status={}){
   const paused=Boolean(status.paused);
   const running=Boolean(status.running)&&!paused;
   const ready=Boolean(status.ready)&&failedCount===0&&(!total||downloaded>=total);
-  return{...status,failed,failedCount,total,attempted,downloaded,running,paused,ready};
+  return{...status,failed,failedCount,total,attempted,downloaded,running,paused,ready,explicitOptIn:Boolean(status.explicitOptIn)};
 }
 
 function render(status){
   const packet=normalize(status);
   lastStatus=packet;
+  if(!packet.explicitOptIn)return packet;
   const root=ensureRoot();
   if(!root)return packet;
   const fill=root.querySelector('.cw-campus-fill');
@@ -126,7 +127,7 @@ function scheduleRetry(delay=1600){
   if(retryTimer)clearTimeout(retryTimer);
   retryTimer=setTimeout(()=>{
     retryTimer=0;
-    if(navigator.onLine!==false&&!lastStatus?.paused)resume('scheduled_retry');
+    if(lastStatus?.explicitOptIn&&navigator.onLine!==false&&!lastStatus?.paused)resume('scheduled_retry');
   },delay);
 }
 
@@ -137,7 +138,7 @@ async function resume(reason='page_opened'){
 
   const status=await askWorker(activeWorker,'GET_OFFLINE_PACKAGE_STATUS');
   if(STATUS_TYPES.has(status?.type))render(status);
-  if(status?.ready||status?.paused)return true;
+  if(!status?.explicitOptIn||status?.ready||status?.paused)return true;
 
   downloadActive=true;
   const channel=new MessageChannel();
@@ -147,7 +148,7 @@ async function resume(reason='page_opened'){
     if(packet.type==='CIVWEAVE_OFFLINE_PACKAGE_STATUS'&&!packet.running){
       downloadActive=false;
       try{channel.port1.close()}catch{}
-      if(!packet.ready&&!packet.paused&&navigator.onLine!==false)scheduleRetry(2200);
+      if(packet.explicitOptIn&&!packet.ready&&!packet.paused&&navigator.onLine!==false)scheduleRetry(2200);
     }
   };
   try{
@@ -162,23 +163,22 @@ async function resume(reason='page_opened'){
 
 function start(){
   if(!('serviceWorker'in navigator))return false;
-  ensureRoot();
   navigator.serviceWorker.addEventListener('message',event=>{
     if(STATUS_TYPES.has(event.data?.type))render(event.data);
   });
   navigator.serviceWorker.addEventListener('controllerchange',()=>{
     activeWorker=null;
-    setTimeout(()=>resume('controller_changed'),120);
+    setTimeout(()=>resume('controller_changed'),400);
   });
   addEventListener('online',()=>resume('connection_restored'));
-  addEventListener('offline',()=>{if(lastStatus&&!lastStatus.ready)render(lastStatus)});
-  const begin=()=>setTimeout(()=>resume('canonical_page_opened'),350);
+  addEventListener('offline',()=>{if(lastStatus?.explicitOptIn&&!lastStatus.ready)render(lastStatus)});
+  const begin=()=>setTimeout(()=>resume('canonical_page_opened'),1500);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',begin,{once:true});
   else begin();
   return true;
 }
 
-const api=Object.freeze({version:VERSION,revision:REVISION,start,resume,render,normalize,get last(){return lastStatus}});
+const api=Object.freeze({version:VERSION,revision:REVISION,start,resume,render,normalize,get last(){return lastStatus},get explicitOptIn(){return Boolean(lastStatus?.explicitOptIn)}});
 globalThis.CivweaveCampusBackgroundDownloadV241=api;
 start();
 })();
