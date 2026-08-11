@@ -2,7 +2,8 @@
 'use strict';
 
 const VERSION='1.0.0';
-const REVISION='campus-background-download-v280';
+const REVISION='campus-background-download-v300-explicit-opt-in';
+const OPT_IN_KEY='civweave.offline-campus.opt-in.v300';
 const STATUS_TYPES=new Set(['CIVWEAVE_OFFLINE_PACKAGE_STATUS','CIVWEAVE_OFFLINE_PACKAGE_PROGRESS']);
 const ROOT_ID='cw-campus-background-v241';
 const STYLE_ID='cw-campus-background-style-v241';
@@ -11,6 +12,10 @@ let activeWorker=null;
 let downloadActive=false;
 let lastStatus=null;
 let retryTimer=0;
+
+function optedIn(){
+  try{return localStorage.getItem(OPT_IN_KEY)==='1'}catch{return false}
+}
 
 function installStyle(){
   if(document.getElementById(STYLE_ID))return;
@@ -65,6 +70,7 @@ function normalize(status={}){
 function render(status){
   const packet=normalize(status);
   lastStatus=packet;
+  if(!optedIn())return packet;
   const root=ensureRoot();
   if(!root)return packet;
   const fill=root.querySelector('.cw-campus-fill');
@@ -126,12 +132,12 @@ function scheduleRetry(delay=1600){
   if(retryTimer)clearTimeout(retryTimer);
   retryTimer=setTimeout(()=>{
     retryTimer=0;
-    if(navigator.onLine!==false&&!lastStatus?.paused)resume('scheduled_retry');
+    if(optedIn()&&navigator.onLine!==false&&!lastStatus?.paused)resume('scheduled_retry');
   },delay);
 }
 
 async function resume(reason='page_opened'){
-  if(downloadActive||navigator.onLine===false||!('serviceWorker'in navigator))return false;
+  if(!optedIn()||downloadActive||navigator.onLine===false||!('serviceWorker'in navigator))return false;
   activeWorker=activeWorker||await currentWorker();
   if(!activeWorker)return false;
 
@@ -161,7 +167,7 @@ async function resume(reason='page_opened'){
 }
 
 function start(){
-  if(!('serviceWorker'in navigator))return false;
+  if(!optedIn()||!('serviceWorker'in navigator))return false;
   ensureRoot();
   navigator.serviceWorker.addEventListener('message',event=>{
     if(STATUS_TYPES.has(event.data?.type))render(event.data);
@@ -178,7 +184,7 @@ function start(){
   return true;
 }
 
-const api=Object.freeze({version:VERSION,revision:REVISION,start,resume,render,normalize,get last(){return lastStatus}});
+const api=Object.freeze({version:VERSION,revision:REVISION,optInKey:OPT_IN_KEY,optedIn,start,resume,render,normalize,get last(){return lastStatus}});
 globalThis.CivweaveCampusBackgroundDownloadV241=api;
 start();
 })();
