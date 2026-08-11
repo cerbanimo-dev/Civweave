@@ -25,12 +25,12 @@ const transformerV4Stage = resolve(scriptDir, "stage-transformers-v4-assets.mjs"
 const mapRuntimeStage = resolve(scriptDir, "stage-maplibre-v275.mjs");
 const federationDataStage = resolve(scriptDir, "stage-federation-finder-data-v274.mjs");
 const mapPackageBuilder = resolve(scriptDir, "build-civweave-map-v1.mjs");
+const mobileInstallBuilder = resolve(scriptDir, "build-mobile-install-kit.mjs");
 const validationSafe = resolve(scriptDir, "apply-confidence-weighted-validation-v1-safe.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
-// These synchronizers are intentionally retained as cheap deterministic guards.
-// Release artifacts, installer smoke tests, and pre-live metadata are produced and
-// verified before merge; Pages must not rebuild them on the production hot path.
+// Keep only cheap deterministic synchronizers in the deploy path. Expensive
+// verification belongs in CI before merge, not in the CDN publish job.
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 await import('./generate-asset-lockboard-catalog-v239.mjs');
@@ -82,10 +82,8 @@ if (existsSync(validationSafe)) {
   runNodeScript(validationSafe, "Confidence-weighted validation transform failed.");
 }
 
-// The remaining generated assets are genuinely absent from git and required by
-// the deployed runtime. They are independent, so build them concurrently rather
-// than serially. Map packaging runs afterward because it consumes the staged map
-// runtime and federation atlas.
+// These generated runtime/data lanes are independent. Build them concurrently
+// instead of serially blocking production on each network/package operation.
 await Promise.all([
   runNodeScriptAsync(transformerStage, "Transformers.js staging failed."),
   runNodeScriptAsync(transformerV4Stage, "Transformers.js 4.2 Gemma 4 staging failed."),
@@ -94,7 +92,13 @@ await Promise.all([
   runNodeScriptAsync(parityMaterializer, "Civweave parity ledger materialization failed."),
 ]);
 
-runNodeScript(mapPackageBuilder, "Civweave Map v1 package build failed.");
+// These compact packages consume the staged assets, so build them only after
+// the parallel phase. The mobile packager is retained solely because it creates
+// the uncommitted Pocket Campus seed required by the public download surface.
+await Promise.all([
+  runNodeScriptAsync(mapPackageBuilder, "Civweave Map v1 package build failed."),
+  runNodeScriptAsync(mobileInstallBuilder, "Civweave mobile/Pocket Campus package build failed."),
+]);
 
 const requiredRuntimeAssets = [
   resolve(sourceDir, 'app/vendor/transformers/transformers.min.js'),
@@ -135,8 +139,8 @@ cpSync(sourceDir, outputDir, {
   },
 });
 
-// Scan only the final publish tree. The old build recursively scanned source and
-// output, doubling I/O after already doing multiple release-generation passes.
+// Audit the actual publish tree once. The old deploy recursively scanned both
+// source and output, doubling filesystem I/O after already rebuilding artifacts.
 const outputOversized = oversizedFiles(outputDir);
 if (outputOversized.length) {
   throw new Error(`Cloudflare Pages output contains ${outputOversized.length} file(s) above 24 MiB:\n- ${formatOversized(outputDir, outputOversized)}\n`);
@@ -146,5 +150,5 @@ const installerBytes = statSync(installerPath).size;
 const seedBytes = statSync(pocketCampusSeedPath).size;
 const mapBytes = statSync(mapPackagePath).size;
 console.log(`Built .cloudflare-pages with mobile installer (${installerBytes} bytes), portable Civweave seed (${seedBytes} bytes), and Civweave Map v1 (${mapBytes} bytes).`);
-console.log("Cloudflare publish hot path: runtime staging parallelized; release artifact rebuilds and installer smoke tests remain outside deploy.");
+console.log("Cloudflare publish hot path: generated runtime/data staging parallelized; release smoke/pre-live work removed from deploy.");
 console.log("All Cloudflare-hosted files are at or below the 24 MiB Civweave project boundary.");
