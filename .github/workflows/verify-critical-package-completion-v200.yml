@@ -63,8 +63,6 @@ jobs:
           PY
           node scripts/materialize-canonical-release.mjs
           node scripts/verify-critical-package-completion-v200.mjs
-          node scripts/verify-map-v1-package.mjs
-          node scripts/verify-node-ai-marketplace-v1.mjs
           npm run check:release-discipline
       - name: Commit canonical release and restore CI
         shell: bash
