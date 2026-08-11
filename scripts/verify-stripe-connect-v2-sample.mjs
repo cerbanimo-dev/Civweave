@@ -4,10 +4,11 @@ import { spawnSync } from 'node:child_process';
 
 const root = new URL('../', import.meta.url);
 const read = path => readFile(new URL(path, root), 'utf8');
-const [pkgText, sampleSource, entrySource, migrationSource, wranglerText, prepareSource, deployWorkflow] = await Promise.all([
+const [pkgText, sampleSource, entrySource, providerSource, migrationSource, wranglerText, prepareSource, deployWorkflow] = await Promise.all([
   read('cloudflare/core/package.json'),
   read('cloudflare/core/src/stripe-connect-v2-sample.mjs'),
   read('cloudflare/core/src/stripe-connect-v2-entry.mjs'),
+  read('cloudflare/core/src/stripe-connect.mjs'),
   read('cloudflare/core/migrations/0003_stripe_connect_v2_sample.sql'),
   read('cloudflare/core/wrangler.template.jsonc'),
   read('scripts/prepare-cloudflare-launch-kit-v1.mjs'),
@@ -61,6 +62,12 @@ assert.ok(sampleSource.includes('parseEventNotificationAsync'));
 assert.ok(sampleSource.includes('notification.fetchEvent()'));
 assert.ok(sampleSource.includes('STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
 
+// Stripe supports both full secret keys (sk_*) and restricted server keys (rk_*).
+// The money-edge status must classify either sandbox/live family correctly without
+// exposing any credential material.
+assert.ok(providerSource.includes("key.startsWith('rk_test_')"));
+assert.ok(providerSource.includes("key.startsWith('rk_live_')"));
+
 // Interactive sample/admin routes remain disabled by default, but the Stripe-
 // signed thin webhook must stay routable without opening the UI.
 assert.equal(wrangler.vars.STRIPE_CONNECT_SAMPLE_ENABLED, 'false');
@@ -74,10 +81,18 @@ assert.ok(deployWorkflow.includes('npm install --prefix cloudflare/core'));
 assert.ok(deployWorkflow.includes('STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
 assert.ok(!deployWorkflow.includes('probe "$CORE_URL/connect-demo"'), 'production deploy must not expect the disabled sample UI to be public');
 
-for (const file of ['cloudflare/core/src/stripe-connect-v2-sample.mjs', 'cloudflare/core/src/stripe-connect-v2-entry.mjs']) {
+for (const file of ['cloudflare/core/src/stripe-connect.mjs', 'cloudflare/core/src/stripe-connect-v2-sample.mjs', 'cloudflare/core/src/stripe-connect-v2-entry.mjs']) {
   const result = spawnSync(process.execPath, ['--check', file], { cwd: new URL('../', import.meta.url), encoding: 'utf8' });
   assert.equal(result.status, 0, `${file} syntax failed: ${result.stderr || result.stdout}`);
 }
+
+const provider = await import(new URL('cloudflare/core/src/stripe-connect.mjs', root));
+assert.equal(provider.stripeCredentialMode(''), 'unconfigured');
+assert.equal(provider.stripeCredentialMode('sk_test_demo'), 'sandbox');
+assert.equal(provider.stripeCredentialMode('rk_test_demo'), 'sandbox');
+assert.equal(provider.stripeCredentialMode('sk_live_demo'), 'live');
+assert.equal(provider.stripeCredentialMode('rk_live_demo'), 'live');
+assert.equal(provider.stripeCredentialMode('not-a-stripe-key'), 'unrecognized');
 
 const sample = await import(new URL('cloudflare/core/src/stripe-connect-v2-sample.mjs', root));
 assert.equal(sample.STRIPE_CONNECT_SAMPLE_SDK, 'stripe-node@22.4.0');
@@ -108,6 +123,7 @@ console.log(JSON.stringify({
   directStatusFetch: true,
   thinEvents: true,
   signedThinWebhookPublic: true,
+  restrictedStripeKeysClassified: true,
   productsOnConnectedAccount: true,
   directCheckoutApplicationFee: true,
   userAccountMappingInD1: true,
