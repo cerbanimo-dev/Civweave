@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Align package release version
+        run: npm version 1.0.104 --no-git-tag-version
       - name: Materialize canonical release
         run: node scripts/materialize-canonical-release.mjs
       - name: Verify generated installer metadata
