@@ -13,6 +13,9 @@ const soft=process.argv.includes('--soft');
 const checkOnly=process.argv.includes('--check');
 const verifyHashes=checkOnly||process.argv.includes('--verify-hash');
 const skip=process.env.CIVWEAVE_SKIP_MODEL_PULL==='1';
+const lifecycle=String(process.env.npm_lifecycle_event||'');
+const startupLifecycle=new Set(['prestart','prestart:local','setup:local']);
+const explicitStartupPull=process.env.CIVWEAVE_PULL_OPTIONAL_MODEL_ON_START==='1';
 const files=[
   {name:'config.json',min:300},
   {name:'tokenizer_config.json',min:100},
@@ -32,7 +35,7 @@ async function valid(spec){
 async function download(spec){
   const target=path.join(modelRoot,spec.name),temp=`${target}.part`;
   await mkdir(path.dirname(target),{recursive:true});await rm(temp,{force:true});
-  const response=await fetch(`${base}/${spec.name}?download=true`,{redirect:'follow',headers:{'user-agent':'Civweave/1.0.7-fixed-ort'}});
+  const response=await fetch(`${base}/${spec.name}?download=true`,{redirect:'follow',headers:{'user-agent':'Civweave/1.0.99-optional-minilm'}});
   if(!response.ok||!response.body)throw new Error(`${spec.name} returned ${response.status}`);
   await pipeline(Readable.fromWeb(response.body),createWriteStream(temp));
   const info=await stat(temp);
@@ -43,10 +46,14 @@ async function download(spec){
 }
 async function main(){
   if(skip){console.log('[Civweave] Fixed MiniLM model pull skipped by CIVWEAVE_SKIP_MODEL_PULL.');return}
+  if(startupLifecycle.has(lifecycle)&&!checkOnly&&!explicitStartupPull){
+    console.log('[Civweave] Optional MiniLM is not staged during app startup. Install local models explicitly from AI settings.');
+    return;
+  }
   const missing=[];for(const spec of files)if(!await valid(spec))missing.push(spec);
   if(!missing.length){console.log(`[Civweave] Fixed MiniLM ONNX package is ready${verifyHashes?' and hash-verified':' (fast size check)'}.`);return}
   if(checkOnly)throw new Error(`Fixed MiniLM package incomplete: ${missing.map(item=>item.name).join(', ')}`);
-  console.log(`[Civweave] Fetching ${missing.length} fixed MiniLM package file(s)…`);
+  console.log(`[Civweave] Fetching ${missing.length} explicitly requested MiniLM package file(s)…`);
   for(const spec of missing){const bytes=await download(spec);console.log(`[Civweave] Downloaded ${spec.name} (${bytes} bytes).`)}
   console.log('[Civweave] Fixed MiniLM ONNX package is ready.');
 }
