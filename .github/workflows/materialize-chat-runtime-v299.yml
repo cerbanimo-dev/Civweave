@@ -1,0 +1,56 @@
+name: Materialize chat runtime release v299
+
+on:
+  push:
+    branches:
+      - fix/chat-boot-local-runtime-v299
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/chat-boot-local-runtime-v299
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Advance release identity
+        run: |
+          printf '1.0.106\n' > VERSION
+          npm version 1.0.106 --no-git-tag-version
+      - name: Materialize canonical release
+        run: |
+          node scripts/materialize-canonical-release.mjs
+          node scripts/build-service-worker-v211.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+      - name: Advance canonical current release
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const path='config/release-contract.json';
+          const contract=JSON.parse(fs.readFileSync(path,'utf8'));
+          contract.canonical.current={version:'1.0.106',path:'releases/1.0.106',status:'current'};
+          fs.writeFileSync(path,JSON.stringify(contract,null,2)+'\n');
+          NODE
+      - name: Verify chat runtime and release contracts
+        run: |
+          node scripts/verify-chat-launch-readiness-v295.mjs
+          node scripts/verify-settings-freeze-recovery-v296.mjs
+          node scripts/verify-small-model-fast-path-v283.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-release-contract.mjs
+          node scripts/verify-release-version-sync.mjs
+      - name: Commit generated release and remove helper workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/materialize-chat-runtime-v299.yml
+          git add -A
+          git commit -m "Materialize Civweave 1.0.106 chat runtime release"
+          git push origin HEAD:fix/chat-boot-local-runtime-v299
