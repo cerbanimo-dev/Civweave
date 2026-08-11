@@ -72,10 +72,10 @@ assert.equal(api.canonicalSubsystemCompatibility,'route-version-settings-only-no
 assert.equal(api.canonicalPolicy,'five-system-first-class-routes-v242-canonical-chat-owner');
 assert.equal(api.systemsMeshRevision,'v251-five-system-non-privileged-event-contract');
 assert.equal(api.nodeAiMeshRevision,'v1-node-owned-service-discovery-routing');
-assert.equal(api.persistentGuideChatSubmissionPipelines,1);
-assert.equal(api.persistentGuideChatGuideCount,5);
-assert.equal(api.persistentGuideChatThreadPolicy,'five-realm-local-ledgers-plus-explicit-handover');
-assert.equal(api.persistentGuideChatWindowPolicy,'five-switchable-windows-current-realm-launcher');
+assert.equal(api.guideWorkspaceSubmissionPipelines,1);
+assert.equal(api.guideWorkspaceGuideCount,5);
+assert.equal(api.guideWorkspaceThreadPolicy,'five-realm-local-ledgers-plus-explicit-handover');
+assert.equal(api.guideWorkspaceWindowPolicy,'five-switchable-windows-current-realm-launcher');
 assert.equal(api.realmSessionIntegrityRevision,'v237-realm-local-memory-handover-state-repair');
 assert.equal(api.guideWorkspaceRevision,'v250-v242-canonical-owner');
 assert.equal(api.workingCampusTopbarRevision,'v243-sticky-top-map-launch-contract');
