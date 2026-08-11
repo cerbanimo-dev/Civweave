@@ -12,13 +12,22 @@ const [orchestrator,fullscreen,store,ui,localRuntime,localOwner,settings]=await 
 ].map(read));
 for(const source of [orchestrator,fullscreen,store,ui,localRuntime,localOwner,settings])new Function(source);
 
-assert.match(orchestrator,/experience-orchestrator-v295-launch-readiness/);
+assert.match(orchestrator,/experience-orchestrator-v296-settings-independent/);
 for(const file of ['settings-parity-v295.js','chat-fullscreen-v295.js','saved-chat-store-v295.js','saved-chat-ui-v295.js','local-chat-runtime-v295.js','local-chat-owner-v295.js'])assert.ok(orchestrator.includes(file),`orchestrator lost ${file}`);
+assert.match(orchestrator,/const SETTINGS_MODULE=/);
+assert.match(orchestrator,/const CHAT_MODULES=/);
+assert.match(orchestrator,/function ensureSettingsModule\(/);
+assert.match(orchestrator,/function ensureChatModules\(/);
 assert.match(orchestrator,/document\.addEventListener\('submit',earlySubmit,true\)/);
 assert.match(orchestrator,/document\.addEventListener\('click',earlySettings,true\)/);
 assert.match(orchestrator,/stopImmediatePropagation/);
 assert.match(orchestrator,/CivweaveLocalChatOwnerV295\?\.submit/);
 assert.match(orchestrator,/CivweaveSettingsParityV295\?\.open/);
+const earlySettings=orchestrator.match(/function earlySettings\(event\)\{([\s\S]*?)\}\n\ndocument\.addEventListener/)?.[1]||'';
+assert.ok(earlySettings,'earlySettings must remain inspectable');
+assert.match(earlySettings,/openSettingsIndependent/);
+assert.doesNotMatch(earlySettings,/ensureLaunchModules|ensureChatModules/,'settings click must never wait on chat readiness');
+assert.match(orchestrator,/releaseLegacySettingsClick/,'failed settings ownership must release the click to the legacy page handler');
 
 assert.match(fullscreen,/height:var\(--cw295-vv-height,100dvh\)!important/);
 assert.match(fullscreen,/globalThis\.visualViewport\?\.addEventListener\('resize',viewport/);
@@ -44,10 +53,13 @@ assert.match(localOwner,/slice\(-6\)/);
 assert.match(localOwner,/Civweave stopped the run instead of letting the interface hang/);
 assert.match(localOwner,/downloaded-local-direct/);
 
+assert.match(settings,/1\.0\.99-settings-parity-v296/);
 assert.match(settings,/data-action="settings"/);
 assert.match(settings,/model-settings-controller-v173\.js/);
 assert.match(settings,/document-lifecycle-v221\.js/);
 assert.match(settings,/ensureLocalAISettingsManagement/);
 assert.match(settings,/document\.addEventListener\('click',capture,true\)/);
+assert.match(settings,/settingsIndependentOfChat:true/);
+assert.match(settings,/inferenceDormantOnOpen:true/);
 
-console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v295',features:{fiveChats:true,fullScreenMobile:true,keyboardVisualViewport:true,savedChatTabs:true,settingsParity:true,downloadedLocalFastPath:true,boundedLocalRecovery:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v296-settings-independent',features:{fiveChats:true,fullScreenMobile:true,keyboardVisualViewport:true,savedChatTabs:true,settingsParity:true,settingsIndependentOfChat:true,downloadedLocalFastPath:true,boundedLocalRecovery:true}},null,2));

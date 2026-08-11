@@ -16,7 +16,7 @@ const [lifecycle,campus,settings,bootstrap,controller,pulse,registry,downloadPol
 for(const source of [lifecycle,settings,bootstrap,controller,pulse,registry,downloadPolicy])new Function(source);
 new Function(campus.replace(/\}\)\(\);\s*$/,''));
 
-assert.match(lifecycle,/document-lifecycle-v294-settings-first-open-resilience/);
+assert.match(lifecycle,/document-lifecycle-v296-management-only-settings/);
 assert.match(lifecycle,/document\.addEventListener\('click',captureSettingsOpen,true\)/);
 assert.match(lifecycle,/controller\.open\(launcher\)/);
 assert.match(lifecycle,/event\.stopImmediatePropagation\(\)/);
@@ -24,9 +24,11 @@ assert.match(lifecycle,/ensureLocalAISettingsManagement/);
 assert.match(lifecycle,/ensureMinimalManagement/);
 assert.match(lifecycle,/localAIInferenceReady/);
 assert.match(lifecycle,/cacheIntegrityOnDemand===true/);
+assert.match(lifecycle,/management-only-no-inference-bootstrap-v296/);
 assert.match(lifecycle,/1\.0\.83-local-ai-bootstrap-v282-inference-health/);
 assert.doesNotMatch(lifecycle,/new Worker\s*\(/);
 assert.doesNotMatch(lifecycle,/\.generate\s*\(/);
+assert.doesNotMatch(lifecycle,/bootstrap-v266\.js/,'opening settings must not request the full local inference bootstrap');
 
 const managementBody=lifecycle.match(/function localAIManagementReady\(\)\{([\s\S]*?)\}\nfunction localAIInferenceReady/)?.[1]||'';
 assert.ok(managementBody,'localAIManagementReady must remain inspectable');
@@ -34,6 +36,12 @@ assert.doesNotMatch(managementBody,/LocalModelRuntimeV266|LocalModelBridgeV266/,
 const inferenceBody=lifecycle.match(/function localAIInferenceReady\(\)\{([\s\S]*?)\}\nfunction enhanceLocalAISettings/)?.[1]||'';
 assert.match(inferenceBody,/LocalModelRuntimeV266/);
 assert.match(inferenceBody,/LocalModelBridgeV266/);
+const settingsOpenBody=lifecycle.match(/function ensureLocalAISettingsManagement\(\)\{([\s\S]*?)\}\nfunction captureSettingsOpen/)?.[1]||'';
+assert.ok(settingsOpenBody,'ensureLocalAISettingsManagement must remain inspectable');
+assert.match(settingsOpenBody,/ensureMinimalManagement/);
+assert.doesNotMatch(settingsOpenBody,/bootstrap\.ready|runtime-v266|runtime-bridge|test-pulse-v269|ensureScript\([^\n]*bootstrap/i,'settings open must not load or await inference machinery');
+assert.match(settingsOpenBody,/managementOnly:true/);
+assert.match(settingsOpenBody,/inferenceDormantOnOpen:true/);
 
 for(const text of ['Downloaded local AI','Download','Resume','Use locally','Remove','Model window','Civweave working default','TTFT']){
   assert.ok(settings.toLowerCase().includes(text.toLowerCase()),`Local settings panel lost ${text}.`);
@@ -73,17 +81,17 @@ for(const token of ["id:'gemma3-1b-it-q4f16'","repo:'onnx-community/gemma-3-1b-i
 assert.match(downloadPolicy,/preferBackground===false/);
 assert.match(downloadPolicy,/largeExternalDataForeground:true/);
 
-// The legacy target handler may still request full inference for chat. The capture-phase
-// document lifecycle now owns settings first-open and prevents that handler from blocking the menu.
+// Full inference remains available to chat/test paths. It is deliberately absent from settings open.
 assert.match(campus,/bootstrap-v266\.js\?v=1\.0\.83-v282/);
 assert.match(campus,/canonicalCausalLM===true/);
 assert.match(campus,/CivweaveLocalModelBridgeV266\?\.patch/);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-model-settings-mount-v294-settings-first',
+  revision:'local-model-settings-mount-v296-management-only',
   canonicalSettingsMount:true,
   settingsFirst:true,
+  managementOnlyOnOpen:true,
   inferenceDormantUntilNeeded:true,
   bootstrapTestPulse:'v286-current',
   componentCompatibility:'capability-contract-v288'

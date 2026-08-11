@@ -1,0 +1,50 @@
+name: Verify settings freeze recovery v296
+
+on:
+  push:
+    branches:
+      - main
+      - 'fix/settings-freeze-v296'
+    paths:
+      - 'public/app/experience-orchestrator-v232.js'
+      - 'public/app/settings-parity-v295.js'
+      - 'public/app/document-lifecycle-v221.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'scripts/verify-settings-freeze-recovery-v296.mjs'
+      - 'scripts/verify-chat-launch-readiness-v295.mjs'
+      - 'scripts/verify-local-model-settings-mount-v273.mjs'
+      - '.github/workflows/verify-settings-freeze-recovery-v296.yml'
+  pull_request:
+    paths:
+      - 'public/app/experience-orchestrator-v232.js'
+      - 'public/app/settings-parity-v295.js'
+      - 'public/app/document-lifecycle-v221.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'scripts/verify-settings-freeze-recovery-v296.mjs'
+      - 'scripts/verify-chat-launch-readiness-v295.mjs'
+      - 'scripts/verify-local-model-settings-mount-v273.mjs'
+      - '.github/workflows/verify-settings-freeze-recovery-v296.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Syntax check shared settings paths
+        run: |
+          node --check public/app/experience-orchestrator-v232.js
+          node --check public/app/settings-parity-v295.js
+          node --check public/app/document-lifecycle-v221.js
+          node --check scripts/verify-settings-freeze-recovery-v296.mjs
+      - name: Verify five-system settings recovery
+        run: node scripts/verify-settings-freeze-recovery-v296.mjs
+      - name: Verify chat launch separation
+        run: node scripts/verify-chat-launch-readiness-v295.mjs
+      - name: Verify local model settings dormancy
+        run: node scripts/verify-local-model-settings-mount-v273.mjs
