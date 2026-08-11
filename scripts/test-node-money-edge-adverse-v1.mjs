@@ -53,6 +53,7 @@ class AdverseProvider {
     return { id: 'acct_adverse_1', charges_enabled: true, payouts_enabled: true, details_submitted: true, requirements: { currently_due: [], past_due: [] } };
   }
   async createTopUpCheckout() { return { id: 'cs_adverse_1', url: 'https://checkout.stripe.test/cs_adverse_1' }; }
+  async verifyWebhook() { return { ok: true }; }
   async verifyTopUpSession({ sessionId }) {
     this.verifyCalls += 1;
     assert.equal(sessionId, 'cs_adverse_1');
