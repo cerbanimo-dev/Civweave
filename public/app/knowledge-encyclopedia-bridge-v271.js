@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.2-knowledge-encyclopedia-bridge-v271';
+const VERSION='1.0.3-knowledge-encyclopedia-bridge-v271';
 if(globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.version===VERSION)return;
 const state={version:VERSION,ready:false,error:'',installed:false};
 globalThis.CivweaveKnowledgeEncyclopediaBridgeV271=state;
@@ -14,7 +14,7 @@ function loadModule(){
 }
 function fallbackAnswer(knowledge){
   const sources=Array.isArray(knowledge?.sources)?knowledge.sources:[];
-  if(!sources.length)return'I searched the installed local knowledge library, but it did not return a usable match for this question. I do not want to pretend the local shelf contained an answer.';
+  if(!sources.length)return'I checked the local knowledge shelf, but it returned no usable reference for this question. The shelf may not be installed on this device, or the installed material may not cover the topic.';
   const first=sources[0],second=sources[1],lead=clean(first.passage,680),support=second?`\n\nA second local reference, ${second.title}, adds: ${clean(second.passage,360)}`:'';
   return`${first.title}: ${lead}${support}\n\nLocal shelf: ${sources.slice(0,3).map(source=>source.title).join(' · ')}. These are downloaded references, not a live current-events check.`;
 }
@@ -25,7 +25,7 @@ function knowledgeOverrideMessage(knowledge){
     'This is a stable knowledge question, not a request to create an intention, quest, market action, or governance action.',
     'Return questDraft:null. Do not manufacture an action or approval gate.',
     'Write a compact mini-informational answer, usually 2-5 short paragraphs.',
-    sources.length?'Use context.knowledgeEncyclopedia.sources as the primary factual grounding. Synthesize them; do not quote long passages.':'The installed local library was searched but had no usable match. You may use stable model knowledge, but explicitly say the local shelf had no match.',
+    sources.length?'Use context.knowledgeEncyclopedia.sources as the primary factual grounding. Synthesize them; do not quote long passages.':'The local knowledge shelf returned no usable match. It may be uninstalled or simply lack matching material. You may use stable model knowledge, but do not claim a downloaded source was found.',
     'Never describe downloaded archive material as current, live, newly verified, or up to date.',
     `Guide personality: ${matrix.guide||'Guide'}; lens=${matrix.lens||'general'}; voice=${matrix.voice||'clear'}; preferred shape=${Array.isArray(matrix.shape)?matrix.shape.join(' -> '):'compact explanation'}.`,
     `Personality affects framing only. It must never alter source facts. Priority: ${matrix.priority||'Preserve factual meaning.'}`,
