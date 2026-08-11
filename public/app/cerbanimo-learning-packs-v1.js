@@ -1,11 +1,12 @@
 (()=>{
 'use strict';
-const VERSION='1.3.0-cerbanimo-learning-packs-v1';
+const VERSION='1.3.1-cerbanimo-learning-packs-v1-lazy-boot';
 const RUNTIME='/app/shared/learning-pack-runtime-v1.mjs?v=learning-packs-v1';
 const RESOLVER='/app/shared/learning-pack-resolver-v1.mjs?v=learning-packs-v1';
 const SHELF='/app/shared/learning-pack-shelf-v1.mjs?v=learning-pack-shelf-v1';
+const SHELF_CSS='/app/shared/learning-pack-shelf-v1.css?v=learning-pack-shelf-v1';
 const CROSSWALK='/app/shared/skill-crosswalk-v1.mjs?v=esco-crosswalk-v1';
-let runtimePromise=null,resolverPromise=null,shelfPromise=null,crosswalkPromise=null,readyPromise=null;
+let runtimePromise=null,resolverPromise=null,shelfPromise=null,crosswalkPromise=null,readyPromise=null,shelfUi=null,shelfOpenPromise=null;
 const clean=(value,max=1200)=>String(value??'').trim().slice(0,max);
 function runtime(){if(!runtimePromise)runtimePromise=import(RUNTIME);return runtimePromise}
 function resolver(){if(!resolverPromise)resolverPromise=import(RESOLVER);return resolverPromise}
@@ -69,7 +70,23 @@ async function laborTaskDraft(referenceId,taskId,options={}){
   const draft=packs.laborTaskDraft(found.item,taskId,{packId:found.packId}),occupationMappings=found.item?.occupationCode?await mapOnetOccupation(found.item.occupationCode,{stage:false}).catch(()=>[]):[];
   return{...draft,occupationMappings};
 }
-const api=Object.freeze({version:VERSION,ready,catalog,status,stage,remove,search,find,recommendPacks,resolve,skillCrosswalkStatus,installSkillCrosswalk,removeSkillCrosswalk,normalizeSkills,mapOnetOccupation,templateToQuest,createQuest,createRecommendedQuest,laborTaskDraft});
+async function openShelf(){
+  if(shelfUi){await shelfUi.open?.();return shelfUi}
+  if(!shelfOpenPromise)shelfOpenPromise=(async()=>{
+    const ui=await shelf();
+    shelfUi=ui.mountLearningPackShelf({audience:'cerbanimo',adapter:api});
+    document.querySelector('[data-cw-cerbanimo-pack-launcher]')?.remove();
+    await shelfUi.open?.();
+    return shelfUi;
+  })().catch(error=>{shelfOpenPromise=null;throw error});
+  return shelfOpenPromise;
+}
+function installLazyLauncher(){
+  if(typeof document==='undefined'||document.querySelector('[data-cw-cerbanimo-pack-launcher]')||document.querySelector('.cw-pack-shelf-launcher'))return;
+  if(!document.querySelector(`link[href^="${SHELF_CSS.split('?')[0]}"]`)){const link=document.createElement('link');link.rel='stylesheet';link.href=SHELF_CSS;document.head.append(link)}
+  const launcher=document.createElement('button');launcher.type='button';launcher.className='cw-pack-shelf-launcher';launcher.dataset.cwCerbanimoPackLauncher='';launcher.textContent='Learning packs';launcher.setAttribute('aria-haspopup','dialog');launcher.addEventListener('click',async()=>{launcher.disabled=true;try{await openShelf()}catch(error){console.warn('[Cerbanimo learning packs]',error);launcher.disabled=false}});document.body.append(launcher);
+}
+const api=Object.freeze({version:VERSION,ready,catalog,status,stage,remove,search,find,recommendPacks,resolve,skillCrosswalkStatus,installSkillCrosswalk,removeSkillCrosswalk,normalizeSkills,mapOnetOccupation,templateToQuest,createQuest,createRecommendedQuest,laborTaskDraft,openShelf});
 globalThis.CivweaveCerbanimoLearningPacksV1=api;
-queueMicrotask(()=>ready().then(async()=>{const ui=await shelf();ui.mountLearningPackShelf({audience:'cerbanimo',adapter:api})}).catch(error=>console.warn('[Cerbanimo learning packs]',error)));
+if(typeof document!=='undefined'){document.readyState==='loading'?addEventListener('DOMContentLoaded',installLazyLauncher,{once:true}):installLazyLauncher()}
 })();
