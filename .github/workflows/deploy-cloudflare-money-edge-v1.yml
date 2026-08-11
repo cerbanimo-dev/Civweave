@@ -9,6 +9,7 @@ on:
       - 'cloudflare/node-cloud/**'
       - 'scripts/prepare-cloudflare-launch-kit-v1.mjs'
       - 'scripts/verify-cloudflare-launch-kit-v1.mjs'
+      - 'scripts/verify-stripe-connect-v2-sample.mjs'
       - '.github/workflows/deploy-cloudflare-money-edge-v1.yml'
 
 permissions:
@@ -49,8 +50,12 @@ jobs:
           npx --yes wrangler@latest --version
           npx --yes wrangler@latest whoami
 
-      - name: Verify money-edge source before deployment
-        run: node scripts/verify-cloudflare-launch-kit-v1.mjs
+      - name: Verify money-edge and Connect sample source before deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/verify-cloudflare-launch-kit-v1.mjs
+          node scripts/verify-stripe-connect-v2-sample.mjs
 
       - name: Resolve Cloudflare resources
         id: resources
@@ -202,7 +207,6 @@ jobs:
           probe "$CORE_URL/api/health"
           probe "$CORE_URL/api/money-edge/status"
           probe "$CORE_URL/api/money-edge/trust"
-          probe "$CORE_URL/connect-demo"
           probe "$NODE_URL/api/fabric/health"
 
       - name: Confirm live money remains fail-closed
@@ -223,7 +227,6 @@ jobs:
       - name: Publish deployment URLs
         run: |
           echo "Money edge: ${{ steps.deploy_core.outputs.core_url }}"
-          echo "Connect sample: ${{ steps.deploy_core.outputs.core_url }}/connect-demo"
-          echo "Thin webhook: ${{ steps.deploy_core.outputs.core_url }}/api/connect-demo/webhooks/stripe-thin"
+          echo "Stripe Connect V2 sample is compiled but disabled by default (STRIPE_CONNECT_SAMPLE_ENABLED=false)."
           echo "Node fabric: ${{ steps.deploy_nodes.outputs.node_url }}"
           echo "R2 enabled: ${{ steps.resources.outputs.r2_ready }}"
