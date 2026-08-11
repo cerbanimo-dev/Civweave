@@ -1,0 +1,32 @@
+name: Materialize core Labor Atlas
+
+on:
+  push:
+    branches: ['feat/core-labor-intelligence-v1']
+    paths:
+      - '.github/workflows/materialize-core-labor-atlas-temp.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: ${{ !contains(github.event.head_commit.message, 'Materialize O*NET core atlas') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/core-labor-intelligence-v1
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build official O*NET 30.3 Labor Atlas
+        run: node scripts/build-learning-packs-v1.mjs
+      - name: Commit generated core artifact
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/downloads/learning-packs/onet-labor-atlas-30-3.json.gz public/downloads/learning-packs/catalog.json
+          git commit -m 'Materialize O*NET core atlas [skip ci]'
+          git push origin HEAD:feat/core-labor-intelligence-v1
