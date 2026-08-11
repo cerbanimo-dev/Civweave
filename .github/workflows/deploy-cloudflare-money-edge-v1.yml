@@ -48,7 +48,7 @@ jobs:
       - name: Verify money-edge source before deployment
         run: node scripts/verify-cloudflare-launch-kit-v1.mjs
 
-      - name: Resolve Cloudflare D1 and R2 resources
+      - name: Resolve Cloudflare resources
         id: resources
         shell: bash
         run: |
@@ -76,10 +76,26 @@ jobs:
           fi
           test -n "$D1_ID" || { echo 'Could not resolve the civweave-core D1 database ID'; exit 3; }
           echo "d1_id=$D1_ID" >> "$GITHUB_OUTPUT"
-          if ! npx --yes wrangler@latest r2 bucket info civweave-distribution --json >/dev/null 2>&1; then
-            npx --yes wrangler@latest r2 bucket create civweave-distribution
-          fi
           node scripts/prepare-cloudflare-launch-kit-v1.mjs "--d1-id=$D1_ID"
+
+          R2_READY=1
+          if ! npx --yes wrangler@latest r2 bucket info civweave-distribution --json >/dev/null 2>&1; then
+            if ! npx --yes wrangler@latest r2 bucket create civweave-distribution; then
+              R2_READY=0
+              echo 'R2 is not enabled on this account. Continuing without the optional PACKAGES binding.'
+            fi
+          fi
+          if [ "$R2_READY" = 0 ]; then
+            node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path = '.cloudflare-launch/core.wrangler.jsonc';
+          const before = fs.readFileSync(path, 'utf8');
+          const after = before.replace(/\n  "r2_buckets": \[[\s\S]*?\n  \],/, '');
+          if (after === before) throw new Error('Could not remove optional R2 binding from generated Wrangler config.');
+          fs.writeFileSync(path, after);
+          NODE
+          fi
+          echo "r2_ready=$R2_READY" >> "$GITHUB_OUTPUT"
 
       - name: Apply D1 migrations
         run: npx --yes wrangler@latest d1 migrations apply civweave-core --remote --config .cloudflare-launch/core.wrangler.jsonc
@@ -155,5 +171,5 @@ jobs:
           const payload = JSON.parse(fs.readFileSync('/tmp/money-status.json','utf8'));
           const edge = payload.moneyEdge || payload;
           if (edge.liveReady === true) throw new Error('Refusing deployment verification: live money unexpectedly reports ready.');
-          console.log(JSON.stringify({ ok: true, authority: payload.authority || edge.authority, liveReady: edge.liveReady, structuralBlockers: edge.structuralBlockers || [], operationalBlockers: edge.operationalBlockers || [] }, null, 2));
+          console.log(JSON.stringify({ ok: true, authority: payload.authority || edge.authority, liveReady: edge.liveReady, structuralBlockers: edge.structuralBlockers || [], operationalBlockers: edge.operationalBlockers || [], r2Ready: '${{ steps.resources.outputs.r2_ready }}' === '1' }, null, 2));
           NODE
