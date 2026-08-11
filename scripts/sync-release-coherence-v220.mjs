@@ -80,6 +80,11 @@ await patch('public/app/install-boundary-v146.js',source=>{
   return source;
 });
 
+await patch('public/service-worker.js',source=>{
+  for(const retired of retiredChatPaths)source=source.replaceAll(`'${retired}',`,'');
+  return source;
+});
+
 await patch('public/app/system-routes-v227.js',source=>{
   source=replaceRequired(source,/const VERSION='[^']+';/,`const VERSION='${version}';`,'five-system route version');
   if(!source.includes(`const REVISION='${routeRevision}';`))throw new Error('Five-system route contract revision drifted.');
