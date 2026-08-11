@@ -70,7 +70,7 @@ for(const token of [
 for(const token of [
   `<title>Install Civweave v${version}</title>`,
   `<span class="version">v${version}</span>`,
-  `Install Civweave v${version}. The campus downloads automatically.`,
+  `Install the shell. Open Civweave immediately. Download offline files only when you choose.`,
   `/app/manifest.webmanifest?v=${version}`,
   `/install-v130.js?v=${version}-lightweight-shell-v208`
 ])check(installerHtml.includes(token),`public/app/index.html is missing ${token}`);

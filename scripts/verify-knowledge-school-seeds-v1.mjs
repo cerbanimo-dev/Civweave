@@ -47,7 +47,7 @@ const [index,helper,installer,installRuntime,boundary,installedEntry,updateContr
   read('public/service-worker-installer-state-v280.js'),read('public/service-worker-shell-integrity-v281.js'),read('public/service-worker-offline-v211-override.js'),
   read('public/app/installer-storage-guard-v281.js'),read('public/service-worker-living-school-cleanroom-v218.js')
 ]);
-assertIncludes(index,['knowledge-school-list','knowledge-school-seeds-v1.js','knowledge-school-installer-v1.js','Download once. Keep it through updates.'],'installer page');
+assertIncludes(index,['knowledge-school-list','knowledge-school-seeds-v1.js','knowledge-school-installer-v1.js','data-lazy-offline-tools','Optional tools are dormant until this section is used.'],'installer page');
 assertIncludes(helper,["CACHE_NAME='cwknowledge-school-seeds-v2'","LEGACY_CACHE_NAMES=['civweave-knowledge-schools-v1']",'migrateLegacyCaches','cachedCurrent','navigator.storage.persist()','async function save(',"phase:'cached'",'record?.download_url','legacySeedUrl','seedUrls','matchCachedSeed','X-Civweave-Source-URL'],'knowledge helper');
 if(helper.includes('serviceWorker.register'))throw new Error('Optional school staging must not register or replace the core service worker.');
 assertIncludes(installer,['neededSchools','Save selected library','Download ${needed.length}',"progress.phase==='cached'",'saved offline'],'knowledge installer');
@@ -74,7 +74,8 @@ if(!(
   workerWrapper.indexOf('service-worker-shell-integrity-v281.js')<workerWrapper.indexOf('service-worker-offline-v211-override.js')
 ))throw new Error('Hardened worker composition order is incorrect.');
 assertIncludes(workerCore,['lightweight-shell-v208',"'cwupdate-'",'DOWNLOAD_OFFLINE_PACKAGE'],'retained service-worker core');
-assertIncludes(installerStateWorker,["'/app/installer-storage-guard-v281.js'","'/app/required-campus-autostart-v1.js'",'shellRequired: true'],'installer state worker');
+assertIncludes(installerStateWorker,["'/app/installer-storage-guard-v281.js'",'shellRequired: true','campusAutostartRequired: false'],'installer state worker');
+if(installerStateWorker.includes("'/app/required-campus-autostart-v1.js'"))throw new Error('Disabled campus autostart must not be pinned into the installer shell.');
 assertIncludes(integrityWorker,["crypto.subtle.digest('SHA-256'",'STAGING_CACHE','lastKnownGoodCache','Integrity mismatch'],'shell integrity worker');
 assertIncludes(offlineOverride,[
   'offline-campus-current-graph-v280',"V211_POLICY = 'resumable-pause-v280'","V211_SYNC_TAG = 'civweave-campus-resume-v280'",

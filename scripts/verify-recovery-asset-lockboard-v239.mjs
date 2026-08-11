@@ -56,19 +56,19 @@ const checks=[
     assert.doesNotMatch(installerPage,/navigator\.serviceWorker\.register\s*\(/);
     assert.match(installRuntime,/navigator\.serviceWorker\.register\s*\(/);
   }],
-  ['old installer-wide mutation observer is gone',()=>{
+  ['legacy campus autostart path is an inert compatibility shim',()=>{
     assert.doesNotMatch(autostart,/new MutationObserver/);
-    assert.match(autostart,/civweave:offline-campus-status/);
+    assert.match(autostart,/disabled:true/);
+    assert.match(autostart,/explicit-user-opt-in-only/);
+    assert.doesNotMatch(autostart,/\.click\(\)/);
+    assert.doesNotMatch(autostart,/DOWNLOAD_OFFLINE_PACKAGE/);
   }],
   ['required campus remains independent from PWA install availability',()=>{
-    assert.match(autostart,/function keepInstallIndependent\(\)/);
-    assert.match(autostart,/classList\.remove\('cw-campus-waiting'\)/);
-    assert.doesNotMatch(autostart,/Waiting for campus files…/);
     assert.doesNotMatch(autostart,/button\.disabled\s*=\s*true/);
     assert.doesNotMatch(autostart,/civweave\.pwa\.install-accepted/);
   }],
-  ['asset lockboard link is runtime assembled to avoid crawl expansion',()=>{
-    assert.match(autostart,/\['\/app','asset-lockboard-v239\.html'\]\.join\('\/'\)/);
+  ['asset lockboard remains independent from the retired autostart shim',()=>{
+    assert.doesNotMatch(autostart,/asset-lockboard-v239\.html/);
   }],
   ['Working Campus repairs null or malformed persisted plans before runtime',()=>{
     assert.match(campus,/working-campus-state-repair-v238/);
