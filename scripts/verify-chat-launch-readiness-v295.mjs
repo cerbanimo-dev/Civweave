@@ -67,9 +67,10 @@ assert.match(runtime266,/stalledWebGPUFallback:true/);
 assert.match(runtime266,/webgpuSessionQuarantine:true/);
 assert.match(runtime266,/backend-quarantined/);
 
-assert.match(bootstrap,/1\.0\.92-local-ai-bootstrap-v299-stage-fallback/);
+assert.match(bootstrap,/REVISION='1\.0\.91-local-ai-bootstrap-v288-component-coherence'/);
 assert.match(bootstrap,/runtime-v266\.js\?v=1\.0\.88-v299-stage-fallback/);
 assert.match(bootstrap,/stalledWebGPUFallback===true/);
+assert.match(bootstrap,/componentCompatibility:'capability-contract-v299'/);
 
 for(const name of ['Weaveling','Moss','Kamiya','Rook','Merlin'])assert.ok(localOwner.includes(name),`local owner lost ${name}`);
 assert.match(localOwner,/fifoQueue:true/);
