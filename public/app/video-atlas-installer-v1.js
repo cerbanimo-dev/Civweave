@@ -4,12 +4,12 @@ const CATALOG_URL='/downloads/knowledge-schools/video-atlases/catalog.json';
 const BASE='/downloads/knowledge-schools/video-atlases/';
 const CACHE_NAME='cw-video-learning-atlas-v1';
 const RECEIPT_KEY='civweave.video-learning-atlas.v1';
-const card=document.querySelector('.knowledge-card'),schoolList=document.querySelector('#knowledge-school-list');
+const card=document.querySelector('.knowledge-card'),schoolList=document.querySelector('#knowledge-school-list'),presets=document.querySelector('#knowledge-school-presets');
 if(!card||!schoolList||document.querySelector('#video-atlas-panel'))return;
 const panel=document.createElement('section');panel.id='video-atlas-panel';panel.className='video-atlas-panel';panel.innerHTML=`<div class="knowledge-school-copy"><small>VIDEO LEARNING ATLAS</small><h3>Pair selected schools with model-friendly video catalogs</h3><p>These bundles contain links and lightweight educational metadata, not video files. The current YouTube description and embeddability sidecars are refreshed separately so the durable seed stays policy-safe.</p></div><div class="knowledge-school-summary"><strong id="video-atlas-total">Loading video catalog…</strong><span id="video-atlas-state">Catalogs update independently from the app shell.</span></div><div class="gateway-actions knowledge-school-actions"><button id="stage-video-atlases" class="secondary" type="button" disabled>Loading video catalog…</button><button id="save-video-atlases" class="secondary" type="button" disabled>Save selected atlas ZIPs</button><a id="video-atlas-catalog-link" href="${CATALOG_URL}">Video catalog</a></div>`;
 const summary=card.querySelector('.knowledge-school-summary');summary?.insertAdjacentElement('beforebegin',panel);
 const total=panel.querySelector('#video-atlas-total'),stateNode=panel.querySelector('#video-atlas-state'),stageButton=panel.querySelector('#stage-video-atlases'),saveButton=panel.querySelector('#save-video-atlases');
-let catalog=null,busy=false;
+let catalog=null,busy=false,refreshTimer=0;
 const selected=()=>[...schoolList.querySelectorAll('input[type="checkbox"]:checked')].map(input=>input.value);
 const human=value=>{let n=Number(value)||0;const u=['B','KiB','MiB','GiB'];let i=0;while(n>=1024&&i<u.length-1){n/=1024;i++}return`${n.toFixed(i?2:0)} ${u[i]}`};
 const receipt=()=>{try{return JSON.parse(localStorage.getItem(RECEIPT_KEY)||'{}')||{}}catch{return{}}};
@@ -28,6 +28,16 @@ async function refresh(){
   stageButton.disabled=busy||!rows.length||saved===rows.length;stageButton.textContent=saved===rows.length&&rows.length?'Selected video atlases saved':`Download ${rows.length-saved} missing video atlas${rows.length-saved===1?'':'es'}`;
   saveButton.disabled=busy||!rows.length||saved!==rows.length;
 }
+function scheduleRefresh(){
+  clearTimeout(refreshTimer);
+  refreshTimer=setTimeout(()=>refresh().catch(error=>{stateNode.textContent=error?.message||String(error)}),0);
+}
+schoolList.addEventListener('change',scheduleRefresh);
+if(globalThis.MutationObserver){
+  const observer=new MutationObserver(scheduleRefresh);
+  observer.observe(schoolList,{childList:true,subtree:true});
+}
+presets?.addEventListener('click',()=>setTimeout(scheduleRefresh,0));
 async function stage(){
   if(busy)return;busy=true;stageButton.disabled=true;saveButton.disabled=true;
   try{
@@ -55,7 +65,7 @@ async function save(){
 async function init(){
   try{
     const response=await fetch(CATALOG_URL,{cache:'no-store'});if(!response.ok)throw new Error(`Video atlas catalog is not published yet (${response.status}).`);catalog=await response.json();if(catalog?.schema!=='civweave.video-learning-atlas.catalog.v1')throw new Error('Video atlas catalog schema is incompatible.');
-    schoolList.addEventListener('change',()=>refresh());stageButton.addEventListener('click',stage);saveButton.addEventListener('click',save);await refresh();
+    stageButton.addEventListener('click',stage);saveButton.addEventListener('click',save);await refresh();
   }catch(error){total.textContent='Video atlas build pending';stateNode.textContent=error?.message||String(error);stageButton.textContent='Video catalogs unavailable';}
 }
 init();
