@@ -12,6 +12,7 @@ const BASE=[
  ['/app/cw-passport-recovery-v1.js?v=1.0.0','passport-recovery'],
  ['/app/cw-hub-commons-v1.js?v=1.0.0','hub-commons'],
  ['/app/cw-hub-peer-mesh-v1.js?v=1.0.0','hub-peer'],
+ ['/app/cw-hub-peer-bootstrap-v1.js?v=1.0.0','hub-peer-bootstrap'],
  ['/app/cw-hub-spot-v1.js?v=1.0.0','hub-spot']
 ];
 const FELLOW=[
