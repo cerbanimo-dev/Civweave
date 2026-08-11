@@ -1,7 +1,7 @@
 {
   "schema": "civweave.learning-pack-catalog.v1",
   "version": "1.2.0",
-  "updated": "2026-08-11T20:37:53.105Z",
+  "updated": "2026-08-11T20:40:42.223Z",
   "packs": [
     {
       "id": "civweave-core-practice-v1",
@@ -306,22 +306,25 @@
       "file": "onet-labor-atlas-30-3.json.gz",
       "contentType": "application/gzip",
       "bytes": 863068,
-      "sha256": "bfe402bea0c04ddd3df09f57e2629be3b2de485a4862f563f15a56c901dee809",
-      "optional": true,
+      "sha256": "59c80fc0833787743a6d3578dd33f2e116841694b4a69cc82a610c748ee205d5",
+      "optional": false,
       "bundled": false,
       "autoStage": false,
       "available": true,
       "generated": true,
       "buildCommand": "node scripts/build-learning-packs-v1.mjs",
-      "summary": "Generated optional labor-reference pack from official O*NET 30.3 occupation, task, essential-skill, and task-to-DWA tables. Reference data requires task-specific adaptation.",
+      "summary": "Core O*NET 30.3 labor-reference atlas used lazily for occupational context in Cerbanimo work, Living School capability generation, and FellowFare labor requests. Reference data requires task-specific adaptation.",
       "sourceRelease": "30.3",
-      "generatedAt": "2026-08-11T20:37:52.933Z",
+      "generatedAt": "2026-08-11T20:40:41.970Z",
       "counts": {
         "occupations": 1016,
         "taskStatements": 18796,
         "essentialSkillRows": 17880,
         "taskDwaRows": 23850
-      }
+      },
+      "coreInfrastructure": true,
+      "hiddenFromShelf": true,
+      "managedBy": "labor-intelligence-core-v1"
     },
     {
       "id": "esco-skill-crosswalk-v1",
@@ -344,13 +347,13 @@
       "contentType": "application/gzip",
       "bytes": 132275,
       "sha256": "e78c3d0ff8380a88bec403133feb7c770bb3259a05c4b31dd385c0b967734434",
-      "optional": true,
+      "optional": false,
       "bundled": false,
       "autoStage": false,
       "available": true,
       "generated": true,
       "buildCommand": "node scripts/build-esco-crosswalk-v1.mjs",
-      "summary": "Optional ESCO interoperability bridge for Civweave skill identities plus the official ESCO-O*NET occupation crosswalk. Exact generated skill matches may be accepted; fuzzy candidates remain review-only.",
+      "summary": "Core ESCO interoperability bridge used lazily to normalize Civweave skills and connect O*NET occupations to ESCO identities. Fuzzy candidates remain review-only.",
       "sourceRelease": "ESCO classification 1.2.1; Web API default (documented as 1.0.9)",
       "generatedAt": "2026-08-10T14:23:15.100Z",
       "counts": {
@@ -360,7 +363,10 @@
         "unresolvedCivweaveSkills": 37,
         "occupationMappings": 4210,
         "occupationRejectedRows": 57
-      }
+      },
+      "coreInfrastructure": true,
+      "hiddenFromShelf": true,
+      "managedBy": "labor-intelligence-core-v1"
     }
   ]
 }
