@@ -14,7 +14,13 @@ const outputDir = path.join(root, '.cloudflare-launch');
 const outputPath = path.join(outputDir, 'core.wrangler.jsonc');
 const template = await readFile(templatePath, 'utf8');
 if (!template.includes('__CIVWEAVE_CORE_D1_ID__')) throw new Error('Core Wrangler template is missing the D1 placeholder.');
-const rendered = template.replaceAll('__CIVWEAVE_CORE_D1_ID__', d1Id);
+const rendered = template
+  .replaceAll('__CIVWEAVE_CORE_D1_ID__', d1Id)
+  .replace('"$schema": "../../node_modules/wrangler/config-schema.json"', '"$schema": "../node_modules/wrangler/config-schema.json"')
+  .replace('"main": "src/index.mjs"', '"main": "../cloudflare/core/src/index.mjs"')
+  .replace('"migrations_dir": "migrations"', '"migrations_dir": "../cloudflare/core/migrations"');
+if (!rendered.includes('"main": "../cloudflare/core/src/index.mjs"')) throw new Error('Generated Wrangler config did not retarget the core Worker entrypoint.');
+if (!rendered.includes('"migrations_dir": "../cloudflare/core/migrations"')) throw new Error('Generated Wrangler config did not retarget the D1 migrations directory.');
 await mkdir(outputDir, { recursive: true });
 await writeFile(outputPath, rendered);
 
