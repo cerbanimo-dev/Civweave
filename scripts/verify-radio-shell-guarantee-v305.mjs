@@ -16,13 +16,16 @@ const requiredRadioAssets = [
   '/app/radio-directory-v240/anarchadia.txt'
 ];
 
-const [layer, wrapper, builder, trackSuggestions, ...assetContents] = await Promise.all([
+const [versionText, layer, wrapper, builder, trackSuggestions, ...assetContents] = await Promise.all([
+  read('VERSION'),
   read('public/service-worker-radio-core-v305.js'),
   read('public/service-worker-v203.js'),
   read('scripts/build-service-worker-v211.mjs'),
   read('public/app/radio-track-suggestions-v240.js'),
   ...requiredRadioAssets.map(path => read(`public${path}`))
 ]);
+const version = versionText.trim();
+assert.equal(version, '1.0.105', 'Radio shell guarantee must ship on the Civweave 1.0.105 release boundary.');
 
 new Function(layer);
 for (const pathname of requiredRadioAssets) {
@@ -33,6 +36,7 @@ assert(layer.includes('const V305_BASE_CACHE_SHELL = cacheShell;'), 'Radio shell
 assert(layer.includes('cacheShell = async function cacheShellWithRadioCoreV305()'), 'Radio shell no longer owns required install/repair completion.');
 assert(layer.includes('const base = await V305_BASE_CACHE_SHELL();'), 'Radio shell bypasses the existing verified shell transaction.');
 assert(layer.includes('const radio = await v305CacheRadioCore();'), 'Radio shell transaction no longer requires radio assets.');
+assert(layer.includes("radioCore: 'required-cached'"), 'Radio diagnostics no longer distinguish required caching from SHA verification.');
 assert(layer.includes('ready: Boolean(packet.ready) && radio.ready'), 'Device package readiness no longer fails closed when radio core is missing.');
 assert(layer.includes('await caches.delete(V305_STAGING_CACHE);'), 'Radio shell no longer stages atomically.');
 assert(!layer.includes('DOWNLOAD_OFFLINE_PACKAGE'), 'Radio shell must not depend on the optional offline-campus download.');
@@ -44,6 +48,7 @@ for (const source of [wrapper, builder]) {
   assert(source.indexOf('/service-worker-shell-integrity-v281.js') < source.indexOf(radioImport), 'Radio shell must wrap the integrity-owned cacheShell implementation.');
   assert(source.indexOf(radioImport) < source.indexOf('/service-worker-shell-repair-v293.js'), 'Installed shell repair must observe the radio-wrapped cacheShell implementation.');
 }
+assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305`), 'Checked-in worker does not pin the radio shell to the current release.');
 assert(builder.includes("'public/service-worker-radio-core-v305.js'"), 'Worker builder does not require the radio shell source file.');
 assert(builder.includes("radioCore:'radio-core-shell-v305'"), 'Worker builder does not report the radio shell revision.');
 
@@ -97,7 +102,7 @@ function makeRuntime({ failPath = '' } = {}) {
 
 const success = makeRuntime();
 const installResult = await success.scope.cacheShell();
-assert.equal(installResult.radioCore, 'verified');
+assert.equal(installResult.radioCore, 'required-cached');
 assert.equal(installResult.radioRequiredAssetCount, requiredRadioAssets.length);
 const shellStore = success.stores.get('civweave-shell-test');
 for (const pathname of requiredRadioAssets) assert(shellStore?.has(pathname), `Successful shell install did not cache ${pathname}.`);
@@ -118,6 +123,7 @@ assert.equal(failure.stores.has('civweave-shell-test-radio-v305-staging'), false
 
 console.log(JSON.stringify({
   ok: true,
+  version,
   revision: 'radio-core-shell-v305',
   requiredAssetCount: requiredRadioAssets.length,
   freshInstallRequired: true,
