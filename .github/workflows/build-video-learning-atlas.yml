@@ -74,7 +74,7 @@ jobs:
             echo 'Video Learning Atlas already current.'
             exit 0
           fi
-          git commit -m 'Build optional Video Learning Atlas bundles'
+          git commit -m '[CF-Pages-Skip] Build optional Video Learning Atlas bundles'
           git fetch origin agent/video-learning-atlas-v1
           git rebase origin/agent/video-learning-atlas-v1
           git push origin HEAD:agent/video-learning-atlas-v1
