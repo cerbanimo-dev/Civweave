@@ -1,10 +1,10 @@
 {
   "schema": "civweave.asset-lockboard.catalog.v239",
-  "generatedAt": "2026-08-11T04:40:29.083Z",
+  "generatedAt": "2026-08-11T14:39:20.124Z",
   "publicRoot": "/",
   "assetCount": 418,
-  "slotCount": 666,
-  "missingReferenceCount": 28,
+  "slotCount": 481,
+  "missingReferenceCount": 26,
   "assets": [
     {
       "path": "/app/assets/ai/chat/kamiya-face-v255.webp",
@@ -130,14 +130,14 @@
       "extension": "webp",
       "bytes": 1826132,
       "filename": "anarchadia.webp",
-      "usageCount": 4
+      "usageCount": 3
     },
     {
       "path": "/app/assets/cabinets/cerbanimo.webp",
       "extension": "webp",
       "bytes": 1809292,
       "filename": "cerbanimo.webp",
-      "usageCount": 4
+      "usageCount": 3
     },
     {
       "path": "/app/assets/cabinets/civweave.webp",
@@ -151,14 +151,14 @@
       "extension": "webp",
       "bytes": 1706694,
       "filename": "fellowfare.webp",
-      "usageCount": 4
+      "usageCount": 3
     },
     {
       "path": "/app/assets/cabinets/living-school.webp",
       "extension": "webp",
       "bytes": 1786570,
       "filename": "living-school.webp",
-      "usageCount": 4
+      "usageCount": 3
     },
     {
       "path": "/app/assets/generated/07-kamiya-pose-sheet/kamiya-celebrating.png",
@@ -956,7 +956,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "dispatch-hall.webp",
-      "usageCount": 5
+      "usageCount": 0
     },
     {
       "path": "/app/assets/world/federation-harbor.webp",
@@ -970,7 +970,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "festival-grounds.webp",
-      "usageCount": 3
+      "usageCount": 0
     },
     {
       "path": "/app/assets/world/frontier-outpost.webp",
@@ -998,14 +998,14 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "inside-quad.webp",
-      "usageCount": 6
+      "usageCount": 2
     },
     {
       "path": "/app/assets/world/personal-chronicle.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "personal-chronicle.webp",
-      "usageCount": 3
+      "usageCount": 0
     },
     {
       "path": "/app/assets/world/regional-world-map.webp",
@@ -1026,14 +1026,14 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "settings-accessibility-hall.webp",
-      "usageCount": 5
+      "usageCount": 0
     },
     {
       "path": "/app/assets/world/town-square-home.webp",
       "extension": "webp",
       "bytes": 258508,
       "filename": "town-square-home.webp",
-      "usageCount": 7
+      "usageCount": 5
     },
     {
       "path": "/app/assets/world/town-square-weaveling.webp",
@@ -1075,14 +1075,14 @@
       "extension": "webp",
       "bytes": 530984,
       "filename": "anarchadia.webp",
-      "usageCount": 1
+      "usageCount": 0
     },
     {
       "path": "/app/logos/cerbanimo.webp",
       "extension": "webp",
       "bytes": 877614,
       "filename": "cerbanimo.webp",
-      "usageCount": 5
+      "usageCount": 4
     },
     {
       "path": "/app/logos/civweave-adaptive-foreground-512.png",
@@ -1306,7 +1306,7 @@
       "extension": "webp",
       "bytes": 263240,
       "filename": "living-school.webp",
-      "usageCount": 1
+      "usageCount": 0
     },
     {
       "path": "/app/services/anarchadia/assets/icon-180.png",
@@ -1355,7 +1355,7 @@
       "extension": "webp",
       "bytes": 263858,
       "filename": "bug-portrait.webp",
-      "usageCount": 4
+      "usageCount": 1
     },
     {
       "path": "/app/services/anarchadia/assets/screens/federation-landscape.webp",
@@ -1369,7 +1369,7 @@
       "extension": "webp",
       "bytes": 268608,
       "filename": "federation-portrait.webp",
-      "usageCount": 5
+      "usageCount": 1
     },
     {
       "path": "/app/services/anarchadia/assets/screens/forge-landscape.webp",
@@ -1383,7 +1383,7 @@
       "extension": "webp",
       "bytes": 263858,
       "filename": "forge-portrait.webp",
-      "usageCount": 5
+      "usageCount": 0
     },
     {
       "path": "/app/services/anarchadia/assets/screens/home-landscape.webp",
@@ -1397,7 +1397,7 @@
       "extension": "webp",
       "bytes": 284304,
       "filename": "home-portrait.webp",
-      "usageCount": 9
+      "usageCount": 4
     },
     {
       "path": "/app/services/anarchadia/assets/screens/hub-landscape.webp",
@@ -1411,7 +1411,7 @@
       "extension": "webp",
       "bytes": 260770,
       "filename": "hub-portrait.webp",
-      "usageCount": 4
+      "usageCount": 1
     },
     {
       "path": "/app/services/anarchadia/assets/screens/ledger-landscape.webp",
@@ -1425,7 +1425,7 @@
       "extension": "webp",
       "bytes": 296526,
       "filename": "ledger-portrait.webp",
-      "usageCount": 4
+      "usageCount": 0
     },
     {
       "path": "/app/services/anarchadia/assets/screens/observatory-landscape.webp",
@@ -1439,7 +1439,7 @@
       "extension": "webp",
       "bytes": 286278,
       "filename": "observatory-portrait.webp",
-      "usageCount": 3
+      "usageCount": 0
     },
     {
       "path": "/app/services/anarchadia/assets/screens/proposal-landscape.webp",
@@ -1453,7 +1453,7 @@
       "extension": "webp",
       "bytes": 263858,
       "filename": "proposal-portrait.webp",
-      "usageCount": 6
+      "usageCount": 1
     },
     {
       "path": "/app/services/anarchadia/assets/screens/rails-landscape.webp",
@@ -1467,7 +1467,7 @@
       "extension": "webp",
       "bytes": 268608,
       "filename": "rails-portrait.webp",
-      "usageCount": 5
+      "usageCount": 0
     },
     {
       "path": "/app/services/anarchadia/assets/wave2/automation/agent-capsule.png",
@@ -1859,7 +1859,7 @@
       "extension": "webp",
       "bytes": 342124,
       "filename": "ai-core.webp",
-      "usageCount": 2
+      "usageCount": 0
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/asset-atlas.webp",
@@ -1880,14 +1880,14 @@
       "extension": "webp",
       "bytes": 3026,
       "filename": "hangar.webp",
-      "usageCount": 3
+      "usageCount": 0
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
       "extension": "webp",
       "bytes": 342124,
       "filename": "kamiya-chamber.webp",
-      "usageCount": 3
+      "usageCount": 0
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/kiosks.webp",
@@ -1915,7 +1915,7 @@
       "extension": "webp",
       "bytes": 358468,
       "filename": "mission-room.webp",
-      "usageCount": 2
+      "usageCount": 0
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/mission.webp",
@@ -1929,7 +1929,7 @@
       "extension": "webp",
       "bytes": 277468,
       "filename": "nexus.webp",
-      "usageCount": 5
+      "usageCount": 3
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/object-viewer.webp",
@@ -1943,49 +1943,49 @@
       "extension": "webp",
       "bytes": 301738,
       "filename": "observatory.webp",
-      "usageCount": 5
+      "usageCount": 0
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/project-workbench.webp",
       "extension": "webp",
       "bytes": 378922,
       "filename": "project-workbench.webp",
-      "usageCount": 2
+      "usageCount": 0
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/quest.webp",
       "extension": "webp",
       "bytes": 367312,
       "filename": "quest.webp",
-      "usageCount": 4
+      "usageCount": 1
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/resource.webp",
       "extension": "webp",
       "bytes": 3026,
       "filename": "resource.webp",
-      "usageCount": 4
+      "usageCount": 0
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/showroom.webp",
       "extension": "webp",
       "bytes": 2972,
       "filename": "showroom.webp",
-      "usageCount": 3
+      "usageCount": 0
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/skill.webp",
       "extension": "webp",
       "bytes": 3026,
       "filename": "skill.webp",
-      "usageCount": 2
+      "usageCount": 0
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/systems.webp",
       "extension": "webp",
       "bytes": 3026,
       "filename": "systems.webp",
-      "usageCount": 4
+      "usageCount": 1
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/title.webp",
@@ -1999,14 +1999,14 @@
       "extension": "webp",
       "bytes": 3026,
       "filename": "transit.webp",
-      "usageCount": 2
+      "usageCount": 0
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/workshop.webp",
       "extension": "webp",
       "bytes": 378922,
       "filename": "workshop.webp",
-      "usageCount": 3
+      "usageCount": 1
     },
     {
       "path": "/app/services/cerbanimo/icons/favicon-64.png",
@@ -2125,98 +2125,98 @@
       "extension": "webp",
       "bytes": 270564,
       "filename": "exchange-galleria.webp",
-      "usageCount": 8
+      "usageCount": 2
     },
     {
       "path": "/app/services/fellowfare/assets/mall/free-store.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "free-store.webp",
-      "usageCount": 2
+      "usageCount": 1
     },
     {
       "path": "/app/services/fellowfare/assets/mall/help-desk.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "help-desk.webp",
-      "usageCount": 5
+      "usageCount": 2
     },
     {
       "path": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "logistics-concourse.webp",
-      "usageCount": 4
+      "usageCount": 2
     },
     {
       "path": "/app/services/fellowfare/assets/mall/main-atrium.webp",
       "extension": "webp",
       "bytes": 278982,
       "filename": "main-atrium.webp",
-      "usageCount": 7
+      "usageCount": 5
     },
     {
       "path": "/app/services/fellowfare/assets/mall/makers-arcade.webp",
       "extension": "webp",
       "bytes": 258568,
       "filename": "makers-arcade.webp",
-      "usageCount": 3
+      "usageCount": 2
     },
     {
       "path": "/app/services/fellowfare/assets/mall/marketplace.webp",
       "extension": "webp",
       "bytes": 306380,
       "filename": "marketplace.webp",
-      "usageCount": 7
+      "usageCount": 3
     },
     {
       "path": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "mutual-aid-wing.webp",
-      "usageCount": 3
+      "usageCount": 1
     },
     {
       "path": "/app/services/fellowfare/assets/mall/pantry.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "pantry.webp",
-      "usageCount": 3
+      "usageCount": 1
     },
     {
       "path": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "repair-cafe.webp",
-      "usageCount": 3
+      "usageCount": 1
     },
     {
       "path": "/app/services/fellowfare/assets/mall/resource-center.webp",
       "extension": "webp",
       "bytes": 246778,
       "filename": "resource-center.webp",
-      "usageCount": 4
+      "usageCount": 2
     },
     {
       "path": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "rooftop-commons.webp",
-      "usageCount": 5
+      "usageCount": 1
     },
     {
       "path": "/app/services/fellowfare/assets/mall/skill-shop.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "skill-shop.webp",
-      "usageCount": 4
+      "usageCount": 2
     },
     {
       "path": "/app/services/fellowfare/assets/mall/tool-rental.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "tool-rental.webp",
-      "usageCount": 3
+      "usageCount": 1
     },
     {
       "path": "/app/services/fellowfare/assets/mall/upper-gallery.webp",
@@ -2230,7 +2230,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "volunteer-hub.webp",
-      "usageCount": 5
+      "usageCount": 2
     },
     {
       "path": "/app/services/living-school/icon.svg",
@@ -2244,7 +2244,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "bridge.webp",
-      "usageCount": 3
+      "usageCount": 1
     },
     {
       "path": "/app/services/living-school/visual-assets/challenge.webp",
@@ -2279,14 +2279,14 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "commons.webp",
-      "usageCount": 4
+      "usageCount": 2
     },
     {
       "path": "/app/services/living-school/visual-assets/core/credential.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "credential.webp",
-      "usageCount": 5
+      "usageCount": 2
     },
     {
       "path": "/app/services/living-school/visual-assets/core/exchange.webp",
@@ -2300,21 +2300,21 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "faculty.webp",
-      "usageCount": 5
+      "usageCount": 2
     },
     {
       "path": "/app/services/living-school/visual-assets/core/forge.webp",
       "extension": "webp",
       "bytes": 289272,
       "filename": "forge.webp",
-      "usageCount": 7
+      "usageCount": 3
     },
     {
       "path": "/app/services/living-school/visual-assets/core/home.webp",
       "extension": "webp",
       "bytes": 307082,
       "filename": "home.webp",
-      "usageCount": 8
+      "usageCount": 5
     },
     {
       "path": "/app/services/living-school/visual-assets/core/journal.webp",
@@ -2328,14 +2328,14 @@
       "extension": "webp",
       "bytes": 267920,
       "filename": "library.webp",
-      "usageCount": 5
+      "usageCount": 3
     },
     {
       "path": "/app/services/living-school/visual-assets/core/moss.webp",
       "extension": "webp",
       "bytes": 238876,
       "filename": "moss.webp",
-      "usageCount": 4
+      "usageCount": 3
     },
     {
       "path": "/app/services/living-school/visual-assets/core/notices.webp",
@@ -2349,21 +2349,21 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "observatory.webp",
-      "usageCount": 5
+      "usageCount": 2
     },
     {
       "path": "/app/services/living-school/visual-assets/core/opportunity.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "opportunity.webp",
-      "usageCount": 5
+      "usageCount": 2
     },
     {
       "path": "/app/services/living-school/visual-assets/core/passport.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "passport.webp",
-      "usageCount": 4
+      "usageCount": 2
     },
     {
       "path": "/app/services/living-school/visual-assets/core/profile.webp",
@@ -2377,7 +2377,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "project-map.webp",
-      "usageCount": 5
+      "usageCount": 2
     },
     {
       "path": "/app/services/living-school/visual-assets/core/projects.webp",
@@ -2398,21 +2398,21 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "review.webp",
-      "usageCount": 5
+      "usageCount": 2
     },
     {
       "path": "/app/services/living-school/visual-assets/core/tower.webp",
       "extension": "webp",
       "bytes": 264414,
       "filename": "tower.webp",
-      "usageCount": 6
+      "usageCount": 2
     },
     {
       "path": "/app/services/living-school/visual-assets/core/workshop.webp",
       "extension": "webp",
       "bytes": 257104,
       "filename": "workshop.webp",
-      "usageCount": 6
+      "usageCount": 3
     },
     {
       "path": "/app/services/living-school/visual-assets/courtyard.webp",
@@ -3540,9 +3540,9 @@
       "exists": true
     },
     {
-      "id": "slot-645ecdcd61efb3",
+      "id": "slot-c6dc7d1de9377c",
       "sourcePath": "/app/family-ai-loader-v105.js",
-      "line": 29,
+      "line": 30,
       "column": 88,
       "kind": "string",
       "raw": "/app/assets/ai/weaveling.png",
@@ -3551,9 +3551,9 @@
       "exists": true
     },
     {
-      "id": "slot-e0c14bef003de6",
+      "id": "slot-1684f37e6df0b4",
       "sourcePath": "/app/family-ai-loader-v105.js",
-      "line": 30,
+      "line": 31,
       "column": 61,
       "kind": "string",
       "raw": "/app/assets/ai/moss.png",
@@ -3562,9 +3562,9 @@
       "exists": true
     },
     {
-      "id": "slot-6a81437a61647a",
+      "id": "slot-ba145c49c54ac4",
       "sourcePath": "/app/family-ai-loader-v105.js",
-      "line": 31,
+      "line": 32,
       "column": 77,
       "kind": "string",
       "raw": "/app/assets/ai/kamiya.png",
@@ -3573,9 +3573,9 @@
       "exists": true
     },
     {
-      "id": "slot-60303ed76cd4f5",
+      "id": "slot-5cd6ad254869c7",
       "sourcePath": "/app/family-ai-loader-v105.js",
-      "line": 32,
+      "line": 33,
       "column": 74,
       "kind": "string",
       "raw": "/app/assets/ai/rook.png",
@@ -3584,9 +3584,9 @@
       "exists": true
     },
     {
-      "id": "slot-1b9b19ab920638",
+      "id": "slot-9211b28ba198c8",
       "sourcePath": "/app/family-ai-loader-v105.js",
-      "line": 33,
+      "line": 34,
       "column": 88,
       "kind": "string",
       "raw": "/app/assets/ai/merlin.png",
@@ -7343,2041 +7343,6 @@
       "raw": "/app/assets/cabinets/anarchadia.webp",
       "assetPath": "/app/assets/cabinets/anarchadia.webp",
       "context": "\"asset\": \"/app/assets/cabinets/anarchadia.webp\"",
-      "exists": true
-    },
-    {
-      "id": "slot-529135fbea3b7d",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 61,
-      "column": 15,
-      "kind": "string",
-      "raw": "/app/logos/commonweave.webp",
-      "assetPath": "/app/logos/commonweave.webp",
-      "context": "\"logo\": \"/app/logos/commonweave.webp\",",
-      "exists": false
-    },
-    {
-      "id": "slot-a21fefc11a4209",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 69,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/assets/world/town-square-home.webp",
-      "assetPath": "/app/assets/world/town-square-home.webp",
-      "context": "\"visualAsset\": \"/app/assets/world/town-square-home.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-d894cbcccd771b",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 80,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/assets/world/inside-quad.webp",
-      "assetPath": "/app/assets/world/inside-quad.webp",
-      "context": "\"visualAsset\": \"/app/assets/world/inside-quad.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-2731c4a4c9208a",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 93,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/assets/world/dispatch-hall.webp",
-      "assetPath": "/app/assets/world/dispatch-hall.webp",
-      "context": "\"visualAsset\": \"/app/assets/world/dispatch-hall.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-fd25f13f505d4d",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 107,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/assets/world/personal-chronicle.webp",
-      "assetPath": "/app/assets/world/personal-chronicle.webp",
-      "context": "\"visualAsset\": \"/app/assets/world/personal-chronicle.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-9cbcc1c2dacef4",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 119,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/assets/world/festival-grounds.webp",
-      "assetPath": "/app/assets/world/festival-grounds.webp",
-      "context": "\"visualAsset\": \"/app/assets/world/festival-grounds.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-39ae5a968d7239",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 131,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/assets/world/settings-accessibility-hall.webp",
-      "assetPath": "/app/assets/world/settings-accessibility-hall.webp",
-      "context": "\"visualAsset\": \"/app/assets/world/settings-accessibility-hall.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-d517ed0ae63073",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 148,
-      "column": 15,
-      "kind": "string",
-      "raw": "/app/logos/living-school.webp",
-      "assetPath": "/app/logos/living-school.webp",
-      "context": "\"logo\": \"/app/logos/living-school.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-1652ece4b1aa5e",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 156,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/home.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/home.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/home.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-e13764339c82a8",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 168,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/observatory.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/observatory.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/observatory.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-6dc070646e0e39",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 180,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/faculty.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/faculty.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/faculty.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-faa347082d3a9d",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 192,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/forge.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/forge.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/forge.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-8ccbace72bad32",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 205,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/project-map.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/project-map.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/project-map.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-ff9a7b40d30c89",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 217,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/moss.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/moss.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/moss.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-a6094947c0d5aa",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 226,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/commons.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/commons.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/commons.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-4c8cac8d38a3ac",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 237,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/opportunity.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/opportunity.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/opportunity.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-f5ce7592977cc6",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 249,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/workshop.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/workshop.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/workshop.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-2871f5a65949f5",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 261,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/library.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/library.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/library.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-9ee346c3057655",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 272,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/review.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/review.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/review.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-1a7b6ea802a302",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 284,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/credential.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/credential.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/credential.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-a699f72712c3f1",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 296,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/passport.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/passport.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/passport.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-0090c8b6f417ac",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 307,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/bridge.webp",
-      "assetPath": "/app/services/living-school/visual-assets/bridge.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/bridge.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-88464a4f853543",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 318,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/tower.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/tower.webp",
-      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/tower.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-231c12e8eae8f5",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 385,
-      "column": 18,
-      "kind": "string",
-      "raw": "/app/assets/cabinets/living-school.webp",
-      "assetPath": "/app/assets/cabinets/living-school.webp",
-      "context": "\"asset\": \"/app/assets/cabinets/living-school.webp\"",
-      "exists": true
-    },
-    {
-      "id": "slot-3c95492e867042",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 393,
-      "column": 15,
-      "kind": "string",
-      "raw": "/app/logos/cerbanimo.webp",
-      "assetPath": "/app/logos/cerbanimo.webp",
-      "context": "\"logo\": \"/app/logos/cerbanimo.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-a87becbc9378c3",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 401,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/nexus.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/nexus.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/nexus.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-b708eb9ce9875a",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 412,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/kamiya-chamber.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-384a20af3e1e9e",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 424,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/mission-room.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/mission-room.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/mission-room.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-3f2eb7cf76f9a8",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 435,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/quest.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/quest.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/quest.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-a64cd43741af42",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 447,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/project-workbench.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/project-workbench.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/project-workbench.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-740b6fedc6b3df",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 458,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/workshop.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/workshop.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/workshop.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-556c955cec18ed",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 469,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/skill.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/skill.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/skill.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-15bb47186e994b",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 480,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/resource.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/resource.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/resource.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-5317e78a7d4cf8",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 493,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/observatory.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/observatory.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/observatory.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-892f6404f281a0",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 507,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/hangar.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/hangar.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/hangar.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-cdfd89ea42ffcc",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 519,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/systems.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/systems.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/systems.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-f772bf0fc8a59b",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 531,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/ai-core.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/ai-core.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/ai-core.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-0456157623c904",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 542,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/showroom.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/showroom.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/showroom.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-a0cfb7bd7c8ad5",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 554,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/transit.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/transit.webp",
-      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/transit.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-23b81293087c7a",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 619,
-      "column": 18,
-      "kind": "string",
-      "raw": "/app/assets/cabinets/cerbanimo.webp",
-      "assetPath": "/app/assets/cabinets/cerbanimo.webp",
-      "context": "\"asset\": \"/app/assets/cabinets/cerbanimo.webp\"",
-      "exists": true
-    },
-    {
-      "id": "slot-5b55813935a358",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 627,
-      "column": 15,
-      "kind": "string",
-      "raw": "/app/logos/fellowfare.webp",
-      "assetPath": "/app/logos/fellowfare.webp",
-      "context": "\"logo\": \"/app/logos/fellowfare.webp\",",
-      "exists": false
-    },
-    {
-      "id": "slot-365b160a562db7",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 635,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/main-atrium.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/main-atrium.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/main-atrium.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-12fd187ee8a434",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 646,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/marketplace.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/marketplace.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/marketplace.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-1f53619d191c8d",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 659,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/mutual-aid-wing.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-9e38c94bfaa749",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 670,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/free-store.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/free-store.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/free-store.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-82c84dba67fa84",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 679,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/resource-center.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/resource-center.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/resource-center.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-8a2aed8d9cef02",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 690,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/makers-arcade.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/makers-arcade.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/makers-arcade.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-01f3cd8d0dccd8",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 699,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/skill-shop.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/skill-shop.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/skill-shop.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-8cdf0dab7723b9",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 710,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/repair-cafe.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-5bfe78fb3f1755",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 721,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/tool-rental.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/tool-rental.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/tool-rental.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-bddadad79e11f4",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 732,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/pantry.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/pantry.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/pantry.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-6b42aa9eee3039",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 743,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/logistics-concourse.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-2ca3b5654a2bc3",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 754,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-b6c5ffed3b967f",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 769,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/volunteer-hub.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-900e558be56591",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 781,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/help-desk.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/help-desk.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/help-desk.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-c919507606f2ee",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 793,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
-      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/rooftop-commons.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-d7d1378c2376ec",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 860,
-      "column": 18,
-      "kind": "string",
-      "raw": "/app/assets/cabinets/fellowfare.webp",
-      "assetPath": "/app/assets/cabinets/fellowfare.webp",
-      "context": "\"asset\": \"/app/assets/cabinets/fellowfare.webp\"",
-      "exists": true
-    },
-    {
-      "id": "slot-0c21a9ba167c93",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 868,
-      "column": 15,
-      "kind": "string",
-      "raw": "/app/logos/anarchadia.webp",
-      "assetPath": "/app/logos/anarchadia.webp",
-      "context": "\"logo\": \"/app/logos/anarchadia.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-53ce76737423e7",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 876,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/home-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/home-portrait.webp",
-      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/home-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-2a62c40eb92517",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 890,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
-      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/proposal-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-952a2c207d1523",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 904,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
-      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/bug-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-5d72ecbf92db12",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 916,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
-      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/hub-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-e74d57c3ad45fe",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 928,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
-      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/federation-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-79657283530130",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 941,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
-      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/rails-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-fd371fbb1ede97",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 955,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
-      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/forge-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-69f4b93ca970ad",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 969,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
-      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/ledger-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-6cd55d6c6b9f03",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 982,
-      "column": 26,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
-      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/observatory-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-ce321b059b9bdd",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1049,
-      "column": 18,
-      "kind": "string",
-      "raw": "/app/assets/cabinets/anarchadia.webp",
-      "assetPath": "/app/assets/cabinets/anarchadia.webp",
-      "context": "\"asset\": \"/app/assets/cabinets/anarchadia.webp\"",
-      "exists": true
-    },
-    {
-      "id": "slot-e591482f46cd7c",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1069,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/settings-accessibility-hall.webp",
-      "assetPath": "/app/assets/world/settings-accessibility-hall.webp",
-      "context": "\"surface\": \"/app/assets/world/settings-accessibility-hall.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-07976882c09e09",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1094,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/town-square-home.webp",
-      "assetPath": "/app/assets/world/town-square-home.webp",
-      "context": "\"surface\": \"/app/assets/world/town-square-home.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-34dc0bfc2ec208",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1120,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/inside-quad.webp",
-      "assetPath": "/app/assets/world/inside-quad.webp",
-      "context": "\"surface\": \"/app/assets/world/inside-quad.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-01fff08e60e212",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1145,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/inside-quad.webp",
-      "assetPath": "/app/assets/world/inside-quad.webp",
-      "context": "\"surface\": \"/app/assets/world/inside-quad.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-9d137ab1cdb151",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1170,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/inside-quad.webp",
-      "assetPath": "/app/assets/world/inside-quad.webp",
-      "context": "\"surface\": \"/app/assets/world/inside-quad.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-298fa80a1c977c",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1195,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/dispatch-hall.webp",
-      "assetPath": "/app/assets/world/dispatch-hall.webp",
-      "context": "\"surface\": \"/app/assets/world/dispatch-hall.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-717cd46ccd5b05",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1225,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/dispatch-hall.webp",
-      "assetPath": "/app/assets/world/dispatch-hall.webp",
-      "context": "\"surface\": \"/app/assets/world/dispatch-hall.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-34931f7887eb95",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1250,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/dispatch-hall.webp",
-      "assetPath": "/app/assets/world/dispatch-hall.webp",
-      "context": "\"surface\": \"/app/assets/world/dispatch-hall.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-6cfd872434bcb4",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1280,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/dispatch-hall.webp",
-      "assetPath": "/app/assets/world/dispatch-hall.webp",
-      "context": "\"surface\": \"/app/assets/world/dispatch-hall.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-f09e48d8fd11d4",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1305,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/personal-chronicle.webp",
-      "assetPath": "/app/assets/world/personal-chronicle.webp",
-      "context": "\"surface\": \"/app/assets/world/personal-chronicle.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-c1272dea17755b",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1332,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/personal-chronicle.webp",
-      "assetPath": "/app/assets/world/personal-chronicle.webp",
-      "context": "\"surface\": \"/app/assets/world/personal-chronicle.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-c12927bced4a68",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1357,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/festival-grounds.webp",
-      "assetPath": "/app/assets/world/festival-grounds.webp",
-      "context": "\"surface\": \"/app/assets/world/festival-grounds.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-50968c74a6a378",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1382,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/festival-grounds.webp",
-      "assetPath": "/app/assets/world/festival-grounds.webp",
-      "context": "\"surface\": \"/app/assets/world/festival-grounds.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-44f39884e3bb09",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1410,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/settings-accessibility-hall.webp",
-      "assetPath": "/app/assets/world/settings-accessibility-hall.webp",
-      "context": "\"surface\": \"/app/assets/world/settings-accessibility-hall.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-fd3a325fa412f1",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1435,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/settings-accessibility-hall.webp",
-      "assetPath": "/app/assets/world/settings-accessibility-hall.webp",
-      "context": "\"surface\": \"/app/assets/world/settings-accessibility-hall.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-74a42f39e79dc8",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1460,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/assets/world/settings-accessibility-hall.webp",
-      "assetPath": "/app/assets/world/settings-accessibility-hall.webp",
-      "context": "\"surface\": \"/app/assets/world/settings-accessibility-hall.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-f823b97ffdee1c",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1485,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/home.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/home.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/home.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-c11ca591e6e5b9",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1510,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/home.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/home.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/home.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-f007d554e609e0",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1535,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/forge.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/forge.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/forge.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-8ba2ce86aab977",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1560,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/forge.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/forge.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/forge.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-50e9496c4d4b37",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1585,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/forge.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/forge.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/forge.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-c6fb1226222087",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1610,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/library.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/library.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/library.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-d543dc94b34a3a",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1635,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/observatory.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/observatory.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/observatory.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-24ed546878bfeb",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1660,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/observatory.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/observatory.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/observatory.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-3753ca2546b3b5",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1685,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/project-map.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/project-map.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/project-map.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-9d66994e914746",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1710,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/project-map.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/project-map.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/project-map.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-0df0e8f192f6ea",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1735,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/faculty.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/faculty.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/faculty.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-0fc9aebb3854bf",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1760,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/faculty.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/faculty.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/faculty.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-dc2b29b78e8498",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1785,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/commons.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/commons.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/commons.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-4af2eb0b19085e",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1810,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/opportunity.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/opportunity.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/opportunity.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-d5e6bf5d11155b",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1835,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/opportunity.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/opportunity.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/opportunity.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-deae7624b1c8f0",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1860,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/workshop.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/workshop.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/workshop.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-4dbb9a96bc9d6b",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1887,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/workshop.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/workshop.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/workshop.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-29e1f622319e2f",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1912,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/bridge.webp",
-      "assetPath": "/app/services/living-school/visual-assets/bridge.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/bridge.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-d6d8d642b24a77",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1939,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/review.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/review.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/review.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-49b6a4aa19db24",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1964,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/review.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/review.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/review.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-bee5dff2665949",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 1989,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/credential.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/credential.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/credential.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-1b8c4f0064be5f",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2016,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/credential.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/credential.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/credential.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-6f142e5676f87c",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2043,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/passport.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/passport.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/passport.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-65b6e81c37dce2",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2068,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/tower.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/tower.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/tower.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-7b63a1a79cee86",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2093,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/tower.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/tower.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/tower.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-fd2d1339dfd11e",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2118,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/living-school/visual-assets/core/tower.webp",
-      "assetPath": "/app/services/living-school/visual-assets/core/tower.webp",
-      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/tower.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-8cbf39c2981ac1",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2143,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/nexus.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/nexus.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/nexus.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-780278260bb1d8",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2168,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/kamiya-chamber.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-77db150d1be4d6",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2193,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/kamiya-chamber.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-d38b52c52a49a3",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2218,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/mission-room.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/mission-room.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/mission-room.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-5844d1aea7311c",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2243,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/quest.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/quest.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/quest.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-0150efc1a75e28",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2268,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/quest.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/quest.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/quest.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-cdf3fc7ca3049f",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2293,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/project-workbench.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/project-workbench.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/project-workbench.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-7b2a99a6f53539",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2318,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/workshop.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/workshop.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/workshop.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-5f1417723db78d",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2343,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/skill.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/skill.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/skill.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-3c8d449a0dc6ca",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2368,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/resource.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/resource.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/resource.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-ddec503e168a26",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2395,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/resource.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/resource.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/resource.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-06c85fe6c4d93e",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2422,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/resource.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/resource.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/resource.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-38dc58fc820ceb",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2449,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/observatory.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/observatory.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/observatory.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-cff9b24e0b839b",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2474,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/observatory.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/observatory.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/observatory.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-92c0007721a9ad",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2499,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/observatory.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/observatory.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/observatory.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-1aa92fd2d8b082",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2524,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/observatory.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/observatory.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/observatory.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-e77cfce8b42114",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2552,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/hangar.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/hangar.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/hangar.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-8c55cbc0886f91",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2577,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/hangar.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/hangar.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/hangar.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-b4c540c3bd5f4f",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2602,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/systems.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/systems.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/systems.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-4b91fd9a25e56c",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2627,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/systems.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/systems.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/systems.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-9a333358b12aeb",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2654,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/ai-core.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/ai-core.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/ai-core.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-075a7e31615f47",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2679,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/showroom.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/showroom.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/showroom.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-809a43a8a1b953",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2704,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/showroom.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/showroom.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/showroom.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-2c6d214e872f61",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2729,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/cerbanimo/assets/visual/transit.webp",
-      "assetPath": "/app/services/cerbanimo/assets/visual/transit.webp",
-      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/transit.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-b7cc9c376bacdf",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2754,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/main-atrium.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/main-atrium.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/main-atrium.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-caae08057f7d7e",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2779,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/marketplace.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/marketplace.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/marketplace.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-2f5f18885eddd6",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2804,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/marketplace.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/marketplace.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/marketplace.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-043cbed3f033e8",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2829,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/mutual-aid-wing.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-0e99614db61eb1",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2854,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/marketplace.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/marketplace.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/marketplace.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-9eb7c899d2a880",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2879,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/volunteer-hub.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-419737001fe087",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2904,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/resource-center.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/resource-center.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/resource-center.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-e871181af27097",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2929,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/skill-shop.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/skill-shop.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/skill-shop.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-d741dcf363b644",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2956,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/repair-cafe.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-fb0f3cfaa53c59",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 2981,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/tool-rental.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/tool-rental.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/tool-rental.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-8743a84790095c",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3006,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/pantry.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/pantry.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/pantry.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-0ef2b4532104bb",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3031,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/logistics-concourse.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-ede28651a996f0",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3056,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-d340fab5c625ea",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3081,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-5b582ed2781d86",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3106,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-846135a4b381b4",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3131,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-be0d7de90feca8",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3156,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-a298c2d52ded6b",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3183,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/help-desk.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/help-desk.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/help-desk.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-f420e3a859db15",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3208,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/help-desk.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/help-desk.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/help-desk.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-7699ac3fb9a305",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3233,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/volunteer-hub.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-32b2ea2b0a81fc",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3258,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/rooftop-commons.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-9eddc7843b8419",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3283,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/rooftop-commons.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-d83292a6a96e3d",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3308,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
-      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/rooftop-commons.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-444325a214a0fa",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3333,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/home-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/home-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/home-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-5379236c9b33d8",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3358,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/home-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/home-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/home-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-0d3777d584638a",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3383,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/home-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/home-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/home-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-c6028ad68ec50d",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3408,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/proposal-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-5e2274d53fea92",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3433,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/proposal-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-083a215f0084ab",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3458,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/proposal-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-3217d81652d7f4",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3483,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/proposal-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-9e9d4414711b81",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3508,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/bug-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-00b88cc99f4828",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3533,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/bug-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-015a5c0268dcd8",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3558,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/hub-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-0ccc1f0818a340",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3583,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/hub-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-edcfcec49ce80b",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3608,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/federation-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-2583cdc48c351b",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3633,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/federation-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-13784f924014bb",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3658,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/federation-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-6104a5256a8f91",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3683,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/rails-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-211b0d70920148",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3708,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/rails-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-8cf478d18f7665",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3733,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/rails-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-340d28ce110ede",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3758,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/rails-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-301ecf2e66a004",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3783,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/forge-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-37b5ca4de68c49",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3808,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/forge-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-6548beded26c41",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3833,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/forge-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-1bff28169125ff",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3858,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/forge-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-afab41be7fa453",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3883,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/ledger-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-3960b8e38c932c",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3908,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/ledger-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-35f872034b77cc",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3933,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/ledger-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-c80038fa73fb23",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3958,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/observatory-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-e581fe60ed8f92",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 3983,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/observatory-portrait.webp\",",
-      "exists": true
-    },
-    {
-      "id": "slot-b93bdb3747e3f7",
-      "sourcePath": "/app/shared/civweave-parity-ledger.json",
-      "line": 4008,
-      "column": 20,
-      "kind": "string",
-      "raw": "/app/services/anarchadia/assets/screens/home-portrait.webp",
-      "assetPath": "/app/services/anarchadia/assets/screens/home-portrait.webp",
-      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/home-portrait.webp\",",
       "exists": true
     },
     {

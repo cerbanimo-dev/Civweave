@@ -1,25 +1,23 @@
 {
-  "version": "1.0.103",
+  "version": "1.0.104",
   "revision": "shell-integrity-v281",
   "algorithm": "sha256",
-  "requiredAssetCount": 17,
+  "requiredAssetCount": 15,
   "assets": {
-    "/index.html": "35ac61a27e6b813ea5a0a051f0a0d6a0de3612e163a950879261c0da2ae4f01a",
+    "/index.html": "eba3a8bd2edb70bc0275c445e5485502899fd298b2858f10a2a7d9f58806a34a",
     "/install-v130.css": "dfb524c1fae9d5cd3b7125b668e92fc7d4fedd43afa785f5f52e23d4c627a367",
-    "/install-v130.js": "a0be89925a8ebcd3c883e8031dbfd9fd2332e19738299ce9a26f95e77982108d",
+    "/install-v130.js": "a4b381ddf28a96c2a5235cfe327ef185e2e598941dbcb35f4a27f5b1e3bc07bb",
     "/offline.html": "7e416c269b72414b434d808e309d38f7b065a1bed49d1e0c7f150427c0a62be4",
-    "/app/manifest.webmanifest": "bd480faa627e3aa0c01df22e26bdee6cc848d3ae0b7a8a6dbbf27d44b2326fdb",
-    "/app/index.html": "d33110c518b4d014df036d0069c3d5fb3cd6570d1fda6244e1f4a4470c50578b",
-    "/app/installed-entry-v146.html": "a1f23368ad4bd59cf9eeddf878f664d23d1c60e64bee3cd73913a30da5a5881e",
-    "/app/installed-entry-v146.js": "731ebebd33b218993f7a811fde82b0d02cf4546a02d7f2474fbed3cc7c3f3479",
+    "/app/manifest.webmanifest": "a4aa0699bae426723f5d840ce7e4affa7fe65bc941b352a83ee3fa4d74f154a2",
+    "/app/index.html": "9afb17908f238eb226bdbdd12dede6f54860fd576354c9dca93c31ffe9b5b626",
+    "/app/installed-entry-v146.html": "77bc5e9716eef561b4356d96f5faf30c5a0e63163e8452696bbf690701a46de4",
+    "/app/installed-entry-v146.js": "601d6b6704fe5d0b7c86dcdbdc7ad138eb8e11f3483c81c5127c8c5bd7c925d9",
     "/app/document-lifecycle-v221.js": "40984d186853491559538faf2c322fc04664ba71f34949e704d6676cd34d3403",
     "/app/fullscreen-family-v104.html": "767911c8f8c80f38d3f6d0ba3e06512a810abb8f12b3bb59d2543fe904b4e83f",
     "/app/logos/civweave-icon-192.png": "7f56100fcaa4b6096bc031df735ee74b124cb0f7884f6b392ff5bf2816a71958",
     "/app/logos/civweave-icon-512.png": "83c649211fb9fad53c2d44ab774ba5ab153e3f635d0864a84596b45b33c70b4d",
     "/app/installer-state-machine-v280.js": "57f84ee8457cce0e9e35e4e561a837fff493af484a940822378ae568faf440b0",
     "/app/installer-storage-guard-v281.js": "72e9f7f2522079a6862f8f3ca871ae8e01adb634b7ba034c736d0a0306da4e08",
-    "/app/offline-campus-status-v210.js": "7133377512c7080e424437996c4099c939923f412d27c5a02c9b8e1687c1ba91",
-    "/app/required-campus-autostart-v1.js": "761572013f6906bf43c5951f3bb6eefb110a77512b59b9ddaba7361095dbf6dc",
-    "/app/campus-background-download-v241.js": "4513110940fc9d6b71958a5682bf18daf914b99c46847980c73a52dd81105deb"
+    "/app/offline-campus-status-v210.js": "7133377512c7080e424437996c4099c939923f412d27c5a02c9b8e1687c1ba91"
   }
 }

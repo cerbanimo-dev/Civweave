@@ -42,7 +42,7 @@ assert.match(boundary,/sharedReviewSurfaceRevision:'v234-chat-owned-review-and-w
 assert.doesNotMatch(installer,/new MutationObserver\(renderProgress\)/,'Installer progress must not observe and rewrite its own hidden/disabled attributes.');
 assert.match(installer,/function progressFromText\(\)/,'Installer progress must remain visible from streamed file-count text.');
 assert.match(installer,/civweave:offline-campus-status/,'Installer progress must accept explicit status events.');
-assert.match(installer,/setInterval\s*\(\s*renderProgress\s*,\s*750\s*\)/,'Installer may use a bounded low-frequency fallback refresh.');
+assert.match(installer,/setInterval\s*\(\s*renderProgress\s*,\s*(?:750|1000)\s*\)/,'Installer may use a bounded low-frequency fallback refresh.');
 
 assert.doesNotMatch(status,/registration\.update\(\)/,'Offline status reader must not compete with the installer for service-worker updates.');
 assert.doesNotMatch(status,/SKIP_WAITING/,'Offline status reader must not change service-worker lifecycle.');

@@ -14,7 +14,8 @@ assert(wrapper.includes(`/service-worker-shell-repair-v225.js?v=${revision}`),'W
 assert(wrapper.indexOf('/service-worker-shell-repair-v225.js')>wrapper.indexOf('/service-worker-navigation-safety-v224.js'),'Shell repair must follow generic redirect safety.');
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical route navigation must remain final after shell repair.');
 assert(indexHtml.includes('/app/installer-online-fallback-v225.js?v=shell-self-repair-v225'),'Installer does not load online fallback.');
-assert(indexHtml.includes('You can open the online campus immediately.'),'Installer copy treats offline preparation as an access gate.');
+assert(indexHtml.includes('Download offline files only when you choose.'),'Installer copy no longer preserves the manual-first campus boundary.');
+assert(indexHtml.includes('Open online campus'),'Installer no longer exposes an immediate online-campus fallback.');
 for(const token of ['REPAIR_DEVICE_PACKAGE','repairableCacheShell','selfRepairingShellStatus','activate-incomplete-retry-required-shell-and-report-paths'])assert(source.includes(token),`Shell repair is missing ${token}.`);
 for(const token of ['Open online campus','Open Civweave online','working-campus-v156.html','launch','online'])assert(installerFallback.includes(token),`Installer fallback is missing ${token}.`);
 assert(canonicalNavigation.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical navigation can be replaced by shell fallback.');
@@ -27,4 +28,4 @@ const installResult=await context.cacheShell();assert.equal(attempts,1);assert.e
 const status=await context.shellStatus();assert.equal(attempts,2);assert.equal(status.ready,true);assert.equal(status.repairRevision,revision);
 assert(context.OPTIONAL_SHELL_ASSETS.includes('/app/installer-online-fallback-v225.js'));assert(context.SHELL_ASSETS.includes('/app/installer-online-fallback-v225.js'));
 const handler=listeners.find(row=>row.type==='message')?.handler;assert(handler);let promise=null;handler({data:{type:'REPAIR_DEVICE_PACKAGE'},waitUntil:value=>{promise=value},ports:[],source:null});await promise;assert.equal(replies.at(-1)?.type,'CIVWEAVE_DEVICE_PACKAGE');assert.equal(replies.at(-1)?.ready,true);
-console.log(JSON.stringify({ok:true,version,revision,activatedIncomplete:true,retryAttempts:attempts,repaired:true,onlineFallback:true,canonicalNavigationFinal:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision,activatedIncomplete:true,retryAttempts:attempts,repaired:true,onlineFallback:true,canonicalNavigationFinal:true,manualFirst:true},null,2));

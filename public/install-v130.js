@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION = '1.0.103';
+const VERSION = '1.0.104';
 const ENTRY = '/app/?system=civweave&installed=1';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
 const WORKER_SCRIPT_REVISION = 'release-coherence-v226';
@@ -12,7 +12,8 @@ const ACTIVATION_TIMEOUT_MS = 45000;
 const WATCHDOG_RECOVERY_KEY = 'civweave.shell.registration-watchdog.v208';
 const LEGACY_LIBRARY_CACHE = 'civweave-knowledge-schools-v1';
 const LIBRARY_CACHE = 'cwknowledge-school-seeds-v2';
-const PROTECTED_CACHE_PREFIXES = ['cwknowledge-', 'cwupdate-', 'civweave-model-'];
+const PROTECTED_CACHE_PREFIXES = ['cwknowledge-', 'cwupdate-', 'civweave-model-', 'civweave-offline-'];
+const OFFLINE_MANIFEST_URL = '/app/offline-package-v208.json';
 
 let installPrompt = null;
 let registration = null;
@@ -95,13 +96,13 @@ function showShell(status = {}) {
   const state = $('#package-state');
   const assets = $('#package-assets');
   const mode = $('#local-mode');
-  if (state) state.textContent = shellReady ? 'ready' : shellError ? 'failed' : 'preparing';
+  if (state) state.textContent = shellReady ? 'ready' : shellError ? 'failed' : preparing ? 'preparing' : 'not prepared';
   if (assets) {
     const total = Number(status.assetCount || 0);
     const present = Number(status.presentCount || 0);
-    assets.textContent = total ? `${present}/${total} shell files` : 'checking shell';
+    assets.textContent = total ? `${present}/${total} shell files` : preparing ? 'checking shell' : 'starts on install';
   }
-  if (mode) mode.textContent = 'small shell · optional resumable campus · separate model and school storage';
+  if (mode) mode.textContent = 'small shell · optional code-first campus · visuals and models on demand';
 }
 
 function showOffline(status = offlineStatus || {}) {
@@ -110,23 +111,25 @@ function showOffline(status = offlineStatus || {}) {
   const assets = $('#offline-package-assets');
   const button = $('#download-offline-package');
   const failed = Number(status.failedCount || status.failed?.length || 0);
-  const complete = Number(status.completed || 0);
+  const complete = Number(status.downloaded ?? status.completed ?? 0);
   const total = Number(status.total || status.discovered || 0);
   const size = formatBytes(status.bytes);
   if (state) {
     if (status.running || offlineBusy) state.textContent = 'downloading';
     else if (status.ready) state.textContent = 'ready offline';
+    else if (status.paused) state.textContent = 'paused';
     else if (failed) state.textContent = `${failed} file${failed === 1 ? '' : 's'} need retry`;
     else state.textContent = complete ? 'partially downloaded' : 'not downloaded';
   }
   if (assets) {
-    const count = total ? `${Math.min(complete, total)}/${total} files` : 'not measured';
+    const count = total ? `${Math.min(complete, total)}/${total} files` : 'not started';
     assets.textContent = size ? `${count} · ${size}` : count;
   }
   if (button) {
-    button.disabled = !shellReady || offlineBusy;
-    if (offlineBusy || status.running) button.textContent = total ? `Downloading ${Math.min(complete, total)}/${total}…` : 'Discovering campus files…';
+    button.disabled = offlineBusy || preparing;
+    if (offlineBusy || status.running) button.textContent = total ? `Downloading ${Math.min(complete, total)}/${total}…` : 'Preparing campus file list…';
     else if (status.ready) button.textContent = 'Refresh offline campus';
+    else if (status.paused) button.textContent = 'Resume offline campus';
     else if (failed) button.textContent = `Retry ${failed} missing file${failed === 1 ? '' : 's'}`;
     else if (complete) button.textContent = 'Resume offline campus';
     else button.textContent = 'Download offline campus';
@@ -139,24 +142,30 @@ function guidance() {
   if (standalone()) {
     button.disabled = false;
     button.textContent = `Open Civweave v${VERSION}`;
-    help(shellReady ? 'Civweave is installed. The optional offline campus can be downloaded or refreshed separately.' : 'Checking the installed Civweave shell…');
+    help(shellReady ? 'Civweave is installed. Open it now; offline campus files are a separate optional download.' : 'Civweave is installed. Open it now; shell repair only runs if you request it.');
     return;
   }
   if (shellError) {
     button.disabled = false;
     button.textContent = 'Reset app shell and retry';
-    help(`App-shell preparation failed: ${shellError.message}. Saved knowledge schools and model files will be preserved.`);
+    help(`App-shell preparation failed: ${shellError.message}. Saved campus, knowledge schools, and model files will be preserved.`);
     return;
   }
-  if (preparing || !shellReady) {
+  if (preparing) {
     button.disabled = true;
     button.textContent = 'Preparing app shell…';
-    help('Preparing only the small installable shell. The campus pack no longer blocks installation.');
+    help('Preparing only the small installable shell. No campus, model, media, or school download is running.');
+    return;
+  }
+  if (!shellReady) {
+    button.disabled = false;
+    button.textContent = `Install Civweave v${VERSION}`;
+    help('Ready when you are. Nothing large downloads until you choose Install or Download offline campus.');
     return;
   }
   button.disabled = false;
   button.textContent = `Install Civweave v${VERSION}`;
-  if (installPrompt) help('The lightweight app shell is ready. Tap Install Civweave now, then download the offline campus whenever useful.');
+  if (installPrompt) help('The lightweight shell is ready. Install now; the offline campus remains optional and separate.');
   else if (isIOS()) help('The shell is ready. Tap Install Civweave for Safari Add to Home Screen instructions.');
   else help('The shell is ready. Tap Install Civweave, or use your browser menu and choose Install app or Add to Home screen.');
 }
@@ -207,7 +216,7 @@ async function clearAppCaches() {
 
 async function resetAppShell() {
   recovering = true;
-  help('Removing the incomplete app shell while preserving saved knowledge schools and model files…');
+  help('Removing the incomplete app shell while preserving the offline campus, saved knowledge schools, and model files…');
   sessionStorage.removeItem(WATCHDOG_RECOVERY_KEY);
   await migrateKnowledgeCache();
   if ('serviceWorker' in navigator) {
@@ -227,7 +236,7 @@ async function resetAppShell() {
   await clearAppCaches();
   registration = null;
   activeWorker = null;
-  await pause(300);
+  await pause(120);
   const next = new URL(location.href);
   next.searchParams.set('shell-reset', Date.now().toString(36));
   location.replace(next.href);
@@ -240,7 +249,7 @@ async function recoverStalledRegistration(error) {
   }
   sessionStorage.setItem(WATCHDOG_RECOVERY_KEY, '1');
   recovering = true;
-  help(`Chrome stalled during ${phase}. Preserving libraries and rebuilding the small app registration once…`);
+  help(`Chrome stalled during ${phase}. Preserving local data and rebuilding the small app registration once…`);
   await migrateKnowledgeCache();
   const regs = await withTimeout(
     navigator.serviceWorker.getRegistrations(),
@@ -257,7 +266,7 @@ async function recoverStalledRegistration(error) {
   await clearAppCaches();
   registration = null;
   activeWorker = null;
-  await pause(300);
+  await pause(120);
   const next = new URL(location.href);
   next.searchParams.set('registration-recovery', Date.now().toString(36));
   location.replace(next.href);
@@ -366,7 +375,7 @@ async function prepareShell(options = {}) {
   const updateButton = $('#check-update');
   if (updateButton) {
     updateButton.disabled = true;
-    updateButton.textContent = options.manual ? 'Checking release…' : 'Checking shell…';
+    updateButton.textContent = options.manual ? 'Checking release…' : 'Preparing shell…';
   }
   try {
     if (!('serviceWorker' in navigator)) throw new Error('This browser does not support service workers.');
@@ -416,7 +425,7 @@ async function prepareShell(options = {}) {
     await confirmShell(worker);
     sessionStorage.removeItem(WATCHDOG_RECOVERY_KEY);
     await refreshOfflineStatus();
-    if (options.manual) help('The app shell is current. Offline-campus files can be refreshed separately without blocking installation.');
+    if (options.manual) help('The app shell is current. Offline-campus files remain separate and start only when requested.');
   } catch (error) {
     if (error?.code === 'CIVWEAVE_PACKAGE_TIMEOUT') {
       try {
@@ -440,18 +449,44 @@ async function prepareShell(options = {}) {
   }
 }
 
+async function offlineStoragePreflight() {
+  try {
+    const [response, estimate] = await Promise.all([
+      fetch(`${OFFLINE_MANIFEST_URL}?preflight=${Date.now()}`, { cache: 'no-store' }),
+      navigator.storage?.estimate?.().catch?.(() => null) || null
+    ]);
+    if (!response?.ok || !estimate?.quota) return true;
+    const manifest = await response.json();
+    const required = Number(manifest?.preflight?.requiredFreeBytes || 0);
+    const available = Math.max(0, Number(estimate.quota || 0) - Number(estimate.usage || 0));
+    if (required && available < required) {
+      help(`Offline campus not started: about ${formatBytes(required - available)} more browser storage is needed. Civweave can still be used online now.`);
+      document.documentElement.dataset.civweaveStorageState = 'insufficient';
+      return false;
+    }
+    document.documentElement.dataset.civweaveStorageState = 'sufficient';
+  } catch {}
+  return true;
+}
+
 async function downloadOfflineCampus() {
-  if (!shellReady || !activeWorker || offlineBusy) return;
+  if (offlineBusy || preparing) return;
+  if (!shellReady || !activeWorker) {
+    await prepareShell({ manual: false });
+    if (!shellReady || !activeWorker) return;
+  }
+  if (!(await offlineStoragePreflight())) return;
   offlineBusy = true;
   showOffline({ ...(offlineStatus || {}), running: true });
-  help('Downloading the optional campus pack. Individual failures are recorded and resumable; installation is already unblocked.');
+  help('Downloading the optional code-first campus. Large visuals, models, and media stay on demand and do not block completion.');
   try {
     const status = await streamWorker(activeWorker, 'DOWNLOAD_OFFLINE_PACKAGE', packet => {
       if (packet.type === 'CIVWEAVE_OFFLINE_PACKAGE_PROGRESS' || packet.type === 'CIVWEAVE_OFFLINE_PACKAGE_STATUS') showOffline(packet);
     });
     showOffline(status);
-    if (status.ready) help(`Offline campus ready: ${status.completed}/${status.total} files${status.bytes ? ` · ${formatBytes(status.bytes)}` : ''}.`);
-    else help(`Offline campus paused with ${status.failedCount || status.failed?.length || 0} files needing retry. Tap the same button to resume.`);
+    if (status.ready) help(`Offline campus ready: ${status.completed}/${status.total} files${status.bytes ? ` · ${formatBytes(status.bytes)}` : ''}. Open Civweave whenever you like.`);
+    else if (status.paused) help('Offline campus paused. Everything already saved stays on the device; tap Resume when convenient.');
+    else help(`Offline campus stopped with ${status.failedCount || status.failed?.length || 0} required files needing retry. Civweave itself remains usable.`);
   } catch (error) {
     help(`${error.message} Installation and the files already saved are unaffected.`);
     await refreshOfflineStatus();
@@ -476,13 +511,15 @@ async function installOrOpen() {
     installPrompt = null;
     await prompt.prompt();
     const choice = await prompt.userChoice.catch(() => null);
-    if (choice?.outcome === 'accepted') help('Civweave installation accepted. The optional offline campus can continue downloading independently.');
-    else guidance();
+    if (choice?.outcome === 'accepted') {
+      help('Civweave installed. Opening the campus now; offline files remain a separate optional download.');
+      location.assign(ENTRY);
+    } else guidance();
     return;
   }
   help(isIOS()
-    ? 'In Safari, tap Share, then Add to Home Screen. The optional offline campus is separate.'
-    : 'Open the browser menu and choose Install app or Add to Home screen. The lightweight shell is ready.');
+    ? 'In Safari, tap Share, then Add to Home Screen. You can open the online campus immediately; offline files are separate.'
+    : 'Open the browser menu and choose Install app or Add to Home screen. You can open Civweave now; offline files are separate.');
 }
 
 addEventListener('beforeinstallprompt', event => {
@@ -492,7 +529,7 @@ addEventListener('beforeinstallprompt', event => {
 });
 addEventListener('appinstalled', () => {
   installPrompt = null;
-  help('Civweave is installed. Download the optional offline campus whenever you want the full local copy.');
+  help('Civweave is installed. Open it now; download the offline campus only if you want a local code copy.');
 });
 
 $('#install-app')?.addEventListener('click', installOrOpen);
@@ -502,5 +539,12 @@ $('#download-offline-package')?.addEventListener('click', downloadOfflineCampus)
 showShell({});
 showOffline({});
 guidance();
-prepareShell();
+
+globalThis.CivweaveInstallerV130 = Object.freeze({
+  version: VERSION,
+  prepareShell,
+  resetAppShell,
+  downloadOfflineCampus,
+  get shellReady() { return shellReady; }
+});
 })();
