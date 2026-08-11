@@ -30,7 +30,8 @@ PUBLISHED_METADATA = {
 for filename in PUBLISHED_METADATA:
     assert (ROOT / filename).is_file(), filename
 
-assert '<script type="module" src="/app/open-learning-media-installer-v1.mjs?v=general-knowledge-packs-v1"></script>' in INSTALLER_HTML
+assert "data-lazy-offline-tools" in INSTALLER_HTML
+assert "module.src='/app/open-learning-media-installer-v1.mjs?v=general-knowledge-packs-v1';" in INSTALLER_HTML
 assert "const LOOKUP_URL='/downloads/knowledge-schools/open-learning-media/lookup.json';" in CACHE_RUNTIME
 assert "const POLICY_URL='/downloads/knowledge-schools/open-learning-media/harvest-policy.json';" in CACHE_RUNTIME
 assert "const REVOCATIONS_URL='/downloads/knowledge-schools/open-learning-media/revocations.json';" in CACHE_RUNTIME
