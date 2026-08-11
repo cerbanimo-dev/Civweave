@@ -1,0 +1,101 @@
+name: Finalize Cloudflare money edge v1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/retarget-cloudflare-money-edge-v1.mjs'
+      - '.github/workflows/finalize-cloudflare-money-edge-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Retarget canonical money edge
+        run: node scripts/retarget-cloudflare-money-edge-v1.mjs
+
+      - name: Verify Cloudflare launch kit
+        run: node scripts/verify-cloudflare-launch-kit-v1.mjs
+
+      - name: Publish generated source branch
+        run: |
+          set -euo pipefail
+          git config user.name 'civweave-cloudflare-bot'
+          git config user.email 'civweave-cloudflare-bot@users.noreply.github.com'
+          git switch -c generated/core-civweave-money-edge-v1
+          git add \
+            cloudflare/core/wrangler.template.jsonc \
+            cloudflare/core/src/index.mjs \
+            config/launch-topology-v1.json \
+            config/host-node-transports-v1.json \
+            config/node-money-edge.example.json \
+            lib/node-ai-bootstrap-v1.mjs \
+            .env.ai-wallet.example \
+            scripts/verify-cloudflare-launch-kit-v1.mjs \
+            docs/finance/node-money-edge-launch-v1.md \
+            docs/operations/launch-kit-cloudflare-node-fabric-v1.md
+          if git diff --cached --quiet; then
+            echo 'Canonical origin was already retargeted.'
+          else
+            git commit -m 'Make core.civweave.com the canonical money edge'
+            git push --force-with-lease origin HEAD:refs/heads/generated/core-civweave-money-edge-v1
+          fi
+
+      - name: Require Cloudflare CI credentials
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing GitHub secret CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing GitHub secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+
+      - name: Resolve or create D1 and R2
+        id: resources
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@latest --version
+          npx --yes wrangler@latest whoami
+          npx --yes wrangler@latest d1 list --json > /tmp/d1.json
+          D1_ID="$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const rows = JSON.parse(fs.readFileSync('/tmp/d1.json','utf8'));
+          const row = (Array.isArray(rows) ? rows : rows?.result || rows?.databases || []).find(x => x?.name === 'civweave-core');
+          if (row) process.stdout.write(String(row.uuid || row.id || row.database_id || row.databaseId || ''));
+          NODE
+          )"
+          if [ -z "$D1_ID" ]; then
+            npx --yes wrangler@latest d1 create civweave-core 2>&1 | tee /tmp/d1-create.txt
+            D1_ID="$(grep -Eo '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}' /tmp/d1-create.txt | head -1 || true)"
+          fi
+          test -n "$D1_ID" || { echo 'Could not resolve civweave-core D1 database ID'; exit 3; }
+          echo "d1_id=$D1_ID" >> "$GITHUB_OUTPUT"
+          npx --yes wrangler@latest r2 bucket create civweave-distribution || true
+          node scripts/prepare-cloudflare-launch-kit-v1.mjs "$D1_ID"
+
+      - name: Apply D1 migrations
+        run: npx --yes wrangler@latest d1 migrations apply civweave-core --remote --config .cloudflare-launch/core.wrangler.jsonc
+
+      - name: Deploy civweave-core Worker
+        run: npx --yes wrangler@latest deploy --config .cloudflare-launch/core.wrangler.jsonc --keep-vars
+
+      - name: Verify deployed money edge
+        run: |
+          set -euo pipefail
+          for path in /api/health /api/money-edge/status /api/money-edge/trust; do
+            echo "GET https://core.civweave.com${path}"
+            curl --fail --silent --show-error --retry 5 --retry-all-errors "https://core.civweave.com${path}" | tee "/tmp/$(echo "$path" | tr '/' '_').json"
+            echo
+          done
