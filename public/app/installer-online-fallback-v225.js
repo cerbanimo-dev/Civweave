@@ -1,7 +1,8 @@
 (() => {
 'use strict';
 
-const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293';
+const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v300';
+const REPAIR_TIMEOUT_MS = 20000;
 const stateNode = document.getElementById('package-state');
 const assetsNode = document.getElementById('package-assets');
 const installButton = document.getElementById('install-app');
@@ -56,27 +57,43 @@ async function currentWorker() {
   }
 }
 
-async function requestRepair() {
+async function requestWorker(type, timeoutMs) {
   const worker = await currentWorker();
   if (!worker) throw new Error('The installed Civweave worker is unavailable.');
   return new Promise((resolve, reject) => {
     const channel = new MessageChannel();
     const timer = setTimeout(() => {
       try { channel.port1.close(); } catch {}
-      reject(new Error('Shell repair stopped responding.'));
-    }, 90000);
+      reject(new Error(`${type === 'REPAIR_DEVICE_PACKAGE' ? 'Shell repair' : 'Worker request'} stopped responding.`));
+    }, timeoutMs);
     channel.port1.onmessage = event => {
       clearTimeout(timer);
       try { channel.port1.close(); } catch {}
       resolve(event.data || null);
     };
     try {
-      worker.postMessage({ type: 'REPAIR_DEVICE_PACKAGE' }, [channel.port2]);
+      worker.postMessage({ type }, [channel.port2]);
     } catch (error) {
       clearTimeout(timer);
       reject(error);
     }
   });
+}
+
+async function pauseCampusBestEffort() {
+  try { await requestWorker('PAUSE_OFFLINE_PACKAGE', 1800); } catch {}
+}
+
+async function requestRepair() {
+  return requestWorker('REPAIR_DEVICE_PACKAGE', REPAIR_TIMEOUT_MS);
+}
+
+async function hardResetFallback(error) {
+  const reset = globalThis.CivweaveInstallerV130?.resetAppShell;
+  if (typeof reset !== 'function') return false;
+  if (helpNode) helpNode.textContent = `Verified repair did not answer (${error?.message || error}). Rebuilding the small app registration once while preserving campus, models, media, and schools…`;
+  await reset();
+  return true;
 }
 
 async function repairInstalledShell() {
@@ -90,8 +107,9 @@ async function repairInstalledShell() {
     updateButton.disabled = true;
     updateButton.textContent = 'Repairing shell…';
   }
-  if (helpNode) helpNode.textContent = 'Rebuilding only the small verified Civweave shell. Campus, model, media, and knowledge-school storage are untouched.';
+  if (helpNode) helpNode.textContent = 'Pausing offline transfer, then rebuilding only the small verified Civweave shell. Campus, model, media, and knowledge-school storage stay untouched.';
   try {
+    await pauseCampusBestEffort();
     const packet = await requestRepair();
     if (packet?.type !== 'CIVWEAVE_DEVICE_PACKAGE_REPAIR') throw new Error('The app worker did not acknowledge shell repair.');
     if (!packet.ready) {
@@ -111,6 +129,7 @@ async function repairInstalledShell() {
     }
     openInstalled();
   } catch (error) {
+    if (await hardResetFallback(error).catch(() => false)) return;
     if (stateNode) stateNode.textContent = 'needs repair';
     if (helpNode) helpNode.textContent = `Shell repair could not complete: ${error?.message || error}. Saved campus, model, media, and school storage was preserved.`;
     if (installButton) {
@@ -192,6 +211,7 @@ globalThis.CivweaveInstallerOnlineFallbackV225 = Object.freeze({
   campusUrl,
   repairInstalledShell,
   repairMessage: 'REPAIR_DEVICE_PACKAGE',
+  repairTimeoutMs: REPAIR_TIMEOUT_MS,
   storagePolicy: 'preserve-campus-model-media-school-storage'
 });
 
