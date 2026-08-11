@@ -1,4 +1,4 @@
-export const STRIPE_CONNECT_DIRECT_PROVIDER = 'stripe-connect-direct-v1';
+export const STRIPE_CONNECT_DIRECT_PROVIDER = 'stripe-connect-platform-reserve-v2';
 export const STRIPE_CONNECT_ACCOUNT_MODEL = 'configurable-controller-v1';
 
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
@@ -49,7 +49,7 @@ export class StripeConnectWorkerProvider {
     this.mode = stripeCredentialMode(this.secretKey);
     this.credentialsPresent = Boolean(this.secretKey);
     this.webhookVerificationReady = Boolean(this.webhookSecret);
-    this.operatorPayouts = 'stripe-connected-account-native';
+    this.operatorPayouts = 'platform-charge-separate-transfer';
     this.connectedAccountModel = STRIPE_CONNECT_ACCOUNT_MODEL;
   }
 
@@ -93,30 +93,172 @@ export class StripeConnectWorkerProvider {
   async createAccountLink({ accountId, refreshUrl, returnUrl } = {}) {
     return this.request('/v1/account_links', { form: { account: required(accountId, 'accountId', 180), refresh_url: safeUrl(refreshUrl, 'refreshUrl'), return_url: safeUrl(returnUrl, 'returnUrl'), type: 'account_onboarding', 'collection_options[fields]': 'eventually_due' } });
   }
-  async createTopUpCheckout({ accountId, nodeId, userId, topupId, grossCents, applicationFeeCents, currency = 'usd', successUrl, cancelUrl, idempotencyKey, displayName = 'Civweave node credit' } = {}) {
-    const gross = cents(grossCents, 'grossCents', { positive: true }), fee = cents(applicationFeeCents, 'applicationFeeCents');
-    if (fee > gross) throw new RangeError('applicationFeeCents cannot exceed grossCents.');
-    const meta = metadata({ civweave_schema: 'civweave.node-money-topup.v1', civweave_node_id: required(nodeId, 'nodeId', 180), civweave_user_id: required(userId, 'userId', 180), civweave_topup_id: required(topupId, 'topupId', 180) });
-    const form = { mode: 'payment', success_url: safeUrl(successUrl, 'successUrl'), cancel_url: safeUrl(cancelUrl, 'cancelUrl'), 'line_items[0][price_data][currency]': clean(currency, 12).toLowerCase(), 'line_items[0][price_data][product_data][name]': clean(displayName || 'Civweave node credit', 120), 'line_items[0][price_data][unit_amount]': gross, 'line_items[0][quantity]': 1, 'payment_intent_data[application_fee_amount]': fee };
-    for (const [key, value] of Object.entries(meta)) { form[`metadata[${key}]`] = value; form[`payment_intent_data[metadata][${key}]`] = value; }
-    return this.request('/v1/checkout/sessions', { accountId, form, idempotencyKey });
+
+  // Customer top-ups are platform charges. The host's connected account ID is metadata
+  // until settlement, when only the host's earned share is transferred out. This keeps
+  // user compute backing in the platform balance instead of entrusting it to hosts.
+  async createTopUpCheckout({ accountId, nodeId, userId, topupId, grossCents, currency = 'usd', successUrl, cancelUrl, idempotencyKey, displayName = 'Civweave node credit' } = {}) {
+    const gross = cents(grossCents, 'grossCents', { positive: true });
+    const meta = metadata({
+      civweave_schema: 'civweave.node-money-topup.v2',
+      civweave_node_id: required(nodeId, 'nodeId', 180),
+      civweave_user_id: required(userId, 'userId', 180),
+      civweave_topup_id: required(topupId, 'topupId', 180),
+      civweave_host_account_id: required(accountId, 'accountId', 180),
+      civweave_funds_model: 'platform-reserve-separate-transfer'
+    });
+    const form = {
+      mode: 'payment',
+      success_url: safeUrl(successUrl, 'successUrl'),
+      cancel_url: safeUrl(cancelUrl, 'cancelUrl'),
+      'line_items[0][price_data][currency]': clean(currency, 12).toLowerCase(),
+      'line_items[0][price_data][product_data][name]': clean(displayName || 'Civweave node credit', 120),
+      'line_items[0][price_data][unit_amount]': gross,
+      'line_items[0][quantity]': 1
+    };
+    for (const [key, value] of Object.entries(meta)) {
+      form[`metadata[${key}]`] = value;
+      form[`payment_intent_data[metadata][${key}]`] = value;
+    }
+    return this.request('/v1/checkout/sessions', { form, idempotencyKey });
   }
-  async retrieveCheckoutSession({ accountId, sessionId } = {}) {
-    return this.request(`/v1/checkout/sessions/${encodeURIComponent(required(sessionId, 'sessionId', 220))}`, { method: 'GET', accountId, query: { 'expand[]': ['payment_intent.latest_charge.balance_transaction'] } });
+
+  // Memberships are also platform charges. The host ID stays metadata on the
+  // subscription; each paid invoice is split only after Stripe's actual fee is known.
+  async createMembershipCheckout({
+    accountId,
+    nodeId,
+    userId,
+    tierId,
+    grossCents,
+    monthlyLifetimeCredits,
+    currency = 'usd',
+    successUrl,
+    cancelUrl,
+    idempotencyKey,
+    displayName = 'Civweave membership'
+  } = {}) {
+    const gross = cents(grossCents, 'grossCents', { positive: true });
+    const credits = Number(monthlyLifetimeCredits);
+    if (!Number.isSafeInteger(credits) || credits < 1) throw new RangeError('monthlyLifetimeCredits must be a positive integer.');
+    const meta = metadata({
+      civweave_schema: 'civweave.node-membership.v1',
+      civweave_node_id: required(nodeId, 'nodeId', 180),
+      civweave_user_id: required(userId, 'userId', 180),
+      civweave_tier_id: required(tierId, 'tierId', 80),
+      civweave_host_account_id: required(accountId, 'accountId', 180),
+      civweave_monthly_lifetime_credits: credits,
+      civweave_funds_model: 'platform-reserve-separate-transfer'
+    });
+    const form = {
+      mode: 'subscription',
+      success_url: safeUrl(successUrl, 'successUrl'),
+      cancel_url: safeUrl(cancelUrl, 'cancelUrl'),
+      client_reference_id: clean(userId, 200),
+      'line_items[0][price_data][currency]': clean(currency, 12).toLowerCase(),
+      'line_items[0][price_data][product_data][name]': clean(displayName || 'Civweave membership', 120),
+      'line_items[0][price_data][recurring][interval]': 'month',
+      'line_items[0][price_data][recurring][interval_count]': 1,
+      'line_items[0][price_data][unit_amount]': gross,
+      'line_items[0][quantity]': 1,
+      'subscription_data[description]': `${clean(displayName || 'Civweave membership', 120)} · monthly`,
+      'subscription_data[billing_mode][type]': 'flexible'
+    };
+    for (const [key, value] of Object.entries(meta)) {
+      form[`metadata[${key}]`] = value;
+      form[`subscription_data[metadata][${key}]`] = value;
+    }
+    return this.request('/v1/checkout/sessions', { form, idempotencyKey });
+  }
+
+  async retrieveCheckoutSession({ sessionId } = {}) {
+    return this.request(`/v1/checkout/sessions/${encodeURIComponent(required(sessionId, 'sessionId', 220))}`, { method: 'GET', query: { 'expand[]': ['payment_intent.latest_charge.balance_transaction'] } });
   }
   async verifyTopUpSession({ accountId, sessionId, nodeId, userId, topupId, grossCents, currency = 'usd' } = {}) {
-    const session = await this.retrieveCheckoutSession({ accountId, sessionId }), meta = session?.metadata || {};
+    const session = await this.retrieveCheckoutSession({ sessionId }), meta = session?.metadata || {};
     if (session.payment_status !== 'paid') throw new Error('Stripe Checkout Session is not paid.');
     if (Number(session.amount_total) !== cents(grossCents, 'grossCents', { positive: true })) throw new Error('Stripe Checkout amount does not match the top-up.');
     if (String(session.currency || '').toLowerCase() !== String(currency).toLowerCase()) throw new Error('Stripe Checkout currency does not match the top-up.');
     if (meta.civweave_node_id !== String(nodeId) || meta.civweave_user_id !== String(userId) || meta.civweave_topup_id !== String(topupId)) throw new Error('Stripe Checkout metadata does not match the Civweave top-up.');
+    if (meta.civweave_host_account_id !== String(accountId)) throw new Error('Stripe Checkout host account metadata does not match the Civweave node.');
     const pi = session.payment_intent; if (!pi || typeof pi !== 'object' || pi.status !== 'succeeded') throw new Error('Stripe PaymentIntent has not succeeded.');
     const charge = pi.latest_charge; if (!charge || typeof charge !== 'object' || charge.status !== 'succeeded') throw new Error('Stripe charge has not succeeded.');
     const balance = charge.balance_transaction; if (!balance || typeof balance !== 'object') throw new Error('Stripe charge balance transaction is unavailable.');
-    const applicationFeeCents = Number(pi.application_fee_amount || 0), totalFeeCents = Number(balance.fee || 0);
-    return Object.freeze({ sessionId: session.id, paymentIntentId: pi.id, chargeId: charge.id, balanceTransactionId: balance.id, grossCents: Number(session.amount_total), applicationFeeCents, processorFeeCents: Math.max(0, totalFeeCents - applicationFeeCents), currency: String(session.currency || '').toUpperCase() });
+    return Object.freeze({
+      sessionId: session.id,
+      paymentIntentId: pi.id,
+      chargeId: charge.id,
+      balanceTransactionId: balance.id,
+      grossCents: Number(session.amount_total),
+      applicationFeeCents: 0,
+      processorFeeCents: Math.max(0, Number(balance.fee || 0)),
+      netCents: Math.max(0, Number(balance.net ?? Number(session.amount_total) - Number(balance.fee || 0))),
+      currency: String(session.currency || '').toUpperCase()
+    });
   }
-  async refundTopUp({ accountId, chargeId, amountCents, idempotencyKey } = {}) {
-    return this.request('/v1/refunds', { accountId, idempotencyKey, form: { charge: required(chargeId, 'chargeId', 220), amount: cents(amountCents, 'amountCents', { positive: true }), refund_application_fee: 'true' } });
+
+  async listInvoicePayments(invoiceId) {
+    return this.request('/v1/invoice_payments', { method: 'GET', query: { invoice: required(invoiceId, 'invoiceId', 220), limit: 100 } });
+  }
+  async retrievePaymentIntent(paymentIntentId) {
+    return this.request(`/v1/payment_intents/${encodeURIComponent(required(paymentIntentId, 'paymentIntentId', 220))}`, { method: 'GET', query: { 'expand[]': ['latest_charge.balance_transaction'] } });
+  }
+  async verifyMembershipInvoice({ invoice, accountId, nodeId, userId, tierId, monthlyLifetimeCredits } = {}) {
+    if (!invoice || typeof invoice !== 'object') throw new TypeError('Stripe invoice is required.');
+    if (invoice.status !== 'paid' && Number(invoice.amount_paid || 0) < 1) throw new Error('Stripe membership invoice is not paid.');
+    const parent = invoice.parent;
+    if (parent?.type !== 'subscription_details') throw new Error('Stripe invoice was not generated by a subscription.');
+    const meta = parent?.subscription_details?.metadata || {};
+    if (meta.civweave_schema !== 'civweave.node-membership.v1') throw new Error('Stripe invoice is not a Civweave membership invoice.');
+    if (meta.civweave_node_id !== String(nodeId) || meta.civweave_user_id !== String(userId) || meta.civweave_tier_id !== String(tierId)) throw new Error('Stripe membership metadata does not match the Civweave member.');
+    if (meta.civweave_host_account_id !== String(accountId)) throw new Error('Stripe membership host account metadata does not match the Civweave node.');
+    if (Number(meta.civweave_monthly_lifetime_credits) !== Number(monthlyLifetimeCredits)) throw new Error('Stripe membership lifetime-credit metadata does not match the tier.');
+    const payments = await this.listInvoicePayments(invoice.id);
+    const paid = (Array.isArray(payments?.data) ? payments.data : []).find(item => item?.status === 'paid' && item?.payment?.type === 'payment_intent' && item?.payment?.payment_intent);
+    if (!paid) throw new Error('Stripe invoice has no settled PaymentIntent payment.');
+    const pi = await this.retrievePaymentIntent(paid.payment.payment_intent);
+    if (!pi || pi.status !== 'succeeded') throw new Error('Stripe membership PaymentIntent has not succeeded.');
+    const charge = pi.latest_charge;
+    if (!charge || typeof charge !== 'object' || charge.status !== 'succeeded') throw new Error('Stripe membership charge has not succeeded.');
+    const balance = charge.balance_transaction;
+    if (!balance || typeof balance !== 'object') throw new Error('Stripe membership balance transaction is unavailable.');
+    const gross = Math.max(0, Number(paid.amount_paid || invoice.amount_paid || 0));
+    const fee = Math.max(0, Number(balance.fee || 0));
+    return Object.freeze({
+      invoiceId: invoice.id,
+      subscriptionId: parent.subscription_details.subscription,
+      customerId: typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id || null,
+      paymentIntentId: pi.id,
+      chargeId: charge.id,
+      balanceTransactionId: balance.id,
+      grossCents: gross,
+      processorFeeCents: fee,
+      netCents: Math.max(0, Number(balance.net ?? gross - fee)),
+      currency: String(invoice.currency || charge.currency || '').toUpperCase(),
+      metadata: Object.freeze({ ...meta })
+    });
+  }
+
+  async createHostTransfer({ accountId, amountCents, currency = 'usd', sourceTransaction = '', transferGroup = '', idempotencyKey, metadata: extraMetadata = {} } = {}) {
+    const amount = cents(amountCents, 'amountCents', { positive: true });
+    const form = {
+      amount,
+      currency: clean(currency, 12).toLowerCase(),
+      destination: required(accountId, 'accountId', 180),
+      source_transaction: required(sourceTransaction, 'sourceTransaction', 220),
+      transfer_group: clean(transferGroup, 180)
+    };
+    for (const [key, value] of Object.entries(metadata(extraMetadata))) form[`metadata[${key}]`] = value;
+    return this.request('/v1/transfers', { form, idempotencyKey });
+  }
+
+  async reverseHostTransfer({ transferId, amountCents, idempotencyKey, metadata: extraMetadata = {} } = {}) {
+    const form = { amount: cents(amountCents, 'amountCents', { positive: true }) };
+    for (const [key, value] of Object.entries(metadata(extraMetadata))) form[`metadata[${key}]`] = value;
+    return this.request(`/v1/transfers/${encodeURIComponent(required(transferId, 'transferId', 220))}/reversals`, { form, idempotencyKey });
+  }
+
+  async refundTopUp({ chargeId, amountCents, idempotencyKey } = {}) {
+    return this.request('/v1/refunds', { idempotencyKey, form: { charge: required(chargeId, 'chargeId', 220), amount: cents(amountCents, 'amountCents', { positive: true }) } });
   }
 }
