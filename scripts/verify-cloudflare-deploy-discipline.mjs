@@ -16,4 +16,14 @@ assert(openMedia.includes('if [ "$TARGET_REF" = "main" ]'),'Open-media refresh m
 assert(openMedia.includes("COMMIT_MESSAGE='Refresh open learning media catalog'"),'Main open-media refresh must remain deployable.');
 assert(openMedia.includes("COMMIT_MESSAGE='[CF-Pages-Skip] Refresh open learning media catalog'"),'Non-main open-media refreshes must skip Pages previews.');
 
-console.log('Cloudflare deploy discipline verified: no evergreen mirror and non-production automation commits skip Pages previews.');
+const pagesBuild=read('scripts/build-cloudflare-pages.mjs');
+assert(pagesBuild.includes('await Promise.all(['),'Pages runtime staging must remain parallelized.');
+for(const required of ['stage-transformers-assets.mjs','stage-transformers-v4-assets.mjs','stage-maplibre-v275.mjs','stage-federation-finder-data-v274.mjs','materialize-parity-ledger.mjs']){
+  assert(pagesBuild.includes(required),`Pages build lost required generated runtime stage: ${required}`);
+}
+for(const forbidden of ['generate-prelive-metadata-v281.mjs','smoke-installer-resume-state-v280.mjs','smoke-installer-hardening-v281.mjs','build-mobile-install-kit.mjs']){
+  assert(!pagesBuild.includes(forbidden),`Pages deploy hot path must not run release/verification work: ${forbidden}`);
+}
+assert(!pagesBuild.includes('sourceOversized = oversizedFiles(sourceDir)'),'Pages deploy must not recursively audit both source and output trees.');
+
+console.log('Cloudflare deploy discipline verified: no duplicate preview mirror, non-production automation skips Pages, and the production build hot path stays parallel and release-only-work-free.');
