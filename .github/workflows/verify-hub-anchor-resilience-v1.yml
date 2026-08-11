@@ -1,0 +1,33 @@
+name: Verify Hub Anchor Resilience v1
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/node-cloud/src/anchor-registry.mjs'
+      - 'cloudflare/node-cloud/src/resilient-entry.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'scripts/civweave-hub-anchor-v1.mjs'
+      - 'scripts/test-hub-anchor-resilience-v1.mjs'
+      - 'scripts/test-hub-anchor-registry-v1.mjs'
+      - 'docs/operations/hub-anchor-resilience-v1.md'
+      - '.github/workflows/verify-hub-anchor-resilience-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check cloudflare/node-cloud/src/anchor-registry.mjs
+          node --check cloudflare/node-cloud/src/resilient-entry.mjs
+          node --check scripts/civweave-hub-anchor-v1.mjs
+      - name: Anchor policy and registry tests
+        run: node --test scripts/test-hub-anchor-resilience-v1.mjs scripts/test-hub-anchor-registry-v1.mjs
