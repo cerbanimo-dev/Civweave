@@ -6,6 +6,7 @@ const root = new URL('../', import.meta.url);
 const read = path => readFile(new URL(path, root), 'utf8');
 const parseJsonc = text => JSON.parse(text.split('\n').filter(line => !line.trim().startsWith('//')).join('\n'));
 const LIVE_MONEY_EDGE = 'https://civweave-core.glaedn.workers.dev';
+const LIVE_NODE_FABRIC = 'https://civweave-node-cloud.glaedn.workers.dev';
 
 const [topologyText, transportsText, coreWranglerText, nodeWranglerText, coreSource, liveCoreSource, moneySource, stripeSource, nodeSource, migration1, migration2, bootstrapSource, envExample, guide] = await Promise.all([
   read('config/launch-topology-v1.json'),
@@ -29,19 +30,24 @@ const core = parseJsonc(coreWranglerText), node = parseJsonc(nodeWranglerText);
 assert.equal(topology.platformFeeBps, 1500);
 assert.equal(topology.backbone.moneyEdgeAuthority, true);
 assert.equal(topology.backbone.publicApiOrigin, LIVE_MONEY_EDGE);
+assert.equal(topology.cloudNodeFabric.publicFabricOrigin, LIVE_NODE_FABRIC);
 assert.equal(topology.transition.cloudflareMoneyEdgeAuthority, true);
 assert.equal(topology.transition.renderIsAuthority, false);
 assert.equal(topology.transition.renderMoneyEdgeEnabled, false);
 assert.equal(topology.physicalNodeFabric.moneyEdgeUrl, LIVE_MONEY_EDGE);
 assert.equal(transports.moneyEdgeAuthority, LIVE_MONEY_EDGE);
 assert.equal(core.name, 'civweave-core');
+assert.equal(core.workers_dev, true);
+assert.equal(core.preview_urls, false);
 assert.equal(core.vars.CIVWEAVE_PLATFORM_FEE_BPS, '1500');
 assert.equal(core.vars.CIVWEAVE_MONEY_LIVE_ENABLED, 'false');
 assert.ok(core.d1_databases.some(x => x.binding === 'DB' && x.database_name === 'civweave-core'));
 assert.ok(core.r2_buckets.some(x => x.binding === 'PACKAGES' && x.bucket_name === 'civweave-distribution'));
 assert.ok(core.durable_objects.bindings.some(x => x.name === 'IDENTITY' && x.class_name === 'CivweaveCoreIdentity'));
 assert.ok(core.triggers.crons.includes('*/5 * * * *'));
-assert.ok(node.routes.some(x => x.pattern === '*.nodes.commonweave.earth/*'));
+assert.equal(node.workers_dev, true);
+assert.equal(node.preview_urls, false);
+assert.equal(node.vars.PUBLIC_FABRIC_ORIGIN, LIVE_NODE_FABRIC);
 assert.ok(node.durable_objects.bindings.some(x => x.name === 'NODES' && x.class_name === 'CivweaveCloudNode'));
 assert.ok(node.services.some(x => x.binding === 'CORE' && x.service === 'civweave-core'));
 for (const forbidden of ['STRIPE_SECRET_KEY', 'STRIPE_CONNECT_WEBHOOK_SECRET', 'CIVWEAVE_MONEY_EDGE_PRIVATE_KEY']) assert.ok(!JSON.stringify(node).includes(forbidden));
@@ -111,4 +117,4 @@ assert.equal(manifest.runtime, 'cloudflare-durable-object-v2');
 assert.equal(manifest.security.stripePlatformSecretPresent, false);
 assert.equal(manifest.security.cerbanimoSigningPrivateKeyPresent, false);
 
-console.log(JSON.stringify({ ok:true, authority:'cloudflare-core', platformFeeBps:1500, canonicalMoneyEdge:LIVE_MONEY_EDGE, d1:true, r2:true, durableIdentity:true, publicHostEnrollment:true, directCharge:true, refundApplicationFee:true, hostNodeSecretsDistributed:false, liveMoneyDefault:false }, null, 2));
+console.log(JSON.stringify({ ok:true, authority:'cloudflare-core', platformFeeBps:1500, canonicalMoneyEdge:LIVE_MONEY_EDGE, nodeFabric:LIVE_NODE_FABRIC, d1:true, r2Optional:true, durableIdentity:true, publicHostEnrollment:true, directCharge:true, refundApplicationFee:true, hostNodeSecretsDistributed:false, liveMoneyDefault:false }, null, 2));
