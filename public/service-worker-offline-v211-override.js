@@ -59,6 +59,7 @@ function v211Packet(meta = {}) {
     revision: V211_REVISION,
     policy: V211_POLICY,
     payloadPolicy: V211_PAYLOAD_POLICY,
+    explicitOptIn: Boolean(meta.explicitOptIn),
     cache: OFFLINE_CACHE,
     ready: Boolean(meta.ready) && failed.length === 0 && (!total || downloaded >= total),
     running: Boolean(meta.running) && !paused,
@@ -117,6 +118,7 @@ async function v211MigrateMeta(meta, manifest) {
   const legacyDownloaded = Math.max(0, Number(meta.downloaded ?? meta.successful ?? meta.completed ?? 0) || 0);
   const packet = v211Packet({
     ...meta,
+    explicitOptIn: Boolean(meta.explicitOptIn),
     running: false,
     paused: Boolean(meta.paused),
     interrupted: Boolean(meta.running && !meta.paused),
@@ -186,6 +188,7 @@ offlineStatus = async function offlineStatusV211() {
     running: false,
     paused: false,
     interrupted: false,
+    explicitOptIn: false,
     attempted: 0,
     downloaded: 0,
     total: manifest.seeds?.length || 0,
@@ -210,6 +213,7 @@ async function v211DownloadOfflinePackage(event) {
   const previousAssets = new Set((previous?.assets || []).filter(Boolean));
   const sameRelease = previous?.version === VERSION && previous?.revision === V211_REVISION && previous?.payloadPolicy === V211_PAYLOAD_POLICY;
   const previousDownloadedAssets = sameRelease ? (previous?.downloadedAssets || []) : [];
+  const explicitOptIn = Boolean(previous?.explicitOptIn) || event?.data?.background !== true;
   const now = Date.now();
   v211PauseRequested = false;
 
@@ -240,6 +244,7 @@ async function v211DownloadOfflinePackage(event) {
     const packet = v211Packet({
       ready,
       running,
+      explicitOptIn,
       paused: Boolean(extra.paused),
       interrupted: Boolean(extra.interrupted),
       attempted,
@@ -374,7 +379,7 @@ self.addEventListener('sync', event => {
   if (event.tag !== V211_SYNC_TAG) return;
   event.waitUntil((async () => {
     const status = await offlineStatus();
-    if (status.ready || status.paused || v211DownloadPromise) return status;
+    if (!status.explicitOptIn || status.ready || status.paused || v211DownloadPromise) return status;
     return downloadOfflinePackage(event);
   })());
 });
@@ -390,6 +395,7 @@ self.CivweaveOfflineCampusV211 = {
   resumablePerFile: true,
   pauseSupported: true,
   resumeSupported: true,
+  explicitOptInRequired: true,
   optionalDependenciesBlockCompletion: false,
   packet: v211Packet,
   migrateMeta: v211MigrateMeta,
