@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.1-knowledge-encyclopedia-bridge-v271';
+const VERSION='1.0.2-knowledge-encyclopedia-bridge-v271';
 if(globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.version===VERSION)return;
 const state={version:VERSION,ready:false,error:'',installed:false};
 globalThis.CivweaveKnowledgeEncyclopediaBridgeV271=state;
@@ -59,7 +59,7 @@ function patchGenerate(runtime,encyclopedia){
     if(['success','fallback'].includes(result?.status))return result;
     return{
       status:'success',
-      outputJson:{answer:fallbackAnswer(knowledge),choice:{mode:mode(system),system,room:clean(options?.context?.currentContext?.roomId,240),nextAction:''},assumptions:[],requiresConsent:false,confidence:Array.isArray(knowledge.sources)&&knowledge.sources.length?.82:.45,questDraft:null},
+      outputJson:{answer:fallbackAnswer(knowledge),choice:{mode:mode(system),system,room:clean(options?.context?.currentContext?.roomId,240),nextAction:''},assumptions:[],requiresConsent:false,confidence:(Array.isArray(knowledge.sources)&&knowledge.sources.length>0)?0.82:0.45,questDraft:null},
       outputText:'',
       actual:{provider:'local-knowledge-school',model:'knowledge-encyclopedia-v271-retrieval-fallback'},
       fallback:{used:true,reason:clean(result?.error?.message||'Selected model failed during local encyclopedia synthesis.',500)}
