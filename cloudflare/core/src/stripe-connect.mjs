@@ -2,6 +2,13 @@ export const STRIPE_CONNECT_DIRECT_PROVIDER = 'stripe-connect-direct-v1';
 export const STRIPE_CONNECT_ACCOUNT_MODEL = 'configurable-controller-v1';
 
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
+export function stripeCredentialMode(value = '') {
+  const key = clean(value, 10000);
+  if (!key) return 'unconfigured';
+  if (key.startsWith('sk_live_') || key.startsWith('rk_live_')) return 'live';
+  if (key.startsWith('sk_test_') || key.startsWith('rk_test_')) return 'sandbox';
+  return 'unrecognized';
+}
 function required(value, label, max = 4000) {
   const out = clean(value, max);
   if (!out) throw new TypeError(`${label} is required.`);
@@ -39,7 +46,7 @@ export class StripeConnectWorkerProvider {
     this.apiVersion = clean(apiVersion, 120);
     this.apiBase = new URL(apiBase).origin;
     this.fetch = fetchImpl;
-    this.mode = this.secretKey.startsWith('sk_live_') ? 'live' : this.secretKey.startsWith('sk_test_') ? 'sandbox' : 'unconfigured';
+    this.mode = stripeCredentialMode(this.secretKey);
     this.credentialsPresent = Boolean(this.secretKey);
     this.webhookVerificationReady = Boolean(this.webhookSecret);
     this.operatorPayouts = 'stripe-connected-account-native';

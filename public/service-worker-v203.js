@@ -1,12 +1,13 @@
-// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + code-coherence-v288 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + installed-shell-repair-v293 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-convergence-v250 + local-model-background-v267 + open-learning-media-v1
+// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + code-coherence-v288 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-convergence-v250 + local-model-background-v267 + open-learning-media-v1
 'use strict';
-importScripts('/app/system-routes-v227.js?v=1.0.104-five-system-route-contract-v227');
+importScripts('/app/system-routes-v227.js?v=1.0.105-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288');
-importScripts('/service-worker-core-v208.js?v=1.0.104-chat-convergence-v250');
+importScripts('/service-worker-core-v208.js?v=1.0.105-chat-convergence-v250');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
+importScripts('/service-worker-radio-core-v305.js?v=1.0.105-radio-core-shell-v305');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');
