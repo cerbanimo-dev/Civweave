@@ -1,5 +1,5 @@
 {
-  "version": "1.0.102",
+  "version": "1.0.103",
   "revision": "canonical-background-campus-v241-systems-mesh-v251",
   "payloadPolicy": "core-first-lazy-packs-v302",
   "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward and systems-mesh runtimes, compact federation seed, deterministic offline map runtime, and the lightweight Node AI operator/marketplace UI. Full federation discovery, decorative visuals and fonts, open-learning media, bulk encyclopedia data, and device-AI model payloads hydrate as optional packs on demand.",
