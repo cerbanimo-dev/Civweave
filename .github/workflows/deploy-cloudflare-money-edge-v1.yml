@@ -85,17 +85,36 @@ jobs:
               echo 'R2 is not enabled on this account. Continuing without the optional PACKAGES binding.'
             fi
           fi
-          if [ "$R2_READY" = 0 ]; then
-            node --input-type=module <<'NODE'
+
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const corePath = '.cloudflare-launch/core.wrangler.jsonc';
+          let core = fs.readFileSync(corePath, 'utf8');
+          core = core.replace(/\n  "routes": \[[\s\S]*?\n  \],/, '');
+          if (process.env.R2_READY === '0') core = core.replace(/\n  "r2_buckets": \[[\s\S]*?\n  \],/, '');
+          fs.writeFileSync(corePath, core);
+
+          const nodeSource = 'cloudflare/node-cloud/wrangler.jsonc';
+          const nodePath = '.cloudflare-launch/node-cloud.wrangler.jsonc';
+          let node = fs.readFileSync(nodeSource, 'utf8');
+          node = node.replace(/\n  "routes": \[[\s\S]*?\n  \],/, '');
+          node = node.replace('"main": "src/index.mjs"', '"main": "../cloudflare/node-cloud/src/index.mjs"');
+          fs.writeFileSync(nodePath, node);
+          NODE
+          echo "r2_ready=$R2_READY" >> "$GITHUB_OUTPUT"
+        env:
+          R2_READY: ${{ env.R2_READY }}
+
+      - name: Strip optional R2 binding when unavailable
+        if: steps.resources.outputs.r2_ready == '0'
+        run: |
+          node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const path = '.cloudflare-launch/core.wrangler.jsonc';
           const before = fs.readFileSync(path, 'utf8');
           const after = before.replace(/\n  "r2_buckets": \[[\s\S]*?\n  \],/, '');
-          if (after === before) throw new Error('Could not remove optional R2 binding from generated Wrangler config.');
           fs.writeFileSync(path, after);
           NODE
-          fi
-          echo "r2_ready=$R2_READY" >> "$GITHUB_OUTPUT"
 
       - name: Apply D1 migrations
         run: npx --yes wrangler@latest d1 migrations apply civweave-core --remote --config .cloudflare-launch/core.wrangler.jsonc
@@ -105,10 +124,18 @@ jobs:
         run: |
           set -euo pipefail
           npx --yes wrangler@latest deploy --dry-run --config .cloudflare-launch/core.wrangler.jsonc
-          npx --yes wrangler@latest deploy --dry-run --config cloudflare/node-cloud/wrangler.jsonc
+          npx --yes wrangler@latest deploy --dry-run --config .cloudflare-launch/node-cloud.wrangler.jsonc
 
       - name: Deploy Cloudflare core authority
-        run: npx --yes wrangler@latest deploy --config .cloudflare-launch/core.wrangler.jsonc
+        id: deploy_core
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@latest deploy --config .cloudflare-launch/core.wrangler.jsonc 2>&1 | tee /tmp/civweave-core-deploy.log
+          CORE_URL="$(grep -Eo 'https://[^[:space:]]+\.workers\.dev' /tmp/civweave-core-deploy.log | tail -1 || true)"
+          test -n "$CORE_URL" || { echo 'Could not determine civweave-core workers.dev URL'; exit 4; }
+          echo "core_url=$CORE_URL" >> "$GITHUB_OUTPUT"
+          echo "Civweave money edge: $CORE_URL"
 
       - name: Configure core secrets when supplied
         shell: bash
@@ -132,22 +159,33 @@ jobs:
           printf '%s' "$NODE_FABRIC_BINDING_TOKEN" > /tmp/civweave-node-fabric-binding-token
 
       - name: Deploy Cloudflare host-node fabric
-        run: npx --yes wrangler@latest deploy --config cloudflare/node-cloud/wrangler.jsonc
+        id: deploy_nodes
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@latest deploy --config .cloudflare-launch/node-cloud.wrangler.jsonc 2>&1 | tee /tmp/civweave-node-cloud-deploy.log
+          NODE_URL="$(grep -Eo 'https://[^[:space:]]+\.workers\.dev' /tmp/civweave-node-cloud-deploy.log | tail -1 || true)"
+          test -n "$NODE_URL" || { echo 'Could not determine civweave-node-cloud workers.dev URL'; exit 5; }
+          echo "node_url=$NODE_URL" >> "$GITHUB_OUTPUT"
+          echo "Civweave node fabric: $NODE_URL"
 
       - name: Configure host-node fabric secrets
         shell: bash
         run: |
           set -euo pipefail
           BINDING_TOKEN="$(cat /tmp/civweave-node-fabric-binding-token)"
-          printf '%s' "$BINDING_TOKEN" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --config cloudflare/node-cloud/wrangler.jsonc
+          printf '%s' "$BINDING_TOKEN" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --config .cloudflare-launch/node-cloud.wrangler.jsonc
           if [ -n "${NODE_FABRIC_OPERATOR_TOKEN:-}" ]; then
-            printf '%s' "$NODE_FABRIC_OPERATOR_TOKEN" | npx --yes wrangler@latest secret put NODE_FABRIC_OPERATOR_TOKEN --config cloudflare/node-cloud/wrangler.jsonc
+            printf '%s' "$NODE_FABRIC_OPERATOR_TOKEN" | npx --yes wrangler@latest secret put NODE_FABRIC_OPERATOR_TOKEN --config .cloudflare-launch/node-cloud.wrangler.jsonc
           else
             echo 'NODE_FABRIC_OPERATOR_TOKEN not present in GitHub secrets; existing Cloudflare value is left unchanged/unconfigured.'
           fi
 
       - name: Probe deployed money edge and node fabric
         shell: bash
+        env:
+          CORE_URL: ${{ steps.deploy_core.outputs.core_url }}
+          NODE_URL: ${{ steps.deploy_nodes.outputs.node_url }}
         run: |
           set -euo pipefail
           probe() {
@@ -156,20 +194,28 @@ jobs:
             curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "$url"
             echo
           }
-          probe https://api.commonweave.earth/api/health
-          probe https://api.commonweave.earth/api/money-edge/status
-          probe https://api.commonweave.earth/api/money-edge/trust
-          probe https://nodes.commonweave.earth/api/fabric/health
+          probe "$CORE_URL/api/health"
+          probe "$CORE_URL/api/money-edge/status"
+          probe "$CORE_URL/api/money-edge/trust"
+          probe "$NODE_URL/api/fabric/health"
 
       - name: Confirm live money remains fail-closed
         shell: bash
+        env:
+          CORE_URL: ${{ steps.deploy_core.outputs.core_url }}
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors https://api.commonweave.earth/api/money-edge/status > /tmp/money-status.json
+          curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "$CORE_URL/api/money-edge/status" > /tmp/money-status.json
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const payload = JSON.parse(fs.readFileSync('/tmp/money-status.json','utf8'));
           const edge = payload.moneyEdge || payload;
           if (edge.liveReady === true) throw new Error('Refusing deployment verification: live money unexpectedly reports ready.');
-          console.log(JSON.stringify({ ok: true, authority: payload.authority || edge.authority, liveReady: edge.liveReady, structuralBlockers: edge.structuralBlockers || [], operationalBlockers: edge.operationalBlockers || [], r2Ready: '${{ steps.resources.outputs.r2_ready }}' === '1' }, null, 2));
+          console.log(JSON.stringify({ ok: true, authority: payload.authority || edge.authority, liveReady: edge.liveReady, structuralBlockers: edge.structuralBlockers || [], operationalBlockers: edge.operationalBlockers || [] }, null, 2));
           NODE
+
+      - name: Publish deployment URLs
+        run: |
+          echo "Money edge: ${{ steps.deploy_core.outputs.core_url }}"
+          echo "Node fabric: ${{ steps.deploy_nodes.outputs.node_url }}"
+          echo "R2 enabled: ${{ steps.resources.outputs.r2_ready }}"
