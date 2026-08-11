@@ -27,6 +27,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
       STRIPE_CONNECT_WEBHOOK_SECRET: ${{ secrets.STRIPE_CONNECT_WEBHOOK_SECRET }}
+      STRIPE_CONNECT_THIN_WEBHOOK_SECRET: ${{ secrets.STRIPE_CONNECT_THIN_WEBHOOK_SECRET }}
       NODE_FABRIC_BINDING_TOKEN: ${{ secrets.NODE_FABRIC_BINDING_TOKEN }}
       NODE_FABRIC_OPERATOR_TOKEN: ${{ secrets.NODE_FABRIC_OPERATOR_TOKEN }}
     steps:
@@ -35,6 +36,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+
+      - name: Install Stripe SDK used by the core Worker
+        run: npm install --prefix cloudflare/core --omit=dev --no-audit --no-fund
 
       - name: Require Cloudflare deployment credentials
         shell: bash
@@ -151,6 +155,7 @@ jobs:
           }
           put_secret STRIPE_SECRET_KEY "${STRIPE_SECRET_KEY:-}"
           put_secret STRIPE_CONNECT_WEBHOOK_SECRET "${STRIPE_CONNECT_WEBHOOK_SECRET:-}"
+          put_secret STRIPE_CONNECT_THIN_WEBHOOK_SECRET "${STRIPE_CONNECT_THIN_WEBHOOK_SECRET:-}"
           if [ -z "${NODE_FABRIC_BINDING_TOKEN:-}" ]; then
             NODE_FABRIC_BINDING_TOKEN="$(node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))")"
             echo 'Generated a fresh internal node-fabric binding token for this deployment.'
@@ -197,6 +202,7 @@ jobs:
           probe "$CORE_URL/api/health"
           probe "$CORE_URL/api/money-edge/status"
           probe "$CORE_URL/api/money-edge/trust"
+          probe "$CORE_URL/connect-demo"
           probe "$NODE_URL/api/fabric/health"
 
       - name: Confirm live money remains fail-closed
@@ -217,5 +223,7 @@ jobs:
       - name: Publish deployment URLs
         run: |
           echo "Money edge: ${{ steps.deploy_core.outputs.core_url }}"
+          echo "Connect sample: ${{ steps.deploy_core.outputs.core_url }}/connect-demo"
+          echo "Thin webhook: ${{ steps.deploy_core.outputs.core_url }}/api/connect-demo/webhooks/stripe-thin"
           echo "Node fabric: ${{ steps.deploy_nodes.outputs.node_url }}"
           echo "R2 enabled: ${{ steps.resources.outputs.r2_ready }}"
