@@ -28,7 +28,7 @@ async function verifyMoneyEdgeEvent(env, rawText, header) {
   if (!trustResponse.ok || !envelope?.trust?.publicKey) throw Object.assign(new Error('Core money-edge trust identity is unavailable.'), { status: 503 });
   if (clean(envelope.trust.keyId, 120) !== keyId) throw Object.assign(new Error('Money-edge event signing key is not trusted.'), { status: 401 });
   const publicKey = await crypto.subtle.importKey('spki', pemToDer(envelope.trust.publicKey), { name: 'Ed25519' }, false, ['verify']);
-  const raw = enc.encode(rawText), message = concatBytes(enc.encode(`civweave.money-edge-event.v1\n${timestamp}\n`), raw);
+  const message = concatBytes(enc.encode(`civweave.money-edge-event.v1\n${timestamp}\n`), enc.encode(rawText));
   const valid = await crypto.subtle.verify({ name: 'Ed25519' }, publicKey, fromB64url(signature), message);
   if (!valid) throw Object.assign(new Error('Money-edge event signature is invalid.'), { status: 401 });
   return envelope.trust;
@@ -153,7 +153,7 @@ export default {
     const payoutMatch = url.pathname.match(/^\/api\/fabric\/nodes\/([a-zA-Z0-9-]+)\/payouts$/);
     if (payoutMatch && request.method === 'POST' && !nodeFromHost) {
       if (!await secretEqual(request.headers.get('authorization')?.replace(/^Bearer\s+/i, ''), env.NODE_FABRIC_OPERATOR_TOKEN)) return json({ ok: false, error: 'forbidden' }, 403);
-      const nodeId = normalizeNodeId(payoutMatch[1]), manifestResponse = await callNode(env, nodeId, new Request(`https://${nodeId}.${domain}/api/ai/node/manifest`, { method: 'GET' }), '/api/ai/node/manifest'), envelope = await manifestResponse.json(), manifest = envelope.manifest, input = await request.json().catch(() => ({}), identity = { nodeId: manifest.nodeId, operatorId: manifest.operatorId, callbackUrl: manifest.publicOrigin };
+      const nodeId = normalizeNodeId(payoutMatch[1]), manifestResponse = await callNode(env, nodeId, new Request(`https://${nodeId}.${domain}/api/ai/node/manifest`, { method: 'GET' }), '/api/ai/node/manifest'), envelope = await manifestResponse.json(), manifest = envelope.manifest, input = await request.json().catch(() => ({})), identity = { nodeId: manifest.nodeId, operatorId: manifest.operatorId, callbackUrl: manifest.publicOrigin };
       const enrollment = (await coreJson(env, '/api/money-edge/enrollment/start', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(identity) })).enrollment;
       const registration = (await coreJson(env, '/api/money-edge/nodes/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...identity, enrollmentGrant: enrollment.token, email: input.email || undefined, country: input.country || undefined }) })).registration;
       return json({ ok: true, registration }, 201);
