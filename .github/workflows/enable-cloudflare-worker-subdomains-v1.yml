@@ -1,0 +1,70 @@
+name: Enable Civweave Workers.dev Endpoints
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CORE_URL: https://civweave-core.glaedn.workers.dev
+      NODE_URL: https://civweave-node-cloud.glaedn.workers.dev
+    steps:
+      - name: Enable stable workers.dev routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          enable_subdomain() {
+            local script="$1"
+            echo "Enabling workers.dev for ${script}"
+            curl --fail --silent --show-error \
+              --request POST \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${script}/subdomain" \
+              --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              --header 'Content-Type: application/json' \
+              --data '{"enabled":true,"previews_enabled":false}' | tee "/tmp/${script}-subdomain.json"
+            node --input-type=module - "/tmp/${script}-subdomain.json" <<'NODE'
+          import fs from 'node:fs';
+          const file = process.argv[2];
+          const payload = JSON.parse(fs.readFileSync(file, 'utf8'));
+          if (!payload.success || payload.result?.enabled !== true) throw new Error(`workers.dev enable failed: ${JSON.stringify(payload.errors || payload)}`);
+          console.log(JSON.stringify(payload.result));
+          NODE
+          }
+          enable_subdomain civweave-core
+          enable_subdomain civweave-node-cloud
+
+      - name: Probe core money edge
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in /api/health /api/money-edge/status /api/money-edge/trust; do
+            echo "GET ${CORE_URL}${path}"
+            curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "${CORE_URL}${path}"
+            echo
+          done
+
+      - name: Probe host-node fabric
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "GET ${NODE_URL}/api/fabric/health"
+          curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "${NODE_URL}/api/fabric/health"
+          echo
+
+      - name: Report canonical endpoints
+        run: |
+          echo "CIVWEAVE_MONEY_EDGE_URL=${CORE_URL}"
+          echo "CIVWEAVE_NODE_FABRIC_URL=${NODE_URL}"
