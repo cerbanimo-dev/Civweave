@@ -1,0 +1,53 @@
+name: Align watchdog with manual-first installer v304
+
+on:
+  push:
+    branches:
+      - fix/manual-first-installer-v304
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/manual-first-installer-v304
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Update watchdog simulation for explicit shell action
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/smoke-service-worker-registration-watchdog-v207.mjs')
+          s=p.read_text()
+          anchor="source=source.replace(\"body:{append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}\",\"body:{isConnected:true,append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}\");"
+          addition="""
+source=source.replace("vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-stall.js'});\\n  await delay(450);","vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-stall.js'});\\n  harness.nodes.get('#check-update').click();\\n  await delay(450);");
+source=source.replace("vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-repeat.js'});\\n  await delay(120);","vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-repeat.js'});\\n  harness.nodes.get('#check-update').click();\\n  await delay(120);");
+source=source.replace("vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-current.js'});\\n  await delay(120);","vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-current.js'});\\n  harness.nodes.get('#check-update').click();\\n  await delay(120);");
+""".strip()
+          if anchor not in s:
+              raise SystemExit('watchdog compatibility anchor not found')
+          if "install-watchdog-stall.js'});\\n  harness.nodes.get('#check-update').click()" not in s:
+              s=s.replace(anchor,anchor+'\n'+addition)
+          p.write_text(s)
+          PY
+      - name: Verify watchdog and manual-first contracts
+        run: |
+          node scripts/smoke-service-worker-registration-watchdog-v207.mjs
+          node scripts/smoke-installer-hardening-v281.mjs
+          node scripts/verify-release-version-sync.mjs
+      - name: Commit and remove helper workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/align-watchdog-manual-first-v304.yml
+          git add -A
+          git commit -m "Align registration watchdog with explicit shell actions"
+          git push origin HEAD:fix/manual-first-installer-v304
