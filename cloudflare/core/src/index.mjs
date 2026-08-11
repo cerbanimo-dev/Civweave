@@ -1,4 +1,7 @@
 import { CloudflareMoneyEdge, derToPem, moneyEdgeError } from './money-edge-with-memberships.mjs';
+import { handlePassportRequest } from './passport-edge.mjs';
+import { handlePortableCreditRequest, handlePortableCreditStripeEvent } from './portable-credit-edge.mjs';
+import { handleFellowFareCommerceRequest, handleFellowFareStripeEvent, handleCredentialVerificationRequest } from './fellowfare-commerce.mjs';
 
 export const CORE_SCHEMA = 'civweave.cloudflare-core.v2';
 export const NODE_SCHEMA = 'civweave.node.v1';
@@ -7,10 +10,7 @@ const encoder = new TextEncoder();
 const clean = (value, max = 500) => String(value ?? '').trim().slice(0, max);
 const slug = value => clean(value, 120).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 const nowIso = () => new Date().toISOString();
-const json = (value, status = 200, headers = {}) => new Response(JSON.stringify(value, null, 2), {
-  status,
-  headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers }
-});
+const json = (value, status = 200, headers = {}) => new Response(JSON.stringify(value, null, 2), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers } });
 function b64url(bytes) { const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes); let binary = ''; for (const byte of data) binary += String.fromCharCode(byte); return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/g, ''); }
 function fromB64url(value) { const normalized = String(value).replaceAll('-', '+').replaceAll('_', '/'); const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4); const binary = atob(padded); return Uint8Array.from(binary, char => char.charCodeAt(0)); }
 function concatBytes(...parts) { const arrays = parts.map(part => part instanceof Uint8Array ? part : new Uint8Array(part)); const size = arrays.reduce((sum, part) => sum + part.byteLength, 0); const out = new Uint8Array(size); let offset = 0; for (const part of arrays) { out.set(part, offset); offset += part.byteLength; } return out; }
@@ -18,20 +18,12 @@ async function sha256Hex(value) { const bytes = value instanceof Uint8Array ? va
 async function secretEqual(left, right) { if (!left || !right) return false; const [a, b] = await Promise.all([sha256Hex(left), sha256Hex(right)]); let diff = a.length ^ b.length; for (let i = 0; i < Math.min(a.length, b.length); i += 1) diff |= a.charCodeAt(i) ^ b.charCodeAt(i); return diff === 0; }
 
 export const launchTopology = Object.freeze({
-  schema: 'civweave.launch-topology.v1',
-  canonicalInstallOrigin: 'https://commonweave.pages.dev',
-  coreApiOrigin: 'https://api.commonweave.earth',
-  cloudNodeDomain: 'nodes.commonweave.earth',
-  nodeProtocol: NODE_SCHEMA,
-  platformFeeBps: 500,
+  schema: 'civweave.launch-topology.v1', canonicalInstallOrigin: 'https://commonweave.pages.dev', coreApiOrigin: 'https://api.commonweave.earth', cloudNodeDomain: 'nodes.commonweave.earth', nodeProtocol: NODE_SCHEMA, platformFeeBps: 500,
   economy: Object.freeze({
-    topup: Object.freeze({ systemBps: 7000, hostBps: 2500, cerbanimoBps: 500, fundsModel: 'platform-reserve-separate-transfer' }),
-    membership: Object.freeze({ systemBps: 5000, hostBps: 2500, cerbanimoBps: 2500, lifetimeCredits: 'monthly-non-expiring-tier-grant' })
-  }),
-  moneyEdgeAuthority: 'cloudflare-core',
-  renderFallbackDiscoverable: true,
-  renderMoneyEdgeAuthority: false,
-  liveMoneyEnabledByDefault: false
+    topup: Object.freeze({ systemBps: 7000, hostBps: 2500, cerbanimoBps: 500, fundsModel: 'platform-reserve-separate-transfer', portableAuthority: 'passport-stripe-customer-billing-credits' }),
+    membership: Object.freeze({ systemBps: 5000, hostBps: 2500, cerbanimoBps: 2500, lifetimeCredits: 'monthly-non-expiring-tier-grant' }),
+    fellowfare: Object.freeze({ networkFeeBps: 100, hostBps: 50, cerbanimoBps: 50, feePlacement: 'buyer-surcharge', internalButtonAcornFeeBps: 0 })
+  }), moneyEdgeAuthority: 'cloudflare-core', renderFallbackDiscoverable: true, renderMoneyEdgeAuthority: false, liveMoneyEnabledByDefault: false
 });
 
 export function normalizeNodeRecord(input = {}) {
@@ -75,19 +67,12 @@ export async function verifyStripeWebhook({ rawBody, signatureHeader, secret, no
 
 async function listNodes(env, limit = 100) {
   const bounded = Math.max(1, Math.min(250, Number(limit) || 100));
-  const result = await env.DB.prepare(`SELECT node_id AS nodeId, operator_id AS operatorId, display_name AS displayName,
-    runtime, public_origin AS publicOrigin, capabilities_json AS capabilitiesJson, status, updated_at AS updatedAt
-    FROM nodes ORDER BY updated_at DESC LIMIT ?1`).bind(bounded).all();
+  const result = await env.DB.prepare(`SELECT node_id AS nodeId, operator_id AS operatorId, display_name AS displayName, runtime, public_origin AS publicOrigin, capabilities_json AS capabilitiesJson, status, updated_at AS updatedAt FROM nodes ORDER BY updated_at DESC LIMIT ?1`).bind(bounded).all();
   return (result.results || []).map(row => ({ ...row, capabilities: JSON.parse(row.capabilitiesJson || '[]'), capabilitiesJson: undefined }));
 }
 async function upsertNode(env, record) {
   const node = normalizeNodeRecord(record);
-  await env.DB.prepare(`INSERT INTO nodes(node_id,operator_id,display_name,runtime,public_origin,capabilities_json,status,updated_at)
-    VALUES(?1,?2,?3,?4,?5,?6,?7,?8)
-    ON CONFLICT(node_id) DO UPDATE SET operator_id=excluded.operator_id,display_name=excluded.display_name,
-      runtime=excluded.runtime,public_origin=excluded.public_origin,capabilities_json=excluded.capabilities_json,
-      status=excluded.status,updated_at=excluded.updated_at`)
-    .bind(node.nodeId, node.operatorId, node.displayName, node.runtime, node.publicOrigin, JSON.stringify(node.capabilities), node.status, node.updatedAt).run();
+  await env.DB.prepare(`INSERT INTO nodes(node_id,operator_id,display_name,runtime,public_origin,capabilities_json,status,updated_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?8) ON CONFLICT(node_id) DO UPDATE SET operator_id=excluded.operator_id,display_name=excluded.display_name,runtime=excluded.runtime,public_origin=excluded.public_origin,capabilities_json=excluded.capabilities_json,status=excluded.status,updated_at=excluded.updated_at`).bind(node.nodeId, node.operatorId, node.displayName, node.runtime, node.publicOrigin, JSON.stringify(node.capabilities), node.status, node.updatedAt).run();
   return node;
 }
 
@@ -99,11 +84,22 @@ async function stripeWebhook(request, env, edge) {
   if (!event?.id || !event?.type) return json({ ok: false, error: 'stripe-event-missing-id-or-type' }, 400);
   const mode = edge.provider.mode;
   if ((mode === 'live' && !event.livemode) || (mode === 'sandbox' && event.livemode)) return json({ ok: false, error: 'stripe-event-mode-mismatch' }, 400);
-  const inserted = await env.DB.prepare(`INSERT OR IGNORE INTO stripe_events(event_id,event_type,livemode,payload_json,received_at)
-    VALUES(?1,?2,?3,?4,?5)`).bind(clean(event.id, 180), clean(event.type, 180), event.livemode ? 1 : 0, rawBody, nowIso()).run();
-  if (Number(inserted?.meta?.changes ?? inserted?.changes ?? 0) === 0) return json({ ok: true, duplicate: true, received: event.id });
-  try { const result = await edge.handleProviderEvent(event); return json({ ok: true, received: event.id, result }); }
-  catch (error) { await env.DB.prepare(`UPDATE stripe_events SET processing_error=?1 WHERE event_id=?2`).bind(clean(error?.message || error, 1200), event.id).run().catch(() => {}); const safe = moneyEdgeError(error); return json(safe.body, safe.status); }
+  const inserted = await env.DB.prepare(`INSERT OR IGNORE INTO stripe_events(event_id,event_type,livemode,payload_json,received_at) VALUES(?1,?2,?3,?4,?5)`).bind(clean(event.id, 180), clean(event.type, 180), event.livemode ? 1 : 0, rawBody, nowIso()).run();
+  if (Number(inserted?.meta?.changes ?? inserted?.changes ?? 0) === 0) {
+    const prior = await env.DB.prepare('SELECT processing_error FROM stripe_events WHERE event_id=?1').bind(event.id).first();
+    if (!prior?.processing_error) return json({ ok: true, duplicate: true, received: event.id });
+  }
+  try {
+    const results = {};
+    results.moneyEdge = await edge.handleProviderEvent(event);
+    results.portableCredits = await handlePortableCreditStripeEvent(event, env, edge);
+    results.fellowfare = await handleFellowFareStripeEvent(event, env, edge);
+    await env.DB.prepare('UPDATE stripe_events SET processing_error=NULL WHERE event_id=?1').bind(event.id).run();
+    return json({ ok: true, received: event.id, results });
+  } catch (error) {
+    await env.DB.prepare(`UPDATE stripe_events SET processing_error=?1 WHERE event_id=?2`).bind(clean(error?.message || error, 1200), event.id).run().catch(() => {});
+    const safe = moneyEdgeError(error); return json(safe.body, safe.status);
+  }
 }
 
 export async function handleMoneyEdgeRequest(request, env, options = {}) {
@@ -128,15 +124,18 @@ export async function handleMoneyEdgeRequest(request, env, options = {}) {
 
 async function routeApi(request, env) {
   const url = new URL(request.url), money = await handleMoneyEdgeRequest(request, env); if (money) return money;
-  if (request.method === 'GET' && url.pathname === '/api/health') { const edge = new CloudflareMoneyEdge(env); return json({ schema: CORE_SCHEMA, ok: true, authority: 'cloudflare-core', bindings: { d1: Boolean(env.DB), r2: Boolean(env.PACKAGES), identity: Boolean(env.IDENTITY) }, moneyEdge: edge.readiness(), platformFeeBps: Number(env.CIVWEAVE_PLATFORM_FEE_BPS || 500) }); }
-  if (request.method === 'GET' && url.pathname === '/api/trust') { const edge = new CloudflareMoneyEdge(env); return json({ trust: await edge.trustDocument(url.origin) }); }
+  const edge = new CloudflareMoneyEdge(env);
+  const credential = await handleCredentialVerificationRequest(request, env); if (credential) return credential;
+  const passport = await handlePassportRequest(request, env, edge); if (passport) return passport;
+  const portable = await handlePortableCreditRequest(request, env, edge); if (portable) return portable;
+  const fellowfare = await handleFellowFareCommerceRequest(request, env, edge); if (fellowfare) return fellowfare;
+  if (request.method === 'GET' && url.pathname === '/api/health') return json({ schema: CORE_SCHEMA, ok: true, authority: 'cloudflare-core', bindings: { d1: Boolean(env.DB), r2: Boolean(env.PACKAGES), identity: Boolean(env.IDENTITY) }, moneyEdge: edge.readiness(), platformFeeBps: Number(env.CIVWEAVE_PLATFORM_FEE_BPS || 500), passportRoaming: true, portableCredits: Boolean(env.CIVWEAVE_STRIPE_BILLING_CREDITS_ENABLED), fellowfareCommerce: true });
+  if (request.method === 'GET' && url.pathname === '/api/trust') return json({ trust: await edge.trustDocument(url.origin) });
   if (request.method === 'GET' && url.pathname === '/api/launch-topology') return json({ ...launchTopology, platformFeeBps: Number(env.CIVWEAVE_PLATFORM_FEE_BPS || 500) });
   if (request.method === 'GET' && url.pathname === '/api/nodes') return json({ schema: 'civweave.node-directory.v1', nodes: await listNodes(env, url.searchParams.get('limit')) });
   if (request.method === 'GET' && url.pathname.startsWith('/api/nodes/')) {
     const nodeId = slug(url.pathname.slice('/api/nodes/'.length));
-    const row = await env.DB.prepare(`SELECT node_id AS nodeId,operator_id AS operatorId,display_name AS displayName,
-      runtime,public_origin AS publicOrigin,capabilities_json AS capabilitiesJson,status,updated_at AS updatedAt
-      FROM nodes WHERE node_id=?1`).bind(nodeId).first();
+    const row = await env.DB.prepare(`SELECT node_id AS nodeId,operator_id AS operatorId,display_name AS displayName,runtime,public_origin AS publicOrigin,capabilities_json AS capabilitiesJson,status,updated_at AS updatedAt FROM nodes WHERE node_id=?1`).bind(nodeId).first();
     if (!row) return json({ ok: false, error: 'node-not-found' }, 404);
     return json({ ...row, capabilities: JSON.parse(row.capabilitiesJson || '[]'), capabilitiesJson: undefined });
   }
