@@ -111,6 +111,7 @@ const recoveryKey='civweave.shell.registration-watchdog.v208';
     cacheNames:['cwknowledge-school-seeds-v2','civweave-stale-package'],
   });
   vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-stall.js'});
+  harness.nodes.get('#check-update').click();
   await delay(450);
   assert.match(harness.location.replaced||'',/registration-recovery=/,'A stalled registration did not trigger one automatic recovery reload.');
   assert(harness.deleted.includes('civweave-stale-package'),'Automatic recovery did not clear stale app caches.');
@@ -126,6 +127,7 @@ const recoveryKey='civweave.shell.registration-watchdog.v208';
     session:{[recoveryKey]:'1'},
   });
   vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-repeat.js'});
+  harness.nodes.get('#check-update').click();
   await delay(120);
   assert.equal(harness.location.replaced,null,'A second watchdog failure entered a reload loop.');
   assert.equal(harness.nodes.get('#install-app').textContent,'Reset app shell and retry','A repeated stall did not expose manual recovery.');
@@ -150,6 +152,7 @@ const recoveryKey='civweave.shell.registration-watchdog.v208';
     ready:Promise.resolve(registration),
   });
   vm.runInNewContext(acceleratedInstaller,harness.context,{filename:'install-watchdog-current.js'});
+  harness.nodes.get('#check-update').click();
   await delay(120);
   assert.equal(registerCalls,0,'An already-current active worker was redundantly registered.');
   assert.equal(harness.nodes.get('#package-state').textContent,'ready','The reused current worker did not complete shell readiness.');
