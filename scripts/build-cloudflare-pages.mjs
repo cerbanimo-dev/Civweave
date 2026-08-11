@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 
 import {
+  chmodSync,
   cpSync,
   existsSync,
+  mkdtempSync,
   readdirSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "node:fs";
+import { tmpdir } from "node:os";
 import { spawn, spawnSync } from "node:child_process";
-import { dirname, relative, resolve, sep } from "node:path";
+import { delimiter, dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -27,6 +31,7 @@ const federationDataStage = resolve(scriptDir, "stage-federation-finder-data-v27
 const mapPackageBuilder = resolve(scriptDir, "build-civweave-map-v1.mjs");
 const mobileInstallBuilder = resolve(scriptDir, "build-mobile-install-kit.mjs");
 const validationSafe = resolve(scriptDir, "apply-confidence-weighted-validation-v1-safe.mjs");
+const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
 
 // Keep only cheap deterministic synchronizers in the deploy path. Expensive
@@ -61,6 +66,34 @@ function runNodeScriptAsync(script, failureMessage) {
   });
 }
 
+function commandAvailable(command, args=["-v"]) {
+  const result=spawnSync(command,args,{cwd:repoRoot,stdio:"ignore"});
+  return !result.error&&result.status===0;
+}
+
+function withPortableZipFallback(task) {
+  if (process.platform === "win32" || commandAvailable("zip")) return task();
+  if (!existsSync(portableZipScript)) throw new Error(`Portable ZIP writer not found: ${portableZipScript}`);
+  const shimDir=mkdtempSync(join(tmpdir(),"civweave-portable-zip-"));
+  const shimPath=join(shimDir,"zip");
+  const previousPath=process.env.PATH;
+  const previousNode=process.env.CIVWEAVE_NODE_BIN;
+  const previousScript=process.env.CIVWEAVE_PORTABLE_ZIP_SCRIPT;
+  writeFileSync(shimPath,'#!/bin/sh\nexec "$CIVWEAVE_NODE_BIN" "$CIVWEAVE_PORTABLE_ZIP_SCRIPT" "$@"\n',"utf8");
+  chmodSync(shimPath,0o755);
+  process.env.PATH=`${shimDir}${delimiter}${previousPath||""}`;
+  process.env.CIVWEAVE_NODE_BIN=process.execPath;
+  process.env.CIVWEAVE_PORTABLE_ZIP_SCRIPT=portableZipScript;
+  console.log("System zip is unavailable; using the dependency-free Civweave ZIP writer.");
+  try{return task()}
+  finally{
+    if(previousPath===undefined)delete process.env.PATH;else process.env.PATH=previousPath;
+    if(previousNode===undefined)delete process.env.CIVWEAVE_NODE_BIN;else process.env.CIVWEAVE_NODE_BIN=previousNode;
+    if(previousScript===undefined)delete process.env.CIVWEAVE_PORTABLE_ZIP_SCRIPT;else process.env.CIVWEAVE_PORTABLE_ZIP_SCRIPT=previousScript;
+    rmSync(shimDir,{recursive:true,force:true});
+  }
+}
+
 function oversizedFiles(directory) {
   return walkFiles(directory)
     .map(file => ({ file, bytes: statSync(file).size }))
@@ -92,13 +125,11 @@ await Promise.all([
   runNodeScriptAsync(parityMaterializer, "Civweave parity ledger materialization failed."),
 ]);
 
-// These compact packages consume the staged assets, so build them only after
-// the parallel phase. The mobile packager is retained solely because it creates
-// the uncommitted Pocket Campus seed required by the public download surface.
-await Promise.all([
-  runNodeScriptAsync(mapPackageBuilder, "Civweave Map v1 package build failed."),
-  runNodeScriptAsync(mobileInstallBuilder, "Civweave mobile/Pocket Campus package build failed."),
-]);
+// Map packaging consumes the staged renderer/atlas. Pocket Campus packaging is
+// tiny but still owns the uncommitted public seed, so retain it with the portable
+// ZIP shim while keeping the expensive verification suite out of deployment.
+runNodeScript(mapPackageBuilder, "Civweave Map v1 package build failed.");
+withPortableZipFallback(() => runNodeScript(mobileInstallBuilder, "Civweave mobile/Pocket Campus package build failed."));
 
 const requiredRuntimeAssets = [
   resolve(sourceDir, 'app/vendor/transformers/transformers.min.js'),
@@ -151,4 +182,4 @@ const seedBytes = statSync(pocketCampusSeedPath).size;
 const mapBytes = statSync(mapPackagePath).size;
 console.log(`Built .cloudflare-pages with mobile installer (${installerBytes} bytes), portable Civweave seed (${seedBytes} bytes), and Civweave Map v1 (${mapBytes} bytes).`);
 console.log("Cloudflare publish hot path: generated runtime/data staging parallelized; release smoke/pre-live work removed from deploy.");
-console.log("All Cloudflare-hosted files are at or below the 24 MiB Civweave project boundary.");
+console.log("All Cloudflare-hosted files are at or below 24 MiB, including the split Gemma 4 runtime and Map v1 runtimes.");
