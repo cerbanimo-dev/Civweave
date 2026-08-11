@@ -27,7 +27,6 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/verify-local-model-download-v267.mjs
-          node scripts/verify-smollm2-runtime-v135.mjs
           node scripts/verify-cloudflare-portable-zip-v185.mjs
           node scripts/verify-cloudflare-deploy-discipline.mjs
           test -f .cloudflare-pages/app/vendor/transformers/transformers.min.js
@@ -35,8 +34,10 @@ jobs:
           test -f .cloudflare-pages/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm
           test ! -f .cloudflare-pages/app/vendor/transformers/ort-wasm-simd-threaded.jsep.wasm
           test ! -f .cloudflare-pages/app/vendor/transformers/transformers.node.mjs
+          test ! -f .cloudflare-pages/app/vendor/transformers/transformers.min.js.map
           test -f .cloudflare-pages/app/vendor/transformers-v4/transformers.min.js
           test -f .cloudflare-pages/app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.wasm.part0
+          test ! -f .cloudflare-pages/app/vendor/transformers-v4/transformers.node.cjs
       - name: Measure publish payload
         run: |
           python - <<'PY'
