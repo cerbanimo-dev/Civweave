@@ -5,6 +5,7 @@ import {
   cpSync,
   existsSync,
   mkdtempSync,
+  readFileSync,
   readdirSync,
   rmSync,
   statSync,
@@ -33,6 +34,7 @@ const mobileInstallBuilder = resolve(scriptDir, "build-mobile-install-kit.mjs");
 const validationSafe = resolve(scriptDir, "apply-confidence-weighted-validation-v1-safe.mjs");
 const portableZipScript = resolve(scriptDir, "portable-zip.mjs");
 const maxCloudflareAssetBytes = 24 * 1024 * 1024;
+const githubRepo = process.env.GITHUB_REPOSITORY || 'cerbanimo-dev/Civweave';
 
 // Keep only cheap deterministic synchronizers in the deploy path. Expensive
 // verification belongs in CI before merge, not in the CDN publish job.
@@ -71,6 +73,15 @@ function commandAvailable(command, args=["-v"]) {
   return !result.error&&result.status===0;
 }
 
+function currentCommitSha(){
+  const envSha=String(process.env.CF_PAGES_COMMIT_SHA||process.env.GITHUB_SHA||'').trim();
+  if(/^[a-f0-9]{40}$/i.test(envSha))return envSha.toLowerCase();
+  const result=spawnSync('git',['rev-parse','HEAD'],{cwd:repoRoot,encoding:'utf8'});
+  const sha=String(result.stdout||'').trim();
+  if(result.status!==0||!/^([a-f0-9]{40})$/i.test(sha))throw new Error('Unable to resolve the source commit for immutable download URLs.');
+  return sha.toLowerCase();
+}
+
 function withPortableZipFallback(task) {
   if (process.platform === "win32" || commandAvailable("zip")) return task();
   if (!existsSync(portableZipScript)) throw new Error(`Portable ZIP writer not found: ${portableZipScript}`);
@@ -105,6 +116,33 @@ function formatOversized(directory, files) {
   return files
     .map(({ file, bytes }) => `${relative(directory, file)} (${(bytes / 1024 / 1024).toFixed(2)} MiB; ${bytes} bytes)`)
     .join("\n- ");
+}
+
+function externalizeKnowledgeSchoolZips(){
+  const catalogPath=resolve(outputDir,'downloads','knowledge-schools','catalog.json');
+  const zipDir=resolve(outputDir,'downloads','knowledge-schools','schools');
+  if(!existsSync(catalogPath))throw new Error(`Knowledge-school catalog missing from Pages output: ${catalogPath}`);
+  const catalog=JSON.parse(readFileSync(catalogPath,'utf8'));
+  if(catalog?.schema!=='civweave.knowledge-school-catalog.v1'||!Array.isArray(catalog.schools))throw new Error('Knowledge-school catalog cannot be externalized safely.');
+  const commit=currentCommitSha();
+  const base=`https://raw.githubusercontent.com/${githubRepo}/${commit}/public/downloads/knowledge-schools/`;
+  for(const school of catalog.schools){
+    const relativeZip=String(school?.zip_file||'');
+    if(!relativeZip.startsWith('schools/')||relativeZip.includes('..'))throw new Error(`Unsafe knowledge-school ZIP path: ${relativeZip}`);
+    school.download_url=new URL(relativeZip,base).href;
+    school.download_origin='github-raw-commit';
+    school.download_commit=commit;
+  }
+  catalog.download_policy={
+    mode:'external-immutable-zips',
+    origin:'github-raw-commit',
+    source_commit:commit,
+    checksum_required:true,
+    pages_carries_zip_bytes:false,
+  };
+  writeFileSync(catalogPath,`${JSON.stringify(catalog,null,2)}\n`,'utf8');
+  rmSync(zipDir,{recursive:true,force:true});
+  console.log(`[Civweave] Externalized ${catalog.schools.length} optional knowledge-school ZIPs to commit-pinned GitHub raw URLs (${commit.slice(0,12)}); Pages retains catalog and checksums only.`);
 }
 
 if (!existsSync(sourceDir) || !statSync(sourceDir).isDirectory()) {
@@ -169,6 +207,7 @@ cpSync(sourceDir, outputDir, {
     return !relativePath.split(sep).includes(".wrangler");
   },
 });
+externalizeKnowledgeSchoolZips();
 
 // Audit the actual publish tree once. The old deploy recursively scanned both
 // source and output, doubling filesystem I/O after already rebuilding artifacts.
@@ -181,5 +220,5 @@ const installerBytes = statSync(installerPath).size;
 const seedBytes = statSync(pocketCampusSeedPath).size;
 const mapBytes = statSync(mapPackagePath).size;
 console.log(`Built .cloudflare-pages with mobile installer (${installerBytes} bytes), portable Civweave seed (${seedBytes} bytes), and Civweave Map v1 (${mapBytes} bytes).`);
-console.log("Cloudflare publish hot path: generated runtime/data staging parallelized; release smoke/pre-live work removed from deploy.");
+console.log("Cloudflare publish hot path: generated runtime/data staging parallelized; optional knowledge-school ZIP bytes externalized to immutable commit-pinned downloads.");
 console.log("All Cloudflare-hosted files are at or below 24 MiB, including the split Gemma 4 runtime and Map v1 runtimes.");

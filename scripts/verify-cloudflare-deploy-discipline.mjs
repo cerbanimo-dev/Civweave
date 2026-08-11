@@ -26,5 +26,22 @@ for(const forbidden of ['generate-prelive-metadata-v281.mjs','smoke-installer-re
 }
 assert(!pagesBuild.includes('sourceOversized = oversizedFiles(sourceDir)'),'Pages deploy must not recursively audit both source and output trees.');
 assert(pagesBuild.includes('Civweave mobile/Pocket Campus package build failed.'),'Pages build must retain Pocket Campus generation while that seed is not committed.');
+assert(pagesBuild.includes('externalizeKnowledgeSchoolZips'),'Pages build must externalize optional knowledge-school ZIP bytes.');
+assert(pagesBuild.includes('raw.githubusercontent.com'),'Pages build must pin external school ZIPs to immutable repository commits.');
+assert(pagesBuild.includes("mode:'external-immutable-zips'"),'Pages catalog must advertise the immutable external ZIP policy.');
+assert(pagesBuild.includes("pages_carries_zip_bytes:false"),'Pages catalog must state that school ZIP bytes are not part of the site payload.');
+assert(pagesBuild.includes("rmSync(zipDir,{recursive:true,force:true})"),'Pages output must remove the optional school ZIP directory after catalog rewriting.');
 
-console.log('Cloudflare deploy discipline verified: no duplicate preview mirror, non-production automation skips Pages, runtime/data staging stays parallel, and only required portable packaging remains in the production hot path.');
+const knowledgeHelper=read('public/app/knowledge-school-seeds-v1.js');
+for(const required of ['record?.download_url','legacySeedUrl','seedUrls','matchCachedSeed','X-Civweave-Source-URL']){
+  assert(knowledgeHelper.includes(required),`Knowledge-school downloader lost external/legacy compatibility token: ${required}`);
+}
+
+const transformersV3=read('scripts/stage-transformers-assets.mjs');
+assert(transformersV3.includes("purpose:'browser-runtime-only'"),'Transformers v3 must remain browser-runtime-only.');
+assert(!transformersV3.includes("fsp.cp(source,destination"),'Transformers v3 must not copy the entire npm dist tree into Pages.');
+const transformersV4=read('scripts/stage-transformers-v4-assets.mjs');
+assert(transformersV4.includes("purpose:'gemma4-mobile-browser-runtime-only'"),'Transformers v4 must remain browser-runtime-only.');
+assert(transformersV4.includes("manifest.schema!=='civweave.transformers-stage.v6'"),'Transformers v4 must reject stale full-runtime stages and prune them once.');
+
+console.log('Cloudflare deploy discipline verified: no duplicate preview mirror, non-production automation skips Pages, runtime/data staging stays minimal and parallel, and optional school ZIP bytes remain outside the Pages publish payload.');

@@ -9,14 +9,16 @@ const backendDestination=path.join(destination,'wasm');
 const soft=process.argv.includes('--soft');
 const force=process.argv.includes('--force');
 const renderBuild=process.env.RENDER==='true';
+const BACKEND_MJS='ort-wasm-simd-threaded.jsep.mjs';
+const BACKEND_WASM='ort-wasm-simd-threaded.jsep.wasm';
 
 async function exists(target){try{await fsp.access(target);return true}catch{return false}}
 async function staged(){
   const required=[
     path.join(destination,'transformers.min.js'),
     path.join(destination,'stage-manifest.json'),
-    path.join(backendDestination,'ort-wasm-simd-threaded.jsep.mjs'),
-    path.join(backendDestination,'ort-wasm-simd-threaded.jsep.wasm')
+    path.join(backendDestination,BACKEND_MJS),
+    path.join(backendDestination,BACKEND_WASM)
   ];
   return (await Promise.all(required.map(exists))).every(Boolean);
 }
@@ -28,6 +30,10 @@ async function walk(directory){
     else output.push(full);
   }
   return output;
+}
+async function findByBasename(directory,name){
+  const files=await walk(directory);
+  return files.find(file=>path.basename(file)===name)||null;
 }
 
 async function main(){
@@ -46,54 +52,44 @@ async function main(){
   }
 
   await fsp.rm(destination,{recursive:true,force:true});
-  await fsp.mkdir(destination,{recursive:true});
   await fsp.mkdir(backendDestination,{recursive:true});
 
-  const files=await walk(source);
-  const copied=[];
-  const backendFiles=[];
-
-  for(const file of files){
-    const relative=path.relative(source,file);
-    if(!/\.(?:js|mjs|cjs|wasm|map)$/i.test(relative))continue;
-
-    const target=path.join(destination,relative);
-    await fsp.mkdir(path.dirname(target),{recursive:true});
-    await fsp.copyFile(file,target);
-    copied.push(relative);
-
-    const basename=path.basename(relative);
-    if(/^ort-wasm.*\.(?:mjs|wasm)$/i.test(basename)){
-      const backendTarget=path.join(backendDestination,basename);
-      if(path.resolve(backendTarget)!==path.resolve(target))await fsp.copyFile(file,backendTarget);
-      backendFiles.push(basename);
-    }
+  const entryCandidates=['transformers.min.js','transformers.web.min.js','transformers.js','transformers.web.js','transformers.mjs'];
+  let entrySource=null;
+  for(const name of entryCandidates){
+    const candidate=path.join(source,name);
+    if(await exists(candidate)){entrySource=candidate;break}
   }
+  if(!entrySource)throw new Error(`Transformers.js installed, but no browser entry was found in ${source}.`);
 
-  const candidates=['transformers.min.js','transformers.js','transformers.mjs'];
-  const entry=candidates.find(name=>copied.includes(name));
-  if(!entry)throw new Error(`Transformers.js installed, but no browser entry was found in ${source}.`);
-  if(entry!=='transformers.min.js')await fsp.copyFile(path.join(destination,entry),path.join(destination,'transformers.min.js'));
+  const backendMjsSource=await findByBasename(source,BACKEND_MJS);
+  const backendWasmSource=await findByBasename(source,BACKEND_WASM);
+  if(!backendMjsSource||!backendWasmSource)throw new Error(`Transformers.js backend staging is incomplete. Missing ${[!backendMjsSource&&BACKEND_MJS,!backendWasmSource&&BACKEND_WASM].filter(Boolean).join(', ')}.`);
 
-  const requiredBackendFiles=['ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm'];
-  const missingBackend=requiredBackendFiles.filter(name=>!backendFiles.includes(name));
-  if(missingBackend.length)throw new Error(`Transformers.js backend staging is incomplete. Missing: ${missingBackend.join(', ')}`);
+  await fsp.copyFile(entrySource,path.join(destination,'transformers.min.js'));
+  await fsp.copyFile(backendMjsSource,path.join(backendDestination,BACKEND_MJS));
+  await fsp.copyFile(backendWasmSource,path.join(backendDestination,BACKEND_WASM));
 
-  const wasmCount=backendFiles.filter(file=>file.endsWith('.wasm')).length;
-  const loaderCount=backendFiles.filter(file=>file.endsWith('.mjs')).length;
+  const stagedFiles=[
+    'transformers.min.js',
+    `wasm/${BACKEND_MJS}`,
+    `wasm/${BACKEND_WASM}`,
+  ];
   await fsp.writeFile(path.join(destination,'stage-manifest.json'),JSON.stringify({
-    schema:'civweave.transformers-stage.v2',
+    schema:'civweave.transformers-stage.v3',
     package:'@huggingface/transformers',
+    purpose:'browser-runtime-only',
     entry:'/app/vendor/transformers/transformers.min.js',
     backendRoot:'/app/vendor/transformers/wasm/',
-    backendFiles:[...new Set(backendFiles)].sort(),
-    copied:copied.length,
-    wasmCount,
-    loaderCount,
+    backendFiles:[BACKEND_MJS,BACKEND_WASM],
+    stagedFiles,
+    copied:stagedFiles.length,
+    wasmCount:1,
+    loaderCount:1,
     stagedAt:new Date().toISOString()
   },null,2));
 
-  console.log(`[Civweave] Staged Transformers.js: ${copied.length} runtime files, ${loaderCount} backend loaders, ${wasmCount} WASM binaries.`);
+  console.log(`[Civweave] Staged minimal Transformers.js browser runtime: ${stagedFiles.length} files (entry + JSEP loader + WASM).`);
 }
 
 main().catch(error=>{console.error(error);process.exitCode=1});
