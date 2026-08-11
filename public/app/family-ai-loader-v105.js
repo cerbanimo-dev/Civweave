@@ -37,7 +37,7 @@ let promise=null;
 let optionalPromise=null;
 let generation=0;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const arr=key=>{const value=parse(localStorage.getItem(key),[]);return Array.isArray(value)?value:[]};
 const obj=key=>{const value=parse(localStorage.getItem(key),{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}};
@@ -60,7 +60,7 @@ function removeStale(path,ready){for(const script of [...document.scripts])if(sc
 function loadScript(src,ready){
   if(ready?.())return Promise.resolve();
   const path=new URL(src,location.href).pathname;
-  const existing=[...document.scripts].find(script=>script.src&&new URL(script.src).pathname===path);
+  const existing=[...document.scripts].find(script=>script.src&&new URL(script.src,location.href).pathname===path);
   if(existing?.dataset.cwf105State==='loading')return new Promise((resolve,reject)=>{
     const timer=setTimeout(()=>{clearInterval(poll);reject(new Error(`${path} did not become ready`))},8000);
     const poll=setInterval(()=>{if(ready?.()){clearTimeout(timer);clearInterval(poll);resolve()}},40);
