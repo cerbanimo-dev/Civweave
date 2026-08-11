@@ -1,4 +1,4 @@
-import { CloudflareMoneyEdge, derToPem, moneyEdgeError } from './money-edge.mjs';
+import { CloudflareMoneyEdge, derToPem, moneyEdgeError } from './money-edge-with-memberships.mjs';
 
 export const CORE_SCHEMA = 'civweave.cloudflare-core.v2';
 export const NODE_SCHEMA = 'civweave.node.v1';
@@ -118,6 +118,7 @@ export async function handleMoneyEdgeRequest(request, env, options = {}) {
     const statusMatch = pathname.match(/^\/api\/money-edge\/nodes\/([^/]+)\/status$/);
     if (statusMatch && request.method === 'GET') { const raw = new Uint8Array(); return json({ operator: await edge.operatorStatus(decodeURIComponent(statusMatch[1]), raw, request.headers.get('x-civweave-node-signature')) }); }
     if (pathname === '/api/money-edge/topups' && request.method === 'POST') { const rawText = await request.text(), input = JSON.parse(rawText || '{}'); return json({ topup: await edge.createTopUp(input, encoder.encode(rawText), request.headers.get('x-civweave-node-signature')) }, 201); }
+    if (pathname === '/api/money-edge/memberships' && request.method === 'POST') { const rawText = await request.text(), input = JSON.parse(rawText || '{}'); return json({ membership: await edge.createMembership(input, encoder.encode(rawText), request.headers.get('x-civweave-node-signature')) }, 201); }
     const refundMatch = pathname.match(/^\/api\/money-edge\/topups\/([^/]+)\/refund$/);
     if (refundMatch && request.method === 'POST') { const rawText = await request.text(), input = JSON.parse(rawText || '{}'); return json({ refund: await edge.refundTopUp({ nodeId: input.nodeId, topupId: decodeURIComponent(refundMatch[1]), amountCents: input.amountCents }, encoder.encode(rawText), request.headers.get('x-civweave-node-signature')) }, 202); }
     if ((pathname === '/api/money-edge/webhooks/stripe' || pathname === '/api/stripe/webhook') && request.method === 'POST') return stripeWebhook(request, env, edge);
