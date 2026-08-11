@@ -92,7 +92,7 @@ jobs:
           npx --yes wrangler@latest deploy --dry-run --config cloudflare/node-cloud/wrangler.jsonc
 
       - name: Deploy Cloudflare core authority
-        run: npx --yes wrangler@latest deploy --config .cloudflare-launch/core.wrangler.jsonc --keep-vars
+        run: npx --yes wrangler@latest deploy --config .cloudflare-launch/core.wrangler.jsonc
 
       - name: Configure core secrets when supplied
         shell: bash
@@ -116,7 +116,7 @@ jobs:
           printf '%s' "$NODE_FABRIC_BINDING_TOKEN" > /tmp/civweave-node-fabric-binding-token
 
       - name: Deploy Cloudflare host-node fabric
-        run: npx --yes wrangler@latest deploy --config cloudflare/node-cloud/wrangler.jsonc --keep-vars
+        run: npx --yes wrangler@latest deploy --config cloudflare/node-cloud/wrangler.jsonc
 
       - name: Configure host-node fabric secrets
         shell: bash
