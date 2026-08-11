@@ -18,12 +18,13 @@ const [versionText,integrityText,wrapper,repairWorker,fallback,builder,materiali
 ]);
 const version=versionText.trim();
 const integrity=JSON.parse(integrityText);
+const requiredShellAssetCount=15;
 assert.match(version,/^\d+\.\d+\.\d+$/);
 assert.equal(integrity.version,version,'Generated shell integrity metadata is not release-coherent.');
 assert.equal(integrity.revision,'shell-integrity-v281');
 assert.equal(integrity.algorithm,'sha256');
-assert.equal(integrity.requiredAssetCount,17,'Verified shell must cover all 17 required shell and installer-state assets.');
-assert.equal(Object.keys(integrity.assets||{}).length,17,'Shell integrity asset map drifted from required asset count.');
+assert.equal(integrity.requiredAssetCount,requiredShellAssetCount,'Verified shell must cover the 15 manual-first shell and installer-state assets.');
+assert.equal(Object.keys(integrity.assets||{}).length,requiredShellAssetCount,'Shell integrity asset map drifted from the manual-first required asset count.');
 for(const [pathname,digest] of Object.entries(integrity.assets||{})){
   assert.ok(pathname.startsWith('/'),`Integrity pathname is not absolute: ${pathname}`);
   assert.match(String(digest),/^[a-f0-9]{64}$/i,`Integrity digest is invalid for ${pathname}`);
@@ -84,7 +85,7 @@ function repairHarness({fail=false}={}){
       if(fail){const error=new Error('Integrity mismatch');error.failures=[{pathname:'/app/installed-entry-v146.html',message:'Integrity mismatch'}];throw error;}
       return{integrity:'verified',integrityRevision:'shell-integrity-v281',optionalFailures:[]};
     },
-    shellStatus:async()=>({ready:true,assetCount:17,presentCount:17,missing:[]}),
+    shellStatus:async()=>({ready:true,assetCount:requiredShellAssetCount,presentCount:requiredShellAssetCount,missing:[]}),
     self:{addEventListener(type,handler){if(type==='message')messageHandler=handler}}
   };
   vm.createContext(context);
@@ -119,5 +120,6 @@ console.log(JSON.stringify({
   repairScope:'verified-small-shell-only',
   preservedStorage:['offline-campus','models','open-learning-media','knowledge-schools'],
   workerGeneratorLocked:true,
-  canonicalMaterializerRegeneratesIntegrity:true
+  canonicalMaterializerRegeneratesIntegrity:true,
+  manualFirstShell:true
 },null,2));
