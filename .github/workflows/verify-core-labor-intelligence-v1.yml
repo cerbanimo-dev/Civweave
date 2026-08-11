@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'public/downloads/learning-packs/**'
+      - 'public/app/offline-package-v208.json'
       - 'public/app/shared/labor-intelligence-core-v1.mjs'
       - 'public/app/shared/learning-pack-shelf-v1.mjs'
       - 'public/app/cerbanimo-learning-packs-v1.js'
@@ -11,6 +12,8 @@ on:
       - 'public/app/rook-request-flow-v160.js'
       - 'public/app/services/fellowfare/cabinet.html'
       - 'public/app/services/fellowfare/labor-context-v1.mjs'
+      - 'scripts/build-install-artifacts.sh'
+      - 'scripts/sync-core-labor-package-v1.mjs'
       - 'scripts/verify-core-labor-intelligence-v1.mjs'
       - '.github/workflows/verify-core-labor-intelligence-v1.yml'
   push:
@@ -33,6 +36,9 @@ jobs:
           node --check public/app/living-school-learning-packs-v1.mjs
           node --check public/app/rook-request-flow-v160.js
           node --check public/app/services/fellowfare/labor-context-v1.mjs
+          node --check scripts/sync-core-labor-package-v1.mjs
           node --check scripts/verify-core-labor-intelligence-v1.mjs
+      - name: Materialize core labor package declarations
+        run: node scripts/sync-core-labor-package-v1.mjs
       - name: Verify cross-realm labor intelligence contract
         run: node scripts/verify-core-labor-intelligence-v1.mjs
