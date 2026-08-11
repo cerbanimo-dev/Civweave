@@ -130,6 +130,7 @@ export class CivweaveCapacityAccount {
       ...capacity, hostNodeIds: [...config.hostNodeIds], nodeId: node || null, nodeMembers: nodeMembers.length,
       nodeCommunityMembers: nodeMembers.filter(item => item.seatClass === 'community').length,
       activePaidMembers: members.filter(item => item.billingStatus === 'paid').length,
+      graceMembers: members.filter(item => item.billingStatus === 'grace').length,
       reservesMicrocents: Object.freeze({ operating: config.operatingReserveMicrocents, communityEndowment: config.communityEndowmentMicrocents, lifetimeCredits: config.creditReserveMicrocents }),
     });
   }
@@ -156,8 +157,9 @@ export class CivweaveCapacityAccount {
   async setBilling(input) {
     const nodeId = clean(input.nodeId), userId = clean(input.userId), key = memberKey(nodeId, userId), prior = await this.state.storage.get(key);
     if (!prior) throw Object.assign(new RangeError('Member is not admitted to this node.'), { status: 404 });
-    const billingStatus = clean(input.billingStatus).toLowerCase() === 'paid' ? 'paid' : 'free';
-    if (prior.seatClass === 'paid-expansion' && billingStatus === 'free') throw Object.assign(new RangeError('Paid expansion residency requires an active membership; move the member into an available community seat before cancelling.'), { status: 409 });
+    const requested = clean(input.billingStatus).toLowerCase();
+    let billingStatus = requested === 'paid' ? 'paid' : requested === 'grace' ? 'grace' : 'free';
+    if (prior.seatClass === 'paid-expansion' && billingStatus === 'free') billingStatus = 'grace';
     const next = Object.freeze({ ...prior, billingStatus, membershipTierId: billingStatus === 'paid' ? clean(input.membershipTierId) || prior.membershipTierId : null, updatedAt: new Date().toISOString() });
     await this.state.storage.put(key, next); return { member: next, capacity: await this.snapshot(nodeId) };
   }
