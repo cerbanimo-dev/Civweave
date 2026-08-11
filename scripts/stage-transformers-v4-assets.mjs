@@ -31,15 +31,6 @@ async function staged(){
     return (await Promise.all(required.map(exists))).every(Boolean);
   }catch{return false}
 }
-async function walk(directory){
-  const output=[];
-  for(const entry of await fsp.readdir(directory,{withFileTypes:true})){
-    const full=path.join(directory,entry.name);
-    if(entry.isDirectory())output.push(...await walk(full));
-    else output.push(full);
-  }
-  return output;
-}
 function run(command,args,options={}){
   const result=spawnSync(command,args,{cwd:root,encoding:'utf8',...options});
   if(result.error)throw result.error;
@@ -145,27 +136,26 @@ async function main(){
     if(!await exists(source))throw new Error(`Transformers.js ${VERSION} package did not contain dist/.`);
     if(!await exists(ortSource))throw new Error(`ONNX Runtime Web ${ORT_VERSION} package did not contain dist/.`);
 
-    await fsp.rm(destination,{recursive:true,force:true});await fsp.mkdir(destination,{recursive:true});await fsp.mkdir(backendDestination,{recursive:true});
-    const files=await walk(source),copied=[];
-    for(const file of files){
-      const relative=path.relative(source,file);if(!/\.(?:js|mjs|cjs|wasm|map)$/i.test(relative))continue;
-      const target=path.join(destination,relative);await fsp.mkdir(path.dirname(target),{recursive:true});await fsp.copyFile(file,target);copied.push(relative);
-    }
-    const candidates=['transformers.min.js','transformers.web.js','transformers.js','transformers.mjs'];
-    const entry=candidates.find(name=>copied.includes(name));if(!entry)throw new Error(`Transformers.js ${VERSION} was packed, but no browser entry was found in dist/.`);
-    if(entry!=='transformers.min.js')await fsp.copyFile(path.join(destination,entry),path.join(destination,'transformers.min.js'));
+    await fsp.rm(destination,{recursive:true,force:true});
+    await fsp.mkdir(backendDestination,{recursive:true});
+
+    const candidates=['transformers.min.js','transformers.web.min.js','transformers.web.js','transformers.js','transformers.mjs'];
+    let entrySource=null;
+    for(const name of candidates){const candidate=path.join(source,name);if(await exists(candidate)){entrySource=candidate;break}}
+    if(!entrySource)throw new Error(`Transformers.js ${VERSION} was packed, but no browser entry was found in dist/.`);
+    await fsp.copyFile(entrySource,path.join(destination,'transformers.min.js'));
 
     const mjsSource=path.join(ortSource,ORT_MJS),wasmSource=path.join(ortSource,ORT_WASM);
     if(!await exists(mjsSource)||!await exists(wasmSource))throw new Error(`${ORT_PACKAGE}@${ORT_VERSION} does not contain the required WebGPU JSEP runtime pair.`);
     await fsp.copyFile(mjsSource,path.join(backendDestination,ORT_MJS));
     const split=await splitWasm(wasmSource);
-    if(await exists(path.join(backendDestination,ORT_WASM)))await fsp.rm(path.join(backendDestination,ORT_WASM),{force:true});
 
+    const stagedFiles=['transformers.min.js',`wasm/${ORT_MJS}`,...split.names.map(name=>`wasm/${name}`)];
     await fsp.writeFile(manifestPath,JSON.stringify({
-      schema:'civweave.transformers-stage.v5',package:PACKAGE,version:VERSION,backendPackage:ORT_PACKAGE,backendVersion:ORT_VERSION,purpose:'gemma4-mobile-runtime',
-      entry:'/app/vendor/transformers-v4/transformers.min.js',backendRoot:'/app/vendor/transformers-v4/wasm/',backendFiles:[ORT_MJS,...split.names],wasmSource:ORT_WASM,wasmBytes:split.bytes,wasmChunks:split.names,wasmChunkBytes:CHUNK_BYTES,copied:copied.length,stagedAt:new Date().toISOString()
+      schema:'civweave.transformers-stage.v6',package:PACKAGE,version:VERSION,backendPackage:ORT_PACKAGE,backendVersion:ORT_VERSION,purpose:'gemma4-mobile-browser-runtime-only',
+      entry:'/app/vendor/transformers-v4/transformers.min.js',backendRoot:'/app/vendor/transformers-v4/wasm/',backendFiles:[ORT_MJS,...split.names],wasmSource:ORT_WASM,wasmBytes:split.bytes,wasmChunks:split.names,wasmChunkBytes:CHUNK_BYTES,stagedFiles,copied:stagedFiles.length,stagedAt:new Date().toISOString()
     },null,2));
-    console.log(`[Civweave] Staged Transformers.js ${VERSION} with matching ONNX Runtime Web ${ORT_VERSION}: ${copied.length} runtime files, ${split.names.length} WASM chunks (${split.bytes} bytes total).`);
+    console.log(`[Civweave] Staged minimal Transformers.js ${VERSION} browser runtime with ONNX Runtime Web ${ORT_VERSION}: ${stagedFiles.length} files, ${split.names.length} WASM chunks (${split.bytes} bytes total).`);
   }finally{await fsp.rm(temp,{recursive:true,force:true})}
 }
 
