@@ -20,18 +20,21 @@ for(const path of [
 assert.match(boundary,/const EXPERIENCE_ORCHESTRATOR='\/app\/experience-orchestrator-v232\.js'/);
 assert.match(boundary,/SYSTEM_EXPERIENCE_SCRIPTS=\[/);
 
-assert.match(orchestrator,/experience-orchestrator-v296-settings-independent/);
+assert.match(orchestrator,/experience-orchestrator-v298-mobile-chat-queue/);
 assert.match(orchestrator,/const SETTINGS_MODULE=/);
 assert.match(orchestrator,/const CHAT_MODULES=/);
 assert.match(orchestrator,/function ensureSettingsModule\(/);
 assert.match(orchestrator,/function ensureChatModules\(/);
 assert.match(orchestrator,/function releaseLegacySettingsClick\(/);
-const settingsClick=orchestrator.match(/function earlySettings\(event\)\{([\s\S]*?)\}\n\ndocument\.addEventListener/)?.[1]||'';
+const settingsClick=orchestrator.match(/function earlySettings\(event\)\{([\s\S]*?)\}\n\nglobalThis\.addEventListener/)?.[1]||'';
 assert.ok(settingsClick,'earlySettings must remain inspectable');
 assert.match(settingsClick,/openSettingsIndependent/);
 assert.doesNotMatch(settingsClick,/ensureChatModules|ensureLaunchModules/,'settings must not be gated by chat readiness');
-const submit=orchestrator.match(/function earlySubmit\(event\)\{([\s\S]*?)\}\nfunction earlySettings/)?.[1]||'';
+const submit=orchestrator.match(/function earlyLocalSubmit\(event\)\{([\s\S]*?)\}\nfunction earlySettings/)?.[1]||'';
 assert.match(submit,/ensureChatModules/,'downloaded-local chat still needs its chat-only launch lane');
+assert.match(submit,/CivweaveLocalChatOwnerV295\?\.enqueue/,'downloaded-local chat must queue through the local owner');
+assert.match(orchestrator,/globalThis\.addEventListener\('submit',earlyLocalSubmit,true\)/,'local preflight must run before canonical document submit capture');
+assert.doesNotMatch(orchestrator,/document\.addEventListener\('submit'/,'settings/chat orchestrator must not compete at document submit capture');
 
 for(const selector of ['[data-action="settings"]','[data-ls-action="open-ai-settings"]','#settings-button','#model-chip']){
   assert.ok(orchestrator.includes(selector),`orchestrator settings selector lost ${selector}`);
@@ -63,10 +66,11 @@ assert.doesNotMatch(managementOpen,/bootstrap\.ready|ensureScript\([^\n]*bootstr
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'settings-freeze-recovery-v296',
+  revision:'settings-freeze-recovery-v298-local-queue',
   canonicalSystems:5,
   settingsIndependentOfChat:true,
   legacyClickFallback:true,
   settingsOpenBeforeManagement:true,
-  inferenceDormantOnSettingsOpen:true
+  inferenceDormantOnSettingsOpen:true,
+  localSubmitWindowPreflight:true
 },null,2));
