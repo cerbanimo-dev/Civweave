@@ -19,18 +19,27 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check reward runtime syntax
+      - name: Check reward and skill-market runtime syntax
         run: |
           node --check public/app/cw-reward-ledger-v2.js
           node --check public/app/cw-reward-receivers-v2.js
           node --check public/app/cw-reward-legacy-bridge-v2.js
           node --check public/app/cw-reward-surfaces-v2.js
+          node --check public/app/cw-skill-market-v1.js
+          node --check public/app/cw-skill-market-surfaces-v1.js
+          node --check public/app/cw-skill-market-frame-injector-v1.js
+          node --check public/app/cw-fellowfare-fee-policy-v1.js
+          node --check public/app/services/fellowfare/skill-market-bridge-v1.js
           node --check scripts/verify-canonical-rewards-v2.mjs
           node --check scripts/verify-reward-model-contract-v2.mjs
-      - name: Verify ledger, Passport, prompts, and receivers
+          node --check scripts/verify-skill-market-v1.mjs
+          node --check scripts/verify-fellowfare-fee-policy-v1.mjs
+      - name: Verify ledger, Passport, skill market, and fee policy
         run: |
           node scripts/verify-canonical-rewards-v2.mjs
           node scripts/verify-reward-model-contract-v2.mjs
+          node scripts/verify-skill-market-v1.mjs
+          node scripts/verify-fellowfare-fee-policy-v1.mjs
       - name: Verify offline package seeds
         run: |
           node - <<'NODE'
