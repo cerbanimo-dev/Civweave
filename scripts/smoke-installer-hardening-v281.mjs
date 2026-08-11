@@ -44,6 +44,7 @@ const installerHtml=await read('public/app/index.html');
 const installerJs=await read('public/install-v130.js');
 const repairJs=await read('public/app/installer-online-fallback-v225.js');
 const offlineWorker=await read('public/service-worker-offline-v211-override.js');
+const backgroundJs=await read('public/app/campus-background-download-v241.js');
 const transformersStage=await read('scripts/stage-transformers-assets.mjs');
 const ortStage=await read('scripts/stage-onnxruntime-web-assets.mjs');
 const miniLmEnsure=await read('scripts/ensure-minilm-fixed-ort-model.mjs');
@@ -62,7 +63,11 @@ assert.match(storageGuard,/storage\?\.persist\?\./);
 assert.match(storageGuard,/storage\?\.estimate\?\./);
 assert.match(storageGuard,/requiredFreeBytes/);
 assert.match(storageGuard,/civweaveStorageState='insufficient'/);
-assert.match(installerWorker,/installer-storage-guard-v281\.js/);
+assert.match(installerWorker,/installer-state-machine-v280\.js/);
+assert.match(installerWorker,/offline-campus-status-v210\.js/);
+assert.doesNotMatch(installerWorker,/required-campus-autostart-v1\.js/,'autostart must not be a required shell asset');
+assert.doesNotMatch(installerWorker,/campus-background-download-v241\.js/,'background campus downloader must not be a required installer asset');
+assert.doesNotMatch(installerWorker,/installer-storage-guard-v281\.js/,'storage preflight code must not be eagerly required by the shell');
 
 assert.doesNotMatch(installerHtml,/<script[^>]+required-campus-autostart-v1\.js/i,'installer must not autostart the offline campus');
 assert.doesNotMatch(installerHtml,/<script[^>]+knowledge-school-seeds-v1\.js/i,'knowledge-school code must not load during first paint');
@@ -87,9 +92,12 @@ for(const prefix of ['/app/models/','/app/vendor/onnxruntime/','/app/vendor/tran
 }
 assert.ok(Number(offline.maxAssets)>=1000,'code-first campus budget must leave headroom for current code graph');
 assert.match(offlineWorker,/const V211_PAYLOAD_POLICY = 'code-first-lazy-visuals-v300'/);
+assert.match(offlineWorker,/explicitOptInRequired: true/);
 assert.match(offlineWorker,/optionalDependenciesBlockCompletion: false/);
 assert.match(offlineWorker,/if \(!item\.required\)/,'optional dependency failures must retire instead of blocking completion');
 assert.match(offlineWorker,/asset-budget-deferred/,'over-budget discovered dependencies must defer to runtime instead of hanging completion');
+assert.match(backgroundJs,/!status\?\.explicitOptIn/,'background continuation must require explicit offline-campus opt-in');
+assert.match(backgroundJs,/canonical_page_opened'\),1500/,'background status check must be delayed until after app first paint');
 
 for(const source of [transformersStage,ortStage]){
   assert.match(source,/CIVWEAVE_STAGE_DEVICE_AI_ON_HOST/,'host staging must require an explicit device-AI opt-in');
@@ -131,11 +139,12 @@ console.log(JSON.stringify({
   campusRequiredFreeBytes:offline.preflight.requiredFreeBytes,
   interactionFirst:true,
   autostartCampus:false,
+  explicitCampusOptIn:true,
   lazyVisuals:true,
   hostedDeviceAiStaging:false,
   legacySmolPayload:false,
   repairFallback:true,
-  storageGuard:true,
+  storageGuardOnDemand:true,
   lastKnownGoodShell:true,
   deterministicFallback:true
 },null,2));
