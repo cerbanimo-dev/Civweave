@@ -14,8 +14,10 @@ on:
       - 'public/app/themed-system-nav-v178.js'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/guide-workspace-v242.js'
-      - 'public/app/persistent-guide-viewport-v216.js'
       - 'public/app/shared-guide-surface-v236.js'
+      - 'public/app/realm-console-v140.html'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/platform-stability-v159.js'
       - 'public/app/working-campus-v156.part5.txt'
       - 'public/service-worker-chat-repair-v245.js'
       - 'public/service-worker-v203.js'
@@ -44,8 +46,9 @@ jobs:
           node --check public/app/themed-system-nav-v178.js
           node --check public/app/install-boundary-v146.js
           node --check public/app/guide-workspace-v242.js
-          node --check public/app/persistent-guide-viewport-v216.js
           node --check public/app/shared-guide-surface-v236.js
+          node --check public/app/family-ai-loader-v105.js
+          node --check public/app/platform-stability-v159.js
           node --check public/service-worker-chat-repair-v245.js
           node --check public/service-worker-v203.js
           node --check scripts/sync-release-version-assets.mjs

@@ -1,78 +1,21 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#04131d">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <title>Civweave</title>
-  <script src="/app/install-boundary-v146.js"></script>
-  <link rel="icon" href="/app/logos/civweave-icon-192.png?v=tight-r2">
-  <link rel="manifest" href="/app/manifest.webmanifest?v=install-only-r26">
-  <link rel="stylesheet" href="/app/loom-v128.css?v=1.0.31">
-  <link rel="stylesheet" href="/app/weaveling-hologram-v133.css?v=heart-r8">
-  <link rel="stylesheet" href="/app/model-settings-v133.css?v=reflex-r1">
-  <link rel="stylesheet" href="/app/intention-ui-v138.css?v=weave-r1">
-  <link rel="stylesheet" href="/app/assistant-runtime-v141.css?v=orchestration-r1">
-  <link rel="stylesheet" href="/app/v130-cabinet-launcher.css?v=cabinet-r22">
-  <link rel="stylesheet" href="/app/pwa-v130.css?v=1.0.31">
-  <link rel="stylesheet" href="/app/hub-runtime-v143.css?v=device-package-r23">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07131e">
+<title>Opening Civweave</title>
+<script src="/app/install-boundary-v146.js"></script>
+<script>
+(()=>{
+  const next=new URL('/app/working-campus-v156.html',location.origin);
+  next.searchParams.set('installed','1');
+  next.searchParams.set('navigation','retired-loom-to-canonical-campus');
+  const version=new URLSearchParams(location.search).get('version');
+  if(/^\d+\.\d+\.\d+$/.test(version||''))next.searchParams.set('version',version);
+  location.replace(next.href);
+})();
+</script>
 </head>
-<body>
-<a class="skip-link" href="#cw127-app">Skip to Civweave</a>
-<main class="cw127-app" id="cw127-app">
-  <section class="cw127-scene" aria-label="Civweave campus hub">
-    <img class="cw127-scene-bg" src="/app/assets/world/town-square-home.webp" alt="The Civweave campus, with Living School, Cerbanimo, FellowFare, Anarchadia, and the central Quad." fetchpriority="high">
-    <button class="cw127-hotspot cw127-living" data-realm="living-school" aria-label="Open the Living School cabinet"><span>Living School</span></button>
-    <button class="cw127-hotspot cw127-cerbanimo" data-realm="cerbanimo" aria-label="Open the Cerbanimo cabinet"><span>Cerbanimo</span></button>
-    <button class="cw127-hotspot cw127-fellowfare" data-realm="fellowfare" aria-label="Open the FellowFare cabinet"><span>FellowFare</span></button>
-    <button class="cw127-hotspot cw127-anarchadia" data-realm="anarchadia" aria-label="Open the Anarchadia cabinet"><span>Anarchadia</span></button>
-    <button class="cw127-hotspot cw127-quad" data-action="chat" aria-label="Talk with Weaveling at the Quad"><span>Weaveling</span></button>
-    <button class="cw127-weaveling" data-action="chat" aria-label="Chat with Weaveling"><img src="/app/assets/ai/weaveling.png" alt="Weaveling hologram"><b id="cw127-context-label">Reflect</b></button>
-    <div class="cw127-status" id="cw127-status">v1.0.32 · Installed device package</div>
-  </section>
-</main>
-<header class="cw127-topbar">
-  <div class="cw143-version-stack">
-    <button class="cw127-version" data-action="version" aria-label="Civweave version 1.0.32"><img src="/app/logos/civweave-icon-192.png?v=tight-r2" alt=""><span>v1.0.32</span></button>
-    <button class="cw143-update" data-action="updates" aria-label="Open the local hub and check for Civweave updates">Hub &amp; updates</button>
-  </div>
-  <nav class="cw127-tools" aria-label="Civweave tools">
-    <button data-action="info" aria-label="Campus information"><span class="cw127-info-glyph">i</span></button>
-    <button data-action="chat" aria-label="Chat with Weaveling"><img src="/app/assets/generated/civweave-navigation-icons/weaveling-compass.png" alt=""></button>
-    <button data-action="cabinet" aria-label="Open Cabinet Mode"><img src="/app/assets/generated/civweave-navigation-icons/civweave-realms.png" alt=""></button>
-    <button data-action="settings" aria-label="Universal AI settings"><img src="/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png" alt=""></button>
-  </nav>
-</header>
-<nav class="cw127-nav" aria-label="Civweave navigation">
-  <button data-action="home"><img src="/app/assets/generated/civweave-navigation-icons/civweave-home.png" alt=""><span>Home</span></button>
-  <button data-action="intentions"><img src="/app/assets/generated/civweave-navigation-icons/civweave-route.png" alt=""><span>Intentions</span></button>
-  <button data-action="chat"><img src="/app/assets/generated/civweave-navigation-icons/weaveling-compass.png" alt=""><span>Weaveling</span></button>
-  <button data-action="realms"><img src="/app/assets/generated/civweave-navigation-icons/civweave-realms.png" alt=""><span>Cabinets</span></button>
-  <button data-action="settings"><img src="/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png" alt=""><span>AI settings</span></button>
-</nav>
-<div class="cw127-toast" id="cw127-toast" hidden></div>
-<script src="/app/local-first-policy-v131.js?v=1.0.31" defer></script>
-<script src="/app/local-object-mesh-v146.js?v=local-mesh-r26" defer></script>
-<script src="/app/shared/civweave-parity-runtime.js?v=cabinet-r22" defer></script>
-<script src="/app/shared/civweave-model-runtime.js?v=1.0.31-antigravity" defer></script>
-<script src="/app/minilm-reflex-runtime-v138.js?v=reflex-r1" defer></script>
-<script src="/app/minilm-model-settings-v138.js?v=reflex-r1" defer></script>
-<script src="/app/device-credential-persistence-v211.js?v=device-memory-r1" defer></script>
-<script src="/app/intention-planner-v141.js?v=orchestration-r1" defer></script>
-<script src="/app/merlinites-semantic-planner-v164.js?v=merlinites-r1" defer></script>
-<script src="/app/reward-policy-v198.js?v=reward-r1" defer></script>
-<script src="/app/context-plan-composer-v198.js?v=minilm-templates-r1" defer></script>
-<script src="/app/intention-ui-v138.js?v=weave-r1" defer></script>
-<script src="/app/guide-contracts-v141.js?v=orchestration-r1" defer></script>
-<script src="/app/assistant-runtime-v141.js?v=orchestration-r1" defer></script>
-<script src="/app/deterministic-mode-v175.js?v=minilm-templates-r1" defer></script>
-<script src="/app/core-loop-v152.js?v=restoration-r1" defer></script>
-<script src="/app/guide-chat-v153.js?v=five-system-chat-r1" defer></script>
-<script src="/app/capability-readiness-v154.js?v=intention-studio-r1" defer></script>
-<script src="/app/loom-v141.js?v=orchestration-r1" defer></script>
-<script src="/app/v130-cabinet-launcher.js?v=cabinet-r22" defer></script>
-<script src="/app/pwa-v130.js?v=1.0.31" defer></script>
-<script src="/app/hub-runtime-v143.js?v=device-package-r23" defer></script>
-</body>
+<body></body>
 </html>
