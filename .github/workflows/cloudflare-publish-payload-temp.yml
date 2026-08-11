@@ -23,6 +23,20 @@ jobs:
       - run: npm ci --ignore-scripts
       - name: Build production Pages tree
         run: node scripts/build-cloudflare-pages.mjs
+      - name: Verify trimmed local-model runtimes
+        run: |
+          set -euo pipefail
+          node scripts/verify-local-model-download-v267.mjs
+          node scripts/verify-smollm2-runtime-v135.mjs
+          node scripts/verify-cloudflare-portable-zip-v185.mjs
+          node scripts/verify-cloudflare-deploy-discipline.mjs
+          test -f .cloudflare-pages/app/vendor/transformers/transformers.min.js
+          test -f .cloudflare-pages/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.mjs
+          test -f .cloudflare-pages/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm
+          test ! -f .cloudflare-pages/app/vendor/transformers/ort-wasm-simd-threaded.jsep.wasm
+          test ! -f .cloudflare-pages/app/vendor/transformers/transformers.node.mjs
+          test -f .cloudflare-pages/app/vendor/transformers-v4/transformers.min.js
+          test -f .cloudflare-pages/app/vendor/transformers-v4/wasm/ort-wasm-simd-threaded.jsep.wasm.part0
       - name: Measure publish payload
         run: |
           python - <<'PY'
@@ -37,6 +51,6 @@ jobs:
               subset=[p for p in base.rglob('*') if p.is_file()] if base.exists() else []
               print('GROUP',group,sum(p.stat().st_size for p in subset),len(subset))
           print('TOP_FILES')
-          for p in sorted(files,key=lambda p:p.stat().st_size,reverse=True)[:80]:
+          for p in sorted(files,key=lambda p:p.stat().st_size,reverse=True)[:50]:
               print(p.stat().st_size,p.relative_to(root))
           PY
