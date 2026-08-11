@@ -1,9 +1,9 @@
 (()=>{
 'use strict';
 const VERSION='1.0.83-local-ai-bootstrap-v282-inference-health';
-const REVISION='1.0.92-local-ai-bootstrap-v299-stage-fallback';
+const REVISION='1.0.91-local-ai-bootstrap-v288-component-coherence';
 const RUNTIME_REVISION='1.0.88-local-ai-runtime-v283-small-model-fast-path';
-if(globalThis.CivweaveLocalAIBootstrapV266?.version===VERSION&&globalThis.CivweaveLocalAIBootstrapV266?.revision===REVISION)return;
+if(globalThis.CivweaveLocalAIBootstrapV266?.version===VERSION&&globalThis.CivweaveLocalAIBootstrapV266?.revision===REVISION&&globalThis.CivweaveLocalAIBootstrapV266?.stalledWebGPUFallback===true)return;
 const registryReady=()=>{const value=globalThis.CivweaveLocalModelRegistryV266;return Boolean(value?.installable&&value?.byId&&value?.directUrl&&value?.artifactRevision&&value?.sourceUrl)};
 const runtimeReady=()=>{const value=globalThis.CivweaveLocalModelRuntimeV266;return Boolean(value?.revision===RUNTIME_REVISION&&value?.smallModelFastPath===true&&value?.canonicalCausalLM===true&&value?.stalledWebGPUFallback===true)};
 const settingsReady=()=>{const value=globalThis.CivweaveLocalAISettingsV266;return Boolean(value?.version==='1.0.83-local-ai-settings-v282-health'&&value?.truthfulCompletion===true&&value?.cacheIntegrityOnDemand===true&&value?.openPath==='snapshot-first-v287')};
