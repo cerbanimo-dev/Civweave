@@ -1,0 +1,159 @@
+name: Deploy Cloudflare Money Edge v1
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/core/**'
+      - 'cloudflare/node-cloud/**'
+      - 'scripts/prepare-cloudflare-launch-kit-v1.mjs'
+      - 'scripts/verify-cloudflare-launch-kit-v1.mjs'
+      - '.github/workflows/deploy-cloudflare-money-edge-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-cloudflare-money-edge-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      STRIPE_CONNECT_WEBHOOK_SECRET: ${{ secrets.STRIPE_CONNECT_WEBHOOK_SECRET }}
+      NODE_FABRIC_BINDING_TOKEN: ${{ secrets.NODE_FABRIC_BINDING_TOKEN }}
+      NODE_FABRIC_OPERATOR_TOKEN: ${{ secrets.NODE_FABRIC_OPERATOR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Require Cloudflare deployment credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing repository secret CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          npx --yes wrangler@latest --version
+          npx --yes wrangler@latest whoami
+
+      - name: Verify money-edge source before deployment
+        run: node scripts/verify-cloudflare-launch-kit-v1.mjs
+
+      - name: Resolve Cloudflare D1 and R2 resources
+        id: resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@latest d1 list --json > /tmp/civweave-d1.json
+          D1_ID="$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const raw = JSON.parse(fs.readFileSync('/tmp/civweave-d1.json','utf8'));
+          const rows = Array.isArray(raw) ? raw : (raw.result || raw.databases || []);
+          const row = rows.find(item => item?.name === 'civweave-core');
+          process.stdout.write(String(row?.uuid || row?.id || row?.database_id || row?.databaseId || ''));
+          NODE
+          )"
+          if [ -z "$D1_ID" ]; then
+            npx --yes wrangler@latest d1 create civweave-core
+            npx --yes wrangler@latest d1 list --json > /tmp/civweave-d1.json
+            D1_ID="$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const raw = JSON.parse(fs.readFileSync('/tmp/civweave-d1.json','utf8'));
+          const rows = Array.isArray(raw) ? raw : (raw.result || raw.databases || []);
+          const row = rows.find(item => item?.name === 'civweave-core');
+          process.stdout.write(String(row?.uuid || row?.id || row?.database_id || row?.databaseId || ''));
+          NODE
+            )"
+          fi
+          test -n "$D1_ID" || { echo 'Could not resolve the civweave-core D1 database ID'; exit 3; }
+          echo "d1_id=$D1_ID" >> "$GITHUB_OUTPUT"
+          if ! npx --yes wrangler@latest r2 bucket info civweave-distribution --json >/dev/null 2>&1; then
+            npx --yes wrangler@latest r2 bucket create civweave-distribution
+          fi
+          node scripts/prepare-cloudflare-launch-kit-v1.mjs "--d1-id=$D1_ID"
+
+      - name: Apply D1 migrations
+        run: npx --yes wrangler@latest d1 migrations apply civweave-core --remote --config .cloudflare-launch/core.wrangler.jsonc
+
+      - name: Validate Worker bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@latest deploy --dry-run --config .cloudflare-launch/core.wrangler.jsonc
+          npx --yes wrangler@latest deploy --dry-run --config cloudflare/node-cloud/wrangler.jsonc
+
+      - name: Deploy Cloudflare core authority
+        run: npx --yes wrangler@latest deploy --config .cloudflare-launch/core.wrangler.jsonc --keep-vars
+
+      - name: Configure core secrets when supplied
+        shell: bash
+        run: |
+          set -euo pipefail
+          put_secret() {
+            local name="$1" value="$2"
+            if [ -n "$value" ]; then
+              printf '%s' "$value" | npx --yes wrangler@latest secret put "$name" --config .cloudflare-launch/core.wrangler.jsonc
+            else
+              echo "$name not present in GitHub secrets; leaving Cloudflare value unchanged/unconfigured."
+            fi
+          }
+          put_secret STRIPE_SECRET_KEY "${STRIPE_SECRET_KEY:-}"
+          put_secret STRIPE_CONNECT_WEBHOOK_SECRET "${STRIPE_CONNECT_WEBHOOK_SECRET:-}"
+          if [ -z "${NODE_FABRIC_BINDING_TOKEN:-}" ]; then
+            NODE_FABRIC_BINDING_TOKEN="$(node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))")"
+            echo 'Generated a fresh internal node-fabric binding token for this deployment.'
+          fi
+          printf '%s' "$NODE_FABRIC_BINDING_TOKEN" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --config .cloudflare-launch/core.wrangler.jsonc
+          printf '%s' "$NODE_FABRIC_BINDING_TOKEN" > /tmp/civweave-node-fabric-binding-token
+
+      - name: Deploy Cloudflare host-node fabric
+        run: npx --yes wrangler@latest deploy --config cloudflare/node-cloud/wrangler.jsonc --keep-vars
+
+      - name: Configure host-node fabric secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          BINDING_TOKEN="$(cat /tmp/civweave-node-fabric-binding-token)"
+          printf '%s' "$BINDING_TOKEN" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --config cloudflare/node-cloud/wrangler.jsonc
+          if [ -n "${NODE_FABRIC_OPERATOR_TOKEN:-}" ]; then
+            printf '%s' "$NODE_FABRIC_OPERATOR_TOKEN" | npx --yes wrangler@latest secret put NODE_FABRIC_OPERATOR_TOKEN --config cloudflare/node-cloud/wrangler.jsonc
+          else
+            echo 'NODE_FABRIC_OPERATOR_TOKEN not present in GitHub secrets; existing Cloudflare value is left unchanged/unconfigured.'
+          fi
+
+      - name: Probe deployed money edge and node fabric
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe() {
+            local url="$1"
+            echo "GET $url"
+            curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "$url"
+            echo
+          }
+          probe https://api.commonweave.earth/api/health
+          probe https://api.commonweave.earth/api/money-edge/status
+          probe https://api.commonweave.earth/api/money-edge/trust
+          probe https://nodes.commonweave.earth/api/fabric/health
+
+      - name: Confirm live money remains fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors https://api.commonweave.earth/api/money-edge/status > /tmp/money-status.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/money-status.json','utf8'));
+          const edge = payload.moneyEdge || payload;
+          if (edge.liveReady === true) throw new Error('Refusing deployment verification: live money unexpectedly reports ready.');
+          console.log(JSON.stringify({ ok: true, authority: payload.authority || edge.authority, liveReady: edge.liveReady, structuralBlockers: edge.structuralBlockers || [], operationalBlockers: edge.operationalBlockers || [] }, null, 2));
+          NODE
