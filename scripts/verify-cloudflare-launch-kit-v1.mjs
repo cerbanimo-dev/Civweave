@@ -7,12 +7,13 @@ const read = path => readFile(new URL(path, root), 'utf8');
 const parseJsonc = text => JSON.parse(text.split('\n').filter(line => !line.trim().startsWith('//')).join('\n'));
 const LIVE_MONEY_EDGE = 'https://civweave-core.glaedn.workers.dev';
 
-const [topologyText, transportsText, coreWranglerText, nodeWranglerText, coreSource, moneySource, stripeSource, nodeSource, migration1, migration2, bootstrapSource, envExample, guide] = await Promise.all([
+const [topologyText, transportsText, coreWranglerText, nodeWranglerText, coreSource, liveCoreSource, moneySource, stripeSource, nodeSource, migration1, migration2, bootstrapSource, envExample, guide] = await Promise.all([
   read('config/launch-topology-v1.json'),
   read('config/host-node-transports-v1.json'),
   read('cloudflare/core/wrangler.template.jsonc'),
   read('cloudflare/node-cloud/wrangler.jsonc'),
   read('cloudflare/core/src/index.mjs'),
+  read('cloudflare/core/src/live-entry.mjs'),
   read('cloudflare/core/src/money-edge.mjs'),
   read('cloudflare/core/src/stripe-connect.mjs'),
   read('cloudflare/node-cloud/src/index.mjs'),
@@ -49,6 +50,9 @@ assert.ok(migration2.includes('CREATE TABLE IF NOT EXISTS money_edge_topups'));
 assert.ok(migration2.includes('CREATE TABLE IF NOT EXISTS money_edge_deliveries'));
 assert.ok(coreSource.includes('/api/money-edge/webhooks/stripe'));
 assert.ok(coreSource.includes('CivweaveCoreIdentity'));
+assert.ok(liveCoreSource.includes('verified-public-https-origin-with-proof-of-key'));
+assert.ok(liveCoreSource.includes('/api/money-edge/enrollment/start'));
+assert.ok(liveCoreSource.includes('/api/money-edge/nodes/register'));
 assert.ok(moneySource.includes("feeAuthority: 'cerbanimo-money-edge'"));
 assert.ok(moneySource.includes("infrastructureAuthority: 'cloudflare-core'"));
 assert.ok(moneySource.includes('proof-of-key-short-lived-grant'));
@@ -59,7 +63,7 @@ assert.ok(bootstrapSource.includes(`DEFAULT_CIVWEAVE_MONEY_EDGE_URL = '${LIVE_MO
 assert.ok(envExample.includes(`CIVWEAVE_MONEY_EDGE_URL=${LIVE_MONEY_EDGE}`));
 assert.ok(guide.includes('Render is no longer a money-edge authority'));
 
-for (const file of ['cloudflare/core/src/index.mjs','cloudflare/core/src/money-edge.mjs','cloudflare/core/src/stripe-connect.mjs','cloudflare/node-cloud/src/index.mjs','lib/node-ai-bootstrap-v1.mjs']) {
+for (const file of ['cloudflare/core/src/index.mjs','cloudflare/core/src/live-entry.mjs','cloudflare/core/src/money-edge.mjs','cloudflare/core/src/stripe-connect.mjs','cloudflare/node-cloud/src/index.mjs','lib/node-ai-bootstrap-v1.mjs']) {
   const result = spawnSync(process.execPath, ['--check', file], { cwd: new URL('../', import.meta.url), encoding: 'utf8' });
   assert.equal(result.status, 0, `${file} syntax failed: ${result.stderr || result.stdout}`);
 }
@@ -92,13 +96,19 @@ body = new URLSearchParams(calls.at(-1).init.body);
 assert.equal(body.get('refund_application_fee'), 'true');
 
 const coreModule = await import(new URL('cloudflare/core/src/index.mjs', root));
+const liveCoreModule = await import(new URL('cloudflare/core/src/live-entry.mjs', root));
 const nodeModule = await import(new URL('cloudflare/node-cloud/src/index.mjs', root));
 const normalized = coreModule.normalizeNodeRecord({ nodeId:'Seed East', publicOrigin:'https://seed-east.nodes.commonweave.earth', capabilities:['relay','relay','discovery'] });
 assert.equal(normalized.nodeId, 'seed-east');
 assert.deepEqual(normalized.capabilities, ['relay','discovery']);
+assert.equal(liveCoreModule.normalizePublicNodeCallback('https://commonweave-host-node.onrender.com/app/node-ai-operator-v1.html'), 'https://commonweave-host-node.onrender.com');
+assert.equal(liveCoreModule.normalizePublicNodeCallback('https://provider.example.org:443/path'), 'https://provider.example.org');
+for (const rejected of ['http://provider.example.org','https://localhost','https://127.0.0.1','https://node.local','https://[::1]']) {
+  assert.throws(() => liveCoreModule.normalizePublicNodeCallback(rejected));
+}
 const manifest = nodeModule.buildCloudNodeManifest('seed-east', { publicKey:'PUBLIC-TEST', keyId:'node-test' });
 assert.equal(manifest.runtime, 'cloudflare-durable-object-v2');
 assert.equal(manifest.security.stripePlatformSecretPresent, false);
 assert.equal(manifest.security.cerbanimoSigningPrivateKeyPresent, false);
 
-console.log(JSON.stringify({ ok:true, authority:'cloudflare-core', platformFeeBps:1500, canonicalMoneyEdge:LIVE_MONEY_EDGE, d1:true, r2:true, durableIdentity:true, wildcardNodes:true, directCharge:true, refundApplicationFee:true, hostNodeSecretsDistributed:false, liveMoneyDefault:false }, null, 2));
+console.log(JSON.stringify({ ok:true, authority:'cloudflare-core', platformFeeBps:1500, canonicalMoneyEdge:LIVE_MONEY_EDGE, d1:true, r2:true, durableIdentity:true, publicHostEnrollment:true, directCharge:true, refundApplicationFee:true, hostNodeSecretsDistributed:false, liveMoneyDefault:false }, null, 2));
