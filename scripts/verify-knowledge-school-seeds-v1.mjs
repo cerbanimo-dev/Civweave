@@ -27,7 +27,7 @@ for(const school of catalog.schools){
   const file=path.join(root,school.zip_file),stat=await fs.stat(file);
   if(!stat.isFile())throw new Error(`Missing school ZIP: ${school.zip_file}`);
   if(stat.size!==Number(school.zip_bytes))throw new Error(`Size mismatch for ${school.zip_file}: ${stat.size} != ${school.zip_bytes}`);
-  if(stat.size>maxCloudflareAssetBytes)throw new Error(`${school.zip_file} exceeds the 24 MiB Cloudflare release boundary.`);
+  if(stat.size>maxCloudflareAssetBytes)throw new Error(`${school.zip_file} exceeds the 24 MiB release-asset boundary.`);
   if(await sha256(file)!==school.zip_sha256)throw new Error(`SHA-256 mismatch for ${school.zip_file}`);
   compressedBytes+=stat.size;
 }
@@ -48,7 +48,7 @@ const [index,helper,installer,installRuntime,boundary,installedEntry,updateContr
   read('public/app/installer-storage-guard-v281.js'),read('public/service-worker-living-school-cleanroom-v218.js')
 ]);
 assertIncludes(index,['knowledge-school-list','knowledge-school-seeds-v1.js','knowledge-school-installer-v1.js','Download once. Keep it through updates.'],'installer page');
-assertIncludes(helper,["CACHE_NAME='cwknowledge-school-seeds-v2'","LEGACY_CACHE_NAMES=['civweave-knowledge-schools-v1']",'migrateLegacyCaches','cachedCurrent','navigator.storage.persist()','async function save(',"phase:'cached'"],'knowledge helper');
+assertIncludes(helper,["CACHE_NAME='cwknowledge-school-seeds-v2'","LEGACY_CACHE_NAMES=['civweave-knowledge-schools-v1']",'migrateLegacyCaches','cachedCurrent','navigator.storage.persist()','async function save(',"phase:'cached'",'record?.download_url','legacySeedUrl','seedUrls','matchCachedSeed','X-Civweave-Source-URL'],'knowledge helper');
 if(helper.includes('serviceWorker.register'))throw new Error('Optional school staging must not register or replace the core service worker.');
 assertIncludes(installer,['neededSchools','Save selected library','Download ${needed.length}',"progress.phase==='cached'",'saved offline'],'knowledge installer');
 assertMatches(installRuntime,/const\s+LIBRARY_CACHE\s*=\s*['"]cwknowledge-school-seeds-v2['"]/, 'app installer protected library cache');
@@ -83,4 +83,4 @@ assertIncludes(offlineOverride,[
 assertIncludes(storageGuard,['navigator.storage','requiredFreeBytes',"civweaveStorageState='insufficient'"],'campus storage guard');
 assertIncludes(cleanroomWorker,["const REVISION='living-school-cleanroom-v218'",'event.stopImmediatePropagation()'],'Living School cache boundary');
 for(const source of [helper,installer,installRuntime,boundary,installedEntry,updateController,updateWorker,workerWrapper,workerCore,installerStateWorker,integrityWorker,offlineOverride,storageGuard,cleanroomWorker])new Function(source);
-console.log(JSON.stringify({schools:catalog.schools.length,articles:articleCount,compressedBytes,compressedMiB:Number((compressedBytes/1024/1024).toFixed(2)),largestSchoolMiB:Number((Math.max(...catalog.schools.map(school=>school.zip_bytes))/1024/1024).toFixed(2)),crossroads:catalog.reconciliation.crossroads_articles,knowledgeCache:'cwknowledge-school-seeds-v2',installedUpdateOwner:'installed-entry-v146',manualUpdateControl:'visible-v207-registration-watchdog',workerComposition:'v281-integrity-v280-resumable-campus-v250-chat-migration',currentFilesSkipRedownload:true,backgroundCampus:true,storagePreflight:true,shellIntegrity:true},null,2));
+console.log(JSON.stringify({schools:catalog.schools.length,articles:articleCount,compressedBytes,compressedMiB:Number((compressedBytes/1024/1024).toFixed(2)),largestSchoolMiB:Number((Math.max(...catalog.schools.map(school=>school.zip_bytes))/1024/1024).toFixed(2)),crossroads:catalog.reconciliation.crossroads_articles,knowledgeCache:'cwknowledge-school-seeds-v2',externalOriginReady:true,legacyOriginCacheCompatible:true,installedUpdateOwner:'installed-entry-v146',manualUpdateControl:'visible-v207-registration-watchdog',workerComposition:'v281-integrity-v280-resumable-campus-v250-chat-migration',currentFilesSkipRedownload:true,backgroundCampus:true,storagePreflight:true,shellIntegrity:true},null,2));
