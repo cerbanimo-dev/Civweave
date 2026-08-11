@@ -1,5 +1,5 @@
 import { verifyStripeWebhook } from './index.mjs';
-import { CloudflareMoneyEdge, moneyEdgeError } from './money-edge.mjs';
+import { CloudflareMoneyEdge, moneyEdgeError } from './money-edge-with-memberships.mjs';
 
 export const STRIPE_SNAPSHOT_WEBHOOK_PATHS = Object.freeze(new Set([
   '/api/money-edge/webhooks/stripe',
