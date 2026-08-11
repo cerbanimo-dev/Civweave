@@ -4,16 +4,8 @@
   "main": "src/index.mjs",
   "compatibility_date": "2026-08-10",
   "compatibility_flags": ["nodejs_compat"],
-  "routes": [
-    {
-      "pattern": "nodes.commonweave.earth/*",
-      "zone_name": "commonweave.earth"
-    },
-    {
-      "pattern": "*.nodes.commonweave.earth/*",
-      "zone_name": "commonweave.earth"
-    }
-  ],
+  "workers_dev": true,
+  "preview_urls": false,
   "durable_objects": {
     "bindings": [
       {
@@ -35,7 +27,8 @@
     }
   ],
   "vars": {
-    "NODE_DOMAIN": "nodes.commonweave.earth"
+    "NODE_DOMAIN": "nodes.commonweave.earth",
+    "PUBLIC_FABRIC_ORIGIN": "https://civweave-node-cloud.glaedn.workers.dev"
   },
   "observability": {
     "enabled": true
