@@ -1,3 +1,5 @@
+export { CivweaveCapacityAccount } from './capacity.mjs';
+
 export const CLOUD_NODE_SCHEMA = 'civweave.node.v1';
 export const CLOUD_NODE_RUNTIME = 'cloudflare-durable-object-v2';
 
@@ -72,7 +74,7 @@ export function buildCloudNodeManifest(nodeId, input = {}, domain = 'nodes.commo
 function nodePage(manifest) {
   const esc = value => String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
   const caps = manifest.capabilities.map(cap => `<li>${esc(cap)}</li>`).join('');
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(manifest.displayName)} · Civweave node</title><style>body{font:16px system-ui;background:#11152b;color:#f5f2ea;max-width:760px;margin:auto;padding:48px 22px}main{border:1px solid #6f77a8;border-radius:24px;padding:28px;background:#171d3a}code{color:#9de3cf}a{color:#f5ca77}</style></head><body><main><p>Civweave public host node</p><h1>${esc(manifest.displayName)}</h1><p><code>${esc(manifest.nodeId)}</code></p><p>Runtime: ${esc(manifest.runtime)}</p><h2>Capabilities</h2><ul>${caps}</ul><p><a href="/api/ai/node/manifest">Node manifest</a> · <a href="/api/node/health">Health</a></p></main></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(manifest.displayName)} · Civweave node</title><style>body{font:16px system-ui;background:#11152b;color:#f5f2ea;max-width:760px;margin:auto;padding:48px 22px}main{border:1px solid #6f77a8;border-radius:24px;padding:28px;background:#171d3a}code{color:#9de3cf}a{color:#f5ca77}</style></head><body><main><p>Civweave public host node</p><h1>${esc(manifest.displayName)}</h1><p><code>${esc(manifest.nodeId)}</code></p><p>Runtime: ${esc(manifest.runtime)}</p><h2>Capabilities</h2><ul>${caps}</ul><p><a href="/api/ai/node/manifest">Node manifest</a> · <a href="/api/ai/node/capacity">Capacity</a> · <a href="/api/node/health">Health</a></p></main></body></html>`;
 }
 
 export class CivweaveCloudNode {
@@ -206,6 +208,18 @@ async function secretEqual(left, right) {
 function nodeStub(env, nodeId) {
   return env.NODES.get(env.NODES.idFromName(nodeId));
 }
+function capacityStub(env) {
+  if (!env.CAPACITY) throw Object.assign(new Error('Capacity Durable Object binding is unavailable.'), { status: 503 });
+  return env.CAPACITY.get(env.CAPACITY.idFromName('civweave-account'));
+}
+async function callCapacity(env, pathname, init = {}) {
+  return capacityStub(env).fetch(new Request(`https://capacity.internal${pathname}`, init));
+}
+function publicCapacity(snapshot) {
+  if (!snapshot || typeof snapshot !== 'object') return snapshot;
+  const { reservesMicrocents, ...safe } = snapshot;
+  return safe;
+}
 async function callNode(env, nodeId, request, pathname = null) {
   const url = new URL(request.url);
   if (pathname) url.pathname = pathname;
@@ -237,7 +251,26 @@ export default {
     const nodeFromHost = nodeIdFromHostname(url.hostname, domain);
 
     if (request.method === 'GET' && url.pathname === '/api/fabric/health' && !nodeFromHost) {
-      return json({ schema: 'civweave.node-cloud-fabric.v1', ok: true, domain, durableObjects: Boolean(env.NODES), coreBinding: Boolean(env.CORE), moneyAuthority: 'cloudflare-core' });
+      return json({ schema: 'civweave.node-cloud-fabric.v1', ok: true, domain, durableObjects: Boolean(env.NODES), capacityBinding: Boolean(env.CAPACITY), coreBinding: Boolean(env.CORE), moneyAuthority: 'cloudflare-core' });
+    }
+
+    if (request.method === 'GET' && url.pathname === '/api/fabric/capacity' && !nodeFromHost) {
+      const response = await callCapacity(env, `/snapshot?nodeId=${encodeURIComponent(url.searchParams.get('nodeId') || '')}`);
+      const payload = await response.json().catch(() => ({}));
+      return json(publicCapacity(payload), response.status);
+    }
+
+    if (nodeFromHost && request.method === 'GET' && url.pathname === '/api/ai/node/capacity') {
+      const response = await callCapacity(env, `/snapshot?nodeId=${encodeURIComponent(nodeFromHost)}`);
+      const payload = await response.json().catch(() => ({}));
+      return json(publicCapacity(payload), response.status);
+    }
+
+    const capacityAdmin = !nodeFromHost ? url.pathname.match(/^\/api\/fabric\/capacity\/(configure|nodes\/register|members\/admit|members\/billing|settlements\/membership|settlements\/topup|usage\/reserve|usage\/settle)$/) : null;
+    if (capacityAdmin && request.method === 'POST') {
+      if (!await secretEqual(request.headers.get('authorization')?.replace(/^Bearer\s+/i, ''), env.NODE_FABRIC_OPERATOR_TOKEN)) return json({ ok: false, error: 'forbidden' }, 403);
+      const response = await callCapacity(env, `/${capacityAdmin[1]}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: await request.text() });
+      return new Response(response.body, { status: response.status, headers: response.headers });
     }
 
     const adminMatch = url.pathname.match(/^\/api\/fabric\/nodes\/([a-zA-Z0-9-]+)$/);
@@ -248,7 +281,10 @@ export default {
       const configured = await callNode(env, nodeId, new Request(`https://${nodeId}.${domain}/internal/configure`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: await request.text() }), '/internal/configure');
       const result = await configured.json();
       if (!configured.ok) return json(result, configured.status);
-      return json({ ok: true, manifest: result.manifest, core: await syncCore(env, result.manifest) });
+      const capacityResponse = await callCapacity(env, '/nodes/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ nodeId }) });
+      const capacity = await capacityResponse.json().catch(() => ({}));
+      if (!capacityResponse.ok) return json({ ok: false, error: capacity.error || 'capacity-node-registration-failed' }, capacityResponse.status);
+      return json({ ok: true, manifest: result.manifest, capacity: publicCapacity(capacity), core: await syncCore(env, result.manifest) });
     }
 
     const payoutMatch = url.pathname.match(/^\/api\/fabric\/nodes\/([a-zA-Z0-9-]+)\/payouts$/);
@@ -279,6 +315,6 @@ export default {
       return callNode(env, nodeId, new Request(forwarded, request));
     }
 
-    return json({ schema: 'civweave.node-cloud-fabric.v1', ok: true, message: 'Civweave Cloudflare host-node fabric', nodeDomain: domain, nodeRoute: `https://<node-id>.${domain}`, moneyAuthority: 'cloudflare-core' });
+    return json({ schema: 'civweave.node-cloud-fabric.v1', ok: true, message: 'Civweave Cloudflare host-node fabric', nodeDomain: domain, nodeRoute: `https://<node-id>.${domain}`, capacityRoute: '/api/fabric/capacity', moneyAuthority: 'cloudflare-core' });
   }
 };
