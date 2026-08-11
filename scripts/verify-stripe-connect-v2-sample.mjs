@@ -4,12 +4,14 @@ import { spawnSync } from 'node:child_process';
 
 const root = new URL('../', import.meta.url);
 const read = path => readFile(new URL(path, root), 'utf8');
-const [pkgText, sampleSource, entrySource, providerSource, migrationSource, wranglerText, prepareSource, deployWorkflow] = await Promise.all([
+const [pkgText, sampleSource, entrySource, providerSource, snapshotSource, migrationSource, retryMigrationSource, wranglerText, prepareSource, deployWorkflow] = await Promise.all([
   read('cloudflare/core/package.json'),
   read('cloudflare/core/src/stripe-connect-v2-sample.mjs'),
   read('cloudflare/core/src/stripe-connect-v2-entry.mjs'),
   read('cloudflare/core/src/stripe-connect.mjs'),
+  read('cloudflare/core/src/stripe-snapshot-webhook.mjs'),
   read('cloudflare/core/migrations/0003_stripe_connect_v2_sample.sql'),
+  read('cloudflare/core/migrations/0004_stripe_event_processing.sql'),
   read('cloudflare/core/wrangler.template.jsonc'),
   read('scripts/prepare-cloudflare-launch-kit-v1.mjs'),
   read('.github/workflows/deploy-cloudflare-money-edge-v1.yml')
@@ -68,11 +70,29 @@ assert.ok(sampleSource.includes('STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
 assert.ok(providerSource.includes("key.startsWith('rk_test_')"));
 assert.ok(providerSource.includes("key.startsWith('rk_live_')"));
 
-// Interactive sample/admin routes remain disabled by default, but the Stripe-
-// signed thin webhook must stay routable without opening the UI.
+// Snapshot webhook receipts have an explicit processing lifecycle. A failed event
+// must be claimable on Stripe retry; a completed event must remain idempotent; a
+// fresh in-flight duplicate must not run concurrently.
+for (const needle of [
+  "processing_state='processing'",
+  "processing_state='processed'",
+  "processing_state='error'",
+  'processing_attempts=processing_attempts+1',
+  'staleBefore',
+  'retryDeferred'
+]) assert.ok(snapshotSource.includes(needle), `missing snapshot retry hardening: ${needle}`);
+for (const needle of ['processing_state', 'processing_attempts', 'last_attempt_at', 'processed_at']) {
+  assert.ok(retryMigrationSource.includes(needle), `missing Stripe receipt migration field: ${needle}`);
+}
+
+// Interactive sample/admin routes remain disabled by default, but both Stripe-
+// signed webhooks must stay routable without opening the UI.
 assert.equal(wrangler.vars.STRIPE_CONNECT_SAMPLE_ENABLED, 'false');
 assert.ok(entrySource.includes("THIN_WEBHOOK_PATH = '/api/connect-demo/webhooks/stripe-thin'"));
+assert.ok(entrySource.includes('STRIPE_SNAPSHOT_WEBHOOK_PATHS.has(url.pathname)'));
+assert.ok(entrySource.includes('handleStripeSnapshotWebhook'));
 assert.ok(entrySource.includes("request.method === 'POST' && url.pathname === THIN_WEBHOOK_PATH"));
+assert.ok(entrySource.indexOf('STRIPE_SNAPSHOT_WEBHOOK_PATHS.has(url.pathname)') < entrySource.indexOf('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
 assert.ok(entrySource.indexOf("request.method === 'POST' && url.pathname === THIN_WEBHOOK_PATH") < entrySource.indexOf('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
 assert.ok(entrySource.includes('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
 assert.ok(entrySource.includes('handleStripeConnectV2Sample'));
@@ -81,10 +101,21 @@ assert.ok(deployWorkflow.includes('npm install --prefix cloudflare/core'));
 assert.ok(deployWorkflow.includes('STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
 assert.ok(!deployWorkflow.includes('probe "$CORE_URL/connect-demo"'), 'production deploy must not expect the disabled sample UI to be public');
 
-for (const file of ['cloudflare/core/src/stripe-connect.mjs', 'cloudflare/core/src/stripe-connect-v2-sample.mjs', 'cloudflare/core/src/stripe-connect-v2-entry.mjs']) {
+for (const file of [
+  'cloudflare/core/src/stripe-connect.mjs',
+  'cloudflare/core/src/stripe-connect-v2-sample.mjs',
+  'cloudflare/core/src/stripe-snapshot-webhook.mjs',
+  'cloudflare/core/src/stripe-connect-v2-entry.mjs'
+]) {
   const result = spawnSync(process.execPath, ['--check', file], { cwd: new URL('../', import.meta.url), encoding: 'utf8' });
   assert.equal(result.status, 0, `${file} syntax failed: ${result.stderr || result.stdout}`);
 }
+
+const hardening = spawnSync(process.execPath, ['scripts/verify-stripe-snapshot-webhook-hardening.mjs'], {
+  cwd: new URL('../', import.meta.url),
+  encoding: 'utf8'
+});
+assert.equal(hardening.status, 0, `snapshot webhook hardening verifier failed: ${hardening.stderr || hardening.stdout}`);
 
 const provider = await import(new URL('cloudflare/core/src/stripe-connect.mjs', root));
 assert.equal(provider.stripeCredentialMode(''), 'unconfigured');
@@ -123,6 +154,7 @@ console.log(JSON.stringify({
   directStatusFetch: true,
   thinEvents: true,
   signedThinWebhookPublic: true,
+  snapshotWebhookRetrySafe: true,
   restrictedStripeKeysClassified: true,
   productsOnConnectedAccount: true,
   directCheckoutApplicationFee: true,
