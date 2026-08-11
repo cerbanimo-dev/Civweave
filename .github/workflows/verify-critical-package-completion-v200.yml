@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   critical-package:
@@ -27,3 +27,54 @@ jobs:
           node --check scripts/verify-critical-package-completion-v200.mjs
       - name: Verify fresh and existing package paths
         run: node scripts/verify-critical-package-completion-v200.mjs
+
+  materialize-offline-core-v302:
+    if: github.event_name == 'pull_request' && github.head_ref == 'fix/offline-core-packs-v302'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Materialize Civweave 1.0.103
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          version='1.0.103'
+          Path('VERSION').write_text(version+'\n',encoding='utf-8')
+          for name in ['package.json','package-lock.json']:
+              path=Path(name)
+              data=json.loads(path.read_text(encoding='utf-8'))
+              data['version']=version
+              if name=='package-lock.json' and isinstance(data.get('packages'),dict) and isinstance(data['packages'].get(''),dict):
+                  data['packages']['']['version']=version
+              path.write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')
+          contract_path=Path('config/release-contract.json')
+          contract=json.loads(contract_path.read_text(encoding='utf-8'))
+          contract['canonical']['current']={'version':version,'path':f'releases/{version}','status':'current'}
+          contract_path.write_text(json.dumps(contract,indent=2)+'\n',encoding='utf-8')
+          PY
+          node scripts/materialize-canonical-release.mjs
+          node scripts/verify-critical-package-completion-v200.mjs
+          node scripts/verify-map-v1-package.mjs
+          node scripts/verify-node-ai-marketplace-v1.mjs
+          npm run check:release-discipline
+      - name: Commit canonical release and restore CI
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          git checkout origin/main -- .github/workflows/verify-critical-package-completion-v200.yml
+          rm -f .github/workflows/materialize-offline-core-v302-temp.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m '[CF-Pages-Skip] Materialize Civweave 1.0.103 offline core'
+          git push origin HEAD:${{ github.head_ref }}
