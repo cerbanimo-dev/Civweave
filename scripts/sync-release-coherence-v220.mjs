@@ -117,7 +117,7 @@ for(const token of [
   '/service-worker-shell-integrity-v281.js?v=shell-integrity-v281',
   `/service-worker-release-coherence-v220.js?v=${revision}`,
   '/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227',
-  `/service-worker-chat-repair-v245.js?v=${chatCachePurgeRevision}`,
+  `/service-worker-chat-repair-v245.js?v=${chatRevision}&purge=${chatCachePurgeRevision}`,
   "self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"
 ])if(!wrapper.includes(token))throw new Error(`The active worker wrapper is missing ${token}.`);
 if(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')<wrapper.indexOf('/service-worker-shell-repair-v225.js'))throw new Error('Canonical navigation must remain the final navigation policy.');
