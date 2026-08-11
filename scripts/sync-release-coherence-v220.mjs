@@ -25,6 +25,13 @@ const retiredChatPaths=[
   '/app/persistent-guide-viewport-v216.js',
   '/app/chat-single-owner-v245.js'
 ];
+const retiredRootCorePaths=[
+  '/app/cabinet-home-v142.js',
+  '/app/cabinet-home-v142.css',
+  '/app/cabinet-surfaces-v143.js',
+  '/app/cabinet-surfaces-v143.css',
+  '/app/sharing-library-v143.js'
+];
 if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('VERSION must contain a semantic release version.');
 
 const changed=[];
@@ -101,6 +108,12 @@ await patch('public/service-worker-core-v208.js',source=>{
   return source;
 });
 
+await patch('public/service-worker.js',source=>{
+  for(const retired of retiredRootCorePaths)source=source.replaceAll(`,'${retired}'`,'').replaceAll(`'${retired}',`, '');
+  for(const retired of retiredRootCorePaths)if(source.includes(`'${retired}'`))throw new Error(`Root portable worker still requires retired runtime ${retired}.`);
+  return source;
+});
+
 await patch('public/extensions/civweave-additions-v156.js',source=>{
   if(!source.includes('let civweaveAdditionsNavigating=false;'))source=source.replace("let readyPromise=null,activeTab='mesh',noticeTimer=null;","let readyPromise=null,activeTab='mesh',noticeTimer=null;\nlet civweaveAdditionsNavigating=false;\naddEventListener('pagehide',()=>{civweaveAdditionsNavigating=true},{once:true});\naddEventListener('beforeunload',()=>{civweaveAdditionsNavigating=true},{once:true});");
   source=source.replace('document.head.append(script)',"(()=>{const head=document.head;if(civweaveAdditionsNavigating||!head){resolve(false);return}head.append(script)})()");
@@ -129,4 +142,4 @@ for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pin
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',retiredChatRuntimeCount:retiredChatPaths.length,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
