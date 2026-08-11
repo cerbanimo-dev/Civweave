@@ -33,7 +33,7 @@ const sandbox={
   localStorage:new Store(),sessionStorage:new Store(),
   crypto:{randomUUID:()=> 'session-test'},
   CustomEvent:class CustomEvent{constructor(type,{detail}={}){this.type=type;this.detail=detail}},
-  dispatchEvent(){},setTimeout(){return 1},clearTimeout(){},queueMicrotask(fn){fn()}
+  addEventListener(){},removeEventListener(){},dispatchEvent(){},setTimeout(){return 1},clearTimeout(){},queueMicrotask(fn){fn()}
 };
 sandbox.globalThis=sandbox;
 vm.createContext(sandbox);
