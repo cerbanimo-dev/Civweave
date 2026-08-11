@@ -22,7 +22,7 @@ Every five minutes, the trusted workflow on `main`:
 3. Add it to GitHub Actions as the repository secret `JULES_API_KEY`.
 4. Create a fine-grained GitHub token owned by the merge identity and add it as `EVERGREEN_GITHUB_TOKEN`.
 
-The merge token should be restricted to this repository with **Contents: write** and **Pull requests: write**. Do not grant ruleset or branch-protection bypass. The separate token is required because merges made with the workflow's ordinary `GITHUB_TOKEN` do not reliably start the downstream push workflows needed for deployment and evergreen-branch synchronization.
+The merge token should be restricted to this repository with **Contents: write** and **Pull requests: write**. Do not grant ruleset or branch-protection bypass. The separate token is required because merges made with the workflow's ordinary `GITHUB_TOKEN` do not reliably start the downstream push workflows needed for deployment.
 
 The workflow is enabled whenever the Jules key exists unless `JULES_EVERGREEN_ENABLED=0`. Automatic merge defaults on and can be paused independently with `JULES_AUTOMERGE_ENABLED=0`.
 
@@ -64,7 +64,7 @@ The merge endpoint still obeys branch protection and repository rules. The daemo
 - A missing API key, missing merge token, missing Jules source, quota response, active PR, active session, legacy claim, retry ceiling, or disabled variable causes a clean no-op or leaves the PR open.
 - The workflow executes only trusted control code checked out from `main`; it never executes Jules pull-request code with repository secrets.
 - Evergreen-control files cannot modify themselves through automatic merge.
-- The `evergreen/jules-pipeline` branch is a disposable mirror of `main`, force-synchronized after every merge.
+- Jules uses `main` directly as its trusted baseline. Do not maintain a deployment-watched mirror of `main`: moving a mirror branch can trigger a second Cloudflare Pages preview build for every production release and starve the production queue.
 
 ## Queue reconciliation
 

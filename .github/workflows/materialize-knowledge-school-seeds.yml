@@ -77,5 +77,5 @@ jobs:
             echo 'Knowledge school assets already match the artifact.'
             exit 0
           fi
-          git commit -m 'Add optional category school seed assets'
+          git commit -m '[CF-Pages-Skip] Add optional category school seed assets'
           git push origin HEAD:agent/optional-knowledge-school-seeds

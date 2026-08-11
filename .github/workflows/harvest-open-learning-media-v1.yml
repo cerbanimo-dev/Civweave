@@ -59,7 +59,12 @@ jobs:
             echo 'Harvest produced no catalog diff.'
             exit 0
           fi
-          git commit -m 'Expand open learning media catalog'
           TARGET_REF="${GITHUB_REF_NAME:-main}"
+          if [ "$TARGET_REF" = "main" ]; then
+            COMMIT_MESSAGE='Refresh open learning media catalog'
+          else
+            COMMIT_MESSAGE='[CF-Pages-Skip] Refresh open learning media catalog'
+          fi
+          git commit -m "$COMMIT_MESSAGE"
           git pull --rebase origin "$TARGET_REF"
           git push origin "HEAD:$TARGET_REF"
