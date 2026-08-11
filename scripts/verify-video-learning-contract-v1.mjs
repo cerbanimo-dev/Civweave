@@ -36,6 +36,9 @@ assert(cerbanimo.includes("addEventListener('cerbanimo:quest-engine-changed'"),'
 assert(realm.includes('/app/cerbanimo-video-task-contract-v1.mjs'),'Cerbanimo realm console does not load the task video contract.');
 assert(installer.includes("CATALOG_URL='/downloads/knowledge-schools/video-atlases/catalog.json'"),'Installer does not load the Video Learning Atlas catalog.');
 assert(installer.includes("'youtube-availability-current.json'"),'Installer does not stage the current YouTube embeddability index for offline resolution.');
+assert(installer.includes("schoolList.addEventListener('change',scheduleRefresh)"),'Video atlas installer does not follow direct school checkbox changes.');
+assert(installer.includes('new MutationObserver(scheduleRefresh)'),'Video atlas installer does not recover when knowledge-school checkboxes render after atlas startup.');
+assert(installer.includes("presets?.addEventListener('click'"),'Video atlas installer does not refresh after programmatic knowledge-school preset changes.');
 assert(installPage.includes('/app/video-atlas-installer-v1.js'),'Core learning download page does not offer Video Learning Atlas bundles.');
 for(const dataset of ['thepowerfuldeez/massive-yt-edu-queue','Awiny/Howto-Interlink7M'])assert(builder.includes(dataset),`Base builder is missing ${dataset}.`);
 assert(parallelBuilder.includes('common-pile/youtube_filtered'),'Parallel builder is missing the viewer-backed open YouTube description/transcript source.');
@@ -49,4 +52,4 @@ assert(availabilityMaterializer.includes('privacy_status'),'Availability materia
 assert(workflow.includes('YOUTUBE_API_KEY')&&workflow.includes('GOOGLE_API_KEY'),'Build workflow is not wired to YouTube/Google API credentials.');
 assert(workflow.includes('build-video-learning-atlas-parallel-v1.py'),'Build workflow does not use the parallel materializer.');
 assert(workflow.includes('materialize-video-learning-lookup-v1.py'),'Build workflow does not materialize the browser lookup.');
-console.log('Video Learning Atlas contracts verified: catalogs, open descriptions, current embeddability filtering, offline lookup, Living School per-module video invariant, Cerbanimo per-task video invariant, and required fallback are wired.');
+console.log('Video Learning Atlas contracts verified: catalogs, open descriptions, current embeddability filtering, offline lookup, Living School per-module video invariant, Cerbanimo per-task video invariant, selection synchronization, and required fallback are wired.');
