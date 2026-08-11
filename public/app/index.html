@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07141f">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <title>Install Civweave v1.0.103</title>
+  <title>Install Civweave v1.0.104</title>
   <script src="/app/pwa-install-prompt-v246.js?v=pwa-install-v246"></script>
-  <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.103">
+  <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.104">
   <link rel="icon" href="/app/logos/civweave-symbol.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/install-v130.css?v=1.0.103-lightweight-shell-v208">
+  <link rel="stylesheet" href="/install-v130.css?v=1.0.104-lightweight-shell-v208">
   <link rel="stylesheet" href="/app/knowledge-school-installer-v1.css?v=knowledge-schools-v2">
   <style>
     .campus-install-progress{max-width:760px;margin:22px 0 12px;display:grid;gap:7px}.campus-progress-heading,.campus-progress-meta{display:flex;align-items:center;justify-content:space-between;gap:12px}.campus-progress-heading span{color:#8de5ef;font-size:.72rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.campus-progress-heading strong{font-size:.84rem;color:#fff}.campus-progress-track{position:relative;height:8px;overflow:hidden;border:1px solid #7ee5ff44;border-radius:999px;background:#001018aa;box-shadow:inset 0 1px 4px #0008}.campus-progress-fill{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#72d9e7,#f3d77d);box-shadow:0 0 14px #7ee5ff77;transition:width .24s ease}.campus-progress-meta{color:var(--muted);font-size:.76rem}.campus-progress-meta strong{color:#f8e5a2;font:900 .76rem ui-monospace,monospace}.campus-install-progress[data-state="ready"] .campus-progress-fill{box-shadow:0 0 18px #8df0c688}.campus-install-progress[data-state="failed"] .campus-progress-heading strong{color:#ffd08a}.campus-retry{justify-self:start;min-height:32px;padding:5px 9px;border:1px solid #ffd08a77;border-radius:9px;background:#3b2a13;color:#fff;font-weight:800;cursor:pointer}.campus-retry[hidden]{display:none!important}@media(max-width:820px){.campus-progress-heading,.campus-progress-meta{align-items:flex-start}.campus-progress-meta{font-size:.72rem}}
@@ -21,29 +21,29 @@
   <header class="gateway-header">
     <img src="/app/logos/civweave.svg" alt="Civweave">
     <div><small>INSTALLER · UPDATER · RECOVERY</small><h1>Civweave</h1></div>
-    <span class="version">v1.0.103</span>
+    <span class="version">v1.0.104</span>
   </header>
   <section class="install-card" aria-labelledby="install-title">
-    <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install Civweave v1.0.103. The campus downloads automatically.</h2><p>You can open the online campus immediately. Installation prepares the small Civweave shell, then automatically downloads the required functional campus as a resumable stream. One slow or missing room no longer freezes access, and interrupted files can continue later. No native modal is involved.</p></div>
-    <div class="topology" aria-label="Civweave topology"><article><b>1</b><strong>Install shell</strong><span>Real browser-native PWA installation.</span></article><i>→</i><article><b>2</b><strong>Download campus</strong><span>Starts automatically and resumes per file.</span></article><i>→</i><article><b>3</b><strong>Open Civweave</strong><span>Launch immediately while the campus continues downloading.</span></article></div>
+    <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install the shell. Open Civweave immediately. Download offline files only when you choose.</h2><p>The installer does no large background work on arrival. Install prepares the small PWA shell. The offline campus is a separate resumable code download, while large pictures, media, knowledge packs, and local AI models arrive on demand.</p></div>
+    <div class="topology" aria-label="Civweave topology"><article><b>1</b><strong>Install shell</strong><span>Small browser-native PWA shell.</span></article><i>→</i><article><b>2</b><strong>Open Civweave</strong><span>Launch as soon as installation completes.</span></article><i>→</i><article><b>3</b><strong>Go offline when useful</strong><span>Download the code-first campus separately.</span></article></div>
 
-    <div id="campus-install-progress" class="campus-install-progress" data-state="preparing" aria-live="polite">
-      <div class="campus-progress-heading"><span>Offline campus</span><strong id="offline-package-state">checking</strong></div>
+    <div id="campus-install-progress" class="campus-install-progress" data-state="idle" aria-live="polite">
+      <div class="campus-progress-heading"><span>Offline campus</span><strong id="offline-package-state">not downloaded</strong></div>
       <div id="offline-campus-progress-track" class="campus-progress-track" role="progressbar" aria-label="Offline campus download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="offline-campus-progress-fill" class="campus-progress-fill"></span></div>
-      <div class="campus-progress-meta"><span id="offline-package-assets">not measured</span><strong id="offline-campus-progress-percent">0%</strong></div>
-      <button id="download-offline-package" class="campus-retry" type="button" disabled hidden>Preparing automatic campus download…</button>
+      <div class="campus-progress-meta"><span id="offline-package-assets">not started</span><strong id="offline-campus-progress-percent">0%</strong></div>
+      <button id="download-offline-package" class="campus-retry" type="button">Download offline campus</button>
     </div>
 
-    <div class="gateway-actions"><button id="install-app" class="primary" type="button" disabled>Preparing app shell…</button><button id="check-update" class="secondary" type="button">Check release</button><a id="open-online-campus-v225" class="secondary" href="/app/working-campus-v156.html?installed=1&amp;launch=online">Open online campus</a></div>
-    <p id="install-help" class="install-help" role="status">Preparing the small app shell. Online launch remains available while offline preparation continues; models and knowledge schools remain separate optional downloads.</p>
-    <dl class="package-state" aria-label="App shell state"><div><dt>App shell</dt><dd id="package-state">preparing</dd></div><div><dt>Shell files</dt><dd id="package-assets">checking</dd></div><div><dt>Storage lanes</dt><dd id="local-mode">shell and required campus · optional models and schools separated</dd></div></dl>
+    <div class="gateway-actions"><button id="install-app" class="primary" type="button">Install Civweave</button><button id="check-update" class="secondary" type="button">Check release</button><a id="open-online-campus-v225" class="secondary" href="/app/working-campus-v156.html?installed=1&amp;launch=online">Open online campus</a></div>
+    <p id="install-help" class="install-help" role="status">Ready when you are. Nothing large downloads until you ask for it.</p>
+    <dl class="package-state" aria-label="App shell state"><div><dt>App shell</dt><dd id="package-state">not prepared</dd></div><div><dt>Shell files</dt><dd id="package-assets">starts on install</dd></div><div><dt>Storage lanes</dt><dd id="local-mode">small shell · optional code-first campus · visuals and models on demand</dd></div></dl>
   </section>
 
-  <section class="knowledge-card" aria-labelledby="knowledge-school-title">
+  <section class="knowledge-card" aria-labelledby="knowledge-school-title" data-lazy-offline-tools>
     <div class="knowledge-school-copy">
       <small>OPTIONAL OFFLINE KNOWLEDGE</small>
-      <h2 id="knowledge-school-title">Download once. Keep it through updates.</h2>
-      <p>All eleven foundation schools are selected by default. The first action downloads and checksum-verifies missing schools into protected offline storage. Once they are saved, the same button becomes an export button for ZIP copies. Current schools are never downloaded twice.</p>
+      <h2 id="knowledge-school-title">Knowledge packs wait until you use this section.</h2>
+      <p>School catalogs, video-atlas tools, and open-media installers are no longer loaded during the first installer paint. Interact with this section when you actually want those offline libraries.</p>
     </div>
     <div id="knowledge-school-presets" class="knowledge-school-presets" aria-label="Knowledge school presets">
       <button type="button" data-school-preset="human-worlds">Human worlds</button>
@@ -51,56 +51,105 @@
       <button type="button" data-school-preset="all">All schools</button>
       <button type="button" data-school-preset="none">None</button>
     </div>
-    <div id="knowledge-school-list" class="knowledge-school-list" aria-live="polite"><p>Loading the school catalog…</p></div>
-    <div class="knowledge-school-summary"><strong id="knowledge-school-total">Loading catalog…</strong><span>Saved schools survive app-shell cleanup and updates.</span></div>
-    <div class="gateway-actions knowledge-school-actions"><button id="stage-knowledge-schools" class="primary" type="button" disabled>Loading school catalog…</button><button id="remove-knowledge-schools" class="secondary" type="button" disabled>Remove selected saved schools</button><a href="/downloads/knowledge-schools/README.md">Manual and node install</a></div>
-    <p id="knowledge-school-help" class="install-help" role="status">Checking protected offline library storage.</p>
+    <div id="knowledge-school-list" class="knowledge-school-list" aria-live="polite"><p>Tap this section to load the optional knowledge catalog.</p></div>
+    <div class="knowledge-school-summary"><strong id="knowledge-school-total">Not loaded</strong><span>Saved schools survive app-shell cleanup and updates.</span></div>
+    <div class="gateway-actions knowledge-school-actions"><button id="stage-knowledge-schools" class="primary" type="button" disabled>Load optional catalog first</button><button id="remove-knowledge-schools" class="secondary" type="button" disabled>Remove selected saved schools</button><a href="/downloads/knowledge-schools/README.md">Manual and node install</a></div>
+    <p id="knowledge-school-help" class="install-help" role="status">Optional tools are dormant until this section is used.</p>
   </section>
 
   <section class="gateway-grid">
-    <article class="status-card"><small>VISIBLE UPDATES</small><h3>Update without re-downloading everything</h3><p>Release checks update the tiny shell first. The required campus download then starts automatically and reuses files already stored on the device.</p></article>
-    <article class="status-card"><small>FAILURE IS LOCAL</small><h3>One file no longer sinks the ship</h3><p>Campus files report their own failures and remain resumable. Stale references are excluded from completion instead of holding the app at 92% forever.</p></article>
+    <article class="status-card"><small>FAST FRONT DOOR</small><h3>No campus crawl before your first click</h3><p>The page paints first. Shell setup begins only when you install, check the release, or explicitly request the offline campus.</p></article>
+    <article class="status-card"><small>LAZY VISUALS</small><h3>Pictures can arrive room by room</h3><p>Large visual assets and fonts no longer belong to offline-campus completion. Normal runtime caching keeps them as the device actually visits those spaces.</p></article>
     <article class="status-card"><small>PORTABLE RECOVERY</small><h3>Carry the package another way</h3><div class="card-actions"><a href="/downloads/Civweave-Mobile-Install-Kit.zip">Mobile install kit</a><a href="/downloads/civweave-pocket-campus.cwseed">Pocket Campus seed</a><a href="/downloads/knowledge-schools/catalog.json">Knowledge school catalog</a></div></article>
   </section>
 </main>
-<script src="/app/civweave-brand.js?v=1.0.103"></script>
-<script src="/app/knowledge-school-seeds-v1.js?v=knowledge-schools-v2"></script>
-<script src="/install-v130.js?v=1.0.103-lightweight-shell-v208"></script>
+<script src="/app/civweave-brand.js?v=1.0.104"></script>
+<script src="/install-v130.js?v=1.0.104-lightweight-shell-v208"></script>
 <script src="/app/installer-online-fallback-v225.js?v=shell-self-repair-v225"></script>
-<script src="/app/offline-campus-status-v210.js?v=1.0.103-offline-retry-loop-v211"></script>
-<script src="/app/required-campus-autostart-v1.js?v=1.0.103-required-campus-v1"></script>
+<script src="/app/offline-campus-status-v210.js?v=1.0.104-offline-retry-loop-v211"></script>
+<script>
+(()=>{
+  'use strict';
+  const OPT_IN_KEY='civweave.offline-campus.explicit-opt-in.v304';
+  const button=document.querySelector('#download-offline-package');
+  let requested=false;
+  function markOptIn(){try{localStorage.setItem(OPT_IN_KEY,'1')}catch{}}
+  function loadController(){
+    markOptIn();
+    if(requested||globalThis.CivweaveInstallerStateV280)return;
+    requested=true;
+    const script=document.createElement('script');
+    script.src='/app/installer-state-machine-v280.js?v=installer-state-machines-v280-lazy';
+    script.async=true;
+    script.dataset.cwInstallerStateV280='lazy';
+    document.head.append(script);
+  }
+  button?.addEventListener('pointerdown',loadController,{capture:true,passive:true});
+  button?.addEventListener('click',loadController,{capture:true});
+})();
+</script>
 <script>
 (()=>{
   'use strict';
   const $=selector=>document.querySelector(selector);
   const numeric=value=>{const number=Number(value);return Number.isFinite(number)&&number>0?number:0};
   const latestStatus=()=>globalThis.CivweaveOfflineCampusStatusV210?.last||null;
-  function progressFromText(){const match=($('#offline-package-assets')?.textContent||'').match(/(\d+)\s*\/\s*(\d+)\s+files/i);return match?{complete:numeric(match[1]),total:numeric(match[2])}:{complete:0,total:0}}
+  function progressFromText(){const match=($('#offline-package-assets')?.textContent||'').match(/(\d+)\s*\/\s*(\d+)\s+(?:current\s+)?files/i);return match?{complete:numeric(match[1]),total:numeric(match[2])}:{complete:0,total:0}}
   function fallbackReady(){return /^ready offline\b/i.test($('#offline-package-state')?.textContent||'')}
   function renderProgress(){
     const status=latestStatus(),textProgress=progressFromText();
     const box=$('#campus-install-progress'),track=$('#offline-campus-progress-track'),fill=$('#offline-campus-progress-fill'),percentNode=$('#offline-campus-progress-percent'),retry=$('#download-offline-package');
     if(!box||!track||!fill||!percentNode)return;
     const total=numeric(status?.total||status?.discovered||textProgress.total);
-    const complete=numeric(status?.downloaded??status?.completed??status?.attempted??textProgress.complete);
+    const complete=numeric(status?.downloaded??status?.completed??textProgress.complete);
     const failed=numeric(status?.failedCount||status?.failed?.length);
     const ready=Boolean(status?.ready)||fallbackReady();
     const running=Boolean(status?.running)||/^downloading\b/i.test($('#offline-package-state')?.textContent||'');
+    const paused=Boolean(status?.paused)||/^paused\b/i.test($('#offline-package-state')?.textContent||'');
     let percent=ready?100:(total?Math.floor(Math.min(complete,total)/total*100):0);
     if(!ready&&percent>=100)percent=99;
     fill.style.width=`${percent}%`;
     percentNode.textContent=`${percent}%`;
     track.setAttribute('aria-valuenow',String(percent));
-    box.dataset.state=ready?'ready':failed?'failed':running?'running':'preparing';
-    if(retry)retry.hidden=!(failed&&!running&&!ready);
+    box.dataset.state=ready?'ready':failed?'failed':running?'running':paused?'paused':'idle';
+    if(retry)retry.hidden=false;
   }
   addEventListener('civweave:offline-campus-status',renderProgress);
-  setInterval(renderProgress,750);
+  setInterval(renderProgress,1000);
   renderProgress();
 })();
 </script>
-<script src="/app/knowledge-school-installer-v1.js?v=knowledge-schools-v2"></script>
-<script src="/app/video-atlas-installer-v1.js?v=video-atlas-selection-sync-v2"></script>
-<script type="module" src="/app/open-learning-media-installer-v1.mjs?v=general-knowledge-packs-v1"></script>
+<script>
+(()=>{
+  'use strict';
+  const card=document.querySelector('[data-lazy-offline-tools]');
+  if(!card)return;
+  let started=false;
+  const classic=[
+    '/app/knowledge-school-seeds-v1.js?v=knowledge-schools-v2',
+    '/app/knowledge-school-installer-v1.js?v=knowledge-schools-v2',
+    '/app/video-atlas-installer-v1.js?v=video-atlas-selection-sync-v2'
+  ];
+  const appendClassic=src=>new Promise(resolve=>{
+    const script=document.createElement('script');
+    script.src=src;
+    script.onload=script.onerror=()=>resolve();
+    document.body.append(script);
+  });
+  async function load(){
+    if(started)return;
+    started=true;
+    const help=document.querySelector('#knowledge-school-help');
+    if(help)help.textContent='Loading optional offline knowledge tools…';
+    for(const src of classic)await appendClassic(src);
+    const module=document.createElement('script');
+    module.type='module';
+    module.src='/app/open-learning-media-installer-v1.mjs?v=general-knowledge-packs-v1';
+    document.body.append(module);
+  }
+  card.addEventListener('pointerdown',load,{once:true,passive:true});
+  card.addEventListener('focusin',load,{once:true});
+})();
+</script>
 </body>
 </html>
