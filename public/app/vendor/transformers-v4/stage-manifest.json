@@ -1,0 +1,24 @@
+{
+  "schema": "civweave.transformers-stage.v5",
+  "package": "@huggingface/transformers",
+  "version": "4.2.0",
+  "backendPackage": "onnxruntime-web",
+  "backendVersion": "1.26.0-dev.20260416-b7804b056c",
+  "purpose": "gemma4-mobile-runtime",
+  "entry": "/app/vendor/transformers-v4/transformers.min.js",
+  "backendRoot": "/app/vendor/transformers-v4/wasm/",
+  "backendFiles": [
+    "ort-wasm-simd-threaded.jsep.mjs",
+    "ort-wasm-simd-threaded.jsep.wasm.part0",
+    "ort-wasm-simd-threaded.jsep.wasm.part1"
+  ],
+  "wasmSource": "ort-wasm-simd-threaded.jsep.wasm",
+  "wasmBytes": 26101073,
+  "wasmChunks": [
+    "ort-wasm-simd-threaded.jsep.wasm.part0",
+    "ort-wasm-simd-threaded.jsep.wasm.part1"
+  ],
+  "wasmChunkBytes": 16777216,
+  "copied": 9,
+  "stagedAt": "2026-08-11T04:13:34.925Z"
+}
