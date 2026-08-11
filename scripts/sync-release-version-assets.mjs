@@ -30,7 +30,7 @@ await patch('public/index.html',source=>{
 await patch('public/app/index.html',source=>{
   source=replaceRequired(source,/<title>Install Civweave v\d+\.\d+\.\d+<\/title>/,`<title>Install Civweave v${version}</title>`,'installer title');
   source=replaceRequired(source,/<span class="version">v\d+\.\d+\.\d+<\/span>/,`<span class="version">v${version}</span>`,'installer version badge');
-  source=replaceRequired(source,/Install Civweave v\d+\.\d+\.\d+\. The campus downloads automatically\./,`Install Civweave v${version}. The campus downloads automatically.`,'installer headline');
+  source=replaceRequired(source,/(?:Install Civweave v\d+\.\d+\.\d+\. The campus downloads automatically\.|Install the shell\. Open Civweave immediately\. Download offline files only when you choose\.)/,`Install the shell. Open Civweave immediately. Download offline files only when you choose.`,'installer headline');
   source=source.replace(/manifest\.webmanifest\?v=\d+\.\d+\.\d+/g,`manifest.webmanifest?v=${version}`);
   source=source.replace(/civweave-brand\.js\?v=\d+\.\d+\.\d+/g,`civweave-brand.js?v=${version}`);
   source=source.replace(/\d+\.\d+\.\d+-lightweight-shell-v208/g,`${version}-lightweight-shell-v208`);
