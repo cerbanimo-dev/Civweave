@@ -1,12 +1,19 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-convergence-v250';
+const REVISION='chat-runtime-repair-v299';
 const CHAT_PATHS=new Set([
   '/app/manifest.webmanifest',
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146.js',
   '/app/install-boundary-v146.js',
+  '/app/experience-orchestrator-v232.js',
+  '/app/chat-fullscreen-v295.js',
+  '/app/local-chat-runtime-v295.js',
+  '/app/local-chat-owner-v295.js',
+  '/app/local-ai/bootstrap-v266.js',
+  '/app/local-ai/runtime-v266.js',
+  '/app/local-ai/worker-v266.js',
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
   '/app/guide-workspace-v242.js',
