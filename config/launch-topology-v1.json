@@ -6,12 +6,11 @@
     "provider": "cloudflare",
     "staticProject": "commonweave",
     "worker": "civweave-core",
-    "publicApiOrigin": "https://api.commonweave.earth",
+    "publicApiOrigin": "https://civweave-core.glaedn.workers.dev",
     "roles": [
       "canonical-site-and-installer",
       "node-directory",
       "trust-root",
-      "package-distribution",
       "stripe-connect-authority",
       "stripe-webhook-authority",
       "money-edge-authority"
@@ -19,7 +18,7 @@
     "storage": {
       "registry": "cloudflare-d1",
       "payments": "cloudflare-d1",
-      "packages": "cloudflare-r2",
+      "packages": "optional-cloudflare-r2",
       "signingIdentity": "cloudflare-durable-object"
     },
     "moneyEdgeAuthority": true,
@@ -28,8 +27,10 @@
   "cloudNodeFabric": {
     "provider": "cloudflare",
     "worker": "civweave-node-cloud",
+    "publicFabricOrigin": "https://civweave-node-cloud.glaedn.workers.dev",
     "domain": "nodes.commonweave.earth",
     "wildcardDomain": "*.nodes.commonweave.earth",
+    "customDomainStatus": "pending-zone-availability",
     "state": "one-sqlite-durable-object-per-node",
     "roles": [
       "public-www-host-node",
@@ -46,7 +47,7 @@
   },
   "physicalNodeFabric": {
     "protocol": "civweave.node.v1",
-    "moneyEdgeUrl": "https://api.commonweave.earth",
+    "moneyEdgeUrl": "https://civweave-core.glaedn.workers.dev",
     "modes": [
       "cloudflare-tunnel-public-server",
       "cloudflare-relay-private-node"
