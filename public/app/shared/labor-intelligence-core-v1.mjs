@@ -86,9 +86,10 @@ function compactOccupation(row,mappings=[]){
   };
 }
 
-export async function enrichWorkContext(query,{skillRefs=[],occupationLimit=3}={}){
+export async function enrichWorkContext(query,{skillRefs=[],occupationLimit=3,forceOccupations=false}={}){
   const text=clean(query,12000),normalized=await normalizeSkills(skillRefs).catch(()=>({refs:list(skillRefs),resolved:[],available:false}));
-  const matches=text?await searchOccupations(text,{limit:occupationLimit}).catch(()=>[]):[];
+  const useAtlas=Boolean(text&&(forceOccupations||isLaborQuery(text)));
+  const matches=useAtlas?await searchOccupations(text,{limit:occupationLimit}).catch(()=>[]):[];
   const occupations=[];
   for(const row of matches){
     const code=clean(row?.item?.occupationCode,80),mappings=code?await mapOnetOccupation(code).catch(()=>[]):[];
@@ -100,6 +101,7 @@ export async function enrichWorkContext(query,{skillRefs=[],occupationLimit=3}={
     authority:'reference-only-no-procedures',
     source:'core-labor-intelligence',
     query:text,
+    laborRelevant:useAtlas,
     normalizedSkillRefs:normalized.refs||list(skillRefs),
     skillMappings:list(normalized.resolved).filter(row=>row?.canonical).map(row=>({from:row.id,to:`esco-skill:${row.canonical.id}`,label:row.canonical.label,uri:row.canonical.uri,confidence:row.matches?.[0]?.confidence??null})),
     occupations,
