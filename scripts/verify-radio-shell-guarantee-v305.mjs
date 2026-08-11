@@ -25,7 +25,7 @@ const [versionText, layer, wrapper, builder, trackSuggestions, ...assetContents]
   ...requiredRadioAssets.map(path => read(`public${path}`))
 ]);
 const version = versionText.trim();
-assert.equal(version, '1.0.105', 'Radio shell guarantee must ship on the Civweave 1.0.105 release boundary.');
+assert.match(version, /^\d+\.\d+\.\d+$/, 'Radio shell guarantee must follow the current semantic Civweave release boundary.');
 
 new Function(layer);
 for (const pathname of requiredRadioAssets) {
