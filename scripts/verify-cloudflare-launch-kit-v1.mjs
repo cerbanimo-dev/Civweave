@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 const root = new URL('../', import.meta.url);
 const read = path => readFile(new URL(path, root), 'utf8');
 const parseJsonc = text => JSON.parse(text.split('\n').filter(line => !line.trim().startsWith('//')).join('\n'));
+const LIVE_MONEY_EDGE = 'https://civweave-core.glaedn.workers.dev';
 
 const [topologyText, transportsText, coreWranglerText, nodeWranglerText, coreSource, moneySource, stripeSource, nodeSource, migration1, migration2, bootstrapSource, envExample, guide] = await Promise.all([
   read('config/launch-topology-v1.json'),
@@ -26,11 +27,12 @@ const core = parseJsonc(coreWranglerText), node = parseJsonc(nodeWranglerText);
 
 assert.equal(topology.platformFeeBps, 1500);
 assert.equal(topology.backbone.moneyEdgeAuthority, true);
+assert.equal(topology.backbone.publicApiOrigin, LIVE_MONEY_EDGE);
 assert.equal(topology.transition.cloudflareMoneyEdgeAuthority, true);
 assert.equal(topology.transition.renderIsAuthority, false);
 assert.equal(topology.transition.renderMoneyEdgeEnabled, false);
-assert.equal(topology.physicalNodeFabric.moneyEdgeUrl, 'https://api.commonweave.earth');
-assert.equal(transports.moneyEdgeAuthority, 'https://api.commonweave.earth');
+assert.equal(topology.physicalNodeFabric.moneyEdgeUrl, LIVE_MONEY_EDGE);
+assert.equal(transports.moneyEdgeAuthority, LIVE_MONEY_EDGE);
 assert.equal(core.name, 'civweave-core');
 assert.equal(core.vars.CIVWEAVE_PLATFORM_FEE_BPS, '1500');
 assert.equal(core.vars.CIVWEAVE_MONEY_LIVE_ENABLED, 'false');
@@ -53,8 +55,8 @@ assert.ok(moneySource.includes('proof-of-key-short-lived-grant'));
 assert.ok(nodeSource.includes('/api/ai/node/live/challenge'));
 assert.ok(nodeSource.includes('/api/ai/node/manifest'));
 assert.ok(nodeSource.includes('privateJwk'));
-assert.ok(bootstrapSource.includes("DEFAULT_CIVWEAVE_MONEY_EDGE_URL = 'https://api.commonweave.earth'"));
-assert.ok(envExample.includes('CIVWEAVE_MONEY_EDGE_URL=https://api.commonweave.earth'));
+assert.ok(bootstrapSource.includes(`DEFAULT_CIVWEAVE_MONEY_EDGE_URL = '${LIVE_MONEY_EDGE}'`));
+assert.ok(envExample.includes(`CIVWEAVE_MONEY_EDGE_URL=${LIVE_MONEY_EDGE}`));
 assert.ok(guide.includes('Render is no longer a money-edge authority'));
 
 for (const file of ['cloudflare/core/src/index.mjs','cloudflare/core/src/money-edge.mjs','cloudflare/core/src/stripe-connect.mjs','cloudflare/node-cloud/src/index.mjs','lib/node-ai-bootstrap-v1.mjs']) {
@@ -99,4 +101,4 @@ assert.equal(manifest.runtime, 'cloudflare-durable-object-v2');
 assert.equal(manifest.security.stripePlatformSecretPresent, false);
 assert.equal(manifest.security.cerbanimoSigningPrivateKeyPresent, false);
 
-console.log(JSON.stringify({ ok:true, authority:'cloudflare-core', platformFeeBps:1500, canonicalMoneyEdge:'https://api.commonweave.earth', d1:true, r2:true, durableIdentity:true, wildcardNodes:true, directCharge:true, refundApplicationFee:true, hostNodeSecretsDistributed:false, liveMoneyDefault:false }, null, 2));
+console.log(JSON.stringify({ ok:true, authority:'cloudflare-core', platformFeeBps:1500, canonicalMoneyEdge:LIVE_MONEY_EDGE, d1:true, r2:true, durableIdentity:true, wildcardNodes:true, directCharge:true, refundApplicationFee:true, hostNodeSecretsDistributed:false, liveMoneyDefault:false }, null, 2));
