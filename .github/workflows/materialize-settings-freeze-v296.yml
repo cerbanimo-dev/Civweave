@@ -1,0 +1,39 @@
+name: Materialize settings freeze v296
+
+on:
+  push:
+    branches:
+      - 'fix/settings-freeze-v296'
+    paths:
+      - 'VERSION'
+      - '.github/workflows/materialize-settings-freeze-v296.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/settings-freeze-v296
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Align package version
+        run: npm version --no-git-tag-version "$(cat VERSION)"
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Commit generated 1.0.99 release
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+            exit 0
+          fi
+          git commit -m "Materialize Civweave 1.0.99 settings freeze repair"
+          git push origin HEAD:fix/settings-freeze-v296
