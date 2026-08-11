@@ -13,8 +13,13 @@ const fellowfareCabinet=read('public/app/services/fellowfare/cabinet.html');
 const fellowfareLabor=read('public/app/services/fellowfare/labor-context-v1.mjs');
 const rook=read('public/app/rook-request-flow-v160.js');
 const realm=read('public/app/realm-console-v140.html');
+const portableWorker=read('public/service-worker.js');
+const offlineManifest=JSON.parse(read('public/app/offline-package-v208.json'));
+const installBuilder=read('scripts/build-install-artifacts.sh');
+const packageSync=read('scripts/sync-core-labor-package-v1.mjs');
 
-for(const id of ['onet-labor-atlas-30-3','esco-skill-crosswalk-v1']){
+const coreIds=['onet-labor-atlas-30-3','esco-skill-crosswalk-v1'];
+for(const id of coreIds){
   const record=catalog.packs.find(row=>row.id===id);assert(record,`Missing core labor record ${id}.`);
   assert.equal(record.available,true,`${id} must be published in the core package.`);
   assert.equal(record.optional,false,`${id} must no longer be user-optional functionality.`);
@@ -46,6 +51,25 @@ assert(fellowfareCabinet.includes('labor-context-v1.mjs?v=core-labor-v1'),'Fello
 for(const token of ['enrichThread','handoffWork','handoffLearning','laborContext','occupationRefs'])assert(fellowfareLabor.includes(token),`FellowFare labor bridge missing ${token}.`);
 assert(rook.includes('enrichActionLabor')&&rook.includes('occupationRefs'),'Rook request previews do not gain core labor context.');
 
+const requiredOffline=[
+  '/app/shared/labor-intelligence-core-v1.mjs',
+  '/app/shared/skill-crosswalk-v1.mjs',
+  '/app/shared/learning-pack-runtime-v1.mjs',
+  '/app/learning-pack-seeds-v1.js',
+  '/app/services/fellowfare/labor-context-v1.mjs',
+  '/downloads/learning-packs/catalog.json',
+  '/downloads/learning-packs/onet-labor-atlas-30-3.json.gz',
+  '/downloads/learning-packs/esco-skill-crosswalk-v1.json.gz'
+];
+for(const asset of requiredOffline){
+  assert(offlineManifest.assets?.includes(asset),`Offline campus does not carry core labor asset ${asset}.`);
+  assert(portableWorker.includes(`'${asset}'`),`Portable mobile core does not carry ${asset}.`);
+}
+assert.match(offlineManifest.payloadPolicy,/core-labor-v1/,'Offline package policy does not identify core labor support.');
+assert(Number(offlineManifest.preflight?.explicitCoreLaborBytes)>900000,'Offline preflight budget does not include the compressed core labor artifacts.');
+assert(installBuilder.includes('sync-core-labor-package-v1.mjs'),'Install artifact build does not synchronize core labor package declarations.');
+for(const asset of requiredOffline)assert(packageSync.includes(`'${asset}'`),`Core labor package synchronizer does not own ${asset}.`);
+
 const atlasRecord=catalog.packs.find(row=>row.id==='onet-labor-atlas-30-3');
 const atlas=JSON.parse(gunzipSync(bytes(`public/downloads/learning-packs/${atlasRecord.file}`)).toString('utf8'));
 assert.equal(atlas.schema,'civweave.learning-pack.v1');
@@ -73,5 +97,6 @@ console.log('Core labor intelligence verified.',{
   skillMappings:esco.crosswalks.skillMappings.length,
   atlasBytes:atlasRecord.bytes,
   escoBytes:escoRecord.bytes,
+  packagedOffline:true,
   safety:{requiresAdaptation:draft.requiresAdaptation,steps:draft.steps.length,riskClass:draft.riskClass}
 });
