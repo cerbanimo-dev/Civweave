@@ -1,18 +1,34 @@
 {
-  "provider": "stripe-connect-direct-v1",
+  "provider": "stripe-connect-platform-reserve-v2",
   "infrastructureAuthority": "cloudflare-core",
   "moneyEdgeUrl": "https://civweave-core.glaedn.workers.dev",
   "operatorAccountModel": "configurable-controller-v1",
-  "chargeModel": "direct-charge",
-  "operatorPayouts": "stripe-connected-account-native",
+  "chargeModel": "platform-charge-separate-transfer",
+  "operatorPayouts": "platform-charge-separate-transfer",
   "currency": "USD",
-  "platformFeeBps": 1500,
+  "platformFeeBps": 500,
+  "topupEconomy": {
+    "basis": "net-service-after-processing",
+    "systemBps": 7000,
+    "hostBps": 2500,
+    "cerbanimoBps": 500,
+    "systemFundsCustody": "cloudflare-core-platform-reserve"
+  },
+  "membershipEconomy": {
+    "basis": "net-service-after-processing",
+    "systemBps": 5000,
+    "hostBps": 2500,
+    "cerbanimoBps": 2500,
+    "cadence": "monthly",
+    "lifetimeCredits": "non-expiring-tier-grant"
+  },
   "liveMoneyEnabled": false,
   "emergencyStop": false,
   "platformFeeAuthority": "cerbanimo-money-edge",
   "platformFeeEnv": "CIVWEAVE_PLATFORM_FEE_BPS",
   "durableState": {
     "financialLedger": "cloudflare-d1",
+    "computeCapacity": "cloudflare-sqlite-durable-object",
     "signingIdentity": "cloudflare-sqlite-durable-object",
     "packageStorage": "optional-cloudflare-r2"
   },
