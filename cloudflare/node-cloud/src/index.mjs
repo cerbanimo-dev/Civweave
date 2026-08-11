@@ -77,6 +77,22 @@ export class CivweaveCloudNode {
       pathname = '/settlements/topup';
       body = { sourceId: event.id, nodeId, userId: event.userId, netServiceCents: Number(event.serviceNetCents || 0) };
       if (!Number.isSafeInteger(body.netServiceCents) || body.netServiceCents < 1) throw Object.assign(new RangeError('Paid top-up service net is invalid.'), { status: 400 });
+    } else if (event.type === 'membership.paid') {
+      pathname = '/settlements/membership';
+      body = {
+        sourceId: event.id,
+        nodeId,
+        userId: event.userId,
+        tierId: clean(event.tierId, 80),
+        netServiceCents: Number(event.serviceNetCents || 0),
+        monthlyLifetimeCredits: Number(event.monthlyLifetimeCredits || 0)
+      };
+      if (!body.tierId || !Number.isSafeInteger(body.netServiceCents) || body.netServiceCents < 1 || !Number.isSafeInteger(body.monthlyLifetimeCredits) || body.monthlyLifetimeCredits < 1) {
+        throw Object.assign(new RangeError('Paid membership settlement is invalid.'), { status: 400 });
+      }
+    } else if (event.type === 'membership.ended') {
+      pathname = '/members/billing';
+      body = { nodeId, userId: event.userId, billingStatus: 'free' };
     } else if (event.type === 'topup.refunded' || event.type === 'payment.chargeback') {
       pathname = '/settlements/topup-adjustment';
       body = { sourceId: event.id, nodeId, userId: event.userId, kind: event.type === 'topup.refunded' ? 'refund' : 'chargeback', userCreditCents: Number(event.userCreditCents || event.amountCents || 0) };
