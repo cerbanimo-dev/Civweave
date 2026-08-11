@@ -1,7 +1,7 @@
 {
   "provider": "stripe-connect-direct-v1",
   "infrastructureAuthority": "cloudflare-core",
-  "moneyEdgeUrl": "https://api.commonweave.earth",
+  "moneyEdgeUrl": "https://civweave-core.glaedn.workers.dev",
   "operatorAccountModel": "configurable-controller-v1",
   "chargeModel": "direct-charge",
   "operatorPayouts": "stripe-connected-account-native",
@@ -14,7 +14,7 @@
   "durableState": {
     "financialLedger": "cloudflare-d1",
     "signingIdentity": "cloudflare-sqlite-durable-object",
-    "packageStorage": "cloudflare-r2"
+    "packageStorage": "optional-cloudflare-r2"
   },
   "registration": {
     "mode": "proof-of-key-short-lived-grant",
@@ -27,11 +27,11 @@
       "callback-origin",
       "receipt-public-key"
     ],
-    "callbackPolicy": "dedicated-https-subdomain-of-nodes.commonweave.earth",
+    "callbackPolicy": "verified-public-https-origin-with-proof-of-key",
     "singleUse": true
   },
   "trustBootstrap": {
-    "moneyEdgeUrl": "https://api.commonweave.earth",
+    "moneyEdgeUrl": "https://civweave-core.glaedn.workers.dev",
     "firstUse": "https-fetch-fingerprint-and-pin",
     "rotation": "reject-unannounced-key-change"
   },
