@@ -2,6 +2,7 @@ import { CloudflareMoneyEdge, derToPem, moneyEdgeError } from './money-edge-with
 import { handlePassportRequest } from './passport-edge.mjs';
 import { handlePortableCreditRequest, handlePortableCreditStripeEvent } from './portable-credit-edge.mjs';
 import { handleFellowFareCommerceRequest, handleFellowFareStripeEvent, handleCredentialVerificationRequest } from './fellowfare-commerce.mjs';
+import { handleFederationRequest } from './federation-edge.mjs';
 
 export const CORE_SCHEMA = 'civweave.cloudflare-core.v2';
 export const NODE_SCHEMA = 'civweave.node.v1';
@@ -126,10 +127,11 @@ async function routeApi(request, env) {
   const url = new URL(request.url), money = await handleMoneyEdgeRequest(request, env); if (money) return money;
   const edge = new CloudflareMoneyEdge(env);
   const credential = await handleCredentialVerificationRequest(request, env); if (credential) return credential;
+  const federation = await handleFederationRequest(request, env); if (federation) return federation;
   const passport = await handlePassportRequest(request, env, edge); if (passport) return passport;
   const portable = await handlePortableCreditRequest(request, env, edge); if (portable) return portable;
   const fellowfare = await handleFellowFareCommerceRequest(request, env, edge); if (fellowfare) return fellowfare;
-  if (request.method === 'GET' && url.pathname === '/api/health') return json({ schema: CORE_SCHEMA, ok: true, authority: 'cloudflare-core', bindings: { d1: Boolean(env.DB), r2: Boolean(env.PACKAGES), identity: Boolean(env.IDENTITY) }, moneyEdge: edge.readiness(), platformFeeBps: Number(env.CIVWEAVE_PLATFORM_FEE_BPS || 500), passportRoaming: true, portableCredits: Boolean(env.CIVWEAVE_STRIPE_BILLING_CREDITS_ENABLED), fellowfareCommerce: true });
+  if (request.method === 'GET' && url.pathname === '/api/health') return json({ schema: CORE_SCHEMA, ok: true, authority: 'cloudflare-core', bindings: { d1: Boolean(env.DB), r2: Boolean(env.PACKAGES), identity: Boolean(env.IDENTITY) }, moneyEdge: edge.readiness(), platformFeeBps: Number(env.CIVWEAVE_PLATFORM_FEE_BPS || 500), passportRoaming: true, portableCredits: Boolean(env.CIVWEAVE_STRIPE_BILLING_CREDITS_ENABLED), fellowfareCommerce: true, federationDirectory: true });
   if (request.method === 'GET' && url.pathname === '/api/trust') return json({ trust: await edge.trustDocument(url.origin) });
   if (request.method === 'GET' && url.pathname === '/api/launch-topology') return json({ ...launchTopology, platformFeeBps: Number(env.CIVWEAVE_PLATFORM_FEE_BPS || 500) });
   if (request.method === 'GET' && url.pathname === '/api/nodes') return json({ schema: 'civweave.node-directory.v1', nodes: await listNodes(env, url.searchParams.get('limit')) });
