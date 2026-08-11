@@ -14,7 +14,10 @@ function assertAvailable(){
 }
 function hex(bytes){return Array.from(new Uint8Array(bytes),value=>value.toString(16).padStart(2,'0')).join('')}
 function normalizeSlugs(slugs){return[...new Set((slugs||[]).map(String).map(value=>value.trim()).filter(Boolean))]}
-function seedUrl(record){return new URL(`/downloads/knowledge-schools/${record.zip_file}`,location.origin).href}
+function legacySeedUrl(record){return new URL(`/downloads/knowledge-schools/${record.zip_file}`,location.origin).href}
+function seedUrl(record){const direct=String(record?.download_url||'').trim();return direct?new URL(direct,location.origin).href:legacySeedUrl(record)}
+function seedUrls(record){return[...new Set([seedUrl(record),legacySeedUrl(record)])]}
+async function matchCachedSeed(cache,record){for(const url of seedUrls(record)){const response=await cache.match(url);if(response)return{url,response}}return{url:seedUrl(record),response:null}}
 function seedFilename(record){return String(record.zip_file||`${record.school_slug}.zip`).split('/').pop()||`${record.school_slug}.zip`}
 function parseReceipt(key){try{return JSON.parse(localStorage.getItem(key)||'{}')||{}}catch{return{}}}
 function readReceipt(){return{...parseReceipt(LEGACY_RECEIPT_KEY),...parseReceipt(RECEIPT_KEY)}}
@@ -79,8 +82,8 @@ async function status(catalog=null){
   const persistence=navigator.storage?.persisted?await navigator.storage.persisted().catch(()=>false):false;
   const records=[];
   for(const school of activeCatalog.schools){
-    const url=seedUrl(school);
-    const response=await cache.match(url);
+    const cached=await matchCachedSeed(cache,school);
+    const response=cached.response;
     const saved=receipt[school.school_slug]||{};
     const current=cachedCurrent(response,school,saved);
     records.push({
@@ -93,6 +96,7 @@ async function status(catalog=null){
       zip_sha256:school.zip_sha256,
       staged_at:saved.staged_at||null,
       persistent:Boolean(persistence),
+      source_url:cached.url,
     });
   }
   return records;
@@ -113,8 +117,8 @@ async function stage(slugs,options={}){
   for(const slug of selected){
     const school=bySlug.get(slug);
     const url=seedUrl(school);
-    const existing=await cache.match(url);
-    if(cachedCurrent(existing,school,receipt[slug])){
+    const cached=await matchCachedSeed(cache,school);
+    if(cachedCurrent(cached.response,school,receipt[slug])){
       completed+=1;
       completedBytes+=Number(school.zip_bytes||0);
       options.onProgress?.({phase:'cached',school,completed,total:selected.length,completedBytes,totalBytes});
@@ -136,6 +140,7 @@ async function stage(slugs,options={}){
       'X-Civweave-SHA256':actualSha,
       'X-Civweave-School':slug,
       'X-Civweave-Knowledge-Cache':CACHE_NAME,
+      'X-Civweave-Source-URL':url,
     }}));
     receipt[slug]={staged_at:new Date().toISOString(),zip_sha256:actualSha,zip_bytes:buffer.byteLength,url,filename};
     writeReceipt(receipt);
@@ -159,9 +164,9 @@ async function save(slugs,options={}){
   for(const slug of selected){
     const school=bySlug.get(slug);
     if(!school)continue;
-    const response=await cache.match(seedUrl(school));
-    if(!cachedCurrent(response,school,receipt[slug]))throw new Error(`${school.school_name} is not fully downloaded yet.`);
-    files.push({school,response,filename:seedFilename(school)});
+    const cached=await matchCachedSeed(cache,school);
+    if(!cachedCurrent(cached.response,school,receipt[slug]))throw new Error(`${school.school_name} is not fully downloaded yet.`);
+    files.push({school,response:cached.response,filename:seedFilename(school)});
   }
   if(!files.length)throw new Error('Select at least one downloaded school to save.');
   if(typeof globalThis.showDirectoryPicker==='function'){
@@ -208,7 +213,7 @@ async function remove(slugs){
   for(const slug of selected){
     const school=bySlug.get(slug);
     if(!school)continue;
-    await cache.delete(seedUrl(school));
+    for(const url of seedUrls(school))await cache.delete(url);
     delete receipt[slug];
   }
   writeReceipt(receipt);
@@ -226,7 +231,7 @@ async function openSeed(slug){
   const school=catalog.schools.find(record=>record.school_slug===slug);
   if(!school)return null;
   const cache=await caches.open(CACHE_NAME);
-  return cache.match(seedUrl(school));
+  return (await matchCachedSeed(cache,school)).response;
 }
 window.CivweaveKnowledgeSchools=Object.freeze({CATALOG_URL,CACHE_NAME,LEGACY_CACHE_NAMES,loadCatalog,status,stage,save,remove,clear,openSeed,seedUrl,seedFilename,migrateLegacyCaches,persistStorage});
 })();
