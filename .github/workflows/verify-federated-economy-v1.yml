@@ -1,0 +1,68 @@
+name: Verify Federated Economy v1
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  federated-economy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check federated economy syntax
+        run: |
+          node --check public/app/cw-skill-market-v1.js
+          node --check public/app/cw-skill-market-surfaces-v1.js
+          node --check public/app/cw-fellowfare-fee-policy-v2.js
+          node --check public/app/cw-fellowfare-market-safety-v1.js
+          node --check public/app/cw-passport-roaming-v1.js
+          node --check public/app/cw-passport-recovery-crypto-v1.js
+          node --check public/app/cw-passport-recovery-v1.js
+          node --check public/app/cw-hub-commons-v1.js
+          node --check public/app/cw-hub-validation-commons-bridge-v1.js
+          node --check public/app/cw-hub-peer-mesh-v1.js
+          node --check public/app/cw-hub-peer-bootstrap-v1.js
+          node --check public/app/cw-hub-compute-worker-v1.js
+          node --check public/app/cw-hub-spot-v1.js
+          node --check public/app/cw-federated-economy-frame-injector-v1.js
+          node --check public/app/services/fellowfare/skill-market-bridge-v1.js
+          node --check public/app/services/fellowfare/market-safety-bridge-v1.js
+          node --check public/app/services/fellowfare/commerce-bridge-v1.js
+          node --check cloudflare/core/src/passport-edge.mjs
+          node --check cloudflare/core/src/portable-credit-edge.mjs
+          node --check cloudflare/core/src/fellowfare-policy.mjs
+          node --check cloudflare/core/src/fellowfare-commerce.mjs
+          node --check cloudflare/core/src/federation-edge.mjs
+          node --check cloudflare/core/src/index.mjs
+          node --check scripts/verify-federated-economy-v1.mjs
+      - name: Verify economic and safety invariants
+        run: node scripts/verify-federated-economy-v1.mjs
+      - name: Verify offline package carries critical runtimes
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const manifest=JSON.parse(fs.readFileSync('public/app/offline-package-v208.json','utf8'));
+          const required=[
+            '/app/cw-federated-economy-frame-injector-v1.js',
+            '/app/cw-skill-market-v1.js',
+            '/app/cw-fellowfare-market-safety-v1.js',
+            '/app/cw-passport-roaming-v1.js',
+            '/app/cw-hub-commons-v1.js',
+            '/app/cw-hub-peer-mesh-v1.js',
+            '/app/cw-hub-compute-worker-v1.js',
+            '/app/cw-hub-spot-v1.js',
+            '/app/services/fellowfare/commerce-bridge-v1.js'
+          ];
+          for(const path of required){if(!manifest.assets.includes(path))throw new Error(`Offline package omits ${path}`)}
+          console.log('federated economy runtime set is available to the offline campus');
+          NODE
