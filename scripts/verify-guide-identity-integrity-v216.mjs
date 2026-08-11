@@ -48,7 +48,7 @@ const listeners=new Map(),switched=[];
 const addEventListener=(type,listener)=>{const rows=listeners.get(type)||[];rows.push(listener);listeners.set(type,rows)};
 const removeEventListener=(type,listener)=>listeners.set(type,(listeners.get(type)||[]).filter(item=>item!==listener));
 const dispatchEvent=event=>{for(const listener of listeners.get(event.type)||[])listener(event);return true};
-const sandbox={console,URLSearchParams,location:{pathname:'/app/cabinets/living-school/index.html',search:'?system=living-school',hostname:'example.test'},document:{documentElement:{dataset:{civweaveSystemRoute:'living-school'},hasAttribute:()=>false},body:{dataset:{}}},CustomEvent:class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}},addEventListener,removeEventListener,dispatchEvent,queueMicrotask:callback=>callback(),CivweaveGuideWorkspaceV242:{switchWindow:(system,options)=>switched.push({system,options})}};
+const sandbox={console,URLSearchParams,location:{pathname:'/app/cabinets/living-school/index.html',search:'?system=living-school',hostname:'example.test'},document:{documentElement:{dataset:{civweaveSystemRoute:'living-school'},hasAttribute:()=>false},body:{dataset:{}}},CustomEvent:class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}},addEventListener,removeEventListener,dispatchEvent,queueMicrotask:callback=>callback(),CivweaveGuideWorkspaceV242:{switchWindow:(system,options)=>switched.push({system,open:Boolean(options?.open)})}};
 sandbox.globalThis=sandbox;
 vm.runInNewContext(identity,sandbox,{filename:'guide-identity-integrity-v216.js'});
 sandbox.CivweaveAssistantV141={respond:async options=>({response:{answer:'Identity held.',choice:{system:options.systemId,nextAction:'Continue.'}},context:{guide:{system:options.systemId}},provider:'test-provider',model:'test-model'})};
@@ -56,6 +56,7 @@ const moss=await sandbox.CivweaveAssistantV141.respond({systemId:'living-school'
 assert.equal(moss.respondingSystem,'living-school');assert.equal(moss.respondingGuide,'Moss');assert.equal(moss.handedOff,false);
 const handedOff=await sandbox.CivweaveAssistantV141.respond({systemId:'civweave',history:[]});
 assert.equal(handedOff.requestedSystem,'civweave');assert.equal(handedOff.respondingSystem,'living-school');assert.equal(handedOff.respondingGuide,'Moss');assert.equal(handedOff.handedOff,true);
-assert.deepEqual(switched.at(-1),{system:'living-school',options:{open:false}},'Canonical workspace did not switch to the receiving guide after handoff.');
+assert.equal(switched.at(-1)?.system,'living-school','Canonical workspace did not switch to the receiving guide after handoff.');
+assert.equal(switched.at(-1)?.open,false,'Identity handoff must not force the chat window open.');
 
 console.log(JSON.stringify({ok:true,revision:'v216-identity-integrity-v242-only',canonicalChatOwner:'guide-workspace-v242',legacyChatMigration:false,documentObservers:0},null,2));
