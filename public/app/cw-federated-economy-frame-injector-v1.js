@@ -9,6 +9,7 @@ const BASE=[
  ['/app/cw-fellowfare-fee-policy-v2.js?v=2.0.0','fee-policy'],
  ['/app/cw-fellowfare-market-safety-v1.js?v=1.0.0','market-safety'],
  ['/app/cw-passport-roaming-v1.js?v=1.0.0','passport-roaming'],
+ ['/app/cw-passport-recovery-crypto-v1.js?v=1.0.0','passport-recovery-crypto'],
  ['/app/cw-passport-recovery-v1.js?v=1.0.0','passport-recovery'],
  ['/app/cw-hub-commons-v1.js?v=1.0.0','hub-commons'],
  ['/app/cw-hub-peer-mesh-v1.js?v=1.0.0','hub-peer'],
