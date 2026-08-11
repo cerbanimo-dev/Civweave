@@ -56,4 +56,4 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@latest d1 execute civweave-core --remote --json --command "SELECT event_id,event_type,livemode,processing_error,received_at FROM stripe_events ORDER BY received_at DESC LIMIT 20"
+          npx --yes wrangler@4.121.0 d1 execute civweave-core --remote --json --command "SELECT event_id,event_type,livemode,processing_error,received_at FROM stripe_events ORDER BY received_at DESC LIMIT 20"
