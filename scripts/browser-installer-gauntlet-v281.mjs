@@ -179,7 +179,6 @@ try{
   const beforeLowStorage=offlinePackageRequests;
   await lowPage.goto(`${base}/app/index.html`,{waitUntil:'domcontentloaded'});
   await lowPage.waitForTimeout(500);
-  assert.equal(document?.undefined,undefined); // keep Node assertion context explicit
   assert.equal(offlinePackageRequests,beforeLowStorage,'low-storage first paint must still be idle');
   await lowPage.click('#download-offline-package');
   await lowPage.waitForFunction(()=>document.documentElement.dataset.civweaveStorageState==='insufficient',undefined,{timeout:45000});
