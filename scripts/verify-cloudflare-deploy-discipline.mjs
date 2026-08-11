@@ -18,12 +18,13 @@ assert(openMedia.includes("COMMIT_MESSAGE='[CF-Pages-Skip] Refresh open learning
 
 const pagesBuild=read('scripts/build-cloudflare-pages.mjs');
 assert(pagesBuild.includes('await Promise.all(['),'Pages runtime staging must remain parallelized.');
-for(const required of ['stage-transformers-assets.mjs','stage-transformers-v4-assets.mjs','stage-maplibre-v275.mjs','stage-federation-finder-data-v274.mjs','materialize-parity-ledger.mjs']){
-  assert(pagesBuild.includes(required),`Pages build lost required generated runtime stage: ${required}`);
+for(const required of ['stage-transformers-assets.mjs','stage-transformers-v4-assets.mjs','stage-maplibre-v275.mjs','stage-federation-finder-data-v274.mjs','materialize-parity-ledger.mjs','build-mobile-install-kit.mjs']){
+  assert(pagesBuild.includes(required),`Pages build lost required generated/runtime packaging stage: ${required}`);
 }
-for(const forbidden of ['generate-prelive-metadata-v281.mjs','smoke-installer-resume-state-v280.mjs','smoke-installer-hardening-v281.mjs','build-mobile-install-kit.mjs']){
+for(const forbidden of ['generate-prelive-metadata-v281.mjs','smoke-installer-resume-state-v280.mjs','smoke-installer-hardening-v281.mjs']){
   assert(!pagesBuild.includes(forbidden),`Pages deploy hot path must not run release/verification work: ${forbidden}`);
 }
 assert(!pagesBuild.includes('sourceOversized = oversizedFiles(sourceDir)'),'Pages deploy must not recursively audit both source and output trees.');
+assert(pagesBuild.includes('Civweave mobile/Pocket Campus package build failed.'),'Pages build must retain Pocket Campus generation while that seed is not committed.');
 
-console.log('Cloudflare deploy discipline verified: no duplicate preview mirror, non-production automation skips Pages, and the production build hot path stays parallel and release-only-work-free.');
+console.log('Cloudflare deploy discipline verified: no duplicate preview mirror, non-production automation skips Pages, runtime/data staging stays parallel, and only required portable packaging remains in the production hot path.');
