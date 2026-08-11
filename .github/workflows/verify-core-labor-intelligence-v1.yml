@@ -1,0 +1,44 @@
+name: Verify Core Labor Intelligence v1
+
+on:
+  pull_request:
+    paths:
+      - 'public/downloads/learning-packs/**'
+      - 'public/app/offline-package-v208.json'
+      - 'public/app/shared/labor-intelligence-core-v1.mjs'
+      - 'public/app/shared/learning-pack-shelf-v1.mjs'
+      - 'public/app/cerbanimo-learning-packs-v1.js'
+      - 'public/app/living-school-learning-packs-v1.mjs'
+      - 'public/app/rook-request-flow-v160.js'
+      - 'public/app/services/fellowfare/cabinet.html'
+      - 'public/app/services/fellowfare/labor-context-v1.mjs'
+      - 'scripts/build-install-artifacts.sh'
+      - 'scripts/sync-core-labor-package-v1.mjs'
+      - 'scripts/verify-core-labor-intelligence-v1.mjs'
+      - '.github/workflows/verify-core-labor-intelligence-v1.yml'
+  push:
+    branches: ['feat/core-labor-intelligence-v1', main]
+  workflow_dispatch:
+
+jobs:
+  verify-core-labor-intelligence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check core labor runtimes
+        run: |
+          node --check public/app/shared/labor-intelligence-core-v1.mjs
+          node --check public/app/shared/learning-pack-shelf-v1.mjs
+          node --check public/app/cerbanimo-learning-packs-v1.js
+          node --check public/app/living-school-learning-packs-v1.mjs
+          node --check public/app/rook-request-flow-v160.js
+          node --check public/app/services/fellowfare/labor-context-v1.mjs
+          node --check scripts/sync-core-labor-package-v1.mjs
+          node --check scripts/verify-core-labor-intelligence-v1.mjs
+      - name: Materialize core labor package declarations
+        run: node scripts/sync-core-labor-package-v1.mjs
+      - name: Verify cross-realm labor intelligence contract
+        run: node scripts/verify-core-labor-intelligence-v1.mjs

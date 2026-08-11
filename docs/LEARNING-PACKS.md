@@ -16,7 +16,7 @@ The shared runtime is `public/app/shared/learning-pack-runtime-v1.mjs`.
 
 ## Current authored library
 
-The locally bundled authored library contains 74 reusable task templates, 39 learning units, and 19 expert guides before any large external reference pack is installed.
+The locally bundled authored library contains 74 reusable task templates, 39 learning units, and 19 expert guides before the core labor reference layer is activated.
 
 The mandatory `civweave-core-practice-v1` starter contributes 20 task templates, 12 learning units, and 10 general expert guides.
 
@@ -38,35 +38,54 @@ Each expert pack has six task templates, three learning units, one expert guide,
 
 `public/app/shared/learning-pack-resolver-v1.mjs` turns a task or learning request into pack recommendations. It expands common user language into domain vocabulary before both pack selection and content search. For example, `bug` expands toward software/debugging/defect, `rubric` toward learning/assessment, and `warehouse` or `pack` toward labor/logistics.
 
-The resolver stages at most a small number of relevant optional packs for the current request rather than loading the entire expert library. The catalog remains the deterministic source of which pack IDs and module exports are approved.
+The resolver stages at most a small number of relevant optional expert packs for the current request rather than loading the entire expert library. The catalog remains the deterministic source of which pack IDs and module exports are approved.
 
 Cerbanimo can call `createRecommendedQuest(query)` to resolve the best expert pack, select a task template, compile it into the existing quest contract, and add it through the existing quest engine.
 
 Living School can call `generateRecommendedCurriculum(query)` to resolve the best expert pack, select a learning unit, compile it into the existing curriculum request shape, and hand it to the existing Moss curriculum workbench.
 
+## Core labor intelligence
+
+O*NET and ESCO are no longer user-managed shelf options. They are core infrastructure owned by `public/app/shared/labor-intelligence-core-v1.mjs`:
+
+- `onet-labor-atlas-30-3` supplies descriptive occupation, task-statement, essential-skill, and DWA reference context.
+- `esco-skill-crosswalk-v1` normalizes authored Civweave skill identities into ESCO and bridges O*NET occupations to ESCO occupation identities.
+
+Both artifacts remain **lazy**. `coreInfrastructure: true` means the capability is part of Civweave; `autoStage: false` means the data is not decompressed, hashed, or cached during realm boot. The core manager stages it only when a labor-related generation or request actually needs it. This preserves the Cerbanimo launch-freeze repair while removing the misleading “optional add-on” lifecycle.
+
+The Learning Pack Shelf hides both records. Users browse authored task, learning, and expert content there; internal crosswalk/index data is handled by the generation and handoff runtimes.
+
+`labor-intelligence-core-v1.mjs` exposes lazy `ensureAtlas`, `ensureCrosswalk`, `normalizeSkills`, `mapOnetOccupation`, `searchOccupations`, and `enrichWorkContext` helpers. Returned labor context is explicitly marked `reference-only-no-procedures` and `requiresAdaptation: true`.
+
+## How labor context is used
+
+### Cerbanimo
+
+`public/app/cerbanimo-learning-packs-v1.js` keeps the normal authored task-template resolver as the executable-work source. After a template is selected, the original request and template skill refs are passed through core labor intelligence. Labor-relevant requests can gain compact O*NET occupation matches, O*NET essential-skill context, accepted ESCO occupation mappings, and normalized authored skill refs in `packMetadata.laborContext`.
+
+O*NET task statements are never promoted directly into quest steps. `laborTaskDraft()` remains a guarded adaptation path with zero executable steps until a reviewed task-specific template exists.
+
+### Living School
+
+`public/app/living-school-learning-packs-v1.mjs` keeps the authored learning-unit resolver as the curriculum source. Generation retains the original skill refs, adds accepted normalized skill refs, and, for labor-relevant capabilities, adds compact occupational/essential-skill context. That context is labelled descriptive rather than procedural before it is handed to the curriculum workbench.
+
+This lets a request such as learning a trade or preparing for a type of work use the same occupation/skill graph as Cerbanimo without treating an occupational database as curriculum instructions.
+
+### FellowFare
+
+FellowFare previously categorized “Work” largely from text/category heuristics and handed agreement text to Cerbanimo without an occupation graph. `public/app/services/fellowfare/labor-context-v1.mjs` now enriches labor-related market threads lazily and carries `laborContext` through Work → Cerbanimo and Learn → Living School handoffs. The parent Rook request flow also enriches labor request previews in the background with occupation refs and normalized skill context.
+
+FellowFare remains the authority for exchange terms, settlement, and repair. The labor graph is descriptive matching/context only; it does not assert qualification, price work, accept an agreement, or authorize work.
+
 ## Learning Pack Shelf
 
-`public/app/shared/learning-pack-shelf-v1.mjs` is one shared, realm-aware browser for the pack catalog. `learning-pack-shelf-v1.css` gives the same controller a Cerbanimo treatment or Living School treatment without creating separate storage or routing systems.
+`public/app/shared/learning-pack-shelf-v1.mjs` is one shared, realm-aware browser for user-facing pack content. `learning-pack-shelf-v1.css` gives the same controller a Cerbanimo treatment or Living School treatment without creating separate storage or routing systems.
 
-The shelf provides:
-
-- catalog search and core/expert/reference filters;
-- offline-ready, update, optional, bundled, and unavailable states from the canonical device status API;
-- verified offline add/update and optional-pack removal through the existing cache runtime;
-- pack-content browsing after a pack is staged;
-- Cerbanimo `Start task` actions only for authored task templates;
-- Living School `Learn this` actions only for learning units;
-- expert-guide browsing in both realms;
-- explicit reference-only treatment for occupational records;
-- mobile safe-area layout, Escape close, and keyboard focus containment.
-
-The launcher mounts from the existing realm adapters. The active realm HTML entries do not need a second shelf-specific boot path.
+The shelf provides catalog search and authored core/expert filters, verified offline add/update and optional-pack removal, pack-content browsing, Cerbanimo `Start task` actions for authored task templates, Living School `Learn this` actions for learning units, expert-guide browsing, mobile safe-area layout, Escape close, and keyboard focus containment. Records marked `coreInfrastructure` or `hiddenFromShelf` are deliberately excluded.
 
 ## Safety boundary
 
 A labor task statement becomes a guarded draft with `requiresAdaptation: true`. It has no executable steps. Cerbanimo's adapter will not create an executable quest from a reference that lacks reviewed work steps.
-
-The shelf preserves this boundary visually and behaviorally: labor-reference cards return before executable action buttons are created, and reference packs carry an explicit adaptation notice. Browsing an occupation is therefore not equivalent to starting work.
 
 The authored General Labor & Logistics expert pack is also guarded. It covers ordinary receiving, cycle counts, pick-and-pack, work-area readiness, simple assembly from supplied instructions, and shift handoff, but includes explicit stop conditions for dangerous goods, hazardous energy, regulated equipment, unknown materials, missing instructions, or work beyond the user's training and authorization.
 
@@ -76,9 +95,7 @@ Use `riskClass: regulated` for references that must not compile directly without
 
 `public/app/learning-pack-seeds-v1.js` uses a dedicated Cache API store and SHA-256 receipts. Packs are listed in `public/downloads/learning-packs/catalog.json`.
 
-The small core pack and nine expert packs ship as module exports and are materialized into the same verified offline cache format used by downloaded packs. The core pack stages automatically. Expert packs are available locally but stage only when selected or resolved. Large reference packs remain optional downloads.
-
-The cache receipt records both the module path and named export for authored expert packs. This lets multiple small domains share a compact source module without losing independent install/update state.
+The small authored core pack stages automatically. Optional expert packs stage only when selected or resolved. The O*NET and ESCO core labor artifacts are packaged and checksum-verified but stage lazily on first relevant use. This is a capability/core distinction rather than a boot/eager-loading distinction.
 
 ## O*NET Labor Atlas
 
@@ -88,9 +105,9 @@ Run:
 node scripts/build-learning-packs-v1.mjs
 ```
 
-The builder downloads the official O*NET 30.3 JSON tables for occupation data, task statements, essential skills, and task-to-DWA mappings. It groups occupational records with their task and skill rows, preserves Detailed Work Activity element IDs as crosswalk references, writes `onet-labor-atlas-30-3.json.gz`, computes its SHA-256, and updates the catalog entry from unavailable to available.
+The builder downloads the official O*NET 30.3 JSON tables for occupation data, task statements, essential skills, and task-to-DWA mappings. It groups occupational records with their task and skill rows, preserves Detailed Work Activity element IDs as crosswalk references, writes `onet-labor-atlas-30-3.json.gz`, computes its SHA-256, and updates the catalog.
 
-The repository intentionally does not mark the atlas available until that generated artifact exists. This prevents the app from advertising a large offline pack that has not actually been published.
+The current core artifact covers 1,016 occupations, 18,796 task statements, 17,880 essential-skill rows, and 23,850 task-to-DWA rows. The compressed artifact is under 1 MiB and is published with a SHA-256 receipt in the catalog.
 
 The generated pack preserves O*NET's CC BY 4.0 attribution, identifies Civweave's restructuring as a modification, links the license, and includes the required non-endorsement language for modified O*NET content.
 
@@ -104,30 +121,21 @@ Run:
 node scripts/build-esco-crosswalk-v1.mjs
 ```
 
-The generated `esco-skill-crosswalk-v1` pack is an optional interoperability layer rather than a replacement skill taxonomy. It gives authored Civweave skill IDs stable links into ESCO while preserving the Civweave IDs already used by tasks, learning units, guides, rewards, and evidence.
+The generated `esco-skill-crosswalk-v1` artifact is the interoperability half of core labor intelligence. It gives authored Civweave skill IDs stable links into ESCO while preserving the Civweave IDs already used by tasks, learning units, guides, rewards, and evidence.
 
-The builder queries the official European Commission ESCO Web Services API in English. When `ESCO_VERSION` is not supplied, it deliberately omits `selectedVersion` and records that fact as `api-default`; the Commission currently documents that web-API default as ESCO v1.0.9. The overall ESCO classification release is tracked separately and is currently v1.2.1. If `ESCO_VERSION` is explicitly supplied, the artifact records that selected API version instead. This separation prevents a portal/classification release number from being silently treated as an API version token.
-
-Civweave-generated skill mappings follow a strict provenance rule:
-
-- a normalized exact preferred-label match may be accepted automatically;
-- a normalized exact authored-alias match may be accepted automatically at slightly lower confidence;
-- non-exact lexical candidates remain `review` mappings below the canonical threshold;
-- generated skill mappings never claim European Commission, human-review, or U.S. Department of Labor validation.
+Civweave-generated skill mappings follow a strict provenance rule: normalized exact preferred-label or authored-alias matches may be accepted; non-exact lexical candidates remain review mappings below the canonical threshold; generated mappings never claim European Commission, human-review, or U.S. Department of Labor validation.
 
 The same artifact also ingests the European Commission's official O*NET-to-ESCO occupation crosswalk. Official relation types and validation provenance are retained. `related` occupation matches stay review-only; quality-assured exact, narrow, broad, and close mappings may participate in the occupation bridge.
 
-`public/app/shared/skill-crosswalk-v1.mjs` resolves only `accepted` mappings at confidence 0.90 or above by default. Review candidates can be requested explicitly for inspection. The bridge can return a small skill graph, normalize a list of Civweave skill refs, or map an O*NET-SOC occupation to ESCO occupations.
-
-The pack is not auto-staged. If it is installed, Cerbanimo quest inputs and Living School curriculum inputs keep their original `skillRefs` and gain `normalizedSkillRefs` plus compact crosswalk metadata. If it is not installed, both realms continue using their existing Civweave skill IDs without a network request or generation failure.
-
-The bridge uses the same verified learning-pack cache, checksum receipts, install/remove lifecycle, and optional-download controls as every other external pack. The required ESCO attribution statement is retained in the generated artifact.
+`public/app/shared/skill-crosswalk-v1.mjs` resolves only accepted mappings at confidence 0.90 or above by default. `labor-intelligence-core-v1.mjs` owns when that lower-level bridge is staged and consumed by realms.
 
 ## Realm APIs
 
-Cerbanimo exposes `globalThis.CivweaveCerbanimoLearningPacksV1` with the existing pack APIs plus `skillCrosswalkStatus`, `installSkillCrosswalk`, `removeSkillCrosswalk`, `normalizeSkills`, and `mapOnetOccupation`. Quest inputs are enriched only when accepted crosswalk mappings are already available offline.
+Cerbanimo exposes `globalThis.CivweaveCerbanimoLearningPacksV1` with pack APIs plus compatibility helpers for crosswalk status/install/normalization. Underneath, generation uses `labor-intelligence-core-v1` and retains `laborContext` on generated quest input metadata.
 
-Living School exposes `globalThis.CivweaveLivingSchoolLearningPacksV1` with the same crosswalk lifecycle and normalization helpers alongside the curriculum APIs. Curriculum inputs are enriched only when accepted crosswalk mappings are already available offline.
+Living School exposes `globalThis.CivweaveLivingSchoolLearningPacksV1` with the same compatibility helpers and uses the core labor layer during curriculum input generation.
+
+FellowFare uses the shared labor core from both the parent Rook request flow and the embedded market handoff bridge rather than maintaining a second occupation taxonomy.
 
 ## Next data layers
 
