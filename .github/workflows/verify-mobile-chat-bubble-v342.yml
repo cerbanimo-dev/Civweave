@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'public/app/shared-chat-face-icons-v255.js'
+      - 'public/service-worker-chat-repair-v245.js'
+      - 'public/service-worker-v203.js'
       - 'scripts/verify-mobile-chat-bubble-anchor-v342.mjs'
       - '.github/workflows/verify-mobile-chat-bubble-v342.yml'
   workflow_dispatch:
@@ -19,7 +21,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax check launcher runtime
-        run: node --check public/app/shared-chat-face-icons-v255.js
+      - name: Syntax check launcher and worker repair runtimes
+        run: |
+          node --check public/app/shared-chat-face-icons-v255.js
+          node --check public/service-worker-chat-repair-v245.js
+          node --check public/service-worker-v203.js
       - name: Verify anchored circular mobile launcher
         run: node scripts/verify-mobile-chat-bubble-anchor-v342.mjs
