@@ -16,9 +16,9 @@ const template = await readFile(templatePath, 'utf8');
 if (!template.includes('__CIVWEAVE_CORE_D1_ID__')) throw new Error('Core Wrangler template is missing the D1 placeholder.');
 let rendered = template.replaceAll('__CIVWEAVE_CORE_D1_ID__', d1Id);
 rendered = rendered
-  .replace('"main": "src/index.mjs"', '"main": "../cloudflare/core/src/index.mjs"')
+  .replace('"main": "src/index.mjs"', '"main": "../cloudflare/core/src/live-entry.mjs"')
   .replace('"migrations_dir": "migrations"', '"migrations_dir": "../cloudflare/core/migrations"');
-if (!rendered.includes('"main": "../cloudflare/core/src/index.mjs"')) throw new Error('Generated Wrangler config did not retarget the core Worker entrypoint.');
+if (!rendered.includes('"main": "../cloudflare/core/src/live-entry.mjs"')) throw new Error('Generated Wrangler config did not retarget the live core Worker entrypoint.');
 if (!rendered.includes('"migrations_dir": "../cloudflare/core/migrations"')) throw new Error('Generated Wrangler config did not retarget the D1 migrations directory.');
 await mkdir(outputDir, { recursive: true });
 await writeFile(outputPath, rendered);
@@ -33,7 +33,7 @@ console.log(JSON.stringify({
   moneyEdgeAuthority: 'cloudflare-core',
   platformFeeBps: 1500,
   liveMoneyEnabled: false,
-  workerEntry: '../cloudflare/core/src/index.mjs',
+  workerEntry: '../cloudflare/core/src/live-entry.mjs',
   migrationsDir: '../cloudflare/core/migrations',
   next: [
     'npx wrangler d1 migrations apply civweave-core --remote --config .cloudflare-launch/core.wrangler.jsonc',
