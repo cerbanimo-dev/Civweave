@@ -11,7 +11,7 @@ This sample lives inside the Cloudflare core Worker and is deliberately separate
 
 ## Safety gate
 
-The sample code is bundled into the core Worker but **disabled by default**:
+The interactive sample code is bundled into the core Worker but **disabled by default**:
 
 ```text
 STRIPE_CONNECT_SAMPLE_ENABLED=false
@@ -19,7 +19,9 @@ STRIPE_CONNECT_SAMPLE_ENABLED=false
 
 This is intentional. The sample provider console is a compact integration lab, not the production Civweave provider-auth surface. Publishing it unauthenticated on the public Worker would expose account/product creation controls.
 
-For a sandbox or local test deployment, explicitly set `STRIPE_CONNECT_SAMPLE_ENABLED=true`. Do not enable the sample on the public production Worker until its provider routes are placed behind the final Civweave operator authentication/authorization layer.
+For a sandbox or local test deployment, explicitly set `STRIPE_CONNECT_SAMPLE_ENABLED=true`. Do not enable the interactive sample on the public production Worker until its provider routes are placed behind the final Civweave operator authentication/authorization layer.
+
+The **thin Stripe webhook is not behind this UI gate**. It remains publicly routable because Stripe must be able to deliver server-to-server requirement/capability notifications. It is cryptographically protected by the destination signing secret and rejects requests that do not carry a valid Stripe signature.
 
 The existing real-money gates remain independent and fail-closed. Enabling the sample does **not** enable live money.
 
@@ -36,21 +38,23 @@ Add these as GitHub **repository secrets** when the corresponding Stripe integra
 
 The existing `CIVWEAVE_PLATFORM_FEE_BPS=1500` Worker variable makes the sample application fee 15%.
 
-## Sample routes when enabled
+## Routes
 
-Provider UI:
+Interactive provider UI, available only when `STRIPE_CONNECT_SAMPLE_ENABLED=true`:
 
 `https://civweave-core.glaedn.workers.dev/connect-demo`
 
-Thin Accounts V2 webhook:
-
-`https://civweave-core.glaedn.workers.dev/api/connect-demo/webhooks/stripe-thin`
-
-Storefront pages use this demo shape:
+Interactive storefront pages, also gated:
 
 `https://civweave-core.glaedn.workers.dev/store/{CONNECTED_ACCOUNT_ID}`
 
 The account ID in a public URL is for the sample only. A production storefront should expose an opaque Civweave merchant slug and resolve the Stripe Account ID server-side.
+
+The thin Accounts V2 webhook is **always routable**, including when the interactive sample is disabled:
+
+`https://civweave-core.glaedn.workers.dev/api/connect-demo/webhooks/stripe-thin`
+
+Until `STRIPE_CONNECT_THIN_WEBHOOK_SECRET` is configured, the webhook fails closed with a descriptive 503. With the secret configured, invalid or missing Stripe signatures are rejected before an event is processed.
 
 ## Account creation
 
@@ -95,13 +99,20 @@ No onboarding status is cached in D1.
 
 ## Thin requirements/capability webhook
 
-Create a Stripe event destination for Accounts V2 changes. Use **Thin** payloads and configure the event destination so these events reach the sample endpoint:
+In Stripe Dashboard, create a dedicated Accounts V2 event destination:
 
-- `v2.core.account[requirements].updated`
-- `v2.core.account[configuration.merchant].capability_status_updated`
-- `v2.core.account[configuration.customer].capability_status_updated`
+1. Open **Developers → Webhooks** and add an event destination.
+2. Set **Events from** to **Connected accounts**.
+3. Open advanced options and select **Thin** payload style.
+4. Select these event types:
+   - `v2.core.account[requirements].updated`
+   - `v2.core.account[configuration.merchant].capability_status_updated`
+   - `v2.core.account[configuration.customer].capability_status_updated`
+5. Set the endpoint to:
+   `https://civweave-core.glaedn.workers.dev/api/connect-demo/webhooks/stripe-thin`
+6. Copy the destination's `whsec_...` signing secret into the GitHub repository secret named exactly `STRIPE_CONNECT_THIN_WEBHOOK_SECRET`.
 
-The handler verifies the Stripe signature with `STRIPE_CONNECT_THIN_WEBHOOK_SECRET`, parses the notification with the current Stripe SDK Event Notification API, fetches the versioned event, then retrieves the current Account from Stripe. D1 stores only an event receipt for idempotency/audit, not the requirements state.
+The handler verifies the Stripe signature, parses the notification with the current Stripe SDK Event Notification API, fetches the versioned event, then retrieves the current Account from Stripe. D1 stores only an event receipt for idempotency/audit, not the requirements state.
 
 For local testing with Stripe CLI:
 
@@ -156,10 +167,25 @@ This is a Connect **direct charge**. The connected account owns the charge and C
 
 ## Existing payment webhook
 
-Do not replace the existing money-edge snapshot webhook with the thin Account V2 destination. They serve different jobs:
+Do not replace the existing money-edge snapshot webhook with the thin Account V2 destination. They serve different jobs and should use different signing secrets.
 
-- `STRIPE_CONNECT_WEBHOOK_SECRET`: snapshot payment events such as completed Checkout, refunds, and disputes for the money ledger.
-- `STRIPE_CONNECT_THIN_WEBHOOK_SECRET`: thin Accounts V2 requirements/capability changes for onboarding status.
+Snapshot payment webhook:
+
+`https://civweave-core.glaedn.workers.dev/api/money-edge/webhooks/stripe`
+
+GitHub secret:
+
+`STRIPE_CONNECT_WEBHOOK_SECRET`
+
+Current payment events handled by the money edge include completed Checkout, refunds, and disputes.
+
+Thin Account V2 webhook:
+
+`https://civweave-core.glaedn.workers.dev/api/connect-demo/webhooks/stripe-thin`
+
+GitHub secret:
+
+`STRIPE_CONNECT_THIN_WEBHOOK_SECRET`
 
 Keeping the signing secrets and endpoints separate reduces the chance of parsing one payload style as the other.
 
