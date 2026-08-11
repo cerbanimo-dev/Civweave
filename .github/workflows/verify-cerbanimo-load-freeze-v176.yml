@@ -1,0 +1,32 @@
+name: Verify Cerbanimo Load Freeze v176
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/fullscreen-family-v104.html'
+      - 'public/app/realm-console-v140.html'
+      - 'public/app/cerbanimo-learning-packs-v1.js'
+      - 'public/app/cerbanimo-video-task-contract-v1.mjs'
+      - 'public/app/cerbanimo-proof-attachments-v165.js'
+      - 'scripts/verify-cerbanimo-load-freeze-v176.mjs'
+      - '.github/workflows/verify-cerbanimo-load-freeze-v176.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify-cerbanimo-load-freeze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check Cerbanimo boot runtimes
+        run: |
+          node --check public/app/cerbanimo-learning-packs-v1.js
+          node --check public/app/cerbanimo-video-task-contract-v1.mjs
+          node --check public/app/cerbanimo-proof-attachments-v165.js
+          node --check scripts/verify-cerbanimo-load-freeze-v176.mjs
+      - name: Verify Cerbanimo lazy boot contract
+        run: node scripts/verify-cerbanimo-load-freeze-v176.mjs
