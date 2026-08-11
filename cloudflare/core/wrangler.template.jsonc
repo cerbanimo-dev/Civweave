@@ -48,7 +48,8 @@
     "CIVWEAVE_MONEY_JURISDICTION_APPROVED": "false",
     "CIVWEAVE_MONEY_KYC_AML_READY": "false",
     "CIVWEAVE_MONEY_TAX_REPORTING_READY": "false",
-    "CIVWEAVE_MONEY_TERMS_APPROVED": "false"
+    "CIVWEAVE_MONEY_TERMS_APPROVED": "false",
+    "STRIPE_CONNECT_SAMPLE_ENABLED": "false"
   },
   "observability": {
     "enabled": true
@@ -57,5 +58,6 @@
   // Cloudflare Worker secrets, never committed or distributed to host nodes:
   // STRIPE_SECRET_KEY
   // STRIPE_CONNECT_WEBHOOK_SECRET
+  // STRIPE_CONNECT_THIN_WEBHOOK_SECRET
   // NODE_FABRIC_BINDING_TOKEN
 }
