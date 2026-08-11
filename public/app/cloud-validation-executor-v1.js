@@ -43,14 +43,14 @@ function normalizeRubricScores(packet,validation){
     return{criterion:text,met:Boolean(row.met),score:Math.max(0,Math.min(1,Number(row.score)||0)),note:clean(row.note,600)};
   });
 }
-async function rewardReceipt(detail,result){
+async function rewardReceipt(detail,result,session){
   const packet=detail.packet||{},validation=result.validation||{};
   const reward=globalThis.CivweaveRewardWeave;
   const identity=globalThis.CivweaveIdentitySync;
   if(!reward?.record||!identity?.signValue)throw new Error('Reward identity runtime is unavailable for this validation receipt.');
   const vault=identityVault();
   if(!vault?.identityId||!vault?.deviceId)throw new Error('A portable Civweave identity is required to claim validation rewards.');
-  const rubricScores=normalizeRubricScores(packet,validation);
+  const rubricScores=normalizeRubricScores(packet,validation),sourceHubId=clean(detail.sourceHubId||packet.sourceHubId||packet.contributorHubId||packet.hubId,180),validatorHubId=clean(session?.nodeId,180);
   const unsigned={
     schema:'civweave.validation-receipt.v1.1',
     id:`validation-receipt:${crypto.randomUUID()}`,
@@ -59,8 +59,10 @@ async function rewardReceipt(detail,result){
     submissionId:clean(packet.submissionId,180),
     validatorId:clean(vault.identityId,180),
     validatorDeviceId:clean(vault.deviceId,180),
+    validatorHubId,
+    sourceHubId,
     validatorType:'cloud-model-assisted-human',
-    relationship:'independent',
+    relationship:sourceHubId&&validatorHubId&&sourceHubId!==validatorHubId?'independent-off-node':'independent',
     provider:'cloudflare-workers-ai',
     model:clean(result.model,240),
     verdict:['pass','fail'].includes(validation.verdict)?validation.verdict:'fail',
@@ -86,9 +88,9 @@ async function validate(detail={}){
   const response=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${session.token}`},body:JSON.stringify({packet:detail.packet,estimatedNeurons:detail.estimatedNeurons,allowLifetimeCredits:detail.allowLifetimeCredits===true})});
   const result=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(clean(result.error||`Cloud validation failed with HTTP ${response.status}.`,1200));
-  const reward=await rewardReceipt(detail,result);
+  const reward=await rewardReceipt(detail,result,session);
   const combined={...result,reward};
-  dispatchEvent(new CustomEvent('civweave:validation-receipt-recorded',{detail:{packetId:detail.packetId||detail.packet?.id,chargedNeurons:Number(result?.usage?.chargedNeurons)||0,receiptId:reward.receipt.id}}));
+  dispatchEvent(new CustomEvent('civweave:validation-receipt-recorded',{detail:{packetId:detail.packetId||detail.packet?.id,submissionId:detail.packet?.submissionId,sourceHubId:reward.receipt.sourceHubId,validatorHubId:reward.receipt.validatorHubId,chargedNeurons:Number(result?.usage?.chargedNeurons)||0,receiptId:reward.receipt.id,receipt:reward.receipt}}));
   return combined;
 }
 function clearSession(nodeId=''){const all=sessions(),id=clean(nodeId,180);if(id)delete all[id];else for(const key of Object.keys(all))delete all[key];save(all);}
