@@ -22,8 +22,6 @@ assert.ok(sampleSource.includes("new Stripe(secretKey"));
 assert.ok(sampleSource.includes('Stripe.createFetchHttpClient'));
 assert.ok(!sampleSource.includes('apiVersion:'), 'SDK sample must use its pinned API version automatically');
 
-// Accounts V2 creation contract. The source must use the requested V2 shape and
-// must never fall back to legacy top-level account types.
 for (const needle of [
   'stripeClient.v2.core.accounts.create',
   'display_name:',
@@ -36,8 +34,6 @@ for (const needle of [
 ]) assert.ok(sampleSource.includes(needle), `missing Accounts V2 contract: ${needle}`);
 for (const forbidden of ["type: 'express'", "type: 'standard'", "type: 'custom'"]) assert.ok(!sampleSource.includes(forbidden));
 
-// Onboarding status is fetched directly from Stripe, while D1 stores only the
-// user-to-account mapping and thin-event idempotency receipts.
 assert.ok(sampleSource.includes('stripeClient.v2.core.accounts.retrieve'));
 assert.ok(sampleSource.includes("include: ['configuration.merchant', 'requirements']"));
 assert.ok(sampleSource.includes('stripeClient.v2.core.accountLinks.create'));
@@ -46,8 +42,6 @@ assert.ok(migrationSource.includes('CREATE TABLE IF NOT EXISTS stripe_connect_us
 assert.ok(migrationSource.includes('CREATE TABLE IF NOT EXISTS stripe_connect_thin_events'));
 assert.ok(!migrationSource.includes('requirements_json'));
 
-// Products and Checkout must execute on the connected account using the SDK's
-// stripeAccount request option (Stripe-Account header) and direct-charge fee.
 for (const needle of [
   'stripeClient.products.create',
   'stripeClient.products.list',
@@ -58,8 +52,6 @@ for (const needle of [
   'stripeAccount:'
 ]) assert.ok(sampleSource.includes(needle), `missing connected-account request path: ${needle}`);
 
-// Accounts V2 requirement changes use thin Event Notifications. stripe-node
-// 22.4.0 exposes parseEventNotificationAsync rather than the older parser name.
 for (const eventType of [
   'v2.core.account[requirements].updated',
   'v2.core.account[configuration.merchant].capability_status_updated',
@@ -69,11 +61,12 @@ assert.ok(sampleSource.includes('parseEventNotificationAsync'));
 assert.ok(sampleSource.includes('notification.fetchEvent()'));
 assert.ok(sampleSource.includes('STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
 
-// The sample is compiled into the core Worker but must remain disabled by default.
-// This prevents the public workers.dev origin from becoming an unauthenticated
-// Stripe operator console. Sandbox testing must opt in explicitly.
+// Interactive sample/admin routes remain disabled by default, but the Stripe-
+// signed thin webhook must stay routable without opening the UI.
 assert.equal(wrangler.vars.STRIPE_CONNECT_SAMPLE_ENABLED, 'false');
-assert.ok(entrySource.includes('STRIPE_CONNECT_SAMPLE_ENABLED'));
+assert.ok(entrySource.includes("THIN_WEBHOOK_PATH = '/api/connect-demo/webhooks/stripe-thin'"));
+assert.ok(entrySource.includes("request.method === 'POST' && url.pathname === THIN_WEBHOOK_PATH"));
+assert.ok(entrySource.indexOf("request.method === 'POST' && url.pathname === THIN_WEBHOOK_PATH") < entrySource.indexOf('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
 assert.ok(entrySource.includes('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
 assert.ok(entrySource.includes('handleStripeConnectV2Sample'));
 assert.ok(prepareSource.includes('../cloudflare/core/src/stripe-connect-v2-entry.mjs'));
@@ -101,8 +94,6 @@ const status = await sample.retrieveConnectStatus(fakeStripe, 'acct_demo');
 assert.equal(status.readyToProcessPayments, true);
 assert.equal(status.onboardingComplete, true);
 
-// Test the sample handler directly. The composite production entry is what adds
-// the opt-in gate, allowing this deterministic UI check without enabling it.
 const ui = await sample.handleStripeConnectV2Sample(new Request('https://core.example/connect-demo'), {});
 assert.equal(ui.status, 200);
 assert.match(ui.headers.get('content-type'), /text\/html/);
@@ -116,6 +107,7 @@ console.log(JSON.stringify({
   accountLinksV2: true,
   directStatusFetch: true,
   thinEvents: true,
+  signedThinWebhookPublic: true,
   productsOnConnectedAccount: true,
   directCheckoutApplicationFee: true,
   userAccountMappingInD1: true,
