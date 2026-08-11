@@ -1,49 +1,18 @@
-# SmolLM2 360M onboard model
+# SmolLM2 360M legacy adapter
 
-This directory contains Civweave's packaged `HuggingFaceTB/SmolLM2-360M-Instruct` model.
+The bundled SmolLM2 360M model package has been retired from Civweave's release payload.
 
-## Roles
+This directory remains only as a compatibility marker for older runtime code. Model weights, tokenizer data, and package configuration are **not shipped with the app** and must not be restored to the hosted release or offline-campus package.
 
-SmolLM2 has two explicit roles:
+## Current local-AI path
 
-1. **Onboard AI** when the user selects the local route.
-2. **Degraded-mode fallback** when a selected provider fails, times out, is unavailable, or returns an unusable response.
+Use **AI settings → Local models**. Civweave's current local-model registry downloads a selected model explicitly to device-owned model storage and keeps model installation separate from:
 
-User cancellation is not treated as provider failure and does not trigger another model call.
+- the PWA shell;
+- the offline campus;
+- knowledge schools;
+- visual/media hydration.
 
-## Fallback expectation
+The application must remain usable without any local model installed. Hosted startup must not materialize this legacy package or any other optional device model.
 
-The local fallback is instructed to:
-
-- provide the smallest useful answer supported by supplied context;
-- state uncertainty when evidence is incomplete;
-- never claim network access, tool execution, writes, messages, purchases, votes, deployments, or other external actions;
-- never invent current facts absent from context;
-- preserve affirmative-consent boundaries;
-- satisfy the requested JSON schema when one is supplied.
-
-## Browser runtime
-
-`npm install` stages the pinned Transformers.js browser runtime beneath:
-
-```text
-public/app/vendor/transformers/
-```
-
-The generated vendor directory is ignored by Git. Model and tokenizer files remain in this directory. The ONNX graph is tracked by Git LFS.
-
-Inference runs in `worker.js` so the UI remains responsive. The worker uses WebGPU when available and WASM otherwise. Remote model downloads are disabled.
-
-## Local trial
-
-Open **AI settings → Onboard SmolLM2 360M → Run five-prompt trial**.
-
-The trial checks learning, skilled work, exchange, governance, and reflection prompts and reports:
-
-- valid JSON responses;
-- correct Civweave route choices;
-- execution backend;
-- per-prompt latency;
-- total elapsed time.
-
-The first run loads the 273 MB local graph into the browser cache and will be much slower than later calls.
+Legacy `adapter.js` and `worker.js` are retained temporarily so older cached pages fail through the existing compatibility/fallback path rather than discovering a new bundled model. They must not be treated as evidence that SmolLM2 is installed.
