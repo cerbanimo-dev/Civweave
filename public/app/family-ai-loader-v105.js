@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.60-inline-realm-guides-r46-fast-memory-v192-local-ai-v266';
+const VERSION='1.0.61-inline-realm-guides-r46-fast-memory-v192-local-ai-v266-knowledge-v271';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 const CIVWEAVE_CHAT_KEY='civweave.weaveling-chat.v127';
 const RETIRED_OVERLAY=['/app/guide-chat-v153.js','CivweaveGuideChatV153'];
@@ -16,7 +16,8 @@ const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.7-v192',()=>glo
 const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.4',()=>globalThis.CivweaveAssistantV141];
 const PATCHES=[
   ['/app/deterministic-mode-v175.js?v=deterministic-r1',()=>globalThis.CivweaveDeterministicModeV175],
-  ['/app/weaveling-memory-bridge-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryBridgeV191]
+  ['/app/weaveling-memory-bridge-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryBridgeV191],
+  ['/app/knowledge-encyclopedia-bridge-v271.js?v=knowledge-encyclopedia-v271',()=>globalThis.CivweaveKnowledgeEncyclopediaBridgeV271]
 ];
 const OPTIONAL=[
   ['/app/intention-ui-v138.js?v=1.0.4',()=>globalThis.CivweaveIntentionUI],
@@ -36,7 +37,7 @@ let promise=null;
 let optionalPromise=null;
 let generation=0;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
-const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
 const arr=key=>{const value=parse(localStorage.getItem(key),[]);return Array.isArray(value)?value:[]};
 const obj=key=>{const value=parse(localStorage.getItem(key),{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}};
@@ -81,8 +82,9 @@ function loadOptional(){
   return optionalPromise;
 }
 async function ensure(){
-  if(globalThis.CivweaveAssistantV141&&globalThis.CivweaveDeterministicModeV175&&globalThis.CivweaveWeavelingMemoryBridgeV191){
+  if(globalThis.CivweaveAssistantV141&&globalThis.CivweaveDeterministicModeV175&&globalThis.CivweaveWeavelingMemoryBridgeV191&&globalThis.CivweaveKnowledgeEncyclopediaBridgeV271){
     globalThis.CivweaveWeavelingMemoryBridgeV191.install?.();
+    await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271.install?.();
     loadOptional();
     return true;
   }
@@ -95,6 +97,7 @@ async function ensure(){
     await loadScript(...FAST_RUNTIME);
     await loadScript(...ASSISTANT);
     await Promise.all(PATCHES.map(([src,ready])=>loadScript(src,ready)));
+    await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.install?.();
     globalThis.CivweaveDeterministicModeV175?.installAssistantPatch?.();
     globalThis.CivweaveWeavelingMemoryBridgeV191?.install?.();
     loadOptional();
@@ -170,5 +173,5 @@ const observer=new MutationObserver(patch);observer.observe(document.documentEle
 function boot(){patch();const start=()=>ensure().catch(()=>{});if('requestIdleCallback'in globalThis)requestIdleCallback(start,{timeout:1500});else setTimeout(start,250)}
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 addEventListener('pageshow',event=>{if(event.persisted&&promise&&!globalThis.CivweaveAssistantV141)reset('restored page contained an incomplete Civweave load');patch();ensure().catch(()=>{})});
-globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,openChat,openSettings,reset,ensureBand,workspaceSnapshot,retiredOverlay:RETIRED_OVERLAY,settingsOwner:'CivweaveModelSettingsControllerV173',defaultProvider:'deterministic',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v192-prewarmed-no-mesh',localModelPathway:'optional-v266'};
+globalThis.CivweaveFamilyAILoaderV105={version:VERSION,ensure,warm,openChat,openSettings,reset,ensureBand,workspaceSnapshot,retiredOverlay:RETIRED_OVERLAY,settingsOwner:'CivweaveModelSettingsControllerV173',defaultProvider:'deterministic',transformerActive:false,memoryRevision:'v192-fast-relevant-memory',latencyRevision:'v192-prewarmed-no-mesh',localModelPathway:'optional-v266',knowledgeRevision:'v271-local-encyclopedia'};
 })();
