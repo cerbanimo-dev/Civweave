@@ -5,7 +5,7 @@ on:
     paths:
       - 'public/app/guide-identity-integrity-v216.js'
       - 'public/app/install-boundary-v146.js'
-      - 'public/app/persistent-guide-chat-v215.js'
+      - 'public/app/guide-workspace-v242.js'
       - 'public/app/assistant-runtime-v141.js'
       - 'scripts/verify-guide-identity-integrity-v216.mjs'
       - '.github/workflows/verify-guide-identity-integrity-v216.yml'
@@ -15,7 +15,7 @@ on:
     paths:
       - 'public/app/guide-identity-integrity-v216.js'
       - 'public/app/install-boundary-v146.js'
-      - 'public/app/persistent-guide-chat-v215.js'
+      - 'public/app/guide-workspace-v242.js'
       - 'public/app/assistant-runtime-v141.js'
       - 'scripts/verify-guide-identity-integrity-v216.mjs'
 

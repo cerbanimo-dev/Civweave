@@ -1,26 +1,18 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-convergence-v250';
-const RUNTIME_REPAIR='chat-runtime-repair-v299';
+const REVISION='chat-convergence-v251-legacy-purge';
 const CHAT_PATHS=new Set([
   '/app/manifest.webmanifest',
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146.js',
   '/app/install-boundary-v146.js',
-  '/app/experience-orchestrator-v232.js',
-  '/app/chat-fullscreen-v295.js',
-  '/app/local-chat-runtime-v295.js',
-  '/app/local-chat-owner-v295.js',
-  '/app/local-ai/bootstrap-v266.js',
-  '/app/local-ai/runtime-v266.js',
-  '/app/local-ai/worker-v266.js',
-  '/app/persistent-guide-chat-v215.js',
-  '/app/persistent-guide-viewport-v216.js',
+  '/app/realm-console-v140.html',
+  '/app/family-ai-loader-v105.js',
+  '/app/platform-stability-v159.js',
   '/app/guide-workspace-v242.js',
   '/app/shared-guide-surface-v236.js',
   '/app/regression-fixes-v243.js',
-  '/app/chat-single-owner-v245.js',
   '/app/working-campus-v156.js',
   '/app/working-campus-v156.part1.txt',
   '/app/working-campus-v156.part2.txt',
@@ -31,6 +23,19 @@ const CHAT_PATHS=new Set([
   '/app/working-campus-v156.css',
   '/app/working-campus-v156.html'
 ]);
+const RETIRED_CHAT_PATHS=new Set([
+  '/app/guide-chat-v153.js',
+  '/app/cabinet-home-v142.js',
+  '/app/cabinet-home-v142.css',
+  '/app/cabinet-surfaces-v143.js',
+  '/app/cabinet-surfaces-v143.css',
+  '/app/sharing-library-v143.js',
+  '/app/persistent-guide-chat-v214.js',
+  '/app/persistent-guide-chat-v215.js',
+  '/app/persistent-guide-viewport-v216.js',
+  '/app/chat-single-owner-v245.js'
+]);
+const PURGE_PATHS=new Set([...CHAT_PATHS,...RETIRED_CHAT_PATHS]);
 
 async function purgeChatRuntimeCaches(){
   const names=await caches.keys();
@@ -40,11 +45,11 @@ async function purgeChatRuntimeCaches(){
     for(const request of requests){
       let pathname='';
       try{pathname=new URL(request.url).pathname}catch{}
-      if(!CHAT_PATHS.has(pathname))continue;
+      if(!PURGE_PATHS.has(pathname))continue;
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,runtimeRepair:RUNTIME_REPAIR,deleted,paths:[...CHAT_PATHS]};
+  return{revision:REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
 }
 
 self.addEventListener('activate',event=>{
@@ -58,5 +63,5 @@ self.addEventListener('message',event=>{
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,runtimeRepair:RUNTIME_REPAIR,paths:[...CHAT_PATHS],purge:purgeChatRuntimeCaches});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches});
 })();

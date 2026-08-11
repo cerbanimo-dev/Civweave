@@ -6,12 +6,25 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const version=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
 const revision='release-coherence-v226';
 const chatRevision='chat-convergence-v250';
+const chatCachePurgeRevision='chat-convergence-v251-legacy-purge';
 const lifecycleRevision='document-lifecycle-v222';
 const campusRevision='canonical-campus-startup-v227';
 const boundaryRevision='chat-convergence-v250';
 const routeRevision='five-system-route-contract-v227';
 const offlineRevision='offline-campus-current-graph-v280';
 const offlinePolicy='resumable-pause-v280';
+const retiredChatPaths=[
+  '/app/guide-chat-v153.js',
+  '/app/cabinet-home-v142.js',
+  '/app/cabinet-home-v142.css',
+  '/app/cabinet-surfaces-v143.js',
+  '/app/cabinet-surfaces-v143.css',
+  '/app/sharing-library-v143.js',
+  '/app/persistent-guide-chat-v214.js',
+  '/app/persistent-guide-chat-v215.js',
+  '/app/persistent-guide-viewport-v216.js',
+  '/app/chat-single-owner-v245.js'
+];
 if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('VERSION must contain a semantic release version.');
 
 const changed=[];
@@ -35,17 +48,17 @@ await patch('public/app/index.html',source=>{
 await patch('public/install-v130.js',source=>replaceRequired(source,/const WORKER_SCRIPT_REVISION = '[^']+';/,`const WORKER_SCRIPT_REVISION = '${revision}';`,'installer worker revision constant'));
 await patch('public/app/installed-entry-v146.js',source=>{
   source=replaceRequired(source,/const FALLBACK_VERSION='\d+\.\d+\.\d+';/,`const FALLBACK_VERSION='${version}';`,'installed entry fallback release version');
-  source=replaceRequired(source,/version:'\d+\.\d+\.\d+-chat-convergence-v250'/,`version:'${version}-chat-convergence-v250'`,'installed entry exported release version');
+  source=replaceRequired(source,/version:'\d+\.\d+\.\d+-chat-convergence-v[^']+'/,`version:'${version}-${chatRevision}'`,'installed entry exported release version');
   if(!source.includes("updateViaCache:'none'"))throw new Error('Installed entry must bypass HTTP cache when checking the active worker.');
   if(!source.includes('await registration.update()'))throw new Error('Installed entry must explicitly request a worker update before routing.');
   if(!source.includes("candidate.postMessage({type:'SKIP_WAITING'})"))throw new Error('Installed entry must activate a waiting worker before routing.');
-  if(!source.includes(`revision=${chatRevision}`))throw new Error('Installed entry does not register the chat-convergence worker.');
+  if(!source.includes(`revision=${chatCachePurgeRevision}`))throw new Error('Installed entry does not register the legacy-purge worker revision.');
   return source;
 });
 
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='[^']+';/,`const VERSION='${version}';`,'install-boundary version');
-  if(!source.includes(`const REVISION='${boundaryRevision}';`))throw new Error('Install boundary must retain the chat-convergence revision.');
+  if(!source.includes(`const REVISION='${boundaryRevision}';`))throw new Error('Install boundary must retain the canonical v242 chat revision.');
   if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;'))throw new Error('Install boundary must derive experience cache identity from the requested release.');
   for(const token of [
     "['/app/working-campus-v156.html','civweave']",
@@ -62,7 +75,7 @@ await patch('public/app/install-boundary-v146.js',source=>{
   ])if(!source.includes(token))throw new Error(`Five-system install boundary is missing ${token}.`);
   const start=source.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),end=source.indexOf('];',start),experience=source.slice(start,end);
   if(!experience.includes('GUIDE_WORKSPACE'))throw new Error('Canonical system experience must boot the v242 workspace.');
-  if(experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')||experience.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'))throw new Error('Release coherence must not resurrect v215/v216 on canonical system surfaces.');
+  for(const retired of ['PERSISTENT_GUIDE_CHAT_SCRIPT','PERSISTENT_GUIDE_VIEWPORT_SCRIPT','/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js'])if(source.includes(retired))throw new Error(`Release coherence must not resurrect ${retired}.`);
   if(source.includes('function startAdditions()'))throw new Error('Canonical boundary still contains delayed automatic additions.');
   return source;
 });
@@ -88,14 +101,6 @@ await patch('public/service-worker-core-v208.js',source=>{
   return source;
 });
 
-await patch('public/app/persistent-guide-viewport-v216.js',source=>{
-  if(!source.includes("addEventListener('pagehide',destroy,{once:true});"))source=source.replace("document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();","addEventListener('pagehide',destroy,{once:true});\ndocument.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();");
-  if(source.includes('CHAT_OWNER_REPAIR')||source.includes('chat-single-owner-v245.js'))throw new Error('Legacy viewport compatibility must not inject another chat owner.');
-  return source;
-});
-await patch('public/app/persistent-guide-chat-v215.js',source=>{
-  return source;
-});
 await patch('public/extensions/civweave-additions-v156.js',source=>{
   if(!source.includes('let civweaveAdditionsNavigating=false;'))source=source.replace("let readyPromise=null,activeTab='mesh',noticeTimer=null;","let readyPromise=null,activeTab='mesh',noticeTimer=null;\nlet civweaveAdditionsNavigating=false;\naddEventListener('pagehide',()=>{civweaveAdditionsNavigating=true},{once:true});\naddEventListener('beforeunload',()=>{civweaveAdditionsNavigating=true},{once:true});");
   source=source.replace('document.head.append(script)',"(()=>{const head=document.head;if(civweaveAdditionsNavigating||!head){resolve(false);return}head.append(script)})()");
@@ -112,13 +117,16 @@ for(const token of [
   '/service-worker-shell-integrity-v281.js?v=shell-integrity-v281',
   `/service-worker-release-coherence-v220.js?v=${revision}`,
   '/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227',
-  `/service-worker-chat-repair-v245.js?v=${chatRevision}`,
+  `/service-worker-chat-repair-v245.js?v=${chatCachePurgeRevision}`,
   "self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"
 ])if(!wrapper.includes(token))throw new Error(`The active worker wrapper is missing ${token}.`);
 if(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')<wrapper.indexOf('/service-worker-shell-repair-v225.js'))throw new Error('Canonical navigation must remain the final navigation policy.');
+const chatRepair=await readFile(path.join(root,'public/service-worker-chat-repair-v245.js'),'utf8');
+if(!chatRepair.includes(`const REVISION='${chatCachePurgeRevision}';`))throw new Error('Chat cache repair revision drifted.');
+for(const retired of retiredChatPaths)if(!chatRepair.includes(`'${retired}'`))throw new Error(`Chat cache repair does not purge retired runtime ${retired}.`);
 const override=await readFile(path.join(root,'public/service-worker-release-coherence-v220.js'),'utf8');
 for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pinned-html-js-css-json-txt-network-first-cached-fallback'])if(!override.includes(token))throw new Error(`Release-coherence worker is missing ${token}.`);
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',retiredChatRuntimeCount:retiredChatPaths.length,changed},null,2));

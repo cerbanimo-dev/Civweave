@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import {readFile,stat} from 'node:fs/promises';
+import {access,readFile,stat} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [viewport,repairs,workspace,sharedLoader,sharedCore,entry,core,generationGuard,localResearch,localActions,knowledge,pkg]=await Promise.all([
-  read('public/app/persistent-guide-viewport-v216.js'),
+const exists=relative=>access(path.join(root,relative)).then(()=>true,()=>false);
+const [repairs,workspace,sharedLoader,sharedCore,entry,core,generationGuard,localResearch,localActions,knowledge,pkg]=await Promise.all([
   read('public/app/regression-fixes-v243.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/shared-guide-surface-v236.js'),
@@ -21,9 +21,8 @@ const [viewport,repairs,workspace,sharedLoader,sharedCore,entry,core,generationG
 ]);
 const sharedGuide=`${sharedLoader}\n${sharedCore}`;
 
-assert(viewport.includes("const REGRESSION_FIXES='/app/regression-fixes-v243.js?v=guide-interaction-r2'"),'Legacy viewport compatibility does not load the cache-busted proof/dialog interaction repair.');
-assert(viewport.includes('installRegressionFixes()'),'Legacy viewport compatibility does not activate the proof/dialog repair loader.');
-assert(!viewport.includes('CHAT_OWNER_REPAIR')&&!viewport.includes('chat-single-owner-v245.js'),'Viewport compatibility resurrects a second chat event owner.');
+assert.equal(await exists('public/app/persistent-guide-viewport-v216.js'),false,'Retired viewport compatibility runtime must remain deleted.');
+assert.equal(await exists('public/app/chat-single-owner-v245.js'),false,'Retired chat owner must remain deleted.');
 assert(repairs.includes("dialog button[data-close]")&&repairs.includes("control.type='button'"),'Proof dialog close controls are not repaired.');
 assert(!repairs.includes("document.addEventListener('pointerup',onPointerUp,true)"),'Retired pointerup relay is still installed.');
 assert(!repairs.includes('queueMicrotask(()=>control.click())'),'Synthetic chat click relay is still present.');
@@ -38,6 +37,9 @@ assert(workspace.includes("if(switchControl){switchWindow(switchControl.dataset.
 assert(workspace.includes("new CustomEvent('civweave:guide-workspace-state'"),'Workspace does not publish state for embedded-surface exclusivity.');
 assert(workspace.includes('submitText:async(text,system=activeWindow)'),'Canonical direct text submission API is missing.');
 assert(workspace.includes('canonicalOwner:true'),'Workspace does not advertise canonical ownership.');
+assert(workspace.includes('globalThis.visualViewport?.addEventListener'),'Canonical workspace does not own mobile viewport resize.');
+assert(workspace.includes('height:min(62dvh,560px)!important'),'Canonical workspace lost mobile dynamic-height sizing.');
+assert(!workspace.includes('CHAT_OWNER_REPAIR')&&!workspace.includes('chat-single-owner-v245.js'),'Canonical workspace resurrects a second owner.');
 
 assert(sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'),'Shared guide loader no longer mounts the canonical inline implementation.');
 assert(sharedGuide.includes('await api.submitText(value,currentSystem)'),'Inline chat does not submit directly through the canonical chat API.');
@@ -108,4 +110,4 @@ assert.equal(parsed.dependencies?.['@huggingface/transformers'],'3.8.1','Pinned 
 assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
 assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second database runtime.');
 
-console.log(JSON.stringify({ok:true,revision:'v243.8-local-ai-dependency-contract',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,sourceMaterialInjectedIntoPrompt:true,localPassagesInjectedIntoPrompt:true,liveEvidenceDigestStrengthened:true,moduleDepthRepair:true,iterativePerModuleQuizCompletion:true,singleQuestionQuizRecovery:true,shortAnswerContractGuard:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,localAIRuntimePinned:true,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243.9-v242-viewport-owner',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,retiredViewportDeleted:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,sourceMaterialInjectedIntoPrompt:true,localPassagesInjectedIntoPrompt:true,liveEvidenceDigestStrengthened:true,moduleDepthRepair:true,iterativePerModuleQuizCompletion:true,singleQuestionQuizRecovery:true,shortAnswerContractGuard:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,localAIRuntimePinned:true,provenanceExplicit:true},null,2));

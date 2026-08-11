@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - 'public/app/guide-workspace-v242.js'
-      - 'public/app/persistent-guide-viewport-v216.js'
       - 'public/app/install-boundary-v146.js'
       - 'public/app/working-campus-v156.css'
       - 'scripts/verify-guide-workspace-v242.mjs'
@@ -24,7 +23,6 @@ jobs:
       - name: Check workspace syntax
         run: |
           node --check public/app/guide-workspace-v242.js
-          node --check public/app/persistent-guide-viewport-v216.js
           node --check scripts/verify-guide-workspace-v242.mjs
       - name: Verify five-window local chat contract
         run: node scripts/verify-guide-workspace-v242.mjs
