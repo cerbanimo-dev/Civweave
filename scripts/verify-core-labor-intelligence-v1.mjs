@@ -61,12 +61,16 @@ assert.equal(draft.riskClass,'guarded','O*NET reference drafts must remain guard
 const escoRecord=catalog.packs.find(row=>row.id==='esco-skill-crosswalk-v1');
 const esco=JSON.parse(gunzipSync(bytes(`public/downloads/learning-packs/${escoRecord.file}`)).toString('utf8'));
 assert.equal(esco.id,'esco-skill-crosswalk-v1');
-assert(Array.isArray(esco.crosswalk?.skillMappings)||Array.isArray(esco.skillMappings)||esco.interoperability,'ESCO core artifact does not expose crosswalk data.');
+assert.equal(esco.crosswalks?.schema,'civweave.skill-crosswalk.v1','ESCO core artifact crosswalk schema is missing.');
+assert(Array.isArray(esco.crosswalks?.skillMappings)&&esco.crosswalks.skillMappings.length>0,'ESCO core artifact has no skill mappings.');
+assert(Array.isArray(esco.crosswalks?.occupationMappings)&&esco.crosswalks.occupationMappings.length>100,'ESCO core artifact has no occupation bridge.');
 
 console.log('Core labor intelligence verified.',{
   occupations:atlas.laborReferences.length,
   taskStatements:atlas.laborReferences.reduce((sum,row)=>sum+(row.taskStatements?.length||0),0),
   essentialSkillRows:atlas.laborReferences.reduce((sum,row)=>sum+(row.essentialSkills?.length||0),0),
+  occupationMappings:esco.crosswalks.occupationMappings.length,
+  skillMappings:esco.crosswalks.skillMappings.length,
   atlasBytes:atlasRecord.bytes,
   escoBytes:escoRecord.bytes,
   safety:{requiresAdaptation:draft.requiresAdaptation,steps:draft.steps.length,riskClass:draft.riskClass}
