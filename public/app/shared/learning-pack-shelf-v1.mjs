@@ -1,162 +1,54 @@
 import * as packs from './learning-pack-runtime-v1.mjs?v=learning-pack-shelf-v1';
 
-const VERSION='1.0.0-learning-pack-shelf-v1';
+const VERSION='1.0.1-learning-pack-shelf-v1-core-infrastructure-hidden';
 const CSS_URL='/app/shared/learning-pack-shelf-v1.css?v=learning-pack-shelf-v1';
+const INTERNAL_CORE_PACKS=new Set(['onet-labor-atlas-30-3','esco-skill-crosswalk-v1']);
 const mounted=new Map();
 const clean=(value,max=1200)=>String(value??'').trim().slice(0,max);
 const list=value=>Array.isArray(value)?value:[];
-const labels={
-  'task-template':'Task template',
-  'learning-unit':'Learning unit',
-  'expert-guide':'Expert guide',
-  'labor-reference':'Labor reference'
-};
+const labels={'task-template':'Task template','learning-unit':'Learning unit','expert-guide':'Expert guide','labor-reference':'Labor reference'};
 
-function element(tag,className='',text=''){
-  const node=document.createElement(tag);
-  if(className)node.className=className;
-  if(text)node.textContent=text;
-  return node;
-}
-function ensureCss(){
-  if(document.querySelector(`link[href^="${CSS_URL.split('?')[0]}"]`))return;
-  const link=document.createElement('link');link.rel='stylesheet';link.href=CSS_URL;document.head.append(link);
-}
-function formatBytes(bytes){
-  const value=Number(bytes||0);if(!value)return'';
-  if(value<1024)return`${value} B`;if(value<1024*1024)return`${(value/1024).toFixed(value<10240?1:0)} KB`;
-  return`${(value/(1024*1024)).toFixed(1)} MB`;
-}
+function element(tag,className='',text=''){const node=document.createElement(tag);if(className)node.className=className;if(text)node.textContent=text;return node}
+function ensureCss(){if(document.querySelector(`link[href^="${CSS_URL.split('?')[0]}"]`))return;const link=document.createElement('link');link.rel='stylesheet';link.href=CSS_URL;document.head.append(link)}
+function formatBytes(bytes){const value=Number(bytes||0);if(!value)return'';if(value<1024)return`${value} B`;if(value<1024*1024)return`${(value/1024).toFixed(value<10240?1:0)} KB`;return`${(value/(1024*1024)).toFixed(1)} MB`}
 function audienceTitle(audience){return audience==='living-school'?'Learning Pack Shelf':'Task & Expert Pack Shelf'}
-function actionLabel(audience,kind){
-  if(audience==='cerbanimo'&&kind==='task-template')return'Start task';
-  if(audience==='living-school'&&kind==='learning-unit')return'Learn this';
-  return'';
-}
+function actionLabel(audience,kind){if(audience==='cerbanimo'&&kind==='task-template')return'Start task';if(audience==='living-school'&&kind==='learning-unit')return'Learn this';return''}
 function packSearchText(record){return[record.title,record.summary,...list(record.tags),record.packType].join(' ').toLowerCase()}
-function statusLabel(row){
-  if(!row?.available)return'Not published';
-  if(row.needs_update)return'Update available';
-  if(row.staged&&row.current)return'Offline ready';
-  if(row.bundled)return'On device';
-  return'Optional';
-}
+function statusLabel(row){if(!row?.available)return'Not published';if(row.needs_update)return'Update available';if(row.staged&&row.current)return'Offline ready';if(row.bundled)return'On device';return'Optional'}
 function dispatch(name,detail={}){try{globalThis.dispatchEvent?.(new CustomEvent(name,{detail}))}catch{}}
+function shelfVisible(record){return !record?.hiddenFromShelf&&!record?.coreInfrastructure&&!INTERNAL_CORE_PACKS.has(record?.id)}
 
 export function mountLearningPackShelf({audience,adapter,host=document.body}={}){
   const realm=audience==='living-school'?'living-school':'cerbanimo';
   if(mounted.has(realm))return mounted.get(realm).api;
   if(!adapter?.catalog||!adapter?.status||!adapter?.stage)throw new Error('Learning Pack Shelf needs a realm learning-pack adapter.');
   ensureCss();
-
   const root=element('div','cw-pack-shelf');root.dataset.audience=realm;root.hidden=true;
   const backdrop=element('button','cw-pack-shelf__backdrop');backdrop.type='button';backdrop.setAttribute('aria-label','Close learning pack shelf');
   const panel=element('section','cw-pack-shelf__panel');panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label',audienceTitle(realm));
-  const head=element('header','cw-pack-shelf__head');
-  const headingWrap=element('div','cw-pack-shelf__heading');headingWrap.append(element('small','',realm==='living-school'?'LIVING SCHOOL LIBRARY':'CERBANIMO WORK LIBRARY'),element('h2','',audienceTitle(realm)));
-  const close=element('button','cw-pack-shelf__close','Close');close.type='button';
-  head.append(headingWrap,close);
-  const toolbar=element('div','cw-pack-shelf__toolbar');
-  const search=element('input','cw-pack-shelf__search');search.type='search';search.placeholder='Search packs, skills, or work…';search.setAttribute('aria-label','Search learning packs');
-  const filters=element('div','cw-pack-shelf__filters');filters.setAttribute('role','group');filters.setAttribute('aria-label','Filter learning packs');
-  for(const [value,label] of [['all','All'],['expert','Expert'],['mixed','Core'],['reference','Reference']]){const button=element('button','cw-pack-shelf__filter',label);button.type='button';button.dataset.filter=value;if(value==='all')button.dataset.active='true';filters.append(button)}
-  toolbar.append(search,filters);
-  const body=element('div','cw-pack-shelf__body');
-  const listPane=element('div','cw-pack-shelf__list');listPane.setAttribute('aria-label','Learning packs');
-  const detail=element('article','cw-pack-shelf__detail');detail.setAttribute('aria-live','polite');
-  body.append(listPane,detail);
-  const footer=element('footer','cw-pack-shelf__footer');
-  const storage=element('span','cw-pack-shelf__storage','Checking offline storage…');
-  const live=element('span','cw-pack-shelf__live');live.setAttribute('role','status');live.setAttribute('aria-live','polite');
-  footer.append(storage,live);
-  panel.append(head,toolbar,body,footer);root.append(backdrop,panel);
-
-  const launcher=element('button','cw-pack-shelf-launcher','Learning packs');launcher.type='button';launcher.setAttribute('aria-haspopup','dialog');
-  const launcherHost=host?.append?host:document.body;launcherHost.append(launcher);document.body.append(root);
-
+  const head=element('header','cw-pack-shelf__head'),headingWrap=element('div','cw-pack-shelf__heading');headingWrap.append(element('small','',realm==='living-school'?'LIVING SCHOOL LIBRARY':'CERBANIMO WORK LIBRARY'),element('h2','',audienceTitle(realm)));const close=element('button','cw-pack-shelf__close','Close');close.type='button';head.append(headingWrap,close);
+  const toolbar=element('div','cw-pack-shelf__toolbar'),search=element('input','cw-pack-shelf__search');search.type='search';search.placeholder='Search packs, skills, or work…';search.setAttribute('aria-label','Search learning packs');const filters=element('div','cw-pack-shelf__filters');filters.setAttribute('role','group');filters.setAttribute('aria-label','Filter learning packs');for(const [value,label] of [['all','All'],['expert','Expert'],['mixed','Core'],['reference','Reference']]){const button=element('button','cw-pack-shelf__filter',label);button.type='button';button.dataset.filter=value;if(value==='all')button.dataset.active='true';filters.append(button)}toolbar.append(search,filters);
+  const body=element('div','cw-pack-shelf__body'),listPane=element('div','cw-pack-shelf__list'),detail=element('article','cw-pack-shelf__detail');listPane.setAttribute('aria-label','Learning packs');detail.setAttribute('aria-live','polite');body.append(listPane,detail);
+  const footer=element('footer','cw-pack-shelf__footer'),storage=element('span','cw-pack-shelf__storage','Checking offline storage…'),live=element('span','cw-pack-shelf__live');live.setAttribute('role','status');live.setAttribute('aria-live','polite');footer.append(storage,live);panel.append(head,toolbar,body,footer);root.append(backdrop,panel);
+  const launcher=element('button','cw-pack-shelf-launcher','Learning packs');launcher.type='button';launcher.setAttribute('aria-haspopup','dialog');const launcherHost=host?.append?host:document.body;launcherHost.append(launcher);document.body.append(root);
   const state={catalog:[],status:new Map(),selectedId:'',filter:'all',query:'',busy:false,previousFocus:null};
   const statusFor=id=>state.status.get(id)||{};
   function announce(message){live.textContent=clean(message,300)}
-  function filteredCatalog(){
-    const query=state.query.toLowerCase();
-    return state.catalog.filter(record=>{
-      if(list(record.audience).length&&!record.audience.includes(realm))return false;
-      if(state.filter!=='all'&&record.packType!==state.filter)return false;
-      return!query||packSearchText(record).includes(query);
-    });
-  }
-  function renderList(){
-    listPane.replaceChildren();
-    const rows=filteredCatalog();
-    if(!rows.length){listPane.append(element('p','cw-pack-shelf__empty','No packs match this shelf view.'));return}
-    for(const record of rows){
-      const row=statusFor(record.id),card=element('button','cw-pack-card');card.type='button';card.dataset.packId=record.id;if(record.id===state.selectedId)card.dataset.selected='true';
-      const top=element('span','cw-pack-card__top');top.append(element('strong','',record.title),element('span','cw-pack-card__state',statusLabel(row)));
-      const summary=element('span','cw-pack-card__summary',record.summary||'Structured offline knowledge pack.');
-      const meta=element('span','cw-pack-card__meta');meta.textContent=[record.packType||'mixed',formatBytes(row.bytes||record.bytes),record.optional===false?'core':'optional'].filter(Boolean).join(' · ');
-      card.append(top,summary,meta);card.addEventListener('click',()=>selectPack(record.id));listPane.append(card);
-    }
-  }
-  function packRecord(id){return state.catalog.find(row=>row.id===id)||null}
-  async function loadedItems(record,row){
-    if(!row?.staged&&!record.autoStage)return[];
-    try{await packs.loadPack(record.id,{force:true});return packs.search('',{packIds:[record.id],limit:100})}catch{return[]}
-  }
-  function itemCard(record,row){
-    const card=element('section','cw-pack-item');
-    const top=element('div','cw-pack-item__top');top.append(element('span','cw-pack-item__kind',labels[row.kind]||row.kind),element('strong','',row.title));card.append(top);
-    const item=row.item||{};
-    const descriptor=clean(item.summary||item.capability||item.outcome||item.description||item.domain,700);if(descriptor)card.append(element('p','',descriptor));
-    const chips=element('div','cw-pack-item__chips');for(const tag of list(item.skillRefs).slice(0,5))chips.append(element('span','',tag));if(chips.childElementCount)card.append(chips);
-    if(row.kind==='labor-reference'){
-      const warning=element('p','cw-pack-item__reference','Reference only. Adapt this occupational description into a reviewed task template before executable work.');card.append(warning);return card;
-    }
-    const action=actionLabel(realm,row.kind);
-    if(action){const button=element('button','cw-pack-item__action',action);button.type='button';button.addEventListener('click',async()=>{button.disabled=true;try{
-      if(realm==='cerbanimo')await adapter.createQuest(row.id,{packId:record.id,activate:true});
-      else await adapter.generateCurriculum(row.id,{packId:record.id});
-      announce(realm==='cerbanimo'?`Started ${row.title}.`:`Opened ${row.title} as a Living School curriculum.`);dispatch('civweave:learning-pack-shelf-item-started',{audience:realm,packId:record.id,itemId:row.id,kind:row.kind});
-    }catch(error){announce(error?.message||'Could not start this pack item.')}finally{button.disabled=false}});card.append(button)}
-    return card;
-  }
-  async function renderDetail(){
-    detail.replaceChildren();const record=packRecord(state.selectedId);if(!record){detail.append(element('div','cw-pack-shelf__intro',realm==='living-school'?'Choose a pack to browse lessons, expert guidance, and practice paths.':'Choose a pack to browse task templates, expert guidance, and labor references.'));return}
-    const row=statusFor(record.id),hero=element('div','cw-pack-detail__hero');hero.append(element('small','',`${record.packType||'mixed'} pack`),element('h3','',record.title),element('p','',record.summary||''));
-    const tags=element('div','cw-pack-detail__tags');for(const tag of list(record.tags).slice(0,10))tags.append(element('span','',tag));hero.append(tags);detail.append(hero);
-    const controls=element('div','cw-pack-detail__controls');
-    if(row.available&&(!row.staged||row.needs_update)){
-      const add=element('button','cw-pack-detail__primary',row.needs_update?'Update offline pack':'Add offline');add.type='button';add.addEventListener('click',()=>stagePack(record.id));controls.append(add);
-    }
-    if(row.staged&&record.optional!==false){const remove=element('button','cw-pack-detail__secondary','Remove offline copy');remove.type='button';remove.addEventListener('click',()=>removePack(record.id));controls.append(remove)}
-    if(!row.available){controls.append(element('span','cw-pack-detail__unavailable',record.generated?'Generated reference pack is not published on this node yet.':'This pack is not currently available.'))}
-    detail.append(controls);
-    if(record.packType==='reference')detail.append(element('p','cw-pack-detail__safety','Reference packs describe occupations and skills. They never become executable Cerbanimo work without adaptation through a reviewed task template.'));
-    if(!row.staged){detail.append(element('p','cw-pack-shelf__empty',row.available?'Add this pack offline to browse its contents.':'Its catalog metadata remains searchable without downloading the pack.'));return}
-    const items=await loadedItems(record,row);const relevant=items.filter(item=>realm==='cerbanimo'?['task-template','expert-guide','labor-reference'].includes(item.kind):['learning-unit','expert-guide','labor-reference'].includes(item.kind));
-    const section=element('div','cw-pack-detail__items');
-    if(!relevant.length)section.append(element('p','cw-pack-shelf__empty','This pack has no realm-specific items to show.'));
-    else for(const item of relevant)section.append(itemCard(record,item));
-    detail.append(section);
-  }
-  async function refresh({preserveSelection=true}={}){
-    const [catalog,status]=await Promise.all([adapter.catalog(),adapter.status()]);state.catalog=list(catalog?.packs);state.status=new Map(list(status).map(row=>[row.id,row]));
-    if(!preserveSelection||!packRecord(state.selectedId))state.selectedId=filteredCatalog()[0]?.id||'';
-    const persistent=[...state.status.values()].some(row=>row.persistent);storage.textContent=persistent?'Offline pack storage is persistent on this device.':'Offline packs are cached locally; the browser may reclaim storage if space is tight.';
-    renderList();await renderDetail();
-  }
+  function filteredCatalog(){const query=state.query.toLowerCase();return state.catalog.filter(record=>{if(!shelfVisible(record))return false;if(list(record.audience).length&&!record.audience.includes(realm))return false;if(state.filter!=='all'&&record.packType!==state.filter)return false;return!query||packSearchText(record).includes(query)})}
+  function renderList(){listPane.replaceChildren();const rows=filteredCatalog();if(!rows.length){listPane.append(element('p','cw-pack-shelf__empty','No packs match this shelf view.'));return}for(const record of rows){const row=statusFor(record.id),card=element('button','cw-pack-card');card.type='button';card.dataset.packId=record.id;if(record.id===state.selectedId)card.dataset.selected='true';const top=element('span','cw-pack-card__top');top.append(element('strong','',record.title),element('span','cw-pack-card__state',statusLabel(row)));const summary=element('span','cw-pack-card__summary',record.summary||'Structured offline knowledge pack.'),meta=element('span','cw-pack-card__meta');meta.textContent=[record.packType||'mixed',formatBytes(row.bytes||record.bytes),record.optional===false?'core':'optional'].filter(Boolean).join(' · ');card.append(top,summary,meta);card.addEventListener('click',()=>selectPack(record.id));listPane.append(card)}}
+  function packRecord(id){return state.catalog.find(row=>row.id===id&&shelfVisible(row))||null}
+  async function loadedItems(record,row){if(!row?.staged&&!record.autoStage)return[];try{await packs.loadPack(record.id,{force:true});return packs.search('',{packIds:[record.id],limit:100})}catch{return[]}}
+  function itemCard(record,row){const card=element('section','cw-pack-item'),top=element('div','cw-pack-item__top');top.append(element('span','cw-pack-item__kind',labels[row.kind]||row.kind),element('strong','',row.title));card.append(top);const item=row.item||{},descriptor=clean(item.summary||item.capability||item.outcome||item.description||item.domain,700);if(descriptor)card.append(element('p','',descriptor));const chips=element('div','cw-pack-item__chips');for(const tag of list(item.skillRefs).slice(0,5))chips.append(element('span','',tag));if(chips.childElementCount)card.append(chips);if(row.kind==='labor-reference'){const warning=element('p','cw-pack-item__reference','Reference only. Adapt this occupational description into a reviewed task template before executable work.');card.append(warning);return card}const action=actionLabel(realm,row.kind);if(action){const button=element('button','cw-pack-item__action',action);button.type='button';button.addEventListener('click',async()=>{button.disabled=true;try{if(realm==='cerbanimo')await adapter.createQuest(row.id,{packId:record.id,activate:true});else await adapter.generateCurriculum(row.id,{packId:record.id});announce(realm==='cerbanimo'?`Started ${row.title}.`:`Opened ${row.title} as a Living School curriculum.`);dispatch('civweave:learning-pack-shelf-item-started',{audience:realm,packId:record.id,itemId:row.id,kind:row.kind})}catch(error){announce(error?.message||'Could not start this pack item.')}finally{button.disabled=false}});card.append(button)}return card}
+  async function renderDetail(){detail.replaceChildren();const record=packRecord(state.selectedId);if(!record){detail.append(element('div','cw-pack-shelf__intro',realm==='living-school'?'Choose a pack to browse lessons, expert guidance, and practice paths.':'Choose a pack to browse task templates and expert guidance.'));return}const row=statusFor(record.id),hero=element('div','cw-pack-detail__hero');hero.append(element('small','',`${record.packType||'mixed'} pack`),element('h3','',record.title),element('p','',record.summary||''));const tags=element('div','cw-pack-detail__tags');for(const tag of list(record.tags).slice(0,10))tags.append(element('span','',tag));hero.append(tags);detail.append(hero);const controls=element('div','cw-pack-detail__controls');if(row.available&&(!row.staged||row.needs_update)){const add=element('button','cw-pack-detail__primary',row.needs_update?'Update offline pack':'Add offline');add.type='button';add.addEventListener('click',()=>stagePack(record.id));controls.append(add)}if(row.staged&&record.optional!==false){const remove=element('button','cw-pack-detail__secondary','Remove offline copy');remove.type='button';remove.addEventListener('click',()=>removePack(record.id));controls.append(remove)}if(!row.available)controls.append(element('span','cw-pack-detail__unavailable',record.generated?'Generated pack is not published on this node yet.':'This pack is not currently available.'));detail.append(controls);if(!row.staged){detail.append(element('p','cw-pack-shelf__empty',row.available?'Add this pack offline to browse its contents.':'Its catalog metadata remains searchable without downloading the pack.'));return}const items=await loadedItems(record,row),relevant=items.filter(item=>realm==='cerbanimo'?['task-template','expert-guide'].includes(item.kind):['learning-unit','expert-guide'].includes(item.kind)),section=element('div','cw-pack-detail__items');if(!relevant.length)section.append(element('p','cw-pack-shelf__empty','This pack has no realm-specific items to show.'));else for(const item of relevant)section.append(itemCard(record,item));detail.append(section)}
+  async function refresh({preserveSelection=true}={}){const [catalog,status]=await Promise.all([adapter.catalog(),adapter.status()]);state.catalog=list(catalog?.packs);state.status=new Map(list(status).map(row=>[row.id,row]));if(!preserveSelection||!packRecord(state.selectedId))state.selectedId=filteredCatalog()[0]?.id||'';const persistent=[...state.status.values()].some(row=>row.persistent);storage.textContent=persistent?'Offline pack storage is persistent on this device.':'Offline packs are cached locally; the browser may reclaim storage if space is tight.';renderList();await renderDetail()}
   async function stagePack(id){if(state.busy)return;state.busy=true;announce('Preparing offline pack…');try{await adapter.stage([id],{onProgress:progress=>announce(progress?.phase?`${progress.phase} ${progress.record?.title||''}`:'Preparing pack…')});await refresh();announce(`${packRecord(id)?.title||id} is ready offline.`);dispatch('civweave:learning-pack-shelf-pack-staged',{audience:realm,packId:id})}catch(error){announce(error?.message||'Could not add this pack offline.')}finally{state.busy=false}}
   async function removePack(id){if(state.busy)return;const record=packRecord(id);if(record?.optional===false)return;state.busy=true;try{await packs.remove([id]);await refresh();announce(`${record?.title||id} was removed from offline storage.`);dispatch('civweave:learning-pack-shelf-pack-removed',{audience:realm,packId:id})}catch(error){announce(error?.message||'Could not remove this pack.')}finally{state.busy=false}}
   async function selectPack(id){state.selectedId=id;renderList();await renderDetail()}
   async function open(){state.previousFocus=document.activeElement;root.hidden=false;document.documentElement.classList.add('cw-pack-shelf-open');try{await refresh({preserveSelection:true})}catch(error){announce(error?.message||'Could not open the learning pack catalog.')}close.focus();dispatch('civweave:learning-pack-shelf-opened',{audience:realm})}
   function shut(){root.hidden=true;document.documentElement.classList.remove('cw-pack-shelf-open');state.previousFocus?.focus?.();dispatch('civweave:learning-pack-shelf-closed',{audience:realm})}
   function keydown(event){if(root.hidden)return;if(event.key==='Escape'){event.preventDefault();shut();return}if(event.key!=='Tab')return;const focusable=[...panel.querySelectorAll('button:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(node=>!node.hidden);if(!focusable.length)return;const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}
-  launcher.addEventListener('click',open);close.addEventListener('click',shut);backdrop.addEventListener('click',shut);document.addEventListener('keydown',keydown);
-  search.addEventListener('input',()=>{state.query=search.value.trim();renderList()});
-  filters.addEventListener('click',event=>{const button=event.target.closest('[data-filter]');if(!button)return;state.filter=button.dataset.filter;for(const peer of filters.querySelectorAll('[data-filter]'))peer.dataset.active=String(peer===button);renderList()});
-
-  const api=Object.freeze({version:VERSION,audience:realm,open,close:shut,refresh,selectPack,destroy(){document.removeEventListener('keydown',keydown);launcher.remove();root.remove();mounted.delete(realm)}});mounted.set(realm,{api,root,launcher});
-  queueMicrotask(()=>adapter.ready?.().then(()=>refresh({preserveSelection:false})).catch(()=>{}));
-  return api;
+  launcher.addEventListener('click',open);close.addEventListener('click',shut);backdrop.addEventListener('click',shut);document.addEventListener('keydown',keydown);search.addEventListener('input',()=>{state.query=search.value.trim();renderList()});filters.addEventListener('click',event=>{const button=event.target.closest('[data-filter]');if(!button)return;state.filter=button.dataset.filter;for(const peer of filters.querySelectorAll('[data-filter]'))peer.dataset.active=String(peer===button);renderList()});
+  const api=Object.freeze({version:VERSION,audience:realm,open,close:shut,refresh,selectPack,destroy(){document.removeEventListener('keydown',keydown);launcher.remove();root.remove();mounted.delete(realm)}});mounted.set(realm,{api,root,launcher});queueMicrotask(()=>adapter.ready?.().then(()=>refresh({preserveSelection:false})).catch(()=>{}));return api;
 }
 
 export const version=VERSION;
