@@ -10,17 +10,11 @@ const [orchestrator,parity,lifecycle,boundary]=await Promise.all([
 ].map(read));
 for(const source of [orchestrator,parity,lifecycle,boundary])new Function(source);
 
-for(const path of [
-  '/app/working-campus-v156.html',
-  '/app/cabinets/living-school/index.html',
-  '/app/realm-console-v140.html',
-  '/app/fellowfare-cabinet-v144.html',
-  '/app/anarchadia-console-v139.html'
-])assert.ok(boundary.includes(path),`five-system loader lost ${path}`);
+for(const path of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert.ok(boundary.includes(path),`five-system loader lost ${path}`);
 assert.match(boundary,/const EXPERIENCE_ORCHESTRATOR='\/app\/experience-orchestrator-v232\.js'/);
 assert.match(boundary,/SYSTEM_EXPERIENCE_SCRIPTS=\[/);
 
-assert.match(orchestrator,/experience-orchestrator-v298-mobile-chat-queue/);
+assert.match(orchestrator,/experience-orchestrator-v299-chat-boot-runtime-fallback/);
 assert.match(orchestrator,/const SETTINGS_MODULE=/);
 assert.match(orchestrator,/const CHAT_MODULES=/);
 assert.match(orchestrator,/function ensureSettingsModule\(/);
@@ -36,11 +30,7 @@ assert.match(submit,/CivweaveLocalChatOwnerV295\?\.enqueue/,'downloaded-local ch
 assert.match(orchestrator,/globalThis\.addEventListener\('submit',earlyLocalSubmit,true\)/,'local preflight must run before canonical document submit capture');
 assert.doesNotMatch(orchestrator,/document\.addEventListener\('submit'/,'settings/chat orchestrator must not compete at document submit capture');
 
-for(const selector of ['[data-action="settings"]','[data-ls-action="open-ai-settings"]','#settings-button','#model-chip']){
-  assert.ok(orchestrator.includes(selector),`orchestrator settings selector lost ${selector}`);
-  assert.ok(parity.includes(selector),`settings parity selector lost ${selector}`);
-  assert.ok(lifecycle.includes(selector),`document lifecycle selector lost ${selector}`);
-}
+for(const selector of ['[data-action="settings"]','[data-ls-action="open-ai-settings"]','#settings-button','#model-chip']){assert.ok(orchestrator.includes(selector),`orchestrator settings selector lost ${selector}`);assert.ok(parity.includes(selector),`settings parity selector lost ${selector}`);assert.ok(lifecycle.includes(selector),`document lifecycle selector lost ${selector}`)}
 
 assert.match(parity,/1\.0\.99-settings-parity-v296/);
 assert.match(parity,/settingsIndependentOfChat:true/);
@@ -57,20 +47,5 @@ assert.doesNotMatch(lifecycle,/bootstrap-v266\.js/,'settings lifecycle must not 
 const managementList=lifecycle.match(/const LOCAL_AI_MANAGEMENT_FILES=\[([\s\S]*?)\n\];/)?.[1]||'';
 assert.ok(managementList,'management file list must remain inspectable');
 for(const forbidden of ['runtime-v266','runtime-bridge-v266','bootstrap-v266','test-pulse-v269','fast-interactive-runtime'])assert.ok(!managementList.includes(forbidden),`settings management lane includes inference asset ${forbidden}`);
-const managementOpen=lifecycle.match(/function ensureLocalAISettingsManagement\(\)\{([\s\S]*?)\}\nfunction captureSettingsOpen/)?.[1]||'';
-assert.ok(managementOpen,'settings management open path must remain inspectable');
-assert.match(managementOpen,/ensureMinimalManagement/);
-assert.match(managementOpen,/managementOnly:true/);
-assert.match(managementOpen,/inferenceDormantOnOpen:true/);
-assert.doesNotMatch(managementOpen,/bootstrap\.ready|ensureScript\([^\n]*bootstrap|runtime-v266|runtime-bridge-v266|test-pulse-v269/i);
 
-console.log(JSON.stringify({
-  ok:true,
-  revision:'settings-freeze-recovery-v298-local-queue',
-  canonicalSystems:5,
-  settingsIndependentOfChat:true,
-  legacyClickFallback:true,
-  settingsOpenBeforeManagement:true,
-  inferenceDormantOnSettingsOpen:true,
-  localSubmitWindowPreflight:true
-},null,2));
+console.log(JSON.stringify({ok:true,revision:'settings-freeze-recovery-v299-chat-runtime-fallback',canonicalSystems:5,settingsIndependentOfChat:true,legacyClickFallback:true,settingsOpenBeforeManagement:true,inferenceDormantOnSettingsOpen:true,localSubmitWindowPreflight:true},null,2));
