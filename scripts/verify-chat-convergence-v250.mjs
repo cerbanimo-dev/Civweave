@@ -84,7 +84,7 @@ for(const path of retiredPaths)check(`retired runtime deleted: ${path}`,!(await 
 for(const path of retiredPaths.map(path=>path.replace(/^public/,'')))check(`worker purge contains ${path}`,workerRepair.includes(`'${path}'`));
 for(const path of ['/app/manifest.webmanifest','/app/installed-entry-v146.js','/app/install-boundary-v146.js','/app/realm-console-v140.html','/app/family-ai-loader-v105.js','/app/platform-stability-v159.js','/app/guide-workspace-v242.js','/app/working-campus-v156.part5.txt'])check(`worker refresh contains ${path}`,workerRepair.includes(`'${path}'`));
 check('worker purge ignores stale query identities',workerRepair.includes('cache.delete(request,{ignoreSearch:true})'));
-check('worker imports v251 legacy purge repair',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v251-legacy-purge')"));
+check('worker runs v251 legacy purge through the canonical v250 worker import',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250&purge=chat-convergence-v251-legacy-purge')"));
 check('worker skips waiting on install',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
 
 check('release version sync preserves updater-first manifest',releaseSync.includes("manifest.start_url='/app/installed-entry-v146.html?installed=1'"));
