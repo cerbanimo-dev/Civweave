@@ -1,4 +1,4 @@
-name: Cloudflare Publish Payload Temp
+name: Cloudflare Publish Payload Release Temp
 
 on:
   push:
@@ -8,74 +8,90 @@ on:
       - .github/workflows/cloudflare-publish-payload-temp.yml
 
 permissions:
-  contents: read
-
-env:
-  PAYLOAD_PROFILE_REVISION: external-schools-v1
+  contents: write
 
 jobs:
-  profile:
+  release:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts
-      - name: Build production Pages tree
-        run: node scripts/build-cloudflare-pages.mjs
-      - name: Verify runtime and external school contract
+
+      - name: Materialize Civweave 1.0.102
         run: |
           set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          version='1.0.102'
+          Path('VERSION').write_text(version+'\n',encoding='utf-8')
+          for name in ['package.json','package-lock.json']:
+              path=Path(name)
+              data=json.loads(path.read_text(encoding='utf-8'))
+              data['version']=version
+              if name=='package-lock.json' and isinstance(data.get('packages'),dict) and isinstance(data['packages'].get(''),dict):
+                  data['packages']['']['version']=version
+              path.write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')
+          contract_path=Path('config/release-contract.json')
+          contract=json.loads(contract_path.read_text(encoding='utf-8'))
+          contract['canonical']['current']={'version':version,'path':f'releases/{version}','status':'current'}
+          contract_path.write_text(json.dumps(contract,indent=2)+'\n',encoding='utf-8')
+          PY
+          node scripts/materialize-canonical-release.mjs
+
+      - name: Verify release, offline libraries, and local inference
+        run: |
+          set -euo pipefail
+          node scripts/verify-cloudflare-deploy-discipline.mjs
+          node scripts/verify-knowledge-school-seeds-v1.mjs
           node scripts/verify-local-model-download-v267.mjs
           node scripts/verify-cloudflare-portable-zip-v185.mjs
-          node scripts/verify-cloudflare-deploy-discipline.mjs
-          node --check public/app/knowledge-school-seeds-v1.js
-          test -f .cloudflare-pages/app/vendor/transformers/transformers.min.js
-          test -f .cloudflare-pages/app/vendor/transformers/wasm/ort-wasm-simd-threaded.jsep.wasm
-          test ! -f .cloudflare-pages/app/vendor/transformers/ort-wasm-simd-threaded.jsep.wasm
-          test -f .cloudflare-pages/app/vendor/transformers-v4/transformers.min.js
+          npm run check:release-discipline
+
+      - name: Build and verify reduced Pages output
+        run: |
+          set -euo pipefail
+          node scripts/build-cloudflare-pages.mjs
           test ! -d .cloudflare-pages/downloads/knowledge-schools/schools
           python - <<'PY'
           import hashlib,json,urllib.request
           from pathlib import Path
-          catalog=json.loads(Path('.cloudflare-pages/downloads/knowledge-schools/catalog.json').read_text())
+          root=Path('.cloudflare-pages')
+          files=[p for p in root.rglob('*') if p.is_file()]
+          total=sum(p.stat().st_size for p in files)
+          print('PAGES_BYTES',total)
+          print('PAGES_FILES',len(files))
+          assert total <= 160_000_000, f'Pages payload regressed above 160 MB: {total}'
+          catalog=json.loads((root/'downloads/knowledge-schools/catalog.json').read_text())
           assert catalog['download_policy']['mode']=='external-immutable-zips'
           assert catalog['download_policy']['checksum_required'] is True
           assert catalog['download_policy']['pages_carries_zip_bytes'] is False
           assert len(catalog['schools'])==11
-          school=next(s for s in catalog['schools'] if s['school_slug']=='mathematics')
-          url=school['download_url']
-          assert url.startswith('https://raw.githubusercontent.com/cerbanimo-dev/Civweave/')
-          req=urllib.request.Request(url,headers={'User-Agent':'Civweave-payload-verifier'})
-          with urllib.request.urlopen(req,timeout=60) as response:
+          assert all(str(row.get('download_url','')).startswith('https://raw.githubusercontent.com/cerbanimo-dev/Civweave/') for row in catalog['schools'])
+          school=next(row for row in catalog['schools'] if row['school_slug']=='mathematics')
+          request=urllib.request.Request(school['download_url'],headers={'User-Agent':'Civweave-release-verifier'})
+          with urllib.request.urlopen(request,timeout=60) as response:
               data=response.read()
-              cors=response.headers.get('access-control-allow-origin','')
-              print('SCHOOL_SOURCE_STATUS',response.status)
-              print('SCHOOL_SOURCE_CORS',cors)
-              print('SCHOOL_SOURCE_BYTES',len(data))
               assert response.status==200
-              assert cors=='*'
+              assert response.headers.get('access-control-allow-origin','')=='*'
           assert len(data)==int(school['zip_bytes'])
           assert hashlib.sha256(data).hexdigest()==school['zip_sha256']
-          print('SCHOOL_SOURCE_SHA256_OK',school['school_slug'])
+          print('PINNED_SCHOOL_DOWNLOAD_OK',school['school_slug'],len(data))
           PY
-      - name: Measure publish payload
+
+      - name: Commit verified release
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          root=Path('.cloudflare-pages')
-          files=[p for p in root.rglob('*') if p.is_file()]
-          total=sum(p.stat().st_size for p in files)
-          print('TOTAL_BYTES',total)
-          print('FILE_COUNT',len(files))
-          for group in ['app','downloads','app/vendor','app/services','app/assets','app/federation-finder-data','downloads/knowledge-schools']:
-              base=root/group
-              subset=[p for p in base.rglob('*') if p.is_file()] if base.exists() else []
-              print('GROUP',group,sum(p.stat().st_size for p in subset),len(subset))
-          print('TOP_FILES')
-          for p in sorted(files,key=lambda p:p.stat().st_size,reverse=True)[:40]:
-              print(p.stat().st_size,p.relative_to(root))
-          PY
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add VERSION package.json package-lock.json config/release-contract.json public releases/1.0.102 scripts/smoke-gateway-v131-base.mjs scripts/verify-device-package-self-heal-v184.mjs
+          git commit -m '[CF-Pages-Skip] Release reduced Pages payload as Civweave 1.0.102'
+          git pull --rebase origin fix/cloudflare-publish-payload-v1
+          git push origin HEAD:fix/cloudflare-publish-payload-v1
