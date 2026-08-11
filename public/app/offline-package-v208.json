@@ -1,7 +1,8 @@
 {
   "version": "1.0.34",
   "revision": "canonical-background-campus-v241-systems-mesh-v251",
-  "description": "Civweave campus pack. The service worker starts from the installed entry, the five canonical system surfaces, canonical reward runtimes, and the non-privileged systems mesh contract; it discovers current same-origin dependencies and also carries Civweave Map v1 with deterministic MapLibre/PMTiles runtimes, signed WWW map exchange, chunked offline storage, automatic peer-ranked coverage healing, and node AI marketplace/live-commerce surfaces without promoting them to canonical roots.",
+  "payloadPolicy": "code-first-lazy-visuals-v300",
+  "description": "Civweave code-first offline campus. The package carries the installed entry, five canonical system surfaces, shared functional runtimes, map and mesh code, and other same-origin text/code dependencies. Large pictures, fonts, media, local AI model files, and browser inference binaries are intentionally excluded and cache on demand while the device is used.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
@@ -59,6 +60,8 @@
   "excludePrefixes": [
     "/app/models/",
     "/app/vendor/onnxruntime/",
+    "/app/vendor/transformers/",
+    "/app/vendor/transformers-v4/",
     "/app/services/living-school/visual-assets/",
     "/app/services/cerbanimo/assets/visual/",
     "/app/services/fellowfare/assets/mall/",
@@ -68,10 +71,24 @@
     ".zip",
     ".mp4",
     ".webm",
+    ".mp3",
+    ".wav",
     ".onnx",
-    ".wasm"
+    ".wasm",
+    ".png",
+    ".webp",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".svg",
+    ".avif",
+    ".ico",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".otf"
   ],
-  "maxAssets": 700,
+  "maxAssets": 1000,
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
