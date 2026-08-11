@@ -16,6 +16,6 @@ importScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v22
 importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224');
 importScripts('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225');
 importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227');
-importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v251-legacy-purge');
+importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250&purge=chat-convergence-v251-legacy-purge');
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
