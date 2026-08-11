@@ -41,4 +41,5 @@ jobs:
           test -f .cloudflare-pages/app/shared/civweave-parity-ledger.json
           test -f .cloudflare-pages/downloads/Civweave-Map-v1.zip
           test -f .cloudflare-pages/downloads/Civweave-Mobile-Install-Kit.zip
+          test -f .cloudflare-pages/downloads/civweave-pocket-campus.cwseed
           node scripts/verify-cloudflare-production-origin-v251.mjs
