@@ -1,6 +1,22 @@
 {
   "schema": "civweave.launch-topology.v1",
-  "platformFeeBps": 1500,
+  "platformFeeBps": 500,
+  "economy": {
+    "topup": {
+      "basis": "net-service-after-processing",
+      "systemBps": 7000,
+      "hostBps": 2500,
+      "cerbanimoBps": 500,
+      "systemFundsCustody": "cloudflare-core-platform-reserve"
+    },
+    "membership": {
+      "basis": "net-service-after-processing",
+      "systemBps": 5000,
+      "hostBps": 2500,
+      "cerbanimoBps": 2500,
+      "lifetimeCredits": "monthly-non-expiring-tier-grant"
+    }
+  },
   "canonicalInstallOrigin": "https://commonweave.pages.dev",
   "backbone": {
     "provider": "cloudflare",
@@ -13,7 +29,8 @@
       "trust-root",
       "stripe-connect-authority",
       "stripe-webhook-authority",
-      "money-edge-authority"
+      "money-edge-authority",
+      "compute-reserve-custodian"
     ],
     "storage": {
       "registry": "cloudflare-d1",
@@ -31,7 +48,8 @@
     "domain": "nodes.commonweave.earth",
     "wildcardDomain": "*.nodes.commonweave.earth",
     "customDomainStatus": "pending-zone-availability",
-    "state": "one-sqlite-durable-object-per-node",
+    "state": "one-sqlite-durable-object-per-node-plus-account-capacity-object",
+    "maxStarterHostsPerAccount": 3,
     "roles": [
       "public-www-host-node",
       "seed-peer",
@@ -40,7 +58,8 @@
       "relay",
       "service-catalog",
       "websocket-presence",
-      "stripe-connect-enrollment"
+      "stripe-connect-enrollment",
+      "adaptive-compute-capacity"
     ],
     "containsStripePlatformSecret": false,
     "containsCerbanimoSigningPrivateKey": false
