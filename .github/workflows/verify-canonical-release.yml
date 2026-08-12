@@ -23,6 +23,17 @@ jobs:
       - run: node scripts/verify-cloudflare-deploy-discipline.mjs
       - run: node scripts/verify-canonical-launch-release.mjs
       - run: node scripts/verify-release-contract.mjs
-      - run: node scripts/verify-release-version-sync.mjs
+      - name: Diagnose release version sync
+        shell: bash
+        run: |
+          set +e
+          output="$(node scripts/verify-release-version-sync.mjs 2>&1)"
+          status=$?
+          printf '%s\n' "$output"
+          if [ "$status" -ne 0 ]; then
+            message="$(printf '%s' "$output" | tail -n 20 | tr '\n' ' ')"
+            echo "::error title=Release version sync::${message}"
+            exit "$status"
+          fi
       - run: node scripts/check-canonical-server-syntax.mjs
       - run: npm audit --omit=dev --audit-level=high
