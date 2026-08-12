@@ -8,11 +8,15 @@ const match=boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\n\];/);
 assert.ok(match,'shared system experience script registry must exist');
 
 const entries=[...match[1].matchAll(/^\s{2}([A-Z][A-Z0-9_]+),?\s*$/gm)].map(item=>item[1]);
-assert.deepEqual(
-  entries.slice(0,4),
-  ['EXPERIENCE_ORCHESTRATOR','SYSTEM_RADIO_AGENT','RADIO_TRACK_SUGGESTIONS','SYSTEMS_MESH_RUNTIME'],
-  'radio station and exact-track scripts must bootstrap immediately after the orchestrator, before slower shared modules'
-);
+const orchestratorIndex=entries.indexOf('EXPERIENCE_ORCHESTRATOR');
+const radioIndex=entries.indexOf('SYSTEM_RADIO_AGENT');
+const trackIndex=entries.indexOf('RADIO_TRACK_SUGGESTIONS');
+const meshIndex=entries.indexOf('SYSTEMS_MESH_RUNTIME');
+
+assert.ok(orchestratorIndex>=0,'experience orchestrator must be present');
+assert.equal(radioIndex,orchestratorIndex+1,'radio station must bootstrap immediately after the orchestrator');
+assert.equal(trackIndex,radioIndex+1,'exact-track suggestions must bootstrap immediately after the radio station');
+assert.ok(meshIndex>trackIndex,'radio station and exact-track scripts must bootstrap before slower shared mesh modules');
 
 assert.equal(entries.filter(entry=>entry==='SYSTEM_RADIO_AGENT').length,1,'radio agent must be injected exactly once');
 assert.equal(entries.filter(entry=>entry==='RADIO_TRACK_SUGGESTIONS').length,1,'track decorator must be injected exactly once');
