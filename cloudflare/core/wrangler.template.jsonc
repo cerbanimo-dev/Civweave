@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "civweave-core",
-  "main": "src/index.mjs",
+  "main": "src/origin-entry.mjs",
   "compatibility_date": "2026-08-11",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
@@ -39,6 +39,7 @@
   },
   "vars": {
     "NODE_DOMAIN": "nodes.commonweave.earth",
+    "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.pages.dev",
     "CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core",
     "CIVWEAVE_PLATFORM_FEE_BPS": "500",
     "CIVWEAVE_MONEY_MAX_TOPUP_CENTS": "10000",
