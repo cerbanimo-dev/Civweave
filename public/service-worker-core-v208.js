@@ -1,7 +1,7 @@
 'use strict';
 
 const VERSION = '1.0.121';
-const BUILD = 'lightweight-shell-v208-installer-brand-v1';
+const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';
 const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
 const OFFLINE_CACHE = `civweave-offline-${VERSION}-${BUILD}`;
@@ -30,6 +30,7 @@ const REQUIRED_SHELL_ASSETS = [
 ];
 
 const OPTIONAL_SHELL_ASSETS = [
+  '/app/working-campus-return-guard-v425.js',
   '/app/open-learning-media-cache-v1.mjs',
   '/app/open-learning-media-installer-v1.mjs',
   '/downloads/knowledge-schools/open-learning-media/lookup.json',
