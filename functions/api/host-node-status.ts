@@ -45,6 +45,7 @@ async function getJson(url: URL) {
 }
 
 function finiteWhole(value: unknown): number | null {
+  if (value == null || value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? Math.floor(number) : null;
 }
