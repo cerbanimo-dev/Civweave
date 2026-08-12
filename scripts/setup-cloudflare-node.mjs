@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -8,6 +8,8 @@ import { spawnSync } from "node:child_process";
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, "..");
 const buildScript = resolve(repoRoot, "scripts/build-cloudflare-pages.mjs");
+const accountEdgeScript = resolve(repoRoot, "scripts/provision-cloudflare-account-edge-v1.mjs");
+const accountEdgeSummaryPath = resolve(repoRoot, ".cloudflare-launch/account-edge-summary.json");
 const pagesOutput = resolve(repoRoot, ".cloudflare-pages");
 const canonicalProjectName = "civweave";
 const canonicalOrigin = `https://${canonicalProjectName}.pages.dev`;
@@ -35,7 +37,7 @@ function parseArgs(argv) {
     else if (arg === "--project-name" || arg === "--project") projectName = String(argv[++i] || "").trim().toLowerCase();
     else if (arg === "--expect-account-email") expectAccountEmail = String(argv[++i] || "").trim().toLowerCase();
     else if (arg === "--help" || arg === "-h") {
-      console.log(`Civweave Cloudflare host setup\n\nCanonical root:\n  CIVWEAVE_EXPECT_CLOUDFLARE_EMAIL=you@example.com node scripts/setup-cloudflare-node.mjs --canonical\n\nCommunity host:\n  node scripts/setup-cloudflare-node.mjs --host-id garden\n\nCommunity host with a custom Pages project name:\n  node scripts/setup-cloudflare-node.mjs --host-id garden --project-name garden\n\nDefaults:\n  canonical: ${canonicalOrigin}\n  community: https://civweave-<host-id>.pages.dev`);
+      console.log(`Civweave Cloudflare host setup\n\nCanonical root:\n  CIVWEAVE_EXPECT_CLOUDFLARE_EMAIL=you@example.com node scripts/setup-cloudflare-node.mjs --canonical\n\nCommunity host:\n  node scripts/setup-cloudflare-node.mjs --host-id garden\n\nCommunity host with a custom Pages project name:\n  node scripts/setup-cloudflare-node.mjs --host-id garden --project-name garden\n\nProvisioning contract:\n  Pages + civweave-host-edge Worker + 3 starter Durable Object nodes\n\nDefaults:\n  canonical: ${canonicalOrigin}\n  community: https://civweave-<host-id>.pages.dev`);
       process.exit(0);
     } else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -120,6 +122,11 @@ function projectAlreadyExists(output) {
   return text.includes("already exists") || text.includes("8000002");
 }
 
+function pagesDeploymentMatchesProject(output, projectName) {
+  const escaped = String(projectName || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`https://[^\\s]*${escaped}\\.pages\\.dev`, "i").test(String(output || ""));
+}
+
 const options = parseArgs(process.argv.slice(2));
 const wrangler = detectWrangler();
 
@@ -129,14 +136,14 @@ console.log(`Host ID: ${options.hostId}`);
 console.log(`Pages project: ${options.projectName}`);
 if (options.expectAccountEmail) console.log(`Required Cloudflare account: ${options.expectAccountEmail}`);
 
-console.log("\n1/4 Checking Cloudflare authentication...");
+console.log("\n1/5 Checking Cloudflare authentication...");
 const whoami = runWrangler(wrangler, ["whoami"], { capture: true });
 process.stdout.write(whoami.output);
 if (options.expectAccountEmail && !whoami.output.toLowerCase().includes(options.expectAccountEmail)) {
   throw new Error(`Wrangler is not authenticated as the expected Cloudflare account email ${options.expectAccountEmail}. Run npx wrangler logout, then npx wrangler login with the intended account before retrying.`);
 }
 
-console.log("\n2/4 Ensuring the Pages project exists...");
+console.log("\n2/5 Ensuring the Pages project exists...");
 const projects = runWrangler(wrangler, ["pages", "project", "list", "--json"], { capture: true });
 if (!includesNamedProject(projects.output, options.projectName)) {
   const created = runWrangler(
@@ -156,7 +163,23 @@ if (!includesNamedProject(projects.output, options.projectName)) {
   console.log(`Pages project ${options.projectName} already exists.`);
 }
 
-console.log("\n3/4 Building the host package...");
+console.log("\n3/5 Provisioning the account Worker and three starter nodes...");
+run(process.execPath, [
+  accountEdgeScript,
+  "--host-id", options.hostId,
+  "--allow-partial",
+  "--output", accountEdgeSummaryPath,
+]);
+let accountEdge = {
+  schema: "civweave.cloudflare-account-edge.v1",
+  status: "pending",
+  requiredStarterNodes: 3,
+};
+try {
+  accountEdge = JSON.parse(readFileSync(accountEdgeSummaryPath, "utf8"));
+} catch {}
+
+console.log("\n4/5 Building the host package...");
 run(process.execPath, [buildScript]);
 const productionUrl = `https://${options.projectName}.pages.dev`;
 writeFileSync(resolve(pagesOutput, "app", "host-deployment-v1.json"), `${JSON.stringify({
@@ -166,28 +189,40 @@ writeFileSync(resolve(pagesOutput, "app", "host-deployment-v1.json"), `${JSON.st
   pagesProject: options.projectName,
   publicOrigin: productionUrl,
   canonicalOrigin,
+  accountEdge,
   localAnchorRecommended: true,
   localAnchorRequired: false,
   generatedAt: new Date().toISOString(),
 }, null, 2)}\n`, "utf8");
 
-console.log("\n4/4 Deploying Cloudflare Pages...");
-runWrangler(wrangler, ["pages", "deploy", pagesOutput, "--project-name", options.projectName, "--branch", "main", "--commit-dirty=true"]);
+console.log("\n5/5 Deploying Cloudflare Pages...");
+const deployed = runWrangler(wrangler, ["pages", "deploy", pagesOutput, "--project-name", options.projectName, "--branch", "main", "--commit-dirty=true"], { capture: true });
+process.stdout.write(deployed.output);
+if (!pagesDeploymentMatchesProject(deployed.output, options.projectName)) {
+  throw new Error(`Cloudflare reported a deployment outside ${options.projectName}.pages.dev. Refusing to call this setup complete because Wrangler appears to be authenticated to a different account/project.`);
+}
 
 console.log("\nCivweave Cloudflare host setup complete.");
 console.log(`Production URL: ${productionUrl}`);
 console.log(`Health: ${productionUrl}/api/health`);
 console.log(`Steward setup: ${productionUrl}/host-setup.html`);
 if (options.canonical) console.log(`Canonical Civweave root: ${canonicalOrigin}`);
+if (accountEdge.status === "ready") {
+  console.log(`Account Worker: ${accountEdge.workerOrigin}`);
+  for (const node of accountEdge.starterNodes || []) console.log(`Starter node: ${node.publicOrigin}`);
+} else {
+  console.warn("Account Worker/starter nodes are still pending. Pages is live; rerun this setup after granting the Cloudflare token Workers Scripts/Durable Objects access.");
+}
+
 console.log("\nAutomatic updates:");
 if (options.canonical) {
-  console.log("  The canonical GitHub workflow deploys every push to main when CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are configured as repository secrets.");
+  console.log("  The canonical GitHub workflow deploys Pages and the account Worker on every push to main when CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID point to this same Cloudflare account.");
 } else {
   console.log("  Initial hosting is complete; GitHub authorization is intentionally not a launch-time requirement.");
   console.log("  To receive future main-branch releases automatically in the steward's repository, configure:");
   console.log(`    repository variable CIVWEAVE_PAGES_PROJECT=${options.projectName}`);
   console.log(`    repository variable CIVWEAVE_HOST_ID=${options.hostId}`);
-  console.log("    repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID");
+  console.log("    repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID for this same Cloudflare account");
   console.log("  Then enable .github/workflows/deploy-civweave-host-pages.yml. The first direct deployment remains live until automation is ready.");
 }
 console.log("Open the steward setup URL once. Civweave will then keep reminding this steward browser to add and pair a local Anchor/companion until it is recorded as complete.");
