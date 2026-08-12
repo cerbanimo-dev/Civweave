@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-
+// shell-v304 keeps OS titlebar and bottom safe areas outside Civweave navigation.
 const VERSION='1.0.117-five-system-navigation-v227';
 const NAV_ID='cw-themed-system-nav';
 const STYLE_ID='cw-themed-system-nav-style';
