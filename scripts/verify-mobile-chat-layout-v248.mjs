@@ -4,9 +4,10 @@ import {access,readFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const exists=path=>access(new URL(path,root)).then(()=>true,()=>false);
-const [topbar,workspace,boundary,workerRepair,workerEntry,manifestText,installedEntry,realmHtml,familyLoader,release,pkgText]=await Promise.all([
+const [topbar,workspace,hardening,boundary,workerRepair,workerEntry,manifestText,installedEntry,realmHtml,familyLoader,release,pkgText]=await Promise.all([
   read('public/app/working-campus-topbar-v243.js'),
   read('public/app/guide-workspace-v242.js'),
+  read('public/app/mobile-ai-hardening-v302.js'),
   read('public/app/install-boundary-v146.js'),
   read('public/service-worker-chat-repair-v245.js'),
   read('public/service-worker-v203.js'),
@@ -17,7 +18,7 @@ const [topbar,workspace,boundary,workerRepair,workerEntry,manifestText,installed
   read('VERSION'),
   read('package.json')
 ]);
-for(const source of [topbar,workspace,boundary,workerRepair,workerEntry,installedEntry,familyLoader])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
+for(const source of [topbar,workspace,hardening,boundary,workerRepair,workerEntry,installedEntry,familyLoader])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
 const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
@@ -38,8 +39,16 @@ check('v242 owns visual viewport adaptation itself',workspace.includes('globalTh
 check('v242 mobile CSS uses dynamic viewport height and safe areas',workspace.includes('100dvh')&&workspace.includes('env(safe-area-inset-bottom)')&&workspace.includes('@media(max-width:620px)'));
 check('v242 advertises canonical ownership',workspace.includes('canonicalOwner:true')&&workspace.includes('v250-canonical-owner'));
 
+const hardeningIndex=boundary.indexOf('MOBILE_AI_HARDENING,'),workspaceIndex=boundary.indexOf('GUIDE_WORKSPACE,');
+check('mobile hardening loads before canonical chat workspace',hardeningIndex>=0&&workspaceIndex>hardeningIndex&&boundary.includes("const MOBILE_AI_HARDENING='/app/mobile-ai-hardening-v302.js'"));
+check('phone chat replaces floating desktop geometry with the visual viewport',hardening.includes('#cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized)')&&hardening.includes('height:var(--cw-mobile-visual-height,100dvh)!important')&&hardening.includes('width:var(--cw-mobile-visual-width,100vw)!important')&&hardening.includes('bottom:auto!important'));
+check('phone chat is opaque and cannot reveal stacked page UI underneath',hardening.includes('background:var(--guide-panel,#111827)!important')&&hardening.includes('z-index:2147483647!important')&&hardening.includes('overflow:hidden!important'));
+check('mobile viewport tracks keyboard pan as well as resize',hardening.includes("visualViewport?.addEventListener('resize',syncViewport")&&hardening.includes("visualViewport?.addEventListener('scroll',syncViewport")&&hardening.includes('--cw-mobile-visual-top'));
+check('interrupted local test recovery clears selection but preserves downloads',hardening.includes("active:false,id:null")&&hardening.includes('downloadPreserved:true')&&!hardening.includes('caches.delete'));
+
 const experienceStart=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),experienceEnd=boundary.indexOf('];',experienceStart),experience=boundary.slice(experienceStart,experienceEnd);
 check('canonical boot contains v242 workspace',experience.includes('GUIDE_WORKSPACE'));
+check('canonical boot contains mobile AI hardening',experience.includes('MOBILE_AI_HARDENING'));
 check('canonical boundary contains no retired persistent guide runtime constants',!boundary.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!boundary.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'));
 check('Cerbanimo mounts no retired cabinet overlay',!realmHtml.includes('cabinet-home-v142')&&!realmHtml.includes('cabinet-surfaces-v143')&&!realmHtml.includes('sharing-library-v143'));
 check('family AI loader is headless and delegates to v242',!familyLoader.includes('ch142-control-band')&&!familyLoader.includes('new MutationObserver')&&familyLoader.includes('CivweaveGuideWorkspaceV242?.openWindow'));
@@ -50,7 +59,7 @@ check('manifest launches installed app through updater entry',['/app/installed-e
 check('installed entry performs no-store release discovery and worker update',installedEntry.includes("cache:'no-store'")&&installedEntry.includes('await registration.update()')&&installedEntry.includes("updateViaCache:'none'"));
 check('installed entry activates a waiting worker before routing',installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})")&&installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='));
 for(const path of ['/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js','/app/chat-single-owner-v245.js'])check(`phone cache purge includes ${path}`,workerRepair.includes(`'${path}'`));
-check('service worker activates v343 chat CSS repair',workerEntry.includes('chat-css-contract-v343')&&workerRepair.includes("const REVISION='chat-css-contract-v343'"));
+check('service worker retains v343 chat repair while purging mobile hardening assets',workerEntry.includes('chat-css-contract-v343')&&workerRepair.includes("const REVISION='chat-css-contract-v343'")&&workerRepair.includes("const HARDENING_REVISION='mobile-ai-hardening-v302'")&&workerRepair.includes("'/app/mobile-ai-hardening-v302.js'")&&workerRepair.includes("'/app/local-ai/test-pulse-v269.js'"));
 check('worker installs with skipWaiting',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
 
-console.log(JSON.stringify({ok:true,version,revision:'mobile-v248-on-v242-canonical-owner',checks:checks.length,mobile:{topbarRows:'brand / modes / map+settings / review+theme',realmCards:'2-column then 1-column',dynamicViewport:true},chat:{canonicalOwner:'v242',deletedLegacyOwners:3,embeddedComposerDelegates:true,modelFallback:true},installedBoot:{updaterFirst:true,workerActivation:true,legacyCachePurge:true}},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'mobile-v302-fullscreen-ai-hardening',checks:checks.length,mobile:{topbarRows:'brand / modes / map+settings / review+theme',realmCards:'2-column then 1-column',dynamicViewport:true,chat:'full-visual-viewport'},chat:{canonicalOwner:'v242',deletedLegacyOwners:3,embeddedComposerDelegates:true,modelFallback:true},localAI:{interruptedTestRecovery:true,downloadsPreserved:true,mobileSafeHealth:true},installedBoot:{updaterFirst:true,workerActivation:true,legacyCachePurge:true}},null,2));

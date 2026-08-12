@@ -14,6 +14,7 @@ const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
 const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
 const PLATFORM_STABILITY='/app/platform-stability-v159.js';
+const MOBILE_AI_HARDENING='/app/mobile-ai-hardening-v302.js';
 const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
 const REALM_SESSION_INTEGRITY='/app/realm-session-integrity-v237.js';
 const GUIDE_WORKSPACE='/app/guide-workspace-v242.js';
@@ -43,8 +44,9 @@ const FALLBACK_PATHS=new Map([
   ['/app/fellowfare-cabinet-v144.html','fellowfare'],
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
-const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR];
+const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR,MOBILE_AI_HARDENING];
 const SYSTEM_EXPERIENCE_SCRIPTS=[
+  MOBILE_AI_HARDENING,
   EXPERIENCE_ORCHESTRATOR,
   // Keep station + exact-track suggestions directly behind the orchestrator so
   // slower mesh/guide/workspace modules cannot starve the six-second radio UI.
@@ -73,6 +75,7 @@ const COMPATIBILITY_SCRIPTS=[
   '/app/model-settings-controller-v173.js',
   AI_SETTINGS_BIND_GUARD,
   AI_SETTINGS_REPAIR,
+  MOBILE_AI_HARDENING,
   '/app/settings-delegation-v175.js',
   '/app/gemini-task-tier-router-v213.js',
   GUIDE_IDENTITY_SCRIPT,
@@ -145,6 +148,7 @@ function installAssetCustomizationIfConfigured(){
   return addScript(ASSET_CUSTOMIZATION);
 }
 function installEarlyGuards(){
+  addScript(MOBILE_AI_HARDENING);
   addScript(PLATFORM_STABILITY);
   addScript(AI_SETTINGS_BIND_GUARD);
   return true;
@@ -253,6 +257,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',
   guideWorkspaceRevision:'v250-v242-canonical-owner',
   workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract',
+  mobileAiHardeningRevision:'v302-mobile-fullscreen-chat-interrupted-test-recovery',
   mapLaunchRevision:'v243-register-route-handler-or-open-event',
   fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',
   assetCustomizationRevision:'v239-local-path-overrides-on-demand',
