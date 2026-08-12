@@ -1,0 +1,10 @@
+{
+  "schema": "civweave.host-deployment.v1",
+  "role": "canonical",
+  "hostId": "civweave",
+  "pagesProject": "civweave",
+  "publicOrigin": "https://civweave.pages.dev",
+  "canonicalOrigin": "https://civweave.pages.dev",
+  "localAnchorRecommended": true,
+  "localAnchorRequired": false
+}

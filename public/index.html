@@ -11,15 +11,20 @@
   <script>
   (() => {
     'use strict';
-    const CANONICAL_ORIGIN='https://commonweave.pages.dev';
+    const CANONICAL_ORIGIN='https://civweave.pages.dev';
+    const LEGACY_CANONICAL_ORIGIN='https://commonweave.pages.dev';
     const HOST_NODE_ORIGIN='https://civweave-host-node.onrender.com';
     const localDevelopment=['localhost','127.0.0.1','::1'].includes(location.hostname);
-    const cloudflarePreview=location.hostname.endsWith('.commonweave.pages.dev')&&location.origin!==CANONICAL_ORIGIN;
-    if(!localDevelopment&&location.origin!==CANONICAL_ORIGIN&&(location.origin===HOST_NODE_ORIGIN||cloudflarePreview)){
-      const target=new URL('/app/index.html',CANONICAL_ORIGIN);
+    const labels=location.hostname.split('.');
+    const cloudflarePreview=location.hostname.endsWith('.pages.dev')&&labels.length>3;
+    const previewParent=cloudflarePreview?`https://${labels.slice(1).join('.')}`:null;
+    const legacyCanonical=location.origin===LEGACY_CANONICAL_ORIGIN;
+    if(!localDevelopment&&(location.origin===HOST_NODE_ORIGIN||legacyCanonical||cloudflarePreview)){
+      const destination=previewParent===LEGACY_CANONICAL_ORIGIN||!previewParent?CANONICAL_ORIGIN:previewParent;
+      const target=new URL('/app/index.html',destination);
       for(const [key,value] of new URL(location.href).searchParams){if(key!=='install_origin')target.searchParams.append(key,value)}
       if(location.origin===HOST_NODE_ORIGIN&&!target.searchParams.has('host'))target.searchParams.set('host',HOST_NODE_ORIGIN);
-      target.searchParams.set('install_origin','canonical');
+      target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical');
       target.hash=location.hash;
       location.replace(target.href);
       return;

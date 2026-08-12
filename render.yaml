@@ -15,7 +15,7 @@ services:
       - key: HUB_NAME
         value: Civweave Host Node
       - key: CIVWEAVE_INSTALL_ORIGIN
-        value: https://commonweave.pages.dev
+        value: https://civweave.pages.dev
       - key: DATA_DIR
         value: ./data
       - key: MAX_ENVELOPES

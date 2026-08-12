@@ -1,11 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v246-single-origin-v281';
+const VERSION='pwa-install-prompt-v246-host-origin-v2';
 const ENTRY='/app/?system=civweave&installed=1';
-const CANONICAL_ORIGIN='https://commonweave.pages.dev';
+const CANONICAL_ORIGIN='https://civweave.pages.dev';
+const LEGACY_CANONICAL_ORIGIN='https://commonweave.pages.dev';
 const HOST_NODE_ORIGIN='https://civweave-host-node.onrender.com';
 const CANONICAL_MANIFEST=`${CANONICAL_ORIGIN}/app/manifest.webmanifest`;
+const LEGACY_CANONICAL_MANIFEST=`${LEGACY_CANONICAL_ORIGIN}/app/manifest.webmanifest`;
 const HOST_NODE_MANIFEST=`${HOST_NODE_ORIGIN}/app/manifest.webmanifest`;
 let promptEvent=null;
 let installed=false;
@@ -17,21 +19,28 @@ function standalone(){
   return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
 }
 function localDevelopment(){return ['localhost','127.0.0.1','::1'].includes(location.hostname)}
-function cloudflarePreview(){return location.hostname.endsWith('.commonweave.pages.dev')&&location.origin!==CANONICAL_ORIGIN}
-function canonicalInstallOrigin(){return localDevelopment()||location.origin===CANONICAL_ORIGIN}
-function canonicalInstallerUrl(){
-  const target=new URL('/app/index.html',CANONICAL_ORIGIN);
+function cloudflarePreview(){return location.hostname.endsWith('.pages.dev')&&location.hostname.split('.').length>3}
+function productionPagesOrigin(){return location.hostname.endsWith('.pages.dev')&&location.hostname.split('.').length===3}
+function previewParentOrigin(){
+  if(!cloudflarePreview())return null;
+  const parent=`https://${location.hostname.split('.').slice(1).join('.')}`;
+  return parent===LEGACY_CANONICAL_ORIGIN?CANONICAL_ORIGIN:parent;
+}
+function installOrigin(){return localDevelopment()||productionPagesOrigin()||(!location.hostname.endsWith('.pages.dev')&&location.origin!==HOST_NODE_ORIGIN&&location.origin!==LEGACY_CANONICAL_ORIGIN)}
+function stableInstallerUrl(){
+  const destination=previewParentOrigin()||CANONICAL_ORIGIN;
+  const target=new URL('/app/index.html',destination);
   const current=new URL(location.href);
   for(const [key,value] of current.searchParams){if(key!=='install_origin')target.searchParams.append(key,value)}
   if(location.origin===HOST_NODE_ORIGIN&&!target.searchParams.has('host'))target.searchParams.set('host',HOST_NODE_ORIGIN);
-  target.searchParams.set('install_origin','canonical');
+  target.searchParams.set('install_origin',cloudflarePreview()?'host-production':'canonical');
   target.hash=current.hash;
   return target;
 }
-function rerouteAlternateInstall(){
-  if(standalone()||canonicalInstallOrigin())return false;
-  if(location.origin!==HOST_NODE_ORIGIN&&!cloudflarePreview())return false;
-  location.replace(canonicalInstallerUrl().href);
+function rerouteUnsafeInstall(){
+  if(standalone()||localDevelopment())return false;
+  if(location.origin!==HOST_NODE_ORIGIN&&location.origin!==LEGACY_CANONICAL_ORIGIN&&!cloudflarePreview())return false;
+  location.replace(stableInstallerUrl().href);
   return true;
 }
 function help(message){
@@ -40,7 +49,7 @@ function help(message){
 }
 function installButton(){return document.querySelector('#install-app')}
 function publish(type,detail={}){
-  try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,standalone:standalone(),installed,canonicalOrigin:CANONICAL_ORIGIN,...detail}}))}catch{}
+  try{dispatchEvent(new CustomEvent(type,{detail:{version:VERSION,standalone:standalone(),installed,canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,...detail}}))}catch{}
 }
 async function discoverRelatedInstalls(){
   if(typeof navigator.getInstalledRelatedApps!=='function')return[];
@@ -51,33 +60,35 @@ async function discoverRelatedInstalls(){
   }
   const urls=new Set(relatedApps.map(app=>String(app?.url||'')));
   const canonicalInstalled=urls.has(CANONICAL_MANIFEST);
+  const legacyCanonicalInstalled=urls.has(LEGACY_CANONICAL_MANIFEST);
   const hostNodeInstalled=urls.has(HOST_NODE_MANIFEST);
   document.documentElement.dataset.civweaveCanonicalInstall=canonicalInstalled?'installed':'unknown';
+  document.documentElement.dataset.civweaveLegacyCanonicalInstall=legacyCanonicalInstalled?'installed':'absent';
   document.documentElement.dataset.civweaveLegacyRenderInstall=hostNodeInstalled?'installed':'absent';
-  publish('civweave:related-install-state',{canonicalInstalled,hostNodeInstalled,relatedApps:[...relatedApps]});
+  publish('civweave:related-install-state',{canonicalInstalled,legacyCanonicalInstalled,hostNodeInstalled,relatedApps:[...relatedApps]});
   return [...relatedApps];
 }
 function refreshButton(){
   const button=installButton();
   if(!button||button.disabled||/reset app shell/i.test(button.textContent||''))return;
-  if(!canonicalInstallOrigin()&&!standalone()){
-    button.textContent='Open canonical installer';
-    help('Civweave installs into one canonical app home. This host node will hand installation to that home instead of creating a second copy.');
+  if(!installOrigin()&&!standalone()){
+    button.textContent='Open stable Civweave installer';
+    help('This address is not a stable Civweave install origin. Opening its production host instead.');
     return;
   }
   if(standalone()){
     if(button.textContent!=='Open Civweave')button.textContent='Open Civweave';
-    help('Civweave is installed as an app. The campus can keep downloading in the background.');
+    help('Civweave is installed as an app from this host origin.');
     return;
   }
   if(promptEvent){
     if(button.textContent!=='Install Civweave')button.textContent='Install Civweave';
-    help('Civweave is ready for a real browser-native app install. Tap Install Civweave.');
+    help('Civweave is ready for a browser-native app install from this host. Tap Install Civweave.');
     return;
   }
   if(!prompting){
     if(button.textContent!=='Install Civweave')button.textContent='Install Civweave';
-    help('Waiting for Chrome to offer the real Civweave app-install prompt. Do not use Create shortcut: that only links back to the website.');
+    help('Waiting for the browser to offer the real Civweave app-install prompt. Do not use Create shortcut: that only links back to the website.');
   }
 }
 function observeButton(){
@@ -90,8 +101,8 @@ function observeButton(){
 }
 function capture(event){
   event.preventDefault();
-  if(!canonicalInstallOrigin()){
-    rerouteAlternateInstall();
+  if(!installOrigin()){
+    rerouteUnsafeInstall();
     return;
   }
   promptEvent=event;
@@ -110,10 +121,10 @@ async function ownInstallClick(event){
   const button=event.target?.closest?.('#install-app');
   if(!button||button.disabled||prompting)return;
   if(/reset app shell/i.test(button.textContent||''))return;
-  if(!canonicalInstallOrigin()&&!standalone()){
+  if(!installOrigin()&&!standalone()){
     event.preventDefault();
     event.stopImmediatePropagation();
-    location.assign(canonicalInstallerUrl().href);
+    location.assign(stableInstallerUrl().href);
     return;
   }
   if(standalone()){
@@ -126,7 +137,7 @@ async function ownInstallClick(event){
   event.preventDefault();
   event.stopImmediatePropagation();
   if(!prompt){
-    help('Chrome has not offered a true Civweave app-install prompt yet. Do not use Create shortcut: that only links back to the website. Tap Check release or reload this installer after the shell is ready.');
+    help('The browser has not offered a true Civweave app-install prompt yet. Do not use Create shortcut. Reload this installer after the shell is ready.');
     return;
   }
   prompting=true;
@@ -138,10 +149,10 @@ async function ownInstallClick(event){
     const choice=await prompt.userChoice.catch(()=>null);
     if(choice?.outcome==='accepted'){
       installed=true;
-      help('Civweave app installation accepted. You can open it immediately while the required campus continues downloading.');
+      help('Civweave app installation accepted. This installed copy stays attached to the host you chose.');
       button.textContent='Installing Civweave…';
     }else{
-      help('Civweave app installation was dismissed. Reload this installer when you want Chrome to offer the native install again.');
+      help('Civweave app installation was dismissed. Reload this installer when you want the native install prompt again.');
       button.disabled=false;
       button.textContent='Reload to install';
     }
@@ -154,7 +165,7 @@ async function ownInstallClick(event){
   }
 }
 
-if(rerouteAlternateInstall())return;
+if(rerouteUnsafeInstall())return;
 
 addEventListener('beforeinstallprompt',capture);
 addEventListener('appinstalled',onInstalled);
@@ -162,12 +173,20 @@ document.addEventListener('click',ownInstallClick,true);
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',()=>{observeButton();discoverRelatedInstalls()},{once:true});else{observeButton();discoverRelatedInstalls()}
 addEventListener('pagehide',()=>buttonObserver?.disconnect(),{once:true});
 
+const reminder=document.createElement('script');
+reminder.src='/app/host-steward-reminder-v1.js?v=1';
+reminder.async=true;
+document.head.append(reminder);
+
 const api=Object.freeze({
   version:VERSION,
   canonicalOrigin:CANONICAL_ORIGIN,
+  legacyCanonicalOrigin:LEGACY_CANONICAL_ORIGIN,
   hostNodeOrigin:HOST_NODE_ORIGIN,
-  canonicalInstallOrigin,
-  canonicalInstallerUrl:()=>canonicalInstallerUrl().href,
+  installOrigin,
+  canonicalInstallOrigin:installOrigin,
+  canonicalInstallerUrl:()=>stableInstallerUrl().href,
+  stableInstallerUrl:()=>stableInstallerUrl().href,
   discoverRelatedInstalls,
   relatedInstalls:()=>[...relatedApps],
   available:()=>Boolean(promptEvent),
@@ -176,7 +195,7 @@ const api=Object.freeze({
   restore(event){if(event)promptEvent=event;return Boolean(promptEvent)},
   standalone,
   refresh:refreshButton,
-  state:()=>({available:Boolean(promptEvent),installed,prompting,standalone:standalone(),canonicalOrigin:CANONICAL_ORIGIN,relatedApps:[...relatedApps]})
+  state:()=>({available:Boolean(promptEvent),installed,prompting,standalone:standalone(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,relatedApps:[...relatedApps]})
 });
 
 globalThis.CivweavePWAInstallV246=api;

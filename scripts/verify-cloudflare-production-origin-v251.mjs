@@ -1,17 +1,29 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
-const [wranglerText,setup,docs]=await Promise.all([
+const [wranglerText,setup,docs,topology,manifest,reminder]=await Promise.all([
   readFile(new URL('../wrangler.jsonc',import.meta.url),'utf8'),
   readFile(new URL('./setup-cloudflare-node.mjs',import.meta.url),'utf8'),
-  readFile(new URL('../docs/operations/cloudflare-setup.md',import.meta.url),'utf8')
+  readFile(new URL('../docs/operations/cloudflare-setup.md',import.meta.url),'utf8'),
+  readFile(new URL('../config/launch-topology-v1.json',import.meta.url),'utf8'),
+  readFile(new URL('../public/app/manifest.webmanifest',import.meta.url),'utf8'),
+  readFile(new URL('../public/app/host-steward-reminder-v1.js',import.meta.url),'utf8')
 ]);
 const wrangler=JSON.parse(wranglerText);
-assert.equal(wrangler.name,'commonweave','Wrangler must target the existing commonweave Pages project.');
+const launch=JSON.parse(topology);
+const webmanifest=JSON.parse(manifest);
+assert.equal(wrangler.name,'civweave','Wrangler must reserve the civweave Pages project for the canonical root.');
 assert.equal(wrangler.pages_build_output_dir,'./.cloudflare-pages','Wrangler Pages output directory drifted.');
-assert.match(setup,/process\.argv\[2\]\s*\|\|\s*\n\s*"commonweave";/,'Cloudflare setup helper does not default to the stable commonweave project.');
-assert.match(docs,/Pages project: commonweave/,'Cloudflare guide does not name the stable project.');
-assert.match(docs,/Stable production URL: https:\/\/commonweave\.pages\.dev/,'Cloudflare guide does not name the stable production origin.');
-assert.match(docs,/Do not install Civweave as a PWA from a hashed Pages preview/,'Cloudflare guide does not warn against preview-origin PWA installs.');
-assert.doesNotMatch(docs,/Production URL: https:\/\/civweave\.pages\.dev/,'Cloudflare guide still advertises the nonexistent civweave.pages.dev origin as production.');
-console.log(JSON.stringify({ok:true,revision:'cloudflare-production-origin-v251',project:'commonweave',production:'https://commonweave.pages.dev',previewInstallSupported:false},null,2));
+assert.equal(launch.canonicalInstallOrigin,'https://civweave.pages.dev','Launch topology must use civweave.pages.dev as the canonical root.');
+assert.equal(launch.backbone.staticProject,'civweave','Launch topology must reserve the civweave Pages project.');
+assert.match(setup,/canonicalProjectName = "civweave"/,'Cloudflare setup helper does not reserve the civweave project.');
+assert.match(setup,/CIVWEAVE_EXPECT_CLOUDFLARE_EMAIL/,'Canonical setup is missing the private account guard.');
+assert.match(setup,/--host-id/,'Cloudflare setup helper does not expose community host IDs.');
+assert.match(setup,/host-deployment-v1\.json/,'Cloudflare setup helper does not stamp host deployment metadata.');
+assert.match(docs,/Canonical production URL: https:\/\/civweave\.pages\.dev/,'Cloudflare guide does not name the canonical production origin.');
+assert.match(docs,/node scripts\/setup-cloudflare-node\.mjs --host-id garden/,'Cloudflare guide does not document clone-and-Wrangler community host creation.');
+assert.match(docs,/Do not install from preview\/branch aliases/,'Cloudflare guide does not warn against preview-origin PWA installs.');
+assert.match(reminder,/civweave\.host-anchor\.paired\.v1/,'Host steward reminder does not persist Anchor completion.');
+assert.match(reminder,/Remind me tomorrow/,'Host steward reminder is not persistent-but-snoozable.');
+assert.equal(webmanifest.related_applications[0]?.url,'https://civweave.pages.dev/app/manifest.webmanifest','Manifest must prefer the new canonical root.');
+console.log(JSON.stringify({ok:true,revision:'cloudflare-production-origin-v252-hosts',project:'civweave',production:'https://civweave.pages.dev',communityPattern:'https://<project>.pages.dev',previewInstallSupported:false,localAnchorReminder:true},null,2));
