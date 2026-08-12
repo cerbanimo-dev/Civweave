@@ -331,3 +331,28 @@ body.cw-anchor code{color:#eaf8ff}
   body.cw-frontdoor::before,.campus-progress-fill{animation:none!important}
   *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
 }
+
+/* Front-door brand recovery v302.
+   The v1 PNGs remain compatibility paths, but they are no longer trusted as the display source.
+   Render the canonical full logos from stable assets so palette/alpha corruption cannot crop them. */
+.cw-platform-logo,.cw-steward-logo{display:none!important}
+.cw-platform-brand::before{
+  content:"";
+  flex:0 0 clamp(132px,18vw,152px);
+  width:clamp(132px,18vw,152px);
+  height:136px;
+  background:url('/app/logos/civweave-pwa-512-v247.png') left center/contain no-repeat;
+  filter:drop-shadow(0 0 18px rgba(111,221,255,.15)) drop-shadow(0 0 28px rgba(255,105,200,.10));
+}
+.cw-steward-seal::before{
+  content:"";
+  width:52px;
+  height:70px;
+  border-radius:8px;
+  background:#fff url('/app/logos/cerbanimo.webp') center/contain no-repeat;
+  box-shadow:0 0 11px rgba(255,78,223,.28),0 0 15px rgba(45,206,255,.18);
+}
+@media(max-width:760px){
+  .cw-platform-brand::before{flex-basis:132px;width:132px;height:118px}
+  .cw-steward-seal::before{width:44px;height:54px;border-radius:6px}
+}
