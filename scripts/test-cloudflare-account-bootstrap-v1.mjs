@@ -90,8 +90,9 @@ assert.ok(affinitySource.includes('.pages.dev'));
 for (const workflow of [canonicalWorkflow, communityWorkflow]) {
   assert.ok(workflow.includes('verify-cloudflare-pages-account-target-v1.mjs'));
   assert.ok(workflow.includes('provision-cloudflare-account-edge-v1.mjs'));
-  assert.ok(workflow.includes('--strict'));
-  assert.ok(workflow.includes('starterNodeIds?.length !== 3'));
+  assert.ok(workflow.includes('--allow-partial'));
+  assert.ok(workflow.includes('Cloudflare starter nodes pending'));
+  assert.ok(workflow.includes('accountEdge,'));
   assert.ok(workflow.includes('Refusing a false-green deploy'));
 }
 assert.ok(canonicalWorkflow.includes('--host-id civweave'));
@@ -119,5 +120,6 @@ console.log(JSON.stringify({
   durableObjects: ['NODES:CivweaveAccountNode', 'CAPACITY:CivweaveCapacityAccount'],
   accountMoneyAuthority: false,
   partialSetupBlocksPages: false,
+  partialSetupWarns: true,
   githubMainAccountAffinityRequired: true,
 }, null, 2));
