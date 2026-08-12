@@ -15,6 +15,12 @@ const json = (value, status = 200) => Response.json(value, {
   headers: { 'cache-control': 'no-store' },
 });
 
+export function scopeAccountNodeHtml(html, publicOrigin) {
+  const origin = trimOrigin(publicOrigin);
+  if (!origin) return String(html || '');
+  return String(html || '').replaceAll('href="/api/', `href="${origin}/api/`);
+}
+
 export class CivweaveAccountNode extends CivweaveCloudNode {
   async accountOrigin() {
     return trimOrigin(await this.state.storage.get(ACCOUNT_ORIGIN_KEY));
@@ -50,6 +56,22 @@ export class CivweaveAccountNode extends CivweaveCloudNode {
     if (nodeId && accountOrigin) await this.state.storage.put(ACCOUNT_ORIGIN_KEY, accountOrigin);
 
     const response = await super.fetch(request);
+    if (
+      response.ok &&
+      nodeId &&
+      request.method === 'GET' &&
+      url.pathname === '/' &&
+      response.headers.get('content-type')?.includes('text/html')
+    ) {
+      const manifest = await this.manifest(nodeId);
+      const headers = new Headers(response.headers);
+      headers.delete('content-length');
+      return new Response(scopeAccountNodeHtml(await response.text(), manifest.publicOrigin), {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
+    }
     if (response.ok && nodeId && request.method === 'POST' && url.pathname === '/internal/configure') {
       return json({ ok: true, manifest: await this.manifest(nodeId) }, response.status);
     }

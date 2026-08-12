@@ -7,7 +7,10 @@ import {
   parseWorkersDevUrl,
   starterNodeIds,
 } from './provision-cloudflare-account-edge-v1.mjs';
-import { accountNodePath } from '../cloudflare/account-edge/src/index.mjs';
+import {
+  accountNodePath,
+  scopeAccountNodeHtml,
+} from '../cloudflare/account-edge/src/index.mjs';
 
 const root = new URL('../', import.meta.url);
 const read = path => readFile(new URL(path, root), 'utf8');
@@ -51,6 +54,16 @@ assert.deepEqual(accountNodePath('/nodes/garden-a/api/node/health'), {
 });
 assert.equal(accountNodePath('/api/fabric/health'), null);
 
+const sampleNodeHtml = '<a href="/api/ai/node/manifest">Manifest</a><a href="/api/ai/node/capacity">Capacity</a><a href="/api/node/health">Health</a>';
+for (const nodeId of ['civweave-a', 'civweave-b', 'civweave-c']) {
+  const origin = `https://civweave-host-edge.cerbanimo.workers.dev/nodes/${nodeId}`;
+  const scoped = scopeAccountNodeHtml(sampleNodeHtml, origin);
+  assert.ok(scoped.includes(`href="${origin}/api/ai/node/manifest"`));
+  assert.ok(scoped.includes(`href="${origin}/api/ai/node/capacity"`));
+  assert.ok(scoped.includes(`href="${origin}/api/node/health"`));
+  assert.ok(!scoped.includes('href="/api/'));
+}
+
 assert.equal(accountWrangler.name, 'civweave-host-edge');
 assert.equal(accountWrangler.workers_dev, true);
 assert.equal(accountWrangler.preview_urls, false);
@@ -70,6 +83,7 @@ assert.ok(capacitySource.includes('This account already has its three host nodes
 assert.ok(accountWorkerSource.includes('CivweaveAccountNode extends CivweaveCloudNode'));
 assert.ok(accountWorkerSource.includes('x-civweave-account-edge-origin'));
 assert.ok(accountWorkerSource.includes('accountEdgePath: true'));
+assert.ok(accountWorkerSource.includes('scopeAccountNodeHtml'));
 assert.ok(accountWorkerSource.includes('central-money-edge-required'));
 
 assert.ok(setupSource.includes('Provisioning contract:'));
