@@ -14,7 +14,7 @@
     "federated": "releases/1.0.120/server/server-federated-v152.mjs"
   },
   "sha256": {
-    "server/server-federated-v152.mjs": "8f1ac28120822fa1709bbbe417ca38fa5322b3bec4c0b72145793d666f5e9936",
+    "server/server-federated-v152.mjs": "0187b6b41332c26da3f63ae65a219f7bfcd562ae7b0df85e1cc35c248bba6b69",
     "server/server-gateway-v131-base.mjs": "2a4f9652013f1e951d2d53c021334b7d22606642b16f9b2187593d9563a40b2b",
     "server/server-gateway-v131.mjs": "a8a093182c7b1de7a2eb67f807c1ed84a395f4f3769f52abd1d667ad25f0349d",
     "server/server-local-v131.mjs": "f21d261c62154c0b2b1f600af28def9bd48e69a82ddc01a39d3a9074e726d55b",

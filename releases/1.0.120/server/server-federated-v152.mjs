@@ -138,7 +138,14 @@ function localNetworkAddress(value) {
   const match = address.match(/^172\.(\d{1,3})\./);
   return Boolean(match && Number(match[1]) >= 16 && Number(match[1]) <= 31);
 }
-function localNetworkClient(req) { return localNetworkAddress(req.socket?.remoteAddress || ''); }
+function requestHostIsLocal(req) {
+  const raw = clean(req.headers.host, 320).toLowerCase();
+  const hostname = raw.startsWith('[') ? raw.slice(1, raw.indexOf(']')) : raw.split(':')[0];
+  return hostname === 'localhost' || localNetworkAddress(hostname);
+}
+function localNetworkClient(req) {
+  return requestHostIsLocal(req) && localNetworkAddress(req.socket?.remoteAddress || '');
+}
 function requireAdmin(req, res) {
   if (adminAuthorized(req)) return true;
   if (!ADMIN_TOKEN && !ALLOW_UNAUTHENTICATED_ADMIN) {
