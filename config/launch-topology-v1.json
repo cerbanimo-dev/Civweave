@@ -15,6 +15,13 @@
       "hostBps": 2500,
       "cerbanimoBps": 2500,
       "lifetimeCredits": "monthly-non-expiring-tier-grant"
+    },
+    "anchorStipend": {
+      "currency": "button",
+      "weeklyButtonsByIndependentAnchorRank": [3, 2, 1],
+      "maxPaidAnchorsPerNode": 3,
+      "separateFromComputeCompensation": true,
+      "receiptSchema": "civweave.anchor-button-stipend.v1"
     }
   },
   "canonicalInstallOrigin": "https://civweave.pages.dev",
@@ -48,7 +55,7 @@
     "domain": "nodes.commonweave.earth",
     "wildcardDomain": "*.nodes.commonweave.earth",
     "customDomainStatus": "pending-zone-availability",
-    "state": "one-sqlite-durable-object-per-node-plus-account-capacity-object",
+    "state": "one-sqlite-durable-object-per-node-plus-account-capacity-object-plus-anchor-registry-object",
     "maxStarterHostsPerAccount": 3,
     "roles": [
       "public-www-host-node",
@@ -59,8 +66,21 @@
       "service-catalog",
       "websocket-presence",
       "stripe-connect-enrollment",
-      "adaptive-compute-capacity"
+      "adaptive-compute-capacity",
+      "local-anchor-recovery",
+      "signed-anchor-stipends"
     ],
+    "resilience": {
+      "localAnchorRecommended": true,
+      "localAnchorRequired": false,
+      "defaultLocalSyncHours": 6,
+      "cloudCheckpointRefresh": "daily",
+      "proofFreshHours": 72,
+      "checkpointFreshHours": 36,
+      "minimumRecoveryCoverageBps": 9500,
+      "statusClasses": ["cloud-only", "locally-anchored", "redundantly-anchored"],
+      "irreversibleExternalSettlementDuringIncompleteRecovery": false
+    },
     "containsStripePlatformSecret": false,
     "containsCerbanimoSigningPrivateKey": false
   },
@@ -69,9 +89,11 @@
     "moneyEdgeUrl": "https://civweave-core.glaedn.workers.dev",
     "modes": [
       "cloudflare-tunnel-public-server",
-      "cloudflare-relay-private-node"
+      "cloudflare-relay-private-node",
+      "local-anchor-backup"
     ],
     "supportedExamples": [
+      "laptop",
       "raspberry-pi",
       "desktop",
       "nas",
