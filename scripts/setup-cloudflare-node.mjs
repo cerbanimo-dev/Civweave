@@ -11,6 +11,7 @@ const buildScript = resolve(repoRoot, "scripts/build-cloudflare-pages.mjs");
 const pagesOutput = resolve(repoRoot, ".cloudflare-pages");
 const canonicalProjectName = "civweave";
 const canonicalOrigin = `https://${canonicalProjectName}.pages.dev`;
+const canonicalAccountEmail = "cerbanimo@gmail.com";
 
 function normalizeHostId(value) {
   return String(value ?? "")
@@ -35,7 +36,7 @@ function parseArgs(argv) {
     else if (arg === "--project-name" || arg === "--project") projectName = String(argv[++i] || "").trim().toLowerCase();
     else if (arg === "--expect-account-email") expectAccountEmail = String(argv[++i] || "").trim().toLowerCase();
     else if (arg === "--help" || arg === "-h") {
-      console.log(`Civweave Cloudflare host setup\n\nCanonical root:\n  node scripts/setup-cloudflare-node.mjs --canonical --expect-account-email you@example.com\n\nCommunity host:\n  node scripts/setup-cloudflare-node.mjs --host-id garden\n\nCommunity host with a custom Pages project name:\n  node scripts/setup-cloudflare-node.mjs --host-id garden --project-name garden\n\nDefaults:\n  canonical: ${canonicalOrigin}\n  community: https://civweave-<host-id>.pages.dev`);
+      console.log(`Civweave Cloudflare host setup\n\nCanonical root:\n  node scripts/setup-cloudflare-node.mjs --canonical\n  reserved owner: ${canonicalAccountEmail}\n\nCommunity host:\n  node scripts/setup-cloudflare-node.mjs --host-id garden\n\nCommunity host with a custom Pages project name:\n  node scripts/setup-cloudflare-node.mjs --host-id garden --project-name garden\n\nDefaults:\n  canonical: ${canonicalOrigin}\n  community: https://civweave-<host-id>.pages.dev`);
       process.exit(0);
     } else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -43,6 +44,7 @@ function parseArgs(argv) {
   if (canonical && hostId) throw new Error("Choose either --canonical or --host-id, not both.");
   if (canonical) {
     if (projectName && projectName !== canonicalProjectName) throw new Error(`Canonical Civweave must deploy to the reserved Pages project ${canonicalProjectName}.`);
+    expectAccountEmail ||= canonicalAccountEmail;
     return { canonical: true, hostId: "civweave", projectName: canonicalProjectName, expectAccountEmail };
   }
 
@@ -110,6 +112,7 @@ console.log("Civweave Cloudflare host setup");
 console.log(`Role: ${options.canonical ? "canonical root" : "community host"}`);
 console.log(`Host ID: ${options.hostId}`);
 console.log(`Pages project: ${options.projectName}`);
+if (options.expectAccountEmail) console.log(`Required Cloudflare account: ${options.expectAccountEmail}`);
 
 console.log("\n1/4 Checking Cloudflare authentication...");
 const whoami = runWrangler(wrangler, ["whoami"], { capture: true });
@@ -142,6 +145,6 @@ const productionUrl = `https://${options.projectName}.pages.dev`;
 console.log("\nCivweave Cloudflare host setup complete.");
 console.log(`Production URL: ${productionUrl}`);
 console.log(`Health: ${productionUrl}/api/health`);
-console.log(`Host setup: ${productionUrl}/app/?host_setup=1`);
+console.log(`Steward setup: ${productionUrl}/app/?host_setup=1`);
 if (options.canonical) console.log(`Canonical Civweave root: ${canonicalOrigin}`);
-console.log("The cloud host is usable immediately. Its steward UI will keep recommending a local companion until this browser records one as installed/paired.");
+console.log("Open the steward setup URL once. Civweave will then keep reminding this steward browser to add and pair a local Anchor/companion until it is recorded as complete.");
