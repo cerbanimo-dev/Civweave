@@ -35,18 +35,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify Cloudflare credentials
+      - name: Verify Cloudflare secrets are configured
         shell: bash
         run: |
           set -euo pipefail
           test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing repository secret CLOUDFLARE_API_TOKEN'; exit 2; }
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
-          npx wrangler whoami
 
       - name: Refuse the wrong Cloudflare Pages account
         shell: bash
         run: |
           set -euo pipefail
+          # Do not use `wrangler whoami` here. Scoped API tokens can deploy
+          # Pages/Workers without permission to enumerate user memberships.
+          # This account-scoped Pages request is both the auth probe and the
+          # project/account-affinity check.
           npx wrangler pages deployment list \
             --project-name civweave \
             --environment production \
