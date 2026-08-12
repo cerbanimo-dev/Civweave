@@ -28,9 +28,8 @@ cp .env.federated.example .env.federated</code></pre>
 </section>
 <section class="card">
 <h2>3. Start the local companion</h2>
-<pre><code>docker compose --env-file .env.federated \
-  -f docker-compose.federated.yml \
-  up -d --build</code></pre>
+<pre><code>docker compose --env-file .env.federated -f docker-compose.federated.yml up -d --build</code></pre>
+<p class="note">Run the command as one line. It works in PowerShell as written; do not add Bash-style trailing <code>\</code> line continuations.</p>
 <p>For a laptop-only backup, LAN access is enough. A public tunnel is optional. Civweave should recommend this local copy strongly, but the cloud host remains usable without it.</p>
 </section>
 <section class="card">
