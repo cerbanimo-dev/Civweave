@@ -3,6 +3,8 @@ name: Verify Quest Veil v1
 on:
   pull_request:
     paths:
+      - 'VERSION'
+      - 'releases/1.0.107/**'
       - 'public/app/quest-veil-v1.js'
       - 'public/app/quest-veil-ledger-gate-v1.js'
       - 'public/app/quest-veil-mesh-v1.js'
@@ -13,6 +15,8 @@ on:
     branches:
       - 'agent/quest-veil-ledger-writer'
     paths:
+      - 'VERSION'
+      - 'releases/1.0.107/**'
       - 'public/app/quest-veil-v1.js'
       - 'public/app/quest-veil-ledger-gate-v1.js'
       - 'public/app/quest-veil-mesh-v1.js'
@@ -38,3 +42,5 @@ jobs:
           node --check public/app/quest-veil-mesh-v1.js
       - name: Verify mandatory privacy, mesh, and rewards contract
         run: node scripts/test-quest-veil-v1.mjs
+      - name: Fingerprint canonical 1.0.107 server snapshot
+        run: sha256sum releases/1.0.107/server/*.mjs
