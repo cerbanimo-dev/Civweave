@@ -1,9 +1,13 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.85-shared-guide-surface-v236-stream-thinking-v249';
+const VERSION='1.0.118-shared-guide-surface-v236-navigation-lifecycle-v424';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
+function liveHead(){
+  const head=document.head;
+  return document.documentElement?.isConnected&&head?.isConnected?head:null;
+}
 function load(src,onload,readyCheck){
   const path=new URL(src,location.href).pathname;
   const existing=[...document.scripts].find(script=>{try{return new URL(script.src,location.href).pathname===path}catch{return false}});
@@ -14,43 +18,55 @@ function load(src,onload,readyCheck){
     }
     return existing;
   }
+  const head=liveHead();
+  if(!head)return null;
   const script=document.createElement('script');
   script.src=src;
   script.async=false;
   script.onload=()=>{script.dataset.civweaveReady='true';onload?.()};
   script.onerror=()=>console.warn('[Civweave] Failed to load shared guide dependency:',src);
-  document.head.append(script);
+  if(!head.isConnected)return null;
+  head.append(script);
   return script;
 }
 function loadStyle(href){
   const path=new URL(href,location.href).pathname;
   if([...document.styleSheets].some(sheet=>{try{return new URL(sheet.href,location.href).pathname===path}catch{return false}}))return false;
+  const head=liveHead();
+  if(!head)return false;
   const link=document.createElement('link');
   link.rel='stylesheet';
   link.href=href;
   link.dataset.civweaveSharedGuideStyle='v265';
-  document.head.append(link);
+  if(!head.isConnected)return false;
+  head.append(link);
+  return true;
+}
+function install(){
+  if(!liveHead())return false;
+  loadStyle('/app/mobile-guide-scroll-v256.css?v=1.0.57-v256');
+  loadStyle('/app/weaveling-scroll-owner-v265.css?v=1.0.57-v265');
+  load('/app/guide-stream-thinking-v249.js?v=1.0.118-v249-navigation-lifecycle-v424',null,()=>Boolean(globalThis.CivweaveGuideStreamThinkingV249));
+  load('/app/gemini-device-direct-v257.js?v=1.0.57-v257',()=>{
+    load('/extensions/civweave-gemini-interactions-v159.js?v=1.0.57-v257',null,()=>Boolean(globalThis.CivweaveGeminiInteractionsV159));
+  },()=>Boolean(globalThis.CivweaveGeminiDeviceDirectV257));
+  load('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization',()=>{
+    load('/app/weaveling-plan-materialization-v265.js?v=1.0.57-v265',()=>{
+      load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.57-v265',()=>{
+        load('/app/shared-chat-face-icons-v255.js?v=1.0.57-v257',()=>{
+          try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION}}))}catch{}
+        },()=>Boolean(globalThis.CivweaveSharedChatFaceIconsV255));
+        load('/app/living-school-chat-workbench-v255.js?v=1.0.57-v265-learning-pathway',()=>{
+          try{dispatchEvent(new CustomEvent('civweave:living-school-chat-workbench-ready',{detail:{version:VERSION}}))}catch{}
+        },()=>Boolean(globalThis.CivweaveLivingSchoolChatWorkbenchV255));
+      },()=>Boolean(globalThis.CivweaveSharedGuideSurfaceV236));
+    },()=>Boolean(globalThis.CivweaveWeavelingPlanMaterializationV265));
+  },()=>Boolean(globalThis.CivweaveIntentionPlanner));
   return true;
 }
 
-loadStyle('/app/mobile-guide-scroll-v256.css?v=1.0.57-v256');
-loadStyle('/app/weaveling-scroll-owner-v265.css?v=1.0.57-v265');
-load('/app/guide-stream-thinking-v249.js?v=1.0.85-v249',null,()=>Boolean(globalThis.CivweaveGuideStreamThinkingV249));
-load('/app/gemini-device-direct-v257.js?v=1.0.57-v257',()=>{
-  load('/extensions/civweave-gemini-interactions-v159.js?v=1.0.57-v257',null,()=>Boolean(globalThis.CivweaveGeminiInteractionsV159));
-},()=>Boolean(globalThis.CivweaveGeminiDeviceDirectV257));
-load('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization',()=>{
-  load('/app/weaveling-plan-materialization-v265.js?v=1.0.57-v265',()=>{
-    load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.57-v265',()=>{
-      load('/app/shared-chat-face-icons-v255.js?v=1.0.57-v257',()=>{
-        try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION}}))}catch{}
-      },()=>Boolean(globalThis.CivweaveSharedChatFaceIconsV255));
-      load('/app/living-school-chat-workbench-v255.js?v=1.0.57-v265-learning-pathway',()=>{
-        try{dispatchEvent(new CustomEvent('civweave:living-school-chat-workbench-ready',{detail:{version:VERSION}}))}catch{}
-      },()=>Boolean(globalThis.CivweaveLivingSchoolChatWorkbenchV255));
-    },()=>Boolean(globalThis.CivweaveSharedGuideSurfaceV236));
-  },()=>Boolean(globalThis.CivweaveWeavelingPlanMaterializationV265));
-},()=>Boolean(globalThis.CivweaveIntentionPlanner));
+install();
+addEventListener('pageshow',()=>queueMicrotask(install));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,plannerMaterialization:'v265',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249'});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,plannerMaterialization:'v265',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',install});
 })();
