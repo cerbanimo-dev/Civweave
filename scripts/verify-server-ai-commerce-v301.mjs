@@ -19,9 +19,9 @@ const offline = JSON.parse(offlineText);
 
 assert.equal(version.trim(), '1.0.116');
 assert.match(router, /1\.0\.116-server-ai-router-v301/);
-assert.match(settings, /1\.0\.116-server-ai-settings-v301/);
+assert.match(settings, /1\.0\.116-server-ai-settings-v304-tabbed/);
 assert.match(mesh, /server-ai-router-v301\.js\?v=1\.0\.116-v301/);
-assert.match(mesh, /server-ai-settings-v301\.js\?v=1\.0\.116-v301/);
+assert.match(mesh, /server-ai-settings-v301\.js\?v=1\.0\.116-v304-tabbed/);
 assert.match(router, /const ROUTE='server-auto'/);
 assert.match(router, /\['device-local','server-local','cloudflare-workers-ai'\]/);
 assert.match(router, /s\.register\(MIDDLEWARE_ID,\{handle\},60\)/);
@@ -50,6 +50,8 @@ assert.match(settings, /\/api\/commerce\/topup/);
 assert.match(settings, /\/api\/commerce\/membership/);
 assert.match(settings, /\/api\/ai\/node\/live\/topups/);
 assert.match(settings, /Membership & compute/);
+for (const tab of ['general','local-models','membership']) assert.ok(settings.includes(`data-settings-tab="${tab}"`));
+assert.doesNotMatch(settings, /insertAdjacentElement\('afterend',button\)/);
 for (const secret of ['STRIPE_SECRET_KEY','STRIPE_CONNECT_WEBHOOK_SECRET','CIVWEAVE_MONEY_EDGE_PRIVATE_KEY','NODE_FABRIC_OPERATOR_TOKEN']) {
   assert.ok(!router.includes(secret) && !settings.includes(secret), `Browser server AI surface must not reference ${secret}.`);
 }
