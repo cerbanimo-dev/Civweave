@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION = '1.0.112';
+const VERSION = '1.0.113';
 const ENTRY = '/app/?system=civweave&installed=1';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
 const WORKER_SCRIPT_REVISION = 'release-coherence-v226';
@@ -548,3 +548,4 @@ globalThis.CivweaveInstallerV130 = Object.freeze({
   get shellReady() { return shellReady; }
 });
 })();
+

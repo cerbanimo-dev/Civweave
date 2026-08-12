@@ -18,8 +18,8 @@ for(const source of [orchestrator,fullscreen,store,ui,localRuntime,localOwner,se
 assert.match(orchestrator,/experience-orchestrator-v299-chat-boot-runtime-fallback/);
 for(const file of ['settings-parity-v295.js','chat-fullscreen-v295.js','saved-chat-store-v295.js','saved-chat-ui-v295.js','local-chat-runtime-v295.js','local-chat-owner-v295.js'])assert.ok(orchestrator.includes(file),`orchestrator lost ${file}`);
 assert.match(orchestrator,/1\.0\.106-chat-fullscreen-v299/);
-assert.match(orchestrator,/1\.0\.105-local-chat-runtime-v299/);
-assert.match(orchestrator,/1\.0\.105-local-chat-owner-v298/);
+assert.match(orchestrator,/1\.0\.111-local-chat-runtime-v300/);
+assert.match(orchestrator,/1\.0\.111-local-chat-owner-v300/);
 assert.match(orchestrator,/v=1\.0\.106-v299/);
 assert.match(orchestrator,/globalThis\.addEventListener\('submit',earlyLocalSubmit,true\)/,'local submit preflight must run at window capture before canonical document capture');
 assert.doesNotMatch(orchestrator,/document\.addEventListener\('submit'/,'orchestrator must not compete with canonical document submit ownership');
@@ -48,16 +48,18 @@ assert.match(store,/civweave\.guide-saved-chats\.v295/);
 assert.match(ui,/data-cw295-new/);
 assert.match(ui,/data-cw295-chat/);
 
-assert.match(localRuntime,/1\.0\.105-local-chat-runtime-v299/);
-assert.match(localRuntime,/bootstrap-v266\.js\?v=1\.0\.92-v299-chat-runtime/);
-assert.match(localRuntime,/p==='loading-model'\)return 240000/,'outer chat watchdog must give the runtime-owned fallback time to execute');
+assert.match(localRuntime,/1\.0\.111-local-chat-runtime-v300/);
+assert.match(localRuntime,/bootstrap-v266\.js\?v=1\.0\.111-v300-windows-memory/);
+assert.match(localRuntime,/p==='loading-model'\)return 300000/,'outer chat watchdog must give Windows WebGPU model construction time to execute');
+assert.match(localRuntime,/coldStartBenchmarkOptOut:true/);
+assert.match(localRuntime,/windowsWebGPUGrace:true/);
 assert.match(localRuntime,/runtimeFallbackOwned/);
 assert.match(localRuntime,/runtimeOwnedWebGPUFallback:true/);
 assert.match(localRuntime,/Promise\.race\(\[request,watchdog,hardTimeout\]\)/);
 
-assert.match(runtime266,/1\.0\.88-local-ai-runtime-v299-stage-fallback/);
+assert.match(runtime266,/1\.0\.111-local-ai-runtime-v300-windows-memory/);
 assert.match(runtime266,/function stageIdleMs\(/);
-assert.match(runtime266,/spec\?\.device==='webgpu'\?75000:210000/,'WebGPU model construction must have a bounded no-progress timeout distinct from WASM');
+assert.match(runtime266,/spec\?\.device==='webgpu'\?240000:300000/,'WebGPU model construction must have a bounded Windows-aware no-progress timeout distinct from WASM');
 assert.match(runtime266,/LOCAL_WEBGPU_LOAD_STALLED/);
 assert.match(runtime266,/function resetWorker\(/,'fallback must start in a fresh worker instead of reusing the stuck global loading promise');
 assert.match(runtime266,/markQuarantined/);
@@ -66,11 +68,14 @@ assert.match(runtime266,/compatibilitySpec\(selected/);
 assert.match(runtime266,/stalledWebGPUFallback:true/);
 assert.match(runtime266,/webgpuSessionQuarantine:true/);
 assert.match(runtime266,/backend-quarantined/);
+assert.match(runtime266,/serializedInference:true/);
+assert.match(runtime266,/coldStartBenchmarkOptIn:true/);
+assert.match(runtime266,/knownArtifactLengths:true/);
 
-assert.match(bootstrap,/REVISION='1\.0\.91-local-ai-bootstrap-v288-component-coherence'/);
-assert.match(bootstrap,/runtime-v266\.js\?v=1\.0\.88-v299-stage-fallback/);
+assert.match(bootstrap,/REVISION='1\.0\.111-local-ai-bootstrap-v300-windows-memory'/);
+assert.match(bootstrap,/runtime-v266\.js\?v=1\.0\.111-v300-windows-memory/);
 assert.match(bootstrap,/stalledWebGPUFallback===true/);
-assert.match(bootstrap,/componentCompatibility:'capability-contract-v288'/);
+assert.match(bootstrap,/componentCompatibility:'capability-contract-v300'/);
 
 for(const name of ['Weaveling','Moss','Kamiya','Rook','Merlin'])assert.ok(localOwner.includes(name),`local owner lost ${name}`);
 assert.match(localOwner,/fifoQueue:true/);
@@ -80,4 +85,4 @@ assert.match(localOwner,/Loading the selected model into memory/);
 assert.match(settings,/settingsIndependentOfChat:true/);
 assert.match(settings,/inferenceDormantOnOpen:true/);
 
-console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v299-deterministic-fullscreen-stage-fallback',features:{fiveChats:true,deterministicFullscreenBoot:true,keyboardVisualViewport:true,restingViewportMemory:true,structuralComposerRepair:true,localFifoQueue:true,runtimeOwnedWebGPUFallback:true,freshWorkerFallback:true,webgpuSessionQuarantine:true,wasmCompatibilityFallback:true,settingsIndependentOfChat:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v300-windows-memory',features:{fiveChats:true,deterministicFullscreenBoot:true,keyboardVisualViewport:true,restingViewportMemory:true,structuralComposerRepair:true,localFifoQueue:true,runtimeOwnedWebGPUFallback:true,freshWorkerFallback:true,webgpuSessionQuarantine:true,wasmCompatibilityFallback:true,settingsIndependentOfChat:true,windowsMemoryHardening:true}},null,2));

@@ -19,11 +19,13 @@ function requestUrl(input){try{return typeof input==='string'?input:input?.url||
 function cacheAdapter(cache,spec){
   const localPrefix=`/models/${spec.repo}/`,repoPrefix=`https://huggingface.co/${spec.repo}/resolve/`;
   const miss=()=>new Response('',{status:404,statusText:'Downloaded model cache miss'});
-  const find=async path=>{const hit=await cache.match(remoteUrl(spec,path));return hit?.ok?hit.clone():miss()};
-  return{async match(request){const key=requestUrl(request);if(key.startsWith(localPrefix))return find(key.slice(localPrefix.length));if(key.startsWith(repoPrefix)){const rest=key.slice(repoPrefix.length),slash=rest.indexOf('/');if(slash>=0)return find(rest.slice(slash+1))}try{const hit=await cache.match(request);return hit?.ok?hit.clone():undefined}catch{return undefined}},put:(request,response)=>cache.put(request,response)};
+  const withKnownLength=(response,path)=>{const known=Math.max(0,Number(artifactFor(spec,path)?.sizeBytes)||0);if(!response?.ok||response.headers.get('content-length')||!known)return response;const headers=new Headers(response.headers);headers.set('content-length',String(known));headers.set('x-civweave-artifact-length','registry-v300');return new Response(response.body,{status:response.status,statusText:response.statusText,headers})};
+  const find=async path=>{const hit=await cache.match(remoteUrl(spec,path));return hit?.ok?withKnownLength(hit,path):miss()};
+  return{async match(request){const key=requestUrl(request);if(key.startsWith(localPrefix))return find(key.slice(localPrefix.length));if(key.startsWith(repoPrefix)){const rest=key.slice(repoPrefix.length),slash=rest.indexOf('/');if(slash>=0)return find(rest.slice(slash+1))}try{const hit=await cache.match(request);return hit?.ok?hit:undefined}catch{return undefined}},put:(request,response)=>cache.put(request,response)};
 }
 function friendlyError(error,spec,stage='inference'){
   const raw=String(error?.message||error);
+  if(/^\s*\d{6,}\s*$/.test(raw))return `${spec?.label||spec?.id||'The selected model'} could not create its local inference session during ${stage}. The browser backend returned diagnostic code ${raw.trim()} without an explanation; Civweave released that worker instead of leaving it resident.`;
   if(raw.includes('/models/')&&(raw.includes('env.allowRemoteModels=false')||raw.includes('local_files_only=true')))return `Downloaded model cache miss for ${spec?.label||spec?.id||'the selected model'} during ${stage}. Resume this model while online so Civweave can fetch only the missing artifact.`;
   if(/Unexpected end of JSON input|Unexpected token\s*['"]?<|<!doctype|not valid JSON/i.test(raw))return `Downloaded model metadata is missing, truncated, or invalid for ${spec?.label||spec?.id||'the selected model'} during ${stage}. Reopen model settings while online so Civweave can repair only the bad metadata artifact.\n\nTransport detail: ${raw}`;
   if(/Gemma 4 runtime chunk/i.test(raw))return `The Gemma 4 browser runtime is incomplete on this device. Open Civweave online once and test the model so the split ONNX runtime can be cached for offline use.\n\nRuntime detail: ${raw}`;
@@ -88,7 +90,7 @@ function runtimeProfile(hf,spec){
 async function backendProfile(spec){
   if(spec.device!=='webgpu')return{backend:'wasm',gpu:null};
   if(!self.navigator?.gpu?.requestAdapter)throw Object.assign(new Error('WebGPU is unavailable in this worker.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'});
-  let adapter;try{adapter=await self.navigator.gpu.requestAdapter({powerPreference:'high-performance'})}catch(error){throw Object.assign(new Error(`Failed to get GPU adapter: ${clean(error?.message||error,1000)}`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'})}
+  let adapter;try{adapter=await self.navigator.gpu.requestAdapter()}catch(error){throw Object.assign(new Error(`Failed to get GPU adapter: ${clean(error?.message||error,1000)}`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'})}
   if(!adapter)throw Object.assign(new Error('Failed to get GPU adapter.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'});
   const info=adapter.info||{},shaderF16=Boolean(adapter.features?.has?.('shader-f16'));
   if(spec.requiresShaderF16&&!shaderF16)throw Object.assign(new Error('WebGPU shader-f16 is required by this mobile q2f16 model, but the active adapter does not expose shader-f16.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'});
@@ -131,9 +133,9 @@ async function warmBenchmark(id,started,profile){
   return{benchmarkMs,benchmarkTtftMs,benchmarkTokens:tokens,benchmarkTokensPerSecond};
 }
 async function unload(){try{await model?.dispose?.()}catch{}tokenizer=null;model=null;loaded=null;hfRuntime=null}
-async function ensure(spec,id){
+async function ensure(spec,id,{benchmark=false}={}){
   const key=`${spec.id}:${spec.runtime||'transformers-js-v3'}:${spec.device||'wasm'}:${spec.dtype||''}:${spec.textOnly?'text':''}`;
-  if(loaded?.key===key&&tokenizer&&model)return{coldStart:false,coldStartMs:0,tokenizerLoadMs:0,modelLoadMs:0,warmupMs:0,backend:loaded.backend,gpu:loaded.gpu,...loaded.runtime,...loaded.benchmark};
+  if(loaded?.key===key&&tokenizer&&model){if(benchmark&&!loaded.benchmark)loaded.benchmark=await warmBenchmark(id,now(),loaded);return{coldStart:false,coldStartMs:0,tokenizerLoadMs:0,modelLoadMs:0,warmupMs:0,backend:loaded.backend,gpu:loaded.gpu,...loaded.runtime,...(loaded.benchmark||{})}};
   if(loading)return loading;
   loading=(async()=>{
     if(loaded?.key&&loaded.key!==key)await unload();
@@ -150,14 +152,12 @@ async function ensure(spec,id){
     if(spec.textOnly)modelOptions.textOnly=true;
     model=await hf.AutoModelForCausalLM.from_pretrained(spec.repo,modelOptions);
     const modelLoadMs=Math.round(now()-modelStarted);
-    phase(id,'warming-model',started,{model:spec.id,backend:profile.backend});const warmStarted=now();
-    await model.generate({...tokenizer('a'),max_new_tokens:1,do_sample:false,use_cache:true});
-    const warmupMs=Math.round(now()-warmStarted);
+    const warmupMs=0;
     loaded={key,id:spec.id,repo:spec.repo,revision:spec.revision,backend:profile.backend,dtype:spec.dtype,gpu:profile.gpu,runtime,benchmark:null};
-    const benchmark=await warmBenchmark(id,started,profile);
-    loaded.benchmark=benchmark;
+    const benchmarkResult=benchmark?await warmBenchmark(id,started,profile):null;
+    loaded.benchmark=benchmarkResult;
     const coldStartMs=Math.round(now()-started);
-    const metrics={coldStart:true,coldStartMs,tokenizerLoadMs,modelLoadMs,warmupMs,backend:profile.backend,gpu:profile.gpu,...runtime,...benchmark};
+    const metrics={coldStart:true,coldStartMs,tokenizerLoadMs,modelLoadMs,warmupMs,backend:profile.backend,gpu:profile.gpu,...runtime,...(benchmarkResult||{})};
     phase(id,'model-ready',started,{model:spec.id,...metrics});
     return metrics;
   })().catch(async error=>{await unload();throw error}).finally(()=>{loading=null});
@@ -165,7 +165,7 @@ async function ensure(spec,id){
 }
 function parseJsonLoose(text){const source=clean(text).replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();for(let start=0;start<source.length;start++){if(source[start]!=='{'&&source[start]!=='[')continue;const open=source[start],close=open==='{'?'}':']';let depth=0,quoted=false,escaped=false;for(let i=start;i<source.length;i++){const c=source[i];if(quoted){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c==='"')quoted=false;continue}if(c==='"'){quoted=true;continue}if(c===open)depth++;else if(c===close&&--depth===0){try{return JSON.parse(source.slice(start,i+1))}catch{break}}}}return null}
 async function generate(message,id){
-  const spec=message.spec,requestStarted=now(),load=await ensure(spec,id);
+  const spec=message.spec,requestStarted=now(),load=await ensure(spec,id,{benchmark:Boolean(message.benchmark)});
   phase(id,'preparing-prompt',requestStarted,{model:spec.id,backend:load.backend,thinking:Boolean(message.thinking)});const prepStarted=now();
   const inputs=tokenizer.apply_chat_template(message.messages||[],{add_generation_prompt:true,tokenize:true,return_dict:true,enable_thinking:Boolean(message.thinking)});
   const promptPrepareMs=Math.round(now()-prepStarted),promptTokens=promptTokenCount(inputs),window=Number(spec.contextWindowTokens||0),working=Number(spec.workingContextTokens||0),maxNewTokens=Math.max(8,Math.min(4096,Number(message.maxNewTokens||256)));

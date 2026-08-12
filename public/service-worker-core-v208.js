@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.112';
+const VERSION = '1.0.113';
 const BUILD = 'lightweight-shell-v208';
 const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
@@ -641,3 +641,4 @@ self.addEventListener('fetch', event => {
     event.respondWith(cacheFirst(request));
   }
 });
+
