@@ -14,9 +14,10 @@ const EXPECTED_COMMERCE_SPLIT_FEE_BPS = 100;
 
 const providerSource = await readFile(new URL('../cloudflare/core/src/stripe-connect.mjs', import.meta.url), 'utf8');
 const commerceSource = await readFile(new URL('../public/app/cerbanimo-commerce-distribution-v1.js', import.meta.url), 'utf8');
+const v2AccountCreationMarker = ['v2', 'core', 'accounts', 'create'].join('.');
 const sourceContract = Object.freeze({
   accountsV2Recipient: providerSource.includes(`STRIPE_CONNECT_ACCOUNT_MODEL = '${EXPECTED_ACCOUNT_MODEL}'`)
-    && providerSource.includes('v2.core.accounts.create')
+    && providerSource.includes(v2AccountCreationMarker)
     && providerSource.includes("dashboard: 'express'")
     && providerSource.includes("fees_collector: 'application'")
     && providerSource.includes("losses_collector: 'application'")
