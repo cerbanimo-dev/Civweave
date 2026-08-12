@@ -1,0 +1,52 @@
+name: TEMP Materialize Account Node Links Release
+
+on:
+  push:
+    branches:
+      - fix/account-node-dashboard-links
+
+permissions:
+  contents: write
+
+concurrency:
+  group: temp-materialize-account-node-links
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/account-node-dashboard-links
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Advance release identity to 1.0.112
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const version = '1.0.112';
+          writeFileSync('VERSION', `${version}\n`);
+          const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+          pkg.version = version;
+          writeFileSync('package.json', `${JSON.stringify(pkg, null, 2)}\n`);
+          const contract = JSON.parse(readFileSync('config/release-contract.json', 'utf8'));
+          contract.canonical.current.version = version;
+          contract.canonical.current.path = `releases/${version}`;
+          writeFileSync('config/release-contract.json', `${JSON.stringify(contract, null, 2)}\n`);
+          NODE
+      - name: Materialize canonical release snapshot
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Commit generated release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add VERSION package.json config/release-contract.json releases/1.0.112 public scripts
+          git commit -m 'Materialize Civweave 1.0.112 canonical release'
+          git push origin HEAD:fix/account-node-dashboard-links
