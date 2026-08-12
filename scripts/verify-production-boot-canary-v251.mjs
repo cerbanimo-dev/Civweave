@@ -100,7 +100,7 @@ async function main(){
     const worker=workerResponse.text;
     requireToken(worker,`/app/system-routes-v227.js?v=${deployed}-five-system-route-contract-v227`,'service worker');
     requireToken(worker,`/service-worker-core-v208.js?v=${deployed}-chat-convergence-v250`,'service worker');
-    requireToken(worker,"/service-worker-chat-repair-v245.js?v=chat-bubble-anchor-v342&purge=chat-bubble-anchor-v342",'service worker');
+    requireToken(worker,"/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343",'service worker');
     requireToken(worker,"self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})",'service worker');
 
     const settings=settingsResponse.text;
@@ -118,7 +118,7 @@ async function main(){
       serviceWorker:new URL(workerResponse.url).pathname,
       localAISettings:new URL(settingsResponse.url).pathname,
       chatRevision:'chat-convergence-v250',
-      activeChatRepairRevision:'chat-bubble-anchor-v342',
+      activeChatRepairRevision:'chat-css-contract-v343',
       mobileAISettingsRevision:'snapshot-first-v287'
     };
   }

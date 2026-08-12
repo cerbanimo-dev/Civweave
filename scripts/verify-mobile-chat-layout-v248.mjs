@@ -50,7 +50,7 @@ check('manifest launches installed app through updater entry',['/app/installed-e
 check('installed entry performs no-store release discovery and worker update',installedEntry.includes("cache:'no-store'")&&installedEntry.includes('await registration.update()')&&installedEntry.includes("updateViaCache:'none'"));
 check('installed entry activates a waiting worker before routing',installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})")&&installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='));
 for(const path of ['/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js','/app/chat-single-owner-v245.js'])check(`phone cache purge includes ${path}`,workerRepair.includes(`'${path}'`));
-check('service worker activates v342 chat repair',workerEntry.includes('chat-bubble-anchor-v342')&&workerRepair.includes("const REVISION='chat-bubble-anchor-v342'"));
+check('service worker activates v343 chat CSS repair',workerEntry.includes('chat-css-contract-v343')&&workerRepair.includes("const REVISION='chat-css-contract-v343'"));
 check('worker installs with skipWaiting',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
 
 console.log(JSON.stringify({ok:true,version,revision:'mobile-v248-on-v242-canonical-owner',checks:checks.length,mobile:{topbarRows:'brand / modes / map+settings / review+theme',realmCards:'2-column then 1-column',dynamicViewport:true},chat:{canonicalOwner:'v242',deletedLegacyOwners:3,embeddedComposerDelegates:true,modelFallback:true},installedBoot:{updaterFirst:true,workerActivation:true,legacyCachePurge:true}},null,2));
