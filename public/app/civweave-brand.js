@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.26-brand-canonical-v1';
-const CANONICAL_LOGO='/app/logos/civweave-canonical.png';
+const VERSION='1.0.26-brand-canonical-v2';
+const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png';
 const FULL_LOGO=CANONICAL_LOGO;
 const SYMBOL_LOGO=CANONICAL_LOGO;
 const SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
