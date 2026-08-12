@@ -1,0 +1,30 @@
+name: Verify Live Marketplace Payments v1
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/core/src/stripe-connect.mjs'
+      - 'cloudflare/core/src/money-edge.mjs'
+      - 'public/app/cerbanimo-commerce-distribution-v1.js'
+      - 'scripts/verify-stripe-live-readiness-preflight.mjs'
+      - 'scripts/verify-live-marketplace-payments-v1.mjs'
+      - 'docs/finance/live-money-human-gate.md'
+      - 'docs/finance/live-money-machine-readiness.md'
+      - 'docs/finance/node-money-edge-launch-v1.md'
+      - '.github/workflows/verify-live-marketplace-payments-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify marketplace live-payment contract
+        run: node scripts/verify-live-marketplace-payments-v1.mjs
