@@ -95,13 +95,29 @@ function runWrangler(wrangler, args, options = {}) {
 }
 
 function includesNamedProject(output, name) {
+  const target = String(name || "").trim().toLowerCase();
+  const visit = value => {
+    if (Array.isArray(value)) return value.some(visit);
+    if (!value || typeof value !== "object") return false;
+    for (const [key, child] of Object.entries(value)) {
+      if (
+        typeof child === "string" &&
+        ["name", "title", "project_name", "projectName"].includes(key) &&
+        child.trim().toLowerCase() === target
+      ) return true;
+      if (visit(child)) return true;
+    }
+    return false;
+  };
   try {
-    const parsed = JSON.parse(output);
-    const items = Array.isArray(parsed) ? parsed : parsed.result ?? parsed.projects ?? [];
-    return items.some(item => item?.name === name || item?.title === name);
-  } catch {
-    return output.includes(name);
-  }
+    if (visit(JSON.parse(output))) return true;
+  } catch {}
+  return String(output || "").toLowerCase().includes(target);
+}
+
+function projectAlreadyExists(output) {
+  const text = String(output || "").toLowerCase();
+  return text.includes("already exists") || text.includes("8000002");
 }
 
 const options = parseArgs(process.argv.slice(2));
@@ -123,7 +139,19 @@ if (options.expectAccountEmail && !whoami.output.toLowerCase().includes(options.
 console.log("\n2/4 Ensuring the Pages project exists...");
 const projects = runWrangler(wrangler, ["pages", "project", "list", "--json"], { capture: true });
 if (!includesNamedProject(projects.output, options.projectName)) {
-  runWrangler(wrangler, ["pages", "project", "create", options.projectName, "--production-branch", "main"]);
+  const created = runWrangler(
+    wrangler,
+    ["pages", "project", "create", options.projectName, "--production-branch", "main"],
+    { capture: true, allowFailure: true },
+  );
+  if (created.status === 0) {
+    process.stdout.write(created.output);
+  } else if (projectAlreadyExists(created.output)) {
+    console.log(`Pages project ${options.projectName} already exists. Continuing with the existing project.`);
+  } else {
+    process.stderr.write(created.output);
+    throw new Error(`Unable to create Cloudflare Pages project ${options.projectName}.`);
+  }
 } else {
   console.log(`Pages project ${options.projectName} already exists.`);
 }
