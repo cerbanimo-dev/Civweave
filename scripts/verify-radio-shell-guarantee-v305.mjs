@@ -3,6 +3,7 @@ import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
 
 await import('./sync-release-version-assets.mjs');
+await import('./build-service-worker-v211.mjs');
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const requiredRadioAssets = [
