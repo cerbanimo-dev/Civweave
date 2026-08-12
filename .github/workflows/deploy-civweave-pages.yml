@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build and deploy civweave.pages.dev + starter nodes
+    name: Build and deploy civweave.pages.dev
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -72,7 +72,9 @@ jobs:
           node scripts/verify-cloudflare-pages-account-target-v1.mjs \
             /tmp/civweave-pages-deployments.json civweave
 
-      - name: Provision account Worker and three starter nodes
+      - name: Provision optional account Worker and starter nodes
+        id: provision_account_edge
+        continue-on-error: true
         run: >-
           node scripts/provision-cloudflare-account-edge-v1.mjs
           --host-id civweave
@@ -88,9 +90,12 @@ jobs:
           node --input-type=module <<'NODE'
           import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
           const target = '.cloudflare-pages/app/host-deployment-v1.json';
-          const accountEdge = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
-          if (accountEdge.status !== 'ready' || accountEdge.starterNodeIds?.length !== 3) {
-            throw new Error('Canonical Cloudflare account edge is not fully provisioned.');
+          let accountEdge = null;
+          try {
+            const candidate = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
+            if (candidate.status === 'ready' && candidate.starterNodeIds?.length === 3) accountEdge = candidate;
+          } catch {
+            // Pages remains a complete host even when optional account-edge provisioning is unavailable.
           }
           mkdirSync('.cloudflare-pages/app', { recursive: true });
           writeFileSync(target, `${JSON.stringify({
@@ -100,7 +105,7 @@ jobs:
             pagesProject: 'civweave',
             publicOrigin: 'https://civweave.pages.dev',
             canonicalOrigin: 'https://civweave.pages.dev',
-            accountEdge,
+            ...(accountEdge ? { accountEdge } : {}),
             localAnchorRecommended: true,
             localAnchorRequired: false,
             sourceCommit: process.env.GITHUB_SHA,
@@ -124,3 +129,9 @@ jobs:
             cat /tmp/civweave-pages-deploy.log
             exit 3
           }
+
+      - name: Report optional account-edge provisioning
+        if: success() && steps.provision_account_edge.outcome == 'failure'
+        shell: bash
+        run: |
+          echo '::warning::The OG Pages host deployed without the optional account Worker/starter nodes. Add Account > Workers Scripts > Edit to this token to enable that layer; Pages hosting remains online.'

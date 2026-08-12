@@ -126,6 +126,8 @@ Then enable `.github/workflows/deploy-civweave-host-pages.yml`. Every push to `m
 
 The canonical repository uses `.github/workflows/deploy-civweave-pages.yml` for `civweave.pages.dev`. Both workflows preserve the initial direct deployment until a successful automated replacement is available; failure or delayed GitHub setup does not take a new host offline.
 
+The OG workflow can also provision an optional account Worker and three starter-node records when its token has `Account > Workers Scripts > Edit`. That broader permission is not required for the Pages host: provisioning failure is reported as a warning and cannot prevent `civweave.pages.dev` from building or deploying.
+
 ## Host-local Anchor reminder
 
 Cloudflare is allowed to be the host's public doorway without being its only surviving copy.
