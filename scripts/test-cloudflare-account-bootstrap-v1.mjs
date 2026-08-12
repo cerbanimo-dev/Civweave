@@ -22,6 +22,7 @@ const [
   affinitySource,
   canonicalWorkflow,
   communityWorkflow,
+  hostSetup,
 ] = await Promise.all([
   read('cloudflare/account-edge/src/index.mjs'),
   read('cloudflare/account-edge/wrangler.jsonc'),
@@ -31,6 +32,7 @@ const [
   read('scripts/verify-cloudflare-pages-account-target-v1.mjs'),
   read('.github/workflows/deploy-civweave-pages.yml'),
   read('.github/workflows/deploy-civweave-host-pages.yml'),
+  read('public/host-setup.html'),
 ]);
 const accountWrangler = parseJsonc(accountWranglerText);
 
@@ -84,6 +86,10 @@ assert.ok(provisionSource.includes('operatorSecretRotated'));
 assert.ok(provisionSource.includes('/api/fabric/nodes/'));
 assert.ok(provisionSource.includes('/api/node/health'));
 assert.ok(provisionSource.includes('/api/ai/node/manifest'));
+assert.ok(provisionSource.includes("const WORKERS_PERMISSION = 'Account > Workers Scripts > Edit'"));
+assert.ok(provisionSource.includes("capability: 'worker-plus-three-starter-nodes'"));
+assert.ok(provisionSource.includes('requiredPermissions: [WORKERS_PERMISSION]'));
+assert.ok(provisionSource.includes('retryCommand:'));
 
 assert.ok(affinitySource.includes('CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID'));
 assert.ok(affinitySource.includes('.pages.dev'));
@@ -91,11 +97,22 @@ for (const workflow of [canonicalWorkflow, communityWorkflow]) {
   assert.ok(workflow.includes('verify-cloudflare-pages-account-target-v1.mjs'));
   assert.ok(workflow.includes('provision-cloudflare-account-edge-v1.mjs'));
   assert.ok(workflow.includes('--strict'));
-  assert.ok(workflow.includes('starterNodeIds?.length !== 3'));
+  assert.ok(workflow.includes('continue-on-error: true'));
+  assert.ok(workflow.includes("requiredPermissions: ['Account > Workers Scripts > Edit']"));
+  assert.ok(workflow.includes('accountEdge,'));
   assert.ok(workflow.includes('Refusing a false-green deploy'));
 }
+assert.ok(!canonicalWorkflow.includes('Canonical Cloudflare account edge is not fully provisioned.'));
+assert.ok(!communityWorkflow.includes('Community Cloudflare account edge is not fully provisioned.'));
 assert.ok(canonicalWorkflow.includes('--host-id civweave'));
 assert.ok(communityWorkflow.includes('CIVWEAVE_HOST_ID'));
+assert.ok(communityWorkflow.includes('Verify stable community host origin'));
+assert.ok(hostSetup.includes('id="edge-worker"'));
+assert.ok(hostSetup.includes('id="edge-node-a"'));
+assert.ok(hostSetup.includes('id="edge-node-b"'));
+assert.ok(hostSetup.includes('id="edge-node-c"'));
+assert.ok(hostSetup.includes('Account → Workers Scripts → Edit'));
+assert.ok(hostSetup.includes('renderAccountEdge(meta)'));
 
 for (const file of [
   'cloudflare/account-edge/src/index.mjs',
