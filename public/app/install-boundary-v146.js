@@ -13,6 +13,7 @@ const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
 const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
+const DOCUMENT_LIFECYCLE='/app/document-lifecycle-v221.js';
 const PLATFORM_STABILITY='/app/platform-stability-v159.js';
 const MOBILE_AI_HARDENING='/app/mobile-ai-hardening-v302.js';
 const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
@@ -44,7 +45,7 @@ const FALLBACK_PATHS=new Map([
   ['/app/fellowfare-cabinet-v144.html','fellowfare'],
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
-const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR,MOBILE_AI_HARDENING];
+const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR,MOBILE_AI_HARDENING,DOCUMENT_LIFECYCLE];
 const SYSTEM_EXPERIENCE_SCRIPTS=[
   MOBILE_AI_HARDENING,
   EXPERIENCE_ORCHESTRATOR,
@@ -242,6 +243,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
   canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
+  realmLocalAISettingsRevision:'v307-lazy-management-via-document-lifecycle',
   legacyChatRuntimePolicy:'removed-from-current-source-v251',
   systemsMeshRevision:'v251-five-system-non-privileged-event-contract',
   nodeAiMeshRevision:'v1-node-owned-service-discovery-routing',
