@@ -1,0 +1,17 @@
+{
+  "schema": "civweave.canonical-release.v1",
+  "version": "1.0.107",
+  "status": "current",
+  "canonicalPath": "releases/1.0.107",
+  "sourceCommit": "pending-merge",
+  "basedOn": "1.0.106",
+  "runtime": {
+    "base": "releases/1.0.107/server/server.mjs",
+    "dev": "releases/1.0.107/server/server-v130.mjs",
+    "local": "releases/1.0.107/server/server-local-v131.mjs",
+    "gatewayBase": "releases/1.0.107/server/server-gateway-v131-base.mjs",
+    "gateway": "releases/1.0.107/server/server-gateway-v131.mjs",
+    "federated": "releases/1.0.107/server/server-federated-v152.mjs"
+  },
+  "sha256": {}
+}
