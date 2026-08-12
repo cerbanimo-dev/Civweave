@@ -46,12 +46,14 @@ jobs:
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
           test -n "${CIVWEAVE_PAGES_PROJECT:-}" || { echo 'Missing repository variable CIVWEAVE_PAGES_PROJECT'; exit 2; }
           test "$CIVWEAVE_PAGES_PROJECT" != 'civweave' || { echo 'The canonical civweave project is reserved'; exit 2; }
-          npx wrangler whoami
 
       - name: Refuse the wrong Cloudflare Pages account
         shell: bash
         run: |
           set -euo pipefail
+          # The scoped account request is the auth probe. `wrangler whoami`
+          # requires user-membership permissions that deployment tokens do not
+          # need and can therefore reject an otherwise valid deployment token.
           npx wrangler pages deployment list \
             --project-name "$CIVWEAVE_PAGES_PROJECT" \
             --environment production \
