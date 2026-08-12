@@ -1,4 +1,4 @@
-// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + code-coherence-v288 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-convergence-v250 + local-model-background-v267 + open-learning-media-v1
+// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + code-coherence-v288 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 resumable-pause-v280 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-bubble-anchor-v342 + local-model-background-v267 + open-learning-media-v1
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.107-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
@@ -15,6 +15,6 @@ importScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v22
 importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224');
 importScripts('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225');
 importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227');
-importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250');
+importScripts('/service-worker-chat-repair-v245.js?v=chat-bubble-anchor-v342&purge=chat-bubble-anchor-v342');
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
