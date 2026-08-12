@@ -23,7 +23,15 @@ jobs:
         with:
           node-version: '22'
       - name: Materialize Civweave 1.0.120
-        run: python3 .github/scripts/materialize-local-host-capacity-v1.py
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('.github/scripts/materialize-local-host-capacity-v1.py')
+          s = p.read_text()
+          p.write_text(s.replace("marker = '\\n})();\\n'", "marker = '\\n})();'"))
+          PY
+          python3 .github/scripts/materialize-local-host-capacity-v1.py
       - name: Verify local Host capacity
         shell: bash
         run: |
