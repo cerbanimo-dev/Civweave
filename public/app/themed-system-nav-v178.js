@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.113-five-system-navigation-v227';
+const VERSION='1.0.114-five-system-navigation-v227';
 const NAV_ID='cw-themed-system-nav';
 const STYLE_ID='cw-themed-system-nav-style';
 const PATH=location.pathname;
@@ -17,7 +17,7 @@ const SYSTEMS=[
   {id:'anarchadia',label:'Anarchadia',image:'/app/assets/navigation/200-anarchadia-nav.webp?v=image-nav-r2',fallback:'/app/anarchadia-console-v139.html?cabinet=1&installed=1',glow:'#ff2f87',shade:'#4a122e'}
 ];
 
-function href(item){return ROUTES?.urlFor?.(item.id,{version:'1.0.113',source:currentSystem()||'navigation'}).href||item.fallback}
+function href(item){return ROUTES?.urlFor?.(item.id,{version:'1.0.114',source:currentSystem()||'navigation'}).href||item.fallback}
 function clearEmbeddedCopy(){
   document.getElementById(NAV_ID)?.remove();
   document.getElementById(STYLE_ID)?.remove();
@@ -97,7 +97,7 @@ function mount(){
     const link=event.target.closest('a[data-system]');
     if(!link||!ROUTES?.navigate)return;
     event.preventDefault();
-    ROUTES.navigate(link.dataset.system,{version:'1.0.113',source:current});
+    ROUTES.navigate(link.dataset.system,{version:'1.0.114',source:current});
   });
   document.body.append(nav);
 }

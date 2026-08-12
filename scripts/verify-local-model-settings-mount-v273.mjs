@@ -56,8 +56,8 @@ assert.match(pulse,/Test model/);
 assert.match(pulse,/raceSafeRepair:true/);
 assert.match(pulse,/thinkingDisabledForHealth:true/);
 
-assert.match(bootstrap,/REVISION='1\.0\.111-local-ai-bootstrap-v300-windows-memory'/);
-assert.match(bootstrap,/capability-contract-v300/);
+assert.match(bootstrap,/REVISION='1\.0\.114-local-ai-bootstrap-v301-bounded-startup'/);
+assert.match(bootstrap,/capability-contract-v301/);
 assert.match(bootstrap,/model-registry-v266\.js\?v=1\.0\.111-v300-cache-lengths/);
 assert.match(bootstrap,/runtime-v266\.js\?v=1\.0\.111-v300-windows-memory/);
 assert.match(bootstrap,/settings-panel-v267\.js\?v=1\.0\.91-v288/);
@@ -94,5 +94,5 @@ console.log(JSON.stringify({
   managementOnlyOnOpen:true,
   inferenceDormantUntilNeeded:true,
   bootstrapTestPulse:'v286-current',
-  componentCompatibility:'capability-contract-v300'
+  componentCompatibility:'capability-contract-v301'
 },null,2));
