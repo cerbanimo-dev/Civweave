@@ -47,7 +47,7 @@ The runtime produces deterministic Stripe separate-transfer instructions from th
 
 On December 1, **50% of the node's eligible AI cash reserve** enters the annual payout. The other 50% remains in the node reserve.
 
-The annual payout itself is divided:
+The annual payout itself is divided, with all percentages measured against that annual payout:
 
 - **85%** among eligible contributing users, weighted by their eligible Cerbanimo cotokens for the annual period
 - **10%** to the node host
