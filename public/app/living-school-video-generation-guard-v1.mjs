@@ -1,4 +1,5 @@
 import{ensureLivingSchool,FALLBACK_VIDEO_URL}from'./video-learning-contract-v1.mjs?v=video-atlas-v1';
+import safeMode,{validateAdmission,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v1';
 
 const REVISION='living-school-video-generation-guard-v1';
 const CURRICULUM_PURPOSE='living-school-research-grounded-curriculum-v218.1';
@@ -29,6 +30,18 @@ export async function installLivingSchoolVideoGenerationGuardV1(){
     if(request?.purpose!==CURRICULUM_PURPOSE||result?.status!=='success'||!Array.isArray(result?.outputJson?.modules))return result;
     const output=typeof structuredClone==='function'?structuredClone(result.outputJson):JSON.parse(JSON.stringify(result.outputJson));
     await ensureLivingSchool(output);
+    if(safeMode.read().enabled){
+      for(const module of output.modules){
+        const video=module?.video;
+        if(video?.safeAdmission?.admitted)continue;
+        const evidence=[video?.title,video?.creator,video?.description,video?.reason].filter(Boolean).join('\n');
+        if(evidence.length<80)throw safeModeError(`video for “${module?.title||'module'}”`,{ai:{categories:['insufficient-video-evidence']}});
+        const review=await validateAdmission(originalGenerate,{title:video?.title,creator:video?.creator,description:video?.description,reason:video?.reason,source:video?.source,url:video?.url},{kind:'video'});
+        if(!review.admitted)throw safeModeError(`video “${video?.title||'Untitled'}”`,review);
+        module.video={...video,safeAdmission:review};module.videos=[module.video];
+      }
+      output.videoContract={...(output.videoContract||{}),safeMode:{revision:safeMode.revision,admission:'deterministic-plus-ai',failClosed:true}};
+    }
     return{...result,outputJson:output,outputText:JSON.stringify(output)};
   };
   const wrapped=Object.freeze({...runtime,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),livingSchoolVideoGenerationGuardRevision:REVISION});

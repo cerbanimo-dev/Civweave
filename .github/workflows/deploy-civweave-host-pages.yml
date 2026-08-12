@@ -66,9 +66,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # The scoped account request is the auth probe. `wrangler whoami`
-          # requires user-membership permissions that deployment tokens do not
-          # need and can therefore reject an otherwise valid deployment token.
+          # The scoped account request is the auth probe. Membership-enumeration
+          # probes require permissions that deployment tokens do not need and can
+          # therefore reject an otherwise valid deployment token.
           npx wrangler pages deployment list \
             --project-name "$CIVWEAVE_PAGES_PROJECT" \
             --environment production \

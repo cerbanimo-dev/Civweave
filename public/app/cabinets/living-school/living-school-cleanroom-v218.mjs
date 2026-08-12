@@ -5,7 +5,9 @@ import{installLivingSchoolGenerationGuard}from'../../living-school-generation-gu
 import{installLivingSchoolQuizContractGuardV263}from'../../living-school-quiz-contract-guard-v263.mjs?v=short-answer-rubric-v263';
 import{installLivingSchoolVideoGenerationGuardV1}from'../../living-school-video-generation-guard-v1.mjs?v=video-atlas-v1';
 import{ensureLivingSchool,renderLivingSchoolEmbed,FALLBACK_VIDEO_URL}from'../../video-learning-contract-v1.mjs?v=video-atlas-v1';
+import safeMode from'../../safe-mode-v1.mjs?v=safe-mode-v1';
 
+safeMode.install();
 await installLivingSchoolGenerationGuard();
 await installLivingSchoolQuizContractGuardV263();
 await installLivingSchoolVideoGenerationGuardV1();

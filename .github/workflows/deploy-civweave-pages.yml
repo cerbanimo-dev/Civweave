@@ -61,8 +61,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Do not use `wrangler whoami` here. Scoped API tokens can deploy
-          # Pages/Workers without permission to enumerate user memberships.
+          # Avoid membership-enumeration probes here. Scoped API tokens can
+          # deploy Pages/Workers without permission to enumerate memberships.
           # This account-scoped Pages request is both the auth probe and the
           # project/account-affinity check.
           npx wrangler pages deployment list \
