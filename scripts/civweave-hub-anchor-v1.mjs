@@ -12,7 +12,7 @@ const RECOVERY_DOMAIN='civweave.anchor-recovery-claim.v1';
 const DEFAULT_PORT=8791;
 const clean=(value,max=4000)=>String(value??'').trim().slice(0,max);
 const args=process.argv.slice(2);
-const option=name=>{const index=args.indexOf(name);return index>=0?args[index+1]:''};
+const option=name=>{const index=args.indexOf(name),value=index>=0?args[index+1]:'';return value&&!String(value).startsWith('--')?value:''};
 const flag=name=>args.includes(name);
 const nodeOrigin=clean(option('--node'),2000).replace(/\/$/,'');
 const pairingGrant=clean(option('--pair'),2000);
