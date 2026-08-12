@@ -53,7 +53,7 @@ assert(workerWrapperSource.includes("importScripts('/service-worker-shell-integr
 assert(workerWrapperSource.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper omits the offline retry override.');
 assert(workerWrapperSource.includes('offline-campus-current-graph-v280'),'Active worker wrapper omits the resumable current-graph offline revision.');
 assert(workerWrapperSource.includes('policy=resumable-pause-v280'),'Active worker wrapper omits the resumable/pause policy.');
-assert(workerWrapperSource.includes("/service-worker-chat-repair-v245.js?v=chat-convergence-v250"),'Active worker wrapper omits the v250 stale-chat cache migration.');
+assert(workerWrapperSource.includes("/service-worker-chat-repair-v245.js?v=chat-bubble-anchor-v342&purge=chat-bubble-anchor-v342"),'Active worker wrapper omits the current stale-chat cache migration.');
 assert(workerWrapperSource.indexOf('service-worker-living-school-cleanroom-v218.js')<workerWrapperSource.indexOf('service-worker-core-v208.js'),'Living School retirement does not load before the retained core.');
 assert(workerWrapperSource.indexOf('service-worker-core-v208.js')<workerWrapperSource.indexOf('service-worker-installer-state-v280.js'),'Installer-state pin does not load after the core globals.');
 assert(workerWrapperSource.indexOf('service-worker-installer-state-v280.js')<workerWrapperSource.indexOf('service-worker-shell-integrity-v281.js'),'Integrity does not see the final required shell asset list.');
