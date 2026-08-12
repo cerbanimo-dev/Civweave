@@ -86,7 +86,7 @@ await patch('public/app/install-boundary-v146.js',source=>{
 await patch('public/app/working-campus-v156.html',source=>{
   source=replaceRequired(source,/Civweave Working Campus · v\d+\.\d+\.\d+/,`Civweave Working Campus · v${version}`,'working-campus title');
   source=replaceRequired(source,/<b class="version-chip">v\d+\.\d+\.\d+<\/b>/,`<b class="version-chip">v${version}</b>`,'working-campus version chip');
-  source=source.replace(/install-boundary-v146\.js\?v=\d+\.\d+\.\d+-v184/,`install-boundary-v146.js?v=${version}-v184`);
+  source=replaceRequired(source,/\/app\/install-boundary-v146\.js\?v=[^"]+/,`/app/install-boundary-v146.js?v=chat-convergence-v250-navigation-lifecycle-v424`,'working-campus boundary navigation revision');
   source=source.replace(/const VERSION='\d+\.\d+\.\d+-working-campus-planner-v199';/,`const VERSION='${version}-working-campus-planner-v199';`);
   return source;
 });
