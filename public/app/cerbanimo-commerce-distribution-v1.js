@@ -122,7 +122,7 @@ function buildAnnualDistribution(input={}){
   const cerbanimoRows=cerbanimoAmountMinor?roleAllocation(cerbanimoAmountMinor,'annual-cerbanimo',[cerbanimo]):[];
   const payouts=combineCashRows([...participantRows,...hostRows,...cerbanimoRows]);
   if(payouts.reduce((sum,row)=>sum+row.amountMinor,0)!==annualPayoutMinor)throw new Error('Annual distribution must conserve the full payout amount.');
-  return Object.freeze({schema:ANNUAL_SCHEMA,version:VERSION,annualId,nodeId,currency,eventDate:clean(input.eventDate||`${new Date().getUTCFullYear()}-12-01`,40),eligibleReserveMinor,reserveShareBps,annualPayoutMinor,retainedReserveMinor,policy:{contributorBps,hostBps,cerbanimoBps},weightSource:'eligible-cerbanimo-cotokens',cotokensConsumed:false,payouts,createdAt:clean(input.createdAt||now(),80)});
+  return Object.freeze({schema:ANNUAL_SCHEMA,version:VERSION,annualId,nodeId,currency,eventDate:clean(input.eventDate||`${new Date().getUTCFullYear()}-12-01`,40),eligibleReserveMinor,reserveShareBps,annualPayoutMinor,retainedReserveMinor,policy:{basis:'annual-payout',contributorBps,hostBps,cerbanimoBps},weightSource:'eligible-cerbanimo-cotokens',cotokensConsumed:false,payouts,createdAt:clean(input.createdAt||now(),80)});
 }
 function stripeTransferInstructions(distribution,{sourceTransaction,transferGroup}={}){
   const source=clean(sourceTransaction,220);if(!source)throw new TypeError('sourceTransaction is required for Stripe commerce transfers.');
