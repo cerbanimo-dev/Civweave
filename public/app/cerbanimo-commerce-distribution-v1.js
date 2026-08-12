@@ -1,11 +1,16 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveCerbanimoCommerceV1)return;
-const VERSION='1.0.0';
+const VERSION='1.1.0';
 const SCHEMA='civweave.cerbanimo-commerce-distribution.v1';
+const ANNUAL_SCHEMA='civweave.cerbanimo-annual-distribution.v1';
 const RECEIPT_SCHEMA='civweave.cerbanimo-commerce-receipt.v1';
 const STORAGE_KEY='civweave.cerbanimo-commerce-receipts.v1';
 const DEFAULT_SERVICE_ORIGIN_ROYALTY_BPS=1000;
+const DEFAULT_COMMERCE_SPLIT_FEE_BPS=100;
+const DEFAULT_ANNUAL_RESERVE_SHARE_BPS=5000;
+const DEFAULT_ANNUAL_HOST_BPS=1000;
+const DEFAULT_ANNUAL_CERBANIMO_BPS=500;
 const clean=(v,n=500)=>String(v??'').trim().slice(0,n);
 const num=v=>Number.isFinite(Number(v))?Number(v):0;
 const list=v=>Array.isArray(v)?v:[];
@@ -49,10 +54,7 @@ function largestRemainder(total,rows){
   [...parts].sort((a,b)=>b._fraction-a._fraction||a.contributorId.localeCompare(b.contributorId)).forEach(r=>{if(remaining>0){r.amount+=1;remaining-=1}});
   return parts.map(({_fraction,...r})=>r);
 }
-function rewardAlloc(total,rows){
-  const hundredths=Math.round(Math.max(0,num(total))*100);
-  return largestRemainder(hundredths,rows).map(r=>({...r,amount:Number((r.amount/100).toFixed(2))}));
-}
+function rewardAlloc(total,rows){const hundredths=Math.round(Math.max(0,num(total))*100);return largestRemainder(hundredths,rows).map(r=>({...r,amount:Number((r.amount/100).toFixed(2))}))}
 function roleAllocation(totalMinor,role,rows){return largestRemainder(totalMinor,rows).map(r=>({...r,role,amountMinor:r.amount,amount:undefined}))}
 function rewardRoleAllocation(total,role,rows){return rewardAlloc(total,rows).map(r=>({...r,role}))}
 function combineRewardRows(rows){
@@ -66,10 +68,15 @@ function combineCashRows(rows){
   return [...map.values()].sort((a,b)=>a.contributorId.localeCompare(b.contributorId));
 }
 function resolveRows(explicit,endeavorId){const rows=normalizeContributors(explicit);return rows.length?rows:vestedOwnership(endeavorId)}
+function feeMinor(amountMinor,feeBps){return Math.round(integer(amountMinor,'sale amount',0)*bps(feeBps,'commerceSplitFeeBps')/10000)}
 function buildDistribution(input={}){
   const saleType=clean(input.saleType,20).toLowerCase();if(!['service','product'].includes(saleType))throw new TypeError('saleType must be service or product.');
   const saleId=clean(input.saleId||input.orderId,220);if(!saleId)throw new TypeError('saleId is required.');
-  const endeavorId=clean(input.endeavorId||input.projectId||input.templateEndeavorId,220);const amountMinor=integer(input.netAmountMinor??input.amountMinor,'netAmountMinor',1);const currency=clean(input.currency||'USD',12).toUpperCase();
+  const endeavorId=clean(input.endeavorId||input.projectId||input.templateEndeavorId,220);
+  const amountMinor=integer(input.saleAmountMinor??input.netAmountMinor??input.amountMinor,'saleAmountMinor',1);
+  const currency=clean(input.currency||'USD',12).toUpperCase();
+  const splitFeeBps=bps(input.commerceSplitFeeBps??DEFAULT_COMMERCE_SPLIT_FEE_BPS,'commerceSplitFeeBps');
+  const splitFeeMinor=feeMinor(amountMinor,splitFeeBps),buyerChargeMinor=amountMinor+splitFeeMinor;
   const rewardBudget={acorns:Math.max(0,num(input.rewardBudget?.acorns)),buttons:Math.max(0,num(input.rewardBudget?.buttons))};
   const originRoyaltyBps=bps(input.serviceOriginRoyaltyBps??DEFAULT_SERVICE_ORIGIN_ROYALTY_BPS,'serviceOriginRoyaltyBps');
   let cashRows=[],acornRows=[],buttonRows=[],policy;
@@ -90,16 +97,45 @@ function buildDistribution(input={}){
     cashRows=roleAllocation(amountMinor,'product-generation',product);acornRows=rewardRoleAllocation(rewardBudget.acorns,'product-generation',product);buttonRows=rewardRoleAllocation(rewardBudget.buttons,'product-generation',product);policy={mode:'product-generation-contribution-share'};
   }
   const payouts=combineCashRows(cashRows);if(payouts.reduce((s,r)=>s+r.amountMinor,0)!==amountMinor)throw new Error('Cash distribution must conserve the full sale amount.');
-  return Object.freeze({schema:SCHEMA,version:VERSION,saleId,saleType,endeavorId:endeavorId||null,currency,netAmountMinor:amountMinor,settlementTiming:'immediate',routesToAnnualPool:false,annualPoolEligible:false,annualPoolContributionMinor:0,weightSource:'vested-cerbanimo-co-credits',cotokensConsumed:false,policy,payouts,rewards:{acorns:combineRewardRows(acornRows),buttons:combineRewardRows(buttonRows)},createdAt:clean(input.createdAt||now(),80)});
+  return Object.freeze({schema:SCHEMA,version:VERSION,saleId,saleType,endeavorId:endeavorId||null,currency,saleAmountMinor:amountMinor,netAmountMinor:amountMinor,buyerChargeMinor,commerceSplitFee:{bps:splitFeeBps,amountMinor:splitFeeMinor,onTop:true,destination:'cerbanimo',reducesContributorPayout:false,routesToAnnualPool:false},settlementTiming:'immediate',routesToAnnualPool:false,annualPoolEligible:false,annualPoolContributionMinor:0,weightSource:'vested-cerbanimo-co-credits',cotokensConsumed:false,policy,payouts,rewards:{acorns:combineRewardRows(acornRows),buttons:combineRewardRows(buttonRows)},createdAt:clean(input.createdAt||now(),80)});
+}
+function buildAnnualDistribution(input={}){
+  const annualId=clean(input.annualId||input.distributionId,220);if(!annualId)throw new TypeError('annualId is required.');
+  const nodeId=clean(input.nodeId,180);if(!nodeId)throw new TypeError('nodeId is required.');
+  const currency=clean(input.currency||'USD',12).toUpperCase();
+  const eligibleReserveMinor=integer(input.eligibleReserveMinor??input.reserveMinor,'eligibleReserveMinor',0);
+  const reserveShareBps=bps(input.reserveShareBps??DEFAULT_ANNUAL_RESERVE_SHARE_BPS,'reserveShareBps');
+  const hostBps=bps(input.hostBps??DEFAULT_ANNUAL_HOST_BPS,'hostBps');
+  const cerbanimoBps=bps(input.cerbanimoBps??DEFAULT_ANNUAL_CERBANIMO_BPS,'cerbanimoBps');
+  if(hostBps+cerbanimoBps>10000)throw new RangeError('Annual host and Cerbanimo shares cannot exceed 100%.');
+  const contributorBps=10000-hostBps-cerbanimoBps;
+  const annualPayoutMinor=Math.floor(eligibleReserveMinor*reserveShareBps/10000),retainedReserveMinor=eligibleReserveMinor-annualPayoutMinor;
+  const buckets=largestRemainder(annualPayoutMinor,[{contributorId:'annual-contributors',weight:contributorBps},{contributorId:'annual-node-host',weight:hostBps},{contributorId:'annual-cerbanimo',weight:cerbanimoBps}]);
+  const bucket=id=>buckets.find(row=>row.contributorId===id)?.amount||0;
+  const contributorPoolMinor=bucket('annual-contributors'),hostAmountMinor=bucket('annual-node-host'),cerbanimoAmountMinor=bucket('annual-cerbanimo');
+  const participants=normalizeContributors(input.contributors||input.participantContributors);
+  if(contributorPoolMinor&&!participants.length)throw new Error('Annual contributor pool requires eligible cotoken contributors.');
+  const participantRows=contributorPoolMinor?roleAllocation(contributorPoolMinor,'annual-cotoken-contributor',participants):[];
+  const host={contributorId:clean(input.host?.contributorId||input.hostId||`node-host:${nodeId}`,180),contributorName:clean(input.host?.contributorName||input.host?.name||'Node host',180),stripeAccountId:clean(input.host?.stripeAccountId||input.hostStripeAccountId,180)||null,weight:1};
+  const cerbanimo={contributorId:clean(input.cerbanimo?.contributorId||input.cerbanimoId||'cerbanimo',180),contributorName:clean(input.cerbanimo?.contributorName||input.cerbanimo?.name||'Cerbanimo',180),stripeAccountId:clean(input.cerbanimo?.stripeAccountId||input.cerbanimoStripeAccountId,180)||null,weight:1};
+  const hostRows=hostAmountMinor?roleAllocation(hostAmountMinor,'annual-node-host',[host]):[];
+  const cerbanimoRows=cerbanimoAmountMinor?roleAllocation(cerbanimoAmountMinor,'annual-cerbanimo',[cerbanimo]):[];
+  const payouts=combineCashRows([...participantRows,...hostRows,...cerbanimoRows]);
+  if(payouts.reduce((sum,row)=>sum+row.amountMinor,0)!==annualPayoutMinor)throw new Error('Annual distribution must conserve the full payout amount.');
+  return Object.freeze({schema:ANNUAL_SCHEMA,version:VERSION,annualId,nodeId,currency,eventDate:clean(input.eventDate||`${new Date().getUTCFullYear()}-12-01`,40),eligibleReserveMinor,reserveShareBps,annualPayoutMinor,retainedReserveMinor,policy:{contributorBps,hostBps,cerbanimoBps},weightSource:'eligible-cerbanimo-cotokens',cotokensConsumed:false,payouts,createdAt:clean(input.createdAt||now(),80)});
 }
 function stripeTransferInstructions(distribution,{sourceTransaction,transferGroup}={}){
-  const source=clean(sourceTransaction,220);if(!source)throw new TypeError('sourceTransaction is required for Stripe transfers.');
-  return distribution.payouts.filter(x=>x.amountMinor>0).map((p,index)=>({schema:'civweave.cerbanimo-commerce-transfer.v1',saleId:distribution.saleId,recipientId:p.contributorId,destinationAccountId:p.stripeAccountId||null,amountCents:p.amountMinor,currency:distribution.currency.toLowerCase(),sourceTransaction:source,transferGroup:clean(transferGroup||`cerbanimo-sale:${distribution.saleId}`,180),idempotencyKey:`cerbanimo-sale-${distribution.saleId}-${p.contributorId}-${index+1}`,metadata:{civweave_schema:SCHEMA,civweave_sale_id:distribution.saleId,civweave_sale_type:distribution.saleType,civweave_recipient_id:p.contributorId,civweave_roles:p.roles.join(','),civweave_annual_pool:'excluded'}}));
+  const source=clean(sourceTransaction,220);if(!source)throw new TypeError('sourceTransaction is required for Stripe commerce transfers.');
+  return distribution.payouts.filter(x=>x.amountMinor>0).map((p,index)=>({schema:'civweave.cerbanimo-commerce-transfer.v1',saleId:distribution.saleId,recipientId:p.contributorId,destinationAccountId:p.stripeAccountId||null,amountCents:p.amountMinor,currency:distribution.currency.toLowerCase(),sourceTransaction:source,transferGroup:clean(transferGroup||`cerbanimo-sale:${distribution.saleId}`,180),idempotencyKey:`cerbanimo-sale-${distribution.saleId}-${p.contributorId}-${index+1}`,metadata:{civweave_schema:SCHEMA,civweave_sale_id:distribution.saleId,civweave_sale_type:distribution.saleType,civweave_recipient_id:p.contributorId,civweave_roles:p.roles.join(','),civweave_annual_pool:'excluded',civweave_split_fee_bps:String(distribution.commerceSplitFee?.bps||0),civweave_split_fee_minor:String(distribution.commerceSplitFee?.amountMinor||0)}}));
+}
+function annualStripeTransferInstructions(distribution,{transferGroup}={}){
+  if(distribution?.schema!==ANNUAL_SCHEMA)throw new TypeError('Annual distribution is required.');
+  return distribution.payouts.filter(x=>x.amountMinor>0).map((p,index)=>({schema:'civweave.cerbanimo-annual-transfer.v1',annualId:distribution.annualId,recipientId:p.contributorId,destinationAccountId:p.stripeAccountId||null,amountCents:p.amountMinor,currency:distribution.currency.toLowerCase(),fundingMode:'platform-reserve',transferGroup:clean(transferGroup||`cerbanimo-annual:${distribution.annualId}`,180),idempotencyKey:`cerbanimo-annual-${distribution.annualId}-${p.contributorId}-${index+1}`,metadata:{civweave_schema:ANNUAL_SCHEMA,civweave_annual_id:distribution.annualId,civweave_node_id:distribution.nodeId,civweave_recipient_id:p.contributorId,civweave_roles:p.roles.join(','),civweave_event_date:distribution.eventDate}}));
 }
 function receiptStore(){try{const v=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return v?.schema===RECEIPT_SCHEMA&&Array.isArray(v.receipts)?v:{schema:RECEIPT_SCHEMA,receipts:[]}}catch{return{schema:RECEIPT_SCHEMA,receipts:[]}}}
 function writeReceipt(distribution){const store=receiptStore(),existing=store.receipts.find(x=>x.saleId===distribution.saleId);if(existing)return{receipt:existing,duplicate:true};const receipt={...copy(distribution),schema:RECEIPT_SCHEMA,recordedAt:now()};store.receipts.push(receipt);store.updatedAt=now();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(store))}catch{}return{receipt,duplicate:false}}
 async function issueRewardRows(distribution){const ledger=globalThis.CivweaveCanonicalRewardsV2;if(!ledger?.appendEntry)return[];const results=[];for(const [asset,rows] of Object.entries(distribution.rewards))for(const row of rows){if(!(row.amount>0))continue;results.push(await ledger.appendEntry({accountId:row.contributorId,assetType:asset==='acorns'?'acorn':'button',amount:row.amount,sourceSystem:'cerbanimo',sourceKind:'exchange',sourceId:distribution.saleId,sourceKey:`cerbanimo:commerce:${distribution.saleId}:${asset}:${row.contributorId}`,metadata:{saleType:distribution.saleType,roles:row.roles,immediateCommerce:true,routesToAnnualPool:false,weightSource:distribution.weightSource}}))}return results}
 async function recordSale(input={}){const distribution=buildDistribution(input),stored=writeReceipt(distribution);if(stored.duplicate)return{distribution:stored.receipt,duplicate:true,rewardResults:[]};const rewardResults=await issueRewardRows(distribution);try{globalThis.dispatchEvent?.(new CustomEvent('civweave:cerbanimo-commerce-payout-ready',{detail:{distribution,transferInstructions:input.sourceTransaction?stripeTransferInstructions(distribution,{sourceTransaction:input.sourceTransaction,transferGroup:input.transferGroup}):[]}}))}catch{}return{distribution,duplicate:false,rewardResults}}
-const api=Object.freeze({VERSION,SCHEMA,STORAGE_KEY,DEFAULT_SERVICE_ORIGIN_ROYALTY_BPS,normalizeContributors,vestedOwnership,largestRemainder,buildDistribution,stripeTransferInstructions,recordSale,readReceipts:()=>receiptStore()});
+const api=Object.freeze({VERSION,SCHEMA,ANNUAL_SCHEMA,STORAGE_KEY,DEFAULT_SERVICE_ORIGIN_ROYALTY_BPS,DEFAULT_COMMERCE_SPLIT_FEE_BPS,DEFAULT_ANNUAL_RESERVE_SHARE_BPS,DEFAULT_ANNUAL_HOST_BPS,DEFAULT_ANNUAL_CERBANIMO_BPS,normalizeContributors,vestedOwnership,largestRemainder,buildDistribution,buildAnnualDistribution,stripeTransferInstructions,annualStripeTransferInstructions,recordSale,readReceipts:()=>receiptStore()});
 globalThis.CivweaveCerbanimoCommerceV1=api;
 })();
