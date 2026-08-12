@@ -7,7 +7,7 @@ const LEGACY_RUNTIME_ASSET='/app/local-ai/runtime-v266.js?v=1.0.87-v287-v283-coh
 if(globalThis.CivweaveLocalAIBootstrapV266?.version===VERSION&&globalThis.CivweaveLocalAIBootstrapV266?.revision===REVISION&&globalThis.CivweaveLocalAIBootstrapV266?.freshWorkerFallback===true&&globalThis.CivweaveLocalAIBootstrapV266?.settingsTeardown===true&&globalThis.CivweaveLocalAIBootstrapV266?.boundedStartup===true)return;
 const registryReady=()=>{const value=globalThis.CivweaveLocalModelRegistryV266;return Boolean(value?.version==='1.0.115-local-ai-registry-v302-gemma3-v4'&&value?.installable&&value?.byId&&value?.directUrl&&value?.artifactRevision&&value?.sourceUrl)};
 const runtimeReady=()=>{const value=globalThis.CivweaveLocalModelRuntimeV266;return Boolean(value?.version==='1.0.115-local-ai-runtime-v302-session-handoff'&&value?.revision===RUNTIME_REVISION&&value?.smallModelFastPath===true&&value?.canonicalCausalLM===true&&value?.stalledWebGPUFallback===true&&value?.freshWorkerFallback===true&&value?.phaseAwareErrors===true&&value?.promptBudgetEnforced===true&&value?.terminalCancellation===true&&value?.settingsTeardown===true)};
-const settingsReady=()=>{const value=globalThis.CivweaveLocalAISettingsV266;return Boolean(value?.version==='1.0.116-local-ai-settings-v304-tabbed'&&value?.truthfulCompletion===true&&value?.cacheIntegrityOnDemand===true&&value?.openPath==='snapshot-first-v287')};
+const settingsReady=()=>{const value=globalThis.CivweaveLocalAISettingsV266;return Boolean(value?.version==='1.0.116-local-ai-settings-v305-download-dock-layout'&&value?.truthfulCompletion===true&&value?.cacheIntegrityOnDemand===true&&value?.openPath==='snapshot-first-v287')};
 const files=[
   ['/app/ai-capability-broker-v268.js?v=1.0.67-v271',()=>globalThis.CivweaveAICapabilityBrokerV268?.version==='1.0.67-ai-capability-broker-v271-semantics'],
   ['/app/fast-interactive-runtime-v192.js?v=1.0.67-v271',()=>globalThis.CivweaveFastInteractiveV192?.version==='1.0.67-runtime-spine-v271'],
@@ -18,7 +18,7 @@ const files=[
   ['/app/local-ai/small-model-policy-v283.js?v=1.0.88-v283',()=>globalThis.CivweaveLocalSmallModelPolicyV283?.version==='1.0.85-local-ai-small-model-policy-v283'],
   ['/app/local-ai/runtime-v266.js?v=1.0.115-v302-session-handoff',runtimeReady],
   ['/app/local-ai/runtime-bridge-v266.js?v=1.0.88-v283',()=>globalThis.CivweaveLocalModelBridgeV266?.version==='1.0.83-local-ai-bridge-v282-health-fallback'&&globalThis.CivweaveLocalModelBridgeV266?.revision===RUNTIME_REVISION.replace('runtime','bridge')&&globalThis.CivweaveLocalModelBridgeV266?.continuationValidation===true],
-  ['/app/local-ai/settings-panel-v267.js?v=1.0.116-v304-tabbed',settingsReady],
+  ['/app/local-ai/settings-panel-v267.js?v=1.0.116-v305-download-dock-layout',settingsReady],
   ['/app/local-ai/primary-route-v283.js?v=1.0.88-v283',()=>globalThis.CivweaveLocalAIPrimaryRouteV283?.version==='1.0.85-local-ai-primary-route-v283'],
   ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.81-v278',()=>globalThis.CivweaveLocalModelHardwareTierUIV278?.version==='1.0.81-local-ai-hardware-tier-ui-v278'],
   ['/app/local-ai/test-pulse-v269.js?v=1.0.116-v303-mobile-safe',()=>globalThis.CivweaveLocalModelTestPulseV269?.version==='1.0.116-local-model-test-pulse-v303-mobile-safe']
