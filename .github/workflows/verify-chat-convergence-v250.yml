@@ -21,9 +21,11 @@ on:
       - 'public/app/working-campus-v156.part5.txt'
       - 'public/service-worker-chat-repair-v245.js'
       - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
       - 'scripts/sync-release-version-assets.mjs'
       - 'scripts/sync-release-coherence-v220.mjs'
       - 'scripts/verify-chat-convergence-v250.mjs'
+      - 'scripts/verify-local-ai-cache-coherence-v306.mjs'
       - '.github/workflows/verify-chat-convergence-v250.yml'
   push:
     branches: [main]
@@ -51,8 +53,12 @@ jobs:
           node --check public/app/platform-stability-v159.js
           node --check public/service-worker-chat-repair-v245.js
           node --check public/service-worker-v203.js
+          node --check scripts/build-service-worker-v211.mjs
           node --check scripts/sync-release-version-assets.mjs
           node --check scripts/sync-release-coherence-v220.mjs
           node --check scripts/verify-chat-convergence-v250.mjs
+          node --check scripts/verify-local-ai-cache-coherence-v306.mjs
       - name: Verify one canonical chat runtime and updater-first launch
         run: node scripts/verify-chat-convergence-v250.mjs
+      - name: Verify local AI cache compatibility coherence
+        run: node scripts/verify-local-ai-cache-coherence-v306.mjs
