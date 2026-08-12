@@ -19,6 +19,7 @@ const parseJsonc = text => JSON.parse(text.split('\n').filter(line => !line.trim
 const [
   accountWorkerSource,
   accountWranglerText,
+  nodeFabricSource,
   capacitySource,
   setupSource,
   provisionSource,
@@ -29,6 +30,7 @@ const [
 ] = await Promise.all([
   read('cloudflare/account-edge/src/index.mjs'),
   read('cloudflare/account-edge/wrangler.jsonc'),
+  read('cloudflare/node-cloud/src/index.mjs'),
   read('cloudflare/node-cloud/src/capacity.mjs'),
   read('scripts/setup-cloudflare-node.mjs'),
   read('scripts/provision-cloudflare-account-edge-v1.mjs'),
@@ -85,6 +87,10 @@ assert.ok(accountWorkerSource.includes('x-civweave-account-edge-origin'));
 assert.ok(accountWorkerSource.includes('accountEdgePath: true'));
 assert.ok(accountWorkerSource.includes('scopeAccountNodeHtml'));
 assert.ok(accountWorkerSource.includes('central-money-edge-required'));
+assert.ok(nodeFabricSource.includes("url.pathname === '/api/fabric/location'"));
+assert.ok(nodeFabricSource.includes("url.pathname === '/internal/location'"));
+assert.ok(nodeFabricSource.includes('civweave.hub-location-owner.v1'));
+assert.ok(nodeFabricSource.includes('coordinateDecimals: 3'));
 
 assert.ok(setupSource.includes('Provisioning contract:'));
 assert.ok(setupSource.includes('Worker + 3 starter Durable Object nodes'));
@@ -127,6 +133,9 @@ assert.ok(hostSetup.includes('id="edge-node-b"'));
 assert.ok(hostSetup.includes('id="edge-node-c"'));
 assert.ok(hostSetup.includes('Account → Workers Scripts → Edit'));
 assert.ok(hostSetup.includes('renderAccountEdge(meta)'));
+assert.ok(hostSetup.includes('id="sync-location"'));
+assert.ok(hostSetup.includes('navigator.geolocation.watchPosition'));
+assert.ok(hostSetup.includes("position.coords.latitude.toFixed(3)"));
 
 for (const file of [
   'cloudflare/account-edge/src/index.mjs',

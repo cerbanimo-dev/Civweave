@@ -267,6 +267,18 @@ This host intentionally uses a small JSON state store. Before running multiple s
 7. User enters Civweave. Heartbeats continue while the app is open.
 8. If the node goes offline, the installed app continues using its cached shell and local records.
 
+# Host location onboarding
+
+After the Cloudflare account Worker and its three starter nodes are ready, the host steward page offers **Place this hub on the mesh**:
+
+1. Take the steward device to the physical place the hub serves.
+2. Tap **Sync this place with the mesh** and approve the browser's one-time location request.
+3. Civweave waits briefly for the best available GPS fix.
+4. The browser rounds latitude and longitude to three decimal places before transmission. The exact device reading is not sent or retained.
+5. The account Worker writes the same rounded site position to all three starter-node manifests so discovery and map surfaces can place the hub consistently.
+
+The first successful sync creates a random location-claim key in the steward browser. Durable Object storage keeps only its SHA-256 digest. The same browser can update the site later; a different browser cannot silently replace it. Preserve the steward browser or its local Anchor before clearing site data.
+
 The saved connection record uses:
 
 ```text
@@ -313,6 +325,8 @@ curl "http://localhost:8787/api/envelopes?nodeId=test-node"
 
 - The host does not receive the user's complete local database by default.
 - The host stores only explicit registration, presence, and relay API submissions.
+- Hub placement is opt-in and user-initiated. Exact GPS coordinates remain on the steward device; mesh manifests receive coordinates rounded to three decimal places and a conservative accuracy band.
+- Location updates use a browser-generated claim key. Only its SHA-256 digest is stored by the Durable Object after the first successful claim.
 - `HUB_TOKEN` protects write and inspection APIs when configured.
 - TLS is provided by Render in hosted deployment.
 - For a public node, use a token and avoid transmitting secrets inside relay payloads.
