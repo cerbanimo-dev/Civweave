@@ -13,7 +13,7 @@ const PORT=18806;
 const origin=`http://127.0.0.1:${PORT}`;
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const releaseVersion=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
-const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209')`;
+const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425')`;
 const dataDir=await mkdtemp(path.join(os.tmpdir(),'civweave-installer-recovery-v281-'));
 const output=[];
 const child=spawn(process.execPath,['scripts/start-civweave-v131.mjs'],{
@@ -68,7 +68,8 @@ try{
     '/app/knowledge-school-installer-v1.css',
     '/app/knowledge-school-seeds-v1.js',
     '/app/knowledge-school-installer-v1.js',
-    '/app/pwa-update-controller-v204.js'
+    '/app/pwa-update-controller-v204.js',
+    '/app/working-campus-return-guard-v425.js'
   ])await expectRoute(route);
   for(const purpose of ['update-controls','shell-install','offline-manifest','offline-campus']){
     await expectRoute('/app/offline-package-v208.json',{headers:{'x-civweave-package':purpose},contentType:'application/json'});
@@ -102,10 +103,11 @@ try{
   const integrityImport="importScripts('/service-worker-shell-integrity-v281.js";
   const offlineImport="importScripts('/service-worker-offline-v211-override.js";
   for(const token of [cleanImport,coherenceImport,coreImport,installerImport,integrityImport,offlineImport])assert(files.wrapper.includes(token),`active worker is missing ${token}`);
+  assert(files.wrapper.includes('working-campus-return-v425'),'active worker does not force the v425 return-guard epoch');
   assert(files.wrapper.includes('offline-campus-current-graph-v280')&&files.wrapper.includes('policy=resumable-pause-v280'),'active worker does not carry the v280 resumable campus policy');
   assert(files.wrapper.indexOf(cleanImport)<files.wrapper.indexOf(coherenceImport)&&files.wrapper.indexOf(coherenceImport)<files.wrapper.indexOf(coreImport)&&files.wrapper.indexOf(coreImport)<files.wrapper.indexOf(installerImport)&&files.wrapper.indexOf(installerImport)<files.wrapper.indexOf(integrityImport)&&files.wrapper.indexOf(integrityImport)<files.wrapper.indexOf(offlineImport),'worker hardening layer order is incorrect');
   assert(files.coherence.includes("const CW_CODE_COHERENCE_VERSION = '1.0.91-code-coherence-v288'")&&files.coherence.includes('event.stopImmediatePropagation()')&&files.coherence.includes("'/app/local-ai/bootstrap-v266.js'"),'v288 executable-code coherence layer is incomplete');
-  assert(files.core.includes("const BUILD = 'lightweight-shell-v208'")&&files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained lightweight/offline core is incomplete');
+  assert(files.core.includes("const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425'")&&files.core.includes("'/app/working-campus-return-guard-v425.js'")&&files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained lightweight/offline core is incomplete');
   assert(!/importScripts\(/.test(files.core),'retained lightweight core imports the retired layered stack');
   assert(files.cleanroom.includes("const REVISION='living-school-cleanroom-v218'")&&files.cleanroom.includes('event.stopImmediatePropagation()'),'Living School worker retirement boundary is incomplete');
   assert(files.installer.includes("'/app/installer-storage-guard-v281.js'"),'installer state worker does not pin the storage guard');
@@ -123,14 +125,14 @@ try{
   );
   assert(files.background.includes('DOWNLOAD_OFFLINE_PACKAGE')&&files.background.includes('height:4px')&&files.background.includes("navigator.serviceWorker.addEventListener('message'"),'canonical page background campus continuation is incomplete');
   assert(files.storage.includes('requiredFreeBytes')&&files.storage.includes('navigator.storage'),'installer storage preflight is incomplete');
-  assert(files.legacy.includes(expectedWorkerImport),`legacy worker does not import the active ${releaseVersion} wrapper`);
+  assert(files.legacy.includes(expectedWorkerImport),`legacy worker does not import the active ${releaseVersion} v425 wrapper`);
 
   const bridgeBody=files.legacy.replace(/importScripts\('\/service-worker-v203\.js[^\n]+\);/,'');
   new vm.Script(`${bridgeBody}\n${files.cleanroom}\n${files.coherence}\n${files.core}\n${files.installer}\n${files.integrity}\n${files.offline}`,{filename:'civweave-v288-bridged-worker.js'});
   console.log(JSON.stringify({
     ok:true,
     releaseVersion,
-    directInstallerAssets:18,
+    directInstallerAssets:19,
     packagePurposeHeadersAccepted:4,
     knowledgeCatalogServed:true,
     knowledgeZipServed:firstZip,
@@ -139,7 +141,8 @@ try{
     backgroundCampus:true,
     storagePreflight:true,
     shellIntegrity:true,
-    workerRevision:'v288-code-coherence-v281-integrity-v280-resumable-campus'
+    workingCampusReturn:'v425',
+    workerRevision:'v288-code-coherence-v281-integrity-v280-resumable-campus-v425'
   },null,2));
 }catch(error){
   console.error(output.join(''));
