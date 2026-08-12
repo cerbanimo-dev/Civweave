@@ -2,121 +2,113 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const source=fs.readFileSync(new URL('../public/app/quest-veil-v1.js',import.meta.url),'utf8');
+const finale=fs.readFileSync(new URL('../public/app/quest-veil-v1.js',import.meta.url),'utf8');
+const gate=fs.readFileSync(new URL('../public/app/quest-veil-ledger-gate-v1.js',import.meta.url),'utf8');
+const mesh=fs.readFileSync(new URL('../public/app/quest-veil-mesh-v1.js',import.meta.url),'utf8');
 const boundary=fs.readFileSync(new URL('../public/app/install-boundary-v146.js',import.meta.url),'utf8');
 
-assert.match(source,/civweave\.chronicle-ledger\.v1\.1/,'Quest Veil must use the canonical chronicle ledger.');
-assert.match(source,/weaveling-quest-veil-writer-v1/,'Quest Veil must identify the dedicated Weaveling writing prompt.');
-assert.match(source,/rawEvidenceIncluded:false/,'Quest Veil entries must explicitly record that raw evidence is excluded.');
-assert.match(source,/sourceDetailsIncluded:false/,'Quest Veil entries must explicitly record that source details are excluded.');
-assert.match(source,/validated-context-stripped-state/,'Quest Veil must derive public fiction from a context-stripped validated state.');
-assert.match(boundary,/const QUEST_VEIL='\/app\/quest-veil-v1\.js';/,'Canonical system loader must name the Quest Veil runtime.');
-assert.match(boundary,/SYSTEM_EXPERIENCE_SCRIPTS=\[[\s\S]*?QUEST_VEIL,/,'Quest Veil must load on canonical system surfaces.');
+assert.match(gate,/civweave\.chronicle-ledger\.v1\.1/,'Mandatory veil gate must project from the canonical chronicle ledger.');
+assert.match(gate,/weaveling-task-veil-writer-v1/,'Mandatory veil gate must identify the dedicated Weaveling task writer prompt.');
+assert.match(gate,/contextStripped:true/,'Task Veil State must explicitly mark itself context stripped.');
+assert.match(gate,/sourceTextIncluded:false/,'Task Veil State must explicitly exclude source text.');
+assert.match(gate,/sourceTitleIncluded:false/,'Task Veil State must explicitly exclude source titles.');
+assert.match(gate,/evidenceContentIncluded:false/,'Task Veil State must explicitly exclude evidence content.');
+assert.match(gate,/humanChronicle/,'Human ledger access must pass through the mandatory projection.');
+assert.match(gate,/quest-veil-pending/,'Unveiled submissions must render only an opaque pending entry to humans.');
+assert.match(gate,/queueMesh\(\[\{submissionId:submission\.id,sourceHash:sourceDigest,stateHash:veilDigest,veilState:state\}\]\)/,'Failed local veil generation must queue only hashes plus stripped state to the mesh.');
+assert.match(mesh,/rawSourceIncluded:false/,'Mesh veil batches must exclude raw source content.');
+assert.match(mesh,/sourceTitlesIncluded:false/,'Mesh veil batches must exclude source titles.');
+assert.match(mesh,/evidenceContentIncluded:false/,'Mesh veil batches must exclude evidence content.');
+assert.match(mesh,/currencyPolicy:'acorns-and-buttons-only'/,'Quest Veil work must not introduce a separate credit currency.');
+assert.match(boundary,/const QUEST_VEIL_MESH='\/app\/quest-veil-mesh-v1\.js';/,'Canonical loader must name the Quest Veil mesh runtime.');
+assert.match(boundary,/const QUEST_VEIL_LEDGER_GATE='\/app\/quest-veil-ledger-gate-v1\.js';/,'Canonical loader must name the mandatory human-ledger veil gate.');
+assert.match(boundary,/SYSTEM_EXPERIENCE_SCRIPTS=\[[\s\S]*?QUEST_VEIL_MESH,[\s\S]*?QUEST_VEIL_LEDGER_GATE,/,'Mesh and mandatory gate must load on canonical system surfaces.');
+assert.match(finale,/civweave\.chronicle-ledger\.v1\.1/,'Questline finale remains a derived canonical chronicle projection.');
 
 const SECRET_TITLE='Project Nightjar private prototype for North Ridge Clinic';
-const SECRET_WISH='Build the Nightjar intake system for the private North Ridge Clinic workflow';
 const SECRET_PROOF='validator receipt says the private Nightjar prototype passed all checks';
-const plan={
-  schema:'civweave.intention-weave.v1',
-  id:'weave-private-nightjar',
-  title:SECRET_TITLE,
-  wish:SECRET_WISH,
-  outcome:'A private production result exists.',
-  state:'completed',
-  createdAt:'2026-08-12T00:00:00.000Z',
-  updatedAt:'2026-08-12T01:00:00.000Z',
-  profile:{constraints:'Do not expose North Ridge Clinic or Nightjar details.'},
-  governance:{title:'Private Nightjar consent terms',purpose:'Keep North Ridge Clinic details confidential.'},
-  paths:[
-    {id:'path-private',realm:'cerbanimo',title:SECRET_TITLE,purpose:'Implement the private Nightjar workflow.',steps:[SECRET_PROOF],status:'completed',proofProgress:{state:'accepted',proofIds:['receipt-secret-1'],reason:SECRET_PROOF}}
-  ]
+const submission={
+  id:'submission-private-nightjar',
+  source:'cerbanimo',
+  kind:'task',
+  subjectTitle:SECRET_TITLE,
+  contributorName:'Private Person',
+  evidenceSummary:SECRET_PROOF,
+  evidenceRefs:['receipt-secret-1'],
+  evidenceArtifacts:[{name:'Nightjar screenshot',inlineText:SECRET_PROOF,sourceRef:'private://nightjar'}],
+  skills:[{name:'Private workflow',rationale:'North Ridge Clinic intake'}],
+  attempt:2,
+  createdAt:'2026-08-12T00:00:00.000Z'
 };
-
+const validation={
+  schema:'civweave.validation-ledger.v1.1',
+  submissions:[submission],
+  packets:[{submissionId:submission.id,status:'open',createdAt:'2026-08-12T00:01:00.000Z'}],
+  thresholdReceipts:[]
+};
+const rawChronicle={
+  schema:'civweave.chronicle-ledger.v1.1',
+  entries:[{id:'chronicle:raw',submissionId:submission.id,title:SECRET_TITLE,story:SECRET_PROOF,kind:'verification',createdAt:'2026-08-12T00:02:00.000Z'}],
+  updatedAt:'2026-08-12T00:02:00.000Z'
+};
 const store=new Map([
-  ['civweave.working-campus.v1',JSON.stringify({view:'progress',plan})],
-  ['civweave.intentions.v127',JSON.stringify([{id:plan.id,kind:'weave-plan',plan}])],
-  ['civweave.chronicle-ledger.v1.1',JSON.stringify({schema:'civweave.chronicle-ledger.v1.1',entries:[],updatedAt:plan.updatedAt})]
+  ['civweave.validation-ledger.v1.1',JSON.stringify(validation)],
+  ['civweave.chronicle-ledger.v1.1',JSON.stringify(rawChronicle)],
+  ['civweave.working-campus.v1',JSON.stringify({})],
+  ['civweave.intentions.v127',JSON.stringify([])]
 ]);
-const writes=[];
-let capturedRequest=null;
 class CustomEventStub{constructor(type,init={}){this.type=type;this.detail=init.detail}}
-const context=vm.createContext({
+const gateContext=vm.createContext({
   console,
   structuredClone:globalThis.structuredClone,
-  setTimeout,
-  clearTimeout,
-  setInterval,
-  clearInterval,
+  TextEncoder,
+  crypto:globalThis.crypto,
   CustomEvent:CustomEventStub,
   dispatchEvent:()=>true,
   addEventListener:()=>{},
-  localStorage:{
-    getItem:key=>store.has(key)?store.get(key):null,
-    setItem:(key,value)=>{writes.push(key);store.set(key,String(value))},
-    removeItem:key=>store.delete(key)
-  },
-  CivweaveModelRuntime:{
-    readSharedConfig:()=>({provider:'bundled',route:'bundled',model:'test-model'}),
-    generate:async request=>{
-      capturedRequest=request;
-      return{
-        status:'success',
-        actual:{provider:'bundled',model:'test-model'},
-        outputJson:{
-          title:'A public chronicle',
-          story:`The model tried to leak this: ${SECRET_TITLE}.`,
-          mapTitle:'A sealed route',
-          mapNodes:[
-            {symbol:'✦',label:'Threshold',description:'A first abstract waymark.'},
-            {symbol:'◇',label:'Crossing',description:'A second abstract waymark.'},
-            {symbol:'✧',label:'Gate',description:'A final abstract waymark.'}
-          ],
-          imageScene:'A symbolic route with no real-world clues.',
-          closingLine:'Complete.'
-        }
-      };
-    }
-  }
+  document:{readyState:'loading'},
+  localStorage:{getItem:key=>store.get(key)??null,setItem:(key,value)=>store.set(key,String(value)),removeItem:key=>store.delete(key)}
 });
-
-vm.runInContext(source,context,{filename:'quest-veil-v1.js'});
-const api=context.CivweaveQuestVeilV1;
-assert.ok(api,'Quest Veil runtime must install a public API.');
-assert.equal(api.KEYS.chronicle,'civweave.chronicle-ledger.v1.1');
-assert.equal(api.eligible(plan),true,'Accepted completed plans should be eligible.');
-
-const state=api.veilState(plan);
+vm.runInContext(gate,gateContext,{filename:'quest-veil-ledger-gate-v1.js'});
+const gateApi=gateContext.CivweaveQuestVeilLedgerGateV1;
+assert.ok(gateApi,'Mandatory Quest Veil ledger gate must install a public API.');
+const state=gateApi.taskVeilState(submission,validation);
 const stateText=JSON.stringify(state);
-for(const secret of [SECRET_TITLE,SECRET_WISH,SECRET_PROOF,'receipt-secret-1','North Ridge Clinic','Nightjar']){
-  assert.equal(stateText.includes(secret),false,`Veil State leaked private source text: ${secret}`);
-}
-assert.equal(state.privacy.rawEvidenceIncluded,false);
-assert.equal(state.validation.allAccepted,true);
+for(const secret of [SECRET_TITLE,SECRET_PROOF,'Nightjar','North Ridge Clinic','receipt-secret-1','Private Person'])assert.equal(stateText.includes(secret),false,`Task Veil State leaked private context: ${secret}`);
+assert.equal(state.privacy.contextStripped,true);
+assert.equal(state.privacy.sourceTextIncluded,false);
+assert.equal(state.privacy.evidenceContentIncluded,false);
+const human=gateApi.humanChronicle();
+const humanText=JSON.stringify(human);
+for(const secret of [SECRET_TITLE,SECRET_PROOF,'Nightjar','North Ridge Clinic','receipt-secret-1'])assert.equal(humanText.includes(secret),false,`Human chronicle leaked an unveiled submission: ${secret}`);
+assert.equal(human.entries[0].kind,'quest-veil-pending','Unveiled human-facing entries must collapse to the opaque pending form.');
 
-const result=await api.generateForPlan(plan);
-assert.equal(result.status,'created');
-assert.ok(capturedRequest,'The Weaveling model harness should be invoked for eligible plans.');
-const requestText=JSON.stringify(capturedRequest);
-for(const secret of [SECRET_TITLE,SECRET_WISH,SECRET_PROOF,'receipt-secret-1','North Ridge Clinic','Nightjar']){
-  assert.equal(requestText.includes(secret),false,`Weaveling writer request leaked private source text: ${secret}`);
-}
-assert.match(requestText,/Quest Veil writer mode/);
-assert.match(requestText,/context-stripped Veil State/);
+const meshContext=vm.createContext({
+  console,
+  structuredClone:globalThis.structuredClone,
+  CustomEvent:CustomEventStub,
+  dispatchEvent:()=>true,
+  addEventListener:()=>{},
+  document:{readyState:'loading'}
+});
+vm.runInContext(mesh,meshContext,{filename:'quest-veil-mesh-v1.js'});
+const meshApi=meshContext.CivweaveQuestVeilMeshV1;
+assert.ok(meshApi,'Quest Veil mesh runtime must install a public API.');
+assert.deepEqual(meshApi.rewardForStage('learning'),{stage:'learning',acorns:1,buttons:0});
+assert.deepEqual(meshApi.rewardForStage('labor'),{stage:'labor',acorns:0,buttons:1});
+assert.deepEqual(meshApi.rewardForStage('making'),{stage:'making',acorns:0,buttons:1});
+assert.deepEqual(meshApi.rewardForStage('material'),{stage:'material',acorns:0,buttons:1});
+assert.deepEqual(meshApi.rewardForStage('materials'),{stage:'materials',acorns:0,buttons:1});
+assert.deepEqual(meshApi.rewardForStage('exchange'),{stage:'exchange',acorns:0,buttons:1});
+const reward=meshApi.rewardSummary([
+  {veilState:{journey:{stage:'learning'}}},
+  {veilState:{journey:{stage:'labor'}}},
+  {veilState:{journey:{stage:'material'}}},
+  {veilState:{journey:{stage:'exchange'}}}
+]);
+assert.equal(reward.acorns,1,'One veiled learning item must pay one Acorn.');
+assert.equal(reward.buttons,3,'Veiled labor, material, and exchange items must each pay one Button.');
+assert.equal(reward.items,4);
+assert.equal(reward.currencyPolicy,'acorns-and-buttons-only');
 
-const ledger=JSON.parse(store.get('civweave.chronicle-ledger.v1.1'));
-assert.equal(ledger.schema,'civweave.chronicle-ledger.v1.1');
-assert.equal(ledger.entries.length,1);
-const entry=ledger.entries[0];
-assert.equal(entry.kind,'quest-veil');
-assert.equal(entry.schema,'civweave.chronicle-entry.quest-veil.v1');
-assert.equal(entry.derived.rawEvidenceIncluded,false);
-assert.equal(entry.derived.sourceDetailsIncluded,false);
-assert.equal(entry.generation.status,'privacy-fallback','A leaking model output must be replaced by the deterministic privacy fallback.');
-const publicText=JSON.stringify({title:entry.title,story:entry.story,public:entry.public});
-for(const secret of [SECRET_TITLE,SECRET_WISH,SECRET_PROOF,'receipt-secret-1','North Ridge Clinic','Nightjar']){
-  assert.equal(publicText.includes(secret),false,`Chronicle entry leaked private source text: ${secret}`);
-}
-assert.deepEqual([...new Set(writes)],['civweave.chronicle-ledger.v1.1'],'Quest Veil must not create a second persistence ledger.');
-assert.equal(api.safePublicPayload({proofIds:['secret']},plan),false,'Proof identifiers must never pass the public payload guard.');
-
-console.log('Quest Veil v1 privacy, Weaveling prompt, canonical ledger, and loader checks passed.');
+console.log('Quest Veil mandatory human gate, stripped mesh payload, and per-item Acorn/Button reward checks passed.');
