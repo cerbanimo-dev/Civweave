@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-host-node-lobby-v1';
+const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-host-node-lobby-v2';
 const stateNode = document.getElementById('package-state');
 const assetsNode = document.getElementById('package-assets');
 const installButton = document.getElementById('install-app');
@@ -10,12 +10,11 @@ const helpNode = document.getElementById('install-help');
 let repairing = false;
 
 function installHostNodeLobby() {
-  const host = new URLSearchParams(location.search).get('host');
-  if (!host || document.querySelector('script[data-civweave-host-node-lobby]')) return false;
+  if (document.querySelector('script[data-civweave-host-node-lobby]')) return false;
   const script = document.createElement('script');
-  script.src = '/app/host-node-installer-lobby-v1.js?v=1.0.116-host-node-lobby-v1';
+  script.src = '/app/host-node-installer-lobby-v1.js?v=1.0.118-local-host-autodetect-v2';
   script.async = true;
-  script.dataset.civweaveHostNodeLobby = 'v1';
+  script.dataset.civweaveHostNodeLobby = 'v2';
   document.head.append(script);
   return true;
 }
