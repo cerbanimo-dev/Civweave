@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY VERSION ./VERSION
 COPY server ./server
+COPY lib ./lib
 COPY releases ./releases
 COPY scripts ./scripts
 COPY public ./public
