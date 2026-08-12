@@ -1,1 +1,181 @@
-awk: cannot open "--" (No such file or directory)
+'use strict';
+const CACHE='civweave-model-generative-v266';
+const RUNTIME_CACHE='civweave-local-runtime-v287';
+const TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js';
+const WASM_V3='/app/vendor/transformers/wasm/';
+const runtimeModules=new Map();
+const wasmBinaryCache=new Map();
+let hfRuntime=null,tokenizer=null,model=null,loaded=null,loading=null;
+const clean=(value,max=200000)=>String(value??'').slice(0,max);
+const now=()=>performance.now();
+const post=(id,type,payload={})=>self.postMessage({id,type,...payload});
+const phase=(id,name,started,detail={})=>post(id,'progress',{progress:{phase:name,elapsedMs:Math.round(now()-started),...detail}});
+const artifactFor=(spec,path)=>spec?.artifacts?.find?.(row=>row?.path===path)||null;
+const revisionFor=(spec,path)=>artifactFor(spec,path)?.revision||spec.revision;
+const remoteUrl=(spec,path)=>`https://huggingface.co/${spec.repo}/resolve/${encodeURIComponent(revisionFor(spec,path))}/${path}`;
+const runtimeAsset=spec=>spec?.runtimeAsset||TRANSFORMERS_V3;
+const wasmRoot=spec=>spec?.wasmRoot||WASM_V3;
+function requestUrl(input){try{return typeof input==='string'?input:input?.url||String(input)}catch{return String(input||'')}}
+function cacheAdapter(cache,spec){
+  const localPrefix=`/models/${spec.repo}/`,repoPrefix=`https://huggingface.co/${spec.repo}/resolve/`;
+  const miss=()=>new Response('',{status:404,statusText:'Downloaded model cache miss'});
+  const withKnownLength=(response,path)=>{const known=Math.max(0,Number(artifactFor(spec,path)?.sizeBytes)||0);if(!response?.ok||response.headers.get('content-length')||!known)return response;const headers=new Headers(response.headers);headers.set('content-length',String(known));headers.set('x-civweave-artifact-length','registry-v300');return new Response(response.body,{status:response.status,statusText:response.statusText,headers})};
+  const find=async path=>{const hit=await cache.match(remoteUrl(spec,path));return hit?.ok?withKnownLength(hit,path):miss()};
+  return{async match(request){const key=requestUrl(request);if(key.startsWith(localPrefix))return find(key.slice(localPrefix.length));if(key.startsWith(repoPrefix)){const rest=key.slice(repoPrefix.length),slash=rest.indexOf('/');if(slash>=0)return find(rest.slice(slash+1))}try{const hit=await cache.match(request);return hit?.ok?hit:undefined}catch{return undefined}},put:(request,response)=>cache.put(request,response)};
+}
+function friendlyError(error,spec,stage='inference'){
+  const raw=String(error?.message||error);
+  if(/^\s*\d{6,}\s*$/.test(raw))return `${spec?.label||spec?.id||'The selected model'} could not create its local inference session during ${stage}. The browser backend returned diagnostic code ${raw.trim()} without an explanation; Civweave released that worker instead of leaving it resident.`;
+  if(raw.includes('/models/')&&(raw.includes('env.allowRemoteModels=false')||raw.includes('local_files_only=true')))return `Downloaded model cache miss for ${spec?.label||spec?.id||'the selected model'} during ${stage}. Resume this model while online so Civweave can fetch only the missing artifact.`;
+  if(/Unexpected end of JSON input|Unexpected token\s*['"]?<|<!doctype|not valid JSON/i.test(raw))return `Downloaded model metadata is missing, truncated, or invalid for ${spec?.label||spec?.id||'the selected model'} during ${stage}. Reopen model settings while online so Civweave can repair only the bad metadata artifact.\n\nTransport detail: ${raw}`;
+  if(/Gemma 4 runtime chunk/i.test(raw))return `The Gemma 4 browser runtime is incomplete on this device. Open Civweave online once and test the model so the split ONNX runtime can be cached for offline use.\n\nRuntime detail: ${raw}`;
+  if(/shader-f16/i.test(raw))return `${spec?.label||spec?.id||'The selected model'} requires WebGPU shader-f16 support for its mobile q2f16 graph. Civweave can step down to a compatible local tier when the request permits it.\n\nBackend detail: ${raw}`;
+  if(/Failed to get GPU adapter|WebGPU adapter|no available backend|WebGPU is unavailable/i.test(raw))return `This browser did not provide a usable WebGPU adapter during ${stage}. Civweave can use its local fallback ladder when the request allows it.\n\nBackend detail: ${raw}`;
+  if(/shader|device lost|out of memory|allocation|buffer/i.test(raw))return `${spec?.label||spec?.id||'The selected model'} reached a WebGPU/device limit during ${stage}. ${raw}`;
+  return raw;
+}
+async function importRuntime(spec){
+  const asset=runtimeAsset(spec);
+  if(runtimeModules.has(asset))return runtimeModules.get(asset);
+  const promise=import(asset).catch(error=>{runtimeModules.delete(asset);throw error});
+  runtimeModules.set(asset,promise);
+  return promise;
+}
+async function runtimeChunk(path){
+  const cache=globalThis.caches?await caches.open(RUNTIME_CACHE):null;
+  const hit=cache?await cache.match(path):null;
+  if(hit?.ok)return new Uint8Array(await hit.arrayBuffer());
+  const response=await fetch(path,{cache:'no-store'});
+  if(!response.ok)throw new Error(`Gemma 4 runtime chunk ${path} returned HTTP ${response.status}.`);
+  if(cache)try{await cache.put(path,response.clone())}catch{}
+  return new Uint8Array(await response.arrayBuffer());
+}
+async function splitWasmBinary(spec){
+  const chunks=Array.isArray(spec?.wasmChunks)?spec.wasmChunks.filter(Boolean):[];
+  if(!chunks.length)return null;
+  const key=chunks.join('|');
+  if(wasmBinaryCache.has(key))return wasmBinaryCache.get(key);
+  const promise=(async()=>{
+    const parts=[];let total=0;
+    for(const path of chunks){const bytes=await runtimeChunk(path);if(!bytes.byteLength)throw new Error(`Gemma 4 runtime chunk ${path} was empty.`);parts.push(bytes);total+=bytes.byteLength}
+    const merged=new Uint8Array(total);let offset=0;
+    for(const part of parts){merged.set(part,offset);offset+=part.byteLength}
+    return merged;
+  })().catch(error=>{wasmBinaryCache.delete(key);throw error});
+  wasmBinaryCache.set(key,promise);
+  return promise;
+}
+function runtimeProfile(hf,spec){
+  const hardwareConcurrency=Math.max(1,Number(self.navigator?.hardwareConcurrency||1));
+  const isolated=Boolean(self.crossOriginIsolated);
+  const requestedThreads=Math.max(1,Math.min(4,Math.floor(hardwareConcurrency/2)||1));
+  const wasmThreads=isolated?requestedThreads:1;
+  const wasm=hf.env.backends?.onnx?.wasm||null;
+  if(wasm){
+    wasm.wasmPaths=wasmRoot(spec);
+    wasm.numThreads=wasmThreads;
+    wasm.simd=true;
+  }
+  return{
+    runtime:spec.runtime||'transformers-js-v3',
+    runtimeAsset:runtimeAsset(spec),
+    crossOriginIsolated:isolated,
+    hardwareConcurrency,
+    wasmThreads,
+    wasmSimd:Boolean(wasm?.simd),
+    workerInference:true,
+    threadedWasmEligible:Boolean(isolated&&wasmThreads>1)
+  };
+}
+async function backendProfile(spec){
+  if(spec.device!=='webgpu')return{backend:'wasm',gpu:null};
+  if(!self.navigator?.gpu?.requestAdapter)throw Object.assign(new Error('WebGPU is unavailable in this worker.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'});
+  let adapter;try{adapter=await self.navigator.gpu.requestAdapter()}catch(error){throw Object.assign(new Error(`Failed to get GPU adapter: ${clean(error?.message||error,1000)}`),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'})}
+  if(!adapter)throw Object.assign(new Error('Failed to get GPU adapter.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'});
+  const info=adapter.info||{},shaderF16=Boolean(adapter.features?.has?.('shader-f16'));
+  if(spec.requiresShaderF16&&!shaderF16)throw Object.assign(new Error('WebGPU shader-f16 is required by this mobile q2f16 model, but the active adapter does not expose shader-f16.'),{code:'LOCAL_BACKEND_CAPABILITY_UNAVAILABLE'});
+  return{backend:'webgpu',gpu:{available:true,shaderF16,vendor:clean(info.vendor||'',120),architecture:clean(info.architecture||'',120),device:clean(info.device||'',120),description:clean(info.description||'',180),maxBufferSize:Number(adapter.limits?.maxBufferSize||0),maxStorageBufferBindingSize:Number(adapter.limits?.maxStorageBufferBindingSize||0)}};
+}
+async function configureRuntime(hf,cache,spec){
+  hf.env.allowLocalModels=true;
+  hf.env.allowRemoteModels=false;
+  hf.env.useBrowserCache=false;
+  hf.env.useCustomCache=true;
+  hf.env.customCache=cacheAdapter(cache,spec);
+  const profile=runtimeProfile(hf,spec),wasm=hf.env.backends?.onnx?.wasm||null;
+  if(wasm&&spec.wasmChunks?.length){
+    const binary=await splitWasmBinary(spec);
+    wasm.wasmBinary=binary;
+    profile.wasmBinaryBytes=binary?.byteLength||0;
+    profile.wasmChunkCount=spec.wasmChunks.length;
+    profile.wasmBinaryCached=true;
+  }
+  return profile;
+}
+const promptTokenCount=inputs=>Number(inputs?.input_ids?.dims?.at?.(-1)||inputs?.input_ids?.tolist?.()?.[0]?.length||0);
+const generatedIds=(sequences,count)=>{try{return sequences?.tolist?.()?.[0]?.slice(count)||[]}catch{return[]}};
+function makeStreamer(id,requested,timing){if(!hfRuntime?.TextStreamer||!tokenizer)return null;return new hfRuntime.TextStreamer(tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:text=>{const value=clean(text,12000);if(!value)return;timing.decoded+=value;if(requested)post(id,'token',{token:{text:value,index:timing.index++}})},token_callback_function:tokens=>{if(!timing.firstTokenAt)timing.firstTokenAt=now();timing.generatedTokens+=Math.max(1,tokens?.length||1)}})}
+async function warmBenchmark(id,started,profile){
+  const benchmarkStarted=now();
+  phase(id,'benchmarking-model',started,{model:loaded?.id||'',backend:profile.backend,targetTokens:10});
+  const inputs=tokenizer('Civweave local inference benchmark');
+  const promptTokens=promptTokenCount(inputs);
+  const timing={firstTokenAt:0,generatedTokens:0,index:0,decoded:''};
+  const streamer=makeStreamer(id,false,timing);
+  const options={...inputs,max_new_tokens:10,min_new_tokens:10,do_sample:false,use_cache:true,return_dict_in_generate:true};
+  if(streamer)options.streamer=streamer;
+  const output=await model.generate(options);
+  const completed=now(),ids=generatedIds(output?.sequences,promptTokens),tokens=ids.length||timing.generatedTokens||10;
+  const benchmarkMs=Math.max(1,Math.round(completed-benchmarkStarted));
+  const benchmarkTtftMs=timing.firstTokenAt?Math.round(timing.firstTokenAt-benchmarkStarted):null;
+  const benchmarkDecodeMs=Math.max(1,completed-(timing.firstTokenAt||benchmarkStarted));
+  const benchmarkTokensPerSecond=Number((tokens/(benchmarkDecodeMs/1000)).toFixed(2));
+  return{benchmarkMs,benchmarkTtftMs,benchmarkTokens:tokens,benchmarkTokensPerSecond};
+}
+async function unload(){try{await model?.dispose?.()}catch{}tokenizer=null;model=null;loaded=null;hfRuntime=null}
+async function ensure(spec,id,{benchmark=false}={}){
+  const key=`${spec.id}:${spec.runtime||'transformers-js-v3'}:${spec.device||'wasm'}:${spec.dtype||''}:${spec.textOnly?'text':''}`;
+  if(loaded?.key===key&&tokenizer&&model){if(benchmark&&!loaded.benchmark)loaded.benchmark=await warmBenchmark(id,now(),loaded);return{coldStart:false,coldStartMs:0,tokenizerLoadMs:0,modelLoadMs:0,warmupMs:0,backend:loaded.backend,gpu:loaded.gpu,...loaded.runtime,...(loaded.benchmark||{})}};
+  if(loading)return loading;
+  loading=(async()=>{
+    if(loaded?.key&&loaded.key!==key)await unload();
+    const started=now();phase(id,'loading-runtime',started,{model:spec.id,runtime:spec.runtime||'transformers-js-v3'});
+    const hf=await importRuntime(spec);hfRuntime=hf;
+    const cache=await caches.open(CACHE),runtime=await configureRuntime(hf,cache,spec);
+    phase(id,'runtime-profile',started,{model:spec.id,...runtime});
+    phase(id,'checking-backend',started,{model:spec.id,requestedBackend:spec.device||'wasm',requiresShaderF16:Boolean(spec.requiresShaderF16)});const profile=await backendProfile(spec);
+    phase(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend,gpu:profile.gpu});const tokenizerStarted=now();
+    tokenizer=await hf.AutoTokenizer.from_pretrained(spec.repo,{revision:spec.revision,progress_callback:p=>phase(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend,...p})});
+    const tokenizerLoadMs=Math.round(now()-tokenizerStarted);
+    phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,textOnly:Boolean(spec.textOnly)});const modelStarted=now();
+    const modelOptions={revision:spec.revision,device:spec.device||profile.backend,dtype:spec.dtype,progress_callback:p=>phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,...p})};
+    if(spec.textOnly)modelOptions.textOnly=true;
+    model=await hf.AutoModelForCausalLM.from_pretrained(spec.repo,modelOptions);
+    const modelLoadMs=Math.round(now()-modelStarted);
+    const warmupMs=0;
+    loaded={key,id:spec.id,repo:spec.repo,revision:spec.revision,backend:profile.backend,dtype:spec.dtype,gpu:profile.gpu,runtime,benchmark:null};
+    const benchmarkResult=benchmark?await warmBenchmark(id,started,profile):null;
+    loaded.benchmark=benchmarkResult;
+    const coldStartMs=Math.round(now()-started);
+    const metrics={coldStart:true,coldStartMs,tokenizerLoadMs,modelLoadMs,warmupMs,backend:profile.backend,gpu:profile.gpu,...runtime,...(benchmarkResult||{})};
+    phase(id,'model-ready',started,{model:spec.id,...metrics});
+    return metrics;
+  })().catch(async error=>{await unload();throw error}).finally(()=>{loading=null});
+  return loading;
+}
+function parseJsonLoose(text){const source=clean(text).replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();for(let start=0;start<source.length;start++){if(source[start]!=='{'&&source[start]!=='[')continue;const open=source[start],close=open==='{'?'}':']';let depth=0,quoted=false,escaped=false;for(let i=start;i<source.length;i++){const c=source[i];if(quoted){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c==='"')quoted=false;continue}if(c==='"'){quoted=true;continue}if(c===open)depth++;else if(c===close&&--depth===0){try{return JSON.parse(source.slice(start,i+1))}catch{break}}}}return null}
+async function generate(message,id){
+  const spec=message.spec,requestStarted=now(),load=await ensure(spec,id,{benchmark:Boolean(message.benchmark)});
+  phase(id,'preparing-prompt',requestStarted,{model:spec.id,backend:load.backend,thinking:Boolean(message.thinking)});const prepStarted=now();
+  const inputs=tokenizer.apply_chat_template(message.messages||[],{add_generation_prompt:true,tokenize:true,return_dict:true,enable_thinking:Boolean(message.thinking)});
+  const promptPrepareMs=Math.round(now()-prepStarted),promptTokens=promptTokenCount(inputs),window=Number(spec.contextWindowTokens||0),working=Number(spec.workingContextTokens||0),maxNewTokens=Math.max(8,Math.min(4096,Number(message.maxNewTokens||256)));
+  if(window&&promptTokens+maxNewTokens>window){const error=new Error(`Prompt is ${promptTokens.toLocaleString()} tokens and asks for ${maxNewTokens.toLocaleString()} output tokens, beyond ${spec.label}'s ${window.toLocaleString()}-token model window.`);error.code='LOCAL_MODEL_CONTEXT_EXCEEDED';throw error}
+  if(working&&promptTokens>working)phase(id,'context-warning',requestStarted,{model:spec.id,promptTokens,workingContextTokens:working,contextWindowTokens:window});
+  const timing={firstTokenAt:0,generatedTokens:0,index:0,decoded:''},generationStarted=now(),streamer=makeStreamer(id,Boolean(message.stream),timing),temperature=Math.max(.01,Math.min(2,Number(message.temperature??.7)));
+  phase(id,'generating',requestStarted,{model:spec.id,backend:load.backend,streaming:Boolean(message.stream),thinking:Boolean(message.thinking),promptTokens,maxNewTokens,contextWindowTokens:window,workingContextTokens:working,wasmThreads:load.wasmThreads,crossOriginIsolated:load.crossOriginIsolated,wasmSimd:load.wasmSimd,runtime:load.runtime});
+  const options={...inputs,max_new_tokens:maxNewTokens,do_sample:true,temperature,top_k:Number(spec.generation?.topK||20),use_cache:true,return_dict_in_generate:true};if(streamer)options.streamer=streamer;
+  const output=await model.generate(options),completed=now(),ids=generatedIds(output?.sequences,promptTokens);let text='';try{text=clean(tokenizer.decode(ids,{skip_special_tokens:true})).trim()}catch{}if(!text)text=clean(timing.decoded).trim();
+  const tokenCount=ids.length||timing.generatedTokens,generationMs=Math.round(completed-generationStarted),ttftMs=timing.firstTokenAt?Math.round(timing.firstTokenAt-generationStarted):null,decodeMs=Math.max(1,completed-(timing.firstTokenAt||generationStarted)),tokensPerSecond=tokenCount?Number((tokenCount/(decodeMs/1000)).toFixed(2)):0;
+  return{text,json:parseJsonLoose(text),model:{id:spec.id,repo:spec.repo,revision:spec.revision,runtime:spec.runtime||'transformers-js-v3'},backend:load.backend,streamed:Boolean(message.stream&&streamer),streamRequested:Boolean(message.stream),metrics:{...load,promptPrepareMs,promptTokens,contextWindowTokens:window,workingContextTokens:working,maxNewTokens,thinking:Boolean(message.thinking),generationMs,ttftMs,prefillAndFirstTokenMs:ttftMs,decodeMs:Math.round(decodeMs),generatedTokens:tokenCount,tokensPerSecond,totalMs:Math.round(completed-requestStarted),kvCache:true}};
+}
+self.addEventListener('message',async event=>{const message=event.data||{},id=message.id;if(!id)return;try{if(message.type==='shutdown'){await unload();post(id,'done',{result:{shutdown:true}});return}if(message.type!=='generate')throw new Error(`Unsupported local-model worker request: ${message.type}`);post(id,'done',{result:await generate(message,id)})}catch(error){post(id,'error',{error:{message:friendlyError(error,message.spec,error?.code==='LOCAL_MODEL_CONTEXT_EXCEEDED'?'context check':'inference'),name:error?.name||'Error',code:error?.code||'LOCAL_MODEL_FAILED',stack:clean(error?.stack,4000)}})}});
