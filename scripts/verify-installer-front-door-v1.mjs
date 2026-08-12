@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
+const readBytes=path=>readFile(new URL(`../${path}`,import.meta.url));
 const [installerHtml,bridge,brand,logoSvg,hostSetup,anchor,setup,frontDoor]=await Promise.all([
   read('public/app/index.html'),
   read('public/app/pwa-install-prompt-v247.js'),
@@ -17,6 +18,14 @@ const entry="/app/installed-entry-v146?installed=1&system=civweave";
 const civweavePrismatic='/app/logos/civweave-prismatic-wordmark-v1.png';
 const cerbanimoMark='/app/logos/cerbanimo-steward-mark-v1.png';
 const frontDoorCss='/app/front-door-prismatic-v301.css';
+const pngSignature=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
+
+for(const path of ['public/app/logos/civweave-prismatic-wordmark-v1.png','public/app/logos/cerbanimo-steward-mark-v1.png']){
+  const bytes=await readBytes(path);
+  assert.ok(bytes.subarray(0,8).equals(pngSignature),`${path} must contain real PNG bytes`);
+  assert.equal(bytes.subarray(12,16).toString('ascii'),'IHDR',`${path} must contain a PNG IHDR`);
+  assert.ok(bytes.readUInt32BE(16)>=512&&bytes.readUInt32BE(20)>=512,`${path} must be at least 512px in both dimensions`);
+}
 
 assert.ok(bridge.includes(`const ENTRY='${entry}'`),'installed Open Civweave button must use updater-first installed entry');
 assert.ok(!bridge.includes("const ENTRY='/app/?system=civweave&installed=1'"),'PWA bridge must not route Open Civweave back into the installer');

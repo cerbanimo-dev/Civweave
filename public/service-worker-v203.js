@@ -3,7 +3,7 @@
 importScripts('/app/system-routes-v227.js?v=1.0.116-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288');
-importScripts('/service-worker-core-v208.js?v=1.0.116-chat-convergence-v250');
+importScripts('/service-worker-core-v208.js?v=1.0.116-chat-convergence-v250-installer-brand-v1');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');

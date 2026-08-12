@@ -1,6 +1,6 @@
 'use strict';
 const VERSION='1.0.7';
-const CACHE_REVISION='direct-family-r45-memory-credential-v191';
+const CACHE_REVISION='direct-family-r46-installer-brand-v1';
 const GUIDE_REVISION='five-system-chat-r46-weaveling-memory';
 const CABINET_REVISION='direct-software-r38-v106';
 const DEVICE_REVISION='device-package-r42-civweave-map-v1';
@@ -64,7 +64,22 @@ const CORE=[
   '/app/shared/civweave-parity-runtime.js','/app/shared/civweave-parity-ledger.json',
   '/app/services/anarchadia/workbench.html','/app/services/anarchadia/cabinet-workbench-v144.css','/app/services/anarchadia/cabinet-workbench-loader-v144.js','/app/services/anarchadia/styles.css','/app/services/anarchadia/src/app.js','/app/services/anarchadia/src/domain.js','/app/services/anarchadia/src/store.js','/app/services/anarchadia/src/export.js','/app/services/anarchadia/src/ai.js','/app/services/anarchadia/civweave-handoff-consumer.js','/app/services/anarchadia/civweave-presence.js','/app/services/anarchadia/docs/PROVISIONAL_CONSTITUTION.md',
   '/app/services/fellowfare/cabinet.html','/app/services/fellowfare/cabinet-embed.css','/app/services/fellowfare/cabinet-bridge.js','/app/services/fellowfare/styles.css','/app/services/fellowfare/app.js','/app/services/fellowfare/ai.js','/app/services/fellowfare/ledger.js','/app/services/fellowfare/shared/civweave-model-runtime.js','/app/services/fellowfare/civweave-handoff-consumer.js',
-  '/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png',
+  '/app/learning-pack-seeds-v1.js',
+  '/app/shared/learning-pack-runtime-v1.mjs',
+  '/app/shared/learning-pack-resolver-v1.mjs',
+  '/app/shared/learning-pack-shelf-v1.mjs',
+  '/app/shared/learning-pack-shelf-v1.css',
+  '/app/shared/core-practice-pack-v1.mjs',
+  '/app/shared/expert-pack-library-v1.mjs',
+  '/app/shared/skill-crosswalk-v1.mjs',
+  '/app/shared/labor-intelligence-core-v1.mjs',
+  '/app/cerbanimo-learning-packs-v1.js',
+  '/app/living-school-learning-packs-v1.mjs',
+  '/app/services/fellowfare/labor-context-v1.mjs',
+  '/downloads/learning-packs/catalog.json',
+  '/downloads/learning-packs/onet-labor-atlas-30-3.json.gz',
+  '/downloads/learning-packs/esco-skill-crosswalk-v1.json.gz',
+  '/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v1.png','/app/logos/cerbanimo-steward-mark-v1.png',
   '/app/assets/ai/weaveling.png','/app/assets/ai/moss.png','/app/assets/ai/kamiya.png','/app/assets/ai/rook.png','/app/assets/ai/merlin.png'
 ];
 const DEVICE_REQUIRED=[...CORE,...MAP_CORE];

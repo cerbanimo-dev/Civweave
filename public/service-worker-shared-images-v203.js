@@ -22,6 +22,8 @@ const ESSENTIAL=[
   '/app/assets/navigation/200-anarchadia-nav.webp',
   '/app/logos/civweave.webp',
   '/app/logos/cerbanimo.webp',
+  '/app/logos/civweave-prismatic-wordmark-v1.png',
+  '/app/logos/cerbanimo-steward-mark-v1.png',
   '/app/logos/fellowfare-v2.webp'
 ];
 const IMAGE_EXT=/\.(?:png|webp|jpe?g|gif|svg|avif)$/i;

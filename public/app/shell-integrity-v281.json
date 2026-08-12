@@ -2,7 +2,7 @@
   "version": "1.0.116",
   "revision": "shell-integrity-v281",
   "algorithm": "sha256",
-  "requiredAssetCount": 15,
+  "requiredAssetCount": 18,
   "assets": {
     "/index.html": "c20fea66c96eb9acf1fa339527cb96701c974909fe72b6e0ff8562c7c68bfd66",
     "/install-v130.css": "dfb524c1fae9d5cd3b7125b668e92fc7d4fedd43afa785f5f52e23d4c627a367",
@@ -16,6 +16,9 @@
     "/app/fullscreen-family-v104.html": "767911c8f8c80f38d3f6d0ba3e06512a810abb8f12b3bb59d2543fe904b4e83f",
     "/app/logos/civweave-icon-192.png": "7f56100fcaa4b6096bc031df735ee74b124cb0f7884f6b392ff5bf2816a71958",
     "/app/logos/civweave-icon-512.png": "83c649211fb9fad53c2d44ab774ba5ab153e3f635d0864a84596b45b33c70b4d",
+    "/app/logos/civweave-pwa-192-v247.png": "7f56100fcaa4b6096bc031df735ee74b124cb0f7884f6b392ff5bf2816a71958",
+    "/app/logos/civweave-prismatic-wordmark-v1.png": "3cd47bd199f675d51b4201ffb08ac030b4176e017acc10cba92b2c678606ca8f",
+    "/app/logos/cerbanimo-steward-mark-v1.png": "f5b6967f3f4ec0d9a744b614300e1ee536275605d01d1e83bde0a34bb827ffde",
     "/app/installer-state-machine-v280.js": "57f84ee8457cce0e9e35e4e561a837fff493af484a940822378ae568faf440b0",
     "/app/installer-storage-guard-v281.js": "72e9f7f2522079a6862f8f3ca871ae8e01adb634b7ba034c736d0a0306da4e08",
     "/app/offline-campus-status-v210.js": "d26e21ed39631f45e085004661853a3ebe2ce4f18be3f26c71beae88f500461c"
