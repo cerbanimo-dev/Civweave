@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build and deploy civweave.pages.dev
+    name: Build and deploy civweave.pages.dev + starter nodes
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -38,9 +38,28 @@ jobs:
       - name: Verify Cloudflare credentials
         shell: bash
         run: |
+          set -euo pipefail
           test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing repository secret CLOUDFLARE_API_TOKEN'; exit 2; }
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
           npx wrangler whoami
+
+      - name: Refuse the wrong Cloudflare Pages account
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler pages deployment list \
+            --project-name civweave \
+            --environment production \
+            --json > /tmp/civweave-pages-deployments.json
+          node scripts/verify-cloudflare-pages-account-target-v1.mjs \
+            /tmp/civweave-pages-deployments.json civweave
+
+      - name: Provision account Worker and three starter nodes
+        run: >-
+          node scripts/provision-cloudflare-account-edge-v1.mjs
+          --host-id civweave
+          --strict
+          --output /tmp/civweave-account-edge.json
 
       - name: Build canonical Pages package
         run: node scripts/build-cloudflare-pages.mjs
@@ -49,8 +68,12 @@ jobs:
         shell: bash
         run: |
           node --input-type=module <<'NODE'
-          import { mkdirSync, writeFileSync } from 'node:fs';
+          import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
           const target = '.cloudflare-pages/app/host-deployment-v1.json';
+          const accountEdge = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
+          if (accountEdge.status !== 'ready' || accountEdge.starterNodeIds?.length !== 3) {
+            throw new Error('Canonical Cloudflare account edge is not fully provisioned.');
+          }
           mkdirSync('.cloudflare-pages/app', { recursive: true });
           writeFileSync(target, `${JSON.stringify({
             schema: 'civweave.host-deployment.v1',
@@ -59,6 +82,7 @@ jobs:
             pagesProject: 'civweave',
             publicOrigin: 'https://civweave.pages.dev',
             canonicalOrigin: 'https://civweave.pages.dev',
+            accountEdge,
             localAnchorRecommended: true,
             localAnchorRequired: false,
             sourceCommit: process.env.GITHUB_SHA,
@@ -69,10 +93,16 @@ jobs:
       - name: Deploy production Pages project
         shell: bash
         run: |
+          set -euo pipefail
           commit_message="$(git log -1 --pretty=%s)"
           npx wrangler pages deploy .cloudflare-pages \
             --project-name civweave \
             --branch main \
             --commit-hash "$GITHUB_SHA" \
             --commit-message "$commit_message" \
-            --commit-dirty=true
+            --commit-dirty=true 2>&1 | tee /tmp/civweave-pages-deploy.log
+          grep -Eqi 'https://[^[:space:]]*civweave\.pages\.dev' /tmp/civweave-pages-deploy.log || {
+            echo 'Cloudflare reported a deployment outside civweave.pages.dev. Refusing a false-green deploy.'
+            cat /tmp/civweave-pages-deploy.log
+            exit 3
+          }
