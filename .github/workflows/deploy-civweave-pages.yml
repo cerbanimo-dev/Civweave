@@ -130,6 +130,32 @@ jobs:
             exit 3
           }
 
+      - name: Verify stable production origin
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const expectedCommit = process.env.GITHUB_SHA;
+          const origin = 'https://civweave.pages.dev';
+          let lastFailure = 'Production marker did not become current.';
+          for (let attempt = 1; attempt <= 12; attempt += 1) {
+            try {
+              const url = `${origin}/app/host-deployment-v1.json?verify=${encodeURIComponent(expectedCommit)}&attempt=${attempt}`;
+              const response = await fetch(url, { headers: { 'Cache-Control': 'no-cache' } });
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              const marker = await response.json();
+              if (marker.pagesProject === 'civweave' && marker.publicOrigin === origin && marker.sourceCommit === expectedCommit) {
+                console.log(`Verified ${origin} at source commit ${expectedCommit}.`);
+                process.exit(0);
+              }
+              lastFailure = `attempt ${attempt}: marker sourceCommit=${marker.sourceCommit || 'missing'}`;
+            } catch (error) {
+              lastFailure = `attempt ${attempt}: ${error.message}`;
+            }
+            if (attempt < 12) await new Promise((resolve) => setTimeout(resolve, 5000));
+          }
+          console.error(`Stable production verification failed: ${lastFailure}`);
+          process.exit(4);
+          NODE
       - name: Report optional account-edge provisioning
         if: success() && steps.provision_account_edge.outcome == 'failure'
         shell: bash

@@ -40,6 +40,10 @@ assert.doesNotMatch(canonicalWorkflow,/wrangler whoami/,'Canonical Pages workflo
 assert.match(canonicalWorkflow,/Provision optional account Worker and starter nodes[\s\S]*continue-on-error: true/,'Optional account-edge provisioning can still block the canonical Pages host.');
 assert.doesNotMatch(canonicalWorkflow,/Canonical Cloudflare account edge is not fully provisioned/,'Canonical host metadata still requires optional account-edge provisioning.');
 assert.match(docs,/broader permission is not required for the Pages host/,'Cloudflare guide does not preserve Pages-only installation.');
+assert.match(canonicalWorkflow,/Verify stable production origin/,'Canonical workflow does not verify the stable hostname after deployment.');
+assert.match(canonicalWorkflow,/https:\/\/civweave\.pages\.dev/,'Canonical workflow does not poll the stable production origin.');
+assert.match(canonicalWorkflow,/marker\.sourceCommit === expectedCommit/,'Canonical workflow does not prove the deployed commit reached production.');
+assert.match(docs,/green workflow therefore proves the canonical hostname updated/,'Cloudflare guide does not explain the stable-origin proof.');
 assert.match(hostWorkflow,/CIVWEAVE_PAGES_PROJECT/,'Community Pages workflow does not use a steward-owned project variable.');
 assert.match(hostWorkflow,/vars\.CIVWEAVE_PAGES_PROJECT != 'civweave'/,'Community Pages workflow does not protect the canonical root.');
 assert.match(hostWorkflow,/api\.cloudflare\.com\/client\/v4\/accounts\//,'Community Pages workflow does not validate its exact Cloudflare project.');
@@ -49,4 +53,4 @@ assert.match(docs,/specifically for the OG `civweave\.pages\.dev` host/,'Cloudfl
 assert.match(reminder,/civweave\.host-anchor\.paired\.v1/,'Host steward reminder does not persist Anchor completion.');
 assert.match(reminder,/Remind me tomorrow/,'Host steward reminder is not persistent-but-snoozable.');
 assert.equal(webmanifest.related_applications[0]?.url,'https://civweave.pages.dev/app/manifest.webmanifest','Manifest must prefer the new canonical root.');
-console.log(JSON.stringify({ok:true,revision:'cloudflare-production-origin-v256-nonblocking-account-edge',project:'civweave',production:'https://civweave.pages.dev',communityPattern:'https://<project>.pages.dev',previewInstallSupported:false,localAnchorReminder:true,idempotentProjectCreate:true,automaticCanonicalUpdates:true,nonBlockingCommunityAutomation:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'cloudflare-production-origin-v257-stable-origin-proof',project:'civweave',production:'https://civweave.pages.dev',communityPattern:'https://<project>.pages.dev',previewInstallSupported:false,localAnchorReminder:true,idempotentProjectCreate:true,automaticCanonicalUpdates:true,nonBlockingCommunityAutomation:true},null,2));

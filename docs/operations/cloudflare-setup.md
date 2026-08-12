@@ -128,6 +128,8 @@ The canonical repository uses `.github/workflows/deploy-civweave-pages.yml` for 
 
 The OG workflow can also provision an optional account Worker and three starter-node records when its token has `Account > Workers Scripts > Edit`. That broader permission is not required for the Pages host: provisioning failure is reported as a warning and cannot prevent `civweave.pages.dev` from building or deploying.
 
+After upload, the OG workflow polls `https://civweave.pages.dev/app/host-deployment-v1.json` until the stable production origin reports the pushed Git commit. A green workflow therefore proves the canonical hostname updated, not only that Cloudflare accepted a preview deployment.
+
 ## Host-local Anchor reminder
 
 Cloudflare is allowed to be the host's public doorway without being its only surviving copy.
