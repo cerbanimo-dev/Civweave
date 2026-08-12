@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.116-server-ai-settings-v301';
+const VERSION='1.0.116-server-ai-settings-v304-tabbed';
 const ROUTE='server-auto';
 const SETTINGS_KEY='civweave.universal-ai.v127';
 const PROFILES_KEY='civweave-model-profiles-v1';
@@ -28,8 +28,10 @@ function marketplaceSession(){
 }
 function installStyle(){
   if(document.getElementById(STYLE_ID))return;
-  const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`#${PANEL_ID},#${COMMERCE_ID}{display:grid;gap:12px;padding:16px;border:1px solid rgba(126,239,213,.24);border-radius:15px;background:#0a1730}#${PANEL_ID}[hidden],#${COMMERCE_ID}[hidden]{display:none!important}.cw-server-order{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.cw-server-hop{padding:10px;border:1px solid #ffffff18;border-radius:11px;background:#071226}.cw-server-hop b{display:block}.cw-server-hop small{display:block;margin-top:4px;color:#b8c7df;letter-spacing:0!important;font-weight:500}.cw-server-commerce-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cw-server-commerce-grid>div{display:grid;gap:8px;padding:12px;border:1px solid #ffffff16;border-radius:12px}.cw-server-commerce-grid label{display:grid;gap:6px}.cw-server-commerce-status{min-height:1.4em;color:#9ff2dc}.cw-server-entry{white-space:nowrap}@media(max-width:640px){.cw-server-order,.cw-server-commerce-grid{grid-template-columns:1fr}}`;document.head.append(style);
+  const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`#${PANEL_ID},#${COMMERCE_ID}{display:grid;gap:12px;padding:16px;border:1px solid rgba(126,239,213,.24);border-radius:15px;background:#0a1730}#${PANEL_ID}[hidden],#${COMMERCE_ID}[hidden]{display:none!important}.cw-settings-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.cw-settings-tabs button{min-width:0;padding-inline:8px;background:#0b1329;color:#cbd4ee}.cw-settings-tabs button[aria-selected="true"]{border-color:#7eeed5;background:#26365f;color:#fff;box-shadow:inset 0 -3px #7eeed5}.cw-settings-tab-panel{display:grid;gap:17px}.cw-settings-tab-panel[hidden]{display:none!important}.cw-server-order{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.cw-server-hop{padding:10px;border:1px solid #ffffff18;border-radius:11px;background:#071226}.cw-server-hop b{display:block}.cw-server-hop small{display:block;margin-top:4px;color:#b8c7df;letter-spacing:0!important;font-weight:500}.cw-server-commerce-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cw-server-commerce-grid>div{display:grid;gap:8px;padding:12px;border:1px solid #ffffff16;border-radius:12px}.cw-server-commerce-grid label{display:grid;gap:6px}.cw-server-commerce-status{min-height:1.4em;color:#9ff2dc}@media(max-width:640px){.cw-server-order,.cw-server-commerce-grid{grid-template-columns:1fr}}`;document.head.append(style);
 }
+function selectTab(form,name){for(const button of form.querySelectorAll('[data-settings-tab]'))button.setAttribute('aria-selected',String(button.dataset.settingsTab===name));for(const panel of form.querySelectorAll('[data-settings-tab-panel]'))panel.hidden=panel.dataset.settingsTabPanel!==name}
+function installTabbedLayout(form){if(form.dataset.settingsTabs==='1')return form;const tabs=document.createElement('nav');tabs.className='cw-settings-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Settings sections');tabs.innerHTML='<button type="button" role="tab" aria-selected="true" data-settings-tab="general">AI & safety</button><button type="button" role="tab" aria-selected="false" data-settings-tab="local-models">Local models</button><button type="button" role="tab" aria-selected="false" data-settings-tab="membership">Membership</button>';const general=document.createElement('div'),local=document.createElement('div'),membership=document.createElement('div');for(const [panel,name] of [[general,'general'],[local,'local-models'],[membership,'membership']]){panel.className='cw-settings-tab-panel';panel.dataset.settingsTabPanel=name;panel.hidden=name!=='general'}const children=[...form.children];form.append(tabs,general,local,membership);for(const child of children)general.append(child);const existingLocal=general.querySelector('#cw-local-ai-v266'),existingCommerce=general.querySelector(`#${COMMERCE_ID}`);if(existingLocal)local.append(existingLocal);if(existingCommerce)membership.append(existingCommerce);tabs.addEventListener('click',event=>{const button=event.target.closest('[data-settings-tab]');if(button)selectTab(form,button.dataset.settingsTab)});form.dataset.settingsTabs='1';return form}
 function saveServerRoute(form){
   const interactive={route:ROUTE,provider:ROUTE,model:'civweave-server-auto-v1',endpoint:'',externalConsent:true,serverOrder:['device-local','server-local','cloudflare-workers-ai']};
   const saved={...interactive,consent:true,agenticEnabled:false,version:'1.0.116',settingsController:VERSION};
@@ -72,10 +74,10 @@ function bindCommerce(form){
   const capacity=capacitySession(),paired=marketplaceSession(),status=panel.querySelector('[data-commerce-status]');if(status)status.textContent=capacity?`Connected to ${capacity.nodeId} for memberships and compute.`:paired?`Paired with ${paired.nodeId}; compute top-ups are available. Memberships need a Cloudflare host session.`:'Join or pair with a host to enable checkout.';
 }
 function enhance(form=document.querySelector('#cw-ai-settings-cleanroom-v188 form,[data-cw-cleanroom-form]')){
-  if(!form)return false;installStyle();const select=form.elements.namedItem('route');if(!select)return false;
+  if(!form)return false;installStyle();const shell=form.closest('.cw-clean-shell'),heading=shell?.querySelector('h2'),description=shell?.querySelector('header p'),dialog=form.closest('[role="dialog"]');if(heading)heading.textContent='Settings';if(description)description.textContent='Choose AI, safety, local models, membership, and compute. Opening this menu does not start a model.';dialog?.setAttribute('aria-label','Civweave settings');installTabbedLayout(form);const select=form.elements.namedItem('route');if(!select)return false;
   if(!select.querySelector(`option[value="${ROUTE}"]`)){const option=document.createElement('option');option.value=ROUTE;option.textContent='Server-side AI · local → host → Cloudflare';select.append(option)}
   if(!form.querySelector(`#${PANEL_ID}`)){const panel=serverPanel(),anchor=form.querySelector('[data-panel="deterministic"]')||form.firstElementChild;if(anchor)anchor.before(panel);else form.prepend(panel)}
-  if(!form.querySelector(`#${COMMERCE_ID}`)){const panel=commercePanel(),note=[...form.querySelectorAll('.cw-clean-note')].at(-1);if(note)note.before(panel);else form.append(panel)}
+  if(!form.querySelector(`#${COMMERCE_ID}`)){const panel=commercePanel();form.querySelector('[data-settings-tab-panel="membership"]')?.append(panel)}
   bindCommerce(form);
   if(form.dataset.serverAiBound!=='1'){
     form.dataset.serverAiBound='1';
@@ -87,12 +89,11 @@ function enhance(form=document.querySelector('#cw-ai-settings-cleanroom-v188 for
 }
 async function openCommerce(){
   try{await globalThis.CivweaveModelSettingsControllerV173?.open?.()}catch{}
-  let ticks=0;const timer=setInterval(()=>{const form=document.querySelector('#cw-ai-settings-cleanroom-v188 form,[data-cw-cleanroom-form]');if(form&&enhance(form)){clearInterval(timer);form.querySelector(`#${COMMERCE_ID}`)?.scrollIntoView?.({block:'center'});return}if(++ticks>60)clearInterval(timer)},50);
+  let ticks=0;const timer=setInterval(()=>{const form=document.querySelector('#cw-ai-settings-cleanroom-v188 form,[data-cw-cleanroom-form]');if(form&&enhance(form)){clearInterval(timer);selectTab(form,'membership');return}if(++ticks>60)clearInterval(timer)},50);
 }
 function installEntry(){
-  if(document.querySelector('[data-civweave-commerce-entry]'))return;
-  const launcher=document.querySelector('[data-open-unified-ai-settings]');if(!launcher||!launcher.parentElement)return;
-  const button=document.createElement('button');button.type='button';button.dataset.civweaveCommerceEntry='1';button.className=`${launcher.className||''} cw-server-entry`.trim();button.textContent='Membership & compute';button.addEventListener('click',openCommerce);launcher.insertAdjacentElement('afterend',button);
+  document.querySelectorAll('[data-civweave-commerce-entry]').forEach(button=>button.remove());
+  document.querySelectorAll('[data-open-unified-ai-settings]').forEach(button=>{const label=button.querySelector('span:last-child');if(label)label.textContent='Settings';else if(button.textContent.trim()==='AI settings')button.textContent='Settings'});
 }
 function boot(){enhance();installEntry()}
 addEventListener('civweave:model-settings-opened',()=>queueMicrotask(()=>enhance()));addEventListener('pageshow',boot);document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):queueMicrotask(boot);
