@@ -1,4 +1,6 @@
 import labor from '../../shared/labor-intelligence-core-v1.mjs?v=core-labor-v1';
+import '../../cw-reward-ledger-v2.js';
+import './community-learning-market-v1.mjs?v=community-learning-market-v1';
 
 const VERSION='1.0.0-fellowfare-labor-context-v1';
 const STORE_KEY='fellowfare.mvp.state.v3';
