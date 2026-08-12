@@ -12,7 +12,7 @@ let repairing = false;
 function installHostNodeLobby() {
   if (document.querySelector('script[data-civweave-host-node-lobby]')) return false;
   const script = document.createElement('script');
-  script.src = '/app/host-node-installer-lobby-v1.js?v=1.0.118-local-host-autodetect-v2';
+  script.src = `/app/host-node-installer-lobby-v1.js?v=${releaseVersion()}-local-host-autodetect-v2`;
   script.async = true;
   script.dataset.civweaveHostNodeLobby = 'v2';
   document.head.append(script);
