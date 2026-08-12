@@ -46,7 +46,7 @@ assert.match(settingsOpenBody,/inferenceDormantOnOpen:true/);
 for(const text of ['Downloaded local AI','Download','Resume','Use locally','Remove','Model window','Civweave working default','TTFT']){
   assert.ok(settings.toLowerCase().includes(text.toLowerCase()),`Local settings panel lost ${text}.`);
 }
-assert.match(settings,/1\.0\.116-local-ai-settings-v304-tabbed/);
+assert.match(settings,/1\.0\.116-local-ai-settings-v305-download-dock-layout/);
 assert.match(settings,/truthfulCompletion:true/);
 assert.match(settings,/cacheIntegrityOnDemand:true/);
 assert.match(settings,/openPath:'snapshot-first-v287'/);
@@ -60,7 +60,7 @@ assert.match(bootstrap,/REVISION='1\.0\.115-local-ai-bootstrap-v302-session-hand
 assert.match(bootstrap,/capability-contract-v302/);
 assert.match(bootstrap,/model-registry-v266\.js\?v=1\.0\.115-v302-gemma3-v4/);
 assert.match(bootstrap,/runtime-v266\.js\?v=1\.0\.115-v302-session-handoff/);
-assert.match(bootstrap,/settings-panel-v267\.js\?v=1\.0\.116-v304-tabbed/);
+assert.match(bootstrap,/settings-panel-v267\.js\?v=1\.0\.116-v305-download-dock-layout/);
 assert.match(bootstrap,/test-pulse-v269\.js\?v=1\.0\.116-v303-mobile-safe/);
 assert.match(bootstrap,/1\.0\.116-local-model-test-pulse-v303-mobile-safe/);
 assert.doesNotMatch(bootstrap,/1\.0\.83-local-model-test-pulse-v282-health/);
