@@ -42,6 +42,10 @@ jobs:
           node-version: 22
       - name: Install Stripe SDK used by the Worker sample
         run: npm install --prefix cloudflare/core --omit=dev --no-audit --no-fund
+      - name: Verify canonical origin entry
+        run: |
+          node --check cloudflare/core/src/origin-entry.mjs
+          node --input-type=module -e "import {launchTopologyFor} from './cloudflare/core/src/origin-entry.mjs'; const t=launchTopologyFor({}); if(t.canonicalInstallOrigin!=='https://civweave.pages.dev') process.exit(1)"
       - name: Verify Cloudflare authority and node fabric
         run: node scripts/verify-cloudflare-launch-kit-v1.mjs
       - name: Verify Stripe Connect v2 sample
