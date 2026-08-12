@@ -1,17 +1,18 @@
 # Civweave launch kit: Cloudflare authority + host fabric
 
-Civweave launch infrastructure is split into a Pages host layer, separately permissioned Cloudflare authority/fabric services, and optional physical/local Anchors that implement the same `civweave.node.v1` family of contracts.
+Civweave launch infrastructure is split into a Pages host layer, an account-local starter-node edge, separately permissioned central Cloudflare authority/fabric services, and optional physical/local Anchors that implement the same `civweave.node.v1` family of contracts.
 
 ## Canonical topology
 
 ```text
-https://civweave.pages.dev
-  OG/root Civweave Pages host + installer
+Cloudflare host/steward account
+  Pages: https://<project>.pages.dev
+  Worker: civweave-host-edge.<account>.workers.dev
+      ├── starter Durable Object node A
+      ├── starter Durable Object node B
+      └── starter Durable Object node C
           |
-          +-- https://civweave-<host-id>.pages.dev
-          |     community Pages hosts created from the same GitHub source
-          |     each host may install its own PWA from its stable production origin
-          |
+          | public/federated contracts only
           v
 https://api.commonweave.earth
   civweave-core Worker
@@ -20,23 +21,44 @@ https://api.commonweave.earth
   Durable Object: persistent Cerbanimo Ed25519 signing identity
   Stripe Connect authority
           |
-          | private Service Binding
+          | private Service Binding inside the Cerbanimo account only
           v
 https://nodes.commonweave.earth
 https://<node-id>.nodes.commonweave.earth
-  civweave-node-cloud Worker
-  one SQLite-backed Durable Object per WWW node
+  civweave-node-cloud central Worker
+  one SQLite-backed Durable Object per central WWW node
           |
           +-- Cloudflare seed/WWW nodes
           +-- local Anchors / Raspberry Pi / local servers
           +-- private-device outbound relay lane
 ```
 
-`https://commonweave.pages.dev` is retained only as a legacy install-origin migration target. New documentation and deployment metadata use `https://civweave.pages.dev`.
+The reserved root Pages host is `https://civweave.pages.dev`. `https://commonweave.pages.dev` is retained only as a legacy install-origin migration target. New documentation and deployment metadata use `https://civweave.pages.dev`.
 
 A Cloudflare Pages branch/hash alias such as `<branch>.<project>.pages.dev` is not a permanent host identity. Civweave routes installation from a preview alias back to that project's stable `<project>.pages.dev` production origin.
 
 Render is no longer a money-edge authority. It may remain online as a transition/fallback host node while useful.
+
+## Cloudflare account provisioning invariant
+
+A new Civweave Cloudflare host account is not fully provisioned merely because its Pages project exists. The launch invariant is:
+
+```text
+1 Pages production host
++ 1 account-local civweave-host-edge Worker
++ 3 registered SQLite Durable Object starter nodes
+= provisioned Cloudflare host account
+```
+
+The starter-node count is the same `maxHostNodes: 3` enforced by `CivweaveCapacityAccount`. Registration is idempotent. If provisioning dies after one or two nodes are created, rerunning setup fills the remaining slots instead of creating a second account fabric.
+
+The three account-local nodes are exposed through stable Worker paths:
+
+```text
+https://<account-edge>.workers.dev/nodes/<node-id>/
+```
+
+The account edge intentionally has no central `CORE` service binding, Stripe platform key, Cerbanimo signing key, or central fabric binding token. It owns only account-local node/capacity state plus optional Workers AI. Central money and trust authority stay on the Cerbanimo-operated core.
 
 ## Host creation
 
@@ -49,7 +71,11 @@ Wrangler login to steward's Cloudflare account
         ↓
 node scripts/setup-cloudflare-node.mjs --host-id <name>
         ↓
-Cloudflare Pages production host
+ensure/create Cloudflare Pages project
+        ↓
+deploy civweave-host-edge + register three starter nodes
+        ↓
+build and deploy Cloudflare Pages production host
         ↓
 open /app/?host_setup=1 once
         ↓
@@ -59,6 +85,25 @@ Civweave persistently recommends a local Anchor/companion
 The reserved root is created with `--canonical`. Canonical deployment requires a locally supplied `CIVWEAVE_EXPECT_CLOUDFLARE_EMAIL` check so it cannot silently publish from the wrong Wrangler login. The account email is never committed to source.
 
 Community hosts cannot claim the reserved `civweave` Pages project name. Their default project is `civweave-<host-id>`; a different project name can be supplied explicitly if that name is already occupied.
+
+Worker provisioning is strongly attempted but does not destroy a successful Pages setup if the steward's token lacks Worker/Durable Object permissions. In that partial state `host-deployment-v1.json` records the account edge as `pending`, Pages remains usable, and rerunning setup after fixing token permissions completes the same account rather than starting over.
+
+## GitHub main-branch updates and account affinity
+
+Both canonical and community deployment workflows update the Pages host **and** `civweave-host-edge` from `main`. Before either workflow mutates the account, it lists existing production Pages deployments and verifies that the credentials point to the expected `<project>.pages.dev` target.
+
+A workflow must fail instead of reporting success when, for example, a `civweave` deployment command returns a `commonweave.pages.dev` URL. The final Pages deployment output is checked a second time for the same invariant.
+
+For community repositories, configure:
+
+```text
+repository variable CIVWEAVE_PAGES_PROJECT=<project>
+repository variable CIVWEAVE_HOST_ID=<host-id>
+repository secret CLOUDFLARE_API_TOKEN=<token for the same account>
+repository secret CLOUDFLARE_ACCOUNT_ID=<same account>
+```
+
+The Cloudflare operator secret for starter-node registration is generated inside the host account. GitHub does not need to know its value after all three starter nodes exist. If provisioning is incomplete, a retry may rotate that still-prelaunch account-local secret so it can safely finish the missing slots.
 
 ## Local Anchor boundary
 
@@ -76,7 +121,7 @@ The first Pages-host reminder is non-blocking and steward-specific. It can be sn
 
 ## Security boundary
 
-Only `civweave-core` receives payment-provider credentials. The WWW node fabric and community nodes never receive:
+Only `civweave-core` receives payment-provider credentials. The account edge, WWW node fabric, and community nodes never receive:
 
 ```text
 STRIPE_SECRET_KEY
@@ -127,7 +172,7 @@ NODE_FABRIC_BINDING_TOKEN
 
 Do not put any of these in source or on a host node.
 
-## WWW node fabric
+## Central WWW node fabric
 
 Deploy `cloudflare/node-cloud/wrangler.jsonc` as `civweave-node-cloud` after the core Worker exists. It binds privately to `civweave-core` as `CORE` and serves:
 
@@ -138,14 +183,14 @@ nodes.commonweave.earth/*
 
 Each node ID maps to one SQLite-backed Durable Object. A cloud seed node has a persistent node keypair, manifest, WebSocket presence state and recent payment-event receipts.
 
-Fabric-only secrets:
+Central fabric-only secrets:
 
 ```text
 NODE_FABRIC_OPERATOR_TOKEN
 NODE_FABRIC_BINDING_TOKEN
 ```
 
-`NODE_FABRIC_BINDING_TOKEN` is an internal credential between the two Cerbanimo-operated Cloudflare systems. It is not distributed to community nodes.
+`NODE_FABRIC_BINDING_TOKEN` is an internal credential between the two Cerbanimo-operated Cloudflare systems. It is not distributed to community/account-edge nodes.
 
 ## Raspberry Pi / local server
 
@@ -176,7 +221,7 @@ POST /api/money-edge/topups/:topupId/refund
 POST /api/money-edge/webhooks/stripe
 ```
 
-The core implements Stripe Connect onboarding, paid-session verification, refunds/dispute adjustments, signed node payment events and retry delivery from D1. Host Pages projects never receive the platform Stripe secret.
+The core implements Stripe Connect onboarding, paid-session verification, refunds/dispute adjustments, signed node payment events and retry delivery from D1. Host Pages projects and account-edge Workers never receive the platform Stripe secret.
 
 ## Live-money gate
 
@@ -186,24 +231,26 @@ A sandbox key can exercise onboarding and Checkout without making the live-money
 
 ## Launch sequence
 
-1. Create/deploy the reserved `civweave` Pages project for `https://civweave.pages.dev` from the intended canonical Cloudflare account.
-2. Verify the canonical installer and PWA from the stable production origin.
-3. Deploy `civweave-core`, create D1/R2, and apply migrations.
-4. Set central Cloudflare secrets directly in Cloudflare, never in source.
-5. Verify `/api/money-edge/status`, `/api/money-edge/trust`, and `/api/launch-topology`.
-6. Deploy `civweave-node-cloud` and its wildcard node routes.
-7. Create community Pages hosts with `setup-cloudflare-node.mjs --host-id ...`.
-8. Open each host's steward setup URL and add a local Anchor where possible.
-9. Keep live-money flags false until legal/compliance/provider readiness is complete.
+1. Run `setup-cloudflare-node.mjs --canonical` or `--host-id ...` from the intended Cloudflare account.
+2. Verify setup reports the account Worker and all three starter-node URLs, or explicitly reports a non-blocking pending fabric state.
+3. Verify the canonical/community installer and PWA from the stable Pages production origin.
+4. For the Cerbanimo-operated authority account, deploy `civweave-core`, create D1/R2, and apply migrations.
+5. Set central Cloudflare secrets directly in Cloudflare, never in source.
+6. Verify `/api/money-edge/status`, `/api/money-edge/trust`, and `/api/launch-topology`.
+7. Deploy the central `civweave-node-cloud` wildcard fabric.
+8. Configure same-account GitHub Cloudflare secrets/variables when automatic `main` deployment is desired.
+9. Open each host's steward setup URL and add a local Anchor where possible.
+10. Keep live-money flags false until legal/compliance/provider readiness is complete.
 
 ## Verification
 
 Run:
 
 ```text
+node scripts/test-cloudflare-account-bootstrap-v1.mjs
 node scripts/verify-cloudflare-launch-kit-v1.mjs
 node scripts/verify-cloudflare-production-origin-v251.mjs
 node scripts/verify-pwa-install-campus-v246.mjs
 ```
 
-Repository CI checks the Cloudflare authority boundary, host-origin installation contract, Pages preview safety, local Anchor reminder, D1/R2/Durable Object bindings, signed trust compatibility, and source syntax.
+Repository CI checks the three-starter-node account invariant, wrong-account deployment refusal, Cloudflare authority boundary, host-origin installation contract, Pages preview safety, local Anchor reminder, D1/R2/Durable Object bindings, signed trust compatibility, and source syntax.
