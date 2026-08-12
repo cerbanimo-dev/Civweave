@@ -9,6 +9,7 @@ on:
       - 'scripts/check-canonical-server-syntax.mjs'
       - 'Dockerfile.federated'
       - 'docker-compose.federated.yml'
+      - 'VERSION'
       - '.dockerignore'
       - '.github/workflows/federation-v1-check.yml'
   push:
@@ -20,6 +21,7 @@ on:
       - 'scripts/check-canonical-server-syntax.mjs'
       - 'Dockerfile.federated'
       - 'docker-compose.federated.yml'
+      - 'VERSION'
       - '.dockerignore'
       - '.github/workflows/federation-v1-check.yml'
 
@@ -41,3 +43,9 @@ jobs:
         run: node scripts/verify-federation-v152.mjs
       - name: Build federated container
         run: docker build -f Dockerfile.federated -t civweave-federated:test .
+      - name: Verify federated image release contract
+        run: |
+          expected="$(tr -d '\r\n' < VERSION)"
+          actual="$(docker run --rm --entrypoint sh civweave-federated:test -c 'tr -d "\r\n" < /app/VERSION')"
+          test "$actual" = "$expected"
+          docker run --rm --entrypoint sh civweave-federated:test -c 'version="$(tr -d "\r\n" < /app/VERSION)"; test -s "/app/releases/$version/server/server-federated-v152.mjs"'
