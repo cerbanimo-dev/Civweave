@@ -243,7 +243,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   nodeAiMeshRevision:'v1-node-owned-service-discovery-routing',
   questVeilRevision:'v1-mandatory-human-ledger-gate-plus-mesh-batches',
   questVeilHumanLedgerPolicy:'raw-task-chronicle-never-human-visible',
-  questVeilMeshBountyPolicy:'accepted-complete-batch-only',
+  questVeilMeshBountyPolicy:'per-item:learning=1-acorn;labor-material-exchange=1-button',
   campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',
   radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
   radioTrackSuggestionRevision:'v241-playlist-context-track-links',
