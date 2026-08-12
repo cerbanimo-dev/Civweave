@@ -16,8 +16,11 @@
 <h1>Add a local Anchor</h1>
 <p>Your Cloudflare host can remain the public doorway. The local Anchor is the stubborn little root under the floorboards: it preserves host identity/state locally and is the right place for always-on discovery, scheduled relay, local AI, and recovery work.</p>
 <section class="card">
-<h2>1. Install prerequisites</h2>
+<h2>1. Install prerequisites and check Docker</h2>
 <p>Install Git and Docker Desktop/Engine with Docker Compose v2 on the machine that will stay near this host.</p>
+<pre><code>docker version
+docker context ls</code></pre>
+<p class="note">On Docker Desktop for Windows, <code>docker version</code> must show both Client and Server. Civweave's Anchor image is Linux-based, so Docker Desktop must have its Linux container engine running before continuing.</p>
 </section>
 <section class="card">
 <h2>2. Clone Civweave</h2>
