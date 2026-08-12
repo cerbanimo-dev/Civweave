@@ -179,4 +179,15 @@ console.log(`Production URL: ${productionUrl}`);
 console.log(`Health: ${productionUrl}/api/health`);
 console.log(`Steward setup: ${productionUrl}/host-setup.html`);
 if (options.canonical) console.log(`Canonical Civweave root: ${canonicalOrigin}`);
+console.log("\nAutomatic updates:");
+if (options.canonical) {
+  console.log("  The canonical GitHub workflow deploys every push to main when CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are configured as repository secrets.");
+} else {
+  console.log("  Initial hosting is complete; GitHub authorization is intentionally not a launch-time requirement.");
+  console.log("  To receive future main-branch releases automatically in the steward's repository, configure:");
+  console.log(`    repository variable CIVWEAVE_PAGES_PROJECT=${options.projectName}`);
+  console.log(`    repository variable CIVWEAVE_HOST_ID=${options.hostId}`);
+  console.log("    repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID");
+  console.log("  Then enable .github/workflows/deploy-civweave-host-pages.yml. The first direct deployment remains live until automation is ready.");
+}
 console.log("Open the steward setup URL once. Civweave will then keep reminding this steward browser to add and pair a local Anchor/companion until it is recorded as complete.");

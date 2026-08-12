@@ -103,9 +103,24 @@ The host ID and Pages project name are separate so a stable Civweave identity do
 5. builds the complete `.cloudflare-pages/` package;
 6. stamps `/app/host-deployment-v1.json` with the host ID, public origin, role, and canonical root;
 7. deploys the production branch with Wrangler;
-8. prints a steward setup URL ending in `/app/?host_setup=1`.
+8. prints a steward setup URL ending in `/host-setup.html`;
+9. leaves the successful direct deployment online while optional GitHub automation is configured.
 
 Open that steward setup URL once after deployment.
+
+## Automatic host updates without blocking installation
+
+Cloudflare Pages direct uploads do not become Git-integrated merely because Wrangler records `main` as the deployment branch. The setup helper therefore keeps first launch independent of GitHub authorization: it builds and deploys the host immediately, then prints the repository settings needed for automatic updates.
+
+For a community host repository, configure:
+
+- repository variable `CIVWEAVE_PAGES_PROJECT` with the existing Pages project name;
+- repository variable `CIVWEAVE_HOST_ID` with the stable host ID;
+- repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` for the steward's Cloudflare account.
+
+Then enable `.github/workflows/deploy-civweave-host-pages.yml`. Every push to `main` rebuilds and deploys that same Pages project. The workflow refuses the reserved `civweave` project, so a community credential cannot overwrite the canonical root.
+
+The canonical repository uses `.github/workflows/deploy-civweave-pages.yml` for `civweave.pages.dev`. Both workflows preserve the initial direct deployment until a successful automated replacement is available; failure or delayed GitHub setup does not take a new host offline.
 
 ## Host-local Anchor reminder
 

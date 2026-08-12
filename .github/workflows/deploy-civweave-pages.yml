@@ -1,0 +1,78 @@
+name: Deploy Civweave Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-pages-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy civweave.pages.dev
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing repository secret CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          npx wrangler whoami
+
+      - name: Build canonical Pages package
+        run: node scripts/build-cloudflare-pages.mjs
+
+      - name: Record canonical host deployment
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { mkdirSync, writeFileSync } from 'node:fs';
+          const target = '.cloudflare-pages/app/host-deployment-v1.json';
+          mkdirSync('.cloudflare-pages/app', { recursive: true });
+          writeFileSync(target, `${JSON.stringify({
+            schema: 'civweave.host-deployment.v1',
+            role: 'canonical',
+            hostId: 'civweave',
+            pagesProject: 'civweave',
+            publicOrigin: 'https://civweave.pages.dev',
+            canonicalOrigin: 'https://civweave.pages.dev',
+            localAnchorRecommended: true,
+            localAnchorRequired: false,
+            sourceCommit: process.env.GITHUB_SHA,
+            generatedAt: new Date().toISOString(),
+          }, null, 2)}\n`, 'utf8');
+          NODE
+
+      - name: Deploy production Pages project
+        shell: bash
+        run: |
+          commit_message="$(git log -1 --pretty=%s)"
+          npx wrangler pages deploy .cloudflare-pages \
+            --project-name civweave \
+            --branch main \
+            --commit-hash "$GITHUB_SHA" \
+            --commit-message "$commit_message" \
+            --commit-dirty=true
