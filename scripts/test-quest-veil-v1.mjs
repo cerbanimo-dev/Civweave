@@ -94,12 +94,19 @@ const meshContext=vm.createContext({
 vm.runInContext(mesh,meshContext,{filename:'quest-veil-mesh-v1.js'});
 const meshApi=meshContext.CivweaveQuestVeilMeshV1;
 assert.ok(meshApi,'Quest Veil mesh runtime must install a public API.');
-assert.deepEqual(meshApi.rewardForStage('learning'),{stage:'learning',acorns:1,buttons:0});
-assert.deepEqual(meshApi.rewardForStage('labor'),{stage:'labor',acorns:0,buttons:1});
-assert.deepEqual(meshApi.rewardForStage('making'),{stage:'making',acorns:0,buttons:1});
-assert.deepEqual(meshApi.rewardForStage('material'),{stage:'material',acorns:0,buttons:1});
-assert.deepEqual(meshApi.rewardForStage('materials'),{stage:'materials',acorns:0,buttons:1});
-assert.deepEqual(meshApi.rewardForStage('exchange'),{stage:'exchange',acorns:0,buttons:1});
+for(const [stage,acorns,buttons] of [
+  ['learning',1,0],
+  ['labor',0,1],
+  ['making',0,1],
+  ['material',0,1],
+  ['materials',0,1],
+  ['exchange',0,1]
+]){
+  const row=meshApi.rewardForStage(stage);
+  assert.equal(row.stage,stage);
+  assert.equal(row.acorns,acorns,`${stage} veil Acorn payout mismatch.`);
+  assert.equal(row.buttons,buttons,`${stage} veil Button payout mismatch.`);
+}
 const reward=meshApi.rewardSummary([
   {veilState:{journey:{stage:'learning'}}},
   {veilState:{journey:{stage:'labor'}}},
