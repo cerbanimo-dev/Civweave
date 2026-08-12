@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
 
-await import('./sync-release-version-assets.mjs');
-await import('./build-service-worker-v211.mjs');
-
+// Deliberately do not run the release sync or service-worker builder before
+// verification. This verifier must inspect the committed worker exactly as it
+// ships, otherwise a stale generated radio import can repair itself in CI and
+// hide the regression from review.
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const requiredRadioAssets = [
   '/app/install-boundary-v146.js',
@@ -51,7 +52,8 @@ for (const source of [wrapper, builder]) {
   assert(source.indexOf('/service-worker-shell-integrity-v281.js') < source.indexOf(radioImport), 'Radio shell must wrap the integrity-owned cacheShell implementation.');
   assert(source.indexOf(radioImport) < source.indexOf('/service-worker-shell-repair-v293.js'), 'Installed shell repair must observe the radio-wrapped cacheShell implementation.');
 }
-assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305`), 'Generated worker does not pin the radio shell to the current release.');
+assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305`), `Committed worker is stale: radio shell must be pinned to current release ${version}.`);
+assert(builder.includes("importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305');"), 'Worker builder must derive the radio cache-bust token from the current release.');
 assert(builder.includes("'public/service-worker-radio-core-v305.js'"), 'Worker builder does not require the radio shell source file.');
 assert(builder.includes("radioCore:'radio-core-shell-v305'"), 'Worker builder does not report the radio shell revision.');
 
@@ -62,6 +64,9 @@ for (const pathname of requiredRadioAssets.filter(path => path.includes('/radio-
   assert(trackSuggestions.includes(pathname), `Track picker no longer references ${pathname}.`);
 }
 assert(trackSuggestions.includes('/app/radio-track-map-v241.json'), 'Track picker no longer references the exact-track map.');
+assert(trackSuggestions.includes("REVISION='radio-track-suggestions-v242'"), 'Installed radio core must carry the playlist playback regression fix.');
+assert(trackSuggestions.includes("trackLink.target='_self'"), 'Installed radio core must preserve same-navigation Spotify handoff.');
+assert(trackSuggestions.includes('recent:nextRecent'), 'Installed radio core must preserve recent-track anti-repeat history.');
 
 function makeRuntime({ failPath = '' } = {}) {
   const stores = new Map();
@@ -128,6 +133,7 @@ console.log(JSON.stringify({
   ok: true,
   version,
   revision: 'radio-core-shell-v305',
+  committedWorkerCurrent: true,
   requiredAssetCount: requiredRadioAssets.length,
   freshInstallRequired: true,
   repairRequired: true,
