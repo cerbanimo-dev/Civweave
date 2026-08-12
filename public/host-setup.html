@@ -7,7 +7,7 @@
 <title>Civweave Host Steward Setup</title>
 <link rel="icon" href="/app/logos/civweave-pwa-192-v247.png" type="image/png">
 <style>
-:root{color-scheme:dark;--ink:#07111b;--panel:#0b1d28;--line:#71d9e455;--cyan:#8de5ef;--gold:#e8c96b;--paper:#f3f7f3;--muted:#b9cbd1}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 12% 0%,#143644 0,transparent 35%),linear-gradient(160deg,#061019,#0a1b27 58%,#130d22);color:var(--paper);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:920px;margin:auto;padding:28px 20px 80px}.brand{display:flex;align-items:center;gap:15px;margin-bottom:28px}.brand img{width:66px;height:66px;object-fit:contain;border-radius:18px}.brand small,.eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.13em;text-transform:uppercase}.brand h1{margin:0;font:700 clamp(2rem,7vw,4.3rem)/.95 Georgia,serif}.card{margin:18px 0;padding:22px;border:1px solid var(--line);border-radius:22px;background:#071c27e8;box-shadow:0 18px 60px #0005}.hero h2{font:700 clamp(1.8rem,5vw,3.4rem)/1.04 Georgia,serif;margin:.25em 0}.hero p,.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tile{padding:16px;border:1px solid #7ee5ff2f;border-radius:16px;background:#061720}.tile small{display:block;color:var(--cyan);font-weight:900;letter-spacing:.09em;text-transform:uppercase}.tile strong{display:block;margin-top:7px;font-size:1rem;overflow-wrap:anywhere}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.actions a,.actions button{min-height:44px;padding:10px 14px;border:1px solid #d8b86466;border-radius:12px;background:#172434;color:#fff;text-decoration:none;font-weight:850;cursor:pointer}.actions .primary{background:#6a5118;border-color:#e6c76699}.actions .campus{background:#123a42;border-color:#78e0ea88}.status{margin-top:12px;color:var(--muted)}@media(max-width:720px){main{padding:18px 14px 70px}.grid{grid-template-columns:1fr}.brand img{width:54px;height:54px}.actions>a,.actions>button{flex:1 1 100%;text-align:center}}
+:root{color-scheme:dark;--ink:#07111b;--panel:#0b1d28;--line:#71d9e455;--cyan:#8de5ef;--gold:#e8c96b;--paper:#f3f7f3;--muted:#b9cbd1}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 12% 0%,#143644 0,transparent 35%),linear-gradient(160deg,#061019,#0a1b27 58%,#130d22);color:var(--paper);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:920px;margin:auto;padding:28px 20px 80px}.brand{display:flex;align-items:center;gap:15px;margin-bottom:28px}.brand img{width:66px;height:66px;object-fit:contain;border-radius:18px}.brand small,.eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.13em;text-transform:uppercase}.brand h1{margin:0;font:700 clamp(2rem,7vw,4.3rem)/.95 Georgia,serif}.card{margin:18px 0;padding:22px;border:1px solid var(--line);border-radius:22px;background:#071c27e8;box-shadow:0 18px 60px #0005}.hero h2{font:700 clamp(1.8rem,5vw,3.4rem)/1.04 Georgia,serif;margin:.25em 0}.hero p,.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tile{padding:16px;border:1px solid #7ee5ff2f;border-radius:16px;background:#061720}.tile small{display:block;color:var(--cyan);font-weight:900;letter-spacing:.09em;text-transform:uppercase}.tile strong{display:block;margin-top:7px;font-size:1rem;overflow-wrap:anywhere}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.actions a,.actions button{min-height:44px;padding:10px 14px;border:1px solid #d8b86466;border-radius:12px;background:#172434;color:#fff;text-decoration:none;font-weight:850;cursor:pointer}.actions .primary{background:#6a5118;border-color:#e6c76699}.actions .campus{background:#123a42;border-color:#78e0ea88}.status{margin-top:12px;color:var(--muted)}.edge-card{border-color:#e8c96b55}.edge-card.ready{border-color:#65dfaa88}.edge-card.pending{border-color:#f2b35f88}.edge-card h2{margin:.2em 0;font:700 clamp(1.5rem,4vw,2.4rem)/1.05 Georgia,serif}.tile a{color:var(--paper);text-decoration:none}.tile a:hover{text-decoration:underline}.permission{margin-top:16px;padding:14px 16px;border:1px solid #e8c96b55;border-radius:14px;background:#2b210f66}.permission summary{cursor:pointer;font-weight:900;color:var(--gold)}.permission code{color:#fff;overflow-wrap:anywhere}.permission li+li{margin-top:7px}@media(max-width:720px){main{padding:18px 14px 70px}.grid{grid-template-columns:1fr}.brand img{width:54px;height:54px}.actions>a,.actions>button{flex:1 1 100%;text-align:center}}
 </style>
 <link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.108-prismatic-front-door-v301">
 </head>
@@ -41,6 +41,29 @@
 </div>
 <p id="host-status" class="status" role="status">Reading this host's deployment metadata…</p>
 </section>
+<section class="card edge-card" id="edge-card">
+<p class="eyebrow">CLOUDFLARE DEPLOYMENT</p>
+<h2>Worker + three starter nodes</h2>
+<p class="muted">Civweave attempts this layer automatically during host creation and every automated deployment. Pages remains usable if it needs follow-up.</p>
+<div class="grid">
+<div class="tile"><small>Account Worker</small><strong id="edge-worker">checking…</strong></div>
+<div class="tile"><small>Starter A</small><strong id="edge-node-a">checking…</strong></div>
+<div class="tile"><small>Starter B</small><strong id="edge-node-b">checking…</strong></div>
+<div class="tile"><small>Starter C</small><strong id="edge-node-c">checking…</strong></div>
+</div>
+<p id="edge-status" class="status" role="status">Reading account-edge deployment status…</p>
+<details class="permission" id="edge-permission">
+<summary>Cloudflare token settings and retry</summary>
+<ol>
+<li>Token permission: <strong>Account → Workers Scripts → Edit</strong>.</li>
+<li>Account resources: include the Cloudflare account that owns this host.</li>
+<li>GitHub Actions: replace <code>CLOUDFLARE_API_TOKEN</code>, then rerun the host deployment workflow.</li>
+<li>Local setup: rerun the command shown below after updating the token.</li>
+</ol>
+<p><code id="edge-retry">node scripts/provision-cloudflare-account-edge-v1.mjs --host-id &lt;host-id&gt; --strict</code></p>
+<p class="muted">Durable Objects are covered by Workers Scripts permission; Cloudflare does not present a separate Durable Objects permission row.</p>
+</details>
+</section>
 <section class="card">
 <p class="eyebrow">WHY THE ANCHOR MATTERS</p>
 <p class="muted">The Cloudflare host remains usable without a local Anchor. A local companion is strongly recommended because it can retain host identity and state for recovery, local-first services, and federation work even when the public edge is unavailable.</p>
@@ -57,6 +80,35 @@ const paired=()=>{try{return localStorage.getItem(ANCHOR_KEY)==='1'}catch{return
 const anchorState=document.querySelector('#anchor-state');
 const status=document.querySelector('#host-status');
 const anchorLink=document.querySelector('#anchor-link');
+const edgeCard=document.querySelector('#edge-card');
+const edgeWorker=document.querySelector('#edge-worker');
+const edgeStatus=document.querySelector('#edge-status');
+const edgePermission=document.querySelector('#edge-permission');
+const edgeRetry=document.querySelector('#edge-retry');
+const edgeNodeSlots=['a','b','c'].map(suffix=>document.querySelector(`#edge-node-${suffix}`));
+function setEdgeLink(element,label,url){
+  if(!element)return;
+  element.textContent='';
+  if(url){const link=document.createElement('a');link.href=url;link.textContent=label;link.target='_blank';link.rel='noreferrer';element.append(link)}
+  else element.textContent=label;
+}
+function renderAccountEdge(meta){
+  const edge=meta?.accountEdge;
+  const nodes=Array.isArray(edge?.starterNodes)?edge.starterNodes:[];
+  const ready=edge?.status==='ready'&&nodes.length===3;
+  edgeCard?.classList.toggle('ready',ready);
+  edgeCard?.classList.toggle('pending',!ready);
+  setEdgeLink(edgeWorker,ready?'civweave-host-edge':'setup required',ready?edge.workerOrigin:'');
+  edgeNodeSlots.forEach((slot,index)=>{
+    const node=nodes[index];
+    setEdgeLink(slot,node?.nodeId||'pending',node?.publicOrigin||'');
+  });
+  if(edgeRetry)edgeRetry.textContent=edge?.retryCommand||`node scripts/provision-cloudflare-account-edge-v1.mjs --host-id ${meta?.hostId||'<host-id>'} --strict`;
+  if(edgePermission)edgePermission.open=!ready;
+  if(edgeStatus)edgeStatus.textContent=ready
+    ?'Ready: the account Worker and all three starter nodes passed their health and manifest checks.'
+    :'Pages is live, but the Worker + three starter nodes still need setup. Open the token settings below; this status will clear automatically after a successful deployment retry.';
+}
 function renderAnchor(){if(anchorState)anchorState.textContent=paired()?'paired on this browser':'recommended, not yet paired'}
 renderAnchor();
 document.querySelector('#mark-paired')?.addEventListener('click',()=>{try{localStorage.setItem(ANCHOR_KEY,'1');localStorage.removeItem(SNOOZE_KEY)}catch{};renderAnchor();if(status)status.textContent='Anchor pairing acknowledgement saved for this steward browser.'});
@@ -66,11 +118,13 @@ document.querySelector('#mark-paired')?.addEventListener('click',()=>{try{localS
     if(!response.ok)throw new Error(`metadata returned ${response.status}`);
     const meta=await response.json();
     const origin=String(meta?.publicOrigin||location.origin);
+    renderAccountEdge(meta);
     document.querySelector('#host-origin').textContent=origin;
     document.querySelector('#host-role').textContent=meta?.role==='canonical'?'canonical Civweave root':'community host';
     if(anchorLink)anchorLink.href=`/host-local-anchor.html?host=${encodeURIComponent(origin)}`;
     if(status)status.textContent=meta?.localAnchorRecommended?'Host metadata loaded. A local Anchor is strongly recommended but is not required to enter Civweave.':'Host metadata loaded.';
   }catch(error){
+    renderAccountEdge({hostId:'<host-id>',accountEdge:{status:'pending'}});
     document.querySelector('#host-origin').textContent=location.origin;
     document.querySelector('#host-role').textContent='host steward';
     if(anchorLink)anchorLink.href=`/host-local-anchor.html?host=${encodeURIComponent(location.origin)}`;

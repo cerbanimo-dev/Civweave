@@ -11,6 +11,7 @@ const repoRoot = resolve(scriptDir, '..');
 const configPath = resolve(repoRoot, 'cloudflare/account-edge/wrangler.jsonc');
 const WORKER_NAME = 'civweave-host-edge';
 const STARTER_NODE_COUNT = 3;
+const WORKERS_PERMISSION = 'Account > Workers Scripts > Edit';
 
 const clean = (value, max = 180) => String(value ?? '').trim().slice(0, max);
 export const normalizeHostId = value => clean(value, 72)
@@ -130,9 +131,13 @@ export async function provisionCloudflareAccountEdge({ hostId, strict = true, ou
   const normalizedHostId = normalizeHostId(hostId) || 'civweave';
   const baseSummary = {
     schema: 'civweave.cloudflare-account-edge.v1',
+    capability: 'worker-plus-three-starter-nodes',
     worker: WORKER_NAME,
     requiredStarterNodes: STARTER_NODE_COUNT,
     hostId: normalizedHostId,
+    requiredPermissions: [WORKERS_PERMISSION],
+    accountResourceScope: 'Include the Cloudflare account that owns this host',
+    retryCommand: `node scripts/provision-cloudflare-account-edge-v1.mjs --host-id ${normalizedHostId} --strict`,
   };
 
   try {
@@ -230,6 +235,8 @@ export async function provisionCloudflareAccountEdge({ hostId, strict = true, ou
     writeSummary(output, summary);
     if (strict) throw error;
     console.warn(`Cloudflare Pages hosting can continue, but the account edge is incomplete: ${summary.error}`);
+    console.warn(`Required token permission: ${WORKERS_PERMISSION}`);
+    console.warn(`Retry after updating the token: ${summary.retryCommand}`);
     return summary;
   }
 }

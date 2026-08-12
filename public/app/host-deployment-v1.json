@@ -6,5 +6,16 @@
   "publicOrigin": "https://civweave.pages.dev",
   "canonicalOrigin": "https://civweave.pages.dev",
   "localAnchorRecommended": true,
-  "localAnchorRequired": false
+  "localAnchorRequired": false,
+  "accountEdge": {
+    "schema": "civweave.cloudflare-account-edge.v1",
+    "capability": "worker-plus-three-starter-nodes",
+    "status": "pending",
+    "requiredStarterNodes": 3,
+    "requiredPermissions": [
+      "Account > Workers Scripts > Edit"
+    ],
+    "accountResourceScope": "Include the Cloudflare account that owns this host",
+    "retryCommand": "node scripts/provision-cloudflare-account-edge-v1.mjs --host-id civweave --strict"
+  }
 }

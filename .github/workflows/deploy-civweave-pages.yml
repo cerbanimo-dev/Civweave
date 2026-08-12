@@ -90,12 +90,18 @@ jobs:
           node --input-type=module <<'NODE'
           import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
           const target = '.cloudflare-pages/app/host-deployment-v1.json';
-          let accountEdge = null;
+          let accountEdge;
           try {
-            const candidate = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
-            if (candidate.status === 'ready' && candidate.starterNodeIds?.length === 3) accountEdge = candidate;
+            accountEdge = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
           } catch {
-            // Pages remains a complete host even when optional account-edge provisioning is unavailable.
+            accountEdge = {
+              schema: 'civweave.cloudflare-account-edge.v1',
+              capability: 'worker-plus-three-starter-nodes',
+              status: 'pending',
+              requiredStarterNodes: 3,
+              requiredPermissions: ['Account > Workers Scripts > Edit'],
+              accountResourceScope: 'Include the Cloudflare account that owns this host',
+            };
           }
           mkdirSync('.cloudflare-pages/app', { recursive: true });
           writeFileSync(target, `${JSON.stringify({
@@ -105,7 +111,7 @@ jobs:
             pagesProject: 'civweave',
             publicOrigin: 'https://civweave.pages.dev',
             canonicalOrigin: 'https://civweave.pages.dev',
-            ...(accountEdge ? { accountEdge } : {}),
+            accountEdge,
             localAnchorRecommended: true,
             localAnchorRequired: false,
             sourceCommit: process.env.GITHUB_SHA,

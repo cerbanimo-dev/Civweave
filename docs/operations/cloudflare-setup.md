@@ -42,6 +42,17 @@ npx wrangler whoami
 
 Always inspect `wrangler whoami` before creating a host. A host belongs to the Cloudflare account that creates its Pages project.
 
+### Cloudflare API token permissions
+
+For GitHub automation, create a custom token scoped to the account that will own the host and select both:
+
+- `Account` → `Cloudflare Pages` → `Edit` for the stable Pages host;
+- `Account` → `Workers Scripts` → `Edit` for `civweave-host-edge` and its three Durable Object starter nodes.
+
+Under **Account resources**, include the specific Cloudflare account that owns the host. There is no separate Durable Objects permission row; Cloudflare documents Durable Object namespace access under Workers Scripts permissions.
+
+The setup helper and GitHub workflow attempt the Worker and all three nodes automatically. If the Workers permission is absent, Pages still deploys and `/host-setup.html` shows the incomplete layer, exact permission, and retry command instead of silently hiding it.
+
 ## Create the canonical OG node
 
 Canonical deployment is deliberately guarded against accidental publication from the wrong Cloudflare login. Set the expected login locally; do not commit it.
@@ -99,12 +110,14 @@ The host ID and Pages project name are separate so a stable Civweave identity do
 1. finds Wrangler;
 2. checks the active Cloudflare account;
 3. protects the reserved `civweave` root project;
-4. creates the requested Pages project when needed;
-5. builds the complete `.cloudflare-pages/` package;
-6. stamps `/app/host-deployment-v1.json` with the host ID, public origin, role, and canonical root;
-7. deploys the production branch with Wrangler;
-8. prints a steward setup URL ending in `/host-setup.html`;
-9. leaves the successful direct deployment online while optional GitHub automation is configured.
+4. creates or reuses the requested Pages project;
+5. automatically deploys `civweave-host-edge` and creates or reuses exactly three starter nodes;
+6. health-checks all three starter nodes and records a `ready` or `pending` account-edge status;
+7. builds the complete `.cloudflare-pages/` package;
+8. stamps `/app/host-deployment-v1.json` with the host, account-edge status, role, and canonical root;
+9. deploys the production branch with Wrangler;
+10. prints `/host-setup.html`, where the steward can see the Worker and each starter node or the exact remediation step;
+11. leaves the successful Pages deployment online while optional GitHub automation is configured.
 
 Open that steward setup URL once after deployment.
 
@@ -122,7 +135,7 @@ The secrets configured in the canonical `cerbanimo-dev/Civweave` repository are 
 
 The Actions workflows validate those credentials by requesting the exact configured Pages project. They intentionally avoid account-membership enumeration, because an account-scoped Pages token can deploy its project without that broader permission.
 
-Then enable `.github/workflows/deploy-civweave-host-pages.yml`. Every push to `main` rebuilds and deploys that same Pages project. The workflow refuses the reserved `civweave` project, so a community credential cannot overwrite the canonical root.
+Then enable `.github/workflows/deploy-civweave-host-pages.yml`. Every push to `main` rebuilds and deploys that same Pages project, automatically retries the account Worker and three starter nodes, and verifies the stable community hostname. The workflow refuses the reserved `civweave` project, so a community credential cannot overwrite the canonical root. Missing Workers permission produces a visible warning and pending status on `/host-setup.html`; it does not take the Pages host offline.
 
 The canonical repository uses `.github/workflows/deploy-civweave-pages.yml` for `civweave.pages.dev`. Both workflows preserve the initial direct deployment until a successful automated replacement is available; failure or delayed GitHub setup does not take a new host offline.
 
