@@ -7,6 +7,7 @@ const builder=await readFile('scripts/build-service-worker-v211.mjs','utf8');
 const family=await readFile('public/app/family-ai-loader-v105.js','utf8');
 const bootstrap=await readFile('public/app/local-ai/bootstrap-v266.js','utf8');
 const registry=await readFile('public/app/local-ai/model-registry-v266.js','utf8');
+const packageGuard=await readFile('public/app/local-ai/package-revision-guard-v307.js','utf8');
 
 assert.match(core,/const COHERENCE_CRITICAL_APP_PATHS = new Set\(/,'service worker must declare coherence-critical app code');
 assert.match(core,/pathname\.startsWith\('\/app\/local-ai\/'\)/,'all local AI modules must use the coherence-critical route');
@@ -30,6 +31,8 @@ assert.match(bootstrap,/delete globalThis\[name\]/,'bootstrap must delete incomp
 assert.match(bootstrap,/metadataReady=.*?metadataRepairRaceSafe===true/s,'metadata repair readiness must include its wrapped-manager capability marker');
 assert.match(bootstrap,/downloadPolicyReady=.*?largeExternalDataForeground===true/s,'download policy readiness must include its wrapped-manager capability marker');
 assert.match(bootstrap,/bridgeReady=.*?continuationValidation===true/s,'runtime bridge readiness must include the capability required by bootstrap');
+assert.match(bootstrap,/packageRevisionReady=.*?packageRevisionGuard===true/s,'bootstrap must require the local package revision migration guard');
+assert.match(bootstrap,/download-manager-v267[^\n]*[\s\S]*package-revision-guard-v307[^\n]*[\s\S]*download-policy-v278/,'package revision guard must install immediately after the download manager and before wrappers that preserve it');
 assert.match(bootstrap,/model-registry-v266\.js\?v=1\.0\.121-v307-gemma3-q4/,'bootstrap must request the updated Gemma registry epoch');
 assert.match(bootstrap,/runtime-v266\.js\?v=1\.0\.121-v307-coherence-reload/,'bootstrap must request a fresh runtime when the resident runtime fails its capability contract');
 
@@ -39,6 +42,11 @@ assert.match(registry,/artifact\('onnx\/model_q4\.onnx',300_000,true,'',347_363\
 assert.match(registry,/artifact\('onnx\/model_q4\.onnx_data',800_000_000,true,'',859_106_816\)/,'Gemma 3 q4 external data artifact must be pinned');
 assert.doesNotMatch(registry,/repo:'onnx-community\/gemma-3-1b-it-ONNX'.*?revision:'a7fa005d133fd9fc99e78b812f450742ad37426d'/s,'Gemma 3 must not remain on the pre-optimization export');
 
+assert.match(packageGuard,/installedRevision===currentRevision/,'package guard must compare the installed and current registry revisions');
+assert.match(packageGuard,/active:false,packageRevisionChanged:true/,'stale selected packages must be suppressed before inference');
+assert.match(packageGuard,/status:'paused'/,'stale ready state must become resumable instead of falsely ready');
+assert.match(packageGuard,/preservesCachedWeights:true/,'migration must preserve the previously downloaded cache instead of deleting it');
+
 console.log(JSON.stringify({
   ok:true,
   revision:'local-ai-bootstrap-coherence-v307',
@@ -46,6 +54,7 @@ console.log(JSON.stringify({
   bootstrapRevision:'1.0.115-local-ai-bootstrap-v302-session-handoff',
   incompatibleGlobals:'evicted-before-reload',
   gemma3Profile:'transformers-js-v4-q4-optimized',
+  packageMigration:'stale-selection-suppressed-resumable',
   staleQueryRetryPrevented:true,
   sameVersionDeadlockPrevented:true
 },null,2));
