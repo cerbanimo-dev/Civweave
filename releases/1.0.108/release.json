@@ -13,5 +13,12 @@
     "gateway": "releases/1.0.108/server/server-gateway-v131.mjs",
     "federated": "releases/1.0.108/server/server-federated-v152.mjs"
   },
-  "sha256": {}
+  "sha256": {
+    "server/server-federated-v152.mjs": "59d01e5ed9f26cb159c4ed33b9ef4130fa1d0b8d22c8d721ff7feb6587138314",
+    "server/server-gateway-v131-base.mjs": "8b1ca874fba1265807a2baba8ab2cf185499753e859e18fd50199689ddf3aa1a",
+    "server/server-gateway-v131.mjs": "6bd31b0af85e9fbf8fc878188d5c1c8ae0df25329eeae59e74624688aa84bee9",
+    "server/server-local-v131.mjs": "d2f4fd7b1880291854c617e684a0555442c9576db65188ed8a7cad07774d6af4",
+    "server/server-v130.mjs": "2f6cc5f601d2ba20a888ee4cf47aa23fa50f8ba446e804819ad4a2e984d37d81",
+    "server/server.mjs": "4a23ed917ea949c1016de9da7c019e925fb08d534208b8b14d90176811a631a8"
+  }
 }
