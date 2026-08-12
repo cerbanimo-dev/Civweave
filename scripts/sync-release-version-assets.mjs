@@ -69,13 +69,18 @@ await patch('public/app/themed-system-nav-v178.js',source=>{
 });
 await patch('public/app/working-campus-v156.js',source=>source.replace(/system-routes-v227\.js\?v=\d+\.\d+\.\d+-five-system-route-contract-v227/,`system-routes-v227.js?v=${version}-five-system-route-contract-v227`));
 await patch('public/app/working-campus-v156.part4.txt',source=>source.replace(/version:'\d+\.\d+\.\d+'/g,`version:'${version}'`));
-await patch('public/service-worker-core-v208.js',source=>replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'service-worker core version'));
-await patch('public/service-worker-v203.js',source=>{
-  source=replaceRequired(source,/system-routes-v227\.js\?v=\d+\.\d+\.\d+-five-system-route-contract-v227/,`system-routes-v227.js?v=${version}-five-system-route-contract-v227`,'worker route contract revision');
-  source=replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+(?:-[^'\n]+)?/,`service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1`,'service-worker wrapper revision');
+await patch('public/service-worker-core-v208.js',source=>{
+  source=replaceRequired(source,/const VERSION = '\d+\.\d+\.\d+';/,`const VERSION = '${version}';`,'service-worker core version');
+  source=replaceRequired(source,/const BUILD = '[^']+';/,"const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';",'service-worker core return-guard build');
+  if(!source.includes("'/app/working-campus-return-guard-v425.js'"))source=source.replace("const OPTIONAL_SHELL_ASSETS = [\n","const OPTIONAL_SHELL_ASSETS = [\n  '/app/working-campus-return-guard-v425.js',\n");
   return source;
 });
-await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+(?:-code-coherence-v288)?-lightweight-shell-v208-legacy-v156-bridge-v209/,`service-worker-v203.js?v=${version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209`,'legacy worker bridge revision'));
+await patch('public/service-worker-v203.js',source=>{
+  source=replaceRequired(source,/system-routes-v227\.js\?v=\d+\.\d+\.\d+-five-system-route-contract-v227/,`system-routes-v227.js?v=${version}-five-system-route-contract-v227`,'worker route contract revision');
+  source=replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+(?:-[^'\n]+)?/,`service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425`,'service-worker wrapper revision');
+  return source;
+});
+await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+(?:-code-coherence-v288)?-lightweight-shell-v208-legacy-v156-bridge-v209(?:-working-campus-return-v425)?/,`service-worker-v203.js?v=${version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425`,'legacy worker bridge revision'));
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'install-boundary runtime version');
   if(!source.includes("const REVISION='chat-convergence-v250-navigation-lifecycle-v424';"))throw new Error(`install-boundary navigation lifecycle revision was not found while synchronizing Civweave ${version}.`);
@@ -86,6 +91,7 @@ await patch('public/app/install-boundary-v146.js',source=>{
 await patch('public/app/working-campus-v156.html',source=>{
   source=replaceRequired(source,/Civweave Working Campus · v\d+\.\d+\.\d+/,`Civweave Working Campus · v${version}`,'working-campus title');
   source=replaceRequired(source,/<b class="version-chip">v\d+\.\d+\.\d+<\/b>/,`<b class="version-chip">v${version}</b>`,'working-campus version chip');
+  if(!source.includes('/app/working-campus-return-guard-v425.js'))source=source.replace('<script src="/app/document-lifecycle-v221.js',`<script src="/app/working-campus-return-guard-v425.js?v=working-campus-return-v425"></script>\n<script src="/app/document-lifecycle-v221.js`);
   source=replaceRequired(source,/\/app\/install-boundary-v146\.js\?v=[^"]+/,`/app/install-boundary-v146.js?v=chat-convergence-v250-navigation-lifecycle-v424`,'working-campus boundary navigation revision');
   source=source.replace(/const VERSION='\d+\.\d+\.\d+-working-campus-planner-v199';/,`const VERSION='${version}-working-campus-planner-v199';`);
   return source;
@@ -120,4 +126,4 @@ await patch('scripts/smoke-gateway-v131-base.mjs',source=>{
 
 await patch('scripts/verify-device-package-self-heal-v184.mjs',source=>source.replace(/v1\.0\.7/g,`v${version}`).replace(/1\.0\.7/g,version));
 
-console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,changed},null,2));
+console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,workingCampusReturnGuard:'v425',changed},null,2));

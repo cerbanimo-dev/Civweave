@@ -52,10 +52,11 @@ for (const source of [wrapper, builder]) {
   assert(source.indexOf('/service-worker-shell-integrity-v281.js') < source.indexOf(radioImport), 'Radio shell must wrap the integrity-owned cacheShell implementation.');
   assert(source.indexOf(radioImport) < source.indexOf('/service-worker-shell-repair-v293.js'), 'Installed shell repair must observe the radio-wrapped cacheShell implementation.');
 }
-assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305`), `Committed worker is stale: radio shell must be pinned to current release ${version}.`);
-assert(builder.includes("importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305');"), 'Worker builder must derive the radio cache-bust token from the current release.');
+assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305-highlight-v243`), `Committed worker is stale: radio shell must carry the highlighted external handoff for release ${version}.`);
+assert(builder.includes("importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-highlight-v243');"), 'Worker builder must preserve the highlighted external radio cache-bust token.');
 assert(builder.includes("'public/service-worker-radio-core-v305.js'"), 'Worker builder does not require the radio shell source file.');
 assert(builder.includes("radioCore:'radio-core-shell-v305'"), 'Worker builder does not report the radio shell revision.');
+assert(builder.includes("radioAssetHandoff:'highlight-v243'"), 'Worker builder must report the active radio handoff revision.');
 
 for (let index = 0; index < requiredRadioAssets.length; index += 1) {
   assert(assetContents[index].length > 0, `${requiredRadioAssets[index]} is empty.`);
@@ -64,8 +65,10 @@ for (const pathname of requiredRadioAssets.filter(path => path.includes('/radio-
   assert(trackSuggestions.includes(pathname), `Track picker no longer references ${pathname}.`);
 }
 assert(trackSuggestions.includes('/app/radio-track-map-v241.json'), 'Track picker no longer references the exact-track map.');
-assert(trackSuggestions.includes("REVISION='radio-track-suggestions-v242'"), 'Installed radio core must carry the playlist playback regression fix.');
-assert(trackSuggestions.includes("trackLink.target='_self'"), 'Installed radio core must preserve same-navigation Spotify handoff.');
+assert(trackSuggestions.includes("REVISION='radio-track-suggestions-v243'"), 'Installed radio core must carry the highlighted external Spotify handoff.');
+assert(trackSuggestions.includes("searchParams.set('highlight',`spotify:track:${id}`)"), 'Installed radio core must identify the suggested track within the playlist URL.');
+assert(trackSuggestions.includes("link.target='_blank'"), 'Installed radio core must keep Civweave open while Spotify opens externally.');
+assert(!trackSuggestions.includes("location.assign(trackLink.href)"), 'Installed radio core must never navigate the PWA away to Spotify.');
 assert(trackSuggestions.includes('recent:nextRecent'), 'Installed radio core must preserve recent-track anti-repeat history.');
 
 function makeRuntime({ failPath = '' } = {}) {
@@ -133,6 +136,7 @@ console.log(JSON.stringify({
   ok: true,
   version,
   revision: 'radio-core-shell-v305',
+  radioAssetHandoff: 'highlight-v243',
   committedWorkerCurrent: true,
   requiredAssetCount: requiredRadioAssets.length,
   freshInstallRequired: true,

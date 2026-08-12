@@ -1,7 +1,7 @@
 'use strict';
 
-const VERSION = '1.0.121';
-const BUILD = 'lightweight-shell-v208-installer-brand-v1';
+const VERSION = '1.0.122';
+const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';
 const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
 const OFFLINE_CACHE = `civweave-offline-${VERSION}-${BUILD}`;
@@ -30,6 +30,7 @@ const REQUIRED_SHELL_ASSETS = [
 ];
 
 const OPTIONAL_SHELL_ASSETS = [
+  '/app/working-campus-return-guard-v425.js',
   '/app/open-learning-media-cache-v1.mjs',
   '/app/open-learning-media-installer-v1.mjs',
   '/downloads/knowledge-schools/open-learning-media/lookup.json',
@@ -88,19 +89,6 @@ const WORKER_PATHS = new Set([
   '/service-worker-shared-images-v203.js',
   '/service-worker-update-v204.js'
 ]);
-
-const COHERENCE_CRITICAL_APP_PATHS = new Set([
-  '/app/family-ai-loader-v105.js',
-  '/app/local-chat-runtime-v295.js',
-  '/app/local-chat-owner-v295.js',
-  '/app/ai-capability-broker-v268.js',
-  '/app/mobile-ai-hardening-v302.js',
-  '/app/document-lifecycle-v221.js'
-]);
-
-function coherenceCriticalAppPath(pathname) {
-  return pathname.startsWith('/app/local-ai/') || COHERENCE_CRITICAL_APP_PATHS.has(pathname);
-}
 
 function post(event, packet) {
   try { event.ports?.[0]?.postMessage(packet); } catch {}
@@ -651,10 +639,6 @@ self.addEventListener('fetch', event => {
   }
   if (request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
     event.respondWith(networkFirst(request, url.pathname === '/' ? '/index.html' : '/offline.html'));
-    return;
-  }
-  if (coherenceCriticalAppPath(url.pathname)) {
-    event.respondWith(networkFirst(request, url.pathname));
     return;
   }
   if (url.pathname.startsWith('/app/') || url.pathname.startsWith('/extensions/') || url.pathname === '/offline.html' || url.pathname.startsWith('/install-')) {

@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.2.0';
-const REVISION='radio-track-suggestions-v242';
+const VERSION='1.3.0';
+const REVISION='radio-track-suggestions-v243';
 const PICK_KEY='civweave.radio.track-picks.v242';
 const TRACK_MAP_PATH='/app/radio-track-map-v241.json';
 const CARD_ID='cw-radio-suggestion-v233';
@@ -117,14 +117,15 @@ function playlistMeta(systemId){
   return Object.freeze({system,playlistId:match[1],playlistUri:`spotify:playlist:${match[1]}`,spotifyUrl});
 }
 function stationUrl(systemId){return playlistMeta(systemId)?.spotifyUrl||'https://open.spotify.com/'}
-function spotifyContextUrl(track,systemId){
+function spotifyHighlightedPlaylistUrl(track,systemId){
   const meta=playlistMeta(systemId);if(!meta)return'https://open.spotify.com/';
   const id=spotifyTrackId(track?.spotifyTrackId||'');
   if(!id)return meta.spotifyUrl;
-  const url=new URL(`https://open.spotify.com/track/${id}`);
-  url.searchParams.set('context',meta.playlistUri);
+  const url=new URL(meta.spotifyUrl);
+  url.searchParams.set('highlight',`spotify:track:${id}`);
   return url.href;
 }
+function spotifyContextUrl(track,systemId){return spotifyHighlightedPlaylistUrl(track,systemId)}
 async function loadTracks(systemId){
   const system=normalizeSystemId(systemId),path=DIRECTORY_PATHS[system];
   if(!path)return[];
@@ -161,8 +162,8 @@ function pickTag(systemId){
   return tag;
 }
 function installStyle(){
-  if(document.getElementById('cw-radio-track-style-v242'))return;
-  const style=document.createElement('style');style.id='cw-radio-track-style-v242';style.textContent=`
+  if(document.getElementById('cw-radio-track-style-v243'))return;
+  const style=document.createElement('style');style.id='cw-radio-track-style-v243';style.textContent=`
 #${CARD_ID} .cw-radio-pick-v241{margin:0 0 12px;padding:10px 11px;border:1px solid #ffffff24;border-radius:13px;background:#00000024}
 #${CARD_ID} .cw-radio-tag-v241{display:inline-flex;max-width:100%;margin:0 0 7px;padding:4px 8px;border:1px solid #ffffff34;border-radius:999px;background:#ffffff10;font-size:10px;font-weight:900;letter-spacing:.08em;line-height:1.25;text-transform:uppercase}
 #${CARD_ID} .cw-radio-pick-label-v241{display:block;margin:0 0 2px;opacity:.66;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
@@ -171,6 +172,12 @@ function installStyle(){
 #${CARD_ID} .cw-radio-track-link-v241{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border:1px solid #ffffff35;border-radius:999px;color:#fff;text-decoration:none;font-size:12px;font-weight:850;background:#ffffff0d}
 #${CARD_ID} .cw-radio-link{min-height:36px;padding:0 12px;font-size:12px}
 `;document.head?.append(style);
+}
+function externalizeSpotifyLink(link){
+  if(!link)return null;
+  link.target='_blank';
+  link.rel='noopener noreferrer external';
+  return link;
 }
 async function decorate(systemId){
   const system=normalizeSystemId(systemId),card=document.getElementById(CARD_ID);
@@ -184,17 +191,17 @@ async function decorate(systemId){
   const title=document.createElement('strong');title.className='cw-radio-track-v241';title.textContent=track.label;
   block.append(badge,label,title);
 
-  const stationLink=card.querySelector?.('.cw-radio-link');
-  if(stationLink){stationLink.textContent='Open station ↗';stationLink.target='_self';stationLink.rel='external'}
+  const stationLink=externalizeSpotifyLink(card.querySelector?.('.cw-radio-link'));
+  if(stationLink)stationLink.textContent='Open station ↗';
   const actions=document.createElement('div');actions.className='cw-radio-actions-v241';
-  const trackLink=document.createElement('a');trackLink.className='cw-radio-track-link-v241';trackLink.target='_self';trackLink.rel='external';
+  const trackLink=externalizeSpotifyLink(document.createElement('a'));trackLink.className='cw-radio-track-link-v241';
   let trackLinkMounted=false;
   const mountContextLink=id=>{
     const resolved=spotifyTrackId(id||track.spotifyTrackId||'');
     if(!resolved)return'';
     const meta=playlistMeta(system);if(!meta)return'';
-    trackLink.href=spotifyContextUrl({...track,spotifyTrackId:resolved},system);
-    trackLink.textContent='Play in station ↗';
+    trackLink.href=spotifyHighlightedPlaylistUrl({...track,spotifyTrackId:resolved},system);
+    trackLink.textContent='Open suggested track ↗';
     trackLink.dataset.spotifyContextReady='true';
     trackLink.dataset.spotifyPlaylistId=meta.playlistId;
     trackLink.dataset.spotifyTrackId=resolved;
@@ -208,24 +215,20 @@ async function decorate(systemId){
     }
     return resolved;
   };
-  trackLink.addEventListener('click',event=>{
-    const plainPrimaryClick=!event.defaultPrevented&&event.button===0&&!event.metaKey&&!event.ctrlKey&&!event.shiftKey&&!event.altKey;
-    globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_CLICKED',revision:REVISION,system,track:track.label,position:track.position,spotifyTrackId:spotifyTrackId(trackLink.href),playlistId:trackLink.dataset.spotifyPlaylistId||'',contextReady:true,tag}}));
-    if(!plainPrimaryClick)return;
-    event.preventDefault();
-    location.assign(trackLink.href);
+  trackLink.addEventListener('click',()=>{
+    globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_CLICKED',revision:REVISION,system,track:track.label,position:track.position,spotifyTrackId:trackLink.dataset.spotifyTrackId||'',playlistId:trackLink.dataset.spotifyPlaylistId||'',contextReady:true,external:true,highlighted:true,tag}}));
   },{once:true});
 
   const radioTitle=card.querySelector?.('.cw-radio-title');
   if(radioTitle?.after)radioTitle.after(block);else card.insertBefore?.(block,stationLink||null);
   const initialId=mountContextLink('');
   if(!initialId&&!stationLink){
-    const fallback=document.createElement('a');fallback.className='cw-radio-track-link-v241';fallback.href=stationUrl(system);fallback.target='_self';fallback.rel='external';fallback.textContent='Open station ↗';
+    const fallback=externalizeSpotifyLink(document.createElement('a'));fallback.className='cw-radio-track-link-v241';fallback.href=stationUrl(system);fallback.textContent='Open station ↗';
     block.after?.(fallback);
   }
 
   card.dataset.radioTrackSuggestionRevision=REVISION;card.dataset.radioTrack=track.label;card.dataset.radioTrackPosition=String(track.position);card.dataset.spotifyTrackId=initialId;
-  globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_SUGGESTED',revision:REVISION,system,track:track.label,position:track.position,spotifyTrackId:initialId,playlistId:playlistMeta(system)?.playlistId||'',contextReady:Boolean(initialId),tag}}));
+  globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-event',{detail:{type:'RADIO_TRACK_SUGGESTED',revision:REVISION,system,track:track.label,position:track.position,spotifyTrackId:initialId,playlistId:playlistMeta(system)?.playlistId||'',contextReady:Boolean(initialId),external:true,highlighted:Boolean(initialId),tag}}));
   return track.label;
 }
 function onRadioEvent(event){const detail=event?.detail||{};if(detail.type==='RADIO_CTA_SHOWN')decorate(detail.system)}
@@ -234,10 +237,11 @@ function start(){
   const existing=document.getElementById(CARD_ID);if(existing)decorate(existing.dataset.system||'');
   return true;
 }
-const api=Object.freeze({version:VERSION,revision:REVISION,recentWindow:RECENT_WINDOW,directoryPaths:DIRECTORY_PATHS,trackMapPath:TRACK_MAP_PATH,tags:TAGS,normalizeSystemId,spotifyTrackId,parseTrackLine,trackKey,playlistMeta,stationUrl,spotifyContextUrl,loadTrackMap,loadTracks,pickTrack,pickTag,decorate,start});
+const api=Object.freeze({version:VERSION,revision:REVISION,recentWindow:RECENT_WINDOW,directoryPaths:DIRECTORY_PATHS,trackMapPath:TRACK_MAP_PATH,tags:TAGS,normalizeSystemId,spotifyTrackId,parseTrackLine,trackKey,playlistMeta,stationUrl,spotifyHighlightedPlaylistUrl,spotifyContextUrl,loadTrackMap,loadTracks,pickTrack,pickTag,externalizeSpotifyLink,decorate,start});
+globalThis.CivweaveRadioTrackSuggestionsV243=api;
 globalThis.CivweaveRadioTrackSuggestionsV242=api;
 globalThis.CivweaveRadioTrackSuggestionsV241=api;
 globalThis.CivweaveRadioTrackSuggestionsV240=api;
 start();
-globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-suggestions-ready',{detail:{version:VERSION,revision:REVISION,systems:Object.keys(DIRECTORY_PATHS),playlistContext:true,sameNavigationPlayback:true,recentWindow:RECENT_WINDOW,trackMapPath:TRACK_MAP_PATH}}));
+globalThis.dispatchEvent?.(new CustomEvent('civweave:radio-track-suggestions-ready',{detail:{version:VERSION,revision:REVISION,systems:Object.keys(DIRECTORY_PATHS),playlistContext:true,highlightedPlaylistTrack:true,externalPlaybackHandoff:true,recentWindow:RECENT_WINDOW,trackMapPath:TRACK_MAP_PATH}}));
 })();

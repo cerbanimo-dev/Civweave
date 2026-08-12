@@ -48,6 +48,7 @@ assert(workerSource.includes("const BUILD = 'lightweight-shell-v208'"),'Verified
 assert(workerSource.includes("const V211_REVISION = 'offline-campus-seed-provenance-v211'"),'Offline retry-loop repair is missing.');`;
 const workerAssertionsAfter=`assert(workerWrapperSource.includes("importScripts('/service-worker-living-school-cleanroom-v218.js"),'Active worker wrapper omits Living School cache retirement.');
 assert(workerWrapperSource.includes("importScripts('/service-worker-core-v208.js"),'Active worker wrapper omits the retained lightweight core.');
+assert(workerWrapperSource.includes('working-campus-return-v425'),'Active worker wrapper omits the Working Campus return cache epoch.');
 assert(workerWrapperSource.includes("importScripts('/service-worker-installer-state-v280.js"),'Active worker wrapper omits the installer-state asset pin.');
 assert(workerWrapperSource.includes("importScripts('/service-worker-shell-integrity-v281.js"),'Active worker wrapper omits shell integrity.');
 assert(workerWrapperSource.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper omits the offline retry override.');
@@ -58,7 +59,8 @@ assert(workerWrapperSource.indexOf('service-worker-living-school-cleanroom-v218.
 assert(workerWrapperSource.indexOf('service-worker-core-v208.js')<workerWrapperSource.indexOf('service-worker-installer-state-v280.js'),'Installer-state pin does not load after the core globals.');
 assert(workerWrapperSource.indexOf('service-worker-installer-state-v280.js')<workerWrapperSource.indexOf('service-worker-shell-integrity-v281.js'),'Integrity does not see the final required shell asset list.');
 assert(workerWrapperSource.indexOf('service-worker-shell-integrity-v281.js')<workerWrapperSource.indexOf('service-worker-offline-v211-override.js'),'Offline override does not load after verified shell staging.');
-assert(workerCoreSource.includes("const BUILD = 'lightweight-shell-v208'"),'Verified lightweight worker core is missing.');
+assert(workerCoreSource.includes("const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425'"),'Verified lightweight worker core lost the v425 return cache epoch.');
+assert(workerCoreSource.includes("'/app/working-campus-return-guard-v425.js'"),'Verified lightweight worker core no longer precaches the return guard.');
 assert(installerStateWorkerSource.includes("'/app/installer-storage-guard-v281.js'"),'Installer-state worker does not pin the storage guard.');
 assert(integrityWorkerSource.includes("crypto.subtle.digest('SHA-256'")&&integrityWorkerSource.includes('lastKnownGoodCache'),'Verified shell integrity/last-known-good policy is missing.');
 assert(offlineOverrideSource.includes("const V211_REVISION = 'offline-campus-current-graph-v280'"),'Resumable current-graph offline retry repair is missing.');
