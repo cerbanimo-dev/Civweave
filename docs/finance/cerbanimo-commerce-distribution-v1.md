@@ -16,7 +16,7 @@ A product sale settles immediately. The full distributable sale amount is split 
 
 ## 1% dollar split fee
 
-Dollar-denominated Cerbanimo product and service sales retain the existing **1% (100 bps) split fee**. It is charged **on top of** the listed/distributable sale price and belongs to Cerbanimo's platform fee lane.
+Dollar-denominated Cerbanimo product and service sales retain the existing **1% (100 bps) split fee**. It is charged **on top of** the listed/distributable sale price and remains with Cerbanimo's platform fee authority.
 
 For a $100.00 sale:
 
