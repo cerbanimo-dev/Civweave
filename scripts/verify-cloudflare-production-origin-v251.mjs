@@ -20,10 +20,14 @@ assert.match(setup,/canonicalProjectName = "civweave"/,'Cloudflare setup helper 
 assert.match(setup,/CIVWEAVE_EXPECT_CLOUDFLARE_EMAIL/,'Canonical setup is missing the private account guard.');
 assert.match(setup,/--host-id/,'Cloudflare setup helper does not expose community host IDs.');
 assert.match(setup,/host-deployment-v1\.json/,'Cloudflare setup helper does not stamp host deployment metadata.');
+assert.match(setup,/function projectAlreadyExists\(output\)/,'Cloudflare setup helper cannot recognize an existing Pages project after a retry.');
+assert.match(setup,/8000002/,'Cloudflare setup helper does not recognize Cloudflare Pages already-exists error code 8000002.');
+assert.match(setup,/allowFailure: true/,'Cloudflare setup helper cannot recover from an eventually-consistent project-list miss.');
+assert.match(setup,/Continuing with the existing project/,'Cloudflare setup helper does not explicitly resume an existing Pages project.');
 assert.match(docs,/Canonical production URL: https:\/\/civweave\.pages\.dev/,'Cloudflare guide does not name the canonical production origin.');
 assert.match(docs,/node scripts\/setup-cloudflare-node\.mjs --host-id garden/,'Cloudflare guide does not document clone-and-Wrangler community host creation.');
 assert.match(docs,/Do not install from preview\/branch aliases/,'Cloudflare guide does not warn against preview-origin PWA installs.');
 assert.match(reminder,/civweave\.host-anchor\.paired\.v1/,'Host steward reminder does not persist Anchor completion.');
 assert.match(reminder,/Remind me tomorrow/,'Host steward reminder is not persistent-but-snoozable.');
 assert.equal(webmanifest.related_applications[0]?.url,'https://civweave.pages.dev/app/manifest.webmanifest','Manifest must prefer the new canonical root.');
-console.log(JSON.stringify({ok:true,revision:'cloudflare-production-origin-v252-hosts',project:'civweave',production:'https://civweave.pages.dev',communityPattern:'https://<project>.pages.dev',previewInstallSupported:false,localAnchorReminder:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'cloudflare-production-origin-v253-idempotent-hosts',project:'civweave',production:'https://civweave.pages.dev',communityPattern:'https://<project>.pages.dev',previewInstallSupported:false,localAnchorReminder:true,idempotentProjectCreate:true},null,2));
