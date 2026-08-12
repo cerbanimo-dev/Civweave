@@ -24,7 +24,7 @@ For a $100.00 sale:
 - contributor/template payout base: $100.00
 - Cerbanimo split fee: $1.00
 
-The fee never reduces the worker, template-origin, or product-contributor allocation. It is also not routed into the December 1 contributor pool. The commerce distribution exposes `buyerChargeMinor` and a `commerceSplitFee` object so the server-side money edge can charge the correct total while separate transfers still conserve the complete listed sale amount.
+The fee never reduces the worker, template-origin, or product-contributor allocation. It is also not routed into the December 1 contributor pool. The commerce distribution exposes `buyerChargeMinor` and a `commerceSplitFee` object so the server-side money edge can charge the correct total while separate transfers still conserve the complete listed sale amount. In the platform-charge/separate-transfer model, contributor transfers move only the listed sale amount; the 1% split fee remains with the Cerbanimo platform fee authority rather than being included in those recipient transfers.
 
 ## Acorns and Buttons
 
