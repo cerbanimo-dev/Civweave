@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 
 const css = fs.readFileSync(new URL('../public/app/working-campus-v156.css', import.meta.url), 'utf8');
+const visualCss = fs.readFileSync(new URL('../public/app/go-live-visual-v300.css', import.meta.url), 'utf8');
 const runtime = fs.readFileSync(new URL('../public/app/working-campus-v156.js', import.meta.url), 'utf8');
 const html = fs.readFileSync(new URL('../public/app/working-campus-v156.html', import.meta.url), 'utf8');
 
@@ -40,6 +41,13 @@ const checks = [
     assert.match(runtime, /chat\.open\(\{guide:'civweave'\}\)/);
   }],
   ['bottom navigation publishes a shared safe-area height', () => assert.match(css, /--cw-themed-nav-height:58px/)],
+  ['inner Working Campus states inherit the prismatic surface language', () => {
+    assert.match(visualCss, /--panel:#1b1932/);
+    assert.match(visualCss, /--panel2:#25223f/);
+    assert.match(visualCss, /html\[data-civweave-system="civweave"\] \.card\{/);
+    assert.match(visualCss, /html\[data-civweave-system="civweave"\] \.guide-foot\{/);
+    assert.match(visualCss, /#weaveling-hub-v233 :is\(\.wh233-thread,\.wh233-panel\)/);
+  }],
   ['compact shell revision is explicit', () => assert.match(runtime, /BRAND_REVISION='compact-shell-v235'/)]
 ];
 
