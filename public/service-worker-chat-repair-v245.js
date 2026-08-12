@@ -1,8 +1,9 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-css-contract-v343';
+const REVISION='chat-css-contract-v344-local-ai-coherence';
 const HARDENING_REVISION='mobile-ai-hardening-v302';
+const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
 const CHAT_PATHS=new Set([
   '/app/manifest.webmanifest',
   '/app/installed-entry-v146.html',
@@ -27,8 +28,19 @@ const CHAT_PATHS=new Set([
   '/app/working-campus-v156.html',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-owner-v295.js',
+  '/app/ai-capability-broker-v268.js',
+  '/app/fast-interactive-runtime-v192.js',
   '/app/local-ai/bootstrap-v266.js',
+  '/app/local-ai/model-registry-v266.js',
+  '/app/local-ai/download-manager-v267.js',
+  '/app/local-ai/download-policy-v278.js',
+  '/app/local-ai/metadata-repair-v276.js',
+  '/app/local-ai/small-model-policy-v283.js',
   '/app/local-ai/runtime-v266.js',
+  '/app/local-ai/runtime-bridge-v266.js',
+  '/app/local-ai/settings-panel-v267.js',
+  '/app/local-ai/primary-route-v283.js',
+  '/app/local-ai/hardware-tier-ui-v278.js',
   '/app/local-ai/worker-v266.js',
   '/app/local-ai/test-pulse-v269.js'
 ]);
@@ -58,7 +70,7 @@ async function purgeChatRuntimeCaches(){
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,hardeningRevision:HARDENING_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
+  return{revision:REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
 }
 
 self.addEventListener('activate',event=>{
@@ -72,5 +84,5 @@ self.addEventListener('message',event=>{
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,hardeningRevision:HARDENING_REVISION,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches});
 })();
