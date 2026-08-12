@@ -1,0 +1,41 @@
+name: Verify Cloudflare Account Bootstrap v1
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/account-edge/**'
+      - 'cloudflare/node-cloud/src/capacity.mjs'
+      - 'scripts/setup-cloudflare-node.mjs'
+      - 'scripts/provision-cloudflare-account-edge-v1.mjs'
+      - 'scripts/verify-cloudflare-pages-account-target-v1.mjs'
+      - 'scripts/test-cloudflare-account-bootstrap-v1.mjs'
+      - '.github/workflows/deploy-civweave-pages.yml'
+      - '.github/workflows/deploy-civweave-host-pages.yml'
+      - '.github/workflows/verify-cloudflare-account-bootstrap-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/account-edge/**'
+      - 'cloudflare/node-cloud/src/capacity.mjs'
+      - 'scripts/setup-cloudflare-node.mjs'
+      - 'scripts/provision-cloudflare-account-edge-v1.mjs'
+      - 'scripts/verify-cloudflare-pages-account-target-v1.mjs'
+      - 'scripts/test-cloudflare-account-bootstrap-v1.mjs'
+      - '.github/workflows/deploy-civweave-pages.yml'
+      - '.github/workflows/deploy-civweave-host-pages.yml'
+      - '.github/workflows/verify-cloudflare-account-bootstrap-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify three-node Cloudflare account contract
+        run: node scripts/test-cloudflare-account-bootstrap-v1.mjs
