@@ -7,6 +7,7 @@ on:
       - 'public/service-worker-v203.js'
       - 'scripts/build-service-worker-v211.mjs'
       - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/local-ai/bootstrap-v266.js'
       - 'public/app/local-ai/model-registry-v266.js'
       - 'scripts/verify-local-ai-bootstrap-coherence-v307.mjs'
       - '.github/workflows/verify-local-ai-bootstrap-coherence-v307.yml'
@@ -17,6 +18,7 @@ on:
       - 'public/service-worker-v203.js'
       - 'scripts/build-service-worker-v211.mjs'
       - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/local-ai/bootstrap-v266.js'
       - 'public/app/local-ai/model-registry-v266.js'
       - 'scripts/verify-local-ai-bootstrap-coherence-v307.mjs'
       - '.github/workflows/verify-local-ai-bootstrap-coherence-v307.yml'
@@ -36,6 +38,7 @@ jobs:
           node --check public/service-worker-v203.js
           node --check scripts/build-service-worker-v211.mjs
           node --check public/app/family-ai-loader-v105.js
+          node --check public/app/local-ai/bootstrap-v266.js
           node --check public/app/local-ai/model-registry-v266.js
           node --check scripts/verify-local-ai-bootstrap-coherence-v307.mjs
       - name: Bootstrap coherence contract
