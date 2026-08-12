@@ -177,6 +177,6 @@ runWrangler(wrangler, ["pages", "deploy", pagesOutput, "--project-name", options
 console.log("\nCivweave Cloudflare host setup complete.");
 console.log(`Production URL: ${productionUrl}`);
 console.log(`Health: ${productionUrl}/api/health`);
-console.log(`Steward setup: ${productionUrl}/app/?host_setup=1`);
+console.log(`Steward setup: ${productionUrl}/host-setup.html`);
 if (options.canonical) console.log(`Canonical Civweave root: ${canonicalOrigin}`);
 console.log("Open the steward setup URL once. Civweave will then keep reminding this steward browser to add and pair a local Anchor/companion until it is recorded as complete.");

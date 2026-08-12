@@ -1,8 +1,9 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v246-host-origin-v2';
-const ENTRY='/app/?system=civweave&installed=1';
+const VERSION='pwa-install-prompt-v246-host-origin-v3';
+const ENTRY='/app/installed-entry-v146?installed=1&system=civweave';
+const HOST_SETUP_PATH='/host-setup.html';
 const CANONICAL_ORIGIN='https://civweave.pages.dev';
 const LEGACY_CANONICAL_ORIGIN='https://commonweave.pages.dev';
 const HOST_NODE_ORIGIN='https://civweave-host-node.onrender.com';
@@ -25,6 +26,15 @@ function previewParentOrigin(){
   if(!cloudflarePreview())return null;
   const parent=`https://${location.hostname.split('.').slice(1).join('.')}`;
   return parent===LEGACY_CANONICAL_ORIGIN?CANONICAL_ORIGIN:parent;
+}
+function hostSetupRedirect(){
+  const current=new URL(location.href);
+  if(current.searchParams.get('host_setup')!=='1'||current.pathname===HOST_SETUP_PATH)return false;
+  const target=new URL(HOST_SETUP_PATH,current.origin);
+  for(const [key,value] of current.searchParams)target.searchParams.append(key,value);
+  target.hash=current.hash;
+  location.replace(target.href);
+  return true;
 }
 function installOrigin(){return localDevelopment()||productionPagesOrigin()||(!location.hostname.endsWith('.pages.dev')&&location.origin!==HOST_NODE_ORIGIN&&location.origin!==LEGACY_CANONICAL_ORIGIN)}
 function stableInstallerUrl(){
@@ -165,6 +175,7 @@ async function ownInstallClick(event){
   }
 }
 
+if(hostSetupRedirect())return;
 if(rerouteUnsafeInstall())return;
 
 addEventListener('beforeinstallprompt',capture);
