@@ -2,6 +2,7 @@ import * as packs from './shared/learning-pack-runtime-v1.mjs?v=learning-packs-v
 import * as resolver from './shared/learning-pack-resolver-v1.mjs?v=learning-packs-v1';
 import * as labor from './shared/labor-intelligence-core-v1.mjs?v=core-labor-v1';
 import {mountLearningPackShelf} from './shared/learning-pack-shelf-v1.mjs?v=learning-pack-shelf-v1';
+import './living-school-fellowfare-publish-v1.mjs?v=community-learning-market-v1';
 
 const VERSION='1.4.0-living-school-learning-packs-v1-core-labor';
 let readyPromise=null;
