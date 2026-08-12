@@ -16,7 +16,7 @@ concurrency:
 jobs:
   deploy:
     if: vars.CIVWEAVE_PAGES_PROJECT != '' && vars.CIVWEAVE_PAGES_PROJECT != 'civweave'
-    name: Build and deploy community host + starter nodes
+    name: Build and deploy community host
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -76,7 +76,9 @@ jobs:
           node scripts/verify-cloudflare-pages-account-target-v1.mjs \
             /tmp/civweave-host-pages-deployments.json "$CIVWEAVE_PAGES_PROJECT"
 
-      - name: Provision account Worker and three starter nodes
+      - name: Provision optional account Worker and three starter nodes
+        id: provision_account_edge
+        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
@@ -96,9 +98,20 @@ jobs:
           import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
           const project = process.env.CIVWEAVE_PAGES_PROJECT;
           const hostId = process.env.CIVWEAVE_HOST_ID || project.replace(/^civweave-/, '');
-          const accountEdge = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
-          if (accountEdge.status !== 'ready' || accountEdge.starterNodeIds?.length !== 3) {
-            throw new Error('Community Cloudflare account edge is not fully provisioned.');
+          let accountEdge;
+          try {
+            accountEdge = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
+          } catch {
+            accountEdge = {
+              schema: 'civweave.cloudflare-account-edge.v1',
+              capability: 'worker-plus-three-starter-nodes',
+              status: 'pending',
+              requiredStarterNodes: 3,
+              hostId,
+              requiredPermissions: ['Account > Workers Scripts > Edit'],
+              accountResourceScope: 'Include the Cloudflare account that owns this host',
+              retryCommand: `node scripts/provision-cloudflare-account-edge-v1.mjs --host-id ${hostId} --strict`,
+            };
           }
           const target = '.cloudflare-pages/app/host-deployment-v1.json';
           mkdirSync('.cloudflare-pages/app', { recursive: true });
@@ -134,3 +147,38 @@ jobs:
             cat /tmp/civweave-host-pages-deploy.log
             exit 3
           }
+
+      - name: Verify stable community host origin
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const project = process.env.CIVWEAVE_PAGES_PROJECT;
+          const expectedCommit = process.env.GITHUB_SHA;
+          const origin = `https://${project}.pages.dev`;
+          let lastFailure = 'Production marker did not become current.';
+          for (let attempt = 1; attempt <= 12; attempt += 1) {
+            try {
+              const response = await fetch(`${origin}/app/host-deployment-v1.json?verify=${encodeURIComponent(expectedCommit)}&attempt=${attempt}`, {
+                headers: { 'Cache-Control': 'no-cache' },
+              });
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              const marker = await response.json();
+              if (marker.pagesProject === project && marker.publicOrigin === origin && marker.sourceCommit === expectedCommit) {
+                console.log(`Verified ${origin} at source commit ${expectedCommit}.`);
+                process.exit(0);
+              }
+              lastFailure = `attempt ${attempt}: marker sourceCommit=${marker.sourceCommit || 'missing'}`;
+            } catch (error) {
+              lastFailure = `attempt ${attempt}: ${error.message}`;
+            }
+            if (attempt < 12) await new Promise((resolve) => setTimeout(resolve, 5000));
+          }
+          console.error(`Stable production verification failed: ${lastFailure}`);
+          process.exit(4);
+          NODE
+
+      - name: Report incomplete account-edge setup
+        if: success() && steps.provision_account_edge.outcome == 'failure'
+        shell: bash
+        run: |
+          echo '::warning::Pages is live, but the Worker + 3 starter nodes need Account > Workers Scripts > Edit. Their pending status is visible on /host-setup.html.'
