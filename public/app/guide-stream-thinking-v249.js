@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.0.85-guide-stream-thinking-v249';
+const VERSION='1.0.118-guide-stream-thinking-v249-navigation-lifecycle-v424';
 const STYLE_ID='cw-guide-stream-thinking-v249-style';
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 if(globalThis.CivweaveGuideStreamThinkingV249?.version===VERSION)return;
 const streams=new Map();
 let wrappedRuntime=null;
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[char]));
-function installStyle(){if(document.getElementById(STYLE_ID))return;const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`
+function installStyle(){if(document.getElementById(STYLE_ID))return true;const head=document.head;if(!document.documentElement?.isConnected||!head?.isConnected)return false;const style=document.createElement('style');style.id=STYLE_ID;style.textContent=`
 .cw249-thinking{margin:0 0 8px;border:1px solid color-mix(in srgb,var(--message-accent,var(--guide-accent,#9bdcff)) 42%,transparent);border-radius:10px;background:#0002;overflow:hidden}
 .cw249-thinking>summary{cursor:pointer;list-style:none;padding:7px 9px;color:color-mix(in srgb,var(--message-accent,var(--guide-accent,#9bdcff)) 82%,#fff);font-size:.76rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;user-select:none}
 .cw249-thinking>summary::-webkit-details-marker{display:none}.cw249-thinking>summary::before{content:'▸';display:inline-block;margin-right:6px;transition:transform .12s ease}.cw249-thinking[open]>summary::before{transform:rotate(90deg)}
@@ -15,7 +15,7 @@ function installStyle(){if(document.getElementById(STYLE_ID))return;const style=
 .cw249-stream-answer{white-space:pre-wrap;overflow-wrap:anywhere}.cw249-stream-cursor::after{content:'▍';margin-left:2px;opacity:.8;animation:cw249blink 1s steps(1) infinite}@keyframes cw249blink{50%{opacity:.18}}
 #cw-shared-guide-surface-v236 .cw249-thinking{grid-column:2;margin:0 0 4px}#cw-shared-guide-surface-v236 .cw249-thinking pre{max-height:120px}
 @media(prefers-reduced-motion:reduce){.cw249-stream-cursor::after{animation:none}.cw249-thinking>summary::before{transition:none}}
-`;document.head.append(style)}
+`;if(!head.isConnected)return false;head.append(style);return true}
 function decodeJsonStringPartial(value){let out='';for(let i=0;i<value.length;i+=1){const ch=value[i];if(ch!=='\\'){out+=ch;continue}const next=value[++i];if(next==null)break;if(next==='n')out+='\n';else if(next==='r')out+='\r';else if(next==='t')out+='\t';else if(next==='b')out+='\b';else if(next==='f')out+='\f';else if(next==='"')out+='"';else if(next==='\\')out+='\\';else if(next==='u'&&/^[0-9a-fA-F]{4}$/.test(value.slice(i+1,i+5))){out+=String.fromCharCode(parseInt(value.slice(i+1,i+5),16));i+=4}else out+=next}return out}
 function visibleAnswer(raw){const value=String(raw||'').trimStart();if(!value)return'';const fence=value.replace(/^```(?:json)?\s*/i,'');if(!fence.startsWith('{')&&!fence.startsWith('['))return value;const match=/"answer"\s*:\s*"/i.exec(fence);if(!match)return'';let escaped=false,buffer='';for(let i=match.index+match[0].length;i<fence.length;i+=1){const ch=fence[i];if(ch==='"'&&!escaped)break;buffer+=ch;if(ch==='\\'&&!escaped)escaped=true;else escaped=false}return decodeJsonStringPartial(buffer)}
 function splitThinking(raw){const source=String(raw||''),lower=source.toLowerCase(),open=lower.indexOf('<think>');if(open<0){if(/^\s*<t(?:h(?:i(?:n(?:k)?)?)?)?\s*$/i.test(source))return{thinking:'',answer:'',inThink:true};return{thinking:'',answer:visibleAnswer(source),inThink:false}}const start=open+7,close=lower.indexOf('</think>',start);if(close<0)return{thinking:source.slice(start).replace(/<\/?think>/gi,'').trim(),answer:visibleAnswer(source.slice(0,open)),inThink:true};const remainder=`${source.slice(0,open)}${source.slice(close+8)}`;return{thinking:source.slice(start,close).trim(),answer:visibleAnswer(remainder),inThink:false}}
@@ -32,6 +32,6 @@ function patchRuntime(){const current=globalThis.CivweaveModelRuntime;if(!curren
 function rehydrate(){for(const system of SYSTEMS){const thread=globalThis.CivweaveRealmSessionIntegrityV237?.readThread?.(system),row=[...(thread?.messages||[])].reverse().find(item=>item?.role==='assistant'&&item?.thinkingText);if(row){streams.set(system,{system,thinking:String(row.thinkingText),answer:'',done:true,persisted:true});decorate(system)}}}
 function onThreadChanged(event){const system=event?.detail?.system;if(!SYSTEMS.includes(system))return;setTimeout(()=>{finalizeIfDone(system);const state=streams.get(system);if(state?.done)decorate(system)},0)}
 for(const name of ['civweave:model-runtime-ready','civweave:runtime-spine-ready','civweave:local-model-bridge-installed','civweave:guide-workspace-ready'])addEventListener(name,()=>{queueMicrotask(patchRuntime);if(name==='civweave:guide-workspace-ready')queueMicrotask(rehydrate)});
-addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('pageshow',()=>{patchRuntime();rehydrate()});installStyle();patchRuntime();queueMicrotask(rehydrate);
-globalThis.CivweaveGuideStreamThinkingV249=Object.freeze({version:VERSION,patchRuntime,splitThinking,visibleAnswer,state:system=>streams.get(system)||null,streaming:true,thinkingDisclosure:true});
+addEventListener('civweave:realm-guide-thread-changed',onThreadChanged);addEventListener('pageshow',()=>{installStyle();patchRuntime();rehydrate()});installStyle();patchRuntime();queueMicrotask(rehydrate);
+globalThis.CivweaveGuideStreamThinkingV249=Object.freeze({version:VERSION,patchRuntime,splitThinking,visibleAnswer,state:system=>streams.get(system)||null,streaming:true,thinkingDisclosure:true,navigationLifecycle:'v424'});
 })();
