@@ -1,0 +1,333 @@
+/* Civweave front-door prismatic design v301
+   Shared threshold language for installer, host stewardship, and local Anchor setup. */
+
+:root{
+  --fd-pink:#ff69c8;
+  --fd-cyan:#6fddff;
+  --fd-gold:#ffc96d;
+  --fd-violet:#9b72ff;
+  --fd-green:#6fe29a;
+  --fd-pearl:#edf8ff;
+  --fd-ink:#f8f6ff;
+  --fd-muted:#bdc9dd;
+  --fd-deep:#080814;
+  --fd-panel:rgba(16,18,37,.82);
+  --fd-line:rgba(225,235,255,.18);
+  --fd-shadow:0 28px 74px rgba(0,0,0,.36);
+  --fd-radius-xl:28px;
+  --fd-radius-lg:20px;
+  color-scheme:dark;
+}
+
+@keyframes fd-breathe{
+  0%,100%{transform:translate3d(-1.5%,-1%,0) scale(1.02);opacity:.68}
+  50%{transform:translate3d(1.5%,1%,0) scale(1.055);opacity:.95}
+}
+@keyframes fd-glint{
+  0%,100%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+}
+
+html,body{min-height:100%}
+body.cw-frontdoor{
+  margin:0;
+  overflow-x:hidden;
+  color:var(--fd-ink);
+  font:16px/1.55 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(ellipse 62% 42% at 50% 28%,rgba(226,245,255,.16),transparent 63%),
+    radial-gradient(circle at -8% -10%,rgba(255,105,200,.36),transparent 43%),
+    radial-gradient(circle at 108% -8%,rgba(111,221,255,.34),transparent 43%),
+    radial-gradient(circle at 108% 108%,rgba(255,201,109,.28),transparent 46%),
+    radial-gradient(circle at -8% 108%,rgba(155,114,255,.34),transparent 46%),
+    linear-gradient(155deg,#0a0a18,#101329 46%,#171126 100%);
+  background-attachment:fixed;
+}
+body.cw-frontdoor::before{
+  content:"";
+  position:fixed;
+  z-index:-2;
+  inset:-14vmax;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 18% 20%,rgba(255,105,200,.18),transparent 21%),
+    radial-gradient(circle at 82% 18%,rgba(111,221,255,.17),transparent 22%),
+    radial-gradient(circle at 80% 82%,rgba(255,201,109,.13),transparent 22%),
+    radial-gradient(circle at 18% 82%,rgba(155,114,255,.17),transparent 23%);
+  filter:blur(34px) saturate(125%);
+  animation:fd-breathe 32s ease-in-out infinite;
+}
+body.cw-frontdoor::after{
+  content:"";
+  position:fixed;
+  z-index:-1;
+  inset:0;
+  pointer-events:none;
+  opacity:.22;
+  background:
+    linear-gradient(115deg,transparent 0 48.5%,rgba(255,255,255,.035) 49%,transparent 49.5% 100%),
+    repeating-linear-gradient(35deg,transparent 0 30px,rgba(153,199,255,.028) 31px 32px,transparent 33px 64px);
+}
+
+/* Shared identity lockup */
+.cw-brand-lockup{
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:clamp(14px,3vw,28px);
+  align-items:center;
+  max-width:1120px;
+  margin:0 auto clamp(18px,4vw,32px);
+  padding:clamp(14px,2vw,20px);
+  border:1px solid var(--fd-line);
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 15% 0,rgba(255,105,200,.10),transparent 35%),
+    radial-gradient(circle at 90% 20%,rgba(111,221,255,.09),transparent 34%),
+    linear-gradient(145deg,rgba(16,20,43,.78),rgba(18,13,37,.82));
+  box-shadow:0 18px 52px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter:blur(22px) saturate(125%);
+}
+.cw-brand-lockup::before{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  z-index:-1;
+  border-radius:inherit;
+  background:linear-gradient(115deg,rgba(255,105,200,.45),rgba(111,221,255,.38),rgba(255,201,109,.32),rgba(155,114,255,.40));
+  opacity:.25;
+  filter:blur(7px);
+}
+.cw-platform-brand{min-width:0;display:flex;align-items:center;gap:clamp(12px,2.8vw,24px)}
+.cw-platform-logo{
+  width:clamp(180px,35vw,340px);
+  max-height:152px;
+  object-fit:contain;
+  object-position:left center;
+  filter:drop-shadow(0 0 18px rgba(111,221,255,.15)) drop-shadow(0 0 28px rgba(255,105,200,.10));
+}
+.cw-platform-copy{min-width:0}
+.cw-platform-copy small,.cw-steward-copy small,.cw-kicker,.eyebrow{
+  display:block;
+  color:#cbefff;
+  font-size:.72rem;
+  font-weight:900;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+.cw-platform-copy h1{margin:4px 0 0;font:700 clamp(1.35rem,3vw,2.1rem)/1.05 Georgia,serif}
+.cw-platform-copy p{margin:6px 0 0;color:var(--fd-muted);font-size:.9rem}
+.cw-steward-seal{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:11px;
+  min-width:min(100%,220px);
+  padding:10px 12px;
+  border:1px solid rgba(255,201,109,.28);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(39,22,53,.74),rgba(15,23,43,.78));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055);
+}
+.cw-steward-logo{
+  width:52px;
+  height:70px;
+  object-fit:contain;
+  filter:drop-shadow(0 0 11px rgba(255,78,223,.32)) drop-shadow(0 0 15px rgba(45,206,255,.22));
+}
+.cw-steward-copy strong{display:block;margin-top:2px;font:700 1rem/1.1 Georgia,serif;color:#fff}
+.cw-steward-copy span{display:block;margin-top:3px;color:var(--fd-muted);font-size:.75rem}
+
+/* Installer */
+body.cw-installer .gateway{
+  min-height:100dvh;
+  padding:clamp(12px,3vw,34px) clamp(10px,3vw,34px) 80px;
+  background:transparent!important;
+  isolation:isolate;
+}
+body.cw-installer .gateway-shade{display:none}
+body.cw-installer .gateway-header{display:none}
+body.cw-installer :is(.install-card,.knowledge-card,.status-card){
+  border-color:var(--fd-line)!important;
+  background:
+    linear-gradient(145deg,rgba(19,23,48,.90),rgba(15,17,35,.88)) padding-box,
+    linear-gradient(120deg,rgba(255,105,200,.40),rgba(111,221,255,.36),rgba(255,201,109,.30),rgba(155,114,255,.34)) border-box!important;
+  box-shadow:var(--fd-shadow),inset 0 1px 0 rgba(255,255,255,.07)!important;
+  backdrop-filter:blur(22px) saturate(118%)!important;
+}
+body.cw-installer .install-card{
+  position:relative;
+  overflow:hidden;
+  margin:0 auto 18px!important;
+  border-radius:var(--fd-radius-xl)!important;
+}
+body.cw-installer .install-card::after{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  inset:auto -12% -110px 36%;
+  height:220px;
+  background:radial-gradient(ellipse,rgba(111,221,255,.10),rgba(255,105,200,.065) 36%,transparent 70%);
+}
+body.cw-installer .install-copy small,
+body.cw-installer .status-card>small,
+body.cw-installer .knowledge-school-copy small,
+body.cw-installer .campus-progress-heading span{color:#bdefff!important}
+body.cw-installer .install-copy h2{
+  max-width:910px!important;
+  color:#fff;
+  text-wrap:balance;
+  text-shadow:0 3px 24px rgba(0,0,0,.24);
+}
+body.cw-installer :is(.install-copy p,.status-card p,.knowledge-school-copy p,.knowledge-school-summary span,.campus-progress-meta){color:var(--fd-muted)!important}
+body.cw-installer .topology{gap:12px!important}
+body.cw-installer .topology article{
+  border-color:rgba(217,230,255,.16)!important;
+  border-radius:18px!important;
+  background:linear-gradient(145deg,rgba(247,244,255,.055),rgba(105,202,255,.045))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important;
+}
+body.cw-installer .topology article:nth-of-type(1){box-shadow:inset 4px 0 0 rgba(255,105,200,.58)!important}
+body.cw-installer .topology article:nth-of-type(2){box-shadow:inset 4px 0 0 rgba(111,221,255,.58)!important}
+body.cw-installer .topology article:nth-of-type(3){box-shadow:inset 4px 0 0 rgba(255,201,109,.58)!important}
+body.cw-installer .topology article b{background:linear-gradient(135deg,rgba(255,105,200,.24),rgba(111,221,255,.24))!important;color:#fff!important}
+body.cw-installer .topology i{color:#e7e9ff!important}
+body.cw-installer .campus-progress-track{
+  height:10px!important;
+  border-color:rgba(180,220,255,.24)!important;
+  background:rgba(3,7,22,.72)!important;
+}
+body.cw-installer .campus-progress-fill{
+  background:linear-gradient(90deg,var(--fd-pink),var(--fd-cyan),var(--fd-gold),var(--fd-violet))!important;
+  background-size:220% 100%!important;
+  box-shadow:0 0 16px rgba(111,221,255,.34),0 0 25px rgba(255,105,200,.14)!important;
+  animation:fd-glint 18s ease-in-out infinite;
+}
+body.cw-installer .gateway-actions :is(button,a),
+body.cw-installer .card-actions a,
+body.cw-steward .actions :is(a,button),
+body.cw-anchor .actions :is(a,button){
+  border-color:rgba(216,229,255,.22)!important;
+  border-radius:13px!important;
+  color:#fff!important;
+  background:linear-gradient(145deg,rgba(35,31,67,.92),rgba(14,27,50,.92))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 8px 18px rgba(0,0,0,.14)!important;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease!important;
+}
+body.cw-frontdoor :is(button,a,input,select,textarea):focus-visible{
+  outline:2px solid var(--fd-cyan)!important;
+  outline-offset:3px!important;
+  box-shadow:0 0 0 4px rgba(255,105,200,.14),0 0 24px rgba(111,221,255,.18)!important;
+}
+body.cw-frontdoor .actions :is(a,button):hover,
+body.cw-installer .gateway-actions :is(button,a):hover,
+body.cw-installer .card-actions a:hover{transform:translateY(-2px)!important;border-color:rgba(111,221,255,.52)!important}
+body.cw-installer .gateway-actions .primary,
+body.cw-steward .actions .primary,
+body.cw-anchor .actions .primary{
+  border-color:rgba(255,217,132,.55)!important;
+  background:linear-gradient(125deg,#8f4ce4,#da4fca 42%,#2baed8 73%,#c68b36)!important;
+  background-size:170% 170%!important;
+  box-shadow:0 12px 28px rgba(108,55,182,.24),0 0 22px rgba(255,105,200,.13)!important;
+}
+body.cw-installer .gateway-actions .secondary{background:linear-gradient(145deg,rgba(29,43,73,.94),rgba(34,26,61,.92))!important}
+body.cw-installer .package-state div,
+body.cw-installer .knowledge-school-presets button{
+  border-color:rgba(218,229,255,.15)!important;
+  background:linear-gradient(145deg,rgba(247,244,255,.052),rgba(120,191,255,.04))!important;
+}
+body.cw-installer .package-state dt{color:#bdefff!important}
+body.cw-installer .knowledge-card{max-width:1120px;margin:0 auto 18px;border:1px solid var(--fd-line);border-radius:var(--fd-radius-xl);padding:clamp(18px,4vw,34px)}
+body.cw-installer .gateway-grid{gap:12px!important}
+body.cw-installer .status-card{border-radius:var(--fd-radius-lg)!important;min-height:190px}
+body.cw-installer .status-card:nth-child(1){box-shadow:inset 0 3px 0 rgba(255,105,200,.38),0 18px 42px rgba(0,0,0,.2)!important}
+body.cw-installer .status-card:nth-child(2){box-shadow:inset 0 3px 0 rgba(111,221,255,.38),0 18px 42px rgba(0,0,0,.2)!important}
+body.cw-installer .status-card:nth-child(3){box-shadow:inset 0 3px 0 rgba(255,201,109,.38),0 18px 42px rgba(0,0,0,.2)!important}
+
+/* Host steward */
+body.cw-steward main,
+body.cw-anchor main{max-width:980px;margin:auto;padding:clamp(12px,3vw,30px) clamp(10px,3vw,24px) 86px}
+body.cw-steward .brand{display:none!important}
+body.cw-steward .card,
+body.cw-anchor .card{
+  position:relative;
+  overflow:hidden;
+  margin:14px 0!important;
+  padding:clamp(18px,3vw,28px)!important;
+  border:1px solid transparent!important;
+  border-radius:var(--fd-radius-xl)!important;
+  background:
+    linear-gradient(145deg,rgba(18,22,46,.91),rgba(13,16,34,.91)) padding-box,
+    linear-gradient(120deg,rgba(255,105,200,.40),rgba(111,221,255,.34),rgba(255,201,109,.28),rgba(155,114,255,.35)) border-box!important;
+  box-shadow:var(--fd-shadow),inset 0 1px 0 rgba(255,255,255,.06)!important;
+  backdrop-filter:blur(22px) saturate(118%)!important;
+}
+body.cw-steward .hero::after,
+body.cw-anchor .anchor-intro::after{
+  content:"";
+  position:absolute;
+  pointer-events:none;
+  right:-90px;
+  bottom:-120px;
+  width:340px;
+  height:260px;
+  background:radial-gradient(ellipse,rgba(111,221,255,.10),rgba(255,105,200,.07) 38%,transparent 70%);
+}
+body.cw-steward .hero h2,
+body.cw-anchor h1{color:#fff;text-wrap:balance;text-shadow:0 4px 26px rgba(0,0,0,.22)}
+body.cw-steward :is(.hero p,.muted,.status),
+body.cw-anchor :is(p,.note){color:var(--fd-muted)!important}
+body.cw-steward .grid{gap:12px!important}
+body.cw-steward .tile{
+  border-color:rgba(218,230,255,.16)!important;
+  border-radius:17px!important;
+  background:linear-gradient(145deg,rgba(250,245,255,.05),rgba(94,186,255,.038))!important;
+}
+body.cw-steward .tile:nth-child(1){box-shadow:inset 4px 0 0 rgba(255,105,200,.5)!important}
+body.cw-steward .tile:nth-child(2){box-shadow:inset 4px 0 0 rgba(111,221,255,.5)!important}
+body.cw-steward .tile:nth-child(3){box-shadow:inset 4px 0 0 rgba(255,201,109,.5)!important}
+body.cw-steward .tile small{color:#bdefff!important}
+body.cw-steward .actions .campus{border-color:rgba(111,221,255,.48)!important;background:linear-gradient(135deg,rgba(28,74,92,.94),rgba(45,40,93,.92))!important}
+
+/* Local Anchor */
+body.cw-anchor>.anchor-shell{max-width:980px;margin:auto;padding:clamp(12px,3vw,30px) clamp(10px,3vw,24px) 86px}
+body.cw-anchor>.anchor-shell>main{padding:0;max-width:none}
+body.cw-anchor .anchor-intro{margin:0 0 14px;padding:clamp(18px,3vw,30px);border:1px solid var(--fd-line);border-radius:var(--fd-radius-xl);background:linear-gradient(145deg,rgba(18,22,46,.88),rgba(13,16,34,.87));box-shadow:var(--fd-shadow);position:relative;overflow:hidden}
+body.cw-anchor .anchor-intro h1{margin:.12em 0 .25em;font:700 clamp(2rem,6vw,4rem)/1 Georgia,serif}
+body.cw-anchor .card h2{margin-top:0;font:700 clamp(1.25rem,3vw,1.7rem)/1.15 Georgia,serif;color:#fff}
+body.cw-anchor .card:nth-of-type(1){box-shadow:inset 4px 0 0 rgba(255,105,200,.42),var(--fd-shadow)!important}
+body.cw-anchor .card:nth-of-type(2){box-shadow:inset 4px 0 0 rgba(111,221,255,.42),var(--fd-shadow)!important}
+body.cw-anchor .card:nth-of-type(3){box-shadow:inset 4px 0 0 rgba(255,201,109,.42),var(--fd-shadow)!important}
+body.cw-anchor .card:nth-of-type(4){box-shadow:inset 4px 0 0 rgba(155,114,255,.42),var(--fd-shadow)!important}
+body.cw-anchor pre{
+  border:1px solid rgba(182,218,255,.17)!important;
+  background:rgba(3,6,18,.78)!important;
+  color:#e4f8ff!important;
+  box-shadow:inset 0 1px 10px rgba(0,0,0,.32)!important;
+}
+body.cw-anchor code{color:#eaf8ff}
+
+@media(max-width:760px){
+  body.cw-frontdoor{background-attachment:scroll}
+  .cw-brand-lockup{grid-template-columns:1fr;padding:12px;border-radius:20px;margin-bottom:12px}
+  .cw-platform-brand{align-items:flex-start;flex-direction:column;gap:8px}
+  .cw-platform-logo{width:min(100%,280px);max-height:126px}
+  .cw-platform-copy h1{font-size:1.35rem}
+  .cw-platform-copy p{font-size:.82rem}
+  .cw-steward-seal{width:100%;grid-template-columns:48px minmax(0,1fr);padding:8px 10px}
+  .cw-steward-logo{width:42px;height:54px}
+  body.cw-installer .gateway{padding:8px 7px calc(70px + env(safe-area-inset-bottom))!important}
+  body.cw-installer .install-card,body.cw-installer .knowledge-card{padding:16px!important;border-radius:19px!important}
+  body.cw-installer .install-copy h2{font-size:clamp(2rem,10vw,3.05rem)!important}
+  body.cw-installer .gateway-actions :is(button,a){flex:1 1 100%;min-height:48px}
+  body.cw-installer .status-card{min-height:0;padding:16px!important}
+  body.cw-steward main,body.cw-anchor>.anchor-shell{padding:8px 7px calc(70px + env(safe-area-inset-bottom))!important}
+  body.cw-steward .card,body.cw-anchor .card,body.cw-anchor .anchor-intro{border-radius:19px!important;padding:16px!important}
+  body.cw-steward .actions :is(a,button),body.cw-anchor .actions :is(a,button){flex:1 1 100%;min-height:48px;text-align:center}
+  body.cw-anchor pre{font-size:.76rem;white-space:pre-wrap;overflow-wrap:anywhere}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.cw-frontdoor::before,.campus-progress-fill{animation:none!important}
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+}
