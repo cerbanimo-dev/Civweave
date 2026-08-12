@@ -28,6 +28,7 @@ const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js';
 const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
+const QUEST_VEIL='/app/quest-veil-v1.js';
 const SYSTEMS_MESH_RUNTIME='/app/civweave-systems-mesh-v251.js';
 const NODE_AI_MESH_RUNTIME='/app/node-ai-mesh-v1.js';
 const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
@@ -43,6 +44,7 @@ const FALLBACK_PATHS=new Map([
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR];
 const SYSTEM_EXPERIENCE_SCRIPTS=[
   EXPERIENCE_ORCHESTRATOR,
+  QUEST_VEIL,
   // Keep station + exact-track suggestions directly behind the orchestrator so
   // slower mesh/guide/workspace modules cannot starve the six-second radio UI.
   SYSTEM_RADIO_AGENT,
@@ -235,6 +237,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   legacyChatRuntimePolicy:'removed-from-current-source-v251',
   systemsMeshRevision:'v251-five-system-non-privileged-event-contract',
   nodeAiMeshRevision:'v1-node-owned-service-discovery-routing',
+  questVeilRevision:'v1-validated-context-stripped-chronicle',
   campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',
   radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
   radioTrackSuggestionRevision:'v241-playlist-context-track-links',
