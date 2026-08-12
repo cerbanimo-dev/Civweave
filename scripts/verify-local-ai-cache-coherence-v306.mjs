@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 const repair=await readFile('public/service-worker-chat-repair-v245.js','utf8');
 const generated=await readFile('public/service-worker-v203.js','utf8');
 const builder=await readFile('scripts/build-service-worker-v211.mjs','utf8');
+const installedEntry=await readFile('public/app/installed-entry-v146.js','utf8');
 
 const requiredLocalAIPaths=[
   '/app/ai-capability-broker-v268.js',
@@ -30,12 +31,13 @@ for(const pathname of requiredLocalAIPaths){
   assert.ok(repair.includes(`'${pathname}'`),`cache repair lost local AI dependency ${pathname}`);
 }
 
-const legacyImportPrefix="importScripts('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343";
-const coherenceMarker='&local-ai=local-ai-cache-coherence-v306';
-assert.ok(generated.includes(`${legacyImportPrefix}${coherenceMarker}');`),'generated service worker must preserve the chat contract while forcing a fresh local AI repair worker');
-assert.ok(builder.includes(`${legacyImportPrefix}${coherenceMarker}');`),'service worker generator must preserve the isolated local AI cache epoch');
-assert.match(builder,/chatRepair:'chat-css-contract-v343'/);
+const canonicalImport="importScripts('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343');";
+assert.ok(generated.includes(canonicalImport),'generated service worker must preserve the canonical chat repair import identity');
+assert.ok(builder.includes(canonicalImport),'service worker generator must preserve the canonical chat repair import identity');
+assert.match(generated,/local-ai-cache-coherence-v306/,'generated parent worker bytes must rotate when the local AI cache epoch changes');
 assert.match(builder,/localAICacheCoherence:'v306'/);
+assert.match(installedEntry,/updateViaCache:'none'/,'installed worker registration must bypass HTTP cache so the changed parent worker fetches current imported repair code');
+assert.match(installedEntry,/await registration\.update\(\)/,'installed entry must explicitly check for the changed parent worker');
 
 console.log(JSON.stringify({
   ok:true,
@@ -43,5 +45,6 @@ console.log(JSON.stringify({
   chatContract:'chat-css-contract-v343',
   protectedPaths:requiredLocalAIPaths.length,
   ignoreSearchEviction:true,
-  serviceWorkerImportRevved:true
+  parentWorkerBytesRotated:true,
+  importedRepairFetchedWithoutHttpCache:true
 },null,2));
