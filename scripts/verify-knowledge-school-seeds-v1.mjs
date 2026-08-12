@@ -65,7 +65,7 @@ assertIncludes(workerWrapper,[
   "importScripts('/service-worker-shell-integrity-v281.js",
   "importScripts('/service-worker-offline-v211-override.js",
   'offline-campus-current-graph-v280','policy=resumable-pause-v280',
-  "/service-worker-chat-repair-v245.js?v=chat-convergence-v250"
+  "/service-worker-chat-repair-v245.js?v=chat-bubble-anchor-v342&purge=chat-bubble-anchor-v342"
 ],'active worker wrapper');
 if(!(
   workerWrapper.indexOf('service-worker-living-school-cleanroom-v218.js')<workerWrapper.indexOf('service-worker-core-v208.js')&&
@@ -84,4 +84,4 @@ assertIncludes(offlineOverride,[
 assertIncludes(storageGuard,['navigator.storage','requiredFreeBytes',"civweaveStorageState='insufficient'"],'campus storage guard');
 assertIncludes(cleanroomWorker,["const REVISION='living-school-cleanroom-v218'",'event.stopImmediatePropagation()'],'Living School cache boundary');
 for(const source of [helper,installer,installRuntime,boundary,installedEntry,updateController,updateWorker,workerWrapper,workerCore,installerStateWorker,integrityWorker,offlineOverride,storageGuard,cleanroomWorker])new Function(source);
-console.log(JSON.stringify({schools:catalog.schools.length,articles:articleCount,compressedBytes,compressedMiB:Number((compressedBytes/1024/1024).toFixed(2)),largestSchoolMiB:Number((Math.max(...catalog.schools.map(school=>school.zip_bytes))/1024/1024).toFixed(2)),crossroads:catalog.reconciliation.crossroads_articles,knowledgeCache:'cwknowledge-school-seeds-v2',externalOriginReady:true,legacyOriginCacheCompatible:true,installedUpdateOwner:'installed-entry-v146',manualUpdateControl:'visible-v207-registration-watchdog',workerComposition:'v281-integrity-v280-resumable-campus-v250-chat-migration',currentFilesSkipRedownload:true,backgroundCampus:true,storagePreflight:true,shellIntegrity:true},null,2));
+console.log(JSON.stringify({schools:catalog.schools.length,articles:articleCount,compressedBytes,compressedMiB:Number((compressedBytes/1024/1024).toFixed(2)),largestSchoolMiB:Number((Math.max(...catalog.schools.map(school=>school.zip_bytes))/1024/1024).toFixed(2)),crossroads:catalog.reconciliation.crossroads_articles,knowledgeCache:'cwknowledge-school-seeds-v2',externalOriginReady:true,legacyOriginCacheCompatible:true,installedUpdateOwner:'installed-entry-v146',manualUpdateControl:'visible-v207-registration-watchdog',workerComposition:'v281-integrity-v280-resumable-campus-v342-chat-repair',currentFilesSkipRedownload:true,backgroundCampus:true,storagePreflight:true,shellIntegrity:true},null,2));

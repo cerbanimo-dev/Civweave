@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.108';
+const VERSION='1.0.109';
 const REVISION='chat-convergence-v250';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
@@ -30,6 +30,9 @@ const RELEASE_VERSION='/app/release-version-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
 const SYSTEMS_MESH_RUNTIME='/app/civweave-systems-mesh-v251.js';
 const NODE_AI_MESH_RUNTIME='/app/node-ai-mesh-v1.js';
+const QUEST_VEIL='/app/quest-veil-v1.js';
+const QUEST_VEIL_MESH='/app/quest-veil-mesh-v1.js';
+const QUEST_VEIL_LEDGER_GATE='/app/quest-veil-ledger-gate-v1.js';
 const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
 const RADIO_TRACK_SUGGESTIONS='/app/radio-track-suggestions-v240.js';
 const SHARED_REVIEW_SURFACE='/app/shared-review-surface-v234.js';
@@ -49,6 +52,9 @@ const SYSTEM_EXPERIENCE_SCRIPTS=[
   RADIO_TRACK_SUGGESTIONS,
   SYSTEMS_MESH_RUNTIME,
   NODE_AI_MESH_RUNTIME,
+  QUEST_VEIL_MESH,
+  QUEST_VEIL_LEDGER_GATE,
+  QUEST_VEIL,
   GUIDE_IDENTITY_SCRIPT,
   REALM_SESSION_INTEGRITY,
   GUIDE_WORKSPACE,
@@ -235,6 +241,9 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   legacyChatRuntimePolicy:'removed-from-current-source-v251',
   systemsMeshRevision:'v251-five-system-non-privileged-event-contract',
   nodeAiMeshRevision:'v1-node-owned-service-discovery-routing',
+  questVeilRevision:'v1-mandatory-human-ledger-gate-plus-mesh-batches',
+  questVeilHumanLedgerPolicy:'raw-task-chronicle-never-human-visible',
+  questVeilMeshBountyPolicy:'per-item:learning=1-acorn;labor-material-exchange=1-button',
   campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',
   radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
   radioTrackSuggestionRevision:'v241-playlist-context-track-links',
