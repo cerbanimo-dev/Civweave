@@ -78,6 +78,10 @@ for(const secret of [SECRET_TITLE,SECRET_PROOF,'Nightjar','North Ridge Clinic','
 assert.equal(state.privacy.contextStripped,true);
 assert.equal(state.privacy.sourceTextIncluded,false);
 assert.equal(state.privacy.evidenceContentIncluded,false);
+assert.equal(state.journey.stage,'labor','Cerbanimo task veils must classify as labor.');
+assert.equal(gateApi.taskVeilState({...submission,id:'learning',source:'living',kind:'lesson'},validation).journey.stage,'learning');
+assert.equal(gateApi.taskVeilState({...submission,id:'material',source:'fellowfare',kind:'material-request'},validation).journey.stage,'material');
+assert.equal(gateApi.taskVeilState({...submission,id:'exchange',source:'fellowfare',kind:'exchange'},validation).journey.stage,'exchange');
 const human=gateApi.humanChronicle();
 const humanText=JSON.stringify(human);
 for(const secret of [SECRET_TITLE,SECRET_PROOF,'Nightjar','North Ridge Clinic','receipt-secret-1'])assert.equal(humanText.includes(secret),false,`Human chronicle leaked an unveiled submission: ${secret}`);
@@ -118,4 +122,4 @@ assert.equal(reward.buttons,3,'Veiled labor, material, and exchange items must e
 assert.equal(reward.items,4);
 assert.equal(reward.currencyPolicy,'acorns-and-buttons-only');
 
-console.log('Quest Veil mandatory human gate, stripped mesh payload, and per-item Acorn/Button reward checks passed.');
+console.log('Quest Veil mandatory human gate, stripped mesh payload, stage classification, and per-item Acorn/Button reward checks passed.');
