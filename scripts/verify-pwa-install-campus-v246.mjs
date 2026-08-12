@@ -5,12 +5,14 @@ import vm from 'node:vm';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const readBytes=path=>readFile(new URL(path,root));
-const [html,rootHtml,manifestText,assetlinksText,bridge,autostart,statusRuntime,workerRepair,workerWrapper,installedEntry,gateway]=await Promise.all([
+const [html,rootHtml,manifestText,assetlinksText,bridge,reminder,hostMeta,autostart,statusRuntime,workerRepair,workerWrapper,installedEntry,gateway]=await Promise.all([
   read('public/app/index.html'),
   read('public/index.html'),
   read('public/app/manifest.webmanifest'),
   read('public/.well-known/assetlinks.json'),
   read('public/app/pwa-install-prompt-v246.js'),
+  read('public/app/host-steward-reminder-v1.js'),
+  read('public/app/host-deployment-v1.json'),
   read('public/app/required-campus-autostart-v1.js'),
   read('public/app/offline-campus-status-v210.js'),
   read('public/service-worker-campus-completion-v246.js'),
@@ -22,9 +24,9 @@ const [html,rootHtml,manifestText,assetlinksText,bridge,autostart,statusRuntime,
 const manifest=JSON.parse(manifestText);
 assert.equal(manifest.display,'standalone');
 assert.equal(manifest.prefer_related_applications,false);
-assert.equal(manifest.id,'/civweave-local','PWA id must remain stable while install origins converge');
-assert.equal(manifest.start_url,'/app/installed-entry-v146.html?installed=1','installed PWA must launch through updater entry, never directly into a version-pinned campus');
-assert.ok((manifest.shortcuts||[]).every(shortcut=>String(shortcut.url||'').startsWith('/app/installed-entry-v146.html?')),'all installed shortcuts must pass through updater entry');
+assert.equal(manifest.id,'/civweave-local','PWA id must remain stable across host origins');
+assert.match(manifest.start_url,/^\/app\/installed-entry-v146(?:\.html)?\?installed=1$/,'installed PWA must launch through updater entry');
+assert.ok((manifest.shortcuts||[]).every(shortcut=>/^\/app\/installed-entry-v146(?:\.html)?\?/.test(String(shortcut.url||''))),'all installed shortcuts must pass through updater entry');
 assert.ok(!manifestText.includes('working-campus-v156.html?installed=1&version='),'manifest must not pin an installed launch to an old Working Campus release');
 assert.ok(installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"),'installed entry must resolve current release without cache');
 assert.ok(installedEntry.includes("updateViaCache:'none'"));
@@ -32,29 +34,54 @@ assert.ok(installedEntry.includes('await registration.update()'));
 assert.ok(installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'installed entry must activate a waiting worker before routing');
 assert.ok(installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='),'worker refresh must finish before installed route selection');
 
-const canonicalOrigin='https://commonweave.pages.dev';
+const canonicalOrigin='https://civweave.pages.dev';
+const legacyCanonicalOrigin='https://commonweave.pages.dev';
 const hostNodeOrigin='https://civweave-host-node.onrender.com';
 const canonicalManifest=`${canonicalOrigin}/app/manifest.webmanifest`;
+const legacyCanonicalManifest=`${legacyCanonicalOrigin}/app/manifest.webmanifest`;
 const hostNodeManifest=`${hostNodeOrigin}/app/manifest.webmanifest`;
 const related=manifest.related_applications||[];
-assert.ok(related.some(app=>app.platform==='webapp'&&app.url===canonicalManifest),'manifest must describe the canonical Cloudflare PWA for installed-related-app discovery');
-assert.ok(related.some(app=>app.platform==='webapp'&&app.url===hostNodeManifest),'manifest must describe the legacy Render PWA for migration discovery');
+assert.ok(related.some(app=>app.platform==='webapp'&&app.url===canonicalManifest),'manifest must prefer civweave.pages.dev for installed-related-app discovery');
+assert.ok(related.some(app=>app.platform==='webapp'&&app.url===legacyCanonicalManifest),'manifest must retain legacy Commonweave discovery during origin migration');
+assert.ok(related.some(app=>app.platform==='webapp'&&app.url===hostNodeManifest),'manifest must retain legacy Render discovery during migration');
+
 const assetlinks=JSON.parse(assetlinksText);
 const querySites=new Set(assetlinks.filter(entry=>(entry.relation||[]).includes('delegate_permission/common.query_webapk')).map(entry=>entry.target?.site));
-assert.ok(querySites.has(canonicalManifest),'asset links must let the canonical manifest query a related installed PWA');
-assert.ok(querySites.has(hostNodeManifest),'asset links must let the Render manifest query a related installed PWA');
-assert.ok(rootHtml.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'root entry must know the canonical PWA origin');
-assert.ok(rootHtml.includes(`const HOST_NODE_ORIGIN='${hostNodeOrigin}'`),'root entry must recognize the Render host node as an alternate install origin');
-assert.ok(rootHtml.includes("target.searchParams.set('host',HOST_NODE_ORIGIN)"),'Render-to-Cloudflare handoff must retain host-node discovery');
-assert.ok(bridge.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'native install bridge must pin one canonical install origin');
-assert.ok(bridge.includes('rerouteAlternateInstall()'),'native installer must reroute alternate origins before accepting a prompt');
-assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer must discover related legacy/canonical installs when the browser supports it');
+assert.ok(querySites.has(canonicalManifest),'asset links must let the new canonical manifest query a related installed PWA');
+assert.ok(querySites.has(legacyCanonicalManifest),'asset links must retain legacy canonical discovery during migration');
+assert.ok(querySites.has(hostNodeManifest),'asset links must retain Render migration discovery');
+
+assert.ok(rootHtml.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'root entry must know the new canonical PWA origin');
+assert.ok(rootHtml.includes(`const LEGACY_CANONICAL_ORIGIN='${legacyCanonicalOrigin}'`),'root entry must recognize the previous canonical origin');
+assert.ok(rootHtml.includes("location.hostname.endsWith('.pages.dev')&&labels.length>3"),'root entry must recognize Pages preview/hash aliases');
+assert.ok(rootHtml.includes("labels.slice(1).join('.')"),'preview root must resolve its own parent production host');
+assert.ok(rootHtml.includes("target.searchParams.set('install_origin',cloudflarePreview?'host-production':'canonical')"),'root handoff must distinguish host-production recovery from canonical migration');
+
+assert.ok(bridge.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'native install bridge must name civweave.pages.dev as the OG root');
+assert.ok(bridge.includes(`const LEGACY_CANONICAL_ORIGIN='${legacyCanonicalOrigin}'`),'native install bridge must recognize the legacy origin');
+assert.ok(bridge.includes('function productionPagesOrigin()'),'native installer must recognize stable production Pages origins');
+assert.ok(bridge.includes('function previewParentOrigin()'),'native installer must resolve preview aliases back to their host production origin');
+assert.ok(bridge.includes('function stableInstallerUrl()'),'native installer must have a stable-origin recovery route');
+assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer must discover related legacy/canonical installs when supported');
 assert.ok(bridge.includes("dataset.civweaveLegacyRenderInstall"),'related Render install state must be exposed to the app');
-assert.ok(gateway.includes(canonicalOrigin),'Render gateway must advertise the canonical install origin');
-assert.ok(gateway.includes('CIVWEAVE_INSTALL_ORIGIN'),'Render gateway runtime must replace self-referential install URLs');
-assert.ok(gateway.includes('releasePacketNeedle'),'Render release metadata must converge on the canonical installer');
+assert.ok(bridge.includes('/app/host-steward-reminder-v1.js'),'installer must load the steward Anchor reminder');
+assert.ok(bridge.includes('This installed copy stays attached to the host you chose.'),'installer must preserve host identity in user messaging');
+
+const meta=JSON.parse(hostMeta);
+assert.equal(meta.schema,'civweave.host-deployment.v1');
+assert.equal(meta.publicOrigin,canonicalOrigin);
+assert.equal(meta.localAnchorRecommended,true);
+assert.equal(meta.localAnchorRequired,false);
+assert.ok(reminder.includes("civweave.host-steward.v1"),'Anchor reminder must only persist for steward browsers');
+assert.ok(reminder.includes("civweave.host-anchor.paired.v1"),'Anchor reminder must remember completion');
+assert.ok(reminder.includes('Remind me tomorrow'),'Anchor reminder must be persistent but non-blocking');
+assert.ok(reminder.includes('/host-local-anchor.html'),'Anchor reminder must provide a setup path');
+
+assert.ok(gateway.includes(canonicalOrigin),'legacy gateway must advertise the new canonical install origin');
+assert.ok(gateway.includes('CIVWEAVE_INSTALL_ORIGIN'),'legacy gateway runtime must replace self-referential install URLs');
+assert.ok(gateway.includes('releasePacketNeedle'),'legacy gateway release metadata must converge on the canonical installer');
 assert.ok(gateway.includes('runtimeGateNeedle'),'installed-runtime recovery must point back to the canonical installer');
-assert.ok(gateway.includes('configNeedle'),'public host-node config must point back to the canonical installer');
+assert.ok(gateway.includes('configNeedle'),'public legacy host config must point back to the canonical installer');
 
 const any192=manifest.icons?.find(icon=>icon.sizes==='192x192'&&String(icon.purpose||'any').includes('any'));
 const any512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'any').includes('any'));
@@ -122,4 +149,4 @@ assert.ok(workerWrapper.includes('policy=resumable-pause-v280'));
 assert.ok(workerWrapper.includes('chat-convergence-v250'),'worker wrapper must carry current convergence identity');
 assert.ok(workerWrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'new worker must activate immediately');
 
-console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v281-single-origin',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first',canonicalInstallOrigin:canonicalOrigin,relatedInstallDiscovery:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v282-host-origins',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first',canonicalInstallOrigin:canonicalOrigin,productionHostsInstallable:true,previewFallsToHostProduction:true,localAnchorReminder:true},null,2));
