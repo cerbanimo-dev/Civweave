@@ -23,5 +23,27 @@ services:
     volumes:
       - civweave_data:/app/data
 
+  anchor:
+    profiles: ["anchor"]
+    image: civweave/federated-node:local
+    init: true
+    restart: unless-stopped
+    depends_on:
+      - civweave
+    command:
+      - node
+      - scripts/civweave-hub-anchor-v1.mjs
+      - --node
+      - ${CIVWEAVE_CLOUD_NODE_ORIGIN:-}
+      - --pair
+      - ${CIVWEAVE_ANCHOR_PAIRING_GRANT:-}
+      - --data-dir
+      - /app/anchor-data
+      - --interval-hours
+      - ${CIVWEAVE_ANCHOR_SYNC_HOURS:-6}
+    volumes:
+      - civweave_anchor_data:/app/anchor-data
+
 volumes:
   civweave_data:
+  civweave_anchor_data:
