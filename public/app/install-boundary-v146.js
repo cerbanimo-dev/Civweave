@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.108';
+const VERSION='1.0.109';
 const REVISION='chat-convergence-v250';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
@@ -43,8 +43,6 @@ const FALLBACK_PATHS=new Map([
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR];
 const SYSTEM_EXPERIENCE_SCRIPTS=[
   EXPERIENCE_ORCHESTRATOR,
-  // Keep station + exact-track suggestions directly behind the orchestrator so
-  // slower mesh/guide/workspace modules cannot starve the six-second radio UI.
   SYSTEM_RADIO_AGENT,
   RADIO_TRACK_SUGGESTIONS,
   SYSTEMS_MESH_RUNTIME,
@@ -86,181 +84,29 @@ let unloading=false;
 addEventListener('pagehide',()=>{unloading=true},{once:true});
 addEventListener('beforeunload',()=>{unloading=true},{once:true});
 
-function installedDisplay(){
-  return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
-}
+function installedDisplay(){return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches)}
 function localhost(){return['localhost','127.0.0.1','::1'].includes(location.hostname)}
-function developer(){
-  if(localhost()&&params.get('developer')==='1'){try{sessionStorage.setItem(DEV_KEY,'1')}catch{}return true}
-  try{return localhost()&&sessionStorage.getItem(DEV_KEY)==='1'}catch{return false}
-}
+function developer(){if(localhost()&&params.get('developer')==='1'){try{sessionStorage.setItem(DEV_KEY,'1')}catch{}return true}try{return localhost()&&sessionStorage.getItem(DEV_KEY)==='1'}catch{return false}}
 function embedded(){try{return window.top!==window.self}catch{return true}}
-function authorize(){
-  try{sessionStorage.setItem(BOOT_KEY,'1');sessionStorage.setItem(LEGACY_BOOT_KEY,'1')}catch{}
-}
-function explicitInstalled(){
-  try{
-    if(params.get('installed')==='1'){authorize();return true}
-    return sessionStorage.getItem(BOOT_KEY)==='1'||sessionStorage.getItem(LEGACY_BOOT_KEY)==='1';
-  }catch{return params.get('installed')==='1'}
-}
-function systemSurface(){
-  const contract=globalThis.CivweaveSystemRoutesV227;
-  const system=contract?.identify?.(location.pathname)||FALLBACK_PATHS.get(location.pathname)||'';
-  if(system)authorize();
-  return system;
-}
+function authorize(){try{sessionStorage.setItem(BOOT_KEY,'1');sessionStorage.setItem(LEGACY_BOOT_KEY,'1')}catch{}}
+function explicitInstalled(){try{if(params.get('installed')==='1'){authorize();return true}return sessionStorage.getItem(BOOT_KEY)==='1'||sessionStorage.getItem(LEGACY_BOOT_KEY)==='1'}catch{return params.get('installed')==='1'}}
+function systemSurface(){const contract=globalThis.CivweaveSystemRoutesV227;const system=contract?.identify?.(location.pathname)||FALLBACK_PATHS.get(location.pathname)||'';if(system)authorize();return system}
 function canonicalAppSurface(){return systemSurface()==='civweave'}
 function allowed(){return Boolean(systemSurface())||installedDisplay()||explicitInstalled()||developer()||embedded()}
-function installerUrl(){
-  const target=`${location.pathname}${location.search}${location.hash}`;
-  const next=new URL(INSTALLER,location.origin);
-  next.searchParams.set('install','required');
-  next.searchParams.set('next',target.slice(0,1800));
-  return next.href;
-}
+function installerUrl(){const target=`${location.pathname}${location.search}${location.hash}`;const next=new URL(INSTALLER,location.origin);next.searchParams.set('install','required');next.searchParams.set('next',target.slice(0,1800));return next.href}
 function liveHead(){return!unloading&&document.documentElement?.isConnected&&document.head?.isConnected}
-function addScript(src){
-  if(!liveHead()||document.querySelector(`script[src^="${src}"]`))return false;
-  const script=document.createElement('script');
-  script.src=`${src}?v=${ADDITIONS_VERSION}`;
-  script.async=false;
-  document.head.append(script);
-  return true;
-}
-function assetCustomizationConfigured(){
-  try{
-    const value=JSON.parse(localStorage.getItem(ASSET_CUSTOMIZATION_STORAGE)||'{}');
-    return value?.personalEnabled!==false&&value?.pathOverrides&&Object.keys(value.pathOverrides).length>0;
-  }catch{return false}
-}
-function installAssetCustomizationIfConfigured(){
-  if(!assetCustomizationConfigured())return false;
-  return addScript(ASSET_CUSTOMIZATION);
-}
-function installEarlyGuards(){
-  addScript(PLATFORM_STABILITY);
-  addScript(AI_SETTINGS_BIND_GUARD);
-  return true;
-}
-function installSystemExperienceSupport(){
-  const system=systemSurface();
-  if(!system||!liveHead())return false;
-  SYSTEM_EXPERIENCE_SCRIPTS.forEach(addScript);
-  if(system==='fellowfare')addScript(FELLOWFARE_GUIDE_BRIDGE);
-  installAssetCustomizationIfConfigured();
-  return true;
-}
-function installCanonicalSystemSupport(){
-  if(canonicalAppSurface()||!systemSurface()||!liveHead())return false;
-  CANONICAL_SYSTEM_SCRIPTS.forEach(addScript);
-  return true;
-}
-function installCanonicalSystemSupportWhenReady(){
-  if(document.body)return installCanonicalSystemSupport();
-  addEventListener('DOMContentLoaded',installCanonicalSystemSupport,{once:true});
-  return true;
-}
-function installAdditions(){
-  if(systemSurface()||!liveHead())return false;
-  if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
-    const link=document.createElement('link');
-    link.rel='stylesheet';
-    link.href=`${ADDITIONS_STYLE}?v=${ADDITIONS_VERSION}`;
-    document.head.append(link);
-  }
-  COMPATIBILITY_SCRIPTS.forEach(addScript);
-  installAssetCustomizationIfConfigured();
-  return true;
-}
-function installAdditionsWhenReady(){
-  if(document.body)return installAdditions();
-  addEventListener('DOMContentLoaded',installAdditions,{once:true});
-  return true;
-}
-function start(){
-  const root=document.documentElement,system=systemSurface();
-  if(!allowed()){
-    if(root)root.dataset.installBoundary='blocked';
-    location.replace(installerUrl());
-    return;
-  }
-  if(system){
-    root.dataset.installBoundary=system==='civweave'?'canonical':'canonical-system';
-    root.dataset.civweaveSystemRoute=system;
-    installSystemExperienceSupport();
-  }else if(root)root.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
-  if(system==='civweave'){
-    root.dataset.civweaveCanonicalCore='only';
-    queueMicrotask(()=>dispatchEvent(new CustomEvent('civweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system}})));
-    return;
-  }
-  if(system){
-    root.dataset.civweaveCanonicalRealm='self-contained';
-    installCanonicalSystemSupportWhenReady();
-    return;
-  }
-  installEarlyGuards();
-  installAdditionsWhenReady();
-}
+function addScript(src){if(!liveHead()||document.querySelector(`script[src^="${src}"]`))return false;const script=document.createElement('script');script.src=`${src}?v=${ADDITIONS_VERSION}`;script.async=false;document.head.append(script);return true}
+function assetCustomizationConfigured(){try{const value=JSON.parse(localStorage.getItem(ASSET_CUSTOMIZATION_STORAGE)||'{}');return value?.personalEnabled!==false&&value?.pathOverrides&&Object.keys(value.pathOverrides).length>0}catch{return false}}
+function installAssetCustomizationIfConfigured(){if(!assetCustomizationConfigured())return false;return addScript(ASSET_CUSTOMIZATION)}
+function installEarlyGuards(){addScript(PLATFORM_STABILITY);addScript(AI_SETTINGS_BIND_GUARD);return true}
+function installSystemExperienceSupport(){const system=systemSurface();if(!system||!liveHead())return false;SYSTEM_EXPERIENCE_SCRIPTS.forEach(addScript);if(system==='fellowfare')addScript(FELLOWFARE_GUIDE_BRIDGE);installAssetCustomizationIfConfigured();return true}
+function installCanonicalSystemSupport(){if(canonicalAppSurface()||!systemSurface()||!liveHead())return false;CANONICAL_SYSTEM_SCRIPTS.forEach(addScript);return true}
+function installCanonicalSystemSupportWhenReady(){if(document.body)return installCanonicalSystemSupport();addEventListener('DOMContentLoaded',installCanonicalSystemSupport,{once:true});return true}
+function installAdditions(){if(systemSurface()||!liveHead())return false;if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=${ADDITIONS_VERSION}`;document.head.append(link)}COMPATIBILITY_SCRIPTS.forEach(addScript);installAssetCustomizationIfConfigured();return true}
+function installAdditionsWhenReady(){if(document.body)return installAdditions();addEventListener('DOMContentLoaded',installAdditions,{once:true});return true}
+function start(){const root=document.documentElement,system=systemSurface();if(!allowed()){if(root)root.dataset.installBoundary='blocked';location.replace(installerUrl());return}if(system){root.dataset.installBoundary=system==='civweave'?'canonical':'canonical-system';root.dataset.civweaveSystemRoute=system;installSystemExperienceSupport()}else if(root)root.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';if(system==='civweave'){root.dataset.civweaveCanonicalCore='only';queueMicrotask(()=>dispatchEvent(new CustomEvent('civweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system}})));return}if(system){root.dataset.civweaveCanonicalRealm='self-contained';installCanonicalSystemSupportWhenReady();return}installEarlyGuards();installAdditionsWhenReady()}
 
 start();
 
-globalThis.CivweaveInstallBoundaryV146=Object.freeze({
-  version:VERSION,allowed,
-  revision:REVISION,
-  systemSurface,
-  canonicalAppSurface,
-  installedDisplay,
-  explicitInstalled,
-  developer,
-  embedded,
-  installerUrl,
-  installEarlyGuards,
-  installSystemExperienceSupport,
-  installCanonicalSystemSupport,
-  installCanonicalSystemSupportWhenReady,
-  installAdditions,
-  installAdditionsWhenReady,
-  assetCustomizationConfigured,
-  installAssetCustomizationIfConfigured,
-  additionsVersion:ADDITIONS_VERSION,
-  publicBrand:'Civweave',
-  canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner',
-  canonicalSystemCount:5,
-  canonicalAutoScripts:0,
-  canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
-  canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
-  canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
-  legacyChatRuntimePolicy:'removed-from-current-source-v251',
-  systemsMeshRevision:'v251-five-system-non-privileged-event-contract',
-  nodeAiMeshRevision:'v1-node-owned-service-discovery-routing',
-  campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',
-  radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',
-  radioTrackSuggestionRevision:'v241-playlist-context-track-links',
-  radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',
-  sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
-  sharedGuideSurfaceRevision:'v236-mirror-into-v242-canonical-thread',
-  realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',
-  guideWorkspaceRevision:'v250-v242-canonical-owner',
-  workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract',
-  mapLaunchRevision:'v243-register-route-handler-or-open-event',
-  fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',
-  assetCustomizationRevision:'v239-local-path-overrides-on-demand',
-  guideIdentityRevision:'v216-explicit-responder-ownership',
-  guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
-  guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm',
-  guideIdentityMigration:'realm-action-owner',
-  guideWorkspaceSubmissionPipelines:1,
-  guideWorkspaceGuideCount:5,
-  guideWorkspaceThreadPolicy:'five-realm-local-ledgers-plus-explicit-handover',
-  guideWorkspaceWindowPolicy:'five-switchable-windows-current-realm-launcher',
-  pwaUpdateRevision:'v250-installed-entry-every-launch',
-  aiSettingsBindGuard:'v230-first-open-atomic-bind',
-  aiSettingsPersistenceRepair:'v229-device-persistence',
-  platformStabilityGuard:'v159-dom-ready-safe',
-  compatibilityDomReady:true,
-  onlineSelfHeal:true,
-  missingAssetDetails:true
-});
+globalThis.CivweaveInstallBoundaryV146=Object.freeze({version:VERSION,allowed,revision:REVISION,systemSurface,canonicalAppSurface,installedDisplay,explicitInstalled,developer,embedded,installerUrl,installEarlyGuards,installSystemExperienceSupport,installCanonicalSystemSupport,installCanonicalSystemSupportWhenReady,installAdditions,installAdditionsWhenReady,assetCustomizationConfigured,installAssetCustomizationIfConfigured,additionsVersion:ADDITIONS_VERSION,publicBrand:'Civweave',canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner',canonicalSystemCount:5,canonicalAutoScripts:0,canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',legacyChatRuntimePolicy:'removed-from-current-source-v251',systemsMeshRevision:'v251-five-system-non-privileged-event-contract',nodeAiMeshRevision:'v1-node-owned-service-discovery-routing',campusBackgroundDownloadRevision:'v241-worker-owned-download-bottom-progress-rail',radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left',radioTrackSuggestionRevision:'v241-playlist-context-track-links',radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',sharedGuideSurfaceRevision:'v236-mirror-into-v242-canonical-thread',realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',guideWorkspaceRevision:'v250-v242-canonical-owner',workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract',mapLaunchRevision:'v243-register-route-handler-or-open-event',fellowfareGuideBridgeRevision:'v236-native-workbench-shared-thread',assetCustomizationRevision:'v239-local-path-overrides-on-demand',guideIdentityRevision:'v216-explicit-responder-ownership',guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',guideIdentityMigration:'realm-action-owner',guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm',guideWorkspaceSubmissionPipelines:1,guideWorkspaceGuideCount:5,guideWorkspaceThreadPolicy:'five-realm-local-ledgers-plus-explicit-handover',guideWorkspaceWindowPolicy:'five-switchable-windows-current-realm-launcher',pwaUpdateRevision:'v250-installed-entry-every-launch',aiSettingsBindGuard:'v230-first-open-atomic-bind',aiSettingsPersistenceRepair:'v229-device-persistence',platformStabilityGuard:'v159-dom-ready-safe',compatibilityDomReady:true,onlineSelfHeal:true,missingAssetDetails:true});
 })();
