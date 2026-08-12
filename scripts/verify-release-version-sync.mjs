@@ -113,7 +113,7 @@ check(workerWrapper.includes('/service-worker-installer-state-v280.js?v=installe
 check(workerWrapper.includes('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281'),'Worker shell integrity layer is missing.');
 check(workerWrapper.includes('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280'),'Worker offline resumable-current-graph revision is stale.');
 check(workerWrapper.includes('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246'),'Worker campus completion layer is missing.');
-check(workerWrapper.includes('/service-worker-chat-repair-v245.js?v=chat-bubble-anchor-v342&purge=chat-bubble-anchor-v342'),'Worker lost the current stale-chat cache migration lane.');
+check(workerWrapper.includes('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343'),'Worker lost the current stale-chat cache migration lane.');
 check(workerWrapper.indexOf('/service-worker-canonical-navigation-v227.js')>workerWrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not the final navigation policy.');
 check(legacyWorker.includes(`/service-worker-v203.js?v=${version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209`),'Legacy worker bridge is stale.');
 for(const token of [

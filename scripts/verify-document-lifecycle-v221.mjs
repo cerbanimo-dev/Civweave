@@ -43,7 +43,7 @@ const installBlock=workerCore.match(/self\.addEventListener\('install',[\s\S]*?\
 assert(installBlock.includes('event.waitUntil(cacheShell())'),'Worker install does not cache shell.');
 assert(!installBlock.includes('skipWaiting'),'Core worker takes over active pages during its own install instead of leaving activation to the v250 wrapper.');
 for(const token of ['release-coherence-v226','working-campus-v156.part5.txt','version-pinned-html-js-css-json-txt-network-first-cached-fallback'])assert(releaseCoherence.includes(token),`Release coherence is missing ${token}.`);
-assert(wrapper.includes('/service-worker-chat-repair-v245.js?v=chat-bubble-anchor-v342&purge=chat-bubble-anchor-v342'),'Worker wrapper lost the current stale-chat migration lane.');
+assert(wrapper.includes('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343'),'Worker wrapper lost the current stale-chat migration lane.');
 assert(wrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'v250 worker wrapper no longer activates the convergence worker promptly.');
 assert(wrapper.indexOf('/app/system-routes-v227.js')<wrapper.indexOf('/service-worker-core-v208.js'),'Worker route contract loads after core.');
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not final.');

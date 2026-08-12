@@ -18,8 +18,8 @@ check('mobile launcher respects safe areas',source.includes('right:max(10px,env(
 check('launcher image is forced to fill the circle',source.includes('#${LAUNCHER_ID} img{display:block!important;width:100%!important;height:100%!important')&&source.includes('border-radius:50%!important;object-fit:cover!important'));
 check('launcher has explicit top-layer touch ownership',source.includes('z-index:2147483643!important')&&source.includes('pointer-events:auto!important')&&source.includes('touch-action:manipulation!important'));
 check('runtime advertises launcher geometry contract',source.includes("launcherPosition:'fixed'")&&source.includes('launcherDesktopPx:52')&&source.includes('launcherMobilePx:48'));
-check('installed cache repair purges stale face icon launcher',repair.includes("const REVISION='chat-bubble-anchor-v342'")&&repair.includes("'/app/shared-chat-face-icons-v255.js'"));
-check('active worker imports matching chat bubble repair revision',worker.includes("/service-worker-chat-repair-v245.js?v=chat-bubble-anchor-v342&purge=chat-bubble-anchor-v342"));
+check('installed cache repair purges stale face icon launcher',repair.includes("const REVISION='chat-css-contract-v343'")&&repair.includes("'/app/shared-chat-face-icons-v255.js'"));
+check('active worker imports matching chat bubble repair revision',worker.includes("/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343"));
 check('active worker still installs with skipWaiting',worker.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
 
-console.log(JSON.stringify({ok:true,revision:'mobile-chat-bubble-anchor-v342',checks:checks.length,launcher:{position:'fixed',shape:'circle',desktopPx:52,mobilePx:48,narrowPx:46},installedPwa:{staleLauncherPurge:true,workerRotation:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'mobile-chat-css-contract-v343',checks:checks.length,launcher:{position:'fixed',shape:'circle',desktopPx:52,mobilePx:48,narrowPx:46},installedPwa:{staleLauncherPurge:true,workerRotation:true}},null,2));
