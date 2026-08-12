@@ -58,6 +58,10 @@ assert.ok(setup.includes('navigator.geolocation.watchPosition'));
 assert.ok(setup.includes("position.coords.latitude.toFixed(3)"));
 assert.ok(setup.includes("'x-civweave-location-key':claimKey"));
 assert.ok(setup.includes('Your exact GPS reading stays on this device.'));
+assert.ok(setup.includes('CONNECT STEWARD PAYOUTS'));
+assert.ok(setup.includes('http://127.0.0.1:8787/app/node-ai-operator-v1.html#liveCommerce'));
+assert.ok(setup.includes('Transfers must be active'));
+assert.ok(setup.includes('bank, identity, and tax details are entered in Stripe-hosted onboarding'));
 
 console.log(JSON.stringify({
   ok: true,
