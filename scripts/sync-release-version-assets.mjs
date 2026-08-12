@@ -78,7 +78,8 @@ await patch('public/service-worker-v203.js',source=>{
 await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+(?:-code-coherence-v288)?-lightweight-shell-v208-legacy-v156-bridge-v209/,`service-worker-v203.js?v=${version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209`,'legacy worker bridge revision'));
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'install-boundary runtime version');
-  if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;'))throw new Error(`install-boundary release-aware additions revision was not found while synchronizing Civweave ${version}.`);
+  if(!source.includes("const REVISION='chat-convergence-v250-navigation-lifecycle-v424';"))throw new Error(`install-boundary navigation lifecycle revision was not found while synchronizing Civweave ${version}.`);
+  if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424`;'))throw new Error(`install-boundary release-aware additions revision was not found while synchronizing Civweave ${version}.`);
   return source;
 });
 
