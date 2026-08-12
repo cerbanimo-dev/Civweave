@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'public/app/quest-veil-v1.js'
+      - 'public/app/quest-veil-ledger-gate-v1.js'
+      - 'public/app/quest-veil-mesh-v1.js'
       - 'public/app/install-boundary-v146.js'
       - 'scripts/test-quest-veil-v1.mjs'
       - '.github/workflows/verify-quest-veil-v1.yml'
@@ -12,6 +14,8 @@ on:
       - 'agent/quest-veil-ledger-writer'
     paths:
       - 'public/app/quest-veil-v1.js'
+      - 'public/app/quest-veil-ledger-gate-v1.js'
+      - 'public/app/quest-veil-mesh-v1.js'
       - 'public/app/install-boundary-v146.js'
       - 'scripts/test-quest-veil-v1.mjs'
       - '.github/workflows/verify-quest-veil-v1.yml'
@@ -28,6 +32,9 @@ jobs:
         with:
           node-version: '22'
       - name: Check runtime syntax
-        run: node --check public/app/quest-veil-v1.js
-      - name: Verify privacy and ledger contract
+        run: |
+          node --check public/app/quest-veil-v1.js
+          node --check public/app/quest-veil-ledger-gate-v1.js
+          node --check public/app/quest-veil-mesh-v1.js
+      - name: Verify mandatory privacy, mesh, and rewards contract
         run: node scripts/test-quest-veil-v1.mjs
