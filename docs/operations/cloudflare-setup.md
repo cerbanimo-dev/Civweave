@@ -118,6 +118,10 @@ For a community host repository, configure:
 - repository variable `CIVWEAVE_HOST_ID` with the stable host ID;
 - repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` for the steward's Cloudflare account.
 
+The secrets configured in the canonical `cerbanimo-dev/Civweave` repository are specifically for the OG `civweave.pages.dev` host. Each community-host fork or repository uses its own steward-owned Cloudflare account ID and API token; it does not inherit the OG credentials.
+
+The Actions workflows validate those credentials by requesting the exact configured Pages project. They intentionally do not run `wrangler whoami`, because an account-scoped Pages token can deploy its project without permission to enumerate every account membership.
+
 Then enable `.github/workflows/deploy-civweave-host-pages.yml`. Every push to `main` rebuilds and deploys that same Pages project. The workflow refuses the reserved `civweave` project, so a community credential cannot overwrite the canonical root.
 
 The canonical repository uses `.github/workflows/deploy-civweave-pages.yml` for `civweave.pages.dev`. Both workflows preserve the initial direct deployment until a successful automated replacement is available; failure or delayed GitHub setup does not take a new host offline.
