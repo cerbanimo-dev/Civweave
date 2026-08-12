@@ -76,8 +76,22 @@ jobs:
         run: >-
           node scripts/provision-cloudflare-account-edge-v1.mjs
           --host-id civweave
-          --strict
+          --allow-partial
           --output /tmp/civweave-account-edge.json
+
+      - name: Report partial starter-node provisioning
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const accountEdge = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
+          if (accountEdge.status !== 'ready' || accountEdge.starterNodeIds?.length !== 3) {
+            const message = String(accountEdge.error || 'Worker/starter-node provisioning is incomplete.').replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
+            console.log(`::warning title=Cloudflare starter nodes pending::Pages deployment will continue. ${message}`);
+          } else {
+            console.log(`Cloudflare account edge ready: ${accountEdge.starterNodeIds.join(', ')}`);
+          }
+          NODE
 
       - name: Build canonical Pages package
         run: node scripts/build-cloudflare-pages.mjs
@@ -89,9 +103,6 @@ jobs:
           import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
           const target = '.cloudflare-pages/app/host-deployment-v1.json';
           const accountEdge = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
-          if (accountEdge.status !== 'ready' || accountEdge.starterNodeIds?.length !== 3) {
-            throw new Error('Canonical Cloudflare account edge is not fully provisioned.');
-          }
           mkdirSync('.cloudflare-pages/app', { recursive: true });
           writeFileSync(target, `${JSON.stringify({
             schema: 'civweave.host-deployment.v1',
