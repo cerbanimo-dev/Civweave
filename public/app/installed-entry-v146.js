@@ -3,7 +3,7 @@
 const params=new URLSearchParams(location.search);
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
-const FALLBACK_VERSION='1.0.116';
+const FALLBACK_VERSION='1.0.117';
 const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
 const legacyEntry=/^\/app\/installed-entry-v146(?:\.html)?$/.test(location.pathname);
 const explicitInstalled=params.get('installed')==='1'||legacyEntry;
@@ -76,5 +76,5 @@ async function boot(){
   }
 }
 boot();
-globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.116-chat-convergence-v250',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker});
+globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.117-chat-convergence-v250',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker});
 })();
