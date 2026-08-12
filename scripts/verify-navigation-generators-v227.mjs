@@ -16,7 +16,7 @@ for(const token of[
   "importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery')",
   "importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280')",
   "importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281')",
-  "importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280')",
+  "importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282')",
   "importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227')",
   'canonicalNavigationFinalPolicy:true',
   'routeContractFirst:true'

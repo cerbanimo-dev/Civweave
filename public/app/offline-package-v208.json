@@ -146,11 +146,11 @@
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
-    "estimatedBytes": 7694582,
+    "estimatedBytes": 7860832,
     "safetyBytes": 67108864,
-    "requiredFreeBytes": 74803446,
-    "candidateAssetCount": 558,
-    "estimatedAssetCount": 558,
+    "requiredFreeBytes": 74969696,
+    "candidateAssetCount": 560,
+    "estimatedAssetCount": 560,
     "conservativeUpperBound": true
   }
 }

@@ -21,6 +21,7 @@ assert.match(files.worker,/downloadedAssets/);
 assert.match(files.worker,/joinedExisting/);
 assert.match(files.worker,/interrupted:\s*true/);
 assert.match(files.worker,/civweave-campus-resume-v280/);
+assert.match(files.worker,/current-manifest-only-v282/);
 assert.match(files.controller,/Pause download/);
 assert.match(files.controller,/Resume download/);
 assert.match(files.controller,/calculating storage/);
@@ -49,6 +50,7 @@ assert.doesNotMatch(files.shell,/required-campus-autostart-v1\.js/);
 assert.doesNotMatch(files.shell,/campus-background-download-v241\.js/);
 
 const listeners={};
+const metadataWrites=[];
 const context={
   VERSION:'1.0.51',
   OFFLINE_CACHE:'test-offline-cache',
@@ -57,7 +59,7 @@ const context={
   downloadOfflinePackage:async()=>({}),
   loadOfflineManifest:async()=>({seeds:[]}),
   readOfflineMeta:async()=>null,
-  writeOfflineMeta:async value=>value,
+  writeOfflineMeta:async value=>{metadataWrites.push(value);return value},
   cacheOfflineAsset:async()=>({response:{headers:{get:()=>''},clone(){return this}},contentLength:0}),
   TEXT_CONTENT:/text/,
   discoverReferences:()=>[],
@@ -86,7 +88,36 @@ assert.equal(paused.paused,true);
 assert.equal(paused.running,false);
 assert.equal(paused.downloaded,4);
 assert.equal(paused.resumeSupported,true);
+const cleaned=api.packet({
+  ready:true,
+  total:3,
+  downloaded:2,
+  downloadedAssets:['a','b'],
+  assets:['a','b'],
+  skipped:[{pathname:'/obsolete.js'}],
+  skippedCount:1,
+  discovered:3
+});
+assert.equal(cleaned.total,2);
+assert.equal(cleaned.discovered,2);
+assert.equal(cleaned.skippedCount,0);
+assert.equal(cleaned.skipped.length,0);
+assert.equal(cleaned.referencePolicy,'current-manifest-only-v282');
+const migrated=await api.migrateMeta({
+  revision:'offline-campus-current-graph-v280',
+  ready:true,
+  downloaded:2,
+  assets:['a','b'],
+  skipped:[{pathname:'/obsolete.js'}],
+  skippedCount:1,
+  discovered:3
+},{seeds:[]});
+assert.equal(migrated.discovered,2);
+assert.equal(migrated.skippedCount,0);
+assert.equal(metadataWrites.length,1);
+assert.equal(metadataWrites[0].skippedCount,0);
+assert.equal(metadataWrites[0].skipped.length,0);
 assert.ok((listeners.message||[]).length>=1);
 assert.ok((listeners.sync||[]).length>=1);
 
-console.log('installer resume state v280 smoke: ok');
+console.log('installer resume state v280 + current-manifest-only v282 smoke: ok');

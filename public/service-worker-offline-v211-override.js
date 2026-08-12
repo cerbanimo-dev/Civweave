@@ -3,6 +3,7 @@
 
 const V211_REVISION = 'offline-campus-current-graph-v280';
 const V211_POLICY = 'resumable-pause-v280';
+const V211_REFERENCE_POLICY = 'current-manifest-only-v282';
 const V211_SYNC_TAG = 'civweave-campus-resume-v280';
 const V211_QUARANTINE_MS = 6 * 60 * 60 * 1000;
 const V211_BATCH_SIZE = 16;
@@ -42,23 +43,25 @@ function v211SkippedEntry(entry) {
 
 function v211Packet(meta = {}) {
   const assets = [...new Set((Array.isArray(meta.assets) ? meta.assets : []).filter(Boolean))];
+  const assetSet = new Set(assets);
   const failed = (Array.isArray(meta.failed) ? meta.failed : []).map(entry => v211FailureEntry(entry));
-  const skipped = (Array.isArray(meta.skipped) ? meta.skipped : []).map(v211SkippedEntry);
-  const downloadedAssets = [...new Set((Array.isArray(meta.downloadedAssets) ? meta.downloadedAssets : []).filter(Boolean))];
-  const total = Math.max(0, Number(meta.total ?? assets.length) || 0);
-  const attempted = Math.max(0, Number(meta.attempted ?? meta.completed ?? 0) || 0);
+  const downloadedAssets = [...new Set((Array.isArray(meta.downloadedAssets) ? meta.downloadedAssets : []).filter(pathname => assetSet.has(pathname)))];
+  const total = assets.length;
+  const attempted = Math.max(0, Math.min(total, Number(meta.attempted ?? meta.completed ?? 0) || 0));
   const downloaded = Math.max(0, Math.min(total || Number.MAX_SAFE_INTEGER, Number(
     meta.downloaded ?? meta.successful ?? downloadedAssets.length ?? Math.max(0, attempted - failed.length)
   ) || 0));
   const paused = Boolean(meta.paused);
+  const computedReady = !meta.running && !paused && failed.length === 0 && total > 0 && downloaded >= total;
   return {
     type: 'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
     mode: 'resumable-current-campus-graph',
     version: VERSION,
     revision: V211_REVISION,
     policy: V211_POLICY,
+    referencePolicy: V211_REFERENCE_POLICY,
     cache: OFFLINE_CACHE,
-    ready: Boolean(meta.ready) && failed.length === 0 && (!total || downloaded >= total),
+    ready: Boolean(meta.ready || computedReady) && failed.length === 0 && (!total || downloaded >= total),
     running: Boolean(meta.running) && !paused,
     paused,
     interrupted: Boolean(meta.interrupted),
@@ -71,11 +74,11 @@ function v211Packet(meta = {}) {
     successful: downloaded,
     downloadedAssets,
     total,
-    discovered: assets.length + skipped.length,
+    discovered: assets.length,
     failed,
     failedCount: failed.length,
-    skipped,
-    skippedCount: skipped.length,
+    skipped: [],
+    skippedCount: 0,
     bytes: Number(meta.bytes || 0),
     updatedAt: meta.updatedAt || null,
     assets
@@ -94,24 +97,24 @@ async function v211Broadcast(packet) {
 
 async function v211MigrateMeta(meta, manifest) {
   if (!meta) return null;
-  if (meta.revision === V211_REVISION) return v211Packet(meta);
+  if (meta.revision === V211_REVISION) {
+    const packet = v211Packet({ ...meta, skipped: [] });
+    const obsoleteCount = Math.max(0, Number(meta.skippedCount || 0), Array.isArray(meta.skipped) ? meta.skipped.length : 0);
+    if (obsoleteCount || meta.referencePolicy !== V211_REFERENCE_POLICY || Number(meta.discovered || 0) !== packet.discovered) {
+      await writeOfflineMeta({ ...packet, updatedAt: new Date().toISOString() });
+    }
+    return packet;
+  }
 
   const requiredSeeds = new Set((manifest.seeds || []).filter(Boolean));
-  const inheritedSkipped = (Array.isArray(meta.skipped) ? meta.skipped : []).map(v211SkippedEntry);
   const failed = (Array.isArray(meta.failed) ? meta.failed : []).map(entry => v211FailureEntry(entry));
   const requiredFailed = failed.filter(entry => entry.pathname === 'package' || requiredSeeds.has(entry.pathname));
   const optionalFailed = failed.filter(entry => entry.pathname !== 'package' && !requiredSeeds.has(entry.pathname));
-  const skippedByPath = new Map(inheritedSkipped.map(entry => [entry.pathname, entry]));
-
-  for (const entry of optionalFailed) {
-    skippedByPath.set(entry.pathname, v211SkippedEntry({
-      ...entry,
-      reason: entry.status === 404 || entry.status === 410 ? 'not-found' : 'legacy-repeated-unavailable',
-      retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString()
-    }));
-  }
-
-  const previousAssets = [...new Set((Array.isArray(meta.assets) ? meta.assets : []).filter(Boolean))];
+  const obsoletePaths = new Set([
+    ...(Array.isArray(meta.skipped) ? meta.skipped.map(entry => String(entry?.pathname || '')) : []),
+    ...optionalFailed.map(entry => entry.pathname)
+  ].filter(Boolean));
+  const previousAssets = [...new Set((Array.isArray(meta.assets) ? meta.assets : []).filter(pathname => pathname && !obsoletePaths.has(pathname)))];
   const legacyDownloaded = Math.max(0, Number(meta.downloaded ?? meta.successful ?? meta.completed ?? 0) || 0);
   const packet = v211Packet({
     ...meta,
@@ -124,7 +127,7 @@ async function v211MigrateMeta(meta, manifest) {
     total: previousAssets.length,
     assets: previousAssets,
     failed: requiredFailed,
-    skipped: [...skippedByPath.values()],
+    skipped: [],
     updatedAt: new Date().toISOString()
   });
   await writeOfflineMeta(packet);
@@ -137,22 +140,22 @@ async function v211SanitizeRetryMeta(meta, manifest) {
   const failed = (meta.failed || []).map(entry => v211FailureEntry(entry));
   const requiredFailed = failed.filter(entry => entry.pathname === 'package' || requiredSeeds.has(entry.pathname));
   const optionalFailed = failed.filter(entry => entry.pathname !== 'package' && !requiredSeeds.has(entry.pathname));
-  if (!optionalFailed.length) return v211Packet(meta);
-
-  const skippedByPath = new Map((meta.skipped || []).map(entry => [entry.pathname, v211SkippedEntry(entry)]));
-  for (const entry of optionalFailed) {
-    skippedByPath.set(entry.pathname, v211SkippedEntry({
-      ...entry,
-      reason: entry.status === 404 || entry.status === 410 ? 'not-found' : 'retry-ledger-retired',
-      retryAfter: new Date(Date.now() + V211_QUARANTINE_MS).toISOString()
-    }));
-  }
+  const obsoletePaths = new Set([
+    ...(meta.skipped || []).map(entry => String(entry?.pathname || '')),
+    ...optionalFailed.map(entry => entry.pathname)
+  ].filter(Boolean));
+  if (!obsoletePaths.size) return v211Packet(meta);
+  const assets = (meta.assets || []).filter(pathname => !obsoletePaths.has(pathname));
+  const downloadedAssets = (meta.downloadedAssets || []).filter(pathname => !obsoletePaths.has(pathname));
   const packet = v211Packet({
     ...meta,
     running: false,
-    ready: false,
+    ready: requiredFailed.length === 0,
     failed: requiredFailed,
-    skipped: [...skippedByPath.values()],
+    skipped: [],
+    assets,
+    downloadedAssets,
+    total: assets.length,
     updatedAt: new Date().toISOString()
   });
   await writeOfflineMeta(packet);
@@ -203,9 +206,8 @@ async function v211DownloadOfflinePackage(event) {
   const maxAssets = Math.max(50, Math.min(1500, Number(manifest.maxAssets || 700)));
   const maxDepth = Math.max(1, Math.min(12, Number(manifest.maxDepth || 8)));
   const requiredSeeds = new Set((manifest.seeds || []).filter(Boolean));
-  const skipped = new Map((previous?.skipped || []).map(entry => [entry.pathname, v211SkippedEntry(entry)]));
+  const skipped = new Map();
   const previousFailures = new Map((previous?.failed || []).map(entry => [entry.pathname, v211FailureEntry(entry)]));
-  const previousAssets = new Set((previous?.assets || []).filter(Boolean));
   const sameRelease = previous?.version === VERSION && previous?.revision === V211_REVISION;
   const previousDownloadedAssets = sameRelease ? (previous?.downloadedAssets || []) : [];
   const now = Date.now();
@@ -307,11 +309,6 @@ async function v211DownloadOfflinePackage(event) {
     await progress(true, false);
   }
 
-  for (const pathname of previousAssets) {
-    if (!pathname || queued.has(pathname) || requiredSeeds.has(pathname) || skipped.has(pathname)) continue;
-    skipped.set(pathname, v211SkippedEntry({ pathname, message: 'This file belonged to an older campus graph and is no longer referenced by the current release.', attempts: 1, reason: 'stale-not-rediscovered', retryAfter: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() }));
-  }
-
   const ready = queue.length === 0 && failed.size === 0;
   const paused = !ready && v211PauseRequested;
   return progress(false, ready, { paused });
@@ -365,6 +362,7 @@ self.addEventListener('sync', event => {
 self.CivweaveOfflineCampusV211 = {
   revision: V211_REVISION,
   policy: V211_POLICY,
+  referencePolicy: V211_REFERENCE_POLICY,
   syncTag: V211_SYNC_TAG,
   batchSize: V211_BATCH_SIZE,
   currentGraphOnly: true,

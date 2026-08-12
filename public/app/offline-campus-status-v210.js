@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.39-offline-campus-status-v210-retired-completion-v246';
+const VERSION='1.0.40-offline-campus-status-v210-current-manifest-only-v282';
 const WORKER_REVISION='offline-campus-current-graph-v280';
 const STATUS_TYPES=new Set([
   'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
@@ -44,7 +44,7 @@ function normalize(status={}){
   const downloaded=clamp(rawDownloaded,0,total||Number.MAX_SAFE_INTEGER);
   const computedReady=!status.running&&failedCount===0&&total>0&&downloaded>=total;
   const ready=(Boolean(status.ready)||computedReady)&&failedCount===0&&(!total||downloaded>=total);
-  return{...status,assets,failed,failedCount,skipped,skippedCount,total,attempted,downloaded,ready,retiredCount:skippedCount,legacyTotalIncludesSkipped};
+  return{...status,assets,failed,failedCount,skipped:[],skippedCount:0,total,attempted,downloaded,ready,retiredCount:0,legacyTotalIncludesSkipped};
 }
 
 function formatBytes(bytes){
@@ -64,7 +64,7 @@ function render(status){
   const requiredFailures=packet.failed.some(entry=>entry?.required===true||entry?.pathname==='package');
   if(state){
     if(packet.running)state.textContent='downloading';
-    else if(packet.ready)state.textContent=packet.skippedCount?`ready offline · ${packet.skippedCount} retired reference${packet.skippedCount===1?'':'s'} skipped`:'ready offline';
+    else if(packet.ready)state.textContent='ready offline';
     else if(packet.failedCount&&requiredFailures)state.textContent=`${packet.failedCount} required file${packet.failedCount===1?'':'s'} need retry`;
     else if(packet.failedCount)state.textContent=`${packet.failedCount} file${packet.failedCount===1?'':'s'} need retry`;
     else state.textContent=packet.downloaded?'partially downloaded':'not downloaded';
@@ -72,9 +72,8 @@ function render(status){
   if(assets){
     const count=packet.total?`${Math.min(packet.downloaded,packet.total)}/${packet.total} current files`:'not measured';
     const checked=packet.failedCount&&packet.attempted>packet.downloaded?` · ${Math.min(packet.attempted,packet.total)}/${packet.total} checked`:'';
-    const skipped=packet.skippedCount?` · ${packet.skippedCount} retired`:'';
     const size=formatBytes(packet.bytes);
-    assets.textContent=`${count}${checked}${skipped}${size?` · ${size}`:''}`;
+    assets.textContent=`${count}${checked}${size?` · ${size}`:''}`;
   }
   if(button){
     if(packet.running)button.textContent=packet.total?`Downloading ${Math.min(packet.attempted,packet.total)}/${packet.total}…`:'Discovering campus files…';
