@@ -1,12 +1,16 @@
-# Civweave launch kit: Cloudflare authority + WWW node fabric
+# Civweave launch kit: Cloudflare authority + host fabric
 
-Civweave launch infrastructure is split into two separately permissioned Cloudflare systems plus physical host nodes that implement the same `civweave.node.v1` protocol.
+Civweave launch infrastructure is split into a Pages host layer, separately permissioned Cloudflare authority/fabric services, and optional physical/local Anchors that implement the same `civweave.node.v1` family of contracts.
 
 ## Canonical topology
 
 ```text
-https://commonweave.pages.dev
-  canonical PWA / installer
+https://civweave.pages.dev
+  OG/root Civweave Pages host + installer
+          |
+          +-- https://civweave-<host-id>.pages.dev
+          |     community Pages hosts created from the same GitHub source
+          |     each host may install its own PWA from its stable production origin
           |
           v
 https://api.commonweave.earth
@@ -14,7 +18,7 @@ https://api.commonweave.earth
   D1: registry + money ledger
   R2: package distribution
   Durable Object: persistent Cerbanimo Ed25519 signing identity
-  Stripe Connect direct-charge authority
+  Stripe Connect authority
           |
           | private Service Binding
           v
@@ -24,11 +28,51 @@ https://<node-id>.nodes.commonweave.earth
   one SQLite-backed Durable Object per WWW node
           |
           +-- Cloudflare seed/WWW nodes
-          +-- Raspberry Pi / local servers through Cloudflare Tunnel
-          +-- private-device outbound relay lane (relay phase)
+          +-- local Anchors / Raspberry Pi / local servers
+          +-- private-device outbound relay lane
 ```
 
+`https://commonweave.pages.dev` is retained only as a legacy install-origin migration target. New documentation and deployment metadata use `https://civweave.pages.dev`.
+
+A Cloudflare Pages branch/hash alias such as `<branch>.<project>.pages.dev` is not a permanent host identity. Civweave routes installation from a preview alias back to that project's stable `<project>.pages.dev` production origin.
+
 Render is no longer a money-edge authority. It may remain online as a transition/fallback host node while useful.
+
+## Host creation
+
+The preferred host-steward path is now:
+
+```text
+clone cerbanimo-dev/Civweave
+        ↓
+Wrangler login to steward's Cloudflare account
+        ↓
+node scripts/setup-cloudflare-node.mjs --host-id <name>
+        ↓
+Cloudflare Pages production host
+        ↓
+open /app/?host_setup=1 once
+        ↓
+Civweave persistently recommends a local Anchor/companion
+```
+
+The reserved root is created with `--canonical`. Canonical deployment requires a locally supplied `CIVWEAVE_EXPECT_CLOUDFLARE_EMAIL` check so it cannot silently publish from the wrong Wrangler login. The account email is never committed to source.
+
+Community hosts cannot claim the reserved `civweave` Pages project name. Their default project is `civweave-<host-id>`; a different project name can be supplied explicitly if that name is already occupied.
+
+## Local Anchor boundary
+
+A Pages host is allowed to operate without a local Anchor. The UI should nevertheless be persistent and insistent about adding one.
+
+The Anchor is the preferred location for:
+
+- recovery copies of host identity/state;
+- durable local federation data;
+- always-on peer discovery and relay;
+- local AI and larger local models;
+- scheduled work that browser background APIs cannot guarantee.
+
+The first Pages-host reminder is non-blocking and steward-specific. It can be snoozed for one day and disappears when that steward records an Anchor as paired. Future Anchor-proof work can replace that local acknowledgement with cryptographic freshness/reconstruction proofs without changing the host creation path.
 
 ## Security boundary
 
@@ -46,13 +90,7 @@ Each Cloudflare WWW node also generates its own persistent Ed25519 identity insi
 
 ## Cerbanimo fee
 
-The authoritative launch platform fee is:
-
-```text
-CIVWEAVE_PLATFORM_FEE_BPS=1500
-```
-
-That is 15%. Host-node manifests cannot override it. For a direct charge, Stripe creates the charge on the connected host-node account and the core supplies the Cerbanimo application fee.
+The authoritative launch platform fee remains controlled by the core configuration. Host-node manifests cannot override it.
 
 ## Core resources
 
@@ -67,20 +105,15 @@ Durable Object: CivweaveCoreIdentity
 Cron: every 5 minutes for pending signed-event delivery
 ```
 
-Apply both migrations in order:
-
-```text
-cloudflare/core/migrations/0001_core.sql
-cloudflare/core/migrations/0002_money_edge.sql
-```
-
-Generate a deployment Wrangler file from the committed template with:
+Apply the committed migrations in order, then generate a deployment Wrangler file from the committed template with:
 
 ```text
 node scripts/prepare-cloudflare-launch-kit-v1.mjs <D1_DATABASE_ID>
 ```
 
 The generated file is local/deployment output and must not become a secret store.
+
+The core deploys through `cloudflare/core/src/origin-entry.mjs`, which delegates the money/registry runtime unchanged while making `https://civweave.pages.dev` the canonical install-origin metadata returned by `/api/launch-topology`.
 
 ### Core secrets
 
@@ -116,25 +149,21 @@ NODE_FABRIC_BINDING_TOKEN
 
 ## Raspberry Pi / local server
 
-A Pi or home server runs the normal Node 22 Civweave host-node runtime with local SQLite and optional local AI. It generates its own node/operator identity and Ed25519 keypair on first startup.
+A Pi or home server runs the normal Node 22 Civweave host-node runtime with persistent local data and optional local AI. It generates its own node/operator identity and Ed25519 keypair on first startup.
 
-Its public transport is a Cloudflare Tunnel assigned a dedicated host under:
+A public local node may use Cloudflare Tunnel under:
 
 ```text
 <node-id>.nodes.commonweave.earth
 ```
 
-The Tunnel is outbound from the local machine, so no router port-forward is required. The node's canonical money edge defaults to:
+The Tunnel is outbound from the local machine, so no router port-forward is required. A backup-only Anchor can remain LAN/localhost-only.
 
-```text
-https://api.commonweave.earth
-```
-
-No Stripe or Cerbanimo private secret is copied to the Pi.
+No Stripe or Cerbanimo private secret is copied to the physical node.
 
 ## Payment authority
 
-The canonical payment API is now:
+The canonical payment API remains on the Cloudflare core:
 
 ```text
 GET  /api/money-edge/status
@@ -147,49 +176,24 @@ POST /api/money-edge/topups/:topupId/refund
 POST /api/money-edge/webhooks/stripe
 ```
 
-The core implements configurable Stripe Connect accounts, hosted onboarding, direct-charge Checkout, independent paid-session verification, the 15% application fee, refunds, dispute/chargeback debt events, signed node payment events and retry delivery from D1.
-
-The Stripe Connect webhook should eventually target:
-
-```text
-https://api.commonweave.earth/api/money-edge/webhooks/stripe
-```
-
-and include:
-
-```text
-checkout.session.completed
-checkout.session.async_payment_succeeded
-charge.refunded
-charge.dispute.created
-charge.dispute.funds_withdrawn
-```
+The core implements Stripe Connect onboarding, paid-session verification, refunds/dispute adjustments, signed node payment events and retry delivery from D1. Host Pages projects never receive the platform Stripe secret.
 
 ## Live-money gate
 
-Cloudflare is the canonical authority in code immediately, but real-money activation remains fail-closed. The committed Worker configuration keeps these false:
+Cloudflare is the canonical authority in code immediately, but real-money activation remains fail-closed. The committed Worker configuration leaves the operational readiness gates false until they are deliberately approved.
 
-```text
-CIVWEAVE_MONEY_LIVE_ENABLED=false
-CIVWEAVE_MONEY_COMPLIANCE_APPROVED=false
-CIVWEAVE_MONEY_JURISDICTION_APPROVED=false
-CIVWEAVE_MONEY_KYC_AML_READY=false
-CIVWEAVE_MONEY_TAX_REPORTING_READY=false
-CIVWEAVE_MONEY_TERMS_APPROVED=false
-```
-
-A sandbox `sk_test_...` key can exercise onboarding and Checkout while `liveReady` remains false. A live Stripe key cannot process Civweave live top-ups until every operational gate is explicitly enabled.
+A sandbox key can exercise onboarding and Checkout without making the live-money gate true.
 
 ## Launch sequence
 
-1. Deploy `civweave-core`, create D1/R2, and apply both migrations.
-2. Set the central Cloudflare secrets directly in Cloudflare, never in chat/source.
-3. Verify `/api/money-edge/status` and `/api/money-edge/trust`.
-4. Deploy `civweave-node-cloud` and its wildcard node routes.
-5. Create several Cerbanimo-operated cloud seed nodes.
-6. Point the Stripe Connect webhook at the Cloudflare money edge.
-7. Run sandbox account onboarding, direct-charge top-up, signed delivery, refund and dispute tests.
-8. Add Raspberry Pi/local-server nodes using Cloudflare Tunnel and verify identical enrollment.
+1. Create/deploy the reserved `civweave` Pages project for `https://civweave.pages.dev` from the intended canonical Cloudflare account.
+2. Verify the canonical installer and PWA from the stable production origin.
+3. Deploy `civweave-core`, create D1/R2, and apply migrations.
+4. Set central Cloudflare secrets directly in Cloudflare, never in source.
+5. Verify `/api/money-edge/status`, `/api/money-edge/trust`, and `/api/launch-topology`.
+6. Deploy `civweave-node-cloud` and its wildcard node routes.
+7. Create community Pages hosts with `setup-cloudflare-node.mjs --host-id ...`.
+8. Open each host's steward setup URL and add a local Anchor where possible.
 9. Keep live-money flags false until legal/compliance/provider readiness is complete.
 
 ## Verification
@@ -198,6 +202,8 @@ Run:
 
 ```text
 node scripts/verify-cloudflare-launch-kit-v1.mjs
+node scripts/verify-cloudflare-production-origin-v251.mjs
+node scripts/verify-pwa-install-campus-v246.mjs
 ```
 
-The repository CI gate checks the two-plane permission boundary, D1/R2/Durable Object bindings, Cloudflare authority URL, 15% fee, Stripe direct-charge form, refund application-fee behavior, wildcard WWW nodes, Ed25519 trust compatibility, no payment-provider secrets on host nodes, and source syntax.
+Repository CI checks the Cloudflare authority boundary, host-origin installation contract, Pages preview safety, local Anchor reminder, D1/R2/Durable Object bindings, signed trust compatibility, and source syntax.
