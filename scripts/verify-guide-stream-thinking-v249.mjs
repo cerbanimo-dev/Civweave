@@ -10,7 +10,9 @@ const [streaming,loader]=await Promise.all([
 new Function(streaming);
 new Function(loader);
 
-assert.match(loader,/guide-stream-thinking-v249\.js\?v=1\.0\.85-v249/,'shared guide loader must mount the streaming thinking layer');
+assert.match(loader,/guide-stream-thinking-v249\.js\?v=[^'"\s]*v249-navigation-lifecycle-v424/,'shared guide loader must mount the navigation-safe streaming thinking layer');
+assert.match(loader,/function liveHead\(\)/,'shared guide loader must retain detached-document protection');
+assert.match(loader,/addEventListener\('pageshow',\(\)=>queueMicrotask\(install\)\)/,'shared guide loader must reinstall after page restoration');
 assert.match(streaming,/purpose==='civweave-guide-response-v141'/,'canonical assistant responses must opt into streaming');
 assert.match(streaming,/stream:true,config:\{\.\.\.\(request\.config\|\|\{\}\),stream:true\}/,'interactive model requests must force stream on both request and config');
 assert.match(streaming,/event\?\.phase!=='partial'/,'partial model events must drive live chat rendering');
@@ -23,4 +25,4 @@ assert.match(streaming,/thinkingText:state\.thinking/,'completed reasoning must 
 assert.match(streaming,/thinkingCollapsed:true/,'completed reasoning must persist in collapsed form');
 assert.ok(!streaming.includes('setInterval('),'streaming layer must not poll continuously');
 
-console.log(JSON.stringify({ok:true,revision:'guide-stream-thinking-v249',livePartials:true,thinkingDisclosure:true,collapseOnFinal:true,structuredAnswerStreaming:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'guide-stream-thinking-v249-navigation-lifecycle-v424',livePartials:true,thinkingDisclosure:true,collapseOnFinal:true,structuredAnswerStreaming:true,navigationSafeLoader:true},null,2));
