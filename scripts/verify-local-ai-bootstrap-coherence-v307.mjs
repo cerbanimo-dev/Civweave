@@ -42,7 +42,9 @@ assert.match(registry,/artifact\('onnx\/model_q4\.onnx',300_000,true,'',347_363\
 assert.match(registry,/artifact\('onnx\/model_q4\.onnx_data',800_000_000,true,'',859_106_816\)/,'Gemma 3 q4 external data artifact must be pinned');
 assert.doesNotMatch(registry,/repo:'onnx-community\/gemma-3-1b-it-ONNX'.*?revision:'a7fa005d133fd9fc99e78b812f450742ad37426d'/s,'Gemma 3 must not remain on the pre-optimization export');
 
-assert.match(packageGuard,/installedRevision===currentRevision/,'package guard must compare the installed and current registry revisions');
+assert.match(packageGuard,/selectedRevision=.*?stateRevision=.*?currentRevision=/s,'package guard must inspect saved selection, package state, and current registry revisions separately');
+assert.match(packageGuard,/replacementReady=stateRevision===currentRevision&&String\(state\?\.status\|\|''\)==='ready'/,'replacement package must reach ready before a stale saved selection may reactivate');
+assert.match(packageGuard,/selectedStale=.*?!replacementReady/,'stale selection must remain suppressed throughout replacement download');
 assert.match(packageGuard,/active:false,packageRevisionChanged:true/,'stale selected packages must be suppressed before inference');
 assert.match(packageGuard,/status:'paused'/,'stale ready state must become resumable instead of falsely ready');
 assert.match(packageGuard,/preservesCachedWeights:true/,'migration must preserve the previously downloaded cache instead of deleting it');
@@ -54,7 +56,7 @@ console.log(JSON.stringify({
   bootstrapRevision:'1.0.115-local-ai-bootstrap-v302-session-handoff',
   incompatibleGlobals:'evicted-before-reload',
   gemma3Profile:'transformers-js-v4-q4-optimized',
-  packageMigration:'stale-selection-suppressed-resumable',
+  packageMigration:'stale-selection-suppressed-until-replacement-ready',
   staleQueryRetryPrevented:true,
   sameVersionDeadlockPrevented:true
 },null,2));
