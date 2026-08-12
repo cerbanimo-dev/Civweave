@@ -2,14 +2,14 @@
 'use strict';
 
 const VERSION='1.0.119';
-const REVISION='chat-convergence-v250';
+const REVISION='chat-convergence-v250-navigation-lifecycle-v424';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
 const INSTALLER='/app/index.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const DEV_KEY='civweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250`;
+const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424`;
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
 const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
@@ -93,8 +93,8 @@ const COMPATIBILITY_SCRIPTS=[
   PWA_UPDATE_SCRIPT
 ];
 let unloading=false;
-addEventListener('pagehide',()=>{unloading=true},{once:true});
-addEventListener('beforeunload',()=>{unloading=true},{once:true});
+addEventListener('pagehide',()=>{unloading=true});
+addEventListener('beforeunload',()=>{unloading=true});
 
 function installedDisplay(){
   return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
@@ -129,13 +129,15 @@ function installerUrl(){
   next.searchParams.set('next',target.slice(0,1800));
   return next.href;
 }
-function liveHead(){return!unloading&&document.documentElement?.isConnected&&document.head?.isConnected}
+function liveHead(head=document.head){return!unloading&&document.documentElement?.isConnected&&head?.isConnected}
 function addScript(src){
-  if(!liveHead()||document.querySelector(`script[src^="${src}"]`))return false;
+  const head=document.head;
+  if(!liveHead(head)||document.querySelector(`script[src^="${src}"]`))return false;
   const script=document.createElement('script');
   script.src=`${src}?v=${ADDITIONS_VERSION}`;
   script.async=false;
-  document.head.append(script);
+  if(!liveHead(head))return false;
+  head.append(script);
   return true;
 }
 function assetCustomizationConfigured(){
@@ -173,12 +175,13 @@ function installCanonicalSystemSupportWhenReady(){
   return true;
 }
 function installAdditions(){
-  if(systemSurface()||!liveHead())return false;
+  const head=document.head;
+  if(systemSurface()||!liveHead(head))return false;
   if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
     const link=document.createElement('link');
     link.rel='stylesheet';
     link.href=`${ADDITIONS_STYLE}?v=${ADDITIONS_VERSION}`;
-    document.head.append(link);
+    if(liveHead(head))head.append(link);
   }
   COMPATIBILITY_SCRIPTS.forEach(addScript);
   installAssetCustomizationIfConfigured();
@@ -187,6 +190,18 @@ function installAdditions(){
 function installAdditionsWhenReady(){
   if(document.body)return installAdditions();
   addEventListener('DOMContentLoaded',installAdditions,{once:true});
+  return true;
+}
+function resumeFromPageShow(){
+  unloading=false;
+  const system=systemSurface();
+  if(system){
+    installSystemExperienceSupport();
+    if(system!=='civweave')installCanonicalSystemSupportWhenReady();
+    return true;
+  }
+  installEarlyGuards();
+  installAdditionsWhenReady();
   return true;
 }
 function start(){
@@ -215,6 +230,7 @@ function start(){
   installAdditionsWhenReady();
 }
 
+addEventListener('pageshow',resumeFromPageShow);
 start();
 
 globalThis.CivweaveInstallBoundaryV146=Object.freeze({
@@ -233,6 +249,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   installCanonicalSystemSupportWhenReady,
   installAdditions,
   installAdditionsWhenReady,
+  resumeFromPageShow,
   assetCustomizationConfigured,
   installAssetCustomizationIfConfigured,
   additionsVersion:ADDITIONS_VERSION,
@@ -255,7 +272,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   radioTrackSuggestionRevision:'v241-playlist-context-track-links',
   radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',
   sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
-  sharedGuideSurfaceRevision:'v236-mirror-into-v242-canonical-thread',
+  sharedGuideSurfaceRevision:'v236-navigation-lifecycle-v424-mirror-into-v242-canonical-thread',
   realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',
   guideWorkspaceRevision:'v250-v242-canonical-owner',
   workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract',
@@ -275,6 +292,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   aiSettingsBindGuard:'v230-first-open-atomic-bind',
   aiSettingsPersistenceRepair:'v229-device-persistence',
   platformStabilityGuard:'v159-dom-ready-safe',
+  navigationLifecycleRevision:'v424-head-capture-bfcache-resume',
   compatibilityDomReady:true,
   onlineSelfHeal:true,
   missingAssetDetails:true
