@@ -1,5 +1,7 @@
+import Stripe from 'stripe';
+
 export const STRIPE_CONNECT_DIRECT_PROVIDER = 'stripe-connect-platform-reserve-v2';
-export const STRIPE_CONNECT_ACCOUNT_MODEL = 'configurable-controller-v1';
+export const STRIPE_CONNECT_ACCOUNT_MODEL = 'accounts-v2-marketplace-recipient';
 
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
 export function stripeCredentialMode(value = '') {
@@ -37,6 +39,28 @@ function formBody(entries = {}) {
 function metadata(input = {}) {
   return Object.fromEntries(Object.entries(input).filter(([, value]) => value != null && String(value).length).map(([key, value]) => [String(key).slice(0, 40), String(value).slice(0, 500)]));
 }
+function recipientTransferStatus(account) {
+  return clean(account?.configuration?.recipient?.capabilities?.stripe_balance?.stripe_transfers?.status || 'unknown', 80).toLowerCase();
+}
+function compatibilityRecipientAccount(account) {
+  const transferStatus = recipientTransferStatus(account);
+  const requirementsStatus = clean(account?.requirements?.summary?.minimum_deadline?.status, 80).toLowerCase() || null;
+  const requirementsCurrentlyDue = requirementsStatus === 'currently_due' ? ['stripe-recipient-requirements'] : [];
+  const requirementsPastDue = requirementsStatus === 'past_due' ? ['stripe-recipient-requirements'] : [];
+  return Object.freeze({
+    ...account,
+    charges_enabled: false,
+    payouts_enabled: transferStatus === 'active',
+    details_submitted: !requirementsCurrentlyDue.length && !requirementsPastDue.length,
+    requirements: {
+      ...(account?.requirements || {}),
+      currently_due: requirementsCurrentlyDue,
+      past_due: requirementsPastDue
+    },
+    civweave_account_model: STRIPE_CONNECT_ACCOUNT_MODEL,
+    civweave_recipient_transfer_status: transferStatus
+  });
+}
 
 export class StripeConnectWorkerProvider {
   constructor({ secretKey = '', webhookSecret = '', apiVersion = '', apiBase = 'https://api.stripe.com', fetchImpl = globalThis.fetch } = {}) {
@@ -51,6 +75,15 @@ export class StripeConnectWorkerProvider {
     this.webhookVerificationReady = Boolean(this.webhookSecret);
     this.operatorPayouts = 'platform-charge-separate-transfer';
     this.connectedAccountModel = STRIPE_CONNECT_ACCOUNT_MODEL;
+    this.stripe = this.secretKey ? new Stripe(this.secretKey, {
+      httpClient: Stripe.createFetchHttpClient(this.fetch),
+      appInfo: { name: 'Civweave Money Edge', version: '2' }
+    }) : null;
+  }
+
+  stripeClient() {
+    if (!this.stripe) throw Object.assign(new Error('Stripe platform credential is not configured.'), { status: 503 });
+    return this.stripe;
   }
 
   async request(pathname, { method = 'POST', accountId = '', idempotencyKey = '', form = null, query = null } = {}) {
@@ -74,24 +107,66 @@ export class StripeConnectWorkerProvider {
   }
 
   async createConnectedAccount({ nodeId, operatorId, email = '', country = '' } = {}) {
-    const form = {
-      'controller[fees][payer]': 'account',
-      'controller[losses][payments]': 'stripe',
-      'controller[requirement_collection]': 'stripe',
-      'controller[stripe_dashboard][type]': 'full'
+    const id = required(nodeId, 'nodeId', 180);
+    const operator = required(operatorId, 'operatorId', 180);
+    const input = {
+      display_name: clean(`Civweave Host · ${id}`, 180),
+      dashboard: 'express',
+      defaults: {
+        responsibilities: {
+          fees_collector: 'application',
+          losses_collector: 'application'
+        }
+      },
+      configuration: {
+        recipient: {
+          capabilities: {
+            stripe_balance: {
+              stripe_transfers: { requested: true }
+            }
+          }
+        }
+      }
     };
-    if (email) form.email = clean(email, 320);
-    if (country) form.country = clean(country, 4).toUpperCase();
-    const meta = metadata({ civweave_node_id: required(nodeId, 'nodeId', 180), civweave_operator_id: required(operatorId, 'operatorId', 180), civweave_connect_model: STRIPE_CONNECT_ACCOUNT_MODEL });
-    for (const [key, value] of Object.entries(meta)) form[`metadata[${key}]`] = value;
-    const stable = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${nodeId}\0${operatorId}`));
+    if (email) input.contact_email = clean(email, 320);
+    if (country) input.identity = { country: clean(country, 4).toLowerCase() };
+    const stable = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${id}\0${operator}`));
     const hash = [...new Uint8Array(stable)].map(b => b.toString(16).padStart(2, '0')).join('');
-    return this.request('/v1/accounts', { form, idempotencyKey: `civweave-account-${hash.slice(0, 48)}` });
+    return this.stripeClient().v2.core.accounts.create(input, { idempotencyKey: `civweave-account-${hash.slice(0, 48)}` });
   }
 
-  async retrieveAccount(accountId) { return this.request(`/v1/accounts/${encodeURIComponent(required(accountId, 'accountId', 180))}`, { method: 'GET' }); }
+  async retrieveAccount(accountId) {
+    const id = required(accountId, 'accountId', 180);
+    try {
+      const account = await this.stripeClient().v2.core.accounts.retrieve(id, {
+        include: ['configuration.recipient', 'requirements']
+      });
+      if (account?.configuration?.recipient) return compatibilityRecipientAccount(account);
+    } catch (error) {
+      if (![400, 404].includes(Number(error?.statusCode || error?.status))) throw error;
+    }
+    // Compatibility only for sandbox/legacy node registrations created before the
+    // marketplace-recipient migration. New accounts are always Accounts v2 recipients.
+    return this.request(`/v1/accounts/${encodeURIComponent(id)}`, { method: 'GET' });
+  }
+
   async createAccountLink({ accountId, refreshUrl, returnUrl } = {}) {
-    return this.request('/v1/account_links', { form: { account: required(accountId, 'accountId', 180), refresh_url: safeUrl(refreshUrl, 'refreshUrl'), return_url: safeUrl(returnUrl, 'returnUrl'), type: 'account_onboarding', 'collection_options[fields]': 'eventually_due' } });
+    const id = required(accountId, 'accountId', 180);
+    const account = await this.retrieveAccount(id);
+    if (account?.civweave_account_model === STRIPE_CONNECT_ACCOUNT_MODEL) {
+      return this.stripeClient().v2.core.accountLinks.create({
+        account: id,
+        use_case: {
+          type: 'account_onboarding',
+          account_onboarding: {
+            configurations: ['recipient'],
+            refresh_url: safeUrl(refreshUrl, 'refreshUrl'),
+            return_url: safeUrl(returnUrl, 'returnUrl')
+          }
+        }
+      });
+    }
+    return this.request('/v1/account_links', { form: { account: id, refresh_url: safeUrl(refreshUrl, 'refreshUrl'), return_url: safeUrl(returnUrl, 'returnUrl'), type: 'account_onboarding', 'collection_options[fields]': 'eventually_due' } });
   }
 
   // Customer top-ups are platform charges. The host's connected account ID is metadata
