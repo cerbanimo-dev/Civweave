@@ -45,8 +45,8 @@ const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
 check('release is coherent',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version&&manifest.name.includes(`v${version}`));
-check('installed launch enters updater first through clean URL',manifest.start_url==='/app/installed-entry-v146?installed=1');
-check('all manifest shortcuts enter updater first through clean URL',(manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(item=>String(item.url).startsWith('/app/installed-entry-v146?')));
+check('installed launch enters updater first through clean URL',manifest.start_url==='/app/installed-entry-v146.html?installed=1');
+check('all manifest shortcuts enter updater first through clean URL',(manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(item=>String(item.url).startsWith('/app/installed-entry-v146.html?')));
 check('manifest has no frozen Working Campus version pin',!manifestText.includes('working-campus-v156.html?installed=1&version='));
 check('Cloudflare has no custom installed-entry redirects',!redirects.split(/\r?\n/).some(line=>line.startsWith('/app/installed-entry-v146 ')||line.startsWith('/app/installed-entry-v146.html ')));
 check('checked-in web launcher carries current release identity',rawLauncher.includes(`/app/civweave-brand.js?v=${version}`)&&rawLauncher.includes(`/app/installed-entry-v146.js?v=${version}`));
@@ -86,7 +86,7 @@ check('worker purge ignores stale query identities',workerRepair.includes('cache
 check('worker runs the current chat-bubble cache repair',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=chat-bubble-anchor-v342&purge=chat-bubble-anchor-v342')")&&workerRepair.includes("const REVISION='chat-bubble-anchor-v342'"));
 check('worker skips waiting on install',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
 
-check('release version sync preserves updater-first clean manifest',releaseSync.includes("manifest.start_url='/app/installed-entry-v146?installed=1'"));
+check('release version sync preserves updater-first clean manifest',releaseSync.includes("manifest.start_url='/app/installed-entry-v146.html?installed=1'"));
 check('release coherence generator preserves canonical chat, legacy worker rotation, and current cache repair',coherenceSync.includes("const chatRevision='chat-convergence-v250'")&&coherenceSync.includes("const chatCachePurgeRevision='chat-convergence-v251-legacy-purge'")&&coherenceSync.includes("const activeChatRepairRevision='chat-bubble-anchor-v342'")&&coherenceSync.includes('retiredChatPaths'));
 check('release coherence generator no longer patches deleted v215/v216 files',!coherenceSync.includes("await patch('public/app/persistent-guide-chat-v215.js'")&&!coherenceSync.includes("await patch('public/app/persistent-guide-viewport-v216.js'"));
 
