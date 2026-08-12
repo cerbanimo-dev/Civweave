@@ -18,6 +18,8 @@ const entry="/app/installed-entry-v146?installed=1&system=civweave";
 const civweavePrismatic='/app/logos/civweave-prismatic-wordmark-v1.png';
 const cerbanimoMark='/app/logos/cerbanimo-steward-mark-v1.png';
 const frontDoorCss='/app/front-door-prismatic-v301.css';
+const canonicalCivweave='/app/logos/civweave-pwa-512-v247.png';
+const canonicalCerbanimo='/app/logos/cerbanimo.webp';
 const pngSignature=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
 
 for(const path of ['public/app/logos/civweave-prismatic-wordmark-v1.png','public/app/logos/cerbanimo-steward-mark-v1.png']){
@@ -47,8 +49,8 @@ assert.ok(brand.includes("const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247
 assert.ok(logoSvg.includes('/app/logos/civweave-pwa-512-v247.png'),'SVG compatibility wrapper must not reference the malformed canonical display PNG');
 
 for(const [name,source] of [['installer',installerHtml],['host steward',hostSetup],['local Anchor',anchor]]){
-  assert.ok(source.includes(civweavePrismatic),`${name} must show the new prismatic Civweave wordmark`);
-  assert.ok(source.includes(cerbanimoMark),`${name} must show the Cerbanimo steward mark`);
+  assert.ok(source.includes(civweavePrismatic),`${name} must retain the legacy Civweave compatibility path`);
+  assert.ok(source.includes(cerbanimoMark),`${name} must retain the legacy Cerbanimo compatibility path`);
   assert.ok(source.includes(frontDoorCss),`${name} must load the shared prismatic front-door design`);
   assert.ok(source.includes('cw-frontdoor'),`${name} must opt into the shared front-door surface`);
 }
@@ -64,15 +66,21 @@ assert.ok(frontDoor.includes('body.cw-installer'),'front-door design must cover 
 assert.ok(frontDoor.includes('body.cw-steward'),'front-door design must cover host stewardship');
 assert.ok(frontDoor.includes('body.cw-anchor'),'front-door design must cover local Anchor setup');
 assert.ok(frontDoor.includes('@media(prefers-reduced-motion:reduce)'),'front-door ambient motion must respect reduced-motion preferences');
+assert.ok(frontDoor.includes(canonicalCivweave),'front-door display must bypass the damaged v1 Civweave raster and use the verified canonical logo');
+assert.ok(frontDoor.includes(canonicalCerbanimo),'front-door display must bypass the damaged v1 Cerbanimo raster and use the canonical Cerbanimo logo');
+assert.ok(frontDoor.includes('.cw-platform-logo,.cw-steward-logo{display:none!important}'),'damaged compatibility rasters must not be rendered directly');
+assert.ok(frontDoor.includes("background:#fff url('/app/logos/cerbanimo.webp')"),'Cerbanimo steward mark must render on an opaque white field');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installer-front-door-v3-prismatic-dual-brand',
+  revision:'installer-front-door-v4-logo-recovery',
   installedEntry:entry,
   hostSetup:'/host-setup.html',
   launcher:'/app/pwa-install-prompt-v247.js',
   compatibilityLogo:'/app/logos/civweave-pwa-512-v247.png',
   civweavePrismatic,
   cerbanimoMark,
+  canonicalCivweave,
+  canonicalCerbanimo,
   frontDoorCss
 },null,2));
