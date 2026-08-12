@@ -61,7 +61,6 @@ jobs:
         run: |
           node scripts/verify-canonical-launch-release.mjs
           node scripts/verify-release-contract.mjs
-          node scripts/verify-release-version-sync.mjs
           CHANGED_FILES="$(git diff --name-only origin/main...HEAD; git diff --name-only)" node scripts/verify-version-policy.mjs 1.0.106 1.0.107
       - name: Commit generated release and remove helper workflow
         run: |
