@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.115-server-ai-router-v301';
+const VERSION='1.0.116-server-ai-router-v301';
 const MIDDLEWARE_ID='server-auto-v301';
 const MARKET_SESSION_KEY='civweave.node-ai-marketplace.sessions.v1';
 const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';

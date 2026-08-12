@@ -45,7 +45,9 @@
     "/app/node-ai-operator-v1.html",
     "/app/node-ai-operator-local-session-v1.js",
     "/app/node-ai-operator-v1.js",
-    "/app/node-ai-live-operator-v1.js"
+    "/app/node-ai-live-operator-v1.js",
+    "/app/server-ai-router-v301.js",
+    "/app/server-ai-settings-v301.js"
   ],
   "lazyPacks": [
     {
@@ -144,11 +146,11 @@
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
-    "estimatedBytes": 7665680,
+    "estimatedBytes": 7694582,
     "safetyBytes": 67108864,
-    "requiredFreeBytes": 74774544,
-    "candidateAssetCount": 556,
-    "estimatedAssetCount": 556,
+    "requiredFreeBytes": 74803446,
+    "candidateAssetCount": 558,
+    "estimatedAssetCount": 558,
     "conservativeUpperBound": true
   }
 }

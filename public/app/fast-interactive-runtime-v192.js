@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.115-runtime-spine-v271-server-auto-v301';
+const VERSION='1.0.116-runtime-spine-v271-server-auto-v301';
 const root=globalThis;
 if(root.CivweaveFastInteractiveV192?.version===VERSION)return;
 const middleware=new Map();

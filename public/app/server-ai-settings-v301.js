@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.115-server-ai-settings-v301';
+const VERSION='1.0.116-server-ai-settings-v301';
 const ROUTE='server-auto';
 const SETTINGS_KEY='civweave.universal-ai.v127';
 const PROFILES_KEY='civweave-model-profiles-v1';
@@ -32,8 +32,8 @@ function installStyle(){
 }
 function saveServerRoute(form){
   const interactive={route:ROUTE,provider:ROUTE,model:'civweave-server-auto-v1',endpoint:'',externalConsent:true,serverOrder:['device-local','server-local','cloudflare-workers-ai']};
-  const saved={...interactive,consent:true,agenticEnabled:false,version:'1.0.115',settingsController:VERSION};
-  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(saved));localStorage.setItem(PROFILES_KEY,JSON.stringify({interactive,agentic:null,agenticEnabled:false,version:'1.0.115',settingsController:VERSION}))}catch{}
+  const saved={...interactive,consent:true,agenticEnabled:false,version:'1.0.116',settingsController:VERSION};
+  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(saved));localStorage.setItem(PROFILES_KEY,JSON.stringify({interactive,agentic:null,agenticEnabled:false,version:'1.0.116',settingsController:VERSION}))}catch{}
   try{globalThis.CivweaveModelRuntime?.saveSharedConfig?.(interactive,{profile:'interactive'})}catch{}
   const status=form.querySelector('[data-status]');if(status)status.textContent='Server-side AI saved. Civweave will try this device, then a paired self-hosted server, then Cloudflare capacity.';
   try{dispatchEvent(new CustomEvent('civweave:model-config-changed',{detail:{profile:'interactive',config:interactive,source:VERSION,at:new Date().toISOString()}}));dispatchEvent(new CustomEvent('civweave:server-ai-selected',{detail:{order:interactive.serverOrder,at:new Date().toISOString()}}))}catch{}
