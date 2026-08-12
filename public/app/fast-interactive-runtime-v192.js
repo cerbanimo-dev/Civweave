@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.67-runtime-spine-v271';
+const VERSION='1.0.116-runtime-spine-v271-server-auto-v301';
 const root=globalThis;
 if(root.CivweaveFastInteractiveV192?.version===VERSION)return;
 const middleware=new Map();
@@ -25,6 +25,17 @@ function ordered(){return[...middleware.values()].sort((a,b)=>(b.priority||0)-(a
 function register(id,hooks={},priority=0){const key=String(id||'').trim();if(!key)throw new Error('Runtime spine middleware requires an id.');const record=Object.freeze({id:key,priority:Number(priority)||0,before:typeof hooks.before==='function'?hooks.before:null,handle:typeof hooks.handle==='function'?hooks.handle:null,after:typeof hooks.after==='function'?hooks.after:null});middleware.set(key,record);dispatch('civweave:runtime-spine-middleware',{version:VERSION,action:'register',id:key,priority:record.priority});return()=>unregister(key);}
 function unregister(id){const removed=middleware.delete(String(id||''));if(removed)dispatch('civweave:runtime-spine-middleware',{version:VERSION,action:'unregister',id:String(id)});return removed;}
 function context(request,trace,states){return{version:VERSION,request,trace,states,baseRuntime:base,broker:root.CivweaveAICapabilityBrokerV268||null,spine:api};}
+function serverAuto(request={}){
+  const explicit=String(request?.config?.provider||request?.config?.route||'').trim().toLowerCase();if(explicit)return explicit==='server-auto';
+  try{const shared=base?.readSharedConfig?.(request.executionProfile||'interactive')||base?.readSharedConfig?.('interactive')||{};return String(shared.provider||shared.route||'').trim().toLowerCase()==='server-auto'}catch{return false}
+}
+function localResultNeedsFailover(result){
+  if(!result||typeof result!=='object')return true;
+  if(String(result.status||'success').toLowerCase()!=='success')return true;
+  if(result.completionValidation?.valid===false||result.completionValidation?.clipped===true)return true;
+  if(result.structured?.requested===true&&result.structured?.valid===false)return true;
+  return !String(result.outputText||'').trim()&&result.outputJson==null;
+}
 async function generate(input={}){
   if(!base?.generate)throw new Error('Civweave model runtime spine has no base generator.');
   state.calls+=1;
@@ -34,30 +45,48 @@ async function generate(input={}){
   if(typeof normalizer==='function'){const started=clock(),normalized=normalizer(request);if(normalized&&typeof normalized==='object')request=normalized;trace.push({id:'capability-normalizer',phase:'before',ms:Math.max(0,Math.round(clock()-started)),changed:Boolean(request?.capabilityNormalization)});}
   for(const item of stack){if(!item.before)continue;const started=clock();const out=await item.before(request,context(request,trace,states));if(out&&typeof out==='object'&&Object.prototype.hasOwnProperty.call(out,'request')){request=out.request||request;if(Object.prototype.hasOwnProperty.call(out,'state'))states[item.id]=out.state;}else if(out&&typeof out==='object')request=out;trace.push({id:item.id,phase:'before',ms:Math.max(0,Math.round(clock()-started))});}
   let result,handledBy='base-runtime';
-  for(const item of stack){if(!item.handle)continue;const started=clock();const out=await item.handle(request,context(request,trace,states));trace.push({id:item.id,phase:'handle',ms:Math.max(0,Math.round(clock()-started)),handled:Boolean(out?.handled)});if(out?.handled){result=out.result;handledBy=item.id;break;}}
+  for(const item of stack){
+    if(!item.handle)continue;
+    const started=clock();
+    try{
+      const out=await item.handle(request,context(request,trace,states));
+      const localIncomplete=Boolean(out?.handled&&serverAuto(request)&&/^downloaded-local(?:-|$)/.test(item.id)&&localResultNeedsFailover(out.result));
+      trace.push({id:item.id,phase:'handle',ms:Math.max(0,Math.round(clock()-started)),handled:Boolean(out?.handled)&&!localIncomplete,failover:localIncomplete,reason:localIncomplete?'local-result-incomplete':undefined});
+      if(localIncomplete){
+        dispatch('civweave:runtime-spine-failover',{version:VERSION,from:item.id,to:'server-auto-v301',reason:'The on-device model returned an incomplete, clipped, invalid, or empty result.',order:['device-local','server-local','cloudflare-workers-ai']});
+        continue;
+      }
+      if(out?.handled){result=out.result;handledBy=item.id;break;}
+    }catch(error){
+      const localFailover=serverAuto(request)&&/^downloaded-local(?:-|$)/.test(item.id)&&!request?.signal?.aborted&&error?.name!=='AbortError';
+      trace.push({id:item.id,phase:'handle',ms:Math.max(0,Math.round(clock()-started)),handled:false,failed:true,failover:localFailover,error:String(error?.message||error).slice(0,600)});
+      if(!localFailover)throw error;
+      dispatch('civweave:runtime-spine-failover',{version:VERSION,from:item.id,to:'server-auto-v301',reason:String(error?.message||error).slice(0,800),order:['device-local','server-local','cloudflare-workers-ai']});
+    }
+  }
   if(handledBy==='base-runtime')result=await base.generate(request);
   for(const item of [...stack].reverse()){if(!item.after)continue;const started=clock();const out=await item.after(result,request,context(request,trace,states));if(out!==undefined)result=out;trace.push({id:item.id,phase:'after',ms:Math.max(0,Math.round(clock()-started))});}
   state.lastTrace=trace.slice(-40);
-  state.lastRequest={purpose:String(request.purpose||''),executionProfile:String(request.executionProfile||'interactive'),handledBy,capabilityNormalization:request.capabilityNormalization||null,at:new Date().toISOString()};
-  if(result&&typeof result==='object')return{...result,runtimeSpine:{schema:'civweave.ai-runtime-spine.v1',version:VERSION,handledBy,middleware:stack.map(item=>item.id),trace:state.lastTrace}};
+  state.lastRequest={purpose:String(request.purpose||''),executionProfile:String(request.executionProfile||'interactive'),handledBy,capabilityNormalization:request.capabilityNormalization||null,serverAuto:serverAuto(request),at:new Date().toISOString()};
+  if(result&&typeof result==='object')return{...result,runtimeSpine:{schema:'civweave.ai-runtime-spine.v1',version:VERSION,handledBy,middleware:stack.map(item=>item.id),trace:state.lastTrace,serverAutoFailover:true}};
   return result;
 }
 function legacyBase(runtime){if(!runtime?.generate)return runtime;const prior=runtime.generate.__prior;if(prior&&(runtime.generate.__civweaveFastInteractiveV192||runtime.generate.__civweaveFastMemoryV192))return Object.freeze({...runtime,generate:prior});return runtime;}
 function install(){
   const current=root.CivweaveModelRuntime;
   if(!current?.generate){state.mode='waiting';return false;}
-  if(current.__civweaveRuntimeSpineV269){proxy=current;state.installed=true;state.mode='spine';state.baseVersion=current.baseVersion||state.baseVersion;return true;}
+  if(current.__civweaveRuntimeSpineV301){proxy=current;state.installed=true;state.mode='spine';state.baseVersion=current.baseVersion||state.baseVersion;return true;}
   try{
     base=legacyBase(current);state.baseVersion=String(base.version||'runtime');
-    proxy=Object.freeze({...base,__civweaveRuntimeSpineV269:true,__civweaveRuntimeSpineV271:true,baseVersion:state.baseVersion,version:`${state.baseVersion}+spine-v271`,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),runtimeSpineVersion:VERSION});
+    proxy=Object.freeze({...base,__civweaveRuntimeSpineV269:true,__civweaveRuntimeSpineV271:true,__civweaveRuntimeSpineV301:true,baseVersion:state.baseVersion,version:`${state.baseVersion}+spine-v301`,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),runtimeSpineVersion:VERSION});
     root.CivweaveModelRuntime=proxy;state.installed=root.CivweaveModelRuntime===proxy;state.mode=state.installed?'spine':'fallback';state.lastError=state.installed?'':'The model runtime spine could not become the active runtime.';
-    dispatch('civweave:runtime-spine-ready',{version:VERSION,installed:state.installed,baseVersion:state.baseVersion,middleware:ordered().map(item=>item.id),capabilityNormalization:true});dispatch('civweave:fast-interactive-installed',{version:VERSION,installed:state.installed,mode:state.mode});return state.installed;
+    dispatch('civweave:runtime-spine-ready',{version:VERSION,installed:state.installed,baseVersion:state.baseVersion,middleware:ordered().map(item=>item.id),capabilityNormalization:true,serverAutoFailover:true});dispatch('civweave:fast-interactive-installed',{version:VERSION,installed:state.installed,mode:state.mode});return state.installed;
   }catch(error){state.installed=false;state.mode='fallback';state.lastError=String(error?.message||error||'Unknown runtime spine installation error.');dispatch('civweave:runtime-spine-fallback',{version:VERSION,error:state.lastError});return false;}
 }
 function stabilize(){return install();}
-function diagnostics(){return Object.freeze({version:VERSION,installed:state.installed,mode:state.mode,lastError:state.lastError,baseVersion:state.baseVersion,calls:state.calls,middleware:ordered().map(item=>item.id),lastTrace:[...state.lastTrace],lastRequest:state.lastRequest,runtimeFrozen:Object.isFrozen(root.CivweaveModelRuntime||{})});}
+function diagnostics(){return Object.freeze({version:VERSION,installed:state.installed,mode:state.mode,lastError:state.lastError,baseVersion:state.baseVersion,calls:state.calls,middleware:ordered().map(item=>item.id),lastTrace:[...state.lastTrace],lastRequest:state.lastRequest,runtimeFrozen:Object.isFrozen(root.CivweaveModelRuntime||{}),serverAutoFailover:true});}
 function status(){return diagnostics();}
-const api=Object.freeze({version:VERSION,install,stabilize,optimizedRequest,register,unregister,diagnostics,status,base:()=>base,proxy:()=>proxy});
+const api=Object.freeze({version:VERSION,install,stabilize,optimizedRequest,register,unregister,diagnostics,status,base:()=>base,proxy:()=>proxy,serverAuto,localResultNeedsFailover});
 root.CivweaveFastInteractiveV192=api;
 register('fast-interactive',{before(request){const next=optimizedRequest(request);return next===request?request:{request:next,state:{started:clock()}};},after(result,_request,ctx){const started=ctx.states['fast-interactive']?.started;if(started==null||!result||typeof result!=='object')return result;return{...result,latency:{...(result.latency||{}),interactiveMs:Math.max(0,Math.round(clock()-started)),revision:VERSION}};}},20);
 root.addEventListener?.('civweave:model-runtime-ready',install);root.addEventListener?.('pageshow',install);install();

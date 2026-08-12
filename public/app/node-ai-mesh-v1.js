@@ -1,15 +1,17 @@
 (()=>{
 'use strict';
-const VERSION='1.1.0-node-ai-mesh-v1';
+const VERSION='1.1.1-node-ai-mesh-v1-server-auto';
 const SERVICE_KIND='civweave.node-ai.service-advert.v1';
 const SETTLEMENT_KIND='civweave.node-ai.settlement-batch.v1';
 const SETTLEMENT_BATCH_SCHEMA='civweave.node-ai-mesh-settlement-batch.v1';
 const ROUTER_URL='/app/shared/civweave-node-ai-routing-v1.mjs';
+const SERVER_AI_SCRIPTS=['/app/server-ai-router-v301.js?v=1.0.116-v301','/app/server-ai-settings-v301.js?v=1.0.116-v301'];
 const DEFAULT_SYNC_MS=90_000;
 const LEASE_KEY='civweave.node-ai-mesh.sync-lease.v1';
 const INSTANCE_ID=`node-ai-mesh:${globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
 let routerPromise=null;
 let meshPromise=null;
+let serverAiPromise=null;
 let syncTimer=null;
 let onlineHandler=null;
 let pageHideHandler=null;
@@ -30,6 +32,15 @@ function loadScript(src,ready){
     if(existing){let ticks=0;const timer=setInterval(()=>{const value=ready?.();if(value){clearInterval(timer);resolve(value)}else if(++ticks>160){clearInterval(timer);reject(new Error(`${src} loaded without becoming ready.`))}},50);return}
     const script=document.createElement('script');script.src=src;script.async=false;script.onload=()=>{const value=ready?.();value?resolve(value):reject(new Error(`${src} loaded without becoming ready.`))};script.onerror=()=>reject(new Error(`Could not load ${src}.`));document.head.append(script);
   });
+}
+async function ensureServerAI(){
+  if(globalThis.CivweaveServerAIRouterV301&&globalThis.CivweaveServerAISettingsV301)return true;
+  if(!serverAiPromise)serverAiPromise=(async()=>{
+    await loadScript(SERVER_AI_SCRIPTS[0],()=>globalThis.CivweaveServerAIRouterV301);
+    await loadScript(SERVER_AI_SCRIPTS[1],()=>globalThis.CivweaveServerAISettingsV301);
+    return true;
+  })().catch(error=>{serverAiPromise=null;dispatchEvent(new CustomEvent('civweave:server-ai-load-error',{detail:{message:error.message,at:now()}}));throw error});
+  return serverAiPromise;
 }
 async function ensureMesh(){
   if(globalThis.CivweaveLocalMeshV146)return globalThis.CivweaveLocalMeshV146;
@@ -164,7 +175,7 @@ function scheduleNext(){
 async function start({baseUrl=location.origin,syncIntervalMs=DEFAULT_SYNC_MS,advertiseLocalNode=true}={}){
   stop();gatewayUrl=String(baseUrl||location.origin);advertiseLocal=advertiseLocalNode!==false;
   activeSyncMs=Math.max(30_000,Math.min(15*60_000,Number(syncIntervalMs)||DEFAULT_SYNC_MS));
-  const mesh=await ensureMesh();await router();
+  const mesh=await ensureMesh();await router();ensureServerAI().catch(()=>{});
   await tick();
   scheduleNext();
   onlineHandler=()=>tick();addEventListener('online',onlineHandler);
@@ -184,11 +195,11 @@ function stop(){
 }
 function status(){
   let lease=null;try{lease=parse(localStorage.getItem(LEASE_KEY),null)}catch{}
-  return{version:VERSION,started:Boolean(syncTimer),baseUrl:gatewayUrl||null,serviceKind:SERVICE_KIND,settlementKind:SETTLEMENT_KIND,syncIntervalMs:activeSyncMs,leaseOwner:lease?.owner||null,leader:lease?.owner===INSTANCE_ID}
+  return{version:VERSION,started:Boolean(syncTimer),baseUrl:gatewayUrl||null,serviceKind:SERVICE_KIND,settlementKind:SETTLEMENT_KIND,syncIntervalMs:activeSyncMs,leaseOwner:lease?.owner||null,leader:lease?.owner===INSTANCE_ID,serverAiLoaded:Boolean(globalThis.CivweaveServerAIRouterV301)}
 }
-function autoStart(){start({baseUrl:location.origin,syncIntervalMs:DEFAULT_SYNC_MS,advertiseLocalNode:true}).catch(error=>dispatchEvent(new CustomEvent('civweave:node-ai-mesh-error',{detail:{message:error.message,phase:'auto-start',at:now()}})))}
+function autoStart(){ensureServerAI().catch(()=>{});start({baseUrl:location.origin,syncIntervalMs:DEFAULT_SYNC_MS,advertiseLocalNode:true}).catch(error=>dispatchEvent(new CustomEvent('civweave:node-ai-mesh-error',{detail:{message:error.message,phase:'auto-start',at:now()}})))}
 
-const api=Object.freeze({version:VERSION,SERVICE_KIND,SETTLEMENT_KIND,SETTLEMENT_BATCH_SCHEMA,ensureMesh,publishManifest,publishManifestFromNode,publishSettlementBatch,listServiceObjects,listSettlementObjects,discover,route,resolveBaseUrl,requestCapability,invoke,routeAndInvoke,sync,start,stop,status});
+const api=Object.freeze({version:VERSION,SERVICE_KIND,SETTLEMENT_KIND,SETTLEMENT_BATCH_SCHEMA,ensureMesh,ensureServerAI,publishManifest,publishManifestFromNode,publishSettlementBatch,listServiceObjects,listSettlementObjects,discover,route,resolveBaseUrl,requestCapability,invoke,routeAndInvoke,sync,start,stop,status});
 globalThis.CivweaveNodeAIMeshV1=api;
 dispatchEvent(new CustomEvent('civweave:node-ai-mesh-ready',{detail:status()}));
 document.readyState==='loading'?addEventListener('DOMContentLoaded',autoStart,{once:true}):queueMicrotask(autoStart);

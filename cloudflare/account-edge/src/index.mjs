@@ -1,4 +1,4 @@
-import fabricEntry from '../../node-cloud/src/entry.mjs';
+import fabricEntry from '../../node-cloud/src/server-ai-entry-v1.mjs';
 import {
   CivweaveCloudNode,
   CivweaveCapacityAccount,
