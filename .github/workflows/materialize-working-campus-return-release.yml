@@ -1,0 +1,42 @@
+name: Materialize Working Campus Return Release
+
+on:
+  push:
+    branches:
+      - fix/working-campus-return-v425
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/working-campus-return-v425
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Materialize the canonical release
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < VERSION)"
+          npm version "$version" --no-git-tag-version --allow-same-version
+          node scripts/materialize-canonical-release.mjs
+          node scripts/verify-release-version-sync.mjs
+          node scripts/verify-working-campus-return-v425.mjs
+      - name: Commit generated release graph
+        run: |
+          set -euo pipefail
+          git config user.name "cerbanimo-dev"
+          git config user.email "cerbanimo@gmail.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Release graph already materialized."
+            exit 0
+          fi
+          git commit -m "Materialize Civweave 1.0.122 return-safe release"
+          git push origin HEAD:fix/working-campus-return-v425
