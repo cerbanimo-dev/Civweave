@@ -9,7 +9,7 @@
 <style>
 :root{color-scheme:dark;--ink:#07111b;--panel:#0b1d28;--line:#71d9e455;--cyan:#8de5ef;--gold:#e8c96b;--paper:#f3f7f3;--muted:#b9cbd1}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 12% 0%,#143644 0,transparent 35%),linear-gradient(160deg,#061019,#0a1b27 58%,#130d22);color:var(--paper);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:920px;margin:auto;padding:28px 20px 80px}.brand{display:flex;align-items:center;gap:15px;margin-bottom:28px}.brand img{width:66px;height:66px;object-fit:contain;border-radius:18px}.brand small,.eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.13em;text-transform:uppercase}.brand h1{margin:0;font:700 clamp(2rem,7vw,4.3rem)/.95 Georgia,serif}.card{margin:18px 0;padding:22px;border:1px solid var(--line);border-radius:22px;background:#071c27e8;box-shadow:0 18px 60px #0005}.hero h2{font:700 clamp(1.8rem,5vw,3.4rem)/1.04 Georgia,serif;margin:.25em 0}.hero p,.muted{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tile{padding:16px;border:1px solid #7ee5ff2f;border-radius:16px;background:#061720}.tile small{display:block;color:var(--cyan);font-weight:900;letter-spacing:.09em;text-transform:uppercase}.tile strong{display:block;margin-top:7px;font-size:1rem;overflow-wrap:anywhere}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.actions a,.actions button{min-height:44px;padding:10px 14px;border:1px solid #d8b86466;border-radius:12px;background:#172434;color:#fff;text-decoration:none;font-weight:850;cursor:pointer}.actions .primary{background:#6a5118;border-color:#e6c76699}.actions .campus{background:#123a42;border-color:#78e0ea88}.status{margin-top:12px;color:var(--muted)}@media(max-width:720px){main{padding:18px 14px 70px}.grid{grid-template-columns:1fr}.brand img{width:54px;height:54px}.actions>a,.actions>button{flex:1 1 100%;text-align:center}}
 </style>
-<link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.108-prismatic-front-door-v301">
+<link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.109-prismatic-front-door-v301">
 </head>
 <body class="cw-frontdoor cw-steward">
 <main>
@@ -27,7 +27,7 @@
 <section class="card hero">
 <p class="eyebrow">HOST NODE SETUP</p>
 <h2>Your cloud doorway is live. Now make it resilient.</h2>
-<p>This page belongs to the host steward, not ordinary Civweave visitors. It records this browser as a steward browser and keeps the local Anchor recommendation visible without blocking the campus.</p>
+<p>This page belongs to the host steward, not ordinary Civweave visitors. The local Anchor recommendation stays visible without blocking the campus, and “paired” now means the cloud node has actually received a fresh cryptographic storage proof.</p>
 <div class="grid">
 <div class="tile"><small>Host</small><strong id="host-origin">loading…</strong></div>
 <div class="tile"><small>Role</small><strong id="host-role">loading…</strong></div>
@@ -37,46 +37,30 @@
 <a class="primary" id="anchor-link" href="/host-local-anchor.html">Set up local Anchor</a>
 <a class="campus" href="/app/installed-entry-v146?installed=1&system=civweave&source=host-setup">Open Civweave</a>
 <a href="/app/index.html">Open installer / updater</a>
-<button id="mark-paired" type="button">Anchor is paired</button>
+<button id="verify-anchor" type="button">Verify Anchor health</button>
 </div>
 <p id="host-status" class="status" role="status">Reading this host's deployment metadata…</p>
 </section>
 <section class="card">
 <p class="eyebrow">WHY THE ANCHOR MATTERS</p>
-<p class="muted">The Cloudflare host remains usable without a local Anchor. A local companion is strongly recommended because it can retain host identity and state for recovery, local-first services, and federation work even when the public edge is unavailable.</p>
+<p class="muted">The Cloudflare host remains usable without a local Anchor. A healthy local companion retains signed recovery state and can help resurrect the hub from peer-held ledger history after a cloud or grid failure. Healthy independent Anchors can receive 3 / 2 / 1 Buttons per week, capped at three paid Anchors per hub.</p>
 </section>
 </main>
 <script>
 (()=>{
 'use strict';
-const STEWARD_KEY='civweave.host-steward.v1';
-const ANCHOR_KEY='civweave.host-anchor.paired.v1';
-const SNOOZE_KEY='civweave.host-anchor.snooze-until.v1';
+const STEWARD_KEY='civweave.host-steward.v1',ANCHOR_KEY='civweave.host-anchor.paired.v1',ANCHOR_ORIGIN_KEY='civweave.host-anchor.origin.v1',VERIFIED_KEY='civweave.host-anchor.verified-at.v1',SNOOZE_KEY='civweave.host-anchor.snooze-until.v1',params=new URLSearchParams(location.search);
 try{localStorage.setItem(STEWARD_KEY,'1')}catch{}
-const paired=()=>{try{return localStorage.getItem(ANCHOR_KEY)==='1'}catch{return false}};
-const anchorState=document.querySelector('#anchor-state');
-const status=document.querySelector('#host-status');
-const anchorLink=document.querySelector('#anchor-link');
-function renderAnchor(){if(anchorState)anchorState.textContent=paired()?'paired on this browser':'recommended, not yet paired'}
-renderAnchor();
-document.querySelector('#mark-paired')?.addEventListener('click',()=>{try{localStorage.setItem(ANCHOR_KEY,'1');localStorage.removeItem(SNOOZE_KEY)}catch{};renderAnchor();if(status)status.textContent='Anchor pairing acknowledgement saved for this steward browser.'});
-(async()=>{
-  try{
-    const response=await fetch('/app/host-deployment-v1.json',{cache:'no-store'});
-    if(!response.ok)throw new Error(`metadata returned ${response.status}`);
-    const meta=await response.json();
-    const origin=String(meta?.publicOrigin||location.origin);
-    document.querySelector('#host-origin').textContent=origin;
-    document.querySelector('#host-role').textContent=meta?.role==='canonical'?'canonical Civweave root':'community host';
-    if(anchorLink)anchorLink.href=`/host-local-anchor.html?host=${encodeURIComponent(origin)}`;
-    if(status)status.textContent=meta?.localAnchorRecommended?'Host metadata loaded. A local Anchor is strongly recommended but is not required to enter Civweave.':'Host metadata loaded.';
-  }catch(error){
-    document.querySelector('#host-origin').textContent=location.origin;
-    document.querySelector('#host-role').textContent='host steward';
-    if(anchorLink)anchorLink.href=`/host-local-anchor.html?host=${encodeURIComponent(location.origin)}`;
-    if(status)status.textContent=`Host metadata could not be read (${error?.message||error}). You can still open Civweave or configure the local Anchor.`;
-  }
-})();
+const anchorState=document.querySelector('#anchor-state'),status=document.querySelector('#host-status'),anchorLink=document.querySelector('#anchor-link');
+const normalize=value=>{try{const raw=String(value||'').trim();if(!raw)return'';const url=new URL(/^https?:\/\//i.test(raw)?raw:`https://${raw}`);return url.origin}catch{return''}};
+const isCloudNode=origin=>{try{return new URL(origin).hostname.endsWith('.nodes.commonweave.earth')}catch{return false}};
+function storedOrigin(){try{return normalize(localStorage.getItem(ANCHOR_ORIGIN_KEY)||'')}catch{return''}}
+function liveOrigin(){const query=normalize(params.get('host')||'');if(isCloudNode(query))return query;if(isCloudNode(location.origin))return location.origin;return storedOrigin()}
+function localPaired(){try{return localStorage.getItem(ANCHOR_KEY)==='1'}catch{return false}}
+function setVerified(origin){try{localStorage.setItem(ANCHOR_KEY,'1');localStorage.setItem(ANCHOR_ORIGIN_KEY,origin);localStorage.setItem(VERIFIED_KEY,new Date().toISOString());localStorage.removeItem(SNOOZE_KEY)}catch{}}
+async function verifyAnchor({quiet=false}={}){const origin=liveOrigin();if(!origin){anchorState.textContent='recommended · cloud node not linked';if(!quiet)status.textContent='Open “Set up local Anchor” and enter the Cloudflare node origin so Civweave can verify its proof status.';return false}if(!quiet)status.textContent='Checking the Cloudflare node’s signed Anchor status…';try{const response=await fetch(`${origin}/api/node/anchor/status`,{cache:'no-store',headers:{accept:'application/json'}}),payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||`HTTP ${response.status}`);const healthy=Math.max(0,Number(payload.healthyAnchors||0)),total=Math.max(0,Number(payload.totalAnchors||0));if(healthy>=1){setVerified(origin);anchorState.textContent=healthy>=2?`${healthy} healthy · redundant`:'1 healthy · local backup';status.textContent=healthy>=2?'This hub has redundant independent recovery copies.':'One healthy cryptographic Anchor is protecting this hub; a second independent Anchor is recommended.';if(anchorLink)anchorLink.href=`/host-local-anchor.html?host=${encodeURIComponent(origin)}`;return true}anchorState.textContent=total?`${total} paired · proof stale/pending`:'cloud-only · backup recommended';status.textContent=total?'Anchor devices are paired, but none currently prove the latest recoverable checkpoint.':'No cryptographic Anchor is paired yet. The cloud host still works, but local backup remains strongly recommended.';return false}catch(error){anchorState.textContent=localPaired()?'previously verified · live check unavailable':'status unavailable';status.textContent=`Could not verify Anchor health (${error?.message||error}). A temporary outage does not erase a previously verified local copy.`;return false}}
+(async()=>{try{const response=await fetch('/app/host-deployment-v1.json',{cache:'no-store'});if(!response.ok)throw new Error(`metadata returned ${response.status}`);const meta=await response.json(),origin=String(meta?.publicOrigin||location.origin),nodeOrigin=liveOrigin();document.querySelector('#host-origin').textContent=origin;document.querySelector('#host-role').textContent=meta?.role==='canonical'?'canonical Civweave root':'community host';if(anchorLink)anchorLink.href=nodeOrigin?`/host-local-anchor.html?host=${encodeURIComponent(nodeOrigin)}`:'/host-local-anchor.html';status.textContent=meta?.localAnchorRecommended?'Host metadata loaded. Checking the optional local Anchor…':'Host metadata loaded.';await verifyAnchor({quiet:true})}catch(error){document.querySelector('#host-origin').textContent=location.origin;document.querySelector('#host-role').textContent='host steward';if(anchorLink)anchorLink.href='/host-local-anchor.html';status.textContent=`Host metadata could not be read (${error?.message||error}). You can still open Civweave or configure the local Anchor.`;await verifyAnchor({quiet:true})}})();
+document.querySelector('#verify-anchor')?.addEventListener('click',()=>verifyAnchor());
 })();
 </script>
 </body>
