@@ -131,7 +131,7 @@ jobs:
           }
 
       - name: Report optional account-edge provisioning
-        if: always() && steps.provision_account_edge.outcome == 'failure'
+        if: success() && steps.provision_account_edge.outcome == 'failure'
         shell: bash
         run: |
           echo '::warning::The OG Pages host deployed without the optional account Worker/starter nodes. Add Account > Workers Scripts > Edit to this token to enable that layer; Pages hosting remains online.'
