@@ -7,6 +7,7 @@ const version = (await fsp.readFile(path.join(root, 'VERSION'), 'utf8')).trim();
 const release = path.join(root, 'releases', version, 'server');
 const runtimePath = path.join(root, '.civweave-canonical-federated.entry.mjs');
 process.env.DATA_DIR ||= path.join(root, 'data');
+process.env.CIVWEAVE_APP_ENTRY ||= path.join(root, 'server', 'gateway.mjs');
 const source = await fsp.readFile(path.join(release, 'server-federated-v152.mjs'), 'utf8');
 await fsp.writeFile(runtimePath, source, 'utf8');
 try {
