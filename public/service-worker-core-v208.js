@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.119';
+const VERSION = '1.0.121';
 const BUILD = 'lightweight-shell-v208-installer-brand-v1';
 const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
