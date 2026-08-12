@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
+const releaseVersion=(await readFile('VERSION','utf8')).trim();
 const core=await readFile('public/service-worker-core-v208.js','utf8');
 const generated=await readFile('public/service-worker-v203.js','utf8');
 const builder=await readFile('scripts/build-service-worker-v211.mjs','utf8');
@@ -16,8 +17,8 @@ const criticalIndex=core.indexOf('if (coherenceCriticalAppPath(url.pathname))');
 const genericIndex=core.indexOf("if (url.pathname.startsWith('/app/') || url.pathname.startsWith('/extensions/')");
 assert.ok(criticalIndex>=0&&genericIndex>=0&&criticalIndex<genericIndex,'local AI network-first routing must precede generic /app cache-first routing');
 
-assert.match(generated,/service-worker-core-v208\.js\?v=1\.0\.121-local-ai-network-first-v307/,'generated service worker must rotate the core worker import identity');
-assert.match(builder,/service-worker-core-v208\.js\?v=\$\{version\}-local-ai-network-first-v307/,'service worker generator must preserve the local AI network-first epoch');
+assert.ok(generated.includes(`service-worker-core-v208.js?v=${releaseVersion}-chat-convergence-v250-installer-brand-v1-local-ai-network-first-v307`),'generated service worker must preserve chat convergence while rotating the local AI core worker epoch');
+assert.match(builder,/service-worker-core-v208\.js\?v=\$\{version\}-chat-convergence-v250-installer-brand-v1-local-ai-network-first-v307/,'service worker generator must preserve chat convergence and the local AI network-first epoch');
 
 assert.match(family,/LOCAL_AI_BOOTSTRAP_REVISION='1\.0\.115-local-ai-bootstrap-v302-session-handoff'/,'family loader must pin the compatible bootstrap revision');
 assert.match(family,/bootstrap-v266\.js\?v=1\.0\.121-local-ai-coherence-v307/,'family loader must request the current bootstrap epoch');
@@ -52,11 +53,13 @@ assert.match(packageGuard,/preservesCachedWeights:true/,'migration must preserve
 console.log(JSON.stringify({
   ok:true,
   revision:'local-ai-bootstrap-coherence-v307',
+  releaseVersion,
   localAICodeDelivery:'network-first-online-cache-fallback-offline',
   bootstrapRevision:'1.0.115-local-ai-bootstrap-v302-session-handoff',
   incompatibleGlobals:'evicted-before-reload',
   gemma3Profile:'transformers-js-v4-q4-optimized',
   packageMigration:'stale-selection-suppressed-until-replacement-ready',
+  chatConvergencePreserved:true,
   staleQueryRetryPrevented:true,
   sameVersionDeadlockPrevented:true
 },null,2));
