@@ -75,6 +75,7 @@ const annual = api.buildAnnualDistribution({
 assert.equal(annual.reserveShareBps, 5000, 'half the eligible reserve should enter the annual payout');
 assert.equal(annual.annualPayoutMinor, 50000);
 assert.equal(annual.retainedReserveMinor, 50000);
+assert.equal(annual.policy.basis, 'annual-payout');
 assert.equal(annual.policy.contributorBps, 8500);
 assert.equal(annual.policy.hostBps, 1000);
 assert.equal(annual.policy.cerbanimoBps, 500);
