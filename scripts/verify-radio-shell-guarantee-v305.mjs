@@ -53,7 +53,7 @@ for (const source of [wrapper, builder]) {
   assert(source.indexOf(radioImport) < source.indexOf('/service-worker-shell-repair-v293.js'), 'Installed shell repair must observe the radio-wrapped cacheShell implementation.');
 }
 assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305`), `Committed worker is stale: radio shell must be pinned to current release ${version}.`);
-assert(builder.includes("`/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305`"), 'Worker builder must derive the radio cache-bust token from the current release.');
+assert(builder.includes("importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305');"), 'Worker builder must derive the radio cache-bust token from the current release.');
 assert(builder.includes("'public/service-worker-radio-core-v305.js'"), 'Worker builder does not require the radio shell source file.');
 assert(builder.includes("radioCore:'radio-core-shell-v305'"), 'Worker builder does not report the radio shell revision.');
 
