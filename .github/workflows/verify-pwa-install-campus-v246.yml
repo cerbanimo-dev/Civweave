@@ -18,4 +18,5 @@ jobs:
       - run: node --check public/app/offline-campus-status-v210.js
       - run: node --check public/app/required-campus-autostart-v1.js
       - run: node --check public/service-worker-campus-completion-v246.js
+      - run: node scripts/verify-installer-front-door-v1.mjs
       - run: node scripts/verify-pwa-install-campus-v246.mjs
