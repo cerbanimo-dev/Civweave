@@ -37,12 +37,12 @@ const checks=[
   ['previous package assets never seed the next crawl',()=>{
     assert.match(offline,/const initialAssets = \[\.\.\.new Set\(\(manifest\.seeds \|\| \[\]\)\.filter\(Boolean\)\)\]/);
     assert.doesNotMatch(offline,/initialAssets[^\n]+previousAssets/);
-    assert.match(offline,/stale-not-rediscovered/);
+    assert.match(offline,/current-manifest-only-v282/);
   }],
   ['same-release retries are cache-first while a new release refreshes discovery text',()=>{
     assert.match(offline,/const preferNetwork = !sameRelease && V211_DISCOVERY_TEXT\.test\(item\.pathname\)/);
     assert.match(offline,/cacheOfflineAsset\(item\.pathname, \{ preferNetwork \}\)/);
-    assert.match(offline,/retry-ledger-retired/);
+    assert.match(offline,/skippedCount: 0/);
   }],
   ['campus can finish while canonical pages are in use',()=>{
     assert.match(offline,/self\.clients\?\.matchAll\?\./);

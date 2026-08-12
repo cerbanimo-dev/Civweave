@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v247-front-door-v1';
+const VERSION='pwa-install-prompt-v247-front-door-v2-open-after-install';
 const ENTRY='/app/installed-entry-v146?installed=1&system=civweave';
 const HOST_SETUP_PATH='/host-setup.html';
 const CANONICAL_ORIGIN='https://civweave.pages.dev';
@@ -76,17 +76,19 @@ async function discoverRelatedInstalls(){
 }
 function refreshButton(){
   const button=installButton();
-  if(!button||button.disabled||/reset app shell/i.test(button.textContent||''))return;
+  if(!button||/reset app shell/i.test(button.textContent||''))return;
   if(!installOrigin()&&!standalone()){
     button.textContent='Open stable Civweave installer';
     help('This address is not a stable Civweave install origin. Opening its production host instead.');
     return;
   }
-  if(standalone()){
+  if(standalone()||installed){
+    button.disabled=false;
     if(button.textContent!=='Open Civweave')button.textContent='Open Civweave';
-    help('Civweave is installed as an app from this host origin.');
+    help(standalone()?'Civweave is installed as an app from this host origin.':'Civweave is installed. Open the campus now.');
     return;
   }
+  if(button.disabled)return;
   if(promptEvent){
     if(button.textContent!=='Install Civweave')button.textContent='Install Civweave';
     help('Civweave is ready for a browser-native app install from this host. Tap Install Civweave.');
@@ -133,7 +135,7 @@ async function ownInstallClick(event){
     location.assign(stableInstallerUrl().href);
     return;
   }
-  if(standalone()){
+  if(standalone()||installed){
     event.preventDefault();
     event.stopImmediatePropagation();
     location.assign(ENTRY);
@@ -156,7 +158,8 @@ async function ownInstallClick(event){
     if(choice?.outcome==='accepted'){
       installed=true;
       help('Civweave app installation accepted. This installed copy stays attached to the host you chose.');
-      button.textContent='Installing Civweave…';
+      button.disabled=false;
+      button.textContent='Open Civweave';
     }else{
       help('Civweave app installation was dismissed. Reload this installer when you want the native install prompt again.');
       button.disabled=false;

@@ -64,7 +64,7 @@ assert(integrityWorkerSource.includes("crypto.subtle.digest('SHA-256'")&&integri
 assert(offlineOverrideSource.includes("const V211_REVISION = 'offline-campus-current-graph-v280'"),'Resumable current-graph offline retry repair is missing.');
 assert(offlineOverrideSource.includes("const V211_POLICY = 'resumable-pause-v280'"),'Resumable campus policy is missing.');
 assert(offlineOverrideSource.includes('downloadedAssets')&&offlineOverrideSource.includes('pauseSupported: true'),'Per-file resume/pause contract is missing.');
-assert(offlineOverrideSource.includes('stale-not-rediscovered'),'Current-graph repair does not retire stale package assets.');
+assert(offlineOverrideSource.includes("V211_REFERENCE_POLICY = 'current-manifest-only-v282'"),'Current-graph repair does not prune stale package references.');
 assert(livingSchoolWorkerSource.includes("const REVISION='living-school-cleanroom-v218'"),'Living School clean-room worker revision is missing.');`;
 if(!source.includes(workerAssertionsBefore))throw new Error('Watchdog verifier could not find direct worker assertions.');
 source=source.replace(workerAssertionsBefore,workerAssertionsAfter);

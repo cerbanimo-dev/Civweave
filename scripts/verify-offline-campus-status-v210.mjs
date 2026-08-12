@@ -22,7 +22,7 @@ vm.createContext(sandbox);
 vm.runInContext(source,sandbox,{filename:'offline-campus-status-v210.js'});
 
 const api=sandbox.CivweaveOfflineCampusStatusV210;
-assert(api?.version?.includes('offline-campus-status-v210')&&api.version.includes('retired-completion-v246'),'Offline campus status API is missing the retired-reference completion repair.');
+assert(api?.version?.includes('offline-campus-status-v210')&&api.version.includes('current-manifest-only-v282'),'Offline campus status API is missing current-manifest-only cleanup.');
 assert(api?.workerRevision==='offline-campus-current-graph-v280','Offline campus status reader is not aligned to the current worker graph.');
 
 const legacy=api.normalize({type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',revision:'lightweight-shell-v208',ready:false,completed:205,total:205,failedCount:19,failed:Array.from({length:19},(_,index)=>({pathname:`/failed-${index}.js`})),bytes:17*1024*1024});
@@ -48,11 +48,12 @@ const retired=api.render({type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',revision:'offli
 assert(retired.total===217,'Retired references remained in the current-campus denominator.');
 assert(retired.downloaded===217,'Retired references changed the downloaded count.');
 assert(retired.ready===true,'A fully downloaded current campus with retired references was not marked ready.');
-assert(nodes.get('#offline-package-state').textContent==='ready offline · 17 retired references skipped','Retired-reference ready label is incorrect.');
-assert(nodes.get('#offline-package-assets').textContent==='217/217 current files · 17 retired','Retired-reference count is incorrect.');
+assert(retired.skippedCount===0&&retired.skipped.length===0,'Obsolete references were retained in normalized status.');
+assert(nodes.get('#offline-package-state').textContent==='ready offline','Ready status still advertises obsolete references.');
+assert(nodes.get('#offline-package-assets').textContent==='217/217 current files','Asset status still advertises obsolete references.');
 
 assert(serviceWorkerListeners.has('message'),'Status reader does not listen for worker progress.');
 assert(listeners.has('load'),'Status reader does not query the current worker after page load.');
 assert(!source.includes('registration.update(')&&!source.includes("postMessage({type:'SKIP_WAITING'"),'Status reader must remain read-only with respect to service-worker lifecycle.');
 
-console.log(JSON.stringify({ok:true,revision:'offline-campus-status-v210-retired-completion-v246',workerRevision:api.workerRevision,runtimeVersion:api.version,legacyAttempted:205,legacyDownloaded:186,failedCount:19,retiredScenario:{reportedTotal:234,downloaded:217,retired:17,currentTotal:retired.total,ready:retired.ready},contradictoryCountRemoved:true,liveWorkerProgress:true,lifecycleOwnership:'read-only-status-reader'},null,2));
+console.log(JSON.stringify({ok:true,revision:'offline-campus-status-v210-current-manifest-only-v282',workerRevision:api.workerRevision,runtimeVersion:api.version,legacyAttempted:205,legacyDownloaded:186,failedCount:19,obsoleteScenario:{reportedTotal:234,downloaded:217,obsoleteInput:17,currentTotal:retired.total,retainedReferences:retired.skippedCount,ready:retired.ready},contradictoryCountRemoved:true,liveWorkerProgress:true,lifecycleOwnership:'read-only-status-reader'},null,2));

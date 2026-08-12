@@ -37,7 +37,7 @@ if(lightweightMode){
   assert(core.includes('discoverReferences')&&core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Retained offline campus core lost discovery or hydration.');
   assert(installerState.includes("'/app/installer-storage-guard-v281.js'"),'Installer state layer no longer pins the storage preflight guard.');
   assert(integrity.includes("crypto.subtle.digest('SHA-256'")&&integrity.includes('lastKnownGoodCache'),'Shell integrity/last-known-good fallback is missing.');
-  assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'")&&offline.includes("const V211_POLICY = 'resumable-pause-v280'")&&offline.includes('stale-not-rediscovered'),'Current-graph resumable retry repair is missing.');
+  assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'")&&offline.includes("const V211_POLICY = 'resumable-pause-v280'")&&offline.includes("const V211_REFERENCE_POLICY = 'current-manifest-only-v282'"),'Current-graph resumable retry and manifest-pruning policy is missing.');
   assert(offline.includes('downloadedAssets')&&offline.includes('pauseSupported: true')&&offline.includes('resumablePerFile: true'),'Per-file resumability contract is missing.');
   assert(offlineManifest.revision==='canonical-background-campus-v241-systems-mesh-v251','Offline campus manifest is not the Systems Mesh canonical background-download contract.');
   assert(offlineManifest.seeds.length===11,'Offline campus manifest no longer has the canonical eleven seed roots.');

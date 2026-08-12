@@ -120,10 +120,62 @@ assert.notDeepEqual(bytes192,bytes512,'192 and 512 install icons must not be the
 const bridgeIndex=html.indexOf('/app/pwa-install-prompt-v247.js');
 const manifestIndex=html.indexOf('rel="manifest"');
 assert.ok(bridgeIndex>=0&&manifestIndex>=0&&bridgeIndex<manifestIndex,'native install bridge must load before manifest discovery');
+assert.ok(html.includes('/app/pwa-install-prompt-v247.js?v=front-door-v2-open-after-install'),'installer must cache-bust the repaired Open-after-install bridge');
+assert.ok(html.includes('/app/offline-campus-status-v210.js?v=1.0.116-current-manifest-only-v282'),'installer must cache-bust the current-manifest-only status reader');
 assert.ok(bridge.includes("addEventListener('beforeinstallprompt',capture)"));
 assert.ok(bridge.includes('await prompt.prompt()'));
 assert.ok(bridge.includes("document.addEventListener('click',ownInstallClick,true)"),'install bridge must own the primary gesture before the legacy installer');
 assert.ok(bridge.includes('Do not use Create shortcut'),'installer must distinguish a PWA install from a web shortcut');
+assert.ok(bridge.includes('if(standalone()||installed)'),'accepted installs must make the primary action launchable before standalone display mode changes');
+assert.ok(bridge.includes("button.textContent='Open Civweave'"),'accepted installs must immediately replace the transient install label');
+
+const installWindowListeners=new Map();
+const installDocumentListeners=new Map();
+let assignedInstallUrl='';
+const installButton={disabled:false,textContent:'Install Civweave'};
+const installHelp={textContent:''};
+const installDocument={
+  readyState:'complete',
+  documentElement:{dataset:{}},
+  head:{append(){}},
+  querySelector(selector){return selector==='#install-app'?installButton:selector==='#install-help'?installHelp:null},
+  addEventListener(type,handler){installDocumentListeners.set(type,handler)},
+  createElement(){return{async:false,src:'',dataset:{}}}
+};
+const installLocation={
+  origin:canonicalOrigin,
+  hostname:'civweave.pages.dev',
+  href:`${canonicalOrigin}/app/index.html`,
+  pathname:'/app/index.html',
+  hash:'',
+  assign(url){assignedInstallUrl=String(url)},
+  replace(url){assignedInstallUrl=String(url)}
+};
+const installSandbox={
+  console,URL,URLSearchParams,Promise,queueMicrotask,setTimeout,clearTimeout,
+  CustomEvent:class CustomEvent{constructor(type,options){this.type=type;this.detail=options?.detail}},
+  MutationObserver:class MutationObserver{observe(){}disconnect(){}},
+  document:installDocument,
+  location:installLocation,
+  navigator:{standalone:false,getInstalledRelatedApps:async()=>[]},
+  matchMedia:()=>({matches:false}),
+  addEventListener(type,handler){installWindowListeners.set(type,handler)},
+  dispatchEvent(){return true},
+  globalThis:null
+};
+installSandbox.globalThis=installSandbox;
+vm.createContext(installSandbox);
+vm.runInContext(bridge,installSandbox,{filename:'pwa-install-prompt-v247.js'});
+const nativePrompt={preventDefault(){},prompt:async()=>{},userChoice:Promise.resolve({outcome:'accepted'})};
+installWindowListeners.get('beforeinstallprompt')(nativePrompt);
+await Promise.resolve();
+const primaryClick=installDocumentListeners.get('click');
+const clickEvent={target:{closest:selector=>selector==='#install-app'?installButton:null},preventDefault(){},stopImmediatePropagation(){}};
+await primaryClick(clickEvent);
+assert.equal(installButton.textContent,'Open Civweave','accepted install remained stuck on its transient label');
+assert.equal(installButton.disabled,false,'accepted install left the Open action disabled');
+await primaryClick(clickEvent);
+assert.match(assignedInstallUrl,/^\/app\/installed-entry-v146\?installed=1&system=civweave$/,'Open action did not route through the installed bootstrap');
 
 assert.ok(!autostart.includes('civweave.pwa.install-accepted'),'campus download must not gate installation using a persisted install flag');
 assert.ok(!autostart.includes("button.disabled=true"),'required campus autostart must never disable the install button');
@@ -139,6 +191,7 @@ const current=normalize({type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',revision:'offlin
 assert.equal(current.total,217,'retired references must be removed from current-campus denominator');
 assert.equal(current.downloaded,217);
 assert.equal(current.ready,true,'217 downloaded + 17 retired must complete a 234-item current graph ledger');
+assert.equal(current.skippedCount,0,'obsolete references must not survive in current status metadata');
 
 assert.ok(workerRepair.includes('retired-references-do-not-block-current-campus-readiness'));
 assert.ok(workerRepair.includes('downloaded+skippedCount>=reportedTotal'));
@@ -149,4 +202,4 @@ assert.ok(workerWrapper.includes('policy=resumable-pause-v280'));
 assert.ok(workerWrapper.includes('chat-convergence-v250'),'worker wrapper must carry current convergence identity');
 assert.ok(workerWrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'new worker must activate immediately');
 
-console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v283-cache-distinct-front-door',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first',canonicalInstallOrigin:canonicalOrigin,productionHostsInstallable:true,previewFallsToHostProduction:true,localAnchorReminder:true,frontDoorBridge:'/app/pwa-install-prompt-v247.js'},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v284-open-after-install-current-manifest-only',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},obsoleteReferencesRetained:0,nativeInstallBridge:true,openAfterInstall:true,installedLaunch:'updater-first',canonicalInstallOrigin:canonicalOrigin,productionHostsInstallable:true,previewFallsToHostProduction:true,localAnchorReminder:true,frontDoorBridge:'/app/pwa-install-prompt-v247.js'},null,2));

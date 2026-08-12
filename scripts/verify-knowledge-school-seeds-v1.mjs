@@ -79,7 +79,7 @@ if(installerStateWorker.includes("'/app/required-campus-autostart-v1.js'"))throw
 assertIncludes(integrityWorker,["crypto.subtle.digest('SHA-256'",'STAGING_CACHE','lastKnownGoodCache','Integrity mismatch'],'shell integrity worker');
 assertIncludes(offlineOverride,[
   'offline-campus-current-graph-v280',"V211_POLICY = 'resumable-pause-v280'","V211_SYNC_TAG = 'civweave-campus-resume-v280'",
-  'CivweaveOfflineCampusV211','stale-not-rediscovered','retry-ledger-retired','V211_BATCH_SIZE = 16','downloadedAssets','pauseSupported: true','resumablePerFile: true','backgroundSafe: true'
+  'CivweaveOfflineCampusV211','current-manifest-only-v282','skipped: []','skippedCount: 0','V211_BATCH_SIZE = 16','downloadedAssets','pauseSupported: true','resumablePerFile: true','backgroundSafe: true'
 ],'offline retry override');
 assertIncludes(storageGuard,['navigator.storage','requiredFreeBytes',"civweaveStorageState='insufficient'"],'campus storage guard');
 assertIncludes(cleanroomWorker,["const REVISION='living-school-cleanroom-v218'",'event.stopImmediatePropagation()'],'Living School cache boundary');

@@ -23,6 +23,7 @@ assert(wrapperSource.includes("importScripts('/service-worker-shell-integrity-v2
 assert(wrapperSource.includes("importScripts('/service-worker-offline-v211-override.js"),'Generated worker omits the offline retry override.');
 assert(wrapperSource.includes('offline-campus-current-graph-v280'),'Generated worker lost the resumable current-graph identity.');
 assert(wrapperSource.includes('policy=resumable-pause-v280'),'Generated worker lost the resumable/pause policy.');
+assert(wrapperSource.includes('references=current-manifest-only-v282'),'Generated worker lost the current-manifest-only reference policy.');
 assert(wrapperSource.indexOf('service-worker-core-v208.js')<wrapperSource.indexOf('service-worker-installer-state-v280.js'),'Installer state must extend the retained core arrays.');
 assert(wrapperSource.indexOf('service-worker-installer-state-v280.js')<wrapperSource.indexOf('service-worker-shell-integrity-v281.js'),'Integrity must see the final required shell asset set.');
 assert(wrapperSource.indexOf('service-worker-shell-integrity-v281.js')<wrapperSource.indexOf('service-worker-offline-v211-override.js'),'Offline package policy must load after shell integrity.');
@@ -30,6 +31,7 @@ assert(wrapperSource.indexOf('service-worker-shell-integrity-v281.js')<wrapperSo
 for(const token of [
   "const V211_REVISION = 'offline-campus-current-graph-v280'",
   "const V211_POLICY = 'resumable-pause-v280'",
+  "const V211_REFERENCE_POLICY = 'current-manifest-only-v282'",
   "const V211_SYNC_TAG = 'civweave-campus-resume-v280'",
   'const V211_BATCH_SIZE = 16',
   'let v211DownloadPromise = null',
@@ -71,6 +73,7 @@ console.log(JSON.stringify({
   ok:true,
   revision:'offline-campus-current-graph-v280',
   policy:'resumable-pause-v280',
+  referencePolicy:'current-manifest-only-v282',
   canonicalSeeds:manifest.seeds.length,
   perFileCheckpointing:true,
   duplicateRequestsJoin:true,
