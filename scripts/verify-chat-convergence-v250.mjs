@@ -45,11 +45,10 @@ const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
 check('release is coherent',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version&&manifest.name.includes(`v${version}`));
-check('installed launch enters updater first',manifest.start_url==='/app/installed-entry-v146.html?installed=1');
-check('all manifest shortcuts enter updater first',(manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(item=>String(item.url).startsWith('/app/installed-entry-v146.html?')));
+check('installed launch enters updater first through clean URL',manifest.start_url==='/app/installed-entry-v146?installed=1');
+check('all manifest shortcuts enter updater first through clean URL',(manifest.shortcuts||[]).length===5&&(manifest.shortcuts||[]).every(item=>String(item.url).startsWith('/app/installed-entry-v146?')));
 check('manifest has no frozen Working Campus version pin',!manifestText.includes('working-campus-v156.html?installed=1&version='));
-check('Cloudflare leaves updater HTML reachable',!redirects.split(/\r?\n/).includes('/app/installed-entry-v146.html /app/ 302'));
-check('extensionless installed entry normalizes to updater HTML',redirects.split(/\r?\n/).includes('/app/installed-entry-v146 /app/installed-entry-v146.html 302'));
+check('Cloudflare has no custom installed-entry redirects',!redirects.split(/\r?\n/).some(line=>line.startsWith('/app/installed-entry-v146 ')||line.startsWith('/app/installed-entry-v146.html ')));
 check('checked-in web launcher carries current release identity',rawLauncher.includes(`/app/civweave-brand.js?v=${version}`)&&rawLauncher.includes(`/app/installed-entry-v146.js?v=${version}`));
 check('checked-in updater HTML carries current installed-entry identity',installedEntryHtml.includes(`/app/installed-entry-v146.js?v=${version}`));
 check('installed entry keeps canonical chat identity while forcing the legacy-purge worker',installedEntry.includes('revision=chat-convergence-v251-legacy-purge')&&installedEntry.includes(`version:'${version}-chat-convergence-v250'`));
@@ -87,8 +86,8 @@ check('worker purge ignores stale query identities',workerRepair.includes('cache
 check('worker runs v251 legacy purge through the canonical v250 worker import',workerEntry.includes("importScripts('/service-worker-chat-repair-v245.js?v=chat-convergence-v250&purge=chat-convergence-v251-legacy-purge')"));
 check('worker skips waiting on install',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
 
-check('release version sync preserves updater-first manifest',releaseSync.includes("manifest.start_url='/app/installed-entry-v146.html?installed=1'"));
+check('release version sync preserves updater-first clean manifest',releaseSync.includes("manifest.start_url='/app/installed-entry-v146?installed=1'"));
 check('release coherence generator preserves canonical chat plus v251 cache purge',coherenceSync.includes("const chatRevision='chat-convergence-v250'")&&coherenceSync.includes("const chatCachePurgeRevision='chat-convergence-v251-legacy-purge'")&&coherenceSync.includes('retiredChatPaths'));
 check('release coherence generator no longer patches deleted v215/v216 files',!coherenceSync.includes("await patch('public/app/persistent-guide-chat-v215.js'")&&!coherenceSync.includes("await patch('public/app/persistent-guide-viewport-v216.js'"));
 
-console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v251-legacy-purge',checks:checks.length,installedLaunch:'updater-first',canonicalRuntime:'guide-workspace-v242',canonicalDuplicateChatOwners:0,retiredChatRuntimeCount:retiredPaths.length,embeddedSurfaceDelegates:true,cacheMigration:true,checkedInReleaseIdentitiesCurrent:true,releaseGeneratorsPreserveRetirement:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'chat-convergence-v251-legacy-purge',checks:checks.length,installedLaunch:'updater-first-clean-url',canonicalRuntime:'guide-workspace-v242',canonicalDuplicateChatOwners:0,retiredChatRuntimeCount:retiredPaths.length,embeddedSurfaceDelegates:true,cacheMigration:true,checkedInReleaseIdentitiesCurrent:true,releaseGeneratorsPreserveRetirement:true},null,2));
