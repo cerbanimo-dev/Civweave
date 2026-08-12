@@ -10,7 +10,7 @@ const [html,rootHtml,manifestText,assetlinksText,bridge,reminder,hostMeta,autost
   read('public/index.html'),
   read('public/app/manifest.webmanifest'),
   read('public/.well-known/assetlinks.json'),
-  read('public/app/pwa-install-prompt-v246.js'),
+  read('public/app/pwa-install-prompt-v247.js'),
   read('public/app/host-steward-reminder-v1.js'),
   read('public/app/host-deployment-v1.json'),
   read('public/app/required-campus-autostart-v1.js'),
@@ -117,7 +117,7 @@ assert.deepEqual(pngDimensions(bytes512,'512 install icon'),[512,512],'512 manif
 assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 install icon'),[512,512],'maskable manifest declaration must match raw PNG pixels');
 assert.notDeepEqual(bytes192,bytes512,'192 and 512 install icons must not be the same mislabeled binary');
 
-const bridgeIndex=html.indexOf('/app/pwa-install-prompt-v246.js');
+const bridgeIndex=html.indexOf('/app/pwa-install-prompt-v247.js');
 const manifestIndex=html.indexOf('rel="manifest"');
 assert.ok(bridgeIndex>=0&&manifestIndex>=0&&bridgeIndex<manifestIndex,'native install bridge must load before manifest discovery');
 assert.ok(bridge.includes("addEventListener('beforeinstallprompt',capture)"));
@@ -149,4 +149,4 @@ assert.ok(workerWrapper.includes('policy=resumable-pause-v280'));
 assert.ok(workerWrapper.includes('chat-convergence-v250'),'worker wrapper must carry current convergence identity');
 assert.ok(workerWrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'new worker must activate immediately');
 
-console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v282-host-origins',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first',canonicalInstallOrigin:canonicalOrigin,productionHostsInstallable:true,previewFallsToHostProduction:true,localAnchorReminder:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v283-cache-distinct-front-door',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},retiredCampusLedger:true,nativeInstallBridge:true,installedLaunch:'updater-first',canonicalInstallOrigin:canonicalOrigin,productionHostsInstallable:true,previewFallsToHostProduction:true,localAnchorReminder:true,frontDoorBridge:'/app/pwa-install-prompt-v247.js'},null,2));
