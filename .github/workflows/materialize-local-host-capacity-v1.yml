@@ -4,7 +4,6 @@ on:
   push:
     branches: [feat/local-host-live-capacity]
     paths:
-      - '.github/scripts/materialize-local-host-capacity-v1.py'
       - '.github/workflows/materialize-local-host-capacity-v1.yml'
 
 permissions:
@@ -13,7 +12,7 @@ permissions:
 jobs:
   materialize:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v5
         with:
@@ -22,16 +21,31 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '22'
-      - name: Materialize Civweave 1.0.120
+      - name: Harden local admission boundary
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p = Path('.github/scripts/materialize-local-host-capacity-v1.py')
+          import hashlib, json
+          p = Path('releases/1.0.120/server/server-federated-v152.mjs')
           s = p.read_text()
-          p.write_text(s.replace("marker = '\\n})();\\n'", "marker = '\\n})();'"))
+          old = "function localNetworkClient(req) { return localNetworkAddress(req.socket?.remoteAddress || ''); }"
+          new = """function requestHostIsLocal(req) {
+            const raw = clean(req.headers.host, 320).toLowerCase();
+            const hostname = raw.startsWith('[') ? raw.slice(1, raw.indexOf(']')) : raw.split(':')[0];
+            return hostname === 'localhost' || localNetworkAddress(hostname);
+          }
+          function localNetworkClient(req) {
+            return requestHostIsLocal(req) && localNetworkAddress(req.socket?.remoteAddress || '');
+          }"""
+          if old not in s:
+              raise SystemExit('local network admission guard target not found')
+          p.write_text(s.replace(old, new, 1))
+          m = Path('releases/1.0.120/release.json')
+          data = json.loads(m.read_text())
+          data['sha256']['server/server-federated-v152.mjs'] = hashlib.sha256(p.read_bytes()).hexdigest()
+          m.write_text(json.dumps(data, indent=2) + '\n')
           PY
-          python3 .github/scripts/materialize-local-host-capacity-v1.py
       - name: Verify local Host capacity
         shell: bash
         run: |
@@ -43,13 +57,13 @@ jobs:
           node scripts/test-local-host-capacity-v1.mjs
           node scripts/verify-host-node-installer-lobby-v1.mjs
           node scripts/check-canonical-server-syntax.mjs
-          grep -q '/api/federation/capacity' releases/1.0.120/server/server-federated-v152.mjs
-          grep -q 'host-node-local-capacity-v1.js' public/app/host-node-installer-lobby-v1.js
-      - name: Commit generated release
+          grep -q 'requestHostIsLocal' releases/1.0.120/server/server-federated-v152.mjs
+          grep -q 'waitForLobby' public/app/host-node-local-capacity-v1.js
+      - name: Commit hardened runtime
         shell: bash
         run: |
           git config user.name 'civweave-release-bot'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add VERSION package.json docker-compose.federated.yml lib public/app scripts releases/1.0.120
-          git commit -m 'Ship Civweave 1.0.120 live local Host capacity'
+          git add releases/1.0.120/server/server-federated-v152.mjs releases/1.0.120/release.json
+          git commit -m 'Harden Civweave 1.0.120 local Host admission'
           git push origin HEAD:feat/local-host-live-capacity
