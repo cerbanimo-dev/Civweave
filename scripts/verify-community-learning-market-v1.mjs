@@ -24,7 +24,7 @@ for(const [name,file] of Object.entries(paths)){
 for(const token of ['civweave.interactive-learning-package.v1','civweave.fellowfare.learning-listing.v1','civweave.fellowfare.learning-purchase.v1','trialSummary','buildInteractiveLearningPackage','publishLivingSchoolToFellowFare','purchaseLearningListing','communityLibrary','progress:{}','requiresLocalResolution','CivweaveCanonicalRewardsV2'])assert.ok(source.shared.includes(token),`Shared community learning contract lost ${token}`);
 assert.ok(!source.shared.includes('application/pdf')&&!source.shared.includes('.pdf"')&&!source.shared.includes(".pdf'"),'Interactive learning package must never flatten curriculum into PDF output.');
 for(const token of ['Sell / Tutor','Acorn price for the interactive module','Also offer tutoring for this module','USD price','Button price','not a PDF or static export','trialSummary'])assert.ok(source.living.includes(token),`Living School publisher lost ${token}`);
-for(const token of ['Interactive modules & tutors','What stays interactive','quiz banks','rubrics','visualizations','media metadata','purchaseLearningListing','createTutorRequest'])assert.ok(source.fellowfare.includes(token),`FellowFare learning shelf lost ${token}`);
+for(const token of ['Interactive modules & tutors','What stays interactive','quiz banks','rubrics','visualizations','media metadata','purchaseLearningListing','createTutorRequest','dataset.renderKey'])assert.ok(source.fellowfare.includes(token),`FellowFare learning shelf lost ${token}`);
 assert.ok(source.packs.includes("living-school-fellowfare-publish-v1.mjs"),'Living School boot path does not load its FellowFare publisher.');
 assert.ok(source.labor.includes("community-learning-market-v1.mjs")&&source.labor.includes("cw-reward-ledger-v2.js"),'FellowFare boot path does not load community learning plus canonical rewards.');
 
@@ -42,4 +42,4 @@ assert.equal(packagedModule.lessonBlocks[0].content,'Interactive content');asser
 const ownPurchase=await market.purchaseLearningListing(published.learning.id,{buyer:{id:'author-1',name:'Author'}});assert.equal(ownPurchase.amount,0);
 const installed=JSON.parse(localStorage.getItem(market.LIVING_SCHOOL_STATE_KEY));assert.equal(installed.school.modules[0].quiz.bank[0].prompt,'Question?');assert.deepEqual(installed.progress,{});assert.equal(installed.communityLibrary.length,1);assert.equal(installed.final,null);assert.equal(installed.credential,null);
 
-console.log('Community learning market verified: creator trial gate, interactive package preservation, fresh learner install, Acorn pricing, and USD/Button tutoring are intact.');
+console.log('Community learning market verified: creator trial gate, interactive package preservation, fresh learner install, Acorn pricing, USD/Button tutoring, and stable FellowFare shelf rendering are intact.');
