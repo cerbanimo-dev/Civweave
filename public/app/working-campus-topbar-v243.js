@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.117-working-campus-topbar-v243-downloads-entry-v1';
+const VERSION='1.0.117-working-campus-topbar-v243-downloads-entry-v2';
 const STYLE_ID='cw-working-campus-topbar-v243-style';
 const MAP_BUTTON_ID='cw-working-campus-map-v243';
 const DOWNLOADS_BUTTON_ID='cw-working-campus-downloads-v243';
@@ -11,6 +11,7 @@ const MAP_API_NAME='CivweaveMapLaunchV243';
 const FINDER_API_NAME='CivweaveFederationFinderV268';
 const DOWNLOADS_API_NAME='CivweaveDownloadsLaunchV243';
 const FINDER_STORAGE='civweave.federation-finder.origin.v1';
+const HOST_ENDPOINT_STORAGE='federation-finder.physical-node-endpoint';
 const BRAND_ICON='/app/logos/civweave-pwa-192-v247.png';
 let header=null;
 let mapButton=null;
@@ -39,6 +40,13 @@ function normalizeFinderOrigin(value){
   const raw=clean(value);if(!raw)return'';
   try{const url=new URL(raw,location.origin);if(url.protocol!=='http:'&&url.protocol!=='https:')return'';return url.origin}catch{return''}
 }
+function normalizeHostOrigin(value){
+  const raw=clean(value);if(!raw)return'';
+  try{const url=new URL(raw,location.origin);if(url.protocol!=='http:'&&url.protocol!=='https:')return'';if(url.username||url.password)return'';return url.origin}catch{return''}
+}
+function storedHostOrigin(){
+  try{return normalizeHostOrigin(localStorage.getItem(HOST_ENDPOINT_STORAGE)||'')}catch{return''}
+}
 function isLoopbackOrigin(value){
   const normalized=normalizeFinderOrigin(value);if(!normalized)return false;
   try{const host=new URL(normalized).hostname.replace(/^\[|\]$/g,'').toLowerCase();return host==='localhost'||host==='127.0.0.1'||host==='::1'}catch{return false}
@@ -63,9 +71,15 @@ function configureFinder(origin){
 function downloadsUrl(){
   const target=new URL('/app/index.html',location.origin);
   const current=new URLSearchParams(location.search);
-  for(const key of ['host','hostNode','node','nodeId','node_id','finder','federationFinder']){
+  const explicitHost=normalizeHostOrigin(current.get('host')||current.get('hostNode')||'');
+  if(explicitHost)target.searchParams.set('host',explicitHost);
+  for(const key of ['node','nodeId','node_id','finder','federationFinder']){
     const value=clean(current.get(key));
     if(value&&!target.searchParams.has(key))target.searchParams.set(key,value)
+  }
+  if(!target.searchParams.has('host')){
+    const stored=storedHostOrigin();
+    if(stored)target.searchParams.set('host',stored)
   }
   target.searchParams.set('manage','downloads');
   target.searchParams.set('source','working-campus');
@@ -177,7 +191,7 @@ function installHeaderControls(){
   if('ResizeObserver'in globalThis){resizeObserver=new ResizeObserver(syncHeaderHeight);resizeObserver.observe(header)}
   addEventListener('resize',syncHeaderHeight,{passive:true});
   globalThis.visualViewport?.addEventListener('resize',syncHeaderHeight,{passive:true});
-  document.documentElement.dataset.civweaveWorkingCampusTopbar='v243-mobile-v248-federation-finder-v268-downloads-entry-v1';
+  document.documentElement.dataset.civweaveWorkingCampusTopbar='v243-mobile-v248-federation-finder-v268-downloads-entry-v2';
   return true
 }
 function start(){if(!isCivweave())return;installStyle();if(!installHeaderControls())queueMicrotask(installHeaderControls)}
@@ -185,6 +199,6 @@ addEventListener(MAP_READY_EVENT,event=>registerMap(event.detail||{}));
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 
 globalThis[FINDER_API_NAME]=Object.freeze({version:'1.7.2-launch-v268-no-localhost-v1',storageKey:FINDER_STORAGE,defaultOrigin:location.origin,url:configuredFinderUrl,configure:configureFinder,open:openFederationFinder});
-globalThis[DOWNLOADS_API_NAME]=Object.freeze({version:VERSION,url:downloadsUrl,open:openDownloads,state:()=>({button:Boolean(downloadsButton),route:downloadsUrl()})});
+globalThis[DOWNLOADS_API_NAME]=Object.freeze({version:VERSION,url:downloadsUrl,open:openDownloads,state:()=>({button:Boolean(downloadsButton),route:downloadsUrl(),storedHost:storedHostOrigin()})});
 globalThis[MAP_API_NAME]=Object.freeze({version:VERSION,event:MAP_EVENT,readyEvent:MAP_READY_EVENT,open:openMap,register:registerMap,configureFinder,state:()=>({route:mapRoute,handler:Boolean(mapOpenHandler),button:Boolean(mapButton),downloadsButton:Boolean(downloadsButton),downloadsRoute:downloadsUrl(),finder:configuredFinderUrl(),finderVersion:'1.7.2',mobileContainment:'v248',brandIcon:BRAND_ICON})});
 })();
