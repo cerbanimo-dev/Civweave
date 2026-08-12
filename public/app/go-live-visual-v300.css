@@ -28,6 +28,11 @@ html[data-civweave-system="civweave"]{
   --glv-cw-gold:#ffc66f;
   --glv-cw-pearl:#e8f6ff;
   --glv-cw-ink:#f9f6ff;
+  /* Retire the pre-prismatic civic-console navy inherited by inner states. */
+  --bg:#111225;
+  --panel:#1b1932;
+  --panel2:#25223f;
+  --line:rgba(224,239,255,.22);
 }
 html[data-civweave-system="civweave"] body{
   background:
@@ -97,9 +102,33 @@ html[data-civweave-system="civweave"] .realm-node:focus-visible{
 html[data-civweave-system="civweave"] .main{gap:12px!important}
 html[data-civweave-system="civweave"] .guide,
 html[data-civweave-system="civweave"] .work{border-radius:22px!important;overflow:hidden}
+html[data-civweave-system="civweave"] .workspace{
+  background:
+    radial-gradient(circle at 10% 12%,rgba(255,121,201,.055),transparent 32%),
+    radial-gradient(circle at 90% 88%,rgba(119,220,255,.05),transparent 34%),
+    linear-gradient(145deg,rgba(24,20,45,.7),rgba(16,22,40,.68))!important;
+}
 html[data-civweave-system="civweave"] .guide-head,
 html[data-civweave-system="civweave"] .work-head{
   background:linear-gradient(90deg,rgba(255,121,201,.075),rgba(119,220,255,.07),rgba(255,198,111,.055))!important;
+}
+html[data-civweave-system="civweave"] .guide-foot{
+  border-color:rgba(224,239,255,.18)!important;
+  background:
+    linear-gradient(90deg,rgba(155,108,255,.11),rgba(255,121,201,.08) 34%,rgba(119,220,255,.08) 68%,rgba(255,198,111,.08)),
+    rgba(17,15,35,.84)!important;
+}
+html[data-civweave-system="civweave"] .card{
+  border-color:transparent!important;
+  background:
+    radial-gradient(circle at 8% 0,rgba(255,121,201,.08),transparent 34%) padding-box,
+    radial-gradient(circle at 100% 100%,rgba(119,220,255,.07),transparent 38%) padding-box,
+    linear-gradient(145deg,rgba(35,29,59,.94),rgba(20,23,43,.94)) padding-box,
+    linear-gradient(120deg,rgba(255,121,201,.42),rgba(119,220,255,.34),rgba(255,198,111,.28),rgba(155,108,255,.38)) border-box!important;
+  box-shadow:0 16px 38px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.055)!important;
+}
+html[data-civweave-system="civweave"] :is(.path,.next,.library article){
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(155,108,255,.045))!important;
 }
 html[data-civweave-system="civweave"] .conversation{
   background:
@@ -130,8 +159,28 @@ html[data-civweave-system="civweave"] .weaveling-chat-form{
 html[data-civweave-system="civweave"] .weaveling-chat-form textarea,
 html[data-civweave-system="civweave"] .field :is(input,select,textarea){
   border-color:rgba(190,222,255,.23)!important;
-  background:rgba(5,10,27,.74)!important;
+  background:linear-gradient(145deg,rgba(11,9,29,.86),rgba(19,16,39,.82))!important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+html[data-civweave-system="civweave"] :is(.pill,.btn,.top>[data-cw160-review],.top>[data-cw160-theme]){
+  background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(155,108,255,.065))!important;
+  border-color:rgba(224,239,255,.2)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045)!important;
+}
+html[data-civweave-system="civweave"] :is(.pill.active,.btn.primary,.top>[data-cw160-review].is-attention){
+  border-color:rgba(119,220,255,.68)!important;
+  background:linear-gradient(135deg,rgba(255,121,201,.18),rgba(119,220,255,.2),rgba(155,108,255,.16))!important;
+  box-shadow:0 0 20px rgba(119,220,255,.09),inset 0 1px 0 rgba(255,255,255,.08)!important;
+}
+html[data-civweave-system="civweave"] #weaveling-hub-v233 :is(.wh233-thread,.wh233-panel){
+  border-color:rgba(224,239,255,.18)!important;
+  background:linear-gradient(145deg,rgba(255,121,201,.055),rgba(119,220,255,.045),rgba(155,108,255,.055))!important;
+}
+html[data-civweave-system="civweave"] #weaveling-hub-v233 .wh233-panel>header{
+  background:linear-gradient(90deg,rgba(255,121,201,.07),rgba(119,220,255,.055),rgba(255,198,111,.045))!important;
+}
+html[data-civweave-system="civweave"] #weaveling-hub-v233 #wh233-update-form :is(select,textarea){
+  background:linear-gradient(145deg,rgba(11,9,29,.86),rgba(19,16,39,.82))!important;
 }
 html[data-civweave-system="civweave"] :is(button,input,textarea,select):focus-visible{
   outline:2px solid var(--glv-cw-cyan)!important;

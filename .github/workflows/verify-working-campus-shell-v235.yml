@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'public/app/working-campus-v156.css'
+      - 'public/app/go-live-visual-v300.css'
       - 'public/app/working-campus-v156.js'
       - 'public/app/working-campus-v156.html'
       - 'scripts/verify-working-campus-shell-v235.mjs'
@@ -15,6 +16,7 @@ on:
       - main
     paths:
       - 'public/app/working-campus-v156.css'
+      - 'public/app/go-live-visual-v300.css'
       - 'public/app/working-campus-v156.js'
       - 'public/app/working-campus-v156.html'
       - 'scripts/verify-working-campus-shell-v235.mjs'
