@@ -11,7 +11,6 @@ const buildScript = resolve(repoRoot, "scripts/build-cloudflare-pages.mjs");
 const pagesOutput = resolve(repoRoot, ".cloudflare-pages");
 const canonicalProjectName = "civweave";
 const canonicalOrigin = `https://${canonicalProjectName}.pages.dev`;
-const canonicalAccountEmail = "cerbanimo@gmail.com";
 
 function normalizeHostId(value) {
   return String(value ?? "")
@@ -36,7 +35,7 @@ function parseArgs(argv) {
     else if (arg === "--project-name" || arg === "--project") projectName = String(argv[++i] || "").trim().toLowerCase();
     else if (arg === "--expect-account-email") expectAccountEmail = String(argv[++i] || "").trim().toLowerCase();
     else if (arg === "--help" || arg === "-h") {
-      console.log(`Civweave Cloudflare host setup\n\nCanonical root:\n  node scripts/setup-cloudflare-node.mjs --canonical\n  reserved owner: ${canonicalAccountEmail}\n\nCommunity host:\n  node scripts/setup-cloudflare-node.mjs --host-id garden\n\nCommunity host with a custom Pages project name:\n  node scripts/setup-cloudflare-node.mjs --host-id garden --project-name garden\n\nDefaults:\n  canonical: ${canonicalOrigin}\n  community: https://civweave-<host-id>.pages.dev`);
+      console.log(`Civweave Cloudflare host setup\n\nCanonical root:\n  CIVWEAVE_EXPECT_CLOUDFLARE_EMAIL=you@example.com node scripts/setup-cloudflare-node.mjs --canonical\n\nCommunity host:\n  node scripts/setup-cloudflare-node.mjs --host-id garden\n\nCommunity host with a custom Pages project name:\n  node scripts/setup-cloudflare-node.mjs --host-id garden --project-name garden\n\nDefaults:\n  canonical: ${canonicalOrigin}\n  community: https://civweave-<host-id>.pages.dev`);
       process.exit(0);
     } else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -44,7 +43,7 @@ function parseArgs(argv) {
   if (canonical && hostId) throw new Error("Choose either --canonical or --host-id, not both.");
   if (canonical) {
     if (projectName && projectName !== canonicalProjectName) throw new Error(`Canonical Civweave must deploy to the reserved Pages project ${canonicalProjectName}.`);
-    expectAccountEmail ||= canonicalAccountEmail;
+    if (!expectAccountEmail) throw new Error("Canonical deployment requires CIVWEAVE_EXPECT_CLOUDFLARE_EMAIL or --expect-account-email so Wrangler cannot silently publish the root from the wrong Cloudflare account.");
     return { canonical: true, hostId: "civweave", projectName: canonicalProjectName, expectAccountEmail };
   }
 
