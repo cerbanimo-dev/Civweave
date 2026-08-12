@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const releaseVersion=(await readFile('VERSION','utf8')).trim();
-const core=await readFile('public/service-worker-core-v208.js','utf8');
+const localAIGate=await readFile('public/service-worker-local-ai-coherence-v307.js','utf8');
 const generated=await readFile('public/service-worker-v203.js','utf8');
 const builder=await readFile('scripts/build-service-worker-v211.mjs','utf8');
 const family=await readFile('public/app/family-ai-loader-v105.js','utf8');
@@ -10,18 +10,25 @@ const bootstrap=await readFile('public/app/local-ai/bootstrap-v266.js','utf8');
 const registry=await readFile('public/app/local-ai/model-registry-v266.js','utf8');
 const packageGuard=await readFile('public/app/local-ai/package-revision-guard-v307.js','utf8');
 
-assert.match(core,/const COHERENCE_CRITICAL_APP_PATHS = new Set\(/,'service worker must declare coherence-critical app code');
-assert.match(core,/pathname\.startsWith\('\/app\/local-ai\/'\)/,'all local AI modules must use the coherence-critical route');
-assert.match(core,/if \(coherenceCriticalAppPath\(url\.pathname\)\) \{\s*event\.respondWith\(networkFirst\(request, url\.pathname\)\);/s,'coherence-critical local AI code must be network-first with same-path cached fallback');
-const criticalIndex=core.indexOf('if (coherenceCriticalAppPath(url.pathname))');
-const genericIndex=core.indexOf("if (url.pathname.startsWith('/app/') || url.pathname.startsWith('/extensions/')");
-assert.ok(criticalIndex>=0&&genericIndex>=0&&criticalIndex<genericIndex,'local AI network-first routing must precede generic /app cache-first routing');
+assert.match(localAIGate,/CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v307'/,'dedicated local AI code gate must advertise v307');
+assert.match(localAIGate,/url\.pathname\.startsWith\('\/app\/local-ai\/'\)/,'all local AI modules must be owned by the dedicated gate');
+assert.match(localAIGate,/event\.stopImmediatePropagation\(\)/,'local AI gate must stop later generic cache handlers from owning the request');
+assert.match(localAIGate,/new Request\(pathnameOrRequest, \{ cache: 'no-store' \}\)/,'local AI gate must request current network bytes');
+assert.match(localAIGate,/cache\.match\(key, \{ ignoreSearch: true \}\).*caches\.match\(key, \{ ignoreSearch: true \}\)/s,'local AI gate must retain cached offline fallback');
+assert.match(localAIGate,/package-revision-guard-v307\.js/,'new package revision guard must be prefetched for offline recovery');
 
-assert.ok(generated.includes(`service-worker-core-v208.js?v=${releaseVersion}-chat-convergence-v250-installer-brand-v1-local-ai-network-first-v307`),'generated service worker must preserve chat convergence while rotating the local AI core worker epoch');
-assert.match(builder,/service-worker-core-v208\.js\?v=\$\{version\}-chat-convergence-v250-installer-brand-v1-local-ai-network-first-v307/,'service worker generator must preserve chat convergence and the local AI network-first epoch');
+const localGateImport="importScripts('/service-worker-local-ai-coherence-v307.js";
+const genericCodeImport="importScripts('/service-worker-code-coherence-v288.js";
+const coreImport="importScripts('/service-worker-core-v208.js";
+assert.ok(generated.includes(`${localGateImport}?v=${releaseVersion}-local-ai-code-coherence-v307`),'generated service worker must rotate the local AI coherence epoch with the release');
+assert.ok(generated.indexOf(localGateImport)>=0&&generated.indexOf(localGateImport)<generated.indexOf(genericCodeImport)&&generated.indexOf(genericCodeImport)<generated.indexOf(coreImport),'local AI code gate must register before generic code coherence and the shell core');
+assert.match(builder,/service-worker-local-ai-coherence-v307\.js\?v=\$\{version\}-local-ai-code-coherence-v307/,'service worker generator must preserve the local AI v307 epoch');
+assert.match(builder,/localAICodeCoherence:'v307-network-first-pre-core'/,'service worker diagnostics must expose the dedicated local AI code policy');
+assert.match(generated,/working-campus-return-v425/,'local AI worker changes must preserve the current Working Campus return epoch');
+assert.match(generated,/chat-convergence-v250/,'local AI worker changes must preserve the current chat convergence epoch');
 
 assert.match(family,/LOCAL_AI_BOOTSTRAP_REVISION='1\.0\.115-local-ai-bootstrap-v302-session-handoff'/,'family loader must pin the compatible bootstrap revision');
-assert.match(family,/bootstrap-v266\.js\?v=1\.0\.121-local-ai-coherence-v307/,'family loader must request the current bootstrap epoch');
+assert.match(family,/bootstrap-v266\.js\?v=1\.0\.121-local-ai-coherence-v307/,'family loader must request the v307 bootstrap epoch');
 assert.match(family,/CivweaveLocalAIBootstrapV266\?\.revision===LOCAL_AI_BOOTSTRAP_REVISION/,'family loader must reject a wrong bootstrap revision');
 
 assert.match(bootstrap,/componentCompatibility:'capability-contract-v307'/,'bootstrap must advertise the v307 compatibility contract');
@@ -54,11 +61,12 @@ console.log(JSON.stringify({
   ok:true,
   revision:'local-ai-bootstrap-coherence-v307',
   releaseVersion,
-  localAICodeDelivery:'network-first-online-cache-fallback-offline',
+  localAICodeDelivery:'dedicated-network-first-pre-core-offline-cache-fallback',
   bootstrapRevision:'1.0.115-local-ai-bootstrap-v302-session-handoff',
   incompatibleGlobals:'evicted-before-reload',
   gemma3Profile:'transformers-js-v4-q4-optimized',
   packageMigration:'stale-selection-suppressed-until-replacement-ready',
+  workingCampusReturnPreserved:true,
   chatConvergencePreserved:true,
   staleQueryRetryPrevented:true,
   sameVersionDeadlockPrevented:true
