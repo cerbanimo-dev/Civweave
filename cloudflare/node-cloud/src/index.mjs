@@ -7,6 +7,7 @@ const enc = new TextEncoder();
 const clean = (value, max = 500) => String(value ?? '').trim().slice(0, max);
 export const normalizeNodeId = value => clean(value, 120).toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 const json = (value, status = 200, headers = {}) => new Response(JSON.stringify(value, null, 2), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers } });
+const locationCors = { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type, x-civweave-location-key', 'access-control-max-age': '86400' };
 function b64url(bytes) { const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes); let binary = ''; for (const byte of data) binary += String.fromCharCode(byte); return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/g, ''); }
 function fromB64url(value) { const normalized = String(value).replaceAll('-', '+').replaceAll('_', '/'); const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4); const binary = atob(padded); return Uint8Array.from(binary, char => char.charCodeAt(0)); }
 function derToPem(der) { const bytes = der instanceof Uint8Array ? der : new Uint8Array(der); let binary = ''; for (const byte of bytes) binary += String.fromCharCode(byte); const base64 = btoa(binary); return `-----BEGIN PUBLIC KEY-----\n${(base64.match(/.{1,64}/g) || []).join('\n')}\n-----END PUBLIC KEY-----`; }
@@ -42,6 +43,25 @@ export function nodeIdFromHostname(hostname, domain = 'nodes.commonweave.earth')
   return normalizeNodeId(candidate) || null;
 }
 
+export function normalizeHubLocation(input = {}, now = Date.now()) {
+  const latitude = Number(input.latitude), longitude = Number(input.longitude), accuracyMeters = Number(input.accuracyMeters);
+  const capturedMs = Date.parse(clean(input.capturedAt, 80));
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) throw Object.assign(new RangeError('Hub latitude is invalid.'), { status: 400 });
+  if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) throw Object.assign(new RangeError('Hub longitude is invalid.'), { status: 400 });
+  if (!Number.isFinite(accuracyMeters) || accuracyMeters <= 0 || accuracyMeters > 5_000) throw Object.assign(new RangeError('Hub location accuracy must be between 1 and 5,000 meters.'), { status: 400 });
+  if (!Number.isFinite(capturedMs) || Math.abs(now - capturedMs) > 10 * 60 * 1000) throw Object.assign(new RangeError('Hub location reading is stale.'), { status: 400 });
+  return Object.freeze({
+    schema: 'civweave.hub-location.v1',
+    latitude: Number(latitude.toFixed(3)),
+    longitude: Number(longitude.toFixed(3)),
+    precisionMeters: Math.max(100, Math.ceil(accuracyMeters / 100) * 100),
+    coordinateDecimals: 3,
+    source: 'steward-browser-geolocation',
+    capturedAt: new Date(capturedMs).toISOString(),
+    syncedAt: new Date(now).toISOString()
+  });
+}
+
 export function buildCloudNodeManifest(nodeId, input = {}, domain = 'nodes.commonweave.earth') {
   const id = normalizeNodeId(nodeId); if (!id) throw new TypeError('nodeId is required.');
   const displayName = clean(input.displayName || id, 180);
@@ -49,6 +69,7 @@ export function buildCloudNodeManifest(nodeId, input = {}, domain = 'nodes.commo
   return Object.freeze({
     schema: CLOUD_NODE_SCHEMA, nodeId: id, operatorId: clean(input.operatorId || `cerbanimo-cloud-${id}`, 180), displayName, runtime: CLOUD_NODE_RUNTIME,
     publicOrigin: `https://${id}.${domain}`, publicKey: clean(input.publicKey, 20000) || null, keyId: clean(input.keyId, 120) || null, capabilities,
+    location: input.location?.schema === 'civweave.hub-location.v1' ? Object.freeze({ ...input.location }) : null,
     services: Array.isArray(input.services) ? input.services : [], transport: { publicHttps: true, webSocket: true, tunnelRequired: false, relayRequired: false },
     security: { stripePlatformSecretPresent: false, cerbanimoSigningPrivateKeyPresent: false, nodePrivateIdentityScope: 'durable-object-local' }, status: 'active', updatedAt: new Date().toISOString()
   });
@@ -69,6 +90,14 @@ export class CivweaveCloudNode {
     const created = buildCloudNodeManifest(nodeId, { publicKey: identity.publicKey, keyId: identity.keyId }, this.env.NODE_DOMAIN || 'nodes.commonweave.earth'); await this.state.storage.put('manifest', created); return created;
   }
   async sign(domain, timestamp, raw) { const identity = await this.identity(), privateKey = await crypto.subtle.importKey('jwk', identity.privateJwk, { name: 'Ed25519' }, false, ['sign']), message = concatBytes(enc.encode(`${domain}\n${timestamp}\n`), raw instanceof Uint8Array ? raw : enc.encode(String(raw))), signature = await crypto.subtle.sign({ name: 'Ed25519' }, privateKey, message); return { keyId: identity.keyId, signature: b64url(signature) }; }
+  async updateHubLocation(nodeId, input, claimKey) {
+    if (!/^[A-Za-z0-9_-]{40,200}$/.test(clean(claimKey, 220))) throw Object.assign(new Error('A valid location claim key is required.'), { status: 401 });
+    const ownerKeyHash = await sha256Hex(`civweave.hub-location-owner.v1\n${claimKey}`), stored = await this.state.storage.get('hub-location');
+    if (stored?.ownerKeyHash && stored.ownerKeyHash !== ownerKeyHash) throw Object.assign(new Error('This hub location is already paired to another steward browser.'), { status: 409 });
+    const location = normalizeHubLocation(input), manifest = Object.freeze({ ...(await this.manifest(nodeId)), location, updatedAt: location.syncedAt });
+    await this.state.storage.put({ 'hub-location': { ...location, ownerKeyHash }, manifest });
+    return { location, manifest, claimed: !stored?.ownerKeyHash };
+  }
   capacityStub() { if (!this.env.CAPACITY) throw Object.assign(new Error('Capacity binding is unavailable.'), { status: 503 }); return this.env.CAPACITY.get(this.env.CAPACITY.idFromName('civweave-account')); }
   async applyPaymentCapacity(nodeId, event) {
     if (!event?.userId) throw Object.assign(new TypeError('Payment event userId is required.'), { status: 400 });
@@ -133,7 +162,11 @@ export class CivweaveCloudNode {
       if (request.headers.get('upgrade')?.toLowerCase() !== 'websocket') return json({ ok: false, error: 'websocket-upgrade-required' }, 426);
       const pair = new WebSocketPair(), [client, server] = Object.values(pair); this.state.acceptWebSocket(server, ['civweave-node-client']); server.serializeAttachment?.({ nodeId, connectedAt: Date.now() }); server.send(JSON.stringify({ schema: 'civweave.node-socket.v1', type: 'welcome', nodeId })); return new Response(null, { status: 101, webSocket: client });
     }
-    if (request.method === 'POST' && url.pathname === '/internal/configure') { const identity = await this.identity(), next = buildCloudNodeManifest(nodeId, { ...(await request.json()), publicKey: identity.publicKey, keyId: identity.keyId }, this.env.NODE_DOMAIN || 'nodes.commonweave.earth'); await this.state.storage.put('manifest', next); return json({ ok: true, manifest: next }); }
+    if (request.method === 'POST' && url.pathname === '/internal/location') {
+      try { return json({ ok: true, ...(await this.updateHubLocation(nodeId, await request.json().catch(() => ({})), request.headers.get('x-civweave-location-key'))) }); }
+      catch (error) { return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 400); }
+    }
+    if (request.method === 'POST' && url.pathname === '/internal/configure') { const identity = await this.identity(), current = await this.manifest(nodeId), next = buildCloudNodeManifest(nodeId, { ...current, ...(await request.json()), publicKey: identity.publicKey, keyId: identity.keyId }, this.env.NODE_DOMAIN || 'nodes.commonweave.earth'); await this.state.storage.put('manifest', next); return json({ ok: true, manifest: next }); }
     if (request.method === 'POST' && url.pathname === '/internal/sign-request') { const raw = await request.text(), timestamp = Math.floor(Date.now() / 1000), signed = await this.sign('civweave.node-money-edge-request.v1', timestamp, enc.encode(raw)); return json({ keyId: signed.keyId, signatureHeader: `t=${timestamp},kid=${signed.keyId},sig=${signed.signature}` }); }
     return json({ ok: false, error: 'not-found' }, 404);
   }
@@ -153,9 +186,25 @@ async function coreJson(env, pathname, init = {}) { const response = await env.C
 export default {
   async fetch(request, env) {
     const url = new URL(request.url), domain = env.NODE_DOMAIN || 'nodes.commonweave.earth', nodeFromHost = nodeIdFromHostname(url.hostname, domain);
+    if (request.method === 'OPTIONS' && url.pathname === '/api/fabric/location' && !nodeFromHost) return new Response(null, { status: 204, headers: locationCors });
     if (request.method === 'GET' && url.pathname === '/api/fabric/health' && !nodeFromHost) return json({ schema: 'civweave.node-cloud-fabric.v1', ok: true, domain, durableObjects: Boolean(env.NODES), capacityBinding: Boolean(env.CAPACITY), coreBinding: Boolean(env.CORE), moneyAuthority: 'cloudflare-core' });
     if (request.method === 'GET' && url.pathname === '/api/fabric/capacity' && !nodeFromHost) { const response = await callCapacity(env, `/snapshot?nodeId=${encodeURIComponent(url.searchParams.get('nodeId') || '')}`), payload = await response.json().catch(() => ({})); return json(publicCapacity(payload), response.status); }
     if (nodeFromHost && request.method === 'GET' && url.pathname === '/api/ai/node/capacity') { const response = await callCapacity(env, `/snapshot?nodeId=${encodeURIComponent(nodeFromHost)}`), payload = await response.json().catch(() => ({})); return json(publicCapacity(payload), response.status); }
+    if (request.method === 'POST' && url.pathname === '/api/fabric/location' && !nodeFromHost) {
+      const claimKey = clean(request.headers.get('x-civweave-location-key'), 220), input = await request.json().catch(() => ({}));
+      if (!/^[A-Za-z0-9_-]{40,200}$/.test(claimKey)) return json({ ok: false, error: 'location-claim-key-required' }, 401, locationCors);
+      const requested = [...new Set((Array.isArray(input.nodeIds) ? input.nodeIds : []).map(normalizeNodeId).filter(Boolean))];
+      const capacityResponse = await callCapacity(env, '/snapshot'), capacity = await capacityResponse.json().catch(() => ({})), registered = new Set(Array.isArray(capacity.hostNodeIds) ? capacity.hostNodeIds : []);
+      if (!capacityResponse.ok) return json({ ok: false, error: capacity.error || 'capacity-unavailable' }, capacityResponse.status, locationCors);
+      if (requested.length < 1 || requested.length > 3 || requested.some(nodeId => !registered.has(nodeId))) return json({ ok: false, error: 'registered-node-selection-required' }, 400, locationCors);
+      const nodes = [];
+      for (const nodeId of requested) {
+        const nodeResponse = await callNode(env, nodeId, new Request(`https://${nodeId}.${domain}/internal/location`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-civweave-location-key': claimKey }, body: JSON.stringify(input) }), '/internal/location'), result = await nodeResponse.json().catch(() => ({}));
+        if (!nodeResponse.ok) return json({ ok: false, error: result.error || 'node-location-sync-failed', nodeId, syncedNodeIds: nodes.map(item => item.nodeId) }, nodeResponse.status, locationCors);
+        nodes.push({ nodeId, location: result.location, claimed: result.claimed, core: await syncCore(env, result.manifest) });
+      }
+      return json({ schema: 'civweave.hub-location-sync.v1', ok: true, nodeIds: requested, location: nodes[0].location, nodes }, 200, locationCors);
+    }
     const capacityAdmin = !nodeFromHost ? url.pathname.match(/^\/api\/fabric\/capacity\/(configure|nodes\/register|members\/admit|members\/billing|settlements\/membership|settlements\/topup|settlements\/topup-adjustment|usage\/reserve|usage\/settle)$/) : null;
     if (capacityAdmin && request.method === 'POST') { if (!await secretEqual(request.headers.get('authorization')?.replace(/^Bearer\s+/i, ''), env.NODE_FABRIC_OPERATOR_TOKEN)) return json({ ok: false, error: 'forbidden' }, 403); const response = await callCapacity(env, `/${capacityAdmin[1]}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: await request.text() }); return new Response(response.body, { status: response.status, headers: response.headers }); }
     const adminMatch = url.pathname.match(/^\/api\/fabric\/nodes\/([a-zA-Z0-9-]+)$/);
@@ -177,6 +226,6 @@ export default {
     if (nodeFromHost) return callNode(env, nodeFromHost, request);
     const pathNode = url.pathname.match(/^\/n\/([a-zA-Z0-9-]+)(\/.*)?$/);
     if (pathNode) { const nodeId = normalizeNodeId(pathNode[1]), forwarded = new URL(request.url); forwarded.pathname = pathNode[2] || '/'; return callNode(env, nodeId, new Request(forwarded, request)); }
-    return json({ schema: 'civweave.node-cloud-fabric.v1', ok: true, message: 'Civweave Cloudflare host-node fabric', nodeDomain: domain, nodeRoute: `https://<node-id>.${domain}`, capacityRoute: '/api/fabric/capacity', moneyAuthority: 'cloudflare-core' });
+    return json({ schema: 'civweave.node-cloud-fabric.v1', ok: true, message: 'Civweave Cloudflare host-node fabric', nodeDomain: domain, nodeRoute: `https://<node-id>.${domain}`, capacityRoute: '/api/fabric/capacity', locationRoute: '/api/fabric/location', moneyAuthority: 'cloudflare-core' });
   }
 };
