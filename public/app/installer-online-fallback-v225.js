@@ -1,13 +1,24 @@
 (() => {
 'use strict';
 
-const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293';
+const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-host-node-lobby-v1';
 const stateNode = document.getElementById('package-state');
 const assetsNode = document.getElementById('package-assets');
 const installButton = document.getElementById('install-app');
 const updateButton = document.getElementById('check-update');
 const helpNode = document.getElementById('install-help');
 let repairing = false;
+
+function installHostNodeLobby() {
+  const host = new URLSearchParams(location.search).get('host');
+  if (!host || document.querySelector('script[data-civweave-host-node-lobby]')) return false;
+  const script = document.createElement('script');
+  script.src = '/app/host-node-installer-lobby-v1.js?v=1.0.116-host-node-lobby-v1';
+  script.async = true;
+  script.dataset.civweaveHostNodeLobby = 'v1';
+  document.head.append(script);
+  return true;
+}
 
 function releaseVersion() {
   const visible = document.querySelector('.version')?.textContent || '';
@@ -184,6 +195,7 @@ updateButton?.addEventListener('click', event => {
 const observer = new MutationObserver(apply);
 if (stateNode) observer.observe(stateNode, { childList: true, characterData: true, subtree: true });
 addEventListener('pagehide', () => observer.disconnect(), { once: true });
+installHostNodeLobby();
 apply();
 
 globalThis.CivweaveInstallerOnlineFallbackV225 = Object.freeze({
@@ -191,6 +203,7 @@ globalThis.CivweaveInstallerOnlineFallbackV225 = Object.freeze({
   installedEntryUrl,
   campusUrl,
   repairInstalledShell,
+  installHostNodeLobby,
   repairMessage: 'REPAIR_DEVICE_PACKAGE',
   storagePolicy: 'preserve-campus-model-media-school-storage'
 });
