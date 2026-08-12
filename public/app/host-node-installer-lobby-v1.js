@@ -330,4 +330,17 @@ globalThis.CivweaveHostNodeInstallerLobbyV1 = Object.freeze({
   joinHostNode,
   boot,
 });
+
+function installLocalCapacityBridge() {
+  if (document.querySelector('script[data-civweave-local-host-capacity]')) return false;
+  const script = document.createElement('script');
+  script.src = '/app/host-node-local-capacity-v1.js?v=local-host-capacity-v1';
+  script.async = true;
+  script.dataset.civweaveLocalHostCapacity = 'v1';
+  document.head.append(script);
+  return true;
+}
+if (document.readyState === 'loading') addEventListener('DOMContentLoaded', installLocalCapacityBridge, { once: true });
+else installLocalCapacityBridge();
+
 })();
