@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-css-contract-v344-local-ai-coherence';
+const REVISION='chat-css-contract-v343';
 const HARDENING_REVISION='mobile-ai-hardening-v302';
 const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
 const CHAT_PATHS=new Set([
