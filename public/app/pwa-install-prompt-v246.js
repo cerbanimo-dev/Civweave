@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v246-host-origin-v1';
+const VERSION='pwa-install-prompt-v246-host-origin-v2';
 const ENTRY='/app/?system=civweave&installed=1';
 const CANONICAL_ORIGIN='https://civweave.pages.dev';
 const LEGACY_CANONICAL_ORIGIN='https://commonweave.pages.dev';
@@ -21,20 +21,26 @@ function standalone(){
 function localDevelopment(){return ['localhost','127.0.0.1','::1'].includes(location.hostname)}
 function cloudflarePreview(){return location.hostname.endsWith('.pages.dev')&&location.hostname.split('.').length>3}
 function productionPagesOrigin(){return location.hostname.endsWith('.pages.dev')&&location.hostname.split('.').length===3}
+function previewParentOrigin(){
+  if(!cloudflarePreview())return null;
+  const parent=`https://${location.hostname.split('.').slice(1).join('.')}`;
+  return parent===LEGACY_CANONICAL_ORIGIN?CANONICAL_ORIGIN:parent;
+}
 function installOrigin(){return localDevelopment()||productionPagesOrigin()||(!location.hostname.endsWith('.pages.dev')&&location.origin!==HOST_NODE_ORIGIN&&location.origin!==LEGACY_CANONICAL_ORIGIN)}
-function canonicalInstallerUrl(){
-  const target=new URL('/app/index.html',CANONICAL_ORIGIN);
+function stableInstallerUrl(){
+  const destination=previewParentOrigin()||CANONICAL_ORIGIN;
+  const target=new URL('/app/index.html',destination);
   const current=new URL(location.href);
   for(const [key,value] of current.searchParams){if(key!=='install_origin')target.searchParams.append(key,value)}
   if(location.origin===HOST_NODE_ORIGIN&&!target.searchParams.has('host'))target.searchParams.set('host',HOST_NODE_ORIGIN);
-  target.searchParams.set('install_origin','canonical');
+  target.searchParams.set('install_origin',cloudflarePreview()?'host-production':'canonical');
   target.hash=current.hash;
   return target;
 }
 function rerouteUnsafeInstall(){
   if(standalone()||localDevelopment())return false;
   if(location.origin!==HOST_NODE_ORIGIN&&location.origin!==LEGACY_CANONICAL_ORIGIN&&!cloudflarePreview())return false;
-  location.replace(canonicalInstallerUrl().href);
+  location.replace(stableInstallerUrl().href);
   return true;
 }
 function help(message){
@@ -66,8 +72,8 @@ function refreshButton(){
   const button=installButton();
   if(!button||button.disabled||/reset app shell/i.test(button.textContent||''))return;
   if(!installOrigin()&&!standalone()){
-    button.textContent='Open Civweave installer';
-    help('This address is not a stable Civweave install origin. Opening the root installer instead.');
+    button.textContent='Open stable Civweave installer';
+    help('This address is not a stable Civweave install origin. Opening its production host instead.');
     return;
   }
   if(standalone()){
@@ -118,7 +124,7 @@ async function ownInstallClick(event){
   if(!installOrigin()&&!standalone()){
     event.preventDefault();
     event.stopImmediatePropagation();
-    location.assign(canonicalInstallerUrl().href);
+    location.assign(stableInstallerUrl().href);
     return;
   }
   if(standalone()){
@@ -179,7 +185,8 @@ const api=Object.freeze({
   hostNodeOrigin:HOST_NODE_ORIGIN,
   installOrigin,
   canonicalInstallOrigin:installOrigin,
-  canonicalInstallerUrl:()=>canonicalInstallerUrl().href,
+  canonicalInstallerUrl:()=>stableInstallerUrl().href,
+  stableInstallerUrl:()=>stableInstallerUrl().href,
   discoverRelatedInstalls,
   relatedInstalls:()=>[...relatedApps],
   available:()=>Boolean(promptEvent),
