@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [router, settings, mesh, spine, cloudEntry, accountEdge, wrangler, offlineText] = await Promise.all([
+const [version, router, settings, mesh, spine, cloudEntry, accountEdge, wrangler, offlineText] = await Promise.all([
+  'VERSION',
   'public/app/server-ai-router-v301.js',
   'public/app/server-ai-settings-v301.js',
   'public/app/node-ai-mesh-v1.js',
@@ -16,6 +17,11 @@ const [router, settings, mesh, spine, cloudEntry, accountEdge, wrangler, offline
 for (const source of [router, settings, mesh, spine]) new Function(source);
 const offline = JSON.parse(offlineText);
 
+assert.equal(version.trim(), '1.0.116');
+assert.match(router, /1\.0\.116-server-ai-router-v301/);
+assert.match(settings, /1\.0\.116-server-ai-settings-v301/);
+assert.match(mesh, /server-ai-router-v301\.js\?v=1\.0\.116-v301/);
+assert.match(mesh, /server-ai-settings-v301\.js\?v=1\.0\.116-v301/);
 assert.match(router, /const ROUTE='server-auto'/);
 assert.match(router, /\['device-local','server-local','cloudflare-workers-ai'\]/);
 assert.match(router, /s\.register\(MIDDLEWARE_ID,\{handle\},60\)/);
@@ -26,7 +32,7 @@ assert.match(router, /allowLifetimeCredits===true/);
 assert.doesNotMatch(router, /allowLifetimeCredits\s*:\s*true/);
 assert.match(router, /Open AI settings to add compute or choose a membership/);
 
-assert.match(spine, /runtime-spine-v271-server-auto-v301/);
+assert.match(spine, /1\.0\.116-runtime-spine-v271-server-auto-v301/);
 assert.match(spine, /serverAuto\(request\)/);
 assert.match(spine, /function localResultNeedsFailover/);
 assert.match(spine, /completionValidation\?\.valid===false/);
@@ -48,8 +54,6 @@ for (const secret of ['STRIPE_SECRET_KEY','STRIPE_CONNECT_WEBHOOK_SECRET','CIVWE
   assert.ok(!router.includes(secret) && !settings.includes(secret), `Browser server AI surface must not reference ${secret}.`);
 }
 
-assert.match(mesh, /server-ai-router-v301\.js/);
-assert.match(mesh, /server-ai-settings-v301\.js/);
 assert.match(mesh, /ensureServerAI/);
 assert.ok(offline.assets.includes('/app/server-ai-router-v301.js'), 'Offline core must cache the server AI router control surface.');
 assert.ok(offline.assets.includes('/app/server-ai-settings-v301.js'), 'Offline core must cache the server AI settings and commerce entry surface.');
@@ -72,6 +76,7 @@ assert.match(wrangler, /"main": "src\/server-ai-entry-v1\.mjs"/);
 
 console.log(JSON.stringify({
   ok: true,
+  version: version.trim(),
   revision: 'server-ai-commerce-v301',
   routeOrder: ['device-local', 'server-local', 'cloudflare-workers-ai'],
   memberships: true,
