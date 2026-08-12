@@ -54,6 +54,12 @@ cp .env.federated.example .env.federated</code></pre>
 <pre><code>curl http://127.0.0.1:8787/api/federation/health</code></pre>
 <p>When the local companion reports healthy, return to the host and mark the Anchor as paired. A later pairing pass can replace this acknowledgement with cryptographic reconstruction proofs.</p>
 </section>
+<section class="card">
+<h2>5. Connect steward payouts</h2>
+<p>Open the local operator console, unlock its controls with this node's internal credential, and choose <strong>Connect payouts</strong>. Stripe-hosted onboarding collects the steward's identity, tax, bank, and payout details; Civweave stores only the connected-account identifier and readiness status.</p>
+<div class="actions"><a class="primary" href="http://127.0.0.1:8787/app/node-ai-operator-v1.html#liveCommerce">Open operator payout setup</a></div>
+<p class="note">A created Stripe account is not enough: steward revenue stays disabled until Stripe reports the connected account's transfer capability as active.</p>
+</section>
 <div class="actions"><a class="primary" href="/host-setup.html">Return to host setup</a><button type="button" id="mark-paired">Mark this Anchor paired</button></div>
 <p class="note">The current reminder is intentionally persistent but non-blocking. “Remind me tomorrow” snoozes it for one day; marking the Anchor paired dismisses it for this steward browser.</p>
 </main>

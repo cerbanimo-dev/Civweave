@@ -28,6 +28,9 @@ assert.ok(installerHtml.includes('<img src="/app/logos/civweave-pwa-192-v247.png
 assert.ok(installerHtml.includes('<link rel="icon" href="/app/logos/civweave-pwa-192-v247.png" type="image/png">'),'installer favicon must use the verified PNG directly');
 assert.ok(hostSetup.includes(`${entry}&source=host-setup`),'host setup must enter Civweave through installed entry');
 assert.ok(hostSetup.includes('/host-local-anchor.html'),'host setup must expose local Anchor setup');
+assert.ok(hostSetup.includes('CONNECT STEWARD PAYOUTS'),'host setup must include connected payout onboarding for the steward');
+assert.ok(hostSetup.includes('http://127.0.0.1:8787/app/node-ai-operator-v1.html#liveCommerce'),'host setup must route payout connection through the local operator console');
+assert.ok(anchor.includes('5. Connect steward payouts'),'local Anchor setup must continue into Stripe connected-account onboarding');
 assert.ok(hostSetup.includes("localStorage.setItem(STEWARD_KEY,'1')"),'host setup must mark the current browser as steward');
 assert.ok(anchor.includes('href="/host-setup.html"'),'Anchor setup must return to dedicated steward setup');
 assert.ok(setup.includes('Steward setup: ${productionUrl}/host-setup.html'),'Cloudflare host provisioning must print the dedicated steward setup URL');
