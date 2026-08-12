@@ -39,11 +39,6 @@ async function publicAnchorRoute(request,env,nodeId){
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
   if(request.method==='GET'&&url.pathname==='/api/node/anchor/trust')return json(await anchorJson(env,'/trust'),200,headers);
   if(request.method==='GET'&&url.pathname==='/api/node/anchor/status')return json(await anchorJson(env,`/status?nodeId=${encodeURIComponent(nodeId)}`),200,headers);
-  if(request.method==='GET'&&url.pathname==='/api/node/anchor/stipends'){
-    const recipientId=clean(url.searchParams.get('recipientId'),240);
-    if(!recipientId)return json({ok:false,error:'recipientId-required'},400,headers);
-    return json(await anchorJson(env,`/stipends?recipientId=${encodeURIComponent(recipientId)}`),200,headers);
-  }
   const mapping=new Map([['/api/node/anchor/pair','/pair'],['/api/node/anchor/sync','/sync'],['/api/node/anchor/proof','/proof']]);
   const target=mapping.get(url.pathname);
   if(target&&request.method==='POST'){
