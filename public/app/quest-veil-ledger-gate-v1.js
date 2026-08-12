@@ -2,7 +2,7 @@
 'use strict';
 if(globalThis.CivweaveQuestVeilLedgerGateV1)return;
 
-const VERSION='1.0.0-quest-veil-ledger-gate-v1';
+const VERSION='1.0.1-quest-veil-ledger-gate-v1';
 const PROMPT_VERSION='weaveling-task-veil-writer-v1';
 const ENTRY_SCHEMA='civweave.chronicle-entry.task-veil.v1';
 const STATE_SCHEMA='civweave.task-veil-state.v1';
@@ -70,7 +70,13 @@ function themeFor(submission){
   const basis=String(plan?.id||submission?.journeyId||submission?.questId||submission?.id||'task');let hash=0;for(const char of basis)hash=(Math.imul(hash,31)+char.charCodeAt(0))>>>0;
   return THEMES[hash%THEMES.length];
 }
-function realmStage(submission){if(submission?.source==='living'||submission?.kind==='lesson')return'learning';if(submission?.source==='fellowfare'||submission?.kind==='exchange')return'exchange';return'making'}
+function realmStage(submission){
+  const kind=clean(submission?.kind,80).toLowerCase(),source=clean(submission?.source,80).toLowerCase();
+  if(source==='living'||kind==='lesson'||kind==='learning'||kind==='module')return'learning';
+  if(['material','materials','material-request','materials-request','request'].includes(kind))return'material';
+  if(source==='fellowfare'||kind==='exchange'||kind==='trade')return'exchange';
+  return'labor';
+}
 function taskVeilState(submission,ledger=validationLedger()){
   const phase=phaseFor(submission,ledger),theme=themeFor(submission),threshold=latestThreshold(ledger,submission?.id),packet=latestPacket(ledger,submission?.id);
   return Object.freeze({
@@ -154,7 +160,7 @@ async function sync(){
   if(syncPromise)return syncPromise;
   syncPromise=(async()=>{
     installRewardGate();const ledger=validationLedger(),submissions=list(ledger?.submissions).slice(0,120),results=[];
-    for(const submission of submissions)results.push(await createOrQueue(submission,ledger));
+    for(const submission of submissions)try{results.push(await createOrQueue(submission,ledger))}catch(error){results.push({status:'error',submissionId:submission?.id,error:clean(error?.message||error,300)})}
     dispatchEvent(new CustomEvent('civweave:quest-veil-ledger-synced',{detail:{submissionCount:submissions.length,ready:results.filter(row=>row.status==='ready'||row.status==='created').length,queued:results.filter(row=>row.status==='queued').length,at:now()}}));
     return results;
   })().finally(()=>{syncPromise=null});
