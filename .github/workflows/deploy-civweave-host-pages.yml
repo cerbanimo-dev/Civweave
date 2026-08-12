@@ -16,7 +16,7 @@ concurrency:
 jobs:
   deploy:
     if: vars.CIVWEAVE_PAGES_PROJECT != '' && vars.CIVWEAVE_PAGES_PROJECT != 'civweave'
-    name: Build and deploy community host
+    name: Build and deploy community host + starter nodes
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -41,11 +41,33 @@ jobs:
       - name: Verify host deployment settings
         shell: bash
         run: |
+          set -euo pipefail
           test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing repository secret CLOUDFLARE_API_TOKEN'; exit 2; }
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
           test -n "${CIVWEAVE_PAGES_PROJECT:-}" || { echo 'Missing repository variable CIVWEAVE_PAGES_PROJECT'; exit 2; }
           test "$CIVWEAVE_PAGES_PROJECT" != 'civweave' || { echo 'The canonical civweave project is reserved'; exit 2; }
           npx wrangler whoami
+
+      - name: Refuse the wrong Cloudflare Pages account
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx wrangler pages deployment list \
+            --project-name "$CIVWEAVE_PAGES_PROJECT" \
+            --environment production \
+            --json > /tmp/civweave-host-pages-deployments.json
+          node scripts/verify-cloudflare-pages-account-target-v1.mjs \
+            /tmp/civweave-host-pages-deployments.json "$CIVWEAVE_PAGES_PROJECT"
+
+      - name: Provision account Worker and three starter nodes
+        shell: bash
+        run: |
+          set -euo pipefail
+          host_id="${CIVWEAVE_HOST_ID:-${CIVWEAVE_PAGES_PROJECT#civweave-}}"
+          node scripts/provision-cloudflare-account-edge-v1.mjs \
+            --host-id "$host_id" \
+            --strict \
+            --output /tmp/civweave-account-edge.json
 
       - name: Build host Pages package
         run: node scripts/build-cloudflare-pages.mjs
@@ -54,9 +76,13 @@ jobs:
         shell: bash
         run: |
           node --input-type=module <<'NODE'
-          import { mkdirSync, writeFileSync } from 'node:fs';
+          import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
           const project = process.env.CIVWEAVE_PAGES_PROJECT;
           const hostId = process.env.CIVWEAVE_HOST_ID || project.replace(/^civweave-/, '');
+          const accountEdge = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
+          if (accountEdge.status !== 'ready' || accountEdge.starterNodeIds?.length !== 3) {
+            throw new Error('Community Cloudflare account edge is not fully provisioned.');
+          }
           const target = '.cloudflare-pages/app/host-deployment-v1.json';
           mkdirSync('.cloudflare-pages/app', { recursive: true });
           writeFileSync(target, `${JSON.stringify({
@@ -66,6 +92,7 @@ jobs:
             pagesProject: project,
             publicOrigin: `https://${project}.pages.dev`,
             canonicalOrigin: 'https://civweave.pages.dev',
+            accountEdge,
             localAnchorRecommended: true,
             localAnchorRequired: false,
             sourceCommit: process.env.GITHUB_SHA,
@@ -76,10 +103,17 @@ jobs:
       - name: Deploy community Pages project
         shell: bash
         run: |
+          set -euo pipefail
           commit_message="$(git log -1 --pretty=%s)"
           npx wrangler pages deploy .cloudflare-pages \
             --project-name "$CIVWEAVE_PAGES_PROJECT" \
             --branch main \
             --commit-hash "$GITHUB_SHA" \
             --commit-message "$commit_message" \
-            --commit-dirty=true
+            --commit-dirty=true 2>&1 | tee /tmp/civweave-host-pages-deploy.log
+          escaped_project="$(printf '%s' "$CIVWEAVE_PAGES_PROJECT" | sed 's/[.[\*^$()+?{|\\]/\\&/g')"
+          grep -Eqi "https://[^[:space:]]*${escaped_project}\\.pages\\.dev" /tmp/civweave-host-pages-deploy.log || {
+            echo "Cloudflare reported a deployment outside ${CIVWEAVE_PAGES_PROJECT}.pages.dev. Refusing a false-green deploy."
+            cat /tmp/civweave-host-pages-deploy.log
+            exit 3
+          }
