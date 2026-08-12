@@ -7,16 +7,16 @@
 <title>Add a local Civweave Anchor</title>
 <link rel="icon" href="/app/logos/civweave-pwa-192-v247.png" type="image/png">
 <style>
-:root{color-scheme:dark}body{margin:0;background:#07111b;color:#f4f0e7;font:16px/1.5 system-ui,-apple-system,sans-serif}main{max-width:820px;margin:auto;padding:34px 20px 80px}h1{font-size:clamp(2rem,7vw,4rem);line-height:1;margin:.2em 0}.eyebrow{color:#e6c766;font-weight:900;letter-spacing:.12em}.card{margin:20px 0;padding:20px;border:1px solid #dfc16655;border-radius:20px;background:#0e1b28}pre{overflow:auto;padding:14px;border-radius:12px;background:#02080d;color:#dff7f4}code{font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.note{color:#bdcbd2}.actions{display:flex;gap:10px;flex-wrap:wrap}.actions a,.actions button{padding:11px 14px;border:1px solid #dfc16666;border-radius:11px;background:#1a2938;color:white;text-decoration:none;font-weight:800;cursor:pointer}.actions .primary{background:#604817}
+:root{color-scheme:dark}body{margin:0;background:#07111b;color:#f4f0e7;font:16px/1.5 system-ui,-apple-system,sans-serif}main{max-width:820px;margin:auto;padding:34px 20px 80px}h1{font-size:clamp(2rem,7vw,4rem);line-height:1;margin:.2em 0}.eyebrow{color:#e6c766;font-weight:900;letter-spacing:.12em}.card{margin:20px 0;padding:20px;border:1px solid #dfc16655;border-radius:20px;background:#0e1b28}pre{overflow:auto;padding:14px;border-radius:12px;background:#02080d;color:#dff7f4}code{font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.note{color:#bdcbd2}.actions{display:flex;gap:10px;flex-wrap:wrap}.actions a,.actions button{padding:11px 14px;border:1px solid #dfc16666;border-radius:11px;background:#1a2938;color:white;text-decoration:none;font-weight:800;cursor:pointer}.actions .primary{background:#604817}.field{display:grid;gap:6px;margin:10px 0}.field label{font-size:12px;font-weight:850;color:#d8d6e9}.field input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #ffffff24;border-radius:11px;background:#050b13;color:#f4f0e7}.state{padding:12px 14px;border:1px solid #ffffff1d;border-radius:12px;background:#07131d}.state[data-state="healthy"]{border-color:#78d99a88;background:#0d271b}.state[data-state="warning"]{border-color:#e6c76688;background:#2b2511}.state[data-state="error"]{border-color:#ff78a866;background:#2c1220}
 </style>
-<link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.108-prismatic-front-door-v301">
+<link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.109-prismatic-front-door-v301">
 </head>
 <body class="cw-frontdoor cw-anchor">
 <div class="anchor-shell">
 <header class="cw-brand-lockup" aria-label="Civweave platform and Cerbanimo stewardship">
   <div class="cw-platform-brand">
     <img class="cw-platform-logo" src="/app/logos/civweave-prismatic-wordmark-v1.png" alt="Civweave">
-    <div class="cw-platform-copy"><small>LOCAL ANCHOR</small><h1>A root beneath the cloud</h1><p>Keep a recoverable local companion near your Civweave host.</p></div>
+    <div class="cw-platform-copy"><small>LOCAL ANCHOR</small><h1>A root beneath the cloud</h1><p>Keep a signed, recoverable copy of your Civweave host close to home.</p></div>
   </div>
   <div class="cw-steward-seal" aria-label="Cerbanimo steward tool">
     <img class="cw-steward-logo" src="/app/logos/cerbanimo-steward-mark-v1.png" alt="Cerbanimo">
@@ -27,39 +27,64 @@
 <section class="anchor-intro">
 <p class="eyebrow">CIVWEAVE HOST STEWARD</p>
 <h1>Add a local Anchor</h1>
-<p>Your Cloudflare host can remain the public doorway. The local Anchor is the stubborn little root under the floorboards: it preserves host identity/state locally and is the right place for always-on discovery, scheduled relay, local AI, and recovery work.</p>
+<p>Your Cloudflare host remains the public doorway. A local Anchor keeps signed recovery checkpoints, its own continuity key, and a persistent local companion so the hub can be reconstructed even after a wider grid failure. It is strongly recommended, never required.</p>
 </section>
 <section class="card">
-<h2>1. Install prerequisites and check Docker</h2>
-<p>Install Git and Docker Desktop/Engine with Docker Compose v2 on the machine that will stay near this host.</p>
-<pre><code>docker version
-docker context ls</code></pre>
-<p class="note">On Docker Desktop for Windows, <code>docker version</code> must show both Client and Server. Civweave's Anchor image is Linux-based, so Docker Desktop must have its Linux container engine running before continuing.</p>
+<h2>1. Identify the Cloudflare hub</h2>
+<div class="field"><label for="cloud-origin">Cloud node origin</label><input id="cloud-origin" placeholder="https://my-hub.nodes.commonweave.earth"></div>
+<div class="field"><label for="node-id">Hub node ID</label><input id="node-id" placeholder="my-hub"></div>
+<div id="anchor-status" class="state" data-state="warning">No verified local Anchor detected yet.</div>
+<div class="actions" style="margin-top:10px"><button type="button" id="verify-anchor">Verify cryptographic Anchor</button></div>
 </section>
 <section class="card">
-<h2>2. Clone Civweave</h2>
+<h2>2. Install the local companion</h2>
+<p>Install Git and Docker Desktop/Engine with Docker Compose v2 on the laptop, desktop, Raspberry Pi, NAS, or home server that will hold the backup.</p>
 <pre><code>git clone https://github.com/cerbanimo-dev/Civweave.git
 cd Civweave
-cp .env.federated.example .env.federated</code></pre>
-<p class="note">Keep the data directory persistent. It contains the node identity, signing material, federation trust, and retained relay state.</p>
+cp .env.federated.example .env.federated
+docker version</code></pre>
+<p class="note">The full local Civweave companion remains useful even when the cloud is healthy. Its persistent volume keeps federation/node state locally.</p>
 </section>
 <section class="card">
-<h2>3. Start the local companion</h2>
-<pre><code>docker compose --env-file .env.federated -f docker-compose.federated.yml up -d --build</code></pre>
-<p class="note">Run the command as one line. It works in PowerShell as written; do not add Bash-style trailing <code>\</code> line continuations.</p>
-<p>For a laptop-only backup, LAN access is enough. A public tunnel is optional. Civweave should recommend this local copy strongly, but the cloud host remains usable without it.</p>
+<h2>3. Issue a one-time pairing grant</h2>
+<p>On a trusted steward shell, use the Cloudflare fabric operator token to issue a short-lived grant. Do not paste the operator token into this web page.</p>
+<pre><code id="pair-command">curl -sS -X POST "https://civweave-node-cloud.glaedn.workers.dev/api/fabric/nodes/&lt;NODE_ID&gt;/anchors/pairing" -H "Authorization: Bearer $NODE_FABRIC_OPERATOR_TOKEN" -H "Content-Type: application/json" --data '{"recipientId":"passport:YOUR_ID","displayName":"Local Anchor"}'</code></pre>
+<p class="note">Copy only the returned <code>pairing.token</code> into the local machine. The Cloudflare operator secret stays off the Anchor.</p>
 </section>
 <section class="card">
-<h2>4. Verify it</h2>
-<pre><code>curl http://127.0.0.1:8787/api/federation/health</code></pre>
-<p>When the local companion reports healthy, return to the host and mark the Anchor as paired. A later pairing pass can replace this acknowledgement with cryptographic reconstruction proofs.</p>
+<h2>4. Start the companion + cryptographic Anchor</h2>
+<p>Add these values to <code>.env.federated</code>:</p>
+<pre><code id="anchor-env">CIVWEAVE_CLOUD_NODE_ORIGIN=https://my-hub.nodes.commonweave.earth
+CIVWEAVE_ANCHOR_PAIRING_GRANT=PASTE_ONE_TIME_GRANT_HERE
+CIVWEAVE_ANCHOR_SYNC_HOURS=6</code></pre>
+<pre><code>docker compose --profile anchor --env-file .env.federated -f docker-compose.federated.yml up -d --build</code></pre>
+<p class="note">The Anchor profile is optional. It creates an independent persistent Anchor volume and automatically restarts with Docker. The local private key never leaves this machine.</p>
 </section>
-<div class="actions"><a class="primary" href="/host-setup.html">Return to host setup</a><button type="button" id="mark-paired">Mark this Anchor paired</button></div>
-<p class="note">The current reminder is intentionally persistent but non-blocking. “Remind me tomorrow” snoozes it for one day; marking the Anchor paired dismisses it for this steward browser.</p>
+<section class="card">
+<h2>5. Verify recovery health</h2>
+<pre><code>curl http://127.0.0.1:8787/api/federation/health
+curl https://my-hub.nodes.commonweave.earth/api/node/anchor/status</code></pre>
+<p>A healthy Anchor has proved that it downloaded, signature-verified, wrote, read back, and retained the latest signed recovery checkpoint. Civweave classifies hubs as <strong>cloud-only</strong>, <strong>locally-anchored</strong>, or <strong>redundantly-anchored</strong>.</p>
+</section>
+<section class="card">
+<h2>Weekly Button stipend</h2>
+<p>Healthy independent Anchors receive a small infrastructure stipend: <strong>3 / 2 / 1 Buttons</strong> per week for the first, second, and third independent Anchor. The automatic maximum is 6 Buttons per hub per week. Stale proofs, stale checkpoints, low recovery coverage, or duplicate signing keys do not qualify.</p>
+<p class="note">Backup stipends are separate from AI-compute compensation. During incomplete disaster recovery, local work can continue provisionally, but irreversible external settlement stays frozen until signed ledger history is reconciled.</p>
+</section>
+<div class="actions"><a class="primary" href="/host-setup.html">Return to host setup</a><button type="button" id="verify-anchor-bottom">Verify and return</button></div>
+<p class="note">The steward reminder is persistent but non-blocking. It dismisses only after the cloud node reports at least one healthy cryptographic Anchor; “Remind me tomorrow” remains available from Civweave.</p>
 </main>
 </div>
 <script>
-document.querySelector('#mark-paired')?.addEventListener('click',()=>{try{localStorage.setItem('civweave.host-steward.v1','1');localStorage.setItem('civweave.host-anchor.paired.v1','1');localStorage.removeItem('civweave.host-anchor.snooze-until.v1')}catch{};location.href='/host-setup.html'});
+(()=>{
+'use strict';
+const params=new URLSearchParams(location.search),originInput=document.querySelector('#cloud-origin'),nodeInput=document.querySelector('#node-id'),status=document.querySelector('#anchor-status'),env=document.querySelector('#anchor-env'),pairCommand=document.querySelector('#pair-command');
+const normalize=value=>{try{const raw=String(value||'').trim();if(!raw)return'';const url=new URL(/^https?:\/\//i.test(raw)?raw:`https://${raw}`);return url.origin}catch{return''}};
+const deriveNode=value=>{try{const host=new URL(value).hostname,suffix='.nodes.commonweave.earth';return host.endsWith(suffix)?host.slice(0,-suffix.length):''}catch{return''}};
+function renderCommands(){const origin=normalize(originInput.value),nodeId=String(nodeInput.value||deriveNode(origin)||'<NODE_ID>').trim();if(!nodeInput.value&&nodeId!=='<NODE_ID>')nodeInput.value=nodeId;env.textContent=`CIVWEAVE_CLOUD_NODE_ORIGIN=${origin||'https://my-hub.nodes.commonweave.earth'}\nCIVWEAVE_ANCHOR_PAIRING_GRANT=PASTE_ONE_TIME_GRANT_HERE\nCIVWEAVE_ANCHOR_SYNC_HOURS=6`;pairCommand.textContent=`curl -sS -X POST "https://civweave-node-cloud.glaedn.workers.dev/api/fabric/nodes/${nodeId||'<NODE_ID>'}/anchors/pairing" -H "Authorization: Bearer $NODE_FABRIC_OPERATOR_TOKEN" -H "Content-Type: application/json" --data '{"recipientId":"passport:YOUR_ID","displayName":"Local Anchor"}'`}
+async function verify({returnAfter=false}={}){const origin=normalize(originInput.value);if(!origin){status.dataset.state='error';status.textContent='Enter the Cloudflare node origin first.';originInput.focus();return false}status.dataset.state='warning';status.textContent='Checking the node’s signed Anchor status…';try{const response=await fetch(`${origin}/api/node/anchor/status`,{cache:'no-store',headers:{accept:'application/json'}}),payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.error||`HTTP ${response.status}`);const healthy=Math.max(0,Number(payload.healthyAnchors||0)),total=Math.max(0,Number(payload.totalAnchors||0));if(healthy<1){status.dataset.state='warning';status.textContent=total?`${total} Anchor device(s) are paired, but none currently prove a fresh recoverable checkpoint.`:'The hub is still cloud-only. Pair and sync the local Anchor, then verify again.';return false}try{localStorage.setItem('civweave.host-steward.v1','1');localStorage.setItem('civweave.host-anchor.paired.v1','1');localStorage.setItem('civweave.host-anchor.origin.v1',origin);localStorage.removeItem('civweave.host-anchor.snooze-until.v1')}catch{}status.dataset.state='healthy';status.textContent=healthy>=2?`Verified: redundantly anchored with ${healthy} healthy Anchors.`:'Verified: one healthy local Anchor is protecting this hub. A second independent Anchor is recommended.';if(returnAfter)setTimeout(()=>{location.href='/host-setup.html'},350);return true}catch(error){status.dataset.state='error';status.textContent=`Anchor status could not be verified: ${error?.message||error}`;return false}}
+const initial=normalize(params.get('host')||'');if(initial)originInput.value=initial;nodeInput.value=params.get('node')||deriveNode(initial);originInput.addEventListener('input',renderCommands);nodeInput.addEventListener('input',renderCommands);document.querySelector('#verify-anchor')?.addEventListener('click',()=>verify());document.querySelector('#verify-anchor-bottom')?.addEventListener('click',()=>verify({returnAfter:true}));renderCommands();if(initial&&deriveNode(initial))void verify();
+})();
 </script>
 </body>
 </html>
