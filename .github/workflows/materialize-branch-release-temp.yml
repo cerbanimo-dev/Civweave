@@ -1,0 +1,42 @@
+name: TEMP Materialize Branch Release
+
+on:
+  push:
+    branches:
+      - agent/cloudflare-three-starter-node-bootstrap
+
+permissions:
+  contents: write
+
+concurrency:
+  group: temp-materialize-cloudflare-three-node-release
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/cloudflare-three-starter-node-bootstrap
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Materialize canonical release snapshot
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Commit generated release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet && test -z "$(git ls-files --others --exclude-standard)"; then
+            echo 'No generated release changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add VERSION package.json config/release-contract.json releases/1.0.110 public scripts
+          git commit -m 'Materialize Civweave 1.0.110 canonical release'
+          git push origin HEAD:agent/cloudflare-three-starter-node-bootstrap
