@@ -1,0 +1,40 @@
+name: Verify Hub Anchor Resilience v1
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/node-cloud/src/anchor-registry.mjs'
+      - 'cloudflare/node-cloud/src/resilient-entry.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'scripts/civweave-hub-anchor-v1.mjs'
+      - 'scripts/test-hub-anchor-resilience-v1.mjs'
+      - 'scripts/test-hub-anchor-registry-v1.mjs'
+      - 'public/host-local-anchor.html'
+      - 'public/host-setup.html'
+      - 'config/launch-topology-v1.json'
+      - '.github/workflows/verify-hub-anchor-resilience-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check cloudflare/node-cloud/src/anchor-registry.mjs
+          node --check cloudflare/node-cloud/src/resilient-entry.mjs
+          node --check scripts/civweave-hub-anchor-v1.mjs
+      - name: Anchor protocol tests
+        run: node --test scripts/test-hub-anchor-resilience-v1.mjs scripts/test-hub-anchor-registry-v1.mjs
+      - name: Steward UI contract
+        run: |
+          grep -q 'api/node/anchor/status' public/host-local-anchor.html
+          grep -q 'api/node/anchor/status' public/host-setup.html
+          grep -q '3 / 2 / 1 Buttons' public/host-local-anchor.html
