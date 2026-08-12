@@ -1,5 +1,5 @@
 {
-  "name": "Civweave v1.0.116",
+  "name": "Civweave v1.0.117",
   "short_name": "Civweave",
   "description": "Five connected, offline-ready Civweave systems with deterministic local operation and a non-modal AI settings layer.",
   "id": "/civweave-local",
@@ -7,7 +7,6 @@
   "scope": "/",
   "display": "standalone",
   "display_override": [
-    "window-controls-overlay",
     "standalone",
     "minimal-ui"
   ],

@@ -8,17 +8,47 @@ import{ensureLivingSchool,renderLivingSchoolEmbed,FALLBACK_VIDEO_URL}from'../../
 import safeMode from'../../safe-mode-v1.mjs?v=safe-mode-v1';
 
 safeMode.install();
-await installLivingSchoolGenerationGuard();
-await installLivingSchoolQuizContractGuardV263();
-await installLivingSchoolVideoGenerationGuardV1();
+document.documentElement.dataset.livingSchoolAiGuards='lazy';
 
-let busy=false,dispatchCount=0,videoContractBusy=false;
+let busy=false,dispatchCount=0,videoContractBusy=false,aiGuardsPromise=null;
 const LEVELS=new Set(['beginner','intermediate','advanced']);
 const MODES=new Set(['guided','just-in-time','browse']);
+const AI_ACTIONS=new Set(['research-sources','generate-curriculum']);
+const AI_GUARD_TIMEOUT_MS=45000;
 
 function markDispatch(){
   dispatchCount+=1;
   document.documentElement.dataset.livingSchoolDispatchCount=String(dispatchCount);
+}
+function timeoutAfter(ms,label){
+  return new Promise((_,reject)=>setTimeout(()=>reject(new Error(`${label} did not become ready within ${Math.round(ms/1000)} seconds.`)),ms));
+}
+async function ensureAIGuards(reason='interaction'){
+  if(globalThis.CivweaveLivingSchoolGenerationGuardV262?.installed&&globalThis.CivweaveLivingSchoolQuizContractGuardV263?.installed&&globalThis.CivweaveLivingSchoolVideoGenerationGuardV1?.installed){
+    document.documentElement.dataset.livingSchoolAiGuards='ready';
+    return true;
+  }
+  if(!aiGuardsPromise){
+    document.documentElement.dataset.livingSchoolAiGuards='starting';
+    aiGuardsPromise=(async()=>{
+      await installLivingSchoolGenerationGuard();
+      await installLivingSchoolQuizContractGuardV263();
+      await installLivingSchoolVideoGenerationGuardV1();
+      return true;
+    })();
+  }
+  try{
+    await Promise.race([aiGuardsPromise,timeoutAfter(AI_GUARD_TIMEOUT_MS,'The Living School AI generation layer')]);
+    document.documentElement.dataset.livingSchoolAiGuards='ready';
+    document.documentElement.dataset.livingSchoolAiGuardReason=reason;
+    return true;
+  }catch(error){
+    aiGuardsPromise=null;
+    document.documentElement.dataset.livingSchoolAiGuards='unavailable';
+    document.documentElement.dataset.livingSchoolAiGuardReason=reason;
+    const message=clean(error?.message||error,1200)||'The shared model runtime did not become ready.';
+    throw new Error(`Living School is open, but its AI generation layer is not ready yet. ${message}`);
+  }
 }
 function sanitizeSavedHybridQuiz(){
   const result=stripLegacyFallbackQuestions(state().school);
@@ -47,11 +77,20 @@ async function handleLivingSchoolClick(event){
   if(!target)return;
   event.preventDefault();event.stopImmediatePropagation();
   if(target.disabled||busy)return;
-  const action=actions[String(target.dataset.lsAction||'').trim()];
+  const actionName=String(target.dataset.lsAction||'').trim();
+  const action=actions[actionName];
   if(!action)return;
-  busy=true;markDispatch();
-  try{await action(target);await applyVideoContract(`action:${target.dataset.lsAction}`)}catch(error){console.error('[Living School cleanroom]',error);const toast=document.getElementById('lsc218-toast');if(toast){toast.textContent=String(error?.message||error);toast.hidden=false}}
-  finally{busy=false;render();queueMicrotask(()=>renderLivingSchoolEmbed(document,state().school,state().activeModuleId))}
+  busy=true;markDispatch();target.setAttribute('aria-busy','true');
+  try{
+    if(AI_ACTIONS.has(actionName))await ensureAIGuards(`action:${actionName}`);
+    await action(target);
+    await applyVideoContract(`action:${actionName}`);
+  }catch(error){
+    console.error('[Living School cleanroom]',error);
+    const toast=document.getElementById('lsc218-toast');
+    if(toast){toast.textContent=String(error?.message||error);toast.hidden=false}
+  }
+  finally{busy=false;target.removeAttribute('aria-busy');render();queueMicrotask(()=>renderLivingSchoolEmbed(document,state().school,state().activeModuleId))}
 }
 
 function chatCurriculumData(input={}){
@@ -96,6 +135,7 @@ async function generateCurriculumFromChat(input={}){
   if(busy)throw new Error('Living School is already processing another learning action.');
   const data=chatCurriculumData(input);
   if(!data.capability)throw new Error('Moss needs an observable capability before generating the curriculum.');
+  await ensureAIGuards('moss-shared-chat');
   const previous=data.newPath?prepareNewPath(data):null;
   busy=true;markDispatch();
   document.documentElement.dataset.livingSchoolChatAction='generating-curriculum';
@@ -126,8 +166,9 @@ async function generateCurriculumFromChat(input={}){
 
 sanitizeSavedHybridQuiz();
 document.addEventListener('click',handleLivingSchoolClick,true);
-applyVideoContract('startup').catch(error=>console.warn('[Living School video contract]',error));
 render();
+document.documentElement.dataset.livingSchoolWorkbench='ready';
+applyVideoContract('startup').catch(error=>console.warn('[Living School video contract]',error));
 queueMicrotask(()=>renderLivingSchoolEmbed(document,state().school,state().activeModuleId));
-globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'live-local-synthesis-source-links-v260',generationGuard:'source-prompt-v262+quiz-contract-v263+video-generation-guard-v1',quizIntegrity:'ai-only-v263-short-answer-contract',videoContract:'required-per-module',videoFallback:FALLBACK_VIDEO_URL,chatPathIntent:'new-vs-revise-v264',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,generateCurriculumFromChat,normalizeChatCurriculum:chatCurriculumData,legacyNavigation:false});
-try{dispatchEvent(new CustomEvent('civweave:living-school-workbench-ready',{detail:{version:VERSION,chatCurriculumBridge:true,generationGuard:'source-prompt-v262+quiz-contract-v263+video-generation-guard-v1',quizIntegrity:'ai-only-v263-short-answer-contract',videoContract:'required-per-module',videoFallback:FALLBACK_VIDEO_URL,chatPathIntent:'new-vs-revise-v264'}}))}catch{}
+globalThis.LivingSchoolCleanroomV218=Object.freeze({version:VERSION,controller:'single-delegated-click-handler',researchAdapter:'live-local-synthesis-source-links-v260',generationGuard:'lazy-source-prompt-v262+quiz-contract-v263+video-generation-guard-v1',quizIntegrity:'ai-only-v263-short-answer-contract',videoContract:'required-per-module',videoFallback:FALLBACK_VIDEO_URL,chatPathIntent:'new-vs-revise-v264',getState:()=>copy(state()),render,dispatchCount:()=>dispatchCount,ensureAIGuards,generateCurriculumFromChat,normalizeChatCurriculum:chatCurriculumData,legacyNavigation:false});
+try{dispatchEvent(new CustomEvent('civweave:living-school-workbench-ready',{detail:{version:VERSION,chatCurriculumBridge:true,generationGuard:'lazy-source-prompt-v262+quiz-contract-v263+video-generation-guard-v1',quizIntegrity:'ai-only-v263-short-answer-contract',videoContract:'required-per-module',videoFallback:FALLBACK_VIDEO_URL,chatPathIntent:'new-vs-revise-v264',aiStartupPolicy:'lazy-nonblocking'}}))}catch{}
