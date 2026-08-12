@@ -88,6 +88,10 @@ jobs:
             --strict \
             --output /tmp/civweave-account-edge.json
 
+      - name: Verify live starter-node dashboards
+        if: steps.provision_account_edge.outcome == 'success'
+        run: node scripts/verify-cloudflare-account-edge-live-v1.mjs /tmp/civweave-account-edge.json
+
       - name: Build host Pages package
         run: node scripts/build-cloudflare-pages.mjs
 
