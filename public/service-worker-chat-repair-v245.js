@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-convergence-v251-legacy-purge';
+const REVISION='chat-bubble-anchor-v342';
 const CHAT_PATHS=new Set([
   '/app/manifest.webmanifest',
   '/app/installed-entry-v146.html',
@@ -12,6 +12,7 @@ const CHAT_PATHS=new Set([
   '/app/platform-stability-v159.js',
   '/app/guide-workspace-v242.js',
   '/app/shared-guide-surface-v236.js',
+  '/app/shared-chat-face-icons-v255.js',
   '/app/regression-fixes-v243.js',
   '/app/working-campus-v156.js',
   '/app/working-campus-v156.part1.txt',
