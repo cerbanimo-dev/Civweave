@@ -1,0 +1,36 @@
+name: Refresh Living School Shell Metadata v304
+
+on:
+  push:
+    branches:
+      - fix/living-school-shell-v304
+    paths:
+      - '.github/workflows/refresh-living-school-shell-metadata-v304.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/living-school-shell-v304
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Refresh verified shell metadata
+        run: node scripts/generate-prelive-metadata-v281.mjs
+      - name: Remove one-time metadata workflow
+        run: rm .github/workflows/refresh-living-school-shell-metadata-v304.yml
+      - name: Commit refreshed metadata
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m 'Refresh Civweave 1.0.117 shell metadata'
+          git push origin HEAD:fix/living-school-shell-v304
