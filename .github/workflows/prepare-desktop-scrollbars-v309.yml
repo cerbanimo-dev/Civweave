@@ -27,6 +27,15 @@ jobs:
           printf '1.0.121\n' > VERSION
       - name: Materialize canonical 1.0.121 release
         run: node scripts/materialize-canonical-release.mjs
+      - name: Refresh canonical release index
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from 'node:fs/promises';
+          const path='config/release-contract.json';
+          const contract=JSON.parse(await readFile(path,'utf8'));
+          contract.canonical.current={version:'1.0.121',path:'releases/1.0.121',status:'current'};
+          await writeFile(path,JSON.stringify(contract,null,2)+'\n');
+          NODE
       - name: Verify desktop and scrollbar assets
         run: |
           test -f public/app/custom-scrollbars-v309.css
