@@ -46,15 +46,15 @@ const FALLBACK_PATHS=new Map([
 const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR];
 const SYSTEM_EXPERIENCE_SCRIPTS=[
   EXPERIENCE_ORCHESTRATOR,
-  SYSTEMS_MESH_RUNTIME,
-  NODE_AI_MESH_RUNTIME,
-  QUEST_VEIL,
-  QUEST_VEIL_MESH,
-  QUEST_VEIL_LEDGER_GATE,
-  // Keep station + exact-track suggestions near the front so slower
-  // guide/workspace modules cannot starve the six-second radio UI.
+  // Keep station + exact-track suggestions directly behind the orchestrator so
+  // slower mesh/guide/workspace modules cannot starve the six-second radio UI.
   SYSTEM_RADIO_AGENT,
   RADIO_TRACK_SUGGESTIONS,
+  SYSTEMS_MESH_RUNTIME,
+  NODE_AI_MESH_RUNTIME,
+  QUEST_VEIL_MESH,
+  QUEST_VEIL_LEDGER_GATE,
+  QUEST_VEIL,
   GUIDE_IDENTITY_SCRIPT,
   REALM_SESSION_INTEGRITY,
   GUIDE_WORKSPACE,
