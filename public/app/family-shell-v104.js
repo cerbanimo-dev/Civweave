@@ -1,5 +1,6 @@
 (()=>{
 'use strict';
+import('/app/safe-mode-v1.mjs?v=safe-mode-v1').then(module=>module.default?.install?.()).catch(error=>console.warn('[Civweave S.A.F.E.]',error));
 const VERSION='1.0.4-direct-settings-v173';
 const STATUS_KEY='civweave.family-status.v105';
 const SYSTEM_ORDER=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];

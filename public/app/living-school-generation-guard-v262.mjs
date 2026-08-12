@@ -1,4 +1,6 @@
-const REVISION='living-school-generation-guard-v262';
+import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v1';
+
+const REVISION='living-school-generation-guard-v262-safe-v1';
 const MAX_PACKET_CHARS=52000;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const deepCopy=value=>{try{return structuredClone(value)}catch{return JSON.parse(JSON.stringify(value))}};
@@ -208,9 +210,27 @@ export async function installLivingSchoolGenerationGuard(){
     let next=strengthenLiveResearch(request);
     next=injectLocalSynthesisSources(next);
     next=injectCurriculumSources(next);
+    const safe=safeMode.read();
+    if(safe.enabled&&next?.purpose==='living-school-research-grounded-curriculum-v218.1'){
+      const sources=Array.isArray(next?.context?.sources)?next.context.sources:[];
+      if(!sources.length)throw safeModeError('curriculum generation',{ai:{categories:['no-validated-sources']}});
+      const reviewed=await validateAdmissions(originalGenerate,sources,{kind:'curriculum-source'});
+      const rejected=reviewed.find(row=>!row.review.admitted);
+      if(rejected)throw safeModeError(`source “${clean(rejected.item?.title,180)||'Untitled'}”`,rejected.review);
+      next={...next,context:{...(next.context||{}),safeSourceAdmissions:reviewed.map(row=>({id:row.item?.id,review:row.review}))}};
+    }
     if(next?.purpose==='living-school-quiz-delta-completion-v258')return completeQuizPerModule(originalGenerate,next);
     if(next?.purpose==='living-school-research-grounded-curriculum-v218.1')return expandThinCurriculumModules(originalGenerate,next,await originalGenerate(next));
-    return originalGenerate(next);
+    const result=await originalGenerate(next);
+    if(safe.enabled&&next?.purpose==='living-school-live-source-research-v260'&&result?.status==='success'){
+      const sources=Array.isArray(result?.outputJson?.sources)?result.outputJson.sources:[];
+      const reviewed=await validateAdmissions(originalGenerate,sources,{kind:'researched-source'});
+      const admitted=reviewed.filter(row=>row.review.admitted).map(row=>({...row.item,safeAdmission:row.review}));
+      if(!admitted.length)throw safeModeError('the researched source set',reviewed.find(row=>!row.review.admitted)?.review||{ai:{categories:['no-admitted-sources']}});
+      const output={...result.outputJson,sources:admitted,safeAdmission:{revision:safeMode.revision,reviewed:reviewed.length,admitted:admitted.length,rejected:reviewed.length-admitted.length}};
+      return{...result,outputJson:output,outputText:JSON.stringify(output)};
+    }
+    return result;
   };
   const wrapped=Object.freeze({...runtime,generate,generateInteractive:request=>generate({...request,executionProfile:'interactive'}),generateAgentic:request=>generate({...request,executionProfile:'agentic'}),livingSchoolGenerationGuardRevision:REVISION});
   globalThis.CivweaveModelRuntime=wrapped;
