@@ -10,8 +10,8 @@ const redirectLines=redirects.split(/\r?\n/).filter(Boolean);
 if (redirectLines.includes('/app/installed-entry-v146.html /app/ 302')) {
   throw new Error('Stable installed entry must remain reachable; do not redirect the PWA start URL back to the installer.');
 }
-if (!redirectLines.includes('/app/installed-entry-v146 /app/installed-entry-v146.html 302')) {
-  throw new Error('Extensionless legacy installed entry must normalize to the updater-first HTML entry.');
+if (redirectLines.some(line => line.startsWith('/app/installed-entry-v146 ') || line.startsWith('/app/installed-entry-v146.html '))) {
+  throw new Error('Do not add redirects for the installed entry; Cloudflare Pages canonicalizes the HTML file to the extensionless clean URL automatically.');
 }
 
 const canonicalPaths = [
@@ -23,14 +23,14 @@ const canonicalPaths = [
 ];
 const pathOf = value => new URL(String(value || ''), 'https://example.test').pathname;
 
-if (pathOf(manifest.start_url) !== '/app/installed-entry-v146.html') {
-  throw new Error(`Manifest start_url must open the updater-first installed entry: ${manifest.start_url}`);
+if (pathOf(manifest.start_url) !== '/app/installed-entry-v146') {
+  throw new Error(`Manifest start_url must use the Cloudflare-canonical extensionless updater entry: ${manifest.start_url}`);
 }
 if (!String(manifest.start_url).includes('installed=1')) throw new Error('Manifest installed entry must carry installed=1.');
 
 for (const shortcut of manifest.shortcuts || []) {
-  if (pathOf(shortcut.url) !== '/app/installed-entry-v146.html') {
-    throw new Error(`Shortcut must use updater-first installed entry: ${shortcut.name} -> ${shortcut.url}`);
+  if (pathOf(shortcut.url) !== '/app/installed-entry-v146') {
+    throw new Error(`Shortcut must use the Cloudflare-canonical extensionless updater entry: ${shortcut.name} -> ${shortcut.url}`);
   }
 }
 for (const route of canonicalPaths) {
@@ -46,4 +46,4 @@ if (installer.includes('/loom/') || installer.includes('clean-slate migration'))
   throw new Error('/app/index.html still contains the retired migration route.');
 }
 
-console.log('Stable app entry verified: installed launches update first, then route into the canonical five-system contract.');
+console.log('Stable app entry verified: installed launches use the Cloudflare-canonical clean URL, update first, then route into the canonical five-system contract.');
