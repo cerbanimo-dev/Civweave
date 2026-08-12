@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
@@ -130,18 +130,23 @@ if (!includesNamedProject(projects.output, options.projectName)) {
 }
 
 console.log("\n3/4 Building the host package...");
-const hostEnv = {
-  CIVWEAVE_HOST_ID: options.hostId,
-  CIVWEAVE_HOST_ROLE: options.canonical ? "canonical" : "community",
-  CIVWEAVE_PAGES_PROJECT: options.projectName,
-  CIVWEAVE_CANONICAL_ORIGIN: canonicalOrigin,
-};
-run(process.execPath, [buildScript], { env: hostEnv });
+run(process.execPath, [buildScript]);
+const productionUrl = `https://${options.projectName}.pages.dev`;
+writeFileSync(resolve(pagesOutput, "app", "host-deployment-v1.json"), `${JSON.stringify({
+  schema: "civweave.host-deployment.v1",
+  role: options.canonical ? "canonical" : "community",
+  hostId: options.hostId,
+  pagesProject: options.projectName,
+  publicOrigin: productionUrl,
+  canonicalOrigin,
+  localAnchorRecommended: true,
+  localAnchorRequired: false,
+  generatedAt: new Date().toISOString(),
+}, null, 2)}\n`, "utf8");
 
 console.log("\n4/4 Deploying Cloudflare Pages...");
 runWrangler(wrangler, ["pages", "deploy", pagesOutput, "--project-name", options.projectName, "--branch", "main", "--commit-dirty=true"]);
 
-const productionUrl = `https://${options.projectName}.pages.dev`;
 console.log("\nCivweave Cloudflare host setup complete.");
 console.log(`Production URL: ${productionUrl}`);
 console.log(`Health: ${productionUrl}/api/health`);
