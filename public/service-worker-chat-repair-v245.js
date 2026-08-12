@@ -2,11 +2,13 @@
 'use strict';
 
 const REVISION='chat-css-contract-v343';
+const HARDENING_REVISION='mobile-ai-hardening-v302';
 const CHAT_PATHS=new Set([
   '/app/manifest.webmanifest',
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146.js',
   '/app/install-boundary-v146.js',
+  '/app/mobile-ai-hardening-v302.js',
   '/app/realm-console-v140.html',
   '/app/family-ai-loader-v105.js',
   '/app/platform-stability-v159.js',
@@ -22,7 +24,13 @@ const CHAT_PATHS=new Set([
   '/app/working-campus-v156.part5.txt',
   '/app/working-campus-topbar-v243.js',
   '/app/working-campus-v156.css',
-  '/app/working-campus-v156.html'
+  '/app/working-campus-v156.html',
+  '/app/local-chat-runtime-v295.js',
+  '/app/local-chat-owner-v295.js',
+  '/app/local-ai/bootstrap-v266.js',
+  '/app/local-ai/runtime-v266.js',
+  '/app/local-ai/worker-v266.js',
+  '/app/local-ai/test-pulse-v269.js'
 ]);
 const RETIRED_CHAT_PATHS=new Set([
   '/app/guide-chat-v153.js',
@@ -50,7 +58,7 @@ async function purgeChatRuntimeCaches(){
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
+  return{revision:REVISION,hardeningRevision:HARDENING_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
 }
 
 self.addEventListener('activate',event=>{
@@ -64,5 +72,5 @@ self.addEventListener('message',event=>{
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,hardeningRevision:HARDENING_REVISION,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches});
 })();
