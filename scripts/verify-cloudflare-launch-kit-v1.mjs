@@ -96,6 +96,10 @@ assert.ok(membershipSource.includes('minimumMembershipCreditBackingCents'));
 assert.ok(composedMoneySource.includes("event.type === 'invoice.paid'"));
 assert.ok(composedMoneySource.includes("event.type === 'customer.subscription.deleted'"));
 assert.ok(stripeSource.includes('platform-reserve-separate-transfer'));
+assert.ok(stripeSource.includes("STRIPE_CONNECT_ACCOUNT_MODEL = 'accounts-v2-marketplace-recipient'"));
+assert.ok(stripeSource.includes("fees_collector: 'application'"));
+assert.ok(stripeSource.includes("losses_collector: 'application'"));
+assert.ok(stripeSource.includes('stripe_transfers: { requested: true }'));
 assert.ok(stripeSource.includes("mode: 'subscription'"));
 assert.ok(stripeSource.includes("this.request('/v1/invoice_payments'"));
 assert.ok(stripeSource.includes("this.request('/v1/transfers'"));
@@ -138,11 +142,28 @@ for (const file of [
 
 const { StripeConnectWorkerProvider } = await import(new URL('cloudflare/core/src/stripe-connect.mjs', root));
 const calls = [];
+const recipientAccount = {
+  id: 'acct_test',
+  object: 'v2.core.account',
+  configuration: {
+    recipient: {
+      capabilities: {
+        stripe_balance: {
+          stripe_transfers: { status: 'active' }
+        }
+      }
+    }
+  },
+  requirements: { summary: { minimum_deadline: null } }
+};
 const fakeFetch = async (url, init = {}) => {
   calls.push({ url: String(url), init });
   const target = String(url);
-  if (target.endsWith('/v1/accounts')) return new Response(JSON.stringify({ id: 'acct_test' }), { status: 200, headers: {'content-type':'application/json'} });
-  if (target.endsWith('/v1/account_links')) return new Response(JSON.stringify({ url: 'https://connect.stripe.test/onboard', expires_at: 2000000000 }), { status: 200, headers: {'content-type':'application/json'} });
+  if (target.endsWith('/v2/core/accounts') && init.method !== 'GET') return new Response(JSON.stringify(recipientAccount), { status: 200, headers: {'content-type':'application/json'} });
+  if (target.includes('/v2/core/accounts/acct_test')) return new Response(JSON.stringify(recipientAccount), { status: 200, headers: {'content-type':'application/json'} });
+  if (target.endsWith('/v2/core/account_links')) return new Response(JSON.stringify({ url: 'https://connect.stripe.test/onboard', expires_at: 2000000000 }), { status: 200, headers: {'content-type':'application/json'} });
+  if (target.endsWith('/v1/accounts/acct_test')) return new Response(JSON.stringify({ id: 'acct_test', payouts_enabled:true, requirements:{currently_due:[],past_due:[]} }), { status: 200, headers: {'content-type':'application/json'} });
+  if (target.endsWith('/v1/account_links')) return new Response(JSON.stringify({ url: 'https://connect.stripe.test/onboard-legacy', expires_at: 2000000000 }), { status: 200, headers: {'content-type':'application/json'} });
   if (target.endsWith('/v1/checkout/sessions')) return new Response(JSON.stringify({ id: 'cs_test', url: 'https://checkout.stripe.test/cs_test' }), { status: 200, headers: {'content-type':'application/json'} });
   if (target.includes('/v1/invoice_payments?')) return new Response(JSON.stringify({ data: [{ id:'inpay_test', status:'paid', amount_paid:500, payment:{ type:'payment_intent', payment_intent:'pi_member' } }] }), { status: 200, headers: {'content-type':'application/json'} });
   if (target.includes('/v1/payment_intents/pi_member')) return new Response(JSON.stringify({ id:'pi_member', status:'succeeded', latest_charge:{ id:'ch_member', status:'succeeded', currency:'usd', balance_transaction:{ id:'txn_member', fee:45, net:455 } } }), { status: 200, headers: {'content-type':'application/json'} });
@@ -153,15 +174,28 @@ const fakeFetch = async (url, init = {}) => {
 };
 const provider = new StripeConnectWorkerProvider({ secretKey: 'sk_test_placeholder_not_a_real_secret', webhookSecret: 'whsec_placeholder', fetchImpl: fakeFetch });
 await provider.createConnectedAccount({ nodeId: 'seed-east', operatorId: 'operator-seed-east' });
-let body = new URLSearchParams(calls.at(-1).init.body);
-assert.equal(body.has('type'), false, 'legacy Connect type must not be sent');
-assert.equal(body.get('controller[fees][payer]'), 'account');
-assert.equal(body.get('controller[losses][payments]'), 'stripe');
-assert.equal(body.get('controller[requirement_collection]'), 'stripe');
-assert.equal(body.get('controller[stripe_dashboard][type]'), 'full');
+let accountCall = calls.at(-1);
+assert.ok(accountCall.url.endsWith('/v2/core/accounts'));
+let jsonBody = JSON.parse(String(accountCall.init.body || '{}'));
+assert.equal(jsonBody.dashboard, 'express');
+assert.equal(jsonBody.defaults.responsibilities.fees_collector, 'application');
+assert.equal(jsonBody.defaults.responsibilities.losses_collector, 'application');
+assert.equal(jsonBody.configuration.recipient.capabilities.stripe_balance.stripe_transfers.requested, true);
+assert.equal(jsonBody.configuration.merchant, undefined);
+
+const recipientStatus = await provider.retrieveAccount('acct_test');
+assert.equal(recipientStatus.civweave_account_model, 'accounts-v2-marketplace-recipient');
+assert.equal(recipientStatus.civweave_recipient_transfer_status, 'active');
+assert.equal(recipientStatus.payouts_enabled, true);
+
+await provider.createAccountLink({ accountId:'acct_test', refreshUrl:'https://seed-east.nodes.commonweave.earth/refresh', returnUrl:'https://seed-east.nodes.commonweave.earth/return' });
+const accountLinkCall = calls.at(-1);
+assert.ok(accountLinkCall.url.endsWith('/v2/core/account_links'));
+jsonBody = JSON.parse(String(accountLinkCall.init.body || '{}'));
+assert.deepEqual(jsonBody.use_case.account_onboarding.configurations, ['recipient']);
 
 await provider.createTopUpCheckout({ accountId:'acct_test', nodeId:'seed-east', userId:'u1', topupId:'t1', grossCents:1000, successUrl:'https://seed-east.nodes.commonweave.earth/success', cancelUrl:'https://seed-east.nodes.commonweave.earth/cancel', idempotencyKey:'idem1' });
-const checkout = calls.at(-1); body = new URLSearchParams(checkout.init.body);
+const checkout = calls.at(-1); let body = new URLSearchParams(checkout.init.body);
 assert.equal(checkout.init.headers.has('stripe-account'), false, 'top-up customer charge must stay on the platform');
 assert.equal(body.has('payment_intent_data[application_fee_amount]'), false);
 assert.equal(body.get('metadata[civweave_host_account_id]'), 'acct_test');
@@ -241,6 +275,7 @@ console.log(JSON.stringify({
   recurringMemberships:true,
   canonicalMoneyEdge:LIVE_MONEY_EDGE,
   nodeFabric:LIVE_NODE_FABRIC,
+  marketplaceRecipientAccountsV2:true,
   platformReserve:true,
   separateHostTransfers:true,
   refundTransferReversal:true,
