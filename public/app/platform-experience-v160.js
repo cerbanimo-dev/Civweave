@@ -36,7 +36,7 @@ function syncFrame(frame){
     if(!doc.querySelector('link[data-cw160-frame-theme]')){
       const link=doc.createElement('link');
       link.rel='stylesheet';
-      link.href='/app/platform-experience-v160.css?v=dark-review-r1';
+      link.href='/app/platform-experience-v160.css?v=1.0.107-go-live-v300';
       link.dataset.cw160FrameTheme='';
       doc.head?.append(link);
       diagnostics.domWrites+=1;
