@@ -10,7 +10,7 @@ const CHAT_MODULES=[
  ['/app/chat-fullscreen-v295.js',()=>globalThis.CivweaveChatFullscreenV295?.version==='1.0.106-chat-fullscreen-v299'],
  ['/app/saved-chat-store-v295.js',()=>globalThis.CivweaveSavedChatStoreV295?.version==='1.0.97-saved-chat-store-v295'],
  ['/app/saved-chat-ui-v295.js',()=>globalThis.CivweaveSavedChatUIV295?.version==='1.0.97-saved-chat-ui-v295'],
- ['/app/local-chat-runtime-v295.js?v=1.0.115-v302',()=>globalThis.CivweaveLocalChatRuntimeV295?.version==='1.0.115-local-chat-runtime-v302'],
+ ['/app/local-chat-runtime-v295.js?v=1.0.117-v305-mobile-bootstrap-recovery',()=>globalThis.CivweaveLocalChatRuntimeV295?.version==='1.0.117-local-chat-runtime-v305-mobile-bootstrap-recovery'],
  ['/app/local-chat-owner-v295.js?v=1.0.115-v302',()=>globalThis.CivweaveLocalChatOwnerV295?.version==='1.0.115-local-chat-owner-v302']
 ];
 const SETTINGS_SELECTOR='[data-action="settings"],[data-settings],#lite-settings,[data-open-unified-ai-settings],#aiSettings,#modelSettings,#btnAISettings,[data-ai-settings],[data-ls-action="open-ai-settings"],#settings-button,#model-chip';
