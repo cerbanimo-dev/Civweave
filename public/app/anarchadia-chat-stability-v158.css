@@ -1,2 +1,69 @@
-@import url('/app/anarchadia-chat-stability-v158-core.css?v=go-live-v300');
-@import url('/app/go-live-visual-v300.css?v=go-live-v300');
+/* Anarchadia v158: persistent Merlin console and mobile stability pass. */
+html[data-civweave-system="anarchadia"] #gc153-launcher{display:none!important}
+html[data-civweave-system="anarchadia"] .ac-frame-noise{display:none!important}
+html[data-civweave-system="anarchadia"] .ac-display{
+  overflow:visible;
+  background:
+    radial-gradient(circle at 50% -10%,#ff2f8716,transparent 34rem),
+    linear-gradient(#08121af8,#03070bfc),
+    repeating-linear-gradient(0deg,transparent 0 31px,#1fd8ff08 31px 32px),
+    repeating-linear-gradient(90deg,transparent 0 31px,#1fd8ff06 31px 32px);
+}
+html[data-civweave-system="anarchadia"] .ac-module,
+html[data-civweave-system="anarchadia"] .ac-card,
+html[data-civweave-system="anarchadia"] .ac-pipeline-card,
+html[data-civweave-system="anarchadia"] .ac-ledger-entry{
+  contain:layout paint;
+}
+html[data-civweave-system="anarchadia"] button[disabled]{opacity:.5;cursor:wait}
+.ac-merlin-chat{
+  position:relative;
+  z-index:3;
+  width:100%;
+  max-width:1080px;
+  margin:18px auto 0;
+  display:grid;
+  grid-template-rows:auto minmax(150px,280px) auto;
+  border:1px solid #ff2f8788;
+  background:linear-gradient(145deg,#0d1821f5,#05090ef8);
+  box-shadow:inset 0 0 26px #ff2f8714,0 0 18px #ff2f8718;
+  clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px);
+}
+.ac-merlin-head{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px 15px;
+  border-bottom:1px solid #ff2f8755;
+}
+.ac-merlin-head img{width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 0 10px #ff2f8790)}
+.ac-merlin-head div{min-width:0;flex:1}
+.ac-merlin-head small,.ac-merlin-head span{display:block;color:#aeb9c1}
+.ac-merlin-head small{color:#1fd8ff;font:900 10px/1.2 ui-monospace,monospace;letter-spacing:.12em}
+.ac-merlin-head h2{margin:2px 0;color:#ff2f87;font-size:clamp(1.25rem,4vw,2rem);letter-spacing:.04em}
+.ac-merlin-head button{border:1px solid #ffffff33;background:#111923;color:#fff;padding:9px 11px;font-weight:850;cursor:pointer}
+.ac-merlin-log{display:grid;align-content:start;gap:9px;overflow:auto;padding:13px 15px;overscroll-behavior:contain}
+.ac-merlin-message{max-width:88%;padding:10px 12px;border:1px solid #ffffff1f;background:#ffffff0b;color:#e7edf0}
+.ac-merlin-message p{margin:0;white-space:pre-wrap;line-height:1.45}
+.ac-merlin-message small{display:block;margin-top:6px;color:#93a4ae;font-size:.68rem}
+.ac-merlin-message.is-user{justify-self:end;border-color:#1fd8ff66;background:#1fd8ff10}
+.ac-merlin-message.is-merlin{border-left:3px solid #ff2f87}
+.ac-merlin-message.is-pending{opacity:.7}
+.ac-merlin-message.is-error{border-color:#ff6b5f;color:#ffd0cb}
+.ac-merlin-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;padding:12px 14px;border-top:1px solid #ff2f8755}
+.ac-merlin-form textarea{min-height:68px;max-height:180px;resize:vertical;border:1px solid #ffffff33;background:#020609;color:#fff;padding:10px;font:inherit}
+.ac-merlin-form button{align-self:stretch;border:1px solid #ff2f87;background:#ff2f8715;color:#ff2f87;padding:10px 15px;font-weight:950;letter-spacing:.08em}
+.ac-merlin-status{grid-column:1/-1;color:#94a3ad;font:700 10px/1.3 ui-monospace,monospace;letter-spacing:.05em}
+.ac-toast{position:fixed;z-index:2147482500;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);max-width:min(92vw,620px);padding:10px 14px;border:1px solid #1fd8ff;background:#071017f5;color:#fff;box-shadow:0 12px 34px #000b}
+@media(max-width:720px){
+  html[data-civweave-system="anarchadia"] .ac-display{box-shadow:inset 0 0 32px #000}
+  html[data-civweave-system="anarchadia"] .ac-module{transition:none}
+  .ac-merlin-chat{grid-template-rows:auto minmax(170px,36vh) auto}
+  .ac-merlin-head{align-items:flex-start}
+  .ac-merlin-head img{width:44px;height:44px}
+  .ac-merlin-form{grid-template-columns:1fr}
+  .ac-merlin-form button{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+  html[data-civweave-system="anarchadia"] *{transition:none!important;scroll-behavior:auto!important}
+}

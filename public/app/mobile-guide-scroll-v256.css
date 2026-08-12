@@ -1,2 +1,24 @@
-@import url('/app/mobile-guide-scroll-v256-core.css?v=go-live-v300');
-@import url('/app/go-live-visual-v300.css?v=go-live-v300');
+/* Civweave mobile guide scroll ownership v256
+   The document owns vertical scrolling on phones. Inline guide transcripts must
+   not become nested scroll traps beneath the user's finger. */
+@media (max-width: 680px), (pointer: coarse) {
+  #cw-shared-guide-surface-v236 {
+    touch-action: pan-y !important;
+    overscroll-behavior-y: auto !important;
+  }
+
+  #cw-shared-guide-surface-v236 .cwsg236-log {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: auto !important;
+  }
+
+  #cw-shared-guide-surface-v236 .cwsg236-main,
+  #cw-shared-guide-surface-v236 .cwsg236-form,
+  #cw-shared-guide-surface-v236 .cwsg236-head {
+    touch-action: pan-y !important;
+  }
+}
