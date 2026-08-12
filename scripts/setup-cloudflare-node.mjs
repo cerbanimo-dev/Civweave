@@ -135,6 +135,12 @@ console.log(`Role: ${options.canonical ? "canonical root" : "community host"}`);
 console.log(`Host ID: ${options.hostId}`);
 console.log(`Pages project: ${options.projectName}`);
 if (options.expectAccountEmail) console.log(`Required Cloudflare account: ${options.expectAccountEmail}`);
+console.log("\nCloudflare deployment contract:");
+console.log("  Pages host: Account > Cloudflare Pages > Edit");
+console.log("  Worker + 3 starter nodes: Account > Workers Scripts > Edit");
+console.log("  Account resources: Include the account that will own this host");
+console.log("  Durable Objects use Workers Scripts permission; there is no separate Durable Objects token row.");
+console.log("  The helper attempts both layers automatically and records any incomplete layer for the steward page.");
 
 console.log("\n1/5 Checking Cloudflare authentication...");
 const whoami = runWrangler(wrangler, ["whoami"], { capture: true });
@@ -211,7 +217,11 @@ if (accountEdge.status === "ready") {
   console.log(`Account Worker: ${accountEdge.workerOrigin}`);
   for (const node of accountEdge.starterNodes || []) console.log(`Starter node: ${node.publicOrigin}`);
 } else {
-  console.warn("Account Worker/starter nodes are still pending. Pages is live; rerun this setup after granting the Cloudflare token Workers Scripts/Durable Objects access.");
+  console.warn("\nACTION REQUIRED: the Pages host is live, but the Worker + 3 starter nodes are pending.");
+  console.warn("Cloudflare token permission: Account > Workers Scripts > Edit");
+  console.warn("Account resources: Include the Cloudflare account that owns this host");
+  console.warn(`Retry: node scripts/provision-cloudflare-account-edge-v1.mjs --host-id ${options.hostId} --strict`);
+  console.warn(`Visible status: ${productionUrl}/host-setup.html`);
 }
 
 console.log("\nAutomatic updates:");
