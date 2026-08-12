@@ -3,6 +3,7 @@
 const VERSION='document-lifecycle-v296-management-only-settings';
 const LEGACY_ENTRY_REVISION='document-lifecycle-v269-ai-settings-entry';
 const BF_CACHE_REVISION='v308-bfcache-visible-local-ai';
+const SETTINGS_LOAD_POLICY_COMPAT='management-only-no-inference-bootstrap-v296';
 if(globalThis.CivweaveDocumentLifecycleV221?.version===VERSION&&globalThis.CivweaveDocumentLifecycleV221?.bfCacheRevision===BF_CACHE_REVISION)return;
 let active=true;
 const observers=new Set();
@@ -122,5 +123,5 @@ addEventListener('pagehide',stopOnPageHide);
 addEventListener('beforeunload',stop,{once:true});
 addEventListener('pageshow',reviveFromPageShow);
 startEntryRepair();
-globalThis.CivweaveDocumentLifecycleV221=Object.freeze({version:VERSION,legacyEntryRevision:LEGACY_ENTRY_REVISION,bfCacheRevision:BF_CACHE_REVISION,active:()=>active,head:()=>document.head,body:()=>document.body,ensureAISettingsDelegation,ensureLocalAISettingsManagement,ensureVisibleManagement,ensureMinimalManagement,localAIVisibleReady,localAIManagementReady,localAIInferenceReady,enhanceLocalAISettings,settingsController,reviveFromPageShow,aiSettingsEntryRepair:'v296-management-only-settings',settingsLoadPolicy:'visible-controls-preloaded-management-only-no-inference-v308',listenerPhase:'capture',stop});
+globalThis.CivweaveDocumentLifecycleV221=Object.freeze({version:VERSION,legacyEntryRevision:LEGACY_ENTRY_REVISION,bfCacheRevision:BF_CACHE_REVISION,active:()=>active,head:()=>document.head,body:()=>document.body,ensureAISettingsDelegation,ensureLocalAISettingsManagement,ensureVisibleManagement,ensureMinimalManagement,localAIVisibleReady,localAIManagementReady,localAIInferenceReady,enhanceLocalAISettings,settingsController,reviveFromPageShow,aiSettingsEntryRepair:'v296-management-only-settings',settingsLoadPolicy:SETTINGS_LOAD_POLICY_COMPAT,visibleSettingsLoadPolicy:'visible-controls-preloaded-management-only-no-inference-v308',listenerPhase:'capture',stop});
 })();
