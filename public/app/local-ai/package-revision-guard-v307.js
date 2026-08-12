@@ -11,10 +11,15 @@ function mismatch(id,selectionValue=null,stateValue=null){
   if(!spec)return null;
   const selected=selectionValue||base.selection?.()||{};
   const state=stateValue||base.state?.(id)||{};
-  const installedRevision=String(state?.revision||((selected?.id===id&&selected?.revision)||''));
+  const selectedRevision=String(selected?.id===id?selected?.revision||'':'');
+  const stateRevision=String(state?.revision||'');
   const currentRevision=String(spec.revision||'');
-  if(!installedRevision||!currentRevision||installedRevision===currentRevision)return null;
-  return{schema:'civweave.local-model-package-revision.v1',id,spec,installedRevision,currentRevision,message:`${spec.label} has a newer local package. Resume the model download once to install the current browser-compatible artifacts.`};
+  const replacementReady=stateRevision===currentRevision&&String(state?.status||'')==='ready';
+  const selectedStale=Boolean(selectedRevision&&currentRevision&&selectedRevision!==currentRevision&&!replacementReady);
+  const stateStale=Boolean(stateRevision&&currentRevision&&stateRevision!==currentRevision);
+  if(!selectedStale&&!stateStale)return null;
+  const installedRevision=stateStale?stateRevision:selectedRevision;
+  return{schema:'civweave.local-model-package-revision.v1',id,spec,installedRevision,currentRevision,replacementReady,stateStatus:String(state?.status||''),message:`${spec.label} has a newer local package. Resume the model download once to install the current browser-compatible artifacts.`};
 }
 function selection(){
   const value=base.selection?.()||{active:false,id:null};
@@ -44,5 +49,5 @@ function migration(id){return mismatch(id)||null}
 const guarded=Object.freeze({...base,selection,state,status,packageRevisionGuard:true,packageRevisionGuardVersion:VERSION,packageMigration:migration});
 globalThis.CivweaveLocalModelDownloadV266=guarded;
 globalThis.CivweaveLocalModelPackageRevisionGuardV307=Object.freeze({version:VERSION,mismatch:migration,selection,state,status});
-try{dispatchEvent(new CustomEvent('civweave:local-model-package-revision-guard-ready',{detail:{version:VERSION,selectionSuppression:true,stateNormalization:true,preservesCachedWeights:true}}))}catch{}
+try{dispatchEvent(new CustomEvent('civweave:local-model-package-revision-guard-ready',{detail:{version:VERSION,selectionSuppression:true,stateNormalization:true,replacementMustBeReady:true,preservesCachedWeights:true}}))}catch{}
 })();
