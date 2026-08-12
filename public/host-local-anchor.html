@@ -16,8 +16,11 @@
 <h1>Add a local Anchor</h1>
 <p>Your Cloudflare host can remain the public doorway. The local Anchor is the stubborn little root under the floorboards: it preserves host identity/state locally and is the right place for always-on discovery, scheduled relay, local AI, and recovery work.</p>
 <section class="card">
-<h2>1. Install prerequisites</h2>
+<h2>1. Install prerequisites and check Docker</h2>
 <p>Install Git and Docker Desktop/Engine with Docker Compose v2 on the machine that will stay near this host.</p>
+<pre><code>docker version
+docker context ls</code></pre>
+<p class="note">On Docker Desktop for Windows, <code>docker version</code> must show both Client and Server. Civweave's Anchor image is Linux-based, so Docker Desktop must have its Linux container engine running before continuing.</p>
 </section>
 <section class="card">
 <h2>2. Clone Civweave</h2>
@@ -28,9 +31,8 @@ cp .env.federated.example .env.federated</code></pre>
 </section>
 <section class="card">
 <h2>3. Start the local companion</h2>
-<pre><code>docker compose --env-file .env.federated \
-  -f docker-compose.federated.yml \
-  up -d --build</code></pre>
+<pre><code>docker compose --env-file .env.federated -f docker-compose.federated.yml up -d --build</code></pre>
+<p class="note">Run the command as one line. It works in PowerShell as written; do not add Bash-style trailing <code>\</code> line continuations.</p>
 <p>For a laptop-only backup, LAN access is enough. A public tunnel is optional. Civweave should recommend this local copy strongly, but the cloud host remains usable without it.</p>
 </section>
 <section class="card">
