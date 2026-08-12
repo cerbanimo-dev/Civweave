@@ -89,6 +89,19 @@ const WORKER_PATHS = new Set([
   '/service-worker-update-v204.js'
 ]);
 
+const COHERENCE_CRITICAL_APP_PATHS = new Set([
+  '/app/family-ai-loader-v105.js',
+  '/app/local-chat-runtime-v295.js',
+  '/app/local-chat-owner-v295.js',
+  '/app/ai-capability-broker-v268.js',
+  '/app/mobile-ai-hardening-v302.js',
+  '/app/document-lifecycle-v221.js'
+]);
+
+function coherenceCriticalAppPath(pathname) {
+  return pathname.startsWith('/app/local-ai/') || COHERENCE_CRITICAL_APP_PATHS.has(pathname);
+}
+
 function post(event, packet) {
   try { event.ports?.[0]?.postMessage(packet); } catch {}
   try { event.source?.postMessage?.(packet); } catch {}
@@ -638,6 +651,10 @@ self.addEventListener('fetch', event => {
   }
   if (request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
     event.respondWith(networkFirst(request, url.pathname === '/' ? '/index.html' : '/offline.html'));
+    return;
+  }
+  if (coherenceCriticalAppPath(url.pathname)) {
+    event.respondWith(networkFirst(request, url.pathname));
     return;
   }
   if (url.pathname.startsWith('/app/') || url.pathname.startsWith('/extensions/') || url.pathname === '/offline.html' || url.pathname.startsWith('/install-')) {
