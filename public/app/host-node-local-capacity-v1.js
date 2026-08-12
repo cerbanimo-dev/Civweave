@@ -8,10 +8,12 @@ const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
 const RESIDENT_KEY = 'civweave.host-resident-id.v1';
 const PASSPORT_KEY = 'civweave.anarchadia.citizen-console.v139';
 const REFRESH_MS = 15_000;
+const LOBBY_WAIT_MS = 10_000;
 let refreshing = false;
 let joining = false;
 let observerTimer = 0;
 let refreshTimer = 0;
+let bound = false;
 
 const el = id => document.getElementById(id);
 
@@ -145,8 +147,33 @@ function observeLobby() {
   return true;
 }
 
+function waitForLobby(timeoutMs = LOBBY_WAIT_MS) {
+  const existing = document.getElementById('cw-host-node-lobby');
+  if (existing) return Promise.resolve(existing);
+  return new Promise(resolve => {
+    const root = document.documentElement || document;
+    let settled = false;
+    const finish = value => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      observer.disconnect();
+      resolve(value);
+    };
+    const observer = new MutationObserver(() => {
+      const lobby = document.getElementById('cw-host-node-lobby');
+      if (lobby) finish(lobby);
+    });
+    observer.observe(root, { childList: true, subtree: true });
+    const timer = setTimeout(() => finish(null), timeoutMs);
+  });
+}
+
 async function boot() {
-  if (!document.getElementById('cw-host-node-lobby')) return false;
+  if (bound) return true;
+  const lobby = await waitForLobby();
+  if (!lobby || bound) return false;
+  bound = true;
   document.addEventListener('click', interceptJoin, true);
   observeLobby();
   await refreshCapacity();
@@ -160,5 +187,5 @@ async function boot() {
 if (document.readyState === 'loading') addEventListener('DOMContentLoaded', boot, { once: true });
 else boot();
 
-globalThis.CivweaveHostNodeLocalCapacityV1 = Object.freeze({ version: VERSION, refreshCapacity, admitResident, residentId, passportId });
+globalThis.CivweaveHostNodeLocalCapacityV1 = Object.freeze({ version: VERSION, refreshCapacity, admitResident, residentId, passportId, waitForLobby, boot });
 })();
