@@ -1,0 +1,40 @@
+name: Verify Quest Veil v1
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/quest-veil-v1.js'
+      - 'public/app/quest-veil-ledger-gate-v1.js'
+      - 'public/app/quest-veil-mesh-v1.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'scripts/test-quest-veil-v1.mjs'
+      - '.github/workflows/verify-quest-veil-v1.yml'
+  push:
+    branches:
+      - 'agent/quest-veil-ledger-writer'
+    paths:
+      - 'public/app/quest-veil-v1.js'
+      - 'public/app/quest-veil-ledger-gate-v1.js'
+      - 'public/app/quest-veil-mesh-v1.js'
+      - 'public/app/install-boundary-v146.js'
+      - 'scripts/test-quest-veil-v1.mjs'
+      - '.github/workflows/verify-quest-veil-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check runtime syntax
+        run: |
+          node --check public/app/quest-veil-v1.js
+          node --check public/app/quest-veil-ledger-gate-v1.js
+          node --check public/app/quest-veil-mesh-v1.js
+      - name: Verify mandatory privacy, mesh, and rewards contract
+        run: node scripts/test-quest-veil-v1.mjs

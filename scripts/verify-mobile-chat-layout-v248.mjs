@@ -45,11 +45,12 @@ check('Cerbanimo mounts no retired cabinet overlay',!realmHtml.includes('cabinet
 check('family AI loader is headless and delegates to v242',!familyLoader.includes('ch142-control-band')&&!familyLoader.includes('new MutationObserver')&&familyLoader.includes('CivweaveGuideWorkspaceV242?.openWindow'));
 
 for(const retired of ['public/app/persistent-guide-viewport-v216.js','public/app/persistent-guide-chat-v215.js','public/app/chat-single-owner-v245.js'])check(`retired mobile chat runtime deleted: ${retired}`,!(await exists(retired)));
-check('manifest launches installed app through updater entry',manifest.start_url==='/app/installed-entry-v146.html?installed=1');
+const manifestStart=new URL(manifest.start_url,'https://civweave.invalid');
+check('manifest launches installed app through updater entry',['/app/installed-entry-v146','/app/installed-entry-v146.html'].includes(manifestStart.pathname)&&manifestStart.searchParams.get('installed')==='1'&&!manifestStart.searchParams.has('version'));
 check('installed entry performs no-store release discovery and worker update',installedEntry.includes("cache:'no-store'")&&installedEntry.includes('await registration.update()')&&installedEntry.includes("updateViaCache:'none'"));
 check('installed entry activates a waiting worker before routing',installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})")&&installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='));
 for(const path of ['/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js','/app/chat-single-owner-v245.js'])check(`phone cache purge includes ${path}`,workerRepair.includes(`'${path}'`));
-check('service worker activates v251 legacy purge',workerEntry.includes('chat-convergence-v251-legacy-purge')&&workerRepair.includes("const REVISION='chat-convergence-v251-legacy-purge'"));
+check('service worker activates v342 chat repair',workerEntry.includes('chat-bubble-anchor-v342')&&workerRepair.includes("const REVISION='chat-bubble-anchor-v342'"));
 check('worker installs with skipWaiting',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
 
 console.log(JSON.stringify({ok:true,version,revision:'mobile-v248-on-v242-canonical-owner',checks:checks.length,mobile:{topbarRows:'brand / modes / map+settings / review+theme',realmCards:'2-column then 1-column',dynamicViewport:true},chat:{canonicalOwner:'v242',deletedLegacyOwners:3,embeddedComposerDelegates:true,modelFallback:true},installedBoot:{updaterFirst:true,workerActivation:true,legacyCachePurge:true}},null,2));

@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
 
+await import('./sync-release-version-assets.mjs');
+await import('./build-service-worker-v211.mjs');
+
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
 const requiredRadioAssets = [
   '/app/install-boundary-v146.js',
@@ -48,7 +51,7 @@ for (const source of [wrapper, builder]) {
   assert(source.indexOf('/service-worker-shell-integrity-v281.js') < source.indexOf(radioImport), 'Radio shell must wrap the integrity-owned cacheShell implementation.');
   assert(source.indexOf(radioImport) < source.indexOf('/service-worker-shell-repair-v293.js'), 'Installed shell repair must observe the radio-wrapped cacheShell implementation.');
 }
-assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305`), 'Checked-in worker does not pin the radio shell to the current release.');
+assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305`), 'Generated worker does not pin the radio shell to the current release.');
 assert(builder.includes("'public/service-worker-radio-core-v305.js'"), 'Worker builder does not require the radio shell source file.');
 assert(builder.includes("radioCore:'radio-core-shell-v305'"), 'Worker builder does not report the radio shell revision.');
 

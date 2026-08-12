@@ -42,11 +42,11 @@ await patch('public/app/index.html',source=>{
 await patch('public/app/manifest.webmanifest',source=>{
   const manifest=JSON.parse(source);
   manifest.name=`Civweave v${version}`;
-  manifest.start_url='/app/installed-entry-v146?installed=1';
+  manifest.start_url='/app/installed-entry-v146.html?installed=1';
   if(Array.isArray(manifest.shortcuts))for(const shortcut of manifest.shortcuts){
-    const target=new URL(shortcut.url||'/app/installed-entry-v146','https://civweave.invalid');
+    const target=new URL(shortcut.url||'/app/installed-entry-v146.html','https://civweave.invalid');
     const system=target.searchParams.get('system');
-    target.pathname='/app/installed-entry-v146';
+    target.pathname='/app/installed-entry-v146.html';
     target.search='?installed=1';
     if(system)target.searchParams.set('system',system);
     shortcut.url=`${target.pathname}${target.search}`;
