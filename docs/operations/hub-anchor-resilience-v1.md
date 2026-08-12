@@ -73,7 +73,7 @@ Per hub, automatic weekly infrastructure stipends diminish by independent Anchor
 
 The automatic maximum is therefore **6 Buttons per hub per week**. Duplicate Anchor signing-key fingerprints cannot multiply payouts. Receipts are week-scoped and idempotent, so daily cron retries cannot issue the same weekly grant twice.
 
-Anchor stipend receipts are separate from AI-compute compensation. The v1 protocol emits signed `civweave.anchor-button-stipend.v1` receipts; canonical wallet ingestion can consume those receipts without changing the proof contract.
+Anchor stipend receipts are separate from AI-compute compensation. The v1 protocol emits signed `civweave.anchor-button-stipend.v1` receipts; canonical wallet ingestion can consume those receipts without changing the proof contract. Recipient-linked stipend history stays inside the Anchor registry/operator boundary rather than being enumerable through the public node API.
 
 ## Scheduling detail
 
@@ -94,7 +94,6 @@ Public per-node routes:
 - `POST /api/node/anchor/pair`
 - `POST /api/node/anchor/sync`
 - `POST /api/node/anchor/proof`
-- `GET /api/node/anchor/stipends?recipientId=...`
 
 Operator-authenticated fabric routes:
 
@@ -128,7 +127,7 @@ Then start the optional profile:
 docker compose --profile anchor --env-file .env.federated -f docker-compose.federated.yml up -d --build
 ```
 
-The `anchor` service gets its own persistent Docker volume. Once paired, the one-time grant is no longer required for authentication; the persisted local Ed25519 key is the Anchor identity.
+The `anchor` service gets its own persistent Docker volume. Once paired, the one-time grant is no longer required for authentication; the persisted local Ed25519 key is the Anchor identity. After the first successful proof, the consumed grant can be removed from `.env.federated`.
 
 ## Direct daemon setup
 
