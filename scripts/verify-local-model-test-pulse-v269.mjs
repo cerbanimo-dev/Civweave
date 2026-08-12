@@ -30,7 +30,7 @@ check('worker keeps KV cache and opt-in warm decode benchmark',worker.includes('
 check('worker supports text-only Gemma v4 without replacing v3',worker.includes('runtimeModules=new Map()')&&worker.includes('if(spec.textOnly)modelOptions.textOnly=true')&&worker.includes("TRANSFORMERS_V3='/app/vendor/transformers/transformers.min.js'"));
 check('registry keeps hidden q8 CPU compatibility lane',registry.includes("id:'qwen3-0.6b-q8-wasm'")&&registry.includes("dtype:'q8'")&&registry.includes("device:'wasm'")&&registry.includes('hidden:true'));
 check('registry includes Gemma E2B and E4B mobile tiers',registry.includes("id:'gemma4-e2b-it-q2f16-mobile'")&&registry.includes("id:'gemma4-e4b-it-q2f16-mobile'"));
-check('registry exposes exact Gemma artifact lengths',registry.includes('sizeBytes')&&registry.includes('763_067_904'));
+check('registry exposes optimized Gemma 3 q4 artifact lengths',registry.includes('sizeBytes')&&registry.includes('347_363')&&registry.includes('859_106_816'));
 
 async function runPulse(safety){
   let capturedRequest=null,directCalls=0,clock=100,finished=null;
@@ -63,4 +63,4 @@ const mobile=await runPulse({mobile:true,safeCompatibility:true,benchmark:false,
 check('mobile health performs one bounded compatibility generation',mobile.directCalls===1&&mobile.capturedRequest.maxNewTokens===12&&mobile.capturedRequest.benchmark===false&&mobile.capturedRequest.thinking===false);
 check('mobile health reports compatibility fallback and completion',mobile.generated.fallbackUsed===true&&mobile.generated.testMode==='mobile-safe-compatibility'&&mobile.finished?.detail?.mode==='mobile-safe-compatibility');
 
-console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v303-mobile-safe',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',thinkingDisabled:true,stagedHealth:true,wasmPerformanceDiagnostics:true,mobileSafeHealth:true,interruptedTestRecovery:true,benchmarkDisabledOnMobile:true,tierFallback:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-model-test-pulse-v307-gemma3-q4',checks:checks.length,directRuntime:'CivweaveLocalModelRuntimeV266.generate',thinkingDisabled:true,stagedHealth:true,wasmPerformanceDiagnostics:true,mobileSafeHealth:true,interruptedTestRecovery:true,benchmarkDisabledOnMobile:true,tierFallback:true,gemma3OptimizedQ4:true},null,2));
