@@ -5,6 +5,7 @@ on:
     paths:
       - 'server/federated.mjs'
       - 'server/gateway.mjs'
+      - 'lib/**'
       - 'releases/**/server/**'
       - 'scripts/verify-federation-v152.mjs'
       - 'scripts/check-canonical-server-syntax.mjs'
@@ -18,6 +19,7 @@ on:
     paths:
       - 'server/federated.mjs'
       - 'server/gateway.mjs'
+      - 'lib/**'
       - 'releases/**/server/**'
       - 'scripts/verify-federation-v152.mjs'
       - 'scripts/check-canonical-server-syntax.mjs'
@@ -50,7 +52,7 @@ jobs:
           expected="$(tr -d '\r\n' < VERSION)"
           actual="$(docker run --rm --entrypoint sh civweave-federated:test -c 'tr -d "\r\n" < /app/VERSION')"
           test "$actual" = "$expected"
-          docker run --rm --entrypoint sh civweave-federated:test -c 'version="$(tr -d "\r\n" < /app/VERSION)"; test -s "/app/releases/$version/server/server-federated-v152.mjs"; test -s /app/server/gateway.mjs'
+          docker run --rm --entrypoint sh civweave-federated:test -c 'version="$(tr -d "\r\n" < /app/VERSION)"; test -s "/app/releases/$version/server/server-federated-v152.mjs"; test -s /app/server/gateway.mjs; test -s /app/lib/ai-wallet-service-v1.mjs'
       - name: Verify federated container default application boot
         run: |
           docker rm -f civweave-federated-boot >/dev/null 2>&1 || true
