@@ -1,6 +1,6 @@
 import safeMode,{validateAdmissions,safeModeError}from'./safe-mode-v1.mjs?v=safe-mode-v1';
 
-const REVISION='living-school-generation-guard-v262-safe-v1';
+const REVISION='living-school-generation-guard-v262';
 const MAX_PACKET_CHARS=52000;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const deepCopy=value=>{try{return structuredClone(value)}catch{return JSON.parse(JSON.stringify(value))}};
