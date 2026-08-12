@@ -9,6 +9,7 @@ on:
       - 'public/app/family-ai-loader-v105.js'
       - 'public/app/local-ai/bootstrap-v266.js'
       - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/package-revision-guard-v307.js'
       - 'scripts/verify-local-ai-bootstrap-coherence-v307.mjs'
       - '.github/workflows/verify-local-ai-bootstrap-coherence-v307.yml'
   push:
@@ -20,6 +21,7 @@ on:
       - 'public/app/family-ai-loader-v105.js'
       - 'public/app/local-ai/bootstrap-v266.js'
       - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/package-revision-guard-v307.js'
       - 'scripts/verify-local-ai-bootstrap-coherence-v307.mjs'
       - '.github/workflows/verify-local-ai-bootstrap-coherence-v307.yml'
 
@@ -40,6 +42,7 @@ jobs:
           node --check public/app/family-ai-loader-v105.js
           node --check public/app/local-ai/bootstrap-v266.js
           node --check public/app/local-ai/model-registry-v266.js
+          node --check public/app/local-ai/package-revision-guard-v307.js
           node --check scripts/verify-local-ai-bootstrap-coherence-v307.mjs
       - name: Bootstrap coherence contract
         run: node scripts/verify-local-ai-bootstrap-coherence-v307.mjs
