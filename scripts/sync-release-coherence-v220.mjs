@@ -7,6 +7,7 @@ const version=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
 const revision='release-coherence-v226';
 const chatRevision='chat-convergence-v250';
 const chatCachePurgeRevision='chat-convergence-v251-legacy-purge';
+const activeChatRepairRevision='chat-bubble-anchor-v342';
 const lifecycleRevision='document-lifecycle-v222';
 const campusRevision='canonical-campus-startup-v227';
 const boundaryRevision='chat-convergence-v250';
@@ -130,16 +131,16 @@ for(const token of [
   '/service-worker-shell-integrity-v281.js?v=shell-integrity-v281',
   `/service-worker-release-coherence-v220.js?v=${revision}`,
   '/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227',
-  `/service-worker-chat-repair-v245.js?v=${chatRevision}&purge=${chatCachePurgeRevision}`,
+  `/service-worker-chat-repair-v245.js?v=${activeChatRepairRevision}&purge=${activeChatRepairRevision}`,
   "self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"
 ])if(!wrapper.includes(token))throw new Error(`The active worker wrapper is missing ${token}.`);
 if(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')<wrapper.indexOf('/service-worker-shell-repair-v225.js'))throw new Error('Canonical navigation must remain the final navigation policy.');
 const chatRepair=await readFile(path.join(root,'public/service-worker-chat-repair-v245.js'),'utf8');
-if(!chatRepair.includes(`const REVISION='${chatCachePurgeRevision}';`))throw new Error('Chat cache repair revision drifted.');
+if(!chatRepair.includes(`const REVISION='${activeChatRepairRevision}';`))throw new Error('Chat cache repair revision drifted.');
 for(const retired of retiredChatPaths)if(!chatRepair.includes(`'${retired}'`))throw new Error(`Chat cache repair does not purge retired runtime ${retired}.`);
 const override=await readFile(path.join(root,'public/service-worker-release-coherence-v220.js'),'utf8');
 for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pinned-html-js-css-json-txt-network-first-cached-fallback'])if(!override.includes(token))throw new Error(`Release-coherence worker is missing ${token}.`);
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
