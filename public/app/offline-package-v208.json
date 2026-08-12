@@ -1,15 +1,15 @@
 {
   "version": "1.0.103",
-  "revision": "canonical-background-campus-v241-systems-mesh-v251",
+  "revision": "canonical-background-campus-v241-systems-mesh-v251-cerbanimo-commerce-v1.1",
   "payloadPolicy": "core-first-lazy-packs-v302",
-  "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward and systems-mesh runtimes, compact federation seed, deterministic offline map runtime, and the lightweight Node AI operator/marketplace UI. Full federation discovery, decorative visuals and fonts, open-learning media, bulk encyclopedia data, and device-AI model payloads hydrate as optional packs on demand.",
+  "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward and systems-mesh runtimes, Cerbanimo commerce distribution contract, compact federation seed, deterministic offline map runtime, and the lightweight Node AI operator/marketplace UI. Full federation discovery, decorative visuals and fonts, open-learning media, bulk encyclopedia data, and device-AI model payloads hydrate as optional packs on demand.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
     "/app/cw-reward-receivers-v2.js",
     "/app/cw-reward-legacy-bridge-v2.js",
-    "/app/cerbanimo-commerce-distribution-v1.js",
     "/app/cw-reward-surfaces-v2.js",
+    "/app/cerbanimo-commerce-distribution-v1.js",
     "/app/civweave-systems-mesh-v251.js",
     "/app/working-campus-v156.html",
     "/app/cabinets/living-school/index.html",
