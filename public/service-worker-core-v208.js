@@ -1,7 +1,7 @@
 'use strict';
 
 const VERSION = '1.0.116';
-const BUILD = 'lightweight-shell-v208';
+const BUILD = 'lightweight-shell-v208-installer-brand-v1';
 const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
 const OFFLINE_CACHE = `civweave-offline-${VERSION}-${BUILD}`;
@@ -23,7 +23,10 @@ const REQUIRED_SHELL_ASSETS = [
   '/app/document-lifecycle-v221.js',
   '/app/fullscreen-family-v104.html',
   '/app/logos/civweave-icon-192.png',
-  '/app/logos/civweave-icon-512.png'
+  '/app/logos/civweave-icon-512.png',
+  '/app/logos/civweave-pwa-192-v247.png',
+  '/app/logos/civweave-prismatic-wordmark-v1.png',
+  '/app/logos/cerbanimo-steward-mark-v1.png'
 ];
 
 const OPTIONAL_SHELL_ASSETS = [
@@ -641,4 +644,3 @@ self.addEventListener('fetch', event => {
     event.respondWith(cacheFirst(request));
   }
 });
-
