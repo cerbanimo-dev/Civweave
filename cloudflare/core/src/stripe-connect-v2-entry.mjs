@@ -1,4 +1,6 @@
 import liveCore from './live-entry.mjs';
+import { CloudflareMoneyEdge } from './money-edge-with-memberships.mjs';
+import { handleCommerceApiRequest } from './commerce-edge.mjs';
 import { handleStripeConnectV2Sample } from './stripe-connect-v2-sample.mjs';
 import { handleStripeSnapshotWebhook, STRIPE_SNAPSHOT_WEBHOOK_PATHS } from './stripe-snapshot-webhook.mjs';
 import {
@@ -12,6 +14,7 @@ import {
 // in production unless STRIPE_CONNECT_SAMPLE_ENABLED=true. Both Stripe webhooks
 // remain server-to-server and signature-protected.
 export * from './live-entry.mjs';
+export * from './commerce-edge.mjs';
 export * from './stripe-connect-v2-sample.mjs';
 export * from './stripe-snapshot-webhook.mjs';
 export * from './stripe-recipient-thin-webhook.mjs';
@@ -21,6 +24,11 @@ const enabled = value => ['1', 'true', 'yes', 'on'].includes(String(value ?? '')
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    if (url.pathname.startsWith('/api/money-edge/commerce/')) {
+      const commerce = await handleCommerceApiRequest(request, env, new CloudflareMoneyEdge(env));
+      if (commerce) return commerce;
+    }
 
     // Route the connected-account snapshot payment webhook through the hardened
     // receipt state machine so failed processing can be retried safely instead of
