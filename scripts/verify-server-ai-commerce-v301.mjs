@@ -80,7 +80,7 @@ assert.match(cloudEntry, /@cf\/meta\/llama-3\.1-8b-instruct-fast/);
 assert.match(cloudEntry, /x-civweave-node-signature/);
 
 assert.match(accountEdge, /node-cloud\/src\/server-ai-entry-v1\.mjs/);
-assert.match(wrangler, /"main": "src\/server-ai-entry-v1\.mjs"/);
+assert.match(wrangler, /"main": "src\/server-ai-entry-v2\.mjs"/);
 
 console.log(JSON.stringify({
   ok: true,
