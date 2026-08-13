@@ -1,11 +1,10 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.26-brand-canonical-v2';
+const VERSION='1.0.27-brand-canonical-v317';
 const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png';
 const FULL_LOGO=CANONICAL_LOGO;
 const SYMBOL_LOGO=CANONICAL_LOGO;
-const SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
 const SKIP_TAGS=new Set(['SCRIPT','STYLE','NOSCRIPT','TEMPLATE','CODE','PRE']);
 const ATTRIBUTES=['alt','title','aria-label','placeholder','content','data-label'];
 const BRAND_ASSET=/(?:^|\/)(?:commonweave|civweave)(?:-symbol|-app-icon|-adaptive-foreground-512|-icon-(?:\d+|maskable-\d+))?\.(?:svg|png|webp)(?:[?#].*)?$/i;
@@ -70,25 +69,13 @@ function brandTree(root){
     node=walker.nextNode();
   }
 }
-function loadSettingsRepair(){
-  if(globalThis.CivweaveAISettingsRepairV229)return true;
-  if(document.querySelector(`script[src^="${SETTINGS_REPAIR}"]`))return true;
-  const script=document.createElement('script');
-  script.src=`${SETTINGS_REPAIR}?v=${VERSION}`;
-  script.async=false;
-  script.dataset.civweaveBootstrap='ai-settings-v229';
-  document.head.append(script);
-  return true;
-}
 function apply(){
   document.title=brandText(document.title);
   brandTree(document.documentElement);
   document.documentElement.dataset.publicBrand='civweave';
-  loadSettingsRepair();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});
 else apply();
-loadSettingsRepair();
 const observer=new MutationObserver(records=>{
   for(const record of records){
     if(record.type==='characterData'){
@@ -101,5 +88,5 @@ const observer=new MutationObserver(records=>{
   }
 });
 observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTES.concat('src','srcset','href','value')});
-globalThis.CivweaveBrand=Object.freeze({version:VERSION,apply,loadSettingsRepair,canonicalLogo:CANONICAL_LOGO,fullLogo:FULL_LOGO,symbolLogo:SYMBOL_LOGO,settingsRepair:SETTINGS_REPAIR});
+globalThis.CivweaveBrand=Object.freeze({version:VERSION,apply,canonicalLogo:CANONICAL_LOGO,fullLogo:FULL_LOGO,symbolLogo:SYMBOL_LOGO,settingsDependency:false});
 })();
