@@ -57,22 +57,26 @@ assert.match(pulse,/raceSafeRepair:true/);
 assert.match(pulse,/thinkingDisabledForHealth:true/);
 
 assert.match(bootstrap,/REVISION='1\.0\.115-local-ai-bootstrap-v302-session-handoff'/);
-assert.match(bootstrap,/capability-contract-v302/);
-assert.match(bootstrap,/model-registry-v266\.js\?v=1\.0\.115-v302-gemma3-v4/);
-assert.match(bootstrap,/runtime-v266\.js\?v=1\.0\.115-v302-session-handoff/);
-assert.match(bootstrap,/settings-panel-v267\.js\?v=1\.0\.116-v305-download-dock-layout/);
+assert.match(bootstrap,/capability-contract-v307/);
+assert.match(bootstrap,/model-registry-v266\.js\?v=1\.0\.121-v307-gemma3-q4/);
+assert.match(bootstrap,/runtime-v266\.js\?v=1\.0\.121-v307-coherence-reload/);
+assert.match(bootstrap,/settings-panel-v267\.js\?v=1\.0\.121-v307/);
 assert.match(bootstrap,/test-pulse-v269\.js\?v=1\.0\.116-v303-mobile-safe/);
 assert.match(bootstrap,/1\.0\.116-local-model-test-pulse-v303-mobile-safe/);
 assert.doesNotMatch(bootstrap,/1\.0\.83-local-model-test-pulse-v282-health/);
+assert.match(bootstrap,/package-revision-guard-v307\.js/);
 assert.match(bootstrap,/download-policy-v278\.js/);
 assert.match(bootstrap,/metadata-repair-v276\.js/);
-assert.ok(bootstrap.indexOf('download-manager-v267.js')<bootstrap.indexOf('download-policy-v278.js'));
+assert.ok(bootstrap.indexOf('download-manager-v267.js')<bootstrap.indexOf('package-revision-guard-v307.js'));
+assert.ok(bootstrap.indexOf('package-revision-guard-v307.js')<bootstrap.indexOf('download-policy-v278.js'));
 assert.ok(bootstrap.indexOf('download-policy-v278.js')<bootstrap.indexOf('metadata-repair-v276.js'));
 assert.match(bootstrap,/backendFallback:true/);
 assert.match(bootstrap,/hardwareLadder:true/);
 assert.match(bootstrap,/canonicalCausalLM:true/);
 assert.match(bootstrap,/artifactRevision/);
 assert.match(bootstrap,/smallModelFastPath===true/);
+assert.match(bootstrap,/coherenceReload:true/);
+assert.match(bootstrap,/packageRevisionGuard:true/);
 assert.match(controller,/civweave:model-settings-opened/);
 
 for(const token of ["id:'gemma3-1b-it-q4f16'","repo:'onnx-community/gemma-3-1b-it-ONNX'","recommended:'default'","id:'smollm3-3b-q4f16'","id:'qwen3-4b-q4f16'","id:'qwen3-8b-ortgenai-int4'","id:'qwen3-14b-hardware-target'","id:'gemma4-26b-a4b-workstation'",'function directUrl','function artifactRevision','contextWindowTokens:65_536']){
@@ -88,11 +92,12 @@ assert.match(campus,/CivweaveLocalModelBridgeV266\?\.patch/);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-model-settings-mount-v296-management-only',
+  revision:'local-model-settings-mount-v307-coherent-bootstrap',
   canonicalSettingsMount:true,
   settingsFirst:true,
   managementOnlyOnOpen:true,
   inferenceDormantUntilNeeded:true,
-  bootstrapTestPulse:'v286-current',
-  componentCompatibility:'capability-contract-v302'
+  bootstrapTestPulse:'v303-mobile-safe-current',
+  componentCompatibility:'capability-contract-v307',
+  packageRevisionGuard:true
 },null,2));

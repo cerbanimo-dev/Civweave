@@ -1,7 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.61-headless-canonical-chat-r50-local-ai-v266-knowledge-v271-validation-optin-v1';
+const VERSION='1.0.121-headless-canonical-chat-r50-local-ai-coherence-v307';
+const LOCAL_AI_BOOTSTRAP_REVISION='1.0.115-local-ai-bootstrap-v302-session-handoff';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
 const CSS=['/app/intention-ui-v138.css?v=1.0.4','/app/assistant-runtime-v141.css?v=1.0.4'];
@@ -23,7 +24,7 @@ const OPTIONAL=[
   ['/app/intention-ui-v138.js?v=1.0.4',()=>globalThis.CivweaveIntentionUI],
   ['/app/local-object-mesh-v146.js?v=1.0.4',()=>globalThis.CivweaveLocalMeshV146],
   ['/app/core-loop-v152.js?v=1.0.4',()=>globalThis.CivweaveCoreLoopV152],
-  ['/app/local-ai/bootstrap-v266.js?v=1.0.60-v266',()=>globalThis.CivweaveLocalAIBootstrapV266],
+  ['/app/local-ai/bootstrap-v266.js?v=1.0.121-local-ai-coherence-v307',()=>globalThis.CivweaveLocalAIBootstrapV266?.revision===LOCAL_AI_BOOTSTRAP_REVISION],
   ['/app/validation-cloud-optin-v1.js?v=host-capacity-v1',()=>globalThis.CivweaveValidationCloudOptInV1]
 ];
 const LABEL={civweave:'Civweave','living-school':'Living School',cerbanimo:'Cerbanimo',fellowfare:'FellowFare',anarchadia:'Anarchadia'};
@@ -187,7 +188,7 @@ globalThis.CivweaveFamilyAILoaderV105={
   transformerActive:false,
   memoryRevision:'v192-fast-relevant-memory',
   latencyRevision:'v250-headless-explicit-demand-only',
-  localModelPathway:'optional-v266',
+  localModelPathway:'optional-v307-coherent-bootstrap',
   knowledgeRevision:'v271-local-encyclopedia',
   canonicalChatOwner:'guide-workspace-v242',
   validationCloudOptIn:'v1',

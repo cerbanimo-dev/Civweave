@@ -1,0 +1,48 @@
+name: Verify Local AI Bootstrap Coherence v307
+
+on:
+  pull_request:
+    paths:
+      - 'public/service-worker-local-ai-coherence-v307.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/local-ai/bootstrap-v266.js'
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/package-revision-guard-v307.js'
+      - 'scripts/verify-local-ai-bootstrap-coherence-v307.mjs'
+      - '.github/workflows/verify-local-ai-bootstrap-coherence-v307.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/service-worker-local-ai-coherence-v307.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'public/app/local-ai/bootstrap-v266.js'
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'public/app/local-ai/package-revision-guard-v307.js'
+      - 'scripts/verify-local-ai-bootstrap-coherence-v307.mjs'
+      - '.github/workflows/verify-local-ai-bootstrap-coherence-v307.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax
+        run: |
+          node --check public/service-worker-local-ai-coherence-v307.js
+          node --check public/service-worker-v203.js
+          node --check scripts/build-service-worker-v211.mjs
+          node --check public/app/family-ai-loader-v105.js
+          node --check public/app/local-ai/bootstrap-v266.js
+          node --check public/app/local-ai/model-registry-v266.js
+          node --check public/app/local-ai/package-revision-guard-v307.js
+          node --check scripts/verify-local-ai-bootstrap-coherence-v307.mjs
+      - name: Bootstrap coherence contract
+        run: node scripts/verify-local-ai-bootstrap-coherence-v307.mjs

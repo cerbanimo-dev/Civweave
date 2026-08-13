@@ -8,6 +8,7 @@ if(!/^\d+\.\d+\.\d+$/.test(version))throw new Error('VERSION must contain a sema
 const required=[
   'public/app/system-routes-v227.js',
   'public/service-worker-living-school-cleanroom-v218.js',
+  'public/service-worker-local-ai-coherence-v307.js',
   'public/service-worker-code-coherence-v288.js',
   'public/service-worker-core-v208.js',
   'public/service-worker-installed-launch-v282.js',
@@ -26,10 +27,11 @@ const required=[
   'public/app/working-campus-return-guard-v425.js'
 ];
 for(const relative of required)await readFile(path.join(root,relative),'utf8');
-const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + code-coherence-v288 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-css-contract-v343 + mobile-ai-hardening-v302 + local-ai-cache-coherence-v306 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425
+const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-css-contract-v343 + mobile-ai-hardening-v302 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425
 'use strict';
 importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
+importScripts('/service-worker-local-ai-coherence-v307.js?v=${version}-local-ai-code-coherence-v307');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288');
 importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
@@ -52,7 +54,8 @@ console.log(JSON.stringify({
   ok:true,
   version,
   output:'public/service-worker-v203.js',
-  imports:17,
+  imports:18,
+  localAICodeCoherence:'v307-network-first-pre-core',
   codeCoherence:'v288',
   installedLaunch:'installed-pwa-launch-v294-campus-recovery',
   radioCore:'radio-core-shell-v305',
@@ -65,7 +68,6 @@ console.log(JSON.stringify({
   installerState:'installer-state-machines-v280',
   chatRepair:'chat-css-contract-v343',
   mobileAIHardening:'v302',
-  localAICacheCoherence:'v306',
   workingCampusReturn:'v425',
   canonicalNavigationFinalPolicy:true,
   routeContractFirst:true

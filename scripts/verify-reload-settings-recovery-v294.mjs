@@ -10,9 +10,10 @@ const installedLaunch=read('public/service-worker-installed-launch-v282.js');
 const worker=read('public/service-worker-v203.js');
 const workerBuilder=read('scripts/build-service-worker-v211.mjs');
 
-assert.match(bootstrap,/test-pulse-v269\.js\?v=1\.0\.86-v286/,'bootstrap must request the shipping test-pulse revision');
-assert.match(bootstrap,/1\.0\.86-local-model-test-pulse-v286-wasm-performance/,'bootstrap must accept the shipping test-pulse identity');
+assert.match(bootstrap,/test-pulse-v269\.js\?v=1\.0\.116-v303-mobile-safe/,'bootstrap must request the shipping v303 mobile-safe test-pulse revision');
+assert.match(bootstrap,/1\.0\.116-local-model-test-pulse-v303-mobile-safe/,'bootstrap must accept the shipping v303 mobile-safe test-pulse identity');
 assert.doesNotMatch(bootstrap,/1\.0\.83-local-model-test-pulse-v282-health/,'stale v282 test-pulse compatibility gate must stay retired');
+assert.doesNotMatch(bootstrap,/1\.0\.86-local-model-test-pulse-v286-wasm-performance/,'stale v286 test-pulse compatibility gate must stay retired');
 
 assert.match(lifecycle,/document\.addEventListener\('click',captureSettingsOpen,true\)/,'AI settings must have a capture-phase first-open path');
 assert.match(lifecycle,/event\.stopImmediatePropagation\(\)/,'successful first-open must suppress legacy target handlers that wait for inference');
@@ -92,7 +93,7 @@ console.log(JSON.stringify({
   ok:true,
   revision:'reload-settings-recovery-v294',
   assertions:{
-    localAICompatibility:'v286-test-pulse-current',
+    localAICompatibility:'v303-test-pulse-mobile-safe-current',
     settingsOpen:'capture-first-management-after-open',
     inferenceGate:'separate-from-settings-management',
     installedReload:'entry-then-working-campus-never-installer',
