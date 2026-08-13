@@ -34,14 +34,15 @@ for(const pathname of requiredLocalAIPaths){
 const canonicalImport="importScripts('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343');";
 assert.ok(generated.includes(canonicalImport),'generated service worker must preserve the canonical chat repair import identity');
 assert.ok(builder.includes(canonicalImport),'service worker generator must preserve the canonical chat repair import identity');
-assert.match(generated,/local-ai-cache-coherence-v306/,'generated parent worker bytes must rotate when the local AI cache epoch changes');
-assert.match(builder,/localAICacheCoherence:'v306'/);
+assert.match(generated,/local-ai-code-coherence-v307/,'generated parent worker must carry the active local AI code-coherence epoch');
+assert.match(builder,/localAICodeCoherence:'v307-network-first-pre-core'/,'service worker generator must report the active local AI code-coherence epoch');
 assert.match(installedEntry,/updateViaCache:'none'/,'installed worker registration must bypass HTTP cache so the changed parent worker fetches current imported repair code');
-assert.match(installedEntry,/await registration\.update\(\)/,'installed entry must explicitly check for the changed parent worker');
+assert.ok(installedEntry.includes('registration.update()')&&installedEntry.includes('bounded(registration.update()'),'installed entry must explicitly perform a bounded update check for the changed parent worker');
 
 console.log(JSON.stringify({
   ok:true,
   revision:'local-ai-cache-coherence-v306',
+  localAICodeCoherence:'v307-network-first-pre-core',
   chatContract:'chat-css-contract-v343',
   protectedPaths:requiredLocalAIPaths.length,
   ignoreSearchEviction:true,
