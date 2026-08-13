@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [versionText,integrityText,wrapper,repairWorker,fallback,builder,materializer,generator]=await Promise.all([
+const [versionText,integrityText,wrapper,repairWorker,fallback,builder,materializer,generator,coreWorker,installerWorker]=await Promise.all([
   read('VERSION'),
   read('public/app/shell-integrity-v281.json'),
   read('public/service-worker-v203.js'),
@@ -14,17 +14,32 @@ const [versionText,integrityText,wrapper,repairWorker,fallback,builder,materiali
   read('public/app/installer-online-fallback-v225.js'),
   read('scripts/build-service-worker-v211.mjs'),
   read('scripts/materialize-canonical-release.mjs'),
-  read('scripts/generate-prelive-metadata-v281.mjs')
+  read('scripts/generate-prelive-metadata-v281.mjs'),
+  read('public/service-worker-core-v208.js'),
+  read('public/service-worker-installer-state-v280.js')
 ]);
 const version=versionText.trim();
 const integrity=JSON.parse(integrityText);
-const requiredShellAssetCount=15;
+function extractStringArray(source,name,label){
+  const match=source.match(new RegExp(`const\\s+${name}\\s*=\\s*\\[(.*?)\\];`,'s'));
+  assert.ok(match,`Could not locate ${name} in ${label}.`);
+  const value=Function(`"use strict"; return [${match[1]}];`)();
+  assert.ok(Array.isArray(value)&&value.every(item=>typeof item==='string'),`${name} in ${label} must be a string array.`);
+  return value;
+}
+const requiredShellAssets=[...new Set([
+  ...extractStringArray(coreWorker,'REQUIRED_SHELL_ASSETS','service-worker-core-v208.js'),
+  ...extractStringArray(installerWorker,'INSTALLER_STATE_ASSETS','service-worker-installer-state-v280.js')
+])];
+const requiredShellAssetCount=requiredShellAssets.length;
 assert.match(version,/^\d+\.\d+\.\d+$/);
 assert.equal(integrity.version,version,'Generated shell integrity metadata is not release-coherent.');
 assert.equal(integrity.revision,'shell-integrity-v281');
 assert.equal(integrity.algorithm,'sha256');
-assert.equal(integrity.requiredAssetCount,requiredShellAssetCount,'Verified shell must cover the 15 manual-first shell and installer-state assets.');
-assert.equal(Object.keys(integrity.assets||{}).length,requiredShellAssetCount,'Shell integrity asset map drifted from the manual-first required asset count.');
+assert.ok(requiredShellAssetCount>=15,'Verified shell unexpectedly lost manual-first shell or installer-state assets.');
+assert.equal(integrity.requiredAssetCount,requiredShellAssetCount,'Verified shell count drifted from the runtime-declared manual-first shell and installer-state assets.');
+assert.equal(Object.keys(integrity.assets||{}).length,requiredShellAssetCount,'Shell integrity asset map drifted from the runtime-declared required asset count.');
+for(const pathname of requiredShellAssets)assert.ok(pathname in (integrity.assets||{}),`Shell integrity metadata is missing required runtime asset ${pathname}.`);
 for(const [pathname,digest] of Object.entries(integrity.assets||{})){
   assert.ok(pathname.startsWith('/'),`Integrity pathname is not absolute: ${pathname}`);
   assert.match(String(digest),/^[a-f0-9]{64}$/i,`Integrity digest is invalid for ${pathname}`);
@@ -116,6 +131,7 @@ console.log(JSON.stringify({
   revision:'installed-shell-repair-v293',
   version,
   shellIntegrityAssets:integrity.requiredAssetCount,
+  shellIntegrityDerivedFromRuntime:true,
   repairMessage:'REPAIR_DEVICE_PACKAGE',
   repairScope:'verified-small-shell-only',
   preservedStorage:['offline-campus','models','open-learning-media','knowledge-schools'],
