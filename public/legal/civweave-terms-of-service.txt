@@ -1,0 +1,655 @@
+CIVWEAVE TERMS OF SERVICE
+
+Effective Date: August 13, 2026
+Last Updated: August 13, 2026
+
+These Terms of Service (“Terms”) govern your access to and use of Civweave and the connected Civweave systems, applications, websites, progressive web applications, software, services, communities, marketplaces, artificial-intelligence features, federated nodes, and related services collectively referred to as the “Platform.”
+
+The Platform is operated by Cerbanimo (“Cerbanimo,” “Civweave,” “we,” “us,” or “our”).
+
+Civweave is an independent platform and has no official affiliation, partnership, sponsorship, endorsement, or other formal relationship with any unrelated organization, project, product, or service named “Commonweave.”
+
+You may not create or use a Civweave account, access authenticated Platform features, purchase or sell through the Platform, operate a node, or otherwise use the Platform unless you have affirmatively agreed to these Terms and any policies expressly incorporated into them.
+
+Where Civweave presents an acceptance control such as “I Agree,” “Accept,” or an equivalent confirmation, selecting that control constitutes your electronic signature and agreement to be legally bound by these Terms.
+
+If you do not agree to these Terms, you must not create an account or use the Platform. Civweave may require renewed acceptance when these Terms are materially updated.
+
+
+1. THE CIVWEAVE ECOSYSTEM
+
+Civweave is an interconnected platform composed of several systems that may share identity, account information, intentions, reputation, achievements, learning records, work records, marketplace records, rewards, and other authorized information.
+
+The primary systems currently include:
+
+Civweave provides shared identity, orchestration, AI assistance, navigation, account infrastructure, federated networking, and cross-system services.
+
+Living School provides learning, curriculum, assessment, educational-resource, tutoring, and competency tools.
+
+Cerbanimo provides project, work, planning, collaboration, production, accomplishment, and contribution-tracking tools.
+
+FellowFare provides marketplace, commerce, service, product, tutoring, request, payment, and exchange functionality.
+
+Anarchadia provides community governance, Passport, reputation, achievements, proposals, voting, coordination, and civic/community tools.
+
+Features may move between systems or be exposed in more than one system without becoming separate services for purposes of these Terms.
+
+
+2. ELIGIBILITY AND ACCOUNTS
+
+You must provide accurate information when information is required and must keep account credentials reasonably secure.
+
+You may not impersonate another person, create accounts to evade restrictions, falsify identity or eligibility information, or use another person's credentials without authorization.
+
+Users under 13 may not create an independent Civweave account unless Civweave has expressly enabled a supported parent, guardian, school, or institutional consent process applicable to that user.
+
+Users between 13 and the age of majority in their jurisdiction may use generally available non-commercial features subject to applicable law and any required parental or guardian permission.
+
+You must be legally capable of entering the relevant transaction to independently buy, sell, provide paid services, receive fiat payouts, operate a commercial Host Node, or enter another binding commercial agreement. Where required, a parent, guardian, business representative, or other legally authorized adult must act on the user's behalf.
+
+We may require additional verification before enabling sensitive functionality.
+
+Account registration and continued authenticated use of Civweave require an affirmative record of acceptance of the then-current Terms. Civweave may block account creation, sign-in, purchases, sales, payouts, node operation, or other authenticated features until required acceptance has been recorded.
+
+
+3. ONE ACCOUNT ACROSS MULTIPLE SYSTEMS
+
+Your Civweave account may operate across multiple systems.
+
+Information generated in one system may be used by another where necessary to provide requested functionality. For example, a Cerbanimo project may become a FellowFare listing, a Living School accomplishment may update your Passport, or a Weaveling plan may coordinate activity across several systems.
+
+Cross-system use remains subject to these Terms, our Privacy Policy, and any applicable feature-specific notices.
+
+
+4. WEAVELING AND ARTIFICIAL INTELLIGENCE
+
+The Platform may use local AI models, remote AI providers, deterministic software, retrieval systems, classifiers, validators, agents, or combinations of these technologies.
+
+AI-generated material can be incomplete, inaccurate, outdated, biased, inappropriate, or unsuitable for a particular purpose.
+
+You remain responsible for important decisions based on AI output.
+
+Unless expressly stated otherwise, AI responses are not professional medical, legal, financial, tax, engineering, emergency, mental-health, or other licensed professional advice.
+
+Civweave may use multiple models or deterministic checks to validate information, but validation does not guarantee truth, safety, legality, or fitness for purpose.
+
+Where local AI is enabled, models may execute directly on your device. Where remote or node-hosted AI is selected or required, information necessary to fulfill a request may be transmitted to the applicable service or node according to our Privacy Policy.
+
+Downloaded models may require substantial memory, processing power, storage, or battery resources. Availability and performance can vary by device.
+
+
+5. S.A.F.E. MODE AND PROTECTIVE SYSTEMS
+
+Civweave may offer protective modes, source filters, content classifiers, deterministic rules, model-based review, or other safeguards intended to reduce exposure to inappropriate, dangerous, unlawful, or unsuitable material.
+
+These systems are risk-reduction tools, not guarantees.
+
+You must not represent S.A.F.E. Mode or another protective feature as guaranteeing that content is completely safe, child-appropriate, accurate, lawful, or free from harmful material.
+
+
+6. USER CONTENT
+
+You retain ownership of original content you create and submit to the Platform, subject to any rights belonging to collaborators or third parties.
+
+You grant Cerbanimo a non-exclusive, worldwide, royalty-free license to host, reproduce, process, transform, transmit, display, and distribute your content as reasonably necessary to operate, secure, improve, synchronize, back up, or provide the Platform and the features you request.
+
+This operational license ends when the content is deleted from active systems, except where continued retention is reasonably necessary for backups, transaction records, legal obligations, fraud prevention, dispute resolution, public contributions that other users have relied upon, or other legitimate operational purposes described in our Privacy Policy.
+
+Publishing content publicly or offering it through FellowFare may grant additional rights necessary for other users to view, purchase, download, install, learn from, or otherwise use the published item.
+
+You must have the rights necessary to submit what you upload.
+
+
+7. COLLABORATIVE WORK AND CONTRIBUTION RECORDS
+
+Civweave may record contributions to projects, products, services, curricula, models, datasets, communities, or other collaborative works.
+
+Contribution records may be used to calculate attribution, reputation, rewards, revenue distributions, or other benefits according to the applicable program rules.
+
+A contribution record does not, by itself, create:
+
+- equity or ownership in Cerbanimo;
+- ownership of another user's company;
+- a security or investment contract;
+- a debt owed by Civweave;
+- an employment relationship;
+- a guaranteed future payment;
+- a guaranteed percentage of future revenue; or
+- a right to demand cash redemption.
+
+Separate contracts may establish rights beyond these Terms.
+
+
+8. BUTTONS, ACORNS, CONTRIBUTION WEIGHTS, AND PLATFORM REWARDS
+
+Civweave may use internal units including Buttons, Acorns, contribution weights, co-credits, cotokens, XP, achievements, Compute credits, or other platform-specific records.
+
+Unless expressly stated otherwise in a separate written agreement:
+
+Buttons, Acorns, XP, contribution weights, and similar internal units are not legal tender, bank deposits, electronic money accounts, securities, ownership interests, or guaranteed claims against Cerbanimo.
+
+They do not have a guaranteed dollar value or guaranteed exchange rate.
+
+Contribution weights are earned through qualifying contribution rather than purchased as investment assets. They are generally non-transferable and are not consumed merely because they are used to calculate an eligible distribution.
+
+Internal units may be used within supported Civweave features according to current program rules.
+
+Civweave may correct fraudulent, duplicated, erroneous, reversed, or invalid reward entries.
+
+We will not arbitrarily confiscate legitimately earned balances, but balances may be adjusted when necessary to correct an error, reverse an invalid transaction, comply with law, resolve fraud or abuse, or enforce these Terms.
+
+Reward programs and future distributions are subject to their applicable published rules and are not promises of investment return or guaranteed income.
+
+
+PART II: LIVING SCHOOL
+
+
+9. EDUCATIONAL PURPOSE
+
+Living School helps users learn, practice, build curricula, test competencies, create educational material, and connect learning with real-world activity.
+
+Living School is not automatically an accredited school, university, licensing authority, certification body, or substitute for legally required professional education.
+
+A Living School credential or competency record represents only what the applicable assessment process establishes.
+
+Users are responsible for determining whether an outside institution, employer, licensing body, government, school, or other organization recognizes a Civweave credential.
+
+
+10. LEARNING MATERIALS AND SOURCES
+
+Learning modules may include user-generated material, AI-generated material, external sources, videos, exercises, assessments, simulations, or other resources.
+
+Civweave may evaluate source quality and confidence, but users should independently verify information where accuracy materially matters.
+
+Educational content must not infringe intellectual-property rights or unlawfully reproduce copyrighted courses, books, videos, tests, answer keys, or other protected material.
+
+
+11. ASSESSMENTS AND CREDENTIALS
+
+Users must complete assessments honestly.
+
+You may not obtain credentials through impersonation, unauthorized answer sharing, falsified evidence, manipulated validation, coordinated fraud, or automated completion that defeats the purpose of an assessment.
+
+Civweave may revoke or correct credentials supported by fraudulent or materially erroneous evidence.
+
+
+12. COMMUNITY-CREATED CURRICULUM
+
+Creators may publish qualifying interactive learning modules through FellowFare.
+
+A creator represents that they have sufficient rights to distribute the material included in the curriculum.
+
+Purchasing an educational module does not transfer copyright unless the listing expressly says otherwise.
+
+Interactive modules should remain interactive where technically supported rather than being reduced to static representations that materially remove the functionality being sold.
+
+
+13. TUTORING
+
+Tutoring arrangements may be offered through FellowFare.
+
+Tutors are responsible for accurately representing their qualifications.
+
+Civweave does not guarantee that a tutor holds a professional credential unless the Platform explicitly states that the credential has been verified.
+
+Tutoring involving regulated professional activity may require additional verification or may be prohibited.
+
+
+PART III: CERBANIMO
+
+
+14. PROJECTS AND WORK
+
+Cerbanimo helps users plan, coordinate, perform, document, validate, and complete work.
+
+A Cerbanimo project may produce a service, product, accomplishment, or another supported output.
+
+Where appropriate, Civweave may propose converting a completed project into a reusable FellowFare listing.
+
+Publication should require the responsible user's authorization unless the user has explicitly enabled an automated publishing workflow.
+
+
+15. SERVICES AND REUSABLE WORK
+
+A service may be transformed into a repeatable service package offered through FellowFare.
+
+Contributors involved in producing a reusable service template may be eligible for attribution or distributions under the applicable contribution policy.
+
+People performing a later customer engagement may separately be eligible for compensation for the delivery work.
+
+The terms displayed for the particular transaction govern the actual customer purchase.
+
+
+16. PRODUCTS
+
+Products created through Cerbanimo may be published through FellowFare.
+
+Where a product has multiple verified contributors, sale proceeds may be allocated according to the applicable contribution and settlement rules.
+
+Contributors must not manipulate contribution evidence for the purpose of increasing payouts.
+
+
+17. ACCOMPLISHMENTS
+
+Cerbanimo may generate accomplishment records that appear in Anarchadia or a Civweave Passport.
+
+Accomplishments are records of participation or achievement. Unless explicitly designated otherwise, they are not professional licenses, government credentials, academic degrees, or transferable financial assets.
+
+
+18. WORK RELATIONSHIPS
+
+Participation in a Civweave project does not automatically make a user an employee, contractor, partner, agent, franchisee, or joint venturer of Cerbanimo.
+
+The actual relationship between users depends on their agreement and applicable law.
+
+Where Cerbanimo itself hires or contracts with someone, a separate agreement will govern that relationship.
+
+
+PART IV: FELLOWFARE
+
+
+19. MARKETPLACE ROLE
+
+FellowFare allows users to discover, offer, purchase, sell, and coordinate eligible goods, services, learning resources, tutoring, and other permitted offerings.
+
+For supported fiat marketplace transactions, payments may be processed through Stripe Connect or another disclosed payment provider.
+
+Sellers receiving fiat payouts may be required to establish and maintain an eligible connected payment account and complete the provider's onboarding and verification requirements.
+
+Where required by the payment provider, connected sellers or recipients must accept the provider's applicable account or connected-account agreements.
+
+
+20. SELLER RESPONSIBILITIES
+
+A seller must:
+
+1. accurately describe what is being sold;
+2. have the right and ability to provide it;
+3. provide truthful pricing, availability, shipping, delivery, licensing, and qualification information;
+4. fulfill accepted orders in accordance with the listing;
+5. comply with applicable laws and professional requirements;
+6. cooperate with legitimate refunds, disputes, tax obligations, and payment-provider requirements; and
+7. keep required payout and verification information current.
+
+A seller may not use FellowFare to disguise prohibited money transfers or sell something different from the item described in the transaction.
+
+
+21. BUYER RESPONSIBILITIES
+
+Buyers must provide accurate payment and transaction information and use purchased goods or services lawfully.
+
+A buyer may not initiate fraudulent disputes, chargebacks, or refund claims.
+
+
+22. MARKETPLACE RESTRICTIONS
+
+FellowFare may prohibit or restrict listings involving illegal goods or services, weapons, controlled substances, exploitation, fraud, stolen property, unsafe goods, financial schemes, unlicensed regulated services, infringing material, harmful activity, or categories prohibited by our payment providers.
+
+AI review may increase scrutiny but may not override a deterministic prohibition where the Platform treats a category as blocked.
+
+Listings may be removed or held for review before or after publication.
+
+
+23. FIAT PRICING AND FEES
+
+Where a fiat listing is subject to a Civweave or Cerbanimo marketplace fee, the applicable fee will be disclosed as part of the transaction.
+
+Additional payment-processing charges, taxes, shipping charges, Host Node fees, or other amounts may apply where disclosed.
+
+Civweave will not intentionally reduce a seller or contributor's promised payout through an undisclosed fee.
+
+The transaction receipt and applicable marketplace fee policy control the calculation for a particular sale.
+
+
+24. CONTRIBUTOR PAYMENTS
+
+Where a product or service has multiple eligible contributors, Civweave may allocate the distributable proceeds according to verified contribution weights and the rules applicable to that listing.
+
+Contributor distributions are subject to refunds, disputes, reversals, fraud investigations, payment-provider restrictions, invalid contribution claims, and applicable law.
+
+
+25. HOST NODE COMMERCE FEES
+
+Transactions involving federated Host Nodes may include a disclosed Host Node or network fee.
+
+Eligibility for Host Node compensation depends on the applicable network rules.
+
+Merely relaying traffic does not create a right to multiply or duplicate commerce fees.
+
+No Host Node operator is guaranteed revenue.
+
+
+26. PAYMENT HOLDS, REFUNDS, AND DISPUTES
+
+Civweave and its payment providers may delay, hold, reverse, or restrict payments where reasonably necessary to address:
+
+fraud; disputes; refunds; chargebacks; sanctions; identity-verification requirements; legal requirements; payment-provider requirements; suspected prohibited transactions; negative balances; or security incidents.
+
+Where a customer payment is refunded or disputed after contributor transfers have occurred, corresponding distributions may be proportionally reversed where permitted.
+
+
+27. TAXES
+
+Transaction prices may be subject to sales, use, VAT, GST, marketplace, withholding, income, or other taxes.
+
+Where Civweave determines that it is legally required to calculate, collect, report, withhold, or remit a tax, it may do so.
+
+Sellers remain responsible for taxes and filings that Civweave does not collect or remit on their behalf.
+
+In jurisdictions where the Platform qualifies as a marketplace provider or marketplace facilitator, the allocation of tax responsibility may be determined by law rather than by seller preference.
+
+Civweave may collect tax information, taxpayer identification information, certifications, or other documentation where required for payment, reporting, withholding, or legal compliance.
+
+
+28. NO GENERAL MONEY-TRANSMISSION SERVICE
+
+FellowFare is intended to facilitate bona fide transactions for eligible goods, services, learning, work, and other permitted marketplace activity.
+
+FellowFare is not offered as a general-purpose remittance service, peer-to-peer cash-transfer system, bank account, deposit account, stored-value cash account, currency exchange, or investment platform.
+
+Users may not use fictitious transactions to transfer money between parties.
+
+
+PART V: ANARCHADIA
+
+
+29. COMMUNITY GOVERNANCE
+
+Anarchadia provides tools for proposals, deliberation, voting, community coordination, participation, reputation, and related governance.
+
+Unless expressly stated otherwise, Anarchadia governance affects only the participating Civweave community, Hub, project, cooperative arrangement, or other defined scope.
+
+A vote on Anarchadia does not override applicable law, third-party contractual rights, Cerbanimo's non-delegable legal obligations, payment-provider rules, security requirements, or another person's legal rights.
+
+
+30. PASSPORT
+
+The Civweave Passport may contain identity-related records, achievements, intentions, reputation, credentials, community memberships, or portable records.
+
+Possession of a Passport does not itself establish government identity, citizenship, immigration status, professional licensure, or another legally regulated status.
+
+Users must not falsify Passport evidence.
+
+
+31. COMMUNITY DECISIONS
+
+Communities may define local rules provided those rules do not conflict with mandatory law or Platform-wide safety and integrity requirements.
+
+Where a decision controls communal resources, Civweave may require stronger authentication, validation, quorum, anti-fraud protections, or settlement safeguards.
+
+
+PART VI: FEDERATED AND HOSTED NODES
+
+
+32. FEDERATED OPERATION
+
+Civweave may operate across Cerbanimo infrastructure, third-party infrastructure, community Host Nodes, personal devices, local servers, cloud services, or other participating infrastructure.
+
+Availability can vary by node and network state.
+
+
+33. HOST NODE OPERATORS
+
+A Host Node operator is responsible for hardware, electricity, network connectivity, physical security, software maintenance, and compliance applicable to operation of that node.
+
+Host Node operators may not intentionally intercept private user information, falsify capabilities, manipulate settlement records, fabricate uptime, forge validation, route traffic for unauthorized surveillance, or misuse privileged infrastructure access.
+
+
+34. NODE COMPENSATION
+
+Eligible nodes may receive Buttons, fiat fees, compute compensation, backup stipends, or other rewards under current program rules.
+
+Rewards compensate qualifying service. Enrollment alone does not guarantee payment.
+
+Civweave may require cryptographic, uptime, capacity, reconstruction, compute, or other proof before crediting a reward.
+
+
+35. ANCHORS AND BACKUPS
+
+Civweave may support local Anchor or backup nodes for resilience.
+
+A backup reward may require evidence that the backup is recent, tied to the appropriate Hub, independently maintained, and capable of restoring required state.
+
+Backup rewards do not guarantee that every outage or data-loss event can be recovered.
+
+
+PART VII: SAFETY, CONDUCT, AND PLATFORM INTEGRITY
+
+
+36. PROHIBITED CONDUCT
+
+You may not use Civweave to:
+
+- violate applicable law;
+- defraud, deceive, exploit, or impersonate others;
+- distribute malware or intentionally compromise systems;
+- bypass access controls or payment restrictions;
+- manipulate validation, votes, reputation, rewards, contribution weights, or marketplace settlements;
+- create fake sales or contributions;
+- harass, threaten, exploit, or unlawfully discriminate against others;
+- infringe intellectual-property rights;
+- facilitate sexual exploitation or abuse;
+- intentionally create or distribute unlawful content;
+- use the Platform to arrange prohibited financial transactions;
+- evade sanctions or payment-provider requirements; or
+- materially interfere with another user's access to the Platform.
+
+Good-faith security research performed within an authorized security program is not prohibited merely because it tests security controls.
+
+
+37. ENFORCEMENT
+
+We may warn, restrict, quarantine, remove, suspend, or terminate accounts, content, listings, payments, nodes, or particular capabilities when reasonably necessary to enforce these Terms, protect users, comply with law, comply with provider requirements, address security incidents, or protect Platform integrity.
+
+Where practical and appropriate, we may provide notice and an opportunity to appeal.
+
+Urgent threats, fraud, security compromise, payment risk, or legal requirements may require immediate action.
+
+
+PART VIII: INTELLECTUAL PROPERTY
+
+
+38. CIVWEAVE MATERIALS
+
+The Platform software, interfaces, artwork, characters, trademarks, documentation, and other materials may be protected by copyright, trademark, open-source licenses, or other rights.
+
+These Terms do not transfer ownership of Cerbanimo or third-party intellectual property to you.
+
+Open-source components remain governed by their applicable licenses.
+
+
+39. FEEDBACK AND CONTRIBUTIONS TO THE PLATFORM
+
+If you voluntarily provide general feedback, ideas, bug reports, or feature suggestions, you permit us to use them without restriction or payment unless we separately agree otherwise.
+
+This does not override an explicit contribution, employment, contractor, revenue-sharing, or intellectual-property agreement.
+
+
+PART IX: PRIVACY AND DATA
+
+
+40. PRIVACY
+
+Our collection and use of personal information is governed by the Civweave Privacy Policy and applicable feature-specific notices.
+
+Civweave is designed to support local-first and federated functionality, but that does not mean every operation remains exclusively on your device.
+
+Depending on the feature you choose, information may be processed by your device, a selected Host Node, Cerbanimo infrastructure, payment providers, AI providers, storage providers, or other disclosed service providers.
+
+
+41. DATA PORTABILITY AND OFFLINE OPERATION
+
+Civweave may provide offline, local-first, synchronization, backup, export, or Passport-based portability features.
+
+We do not guarantee that every feature, external service, marketplace transaction, payment, or network operation can function offline.
+
+Irreversible external financial settlement may be paused when the Platform cannot safely verify required network or ledger state.
+
+
+PART X: SERVICE OPERATION
+
+
+42. CHANGES AND AVAILABILITY
+
+We may add, modify, replace, suspend, or retire Platform features.
+
+We will attempt to avoid unnecessarily removing user-owned data, earned records, or paid entitlements.
+
+We may make urgent changes without advance notice where required for security, fraud prevention, legal compliance, provider requirements, system integrity, or emergency recovery.
+
+
+43. BETA AND EXPERIMENTAL FEATURES
+
+Some features may be marked experimental, preview, beta, local, community-hosted, or similarly provisional.
+
+Experimental functionality may change substantially and may be less reliable than established functionality.
+
+
+PART XI: DISCLAIMERS AND LIABILITY
+
+
+44. NO GUARANTEE OF OUTCOMES
+
+Civweave helps users learn, work, organize, build, transact, and coordinate.
+
+We do not guarantee employment, income, sales, educational attainment, business success, community consensus, AI accuracy, marketplace demand, investment return, credential recognition, network uptime, or any particular outcome.
+
+
+45. SERVICE DISCLAIMER
+
+To the fullest extent permitted by applicable law, the Platform is provided on an “as available” basis.
+
+We disclaim warranties that may legally be disclaimed, including implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
+
+Nothing in these Terms excludes warranties or consumer rights that applicable law does not permit us to exclude.
+
+
+46. LIMITATION OF LIABILITY
+
+To the fullest extent permitted by applicable law, Cerbanimo and its officers, employees, contractors, and affiliates will not be liable for indirect, incidental, special, exemplary, punitive, or consequential damages arising from use of the Platform.
+
+For claims where a monetary limitation is legally permitted, Cerbanimo's aggregate liability will not exceed the greater of:
+
+(a) amounts you paid directly to Cerbanimo for the affected service during the twelve months before the event giving rise to the claim; or
+(b) US $100.
+
+This limitation does not apply where applicable law prohibits it or to liability that cannot legally be limited.
+
+
+47. THIRD-PARTY SERVICES
+
+Civweave may integrate third-party services such as Stripe, AI providers, media providers, hosting services, or external information sources.
+
+Those services may have their own terms and privacy policies.
+
+We are not responsible for an independent third party's services merely because Civweave integrates with them.
+
+
+PART XII: INDEMNITY
+
+
+48. BUSINESS AND SELLER INDEMNITY
+
+To the extent permitted by law, users acting as businesses, professional service providers, Host Node operators, or marketplace sellers agree to indemnify Cerbanimo against third-party claims arising from their unlawful conduct, infringement, fraudulent listings, products or services they provide, breach of these Terms, or violation of another person's rights.
+
+This provision does not require a consumer to indemnify Cerbanimo where applicable consumer law prohibits it.
+
+
+PART XIII: TERMINATION
+
+
+49. ENDING YOUR USE
+
+You may stop using Civweave at any time and may close your account through available account controls.
+
+Account closure does not automatically erase transaction records, settlement obligations, tax records, dispute records, public collaborative dependencies, or information we must retain for legitimate legal or operational purposes.
+
+
+50. EFFECT OF TERMINATION
+
+Termination does not cancel:
+
+completed purchases; outstanding refunds; disputes; payment obligations; valid licenses previously granted to purchasers; required tax records; accrued third-party rights; or provisions of these Terms that by their nature must survive termination.
+
+
+PART XIV: DISPUTES AND GENERAL TERMS
+
+
+51. INFORMAL RESOLUTION
+
+Before filing a non-urgent legal claim against Cerbanimo, you agree to make a reasonable attempt to resolve the dispute by contacting cerbanimo@gmail.com with a subject line beginning “Legal:”.
+
+Nothing in this provision prevents either party from seeking emergency or injunctive relief where appropriate.
+
+
+52. GOVERNING LAW
+
+These Terms are governed by the laws of the State of New York, without regard to conflict-of-law principles, except where applicable consumer or other mandatory law requires otherwise.
+
+Any court proceeding concerning these Terms will be brought in an appropriate state or federal court in New York, unless applicable law gives you the right to bring the proceeding elsewhere.
+
+Counsel review note: Mandatory arbitration and class-action-waiver language should be added only after legal review appropriate to Civweave's launch jurisdictions and user relationships.
+
+
+53. CHANGES TO THESE TERMS
+
+We may update these Terms.
+
+For material changes, we will provide reasonable notice through the Platform, email, or another appropriate method before the changes take effect where required.
+
+Changes will apply prospectively unless applicable law permits otherwise.
+
+If a change materially alters a paid or continuing relationship, additional acceptance may be required.
+
+
+54. SEVERABILITY
+
+If a provision of these Terms is found unenforceable, the remaining provisions remain effective to the extent permitted by law.
+
+
+55. NO WAIVER
+
+Failure to enforce a provision once does not waive our right to enforce it later.
+
+
+56. ASSIGNMENT
+
+You may not assign these Terms in a way that transfers your account or obligations to another person without authorization.
+
+Cerbanimo may assign these Terms in connection with a merger, acquisition, corporate restructuring, financing, or transfer of the Platform, subject to applicable law.
+
+
+57. ENTIRE AGREEMENT
+
+These Terms, together with policies and agreements expressly incorporated by reference, constitute the agreement between you and Cerbanimo regarding the Platform.
+
+Feature-specific agreements may supplement these Terms.
+
+If a specifically negotiated written agreement conflicts with these Terms, that agreement controls for its stated subject matter.
+
+
+58. INCORPORATED POLICIES
+
+The following should exist as separate documents before public launch and be incorporated into these Terms:
+
+1. Civweave Privacy Policy
+2. FellowFare Marketplace & Prohibited Listings Policy
+3. Seller and Service Provider Agreement
+4. Refund, Cancellation & Dispute Policy
+5. Payment, Fee & Contributor Distribution Policy
+6. Tax & Marketplace Collection Notice
+7. Community Standards
+8. AI & Automated Systems Notice
+9. Node Steward Agreement
+10. Copyright / DMCA Policy
+11. Child and Education Privacy Policy, if Civweave later enables under-13 accounts
+12. Security and Responsible Disclosure Policy
+
+
+59. CONTACT
+
+Cerbanimo
+Business address: Not yet established
+General contact: cerbanimo@gmail.com
+Legal notices: cerbanimo@gmail.com — use subject line “Legal: <subject>”
+Privacy inquiries: cerbanimo@gmail.com — use subject line “Privacy: <subject>”

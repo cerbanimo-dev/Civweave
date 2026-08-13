@@ -42,7 +42,7 @@ const legacyCanonicalManifest=`${legacyCanonicalOrigin}/app/manifest.webmanifest
 const hostNodeManifest=`${hostNodeOrigin}/app/manifest.webmanifest`;
 const related=manifest.related_applications||[];
 assert.ok(related.some(app=>app.platform==='webapp'&&app.url===canonicalManifest),'manifest must prefer civweave.pages.dev for installed-related-app discovery');
-assert.ok(related.some(app=>app.platform==='webapp'&&app.url===legacyCanonicalManifest),'manifest must retain legacy Commonweave discovery during origin migration');
+assert.ok(!related.some(app=>app.platform==='webapp'&&app.url===legacyCanonicalManifest),'manifest must not advertise an unrelated Commonweave PWA');
 assert.ok(related.some(app=>app.platform==='webapp'&&app.url===hostNodeManifest),'manifest must retain legacy Render discovery during migration');
 
 const assetlinks=JSON.parse(assetlinksText);
@@ -202,4 +202,4 @@ assert.ok(workerWrapper.includes('policy=resumable-pause-v280'));
 assert.ok(workerWrapper.includes('chat-convergence-v250'),'worker wrapper must carry current convergence identity');
 assert.ok(workerWrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'new worker must activate immediately');
 
-console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v284-open-after-install-current-manifest-only',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},obsoleteReferencesRetained:0,nativeInstallBridge:true,openAfterInstall:true,installedLaunch:'updater-first',canonicalInstallOrigin:canonicalOrigin,productionHostsInstallable:true,previewFallsToHostProduction:true,localAnchorReminder:true,frontDoorBridge:'/app/pwa-install-prompt-v247.js'},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v284-civweave-only-manifest-terms-gate',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},obsoleteReferencesRetained:0,nativeInstallBridge:true,openAfterInstall:true,installedLaunch:'updater-first',canonicalInstallOrigin:canonicalOrigin,productionHostsInstallable:true,previewFallsToHostProduction:true,localAnchorReminder:true,frontDoorBridge:'/app/pwa-install-prompt-v247.js'},null,2));

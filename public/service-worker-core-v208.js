@@ -20,6 +20,7 @@ const REQUIRED_SHELL_ASSETS = [
   '/app/index.html',
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146.js',
+  '/legal/civweave-terms-of-service.txt',
   '/app/document-lifecycle-v221.js',
   '/app/fullscreen-family-v104.html',
   '/app/logos/civweave-icon-192.png',
