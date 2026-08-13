@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 
 const provider = await readFile(new URL('../cloudflare/core/src/stripe-connect.mjs', import.meta.url), 'utf8');
 const money = await readFile(new URL('../cloudflare/core/src/money-edge.mjs', import.meta.url), 'utf8');
-const commerce = await readFile(new URL('../public/app/cerbanimo-commerce-distribution-v1.js', import.meta.url), 'utf8');
+const moneyWithMemberships = await readFile(new URL('../cloudflare/core/src/money-edge-with-memberships.mjs', import.meta.url), 'utf8');
+const browserCommerce = await readFile(new URL('../public/app/cerbanimo-commerce-distribution-v1.js', import.meta.url), 'utf8');
+const serverCommerce = await readFile(new URL('../cloudflare/core/src/commerce-edge.mjs', import.meta.url), 'utf8');
+const commerceMigration = await readFile(new URL('../cloudflare/core/migrations/0005_cerbanimo_commerce.sql', import.meta.url), 'utf8');
+const entry = await readFile(new URL('../cloudflare/core/src/stripe-connect-v2-entry.mjs', import.meta.url), 'utf8');
 const preflight = await readFile(new URL('./verify-stripe-live-readiness-preflight.mjs', import.meta.url), 'utf8');
 const humanGate = await readFile(new URL('../docs/finance/live-money-human-gate.md', import.meta.url), 'utf8');
 const launch = await readFile(new URL('../docs/finance/node-money-edge-launch-v1.md', import.meta.url), 'utf8');
@@ -30,11 +34,84 @@ assert.match(money, /CIVWEAVE_MONEY_KYC_AML_READY/);
 assert.match(money, /CIVWEAVE_MONEY_TAX_REPORTING_READY/);
 assert.match(money, /CIVWEAVE_MONEY_TERMS_APPROVED/);
 
-assert.match(commerce, /DEFAULT_COMMERCE_SPLIT_FEE_BPS=100/);
-assert.match(commerce, /buyerChargeMinor=amountMinor\+splitFeeMinor/);
-assert.match(commerce, /reducesContributorPayout:false/);
-assert.match(commerce, /routesToAnnualPool:false/);
-assert.match(commerce, /weightSource:'vested-cerbanimo-co-credits'/);
+assert.match(browserCommerce, /DEFAULT_COMMERCE_SPLIT_FEE_BPS=100/);
+assert.match(browserCommerce, /buyerChargeMinor=amountMinor\+splitFeeMinor/);
+assert.match(browserCommerce, /reducesContributorPayout:false/);
+assert.match(browserCommerce, /routesToAnnualPool:false/);
+assert.match(browserCommerce, /weightSource:'vested-cerbanimo-co-credits'/);
+
+for (const needle of [
+  "CERBANIMO_COMMERCE_FEE_BPS = 100",
+  "CERBANIMO_SERVICE_ORIGIN_ROYALTY_BPS = 1000",
+  "saleType === 'service'",
+  "buyerChargeCents = listedCents + splitFeeCents",
+  "fees_collector: 'application'",
+  "losses_collector: 'application'",
+  "stripe_transfers: { requested: true }",
+  "dashboard: 'express'",
+  "readyToReceiveTransfers",
+  "edge.verifyNodeRequest",
+  "'/v1/checkout/sessions'",
+  "'payment_intent_data[transfer_group]'",
+  "Cerbanimo commerce split fee (1%)",
+  "createHostTransfer",
+  "sourceTransaction: charge.id",
+  "reverseHostTransfer",
+  "refundTopUp",
+  "civweave_annual_pool: 'excluded'"
+]) assert.ok(serverCommerce.includes(needle), `missing server commerce contract: ${needle}`);
+assert.doesNotMatch(serverCommerce, /application_fee_amount/);
+assert.match(serverCommerce, /money_edge_commerce_recipients/);
+assert.match(serverCommerce, /money_edge_commerce_sales/);
+assert.match(serverCommerce, /money_edge_commerce_payouts/);
+assert.match(commerceMigration, /CREATE TABLE IF NOT EXISTS money_edge_commerce_recipients/);
+assert.match(commerceMigration, /CREATE TABLE IF NOT EXISTS money_edge_commerce_sales/);
+assert.match(commerceMigration, /CREATE TABLE IF NOT EXISTS money_edge_commerce_payouts/);
+assert.match(entry, /\/api\/money-edge\/commerce\//);
+assert.match(entry, /handleCommerceApiRequest/);
+assert.match(moneyWithMemberships, /settleCommerceCheckout/);
+assert.match(moneyWithMemberships, /handleCommerceRefund/);
+assert.match(moneyWithMemberships, /handleCommerceDispute/);
+assert.match(moneyWithMemberships, /restoreCommerceDisputeTransfers/);
+assert.match(moneyWithMemberships, /charge\.dispute\.funds_reinstated/);
+
+const commerceModule = await import(new URL('../cloudflare/core/src/commerce-edge.mjs', import.meta.url));
+const service = commerceModule.buildCommerceDistribution({
+  saleType: 'service',
+  listedCents: 10_000,
+  deliveryContributors: [
+    { userId: 'worker-a', weight: 3 },
+    { userId: 'worker-b', weight: 1 }
+  ],
+  originContributors: [{ userId: 'origin-a', weight: 1 }]
+});
+assert.equal(service.saleType, 'service');
+assert.equal(service.splitFeeBps, 100);
+assert.equal(service.splitFeeCents, 100);
+assert.equal(service.buyerChargeCents, 10_100);
+assert.equal(service.payouts.reduce((sum, row) => sum + row.amountCents, 0), 10_000);
+assert.deepEqual(service.payouts.map(row => [row.userId, row.amountCents]), [
+  ['origin-a', 1000],
+  ['worker-a', 6750],
+  ['worker-b', 2250]
+]);
+const product = commerceModule.buildCommerceDistribution({
+  saleType: 'product',
+  listedCents: 10_000,
+  productContributors: [
+    { userId: 'maker-a', weight: 2 },
+    { userId: 'maker-b', weight: 1 }
+  ],
+  commerceSplitFeeBps: 9999
+});
+assert.equal(product.saleType, 'product');
+assert.equal(product.splitFeeBps, 100, 'client input cannot alter the 1% commerce fee');
+assert.equal(product.buyerChargeCents, 10_100);
+assert.equal(product.payouts.reduce((sum, row) => sum + row.amountCents, 0), 10_000);
+assert.deepEqual(product.payouts.map(row => [row.userId, row.amountCents]), [
+  ['maker-a', 6667],
+  ['maker-b', 3333]
+]);
 
 assert.match(preflight, /accounts-v2-marketplace-recipient/);
 assert.match(preflight, /EXPECTED_COMMERCE_SPLIT_FEE_BPS = 100/);
@@ -70,6 +147,12 @@ console.log(JSON.stringify({
     'recipient-transfer-capability',
     'separate-charges-and-transfers',
     'commerce-one-percent-fee-on-top',
+    'server-side-commerce-distribution',
+    'signed-node-commerce-requests',
+    'recipient-user-to-account-mapping',
+    'paid-checkout-contributor-transfers',
+    'refund-transfer-reversals',
+    'dispute-transfer-reversal-and-restoration',
     'human-gates-fail-closed',
     'live-preflight-read-only',
     'stale-direct-charge-fee-language-removed'
