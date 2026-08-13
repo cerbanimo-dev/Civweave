@@ -4,7 +4,7 @@
   "runtimeFormat": "WebP atlas shards with alpha",
   "sourceCut": {"format":"PNG RGBA","width":308,"height":256,"gridInsetPx":4,"alphaVerified":true},
   "runtimeCell": {"width":80,"height":67,"quality":70},
-  "delivery": {"kind":"transparent-webp-atlas-shards","atlasDirectory":"/app/assets/ai/chat/expressions/atlases","columns":5,"rows":1,"expressionsPerShard":5,"shardsPerCharacter":4,"totalAtlasFiles":20},
+  "delivery": {"kind":"transparent-webp-atlas-shards","atlasDirectory":"/app/assets/ai/chat/expressions/atlases","columns":2,"rows":1,"expressionsPerShard":2,"shardsPerCharacter":10,"totalAtlasFiles":50},
   "systems": {
     "civweave": {"character":"weaveling","expressions":["neutral","happy","excited","laughing","curious","thinking","confused","surprised","worried","sad","shy","determined","proud","mischievous","sleepy","cheering","waving","pointing","magical","hopeful"]},
     "living-school": {"character":"moss","expressions":["neutral","happy","excited","laughing","curious","thinking","confused","surprised","worried","sad","crying","shy","determined","proud","mischievous","sleepy","cheering","waving","pointing","encouraging"]},
