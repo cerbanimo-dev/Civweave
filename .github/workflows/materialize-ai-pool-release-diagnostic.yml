@@ -1,0 +1,42 @@
+name: Diagnose AI pool release materialization
+
+on:
+  push:
+    branches:
+      - agent/free-user-ai-gateway-fallback
+    paths:
+      - '.github/workflows/materialize-ai-pool-release-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/free-user-ai-gateway-fallback
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Run canonical materializer in ephemeral checkout
+        run: |
+          set -euo pipefail
+          VERSION="$(tr -d '[:space:]' < VERSION)"
+          npm pkg set version="$VERSION"
+          node scripts/materialize-canonical-release.mjs
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+          echo '=== STATUS ==='
+          git status --short
+          echo '=== RELEASE MANIFEST ==='
+          cat "releases/$VERSION/release.json"
+          echo '=== SHELL INTEGRITY ==='
+          cat public/app/shell-integrity-v281.json
+          echo '=== TRACKED DIFF ==='
+          git diff -- package.json public config scripts
+          echo '=== NEW RELEASE FILES ==='
+          find "releases/$VERSION" -type f -maxdepth 3 -print | sort
