@@ -32,6 +32,9 @@ assert.equal(policy.governance.futureAuthority,'anarchadia-democratic');
 assert.equal(policy.governance.democraticActivation,false,'economic voting must not activate before Anarchadia governance exists');
 assert.equal(policy.governance.maxPercentChangePerProposal,null,'do not invent a percentage cap before governance chooses one');
 assert.deepEqual(Array.from(policy.stability.enabledDeflationaryMechanisms),[],'no deflationary mechanism should be silently enabled');
+for(const id of ['stability.buttons.transactionSinkBps','stability.acorns.transactionSinkBps','stability.buttons.demurrageBpsPerYear','stability.acorns.demurrageBpsPerYear','stability.buttons.issuanceCeilingPerPeriod','stability.acorns.issuanceCeilingPerPeriod']){
+  const row=vars.find(item=>item.id===id);assert.ok(row,`missing stability lever ${id}`);assert.equal(row.currentValue,null,`${id} must remain disabled/unset`);assert.ok(policy.stabilityLevers.includes(id));
+}
 assert.equal(policy.candidateChange({id:'labor.baselineButtonsPerHour',nextValue:6,quorumSatisfied:true,percentLimit:10,governanceActive:true}).allowed,false,'future vote guard must stay locked until democratic activation');
 
 const rubricIds=review.rubric.map(row=>row.id);
@@ -63,8 +66,8 @@ assert.ok(schema.properties.modules.items.properties.educationalHours);assert.ok
 assert.match(model.promptContract,/second-pass civweave\.basic-value-review\.v1/);
 assert.match(model.promptContract,/must not discount/i);
 
-for(const token of ['civweave.working-campus.v1','civweave.living-school.cabinet.v151','cerbanimo.quest-engine.v144','review.reviewSubjects','model-reviewed-fair','valuationRationale'])assert.ok(systemsSource.includes(token),`systems propagation omits ${token}`);
-for(const token of ['/app/civweave-basic-value-v1.js?v=economic-review-v1','/app/civweave-economic-policy-v1.js?v=economic-review-v1','/app/civweave-basic-value-model-v1.js?v=economic-review-v1','/app/civweave-basic-value-review-v1.js?v=economic-review-v1','/app/civweave-basic-value-systems-v1.js?v=economic-review-v1','await loadValueCore()','await loadValueModel()'])assert.ok(loaderSource.includes(token),`family AI loader omits ${token}`);
+for(const token of ['civweave.working-campus.v1','civweave.living-school.cabinet.v151','cerbanimo.quest-engine.v144','review.reviewSubjects','model-reviewed-fair','valuationRationale','Economic value review','MutationObserver'])assert.ok(systemsSource.includes(token),`systems propagation omits ${token}`);
+for(const token of ['/app/civweave-basic-value-v1.js?v=economic-review-v1','/app/civweave-economic-policy-v1.js?v=economic-review-v1','/app/civweave-basic-value-model-v1.js?v=economic-review-v1','/app/civweave-basic-value-review-v1.js?v=economic-review-v1','/app/civweave-basic-value-systems-v1.js?v=economic-review-v1','await loadValueCore()','await loadValueModel()','requestEconomicReview','civweave:working-campus-plan-built','cerbanimo:quest-engine-changed'])assert.ok(loaderSource.includes(token),`family AI loader omits ${token}`);
 for(const path of ['/app/civweave-basic-value-v1.js','/app/civweave-economic-policy-v1.js','/app/civweave-basic-value-model-v1.js','/app/civweave-basic-value-review-v1.js','/app/civweave-basic-value-systems-v1.js'])assert.ok(offline.seeds.includes(path),`offline core omits ${path}`);
 
-console.log(JSON.stringify({ok:true,authority:'model-interim',futureAuthority:'anarchadia-democratic',laborBaseline:'5 Buttons/hour',review:'upstream model proposal -> independent rubric review -> fair/adjust/reject',rubricGate:'all required fairness criteria must pass before price readiness',stability:'no hidden deflationary mechanisms enabled',payMinimum:'unset future governed variable'},null,2));
+console.log(JSON.stringify({ok:true,authority:'model-interim',futureAuthority:'anarchadia-democratic',laborBaseline:'5 Buttons/hour',review:'upstream model proposal -> independent rubric review -> fair/adjust/reject',rubricGate:'all required fairness criteria must pass before price readiness',stability:'candidate sinks/demurrage/issuance ceilings are explicit but disabled and unset',payMinimum:'unset future governed variable'},null,2));
