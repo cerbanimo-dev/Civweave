@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+const [entryHtml, entryJs, recoveryHtml, worker, recoveryWorker] = await Promise.all([
+  read('public/app/installed-entry-v146.html'), read('public/app/installed-entry-v146.js'), read('public/app/recovery-v426.html'), read('public/service-worker-v203.js'), read('public/service-worker-boot-recovery-v426.js')
+]);
+assert.match(entryHtml, /id="boot-recovery"[^>]*hidden/);
+assert.match(entryHtml, /setTimeout\(\(\)=>showRecovery\([^)]*\),4500\)/);
+assert.match(entryHtml, /civweave\.boot-recovery\.attempt\.v426/);
+assert.match(entryHtml, /\/app\/recovery-v426\.html/);
+assert.match(entryHtml, /installed-entry-v146\.js\?v=1\.0\.122-boot-recovery-v426" defer/);
+assert.ok(entryHtml.indexOf('<body>') < entryHtml.indexOf('installed-entry-v146.js'), 'recovery UI must parse before external bootstrap');
+assert.doesNotMatch(entryHtml, /cw-reward-ledger-v2\.js|cw-reward-receivers-v2\.js|cerbanimo-commerce-distribution-v1\.js/);
+assert.match(entryJs, /RELEASE_TIMEOUT_MS=1500/);
+assert.match(entryJs, /WORKER_STEP_TIMEOUT_MS=1800/);
+assert.match(entryJs, /ROUTE_TIMEOUT_MS=2200/);
+assert.match(entryJs, /bounded\(navigator\.serviceWorker\.register/);
+assert.match(entryJs, /recoveryUi\(\)\?\.showRecovery/);
+assert.match(entryJs, /safeRecoveryRequested/);
+assert.match(entryJs, /ui\?\.markRouted\?\.\(\)/);
+assert.match(recoveryHtml, /Civweave can recover without reinstalling/);
+assert.match(recoveryHtml, /Open Working Campus safely/);
+assert.match(recoveryHtml, /REPAIR_DEVICE_PACKAGE/);
+assert.match(recoveryHtml, /Reset startup state only/);
+assert.doesNotMatch(recoveryHtml, /localStorage\.clear|indexedDB\.deleteDatabase|caches\.delete/);
+assert.match(worker, /service-worker-local-ai-coherence-v307\.js/);
+assert.match(worker, /service-worker-boot-recovery-v426\.js\?v=boot-recovery-v426/);
+assert.ok(worker.indexOf('service-worker-boot-recovery-v426.js') > worker.indexOf('service-worker-navigation-safety-v224.js'), 'boot recovery must wrap final stable entry path');
+assert.match(recoveryWorker, /LAUNCH_BUDGET_MS=2200/);
+assert.match(recoveryWorker, /RECOVERY_CACHE='cwrecovery-v426'/);
+assert.match(recoveryWorker, /stableAppEntry=async function bootRecoveryStableAppEntry/);
+assert.match(recoveryWorker, /cachedRecoveryResponse/);
+assert.match(recoveryWorker, /syntheticRecovery/);
+assert.match(recoveryWorker, /paint-recovery-instead-of-native-splash-dead-end/);
+assert.doesNotMatch(recoveryWorker, /caches\.delete|indexedDB\.deleteDatabase/);
+console.log('PWA cold-launch recovery v426 verifier passed.');
