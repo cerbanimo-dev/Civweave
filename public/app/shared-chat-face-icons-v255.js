@@ -30,7 +30,7 @@ function installDirector(){
 }
 const TRANSPARENT_PIXEL='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 const CHARACTER=Object.freeze({civweave:'weaveling','living-school':'moss',cerbanimo:'kamiya',fellowfare:'rook',anarchadia:'merlin'});
-function atlasDescriptor(system){const api=director(),expression=expressions.get(system)||'neutral',list=api?.expressions?.[system]||[],index=Math.max(0,list.indexOf(expression)),shard=Math.floor(index/10)+1,local=index%10,col=local%5,row=Math.floor(local/5),character=CHARACTER[system];if(!character||!list.length)return null;return{expression,src:`/app/assets/ai/chat/expressions/atlases/${character}-expressions-${shard}-v313.webp`,x:`${col*25}%`,y:`${row*100}%`}}
+function atlasDescriptor(system){const api=director(),expression=expressions.get(system)||'neutral',list=api?.expressions?.[system]||[],index=Math.max(0,list.indexOf(expression)),shard=Math.floor(index/5)+1,local=index%5,col=local,character=CHARACTER[system];if(!character||!list.length)return null;return{expression,src:`/app/assets/ai/chat/expressions/atlases/${character}-expressions-${shard}-v313.webp`,x:`${col*25}%`}}
 function clearAtlas(img){delete img.dataset.cwExpressionAtlas;img.style.removeProperty('background-image');img.style.removeProperty('background-size');img.style.removeProperty('background-position');img.style.removeProperty('background-repeat')}
 
 function installStyle(){
@@ -72,8 +72,8 @@ function apply(scope=document){
       if(img.getAttribute('src')!==TRANSPARENT_PIXEL)img.src=TRANSPARENT_PIXEL;
       img.dataset.cwExpressionAtlas='v313';
       img.style.setProperty('background-image',`url("${atlas.src}")`);
-      img.style.setProperty('background-size','500% 200%');
-      img.style.setProperty('background-position',`${atlas.x} ${atlas.y}`);
+      img.style.setProperty('background-size','500% 100%');
+      img.style.setProperty('background-position',`${atlas.x} 0%`);
       img.style.setProperty('background-repeat','no-repeat');
       img.dataset.cwExpression=atlas.expression;
     }else{
