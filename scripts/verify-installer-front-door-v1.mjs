@@ -31,8 +31,8 @@ for(const path of ['public/app/logos/civweave-prismatic-wordmark-v1.png']){
 const cerbanimoBytes=await readBytes('public/app/logos/cerbanimo-steward-mark-v1.png');
 assert.ok(cerbanimoBytes.subarray(0,8).equals(pngSignature),'Cerbanimo steward mark must contain real PNG bytes');
 assert.equal(cerbanimoBytes.subarray(12,16).toString('ascii'),'IHDR','Cerbanimo steward mark must contain a PNG IHDR');
-assert.equal(cerbanimoBytes.readUInt32BE(16),192,'Cerbanimo steward mark width must stay at the verified display size');
-assert.equal(cerbanimoBytes.readUInt32BE(20),288,'Cerbanimo steward mark height must stay at the verified display size');
+assert.equal(cerbanimoBytes.readUInt32BE(16),48,'Cerbanimo steward mark width must stay at the verified uncropped display size');
+assert.equal(cerbanimoBytes.readUInt32BE(20),72,'Cerbanimo steward mark height must stay at the verified uncropped display size');
 assert.equal(cerbanimoBytes.readUInt8(25),2,'Cerbanimo steward mark must stay truecolor RGB, never indexed/paletted');
 
 assert.ok(bridge.includes(`const ENTRY='${entry}'`),'installed Open Civweave button must use updater-first installed entry');
@@ -79,7 +79,7 @@ assert.ok(frontDoor.includes("background:#fff url('/app/logos/cerbanimo-steward-
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installer-front-door-v5-cerbanimo-white-rgb',
+  revision:'installer-front-door-v6-approved-cerbanimo-uncropped',
   installedEntry:entry,
   hostSetup:'/host-setup.html',
   launcher:'/app/pwa-install-prompt-v247.js',
