@@ -77,3 +77,52 @@ html,body{color:var(--ff-ink);}
 .hero-side,.loom-principle,.provider-headline{background:linear-gradient(145deg,#173f56,#70452d)!important;color:#fff8e9!important}
 .hero-side p,.loom-principle p,.provider-headline p{color:rgba(255,248,232,.85)!important}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#173b49;--muted:#536666;--surface:rgba(255,249,231,.96);--surface-solid:#fff9e7;--sand-50:#f8e8bf;--sand-100:#f4dfb1;--sage-100:#f4dfb1;--sage-200:#ecd09d}:root:not([data-theme="light"]) body{background:linear-gradient(180deg,#f9e7b7,#fff6dc)!important}}
+
+/* r2: form controls must remain legible even when parent/shared dark-mode rules leak in. */
+body.ff-cabinet-embedded .ffv2-toolbar label,
+body.ff-cabinet-embedded .ffv2-form label,
+body.ff-cabinet-embedded .ffv2-dialog label,
+body.ff-cabinet-embedded .ffv2-rook-price label,
+body.ff-cabinet-embedded .ffv2-check,
+body.ff-cabinet-embedded .ffv2-check-row label{color:#173b49!important}
+body.ff-cabinet-embedded .ffv2-toolbar label>span,
+body.ff-cabinet-embedded .ffv2-form label>span,
+body.ff-cabinet-embedded .ffv2-dialog label>span,
+body.ff-cabinet-embedded .ffv2-rook-price label>span,
+body.ff-cabinet-embedded .ffv2-check span,
+body.ff-cabinet-embedded .ffv2-check-row span{color:#173b49!important;opacity:1!important}
+body.ff-cabinet-embedded .ffv2-toolbar input,
+body.ff-cabinet-embedded .ffv2-toolbar select,
+body.ff-cabinet-embedded .ffv2-form input,
+body.ff-cabinet-embedded .ffv2-form textarea,
+body.ff-cabinet-embedded .ffv2-dialog input,
+body.ff-cabinet-embedded .ffv2-dialog select,
+body.ff-cabinet-embedded .ffv2-dialog textarea,
+body.ff-cabinet-embedded .ffv2-rook-price select{
+  background:#fff9e8!important;
+  color:#153849!important;
+  border:2px solid rgba(169,94,45,.72)!important;
+  caret-color:#153849!important;
+  -webkit-text-fill-color:#153849!important;
+  opacity:1!important;
+  box-shadow:none!important;
+}
+body.ff-cabinet-embedded .ffv2-toolbar input::placeholder,
+body.ff-cabinet-embedded .ffv2-form input::placeholder,
+body.ff-cabinet-embedded .ffv2-form textarea::placeholder,
+body.ff-cabinet-embedded .ffv2-dialog input::placeholder,
+body.ff-cabinet-embedded .ffv2-dialog textarea::placeholder{color:#75634e!important;opacity:1!important;-webkit-text-fill-color:#75634e!important}
+body.ff-cabinet-embedded .ffv2-toolbar select option,
+body.ff-cabinet-embedded .ffv2-dialog select option,
+body.ff-cabinet-embedded .ffv2-rook-price select option{background:#fff9e8!important;color:#153849!important}
+body.ff-cabinet-embedded input[type="checkbox"]{accent-color:#c46f35!important}
+body.ff-cabinet-embedded .ffv2-toolbar input:focus,
+body.ff-cabinet-embedded .ffv2-toolbar select:focus,
+body.ff-cabinet-embedded .ffv2-form input:focus,
+body.ff-cabinet-embedded .ffv2-form textarea:focus,
+body.ff-cabinet-embedded .ffv2-dialog input:focus,
+body.ff-cabinet-embedded .ffv2-dialog select:focus,
+body.ff-cabinet-embedded .ffv2-dialog textarea:focus,
+body.ff-cabinet-embedded .ffv2-rook-price select:focus{border-color:#1d5870!important;box-shadow:0 0 0 3px rgba(29,88,112,.18)!important}
+.ffv2-currency-label{display:inline-flex;align-items:baseline;gap:.18em;white-space:nowrap}
+.ffv2-currency-symbol{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-weight:400;line-height:1}
