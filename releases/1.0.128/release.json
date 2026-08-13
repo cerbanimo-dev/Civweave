@@ -1,0 +1,15 @@
+{
+  "version": "1.0.128",
+  "releaseDir": "releases/1.0.128",
+  "serverDir": "releases/1.0.128/server",
+  "serverFiles": [
+    "server.mjs",
+    "server-v130.mjs",
+    "server-local-v131.mjs",
+    "server-gateway-v131-base.mjs",
+    "server-gateway-v131.mjs",
+    "server-federated-v152.mjs"
+  ],
+  "regressionCommand": "npm run test:critical",
+  "notes": "Root runtime files are archived out of the live source tree. Canonical launch/runtime files live here while active development stays in server/, lib/, and public/."
+}

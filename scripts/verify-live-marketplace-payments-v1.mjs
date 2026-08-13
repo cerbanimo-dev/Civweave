@@ -1,160 +1,125 @@
 import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
-const provider = await readFile(new URL('../cloudflare/core/src/stripe-connect.mjs', import.meta.url), 'utf8');
-const money = await readFile(new URL('../cloudflare/core/src/money-edge.mjs', import.meta.url), 'utf8');
-const moneyWithMemberships = await readFile(new URL('../cloudflare/core/src/money-edge-with-memberships.mjs', import.meta.url), 'utf8');
-const browserCommerce = await readFile(new URL('../public/app/cerbanimo-commerce-distribution-v1.js', import.meta.url), 'utf8');
-const serverCommerce = await readFile(new URL('../cloudflare/core/src/commerce-edge.mjs', import.meta.url), 'utf8');
-const commerceMigration = await readFile(new URL('../cloudflare/core/migrations/0005_cerbanimo_commerce.sql', import.meta.url), 'utf8');
-const entry = await readFile(new URL('../cloudflare/core/src/stripe-connect-v2-entry.mjs', import.meta.url), 'utf8');
-const preflight = await readFile(new URL('./verify-stripe-live-readiness-preflight.mjs', import.meta.url), 'utf8');
-const humanGate = await readFile(new URL('../docs/finance/live-money-human-gate.md', import.meta.url), 'utf8');
-const launch = await readFile(new URL('../docs/finance/node-money-edge-launch-v1.md', import.meta.url), 'utf8');
+const read = relative => readFile(new URL(`../${relative}`, import.meta.url), 'utf8');
+const [fulfillment,cabinet,legacyShim,browserCommerce,symbols,moneyWithMemberships,entry,originEntry,serverCommerce,directCommerce] = await Promise.all([
+  read('public/app/services/fellowfare/fulfillment-economy-v2.js'),
+  read('public/app/services/fellowfare/cabinet.html'),
+  read('public/app/services/fellowfare/app.js'),
+  read('public/app/cerbanimo-commerce-distribution-v1.js'),
+  read('public/app/services/fellowfare/marketplace-v2-symbols.js'),
+  read('cloudflare/core/src/money-edge-with-memberships.mjs'),
+  read('cloudflare/core/src/stripe-connect-v2-entry.mjs'),
+  read('cloudflare/core/src/origin-entry.mjs'),
+  read('cloudflare/core/src/commerce-edge.mjs'),
+  read('cloudflare/core/src/fellowfare-direct-commerce-v1.mjs')
+]);
 
-assert.match(provider, /STRIPE_CONNECT_ACCOUNT_MODEL = 'accounts-v2-marketplace-recipient'/);
-assert.match(provider, /v2\.core\.accounts\.create/);
-assert.match(provider, /dashboard: 'express'/);
-assert.match(provider, /fees_collector: 'application'/);
-assert.match(provider, /losses_collector: 'application'/);
-assert.match(provider, /recipient:\s*\{/);
-assert.match(provider, /stripe_transfers: \{ requested: true \}/);
-assert.match(provider, /v2\.core\.accountLinks\.create/);
-assert.match(provider, /configurations: \['recipient'\]/);
-assert.match(provider, /platform-charge-separate-transfer/);
-assert.match(provider, /source_transaction/);
-assert.match(provider, /Compatibility only for sandbox\/legacy node registrations/);
+for (const [name, source] of [
+  ['fulfillment-economy-v2.js', fulfillment],
+  ['marketplace-v2-symbols.js', symbols],
+  ['cerbanimo-commerce-distribution-v1.js', browserCommerce]
+]) assert.doesNotThrow(() => new Function(source), `${name} contains a JavaScript syntax error.`);
 
-assert.match(money, /TOPUP_ECONOMY = Object\.freeze\(\{ systemBps: 7000, hostBps: 2500, cerbanimoBps: 500 \}\)/);
-assert.match(money, /fundsModel: 'platform-reserve-separate-transfer'/);
-assert.match(money, /CIVWEAVE_MONEY_LIVE_ENABLED/);
-assert.match(money, /CIVWEAVE_MONEY_COMPLIANCE_APPROVED/);
-assert.match(money, /CIVWEAVE_MONEY_JURISDICTION_APPROVED/);
-assert.match(money, /CIVWEAVE_MONEY_KYC_AML_READY/);
-assert.match(money, /CIVWEAVE_MONEY_TAX_REPORTING_READY/);
-assert.match(money, /CIVWEAVE_MONEY_TERMS_APPROVED/);
+// Current cabinet boots v2 before the retained v1 compatibility layer. The old
+// browser distribution API remains fail-closed so cached code cannot recreate the
+// retired platform-charge/separate-transfer marketplace.
+assert.match(cabinet, /fulfillment-economy-v2\.js/);
+assert.match(cabinet, /fulfillment-economy-v1\.js/);
+assert.ok(cabinet.indexOf('fulfillment-economy-v2.js') < cabinet.indexOf('fulfillment-economy-v1.js'));
+assert.match(cabinet, /cerbanimo-commerce-distribution-v1\.js/);
+assert.match(legacyShim, /fulfillment-economy-v2\.js/);
+assert.doesNotMatch(legacyShim, /cerbanimo-commerce-distribution-v1\.js/);
+assert.match(browserCommerce, /commerceEnabled:false/);
+assert.match(browserCommerce, /marketplacePaymentMode:'disabled'/);
+assert.match(browserCommerce, /buildDistribution:disabled/);
+assert.match(browserCommerce, /stripeTransferInstructions:disabled/);
+assert.match(browserCommerce, /recordSale:async\(\)=>disabled\(\)/);
+assert.match(browserCommerce, /buildAnnualDistribution/);
 
-assert.match(browserCommerce, /DEFAULT_COMMERCE_SPLIT_FEE_BPS=100/);
-assert.match(browserCommerce, /buyerChargeMinor=amountMinor\+splitFeeMinor/);
-assert.match(browserCommerce, /reducesContributorPayout:false/);
-assert.match(browserCommerce, /routesToAnnualPool:false/);
-assert.match(browserCommerce, /weightSource:'vested-cerbanimo-co-credits'/);
-
-for (const needle of [
-  "CERBANIMO_COMMERCE_FEE_BPS = 100",
-  "CERBANIMO_SERVICE_ORIGIN_ROYALTY_BPS = 1000",
-  "saleType === 'service'",
-  "buyerChargeCents = listedCents + splitFeeCents",
-  "fees_collector: 'application'",
-  "losses_collector: 'application'",
-  "stripe_transfers: { requested: true }",
-  "dashboard: 'express'",
-  "readyToReceiveTransfers",
-  "edge.verifyNodeRequest",
-  "'/v1/checkout/sessions'",
-  "'payment_intent_data[transfer_group]'",
-  "Cerbanimo commerce split fee (1%)",
-  "createHostTransfer",
-  "sourceTransaction: charge.id",
-  "reverseHostTransfer",
-  "refundTopUp",
-  "civweave_annual_pool: 'excluded'"
-]) assert.ok(serverCommerce.includes(needle), `missing server commerce contract: ${needle}`);
-assert.doesNotMatch(serverCommerce, /application_fee_amount/);
-assert.match(serverCommerce, /money_edge_commerce_recipients/);
-assert.match(serverCommerce, /money_edge_commerce_sales/);
-assert.match(serverCommerce, /money_edge_commerce_payouts/);
-assert.match(commerceMigration, /CREATE TABLE IF NOT EXISTS money_edge_commerce_recipients/);
-assert.match(commerceMigration, /CREATE TABLE IF NOT EXISTS money_edge_commerce_sales/);
-assert.match(commerceMigration, /CREATE TABLE IF NOT EXISTS money_edge_commerce_payouts/);
+// Physical-goods marketplace payment remains retired, including the old host-fee
+// allocator. Service/learning direct commerce is routed on its own endpoint.
+assert.match(entry, /handleFellowFareDirectCommerce/);
+assert.match(entry, /\/api\/fellowfare\/direct-commerce\//);
+assert.match(entry, /marketplacePaymentsDisabled/);
+assert.match(entry, /marketplace-checkout-disabled/);
 assert.match(entry, /\/api\/money-edge\/commerce\//);
-assert.match(entry, /handleCommerceApiRequest/);
-assert.match(moneyWithMemberships, /settleCommerceCheckout/);
-assert.match(moneyWithMemberships, /handleCommerceRefund/);
-assert.match(moneyWithMemberships, /handleCommerceDispute/);
-assert.match(moneyWithMemberships, /restoreCommerceDisputeTransfers/);
-assert.match(moneyWithMemberships, /charge\.dispute\.funds_reinstated/);
+assert.doesNotMatch(entry, /handleCommerceApiRequest/);
+assert.match(originEntry, /commerce-host-fee-retired/);
+assert.match(originEntry, /\/api\/commerce\/host-fee\/policy/);
+assert.match(originEntry, /\/api\/commerce\/host-fee\/quote/);
+assert.doesNotMatch(originEntry, /splitCommerceHostFee|COMMERCE_HOST_FEE_SCHEMA/);
 
-const commerceModule = await import(new URL('../cloudflare/core/src/commerce-edge.mjs', import.meta.url));
-const service = commerceModule.buildCommerceDistribution({
-  saleType: 'service',
-  listedCents: 10_000,
-  deliveryContributors: [
-    { userId: 'worker-a', weight: 3 },
-    { userId: 'worker-b', weight: 1 }
-  ],
-  originContributors: [{ userId: 'origin-a', weight: 1 }]
-});
-assert.equal(service.saleType, 'service');
-assert.equal(service.splitFeeBps, 100);
-assert.equal(service.splitFeeCents, 100);
-assert.equal(service.buyerChargeCents, 10_100);
-assert.equal(service.payouts.reduce((sum, row) => sum + row.amountCents, 0), 10_000);
-assert.deepEqual(service.payouts.map(row => [row.userId, row.amountCents]), [
-  ['origin-a', 1000],
-  ['worker-a', 6750],
-  ['worker-b', 2250]
-]);
-const product = commerceModule.buildCommerceDistribution({
-  saleType: 'product',
-  listedCents: 10_000,
-  productContributors: [
-    { userId: 'maker-a', weight: 2 },
-    { userId: 'maker-b', weight: 1 }
-  ],
-  commerceSplitFeeBps: 9999
-});
-assert.equal(product.saleType, 'product');
-assert.equal(product.splitFeeBps, 100, 'client input cannot alter the 1% commerce fee');
-assert.equal(product.buyerChargeCents, 10_100);
-assert.equal(product.payouts.reduce((sum, row) => sum + row.amountCents, 0), 10_000);
-assert.deepEqual(product.payouts.map(row => [row.userId, row.amountCents]), [
-  ['maker-a', 6667],
-  ['maker-b', 3333]
-]);
+// Direct cash commerce is provider-owned and limited to service/learning/tutoring.
+assert.match(directCommerce, /\['service', 'learning', 'tutoring'\]/);
+assert.match(directCommerce, /dashboard: 'full'/);
+assert.match(directCommerce, /fees_collector: 'stripe'/);
+assert.match(directCommerce, /losses_collector: 'stripe'/);
+assert.match(directCommerce, /card_payments: \{ requested: true \}/);
+assert.match(directCommerce, /application_fee_amount/);
+assert.match(directCommerce, /stripeAccount: accountId/);
+assert.match(directCommerce, /merchantOfRecord: 'connected-account'/);
+assert.match(directCommerce, /platformCollectsGross: false/);
+assert.match(directCommerce, /platformRoutesSellerProceeds: false/);
+assert.match(directCommerce, /FELLOWFARE_DEFAULT_SERVICE_FEE_BPS = 100/);
+assert.match(directCommerce, /CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS/);
+assert.match(directCommerce, /integration_identifier: integrationIdentifier\(\)/);
+assert.doesNotMatch(directCommerce, /payment_method_types/);
+assert.doesNotMatch(directCommerce, /automatic_tax/);
+assert.doesNotMatch(directCommerce, /\/v1\/transfers|transfer_data|destination:/);
 
-assert.match(preflight, /accounts-v2-marketplace-recipient/);
-assert.match(preflight, /EXPECTED_COMMERCE_SPLIT_FEE_BPS = 100/);
-assert.match(preflight, /mutationPerformed: false/);
-assert.doesNotMatch(preflight, /\.create\(/, 'live preflight must remain read-only');
-assert.doesNotMatch(preflight, /\.update\(/, 'live preflight must remain read-only');
-assert.doesNotMatch(preflight, /\.del\(/, 'live preflight must remain read-only');
+assert.match(moneyWithMemberships, /goodsPaymentMode: 'seller-direct-outside-platform'/);
+assert.match(moneyWithMemberships, /serviceLearningTokenMode: 'acorn-button-fulfillment-burn'/);
+assert.match(moneyWithMemberships, /serviceLearningUsdMode: 'stripe-connect-direct-charge'/);
+assert.match(moneyWithMemberships, /serviceLearningMerchantOfRecord: 'connected-provider'/);
+assert.match(moneyWithMemberships, /serviceLearningPlatformFeeMode: 'application-fee'/);
+assert.match(moneyWithMemberships, /platformCollectsGrossSellerPayment: false/);
+assert.match(moneyWithMemberships, /platformRoutesSellerProceeds: false/);
 
-for (const gate of [
-  'CIVWEAVE_MONEY_LIVE_ENABLED',
-  'CIVWEAVE_MONEY_COMPLIANCE_APPROVED',
-  'CIVWEAVE_MONEY_JURISDICTION_APPROVED',
-  'CIVWEAVE_MONEY_KYC_AML_READY',
-  'CIVWEAVE_MONEY_TAX_REPORTING_READY',
-  'CIVWEAVE_MONEY_TERMS_APPROVED'
-]) {
-  assert.match(humanGate, new RegExp(`${gate}=false`), `${gate} must remain explicitly false before human launch approval`);
-}
-assert.match(humanGate, /stripe_transfers\.status = active/);
-assert.match(humanGate, /listed commerce amount plus the 1% Cerbanimo split fee/);
-assert.match(launch, /marketplace/);
-assert.match(launch, /separate charges and transfers/);
-assert.match(launch, /1% Cerbanimo split fee is added on top/);
-assert.doesNotMatch(launch, /15% application fee/);
-assert.doesNotMatch(humanGate, /15% application fee/);
+// Legacy lifecycle code is still present only so previously-created payments can
+// finish, refund, dispute, or reverse safely.
+assert.match(serverCommerce, /settleCommerceCheckout/);
+assert.match(serverCommerce, /handleCommerceRefund/);
+assert.match(serverCommerce, /handleCommerceDispute/);
+assert.match(serverCommerce, /restoreCommerceDisputeTransfers/);
+
+// Fulfillment remains the token settlement contract beside optional USD checkout.
+assert.match(fulfillment, /REWARD_PER_QUEST=5/);
+assert.match(fulfillment, /MILESTONE_SIZE=100/);
+assert.match(fulfillment, /MILESTONE_BONUS=10/);
+for (const quest of ['finish-learning-module','fulfill-20-acorns','fulfill-20-buttons','post-need','post-offering']) assert.ok(fulfillment.includes(quest), `Missing quest ${quest}`);
+assert.match(fulfillment, /nonTransferable:true/);
+assert.match(fulfillment, /recipientCredited:false/);
+assert.match(fulfillment, /operation:'fulfillment-burn'/);
+assert.match(fulfillment, /GOODS_KINDS=new Set\(\['product','resource'\]\)/);
+assert.match(fulfillment, /TOKEN_KINDS=new Set\(\['service','learning','tutoring'\]\)/);
+assert.match(fulfillment, /listing\.pricing=\{\.\.\.pricing,usdMinor:0,buttons:0,acorns:0\}/);
+assert.match(fulfillment, /cashMode:cash\?'stripe-connect-direct-charge':'none'/);
+assert.match(fulfillment, /Offer USD, Acorn\/Button fulfillment, or both/);
+
+assert.match(symbols, /does not collect or route a goods payment/);
+assert.match(symbols, /provider Stripe direct checkout/);
+assert.match(symbols, /FellowFare receives only its application fee/);
+assert.match(symbols, /Acorns\/Buttons are fulfilled and burned/);
 
 console.log(JSON.stringify({
   ok: true,
+  revision: 'fellowfare-fulfillment-direct-commerce-v2',
   checks: [
-    'accounts-v2-marketplace-recipient',
-    'express-dashboard',
-    'platform-pricing-and-loss-liability',
-    'recipient-transfer-capability',
-    'separate-charges-and-transfers',
-    'commerce-one-percent-fee-on-top',
-    'server-side-commerce-distribution',
-    'signed-node-commerce-requests',
-    'recipient-user-to-account-mapping',
-    'paid-checkout-contributor-transfers',
-    'refund-transfer-reversals',
-    'dispute-transfer-reversal-and-restoration',
-    'human-gates-fail-closed',
-    'live-preflight-read-only',
-    'stale-direct-charge-fee-language-removed'
+    'goods-seller-direct',
+    'legacy-platform-marketplace-checkout-retired',
+    'commerce-host-fee-retired',
+    'service-learning-provider-direct-charge',
+    'connected-provider-merchant-of-record',
+    'fellowfare-application-fee-only',
+    'no-platform-gross-collection',
+    'no-seller-proceeds-routing',
+    'services-learning-fulfillment-burn',
+    'no-recipient-token-transfer',
+    'three-daily-quest-buckets',
+    'fixed-daily-reward',
+    'hundred-unit-milestone-bonus',
+    'legacy-payment-unwind-preserved',
+    'annual-reserve-payout-preserved'
   ]
 }, null, 2));
