@@ -17,7 +17,7 @@ for(const token of ["['/app/working-campus-v156.html','civweave']","['/app/cabin
 const experienceStart=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),experienceEnd=boundary.indexOf('];',experienceStart),experience=boundary.slice(experienceStart,experienceEnd);
 assert(experience.includes('SETTINGS_GATEWAY')&&experience.includes('GUIDE_WORKSPACE'));
 assert(!experience.includes('DOCUMENT_LIFECYCLE')&&!experience.includes('AI_SETTINGS_BIND_GUARD')&&!experience.includes('AI_SETTINGS_REPAIR'));
-assert(campusPart4.includes('CivweaveSystemRoutesV227')&&campusPart4.includes('routes.navigate(id)'));
+assert(campusPart4.includes('CivweaveSystemRoutesV227')&&/routes\.navigate\(id(?:,|\))/.test(campusPart4),'Working Campus no longer delegates realm navigation through the canonical route contract.');
 assert.match(lifecycle,/document-lifecycle-v317-explicit-activation/);
 assert.match(lifecycle,/searchParams\.get\('activate'\)==='1'/);
 assert.match(lifecycle,/settingsEntryOwner:'settings-gateway-v317'/);
