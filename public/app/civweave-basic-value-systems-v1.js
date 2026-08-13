@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueSystemsV1)return;
-const VERSION='1.0.1';
+const VERSION='1.0.2';
 const KEYS=Object.freeze({civweave:'civweave.working-campus.v1',living:'civweave.living-school.cabinet.v151',cerbanimo:'cerbanimo.quest-engine.v144'});
 const clean=(value,max=5000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -24,7 +24,7 @@ function needs(system,row){
   return !valuation||valuation.inputFingerprint!==fp||!['model-reviewed-fair','model-reviewed-adjusted'].includes(valuation.status);
 }
 function subject(system,row,index){
-  return{id:clean(row?.id||`${system}-${index+1}`,220),system,kind:kindFor(system,row),title:clean(row?.title||row?.name||`Work ${index+1}`,300),description:textFor(row),acceptanceCriteria:row?.acceptanceCriteria||row?.completionCriteria||[],evidence:row?.proofRequired||row?.proof||row?.artifact||row?.deliverable||'',laborWorthHours:row?.laborWorthHours,educationalHours:row?.educationalHours,curriculumAcorns:row?.curriculumAcorns,mentorshipMode:row?.mentorshipMode,valuation:row?.valuation};
+  return{id:clean(row?.id||`${system}-${index+1}`,220),system,kind:kindFor(system,row),title:clean(row?.title||row?.name||`Work ${index+1}`,300),description:textFor(row),acceptanceCriteria:row?.acceptanceCriteria||row?.completionCriteria||[],evidence:row?.proofRequired||row?.proof||row?.artifact||row?.deliverable||'',laborWorthHours:row?.laborWorthHours,educationalHours:row?.educationalHours,curriculumAcorns:row?.curriculumAcorns,mentorshipMode:row?.mentorshipMode,valuationRationale:row?.valuationRationale||row?.valuation?.proposed?.rationale,valuationProvider:row?.generation?.provider||row?.valuation?.estimator?.provider,valuationModel:row?.generation?.model||row?.valuation?.estimator?.model,valuation:row?.valuation};
 }
 function refsForCiv(state){
   const out=[];for(const path of state?.plan?.paths||[]){const system=path?.realm==='living-school'?'learning':path?.realm||'civweave';for(const row of path?.tasks||[])out.push({system,row})}return out;
