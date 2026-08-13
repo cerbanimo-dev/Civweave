@@ -1,0 +1,32 @@
+name: Verify Mobile Local Settings v315
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/experience-orchestrator-v232.js'
+      - 'public/app/settings-parity-v295.js'
+      - 'public/app/cabinets/living-school/index.html'
+      - 'public/app/install-boundary-v146.js'
+      - 'scripts/verify-mobile-local-settings-v315.mjs'
+      - '.github/workflows/verify-mobile-local-settings-v315.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/app/experience-orchestrator-v232.js'
+      - 'public/app/settings-parity-v295.js'
+      - 'public/app/cabinets/living-school/index.html'
+      - 'public/app/install-boundary-v146.js'
+      - 'scripts/verify-mobile-local-settings-v315.mjs'
+      - '.github/workflows/verify-mobile-local-settings-v315.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify mobile canonical settings and local-model controls
+        run: node scripts/verify-mobile-local-settings-v315.mjs
