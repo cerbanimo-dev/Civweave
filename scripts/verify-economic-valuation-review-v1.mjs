@@ -24,9 +24,16 @@ vm.runInContext(reviewSource,context,{filename:'civweave-basic-value-review-v1.j
 const guide=context.CivweaveBasicValueV1,policy=context.CivweaveEconomicPolicyV1,review=context.CivweaveBasicValueReviewV1;
 assert.ok(guide&&policy&&review,'economic runtimes did not boot');
 
+assert.equal(guide.guide.labor.wageButtonsPerHour,5);
+assert.equal(guide.guide.labor.wagePolicy,'uniform-starting-wage');
+assert.equal(guide.baselineFor('labor',{hours:4}).buttons,20);
+assert.equal(guide.baselineFor('labor',{hours:4}).wageRateButtonsPerHour,5);
+assert.match(guide.baselineFor('labor',{hours:4}).basis,/every worker/i);
 const vars=policy.variables();
-assert.equal(vars.find(row=>row.id==='labor.baselineButtonsPerHour').currentValue,5);
-assert.equal(vars.find(row=>row.id==='labor.minimumButtonsPerHour').currentValue,null,'pay minimum must remain distinct and unset');
+assert.equal(vars.find(row=>row.id==='labor.wageButtonsPerHour').currentValue,5);
+assert.equal(vars.some(row=>row.id==='labor.minimumButtonsPerHour'),false,'uniform wage policy must not masquerade as a minimum wage');
+assert.equal(policy.labor.wagePolicy,'uniform-starting-wage');
+assert.match(policy.labor.hierarchyPolicy,/same Button wage rate for every worker/i);
 assert.ok(vars.every(row=>row.voteEligibleEventually&&row.requiresQuorum&&row.requiresPercentageLimit),'every economic variable must be addressable by future guarded democracy');
 assert.equal(policy.governance.futureAuthority,'anarchadia-democratic');
 assert.equal(policy.governance.democraticActivation,false,'economic voting must not activate before Anarchadia governance exists');
@@ -35,7 +42,7 @@ assert.deepEqual(Array.from(policy.stability.enabledDeflationaryMechanisms),[],'
 for(const id of ['stability.buttons.transactionSinkBps','stability.acorns.transactionSinkBps','stability.buttons.demurrageBpsPerYear','stability.acorns.demurrageBpsPerYear','stability.buttons.issuanceCeilingPerPeriod','stability.acorns.issuanceCeilingPerPeriod']){
   const row=vars.find(item=>item.id===id);assert.ok(row,`missing stability lever ${id}`);assert.equal(row.currentValue,null,`${id} must remain disabled/unset`);assert.ok(policy.stabilityLevers.includes(id));
 }
-assert.equal(policy.candidateChange({id:'labor.baselineButtonsPerHour',nextValue:6,quorumSatisfied:true,percentLimit:10,governanceActive:true}).allowed,false,'future vote guard must stay locked until democratic activation');
+assert.equal(policy.candidateChange({id:'labor.wageButtonsPerHour',nextValue:6,quorumSatisfied:true,percentLimit:10,governanceActive:true}).allowed,false,'future vote guard must stay locked until democratic activation');
 
 const rubricIds=review.rubric.map(row=>row.id);
 for(const id of ['human-equivalent','scope-complete','automation-neutral','market-separation','currency-separation','no-automatic-mint','education-baseline','stability-awareness'])assert.ok(rubricIds.includes(id),`valuation rubric omits ${id}`);
@@ -44,10 +51,11 @@ const labor=review.valuationFrom({subject:{id:'task-a',kind:'labor',existing:{}}
 assert.equal(labor.status,'model-reviewed-fair');
 assert.equal(labor.laborWorthHours,4.5);
 assert.equal(labor.baseline.buttons,22.5);
+assert.equal(labor.baseline.wageRateButtonsPerHour,5);
 assert.equal(labor.review.rubricSatisfied,true);
 assert.equal(labor.pricingReady,true);
 const adjusted=review.valuationFrom({subject:{id:'task-b',kind:'labor',existing:{}},estimate:{laborWorthHours:2,rationale:'too low'},review:{decision:'adjust',suggestedLaborWorthHours:3,confidence:.9,criteria:passes('labor'),rationale:'scope includes testing',stabilityImpact:'neutral'}});
-assert.equal(adjusted.status,'model-reviewed-adjusted');assert.equal(adjusted.laborWorthHours,3);assert.equal(adjusted.baseline.buttons,15);assert.equal(adjusted.pricingReady,true);
+assert.equal(adjusted.status,'model-reviewed-adjusted');assert.equal(adjusted.laborWorthHours,3);assert.equal(adjusted.baseline.buttons,15);assert.equal(adjusted.baseline.wageRateButtonsPerHour,5);assert.equal(adjusted.pricingReady,true);
 const curriculum=review.valuationFrom({subject:{id:'module-a',kind:'curriculum',existing:{}},estimate:{educationalHours:2,curriculumAcorns:30,rationale:'two-hour module'},review:{decision:'fair',confidence:.9,criteria:passes('curriculum'),rationale:'within rubric',stabilityImpact:'neutral'}});
 assert.equal(curriculum.baseline.acorns,30);assert.equal(curriculum.pricingReady,true);
 const incomplete=review.valuationFrom({subject:{id:'task-incomplete',kind:'labor',existing:{}},estimate:{laborWorthHours:4,rationale:'proposal'},review:{decision:'fair',confidence:.9,criteria:passes('labor').filter(row=>row.id!=='automation-neutral'),rationale:'forgot a criterion',stabilityImpact:'neutral'}});
@@ -64,10 +72,12 @@ const schema=model.augmentSchema({type:'object',properties:{tasks:{type:'array',
 assert.ok(schema.properties.tasks.items.properties.laborWorthHours);assert.ok(schema.properties.tasks.items.required.includes('valuationRationale'));
 assert.ok(schema.properties.modules.items.properties.educationalHours);assert.ok(schema.properties.modules.items.properties.curriculumAcorns);assert.ok(schema.properties.modules.items.required.includes('valuationRationale'));
 assert.match(model.promptContract,/second-pass civweave\.basic-value-review\.v1/);
+assert.match(model.promptContract,/uniform starting wage/i);
+assert.match(model.promptContract,/do not choose different wage rates/i);
 assert.match(model.promptContract,/must not discount/i);
 
-for(const token of ['civweave.working-campus.v1','civweave.living-school.cabinet.v151','cerbanimo.quest-engine.v144','review.reviewSubjects','model-reviewed-fair','valuationRationale','Economic value review','MutationObserver'])assert.ok(systemsSource.includes(token),`systems propagation omits ${token}`);
+for(const token of ['civweave.working-campus.v1','civweave.living-school.cabinet.v151','cerbanimo.quest-engine.v144','review.reviewSubjects','model-reviewed-fair','valuationRationale','Economic value review','uniform rate','MutationObserver'])assert.ok(systemsSource.includes(token),`systems propagation omits ${token}`);
 for(const token of ['/app/civweave-basic-value-v1.js?v=economic-review-v1','/app/civweave-economic-policy-v1.js?v=economic-review-v1','/app/civweave-basic-value-model-v1.js?v=economic-review-v1','/app/civweave-basic-value-review-v1.js?v=economic-review-v1','/app/civweave-basic-value-systems-v1.js?v=economic-review-v1','await loadValueCore()','await loadValueModel()','requestEconomicReview','civweave:working-campus-plan-built','cerbanimo:quest-engine-changed'])assert.ok(loaderSource.includes(token),`family AI loader omits ${token}`);
 for(const path of ['/app/civweave-basic-value-v1.js','/app/civweave-economic-policy-v1.js','/app/civweave-basic-value-model-v1.js','/app/civweave-basic-value-review-v1.js','/app/civweave-basic-value-systems-v1.js'])assert.ok(offline.seeds.includes(path),`offline core omits ${path}`);
 
-console.log(JSON.stringify({ok:true,authority:'model-interim',futureAuthority:'anarchadia-democratic',laborBaseline:'5 Buttons/hour',review:'upstream model proposal -> independent rubric review -> fair/adjust/reject',rubricGate:'all required fairness criteria must pass before price readiness',stability:'candidate sinks/demurrage/issuance ceilings are explicit but disabled and unset',payMinimum:'unset future governed variable'},null,2));
+console.log(JSON.stringify({ok:true,authority:'model-interim',futureAuthority:'anarchadia-democratic',laborWage:'5 Buttons/hour uniform starting wage',hierarchy:'models estimate hours only; wage rate is identical for every worker',review:'upstream model proposal -> independent rubric review -> fair/adjust/reject',rubricGate:'all required fairness criteria must pass before price readiness',stability:'candidate sinks/demurrage/issuance ceilings are explicit but disabled and unset'},null,2));
