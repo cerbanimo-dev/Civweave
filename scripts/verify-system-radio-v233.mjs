@@ -51,15 +51,16 @@ vm.runInContext(radioSource,sandbox,{filename:'system-radio-agent-v233.js'});
 vm.runInContext(trackSource,sandbox,{filename:'radio-track-suggestions-v240.js'});
 
 const radio=sandbox.CivweaveRadioRecommendationAgentV233;
-const tracks=sandbox.CivweaveRadioTrackSuggestionsV243;
+const tracks=sandbox.CivweaveRadioTrackSuggestionsV244;
 assert.ok(radio,'v233 radio runtime must initialize');
-assert.ok(tracks,'v243 track suggestion behavior must initialize from stable v240 file');
+assert.ok(tracks,'v244 track suggestion behavior must initialize from stable v240 file');
 assert.equal(sandbox.CivweaveRadioRecommendationAgentV232,radio,'v232 compatibility alias must point to v233 runtime');
-assert.equal(sandbox.CivweaveRadioTrackSuggestionsV242,tracks,'v242 compatibility alias must point to v243 behavior');
-assert.equal(sandbox.CivweaveRadioTrackSuggestionsV241,tracks,'v241 compatibility alias must point to v243 behavior');
-assert.equal(sandbox.CivweaveRadioTrackSuggestionsV240,tracks,'stable v240 compatibility alias must point to v243 behavior');
+assert.equal(sandbox.CivweaveRadioTrackSuggestionsV243,tracks,'v243 compatibility alias must point to v244 behavior');
+assert.equal(sandbox.CivweaveRadioTrackSuggestionsV242,tracks,'v242 compatibility alias must point to v244 behavior');
+assert.equal(sandbox.CivweaveRadioTrackSuggestionsV241,tracks,'v241 compatibility alias must point to v244 behavior');
+assert.equal(sandbox.CivweaveRadioTrackSuggestionsV240,tracks,'stable v240 compatibility alias must point to v244 behavior');
 assert.equal(radio.revision,'system-radio-agent-v233');
-assert.equal(tracks.revision,'radio-track-suggestions-v243');
+assert.equal(tracks.revision,'radio-track-suggestions-v244');
 assert.equal(tracks.recentWindow,6,'track picker must retain a useful recent-history window');
 assert.equal(tracks.trackMapPath,'/app/radio-track-map-v241.json');
 assert.equal(trackMap.version,1);
@@ -103,13 +104,17 @@ const enriched=tracks.parseTrackLine(`The Coup - Ride The Fence\tspotify:track:$
 assert.equal(enriched.label,'The Coup - Ride The Fence');
 assert.equal(enriched.position,7);
 assert.equal(enriched.spotifyTrackId,testTrackId);
-const highlightedUrl=new URL(tracks.spotifyHighlightedPlaylistUrl(enriched,'cerbanimo'));
-assert.equal(highlightedUrl.pathname,`/playlist/${expectedIds.cerbanimo}`,'suggested-track handoff must land on its approved playlist');
-assert.equal(highlightedUrl.searchParams.get('highlight'),`spotify:track:${testTrackId}`,'playlist handoff must identify the suggested track');
-assert.equal(tracks.spotifyContextUrl(enriched,'cerbanimo'),tracks.spotifyHighlightedPlaylistUrl(enriched,'cerbanimo'),'legacy context helper must use the highlighted playlist handoff');
+const contextUrl=new URL(tracks.spotifyContextUrl(enriched,'cerbanimo'));
+assert.equal(contextUrl.pathname,`/track/${testTrackId}`,'suggested-track handoff must target the exact suggested Spotify track');
+assert.equal(contextUrl.searchParams.get('context'),`spotify:playlist:${expectedIds.cerbanimo}`,'suggested-track handoff must retain its approved station playlist context');
+assert.equal(tracks.spotifyHighlightedPlaylistUrl(enriched,'cerbanimo'),tracks.spotifyContextUrl(enriched,'cerbanimo'),'v243 compatibility helper must resolve to the restored exact-track context URL');
 const legacy=tracks.parseTrackLine('The Coup - Ride The Fence',7);
 assert.equal(legacy.spotifyTrackId,'');
-assert.match(tracks.spotifyHighlightedPlaylistUrl(legacy,'cerbanimo'),new RegExp(`/playlist/${expectedIds.cerbanimo}(?:\\?|$)`),'legacy metadata must fall back to the approved station, never an isolated track search');
+assert.match(tracks.spotifyContextUrl(legacy,'cerbanimo'),new RegExp(`/playlist/${expectedIds.cerbanimo}(?:\\?|$)`),'legacy metadata must fall back to the approved station, never an isolated track search');
+const externalProbe={};
+assert.equal(tracks.externalizeSpotifyLink(externalProbe),externalProbe,'external handoff helper must return the original link');
+assert.equal(externalProbe.target,'_blank','Spotify handoff must leave the installed Civweave PWA open');
+assert.equal(externalProbe.rel,'noopener noreferrer external','external Spotify handoff must isolate its opener');
 assert.ok(tracks.pickTag('living-school'),'Living School must produce a label tag');
 
 const pageContext={
@@ -153,7 +158,9 @@ assert.match(trackSource,/RADIO_TRACK_SUGGESTED/,'track suggestions must emit an
 assert.match(trackSource,/Random pull from this station/,'card must explain that the selected song is a station pull');
 assert.match(trackSource,/Open suggested track ↗/,'exact track metadata must expose an explicit suggested-track CTA');
 assert.match(trackSource,/Open station ↗/,'playlist-first fallback must remain available');
-assert.match(trackSource,/searchParams\.set\('highlight',`spotify:track:\$\{id\}`\)/,'playlist handoff must use Spotify highlighted-track context');
+assert.match(trackSource,/new URL\(`https:\/\/open\.spotify\.com\/track\/\$\{id\}`\)/,'suggested-track CTA must target the exact Spotify track URL');
+assert.match(trackSource,/searchParams\.set\('context',meta\.playlistUri\)/,'exact-track handoff must preserve approved playlist context');
+assert.doesNotMatch(trackSource,/searchParams\.set\('highlight'/,'unsupported playlist-highlight handoff must stay removed');
 assert.match(trackSource,/const RECENT_WINDOW=6;/,'recommendations must remember multiple recent tracks');
 assert.match(trackSource,/recent:nextRecent/,'recent track history must persist per station');
 assert.match(trackSource,/link\.target='_blank'/,'Spotify links must leave the installed Civweave PWA open');
@@ -161,7 +168,7 @@ assert.match(trackSource,/link\.rel='noopener noreferrer external'/,'external Sp
 assert.doesNotMatch(trackSource,/trackLink\.target='_self'/,'suggested tracks must never replace the installed PWA');
 assert.doesNotMatch(trackSource,/stationLink\.target='_self'/,'station fallback must never replace the installed PWA');
 assert.doesNotMatch(trackSource,/location\.assign\(trackLink\.href\)/,'track playback must never navigate the Civweave PWA away');
-assert.doesNotMatch(trackSource,/open\.spotify\.com\/search\//,'v243 behavior must never strand users in Spotify search');
+assert.doesNotMatch(trackSource,/open\.spotify\.com\/search\//,'v244 behavior must never strand users in Spotify search');
 assert.doesNotMatch(trackSource,/api\.spotify\.com/,'ordinary radio playback must not require Spotify API access');
 assert.doesNotMatch(trackSource,/Authorization:/,'ordinary radio playback must not carry Spotify credentials');
 assert.match(trackSource,/THE SYLLABUS HAS UNIONIZED/,'snarky station labels must ship with the runtime');
@@ -173,4 +180,4 @@ assert.ok(boundarySource.indexOf('SYSTEM_RADIO_AGENT,')<boundarySource.indexOf('
 assert.match(boundarySource,/radioRecommendationRevision:'v233-every-page-30-minute-snooze-bottom-left'/,'boundary metadata must describe the active station policy');
 assert.match(boundarySource,/radioTrackSuggestionRevision:'v241-playlist-context-track-links'/,'stable boundary metadata must continue identifying the playlist-context compatibility family');
 
-console.log('Civweave system radio v233 + stable-v240/v243 highlighted external playlist handoff contract verified.');
+console.log('Civweave system radio v233 + stable-v240/v244 exact-track external context handoff contract verified.');
