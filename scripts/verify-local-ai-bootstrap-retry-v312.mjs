@@ -5,7 +5,7 @@ import {readFile} from 'node:fs/promises';
 const source=await readFile('public/app/local-ai/bootstrap-v266.js','utf8');
 new Function(source);
 
-assert.match(source,/selfHealingBootstrap===true&&existing\?\.readyState!=='failed'/,'a previously failed bootstrap must never short-circuit a fresh script execution');
+assert.match(source,/selfHealingBootstrap===true&&existing\?\.smoothFitRuntime===true&&existing\?\.readyState!=='failed'/,'a previously failed or pre-smooth-fit bootstrap must never short-circuit a fresh script execution');
 assert.match(source,/for\(let pass=0;pass<2;pass\+\+\)/,'bootstrap must retry the component graph once before declaring local AI unavailable');
 assert.match(source,/civweave:local-ai-recovering/,'bootstrap must expose the recovery pass');
 assert.match(source,/function retry\(\)/,'bootstrap must expose a manual retry entry point');
@@ -17,6 +17,8 @@ assert.match(source,/fastInteractiveSpineContract:'capability-v313'/,'bootstrap 
 assert.match(source,/const fastInteractiveReady=.*?runtime-spine-v271.*?register.*?diagnostics.*?serverAuto.*?localResultNeedsFailover/s,'fast interactive readiness must follow capabilities rather than an obsolete exact release string');
 assert.match(source,/fast-interactive-runtime-v192\.js\?v=1\.0\.124-v313-runtime-spine-contract/,'bootstrap must rotate the fast runtime asset epoch');
 assert.doesNotMatch(source,/CivweaveFastInteractiveV192\?\.version==='1\.0\.67-runtime-spine-v271'/,'bootstrap must not reject the shipping server-auto runtime using the retired exact version');
+assert.match(source,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?intentPrewarm===true.*?compatibilityPromptCap===true/s,'bootstrap must require the smooth-fit runtime contract');
+assert.match(source,/deviceFitRecommendations===true/,'bootstrap must require device-fit recommendations');
 
 const events=[];
 let runtimeLoads=0;
@@ -31,6 +33,10 @@ const runtime=()=>({
   promptBudgetEnforced:true,
   terminalCancellation:true,
   settingsTeardown:true,
+  adaptiveResidency:true,
+  adaptiveWasmThreads:true,
+  intentPrewarm:true,
+  compatibilityPromptCap:true,
   shutdown(){}
 });
 const context={
@@ -55,7 +61,7 @@ const context={
   CivweaveLocalModelBridgeV266:{version:'1.0.83-local-ai-bridge-v282-health-fallback',revision:'1.0.88-local-ai-bridge-v283-small-model-fast-path',continuationValidation:true},
   CivweaveLocalAISettingsV266:{version:'1.0.116-local-ai-settings-v305-download-dock-layout',truthfulCompletion:true,cacheIntegrityOnDemand:true,openPath:'snapshot-first-v287'},
   CivweaveLocalAIPrimaryRouteV283:{version:'1.0.85-local-ai-primary-route-v283'},
-  CivweaveLocalModelHardwareTierUIV278:{version:'1.0.81-local-ai-hardware-tier-ui-v278'},
+  CivweaveLocalModelHardwareTierUIV278:{version:'1.0.81-local-ai-hardware-tier-ui-v278',deviceFitRecommendations:true},
   CivweaveLocalModelTestPulseV269:{version:'1.0.116-local-model-test-pulse-v303-mobile-safe'},
 };
 context.globalThis=context;
@@ -81,14 +87,16 @@ assert.ok(events.some(event=>event.type==='civweave:local-ai-recovering'),'first
 const readyEvent=events.findLast(event=>event.type==='civweave:local-ai-ready');
 assert.equal(readyEvent?.detail?.recoveredBootstrap,true,'successful retry should be observable');
 assert.equal(readyEvent?.detail?.fastInteractiveSpineContract,'capability-v313','ready event must report the repaired fast runtime contract');
+assert.equal(readyEvent?.detail?.smoothFitRuntime,true,'ready event must advertise the tuned runtime contract');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-ai-bootstrap-retry-v312-fast-runtime-v313',
+  revision:'local-ai-bootstrap-retry-v312-smooth-fit-v314',
   contract:'capability-contract-v307',
   fastInteractiveSpineContract:'capability-v313',
   transientCompatibilityFailure:'recovered-on-second-pass',
   failedBootstrapShortCircuit:'blocked',
   shippingFastRuntimeAccepted:true,
+  smoothFitRuntime:true,
   componentDiagnostics:true
 },null,2));
