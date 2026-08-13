@@ -7,7 +7,7 @@ const SAFE_KEY='civweave.boot-recovery.safe.v426';
 const TERMS_KEY='civweave.legal.terms.acceptance.v1';
 const TERMS_VERSION='2026-08-13';
 const TERMS_URL='/legal/civweave-terms-of-service.txt';
-const FALLBACK_VERSION='1.0.131';
+const FALLBACK_VERSION='1.0.133';
 const RELEASE_TIMEOUT_MS=1500;
 const WORKER_STEP_TIMEOUT_MS=1800;
 const ROUTE_TIMEOUT_MS=2200;
@@ -184,7 +184,7 @@ async function boot(){
   ui?.markRouted?.();
   location.replace(destination.href);
 }
-const api=Object.freeze({version:'1.0.131-terms-clickwrap-v1',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker,safeRecoveryRequested,ensureTermsAccepted,readTermsAcceptance,termsVersion:TERMS_VERSION,termsUrl:TERMS_URL,termsKey:TERMS_KEY});
+const api=Object.freeze({version:'1.0.133-terms-clickwrap-v1',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker,safeRecoveryRequested,ensureTermsAccepted,readTermsAcceptance,termsVersion:TERMS_VERSION,termsUrl:TERMS_URL,termsKey:TERMS_KEY});
 globalThis.CivweaveInstalledEntryV146=api;
 document.addEventListener('click',event=>{
   const target=event.target instanceof Element?event.target.closest('#boot-safe'):null;
