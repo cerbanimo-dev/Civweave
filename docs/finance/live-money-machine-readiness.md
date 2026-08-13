@@ -1,68 +1,60 @@
 # Civweave live-money machine readiness
 
-Status after the 2026-08-13 FellowFare fulfillment-economy boundary pass.
+Status after the 2026-08-13 FellowFare fulfillment + direct-commerce v2 pass.
 
 ## Green machine-side invariants
 
-- Sandbox Stripe Checkout has completed successfully for supported platform-money lanes.
-- Sandbox refund handling has completed successfully.
-- The connected-account snapshot webhook has delivered verified refund/payment-state events into D1 with no processing error.
-- Snapshot webhook receipt processing is retry-safe: failed processing can be reclaimed on Stripe retry, processed duplicates do not reapply money state, fresh concurrent duplicates are suppressed, and stale processing claims can recover.
-- Provider mode mismatch fails closed.
-- Unpaid Checkout completion does not settle or credit a node.
-- Top-up idempotency keys cannot be reused for a materially different request.
-- Refund cumulative amounts debit node credit only by the new delta.
-- Dispute creation/funds-withdrawn events debit node credit only by the new delta and do not double-apply.
-- Node enrollment remains proof-of-key with short-lived single-use grants.
-- Platform Checkout and separate Stripe transfers remain available for node top-ups/memberships and eligible Host Steward earnings.
+- Existing platform Checkout/refund/idempotency protections remain intact.
+- Platform Checkout and separate transfers remain limited to platform-owned lanes such as node top-ups, memberships, and eligible Host Steward earnings.
 - Stripe platform credentials remain Cloudflare-core-only.
-- Current live-money gates remain false.
+- Live-money gates remain fail-closed until explicitly activated.
 
-## FellowFare payment boundary
+## FellowFare three-rail boundary
 
-FellowFare seller commerce is no longer a Stripe marketplace rail.
+### Physical/community goods
 
-- `/api/money-edge/commerce/*` returns HTTP `410` with `marketplace-checkout-disabled`.
-- The production Stripe entry no longer exposes `handleCommerceApiRequest`.
-- Browser marketplace sale distribution, marketplace Stripe transfer instructions, and `recordSale` fail closed.
-- Physical/community goods use seller-direct payment methods outside FellowFare settlement.
-- Goods cannot use Acorns or Buttons as a price.
-- Services, tutoring, and learning use Acorn/Button fulfillment burn.
-- Fulfilled Acorns/Buttons are not transferred to the provider.
-- FellowFare does not require or publish a USD exchange rate for Acorns/Buttons.
-- The daily reward system selects three quest buckets and issues fixed platform rewards.
-- Every 100 cumulative Acorns or Buttons fulfilled awards the configured same-asset milestone bonus.
-- Legacy Stripe commerce settlement/refund/dispute handlers remain only so already-created marketplace payments can safely finish or unwind.
-- The December 1 compute-reserve distribution remains available because it is a platform-reserve payout, not seller-sale settlement.
+- Goods use seller-direct payment methods outside FellowFare settlement.
+- Goods cannot have Acorn/Button prices.
+- FellowFare does not collect, route, split, escrow, or take a percentage of a goods purchase.
+- The old `/api/money-edge/commerce/*` platform-charge marketplace route returns `410 marketplace-checkout-disabled`.
 
-See `docs/finance/fellowfare-fulfillment-economy-v1.md` for the canonical marketplace contract.
+### Acorns and Buttons
 
-## Automation prepared for live platform money
+- Services, tutoring, and learning may use Acorn/Button fulfillment burn.
+- Fulfilled units are not transferred to the provider.
+- FellowFare publishes no required USD exchange rate for Acorns/Buttons.
+- Each day selects three quest buckets with fixed rewards.
+- Every 100 cumulative units fulfilled awards the configured same-asset milestone bonus.
 
-Manual GitHub Actions workflow:
+### USD services, tutoring, and learning
 
-```text
-Stripe Live Readiness Preflight
-```
+- Production routes are exposed under `/api/fellowfare/direct-commerce/*`.
+- Only `service`, `learning`, and `tutoring` kinds are accepted.
+- Providers use Accounts v2 merchant configuration with full Stripe dashboard and card-payments capability.
+- Stripe Products/Prices live on the connected provider account.
+- Checkout is created with the connected account as charge owner.
+- FellowFare receives `application_fee_amount` only.
+- Default FellowFare fee is 1% / 100 bps, configurable with `CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS`.
+- The server retrieves the connected-account Price and verifies FellowFare listing/kind metadata before checkout.
+- No buyer-supplied amount is trusted.
+- No destination charge, transfer destination, or separate seller transfer is used.
+- FellowFare does not collect provider gross proceeds and does not route seller proceeds.
 
-Staged secret expected:
+Legacy browser sale-distribution methods remain fail-closed. Legacy Stripe settlement/refund/dispute handlers remain only so transactions created under the retired model can finish or unwind safely. The December 1 compute-reserve distribution remains separate and available.
 
-```text
-STRIPE_LIVE_SECRET_KEY
-```
+## Automation prepared for live mode
 
-The preflight is intentionally read-only. It refuses non-live Stripe server keys and checks the platform capabilities required by the currently enabled Civweave money lanes. It must not treat marketplace-recipient inventory or a FellowFare commerce fee as a launch prerequisite.
-
-Live activation applies to supported platform-money lanes only. It must not change FellowFare's seller-payment boundary.
+The existing read-only Stripe live preflight and guarded Cloudflare live-money workflows remain the activation path. Production readiness must include the merchant/card-payments capability needed by FellowFare service providers in addition to the platform recipient capabilities used by Host Stewards.
 
 ## Human work still required
 
-The currently connected ChatGPT Stripe account may not be the final verified production account. Real-money activation still requires the verified Cerbanimo LLC live Stripe account, its live server credential, required live event destinations/signing secrets, an eligible first platform payout recipient, and the explicit compliance/jurisdiction/KYC-AML/tax/provider-terms attestations in `docs/finance/live-money-human-gate.md`.
+Real-money activation still requires the verified Cerbanimo LLC live Stripe account, live server credential, required event destinations/signing secrets, real connected-account onboarding, and explicit compliance/jurisdiction/KYC-AML/tax/provider-terms attestations in `docs/finance/live-money-human-gate.md`.
 
-The FellowFare boundary must be tested independently after activation:
+Acceptance must independently confirm:
 
 ```text
-GET/POST /api/money-edge/commerce/* -> 410 marketplace-checkout-disabled
+/api/money-edge/commerce/* -> 410 marketplace-checkout-disabled
+/api/fellowfare/direct-commerce/* -> service/learning/tutoring only
 ```
 
-Enabling platform money is never permission to re-enable FellowFare seller checkout.
+and verify one provider-owned direct charge end to end, including the FellowFare application fee and absence of a seller transfer.
