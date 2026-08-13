@@ -1,7 +1,7 @@
 {
   "schema": "civweave.avatar-expression-assets.v2",
   "version": "1.0.1-avatar-expressions-v314",
-  "sourceCuts": {"count":100,"format":"PNG RGBA","width":240,"height":200,"alphaVerified":true,"archive":"/app/assets/ai/chat/expressions/commonweave-avatar-labeled-cuts-v314.zip"},
+  "sourceCuts": {"count":100,"format":"WebP RGBA","width":240,"height":200,"alphaVerified":true,"archives":{"weaveling":"/app/assets/ai/chat/expressions/source/weaveling-labeled-cuts-v314.zip","moss":"/app/assets/ai/chat/expressions/source/moss-labeled-cuts-v314.zip","kamiya":"/app/assets/ai/chat/expressions/source/kamiya-labeled-cuts-v314.zip","rook":"/app/assets/ai/chat/expressions/source/rook-labeled-cuts-v314.zip","merlin":"/app/assets/ai/chat/expressions/source/merlin-labeled-cuts-v314.zip"}},
   "runtime": {"format":"WebP RGBA atlas","columns":5,"rows":4,"cellWidth":240,"cellHeight":200,"atlasWidth":1200,"atlasHeight":800,"preservesAlpha":true},
   "sleepPolicy": {"expression":"sleepy","onModelFailure":true,"inDeterministicModeWhenTinyLMUnavailable":true},
   "systems": {
