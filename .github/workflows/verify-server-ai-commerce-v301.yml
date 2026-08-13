@@ -9,6 +9,7 @@ on:
       - 'cloudflare/node-cloud/**'
       - 'cloudflare/account-edge/**'
       - 'scripts/verify-server-ai-commerce-v301.mjs'
+      - 'scripts/test-user-ai-pool-routing-v2.mjs'
       - '.github/workflows/verify-server-ai-commerce-v301.yml'
   push:
     branches: [main]
@@ -19,6 +20,7 @@ on:
       - 'cloudflare/node-cloud/**'
       - 'cloudflare/account-edge/**'
       - 'scripts/verify-server-ai-commerce-v301.mjs'
+      - 'scripts/test-user-ai-pool-routing-v2.mjs'
       - '.github/workflows/verify-server-ai-commerce-v301.yml'
 
 jobs:
@@ -36,6 +38,12 @@ jobs:
           node --check public/app/node-ai-mesh-v1.js
           node --check public/app/fast-interactive-runtime-v192.js
           node --check cloudflare/node-cloud/src/server-ai-entry-v1.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v2.mjs
+          node --check cloudflare/node-cloud/src/capacity-user-pools-v2.mjs
+          node --check cloudflare/node-cloud/src/user-ai-pool-router-v2.mjs
           node --check cloudflare/account-edge/src/index.mjs
+          node --check cloudflare/account-edge/src/index-legacy-v1.mjs
+      - name: Test personal compute-pool switching
+        run: node scripts/test-user-ai-pool-routing-v2.mjs
       - name: Verify ordered routing and commerce entry points
         run: node scripts/verify-server-ai-commerce-v301.mjs
