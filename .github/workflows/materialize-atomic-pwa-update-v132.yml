@@ -1,0 +1,56 @@
+name: Prepare Atomic PWA Update v1.0.132
+on:
+  push:
+    branches: [agent/atomic-pwa-update-handoff]
+    paths: ['.github/workflows/materialize-atomic-pwa-update-v132.yml']
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/atomic-pwa-update-handoff
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Materialize 1.0.132
+        run: |
+          printf '1.0.132\n' > VERSION
+          npm pkg set version=1.0.132
+          node scripts/materialize-canonical-release.mjs
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const file='config/release-contract.json';
+          const value=JSON.parse(fs.readFileSync(file,'utf8'));
+          value.canonical.current={version:'1.0.132',path:'releases/1.0.132',status:'current'};
+          fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n');
+          NODE
+      - name: Verify atomic update release
+        env:
+          CHANGED_FILES: |
+            public/service-worker-v203.js
+            scripts/build-service-worker-v211.mjs
+        run: |
+          node --check public/service-worker-v203.js
+          node --check scripts/build-service-worker-v211.mjs
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const worker=fs.readFileSync('public/service-worker-v203.js','utf8');
+          if(!worker.includes('atomic-update-handoff-v427')) throw new Error('Atomic update marker missing from generated worker.');
+          const executable=worker.split(/\r?\n/).some(line=>line.trim().startsWith("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"));
+          if(executable) throw new Error('Root worker still auto-activates during install.');
+          NODE
+          node scripts/verify-version-policy.mjs 1.0.131 1.0.132
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/smoke-installer-recovery-v206.mjs
+      - name: Commit materialized release
+        run: |
+          git config user.name civweave-release-bot
+          git config user.email civweave-release-bot@users.noreply.github.com
+          git add -A
+          git commit -m 'Materialize Civweave 1.0.132 atomic PWA update' || exit 0
+          git push origin HEAD:agent/atomic-pwa-update-handoff
