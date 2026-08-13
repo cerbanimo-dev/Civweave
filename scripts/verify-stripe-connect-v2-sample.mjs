@@ -131,7 +131,7 @@ const fakeStripe = {
     id: 'acct_demo',
     configuration: { merchant: { capabilities: { card_payments: { status: 'active' } } } },
     requirements: { summary: { minimum_deadline: { status: 'pending' } } }
-  }) } } } }
+  }) } } }
 };
 const status = await sample.retrieveConnectStatus(fakeStripe, 'acct_demo');
 assert.equal(status.readyToProcessPayments, true);
