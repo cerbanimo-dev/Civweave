@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-host-node-lobby-v2';
+const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-host-node-lobby-v2-hub-recovery-v1';
 const stateNode = document.getElementById('package-state');
 const assetsNode = document.getElementById('package-assets');
 const installButton = document.getElementById('install-app');
@@ -29,6 +29,25 @@ function installHostNodeLobby() {
   script.dataset.civweaveHostNodeSession = 'v1';
   script.addEventListener('load', appendLobby, { once: true });
   document.head.append(script);
+  return true;
+}
+
+function installHubRecovery() {
+  const sources = [
+    '/app/host-node-session-export-v1.js',
+    '/app/host-node-session-import-v1.js',
+    '/app/hub-recovery-api-v1.js',
+    '/app/hub-recovery-ui-v1.js'
+  ];
+  let delay = 0;
+  for (const src of sources) {
+    if (document.querySelector(`script[src^="${src}"]`)) continue;
+    const script = document.createElement('script');
+    script.src = `${src}?v=${releaseVersion()}-hub-recovery-v1`;
+    script.async = false;
+    setTimeout(() => document.head.append(script), delay);
+    delay += 1;
+  }
   return true;
 }
 
@@ -208,6 +227,7 @@ const observer = new MutationObserver(apply);
 if (stateNode) observer.observe(stateNode, { childList: true, characterData: true, subtree: true });
 addEventListener('pagehide', () => observer.disconnect(), { once: true });
 installHostNodeLobby();
+installHubRecovery();
 apply();
 
 globalThis.CivweaveInstallerOnlineFallbackV225 = Object.freeze({
@@ -216,6 +236,7 @@ globalThis.CivweaveInstallerOnlineFallbackV225 = Object.freeze({
   campusUrl,
   repairInstalledShell,
   installHostNodeLobby,
+  installHubRecovery,
   repairMessage: 'REPAIR_DEVICE_PACKAGE',
   storagePolicy: 'preserve-campus-model-media-school-storage'
 });
