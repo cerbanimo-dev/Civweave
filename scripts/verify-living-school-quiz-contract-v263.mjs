@@ -28,7 +28,7 @@ assert(guard.includes("question&&typeOf(question)===type"),'A recovery call can 
 assert(entry.includes("../../living-school-quiz-contract-guard-v263.mjs?v=short-answer-rubric-v263"),'Living School does not load the v263 quiz contract guard.');
 assert(entry.includes('await installLivingSchoolQuizContractGuardV263()'),'Living School does not install the v263 guard after the v262 generation guard.');
 assert(entry.includes("quizIntegrity:'ai-only-v263-short-answer-contract'"),'Living School does not expose the v263 quiz integrity revision.');
-assert(index.includes('v263-short-answer-contract'),'Living School entry does not cache-bust the v263 quiz contract repair.');
+assert(index.includes("living-school-cleanroom-v218.mjs?v=research-first-v218.1-v304-nonblocking-boot"),'Living School outer entry does not load the current nonblocking clean-room module.');
 assert(actions.includes("if(type==='short-answer'&&!rubric.length)return null"),'Final downstream normalizer no longer enforces a visible short-answer rubric.');
 
-console.log(JSON.stringify({ok:true,revision:'living-school-quiz-contract-v263',validatesBeforeCounting:true,shortAnswerRubricRequired:true,typePinnedRecovery:true,boundedRepair:true,finalNormalizerStillStrict:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'living-school-quiz-contract-v263',validatesBeforeCounting:true,shortAnswerRubricRequired:true,typePinnedRecovery:true,boundedRepair:true,nonblockingOuterBoot:true,finalNormalizerStillStrict:true},null,2));
