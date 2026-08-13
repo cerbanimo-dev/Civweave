@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveEconomicPolicyV1)return;
-const VERSION='1.0.2';
+const VERSION='1.1.0';
 const SCHEMA='civweave.economic-policy.v1';
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
 const num=value=>value===null||value===undefined||value===''?null:Number.isFinite(Number(value))?Number(value):null;
@@ -14,6 +14,12 @@ const GOVERNANCE=Object.freeze({
   requiresPercentageLimit:true,
   maxPercentChangePerProposal:null,
   note:'Economic variables are vote-addressable now, but democratic mutation remains disabled until Anarchadia has a quorum rule and an explicit percentage-change limit.'
+});
+const LABOR=Object.freeze({
+  wagePolicy:'uniform-starting-wage',
+  hierarchyPolicy:'same Button wage rate for every worker; models estimate human-equivalent hours, not rank-adjusted rates',
+  marketBoundary:'scarcity, prestige, seniority, urgency, bargaining power, and automation do not change the worker wage rate; they may only affect separately identified non-wage market terms',
+  settlementBoundary:'the wage schedule defines compensation for validated labor, but a valuation record alone does not mint or transfer currency'
 });
 const STABILITY_LEVERS=Object.freeze([
   'stability.buttons.transactionSinkBps',
@@ -34,8 +40,7 @@ function rows(){
   const g=guide();
   const value=(path,fallback=null)=>{let node=g;for(const key of path.split('.'))node=node?.[key];const n=num(node);return n===null?fallback:n};
   const defs=[
-    ['labor.baselineButtonsPerHour','button/hour',value('labor.buttonsPerHour',5),'Baseline human-equivalent labor value.'],
-    ['labor.minimumButtonsPerHour','button/hour',null,'Future democratically governed pay minimum. Unset is distinct from the baseline.'],
+    ['labor.wageButtonsPerHour','button/hour',value('labor.wageButtonsPerHour',value('labor.buttonsPerHour',5)),'Uniform starting wage for validated human-equivalent labor. The same Button rate applies to every worker.'],
     ['learning.moduleCompletionAcorns','acorn/module',value('learning.moduleCompletionAcorns',2),'Completion grant.'],
     ['learning.externalValidationBonusAcorns','acorn/module',value('learning.externalValidationBonusAcorns',2),'External successful validation bonus.'],
     ['learning.validatorContributionAcorns','acorn/validation',value('learning.validatorContributionAcorns',1),'Qualified learning-validation contribution.'],
@@ -60,7 +65,7 @@ function rows(){
   }));
 }
 function snapshot(){
-  return{schema:SCHEMA,version:VERSION,governance:GOVERNANCE,stability:STABILITY,variables:rows()};
+  return{schema:SCHEMA,version:VERSION,governance:GOVERNANCE,labor:LABOR,stability:STABILITY,variables:rows()};
 }
 function candidateChange({id,nextValue,currentValue,quorumSatisfied=false,percentLimit=null,governanceActive=false}={}){
   const variable=rows().find(row=>row.id===clean(id,180));if(!variable)return{allowed:false,reason:'unknown-variable'};
@@ -71,6 +76,6 @@ function candidateChange({id,nextValue,currentValue,quorumSatisfied=false,percen
   const change=prior===0?(next===0?0:Infinity):Math.abs((next-prior)/prior)*100;
   return{allowed:change<=limit,reason:change<=limit?'within-governance-guardrails':'percentage-change-limit-exceeded',changePercent:Number.isFinite(change)?Number(change.toFixed(4)):change,limitPercent:limit,variable};
 }
-globalThis.CivweaveEconomicPolicyV1=Object.freeze({version:VERSION,schema:SCHEMA,governance:GOVERNANCE,stability:STABILITY,stabilityLevers:STABILITY_LEVERS,variables:rows,snapshot,candidateChange});
+globalThis.CivweaveEconomicPolicyV1=Object.freeze({version:VERSION,schema:SCHEMA,governance:GOVERNANCE,labor:LABOR,stability:STABILITY,stabilityLevers:STABILITY_LEVERS,variables:rows,snapshot,candidateChange});
 try{dispatchEvent(new CustomEvent('civweave:economic-policy-ready',{detail:snapshot()}))}catch{}
 })();
