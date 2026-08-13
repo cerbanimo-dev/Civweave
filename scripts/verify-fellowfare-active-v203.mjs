@@ -5,14 +5,17 @@ const root=process.cwd();
 const read=file=>fs.readFile(path.join(root,file),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
-const [outerHtml,outerCss,parentTheme,mobileFlow,innerHtml,marketplaceCss,marketplaceJs,bridge,legacyShim,embedCss,themedNav,legacyWorker,workerWrapper,workerCore,offlineManifestText,critical]=await Promise.all([
+const [outerHtml,outerCss,parentTheme,mobileFlow,innerHtml,marketplaceCss,contrastCss,marketplaceJs,preflight,capabilities,bridge,legacyShim,embedCss,themedNav,legacyWorker,workerWrapper,workerCore,offlineManifestText,critical]=await Promise.all([
   read('public/app/fellowfare-cabinet-v144.html'),
   read('public/app/fellowfare-cabinet-v144.css'),
   read('public/app/fellowfare-parent-theme-v205.css'),
   read('public/app/fellowfare-mobile-flow-v205.js'),
   read('public/app/services/fellowfare/cabinet.html'),
   read('public/app/services/fellowfare/marketplace-v2.css'),
+  read('public/app/services/fellowfare/marketplace-v2-contrast.css'),
   read('public/app/services/fellowfare/marketplace-v2.js'),
+  read('public/app/services/fellowfare/live-data-preflight-v3.js'),
+  read('public/app/services/fellowfare/marketplace-v2-capabilities.js'),
   read('public/app/services/fellowfare/cabinet-bridge.js'),
   read('public/app/services/fellowfare/app.js'),
   read('public/app/services/fellowfare/cabinet-embed.css'),
@@ -25,8 +28,8 @@ const [outerHtml,outerCss,parentTheme,mobileFlow,innerHtml,marketplaceCss,market
 ]);
 const offlineManifest=JSON.parse(offlineManifestText);
 
-assert(outerHtml.includes('data-build="fellowfare-parent-market-v2"'),'Outer FellowFare cabinet did not rotate to the live marketplace revision.');
-assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1&market=2#market'),'Outer cabinet is not pointing at the live FellowFare marketplace v2.');
+assert(outerHtml.includes('data-build="fellowfare-parent-market-v2-live-capabilities"'),'Outer FellowFare cabinet did not rotate to the live-capability marketplace revision.');
+assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1&market=2&ffv2=live-capabilities-r1#market'),'Outer cabinet is not pointing at the cache-busted live FellowFare marketplace.');
 assert(outerHtml.indexOf('/app/fellowfare-cabinet-v144.css')<outerHtml.indexOf('/app/fellowfare-parent-theme-v205.css'),'The complete FellowFare parent theme must load after the legacy cabinet stylesheet.');
 assert(outerHtml.indexOf('/app/fellowfare-cabinet-v144.js')<outerHtml.indexOf('/app/fellowfare-mobile-flow-v205.js'),'The mobile flow must layer on top of the working FellowFare cabinet runtime.');
 for(const token of ['--ffc-parchment-soft: #fff4d8','--ffc-blue: #1e4b64','color: var(--ffc-ink) !important','.ffc144-rook-log .ffc144-rook-message'])assert(outerCss.includes(token),`Outer active Rook contrast is missing ${token}`);
@@ -54,19 +57,24 @@ for(const token of [
 ])assert(mobileFlow.includes(token),`FellowFare mobile single-scroll runtime is missing ${token}`);
 
 assert(innerHtml.indexOf('/app/fellowfare-parchment-type-v266.css')<innerHtml.indexOf('marketplace-v2.css'),'Marketplace v2 styles must load after the shared parchment typography.');
+assert(innerHtml.indexOf('marketplace-v2.css')<innerHtml.indexOf('marketplace-v2-contrast.css'),'Contrast layer must load after marketplace v2 styles.');
+assert(innerHtml.indexOf('live-data-preflight-v3.js')<innerHtml.indexOf('marketplace-v2.js'),'Live-data scrub must run before marketplace v2.');
 for(const token of [
-  'data-fellowfare-renderer="marketplace-v2"',
+  'data-fellowfare-renderer="marketplace-v2-live-capabilities"',
   '/app/cw-reward-ledger-v2.js',
   '/app/cerbanimo-commerce-distribution-v1.js',
   '/app/civweave-live-data.js',
+  'live-data-preflight-v3.js?v=live-data-r1',
   'marketplace-v2.js?v=live-market-v2',
-  'cabinet-bridge.js?v=marketplace-v2',
+  'marketplace-v2-capabilities.js?v=capabilities-r1',
+  'cabinet-bridge.js?v=marketplace-v2-capabilities-r1',
   '>Sell<','>Orders<','>Wallet<span'
 ])assert(innerHtml.includes(token),`Active FellowFare marketplace shell is missing ${token}`);
 assert(!innerHtml.includes('src="app.js"'),'The retired FellowFare runtime is still active in the current cabinet.');
 for(const token of [
   '--ff-paper:#f7e7bd','--ff-ink:#153849','.ffv2-listing-grid','.ffv2-balance-grid','@media(max-width:640px)'
 ])assert(marketplaceCss.includes(token),`Marketplace v2 styling is missing ${token}`);
+for(const token of ['--ff-amber:#e5a231','--ff-copper:#a95e2d','--ff-green:#1f5a70','.thread-card[data-mode="offer"]::before{background:#d89a31'])assert(contrastCss.includes(token),`FellowFare contrast/identity layer is missing ${token}`);
 for(const token of [
   "const SCHEMA='fellowfare.marketplace.v2'",
   "const KINDS=['product','service','learning','tutoring','resource','request','collective']",
@@ -76,7 +84,11 @@ for(const token of [
   'serviceOriginRoyaltyBps:kind===\'service\'?1000:0',
   'splitFeeBps:100'
 ])assert(marketplaceJs.includes(token),`Marketplace v2 runtime is missing ${token}`);
+for(const token of ['Pickup truck and hauling help','Reclaimed windows for greenhouse build','Flyer and one-page web design','market.listings=filterRows','legacy.threads=filterRows'])assert(preflight.includes(token),`Live-data preflight is missing ${token}`);
+for(const token of ['data-ff-cap-share','data-ff-need-shortcut','data-ff-order-action','Download ledger snapshot','Share profile summary'])assert(capabilities.includes(token),`Live FellowFare capability layer is missing ${token}`);
+assert(legacyShim.includes("import './live-data-preflight-v3.js'"),'Old cached FellowFare cabinets do not scrub retired demo state.');
 assert(legacyShim.includes("import './marketplace-v2.js'"),'Old cached FellowFare cabinets do not recover into marketplace v2.');
+assert(legacyShim.includes("import './marketplace-v2-capabilities.js'"),'Old cached FellowFare cabinets do not gain current page capabilities.');
 for(const retired of ['starterState','Friday bread circle','North Country maker room'])assert(!legacyShim.includes(retired),`Legacy FellowFare app shim still contains retired demo state: ${retired}`);
 assert(bridge.includes("version:'2.0.0-live-market'"),'Cabinet bridge is not announcing marketplace v2.');
 assert(bridge.includes('civweave:exchange-import'),'Reviewed exchange imports no longer reach marketplace v2.');
@@ -108,7 +120,7 @@ for(const token of [
   '/app/fellowfare-parent-theme-v205.css',
   '/app/fellowfare-mobile-flow-v205.js'
 ])assert(outerHtml.includes(token),`FellowFare seed cannot discover ${token}`);
-assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1&market=2#market'),'FellowFare seed cannot discover its marketplace v2 embed.');
+assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1&market=2&ffv2=live-capabilities-r1#market'),'FellowFare seed cannot discover its live-capability marketplace embed.');
 
 assert(critical.includes("const VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Compatibility coordinator lost the current parent/mobile or memory-bridge revision.');
 assert(critical.includes("const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Compatibility cache identity changed unexpectedly.');
@@ -124,9 +136,9 @@ for(const token of [
   'self.CivweaveCriticalBootV205=api'
 ])assert(critical.includes(token),`Compatibility coordinator is missing ${token}`);
 
-for(const [name,source] of [['marketplace v2',marketplaceJs],['cabinet bridge',bridge],['mobile flow',mobileFlow],['themed navigation',themedNav],['compatibility coordinator',critical],['active worker wrapper',workerWrapper],['retained worker core',workerCore]]){
+for(const [name,source] of [['marketplace v2',marketplaceJs],['live-data preflight',preflight],['marketplace capabilities',capabilities],['cabinet bridge',bridge],['mobile flow',mobileFlow],['themed navigation',themedNav],['compatibility coordinator',critical],['active worker wrapper',workerWrapper],['retained worker core',workerCore]]){
   try{new Function(source)}catch(error){throw new Error(`${name} has invalid JavaScript: ${error.message}`)}
 }
-for(const [name,source] of [['outer CSS',outerCss],['parent theme CSS',parentTheme],['marketplace v2 CSS',marketplaceCss],['legacy embed CSS',embedCss]])assert((source.match(/{/g)||[]).length===(source.match(/}/g)||[]).length,`${name} has unbalanced braces.`);
+for(const [name,source] of [['outer CSS',outerCss],['parent theme CSS',parentTheme],['marketplace v2 CSS',marketplaceCss],['marketplace contrast CSS',contrastCss],['legacy embed CSS',embedCss]])assert((source.match(/{/g)||[]).length===(source.match(/}/g)||[]).length,`${name} has unbalanced braces.`);
 
-console.log('FellowFare v2 verification passed: the parent cabinet remains responsive and offline-discoverable, the embedded surface is the live marketplace, fresh state is empty, legacy demo state cannot boot, and current product/service/learning/wallet contracts are present.');
+console.log('FellowFare v2 verification passed: the parent cabinet remains responsive and offline-discoverable, retired demo records are scrubbed before render, market/sell/orders/wallet/profile controls operate on real state, and FellowFare now leads with saffron, copper, parchment, and ink blue.');

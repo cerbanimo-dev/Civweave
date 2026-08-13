@@ -1,0 +1,79 @@
+/* FellowFare contrast pass: saffron, copper, parchment and ink-blue lead.
+   Jade remains a small trust/status accent so Living School keeps the green lane. */
+:root{
+  --ff-ink:#123847;
+  --ff-ink-2:#1d5065;
+  --ff-amber:#e5a231;
+  --ff-copper:#a95e2d;
+  --ff-terracotta:#bd6a3f;
+  --ff-jade:#2d7a68;
+  --ff-green:#1f5a70;
+  --ff-green-2:#143f55;
+  --ff-muted:#596a6b;
+  --ff-line:#b96a36;
+}
+html,body{color:var(--ff-ink);}
+.ffv2-page-head{background:linear-gradient(135deg,rgba(255,249,228,.98),rgba(246,214,146,.94));border-color:rgba(169,94,45,.78)}
+.ffv2-page-head h1,.ffv2-section-head h2,.ffv2-listing h3,.ffv2-order h3,.ffv2-profile-card h2,.ffv2-policy-grid h2,.ffv2-rook-price h2{color:var(--ff-ink)}
+.ffv2-page-head p:not(.ffv2-eyebrow),.ffv2-listing>p,.ffv2-order>p,.ffv2-policy-grid p,.ffv2-rook-price p:not(.ffv2-eyebrow),.ffv2-profile-card p,.ffv2-empty p{color:#4d6163}
+.ffv2-eyebrow{color:#79502d!important}
+.ffv2-primary,.ffv2-head-actions button,.ffv2-card-actions button,.ffv2-form button,.ffv2-empty button{background:linear-gradient(135deg,#1d5870,#123f55);color:#fff9e9;box-shadow:0 5px 0 rgba(18,56,71,.18)}
+.ffv2-primary:hover,.ffv2-head-actions button:hover,.ffv2-card-actions button:hover,.ffv2-form button:hover,.ffv2-empty button:hover{background:#0f3548}
+.ffv2-secondary-action,.ffv2-card-actions button.quiet{background:rgba(255,245,218,.92)!important;color:#6d3e24!important;border:1px solid rgba(169,94,45,.55)!important;box-shadow:none!important}
+.ffv2-chip{background:#f5d89b;color:#68401f}
+.ffv2-status{color:#225e55}
+.ffv2-listing{background:linear-gradient(180deg,rgba(255,250,234,.98),rgba(247,222,164,.88));border-color:rgba(169,94,45,.68)}
+.ffv2-listing:nth-child(3n+2){background:linear-gradient(180deg,rgba(255,247,226,.98),rgba(239,201,166,.82))}
+.ffv2-listing:nth-child(3n+3){background:linear-gradient(180deg,rgba(250,244,224,.98),rgba(227,215,181,.88))}
+.ffv2-meta div,.ffv2-detail-list div{background:rgba(255,255,255,.55)}
+.ffv2-price{color:#783e21}
+.ffv2-wallet-strip{background:linear-gradient(100deg,#173f56,#8a542d);color:#fff8e9}
+.ffv2-node-card,.ffv2-money-panel{background:linear-gradient(120deg,#173f56,#70452d);color:#fff8e9}
+.ffv2-node-card p:not(.ffv2-eyebrow),.ffv2-money-panel p:not(.ffv2-eyebrow),.ffv2-money-status span{color:rgba(255,250,235,.86)}
+.ffv2-balance-grid article{background:linear-gradient(135deg,#153f56,#7b4a2c);color:#fff8e9}
+.ffv2-balance-grid article:nth-child(2){background:linear-gradient(135deg,#704328,#b56834)}
+.ffv2-balance-grid article:nth-child(3){background:linear-gradient(135deg,#16475f,#8b5e31)}
+.ffv2-rook-price{border-color:rgba(185,106,54,.62);background:linear-gradient(135deg,rgba(255,240,202,.9),rgba(247,225,198,.92))}
+.ffv2-policy-grid article,.ffv2-order,.ffv2-profile-card,.ffv2-policy-note,.ffv2-trust-empty,.ffv2-receipt,.ffv2-draft-card,.ffv2-toolbar{background:rgba(255,247,225,.9);border-color:rgba(169,94,45,.56)}
+.ffv2-live-wallet-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.ffv2-live-wallet-actions button{background:#e5a231;color:#3d301d;border:0;border-radius:999px;padding:11px 15px;font-weight:850}
+.ffv2-live-order-actions{margin-top:14px;flex-wrap:wrap}
+.ffv2-toast{background:#153f56;color:#fff9e9;border:1px solid rgba(229,162,49,.72)}
+.bottom-nav{background:linear-gradient(100deg,rgba(18,63,85,.98),rgba(104,66,40,.97))}
+.bottom-link.is-active,.bottom-link[aria-current]{background:#e5a231;color:#3c2a16}
+
+/* Compatibility layer for stale/legacy FellowFare cabinet markup. Old cached
+   cabinets may still load styles.css; keep their good mobile sizing while
+   removing the dark-green-on-dark-green failure shown on phones. */
+:root{
+  --forest-950:#133d50;
+  --forest-900:#194f64;
+  --forest-800:#1f5f74;
+  --forest-700:#286d78;
+  --forest-600:#34796f;
+  --sage-100:#f4dfb1;
+  --sage-200:#ecd09d;
+  --sage-400:#d7ad62;
+  --clay-500:#c66f3f;
+  --clay-600:#a85830;
+  --ink:#173b49;
+  --muted:#536666;
+  --surface:rgba(255,249,231,.96);
+  --surface-solid:#fff9e7;
+  --line:rgba(169,94,45,.42);
+}
+.thread-card,.assembly-card,.panel,.card,.workbench-card,.loom-workbench,.loom-result,.profile-card,.agreement-card,.detail-card{background:linear-gradient(180deg,rgba(255,249,232,.98),rgba(245,220,170,.94))!important;color:#173b49!important;border-color:rgba(169,94,45,.58)!important}
+.thread-card h1,.thread-card h2,.thread-card h3,.assembly-card h1,.assembly-card h2,.assembly-card h3,.loom-workbench h1,.loom-workbench h2,.loom-workbench h3,.loom-result h1,.loom-result h2,.loom-result h3,.detail-card h1,.detail-card h2,.detail-card h3{color:#173b49!important}
+.thread-card p,.thread-card small,.person-info small,.assembly-card p,.loom-workbench p,.loom-result p,.detail-card p,.muted{color:#506466!important}
+.thread-card[data-mode="offer"]::before{background:#d89a31!important}
+.thread-card[data-mode="need"]::before{background:#b85f39!important}
+.thread-card[data-mode="collective"]::before{background:#27647a!important}
+.thread-card[data-mode="offer"] .mode-label{background:#f5d89b!important;color:#69401f!important}
+.meta-pill,.thread-meta .meta-pill,.proposal-preview label,.loom-selected{background:rgba(255,239,199,.92)!important;color:#694225!important}
+.price{color:#743c22!important}
+.avatar{background:#225e78!important;color:#fff!important}
+.button-primary,.filter-chip.is-active,.match-score,.plan-step>span{background:#1d5870!important;color:#fff8e9!important}
+.button-secondary{background:#c66f3f!important;color:#fff8e9!important}
+.hero-side,.loom-principle,.provider-headline{background:linear-gradient(145deg,#173f56,#70452d)!important;color:#fff8e9!important}
+.hero-side p,.loom-principle p,.provider-headline p{color:rgba(255,248,232,.85)!important}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#173b49;--muted:#536666;--surface:rgba(255,249,231,.96);--surface-solid:#fff9e7;--sand-50:#f8e8bf;--sand-100:#f4dfb1;--sage-100:#f4dfb1;--sage-200:#ecd09d}:root:not([data-theme="light"]) body{background:linear-gradient(180deg,#f9e7b7,#fff6dc)!important}}

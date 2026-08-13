@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-fellowfare-renderer="marketplace-v2">
+<html lang="en" data-fellowfare-renderer="marketplace-v2-live-capabilities">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -8,6 +8,7 @@
   <meta name="color-scheme" content="light">
   <link rel="stylesheet" href="/app/fellowfare-parchment-type-v266.css?v=parchment-type-r1">
   <link rel="stylesheet" href="marketplace-v2.css?v=live-market-v2">
+  <link rel="stylesheet" href="marketplace-v2-contrast.css?v=contrast-live-r1">
   <title>FellowFare Marketplace</title>
 </head>
 <body class="ff-cabinet-embedded">
@@ -24,12 +25,14 @@
       <button data-route="profile" class="bottom-link">You</button>
     </nav>
   </div>
+  <script src="live-data-preflight-v3.js?v=live-data-r1"></script>
   <script src="/app/cw-reward-ledger-v2.js"></script>
   <script src="/app/cerbanimo-commerce-distribution-v1.js"></script>
   <script src="/app/civweave-live-data.js"></script>
   <script src="marketplace-v2.js?v=live-market-v2"></script>
+  <script src="marketplace-v2-capabilities.js?v=capabilities-r1"></script>
   <script type="module" src="labor-context-v1.mjs?v=core-labor-v1"></script>
-  <script src="cabinet-bridge.js?v=marketplace-v2"></script>
+  <script src="cabinet-bridge.js?v=marketplace-v2-capabilities-r1"></script>
   <script src="civweave-handoff-consumer.js" data-system="fellowfare"></script>
 </body>
 </html>
