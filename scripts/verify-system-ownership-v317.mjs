@@ -19,7 +19,10 @@ const paths={
   campus:'public/app/working-campus-v156.html',
   cerbanimo:'public/app/realm-console-v140.html',
   fellowfare:'public/app/fellowfare-cabinet-v144.html',
-  anarchadia:'public/app/anarchadia-console-v139.html'
+  anarchadia:'public/app/anarchadia-console-v139.html',
+  codeCache:'public/service-worker-code-coherence-v288.js',
+  localAICache:'public/service-worker-local-ai-coherence-v307.js',
+  criticalCache:'public/service-worker-critical-v199.js'
 };
 const src=Object.fromEntries(await Promise.all(Object.entries(paths).map(async([key,path])=>[key,await read(path)])));
 for(const key of ['gateway','controller','lifecycle','boundary','orchestrator','shell','parity','delegation','bindGuard','repair'])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
@@ -91,4 +94,8 @@ for(const key of ['campus','cerbanimo','fellowfare','anarchadia']){
 }
 assert.match(src.campus,/data-open-unified-ai-settings/,'Civweave lost its canonical Settings control marker.');
 
-console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,prototypePatching:false}},null,2));
+// Offline-first invariant: the owner must already be cached before the first click.
+for(const key of ['codeCache','localAICache','criticalCache'])assert.ok(src[key].includes("'/app/settings-gateway-v317.js'"),`${paths[key]} does not pin the Settings gateway for offline first-click use.`);
+assert.ok(src.codeCache.includes("'/app/model-settings-controller-v173.js'")&&src.codeCache.includes("'/app/document-lifecycle-v221.js'"),'Code coherence cache must retain the lazy controller and management subscriber for offline activation.');
+
+console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,prototypePatching:false,offlineFirstClick:true}},null,2));
