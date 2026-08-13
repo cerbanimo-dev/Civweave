@@ -1,0 +1,42 @@
+name: Patch FellowFare Native Verifier
+on:
+  push:
+    branches: [fix/fellowfare-native-v207]
+    paths: ['.github/workflows/patch-fellowfare-native-verifier.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/fellowfare-native-v207
+          fetch-depth: 0
+      - name: Patch active verifier
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p=Path('scripts/verify-fellowfare-active-v203.mjs')
+          s=p.read_text()
+          replacements=[
+            ('data-build="fellowfare-parent-market-v2-live-capabilities"','data-build="fellowfare-native-market-v207"'),
+            ("assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1&market=2&ffv2=live-capabilities-r1#market'),'Outer cabinet is not pointing at the cache-busted live FellowFare marketplace.');", "assert(outerHtml.includes('data-fellowfare-native-host=\\\"v207\\\"'),'Outer FellowFare surface is not using the native market host.');\nassert(!outerHtml.includes('<iframe id=\\\"ffc144-workbench\\\"'),'Active FellowFare still contains the retired nested marketplace iframe.');"),
+            ("assert(outerHtml.indexOf('/app/fellowfare-cabinet-v144.js')<outerHtml.indexOf('/app/fellowfare-mobile-flow-v205.js'),'The mobile flow must layer on top of the working FellowFare cabinet runtime.');", "assert(outerHtml.indexOf('/app/services/fellowfare/marketplace-v2.js')<outerHtml.indexOf('/app/fellowfare-cabinet-v144.js'),'The native marketplace runtime must boot before the retained parent controller.');"),
+            ("  '/app/fellowfare-mobile-flow-v205.js'\n])assert(outerHtml.includes(token),`FellowFare seed cannot discover ${token}`);", "  '/app/fellowfare-native-v207.css',\n  '/app/fellowfare-native-host-v207.js'\n])assert(outerHtml.includes(token),`FellowFare seed cannot discover ${token}`);"),
+            ("assert(outerHtml.includes('/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1&market=2&ffv2=live-capabilities-r1#market'),'FellowFare seed cannot discover its live-capability marketplace embed.');", "assert(outerHtml.includes('/app/services/fellowfare/marketplace-v2.js?v=native-v207'),'FellowFare seed cannot discover its native marketplace runtime.');")
+          ]
+          for old,new in replacements:
+            if old not in s: raise SystemExit('expected verifier contract not found: '+old[:70])
+            s=s.replace(old,new,1)
+          p.write_text(s)
+          PY
+          node scripts/verify-fellowfare-native-v207.mjs
+          node scripts/verify-fellowfare-active-v203.mjs
+      - name: Commit
+        run: |
+          git config user.name civweave-release-bot
+          git config user.email civweave-release-bot@users.noreply.github.com
+          git add scripts/verify-fellowfare-active-v203.mjs
+          git commit -m 'Update FellowFare active verifier for native host' || exit 0
+          git push origin HEAD:fix/fellowfare-native-v207
