@@ -91,11 +91,14 @@ async function main(){
 
     const entry=entryResponse.text;
     requireToken(entry,`const FALLBACK_VERSION='${deployed}';`,'installed entry');
-    requireToken(entry,`version:'${deployed}-chat-convergence-v250'`,'installed entry');
+    requireToken(entry,`version:'${deployed}-boot-recovery-v426'`,'installed entry');
     requireToken(entry,"updateViaCache:'none'",'installed entry');
-    requireToken(entry,'await registration.update()','installed entry');
+    requireToken(entry,'registration.update()','installed entry');
+    requireToken(entry,'bounded(registration.update()','installed entry');
     requireToken(entry,"candidate.postMessage({type:'SKIP_WAITING'})",'installed entry');
-    requireToken(entry,'revision=chat-convergence-v250','installed entry');
+    requireToken(entry,'revision=boot-recovery-v426','installed entry');
+    requireToken(entry,"fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'",'installed entry');
+    requireToken(entry,'bounded(fetch(','installed entry');
 
     const worker=workerResponse.text;
     requireToken(worker,`/app/system-routes-v227.js?v=${deployed}-five-system-route-contract-v227`,'service worker');
@@ -117,7 +120,8 @@ async function main(){
       installedEntry:new URL(entryResponse.url).pathname,
       serviceWorker:new URL(workerResponse.url).pathname,
       localAISettings:new URL(settingsResponse.url).pathname,
-      chatRevision:'chat-convergence-v250',
+      launchRevision:'boot-recovery-v426',
+      boundedUpdate:true,
       activeChatRepairRevision:'chat-css-contract-v343',
       mobileAISettingsRevision:'snapshot-first-v287'
     };
