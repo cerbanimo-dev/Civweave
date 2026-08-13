@@ -1,9 +1,10 @@
 import Stripe from 'stripe';
 
-export const STRIPE_RECIPIENT_THIN_WEBHOOK_PATH = '/api/money-edge/webhooks/stripe-connect';
+export const STRIPE_RECIPIENT_THIN_WEBHOOK_PATH = '/api/connect-demo/webhooks/stripe-thin';
+export const STRIPE_RECIPIENT_THIN_CANONICAL_PATH = '/api/money-edge/webhooks/stripe-connect';
 export const STRIPE_RECIPIENT_THIN_WEBHOOK_PATHS = new Set([
-  STRIPE_RECIPIENT_THIN_WEBHOOK_PATH,
-  '/api/connect-demo/webhooks/stripe-thin'
+  STRIPE_RECIPIENT_THIN_CANONICAL_PATH,
+  STRIPE_RECIPIENT_THIN_WEBHOOK_PATH
 ]);
 export const STRIPE_RECIPIENT_THIN_EVENTS = Object.freeze([
   'v2.core.account[requirements].updated',
