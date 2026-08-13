@@ -129,22 +129,23 @@ jobs:
           printf '%s' "$STRIPE_LIVE_SECRET_KEY" | npx --yes wrangler@latest secret put STRIPE_SECRET_KEY --config "$CONFIG"
           printf '%s' "$STRIPE_LIVE_CONNECT_WEBHOOK_SECRET" | npx --yes wrangler@latest secret put STRIPE_CONNECT_WEBHOOK_SECRET --config "$CONFIG"
           printf '%s' "$STRIPE_LIVE_CONNECT_THIN_WEBHOOK_SECRET" | npx --yes wrangler@latest secret put STRIPE_CONNECT_THIN_WEBHOOK_SECRET --config "$CONFIG"
+          # Secret writes create new Worker versions, but the public edge can briefly
+          # continue serving the previous version. Publish one coherent version with
+          # keep-vars so the three live secrets become active together without
+          # disturbing the fail-closed money gates.
+          npx --yes wrangler@latest deploy --keep-vars --config "$CONFIG"
 
       - name: Verify live provider is staged but transactions remain closed
         if: inputs.stage_live_credentials
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "$CIVWEAVE_LIVE_CORE_ORIGIN/api/money-edge/status" > /tmp/staged-live.json
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          const payload = JSON.parse(fs.readFileSync('/tmp/staged-live.json', 'utf8'));
-          const edge = payload.moneyEdge || payload;
-          if (edge.providerMode !== 'live') throw new Error(`Expected providerMode=live after credential promotion, got ${edge.providerMode}`);
-          if (edge.integrationDoorReady !== true) throw new Error(`Live integration door is not ready: ${(edge.structuralBlockers || []).join(', ')}`);
-          if (edge.liveReady === true) throw new Error('Live money became ready before explicit gate enablement.');
-          console.log(JSON.stringify({ ok: true, providerMode: edge.providerMode, integrationDoorReady: edge.integrationDoorReady, liveReady: edge.liveReady, operationalBlockers: edge.operationalBlockers || [] }, null, 2));
-          NODE
+          node scripts/wait-for-money-edge-state-v1.mjs \
+            --provider-mode=live \
+            --integration-ready=true \
+            --live-ready=false \
+            --timeout-ms=90000 \
+            --interval-ms=2000
 
       - name: Require explicit human attestations before enablement
         if: inputs.enable_live_money
@@ -195,20 +196,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "$CIVWEAVE_LIVE_CORE_ORIGIN/api/money-edge/status" > /tmp/pre-enable-status.json
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          const payload = JSON.parse(fs.readFileSync('/tmp/pre-enable-status.json', 'utf8'));
-          const edge = payload.moneyEdge || payload;
-          const blockers = edge.operationalBlockers || [];
-          if (edge.providerMode !== 'live') throw new Error(`Provider is not live: ${edge.providerMode}`);
-          if ((edge.structuralBlockers || []).length) throw new Error(`Structural blockers remain: ${(edge.structuralBlockers || []).join(', ')}`);
-          if (edge.liveReady === true) throw new Error('Live money is unexpectedly enabled before the final switch.');
-          if (blockers.length !== 1 || blockers[0] !== 'live-money-disabled') {
-            throw new Error(`Expected only live-money-disabled before final enablement; got ${blockers.join(', ')}`);
-          }
-          console.log(JSON.stringify({ ok: true, providerMode: edge.providerMode, onlyRemainingBlocker: blockers[0] }, null, 2));
-          NODE
+          node scripts/wait-for-money-edge-state-v1.mjs \
+            --provider-mode=live \
+            --integration-ready=true \
+            --live-ready=false \
+            --only-operational-blocker=live-money-disabled \
+            --timeout-ms=90000 \
+            --interval-ms=2000
 
       - name: Enable live money with automatic fail-closed rollback
         if: inputs.enable_live_money
@@ -218,21 +212,23 @@ jobs:
           PRE="${{ steps.gates.outputs.pre }}"
           FINAL="${{ steps.gates.outputs.final }}"
           npx --yes wrangler@latest deploy --keep-vars --config "$FINAL"
-          if ! curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "$CIVWEAVE_LIVE_CORE_ORIGIN/api/money-edge/status" > /tmp/live-enabled-status.json; then
-            echo 'Live status probe failed; restoring live switch to false.'
-            npx --yes wrangler@latest deploy --keep-vars --config "$PRE" || true
-            exit 20
-          fi
-          if ! node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          const payload = JSON.parse(fs.readFileSync('/tmp/live-enabled-status.json', 'utf8'));
-          const edge = payload.moneyEdge || payload;
-          if (edge.providerMode !== 'live' || edge.liveReady !== true || (edge.structuralBlockers || []).length || (edge.operationalBlockers || []).length) process.exit(1);
-          console.log(JSON.stringify({ ok: true, authority: edge.authority || payload.authority, providerMode: edge.providerMode, liveReady: edge.liveReady, emergencyStop: false }, null, 2));
-          NODE
+          if ! node scripts/wait-for-money-edge-state-v1.mjs \
+            --provider-mode=live \
+            --integration-ready=true \
+            --live-ready=true \
+            --no-operational-blockers=true \
+            --timeout-ms=90000 \
+            --interval-ms=2000
           then
-            echo 'Final readiness contract failed; restoring live switch to false.'
+            echo 'Final readiness contract failed or timed out; restoring live switch to false.'
             npx --yes wrangler@latest deploy --keep-vars --config "$PRE" || true
+            node scripts/wait-for-money-edge-state-v1.mjs \
+              --provider-mode=live \
+              --integration-ready=true \
+              --live-ready=false \
+              --only-operational-blocker=live-money-disabled \
+              --timeout-ms=90000 \
+              --interval-ms=2000 || true
             exit 21
           fi
 

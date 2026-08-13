@@ -69,9 +69,11 @@ for (const secret of ['STRIPE_LIVE_SECRET_KEY','STRIPE_LIVE_CONNECT_WEBHOOK_SECR
 }
 assert.ok(promoteWorkflow.includes("sk_live_*|rk_live_*"), 'promotion must reject non-live Stripe server credentials');
 assert.ok(promoteWorkflow.includes('node scripts/verify-stripe-live-readiness-preflight.mjs'));
+assert.ok(promoteWorkflow.includes('wait-for-money-edge-state-v1.mjs'), 'promotion must wait for semantic Worker propagation');
+assert.ok(promoteWorkflow.includes('wrangler@latest deploy --keep-vars --config "$CONFIG"'), 'staged Stripe secrets must be published as one coherent Worker version');
+assert.ok(promoteWorkflow.includes('--only-operational-blocker=live-money-disabled'), 'pre-enable verification must require live-money-disabled as the only blocker');
 assert.ok(promoteWorkflow.includes("CONFIRMATION"));
 assert.ok(promoteWorkflow.includes('ENABLE CIVWEAVE LIVE MONEY'));
-assert.ok(promoteWorkflow.includes('Expected only live-money-disabled before final enablement'));
 assert.ok(promoteWorkflow.includes('restoring live switch to false'), 'promotion must fail closed if final verification fails');
 assert.ok(promoteWorkflow.indexOf('CIVWEAVE_MONEY_LIVE_ENABLED": "false"') < promoteWorkflow.indexOf('CIVWEAVE_MONEY_LIVE_ENABLED": "true"'), 'promotion must stage gates while live money is off before the final switch');
 for (const gate of gates.filter(gate => !['CIVWEAVE_MONEY_LIVE_ENABLED','CIVWEAVE_MONEY_EMERGENCY_STOP'].includes(gate))) {
@@ -120,6 +122,7 @@ console.log(JSON.stringify({
   ordinaryDeployPreservesLiveState: true,
   ordinaryDeployDoesNotRewriteStripeSecrets: true,
   liveCredentialsRequireDedicatedPromotion: true,
+  liveCredentialPropagationIsSemantic: true,
   humanAttestationsRemainExplicit: true,
   enablementIsLastStep: true,
   failedPromotionRollsBackClosed: true,
