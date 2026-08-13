@@ -46,6 +46,10 @@ replaceRequired(
 await writeFile(runtimePath,source,'utf8');
 try{
   await import(pathToFileURL(runtimePath).href+`?run=${Date.now()}`);
+}catch(error){
+  const message=String(error?.message||error).replace(/[%\r\n]/g,' ');
+  console.error(`::error title=Weaveling Memory and Credential v191::${message}`);
+  throw error;
 }finally{
   await unlink(runtimePath).catch(()=>{});
 }
