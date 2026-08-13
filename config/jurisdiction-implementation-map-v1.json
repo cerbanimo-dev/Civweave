@@ -1,0 +1,10 @@
+{
+  "schema": "civweave.jurisdiction-implementation-map.v1",
+  "status": "documentation-index-not-live-money-authority",
+  "asOf": "2026-08-13",
+  "financialFeatureCatalog": "config/jurisdiction-financial-features-v1.json",
+  "humanImplementationMap": "docs/finance/jurisdiction-implementation-map-v1.md",
+  "defaultGoodsBoundary": "seller_direct",
+  "liveActivation": "human_compliance_approval_required",
+  "unknownJurisdiction": "keep_seller_direct_and_require_review"
+}
