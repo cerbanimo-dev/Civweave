@@ -27,11 +27,14 @@ const experienceStart=installBoundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=[
 assert(experience.includes('GUIDE_WORKSPACE'),'Canonical boundary no longer boots the v242 workspace.');
 assert(!experience.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!experience.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'),'Canonical boundary restored a retired chat owner.');
 assert(!installBoundary.includes('function startAdditions()'),'Boundary contains delayed automatic additions.');
-const startBlock=installBoundary.match(/function start\(\)\{[\s\S]*?\n\}\n\nstart\(\);/)?.[0]||'';
+const startStart=installBoundary.indexOf('function start(){');
+const startEnd=installBoundary.indexOf("\n\naddEventListener('pageshow',resumeFromPageShow);",startStart);
+assert(startStart>=0&&startEnd>startStart,'Install boundary start() could not be isolated from the current pageshow-resume wrapper.');
+const startBlock=installBoundary.slice(startStart,startEnd);
 const additionCall=startBlock.includes('installAdditionsWhenReady();')?'installAdditionsWhenReady();':'installAdditions();';
 assert(startBlock.includes("if(system==='civweave'){"),'Install boundary start() is missing the Civweave short-circuit.');
-assert(startBlock.includes(additionCall),'Install boundary start() is missing the realm additions handoff.');
-assert(startBlock.indexOf("if(system==='civweave'){")<startBlock.indexOf(additionCall),'Civweave short-circuit occurs after realm additions.');
+assert(startBlock.includes(additionCall),'Install boundary start() is missing the compatibility additions handoff.');
+assert(startBlock.indexOf("if(system==='civweave'){")<startBlock.lastIndexOf(additionCall),'Civweave short-circuit occurs after compatibility additions.');
 for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
 assert(campusPart4.includes('CivweaveSystemRoutesV227')&&campusPart4.includes('routes.navigate(id'),'Working Campus realm travel bypasses the route contract.');
 for(const token of ['document-lifecycle-v269-ai-settings-entry','CivweaveLifecycleMutationObserver',"addEventListener('pagehide',stop",'ensureAISettingsDelegation',"/app/settings-delegation-v175.js?v=1.0.65-ai-settings-entry-v269"])assert(lifecycle.includes(token),`Lifecycle guard is missing ${token}.`);
@@ -49,4 +52,4 @@ assert(wrapper.indexOf('/app/system-routes-v227.js')<wrapper.indexOf('/service-w
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation is not final.');
 assert(canonicalNavigation.includes("headers.set('x-civweave-package',REVISION)")&&canonicalNavigation.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical worker navigation contract is incomplete.');
 for(const [name,source] of [['installed entry',installedEntry],['campus loader',campusLoader],['lifecycle guard',lifecycle],['install boundary',installBoundary],['route contract',routes],['shared additions',additions],['release coherence',releaseCoherence],['canonical navigation',canonicalNavigation]])assert.doesNotThrow(()=>new vm.Script(source,{filename:name}),`${name} does not compile.`);
-console.log(JSON.stringify({ok:true,revision:'canonical-campus-startup-v269-boot-recovery-v426',updaterFirstStart:true,boundedUpdater:true,directCampusStart:false,canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',civweaveCoreOnly:true,aiSettingsEntryRepair:true,navigationErrorsSilent:true,campusFragmentsNetworkFirst:true,packageAuthenticatedNavigation:true,exactRouteFallback:true,nonInterruptingCoreWorker:true,v250WrapperActivation:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'canonical-campus-startup-v269-boot-recovery-v426',updaterFirstStart:true,boundedUpdater:true,pageshowResume:true,directCampusStart:false,canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',civweaveCoreOnly:true,aiSettingsEntryRepair:true,navigationErrorsSilent:true,campusFragmentsNetworkFirst:true,packageAuthenticatedNavigation:true,exactRouteFallback:true,nonInterruptingCoreWorker:true,v250WrapperActivation:true},null,2));
