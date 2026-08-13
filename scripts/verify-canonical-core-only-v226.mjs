@@ -14,7 +14,7 @@ const [routesSource,boundarySource,versionText]=await Promise.all([
 ]);
 const version=versionText.trim();
 const systems={civweave:'/app/working-campus-v156.html','living-school':'/app/cabinets/living-school/index.html',cerbanimo:'/app/realm-console-v140.html',fellowfare:'/app/fellowfare-cabinet-v144.html',anarchadia:'/app/anarchadia-console-v139.html'};
-const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-version-v1.js','/app/ai-settings-bind-guard-v230.js','/app/ai-settings-device-repair-v229.js'];
+const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-version-v1.js','/app/ai-settings-bind-guard-v230.js','/app/ai-settings-device-repair-v229.js','/app/document-lifecycle-v221.js'];
 const allowedExperienceSupport=[
   '/app/mobile-ai-hardening-v302.js',
   '/app/experience-orchestrator-v232.js',
@@ -38,7 +38,7 @@ const retiredCanonicalChat=['/app/persistent-guide-chat-v215.js','/app/persisten
 const fellowfareBridge='/app/fellowfare-shared-guide-bridge-v236.js';
 function runBoundary(pathname){
   const appended=[],replaced=[],storage=new Map(),documentElement={isConnected:true,dataset:{}},head={isConnected:true,append:node=>appended.push(node)},body={isConnected:true};
-  const document={documentElement,head,body,querySelector:()=>null,createElement:tag=>({tagName:String(tag).toUpperCase(),async:true,rel:'',href:'',src:''})};
+  const document={documentElement,head,body,querySelector:selector=>{const match=String(selector).match(/^script\[src\^=\"([^\"]+)\"\]$/);if(!match)return null;return appended.find(node=>String(node.src||'').startsWith(match[1]))||null},createElement:tag=>({tagName:String(tag).toUpperCase(),async:true,rel:'',href:'',src:''})};
   const location={pathname,search:'',hash:'',hostname:'civweave.invalid',origin:'https://civweave.invalid',href:`https://civweave.invalid${pathname}`,replace:url=>replaced.push(String(url))};
   const context={console,URL,URLSearchParams,Map,Object,String,Boolean,CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},navigator:{standalone:false},matchMedia:()=>({matches:false}),sessionStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value))},document,location,addEventListener:()=>{},dispatchEvent:()=>true,queueMicrotask:callback=>callback()};
   context.window=context;context.top=context;context.self=context;context.globalThis=context;
@@ -71,7 +71,7 @@ for(const [system,pathname] of Object.entries(systems)){
 const api=runBoundary(systems.civweave).api;
 assert.equal(api.canonicalSystemCount,5);
 assert.equal(api.canonicalAutoScripts,0);
-assert.equal(api.canonicalSubsystemSupportScripts,4);
+assert.equal(api.canonicalSubsystemSupportScripts,6);
 assert.equal(api.canonicalExperienceScripts,allowedExperienceSupport.length);
 assert.equal(api.canonicalSubsystemCompatibility,'route-version-settings-only-no-legacy-additions');
 assert.equal(api.canonicalPolicy,'five-system-first-class-routes-v242-canonical-chat-owner');

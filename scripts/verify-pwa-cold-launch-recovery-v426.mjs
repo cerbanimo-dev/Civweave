@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+const version=(await read('VERSION')).trim();
 const [entryHtml, entryJs, recoveryHtml, worker, recoveryWorker] = await Promise.all([
   read('public/app/installed-entry-v146.html'), read('public/app/installed-entry-v146.js'), read('public/app/recovery-v426.html'), read('public/service-worker-v203.js'), read('public/service-worker-boot-recovery-v426.js')
 ]);
@@ -8,7 +9,7 @@ assert.match(entryHtml, /id="boot-recovery"[^>]*hidden/);
 assert.match(entryHtml, /setTimeout\(\(\)=>showRecovery\([^)]*\),4500\)/);
 assert.match(entryHtml, /civweave\.boot-recovery\.attempt\.v426/);
 assert.match(entryHtml, /\/app\/recovery-v426\.html/);
-assert.match(entryHtml, /installed-entry-v146\.js\?v=1\.0\.122-boot-recovery-v426" defer/);
+assert.ok(entryHtml.includes(`/app/installed-entry-v146.js?v=${version}-boot-recovery-v426" defer`),'installed bootstrap HTML must carry the current boot-recovery script identity');
 assert.ok(entryHtml.indexOf('<body>') < entryHtml.indexOf('installed-entry-v146.js'), 'recovery UI must parse before external bootstrap');
 assert.doesNotMatch(entryHtml, /cw-reward-ledger-v2\.js|cw-reward-receivers-v2\.js|cerbanimo-commerce-distribution-v1\.js/);
 assert.match(entryJs, /RELEASE_TIMEOUT_MS=1500/);

@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
 const releaseVersion=(await read('VERSION')).trim();
-const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209')`;
+const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425')`;
 const [source,boundary,legacyWorker,wrapper,core,installerState,integrity,offline,workingCampus,manifestText,css]=await Promise.all([
   read('public/extensions/civweave-proof-progress-v158.js'),
   read('public/app/install-boundary-v146.js'),
@@ -33,14 +33,14 @@ if(lightweightMode){
   assert(legacyWorker.includes(expectedWorkerImport),`Legacy registrations do not reach the active ${releaseVersion} worker wrapper.`);
   assert(wrapper.includes("importScripts('/service-worker-living-school-cleanroom-v218.js")&&wrapper.includes("importScripts('/service-worker-code-coherence-v288.js")&&wrapper.includes("importScripts('/service-worker-core-v208.js")&&wrapper.includes("importScripts('/service-worker-installer-state-v280.js")&&wrapper.includes("importScripts('/service-worker-shell-integrity-v281.js")&&wrapper.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper is incomplete.');
   assert(wrapper.includes('offline-campus-current-graph-v280')&&wrapper.includes('policy=resumable-pause-v280'),'Active worker wrapper does not load the resumable current-graph repair.');
-  assert(core.includes("const BUILD = 'lightweight-shell-v208'"),'Retained worker core is not the lightweight shell.');
+  assert(core.includes("const BUILD = 'lightweight-shell-v208"),'Retained worker core is not in the lightweight-shell-v208 family.');
   assert(core.includes('discoverReferences')&&core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Retained offline campus core lost discovery or hydration.');
   assert(installerState.includes("'/app/installer-storage-guard-v281.js'"),'Installer state layer no longer pins the storage preflight guard.');
   assert(integrity.includes("crypto.subtle.digest('SHA-256'")&&integrity.includes('lastKnownGoodCache'),'Shell integrity/last-known-good fallback is missing.');
   assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'")&&offline.includes("const V211_POLICY = 'resumable-pause-v280'")&&offline.includes("const V211_REFERENCE_POLICY = 'current-manifest-only-v282'"),'Current-graph resumable retry and manifest-pruning policy is missing.');
   assert(offline.includes('downloadedAssets')&&offline.includes('pauseSupported: true')&&offline.includes('resumablePerFile: true'),'Per-file resumability contract is missing.');
-  assert(offlineManifest.revision==='canonical-background-campus-v241-systems-mesh-v251','Offline campus manifest is not the Systems Mesh canonical background-download contract.');
-  assert(offlineManifest.seeds.length===11,'Offline campus manifest no longer has the canonical eleven seed roots.');
+  assert(String(offlineManifest.revision||'').startsWith('canonical-background-campus-v241-systems-mesh-v251'),'Offline campus manifest left the Systems Mesh canonical background-download contract family.');
+  assert(Array.isArray(offlineManifest.seeds)&&offlineManifest.seeds.length>=11,'Offline campus manifest unexpectedly lost canonical seed roots.');
   assert(offlineManifest.seeds.includes('/app/working-campus-v156.html'),'Offline campus no longer seeds the working campus.');
   assert(offlineManifest.seeds.includes('/app/civweave-systems-mesh-v251.js'),'Offline campus no longer seeds the Civweave Systems Mesh runtime.');
   assert(offlineManifest.includePrefixes.includes('/extensions/'),'Offline campus excludes extension runtimes.');

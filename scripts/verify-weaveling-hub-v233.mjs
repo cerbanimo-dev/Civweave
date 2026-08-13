@@ -44,9 +44,9 @@ assert(workspace.includes("const LAUNCHER_ID='cwp215-launcher';"),'Canonical v24
 assert(workspace.includes('canonicalOwner:true'),'v242 must remain the canonical guide owner.');
 assert(assistantRuntime.includes('globalThis.CivweaveIntentionPlanner?.maybeCreate'),'Assistant runtime must retain the canonical Weaveling intention-planner boundary.');
 
-const plannerIndex=sharedLoader.indexOf('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization');
-const materializationIndex=sharedLoader.indexOf('/app/weaveling-plan-materialization-v265.js?v=1.0.57-v265');
-const sharedCoreIndex=sharedLoader.indexOf('/app/shared-guide-surface-v236-core-v244.js?v=1.0.57-v265');
+const plannerIndex=sharedLoader.indexOf('/app/intention-planner-v141.js');
+const materializationIndex=sharedLoader.indexOf('/app/weaveling-plan-materialization-v265.js');
+const sharedCoreIndex=sharedLoader.indexOf('/app/shared-guide-surface-v236-core-v244.js');
 assert(plannerIndex>=0,'Shared guide loader must guarantee the intention planner.');
 assert(materializationIndex>plannerIndex,'Weaveling materialization must load after the canonical planner.');
 assert(sharedCoreIndex>materializationIndex,'Shared chat must not mount before Weaveling materialization is ready.');

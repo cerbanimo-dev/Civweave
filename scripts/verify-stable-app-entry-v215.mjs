@@ -37,9 +37,10 @@ for (const shortcut of manifest.shortcuts || []) {
 for (const route of canonicalPaths) {
   if (!routes.includes(route)) throw new Error(`Route contract is missing ${route}.`);
 }
-for (const token of ["updateViaCache:'none'",'await registration.update()',"candidate.postMessage({type:'SKIP_WAITING'})",'routes.urlFor']) {
+for (const token of ["updateViaCache:'none'",'registration.update()',"candidate.postMessage({type:'SKIP_WAITING'})",'routes.urlFor']) {
   if (!installedEntry.includes(token)) throw new Error(`Installed entry is missing updater-first token ${token}.`);
 }
+if(!installedEntry.includes('bounded(registration.update()')) throw new Error('Installed entry must bound service-worker update latency so startup stays recoverable.');
 for (const token of ['Install Civweave','/install-v130.js','knowledge-school-installer-v1.js']) {
   if (!installer.includes(token)) throw new Error(`/app/index.html installer is missing ${token}.`);
 }

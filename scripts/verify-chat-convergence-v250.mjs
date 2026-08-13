@@ -52,9 +52,9 @@ check('manifest has no frozen Working Campus version pin',!manifestText.includes
 check('Cloudflare has no custom installed-entry redirects',!redirects.split(/\r?\n/).some(line=>line.startsWith('/app/installed-entry-v146 ')||line.startsWith('/app/installed-entry-v146.html ')));
 check('checked-in web launcher carries current release identity',rawLauncher.includes(`/app/civweave-brand.js?v=${version}`)&&rawLauncher.includes(`/app/installed-entry-v146.js?v=${version}`));
 check('checked-in updater HTML carries current installed-entry identity',installedEntryHtml.includes(`/app/installed-entry-v146.js?v=${version}`));
-check('installed entry keeps canonical chat identity while forcing the legacy-purge worker',installedEntry.includes('revision=chat-convergence-v251-legacy-purge')&&installedEntry.includes(`version:'${version}-chat-convergence-v250'`));
-check('installed entry resolves release with no-store manifest fetch',installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"));
-check('installed entry forces worker update checks',installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('await registration.update()'));
+check('installed entry carries current boot-recovery identity',installedEntry.includes('revision=boot-recovery-v426')&&installedEntry.includes(`version:'${version}-boot-recovery-v426'`));
+check('installed entry resolves release with bounded no-store manifest fetch',installedEntry.includes('/app/manifest.webmanifest?boot=${Date.now()}')&&installedEntry.includes("cache:'no-store'")&&installedEntry.includes('bounded(fetch('));
+check('installed entry forces bounded worker update checks',installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('registration.update()')&&installedEntry.includes('bounded(registration.update()'));
 check('installed entry activates waiting worker before route',installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})")&&installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='));
 
 const expStart=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),expEnd=boundary.indexOf('];',expStart),experience=boundary.slice(expStart,expEnd);
