@@ -1,6 +1,10 @@
 import liveCore from './live-entry.mjs';
 import { handleStripeConnectV2Sample } from './stripe-connect-v2-sample.mjs';
 import { handleStripeSnapshotWebhook, STRIPE_SNAPSHOT_WEBHOOK_PATHS } from './stripe-snapshot-webhook.mjs';
+import {
+  handleStripeRecipientThinWebhook,
+  STRIPE_RECIPIENT_THIN_WEBHOOK_PATH
+} from './stripe-recipient-thin-webhook.mjs';
 
 // Keep the existing money-edge router intact and layer the documented Stripe
 // Connect V2 sample on top. Interactive sample/admin routes are deliberately OFF
@@ -9,9 +13,9 @@ import { handleStripeSnapshotWebhook, STRIPE_SNAPSHOT_WEBHOOK_PATHS } from './st
 export * from './live-entry.mjs';
 export * from './stripe-connect-v2-sample.mjs';
 export * from './stripe-snapshot-webhook.mjs';
+export * from './stripe-recipient-thin-webhook.mjs';
 
 const enabled = value => ['1', 'true', 'yes', 'on'].includes(String(value ?? '').trim().toLowerCase());
-const THIN_WEBHOOK_PATH = '/api/connect-demo/webhooks/stripe-thin';
 
 export default {
   async fetch(request, env, ctx) {
@@ -24,12 +28,11 @@ export default {
       return handleStripeSnapshotWebhook(request, env);
     }
 
-    // Always route the signed thin webhook. The handler itself requires both the
-    // Stripe secret key and STRIPE_CONNECT_THIN_WEBHOOK_SECRET and rejects an
-    // invalid/missing Stripe-Signature before processing an event.
-    if (request.method === 'POST' && url.pathname === THIN_WEBHOOK_PATH) {
-      const webhook = await handleStripeConnectV2Sample(request, env);
-      if (webhook) return webhook;
+    // Production Connect onboarding creates Accounts v2 recipient accounts. The
+    // always-on thin-event route therefore watches recipient requirements and the
+    // stripe_transfers capability, not the merchant/card-payment demo capability.
+    if (request.method === 'POST' && url.pathname === STRIPE_RECIPIENT_THIN_WEBHOOK_PATH) {
+      return handleStripeRecipientThinWebhook(request, env);
     }
 
     // Everything interactive stays sealed unless a sandbox opts in explicitly.
