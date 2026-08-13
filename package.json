@@ -1,6 +1,6 @@
 {
   "name": "civweave-host-node-hub",
-  "version": "1.0.131",
+  "version": "1.0.132",
   "private": true,
   "description": "Install-only Civweave device package with deterministic local operation, local sovereignty, and optional connected AI providers.",
   "type": "module",

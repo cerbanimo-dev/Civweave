@@ -1,0 +1,60 @@
+name: Materialize Civweave Terms Release
+
+on:
+  push:
+    branches:
+      - feat/civweave-terms-onboarding
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: ${{ !contains(github.event.head_commit.message, '[materialized-terms-release]') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Advance release version
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs');
+          const version='1.0.133';
+          fs.writeFileSync('VERSION',version+'\n');
+          const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+          pkg.version=version;
+          fs.writeFileSync('package.json',JSON.stringify(pkg,null,2)+'\n');
+          NODE
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Advance canonical release index
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs');
+          const version='1.0.133';
+          const file='config/release-contract.json';
+          const contract=JSON.parse(fs.readFileSync(file,'utf8'));
+          contract.canonical.current={version,path:`releases/${version}`,status:'current'};
+          fs.writeFileSync(file,JSON.stringify(contract,null,2)+'\n');
+          NODE
+      - name: Stabilize and verify generated tree
+        run: |
+          node scripts/sync-release-version-assets.mjs
+          node scripts/build-service-worker-v211.mjs
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+          node scripts/verify-civweave-terms-onboarding-v1.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-release-version-sync.mjs
+      - name: Commit materialized release
+        run: |
+          git config user.name 'cerbanimo-dev'
+          git config user.email 'cerbanimo@gmail.com'
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m 'Materialize Civweave v1.0.133 Terms onboarding [materialized-terms-release]'
+          git push origin HEAD:feat/civweave-terms-onboarding
