@@ -44,7 +44,6 @@ for (const needle of [
   "CERBANIMO_COMMERCE_FEE_BPS = 100",
   "CERBANIMO_SERVICE_ORIGIN_ROYALTY_BPS = 1000",
   "saleType === 'service'",
-  "saleType === 'product'",
   "buyerChargeCents = listedCents + splitFeeCents",
   "fees_collector: 'application'",
   "losses_collector: 'application'",
@@ -86,6 +85,7 @@ const service = commerceModule.buildCommerceDistribution({
   ],
   originContributors: [{ userId: 'origin-a', weight: 1 }]
 });
+assert.equal(service.saleType, 'service');
 assert.equal(service.splitFeeBps, 100);
 assert.equal(service.splitFeeCents, 100);
 assert.equal(service.buyerChargeCents, 10_100);
@@ -104,6 +104,7 @@ const product = commerceModule.buildCommerceDistribution({
   ],
   commerceSplitFeeBps: 9999
 });
+assert.equal(product.saleType, 'product');
 assert.equal(product.splitFeeBps, 100, 'client input cannot alter the 1% commerce fee');
 assert.equal(product.buyerChargeCents, 10_100);
 assert.equal(product.payouts.reduce((sum, row) => sum + row.amountCents, 0), 10_000);
