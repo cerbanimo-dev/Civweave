@@ -13,6 +13,10 @@ assert.match(source,/componentStatus/,'bootstrap must preserve per-component com
 assert.match(source,/get readyState\(\)/,'bootstrap must expose resolved startup state instead of only a promise');
 assert.match(source,/get lastError\(\)/,'bootstrap must retain the actual component failure');
 assert.match(source,/componentCompatibility:'capability-contract-v307'/,'self-healing must preserve the v307 component contract');
+assert.match(source,/fastInteractiveSpineContract:'capability-v313'/,'bootstrap must expose the current fast interactive spine contract');
+assert.match(source,/const fastInteractiveReady=.*?runtime-spine-v271.*?register.*?diagnostics.*?serverAuto.*?localResultNeedsFailover/s,'fast interactive readiness must follow capabilities rather than an obsolete exact release string');
+assert.match(source,/fast-interactive-runtime-v192\.js\?v=1\.0\.124-v313-runtime-spine-contract/,'bootstrap must rotate the fast runtime asset epoch');
+assert.doesNotMatch(source,/CivweaveFastInteractiveV192\?\.version==='1\.0\.67-runtime-spine-v271'/,'bootstrap must not reject the shipping server-auto runtime using the retired exact version');
 
 const events=[];
 let runtimeLoads=0;
@@ -41,7 +45,7 @@ const context={
   CustomEvent:class CustomEvent{constructor(type,{detail}={}){this.type=type;this.detail=detail}},
   dispatchEvent(event){events.push(event)},
   CivweaveAICapabilityBrokerV268:{version:'1.0.67-ai-capability-broker-v271-semantics'},
-  CivweaveFastInteractiveV192:{version:'1.0.67-runtime-spine-v271'},
+  CivweaveFastInteractiveV192:{version:'1.0.116-runtime-spine-v271-server-auto-v301',register(){},diagnostics(){},serverAuto(){return false},localResultNeedsFailover(){return false}},
   CivweaveLocalModelRegistryV266:{version:'1.0.115-local-ai-registry-v302-gemma3-v4',installable(){},byId(){},directUrl(){},artifactRevision(){},sourceUrl(){},gemma3OptimizedQ4:true},
   CivweaveLocalModelDownloadV266:{version:'1.0.67-local-ai-download-v271-integrity',packageRevisionGuard:true,largeExternalDataForeground:true,metadataOnlyRepair:true,metadataRepairRaceSafe:true},
   CivweaveLocalModelPackageRevisionGuardV307:{version:'1.0.121-local-model-package-revision-guard-v307'},
@@ -76,12 +80,15 @@ assert.equal(context.CivweaveLocalAIBootstrapV266.lastError,'');
 assert.ok(events.some(event=>event.type==='civweave:local-ai-recovering'),'first failed pass should publish recovery state');
 const readyEvent=events.findLast(event=>event.type==='civweave:local-ai-ready');
 assert.equal(readyEvent?.detail?.recoveredBootstrap,true,'successful retry should be observable');
+assert.equal(readyEvent?.detail?.fastInteractiveSpineContract,'capability-v313','ready event must report the repaired fast runtime contract');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'local-ai-bootstrap-retry-v312',
+  revision:'local-ai-bootstrap-retry-v312-fast-runtime-v313',
   contract:'capability-contract-v307',
+  fastInteractiveSpineContract:'capability-v313',
   transientCompatibilityFailure:'recovered-on-second-pass',
   failedBootstrapShortCircuit:'blocked',
+  shippingFastRuntimeAccepted:true,
   componentDiagnostics:true
 },null,2));
