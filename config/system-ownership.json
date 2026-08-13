@@ -1,0 +1,84 @@
+{
+  "schema": "civweave.system-ownership.v1",
+  "policy": "extend-existing-owner-never-add-parallel-owner",
+  "requiredForAgentWork": true,
+  "systems": {
+    "settings": {
+      "capability": "Cross-system Settings entry and presentation",
+      "inputOwner": "public/app/settings-gateway-v317.js",
+      "presentationOwner": "public/app/model-settings-controller-v173.js",
+      "managementSubscriber": "public/app/document-lifecycle-v221.js",
+      "credentialOwner": "public/app/model-settings-controller-v173.js",
+      "canonicalControl": "[data-open-unified-ai-settings]",
+      "activeEntryRoutes": [
+        "public/app/working-campus-v156.html",
+        "public/app/cabinets/living-school/index.html",
+        "public/app/realm-console-v140.html",
+        "public/app/fellowfare-cabinet-v144.html",
+        "public/app/anarchadia-console-v139.html"
+      ],
+      "activeRouteDependencies": [
+        "public/app/working-campus-v156.part5.txt",
+        "public/app/family-shell-v104.js",
+        "public/app/anarchadia-runtime-stability-v159.js"
+      ],
+      "allowedInputListenerFiles": ["public/app/settings-gateway-v317.js"],
+      "forbiddenInputOwnerFiles": [
+        "public/app/working-campus-v156.part5.txt",
+        "public/app/experience-orchestrator-v232.js",
+        "public/app/family-shell-v104.js",
+        "public/app/settings-parity-v295.js",
+        "public/app/settings-delegation-v175.js",
+        "public/app/ai-settings-bind-guard-v230.js",
+        "public/app/ai-settings-device-repair-v229.js",
+        "public/app/device-credential-persistence-v211.js",
+        "public/app/anarchadia-runtime-stability-v159.js",
+        "public/app/document-lifecycle-v221.js"
+      ],
+      "forbiddenEagerImplementations": [
+        "/app/model-settings-controller-v173.js?activate=1",
+        "/app/document-lifecycle-v221.js?activate=1",
+        "/app/settings-parity-v295.js",
+        "/app/settings-delegation-v175.js",
+        "/app/ai-settings-bind-guard-v230.js",
+        "/app/ai-settings-device-repair-v229.js"
+      ],
+      "rules": [
+        "One DOM input owner per document.",
+        "Settings controller and local-model management activate only from the first explicit Settings request.",
+        "Realm pages may style the shared control but may not create a second Settings implementation or listener.",
+        "Living School uses the family-shell Settings control and has no realm-local Settings button.",
+        "The Civweave campus may mark Settings controls but may not preload Settings repairs, local-model bootstrap, or attach direct Settings listeners.",
+        "Browser prototypes, DOM prototypes, and Settings API methods may not be monkey-patched to repair Settings behavior.",
+        "Credential helpers may expose explicit compatibility methods but may not intercept Settings input, patch Settings open(), or mutate credential state at module load.",
+        "Realm stability/recovery layers may call the gateway programmatically but may not intercept Settings controls or carry dormant fallback listeners.",
+        "Subscribers may listen to civweave:model-settings-opened but may not intercept the Settings control."
+      ]
+    },
+    "family-navigation": {
+      "capability": "Five-system navigation and realm status chrome",
+      "owner": "public/app/family-shell-v104.js",
+      "routeContract": "public/app/system-routes-v227.js"
+    },
+    "guide-chat": {
+      "capability": "Five guide windows and canonical conversation workspace",
+      "owner": "public/app/guide-workspace-v242.js",
+      "loader": "public/app/family-ai-loader-v105.js"
+    },
+    "local-ai-inference": {
+      "capability": "Downloaded local model inference",
+      "owner": "public/app/local-ai/runtime-v266.js",
+      "bootstrap": "public/app/local-ai/bootstrap-v266.js",
+      "rule": "Settings may manage downloaded models but must never start inference on open."
+    },
+    "radio": {
+      "capability": "Shared radio station and track suggestions",
+      "owner": "public/app/system-radio-agent-v233.js",
+      "suggestions": "public/app/radio-track-suggestions-v240.js"
+    },
+    "review": {
+      "capability": "Shared review surface and review handoffs",
+      "owner": "public/app/shared-review-surface-v234.js"
+    }
+  }
+}

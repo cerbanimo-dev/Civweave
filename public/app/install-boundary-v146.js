@@ -11,9 +11,7 @@ const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const DEV_KEY='civweave.install-boundary.developer.v146';
 const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424`;
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
-const AI_SETTINGS_BIND_GUARD='/app/ai-settings-bind-guard-v230.js';
-const AI_SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';
-const DOCUMENT_LIFECYCLE='/app/document-lifecycle-v221.js';
+const SETTINGS_GATEWAY='/app/settings-gateway-v317.js';
 const PLATFORM_STABILITY='/app/platform-stability-v159.js';
 const MOBILE_AI_HARDENING='/app/mobile-ai-hardening-v302.js';
 const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
@@ -45,8 +43,9 @@ const FALLBACK_PATHS=new Map([
   ['/app/fellowfare-cabinet-v144.html','fellowfare'],
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
-const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION,AI_SETTINGS_BIND_GUARD,AI_SETTINGS_REPAIR,MOBILE_AI_HARDENING,DOCUMENT_LIFECYCLE];
+const CANONICAL_SYSTEM_SCRIPTS=[ROUTE_CONTRACT,RELEASE_VERSION];
 const SYSTEM_EXPERIENCE_SCRIPTS=[
+  SETTINGS_GATEWAY,
   MOBILE_AI_HARDENING,
   EXPERIENCE_ORCHESTRATOR,
   // Keep station + exact-track suggestions directly behind the orchestrator so
@@ -70,14 +69,11 @@ const SYSTEM_EXPERIENCE_SCRIPTS=[
 const COMPATIBILITY_SCRIPTS=[
   ROUTE_CONTRACT,
   RELEASE_VERSION,
+  SETTINGS_GATEWAY,
   '/app/weaveling-memory-v191.js',
   '/app/weaveling-memory-bridge-v191.js',
   '/app/deterministic-mode-v175.js',
-  '/app/model-settings-controller-v173.js',
-  AI_SETTINGS_BIND_GUARD,
-  AI_SETTINGS_REPAIR,
   MOBILE_AI_HARDENING,
-  '/app/settings-delegation-v175.js',
   '/app/gemini-task-tier-router-v213.js',
   GUIDE_IDENTITY_SCRIPT,
   REALM_SESSION_INTEGRITY,
@@ -153,7 +149,6 @@ function installAssetCustomizationIfConfigured(){
 function installEarlyGuards(){
   addScript(MOBILE_AI_HARDENING);
   addScript(PLATFORM_STABILITY);
-  addScript(AI_SETTINGS_BIND_GUARD);
   return true;
 }
 function installSystemExperienceSupport(){
@@ -260,6 +255,8 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
   canonicalExperienceScripts:SYSTEM_EXPERIENCE_SCRIPTS.length,
   canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions',
+  settingsGatewayRevision:'v317-single-owner-first-click-only',
+  settingsLaunchPolicy:'gateway-only-no-controller-lifecycle-repair-or-delegation',
   realmLocalAISettingsRevision:'v307-lazy-management-via-document-lifecycle',
   legacyChatRuntimePolicy:'removed-from-current-source-v251',
   systemsMeshRevision:'v251-five-system-non-privileged-event-contract',
@@ -289,8 +286,8 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   guideWorkspaceThreadPolicy:'five-realm-local-ledgers-plus-explicit-handover',
   guideWorkspaceWindowPolicy:'five-switchable-windows-current-realm-launcher',
   pwaUpdateRevision:'v250-installed-entry-every-launch',
-  aiSettingsBindGuard:'v230-first-open-atomic-bind',
-  aiSettingsPersistenceRepair:'v229-device-persistence',
+  aiSettingsBindGuard:'retired-v317-no-input-no-prototype-patch',
+  aiSettingsPersistenceRepair:'controller-owned-on-demand-v317',
   platformStabilityGuard:'v159-dom-ready-safe',
   navigationLifecycleRevision:'v424-head-capture-bfcache-resume',
   compatibilityDomReady:true,

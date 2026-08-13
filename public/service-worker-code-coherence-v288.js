@@ -6,6 +6,7 @@ const CW_CODE_COHERENCE_PREFIX = 'civweave-code-coherence-';
 const CW_CODE_EXTENSIONS = /\.(?:m?js|css|txt)$/i;
 const CW_CODE_ROOTS = ['/app/', '/extensions/', '/install-'];
 const CW_CODE_CRITICAL = [
+  '/app/settings-gateway-v317.js',
   '/app/document-lifecycle-v221.js',
   '/app/model-settings-controller-v173.js',
   '/app/working-campus-v156.js',
