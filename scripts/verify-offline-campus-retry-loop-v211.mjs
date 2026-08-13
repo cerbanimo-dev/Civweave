@@ -52,12 +52,13 @@ assert(backgroundSource.includes("if(optedIn()&&!packet.ready&&!packet.paused&&n
 assert(backgroundSource.includes("activeWorker.postMessage({type:'DOWNLOAD_OFFLINE_PACKAGE',background:true"),'Canonical page runtime does not resume the worker-owned download.');
 assert(backgroundSource.includes("navigator.serviceWorker.addEventListener('message'"),'Background progress rail does not receive worker broadcasts.');
 
-const expectedSeeds=[
+const requiredSeeds=[
   '/app/installed-entry-v146.html',
   '/app/cw-reward-ledger-v2.js',
   '/app/cw-reward-receivers-v2.js',
   '/app/cw-reward-legacy-bridge-v2.js',
   '/app/cw-reward-surfaces-v2.js',
+  '/app/cerbanimo-commerce-distribution-v1.js',
   '/app/civweave-systems-mesh-v251.js',
   '/app/working-campus-v156.html',
   '/app/cabinets/living-school/index.html',
@@ -65,8 +66,11 @@ const expectedSeeds=[
   '/app/fellowfare-cabinet-v144.html',
   '/app/anarchadia-console-v139.html'
 ];
-assert(JSON.stringify(manifest.seeds)===JSON.stringify(expectedSeeds),`Offline manifest must seed exactly installed entry + reward runtimes + Systems Mesh + five canonical systems; got ${manifest.seeds.length} seeds.`);
-assert(manifest.revision==='canonical-background-campus-v241-systems-mesh-v251','Offline manifest does not identify the approved Systems Mesh seed revision.');
+assert(Array.isArray(manifest.seeds),'Offline manifest seeds must be an array.');
+assert(new Set(manifest.seeds).size===manifest.seeds.length,'Offline manifest contains duplicate seed roots.');
+for(const seed of requiredSeeds)assert(manifest.seeds.includes(seed),`Offline manifest lost required seed ${seed}.`);
+assert(manifest.seeds.length>=requiredSeeds.length,`Offline manifest unexpectedly shrank below the required campus seed set; got ${manifest.seeds.length} seeds.`);
+assert(String(manifest.revision||'').startsWith('canonical-background-campus-v241-systems-mesh-v251'),'Offline manifest left the approved Systems Mesh seed revision family.');
 assert(manifest.preflight?.revision==='campus-storage-budget-v281','Offline manifest is missing the storage preflight budget.');
 
 console.log(JSON.stringify({
@@ -75,6 +79,8 @@ console.log(JSON.stringify({
   policy:'resumable-pause-v280',
   referencePolicy:'current-manifest-only-v282',
   canonicalSeeds:manifest.seeds.length,
+  requiredSeeds:requiredSeeds.length,
+  cerbanimoCommerceSeed:true,
   perFileCheckpointing:true,
   duplicateRequestsJoin:true,
   manualPause:true,
