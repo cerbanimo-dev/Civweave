@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.132-host-node-session-v1';
+const VERSION='1.0.132-host-node-session-v2-paid-join';
 const SESSION_KEY='civweave.host-capacity.sessions.v1';
 const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
@@ -112,7 +112,18 @@ function recordUsage({nodeId='',chargedNeurons=0,quota=null}={}){
 }
 function forgetCredential(origin,nodeId=''){const host=normalizedOrigin(origin);if(!host)return false;const all=credentials();delete all[nodeId?`${host}#${clean(nodeId,180)}`:host];return saveCredentials(all)}
 function publicStatus(){return{version:VERSION,selectedOrigin:selectedOrigin(),sessions:Object.values(sessions()).map(item=>({nodeId:item.nodeId,userId:item.userId,origin:item.origin,seatClass:item.seatClass||null,expiresAt:item.expiresAt||null,active:!item.expiresAt||Date.parse(item.expiresAt)>Date.now(),telemetry:clone(item.telemetry||null)}))}}
+function loadPaidJoinExtension(){
+  if(typeof document==='undefined')return false;
+  const assets=[
+    ['/app/host-node-paid-join-v1.js?v=paid-only-hub-join-v1','civweavePaidHubJoin','v1'],
+    ['/app/host-node-status-selection-v1.js?v=paid-only-hub-join-v1','civweaveHostStatusSelection','v1']
+  ];
+  let loaded=false;
+  for(const[src,key,value]of assets){if(document.querySelector(`script[data-${key.replace(/[A-Z]/g,letter=>`-${letter.toLowerCase()}`)}]`))continue;const script=document.createElement('script');script.src=src;script.async=true;script.dataset[key]=value;document.head.append(script);loaded=true;}
+  return loaded
+}
 
 globalThis.CivweaveHostNodeSessionV1=Object.freeze({version:VERSION,sessionKey:SESSION_KEY,credentialKey:CREDENTIAL_KEY,selectionKey:SELECTION_KEY,join,status,ensureSelected,setSession,sessionFor,telemetryFor,recordUsage,clearSession,selectedOrigin,hasCredential:(origin,nodeId='')=>Boolean(credentialFor(origin,{nodeId})),forgetCredential,publicStatus});
 dispatchEvent(new CustomEvent('civweave:host-node-session-ready',{detail:{version:VERSION,sessionCount:publicStatus().sessions.length}}));
+loadPaidJoinExtension();
 })();
