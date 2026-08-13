@@ -22,6 +22,8 @@ assert(workspace.includes("document.addEventListener('submit',onSubmitCapture,tr
 assert(workspace.includes('void submitActive(text)'),'Canonical workspace does not route form submission into submitActive.');
 assert(workspace.includes('submitText:async(text,system=activeWindow)'),'Canonical workspace direct submission API is missing.');
 assert(sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'),'Shared guide loader no longer mounts the canonical inline implementation.');
-assert(shared.includes('await api.submitText(value,currentSystem)'),'Inline realm composer is not routed through the canonical submission API.');
-assert(shared.includes('type="submit"'),'Inline realm composer Send control is not a submit button.');
-console.log(JSON.stringify({ok:true,revision:'v253-chat-control-single-owner',chatEventOwner:'guide-workspace-v242',realmSessionDataOnly:true,sendButtonDefaultPreserved:true,closeMinimizeDefaultPreserved:true,canonicalWorkspaceSubmit:true,inlineSubmit:true,sharedGuideLoaderAware:true},null,2));
+assert(shared.includes('await api.submitText(value,currentSystem)'),'Shared guide surface is not routed through the canonical submission API.');
+assert(sharedCore.includes("mode:'bubble-only'"),'Shared guide surface must remain bubble-only.');
+assert(sharedCore.includes('function buildInline(){removeEmbeddedGuideCards();return false}'),'Retired inline guide cards must stay disabled.');
+assert(sharedCore.includes('function removeEmbeddedGuideCards()'),'Bubble-only embedded-card cleanup is missing.');
+console.log(JSON.stringify({ok:true,revision:'v253-chat-control-single-owner',chatEventOwner:'guide-workspace-v242',realmSessionDataOnly:true,embeddedGuideCardsDisabled:true,closeMinimizeDefaultPreserved:true,canonicalWorkspaceSubmit:true,bubbleOnly:true,sharedGuideLoaderAware:true},null,2));
