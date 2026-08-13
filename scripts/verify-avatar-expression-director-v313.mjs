@@ -9,14 +9,14 @@ const faces=fs.readFileSync(path.join(root,'public/app/shared-chat-face-icons-v2
 assert.equal(manifest.schema,'civweave.avatar-expression-assets.v1');
 assert.equal(manifest.sourceCut.alphaVerified,true);
 assert.equal(manifest.runtimeFormat,'WebP atlas shards with alpha');
-assert.equal(manifest.delivery.totalAtlasFiles,10);
-assert.equal(manifest.delivery.expressionsPerShard,10);
+assert.equal(manifest.delivery.totalAtlasFiles,20);
+assert.equal(manifest.delivery.expressionsPerShard,5);
 assert.deepEqual(Object.keys(manifest.systems).sort(),['anarchadia','cerbanimo','civweave','fellowfare','living-school']);
 let expressionCount=0,atlasCount=0;
 for(const [system,data] of Object.entries(manifest.systems)){
   assert.equal(data.expressions.length,20,`${system} must have exactly 20 labeled expressions`);
   expressionCount+=data.expressions.length;
-  for(let shard=1;shard<=2;shard++){
+  for(let shard=1;shard<=4;shard++){
     atlasCount++;
     const file=path.join(root,'public/app/assets/ai/chat/expressions/atlases',`${data.character}-expressions-${shard}-v313.webp`);
     const webp=fs.readFileSync(file);
@@ -26,7 +26,7 @@ for(const [system,data] of Object.entries(manifest.systems)){
   }
 }
 assert.equal(expressionCount,100,'must map all 100 individually labeled expression cuts');
-assert.equal(atlasCount,10,'must ship two transparent atlas shards per guide');
+assert.equal(atlasCount,20,'must ship four transparent atlas shards per guide');
 for(const marker of ["smollm2-135m-avatar-q8-wasm","onnx-community/SmolLM2-135M-Instruct-ONNX","b8a5c0f183b78c55955a5364f610c36668b5e681","onnx/model_quantized.onnx","device:'wasm'","recommended:'high'","chatSelectable:false","civweave:avatar-expression","civweave:avatar-classifier-fallback","new Worker(WORKER","classifyRules"])assert.ok(director.includes(marker),`director missing ${marker}`);
 assert.ok(director.includes('HIGHLY RECOMMENDED'),'download UI must visibly highly recommend the avatar director');
 assert.ok(director.includes('stopClassifierSelection'),'avatar model must not replace selected chat model');
