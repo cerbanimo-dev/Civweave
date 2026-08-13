@@ -1,0 +1,69 @@
+name: One-shot Civweave green-pass materializer
+
+on:
+  push:
+    branches:
+      - ci/repair-green-pass-20260812
+    paths:
+      - .github/workflows/repair-green-pass-scratch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Align package lock metadata with VERSION
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const version = fs.readFileSync('VERSION', 'utf8').trim();
+          const file = 'package-lock.json';
+          const lock = JSON.parse(fs.readFileSync(file, 'utf8'));
+          lock.version = version;
+          if (lock.packages?.['']) lock.packages[''].version = version;
+          fs.writeFileSync(file, JSON.stringify(lock, null, 2) + '\n');
+          NODE
+
+      - name: Refresh bubble-only chat control guard
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const file = 'scripts/verify-chat-controls-v253.mjs';
+          let source = fs.readFileSync(file, 'utf8');
+          const old = `assert(shared.includes('await api.submitText(value,currentSystem)'),'Inline realm composer is not routed through the canonical submission API.');\nassert(shared.includes('type="submit"'),'Inline realm composer Send control is not a submit button.');`;
+          const next = `assert(shared.includes('await api.submitText(value,currentSystem)'),'Shared guide surface is not routed through the canonical submission API.');\nassert(sharedCore.includes("mode:'bubble-only'"),'Shared guide surface must remain bubble-only.');\nassert(sharedCore.includes('function buildInline(){removeEmbeddedGuideCards();return false}'),'Retired inline guide cards must stay disabled.');\nassert(sharedCore.includes('function removeEmbeddedGuideCards()'),'Bubble-only embedded-card cleanup is missing.');`;
+          if (!source.includes(old)) throw new Error('Expected obsolete inline-composer assertions were not found.');
+          source = source.replace(old, next)
+            .replace("inlineSubmit:true,", "bubbleOnly:true,")
+            .replace("sendButtonDefaultPreserved:true,", "embeddedGuideCardsDisabled:true,");
+          fs.writeFileSync(file, source);
+          NODE
+
+      - name: Materialize canonical 1.0.124 release
+        run: node scripts/materialize-canonical-release.mjs
+
+      - name: Verify repaired contracts
+        run: |
+          node scripts/sync-release-version-assets.mjs
+          node scripts/verify-chat-controls-v253.mjs
+          node scripts/verify-ai-settings-cleanroom-v188.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          npm run check:release-discipline
+
+      - name: Commit generated repair to scratch branch
+        run: |
+          rm .github/workflows/repair-green-pass-scratch.yml
+          git config user.name "civweave-green-pass-bot"
+          git config user.email "civweave-green-pass-bot@users.noreply.github.com"
+          git add -A
+          git status --short
+          git commit -m "Materialize release 1.0.124 and refresh CI contracts"
+          git push origin HEAD:ci/repair-green-pass-20260812
