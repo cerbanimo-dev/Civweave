@@ -1,0 +1,49 @@
+name: Verify Local AI Smooth Fit v314
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/runtime-v266.js'
+      - 'public/app/local-ai/worker-v266.js'
+      - 'public/app/local-ai/hardware-tier-ui-v278.js'
+      - 'public/app/local-ai/settings-panel-v267.js'
+      - 'public/app/local-ai/bootstrap-v266.js'
+      - 'public/app/local-chat-runtime-v295.js'
+      - 'public/app/local-chat-owner-v295.js'
+      - 'public/app/experience-orchestrator-v232.js'
+      - 'public/app/document-lifecycle-v221.js'
+      - 'public/service-worker-local-ai-coherence-v307.js'
+      - 'public/_headers'
+      - 'scripts/verify-local-ai-smooth-fit-v314.mjs'
+      - '.github/workflows/verify-local-ai-smooth-fit-v314.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check tuned local AI modules
+        run: |
+          node --check public/app/local-ai/runtime-v266.js
+          node --check public/app/local-ai/worker-v266.js
+          node --check public/app/local-ai/hardware-tier-ui-v278.js
+          node --check public/app/local-ai/settings-panel-v267.js
+          node --check public/app/local-ai/bootstrap-v266.js
+          node --check public/app/local-chat-runtime-v295.js
+          node --check public/app/local-chat-owner-v295.js
+          node --check public/app/experience-orchestrator-v232.js
+          node --check public/app/document-lifecycle-v221.js
+          node --check public/service-worker-local-ai-coherence-v307.js
+      - name: Verify smooth-fit local inference contract
+        run: node scripts/verify-local-ai-smooth-fit-v314.mjs
+      - name: Preserve bootstrap retry contract
+        run: node scripts/verify-local-ai-bootstrap-retry-v312.mjs
+      - name: Preserve runtime-first chat bootstrap
+        run: node scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs
