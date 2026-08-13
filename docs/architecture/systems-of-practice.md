@@ -19,6 +19,18 @@ For every cross-cutting change, an agent must perform this sequence before editi
 7. Update the ownership verifier whenever the capability boundary changes.
 8. A PR is incomplete until the ownership verifier proves the active route graph still has one owner.
 
+## Jurisdiction-sensitive financial behavior
+
+Before changing goods checkout, seller payment methods, marketplace fees, tax collection, seller reporting or withholding, cross-border goods behavior, service/learning/tutoring tax behavior, membership/compute/digital-service tax behavior, or a jurisdiction gate, read all three canonical artifacts:
+
+- `config/jurisdiction-financial-features-v1.json`
+- `config/jurisdiction-implementation-map-v1.json`
+- `docs/finance/jurisdiction-implementation-map-v1.md`
+
+Preserve the seller-direct goods boundary unless an explicitly approved jurisdiction mode supersedes it. Resolve seller establishment and tax status, goods origin, destination/subdivision, transaction value and product class, contract-formation surface, payment control, tax collector/remitter, and delivery control before selecting a mode. Unknown, stale, conflicting, or unreviewed jurisdiction state fails closed for platform goods payment, platform goods-tax collection, transaction-specific goods fees, and any required external-contract boundary.
+
+The implementation map is an engineering/compliance screening artifact, not authority to enable live-money behavior. Facilitator, deemed-supplier, withholding, and platform-tax behavior continues to require the existing human compliance and live-money gates. A jurisdiction-policy change must update the feature catalog, implementation index, and human-readable map together rather than silently changing the global economic boundary.
+
 ## Settings
 
 Settings is the reference implementation of this discipline.
