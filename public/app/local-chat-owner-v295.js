@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='1.0.115-local-chat-owner-v302',SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'],GUIDE={civweave:['Weaveling','central mirror and orchestrator'],'living-school':['Moss','learning guide'],cerbanimo:['Kamiya','questwright and skilled-work guide'],fellowfare:['Rook','quartermaster and exchange guide'],anarchadia:['Merlin','civic and automation guide']};
-if(globalThis.CivweaveLocalChatOwnerV295?.version===VERSION&&globalThis.CivweaveLocalChatOwnerV295?.intentPrewarm===true)return;
+if(globalThis.CivweaveLocalChatOwnerV295?.version===VERSION&&globalThis.CivweaveLocalChatOwnerV295?.intentPrewarm===true&&globalThis.CivweaveLocalChatOwnerV295?.chatOpenPrewarm===true)return;
 const clean=(v,n=12000)=>String(v??'').trim().slice(0,n),now=()=>new Date().toISOString(),uid=p=>`${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,queues=new Map(),running=new Set(),api=()=>globalThis.CivweaveRealmSessionIntegrityV237,runtime=()=>globalThis.CivweaveLocalChatRuntimeV295;
 let prewarmFlight=null;
 function queue(system){let value=queues.get(system);if(!value){value=[];queues.set(system,value)}return value}
@@ -23,7 +23,9 @@ function progress(system,p){
  if(phase==='generating')return`${name} is generating locally${suffix}`;
  return`${name} is working locally${suffix}`
 }
-function prewarmIntent(event){const target=event.target instanceof Element?event.target:null;if(!target?.matches?.('#cw-persistent-guide-chat-v215 [data-persistent-form] textarea,#cw-persistent-guide-chat-v215 [data-persistent-form] input[type="text"]'))return;if(document.visibilityState==='hidden'||prewarmFlight)return;const r=runtime(),pick=r?.selected?.();if(!pick?.active||!pick.id)return;prewarmFlight=Promise.resolve(r.ready?.()).then(ok=>{if(ok===false)return null;const direct=globalThis.CivweaveLocalModelRuntimeV266;if(!direct?.prewarm)return null;const resident=direct.residentStatus?.();if(resident?.resident&&resident.model===pick.id)return resident;return direct.prewarm({onProgress:p=>{try{dispatchEvent(new CustomEvent('civweave:local-chat-prewarm-progress',{detail:{model:pick.id,...p}}))}catch{}}})}).catch(()=>null).finally(()=>{prewarmFlight=null})}
+function beginPrewarm(reason='chat-intent'){if(document.visibilityState==='hidden'||prewarmFlight)return prewarmFlight;const r=runtime(),pick=r?.selected?.();if(!pick?.active||!pick.id)return null;prewarmFlight=Promise.resolve(r.ready?.()).then(ok=>{if(ok===false)return null;const direct=globalThis.CivweaveLocalModelRuntimeV266;if(!direct?.prewarm)return null;const resident=direct.residentStatus?.();if(resident?.resident&&resident.model===pick.id)return resident;return direct.prewarm({onProgress:p=>{try{dispatchEvent(new CustomEvent('civweave:local-chat-prewarm-progress',{detail:{model:pick.id,reason,...p}}))}catch{}}})}).catch(()=>null).finally(()=>{prewarmFlight=null});return prewarmFlight}
+function prewarmIntent(event){const target=event.target instanceof Element?event.target:null;if(!target?.matches?.('#cw-persistent-guide-chat-v215 [data-persistent-form] textarea,#cw-persistent-guide-chat-v215 [data-persistent-form] input[type="text"]'))return;void beginPrewarm('chat-input-focus')}
+function prewarmWorkspace(event){const detail=event?.detail||{};if(detail.open===true&&detail.minimized!==true)void beginPrewarm('chat-open')}
 async function runOne(system,item){
  const r=runtime(),pick=r?.selected?.(),meta=GUIDE[system]||GUIDE.civweave,before=history(system,item.messageId);update(system,item.messageId,{queuePending:false,queueStartedAt:now(),provider:'downloaded-local-queue'});
  if(!pick){append(system,{id:uid('local-error'),role:'assistant',guide:system,responderSystem:system,text:'The queued local turn could not start because no downloaded local model is selected now.',pending:false,error:true,provider:'local-recovery',at:now()});return false}
@@ -42,6 +44,7 @@ function submit(system,text,form){return enqueue(system,text,form)}
 function queued(system){return queue(system).length+(running.has(system)?1:0)}
 function cancelQueued(reason='settings-open'){let count=0;for(const [system,items] of queues){for(const item of items){update(system,item.messageId,{queuePending:false,queueCancelled:true,queueCancelReason:reason});count+=1}items.length=0}queues.clear();return count}
 addEventListener('civweave:local-inference-cancel-requested',event=>cancelQueued(event?.detail?.reason||'external-request'));
+addEventListener('civweave:guide-workspace-state',prewarmWorkspace);
 document.addEventListener('focusin',prewarmIntent,true);
-globalThis.CivweaveLocalChatOwnerV295=Object.freeze({version:VERSION,capturePhase:false,canonicalSubmitOwner:false,fiveGuideWindows:true,truthfulLoadProgress:true,boundedStartupRecovery:true,freshWorkerFallback:true,truthfulExecutionModel:true,fifoQueue:true,terminalCancellation:true,settingsTeardown:true,intentPrewarm:true,prewarmTrigger:'chat-input-focus-v314',enqueue,submit,queued,drain,cancelQueued});
+globalThis.CivweaveLocalChatOwnerV295=Object.freeze({version:VERSION,capturePhase:false,canonicalSubmitOwner:false,fiveGuideWindows:true,truthfulLoadProgress:true,boundedStartupRecovery:true,freshWorkerFallback:true,truthfulExecutionModel:true,fifoQueue:true,terminalCancellation:true,settingsTeardown:true,intentPrewarm:true,chatOpenPrewarm:true,prewarmTrigger:'chat-open-or-input-focus-v314',beginPrewarm,enqueue,submit,queued,drain,cancelQueued});
 })();
