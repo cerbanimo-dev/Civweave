@@ -1,116 +1,23 @@
+import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
-
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const read=file=>readFile(path.join(root,file),'utf8');
-const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-
-const [delegation,additive,installer,pwa,boundary,campus]=await Promise.all([
+await import('./verify-system-ownership-v317.mjs');
+const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
+const [gateway,delegation,campus,boundary]=await Promise.all([
+  read('public/app/settings-gateway-v317.js'),
   read('public/app/settings-delegation-v175.js'),
-  read('public/service-worker-v156.js'),
-  read('public/install-v130.js'),
-  read('public/app/pwa-v130.js'),
-  read('public/app/install-boundary-v146.js'),
-  read('public/app/working-campus-v156.html')
+  read('public/app/working-campus-v156.html'),
+  read('public/app/install-boundary-v146.js')
 ]);
-
-new Function(delegation);
-new Function(additive.replace(/^importScripts\([^\n]+\);/m,''));
-new Function(installer);
-new Function(pwa);
-new Function(boundary);
-
-for(const token of [
-  "VERSION='183.0-settings-diagnostics-log-level'",
-  "LOGGER_VERSION='1.0.7-settings-log-v183'",
-  "LEVEL_KEY='civweave.log-level'",
-  "BUFFER_KEY='civweave.log-buffer.v1'",
-  "off:0,error:1,warn:2,info:3,debug:4,trace:5",
-  "new URLSearchParams(location.search).get('cwlog')",
-  'MAX_ENTRIES=240',
-  'function sanitize(',
-  "'[redacted]'",
-  "PerformanceObserver.supportedEntryTypes?.includes('longtask')",
-  "warn('performance','event-loop-stall'",
-  "warn('performance','long-task'",
-  "addEventListener('unhandledrejection'",
-  "addEventListener('error'",
-  "id='cw-log-dock'",
-  'data-cw-log-copy',
-  'data-cw-log-download',
-  'data-cw-log-clear',
-  'data-cw-log-off',
-  "logger.info('settings','open-invoke'",
-  "logger.info('settings','open-return'",
-  "logger.debug('settings','open-first-paint'",
-  "logger.error('settings','open-threw'",
-  "result&&typeof result.then==='function'",
-  'globalThis.CivweaveLogV183=logger'
-])assert(delegation.includes(token),`Settings diagnostics missing ${token}`);
-
-for(const forbidden of [
-  'open().catch(',
-  '\nmigrateLegacyAI();\n',
-  'pipeline(',
-  'new Worker(',
-  'showModal('
-])assert(!delegation.includes(forbidden),`Settings diagnostics retained forbidden behavior: ${forbidden}`);
-
-assert(delegation.includes("/(?:api.?key|secret|token|authorization|password|credential)/i"),'Secret-redaction key pattern is missing.');
-assert(delegation.includes("localStorage.setItem(BUFFER_KEY"),'Diagnostic buffer is not persisted for post-freeze recovery.');
-assert(delegation.includes("document.addEventListener('click'"),'Launcher capture logging is missing.');
-assert(delegation.includes("event.stopImmediatePropagation()"),'Logged launcher path is not the single capture owner.');
-
-for(const token of [
-  "EXTENSION_VERSION='working-campus-additions-v183-settings-diagnostics'",
-  "SETTINGS_LOG_REVISION='settings-log-level-v183'",
-  "logLevelKey:'civweave.log-level'",
-  "logBufferKey:'civweave.log-buffer.v1'",
-  'persistentLogBuffer:true',
-  'redactsSecrets:true'
-])assert(additive.includes(token),`Additive package missing ${token}`);
-
-for(const token of [
-  "ADDITIONS_REVISION='working-campus-additions-v183-settings-diagnostics'",
-  "AUTO_RESET_KEY='civweave.device-package.auto-reset.v106-r45'",
-  '?cwlog=debug'
-])assert(installer.includes(token),`Installer diagnostics delivery missing ${token}`);
-
-for(const token of [
-  'working-campus-additions-v183-settings-diagnostics',
-  'diagnostic log update downloaded',
-  'settings diagnostics active'
-])assert(pwa.includes(token),`PWA diagnostics marker missing ${token}`);
-
-for(const token of [
-  "ADDITIONS_VERSION='v183-settings-diagnostics'",
-  "SETTINGS_LOG_REVISION='v183-reusable-log-levels'",
-  "logLevelKey:'civweave.log-level'",
-  "logBufferKey:'civweave.log-buffer.v1'",
-  "diagnosticQueryParameter:'cwlog'"
-])assert(boundary.includes(token),`Install boundary diagnostics marker missing ${token}`);
-
-for(const token of [
-  'working-campus-v183-v106',
-  'data-settings-diagnostics="cwlog"',
-  'data-open-unified-ai-settings',
-  'settings-v183-logs-v106'
-])assert(campus.includes(token),`Working Campus diagnostics route missing ${token}`);
-
-console.log(JSON.stringify({
-  ok:true,
-  revision:'v183-settings-diagnostics-log-level',
-  defaultLevel:'warn',
-  levels:['off','error','warn','info','debug','trace'],
-  enableQuery:'?cwlog=debug',
-  persistentBuffer:true,
-  maxEntries:240,
-  redactsSecrets:true,
-  longTaskObserver:true,
-  eventLoopStallWatch:true,
-  logDockAtDebug:true,
-  providerRuntimeOnOpen:false,
-  singleLauncherCapture:true,
-  synchronousOpenPromiseBugRemoved:true
-},null,2));
+new Function(gateway);new Function(delegation);new Function(boundary);
+assert.match(gateway,/inputOwner:true/);
+assert.match(gateway,/launchWork:'none'/);
+assert.match(gateway,/civweave:model-settings-open-failed/,'Gateway must surface failures for diagnostics without delegating input ownership.');
+assert.match(delegation,/retired:true/);
+assert.match(delegation,/listenerCount:0/);
+assert.match(delegation,/inputOwnership:false/);
+assert.doesNotMatch(delegation,/document\.addEventListener\('click'|stopImmediatePropagation\(\)/,'Diagnostics/delegation compatibility code may not intercept Settings input.');
+assert.match(campus,/data-open-log-diagnostics/,'Working Campus lost its explicit diagnostics control.');
+assert.match(campus,/data-settings-diagnostics="cwlog"/,'Working Campus lost its diagnostics marker.');
+assert.match(campus,/data-open-unified-ai-settings/,'Working Campus lost its canonical Settings marker.');
+assert.match(boundary,/settingsGatewayRevision:'v317-single-owner-first-click-only'/);
+console.log(JSON.stringify({ok:true,revision:'settings-diagnostics-v317-subscriber-only',settingsInputOwner:'settings-gateway-v317',diagnosticsInputOwnership:false,settingsFailureEvent:true,diagnosticsControl:true,settingsOpenBlocking:false},null,2));

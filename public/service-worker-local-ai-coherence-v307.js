@@ -4,6 +4,7 @@ const CW_LOCAL_AI_COHERENCE_VERSION = 'local-ai-code-v307';
 const CW_LOCAL_AI_COHERENCE_CACHE = `civweave-local-ai-code-${CW_LOCAL_AI_COHERENCE_VERSION}`;
 const CW_LOCAL_AI_COHERENCE_PREFIX = 'civweave-local-ai-code-';
 const CW_LOCAL_AI_EXTRA_PATHS = new Set([
+  '/app/settings-gateway-v317.js',
   '/app/family-ai-loader-v105.js',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-owner-v295.js',
@@ -14,6 +15,7 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/document-lifecycle-v221.js'
 ]);
 const CW_LOCAL_AI_CRITICAL = [
+  '/app/settings-gateway-v317.js',
   '/app/family-ai-loader-v105.js',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-owner-v295.js',
