@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 
 const paths = [
   'cloudflare/account-edge/src/hub-account-recovery-v1.mjs',
-  'cloudflare/account-edge/src/recovery-entry-v2.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v3.mjs',
   'cloudflare/account-edge/wrangler.jsonc',
   'public/app/installer-online-fallback-v225.js',
   'public/app/hub-recovery-api-v1.js',
@@ -14,9 +14,10 @@ const paths = [
 ];
 const source = Object.fromEntries(await Promise.all(paths.map(async path => [path, await readFile(path, 'utf8')])));
 
-assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v2\.mjs/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v2.mjs'], /capacity\.internal\/members\/admit/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v2.mjs'], /packet\.idempotent/);
+assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v3\.mjs/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v3.mjs'], /capacity\.internal\/members\/status/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v3.mjs'], /capacity\.internal\/members\/admit/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v3.mjs'], /packet\.idempotent/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-v1.mjs'], /recover-account/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-v1.mjs'], /already used/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-v1.mjs'], /If that email is a verified recovery method/);
