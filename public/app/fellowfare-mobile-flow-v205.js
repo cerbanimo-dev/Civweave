@@ -1,12 +1,11 @@
 (()=>{
 'use strict';
-const VERSION='fellowfare-mobile-flow-v205';
-if(globalThis.CivweaveFellowFareMobileFlowV205?.version===VERSION)return;
+const VERSION='fellowfare-page-flow-v206';
+if(globalThis.CivweaveFellowFarePageFlowV206?.version===VERSION)return;
 
 const iframe=document.getElementById('ffc144-workbench');
 const shell=iframe?.closest('.ffc144-frame');
-const mobileQuery=matchMedia('(max-width: 760px)');
-const INNER_LAYOUT_SELECTOR='.app-shell,#main,.ff-world-main,.ff-projected-main,.ff-route-scene,.ff-world-projection';
+const INNER_LAYOUT_SELECTOR='.app-shell,#app,#main,.ff-world-main,.ff-projected-main,.ff-route-scene,.ff-world-projection';
 let resizeObserver=null;
 let mutationObserver=null;
 let innerResizeHandler=null;
@@ -39,85 +38,74 @@ function scheduleMeasure(){
 function settle(){
   scheduleMeasure();
   settleTimers.forEach(clearTimeout);
-  settleTimers=[80,220,520,1100].map(delay=>setTimeout(scheduleMeasure,delay));
+  settleTimers=[60,160,360,760,1400].map(delay=>setTimeout(scheduleMeasure,delay));
 }
 
-function naturalHeight(doc){
-  const root=doc.documentElement;
-  const body=doc.body;
-  return Math.max(
-    root?.scrollHeight||0,
-    root?.offsetHeight||0,
-    root?.clientHeight||0,
-    body?.scrollHeight||0,
-    body?.offsetHeight||0,
-    body?.clientHeight||0,
-    480
-  );
-}
-
-function markMobileNode(node){
-  if(!node||node.dataset.ffcParentMobileNode==='true')return;
-  node.dataset.ffcParentMobileNode='true';
+function markFlowNode(node){
+  if(!node)return;
+  node.dataset.ffcParentPageFlow='true';
   node.style.setProperty('height','auto','important');
   node.style.setProperty('min-height','0','important');
   node.style.setProperty('max-height','none','important');
   node.style.setProperty('overflow-x','hidden','important');
   node.style.setProperty('overflow-y','visible','important');
+  node.style.setProperty('overscroll-behavior-y','auto','important');
 }
 
-function prepareInnerMobile(doc){
+function prepareInner(doc){
   const root=doc.documentElement;
   const body=doc.body;
-  if(root?.getAttribute('data-ffc-parent-mobile-flow')!=='true')root?.setAttribute('data-ffc-parent-mobile-flow','true');
-  markMobileNode(root);
-  markMobileNode(body);
-  if(root&&root.style.getPropertyValue('overscroll-behavior-y')!=='auto')root.style.setProperty('overscroll-behavior-y','auto','important');
-  if(body){
-    if(body.style.getPropertyValue('overscroll-behavior-y')!=='auto')body.style.setProperty('overscroll-behavior-y','auto','important');
-    if(body.style.getPropertyValue('touch-action')!=='pan-y')body.style.setProperty('touch-action','pan-y','important');
+  root?.setAttribute('data-ffc-parent-page-flow','true');
+  markFlowNode(root);
+  markFlowNode(body);
+  doc.querySelectorAll(INNER_LAYOUT_SELECTOR).forEach(markFlowNode);
+  if(body)body.style.setProperty('touch-action','pan-y','important');
+
+  const app=doc.querySelector('#app,.app-shell');
+  if(app){
+    app.style.setProperty('padding-bottom','0','important');
+    app.style.setProperty('margin-bottom','0','important');
   }
-  doc.querySelectorAll(INNER_LAYOUT_SELECTOR).forEach(markMobileNode);
+
+  /* The parent cabinet already owns Market / Sell / Orders / Wallet / You.
+     Keeping a second fixed nav inside the iframe is what created the overlap
+     with the shared guide window. */
   const localNav=doc.querySelector('.bottom-nav');
-  if(localNav&&localNav.dataset.ffcParentMobileNode!=='true'){
-    localNav.dataset.ffcParentMobileNode='true';
+  if(localNav){
+    localNav.dataset.ffcParentPageFlow='true';
     localNav.style.setProperty('display','none','important');
   }
 }
 
-function restoreInnerDesktop(doc){
-  const root=doc?.documentElement;
-  root?.removeAttribute('data-ffc-parent-mobile-flow');
-  doc?.querySelectorAll('[data-ffc-parent-mobile-node="true"]').forEach(node=>{
-    delete node.dataset.ffcParentMobileNode;
-    for(const property of ['display','height','min-height','max-height','overflow-x','overflow-y','overscroll-behavior-y','touch-action'])node.style.removeProperty(property);
-  });
+function naturalHeight(doc){
+  const body=doc.body;
+  const app=doc.querySelector('#app,.app-shell');
+  const main=doc.querySelector('#main');
+  const candidates=[
+    main?.scrollHeight,main?.offsetHeight,
+    app?.scrollHeight,app?.offsetHeight,
+    body?.scrollHeight,body?.offsetHeight
+  ].map(Number).filter(Number.isFinite);
+  return Math.max(480,...candidates);
 }
 
 function measure(){
   if(!iframe||!shell)return;
   const doc=innerDocument();
   if(!doc)return;
-  if(!mobileQuery.matches){
-    document.body.classList.remove('ffc144-mobile-flow');
-    document.body.style.removeProperty('--ffc144-mobile-frame-height');
-    shell.style.removeProperty('height');
-    iframe.style.removeProperty('height');
-    iframe.setAttribute('scrolling','yes');
-    restoreInnerDesktop(doc);
-    lastHeight=0;
-    return;
-  }
+  prepareInner(doc);
 
-  prepareInnerMobile(doc);
   const height=Math.ceil(naturalHeight(doc));
   if(Math.abs(height-lastHeight)>2){
     lastHeight=height;
-    document.body.style.setProperty('--ffc144-mobile-frame-height',`${height}px`);
-    shell.style.setProperty('height',`${height}px`,'important');
-    iframe.style.setProperty('height','100%','important');
+    document.body.style.setProperty('--ffc144-flow-height',`${height}px`);
+    shell.style.setProperty('height','auto','important');
+    shell.style.setProperty('min-height','0','important');
+    shell.style.setProperty('overflow','visible','important');
+    iframe.style.setProperty('height',`${height}px`,'important');
   }
-  document.body.classList.add('ffc144-mobile-flow');
+  document.body.classList.add('ffc144-page-flow');
+  document.body.classList.remove('ffc144-mobile-flow');
   iframe.setAttribute('scrolling','no');
 }
 
@@ -125,32 +113,36 @@ function bindInner(){
   clearObservers();
   const doc=innerDocument();
   if(!doc)return;
+  prepareInner(doc);
   if(typeof ResizeObserver==='function'){
     resizeObserver=new ResizeObserver(scheduleMeasure);
-    resizeObserver.observe(doc.documentElement);
+    const main=doc.querySelector('#main');
+    const app=doc.querySelector('#app,.app-shell');
+    if(main)resizeObserver.observe(main);
+    if(app)resizeObserver.observe(app);
     if(doc.body)resizeObserver.observe(doc.body);
   }
   mutationObserver=new MutationObserver(scheduleMeasure);
   mutationObserver.observe(doc.documentElement,{subtree:true,childList:true,attributes:true,characterData:true});
-  innerResizeHandler=scheduleMeasure;
+  innerResizeHandler=settle;
   try{iframe.contentWindow.addEventListener('resize',innerResizeHandler,{passive:true})}catch{}
   settle();
 }
 
 iframe?.addEventListener('load',bindInner);
-mobileQuery.addEventListener?.('change',()=>{bindInner();settle()});
 addEventListener('resize',settle,{passive:true});
 addEventListener('orientationchange',settle,{passive:true});
 globalThis.visualViewport?.addEventListener('resize',settle,{passive:true});
 document.addEventListener('click',event=>{
   if(event.target.closest?.('[data-ffc-command], [data-ffc-rook-action], .ffc144-frame button, .ffc144-frame a'))settle();
 },true);
-addEventListener('message',event=>{
-  if(event.source===iframe?.contentWindow)settle();
-});
+addEventListener('message',event=>{if(event.source===iframe?.contentWindow)settle()});
 
 if(iframe?.contentDocument?.readyState==='complete')bindInner();
 else settle();
 
-globalThis.CivweaveFellowFareMobileFlowV205={version:VERSION,measure:scheduleMeasure,rebind:bindInner,status:()=>({mobile:mobileQuery.matches,height:lastHeight,bound:Boolean(innerDocument())})};
+const api={version:VERSION,measure:scheduleMeasure,rebind:bindInner,status:()=>({singleScroll:true,height:lastHeight,bound:Boolean(innerDocument())})};
+globalThis.CivweaveFellowFarePageFlowV206=api;
+/* Compatibility name retained for callers that only know the v205 surface. */
+globalThis.CivweaveFellowFareMobileFlowV205=api;
 })();
