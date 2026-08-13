@@ -1,0 +1,28 @@
+name: Verify avatar expressions v344
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-avatar-expressions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check avatar and offline runtimes
+        run: |
+          node --check public/app/avatar-expression-director-v343.js
+          node --check public/service-worker-avatar-expression-v344.js
+          node --check public/service-worker-v203.js
+          node --check scripts/build-service-worker-v211.mjs
+          node --check scripts/verify-avatar-expression-director-v344.mjs
+      - name: Verify all five guides and 100 expressions
+        run: node scripts/verify-avatar-expression-director-v344.mjs
