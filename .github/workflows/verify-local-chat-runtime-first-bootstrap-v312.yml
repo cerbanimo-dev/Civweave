@@ -1,0 +1,26 @@
+name: Verify Local Chat Runtime First Bootstrap v312
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-chat-runtime-v295.js'
+      - 'public/app/experience-orchestrator-v232.js'
+      - 'public/app/local-ai/bootstrap-v266.js'
+      - 'public/app/local-ai/model-registry-v266.js'
+      - 'scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs'
+      - '.github/workflows/verify-local-chat-runtime-first-bootstrap-v312.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify runtime-first local bootstrap
+        run: node scripts/verify-local-chat-runtime-first-bootstrap-v312.mjs
