@@ -1,10 +1,10 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveEconomicPolicyV1)return;
-const VERSION='1.0.0';
+const VERSION='1.0.1';
 const SCHEMA='civweave.economic-policy.v1';
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
-const num=value=>Number.isFinite(Number(value))?Number(value):null;
+const num=value=>value===null||value===undefined||value===''?null:Number.isFinite(Number(value))?Number(value):null;
 const guide=()=>globalThis.CivweaveBasicValueV1?.guide||null;
 const GOVERNANCE=Object.freeze({
   currentAuthority:'model-interim',
