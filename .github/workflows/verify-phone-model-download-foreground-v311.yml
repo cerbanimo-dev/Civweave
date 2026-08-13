@@ -1,0 +1,25 @@
+name: Verify Phone Model Download Foreground v311
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-ai/download-policy-v278.js'
+      - 'public/app/local-ai/settings-panel-v267.js'
+      - 'scripts/verify-phone-model-download-foreground-v311.mjs'
+      - '.github/workflows/verify-phone-model-download-foreground-v311.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax
+        run: |
+          node --check public/app/local-ai/download-policy-v278.js
+          node --check public/app/local-ai/settings-panel-v267.js
+          node --check scripts/verify-phone-model-download-foreground-v311.mjs
+      - name: Phone model foreground contract
+        run: node scripts/verify-phone-model-download-foreground-v311.mjs
