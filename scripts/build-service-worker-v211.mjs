@@ -24,11 +24,12 @@ const required=[
   'public/service-worker-canonical-navigation-v227.js',
   'public/service-worker-chat-repair-v245.js',
   'public/service-worker-local-model-download-v267.js',
+  'public/service-worker-avatar-expression-v344.js',
   'public/app/working-campus-return-guard-v425.js',
   'public/service-worker-boot-recovery-v426.js'
 ];
 for(const relative of required)await readFile(path.join(root,relative),'utf8');
-const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-css-contract-v343 + mobile-ai-hardening-v302 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + boot-recovery-v426 + atomic-update-handoff-v427
+const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-css-contract-v343 + mobile-ai-hardening-v302 + local-model-background-v267 + avatar-expression-offline-v344 + open-learning-media-v1 + working-campus-return-v425 + boot-recovery-v426 + atomic-update-handoff-v427
 'use strict';
 importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
@@ -48,6 +49,7 @@ importScripts('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225');
 importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227');
 importScripts('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343');
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
+importScripts('/service-worker-avatar-expression-v344.js?v=${version}-avatar-expression-offline-v344');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v426');
 // atomic-update-handoff-v427: updated workers remain waiting until the visible update controller explicitly activates them.
 // Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})
@@ -57,7 +59,7 @@ console.log(JSON.stringify({
   ok:true,
   version,
   output:'public/service-worker-v203.js',
-  imports:19,
+  imports:20,
   localAICodeCoherence:'v307-network-first-pre-core',
   codeCoherence:'v288',
   installedLaunch:'installed-pwa-launch-v294-campus-recovery',
@@ -67,10 +69,11 @@ console.log(JSON.stringify({
   offlineRevision:'offline-campus-current-graph-v280',
   offlinePolicy:'resumable-pause-v280',
   offlineReferencePolicy:'current-manifest-only-v282',
-  shellIntegrity:'shell-integrity-v281',
+  shellIntegrity:'v281',
   installerState:'installer-state-machines-v280',
   chatRepair:'chat-css-contract-v343',
   mobileAIHardening:'v302',
+  avatarExpressionOffline:'v344',
   workingCampusReturn:'v425',
   bootRecovery:'v426',
   updateActivation:'explicit-waiting-worker-handoff-v427',
