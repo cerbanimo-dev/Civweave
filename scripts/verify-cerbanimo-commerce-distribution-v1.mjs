@@ -17,51 +17,19 @@ context.globalThis = context;
 vm.createContext(context);
 vm.runInContext(source, context, { filename: 'cerbanimo-commerce-distribution-v1.js' });
 const api = context.CivweaveCerbanimoCommerceV1;
-assert.ok(api, 'commerce distribution API should load');
-assert.equal(api.DEFAULT_COMMERCE_SPLIT_FEE_BPS, 100);
+assert.ok(api, 'commerce compatibility API should load');
+assert.equal(api.commerceEnabled, false, 'marketplace commerce must be disabled');
+assert.equal(api.marketplacePaymentMode, 'disabled');
+assert.equal(api.goodsPaymentMode, 'seller-direct');
+assert.equal(api.serviceLearningMode, 'acorn-button-fulfillment-burn');
+assert.throws(() => api.buildDistribution({ saleType: 'product', saleAmountMinor: 1000 }), /marketplace payment processing is disabled/i);
+assert.throws(() => api.stripeTransferInstructions({}), /marketplace payment processing is disabled/i);
+await assert.rejects(() => api.recordSale({ saleType: 'service', saleAmountMinor: 1000 }), /marketplace payment processing is disabled/i);
+
+// The annual compute-reserve distribution is a separate platform-reserve rail and
+// must remain available. Retiring marketplace checkout must not accidentally erase it.
 assert.equal(api.DEFAULT_ANNUAL_HOST_BPS, 1000);
 assert.equal(api.DEFAULT_ANNUAL_CERBANIMO_BPS, 500);
-
-const service = api.buildDistribution({
-  saleId: 'service-sale-1', saleType: 'service', saleAmountMinor: 10000,
-  deliveryContributors: [{ contributorId: 'worker-a', cotokens: 3 }, { contributorId: 'worker-b', cotokens: 1 }],
-  originContributors: [{ contributorId: 'origin-a', cotokens: 1 }, { contributorId: 'origin-b', cotokens: 1 }],
-  rewardBudget: { acorns: 4, buttons: 8 }
-});
-assert.equal(service.settlementTiming, 'immediate');
-assert.equal(service.routesToAnnualPool, false);
-assert.equal(service.annualPoolContributionMinor, 0);
-assert.equal(service.cotokensConsumed, false);
-assert.equal(service.saleAmountMinor, 10000);
-assert.equal(service.commerceSplitFee.bps, 100);
-assert.equal(service.commerceSplitFee.amountMinor, 100);
-assert.equal(service.commerceSplitFee.onTop, true);
-assert.equal(service.commerceSplitFee.reducesContributorPayout, false);
-assert.equal(service.buyerChargeMinor, 10100);
-assert.equal(service.payouts.reduce((sum, row) => sum + row.amountMinor, 0), 10000);
-assert.equal(JSON.stringify(service.payouts.map(row => [row.contributorId, row.amountMinor])), JSON.stringify([
-  ['origin-a', 500], ['origin-b', 500], ['worker-a', 6750], ['worker-b', 2250]
-].sort((a,b)=>a[0].localeCompare(b[0]))));
-assert.equal(service.rewards.acorns.reduce((sum, row) => sum + row.amount, 0), 4);
-assert.equal(service.rewards.buttons.reduce((sum, row) => sum + row.amount, 0), 8);
-
-const product = api.buildDistribution({
-  saleId: 'product-sale-1', saleType: 'product', saleAmountMinor: 10100,
-  productContributors: [{ contributorId: 'maker-a', coCredits: 2 }, { contributorId: 'maker-b', coCredits: 1 }]
-});
-assert.equal(JSON.stringify(product.payouts.map(row => [row.contributorId, row.amountMinor])), JSON.stringify([['maker-a', 6733], ['maker-b', 3367]]));
-assert.equal(product.annualPoolEligible, false);
-assert.equal(product.commerceSplitFee.amountMinor, 101);
-assert.equal(product.buyerChargeMinor, 10201);
-
-const transferInstructions = api.stripeTransferInstructions({
-  ...product,
-  payouts: product.payouts.map((row, index) => ({ ...row, stripeAccountId: `acct_${index}` }))
-}, { sourceTransaction: 'ch_source' });
-assert.equal(transferInstructions.length, 2);
-assert.ok(transferInstructions.every(row => row.metadata.civweave_annual_pool === 'excluded'));
-assert.ok(transferInstructions.every(row => row.metadata.civweave_split_fee_bps === '100'));
-
 const annual = api.buildAnnualDistribution({
   annualId: 'annual-node-2026', nodeId: 'node-1', eligibleReserveMinor: 100000,
   contributors: [
@@ -92,13 +60,16 @@ assert.ok(annualTransfers.every(row => row.fundingMode === 'platform-reserve'));
 
 console.log(JSON.stringify({
   ok: true,
-  policy: {
-    serviceOriginRoyaltyBps: api.DEFAULT_SERVICE_ORIGIN_ROYALTY_BPS,
-    commerceSplitFeeBps: api.DEFAULT_COMMERCE_SPLIT_FEE_BPS,
-    annualReserveShareBps: api.DEFAULT_ANNUAL_RESERVE_SHARE_BPS,
-    annualParticipantBps: 8500,
-    annualHostBps: api.DEFAULT_ANNUAL_HOST_BPS,
-    annualCerbanimoBps: api.DEFAULT_ANNUAL_CERBANIMO_BPS
-  },
-  checks: ['immediate-service-split','origin-stipend','product-contribution-split','acorn-button-weighting','one-percent-fee-on-top','annual-pool-exclusion','annual-50-percent-reserve','annual-85-10-5-split','exact-rounding','stripe-transfer-intents']
+  marketplaceCommerce: 'disabled',
+  goodsPayment: 'seller-direct',
+  serviceLearning: 'fulfillment-burn',
+  annualReserveDistribution: 'preserved',
+  checks: [
+    'marketplace-distribution-fails-closed',
+    'marketplace-transfer-instructions-fail-closed',
+    'marketplace-record-sale-fails-closed',
+    'annual-50-percent-reserve',
+    'annual-85-10-5-split',
+    'annual-platform-reserve-transfer-intents'
+  ]
 }, null, 2));

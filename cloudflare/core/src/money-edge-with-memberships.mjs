@@ -53,13 +53,19 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
       membershipTiers: Object.values(MEMBERSHIP_TIERS).map(tier => Object.freeze({ ...tier })),
       membershipBilling: 'monthly-platform-subscription-separate-host-transfer',
       commerce: Object.freeze({
-        accountModel: 'accounts-v2-marketplace-recipient',
-        chargePattern: 'platform-charge-separate-transfers',
-        splitFeeBps: CERBANIMO_COMMERCE_FEE_BPS,
-        splitFeePlacement: 'on-top-of-listed-price',
-        contributorPayoutBase: 'full-listed-price',
-        settlementTiming: 'immediate-after-paid-checkout',
-        annualPoolEligible: false
+        mode: 'fellowfare-split-boundary-v2',
+        legacyMarketplaceCheckoutEnabled: false,
+        legacyMarketplaceRecipientOnboardingEnabled: false,
+        goodsPaymentMode: 'seller-direct-outside-platform',
+        serviceLearningTokenMode: 'acorn-button-fulfillment-burn',
+        serviceLearningUsdMode: 'stripe-connect-direct-charge',
+        serviceLearningMerchantOfRecord: 'connected-provider',
+        serviceLearningPlatformFeeMode: 'application-fee',
+        serviceLearningDefaultPlatformFeeBps: 100,
+        platformCollectsGrossSellerPayment: false,
+        platformRoutesSellerProceeds: false,
+        legacyLifecycleHandling: true,
+        note: 'Physical goods remain seller-direct. Services, learning, and tutoring may use fulfillment burn and/or provider-owned Stripe direct charges with a FellowFare application fee. Legacy platform-charge marketplace records remain unwind-only.'
       })
     });
   }
@@ -72,6 +78,8 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
     const object = event?.data?.object || {};
     if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       if (object?.metadata?.civweave_schema === CERBANIMO_COMMERCE_SCHEMA) {
+        // Legacy only: no new platform-charge/separate-transfer commerce sessions
+        // can be created by the public router.
         return settleCommerceCheckout(this, object, event.id);
       }
       if (object?.mode === 'subscription' || object?.metadata?.civweave_schema === 'civweave.node-membership.v1') {

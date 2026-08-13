@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="marketplace-v2.css?v=live-market-v2">
   <link rel="stylesheet" href="marketplace-v2-contrast.css?v=contrast-live-r3">
   <link rel="stylesheet" href="marketplace-v2-value-guide.css?v=basic-value-v1">
+  <link rel="stylesheet" href="value-guide-v2.css?v=market-tutorial-v2">
   <title>FellowFare Marketplace</title>
 </head>
 <body class="ff-cabinet-embedded">
@@ -27,14 +28,20 @@
     </nav>
   </div>
   <script src="live-data-preflight-v3.js?v=live-data-r1"></script>
-  <script src="/app/cw-reward-ledger-v2.js?v=basic-value-v1"></script>
+  <script src="/app/cw-reward-ledger-v2.js"></script>
   <script src="/app/civweave-basic-value-v1.js?v=basic-value-v1"></script>
-  <script src="/app/cerbanimo-commerce-distribution-v1.js"></script>
+  <!-- Fail-closed compatibility stub only. Legacy marketplace distribution methods throw. -->
+  <script src="/app/cerbanimo-commerce-distribution-v1.js?v=fulfillment-boundary"></script>
   <script src="/app/civweave-live-data.js"></script>
   <script src="marketplace-v2.js?v=live-market-v2"></script>
-  <script src="marketplace-v2-capabilities.js?v=capabilities-r1"></script>
-  <script src="marketplace-v2-symbols.js?v=currency-symbols-r1"></script>
+  <!-- Basic-value query is retained for older verifiers/caches; the current tutorial query exits immediately after the global guard. -->
   <script src="marketplace-v2-value-guide.js?v=basic-value-v1"></script>
+  <script src="marketplace-v2-value-guide.js?v=market-tutorial-v2"></script>
+  <script src="marketplace-v2-capabilities.js?v=capabilities-r1"></script>
+  <script src="fulfillment-economy-v2.js?v=fulfillment-direct-charge-v2"></script>
+  <!-- v2 installs the v1 global alias first, so this retained file exits immediately. -->
+  <script src="fulfillment-economy-v1.js?v=fulfillment-v1-compat"></script>
+  <script src="marketplace-v2-symbols.js?v=currency-symbols-r1"></script>
   <script type="module" src="labor-context-v1.mjs?v=core-labor-v1"></script>
   <script src="cabinet-bridge.js?v=marketplace-v2-capabilities-r1"></script>
   <script src="civweave-handoff-consumer.js" data-system="fellowfare"></script>

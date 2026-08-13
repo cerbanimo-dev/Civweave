@@ -13,39 +13,42 @@ const EXPECTED_EVENTS = Object.freeze([
   'invoice.paid',
   'customer.subscription.deleted'
 ]);
-const EXPECTED_ACCOUNT_MODEL = 'accounts-v2-marketplace-recipient';
-const EXPECTED_COMMERCE_SPLIT_FEE_BPS = 100;
+const EXPECTED_ACCOUNT_MODEL = 'accounts-v2-marketplace-recipient'; // Stripe SDK model name; used for eligible platform payout recipients, not FellowFare sellers.
 
 const providerSource = await readFile(new URL('../cloudflare/core/src/stripe-connect.mjs', import.meta.url), 'utf8');
-const commerceSource = await readFile(new URL('../public/app/cerbanimo-commerce-distribution-v1.js', import.meta.url), 'utf8');
-const serverCommerceSource = await readFile(new URL('../cloudflare/core/src/commerce-edge.mjs', import.meta.url), 'utf8');
+const browserCommerceSource = await readFile(new URL('../public/app/cerbanimo-commerce-distribution-v1.js', import.meta.url), 'utf8');
 const providerEventSource = await readFile(new URL('../cloudflare/core/src/money-edge-with-memberships.mjs', import.meta.url), 'utf8');
+const productionEntrySource = await readFile(new URL('../cloudflare/core/src/stripe-connect-v2-entry.mjs', import.meta.url), 'utf8');
 const v2AccountCreationMarker = ['v2', 'core', 'accounts', 'create'].join('.');
 const sourceContract = Object.freeze({
-  accountsV2Recipient: providerSource.includes(`STRIPE_CONNECT_ACCOUNT_MODEL = '${EXPECTED_ACCOUNT_MODEL}'`)
+  accountsV2RecipientForPlatformPayouts: providerSource.includes(`STRIPE_CONNECT_ACCOUNT_MODEL = '${EXPECTED_ACCOUNT_MODEL}'`)
     && providerSource.includes(v2AccountCreationMarker)
     && providerSource.includes("dashboard: 'express'")
     && providerSource.includes("fees_collector: 'application'")
     && providerSource.includes("losses_collector: 'application'")
     && providerSource.includes('stripe_transfers: { requested: true }'),
-  separateChargesAndTransfers: providerSource.includes("operatorPayouts = 'platform-charge-separate-transfer'")
+  separateChargesAndTransfersForPlatformEarnings: providerSource.includes("operatorPayouts = 'platform-charge-separate-transfer'")
     && providerSource.includes("return this.request('/v1/transfers'")
     && providerSource.includes('source_transaction'),
-  commerceSplitFeeOnTop: commerceSource.includes('DEFAULT_COMMERCE_SPLIT_FEE_BPS=100')
-    && commerceSource.includes('buyerChargeMinor=amountMinor+splitFeeMinor')
-    && commerceSource.includes('reducesContributorPayout:false'),
-  serverCommerceSettlement: serverCommerceSource.includes('CERBANIMO_COMMERCE_FEE_BPS = 100')
-    && serverCommerceSource.includes('edge.verifyNodeRequest')
-    && serverCommerceSource.includes("'/v1/checkout/sessions'")
-    && serverCommerceSource.includes('createHostTransfer')
-    && serverCommerceSource.includes('sourceTransaction: charge.id')
-    && serverCommerceSource.includes('reverseHostTransfer')
-    && serverCommerceSource.includes("civweave_annual_pool: 'excluded'"),
-  serverCommerceEventRouting: providerEventSource.includes('settleCommerceCheckout')
+  fellowFareMarketplaceCheckoutDisabled: productionEntrySource.includes('marketplacePaymentsDisabled')
+    && productionEntrySource.includes('marketplace-checkout-disabled')
+    && productionEntrySource.includes('status: 410')
+    && !productionEntrySource.includes('handleCommerceApiRequest'),
+  browserMarketplaceDistributionDisabled: browserCommerceSource.includes('commerceEnabled:false')
+    && browserCommerceSource.includes("marketplacePaymentMode:'disabled'")
+    && browserCommerceSource.includes('buildDistribution:disabled')
+    && browserCommerceSource.includes('stripeTransferInstructions:disabled'),
+  fulfillmentBoundaryAdvertised: providerEventSource.includes('marketplaceCheckoutEnabled: false')
+    && providerEventSource.includes('marketplaceRecipientOnboardingEnabled: false')
+    && providerEventSource.includes("goodsPaymentMode: 'seller-direct-outside-platform'")
+    && providerEventSource.includes("serviceLearningMode: 'acorn-button-fulfillment-burn'")
+    && providerEventSource.includes('platformCollectsSellerPayment: false')
+    && providerEventSource.includes('platformRoutesSellerPayment: false'),
+  legacyMarketplaceUnwindOnly: providerEventSource.includes('settleCommerceCheckout')
     && providerEventSource.includes('handleCommerceRefund')
     && providerEventSource.includes('handleCommerceDispute')
     && providerEventSource.includes('restoreCommerceDisputeTransfers')
-    && providerEventSource.includes("event.type === 'charge.dispute.funds_reinstated'")
+    && providerEventSource.includes('Legacy only')
 });
 const failedSourceChecks = Object.entries(sourceContract).filter(([, ok]) => !ok).map(([name]) => name);
 if (failedSourceChecks.length) {
@@ -60,7 +63,7 @@ if (!key) {
     reason: 'STRIPE_LIVE_SECRET_KEY is not staged',
     coreOrigin: CORE_ORIGIN,
     expectedAccountModel: EXPECTED_ACCOUNT_MODEL,
-    expectedCommerceSplitFeeBps: EXPECTED_COMMERCE_SPLIT_FEE_BPS,
+    fellowFareMarketplaceCheckout: 'disabled',
     sourceContract,
     mutationPerformed: false
   }, null, 2));
@@ -103,22 +106,23 @@ const report = {
   platformAccountPresent: Boolean(account?.id),
   platformChargesEnabled: Boolean(account?.charges_enabled),
   platformPayoutsEnabled: Boolean(account?.payouts_enabled),
-  marketplace: {
-    expectedAccountModel: EXPECTED_ACCOUNT_MODEL,
-    chargePattern: 'separate-charges-and-transfers',
-    feeCollection: 'application',
-    negativeBalanceLiability: 'application',
+  platformRecipients: {
+    stripeAccountModelName: EXPECTED_ACCOUNT_MODEL,
+    purpose: 'eligible Civweave platform earnings such as Host Steward payouts; not FellowFare goods sellers',
+    chargePattern: 'platform-charge-separate-transfer where the platform lane requires it',
     connectedAccountDashboard: 'express',
     recipientCapability: 'configuration.recipient.capabilities.stripe_balance.stripe_transfers',
     currentConnectedAccountCount: connectedAccounts.data?.length || 0,
     legacyLiabilityShapeCount: legacyLiabilityShape.length
   },
-  commerce: {
-    splitFeeBps: EXPECTED_COMMERCE_SPLIT_FEE_BPS,
-    splitFeePlacement: 'on-top-of-listed-price',
-    reducesContributorPayout: false,
-    serverSettlementExecutor: sourceContract.serverCommerceSettlement,
-    providerEventRouting: sourceContract.serverCommerceEventRouting
+  fellowFare: {
+    marketplaceCheckoutEnabled: false,
+    goodsPaymentMode: 'seller-direct-outside-platform',
+    serviceLearningMode: 'acorn-button-fulfillment-burn',
+    platformCollectsSellerPayment: false,
+    platformRoutesSellerPayment: false,
+    publicCommerceRouteExpectedStatus: 410,
+    legacyPaymentLifecycle: 'unwind-only'
   },
   snapshotWebhook: {
     url: LIVE_SNAPSHOT_URL,
@@ -139,10 +143,11 @@ const report = {
   sourceContract,
   humanStillRequired: [
     'live Stripe platform activation and factual business verification',
-    'live connected-account requirement/capability event destination and signing secret staging',
-    'first live recipient connected-account onboarding and stripe_transfers capability verification',
-    'compliance, jurisdiction, KYC/AML, tax, and provider-terms attestations',
-    'explicit live-money enablement after all gates are satisfied'
+    'live recipient requirement/capability event destination and signing secret staging for eligible platform payouts',
+    'first live Host Steward/platform recipient onboarding and stripe_transfers capability verification',
+    'compliance, jurisdiction, KYC/AML, tax, and provider-terms attestations for supported platform-money lanes',
+    'explicit live-money enablement after all gates are satisfied',
+    'independent confirmation that FellowFare marketplace checkout remains disabled after activation'
   ]
 };
 
