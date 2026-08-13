@@ -20,7 +20,7 @@ const [topbar,workspace,hardening,boundary,workerRepair,workerEntry,manifestText
 ]);
 for(const source of [topbar,workspace,hardening,boundary,workerRepair,workerEntry,installedEntry,familyLoader])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
 const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
-const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
+const check=(name,condition)=>{if(!condition)console.error(`::error title=Mobile Chat + Layout v248::${name}`);assert.ok(condition,name);checks.push(name)};
 
 check('release and package are coherent',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version);
 check('working campus repairs the brand to a known-good cache-safe icon',topbar.includes("const BRAND_ICON='/app/logos/civweave-pwa-192-v247.png'")&&topbar.includes('function repairBrand()'));
