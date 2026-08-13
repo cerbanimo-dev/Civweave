@@ -51,8 +51,9 @@ assert(workerCore.includes("'/app/working-campus-return-guard-v425.js'"),'Return
 assert(workerWrapper.includes(`service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425`),'Worker wrapper no longer forces a v425 core refresh.');
 
 assert(topbar.includes("target.searchParams.set('manage','downloads')")&&topbar.includes('location.assign(downloadsUrl())'),'Downloads navigation contract drifted; update the return test with any intentional navigation change.');
-assert(lifecycle.includes('function stopOnPageHide(event){if(event?.persisted)return;stop()}'),'Document lifecycle once again tears down BFCache pages.');
-assert(lifecycle.includes("addEventListener('pageshow',reviveFromPageShow)"),'Document lifecycle no longer revives on pageshow.');
+assert(lifecycle.includes('function stopOnPageHide(event){if(!event?.persisted)active=false}'),'Document lifecycle once again tears down BFCache pages.');
+assert(lifecycle.includes("addEventListener('pageshow',revive)"),'Document lifecycle no longer revives on pageshow.');
+assert(lifecycle.includes("settingsEntryOwner:'settings-gateway-v317'")&&lifecycle.includes('inputOwnership:false'),'Document lifecycle regained Settings input ownership.');
 
 assert(!releaseVerifier.includes("await import('./sync-release-version-assets.mjs')"),'Release verifier self-heals the tree before verifying it.');
 assert(!releaseVerifier.includes("await import('./sync-release-coherence-v220.mjs')"),'Release verifier still mutates coherence before verifying it.');
@@ -94,4 +95,4 @@ pagehide({persisted:false,stopImmediatePropagation(){stopped+=1}});
 assert.equal(stopped,1,'Non-persisted navigation was incorrectly quarantined.');
 assert.equal(replaceCalls,0,'Healthy guard simulation unexpectedly reloaded the campus.');
 
-console.log(JSON.stringify({ok:true,version,revision:'working-campus-return-v425',committedTreeReadOnly:true,workerIntegrityReleaseMatch:true,bfcachePagehideQuarantined:true,oneShotRecovery:true,visibleFailsafe:true,downloadsReturnCovered:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'working-campus-return-v425-v317-lifecycle',committedTreeReadOnly:true,workerIntegrityReleaseMatch:true,bfcachePagehideQuarantined:true,oneShotRecovery:true,visibleFailsafe:true,downloadsReturnCovered:true,settingsOwner:'settings-gateway-v317'},null,2));
