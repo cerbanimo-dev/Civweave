@@ -1,0 +1,34 @@
+name: Verify PWA cold-launch recovery v426
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/installed-entry-v146.html'
+      - 'public/app/installed-entry-v146.js'
+      - 'public/app/recovery-v426.html'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker-boot-recovery-v426.js'
+      - 'scripts/verify-pwa-cold-launch-recovery-v426.mjs'
+      - '.github/workflows/verify-pwa-cold-launch-recovery-v426.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/app/installed-entry-v146.html'
+      - 'public/app/installed-entry-v146.js'
+      - 'public/app/recovery-v426.html'
+      - 'public/service-worker-v203.js'
+      - 'public/service-worker-boot-recovery-v426.js'
+      - 'scripts/verify-pwa-cold-launch-recovery-v426.mjs'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check public/app/installed-entry-v146.js
+      - run: node --check public/service-worker-boot-recovery-v426.js
+      - run: node --check public/service-worker-v203.js
+      - run: node scripts/verify-pwa-cold-launch-recovery-v426.mjs
