@@ -18,7 +18,10 @@ assert.doesNotMatch(settingsButton,/data-ls-action="open-ai-settings"/,'Living S
 assert.match(cleanroom,/closest\?\.\('\[data-ls-action\]'\)/,'Living School cleanroom action delegation contract changed unexpectedly.');
 assert.match(parity,/\[data-open-unified-ai-settings\]/,'Canonical settings parity no longer recognizes the Living School Settings marker.');
 assert.match(orchestrator,/\[data-open-unified-ai-settings\]/,'Experience orchestrator no longer recognizes the Living School Settings marker.');
-assert.match(parity,/ensureManagement\(\)/,'Canonical settings parity no longer mounts downloaded-local management.');
+assert.match(orchestrator,/settingsCaptureOwner:'window-only-v316'/,'The orchestrator must remain the one canonical Settings input owner.');
+assert.match(parity,/function scheduleManagement\(/,'Canonical settings parity no longer schedules downloaded-local management.');
+assert.match(parity,/managementAfterPaint:true/,'Downloaded-local management must not block the Settings opening turn.');
+assert.match(parity,/canonicalCaptureDelegated:true/,'Settings parity must not compete with the orchestrator for Living School taps.');
 assert.match(parity,/downloadedLocalManagement:true/,'Canonical settings parity lost downloaded-local ownership.');
 
-console.log(JSON.stringify({ok:true,revision:'living-school-settings-owner-v310',owner:'canonical-settings-parity',legacyLivingSchoolActionBypassed:true,downloadedLocalManagement:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'living-school-settings-owner-v316',owner:'experience-orchestrator',legacyLivingSchoolActionBypassed:true,downloadedLocalManagement:true,managementAfterPaint:true,singleInputOwner:true},null,2));
