@@ -1,0 +1,32 @@
+name: Verify FellowFare Native v207
+on:
+  push:
+    paths:
+      - 'public/app/fellowfare-cabinet-v144.html'
+      - 'public/app/fellowfare-native-v207.css'
+      - 'public/app/fellowfare-native-host-v207.js'
+      - 'public/app/services/fellowfare/cabinet-bridge.js'
+      - 'public/app/services/fellowfare/fulfillment-economy-v2.js'
+      - 'public/app/services/fellowfare/marketplace-v2-contrast.css'
+      - 'scripts/verify-fellowfare-native-v207.mjs'
+  pull_request:
+    paths:
+      - 'public/app/fellowfare-cabinet-v144.html'
+      - 'public/app/fellowfare-native-v207.css'
+      - 'public/app/fellowfare-native-host-v207.js'
+      - 'public/app/services/fellowfare/cabinet-bridge.js'
+      - 'public/app/services/fellowfare/fulfillment-economy-v2.js'
+      - 'public/app/services/fellowfare/marketplace-v2-contrast.css'
+      - 'scripts/verify-fellowfare-native-v207.mjs'
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check public/app/fellowfare-native-host-v207.js
+      - run: node --check public/app/services/fellowfare/fulfillment-economy-v2.js
+      - run: node scripts/verify-fellowfare-native-v207.mjs
+      - run: node scripts/verify-fellowfare-active-v203.mjs

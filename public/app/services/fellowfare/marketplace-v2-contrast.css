@@ -201,3 +201,13 @@ body.ff-cabinet-embedded :is(.ffv2-toolbar,.ffv2-form,.ffv2-dialog,.ffv2-rook-pr
   color:#153849!important;
   -webkit-text-fill-color:#153849!important;
 }
+
+
+/* r4 profile + fulfillment parchment contrast */
+.ffv2-trust-empty h2,.ffv2-profile-card h2{color:#173b49!important;opacity:1!important;text-shadow:none!important}
+.ffv2-trust-empty p,.ffv2-profile-card p{color:#425958!important;opacity:1!important;text-shadow:none!important}
+.ffv2-profile-card small{background:#f5d89b!important;color:#68401f!important;opacity:1!important}
+.ff-fulfillment-daily,.ff-fulfillment-merchant{background:rgba(255,247,225,.94)!important;color:#173b49!important;border-color:rgba(169,94,45,.58)!important}
+.ff-fulfillment-quest-grid article,.ff-fulfillment-milestones article{background:#fff2d1!important;color:#173b49!important;border-color:rgba(169,94,45,.38)!important}
+.ff-fulfillment-quest-grid :is(span,small),.ff-fulfillment-milestones span,.ff-fulfillment-merchant :is(p,small,label){color:#425958!important;opacity:1!important}
+.ff-fulfillment-quest-grid strong,.ff-fulfillment-milestones strong{color:#173b49!important;opacity:1!important}
