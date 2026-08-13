@@ -1,0 +1,89 @@
+name: Assemble Cerbanimo White Logo v2
+
+on:
+  push:
+    branches: [fix/cerbanimo-white-steward-logo-20260812]
+    paths:
+      - '.github/tmp-cerbanimo-white-v2/**'
+      - '.github/workflows/assemble-cerbanimo-white-logo-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/cerbanimo-white-steward-logo-20260812
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Assemble, verify, and install exact steward display asset
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import base64, hashlib, json, shutil
+
+          chunk_dir=Path('.github/tmp-cerbanimo-white-v2')
+          encoded=''.join(p.read_text().strip() for p in sorted(chunk_dir.glob('*.b64')))
+          data=base64.b64decode(encoded, validate=True)
+          expected_sha256='2ec7fd68f4d851dac4bee7301cc9414f97e8b9870f536017843942afb1decb81'
+          expected_git_blob='ed060af68cd0fb95e6945a86014ee72f8463a292'
+          assert hashlib.sha256(data).hexdigest()==expected_sha256
+          git_blob=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+          assert git_blob==expected_git_blob
+          assert data[:8]==b'\x89PNG\r\n\x1a\n'
+          assert int.from_bytes(data[16:20],'big')==192
+          assert int.from_bytes(data[20:24],'big')==288
+          assert data[25]==2, 'Cerbanimo logo must remain truecolor RGB, never indexed/paletted'
+
+          target=Path('public/app/logos/cerbanimo-steward-mark-v1.png')
+          target.write_bytes(data)
+
+          css_path=Path('public/app/front-door-prismatic-v301.css')
+          css=css_path.read_text()
+          old="background:#fff url('/app/logos/cerbanimo.webp') center/contain no-repeat;"
+          new="background:#fff url('/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2') center/contain no-repeat;"
+          assert old in css
+          css_path.write_text(css.replace(old,new,1))
+
+          verify_path=Path('scripts/verify-installer-front-door-v1.mjs')
+          source=verify_path.read_text()
+          source=source.replace("const canonicalCerbanimo='/app/logos/cerbanimo.webp';","const canonicalCerbanimo='/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2';",1)
+          old_loop="""for(const path of ['public/app/logos/civweave-prismatic-wordmark-v1.png','public/app/logos/cerbanimo-steward-mark-v1.png']){\n  const bytes=await readBytes(path);\n  assert.ok(bytes.subarray(0,8).equals(pngSignature),`${path} must contain real PNG bytes`);\n  assert.equal(bytes.subarray(12,16).toString('ascii'),'IHDR',`${path} must contain a PNG IHDR`);\n  assert.ok(bytes.readUInt32BE(16)>=512&&bytes.readUInt32BE(20)>=512,`${path} must be at least 512px in both dimensions`);\n}\n"""
+          new_loop="""for(const path of ['public/app/logos/civweave-prismatic-wordmark-v1.png']){\n  const bytes=await readBytes(path);\n  assert.ok(bytes.subarray(0,8).equals(pngSignature),`${path} must contain real PNG bytes`);\n  assert.equal(bytes.subarray(12,16).toString('ascii'),'IHDR',`${path} must contain a PNG IHDR`);\n  assert.ok(bytes.readUInt32BE(16)>=512&&bytes.readUInt32BE(20)>=512,`${path} must be at least 512px in both dimensions`);\n}\nconst cerbanimoBytes=await readBytes('public/app/logos/cerbanimo-steward-mark-v1.png');\nassert.ok(cerbanimoBytes.subarray(0,8).equals(pngSignature),'Cerbanimo steward mark must contain real PNG bytes');\nassert.equal(cerbanimoBytes.subarray(12,16).toString('ascii'),'IHDR','Cerbanimo steward mark must contain a PNG IHDR');\nassert.equal(cerbanimoBytes.readUInt32BE(16),192,'Cerbanimo steward mark width must stay at the verified display size');\nassert.equal(cerbanimoBytes.readUInt32BE(20),288,'Cerbanimo steward mark height must stay at the verified display size');\nassert.equal(cerbanimoBytes.readUInt8(25),2,'Cerbanimo steward mark must stay truecolor RGB, never indexed/paletted');\n"""
+          assert old_loop in source
+          source=source.replace(old_loop,new_loop,1)
+          old_assert="assert.ok(frontDoor.includes(canonicalCerbanimo),'front-door display must bypass the damaged v1 Cerbanimo raster and use the canonical Cerbanimo logo');"
+          new_assert="assert.ok(frontDoor.includes(canonicalCerbanimo),'front-door display must use the verified white-background truecolor Cerbanimo steward mark');"
+          assert old_assert in source
+          source=source.replace(old_assert,new_assert,1)
+          old_white="assert.ok(frontDoor.includes(\"background:#fff url('/app/logos/cerbanimo.webp')\"),'Cerbanimo steward mark must render on an opaque white field');"
+          new_white="assert.ok(frontDoor.includes(\"background:#fff url('/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2')\"),'Cerbanimo steward mark must render its verified RGB asset on an opaque white field');"
+          assert old_white in source
+          source=source.replace(old_white,new_white,1)
+          source=source.replace("revision:'installer-front-door-v4-logo-recovery'","revision:'installer-front-door-v5-cerbanimo-white-rgb'",1)
+          verify_path.write_text(source)
+
+          integrity_path=Path('public/app/shell-integrity-v281.json')
+          integrity=json.loads(integrity_path.read_text())
+          assert '/app/logos/cerbanimo-steward-mark-v1.png' in integrity['assets']
+          integrity['assets']['/app/logos/cerbanimo-steward-mark-v1.png']=expected_sha256
+          integrity_path.write_text(json.dumps(integrity,indent=2)+'\n')
+
+          shutil.rmtree(chunk_dir)
+          PY
+          node scripts/verify-installer-front-door-v1.mjs
+          test "$(git hash-object public/app/logos/cerbanimo-steward-mark-v1.png)" = "ed060af68cd0fb95e6945a86014ee72f8463a292"
+      - name: Commit verified repair
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Install verified white Cerbanimo steward logo'
+          git push origin HEAD:fix/cerbanimo-white-steward-logo-20260812
