@@ -4,12 +4,13 @@ import { spawnSync } from 'node:child_process';
 
 const root = new URL('../', import.meta.url);
 const read = path => readFile(new URL(path, root), 'utf8');
-const [pkgText, sampleSource, entrySource, providerSource, snapshotSource, migrationSource, retryMigrationSource, wranglerText, prepareSource, deployWorkflow, promoteWorkflow] = await Promise.all([
+const [pkgText, sampleSource, entrySource, providerSource, snapshotSource, recipientThinSource, migrationSource, retryMigrationSource, wranglerText, prepareSource, deployWorkflow, promoteWorkflow] = await Promise.all([
   read('cloudflare/core/package.json'),
   read('cloudflare/core/src/stripe-connect-v2-sample.mjs'),
   read('cloudflare/core/src/stripe-connect-v2-entry.mjs'),
   read('cloudflare/core/src/stripe-connect.mjs'),
   read('cloudflare/core/src/stripe-snapshot-webhook.mjs'),
+  read('cloudflare/core/src/stripe-recipient-thin-webhook.mjs'),
   read('cloudflare/core/migrations/0003_stripe_connect_v2_sample.sql'),
   read('cloudflare/core/migrations/0004_stripe_event_processing.sql'),
   read('cloudflare/core/wrangler.template.jsonc'),
@@ -35,7 +36,7 @@ for (const needle of [
   "fees_collector: 'stripe'",
   "losses_collector: 'stripe'",
   'card_payments: { requested: true }'
-]) assert.ok(sampleSource.includes(needle), `missing Accounts V2 contract: ${needle}`);
+]) assert.ok(sampleSource.includes(needle), `missing Accounts V2 sample contract: ${needle}`);
 for (const forbidden of ["type: 'express'", "type: 'standard'", "type: 'custom'"]) assert.ok(!sampleSource.includes(forbidden));
 
 assert.ok(sampleSource.includes('stripeClient.v2.core.accounts.retrieve'));
@@ -54,16 +55,28 @@ for (const needle of [
   'stripeClient.checkout.sessions.create',
   'application_fee_amount',
   'stripeAccount:'
-]) assert.ok(sampleSource.includes(needle), `missing connected-account request path: ${needle}`);
+]) assert.ok(sampleSource.includes(needle), `missing connected-account sample request path: ${needle}`);
 
 for (const eventType of [
   'v2.core.account[requirements].updated',
   'v2.core.account[configuration.merchant].capability_status_updated',
   'v2.core.account[configuration.customer].capability_status_updated'
-]) assert.ok(sampleSource.includes(eventType));
-assert.ok(sampleSource.includes('parseEventNotificationAsync'));
-assert.ok(sampleSource.includes('notification.fetchEvent()'));
-assert.ok(sampleSource.includes('STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
+]) assert.ok(sampleSource.includes(eventType), `missing sealed demo event: ${eventType}`);
+
+for (const needle of [
+  "STRIPE_RECIPIENT_THIN_WEBHOOK_PATH = '/api/connect-demo/webhooks/stripe-thin'",
+  "'v2.core.account[requirements].updated'",
+  "'v2.core.account[configuration.recipient].capability_status_updated'",
+  "include: ['configuration.recipient', 'requirements']",
+  'configuration?.recipient?.capabilities?.stripe_balance?.stripe_transfers?.status',
+  "readyToReceiveTransfers: stripeTransfersStatus === 'active'",
+  'parseEventNotificationAsync',
+  'notification.fetchEvent()',
+  'STRIPE_CONNECT_THIN_WEBHOOK_SECRET',
+  'stripe_connect_thin_events'
+]) assert.ok(recipientThinSource.includes(needle), `missing production recipient thin-event contract: ${needle}`);
+assert.ok(!recipientThinSource.includes('configuration.merchant'), 'production recipient watcher must not gate on merchant capabilities');
+assert.ok(!recipientThinSource.includes('configuration.customer'), 'production recipient watcher must not gate on customer capabilities');
 
 assert.ok(providerSource.includes("key.startsWith('rk_test_')"));
 assert.ok(providerSource.includes("key.startsWith('rk_live_')"));
@@ -81,12 +94,13 @@ for (const needle of ['processing_state', 'processing_attempts', 'last_attempt_a
 }
 
 assert.equal(wrangler.vars.STRIPE_CONNECT_SAMPLE_ENABLED, 'false');
-assert.ok(entrySource.includes("THIN_WEBHOOK_PATH = '/api/connect-demo/webhooks/stripe-thin'"));
+assert.ok(entrySource.includes('STRIPE_RECIPIENT_THIN_WEBHOOK_PATH'));
 assert.ok(entrySource.includes('STRIPE_SNAPSHOT_WEBHOOK_PATHS.has(url.pathname)'));
 assert.ok(entrySource.includes('handleStripeSnapshotWebhook'));
-assert.ok(entrySource.includes("request.method === 'POST' && url.pathname === THIN_WEBHOOK_PATH"));
+assert.ok(entrySource.includes('handleStripeRecipientThinWebhook'));
+assert.ok(entrySource.includes("request.method === 'POST' && url.pathname === STRIPE_RECIPIENT_THIN_WEBHOOK_PATH"));
 assert.ok(entrySource.indexOf('STRIPE_SNAPSHOT_WEBHOOK_PATHS.has(url.pathname)') < entrySource.indexOf('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
-assert.ok(entrySource.indexOf("request.method === 'POST' && url.pathname === THIN_WEBHOOK_PATH") < entrySource.indexOf('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
+assert.ok(entrySource.indexOf("request.method === 'POST' && url.pathname === STRIPE_RECIPIENT_THIN_WEBHOOK_PATH") < entrySource.indexOf('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
 assert.ok(entrySource.includes('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
 assert.ok(entrySource.includes('handleStripeConnectV2Sample'));
 assert.ok(prepareSource.includes('templateEntryMatch'));
@@ -102,6 +116,7 @@ for (const file of [
   'cloudflare/core/src/stripe-connect.mjs',
   'cloudflare/core/src/stripe-connect-v2-sample.mjs',
   'cloudflare/core/src/stripe-snapshot-webhook.mjs',
+  'cloudflare/core/src/stripe-recipient-thin-webhook.mjs',
   'cloudflare/core/src/stripe-connect-v2-entry.mjs'
 ]) {
   const result = spawnSync(process.execPath, ['--check', file], { cwd: new URL('../', import.meta.url), encoding: 'utf8' });
@@ -137,6 +152,22 @@ const status = await sample.retrieveConnectStatus(fakeStripe, 'acct_demo');
 assert.equal(status.readyToProcessPayments, true);
 assert.equal(status.onboardingComplete, true);
 
+const recipient = await import(new URL('cloudflare/core/src/stripe-recipient-thin-webhook.mjs', root));
+assert.deepEqual(recipient.STRIPE_RECIPIENT_THIN_EVENTS, [
+  'v2.core.account[requirements].updated',
+  'v2.core.account[configuration.recipient].capability_status_updated'
+]);
+const recipientStatus = await recipient.retrieveRecipientStatus({
+  v2: { core: { accounts: { retrieve: async () => ({
+    id: 'acct_recipient_demo',
+    configuration: { recipient: { capabilities: { stripe_balance: { stripe_transfers: { status: 'active' } } } } },
+    requirements: { summary: { minimum_deadline: { status: 'pending' } } }
+  }) } } }
+}, 'acct_recipient_demo');
+assert.equal(recipientStatus.readyToReceiveTransfers, true);
+assert.equal(recipientStatus.stripeTransfersStatus, 'active');
+assert.equal(recipientStatus.onboardingComplete, true);
+
 const ui = await sample.handleStripeConnectV2Sample(new Request('https://core.example/connect-demo'), {});
 assert.equal(ui.status, 200);
 assert.match(ui.headers.get('content-type'), /text\/html/);
@@ -146,15 +177,17 @@ console.log(JSON.stringify({
   ok: true,
   sdk: sample.STRIPE_CONNECT_SAMPLE_SDK,
   apiVersionManagedBySdk: true,
-  accountsV2: true,
-  accountLinksV2: true,
-  directStatusFetch: true,
-  thinEvents: true,
+  accountsV2Sample: true,
+  accountLinksV2Sample: true,
+  sampleDirectStatusFetch: true,
+  sealedDemoThinEvents: true,
+  productionRecipientThinEvents: true,
+  recipientTransferCapabilityGate: true,
   signedThinWebhookPublic: true,
   snapshotWebhookRetrySafe: true,
   restrictedStripeKeysClassified: true,
-  productsOnConnectedAccount: true,
-  directCheckoutApplicationFee: true,
+  productsOnConnectedAccountSample: true,
+  directCheckoutApplicationFeeSample: true,
   userAccountMappingInD1: true,
   liveThinWebhookSecretUsesGuardedPromotion: true,
   cleanHtmlSample: true,

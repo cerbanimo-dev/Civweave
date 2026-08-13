@@ -8,7 +8,9 @@ const EXPECTED_EVENTS = Object.freeze([
   'checkout.session.async_payment_succeeded',
   'charge.refunded',
   'charge.dispute.created',
-  'charge.dispute.funds_withdrawn'
+  'charge.dispute.funds_withdrawn',
+  'invoice.paid',
+  'customer.subscription.deleted'
 ]);
 const EXPECTED_ACCOUNT_MODEL = 'accounts-v2-marketplace-recipient';
 const EXPECTED_COMMERCE_SPLIT_FEE_BPS = 100;
@@ -105,6 +107,7 @@ const report = {
     targetCount: target.length,
     enabledExactMatch: Boolean(exact),
     expectedEventCount: EXPECTED_EVENTS.length,
+    expectedEvents: EXPECTED_EVENTS,
     apiVersion: exact?.api_version || null
   },
   civweave: {
