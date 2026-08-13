@@ -32,6 +32,21 @@ jobs:
           fs.writeFileSync(file, JSON.stringify(lock, null, 2) + '\n');
           NODE
 
+      - name: Align canonical release index with VERSION
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const version = fs.readFileSync('VERSION', 'utf8').trim();
+          const file = 'config/release-contract.json';
+          const contract = JSON.parse(fs.readFileSync(file, 'utf8'));
+          contract.canonical.current = {
+            version,
+            path: `releases/${version}`,
+            status: 'current'
+          };
+          fs.writeFileSync(file, JSON.stringify(contract, null, 2) + '\n');
+          NODE
+
       - name: Refresh bubble-only chat control guard
         run: |
           node <<'NODE'
