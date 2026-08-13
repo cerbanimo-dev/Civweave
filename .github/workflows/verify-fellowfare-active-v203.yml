@@ -15,9 +15,13 @@ on:
       - 'public/app/services/fellowfare/marketplace-v2.css'
       - 'public/app/services/fellowfare/marketplace-v2-contrast.css'
       - 'public/app/services/fellowfare/marketplace-v2-symbols.js'
+      - 'public/app/services/fellowfare/marketplace-v2-value-guide.js'
+      - 'public/app/services/fellowfare/marketplace-v2-value-guide.css'
       - 'public/app/services/fellowfare/live-data-preflight-v3.js'
       - 'public/app/services/fellowfare/marketplace-v2-capabilities.js'
       - 'public/app/services/fellowfare/cabinet-embed.css'
+      - 'public/app/civweave-basic-value-v1.js'
+      - 'public/app/civweave-basic-value-model-v1.js'
       - 'public/app/civweave-live-data.js'
       - 'public/app/themed-system-nav-v178.js'
       - 'public/service-worker-v156.js'
@@ -25,6 +29,7 @@ on:
       - 'scripts/verify-fellowfare-active-v203.mjs'
       - 'scripts/verify-fellowfare-marketplace-v2.mjs'
       - 'scripts/verify-fellowfare-symbols-contrast-r2.mjs'
+      - 'scripts/verify-basic-value-guide-v1.mjs'
       - '.github/workflows/verify-fellowfare-active-v203.yml'
   workflow_dispatch:
 
@@ -42,3 +47,4 @@ jobs:
       - run: node scripts/verify-fellowfare-active-v203.mjs
       - run: node scripts/verify-fellowfare-marketplace-v2.mjs
       - run: node scripts/verify-fellowfare-symbols-contrast-r2.mjs
+      - run: node scripts/verify-basic-value-guide-v1.mjs
