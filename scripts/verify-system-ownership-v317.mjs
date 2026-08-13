@@ -17,6 +17,8 @@ const paths={
   repair:'public/app/ai-settings-device-repair-v229.js',
   credentialHelper:'public/app/device-credential-persistence-v211.js',
   anarchadiaStability:'public/app/anarchadia-runtime-stability-v159.js',
+  brand:'public/app/civweave-brand.js',
+  campusRuntime:'public/app/working-campus-v156.part5.txt',
   living:'public/app/cabinets/living-school/index.html',
   campus:'public/app/working-campus-v156.html',
   cerbanimo:'public/app/realm-console-v140.html',
@@ -27,7 +29,7 @@ const paths={
   criticalCache:'public/service-worker-critical-v199.js'
 };
 const src=Object.fromEntries(await Promise.all(Object.entries(paths).map(async([key,path])=>[key,await read(path)])));
-for(const key of ['gateway','controller','lifecycle','boundary','orchestrator','shell','parity','delegation','bindGuard','repair','credentialHelper','anarchadiaStability'])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
+for(const key of ['gateway','controller','lifecycle','boundary','orchestrator','shell','parity','delegation','bindGuard','repair','credentialHelper','anarchadiaStability','brand'])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
 
 assert.equal(registry.policy,'extend-existing-owner-never-add-parallel-owner');
 assert.equal(settings.inputOwner,paths.gateway);
@@ -36,6 +38,7 @@ assert.equal(settings.managementSubscriber,paths.lifecycle);
 assert.equal(settings.credentialOwner,paths.controller);
 assert.equal(settings.canonicalControl,'[data-open-unified-ai-settings]');
 assert.deepEqual(settings.allowedInputListenerFiles,[paths.gateway]);
+assert.ok(settings.forbiddenInputOwnerFiles.includes(paths.campusRuntime),'Campus runtime must be explicitly registered as a forbidden Settings owner.');
 
 // Gateway: the only Settings input listener, no launch-time implementation work.
 assert.match(src.gateway,/const SELECTOR='\[data-open-unified-ai-settings\]'/);
@@ -78,6 +81,20 @@ assert.doesNotMatch(src.anarchadiaStability,/data-cwf-settings|closest\?\.\('\[d
 assert.match(src.anarchadiaStability,/settingsInputOwnership:false/);
 assert.match(src.anarchadiaStability,/settingsOwner:'settings-gateway-v317'/);
 
+// Branding is branding. It must never bootstrap Settings or repair code.
+assert.doesNotMatch(src.brand,/SETTINGS_REPAIR|ai-settings-device-repair|loadSettingsRepair|settingsRepair:/,'Brand runtime regained a Settings dependency.');
+assert.match(src.brand,/settingsDependency:false/);
+
+// The active Civweave campus runtime may mark controls, but may never preflight or own Settings.
+for(const forbidden of ['openSharedSettings','ensureSettingsRepairs','settingsRepairPromise','ai-settings-bind-guard-v230','ai-settings-device-repair-v229'])assert.ok(!src.campusRuntime.includes(forbidden),`Campus runtime regained forbidden Settings path ${forbidden}.`);
+assert.doesNotMatch(src.campusRuntime,/\$\('#settings-button'\)\.addEventListener\('click'/,'Campus Settings button regained a direct listener.');
+assert.doesNotMatch(src.campusRuntime,/\$\('#model-chip'\)\.addEventListener\('click'/,'Campus model chip regained a direct Settings listener.');
+assert.match(src.campusRuntime,/setAttribute\('data-open-unified-ai-settings',''\)/,'Campus controls are not delegated to the canonical gateway.');
+const localBootstrapIndex=src.campusRuntime.indexOf("'/app/local-ai/bootstrap-v266.js");
+const sendWeavelingIndex=src.campusRuntime.indexOf('async function sendWeaveling');
+assert.ok(localBootstrapIndex>=0&&sendWeavelingIndex>=0,'Campus lost its explicit inference bootstrap path.');
+assert.ok(!src.campusRuntime.slice(0,sendWeavelingIndex).includes('ensureDownloadedLocalAISettings();'),'Campus must not run local-AI bootstrap before an explicit chat/inference action.');
+
 // Install boundary may install the tiny gateway, never an activated implementation.
 assert.match(src.boundary,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js'/);
 const experience=src.boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\n\];/)?.[1]||'';
@@ -109,4 +126,4 @@ assert.match(src.campus,/data-open-unified-ai-settings/,'Civweave lost its canon
 for(const key of ['codeCache','localAICache','criticalCache'])assert.ok(src[key].includes("'/app/settings-gateway-v317.js'"),`${paths[key]} does not pin the Settings gateway for offline first-click use.`);
 assert.ok(src.codeCache.includes("'/app/model-settings-controller-v173.js'")&&src.codeCache.includes("'/app/document-lifecycle-v221.js'"),'Code coherence cache must retain the lazy controller and management subscriber for offline activation.');
 
-console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,credentialOwner:settings.credentialOwner,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,prototypePatching:false,settingsApiPatching:false,realmFallbackListeners:false,offlineFirstClick:true}},null,2));
+console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,credentialOwner:settings.credentialOwner,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,campusPreflight:false,brandingDependency:false,prototypePatching:false,settingsApiPatching:false,realmFallbackListeners:false,offlineFirstClick:true}},null,2));
