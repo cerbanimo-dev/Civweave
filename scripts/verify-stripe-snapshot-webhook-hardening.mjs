@@ -71,7 +71,7 @@ function signedRequest(event, now = fixedNow) {
   const raw = JSON.stringify(event);
   const timestamp = Math.floor(now / 1000);
   const signature = crypto.createHmac('sha256', secret).update(`${timestamp}.${raw}`).digest('hex');
-  return new Request('https://civweave-core.glaedn.workers.dev/api/money-edge/webhooks/stripe', {
+  return new Request('https://civweave-core.cerbanimo.workers.dev/api/money-edge/webhooks/stripe', {
     method: 'POST',
     headers: { 'stripe-signature': `t=${timestamp},v1=${signature}`, 'content-type': 'application/json' },
     body: raw
