@@ -59,7 +59,7 @@ await patch('public/app/installed-entry-v146.js',source=>{
   source=replaceRequired(source,/const FALLBACK_VERSION='\d+\.\d+\.\d+';/,`const FALLBACK_VERSION='${version}';`,'installed entry fallback release version');
   source=replaceRequired(source,/version:'\d+\.\d+\.\d+(-[^']+)'/,`version:'${version}$1'`,'installed entry exported release version');
   if(!source.includes("updateViaCache:'none'"))throw new Error('Installed entry must bypass HTTP cache when checking the active worker.');
-  if(!source.includes('await registration.update()'))throw new Error('Installed entry must explicitly request a worker update before routing.');
+  if(!/await\s+(?:bounded\()?registration\.update\(\)/.test(source))throw new Error('Installed entry must explicitly request a worker update before routing.');
   if(!source.includes("candidate.postMessage({type:'SKIP_WAITING'})"))throw new Error('Installed entry must activate a waiting worker before routing.');
   if(!source.includes(`revision=${installedEntryRevision}`))throw new Error('Installed entry does not register the current boot-recovery worker revision.');
   return source;
