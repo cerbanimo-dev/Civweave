@@ -62,9 +62,9 @@ assert.match(valueModel.promptContract,/10 🌰 Acorns per hour/);
 assert.match(valueModel.promptContract,/5 🔘 Buttons \+ 5 🌰 Acorns/);
 
 for(const token of ['marketplace-v2-value-guide.css?v=basic-value-v1','/app/civweave-basic-value-v1.js?v=basic-value-v1','marketplace-v2-value-guide.js?v=basic-value-v1'])assert.ok(fellowfare.includes(token),`FellowFare does not load ${token}`);
-for(const token of ['SHARED BASIC VALUE GUIDE','Baseline first. Market second.','Human-equivalent labor hours','Use baseline suggestion','live market','Automation speed does not reduce'])assert.ok(fellowfareGuide.includes(token),`FellowFare guide is missing ${token}`);
+for(const token of ['SHARED BASIC VALUE GUIDE','Baseline first. Market second.','Human-equivalent labor hours','Use baseline suggestion','live market','Automation speed does not reduce','notifyMarketplaceStorage','StorageEvent','serialized=JSON.stringify(market)'])assert.ok(fellowfareGuide.includes(token),`FellowFare guide is missing ${token}`);
 assert.ok(fellowfareCss.includes('.ffv2-value-table'));
 for(const shell of [living,cerbanimo])for(const token of ['/app/cw-reward-ledger-v2.js?v=basic-value-v1','/app/civweave-basic-value-v1.js?v=basic-value-v1','/app/cw-reward-receivers-v2.js?v=basic-value-v1','/app/civweave-basic-value-model-v1.js?v=basic-value-v1'])assert.ok(shell.includes(token),`Cross-system shell is missing ${token}`);
 for(const path of ['/app/civweave-basic-value-v1.js','/app/civweave-basic-value-model-v1.js'])assert.ok(offline.seeds.includes(path),`Offline core omits ${path}`);
 
-console.log(JSON.stringify({ok:true,schema:guide.schema,labor:'5 🔘 / human-equivalent hour',learning:'2 🌰 completion + 2 🌰 external validation + 1 🌰 validator contribution',education:'10 🌰/hour; curriculum 5–50 🌰',mentorship:['5 🔘 + 5 🌰','15 🔘','20 🌰'],crossSystem:true},null,2));
+console.log(JSON.stringify({ok:true,schema:guide.schema,labor:'5 🔘 / human-equivalent hour',learning:'2 🌰 completion + 2 🌰 external validation + 1 🌰 validator contribution',education:'10 🌰/hour; curriculum 5–50 🌰',mentorship:['5 🔘 + 5 🌰','15 🔘','20 🌰'],crossSystem:true,valuationPersists:true},null,2));
