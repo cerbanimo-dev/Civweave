@@ -1,31 +1,44 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueModelV1)return;
-const VERSION='1.0.0';
+const VERSION='1.1.0';
 const clean=value=>String(value??'').trim();
 const copy=value=>JSON.parse(JSON.stringify(value));
 const CONTRACT=`CIVWEAVE BASIC VALUE GUIDE civweave.basic-value-guide.v1
 Use a human-equivalent baseline before market evaluation. Automation may make work faster in practice, but it must not discount the baseline value of the human labor the task represents.
-- Every task/work item that exposes laborWorthHours: estimate the ordinary competent human labor hours the work is worth. This is NOT model runtime or automated elapsed time.
+- Every task/work item that exposes laborWorthHours: estimate the ordinary competent human labor hours the work is worth. This is NOT model runtime or automated elapsed time. Include material setup, coordination, testing, documentation, handoff, and reasonable rework implied by scope.
 - Baseline labor value: 1 hour = 5 🔘 Buttons. Product/service baseline = the sum of their component laborWorthHours × 5 🔘 Buttons. Live FellowFare comparables are a separate market layer applied afterward.
+- Every Living School module/curriculum item that exposes educationalHours: estimate ordinary learner/instructor educational time. For marketed curriculum, also suggest curriculumAcorns within 5–50 🌰 based on length and quality, using 10 🌰 Acorns/hour as the time reference.
 - Learning module completion grant: 2 🌰 Acorns. Successful external confidence validation bonus: +2 🌰 Acorns. A qualified model/neuron contribution validating somebody else's learning: 1 🌰 Acorn. These grants are deterministic ledger rules; do not fabricate extra rewards.
 - Marketed curriculum/tutoring time: 10 🌰 Acorns per hour. Curriculum packages should be suggested within 5–50 🌰 Acorns based on length and quality.
 - Mentorship: balanced learning+doing = 5 🔘 Buttons + 5 🌰 Acorns; doing-heavy = 15 🔘 Buttons; learning-heavy = 20 🌰 Acorns.
+- Every generated valuation is provisional until the second-pass civweave.basic-value-review.v1 reviewer checks it against the shared fairness rubric.
 Never convert 🔘 Buttons to 🌰 Acorns or vice versa as if they were exchange-rate equivalents. They represent different kinds of value. Never award 🔘 Buttons merely because a task has a baseline price.`;
-const taskKey=/^(tasks?|steps?|workItems?|work_items?|quests?|deliverables?|products?|services?|projects?|activities?|actions?)$/i;
+const laborKey=/^(tasks?|steps?|workItems?|work_items?|quests?|deliverables?|products?|services?|projects?|activities?|actions?)$/i;
+const educationKey=/^(modules?|lessons?|curricula?|curriculums?|courses?|tutorials?|tutoring|learningModules?|learning_modules?)$/i;
 const commerceKey=/^(product|service|deliverable|project|quest|task|step|workItem|work_item)$/i;
 function laborProperty(){return{type:'number',minimum:0,description:'Human-equivalent labor hours this work is worth at an ordinary competent pace. Ignore acceleration from AI or automation.'}}
+function educationalProperty(){return{type:'number',minimum:0,description:'Ordinary educational hours represented by this learning item. This is learning/instruction time, not model runtime.'}}
+function rationaleProperty(){return{type:'string',description:'Explain the scope assumptions behind the proposed economic valuation so an independent reviewer can audit fairness.'}}
+function curriculumProperty(){return{type:'number',minimum:5,maximum:50,description:'For curriculum only: suggested 5–50 🌰 Acorns based on length and quality, using 10 🌰/hour as the time reference.'}}
 function recurseSchema(node,key='',root=false,seen=new WeakSet()){
   if(!node||typeof node!=='object'||seen.has(node))return node;seen.add(node);
   if(Array.isArray(node)){node.forEach(item=>recurseSchema(item,key,false,seen));return node}
   if(node.type==='object'||node.properties){
     node.properties=node.properties||{};
-    if(taskKey.test(key)||commerceKey.test(key)){
+    if(laborKey.test(key)||commerceKey.test(key)){
       if(!node.properties.laborWorthHours)node.properties.laborWorthHours=laborProperty();
-      node.required=[...new Set([...(Array.isArray(node.required)?node.required:[]),'laborWorthHours'])];
+      if(!node.properties.valuationRationale)node.properties.valuationRationale=rationaleProperty();
+      node.required=[...new Set([...(Array.isArray(node.required)?node.required:[]),'laborWorthHours','valuationRationale'])];
+    }
+    if(educationKey.test(key)){
+      if(!node.properties.educationalHours)node.properties.educationalHours=educationalProperty();
+      if(!node.properties.curriculumAcorns)node.properties.curriculumAcorns=curriculumProperty();
+      if(!node.properties.valuationRationale)node.properties.valuationRationale=rationaleProperty();
+      node.required=[...new Set([...(Array.isArray(node.required)?node.required:[]),'educationalHours','curriculumAcorns','valuationRationale'])];
     }
     if(root&&!node.properties.valuation){
-      node.properties.valuation={type:'object',description:'Shared pre-market Civweave value estimate.',properties:{laborWorthHours:laborProperty(),curriculumAcorns:{type:'number',minimum:5,maximum:50,description:'For curriculum only: 5–50 🌰 based on length and quality, using 10 🌰/hour as the time baseline.'},mentorshipMode:{type:'string',enum:['balanced','doing-heavy','learning-heavy']}}};
+      node.properties.valuation={type:'object',description:'Shared pre-market Civweave value estimate. Provisional until second-pass economic review.',properties:{laborWorthHours:laborProperty(),educationalHours:educationalProperty(),curriculumAcorns:curriculumProperty(),mentorshipMode:{type:'string',enum:['balanced','doing-heavy','learning-heavy']},rationale:rationaleProperty()}};
     }
     for(const [name,child] of Object.entries(node.properties))recurseSchema(child,name,false,seen);
   }
@@ -36,7 +49,7 @@ function recurseSchema(node,key='',root=false,seen=new WeakSet()){
 function augmentSchema(schema){if(!schema||typeof schema!=='object')return schema;return recurseSchema(copy(schema),'',true)}
 function relevant(request={}){
   const text=`${request.purpose||''} ${request.systemId||''} ${JSON.stringify(request.context||{})} ${(request.messages||[]).map(row=>row?.content||'').join(' ')}`.toLowerCase();
-  return/(cerbanimo|living-school|fellowfare|task|quest|project|product|service|curriculum|tutor|mentor|learning|labor|market|price|value)/.test(text);
+  return/(cerbanimo|living-school|fellowfare|civweave|task|quest|project|product|service|curriculum|tutor|mentor|learning|labor|market|price|value)/.test(text);
 }
 function patch(runtime){
   const rewardPatched=globalThis.CivweaveRewardReceiversV2?.patchRuntime?.(runtime)||runtime;
@@ -44,7 +57,7 @@ function patch(runtime){
   const original=rewardPatched.generate.bind(rewardPatched);
   const generate=async request=>{
     let next=request&&typeof request==='object'?{...request}:request;
-    if(next&&relevant(next))next={...next,schema:augmentSchema(next.schema),context:{...(next.context||{}),basicValueGuide:{schema:'civweave.basic-value-guide.v1',laborButtonsPerHour:5,educationAcornsPerHour:10,curriculumAcorns:[5,50],moduleCompletionAcorns:2,externalValidationBonusAcorns:2,validatorContributionAcorns:1,mentorship:['5 🔘 + 5 🌰 balanced','15 🔘 doing-heavy','20 🌰 learning-heavy']}},messages:[...(next.messages||[]),{role:'system',content:CONTRACT}]};
+    if(next&&relevant(next))next={...next,schema:augmentSchema(next.schema),context:{...(next.context||{}),basicValueGuide:{schema:'civweave.basic-value-guide.v1',laborButtonsPerHour:5,educationAcornsPerHour:10,curriculumAcorns:[5,50],moduleCompletionAcorns:2,externalValidationBonusAcorns:2,validatorContributionAcorns:1,mentorship:['5 🔘 + 5 🌰 balanced','15 🔘 doing-heavy','20 🌰 learning-heavy'],valuationReview:'civweave.basic-value-review.v1'}},messages:[...(next.messages||[]),{role:'system',content:CONTRACT}]};
     return original(next);
   };
   Object.defineProperty(generate,'__cwBasicValueV1',{value:true});
