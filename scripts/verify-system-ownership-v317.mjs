@@ -1,0 +1,94 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+
+const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
+const registry=JSON.parse(await read('config/system-ownership.json'));
+const settings=registry.systems.settings;
+const paths={
+  gateway:'public/app/settings-gateway-v317.js',
+  controller:'public/app/model-settings-controller-v173.js',
+  lifecycle:'public/app/document-lifecycle-v221.js',
+  boundary:'public/app/install-boundary-v146.js',
+  orchestrator:'public/app/experience-orchestrator-v232.js',
+  shell:'public/app/family-shell-v104.js',
+  parity:'public/app/settings-parity-v295.js',
+  delegation:'public/app/settings-delegation-v175.js',
+  bindGuard:'public/app/ai-settings-bind-guard-v230.js',
+  repair:'public/app/ai-settings-device-repair-v229.js',
+  living:'public/app/cabinets/living-school/index.html',
+  campus:'public/app/working-campus-v156.html',
+  cerbanimo:'public/app/realm-console-v140.html',
+  fellowfare:'public/app/fellowfare-cabinet-v144.html',
+  anarchadia:'public/app/anarchadia-console-v139.html'
+};
+const src=Object.fromEntries(await Promise.all(Object.entries(paths).map(async([key,path])=>[key,await read(path)])));
+for(const key of ['gateway','controller','lifecycle','boundary','orchestrator','shell','parity','delegation','bindGuard','repair'])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
+
+assert.equal(registry.policy,'extend-existing-owner-never-add-parallel-owner');
+assert.equal(settings.inputOwner,paths.gateway);
+assert.equal(settings.presentationOwner,paths.controller);
+assert.equal(settings.managementSubscriber,paths.lifecycle);
+assert.equal(settings.canonicalControl,'[data-open-unified-ai-settings]');
+assert.deepEqual(settings.allowedInputListenerFiles,[paths.gateway]);
+
+// Gateway: the only Settings input listener, no launch-time implementation work.
+assert.match(src.gateway,/const SELECTOR='\[data-open-unified-ai-settings\]'/);
+assert.equal((src.gateway.match(/addEventListener\('click'/g)||[]).length,1,'Settings gateway must have exactly one click listener.');
+assert.match(src.gateway,/document\.addEventListener\('click',onClick,true\)/);
+assert.match(src.gateway,/model-settings-controller-v173\.js\?activate=1/);
+assert.match(src.gateway,/document-lifecycle-v221\.js\?activate=1/);
+assert.match(src.gateway,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/);
+assert.doesNotMatch(src.gateway,/queueMicrotask\([^)]*ensureController/);
+assert.doesNotMatch(src.gateway,/DOMContentLoaded[^\n]*ensureController/);
+
+// Controller: dormant when an old HTML script tag loads it, fixed at the actual close lookup.
+assert.match(src.controller,/searchParams\.get\('activate'\)==='1'/);
+assert.match(src.controller,/if\(!ACTIVATED\).*dormant:true/s);
+assert.match(src.controller,/layer\.querySelector\('\[data-close\]'\)\.addEventListener/);
+assert.doesNotMatch(src.controller,/form\.querySelector\('\[data-close\]'\)\.addEventListener/);
+assert.doesNotMatch(src.controller,/^restoreRememberedCredential\(\);$/m,'Controller performs credential mutation merely because the script was parsed.');
+assert.match(src.controller,/eventOwnership:'none-input-owned-by-settings-gateway-v317'/);
+
+// Known former owners must remain subscribers/shims, never input interceptors.
+for(const key of ['orchestrator','parity','delegation','bindGuard','repair','lifecycle']){
+  assert.doesNotMatch(src[key],/addEventListener\('click'[^\n]*(settings|Settings|SELECTOR|capture|onClick|earlySettings)/i,`${paths[key]} regained Settings click ownership.`);
+}
+assert.doesNotMatch(src.orchestrator,/SETTINGS_SELECTOR|earlySettings|openSettingsIndependent|ensureSettingsModule|settingsCaptureOwner/);
+assert.match(src.orchestrator,/settingsInputOwnership:false/);
+assert.doesNotMatch(src.bindGuard,/HTMLFormElement[^\n]*prototype|proto\.querySelector|prototype\.querySelector/,'Bind guard may not patch browser prototypes.');
+assert.match(src.bindGuard,/retired:true/);
+assert.match(src.repair,/automaticListeners:false/);
+assert.match(src.parity,/retiredInputOwner:true/);
+assert.match(src.delegation,/listenerCount:0/);
+assert.match(src.lifecycle,/searchParams\.get\('activate'\)==='1'/);
+assert.match(src.lifecycle,/settingsEntryOwner:'settings-gateway-v317'/);
+assert.match(src.lifecycle,/inputOwnership:false/);
+
+// Install boundary may install the tiny gateway, never an activated implementation.
+assert.match(src.boundary,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js'/);
+const experience=src.boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\n\];/)?.[1]||'';
+assert.match(experience,/SETTINGS_GATEWAY/);
+for(const forbidden of ['AI_SETTINGS_BIND_GUARD','AI_SETTINGS_REPAIR','DOCUMENT_LIFECYCLE','model-settings-controller-v173','settings-delegation-v175','settings-parity-v295'])assert.ok(!experience.includes(forbidden),`Launch experience still eagerly contains ${forbidden}.`);
+assert.doesNotMatch(src.boundary,/addScript\(AI_SETTINGS_BIND_GUARD\)/);
+
+// Shared family shell displays the button but does not own its input.
+assert.match(src.shell,/data-open-unified-ai-settings/);
+assert.doesNotMatch(src.shell,/data-cwf-settings/);
+assert.doesNotMatch(src.shell,/isSettingsControl|\.onclick=openSettings|function openSettings\(/);
+assert.match(src.shell,/settingsOwner:'settings-gateway-v317'/);
+assert.match(src.shell,/settingsInputOwnership:false/);
+
+// Living School is not a special Settings implementation anymore.
+assert.doesNotMatch(src.living,/>Settings<\/button>/i,'Living School still ships a realm-local Settings button.');
+assert.doesNotMatch(src.living,/data-living-school-settings-owner|data-ls-action="open-ai-settings"/);
+for(const legacy of ['model-settings-controller-v173.js','ai-settings-bind-guard-v230.js','ai-settings-device-repair-v229.js'])assert.ok(!src.living.includes(legacy),`Living School still directly loads ${legacy}.`);
+assert.match(src.living,/family-shell-v104\.js/,'Living School must receive the same shared family Settings control as the other realms.');
+
+// Old direct script tags in large legacy parents are tolerated only as dormant bootstraps.
+for(const key of ['campus','cerbanimo','fellowfare','anarchadia']){
+  assert.doesNotMatch(src[key],/model-settings-controller-v173\.js[^"']*activate=1/,`${paths[key]} eagerly activates Settings.`);
+  assert.doesNotMatch(src[key],/document-lifecycle-v221\.js[^"']*activate=1/,`${paths[key]} eagerly activates Settings management.`);
+}
+assert.match(src.campus,/data-open-unified-ai-settings/,'Civweave lost its canonical Settings control marker.');
+
+console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,prototypePatching:false}},null,2));
