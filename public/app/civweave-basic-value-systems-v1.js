@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueSystemsV1)return;
-const VERSION='1.0.2';
+const VERSION='1.0.3';
 const KEYS=Object.freeze({civweave:'civweave.working-campus.v1',living:'civweave.living-school.cabinet.v151',cerbanimo:'cerbanimo.quest-engine.v144'});
 const clean=(value,max=5000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const now=()=>new Date().toISOString();
 const REVIEW=()=>globalThis.CivweaveBasicValueReviewV1;
-const attempts=new Map();let running=false,timer=0;
+const attempts=new Map();let running=false,timer=0,observer=null;
 function hash(value){let h=2166136261;for(const ch of clean(value,24000)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return(h>>>0).toString(36)}
 function textFor(row){return clean([row?.title,row?.name,row?.description,row?.summary,row?.objective,row?.prompt,row?.deliverable,row?.artifact,Array.isArray(row?.acceptanceCriteria)?row.acceptanceCriteria.join(' '):'',Array.isArray(row?.completionCriteria)?row.completionCriteria.join(' '):'',row?.estimatedEffort].filter(Boolean).join('\n'),7000)}
 function kindFor(system,row){
@@ -60,18 +60,34 @@ async function processKey(key){
   }
   return changed;
 }
+function valuationText(v,{learning=false}={}){
+  if(!v)return'awaiting model estimate + fairness rubric review';
+  const parts=[];
+  if(v.laborWorthHours>0)parts.push(`${v.laborWorthHours}h human-equivalent`);
+  if(v.educationalHours>0)parts.push(`${v.educationalHours}h educational`);
+  if(v.baseline?.buttons>0)parts.push(`${v.baseline.buttons} 🔘 Buttons baseline`);
+  if(v.baseline?.acorns>0)parts.push(`${v.baseline.acorns} 🌰 Acorns${learning?' curriculum reference':' baseline'}`);
+  parts.push(v.status.replace(/^model-/,'').replace(/-/g,' '));
+  return parts.join(' · ');
+}
 function decorateCerbanimo(){
   const bundle=readRefs(KEYS.cerbanimo);if(!bundle)return;
   const byId=new Map(bundle.refs.map(ref=>[String(ref.row?.id||''),ref.row]));
   for(const card of document.querySelectorAll?.('.cq144-task[data-task-id]')||[]){
     const row=byId.get(card.dataset.taskId);if(!row)continue;let node=card.querySelector('[data-economic-valuation]');
     if(!node){node=document.createElement('div');node.dataset.economicValuation='';node.className='cq144-warning';card.querySelector('header')?.insertAdjacentElement('afterend',node)}
-    const v=row.valuation;if(!v){node.textContent='Value review: awaiting model estimate + rubric review.';continue}
-    const parts=[];if(v.laborWorthHours>0)parts.push(`${v.laborWorthHours}h human-equivalent`);if(v.baseline?.buttons>0)parts.push(`${v.baseline.buttons} 🔘 Buttons baseline`);if(v.baseline?.acorns>0)parts.push(`${v.baseline.acorns} 🌰 Acorns baseline`);
-    node.textContent=`Value review: ${parts.join(' · ')||v.kind} · ${v.status.replace(/^model-/,'')}. Baseline is not an automatic payout.`;
+    node.textContent=`Value review: ${valuationText(row.valuation)}. Baseline is not an automatic payout.`;
   }
 }
-async function run(){if(running)return;running=true;try{for(const key of Object.values(KEYS))await processKey(key);decorateCerbanimo()}finally{running=false}}
+function decorateLiving(){
+  const bundle=readRefs(KEYS.living),panel=document.querySelector?.('.lsc218-lesson');if(!bundle||!panel)return;
+  const id=clean(bundle.state?.activeModuleId,220),row=bundle.refs.find(ref=>ref.row?.id===id)?.row||bundle.refs[0]?.row;if(!row)return;
+  let node=panel.querySelector('[data-economic-valuation]');
+  if(!node){node=document.createElement('div');node.dataset.economicValuation='';node.className='lsc218-note';panel.querySelector('header')?.insertAdjacentElement('afterend',node)}
+  node.innerHTML=`<b>Economic value review</b><br>${valuationText(row.valuation,{learning:true})}. This is the shared curriculum-market reference, not the learner's completion reward and not an automatic charge.`;
+}
+function decorate(){decorateCerbanimo();decorateLiving()}
+async function run(){if(running)return;running=true;try{for(const key of Object.values(KEYS))await processKey(key);decorate()}finally{running=false}}
 function schedule(delay=350){clearTimeout(timer);timer=setTimeout(()=>run().catch(error=>console.warn('[Civweave value systems]',error)),delay)}
 function start(){
   addEventListener('civweave:assistant-runtime-ready',()=>schedule(0));
@@ -79,9 +95,10 @@ function start(){
   addEventListener('cerbanimo:quest-engine-changed',()=>schedule(200));
   for(const name of ['living-school:module-completed','living-school:assessment-completed','civweave:basic-value-review-ready'])addEventListener(name,()=>schedule(200));
   addEventListener('storage',event=>{if(Object.values(KEYS).includes(event.key))schedule(250)});
+  const root=document.querySelector?.('#living-school-root')||document.querySelector?.('#rc-app');if(root&&typeof MutationObserver!=='undefined'){observer=new MutationObserver(()=>schedule(180));observer.observe(root,{childList:true,subtree:true})}
   setInterval(()=>schedule(0),60000);schedule(1000);
 }
-const api=Object.freeze({version:VERSION,keys:KEYS,run,schedule,kindFor,needs});
+const api=Object.freeze({version:VERSION,keys:KEYS,run,schedule,kindFor,needs,valuationText});
 globalThis.CivweaveBasicValueSystemsV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
