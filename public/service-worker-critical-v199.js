@@ -37,6 +37,7 @@ const CRITICAL_FILES=[
   '/app/services/fellowfare/cabinet-embed.css',
   '/app/themed-system-nav-v178.js',
   '/app/install-boundary-v146.js',
+  '/app/settings-gateway-v317.js',
   '/app/local-first-policy-v131.js',
   '/app/platform-stability-v159.js','/app/platform-stability-v159.css',
   '/app/platform-experience-v160.js','/app/platform-experience-v160.css',

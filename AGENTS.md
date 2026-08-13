@@ -66,6 +66,21 @@ For any cabinet or cross-realm task:
 5. Confirm whether installer, service-worker, verifier, and workflow files retain exact filename lists.
 6. Edit the smallest canonical surface that owns the behavior.
 
+### Mandatory system-of-practice lookup
+
+Before adding or changing any cross-cutting button handler, global event listener, loader, overlay, shared state store, service-worker hook, or shared runtime:
+
+1. Read `docs/architecture/systems-of-practice.md`.
+2. Read `config/system-ownership.json`.
+3. Identify the existing capability owner and canonical control/event/API.
+4. Search the active route graph for every existing owner, subscriber, caller, compatibility shim, and retired implementation.
+5. **If the capability already exists, extend or repair its declared owner. Do not add a parallel owner.**
+6. If duplicated ownership already exists, consolidation is the task. Do not add a third path to bridge the first two.
+7. Any intentional ownership change must update the registry, executable verifier, and documentation in the same pull request.
+8. Run `node scripts/verify-system-ownership-v317.mjs` for any file covered by the ownership registry.
+
+A visible button does not own its behavior merely because it is nearby. Realm-specific markup may expose a canonical shared control, but it may not independently intercept that control. Browser prototypes and globals must never be patched to compensate for an implementation bug that can be fixed at its source.
+
 Useful local commands include:
 
 ```bash
@@ -134,7 +149,8 @@ Preserve these architectural expectations unless the task explicitly changes the
 
 - Offline-first operation is primary.
 - Hosted services widen capability but must not become mandatory for basic local work.
-- Shared AI settings have one owning runtime. Do not add duplicate settings listeners, loaders, or overlays.
+- Shared Settings input belongs only to `public/app/settings-gateway-v317.js`; the presentation belongs to `public/app/model-settings-controller-v173.js`. Do not add duplicate Settings listeners, loaders, overlays, repair interceptors, or realm-local Settings implementations.
+- Living School uses the same shared family Settings control and canonical Settings surface as Cerbanimo, FellowFare, and Anarchadia.
 - The global five-system navigation belongs to the family shell. Embedded realm pages should not create a second competing switcher.
 - Canonical cross-realm state and capability semantics live in shared contracts and parity code, not in visually convenient duplicates.
 - Generated installer assets follow source changes; they do not lead them.
@@ -142,6 +158,12 @@ Preserve these architectural expectations unless the task explicitly changes the
 ## Verification
 
 Run the narrowest relevant verifier while developing, then the repository checks appropriate to the change.
+
+For cross-cutting ownership changes:
+
+```bash
+node scripts/verify-system-ownership-v317.mjs
+```
 
 For broad runtime changes:
 
@@ -203,7 +225,6 @@ Pipeline rules:
 - When the queue is exhausted, create the next epoch from fresh screenshots, redacted feedback, incidents, measurements, and current code. The old plan is a structural example, not the source of truth.
 
 The pipeline coordinates work. It does not grant authority. Human approval remains required for merge, compatibility removal, destructive migration, paid-service activation, and high-stakes governance or economic actions.
-
 
 ## Canonical release storage
 

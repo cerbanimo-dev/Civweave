@@ -18,7 +18,9 @@ class HTMLElement {}
 function boot(localSeed = {}, sessionSeed = {}) {
   const localStorage = new MemoryStorage(localSeed);
   const sessionStorage = new MemoryStorage(sessionSeed);
+  const location={href:'https://civweave.test/app/model-settings-controller-v173.js?activate=1',origin:'https://civweave.test'};
   const document = {
+    currentScript:{src:location.href},
     documentElement: { dataset: {} },
     getElementById() { return null; },
     querySelector() { return null; },
@@ -29,6 +31,8 @@ function boot(localSeed = {}, sessionSeed = {}) {
     console,
     Date,
     JSON,
+    URL,
+    location,
     localStorage,
     sessionStorage,
     document,
@@ -62,20 +66,30 @@ const remembered = boot({
   'civweave-model-persistent-secrets-v191': JSON.stringify(persistent),
   'civweave-model-profiles-v1': JSON.stringify(retiredProfile),
 });
+assert(remembered.controller?.activationRequired === true, 'Settings controller was not explicitly activated for the verifier.');
 const rememberedState = remembered.controller.readState();
 assert(rememberedState.remembered === true, 'Remembered credential was not detected.');
 assert(rememberedState.credentialMode === 'device', 'Retired MiniLM profile reset remembered lifetime to session.');
-assert(remembered.localStorage.getItem('civweave-model-credential-policy-v191') === 'device', 'Restore did not keep the device policy canonical.');
+assert(!remembered.sessionStorage.getItem('civweave-model-session'), 'Controller mutated credential session merely because it was parsed.');
+assert(!remembered.localStorage.getItem('civweave-model-credential-policy-v191'), 'Controller mutated credential policy merely because it was parsed.');
+assert(remembered.controller.restoreRememberedCredential() === true, 'Explicit remembered-credential restore failed.');
+assert(remembered.localStorage.getItem('civweave-model-credential-policy-v191') === 'device', 'Explicit restore did not keep the device policy canonical.');
+const restoredSession=JSON.parse(remembered.sessionStorage.getItem('civweave-model-session')||'{}');
+assert(restoredSession.apiKey===persistent.apiKey,'Explicit restore did not recover the remembered key.');
 
 const sessionOnly = boot({
   'civweave-model-profiles-v1': JSON.stringify(retiredProfile),
   'civweave-model-credential-policy-v191': 'session',
 });
 assert(sessionOnly.controller.readState().credentialMode === 'session', 'Session-only profile should remain session-only without a durable credential.');
+assert(sessionOnly.controller.restoreRememberedCredential() === false, 'Restore should be a no-op without a remembered credential.');
 
 console.log(JSON.stringify({
   ok: true,
-  revision: 'v212-credential-lifetime-state',
+  revision: 'v212-credential-lifetime-state-v317-explicit',
+  activationRequired:true,
+  moduleLoadMutation:false,
   rememberedRetiredProfile: 'device',
+  explicitRestore:true,
   noRememberedCredential: 'session',
 }, null, 2));
