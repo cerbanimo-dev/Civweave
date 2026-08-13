@@ -40,9 +40,21 @@ Platform payment webhook:
 https://civweave-core.cerbanimo.workers.dev/api/money-edge/webhooks/stripe
 ```
 
+Canonical connected-account thin-event destination:
+
+```text
+https://civweave-core.cerbanimo.workers.dev/api/money-edge/webhooks/stripe-recipient-thin
+```
+
+Legacy compatibility destination retained during migration:
+
+```text
+https://civweave-core.cerbanimo.workers.dev/api/connect-demo/webhooks/stripe-thin
+```
+
 Connected-account requirements/capability events must cover the Accounts v2 configurations actually used by production recipients and FellowFare merchant accounts. FellowFare direct-commerce readiness depends on current merchant `card_payments` capability rather than stale local state.
 
-Legacy marketplace events may still arrive for transactions predating the new boundary. They may finish or unwind but must not originate another old-style sale.
+Legacy marketplace events may still arrive for transactions predating the new boundary. They may finish or unwind but must not originate another old-style sale. The legacy thin-event URL above remains documented only so an already-created Stripe event destination can be migrated safely to the canonical route.
 
 ## Human checkpoint C: live connected accounts
 
