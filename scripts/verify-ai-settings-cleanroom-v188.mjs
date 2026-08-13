@@ -1,50 +1,69 @@
+import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+await import('./verify-system-ownership-v317.mjs');
 
-await import('./sync-release-version-assets.mjs');
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const read=file=>readFile(path.join(root,file),'utf8');
-const assert=(condition,message)=>{if(!condition)throw new Error(message)};
+const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const releaseVersion=(await read('VERSION')).trim();
-const sources={};
-for(const [name,file] of Object.entries({controller:'public/app/model-settings-controller-v173.js',unified:'public/app/unified-ai-settings-v175.js',delegation:'public/app/settings-delegation-v175.js',boundary:'public/app/install-boundary-v146.js',routes:'public/app/system-routes-v227.js',worker:'public/service-worker.js',additive:'public/service-worker-v156.js',wrapper:'public/service-worker-v203.js',coherence:'public/service-worker-code-coherence-v288.js',lightweight:'public/service-worker-core-v208.js',livingSchoolBoundary:'public/service-worker-living-school-cleanroom-v218.js',installer:'public/install-v130.js',brand:'public/app/civweave-brand.js',settingsRepair:'public/app/ai-settings-device-repair-v229.js'}))sources[name]=await read(file);
-for(const [label,source] of Object.entries(sources)){const compilable=label==='additive'?source.replace(/^\s*importScripts\([^\n]+\);/m,''):label==='wrapper'?source.replace(/^\s*importScripts\([^\n]+\);/gm,''):source;new Function(compilable)}
-function requires(source,tokens,label){for(const token of tokens)assert(source.includes(token),`${label} missing ${token}`)}
-function forbids(source,tokens,label){for(const token of tokens)assert(!source.includes(token),`${label} contains forbidden behavior: ${token}`)}
-requires(sources.controller,["const LAYER_ID='cw-ai-settings-cleanroom-v188'","authority:'ai-settings-cleanroom-v188'","eventOwnership:'single-cleanroom-controller'","presentation:'cleanroom-v188'",'providerRuntimeOnOpen:false','providerRuntimeAvailable:false','providerTestsAvailable:false','modelDiscoveryAvailable:false','singlePassOpen:true','function open(launcher)','function close(reason=','globalThis.CivweaveAISettingsCleanroomV188=api','globalThis.CivweaveModelSettingsControllerV173=api'],'controller');
-forbids(sources.controller,['MutationObserver','PerformanceObserver','setTimeout(','setInterval(','requestAnimationFrame(','requestIdleCallback(','import(','importScripts(',"createElement('script')",'createElement("script")','civweave-model-runtime','ensureRuntime','detectCapabilities','.generate(','new Worker(','navigator.gpu','GPUDevice','GPUAdapter','showModal(',"createElement('dialog')",'document.body.style.overflow'],'controller');
+const sources=Object.fromEntries(await Promise.all(Object.entries({
+  gateway:'public/app/settings-gateway-v317.js',
+  controller:'public/app/model-settings-controller-v173.js',
+  lifecycle:'public/app/document-lifecycle-v221.js',
+  boundary:'public/app/install-boundary-v146.js',
+  brand:'public/app/civweave-brand.js',
+  credential:'public/app/device-credential-persistence-v211.js',
+  codeCache:'public/service-worker-code-coherence-v288.js',
+  localAICache:'public/service-worker-local-ai-coherence-v307.js',
+  criticalCache:'public/service-worker-critical-v199.js',
+  routes:'public/app/system-routes-v227.js',
+  campusRuntime:'public/app/working-campus-v156.part5.txt'
+}).map(async([name,path])=>[name,await read(path)])));
+for(const key of ['gateway','controller','lifecycle','boundary','brand','credential'])assert.doesNotThrow(()=>new Function(sources[key]),`${key} does not compile.`);
+
+// Opening Settings is a tiny input-to-DOM path. It cannot depend on model startup.
+assert.match(sources.gateway,/inputOwner:true/);
+assert.match(sources.gateway,/lazyController:true/);
+assert.match(sources.gateway,/lazyManagement:true/);
+assert.match(sources.gateway,/launchWork:'none'/);
+assert.match(sources.gateway,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/);
+assert.doesNotMatch(sources.gateway,/bootstrap-v266|runtime-v266|runtime-bridge-v266|test-pulse-v269|navigator\.gpu|new Worker\(/);
+
+assert.match(sources.controller,/const LAYER_ID='cw-ai-settings-cleanroom-v188'/);
+assert.match(sources.controller,/searchParams\.get\('activate'\)==='1'/);
+assert.match(sources.controller,/providerRuntimeOnOpen:false/);
+assert.match(sources.controller,/providerTestsAvailable:false/);
+assert.match(sources.controller,/modelDiscoveryAvailable:false/);
+assert.match(sources.controller,/singlePassOpen:true/);
+assert.match(sources.controller,/layer\.querySelector\('\[data-close\]'\)\.addEventListener/);
 const openBlock=sources.controller.slice(sources.controller.indexOf('function open(launcher)'),sources.controller.indexOf('function ensure()'));
-requires(openBlock,['if(existing&&!existing.hidden)return existing','const layer=existing||build()','layer.hidden=false'],'open path');
-forbids(openBlock,['await ','Promise','fetch(','.focus('],'open path');
-requires(sources.delegation,["document.addEventListener('click',onClick);","listenerPhase:'bubble'",'listenerCount:1','mutationObserver:false','polling:false','timers:false','diagnosticsRuntime:false'],'delegation');
-forbids(sources.delegation,['MutationObserver','PerformanceObserver','setTimeout(','setInterval(',"addEventListener('click',onClick,true)","addEventListener('click',onClick,{capture:true",'longtask','civweave.log-buffer.v1'],'delegation');
-requires(sources.unified,['retiredRuntime:true',"authority:'ai-settings-cleanroom-v188'",'providerRuntimeOnOpen:false'],'unified compatibility shell');
-forbids(sources.unified,['MutationObserver','setTimeout(','setInterval(','fetch(',"createElement('script')",'ensureRuntime','detectCapabilities','.generate('],'unified compatibility shell');
-requires(sources.brand,["const SETTINGS_REPAIR='/app/ai-settings-device-repair-v229.js';",'function loadSettingsRepair()','loadSettingsRepair();','settingsRepair:SETTINGS_REPAIR'],'Civweave settings bootstrap');
-requires(sources.settingsRepair,["gemini:Object.freeze({model:'gemini-3.5-flash-lite',endpoint:'https://generativelanguage.googleapis.com/v1beta'})","const PERSIST_KEY='civweave-model-persistent-secrets-v191';","const OLD_PERSIST_KEYS=['commonweave-model-persistent-secrets-v211'","if(key&&!input.value)input.value=key;","field(form,'credentialMode')?.value==='device'?'device':'session'","addEventListener('civweave:model-settings-saved'",'persistCaptured(state)','restoreRemembered()','applyProviderDefaults(form,providerName(routeField.value),{routeChanged:true})'],'AI settings device repair');
-forbids(sources.settingsRepair,['MutationObserver','PerformanceObserver','setTimeout(','setInterval(','requestAnimationFrame(','requestIdleCallback(','fetch(','.generate(','new Worker('],'AI settings device repair');
-requires(sources.boundary,[`const VERSION='${releaseVersion}';`,`const ADDITIONS_VERSION=\`\${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424\`;`,"const REVISION='chat-convergence-v250-navigation-lifecycle-v424'",'const CANONICAL_SYSTEM_SCRIPTS=[','const SYSTEM_EXPERIENCE_SCRIPTS=[','const COMPATIBILITY_SCRIPTS=[',"'/app/model-settings-controller-v173.js'","'/app/settings-delegation-v175.js'",'function installCanonicalSystemSupport()','if(canonicalAppSurface()||!systemSurface()||!liveHead())return false;',"canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner'","navigationLifecycleRevision:'v424-head-capture-bfcache-resume'",'canonicalSystemCount:5','canonicalAutoScripts:0','canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length',"canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions'"],'install boundary');
-const expStart=sources.boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),expEnd=sources.boundary.indexOf('];',expStart),experience=sources.boundary.slice(expStart,expEnd);
-requires(experience,['GUIDE_WORKSPACE','REALM_SESSION_INTEGRITY','MOBILE_AI_HARDENING'],'canonical experience');
-forbids(experience,['PERSISTENT_GUIDE_CHAT_SCRIPT','PERSISTENT_GUIDE_VIEWPORT_SCRIPT'],'canonical experience');
-forbids(sources.boundary,["ADDITIONS_VERSION='v188-ai-settings-cleanroom'",'SETTINGS_STABILITY_REVISION','SETTINGS_CONTROLLER_REVISION','SETTINGS_RUNTIME_REVISION','SETTINGS_LOG_REVISION','addScript(RELEASE_VERSION_SCRIPT)'],'install boundary');
-for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(sources.routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
-const activeWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425')`;
-requires(sources.additive,[activeWorkerImport,'GET_SHARED_IMAGE_STATUS','GET_CRITICAL_BOOT_STATUS','GET_ADDITIONS_STATUS'],'legacy package bridge');
-assert(!/^[ \t]*importScripts\('\/service-worker\.js/m.test(sources.additive),'Legacy package bridge executes the retired base worker.');
-const routeImport="importScripts('/app/system-routes-v227.js",cleanImport="importScripts('/service-worker-living-school-cleanroom-v218.js",coherenceImport="importScripts('/service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288')",coreImport="importScripts('/service-worker-core-v208.js",canonicalImport="importScripts('/service-worker-canonical-navigation-v227.js",chatRepairImport="importScripts('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343')";
-requires(sources.wrapper,[routeImport,cleanImport,coherenceImport,coreImport,canonicalImport,chatRepairImport],'active worker wrapper');
-assert(sources.wrapper.indexOf(routeImport)<sources.wrapper.indexOf(coreImport),'Route contract must load before worker core.');
-assert(sources.wrapper.indexOf(cleanImport)<sources.wrapper.indexOf(coherenceImport)&&sources.wrapper.indexOf(coherenceImport)<sources.wrapper.indexOf(coreImport),'Code coherence must run after the Living School boundary and before generic app caching.');
-assert(sources.wrapper.indexOf(canonicalImport)>sources.wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation must be final.');
-requires(sources.coherence,["const CW_CODE_COHERENCE_VERSION = '1.0.91-code-coherence-v288'",'event.stopImmediatePropagation()',"'/app/local-ai/bootstrap-v266.js'","'/app/local-ai/settings-panel-v267.js'",'network-first-current-version-cache-legacy-offline-fallback'],'code coherence');
-assert(sources.coherence.indexOf('const response = await cwCodeFetch(request)')<sources.coherence.indexOf('const current = await cache.match'),'Code coherence must try the live executable before local fallback.');
-requires(sources.livingSchoolBoundary,["const REVISION='living-school-cleanroom-v218'",'event.stopImmediatePropagation()'],'Living School worker boundary');
-requires(sources.lightweight,["const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425'","'/app/install-boundary-v146.js'","'/app/working-campus-return-guard-v425.js'",'knowledgeLibrarySeparate: true','DOWNLOAD_OFFLINE_PACKAGE'],'retained lightweight package');
-assert(!sources.installer.includes('GET_CRITICAL_BOOT_STATUS')&&!sources.installer.includes('GET_ADDITIONS_STATUS'),'Installer waits on retired package layers.');
-requires(sources.worker,["'/app/model-settings-controller-v173.js'","'/app/unified-ai-settings-v175.js'","'/app/settings-delegation-v175.js'"],'legacy core package compatibility');
-const activeSurfaces=['public/app/working-campus-v156.html','public/app/realm-console-v140.html','public/app/fellowfare-cabinet-v144.html'];
-let launcherSurfaces=0;for(const file of activeSurfaces){const html=await read(file);if(['data-open-unified-ai-settings','id="aiSettings"','id="modelSettings"','id="btnAISettings"','data-ai-settings'].some(token=>html.includes(token)))launcherSurfaces+=1;assert(html.includes('/app/model-settings-controller-v173.js')||html.includes('/app/install-boundary-v146.js'),`${file} does not reach the clean-room path.`)}
-assert(launcherSurfaces>=1,'No packaged surface exposes a recognized AI settings launcher.');
-console.log(JSON.stringify({ok:true,releaseVersion,revision:'cleanroom-capability-contract-v229-v250-v288-coherence-navigation-v424-return-v425',controllerAuthority:'single-cleanroom-controller',openPath:'synchronous-local-dom-only',canonicalBoundary:'five-self-contained-surfaces-minimal-settings-corridor-v250-chat-converged-navigation-v424',canonicalSystemCount:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',workingCampusReturn:'v425',legacyCompatibility:'noncanonical-only',mutationObserver:false,polling:false,timers:false,diagnosticsRuntime:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,geminiDefaultsVisible:true,deviceCredentialPersistence:true,maskedRememberedKeyVisible:true,settingsRepair:'v229',installedPackageMode:'v250-updater-first-v218-cleanroom-v288-network-first-code-coherence-v208-core-v425',launcherSurfaces},null,2));
+for(const forbidden of ['await ','fetch(','.generate(','new Worker(','navigator.gpu','showModal('])assert.ok(!openBlock.includes(forbidden),`Controller open path regained ${forbidden}.`);
+
+// Management is allowed only after the panel is painted and contains no inference startup lane.
+assert.match(sources.lifecycle,/activationRequired:true/);
+assert.match(sources.lifecycle,/managementAfterPaint:true/);
+assert.match(sources.lifecycle,/globalObserverPatch:false/);
+for(const forbidden of ['runtime-v266','runtime-bridge-v266','bootstrap-v266','test-pulse-v269','new Worker(','navigator.gpu'])assert.ok(!sources.lifecycle.includes(forbidden),`Settings management regained inference dependency ${forbidden}.`);
+
+// No unrelated subsystem may secretly bootstrap Settings repair.
+assert.doesNotMatch(sources.brand,/SettingsRepair|SETTINGS_REPAIR|ai-settings-device-repair/);
+assert.match(sources.brand,/settingsDependency:false/);
+assert.match(sources.credential,/automaticRestore:false/);
+assert.match(sources.credential,/automaticListeners:false/);
+assert.match(sources.credential,/settingsApiPatching:false/);
+assert.doesNotMatch(sources.credential,/document\.addEventListener\('click'|SETTINGS_SELECTOR|api\.open\s*=/);
+
+// The active campus does not wait for local AI before Settings can paint.
+for(const forbidden of ['openSharedSettings','ensureSettingsRepairs','settingsRepairPromise','ai-settings-bind-guard-v230','ai-settings-device-repair-v229'])assert.ok(!sources.campusRuntime.includes(forbidden),`Campus retained old Settings preflight ${forbidden}.`);
+assert.match(sources.campusRuntime,/setAttribute\('data-open-unified-ai-settings',''\)/);
+
+// Five active systems enter one boundary and one gateway.
+assert.match(sources.boundary,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js'/);
+const experience=sources.boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\n\];/)?.[1]||'';
+assert.match(experience,/SETTINGS_GATEWAY/);
+for(const forbidden of ['AI_SETTINGS_BIND_GUARD','AI_SETTINGS_REPAIR','DOCUMENT_LIFECYCLE','model-settings-controller-v173','settings-delegation-v175'])assert.ok(!experience.includes(forbidden),`Boundary eagerly includes ${forbidden}.`);
+for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert.ok(sources.routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
+
+// Offline first click is a release invariant, not an online-only convenience.
+for(const key of ['codeCache','localAICache','criticalCache'])assert.ok(sources[key].includes("'/app/settings-gateway-v317.js'"),`${key} does not cache the Settings gateway.`);
+assert.ok(sources.codeCache.includes("'/app/model-settings-controller-v173.js'")&&sources.codeCache.includes("'/app/document-lifecycle-v221.js'"),'Code cache cannot activate Settings offline.');
+
+console.log(JSON.stringify({ok:true,releaseVersion,revision:'settings-cleanroom-single-gateway-v317',inputOwner:'settings-gateway-v317',systems:5,synchronousPanelOpen:true,firstClickControllerActivation:true,managementAfterPaint:true,providerRuntimeOnOpen:false,inferenceBootstrapOnOpen:false,prototypePatching:false,settingsApiPatching:false,brandingDependency:false,campusPreflight:false,offlineFirstClick:true},null,2));
