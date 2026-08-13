@@ -24,11 +24,13 @@ for(const [system,data] of Object.entries(manifest.systems)){
   assert.equal(atlas.subarray(8,12).toString('ascii'),'WEBP',`${system} atlas must be WebP`);
   assert.ok(atlas.byteLength>250_000,`${system} atlas should contain the full 20-pose art bank`);
   assert.ok(atlas.includes(Buffer.from('VP8 '))||atlas.includes(Buffer.from('VP8L'))||atlas.includes(Buffer.from('ALPH')),`${system} atlas must contain WebP image payload`);
+  const archivePath=manifest.sourceCuts.archives[data.character];
+  assert.ok(archivePath,`${system} must publish its labeled source-cut archive`);
+  const archive=fs.readFileSync(path.join(root,archivePath.replace(/^\/app\//,'public/app/')));
+  assert.equal(archive.subarray(0,2).toString('ascii'),'PK',`${system} labeled cut archive must be ZIP`);
+  assert.ok(archive.byteLength>250_000,`${system} labeled cut archive must contain 20 named alpha sprites`);
 }
 assert.equal(count,100,'must label all 100 expression cells');
-const archive=fs.readFileSync(path.join(root,manifest.sourceCuts.archive.replace(/^\/app\//,'public/app/')));
-assert.equal(archive.subarray(0,2).toString('ascii'),'PK','labeled cut archive must be ZIP');
-assert.ok(archive.byteLength>1_000_000,'labeled cut archive must contain all 100 cut assets');
 for(const marker of ['smollm2-135m-avatar-q8-wasm','onnx-community/SmolLM2-135M-Instruct-ONNX',"device:'wasm'","recommended:'high'",'chatSelectable:false','HIGHLY RECOMMENDED','civweave:avatar-expression','civweave:avatar-classifier-fallback','new Worker(WORKER','classifyRules','sleepOnModelFailure:true','sleepInDeterministicWithoutTinyLM:true','civweave:local-model-error','model-failure','deterministicMode()&&!tinyAvailable','publishSleep'])assert.ok(director.includes(marker),`director missing ${marker}`);
 assert.ok(director.includes('stopClassifierSelection'),'avatar model must not replace selected chat model');
 for(const marker of ['/app/avatar-expression-director-v313.js','civweave:avatar-expression',"atlasGrid:'5x4'",'background-size'])assert.ok(faces.includes(marker),`face renderer missing ${marker}`);
