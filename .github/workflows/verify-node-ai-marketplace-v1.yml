@@ -83,7 +83,7 @@ jobs:
           grep -q 'NODE_AI_MESH_RUNTIME' public/app/install-boundary-v146.js
           grep -q "'/app/local-object-mesh-v146.js?v=node-ai-mesh-v1'" public/app/node-ai-mesh-v1.js
           grep -q "const ROUTER_URL='/app/shared/civweave-node-ai-routing-v1.mjs'" public/app/node-ai-mesh-v1.js
-          node -e "const p=require('./public/app/offline-package-v208.json'); if(p.seeds.length!==11) throw new Error('canonical offline roots changed'); for(const f of ['/finder','/app/federation-finder-local-v269.html','/app/node-ai-marketplace-surface-v1.js','/app/node-ai-operator-v1.html']) if(!p.assets.includes(f)) throw new Error('missing optional offline marketplace asset '+f)"
+          node -e "const p=require('./public/app/offline-package-v208.json'); if(!Array.isArray(p.seeds)||p.seeds.length<11) throw new Error('canonical offline roots unexpectedly shrank'); for(const f of ['/finder','/app/federation-finder-local-v269.html','/app/node-ai-marketplace-surface-v1.js','/app/node-ai-operator-v1.html']) if(!p.assets.includes(f)) throw new Error('missing optional offline marketplace asset '+f)"
       - name: Reject centralized wallet architecture
         run: |
           test ! -e lib/ai-wallet-postgres-v1.mjs

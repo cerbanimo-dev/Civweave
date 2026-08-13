@@ -2,13 +2,13 @@
 'use strict';
 importScripts('/app/system-routes-v227.js?v=1.0.124-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
-importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.122-local-ai-code-coherence-v307');
+importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.124-local-ai-code-coherence-v307');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288');
 importScripts('/service-worker-core-v208.js?v=1.0.124-chat-convergence-v250-installer-brand-v1-working-campus-return-v425');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
-importScripts('/service-worker-radio-core-v305.js?v=1.0.122-radio-core-shell-v305-playlist-only-v246');
+importScripts('/service-worker-radio-core-v305.js?v=1.0.124-radio-core-shell-v305-playlist-only-v246');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');

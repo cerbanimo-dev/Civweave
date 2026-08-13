@@ -50,10 +50,14 @@ assert(mediaInstaller.includes('ensureRoot'));
 assert(mediaInstaller.includes('navigator.storage?.persist?.()'));
 assert(mediaInstaller.includes('data-media-pack'));
 assert(mediaInstaller.includes('General knowledge outage pack'));
-for(const surface of ['public/app/cabinets/living-school/index.html','public/app/realm-console-v140.html','public/app/working-campus-v156.html']){
+for(const surface of ['public/app/cabinets/living-school/index.html','public/app/working-campus-v156.html']){
   const html=fs.readFileSync(path.join(root,surface),'utf8');
   assert(html.includes('/app/open-learning-media-cache-v1.mjs'),surface);
 }
+const cerbanimoHtml=fs.readFileSync(path.join(root,'public/app/realm-console-v140.html'),'utf8');
+const cerbanimoVideo=fs.readFileSync(path.join(root,'public/app/cerbanimo-video-task-contract-v1.mjs'),'utf8');
+assert(!cerbanimoHtml.includes('<script type="module" src="/app/open-learning-media-cache-v1.mjs'),'Cerbanimo must keep Open Learning Media off the eager boot path');
+assert(cerbanimoVideo.includes('import(CONTRACT)'),'Cerbanimo must retain on-demand shared media loading');
 const worker=fs.readFileSync(path.join(root,'public/service-worker-core-v208.js'),'utf8');
 assert(worker.includes("'cw-open-learning-media-'"));
 assert(worker.includes("OPEN_MEDIA_ROUTE_PREFIX = '/__civweave_open_media__/'"));

@@ -28,9 +28,9 @@ assert.equal(manifest.id,'/civweave-local','PWA id must remain stable across hos
 assert.match(manifest.start_url,/^\/app\/installed-entry-v146(?:\.html)?\?installed=1$/,'installed PWA must launch through updater entry');
 assert.ok((manifest.shortcuts||[]).every(shortcut=>/^\/app\/installed-entry-v146(?:\.html)?\?/.test(String(shortcut.url||''))),'all installed shortcuts must pass through updater entry');
 assert.ok(!manifestText.includes('working-campus-v156.html?installed=1&version='),'manifest must not pin an installed launch to an old Working Campus release');
-assert.ok(installedEntry.includes("fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})"),'installed entry must resolve current release without cache');
+assert.ok(installedEntry.includes('/app/manifest.webmanifest?boot=${Date.now()}')&&installedEntry.includes("cache:'no-store'")&&installedEntry.includes('bounded(fetch('),'installed entry must resolve current release through the bounded no-store path');
 assert.ok(installedEntry.includes("updateViaCache:'none'"));
-assert.ok(installedEntry.includes('await registration.update()'));
+assert.ok(installedEntry.includes('registration.update()')&&installedEntry.includes('bounded(registration.update()'),'installed entry must perform a bounded worker update');
 assert.ok(installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'installed entry must activate a waiting worker before routing');
 assert.ok(installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='),'worker refresh must finish before installed route selection');
 
