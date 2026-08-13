@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en" data-build="fellowfare-parent-mobile-v205" data-civweave-system="fellowfare">
+<html lang="en" data-build="fellowfare-parent-market-v2" data-civweave-system="fellowfare">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#1e4b64">
-  <title>FellowFare Cabinet Mode</title>
+  <title>FellowFare Marketplace</title>
   <script src="/app/install-boundary-v146.js"></script>
   <link rel="stylesheet" href="/app/family-shell-v104.css?v=merlinites-r1">
   <link rel="stylesheet" href="/app/realm-console-v140.css?v=4">
@@ -17,52 +17,52 @@
 </head>
 <body>
   <header class="rc-top ffc144-header">
-    <div class="rc-brand"><img src="/app/logos/fellowfare-v2.webp" alt=""><div><small>FELLOWFARE // CABINET MARKET</small><b>Rook's Exchange Workbench</b></div></div>
-    <div class="rc-status"><i></i><span>Offline-ready market engine</span></div>
+    <div class="rc-brand"><img src="/app/logos/fellowfare-v2.webp" alt=""><div><small>FELLOWFARE // LIVE MARKET</small><b>Rook's Marketplace</b></div></div>
+    <div class="rc-status"><i></i><span>Local-first · real records only</span></div>
   </header>
   <main id="ffc144-app" class="ffc144-app">
     <section class="ffc144-rook" aria-labelledby="ffc144-rook-title">
       <header class="ffc144-rook-head">
         <img src="/app/assets/ai/rook.png" alt="Rook the Raven">
         <div>
-          <small>FELLOWFARE EXCHANGE GUIDE</small>
+          <small>FELLOWFARE MARKET GUIDE</small>
           <h1 id="ffc144-rook-title">Chat with Rook</h1>
-          <p>Name a need, offer, service, trade, or material list. Rook will build a private request preview. An explicit “submit this draft” publishes the reviewed request instead of starting over.</p>
+          <p>Bring Rook a product, service, learning module, tutoring offer, material need, or collective ask. Rook can inspect the listings that actually exist, help shape terms, and refuse to invent a market rate when there are no real comparables.</p>
         </div>
         <button type="button" class="ffc144-rook-settings" data-ffc-rook-settings>AI settings</button>
       </header>
       <div class="ffc144-rook-log" data-ffc-rook-log role="log" aria-live="polite" aria-label="Conversation with Rook"></div>
       <form class="ffc144-rook-form" data-ffc-rook-form>
         <label for="ffc144-rook-input">Message Rook</label>
-        <textarea id="ffc144-rook-input" data-ffc-rook-input rows="2" maxlength="4000" placeholder="I need reclaimed windows and can pay 8 Buttons once I earn them…" required></textarea>
+        <textarea id="ffc144-rook-input" data-ffc-rook-input rows="2" maxlength="4000" placeholder="I finished a reusable service package and want to list it for Buttons and USD…" required></textarea>
         <button type="submit">Send</button>
       </form>
       <div class="ffc144-rook-actions" aria-label="Rook shortcuts">
-        <button type="button" data-ffc-rook-action="need">Draft a need</button>
-        <button type="button" data-ffc-rook-action="offer">Draft an offer</button>
-        <button type="button" data-ffc-rook-action="matches">Find matches</button>
+        <button type="button" data-ffc-rook-action="need">List a need</button>
+        <button type="button" data-ffc-rook-action="offer">List an offer</button>
+        <button type="button" data-ffc-rook-action="matches">Price & prepare</button>
       </div>
-      <output class="ffc144-rook-status" data-ffc-rook-status aria-live="polite">Rook is ready locally. Requests remain private until reviewed and explicitly approved.</output>
+      <output class="ffc144-rook-status" data-ffc-rook-status aria-live="polite">Rook is ready locally. Nothing publishes, accepts, pays, or commits without an explicit human action.</output>
     </section>
-    <nav class="ffc144-tabs" aria-label="FellowFare workbench">
+    <nav class="ffc144-tabs" aria-label="FellowFare marketplace">
       <button type="button" data-ffc-command="market" aria-current="page">Market</button>
-      <button type="button" data-ffc-command="loom">Loom</button>
-      <button type="button" data-ffc-command="assemblies">Assemblies</button>
-      <button type="button" data-ffc-command="inbox">Exchange Desk</button>
+      <button type="button" data-ffc-command="loom">Sell</button>
+      <button type="button" data-ffc-command="assemblies">Orders</button>
+      <button type="button" data-ffc-command="inbox">Wallet</button>
       <button type="button" data-ffc-command="profile">You</button>
     </nav>
-    <section class="ffc144-frame" aria-label="FellowFare exchange application">
-      <iframe id="ffc144-workbench" title="FellowFare market, agreements, settlement, repair, and trust" src="/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1#market" allow="clipboard-read; clipboard-write" scrolling="yes"></iframe>
-      <div class="ffc144-loading" data-ffc-loading>Opening the local exchange ledger…</div>
+    <section class="ffc144-frame" aria-label="FellowFare products, services, learning, tutoring, orders, wallet, and profile">
+      <iframe id="ffc144-workbench" title="FellowFare live marketplace" src="/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1&market=2#market" allow="clipboard-read; clipboard-write" scrolling="yes"></iframe>
+      <div class="ffc144-loading" data-ffc-loading>Opening the live local marketplace…</div>
     </section>
-    <output class="ffc144-status" data-ffc-status aria-live="polite">Market engine is loading from the installed device package.</output>
+    <output class="ffc144-status" data-ffc-status aria-live="polite">Marketplace is loading from the installed device package.</output>
   </main>
   <script src="/app/local-first-policy-v131.js?v=1.0.4" defer></script>
   <script src="/app/platform-stability-v159.js?v=tray-escape-r1" defer></script>
   <script src="/app/platform-experience-v160.js?v=dark-review-r1" defer></script>
   <script src="/app/local-object-mesh-v146.js?v=direct-r38" defer></script>
   <script src="/app/shared/civweave-parity-runtime.js?v=direct-r38" defer></script>
-  <script src="/app/fellowfare-cabinet-v144.js?v=rook-chat-r39" defer></script>
+  <script src="/app/fellowfare-cabinet-v144.js?v=marketplace-v2" defer></script>
   <script src="/app/fellowfare-mobile-flow-v205.js?v=single-scroll-r1" defer></script>
   <script src="/app/model-settings-controller-v173.js?v=direct-settings-r1" defer></script>
   <script src="/app/family-ai-loader-v105.js?v=direct-r42" defer></script>

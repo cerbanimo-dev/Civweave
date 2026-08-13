@@ -1,11 +1,45 @@
 const ORIGIN=location.origin;
-const STORE_KEY='fellowfare.mvp.state.v3';
+const LEGACY_KEY='fellowfare.mvp.state.v3';
+const V2_KEY='fellowfare.marketplace.v2';
 const routeButton=route=>document.querySelector(`[data-route="${CSS.escape(route)}"]`);
-function route(route){const button=routeButton(route);if(button){button.click();return true}location.hash=route;return false}
-function syntheticComposer(mode='need',text=''){route('market');requestAnimationFrame(()=>{const trigger=document.createElement('button');trigger.type='button';trigger.dataset.openComposer=['offer','collective'].includes(mode)?mode:'need';trigger.hidden=true;document.body.append(trigger);trigger.click();trigger.remove();requestAnimationFrame(()=>{const input=document.querySelector('#naturalInput');if(input&&text)input.value=String(text).slice(0,4000)})})}
-function command(name,payload={}){if(name==='compose'){syntheticComposer(payload.mode,payload.text||'');return}if(['market','loom','assemblies','inbox','profile'].includes(name)){route(name);return}route('market')}
-function removeSceneArt(){document.querySelectorAll('.ff-route-scene-art').forEach(node=>node.remove())}
-new MutationObserver(removeSceneArt).observe(document.documentElement,{childList:true,subtree:true});removeSceneArt();
-addEventListener('message',event=>{if(event.origin!==ORIGIN||event.source!==parent||!event.data||typeof event.data!=='object')return;if(event.data.type==='fellowfare:cabinet-command')command(String(event.data.command||'market'),event.data.payload||{})});
-addEventListener('storage',event=>{if(event.key===STORE_KEY&&event.newValue!==event.oldValue)location.reload()});
-addEventListener('DOMContentLoaded',()=>{document.body.classList.add('ff-cabinet-embedded');if(!['market','loom','assemblies','inbox','profile'].includes(location.hash.slice(1)))location.hash='market';route('market');parent.postMessage({type:'fellowfare:cabinet-ready',version:'1.0.31-v144',capabilities:['threads','proposals','messages','assemblies','agreements','milestones','evidence','settlement','repair','trust','recurrence','portable-bundles']},ORIGIN)},{once:true});
+function route(route){const button=routeButton(route);if(button){button.click();return true}globalThis.CivweaveFellowFareMarketplaceV2?.routeTo?.(route);return false}
+function composer(mode='offer',text=''){
+  const api=globalThis.CivweaveFellowFareMarketplaceV2;
+  if(api?.openComposer){api.openComposer(mode==='need'?'need':'offer');requestAnimationFrame(()=>{const form=document.querySelector('#ffv2ComposerForm');if(form&&text){form.elements.description.value=String(text).slice(0,2400);if(!form.elements.title.value)form.elements.title.value=String(text).trim().slice(0,120)}});return}
+  route('loom');
+}
+function command(name,payload={}){
+  if(name==='compose'){composer(payload.mode,payload.text||'');return}
+  if(['market','loom','assemblies','inbox','profile'].includes(name)){route(name);return}
+  route('market');
+}
+function importLegacyThread(thread={}){
+  const api=globalThis.CivweaveFellowFareMarketplaceV2;if(!api)return null;
+  const sourceId=String(thread.id||'').trim();
+  const duplicate=api.listings().find(row=>row?.source?.sourceId===sourceId||row?.legacyId===sourceId);
+  if(duplicate)return duplicate;
+  const category=String(thread.category||'').toLowerCase();
+  let kind=thread.mode==='need'?'request':thread.mode==='collective'?'collective':/service|work|repair|transport/.test(category)?'service':/learning|teach|tutor/.test(category)?'tutoring':'resource';
+  return api.publishListing({kind,mode:thread.mode==='need'?'need':'offer',title:thread.title||'Imported exchange listing',description:thread.description||'',pricing:{usdMinor:Number(thread.amount)>0?Math.round(Number(thread.amount)*100):0,gift:Array.isArray(thread.methods)&&thread.methods.includes('Gift'),barter:Array.isArray(thread.methods)&&thread.methods.includes('Barter')},fulfillment:{area:thread.area||'',timing:thread.when||'',quantity:thread.quantity||'',partial:Boolean(thread.partial)},source:{system:'fellowfare',sourceId:sourceId||null},ownerId:thread.ownerId||'me'});
+}
+function consumeExchangeImport(message){
+  const threads=message?.bundle?.entities?.threads;
+  if(!Array.isArray(threads)||!threads.length)return;
+  const imported=threads.map(importLegacyThread).filter(Boolean);
+  parent.postMessage({type:'civweave:exchange-import-receipt',status:'reviewed',detail:`Imported ${imported.length} reviewed FellowFare listing${imported.length===1?'':'s'} into the live marketplace.`,automaticEffect:false},ORIGIN);
+}
+addEventListener('message',event=>{
+  if(event.origin!==ORIGIN||event.source!==parent||!event.data||typeof event.data!=='object')return;
+  if(event.data.type==='fellowfare:cabinet-command'){command(String(event.data.command||'market'),event.data.payload||{});return}
+  if(event.data.type==='civweave:exchange-import'){consumeExchangeImport(event.data);return}
+});
+addEventListener('storage',event=>{
+  if(![LEGACY_KEY,V2_KEY,'civweave.reward-ledger.v2','civweave.cerbanimo-commerce-receipts.v1'].includes(event.key)||event.newValue===event.oldValue)return;
+  globalThis.CivweaveFellowFareMarketplaceV2?.render?.();
+});
+addEventListener('DOMContentLoaded',()=>{
+  document.body.classList.add('ff-cabinet-embedded');
+  const hash=location.hash.slice(1);if(!['market','loom','assemblies','inbox','profile'].includes(hash))history.replaceState(null,'','#market');
+  globalThis.CivweaveFellowFareMarketplaceV2?.render?.(location.hash.slice(1)||'market');
+  parent.postMessage({type:'fellowfare:cabinet-ready',version:'2.0.0-live-market',capabilities:['products','services','learning-modules','tutoring','resources','needs','collectives','listings','orders','proposals','agreements','assemblies','canonical-acorns','canonical-buttons','commerce-receipts','usd-money-edge-status','portable-market-data']},ORIGIN);
+},{once:true});
