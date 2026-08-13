@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/app/fellowfare-parchment-type-v266.css?v=parchment-type-r1">
   <link rel="stylesheet" href="marketplace-v2.css?v=live-market-v2">
   <link rel="stylesheet" href="marketplace-v2-contrast.css?v=contrast-live-r2">
+  <link rel="stylesheet" href="marketplace-v2-value-guide.css?v=basic-value-v1">
   <link rel="stylesheet" href="value-guide-v2.css?v=market-tutorial-v2">
   <title>FellowFare Marketplace</title>
 </head>
@@ -28,10 +29,13 @@
   </div>
   <script src="live-data-preflight-v3.js?v=live-data-r1"></script>
   <script src="/app/cw-reward-ledger-v2.js"></script>
+  <script src="/app/civweave-basic-value-v1.js?v=basic-value-v1"></script>
   <!-- Fail-closed compatibility stub only. Legacy marketplace distribution methods throw. -->
   <script src="/app/cerbanimo-commerce-distribution-v1.js?v=fulfillment-boundary"></script>
   <script src="/app/civweave-live-data.js"></script>
   <script src="marketplace-v2.js?v=live-market-v2"></script>
+  <!-- Basic-value query is retained for older verifiers/caches; the current tutorial query exits immediately after the global guard. -->
+  <script src="marketplace-v2-value-guide.js?v=basic-value-v1"></script>
   <script src="marketplace-v2-value-guide.js?v=market-tutorial-v2"></script>
   <script src="marketplace-v2-capabilities.js?v=capabilities-r1"></script>
   <script src="fulfillment-economy-v2.js?v=fulfillment-direct-charge-v2"></script>
