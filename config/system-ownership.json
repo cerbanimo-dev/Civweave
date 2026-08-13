@@ -17,8 +17,14 @@
         "public/app/fellowfare-cabinet-v144.html",
         "public/app/anarchadia-console-v139.html"
       ],
+      "activeRouteDependencies": [
+        "public/app/working-campus-v156.part5.txt",
+        "public/app/family-shell-v104.js",
+        "public/app/anarchadia-runtime-stability-v159.js"
+      ],
       "allowedInputListenerFiles": ["public/app/settings-gateway-v317.js"],
       "forbiddenInputOwnerFiles": [
+        "public/app/working-campus-v156.part5.txt",
         "public/app/experience-orchestrator-v232.js",
         "public/app/family-shell-v104.js",
         "public/app/settings-parity-v295.js",
@@ -42,6 +48,7 @@
         "Settings controller and local-model management activate only from the first explicit Settings request.",
         "Realm pages may style the shared control but may not create a second Settings implementation or listener.",
         "Living School uses the family-shell Settings control and has no realm-local Settings button.",
+        "The Civweave campus may mark Settings controls but may not preload Settings repairs, local-model bootstrap, or attach direct Settings listeners.",
         "Browser prototypes, DOM prototypes, and Settings API methods may not be monkey-patched to repair Settings behavior.",
         "Credential helpers may expose explicit compatibility methods but may not intercept Settings input, patch Settings open(), or mutate credential state at module load.",
         "Realm stability/recovery layers may call the gateway programmatically but may not intercept Settings controls or carry dormant fallback listeners.",
