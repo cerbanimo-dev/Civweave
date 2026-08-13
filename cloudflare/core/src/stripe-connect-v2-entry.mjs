@@ -3,7 +3,7 @@ import { handleStripeConnectV2Sample } from './stripe-connect-v2-sample.mjs';
 import { handleStripeSnapshotWebhook, STRIPE_SNAPSHOT_WEBHOOK_PATHS } from './stripe-snapshot-webhook.mjs';
 import {
   handleStripeRecipientThinWebhook,
-  STRIPE_RECIPIENT_THIN_WEBHOOK_PATH
+  STRIPE_RECIPIENT_THIN_WEBHOOK_PATHS
 } from './stripe-recipient-thin-webhook.mjs';
 
 // Keep the existing money-edge router intact and layer the documented Stripe
@@ -31,7 +31,8 @@ export default {
     // Production Connect onboarding creates Accounts v2 recipient accounts. The
     // always-on thin-event route therefore watches recipient requirements and the
     // stripe_transfers capability, not the merchant/card-payment demo capability.
-    if (request.method === 'POST' && url.pathname === STRIPE_RECIPIENT_THIN_WEBHOOK_PATH) {
+    // The old /connect-demo path remains accepted only as a migration alias.
+    if (request.method === 'POST' && STRIPE_RECIPIENT_THIN_WEBHOOK_PATHS.has(url.pathname)) {
       return handleStripeRecipientThinWebhook(request, env);
     }
 
