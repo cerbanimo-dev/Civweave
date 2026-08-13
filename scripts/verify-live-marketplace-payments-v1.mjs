@@ -10,6 +10,7 @@ const [
   symbols,
   moneyWithMemberships,
   entry,
+  originEntry,
   serverCommerce
 ] = await Promise.all([
   read('public/app/services/fellowfare/fulfillment-economy-v1.js'),
@@ -19,6 +20,7 @@ const [
   read('public/app/services/fellowfare/marketplace-v2-symbols.js'),
   read('cloudflare/core/src/money-edge-with-memberships.mjs'),
   read('cloudflare/core/src/stripe-connect-v2-entry.mjs'),
+  read('cloudflare/core/src/origin-entry.mjs'),
   read('cloudflare/core/src/commerce-edge.mjs')
 ]);
 
@@ -39,6 +41,11 @@ assert.match(entry, /marketplacePaymentsDisabled/);
 assert.match(entry, /marketplace-checkout-disabled/);
 assert.match(entry, /status:\s*410/);
 assert.doesNotMatch(entry, /handleCommerceApiRequest/);
+assert.match(originEntry, /commerce-host-fee-retired/);
+assert.match(originEntry, /\/api\/commerce\/host-fee\/policy/);
+assert.match(originEntry, /\/api\/commerce\/host-fee\/quote/);
+assert.match(originEntry, /410/);
+assert.doesNotMatch(originEntry, /splitCommerceHostFee|COMMERCE_HOST_FEE_SCHEMA/);
 assert.match(moneyWithMemberships, /marketplaceCheckoutEnabled:\s*false/);
 assert.match(moneyWithMemberships, /marketplaceRecipientOnboardingEnabled:\s*false/);
 assert.match(moneyWithMemberships, /platformCollectsSellerPayment:\s*false/);
@@ -98,6 +105,7 @@ console.log(JSON.stringify({
   checks: [
     'goods-seller-direct',
     'marketplace-checkout-route-gone',
+    'commerce-host-fee-routes-retired',
     'marketplace-connected-recipient-onboarding-gone',
     'browser-marketplace-distribution-fails-closed',
     'services-learning-fulfillment-burn',
