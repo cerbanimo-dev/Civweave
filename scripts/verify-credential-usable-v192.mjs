@@ -24,7 +24,7 @@ class MemoryStorage{
 class CustomEvent{constructor(type,{detail}={}){this.type=type;this.detail=detail}}
 class HTMLElement{}
 
-const apiKey='AIza-v192-test-key-not-real';
+const apiKey='test-gemini-key-not-real-v192';
 const config={route:'gemini',provider:'gemini',model:'gemini-3.5-flash-lite',endpoint:'https://generativelanguage.googleapis.com/v1beta',externalConsent:true};
 const persistent={schema:'civweave.device-model-secret.v191',apiKey,provider:'gemini',savedAt:'2026-08-05T00:00:00.000Z'};
 const localStorage=new MemoryStorage({
@@ -35,11 +35,12 @@ const localStorage=new MemoryStorage({
 });
 const sessionStorage=new MemoryStorage();
 const listeners=new Map();
-const document={documentElement:{dataset:{}},getElementById(){return null},querySelector(){return null},head:{append(){}},body:{append(){}}};
+const controllerUrl='https://civweave.test/app/model-settings-controller-v173.js?activate=1';
+const document={currentScript:{src:controllerUrl},documentElement:{dataset:{}},getElementById(){return null},querySelector(){return null},head:{append(){}},body:{append(){}}};
 const sandbox={
   console,Date,Math,JSON,URL,TextEncoder,TextDecoder,AbortController,Headers,Request,Response,Promise,Set,Map,
   crypto:webcrypto,performance,localStorage,sessionStorage,CustomEvent,HTMLElement,document,
-  location:{href:'https://civweave.test/app/working-campus-v156.html',origin:'https://civweave.test'},
+  location:{href:controllerUrl,origin:'https://civweave.test'},
   navigator:{userAgent:'Civweave v192 verifier'},
   fetch:async()=>new Response('{}',{status:200,headers:{'content-type':'application/json'}}),
   setTimeout,clearTimeout,setInterval,clearInterval,
@@ -52,6 +53,10 @@ sandbox.globalThis=sandbox;sandbox.window=sandbox;sandbox.self=sandbox;
 vm.createContext(sandbox);
 
 vm.runInContext(settingsSource,sandbox,{filename:'model-settings-controller-v173.js'});
+const controller=sandbox.CivweaveModelSettingsControllerV173;
+assert(controller?.activationRequired===true,'Settings controller was not explicitly activated.');
+assert(!sessionStorage.getItem('civweave-model-session'),'Settings controller restored credentials merely because the script was parsed.');
+assert(controller.restoreRememberedCredential()===true,'Explicit Settings credential restore failed.');
 const brokenSession=JSON.parse(sessionStorage.getItem('civweave-model-session'));
 assert(brokenSession.apiKey===apiKey,'Settings controller did not restore the remembered key fixture.');
 assert(brokenSession.remoteConsent===false,'Regression fixture no longer demonstrates the key-without-consent split.');
@@ -83,11 +88,13 @@ assert(workerWrapper.includes("importScripts('/service-worker-core-v208.js"),'Ac
 assert(workerCore.includes('discoverReferences')&&workerCore.includes('DOWNLOAD_OFFLINE_PACKAGE'),'Offline campus no longer discovers or stores dependencies.');
 assert(offlineManifest.seeds.includes('/app/working-campus-v156.html'),'Offline campus no longer seeds the installed working campus.');
 assert(offlineManifest.includePrefixes.includes('/extensions/'),'Offline campus excludes extension runtimes.');
-assert(installBoundary.includes('/extensions/civweave-device-credentials-v160.js'),'Installed surfaces no longer load the credential bridge.');
+assert(installBoundary.includes('/extensions/civweave-device-credentials-v160.js'),'Compatibility boundary no longer retains the explicit credential bridge.');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'v192-credential-usable',
+  revision:'v192-credential-usable-v317-explicit',
+  activationRequired:true,
+  moduleLoadMutation:false,
   reproduced:{keyPresent:true,consentLost:true},
   repaired:{keyPresent:true,consentRestored:true,fingerprintedSecret:true,runtimeUsable:true},
   offlinePackaged:'discovered-through-working-campus-install-boundary',
