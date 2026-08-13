@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Align package metadata
+        run: npm version "$(cat VERSION)" --no-git-tag-version --allow-same-version
       - name: Materialize canonical release
         run: node scripts/materialize-canonical-release.mjs
       - name: Commit generated release files
