@@ -21,6 +21,11 @@ on:
       - 'scripts/verify-reload-settings-recovery-v294.mjs'
       - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-local-model-settings-mount-v273.mjs'
+      - 'scripts/verify-living-school-settings-owner-v310.mjs'
+      - 'scripts/verify-realm-local-ai-visible-v308.mjs'
+      - 'scripts/verify-realm-local-ai-settings-v307.mjs'
+      - 'scripts/verify-ai-settings-entry-runtime-spine-v269.mjs'
+      - 'scripts/verify-working-campus-return-v425.mjs'
       - '.github/workflows/verify-settings-freeze-recovery-v296.yml'
   pull_request:
     paths:
@@ -38,6 +43,11 @@ on:
       - 'scripts/verify-reload-settings-recovery-v294.mjs'
       - 'scripts/verify-chat-launch-readiness-v295.mjs'
       - 'scripts/verify-local-model-settings-mount-v273.mjs'
+      - 'scripts/verify-living-school-settings-owner-v310.mjs'
+      - 'scripts/verify-realm-local-ai-visible-v308.mjs'
+      - 'scripts/verify-realm-local-ai-settings-v307.mjs'
+      - 'scripts/verify-ai-settings-entry-runtime-spine-v269.mjs'
+      - 'scripts/verify-working-campus-return-v425.mjs'
       - '.github/workflows/verify-settings-freeze-recovery-v296.yml'
 
 permissions:
@@ -61,10 +71,25 @@ jobs:
           node --check scripts/verify-settings-freeze-recovery-v296.mjs
           node --check scripts/verify-mobile-local-settings-v315.mjs
           node --check scripts/verify-reload-settings-recovery-v294.mjs
+          node --check scripts/verify-living-school-settings-owner-v310.mjs
+          node --check scripts/verify-realm-local-ai-visible-v308.mjs
+          node --check scripts/verify-realm-local-ai-settings-v307.mjs
+          node --check scripts/verify-ai-settings-entry-runtime-spine-v269.mjs
+          node --check scripts/verify-working-campus-return-v425.mjs
       - name: Verify settings nonblocking contract
         run: node scripts/verify-settings-freeze-recovery-v296.mjs
       - name: Verify mobile settings single-owner contract
         run: node scripts/verify-mobile-local-settings-v315.mjs
+      - name: Verify Living School canonical ownership
+        run: node scripts/verify-living-school-settings-owner-v310.mjs
+      - name: Verify realm Settings management is on demand
+        run: node scripts/verify-realm-local-ai-settings-v307.mjs
+      - name: Verify BFCache and visible local AI contract
+        run: node scripts/verify-realm-local-ai-visible-v308.mjs
+      - name: Verify Settings entry and runtime spine
+        run: node scripts/verify-ai-settings-entry-runtime-spine-v269.mjs
+      - name: Verify Working Campus BFCache return
+        run: node scripts/verify-working-campus-return-v425.mjs
       - name: Verify reload settings recovery
         run: node scripts/verify-reload-settings-recovery-v294.mjs
       - name: Verify chat launch separation
