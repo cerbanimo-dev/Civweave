@@ -14,6 +14,7 @@ on:
       - 'public/app/services/fellowfare/marketplace-v2.js'
       - 'public/app/services/fellowfare/marketplace-v2.css'
       - 'public/app/services/fellowfare/marketplace-v2-contrast.css'
+      - 'public/app/services/fellowfare/marketplace-v2-symbols.js'
       - 'public/app/services/fellowfare/live-data-preflight-v3.js'
       - 'public/app/services/fellowfare/marketplace-v2-capabilities.js'
       - 'public/app/services/fellowfare/cabinet-embed.css'
@@ -23,6 +24,7 @@ on:
       - 'public/service-worker-critical-v199.js'
       - 'scripts/verify-fellowfare-active-v203.mjs'
       - 'scripts/verify-fellowfare-marketplace-v2.mjs'
+      - 'scripts/verify-fellowfare-symbols-contrast-r2.mjs'
       - '.github/workflows/verify-fellowfare-active-v203.yml'
   workflow_dispatch:
 
@@ -39,3 +41,4 @@ jobs:
           node-version: '22'
       - run: node scripts/verify-fellowfare-active-v203.mjs
       - run: node scripts/verify-fellowfare-marketplace-v2.mjs
+      - run: node scripts/verify-fellowfare-symbols-contrast-r2.mjs
