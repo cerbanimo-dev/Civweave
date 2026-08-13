@@ -16,6 +16,7 @@ const paths={
   bindGuard:'public/app/ai-settings-bind-guard-v230.js',
   repair:'public/app/ai-settings-device-repair-v229.js',
   credentialHelper:'public/app/device-credential-persistence-v211.js',
+  anarchadiaStability:'public/app/anarchadia-runtime-stability-v159.js',
   living:'public/app/cabinets/living-school/index.html',
   campus:'public/app/working-campus-v156.html',
   cerbanimo:'public/app/realm-console-v140.html',
@@ -26,7 +27,7 @@ const paths={
   criticalCache:'public/service-worker-critical-v199.js'
 };
 const src=Object.fromEntries(await Promise.all(Object.entries(paths).map(async([key,path])=>[key,await read(path)])));
-for(const key of ['gateway','controller','lifecycle','boundary','orchestrator','shell','parity','delegation','bindGuard','repair','credentialHelper'])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
+for(const key of ['gateway','controller','lifecycle','boundary','orchestrator','shell','parity','delegation','bindGuard','repair','credentialHelper','anarchadiaStability'])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
 
 assert.equal(registry.policy,'extend-existing-owner-never-add-parallel-owner');
 assert.equal(settings.inputOwner,paths.gateway);
@@ -55,8 +56,8 @@ assert.doesNotMatch(src.controller,/^restoreRememberedCredential\(\);$/m,'Contro
 assert.match(src.controller,/eventOwnership:'none-input-owned-by-settings-gateway-v317'/);
 
 // Known former owners must remain subscribers/shims, never input interceptors.
-for(const key of ['orchestrator','parity','delegation','bindGuard','repair','credentialHelper','lifecycle']){
-  assert.doesNotMatch(src[key],/addEventListener\('click'[^\n]*(settings|Settings|SELECTOR|capture|onClick|openSettings)/i,`${paths[key]} regained Settings click ownership.`);
+for(const key of ['orchestrator','parity','delegation','bindGuard','repair','credentialHelper','anarchadiaStability','lifecycle']){
+  assert.doesNotMatch(src[key],/addEventListener\('click'[^\n]*(settings|Settings|SELECTOR|data-cwf-settings|openSettings)/i,`${paths[key]} regained Settings click ownership.`);
 }
 assert.doesNotMatch(src.orchestrator,/SETTINGS_SELECTOR|earlySettings|openSettingsIndependent|ensureSettingsModule|settingsCaptureOwner/);
 assert.match(src.orchestrator,/settingsInputOwnership:false/);
@@ -73,6 +74,9 @@ assert.match(src.credentialHelper,/automaticRestore:false/);
 assert.match(src.credentialHelper,/automaticListeners:false/);
 assert.match(src.credentialHelper,/inputOwnership:false/);
 assert.match(src.credentialHelper,/settingsApiPatching:false/);
+assert.doesNotMatch(src.anarchadiaStability,/data-cwf-settings|closest\?\.\('\[data-open-unified-ai-settings\]'\)/,'Realm stability layer may not intercept any Settings control.');
+assert.match(src.anarchadiaStability,/settingsInputOwnership:false/);
+assert.match(src.anarchadiaStability,/settingsOwner:'settings-gateway-v317'/);
 
 // Install boundary may install the tiny gateway, never an activated implementation.
 assert.match(src.boundary,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js'/);
@@ -105,4 +109,4 @@ assert.match(src.campus,/data-open-unified-ai-settings/,'Civweave lost its canon
 for(const key of ['codeCache','localAICache','criticalCache'])assert.ok(src[key].includes("'/app/settings-gateway-v317.js'"),`${paths[key]} does not pin the Settings gateway for offline first-click use.`);
 assert.ok(src.codeCache.includes("'/app/model-settings-controller-v173.js'")&&src.codeCache.includes("'/app/document-lifecycle-v221.js'"),'Code coherence cache must retain the lazy controller and management subscriber for offline activation.');
 
-console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,credentialOwner:settings.credentialOwner,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,prototypePatching:false,settingsApiPatching:false,offlineFirstClick:true}},null,2));
+console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,credentialOwner:settings.credentialOwner,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,prototypePatching:false,settingsApiPatching:false,realmFallbackListeners:false,offlineFirstClick:true}},null,2));
