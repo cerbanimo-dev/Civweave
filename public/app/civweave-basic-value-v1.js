@@ -113,14 +113,37 @@ async function scanLivingSchoolState(raw){
     if(row.validationConfidence&&validationPassed({moduleId:module.id,validationConfidence:row.validationConfidence}))await grantExternalValidation({moduleId:module.id,validationConfidence:row.validationConfidence});
   }
 }
+function learningValidationContext(value,receipt){
+  const packet=value?.validation?.packets?.find(row=>row?.id===receipt?.packetId),submission=value?.validation?.submissions?.find(row=>row?.id===packet?.submissionId);
+  const isLearning=submission?.source==='living'||submission?.kind==='lesson'||/living|lesson|module|learning/i.test(`${submission?.source||''} ${submission?.kind||''} ${submission?.subjectId||''}`);
+  return isLearning?{packet,submission}:null;
+}
+async function settleWeaveLearningValidation(value,receipt){
+  const ctx=learningValidationContext(value,receipt);if(!ctx)return;
+  const stored=value?.validation?.receipts?.find(row=>row?.id===receipt?.id);if(stored)await grantValidationContribution({validationId:stored.id,moduleId:ctx.submission?.subjectId,validatorId:stored.validatorId||stored.model||stored.deviceId,accepted:true});
+  const packet=value?.validation?.packets?.find(row=>row?.id===receipt?.packetId),confidence=packet?.validationConfidence;
+  if(confidence&&validationPassed({moduleId:ctx.submission?.subjectId,validationConfidence:confidence}))await grantExternalValidation({moduleId:ctx.submission?.subjectId,validationConfidence:confidence,validatorIds:(value?.validation?.receipts||[]).filter(row=>row?.packetId===packet.id).map(row=>row?.validatorId).filter(Boolean)});
+}
+function patchRewardWeave(){
+  const weave=globalThis.CivweaveRewardWeave;if(!weave||weave.__cwBasicValueV1)return weave;
+  if(typeof weave.record==='function'){
+    const original=weave.record.bind(weave);weave.record=receipt=>{const next=original(receipt);Promise.resolve(settleWeaveLearningValidation(next,receipt)).catch(console.warn);return next};
+  }
+  if(typeof weave.applyExchange==='function'){
+    const original=weave.applyExchange.bind(weave);weave.applyExchange=async exchange=>{const next=await original(exchange);if(exchange?.kind==='receipt')await settleWeaveLearningValidation(next,exchange.payload);return next};
+  }
+  try{Object.defineProperty(weave,'__cwBasicValueV1',{value:true})}catch{weave.__cwBasicValueV1=true}
+  return weave;
+}
 function bind(){
   for(const name of ['living-school:module-completed','civweave:learning-module-completed'])addEventListener(name,event=>grantModuleCompletion(event.detail||{}).catch(console.warn));
   for(const name of ['living-school:learning-validated','civweave:learning-validation-completed'])addEventListener(name,event=>grantExternalValidation(event.detail||{}).catch(console.warn));
   for(const name of ['living-school:validation-contribution','civweave:learning-validation-contribution'])addEventListener(name,event=>grantValidationContribution(event.detail||{}).catch(console.warn));
   addEventListener('storage',event=>{if(event.key===LIVING_STATE_KEY)scanLivingSchoolState(parse(event.newValue,null)).catch(console.warn)});
   queueMicrotask(()=>scanLivingSchoolState().catch(console.warn));
+  patchRewardWeave();setInterval(patchRewardWeave,1800);
 }
-const api=Object.freeze({version:VERSION,schema:SCHEMA,guide:GUIDE,laborButtons,educationalAcorns,curriculumAcorns,directLaborHours,sumLaborHours,mentorship,baselineFor,formatButtons,formatAcorns,chartRows,grantModuleCompletion,grantExternalValidation,grantValidationContribution,scanLivingSchoolState});
+const api=Object.freeze({version:VERSION,schema:SCHEMA,guide:GUIDE,laborButtons,educationalAcorns,curriculumAcorns,directLaborHours,sumLaborHours,mentorship,baselineFor,formatButtons,formatAcorns,chartRows,grantModuleCompletion,grantExternalValidation,grantValidationContribution,scanLivingSchoolState,patchRewardWeave});
 globalThis.CivweaveBasicValueV1=api;
 bind();
 try{dispatchEvent(new CustomEvent('civweave:basic-value-guide-ready',{detail:{version:VERSION,schema:SCHEMA,guide:GUIDE}}))}catch{}
