@@ -4,10 +4,10 @@
 
 import './live-data-preflight-v3.js';
 import '../../cw-reward-ledger-v2.js';
-import '../../cerbanimo-commerce-distribution-v1.js';
 import '../../civweave-live-data.js';
 import './marketplace-v2.js';
 import './marketplace-v2-capabilities.js';
+import './fulfillment-economy-v1.js';
 
 function ensureStyle(href, marker) {
   if (document.querySelector(`link[${marker}]`)) return;
