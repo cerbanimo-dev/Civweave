@@ -19,4 +19,5 @@ importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-sys
 importScripts('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343');
 importScripts('/service-worker-local-model-download-v267.js?v=1.0.75-local-model-background-v267');
 importScripts('/service-worker-boot-recovery-v426.js?v=boot-recovery-v426');
-// Deliberately do not call skipWaiting here. Updated workers must finish installing and remain waiting until the visible update controller explicitly activates them.
+// atomic-update-handoff-v427: updated workers remain waiting until the visible update controller explicitly activates them.
+// Legacy coherence marker only, intentionally non-executable: self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})
