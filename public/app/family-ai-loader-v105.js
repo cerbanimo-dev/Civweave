@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.122-headless-canonical-chat-r51-economic-value-v1';
+const VERSION='1.0.123-headless-canonical-chat-r52-economic-value-v1';
 const LOCAL_AI_BOOTSTRAP_REVISION='1.0.115-local-ai-bootstrap-v302-session-handoff';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
@@ -49,6 +49,7 @@ let promise=null;
 let optionalPromise=null;
 let valueCorePromise=null;
 let valueModelPromise=null;
+let economicReviewQueued=false;
 let generation=0;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
@@ -125,6 +126,19 @@ async function ensure(){
   })().catch(error=>{if(ticket===generation)reset(error.message);throw error});
   return promise;
 }
+function requestEconomicReview(reason='realm-work-created'){
+  if(economicReviewQueued)return;
+  economicReviewQueued=true;
+  queueMicrotask(async()=>{
+    try{
+      await ensure();
+      globalThis.CivweaveBasicValueSystemsV1?.schedule?.(0);
+      try{dispatchEvent(new CustomEvent('civweave:economic-review-requested',{detail:{reason,system:detect(),at:new Date().toISOString()}}))}catch{}
+    }catch(error){
+      console.info('[Civweave economic review deferred]',error.message);
+    }finally{economicReviewQueued=false}
+  });
+}
 
 function patchHeader(){
   const button=document.querySelector('#cwf104-head [data-cwf-chat]');
@@ -192,6 +206,8 @@ function boot(){patchHeader();loadValueCore().catch(error=>console.warn('[Civwea
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 addEventListener('pageshow',boot);
 addEventListener('civweave:guide-workspace-ready',patchHeader);
+addEventListener('civweave:working-campus-plan-built',()=>requestEconomicReview('working-campus-plan-built'));
+addEventListener('cerbanimo:quest-engine-changed',()=>requestEconomicReview('cerbanimo-quest-changed'));
 
 globalThis.CivweaveFamilyAILoaderV105={
   version:VERSION,
@@ -201,6 +217,7 @@ globalThis.CivweaveFamilyAILoaderV105={
   openSettings,
   reset,
   workspaceSnapshot,
+  requestEconomicReview,
   settingsOwner:'CivweaveModelSettingsControllerV173',
   defaultProvider:'deterministic',
   transformerActive:false,
