@@ -1,4 +1,5 @@
 const ORIGIN=location.origin;
+const NATIVE=Boolean(document.querySelector('[data-fellowfare-native-host]'));
 const LEGACY_KEY='fellowfare.mvp.state.v3';
 const V2_KEY='fellowfare.marketplace.v2';
 const routeButton=route=>document.querySelector(`[data-route="${CSS.escape(route)}"]`);
@@ -38,7 +39,7 @@ addEventListener('storage',event=>{
   globalThis.CivweaveFellowFareMarketplaceV2?.render?.();
 });
 addEventListener('DOMContentLoaded',()=>{
-  document.body.classList.add('ff-cabinet-embedded');
+  document.body.classList.add(NATIVE?'ff-market-native':'ff-cabinet-embedded');
   const hash=location.hash.slice(1);if(!['market','loom','assemblies','inbox','profile'].includes(hash))history.replaceState(null,'','#market');
   globalThis.CivweaveFellowFareMarketplaceV2?.render?.(location.hash.slice(1)||'market');
   parent.postMessage({type:'fellowfare:cabinet-ready',version:'2.0.0-live-market',capabilities:['products','services','learning-modules','tutoring','resources','needs','collectives','listings','orders','proposals','agreements','assemblies','canonical-acorns','canonical-buttons','commerce-receipts','usd-money-edge-status','portable-market-data']},ORIGIN);
