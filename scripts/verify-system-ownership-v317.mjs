@@ -15,6 +15,7 @@ const paths={
   delegation:'public/app/settings-delegation-v175.js',
   bindGuard:'public/app/ai-settings-bind-guard-v230.js',
   repair:'public/app/ai-settings-device-repair-v229.js',
+  credentialHelper:'public/app/device-credential-persistence-v211.js',
   living:'public/app/cabinets/living-school/index.html',
   campus:'public/app/working-campus-v156.html',
   cerbanimo:'public/app/realm-console-v140.html',
@@ -25,12 +26,13 @@ const paths={
   criticalCache:'public/service-worker-critical-v199.js'
 };
 const src=Object.fromEntries(await Promise.all(Object.entries(paths).map(async([key,path])=>[key,await read(path)])));
-for(const key of ['gateway','controller','lifecycle','boundary','orchestrator','shell','parity','delegation','bindGuard','repair'])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
+for(const key of ['gateway','controller','lifecycle','boundary','orchestrator','shell','parity','delegation','bindGuard','repair','credentialHelper'])assert.doesNotThrow(()=>new Function(src[key]),`${paths[key]} does not compile.`);
 
 assert.equal(registry.policy,'extend-existing-owner-never-add-parallel-owner');
 assert.equal(settings.inputOwner,paths.gateway);
 assert.equal(settings.presentationOwner,paths.controller);
 assert.equal(settings.managementSubscriber,paths.lifecycle);
+assert.equal(settings.credentialOwner,paths.controller);
 assert.equal(settings.canonicalControl,'[data-open-unified-ai-settings]');
 assert.deepEqual(settings.allowedInputListenerFiles,[paths.gateway]);
 
@@ -53,8 +55,8 @@ assert.doesNotMatch(src.controller,/^restoreRememberedCredential\(\);$/m,'Contro
 assert.match(src.controller,/eventOwnership:'none-input-owned-by-settings-gateway-v317'/);
 
 // Known former owners must remain subscribers/shims, never input interceptors.
-for(const key of ['orchestrator','parity','delegation','bindGuard','repair','lifecycle']){
-  assert.doesNotMatch(src[key],/addEventListener\('click'[^\n]*(settings|Settings|SELECTOR|capture|onClick|earlySettings)/i,`${paths[key]} regained Settings click ownership.`);
+for(const key of ['orchestrator','parity','delegation','bindGuard','repair','credentialHelper','lifecycle']){
+  assert.doesNotMatch(src[key],/addEventListener\('click'[^\n]*(settings|Settings|SELECTOR|capture|onClick|openSettings)/i,`${paths[key]} regained Settings click ownership.`);
 }
 assert.doesNotMatch(src.orchestrator,/SETTINGS_SELECTOR|earlySettings|openSettingsIndependent|ensureSettingsModule|settingsCaptureOwner/);
 assert.match(src.orchestrator,/settingsInputOwnership:false/);
@@ -66,6 +68,11 @@ assert.match(src.delegation,/listenerCount:0/);
 assert.match(src.lifecycle,/searchParams\.get\('activate'\)==='1'/);
 assert.match(src.lifecycle,/settingsEntryOwner:'settings-gateway-v317'/);
 assert.match(src.lifecycle,/inputOwnership:false/);
+assert.doesNotMatch(src.credentialHelper,/SETTINGS_SELECTOR|document\.addEventListener\('click'|api\.open\s*=|originalOpen|patchSettingsApi\(\);\s*$/m,'Credential helper may not intercept input or monkey-patch Settings open().');
+assert.match(src.credentialHelper,/automaticRestore:false/);
+assert.match(src.credentialHelper,/automaticListeners:false/);
+assert.match(src.credentialHelper,/inputOwnership:false/);
+assert.match(src.credentialHelper,/settingsApiPatching:false/);
 
 // Install boundary may install the tiny gateway, never an activated implementation.
 assert.match(src.boundary,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js'/);
@@ -98,4 +105,4 @@ assert.match(src.campus,/data-open-unified-ai-settings/,'Civweave lost its canon
 for(const key of ['codeCache','localAICache','criticalCache'])assert.ok(src[key].includes("'/app/settings-gateway-v317.js'"),`${paths[key]} does not pin the Settings gateway for offline first-click use.`);
 assert.ok(src.codeCache.includes("'/app/model-settings-controller-v173.js'")&&src.codeCache.includes("'/app/document-lifecycle-v221.js'"),'Code coherence cache must retain the lazy controller and management subscriber for offline activation.');
 
-console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,prototypePatching:false,offlineFirstClick:true}},null,2));
+console.log(JSON.stringify({ok:true,schema:registry.schema,policy:registry.policy,settings:{inputOwner:settings.inputOwner,presentationOwner:settings.presentationOwner,managementSubscriber:settings.managementSubscriber,credentialOwner:settings.credentialOwner,canonicalControl:settings.canonicalControl,oneInputListener:true,lazyController:true,lazyManagement:true,livingSchoolShared:true,prototypePatching:false,settingsApiPatching:false,offlineFirstClick:true}},null,2));
