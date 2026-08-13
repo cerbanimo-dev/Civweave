@@ -1,0 +1,95 @@
+name: One-shot Civweave green-pass repair 2c
+
+on:
+  push:
+    branches:
+      - ci/repair-green-pass-2-20260812
+    paths:
+      - .github/workflows/repair-green-pass-2c-scratch.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Reuse corrected pass-two patch program
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const source=fs.readFileSync('.github/workflows/repair-green-pass-2-scratch.yml','utf8');
+          const match=source.match(/node <<'NODE'\n([\s\S]*?)\n          NODE/);
+          if(!match)throw new Error('Could not recover pass-two patch program.');
+          let code=match[1].replace(/^          /gm,'');
+          const broken="installedEntry.includes('fetch(`/app/manifest.webmanifest?boot=${Date.now()}`)&&";
+          const fixed="installedEntry.includes('/app/manifest.webmanifest?boot=${Date.now()}')&&";
+          code=code.replaceAll(broken,fixed);
+          fs.writeFileSync('/tmp/civweave-green-pass-2.cjs',code);
+          NODE
+          node /tmp/civweave-green-pass-2.cjs
+          node <<'NODE'
+          const fs=require('fs');
+          const file='scripts/test-proof-driven-checkpoints-v158.mjs';
+          let source=fs.readFileSync(file,'utf8');
+          const old="assert(core.includes(\"const BUILD = 'lightweight-shell-v208'\"),'Retained worker core is not the lightweight shell.');";
+          const next="assert(core.includes(\"const BUILD = 'lightweight-shell-v208\"),'Retained worker core is not in the lightweight-shell-v208 family.');";
+          if(!source.includes(old))throw new Error('Expected stale proof-progress worker build assertion not found.');
+          fs.writeFileSync(file,source.replace(old,next));
+          NODE
+
+      - name: Install production dependencies
+        run: npm ci --omit=dev --no-audit --no-fund
+
+      - name: Rebuild current service worker
+        run: node scripts/build-service-worker-v211.mjs
+
+      - name: Verify formerly red contracts
+        run: |
+          set -euxo pipefail
+          node scripts/verify-stable-app-entry-v215.mjs
+          node scripts/verify-weaveling-hub-v233.mjs
+          node scripts/verify-chat-convergence-v250.mjs
+          node scripts/verify-local-ai-bootstrap-coherence-v307.mjs
+          node scripts/test-open-learning-media-runtime-v1.mjs
+          node scripts/verify-navigation-generators-v227.mjs
+          node scripts/verify-pwa-cold-launch-recovery-v426.mjs
+          node scripts/verify-pwa-install-campus-v246.mjs
+          node scripts/verify-radio-shell-guarantee-v305.mjs
+          node scripts/verify-canonical-core-only-v226.mjs
+          node scripts/test-proof-driven-checkpoints-v158.mjs
+          npm run check:release-discipline
+
+      - name: Run full core check
+        run: npm run check
+
+      - name: Rebuild Cloudflare package and verify packaged recovery contract
+        run: |
+          npm run build:release
+          node scripts/build-cloudflare-pages.mjs
+          release_version="$(tr -d '[:space:]' < VERSION)"
+          grep -q "revision=boot-recovery-v426" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "version:'${release_version}-boot-recovery-v426'" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "updateViaCache:'none'" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "bounded(registration.update()" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "service-worker-local-ai-coherence-v307.js?v=${release_version}-local-ai-code-coherence-v307" .cloudflare-pages/service-worker-v203.js
+          grep -q "radio-core-shell-v305-playlist-only-v246" .cloudflare-pages/service-worker-v203.js
+
+      - name: Commit repair to scratch branch
+        run: |
+          rm .github/workflows/repair-green-pass-2-scratch.yml
+          rm .github/workflows/repair-green-pass-2b-scratch.yml
+          rm .github/workflows/repair-green-pass-2c-scratch.yml
+          git config user.name "civweave-green-pass-bot"
+          git config user.email "civweave-green-pass-bot@users.noreply.github.com"
+          git add -A
+          git status --short
+          git commit -m "Repair current runtime guards and worker generation"
+          git push origin HEAD:ci/repair-green-pass-2-20260812
