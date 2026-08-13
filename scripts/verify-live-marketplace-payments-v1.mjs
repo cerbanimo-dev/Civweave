@@ -59,7 +59,6 @@ for (const needle of [
   "sourceTransaction: charge.id",
   "reverseHostTransfer",
   "refundTopUp",
-  "charge.dispute.funds_reinstated",
   "civweave_annual_pool: 'excluded'"
 ]) assert.ok(serverCommerce.includes(needle), `missing server commerce contract: ${needle}`);
 assert.doesNotMatch(serverCommerce, /application_fee_amount/);
@@ -75,6 +74,7 @@ assert.match(moneyWithMemberships, /settleCommerceCheckout/);
 assert.match(moneyWithMemberships, /handleCommerceRefund/);
 assert.match(moneyWithMemberships, /handleCommerceDispute/);
 assert.match(moneyWithMemberships, /restoreCommerceDisputeTransfers/);
+assert.match(moneyWithMemberships, /charge\.dispute\.funds_reinstated/);
 
 const commerceModule = await import(new URL('../cloudflare/core/src/commerce-edge.mjs', import.meta.url));
 const service = commerceModule.buildCommerceDistribution({
