@@ -8,6 +8,7 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-owner-v295.js',
   '/app/ai-capability-broker-v268.js',
+  '/app/fast-interactive-runtime-v192.js',
   '/app/mobile-ai-hardening-v302.js',
   '/app/document-lifecycle-v221.js'
 ]);
@@ -16,6 +17,7 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-owner-v295.js',
   '/app/ai-capability-broker-v268.js',
+  '/app/fast-interactive-runtime-v192.js',
   '/app/mobile-ai-hardening-v302.js',
   '/app/document-lifecycle-v221.js',
   '/app/local-ai/bootstrap-v266.js',
