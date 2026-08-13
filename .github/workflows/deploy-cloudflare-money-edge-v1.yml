@@ -60,7 +60,7 @@ jobs:
           import fs from 'node:fs';
           const payload = JSON.parse(fs.readFileSync('/tmp/civweave-money-before.json', 'utf8'));
           const edge = payload.moneyEdge || payload;
-          process.stdout.write(`${edge.liveReady === true ? 'true' : 'false'} ${String(edge.providerMode || 'unknown')}`);
+          console.log(`${edge.liveReady === true ? 'true' : 'false'} ${String(edge.providerMode || 'unknown')}`);
           NODE
             )
           fi
