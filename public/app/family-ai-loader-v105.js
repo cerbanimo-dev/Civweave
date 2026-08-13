@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.123-headless-canonical-chat-r52-economic-value-v1';
+const VERSION='1.0.124-headless-canonical-chat-r52-economic-value-v1-settings-gateway-v317';
 const LOCAL_AI_BOOTSTRAP_REVISION='1.0.115-local-ai-bootstrap-v302-session-handoff';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
@@ -189,16 +189,14 @@ function workspaceSnapshot(system=detect(),query=''){
   return clean(JSON.stringify(snapshot),7000);
 }
 
-async function openSettings(){
-  try{
-    const controller=globalThis.CivweaveModelSettingsControllerV173;
-    if(!controller?.open)throw new Error('The direct model settings controller is unavailable.');
-    return await controller.open();
-  }catch(error){
-    console.error('Civweave settings failed to open',error);
-    try{dispatchEvent(new CustomEvent('civweave:model-settings-open-failed',{detail:{message:error.message,system:detect()}}))}catch{}
+async function openSettings(launcher){
+  const gateway=globalThis.CivweaveSettingsGatewayV317;
+  if(!gateway?.open){
+    console.error('Civweave Settings gateway is unavailable.');
+    try{dispatchEvent(new CustomEvent('civweave:model-settings-open-failed',{detail:{message:'Settings gateway unavailable',system:detect()}}))}catch{}
     return null;
   }
+  return gateway.open(launcher);
 }
 function warm(){return ensure()}
 function boot(){patchHeader();loadValueCore().catch(error=>console.warn('[Civweave economic value core]',error.message))}
@@ -218,7 +216,8 @@ globalThis.CivweaveFamilyAILoaderV105={
   reset,
   workspaceSnapshot,
   requestEconomicReview,
-  settingsOwner:'CivweaveModelSettingsControllerV173',
+  settingsOwner:'settings-gateway-v317',
+  settingsInputOwnership:false,
   defaultProvider:'deterministic',
   transformerActive:false,
   memoryRevision:'v192-fast-relevant-memory',

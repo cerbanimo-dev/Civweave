@@ -38,7 +38,7 @@ const proxy={
   ensure:async()=>{const api=await loadFamily();return api.ensure()},
   warm:async()=>{const api=await loadFamily();return api.warm?.()||api.ensure()},
   openChat:async(...args)=>{const api=await loadFamily();return api.openChat(...args)},
-  openSettings:async()=>{const api=await loadFamily();return api.openSettings()},
+  openSettings:async launcher=>globalThis.CivweaveSettingsGatewayV317?.open?.(launcher)||null,
   reset:()=>{loaderPromise=null}
 };
 if(!actualLoader())globalThis.CivweaveFamilyAILoaderV105=proxy;
@@ -56,9 +56,8 @@ function openWorkbench(route='workbench'){location.assign(`/app/services/anarcha
 document.addEventListener('click',event=>{
   const governed=event.target.closest?.('[data-ag145-open]');if(governed){event.preventDefault();event.stopImmediatePropagation();openGovernance(governed.dataset.ag145Open||'');return}
   const workbench=event.target.closest?.('[data-anarchadia-workbench]');if(workbench){event.preventDefault();event.stopImmediatePropagation();openWorkbench(workbench.dataset.anarchadiaWorkbench||'workbench');return}
-  if(event.target.closest?.('[data-cwf-settings]')&&!actualLoader()){event.preventDefault();event.stopImmediatePropagation();proxy.openSettings();return}
   if(event.target.closest?.('[data-cwf-chat]')&&!actualLoader()){event.preventDefault();event.stopImmediatePropagation();proxy.openChat('anarchadia',{contextSystem:'anarchadia'});return}
 },true);
 compactLegacyState();
-globalThis.AnarchadiaRuntimeStabilityV159={version:VERSION,loadFamily,compactLegacyState,askMerlin};
+globalThis.AnarchadiaRuntimeStabilityV159={version:VERSION,loadFamily,compactLegacyState,askMerlin,settingsInputOwnership:false,settingsOwner:'settings-gateway-v317'};
 })();
