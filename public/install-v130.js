@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION = '1.0.124';
+const VERSION = '1.0.126';
 const ENTRY = '/app/?system=civweave&installed=1';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
 const WORKER_SCRIPT_REVISION = 'release-coherence-v226';

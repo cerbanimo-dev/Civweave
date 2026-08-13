@@ -34,11 +34,17 @@ const canonical = boundary.match(/const CANONICAL_SYSTEM_SCRIPTS=\[([^\]]+)\]/)?
 assert.ok(canonical.includes('DOCUMENT_LIFECYCLE'), 'Canonical realm support must load document lifecycle.');
 assert.match(boundary, /realmLocalAISettingsRevision:'v307-lazy-management-via-document-lifecycle'/);
 
-assert.match(lifecycle, /addEventListener\('civweave:model-settings-opened',\(\)=>ensureLocalAISettingsManagement\(\)\)/);
+assert.match(lifecycle, /addEventListener\('civweave:model-settings-opened'/);
+assert.match(lifecycle, /scheduleSettingsManagement\(layer\)/,'Settings-open must schedule management rather than synchronously mounting it.');
+assert.match(lifecycle, /function scheduleSettingsManagement\(/);
+assert.match(lifecycle, /afterPaint\(/,'Realm local-AI management must yield a paint before loading management code.');
+assert.doesNotMatch(lifecycle, /addEventListener\('civweave:model-settings-opened',\(\)=>ensureLocalAISettingsManagement\(\)\)/,'Realm settings must not synchronously mount local-AI management from the open event.');
 assert.match(lifecycle, /ensureMinimalManagement/);
 assert.match(lifecycle, /settings-panel-v267\.js/);
 assert.match(lifecycle, /managementOnly:true/);
 assert.match(lifecycle, /inferenceDormantOnOpen:true/);
+assert.match(lifecycle, /managementAfterPaint:true/);
+assert.match(lifecycle, /globalObserverPatch:false/);
 
 for (const token of ['Downloaded local AI', 'Download', 'Resume', 'Use locally', 'Remove', 'Model window', 'Civweave working default']) {
   assert.ok(settings.includes(token), `Local AI settings lost ${token}.`);
@@ -65,8 +71,10 @@ assert.ok(campus.includes('/app/document-lifecycle-v221.js'), 'Civweave campus m
 
 console.log(JSON.stringify({
   ok: true,
-  revision: 'realm-local-ai-settings-v307',
+  revision: 'realm-local-ai-settings-v316',
   realms: [...realms.keys()],
   managementOnly: true,
-  inferenceDormantOnOpen: true
+  managementAfterPaint: true,
+  inferenceDormantOnOpen: true,
+  globalObserverPatch: false
 }, null, 2));

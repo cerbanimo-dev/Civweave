@@ -6,15 +6,18 @@ for(const token of [
   "const SETTINGS_LOAD_POLICY_COMPAT='management-only-no-inference-bootstrap-v296'",
   'const LOCAL_AI_VISIBLE_FILES=',
   'function ensureVisibleManagement()',
-  'warmVisibleManagement()',
+  'function scheduleSettingsManagement(',
   'function stopOnPageHide(event){if(event?.persisted)return;stop()}',
   "addEventListener('pagehide',stopOnPageHide)",
   "addEventListener('pageshow',reviveFromPageShow)",
-  'if(layer&&!layer.hidden)void ensureLocalAISettingsManagement()',
-  "visibleSettingsLoadPolicy:'visible-controls-preloaded-management-only-no-inference-v308'"
+  'if(layer&&!layer.hidden)scheduleSettingsManagement(layer)',
+  "visibleSettingsLoadPolicy:'on-open-after-paint-management-only-v316'",
+  'managementAfterPaint:true',
+  'bfCacheSafe:true'
 ]) assert.ok(lifecycle.includes(token),`Lifecycle local-AI revival lost: ${token}`);
-assert.ok(lifecycle.indexOf('warmVisibleManagement()')<lifecycle.lastIndexOf('startEntryRepair();'),'Visible local AI controls must begin warming during lifecycle startup.');
+assert.ok(!lifecycle.includes('warmVisibleManagement()'),'Local AI controls must not prewarm during lifecycle startup.');
 assert.ok(!lifecycle.includes('new Worker('),'Settings lifecycle must not start inference workers.');
 assert.ok(!lifecycle.includes('.generate('),'Settings lifecycle must not run inference.');
+assert.ok(!/globalThis\.MutationObserver\s*=/.test(lifecycle),'Settings lifecycle must not replace MutationObserver globally.');
 new Function(lifecycle);
-console.log(JSON.stringify({ok:true,revision:'realm-local-ai-visible-v308',bfcacheSafe:true,visibleControlsPreloaded:true,inferenceDormant:true,compatibilityMarkerPreserved:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'realm-local-ai-visible-v316',bfcacheSafe:true,visibleControlsOnDemand:true,managementAfterPaint:true,inferenceDormant:true,globalObserverUntouched:true},null,2));

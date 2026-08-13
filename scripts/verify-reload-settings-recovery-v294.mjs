@@ -15,10 +15,11 @@ assert.match(bootstrap,/1\.0\.116-local-model-test-pulse-v303-mobile-safe/,'boot
 assert.doesNotMatch(bootstrap,/1\.0\.83-local-model-test-pulse-v282-health/,'stale v282 test-pulse compatibility gate must stay retired');
 assert.doesNotMatch(bootstrap,/1\.0\.86-local-model-test-pulse-v286-wasm-performance/,'stale v286 test-pulse compatibility gate must stay retired');
 
-assert.match(lifecycle,/document\.addEventListener\('click',captureSettingsOpen,true\)/,'AI settings must have a capture-phase first-open path');
-assert.match(lifecycle,/event\.stopImmediatePropagation\(\)/,'successful first-open must suppress legacy target handlers that wait for inference');
-assert.match(lifecycle,/controller\.open\(launcher\)/,'settings controller must open before downloaded inference readiness is awaited');
-assert.match(lifecycle,/ensureMinimalManagement/,'settings must have a management-only recovery path');
+assert.match(lifecycle,/document-lifecycle-v316-nonblocking-no-global-observer-patch/,'settings lifecycle must use the nonblocking v316 recovery contract');
+assert.doesNotMatch(lifecycle,/captureSettingsOpen|document\.addEventListener\('click'/,'document lifecycle must not compete with the orchestrator for Settings taps');
+assert.doesNotMatch(lifecycle,/globalThis\.MutationObserver\s*=/,'document lifecycle must never replace MutationObserver globally');
+assert.match(lifecycle,/function scheduleSettingsManagement\(/,'settings management must be independently schedulable');
+assert.match(lifecycle,/managementAfterPaint:true/,'settings management must yield a browser paint before enhancement work');
 assert.match(lifecycle,/settingsStillOpen/,'local-AI enhancement failure must report without closing the settings surface');
 
 const managementBody=lifecycle.match(/function localAIManagementReady\(\)\{([\s\S]*?)\}\nfunction localAIInferenceReady/)?.[1]||'';
@@ -91,11 +92,12 @@ function makeContext(){
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'reload-settings-recovery-v294',
+  revision:'reload-settings-recovery-v316-nonblocking',
   assertions:{
     localAICompatibility:'v303-test-pulse-mobile-safe-current',
-    settingsOpen:'capture-first-management-after-open',
+    settingsOpen:'window-owner-then-post-paint-management',
     inferenceGate:'separate-from-settings-management',
+    globalBrowserPrimitives:'untouched',
     installedReload:'entry-then-working-campus-never-installer',
     workerCacheBust:'installed-pwa-launch-v294-campus-recovery'
   }
