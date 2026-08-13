@@ -1,5 +1,4 @@
 import core, { CivweaveCoreIdentity, launchTopology as baseLaunchTopology } from './index.mjs';
-import { COMMERCE_HOST_FEE_SCHEMA, splitCommerceHostFee, assertCommerceHostFeeConservation } from './commerce-node-fees.mjs';
 
 export { CivweaveCoreIdentity };
 
@@ -21,31 +20,23 @@ export function launchTopologyFor(env = {}) {
   });
 }
 
+function retiredCommerceHostFee() {
+  return json({
+    schema: 'civweave.fellowfare-payment-boundary.v1',
+    ok: false,
+    code: 'commerce-host-fee-retired',
+    message: 'FellowFare no longer charges or distributes a marketplace commerce host fee. Goods use seller-direct payment; services and learning use Acorn/Button fulfillment.'
+  }, 410);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     if (request.method === 'GET' && url.pathname === '/api/launch-topology') {
       return json(launchTopologyFor(env));
     }
-    if (request.method === 'GET' && url.pathname === '/api/commerce/host-fee/policy') {
-      return json({
-        schema: COMMERCE_HOST_FEE_SCHEMA,
-        oneHostFeeMaximum: true,
-        sameNode: '100-percent-single-host',
-        crossNode: '50-50-buyer-seller-home-hosts',
-        singleParticipatingHost: '100-percent-participating-host',
-        noParticipatingHost: 'system-retained',
-        relayNodesEligible: false,
-        feeRateDefinedBy: 'checkout-policy'
-      });
-    }
-    if (request.method === 'POST' && url.pathname === '/api/commerce/host-fee/quote') {
-      try {
-        const input = await request.json();
-        return json(assertCommerceHostFeeConservation(splitCommerceHostFee(input)));
-      } catch (error) {
-        return json({ error: String(error?.message || error) }, 400);
-      }
+    if (url.pathname === '/api/commerce/host-fee/policy' || url.pathname === '/api/commerce/host-fee/quote') {
+      return retiredCommerceHostFee();
     }
     return core.fetch(request, env, ctx);
   },
