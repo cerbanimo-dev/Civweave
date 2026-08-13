@@ -4,15 +4,22 @@ on:
   pull_request:
     paths:
       - 'public/app/fellowfare-cabinet-v144.html'
+      - 'public/app/fellowfare-cabinet-v144.js'
       - 'public/app/fellowfare-cabinet-v144.css'
       - 'public/app/fellowfare-parent-theme-v205.css'
       - 'public/app/fellowfare-mobile-flow-v205.js'
       - 'public/app/services/fellowfare/cabinet.html'
+      - 'public/app/services/fellowfare/app.js'
+      - 'public/app/services/fellowfare/cabinet-bridge.js'
+      - 'public/app/services/fellowfare/marketplace-v2.js'
+      - 'public/app/services/fellowfare/marketplace-v2.css'
       - 'public/app/services/fellowfare/cabinet-embed.css'
+      - 'public/app/civweave-live-data.js'
       - 'public/app/themed-system-nav-v178.js'
       - 'public/service-worker-v156.js'
       - 'public/service-worker-critical-v199.js'
       - 'scripts/verify-fellowfare-active-v203.mjs'
+      - 'scripts/verify-fellowfare-marketplace-v2.mjs'
       - '.github/workflows/verify-fellowfare-active-v203.yml'
   workflow_dispatch:
 
@@ -28,3 +35,4 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/verify-fellowfare-active-v203.mjs
+      - run: node scripts/verify-fellowfare-marketplace-v2.mjs
