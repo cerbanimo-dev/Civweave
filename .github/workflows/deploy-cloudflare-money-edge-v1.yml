@@ -107,7 +107,12 @@ jobs:
           const nodePath = '.cloudflare-launch/node-cloud.wrangler.jsonc';
           let node = fs.readFileSync(nodeSource, 'utf8');
           node = node.replace(/\n  "routes": \[[\s\S]*?\n  \],/, '');
-          node = node.replace('"main": "src/index.mjs"', '"main": "../cloudflare/node-cloud/src/index.mjs"');
+          const nodeEntryMatch = node.match(/"main"\s*:\s*"([^"]+)"/);
+          const nodeEntry = String(nodeEntryMatch?.[1] || '').trim();
+          if (!nodeEntry) throw new Error('Node-cloud Wrangler config is missing its canonical entrypoint.');
+          const generatedNodeEntry = `../cloudflare/node-cloud/${nodeEntry.replace(/^\.\//, '')}`;
+          node = node.replace(`"main": "${nodeEntry}"`, `"main": "${generatedNodeEntry}"`);
+          if (!node.includes(`"main": "${generatedNodeEntry}"`)) throw new Error('Generated node-cloud Wrangler config did not retarget the canonical entrypoint.');
           fs.writeFileSync(nodePath, node);
           NODE
           echo "r2_ready=$R2_READY" >> "$GITHUB_OUTPUT"
