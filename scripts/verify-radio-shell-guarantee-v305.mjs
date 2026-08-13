@@ -52,11 +52,11 @@ for (const source of [wrapper, builder]) {
   assert(source.indexOf('/service-worker-shell-integrity-v281.js') < source.indexOf(radioImport), 'Radio shell must wrap the integrity-owned cacheShell implementation.');
   assert(source.indexOf(radioImport) < source.indexOf('/service-worker-shell-repair-v293.js'), 'Installed shell repair must observe the radio-wrapped cacheShell implementation.');
 }
-assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305-smartlink-v245`), `Committed worker is stale: radio shell must carry the exact-station smart-link handoff for release ${version}.`);
-assert(builder.includes("importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-smartlink-v245');"), 'Worker builder must preserve the Spotify smart-link radio cache-bust token.');
+assert(wrapper.includes(`${radioImport}?v=${version}-radio-core-shell-v305-playlist-only-v246`), `Committed worker is stale: radio shell must carry the playlist-only station handoff for release ${version}.`);
+assert(builder.includes("importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-playlist-only-v246');"), 'Worker builder must preserve the playlist-only radio cache-bust token.');
 assert(builder.includes("'public/service-worker-radio-core-v305.js'"), 'Worker builder does not require the radio shell source file.');
 assert(builder.includes("radioCore:'radio-core-shell-v305'"), 'Worker builder does not report the radio shell revision.');
-assert(builder.includes("radioAssetHandoff:'smartlink-v245'"), 'Worker builder must report the active radio smart-link handoff revision.');
+assert(builder.includes("radioAssetHandoff:'playlist-only-v246'"), 'Worker builder must report the active playlist-only radio handoff revision.');
 
 for (let index = 0; index < requiredRadioAssets.length; index += 1) {
   assert(assetContents[index].length > 0, `${requiredRadioAssets[index]} is empty.`);
@@ -65,13 +65,16 @@ for (const pathname of requiredRadioAssets.filter(path => path.includes('/radio-
   assert(trackSuggestions.includes(pathname), `Track picker no longer references ${pathname}.`);
 }
 assert(trackSuggestions.includes('/app/radio-track-map-v241.json'), 'Track picker no longer references the exact-track map.');
-assert(trackSuggestions.includes("REVISION='radio-track-suggestions-v245'"), 'Installed radio core must carry the exact-station Spotify smart-link handoff.');
-assert(trackSuggestions.includes("new URL(`https://open.spotify.com/track/${id}`)"), 'Installed radio core must identify the exact suggested track.');
-assert(trackSuggestions.includes("searchParams.set('context',meta.playlistUri)"), 'Installed radio core must attach the approved station playlist context.');
-assert(trackSuggestions.includes("new URL('https://spotify.link/content_linking')"), 'Installed radio core must use Spotify content linking for native-app handoff.');
+assert(trackSuggestions.includes("REVISION='radio-track-suggestions-v246'"), 'Installed radio core must carry the playlist-only Spotify handoff.');
+assert(trackSuggestions.includes("new URL(meta.spotifyUrl)"), 'Installed radio core must build suggested-track handoff from the approved station playlist.');
+assert(trackSuggestions.includes("searchParams.set('highlight',`spotify:track:${id}`)"), 'Installed radio core must identify the suggested track inside the playlist URL.');
+assert(trackSuggestions.includes("configureStationLink(stationLink,track,system,tag)"), 'Installed radio core must decorate the station link rather than create a track link.');
+assert(trackSuggestions.includes("playlistOnly:true"), 'Installed radio core must expose the playlist-only invariant.');
 assert(trackSuggestions.includes("link.target='_blank'"), 'Installed radio core must keep Civweave open while Spotify opens externally.');
-assert(!trackSuggestions.includes("location.assign(trackLink.href)"), 'Installed radio core must never navigate the PWA away to Spotify.');
-assert(!trackSuggestions.includes("searchParams.set('highlight'"), 'Installed radio core must not revive the failed playlist-highlight experiment.');
+assert(!trackSuggestions.includes("new URL(`https://open.spotify.com/track/${id}`)"), 'Installed radio core must never construct an isolated Spotify track destination.');
+assert(!trackSuggestions.includes('spotify.link/content_linking'), 'Installed radio core must not use a content-link wrapper around a track resource.');
+assert(!trackSuggestions.includes('trackLink'), 'Installed radio core must not create a separate track CTA.');
+assert(!trackSuggestions.includes('location.assign'), 'Installed radio core must never navigate the PWA away to Spotify.');
 assert(trackSuggestions.includes('recent:nextRecent'), 'Installed radio core must preserve recent-track anti-repeat history.');
 
 function makeRuntime({ failPath = '' } = {}) {
@@ -139,7 +142,7 @@ console.log(JSON.stringify({
   ok: true,
   version,
   revision: 'radio-core-shell-v305',
-  radioAssetHandoff: 'smartlink-v245',
+  radioAssetHandoff: 'playlist-only-v246',
   committedWorkerCurrent: true,
   requiredAssetCount: requiredRadioAssets.length,
   freshInstallRequired: true,
