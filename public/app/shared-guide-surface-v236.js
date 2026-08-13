@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.118-shared-guide-surface-v236-bubble-only-v425';
+const VERSION='1.0.119-shared-guide-surface-v236-avatar-expression-v426';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 function liveHead(){
@@ -46,6 +46,7 @@ function install(){
   if(!liveHead())return false;
   loadStyle('/app/mobile-guide-scroll-v256.css?v=1.0.57-v256');
   loadStyle('/app/weaveling-scroll-owner-v265.css?v=1.0.57-v265');
+  load('/app/avatar-expression-director-v313.js?v=1.0.1-v314-sleep-policy',null,()=>Boolean(globalThis.CivweaveAvatarExpressionDirectorV313));
   load('/app/guide-stream-thinking-v249.js?v=1.0.118-v249-navigation-lifecycle-v424',null,()=>Boolean(globalThis.CivweaveGuideStreamThinkingV249));
   load('/app/gemini-device-direct-v257.js?v=1.0.57-v257',()=>{
     load('/extensions/civweave-gemini-interactions-v159.js?v=1.0.57-v257',null,()=>Boolean(globalThis.CivweaveGeminiInteractionsV159));
@@ -53,8 +54,8 @@ function install(){
   load('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization',()=>{
     load('/app/weaveling-plan-materialization-v265.js?v=1.0.57-v265',()=>{
       load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.118-v425-bubble-only',()=>{
-        load('/app/shared-chat-face-icons-v255.js?v=1.0.57-v257',()=>{
-          try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION}}))}catch{}
+        load('/app/shared-chat-face-icons-v255.js?v=1.0.120-v314-expressive',()=>{
+          try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION,avatarExpression:'v314'}}))}catch{}
         },()=>Boolean(globalThis.CivweaveSharedChatFaceIconsV255));
         load('/app/living-school-chat-workbench-v255.js?v=1.0.57-v265-learning-pathway',()=>{
           try{dispatchEvent(new CustomEvent('civweave:living-school-chat-workbench-ready',{detail:{version:VERSION}}))}catch{}
@@ -68,5 +69,5 @@ function install(){
 install();
 addEventListener('pageshow',()=>queueMicrotask(install));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,plannerMaterialization:'v265',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',install});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,plannerMaterialization:'v265',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',avatarExpression:'v314',install});
 })();
