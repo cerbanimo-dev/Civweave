@@ -1,0 +1,47 @@
+name: Materialize Civweave 1.0.130 Settings Release
+
+on:
+  push:
+    branches:
+      - agent/settings-single-gateway-v317-v129
+    paths:
+      - .github/workflows/materialize-settings-release-v130.yml
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/settings-single-gateway-v317-v129
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Set release inputs to 1.0.130
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const version='1.0.130';
+          fs.writeFileSync('VERSION',version+'\n');
+          const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+          pkg.version=version;
+          fs.writeFileSync('package.json',JSON.stringify(pkg,null,2)+'\n');
+          const contract=JSON.parse(fs.readFileSync('config/release-contract.json','utf8'));
+          contract.canonical.current={version,path:`releases/${version}`,status:'current'};
+          fs.writeFileSync('config/release-contract.json',JSON.stringify(contract,null,2)+'\n');
+          NODE
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Commit generated release
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m 'Materialize Civweave 1.0.130 settings gateway release'
+          git push origin HEAD:agent/settings-single-gateway-v317-v129
