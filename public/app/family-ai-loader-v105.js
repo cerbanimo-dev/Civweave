@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.121-headless-canonical-chat-r50-local-ai-coherence-v307';
+const VERSION='1.0.122-headless-canonical-chat-r51-economic-value-v1';
 const LOCAL_AI_BOOTSTRAP_REVISION='1.0.115-local-ai-bootstrap-v302-session-handoff';
 if(globalThis.CivweaveFamilyAILoaderV105?.version===VERSION)return;
 
@@ -12,6 +12,15 @@ const PREREQUISITES=[
   ['/app/weaveling-memory-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryV191],
   ['/app/intention-planner-v141.js?v=1.0.4',()=>globalThis.CivweaveIntentionPlanner],
   ['/app/guide-contracts-v141.js?v=1.0.4',()=>globalThis.CivweaveGuideContractsV141]
+];
+const VALUE_CORE=[
+  ['/app/civweave-basic-value-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueV1],
+  ['/app/civweave-economic-policy-v1.js?v=economic-review-v1',()=>globalThis.CivweaveEconomicPolicyV1]
+];
+const VALUE_MODEL=[
+  ['/app/civweave-basic-value-model-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueModelV1],
+  ['/app/civweave-basic-value-review-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueReviewV1],
+  ['/app/civweave-basic-value-systems-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueSystemsV1]
 ];
 const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.7-v192',()=>globalThis.CivweaveFastInteractiveV192];
 const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.4',()=>globalThis.CivweaveAssistantV141];
@@ -38,6 +47,8 @@ const GUIDE={
 
 let promise=null;
 let optionalPromise=null;
+let valueCorePromise=null;
+let valueModelPromise=null;
 let generation=0;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{const parsed=JSON.parse(value);return parsed==null?fallback:parsed}catch{return fallback}};
@@ -77,12 +88,17 @@ function loadScript(src,ready){
     document.head.append(script);
   });
 }
-function reset(reason='manual reset'){generation++;promise=null;optionalPromise=null;try{dispatchEvent(new CustomEvent('civweave:guide-loader-reset',{detail:{reason,at:new Date().toISOString()}}))}catch{}}
+function loadSequence(rows){return rows.reduce((chain,pair)=>chain.then(()=>loadScript(...pair)),Promise.resolve())}
+function loadValueCore(){if(valueCorePromise)return valueCorePromise;valueCorePromise=loadSequence(VALUE_CORE).catch(error=>{valueCorePromise=null;throw error});return valueCorePromise}
+function loadValueModel(){if(valueModelPromise)return valueModelPromise;valueModelPromise=loadValueCore().then(()=>loadSequence(VALUE_MODEL)).catch(error=>{valueModelPromise=null;throw error});return valueModelPromise}
+function reset(reason='manual reset'){generation++;promise=null;optionalPromise=null;valueModelPromise=null;try{dispatchEvent(new CustomEvent('civweave:guide-loader-reset',{detail:{reason,at:new Date().toISOString()}}))}catch{}}
 function loadOptional(){if(optionalPromise)return optionalPromise;optionalPromise=Promise.allSettled(OPTIONAL.map(([src,ready])=>loadScript(src,ready))).then(()=>true);return optionalPromise}
 function emitAssistantReady(){try{dispatchEvent(new CustomEvent('civweave:assistant-runtime-ready',{detail:{version:VERSION,system:detect(),at:new Date().toISOString()}}))}catch{}}
 
 async function ensure(){
   if(globalThis.CivweaveAssistantV141&&globalThis.CivweaveDeterministicModeV175&&globalThis.CivweaveWeavelingMemoryBridgeV191&&globalThis.CivweaveKnowledgeEncyclopediaBridgeV271){
+    await loadValueCore();
+    await loadValueModel();
     globalThis.CivweaveWeavelingMemoryBridgeV191.install?.();
     await globalThis.CivweaveKnowledgeEncyclopediaBridgeV271.install?.();
     loadOptional();
@@ -93,8 +109,10 @@ async function ensure(){
   const ticket=++generation;
   promise=(async()=>{
     CSS.forEach(addCss);
+    await loadValueCore();
     await Promise.all(PREREQUISITES.map(([src,ready])=>loadScript(src,ready)));
     if(ticket!==generation)throw new Error('Civweave loading was reset.');
+    await loadValueModel();
     await loadScript(...FAST_RUNTIME);
     await loadScript(...ASSISTANT);
     await Promise.all(PATCHES.map(([src,ready])=>loadScript(src,ready)));
@@ -169,7 +187,7 @@ async function openSettings(){
   }
 }
 function warm(){return ensure()}
-function boot(){patchHeader()}
+function boot(){patchHeader();loadValueCore().catch(error=>console.warn('[Civweave economic value core]',error.message))}
 
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 addEventListener('pageshow',boot);
@@ -192,6 +210,7 @@ globalThis.CivweaveFamilyAILoaderV105={
   knowledgeRevision:'v271-local-encyclopedia',
   canonicalChatOwner:'guide-workspace-v242',
   validationCloudOptIn:'v1',
+  economicValueRevision:'v1-model-estimate-plus-rubric-review',
   eagerWarm:false
 };
 })();
