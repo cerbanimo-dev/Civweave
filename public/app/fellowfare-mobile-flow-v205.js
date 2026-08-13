@@ -1,7 +1,8 @@
 (()=>{
 'use strict';
-const VERSION='fellowfare-page-flow-v206';
-if(globalThis.CivweaveFellowFarePageFlowV206?.version===VERSION)return;
+const VERSION='fellowfare-mobile-flow-v205';
+const REVISION='fellowfare-page-flow-v206';
+if(globalThis.CivweaveFellowFarePageFlowV206?.revision===REVISION)return;
 
 const iframe=document.getElementById('ffc144-workbench');
 const shell=iframe?.closest('.ffc144-frame');
@@ -67,9 +68,8 @@ function prepareInner(doc){
     app.style.setProperty('margin-bottom','0','important');
   }
 
-  /* The parent cabinet already owns Market / Sell / Orders / Wallet / You.
-     Keeping a second fixed nav inside the iframe is what created the overlap
-     with the shared guide window. */
+  /* Parent tabs already own Market / Sell / Orders / Wallet / You. The child
+     fixed nav was the element colliding with the shared guide window. */
   const localNav=doc.querySelector('.bottom-nav');
   if(localNav){
     localNav.dataset.ffcParentPageFlow='true';
@@ -99,13 +99,14 @@ function measure(){
   if(Math.abs(height-lastHeight)>2){
     lastHeight=height;
     document.body.style.setProperty('--ffc144-flow-height',`${height}px`);
+    document.body.style.setProperty('--ffc144-mobile-frame-height',`${height}px`);
     shell.style.setProperty('height','auto','important');
     shell.style.setProperty('min-height','0','important');
     shell.style.setProperty('overflow','visible','important');
     iframe.style.setProperty('height',`${height}px`,'important');
   }
   document.body.classList.add('ffc144-page-flow');
-  document.body.classList.remove('ffc144-mobile-flow');
+  document.body.classList.add('ffc144-mobile-flow');
   iframe.setAttribute('scrolling','no');
 }
 
@@ -141,8 +142,7 @@ addEventListener('message',event=>{if(event.source===iframe?.contentWindow)settl
 if(iframe?.contentDocument?.readyState==='complete')bindInner();
 else settle();
 
-const api={version:VERSION,measure:scheduleMeasure,rebind:bindInner,status:()=>({singleScroll:true,height:lastHeight,bound:Boolean(innerDocument())})};
+const api={version:VERSION,revision:REVISION,measure:scheduleMeasure,rebind:bindInner,status:()=>({singleScroll:true,height:lastHeight,bound:Boolean(innerDocument())})};
 globalThis.CivweaveFellowFarePageFlowV206=api;
-/* Compatibility name retained for callers that only know the v205 surface. */
 globalThis.CivweaveFellowFareMobileFlowV205=api;
 })();
