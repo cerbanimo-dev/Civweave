@@ -10,7 +10,7 @@ function download(name,text,type){const blob=new Blob([text],{type}),href=URL.cr
 function render(){
  if((document.body.dataset.ffRoute||location.hash.slice(1))!=='profile')return;
  if(document.querySelector('#ffSellerBookkeeping'))return;
- const api=globalThis.CivweaveFellowFareTaxRecordsV1,exporter=globalThis.CivweaveFellowFareSellerRecordExportV1,main=document.querySelector('#main');
+ const api=globalThis.CivweaveFellowFareTaxRecordsV1,main=document.querySelector('#main');
  if(!api||!main)return;
  const p=api.profile(),summary=api.summary(),section=document.createElement('section');
  section.id='ffSellerBookkeeping';section.className='ff-fulfillment-merchant';
@@ -25,7 +25,6 @@ function render(){
  <div data-ff-record-summary>${summary.length?summary.map(row=>`<p><strong>${esc(row.jurisdiction)}</strong> · $${(Number(row.salesMinor||0)/100).toFixed(2)} recorded sales · $${(Number(row.taxMinor||0)/100).toFixed(2)} estimated seller-collected tax · ${Number(row.count||0)} record${Number(row.count||0)===1?'':'s'}</p>`).join(''):'<p>No seller-confirmed goods records yet.</p>'}</div>
  <small>This is seller-side assistance and bookkeeping, not a filing determination. The seller's own payment method collects the purchase price and any applicable tax. FellowFare does not collect or remit either amount.</small>`;
  main.append(section);
- if(!exporter)section.querySelectorAll('[data-ff-record-export]').forEach(button=>button.disabled=true);
 }
 function save(event){
  const form=event.target,api=globalThis.CivweaveFellowFareTaxRecordsV1;if(!form?.matches?.('[data-ff-seller-record-settings]')||!api)return;
@@ -33,10 +32,10 @@ function save(event){
  document.querySelector('#ffSellerBookkeeping')?.remove();render();
 }
 function click(event){
- const button=event.target.closest?.('[data-ff-record-export]'),exporter=globalThis.CivweaveFellowFareSellerRecordExportV1;if(!button||!exporter)return;
+ const button=event.target.closest?.('[data-ff-record-export]'),api=globalThis.CivweaveFellowFareTaxRecordsV1;if(!button||!api)return;
  event.preventDefault();const day=new Date().toISOString().slice(0,10);
- if(button.dataset.ffRecordExport==='json')download(`fellowfare-seller-records-${day}.json`,JSON.stringify(exporter.snapshot(),null,2),'application/json');
- else download(`fellowfare-seller-records-${day}.csv`,exporter.csv(),'text/csv');
+ if(button.dataset.ffRecordExport==='json')download(`fellowfare-seller-records-${day}.json`,JSON.stringify(api.exportData(),null,2),'application/json');
+ else download(`fellowfare-seller-records-${day}.csv`,api.exportCsv(),'text/csv');
 }
 function start(){document.addEventListener('submit',save,true);document.addEventListener('click',click,true);addEventListener('hashchange',()=>requestAnimationFrame(render));addEventListener('fellowfare:tax-ledger-changed',()=>{document.querySelector('#ffSellerBookkeeping')?.remove();requestAnimationFrame(render)});render()}
 globalThis.CivweaveFellowFareSellerBookkeepingV1=Object.freeze({version:VERSION,render,role:'seller-records-ui',platformCollectsGoodsPayment:false,platformCollectsTax:false});
