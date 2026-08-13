@@ -8,6 +8,12 @@ import '../../civweave-live-data.js';
 import './marketplace-v2.js';
 import './marketplace-v2-capabilities.js';
 import './fulfillment-economy-v2.js';
+import './jurisdiction-policy-v1.js';
+import './seller-method-types-v1.js';
+import './seller-methods-v1.js';
+import './seller-direct-transactions-v1.js';
+import './tax-records-v1.js';
+import './tax-record-bridge-v1.js';
 // Retained only for cached references/verifiers. v2 installs the compatibility
 // global first, so v1 returns without booting its retired cash-disabled policy.
 import './fulfillment-economy-v1.js';
