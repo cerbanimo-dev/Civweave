@@ -1,0 +1,14 @@
+{
+  "schema": "civweave.avatar-atlas-stage.v1",
+  "version": "v315",
+  "encoding": "base64-chunks",
+  "chunkChars": 30000,
+  "grid": { "columns": 5, "rows": 4, "cellWidth": 72, "cellHeight": 60, "width": 360, "height": 240 },
+  "characters": {
+    "weaveling": { "parts": 4, "bytes": 70606, "sha256": "f716a422e8cdaea9f938b0fe149c4a98b433f133902d9fdd4e719c9f5eae1836" },
+    "moss": { "parts": 3, "bytes": 57360, "sha256": "d4f728cad48f9c3677d1d1dd06af20905d58ee54bc3772a88981d5b9fa1d2841" },
+    "kamiya": { "parts": 3, "bytes": 52954, "sha256": "ffda6af1294c28460f341cf707e48f1bdb080164d983f7ec752524e5200967a8" },
+    "rook": { "parts": 3, "bytes": 57554, "sha256": "5d80d4e68c76b8433aae83220c68a5d185804e016cfc4c7c2f704ed32a85ad47" },
+    "merlin": { "parts": 4, "bytes": 73608, "sha256": "8f878eb1d7367d3857c5231d62847b11a8d9ea93b91f9d7a2173518423ec3a56" }
+  }
+}
