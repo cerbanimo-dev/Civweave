@@ -2,12 +2,13 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [runtime,worker,hardware,owner,wrapper,bootstrap,lifecycle,settings,coherence,headers]=await Promise.all([
+const [runtime,worker,hardware,owner,wrapper,orchestrator,bootstrap,lifecycle,settings,coherence,headers]=await Promise.all([
   'public/app/local-ai/runtime-v266.js',
   'public/app/local-ai/worker-v266.js',
   'public/app/local-ai/hardware-tier-ui-v278.js',
   'public/app/local-chat-owner-v295.js',
   'public/app/local-chat-runtime-v295.js',
+  'public/app/experience-orchestrator-v232.js',
   'public/app/local-ai/bootstrap-v266.js',
   'public/app/document-lifecycle-v221.js',
   'public/app/local-ai/settings-panel-v267.js',
@@ -15,7 +16,7 @@ const [runtime,worker,hardware,owner,wrapper,bootstrap,lifecycle,settings,cohere
   'public/_headers'
 ].map(read));
 
-for(const source of [runtime,worker,hardware,owner,wrapper,bootstrap,lifecycle,settings,coherence])new Function(source);
+for(const source of [runtime,worker,hardware,owner,wrapper,orchestrator,bootstrap,lifecycle,settings,coherence])new Function(source);
 
 // CPU/WASM compatibility must use available desktop threads rather than being
 // permanently crippled to a single lane.
@@ -31,13 +32,18 @@ assert.match(runtime,/compatibility\?Math\.min\(512,Math\.max\(192,/,'WASM fallb
 assert.match(runtime,/compatibility\?Math\.min\(48,Math\.max\(8,/,'WASM fallback output must be capped at 48 tokens');
 assert.match(runtime,/compatibilityPromptCap:true/);
 
-// Warm on intent, not for the entire platform session.
+// Warm on explicit chat intent, not for the entire platform session.
 assert.match(runtime,/function residencyMs\(\).*?hidden.*?30000.*?mobileLike\(\).*?90000.*?300000/s,'residency must be 30s hidden, 90s mobile, 5m desktop');
 assert.match(runtime,/function prewarm\(/,'runtime must expose a dedicated prewarm path');
 assert.match(runtime,/selected\.device!=='webgpu'.*?compatibility-model-not-prewarmed/s,'CPU fallback must never be prewarmed speculatively');
 assert.match(runtime,/addEventListener\('pagehide'.*?shutdown/s,'pagehide must still release the inference worker');
-assert.match(owner,/document\.addEventListener\('focusin',prewarmIntent,true\)/,'chat input focus must start intent prewarm');
+assert.match(owner,/document\.addEventListener\('focusin',prewarmIntent,true\)/,'chat input focus must remain a prewarm trigger');
+assert.match(owner,/addEventListener\('civweave:guide-workspace-state',prewarmWorkspace\)/,'opening the canonical chat workspace must begin prewarm before typing');
+assert.match(owner,/detail\.open===true&&detail\.minimized!==true/,'minimized/closed chat must not prewarm the model');
 assert.match(owner,/intentPrewarm:true/);
+assert.match(owner,/chatOpenPrewarm:true/);
+assert.match(orchestrator,/CivweaveLocalChatOwnerV295\?\.intentPrewarm===true&&globalThis\.CivweaveLocalChatOwnerV295\?\.chatOpenPrewarm===true/,'orchestrator must reject a stale focus-only chat owner');
+assert.match(orchestrator,/chatOpenPrewarm:true/,'orchestrator diagnostics must advertise chat-open prewarm');
 assert.match(worker,/message\.type==='prewarm'/,'worker must support model-only prewarm without generation');
 
 // Loading UI may expose per-artifact movement, but the user-facing overall
@@ -87,7 +93,7 @@ console.log(JSON.stringify({
   smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},
   residency:{desktopMs:300000,mobileMs:90000,hiddenMs:30000},
   wasm:'adaptive-threading-plus-interactive-context-cap',
-  prewarm:'chat-intent-only',
+  prewarm:'chat-open-or-input-focus',
   progress:'monotonic-overall',
   externalData:'explicit-single-file-path',
   coherence:'orchestrator-network-first'
