@@ -1,0 +1,77 @@
+/* FellowFare page flow v206
+   The marketplace iframe remains a compatibility boundary, but it is no longer
+   presented as a second scrollable window. The parent page owns scrolling. */
+
+html[data-civweave-system="fellowfare"] body{
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior-y:auto!important;
+  touch-action:pan-y!important;
+}
+
+html[data-civweave-system="fellowfare"] .ffc144-app{
+  display:block!important;
+  width:100%!important;
+  min-height:0!important;
+  padding:0 0 18px!important;
+  overflow:visible!important;
+}
+
+html[data-civweave-system="fellowfare"] .ffc144-tabs{
+  position:sticky!important;
+  top:var(--cwf104-head-total,54px)!important;
+  z-index:90!important;
+  margin:0!important;
+  border-left:0!important;
+  border-right:0!important;
+  border-radius:0!important;
+}
+
+html[data-civweave-system="fellowfare"] .ffc144-frame,
+html[data-civweave-system="fellowfare"] body.ffc144-page-flow .ffc144-frame{
+  position:relative!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+html[data-civweave-system="fellowfare"] body.ffc144-page-flow .ffc144-frame iframe{
+  display:block!important;
+  width:100%!important;
+  height:var(--ffc144-flow-height,720px)!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+  border:0!important;
+  background:transparent!important;
+  touch-action:pan-y!important;
+  overscroll-behavior:none!important;
+}
+
+html[data-civweave-system="fellowfare"] body.ffc144-page-flow .ffc144-loading[hidden]{display:none!important}
+html[data-civweave-system="fellowfare"] body.ffc144-page-flow .ffc144-status{margin:0;padding:7px 12px 10px!important}
+
+/* The shared guide window belongs above the family tray. The embedded market's
+   duplicate bottom navigation is removed by the page-flow runtime, so the guide
+   can no longer sit on top of FellowFare navigation controls. */
+html[data-civweave-system="fellowfare"] #cw159-chat-dock{
+  right:max(10px,env(safe-area-inset-right))!important;
+  bottom:calc(var(--cwf104-bottom-total,78px) + 12px)!important;
+  max-width:min(460px,calc(100vw - 20px))!important;
+  max-height:calc(100dvh - var(--cwf104-head-total,54px) - var(--cwf104-bottom-total,78px) - 30px)!important;
+}
+
+@media(max-width:760px){
+  html[data-civweave-system="fellowfare"] .ffc144-tabs{padding:5px 4px!important}
+  html[data-civweave-system="fellowfare"] .ffc144-tabs button{min-height:40px!important;font-size:9px!important;line-height:1.12!important;padding:6px 2px!important}
+  html[data-civweave-system="fellowfare"] #cw159-chat-dock{
+    max-width:calc(100vw - 12px)!important;
+    right:6px!important;
+  }
+}
