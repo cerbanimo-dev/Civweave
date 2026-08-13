@@ -23,6 +23,27 @@ export * from './stripe-snapshot-webhook.mjs';
 export * from './stripe-recipient-thin-webhook.mjs';
 
 const enabled = value => ['1', 'true', 'yes', 'on'].includes(String(value ?? '').trim().toLowerCase());
+const allowedBrowserOrigin = (request, env) => {
+  const origin = String(request.headers.get('origin') || '').trim();
+  if (!origin) return null;
+  const canonical = String(env?.CIVWEAVE_CANONICAL_INSTALL_ORIGIN || 'https://civweave.pages.dev').trim();
+  let canonicalOrigin = 'https://civweave.pages.dev';
+  try { canonicalOrigin = new URL(canonical).origin; } catch {}
+  return origin === canonicalOrigin ? origin : null;
+};
+const directCommerceCors = origin => ({
+  'access-control-allow-origin': origin,
+  'access-control-allow-methods': 'GET, POST, OPTIONS',
+  'access-control-allow-headers': 'content-type',
+  'access-control-max-age': '86400',
+  'vary': 'Origin'
+});
+const withDirectCommerceCors = (response, origin) => {
+  if (!origin) return response;
+  const headers = new Headers(response.headers);
+  for (const [name, value] of Object.entries(directCommerceCors(origin))) headers.set(name, value);
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+};
 const marketplacePaymentsDisabled = () => new Response(JSON.stringify({
   schema: 'civweave.fellowfare-payment-boundary.v2',
   ok: false,
@@ -38,8 +59,13 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname.startsWith('/api/fellowfare/direct-commerce/')) {
+      const browserOrigin = allowedBrowserOrigin(request, env);
+      if (request.method === 'OPTIONS') {
+        if (!browserOrigin) return new Response(null, { status: 403 });
+        return new Response(null, { status: 204, headers: directCommerceCors(browserOrigin) });
+      }
       const direct = await handleFellowFareDirectCommerce(request, env);
-      if (direct) return direct;
+      if (direct) return withDirectCommerceCors(direct, browserOrigin);
     }
 
     // The retired platform-charge/separate-transfer marketplace route remains dead.

@@ -39,14 +39,17 @@ function requireDb(env) {
 function stripeSecret(env) {
   const key = clean(env?.STRIPE_SECRET_KEY, 10000);
   if (!key) throw Object.assign(new Error('STRIPE_SECRET_KEY is not configured.'), { status: 503 });
-  const live = /^(?:sk|rk)_live_/.test(key);
-  if (live && !enabled(env?.CIVWEAVE_MONEY_LIVE_ENABLED)) {
+  return key;
+}
+function stripeWriteSecret(env) {
+  const key = stripeSecret(env);
+  if (/^(?:sk|rk|rkcs)_live_/.test(key) && !enabled(env?.CIVWEAVE_MONEY_LIVE_ENABLED)) {
     throw Object.assign(new Error('Live Stripe payments remain disabled by the Civweave live-money gate.'), { status: 503 });
   }
   return key;
 }
-function createStripeClient(env, { fetchImpl = globalThis.fetch } = {}) {
-  return new Stripe(stripeSecret(env), {
+function createStripeClient(env, { fetchImpl = globalThis.fetch, write = false } = {}) {
+  return new Stripe(write ? stripeWriteSecret(env) : stripeSecret(env), {
     httpClient: Stripe.createFetchHttpClient(fetchImpl),
     appInfo: { name: 'FellowFare Direct Commerce', version: '1' }
   });
@@ -123,7 +126,7 @@ function publicMerchantStatus(mapping, result) {
 }
 
 export async function createFellowFareMerchant(env, input, options = {}) {
-  const stripe = options.stripeClient || createStripeClient(env, options);
+  const stripe = options.stripeClient || createStripeClient(env, { ...options, write: true });
   const userId = required(input?.userId, 'userId', 180);
   const existing = await mappingForUser(env, userId);
   if (existing) return publicMerchantStatus(existing, await retrieveMerchantStatus(stripe, existing.accountId));
@@ -160,7 +163,7 @@ export async function getFellowFareMerchant(env, userId, options = {}) {
 }
 
 export async function createFellowFareMerchantOnboarding(request, env, userId, options = {}) {
-  const stripe = options.stripeClient || createStripeClient(env, options);
+  const stripe = options.stripeClient || createStripeClient(env, { ...options, write: true });
   const mapping = await mappingForUser(env, userId);
   if (!mapping) throw Object.assign(new Error('Create the FellowFare merchant account before requesting onboarding.'), { status: 404 });
   const origin = new URL(request.url).origin;
@@ -185,7 +188,7 @@ export async function createFellowFareMerchantOnboarding(request, env, userId, o
 }
 
 export async function createFellowFareServicePrice(env, input, options = {}) {
-  const stripe = options.stripeClient || createStripeClient(env, options);
+  const stripe = options.stripeClient || createStripeClient(env, { ...options, write: true });
   const listingKind = kind(input?.kind);
   const userId = required(input?.userId, 'userId', 180);
   const mapping = await mappingForUser(env, userId);
@@ -230,7 +233,7 @@ export async function createFellowFareServicePrice(env, input, options = {}) {
 }
 
 export async function createFellowFareDirectCheckout(request, env, input, options = {}) {
-  const stripe = options.stripeClient || createStripeClient(env, options);
+  const stripe = options.stripeClient || createStripeClient(env, { ...options, write: true });
   const listingKind = kind(input?.kind);
   const accountId = required(input?.accountId, 'accountId', 180);
   const mapping = await mappingForAccount(env, accountId);

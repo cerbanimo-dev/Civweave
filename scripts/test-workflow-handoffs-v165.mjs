@@ -12,7 +12,7 @@ const [followthrough,anarchadia,attachments,anarchadiaHtml,fellowfareHtml,realmH
   read('public/app/anarchadia-console-v139.html'),
   read('public/app/fellowfare-cabinet-v144.html'),
   read('public/app/realm-console-v140.html'),
-  read('public/service-worker-v156.js'),
+  read('public/service-worker.js'),
   read('public/app/install-boundary-v146.js')
 ]);
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
@@ -74,6 +74,9 @@ assert(run.ok&&pipelineRuns===1,'Merlin approval did not invoke preview generati
 const reviewedState=JSON.parse(merlin.localStorage.getItem('civweave.anarchadia.citizen-console.v139'));
 assert(reviewedState.proposals[0].approval.state==='approved','Merlin did not persist the approval receipt.');
 assert(reviewedState.proposals[0].preview?.srcdoc,'Merlin did not retain the generated preview.');
+assert(reviewedState.proposals[0].authority.level==='device','Merlin escalated a bounded Anarchadia export control beyond the device.');
+const governed=merlin.AnarchadiaChangeReviewV165.classifyAuthority({title:'Change mesh quorum rules',problem:'The mesh protocol needs a new quorum policy for all hubs.',expected:'Update the federated schema.',area:'Civweave',impact:'auto'});
+assert(governed.level==='mesh'&&governed.requiresConsensus,'Merlin did not route a mesh protocol change through consensus.');
 
 // Cerbanimo attachment acceptance and local delivery contract.
 const proof=context();
@@ -83,18 +86,18 @@ assert(proofApi.validProofUrl('https://example.test/proof')&&!proofApi.validProo
 assert(proofApi.validateFiles([{name:'gitingest.txt',size:1024},{name:'work.png',size:2048}]).ok,'Cerbanimo rejected valid text/image proof files.');
 assert(!proofApi.validateFiles([{name:'oversized.png',size:16*1024*1024}]).ok,'Cerbanimo accepted an oversized proof file.');
 
-for(const token of ['approveAndRun','selectPreview','revertPreview','Keep this preview','Revert to current look','awaiting explicit approval before preview generation'])assert(anarchadia.includes(token),`Merlin flow is missing ${token}.`);
+for(const token of ['approveAndRun','submitToHub','selectPreview','revertPreview','Keep this preview','Revert to current look','consensusState','classifyAuthority'])assert(anarchadia.includes(token),`Merlin flow is missing ${token}.`);
 for(const token of ['indexedDB','proofFiles','proofLink','attachment:','15 MB per-file proof limit','40 MB attachment limit'])assert(attachments.includes(token),`Cerbanimo attachment flow is missing ${token}.`);
 for(const token of ['/app/action-followthrough-v165.js','/app/anarchadia-change-review-v165.js'])assert(anarchadiaHtml.includes(token),`Anarchadia page is missing ${token}.`);
 assert(fellowfareHtml.includes('/app/action-followthrough-v165.js'),'FellowFare does not load explicit approval followthrough.');
 assert(realmHtml.includes('/app/cerbanimo-proof-attachments-v165.js'),'Cerbanimo does not load proof attachments.');
-for(const token of ["working-campus-additions-v165-reviewed-requests-material-followthrough-proof-attachments",'/app/action-followthrough-v165.js','/app/anarchadia-change-review-v165.js','/app/cerbanimo-proof-attachments-v165.js',"WORKFLOW_HANDOFF_REVISION='reviewed-merlin-rook-proof-attachments-v165'"])assert(worker.includes(token),`Installed PWA package is missing ${token}.`);
-assert(boundary.includes("additionsVersion:'v165-reviewed-merlin-rook-proof-attachments'"),'Install boundary was not rotated to v165.');
+for(const token of ['/app/action-followthrough-v165.js','/app/anarchadia-change-review-v165.js','/app/anarchadia-consensus-v145.js'])assert(worker.includes(token),`Installed PWA package is missing ${token}.`);
+assert(boundary.includes('canonicalSystemCount:5'),'Install boundary lost the canonical five-system contract.');
 
 console.log(JSON.stringify({
   ok:true,
   rook:{explicitApproval:'published-current-draft',materials:'canonical-request'},
   merlin:{gates:['review','approve-generation','preview','keep-or-revert'],pipelineRuns},
   cerbanimo:{proofTypes:['text','link','file','image'],storage:'indexeddb-local'},
-  installedPackage:'working-campus-additions-v165-reviewed-requests-material-followthrough-proof-attachments'
+  installedPackage:'device-package-r44-anarchadia-consensus'
 },null,2));

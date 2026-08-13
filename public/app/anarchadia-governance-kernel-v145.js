@@ -7,8 +7,12 @@ const CREDENTIAL_SCHEMA='civweave.anarchadia-credential.v1';
 const OUTCOME_SCHEMA='civweave.anarchadia-node-outcome.v1';
 const CONSENT_SCHEMA='civweave.anarchadia-consent.v1';
 const DISSENT_SCHEMA='civweave.anarchadia-dissent.v1';
+const INTENTION_SCHEMA='civweave.anarchadia-intention-plan.v1';
+const CONSENSUS_SCHEMA='civweave.anarchadia-consensus-round.v1';
 export const GOVERNANCE_VERSION='1.0.0';
 export const CHOICES=['approve','reject','abstain','request-amendment'];
+export const CONSENSUS_LEVELS=['individual','hub','region','mesh'];
+export const CONSENSUS_CHOICES=['support','oppose','abstain','amend'];
 export const CHANGE_STATES=['draft','rails-checked','deliberating','frozen','voting','outcome-declared','authorized','queued','prepared','released','verified','rolled-back','rejected','expired','withdrawn','contested'];
 const TRANSITIONS={
   draft:['rails-checked','withdrawn'],
@@ -58,11 +62,11 @@ export async function sha256(value){
   return base64url(await crypto.subtle.digest('SHA-256',bytes));
 }
 export function newGovernanceState(){
-  return {schema:SCHEMA,version:GOVERNANCE_VERSION,node:null,credentials:[],groups:[],trustedNodes:[],changeSets:[],ballots:[],consents:[],dissents:[],nodeOutcomes:[],authorizations:[],executionPackets:[],audit:[]};
+  return {schema:SCHEMA,version:GOVERNANCE_VERSION,node:null,credentials:[],groups:[],trustedNodes:[],intentionPlans:[],consensusRounds:[],changeSets:[],ballots:[],consents:[],dissents:[],nodeOutcomes:[],authorizations:[],executionPackets:[],audit:[]};
 }
 export function normalizeGovernanceState(input){
   const state=input?.schema===SCHEMA?clone(input):newGovernanceState();
-  for(const key of ['credentials','groups','trustedNodes','changeSets','ballots','consents','dissents','nodeOutcomes','authorizations','executionPackets','audit'])if(!Array.isArray(state[key]))state[key]=[];
+  for(const key of ['credentials','groups','trustedNodes','intentionPlans','consensusRounds','changeSets','ballots','consents','dissents','nodeOutcomes','authorizations','executionPackets','audit'])if(!Array.isArray(state[key]))state[key]=[];
   state.schema=SCHEMA;state.version=GOVERNANCE_VERSION;return state;
 }
 export function audit(state,action,detail={}){
@@ -136,6 +140,87 @@ export function transitionChangeSet(change,next){
 }
 export function createGroup(input={}){
   return {schema:'civweave.anarchadia-group.v1',id:input.id||id('group'),name:String(input.name||'Unnamed group').slice(0,120),charter:String(input.charter||'').slice(0,8000),memberIds:[...new Set(input.memberIds||[])],procedure:{quorum:Number(input.quorum??0.5),threshold:Number(input.threshold??0.5),allowReplacement:input.allowReplacement!==false},createdAt:now(),status:'active'};
+}
+
+function normalizeRealm(value){
+  const realm=String(value||'').trim().toLowerCase().replace(/[_\s]+/g,'-');
+  if(['living','living-academy','living-school'].includes(realm))return'living-school';
+  if(['fellow-fare','fellowfare'].includes(realm))return'fellowfare';
+  if(['commonweave','civweave'].includes(realm))return'civweave';
+  return realm||'anarchadia';
+}
+export function intentionAuthorityPath(input={}){
+  const realms=[...new Set((Array.isArray(input.realms)?input.realms:[input.realm]).filter(Boolean).map(normalizeRealm))];
+  const requested=String(input.reach||input.requestedReach||'auto').toLowerCase();
+  if(realms.length===1&&realms[0]==='living-school')return['individual'];
+  const crossRealm=realms.length>1||Boolean(input.crossEffecting);
+  if(requested==='mesh'||crossRealm)return['hub','region','mesh'];
+  if(requested==='region')return['hub','region'];
+  if(requested==='individual'&&!realms.some(realm=>['cerbanimo','fellowfare'].includes(realm)))return['individual'];
+  return['hub'];
+}
+function intentionHashPayload(plan){
+  return {schema:INTENTION_SCHEMA,id:plan.id,revision:plan.revision,title:plan.title,summary:plan.summary,realms:plan.realms,creatorId:plan.creatorId,authorityPath:plan.authorityPath,sourceKind:plan.sourceKind,sourceProposalId:plan.sourceProposalId,successSignals:plan.successSignals,risks:plan.risks};
+}
+export async function hashIntentionPlan(plan){return sha256(canonicalJson(intentionHashPayload(plan)))}
+export async function createIntentionPlan(input={}){
+  const realms=[...new Set((Array.isArray(input.realms)?input.realms:[input.realm||'anarchadia']).filter(Boolean).map(normalizeRealm))];
+  const authorityPath=intentionAuthorityPath({...input,realms});
+  const createdAt=now(),individual=authorityPath.length===1&&authorityPath[0]==='individual';
+  const plan={schema:INTENTION_SCHEMA,id:input.id||id('intention'),revision:1,title:String(input.title||'Untitled intention').slice(0,180),summary:String(input.summary||input.description||'').slice(0,12000),realms,creatorId:String(input.creatorId||'local-citizen').slice(0,180),authorityPath,activeLevel:individual?'individual':'hub',state:individual?'adopted':'hub-deliberation',sourceKind:String(input.sourceKind||'intention').slice(0,80),sourceProposalId:String(input.sourceProposalId||'').slice(0,220),successSignals:(Array.isArray(input.successSignals)?input.successSignals:String(input.successSignals||'').split('\n')).map(value=>String(value).trim()).filter(Boolean).slice(0,30),risks:String(input.risks||'').slice(0,6000),decisions:individual?[{level:'individual',outcome:'adopted',decidedAt:createdAt,reason:'Living School paths remain individually governed.'}]:[],createdAt,updatedAt:createdAt};
+  plan.revisionHash=await hashIntentionPlan(plan);return plan;
+}
+export async function openConsensusRound(plan,input={}){
+  if(plan?.schema!==INTENTION_SCHEMA)throw new Error('A valid intention plan is required.');
+  const level=String(input.level||plan.activeLevel||'hub');
+  if(!plan.authorityPath.includes(level)||level==='individual')throw new Error('This level is not part of the plan authority path.');
+  if(level!==plan.activeLevel)throw new Error(`The ${plan.activeLevel} round must resolve before ${level}.`);
+  const electorate=(input.electorate||[]).map(actor=>({actorId:actor.id||actor.actorId,label:actor.label||actor.name||actor.id,kind:actor.kind||'member',publicKey:actor.publicKey})).filter(actor=>actor.actorId&&actor.publicKey);
+  if(!electorate.length)throw new Error(`The ${level} round requires at least one credentialed participant.`);
+  const snapshotHash=await sha256(canonicalJson(electorate));
+  return {schema:CONSENSUS_SCHEMA,id:id('consensus'),planId:plan.id,planRevisionHash:plan.revisionHash,level,electorate,snapshotHash,procedure:{quorum:Math.min(1,Math.max(0,Number(input.quorum??0.6))),threshold:Math.min(1,Math.max(0,Number(input.threshold??0.67)))},choices:CONSENSUS_CHOICES,positions:[],status:'open',openedAt:now(),closedAt:null,outcome:null};
+}
+function consensusPositionPayload(round,actorId,choice,sequence,castAt,note=''){
+  return {schema:'civweave.anarchadia-consensus-position.v1',roundId:round.id,planId:round.planId,planRevisionHash:round.planRevisionHash,snapshotHash:round.snapshotHash,level:round.level,actorId,choice,sequence,castAt,note};
+}
+export async function castConsensusPosition(round,credential,privateKey,choice,note=''){
+  if(round.status!=='open')throw new Error('This consensus round is closed.');
+  if(!CONSENSUS_CHOICES.includes(choice))throw new Error('Unsupported consensus position.');
+  if(!round.electorate.some(actor=>actor.actorId===credential.id))throw new Error('This credential is not in the frozen electorate.');
+  const prior=round.positions.find(position=>position.actorId===credential.id),castAt=now(),sequence=Number(prior?.sequence||0)+1;
+  const payload=consensusPositionPayload(round,credential.id,choice,sequence,castAt,String(note||'').slice(0,2000));
+  const position={...payload,publicKey:credential.publicKey,signature:await signPayload(privateKey,payload)};
+  round.positions=round.positions.filter(item=>item.actorId!==credential.id);round.positions.push(position);return position;
+}
+export async function verifyConsensusPosition(round,position){
+  const eligible=round.electorate.find(actor=>actor.actorId===position.actorId);
+  if(!eligible||canonicalJson(eligible.publicKey)!==canonicalJson(position.publicKey))return false;
+  return verifySignature(position.publicKey,consensusPositionPayload(round,position.actorId,position.choice,position.sequence,position.castAt,position.note),position.signature);
+}
+export function tallyConsensusRound(round){
+  const totals=Object.fromEntries(CONSENSUS_CHOICES.map(choice=>[choice,0]));
+  for(const position of round.positions||[])if(totals[position.choice]!==undefined)totals[position.choice]+=1;
+  const eligible=round.electorate.length,cast=round.positions.length,remaining=Math.max(0,eligible-cast),participation=eligible?cast/eligible:0;
+  const decisive=totals.support+totals.oppose+totals.amend,approval=decisive?totals.support/decisive:0;
+  const maxApproval=decisive+remaining?(totals.support+remaining)/(decisive+remaining):1;
+  const quorumMet=participation>=round.procedure.quorum,thresholdMet=approval>=round.procedure.threshold;
+  const neededForQuorum=Math.max(0,Math.ceil(eligible*round.procedure.quorum)-cast);
+  const denominator=1-round.procedure.threshold;
+  const neededForThreshold=thresholdMet?0:denominator<=0?remaining+1:Math.max(0,Math.ceil((round.procedure.threshold*decisive-totals.support)/denominator));
+  const plausible=cast<eligible&&neededForQuorum<=remaining&&neededForThreshold<=remaining;
+  const outcome=quorumMet&&thresholdMet?'ready-to-adopt':cast===eligible?(quorumMet?'not-adopted':'no-quorum'):plausible?'forming':'stalled';
+  return {eligible,cast,remaining,participation,approval,maxApproval,quorumMet,thresholdMet,neededForQuorum,neededForThreshold,plausible,totals,outcome};
+}
+export async function closeConsensusRound(round,plan){
+  if(round.status!=='open')return round.outcome;
+  if(plan.revisionHash!==round.planRevisionHash)throw new Error('The intention changed after this round opened.');
+  for(const position of round.positions)if(!await verifyConsensusPosition(round,position))throw new Error(`Invalid consensus signature for ${position.actorId}.`);
+  const tally=tallyConsensusRound(round),outcome=tally.quorumMet&&tally.thresholdMet?'adopted':tally.quorumMet?'not-adopted':'no-quorum';
+  round.status='closed';round.closedAt=now();round.outcome={...tally,outcome,hash:await sha256(canonicalJson({...tally,outcome}))};
+  plan.decisions=Array.isArray(plan.decisions)?plan.decisions:[];plan.decisions.push({level:round.level,outcome,roundId:round.id,roundHash:round.outcome.hash,decidedAt:round.closedAt});
+  const index=plan.authorityPath.indexOf(round.level),next=outcome==='adopted'?plan.authorityPath[index+1]:null;
+  if(next){plan.activeLevel=next;plan.state=`${next}-deliberation`}else if(outcome==='adopted'){plan.state='adopted'}else{plan.state='stalled'}
+  plan.updatedAt=now();return round.outcome;
 }
 export async function openBallot(change,input={}){
   if(!['frozen','voting'].includes(change.state))throw new Error('Freeze the exact change revision before opening a ballot.');
@@ -237,4 +322,4 @@ export async function validateExecutionPacket(packet){
   const expected=packet?await sha256(canonicalJson({...packet,packetHash:undefined})):'';if(packet?.packetHash!==expected)errors.push('Packet hash mismatch.');
   return {valid:errors.length===0,errors,rails};
 }
-export const schemas={SCHEMA,CHANGE_SCHEMA,BALLOT_SCHEMA,AUTH_SCHEMA,PACKET_SCHEMA,CREDENTIAL_SCHEMA,OUTCOME_SCHEMA,CONSENT_SCHEMA,DISSENT_SCHEMA};
+export const schemas={SCHEMA,CHANGE_SCHEMA,BALLOT_SCHEMA,AUTH_SCHEMA,PACKET_SCHEMA,CREDENTIAL_SCHEMA,OUTCOME_SCHEMA,CONSENT_SCHEMA,DISSENT_SCHEMA,INTENTION_SCHEMA,CONSENSUS_SCHEMA};

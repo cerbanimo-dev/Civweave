@@ -18,7 +18,7 @@ assert.match(source,/const fastInteractiveReady=.*?runtime-spine-v271.*?register
 assert.match(source,/fast-interactive-runtime-v192\.js\?v=1\.0\.124-v313-runtime-spine-contract/,'bootstrap must rotate the fast runtime asset epoch');
 assert.doesNotMatch(source,/CivweaveFastInteractiveV192\?\.version==='1\.0\.67-runtime-spine-v271'/,'bootstrap must not reject the shipping server-auto runtime using the retired exact version');
 assert.match(source,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?intentPrewarm===true.*?compatibilityPromptCap===true/s,'bootstrap must require the smooth-fit runtime contract');
-assert.match(source,/deviceFitRecommendations===true/,'bootstrap must require device-fit recommendations');
+assert.match(source,/deviceFitRecommendations===true.*?observerFeedbackBounded===true/,'bootstrap must require bounded device-fit Settings decoration');
 
 const events=[];
 let runtimeLoads=0;
@@ -61,7 +61,7 @@ const context={
   CivweaveLocalModelBridgeV266:{version:'1.0.83-local-ai-bridge-v282-health-fallback',revision:'1.0.88-local-ai-bridge-v283-small-model-fast-path',continuationValidation:true},
   CivweaveLocalAISettingsV266:{version:'1.0.116-local-ai-settings-v305-download-dock-layout',truthfulCompletion:true,cacheIntegrityOnDemand:true,openPath:'snapshot-first-v287'},
   CivweaveLocalAIPrimaryRouteV283:{version:'1.0.85-local-ai-primary-route-v283'},
-  CivweaveLocalModelHardwareTierUIV278:{version:'1.0.81-local-ai-hardware-tier-ui-v278',deviceFitRecommendations:true},
+  CivweaveLocalModelHardwareTierUIV278:{version:'1.0.81-local-ai-hardware-tier-ui-v278',deviceFitRecommendations:true,observerFeedbackBounded:true},
   CivweaveLocalModelTestPulseV269:{version:'1.0.116-local-model-test-pulse-v303-mobile-safe'},
 };
 context.globalThis=context;

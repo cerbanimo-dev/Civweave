@@ -7,8 +7,8 @@ const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
 export function stripeCredentialMode(value = '') {
   const key = clean(value, 10000);
   if (!key) return 'unconfigured';
-  if (key.startsWith('sk_live_') || key.startsWith('rk_live_')) return 'live';
-  if (key.startsWith('sk_test_') || key.startsWith('rk_test_')) return 'sandbox';
+  if (/^(?:sk|rk|rkcs)_live_/.test(key)) return 'live';
+  if (/^(?:sk|rk|rkcs)_test_/.test(key)) return 'sandbox';
   return 'unrecognized';
 }
 function required(value, label, max = 4000) {
@@ -38,6 +38,12 @@ function formBody(entries = {}) {
 }
 function metadata(input = {}) {
   return Object.fromEntries(Object.entries(input).filter(([, value]) => value != null && String(value).length).map(([key, value]) => [String(key).slice(0, 40), String(value).slice(0, 500)]));
+}
+function integrationIdentifier(prefix) {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  return `${clean(prefix, 64)}-${Array.from(bytes, value => alphabet[value % alphabet.length]).join('')}`;
 }
 function recipientTransferStatus(account) {
   return clean(account?.configuration?.recipient?.capabilities?.stripe_balance?.stripe_transfers?.status || 'unknown', 80).toLowerCase();
@@ -184,6 +190,7 @@ export class StripeConnectWorkerProvider {
     });
     const form = {
       mode: 'payment',
+      integration_identifier: integrationIdentifier('civweave-topup'),
       success_url: safeUrl(successUrl, 'successUrl'),
       cancel_url: safeUrl(cancelUrl, 'cancelUrl'),
       'line_items[0][price_data][currency]': clean(currency, 12).toLowerCase(),
@@ -227,6 +234,7 @@ export class StripeConnectWorkerProvider {
     });
     const form = {
       mode: 'subscription',
+      integration_identifier: integrationIdentifier('civweave-membership'),
       success_url: safeUrl(successUrl, 'successUrl'),
       cancel_url: safeUrl(cancelUrl, 'cancelUrl'),
       client_reference_id: clean(userId, 200),

@@ -212,6 +212,7 @@ assert.equal(checkout.init.headers.has('stripe-account'), false, 'top-up custome
 assert.equal(body.has('payment_intent_data[application_fee_amount]'), false);
 assert.equal(body.get('metadata[civweave_host_account_id]'), 'acct_test');
 assert.equal(body.get('line_items[0][price_data][unit_amount]'), '1000');
+assert.match(body.get('integration_identifier') || '', /^civweave-topup-[a-z]{8}$/);
 
 await provider.createMembershipCheckout({ accountId:'acct_test', nodeId:'seed-east', userId:'u1', tierId:'member', grossCents:500, monthlyLifetimeCredits:100000, successUrl:'https://seed-east.nodes.commonweave.earth/member-success', cancelUrl:'https://seed-east.nodes.commonweave.earth/member-cancel', idempotencyKey:'member1' });
 const memberCheckout = calls.at(-1); body = new URLSearchParams(memberCheckout.init.body);
@@ -222,6 +223,7 @@ assert.equal(body.get('line_items[0][price_data][unit_amount]'), '500');
 assert.equal(body.get('subscription_data[metadata][civweave_tier_id]'), 'member');
 assert.equal(body.get('subscription_data[metadata][civweave_host_account_id]'), 'acct_test');
 assert.equal(body.get('subscription_data[metadata][civweave_monthly_lifetime_credits]'), '100000');
+assert.match(body.get('integration_identifier') || '', /^civweave-membership-[a-z]{8}$/);
 
 const verifiedMembership = await provider.verifyMembershipInvoice({
   invoice:{

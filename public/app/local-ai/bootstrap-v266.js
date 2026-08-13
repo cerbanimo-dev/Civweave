@@ -27,7 +27,7 @@ const files=[
   ['/app/local-ai/runtime-bridge-v266.js?v=1.0.121-v307',bridgeReady,'CivweaveLocalModelBridgeV266'],
   ['/app/local-ai/settings-panel-v267.js?v=1.0.121-v307',settingsReady,'CivweaveLocalAISettingsV266'],
   ['/app/local-ai/primary-route-v283.js?v=1.0.88-v283',()=>globalThis.CivweaveLocalAIPrimaryRouteV283?.version==='1.0.85-local-ai-primary-route-v283','CivweaveLocalAIPrimaryRouteV283'],
-  ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.81-v278',()=>globalThis.CivweaveLocalModelHardwareTierUIV278?.version==='1.0.81-local-ai-hardware-tier-ui-v278'&&globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations===true,'CivweaveLocalModelHardwareTierUIV278'],
+  ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.81-v278-settings-stability-v318',()=>globalThis.CivweaveLocalModelHardwareTierUIV278?.version==='1.0.81-local-ai-hardware-tier-ui-v278'&&globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations===true&&globalThis.CivweaveLocalModelHardwareTierUIV278?.observerFeedbackBounded===true,'CivweaveLocalModelHardwareTierUIV278'],
   ['/app/local-ai/test-pulse-v269.js?v=1.0.116-v303-mobile-safe',()=>globalThis.CivweaveLocalModelTestPulseV269?.version==='1.0.116-local-model-test-pulse-v303-mobile-safe','CivweaveLocalModelTestPulseV269']
 ];
 let readyState='loading',lastError='',lastComponent='',currentReady=null,flight=null,passNumber=0;

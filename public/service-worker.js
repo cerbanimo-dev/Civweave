@@ -3,7 +3,7 @@ const VERSION='1.0.7';
 const CACHE_REVISION='direct-family-r46-installer-brand-v1';
 const GUIDE_REVISION='five-system-chat-r46-weaveling-memory';
 const CABINET_REVISION='direct-software-r38-v106';
-const DEVICE_REVISION='device-package-r42-civweave-map-v1';
+const DEVICE_REVISION='device-package-r44-anarchadia-consensus';
 const CALIBRATION_REVISION='marketing-only-r1';
 const INSTALL_REVISION='direct-entry-r45-memory-credential-v191';
 const LEDGER_HYDRATION_REVISION='direct-software-r35';
@@ -57,7 +57,7 @@ const CORE=[
   '/app/realm-console-v140.html','/app/realm-console-v140.css','/app/realm-console-v140.js','/app/cerbanimo-quest-engine-v144.css','/app/cerbanimo-quest-engine-v144.js','/app/cerbanimo-ai-validator-v156.js',
   '/app/cabinets/living-school/index.html','/app/cabinets/living-school/living-school-cabinet-v151.css','/app/cabinets/living-school/living-school-cabinet-v151.mjs','/app/services/living-school/modules/rubric-engine.mjs','/app/services/living-school/modules/project-gate.mjs','/app/services/living-school/modules/cerbanimo-bridge.mjs',
   '/app/fellowfare-cabinet-v144.html','/app/fellowfare-cabinet-v144.css','/app/fellowfare-cabinet-v144.js',
-  '/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-console-v139.js','/app/anarchadia-cabinet-workbench-v144.js',
+  '/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-console-v139.js','/app/anarchadia-console-v158.js','/app/anarchadia-chat-stability-v158.css','/app/anarchadia-runtime-stability-v159.js','/app/anarchadia-passport-v193.css','/app/anarchadia-passport-v193.js','/app/anarchadia-change-review-v165.js','/app/anarchadia-live-layout-v167.js','/app/anarchadia-consensus-v145.css','/app/anarchadia-consensus-v145.js','/app/action-followthrough-v165.js','/app/platform-stability-v159.css','/app/platform-stability-v159.js','/app/platform-experience-v160.css','/app/platform-experience-v160.js','/app/mobile-regression-v170.css','/app/mobile-regression-v170.js','/app/local-rails-validator-v170.js','/app/anarchadia-cabinet-workbench-v144.js',
   '/app/anarchadia-governance-v145.html','/app/anarchadia-governance-v145.css','/app/anarchadia-governance-v145.js','/app/anarchadia-governance-kernel-v145.js','/app/anarchadia-governance-store-v145.js','/app/anarchadia-governance-bridge-v145.js',
   '/app/anarchadia-sovereignty-v146.html','/app/anarchadia-sovereignty-v146.css','/app/anarchadia-sovereignty-v146.js','/app/anarchadia-sovereignty-kernel-v146.js','/app/anarchadia-local-sovereignty-v146.js','/app/anarchadia-sovereignty-bridge-v146.js',
   '/app/guide-contracts-v141.js','/app/assistant-runtime-v141.js','/app/assistant-runtime-v141.css','/app/core-loop-v152.js','/app/capability-readiness-v154.js','/app/intention-planner-v141.js','/app/intention-ui-v138.js','/app/intention-ui-v138.css',

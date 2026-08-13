@@ -78,8 +78,8 @@ for (const needle of [
 assert.ok(!recipientThinSource.includes('configuration.merchant'), 'production recipient watcher must not gate on merchant capabilities');
 assert.ok(!recipientThinSource.includes('configuration.customer'), 'production recipient watcher must not gate on customer capabilities');
 
-assert.ok(providerSource.includes("key.startsWith('rk_test_')"));
-assert.ok(providerSource.includes("key.startsWith('rk_live_')"));
+assert.ok(providerSource.includes("/^(?:sk|rk|rkcs)_test_/"));
+assert.ok(providerSource.includes("/^(?:sk|rk|rkcs)_live_/"));
 
 for (const needle of [
   "processing_state='processing'",
@@ -133,8 +133,10 @@ const provider = await import(new URL('cloudflare/core/src/stripe-connect.mjs', 
 assert.equal(provider.stripeCredentialMode(''), 'unconfigured');
 assert.equal(provider.stripeCredentialMode('sk_test_demo'), 'sandbox');
 assert.equal(provider.stripeCredentialMode('rk_test_demo'), 'sandbox');
+assert.equal(provider.stripeCredentialMode('rkcs_test_demo'), 'sandbox');
 assert.equal(provider.stripeCredentialMode('sk_live_demo'), 'live');
 assert.equal(provider.stripeCredentialMode('rk_live_demo'), 'live');
+assert.equal(provider.stripeCredentialMode('rkcs_live_demo'), 'live');
 assert.equal(provider.stripeCredentialMode('not-a-stripe-key'), 'unrecognized');
 
 const sample = await import(new URL('cloudflare/core/src/stripe-connect-v2-sample.mjs', root));

@@ -1,0 +1,67 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "civweave-core",
+  "main": "../cloudflare/core/src/origin-entry.mjs",
+  "compatibility_date": "2026-08-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "keep_vars": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "civweave-core",
+      "database_id": "acd3bd7f-c3fa-4d41-aa80-f379ed41a32e",
+      "migrations_dir": "../cloudflare/core/migrations"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "IDENTITY",
+        "class_name": "CivweaveCoreIdentity"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["CivweaveCoreIdentity"]
+    }
+  ],
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
+  "vars": {
+    "NODE_DOMAIN": "nodes.commonweave.earth",
+    "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.pages.dev",
+    "CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core",
+    "CIVWEAVE_PLATFORM_FEE_BPS": "500",
+    "CIVWEAVE_MONEY_MAX_TOPUP_CENTS": "10000",
+    "STRIPE_CONNECT_SAMPLE_ENABLED": "false"
+  },
+  "observability": {
+    "enabled": true
+  }
+
+  // Cloudflare Worker secrets, never committed or distributed to host nodes:
+  // STRIPE_SECRET_KEY
+  // STRIPE_CONNECT_WEBHOOK_SECRET
+  // STRIPE_CONNECT_THIN_WEBHOOK_SECRET
+  // NODE_FABRIC_BINDING_TOKEN
+  //
+  // Live-money runtime gates are intentionally NOT source-controlled vars. The
+  // guarded promotion / emergency-stop workflows own these remote values:
+  // CIVWEAVE_MONEY_LIVE_ENABLED
+  // CIVWEAVE_MONEY_EMERGENCY_STOP
+  // CIVWEAVE_MONEY_COMPLIANCE_APPROVED
+  // CIVWEAVE_MONEY_JURISDICTION_APPROVED
+  // CIVWEAVE_MONEY_KYC_AML_READY
+  // CIVWEAVE_MONEY_TAX_REPORTING_READY
+  // CIVWEAVE_MONEY_TERMS_APPROVED
+  // Missing gates fail closed in the Worker. keep_vars preserves deliberately
+  // promoted remote values across ordinary code deployments.
+  //
+  // CIVWEAVE_PLATFORM_FEE_BPS is the Cerbanimo share of compute top-ups only.
+  // Membership economics are 50% system / 25% host / 25% Cerbanimo in the capacity ledger.
+}

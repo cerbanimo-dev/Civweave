@@ -2,9 +2,11 @@ import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 const read = relative => readFile(new URL(`../${relative}`, import.meta.url), 'utf8');
-const [server, entry, money, frontend, compat, cabinet, symbols] = await Promise.all([
+const { default: paymentEntry } = await import('../cloudflare/core/src/stripe-connect-v2-entry.mjs');
+const [server, entry, originEntry, money, frontend, compat, cabinet, symbols] = await Promise.all([
   read('cloudflare/core/src/fellowfare-direct-commerce-v1.mjs'),
   read('cloudflare/core/src/stripe-connect-v2-entry.mjs'),
+  read('cloudflare/core/src/origin-entry.mjs'),
   read('cloudflare/core/src/money-edge-with-memberships.mjs'),
   read('public/app/services/fellowfare/fulfillment-economy-v2.js'),
   read('public/app/services/fellowfare/fulfillment-economy-v1.js'),
@@ -40,6 +42,7 @@ assert.match(server, /integration_identifier: integrationIdentifier\(\)/);
 assert.doesNotMatch(server, /payment_method_types/);
 assert.doesNotMatch(server, /automatic_tax/);
 assert.doesNotMatch(server, /\/v1\/transfers|transfer_data|destination:/);
+assert.match(server, /\(\?:sk\|rk\|rkcs\)_live_/);
 
 // Price integrity: checkout retrieves the seller-owned Stripe Price and requires
 // its FellowFare listing metadata to match instead of trusting a buyer-supplied amount.
@@ -52,6 +55,10 @@ assert.match(server, /The Stripe Price does not match this FellowFare listing/);
 // marketplace API remains intentionally dead.
 assert.match(entry, /handleFellowFareDirectCommerce/);
 assert.match(entry, /\/api\/fellowfare\/direct-commerce\//);
+assert.match(entry, /access-control-allow-origin/);
+assert.match(entry, /request\.method === 'OPTIONS'/);
+assert.match(entry, /CIVWEAVE_CANONICAL_INSTALL_ORIGIN/);
+assert.match(originEntry, /from '\.\/stripe-connect-v2-entry\.mjs'/);
 assert.match(entry, /\/api\/money-edge\/commerce\//);
 assert.match(entry, /marketplace-checkout-disabled/);
 assert.doesNotMatch(entry, /handleCommerceApiRequest/);
@@ -95,6 +102,46 @@ assert.match(symbols, /provider Stripe direct checkout/);
 assert.match(symbols, /FellowFare receives only its application fee/);
 assert.match(symbols, /Acorns\/Buttons are fulfilled and burned/);
 assert.match(symbols, /does not collect or route a goods payment/);
+
+const pausedLiveEnv = {
+  CIVWEAVE_CANONICAL_INSTALL_ORIGIN: 'https://civweave.pages.dev',
+  CIVWEAVE_MONEY_LIVE_ENABLED: 'false',
+  STRIPE_SECRET_KEY: 'sk_live_paused_verifier_only',
+  DB: {
+    prepare() {
+      return {
+        bind() {
+          return { first: async () => null };
+        }
+      };
+    }
+  }
+};
+const preflight = await paymentEntry.fetch(new Request('https://core.example/api/fellowfare/direct-commerce/accounts', {
+  method: 'OPTIONS',
+  headers: {
+    origin: 'https://civweave.pages.dev',
+    'access-control-request-method': 'POST',
+    'access-control-request-headers': 'content-type'
+  }
+}), pausedLiveEnv, {});
+assert.equal(preflight.status, 204);
+assert.equal(preflight.headers.get('access-control-allow-origin'), 'https://civweave.pages.dev');
+assert.match(preflight.headers.get('access-control-allow-methods') || '', /POST/);
+
+const missingMerchant = await paymentEntry.fetch(new Request('https://core.example/api/fellowfare/direct-commerce/accounts/missing-browser-merchant', {
+  headers: { origin: 'https://civweave.pages.dev' }
+}), pausedLiveEnv, {});
+assert.equal(missingMerchant.status, 404);
+assert.equal(missingMerchant.headers.get('access-control-allow-origin'), 'https://civweave.pages.dev');
+
+const pausedMutation = await paymentEntry.fetch(new Request('https://core.example/api/fellowfare/direct-commerce/accounts', {
+  method: 'POST',
+  headers: { origin: 'https://civweave.pages.dev', 'content-type': 'application/json' },
+  body: JSON.stringify({ userId: 'verification-user', displayName: 'Verification merchant', contactEmail: 'verification@example.test' })
+}), pausedLiveEnv, {});
+assert.equal(pausedMutation.status, 503);
+assert.equal(pausedMutation.headers.get('access-control-allow-origin'), 'https://civweave.pages.dev');
 
 console.log(JSON.stringify({
   ok: true,

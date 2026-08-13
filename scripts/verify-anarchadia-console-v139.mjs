@@ -5,25 +5,19 @@ import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-const [html,css,js,launcher,adapter,worker,serviceWorker]=await Promise.all([
-  read('public/app/anarchadia-console-v139.html'),read('public/app/anarchadia-console-v139.css'),read('public/app/anarchadia-console-v139.js'),read('public/app/v130-cabinet-launcher.js'),read('public/app/models/all-minilm-l6-v2/adapter.js'),read('public/app/models/all-minilm-l6-v2/worker.js'),read('public/service-worker.js')
+const [html,css,js,launcher,serviceWorker]=await Promise.all([
+  read('public/app/anarchadia-console-v139.html'),read('public/app/anarchadia-console-v139.css'),read('public/app/anarchadia-console-v158.js'),read('public/app/fullscreen-family-v104.html'),read('public/service-worker.js')
 ]);
-for(const required of ['ANARCHADIA','// CITIZEN CONSOLE','OPEN PROPOSALS','VIEW LEDGER','AUTOMATION','OBSERVATORY','BUGFIX REQUEST','FEATURE REQUEST','VOTE!','ac-request-form','ac-preview-frame','ac-display','ac-console-bar'])assert(html.includes(required),`console HTML missing ${required}`);
-for(const required of ['title','problem','expected','acceptance','risk','evidence','autoRun'])assert(html.includes(`name="${required}"`),`request form missing ${required}`);
+for(const required of ['ANARCHADIA','// CITIZEN CONSOLE','INTENTION COMMONS','CHANGE STEWARDSHIP','CONSENSUS LADDER','VIEW LEDGER','OBSERVATORY','BUGFIX REQUEST','FEATURE REQUEST','CHECK RAILS &amp; AUTHORITY','ac-request-form','ac-intention-form','ac-preview-frame','ac-display','ac-console-bar'])assert(html.includes(required),`console HTML missing ${required}`);
+for(const required of ['title','problem','expected','area','impact','acceptance','risk','evidence'])assert(html.includes(`name="${required}"`),`request form missing ${required}`);
 for(const required of ['--pink:#ff2f87','--gold:#ffc21a','--cyan:#1fd8ff','--lime:#8dff2b','.ac-display','.ac-console-bar','.ac-pipeline-track','.ac-observatory','repeating-linear-gradient'])assert(css.includes(required),`console CSS missing ${required}`);
 assert(!css.includes('/app/assets/cabinets/anarchadia.webp'),'console interior must not draw a second cabinet exterior');
 assert(!html.includes('ac-masthead'),'console interior still contains the duplicate exterior masthead');
-for(const required of ["const STAGES=['intake','rail-check','code-generation','validation','sandbox-install','preview-ready']",'civweave.anarchadia.citizen-console.v139','CivweaveReflexRuntime','CivweaveModelRuntime','civweave-safe-scaffolder','validatePatch','sandbox-install','preview-ready','vote-signal','HUB_PROPOSALS','No external action occurred.'])assert(js.includes(required),`console runtime missing ${required}`);
+for(const required of ["const STAGES=['intake','rail-check','code-generation','validation','sandbox-install','preview-ready']",'civweave.anarchadia.citizen-console.v139','CivweaveReflexRuntime','CivweaveModelRuntime','civweave-safe-scaffolder','validatePatch','assessProposal','proposal-consensus-required','sandbox-install','preview-ready','No external action occurred.'])assert(js.includes(required),`console runtime missing ${required}`);
 for(const forbidden of ['eval(', 'new Function(', 'document.cookie'])assert(!js.includes(forbidden),`console runtime contains forbidden executable ${forbidden}`);
-assert(launcher.includes('/app/anarchadia-console-v139.html?embed=1'),'cabinet launcher does not route Anarchadia to the citizen console');
-assert(launcher.includes('cw-cabinet-frame-art'),'Anarchadia citizen console is not wrapped in the physical cabinet shell');
-assert(launcher.includes("'Citizen Console'"),'cabinet launcher does not label the Anarchadia console');
-assert(adapter.includes('BODY_PROBE_LIMIT=2_000_000'),'MiniLM status checker lacks the small-file body probe');
-assert(adapter.includes("response.blob()).size"),'MiniLM status checker does not measure cached response bodies');
-assert(adapter.includes("probeBody:false"),'MiniLM graph checks could accidentally download full ONNX bodies');
-assert(worker.includes("pipeline('feature-extraction'"),'MiniLM worker no longer performs semantic feature extraction');
-assert(worker.includes("['wasm','q8']"),'MiniLM worker no longer offers the stable WASM route');
-assert(serviceWorker.includes("CACHE_REVISION='minilm-runtime-r19'"),'service worker revision was not rotated');
-assert(serviceWorker.includes('binaryStreamFirst'),'service worker does not stream ONNX binaries directly');
-for(const required of ['/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-console-v139.js'])assert(serviceWorker.includes(required),`service worker does not precache ${required}`);
-console.log(JSON.stringify({ok:true,console:'Anarchadia Citizen Console v139 interior correction',visualBoundary:'existing cabinet remains outside iframe; console renders only the display interior',modules:['proposals','ledger','automation','observatory'],requestKinds:['bugfix','feature'],pipeline:['intake','rail-check','code-generation','validation','sandbox-install','preview-ready'],publicationBoundary:'sandbox auto-install; production requires explicit community approval',minilmStatusProbe:'small cached files measured; ONNX binaries stream without blocking on Cache Storage',cacheRevision:'minilm-runtime-r19'},null,2));
+assert(launcher.includes('/app/anarchadia-console-v139.html?cabinet=1'),'family dispatcher does not route Anarchadia to the citizen console');
+assert(launcher.includes('location.replace')&&!launcher.includes('<iframe'),'family dispatcher must preserve the direct canonical route');
+assert(serviceWorker.includes("MODEL_CACHE='civweave-model-1.0.7-minilm-fixed-ort-r1'"),'service worker model cache is not the fixed ORT package');
+assert(serviceWorker.includes('modelOnDemand'),'service worker no longer isolates model download from the core package');
+for(const required of ['/app/anarchadia-console-v139.html','/app/anarchadia-console-v139.css','/app/anarchadia-consensus-v145.css','/app/anarchadia-consensus-v145.js'])assert(serviceWorker.includes(required),`service worker does not precache ${required}`);
+console.log(JSON.stringify({ok:true,console:'Anarchadia Citizen Console v139 consensus and change-stewardship overhaul',visualBoundary:'existing cabinet remains outside iframe; console renders only the display interior',modules:['intention-commons','change-stewardship','ledger','approved-work','observatory'],requestKinds:['bugfix','feature'],pipeline:['preflight-rails','authority-routing','approval-or-consensus','code-generation','validation','sandbox-install','preview-adoption'],publicationBoundary:'preview adoption and production deployment remain separate receipt-bearing actions',minilmStatusProbe:'small cached files measured; ONNX binaries stream without blocking on Cache Storage'},null,2));

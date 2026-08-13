@@ -38,12 +38,13 @@ const sourceContract = Object.freeze({
     && browserCommerceSource.includes("marketplacePaymentMode:'disabled'")
     && browserCommerceSource.includes('buildDistribution:disabled')
     && browserCommerceSource.includes('stripeTransferInstructions:disabled'),
-  fulfillmentBoundaryAdvertised: providerEventSource.includes('marketplaceCheckoutEnabled: false')
-    && providerEventSource.includes('marketplaceRecipientOnboardingEnabled: false')
+  fulfillmentBoundaryAdvertised: providerEventSource.includes('legacyMarketplaceCheckoutEnabled: false')
+    && providerEventSource.includes('legacyMarketplaceRecipientOnboardingEnabled: false')
     && providerEventSource.includes("goodsPaymentMode: 'seller-direct-outside-platform'")
-    && providerEventSource.includes("serviceLearningMode: 'acorn-button-fulfillment-burn'")
-    && providerEventSource.includes('platformCollectsSellerPayment: false')
-    && providerEventSource.includes('platformRoutesSellerPayment: false'),
+    && providerEventSource.includes("serviceLearningTokenMode: 'acorn-button-fulfillment-burn'")
+    && providerEventSource.includes("serviceLearningUsdMode: 'stripe-connect-direct-charge'")
+    && providerEventSource.includes('platformCollectsGrossSellerPayment: false')
+    && providerEventSource.includes('platformRoutesSellerProceeds: false'),
   legacyMarketplaceUnwindOnly: providerEventSource.includes('settleCommerceCheckout')
     && providerEventSource.includes('handleCommerceRefund')
     && providerEventSource.includes('handleCommerceDispute')
@@ -116,11 +117,13 @@ const report = {
     legacyLiabilityShapeCount: legacyLiabilityShape.length
   },
   fellowFare: {
-    marketplaceCheckoutEnabled: false,
+    legacyMarketplaceCheckoutEnabled: false,
     goodsPaymentMode: 'seller-direct-outside-platform',
-    serviceLearningMode: 'acorn-button-fulfillment-burn',
-    platformCollectsSellerPayment: false,
-    platformRoutesSellerPayment: false,
+    serviceLearningTokenMode: 'acorn-button-fulfillment-burn',
+    serviceLearningUsdMode: 'stripe-connect-direct-charge',
+    serviceLearningMerchantOfRecord: 'connected-provider',
+    platformCollectsGrossSellerPayment: false,
+    platformRoutesSellerProceeds: false,
     publicCommerceRouteExpectedStatus: 410,
     legacyPaymentLifecycle: 'unwind-only'
   },

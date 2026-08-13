@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {
   createCredential,createChangeSet,applyRails,transitionChangeSet,createGroup,openBallot,castBallot,
   closeBallot,recordConsent,createDissent,createNodeOutcome,verifyNodeOutcome,issueExecutionAuthorization,
-  createExecutionPacket,validateExecutionPacket,reviseChangeSet
+  createExecutionPacket,validateExecutionPacket,reviseChangeSet,createIntentionPlan,intentionAuthorityPath,
+  openConsensusRound,castConsensusPosition,tallyConsensusRound,closeConsensusRound
 } from '../public/app/anarchadia-governance-kernel-v145.js';
 
 const BASE='a'.repeat(40);
@@ -69,4 +70,32 @@ test('signed node outcome verifies only against the trusted key',async()=>{
   const outcome=await createNodeOutcome(ballot,node.record,node.privateKey);
   assert.equal(await verifyNodeOutcome(outcome,node.record),true);
   assert.equal(await verifyNodeOutcome(outcome,other.record),false);
+});
+test('intention authority keeps learning personal and shared generations collective',async()=>{
+  assert.deepEqual(intentionAuthorityPath({realms:['living-school']}),['individual']);
+  assert.deepEqual(intentionAuthorityPath({realms:['cerbanimo']}),['hub']);
+  assert.deepEqual(intentionAuthorityPath({realms:['fellowfare']}),['hub']);
+  assert.deepEqual(intentionAuthorityPath({realms:['living-school','cerbanimo']}),['hub','region','mesh']);
+  const personal=await createIntentionPlan({title:'Practice joinery',summary:'Follow my own learning path.',realms:['living-school']});
+  assert.equal(personal.state,'adopted');assert.equal(personal.decisions[0].level,'individual');
+});
+test('mesh intentions advance hub then region then mesh on the same signed revision',async()=>{
+  const members=await Promise.all(['A','B','C'].map(label=>createCredential(label)));
+  const plan=await createIntentionPlan({title:'Shared repair generation',summary:'Coordinate learning, labor, and materials across the mesh.',realms:['living-school','cerbanimo','fellowfare'],reach:'mesh'});
+  for(const level of ['hub','region','mesh']){
+    assert.equal(plan.activeLevel,level);
+    const round=await openConsensusRound(plan,{level,electorate:members.map(item=>item.record),quorum:.6,threshold:.67});
+    await castConsensusPosition(round,members[0].record,members[0].privateKey,'support');
+    await castConsensusPosition(round,members[1].record,members[1].privateKey,'support');
+    const tally=tallyConsensusRound(round);assert.equal(tally.quorumMet,true);assert.equal(tally.thresholdMet,true);assert.equal(tally.outcome,'ready-to-adopt');
+    const outcome=await closeConsensusRound(round,plan);assert.equal(outcome.outcome,'adopted');
+  }
+  assert.equal(plan.state,'adopted');assert.deepEqual(plan.decisions.map(item=>item.level),['hub','region','mesh']);
+});
+test('consensus reports when adoption is no longer mathematically plausible',async()=>{
+  const members=await Promise.all(['A','B','C','D','E'].map(label=>createCredential(label)));
+  const plan=await createIntentionPlan({title:'Contested mesh plan',summary:'A plan whose threshold cannot be reached.',realms:['civweave'],reach:'mesh'});
+  const round=await openConsensusRound(plan,{level:'hub',electorate:members.map(item=>item.record),quorum:.6,threshold:.67});
+  for(const item of members.slice(0,3))await castConsensusPosition(round,item.record,item.privateKey,'oppose');
+  const tally=tallyConsensusRound(round);assert.equal(tally.plausible,false);assert.equal(tally.outcome,'stalled');assert.ok(tally.neededForThreshold>tally.remaining);
 });

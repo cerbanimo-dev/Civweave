@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const [runtime,worker,hardware,owner,wrapper,orchestrator,bootstrap,lifecycle,settings,coherence,headers]=await Promise.all([
@@ -49,6 +50,22 @@ assert.match(hardware,/qwen3-0\.6b-q4f16.*?Best first try/s);
 assert.match(hardware,/smollm3-3b-q4f16.*?Benchmark first/s);
 assert.match(hardware,/fallbackUsed.*?Fallback only/s);
 assert.match(hardware,/deviceFitRecommendations:true/);
+assert.match(hardware,/observerFeedbackBounded:true/);
+assert.match(hardware,/idempotentSummaryWrites:true/);
+const summaryStart=hardware.indexOf('function summary('),summaryEnd=hardware.indexOf('\nasync function decorate()',summaryStart);
+assert.ok(summaryStart>=0&&summaryEnd>summaryStart,'device-fit summary decorator is missing');
+const summary=vm.runInNewContext(`(${hardware.slice(summaryStart,summaryEnd)})`,{NOTE:'cw-local-ai-device-fit-v314'});
+let summaryText='',summaryWrites=0,observerCallbacks=0;
+const summaryNode={
+  get textContent(){return summaryText},
+  set textContent(value){summaryText=String(value);summaryWrites++;observerCallbacks++}
+};
+const summaryPanel={querySelector(){return summaryNode}};
+const summaryDevice={webgpu:true,cores:8,memoryGB:8,isolated:true};
+const decorateSummary=()=>summary(summaryPanel,summaryDevice,{label:'Qwen 3 0.6B'},1);
+decorateSummary();
+while(observerCallbacks){observerCallbacks--;assert.ok(summaryWrites<20,'device-fit summary entered a recursive observer feedback loop');decorateSummary()}
+assert.equal(summaryWrites,1,'unchanged device-fit summary text must not retrigger its MutationObserver');
 assert.match(settings,/HEALTH='civweave\.local-ai\.health\.v286'/);
 const managementBody=lifecycle.match(/function managementReady\(\)\{([\s\S]*?)\}\nfunction enhance/)?.[1]||'';
 assert.match(managementBody,/largeExternalDataForeground===true/);
@@ -56,16 +73,20 @@ assert.match(managementBody,/metadataOnlyRepair===true/);
 assert.match(managementBody,/metadataRepairRaceSafe===true/);
 assert.match(managementBody,/CivweaveLocalAIPrimaryRouteV283/);
 assert.match(managementBody,/deviceFitRecommendations===true/);
+assert.match(managementBody,/observerFeedbackBounded===true/);
+assert.match(lifecycle,/hardware-tier-ui-v278\.js\?v=1\.0\.81-v278-settings-stability-v318/);
 assert.match(lifecycle,/deviceFitManagement:true/);
 assert.match(lifecycle,/completeManagementReadiness:true/);
 assert.match(lifecycle,/settingsEntryOwner:'settings-gateway-v317'/);
 assert.match(lifecycle,/inputOwnership:false/);
 assert.match(bootstrap,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?intentPrewarm===true.*?compatibilityPromptCap===true/s);
 assert.match(bootstrap,/deviceFitRecommendations===true/);
+assert.match(bootstrap,/hardware-tier-ui-v278\.js\?v=1\.0\.81-v278-settings-stability-v318/);
+assert.match(bootstrap,/observerFeedbackBounded===true/);
 assert.match(bootstrap,/smoothFitRuntime:true/);
 assert.match(wrapper,/smoothFitRuntime===true/);
 assert.match(wrapper,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?intentPrewarm===true/s);
 assert.match(coherence,/CW_LOCAL_AI_EXTRA_PATHS[\s\S]*experience-orchestrator-v232\.js/);
 assert.match(coherence,/CW_LOCAL_AI_CRITICAL[\s\S]*experience-orchestrator-v232\.js/);
 assert.match(coherence,/smoothFitOrchestrator: true/);
-console.log(JSON.stringify({ok:true,revision:'local-ai-smooth-fit-v317',recommendationPolicy:'measured-smoothness-first',smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},residency:{desktopMs:300000,mobileMs:90000,hiddenMs:30000},wasm:'adaptive-threading-plus-interactive-context-cap',prewarm:'chat-open-or-input-focus',progress:'monotonic-overall',externalData:'explicit-single-file-path',management:'complete-on-demand-v317',coherence:'orchestrator-network-first'},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-ai-smooth-fit-v318-settings-stability',recommendationPolicy:'measured-smoothness-first',smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},residency:{desktopMs:300000,mobileMs:90000,hiddenMs:30000},wasm:'adaptive-threading-plus-interactive-context-cap',prewarm:'chat-open-or-input-focus',progress:'monotonic-overall',externalData:'explicit-single-file-path',management:'complete-on-demand-v317',settingsDecoration:'bounded-idempotent-observer',coherence:'orchestrator-network-first'},null,2));
