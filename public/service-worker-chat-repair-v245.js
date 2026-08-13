@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-css-contract-v343';
+const REVISION='chat-css-contract-v344-avatar-expression';
 const HARDENING_REVISION='mobile-ai-hardening-v302';
 const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
 const CHAT_PATHS=new Set([
@@ -16,6 +16,13 @@ const CHAT_PATHS=new Set([
   '/app/guide-workspace-v242.js',
   '/app/shared-guide-surface-v236.js',
   '/app/shared-chat-face-icons-v255.js',
+  '/app/avatar-expression-director-v313.js',
+  '/app/assets/ai/chat/expressions/manifest-v313.json',
+  '/app/assets/ai/chat/expressions/atlases/weaveling-expressions-v314.webp',
+  '/app/assets/ai/chat/expressions/atlases/moss-expressions-v314.webp',
+  '/app/assets/ai/chat/expressions/atlases/kamiya-expressions-v314.webp',
+  '/app/assets/ai/chat/expressions/atlases/rook-expressions-v314.webp',
+  '/app/assets/ai/chat/expressions/atlases/merlin-expressions-v314.webp',
   '/app/regression-fixes-v243.js',
   '/app/working-campus-v156.js',
   '/app/working-campus-v156.part1.txt',
