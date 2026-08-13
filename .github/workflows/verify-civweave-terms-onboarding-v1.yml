@@ -1,0 +1,39 @@
+name: Verify Civweave Terms Onboarding v1
+
+on:
+  pull_request:
+    paths:
+      - 'public/legal/civweave-terms-of-service.txt'
+      - 'public/app/installed-entry-v146.js'
+      - 'public/app/installer-online-fallback-v225.js'
+      - 'public/app/manifest.webmanifest'
+      - 'scripts/verify-civweave-terms-onboarding-v1.mjs'
+      - '.github/workflows/verify-civweave-terms-onboarding-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/legal/civweave-terms-of-service.txt'
+      - 'public/app/installed-entry-v146.js'
+      - 'public/app/installer-online-fallback-v225.js'
+      - 'public/app/manifest.webmanifest'
+      - 'scripts/verify-civweave-terms-onboarding-v1.mjs'
+      - '.github/workflows/verify-civweave-terms-onboarding-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Verify clickwrap contract
+        run: node scripts/verify-civweave-terms-onboarding-v1.mjs
+      - name: Verify launcher syntax
+        run: |
+          node --check public/app/installed-entry-v146.js
+          node --check public/app/installer-online-fallback-v225.js
+          node --check scripts/verify-civweave-terms-onboarding-v1.mjs

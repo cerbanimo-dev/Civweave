@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-host-node-lobby-v2';
+const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-terms-gate-v1';
 const stateNode = document.getElementById('package-state');
 const assetsNode = document.getElementById('package-assets');
 const installButton = document.getElementById('install-app');
@@ -29,20 +29,16 @@ function installedDisplay() {
   return navigator.standalone === true || ['standalone', 'fullscreen', 'minimal-ui', 'window-controls-overlay'].some(mode => matchMedia(`(display-mode: ${mode})`).matches);
 }
 
-function installedEntryUrl() {
+function installedEntryUrl(source = 'installer-open') {
   const url = new URL('/app/installed-entry-v146.html', location.origin);
   url.searchParams.set('installed', '1');
   url.searchParams.set('system', 'civweave');
-  url.searchParams.set('source', 'installer-open');
+  url.searchParams.set('source', source);
   return url.href;
 }
 
 function campusUrl() {
-  const url = new URL('/app/working-campus-v156.html', location.origin);
-  url.searchParams.set('installed', '1');
-  url.searchParams.set('version', releaseVersion());
-  url.searchParams.set('launch', 'online');
-  return url.href;
+  return installedEntryUrl('installer-online-fallback');
 }
 
 function failed() {
@@ -150,6 +146,11 @@ function ensureOnlineButton() {
 
 function apply() {
   ensureOnlineButton();
+  const onlineFallback = document.getElementById('open-online-campus-v225');
+  if (onlineFallback instanceof HTMLAnchorElement) {
+    onlineFallback.href = campusUrl();
+    onlineFallback.dataset.civweaveTermsGate = 'installed-entry-v1';
+  }
   if (repairing) return;
   if (installedDisplay() && installButton && !failed()) {
     installButton.disabled = false;
@@ -204,7 +205,8 @@ globalThis.CivweaveInstallerOnlineFallbackV225 = Object.freeze({
   repairInstalledShell,
   installHostNodeLobby,
   repairMessage: 'REPAIR_DEVICE_PACKAGE',
-  storagePolicy: 'preserve-campus-model-media-school-storage'
+  storagePolicy: 'preserve-campus-model-media-school-storage',
+  legalGate: 'installed-entry-v1'
 });
 
 })();
