@@ -1,4 +1,4 @@
-name: One-shot Civweave green-pass repair 3
+name: One-shot Civweave green-pass validation
 
 on:
   push:
@@ -8,10 +8,10 @@ on:
       - .github/workflows/repair-green-pass-3-scratch.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  repair:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -20,91 +20,9 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-
-      - name: Apply tested source repairs
-        run: |
-          node <<'NODE'
-          const fs=require('fs');
-          const read=f=>fs.readFileSync(f,'utf8');
-          const write=(f,s)=>fs.writeFileSync(f,s);
-          const replace=(f,from,to)=>{
-            const s=read(f);
-            if(!s.includes(from)) throw new Error(`Expected text not found in ${f}: ${from.slice(0,120)}`);
-            write(f,s.replace(from,to));
-          };
-
-          replace('scripts/materialize-canonical-release.mjs',
-            "const sync=spawnSync(process.execPath,['scripts/sync-release-version-assets.mjs'],{cwd:root,stdio:'inherit'});if(sync.status!==0)throw new Error('Release synchronization failed.');\nconst metadata=spawnSync(process.execPath,['scripts/generate-prelive-metadata-v281.mjs'],{cwd:root,stdio:'inherit'});if(metadata.status!==0)throw new Error('Verified shell metadata materialization failed.');",
-            "const sync=spawnSync(process.execPath,['scripts/sync-release-version-assets.mjs'],{cwd:root,stdio:'inherit'});if(sync.status!==0)throw new Error('Release synchronization failed.');\nconst worker=spawnSync(process.execPath,['scripts/build-service-worker-v211.mjs'],{cwd:root,stdio:'inherit'});if(worker.status!==0)throw new Error('Service worker materialization failed.');\nconst metadata=spawnSync(process.execPath,['scripts/generate-prelive-metadata-v281.mjs'],{cwd:root,stdio:'inherit'});if(metadata.status!==0)throw new Error('Verified shell metadata materialization failed.');");
-
-          const pkg=JSON.parse(read('package.json'));
-          if(!pkg.scripts.check.includes('node scripts/build-service-worker-v211.mjs')){
-            pkg.scripts.check=pkg.scripts.check.replace('node scripts/sync-release-version-assets.mjs && node scripts/sync-release-coherence-v220.mjs','node scripts/sync-release-version-assets.mjs && node scripts/build-service-worker-v211.mjs && node scripts/sync-release-coherence-v220.mjs');
-          }
-          write('package.json',JSON.stringify(pkg,null,2)+'\n');
-
-          replace('scripts/verify-stable-app-entry-v215.mjs',
-            "for (const token of [\"updateViaCache:'none'\",'await registration.update()',\"candidate.postMessage({type:'SKIP_WAITING'})\",'routes.urlFor']) {\n  if (!installedEntry.includes(token)) throw new Error(`Installed entry is missing updater-first token ${token}.`);\n}",
-            "for (const token of [\"updateViaCache:'none'\",'registration.update()',\"candidate.postMessage({type:'SKIP_WAITING'})\",'routes.urlFor']) {\n  if (!installedEntry.includes(token)) throw new Error(`Installed entry is missing updater-first token ${token}.`);\n}\nif(!installedEntry.includes('bounded(registration.update()')) throw new Error('Installed entry must bound service-worker update latency so startup stays recoverable.');");
-
-          replace('scripts/verify-weaveling-hub-v233.mjs',
-            "const plannerIndex=sharedLoader.indexOf('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization');\nconst materializationIndex=sharedLoader.indexOf('/app/weaveling-plan-materialization-v265.js?v=1.0.57-v265');\nconst sharedCoreIndex=sharedLoader.indexOf('/app/shared-guide-surface-v236-core-v244.js?v=1.0.57-v265');",
-            "const plannerIndex=sharedLoader.indexOf('/app/intention-planner-v141.js');\nconst materializationIndex=sharedLoader.indexOf('/app/weaveling-plan-materialization-v265.js');\nconst sharedCoreIndex=sharedLoader.indexOf('/app/shared-guide-surface-v236-core-v244.js');");
-
-          replace('scripts/verify-chat-convergence-v250.mjs',
-            "check('installed entry keeps canonical chat identity while forcing the legacy-purge worker',installedEntry.includes('revision=chat-convergence-v251-legacy-purge')&&installedEntry.includes(`version:'${version}-chat-convergence-v250'`));\ncheck('installed entry resolves release with no-store manifest fetch',installedEntry.includes(\"fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})\"));\ncheck('installed entry forces worker update checks',installedEntry.includes(\"updateViaCache:'none'\")&&installedEntry.includes('await registration.update()'));",
-            "check('installed entry carries current boot-recovery identity',installedEntry.includes('revision=boot-recovery-v426')&&installedEntry.includes(`version:'${version}-boot-recovery-v426'`));\ncheck('installed entry resolves release with bounded no-store manifest fetch',installedEntry.includes('/app/manifest.webmanifest?boot=${Date.now()}')&&installedEntry.includes(\"cache:'no-store'\")&&installedEntry.includes('bounded(fetch('));\ncheck('installed entry forces bounded worker update checks',installedEntry.includes(\"updateViaCache:'none'\")&&installedEntry.includes('registration.update()')&&installedEntry.includes('bounded(registration.update()'));");
-
-          replace('scripts/verify-navigation-generators-v227.mjs',
-            "assert(installedEntry.includes(\"updateViaCache:'none'\")&&installedEntry.includes('await registration.update()'),'Updater-first entry no longer refreshes the worker before routing.');",
-            "assert(installedEntry.includes(\"updateViaCache:'none'\")&&installedEntry.includes('registration.update()')&&installedEntry.includes('bounded(registration.update()'),'Updater-first entry no longer performs a bounded worker refresh before routing.');");
-
-          replace('scripts/verify-pwa-cold-launch-recovery-v426.mjs',
-            "const [entryHtml, entryJs, recoveryHtml, worker, recoveryWorker] = await Promise.all([",
-            "const version=(await read('VERSION')).trim();\nconst [entryHtml, entryJs, recoveryHtml, worker, recoveryWorker] = await Promise.all([");
-          replace('scripts/verify-pwa-cold-launch-recovery-v426.mjs',
-            "assert.match(entryHtml, /installed-entry-v146\\.js\\?v=1\\.0\\.122-boot-recovery-v426\" defer/);",
-            "assert.ok(entryHtml.includes(`/app/installed-entry-v146.js?v=${version}-boot-recovery-v426\" defer`),'installed bootstrap HTML must carry the current boot-recovery script identity');");
-
-          replace('scripts/verify-pwa-install-campus-v246.mjs',
-            "assert.ok(installedEntry.includes(\"fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})\"),'installed entry must resolve current release without cache');\nassert.ok(installedEntry.includes(\"updateViaCache:'none'\"));\nassert.ok(installedEntry.includes('await registration.update()'));",
-            "assert.ok(installedEntry.includes('/app/manifest.webmanifest?boot=${Date.now()}')&&installedEntry.includes(\"cache:'no-store'\")&&installedEntry.includes('bounded(fetch('),'installed entry must resolve current release through the bounded no-store path');\nassert.ok(installedEntry.includes(\"updateViaCache:'none'\"));\nassert.ok(installedEntry.includes('registration.update()')&&installedEntry.includes('bounded(registration.update()'),'installed entry must perform a bounded worker update');");
-
-          replace('scripts/test-open-learning-media-runtime-v1.mjs',
-            "for(const surface of ['public/app/cabinets/living-school/index.html','public/app/realm-console-v140.html','public/app/working-campus-v156.html']){\n  const html=fs.readFileSync(path.join(root,surface),'utf8');\n  assert(html.includes('/app/open-learning-media-cache-v1.mjs'),surface);\n}",
-            "for(const surface of ['public/app/cabinets/living-school/index.html','public/app/working-campus-v156.html']){\n  const html=fs.readFileSync(path.join(root,surface),'utf8');\n  assert(html.includes('/app/open-learning-media-cache-v1.mjs'),surface);\n}\nconst cerbanimoHtml=fs.readFileSync(path.join(root,'public/app/realm-console-v140.html'),'utf8');\nconst cerbanimoVideo=fs.readFileSync(path.join(root,'public/app/cerbanimo-video-task-contract-v1.mjs'),'utf8');\nassert(!cerbanimoHtml.includes('<script type=\"module\" src=\"/app/open-learning-media-cache-v1.mjs'),'Cerbanimo must keep Open Learning Media off the eager boot path');\nassert(cerbanimoVideo.includes('import(CONTRACT)'),'Cerbanimo must retain on-demand shared media loading');");
-
-          replace('scripts/verify-canonical-core-only-v226.mjs',
-            "const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-version-v1.js','/app/ai-settings-bind-guard-v230.js','/app/ai-settings-device-repair-v229.js'];",
-            "const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-version-v1.js','/app/ai-settings-bind-guard-v230.js','/app/ai-settings-device-repair-v229.js','/app/document-lifecycle-v221.js'];");
-          replace('scripts/verify-canonical-core-only-v226.mjs',
-            "const document={documentElement,head,body,querySelector:()=>null,createElement:tag=>({tagName:String(tag).toUpperCase(),async:true,rel:'',href:'',src:''})};",
-            "const document={documentElement,head,body,querySelector:selector=>{const match=String(selector).match(/^script\\[src\\^=\\\"([^\\\"]+)\\\"\\]$/);if(!match)return null;return appended.find(node=>String(node.src||'').startsWith(match[1]))||null},createElement:tag=>({tagName:String(tag).toUpperCase(),async:true,rel:'',href:'',src:''})};");
-          replace('scripts/verify-canonical-core-only-v226.mjs',
-            "assert.equal(api.canonicalSubsystemSupportScripts,4);",
-            "assert.equal(api.canonicalSubsystemSupportScripts,6);");
-
-          replace('scripts/test-proof-driven-checkpoints-v158.mjs',
-            "const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209')`;",
-            "const expectedWorkerImport=`importScripts('/service-worker-v203.js?v=${releaseVersion}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425')`;");
-          replace('scripts/test-proof-driven-checkpoints-v158.mjs',
-            "assert(offlineManifest.seeds.length===11,'Offline campus manifest no longer has the canonical eleven seed roots.');",
-            "assert(Array.isArray(offlineManifest.seeds)&&offlineManifest.seeds.length>=11,'Offline campus manifest unexpectedly lost canonical seed roots.');");
-          replace('scripts/test-proof-driven-checkpoints-v158.mjs',
-            "assert(core.includes(\"const BUILD = 'lightweight-shell-v208'\"),'Retained worker core is not the lightweight shell.');",
-            "assert(core.includes(\"const BUILD = 'lightweight-shell-v208\"),'Retained worker core is not in the lightweight-shell-v208 family.');");
-          replace('scripts/test-proof-driven-checkpoints-v158.mjs',
-            "assert(offlineManifest.revision==='canonical-background-campus-v241-systems-mesh-v251','Offline campus manifest is not the Systems Mesh canonical background-download contract.');",
-            "assert(String(offlineManifest.revision||'').startsWith('canonical-background-campus-v241-systems-mesh-v251'),'Offline campus manifest left the Systems Mesh canonical background-download contract family.');");
-          NODE
-
       - name: Install production dependencies
         run: npm ci --omit=dev --no-audit --no-fund
-
-      - name: Rebuild current service worker
-        run: node scripts/build-service-worker-v211.mjs
-
-      - name: Verify repaired contracts
+      - name: Verify all repaired contracts
         run: |
           set -euxo pipefail
           node scripts/verify-stable-app-entry-v215.mjs
@@ -120,8 +38,10 @@ jobs:
           node scripts/test-proof-driven-checkpoints-v158.mjs
           npm run check:release-discipline
           npm run check
-
-      - name: Verify release packaging
+      - name: Verify marketplace workflow contract
+        run: |
+          node -e "const p=require('./public/app/offline-package-v208.json'); if(!Array.isArray(p.seeds)||p.seeds.length<11) throw new Error('canonical offline roots unexpectedly shrank'); for(const f of ['/finder','/app/federation-finder-local-v269.html','/app/node-ai-marketplace-surface-v1.js','/app/node-ai-operator-v1.html']) if(!p.assets.includes(f)) throw new Error('missing optional offline marketplace asset '+f)"
+      - name: Verify release and packaged recovery
         run: |
           npm run build:release
           node scripts/build-cloudflare-pages.mjs
@@ -132,22 +52,3 @@ jobs:
           grep -q "bounded(registration.update()" .cloudflare-pages/app/installed-entry-v146.js
           grep -q "service-worker-local-ai-coherence-v307.js?v=${release_version}-local-ai-code-coherence-v307" .cloudflare-pages/service-worker-v203.js
           grep -q "radio-core-shell-v305-playlist-only-v246" .cloudflare-pages/service-worker-v203.js
-
-      - name: Commit only intended source repair
-        run: |
-          git config user.name "civweave-green-pass-bot"
-          git config user.email "civweave-green-pass-bot@users.noreply.github.com"
-          git add package.json public/service-worker-v203.js \
-            scripts/materialize-canonical-release.mjs \
-            scripts/test-open-learning-media-runtime-v1.mjs \
-            scripts/test-proof-driven-checkpoints-v158.mjs \
-            scripts/verify-canonical-core-only-v226.mjs \
-            scripts/verify-chat-convergence-v250.mjs \
-            scripts/verify-navigation-generators-v227.mjs \
-            scripts/verify-pwa-cold-launch-recovery-v426.mjs \
-            scripts/verify-pwa-install-campus-v246.mjs \
-            scripts/verify-stable-app-entry-v215.mjs \
-            scripts/verify-weaveling-hub-v233.mjs
-          git diff --cached --check
-          git commit -m "Repair current runtime guards and worker generation"
-          git push origin HEAD:ci/repair-green-pass-3-20260812
