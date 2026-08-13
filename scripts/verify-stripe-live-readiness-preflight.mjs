@@ -19,6 +19,7 @@ const EXPECTED_COMMERCE_SPLIT_FEE_BPS = 100;
 const providerSource = await readFile(new URL('../cloudflare/core/src/stripe-connect.mjs', import.meta.url), 'utf8');
 const commerceSource = await readFile(new URL('../public/app/cerbanimo-commerce-distribution-v1.js', import.meta.url), 'utf8');
 const serverCommerceSource = await readFile(new URL('../cloudflare/core/src/commerce-edge.mjs', import.meta.url), 'utf8');
+const providerEventSource = await readFile(new URL('../cloudflare/core/src/money-edge-with-memberships.mjs', import.meta.url), 'utf8');
 const v2AccountCreationMarker = ['v2', 'core', 'accounts', 'create'].join('.');
 const sourceContract = Object.freeze({
   accountsV2Recipient: providerSource.includes(`STRIPE_CONNECT_ACCOUNT_MODEL = '${EXPECTED_ACCOUNT_MODEL}'`)
@@ -34,16 +35,21 @@ const sourceContract = Object.freeze({
     && commerceSource.includes('buyerChargeMinor=amountMinor+splitFeeMinor')
     && commerceSource.includes('reducesContributorPayout:false'),
   serverCommerceSettlement: serverCommerceSource.includes('CERBANIMO_COMMERCE_FEE_BPS = 100')
-    && serverCommerceSource.includes("edge.verifyNodeRequest")
+    && serverCommerceSource.includes('edge.verifyNodeRequest')
     && serverCommerceSource.includes("'/v1/checkout/sessions'")
     && serverCommerceSource.includes('createHostTransfer')
     && serverCommerceSource.includes('sourceTransaction: charge.id')
     && serverCommerceSource.includes('reverseHostTransfer')
-    && serverCommerceSource.includes("charge.dispute.funds_reinstated")
-    && serverCommerceSource.includes("civweave_annual_pool: 'excluded'")
+    && serverCommerceSource.includes("civweave_annual_pool: 'excluded'"),
+  serverCommerceEventRouting: providerEventSource.includes('settleCommerceCheckout')
+    && providerEventSource.includes('handleCommerceRefund')
+    && providerEventSource.includes('handleCommerceDispute')
+    && providerEventSource.includes('restoreCommerceDisputeTransfers')
+    && providerEventSource.includes("event.type === 'charge.dispute.funds_reinstated'")
 });
-if (!Object.values(sourceContract).every(Boolean)) {
-  throw new Error(`Live readiness source contract is stale: ${JSON.stringify(sourceContract)}`);
+const failedSourceChecks = Object.entries(sourceContract).filter(([, ok]) => !ok).map(([name]) => name);
+if (failedSourceChecks.length) {
+  throw new Error(`Live readiness source contract is stale; failed checks: ${failedSourceChecks.join(', ')}. ${JSON.stringify(sourceContract)}`);
 }
 
 const key = String(process.env.STRIPE_LIVE_SECRET_KEY || '').trim();
@@ -111,7 +117,8 @@ const report = {
     splitFeeBps: EXPECTED_COMMERCE_SPLIT_FEE_BPS,
     splitFeePlacement: 'on-top-of-listed-price',
     reducesContributorPayout: false,
-    serverSettlementExecutor: sourceContract.serverCommerceSettlement
+    serverSettlementExecutor: sourceContract.serverCommerceSettlement,
+    providerEventRouting: sourceContract.serverCommerceEventRouting
   },
   snapshotWebhook: {
     url: LIVE_SNAPSHOT_URL,
