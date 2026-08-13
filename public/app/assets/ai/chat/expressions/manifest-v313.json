@@ -1,0 +1,34 @@
+{
+  "schema": "civweave.avatar-expression-assets.v3",
+  "version": "1.0.3-avatar-expressions-v314-compact",
+  "sourceCuts": {
+    "count": 100,
+    "sourceFormat": "PNG RGBA",
+    "sourceCellWidth": 240,
+    "sourceCellHeight": 200,
+    "alphaVerified": true,
+    "delivery": "100 individually labeled logical cuts packed into transparent per-character atlases for runtime"
+  },
+  "runtime": {
+    "format": "WebP RGBA atlas",
+    "columns": 5,
+    "rows": 4,
+    "cellWidth": 80,
+    "cellHeight": 80,
+    "atlasWidth": 400,
+    "atlasHeight": 320,
+    "preservesAlpha": true
+  },
+  "sleepPolicy": {
+    "expression": "sleepy",
+    "onModelFailure": true,
+    "inDeterministicModeWhenTinyLMUnavailable": true
+  },
+  "systems": {
+    "civweave": {"character":"weaveling","atlas":"/app/assets/ai/chat/expressions/atlases/weaveling-expressions-v314.webp","expressions":["neutral","happy","excited","laughing","curious","thinking","confused","surprised","worried","sad","shy","determined","proud","mischievous","sleepy","cheering","waving","pointing","magical","hopeful"]},
+    "living-school": {"character":"moss","atlas":"/app/assets/ai/chat/expressions/atlases/moss-expressions-v314.webp","expressions":["neutral","happy","excited","laughing","curious","thinking","confused","surprised","worried","sad","crying","shy","determined","proud","mischievous","sleepy","cheering","waving","pointing","encouraging"]},
+    "cerbanimo": {"character":"kamiya","atlas":"/app/assets/ai/chat/expressions/atlases/kamiya-expressions-v314.webp","expressions":["neutral","happy","excited","laughing","curious","thinking","confused","surprised","worried","sad","crying","shy","determined","proud","mischievous","sleepy","cheering","waving","pointing","helpful"]},
+    "fellowfare": {"character":"rook","atlas":"/app/assets/ai/chat/expressions/atlases/rook-expressions-v314.webp","expressions":["neutral","happy","excited","laughing","curious","thinking","confused","surprised","worried","sad","crying","shy","determined","proud","mischievous","sleepy","cheering","waving","pointing","approving"]},
+    "anarchadia": {"character":"merlin","atlas":"/app/assets/ai/chat/expressions/atlases/merlin-expressions-v314.webp","expressions":["neutral","happy","excited","laughing","curious","thinking","confused","surprised","worried","sad","crying","shy","determined","proud","mischievous","sleepy","cheering","waving","pointing","magical"]}
+  }
+}
