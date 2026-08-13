@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.0-rc21.1';
+const VERSION='1.1.0-fellowfare-market-v2';
 const BUS=new EventTarget();
 const CACHE={updatedAt:null,records:[],signals:[],counts:{},systems:{},anarchadiaPending:true};
 const safeJson=(key,fallback=null)=>{try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback}catch{return fallback}};
@@ -13,7 +13,7 @@ const normalize=(system,type,item,index,extra={})=>({
  title:titleOf(item,`${type} ${index+1}`),subtitle:text(item?.description||item?.summary||item?.status||item?.category||extra.subtitle||''),
  status:text(item?.status||extra.status||'active').toLowerCase(),updatedAt:item?.updatedAt||item?.createdAt||item?.savedAt||null,
  deepLink:extra.deepLink||`services/${system==='living'?'living-school':system}/index.html`,scene:extra.scene||null,
- tags:[system,type,text(item?.category),text(item?.mode),text(item?.status),...(extra.tags||[])].filter(Boolean),raw:item
+ tags:[system,type,text(item?.category),text(item?.kind),text(item?.mode),text(item?.status),...(extra.tags||[])].filter(Boolean),raw:item
 });
 function cerbanimo(){
  const s=safeJson('cerbanimo-pocket-constellary-v0.6',{}), out=[];
@@ -30,9 +30,13 @@ function living(){
  return {state:s,records:out};
 }
 function fellowfare(){
- const s=safeJson('fellowfare.mvp.state.v3',safeJson('fellowfare.mvp.state.v2',safeJson('fellowfare.mvp.state.v1',{}))),out=[];
- [['listing',s.threads||[],'festival'],['proposal',s.proposals||[],'dispatch'],['agreement',s.agreements||[],'archive'],['assembly',s.assemblies||[],'festival'],['message',s.messages||[],'dispatch']].forEach(([type,items,scene])=>arr(items).forEach((x,i)=>out.push(normalize('fellowfare',type,x,i,{scene,deepLink:`services/fellowfare/index.html#${type}/${idOf(x,type,i)}`}))));
- return {state:s,records:out};
+ const market=safeJson('fellowfare.marketplace.v2',{}),legacy=safeJson('fellowfare.mvp.state.v3',safeJson('fellowfare.mvp.state.v2',safeJson('fellowfare.mvp.state.v1',{}))),out=[];
+ const demoTitles=new Set(['Pickup truck and hauling help','Reclaimed windows for greenhouse build','Weekly local bread buying circle','Two hours of household reset help','Shared workshop space one evening a week','Flyer and one-page web design']);
+ const listedSourceIds=new Set();
+ arr(market.listings).forEach((x,i)=>{listedSourceIds.add(text(x?.source?.sourceId));out.push(normalize('fellowfare','listing',x,i,{scene:'festival',deepLink:`services/fellowfare/index.html#listing/${idOf(x,'listing',i)}`,tags:[text(x?.kind),text(x?.source?.system)]}))});
+ arr(market.orders).forEach((x,i)=>out.push(normalize('fellowfare','arrangement',x,i,{scene:'archive',deepLink:`services/fellowfare/index.html#arrangement/${idOf(x,'arrangement',i)}`})));
+ [['listing',legacy.threads||[],'festival'],['proposal',legacy.proposals||[],'dispatch'],['agreement',legacy.agreements||[],'archive'],['assembly',legacy.assemblies||[],'festival'],['message',legacy.messages||[],'dispatch']].forEach(([type,items,scene])=>arr(items).filter(x=>!(type==='listing'&&(demoTitles.has(x?.title)||listedSourceIds.has(text(x?.id))))).forEach((x,i)=>out.push(normalize('fellowfare',type,x,i,{scene,deepLink:`services/fellowfare/index.html#${type}/${idOf(x,type,i)}`}))));
+ return {state:{marketplace:market,legacy},records:out};
 }
 function openAnarchadia(){return new Promise(resolve=>{
  if(!indexedDB){resolve({state:{},records:[]});return}
