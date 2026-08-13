@@ -72,9 +72,10 @@ jobs:
           ! grep -q "navigator.serviceWorker.register" .cloudflare-pages/app/index.html
           grep -q "navigator.serviceWorker.register(WORKER_URL" .cloudflare-pages/install-v130.js
           grep -q '"start_url": "/app/installed-entry-v146.html?installed=1"' .cloudflare-pages/app/manifest.webmanifest
-          grep -q "revision=chat-convergence-v251-legacy-purge" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "revision=boot-recovery-v426" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "version:'${release_version}-boot-recovery-v426'" .cloudflare-pages/app/installed-entry-v146.js
           grep -q "updateViaCache:'none'" .cloudflare-pages/app/installed-entry-v146.js
-          grep -q "await registration.update()" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "bounded(registration.update()" .cloudflare-pages/app/installed-entry-v146.js
           grep -q "service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288" .cloudflare-pages/service-worker-v203.js
           grep -q "network-first-current-version-cache-legacy-offline-fallback" .cloudflare-pages/service-worker-code-coherence-v288.js
           grep -q "service-worker-core-v208.js?v=${release_version}-chat-convergence-v250" .cloudflare-pages/service-worker-v203.js
