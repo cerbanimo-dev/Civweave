@@ -1,7 +1,8 @@
 import worker, {
   CivweaveCloudNode,
   CivweaveCapacityAccount,
-  nodeIdFromHostname
+  nodeIdFromHostname,
+  normalizeNodeId
 } from './index.mjs';
 
 export { CivweaveCloudNode, CivweaveCapacityAccount };
@@ -12,6 +13,12 @@ const VALIDATION_INPUT_NEURONS_PER_MILLION = 4_119;
 const VALIDATION_OUTPUT_NEURONS_PER_MILLION = 34_868;
 const SESSION_DOMAIN = 'civweave.capacity-session.v1';
 const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
+const AI_CORS = Object.freeze({
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, OPTIONS',
+  'access-control-allow-headers': 'authorization, content-type, x-civweave-node-id',
+  'access-control-max-age': '86400'
+});
 
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
 const b64url = bytes => {
@@ -26,15 +33,21 @@ const fromB64url = value => {
   const binary = atob(padded);
   return Uint8Array.from(binary, char => char.charCodeAt(0));
 };
-const json = (value, status = 200) => Response.json(value, { status, headers: { 'cache-control': 'no-store' } });
+const json = (value, status = 200, headers = {}) => Response.json(value, { status, headers: { 'cache-control': 'no-store', ...headers } });
+const aiJson = (value, status = 200) => json(value, status, AI_CORS);
+const publicCapacity = value => {
+  if (!value || typeof value !== 'object') return value;
+  const { reservesMicrocents, ...safe } = value;
+  return safe;
+};
 
 async function hmacKey(env) {
-  const source = clean(env.NODE_FABRIC_OPERATOR_TOKEN, 10000);
-  if (source.length < 24) throw Object.assign(new Error('Node fabric operator secret is unavailable for member sessions.'), { status: 503 });
+  const source = clean(env.NODE_FABRIC_SESSION_SECRET || env.NODE_FABRIC_OPERATOR_TOKEN, 10000);
+  if (source.length < 24) throw Object.assign(new Error('Node fabric session secret is unavailable for member sessions.'), { status: 503 });
   const material = await crypto.subtle.digest('SHA-256', enc.encode(`${SESSION_DOMAIN}\0${source}`));
   return crypto.subtle.importKey('raw', material, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
 }
-async function issueCapacitySession(env, member, domain) {
+async function issueCapacitySession(env, member, publicOrigin) {
   const now = Math.floor(Date.now() / 1000);
   const payload = Object.freeze({
     v: 1,
@@ -43,7 +56,7 @@ async function issueCapacitySession(env, member, domain) {
     seatClass: clean(member?.seatClass, 40),
     iat: now,
     exp: now + SESSION_TTL_SECONDS,
-    origin: `https://${clean(member?.nodeId, 180)}.${domain}`
+    origin: new URL(publicOrigin).origin
   });
   if (!payload.nodeId || !payload.userId) throw Object.assign(new Error('Capacity session cannot be issued without nodeId and userId.'), { status: 500 });
   const encoded = b64url(enc.encode(JSON.stringify(payload)));
@@ -53,6 +66,7 @@ async function issueCapacitySession(env, member, domain) {
     token: `${encoded}.${b64url(signature)}`,
     nodeId: payload.nodeId,
     userId: payload.userId,
+    seatClass: payload.seatClass,
     origin: payload.origin,
     expiresAt: new Date(payload.exp * 1000).toISOString()
   });
@@ -87,6 +101,51 @@ async function capacityPost(env, pathname, body) {
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw Object.assign(new Error(payload.error || `Capacity service returned HTTP ${response.status}.`), { status: response.status });
   return payload;
+}
+async function loginCredentialHash(secret) {
+  const value = clean(secret, 400);
+  if (!/^[A-Za-z0-9_-]{40,200}$/.test(value)) throw Object.assign(new TypeError('A valid device login credential is required.'), { status: 400 });
+  const digest = await crypto.subtle.digest('SHA-256', enc.encode(`civweave.host-login-credential.v1\n${value}`));
+  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+}
+function loginUserId(value) {
+  const userId = clean(value, 180);
+  if (!/^[A-Za-z0-9:_-]{12,180}$/.test(userId)) throw Object.assign(new TypeError('A valid device resident id is required.'), { status: 400 });
+  return userId;
+}
+async function handleCapacitySession(request, env, nodeId, publicOrigin) {
+  try {
+    if (request.method === 'POST') {
+      const input = await request.json().catch(() => ({}));
+      const userId = loginUserId(input.userId);
+      const admitted = await capacityPost(env, '/members/admit', {
+        nodeId,
+        userId,
+        seatClass: 'community',
+        billingStatus: 'free',
+        loginCredentialHash: await loginCredentialHash(input.credential),
+      });
+      const memberStatus = await capacityPost(env, '/members/status', { nodeId, userId });
+      return aiJson({
+        ok: true,
+        schema: 'civweave.host-node-login.v1',
+        nodeId,
+        member: admitted.member,
+        capacity: publicCapacity(admitted.capacity),
+        quota: memberStatus.quota,
+        idempotent: admitted.idempotent,
+        capacitySession: await issueCapacitySession(env, admitted.member, publicOrigin),
+      }, admitted.idempotent ? 200 : 201);
+    }
+    if (request.method === 'GET') {
+      const session = await verifyCapacitySession(env, bearer(request), nodeId);
+      const memberStatus = await capacityPost(env, '/members/status', { nodeId, userId: session.userId });
+      return aiJson({ ok: true, schema: 'civweave.host-node-login-status.v1', nodeId, ...memberStatus });
+    }
+    return aiJson({ ok: false, error: 'Method not allowed.' }, 405);
+  } catch (error) {
+    return aiJson({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 500);
+  }
 }
 function compactPacket(packet = {}) {
   return Object.freeze({
@@ -140,12 +199,12 @@ function normalizeValidation(value, packet) {
 }
 
 async function handleValidation(request, env, nodeId) {
-  if (!env.AI) return json({ ok: false, error: 'Workers AI binding is unavailable.' }, 503);
+  if (!env.AI) return aiJson({ ok: false, error: 'Workers AI binding is unavailable.' }, 503);
   let session;
   try { session = await verifyCapacitySession(env, bearer(request), nodeId); }
-  catch (error) { return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 401); }
+  catch (error) { return aiJson({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 401); }
   const input = await request.json().catch(() => ({})), packet = compactPacket(input.packet || {});
-  if (!packet.id || !packet.rubric.length) return json({ ok: false, error: 'Validation packet must include an id and rubric.' }, 400);
+  if (!packet.id || !packet.rubric.length) return aiJson({ ok: false, error: 'Validation packet must include an id and rubric.' }, 400);
   const requestedNeurons = Math.max(validationEstimate(packet), Math.min(120, Number(input.estimatedNeurons) || 0));
   let reservation;
   try {
@@ -156,7 +215,7 @@ async function handleValidation(request, env, nodeId) {
       allowLifetimeCredits: input.allowLifetimeCredits === true
     })).reservation;
   } catch (error) {
-    return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 503);
+    return aiJson({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 503);
   }
 
   try {
@@ -199,8 +258,9 @@ async function handleValidation(request, env, nodeId) {
     });
     const chargedNeurons = Math.min(reservation.requestedNeurons, actualNeurons(result?.usage));
     const settlement = await capacityPost(env, '/usage/settle', { reservationId: reservation.reservationId, actualNeurons: chargedNeurons });
+    const memberStatus = await capacityPost(env, '/members/status', { nodeId, userId: session.userId });
     const validation = normalizeValidation(parseModelResponse(result), packet);
-    return json({
+    return aiJson({
       ok: true,
       schema: 'civweave.cloud-validation.v1',
       nodeId,
@@ -208,17 +268,23 @@ async function handleValidation(request, env, nodeId) {
       model: VALIDATION_MODEL,
       validation,
       usage: { ...result?.usage, chargedNeurons },
-      settlement
+      settlement,
+      quota: memberStatus.quota,
     });
   } catch (error) {
     await capacityPost(env, '/usage/settle', { reservationId: reservation.reservationId, actualNeurons: 0 }).catch(() => {});
-    return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 502);
+    return aiJson({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 502);
   }
 }
 
 export default {
   async fetch(request, env, ctx) {
-    const url = new URL(request.url), domain = env.NODE_DOMAIN || 'nodes.commonweave.earth', nodeId = nodeIdFromHostname(url.hostname, domain);
+    const url = new URL(request.url), domain = env.NODE_DOMAIN || 'nodes.commonweave.earth';
+    const hostnameNodeId = nodeIdFromHostname(url.hostname, domain);
+    const nodeId = hostnameNodeId || normalizeNodeId(url.searchParams.get('nodeId') || request.headers.get('x-civweave-node-id'));
+    const publicOrigin = hostnameNodeId ? `https://${hostnameNodeId}.${domain}` : url.origin;
+    if (nodeId && request.method === 'OPTIONS' && url.pathname.startsWith('/api/ai/node/')) return new Response(null, { status: 204, headers: AI_CORS });
+    if (nodeId && url.pathname === '/api/ai/node/session') return handleCapacitySession(request, env, nodeId, publicOrigin);
     if (nodeId && request.method === 'POST' && url.pathname === '/api/ai/node/validation') return handleValidation(request, env, nodeId);
 
     const admission = !nodeId && request.method === 'POST' && url.pathname === '/api/fabric/capacity/members/admit';
@@ -227,7 +293,7 @@ export default {
     const payload = await response.json().catch(() => null);
     if (!payload?.member) return json(payload || { ok: false, error: 'capacity-admission-response-invalid' }, 502);
     try {
-      return json({ ...payload, capacitySession: await issueCapacitySession(env, payload.member, domain) }, response.status);
+      return json({ ...payload, capacitySession: await issueCapacitySession(env, payload.member, `https://${payload.member.nodeId}.${domain}`) }, response.status);
     } catch (error) {
       return json({ ...payload, capacitySession: null, sessionError: String(error?.message || error) }, response.status);
     }

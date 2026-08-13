@@ -22,6 +22,15 @@ A paid Workers plan only opens the overage pipe. Additional daily service and pe
 - Revenue loss freezes growth and reduces included throughput before residency is removed.
 - Paid-expansion residents whose membership ends enter grace rather than being abruptly deleted.
 
+## Hub login and discovery
+
+- The Downloads screen is the canonical Hub admission surface and keeps Hub status directly below the first install module.
+- A new public Join action may claim only an open community seat. The browser creates a per-Hub resident id plus a high-entropy device credential; the capacity authority stores only a domain-separated hash of that credential.
+- Successful admission issues a signed, expiring capacity session using the node fabric's dedicated session secret. The bearer token remains tab-scoped in `sessionStorage`; the reusable device credential remains local and is never published in Hub events.
+- Cloudflare generation and validation remain fail-closed without that capacity session.
+- Nearest-Hub discovery uses the steward-published three-decimal location already present in node manifests. Device coordinates are rounded to three decimals before a bounded search request and are neither stored nor returned.
+- Discovery may filter for free, paid-expansion, or either kind of open slot. A visible paid-expansion slot is not permission to bypass membership settlement; new public admission remains community-only until active payment authority exists.
+
 ## Monthly memberships
 
 Monthly membership service value is split after payment processing:

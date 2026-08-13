@@ -71,6 +71,24 @@
       "bootstrap": "public/app/local-ai/bootstrap-v266.js",
       "rule": "Settings may manage downloaded models but must never start inference on open."
     },
+    "host-node-access": {
+      "capability": "Device-bound Hub Node login, capacity sessions, and neuron quota telemetry",
+      "owner": "public/app/host-node-session-v1.js",
+      "admissionSurface": "public/app/host-node-installer-lobby-v1.js",
+      "cloudAuthority": "cloudflare/node-cloud/src/entry.mjs",
+      "subscribers": [
+        "public/app/server-ai-router-v301.js",
+        "public/app/cloud-validation-executor-v1.js",
+        "public/app/working-campus-topbar-v243.js",
+        "public/app/guide-workspace-v242.js"
+      ],
+      "rules": [
+        "Only the owner writes browser Hub capacity sessions and device login credentials.",
+        "Capacity bearer tokens remain tab-scoped in sessionStorage; device login credentials remain local and are never dispatched in events.",
+        "Cloudflare AI generation and validation require a verified Hub capacity session.",
+        "Paid-expansion availability may be discovered, but a new paid-expansion resident is never admitted without active membership authority."
+      ]
+    },
     "radio": {
       "capability": "Shared radio station and track suggestions",
       "owner": "public/app/system-radio-agent-v233.js",

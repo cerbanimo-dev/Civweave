@@ -1,4 +1,5 @@
 const NODE_DOMAIN = "nodes.commonweave.earth";
+const CENTRAL_FABRIC_HOST = "civweave-node-cloud.cerbanimo.workers.dev";
 const LEGACY_HOSTS = new Set(["civweave-host-node.onrender.com"]);
 const COMMUNITY_SEATS_PER_FREE_NODE = 6;
 const SURVIVAL_FLOOR_NEURONS = 25;
@@ -25,7 +26,12 @@ function nodeIdForHost(hostname: string): string | null {
 
 function allowedHost(url: URL): boolean {
   const hostname = url.hostname.toLowerCase();
-  return Boolean(nodeIdForHost(hostname)) || LEGACY_HOSTS.has(hostname);
+  return hostname === CENTRAL_FABRIC_HOST || Boolean(nodeIdForHost(hostname)) || LEGACY_HOSTS.has(hostname);
+}
+
+function requestedNodeId(value: string | null): string | null {
+  const nodeId = String(value || "").trim().toLowerCase();
+  return /^[a-z0-9-]{1,120}$/.test(nodeId) ? nodeId : null;
 }
 
 async function getJson(url: URL) {
@@ -88,14 +94,18 @@ export const onRequestGet: PagesFunction = async (context) => {
     return reply({ ok: false, error: "host-node-not-allowed" }, 400);
   }
 
-  const nodeId = nodeIdForHost(origin.hostname);
+  const centralFabric = origin.hostname.toLowerCase() === CENTRAL_FABRIC_HOST;
+  const nodeId = nodeIdForHost(origin.hostname) || (centralFabric ? requestedNodeId(requestUrl.searchParams.get("node")) : null);
   try {
     if (nodeId) {
-      const manifestUrl = new URL("/api/ai/node/manifest", origin);
-      const capacityUrl = new URL("/api/ai/node/capacity", origin);
-      const [manifestResult, capacityResult] = await Promise.all([
+      const manifestUrl = new URL(centralFabric ? `/n/${nodeId}/api/ai/node/manifest` : "/api/ai/node/manifest", origin);
+      const capacityUrl = new URL(centralFabric ? "/api/fabric/capacity" : "/api/ai/node/capacity", origin);
+      if (centralFabric) capacityUrl.searchParams.set("nodeId", nodeId);
+      const healthUrl = new URL(centralFabric ? `/n/${nodeId}/api/node/health` : "/api/node/health", origin);
+      const [manifestResult, capacityResult, healthResult] = await Promise.all([
         getJson(manifestUrl),
         getJson(capacityUrl),
+        getJson(healthUrl),
       ]);
       if (!manifestResult.ok || !capacityResult.ok) {
         return reply({
@@ -119,6 +129,11 @@ export const onRequestGet: PagesFunction = async (context) => {
         displayName: String(manifest.displayName || manifest.nodeId || nodeId),
         runtime: String(manifest.runtime || "cloudflare-host-node"),
         status: String(manifest.status || "active"),
+        health: healthResult.ok ? {
+          ok: healthResult.payload?.ok === true,
+          connections: finiteWhole(healthResult.payload?.connections),
+          updatedAt: healthResult.payload?.updatedAt || manifest.updatedAt || null,
+        } : { ok: false, connections: null, updatedAt: manifest.updatedAt || null },
         slots: cloudNodeSlots(capacity),
         capacityAvailable: true,
         capacity: {

@@ -1,0 +1,118 @@
+(()=>{
+'use strict';
+
+const VERSION='1.0.132-host-node-session-v1';
+const SESSION_KEY='civweave.host-capacity.sessions.v1';
+const CREDENTIAL_KEY='civweave.host-node.credentials.v1';
+const SELECTION_KEY='civweave.host-node.selection.v1';
+const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
+const DEFAULT_NEURONS_PER_CHAT=12;
+
+if(globalThis.CivweaveHostNodeSessionV1?.version===VERSION)return;
+
+const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
+const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
+const clone=value=>value==null?value:structuredClone(value);
+const finite=value=>Number.isFinite(Number(value))&&Number(value)>=0?Math.floor(Number(value)):null;
+
+function normalizedOrigin(value){
+  try{const url=new URL(clean(value,2000));return url.protocol==='https:'&&!url.username&&!url.password?url.origin:''}catch{return''}
+}
+function storageObject(storage,key){
+  try{const value=parse(storage.getItem(key),{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}catch{return{}}
+}
+function randomToken(bytes=32){
+  const data=crypto.getRandomValues(new Uint8Array(bytes));
+  let binary='';for(const byte of data)binary+=String.fromCharCode(byte);
+  return btoa(binary).replaceAll('+','-').replaceAll('/','_').replace(/=+$/g,'')
+}
+function credentials(){return storageObject(localStorage,CREDENTIAL_KEY)}
+function saveCredentials(value){try{localStorage.setItem(CREDENTIAL_KEY,JSON.stringify(value));return true}catch{return false}}
+function credentialFor(origin,{create=false,nodeId=''}={}){
+  const host=normalizedOrigin(origin);if(!host)return null;
+  const key=nodeId?`${host}#${clean(nodeId,180)}`:host,all=credentials(),saved=all[key]||all[host];
+  if(saved?.userId&&saved?.credential)return saved;
+  if(!create)return null;
+  const next={schema:'civweave.host-node-device-login.v1',userId:`cwres:${randomToken(18)}`,credential:randomToken(32),createdAt:new Date().toISOString()};
+  all[key]=next;if(!saveCredentials(all))throw new Error('This browser blocked persistent Hub login storage.');
+  return next
+}
+function sessions(){return storageObject(sessionStorage,SESSION_KEY)}
+function saveSessions(value){try{sessionStorage.setItem(SESSION_KEY,JSON.stringify(value));return true}catch{return false}}
+function sessionFor(selector=''){
+  const all=sessions(),wanted=clean(selector,2000),wantedOrigin=normalizedOrigin(wanted);
+  const rows=Object.values(all).filter(item=>item?.nodeId&&item?.token&&normalizedOrigin(item.origin)&&(!item.expiresAt||Date.parse(item.expiresAt)>Date.now()));
+  return wanted?(rows.find(item=>item.nodeId===wanted||item.origin===wantedOrigin)||null):(rows[0]||null)
+}
+function telemetryFor(selector=''){
+  const session=sessionFor(selector);return session?.telemetry?clone(session.telemetry):null
+}
+function setSession(envelope,{quota=null,emit=true}={}){
+  const source=envelope?.capacitySession||envelope;
+  const nodeId=clean(source?.nodeId,180),token=clean(source?.token,20000),origin=normalizedOrigin(source?.origin),userId=clean(source?.userId,180);
+  if(!nodeId||!token||!origin||!userId)throw new TypeError('Hub capacity session must include nodeId, userId, HTTPS origin, and token.');
+  const all=sessions(),prior=all[nodeId]||{},remaining=finite(quota?.includedRemainingNeurons);
+  all[nodeId]={
+    nodeId,userId,origin,token,seatClass:clean(source?.seatClass,40)||prior.seatClass||null,expiresAt:source.expiresAt||null,
+    telemetry:{...prior.telemetry,...(remaining==null?{}:{remainingNeurons:remaining,approximateTurnsLeft:Math.floor(remaining/Math.max(1,Number(prior?.telemetry?.averageNeuronsPerTurn)||DEFAULT_NEURONS_PER_CHAT))}),updatedAt:new Date().toISOString()}
+  };
+  if(!saveSessions(all))throw new Error('This browser blocked the temporary Hub session.');
+  if(emit)dispatchEvent(new CustomEvent('civweave:capacity-session-ready',{detail:{nodeId,userId,origin,expiresAt:source.expiresAt||null,quota:clone(quota)}}));
+  return clone(all[nodeId])
+}
+function clearSession(selector=''){
+  const all=sessions(),wanted=clean(selector,2000),wantedOrigin=normalizedOrigin(wanted);
+  for(const [nodeId,item] of Object.entries(all))if(!wanted||nodeId===wanted||item?.origin===wantedOrigin)delete all[nodeId];
+  saveSessions(all);dispatchEvent(new CustomEvent('civweave:capacity-session-cleared',{detail:{selector:wanted||null}}));return true
+}
+async function jsonRequest(url,options={}){
+  const response=await fetch(url,{cache:'no-store',...options,headers:{accept:'application/json',...(options.headers||{})}});
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok){const error=new Error(clean(payload?.error||`Hub returned HTTP ${response.status}.`,1200));error.status=response.status;error.payload=payload;throw error}
+  return payload
+}
+async function join(origin,{createCredential=true,nodeId=''}={}){
+  const host=normalizedOrigin(origin);if(!host)throw new TypeError('A valid HTTPS Hub Node origin is required.');
+  const requestedNodeId=clean(nodeId,180),identity=credentialFor(host,{create:createCredential,nodeId:requestedNodeId});if(!identity)throw new Error('This device has no saved login for that Hub Node.');
+  const endpoint=new URL('/api/ai/node/session',host);if(requestedNodeId)endpoint.searchParams.set('nodeId',requestedNodeId);
+  const packet=await jsonRequest(endpoint,{method:'POST',headers:{'content-type':'application/json',...(requestedNodeId?{'x-civweave-node-id':requestedNodeId}:{})},body:JSON.stringify({userId:identity.userId,credential:identity.credential})});
+  const session=setSession(packet,{quota:packet.quota||null});
+  dispatchEvent(new CustomEvent('civweave:host-node-logged-in',{detail:{nodeId:session.nodeId,userId:session.userId,origin:session.origin,quota:clone(packet.quota||null),idempotent:Boolean(packet.idempotent)}}));
+  return{...packet,session}
+}
+async function status(selector=''){
+  const session=sessionFor(selector);if(!session)throw new Error('This device is not logged in to a Hub Node.');
+  try{
+    const endpoint=new URL('/api/ai/node/session',session.origin);endpoint.searchParams.set('nodeId',session.nodeId);
+    const packet=await jsonRequest(endpoint,{headers:{authorization:`Bearer ${session.token}`,'x-civweave-node-id':session.nodeId}});
+    const updated=setSession(session,{quota:packet.quota||null,emit:false});
+    dispatchEvent(new CustomEvent('civweave:host-node-health',{detail:{nodeId:updated.nodeId,origin:updated.origin,member:clone(packet.member||null),capacity:clone(packet.capacity||null),quota:clone(packet.quota||null),at:new Date().toISOString()}}));
+    return packet
+  }catch(error){if(error.status===401||error.status===403)clearSession(session.nodeId);throw error}
+}
+function selectedRecord(){
+  try{const saved=parse(localStorage.getItem(SELECTION_KEY),{}),origin=normalizedOrigin(saved?.origin)||normalizedOrigin(localStorage.getItem(HOST_ENDPOINT_KEY)||'');return{origin,nodeId:clean(saved?.nodeId,180)}}catch{return{origin:'',nodeId:''}}
+}
+function selectedOrigin(){return selectedRecord().origin}
+async function ensureSelected(){
+  const selected=selectedRecord(),active=sessionFor(selected.nodeId||selected.origin);if(active)return active;
+  if(!selected.origin||!credentialFor(selected.origin,{nodeId:selected.nodeId}))return null;
+  const packet=await join(selected.origin,{createCredential:false,nodeId:selected.nodeId});return packet.session
+}
+function recordUsage({nodeId='',chargedNeurons=0,quota=null}={}){
+  const session=sessionFor(nodeId);if(!session)return null;
+  const all=sessions(),row=all[session.nodeId];if(!row)return null;
+  const charged=Math.max(0,finite(chargedNeurons)||0),priorAverage=Number(row?.telemetry?.averageNeuronsPerTurn)||DEFAULT_NEURONS_PER_CHAT;
+  const turns=Math.max(0,Number(row?.telemetry?.measuredTurns)||0),average=charged>0?(turns?priorAverage*.65+charged*.35:charged):priorAverage;
+  const remaining=finite(quota?.includedRemainingNeurons)??finite(row?.telemetry?.remainingNeurons);
+  const telemetry={chargedNeurons:charged,remainingNeurons:remaining,averageNeuronsPerTurn:Number(average.toFixed(2)),measuredTurns:turns+(charged>0?1:0),approximateTurnsLeft:remaining==null?null:Math.max(0,Math.floor(remaining/Math.max(1,average))),updatedAt:new Date().toISOString()};
+  row.telemetry=telemetry;all[session.nodeId]=row;saveSessions(all);
+  dispatchEvent(new CustomEvent('civweave:ai-neuron-usage',{detail:{nodeId:session.nodeId,origin:session.origin,...clone(telemetry)}}));
+  return clone(telemetry)
+}
+function forgetCredential(origin,nodeId=''){const host=normalizedOrigin(origin);if(!host)return false;const all=credentials();delete all[nodeId?`${host}#${clean(nodeId,180)}`:host];return saveCredentials(all)}
+function publicStatus(){return{version:VERSION,selectedOrigin:selectedOrigin(),sessions:Object.values(sessions()).map(item=>({nodeId:item.nodeId,userId:item.userId,origin:item.origin,seatClass:item.seatClass||null,expiresAt:item.expiresAt||null,active:!item.expiresAt||Date.parse(item.expiresAt)>Date.now(),telemetry:clone(item.telemetry||null)}))}}
+
+globalThis.CivweaveHostNodeSessionV1=Object.freeze({version:VERSION,sessionKey:SESSION_KEY,credentialKey:CREDENTIAL_KEY,selectionKey:SELECTION_KEY,join,status,ensureSelected,setSession,sessionFor,telemetryFor,recordUsage,clearSession,selectedOrigin,hasCredential:(origin,nodeId='')=>Boolean(credentialFor(origin,{nodeId})),forgetCredential,publicStatus});
+dispatchEvent(new CustomEvent('civweave:host-node-session-ready',{detail:{version:VERSION,sessionCount:publicStatus().sessions.length}}));
+})();

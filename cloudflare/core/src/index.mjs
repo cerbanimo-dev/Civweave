@@ -19,7 +19,7 @@ async function secretEqual(left, right) { if (!left || !right) return false; con
 
 export const launchTopology = Object.freeze({
   schema: 'civweave.launch-topology.v1',
-  canonicalInstallOrigin: 'https://commonweave.pages.dev',
+  canonicalInstallOrigin: 'https://civweave.pages.dev',
   coreApiOrigin: 'https://api.commonweave.earth',
   cloudNodeDomain: 'nodes.commonweave.earth',
   nodeProtocol: NODE_SCHEMA,
@@ -34,12 +34,26 @@ export const launchTopology = Object.freeze({
   liveMoneyEnabledByDefault: false
 });
 
+function normalizePublicLocation(value) {
+  if (!value || value.schema !== 'civweave.hub-location.v1') return null;
+  const latitude = Number(value.latitude), longitude = Number(value.longitude);
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) return null;
+  return Object.freeze({
+    schema: 'civweave.hub-location.v1',
+    latitude: Number(latitude.toFixed(3)),
+    longitude: Number(longitude.toFixed(3)),
+    precisionMeters: Math.max(100, Math.min(5000, Math.ceil(Number(value.precisionMeters || 100) / 100) * 100)),
+    coordinateDecimals: 3,
+    syncedAt: clean(value.syncedAt, 80) || null,
+  });
+}
+
 export function normalizeNodeRecord(input = {}) {
   const nodeId = slug(input.nodeId); if (!nodeId) throw new TypeError('nodeId is required.');
   const publicOrigin = new URL(clean(input.publicOrigin, 2000)); if (publicOrigin.protocol !== 'https:') throw new RangeError('publicOrigin must use HTTPS.');
   const runtime = clean(input.runtime || 'unknown', 80), operatorId = clean(input.operatorId || `operator-${nodeId}`, 180), displayName = clean(input.displayName || nodeId, 180);
   const capabilities = [...new Set((Array.isArray(input.capabilities) ? input.capabilities : []).map(item => clean(item, 120)).filter(Boolean))];
-  return Object.freeze({ schema: NODE_SCHEMA, nodeId, operatorId, displayName, runtime, publicOrigin: publicOrigin.origin, capabilities, status: ['active', 'degraded', 'offline'].includes(input.status) ? input.status : 'active', updatedAt: clean(input.updatedAt, 80) || nowIso() });
+  return Object.freeze({ schema: NODE_SCHEMA, nodeId, operatorId, displayName, runtime, publicOrigin: publicOrigin.origin, capabilities, location: normalizePublicLocation(input.location), status: ['active', 'degraded', 'offline'].includes(input.status) ? input.status : 'active', updatedAt: clean(input.updatedAt, 80) || nowIso() });
 }
 
 export class CivweaveCoreIdentity {
@@ -76,18 +90,18 @@ export async function verifyStripeWebhook({ rawBody, signatureHeader, secret, no
 async function listNodes(env, limit = 100) {
   const bounded = Math.max(1, Math.min(250, Number(limit) || 100));
   const result = await env.DB.prepare(`SELECT node_id AS nodeId, operator_id AS operatorId, display_name AS displayName,
-    runtime, public_origin AS publicOrigin, capabilities_json AS capabilitiesJson, status, updated_at AS updatedAt
+    runtime, public_origin AS publicOrigin, capabilities_json AS capabilitiesJson, location_json AS locationJson, status, updated_at AS updatedAt
     FROM nodes ORDER BY updated_at DESC LIMIT ?1`).bind(bounded).all();
-  return (result.results || []).map(row => ({ ...row, capabilities: JSON.parse(row.capabilitiesJson || '[]'), capabilitiesJson: undefined }));
+  return (result.results || []).map(row => ({ ...row, capabilities: JSON.parse(row.capabilitiesJson || '[]'), location: JSON.parse(row.locationJson || 'null'), capabilitiesJson: undefined, locationJson: undefined }));
 }
 async function upsertNode(env, record) {
   const node = normalizeNodeRecord(record);
-  await env.DB.prepare(`INSERT INTO nodes(node_id,operator_id,display_name,runtime,public_origin,capabilities_json,status,updated_at)
-    VALUES(?1,?2,?3,?4,?5,?6,?7,?8)
+  await env.DB.prepare(`INSERT INTO nodes(node_id,operator_id,display_name,runtime,public_origin,capabilities_json,location_json,status,updated_at)
+    VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9)
     ON CONFLICT(node_id) DO UPDATE SET operator_id=excluded.operator_id,display_name=excluded.display_name,
       runtime=excluded.runtime,public_origin=excluded.public_origin,capabilities_json=excluded.capabilities_json,
-      status=excluded.status,updated_at=excluded.updated_at`)
-    .bind(node.nodeId, node.operatorId, node.displayName, node.runtime, node.publicOrigin, JSON.stringify(node.capabilities), node.status, node.updatedAt).run();
+      location_json=excluded.location_json,status=excluded.status,updated_at=excluded.updated_at`)
+    .bind(node.nodeId, node.operatorId, node.displayName, node.runtime, node.publicOrigin, JSON.stringify(node.capabilities), JSON.stringify(node.location), node.status, node.updatedAt).run();
   return node;
 }
 
@@ -135,10 +149,10 @@ async function routeApi(request, env) {
   if (request.method === 'GET' && url.pathname.startsWith('/api/nodes/')) {
     const nodeId = slug(url.pathname.slice('/api/nodes/'.length));
     const row = await env.DB.prepare(`SELECT node_id AS nodeId,operator_id AS operatorId,display_name AS displayName,
-      runtime,public_origin AS publicOrigin,capabilities_json AS capabilitiesJson,status,updated_at AS updatedAt
+      runtime,public_origin AS publicOrigin,capabilities_json AS capabilitiesJson,location_json AS locationJson,status,updated_at AS updatedAt
       FROM nodes WHERE node_id=?1`).bind(nodeId).first();
     if (!row) return json({ ok: false, error: 'node-not-found' }, 404);
-    return json({ ...row, capabilities: JSON.parse(row.capabilitiesJson || '[]'), capabilitiesJson: undefined });
+    return json({ ...row, capabilities: JSON.parse(row.capabilitiesJson || '[]'), location: JSON.parse(row.locationJson || 'null'), capabilitiesJson: undefined, locationJson: undefined });
   }
   if (request.method === 'POST' && url.pathname === '/internal/nodes/upsert') {
     if (!await secretEqual(request.headers.get('x-civweave-fabric-token'), env.NODE_FABRIC_BINDING_TOKEN)) return json({ ok: false, error: 'forbidden' }, 403);

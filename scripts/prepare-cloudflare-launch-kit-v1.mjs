@@ -1,8 +1,9 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
-const root = path.resolve(new URL('../', import.meta.url).pathname);
+const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const d1Id = String(process.env.CIVWEAVE_CORE_D1_ID || process.argv.find(arg => arg.startsWith('--d1-id='))?.slice('--d1-id='.length) || '').trim();
 if (!/^[0-9a-f-]{20,}$/i.test(d1Id)) {
   console.error('CIVWEAVE_CORE_D1_ID (or --d1-id=<id>) is required. Create/reuse the D1 database named civweave-core, then rerun this preparer.');

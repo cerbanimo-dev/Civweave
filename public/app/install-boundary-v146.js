@@ -29,6 +29,7 @@ const ROUTE_CONTRACT='/app/system-routes-v227.js';
 const RELEASE_VERSION='/app/release-version-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
 const SYSTEMS_MESH_RUNTIME='/app/civweave-systems-mesh-v251.js';
+const HOST_NODE_SESSION='/app/host-node-session-v1.js';
 const NODE_AI_MESH_RUNTIME='/app/node-ai-mesh-v1.js';
 const QUEST_VEIL='/app/quest-veil-v1.js';
 const QUEST_VEIL_MESH='/app/quest-veil-mesh-v1.js';
@@ -53,6 +54,7 @@ const SYSTEM_EXPERIENCE_SCRIPTS=[
   SYSTEM_RADIO_AGENT,
   RADIO_TRACK_SUGGESTIONS,
   SYSTEMS_MESH_RUNTIME,
+  HOST_NODE_SESSION,
   NODE_AI_MESH_RUNTIME,
   QUEST_VEIL_MESH,
   QUEST_VEIL_LEDGER_GATE,
@@ -73,6 +75,7 @@ const COMPATIBILITY_SCRIPTS=[
   '/app/weaveling-memory-v191.js',
   '/app/weaveling-memory-bridge-v191.js',
   '/app/deterministic-mode-v175.js',
+  HOST_NODE_SESSION,
   MOBILE_AI_HARDENING,
   '/app/gemini-task-tier-router-v213.js',
   GUIDE_IDENTITY_SCRIPT,

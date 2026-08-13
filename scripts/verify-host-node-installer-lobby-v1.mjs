@@ -7,6 +7,8 @@ const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const installerBridge = read('public/app/installer-online-fallback-v225.js');
 const lobby = read('public/app/host-node-installer-lobby-v1.js');
 const status = read('functions/api/host-node-status.ts');
+const search = read('functions/api/host-node-search.ts');
+const access = read('public/app/host-node-session-v1.js');
 
 const checks = [
   [installerBridge.includes('host-node-installer-lobby-v1.js'), 'installer bridge loads Host Node lobby'],
@@ -19,9 +21,14 @@ const checks = [
   [lobby.includes("civweave.host-node.selection.v1"), 'Join stores structured Host Node selection metadata'],
   [lobby.includes("/api/host-node-status"), 'remote hosted lobby still reads the same-origin Host Node status proxy'],
   [lobby.includes('Free slots') && lobby.includes('Paid slots'), 'lobby exposes free and paid slot counters'],
-  [lobby.includes('Use this Host Node') && lobby.includes('Join this Host'), 'lobby exposes local and remote Host selection actions'],
+  [lobby.includes('Use this Hub Node') && lobby.includes('Join & log in'), 'lobby exposes local and remote Hub login actions'],
+  [lobby.includes('Nearest Hubs with open slots') && lobby.includes('Use my approximate location'), 'lobby exposes nearest open-Hub search'],
+  [lobby.includes('<option value="free">') && lobby.includes('<option value="paid">') && lobby.includes('<option value="both">'), 'nearest search offers free, paid, and combined slot filters'],
+  [access.includes('civweave.host-node.credentials.v1') && access.includes('civweave.host-capacity.sessions.v1'), 'Hub login keeps persistent device credentials separate from tab-scoped capacity sessions'],
+  [search.includes('MAX_CAPACITY_PROBES = 24') && search.includes('exactLocationStored: false'), 'nearest search is bounded and does not retain exact device location'],
   [lobby.includes('will not invent capacity numbers'), 'local runtime reports unavailable membership capacity explicitly rather than fabricating slots'],
   [status.includes('/api/ai/node/capacity'), 'status proxy consumes Cloudflare capacity contract'],
+  [status.includes('/api/node/health'), 'status proxy includes Hub health telemetry'],
   [status.includes('COMMUNITY_SEATS_PER_FREE_NODE = 6'), 'free-node community seat cap matches host economy contract'],
   [status.includes('SURVIVAL_FLOOR_NEURONS = 25'), 'funded paid capacity uses survival-floor contract'],
   [status.includes('INCLUDED_POOL_BPS = 9_000'), 'funded paid capacity reserves ten percent burst pool'],

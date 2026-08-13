@@ -68,6 +68,11 @@ function renderCapacity(packet) {
     const limits = capacity.limits || {};
     note.textContent = `${Number(counts.communityMembers || 0).toLocaleString()} / ${Number(limits.community || 0).toLocaleString()} community seats used · ${Number(counts.paidExpansionMembers || 0).toLocaleString()} / ${Number(limits.paidExpansion || 0).toLocaleString()} paid-expansion seats used · ${Number(counts.activePaidMembers || 0).toLocaleString()} paid member${Number(counts.activePaidMembers || 0) === 1 ? '' : 's'} total. A paid community resident keeps the community seat and leaves paid-expansion capacity open.`;
   }
+  const join = el('cw-host-node-join');
+  if (join && Number(capacity.slots.free || 0) < 1 && !selectedLocalHost()) {
+    join.dataset.mode = 'search';
+    join.textContent = 'Find nearest open Hub';
+  }
   document.getElementById('cw-host-node-lobby')?.setAttribute('data-local-capacity-live', 'true');
   return true;
 }
@@ -115,14 +120,16 @@ async function admitResident({ quiet = false } = {}) {
 
 async function interceptJoin(event) {
   const button = event.target?.closest?.('#cw-host-node-join');
-  if (!button || !document.getElementById('cw-host-node-lobby')) return;
+  const lobby = document.getElementById('cw-host-node-lobby');
+  if (!button || !lobby || lobby.dataset.localFederated !== 'true') return;
+  if (button.dataset.mode === 'search') return;
   event.preventDefault();
   event.stopImmediatePropagation();
   if (joining) return;
   joining = true;
   try {
     await admitResident();
-    globalThis.CivweaveHostNodeInstallerLobbyV1?.joinHostNode?.();
+    await globalThis.CivweaveHostNodeInstallerLobbyV1?.joinHostNode?.();
     await refreshCapacity();
   } catch {
     // admitResident already leaves a useful status message and deliberately does not select a full host.

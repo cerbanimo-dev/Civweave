@@ -2,7 +2,7 @@
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "civweave-node-cloud",
   "main": "src/server-ai-entry-v1.mjs",
-  "compatibility_date": "2026-08-11",
+  "compatibility_date": "2026-08-13",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "preview_urls": false,
@@ -47,11 +47,13 @@
   }
 
   // Central fabric secrets only, never distributed to community/physical nodes:
+  // NODE_FABRIC_SESSION_SECRET
   // NODE_FABRIC_OPERATOR_TOKEN
   // NODE_FABRIC_BINDING_TOKEN
   //
-  // Member capacity sessions use a domain-separated HMAC derived from the operator token.
-  // The raw operator secret is never sent to clients.
+  // Member capacity sessions use a domain-separated HMAC derived from the dedicated
+  // session secret. The operator token remains a compatibility fallback only.
+  // Neither raw secret is ever sent to clients.
   //
   // CIVWEAVE_WORKERS_PLAN is a deployment capability flag. Setting it to "paid"
   // only permits funded overage; it does not increase the 10,000-neuron free pool.
