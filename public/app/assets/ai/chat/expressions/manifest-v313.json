@@ -2,7 +2,7 @@
   "schema": "civweave.avatar-expression-assets.v1",
   "version": "1.0.0-avatar-expressions-v313",
   "runtimeFormat": "WebP with alpha",
-  "runtimeSize": {"width":112,"height":93,"quality":76,"sourceCutsPreservedLocallyAs":"PNG RGBA 308x256"},
+  "runtimeSize": {"width":80,"height":67,"quality":70,"sourceCutsPreservedLocallyAs":"PNG RGBA 308x256"},
   "sourceCut": {"format":"PNG RGBA","width":308,"height":256,"gridInsetPx":4,"alphaVerified":true},
   "systems": {
     "civweave": {"character":"weaveling","expressions":["neutral","happy","excited","laughing","curious","thinking","confused","surprised","worried","sad","shy","determined","proud","mischievous","sleepy","cheering","waving","pointing","magical","hopeful"]},
