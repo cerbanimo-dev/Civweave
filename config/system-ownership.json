@@ -26,6 +26,7 @@
         "public/app/ai-settings-bind-guard-v230.js",
         "public/app/ai-settings-device-repair-v229.js",
         "public/app/device-credential-persistence-v211.js",
+        "public/app/anarchadia-runtime-stability-v159.js",
         "public/app/document-lifecycle-v221.js"
       ],
       "forbiddenEagerImplementations": [
@@ -43,6 +44,7 @@
         "Living School uses the family-shell Settings control and has no realm-local Settings button.",
         "Browser prototypes, DOM prototypes, and Settings API methods may not be monkey-patched to repair Settings behavior.",
         "Credential helpers may expose explicit compatibility methods but may not intercept Settings input, patch Settings open(), or mutate credential state at module load.",
+        "Realm stability/recovery layers may call the gateway programmatically but may not intercept Settings controls or carry dormant fallback listeners.",
         "Subscribers may listen to civweave:model-settings-opened but may not intercept the Settings control."
       ]
     },
