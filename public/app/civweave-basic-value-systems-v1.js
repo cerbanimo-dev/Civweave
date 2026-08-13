@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueSystemsV1)return;
-const VERSION='1.0.0';
+const VERSION='1.0.1';
 const KEYS=Object.freeze({civweave:'civweave.working-campus.v1',living:'civweave.living-school.cabinet.v151',cerbanimo:'cerbanimo.quest-engine.v144'});
 const clean=(value,max=5000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -17,7 +17,7 @@ function kindFor(system,row){
   if(system==='learning')return'learning';
   return'labor';
 }
-function fingerprint(system,row){return hash(`${system}|${row?.id||''}|${textFor(row)}|${row?.valuation?.proposed?.rationale||''}`)}
+function fingerprint(system,row){return hash(`${system}|${row?.id||''}|${textFor(row)}`)}
 function needs(system,row){
   if(!row||typeof row!=='object')return false;
   const fp=fingerprint(system,row),valuation=row.valuation;
