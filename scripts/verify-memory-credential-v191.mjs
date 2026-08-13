@@ -28,6 +28,11 @@ replaceRequired(
   'explicit remembered credential restore contract'
 );
 replaceRequired(
+  "for(const token of ['name=\"credentialMode\"','Remember on this device','This app session only','anyone with access to this unlocked browser profile','credentialPersistence'])assert(settingsSource.includes(token),`Settings teaching flow is missing ${token}.`);",
+  "for(const token of ['name=\"credentialMode\"','Remember on this device','This app session only','Remembered credentials stay in this browser profile','Forget saved key','credentialPersistence'])assert(settingsSource.includes(token),`Settings teaching flow is missing ${token}.`);",
+  'current credential teaching copy'
+);
+replaceRequired(
   "assert(deviceSource.includes('restoresConsent:true')&&deviceSource.includes('mirrorsRuntimeSecret:true'),'Credential bridge does not declare the v192 usability repair.');\nfor(const token of ['/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js']){",
   "assert(deviceSource.includes('restoresConsent:true')&&deviceSource.includes('mirrorsRuntimeSecret:true'),'Credential bridge does not declare the v192 usability repair.');\nconst lightweightBridge=additiveWorker.includes(\"importScripts('/service-worker-v203.js?v=\");\nfor(const token of ['/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js']){",
   'lightweight bridge detection'
