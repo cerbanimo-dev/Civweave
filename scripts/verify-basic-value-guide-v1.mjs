@@ -23,6 +23,8 @@ context.globalThis=context;vm.createContext(context);vm.runInContext(guideSource
 const guide=context.CivweaveBasicValueV1;
 assert.ok(guide,'basic value guide did not boot');
 assert.equal(guide.guide.labor.buttonsPerHour,5);
+assert.equal(guide.guide.labor.wageButtonsPerHour,5);
+assert.equal(guide.guide.labor.wagePolicy,'uniform-starting-wage');
 assert.equal(guide.guide.learning.moduleCompletionAcorns,2);
 assert.equal(guide.guide.learning.externalValidationBonusAcorns,2);
 assert.equal(guide.guide.learning.validatorContributionAcorns,1);
@@ -33,7 +35,12 @@ assert.deepEqual(JSON.parse(JSON.stringify(guide.guide.symbols)),{button:'🔘',
 assert.equal(guide.laborButtons(1),5);
 assert.equal(guide.laborButtons(3.5),17.5);
 assert.equal(guide.sumLaborHours({tasks:[{laborWorthHours:2},{laborWorthHours:3.5}]}),5.5);
-assert.equal(guide.baselineFor('service',{tasks:[{laborWorthHours:2},{laborWorthHours:3}]}).buttons,25);
+const serviceWage=guide.baselineFor('service',{tasks:[{laborWorthHours:2},{laborWorthHours:3}]});
+assert.equal(serviceWage.buttons,25);
+assert.equal(serviceWage.wageButtons,25);
+assert.equal(serviceWage.wageRateButtonsPerHour,5);
+assert.equal(serviceWage.wagePolicy,'uniform-starting-wage');
+assert.match(serviceWage.basis,/every worker/i);
 assert.equal(guide.baselineFor('tutoring',{hours:2}).acorns,20);
 assert.equal(guide.curriculumAcorns({hours:.25}),5);
 assert.equal(guide.curriculumAcorns({hours:10}),50);
@@ -41,7 +48,7 @@ assert.equal(guide.curriculumAcorns({hours:2,recommendedAcorns:37}),37);
 assert.deepEqual(JSON.parse(JSON.stringify(guide.mentorship('balanced'))),{id:'balanced',label:'Learning + doing',buttons:5,acorns:5});
 assert.equal(guide.mentorship('doing-heavy').buttons,15);
 assert.equal(guide.mentorship('learning-heavy').acorns,20);
-const chart=guide.chartRows().map(row=>`${row.label} ${row.value}`).join('\n');assert.match(chart,/5 🔘 Buttons \/ hour/);assert.match(chart,/10 🌰 Acorns \/ hour/);assert.match(chart,/5 🔘 Buttons \+ 5 🌰 Acorns/);
+const chart=guide.chartRows().map(row=>`${row.label} ${row.value} ${row.note}`).join('\n');assert.match(chart,/Starting wage/);assert.match(chart,/5 🔘 Buttons \/ hour/);assert.match(chart,/Uniform labor wage for everyone/);assert.match(chart,/10 🌰 Acorns \/ hour/);assert.match(chart,/5 🔘 Buttons \+ 5 🌰 Acorns/);
 await guide.grantModuleCompletion({moduleId:'module-a'});
 await guide.grantExternalValidation({moduleId:'module-a',validationConfidence:{verifiedPass:true,crossDeviceSatisfied:true,passConfidence:.94}});
 await guide.grantValidationContribution({moduleId:'module-b',validationId:'receipt-b',validatorId:'model-b',accepted:true});
@@ -57,14 +64,16 @@ const schema=valueModel.augmentSchema({type:'object',properties:{tasks:{type:'ar
 assert.ok(schema.properties.tasks.items.properties.laborWorthHours,'task schema lacks laborWorthHours');
 assert.ok(schema.properties.tasks.items.required.includes('laborWorthHours'),'task labor estimate is not required');
 assert.match(valueModel.promptContract,/automation.*must not discount/i);
-assert.match(valueModel.promptContract,/1 hour = 5 🔘 Buttons/);
+assert.match(valueModel.promptContract,/1 human-equivalent labor hour = 5 🔘 Buttons/);
+assert.match(valueModel.promptContract,/same.*wage|wage.*everybody/i);
+assert.match(valueModel.promptContract,/models estimate.*hours/i);
 assert.match(valueModel.promptContract,/10 🌰 Acorns per hour/);
 assert.match(valueModel.promptContract,/5 🔘 Buttons \+ 5 🌰 Acorns/);
 
 for(const token of ['marketplace-v2-value-guide.css?v=basic-value-v1','/app/civweave-basic-value-v1.js?v=basic-value-v1','marketplace-v2-value-guide.js?v=basic-value-v1'])assert.ok(fellowfare.includes(token),`FellowFare does not load ${token}`);
-for(const token of ['SHARED BASIC VALUE GUIDE','Baseline first. Market second.','Human-equivalent labor hours','Use baseline suggestion','live market','Automation speed does not reduce','notifyMarketplaceStorage','StorageEvent','serialized=JSON.stringify(market)'])assert.ok(fellowfareGuide.includes(token),`FellowFare guide is missing ${token}`);
+for(const token of ['SHARED BASIC VALUE GUIDE','Starting wage first. Market second.','Human-equivalent labor hours','Use wage/value suggestion','live market','do not alter the 5 🔘/h labor wage','notifyMarketplaceStorage','StorageEvent','serialized=JSON.stringify(market)'])assert.ok(fellowfareGuide.includes(token),`FellowFare guide is missing ${token}`);
 assert.ok(fellowfareCss.includes('.ffv2-value-table'));
 for(const shell of [living,cerbanimo])for(const token of ['/app/cw-reward-ledger-v2.js?v=basic-value-v1','/app/civweave-basic-value-v1.js?v=basic-value-v1','/app/cw-reward-receivers-v2.js?v=basic-value-v1','/app/civweave-basic-value-model-v1.js?v=basic-value-v1'])assert.ok(shell.includes(token),`Cross-system shell is missing ${token}`);
 for(const path of ['/app/civweave-basic-value-v1.js','/app/civweave-basic-value-model-v1.js'])assert.ok(offline.seeds.includes(path),`Offline core omits ${path}`);
 
-console.log(JSON.stringify({ok:true,schema:guide.schema,labor:'5 🔘 / human-equivalent hour',learning:'2 🌰 completion + 2 🌰 external validation + 1 🌰 validator contribution',education:'10 🌰/hour; curriculum 5–50 🌰',mentorship:['5 🔘 + 5 🌰','15 🔘','20 🌰'],crossSystem:true,valuationPersists:true},null,2));
+console.log(JSON.stringify({ok:true,schema:guide.schema,labor:'uniform starting wage: 5 🔘 / human-equivalent hour for every worker',learning:'2 🌰 completion + 2 🌰 external validation + 1 🌰 validator contribution',education:'10 🌰/hour; curriculum 5–50 🌰',mentorship:['5 🔘 + 5 🌰','15 🔘','20 🌰'],crossSystem:true,valuationPersists:true},null,2));
