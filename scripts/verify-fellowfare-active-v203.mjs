@@ -28,9 +28,10 @@ const [outerHtml,outerCss,parentTheme,mobileFlow,innerHtml,marketplaceCss,contra
 ]);
 const offlineManifest=JSON.parse(offlineManifestText);
 
-assert(outerHtml.includes('data-build="fellowfare-native-market-v207"'),'Outer FellowFare cabinet did not rotate to the live-capability marketplace revision.');
+assert(outerHtml.includes('data-build="fellowfare-native-market-v208"'),'Outer FellowFare cabinet did not rotate to the live-capability marketplace revision.');
 assert(outerHtml.includes('data-fellowfare-native-host=\"v207\"'),'Outer FellowFare surface is not using the native market host.');
 assert(!outerHtml.includes('<iframe id=\"ffc144-workbench\"'),'Active FellowFare still contains the retired nested marketplace iframe.');
+assert(!outerHtml.includes('<script src=\"/app/fellowfare-mobile-flow-v205.js'),'Active FellowFare re-enabled the retired cross-document sizing runtime.');
 assert(outerHtml.indexOf('/app/fellowfare-cabinet-v144.css')<outerHtml.indexOf('/app/fellowfare-parent-theme-v205.css'),'The complete FellowFare parent theme must load after the legacy cabinet stylesheet.');
 assert(outerHtml.indexOf('/app/services/fellowfare/marketplace-v2.js')<outerHtml.indexOf('/app/fellowfare-cabinet-v144.js'),'The native marketplace runtime must boot before the retained parent controller.');
 for(const token of ['--ffc-parchment-soft: #fff4d8','--ffc-blue: #1e4b64','color: var(--ffc-ink) !important','.ffc144-rook-log .ffc144-rook-message'])assert(outerCss.includes(token),`Outer active Rook contrast is missing ${token}`);
@@ -119,10 +120,11 @@ assert(offlineManifest.includePrefixes.includes('/app/'),'Offline campus exclude
 for(const token of [
   '/app/fellowfare-cabinet-v144.css',
   '/app/fellowfare-parent-theme-v205.css',
-  '/app/fellowfare-native-v207.css',
+  '/app/fellowfare-native-v208.css',
+  '/app/fellowfare-native-scroll-v208.js',
   '/app/fellowfare-native-host-v207.js'
 ])assert(outerHtml.includes(token),`FellowFare seed cannot discover ${token}`);
-assert(outerHtml.includes('/app/services/fellowfare/marketplace-v2.js?v=native-v207'),'FellowFare seed cannot discover its native marketplace runtime.');
+assert(outerHtml.includes('/app/services/fellowfare/marketplace-v2.js?v=native-v208'),'FellowFare seed cannot discover its native marketplace runtime.');
 
 assert(critical.includes("const VERSION='fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Compatibility coordinator lost the current parent/mobile or memory-bridge revision.');
 assert(critical.includes("const CRITICAL_CACHE='cwboot-critical-fellowfare-active-v203-parent-mobile-v205-cerbanimo-boundary-v204-memory-bridge-v205'"),'Compatibility cache identity changed unexpectedly.');
