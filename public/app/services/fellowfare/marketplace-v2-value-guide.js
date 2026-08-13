@@ -11,6 +11,10 @@ const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&
 let pendingValuation=null,enhancing=false;
 function currentRoute(){return document.body.dataset.ffRoute||location.hash.slice(1)||'market'}
 function state(){const value=parse(localStorage.getItem(MARKET_KEY),{});return value&&typeof value==='object'?value:{}}
+function notifyMarketplaceStorage(newValue){
+ try{dispatchEvent(new StorageEvent('storage',{key:MARKET_KEY,newValue,storageArea:localStorage,url:location.href}));return}catch{}
+ try{const event=new Event('storage');Object.defineProperty(event,'key',{value:MARKET_KEY});Object.defineProperty(event,'newValue',{value:newValue});dispatchEvent(event)}catch{}
+}
 function rawCandidates(){
  const rows=[];
  const queued=parse(localStorage.getItem(DRAFT_KEY),[]);if(Array.isArray(queued))rows.push(...queued);
@@ -77,7 +81,7 @@ function decorateListings(){
 function savePublishedValuation(){
  if(!pendingValuation)return;const market=state(),listing=Array.isArray(market.listings)?market.listings[0]:null;if(!listing){pendingValuation=null;return}
  const matches=!pendingValuation.title||clean(listing.title,180)===pendingValuation.title;if(!matches)return;
- const b=baseline(listing.kind,{hours:pendingValuation.laborWorthHours,recommendedAcorns:pendingValuation.curriculumAcorns});listing.valuation={schema:'civweave.basic-value-estimate.v1',laborWorthHours:pendingValuation.laborWorthHours||0,curriculumAcorns:pendingValuation.curriculumAcorns||0,baseline:b,source:pendingValuation.source||'composer',updatedAt:new Date().toISOString()};market.updatedAt=new Date().toISOString();localStorage.setItem(MARKET_KEY,JSON.stringify(market));pendingValuation=null;requestAnimationFrame(()=>globalThis.CivweaveFellowFareMarketplaceV2?.render?.(currentRoute()));
+ const b=baseline(listing.kind,{hours:pendingValuation.laborWorthHours,recommendedAcorns:pendingValuation.curriculumAcorns});listing.valuation={schema:'civweave.basic-value-estimate.v1',laborWorthHours:pendingValuation.laborWorthHours||0,curriculumAcorns:pendingValuation.curriculumAcorns||0,baseline:b,source:pendingValuation.source||'composer',updatedAt:new Date().toISOString()};market.updatedAt=new Date().toISOString();const serialized=JSON.stringify(market);localStorage.setItem(MARKET_KEY,serialized);notifyMarketplaceStorage(serialized);pendingValuation=null;requestAnimationFrame(()=>globalThis.CivweaveFellowFareMarketplaceV2?.render?.(currentRoute()));
 }
 function enhance(){if(enhancing)return;enhancing=true;requestAnimationFrame(()=>{try{renderGuide();ensureComposerLabor();decorateDrafts();decorateListings();const form=document.querySelector('#ffv2ComposerForm');if(form?.open||form?.closest('dialog')?.open)updateComposer(form)}finally{enhancing=false}})}
 function clicks(event){
