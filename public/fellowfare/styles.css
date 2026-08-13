@@ -1,0 +1,174 @@
+/* FellowFare marketplace v2 visual adjustments */
+:root {
+  --ff-ink: #123645;
+  --ff-ink-soft: #385462;
+  --ff-cream: #fff3cf;
+  --ff-paper: #f7dfab;
+  --ff-saffron: #e3a02e;
+  --ff-terracotta: #b55f33;
+  --ff-copper: #8d4f2d;
+  --ff-jade: #2f6f63;
+  --ff-inkblue: #16485f;
+  --ff-panel: rgba(255, 246, 218, 0.97);
+  --ff-panel-deep: rgba(23, 66, 84, 0.97);
+  --ff-panel-warm: rgba(181, 95, 51, 0.14);
+  --ff-border: rgba(141, 79, 45, 0.72);
+  --ff-shadow: 0 12px 30px rgba(52, 32, 18, 0.16);
+}
+
+body.fellowfare,
+.ff-shell {
+  color: var(--ff-ink);
+}
+
+/* FellowFare should read as its own realm. Green is now a secondary trust/accent
+   color instead of the dominant surface treatment. */
+.ff-card,
+.ff-listing-card,
+.ff-detail-card,
+.ff-panel,
+.ff-workbench,
+.ff-market-card,
+.ff-order-card,
+.ff-wallet-card,
+.ff-profile-card {
+  background: linear-gradient(180deg, rgba(255, 244, 211, 0.98), rgba(247, 222, 168, 0.98));
+  border-color: var(--ff-border);
+  color: var(--ff-ink);
+  box-shadow: var(--ff-shadow);
+}
+
+.ff-listing-card[data-kind="offer"],
+.ff-detail-card[data-kind="offer"] {
+  background: linear-gradient(160deg, rgba(255, 240, 198, 0.98), rgba(232, 177, 82, 0.92));
+}
+
+.ff-listing-card[data-kind="need"],
+.ff-detail-card[data-kind="need"] {
+  background: linear-gradient(160deg, rgba(244, 223, 202, 0.98), rgba(207, 131, 88, 0.88));
+}
+
+.ff-card h1,
+.ff-card h2,
+.ff-card h3,
+.ff-listing-card h2,
+.ff-listing-card h3,
+.ff-detail-card h1,
+.ff-detail-card h2,
+.ff-panel h2,
+.ff-panel h3,
+.ff-workbench h2,
+.ff-workbench h3,
+.ff-muted strong,
+.ff-meta strong {
+  color: var(--ff-ink);
+}
+
+.ff-card p,
+.ff-listing-card p,
+.ff-detail-card p,
+.ff-panel p,
+.ff-workbench p,
+.ff-meta,
+.ff-muted,
+.ff-subtle {
+  color: var(--ff-ink-soft);
+}
+
+.ff-chip,
+.ff-pill,
+.ff-tag,
+.ff-badge {
+  background: rgba(255, 238, 190, 0.92);
+  color: #684326;
+  border-color: rgba(141, 79, 45, 0.34);
+}
+
+.ff-primary,
+.ff-button-primary,
+.ff-cta,
+.ff-tab[aria-selected="true"],
+.ff-nav-item[aria-current="page"] {
+  background: linear-gradient(135deg, var(--ff-saffron), #d98523);
+  color: #1e3440;
+  border-color: rgba(125, 71, 26, 0.55);
+}
+
+.ff-secondary,
+.ff-button-secondary {
+  background: linear-gradient(135deg, var(--ff-inkblue), #1e5e70);
+  color: #fff7df;
+  border-color: rgba(13, 47, 63, 0.72);
+}
+
+.ff-trust,
+.ff-status-good,
+.ff-capability-ready {
+  color: #155347;
+}
+
+.ff-dark-panel,
+.ff-ledger-panel,
+.ff-arrangement-panel {
+  background: linear-gradient(180deg, #173f54, #102f3f);
+  color: #fff5d9;
+  border-color: rgba(227, 160, 46, 0.72);
+}
+
+.ff-dark-panel h1,
+.ff-dark-panel h2,
+.ff-dark-panel h3,
+.ff-ledger-panel h1,
+.ff-ledger-panel h2,
+.ff-ledger-panel h3,
+.ff-arrangement-panel h1,
+.ff-arrangement-panel h2,
+.ff-arrangement-panel h3,
+.ff-dark-panel strong,
+.ff-ledger-panel strong,
+.ff-arrangement-panel strong {
+  color: #fff8e6;
+}
+
+.ff-dark-panel p,
+.ff-dark-panel .ff-meta,
+.ff-dark-panel .ff-muted,
+.ff-ledger-panel p,
+.ff-ledger-panel .ff-meta,
+.ff-arrangement-panel p,
+.ff-arrangement-panel .ff-meta {
+  color: #d8e5e8;
+}
+
+.ff-empty-state {
+  background: rgba(255, 248, 225, 0.84);
+  color: var(--ff-ink-soft);
+  border: 1px dashed rgba(141, 79, 45, 0.42);
+}
+
+.ff-empty-state strong {
+  color: var(--ff-ink);
+}
+
+.ff-price,
+.ff-balance,
+.ff-amount {
+  color: #7b3f1f;
+  font-weight: 800;
+}
+
+.ff-link,
+.ff-action-link {
+  color: #0f4d66;
+  text-decoration-color: rgba(15, 77, 102, 0.45);
+}
+
+@media (max-width: 720px) {
+  .ff-card,
+  .ff-listing-card,
+  .ff-detail-card,
+  .ff-panel,
+  .ff-workbench {
+    box-shadow: 0 8px 18px rgba(52, 32, 18, 0.14);
+  }
+}
