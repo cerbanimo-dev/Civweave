@@ -8,7 +8,7 @@ importScripts('/service-worker-core-v208.js?v=1.0.122-chat-convergence-v250-inst
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
-importScripts('/service-worker-radio-core-v305.js?v=1.0.122-radio-core-shell-v305-smartlink-v245');
+importScripts('/service-worker-radio-core-v305.js?v=1.0.122-radio-core-shell-v305-playlist-only-v246');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');
