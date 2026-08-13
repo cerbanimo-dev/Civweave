@@ -1,8 +1,8 @@
 {
   "provider": "stripe-connect-platform-reserve-v2",
   "infrastructureAuthority": "cloudflare-core",
-  "moneyEdgeUrl": "https://civweave-core.glaedn.workers.dev",
-  "operatorAccountModel": "configurable-controller-v1",
+  "moneyEdgeUrl": "https://civweave-core.cerbanimo.workers.dev",
+  "operatorAccountModel": "accounts-v2-marketplace-recipient",
   "chargeModel": "platform-charge-separate-transfer",
   "operatorPayouts": "platform-charge-separate-transfer",
   "currency": "USD",
@@ -47,7 +47,7 @@
     "singleUse": true
   },
   "trustBootstrap": {
-    "moneyEdgeUrl": "https://civweave-core.glaedn.workers.dev",
+    "moneyEdgeUrl": "https://civweave-core.cerbanimo.workers.dev",
     "firstUse": "https-fetch-fingerprint-and-pin",
     "rotation": "reject-unannounced-key-change"
   },
@@ -62,6 +62,7 @@
     "cloudflareWorkerSecrets": [
       "STRIPE_SECRET_KEY",
       "STRIPE_CONNECT_WEBHOOK_SECRET",
+      "STRIPE_CONNECT_THIN_WEBHOOK_SECRET",
       "NODE_FABRIC_BINDING_TOKEN"
     ],
     "generatedInsideDurableObject": [

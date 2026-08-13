@@ -7,8 +7,8 @@ import {
 
 export * from './index.mjs';
 
-export const LIVE_CIVWEAVE_MONEY_EDGE_ORIGIN = 'https://civweave-core.glaedn.workers.dev';
-export const LIVE_CIVWEAVE_NODE_FABRIC_ORIGIN = 'https://civweave-node-cloud.glaedn.workers.dev';
+export const LIVE_CIVWEAVE_MONEY_EDGE_ORIGIN = 'https://civweave-core.cerbanimo.workers.dev';
+export const LIVE_CIVWEAVE_NODE_FABRIC_ORIGIN = 'https://civweave-node-cloud.cerbanimo.workers.dev';
 export const LIVE_CIVWEAVE_INSTALL_ORIGIN = 'https://civweave.pages.dev';
 
 const encoder = new TextEncoder();

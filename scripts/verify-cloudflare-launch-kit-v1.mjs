@@ -5,8 +5,17 @@ import { spawnSync } from 'node:child_process';
 const root = new URL('../', import.meta.url);
 const read = path => readFile(new URL(path, root), 'utf8');
 const parseJsonc = text => JSON.parse(text.split('\n').filter(line => !line.trim().startsWith('//')).join('\n'));
-const LIVE_MONEY_EDGE = 'https://civweave-core.glaedn.workers.dev';
-const LIVE_NODE_FABRIC = 'https://civweave-node-cloud.glaedn.workers.dev';
+const LIVE_MONEY_EDGE = 'https://civweave-core.cerbanimo.workers.dev';
+const LIVE_NODE_FABRIC = 'https://civweave-node-cloud.cerbanimo.workers.dev';
+const REMOTE_LIVE_GATES = Object.freeze([
+  'CIVWEAVE_MONEY_LIVE_ENABLED',
+  'CIVWEAVE_MONEY_EMERGENCY_STOP',
+  'CIVWEAVE_MONEY_COMPLIANCE_APPROVED',
+  'CIVWEAVE_MONEY_JURISDICTION_APPROVED',
+  'CIVWEAVE_MONEY_KYC_AML_READY',
+  'CIVWEAVE_MONEY_TAX_REPORTING_READY',
+  'CIVWEAVE_MONEY_TERMS_APPROVED'
+]);
 
 const [topologyText, transportsText, coreWranglerText, nodeWranglerText, coreSource, liveCoreSource, moneySource, membershipSource, composedMoneySource, stripeSource, nodeSource, capacitySource, migration1, migration2, migration3, migration4, bootstrapSource, envExample, guide, validationOptIn] = await Promise.all([
   read('config/launch-topology-v1.json'),
@@ -57,8 +66,11 @@ assert.equal(transports.moneyEdgeAuthority, LIVE_MONEY_EDGE);
 assert.equal(core.name, 'civweave-core');
 assert.equal(core.workers_dev, true);
 assert.equal(core.preview_urls, false);
+assert.equal(core.keep_vars, true);
 assert.equal(core.vars.CIVWEAVE_PLATFORM_FEE_BPS, '500');
-assert.equal(core.vars.CIVWEAVE_MONEY_LIVE_ENABLED, 'false');
+for (const gate of REMOTE_LIVE_GATES) {
+  assert.equal(core.vars[gate], undefined, `${gate} must remain deliberate remote runtime state, not a source-controlled deploy default`);
+}
 assert.ok(core.d1_databases.some(x => x.binding === 'DB' && x.database_name === 'civweave-core'));
 assert.ok(core.r2_buckets.some(x => x.binding === 'PACKAGES' && x.bucket_name === 'civweave-distribution'));
 assert.ok(core.durable_objects.bindings.some(x => x.name === 'IDENTITY' && x.class_name === 'CivweaveCoreIdentity'));
@@ -284,5 +296,6 @@ console.log(JSON.stringify({
   authenticatedMoneyEvents:true,
   cloudValidationOptIn:true,
   hostNodeSecretsDistributed:false,
+  liveStateRemoteAndPreserved:true,
   liveMoneyDefault:false
 }, null, 2));

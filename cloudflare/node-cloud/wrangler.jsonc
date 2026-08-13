@@ -39,7 +39,7 @@
   ],
   "vars": {
     "NODE_DOMAIN": "nodes.commonweave.earth",
-    "PUBLIC_FABRIC_ORIGIN": "https://civweave-node-cloud.glaedn.workers.dev",
+    "PUBLIC_FABRIC_ORIGIN": "https://civweave-node-cloud.cerbanimo.workers.dev",
     "CIVWEAVE_WORKERS_PLAN": "free"
   },
   "observability": {

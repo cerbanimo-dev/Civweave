@@ -1,0 +1,247 @@
+name: Promote Cloudflare Live Money v1
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage_live_credentials:
+        description: 'Promote staged live Stripe credentials to the Cloudflare core while keeping live money disabled'
+        required: true
+        type: boolean
+        default: true
+      enable_live_money:
+        description: 'Enable real-money transactions after live credentials and every human gate are complete'
+        required: true
+        type: boolean
+        default: false
+      compliance_approved:
+        description: 'Human attestation: compliance approval complete for launch scope'
+        required: true
+        type: boolean
+        default: false
+      jurisdiction_approved:
+        description: 'Human attestation: jurisdiction review complete for launch geography'
+        required: true
+        type: boolean
+        default: false
+      kyc_aml_ready:
+        description: 'Human attestation: KYC/AML operating responsibilities are ready'
+        required: true
+        type: boolean
+        default: false
+      tax_reporting_ready:
+        description: 'Human attestation: tax collection/reporting responsibilities are ready'
+        required: true
+        type: boolean
+        default: false
+      provider_terms_approved:
+        description: 'Human attestation: current Stripe/provider terms and platform obligations accepted'
+        required: true
+        type: boolean
+        default: false
+      confirmation:
+        description: 'For enablement, type exactly: ENABLE CIVWEAVE LIVE MONEY'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-cloudflare-money-edge-production
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      STRIPE_LIVE_SECRET_KEY: ${{ secrets.STRIPE_LIVE_SECRET_KEY }}
+      STRIPE_LIVE_CONNECT_WEBHOOK_SECRET: ${{ secrets.STRIPE_LIVE_CONNECT_WEBHOOK_SECRET }}
+      STRIPE_LIVE_CONNECT_THIN_WEBHOOK_SECRET: ${{ secrets.STRIPE_LIVE_CONNECT_THIN_WEBHOOK_SECRET }}
+      CIVWEAVE_LIVE_CORE_ORIGIN: https://civweave-core.cerbanimo.workers.dev
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Install pinned Stripe SDK
+        run: npm install --prefix cloudflare/core --omit=dev --no-audit --no-fund
+
+      - name: Require production credentials without exposing them
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          test -n "${STRIPE_LIVE_SECRET_KEY:-}" || { echo 'Missing STRIPE_LIVE_SECRET_KEY'; exit 3; }
+          test -n "${STRIPE_LIVE_CONNECT_WEBHOOK_SECRET:-}" || { echo 'Missing STRIPE_LIVE_CONNECT_WEBHOOK_SECRET'; exit 3; }
+          test -n "${STRIPE_LIVE_CONNECT_THIN_WEBHOOK_SECRET:-}" || { echo 'Missing STRIPE_LIVE_CONNECT_THIN_WEBHOOK_SECRET'; exit 3; }
+          case "$STRIPE_LIVE_SECRET_KEY" in
+            sk_live_*|rk_live_*) ;;
+            *) echo 'STRIPE_LIVE_SECRET_KEY is not a live-mode Stripe server credential'; exit 4 ;;
+          esac
+          npx --yes wrangler@latest whoami
+
+      - name: Run read-only live Stripe preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/verify-stripe-live-readiness-preflight.mjs
+
+      - name: Prepare production Cloudflare config
+        id: config
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@latest d1 list --json > /tmp/civweave-d1.json
+          D1_ID="$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const raw = JSON.parse(fs.readFileSync('/tmp/civweave-d1.json','utf8'));
+          const rows = Array.isArray(raw) ? raw : (raw.result || raw.databases || []);
+          const row = rows.find(item => item?.name === 'civweave-core');
+          process.stdout.write(String(row?.uuid || row?.id || row?.database_id || row?.databaseId || ''));
+          NODE
+          )"
+          test -n "$D1_ID" || { echo 'civweave-core D1 database is missing'; exit 5; }
+          node scripts/prepare-cloudflare-launch-kit-v1.mjs "--d1-id=$D1_ID"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path = '.cloudflare-launch/core.wrangler.jsonc';
+          let text = fs.readFileSync(path, 'utf8');
+          text = text.replace(/\n  "routes": \[[\s\S]*?\n  \],/, '');
+          // R2 is optional and is not required to activate payments.
+          text = text.replace(/\n  "r2_buckets": \[[\s\S]*?\n  \],/, '');
+          fs.writeFileSync(path, text);
+          NODE
+          echo "config=.cloudflare-launch/core.wrangler.jsonc" >> "$GITHUB_OUTPUT"
+
+      - name: Promote live Stripe credentials while money stays disabled
+        if: inputs.stage_live_credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          CONFIG="${{ steps.config.outputs.config }}"
+          printf '%s' "$STRIPE_LIVE_SECRET_KEY" | npx --yes wrangler@latest secret put STRIPE_SECRET_KEY --config "$CONFIG"
+          printf '%s' "$STRIPE_LIVE_CONNECT_WEBHOOK_SECRET" | npx --yes wrangler@latest secret put STRIPE_CONNECT_WEBHOOK_SECRET --config "$CONFIG"
+          printf '%s' "$STRIPE_LIVE_CONNECT_THIN_WEBHOOK_SECRET" | npx --yes wrangler@latest secret put STRIPE_CONNECT_THIN_WEBHOOK_SECRET --config "$CONFIG"
+
+      - name: Verify live provider is staged but transactions remain closed
+        if: inputs.stage_live_credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "$CIVWEAVE_LIVE_CORE_ORIGIN/api/money-edge/status" > /tmp/staged-live.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/staged-live.json', 'utf8'));
+          const edge = payload.moneyEdge || payload;
+          if (edge.providerMode !== 'live') throw new Error(`Expected providerMode=live after credential promotion, got ${edge.providerMode}`);
+          if (edge.integrationDoorReady !== true) throw new Error(`Live integration door is not ready: ${(edge.structuralBlockers || []).join(', ')}`);
+          if (edge.liveReady === true) throw new Error('Live money became ready before explicit gate enablement.');
+          console.log(JSON.stringify({ ok: true, providerMode: edge.providerMode, integrationDoorReady: edge.integrationDoorReady, liveReady: edge.liveReady, operationalBlockers: edge.operationalBlockers || [] }, null, 2));
+          NODE
+
+      - name: Require explicit human attestations before enablement
+        if: inputs.enable_live_money
+        shell: bash
+        env:
+          COMPLIANCE_APPROVED: ${{ inputs.compliance_approved }}
+          JURISDICTION_APPROVED: ${{ inputs.jurisdiction_approved }}
+          KYC_AML_READY: ${{ inputs.kyc_aml_ready }}
+          TAX_REPORTING_READY: ${{ inputs.tax_reporting_ready }}
+          PROVIDER_TERMS_APPROVED: ${{ inputs.provider_terms_approved }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          test "$COMPLIANCE_APPROVED" = 'true' || { echo 'Compliance attestation is not approved'; exit 10; }
+          test "$JURISDICTION_APPROVED" = 'true' || { echo 'Jurisdiction attestation is not approved'; exit 10; }
+          test "$KYC_AML_READY" = 'true' || { echo 'KYC/AML readiness attestation is not approved'; exit 10; }
+          test "$TAX_REPORTING_READY" = 'true' || { echo 'Tax reporting readiness attestation is not approved'; exit 10; }
+          test "$PROVIDER_TERMS_APPROVED" = 'true' || { echo 'Provider terms attestation is not approved'; exit 10; }
+          test "$CONFIRMATION" = 'ENABLE CIVWEAVE LIVE MONEY' || { echo 'Exact live-money confirmation phrase is required'; exit 11; }
+
+      - name: Stage human gates with the live switch still off
+        if: inputs.enable_live_money
+        id: gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="${{ steps.config.outputs.config }}"
+          PRE='/tmp/civweave-core-live-preenable.jsonc'
+          FINAL='/tmp/civweave-core-live-enabled.jsonc'
+          cp "$BASE" "$PRE"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path = '/tmp/civweave-core-live-preenable.jsonc';
+          let text = fs.readFileSync(path, 'utf8');
+          const marker = '"vars": {';
+          if (!text.includes(marker)) throw new Error('Generated Wrangler config is missing vars.');
+          const injected = `${marker}\n    "CIVWEAVE_MONEY_LIVE_ENABLED": "false",\n    "CIVWEAVE_MONEY_EMERGENCY_STOP": "false",\n    "CIVWEAVE_MONEY_COMPLIANCE_APPROVED": "true",\n    "CIVWEAVE_MONEY_JURISDICTION_APPROVED": "true",\n    "CIVWEAVE_MONEY_KYC_AML_READY": "true",\n    "CIVWEAVE_MONEY_TAX_REPORTING_READY": "true",\n    "CIVWEAVE_MONEY_TERMS_APPROVED": "true",`;
+          text = text.replace(marker, injected);
+          fs.writeFileSync(path, text);
+          fs.writeFileSync('/tmp/civweave-core-live-enabled.jsonc', text.replace('"CIVWEAVE_MONEY_LIVE_ENABLED": "false"', '"CIVWEAVE_MONEY_LIVE_ENABLED": "true"'));
+          NODE
+          npx --yes wrangler@latest deploy --keep-vars --config "$PRE"
+          echo "pre=$PRE" >> "$GITHUB_OUTPUT"
+          echo "final=$FINAL" >> "$GITHUB_OUTPUT"
+
+      - name: Verify live switch is the only remaining blocker
+        if: inputs.enable_live_money
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "$CIVWEAVE_LIVE_CORE_ORIGIN/api/money-edge/status" > /tmp/pre-enable-status.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/pre-enable-status.json', 'utf8'));
+          const edge = payload.moneyEdge || payload;
+          const blockers = edge.operationalBlockers || [];
+          if (edge.providerMode !== 'live') throw new Error(`Provider is not live: ${edge.providerMode}`);
+          if ((edge.structuralBlockers || []).length) throw new Error(`Structural blockers remain: ${(edge.structuralBlockers || []).join(', ')}`);
+          if (edge.liveReady === true) throw new Error('Live money is unexpectedly enabled before the final switch.');
+          if (blockers.length !== 1 || blockers[0] !== 'live-money-disabled') {
+            throw new Error(`Expected only live-money-disabled before final enablement; got ${blockers.join(', ')}`);
+          }
+          console.log(JSON.stringify({ ok: true, providerMode: edge.providerMode, onlyRemainingBlocker: blockers[0] }, null, 2));
+          NODE
+
+      - name: Enable live money with automatic fail-closed rollback
+        if: inputs.enable_live_money
+        shell: bash
+        run: |
+          set -euo pipefail
+          PRE="${{ steps.gates.outputs.pre }}"
+          FINAL="${{ steps.gates.outputs.final }}"
+          npx --yes wrangler@latest deploy --keep-vars --config "$FINAL"
+          if ! curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "$CIVWEAVE_LIVE_CORE_ORIGIN/api/money-edge/status" > /tmp/live-enabled-status.json; then
+            echo 'Live status probe failed; restoring live switch to false.'
+            npx --yes wrangler@latest deploy --keep-vars --config "$PRE" || true
+            exit 20
+          fi
+          if ! node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/live-enabled-status.json', 'utf8'));
+          const edge = payload.moneyEdge || payload;
+          if (edge.providerMode !== 'live' || edge.liveReady !== true || (edge.structuralBlockers || []).length || (edge.operationalBlockers || []).length) process.exit(1);
+          console.log(JSON.stringify({ ok: true, authority: edge.authority || payload.authority, providerMode: edge.providerMode, liveReady: edge.liveReady, emergencyStop: false }, null, 2));
+          NODE
+          then
+            echo 'Final readiness contract failed; restoring live switch to false.'
+            npx --yes wrangler@latest deploy --keep-vars --config "$PRE" || true
+            exit 21
+          fi
+
+      - name: Final payment status
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error "$CIVWEAVE_LIVE_CORE_ORIGIN/api/money-edge/status"
+          echo
+          if [ "${{ inputs.enable_live_money }}" != 'true' ]; then
+            echo 'Live credentials may be staged, but real-money transactions remain deliberately disabled.'
+          fi

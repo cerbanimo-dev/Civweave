@@ -1,7 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import Stripe from '../cloudflare/core/node_modules/stripe/esm/stripe.esm.node.js';
 
-const LIVE_SNAPSHOT_URL = 'https://civweave-core.glaedn.workers.dev/api/money-edge/webhooks/stripe';
+const CORE_ORIGIN = String(process.env.CIVWEAVE_LIVE_CORE_ORIGIN || 'https://civweave-core.cerbanimo.workers.dev').replace(/\/$/, '');
+const LIVE_SNAPSHOT_URL = `${CORE_ORIGIN}/api/money-edge/webhooks/stripe`;
 const EXPECTED_EVENTS = Object.freeze([
   'checkout.session.completed',
   'checkout.session.async_payment_succeeded',
@@ -39,6 +40,7 @@ if (!key) {
     ok: false,
     readyForCredentialPreflight: false,
     reason: 'STRIPE_LIVE_SECRET_KEY is not staged',
+    coreOrigin: CORE_ORIGIN,
     expectedAccountModel: EXPECTED_ACCOUNT_MODEL,
     expectedCommerceSplitFeeBps: EXPECTED_COMMERCE_SPLIT_FEE_BPS,
     sourceContract,
@@ -67,7 +69,7 @@ const legacyLiabilityShape = (connectedAccounts.data || []).filter(item => (
   || item?.controller?.losses?.payments === 'stripe'
 ));
 
-const coreResponse = await fetch('https://civweave-core.glaedn.workers.dev/api/money-edge/status', {
+const coreResponse = await fetch(`${CORE_ORIGIN}/api/money-edge/status`, {
   headers: { accept: 'application/json' }
 });
 if (!coreResponse.ok) throw new Error(`Cloudflare money-edge status returned HTTP ${coreResponse.status}.`);
@@ -78,6 +80,7 @@ if (edge.liveReady === true) throw new Error('Refusing preflight: Civweave live 
 const report = {
   ok: Boolean(exact) && sourceContract.accountsV2Recipient && sourceContract.separateChargesAndTransfers && sourceContract.commerceSplitFeeOnTop,
   mutationPerformed: false,
+  coreOrigin: CORE_ORIGIN,
   stripeLiveAuthentication: true,
   platformAccountPresent: Boolean(account?.id),
   platformChargesEnabled: Boolean(account?.charges_enabled),
@@ -98,6 +101,7 @@ const report = {
     reducesContributorPayout: false
   },
   snapshotWebhook: {
+    url: LIVE_SNAPSHOT_URL,
     targetCount: target.length,
     enabledExactMatch: Boolean(exact),
     expectedEventCount: EXPECTED_EVENTS.length,

@@ -26,11 +26,9 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
-      STRIPE_CONNECT_WEBHOOK_SECRET: ${{ secrets.STRIPE_CONNECT_WEBHOOK_SECRET }}
-      STRIPE_CONNECT_THIN_WEBHOOK_SECRET: ${{ secrets.STRIPE_CONNECT_THIN_WEBHOOK_SECRET }}
       NODE_FABRIC_BINDING_TOKEN: ${{ secrets.NODE_FABRIC_BINDING_TOKEN }}
       NODE_FABRIC_OPERATOR_TOKEN: ${{ secrets.NODE_FABRIC_OPERATOR_TOKEN }}
+      CANONICAL_CORE_URL: https://civweave-core.cerbanimo.workers.dev
     steps:
       - uses: actions/checkout@v5
 
@@ -49,6 +47,26 @@ jobs:
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
           npx --yes wrangler@latest --version
           npx --yes wrangler@latest whoami
+
+      - name: Capture current payment activation state
+        id: before_money
+        shell: bash
+        run: |
+          set -euo pipefail
+          LIVE_READY=false
+          PROVIDER_MODE=unknown
+          if curl --fail --silent --show-error --retry 2 --retry-delay 1 "$CANONICAL_CORE_URL/api/money-edge/status" > /tmp/civweave-money-before.json; then
+            read -r LIVE_READY PROVIDER_MODE < <(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/civweave-money-before.json', 'utf8'));
+          const edge = payload.moneyEdge || payload;
+          process.stdout.write(`${edge.liveReady === true ? 'true' : 'false'} ${String(edge.providerMode || 'unknown')}`);
+          NODE
+            )
+          fi
+          echo "live_ready=$LIVE_READY" >> "$GITHUB_OUTPUT"
+          echo "provider_mode=$PROVIDER_MODE" >> "$GITHUB_OUTPUT"
+          echo "Pre-deploy payment state: liveReady=$LIVE_READY providerMode=$PROVIDER_MODE"
 
       - name: Verify money-edge and Connect sample source before deployment
         shell: bash
@@ -145,33 +163,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes wrangler@latest deploy --config .cloudflare-launch/core.wrangler.jsonc 2>&1 | tee /tmp/civweave-core-deploy.log
+          npx --yes wrangler@latest deploy --keep-vars --config .cloudflare-launch/core.wrangler.jsonc 2>&1 | tee /tmp/civweave-core-deploy.log
           CORE_URL="$(grep -Eo 'https://[^[:space:]]+\.workers\.dev' /tmp/civweave-core-deploy.log | tail -1 || true)"
           test -n "$CORE_URL" || { echo 'Could not determine civweave-core workers.dev URL'; exit 4; }
           echo "core_url=$CORE_URL" >> "$GITHUB_OUTPUT"
           echo "Civweave money edge: $CORE_URL"
 
-      - name: Configure core secrets when supplied
+      - name: Refresh internal node-fabric binding secret
         shell: bash
         run: |
           set -euo pipefail
-          put_secret() {
-            local name="$1" value="$2"
-            if [ -n "$value" ]; then
-              printf '%s' "$value" | npx --yes wrangler@latest secret put "$name" --config .cloudflare-launch/core.wrangler.jsonc
-            else
-              echo "$name not present in GitHub secrets; leaving Cloudflare value unchanged/unconfigured."
-            fi
-          }
-          put_secret STRIPE_SECRET_KEY "${STRIPE_SECRET_KEY:-}"
-          put_secret STRIPE_CONNECT_WEBHOOK_SECRET "${STRIPE_CONNECT_WEBHOOK_SECRET:-}"
-          put_secret STRIPE_CONNECT_THIN_WEBHOOK_SECRET "${STRIPE_CONNECT_THIN_WEBHOOK_SECRET:-}"
           if [ -z "${NODE_FABRIC_BINDING_TOKEN:-}" ]; then
             NODE_FABRIC_BINDING_TOKEN="$(node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))")"
             echo 'Generated a fresh internal node-fabric binding token for this deployment.'
           fi
           printf '%s' "$NODE_FABRIC_BINDING_TOKEN" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --config .cloudflare-launch/core.wrangler.jsonc
           printf '%s' "$NODE_FABRIC_BINDING_TOKEN" > /tmp/civweave-node-fabric-binding-token
+          echo 'Stripe platform/webhook secrets are intentionally not rewritten by ordinary code deploys.'
 
       - name: Deploy Cloudflare host-node fabric
         id: deploy_nodes
@@ -214,10 +222,11 @@ jobs:
           probe "$CORE_URL/api/money-edge/trust"
           probe "$NODE_URL/api/fabric/health"
 
-      - name: Confirm live money remains fail-closed
+      - name: Confirm ordinary deploy preserved payment activation state
         shell: bash
         env:
           CORE_URL: ${{ steps.deploy_core.outputs.core_url }}
+          BEFORE_LIVE_READY: ${{ steps.before_money.outputs.live_ready }}
         run: |
           set -euo pipefail
           curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "$CORE_URL/api/money-edge/status" > /tmp/money-status.json
@@ -225,8 +234,12 @@ jobs:
           import fs from 'node:fs';
           const payload = JSON.parse(fs.readFileSync('/tmp/money-status.json','utf8'));
           const edge = payload.moneyEdge || payload;
-          if (edge.liveReady === true) throw new Error('Refusing deployment verification: live money unexpectedly reports ready.');
-          console.log(JSON.stringify({ ok: true, authority: payload.authority || edge.authority, liveReady: edge.liveReady, structuralBlockers: edge.structuralBlockers || [], operationalBlockers: edge.operationalBlockers || [] }, null, 2));
+          const before = String(process.env.BEFORE_LIVE_READY || 'false') === 'true';
+          if ((edge.structuralBlockers || []).length) throw new Error(`Money edge has structural blockers after deploy: ${(edge.structuralBlockers || []).join(', ')}`);
+          if (Boolean(edge.liveReady) !== before) {
+            throw new Error(`Ordinary deployment changed liveReady from ${before} to ${Boolean(edge.liveReady)}.`);
+          }
+          console.log(JSON.stringify({ ok: true, authority: payload.authority || edge.authority, providerMode: edge.providerMode, liveReady: edge.liveReady, preservedActivationState: true, operationalBlockers: edge.operationalBlockers || [] }, null, 2));
           NODE
 
       - name: Publish deployment URLs

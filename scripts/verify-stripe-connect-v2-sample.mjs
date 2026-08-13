@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 
 const root = new URL('../', import.meta.url);
 const read = path => readFile(new URL(path, root), 'utf8');
-const [pkgText, sampleSource, entrySource, providerSource, snapshotSource, migrationSource, retryMigrationSource, wranglerText, prepareSource, deployWorkflow] = await Promise.all([
+const [pkgText, sampleSource, entrySource, providerSource, snapshotSource, migrationSource, retryMigrationSource, wranglerText, prepareSource, deployWorkflow, promoteWorkflow] = await Promise.all([
   read('cloudflare/core/package.json'),
   read('cloudflare/core/src/stripe-connect-v2-sample.mjs'),
   read('cloudflare/core/src/stripe-connect-v2-entry.mjs'),
@@ -14,7 +14,8 @@ const [pkgText, sampleSource, entrySource, providerSource, snapshotSource, migra
   read('cloudflare/core/migrations/0004_stripe_event_processing.sql'),
   read('cloudflare/core/wrangler.template.jsonc'),
   read('scripts/prepare-cloudflare-launch-kit-v1.mjs'),
-  read('.github/workflows/deploy-cloudflare-money-edge-v1.yml')
+  read('.github/workflows/deploy-cloudflare-money-edge-v1.yml'),
+  read('.github/workflows/promote-cloudflare-live-money-v1.yml')
 ]);
 const pkg = JSON.parse(pkgText);
 const parseJsonc = text => JSON.parse(text.split('\n').filter(line => !line.trim().startsWith('//')).join('\n'));
@@ -64,15 +65,9 @@ assert.ok(sampleSource.includes('parseEventNotificationAsync'));
 assert.ok(sampleSource.includes('notification.fetchEvent()'));
 assert.ok(sampleSource.includes('STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
 
-// Stripe supports both full secret keys (sk_*) and restricted server keys (rk_*).
-// The money-edge status must classify either sandbox/live family correctly without
-// exposing any credential material.
 assert.ok(providerSource.includes("key.startsWith('rk_test_')"));
 assert.ok(providerSource.includes("key.startsWith('rk_live_')"));
 
-// Snapshot webhook receipts have an explicit processing lifecycle. A failed event
-// must be claimable on Stripe retry; a completed event must remain idempotent; a
-// fresh in-flight duplicate must not run concurrently.
 for (const needle of [
   "processing_state='processing'",
   "processing_state='processed'",
@@ -85,8 +80,6 @@ for (const needle of ['processing_state', 'processing_attempts', 'last_attempt_a
   assert.ok(retryMigrationSource.includes(needle), `missing Stripe receipt migration field: ${needle}`);
 }
 
-// Interactive sample/admin routes remain disabled by default, but both Stripe-
-// signed webhooks must stay routable without opening the UI.
 assert.equal(wrangler.vars.STRIPE_CONNECT_SAMPLE_ENABLED, 'false');
 assert.ok(entrySource.includes("THIN_WEBHOOK_PATH = '/api/connect-demo/webhooks/stripe-thin'"));
 assert.ok(entrySource.includes('STRIPE_SNAPSHOT_WEBHOOK_PATHS.has(url.pathname)'));
@@ -100,7 +93,9 @@ assert.ok(prepareSource.includes('templateEntryMatch'));
 assert.ok(prepareSource.includes('generatedEntry'));
 assert.ok(prepareSource.includes('../cloudflare/core/'));
 assert.ok(deployWorkflow.includes('npm install --prefix cloudflare/core'));
-assert.ok(deployWorkflow.includes('STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
+assert.ok(!deployWorkflow.includes('secret put STRIPE_CONNECT_THIN_WEBHOOK_SECRET'), 'ordinary production deploy must not rewrite the active thin-webhook credential');
+assert.ok(promoteWorkflow.includes('STRIPE_LIVE_CONNECT_THIN_WEBHOOK_SECRET'));
+assert.ok(promoteWorkflow.includes('secret put STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
 assert.ok(!deployWorkflow.includes('probe "$CORE_URL/connect-demo"'), 'production deploy must not expect the disabled sample UI to be public');
 
 for (const file of [
@@ -161,6 +156,7 @@ console.log(JSON.stringify({
   productsOnConnectedAccount: true,
   directCheckoutApplicationFee: true,
   userAccountMappingInD1: true,
+  liveThinWebhookSecretUsesGuardedPromotion: true,
   cleanHtmlSample: true,
   productionSampleDefault: 'disabled'
 }, null, 2));

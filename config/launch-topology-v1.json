@@ -22,7 +22,7 @@
     "provider": "cloudflare",
     "staticProject": "civweave",
     "worker": "civweave-core",
-    "publicApiOrigin": "https://civweave-core.glaedn.workers.dev",
+    "publicApiOrigin": "https://civweave-core.cerbanimo.workers.dev",
     "roles": [
       "canonical-site-and-installer",
       "node-directory",
@@ -44,7 +44,7 @@
   "cloudNodeFabric": {
     "provider": "cloudflare",
     "worker": "civweave-node-cloud",
-    "publicFabricOrigin": "https://civweave-node-cloud.glaedn.workers.dev",
+    "publicFabricOrigin": "https://civweave-node-cloud.cerbanimo.workers.dev",
     "domain": "nodes.commonweave.earth",
     "wildcardDomain": "*.nodes.commonweave.earth",
     "customDomainStatus": "pending-zone-availability",
@@ -66,7 +66,7 @@
   },
   "physicalNodeFabric": {
     "protocol": "civweave.node.v1",
-    "moneyEdgeUrl": "https://civweave-core.glaedn.workers.dev",
+    "moneyEdgeUrl": "https://civweave-core.cerbanimo.workers.dev",
     "modes": [
       "cloudflare-tunnel-public-server",
       "cloudflare-relay-private-node"
@@ -88,6 +88,6 @@
     "renderMoneyEdgeEnabled": false,
     "cloudflareMoneyEdgeAuthority": true,
     "cloudflareMoneyEdgeLive": false,
-    "conditionForLiveMoney": "Cloudflare core deployed with D1 migrations, Stripe sandbox secrets, webhook switched, and sandbox end-to-end checks green"
+    "conditionForLiveMoney": "Cerbanimo live Stripe account and event destinations verified, first live recipient transfer capability active, human compliance/jurisdiction/KYC-AML/tax/provider-terms attestations complete, then guarded Cloudflare promotion succeeds"
   }
 }

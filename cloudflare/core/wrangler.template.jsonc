@@ -6,6 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "preview_urls": false,
+  "keep_vars": true,
   "d1_databases": [
     {
       "binding": "DB",
@@ -43,13 +44,6 @@
     "CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core",
     "CIVWEAVE_PLATFORM_FEE_BPS": "500",
     "CIVWEAVE_MONEY_MAX_TOPUP_CENTS": "10000",
-    "CIVWEAVE_MONEY_LIVE_ENABLED": "false",
-    "CIVWEAVE_MONEY_EMERGENCY_STOP": "false",
-    "CIVWEAVE_MONEY_COMPLIANCE_APPROVED": "false",
-    "CIVWEAVE_MONEY_JURISDICTION_APPROVED": "false",
-    "CIVWEAVE_MONEY_KYC_AML_READY": "false",
-    "CIVWEAVE_MONEY_TAX_REPORTING_READY": "false",
-    "CIVWEAVE_MONEY_TERMS_APPROVED": "false",
     "STRIPE_CONNECT_SAMPLE_ENABLED": "false"
   },
   "observability": {
@@ -61,6 +55,18 @@
   // STRIPE_CONNECT_WEBHOOK_SECRET
   // STRIPE_CONNECT_THIN_WEBHOOK_SECRET
   // NODE_FABRIC_BINDING_TOKEN
+  //
+  // Live-money runtime gates are intentionally NOT source-controlled vars. The
+  // guarded promotion / emergency-stop workflows own these remote values:
+  // CIVWEAVE_MONEY_LIVE_ENABLED
+  // CIVWEAVE_MONEY_EMERGENCY_STOP
+  // CIVWEAVE_MONEY_COMPLIANCE_APPROVED
+  // CIVWEAVE_MONEY_JURISDICTION_APPROVED
+  // CIVWEAVE_MONEY_KYC_AML_READY
+  // CIVWEAVE_MONEY_TAX_REPORTING_READY
+  // CIVWEAVE_MONEY_TERMS_APPROVED
+  // Missing gates fail closed in the Worker. keep_vars preserves deliberately
+  // promoted remote values across ordinary code deployments.
   //
   // CIVWEAVE_PLATFORM_FEE_BPS is the Cerbanimo share of compute top-ups only.
   // Membership economics are 50% system / 25% host / 25% Cerbanimo in the capacity ledger.
