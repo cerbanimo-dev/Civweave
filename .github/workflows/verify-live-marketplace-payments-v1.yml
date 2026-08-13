@@ -6,6 +6,12 @@ on:
       - 'public/app/services/fellowfare/fulfillment-economy-v1.js'
       - 'public/app/services/fellowfare/fulfillment-economy-v2.js'
       - 'public/app/services/fellowfare/marketplace-v2-symbols.js'
+      - 'public/app/services/fellowfare/jurisdiction-policy-v1.js'
+      - 'public/app/services/fellowfare/seller-method-types-v1.js'
+      - 'public/app/services/fellowfare/seller-methods-v1.js'
+      - 'public/app/services/fellowfare/seller-direct-transactions-v1.js'
+      - 'public/app/services/fellowfare/tax-records-v1.js'
+      - 'public/app/services/fellowfare/tax-record-bridge-v1.js'
       - 'public/app/services/fellowfare/cabinet.html'
       - 'public/app/services/fellowfare/app.js'
       - 'public/app/cerbanimo-commerce-distribution-v1.js'
@@ -18,12 +24,6 @@ on:
       - 'scripts/verify-fellowfare-direct-commerce-v2.mjs'
       - 'scripts/verify-cerbanimo-commerce-distribution-v1.mjs'
       - 'scripts/verify-fellowfare-marketplace-v2.mjs'
-      - 'docs/finance/fellowfare-fulfillment-economy-v1.md'
-      - 'docs/finance/cerbanimo-commerce-distribution-v1.md'
-      - 'docs/finance/cross-node-commerce-host-fee-v1.md'
-      - 'docs/finance/node-money-edge-launch-v1.md'
-      - 'docs/finance/live-money-human-gate.md'
-      - 'docs/finance/live-money-machine-readiness.md'
       - '.github/workflows/verify-live-marketplace-payments-v1.yml'
   workflow_dispatch:
 
@@ -46,6 +46,12 @@ jobs:
           node --check cloudflare/core/src/money-edge-with-memberships.mjs
           node --check cloudflare/core/src/fellowfare-direct-commerce-v1.mjs
           node --check public/app/services/fellowfare/fulfillment-economy-v2.js
+          node --check public/app/services/fellowfare/jurisdiction-policy-v1.js
+          node --check public/app/services/fellowfare/seller-method-types-v1.js
+          node --check public/app/services/fellowfare/seller-methods-v1.js
+          node --check public/app/services/fellowfare/seller-direct-transactions-v1.js
+          node --check public/app/services/fellowfare/tax-records-v1.js
+          node --check public/app/services/fellowfare/tax-record-bridge-v1.js
           node scripts/verify-fellowfare-direct-commerce-v2.mjs
           node scripts/verify-live-marketplace-payments-v1.mjs
           node scripts/verify-cerbanimo-commerce-distribution-v1.mjs
