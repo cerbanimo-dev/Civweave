@@ -15,9 +15,9 @@
   },
   "sha256": {
     "server/server-federated-v152.mjs": "0187b6b41332c26da3f63ae65a219f7bfcd562ae7b0df85e1cc35c248bba6b69",
-    "server/server-gateway-v131-base.mjs": "246d61b1ef33ccfd16a113501bce8baefdb0a4b1f319e6cacc73adef3953317e",
-    "server/server-gateway-v131.mjs": "fe414d5579b69572fdb733be1f0de93eec12ae0b6a38ce11583e790a38f7902b",
-    "server/server-local-v131.mjs": "574d852bb106940193d49409056076146e72233455461e09f780c14d186cec20",
+    "server/server-gateway-v131-base.mjs": "f6677652c02dc25f603f95cbb4b994571295b13b489a3a0f1a21fb7c3cd32b90",
+    "server/server-gateway-v131.mjs": "a7d6acf350b7aeab1e465b28d1360b1cfc001ef1fee358dc8f49479c9c8ee6c4",
+    "server/server-local-v131.mjs": "7ed7c94ef7219bdc6f1a9e28d25a3f15d6fa43d03cad743f4079f8f1abcae3f0",
     "server/server-v130.mjs": "2f6cc5f601d2ba20a888ee4cf47aa23fa50f8ba446e804819ad4a2e984d37d81",
     "server/server.mjs": "4a23ed917ea949c1016de9da7c019e925fb08d534208b8b14d90176811a631a8"
   }

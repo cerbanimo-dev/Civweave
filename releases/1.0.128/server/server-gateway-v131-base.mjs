@@ -5,8 +5,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const sourcePath = path.join(rootDir, 'server.mjs');
 const runtimePath = path.join(rootDir, '.civweave-gateway-v131.runtime.mjs');
-const VERSION = '1.0.127';
-const BUILD = '1.0.127-install-only-fullscreen-family-gateway';
+const VERSION = '1.0.128';
+const BUILD = '1.0.128-install-only-fullscreen-family-gateway';
 let source = (await fsp.readFile(sourcePath, 'utf8')).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
 function replaceRequired(before, after, label) { if (!source.includes(before)) throw new Error(`Civweave gateway patch could not find ${label}`); source = source.replace(before, after); }
 replaceRequired("import { fileURLToPath } from 'node:url';","import { fileURLToPath } from 'node:url';\nimport { AiWalletService } from './lib/ai-wallet-service-v1.mjs';\nimport { createAiWalletHttpHandler } from './lib/ai-wallet-http-v1.mjs';",'node AI marketplace imports');
@@ -14,7 +14,7 @@ replaceRequired("const BUILD_VERSION = '1.0.21-ai-uplift';",`const BUILD_VERSION
 replaceRequired("const APP_VERSION = 'rc22.3.20-ai-checkpoint';",`const APP_VERSION = '${VERSION}';`,'app version marker');
 replaceRequired("const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://civweave-host-node.onrender.com';","const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://civweave-host-node.onrender.com';\nconst CIVWEAVE_SOURCE_URL = process.env.CIVWEAVE_SOURCE_URL || 'https://github.com/cerbanimo-dev/Civweave';\nconst CIVWEAVE_RELEASE_URL = process.env.CIVWEAVE_RELEASE_URL || 'https://github.com/cerbanimo-dev/Civweave/archive/refs/heads/main.zip';",'gateway release URLs');
 replaceRequired("let installKitSha256 = '';\nlet installKitSize = 0;\ntry {\n  const kit = await fsp.readFile(INSTALL_KIT_PATH);\n  installKitSha256 = crypto.createHash('sha256').update(kit).digest('hex');\n  installKitSize = kit.length;\n} catch (error) {\n  console.warn('Install kit metadata unavailable:', error.message);\n}","const installKitSha256 = '';\nconst installKitSize = 0;",'install kit startup hashing');
-replaceRequired("    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Civweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Civweave host-node and offline PWA release.'","    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: CIVWEAVE_SOURCE_URL,\n    downloadUrl: CIVWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin distributes the Civweave v1.0.127 fixed-settings-layer device package.'",'release packet hosting fields');
+replaceRequired("    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,\n    downloadUrl: `${root}/downloads/Civweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,\n    bytes: installKitSize, mandatory: false, notes: 'Current stable Civweave host-node and offline PWA release.'","    releasedAt: STARTED_AT, appUrl: `${root}/`, installUrl: `${root}/`, sourceUrl: CIVWEAVE_SOURCE_URL,\n    downloadUrl: CIVWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,\n    notes: 'The public origin distributes the Civweave v1.0.128 fixed-settings-layer device package.'",'release packet hosting fields');
 replaceRequired("} catch (error) {\n  if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);\n}",String.raw`} catch (error) {
   if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);
 }
