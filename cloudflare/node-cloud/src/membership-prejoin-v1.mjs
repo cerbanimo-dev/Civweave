@@ -1,4 +1,3 @@
-import{preservesServiceFloor}from'./capacity-service-floor-v1.mjs';
 import{pendingPaidKey,memberStorageKey,pendingPaidRecord}from'./paid-admission-state-v1.mjs';
 const clean=(value,max=180)=>String(value??'').trim().slice(0,max);
 export async function prepareMembershipJoin(account,input={}){
