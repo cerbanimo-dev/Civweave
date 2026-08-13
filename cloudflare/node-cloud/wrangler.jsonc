@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "civweave-node-cloud",
-  "main": "src/server-ai-entry-v1.mjs",
+  "main": "src/server-ai-entry-v2.mjs",
   "compatibility_date": "2026-08-13",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
@@ -40,6 +40,7 @@
   "vars": {
     "NODE_DOMAIN": "nodes.commonweave.earth",
     "PUBLIC_FABRIC_ORIGIN": "https://civweave-node-cloud.cerbanimo.workers.dev",
+    "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.pages.dev",
     "CIVWEAVE_WORKERS_PLAN": "free"
   },
   "observability": {
