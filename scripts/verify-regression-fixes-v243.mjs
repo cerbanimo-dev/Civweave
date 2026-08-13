@@ -34,20 +34,22 @@ assert(workspace.includes('suppressClickUntil=performance.now()+500'),'Workspace
 assert(workspace.includes('suppressedControl=switchControl||closeControl||minimizeControl'),'Compatibility click suppression is not scoped to the control that owned pointerdown.');
 assert(workspace.includes('if(closeControl)closeWorkspace();else toggleMinimize()'),'Close/minimize gestures do not invoke canonical workspace state directly.');
 assert(workspace.includes("if(switchControl){switchWindow(switchControl.dataset.cw242Window,{open:true});return}"),'Persona pointer gesture does not invoke canonical workspace switching directly.');
-assert(workspace.includes("new CustomEvent('civweave:guide-workspace-state'"),'Workspace does not publish state for embedded-surface exclusivity.');
+assert(workspace.includes("new CustomEvent('civweave:guide-workspace-state'"),'Workspace does not publish canonical workspace state.');
 assert(workspace.includes('submitText:async(text,system=activeWindow)'),'Canonical direct text submission API is missing.');
 assert(workspace.includes('canonicalOwner:true'),'Workspace does not advertise canonical ownership.');
 assert(workspace.includes('globalThis.visualViewport?.addEventListener'),'Canonical workspace does not own mobile viewport resize.');
 assert(workspace.includes('height:min(62dvh,560px)!important'),'Canonical workspace lost mobile dynamic-height sizing.');
 assert(!workspace.includes('CHAT_OWNER_REPAIR')&&!workspace.includes('chat-single-owner-v245.js'),'Canonical workspace resurrects a second owner.');
 
-assert(sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'),'Shared guide loader no longer mounts the canonical inline implementation.');
-assert(sharedGuide.includes('await api.submitText(value,currentSystem)'),'Inline chat does not submit directly through the canonical chat API.');
-assert(!sharedGuide.includes('form.requestSubmit()'),'Inline chat still tunnels submission through the hidden floating form.');
-assert(!sharedGuide.includes("api.open?.({guide:currentSystem,prefill:value})"),'Inline chat still opens the full composer as a submission side effect.');
-assert(sharedGuide.includes('syncInlineVisibility'),'Inline/full chat mutual exclusion is missing.');
-assert(sharedGuide.includes("addEventListener('civweave:guide-workspace-state'"),'Inline surface does not react to canonical workspace state.');
-assert(!sharedGuide.includes('input.focus();'),'Inline Send still forces keyboard focus after submission.');
+assert(sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'),'Shared guide loader no longer mounts the canonical bubble-only implementation.');
+assert(sharedGuide.includes('await api.submitText(value,currentSystem)'),'Shared guide submission helper does not submit directly through the canonical chat API.');
+assert(!sharedGuide.includes('form.requestSubmit()'),'Shared guide still tunnels submission through the hidden floating form.');
+assert(!sharedGuide.includes("api.open?.({guide:currentSystem,prefill:value})"),'Shared guide still opens the full composer as a submission side effect.');
+assert(sharedCore.includes("mode:'bubble-only'"),'Shared guide surface must remain bubble-only.');
+assert(sharedCore.includes('function buildInline(){removeEmbeddedGuideCards();return false}'),'Retired inline guide cards can be rebuilt.');
+assert(sharedCore.includes('function syncInlineVisibility(){removeEmbeddedGuideCards();return false}'),'Retired inline visibility path no longer removes embedded guide cards.');
+assert(sharedCore.includes("document.documentElement.dataset.civweaveGuideSurfaceMode='bubble-only'"),'Bubble-only state is not exposed for page-level coordination.');
+assert(!sharedGuide.includes('input.focus();'),'Shared guide still forces keyboard focus after submission.');
 
 assert(entry.includes("../../living-school-cleanroom-actions-v243.mjs?v=quiz-integrity-v261"),'Living School is not cache-busting the AI-only quiz integrity adapter.');
 assert(entry.includes("../../living-school-generation-guard-v262.mjs?v=source-prompt-quiz-delta-v262"),'Living School does not load the source-injection and iterative quiz guard.');
@@ -110,4 +112,4 @@ assert.equal(parsed.dependencies?.['@huggingface/transformers'],'3.8.1','Pinned 
 assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
 assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second database runtime.');
 
-console.log(JSON.stringify({ok:true,revision:'v243.9-v242-viewport-owner',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directInlineSubmit:true,sharedGuideLoaderAware:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,retiredViewportDeleted:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,sourceMaterialInjectedIntoPrompt:true,localPassagesInjectedIntoPrompt:true,liveEvidenceDigestStrengthened:true,moduleDepthRepair:true,iterativePerModuleQuizCompletion:true,singleQuestionQuizRecovery:true,shortAnswerContractGuard:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,localAIRuntimePinned:true,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243.10-v242-bubble-only',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directGuideSubmit:true,sharedGuideBubbleOnly:true,embeddedGuideCardsDisabled:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,retiredViewportDeleted:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,sourceMaterialInjectedIntoPrompt:true,localPassagesInjectedIntoPrompt:true,liveEvidenceDigestStrengthened:true,moduleDepthRepair:true,iterativePerModuleQuizCompletion:true,singleQuestionQuizRecovery:true,shortAnswerContractGuard:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,localAIRuntimePinned:true,provenanceExplicit:true},null,2));
