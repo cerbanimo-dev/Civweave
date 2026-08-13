@@ -37,7 +37,7 @@ importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-i
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
-importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-highlight-v243');
+importScripts('/service-worker-radio-core-v305.js?v=${version}-radio-core-shell-v305-context-v244');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');
@@ -59,7 +59,7 @@ console.log(JSON.stringify({
   codeCoherence:'v288',
   installedLaunch:'installed-pwa-launch-v294-campus-recovery',
   radioCore:'radio-core-shell-v305',
-  radioAssetHandoff:'highlight-v243',
+  radioAssetHandoff:'context-v244',
   installedShellRepair:'installed-shell-repair-v293',
   offlineRevision:'offline-campus-current-graph-v280',
   offlinePolicy:'resumable-pause-v280',
