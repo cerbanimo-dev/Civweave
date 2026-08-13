@@ -6,7 +6,7 @@ if(globalThis.CivweaveFellowFarePageFlowV206?.revision===REVISION)return;
 
 const iframe=document.getElementById('ffc144-workbench');
 const shell=iframe?.closest('.ffc144-frame');
-const INNER_LAYOUT_SELECTOR='.app-shell,#app,#main,.ff-world-main,.ff-projected-main,.ff-route-scene,.ff-world-projection';
+const INNER_LAYOUT_SELECTOR='.app-shell,#main,.ff-world-main,.ff-projected-main,.ff-route-scene,.ff-world-projection';
 let resizeObserver=null;
 let mutationObserver=null;
 let innerResizeHandler=null;
@@ -64,6 +64,10 @@ function prepareInner(doc){
 
   const app=doc.querySelector('#app,.app-shell');
   if(app){
+    app.style.setProperty('height','auto','important');
+    app.style.setProperty('min-height','0','important');
+    app.style.setProperty('max-height','none','important');
+    app.style.setProperty('overflow','visible','important');
     app.style.setProperty('padding-bottom','0','important');
     app.style.setProperty('margin-bottom','0','important');
   }
