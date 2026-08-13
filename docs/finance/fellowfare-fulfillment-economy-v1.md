@@ -1,153 +1,135 @@
-# FellowFare fulfillment economy v1
+# FellowFare fulfillment economy
 
-Status: canonical marketplace economy contract.
+Status: canonical marketplace economy contract. Current runtime revision: v2.
 
 ## Purpose
 
-FellowFare separates community fulfillment from conventional payment processing.
+FellowFare deliberately separates three economic rails:
 
-Acorns (`🌰`) and Buttons (`🔘`) are participation resources. They are **not peer-to-peer payment instruments** inside FellowFare. Users earn them from the platform, fulfill them to access eligible services/learning, and the fulfilled units are burned. The provider does not receive the requester's spent units.
+1. Acorn (`🌰`) and Button (`🔘`) fulfillment for services, learning, tutoring, and community participation.
+2. Provider-owned Stripe direct charges for optional USD service, learning, and tutoring sales.
+3. Seller-direct private payment for physical/community goods.
 
-Physical/community goods use a separate seller-direct rail. FellowFare may host the listing, reputation, discovery, communication, and arrangement record, but it does not collect, route, split, escrow, or settle the seller's payment.
+These rails must not collapse back into the retired model where FellowFare receives a buyer's gross purchase and later transfers a seller payout.
 
-## Canonical rules
+## Acorns and Buttons
 
-### Acorns and Buttons
+Acorns and Buttons are participation resources, not peer-to-peer settlement instruments.
 
-- Acorns and Buttons are never purchased from FellowFare for USD.
-- FellowFare does not publish a USD exchange rate for either resource.
-- Acorns and Buttons are not transferred user-to-user as settlement.
-- Eligible services, tutoring, and learning can specify a fulfillment amount in Acorns and/or Buttons.
-- Completing fulfillment creates a negative canonical-ledger entry for the requester with `operation=fulfillment-burn`.
-- The entry explicitly records `nonTransferable=true` and `recipientCredited=false`.
-- Providers gain contribution evidence from completed work; platform rewards are issued independently from another user's burn.
+- They are never purchased from FellowFare for USD.
+- FellowFare publishes no required USD exchange rate for them.
+- They are not transferred user-to-user as settlement.
+- Eligible services, tutoring, and learning may specify an Acorn and/or Button fulfillment amount.
+- Fulfillment creates a negative canonical-ledger entry with `operation=fulfillment-burn`, `nonTransferable=true`, and `recipientCredited=false`.
+- The provider gains contribution evidence from completed work, but does not receive the requester's burned units.
+- Platform rewards are issued independently from another user's fulfillment.
 
-### Physical/community goods
+## Physical/community goods
 
-Kinds currently treated as goods are `product` and `resource`.
+Kinds treated as goods are `product` and `resource`.
 
 - Goods cannot have an Acorn or Button price.
-- FellowFare does not run a seller checkout.
-- FellowFare does not collect a USD purchase amount.
-- FellowFare does not create a destination charge or separate seller transfer.
-- FellowFare does not escrow or split the seller's proceeds.
-- A seller may describe their own price, accepted private payment methods, and pickup/payment instructions.
-- Payment occurs directly between buyer and seller outside FellowFare's settlement system.
+- FellowFare does not run a goods seller checkout.
+- FellowFare does not collect, route, split, escrow, or settle the purchase price.
+- FellowFare does not take a percentage of the goods sale.
+- A seller may state their own price, accepted private payment methods, and pickup/payment instructions.
+- Payment occurs directly between buyer and seller outside FellowFare settlement.
 - Gift/free listings remain allowed.
 
-Legacy listing records carrying `usdMinor`, token prices, or `commerce` metadata are sanitized when the current marketplace loads. For goods, an old displayable USD amount may be preserved only as seller-facing price text while the platform settlement fields are zeroed and commerce metadata is removed.
+Legacy goods records carrying USD/token settlement fields are sanitized. A displayable old USD amount may survive only as seller-facing text, while platform settlement fields are zeroed.
 
-### Services, tutoring, and learning
+## Services, tutoring, and learning
 
-Kinds currently eligible for fulfillment settlement are `service`, `learning`, and `tutoring`.
+Kinds eligible for these rails are `service`, `learning`, and `tutoring`.
 
-- USD marketplace checkout is disabled for these kinds.
-- Acorn/Button fulfillment is allowed.
-- The requester burns the listed fulfillment amount when completing an eligible arrangement.
-- The provider receives no direct transfer of those burned units.
-- Completion becomes contribution/activity evidence that can satisfy fixed platform-reward quests.
-- Learning completion can be observed from canonical learning XP receipts or explicit completion events.
+A provider may offer **Acorn/Button fulfillment, USD, or both**.
 
-This makes the economy:
+### Token fulfillment
 
 ```text
-participation -> platform reward -> user balance
-user balance -> fulfillment -> burn
+requester balance -> fulfillment burn
 provider contribution -> platform reward eligibility
 ```
 
-It is deliberately not:
+The requester burns the listed units. The provider receives no transfer of those units.
+
+### USD direct commerce
+
+USD service/learning/tutoring sales use Stripe Connect **direct charges**:
 
 ```text
-buyer token -> seller token
-buyer USD -> FellowFare -> seller payout
+buyer -> provider's connected Stripe account
+             |
+             +-> FellowFare application fee
 ```
+
+Canonical properties:
+
+- The connected provider is merchant of record for the charge.
+- The provider uses an Accounts v2 merchant configuration with card-payments capability.
+- The Checkout Session and Price live on the connected provider account.
+- FellowFare receives an `application_fee_amount` from the direct charge.
+- The default FellowFare fee is **1% / 100 bps**, configurable by `CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS`.
+- FellowFare does not receive the provider's gross sale and then transfer proceeds.
+- No destination charge or separate seller transfer is used for this rail.
+- The server retrieves the connected-account Stripe Price and verifies its FellowFare listing metadata before checkout. Buyer-supplied amounts are not trusted.
+
+The production API is `/api/fellowfare/direct-commerce/*`.
 
 ## Daily quests
 
-Each local day selects three quests, one from each bucket:
+Each local day selects exactly three quests, one from each bucket: personal progress, fulfillment, and community participation. The current ordinary quest reward is **5 units** of the designated resource.
 
-1. personal progress;
-2. fulfillment;
-3. community participation.
-
-The current fixed reward for an ordinary completed daily quest is **5 units** of the quest's designated resource.
-
-Current quest pool includes:
-
-### Personal progress
+Current pool includes:
 
 - Finish a learning module -> `+5 🌰`
 - Finish a Cerbanimo quest -> `+5 🔘`
 - Help someone finish a learning activity -> `+5 🌰`
-
-### Fulfillment
-
 - Fulfill `20 🌰` -> `+5 🌰`
 - Fulfill `20 🔘` -> `+5 🔘`
 - Complete a service arrangement -> `+5 🔘`
-
-### Community participation
-
 - Post a need -> `+5 🌰`
 - Post an offering -> `+5 🔘`
 - Respond to a community need -> `+5 🔘`
 - Validate a contribution -> `+5 🔘`
 - Contribute a useful project resource -> `+5 🌰`
 
-The bucket rule prevents a daily set made entirely of spending tasks and ensures a progress/community path remains available to a user without an existing token balance.
-
-Daily quest rewards are platform issuance. They are not transfers from the person on the other side of an arrangement.
+The bucket rule guarantees that daily participation is not composed entirely of spending tasks.
 
 ## Fulfillment milestones
 
-Fulfillment is tracked independently for Acorns and Buttons.
-
-For every cumulative **100 units fulfilled**, the platform issues a **10-unit bonus of the same resource**:
+Fulfillment is tracked independently for Acorns and Buttons. Every cumulative **100 units fulfilled** issues a **10-unit bonus of the same resource**:
 
 ```text
-100 fulfilled -> +10
-200 fulfilled -> +10
-300 fulfilled -> +10
+100 -> +10
+200 -> +10
+300 -> +10
 ...
 ```
 
-A daily fulfillment quest and a lifetime milestone may both complete from the same legitimate fulfillment event. They reward different behavior: current participation and long-term circulation.
+Daily fulfillment quests and lifetime milestones may stack. Attempts, cancelled arrangements, duplicates, and direct transfers do not advance fulfillment totals.
 
-Only completed fulfillment counts. Attempts, cancelled arrangements, duplicate activity IDs, and direct transfers do not advance the fulfillment totals.
+## Retired marketplace machinery
 
-## Stripe/payment boundary
+The old platform-charge/separate-transfer route `/api/money-edge/commerce/*` remains retired and returns `410 marketplace-checkout-disabled`.
 
-The public Cloudflare route `/api/money-edge/commerce/*` is retired and returns `410 marketplace-checkout-disabled`.
+The old browser commerce-distribution compatibility API fails closed for new sale distribution, Stripe seller-transfer instructions, and `recordSale`. Legacy webhook settlement/refund/dispute code remains only to safely finish or unwind payments created under the old architecture.
 
-The browser compatibility API for old Cerbanimo marketplace distribution also fails closed for:
+The former cross-node commerce host fee remains retired.
 
-- marketplace sale distribution;
-- marketplace Stripe transfer instructions;
-- marketplace `recordSale`.
-
-Legacy Stripe webhook settlement/refund/dispute handlers remain available only to safely finish or unwind a payment that was created before this boundary was introduced. No public production route may create a new marketplace Checkout Session.
-
-Stripe remains available for **non-marketplace** money rails such as:
-
-- node compute top-ups;
-- memberships;
-- Host Steward earnings tied to those platform services;
-- the December 1 compute-reserve distribution.
-
-The annual compute-reserve payout is deliberately preserved and is not a FellowFare seller-payment rail.
+Stripe remains separately available for compute top-ups, memberships, Host Steward/platform earnings, and the December 1 compute-reserve distribution.
 
 ## Compatibility invariants
 
-Future changes must preserve all of these unless this contract is deliberately superseded:
+Future changes must preserve these unless this contract is deliberately superseded:
 
-- goods are seller-direct;
-- goods have no Acorn/Button price;
-- FellowFare does not collect or route seller payment;
-- services/learning/tutoring use fulfillment burn rather than recipient token transfer;
-- no USD/Acorn/Button exchange rate is required;
-- each day has exactly three quest buckets;
-- ordinary quest rewards are fixed;
+- goods remain seller-direct with no Acorn/Button price and no FellowFare percentage of the goods sale;
+- services/learning/tutoring may use fulfillment, provider-owned Stripe direct charges, or both;
+- burned tokens never become a recipient token transfer;
+- USD service charges belong to the connected provider and FellowFare receives only its application fee;
+- FellowFare does not collect service gross and route seller proceeds;
+- no destination charge or separate seller transfer is used for new FellowFare service commerce;
+- each day has exactly three quest buckets and fixed ordinary rewards;
 - every 100 fulfilled produces the configured same-asset milestone bonus;
-- legacy marketplace payment creation remains fail-closed;
+- the old platform-charge marketplace route remains fail-closed;
 - legacy payment unwind and unrelated platform-reserve payout systems remain recoverable.
