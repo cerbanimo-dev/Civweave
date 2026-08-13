@@ -9,6 +9,7 @@ const guide=`${guideLoader}\n${guideCore}`;
 const realmIntegrity=read('public/app/realm-session-integrity-v237.js');
 const workspace=read('public/app/guide-workspace-v242.js');
 const rookBridge=read('public/app/fellowfare-shared-guide-bridge-v236.js');
+const fellowfare=read('public/app/fellowfare-cabinet-v144.html');
 const nav=read('public/app/themed-system-nav-v178.js');
 const radio=read('public/app/system-radio-agent-v233.js');
 const familyLoader=read('public/app/family-ai-loader-v105.js');
@@ -32,17 +33,20 @@ const checks=[
   ['launcher-first open owns the current realm without inline priming',()=>{
     assert.match(workspace,/event\.target\.closest\?\.\(`#\$\{LAUNCHER_ID\}`\)/);assert.match(workspace,/openWindow\(pageSystem\)/);assert.match(workspace,/switchGuide:\(system,options=\{\}\)=>switchWindow/);
   }],
-  ['inline and floating surfaces use the one v242 submission pipeline',()=>{
-    assert.match(guideLoader,/shared-guide-surface-v236-core-v244\.js/);assert.match(guide,/function submitInline\(text\)/);assert.match(guide,/await api\.submitText\(value,currentSystem\)/);
-    assert.doesNotMatch(guide,/form\.requestSubmit\(\)/);assert.match(workspace,/submitText:async\(text,system=activeWindow\)/);assert.match(workspace,/assistant\.respond\(\{text:value,systemId:system/);assert.match(workspace,/fallbackReply/);assert.match(realmIntegrity,/civweave\.guide-thread\.\$\{system\}\.v237/);
+  ['bubble-only guide surface keeps one submission pipeline without embedded composers',()=>{
+    assert.match(guideLoader,/shared-guide-surface-v236-core-v244\.js/);assert.match(guideLoader,/surfaceMode:'bubble-only'/);assert.match(guideCore,/mode:'bubble-only'/);
+    assert.match(guideCore,/function submitInline\(text\)/);assert.match(guideCore,/api\.submitText\(value,currentSystem\)/);assert.match(guideCore,/function removeEmbeddedGuideCards\(\)/);
+    assert.doesNotMatch(guideCore,/section\.innerHTML|cwsg236-form|Open full chat|Chat with \$\{guide\.name\}/,'embedded guide card must not be rebuilt');
+    assert.match(workspace,/submitText:async\(text,system=activeWindow\)/);assert.match(workspace,/assistant\.respond\(\{text:value,systemId:system/);assert.match(workspace,/fallbackReply/);assert.match(realmIntegrity,/civweave\.guide-thread\.\$\{system\}\.v237/);
   }],
   ['full workspace owns mobile viewport and scroll behavior',()=>{
     assert.match(workspace,/globalThis\.visualViewport\?\.addEventListener/);assert.match(workspace,/height:min\(62dvh,560px\)!important/);assert.match(workspace,/z-index:2147483644!important/);assert.match(workspace,/touch-action:pan-y!important/);
     assert.doesNotMatch(workspace,/document\.body\.style\.overflow|document\.documentElement\.style\.overflow/);
     assert.doesNotMatch(familyLoader,/MutationObserver|persistent-guide-viewport-v216|chat-single-owner-v245/,'headless loader must not recreate deleted owners');
   }],
-  ['Rook keeps the native workbench while workspace owns switchable windows',()=>{
-    assert.match(guide,/if\(system==='fellowfare'\)return document\.querySelector\('\.ffc144-rook'\)/);assert.match(boundary,/FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);assert.match(rookBridge,/CivweaveSharedGuideSurfaceV236/);assert.match(realmIntegrity,/exchangeMethod:'Buttons'/);
+  ['FellowFare uses the floating Rook bubble without a duplicate top-level exchange desk',()=>{
+    assert.doesNotMatch(fellowfare,/class="ffc144-rook"|data-ffc-rook-form|Chat with Rook/,'FellowFare must not reserve page space for a second Rook chat');
+    assert.match(boundary,/FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);assert.match(rookBridge,/mode:'bubble-only'/);assert.match(realmIntegrity,/exchangeMethod:'Buttons'/);
   }],
   ['radio launcher and ornate nav keep their floating-layer contract',()=>{
     assert.match(guide,/#cw-radio-suggestion-v233\{z-index:2147483610!important/);assert.match(workspace,/#\$\{LAUNCHER_ID\}\{z-index:2147483643!important/);assert.match(radio,/left:max\(14px,env\(safe-area-inset-left\)\)/);assert.match(nav,/--cw-themed-nav-height:clamp\(46\.8px,6\.3vw,64\.8px\)/);
