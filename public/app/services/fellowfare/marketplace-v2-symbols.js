@@ -9,6 +9,7 @@ const GOODS_KINDS=new Set(['product','resource']);
 const TOKEN_KINDS=new Set(['service','learning','tutoring']);
 const clean=(value,max=12000)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
+const money=minor=>Number(minor)>0?`$${(Number(minor)/100).toFixed(2)}`:'';
 
 function kindFor(term){return /^button/i.test(term)?'button':'acorn'}
 function symbolFor(term){return SYMBOLS[kindFor(term)]}
@@ -61,22 +62,25 @@ function listingShareText(listing){
    if(Array.isArray(seller.methods)&&seller.methods.length)terms.push(`Seller accepts: ${seller.methods.map(x=>clean(x,80)).filter(Boolean).join(', ')}`);
    if(!terms.length)terms.push('Seller-direct payment terms');
  }else if(TOKEN_KINDS.has(kind)){
+   if(Number(pricing.usdMinor)>0){
+     const ready=listing?.sellerPayment?.mode==='stripe-direct'&&listing?.sellerPayment?.priceId;
+     terms.push(`${money(pricing.usdMinor)} via ${ready?'provider Stripe direct checkout':'provider Stripe once setup completes'}`);
+   }
    const fulfill=[];
    if(Number(pricing.buttons)>0)fulfill.push(`${Number(pricing.buttons)} ${format('Buttons')}`);
    if(Number(pricing.acorns)>0)fulfill.push(`${Number(pricing.acorns)} ${format('Acorns')}`);
    if(fulfill.length)terms.push(`Fulfill ${fulfill.join(' + ')}`);
-   else if(pricing.gift)terms.push('gift/free');
- }else{
-   if(pricing.gift)terms.push('gift/free');
- }
+   if(!terms.length&&pricing.gift)terms.push('gift/free');
+ }else if(pricing.gift)terms.push('gift/free');
  return [
    listing?.title,
    listing?.description,
    listing?.fulfillment?.area&&`Area: ${listing.fulfillment.area}`,
    listing?.fulfillment?.timing&&`Timing: ${listing.fulfillment.timing}`,
    terms.length&&`Terms: ${terms.join(' · ')}`,
-   GOODS_KINDS.has(kind)&&'Payment is arranged directly with the seller; FellowFare does not collect or route it.',
-   TOKEN_KINDS.has(kind)&&'Acorns/Buttons are fulfilled and burned; they are not transferred to the provider.'
+   GOODS_KINDS.has(kind)&&'Payment is arranged directly with the seller; FellowFare does not collect or route a goods payment.',
+   TOKEN_KINDS.has(kind)&&Number(pricing.usdMinor)>0&&'USD checkout is a direct charge on the provider’s connected Stripe account. FellowFare receives only its application fee and does not route the provider’s sale proceeds.',
+   TOKEN_KINDS.has(kind)&&(Number(pricing.buttons)>0||Number(pricing.acorns)>0)&&'Acorns/Buttons are fulfilled and burned; they are not transferred to the provider.'
  ].filter(Boolean).join('\n');
 }
 async function shareListing(id){
@@ -87,13 +91,13 @@ async function shareListing(id){
 }
 async function onCapture(event){
  const wallet=event.target.closest?.('[data-ff-copy-wallet]');
- if(wallet){event.preventDefault();event.stopImmediatePropagation();const p=projection();const f=globalThis.CivweaveFulfillmentEconomyV1?.read?.()?.lifetimeFulfilled||{};const text=`FellowFare balances\n${SYMBOLS.button} Buttons: ${Number(p.buttons||0)}\n${SYMBOLS.acorn} Acorns: ${Number(p.acorns||0)}\nSkill XP: ${Number(p.skillXp||0)}\nLifetime fulfilled: ${Number(f.buttons||0)} ${SYMBOLS.button} / ${Number(f.acorns||0)} ${SYMBOLS.acorn}`;notify(await copyText(text)?'Balance diagnostics copied.':'Could not copy diagnostics.');return}
+ if(wallet){event.preventDefault();event.stopImmediatePropagation();const p=projection();const economy=globalThis.CivweaveFulfillmentEconomyV2||globalThis.CivweaveFulfillmentEconomyV1;const f=economy?.read?.()?.lifetimeFulfilled||{};const text=`FellowFare balances\n${SYMBOLS.button} Buttons: ${Number(p.buttons||0)}\n${SYMBOLS.acorn} Acorns: ${Number(p.acorns||0)}\nSkill XP: ${Number(p.skillXp||0)}\nLifetime fulfilled: ${Number(f.buttons||0)} ${SYMBOLS.button} / ${Number(f.acorns||0)} ${SYMBOLS.acorn}`;notify(await copyText(text)?'Balance diagnostics copied.':'Could not copy diagnostics.');return}
  const share=event.target.closest?.('[data-ff-cap-share]');
  if(share){event.preventDefault();event.stopImmediatePropagation();await shareListing(share.dataset.ffCapShare);}
 }
 const observer=new MutationObserver(()=>requestAnimationFrame(()=>decorate()));
 function start(){document.addEventListener('click',onCapture,true);observer.observe(document.body,{childList:true,subtree:true});addEventListener('hashchange',()=>requestAnimationFrame(()=>decorate()));addEventListener('fellowfare:marketplace-changed',()=>requestAnimationFrame(()=>decorate()));decorate()}
-const api=Object.freeze({version:'2.0.0-fulfillment',symbols:SYMBOLS,format,decorate,listingShareText});
+const api=Object.freeze({version:'3.0.0-direct-commerce',symbols:SYMBOLS,format,decorate,listingShareText});
 globalThis.CivweaveFellowFareCurrencySymbols=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
