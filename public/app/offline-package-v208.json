@@ -1,15 +1,15 @@
 {
   "version": "1.0.104",
-  "revision": "canonical-background-campus-v241-systems-mesh-v251-fulfillment-economy-v1",
+  "revision": "canonical-background-campus-v241-systems-mesh-v251",
   "payloadPolicy": "core-first-lazy-packs-v302",
-  "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward and systems-mesh runtimes, FellowFare fulfillment economy, compact federation seed, deterministic offline map runtime, and the lightweight Node AI operator/marketplace UI. Marketplace seller payments are not processed by Civweave: physical goods use seller-direct payment methods while services and learning use Acorn/Button fulfillment. Full federation discovery, decorative visuals and fonts, open-learning media, bulk encyclopedia data, and device-AI model payloads hydrate as optional packs on demand.",
+  "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward and systems-mesh runtimes, FellowFare fulfillment economy, compact federation seed, deterministic offline map runtime, and the lightweight Node AI operator/marketplace UI. Marketplace seller payments are not processed by Civweave: physical goods use seller-direct payment methods while services and learning use Acorn/Button fulfillment. The retained Cerbanimo commerce-distribution seed is a fail-closed compatibility stub for cached callers and cannot create marketplace sales. Full federation discovery, decorative visuals and fonts, open-learning media, bulk encyclopedia data, and device-AI model payloads hydrate as optional packs on demand.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
     "/app/cw-reward-receivers-v2.js",
     "/app/cw-reward-legacy-bridge-v2.js",
     "/app/cw-reward-surfaces-v2.js",
-    "/app/services/fellowfare/fulfillment-economy-v1.js",
+    "/app/cerbanimo-commerce-distribution-v1.js",
     "/app/civweave-systems-mesh-v251.js",
     "/app/working-campus-v156.html",
     "/app/cabinets/living-school/index.html",
@@ -147,11 +147,11 @@
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
-    "estimatedBytes": 7757851,
+    "estimatedBytes": 7780557,
     "safetyBytes": 67108864,
-    "requiredFreeBytes": 74866715,
-    "candidateAssetCount": 573,
-    "estimatedAssetCount": 573,
+    "requiredFreeBytes": 74889421,
+    "candidateAssetCount": 574,
+    "estimatedAssetCount": 574,
     "conservativeUpperBound": true
   }
 }
