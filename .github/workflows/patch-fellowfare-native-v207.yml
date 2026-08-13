@@ -1,0 +1,43 @@
+name: Patch FellowFare Native v207
+on:
+  push:
+    branches: [fix/fellowfare-native-v207]
+    paths: ['.github/workflows/patch-fellowfare-native-v207.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/fellowfare-native-v207
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Patch loop and contrast
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p=Path('public/app/services/fellowfare/fulfillment-economy-v2.js')
+          s=p.read_text()
+          old="const observer=new MutationObserver(()=>requestAnimationFrame(enhance));"
+          new="const SELF_MUTATION_SELECTOR='#ffFulfillmentDaily,#ffDirectMerchant,.ffv2-money-panel,.ffv2-policy-note';\nlet enhanceFrame=0;\nfunction scheduleEnhance(){cancelAnimationFrame(enhanceFrame);enhanceFrame=requestAnimationFrame(enhance)}\nconst observer=new MutationObserver(records=>{if(records.length&&records.every(record=>record.target?.closest?.(SELF_MUTATION_SELECTOR)))return;scheduleEnhance()});"
+          if old not in s: raise SystemExit('fulfillment observer contract changed')
+          p.write_text(s.replace(old,new))
+          p=Path('public/app/services/fellowfare/marketplace-v2-contrast.css')
+          s=p.read_text()
+          marker='/* r4 profile + fulfillment parchment contrast */'
+          if marker not in s:
+            s += '''\n\n/* r4 profile + fulfillment parchment contrast */\n.ffv2-trust-empty h2,.ffv2-profile-card h2{color:#173b49!important;opacity:1!important;text-shadow:none!important}\n.ffv2-trust-empty p,.ffv2-profile-card p{color:#425958!important;opacity:1!important;text-shadow:none!important}\n.ffv2-profile-card small{background:#f5d89b!important;color:#68401f!important;opacity:1!important}\n.ff-fulfillment-daily,.ff-fulfillment-merchant{background:rgba(255,247,225,.94)!important;color:#173b49!important;border-color:rgba(169,94,45,.58)!important}\n.ff-fulfillment-quest-grid article,.ff-fulfillment-milestones article{background:#fff2d1!important;color:#173b49!important;border-color:rgba(169,94,45,.38)!important}\n.ff-fulfillment-quest-grid :is(span,small),.ff-fulfillment-milestones span,.ff-fulfillment-merchant :is(p,small,label){color:#425958!important;opacity:1!important}\n.ff-fulfillment-quest-grid strong,.ff-fulfillment-milestones strong{color:#173b49!important;opacity:1!important}\n'''
+          p.write_text(s)
+          PY
+          node --check public/app/services/fellowfare/fulfillment-economy-v2.js
+      - name: Commit patch
+        run: |
+          git config user.name civweave-release-bot
+          git config user.email civweave-release-bot@users.noreply.github.com
+          git add public/app/services/fellowfare/fulfillment-economy-v2.js public/app/services/fellowfare/marketplace-v2-contrast.css
+          git commit -m 'Stop FellowFare fulfillment render loop' || exit 0
+          git push origin HEAD:fix/fellowfare-native-v207
