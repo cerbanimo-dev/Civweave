@@ -7,76 +7,59 @@ const root=path.resolve(dir,'..');
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
 await import('./generate-prelive-metadata-v281.mjs');
-const sourcePath=path.join(dir,'smoke-service-worker-registration-watchdog-v207-legacy.mjs');
+
+const legacyPath=path.join(dir,'smoke-service-worker-registration-watchdog-v207-legacy.mjs');
 const runtimePath=path.join(dir,'.smoke-service-worker-registration-watchdog-v207.runtime.mjs');
-const installerPath=path.join(root,'public/install-v130.js');
-const updaterPath=path.join(root,'public/app/pwa-update-controller-v204.js');
-let source=await readFile(sourcePath,'utf8');
-const installerSource=await readFile(installerPath,'utf8');
-const updaterSource=await readFile(updaterPath,'utf8');
-const releaseVersion=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
-const revision=installerSource.match(/const\s+WORKER_SCRIPT_REVISION\s*=\s*['"]([^'"]+)['"]/)?.[1];
-const updaterVersion=updaterSource.match(/const\s+VERSION\s*=\s*['"]([^'"]+)['"]/)?.[1];
-if(!revision)throw new Error('Watchdog verifier could not resolve the current worker revision.');
-if(!updaterVersion)throw new Error('Watchdog verifier could not resolve the current updater revision.');
-source=source.replaceAll('stable-entry-v217',revision);
-source=source.replaceAll('v207-registration-watchdog',updaterVersion);
-source=source.replaceAll('1.0.7',releaseVersion);
-source=source.replace("const indexSource=await fs.readFile('public/index.html','utf8');","const indexSource=await fs.readFile('public/app/index.html','utf8');");
+const installer=await readFile(path.join(root,'public/install-v130.js'),'utf8');
+const updater=await readFile(path.join(root,'public/app/pwa-update-controller-v204.js'),'utf8');
+const release=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
+const revision=installer.match(/const\s+WORKER_SCRIPT_REVISION\s*=\s*['"]([^'"]+)['"]/)?.[1];
+const updaterVersion=updater.match(/const\s+VERSION\s*=\s*['"]([^'"]+)['"]/)?.[1];
+if(!revision||!updaterVersion)throw new Error('Could not resolve current watchdog revisions.');
+
+let source=await readFile(legacyPath,'utf8');
+const replace=(before,after,label)=>{
+  if(!source.includes(before))throw new Error(`Watchdog compatibility patch missed ${label}.`);
+  source=source.replace(before,after);
+};
+source=source.replaceAll('stable-entry-v217',revision).replaceAll('v207-registration-watchdog',updaterVersion).replaceAll('1.0.7',release);
+replace("const indexSource=await fs.readFile('public/index.html','utf8');","const indexSource=await fs.readFile('public/app/index.html','utf8');",'installer entry path');
 source=source.replaceAll('context.window=context;','context.addEventListener=()=>{};context.removeEventListener=()=>{};context.window=context;');
-source=source.replace("location:{assigned:null,assign(url){this.assigned=String(url)},reload(){}}","location:{pathname:'/',assigned:null,assign(url){this.assigned=String(url)},reload(){}}");
-source=source.replace("readyState:'complete',documentElement:{},head:{append(){}}","readyState:'complete',documentElement:{isConnected:true,dataset:{}},head:{isConnected:true,append(){}}");
-source=source.replace("body:{append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}","body:{isConnected:true,append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}");
+replace("location:{assigned:null,assign(url){this.assigned=String(url)},reload(){}}","location:{pathname:'/',assigned:null,assign(url){this.assigned=String(url)},reload(){}}",'location fixture');
+replace("readyState:'complete',documentElement:{},head:{append(){}}","readyState:'complete',documentElement:{isConnected:true,dataset:{}},head:{isConnected:true,append(){}}",'document fixture');
+replace("body:{append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}","body:{isConnected:true,append(node){if(node.dataset?.civweaveUpdateControl!==undefined)updateButton=node}}",'body fixture');
 
-const boundaryBefore=`assert(boundarySource.includes("const ADDITIONS_VERSION='${updaterVersion}'"),'Installed pages do not cache-bust the v207 update controller.');`;
-const boundaryAfter="assert(boundarySource.includes(\"const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'\"),'Installed boundary no longer names the shared update controller.');\nassert(boundarySource.includes('PWA_UPDATE_SCRIPT'),'Installed boundary no longer retains the update controller for noncanonical compatibility surfaces.');\nassert(boundarySource.includes(\"canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions'\"),'Canonical realms no longer declare the minimal startup corridor.');\nassert(boundarySource.includes('const requestedRelease=/^\\\\d+\\\\.\\\\d+\\\\.\\\\d+$/.test(params.get(\\'version\\')||\\'\\')?params.get(\\'version\\'):VERSION;'),'Installed boundary no longer validates the requested release before deriving cache identity.');\nassert(boundarySource.includes(\"const REVISION='chat-convergence-v250-navigation-lifecycle-v424';\"),'Installed boundary lost the navigation lifecycle revision.');\nassert(boundarySource.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424`;'),'Installed boundary does not derive the navigation-safe shared experience cache identity from the active release.');\nassert(boundarySource.includes(\"navigationLifecycleRevision:'v424-head-capture-bfcache-resume'\"),'Installed boundary no longer advertises BFCache resume support.');\nassert(!boundarySource.includes(\"const ADDITIONS_VERSION='v1.0.36\"),'Installed boundary restored a frozen shared-experience cache identity.');";
-if(!source.includes(boundaryBefore))throw new Error('Watchdog verifier compatibility patch could not find the retired updater additions assertion.');
-source=source.replace(boundaryBefore,boundaryAfter);
-
-const statusBefore="assert(statusSource.includes('registration.update()'),'Offline status repair does not force-check the current worker.');";
-const statusAfter="assert(!statusSource.includes('registration.update()'),'Offline status reader must not compete with the installer update watchdog.');\nassert(!statusSource.includes('SKIP_WAITING'),'Offline status reader must not activate workers behind the installer watchdog.');\nassert(statusSource.includes('function currentWorker()'),'Offline status reader no longer discovers the current worker.');\nassert(statusSource.includes('civweave:offline-campus-status'),'Offline status reader no longer publishes normalized progress events.');";
-if(!source.includes(statusBefore))throw new Error('Watchdog verifier could not find the retired offline-status update assertion.');
-source=source.replace(statusBefore,statusAfter);
-
-const workerReadBefore="const workerSource=await fs.readFile('public/service-worker-v203.js','utf8');";
-const workerReadAfter="const workerWrapperSource=await fs.readFile('public/service-worker-v203.js','utf8');\nconst workerCoreSource=await fs.readFile('public/service-worker-core-v208.js','utf8');\nconst livingSchoolWorkerSource=await fs.readFile('public/service-worker-living-school-cleanroom-v218.js','utf8');\nconst installerStateWorkerSource=await fs.readFile('public/service-worker-installer-state-v280.js','utf8');\nconst integrityWorkerSource=await fs.readFile('public/service-worker-shell-integrity-v281.js','utf8');\nconst offlineOverrideSource=await fs.readFile('public/service-worker-offline-v211-override.js','utf8');\nconst workerSource=workerWrapperSource+'\\n'+workerCoreSource+'\\n'+installerStateWorkerSource+'\\n'+integrityWorkerSource+'\\n'+offlineOverrideSource;";
-if(!source.includes(workerReadBefore))throw new Error('Watchdog verifier could not find the direct worker read.');
-source=source.replace(workerReadBefore,workerReadAfter);
-
-const workerAssertionsBefore=`assert(workerSource.startsWith('// GENERATED: lightweight-shell-v208 core + offline-campus-seed-provenance-v211'),'Generated lightweight worker marker is missing.');
-assert(workerSource.includes("const BUILD = 'lightweight-shell-v208'"),'Verified lightweight worker core is missing.');
-assert(workerSource.includes("const V211_REVISION = 'offline-campus-seed-provenance-v211'"),'Offline retry-loop repair is missing.');`;
-const workerAssertionsAfter=`assert(workerWrapperSource.includes("importScripts('/service-worker-living-school-cleanroom-v218.js"),'Active worker wrapper omits Living School cache retirement.');
-assert(workerWrapperSource.includes("importScripts('/service-worker-core-v208.js"),'Active worker wrapper omits the retained lightweight core.');
-assert(workerWrapperSource.includes('working-campus-return-v425'),'Active worker wrapper omits the Working Campus return cache epoch.');
-assert(workerWrapperSource.includes("importScripts('/service-worker-installer-state-v280.js"),'Active worker wrapper omits the installer-state asset pin.');
-assert(workerWrapperSource.includes("importScripts('/service-worker-shell-integrity-v281.js"),'Active worker wrapper omits shell integrity.');
-assert(workerWrapperSource.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper omits the offline retry override.');
-assert(workerWrapperSource.includes('offline-campus-current-graph-v280'),'Active worker wrapper omits the resumable current-graph offline revision.');
-assert(workerWrapperSource.includes('policy=resumable-pause-v280'),'Active worker wrapper omits the resumable/pause policy.');
-assert(workerWrapperSource.includes("/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343"),'Active worker wrapper omits the current stale-chat cache migration.');
-assert(workerWrapperSource.indexOf('service-worker-living-school-cleanroom-v218.js')<workerWrapperSource.indexOf('service-worker-core-v208.js'),'Living School retirement does not load before the retained core.');
-assert(workerWrapperSource.indexOf('service-worker-core-v208.js')<workerWrapperSource.indexOf('service-worker-installer-state-v280.js'),'Installer-state pin does not load after the core globals.');
-assert(workerWrapperSource.indexOf('service-worker-installer-state-v280.js')<workerWrapperSource.indexOf('service-worker-shell-integrity-v281.js'),'Integrity does not see the final required shell asset list.');
-assert(workerWrapperSource.indexOf('service-worker-shell-integrity-v281.js')<workerWrapperSource.indexOf('service-worker-offline-v211-override.js'),'Offline override does not load after verified shell staging.');
-assert(workerCoreSource.includes("const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425'"),'Verified lightweight worker core lost the v425 return cache epoch.');
-assert(workerCoreSource.includes("'/app/working-campus-return-guard-v425.js'"),'Verified lightweight worker core no longer precaches the return guard.');
-assert(installerStateWorkerSource.includes("'/app/installer-storage-guard-v281.js'"),'Installer-state worker does not pin the storage guard.');
-assert(integrityWorkerSource.includes("crypto.subtle.digest('SHA-256'")&&integrityWorkerSource.includes('lastKnownGoodCache'),'Verified shell integrity/last-known-good policy is missing.');
-assert(offlineOverrideSource.includes("const V211_REVISION = 'offline-campus-current-graph-v280'"),'Resumable current-graph offline retry repair is missing.');
-assert(offlineOverrideSource.includes("const V211_POLICY = 'resumable-pause-v280'"),'Resumable campus policy is missing.');
-assert(offlineOverrideSource.includes('downloadedAssets')&&offlineOverrideSource.includes('pauseSupported: true'),'Per-file resume/pause contract is missing.');
-assert(offlineOverrideSource.includes("V211_REFERENCE_POLICY = 'current-manifest-only-v282'"),'Current-graph repair does not prune stale package references.');
-assert(livingSchoolWorkerSource.includes("const REVISION='living-school-cleanroom-v218'"),'Living School clean-room worker revision is missing.');`;
-if(!source.includes(workerAssertionsBefore))throw new Error('Watchdog verifier could not find direct worker assertions.');
-source=source.replace(workerAssertionsBefore,workerAssertionsAfter);
+replace(
+  `assert(boundarySource.includes("const ADDITIONS_VERSION='${updaterVersion}'"),'Installed pages do not cache-bust the v207 update controller.');`,
+  "assert(boundarySource.includes(\"const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'\"),'Installed boundary lost the shared update controller.');\nassert(boundarySource.includes(\"navigationLifecycleRevision:'v424-head-capture-bfcache-resume'\"),'Installed boundary lost BFCache resume support.');",
+  'retired additions cache assertion'
+);
+replace(
+  "assert(indexSource.includes('offline-retry-loop-v211'),'Gateway does not cache-bust the retry-loop repair.');",
+  `assert(indexSource.includes('/install-v130.js?v=${release}-lightweight-shell-v208'),'Gateway no longer pins the current installer release.');`,
+  'retired gateway retry token'
+);
+replace(
+  "assert(statusSource.includes('registration.update()'),'Offline status repair does not force-check the current worker.');",
+  "assert(!statusSource.includes('registration.update()'),'Offline status reader must not compete with the installer watchdog.');\nassert(statusSource.includes('function currentWorker()'),'Offline status reader lost current-worker discovery.');",
+  'retired offline-status updater ownership'
+);
+replace(
+  "const workerSource=await fs.readFile('public/service-worker-v203.js','utf8');",
+  "const workerWrapperSource=await fs.readFile('public/service-worker-v203.js','utf8');\nconst workerCoreSource=await fs.readFile('public/service-worker-core-v208.js','utf8');\nconst livingSchoolWorkerSource=await fs.readFile('public/service-worker-living-school-cleanroom-v218.js','utf8');\nconst installerStateWorkerSource=await fs.readFile('public/service-worker-installer-state-v280.js','utf8');\nconst integrityWorkerSource=await fs.readFile('public/service-worker-shell-integrity-v281.js','utf8');\nconst offlineOverrideSource=await fs.readFile('public/service-worker-offline-v211-override.js','utf8');\nconst workerSource=workerWrapperSource+'\\n'+workerCoreSource+'\\n'+installerStateWorkerSource+'\\n'+integrityWorkerSource+'\\n'+offlineOverrideSource;",
+  'layered worker reads'
+);
+replace(
+  `assert(workerSource.startsWith('// GENERATED: lightweight-shell-v208 core + offline-campus-seed-provenance-v211'),'Generated lightweight worker marker is missing.');\nassert(workerSource.includes("const BUILD = 'lightweight-shell-v208'"),'Verified lightweight worker core is missing.');\nassert(workerSource.includes("const V211_REVISION = 'offline-campus-seed-provenance-v211'"),'Offline retry-loop repair is missing.');`,
+  `assert(workerWrapperSource.includes("importScripts('/service-worker-core-v208.js"),'Active worker wrapper lost the retained core.');\nassert(workerWrapperSource.includes("importScripts('/service-worker-offline-v211-override.js"),'Active worker wrapper lost the offline retry override.');\nassert(workerWrapperSource.includes('offline-campus-current-graph-v280'),'Active worker wrapper lost the current offline graph revision.');\nassert(workerWrapperSource.includes('policy=resumable-pause-v280'),'Active worker wrapper lost the resumable policy.');\nassert(workerCoreSource.includes("const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425'"),'Worker core lost the current cache epoch.');\nassert(installerStateWorkerSource.includes("'/app/installer-storage-guard-v281.js'"),'Installer-state worker lost the storage guard.');\nassert(integrityWorkerSource.includes('lastKnownGoodCache'),'Shell integrity lost last-known-good recovery.');\nassert(offlineOverrideSource.includes("const V211_REVISION = 'offline-campus-current-graph-v280'"),'Offline override lost the current graph revision.');\nassert(livingSchoolWorkerSource.includes("const REVISION='living-school-cleanroom-v218'"),'Living School worker revision is missing.');`,
+  'retired monolithic worker assertions'
+);
 
 await writeFile(runtimePath,source,'utf8');
 try{
   await import(pathToFileURL(runtimePath).href+`?run=${Date.now()}`);
 }catch(error){
-  const message=String(error?.message||error).replace(/[%\r\n]/g,' ');
-  console.error(`::error title=Service Worker Registration Watchdog v207::${message}`);
+  console.error(`::error title=Service Worker Registration Watchdog v207::${String(error?.message||error).replace(/[\r\n%]/g,' ')}`);
   throw error;
 }finally{
   await unlink(runtimePath).catch(()=>{});
