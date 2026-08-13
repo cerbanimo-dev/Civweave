@@ -15,6 +15,7 @@ const now=()=>new Date().toISOString();
 const runtime=()=>globalThis.CivweaveModelRuntime||null;
 const spine=()=>globalThis.CivweaveFastInteractiveV192||null;
 const mesh=()=>globalThis.CivweaveNodeAIMeshV1||null;
+const hostAccess=()=>globalThis.CivweaveHostNodeSessionV1||null;
 function storageObject(storage,key){try{const value=parse(storage.getItem(key),{});return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}catch{return{}}}
 function selectedRoute(request={}){
   const explicit=clean(request?.config?.provider||request?.config?.route,80).toLowerCase();
@@ -83,7 +84,7 @@ function resultFor(request,{provider,model,text,outputJson=null,usage={},diagnos
     actual:{provider,model:model||provider},
     outputText:text||'',
     outputJson,
-    usage:{inputTokens:Number(usage.inputTokens??usage.prompt_tokens??usage.input_tokens??0)||0,outputTokens:Number(usage.outputTokens??usage.completion_tokens??usage.output_tokens??0)||0,totalTokens:Number(usage.totalTokens??usage.total_tokens??0)||0,costCents:Number(usage.costCents||0)||0,remainingCents:Number(usage.remainingCents||0)||0,chargedNeurons:Number(usage.chargedNeurons||0)||0},
+    usage:{inputTokens:Number(usage.inputTokens??usage.prompt_tokens??usage.input_tokens??0)||0,outputTokens:Number(usage.outputTokens??usage.completion_tokens??usage.output_tokens??0)||0,totalTokens:Number(usage.totalTokens??usage.total_tokens??0)||0,costCents:Number(usage.costCents||0)||0,remainingCents:Number(usage.remainingCents||0)||0,chargedNeurons:Number(usage.chargedNeurons||0)||0,remainingNeurons:usage.remainingNeurons!=null&&Number.isFinite(Number(usage.remainingNeurons))?Math.max(0,Math.floor(Number(usage.remainingNeurons))):null,approximateTurnsLeft:usage.approximateTurnsLeft!=null&&Number.isFinite(Number(usage.approximateTurnsLeft))?Math.max(0,Math.floor(Number(usage.approximateTurnsLeft))):null},
     timing:{startedAt:new Date(started).toISOString(),completedAt:now(),elapsedMs:Math.max(0,Date.now()-started)},
     events:[],
     diagnostics:[{code:'SERVER_AUTO_ORDER',message:'Server-side AI preference is device local → paired server-local → Cloudflare Workers AI.'},...diagnostics,{code:'SERVER_AUTO_TRACE',message:routeTrace.map(item=>`${item.route}:${item.status}`).join(' → '),routeTrace}],
@@ -121,6 +122,7 @@ async function serverLocal(request,trace){
   return null;
 }
 function usableCapacitySession(){
+  const owned=hostAccess()?.sessionFor?.();if(owned)return owned;
   const all=capacitySessions(),preferred=clean(marketPrefs().preferredNodeId,180),rows=Object.values(all).filter(item=>item?.nodeId&&item?.token&&item?.origin&&(!item.expiresAt||Date.parse(item.expiresAt)>Date.now()));
   return rows.find(item=>item.nodeId===preferred)||rows[0]||null;
 }
@@ -128,8 +130,9 @@ async function cloudflare(request,trace){
   const session=usableCapacitySession();
   if(!session){trace.push({route:'cloudflare-workers-ai',status:'skipped',reason:'no active host-capacity session'});return null}
   const endpointUrl=new URL('/api/ai/node/generate',session.origin);
+  endpointUrl.searchParams.set('nodeId',session.nodeId);
   const payload=requestPayload(request);
-  const response=await fetch(endpointUrl,{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${session.token}`},body:JSON.stringify({...payload,allowLifetimeCredits:request.allowLifetimeCredits===true||request?.config?.allowLifetimeCredits===true})});
+  const response=await fetch(endpointUrl,{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${session.token}`,'x-civweave-node-id':session.nodeId},body:JSON.stringify({...payload,allowLifetimeCredits:request.allowLifetimeCredits===true||request?.config?.allowLifetimeCredits===true})});
   const body=await response.json().catch(()=>({}));
   if(!response.ok){
     const message=clean(body?.error||`Cloudflare Workers AI returned HTTP ${response.status}.`,1000);
@@ -138,8 +141,9 @@ async function cloudflare(request,trace){
   }
   const text=clean(body.text,5_000_000),outputJson=body.outputJson&&typeof body.outputJson==='object'?body.outputJson:null;
   if(!text&&!outputJson)throw new Error('Cloudflare Workers AI returned no output.');
+  const telemetry=hostAccess()?.recordUsage?.({nodeId:session.nodeId,chargedNeurons:Number(body?.usage?.chargedNeurons||0),quota:body.quota||null})||{};
   trace.push({route:'cloudflare-workers-ai',status:'success',nodeId:session.nodeId});
-  return resultFor(request,{provider:'cloudflare-workers-ai',model:body.model||'workers-ai',text:text||JSON.stringify(outputJson),outputJson,usage:{...(body.usage||{}),chargedNeurons:Number(body?.usage?.chargedNeurons||0)},diagnostics:[{code:'CLOUDFLARE_CAPACITY',message:`Used capacity-backed Workers AI through ${session.nodeId}; lifetime credits are never spent unless explicitly allowed.`}],routeTrace:trace});
+  return resultFor(request,{provider:'cloudflare-workers-ai',model:body.model||'workers-ai',text:text||JSON.stringify(outputJson),outputJson,usage:{...(body.usage||{}),chargedNeurons:Number(body?.usage?.chargedNeurons||0),remainingNeurons:telemetry.remainingNeurons,approximateTurnsLeft:telemetry.approximateTurnsLeft},diagnostics:[{code:'CLOUDFLARE_CAPACITY',message:`Used capacity-backed Workers AI through ${session.nodeId}; lifetime credits are never spent unless explicitly allowed.`}],routeTrace:trace});
 }
 async function handle(request={}){
   if(!isServerAuto(request))return null;

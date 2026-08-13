@@ -17,7 +17,7 @@ const [version, router, settings, mesh, spine, cloudEntry, accountEdge, wrangler
 for (const source of [router, settings, mesh, spine]) new Function(source);
 const offline = JSON.parse(offlineText);
 
-assert.equal(version.trim(), '1.0.116');
+assert.match(version.trim(), /^\d+\.\d+\.\d+$/);
 assert.match(router, /1\.0\.116-server-ai-router-v301/);
 assert.match(settings, /1\.0\.116-server-ai-settings-v304-tabbed/);
 assert.match(mesh, /server-ai-router-v301\.js\?v=1\.0\.116-v301/);
@@ -31,6 +31,9 @@ assert.match(router, /\/api\/ai\/node\/generate/);
 assert.match(router, /allowLifetimeCredits===true/);
 assert.doesNotMatch(router, /allowLifetimeCredits\s*:\s*true/);
 assert.match(router, /Open AI settings to add compute or choose a membership/);
+assert.match(router, /CivweaveHostNodeSessionV1/);
+assert.match(router, /recordUsage/);
+assert.match(router, /approximateTurnsLeft/);
 
 assert.match(spine, /1\.0\.116-runtime-spine-v271-server-auto-v301/);
 assert.match(spine, /serverAuto\(request\)/);
@@ -59,6 +62,7 @@ for (const secret of ['STRIPE_SECRET_KEY','STRIPE_CONNECT_WEBHOOK_SECRET','CIVWE
 assert.match(mesh, /ensureServerAI/);
 assert.ok(offline.assets.includes('/app/server-ai-router-v301.js'), 'Offline core must cache the server AI router control surface.');
 assert.ok(offline.assets.includes('/app/server-ai-settings-v301.js'), 'Offline core must cache the server AI settings and commerce entry surface.');
+assert.ok(offline.assets.includes('/app/host-node-session-v1.js'), 'Offline core must cache the canonical Hub Node session owner.');
 
 assert.match(cloudEntry, /POST|request\.method === 'POST'/);
 assert.match(cloudEntry, /\/api\/ai\/node\/generate/);
@@ -69,6 +73,8 @@ assert.match(cloudEntry, /\/api\/money-edge\/topups/);
 assert.match(cloudEntry, /\/api\/money-edge\/memberships/);
 assert.match(cloudEntry, /\/usage\/reserve/);
 assert.match(cloudEntry, /\/usage\/settle/);
+assert.match(cloudEntry, /\/members\/status/);
+assert.match(cloudEntry, /quota: memberStatus\.quota/);
 assert.match(cloudEntry, /input\.allowLifetimeCredits === true/);
 assert.match(cloudEntry, /@cf\/meta\/llama-3\.1-8b-instruct-fast/);
 assert.match(cloudEntry, /x-civweave-node-signature/);

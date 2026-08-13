@@ -1,18 +1,23 @@
 (() => {
 'use strict';
 
-const REVISION = 'host-node-installer-lobby-v2-local-federated-autodetect';
+const REVISION = 'host-node-installer-lobby-v3-hub-login-nearest-search';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
 const HOST_SELECTION_KEY = 'civweave.host-node.selection.v1';
 const STEWARD_KEY = 'civweave.host-steward.v1';
 const STATUS_ENDPOINT = '/api/host-node-status';
+const SEARCH_ENDPOINT = '/api/host-node-search';
 const FEDERATION_HEALTH_ENDPOINT = '/api/federation/health';
 const FEDERATION_PROFILE_ENDPOINT = '/.well-known/civweave';
 const REFRESH_MS = 30_000;
 let latestStatus = null;
 let activeHost = '';
+let activeNodeId = '';
 let localFederated = false;
 let refreshTimer = 0;
+let searching = false;
+
+const access = () => globalThis.CivweaveHostNodeSessionV1 || null;
 
 function queryHost() {
   const raw = new URLSearchParams(location.search).get('host');
@@ -27,13 +32,18 @@ function queryHost() {
 }
 
 function normalizedHost() {
-  return activeHost || queryHost();
+  return activeHost || queryHost() || selectedHub().origin;
 }
 
-function selectedOrigin() {
-  try { return new URL(localStorage.getItem(HOST_ENDPOINT_KEY) || '').origin; }
-  catch { return ''; }
+function selectedHub() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(HOST_SELECTION_KEY) || '{}');
+    const origin = new URL(saved?.origin || localStorage.getItem(HOST_ENDPOINT_KEY) || '').origin;
+    return { origin, nodeId: /^[a-z0-9-]{1,120}$/.test(String(saved?.nodeId || '')) ? String(saved.nodeId) : '' };
+  } catch { return { origin: '', nodeId: '' }; }
 }
+function selectedOrigin() { return selectedHub().origin; }
+function normalizedNodeId() { return activeNodeId || new URLSearchParams(location.search).get('node') || selectedHub().nodeId || ''; }
 
 function isLocalAddress(origin = location.origin) {
   try {
@@ -63,9 +73,15 @@ function markStewardBrowser() {
 }
 
 function el(id) { return document.getElementById(id); }
+function esc(value) { return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
 function numberText(value) {
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? Math.floor(number).toLocaleString() : '—';
+}
+
+function slotCount(kind) {
+  const value = Number(latestStatus?.slots?.[kind]);
+  return Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
 }
 
 async function readJson(url) {
@@ -115,6 +131,15 @@ function installStyles() {
     .cw-host-node-steward{background:#5b4618;color:#fff;border-color:#e8c96b77!important}
     .cw-host-node-actions button:disabled{opacity:.55;cursor:not-allowed}
     .cw-host-node-help{position:relative;margin:11px 0 0;color:#aebfca;font-size:.76rem;line-height:1.45}
+    .cw-host-node-search{position:relative;margin-top:16px;padding:16px;border:1px solid #8de5ef36;border-radius:18px;background:#020a11a8}
+    .cw-host-node-search[hidden]{display:none}
+    .cw-host-node-search h3{margin:0 0 5px;font-size:1rem}.cw-host-node-search>p{margin:0 0 12px;color:#afc5d2;font-size:.78rem;line-height:1.45}
+    .cw-host-node-search-controls{display:flex;flex-wrap:wrap;gap:9px;align-items:end}.cw-host-node-search-controls label{display:grid;gap:5px;color:#bcd2dc;font-size:.7rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+    .cw-host-node-search select{min-height:42px;padding:8px 34px 8px 10px;border:1px solid #ffffff2a;border-radius:11px;background:#09141f;color:#fff;font:800 .82rem system-ui}
+    .cw-host-node-search button{min-height:42px;padding:8px 13px;border:1px solid #8de5ef66;border-radius:11px;background:#123647;color:#fff;font:900 .8rem system-ui;cursor:pointer}
+    .cw-host-node-results{display:grid;gap:8px;margin-top:12px}.cw-host-node-result{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:11px;border:1px solid #ffffff18;border-radius:13px;background:#0b1521;color:#fff;text-align:left}
+    .cw-host-node-result strong,.cw-host-node-result span{display:block}.cw-host-node-result span{margin-top:3px;color:#afc2cf;font-size:.72rem}.cw-host-node-result em{font-style:normal;color:#8df0c6;font-size:.72rem;font-weight:900}
+    .cw-host-node-search-status{margin:10px 0 0!important;color:#c8d7df!important}
     @media(max-width:640px){.cw-host-node-lobby{padding:18px;border-radius:20px}.cw-host-node-head{display:grid}.cw-host-node-live{justify-self:start}.cw-host-node-slots{grid-template-columns:1fr 1fr}.cw-host-node-actions button,.cw-host-node-actions a{flex:1 1 140px}}
   `;
   document.head.append(style);
@@ -123,49 +148,146 @@ function installStyles() {
 function buildLobby() {
   if (el('cw-host-node-lobby')) return el('cw-host-node-lobby');
   const host = normalizedHost();
-  if (!host) return null;
   const section = document.createElement('section');
   section.id = 'cw-host-node-lobby';
   section.className = 'cw-host-node-lobby';
+  section.dataset.localFederated = String(localFederated);
   section.setAttribute('aria-labelledby', 'cw-host-node-title');
   section.innerHTML = `
     <div class="cw-host-node-head">
-      <div><small class="cw-host-node-kicker">${localFederated ? 'LOCAL HOST NODE' : 'HOST NODE'}</small><h2 class="cw-host-node-title" id="cw-host-node-title">Checking this Host Node…</h2><p class="cw-host-node-meta" id="cw-host-node-meta"></p></div>
-      <span class="cw-host-node-live" id="cw-host-node-live" data-state="checking">Checking status</span>
+      <div><small class="cw-host-node-kicker">${localFederated ? 'LOCAL HUB NODE' : 'HUB NODE'}</small><h2 class="cw-host-node-title" id="cw-host-node-title">${host ? 'Checking this Hub Node…' : 'Join a Civweave Hub Node'}</h2><p class="cw-host-node-meta" id="cw-host-node-meta">${host || 'Hub login unlocks capacity-backed Cloudflare AI.'}</p></div>
+      <span class="cw-host-node-live" id="cw-host-node-live" data-state="checking">${host ? 'Checking status' : 'Choose a Hub'}</span>
     </div>
     <div class="cw-host-node-slots" aria-label="Host Node membership capacity">
       <article class="cw-host-slot"><small>Free slots</small><strong id="cw-host-free-slots">—</strong><span>Community residency available on this host.</span></article>
       <article class="cw-host-slot"><small>Paid slots</small><strong id="cw-host-paid-slots">—</strong><span>Additional paid-expansion residency available.</span></article>
     </div>
-    <p class="cw-host-node-note" id="cw-host-node-note">Reading the host's live capacity before you join.</p>
+    <p class="cw-host-node-note" id="cw-host-node-note">${host ? 'Reading the Hub’s live capacity before you join.' : 'Find the nearest Hub with community or paid-expansion capacity. Your exact location is never sent; Civweave rounds it before searching.'}</p>
     <div class="cw-host-node-actions">
-      <button class="cw-host-node-join" id="cw-host-node-join" type="button" disabled>${localFederated ? 'Use this Host Node' : 'Join this Host'}</button>
-      ${localFederated && stewardBrowser() ? '<a class="cw-host-node-steward" id="cw-host-node-steward" href="/app/node-ai-operator-v1.html">Host steward tools</a>' : ''}
-      <button class="cw-host-node-refresh" id="cw-host-node-refresh" type="button">Refresh status</button>
+      <button class="cw-host-node-join" id="cw-host-node-join" type="button" ${host ? 'disabled' : ''} data-mode="${host ? 'join' : 'search'}">${host ? (localFederated ? 'Use this Hub Node' : 'Join & log in') : 'Find an open Hub'}</button>
+      ${localFederated && stewardBrowser() ? '<a class="cw-host-node-steward" id="cw-host-node-steward" href="/app/node-ai-operator-v1.html">Hub steward tools</a>' : ''}
+      <button class="cw-host-node-refresh" id="cw-host-node-refresh" type="button" ${host ? '' : 'hidden'}>Refresh status</button>
     </div>
-    <p class="cw-host-node-help" id="cw-host-node-help" role="status">${localFederated ? 'This installer is being served by a Civweave federated Host Node. Steward controls stay local to this node.' : 'Joining sets this as your device\'s Host Node. It does not silently start a paid membership.'}</p>
+    <p class="cw-host-node-help" id="cw-host-node-help" role="status">${localFederated ? 'This installer is being served by a Civweave federated Hub Node. Steward controls stay local to this node.' : 'A Hub login is device-bound and stored locally. Joining never silently starts a paid membership.'}</p>
+    <section class="cw-host-node-search" id="cw-host-node-search" ${host ? 'hidden' : ''} aria-labelledby="cw-host-node-search-title">
+      <h3 id="cw-host-node-search-title">Nearest Hubs with open slots</h3>
+      <p>Choose which capacity counts as open. Paid-expansion access still requires an active Civweave membership.</p>
+      <div class="cw-host-node-search-controls"><label>Show slots<select id="cw-host-node-search-mode"><option value="both">Free or paid</option><option value="free">Free only</option><option value="paid">Paid only</option></select></label><button type="button" id="cw-host-node-search-run">Use my approximate location</button></div>
+      <p class="cw-host-node-search-status" id="cw-host-node-search-status" role="status">Location is requested only when you start a nearest-Hub search.</p>
+      <div class="cw-host-node-results" id="cw-host-node-results"></div>
+    </section>
   `;
   const knowledge = document.querySelector('.knowledge-card');
   const installCard = document.querySelector('.install-card');
   if (knowledge?.parentNode) knowledge.parentNode.insertBefore(section, knowledge);
   else if (installCard?.parentNode) installCard.insertAdjacentElement('afterend', section);
   else document.querySelector('main')?.append(section);
-  el('cw-host-node-join')?.addEventListener('click', joinHostNode);
+  el('cw-host-node-join')?.addEventListener('click', () => void joinHostNode());
   el('cw-host-node-refresh')?.addEventListener('click', () => loadStatus(true));
+  el('cw-host-node-search-run')?.addEventListener('click', () => void searchNearest());
+  el('cw-host-node-results')?.addEventListener('click', event => {
+    const button = event.target.closest?.('[data-hub-origin]');
+    if (!button) return;
+    activeHost = button.dataset.hubOrigin || '';
+    activeNodeId = button.dataset.hubNodeId || '';
+    localFederated = false;
+    latestStatus = null;
+    section.dataset.localFederated = 'false';
+    const refresh = el('cw-host-node-refresh'); if (refresh) refresh.hidden = false;
+    const title = el('cw-host-node-title'); if (title) title.textContent = 'Checking this Hub Node…';
+    const live = el('cw-host-node-live'); if (live) { live.dataset.state = 'checking'; live.textContent = 'Checking status'; }
+    revealSearch(false);
+    loadStatus(true);
+  });
   return section;
+}
+
+function revealSearch(visible = true) {
+  const panel = el('cw-host-node-search');
+  if (panel) panel.hidden = !visible;
+  if (visible) panel?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+  return visible;
+}
+
+function approximateLocation() {
+  if (!navigator.geolocation) return Promise.reject(new Error('This browser does not provide location search.'));
+  return new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(
+    position => resolve({
+      latitude: Number(position.coords.latitude.toFixed(3)),
+      longitude: Number(position.coords.longitude.toFixed(3)),
+      accuracyMeters: Math.max(100, Math.ceil(Number(position.coords.accuracy || 100) / 100) * 100),
+    }),
+    error => reject(new Error(error?.message || 'Location permission was not granted.')),
+    { enableHighAccuracy: false, maximumAge: 10 * 60 * 1000, timeout: 12_000 },
+  ));
+}
+
+function renderSearchResults(packet) {
+  const results = el('cw-host-node-results');
+  const status = el('cw-host-node-search-status');
+  const rows = Array.isArray(packet?.nodes) ? packet.nodes : [];
+  if (status) status.textContent = rows.length
+    ? `${rows.length} nearby Hub${rows.length === 1 ? '' : 's'} currently match this slot search.`
+    : 'No nearby registered Hubs currently match those open-slot filters.';
+  if (!results) return;
+  results.innerHTML = rows.map(node => {
+    const distance = Number.isFinite(Number(node.distanceKm)) ? `${Number(node.distanceKm).toFixed(Number(node.distanceKm) < 10 ? 1 : 0)} km away` : 'distance unavailable';
+    return `<button type="button" class="cw-host-node-result" data-hub-origin="${esc(node.hostOrigin)}" data-hub-node-id="${esc(node.nodeId || '')}"><span><strong>${esc(node.displayName || node.nodeId || 'Civweave Hub')}</strong><span>${esc(distance)} · ${esc(node.nodeId || '')}</span></span><em>${numberText(node?.slots?.free)} free · ${numberText(node?.slots?.paid)} paid</em></button>`;
+  }).join('');
+}
+
+async function searchNearest() {
+  if (searching) return null;
+  searching = true;
+  revealSearch(true);
+  const button = el('cw-host-node-search-run');
+  const status = el('cw-host-node-search-status');
+  const results = el('cw-host-node-results');
+  if (button) { button.disabled = true; button.textContent = 'Finding nearby Hubs…'; }
+  if (status) status.textContent = 'Getting an approximate location for this search…';
+  if (results) results.innerHTML = '';
+  try {
+    const locationPacket = await approximateLocation();
+    if (status) status.textContent = 'Checking nearby Hub capacity…';
+    const response = await fetch(SEARCH_ENDPOINT, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: JSON.stringify({ ...locationPacket, mode: el('cw-host-node-search-mode')?.value || 'both' }),
+    });
+    const packet = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(packet.error || `Nearest-Hub search returned HTTP ${response.status}.`);
+    renderSearchResults(packet);
+    return packet;
+  } catch (error) {
+    if (status) status.textContent = `Nearest-Hub search could not complete: ${error?.message || error}`;
+    return null;
+  } finally {
+    searching = false;
+    if (button) { button.disabled = false; button.textContent = 'Use my approximate location'; }
+  }
 }
 
 function renderSelectedState() {
   const host = normalizedHost();
   const button = el('cw-host-node-join');
-  if (!button || !host) return;
+  if (!button) return;
+  if (!host) { button.dataset.mode = 'search'; button.dataset.selected = 'false'; button.textContent = 'Find an open Hub'; return; }
+  const nodeId = normalizedNodeId();
+  const loggedIn = Boolean(access()?.sessionFor?.(nodeId || host));
   const selected = selectedOrigin() === host;
-  button.dataset.selected = String(selected);
-  button.textContent = selected ? 'This is your Host Node' : (localFederated ? 'Use this Host Node' : 'Join this Host');
+  button.dataset.selected = String(loggedIn || selected);
+  if (loggedIn) { button.dataset.mode = 'join'; button.textContent = 'Logged in to this Hub'; return; }
+  if (latestStatus?.capacityAvailable && slotCount('free') < 1 && !access()?.hasCredential?.(host,nodeId)) {
+    button.dataset.mode = 'search'; button.textContent = 'Find nearest open Hub'; return;
+  }
+  button.dataset.mode = 'join';
+  button.textContent = access()?.hasCredential?.(host,nodeId) ? 'Log back in' : (localFederated ? 'Use this Hub Node' : 'Join & log in');
 }
 
 function renderStatus(packet) {
   latestStatus = packet;
+  if (packet?.nodeId) activeNodeId = String(packet.nodeId);
   const live = el('cw-host-node-live');
   const join = el('cw-host-node-join');
   const title = el('cw-host-node-title');
@@ -180,15 +302,14 @@ function renderStatus(packet) {
     if (meta) meta.textContent = normalizedHost();
     if (free) free.textContent = '—';
     if (paid) paid.textContent = '—';
-    if (join) join.disabled = true;
+    if (join) { join.disabled = false; join.dataset.mode = 'search'; join.textContent = 'Find another Hub'; }
     if (note) note.textContent = 'Civweave could not verify this host or its current capacity.';
     if (help) help.textContent = 'Refresh to try again. The Host button stays locked until this node answers successfully.';
     return;
   }
-  if (live) { live.dataset.state = packet.status === 'degraded' ? 'error' : 'online'; live.textContent = packet.status === 'degraded' ? 'Node online · app unavailable' : 'Online'; }
+  if (live) { live.dataset.state = packet.status === 'degraded' ? 'error' : 'online'; live.textContent = packet.status === 'degraded' ? 'Hub online · app unavailable' : 'Online'; }
   if (title) title.textContent = packet.displayName || (localFederated ? 'Local Civweave Host Node' : 'Civweave Host Node');
   if (meta) meta.textContent = [packet.nodeId, packet.runtime, packet.hostOrigin].filter(Boolean).join(' · ');
-  if (join) join.disabled = false;
   if (packet.capacityAvailable && packet.slots) {
     if (free) free.textContent = numberText(packet.slots.free);
     if (paid) paid.textContent = numberText(packet.slots.paid);
@@ -201,6 +322,13 @@ function renderStatus(packet) {
     if (free) free.textContent = '—';
     if (paid) paid.textContent = '—';
     if (note) note.textContent = packet.capacityMessage || 'This host is online but does not publish membership capacity yet.';
+  }
+  if (join) {
+    const canReconnect = Boolean(access()?.hasCredential?.(normalizedHost(),normalizedNodeId()));
+    const freeOpen = slotCount('free') > 0;
+    join.disabled = false;
+    join.dataset.mode = freeOpen || canReconnect || localFederated ? 'join' : 'search';
+    if (!freeOpen && !canReconnect && !localFederated) revealSearch(true);
   }
   if (help && selectedOrigin() !== normalizedHost()) {
     help.textContent = localFederated
@@ -252,6 +380,7 @@ async function loadStatus(force = false) {
     } else {
       const url = new URL(STATUS_ENDPOINT, location.origin);
       url.searchParams.set('host', host);
+      if (normalizedNodeId()) url.searchParams.set('node', normalizedNodeId());
       const response = await fetch(url, { cache: 'no-store', headers: { accept: 'application/json' } });
       const body = await response.json().catch(() => ({ ok: false, error: `HTTP ${response.status}` }));
       packet = response.ok ? body : { ...body, ok: false };
@@ -266,13 +395,31 @@ async function loadStatus(force = false) {
   }
 }
 
-function joinHostNode() {
+async function joinHostNode() {
   const host = normalizedHost();
-  if (!host || !latestStatus?.ok) return false;
+  const button = el('cw-host-node-join');
+  if (button?.dataset.mode === 'search' || !host) { revealSearch(true); await searchNearest(); return false; }
+  if (!latestStatus?.ok) return false;
+  const help = el('cw-host-node-help');
+  if (button) { button.disabled = true; button.textContent = localFederated ? 'Reserving seat…' : 'Logging in…'; }
+  let login = null;
+  if (!localFederated) {
+    try {
+      if (!access()?.join) throw new Error('The Hub login runtime is not ready. Refresh this screen and try again.');
+      login = await access().join(host,{nodeId:normalizedNodeId()});
+    } catch (error) {
+      if (help) help.textContent = Number(error?.status) === 409
+        ? 'This Hub filled before the seat could be reserved. Find the nearest Hub with an open slot.'
+        : `Civweave could not log in to this Hub: ${error?.message || error}`;
+      if (Number(error?.status) === 409) revealSearch(true);
+      if (button) { button.disabled = false; renderSelectedState(); }
+      return false;
+    }
+  }
   const selection = Object.freeze({
     schema: 'civweave.host-node-selection.v1',
     origin: host,
-    nodeId: latestStatus.nodeId || null,
+    nodeId: login?.session?.nodeId || latestStatus.nodeId || normalizedNodeId() || null,
     displayName: latestStatus.displayName || null,
     selectedAt: new Date().toISOString(),
     source: REVISION,
@@ -281,13 +428,15 @@ function joinHostNode() {
     localStorage.setItem(HOST_ENDPOINT_KEY, host);
     localStorage.setItem(HOST_SELECTION_KEY, JSON.stringify(selection));
   } catch {
-    const help = el('cw-host-node-help');
     if (help) help.textContent = 'This browser blocked local Host Node storage, so Civweave could not save the selection.';
+    if (button) button.disabled = false;
     return false;
   }
   renderSelectedState();
-  const help = el('cw-host-node-help');
-  if (help) help.textContent = `${latestStatus.displayName || 'This host'} is now your Host Node on this device.`;
+  if (button) button.disabled = false;
+  if (help) help.textContent = localFederated
+    ? `${latestStatus.displayName || 'This Hub'} is now your device’s Hub Node.`
+    : `Logged in to ${latestStatus.displayName || 'this Hub'}. Capacity-backed Cloudflare AI is now available in this tab.`;
   dispatchEvent(new CustomEvent('civweave:host-node-selected', { detail: selection }));
   return true;
 }
@@ -305,13 +454,13 @@ async function boot() {
     activeHost = explicit;
     if (explicit === location.origin) await discoverSameOriginFederatedHost();
   } else if (!await discoverSameOriginFederatedHost()) {
-    return false;
+    activeHost = selectedOrigin();
   }
   markStewardBrowser();
   installStyles();
   if (!buildLobby()) return false;
   renderSelectedState();
-  loadStatus(false);
+  if (normalizedHost()) loadStatus(false);
   scheduleRefresh();
   addEventListener('pagehide', () => clearInterval(refreshTimer), { once: true });
   return true;
@@ -328,6 +477,8 @@ globalThis.CivweaveHostNodeInstallerLobbyV1 = Object.freeze({
   discoverSameOriginFederatedHost,
   loadStatus,
   joinHostNode,
+  searchNearest,
+  showSearch: revealSearch,
   boot,
 });
 

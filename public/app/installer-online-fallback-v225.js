@@ -11,10 +11,23 @@ let repairing = false;
 
 function installHostNodeLobby() {
   if (document.querySelector('script[data-civweave-host-node-lobby]')) return false;
+  const appendLobby = () => {
+    if (document.querySelector('script[data-civweave-host-node-lobby]')) return false;
+    const lobby = document.createElement('script');
+    lobby.src = `/app/host-node-installer-lobby-v1.js?v=${releaseVersion()}-hub-login-v1`;
+    lobby.async = true;
+    lobby.dataset.civweaveHostNodeLobby = 'v3';
+    document.head.append(lobby);
+    return true;
+  };
+  if (globalThis.CivweaveHostNodeSessionV1) return appendLobby();
+  const existing = document.querySelector('script[data-civweave-host-node-session]');
+  if (existing) { existing.addEventListener('load', appendLobby, { once: true }); return true; }
   const script = document.createElement('script');
-  script.src = `/app/host-node-installer-lobby-v1.js?v=${releaseVersion()}-local-host-autodetect-v2`;
+  script.src = `/app/host-node-session-v1.js?v=${releaseVersion()}-hub-login-v1`;
   script.async = true;
-  script.dataset.civweaveHostNodeLobby = 'v2';
+  script.dataset.civweaveHostNodeSession = 'v1';
+  script.addEventListener('load', appendLobby, { once: true });
   document.head.append(script);
   return true;
 }

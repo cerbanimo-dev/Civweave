@@ -10,6 +10,12 @@ const GENERATION_MODEL = '@cf/meta/llama-3.1-8b-instruct-fast';
 const INPUT_NEURONS_PER_MILLION = 4_119;
 const OUTPUT_NEURONS_PER_MILLION = 34_868;
 const DEFAULT_CORE_ORIGIN = 'https://api.commonweave.earth';
+const AI_CORS = Object.freeze({
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET, POST, OPTIONS',
+  'access-control-allow-headers': 'authorization, content-type, x-civweave-node-id',
+  'access-control-max-age': '86400'
+});
 const MEMBERSHIP_TIERS = Object.freeze({
   member: Object.freeze({ id: 'member', serviceAmountCents: 500, monthlyLifetimeCredits: 100_000 }),
   maker: Object.freeze({ id: 'maker', serviceAmountCents: 1_000, monthlyLifetimeCredits: 250_000 }),
@@ -18,7 +24,7 @@ const MEMBERSHIP_TIERS = Object.freeze({
 });
 
 const clean = (value, max = 12_000) => String(value ?? '').trim().slice(0, max);
-const json = (value, status = 200) => Response.json(value, { status, headers: { 'cache-control': 'no-store' } });
+const json = (value, status = 200) => Response.json(value, { status, headers: { 'cache-control': 'no-store', ...AI_CORS } });
 function b64urlDecode(value) {
   const normalized = clean(value, 20_000).replaceAll('-', '+').replaceAll('_', '/');
   const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
@@ -26,7 +32,7 @@ function b64urlDecode(value) {
   return Uint8Array.from(binary, char => char.charCodeAt(0));
 }
 async function hmacKey(env) {
-  const source = clean(env.NODE_FABRIC_OPERATOR_TOKEN, 10_000);
+  const source = clean(env.NODE_FABRIC_SESSION_SECRET || env.NODE_FABRIC_OPERATOR_TOKEN, 10_000);
   if (source.length < 24) throw Object.assign(new Error('Host capacity session authority is unavailable.'), { status: 503 });
   const material = await crypto.subtle.digest('SHA-256', enc.encode(`${SESSION_DOMAIN}\0${source}`));
   return crypto.subtle.importKey('raw', material, { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
@@ -129,9 +135,10 @@ async function handleGenerate(request, env, nodeId) {
     const result = await env.AI.run(GENERATION_MODEL, options);
     const chargedNeurons = Math.min(reservation.requestedNeurons, actualNeurons(result?.usage));
     const settlement = await capacityPost(env, '/usage/settle', { reservationId: reservation.reservationId, actualNeurons: chargedNeurons });
+    const memberStatus = await capacityPost(env, '/members/status', { nodeId, userId: session.userId });
     const text = extractText(result);
     const outputJson = schema || input.responseFormat === 'json' ? parseStructured(text) : null;
-    if ((schema || input.responseFormat === 'json') && !outputJson) return json({ ok: false, error: 'Workers AI did not return valid structured output.', model: GENERATION_MODEL, usage: { ...(result?.usage || {}), chargedNeurons }, settlement }, 502);
+    if ((schema || input.responseFormat === 'json') && !outputJson) return json({ ok: false, error: 'Workers AI did not return valid structured output.', model: GENERATION_MODEL, usage: { ...(result?.usage || {}), chargedNeurons }, settlement, quota: memberStatus.quota }, 502);
     return json({
       ok: true,
       schema: 'civweave.cloud-generation.v1',
@@ -142,6 +149,7 @@ async function handleGenerate(request, env, nodeId) {
       outputJson,
       usage: { ...(result?.usage || {}), chargedNeurons },
       settlement,
+      quota: memberStatus.quota,
     });
   } catch (error) {
     await capacityPost(env, '/usage/settle', { reservationId: reservation.reservationId, actualNeurons: 0 }).catch(() => {});
@@ -220,12 +228,13 @@ async function handleCommerce(request, env, nodeId, kind) {
 }
 function resolveNodeId(request, env) {
   const url = new URL(request.url), domain = env.NODE_DOMAIN || 'nodes.commonweave.earth';
-  return normalizeNodeId(request.headers.get('x-civweave-node-id') || nodeIdFromHostname(url.hostname, domain));
+  return normalizeNodeId(request.headers.get('x-civweave-node-id') || url.searchParams.get('nodeId') || nodeIdFromHostname(url.hostname, domain));
 }
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url), nodeId = resolveNodeId(request, env);
+    if (nodeId && request.method === 'OPTIONS' && (url.pathname.startsWith('/api/ai/node/') || url.pathname.startsWith('/api/commerce/'))) return new Response(null, { status: 204, headers: AI_CORS });
     if (nodeId && request.method === 'POST' && url.pathname === '/api/ai/node/generate') return handleGenerate(request, env, nodeId);
     if (nodeId && url.pathname === '/api/commerce/options') return handleCommerce(request, env, nodeId, 'options');
     if (nodeId && url.pathname === '/api/commerce/topup') return handleCommerce(request, env, nodeId, 'topup');

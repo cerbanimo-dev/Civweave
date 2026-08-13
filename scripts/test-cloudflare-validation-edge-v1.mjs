@@ -13,7 +13,7 @@ const [wranglerText, entry, executor, optIn] = await Promise.all([
 ]);
 const wrangler = parseJsonc(wranglerText);
 
-assert.equal(wrangler.main, 'src/entry.mjs');
+assert.equal(wrangler.main, 'src/server-ai-entry-v1.mjs');
 assert.equal(wrangler.ai?.binding, 'AI');
 assert.ok(entry.includes("const VALIDATION_MODEL = '@cf/meta/llama-3.1-8b-instruct-fast'"));
 assert.ok(entry.includes("response_format: { type: 'json_schema', json_schema: schema }"));

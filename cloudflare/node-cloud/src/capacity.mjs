@@ -40,6 +40,16 @@ const usageKey = (day, nodeId, userId) => `usage:${day}:${clean(nodeId)}:${clean
 const reservationKey = id => `reservation:${clean(id, 240)}`;
 const settlementKey = (kind, sourceId) => `settlement:${clean(kind, 40)}:${clean(sourceId, 240)}`;
 const emptyWallet = () => ({ balanceNeurons: 0, issuedNeurons: 0, spentNeurons: 0, debtNeurons: 0 });
+const publicMember = member => {
+  if (!member || typeof member !== 'object') return member;
+  const { loginCredentialHash, ...safe } = member;
+  return Object.freeze(safe);
+};
+const publicCapacity = capacity => {
+  if (!capacity || typeof capacity !== 'object') return capacity;
+  const { reservesMicrocents, ...safe } = capacity;
+  return Object.freeze(safe);
+};
 
 export function microcentsToNeurons(microcents, policy = HOST_ECONOMY_POLICY) {
   return Math.max(0, Math.floor(Number(microcents || 0) / policy.neuronCostMicrocents));
@@ -121,6 +131,38 @@ export class CivweaveCapacityAccount {
   async member(nodeId, userId) { return this.state.storage.get(memberKey(nodeId, userId)); }
   async wallet(nodeId, userId) { return { ...emptyWallet(), ...((await this.state.storage.get(walletKey(nodeId, userId))) || {}) }; }
 
+  async memberStatus(input) {
+    const nodeId = clean(input.nodeId), userId = clean(input.userId);
+    if (!nodeId || !userId) throw Object.assign(new TypeError('nodeId and userId are required.'), { status: 400 });
+    const member = await this.member(nodeId, userId);
+    if (!member) throw Object.assign(new RangeError('Member is not admitted to this node.'), { status: 404 });
+    const now = Date.now(), day = dayKey(now);
+    const [capacity, wallet, usedNeuronsToday] = await Promise.all([
+      this.snapshot(nodeId),
+      this.wallet(nodeId, userId),
+      this.state.storage.get(usageKey(day, nodeId, userId)).then(value => Number(value || 0)),
+    ]);
+    const includedUsedNeurons = Math.min(capacity.includedDailyNeurons, Math.max(0, usedNeuronsToday));
+    const includedRemainingNeurons = Math.max(0, capacity.includedDailyNeurons - includedUsedNeurons);
+    const lifetimeRemainingNeurons = wallet.debtNeurons > 0 ? 0 : Math.max(0, wallet.balanceNeurons);
+    const reset = new Date(now); reset.setUTCHours(24, 0, 0, 0);
+    return Object.freeze({
+      schema: 'civweave.host-member-status.v1',
+      member: publicMember(member),
+      capacity: publicCapacity(capacity),
+      quota: Object.freeze({
+        usedNeuronsToday: Math.max(0, usedNeuronsToday),
+        includedDailyNeurons: capacity.includedDailyNeurons,
+        includedUsedNeurons,
+        includedRemainingNeurons,
+        lifetimeRemainingNeurons,
+        totalRemainingNeurons: includedRemainingNeurons + lifetimeRemainingNeurons,
+        debtNeurons: Math.max(0, wallet.debtNeurons),
+        resetsAt: reset.toISOString(),
+      }),
+    });
+  }
+
   async snapshot(nodeId = '') {
     const [config, members, dailyUsedNeurons] = await Promise.all([this.config(), this.members(), this.dailyTotal()]);
     const community = members.filter(item => item.seatClass === 'community'), expansion = members.filter(item => item.seatClass === 'paid-expansion');
@@ -146,12 +188,21 @@ export class CivweaveCapacityAccount {
   async admitMember(input) {
     const nodeId = clean(input.nodeId), userId = clean(input.userId); if (!nodeId || !userId) throw Object.assign(new TypeError('nodeId and userId are required.'), { status: 400 });
     const config = await this.config(); if (!config.hostNodeIds.includes(nodeId)) throw Object.assign(new RangeError('Node is not registered to this capacity account.'), { status: 404 });
-    const key = memberKey(nodeId, userId), prior = await this.state.storage.get(key); if (prior) return { member: prior, capacity: await this.snapshot(nodeId), idempotent: true };
+    const key = memberKey(nodeId, userId), prior = await this.state.storage.get(key);
+    if (prior) {
+      const suppliedHash = clean(input.loginCredentialHash, 128);
+      if (prior.loginCredentialHash && suppliedHash && suppliedHash !== prior.loginCredentialHash) throw Object.assign(new Error('Host login credential is invalid.'), { status: 401 });
+      const next = !prior.loginCredentialHash && suppliedHash
+        ? Object.freeze({ ...prior, loginCredentialHash: suppliedHash, updatedAt: new Date().toISOString() })
+        : prior;
+      if (next !== prior) await this.state.storage.put(key, next);
+      return { member: publicMember(next), capacity: await this.snapshot(nodeId), idempotent: true };
+    }
     const members = await this.members(), capacity = await this.snapshot(nodeId), nodeCommunityCount = members.filter(item => item.nodeId === nodeId && item.seatClass === 'community').length;
     const decision = admissionDecision({ seatClass: input.seatClass, billingStatus: input.billingStatus, capacity, nodeCommunityCount });
     if (!decision.allowed) throw Object.assign(new RangeError(decision.reason), { status: 409 });
-    const member = Object.freeze({ schema: 'civweave.host-member.v1', nodeId, userId, seatClass: clean(input.seatClass).toLowerCase(), billingStatus: clean(input.billingStatus || 'free').toLowerCase() === 'paid' ? 'paid' : 'free', membershipTierId: clean(input.membershipTierId) || null, admittedAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-    await this.state.storage.put(key, member); return { member, capacity: await this.snapshot(nodeId), idempotent: false };
+    const member = Object.freeze({ schema: 'civweave.host-member.v1', nodeId, userId, seatClass: clean(input.seatClass).toLowerCase(), billingStatus: clean(input.billingStatus || 'free').toLowerCase() === 'paid' ? 'paid' : 'free', membershipTierId: clean(input.membershipTierId) || null, loginCredentialHash: clean(input.loginCredentialHash, 128) || null, admittedAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+    await this.state.storage.put(key, member); return { member: publicMember(member), capacity: await this.snapshot(nodeId), idempotent: false };
   }
 
   async setBilling(input) {
@@ -249,6 +300,7 @@ export class CivweaveCapacityAccount {
       if (request.method === 'POST' && url.pathname === '/configure') { const config = await this.config(); config.workersPlan = clean(input.workersPlan).toLowerCase() === 'paid' ? 'paid' : 'free'; await this.putConfig(config); return Response.json(await this.snapshot(input.nodeId || '')); }
       if (request.method === 'POST' && url.pathname === '/nodes/register') return Response.json(await this.registerNode(input.nodeId));
       if (request.method === 'POST' && url.pathname === '/members/admit') return Response.json(await this.admitMember(input));
+      if (request.method === 'POST' && url.pathname === '/members/status') return Response.json(await this.memberStatus(input));
       if (request.method === 'POST' && url.pathname === '/members/billing') return Response.json(await this.setBilling(input));
       if (request.method === 'POST' && url.pathname === '/settlements/membership') return Response.json(await this.settleMembership(input));
       if (request.method === 'POST' && url.pathname === '/settlements/topup') return Response.json(await this.settleTopup(input));

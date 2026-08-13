@@ -5,6 +5,8 @@ const VERSION='1.0.117-working-campus-topbar-v243-downloads-entry-v2';
 const STYLE_ID='cw-working-campus-topbar-v243-style';
 const MAP_BUTTON_ID='cw-working-campus-map-v243';
 const DOWNLOADS_BUTTON_ID='cw-working-campus-downloads-v243';
+const NODE_STATUS_ID='cw-working-campus-node-v243';
+const NODE_STATUS_ENDPOINT='/api/host-node-status';
 const MAP_EVENT='civweave:map-open-request';
 const MAP_READY_EVENT='civweave:map-ready';
 const MAP_API_NAME='CivweaveMapLaunchV243';
@@ -16,9 +18,11 @@ const BRAND_ICON='/app/logos/civweave-pwa-192-v247.png';
 let header=null;
 let mapButton=null;
 let downloadsButton=null;
+let nodeStatus=null;
 let resizeObserver=null;
 let mapOpenHandler=null;
 let mapRoute='';
+let nodeRefreshTimer=0;
 
 if(globalThis[MAP_API_NAME]?.version===VERSION)return;
 
@@ -27,6 +31,7 @@ const isCivweave=()=>{
   return declared==='civweave'||location.pathname==='/app/working-campus-v156.html';
 };
 const clean=value=>String(value??'').trim();
+const hostAccess=()=>globalThis.CivweaveHostNodeSessionV1||null;
 function toast(message){
   const existing=document.getElementById('toast');
   if(existing){existing.textContent=message;existing.hidden=false;setTimeout(()=>{existing.hidden=true},3600);return}
@@ -140,17 +145,23 @@ html[data-civweave-system-route="civweave"],html[data-civweave-system="civweave"
 html[data-civweave-system-route="civweave"] body,html[data-civweave-system="civweave"] body{max-width:100%;overflow-x:clip}
 html[data-civweave-system-route="civweave"] main.app,html[data-civweave-system="civweave"] main.app{max-width:100%;overflow-x:clip}
 html[data-civweave-system-route="civweave"] main.app>header.top,html[data-civweave-system="civweave"] main.app>header.top{position:sticky!important;top:max(6px,env(safe-area-inset-top))!important;z-index:2147483646!important;pointer-events:auto!important;isolation:isolate!important;overflow:visible!important;grid-template-columns:minmax(190px,1fr) auto auto auto auto auto auto!important;grid-template-areas:"brand modes map downloads settings review theme"!important;box-shadow:0 10px 28px #0008!important;max-width:1180px!important;width:100%!important;min-width:0!important}
+html[data-civweave-system-route="civweave"] main.app>header.top[data-hub-session="true"],html[data-civweave-system="civweave"] main.app>header.top[data-hub-session="true"]{grid-template-areas:"brand modes map downloads settings review theme" "node node node node node node node"!important}
 html[data-civweave-system-route="civweave"] main.app>header.top>*,html[data-civweave-system="civweave"] main.app>header.top>*{pointer-events:auto!important;min-width:0}
 #${MAP_BUTTON_ID}{grid-area:map;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:38px;border-color:#8ee8ff66;background:linear-gradient(135deg,#8ee8ff18,#8af5d214)}
 #${MAP_BUTTON_ID}[data-map-state="ready"]{border-color:#8af5d299;box-shadow:inset 0 0 14px #8af5d214}
 #${DOWNLOADS_BUTTON_ID}{grid-area:downloads;position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:38px;border-color:#f6d77d66;background:linear-gradient(135deg,#f6d77d18,#ef9cff14)}
 #${DOWNLOADS_BUTTON_ID}:focus-visible{outline:2px solid #f6d77dcc;outline-offset:2px}
+#${NODE_STATUS_ID}{grid-area:node;display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;padding:9px 12px;border:1px solid #8df0c64d;border-radius:13px;background:linear-gradient(100deg,#09251fd9,#10243be8);color:#eefcff;text-align:left;cursor:pointer}
+#${NODE_STATUS_ID}[hidden]{display:none!important}#${NODE_STATUS_ID}>span{min-width:0}#${NODE_STATUS_ID} strong,#${NODE_STATUS_ID} small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#${NODE_STATUS_ID} strong{font-size:.8rem}#${NODE_STATUS_ID} small{margin-top:2px;color:#b9d8d1;font-size:.69rem}#${NODE_STATUS_ID}>b{flex:none;padding:4px 8px;border-radius:999px;background:#8df0c622;color:#8df0c6;font-size:.68rem}#${NODE_STATUS_ID}[data-health="degraded"]{border-color:#ffd08a66;background:linear-gradient(100deg,#2a2110e8,#291a24e8)}#${NODE_STATUS_ID}[data-health="degraded"]>b{background:#ffd08a22;color:#ffd08a}
 html[data-civweave-system-route="civweave"] #cw-persistent-guide-chat-v215,html[data-civweave-system="civweave"] #cw-persistent-guide-chat-v215{top:calc(var(--cw-working-campus-topbar-height,88px) + env(safe-area-inset-top) + 14px)!important;bottom:calc(var(--cw-themed-nav-height,58px) + env(safe-area-inset-bottom) + 10px)!important;height:auto!important;max-height:none!important;z-index:2147483644!important}
 html[data-civweave-system-route="civweave"] #cw-persistent-guide-chat-v215.is-minimized,html[data-civweave-system="civweave"] #cw-persistent-guide-chat-v215.is-minimized{top:auto!important;height:auto!important;max-height:min(38dvh,300px)!important}
 @media(max-width:960px){html[data-civweave-system-route="civweave"] main.app>header.top,html[data-civweave-system="civweave"] main.app>header.top{grid-template-columns:minmax(0,1fr) auto auto auto auto!important;grid-template-areas:"brand modes map downloads settings" "brand review theme diagnostics diagnostics"!important}}
+@media(max-width:960px){html[data-civweave-system-route="civweave"] main.app>header.top[data-hub-session="true"],html[data-civweave-system="civweave"] main.app>header.top[data-hub-session="true"]{grid-template-areas:"brand modes map downloads settings" "brand review theme diagnostics diagnostics" "node node node node node"!important}}
 @media(max-width:700px){
 html[data-civweave-system-route="civweave"] main.app>header.top,html[data-civweave-system="civweave"] main.app>header.top{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;grid-template-areas:"brand brand" "modes modes" "map downloads" "settings review" "theme theme"!important;top:max(4px,env(safe-area-inset-top))!important;gap:6px!important}
+html[data-civweave-system-route="civweave"] main.app>header.top[data-hub-session="true"],html[data-civweave-system="civweave"] main.app>header.top[data-hub-session="true"]{grid-template-areas:"brand brand" "node node" "modes modes" "map downloads" "settings review" "theme theme"!important}
 html[data-civweave-diagnostics="true"][data-civweave-system-route="civweave"] main.app>header.top,html[data-civweave-diagnostics="true"][data-civweave-system="civweave"] main.app>header.top{grid-template-areas:"brand brand" "modes modes" "map downloads" "settings review" "theme theme" "diagnostics diagnostics"!important}
+html[data-civweave-diagnostics="true"][data-civweave-system-route="civweave"] main.app>header.top[data-hub-session="true"],html[data-civweave-diagnostics="true"][data-civweave-system="civweave"] main.app>header.top[data-hub-session="true"]{grid-template-areas:"brand brand" "node node" "modes modes" "map downloads" "settings review" "theme theme" "diagnostics diagnostics"!important}
 html[data-civweave-system-route="civweave"] main.app>header.top .mode-switch,html[data-civweave-system="civweave"] main.app>header.top .mode-switch{width:100%!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
 html[data-civweave-system-route="civweave"] main.app>header.top .pill,html[data-civweave-system="civweave"] main.app>header.top .pill,html[data-civweave-system-route="civweave"] main.app>header.top [data-cw160-review],html[data-civweave-system="civweave"] main.app>header.top [data-cw160-review],html[data-civweave-system-route="civweave"] main.app>header.top [data-cw160-theme],html[data-civweave-system="civweave"] main.app>header.top [data-cw160-theme]{min-width:0!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important}
 #${MAP_BUTTON_ID},#${DOWNLOADS_BUTTON_ID}{min-width:0!important;width:100%!important;padding:8px 9px!important}
@@ -183,22 +194,61 @@ function installDownloadsButton(){
   downloadsButton.title='Manage installs, offline downloads, and host node connection';
   return true
 }
+function finiteWhole(value){if(value==null||value==='')return null;const number=Number(value);return Number.isFinite(number)&&number>=0?Math.floor(number):null}
+async function publicNodeStatus(origin,nodeId=''){
+  const url=new URL(NODE_STATUS_ENDPOINT,location.origin);url.searchParams.set('host',origin);if(nodeId)url.searchParams.set('node',nodeId);
+  const response=await fetch(url,{cache:'no-store',headers:{accept:'application/json'}}),packet=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(packet.error||`Hub status returned HTTP ${response.status}.`);return packet
+}
+function installNodeStatus(){
+  header=document.querySelector('main.app>header.top');if(!header)return false;
+  nodeStatus=document.getElementById(NODE_STATUS_ID);
+  if(!nodeStatus){nodeStatus=document.createElement('button');nodeStatus.id=NODE_STATUS_ID;nodeStatus.type='button';nodeStatus.hidden=true;nodeStatus.setAttribute('aria-label','Open Hub Node status in Downloads');nodeStatus.innerHTML='<span><strong>Hub status</strong><small>Checking login and capacity…</small></span><b>Checking</b>';const first=header.firstElementChild;if(first)first.after(nodeStatus);else header.append(nodeStatus)}
+  if(!nodeStatus.dataset.cw243Bound){nodeStatus.dataset.cw243Bound='true';nodeStatus.addEventListener('click',openDownloads)}
+  return true
+}
+function renderNodeStatus({session=null,memberStatus=null,publicStatus=null,error=null}={}){
+  if(!nodeStatus||!header)return false;
+  if(!session){nodeStatus.hidden=true;header.dataset.hubSession='false';syncHeaderHeight();return false}
+  const quota=memberStatus?.quota||{},capacity=memberStatus?.capacity||{},telemetry=hostAccess()?.telemetryFor?.(session.nodeId)||{};
+  const remaining=finiteWhole(quota.includedRemainingNeurons)??finiteWhole(telemetry.remainingNeurons),turns=finiteWhole(telemetry.approximateTurnsLeft),members=finiteWhole(capacity.nodeMembers),connections=finiteWhole(publicStatus?.health?.connections);
+  const displayName=clean(publicStatus?.displayName||session.nodeId)||'Civweave Hub';
+  const healthy=!error&&publicStatus?.status!=='degraded'&&publicStatus?.health?.ok!==false;
+  const details=[remaining==null?null:`${remaining.toLocaleString()} neurons left today`,turns==null?null:`≈${turns.toLocaleString()} chats`,members==null?null:`${members.toLocaleString()} member${members===1?'':'s'}`,connections==null?null:`${connections.toLocaleString()} live connection${connections===1?'':'s'}`].filter(Boolean).join(' · ');
+  nodeStatus.hidden=false;header.dataset.hubSession='true';nodeStatus.dataset.health=healthy?'online':'degraded';nodeStatus.querySelector('strong').textContent=`${displayName} · ${healthy?'healthy':'degraded'}`;nodeStatus.querySelector('small').textContent=error?`Hub health refresh failed: ${clean(error.message||error)}`:(details||`Logged in as ${clean(memberStatus?.member?.seatClass||session.seatClass||'member')}`);nodeStatus.querySelector('b').textContent=healthy?'Hub online':'Check Hub';nodeStatus.title=`${session.nodeId} · ${session.origin}`;syncHeaderHeight();return true
+}
+async function refreshNodeStatus(){
+  if(!installNodeStatus())return null;
+  const api=hostAccess();if(!api){renderNodeStatus();return null}
+  let session=api.sessionFor?.()||null;
+  try{session=session||await api.ensureSelected?.()}catch(error){console.warn('[Civweave] Saved Hub login could not be restored.',error)}
+  if(!session){renderNodeStatus();return null}
+  const [memberResult,publicResult]=await Promise.allSettled([api.status(session.nodeId),publicNodeStatus(session.origin,session.nodeId)]);
+  const memberStatus=memberResult.status==='fulfilled'?memberResult.value:null,publicStatus=publicResult.status==='fulfilled'?publicResult.value:null,error=memberResult.status==='rejected'?memberResult.reason:publicResult.status==='rejected'?publicResult.reason:null;
+  renderNodeStatus({session:api.sessionFor?.(session.nodeId)||session,memberStatus,publicStatus,error});
+  return{session,memberStatus,publicStatus,error}
+}
 function installHeaderControls(){
   if(!installMapButton())return false;
   installDownloadsButton();
+  installNodeStatus();
   syncHeaderHeight();
   resizeObserver?.disconnect();
   if('ResizeObserver'in globalThis){resizeObserver=new ResizeObserver(syncHeaderHeight);resizeObserver.observe(header)}
   addEventListener('resize',syncHeaderHeight,{passive:true});
   globalThis.visualViewport?.addEventListener('resize',syncHeaderHeight,{passive:true});
   document.documentElement.dataset.civweaveWorkingCampusTopbar='v243-mobile-v248-federation-finder-v268-downloads-entry-v2';
+  void refreshNodeStatus();
+  clearInterval(nodeRefreshTimer);nodeRefreshTimer=setInterval(()=>{if(document.visibilityState==='visible')void refreshNodeStatus()},30_000);
+  addEventListener('pagehide',()=>clearInterval(nodeRefreshTimer),{once:true});
   return true
 }
 function start(){if(!isCivweave())return;installStyle();if(!installHeaderControls())queueMicrotask(installHeaderControls)}
 addEventListener(MAP_READY_EVENT,event=>registerMap(event.detail||{}));
+for(const eventName of ['civweave:capacity-session-ready','civweave:capacity-session-cleared','civweave:ai-neuron-usage'])addEventListener(eventName,()=>queueMicrotask(()=>void refreshNodeStatus()));
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 
 globalThis[FINDER_API_NAME]=Object.freeze({version:'1.7.2-launch-v268-no-localhost-v1',storageKey:FINDER_STORAGE,defaultOrigin:location.origin,url:configuredFinderUrl,configure:configureFinder,open:openFederationFinder});
 globalThis[DOWNLOADS_API_NAME]=Object.freeze({version:VERSION,url:downloadsUrl,open:openDownloads,state:()=>({button:Boolean(downloadsButton),route:downloadsUrl(),storedHost:storedHostOrigin()})});
-globalThis[MAP_API_NAME]=Object.freeze({version:VERSION,event:MAP_EVENT,readyEvent:MAP_READY_EVENT,open:openMap,register:registerMap,configureFinder,state:()=>({route:mapRoute,handler:Boolean(mapOpenHandler),button:Boolean(mapButton),downloadsButton:Boolean(downloadsButton),downloadsRoute:downloadsUrl(),finder:configuredFinderUrl(),finderVersion:'1.7.2',mobileContainment:'v248',brandIcon:BRAND_ICON})});
+globalThis[MAP_API_NAME]=Object.freeze({version:VERSION,event:MAP_EVENT,readyEvent:MAP_READY_EVENT,open:openMap,register:registerMap,configureFinder,refreshNodeStatus,state:()=>({route:mapRoute,handler:Boolean(mapOpenHandler),button:Boolean(mapButton),downloadsButton:Boolean(downloadsButton),nodeStatus:Boolean(nodeStatus&&!nodeStatus.hidden),downloadsRoute:downloadsUrl(),finder:configuredFinderUrl(),finderVersion:'1.7.2',mobileContainment:'v248',brandIcon:BRAND_ICON})});
 })();
