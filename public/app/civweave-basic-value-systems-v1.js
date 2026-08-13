@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueSystemsV1)return;
-const VERSION='1.0.3';
+const VERSION='1.1.0';
 const KEYS=Object.freeze({civweave:'civweave.working-campus.v1',living:'civweave.living-school.cabinet.v151',cerbanimo:'cerbanimo.quest-engine.v144'});
 const clean=(value,max=5000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
@@ -65,7 +65,10 @@ function valuationText(v,{learning=false}={}){
   const parts=[];
   if(v.laborWorthHours>0)parts.push(`${v.laborWorthHours}h human-equivalent`);
   if(v.educationalHours>0)parts.push(`${v.educationalHours}h educational`);
-  if(v.baseline?.buttons>0)parts.push(`${v.baseline.buttons} 🔘 Buttons baseline`);
+  if(v.baseline?.buttons>0){
+    const rate=Number(v.baseline?.wageRateButtonsPerHour||globalThis.CivweaveBasicValueV1?.guide?.labor?.wageButtonsPerHour||5);
+    parts.push(`${v.baseline.buttons} 🔘 wage · ${rate} 🔘/h uniform rate`);
+  }
   if(v.baseline?.acorns>0)parts.push(`${v.baseline.acorns} 🌰 Acorns${learning?' curriculum reference':' baseline'}`);
   parts.push(v.status.replace(/^model-/,'').replace(/-/g,' '));
   return parts.join(' · ');
@@ -76,7 +79,7 @@ function decorateCerbanimo(){
   for(const card of document.querySelectorAll?.('.cq144-task[data-task-id]')||[]){
     const row=byId.get(card.dataset.taskId);if(!row)continue;let node=card.querySelector('[data-economic-valuation]');
     if(!node){node=document.createElement('div');node.dataset.economicValuation='';node.className='cq144-warning';card.querySelector('header')?.insertAdjacentElement('afterend',node)}
-    node.textContent=`Value review: ${valuationText(row.valuation)}. Baseline is not an automatic payout.`;
+    node.textContent=`Value review: ${valuationText(row.valuation)}. The Button rate is the same starting wage for everyone; the model only judges human-equivalent hours. This record does not itself transfer currency.`;
   }
 }
 function decorateLiving(){
