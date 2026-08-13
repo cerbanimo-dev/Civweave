@@ -14,11 +14,15 @@ const outputDir = path.join(root, '.cloudflare-launch');
 const outputPath = path.join(outputDir, 'core.wrangler.jsonc');
 const template = await readFile(templatePath, 'utf8');
 if (!template.includes('__CIVWEAVE_CORE_D1_ID__')) throw new Error('Core Wrangler template is missing the D1 placeholder.');
+const templateEntryMatch = template.match(/"main"\s*:\s*"([^"]+)"/);
+const templateEntry = String(templateEntryMatch?.[1] || '').trim();
+if (!templateEntry) throw new Error('Core Wrangler template is missing its Worker entrypoint.');
+const generatedEntry = `../cloudflare/core/${templateEntry.replace(/^\.\//, '')}`;
 let rendered = template.replaceAll('__CIVWEAVE_CORE_D1_ID__', d1Id);
 rendered = rendered
-  .replace('"main": "src/index.mjs"', '"main": "../cloudflare/core/src/stripe-connect-v2-entry.mjs"')
+  .replace(`"main": "${templateEntry}"`, `"main": "${generatedEntry}"`)
   .replace('"migrations_dir": "migrations"', '"migrations_dir": "../cloudflare/core/migrations"');
-if (!rendered.includes('"main": "../cloudflare/core/src/stripe-connect-v2-entry.mjs"')) throw new Error('Generated Wrangler config did not retarget the Stripe Connect V2 core entrypoint.');
+if (!rendered.includes(`"main": "${generatedEntry}"`)) throw new Error(`Generated Wrangler config did not retarget the canonical core entrypoint ${templateEntry}.`);
 if (!rendered.includes('"migrations_dir": "../cloudflare/core/migrations"')) throw new Error('Generated Wrangler config did not retarget the D1 migrations directory.');
 await mkdir(outputDir, { recursive: true });
 await writeFile(outputPath, rendered);
@@ -36,7 +40,7 @@ console.log(JSON.stringify({
   membershipSplit: '50-system/25-host/25-cerbanimo',
   fundsModel: 'platform-reserve-separate-transfer',
   liveMoneyEnabled: false,
-  workerEntry: '../cloudflare/core/src/stripe-connect-v2-entry.mjs',
+  workerEntry: generatedEntry,
   migrationsDir: '../cloudflare/core/migrations',
   next: [
     'npx wrangler d1 migrations apply civweave-core --remote --config .cloudflare-launch/core.wrangler.jsonc',

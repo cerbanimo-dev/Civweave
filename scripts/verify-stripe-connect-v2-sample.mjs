@@ -96,7 +96,9 @@ assert.ok(entrySource.indexOf('STRIPE_SNAPSHOT_WEBHOOK_PATHS.has(url.pathname)')
 assert.ok(entrySource.indexOf("request.method === 'POST' && url.pathname === THIN_WEBHOOK_PATH") < entrySource.indexOf('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
 assert.ok(entrySource.includes('if (enabled(env?.STRIPE_CONNECT_SAMPLE_ENABLED))'));
 assert.ok(entrySource.includes('handleStripeConnectV2Sample'));
-assert.ok(prepareSource.includes('../cloudflare/core/src/stripe-connect-v2-entry.mjs'));
+assert.ok(prepareSource.includes('templateEntryMatch'));
+assert.ok(prepareSource.includes('generatedEntry'));
+assert.ok(prepareSource.includes('../cloudflare/core/'));
 assert.ok(deployWorkflow.includes('npm install --prefix cloudflare/core'));
 assert.ok(deployWorkflow.includes('STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
 assert.ok(!deployWorkflow.includes('probe "$CORE_URL/connect-demo"'), 'production deploy must not expect the disabled sample UI to be public');
