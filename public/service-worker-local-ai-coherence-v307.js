@@ -7,6 +7,7 @@ const CW_LOCAL_AI_EXTRA_PATHS = new Set([
   '/app/family-ai-loader-v105.js',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-owner-v295.js',
+  '/app/experience-orchestrator-v232.js',
   '/app/ai-capability-broker-v268.js',
   '/app/fast-interactive-runtime-v192.js',
   '/app/mobile-ai-hardening-v302.js',
@@ -16,6 +17,7 @@ const CW_LOCAL_AI_CRITICAL = [
   '/app/family-ai-loader-v105.js',
   '/app/local-chat-runtime-v295.js',
   '/app/local-chat-owner-v295.js',
+  '/app/experience-orchestrator-v232.js',
   '/app/ai-capability-broker-v268.js',
   '/app/fast-interactive-runtime-v192.js',
   '/app/mobile-ai-hardening-v302.js',
@@ -128,5 +130,6 @@ self.CivweaveLocalAICodeCoherenceV307 = Object.freeze({
   cache: CW_LOCAL_AI_COHERENCE_CACHE,
   critical: CW_LOCAL_AI_CRITICAL.slice(),
   policy: 'network-first-current-bytes-offline-cache-fallback',
+  smoothFitOrchestrator: true,
   ownsBeforeGenericCodeCoherence: true
 });

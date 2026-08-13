@@ -115,6 +115,8 @@ async function configureRuntime(hf,cache,spec){
   }
   return profile;
 }
+function progressReporter(id,name,started,base={}){let high=0;return value=>{const p=value||{},raw=Number(p.progress_total??p.progress),detail={...base,...p};if(Number.isFinite(raw)&&raw>=0){const pct=Math.max(0,Math.min(100,raw<=1?raw*100:raw));high=Math.max(high,pct);detail.artifactProgress=Number.isFinite(Number(p.progress))?Number(p.progress):null;detail.progress=high;detail.progressOverall=high}if(!detail.artifact&&p.file)detail.artifact=p.file;phase(id,name,started,detail)}}
+function externalDataSetting(spec){const rows=(spec?.artifacts||[]).filter(row=>/\.onnx_data$/i.test(String(row?.path||'')));return rows.length===1?true:false}
 const promptTokenCount=inputs=>Number(inputs?.input_ids?.dims?.at?.(-1)||inputs?.input_ids?.tolist?.()?.[0]?.length||0);
 const generatedIds=(sequences,count)=>{try{return sequences?.tolist?.()?.[0]?.slice(count)||[]}catch{return[]}};
 function makeStreamer(id,requested,timing){if(!hfRuntime?.TextStreamer||!tokenizer)return null;return new hfRuntime.TextStreamer(tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:text=>{const value=clean(text,12000);if(!value)return;timing.decoded+=value;if(requested)post(id,'token',{token:{text:value,index:timing.index++}})},token_callback_function:tokens=>{if(!timing.firstTokenAt)timing.firstTokenAt=now();timing.generatedTokens+=Math.max(1,tokens?.length||1)}})}
@@ -148,10 +150,11 @@ async function ensure(spec,id,{benchmark=false}={}){
     phase(id,'runtime-profile',started,{model:spec.id,...runtime});
     phase(id,'checking-backend',started,{model:spec.id,requestedBackend:spec.device||'wasm',requiresShaderF16:Boolean(spec.requiresShaderF16)});const profile=await atStage('checking-backend',spec,()=>backendProfile(spec));
     phase(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend,gpu:profile.gpu});const tokenizerStarted=now();
-    tokenizer=await atStage('loading-tokenizer',spec,()=>hf.AutoTokenizer.from_pretrained(spec.repo,{revision:spec.revision,progress_callback:p=>phase(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend,...p})}));
+    tokenizer=await atStage('loading-tokenizer',spec,()=>hf.AutoTokenizer.from_pretrained(spec.repo,{revision:spec.revision,progress_callback:progressReporter(id,'loading-tokenizer',started,{model:spec.id,backend:profile.backend})}));
     const tokenizerLoadMs=Math.round(now()-tokenizerStarted);
-    phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,textOnly:Boolean(spec.textOnly)});const modelStarted=now();
-    const modelOptions={revision:spec.revision,device:spec.device||profile.backend,dtype:spec.dtype,progress_callback:p=>phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,...p})};
+    phase(id,'loading-model',started,{model:spec.id,backend:profile.backend,textOnly:Boolean(spec.textOnly),progress:0,progressOverall:0});const modelStarted=now();
+    const modelOptions={revision:spec.revision,device:spec.device||profile.backend,dtype:spec.dtype,progress_callback:progressReporter(id,'loading-model',started,{model:spec.id,backend:profile.backend})};
+    const externalData=externalDataSetting(spec);if(externalData)modelOptions.use_external_data_format=externalData;
     if(spec.textOnly)modelOptions.textOnly=true;
     model=await atStage('loading-model',spec,()=>hf.AutoModelForCausalLM.from_pretrained(spec.repo,modelOptions));
     const modelLoadMs=Math.round(now()-modelStarted);
@@ -160,8 +163,8 @@ async function ensure(spec,id,{benchmark=false}={}){
     const benchmarkResult=benchmark?await warmBenchmark(id,started,profile):null;
     loaded.benchmark=benchmarkResult;
     const coldStartMs=Math.round(now()-started);
-    const metrics={coldStart:true,coldStartMs,tokenizerLoadMs,modelLoadMs,warmupMs,backend:profile.backend,gpu:profile.gpu,...runtime,...(benchmarkResult||{})};
-    phase(id,'model-ready',started,{model:spec.id,...metrics});
+    const metrics={coldStart:true,coldStartMs,tokenizerLoadMs,modelLoadMs,warmupMs,backend:profile.backend,gpu:profile.gpu,...runtime,externalDataFormat:Boolean(externalData),...(benchmarkResult||{})};
+    phase(id,'model-ready',started,{model:spec.id,progress:100,progressOverall:100,...metrics});
     return metrics;
   })().catch(async error=>{await unload();throw error}).finally(()=>{loading=null});
   return loading;
@@ -175,6 +178,7 @@ function prepareInputs(message,id,started,spec){
   if(removed)phase(id,'trimming-context',started,{model:spec.id,backend:spec.device||'',removedMessages:removed,promptTokens:tokens,promptTokenBudget:budget});
   return{inputs,promptTokens:tokens,removedMessages:removed,promptTokenBudget:budget};
 }
+async function prewarm(message,id){const spec=message.spec,started=now();const metrics=await ensure(spec,id,{benchmark:false});phase(id,'prewarm-ready',started,{model:spec.id,backend:metrics.backend,coldStart:metrics.coldStart,coldStartMs:metrics.coldStartMs,wasmThreads:metrics.wasmThreads});return{prewarmed:true,model:spec.id,backend:metrics.backend,metrics}}
 async function generate(message,id){
   const spec=message.spec,requestStarted=now();let currentPhase='loading-model';
   try{
@@ -192,4 +196,4 @@ async function generate(message,id){
   return{text,json:parseJsonLoose(text),model:{id:spec.id,repo:spec.repo,revision:spec.revision,runtime:spec.runtime||'transformers-js-v3'},backend:load.backend,streamed:Boolean(message.stream&&streamer),streamRequested:Boolean(message.stream),metrics:{...load,promptPrepareMs,promptTokens,promptTokenBudget:prepared.promptTokenBudget,removedMessages:prepared.removedMessages,contextWindowTokens:window,workingContextTokens:working,maxNewTokens,thinking:Boolean(message.thinking),generationMs,ttftMs,prefillAndFirstTokenMs:ttftMs,decodeMs:Math.round(decodeMs),generatedTokens:tokenCount,tokensPerSecond,totalMs:Math.round(completed-requestStarted),kvCache:true}};
   }catch(error){throw annotate(error,currentPhase,spec)}
 }
-self.addEventListener('message',async event=>{const message=event.data||{},id=message.id;if(!id)return;try{if(message.type==='shutdown'){await unload();post(id,'done',{result:{shutdown:true}});return}if(message.type!=='generate')throw new Error(`Unsupported local-model worker request: ${message.type}`);post(id,'done',{result:await generate(message,id)})}catch(error){const stage=error?.code==='LOCAL_MODEL_CONTEXT_EXCEEDED'?'context check':error?.phase||'inference',detail={message:friendlyError(error,message.spec,stage),name:error?.name||'Error',code:error?.code||'LOCAL_MODEL_FAILED',phase:error?.phase||stage,model:error?.model||message.spec?.id||'',modelLabel:error?.modelLabel||message.spec?.label||message.spec?.id||'',backend:error?.backend||message.spec?.device||'',rawMessage:clean(error?.message||error,1000),stack:clean(error?.stack,4000),sessionReleased:true};await unload();post(id,'error',{error:detail})}});
+self.addEventListener('message',async event=>{const message=event.data||{},id=message.id;if(!id)return;try{if(message.type==='shutdown'){await unload();post(id,'done',{result:{shutdown:true}});return}if(message.type==='prewarm'){post(id,'done',{result:await prewarm(message,id)});return}if(message.type!=='generate')throw new Error(`Unsupported local-model worker request: ${message.type}`);post(id,'done',{result:await generate(message,id)})}catch(error){const stage=error?.code==='LOCAL_MODEL_CONTEXT_EXCEEDED'?'context check':error?.phase||'inference',detail={message:friendlyError(error,message.spec,stage),name:error?.name||'Error',code:error?.code||'LOCAL_MODEL_FAILED',phase:error?.phase||stage,model:error?.model||message.spec?.id||'',modelLabel:error?.modelLabel||message.spec?.label||message.spec?.id||'',backend:error?.backend||message.spec?.device||'',rawMessage:clean(error?.message||error,1000),stack:clean(error?.stack,4000),sessionReleased:true};await unload();post(id,'error',{error:detail})}});

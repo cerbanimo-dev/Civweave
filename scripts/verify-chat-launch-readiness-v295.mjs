@@ -28,6 +28,8 @@ assert.match(orchestrator,/CivweaveLocalChatOwnerV295\?\.enqueue/);
 assert.match(orchestrator,/CivweaveChatFullscreenV295\?\.settleViewport/);
 assert.match(orchestrator,/runtimeOwnedWebGPUFallback:true/);
 assert.match(orchestrator,/runtimeFirstBootstrap:true/);
+assert.match(orchestrator,/smoothFitRuntime===true/);
+assert.match(orchestrator,/intentPrewarm===true/);
 assert.match(workspace,/document\.addEventListener\('submit',onSubmitCapture,true\)/,'guide workspace remains the canonical non-local document submit owner');
 
 assert.match(fullscreen,/1\.0\.106-chat-fullscreen-v299/);
@@ -64,16 +66,20 @@ assert.match(localRuntime,/bootstrapAuxiliaryFailureNonFatal:true/);
 assert.match(localRuntime,/function waitForRuntime\(/);
 assert.match(localRuntime,/if\(runtimeReady\(\)\|\|outcome\?\.runtime\)/,'compatible inference runtime must win over later bootstrap auxiliary failure');
 assert.ok(localRuntime.indexOf("onProgress?.({phase:'loading-runtime'")<localRuntime.indexOf('await load(`${BOOT}'),'startup progress must be published before bootstrap wait');
-assert.match(localRuntime,/p==='loading-model'\)return 300000/,'outer chat watchdog must give Windows WebGPU model construction time to execute');
+assert.match(localRuntime,/p==='loading-model'\)return 240000/,'outer chat watchdog must remain bounded while allowing real WebGPU model construction');
 assert.match(localRuntime,/coldStartBenchmarkOptOut:true/);
 assert.match(localRuntime,/windowsWebGPUGrace:true/);
 assert.match(localRuntime,/runtimeFallbackOwned/);
 assert.match(localRuntime,/runtimeOwnedWebGPUFallback:true/);
 assert.match(localRuntime,/Promise\.race\(\[request,watchdog,hardTimeout\]\)/);
+assert.match(localRuntime,/smoothFitRuntime:true/);
+assert.match(localRuntime,/adaptiveResidency:true/);
+assert.match(localRuntime,/adaptiveWasmThreads:true/);
+assert.match(localRuntime,/intentPrewarm:true/);
 
 assert.match(runtime266,/1\.0\.115-local-ai-runtime-v302-session-handoff/);
 assert.match(runtime266,/function stageIdleMs\(/);
-assert.match(runtime266,/spec\?\.device==='webgpu'\?240000:300000/,'WebGPU model construction must have a bounded Windows-aware no-progress timeout distinct from WASM');
+assert.match(runtime266,/p==='loading-model'\)return spec\?\.device==='webgpu'\?240000:240000/,'model construction keeps a bounded no-progress timeout');
 assert.match(runtime266,/LOCAL_WEBGPU_LOAD_STALLED/);
 assert.match(runtime266,/function resetWorker\(/,'fallback must start in a fresh worker instead of reusing the stuck global loading promise');
 assert.match(runtime266,/markQuarantined/);
@@ -86,7 +92,12 @@ assert.match(runtime266,/serializedInference:true/);
 assert.match(runtime266,/coldStartBenchmarkOptIn:true/);
 assert.match(runtime266,/knownArtifactLengths:true/);
 assert.match(runtime266,/freshFallbackWorker/,'a fallback must terminate the previous worker before loading another model');
-assert.match(runtime266,/forceSingleThread:spec\.device==='wasm'/,'the compatibility model must favor bounded memory over threaded WASM');
+assert.doesNotMatch(runtime266,/forceSingleThread:spec\.device==='wasm'/,'desktop WASM must no longer be permanently single-threaded');
+assert.match(runtime266,/spec\.device==='wasm'&&\(!globalThis\.crossOriginIsolated\|\|mobileLike\(\)\|\|hardwareConcurrency\(\)<4\)/,'single-thread compatibility remains for mobile, low-core, or non-isolated devices');
+assert.match(runtime266,/compatibility\?Math\.min\(512/,'CPU compatibility must cap prompt work');
+assert.match(runtime266,/compatibility\?Math\.min\(48/,'CPU compatibility must cap output work');
+assert.match(runtime266,/function prewarm\(/);
+assert.match(runtime266,/function residencyMs\(/);
 assert.match(runtime266,/\['loading-runtime','checking-backend','loading-tokenizer','loading-model'\]\.includes\(phase\)/,'only session-construction failures may silently change model tiers');
 
 assert.match(bootstrap,/REVISION='1\.0\.115-local-ai-bootstrap-v302-session-handoff'/);
@@ -95,6 +106,7 @@ assert.match(bootstrap,/stalledWebGPUFallback===true/);
 assert.match(bootstrap,/componentCompatibility:'capability-contract-v307'/);
 assert.match(bootstrap,/did not load within 12 seconds/);
 assert.match(bootstrap,/boundedStartup:true/);
+assert.match(bootstrap,/smoothFitRuntime:true/);
 
 for(const name of ['Weaveling','Moss','Kamiya','Rook','Merlin'])assert.ok(localOwner.includes(name),`local owner lost ${name}`);
 assert.match(localOwner,/fifoQueue:true/);
@@ -102,8 +114,10 @@ assert.doesNotMatch(localOwner,/button\.disabled=true/,'local queue must keep Se
 assert.match(localOwner,/Loading the selected model into memory/);
 assert.match(localOwner,/truthfulExecutionModel:true/);
 assert.match(localOwner,/executionModel:failedId/);
+assert.match(localOwner,/document\.addEventListener\('focusin',prewarmIntent,true\)/);
+assert.match(localOwner,/intentPrewarm:true/);
 
 assert.match(settings,/settingsIndependentOfChat:true/);
 assert.match(settings,/inferenceDormantOnOpen:true/);
 
-console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v312-runtime-first-bootstrap',features:{fiveChats:true,deterministicFullscreenBoot:true,keyboardVisualViewport:true,restingViewportMemory:true,structuralComposerRepair:true,localFifoQueue:true,runtimeOwnedWebGPUFallback:true,runtimeFirstBootstrap:true,bootstrapAuxiliaryFailureNonFatal:true,freshWorkerFallback:true,failedBootstrapRecovery:true,phaseAwareErrors:true,promptBudgetEnforced:true,truthfulExecutionModel:true,singleThreadCompatibility:true,webgpuSessionQuarantine:true,wasmCompatibilityFallback:true,settingsIndependentOfChat:true,windowsMemoryHardening:true,boundedStartup:true,startupProgress:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v314-smooth-fit',features:{fiveChats:true,deterministicFullscreenBoot:true,keyboardVisualViewport:true,restingViewportMemory:true,structuralComposerRepair:true,localFifoQueue:true,runtimeOwnedWebGPUFallback:true,runtimeFirstBootstrap:true,bootstrapAuxiliaryFailureNonFatal:true,freshWorkerFallback:true,failedBootstrapRecovery:true,phaseAwareErrors:true,promptBudgetEnforced:true,truthfulExecutionModel:true,adaptiveWasmCompatibility:true,webgpuSessionQuarantine:true,wasmCompatibilityFallback:true,settingsIndependentOfChat:true,windowsMemoryHardening:true,boundedStartup:true,startupProgress:true,intentPrewarm:true,adaptiveResidency:true,smoothFitRuntime:true}},null,2));

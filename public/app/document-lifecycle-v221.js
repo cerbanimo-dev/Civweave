@@ -4,7 +4,7 @@ const VERSION='document-lifecycle-v296-management-only-settings';
 const LEGACY_ENTRY_REVISION='document-lifecycle-v269-ai-settings-entry';
 const BF_CACHE_REVISION='v308-bfcache-visible-local-ai';
 const SETTINGS_LOAD_POLICY_COMPAT='management-only-no-inference-bootstrap-v296';
-if(globalThis.CivweaveDocumentLifecycleV221?.version===VERSION&&globalThis.CivweaveDocumentLifecycleV221?.bfCacheRevision===BF_CACHE_REVISION)return;
+if(globalThis.CivweaveDocumentLifecycleV221?.version===VERSION&&globalThis.CivweaveDocumentLifecycleV221?.bfCacheRevision===BF_CACHE_REVISION&&globalThis.CivweaveDocumentLifecycleV221?.deviceFitManagement===true)return;
 let active=true;
 const observers=new Set();
 const NativeMutationObserver=globalThis.MutationObserver;
@@ -18,7 +18,7 @@ const LOCAL_AI_MANAGEMENT_FILES=[
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.81-v277',()=>globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true],
   ['/app/local-ai/settings-panel-v267.js?v=1.0.116-v305-download-dock-layout',()=>Boolean(globalThis.CivweaveLocalAISettingsV266?.enhance&&globalThis.CivweaveLocalAISettingsV266?.cacheIntegrityOnDemand===true&&globalThis.CivweaveLocalAISettingsV266?.openPath==='snapshot-first-v287')],
   ['/app/local-ai/primary-route-v283.js?v=1.0.88-v283',()=>globalThis.CivweaveLocalAIPrimaryRouteV283?.version==='1.0.85-local-ai-primary-route-v283'],
-  ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.81-v278',()=>globalThis.CivweaveLocalModelHardwareTierUIV278?.version==='1.0.81-local-ai-hardware-tier-ui-v278']
+  ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.81-v278',()=>globalThis.CivweaveLocalModelHardwareTierUIV278?.version==='1.0.81-local-ai-hardware-tier-ui-v278'&&globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations===true]
 ];
 const LOCAL_AI_VISIBLE_FILES=[LOCAL_AI_MANAGEMENT_FILES[0],LOCAL_AI_MANAGEMENT_FILES[1],LOCAL_AI_MANAGEMENT_FILES[4]];
 let settingsDelegationPromise=null,localAISettingsPromise=null,minimalManagementPromise=null,visibleManagementPromise=null;
@@ -30,9 +30,9 @@ if(typeof NativeMutationObserver==='function'){
 }
 function settingsController(){return globalThis.CivweaveAISettingsCleanroomV188||globalThis.CivweaveModelSettingsControllerV173||globalThis.CivweaveUnifiedAISettingsV175||null}
 function localAIVisibleReady(){return Boolean(globalThis.CivweaveLocalAISettingsV266?.enhance&&globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelRegistryV266?.installable)}
-function localAIManagementReady(){return Boolean(globalThis.CivweaveLocalAISettingsV266?.enhance&&globalThis.CivweaveLocalAISettingsV266?.truthfulCompletion===true&&globalThis.CivweaveLocalAISettingsV266?.cacheIntegrityOnDemand===true&&globalThis.CivweaveLocalAISettingsV266?.openPath==='snapshot-first-v287'&&globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelRegistryV266?.installable)}
-function localAIInferenceReady(){return Boolean(localAIManagementReady()&&globalThis.CivweaveLocalAIBootstrapV266?.version===LOCAL_AI_BOOTSTRAP_VERSION&&globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true&&globalThis.CivweaveLocalModelRuntimeV266?.canonicalCausalLM===true&&globalThis.CivweaveLocalModelBridgeV266?.patch)}
-function enhanceLocalAISettings(){const panel=globalThis.CivweaveLocalAISettingsV266?.enhance?.()||null;globalThis.CivweaveLocalModelTestPulseV269?.enhance?.(panel||undefined);return panel}
+function localAIManagementReady(){return Boolean(globalThis.CivweaveLocalAISettingsV266?.enhance&&globalThis.CivweaveLocalAISettingsV266?.truthfulCompletion===true&&globalThis.CivweaveLocalAISettingsV266?.cacheIntegrityOnDemand===true&&globalThis.CivweaveLocalAISettingsV266?.openPath==='snapshot-first-v287'&&globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true&&globalThis.CivweaveLocalModelRegistryV266?.installable&&globalThis.CivweaveLocalAIPrimaryRouteV283?.version==='1.0.85-local-ai-primary-route-v283'&&globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations===true)}
+function localAIInferenceReady(){return Boolean(localAIManagementReady()&&globalThis.CivweaveLocalAIBootstrapV266?.version===LOCAL_AI_BOOTSTRAP_VERSION&&globalThis.CivweaveLocalModelRuntimeV266?.canonicalCausalLM===true&&globalThis.CivweaveLocalModelBridgeV266?.patch)}
+function enhanceLocalAISettings(){const panel=globalThis.CivweaveLocalAISettingsV266?.enhance?.()||null;globalThis.CivweaveLocalModelHardwareTierUIV278?.decorate?.();globalThis.CivweaveLocalModelTestPulseV269?.enhance?.(panel||undefined);return panel}
 function ensureScript(src,ready,label='Civweave script'){
   if(ready?.())return Promise.resolve(true);
   return new Promise((resolve,reject)=>{
@@ -40,7 +40,7 @@ function ensureScript(src,ready,label='Civweave script'){
     const timer=setTimeout(()=>reject(new Error(`${label} did not become ready.`)),8000);
     script.onload=()=>{clearTimeout(timer);ready?.()?resolve(true):reject(new Error(`${label} loaded without becoming ready.`))};
     script.onerror=()=>{clearTimeout(timer);reject(new Error(`${label} could not load.`))};
-    document.head.append(script);
+    const head=document.head;if(!head){clearTimeout(timer);reject(new Error(`${label} could not mount because the document is leaving.`));return}head.append(script);
   });
 }
 function ensureVisibleManagement(){
@@ -73,7 +73,7 @@ function ensureLocalAISettingsManagement(){
     await ensureMinimalManagement();
     if(!localAIManagementReady())throw new Error('Downloaded local AI management did not become ready.');
     queueMicrotask(enhanceLocalAISettings);
-    try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-mounted',{detail:{version:VERSION,bfCacheRevision:BF_CACHE_REVISION,bootstrapVersion:globalThis.CivweaveLocalAIBootstrapV266?.version||'',bootstrapReady:false,managementReady:true,inferenceReady:localAIInferenceReady(),settingsFirst:true,managementOnly:true,inferenceDormantOnOpen:true,cacheIntegrityOnDemand:true,metadataOnlyRepair:Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair),metadataRepairRaceSafe:Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe),truthfulCompletion:true,largeExternalDataForeground:Boolean(globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground)}}))}catch{}
+    try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-mounted',{detail:{version:VERSION,bfCacheRevision:BF_CACHE_REVISION,bootstrapVersion:globalThis.CivweaveLocalAIBootstrapV266?.version||'',bootstrapReady:false,managementReady:true,inferenceReady:localAIInferenceReady(),settingsFirst:true,managementOnly:true,inferenceDormantOnOpen:true,cacheIntegrityOnDemand:true,metadataOnlyRepair:Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair),metadataRepairRaceSafe:Boolean(globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe),truthfulCompletion:true,largeExternalDataForeground:Boolean(globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground),deviceFitRecommendations:Boolean(globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations)}}))}catch{}
     return true;
   })().catch(error=>{localAISettingsPromise=null;try{dispatchEvent(new CustomEvent('civweave:local-ai-settings-unavailable',{detail:{version:VERSION,bfCacheRevision:BF_CACHE_REVISION,message:String(error?.message||error),settingsStillOpen:Boolean(document.getElementById('cw-ai-settings-cleanroom-v188')&&!document.getElementById('cw-ai-settings-cleanroom-v188').hidden)}}))}catch{}return false});
   return localAISettingsPromise;
@@ -123,5 +123,5 @@ addEventListener('pagehide',stopOnPageHide);
 addEventListener('beforeunload',stop,{once:true});
 addEventListener('pageshow',reviveFromPageShow);
 startEntryRepair();
-globalThis.CivweaveDocumentLifecycleV221=Object.freeze({version:VERSION,legacyEntryRevision:LEGACY_ENTRY_REVISION,bfCacheRevision:BF_CACHE_REVISION,active:()=>active,head:()=>document.head,body:()=>document.body,ensureAISettingsDelegation,ensureLocalAISettingsManagement,ensureVisibleManagement,ensureMinimalManagement,localAIVisibleReady,localAIManagementReady,localAIInferenceReady,enhanceLocalAISettings,settingsController,reviveFromPageShow,aiSettingsEntryRepair:'v296-management-only-settings',settingsLoadPolicy:SETTINGS_LOAD_POLICY_COMPAT,visibleSettingsLoadPolicy:'visible-controls-preloaded-management-only-no-inference-v308',listenerPhase:'capture',stop});
+globalThis.CivweaveDocumentLifecycleV221=Object.freeze({version:VERSION,legacyEntryRevision:LEGACY_ENTRY_REVISION,bfCacheRevision:BF_CACHE_REVISION,active:()=>active,head:()=>document.head,body:()=>document.body,ensureAISettingsDelegation,ensureLocalAISettingsManagement,ensureVisibleManagement,ensureMinimalManagement,localAIVisibleReady,localAIManagementReady,localAIInferenceReady,enhanceLocalAISettings,settingsController,reviveFromPageShow,aiSettingsEntryRepair:'v296-management-only-settings',settingsLoadPolicy:SETTINGS_LOAD_POLICY_COMPAT,visibleSettingsLoadPolicy:'visible-controls-preloaded-management-only-no-inference-v308',listenerPhase:'capture',deviceFitManagement:true,stop});
 })();
