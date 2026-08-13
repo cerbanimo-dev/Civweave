@@ -27,13 +27,15 @@
   </div>
   <script src="live-data-preflight-v3.js?v=live-data-r1"></script>
   <script src="/app/cw-reward-ledger-v2.js"></script>
-  <!-- Fail-closed compatibility stub only. Marketplace sale/distribution methods throw. -->
+  <!-- Fail-closed compatibility stub only. Legacy marketplace distribution methods throw. -->
   <script src="/app/cerbanimo-commerce-distribution-v1.js?v=fulfillment-boundary"></script>
   <script src="/app/civweave-live-data.js"></script>
   <script src="marketplace-v2.js?v=live-market-v2"></script>
   <script src="marketplace-v2-capabilities.js?v=capabilities-r1"></script>
-  <script src="fulfillment-economy-v1.js?v=fulfillment-v1"></script>
-  <script src="marketplace-v2-symbols.js?v=currency-symbols-r1"></script>
+  <script src="fulfillment-economy-v2.js?v=fulfillment-direct-charge-v2"></script>
+  <!-- v2 installs the v1 global alias first, so this retained file exits immediately. -->
+  <script src="fulfillment-economy-v1.js?v=fulfillment-v1-compat"></script>
+  <script src="marketplace-v2-symbols.js?v=currency-symbols-r2"></script>
   <script type="module" src="labor-context-v1.mjs?v=core-labor-v1"></script>
   <script src="cabinet-bridge.js?v=marketplace-v2-capabilities-r1"></script>
   <script src="civweave-handoff-consumer.js" data-system="fellowfare"></script>
