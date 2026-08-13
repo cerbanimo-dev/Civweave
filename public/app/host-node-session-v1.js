@@ -113,8 +113,14 @@ function recordUsage({nodeId='',chargedNeurons=0,quota=null}={}){
 function forgetCredential(origin,nodeId=''){const host=normalizedOrigin(origin);if(!host)return false;const all=credentials();delete all[nodeId?`${host}#${clean(nodeId,180)}`:host];return saveCredentials(all)}
 function publicStatus(){return{version:VERSION,selectedOrigin:selectedOrigin(),sessions:Object.values(sessions()).map(item=>({nodeId:item.nodeId,userId:item.userId,origin:item.origin,seatClass:item.seatClass||null,expiresAt:item.expiresAt||null,active:!item.expiresAt||Date.parse(item.expiresAt)>Date.now(),telemetry:clone(item.telemetry||null)}))}}
 function loadPaidJoinExtension(){
-  if(typeof document==='undefined'||document.querySelector('script[data-civweave-paid-hub-join]'))return false;
-  const script=document.createElement('script');script.src='/app/host-node-paid-join-v1.js?v=paid-only-hub-join-v1';script.async=true;script.dataset.civweavePaidHubJoin='v1';document.head.append(script);return true
+  if(typeof document==='undefined')return false;
+  const assets=[
+    ['/app/host-node-paid-join-v1.js?v=paid-only-hub-join-v1','civweavePaidHubJoin','v1'],
+    ['/app/host-node-status-selection-v1.js?v=paid-only-hub-join-v1','civweaveHostStatusSelection','v1']
+  ];
+  let loaded=false;
+  for(const[src,key,value]of assets){if(document.querySelector(`script[data-${key.replace(/[A-Z]/g,letter=>`-${letter.toLowerCase()}`)}]`))continue;const script=document.createElement('script');script.src=src;script.async=true;script.dataset[key]=value;document.head.append(script);loaded=true;}
+  return loaded
 }
 
 globalThis.CivweaveHostNodeSessionV1=Object.freeze({version:VERSION,sessionKey:SESSION_KEY,credentialKey:CREDENTIAL_KEY,selectionKey:SELECTION_KEY,join,status,ensureSelected,setSession,sessionFor,telemetryFor,recordUsage,clearSession,selectedOrigin,hasCredential:(origin,nodeId='')=>Boolean(credentialFor(origin,{nodeId})),forgetCredential,publicStatus});
