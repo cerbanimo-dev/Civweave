@@ -126,3 +126,78 @@ body.ff-cabinet-embedded .ffv2-dialog textarea:focus,
 body.ff-cabinet-embedded .ffv2-rook-price select:focus{border-color:#1d5870!important;box-shadow:0 0 0 3px rgba(29,88,112,.18)!important}
 .ffv2-currency-label{display:inline-flex;align-items:baseline;gap:.18em;white-space:nowrap}
 .ffv2-currency-symbol{font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-weight:400;line-height:1}
+
+/* r3: finish contrast on empty states, result counters, dark cards and muted copy.
+   Every light parchment surface gets explicit dark ink; every dark surface gets
+   explicit cream. Do not rely on inherited opacity or system theme colors. */
+body.ff-cabinet-embedded .ffv2-empty h2{
+  color:#173b49!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+body.ff-cabinet-embedded .ffv2-empty p{
+  color:#455b5b!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+body.ff-cabinet-embedded :is(
+  .ffv2-section-head>p,
+  .ffv2-section-head>span,
+  .ffv2-metric span,
+  .ffv2-metric small,
+  .ffv2-source,
+  .ffv2-meta dt,
+  .ffv2-detail-list dt,
+  .ffv2-policy-grid p,
+  .ffv2-rook-price p:not(.ffv2-eyebrow),
+  .ffv2-draft-card>small,
+  .ffv2-order>small,
+  .ffv2-receipt small,
+  .ffv2-profile-card p,
+  .ffv2-policy-note p,
+  .ffv2-trust-empty p
+){
+  color:#425958!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+body.ff-cabinet-embedded .ffv2-wallet-strip small{
+  color:#ffe8b6!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+body.ff-cabinet-embedded .ffv2-wallet-strip strong,
+body.ff-cabinet-embedded .ffv2-wallet-strip button{
+  color:#fff8e9!important;
+  opacity:1!important;
+}
+body.ff-cabinet-embedded .ffv2-node-card h2,
+body.ff-cabinet-embedded .ffv2-money-panel h2{
+  color:#fff8e9!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+body.ff-cabinet-embedded .ffv2-node-card p:not(.ffv2-eyebrow),
+body.ff-cabinet-embedded .ffv2-money-panel p:not(.ffv2-eyebrow),
+body.ff-cabinet-embedded .ffv2-money-status span{
+  color:#f9e7c1!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+body.ff-cabinet-embedded .ffv2-balance-grid :is(strong,small){
+  color:#fff8e9!important;
+  opacity:1!important;
+}
+body.ff-cabinet-embedded .ffv2-balance-grid span{
+  color:#ffd98e!important;
+  opacity:1!important;
+}
+body.ff-cabinet-embedded :is(.ffv2-toolbar,.ffv2-form,.ffv2-dialog,.ffv2-rook-price){
+  color-scheme:light!important;
+}
+body.ff-cabinet-embedded :is(.ffv2-toolbar,.ffv2-form,.ffv2-dialog,.ffv2-rook-price) :is(input,textarea,select){
+  color-scheme:light!important;
+  background-color:#fff9e8!important;
+  color:#153849!important;
+  -webkit-text-fill-color:#153849!important;
+}
