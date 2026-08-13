@@ -1,0 +1,54 @@
+name: Civweave final green-pass validation
+
+on:
+  push:
+    branches:
+      - ci/repair-green-pass-3-20260812
+    paths:
+      - .github/workflows/green-pass-final-validation-scratch.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install production dependencies
+        run: npm ci --omit=dev --no-audit --no-fund
+      - name: Verify current contracts
+        run: |
+          set -euxo pipefail
+          node scripts/verify-stable-app-entry-v215.mjs
+          node scripts/verify-weaveling-hub-v233.mjs
+          node scripts/verify-chat-convergence-v250.mjs
+          node scripts/verify-local-ai-bootstrap-coherence-v307.mjs
+          node scripts/test-open-learning-media-runtime-v1.mjs
+          node scripts/verify-navigation-generators-v227.mjs
+          node scripts/verify-pwa-cold-launch-recovery-v426.mjs
+          node scripts/verify-pwa-install-campus-v246.mjs
+          node scripts/verify-radio-shell-guarantee-v305.mjs
+          node scripts/verify-canonical-core-only-v226.mjs
+          node scripts/test-proof-driven-checkpoints-v158.mjs
+          npm run check:release-discipline
+          npm run check
+      - name: Verify marketplace workflow semantics
+        run: |
+          node -e "const p=require('./public/app/offline-package-v208.json'); if(!Array.isArray(p.seeds)||p.seeds.length<11) throw new Error('canonical offline roots unexpectedly shrank'); for(const f of ['/finder','/app/federation-finder-local-v269.html','/app/node-ai-marketplace-surface-v1.js','/app/node-ai-operator-v1.html']) if(!p.assets.includes(f)) throw new Error('missing optional offline marketplace asset '+f)"
+      - name: Verify packaged recovery semantics
+        run: |
+          npm run build:release
+          node scripts/build-cloudflare-pages.mjs
+          release_version="$(tr -d '[:space:]' < VERSION)"
+          grep -q "revision=boot-recovery-v426" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "version:'${release_version}-boot-recovery-v426'" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "updateViaCache:'none'" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "bounded(registration.update()" .cloudflare-pages/app/installed-entry-v146.js
+          grep -q "service-worker-local-ai-coherence-v307.js?v=${release_version}-local-ai-code-coherence-v307" .cloudflare-pages/service-worker-v203.js
+          grep -q "radio-core-shell-v305-playlist-only-v246" .cloudflare-pages/service-worker-v203.js
