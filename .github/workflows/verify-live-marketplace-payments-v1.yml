@@ -11,9 +11,12 @@ on:
       - 'cloudflare/core/src/commerce-edge.mjs'
       - 'cloudflare/core/src/money-edge-with-memberships.mjs'
       - 'cloudflare/core/src/stripe-connect-v2-entry.mjs'
+      - 'cloudflare/core/src/origin-entry.mjs'
       - 'scripts/verify-live-marketplace-payments-v1.mjs'
       - 'scripts/verify-cerbanimo-commerce-distribution-v1.mjs'
       - 'docs/finance/fellowfare-fulfillment-economy-v1.md'
+      - 'docs/finance/cerbanimo-commerce-distribution-v1.md'
+      - 'docs/finance/cross-node-commerce-host-fee-v1.md'
       - '.github/workflows/verify-live-marketplace-payments-v1.yml'
   workflow_dispatch:
 
@@ -31,5 +34,9 @@ jobs:
           node-version: 22
       - name: Verify FellowFare fulfillment/payment boundary
         run: |
+          node --check cloudflare/core/src/origin-entry.mjs
+          node --check cloudflare/core/src/stripe-connect-v2-entry.mjs
+          node --check cloudflare/core/src/money-edge-with-memberships.mjs
           node scripts/verify-live-marketplace-payments-v1.mjs
           node scripts/verify-cerbanimo-commerce-distribution-v1.mjs
+          node scripts/verify-fellowfare-marketplace-v2.mjs
