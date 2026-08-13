@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueV1)return;
-const VERSION='1.0.0';
+const VERSION='1.1.0';
 const SCHEMA='civweave.basic-value-guide.v1';
 const LIVING_STATE_KEY='civweave.living-school.cabinet.v151';
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
@@ -12,9 +12,14 @@ const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{retu
 const copy=value=>JSON.parse(JSON.stringify(value));
 const GUIDE=Object.freeze({
   schema:SCHEMA,
-  version:1,
+  version:2,
   symbols:Object.freeze({button:'🔘',acorn:'🌰'}),
-  labor:Object.freeze({buttonsPerHour:5,basis:'human-equivalent labor at an ordinary competent pace; automation does not reduce the baseline'}),
+  labor:Object.freeze({
+    wageButtonsPerHour:5,
+    buttonsPerHour:5,
+    wagePolicy:'uniform-starting-wage',
+    basis:'uniform starting wage for human-equivalent labor at an ordinary competent pace; every worker receives the same Button wage rate, while models estimate only the hours represented by the work; automation does not reduce the wage or hours baseline'
+  }),
   learning:Object.freeze({moduleCompletionAcorns:2,externalValidationBonusAcorns:2,validatorContributionAcorns:1}),
   education:Object.freeze({acornsPerHour:10,curriculumMinAcorns:5,curriculumMaxAcorns:50,curriculumBasis:'length and quality'}),
   mentorship:Object.freeze({
@@ -23,7 +28,7 @@ const GUIDE=Object.freeze({
     learningHeavy:Object.freeze({id:'learning-heavy',label:'Learning-heavy mentorship',buttons:0,acorns:20})
   })
 });
-function laborButtons(hours){return round(Math.max(0,num(hours))*GUIDE.labor.buttonsPerHour)}
+function laborButtons(hours){return round(Math.max(0,num(hours))*GUIDE.labor.wageButtonsPerHour)}
 function educationalAcorns(hours){return round(Math.max(0,num(hours))*GUIDE.education.acornsPerHour)}
 function curriculumAcorns({hours=0,recommendedAcorns=0}={}){
   const explicit=num(recommendedAcorns);
@@ -61,12 +66,13 @@ function baselineFor(kind,input={}){
   if(['learning','curriculum'].includes(type))return{kind:type,hours,buttons:0,acorns:curriculumAcorns({hours,recommendedAcorns:input?.recommendedAcorns}),basis:'curriculum length + quality, with 10 🌰 Acorns/hour as the time baseline and a 5–50 🌰 range'};
   if(['tutoring','education','educational-time'].includes(type))return{kind:type,hours,buttons:0,acorns:educationalAcorns(hours),basis:'10 🌰 Acorns per educational hour'};
   if(type==='mentorship')return{kind:type,hours,...mentorship(input?.mode||input?.mentorshipMode),basis:'mentorship mix of learning and doing'};
-  return{kind:type||'labor',hours,buttons:laborButtons(hours),acorns:0,basis:'5 🔘 Buttons per human-equivalent labor hour before market evaluation'};
+  const wage=laborButtons(hours);
+  return{kind:type||'labor',hours,buttons:wage,wageButtons:wage,wageRateButtonsPerHour:GUIDE.labor.wageButtonsPerHour,acorns:0,wagePolicy:GUIDE.labor.wagePolicy,basis:'uniform starting wage: 5 🔘 Buttons per human-equivalent labor hour for every worker; models value hours, not rank'};
 }
 function formatButtons(value){return`${round(value)} 🔘 Buttons`}
 function formatAcorns(value){return`${round(value)} 🌰 Acorns`}
 function chartRows(){return[
-  {id:'labor-hour',label:'Baseline labor',value:`${formatButtons(5)} / hour`,note:'Human-equivalent pace; automation does not discount value.'},
+  {id:'labor-hour',label:'Starting wage',value:`${formatButtons(5)} / hour`,note:'Uniform labor wage for everyone. Models estimate human-equivalent hours, never a higher or lower rate for rank, prestige, or automation.'},
   {id:'module-complete',label:'Learning module completed',value:formatAcorns(2),note:'Completion grant.'},
   {id:'module-validated',label:'External successful validation',value:`+${formatAcorns(2)}`,note:'Bonus after successful external confidence validation.'},
   {id:'validation-help',label:'Validate someone’s learning',value:formatAcorns(1),note:'For a qualified model/neuron validation contribution.'},
