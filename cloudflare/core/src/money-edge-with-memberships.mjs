@@ -53,13 +53,15 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
       membershipTiers: Object.values(MEMBERSHIP_TIERS).map(tier => Object.freeze({ ...tier })),
       membershipBilling: 'monthly-platform-subscription-separate-host-transfer',
       commerce: Object.freeze({
-        accountModel: 'accounts-v2-marketplace-recipient',
-        chargePattern: 'platform-charge-separate-transfers',
-        splitFeeBps: CERBANIMO_COMMERCE_FEE_BPS,
-        splitFeePlacement: 'on-top-of-listed-price',
-        contributorPayoutBase: 'full-listed-price',
-        settlementTiming: 'immediate-after-paid-checkout',
-        annualPoolEligible: false
+        mode: 'legacy-settlement-only',
+        marketplaceCheckoutEnabled: false,
+        marketplaceRecipientOnboardingEnabled: false,
+        goodsPaymentMode: 'seller-direct-outside-platform',
+        serviceLearningMode: 'acorn-button-fulfillment-burn',
+        platformCollectsSellerPayment: false,
+        platformRoutesSellerPayment: false,
+        legacyLifecycleHandling: true,
+        note: 'Legacy webhook settlement/refund/dispute handling remains only to safely unwind payments that were already started before marketplace checkout was retired.'
       })
     });
   }
@@ -72,6 +74,7 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
     const object = event?.data?.object || {};
     if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       if (object?.metadata?.civweave_schema === CERBANIMO_COMMERCE_SCHEMA) {
+        // Legacy only: no new commerce sessions can be created by the public router.
         return settleCommerceCheckout(this, object, event.id);
       }
       if (object?.mode === 'subscription' || object?.metadata?.civweave_schema === 'civweave.node-membership.v1') {
