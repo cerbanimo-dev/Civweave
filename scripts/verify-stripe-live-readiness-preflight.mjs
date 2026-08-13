@@ -9,6 +9,7 @@ const EXPECTED_EVENTS = Object.freeze([
   'charge.refunded',
   'charge.dispute.created',
   'charge.dispute.funds_withdrawn',
+  'charge.dispute.funds_reinstated',
   'invoice.paid',
   'customer.subscription.deleted'
 ]);
@@ -17,6 +18,7 @@ const EXPECTED_COMMERCE_SPLIT_FEE_BPS = 100;
 
 const providerSource = await readFile(new URL('../cloudflare/core/src/stripe-connect.mjs', import.meta.url), 'utf8');
 const commerceSource = await readFile(new URL('../public/app/cerbanimo-commerce-distribution-v1.js', import.meta.url), 'utf8');
+const serverCommerceSource = await readFile(new URL('../cloudflare/core/src/commerce-edge.mjs', import.meta.url), 'utf8');
 const v2AccountCreationMarker = ['v2', 'core', 'accounts', 'create'].join('.');
 const sourceContract = Object.freeze({
   accountsV2Recipient: providerSource.includes(`STRIPE_CONNECT_ACCOUNT_MODEL = '${EXPECTED_ACCOUNT_MODEL}'`)
@@ -30,7 +32,15 @@ const sourceContract = Object.freeze({
     && providerSource.includes('source_transaction'),
   commerceSplitFeeOnTop: commerceSource.includes('DEFAULT_COMMERCE_SPLIT_FEE_BPS=100')
     && commerceSource.includes('buyerChargeMinor=amountMinor+splitFeeMinor')
-    && commerceSource.includes('reducesContributorPayout:false')
+    && commerceSource.includes('reducesContributorPayout:false'),
+  serverCommerceSettlement: serverCommerceSource.includes('CERBANIMO_COMMERCE_FEE_BPS = 100')
+    && serverCommerceSource.includes("edge.verifyNodeRequest")
+    && serverCommerceSource.includes("'/v1/checkout/sessions'")
+    && serverCommerceSource.includes('createHostTransfer')
+    && serverCommerceSource.includes('sourceTransaction: charge.id')
+    && serverCommerceSource.includes('reverseHostTransfer')
+    && serverCommerceSource.includes("charge.dispute.funds_reinstated")
+    && serverCommerceSource.includes("civweave_annual_pool: 'excluded'")
 });
 if (!Object.values(sourceContract).every(Boolean)) {
   throw new Error(`Live readiness source contract is stale: ${JSON.stringify(sourceContract)}`);
@@ -80,7 +90,7 @@ const edge = core.moneyEdge || core;
 if (edge.liveReady === true) throw new Error('Refusing preflight: Civweave live money is unexpectedly enabled.');
 
 const report = {
-  ok: Boolean(exact) && sourceContract.accountsV2Recipient && sourceContract.separateChargesAndTransfers && sourceContract.commerceSplitFeeOnTop,
+  ok: Boolean(exact) && Object.values(sourceContract).every(Boolean),
   mutationPerformed: false,
   coreOrigin: CORE_ORIGIN,
   stripeLiveAuthentication: true,
@@ -100,7 +110,8 @@ const report = {
   commerce: {
     splitFeeBps: EXPECTED_COMMERCE_SPLIT_FEE_BPS,
     splitFeePlacement: 'on-top-of-listed-price',
-    reducesContributorPayout: false
+    reducesContributorPayout: false,
+    serverSettlementExecutor: sourceContract.serverCommerceSettlement
   },
   snapshotWebhook: {
     url: LIVE_SNAPSHOT_URL,
