@@ -65,15 +65,9 @@ assert.ok(sampleSource.includes('parseEventNotificationAsync'));
 assert.ok(sampleSource.includes('notification.fetchEvent()'));
 assert.ok(sampleSource.includes('STRIPE_CONNECT_THIN_WEBHOOK_SECRET'));
 
-// Stripe supports both full secret keys (sk_*) and restricted server keys (rk_*).
-// The money-edge status must classify either sandbox/live family correctly without
-// exposing any credential material.
 assert.ok(providerSource.includes("key.startsWith('rk_test_')"));
 assert.ok(providerSource.includes("key.startsWith('rk_live_')"));
 
-// Snapshot webhook receipts have an explicit processing lifecycle. A failed event
-// must be claimable on Stripe retry; a completed event must remain idempotent; a
-// fresh in-flight duplicate must not run concurrently.
 for (const needle of [
   "processing_state='processing'",
   "processing_state='processed'",
@@ -86,8 +80,6 @@ for (const needle of ['processing_state', 'processing_attempts', 'last_attempt_a
   assert.ok(retryMigrationSource.includes(needle), `missing Stripe receipt migration field: ${needle}`);
 }
 
-// Interactive sample/admin routes remain disabled by default, but both Stripe-
-// signed webhooks must stay routable without opening the UI.
 assert.equal(wrangler.vars.STRIPE_CONNECT_SAMPLE_ENABLED, 'false');
 assert.ok(entrySource.includes("THIN_WEBHOOK_PATH = '/api/connect-demo/webhooks/stripe-thin'"));
 assert.ok(entrySource.includes('STRIPE_SNAPSHOT_WEBHOOK_PATHS.has(url.pathname)'));
@@ -137,9 +129,9 @@ assert.throws(() => sample.createStripeClient({}), /STRIPE_SECRET_KEY is not con
 const fakeStripe = {
   v2: { core: { accounts: { retrieve: async () => ({
     id: 'acct_demo',
-    configuration: { merchant: { capabilities: { card_payments: { status: 'active' } } },
+    configuration: { merchant: { capabilities: { card_payments: { status: 'active' } } } },
     requirements: { summary: { minimum_deadline: { status: 'pending' } } }
-  }) } } }
+  }) } } } }
 };
 const status = await sample.retrieveConnectStatus(fakeStripe, 'acct_demo');
 assert.equal(status.readyToProcessPayments, true);
