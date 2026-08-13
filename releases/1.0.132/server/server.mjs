@@ -4,8 +4,6 @@ import fsp from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { AiWalletService } from './lib/ai-wallet-service-v1.mjs';
-import { createAiWalletHttpHandler } from './lib/ai-wallet-http-v1.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -17,24 +15,28 @@ const HUB_NAME = process.env.HUB_NAME || 'Civweave Host Node';
 const HUB_TOKEN = String(process.env.HUB_TOKEN || '').trim();
 const MAX_ENVELOPES = Math.max(100, Number(process.env.MAX_ENVELOPES || 5000));
 const STARTED_AT = new Date().toISOString();
-const BUILD_VERSION = '1.0.132-install-only-fullscreen-family-gateway';
-const APP_VERSION = '1.0.132';
+const BUILD_VERSION = '1.0.21-ai-uplift';
+const APP_VERSION = 'rc22.3.20-ai-checkpoint';
 const DEFAULT_PUBLIC_HOST = process.env.PUBLIC_HOST_URL || 'https://civweave-host-node.onrender.com';
-const CIVWEAVE_SOURCE_URL = process.env.CIVWEAVE_SOURCE_URL || 'https://github.com/cerbanimo-dev/Civweave';
-const CIVWEAVE_RELEASE_URL = process.env.CIVWEAVE_RELEASE_URL || 'https://github.com/cerbanimo-dev/Civweave/archive/refs/heads/main.zip';
-const CIVWEAVE_INSTALL_ORIGIN = process.env.CIVWEAVE_INSTALL_ORIGIN || 'https://civweave.pages.dev';
 const INSTALL_KIT_PATH = path.join(PUBLIC_DIR, 'downloads', 'Civweave-Mobile-Install-Kit.zip');
 const CAMPUS_SEED_PATH = path.join(PUBLIC_DIR, 'downloads', 'civweave-pocket-campus.cwseed');
 const sseClients = new Set();
-const installKitSha256 = '';
-const installKitSize = 0;
+let installKitSha256 = '';
+let installKitSize = 0;
+try {
+  const kit = await fsp.readFile(INSTALL_KIT_PATH);
+  installKitSha256 = crypto.createHash('sha256').update(kit).digest('hex');
+  installKitSize = kit.length;
+} catch (error) {
+  console.warn('Install kit metadata unavailable:', error.message);
+}
 function releasePacket(baseUrl = DEFAULT_PUBLIC_HOST) {
   const root = String(baseUrl || DEFAULT_PUBLIC_HOST).replace(/\/$/, '');
   return {
     schema: 'civweave.release.v1', channel: 'stable', hostBuild: BUILD_VERSION, appVersion: APP_VERSION,
-    releasedAt: STARTED_AT, appUrl: CIVWEAVE_INSTALL_ORIGIN, installUrl: CIVWEAVE_INSTALL_ORIGIN, sourceUrl: CIVWEAVE_SOURCE_URL,
-    downloadUrl: CIVWEAVE_RELEASE_URL, sha256: '', bytes: 0, mandatory: false, localInstallRequired: true,
-    notes: 'The public origin distributes the Civweave v1.0.132 fixed-settings-layer device package.'
+    releasedAt: STARTED_AT, appUrl: `${root}/app/?setup=1&host=${encodeURIComponent(root)}`,
+    downloadUrl: `${root}/downloads/Civweave-Mobile-Install-Kit.zip`, sha256: installKitSha256,
+    bytes: installKitSize, mandatory: false, notes: 'Current stable Civweave host-node and offline PWA release.'
   };
 }
 
@@ -55,33 +57,6 @@ try {
 } catch (error) {
   if (error.code !== 'ENOENT') console.warn('State restore skipped:', error.message);
 }
-
-const AI_WALLET_REQUESTED = process.env.NODE_AI_MARKETPLACE_ENABLED === '1' || process.env.AI_WALLET_ENABLED === '1';
-const AI_WALLET_CAPABILITY_SECRET = String(process.env.NODE_AI_CAPABILITY_SECRET || process.env.AI_WALLET_CAPABILITY_SECRET || '').trim();
-const AI_WALLET_AUTH_SECRET = String(process.env.NODE_AI_AUTH_SECRET || process.env.AI_WALLET_AUTH_SECRET || '').trim();
-const AI_WALLET_PAYMENT_SECRET = String(process.env.NODE_AI_PAYMENT_WEBHOOK_SECRET || process.env.AI_WALLET_PAYMENT_SECRET || '').trim();
-const AI_WALLET_INTERNAL_SECRET = String(process.env.NODE_AI_INTERNAL_SECRET || process.env.AI_WALLET_INTERNAL_SECRET || '').trim();
-let aiWalletService = null;
-if (AI_WALLET_REQUESTED) {
-  try {
-    aiWalletService = await new AiWalletService({
-      databasePath: process.env.NODE_AI_LEDGER_PATH || path.join(DATA_DIR, 'node-ai-ledger-v1.sqlite'),
-      nodeId: process.env.NODE_AI_NODE_ID,
-      operatorId: process.env.NODE_AI_OPERATOR_ID,
-      platformFeeBps: process.env.NODE_AI_PLATFORM_FEE_BPS
-    }).load();
-  } catch (error) {
-    console.error('[Civweave] Node AI marketplace stayed disabled:', error.message);
-  }
-}
-const aiWalletHttp = createAiWalletHttpHandler({
-  walletService: aiWalletService,
-  requested: AI_WALLET_REQUESTED,
-  authSecret: AI_WALLET_AUTH_SECRET,
-  paymentSecret: AI_WALLET_PAYMENT_SECRET,
-  internalSecret: AI_WALLET_INTERNAL_SECRET,
-  capabilitySecret: AI_WALLET_CAPABILITY_SECRET
-});
 
 
 function requestOrigin(req, url) {
@@ -259,58 +234,6 @@ const server = http.createServer(async (req, res) => {
   const base = `http://${req.headers.host || 'localhost'}`;
   const url = new URL(req.url || '/', base);
   const pathname = decodeURIComponent(url.pathname);
-  const gatewayRequest = req.method === 'GET' || req.method === 'HEAD';
-  const packageInstall = Boolean(String(req.headers['x-civweave-package'] || '').trim());
-  const installerSurface = pathname === '/'
-    || pathname === '/index.html'
-    || pathname === '/install-v130.js'
-    || pathname === '/install-v130.css'
-    || pathname === '/service-worker.js'
-    || pathname === '/service-worker-v156.js'
-    || pathname === '/service-worker-v203.js'
-    || pathname === '/app/manifest.webmanifest'
-    || pathname === '/app/logos/civweave.webp'
-    || pathname === '/app/logos/civweave-app-icon.png'
-    || pathname === '/app/logos/civweave-icon-192.png'
-    || pathname === '/app/logos/civweave-icon-512.png'
-    || pathname === '/app/logos/civweave-icon-maskable-192.png'
-    || pathname === '/app/logos/civweave-icon-maskable-512.png'
-    || pathname === '/app/knowledge-school-seeds-v1.js'
-    || pathname === '/app/knowledge-school-installer-v1.js'
-    || pathname === '/app/knowledge-school-installer-v1.css'
-    || pathname === '/app/offline-package-v208.json'
-    || pathname === '/app/offline-campus-status-v210.js'
-    || pathname === '/app/pwa-update-controller-v204.js';
-  const applicationSurface = pathname === '/offline.html'
-    || pathname === '/app'
-    || pathname.startsWith('/app/')
-    || pathname === '/loom'
-    || pathname.startsWith('/loom/')
-    || pathname === '/lite'
-    || pathname.startsWith('/lite/')
-    || pathname === '/cabinetonly'
-    || pathname.startsWith('/cabinetonly/')
-    || pathname === '/campus'
-    || pathname.startsWith('/campus/');
-  if (gatewayRequest && packageInstall && pathname === '/app/shared/civweave-parity-ledger.json') {
-    try {
-      const { gunzipSync } = await import('node:zlib');
-      const sharedDir = path.join(PUBLIC_DIR, 'app', 'shared');
-      const encoded = (await Promise.all([1,2,3,4].map(part => fsp.readFile(path.join(sharedDir,'civweave-parity-ledger.part'+part+'.b64'),'utf8')))).join('').replace(/\s+/g,'');
-      const ledger = JSON.parse(gunzipSync(Buffer.from(encoded,'base64')).toString('utf8'));
-      const payload = Buffer.from(JSON.stringify(ledger));
-      res.writeHead(200,{'content-type':'application/json; charset=utf-8','content-length':payload.length,'cache-control':'public, max-age=31536000, immutable','x-civweave-device-package':'parity-ledger','x-civweave-software-family':'1.0.7'});
-      return res.end(req.method === 'HEAD' ? undefined : payload);
-    } catch (error) { console.error('[Civweave] Unable to reconstruct parity ledger:',error); return json(res,500,{error:'The Civweave capability ledger could not be reconstructed for this device package.'}); }
-  }
-  if (gatewayRequest && packageInstall && (pathname === '/loom' || pathname === '/loom/' || pathname === '/loom/index.html' || pathname === '/lite' || pathname === '/lite/' || pathname === '/lite/index.html' || pathname === '/cabinetonly' || pathname === '/cabinetonly/' || pathname === '/cabinetonly/index.html')) {
-    if (await serveFile(req,res,'/app/fullscreen-family-v104.html')) return;
-    return json(res,404,{error:'The full-screen Civweave family entry is missing from this device package.'});
-  }
-  const knowledgeSchoolDownload = pathname === '/downloads/knowledge-schools' || pathname.startsWith('/downloads/knowledge-schools/');
-  if (gatewayRequest && !knowledgeSchoolDownload && (pathname === '/field/civweave/seed' || pathname === '/downloads' || pathname.startsWith('/downloads/'))) { res.writeHead(302,{location:CIVWEAVE_RELEASE_URL,'cache-control':'no-store'}); return res.end(); }
-  if (gatewayRequest && applicationSurface && !installerSurface && !packageInstall && pathname !== '/app' && !pathname.startsWith('/app/')) { return json(res,410,{error:'Installed runtime required',localInstallRequired:true,installUrl:CIVWEAVE_INSTALL_ORIGIN,sourceUrl:CIVWEAVE_SOURCE_URL,releaseUrl:CIVWEAVE_RELEASE_URL,message:'This public origin distributes the complete device package but does not run the Civweave software family in browser mode.'}); }
-  if (pathname === '/api/boot-log' || pathname === '/api/boot-logs') { res.writeHead(204,{'cache-control':'no-store'}); return res.end(); }
   try {
     if ((pathname === '/field/civweave/seed' || pathname === '/downloads/civweave-pocket-campus.cwseed') && req.method === 'GET') {
       const served = await serveFile(req, res, '/downloads/civweave-pocket-campus.cwseed');
@@ -319,26 +242,17 @@ const server = http.createServer(async (req, res) => {
     }
     if (pathname.startsWith('/api/')) {
       if (req.method === 'OPTIONS') {
-        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-civweave-hub-token, x-civweave-ai-capability, x-civweave-internal-secret, x-civweave-payment-signature', 'access-control-allow-methods': 'GET,POST,OPTIONS' });
+        res.writeHead(204, { 'access-control-allow-origin': '*', 'access-control-allow-headers': 'content-type, authorization, x-civweave-hub-token', 'access-control-allow-methods': 'GET,POST,OPTIONS' });
         return res.end();
       }
       res.setHeader('access-control-allow-origin', '*');
-      if (pathname === '/api/finder-status' && req.method === 'GET') {
-        const manifest = aiWalletService?.manifest || null;
-        const sanitizeLocation = value => { const lat = Number(value?.lat ?? value?.latitude), lon = Number(value?.lon ?? value?.longitude); return Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180 ? { lat, lon } : null; };
-        const ownLocation = sanitizeLocation(manifest?.metadata?.publicLocation);
-        const peers = Object.values(state.nodes).map(node => { const publicRecord = publicNode(node); const publicLocation = sanitizeLocation(node?.metadata?.publicLocation); return publicLocation ? { ...publicRecord, publicLocation } : publicRecord; });
-        const capabilities = [...new Set(['node-ai-marketplace', ...(manifest?.services || []).flatMap(service => Array.isArray(service.capabilities) ? service.capabilities : [])])];
-        return json(res, 200, { schema:'civweave.finder-status.v1', observedAt:now(), node:{ nodeId:manifest?.nodeId || 'host-node', label:manifest?.displayName || HUB_NAME, system:'civweave', capabilities, endpoint:requestOrigin(req,url), ...(ownLocation ? { publicLocation:ownLocation } : {}), online:true, firstSeenAt:STARTED_AT, lastSeenAt:now() }, peers });
-      }
-      if (await aiWalletHttp.handle(req, res, url)) return;
       if (!authorized(req) && !['/api/health','/api/config','/api/releases/current','/api/events'].includes(pathname)) return json(res, 401, { error: 'Host node token required' });
       if (pathname === '/api/ai/gemini/interactions' || pathname.startsWith('/api/ai/gemini/interactions/')) return proxyGeminiInteraction(req, res, pathname);
       if (pathname === '/api/health' && req.method === 'GET') {
-        return json(res, 200, { ok: true, name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, release: releasePacket(requestOrigin(req, url)), startedAt: STARTED_AT, now: now(), nodes: Object.keys(state.nodes).length, envelopes: state.envelopes.length, persistence: STATE_FILE, aiWallet: aiWalletHttp.status() });
+        return json(res, 200, { ok: true, name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, release: releasePacket(requestOrigin(req, url)), startedAt: STARTED_AT, now: now(), nodes: Object.keys(state.nodes).length, envelopes: state.envelopes.length, persistence: STATE_FILE });
       }
       if (pathname === '/api/config' && req.method === 'GET') {
-        return json(res, 200, { schema: 'civweave.host-node-config.v1', name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, baseUrl: requestOrigin(req, url), apiBase: `${requestOrigin(req, url)}/api`, appUrl: CIVWEAVE_INSTALL_ORIGIN, installUrl: CIVWEAVE_INSTALL_ORIGIN, sourceUrl: CIVWEAVE_SOURCE_URL, downloadUrl: CIVWEAVE_RELEASE_URL, seedUrl: null, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['install-only-pwa','device-package-distribution','fullscreen-software-family','node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','release-advertising','node-ai-marketplace-v1','federation-finder','node-ai-operator-status'], aiWallet: aiWalletHttp.status() });
+        return json(res, 200, { schema: 'civweave.host-node-config.v1', name: HUB_NAME, build: BUILD_VERSION, appVersion: APP_VERSION, defaultHost: DEFAULT_PUBLIC_HOST, baseUrl: requestOrigin(req, url), apiBase: `${requestOrigin(req, url)}/api`, appUrl: `${requestOrigin(req, url)}/app/`, downloadUrl: `${requestOrigin(req, url)}/downloads/Civweave-Mobile-Install-Kit.zip`, seedUrl: `${requestOrigin(req, url)}/downloads/civweave-pocket-campus.cwseed`, release: releasePacket(requestOrigin(req, url)), tokenRequired: Boolean(HUB_TOKEN), features: ['node-registration','heartbeat','relay-envelopes','presence','sse-events','release-broadcasts','pwa-hosting','offline-installer','gemini-agent-proxy','campus-seed-download'] });
       }
       if (pathname === '/api/releases/current' && req.method === 'GET') {
         return json(res, 200, releasePacket(requestOrigin(req, url)));
@@ -435,7 +349,7 @@ data: ${JSON.stringify(release)}
       if (pathname === '/api/presence' && req.method === 'GET') return json(res, 200, { presence: Object.values(state.presence) });
       return json(res, 404, { error: 'API route not found' });
     }
-    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/civweave-icon-192.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }
+    if (pathname === '/favicon.ico') { res.writeHead(302, { location: '/app/logos/civweave-icon-32.png', 'cache-control': 'public, max-age=86400' }); return res.end(); }
     if (await serveFile(req, res, pathname)) return;
     json(res, 404, { error: 'Not found' });
   } catch (error) {
@@ -451,7 +365,6 @@ async function shutdown(signal) {
   server.close();
   clearTimeout(persistTimer);
   try { await fsp.writeFile(STATE_FILE, JSON.stringify(state, null, 2)); } catch {}
-  try { await aiWalletService?.flush?.(); } catch {}
   process.exit(0);
 }
 process.on('SIGTERM', () => shutdown('SIGTERM'));
