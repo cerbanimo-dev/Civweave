@@ -2,23 +2,26 @@
 
 The canonical Cerbanimo money edge is the Cloudflare `civweave-core` Worker. Render is not a payment authority; it may remain online as a transitional/fallback host while useful.
 
+FellowFare seller commerce is **not** a money-edge payment rail. The canonical marketplace economy is documented in `docs/finance/fellowfare-fulfillment-economy-v1.md`.
+
 ## Current Stripe model
 
-Civweave operates the external-money lane as a **marketplace**. Customer charges are created on the Cerbanimo platform and earned shares are distributed with Stripe **separate charges and transfers**.
+Civweave uses Stripe for platform-controlled money lanes such as compute top-ups, memberships, Host Steward earnings, and reserve-funded distributions.
 
-New Host Steward payout accounts are Stripe Accounts V2 recipient accounts:
+Host Steward payout accounts are Stripe Accounts V2 recipient accounts:
 
 - dashboard: Express;
-- fee collection responsibility: Cerbanimo/application;
-- negative balance liability: Cerbanimo/application;
-- requested payout capability: `configuration.recipient.capabilities.stripe_balance.stripe_transfers`;
-- connected accounts do not need to accept the customer charge themselves.
+- fee collection responsibility: Cerbanimo/application where the platform creates the underlying charge;
+- negative balance liability: Cerbanimo/application where applicable;
+- requested payout capability: `configuration.recipient.capabilities.stripe_balance.stripe_transfers`.
 
-Older sandbox accounts may still have the former direct-charge/full-dashboard shape. They remain readable for migration/testing, but new production enrollment must use the marketplace recipient model.
+These recipient accounts are **not** FellowFare goods-seller accounts. FellowFare does not onboard physical-goods sellers into a platform marketplace payout flow.
+
+Older sandbox marketplace-recipient records may remain readable for recovery/testing. They must not be used to create a new FellowFare seller checkout.
 
 ## Economic lanes
 
-External money is deliberately split into distinct lanes rather than using one global platform-fee percentage.
+External money is deliberately split into distinct platform lanes rather than using a global marketplace take rate.
 
 ### Node compute top-ups
 
@@ -30,7 +33,7 @@ After Stripe's actual processor fee, service net is allocated:
  5% Cerbanimo
 ```
 
-The customer charge belongs to the platform. The Host Steward's 25% earned share is transferred to the host recipient account from the verified source charge.
+The customer charge belongs to the platform. The Host Steward's earned share is transferred from the verified platform charge.
 
 ### Node memberships
 
@@ -44,14 +47,35 @@ Memberships are monthly platform subscriptions. After processor costs, the curre
 
 Host earnings are transferred separately after a paid invoice is independently verified.
 
-### Cerbanimo/FellowFare product and service sales
+### FellowFare goods
 
-The listed USD price is the contributor payout base. A **1% Cerbanimo split fee is added on top** of the listed price and never reduces contributor payouts.
+Physical/community goods do not use the money edge for seller settlement.
 
-- Product sale: the full listed amount is distributed immediately among the Cerbanimo contributors who generated the product, weighted by vested cotoken/co-credit contribution.
-- Service sale: the default 10% origin/template royalty is allocated to contributors who built the reusable original project/template, and the remaining 90% goes to the people delivering that service instance. Each pool is divided by its own vested cotoken/co-credit contribution weight.
-- The same contribution weighting drives associated Acorn/Button sale rewards.
-- Direct commerce proceeds and the 1% split fee do not feed the December 1 reserve distribution.
+```text
+FellowFare listing -> buyer/seller arrangement -> seller's private payment method
+```
+
+FellowFare does not:
+
+- create a marketplace Checkout Session for the goods sale;
+- collect the seller's purchase price;
+- escrow the purchase price;
+- split the purchase price;
+- route the seller's proceeds;
+- charge a FellowFare commerce percentage on the sale.
+
+The seller may state their own price and accepted private payment methods in the listing. Payment is arranged directly between buyer and seller.
+
+### FellowFare services, tutoring, and learning
+
+Services, tutoring, and learning use Acorn/Button fulfillment rather than a platform seller-payment flow.
+
+```text
+requester balance -> fulfillment burn
+provider contribution -> platform reward eligibility
+```
+
+Burned Acorns/Buttons are not transferred to the provider. FellowFare publishes no required USD exchange rate for either resource.
 
 ### December 1 reserve distribution
 
@@ -65,27 +89,47 @@ Once per year, 50% of eligible AI cash reserve becomes the annual payout. That p
 
 The other 50% of eligible reserve remains reserved. Cotokens are weights only; they are not burned by the distribution.
 
+This is a platform-reserve distribution and is separate from FellowFare seller commerce.
+
 ## Node enrollment loop
 
 1. Every host node creates its own stable node/operator identity and Ed25519 receipt keypair locally.
 2. When an operator chooses Connect payouts, the node fetches the Cloudflare core trust document and pins the signing identity.
 3. The core fetches the node manifest and sends a proof challenge. The node signs it with its private key.
 4. The core issues a short-lived, single-use enrollment grant bound to node ID, operator ID, callback origin, and receipt public key. Only the grant hash is stored in D1.
-5. The core creates or reuses a Stripe Accounts V2 recipient connected account and returns Stripe-hosted onboarding.
+5. The core creates or reuses the appropriate Stripe recipient account for eligible platform earnings and returns Stripe-hosted onboarding.
 6. Stripe collects the Host Steward's truthful identity/business and payout-bank information.
 7. Civweave must observe `configuration.recipient.capabilities.stripe_balance.stripe_transfers.status = active` before treating the recipient as transfer-ready.
 
-## Payment settlement loop
+## Platform-payment settlement loop
 
-1. A buyer starts Checkout through the node/app.
+This loop applies to eligible Civweave platform products such as compute top-ups and memberships, not FellowFare seller transactions.
+
+1. A customer starts an eligible platform Checkout through the node/app.
 2. The node signs the request where node authority is required.
 3. Cloudflare core validates the request and creates the platform Checkout Session/subscription.
 4. Stripe sends the relevant live webhook to Cloudflare core.
-5. Core verifies the webhook and independently retrieves the Stripe payment objects before applying value.
-6. D1 records the authoritative settlement idempotently.
-7. Earned Host Steward/contributor shares are transferred to recipient connected accounts using separate Transfers. When the transfer is tied to a particular charge, the verified source charge is used as `source_transaction`.
+5. Core verifies the webhook and independently retrieves Stripe payment objects before applying value.
+6. D1 records authoritative settlement idempotently.
+7. Eligible Host Steward/platform shares are transferred using the appropriate verified source transaction.
 8. Core emits signed payment events to the node where node-local state must change.
 9. Refund/dispute events produce delta adjustments and transfer reversals/debits as appropriate without double application.
+
+## Retired FellowFare marketplace endpoints
+
+The production entry rejects:
+
+```text
+/api/money-edge/commerce/*
+```
+
+with HTTP `410` and code:
+
+```text
+marketplace-checkout-disabled
+```
+
+Legacy commerce webhook settlement/refund/dispute code is retained only so already-created payments can finish or unwind safely. It is not an authorization to open new marketplace sales.
 
 ## Cloudflare authority storage
 
@@ -97,6 +141,7 @@ D1 civweave-core
   connected-account bindings
   top-ups/memberships/settlements
   refunds/disputes
+  legacy commerce records retained for unwind/audit
   pending signed-event deliveries
 
 Durable Object CivweaveCoreIdentity
@@ -117,9 +162,11 @@ STRIPE_CONNECT_THIN_WEBHOOK_SECRET
 NODE_FABRIC_BINDING_TOKEN
 ```
 
-`CIVWEAVE_PLATFORM_FEE_BPS=500` remains the Cerbanimo share of **compute top-up service net only**. It is not the commerce fee and must not be reused as a generic marketplace take rate. Product/service commerce has its own 1% fee-on-top contract.
+`CIVWEAVE_PLATFORM_FEE_BPS=500` remains the Cerbanimo share of **compute top-up service net only**. It must not be reused as a FellowFare marketplace take rate.
 
 ## Payment API
+
+Current platform-money APIs include:
 
 ```text
 GET  /api/money-edge/status
@@ -132,21 +179,11 @@ POST /api/money-edge/topups/:topupId/refund
 POST /api/money-edge/webhooks/stripe
 ```
 
-The payment snapshot webhook subscribes to:
-
-```text
-checkout.session.completed
-checkout.session.async_payment_succeeded
-charge.refunded
-charge.dispute.created
-charge.dispute.funds_withdrawn
-```
-
-Accounts V2 recipient requirements/capability changes must also be observable through a separately signed live event destination so transfer eligibility does not depend on stale local state.
+FellowFare marketplace commerce APIs are intentionally retired.
 
 ## Live-money gate
 
-Cloudflare is canonical authority regardless of whether real money is currently enabled. Live transactions remain fail-closed until all operational gates are deliberately true:
+Cloudflare is canonical authority regardless of whether real platform money is currently enabled. Live platform transactions remain fail-closed until all operational gates are deliberately true:
 
 ```text
 CIVWEAVE_MONEY_LIVE_ENABLED=true
@@ -157,7 +194,7 @@ CIVWEAVE_MONEY_TAX_REPORTING_READY=true
 CIVWEAVE_MONEY_TERMS_APPROVED=true
 ```
 
-The committed launch configuration leaves those gates false. A live Stripe key alone must not enable real Civweave payments.
+Those gates authorize the supported platform-money lanes. They do **not** re-enable FellowFare seller checkout.
 
 ## Security invariants
 
@@ -170,8 +207,10 @@ The committed launch configuration leaves those gates false. A live Stripe key a
 - Core-to-node payment events are signed with the persistent core key.
 - Platform Checkout amounts and economic splits come from Cerbanimo policy, not host-provided fee declarations.
 - Customer payment state is independently re-verified before credit or transfer.
-- Recipient transfers are idempotent and tied to the correct settlement source.
+- Recipient transfers are idempotent and tied to the correct platform settlement source.
 - Refund/dispute adjustments remain separate from processor-fee and Cerbanimo-share accounting.
-- Live money fails closed on provider, webhook, compliance, jurisdiction, KYC/AML, tax, and terms readiness.
+- FellowFare physical-goods seller payments remain outside the platform money edge.
+- FellowFare services/learning/tutoring use fulfillment burn, not seller payment routing.
+- The public marketplace commerce route remains fail-closed even when live platform money is enabled.
 
-See `docs/finance/live-money-human-gate.md` for the remaining launch checkpoints.
+See `docs/finance/live-money-human-gate.md` for platform-money launch checkpoints and `docs/finance/fellowfare-fulfillment-economy-v1.md` for the marketplace economy contract.
