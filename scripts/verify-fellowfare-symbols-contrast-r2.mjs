@@ -10,7 +10,7 @@ const [cabinet,contrast,symbols]=await Promise.all([
 
 assert.doesNotThrow(()=>new Function(symbols),'FellowFare currency-symbol runtime has invalid JavaScript.');
 assert.ok(cabinet.includes('marketplace-v2-symbols.js?v=currency-symbols-r1'),'Active FellowFare cabinet does not load the currency-symbol runtime.');
-assert.ok(cabinet.includes('marketplace-v2-contrast.css?v=contrast-live-r2'),'Active FellowFare cabinet is not cache-busted onto contrast r2.');
+assert.ok(cabinet.includes('marketplace-v2-contrast.css?v=contrast-live-r3'),'Active FellowFare cabinet is not cache-busted onto contrast r3.');
 assert.match(symbols,/button:'🔘'/,'Button symbol is missing.');
 assert.match(symbols,/acorn:'🌰'/,'Acorn symbol is missing.');
 assert.match(symbols,/ffv2-currency-label/,'Visible FellowFare currency terms are not decorated accessibly.');
@@ -21,7 +21,13 @@ for(const token of [
   'color:#153849!important',
   '-webkit-text-fill-color:#153849!important',
   'color:#75634e!important',
-  '.ffv2-currency-symbol'
-])assert.ok(contrast.includes(token),`FellowFare contrast r2 is missing ${token}`);
+  '.ffv2-currency-symbol',
+  '.ffv2-empty h2',
+  '.ffv2-wallet-strip small',
+  '.ffv2-section-head>p',
+  'color:#425958!important',
+  'color:#ffe8b6!important',
+  'color-scheme:light!important'
+])assert.ok(contrast.includes(token),`FellowFare contrast r3 is missing ${token}`);
 
-console.log('FellowFare symbols + contrast r2 verification passed.');
+console.log('FellowFare symbols + contrast r3 verification passed.');
