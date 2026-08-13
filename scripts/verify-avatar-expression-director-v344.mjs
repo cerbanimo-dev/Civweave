@@ -3,7 +3,7 @@ import path from 'node:path';
 
 const root=process.cwd();
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-const need=(ok,msg)=>{if(!ok)throw new Error(msg)};
+const need=(ok,msg)=>{if(!ok){console.error(`::error title=Avatar expression regression::${msg}`);throw new Error(msg)}};
 const D=read('public/app/avatar-expression-director-v343.js');
 const F=read('public/app/shared-chat-face-icons-v255.js');
 const M=JSON.parse(read('public/app/assets/ai/chat/expressions/rle-v315/manifest.json'));
@@ -59,7 +59,7 @@ need(SW.includes('alreadyDownloadedTinyLMSurvivesOffline:true'),'offline TinyLM 
 const failures=[
   ['chat model crash',"phase==='failed'","'sleepy','chat-model-crash'"],
   ['deterministic without TinyLM',"deterministic&&!installed()","'sleepy','deterministic-sleepy'"],
-  ['TinyLM unavailable rules fallback',"if(text&&installed())","'rules'"],
+  ['TinyLM unavailable rules fallback',"if(text&&installed()","'rules'"],
   ['recovery',"phase==='completed'","'recovered'"]
 ];
 for(const [name,...markers] of failures)for(const marker of markers)need(D.includes(marker),`${name} contract missing ${marker}`);
