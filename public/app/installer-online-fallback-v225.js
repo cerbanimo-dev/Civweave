@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-host-node-lobby-v2-hub-recovery-v1-redirect-loop-guard-v1';
+const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-host-node-lobby-v2-hub-recovery-v1-civweave-mail-v1-redirect-loop-guard-v1';
 const REQUIRED_NEXT_KEY = 'civweave.install-required-next.v1';
 const REQUIRED_NEXT_WINDOW_MS = 30_000;
 const CANONICAL_NEXT_PATHS = new Set([
@@ -57,7 +57,7 @@ function installHostNodeLobby() {
   const script = document.createElement('script'); script.src = `/app/host-node-session-v1.js?v=${releaseVersion()}-hub-login-v1`; script.async = true; script.dataset.civweaveHostNodeSession = 'v1'; script.addEventListener('load', appendLobby, { once: true }); document.head.append(script); return true;
 }
 function installHubRecovery() {
-  const sources = ['/app/host-node-session-export-v1.js','/app/host-node-session-import-v1.js','/app/hub-recovery-api-v1.js','/app/hub-recovery-ui-v1.js'];
+  const sources = ['/app/host-node-session-export-v1.js','/app/host-node-session-import-v1.js','/app/hub-recovery-api-v1.js','/app/hub-recovery-ui-v1.js','/app/hub-mail-claim-v1.js'];
   let delay = 0;
   for (const src of sources) { if (document.querySelector(`script[src^="${src}"]`)) continue; const script = document.createElement('script'); script.src = `${src}?v=${releaseVersion()}-hub-recovery-v1`; script.async = false; setTimeout(() => document.head.append(script), delay); delay += 1; }
   return true;
