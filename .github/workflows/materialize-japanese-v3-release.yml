@@ -33,6 +33,7 @@ jobs:
           IFS=. read -r MAJOR MINOR PATCH <<< "$BASE_VERSION"
           NEXT_VERSION="$MAJOR.$MINOR.$((PATCH + 1))"
           printf '%s\n' "$NEXT_VERSION" > VERSION
+          npm version "$NEXT_VERSION" --no-git-tag-version --allow-same-version
           node scripts/materialize-canonical-release.mjs
           node --check public/app/japanese-mode-v1.js
           node scripts/verify-japanese-mode-v1.mjs
