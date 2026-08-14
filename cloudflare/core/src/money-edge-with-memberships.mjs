@@ -110,7 +110,7 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
         serviceLearningMerchantOfRecord: 'connected-provider',
         serviceLearningPlatformFeeMode: 'application-fee',
         serviceLearningDefaultPlatformFeeBps: FELLOWFARE_DEFAULT_SERVICE_FEE_BPS,
-        serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo-first-stage',
+        serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo',
         serviceLearningHostStewardShareBpsOfFee: FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS,
         serviceLearningCerbanimoShareBpsOfFee: FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS,
         serviceLearningCerbanimoSecondStageSplit: '50-cerbanimo-global-50-territory-stewardship',
@@ -119,7 +119,7 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
         platformCollectsGrossSellerPayment: false,
         platformRoutesSellerProceeds: false,
         legacyLifecycleHandling: true,
-        note: 'Physical goods remain seller-direct. Services, learning, and tutoring may use fulfillment burn and/or provider-owned Stripe direct charges. The 5% FellowFare fee still gives half to the facilitating Hub Steward. Only the pre-existing Cerbanimo half is subdivided equally between Cerbanimo Global and the applicable Territory Stewardship office.'
+        note: 'Physical goods remain seller-direct. Services, learning, and tutoring may use fulfillment burn and/or provider-owned Stripe direct charges. The 5% FellowFare fee still gives half to the facilitating Host Steward. Only the pre-existing Cerbanimo half is subdivided equally between Cerbanimo Global and the applicable Territory Stewardship office.'
       })
     });
   }
