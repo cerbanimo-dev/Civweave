@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.0.106-chat-fullscreen-v299',ROOT='cw-persistent-guide-chat-v215',STYLE='cw-chat-fullscreen-v299-style';
-if(globalThis.CivweaveChatFullscreenV295?.version===VERSION)return;
+const VERSION='1.0.106-chat-fullscreen-v299',REVISION='mobile-chat-freeze-v347',ROOT='cw-persistent-guide-chat-v215',STYLE='cw-chat-fullscreen-v299-style';
+if(globalThis.CivweaveChatFullscreenV295?.version===VERSION&&globalThis.CivweaveChatFullscreenV295?.revision===REVISION)return;
 let settleTimers=[],observer=null,rootObserver=null,restingHeight=0,lastOrientation='';
 function root(){return document.getElementById(ROOT)}
 function mobile(){return matchMedia?.('(max-width:720px)')?.matches??innerWidth<=720}
@@ -17,11 +17,11 @@ function viewport(){
   const node=root();if(node)node.dataset.cw299Keyboard=keyboard?'true':'false';
   enforceFullScreen(node);
 }
-function clearInline(node){for(const prop of ['position','inset','left','right','top','bottom','translate','transform','width','height','min-height','max-height','margin','border-radius','border','overflow','overscroll-behavior','contain','z-index','display','flex-direction','box-sizing'])node.style.removeProperty(prop)}
+function clearInline(node){for(const prop of ['position','inset','left','right','top','bottom','translate','transform','width','height','min-height','max-height','margin','border-radius','border','overflow','overscroll-behavior','contain','z-index','display','flex-direction','box-sizing'])if(node.style.getPropertyValue(prop))node.style.removeProperty(prop)}
 function enforceFullScreen(node=root()){
   if(!node)return false;
   if(!mobile()||node.hidden||node.classList.contains('is-minimized')){clearInline(node);return false}
-  const important=(prop,value)=>node.style.setProperty(prop,value,'important');
+  const important=(prop,value)=>{if(node.style.getPropertyValue(prop)===value&&node.style.getPropertyPriority(prop)==='important')return;node.style.setProperty(prop,value,'important')};
   important('position','fixed');important('inset','0 auto auto 0');important('left','0');important('right','auto');important('top','0');important('bottom','auto');important('translate','none');important('transform','none');important('width','100vw');important('height','var(--cw299-vv-height,100dvh)');important('min-height','0');important('max-height','none');important('margin','0');important('border-radius','0');important('border','0');important('overflow','hidden');important('overscroll-behavior','contain');important('contain','layout paint style');important('z-index','2147483646');important('display','flex');important('flex-direction','column');important('box-sizing','border-box');
   node.dataset.cw299Fullscreen='true';return true
 }
@@ -31,7 +31,7 @@ function ensureStructure(){
   let form=node.querySelector('[data-persistent-form]');if(!form){form=node.querySelector('.cwp215-form');if(form)form.setAttribute('data-persistent-form','');else{form=document.createElement('form');form.setAttribute('data-persistent-form','');form.innerHTML='<textarea rows="2" maxlength="12000" required placeholder="Message"></textarea><button data-send type="submit">Send</button>';node.append(form)}}
   let input=form.querySelector('textarea,input[type="text"]');if(!input){input=document.createElement('textarea');input.rows=2;input.maxLength=12000;input.required=true;input.placeholder='Message';form.prepend(input)}
   let send=form.querySelector('[data-send],button[type="submit"]');if(!send){send=document.createElement('button');send.type='submit';send.textContent='Send';form.append(send)}send.setAttribute('data-send','');
-  if(rootObserver?.target!==node){try{rootObserver?.disconnect?.()}catch{}rootObserver=new MutationObserver(()=>queueMicrotask(()=>{ensureStructure();viewport();enforceFullScreen(node)}));rootObserver.observe(node,{attributes:true,attributeFilter:['hidden','class','style'],childList:true,subtree:true});rootObserver.target=node}
+  if(rootObserver?.target!==node){try{rootObserver?.disconnect?.()}catch{}rootObserver=new MutationObserver(()=>queueMicrotask(()=>{ensureStructure();viewport();enforceFullScreen(node)}));rootObserver.observe(node,{attributes:true,attributeFilter:['hidden','class'],childList:true,subtree:true});rootObserver.target=node}
   return true
 }
 function settleViewport(){for(const timer of settleTimers)clearTimeout(timer);settleTimers=[0,32,80,150,260,420,700].map(delay=>setTimeout(()=>{ensureStructure();viewport();enforceFullScreen()},delay))}
@@ -57,5 +57,5 @@ document.addEventListener('focusin',event=>{if(event.target?.closest?.(`#${ROOT}
 document.addEventListener('focusout',event=>{if(event.target?.closest?.(`#${ROOT}`))settleViewport()},{passive:true});
 addEventListener('civweave:guide-workspace-state',settleViewport,{passive:true});
 observer=new MutationObserver(()=>queueMicrotask(()=>{ensureStructure();viewport();enforceFullScreen()}));observer.observe(document.documentElement,{childList:true,subtree:true});
-globalThis.CivweaveChatFullscreenV295=Object.freeze({version:VERSION,fullScreenMobile:true,keyboardVisualViewport:true,staleViewportRecovery:true,restingViewportMemory:true,inlineImportantEnforcement:true,workspaceStateEnforcement:true,androidKeyboardSettling:true,structuralComposerRepair:true,viewport,settleViewport,ensureStructure,enforceFullScreen});
+globalThis.CivweaveChatFullscreenV295=Object.freeze({version:VERSION,revision:REVISION,fullScreenMobile:true,keyboardVisualViewport:true,staleViewportRecovery:true,restingViewportMemory:true,inlineImportantEnforcement:true,workspaceStateEnforcement:true,androidKeyboardSettling:true,structuralComposerRepair:true,mutationLoopGuard:true,styleMutationObserverDisabled:true,viewport,settleViewport,ensureStructure,enforceFullScreen});
 })();
