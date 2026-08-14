@@ -15,7 +15,7 @@ function replaceRequired(before, after, label) {
 }
 replaceRequired(
   "import { createLocalHostCapacityStore } from './lib/local-host-capacity-v1.mjs';",
-  "import { createLocalHostCapacityStore } from './lib/local-host-capacity-v2.mjs';\nimport { createLocalHubAccountStore } from './lib/local-hub-account-v1.mjs';",
+  "import { createLocalHostCapacityStore } from './lib/local-host-capacity-v2.mjs';\nimport { createLocalHubAccountStore } from './lib/local-hub-account-v2.mjs';",
   'local capacity import'
 );
 replaceRequired(
