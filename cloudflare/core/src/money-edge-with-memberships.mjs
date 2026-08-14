@@ -22,6 +22,7 @@ import {
 import {
   SHARED_DOMAIN_HOSTING_SCHEMA,
   sharedDomainHostingReadiness,
+  reconcileSharedDomainHostingRenewal,
   settleSharedDomainHostingInvoice
 } from './shared-domain-billing.mjs';
 import {
@@ -86,8 +87,6 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
     const object = event?.data?.object || {};
     if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       if (object?.metadata?.civweave_schema === CERBANIMO_COMMERCE_SCHEMA) {
-        // Legacy only: no new platform-charge/separate-transfer commerce sessions
-        // can be created by the public router.
         return settleCommerceCheckout(this, object, event.id);
       }
       if (object?.metadata?.civweave_schema === SHARED_DOMAIN_HOSTING_SCHEMA) {
@@ -96,6 +95,10 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
       if (object?.mode === 'subscription' || object?.metadata?.civweave_schema === 'civweave.node-membership.v1') {
         return recordMembershipCheckoutCompletion(this, object);
       }
+    }
+    if (event.type === 'invoice.upcoming') {
+      const meta = object?.parent?.type === 'subscription_details' ? object.parent.subscription_details?.metadata || {} : {};
+      if (meta.civweave_schema === SHARED_DOMAIN_HOSTING_SCHEMA) return reconcileSharedDomainHostingRenewal(this, object);
     }
     if (event.type === 'invoice.paid') {
       const meta = object?.parent?.type === 'subscription_details' ? object.parent.subscription_details?.metadata || {} : {};
