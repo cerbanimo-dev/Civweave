@@ -30,51 +30,23 @@ must(mailConfig.services?.some(binding => binding.binding === 'ACCOUNT_EDGE' && 
 must(!mailConfig.send_email, 'External arbitrary outbound mail must remain disabled until paid Email Sending is intentionally enabled.');
 must(mailPackage.dependencies?.['postal-mime'] === '2.7.5', 'postal-mime must remain pinned for deterministic Worker builds.');
 
-for (const token of [
-  "MAIL_SCHEMA = 'civweave.mail.v2'",
-  "'/api/claim'",
-  'consumeHubClaim',
-  'env.MAIL_BLOBS.put',
-  'env.MAIL_BLOBS.delete(rawKey)',
-  'env.MAILBOX.getByName',
-  "recipientDomain === domain",
-  "External outbound mail is not enabled yet",
-]) must(mailBase.includes(token), `Base mail service is missing ${token}.`);
+for (const token of ["MAIL_SCHEMA = 'civweave.mail.v2'", "'/api/claim'", 'consumeHubClaim', 'env.MAIL_BLOBS.put', 'env.MAIL_BLOBS.delete(rawKey)', 'env.MAILBOX.getByName', "recipientDomain === domain", "External outbound mail is not enabled yet"]) must(mailBase.includes(token), `Base mail service is missing ${token}.`);
 must(!mailBase.includes('crypto.subtle.timingSafeEqual'), 'Base mail service uses a nonexistent Web Crypto timingSafeEqual method.');
 must(!/passport|stripe/i.test(mailBase), 'Mail runtime must not persist or depend on Passport or Stripe identity.');
 
 for (const localPart of ['weaveling', 'moss', 'kamiya', 'rook', 'merlin']) must(mailPm.includes(`'${localPart}'`), `System mailbox ${localPart}@civweave.cc is missing.`);
-for (const token of [
-  'SYSTEM_ACCESS_HASH',
-  'ensureSystem',
-  '/api/system-mailboxes',
-  '/api/worker-interval',
-  "PM_SUFFIX = '_pm'",
-  "'/api/pm/claim'",
-  "'/api/pm/send'",
-  'Hidden _pm transport identities cannot use public mail APIs.',
-  'internal private-messaging transport identity and cannot receive internet email',
-  'paidMailSeparate: true',
-]) must(mailPm.includes(token), `PM/system mail entrypoint is missing ${token}.`);
+for (const token of ['SYSTEM_ACCESS_HASH', 'ensureSystem', '/api/system-mailboxes', '/api/worker-interval', "PM_SUFFIX = '_pm'", "'/api/pm/claim'", "'/api/pm/send'", 'Hidden _pm transport identities cannot use public mail APIs.', 'internal private-messaging transport identity and cannot receive internet email', 'paidMailSeparate: true']) must(mailPm.includes(token), `PM/system mail entrypoint is missing ${token}.`);
 must(!mailPm.includes('ByTheTimeIGetToAriz0n4'), 'The shared bootstrap password must never be committed in plaintext.');
 
-for (const token of [
-  "FEEDBACK_SCHEMA = 'civweave.feedback-mail-batch.v1'",
-  'FEEDBACK_BATCH_TOKEN',
-  "'/api/feedback/batch'",
-  "'/api/feedback/ack'",
-  'senderIdentityIncluded: false',
-  'feedback_batch_state',
-]) must(mailFeedback.includes(token), `Feedback mail feed is missing ${token}.`);
-
+for (const token of ["FEEDBACK_SCHEMA = 'civweave.feedback-mail-batch.v1'", 'FEEDBACK_BATCH_TOKEN', "'/api/feedback/batch'", "'/api/feedback/ack'", 'senderIdentityIncluded: false', 'feedback_batch_state']) must(mailFeedback.includes(token), `Feedback mail feed is missing ${token}.`);
 for (const token of ['SYSTEM_MAIL_POLL_BACKOFF_MS', 'recommendedWorkerInterval', "return 'low-traffic'", "inboundDelivery: 'event-driven-immediate'"]) must(mailTrafficPolicy.includes(token), `Low-traffic policy is missing ${token}.`);
 for (const token of ['Civweave Mail', 'Save this recovery kit now', 'mail.css', 'mail.js']) must(mailUi.includes(token), `Mail client is missing ${token}.`);
 
-must(accountConfig.main === 'src/recovery-entry-v11.mjs', 'Account edge is not deploying mail claim grants.');
-for (const token of ['/api/account/mail/claim/request', '/api/account/mail/claim/consume', 'verifyMemberLogin', 'MAIL_CLAIM_TTL_MS', "this.state.storage.delete(key)"]) must(claimSource.includes(token), `Hub mail claim service is missing ${token}.`);
-must(claimSource.includes("claimUrl: `https://mail.civweave.cc/#claim="), 'Hub does not return the first-party mail claim URL.');
-for (const token of ['Claim @civweave.cc address', '/api/account/mail/claim/request', 'CivweaveHostNodeSessionExportV1', "url.hostname!=='mail.civweave.cc'"]) must(claimUi.includes(token), `Hub mail claim UI is missing ${token}.`);
-must(installer.includes("'/app/hub-mail-claim-v1.js'"), 'Installer does not load the Hub mail claim companion.');
+must(accountConfig.main === 'src/recovery-entry-v11.mjs', 'Account edge is not deploying one-use identity claim grants.');
+for (const token of ['/api/account/mail/claim/request', '/api/account/mail/claim/consume', 'verifyMemberLogin', 'MAIL_CLAIM_TTL_MS', "this.state.storage.delete(key)"]) must(claimSource.includes(token), `Hub identity claim service is missing ${token}.`);
+for (const token of ['Private messaging', 'Claim username', 'setupPrivateMessaging', '/api/account/mail/claim/request', 'CivweaveHostNodeSessionExportV1', 'CivweavePrivateMessagingV1', 'not an email address']) must(claimUi.includes(token), `Hub PM setup UI is missing ${token}.`);
+must(!claimUi.includes('Claim @civweave.cc address'), 'Free Hub UI still advertises a public email claim.');
+must(installer.includes("'/app/hub-mail-claim-v1.js'"), 'Installer does not load the private-messaging setup companion.');
 
 console.log(JSON.stringify({
   ok: true,
@@ -83,6 +55,7 @@ console.log(JSON.stringify({
   externalInbound: 'guide-and-paid-mail-only',
   publicFreeMail: false,
   freePrivateMessaging: 'mesh-first-hidden-_pm-relay',
+  freeIdentityUi: '@username-only',
   pmExternalSmtp: 'rejected',
   paidMail: 'separate-entitlement-lane',
   guideMailboxes: ['weaveling', 'moss', 'kamiya', 'rook', 'merlin'],
