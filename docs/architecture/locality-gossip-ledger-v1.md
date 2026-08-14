@@ -71,6 +71,8 @@ A Region is the automatic gossip unit for a Hub-connected member.
 7. A local cross-surface lease prevents multiple open Civweave surfaces from performing the same Region sweep concurrently.
 8. The latest accepted public/federated records remain in IndexedDB and are available offline.
 
+The canonical install boundary already loads `host-node-session-v1.js` before `node-ai-mesh-v1.js`. The approved node mesh runtime then lazily loads `civweave-locality-gossip-v1.js`, so Region refresh is available across installed Civweave surfaces without expanding the canonical startup-script contract.
+
 If the Hub directory changes, the next Region calculation can change the six neighbors naturally. The home Hub remains the stable anchor until the user selects a different home Hub.
 
 ## Physical pass-by
@@ -153,9 +155,9 @@ Connectivity therefore spreads *freshness* outward from well-connected members i
 - Hub Map entry: `public/app/hub-map-v1.html`
 - Hub Map behavior: `public/app/civweave-hub-map-v1.js`
 - Locality policy, Region scheduler, and API: `public/app/civweave-locality-gossip-v1.js`
-- Installed-surface runtime wiring: `public/app/install-boundary-v146.js`
+- Installed-surface Region loader: `public/app/node-ai-mesh-v1.js`
+- Canonical Host-session-before-node-mesh ordering: `public/app/install-boundary-v146.js`
 - Signed store-and-forward ledger: `public/app/local-object-mesh-v146.js`
-- Generic always-available installed-app sync loop: `public/app/node-ai-mesh-v1.js`
 - Hub membership/session: `public/app/host-node-session-v1.js`
 - Steward site setup: `public/host-setup.html`
 - Cloudflare Hub location manifest: `cloudflare/node-cloud/src/index.mjs`
