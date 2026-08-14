@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const readBytes=path=>readFile(new URL(path,root));
-const [html,rootHtml,manifestText,assetlinksText,bridge,repairOnly,workerRepair,workerWrapper,installedEntryHtml,installedEntry,hostMeta]=await Promise.all([
+const [html,rootHtml,manifestText,assetlinksText,bridge,repairOnly,workerRepair,workerWrapper,installedEntryHtml,installedEntry,hostMeta,iconGenerator,assetCatalogGenerator,installArtifactBuilder]=await Promise.all([
   read('public/app/index.html'),
   read('public/index.html'),
   read('public/app/manifest.webmanifest'),
@@ -15,7 +15,10 @@ const [html,rootHtml,manifestText,assetlinksText,bridge,repairOnly,workerRepair,
   read('public/service-worker-v203.js'),
   read('public/app/installed-entry-v146.html'),
   read('public/app/installed-entry-v146.js'),
-  read('public/app/host-deployment-v1.json')
+  read('public/app/host-deployment-v1.json'),
+  read('scripts/generate-civweave-icons.mjs'),
+  read('scripts/generate-asset-lockboard-catalog-v239.mjs'),
+  read('scripts/build-install-artifacts.sh')
 ]);
 
 const manifest=JSON.parse(manifestText);
@@ -82,8 +85,25 @@ assert.equal(meta.publicOrigin,canonicalOrigin);
 
 const any192=manifest.icons?.find(icon=>icon.sizes==='192x192'&&String(icon.purpose||'any').includes('any'));
 const any512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'any').includes('any'));
+const mask192=manifest.icons?.find(icon=>icon.sizes==='192x192'&&String(icon.purpose||'').includes('maskable'));
 const mask512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'').includes('maskable'));
-assert.ok(any192&&any512&&mask512,'manifest must advertise 192, 512, and maskable install icons');
+assert.ok(any192&&any512&&mask192&&mask512,'manifest must advertise 192/512 any and maskable install icons');
+assert.equal(any192.src,'/app/logos/civweave-icon-192.png','PWA 192px launcher must use the current generated icon family');
+assert.equal(any512.src,'/app/logos/civweave-icon-512.png','PWA 512px launcher must use the current generated icon family');
+assert.equal(mask192.src,'/app/logos/civweave-icon-maskable-192.png','PWA maskable 192px launcher must use the current generated icon family');
+assert.equal(mask512.src,'/app/logos/civweave-icon-maskable-512.png','PWA maskable 512px launcher must use the current generated icon family');
+assert.ok(!manifestText.includes('civweave-pwa-192-v247.png'),'PWA manifest must never regress to the retired v247 192px heart icon');
+assert.ok(!manifestText.includes('civweave-pwa-512-v247.png'),'PWA manifest must never regress to the retired v247 512px heart icon');
+assert.ok(!manifestText.includes('civweave-pwa-maskable-512-v247.png'),'PWA manifest must never regress to the retired v247 maskable heart icon');
+assert.ok(iconGenerator.includes("const sourcePath=path.join(logoDir,'civweave-day-logo.jpg')"),'launcher raster generator must source the approved daytime logo');
+assert.ok(!iconGenerator.includes("const sourcePath=path.join(logoDir,'civweave-canonical.png')"),'launcher raster generator must never source the retired canonical heart raster');
+for(const alias of ['civweave-pwa-192-v247.png','civweave-pwa-512-v247.png','civweave-pwa-maskable-512-v247.png']){
+  assert.ok(iconGenerator.includes(`await writeIcon('${alias}'`),`legacy alias ${alias} must be overwritten with current daytime pixels for old installed workers`);
+}
+assert.ok(assetCatalogGenerator.includes("await import('./generate-civweave-icons.mjs')"),'production asset packaging must regenerate launcher pixels before catalog/copy');
+assert.ok(installArtifactBuilder.includes('generate-civweave-icons.mjs'),'portable install packages must regenerate launcher pixels from the same source');
+assert.ok((manifest.shortcuts||[]).every(shortcut=>(shortcut.icons||[]).every(icon=>icon.src==='/app/logos/civweave-icon-512.png')),'all launcher shortcuts must use the current 512px Civweave icon');
+
 function localIconPath(src){assert.match(src,/^\/app\/logos\/[A-Za-z0-9._-]+\.png$/);return `public${src}`}
 function pngDimensions(buffer,label){
   const signature=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
@@ -91,19 +111,28 @@ function pngDimensions(buffer,label){
   assert.equal(buffer.toString('ascii',12,16),'IHDR',`${label} must contain IHDR`);
   return [buffer.readUInt32BE(16),buffer.readUInt32BE(20)];
 }
-const [bytes192,bytes512,bytesMask512]=await Promise.all([readBytes(localIconPath(any192.src)),readBytes(localIconPath(any512.src)),readBytes(localIconPath(mask512.src))]);
+const [bytes192,bytes512,bytesMask192,bytesMask512]=await Promise.all([
+  readBytes(localIconPath(any192.src)),
+  readBytes(localIconPath(any512.src)),
+  readBytes(localIconPath(mask192.src)),
+  readBytes(localIconPath(mask512.src))
+]);
 assert.deepEqual(pngDimensions(bytes192,'192 icon'),[192,192]);
 assert.deepEqual(pngDimensions(bytes512,'512 icon'),[512,512]);
+assert.deepEqual(pngDimensions(bytesMask192,'maskable 192 icon'),[192,192]);
 assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'pwa-install-campus-v249-first-input-safe',
+  revision:'pwa-install-campus-v250-daytime-launcher-source-truth',
   canonicalOrigin,
   previousCanonicalOrigin,
   browserRuntime:'installed-display-only',
   onlineFallback:false,
   repairOnly:true,
   workerCacheBusted:true,
+  launcherPolicy:'daytime-artwork-always',
+  launcher192:any192.src,
+  launcher512:any512.src,
   relatedOrigins:manifests.length
 },null,2));
