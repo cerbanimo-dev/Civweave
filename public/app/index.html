@@ -87,12 +87,12 @@
   function markOptIn(){try{localStorage.setItem(OPT_IN_KEY,'1')}catch{}}
   function loadController(){
     markOptIn();
-    if(requested||globalThis.CivweaveInstallerStateV280)return;
+    if(requested||globalThis.CivweaveInstallerStateV281)return;
     requested=true;
     const script=document.createElement('script');
-    script.src='/app/installer-state-machine-v280.js?v=installer-state-machines-v280-lazy';
+    script.src='/app/installer-state-machine-v281.js?v=installer-state-authority-v281-lazy';
     script.async=true;
-    script.dataset.cwInstallerStateV280='lazy';
+    script.dataset.cwInstallerStateV281='lazy';
     document.head.append(script);
   }
   button?.addEventListener('pointerdown',loadController,{capture:true,passive:true});

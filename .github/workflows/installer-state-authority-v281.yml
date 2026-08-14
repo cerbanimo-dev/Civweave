@@ -1,0 +1,56 @@
+name: Installer state authority v281
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/index.html'
+      - 'public/app/installer-state-machine-v281.js'
+      - 'public/service-worker-installer-state-v280.js'
+      - 'public/service-worker-offline-v211-override.js'
+      - 'public/app/shell-integrity-v281.json'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/verify-installer-state-authority-v281.mjs'
+      - 'scripts/smoke-installer-hardening-v281.mjs'
+      - 'scripts/smoke-installer-resume-state-v280.mjs'
+      - '.github/workflows/installer-state-authority-v281.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'public/app/index.html'
+      - 'public/app/installer-state-machine-v281.js'
+      - 'public/service-worker-installer-state-v280.js'
+      - 'public/service-worker-offline-v211-override.js'
+      - 'public/app/shell-integrity-v281.json'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/verify-installer-state-authority-v281.mjs'
+      - 'scripts/smoke-installer-hardening-v281.mjs'
+      - 'scripts/smoke-installer-resume-state-v280.mjs'
+      - '.github/workflows/installer-state-authority-v281.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check controller
+        run: node --check public/app/installer-state-machine-v281.js
+      - name: Verify single-writer installer contract
+        run: node scripts/verify-installer-state-authority-v281.mjs
+      - name: Generate and inspect installer metadata
+        run: |
+          node scripts/generate-prelive-metadata-v281.mjs
+          sha256sum public/app/index.html public/app/installer-state-machine-v281.js
+          git diff -- public/app/shell-integrity-v281.json public/app/offline-package-v208.json
+      - name: Verify installer manual-first contract
+        run: node scripts/smoke-installer-hardening-v281.mjs
+      - name: Verify resumable campus protocol
+        run: node scripts/smoke-installer-resume-state-v280.mjs
+      - name: Verify generated installer metadata is committed
+        run: git diff --exit-code -- public/app/shell-integrity-v281.json public/app/offline-package-v208.json
