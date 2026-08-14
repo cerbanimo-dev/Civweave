@@ -1,18 +1,18 @@
 {
   "schema": "civweave.map.package/v1",
-  "name": "Civweave Map",
-  "version": "1.0.0",
-  "entry": "/app/federation-finder-map-v275.html",
+  "name": "Civweave Hub Map",
+  "version": "1.1.0",
+  "entry": "/app/hub-map-v1.html",
   "route": "/finder",
   "offlineFirst": true,
-  "description": "Federated locality map with real vector cartography, public Civweave node discovery, signed WWW map exchange, and peer-healed offline PMTiles coverage.",
+  "description": "Hub-node-first locality map with steward-published physical Hub locations, join/explore actions, signed offline Needs/Offerings/Ideas gossip, and peer-healed map coverage.",
   "renderers": {
     "maplibre": "5.13.0",
     "pmtiles": "4.4.1",
     "pmtilesSpec": 3
   },
   "storage": {
-    "engine": "IndexedDB chunk store",
+    "engine": "IndexedDB chunk store + signed community-object ledger",
     "chunkBytes": 1048576,
     "defaultBudgetBytes": 268435456,
     "streamingVerification": "SHA-256",
@@ -31,14 +31,29 @@
     "staleAfterMs": 21600000,
     "expiresAfterMs": 86400000
   },
+  "localityGossip": {
+    "entrySchema": "civweave.locality-ledger-entry.v1",
+    "types": ["need", "offering", "idea"],
+    "physicalRadiusMeters": 750,
+    "physicalExchange": "foreground proximity after user enables map location",
+    "virtualExchange": "Hub-member pass-by over the federated community-object gateway",
+    "relevance": ["selected hub", "frequent partner hubs", "recent foreground passersby"],
+    "offlineCopy": true
+  },
   "privacy": {
     "deviceLocation": "session-only",
     "deviceLocationPublished": false,
-    "federatedData": "explicitly public locality and node metadata only"
+    "deviceLocationStoredByGossip": false,
+    "hubLocation": "steward-published physical node manifest",
+    "federatedData": "explicitly public or federated signed locality and node metadata only"
   },
   "assets": [
     "/finder/index.html",
+    "/app/hub-map-v1.html",
     "/app/federation-finder-map-v275.html",
+    "/app/civweave-hub-map-v1.js",
+    "/app/civweave-locality-gossip-v1.js",
+    "/app/host-node-session-v1.js",
     "/app/civweave-map-service-v275.js",
     "/app/civweave-map-bootstrap-v1.js",
     "/app/civweave-map-mesh-v276.js",
