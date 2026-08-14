@@ -79,12 +79,12 @@ jobs:
             test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing founder CLOUDFLARE_API_TOKEN'; exit 2; }
             test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing founder CLOUDFLARE_ACCOUNT_ID'; exit 2; }
             npx --yes wrangler@latest whoami
-            npx --yes wrangler@latest secret list --name civweave-core --format json >/tmp/civweave-core-secrets.json
-            npx --yes wrangler@latest secret list --name civweave-node-cloud --format json >/tmp/civweave-node-cloud-secrets.json
+            npx --yes wrangler@latest secret list --cwd /tmp --name civweave-core --format json >/tmp/civweave-core-secrets.json
+            npx --yes wrangler@latest secret list --cwd /tmp --name civweave-node-cloud --format json >/tmp/civweave-node-cloud-secrets.json
             binding_token="$(node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))")"
             echo "::add-mask::$binding_token"
-            printf '%s' "$binding_token" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --name civweave-core
-            printf '%s' "$binding_token" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --name civweave-node-cloud
+            printf '%s' "$binding_token" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --cwd /tmp --name civweave-core
+            printf '%s' "$binding_token" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --cwd /tmp --name civweave-node-cloud
             echo 'Rotated the founder-only binding token across core and central node fabric without exposing it to New New York.'
           fi
           echo "::add-mask::$binding_token"
