@@ -34,6 +34,19 @@ jobs:
       - name: Materialize canonical release
         run: npm run release:materialize
 
+      - name: Advance canonical release index
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs/promises';
+          const version=(await fs.readFile('VERSION','utf8')).trim();
+          const path='config/release-contract.json';
+          const contract=JSON.parse(await fs.readFile(path,'utf8'));
+          contract.canonical.current.version=version;
+          contract.canonical.current.path=`releases/${version}`;
+          await fs.writeFile(path,`${JSON.stringify(contract,null,2)}\n`,'utf8');
+          NODE
+
       - name: Verify generated release
         run: |
           node scripts/verify-canonical-launch-release.mjs
