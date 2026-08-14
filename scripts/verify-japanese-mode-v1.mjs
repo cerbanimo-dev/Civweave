@@ -18,6 +18,7 @@ assert(runtime.includes("kanji:'民織'"),'Civweave Japanese kanji branding is m
 assert(runtime.includes("katakana:'シヴウィーヴ'"),'Civweave katakana branding is missing.');
 assert(runtime.includes("kanji:'神織'"),'Cerbanimo Japanese kanji branding is missing.');
 assert(runtime.includes("katakana:'セルバニモ'"),'Cerbanimo katakana branding is missing.');
+assert(runtime.includes("trimmed.includes('Cerbanimo')")&&runtime.includes("神織（セルバニモ / Cerbanimo）"),'Cerbanimo references in Japanese prose are not localized.');
 assert(runtime.includes("data-cw-ja-name=\"cerbanimo\"")||runtime.includes("data-cw-ja-name=\\\"cerbanimo\\\""),'Cerbanimo logo-adjacent branding hook is missing.');
 assert(runtime.includes("LANGUAGE_KEY='civweave.language.v1'"),'Japanese mode persistence key is missing.');
 assert(runtime.includes("params.get('lang')")||runtime.includes("searchParams.get('lang')"),'Japanese mode does not accept a shareable lang query.');
@@ -35,4 +36,5 @@ assert(japaneseEntry.includes("target.searchParams.set('lang','ja')"),'Shareable
 
 console.log('Japanese mode v1 verification passed.');
 console.log('Branding: 民織 / シヴウィーヴ / Civweave; 神織 / セルバニモ / Cerbanimo');
+console.log('Cerbanimo prose references: 神織（セルバニモ / Cerbanimo）');
 console.log('Share route: /ja/');
