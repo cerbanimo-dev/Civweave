@@ -28,6 +28,7 @@ const CHAT_PATHS=new Set([
   '/app/experience-orchestrator-v232.js',
   '/app/realm-session-integrity-v237.js',
   '/app/guide-workspace-v242.js',
+  '/app/guide-chat-surface-v350.js',
   '/app/chat-fullscreen-v295.js',
   '/app/saved-chat-store-v295.js',
   '/app/saved-chat-ui-v295.js',
@@ -84,7 +85,19 @@ const RETIRED_CHAT_PATHS=new Set([
   '/app/persistent-guide-chat-v214.js',
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
-  '/app/chat-single-owner-v245.js'
+  '/app/chat-single-owner-v245.js',
+  '/app/cabinet-calibrator-v144.html',
+  '/app/cabinet-visual-v141.html',
+  '/app/cabinet-mode-v142.html',
+  '/app/cabinet-only-v144.html',
+  '/cabinetonly/index.html',
+  '/app/realm-v128.html',
+  '/app/realm-v127.html',
+  '/app/loom-v128.html',
+  '/app/loom-v127.html',
+  '/app/lite-v129.html',
+  '/app/lite-v128.html',
+  '/app/fullscreen-family-v104.html'
 ]);
 const PURGE_PATHS=new Set([...CHAT_PATHS,...RETIRED_CHAT_PATHS]);
 
