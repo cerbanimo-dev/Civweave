@@ -13,8 +13,7 @@ const required = [
   "window.close()",
   'location.replace(target.href)',
   'function progressFromText()',
-  "addEventListener('civweave:offline-campus-status', renderProgress)",
-  'setInterval(renderProgress, 750)'
+  "addEventListener('civweave:offline-campus-status', renderProgress)"
 ];
 
 for (const token of required) {
@@ -23,6 +22,9 @@ for (const token of required) {
 
 if (html.includes('new MutationObserver(renderProgress)')) {
   throw new Error('Installer progress must not observe attributes that its own renderer rewrites.');
+}
+if (/setInterval\s*\(\s*renderProgress/.test(html)) {
+  throw new Error('Installer progress must remain event-driven instead of polling renderProgress.');
 }
 
 const progressPosition = html.indexOf('id="campus-install-progress"');
@@ -45,4 +47,4 @@ if (manifest?.launch_handler?.client_mode !== 'navigate-new') {
   throw new Error('Installed Civweave launches must request a fresh PWA client.');
 }
 
-console.log('Installer campus progress + fresh launch + no-mutation-loop contract verified.');
+console.log('Installer campus progress + fresh launch + event-driven no-mutation-loop contract verified.');
