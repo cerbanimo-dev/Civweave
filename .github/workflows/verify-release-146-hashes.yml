@@ -1,0 +1,16 @@
+name: Verify release 1.0.146 hashes
+on:
+  pull_request:
+    paths:
+      - 'releases/1.0.146/server/**'
+      - '.github/workflows/verify-release-146-hashes.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  hashes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print canonical server SHA-256
+        run: sha256sum releases/1.0.146/server/*.mjs
