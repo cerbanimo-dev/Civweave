@@ -1,0 +1,11 @@
+{
+  "schema": "civweave.legal-release.v1",
+  "status": "draft",
+  "enforcement": "disabled",
+  "termsVersion": null,
+  "termsUrl": null,
+  "privacyUrl": null,
+  "communityStandardsUrl": null,
+  "adultPilotBoundary": true,
+  "reviewNote": "Public launch is blocked until reviewed final Terms and policies are published and this manifest is changed to status=final and enforcement=required."
+}
