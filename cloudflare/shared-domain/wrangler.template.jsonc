@@ -1,0 +1,28 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "civweave-domain-router",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-08-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "*.civweave.cc/*",
+      "zone_name": "civweave.cc"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "civweave-core",
+      "database_id": "__CIVWEAVE_CORE_D1_ID__"
+    }
+  ],
+  "vars": {
+    "CIVWEAVE_SHARED_DOMAIN": "civweave.cc"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
