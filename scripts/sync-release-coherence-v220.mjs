@@ -5,13 +5,14 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const version=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
 const revision='release-coherence-v226';
+const workerRevision=`${revision}-install-only-pwa-v1`;
 const chatRevision='chat-convergence-v250';
 const chatCachePurgeRevision='chat-convergence-v251-legacy-purge';
 const installedEntryRevision='boot-recovery-v426';
 const activeChatRepairRevision='chat-avatar-visible-v346';
 const lifecycleRevision='document-lifecycle-v222';
 const campusRevision='canonical-campus-startup-v227';
-const boundaryRevision='chat-convergence-v250-navigation-lifecycle-v424';
+const boundaryRevision='chat-convergence-v250-navigation-lifecycle-v424-install-only-pwa-v1';
 const routeRevision='five-system-route-contract-v227';
 const offlineRevision='offline-campus-current-graph-v280';
 const offlinePolicy='resumable-pause-v280';
@@ -54,7 +55,7 @@ await patch('public/app/index.html',source=>{
   if(/navigator\.serviceWorker\.register\s*\(/.test(source))throw new Error('Installer page must not register a second service worker; install-v130.js owns installer registration.');
   return source;
 });
-await patch('public/install-v130.js',source=>replaceRequired(source,/const WORKER_SCRIPT_REVISION = '[^']+';/,`const WORKER_SCRIPT_REVISION = '${revision}';`,'installer worker revision constant'));
+await patch('public/install-v130.js',source=>replaceRequired(source,/const WORKER_SCRIPT_REVISION = '[^']+';/,`const WORKER_SCRIPT_REVISION = '${workerRevision}';`,'installer worker revision constant'));
 await patch('public/app/installed-entry-v146.js',source=>{
   source=replaceRequired(source,/const FALLBACK_VERSION='\d+\.\d+\.\d+';/,`const FALLBACK_VERSION='${version}';`,'installed entry fallback release version');
   source=replaceRequired(source,/version:'\d+\.\d+\.\d+(-[^']+)'/,`version:'${version}$1'`,'installed entry exported release version');
@@ -67,7 +68,7 @@ await patch('public/app/installed-entry-v146.js',source=>{
 
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='[^']+';/,`const VERSION='${version}';`,'install-boundary version');
-  if(!source.includes(`const REVISION='${boundaryRevision}';`))throw new Error('Install boundary must retain the canonical chat and navigation lifecycle revision.');
+  if(!source.includes(`const REVISION='${boundaryRevision}';`))throw new Error('Install boundary must retain the install-only canonical chat and navigation lifecycle revision.');
   if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424`;'))throw new Error('Install boundary must derive the navigation-safe experience cache identity from the requested release.');
   for(const token of [
     "['/app/working-campus-v156.html','civweave']",
@@ -80,6 +81,9 @@ await patch('public/app/install-boundary-v146.js',source=>{
     "guideWorkspaceRevision:'v250-v242-canonical-owner'",
     "guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm'",
     "navigationLifecycleRevision:'v424-head-capture-bfcache-resume'",
+    "browserRuntimePolicy:'installed-display-only-v1'",
+    'installedQueryIsAuthorization:false',
+    "function allowed(){return installedDisplay()||developer()}",
     'canonicalSystemCount:5',
     'canonicalAutoScripts:0'
   ])if(!source.includes(token))throw new Error(`Five-system install boundary is missing ${token}.`);
@@ -129,9 +133,11 @@ await patch('public/extensions/civweave-additions-v156.js',source=>{
 const wrapper=await readFile(path.join(root,'public/service-worker-v203.js'),'utf8');
 for(const token of [
   `/app/system-routes-v227.js?v=${version}-${routeRevision}`,
+  `/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1`,
   `/service-worker-offline-v211-override.js?v=${offlineRevision}&policy=${offlinePolicy}`,
   '/service-worker-shell-integrity-v281.js?v=shell-integrity-v281',
   `/service-worker-release-coherence-v220.js?v=${revision}`,
+  '/service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1',
   '/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227',
   `/service-worker-chat-repair-v245.js?v=${activeChatRepairRevision}&purge=${activeChatRepairRevision}`,
   "self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"
@@ -145,4 +151,4 @@ for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pin
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,workerRevision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424-install-only-pwa-v1',browserRuntime:false,retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
