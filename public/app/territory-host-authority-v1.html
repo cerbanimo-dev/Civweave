@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10162a">
+<title>Civweave Territory Host Authority</title>
+<style>
+:root{color-scheme:dark;--bg:#071019;--panel:#101a2b;--line:#82dce544;--ink:#f5f8f7;--muted:#b7c9ce;--cyan:#8de5ef;--gold:#e8c96b;--good:#71dfa8}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 10% 0,#173b48 0,transparent 34%),linear-gradient(155deg,#061019,#0c1728 62%,#170e25);color:var(--ink);font:16px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:880px;margin:auto;padding:24px 16px 80px}header{margin-bottom:20px}small,.eyebrow{color:var(--cyan);font-weight:900;letter-spacing:.12em;text-transform:uppercase}h1{margin:.15em 0;font:700 clamp(2.2rem,8vw,4.7rem)/.94 Georgia,serif}h2{margin:.15em 0 .55em;font:700 clamp(1.5rem,4vw,2.4rem)/1 Georgia,serif}.muted,.status{color:var(--muted)}.card{margin:16px 0;padding:20px;border:1px solid var(--line);border-radius:20px;background:#091a27e8;box-shadow:0 16px 50px #0005}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:grid;gap:6px;color:var(--muted);font-weight:700}input,textarea{width:100%;padding:11px 12px;border:1px solid #85dfe855;border-radius:11px;background:#06131d;color:var(--ink);font:inherit}textarea{min-height:112px;resize:vertical}button{min-height:44px;padding:10px 15px;border:1px solid #e8c96b77;border-radius:12px;background:#5d491a;color:#fff;font-weight:900;cursor:pointer}button.secondary{background:#123942;border-color:#82dce566}button:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.pill{display:inline-block;padding:6px 9px;border:1px solid #82dce555;border-radius:999px;color:var(--muted);font-size:.9rem}.pill.good{border-color:#71dfa877;color:var(--good)}pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;border-radius:12px;background:#050d14;color:#cceef2}@media(max-width:680px){.grid{grid-template-columns:1fr}.actions button{flex:1 1 100%}}
+</style>
+</head>
+<body>
+<main>
+<header><small>Territory Steward · Host Authority</small><h1>Open a trusted doorway</h1><p class="muted">Issue one-use Host Node admissions without copying Civweave root credentials onto this machine.</p></header>
+<section class="card">
+<p class="eyebrow">AUTHORITY</p><h2>This node’s delegation</h2>
+<div id="authority-pill" class="pill">checking…</div>
+<p id="authority-status" class="status">Reading the canonical authority registry…</p>
+<pre id="authority-details" hidden></pre>
+</section>
+<section class="card">
+<p class="eyebrow">SPONSOR A HOST</p><h2>Grant a trusted partner one doorway.</h2>
+<p class="muted">The grant is short-lived, single-use, territory-bound, and locked to the partner node identity you enter here. The partner still has to prove possession of its own Ed25519 node key.</p>
+<div class="grid">
+<label>Territory ID<input id="territory" placeholder="us"></label>
+<label>Partner Host ID<input id="candidate-host" placeholder="community-garden"></label>
+<label>Partner Node ID<input id="candidate-node" placeholder="community-garden-a"></label>
+<label>Partner Operator ID<input id="candidate-operator" placeholder="cloudflare-account-community-garden"></label>
+<label style="grid-column:1/-1">Partner public node URL<input id="candidate-url" type="url" placeholder="https://host.example/nodes/community-garden-a/"></label>
+<label>Grant lifetime, seconds<input id="ttl" type="number" min="60" max="3600" value="900"></label>
+</div>
+<div class="actions"><button id="issue">Issue Host admission</button></div>
+<p id="issue-status" class="status"></p>
+<label id="grant-wrap" hidden>Admission grant<textarea id="grant" readonly></textarea></label>
+</section>
+<section class="card">
+<p class="eyebrow">JOIN THROUGH A STEWARD</p><h2>Claim an admission sent to this node.</h2>
+<p class="muted">Use this on the prospective Host Node itself. The canonical core will call this node back and challenge its key before admitting it.</p>
+<div class="grid"><label>Host ID<input id="claim-host" placeholder="community-garden"></label><label style="grid-column:1/-1">Admission grant<textarea id="claim-grant" placeholder="Paste the one-use grant"></textarea></label></div>
+<div class="actions"><button class="secondary" id="claim">Claim Host admission</button></div>
+<p id="claim-status" class="status"></p>
+</section>
+<section class="card"><p class="muted"><strong>Authority does not recurse.</strong> A Territory Steward can admit ordinary Host Nodes inside the appointed territory and its descendants. Only the Civweave root can bind or revoke Territory Host Authorities.</p></section>
+</main>
+<script>
+(()=>{
+'use strict';
+let session='';
+const $=id=>document.getElementById(id);
+const text=(id,value)=>{$(id).textContent=value};
+async function jsonFetch(path,options={}){
+  const response=await fetch(path,{cache:'no-store',...options});
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(payload.error||payload.message||`HTTP ${response.status}`);
+  return payload;
+}
+async function operatorSession(){
+  if(session)return session;
+  const payload=await jsonFetch('/api/ai/node/operator/local-session',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({ttlSeconds:3600})});
+  session=payload.session||'';
+  if(!session)throw new Error('This page must be opened from the local Host Node so it can unlock the operator session.');
+  return session;
+}
+async function refresh(){
+  try{
+    const payload=await jsonFetch('/api/ai/node/territory-host-authority/status');
+    const binding=payload.binding;
+    $('authority-pill').classList.toggle('good',Boolean(binding));
+    text('authority-pill',binding?`Active · ${binding.territoryId}`:'Not bound');
+    text('authority-status',binding?`${binding.stewardPublicName||'Territory Steward'} may issue Host admissions from node ${binding.issuerNodeId}.`:'This node has no active Territory Host Authority. The Civweave root must bind an appointed Steward node once before it can sponsor Hosts.');
+    if(binding){$('territory').value=binding.territoryId||'';$('authority-details').hidden=false;$('authority-details').textContent=JSON.stringify({authorityId:binding.authorityId,appointmentId:binding.appointmentId,territoryId:binding.territoryId,issuerNodeId:binding.issuerNodeId,issuerKeyFingerprint:binding.issuerKeyFingerprint,canDelegateAuthority:binding.canDelegateAuthority},null,2)}
+  }catch(error){text('authority-pill','Unavailable');text('authority-status',error.message)}
+}
+$('issue').addEventListener('click',async()=>{
+  $('issue').disabled=true;text('issue-status','Signing the admission with this Steward node…');$('grant-wrap').hidden=true;
+  try{
+    const token=await operatorSession();
+    const payload=await jsonFetch('/api/ai/node/territory-host-authority/grants',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify({territoryId:$('territory').value,candidateHostId:$('candidate-host').value,candidateNodeId:$('candidate-node').value,candidateOperatorId:$('candidate-operator').value,candidateCallbackUrl:$('candidate-url').value,ttlSeconds:Number($('ttl').value)||900})});
+    $('grant').value=payload.admission?.admissionGrant||'';$('grant-wrap').hidden=false;text('issue-status',`Issued. Expires ${payload.admission?.expiresAt||'soon'} and can be used once.`);
+  }catch(error){text('issue-status',error.message)}finally{$('issue').disabled=false}
+});
+$('claim').addEventListener('click',async()=>{
+  $('claim').disabled=true;text('claim-status','Asking the core to challenge this node’s key…');
+  try{
+    const token=await operatorSession();
+    const payload=await jsonFetch('/api/ai/node/territory-host-authority/claim',{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify({hostId:$('claim-host').value,admissionGrant:$('claim-grant').value})});
+    text('claim-status',`Admitted to ${payload.admission?.territoryId||'the territory'} through ${payload.admission?.stewardPublicName||'the Territory Steward'}.`);
+  }catch(error){text('claim-status',error.message)}finally{$('claim').disabled=false}
+});
+refresh();
+})();
+</script>
+</body>
+</html>
