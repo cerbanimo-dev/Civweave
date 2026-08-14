@@ -46,7 +46,7 @@ The USD charge is a Stripe Connect **direct charge**. The connected provider is 
 
 The default FellowFare service/learning/tutoring fee is **5% / 500 bps**, configurable by `CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS`. The fee proceeds are split **50/50** between the facilitating Hub Steward and Cerbanimo. At the default rate, each receives an economic share equal to **2.5% of the service sale**.
 
-The facilitating Hub is bound into server-created connected-account Price metadata before checkout. The buyer does not choose or submit the payout destination. When Stripe creates the application fee, Cloudflare core resolves that Hub's registered Steward payout account and transfers half of the application fee from the platform balance. Cerbanimo retains the other half. Partial and full application-fee refunds proportionally reverse the Host Steward transfer.
+The facilitating Hub is bound into server-created connected-account Price metadata before checkout. The buyer does not choose or submit the payout destination. When Stripe creates the application fee, Cloudflare core records the split and attempts the Steward half from the platform application-fee balance. If the platform balance is not available yet, the D1 settlement stays `pending-funds`; `balance.available` retries pending Steward shares when funds become transferable. Cerbanimo retains the other half. Partial and full application-fee refunds reduce the pending Steward entitlement or proportionally reverse an already-paid Steward transfer.
 
 FellowFare does not receive the provider's gross sale and then transfer proceeds. New FellowFare service commerce must not use destination charges or separate seller transfers.
 
@@ -122,7 +122,7 @@ Live Stripe transactions remain fail-closed until the existing compliance, juris
 
 Those gates may authorize provider-owned FellowFare service/learning/tutoring direct charges. They never authorize physical-goods checkout or revival of the retired platform-charge marketplace route.
 
-The production snapshot webhook must include `application_fee.created` and `application_fee.refunded` so Host Steward fee shares and refund reversals are settled through the same idempotent receipt state machine as other money-edge events.
+The production snapshot webhook must include `application_fee.created`, `application_fee.refunded`, and `balance.available` so Host Steward fee shares, refund adjustments, and pending-balance retries are settled through the same idempotent receipt state machine as other money-edge events.
 
 ## Security invariants
 
@@ -134,6 +134,7 @@ The production snapshot webhook must include `application_fee.created` and `appl
 - The default service fee is 5%, with application-fee proceeds split 50/50 between the facilitating Hub Steward and Cerbanimo.
 - The facilitating Hub is bound into seller-owned Price metadata before checkout; buyers cannot redirect the Steward share.
 - Checkout validates the connected-account Stripe Price and its FellowFare listing/Hub metadata.
+- Host Steward fee transfers persist as pending until Stripe reports available platform funds rather than being dropped on an insufficient-balance error.
 - No new FellowFare seller settlement uses destination charges or separate transfers.
 - The old `/api/money-edge/commerce/*` route remains fail-closed.
 - Legacy unwind and unrelated platform-reserve payouts remain recoverable.
