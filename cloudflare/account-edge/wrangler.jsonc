@@ -1,8 +1,8 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "civweave-host-edge",
-  "main": "src/recovery-entry-v10.mjs",
-  "compatibility_date": "2026-08-12",
+  "main": "src/recovery-entry-v11.mjs",
+  "compatibility_date": "2026-08-14",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "preview_urls": false,
@@ -19,7 +19,8 @@
   "vars": {
     "NODE_DOMAIN": "nodes.civweave.invalid",
     "CIVWEAVE_WORKERS_PLAN": "free",
-    "CIVWEAVE_ACCOUNT_EDGE_MODE": "path-v1"
+    "CIVWEAVE_ACCOUNT_EDGE_MODE": "path-v1",
+    "CIVWEAVE_ACCOUNT_DIRECTORY_ORIGIN": "https://civweave-node-cloud.cerbanimo.workers.dev"
   },
   "observability": { "enabled": true }
 }
