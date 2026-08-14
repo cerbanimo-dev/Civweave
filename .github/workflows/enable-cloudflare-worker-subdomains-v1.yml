@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml'
       - 'cloudflare/recovery-relay/**'
+      - 'scripts/resolve-cloudflare-recovery-zone-v1.mjs'
   workflow_dispatch:
 
 permissions:
@@ -18,18 +19,48 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CIVWEAVE_RECOVERY_ZONE: ${{ vars.CIVWEAVE_RECOVERY_ZONE }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Deploy global Hub recovery proof relay
+      - name: Resolve live workers.dev endpoints
         shell: bash
         run: |
           set -euo pipefail
           test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 2; }
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          curl --fail --silent --show-error \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain" \
+            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            --header 'Content-Type: application/json' > /tmp/workers-account-subdomain.json
+          node --input-type=module <<'NODE'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const payload = JSON.parse(readFileSync('/tmp/workers-account-subdomain.json', 'utf8'));
+          const subdomain = String(payload?.result?.subdomain || '').trim();
+          if (!payload?.success || !/^[a-z0-9-]{1,63}$/i.test(subdomain)) {
+            throw new Error(`Could not resolve this Cloudflare account's workers.dev subdomain: ${JSON.stringify(payload?.errors || payload)}`);
+          }
+          const endpoints = {
+            WORKERS_ACCOUNT_SUBDOMAIN: subdomain,
+            CORE_URL: `https://civweave-core.${subdomain}.workers.dev`,
+            NODE_URL: `https://civweave-node-cloud.${subdomain}.workers.dev`,
+            RECOVERY_RELAY_URL: `https://civweave-recovery-relay.${subdomain}.workers.dev`,
+          };
+          appendFileSync(process.env.GITHUB_ENV, Object.entries(endpoints).map(([key, value]) => `${key}=${value}`).join('\n') + '\n');
+          console.log(JSON.stringify({ ok: true, workersAccountSubdomain: subdomain, recoveryRelay: endpoints.RECOVERY_RELAY_URL }));
+          NODE
+
+      - name: Resolve owned recovery-email zone
+        shell: bash
+        run: node scripts/resolve-cloudflare-recovery-zone-v1.mjs --output /tmp/civweave-recovery-zone.json
+
+      - name: Deploy global Hub recovery proof relay
+        shell: bash
+        run: |
+          set -euo pipefail
           npx --yes wrangler@latest deploy --config cloudflare/recovery-relay/wrangler.jsonc
 
       - name: Enable stable workers.dev routes
@@ -57,31 +88,6 @@ jobs:
           enable_subdomain civweave-node-cloud
           enable_subdomain civweave-recovery-relay
 
-      - name: Resolve live workers.dev endpoints
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error \
-            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain" \
-            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-            --header 'Content-Type: application/json' > /tmp/workers-account-subdomain.json
-          node --input-type=module <<'NODE'
-          import { readFileSync, appendFileSync } from 'node:fs';
-          const payload = JSON.parse(readFileSync('/tmp/workers-account-subdomain.json', 'utf8'));
-          const subdomain = String(payload?.result?.subdomain || '').trim();
-          if (!payload?.success || !/^[a-z0-9-]{1,63}$/i.test(subdomain)) {
-            throw new Error(`Could not resolve this Cloudflare account's workers.dev subdomain: ${JSON.stringify(payload?.errors || payload)}`);
-          }
-          const endpoints = {
-            WORKERS_ACCOUNT_SUBDOMAIN: subdomain,
-            CORE_URL: `https://civweave-core.${subdomain}.workers.dev`,
-            NODE_URL: `https://civweave-node-cloud.${subdomain}.workers.dev`,
-            RECOVERY_RELAY_URL: `https://civweave-recovery-relay.${subdomain}.workers.dev`,
-          };
-          appendFileSync(process.env.GITHUB_ENV, Object.entries(endpoints).map(([key, value]) => `${key}=${value}`).join('\n') + '\n');
-          console.log(JSON.stringify({ ok: true, workersAccountSubdomain: subdomain, recoveryRelay: endpoints.RECOVERY_RELAY_URL }));
-          NODE
-
       - name: Probe recovery proof relay
         shell: bash
         run: |
@@ -90,16 +96,16 @@ jobs:
           echo
 
       - name: Configure free Hub recovery email routing
+        if: env.RECOVERY_ZONE_ID != ''
         shell: bash
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           const API = 'https://api.cloudflare.com/client/v4';
           const token = process.env.CLOUDFLARE_API_TOKEN;
-          const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-          const zoneName = 'commonweave.earth';
-          const routingDomain = 'recovery.commonweave.earth';
-          const mailbox = 'recover@recovery.commonweave.earth';
+          const zoneId = process.env.RECOVERY_ZONE_ID;
+          const routingDomain = process.env.RECOVERY_ROUTING_DOMAIN;
+          const mailbox = process.env.RECOVERY_MAILBOX;
           const worker = 'civweave-recovery-relay';
           const auth = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
           const annotate = value => String(value || '').replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
@@ -115,14 +121,10 @@ jobs:
             return { response, payload };
           }
 
-          const zones = await request(`/zones?name=${encodeURIComponent(zoneName)}&account.id=${encodeURIComponent(accountId)}`);
-          const zone = (zones.payload.result || []).find(item => item.name === zoneName);
-          if (!zone?.id) throw new Error(`Cloudflare zone ${zoneName} was not found in this account.`);
-
-          const dns = await request(`/zones/${zone.id}/email/routing/dns?subdomain=${encodeURIComponent(routingDomain)}`, {}, { allowFailure: true });
+          const dns = await request(`/zones/${zoneId}/email/routing/dns?subdomain=${encodeURIComponent(routingDomain)}`, {}, { allowFailure: true });
           const dnsText = JSON.stringify(dns.payload.result || {});
           if (!dns.response.ok || dns.payload.success !== true || !dnsText.includes(routingDomain)) {
-            const enabled = await request(`/zones/${zone.id}/email/routing/dns`, {
+            const enabled = await request(`/zones/${zoneId}/email/routing/dns`, {
               method: 'POST',
               body: JSON.stringify({ name: routingDomain }),
             });
@@ -131,9 +133,9 @@ jobs:
             console.log(`Email Routing DNS already exists for ${routingDomain}.`);
           }
 
-          const listed = await request(`/zones/${zone.id}/email/routing/rules?per_page=100`);
+          const listed = await request(`/zones/${zoneId}/email/routing/rules?per_page=100`);
           const rules = Array.isArray(listed.payload.result) ? listed.payload.result : [];
-          const existing = rules.find(rule => (rule.matchers || []).some(matcher => matcher.type === 'literal' && matcher.field === 'to' && String(matcher.value || '').toLowerCase() === mailbox));
+          const existing = rules.find(rule => (rule.matchers || []).some(matcher => matcher.type === 'literal' && matcher.field === 'to' && String(matcher.value || '').toLowerCase() === mailbox.toLowerCase()));
           const body = {
             name: 'Civweave Hub recovery',
             enabled: true,
@@ -141,14 +143,20 @@ jobs:
             actions: [{ type: 'worker', value: [worker] }],
           };
           const saved = existing?.id
-            ? await request(`/zones/${zone.id}/email/routing/rules/${existing.id}`, { method: 'PUT', body: JSON.stringify(body) })
-            : await request(`/zones/${zone.id}/email/routing/rules`, { method: 'POST', body: JSON.stringify(body) });
+            ? await request(`/zones/${zoneId}/email/routing/rules/${existing.id}`, { method: 'PUT', body: JSON.stringify(body) })
+            : await request(`/zones/${zoneId}/email/routing/rules`, { method: 'POST', body: JSON.stringify(body) });
           const rule = saved.payload.result;
           if (rule?.enabled !== true || !(rule?.actions || []).some(action => action.type === 'worker' && (action.value || []).includes(worker))) {
             throw new Error('Hub recovery Email Routing rule did not become active.');
           }
           console.log(JSON.stringify({ ok: true, routingDomain, mailbox, worker, ruleId: rule.id || existing?.id || null }));
           NODE
+
+      - name: Report pending recovery-email domain
+        if: env.RECOVERY_ZONE_ID == ''
+        shell: bash
+        run: |
+          echo '::warning title=Hub recovery email pending::No unambiguous Civweave/Cerbanimo-owned Cloudflare zone is visible to this token. Cloud Hub deployment remains healthy, but new Hub signup fails closed until a recovery mailbox is configured.'
 
       - name: Probe core money edge
         shell: bash
@@ -169,8 +177,13 @@ jobs:
           echo
 
       - name: Report canonical endpoints
+        shell: bash
         run: |
           echo "CIVWEAVE_MONEY_EDGE_URL=${CORE_URL}"
           echo "CIVWEAVE_NODE_FABRIC_URL=${NODE_URL}"
           echo "CIVWEAVE_HUB_RECOVERY_RELAY=${RECOVERY_RELAY_URL}"
-          echo "CIVWEAVE_HUB_RECOVERY_EMAIL=recover@recovery.commonweave.earth"
+          if [ -n "${RECOVERY_MAILBOX:-}" ]; then
+            echo "CIVWEAVE_HUB_RECOVERY_EMAIL=${RECOVERY_MAILBOX}"
+          else
+            echo 'CIVWEAVE_HUB_RECOVERY_EMAIL=pending-owned-zone'
+          fi
