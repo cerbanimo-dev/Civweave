@@ -2,8 +2,11 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [nav,mapper]=await Promise.all([read('public/app/themed-system-nav-v178.js'),read('public/app/subsystem-avatar-state-v347.js')]);
+const [nav,mapper,release]=await Promise.all([read('public/app/themed-system-nav-v178.js'),read('public/app/subsystem-avatar-state-v347.js'),read('VERSION')]);
+const version=release.trim();
 new Function(nav);new Function(mapper);
+assert.equal(version,'1.0.144','Avatar navigation release must be materialized as Civweave 1.0.144.');
+assert.ok(nav.includes(`const VERSION='${version}-five-system-navigation-v227';`),'Themed navigation must stay synchronized with the canonical release token.');
 for(const asset of['Civweave-weaveling-sprites.png','Living-School-moss-sprites.png','Cerbanimo-kamiya-sprites.png','FellowFare-rook-sprites.png','Anarchadia-merlin-sprites.png'])assert.ok(nav.includes(asset),`Missing avatar atlas ${asset}`);
 assert.match(nav,/fellowfare'.*glow:'#f5b446'.*shade:'#5a3618'/s,'Rook button must be amber.');
 assert.match(nav,/cerbanimo'.*glow:'#bb79ff'.*shade:'#4f265f'/s,'Kamiya button must be purple.');
@@ -20,4 +23,4 @@ assert.equal(api.expressionFor('civweave','healthy'),'hopeful');assert.equal(api
 api.set('cerbanimo','needs-attention',{sticky:true,source:'test',reason:'needs you'});assert.equal(api.status('cerbanimo').expression,'worried');api.clear('cerbanimo');assert.equal(api.status('cerbanimo'),null);
 context.dispatchEvent(new context.CustomEvent('civweave:systems-mesh:projection-candidate',{detail:{projection:{targetSystem:'fellowfare',projectionId:'p1',projectionType:'offer'}}}));assert.equal(api.status('fellowfare').state,'needs-attention');assert.equal(api.status('fellowfare').expression,'worried');
 context.dispatchEvent(new context.CustomEvent('civweave:capacity-session-ready',{detail:{}}));assert.equal(api.status('civweave').expression,'hopeful');
-console.log(JSON.stringify({ok:true,revision:'subsystem-avatar-nav-v347',atlasCount:5,stateContract:'civweave.subsystem-avatar-state/v1',quiet:'sleepy',lonely:'shy',attention:'worried'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'subsystem-avatar-nav-v347',atlasCount:5,stateContract:'civweave.subsystem-avatar-state/v1',quiet:'sleepy',lonely:'shy',attention:'worried'},null,2));
