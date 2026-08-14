@@ -42,43 +42,16 @@ jobs:
           test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing repository secret CLOUDFLARE_API_TOKEN'; exit 2; }
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
 
-      - name: Build public site and live history marker
+      - name: Build flagship and Pages-mirror package
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf .cerbanimo-pages
-          mkdir -p .cerbanimo-pages/assets
-          cp site/cerbanimo-cc/index.html .cerbanimo-pages/index.html
-          cp site/cerbanimo-cc/styles.css .cerbanimo-pages/styles.css
-          cp site/cerbanimo-cc/app.js .cerbanimo-pages/app.js
-          cp -R site/cerbanimo-cc/assets/. .cerbanimo-pages/assets/
-          cp Civweave-on-logo.png .cerbanimo-pages/assets/civweave-on.png
-          cp Civweave-off-logo.png .cerbanimo-pages/assets/civweave-off.png
-          cp Civweave-weaveling-sprites.png .cerbanimo-pages/assets/weaveling.png
-          cp Living-School-moss-sprites.png .cerbanimo-pages/assets/moss.png
-          cp Cerbanimo-kamiya-sprites.png .cerbanimo-pages/assets/kamiya.png
-          cp FellowFare-rook-sprites.png .cerbanimo-pages/assets/rook.png
-          cp Anarchadia-merlin-sprites.png .cerbanimo-pages/assets/merlin.png
-          node --input-type=module <<'NODE'
-          import { execFileSync } from 'node:child_process';
-          import { writeFileSync } from 'node:fs';
-          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
-          const initialCommitDate = git('log', '--reverse', '--format=%cI').split(/\r?\n/)[0];
-          const history = {
-            schema: 'cerbanimo.civweave-history.v1',
-            repository: 'cerbanimo-dev/Civweave',
-            branch: 'main',
-            commitCount: Number(git('rev-list', '--count', 'HEAD')),
-            initialCommitDate,
-            latestCommit: git('rev-parse', 'HEAD'),
-            generatedAt: new Date().toISOString()
-          };
-          if (!Number.isSafeInteger(history.commitCount) || history.commitCount < 1 || !history.initialCommitDate) {
-            throw new Error(`Invalid Git history marker: ${JSON.stringify(history)}`);
-          }
-          writeFileSync('.cerbanimo-pages/history.json', `${JSON.stringify(history, null, 2)}\n`, 'utf8');
-          console.log(JSON.stringify(history));
-          NODE
+          node site/cerbanimo-cc/build.mjs \
+            --output .cerbanimo-pages \
+            --base / \
+            --role flagship \
+            --public-origin "https://${PUBLIC_DOMAIN}" \
+            --pages-origin "https://${PAGES_PROJECT}.pages.dev"
 
       - name: Ensure Cloudflare Pages project exists
         shell: bash
@@ -153,6 +126,7 @@ jobs:
           if (response.status === 404) {
             ({ response, packet } = await request(base, {
               method: 'POST',
+              headers,
               body: JSON.stringify({ name: domain })
             }));
             if (!response.ok || packet.success !== true) {
@@ -174,7 +148,7 @@ jobs:
           }
           NODE
 
-      - name: Verify deployed site and history
+      - name: Verify both public origins and story surface
         shell: bash
         run: |
           set -euo pipefail
@@ -191,19 +165,24 @@ jobs:
             for (let attempt = 1; attempt <= 12; attempt += 1) {
               try {
                 const bust = `${Date.now()}-${attempt}`;
-                const [pageResponse, historyResponse] = await Promise.all([
+                const [pageResponse, historyResponse, surfaceResponse] = await Promise.all([
                   fetch(`${origin}/?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
-                  fetch(`${origin}/history.json?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } })
+                  fetch(`${origin}/history.json?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
+                  fetch(`${origin}/surface.json?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } })
                 ]);
                 if (!pageResponse.ok) throw new Error(`page HTTP ${pageResponse.status}`);
                 if (!historyResponse.ok) throw new Error(`history HTTP ${historyResponse.status}`);
+                if (!surfaceResponse.ok) throw new Error(`surface HTTP ${surfaceResponse.status}`);
                 const html = await pageResponse.text();
                 const history = await historyResponse.json();
+                const surface = await surfaceResponse.json();
                 if (!html.includes('Civweave | Cerbanimo')) throw new Error('public page marker missing');
+                if (!html.includes('id="story"')) throw new Error('story section missing');
                 if (history.latestCommit !== expectedCommit) throw new Error(`history is at ${history.latestCommit || 'missing'}, expected ${expectedCommit}`);
                 if (!Number.isSafeInteger(history.commitCount) || history.commitCount < 1) throw new Error('commit counter is invalid');
                 if (!history.initialCommitDate) throw new Error('initial commit date is missing');
-                console.log(`Verified ${origin} at ${history.latestCommit} with ${history.commitCount} commits since ${history.initialCommitDate}.`);
+                if (surface.role !== 'flagship' || surface.basePath !== '/') throw new Error('flagship surface marker is invalid');
+                console.log(`Verified ${origin}/#story at ${history.latestCommit} with ${history.commitCount} commits since ${history.initialCommitDate}.`);
                 return history;
               } catch (error) {
                 failure = `attempt ${attempt}: ${error.message}`;
@@ -220,6 +199,6 @@ jobs:
           if (statusResponse.ok && statusPacket.success === true && statusPacket.result?.status === 'active') {
             await verify(`https://${domain}`);
           } else {
-            console.log(`Custom domain ${domain} is still validating; stable Pages origin is verified and the domain activator will finish the cutover.`);
+            console.log(`Custom domain ${domain} is still validating; the first-class Pages origin remains verified and live.`);
           }
           NODE
