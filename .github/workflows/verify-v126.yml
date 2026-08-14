@@ -81,7 +81,7 @@ jobs:
           grep -Fq "version:'${release_version}-boot-recovery-v426" .cloudflare-pages/app/installed-entry-v146.js
           grep -q "updateViaCache:'none'" .cloudflare-pages/app/installed-entry-v146.js
           grep -q "bounded(registration.update()" .cloudflare-pages/app/installed-entry-v146.js
-          grep -q "service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v288-language-v2" .cloudflare-pages/service-worker-v203.js
           grep -q "network-first-current-version-cache-legacy-offline-fallback" .cloudflare-pages/service-worker-code-coherence-v288.js
           grep -q "service-worker-core-v208.js?v=${release_version}-chat-convergence-v250" .cloudflare-pages/service-worker-v203.js
           grep -q "service-worker-installer-state-v280.js?v=installer-state-machines-v280" .cloudflare-pages/service-worker-v203.js

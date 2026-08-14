@@ -1,6 +1,6 @@
 'use strict';
 
-const CW_CODE_COHERENCE_VERSION = '1.0.91-code-coherence-v288-language-v1';
+const CW_CODE_COHERENCE_VERSION = '1.0.92-code-coherence-v288-language-v2';
 const CW_CODE_COHERENCE_CACHE = `civweave-code-coherence-${CW_CODE_COHERENCE_VERSION}`;
 const CW_CODE_COHERENCE_PREFIX = 'civweave-code-coherence-';
 const CW_CODE_EXTENSIONS = /\.(?:m?js|css|txt)$/i;
@@ -10,6 +10,7 @@ const CW_CODE_CRITICAL = [
   '/app/language-settings-v1.js',
   '/app/japanese-mode-v1.js',
   '/app/japanese-shell-copy-v1.js',
+  '/app/release-version-v1.js',
   '/app/document-lifecycle-v221.js',
   '/app/model-settings-controller-v173.js',
   '/app/working-campus-v156.js',

@@ -2,16 +2,19 @@
 'use strict';
 if(globalThis.CivweaveCanonicalPlaylistsV1)return;
 
-const VERSION='1.0.0';
+const VERSION='1.1.0';
 const SCHEMA='civweave.canonical-playlists.v1';
 const PROPOSAL_SCHEMA='civweave.canonical-playlist-proposal.v1';
 const TRACK_SCHEMA='civweave.canonical-track.v1';
+const RIGHTS_SCHEMA='civweave.cerbanimo-family-music-rights.v1';
 const STORE_KEY='civweave.canonical-playlists.v1';
 const CHANNEL='civweave.canonical-playlists.v1';
 const OPEN_MUSIC_BATCH='/downloads/hub-media/open-music/daily-batch.json';
 const OPEN_MUSIC_MANIFEST='/downloads/hub-media/open-music/lazy-manifest.json';
+const FAMILY_MUSIC_POLICY='/downloads/hub-media/cerbanimo-family-music-policy.json';
 const ALLOWED_OPEN_LICENSES=new Set(['PUBLIC-DOMAIN','CC0','CC-BY','CC-BY-SA']);
 const PROVIDERS=['spotify','appleMusic','youtubeMusic','youtube','bandcamp','soundcloud','tidal','deezer'];
+const FAMILY_PRODUCTS=Object.freeze(['cerbanimo','civweave','living-school','fellowfare','anarchadia','commonweave']);
 const PLAYLISTS=Object.freeze({
   anarchadia:Object.freeze({id:'anarchadia',label:'Anarchadia',spotifyPlaylistId:'2AsCLZiAPlUYHOcogllTia'}),
   cerbanimo:Object.freeze({id:'cerbanimo',label:'Cerbanimo',spotifyPlaylistId:'1CB3LLMSnuDwD013B1ZY3M'}),
@@ -43,8 +46,28 @@ function normalizedProviderLinks(input={}){
   if(spotify)links.spotify=spotify;
   return links;
 }
+function cerbanimoFamilyRights(source={}){
+  const createdAt=clean(source.createdAt||source.creationAt||'',80)||now();
+  return {
+    schema:RIGHTS_SCHEMA,
+    grant:'cerbanimo-family-stream-and-store',
+    trigger:'cerbanimo-created',
+    grantBasis:'cerbanimo-creation-terms',
+    grantedAt:clean(source.rights?.grantedAt||createdAt,80),
+    licensee:'cerbanimo-family',
+    products:[...FAMILY_PRODUCTS],
+    ownership:'creator-retained',
+    exclusive:false,
+    streaming:{allowed:true,pricePolicy:'free',chargeAllowed:false},
+    storage:{allowed:true,hubServers:true,userDevices:true,creatorMayCharge:true,freeAllowed:true,pricePolicy:'creator-may-charge'},
+    publicRedistribution:false,
+    policyPath:FAMILY_MUSIC_POLICY
+  };
+}
 function trustedCerbanimoSource(source={}){
-  return clean(source.system,80).toLowerCase()==='cerbanimo' && Boolean(source.firstPartyProvenance) && Boolean(source.creatorRightsGrant);
+  if(clean(source.system,80).toLowerCase()!=='cerbanimo'||!Boolean(source.firstPartyProvenance))return false;
+  const rights=source.rights&&typeof source.rights==='object'?source.rights:cerbanimoFamilyRights(source);
+  return rights.schema===RIGHTS_SCHEMA&&rights.licensee==='cerbanimo-family'&&rights.streaming?.allowed===true&&rights.storage?.allowed===true;
 }
 function normalizeLicense(input={}){
   const id=clean(input.spdx||input.id||input.license,80).toUpperCase();
@@ -73,6 +96,7 @@ function normalizeTrack(input={},source={}){
     spotifyPending:!spotifyId&&firstParty,
     providerLinks:links,
     providerMappings:Array.isArray(input.providerMappings)?input.providerMappings.map(row=>({provider:clean(row.provider,80),url:clean(row.url,1800),providerId:clean(row.providerId,300),confidence:clamp01(row.confidence),provenance:clean(row.provenance,120)})).filter(row=>row.provider&&row.url):[],
+    rights:firstParty?cerbanimoFamilyRights(source):null,
     createdAt:now()
   };
 }
@@ -101,6 +125,7 @@ function registerTrack(track){state.tracks[track.identityKey]={...(state.tracks[
 function proposalPayload(input={},options={}){
   const target=playlist(input.playlistId||input.playlist);
   const source=input.source&&typeof input.source==='object'?copy(input.source):{};
+  if(clean(source.system,80).toLowerCase()==='cerbanimo'&&source.firstPartyProvenance)source.rights=cerbanimoFamilyRights(source);
   const track=normalizeTrack(input.track||input,source);
   const action=clean(input.action||'add',20).toLowerCase();if(!['add','remove'].includes(action))throw new TypeError('Playlist proposal action must be add or remove.');
   const electorate=activeElectorate(options.electorate||input.electorate||[]);
@@ -108,7 +133,7 @@ function proposalPayload(input={},options={}){
   const trusted=trustedCerbanimoSource(source);
   return {
     schema:PROPOSAL_SCHEMA,id:uid('playlistProposal'),action,playlistId:target.id,playlistLabel:target.label,spotifyPlaylistId:target.spotifyPlaylistId,
-    track:copy(track),source:{system:clean(source.system||'user',80),sourceId:clean(source.sourceId||source.artifactId,240),artifactHash:clean(source.artifactHash,220),firstPartyProvenance:Boolean(source.firstPartyProvenance),creatorRightsGrant:Boolean(source.creatorRightsGrant),qualityGate:trusted?'cerbanimo-first-party':'spotify-catalog-anchor'},
+    track:copy(track),source:{system:clean(source.system||'user',80),sourceId:clean(source.sourceId||source.artifactId,240),artifactHash:clean(source.artifactHash,220),firstPartyProvenance:Boolean(source.firstPartyProvenance),rights:trusted?cerbanimoFamilyRights(source):null,qualityGate:trusted?'cerbanimo-first-party':'spotify-catalog-anchor'},
     rationale:clean(input.rationale,1200),
     governance:{system:'anarchadia',scope:'mesh-wide',electorateMode:'recently-active-eligible',electorateSnapshot:electorate,quorum,threshold},
     votes:[],status:electorate.length?'voting':'awaiting-electorate',createdAt:now(),updatedAt:now(),approvedAt:null,rejectedAt:null
@@ -122,6 +147,7 @@ function createProposal(input={},options={}){
   announce('civweave:anarchadia-playlist-proposal',{proposal:copy(proposal)});
   return copy(proposal);
 }
+function suggestTrack(input={},options={}){return createProposal({...input,action:'add'},options)}
 function setElectorate(proposalId,members=[]){
   const proposal=state.proposals.find(row=>row.id===proposalId);if(!proposal)throw new Error('Playlist proposal not found.');if(proposal.votes.length)throw new Error('Electorate snapshot cannot change after voting begins.');
   proposal.governance.electorateSnapshot=activeElectorate(members);proposal.status=proposal.governance.electorateSnapshot.length?'voting':'awaiting-electorate';proposal.updatedAt=now();writeState('electorate-snapshotted');return copy(proposal);
@@ -155,9 +181,15 @@ function attachProviderMapping(identityKey,mapping={}){
   const row={provider,url,providerId:clean(mapping.providerId,300),confidence:clamp01(mapping.confidence??1),provenance:clean(mapping.provenance||'daily-enrichment',120),matchedAt:now()};
   track.providerMappings=(track.providerMappings||[]).filter(item=>item.provider!==provider);track.providerMappings.push(row);track.providerLinks={...(track.providerLinks||{}),[provider]:url};if(provider==='spotify'){track.spotifyTrackId=spotifyTrackId(url);track.spotifyPending=!track.spotifyTrackId}writeState('provider-mapping');return copy(track);
 }
+function registerCerbanimoCreatedTrack(input={}){
+  const source={...(input.source||{}),system:'cerbanimo',firstPartyProvenance:true,artifactHash:input.source?.artifactHash||input.artifactHash,sourceId:input.source?.sourceId||input.sourceId,createdAt:input.source?.createdAt||input.createdAt};
+  source.rights=cerbanimoFamilyRights(source);
+  const track=normalizeTrack(input.track||input,source);registerTrack(track);writeState('cerbanimo-track-registered');
+  announce('civweave:cerbanimo-family-music-rights-granted',{track:copy(track),rights:copy(track.rights)});return copy(track);
+}
 function nominateCerbanimoTrack(input={},options={}){
-  const source={...(input.source||{}),system:'cerbanimo',firstPartyProvenance:true,creatorRightsGrant:Boolean(input.source?.creatorRightsGrant??input.creatorRightsGrant),artifactHash:input.source?.artifactHash||input.artifactHash,sourceId:input.source?.sourceId||input.sourceId};
-  if(!source.creatorRightsGrant)throw new Error('Cerbanimo creator must explicitly grant the rights needed for the nominated distribution.');
+  const source={...(input.source||{}),system:'cerbanimo',firstPartyProvenance:true,artifactHash:input.source?.artifactHash||input.artifactHash,sourceId:input.source?.sourceId||input.sourceId,createdAt:input.source?.createdAt||input.createdAt};
+  source.rights=cerbanimoFamilyRights(source);
   return createProposal({...input,source},{...options});
 }
 function validateOpenCandidate(candidate){
@@ -173,9 +205,19 @@ function ingestOpenMusicBatch(batch={}){
 }
 async function loadOpenMusicBatch(){const response=await fetch(OPEN_MUSIC_BATCH,{cache:'no-store'});if(!response.ok)throw new Error(`Open music batch returned ${response.status}.`);const batch=await response.json();return{batch,result:ingestOpenMusicBatch(batch)}}
 async function loadLazyManifest(){const response=await fetch(OPEN_MUSIC_MANIFEST,{cache:'force-cache'});if(!response.ok)throw new Error(`Open music manifest returned ${response.status}.`);const manifest=await response.json();if(manifest?.schema!=='civweave.open-music-lazy-manifest.v1')throw new Error('Open music manifest schema is invalid.');return manifest}
+async function loadFamilyMusicPolicy(){const response=await fetch(FAMILY_MUSIC_POLICY,{cache:'force-cache'});if(!response.ok)throw new Error(`Cerbanimo family music policy returned ${response.status}.`);const policy=await response.json();if(policy?.schema!==RIGHTS_SCHEMA)throw new Error('Cerbanimo family music policy schema is invalid.');return policy}
 function exportQueue(){return{schema:'civweave.canonical-playlist-sync-queue.v1',exportedAt:now(),events:pendingSync()}}
 function read(){return copy(state)}
-const api=Object.freeze({version:VERSION,schema:SCHEMA,storeKey:STORE_KEY,playlists:PLAYLISTS,providerKeys:Object.freeze(PROVIDERS.slice()),allowedOpenLicenses:Object.freeze([...ALLOWED_OPEN_LICENSES]),spotifyTrackId,spotifyTrackUrl,normalizeTrack,normalizeLicense,validateOpenCandidate,createProposal,nominateCerbanimoTrack,setElectorate,castVote,tallyProposal,pendingSync,markSynced,markSyncFailure,attachProviderMapping,ingestOpenMusicBatch,loadOpenMusicBatch,loadLazyManifest,exportQueue,read});
+function handleSuggestionEvent(event){
+  const detail=event?.detail&&typeof event.detail==='object'?event.detail:{};
+  try{const proposal=suggestTrack(detail,detail.options||{});announce('civweave:canonical-playlist-suggestion-opened',{proposal})}catch(error){announce('civweave:canonical-playlist-suggestion-error',{message:clean(error?.message||error,1000),detail:copy(detail)})}
+}
+function handleCerbanimoCreatedEvent(event){
+  const detail=event?.detail&&typeof event.detail==='object'?event.detail:{};
+  try{registerCerbanimoCreatedTrack(detail)}catch(error){announce('civweave:cerbanimo-family-music-rights-error',{message:clean(error?.message||error,1000),detail:copy(detail)})}
+}
+try{globalThis.addEventListener?.('civweave:canonical-playlist-suggest',handleSuggestionEvent);globalThis.addEventListener?.('civweave:playlist-song-suggested',handleSuggestionEvent);globalThis.addEventListener?.('civweave:cerbanimo-song-created',handleCerbanimoCreatedEvent);globalThis.addEventListener?.('civweave:cerbanimo-music-created',handleCerbanimoCreatedEvent)}catch{}
+const api=Object.freeze({version:VERSION,schema:SCHEMA,rightsSchema:RIGHTS_SCHEMA,storeKey:STORE_KEY,playlists:PLAYLISTS,providerKeys:Object.freeze(PROVIDERS.slice()),familyProducts:FAMILY_PRODUCTS,familyMusicPolicyPath:FAMILY_MUSIC_POLICY,allowedOpenLicenses:Object.freeze([...ALLOWED_OPEN_LICENSES]),spotifyTrackId,spotifyTrackUrl,normalizeTrack,normalizeLicense,cerbanimoFamilyRights,validateOpenCandidate,createProposal,suggestTrack,registerCerbanimoCreatedTrack,nominateCerbanimoTrack,setElectorate,castVote,tallyProposal,pendingSync,markSynced,markSyncFailure,attachProviderMapping,ingestOpenMusicBatch,loadOpenMusicBatch,loadLazyManifest,loadFamilyMusicPolicy,exportQueue,read});
 globalThis.CivweaveCanonicalPlaylistsV1=api;
-announce('civweave:canonical-playlists:ready',{version:VERSION,playlists:Object.keys(PLAYLISTS),spotifyRequiredForStandardNominations:true,cerbanimoTrustedCreatorLane:true,governance:'anarchadia-mesh-wide'});
+announce('civweave:canonical-playlists:ready',{version:VERSION,playlists:Object.keys(PLAYLISTS),spotifyRequiredForStandardNominations:true,cerbanimoTrustedCreatorLane:true,cerbanimoFamilyMusicRights:true,streamingPricePolicy:'free',storagePricePolicy:'creator-may-charge',governance:'anarchadia-mesh-wide'});
 })();
