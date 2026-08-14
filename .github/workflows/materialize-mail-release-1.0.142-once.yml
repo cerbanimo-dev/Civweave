@@ -1,0 +1,50 @@
+name: Materialize Civweave Mail 1.0.142 Once
+
+on:
+  push:
+    branches: [feat/civweave-mail-v1-current]
+    paths:
+      - '.github/workflows/materialize-mail-release-1.0.142-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/civweave-mail-v1-current
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Materialize canonical 1.0.142 release
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '1.0.142\n' > VERSION
+          npm version 1.0.142 --no-git-tag-version --allow-same-version
+          node scripts/materialize-canonical-release.mjs
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const path='config/release-contract.json';
+          const contract=JSON.parse(await readFile(path,'utf8'));
+          contract.canonical.current={version:'1.0.142',path:'releases/1.0.142',status:'current'};
+          await writeFile(path,JSON.stringify(contract,null,2)+'\n');
+          NODE
+          test -f releases/1.0.142/release.json
+          node scripts/verify-canonical-launch-release.mjs
+      - name: Commit canonical release and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'civweave-release-bot'
+          git config user.email 'release-bot@users.noreply.github.com'
+          git rm .github/workflows/materialize-mail-release-1.0.142-once.yml
+          git add -A
+          git diff --cached --check
+          git commit -m 'Materialize canonical release 1.0.142 for Civweave Mail'
+          git push origin HEAD:feat/civweave-mail-v1-current
