@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION='1.0.141';
-const REVISION='chat-convergence-v250-navigation-lifecycle-v424';
+const REVISION='chat-convergence-v250-navigation-lifecycle-v424-install-only-pwa-v1';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
 const INSTALLER='/app/index.html';
@@ -109,18 +109,15 @@ function authorize(){
 }
 function explicitInstalled(){
   try{
-    if(params.get('installed')==='1'){authorize();return true}
-    return sessionStorage.getItem(BOOT_KEY)==='1'||sessionStorage.getItem(LEGACY_BOOT_KEY)==='1';
+    return params.get('installed')==='1'||sessionStorage.getItem(BOOT_KEY)==='1'||sessionStorage.getItem(LEGACY_BOOT_KEY)==='1';
   }catch{return params.get('installed')==='1'}
 }
 function systemSurface(){
   const contract=globalThis.CivweaveSystemRoutesV227;
-  const system=contract?.identify?.(location.pathname)||FALLBACK_PATHS.get(location.pathname)||'';
-  if(system)authorize();
-  return system;
+  return contract?.identify?.(location.pathname)||FALLBACK_PATHS.get(location.pathname)||'';
 }
 function canonicalAppSurface(){return systemSurface()==='civweave'}
-function allowed(){return Boolean(systemSurface())||installedDisplay()||explicitInstalled()||developer()||embedded()}
+function allowed(){return installedDisplay()||developer()}
 function installerUrl(){
   const target=`${location.pathname}${location.search}${location.hash}`;
   const next=new URL(INSTALLER,location.origin);
@@ -192,6 +189,11 @@ function installAdditionsWhenReady(){
 }
 function resumeFromPageShow(){
   unloading=false;
+  if(!allowed()){
+    location.replace(installerUrl());
+    return false;
+  }
+  if(installedDisplay())authorize();
   const system=systemSurface();
   if(system){
     installSystemExperienceSupport();
@@ -209,11 +211,12 @@ function start(){
     location.replace(installerUrl());
     return;
   }
+  if(installedDisplay())authorize();
   if(system){
     root.dataset.installBoundary=system==='civweave'?'canonical':'canonical-system';
     root.dataset.civweaveSystemRoute=system;
     installSystemExperienceSupport();
-  }else if(root)root.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
+  }else if(root)root.dataset.installBoundary=installedDisplay()?'installed':'developer';
   if(system==='civweave'){
     root.dataset.civweaveCanonicalCore='only';
     queueMicrotask(()=>dispatchEvent(new CustomEvent('civweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system}})));
@@ -293,8 +296,10 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   aiSettingsPersistenceRepair:'controller-owned-on-demand-v317',
   platformStabilityGuard:'v159-dom-ready-safe',
   navigationLifecycleRevision:'v424-head-capture-bfcache-resume',
+  browserRuntimePolicy:'installed-display-only-v1',
+  installedQueryIsAuthorization:false,
   compatibilityDomReady:true,
-  onlineSelfHeal:true,
+  onlineSelfHeal:false,
   missingAssetDetails:true
 });
 })();
