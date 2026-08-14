@@ -28,12 +28,12 @@ const required=[
   'public/service-worker-boot-recovery-v426.js'
 ];
 for(const relative of required)await readFile(path.join(root,relative),'utf8');
-const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288-language-v1 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-freeze-v347 + mobile-ai-hardening-v302 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + desktop-reload-storm-v428 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1
+const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288-language-v2 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-freeze-v347 + mobile-ai-hardening-v302 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1
 'use strict';
 importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
 importScripts('/service-worker-local-ai-coherence-v307.js?v=${version}-local-ai-code-coherence-v307');
-importScripts('/service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288-language-v1');
+importScripts('/service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v288-language-v2');
 importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
@@ -60,7 +60,7 @@ console.log(JSON.stringify({
   output:'public/service-worker-v203.js',
   imports:19,
   localAICodeCoherence:'v307-network-first-pre-core',
-  codeCoherence:'v288-language-v1',
+  codeCoherence:'v288-language-v2',
   installedLaunch:'installed-pwa-launch-v294-campus-recovery',
   radioCore:'radio-core-shell-v305',
   radioAssetHandoff:'playlist-only-v246',
@@ -71,9 +71,9 @@ console.log(JSON.stringify({
   shellIntegrity:'shell-integrity-v281',
   installerState:'installer-state-machines-v280',
   chatRepair:'chat-avatar-visible-v346',
-  chatFreezeRepair:'mobile-chat-freeze-v347',
+  mobileChatFreeze:'v347',
   mobileAIHardening:'v302',
-  workingCampusReturn:'v425-desktop-reload-storm-v428',
+  workingCampusReturn:'v425',
   bootRecovery:'v426',
   installOnlyPwa:'v1',
   updateActivation:'explicit-waiting-worker-handoff-v427',

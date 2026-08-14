@@ -21,6 +21,8 @@ const allowedExperienceSupport=[
   '/app/experience-orchestrator-v232.js',
   '/app/system-radio-agent-v233.js',
   '/app/radio-track-suggestions-v240.js',
+  '/app/canonical-playlists-v1.js',
+  '/app/radio-playlist-governance-v1.js',
   '/app/civweave-systems-mesh-v251.js',
   '/app/host-node-session-v1.js',
   '/app/node-ai-mesh-v1.js',
@@ -103,4 +105,13 @@ assert.equal(api.pwaUpdateRevision,'v250-installed-entry-every-launch');
 assert.equal(api.browserBoundaryRevision,'v228-installed-only-stale-session-chat-escape-install-only-pwa-v1');
 assert.equal(api.browserRuntimePolicy,'installed-display-only');
 assert.equal(api.installedQueryIsAuthorization,false);
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),browserRequiresInstalledDisplay:true,emptySessionAuthorized:false,boundaryInstalledAuthorization:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,settingsOwner:'settings-gateway-v317',canonicalChatOwner:'guide-workspace-v242',mobileAIHardening:'v302',systemsMesh:'v251-five-system-non-privileged-event-contract',nodeAiMesh:'v1-node-owned-service-discovery-routing',questVeil:'v1-mandatory-human-ledger-gate-plus-mesh-batches',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,hostNodeSession:true,legacyCompatibility:'noncanonical-only'},null,2));
+const radioIndex=allowedExperienceSupport.indexOf('/app/system-radio-agent-v233.js');
+const trackIndex=allowedExperienceSupport.indexOf('/app/radio-track-suggestions-v240.js');
+const playlistsIndex=allowedExperienceSupport.indexOf('/app/canonical-playlists-v1.js');
+const governanceIndex=allowedExperienceSupport.indexOf('/app/radio-playlist-governance-v1.js');
+const meshIndex=allowedExperienceSupport.indexOf('/app/civweave-systems-mesh-v251.js');
+assert.equal(trackIndex,radioIndex+1,'Track suggestions must immediately follow radio.');
+assert.equal(playlistsIndex,trackIndex+1,'Canonical playlists must immediately follow track suggestions.');
+assert.equal(governanceIndex,playlistsIndex+1,'Playlist governance must immediately follow canonical playlists.');
+assert.equal(meshIndex,governanceIndex+1,'Systems mesh must immediately follow playlist governance.');
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),browserRequiresInstalledDisplay:true,emptySessionAuthorized:false,boundaryInstalledAuthorization:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,settingsOwner:'settings-gateway-v317',canonicalChatOwner:'guide-workspace-v242',mobileAIHardening:'v302',systemsMesh:'v251-five-system-non-privileged-event-contract',nodeAiMesh:'v1-node-owned-service-discovery-routing',questVeil:'v1-mandatory-human-ledger-gate-plus-mesh-batches',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,canonicalPlaylists:true,playlistGovernance:true,backgroundCampus:true,hostNodeSession:true,legacyCompatibility:'noncanonical-only'},null,2));
