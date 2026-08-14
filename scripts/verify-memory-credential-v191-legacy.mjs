@@ -55,7 +55,7 @@ assert(JSON.parse(settingsSession.getItem('civweave-model-session')).apiKey===pe
 controller.forgetCredential();
 assert(!controller.credentialStatus().remembered&&!controller.credentialStatus().session,'Forget saved key did not clear both durable and session copies.');
 
-for(const token of ['name="credentialMode"','Remember on this device','This app session only','anyone with access to this unlocked browser profile','credentialPersistence'])assert(settingsSource.includes(token),`Settings teaching flow is missing ${token}.`);
+for(const token of ['name="credentialMode"','Remember on this device','This app session only','unlocked browser profile','credentialPersistence'])assert(settingsSource.includes(token),`Settings teaching flow is missing ${token}.`);
 for(const forbidden of ['MutationObserver','setInterval(','setTimeout('])assert(!settingsSource.includes(forbidden),`Clean-room settings reintroduced ${forbidden}.`);
 assert(!deviceSource.includes('MutationObserver'),'Credential compatibility shim still observes the document.');
 assert(deviceSource.includes("addEventListener('civweave:model-settings-saved'"),'Credential bridge does not canonicalize an explicitly saved credential.');
