@@ -1,15 +1,16 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { extname, join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = new URL('../', import.meta.url);
-const APP = new URL('../public/app/', import.meta.url);
+const ROOT = fileURLToPath(new URL('../', import.meta.url));
+const APP = fileURLToPath(new URL('../public/app/', import.meta.url));
 const TRANSLATION_FILES = [
   new URL('../public/app/japanese-mode-v1.js', import.meta.url),
   new URL('../public/app/japanese-shell-copy-v1.js', import.meta.url),
 ];
 const EXTRA_FILES = [
-  new URL('../public/index.html', import.meta.url),
-  new URL('../public/install-v130.js', import.meta.url),
+  fileURLToPath(new URL('../public/index.html', import.meta.url)),
+  fileURLToPath(new URL('../public/install-v130.js', import.meta.url)),
 ];
 
 const UI_KEYS = [
@@ -141,11 +142,11 @@ for (const url of TRANSLATION_FILES) {
   for (const key of translationKeys(source)) translated.add(key);
 }
 
-const files = [...await walk(APP), ...EXTRA_FILES.map(url => url.pathname)];
+const files = [...await walk(APP), ...EXTRA_FILES];
 const found = new Map();
 for (const full of files) {
   const source = await readFile(full, 'utf8');
-  const file = relative(ROOT.pathname, full).replaceAll('\\', '/');
+  const file = relative(ROOT, full).replaceAll('\\', '/');
   if (file.includes('japanese-mode-v1.js') || file.includes('japanese-shell-copy-v1.js')) continue;
   if (extname(full) === '.html') scanHtml(source, file, found);
   else scanJs(source, file, found);
