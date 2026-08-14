@@ -6,6 +6,7 @@ try{
 }
 await import('./sync-release-version-assets.mjs');
 await import('./sync-release-coherence-v220.mjs');
+await import('./generate-civweave-icons.mjs');
 await import('./stage-maplibre-v275.mjs');
 await import('./stage-federation-finder-data-v274.mjs');
 await import('./generate-prelive-metadata-v281.mjs');
