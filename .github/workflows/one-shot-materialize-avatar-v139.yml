@@ -1,0 +1,67 @@
+name: One-shot materialize Civweave 1.0.139 avatar repair
+
+on:
+  push:
+    branches:
+      - agent/fix-avatar-runtime-visibility-v346
+    paths:
+      - '.github/workflows/one-shot-materialize-avatar-v139.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize-avatar-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/fix-avatar-runtime-visibility-v346
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Advance release identity to 1.0.139
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from 'node:fs/promises';
+          const version='1.0.139';
+          await writeFile('VERSION',version+'\n');
+          const pkg=JSON.parse(await readFile('package.json','utf8'));
+          pkg.version=version;
+          await writeFile('package.json',JSON.stringify(pkg,null,2)+'\n');
+          const lock=JSON.parse(await readFile('package-lock.json','utf8'));
+          lock.version=version;
+          if(lock.packages?.[''])lock.packages[''].version=version;
+          await writeFile('package-lock.json',JSON.stringify(lock,null,2)+'\n');
+          const contract=JSON.parse(await readFile('config/release-contract.json','utf8'));
+          contract.canonical.current={version,path:`releases/${version}`,status:'current'};
+          await writeFile('config/release-contract.json',JSON.stringify(contract,null,2)+'\n');
+          NODE
+      - name: Materialize canonical 1.0.139 from current 1.0.138
+        run: |
+          node scripts/materialize-canonical-release.mjs
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/sync-release-version-assets.mjs
+          node scripts/build-service-worker-v211.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+      - name: Verify avatar and release contracts
+        run: |
+          node scripts/verify-release-version-sync.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-avatar-expression-director-v343.mjs
+          node scripts/verify-mobile-chat-bubble-anchor-v342.mjs
+          node scripts/verify-navigation-generators-v227.mjs
+          node scripts/verify-installed-shell-repair-v293.mjs
+      - name: Commit exact generated 1.0.139 outputs
+        run: |
+          git config user.name 'cerbanimo-dev'
+          git config user.email 'cerbanimo@gmail.com'
+          git add -A ':!.github/workflows/one-shot-materialize-avatar-v139.yml'
+          if git diff --cached --quiet; then
+            echo 'No generated changes required.'
+            exit 0
+          fi
+          git commit -m 'Materialize Civweave 1.0.139 avatar runtime repair'
+          git push origin HEAD:agent/fix-avatar-runtime-visibility-v346
