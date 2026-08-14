@@ -102,7 +102,7 @@ function scanJs(source, file, found) {
   const keys = UI_KEYS.join('|');
   const single = new RegExp(`(?:${keys})\\s*[:=]\\s*'((?:\\\\.|[^'])*)'`, 'g');
   const double = new RegExp(`(?:${keys})\\s*[:=]\\s*"((?:\\\\.|[^"])*)"`, 'g');
-  const template = new RegExp(`(?:${keys})\\s*[:=]\\s*\\`([^\\`$]*)\\``, 'g');
+  const template = new RegExp('(?:' + keys + ')\\s*[:=]\\s*`([^`$]*)`', 'g');
   const attrSingle = /setAttribute\(\s*['"](?:aria-label|title|placeholder|alt)['"]\s*,\s*'((?:\\.|[^'])*)'/g;
   const attrDouble = /setAttribute\(\s*['"](?:aria-label|title|placeholder|alt)['"]\s*,\s*"((?:\\.|[^"])*)"/g;
   const alertSingle = /(?:alert|confirm)\(\s*'((?:\\.|[^'])*)'\s*\)/g;
