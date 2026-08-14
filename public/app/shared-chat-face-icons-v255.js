@@ -42,7 +42,19 @@ function installStyle(){
 #${LAUNCHER_ID} img{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;border:0!important;border-radius:50%!important;object-fit:cover!important}
 #${SHARED_ROOT_ID} img[data-cwsg-avatar],#${SHARED_ROOT_ID} .cwsg236-avatar img{border-radius:14px!important;object-fit:cover!important}
 #${ROOT_ID} img[data-cw-expression-sprite="v343"],#${SHARED_ROOT_ID} img[data-cw-expression-sprite="v343"],#${LAUNCHER_ID} img[data-cw-expression-sprite="v343"]{object-fit:contain!important;background:transparent!important}
-@media(max-width:620px){#${ROOT_ID} .cw242-window-switcher{gap:4px!important;padding:7px 5px 8px!important}#${ROOT_ID} .cw242-window img{width:54px!important;height:54px!important;border-radius:12px!important}#${ROOT_ID} .cw242-window span{font-size:9px!important}#${ROOT_ID} header [data-guide-avatar]{width:68px!important;height:68px!important;min-width:68px!important;border-radius:14px!important}#${LAUNCHER_ID}{right:max(10px,env(safe-area-inset-right))!important;bottom:calc(var(--cw-themed-nav-height,58px) + env(safe-area-inset-bottom) + 10px)!important;width:48px!important;height:48px!important;min-width:48px!important;max-width:48px!important;min-height:48px!important;max-height:48px!important}}
+@media(max-width:620px){
+  #${ROOT_ID} .cw242-window-switcher{gap:4px!important;padding:7px 5px 8px!important}
+  #${ROOT_ID} .cw242-window img{width:54px!important;height:54px!important;border-radius:12px!important}
+  #${ROOT_ID}[data-cw-minilm-active="true"] .cw242-window[aria-pressed="true"]::after{right:4px!important;top:3px!important;width:8px!important;height:8px!important}
+  #${ROOT_ID} .cw242-window span{font-size:9px!important}
+  #${ROOT_ID} header [data-guide-avatar]{width:68px!important;height:68px!important;min-width:68px!important;border-radius:14px!important}
+  #${LAUNCHER_ID}{right:max(10px,env(safe-area-inset-right))!important;bottom:calc(var(--cw-themed-nav-height,58px) + env(safe-area-inset-bottom) + 10px)!important;width:48px!important;height:48px!important;min-width:48px!important;max-width:48px!important;min-height:48px!important;max-height:48px!important}
+}
+@media(max-width:390px){
+  #${ROOT_ID} .cw242-window img{width:50px!important;height:50px!important}
+  #${ROOT_ID} .cw242-window-switcher{gap:2px!important;padding-left:3px!important;padding-right:3px!important}
+  #${LAUNCHER_ID}{width:46px!important;height:46px!important;min-width:46px!important;max-width:46px!important;min-height:46px!important;max-height:46px!important}
+}
 `;(document.head||document.documentElement).append(style)
 }
 function explicitSystem(img){
@@ -72,7 +84,8 @@ function start(){
   addEventListener('civweave:avatar-expression',event=>applyExpression(event.detail||{}));
   ['civweave:guide-workspace-ready','civweave:guide-workspace-state','civweave:realm-guide-thread-changed','civweave:chat-single-owner-ready','civweave:minilm-context-ready','civweave:minilm-context-fallback','civweave:minilm-package-needed'].forEach(name=>addEventListener(name,()=>queueMicrotask(refreshMiniLmLamp)));
   miniLmLampTimer=setInterval(refreshMiniLmLamp,1500);addEventListener('pagehide',()=>clearInterval(miniLmLampTimer),{once:true});
-  globalThis.CivweaveSharedChatFaceIconsV255=Object.freeze({version:VERSION,icons:ICONS,refresh,apply,applyExpression,refreshMiniLmLamp,primeAvatars,ensureExpressionDirector,destroy:()=>clearInterval(miniLmLampTimer),sourceTruth:true,neutralSourceRewrite:false,expressiveSprites:true,miniLmActivityLamp:true})
+  globalThis.CivweaveSharedChatFaceIconsV255=Object.freeze({version:VERSION,icons:ICONS,refresh,apply,applyExpression,refreshMiniLmLamp,primeAvatars,ensureExpressionDirector,destroy:()=>clearInterval(miniLmLampTimer),switcherDesktopPx:60,switcherMobilePx:54,launcherShape:'circle',launcherPosition:'fixed',launcherDesktopPx:52,launcherMobilePx:48,launcherNarrowPx:46,launcherContainsOnlyImage:true,sourceTruth:true,neutralSourceRewrite:false,expressiveSprites:true,miniLmActivityLamp:true})
+  try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION,expressiveSprites:true,miniLmActivityLamp:true,neutralSourceRewrite:false}}))}catch{}
 }
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
