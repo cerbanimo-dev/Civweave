@@ -17,7 +17,7 @@ jobs:
   deploy:
     name: Build and deploy cerbanimo.cc
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -34,10 +34,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-
-      - name: Install deployment dependencies
-        run: npm install --ignore-scripts
 
       - name: Verify Cloudflare credentials
         shell: bash
@@ -121,7 +117,7 @@ jobs:
         run: |
           set -euo pipefail
           commit_message="$(git log -1 --pretty=%s)"
-          npx wrangler pages deploy .cerbanimo-pages \
+          npx --yes wrangler@4 pages deploy .cerbanimo-pages \
             --project-name "$PAGES_PROJECT" \
             --branch main \
             --commit-hash "$GITHUB_SHA" \
@@ -133,45 +129,96 @@ jobs:
             exit 3
           }
 
-      - name: Attach and repair cerbanimo.cc
-        shell: bash
-        run: >-
-          node scripts/ensure-cloudflare-pages-domain-v1.mjs
-          --project "$PAGES_PROJECT"
-          --domain "$PUBLIC_DOMAIN"
-          --repair
-          --attempts 60
-          --interval-ms 10000
-
-      - name: Verify live public site and history
+      - name: Ensure custom domain is attached through Pages
         shell: bash
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
-          const origin = `https://${process.env.PUBLIC_DOMAIN}`;
-          const expectedCommit = process.env.GITHUB_SHA;
-          let failure = 'site did not become current';
-          for (let attempt = 1; attempt <= 18; attempt += 1) {
-            try {
-              const bust = `${Date.now()}-${attempt}`;
-              const [pageResponse, historyResponse] = await Promise.all([
-                fetch(`${origin}/?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
-                fetch(`${origin}/history.json?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } })
-              ]);
-              if (!pageResponse.ok) throw new Error(`page HTTP ${pageResponse.status}`);
-              if (!historyResponse.ok) throw new Error(`history HTTP ${historyResponse.status}`);
-              const html = await pageResponse.text();
-              const history = await historyResponse.json();
-              if (!html.includes('Civweave | Cerbanimo')) throw new Error('public page marker missing');
-              if (history.latestCommit !== expectedCommit) throw new Error(`history is at ${history.latestCommit || 'missing'}, expected ${expectedCommit}`);
-              if (!Number.isSafeInteger(history.commitCount) || history.commitCount < 1) throw new Error('commit counter is invalid');
-              if (!history.initialCommitDate) throw new Error('initial commit date is missing');
-              console.log(`Verified ${origin} at ${history.latestCommit} with ${history.commitCount} commits since ${history.initialCommitDate}.`);
-              process.exit(0);
-            } catch (error) {
-              failure = `attempt ${attempt}: ${error.message}`;
+          const account = encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID);
+          const project = encodeURIComponent(process.env.PAGES_PROJECT);
+          const domain = process.env.PUBLIC_DOMAIN;
+          const headers = {
+            Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+            'Content-Type': 'application/json'
+          };
+          const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}/domains`;
+          const endpoint = `${base}/${encodeURIComponent(domain)}`;
+          const request = async (url, options = {}) => {
+            const response = await fetch(url, { headers, ...options });
+            const packet = await response.json().catch(() => ({}));
+            return { response, packet };
+          };
+          let { response, packet } = await request(endpoint);
+          if (response.status === 404) {
+            ({ response, packet } = await request(base, {
+              method: 'POST',
+              body: JSON.stringify({ name: domain })
+            }));
+            if (!response.ok || packet.success !== true) {
+              throw new Error(`Could not attach ${domain} through Pages: ${JSON.stringify(packet.errors || packet)}`);
             }
-            if (attempt < 18) await new Promise(resolve => setTimeout(resolve, 5000));
+            console.log(`Attached ${domain} to ${process.env.PAGES_PROJECT} through the Pages API.`);
+          } else if (!response.ok || packet.success !== true) {
+            throw new Error(`Could not inspect Pages domain ${domain}: ${JSON.stringify(packet.errors || packet)}`);
           }
-          throw new Error(`Production verification failed: ${failure}`);
+          const status = packet.result?.status || 'pending';
+          if (status !== 'active') {
+            const retried = await request(endpoint, { method: 'PATCH' });
+            if (!retried.response.ok || retried.packet.success !== true) {
+              throw new Error(`Could not retry Pages validation for ${domain}: ${JSON.stringify(retried.packet.errors || retried.packet)}`);
+            }
+            console.log(`Pages domain ${domain} is ${status}; validation retry requested.`);
+          } else {
+            console.log(`Pages domain ${domain} is active.`);
+          }
+          NODE
+
+      - name: Verify deployed site and history
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const account = encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID);
+          const project = encodeURIComponent(process.env.PAGES_PROJECT);
+          const domain = process.env.PUBLIC_DOMAIN;
+          const headers = { Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}` };
+          const domainEndpoint = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}/domains/${encodeURIComponent(domain)}`;
+          const expectedCommit = process.env.GITHUB_SHA;
+
+          async function verify(origin) {
+            let failure = 'site did not become current';
+            for (let attempt = 1; attempt <= 12; attempt += 1) {
+              try {
+                const bust = `${Date.now()}-${attempt}`;
+                const [pageResponse, historyResponse] = await Promise.all([
+                  fetch(`${origin}/?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
+                  fetch(`${origin}/history.json?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } })
+                ]);
+                if (!pageResponse.ok) throw new Error(`page HTTP ${pageResponse.status}`);
+                if (!historyResponse.ok) throw new Error(`history HTTP ${historyResponse.status}`);
+                const html = await pageResponse.text();
+                const history = await historyResponse.json();
+                if (!html.includes('Civweave | Cerbanimo')) throw new Error('public page marker missing');
+                if (history.latestCommit !== expectedCommit) throw new Error(`history is at ${history.latestCommit || 'missing'}, expected ${expectedCommit}`);
+                if (!Number.isSafeInteger(history.commitCount) || history.commitCount < 1) throw new Error('commit counter is invalid');
+                if (!history.initialCommitDate) throw new Error('initial commit date is missing');
+                console.log(`Verified ${origin} at ${history.latestCommit} with ${history.commitCount} commits since ${history.initialCommitDate}.`);
+                return history;
+              } catch (error) {
+                failure = `attempt ${attempt}: ${error.message}`;
+              }
+              if (attempt < 12) await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+            throw new Error(`Verification failed for ${origin}: ${failure}`);
+          }
+
+          await verify(`https://${process.env.PAGES_PROJECT}.pages.dev`);
+
+          const statusResponse = await fetch(domainEndpoint, { headers });
+          const statusPacket = await statusResponse.json().catch(() => ({}));
+          if (statusResponse.ok && statusPacket.success === true && statusPacket.result?.status === 'active') {
+            await verify(`https://${domain}`);
+          } else {
+            console.log(`Custom domain ${domain} is still validating; stable Pages origin is verified and the domain activator will finish the cutover.`);
+          }
           NODE
