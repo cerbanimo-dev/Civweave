@@ -25,6 +25,13 @@ await edit('public/service-worker-core-v208.js',source=>source
   .filter(line=>!line.includes("'/app/fullscreen-family-v104"))
   .join('\n'));
 
+await edit('public/service-worker-chat-repair-v245.js',source=>{
+  let next=source;
+  if(!next.includes("'/app/guide-chat-surface-v350.js'"))next=next.replace("  '/app/guide-workspace-v242.js',","  '/app/guide-workspace-v242.js',\n  '/app/guide-chat-surface-v350.js',");
+  for(const route of deleted){if(!next.includes(`'${route}'`))next=next.replace("  '/app/chat-single-owner-v245.js'","  '/app/chat-single-owner-v245.js',\n  '"+route+"'");}
+  return next;
+});
+
 await edit('public/app/install-boundary-v146.js',source=>source
   .replace("const GUIDE_WORKSPACE='/app/guide-workspace-v242.js';","const GUIDE_WORKSPACE='/app/guide-chat-surface-v350.js';")
   .replace("globalThis.CivweaveGuideWorkspaceV242?.closeWorkspace?.();","globalThis.CivweaveGuideChatSurfaceV350?.close?.();")
@@ -33,6 +40,13 @@ await edit('public/app/install-boundary-v146.js',source=>source
   .replace("guideWorkspaceRevision:'v250-v242-canonical-owner'","guideWorkspaceRevision:'v350-single-current-chat-surface'")
   .replace("guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm'","guideSurfaceOwnershipPolicy:'v350-single-current-surface-five-private-ledgers-handover-only-cross-realm'")
   .replace("guideWorkspaceWindowPolicy:'five-switchable-windows-current-realm-launcher'","guideWorkspaceWindowPolicy:'single-current-surface-explicit-guide-selector'")
+);
+
+await edit('public/app/family-ai-loader-v105.js',source=>source
+  .replace("if(globalThis.CivweaveGuideWorkspaceV242?.openWindow)return{kind:'workspace',api:globalThis.CivweaveGuideWorkspaceV242};","if(globalThis.CivweaveGuideChatSurfaceV350?.open)return{kind:'surface',api:globalThis.CivweaveGuideChatSurfaceV350};")
+  .replace("  if(owner.kind==='workspace')return owner.api.openWindow(target,{prefill,focus:true});\n  return owner.api.open({guide:target,prefill,focus:true});","  return owner.api.open({guide:target,prefill,focus:true});")
+  .replaceAll("'civweave:guide-workspace-ready'","'civweave:guide-chat-ready'")
+  .replace("canonicalChatOwner:'guide-workspace-v242'","canonicalChatOwner:'guide-chat-surface-v350'")
 );
 
 const releaseGateway=`releases/${version}/server/server-gateway-v131-base.mjs`;
@@ -49,7 +63,7 @@ await edit(releaseLocal,source=>source
 
 await edit('scripts/smoke-gateway-v131.mjs',source=>source
   .replace("const after = \"  for(const route of ['/loom/','/lite/']){const response=await fetch(origin+route,{cache:'no-store'}),body=await response.json();assert(response.status===410,`${route} returned ${response.status}, expected 410`);assert(body.localInstallRequired===true,`${route} does not explain installation`)}\\n  for(const route of ['/app/','/app/index.html','/app/working-campus-v156.html','/app/realm-console-v140.html','/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html']){const response=await fetch(origin+route,{cache:'no-store'});assert(response.ok,`${route} returned ${response.status}, expected a public installed-runtime asset`);const type=String(response.headers.get('content-type')||'');assert(/text\\\\/html/i.test(type),`${route} returned unexpected content type ${type}`)}\";",
-  "const after = \"  for(const route of ['/loom/','/lite/']){const response=await fetch(origin+route,{cache:'no-store'});assert(response.status===410,`${route} returned ${response.status}, expected 410`);assert(body.localInstallRequired===true,`${route} does not explain installation`)}\\n  for(const route of ['/app/','/app/index.html','/app/working-campus-v156.html','/app/realm-console-v140.html']){const response=await fetch(origin+route,{cache:'no-store'});assert(response.ok,`${route} returned ${response.status}, expected a public installed-runtime asset`);const type=String(response.headers.get('content-type')||'');assert(/text\\\\/html/i.test(type),`${route} returned unexpected content type ${type}`)}\\n  for(const route of ['/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html']){const response=await fetch(origin+route,{cache:'no-store'});assert(response.status===404,`${route} returned ${response.status}, expected retired 404`)}\";"
+  "const after = \"  for(const route of ['/loom/','/lite/']){const response=await fetch(origin+route,{cache:'no-store'}),body=await response.json();assert(response.status===410,`${route} returned ${response.status}, expected 410`);assert(body.localInstallRequired===true,`${route} does not explain installation`)}\\n  for(const route of ['/app/','/app/index.html','/app/working-campus-v156.html','/app/realm-console-v140.html']){const response=await fetch(origin+route,{cache:'no-store'});assert(response.ok,`${route} returned ${response.status}, expected a public installed-runtime asset`);const type=String(response.headers.get('content-type')||'');assert(/text\\\\/html/i.test(type),`${route} returned unexpected content type ${type}`)}\\n  for(const route of ['/app/fullscreen-family-v104.html','/app/cabinet-mode-v142.html']){const response=await fetch(origin+route,{cache:'no-store'});assert(response.status===404,`${route} returned ${response.status}, expected retired 404`)}\";"
 ));
 
 await edit('scripts/smoke-gateway-v131-base.mjs',source=>source.replace(
