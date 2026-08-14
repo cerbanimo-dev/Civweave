@@ -2,31 +2,22 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [installerFallback,returnGuard]=await Promise.all([
-  read('public/app/installer-online-fallback-v225.js'),
+const [repairOnly,boundary,installedEntryHtml,returnGuard]=await Promise.all([
+  read('public/app/installer-repair-only-v1.js'),
+  read('public/app/install-boundary-v146.js'),
+  read('public/app/installed-entry-v146.html'),
   read('public/app/working-campus-return-guard-v425.js')
 ]);
-
-new Function(installerFallback);
-new Function(returnGuard);
-
-assert.match(installerFallback,/function resumeRequiredNext\(\)/,'Installer lost required-next recovery.');
-assert.match(installerFallback,/params\.get\('install'\) === 'required'/,'Installer no longer recognizes install=required.');
-assert.match(installerFallback,/CANONICAL_NEXT_PATHS/,'Installer required-next recovery is not allowlisted.');
-assert.match(installerFallback,/target\.searchParams\.set\('installed', '1'\)/,'Recovered next target is not explicitly authorized.');
-assert.match(installerFallback,/installer-redirect-loop-failsafe-v1/,'Repeated required-next navigation has no installed-entry failsafe.');
-assert.match(installerFallback,/if \(resumeRequiredNext\(\)\) return;/,'Required-next recovery does not run before installer observers and optional tools.');
-
-assert.match(returnGuard,/function preauthorizeCanonicalCampus\(\)/,'Working Campus lost pre-boundary authorization.');
-assert.match(returnGuard,/sessionStorage\.setItem\(BOOT_KEY,'1'\)/,'Working Campus does not stamp the current install-boundary boot key.');
-assert.match(returnGuard,/sessionStorage\.setItem\(LEGACY_BOOT_KEY,'1'\)/,'Working Campus does not stamp the legacy install-boundary boot key.');
-assert.match(returnGuard,/preauthorizeCanonicalCampus\(\);\naddEventListener\('pagehide'/,'Working Campus authorization no longer runs before lifecycle listeners and the shared boundary.');
-assert.match(returnGuard,/installBoundaryPolicy:'canonical-campus-preauthorized-before-shared-boundary'/,'Working Campus redirect-loop policy marker drifted.');
-
-console.log(JSON.stringify({
-  ok:true,
-  revision:'installer-redirect-loop-v1',
-  installerRequiredNext:'single-use-allowlisted-next-with-installed-authorization',
-  repeatedRedirect:'safe-installed-entry',
-  workingCampus:'preauthorized-before-install-boundary'
-},null,2));
+new Function(repairOnly);new Function(boundary);new Function(returnGuard);
+assert.match(repairOnly,/function resumeRequiredNext\(\)/,'Installer lost required-next recovery.');
+assert.match(repairOnly,/params\.get\('install'\)===['"]required['"]/,'Installer no longer recognizes install=required.');
+assert.match(repairOnly,/CANONICAL_NEXT_PATHS/,'Installer required-next recovery is not allowlisted.');
+assert.match(repairOnly,/if\(!required\|\|!rawNext\|\|!installedDisplay\(\)\)return false/,'Required-next recovery can run outside installed display mode.');
+assert.match(repairOnly,/target\.searchParams\.set\('installed','1'\)/,'Installed recovery target is not marked installed.');
+assert.match(repairOnly,/browserRuntimePolicy:'installer-only-until-installed-display'/,'Installer repair bridge lost install-only policy.');
+assert.match(boundary,/function allowed\(\)\{return installedDisplay\(\)\|\|developer\(\)\}/,'Shared boundary can still authorize ordinary browser runtime.');
+assert.match(boundary,/installedQueryIsAuthorization:false/,'installed=1 can become authorization again.');
+assert.match(installedEntryHtml,/installed-entry-browser-gate-v1/,'Installed entry lost its pre-paint browser gate.');
+assert.match(installedEntryHtml,/location\.replace\(installer\.href\)/,'Installed entry no longer redirects ordinary browser display to installer.');
+assert.match(returnGuard,/function preauthorizeCanonicalCampus\(\)/,'Working Campus lost its installed-return recovery marker.');
+console.log(JSON.stringify({ok:true,revision:'installer-redirect-loop-install-only-v1',installerRequiredNext:'allowlisted-and-installed-display-only',browserRuntime:false,installedQueryAuthorization:false,prePaintGate:true,workingCampusReturnGuardRetained:true},null,2));

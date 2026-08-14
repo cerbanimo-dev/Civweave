@@ -17,6 +17,7 @@ const paths = [
   '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml',
   'scripts/resolve-cloudflare-recovery-zone-v1.mjs',
   'config/launch-topology-v1.json',
+  'public/app/installer-repair-only-v1.js',
   'public/app/installer-online-fallback-v225.js',
   'public/app/civweave-brand.js',
   'public/app/hub-recovery-api-v1.js',
@@ -69,58 +70,24 @@ assert.match(source['config/launch-topology-v1.json'], /"domain": null/);
 assert.match(source['config/launch-topology-v1.json'], /nodes\.civweave\.invalid/);
 assert.match(source['cloudflare/node-cloud/wrangler.jsonc'], /nodes\.civweave\.invalid/);
 
-const activeDomainSurfaces = [
-  'cloudflare/account-edge/wrangler.jsonc',
-  'cloudflare/node-cloud/wrangler.jsonc',
-  'cloudflare/recovery-relay/wrangler.jsonc',
-  '.github/workflows/deploy-civweave-pages.yml',
-  '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml',
-  'config/launch-topology-v1.json',
-];
-for (const path of activeDomainSurfaces) {
-  assert.doesNotMatch(source[path], /(?:^|[^a-z])commonweave\.earth/i, `${path} must not depend on the unrelated commonweave.earth domain`);
-}
+const activeDomainSurfaces = ['cloudflare/account-edge/wrangler.jsonc','cloudflare/node-cloud/wrangler.jsonc','cloudflare/recovery-relay/wrangler.jsonc','.github/workflows/deploy-civweave-pages.yml','.github/workflows/enable-cloudflare-worker-subdomains-v1.yml','config/launch-topology-v1.json'];
+for (const path of activeDomainSurfaces) assert.doesNotMatch(source[path], /(?:^|[^a-z])commonweave\.earth/i, `${path} must not depend on the unrelated commonweave.earth domain`);
 
 assert.match(source['public/app/civweave-brand.js'], /hub-delivery-intent-v1\.js/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /mailto:/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /#cw-hub-recover-request/);
-assert.match(source['public/app/installer-online-fallback-v225.js'], /hub-recovery-api-v1\.js/);
+assert.match(source['public/app/installer-repair-only-v1.js'], /hub-recovery-api-v1\.js/);
+assert.match(source['public/app/installer-repair-only-v1.js'], /browserRuntimePolicy:'installer-only-until-installed-display'/);
+assert.match(source['public/app/installer-online-fallback-v225.js'], /retired:true/);
+assert.match(source['public/app/installer-online-fallback-v225.js'], /browserRuntime:false/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryKit:packet\.recoveryKit/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryMethod/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Save these recovery codes now/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Use a saved recovery code/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Add a recovery email before creating this Hub account/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /not written into your Passport or exposed to FellowFare/);
-for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {
-  const result = spawnSync(process.execPath, ['--check', path], { encoding: 'utf8' });
-  assert.equal(result.status, 0, `${path} syntax failed: ${result.stderr || result.stdout}`);
-}
+for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {const result = spawnSync(process.execPath, ['--check', path], { encoding: 'utf8' });assert.equal(result.status, 0, `${path} syntax failed: ${result.stderr || result.stdout}`);}
 
-const recoveryNoStripeSurfaces = [
-  'cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs',
-  'cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs',
-  'cloudflare/account-edge/src/recovery-entry-v10.mjs',
-  'cloudflare/account-edge/wrangler.jsonc',
-  'cloudflare/recovery-relay/src/index.mjs',
-  'cloudflare/recovery-relay/wrangler.jsonc',
-  'scripts/resolve-cloudflare-recovery-zone-v1.mjs',
-  'public/app/hub-recovery-api-v1.js',
-  'public/app/hub-recovery-ui-v1.js',
-  'public/app/hub-delivery-intent-v1.js',
-];
-for (const path of recoveryNoStripeSurfaces) {
-  assert.doesNotMatch(source[path], /stripe/i, `${path} must not add Stripe as a Hub recovery dependency`);
-}
-
-console.log(JSON.stringify({
-  ok: true,
-  schema: 'civweave.hub-recovery-wiring-check.v8',
-  freeTierInboundProof: true,
-  offlineRecoveryCodes: true,
-  offlineCodeCount: 8,
-  crossAccountRelay: true,
-  relayDiscovery: 'canonical-pages',
-  ownedZoneOnly: true,
-  unrelatedDomainGuard: true,
-  relayStoresIdentity: false,
-}));
+const recoveryNoStripeSurfaces = ['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs','cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs','cloudflare/account-edge/src/recovery-entry-v10.mjs','cloudflare/account-edge/wrangler.jsonc','cloudflare/recovery-relay/src/index.mjs','cloudflare/recovery-relay/wrangler.jsonc','scripts/resolve-cloudflare-recovery-zone-v1.mjs','public/app/hub-recovery-api-v1.js','public/app/hub-recovery-ui-v1.js','public/app/hub-delivery-intent-v1.js'];
+for (const path of recoveryNoStripeSurfaces) assert.doesNotMatch(source[path], /stripe/i, `${path} must not add Stripe as a Hub recovery dependency`);
+console.log(JSON.stringify({ok:true,schema:'civweave.hub-recovery-wiring-check.v8-install-only',freeTierInboundProof:true,offlineRecoveryCodes:true,offlineCodeCount:8,crossAccountRelay:true,relayDiscovery:'canonical-pages',ownedZoneOnly:true,unrelatedDomainGuard:true,relayStoresIdentity:false,browserRuntime:false}));

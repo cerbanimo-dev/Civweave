@@ -21,5 +21,8 @@
 /app/installer-repair-only-v1.js
   Cache-Control: no-cache
 
+/app/installer-online-fallback-v225.js
+  Cache-Control: no-cache
+
 /app/local-ai/worker-v266.js
   Cache-Control: no-cache
