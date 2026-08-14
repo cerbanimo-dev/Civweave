@@ -14,8 +14,10 @@ assert.equal(sharedLabelFromHostname('deep.garden.civweave.cc'), null);
 assert.equal(sharedLabelFromHostname('garden.example.com'), null);
 
 const now = Date.parse('2026-08-14T12:00:00Z');
-assert.equal(sharedDomainEntitlementStatus({ entitlement_status: 'active', paid_through: '2026-08-15T00:00:00Z' }, now), 'active');
-assert.equal(sharedDomainEntitlementStatus({ entitlement_status: 'active', paid_through: '2026-08-13T00:00:00Z' }, now), 'expired');
+assert.equal(sharedDomainEntitlementStatus({ entitlement_status: 'active', entitlement_source: 'hosting-cost-share', paid_through: '2026-08-15T00:00:00Z' }, now), 'active');
+assert.equal(sharedDomainEntitlementStatus({ entitlement_status: 'active', entitlement_source: 'hosting-cost-share', paid_through: '2026-08-13T00:00:00Z' }, now), 'expired');
+assert.equal(sharedDomainEntitlementStatus({ entitlement_status: 'active', entitlement_source: 'hosting-cost-share' }, now), 'expired');
+assert.equal(sharedDomainEntitlementStatus({ entitlement_status: 'active', entitlement_source: 'sponsored' }, now), 'active');
 assert.equal(sharedDomainEntitlementStatus({ entitlement_status: 'grace', grace_until: '2026-08-15T00:00:00Z' }, now), 'grace');
 assert.equal(sharedDomainEntitlementStatus({ entitlement_status: 'grace', grace_until: '2026-08-13T00:00:00Z' }, now), 'expired');
 assert.equal(sharedDomainEntitlementStatus({ entitlement_status: 'suspended' }, now), 'suspended');
@@ -74,6 +76,7 @@ try {
       host_id: 'garden',
       pages_origin: 'https://civweave-garden.pages.dev',
       entitlement_status: 'active',
+      entitlement_source: 'hosting-cost-share',
       paid_through: '2999-01-01T00:00:00Z'
     })
   );
