@@ -1,0 +1,71 @@
+name: Maintain Founder Source Node v1
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/account-edge/**'
+      - 'scripts/provision-cloudflare-account-edge-v1.mjs'
+      - 'scripts/ensure-founder-source-node-v1.mjs'
+      - '.github/workflows/maintain-founder-source-node-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-founder-source-node
+  cancel-in-progress: false
+
+jobs:
+  health-and-repair:
+    name: Keep founder minting fabric healthy
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Worker tooling
+        run: npm install --ignore-scripts
+
+      - name: Require founder Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing founder CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing founder CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+
+      - name: Check and self-heal founder source node
+        run: node scripts/ensure-founder-source-node-v1.mjs --repair --output /tmp/founder-source-node-health.json
+
+      - name: Publish operator summary
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const health = JSON.parse(fs.readFileSync('/tmp/founder-source-node-health.json', 'utf8'));
+          const lines = [
+            '## Founder source node',
+            '',
+            `- Status: ${health.ok ? 'healthy' : 'unhealthy'}`,
+            `- Repaired this run: ${health.repaired ? 'yes' : 'no'}`,
+            `- Worker: ${health.worker}`,
+            `- Starter nodes: ${health.expectedStarterNodes.join(', ')}`,
+            '- Browser traffic policy: not a public web origin',
+            '- Purpose: node fabric and steward operations'
+          ];
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`);
+          NODE
