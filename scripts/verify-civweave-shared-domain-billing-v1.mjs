@@ -77,6 +77,7 @@ const db = new FakeDB();
 const providerCalls = [];
 const deliveredEvents = [];
 let reportedMembers = 50;
+let reportedNodeMembers = 20;
 let signatureVerified = false;
 const nodeRow = {
   node_id: 'garden',
@@ -106,7 +107,7 @@ const edge = {
         schema: 'civweave.host-capacity.v2',
         nodeId: 'garden',
         memberCount: reportedMembers,
-        nodeMembers: reportedMembers,
+        nodeMembers: reportedNodeMembers,
         maxMembers: reportedMembers > 28 ? 400 : 28
       });
     }
@@ -182,9 +183,10 @@ const upcoming = {
 };
 
 reportedMembers = 200;
+reportedNodeMembers = 70;
 const renewal = await reconcileSharedDomainHostingRenewal(edge, upcoming);
 assert.equal(renewal.applied, true);
-assert.equal(renewal.memberCount, 200);
+assert.equal(renewal.memberCount, 200, 'renewal billing must use total hub membership, not one starter node');
 assert.equal(renewal.nextMonthlyCents, 1000);
 assert.equal(renewal.nextQuantity, 2);
 assert.equal(renewal.changed, true);
