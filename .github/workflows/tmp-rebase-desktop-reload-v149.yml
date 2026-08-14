@@ -1,21 +1,22 @@
 name: Temporary rebase desktop reload v1.0.149
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches:
+      - agent/fix-desktop-home-reload-storm
 
 permissions:
   contents: write
 
 jobs:
   rebase-and-materialize:
-    if: github.head_ref == 'agent/fix-desktop-home-reload-storm'
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
@@ -53,4 +54,4 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m 'Rebase desktop reload repair onto Civweave 1.0.149'
           fi
-          git push origin "HEAD:${GITHUB_HEAD_REF}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
