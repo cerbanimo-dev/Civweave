@@ -28,7 +28,8 @@
     "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.pages.dev",
     "CIVWEAVE_WORKERS_PLAN": "free",
     "CIVWEAVE_UNIFIED_BILLING_MODEL": "google/gemini-3.1-flash-lite",
-    "CIVWEAVE_AI_GATEWAY_ID": "default"
+    "CIVWEAVE_AI_GATEWAY_ID": "default",
+    "HUB_RECOVERY_INBOUND_EMAIL": "recover@recovery.commonweave.earth"
   },
   "observability": { "enabled": true }
 
