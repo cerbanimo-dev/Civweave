@@ -91,7 +91,7 @@ async function main(){
 
     const entry=entryResponse.text;
     requireToken(entry,`const FALLBACK_VERSION='${deployed}';`,'installed entry');
-    requireToken(entry,`version:'${deployed}-boot-recovery-v426'`,'installed entry');
+    requireToken(entry,`version:'${deployed}-boot-recovery-v426`,'installed entry');
     requireToken(entry,"updateViaCache:'none'",'installed entry');
     requireToken(entry,'registration.update()','installed entry');
     requireToken(entry,'bounded(registration.update()','installed entry');
@@ -99,6 +99,7 @@ async function main(){
     requireToken(entry,'revision=boot-recovery-v426','installed entry');
     requireToken(entry,"fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'",'installed entry');
     requireToken(entry,'bounded(fetch(','installed entry');
+    requireToken(entry,"browserRuntimePolicy:'installed-display-only'",'installed entry');
 
     const worker=workerResponse.text;
     requireToken(worker,`/app/system-routes-v227.js?v=${deployed}-five-system-route-contract-v227`,'service worker');
