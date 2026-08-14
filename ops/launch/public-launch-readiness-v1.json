@@ -1,0 +1,27 @@
+{
+  "schema": "civweave.public-launch-readiness.v1",
+  "releaseMode": "pre-public",
+  "publicLaunchApproved": false,
+  "lastReviewedAt": "2026-08-13T20:43:00-04:00",
+  "automatedGates": {
+    "repositoryRegressionSuite": "required",
+    "productionDependencyAudit": "required",
+    "pwaColdLaunchRecovery": "required",
+    "lowEndLocalAiContract": "required",
+    "perUserAiPoolBoundary": "required",
+    "d1BackupTooling": "required",
+    "releaseDiscipline": "required"
+  },
+  "manualGates": {
+    "mainBranchProtection": { "status": "blocked", "evidence": null, "reason": "main is currently unprotected and required status checks are not enforced" },
+    "cloudflareWorkerProduction": { "status": "blocked", "evidence": null, "reason": "the current main commit has a failing Cloudflare Workers production build check" },
+    "legalReviewAndClickwrap": { "status": "blocked", "evidence": null, "reason": "the draft Terms still contains counsel-review and missing-policy placeholders; public clickwrap must not be activated before review" },
+    "remoteRestoreDrill": { "status": "blocked", "evidence": null, "reason": "a real backup and clean-target restore drill has not yet been recorded" },
+    "lowEndPhysicalDeviceMatrix": { "status": "blocked", "evidence": null, "reason": "real weak-phone cold/warm inference, memory, offline restart, and battery-behavior evidence has not yet been recorded" }
+  },
+  "promotionPolicy": {
+    "closedAlpha": "5-10 trusted participants after worker production, recovery, backup, and operational gates pass",
+    "inviteOnlyBeta": "50-200 participants after monitoring, moderation, budget controls, restore drill, and rollback are exercised",
+    "publicBeta": "only after all manual gates pass and the public launch gate exits successfully"
+  }
+}
