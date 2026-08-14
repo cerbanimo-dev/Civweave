@@ -21,10 +21,10 @@ try{
 
   const controller=await fetch(`${origin}/app/model-settings-controller-v173.js`,{headers:packageHeaders}).then(response=>response.text());
   for(const token of [
-    "VERSION='1.0.7-ai-settings-cleanroom-v188'",
-    "authority:'ai-settings-cleanroom-v188'",
-    "eventOwnership:'single-cleanroom-controller'",
-    "presentation:'cleanroom-v188'",
+    "VERSION='1.0.8-ai-settings-cleanroom-v188-v317'",
+    "authority:'ai-settings-cleanroom-v188-v317'",
+    "eventOwnership:'none-input-owned-by-settings-gateway-v317'",
+    "presentation:'cleanroom-v188-v317'",
     'providerRuntimeOnOpen:false',
     'providerRuntimeAvailable:false',
     'providerTestsAvailable:false',
@@ -55,5 +55,5 @@ try{
   const sharedTools=await fetch(`${origin}/extensions/civweave-additions-v156.js`,{headers:packageHeaders}).then(response=>response.text());assert(sharedTools.includes('Node & friends')&&sharedTools.includes('aiVault:false'),'Shared Tools regressed');
   const packageLedger=await fetch(`${origin}/app/shared/civweave-parity-ledger.json`,{cache:'no-store',headers:packageHeaders});assert(packageLedger.ok,`marked parity ledger returned ${packageLedger.status}`);const ledger=await packageLedger.json();assert(Array.isArray(ledger.systems)&&ledger.systems.length>=5,'parity ledger is missing systems');
   const telemetry=await fetch(`${origin}/api/boot-log`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:'room-opened'})});assert(telemetry.status===204,`boot telemetry returned ${telemetry.status}`);
-  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsPresentation:'cleanroom-v188',nativeDialog:false,outsideTap:'safe-close',settingsTransformerWork:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,captureListener:false,mutationObserver:false,polling:false,timers:false,campusIconPixels:64,campusShell:'compact-v235',manualFirstInstaller:true},null,2));
+  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsPresentation:'cleanroom-v188-v317',nativeDialog:false,outsideTap:'safe-close',settingsTransformerWork:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,captureListener:false,mutationObserver:false,polling:false,timers:false,campusIconPixels:64,campusShell:'compact-v235',manualFirstInstaller:true},null,2));
 }catch(error){console.error(output.join(''));throw error}finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}
