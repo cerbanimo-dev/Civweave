@@ -1,0 +1,27 @@
+{
+  "schema": "civweave.open-music-policy.v1",
+  "built_at": "2026-08-14T12:14:38Z",
+  "accepted_licenses": [
+    "CC-BY",
+    "CC-BY-SA",
+    "CC0",
+    "PUBLIC-DOMAIN"
+  ],
+  "excluded_classes": [
+    "CC-BY-NC",
+    "CC-BY-ND",
+    "CC-BY-NC-SA",
+    "CC-BY-NC-ND",
+    "custom",
+    "unknown",
+    "all-rights-reserved",
+    "download-only-without-redistribution-grant"
+  ],
+  "rule": "A track is omitted entirely unless explicit source evidence permits Civweave redistribution and a direct downloadable audio file is available.",
+  "storage": "metadata-and-download-references-only; hubs fetch lazily and compute SHA-256 when the binary enters cache",
+  "providers": {
+    "wikimedia-commons": "machine-readable Commons license metadata",
+    "internet-archive": "explicit licenseurl plus downloadable audio",
+    "ccmixter": "Query API restricted to allowlisted Creative Commons/Public Domain classes plus per-result license evidence"
+  }
+}

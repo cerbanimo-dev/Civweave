@@ -8,6 +8,7 @@ import '../../civweave-live-data.js';
 import './marketplace-v2.js';
 import './marketplace-v2-capabilities.js';
 import './fulfillment-economy-v2.js';
+import './goods-fulfillment-v1.js';
 import './jurisdiction-policy-v1.js';
 import './seller-method-types-v1.js';
 import './seller-methods-v1.js';
