@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='civweave-hub-map-v1.0.0';
+const VERSION='civweave-hub-map-v1.1.0-region-gossip';
 const DIRECTORY_ENDPOINT='/api/hub-map-nodes';
 const DIRECTORY_CACHE_KEY='civweave.hub-map.directory.v1';
 const HOST_ENDPOINT_KEY='federation-finder.physical-node-endpoint';
@@ -71,7 +71,7 @@ function selectedHubNode(){const row=selectedHubRow(),nodeId=rowNodeId(row);retu
 
 function installPanel(){
   const panel=document.getElementById('panel');if(!panel||document.getElementById('hubMapLedger'))return;
-  const section=document.createElement('section');section.id='hubMapLedger';section.innerHTML=`<h3>Hub locality ledger</h3><p>Hub members ferry signed public Needs, Offerings, and Ideas between online Hubs and nearby foreground devices. The most recent copy stays available offline.</p><div class="row"><button id="hubLedgerRefresh" class="btn primary" type="button">Refresh selected Hub</button><button id="hubLedgerHome" class="btn" type="button">My Hub</button></div><p id="hubGossipStatus">Select a Hub node to explore its cached neighborhood ledger.</p><div id="hubLedgerList" class="results"><div class="empty">No Hub selected yet.</div></div>`;
+  const section=document.createElement('section');section.id='hubMapLedger';section.innerHTML=`<h3>Hub locality ledger</h3><p>Connected Hub members automatically carry a Region: their home Hub plus the six nearest mapped Hubs. That signed gossip stays available offline, while any other Hub on the map can still be visited and exchanged with manually.</p><div class="row"><button id="hubLedgerRefresh" class="btn primary" type="button">Refresh selected Hub</button><button id="hubLedgerHome" class="btn" type="button">My Hub</button></div><p id="hubGossipStatus">Select a Hub node to explore its cached neighborhood ledger.</p><div id="hubLedgerList" class="results"><div class="empty">No Hub selected yet.</div></div>`;
   const detail=document.getElementById('detail');detail?.parentNode?.insertBefore(section,detail.nextSibling);
   document.getElementById('hubLedgerRefresh')?.addEventListener('click',()=>refreshSelectedHub(true));
   document.getElementById('hubLedgerHome')?.addEventListener('click',focusMyHub);
@@ -113,7 +113,7 @@ function startProximity(){
 function stopProximity(){if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null}}
 async function virtualMemberRefresh(){
   if(navigator.onLine===false)return;const active=session()?.publicStatus?.()?.sessions?.filter(item=>item.active)||[];if(!active.length)return;
-  const hubs=gossip()?.frequentHubs?.(6)||[];for(const hub of hubs.slice(0,4))try{await gossip().passByHub(hub,{physical:false})}catch{}
+  try{return await gossip()?.syncRegion?.({nodes:directory.nodes||[],networkDirectory:false})}catch{return null}
 }
 function bind(){
   document.getElementById('locate')?.addEventListener('click',startProximity,{capture:true});addEventListener('online',()=>{loadDirectory({network:true}).then(()=>virtualMemberRefresh()).catch(()=>{})});addEventListener('civweave:map-mesh-applied',()=>{activateNodeMode();augmentDetail()});addEventListener('civweave:locality-ledger-changed',()=>refreshSelectedHub(false).catch(()=>{}));addEventListener('visibilitychange',()=>{if(document.hidden)stopProximity();else if(proximityEnabled)startProximity()});addEventListener('pagehide',()=>{stopProximity();if(refreshTimer)clearInterval(refreshTimer)},{once:true});
