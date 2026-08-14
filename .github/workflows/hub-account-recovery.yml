@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'cloudflare/account-edge/**'
+      - 'cloudflare/recovery-relay/**'
       - 'public/app/hub-recovery-*.js'
       - 'public/app/hub-delivery-intent-v1.js'
       - 'public/app/civweave-brand.js'
@@ -12,11 +13,13 @@ on:
       - 'public/app/installer-online-fallback-v225.js'
       - 'scripts/verify-hub-recovery-wiring-v1.mjs'
       - 'scripts/test-hub-recovery-behavior-v1.mjs'
+      - 'scripts/test-hub-recovery-relay-v1.mjs'
       - '.github/workflows/hub-account-recovery.yml'
   push:
     branches: [main]
     paths:
       - 'cloudflare/account-edge/**'
+      - 'cloudflare/recovery-relay/**'
       - 'public/app/hub-recovery-*.js'
       - 'public/app/hub-delivery-intent-v1.js'
       - 'public/app/civweave-brand.js'
@@ -25,6 +28,7 @@ on:
       - 'public/app/installer-online-fallback-v225.js'
       - 'scripts/verify-hub-recovery-wiring-v1.mjs'
       - 'scripts/test-hub-recovery-behavior-v1.mjs'
+      - 'scripts/test-hub-recovery-relay-v1.mjs'
 
 permissions:
   contents: read
@@ -40,6 +44,8 @@ jobs:
           node-version: '22'
       - name: Test Hub recovery behavior
         run: node scripts/test-hub-recovery-behavior-v1.mjs
+      - name: Test cross-Hub recovery proof relay
+        run: node scripts/test-hub-recovery-relay-v1.mjs
       - name: Verify Hub recovery wiring
         run: node scripts/verify-hub-recovery-wiring-v1.mjs
       - name: Verify account edge bootstrap
