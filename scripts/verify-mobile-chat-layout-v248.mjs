@@ -25,7 +25,7 @@ const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
 check('release and package are coherent',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version);
-check('working campus source owns the Civweave brand icon before paint',campusHtml.includes('id="brand-home"')&&campusHtml.includes('src="/app/civweave-symbol.svg"'));
+check('working campus source owns the Civweave brand icon before paint',campusHtml.includes('id="brand-home"')&&campusHtml.includes('src="/app/logos/civweave-symbol.svg"'));
 check('topbar respects source-owned branding instead of repairing it',topbar.includes('sourceTruthBrand:true')&&!topbar.includes('function repairBrand()')&&!topbar.includes('cw243ValidBrand')&&!topbar.includes('BRAND_ICON'));
 check('mobile topbar uses two safe columns',topbar.includes('grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important')&&topbar.includes('grid-template-areas:"brand brand" "modes modes" "map downloads" "settings review" "theme theme"!important'));
 check('mobile downloads control remains independently tappable',topbar.includes("DOWNLOADS_BUTTON_ID='cw-working-campus-downloads-v243'")&&topbar.includes("downloadsButton.innerHTML='<span aria-hidden=\"true\">⇩</span><span>Downloads</span>'")&&topbar.includes('grid-area:downloads'));
