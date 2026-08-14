@@ -1,3 +1,4 @@
+// Focused contract verifier for borrowed local planning, validation labor rewards, Cotokens, and content-addition quorum gates.
 import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
