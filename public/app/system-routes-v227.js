@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.140';
+const VERSION='1.0.141';
 const REVISION='five-system-route-contract-v227';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const ROUTES=Object.freeze({
