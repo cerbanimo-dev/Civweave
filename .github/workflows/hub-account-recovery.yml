@@ -5,6 +5,8 @@ on:
     paths:
       - 'cloudflare/account-edge/**'
       - 'public/app/hub-recovery-*.js'
+      - 'public/app/hub-delivery-intent-v1.js'
+      - 'public/app/civweave-brand.js'
       - 'public/app/host-node-session-import-v1.js'
       - 'public/app/host-node-session-export-v1.js'
       - 'public/app/installer-online-fallback-v225.js'
@@ -16,6 +18,8 @@ on:
     paths:
       - 'cloudflare/account-edge/**'
       - 'public/app/hub-recovery-*.js'
+      - 'public/app/hub-delivery-intent-v1.js'
+      - 'public/app/civweave-brand.js'
       - 'public/app/host-node-session-import-v1.js'
       - 'public/app/host-node-session-export-v1.js'
       - 'public/app/installer-online-fallback-v225.js'

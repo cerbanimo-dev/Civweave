@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.27-brand-canonical-v317';
+const VERSION='1.0.27-brand-canonical-v318';
 const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png';
 const FULL_LOGO=CANONICAL_LOGO;
 const SYMBOL_LOGO=CANONICAL_LOGO;
@@ -69,10 +69,15 @@ function brandTree(root){
     node=walker.nextNode();
   }
 }
+function installInstallerDeliveryBridge(){
+  if(location.pathname!=='/app/index.html'||document.querySelector('script[data-civweave-hub-delivery-intent]'))return false;
+  const script=document.createElement('script');script.src='/app/hub-delivery-intent-v1.js?v=hub-recovery-inbound-v1';script.async=false;script.dataset.civweaveHubDeliveryIntent='v1';document.head.append(script);return true
+}
 function apply(){
   document.title=brandText(document.title);
   brandTree(document.documentElement);
   document.documentElement.dataset.publicBrand='civweave';
+  installInstallerDeliveryBridge();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});
 else apply();
@@ -88,5 +93,5 @@ const observer=new MutationObserver(records=>{
   }
 });
 observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTES.concat('src','srcset','href','value')});
-globalThis.CivweaveBrand=Object.freeze({version:VERSION,apply,canonicalLogo:CANONICAL_LOGO,fullLogo:FULL_LOGO,symbolLogo:SYMBOL_LOGO,settingsDependency:false});
+globalThis.CivweaveBrand=Object.freeze({version:VERSION,apply,canonicalLogo:CANONICAL_LOGO,fullLogo:FULL_LOGO,symbolLogo:SYMBOL_LOGO,settingsDependency:false,installInstallerDeliveryBridge});
 })();

@@ -46,6 +46,65 @@ jobs:
           enable_subdomain civweave-core
           enable_subdomain civweave-node-cloud
 
+      - name: Configure free Hub recovery email routing
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const API = 'https://api.cloudflare.com/client/v4';
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+          const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+          const zoneName = 'commonweave.earth';
+          const routingDomain = 'recovery.commonweave.earth';
+          const mailbox = 'recover@recovery.commonweave.earth';
+          const worker = 'civweave-host-edge';
+          const auth = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+          async function request(path, init = {}, { allowFailure = false } = {}) {
+            const response = await fetch(API + path, { ...init, headers: { ...auth, ...(init.headers || {}) } });
+            const payload = await response.json().catch(() => ({}));
+            if ((!response.ok || payload.success !== true) && !allowFailure) {
+              const detail = (payload.errors || []).map(item => item.message || item.code).join('; ') || `HTTP ${response.status}`;
+              throw Object.assign(new Error(detail), { status: response.status, path });
+            }
+            return { response, payload };
+          }
+
+          const zones = await request(`/zones?name=${encodeURIComponent(zoneName)}&account.id=${encodeURIComponent(accountId)}`);
+          const zone = (zones.payload.result || []).find(item => item.name === zoneName);
+          if (!zone?.id) throw new Error(`Cloudflare zone ${zoneName} was not found in this account.`);
+
+          const dns = await request(`/zones/${zone.id}/email/routing/dns?subdomain=${encodeURIComponent(routingDomain)}`, {}, { allowFailure: true });
+          const dnsText = JSON.stringify(dns.payload.result || {});
+          if (!dns.response.ok || dns.payload.success !== true || !dnsText.includes(routingDomain)) {
+            const enabled = await request(`/zones/${zone.id}/email/routing/dns`, {
+              method: 'POST',
+              body: JSON.stringify({ name: routingDomain }),
+            });
+            console.log(`Email Routing domain state: ${enabled.payload.result?.status || 'configured'}`);
+          } else {
+            console.log(`Email Routing DNS already exists for ${routingDomain}.`);
+          }
+
+          const listed = await request(`/zones/${zone.id}/email/routing/rules?per_page=100`);
+          const rules = Array.isArray(listed.payload.result) ? listed.payload.result : [];
+          const existing = rules.find(rule => (rule.matchers || []).some(matcher => matcher.type === 'literal' && matcher.field === 'to' && String(matcher.value || '').toLowerCase() === mailbox));
+          const body = {
+            name: 'Civweave Hub recovery',
+            enabled: true,
+            matchers: [{ type: 'literal', field: 'to', value: mailbox }],
+            actions: [{ type: 'worker', value: [worker] }],
+          };
+          const saved = existing?.id
+            ? await request(`/zones/${zone.id}/email/routing/rules/${existing.id}`, { method: 'PUT', body: JSON.stringify(body) })
+            : await request(`/zones/${zone.id}/email/routing/rules`, { method: 'POST', body: JSON.stringify(body) });
+          const rule = saved.payload.result;
+          if (rule?.enabled !== true || !(rule?.actions || []).some(action => action.type === 'worker' && (action.value || []).includes(worker))) {
+            throw new Error('Hub recovery Email Routing rule did not become active.');
+          }
+          console.log(JSON.stringify({ ok: true, routingDomain, mailbox, worker, ruleId: rule.id || existing?.id || null }));
+          NODE
+
       - name: Probe core money edge
         shell: bash
         run: |
@@ -68,3 +127,4 @@ jobs:
         run: |
           echo "CIVWEAVE_MONEY_EDGE_URL=${CORE_URL}"
           echo "CIVWEAVE_NODE_FABRIC_URL=${NODE_URL}"
+          echo "CIVWEAVE_HUB_RECOVERY_EMAIL=recover@recovery.commonweave.earth"
