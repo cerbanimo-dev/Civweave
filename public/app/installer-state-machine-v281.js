@@ -2,7 +2,7 @@
 'use strict';
 
 const REVISION='installer-state-authority-v281';
-const SYNC_TAG='civweave-campus-resume-v281';
+const SYNC_TAG='civweave-campus-resume-v280';
 const STATUS_TYPES=new Set(['CIVWEAVE_OFFLINE_PACKAGE_STATUS','CIVWEAVE_OFFLINE_PACKAGE_PROGRESS']);
 let campusStatus=null;
 let pausing=false;
