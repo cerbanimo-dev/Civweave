@@ -8,13 +8,6 @@ const logoDir=path.join(root,'public','app','logos');
 const sourcePath=path.join(root,'Civweave-on-logo.png');
 const soft=process.argv.includes('--soft');
 const ICON_SIZES=[16,32,48,72,96,128,144,152,180,192,384,512,1024];
-const DAYTIME_LAUNCHER_ICONS=[
-  ['civweave-daytime-180-v1.png',180],
-  ['civweave-daytime-192-v1.png',192],
-  ['civweave-daytime-512-v1.png',512],
-  ['civweave-daytime-maskable-192-v1.png',192],
-  ['civweave-daytime-maskable-512-v1.png',512]
-];
 
 async function render(size){
   return sharp(sourcePath)
@@ -29,7 +22,6 @@ async function main(){
   await writeIcon('civweave-app-icon.png',await render(1024));
   for(const size of [192,512])await writeIcon(`civweave-icon-maskable-${size}.png`,await render(size));
   await writeIcon('civweave-adaptive-foreground-512.png',await render(512));
-  for(const [file,size] of DAYTIME_LAUNCHER_ICONS)await writeIcon(file,await render(size));
   const summary={
     schema:'civweave.icon-generation.v3',
     source:'Civweave-on-logo.png',
@@ -42,8 +34,7 @@ async function main(){
       'civweave-app-icon.png',
       'civweave-icon-maskable-192.png',
       'civweave-icon-maskable-512.png',
-      'civweave-adaptive-foreground-512.png',
-      ...DAYTIME_LAUNCHER_ICONS.map(([file])=>file)
+      'civweave-adaptive-foreground-512.png'
     ]
   };
   await fsp.writeFile(path.join(logoDir,'civweave-icon-generation.json'),JSON.stringify(summary,null,2));
