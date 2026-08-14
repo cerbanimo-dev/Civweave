@@ -12,6 +12,7 @@ const activeChatRepairRevision='chat-avatar-visible-v346';
 const lifecycleRevision='document-lifecycle-v222';
 const campusRevision='canonical-campus-startup-v227';
 const boundaryRevision='chat-convergence-v250-navigation-lifecycle-v424';
+const boundaryRuntimeRevision='browser-install-boundary-v228-chat-escape';
 const routeRevision='five-system-route-contract-v227';
 const offlineRevision='offline-campus-current-graph-v280';
 const offlinePolicy='resumable-pause-v280';
@@ -67,8 +68,8 @@ await patch('public/app/installed-entry-v146.js',source=>{
 
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='[^']+';/,`const VERSION='${version}';`,'install-boundary version');
-  if(!source.includes(`const REVISION='${boundaryRevision}';`))throw new Error('Install boundary must retain the canonical chat and navigation lifecycle revision.');
-  if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424`;'))throw new Error('Install boundary must derive the navigation-safe experience cache identity from the requested release.');
+  if(!source.includes(`const REVISION='${boundaryRuntimeRevision}';`))throw new Error('Install boundary must retain the browser install boundary revision.');
+  if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228`;'))throw new Error('Install boundary must derive the browser-safe experience cache identity from the requested release.');
   for(const token of [
     "['/app/working-campus-v156.html','civweave']",
     "['/app/cabinets/living-school/index.html','living-school']",
@@ -145,4 +146,4 @@ for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pin
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,routeRevision,offlineRevision,offlinePolicy,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
