@@ -17,6 +17,7 @@
     { "tag": "v1", "new_sqlite_classes": ["CivweaveAccountNode", "CivweaveCapacityAccount"] }
   ],
   "vars": {
+    "NODE_DOMAIN": "nodes.civweave.invalid",
     "CIVWEAVE_WORKERS_PLAN": "free",
     "CIVWEAVE_ACCOUNT_EDGE_MODE": "path-v1"
   },
