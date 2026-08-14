@@ -88,7 +88,8 @@ test('Map v1 exposes coverage, storage, basemap, attribution, and diagnostics UI
 
 test('device package, mobile kit, and standalone package share one Map v1 asset contract',()=>{
   assert.equal(manifest.name,'Civweave Map');assert.equal(manifest.version,'1.0.0');assert.equal(manifest.offlineFirst,true);
-  assert.equal(offlinePackage.revision,'canonical-background-campus-v241-systems-mesh-v251','canonical campus revision must not drift');
+  assert.match(offlinePackage.revision,/^canonical-background-campus-v241-systems-mesh-v251(?:-|$)/,'offline package must preserve the canonical campus + systems-mesh baseline while allowing newer additive launch contracts');
+  for(const marker of ['cerbanimo-commerce-v1.1','economic-value-review-v1'])assert.ok(offlinePackage.revision.includes(marker),`offline package revision must retain additive contract ${marker}`);
   for(const asset of ['/app/civweave-map-storage-v1.js','/app/civweave-map-offline-v1.js','/app/civweave-map-ui-v1.js','/app/civweave-map-bootstrap-v1.js','/app/shared/civweave-sha256-stream-v1.mjs','/app/vendor/pmtiles-v4.4.1/pmtiles.js'])assert.ok(offlinePackage.assets.includes(asset),`${asset} should be in the offline package`);
   has(serviceWorker,/const MAP_CORE=\[/,'Service worker should define a Map v1 install boundary');
   has(mobileBuilder,/extractArray\(workerSource, 'MAP_CORE'\)/,'Mobile installer must hydrate the Map v1 service-worker boundary');

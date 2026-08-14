@@ -18,6 +18,7 @@ const parseJsonc = text => JSON.parse(text.split('\n').filter(line => !line.trim
 
 const [
   accountWorkerSource,
+  legacyAccountWorkerSource,
   accountWranglerText,
   nodeFabricSource,
   capacitySource,
@@ -29,6 +30,7 @@ const [
   hostSetup,
 ] = await Promise.all([
   read('cloudflare/account-edge/src/index.mjs'),
+  read('cloudflare/account-edge/src/index-legacy-v1.mjs'),
   read('cloudflare/account-edge/wrangler.jsonc'),
   read('cloudflare/node-cloud/src/index.mjs'),
   read('cloudflare/node-cloud/src/capacity.mjs'),
@@ -40,6 +42,7 @@ const [
   read('public/host-setup.html'),
 ]);
 const accountWrangler = parseJsonc(accountWranglerText);
+const accountEdgeRuntimeSource = `${accountWorkerSource}\n${legacyAccountWorkerSource}`;
 
 assert.deepEqual(starterNodeIds('Garden Club'), ['garden-club-a', 'garden-club-b', 'garden-club-c']);
 assert.equal(starterNodeIds('civweave').length, 3);
@@ -82,11 +85,13 @@ for (const forbidden of ['STRIPE_SECRET_KEY', 'STRIPE_CONNECT_WEBHOOK_SECRET', '
 
 assert.ok(capacitySource.includes('maxHostNodes: 3'));
 assert.ok(capacitySource.includes('This account already has its three host nodes.'));
-assert.ok(accountWorkerSource.includes('CivweaveAccountNode extends CivweaveCloudNode'));
-assert.ok(accountWorkerSource.includes('x-civweave-account-edge-origin'));
-assert.ok(accountWorkerSource.includes('accountEdgePath: true'));
-assert.ok(accountWorkerSource.includes('scopeAccountNodeHtml'));
-assert.ok(accountWorkerSource.includes('central-money-edge-required'));
+assert.ok(accountEdgeRuntimeSource.includes('CivweaveAccountNode extends CivweaveCloudNode'));
+assert.ok(accountEdgeRuntimeSource.includes('x-civweave-account-edge-origin'));
+assert.ok(accountEdgeRuntimeSource.includes('accountEdgePath: true'));
+assert.ok(accountEdgeRuntimeSource.includes('scopeAccountNodeHtml'));
+assert.ok(accountEdgeRuntimeSource.includes('central-money-edge-required'));
+assert.ok(accountWorkerSource.includes('server-ai-entry-v2.mjs'), 'account edge must delegate generation to the per-user AI router');
+assert.ok(accountWorkerSource.includes('legacyAccountEdge.fetch'), 'non-generation account-edge behavior must remain delegated to the established authority');
 assert.ok(nodeFabricSource.includes("url.pathname === '/api/fabric/location'"));
 assert.ok(nodeFabricSource.includes("url.pathname === '/internal/location'"));
 assert.ok(nodeFabricSource.includes('civweave.hub-location-owner.v1'));
@@ -139,6 +144,7 @@ assert.ok(hostSetup.includes("position.coords.latitude.toFixed(3)"));
 
 for (const file of [
   'cloudflare/account-edge/src/index.mjs',
+  'cloudflare/account-edge/src/index-legacy-v1.mjs',
   'scripts/provision-cloudflare-account-edge-v1.mjs',
   'scripts/setup-cloudflare-node.mjs',
   'scripts/verify-cloudflare-pages-account-target-v1.mjs',
@@ -158,6 +164,7 @@ console.log(JSON.stringify({
   accountWorker: 'civweave-host-edge',
   durableObjects: ['NODES:CivweaveAccountNode', 'CAPACITY:CivweaveCapacityAccount'],
   accountMoneyAuthority: false,
+  composedAccountEdge: true,
   partialSetupBlocksPages: false,
   githubMainAccountAffinityRequired: true,
 }, null, 2));

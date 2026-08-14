@@ -1,0 +1,60 @@
+{
+  "schema": "civweave.public-launch-readiness.v1",
+  "releaseMode": "pre-public",
+  "publicLaunchApproved": false,
+  "lastReviewedAt": "2026-08-13T22:25:22-04:00",
+  "automatedGates": {
+    "repositoryRegressionSuite": "required",
+    "productionDependencyAudit": "required",
+    "pwaColdLaunchRecovery": "required",
+    "lowEndLocalAiContract": "required",
+    "perUserAiPoolBoundary": "required",
+    "d1BackupTooling": "required",
+    "releaseDiscipline": "required"
+  },
+  "manualGates": {
+    "mainBranchProtection": {
+      "status": "blocked",
+      "evidence": null,
+      "reason": "main is currently unprotected and required status checks are not enforced"
+    },
+    "cloudflareWorkerProduction": {
+      "status": "pass",
+      "evidence": {
+        "record": "ops/launch/evidence/2026-08-14-production-workers-d1-restore-v1.json",
+        "runtimeBaseSha": "ff66d202b1a59c4865d3d218eb9ffcc5f61f766a",
+        "coreNodeDeployRunId": 31763050200,
+        "productionEvidenceRunId": 31763624773,
+        "artifactId": 9205504506
+      },
+      "reason": "all four canonical Cloudflare Workers returned successful production smoke responses; core/node deployment provenance is tied to the merged runtime SHA and host-edge/recovery-relay were deployed and verified in the evidence run"
+    },
+    "legalReviewAndClickwrap": {
+      "status": "blocked",
+      "evidence": null,
+      "reason": "the draft Terms still contains counsel-review and missing-policy placeholders; public clickwrap must not be activated before review"
+    },
+    "remoteRestoreDrill": {
+      "status": "pass",
+      "evidence": {
+        "record": "ops/launch/evidence/2026-08-14-production-workers-d1-restore-v1.json",
+        "workflowRunId": 31763624773,
+        "backupSha256": "99e2a56cb7d9465cd0753695bc630d74a8c3f6ad07dc8315f481fe20aa74bb0c",
+        "tableCount": 15,
+        "cleanTarget": true,
+        "temporaryTargetDeleted": true
+      },
+      "reason": "the production civweave-core D1 was exported, integrity-verified, restored into a newly created clean D1 target, re-exported with matching table row counts, and the temporary target was deleted"
+    },
+    "lowEndPhysicalDeviceMatrix": {
+      "status": "blocked",
+      "evidence": null,
+      "reason": "real weak-phone cold/warm inference, memory, offline restart, and battery-behavior evidence has not yet been recorded"
+    }
+  },
+  "promotionPolicy": {
+    "closedAlpha": "5-10 trusted participants after worker production, recovery, backup, and operational gates pass",
+    "inviteOnlyBeta": "50-200 participants after monitoring, moderation, budget controls, restore drill, and rollback are exercised",
+    "publicBeta": "only after all manual gates pass and the public launch gate exits successfully"
+  }
+}

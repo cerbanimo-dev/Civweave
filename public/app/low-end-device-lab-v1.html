@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07151c">
+  <title>Civweave · Low-end device launch lab</title>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#061019;color:#effbff}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0,#123748 0,#07151c 34%,#050b11 78%);color:#effbff;padding:max(18px,env(safe-area-inset-top)) 14px max(28px,env(safe-area-inset-bottom))}main{width:min(100%,840px);margin:auto;display:grid;gap:14px}.hero,.card{border:1px solid #8de5ef2d;border-radius:18px;background:#071720e8;box-shadow:0 16px 50px #0005}.hero{padding:18px}.hero h1{font-size:clamp(1.35rem,6vw,2.2rem);margin:.2rem 0 .55rem}.hero p,.card p{color:#bad0da;line-height:1.5}.eyebrow{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:#8de5ef;font-weight:900}.card{padding:15px;display:grid;gap:10px}.card h2{font-size:1.05rem;margin:0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}.metric,.scenario{padding:10px;border:1px solid #ffffff16;border-radius:12px;background:#ffffff08;overflow-wrap:anywhere}.metric b,.scenario b{display:block;color:#f5feff}.metric small,.scenario small{color:#9bb2bd}.scenario[data-state="pass"]{border-color:#74efad66;background:#0c3024}.scenario[data-state="fail"]{border-color:#ff8c8066;background:#35161a}.scenario[data-state="armed"],.scenario[data-state="running"]{border-color:#ffd97866;background:#342d15}.scenario[data-state="blocked"]{border-color:#ffffff24;background:#151d22}.actions{display:flex;flex-wrap:wrap;gap:8px}button,a.action{min-height:44px;border:1px solid #8de5ef55;border-radius:12px;background:#102c39;color:#f4fdff;padding:10px 13px;font:inherit;font-weight:800;cursor:pointer;text-decoration:none}button.primary{border:0;background:linear-gradient(135deg,#80e3ee,#edd77f);color:#07151c}button.danger{border-color:#ff998866;background:#35191c}button:disabled{opacity:.5;cursor:not-allowed}label{display:grid;gap:5px;color:#c9dbe3;font-size:.88rem}input,select,textarea{width:100%;min-height:42px;border:1px solid #ffffff24;border-radius:10px;background:#071018;color:#f4fdff;padding:9px;font:inherit}textarea{min-height:90px;resize:vertical}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:340px;overflow:auto;border-radius:12px;background:#03070b;padding:11px;border:1px solid #ffffff16;font-size:.75rem;color:#d7edf5}.notice{padding:10px 12px;border-left:3px solid #e8d573;background:#e8d57310;color:#ecdfae;line-height:1.45}.privacy{font-size:.78rem;color:#8fa7b2}.statusline{font-weight:850;color:#9ff2dc}.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}@media(max-width:540px){.two{grid-template-columns:1fr}.actions>*{flex:1 1 100%}}
+  </style>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <div class="eyebrow">Physical launch evidence · v1</div>
+    <h1>Low-end device launch lab</h1>
+    <p>This page measures the real device you are holding. Synthetic desktop throttling cannot satisfy the launch gate. Nothing here uploads itself, reads location, or captures chats or credentials.</p>
+    <div id="lab-status" class="statusline">Loading device test harness…</div>
+  </section>
+
+  <section class="card">
+    <h2>1 · Device snapshot</h2>
+    <div id="device-grid" class="grid"></div>
+    <div class="actions"><button id="capture-device" class="primary" type="button">Capture device snapshot</button></div>
+  </section>
+
+  <section class="card">
+    <h2>2 · Automated core checks</h2>
+    <p>Cold-reset MiniLM, measure first and warm classifications, prove classifier shutdown/recovery, and run the actual SmolLM2 135M health generation if its ~140 MB package is installed.</p>
+    <div class="actions">
+      <button id="run-core" class="primary" type="button">Run core device checks</button>
+      <button id="prepare-135" type="button">Install / repair 135M model</button>
+    </div>
+    <div id="core-progress" class="notice">The 135M package is never downloaded without pressing its install button.</div>
+    <div id="metric-grid" class="grid"></div>
+  </section>
+
+  <section class="card">
+    <h2>3 · Real restart / interruption checkpoints</h2>
+    <div class="notice">These steps deliberately require real device state changes. The lab will not fake airplane mode, an OS memory-pressure return, or an interrupted download.</div>
+    <div id="scenario-grid" class="grid"></div>
+    <div class="actions">
+      <button id="arm-offline" type="button">Arm offline relaunch</button>
+      <button id="arm-memory" type="button">Arm memory-pressure return</button>
+      <button id="confirm-memory" type="button" disabled>Confirm memory-pressure recovery</button>
+      <button id="arm-download" type="button">Begin interrupted-download checkpoint</button>
+      <button id="resume-download" type="button" disabled>Resume interrupted 135M download</button>
+    </div>
+    <p class="privacy">Offline relaunch: arm it, switch airplane mode on, fully close Civweave, then reopen this same lab. Memory pressure: arm it, background Civweave, use other apps long enough to pressure memory, then return and confirm only if this same run survived without reinstalling.</p>
+  </section>
+
+  <section class="card">
+    <h2>4 · Thermal & battery observation</h2>
+    <div class="two">
+      <label>Battery at start (%)<input id="battery-start" inputmode="decimal" type="number" min="0" max="100" step="1"></label>
+      <label>Battery at end (%)<input id="battery-end" inputmode="decimal" type="number" min="0" max="100" step="1"></label>
+      <label>Thermal observation
+        <select id="thermal">
+          <option value="">Choose after the run</option>
+          <option value="cool">Cool / no noticeable heat</option>
+          <option value="warm">Warm, no visible throttling</option>
+          <option value="hot">Hot, but test remained responsive</option>
+          <option value="throttled">Noticeably throttled or unstable</option>
+          <option value="shutdown">OS/browser killed the run</option>
+        </select>
+      </label>
+      <label>Approx. observation minutes<input id="observation-minutes" inputmode="decimal" type="number" min="1" max="240" step="1"></label>
+      <label>Manual peak memory (MB, only if browser memory API is unavailable)<input id="manual-peak-memory" inputmode="decimal" type="number" min="1" step="1"></label>
+    </div>
+    <label>Physical notes<textarea id="physical-notes" placeholder="Heat, UI jank, battery behavior, OS memory pressure, anything surprising…"></textarea></label>
+    <div class="actions"><button id="record-thermal" type="button">Record physical observation</button></div>
+  </section>
+
+  <section class="card">
+    <h2>5 · Evidence</h2>
+    <p id="gate-summary">The launch gate remains blocked until every required physical scenario is recorded as a pass.</p>
+    <div class="actions">
+      <button id="export-evidence" class="primary" type="button">Export hashed evidence JSON</button>
+      <button id="copy-evidence" type="button">Copy evidence JSON</button>
+      <button id="reset-evidence" class="danger" type="button">Reset this lab run</button>
+    </div>
+    <pre id="evidence-preview">Preparing evidence record…</pre>
+  </section>
+</main>
+<script src="/app/local-ai/model-registry-v266.js" defer></script>
+<script src="/app/local-ai/download-manager-v267.js" defer></script>
+<script src="/app/local-ai/runtime-v266.js" defer></script>
+<script src="/app/mobile-ai-hardening-v302.js" defer></script>
+<script src="/app/local-ai/test-pulse-v269.js" defer></script>
+<script src="/app/minilm-context-router-v344.js" defer></script>
+<script src="/app/low-end-device-lab-v1.js" defer></script>
+</body>
+</html>

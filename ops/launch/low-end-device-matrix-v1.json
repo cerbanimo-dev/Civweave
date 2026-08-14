@@ -1,0 +1,64 @@
+{
+  "schema": "civweave.low-end-device-matrix.v1",
+  "status": "blocked",
+  "reviewedAt": null,
+  "labPath": "/app/low-end-device-lab-v1.html",
+  "evidenceSchema": "civweave.low-end-device-evidence.v1",
+  "physicalEvidenceRequired": true,
+  "syntheticEvidenceAccepted": false,
+  "devices": [],
+  "requiredEvidence": [
+    "coldLaunchOnline",
+    "coldLaunchOffline",
+    "warmMiniLmClassification",
+    "smolLm135mGeneration",
+    "memoryPressureRecovery",
+    "workerShutdown",
+    "interruptedModelDownloadRecovery",
+    "fullyDisconnectedRelaunch",
+    "thermalAndBatteryObservation"
+  ],
+  "requiredMeasurements": [
+    "startupMs",
+    "miniLmColdMs",
+    "miniLmWarmMs",
+    "smolLm135mFirstTokenMs",
+    "smolLm135mTokensPerSecond",
+    "peakMemoryMb"
+  ],
+  "performanceReferences": {
+    "smolLm135mSmooth": {
+      "coldStartMsMax": 90000,
+      "ttftMsMax": 15000,
+      "tokensPerSecondMin": 4
+    },
+    "smolLm135mUsableFloor": {
+      "coldStartMsMax": 180000,
+      "ttftMsMax": 30000,
+      "tokensPerSecondMin": 2
+    },
+    "miniLm": {
+      "warmClassificationBudgetMs": 700,
+      "note": "The live context router itself gives semantic classification roughly a 700 ms deadline; physical evidence should report actual cold and warm latency rather than substituting synthetic throttling."
+    }
+  },
+  "evidenceRules": {
+    "contentHash": "SHA-256 over the exported evidence record before the evidenceHash field is attached",
+    "location": "must not be collected",
+    "chatContent": "must not be collected",
+    "credentials": "must not be collected",
+    "automaticUpload": "forbidden",
+    "memoryMeasurement": "Use browser process/heap measurement when exposed. A manually observed OS/process peak may be supplied when the browser does not expose a usable memory API, but the evidence must identify it as manual."
+  },
+  "operatorProtocol": [
+    "Open the lab on the real low-end phone and capture the device snapshot.",
+    "Install the highly recommended MiniLM package and SmolLM2 135M test model if they are not already present.",
+    "Run automated core checks to cold-reset and time MiniLM, verify worker release/recovery, and perform direct 135M generation.",
+    "Arm offline relaunch, enable airplane mode, fully close Civweave, and reopen the same lab from the installed PWA.",
+    "Arm memory-pressure return, background Civweave, create realistic OS memory pressure using other apps, return, and attest only if the same run survived without reinstalling.",
+    "On a fresh or deliberately incomplete 135M download, arm the interruption checkpoint, close Civweave during visible progress, reopen, and resume to completion.",
+    "Record battery and thermal behavior after the physical run.",
+    "Export the hashed evidence JSON. Do not mark this matrix pass until every required scenario and measurement is present and the evidence has been reviewed."
+  ],
+  "policy": "Physical evidence must come from a real low-end device. Synthetic CI and desktop throttling may supplement but cannot satisfy this gate. A pass requires every required scenario to complete without unrecoverable state loss, boot lockout, or a required reinstall. Thermal shutdown or visible thermal throttling is a failed thermal scenario."
+}
