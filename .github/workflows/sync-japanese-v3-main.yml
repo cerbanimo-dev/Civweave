@@ -1,0 +1,27 @@
+name: Sync Japanese v3 with latest main
+
+on:
+  push:
+    paths:
+      - '.github/workflows/sync-japanese-v3-main.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Merge latest main and clean trigger
+        run: |
+          set -euo pipefail
+          git config user.name "cerbanimo-dev"
+          git config user.email "cerbanimo@gmail.com"
+          git fetch origin main
+          git merge --no-edit origin/main
+          git rm .github/workflows/sync-japanese-v3-main.yml
+          git commit -m "Sync Japanese coverage pass with latest main"
+          git push origin HEAD:fix/japanese-localization-v3-coverage
