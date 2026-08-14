@@ -1,0 +1,24 @@
+{
+  "schema": "civweave.canonical-release.v1",
+  "version": "1.0.153",
+  "status": "current",
+  "canonicalPath": "releases/1.0.153",
+  "sourceCommit": "pending-merge",
+  "basedOn": "1.0.152",
+  "runtime": {
+    "base": "releases/1.0.153/server/server.mjs",
+    "dev": "releases/1.0.153/server/server-v130.mjs",
+    "local": "releases/1.0.153/server/server-local-v131.mjs",
+    "gatewayBase": "releases/1.0.153/server/server-gateway-v131-base.mjs",
+    "gateway": "releases/1.0.153/server/server-gateway-v131.mjs",
+    "federated": "releases/1.0.153/server/server-federated-v152.mjs"
+  },
+  "sha256": {
+    "server/server-federated-v152.mjs": "0187b6b41332c26da3f63ae65a219f7bfcd562ae7b0df85e1cc35c248bba6b69",
+    "server/server-gateway-v131-base.mjs": "066564c55a6484ff74eadef2ee6e060454a871d1df08aeeeb615d7c00e0b3f35",
+    "server/server-gateway-v131.mjs": "2fa889d5ce7c3f91491176155b75eebaa2b8bd2f6ad508acd2b79bd26225ec77",
+    "server/server-local-v131.mjs": "9d74908d5b65de468b0dd8939555126c42983aa4c6691062235872e4e054fa34",
+    "server/server-v130.mjs": "2f6cc5f601d2ba20a888ee4cf47aa23fa50f8ba446e804819ad4a2e984d37d81",
+    "server/server.mjs": "4a23ed917ea949c1016de9da7c019e925fb08d534208b8b14d90176811a631a8"
+  }
+}
