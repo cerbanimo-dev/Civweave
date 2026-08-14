@@ -1,0 +1,94 @@
+name: Repair stale Civweave Workers Builds trigger
+
+on:
+  push:
+    branches:
+      - fix/remove-stale-civweave-worker-build-v1
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Remove stale Worker build triggers from Pages project identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+
+          const account = encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID);
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+          const api = `https://api.cloudflare.com/client/v4/accounts/${account}`;
+          const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+          const request = async (path, init = {}) => {
+            const response = await fetch(`${api}${path}`, { ...init, headers: { ...headers, ...(init.headers || {}) } });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok || payload.success !== true) {
+              const errors = Array.isArray(payload.errors) ? payload.errors.map(({code,message}) => ({code,message})) : [];
+              throw new Error(`${init.method || 'GET'} ${path} failed (${response.status}): ${JSON.stringify(errors)}`);
+            }
+            return payload.result;
+          };
+
+          const rootWrangler = JSON.parse(readFileSync('wrangler.jsonc', 'utf8'));
+          if (rootWrangler.name !== 'civweave' || rootWrangler.pages_build_output_dir !== './.cloudflare-pages') {
+            throw new Error('Refusing repair: repository root is not the canonical civweave Pages configuration.');
+          }
+
+          const scripts = await request('/workers/scripts');
+          const civweave = scripts.find((script) => script.id === 'civweave');
+          if (!civweave?.tag) {
+            console.log('No Worker named civweave exists; there is no stale Workers Builds trigger to remove.');
+            process.exit(0);
+          }
+
+          const triggers = await request(`/builds/workers/${encodeURIComponent(civweave.tag)}/triggers`);
+          const candidates = triggers.filter((trigger) => {
+            const repo = String(trigger.repo_connection?.repo_name || '').toLowerCase();
+            const provider = String(trigger.repo_connection?.provider_type || '').toLowerCase();
+            return repo === 'civweave' && provider === 'github';
+          });
+
+          console.log(JSON.stringify({
+            worker: civweave.id,
+            workerTag: civweave.tag,
+            totalTriggers: triggers.length,
+            repoAttachedTriggers: candidates.map((trigger) => ({
+              trigger_uuid: trigger.trigger_uuid,
+              trigger_name: trigger.trigger_name,
+              branch_includes: trigger.branch_includes,
+              branch_excludes: trigger.branch_excludes,
+              root_directory: trigger.root_directory,
+              build_command: trigger.build_command,
+              deploy_command: trigger.deploy_command,
+            })),
+          }, null, 2));
+
+          if (!candidates.length) {
+            console.log('No GitHub Civweave trigger is attached to the stale Worker; nothing to delete.');
+            process.exit(0);
+          }
+
+          for (const trigger of candidates) {
+            await request(`/builds/triggers/${encodeURIComponent(trigger.trigger_uuid)}`, { method: 'DELETE' });
+            console.log(`Deleted stale Workers Builds trigger ${trigger.trigger_uuid} (${trigger.trigger_name || 'unnamed'}).`);
+          }
+
+          const remaining = await request(`/builds/workers/${encodeURIComponent(civweave.tag)}/triggers`);
+          const stillAttached = remaining.filter((trigger) => String(trigger.repo_connection?.repo_name || '').toLowerCase() === 'civweave');
+          if (stillAttached.length) throw new Error(`Stale Civweave Workers Builds triggers remain: ${stillAttached.map(t => t.trigger_uuid).join(', ')}`);
+          console.log('Verified: canonical Civweave remains Pages-only; no stale Worker Git trigger remains attached.');
+          NODE
