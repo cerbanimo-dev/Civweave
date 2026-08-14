@@ -1,5 +1,9 @@
 import liveCore from './live-entry.mjs';
-import { CloudflareMoneyEdge } from './money-edge-with-memberships.mjs';
+import { CloudflareMoneyEdge, moneyEdgeError } from './money-edge-with-memberships.mjs';
+import {
+  createSharedDomainHostingCheckout,
+  sharedDomainHostingReadiness
+} from './shared-domain-billing.mjs';
 import { handleStripeConnectV2Sample } from './stripe-connect-v2-sample.mjs';
 import { handleFellowFareDirectCommerce } from './fellowfare-direct-commerce-v1.mjs';
 import { handleStripeSnapshotWebhook, STRIPE_SNAPSHOT_WEBHOOK_PATHS } from './stripe-snapshot-webhook.mjs';
@@ -23,6 +27,10 @@ export * from './stripe-snapshot-webhook.mjs';
 export * from './stripe-recipient-thin-webhook.mjs';
 
 const enabled = value => ['1', 'true', 'yes', 'on'].includes(String(value ?? '').trim().toLowerCase());
+const json = (value, status = 200) => new Response(JSON.stringify(value, null, 2), {
+  status,
+  headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }
+});
 const marketplacePaymentsDisabled = () => new Response(JSON.stringify({
   schema: 'civweave.fellowfare-payment-boundary.v2',
   ok: false,
@@ -36,6 +44,34 @@ const marketplacePaymentsDisabled = () => new Response(JSON.stringify({
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    if (request.method === 'GET' && url.pathname === '/api/money-edge/shared-domain') {
+      return json({ sharedDomainHosting: sharedDomainHostingReadiness(env), authority: 'cloudflare-core', canonical: true });
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/money-edge/shared-domain/checkout') {
+      const edge = new CloudflareMoneyEdge(env);
+      try {
+        const readiness = edge.readiness();
+        if (edge.provider.mode === 'live' && !readiness.liveReady) {
+          throw Object.assign(new Error(`Live shared-domain billing is blocked: ${readiness.operationalBlockers.join(', ')}`), { status: 503 });
+        }
+        const rawText = await request.text();
+        let input;
+        try { input = JSON.parse(rawText || '{}'); }
+        catch { return json({ ok: false, error: 'invalid-json' }, 400); }
+        const checkout = await createSharedDomainHostingCheckout(
+          edge,
+          input,
+          new TextEncoder().encode(rawText),
+          request.headers.get('x-civweave-node-signature')
+        );
+        return json({ sharedDomainHosting: checkout }, 201);
+      } catch (error) {
+        const safe = moneyEdgeError(error);
+        return json(safe.body, safe.status);
+      }
+    }
 
     if (url.pathname.startsWith('/api/fellowfare/direct-commerce/')) {
       const direct = await handleFellowFareDirectCommerce(request, env);
