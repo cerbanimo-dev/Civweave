@@ -12,7 +12,7 @@ The following former behavior is not allowed for new FellowFare transactions:
 - destination charges or platform-charge/separate-transfer seller settlement;
 - contributor cash payout splitting from a buyer's FellowFare sale;
 - Acorn/Button recipient allocation as a side effect of a sale;
-- commerce host-fee allocation.
+- the retired gross-sale commerce host-fee allocator.
 
 The old browser compatibility API exposes `commerceEnabled=false` and fails closed if cached code calls `buildDistribution`, `stripeTransferInstructions`, or `recordSale`.
 
@@ -27,7 +27,9 @@ Services, tutoring, and learning may use either or both of:
 - Acorn/Button fulfillment, where requester units burn and are not transferred to the provider;
 - USD Stripe Connect direct charges owned by the connected provider, with FellowFare receiving an application fee.
 
-The current default service/learning/tutoring application fee is 1% (`100` bps), configurable through `CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS`. The provider remains merchant of record. FellowFare never receives the provider's gross sale and then sends the provider a payout.
+The current default service/learning/tutoring application fee is **5% (`500` bps)**, configurable through `CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS`. The application fee itself is split **50/50** between the facilitating Hub Steward and Cerbanimo, so the default economic shares are **2.5% of the service sale each**. The provider remains merchant of record. FellowFare never receives the provider's gross sale and then sends the provider a payout.
+
+This active Steward share is not the retired commerce host fee: it distributes half of FellowFare's application fee on a provider-owned direct charge and never touches goods payments or reroutes seller gross.
 
 See `docs/finance/fellowfare-fulfillment-economy-v1.md` for the canonical rules.
 
@@ -52,4 +54,4 @@ node scripts/verify-cerbanimo-commerce-distribution-v1.mjs
 node scripts/verify-fellowfare-direct-commerce-v2.mjs
 ```
 
-The first verifier keeps the retired distribution API fail-closed while preserving the annual reserve event. The second verifies the active provider-owned direct-charge service rail.
+The first verifier keeps the retired distribution API fail-closed while preserving the annual reserve event. The second verifies the active provider-owned direct-charge service rail, including the 5% application fee and its 50/50 Steward/Cerbanimo split.
