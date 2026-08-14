@@ -21,6 +21,11 @@ function safePath(url){
   if(!candidate.startsWith(`${publicDir}${path.sep}`)&&candidate!==path.join(publicDir,'index.html'))return null;
   return candidate;
 }
+const waitUntil=async(predicate,timeoutMs=10000,intervalMs=50)=>{
+  const started=Date.now();
+  while(Date.now()-started<timeoutMs){if(predicate())return true;await new Promise(resolve=>setTimeout(resolve,intervalMs))}
+  return Boolean(predicate());
+};
 
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.webmanifest':'application/manifest+json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.woff2':'font/woff2'};
 const server=http.createServer(async(req,res)=>{
@@ -75,9 +80,9 @@ try{
   assert.equal(resourcesAfterOptIn.some(url=>url.includes('installer-state-machine-v280.js')),false,'retired v280 page writer must remain absent after opt-in');
   assert.ok(resourcesAfterOptIn.some(url=>url.includes('installer-state-machine-v281.js')),'explicit campus action must load the v281 controller');
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),OPT_IN_KEY),'1','explicit campus action must persist opt-in');
-  assert.ok(offlinePackageRequests>0,'explicit campus action must begin offline traffic');
+  assert.equal(await waitUntil(()=>offlinePackageRequests>0,10000),true,'explicit campus action must begin offline traffic');
 
-  console.log(JSON.stringify({ok:true,revision:'browser-installer-gauntlet-v305-state-authority-v281',idleFirstPaint:true,shellWithoutCampusTraffic:true,noOptInAppOpen:true,explicitOptInStartsCampus:true,singleWriterController:true,offlinePackageRequests},null,2));
+  console.log(JSON.stringify({ok:true,revision:'browser-installer-gauntlet-v306-first-package-request',idleFirstPaint:true,shellWithoutCampusTraffic:true,noOptInAppOpen:true,explicitOptInStartsCampus:true,singleWriterController:true,offlinePackageRequests},null,2));
   await context.close();
 }finally{
   await browser.close().catch(()=>{});
