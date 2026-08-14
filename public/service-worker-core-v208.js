@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.158';
+const VERSION = '1.0.160';
 const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';
 const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
@@ -23,7 +23,6 @@ const REQUIRED_SHELL_ASSETS = [
   '/app/legal-consent-v1.js',
   '/legal/civweave-legal-release-v1.json',
   '/app/document-lifecycle-v221.js',
-  '/app/fullscreen-family-v104.html',
   '/app/logos/civweave-icon-192.png',
   '/app/logos/civweave-icon-512.png',
   '/app/logos/civweave-pwa-192-v247.png',
@@ -88,8 +87,6 @@ const IMAGE_EXTENSION = /\.(?:png|webp|jpe?g|gif|svg|avif|ico)$/i;
 const COMPAT_ENTRY_PATHS = new Set([
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146',
-  '/app/fullscreen-family-v104.html',
-  '/app/fullscreen-family-v104'
 ]);
 
 const WORKER_PATHS = new Set([
