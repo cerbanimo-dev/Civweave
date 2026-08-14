@@ -1,0 +1,68 @@
+name: Materialize Civweave 1.0.158 once
+
+on:
+  push:
+    branches:
+      - fix/civweave-day-night-logo-nav-safe-area
+    paths:
+      - 'ops/triggers/materialize-civweave-1.0.158.txt'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-civweave-1-0-158-once
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Materialize the shipping release and preserve shell ownership
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f ops/triggers/materialize-civweave-1.0.158.txt
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const runtimePath='public/app/working-campus-v156.js';
+          let runtime=fs.readFileSync(runtimePath,'utf8');
+          runtime=runtime.replace("const BRAND_REVISION='day-night-clock-v236';", "const BRAND_REVISION='compact-shell-v235';\nconst BRAND_CYCLE_REVISION='day-night-clock-v236';");
+          if(!runtime.includes("const BRAND_REVISION='compact-shell-v235';")||!runtime.includes("const BRAND_CYCLE_REVISION='day-night-clock-v236';"))throw new Error('Working Campus brand revision split did not apply.');
+          runtime=runtime.replace("document.documentElement.dataset.civweaveBrandPresentation=BRAND_REVISION;", "document.documentElement.dataset.civweaveBrandPresentation=BRAND_REVISION;\n  document.documentElement.dataset.civweaveBrandCycleRevision=BRAND_CYCLE_REVISION;");
+          runtime=runtime.replace('brandRevision:BRAND_REVISION,webEntryRevision:', 'brandRevision:BRAND_REVISION,brandCycleRevision:BRAND_CYCLE_REVISION,webEntryRevision:');
+          fs.writeFileSync(runtimePath,runtime);
+          fs.writeFileSync('VERSION','1.0.158\n');
+          const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+          pkg.version='1.0.158';
+          fs.writeFileSync('package.json',JSON.stringify(pkg,null,2)+'\n');
+          NODE
+          npm run release:materialize
+          node --check public/app/working-campus-v156.js
+          node scripts/verify-working-campus-shell-v235.mjs
+          node scripts/verify-mobile-chat-layout-v248.mjs
+          node scripts/verify-subsystem-avatar-nav-v347.mjs
+          node scripts/verify-system-ownership-v317.mjs
+          node scripts/verify-release-version-sync.mjs
+          node scripts/verify-canonical-launch-release.mjs
+      - name: Commit generated release tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f ops/triggers/materialize-civweave-1.0.158.txt .github/workflows/materialize-civweave-1.0.158-once.yml
+          git config user.name 'cerbanimo-dev'
+          git config user.email 'cerbanimo@gmail.com'
+          git add -A
+          git diff --cached --stat
+          git diff --cached --quiet && { echo 'No release changes to commit.'; exit 1; }
+          git commit -m 'Materialize Civweave 1.0.158 day-night nav repair'
+          git push origin HEAD:${GITHUB_REF_NAME}
