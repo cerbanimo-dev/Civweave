@@ -1,0 +1,62 @@
+name: Deploy Cerbanimo mail portal
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/cerbanimo-mail/**'
+      - 'scripts/verify-cerbanimo-mail-portal-v1.mjs'
+      - '.github/workflows/deploy-cerbanimo-mail.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerbanimo-mail-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify portal contract
+        run: node scripts/verify-cerbanimo-mail-portal-v1.mjs
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing repository secret CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          npx --yes wrangler@latest whoami
+      - name: Deploy secure mail doorway
+        run: npx --yes wrangler@latest deploy --config cloudflare/cerbanimo-mail/wrangler.jsonc
+      - name: Verify mail.cerbanimo.cc
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error --location --max-redirs 0 https://mail.cerbanimo.cc/api/health > /tmp/mail-health.json 2>/tmp/mail-error; then
+              node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const payload = JSON.parse(fs.readFileSync('/tmp/mail-health.json', 'utf8'));
+          if (payload?.ok !== true || payload?.schema !== 'cerbanimo.mail-portal.v1' || payload?.provider !== 'gmail') {
+            throw new Error(`Unexpected Cerbanimo Mail health payload: ${JSON.stringify(payload)}`);
+          }
+          console.log(JSON.stringify(payload));
+          NODE
+              exit 0
+            fi
+            cat /tmp/mail-error || true
+            sleep 3
+          done
+          echo 'mail.cerbanimo.cc did not become healthy in time.'
+          exit 3
