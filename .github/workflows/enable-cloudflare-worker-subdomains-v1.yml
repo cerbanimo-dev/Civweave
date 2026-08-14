@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml'
+      - 'cloudflare/recovery-relay/**'
   workflow_dispatch:
 
 permissions:
@@ -13,19 +14,28 @@ permissions:
 jobs:
   enable:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      CORE_URL: https://civweave-core.glaedn.workers.dev
-      NODE_URL: https://civweave-node-cloud.glaedn.workers.dev
     steps:
-      - name: Enable stable workers.dev routes
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Deploy global Hub recovery proof relay
         shell: bash
         run: |
           set -euo pipefail
           test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 2; }
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          npx --yes wrangler@latest deploy --config cloudflare/recovery-relay/wrangler.jsonc
+
+      - name: Enable stable workers.dev routes
+        shell: bash
+        run: |
+          set -euo pipefail
           enable_subdomain() {
             local script="$1"
             echo "Enabling workers.dev for ${script}"
@@ -45,6 +55,39 @@ jobs:
           }
           enable_subdomain civweave-core
           enable_subdomain civweave-node-cloud
+          enable_subdomain civweave-recovery-relay
+
+      - name: Resolve live workers.dev endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain" \
+            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            --header 'Content-Type: application/json' > /tmp/workers-account-subdomain.json
+          node --input-type=module <<'NODE'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const payload = JSON.parse(readFileSync('/tmp/workers-account-subdomain.json', 'utf8'));
+          const subdomain = String(payload?.result?.subdomain || '').trim();
+          if (!payload?.success || !/^[a-z0-9-]{1,63}$/i.test(subdomain)) {
+            throw new Error(`Could not resolve this Cloudflare account's workers.dev subdomain: ${JSON.stringify(payload?.errors || payload)}`);
+          }
+          const endpoints = {
+            WORKERS_ACCOUNT_SUBDOMAIN: subdomain,
+            CORE_URL: `https://civweave-core.${subdomain}.workers.dev`,
+            NODE_URL: `https://civweave-node-cloud.${subdomain}.workers.dev`,
+            RECOVERY_RELAY_URL: `https://civweave-recovery-relay.${subdomain}.workers.dev`,
+          };
+          appendFileSync(process.env.GITHUB_ENV, Object.entries(endpoints).map(([key, value]) => `${key}=${value}`).join('\n') + '\n');
+          console.log(JSON.stringify({ ok: true, workersAccountSubdomain: subdomain, recoveryRelay: endpoints.RECOVERY_RELAY_URL }));
+          NODE
+
+      - name: Probe recovery proof relay
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 8 --retry-delay 2 --retry-all-errors "${RECOVERY_RELAY_URL}/api/health"
+          echo
 
       - name: Configure free Hub recovery email routing
         shell: bash
@@ -57,14 +100,16 @@ jobs:
           const zoneName = 'commonweave.earth';
           const routingDomain = 'recovery.commonweave.earth';
           const mailbox = 'recover@recovery.commonweave.earth';
-          const worker = 'civweave-host-edge';
+          const worker = 'civweave-recovery-relay';
           const auth = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+          const annotate = value => String(value || '').replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
 
           async function request(path, init = {}, { allowFailure = false } = {}) {
             const response = await fetch(API + path, { ...init, headers: { ...auth, ...(init.headers || {}) } });
             const payload = await response.json().catch(() => ({}));
             if ((!response.ok || payload.success !== true) && !allowFailure) {
               const detail = (payload.errors || []).map(item => item.message || item.code).join('; ') || `HTTP ${response.status}`;
+              console.error(`::error title=Cloudflare Email Routing::${annotate(`${path}: ${detail}`)}`);
               throw Object.assign(new Error(detail), { status: response.status, path });
             }
             return { response, payload };
@@ -127,4 +172,5 @@ jobs:
         run: |
           echo "CIVWEAVE_MONEY_EDGE_URL=${CORE_URL}"
           echo "CIVWEAVE_NODE_FABRIC_URL=${NODE_URL}"
+          echo "CIVWEAVE_HUB_RECOVERY_RELAY=${RECOVERY_RELAY_URL}"
           echo "CIVWEAVE_HUB_RECOVERY_EMAIL=recover@recovery.commonweave.earth"

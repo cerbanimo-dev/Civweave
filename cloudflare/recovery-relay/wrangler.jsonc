@@ -1,0 +1,21 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "civweave-recovery-relay",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-08-12",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "durable_objects": {
+    "bindings": [
+      { "name": "PROOFS", "class_name": "CivweaveRecoveryProofRelay" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["CivweaveRecoveryProofRelay"] }
+  ],
+  "vars": {
+    "RECOVERY_MAILBOX": "recover@recovery.commonweave.earth"
+  },
+  "observability": { "enabled": true }
+}

@@ -61,16 +61,32 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Avoid membership-enumeration probes here. Scoped API tokens can
-          # deploy Pages/Workers without permission to enumerate memberships.
-          # This account-scoped Pages request is both the auth probe and the
-          # project/account-affinity check.
           npx wrangler pages deployment list \
             --project-name civweave \
             --environment production \
             --json > /tmp/civweave-pages-deployments.json
           node scripts/verify-cloudflare-pages-account-target-v1.mjs \
             /tmp/civweave-pages-deployments.json civweave
+
+      - name: Resolve canonical recovery relay endpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/subdomain" \
+            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            --header 'Content-Type: application/json' > /tmp/workers-account-subdomain.json
+          node --input-type=module <<'NODE'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          const payload = JSON.parse(readFileSync('/tmp/workers-account-subdomain.json', 'utf8'));
+          const subdomain = String(payload?.result?.subdomain || '').trim();
+          if (!payload?.success || !/^[a-z0-9-]{1,63}$/i.test(subdomain)) {
+            throw new Error(`Could not resolve this Cloudflare account's workers.dev subdomain: ${JSON.stringify(payload?.errors || payload)}`);
+          }
+          const relay = `https://civweave-recovery-relay.${subdomain}.workers.dev`;
+          appendFileSync(process.env.GITHUB_ENV, `RECOVERY_RELAY_URL=${relay}\nWORKERS_ACCOUNT_SUBDOMAIN=${subdomain}\n`);
+          console.log(JSON.stringify({ ok: true, recoveryRelay: relay }));
+          NODE
 
       - name: Provision optional account Worker and starter nodes
         id: provision_account_edge
@@ -88,7 +104,7 @@ jobs:
       - name: Build canonical Pages package
         run: node scripts/build-cloudflare-pages.mjs
 
-      - name: Record canonical host deployment
+      - name: Record canonical host deployment and recovery relay
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -121,6 +137,13 @@ jobs:
             sourceCommit: process.env.GITHUB_SHA,
             generatedAt: new Date().toISOString(),
           }, null, 2)}\n`, 'utf8');
+          writeFileSync('.cloudflare-pages/app/recovery-relay-v1.json', `${JSON.stringify({
+            schema: 'civweave.recovery-relay-discovery.v1',
+            url: process.env.RECOVERY_RELAY_URL,
+            mailbox: 'recover@recovery.commonweave.earth',
+            sourceCommit: process.env.GITHUB_SHA,
+            generatedAt: new Date().toISOString(),
+          }, null, 2)}\n`, 'utf8');
           NODE
 
       - name: Deploy production Pages project
@@ -149,15 +172,17 @@ jobs:
           let lastFailure = 'Production marker did not become current.';
           for (let attempt = 1; attempt <= 12; attempt += 1) {
             try {
-              const url = `${origin}/app/host-deployment-v1.json?verify=${encodeURIComponent(expectedCommit)}&attempt=${attempt}`;
-              const response = await fetch(url, { headers: { 'Cache-Control': 'no-cache' } });
-              if (!response.ok) throw new Error(`HTTP ${response.status}`);
-              const marker = await response.json();
-              if (marker.pagesProject === 'civweave' && marker.publicOrigin === origin && marker.sourceCommit === expectedCommit) {
-                console.log(`Verified ${origin} at source commit ${expectedCommit}.`);
+              const markerResponse = await fetch(`${origin}/app/host-deployment-v1.json?verify=${encodeURIComponent(expectedCommit)}&attempt=${attempt}`, { headers: { 'Cache-Control': 'no-cache' } });
+              if (!markerResponse.ok) throw new Error(`marker HTTP ${markerResponse.status}`);
+              const marker = await markerResponse.json();
+              const relayResponse = await fetch(`${origin}/app/recovery-relay-v1.json?verify=${encodeURIComponent(expectedCommit)}&attempt=${attempt}`, { headers: { 'Cache-Control': 'no-cache' } });
+              if (!relayResponse.ok) throw new Error(`relay discovery HTTP ${relayResponse.status}`);
+              const relay = await relayResponse.json();
+              if (marker.pagesProject === 'civweave' && marker.publicOrigin === origin && marker.sourceCommit === expectedCommit && relay.schema === 'civweave.recovery-relay-discovery.v1' && relay.sourceCommit === expectedCommit && relay.url === process.env.RECOVERY_RELAY_URL) {
+                console.log(`Verified ${origin} at source commit ${expectedCommit} with recovery relay ${relay.url}.`);
                 process.exit(0);
               }
-              lastFailure = `attempt ${attempt}: marker sourceCommit=${marker.sourceCommit || 'missing'}`;
+              lastFailure = `attempt ${attempt}: marker=${marker.sourceCommit || 'missing'} relay=${relay.sourceCommit || 'missing'} url=${relay.url || 'missing'}`;
             } catch (error) {
               lastFailure = `attempt ${attempt}: ${error.message}`;
             }
@@ -166,6 +191,7 @@ jobs:
           console.error(`Stable production verification failed: ${lastFailure}`);
           process.exit(4);
           NODE
+
       - name: Report optional account-edge provisioning
         if: success() && steps.provision_account_edge.outcome == 'failure'
         shell: bash
