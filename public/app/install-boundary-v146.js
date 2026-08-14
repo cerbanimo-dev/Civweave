@@ -2,14 +2,14 @@
 'use strict';
 
 const VERSION='1.0.144';
-const REVISION='browser-install-boundary-v228-chat-escape-install-only-pwa-v1-region-gossip-v1';
+const REVISION='browser-install-boundary-v228-chat-escape-install-only-pwa-v1';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
 const INSTALLER='/app/index.html';
 const BOOT_KEY='civweave.install-boundary.boot.v228';
 const STALE_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-boundary.boot.v226'];
 const DEV_KEY='civweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228-install-only-pwa-v1-region-gossip-v1`;
+const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228-install-only-pwa-v1`;
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js';
 const PLATFORM_STABILITY='/app/platform-stability-v159.js';
@@ -30,7 +30,6 @@ const RELEASE_VERSION='/app/release-version-v1.js';
 const EXPERIENCE_ORCHESTRATOR='/app/experience-orchestrator-v232.js';
 const SYSTEMS_MESH_RUNTIME='/app/civweave-systems-mesh-v251.js';
 const HOST_NODE_SESSION='/app/host-node-session-v1.js';
-const LOCALITY_GOSSIP_RUNTIME='/app/civweave-locality-gossip-v1.js';
 const NODE_AI_MESH_RUNTIME='/app/node-ai-mesh-v1.js';
 const QUEST_VEIL='/app/quest-veil-v1.js';
 const QUEST_VEIL_MESH='/app/quest-veil-mesh-v1.js';
@@ -54,7 +53,6 @@ const SYSTEM_EXPERIENCE_SCRIPTS=[
   RADIO_TRACK_SUGGESTIONS,
   SYSTEMS_MESH_RUNTIME,
   HOST_NODE_SESSION,
-  LOCALITY_GOSSIP_RUNTIME,
   NODE_AI_MESH_RUNTIME,
   QUEST_VEIL_MESH,
   QUEST_VEIL_LEDGER_GATE,
@@ -76,7 +74,6 @@ const COMPATIBILITY_SCRIPTS=[
   '/app/weaveling-memory-bridge-v191.js',
   '/app/deterministic-mode-v175.js',
   HOST_NODE_SESSION,
-  LOCALITY_GOSSIP_RUNTIME,
   MOBILE_AI_HARDENING,
   '/app/gemini-task-tier-router-v213.js',
   GUIDE_IDENTITY_SCRIPT,
@@ -256,7 +253,6 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   legacyChatRuntimePolicy:'removed-from-current-source-v251',
   systemsMeshRevision:'v251-five-system-non-privileged-event-contract',
   nodeAiMeshRevision:'v1-node-owned-service-discovery-routing',
-  localityGossipRevision:'v1.1-home-plus-six-region-chunks',
   questVeilRevision:'v1-mandatory-human-ledger-gate-plus-mesh-batches',
   questVeilHumanLedgerPolicy:'raw-task-chronicle-never-human-visible',
   questVeilMeshBountyPolicy:'per-item:learning=1-acorn;labor-material-exchange=1-button',
