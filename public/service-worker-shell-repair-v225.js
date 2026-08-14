@@ -1,8 +1,8 @@
 ;(() => {
 'use strict';
 
-const V225_REVISION = 'shell-self-repair-v225';
-const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js'];
+const V225_REVISION = 'shell-self-repair-v225-install-only-pwa-v1';
+const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js'];
 const v225OriginalCacheShell = cacheShell;
 const v225OriginalShellStatus = shellStatus;
 let v225LastFailures = [];
@@ -77,7 +77,8 @@ self.CivweaveShellRepairV225 = Object.freeze({
   revision: V225_REVISION,
   optionalAssets: [...V225_OPTIONAL_ASSETS],
   repair: v225RepairShell,
-  policy: 'activate-incomplete-retry-required-shell-and-report-paths'
+  browserRuntime:false,
+  policy: 'activate-incomplete-retry-required-shell-and-report-paths-install-only'
 });
 
 })();
