@@ -98,7 +98,13 @@ function scanReferences(absolute) {
 
 if (!existsSync(publicRoot)) throw new Error(`Public directory not found: ${publicRoot}`);
 
-await import('./generate-civweave-icons.mjs');
+try {
+  await import('./generate-civweave-icons.mjs');
+} catch (error) {
+  const missingSharp=error?.code==='ERR_MODULE_NOT_FOUND'&&String(error?.message||'').includes("package 'sharp'");
+  if (!missingSharp) throw error;
+  console.log('[Civweave] Icon materialization skipped because optional build dependencies are not installed; cataloging committed icon assets instead.');
+}
 
 const files = walk(publicRoot).filter(file => !skipped(file));
 const assets = files
