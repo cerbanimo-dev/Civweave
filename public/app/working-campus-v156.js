@@ -1,14 +1,15 @@
 (()=>{
 'use strict';
 const REVISION='canonical-campus-startup-v227';
-const BRAND_REVISION='day-night-clock-v236';
+const BRAND_REVISION='compact-shell-v235';
+const BRAND_CYCLE_REVISION='day-night-clock-v236';
 const BRAND_DAY='/app/logos/civweave-day-logo.jpg';
 const BRAND_NIGHT='/app/logos/civweave-night-logo.jpg';
 const WEB_ENTRY_REVISION='web-install-entry-v232';
 const HUB_REVISION='weaveling-hub-v233';
 const STATE_REPAIR_REVISION='working-campus-state-repair-v238';
 const HUB_SCRIPT='/app/weaveling-hub-v233.js';
-const routeScript='/app/system-routes-v227.js?v=1.0.157-five-system-route-contract-v227';
+const routeScript='/app/system-routes-v227.js?v=1.0.158-five-system-route-contract-v227';
 const parts=['/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt'];
 const required=['conversation','weaveling-chat-form','weaveling-chat-input','workspace','view-title','state-label'];
 const controller=new AbortController();
@@ -164,6 +165,7 @@ function installBrandPresentation(){
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncBrandPresentation();scheduleBrandPresentation()}},{signal:controller.signal});
   addEventListener('pageshow',()=>{syncBrandPresentation();scheduleBrandPresentation()},{signal:controller.signal});
   document.documentElement.dataset.civweaveBrandPresentation=BRAND_REVISION;
+  document.documentElement.dataset.civweaveBrandCycleRevision=BRAND_CYCLE_REVISION;
 }
 function installDiagnosticsPolicy(){
   const params=new URLSearchParams(location.search);
@@ -241,7 +243,7 @@ async function boot(){
   if(!liveDocument())throw new DOMException('Working Campus navigation interrupted startup.','AbortError');
   Function(source.join(''))();
   document.documentElement.dataset.civweaveCampusRuntime='ready';
-  dispatchEvent(new CustomEvent('civweave:working-campus-runtime-ready',{detail:{revision:REVISION,brandRevision:BRAND_REVISION,webEntryRevision:WEB_ENTRY_REVISION,hubRevision:HUB_REVISION,stateRepairRevision:STATE_REPAIR_REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-core-only-five-system-routing'}}));
+  dispatchEvent(new CustomEvent('civweave:working-campus-runtime-ready',{detail:{revision:REVISION,brandRevision:BRAND_REVISION,brandCycleRevision:BRAND_CYCLE_REVISION,webEntryRevision:WEB_ENTRY_REVISION,hubRevision:HUB_REVISION,stateRepairRevision:STATE_REPAIR_REVISION,parts:parts.length,at:new Date().toISOString(),policy:'canonical-core-only-five-system-routing'}}));
 }
 boot().catch(error=>{
   if(!active||error?.name==='AbortError')return;
