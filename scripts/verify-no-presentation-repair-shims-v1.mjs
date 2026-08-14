@@ -129,6 +129,29 @@ const rules = [
   },
 ];
 
+const reviewedDynamic = new Map([
+  ['public/app/anarchadia-local-sovereignty-v146.js', 'Explicit user-authored local sovereignty profiles intentionally alter selected DOM/assets and must follow later matching nodes.'],
+  ['public/app/assistant-runtime-v141.js', 'Attaches the live assistant controller to dialogs that are genuinely created later; it renders conversation state rather than repairing static presentation.'],
+  ['public/app/avatar-expression-director-v343.js', 'Live avatar-expression state deliberately changes visible expressions after model/chat events.'],
+  ['public/app/avatar-expression-director-v345.js', 'Current live avatar-expression director; sprite changes are semantic expression state, not neutral-art repair.'],
+  ['public/app/cerbanimo-proof-attachments-v165.js', 'User proof attachments and previews are created/updated from live submission state.'],
+  ['public/app/civweave-world.js', 'Visual-world renderer owns scene changes and live world imagery; it is a renderer, not a patch over pre-rendered canonical markup.'],
+  ['public/app/cw-reward-legacy-bridge-v2.js', 'Data/runtime compatibility bridge patches reward APIs and injects itself into dynamically loaded legacy iframes; it does not repair static page presentation.'],
+  ['public/app/cw-reward-surfaces-v2.js', 'Live reward balances and ledger surfaces update as reward state changes.'],
+  ['public/app/guide-workspace-v242.js', 'Canonical live chat workspace renders messages, persona state, and model activity.'],
+  ['public/app/host-node-v124.js', 'Host-node connection/status UI changes with actual network and node state.'],
+  ['public/app/hub-mail-claim-v1.js', 'Mail-claim UI is created/updated from asynchronous account recovery state.'],
+  ['public/app/hub-recovery-ui-v1.js', 'Recovery UI reflects genuine recovery workflow state and dynamically discovered account data.'],
+  ['public/app/installer-repair-only-v1.js', 'The remaining observer tracks real shell failure/repair state; static launcher cleanup is separately forbidden.'],
+  ['public/app/pwa-install-prompt-v246.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
+  ['public/app/pwa-install-prompt-v247.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
+  ['public/app/pwa-install-prompt-v248.js', 'Legacy install-prompt runtime reflects browser beforeinstallprompt/appinstalled state.'],
+  ['public/app/pwa-install-prompt-v249.js', 'Current install-prompt runtime updates controls from real browser install availability and install completion.'],
+  ['public/app/shared-intention-party-chat-v1.js', 'Party chat renders newly arriving messages and participant state.'],
+  ['public/app/shared-review-surface-v234.js', 'Review surface renders live pending/approved/rejected action state.'],
+  ['public/app/shared/visual-shell-cleanup.js', 'Realm visual-shell renderer mounts the actual illustrated shell into intentionally empty render hosts; source pages do not contain fake classic UI to replace.'],
+]);
+
 const failures = [];
 for (const rule of rules) {
   const source = read(rule.path);
@@ -146,9 +169,6 @@ function walk(path) {
   return out;
 }
 
-// Discovery pass: report, but do not automatically condemn, files that use the same
-// primitives for legitimate live state. This keeps the audit useful without banning
-// chat, maps, install progress, AI expression changes, localization, or opt-in skins.
 const discovery = [];
 for (const scanRoot of ['public/app', 'site/cerbanimo-cc']) {
   for (const file of walk(resolve(root, scanRoot))) {
@@ -162,10 +182,16 @@ for (const scanRoot of ['public/app', 'site/cerbanimo-cc']) {
   }
 }
 
+const candidates = [...new Set(discovery)].sort();
+const unclassified = candidates.filter(path => !reviewedDynamic.has(path));
+for (const path of unclassified) failures.push(`${path}: observer+rewrite runtime is not classified as legitimate live state or explicit customization`);
+const classifiedDynamic = candidates.map(path => ({ path, rationale: reviewedDynamic.get(path) || null }));
+
 console.log(JSON.stringify({
-  schema: 'civweave.presentation-source-truth.v3',
+  schema: 'civweave.presentation-source-truth.v4',
   enforcedFiles: rules.map(rule => rule.path),
-  discoveryCandidates: [...new Set(discovery)].sort(),
+  classifiedDynamic,
+  unclassifiedCandidates: unclassified,
   failures,
 }, null, 2));
 
@@ -175,4 +201,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('\nCanonical static presentation repair shims are retired; live-state discovery remains informational.');
+console.log('\nCanonical static presentation repair shims are retired. Every remaining observer+rewrite candidate is explicitly classified as live state, a renderer, compatibility data plumbing, or user-authored customization.');
