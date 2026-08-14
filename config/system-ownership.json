@@ -89,6 +89,32 @@
         "Paid-expansion availability may be discovered, but a new paid-expansion resident is never admitted without active membership authority."
       ]
     },
+    "private-messaging": {
+      "capability": "Offline-first encrypted member private messaging with opportunistic mesh and hidden online relay transport",
+      "owner": "public/app/civweave-private-messaging-v1.js",
+      "setupCaller": "public/app/hub-mail-claim-v1.js",
+      "meshDependency": "public/app/local-object-mesh-v146.js",
+      "onlineAuthority": "cloudflare/mail/src/index-v4.mjs",
+      "canonicalApi": "globalThis.CivweavePrivateMessagingV1",
+      "canonicalEvents": [
+        "civweave:private-messaging-ready",
+        "civweave:private-messaging-identity",
+        "civweave:private-message"
+      ],
+      "offlinePackage": "public/app/offline-package-v208.json",
+      "allowedCallers": [
+        "public/app/hub-mail-claim-v1.js",
+        "future shared private-messaging presentation surface"
+      ],
+      "rules": [
+        "The user-facing member identity is @username; the derived username_pm@civweave.cc address is transport-only and must never be presented as the member's email address.",
+        "Private message plaintext is encrypted on the sending device before mesh, Hub, Worker, R2, or hidden-mail relay transport sees it.",
+        "The same encrypted envelope and UUID travel over local mesh and online relay so duplicate paths converge locally.",
+        "Inbound internet SMTP to _pm transport identities is rejected before message storage.",
+        "Paid human-visible email uses a separate entitlement-gated account and claim path.",
+        "Realm pages may call or present the canonical PM API but may not create realm-local messaging stores, encryption owners, relay protocols, or username registries."
+      ]
+    },
     "radio": {
       "capability": "Shared radio station and track suggestions",
       "owner": "public/app/system-radio-agent-v233.js",
