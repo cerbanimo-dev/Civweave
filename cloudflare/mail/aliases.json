@@ -1,0 +1,11 @@
+{
+  "schema": "cerbanimo.mail-aliases.v1",
+  "zone": "cerbanimo.cc",
+  "destination": "cerbanimo@gmail.com",
+  "aliases": [
+    {
+      "address": "kamiya@cerbanimo.cc",
+      "name": "Kamiya"
+    }
+  ]
+}
