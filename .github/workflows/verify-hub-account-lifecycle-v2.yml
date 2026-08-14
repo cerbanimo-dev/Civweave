@@ -8,7 +8,7 @@ on:
       - 'cloudflare/node-cloud/src/capacity-membership-admin-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v*.mjs'
       - 'cloudflare/node-cloud/wrangler.jsonc'
-      - 'lib/local-hub-account-v1.mjs'
+      - 'lib/local-hub-account-v*.mjs'
       - 'lib/local-host-capacity-v2.mjs'
       - 'server/federated.mjs'
       - 'public/app/hub-passport-account-v1.js'
@@ -26,7 +26,7 @@ on:
       - 'cloudflare/node-cloud/src/capacity-membership-admin-v1.mjs'
       - 'cloudflare/node-cloud/src/server-ai-entry-v*.mjs'
       - 'cloudflare/node-cloud/wrangler.jsonc'
-      - 'lib/local-hub-account-v1.mjs'
+      - 'lib/local-hub-account-v*.mjs'
       - 'lib/local-host-capacity-v2.mjs'
       - 'server/federated.mjs'
       - 'public/app/hub-passport-account-v1.js'
@@ -54,6 +54,7 @@ jobs:
           node --check cloudflare/account-edge/src/hub-passport-account-v2.mjs
           node --check cloudflare/account-edge/src/hub-passport-account-v3.mjs
           node --check cloudflare/account-edge/src/hub-passport-account-v4.mjs
+          node --check cloudflare/account-edge/src/hub-passport-account-v5.mjs
           node --check cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs
           node --check cloudflare/node-cloud/src/cloud-node-recovery-v3.mjs
           node --check cloudflare/node-cloud/src/capacity-membership-admin-v1.mjs
@@ -61,6 +62,7 @@ jobs:
           node --check cloudflare/node-cloud/src/server-ai-entry-v7.mjs
           node --check cloudflare/node-cloud/src/server-ai-entry-v8.mjs
           node --check lib/local-hub-account-v1.mjs
+          node --check lib/local-hub-account-v2.mjs
           node --check lib/local-host-capacity-v2.mjs
           node --check server/federated.mjs
           node --check public/app/hub-passport-account-v1.js
