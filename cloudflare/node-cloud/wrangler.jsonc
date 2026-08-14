@@ -1,8 +1,8 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "civweave-node-cloud",
-  "main": "src/server-ai-entry-v4.mjs",
-  "compatibility_date": "2026-08-13",
+  "main": "src/server-ai-entry-v5.mjs",
+  "compatibility_date": "2026-08-14",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "preview_urls": false,
@@ -12,20 +12,24 @@
   "durable_objects": {
     "bindings": [
       { "name": "NODES", "class_name": "CivweaveCloudNode" },
-      { "name": "CAPACITY", "class_name": "CivweaveCapacityAccount" }
+      { "name": "CAPACITY", "class_name": "CivweaveCapacityAccount" },
+      { "name": "ACCOUNT_DIRECTORY", "class_name": "CivweaveAccountDirectory" }
     ]
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["CivweaveCloudNode"] },
-    { "tag": "v2", "new_sqlite_classes": ["CivweaveCapacityAccount"] }
+    { "tag": "v2", "new_sqlite_classes": ["CivweaveCapacityAccount"] },
+    { "tag": "v3", "new_sqlite_classes": ["CivweaveAccountDirectory"] }
   ],
   "services": [
-    { "binding": "CORE", "service": "civweave-core" }
+    { "binding": "CORE", "service": "civweave-core" },
+    { "binding": "CERBANIMO_MAIL", "service": "cerbanimo-mail" }
   ],
   "vars": {
     "NODE_DOMAIN": "nodes.civweave.invalid",
     "PUBLIC_FABRIC_ORIGIN": "https://civweave-node-cloud.cerbanimo.workers.dev",
     "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.cc",
+    "CIVWEAVE_ACCOUNT_DIRECTORY_ORIGIN": "https://civweave-node-cloud.cerbanimo.workers.dev",
     "CIVWEAVE_WORKERS_PLAN": "free",
     "CIVWEAVE_UNIFIED_BILLING_MODEL": "google/gemini-3.1-flash-lite",
     "CIVWEAVE_AI_GATEWAY_ID": "default"
@@ -36,6 +40,13 @@
   // NODE_FABRIC_SESSION_SECRET
   // NODE_FABRIC_OPERATOR_TOKEN
   // NODE_FABRIC_BINDING_TOKEN
+  //
+  // The ACCOUNT_DIRECTORY Durable Object stores only hashed recovery-email keys
+  // and verified account locators. It never returns account existence before the
+  // user has proved control of the email address.
+  //
+  // CERBANIMO_MAIL is an internal Cloudflare service binding. Recovery mail is
+  // sent by the Cerbanimo mail Worker without exposing a public send endpoint.
   //
   // NODE_DOMAIN intentionally uses the reserved .invalid namespace until an
   // owned custom zone is explicitly configured. Public starter-node links are
