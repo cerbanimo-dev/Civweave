@@ -6,12 +6,12 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [versionText,integrityText,wrapper,repairWorker,fallback,builder,materializer,generator,coreWorker,installerWorker]=await Promise.all([
+const [versionText,integrityText,wrapper,repairWorker,repairUi,builder,materializer,generator,coreWorker,installerWorker]=await Promise.all([
   read('VERSION'),
   read('public/app/shell-integrity-v281.json'),
   read('public/service-worker-v203.js'),
   read('public/service-worker-shell-repair-v293.js'),
-  read('public/app/installer-online-fallback-v225.js'),
+  read('public/app/installer-repair-only-v1.js'),
   read('scripts/build-service-worker-v211.mjs'),
   read('scripts/materialize-canonical-release.mjs'),
   read('scripts/generate-prelive-metadata-v281.mjs'),
@@ -77,16 +77,18 @@ for(const token of [
   "policy:'verified-shell-only-preserve-campus-model-school-storage'"
 ])assert.ok(repairWorker.includes(token),`Installed shell repair worker is missing ${token}`);
 
-const fallbackContracts=[
+const repairContracts=[
   ['repair-state detection',/needs\? repair/],
   ['repair message dispatch',/worker\.postMessage\(\{\s*type\s*:\s*['"]REPAIR_DEVICE_PACKAGE['"]\s*\}/],
   ['repair response validation',/packet\?\.type\s*!==\s*['"]CIVWEAVE_DEVICE_PACKAGE_REPAIR['"]/],
   ['preserved storage policy',/storagePolicy\s*:\s*['"]preserve-campus-model-media-school-storage['"]/],
   ['repair button copy',/installButton\.textContent\s*=\s*['"]Repair shell['"]/]
 ];
-for(const [label,pattern] of fallbackContracts)assert.match(fallback,pattern,`Installer repair UI is missing ${label}`);
-assert.match(fallback,/new MessageChannel\(\)/,'Installer repair UI no longer uses a reply channel for shell repair.');
-assert.match(fallback,/\[\s*channel\.port2\s*\]/,'Installer repair UI no longer transfers the reply port with the repair request.');
+for(const [label,pattern] of repairContracts)assert.match(repairUi,pattern,`Installer repair UI is missing ${label}`);
+assert.match(repairUi,/new MessageChannel\(\)/,'Installer repair UI no longer uses a reply channel for shell repair.');
+assert.match(repairUi,/\[\s*channel\.port2\s*\]/,'Installer repair UI no longer transfers the reply port with the repair request.');
+assert.match(repairUi,/browserRuntimePolicy:'installer-only-until-installed-display'/,'Installer repair UI lost the install-only browser contract.');
+assert.ok(!repairUi.includes('function openCampus'),'Installer repair UI must not restore an online-campus launcher.');
 
 function repairHarness({fail=false}={}){
   let messageHandler=null;
@@ -132,7 +134,7 @@ assert.equal(failure?.failures?.[0]?.pathname,'/app/installed-entry-v146.html');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installed-shell-repair-v293-behavioral-contract',
+  revision:'installed-shell-repair-v293-behavioral-contract-install-only-pwa-v1',
   version,
   shellIntegrityAssets:integrity.requiredAssetCount,
   shellIntegrityDerivedFromRuntime:true,
@@ -142,5 +144,6 @@ console.log(JSON.stringify({
   workerGeneratorLocked:true,
   canonicalMaterializerRegeneratesIntegrity:true,
   manualFirstShell:true,
+  browserRuntime:false,
   sourceFormattingAgnostic:true
 },null,2));
