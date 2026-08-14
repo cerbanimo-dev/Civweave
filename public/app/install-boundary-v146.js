@@ -110,16 +110,16 @@ function authorize(){
 }
 function explicitInstalled(){
   try{
-    if(params.get('installed')==='1'){authorize();return true}
-    return sessionStorage.getItem(BOOT_KEY)==='1';
-  }catch{return params.get('installed')==='1'}
+    if(params.get('installed')==='1'&&installedDisplay()){authorize();return true}
+    return installedDisplay()&&sessionStorage.getItem(BOOT_KEY)==='1';
+  }catch{return params.get('installed')==='1'&&installedDisplay()}
 }
 function systemSurface(){
   const contract=globalThis.CivweaveSystemRoutesV227;
   return contract?.identify?.(location.pathname)||FALLBACK_PATHS.get(location.pathname)||'';
 }
 function canonicalAppSurface(){return systemSurface()==='civweave'}
-function allowed(){return installedDisplay()||explicitInstalled()||developer()||embedded()}
+function allowed(){return installedDisplay()||developer()||embedded()}
 function installerUrl(){
   const target=`${location.pathname}${location.search}${location.hash}`;
   const next=new URL(INSTALLER,location.origin);
@@ -139,9 +139,7 @@ function liveHead(head=document.head){return!unloading&&document.documentElement
 function addScript(src){
   const head=document.head;
   if(!liveHead(head)||document.querySelector(`script[src^="${src}"]`))return false;
-  const script=document.createElement('script');
-  script.src=`${src}?v=${ADDITIONS_VERSION}`;
-  script.async=false;
+  const script=document.createElement('script');script.src=`${src}?v=${ADDITIONS_VERSION}`;script.async=false;
   if(!liveHead(head))return false;
   head.append(script);
   return true;
@@ -152,10 +150,7 @@ function assetCustomizationConfigured(){
     return value?.personalEnabled!==false&&value?.pathOverrides&&Object.keys(value.pathOverrides).length>0;
   }catch{return false}
 }
-function installAssetCustomizationIfConfigured(){
-  if(!assetCustomizationConfigured())return false;
-  return addScript(ASSET_CUSTOMIZATION);
-}
+function installAssetCustomizationIfConfigured(){if(!assetCustomizationConfigured())return false;return addScript(ASSET_CUSTOMIZATION)}
 function installEarlyGuards(){addScript(MOBILE_AI_HARDENING);addScript(PLATFORM_STABILITY);return true}
 function installSystemExperienceSupport(){
   const system=systemSurface();
@@ -242,27 +237,8 @@ addEventListener('pageshow',resumeFromPageShow);
 start();
 
 globalThis.CivweaveInstallBoundaryV146=Object.freeze({
-  version:VERSION,allowed,
-  revision:REVISION,
-  systemSurface,
-  canonicalAppSurface,
-  installedDisplay,
-  explicitInstalled,
-  developer,
-  embedded,
-  installerUrl,
-  authorize,
-  clearStaleAuthorization,
-  closeBrowserChatBeforeRedirect,
-  installEarlyGuards,
-  installSystemExperienceSupport,
-  installCanonicalSystemSupport,
-  installCanonicalSystemSupportWhenReady,
-  installAdditions,
-  installAdditionsWhenReady,
-  resumeFromPageShow,
-  assetCustomizationConfigured,
-  installAssetCustomizationIfConfigured,
+  version:VERSION,allowed,revision:REVISION,systemSurface,canonicalAppSurface,installedDisplay,explicitInstalled,developer,embedded,installerUrl,authorize,clearStaleAuthorization,closeBrowserChatBeforeRedirect,
+  installEarlyGuards,installSystemExperienceSupport,installCanonicalSystemSupport,installCanonicalSystemSupportWhenReady,installAdditions,installAdditionsWhenReady,resumeFromPageShow,assetCustomizationConfigured,installAssetCustomizationIfConfigured,
   additionsVersion:ADDITIONS_VERSION,
   publicBrand:'Civweave',
   canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner-installed-only-v228',
