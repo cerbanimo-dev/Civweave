@@ -1,4 +1,4 @@
-import core, { CivweaveCoreIdentity, launchTopology as baseLaunchTopology } from './stripe-connect-v2-entry.mjs';
+import core, { CivweaveCoreIdentity, launchTopology as baseLaunchTopology } from './territory-host-entry-v1.mjs';
 
 export { CivweaveCoreIdentity };
 
