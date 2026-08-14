@@ -2,13 +2,14 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [cloudEntry,poolRouter,poolCapacity,hostingCapacity,hostingNode,recoveryNode,hostedEntry,accountEdge,legacyAccountEdge,wrangler] = await Promise.all([
+const [cloudEntry,poolRouter,poolCapacity,hostingCapacity,hostingNode,recoveryNode,hostedEntry,deployedEntry,accountEdge,legacyAccountEdge,wrangler] = await Promise.all([
   'cloudflare/node-cloud/src/server-ai-entry-v2.mjs',
   'cloudflare/node-cloud/src/user-ai-pool-router-v2.mjs',
   'cloudflare/node-cloud/src/capacity-user-pools-v2.mjs',
   'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs',
   'cloudflare/node-cloud/src/cloud-node-hosting-v1.mjs',
   'cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v4.mjs',
   'cloudflare/node-cloud/src/server-ai-entry-v5.mjs',
   'cloudflare/account-edge/src/index.mjs',
   'cloudflare/account-edge/src/index-legacy-v1.mjs',
@@ -54,7 +55,10 @@ assert.match(hostingNode,/hosting\.plan\.paid/);
 assert.match(recoveryNode,/cloud-node-hosting-v1\.mjs/,'Recovery-aware Cloud Nodes must extend the canonical hosting node instead of replacing hosting behavior.');
 assert.match(recoveryNode,/extends BaseCloudNode/,'Recovery-aware Cloud Nodes must preserve the hosting node inheritance chain.');
 assert.match(hostedEntry,/capacity-hosting-plan-v1\.mjs/);
-assert.match(hostedEntry,/cloud-node-recovery-v1\.mjs/,'The deployed v5 entry must expose the recovery-aware Cloud Node wrapper.');
+assert.match(hostedEntry,/cloud-node-recovery-v1\.mjs/,'The v4 composition layer must expose the recovery-aware Cloud Node wrapper.');
+assert.match(deployedEntry,/server-ai-entry-v4\.mjs/,'The deployed v5 entry must preserve the v4 hosting and user-pool composition.');
+assert.match(deployedEntry,/cloud-node-recovery-v2\.mjs/,'The deployed v5 entry must add the current recovery wrapper.');
+assert.match(deployedEntry,/account-directory-v1\.mjs/,'The deployed v5 entry must retain account-directory composition.');
 
 assert.match(accountEdge,/index-legacy-v1\.mjs/);
 assert.match(accountEdge,/server-ai-entry-v2\.mjs/);
@@ -67,4 +71,4 @@ assert.match(wrangler,/"CIVWEAVE_UNIFIED_BILLING_MODEL": "google\/gemini-3\.1-fl
 assert.match(wrangler,/"CIVWEAVE_AI_GATEWAY_ID": "default"/);
 assert.match(wrangler,/"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https:\/\/civweave\.cc"/);
 
-console.log(JSON.stringify({ok:true,revision:'user-ai-pools-v302-membership-preserving-hosting-recovery-v5',personalIncludedPoolGuard:true,sharedFreePoolSeparated:true,unifiedBillingFallback:true,paidMembershipPreserved:true,hostedCapacity:true,recoveryAwareHosting:true,freeHostMaxMembers:28,hostedMaxMembers:400,accountEdgeDelegated:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'user-ai-pools-v302-membership-preserving-hosting-recovery-v6',personalIncludedPoolGuard:true,sharedFreePoolSeparated:true,unifiedBillingFallback:true,paidMembershipPreserved:true,hostedCapacity:true,recoveryAwareHosting:true,deployedEntry:'v5',freeHostMaxMembers:28,hostedMaxMembers:400,accountEdgeDelegated:true},null,2));
