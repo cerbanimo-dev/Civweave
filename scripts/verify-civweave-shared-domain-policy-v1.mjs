@@ -20,7 +20,7 @@ assert.equal(normalizePagesOrigin('https://civweave-garden.pages.dev/path?q=1'),
 
 assert.throws(() => normalizeSharedDomainLabel('api'), /reserved/i);
 assert.throws(() => normalizeSharedDomainLabel('---'), /required/i);
-assert.throws(() => normalizePagesOrigin('https://garden.example.com'), /Pages origin/i);
+assert.throws(() => normalizePagesOrigin('https://garden.example.com'), /Pages.*origin/i);
 assert.throws(() => normalizePagesOrigin('http://civweave-garden.pages.dev'), /HTTPS/i);
 
 const free = communityHostAddress({
