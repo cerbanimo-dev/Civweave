@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#141126">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <title>Install Civweave v1.0.154</title>
-  <script src="/app/pwa-install-prompt-v248.js?v=shell-first-prompt-wait"></script>
-  <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.154">
+  <title>Install Civweave v1.0.155</title>
+  <script src="/app/pwa-install-prompt-v249.js?v=first-input-safe"></script>
+  <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.155">
   <link rel="icon" href="/app/logos/civweave-pwa-192-v247.png" type="image/png">
-  <link rel="stylesheet" href="/install-v130.css?v=1.0.154-lightweight-shell-v208">
+  <link rel="stylesheet" href="/install-v130.css?v=1.0.155-lightweight-shell-v208">
   <link rel="stylesheet" href="/app/knowledge-school-installer-v1.css?v=knowledge-schools-v2">
   <link rel="stylesheet" href="/app/front-door-prismatic-v301.css?v=1.0.108-prismatic-front-door-v301">
   <style>
@@ -32,7 +32,7 @@
   <header class="gateway-header">
     <img src="/app/logos/civweave-pwa-192-v247.png" alt="Civweave">
     <div><small>INSTALLER · UPDATER · RECOVERY</small><h1>Civweave</h1></div>
-    <span class="version">v1.0.154</span>
+    <span class="version">v1.0.155</span>
   </header>
   <section class="install-card" aria-labelledby="install-title">
     <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install the shell. Launch Civweave from your device app launcher. Download offline files only when you choose.</h2><p>The installer does no large background work on arrival. Install prepares the small PWA shell. The offline campus is a separate resumable code download, while large pictures, media, knowledge packs, and local AI models arrive on demand.</p></div>
@@ -74,10 +74,10 @@
     <article class="status-card"><small>PORTABLE RECOVERY</small><h3>Carry the package another way</h3><div class="card-actions"><a href="/downloads/Civweave-Mobile-Install-Kit.zip">Mobile install kit</a><a href="/downloads/civweave-pocket-campus.cwseed">Pocket Campus seed</a><a href="/downloads/knowledge-schools/catalog.json">Knowledge school catalog</a></div></article>
   </section>
 </main>
-<script src="/app/civweave-brand.js?v=1.0.154"></script>
-<script src="/install-v130.js?v=1.0.154-lightweight-shell-v208"></script>
+<script src="/app/civweave-brand.js?v=1.0.155"></script>
+<script src="/install-v130.js?v=1.0.155-lightweight-shell-v208"></script>
 <script src="/app/installer-repair-only-v1.js?v=install-only-pwa-v1"></script>
-<script src="/app/offline-campus-status-v210.js?v=1.0.116-current-manifest-only-v282"></script>
+<script src="/app/offline-campus-status-v211.js?v=first-input-safe"></script>
 <script>
 (()=>{
   'use strict';
@@ -104,7 +104,7 @@
   'use strict';
   const $=selector=>document.querySelector(selector);
   const numeric=value=>{const number=Number(value);return Number.isFinite(number)&&number>0?number:0};
-  const latestStatus=()=>globalThis.CivweaveOfflineCampusStatusV210?.last||null;
+  const latestStatus=()=>globalThis.CivweaveOfflineCampusStatusV211?.last||globalThis.CivweaveOfflineCampusStatusV210?.last||null;
   function progressFromText(){const match=($('#offline-package-assets')?.textContent||'').match(/(\d+)\s*\/\s*(\d+)\s+(?:current\s+)?files/i);return match?{complete:numeric(match[1]),total:numeric(match[2])}:{complete:0,total:0}}
   function fallbackReady(){return /^ready offline\b/i.test($('#offline-package-state')?.textContent||'')}
   function renderProgress(){
@@ -126,7 +126,6 @@
     if(retry)retry.hidden=false;
   }
   addEventListener('civweave:offline-campus-status',renderProgress);
-  setInterval(renderProgress,1000);
   renderProgress();
 })();
 </script>

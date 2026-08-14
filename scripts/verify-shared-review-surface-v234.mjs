@@ -41,21 +41,24 @@ assert.match(boundary,/sharedReviewSurfaceRevision:'v234-chat-owned-review-and-w
 
 assert.doesNotMatch(installer,/new MutationObserver\(renderProgress\)/,'Installer progress must not observe and rewrite its own hidden/disabled attributes.');
 assert.match(installer,/function progressFromText\(\)/,'Installer progress must remain visible from streamed file-count text.');
-assert.match(installer,/civweave:offline-campus-status/,'Installer progress must accept explicit status events.');
-assert.match(installer,/setInterval\s*\(\s*renderProgress\s*,\s*(?:750|1000)\s*\)/,'Installer may use a bounded low-frequency fallback refresh.');
+assert.match(installer,/addEventListener\('civweave:offline-campus-status',renderProgress\)/,'Installer progress must be driven by explicit offline-campus status events.');
+assert.doesNotMatch(installer,/setInterval\s*\(\s*renderProgress\s*,/,'Installer must not poll progress before user input.');
+assert.match(installer,/renderProgress\(\);/,'Installer must still render the initial dormant progress state once.');
 
 assert.doesNotMatch(status,/registration\.update\(\)/,'Offline status reader must not compete with the installer for service-worker updates.');
 assert.doesNotMatch(status,/SKIP_WAITING/,'Offline status reader must not change service-worker lifecycle.');
 assert.match(status,/function currentWorker\(\)/,'Offline status reader must only discover the current worker.');
 assert.match(status,/civweave:offline-campus-status/,'Offline status reader must publish normalized status events.');
+assert.match(status,/eagerStatusLookup:false/,'Offline status reader must stay dormant until explicit download intent.');
 
 console.log(JSON.stringify({
   ok:true,
   version,
-  revision:'shared-review-surface-v234',
+  revision:'shared-review-surface-v234-event-driven-installer-progress',
   reviewKinds:['weave','realm-action'],
   chatGateFormats:2,
   reviewWeavesCollapsedByDefault:true,
   installerMutationFeedbackLoop:false,
+  installerProgressPolling:false,
   offlineStatusOwnsWorkerLifecycle:false
 },null,2));

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v248-shell-first-prompt-wait-input-safe-v1';
+const VERSION='pwa-install-prompt-v249-first-input-safe';
 const ENTRY='/app/installed-entry-v146.html?installed=1&system=civweave';
 const HOST_SETUP_PATH='/host-setup.html';
 const CANONICAL_ORIGIN='https://civweave.cc';
@@ -267,6 +267,7 @@ const api=Object.freeze({
   state:()=>({available:Boolean(promptEvent),installed,prompting,standalone:standalone(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,relatedApps:[...relatedApps]})
 });
 
+globalThis.CivweavePWAInstallV249=api;
 globalThis.CivweavePWAInstallV248=api;
 globalThis.CivweavePWAInstallV247=api;
 globalThis.CivweavePWAInstallV246=api;

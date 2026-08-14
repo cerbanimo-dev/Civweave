@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.40-offline-campus-status-v210-current-manifest-only-v282-input-safe-v1';
+const VERSION='1.0.40-offline-campus-status-v211-first-input-safe';
 const WORKER_REVISION='offline-campus-current-graph-v280';
 const STATUS_TYPES=new Set([
   'CIVWEAVE_OFFLINE_PACKAGE_STATUS',
@@ -125,6 +125,7 @@ function activateStatus(){
 }
 
 const api={version:VERSION,workerRevision:WORKER_REVISION,normalize,render,last:null,activate:activateStatus,eagerStatusLookup:false,firstInputSafe:true};
+globalThis.CivweaveOfflineCampusStatusV211=api;
 globalThis.CivweaveOfflineCampusStatusV210=api;
 const serviceWorker=typeof navigator!=='undefined'?navigator.serviceWorker:null;
 serviceWorker?.addEventListener('message',event=>{

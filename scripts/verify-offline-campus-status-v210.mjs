@@ -7,10 +7,12 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const source=await readFile(path.join(root,'public/app/offline-campus-status-v210.js'),'utf8');
 const assert=(condition,message)=>{if(!condition)throw new Error(message)};
 
+const nodeListeners=new Map();
+const listenerNode=selector=>({textContent:'',addEventListener(type,handler){nodeListeners.set(`${selector}:${type}`,handler);}});
 const nodes=new Map([
   ['#offline-package-state',{textContent:''}],
   ['#offline-package-assets',{textContent:''}],
-  ['#download-offline-package',{textContent:''}],
+  ['#download-offline-package',listenerNode('#download-offline-package')],
 ]);
 const listeners=new Map();
 const serviceWorkerListeners=new Map();
@@ -24,6 +26,7 @@ vm.runInContext(source,sandbox,{filename:'offline-campus-status-v210.js'});
 const api=sandbox.CivweaveOfflineCampusStatusV210;
 assert(api?.version?.includes('offline-campus-status-v210')&&api.version.includes('current-manifest-only-v282'),'Offline campus status API is missing current-manifest-only cleanup.');
 assert(api?.workerRevision==='offline-campus-current-graph-v280','Offline campus status reader is not aligned to the current worker graph.');
+assert(api?.eagerStatusLookup===false&&api?.firstInputSafe===true,'Offline campus status must publish the first-input-safe lazy lookup contract.');
 
 const legacy=api.normalize({type:'CIVWEAVE_OFFLINE_PACKAGE_STATUS',revision:'lightweight-shell-v208',ready:false,completed:205,total:205,failedCount:19,failed:Array.from({length:19},(_,index)=>({pathname:`/failed-${index}.js`})),bytes:17*1024*1024});
 assert(legacy.attempted===205,'Legacy status did not preserve attempted count.');
@@ -53,7 +56,10 @@ assert(nodes.get('#offline-package-state').textContent==='ready offline','Ready 
 assert(nodes.get('#offline-package-assets').textContent==='217/217 current files','Asset status still advertises obsolete references.');
 
 assert(serviceWorkerListeners.has('message'),'Status reader does not listen for worker progress.');
-assert(listeners.has('load'),'Status reader does not query the current worker after page load.');
+assert(!listeners.has('load'),'Status reader must not query the current worker on page load.');
+assert(nodeListeners.has('#download-offline-package:pointerdown'),'Pointer intent must activate the lazy worker-status lookup.');
+assert(nodeListeners.has('#download-offline-package:focusin'),'Keyboard focus must activate the lazy worker-status lookup.');
+assert(listeners.has('civweave:offline-campus-status-requested'),'Explicit status requests must activate the lazy worker-status lookup.');
 assert(!source.includes('registration.update(')&&!source.includes("postMessage({type:'SKIP_WAITING'"),'Status reader must remain read-only with respect to service-worker lifecycle.');
 
-console.log(JSON.stringify({ok:true,revision:'offline-campus-status-v210-current-manifest-only-v282',workerRevision:api.workerRevision,runtimeVersion:api.version,legacyAttempted:205,legacyDownloaded:186,failedCount:19,obsoleteScenario:{reportedTotal:234,downloaded:217,obsoleteInput:17,currentTotal:retired.total,retainedReferences:retired.skippedCount,ready:retired.ready},contradictoryCountRemoved:true,liveWorkerProgress:true,lifecycleOwnership:'read-only-status-reader'},null,2));
+console.log(JSON.stringify({ok:true,revision:'offline-campus-status-v210-current-manifest-only-v282-first-input-safe',workerRevision:api.workerRevision,runtimeVersion:api.version,legacyAttempted:205,legacyDownloaded:186,failedCount:19,obsoleteScenario:{reportedTotal:234,downloaded:217,obsoleteInput:17,currentTotal:retired.total,retainedReferences:retired.skippedCount,ready:retired.ready},contradictoryCountRemoved:true,liveWorkerProgress:true,eagerStatusLookup:false,firstInputSafe:true,lifecycleOwnership:'read-only-status-reader'},null,2));

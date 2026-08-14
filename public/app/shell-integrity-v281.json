@@ -1,17 +1,17 @@
 {
-  "version": "1.0.154",
+  "version": "1.0.155",
   "revision": "shell-integrity-v281",
   "algorithm": "sha256",
   "requiredAssetCount": 20,
   "assets": {
-    "/index.html": "0e2e000c1397274edd73f8ef871cfb30fc0ea97c504795f50c69e3d63d5db3df",
+    "/index.html": "3e85bce04d9e88c23d08516358884b2b347d91ea967f62a333e19ea783ef0528",
     "/install-v130.css": "dfb524c1fae9d5cd3b7125b668e92fc7d4fedd43afa785f5f52e23d4c627a367",
-    "/install-v130.js": "296fe65984fc20a53ee4156a1254524bd9f887a197656cb5b9929bcc5b2b46b9",
+    "/install-v130.js": "e40d2b6862b256fe62d5e42273b3cbf8c9f154f471fb19407da65e94f5a714a3",
     "/offline.html": "7e416c269b72414b434d808e309d38f7b065a1bed49d1e0c7f150427c0a62be4",
-    "/app/manifest.webmanifest": "e70855ef14840057b36b41e6a79417bf237d8f1d1028dc7eccc6d0f774a908d6",
-    "/app/index.html": "ea9f1c72dffd122d2ec758c8f1b8ae69dfc4381472180be1f55b4e6fc0d40bdf",
-    "/app/installed-entry-v146.html": "881cc58a4b3af1d2914527b09cec414d3e58974f4eef33503d708a9a1464a36b",
-    "/app/installed-entry-v146.js": "0c9a903976d4c27ab18b607226afeadac374d395641c69486690c8539e207a54",
+    "/app/manifest.webmanifest": "0c8339518b88a5a73338807fabaec47b9f7aa47dc1c0c658dd2b59cf183358cb",
+    "/app/index.html": "75646b2958e3b3e40636b25449db02a00837184bb3f257382a6c45115120606e",
+    "/app/installed-entry-v146.html": "1838f3cbd0b167a18340e86a3ccc074b02ceca07e7c8d1a207fcbf2e78bd512d",
+    "/app/installed-entry-v146.js": "871ebb6880b0d3588f86dff4c2f25e7c6f5aa59e6bd43cfd8148292922fb9293",
     "/app/legal-consent-v1.js": "193a2de3a5103ed3a4b69c4d62411d64ee87ed8c9e2a95a6f5c4037e1186594d",
     "/legal/civweave-legal-release-v1.json": "f5b35a89986604568c2791d97442b03a62a15949a20a1c24ce7b9d3194ea3b86",
     "/app/document-lifecycle-v221.js": "a637a3ad85a1a5d86901215850f8c3e92bdca74a084f2e2a6da7c5314a07abaa",
@@ -23,6 +23,6 @@
     "/app/logos/cerbanimo-steward-mark-v1.png": "6ed0764c38d8d6221539d5c49d4086cad3fbe9ddf85f163f97c2f8c1a4b9eb2f",
     "/app/installer-state-machine-v280.js": "57f84ee8457cce0e9e35e4e561a837fff493af484a940822378ae568faf440b0",
     "/app/installer-storage-guard-v281.js": "72e9f7f2522079a6862f8f3ca871ae8e01adb634b7ba034c736d0a0306da4e08",
-    "/app/offline-campus-status-v210.js": "d26e21ed39631f45e085004661853a3ebe2ce4f18be3f26c71beae88f500461c"
+    "/app/offline-campus-status-v210.js": "f5ae2b913ea203051278c5f4278c079ab2c1dc22baf1e85bf0ca3e3797d75f16"
   }
 }
