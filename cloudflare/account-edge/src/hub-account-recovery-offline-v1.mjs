@@ -52,6 +52,7 @@ async function decryptCredential(record, secret) {
 }
 function accountKey(accountId) { return `hub-account:${clean(accountId, 180)}`; }
 function codeKey(hash) { return `hub-offline-recovery:${clean(hash, 128)}`; }
+function hashes(account) { return Array.isArray(account?.offlineRecoveryCodeHashes) ? account.offlineRecoveryCodeHashes.map(value => clean(value, 128)).filter(Boolean) : []; }
 function withOfflineState(publicAccount, account) {
   const remaining = Math.max(0, Number(account?.offlineRecoveryRemaining || 0));
   return Object.freeze({
@@ -59,18 +60,27 @@ function withOfflineState(publicAccount, account) {
     offlineRecoveryReady: remaining > 0,
     offlineRecoveryRemaining: remaining,
     offlineRecoveryIssuedAt: account?.offlineRecoveryIssuedAt || null,
-    fullyEstablished: Boolean(publicAccount?.emailVerified || remaining > 0),
+    offlineRecoveryAcknowledged: Boolean(account?.offlineRecoveryAcknowledgedAt),
+    offlineRecoveryAcknowledgedAt: account?.offlineRecoveryAcknowledgedAt || null,
+    fullyEstablished: Boolean(publicAccount?.emailVerified || (remaining > 0 && account?.offlineRecoveryAcknowledgedAt)),
   });
 }
 
 export class HubAccountRecoveryOfflineService extends HubAccountRecoveryInboundService {
+  async invalidateOfflineRecoveryCodes(account) {
+    for (const hash of hashes(account)) await this.state.storage.delete(codeKey(hash));
+  }
+
   async issueOfflineRecoveryKit(account) {
-    if (account?.offlineRecoveryIssuedAt) return { account, kit: null };
+    if (account?.offlineRecoveryAcknowledgedAt) return { account, kit: null };
+    await this.invalidateOfflineRecoveryCodes(account);
     const now = this.now();
     const codes = Array.from({ length: HUB_OFFLINE_RECOVERY_CODE_COUNT }, () => randomCode());
+    const codeHashes = [];
     const records = {};
     for (const code of codes) {
       const hash = await offlineCodeHash(code);
+      codeHashes.push(hash);
       records[codeKey(hash)] = Object.freeze({
         schema: HUB_OFFLINE_RECOVERY_SCHEMA,
         accountId: account.accountId,
@@ -80,7 +90,9 @@ export class HubAccountRecoveryOfflineService extends HubAccountRecoveryInboundS
     const next = Object.freeze({
       ...account,
       offlineRecoveryIssuedAt: nowIso(now),
+      offlineRecoveryAcknowledgedAt: null,
       offlineRecoveryRemaining: codes.length,
+      offlineRecoveryCodeHashes: Object.freeze([...codeHashes]),
       updatedAt: nowIso(now),
     });
     records[accountKey(account.accountId)] = next;
@@ -91,8 +103,8 @@ export class HubAccountRecoveryOfflineService extends HubAccountRecoveryInboundS
         schema: HUB_OFFLINE_RECOVERY_SCHEMA,
         codes: Object.freeze([...codes]),
         issuedAt: next.offlineRecoveryIssuedAt,
-        oneTimeDisplay: true,
-        instruction: 'Save these codes somewhere separate from this device. Each code can recover this Hub account once.',
+        acknowledgementRequired: true,
+        instruction: 'Save these codes somewhere separate from this device, then confirm that you saved them. Each code can recover this Hub account once.',
       }),
     };
   }
@@ -102,11 +114,28 @@ export class HubAccountRecoveryOfflineService extends HubAccountRecoveryInboundS
     let account = await this.accountForResident(input.userId);
     if (!account) return packet;
     let kit = null;
-    if (!account.offlineRecoveryIssuedAt) ({ account, kit } = await this.issueOfflineRecoveryKit(account));
+    if (!account.offlineRecoveryAcknowledgedAt) ({ account, kit } = await this.issueOfflineRecoveryKit(account));
     return Object.freeze({
       ...packet,
       account: withOfflineState(packet.account, account),
       recoveryKit: kit,
+    });
+  }
+
+  async acknowledgeOfflineRecovery(userId) {
+    const account = await this.accountForResident(userId);
+    if (!account) throw Object.assign(new Error('Hub account is unavailable.'), { status: 404 });
+    if (!hashes(account).length || Number(account.offlineRecoveryRemaining || 0) < 1) {
+      throw Object.assign(new Error('This Hub account does not have an active recovery kit to acknowledge.'), { status: 409 });
+    }
+    const now = this.now();
+    const next = Object.freeze({ ...account, offlineRecoveryAcknowledgedAt: account.offlineRecoveryAcknowledgedAt || nowIso(now), updatedAt: nowIso(now) });
+    await this.state.storage.put(accountKey(account.accountId), next);
+    return Object.freeze({
+      ok: true,
+      schema: HUB_OFFLINE_RECOVERY_SCHEMA,
+      acknowledged: true,
+      account: withOfflineState({}, next),
     });
   }
 
@@ -118,7 +147,8 @@ export class HubAccountRecoveryOfflineService extends HubAccountRecoveryInboundS
 
   async completeOfflineRecovery(token) {
     const code = normalizeOfflineCode(token);
-    const key = codeKey(await offlineCodeHash(code));
+    const hash = await offlineCodeHash(code);
+    const key = codeKey(hash);
     const record = await this.state.storage.get(key);
     if (!record?.accountId) return null;
     const account = await this.state.storage.get(accountKey(record.accountId));
@@ -129,9 +159,11 @@ export class HubAccountRecoveryOfflineService extends HubAccountRecoveryInboundS
     const now = this.now();
     const credential = await decryptCredential(account.credentialVault, await this.secret());
     await this.state.storage.delete(key);
+    const nextHashes = hashes(account).filter(value => value !== hash);
     const next = Object.freeze({
       ...account,
-      offlineRecoveryRemaining: Math.max(0, Number(account.offlineRecoveryRemaining || 1) - 1),
+      offlineRecoveryRemaining: nextHashes.length,
+      offlineRecoveryCodeHashes: Object.freeze(nextHashes),
       recoveryRequestedAt: null,
       lastRecoveredAt: nowIso(now),
       updatedAt: nowIso(now),
