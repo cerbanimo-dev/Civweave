@@ -5,6 +5,7 @@ on:
     paths:
       - 'cloudflare/account-edge/**'
       - 'cloudflare/recovery-relay/**'
+      - 'cloudflare/node-cloud/src/**'
       - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'config/launch-topology-v1.json'
       - 'public/app/hub-recovery-*.js'
@@ -27,6 +28,7 @@ on:
     paths:
       - 'cloudflare/account-edge/**'
       - 'cloudflare/recovery-relay/**'
+      - 'cloudflare/node-cloud/src/**'
       - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'config/launch-topology-v1.json'
       - 'public/app/hub-recovery-*.js'
@@ -72,3 +74,4 @@ jobs:
         run: |
           npx --yes wrangler@latest deploy --dry-run --config cloudflare/recovery-relay/wrangler.jsonc
           npx --yes wrangler@latest deploy --dry-run --config cloudflare/account-edge/wrangler.jsonc
+          npx --yes wrangler@latest deploy --dry-run --config cloudflare/node-cloud/wrangler.jsonc
