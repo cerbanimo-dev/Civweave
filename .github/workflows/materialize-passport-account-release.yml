@@ -1,0 +1,38 @@
+name: Materialize Passport Account Release
+
+on:
+  push:
+    branches: [feat/passport-account-passkeys-v1]
+    paths:
+      - '.github/workflows/materialize-passport-account-release.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: feat/passport-account-passkeys-v1
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Materialize canonical 1.0.154 release
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'civweave-release-bot'
+          git config user.email 'cerbanimo@gmail.com'
+          printf '1.0.154\n' > VERSION
+          npm version 1.0.154 --no-git-tag-version --allow-same-version
+          node scripts/materialize-canonical-release.mjs
+          node scripts/verify-passport-account-passkeys-v1.mjs
+          node scripts/verify-release-contract.mjs
+          git rm .github/workflows/materialize-passport-account-release.yml
+          git add -A
+          git commit -m 'Materialize Civweave 1.0.154 Passport account release'
+          git push origin HEAD:feat/passport-account-passkeys-v1
