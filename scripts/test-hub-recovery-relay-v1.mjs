@@ -31,11 +31,8 @@ globalThis.fetch = async (url, init = {}) => {
   if (target.pathname === '/api/recovery-proof/status') {
     return Response.json(relay.get(input.token) || { ok: true, approved: false });
   }
-  if (target.pathname === '/api/recovery-proof/consume') {
-    const found = relay.get(input.token);
-    if (found) relay.delete(input.token);
-    return Response.json({ ok: true, consumed: Boolean(found) });
-  }
+  // Production relay proofs are not publicly consumable. Hubs enforce local
+  // one-time use and the relay expires its email-hash proofs automatically.
   return Response.json({ ok: false, error: 'not-found' }, { status: 404 });
 };
 
@@ -76,7 +73,10 @@ try {
   const status = await service.status({ userId, credential });
   assert.equal(status.account.emailVerified, true);
   assert.deepEqual(status.account.passportIds, [passportId]);
-  assert.equal(relay.has(signup.delivery.proofToken), false, 'successful local completion consumes the relay proof');
+  await assert.rejects(
+    () => service.completeInboundVerification(nodeId, signup.delivery.proofToken),
+    /already used/,
+  );
 
   const known = await service.requestRecoveryForNode(nodeId, { email });
   const unknownEmail = 'nobody@example.net';
@@ -97,6 +97,10 @@ try {
   assert.equal(recovered.userId, userId);
   assert.equal(recovered.credential, credential);
   assert.deepEqual(recovered.passportIds, [passportId]);
+  await assert.rejects(
+    () => service.completeInboundRecovery(nodeId, known.delivery.proofToken),
+    /already used/,
+  );
 
   relay.set(unknown.delivery.proofToken, {
     ok: true,
@@ -126,7 +130,7 @@ try {
     assert.equal('passportIds' in proof, false, 'relay proof must never carry Passport associations');
   }
 
-  console.log(JSON.stringify({ ok: true, schema: 'civweave.hub-recovery-relay-test.v1', relayStoresIdentity: false }));
+  console.log(JSON.stringify({ ok: true, schema: 'civweave.hub-recovery-relay-test.v1', relayStoresIdentity: false, localOneTimeUse: true }));
 } finally {
   globalThis.fetch = priorFetch;
 }
