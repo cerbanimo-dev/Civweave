@@ -1,6 +1,6 @@
 # Civweave adaptive host economy v1
 
-This contract keeps host residency, billing status, compute funding, and payout economics separate.
+This contract keeps host residency, billing status, compute funding, Host Node Steward compensation, Territory Stewardship, and platform economics separate.
 
 ## Starter Cloudflare account
 
@@ -31,13 +31,27 @@ A paid Workers plan only opens the overage pipe. Additional daily service and pe
 - Nearest-Hub discovery uses the steward-published three-decimal location already present in node manifests. Device coordinates are rounded to three decimals before a bounded search request and are neither stored nor returned.
 - Discovery may filter for free, paid-expansion, or either kind of open slot. A visible paid-expansion slot is not permission to bypass membership settlement; new public admission remains community-only until active payment authority exists.
 
+## Territory Stewardship invariant
+
+The Host Node Steward cut is protected. Territory Stewardship is funded only by subdividing the cash share that previously accrued entirely to Cerbanimo:
+
+- 50% of the existing Cerbanimo share remains **Cerbanimo Global**;
+- 50% of the existing Cerbanimo share becomes the **Territory Stewardship Share**.
+
+No provider, seller, contributor, Host Node Steward, or compute/system reserve share is reduced by this second-stage split. An unassigned, vacant, unsigned, or not-yet-onboarded Territory Steward share is held for the Territory rather than reverting to Cerbanimo Global.
+
+See `docs/finance/territory-stewardship-economy-v1.md` for the canonical routing and succession contract.
+
 ## Monthly memberships
 
 Monthly membership service value is split after payment processing:
 
 - 50% system and compute reserve
-- 25% host operator
-- 25% Cerbanimo LLC
+- 25% Host Node Steward
+- 12.5% Cerbanimo Global
+- 12.5% Territory Stewardship
+
+This preserves the prior 50% system / 25% host / 25% Cerbanimo first-stage economics. Only the previous Cerbanimo 25% receives the new 50/50 second-stage allocation.
 
 Each tier adds non-expiring lifetime compute credits every paid month:
 
@@ -55,12 +69,19 @@ The lifetime-credit grant is checked against the system share at the configured 
 Top-up service value is split after payment processing:
 
 - 70% lifetime compute backing
-- 25% host operator
-- 5% Cerbanimo LLC
+- 25% Host Node Steward
+- 2.5% Cerbanimo Global
+- 2.5% Territory Stewardship
 
-Customer charges remain on the Civweave platform. Only the host's earned share is transferred to the host's connected Stripe account. The compute backing stays in the platform balance until the corresponding compute is consumed.
+This preserves the prior 70% system / 25% host / 5% Cerbanimo first-stage economics. Customer charges remain on the Civweave platform. The Host Node Steward's 25% earned share is transferred exactly as before; Territory Stewardship is carved solely from the former Cerbanimo 5%.
 
-Refunds and chargebacks reverse the proportional host share and remove the corresponding lifetime compute liability. Already-spent refunded compute becomes wallet debt rather than an unbacked credit balance.
+The compute backing stays in the platform balance until the corresponding compute is consumed. Refunds and chargebacks reverse the proportional Host Node Steward share, Territory Stewardship entitlement, and corresponding lifetime compute liability. Already-spent refunded compute becomes wallet debt rather than an unbacked credit balance.
+
+## Territory routing
+
+Each registered Hub may bind itself, using its existing signed money-edge identity, to a canonical territory. The most-specific active appointed territory wins; an active parent territory is the fallback. Buyer or seller checkout input cannot select the Territory Steward recipient.
+
+If no territory has been assigned or the office cannot yet receive money, its calculated share remains held in a Territory Operations Reserve until a lawful payout destination exists.
 
 ## Cloud validation
 
