@@ -39,6 +39,8 @@ jobs:
       - name: Check Worker syntax
         run: |
           node --check cloudflare/mail/src/index-v2.mjs
+          node --check cloudflare/mail/src/index-v3.mjs
+          node --check cloudflare/mail/src/low-traffic-policy.mjs
           node --check cloudflare/mail/src/ui.mjs
           node --check cloudflare/account-edge/src/recovery-entry-v11.mjs
       - name: Compile account edge
