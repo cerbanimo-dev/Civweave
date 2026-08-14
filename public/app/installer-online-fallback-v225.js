@@ -1,13 +1,69 @@
 (() => {
 'use strict';
 
-const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-host-node-lobby-v2-hub-recovery-v1';
+const REVISION = 'installer-online-fallback-v225-installed-shell-repair-v293-host-node-lobby-v2-hub-recovery-v1-redirect-loop-guard-v1';
+const REQUIRED_NEXT_KEY = 'civweave.install-required-next.v1';
+const REQUIRED_NEXT_WINDOW_MS = 30_000;
+const CANONICAL_NEXT_PATHS = new Set([
+  '/app/working-campus-v156.html',
+  '/app/cabinets/living-school/index.html',
+  '/app/realm-console-v140.html',
+  '/app/fellowfare-cabinet-v144.html',
+  '/app/anarchadia-console-v139.html',
+  '/app/installed-entry-v146.html'
+]);
 const stateNode = document.getElementById('package-state');
 const assetsNode = document.getElementById('package-assets');
 const installButton = document.getElementById('install-app');
 const updateButton = document.getElementById('check-update');
 const helpNode = document.getElementById('install-help');
 let repairing = false;
+
+function readRequiredNextState() {
+  try { return JSON.parse(sessionStorage.getItem(REQUIRED_NEXT_KEY) || 'null'); } catch { return null; }
+}
+
+function writeRequiredNextState(value) {
+  try { sessionStorage.setItem(REQUIRED_NEXT_KEY, JSON.stringify(value)); } catch {}
+}
+
+function clearRequiredNextState() {
+  try { sessionStorage.removeItem(REQUIRED_NEXT_KEY); } catch {}
+}
+
+function resumeRequiredNext() {
+  const params = new URLSearchParams(location.search);
+  const installRequired = params.get('install') === 'required' || params.has('installrequired');
+  const rawNext = params.get('next');
+  if (!installRequired || !rawNext) return false;
+  let target;
+  try { target = new URL(rawNext, location.origin); } catch { return false; }
+  if (target.origin !== location.origin || !CANONICAL_NEXT_PATHS.has(target.pathname)) return false;
+
+  target.searchParams.delete('install');
+  target.searchParams.delete('installrequired');
+  target.searchParams.delete('next');
+  target.searchParams.set('installed', '1');
+  target.searchParams.set('source', 'installer-required-next-recovery-v1');
+
+  const fingerprint = `${target.pathname}?${target.searchParams.toString()}`;
+  const previous = readRequiredNextState();
+  const repeated = previous?.fingerprint === fingerprint && Number(previous?.at || 0) > Date.now() - REQUIRED_NEXT_WINDOW_MS;
+  if (repeated) {
+    clearRequiredNextState();
+    const safe = new URL('/app/installed-entry-v146.html', location.origin);
+    safe.searchParams.set('installed', '1');
+    safe.searchParams.set('system', 'civweave');
+    safe.searchParams.set('recovery', 'safe');
+    safe.searchParams.set('source', 'installer-redirect-loop-failsafe-v1');
+    location.replace(safe.href);
+    return true;
+  }
+
+  writeRequiredNextState({ fingerprint, at: Date.now() });
+  location.replace(target.href);
+  return true;
+}
 
 function installHostNodeLobby() {
   if (document.querySelector('script[data-civweave-host-node-lobby]')) return false;
@@ -223,6 +279,8 @@ updateButton?.addEventListener('click', event => {
   repairInstalledShell();
 }, true);
 
+if (resumeRequiredNext()) return;
+
 const observer = new MutationObserver(apply);
 if (stateNode) observer.observe(stateNode, { childList: true, characterData: true, subtree: true });
 addEventListener('pagehide', () => observer.disconnect(), { once: true });
@@ -237,8 +295,10 @@ globalThis.CivweaveInstallerOnlineFallbackV225 = Object.freeze({
   repairInstalledShell,
   installHostNodeLobby,
   installHubRecovery,
+  resumeRequiredNext,
   repairMessage: 'REPAIR_DEVICE_PACKAGE',
-  storagePolicy: 'preserve-campus-model-media-school-storage'
+  storagePolicy: 'preserve-campus-model-media-school-storage',
+  redirectLoopPolicy: 'consume-valid-required-next-once-then-safe-installed-entry'
 });
 
 })();
