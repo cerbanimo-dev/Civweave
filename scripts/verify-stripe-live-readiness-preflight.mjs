@@ -12,6 +12,7 @@ const EXPECTED_EVENTS = Object.freeze([
   'charge.dispute.funds_reinstated',
   'application_fee.created',
   'application_fee.refunded',
+  'balance.available',
   'invoice.paid',
   'customer.subscription.deleted'
 ]);
@@ -55,8 +56,12 @@ const sourceContract = Object.freeze({
     && directCommerceSource.includes('fellowfare_node_id')
     && providerEventSource.includes("event.type === 'application_fee.created'")
     && providerEventSource.includes("event.type === 'application_fee.refunded'")
+    && providerEventSource.includes("event.type === 'balance.available'")
+    && providerEventSource.includes('retryPendingFellowFareServiceFees')
     && serviceFeeSource.includes('transfers.create')
-    && serviceFeeSource.includes('reverseHostTransfer'),
+    && serviceFeeSource.includes('reverseHostTransfer')
+    && serviceFeeSource.includes("status='pending-funds'")
+    && serviceFeeSource.includes('availableBalanceError'),
   legacyMarketplaceUnwindOnly: providerEventSource.includes('settleCommerceCheckout')
     && providerEventSource.includes('handleCommerceRefund')
     && providerEventSource.includes('handleCommerceDispute')
@@ -136,6 +141,7 @@ const report = {
     merchantOfRecord: 'connected-provider',
     serviceFeeBps: 500,
     serviceFeeSplit: '50-host-steward-50-cerbanimo',
+    hostSettlement: 'application-fee-event-plus-balance-available-retry',
     platformCollectsGrossSellerPayment: false,
     platformRoutesSellerProceeds: false,
     publicCommerceRouteExpectedStatus: 410,
@@ -162,7 +168,7 @@ const report = {
     'live Stripe platform activation and factual business verification',
     'live recipient requirement/capability event destination and signing secret staging for eligible platform payouts',
     'first live Host Steward/platform recipient onboarding and stripe_transfers capability verification',
-    'confirmation that the production snapshot webhook includes application_fee.created and application_fee.refunded',
+    'confirmation that the production snapshot webhook includes application_fee.created, application_fee.refunded, and balance.available',
     'compliance, jurisdiction, KYC/AML, tax, and provider-terms attestations for supported platform-money lanes',
     'explicit live-money enablement after all gates are satisfied',
     'independent confirmation that FellowFare marketplace checkout remains disabled after activation'
