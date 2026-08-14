@@ -100,5 +100,7 @@ assert.equal(api.fellowfareGuideBridgeRevision,'v236-native-workbench-shared-thr
 assert.equal(api.radioTrackSuggestionRevision,'v241-playlist-context-track-links');
 assert.equal(api.campusBackgroundDownloadRevision,'v241-worker-owned-download-bottom-progress-rail');
 assert.equal(api.pwaUpdateRevision,'v250-installed-entry-every-launch');
-assert.equal(api.browserBoundaryRevision,'v228-installed-only-stale-session-chat-escape');
+assert.equal(api.browserBoundaryRevision,'v228-installed-only-stale-session-chat-escape-install-only-pwa-v1');
+assert.equal(api.browserRuntimePolicy,'installed-display-only');
+assert.equal(api.installedQueryIsAuthorization,false);
 console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),browserRequiresInstalledDisplay:true,emptySessionAuthorized:false,boundaryInstalledAuthorization:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,settingsOwner:'settings-gateway-v317',canonicalChatOwner:'guide-workspace-v242',mobileAIHardening:'v302',systemsMesh:'v251-five-system-non-privileged-event-contract',nodeAiMesh:'v1-node-owned-service-discovery-routing',questVeil:'v1-mandatory-human-ledger-gate-plus-mesh-batches',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,hostNodeSession:true,legacyCompatibility:'noncanonical-only'},null,2));
