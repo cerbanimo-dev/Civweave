@@ -5,8 +5,10 @@ import { spawnSync } from 'node:child_process';
 const paths = [
   'cloudflare/account-edge/src/hub-account-recovery-v1.mjs',
   'cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs',
+  'cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs',
   'cloudflare/account-edge/src/recovery-entry-v8.mjs',
   'cloudflare/account-edge/src/recovery-entry-v9.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v10.mjs',
   'cloudflare/account-edge/wrangler.jsonc',
   'cloudflare/node-cloud/wrangler.jsonc',
   'cloudflare/recovery-relay/src/index.mjs',
@@ -25,14 +27,20 @@ const paths = [
 ];
 const source = Object.fromEntries(await Promise.all(paths.map(async path => [path, await readFile(path, 'utf8')])));
 
-assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v9\.mjs/);
+assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v10\.mjs/);
 assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /nodes\.civweave\.invalid/);
 assert.doesNotMatch(source['cloudflare/account-edge/wrangler.jsonc'], /recover@/);
 assert.doesNotMatch(source['cloudflare/account-edge/wrangler.jsonc'], /glaedn\.workers\.dev/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v9.mjs'], /civweave\.pages\.dev\/app\/recovery-relay-v1\.json/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v9.mjs'], /civweave\.recovery-relay-discovery\.v1/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v9.mjs'], /HUB_RECOVERY_MAILBOX_PENDING/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v9.mjs'], /validMailbox/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /HubAccountRecoveryOfflineService/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /civweave\.pages\.dev\/app\/recovery-relay-v1\.json/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /offline-code-only/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /validMailbox/);
+assert.doesNotMatch(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /HUB_RECOVERY_MAILBOX_PENDING/);
+assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /HUB_OFFLINE_RECOVERY_CODE_COUNT = 8/);
+assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /hub-offline-recovery:/);
+assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /offlineRecoveryRemaining/);
+assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /recoveryMethod: 'offline-code'/);
+assert.doesNotMatch(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /storage\.put\([^\n]*codes/i, 'plaintext offline codes must not be persisted');
 assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /"name": "civweave-recovery-relay"/);
 assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /CivweaveRecoveryProofRelay/);
 assert.doesNotMatch(source['cloudflare/recovery-relay/wrangler.jsonc'], /RECOVERY_MAILBOX/);
@@ -77,6 +85,10 @@ assert.match(source['public/app/civweave-brand.js'], /hub-delivery-intent-v1\.js
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /mailto:/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /#cw-hub-recover-request/);
 assert.match(source['public/app/installer-online-fallback-v225.js'], /hub-recovery-api-v1\.js/);
+assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryKit:packet\.recoveryKit/);
+assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryMethod/);
+assert.match(source['public/app/hub-recovery-ui-v1.js'], /Save these recovery codes now/);
+assert.match(source['public/app/hub-recovery-ui-v1.js'], /Use a saved recovery code/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Add a recovery email before creating this Hub account/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /not written into your Passport or exposed to FellowFare/);
 for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {
@@ -86,8 +98,8 @@ for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {
 
 const recoveryNoStripeSurfaces = [
   'cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs',
-  'cloudflare/account-edge/src/recovery-entry-v8.mjs',
-  'cloudflare/account-edge/src/recovery-entry-v9.mjs',
+  'cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v10.mjs',
   'cloudflare/account-edge/wrangler.jsonc',
   'cloudflare/recovery-relay/src/index.mjs',
   'cloudflare/recovery-relay/wrangler.jsonc',
@@ -102,8 +114,10 @@ for (const path of recoveryNoStripeSurfaces) {
 
 console.log(JSON.stringify({
   ok: true,
-  schema: 'civweave.hub-recovery-wiring-check.v7',
+  schema: 'civweave.hub-recovery-wiring-check.v8',
   freeTierInboundProof: true,
+  offlineRecoveryCodes: true,
+  offlineCodeCount: 8,
   crossAccountRelay: true,
   relayDiscovery: 'canonical-pages',
   ownedZoneOnly: true,
