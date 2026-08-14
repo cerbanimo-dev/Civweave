@@ -37,6 +37,13 @@ function envFor(row) {
   };
 }
 
+const www = await routeSharedDomainRequest(
+  new Request('https://www.civweave.cc/app/?hello=world'),
+  envFor(null)
+);
+assert.equal(www.status, 308);
+assert.equal(www.headers.get('location'), 'https://civweave.cc/app/?hello=world');
+
 const inactive = await routeSharedDomainRequest(
   new Request('https://garden.civweave.cc/app/working-campus.html?hello=world'),
   envFor({
