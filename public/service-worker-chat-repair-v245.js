@@ -2,6 +2,7 @@
 'use strict';
 
 const REVISION='chat-avatar-visible-v346';
+const FREEZE_REVISION='mobile-chat-freeze-v347';
 // Non-executable legacy audit marker only: const REVISION='chat-css-contract-v343'
 const PARTY_REVISION='party-chat-v1';
 const HUMAN_BUBBLE_REVISION='human-message-bubble-v1';
@@ -24,7 +25,12 @@ const CHAT_PATHS=new Set([
   '/app/realm-console-v140.html',
   '/app/family-ai-loader-v105.js',
   '/app/platform-stability-v159.js',
+  '/app/experience-orchestrator-v232.js',
+  '/app/realm-session-integrity-v237.js',
   '/app/guide-workspace-v242.js',
+  '/app/chat-fullscreen-v295.js',
+  '/app/saved-chat-store-v295.js',
+  '/app/saved-chat-ui-v295.js',
   '/app/shared-guide-surface-v236.js',
   '/app/shared-intention-party-chat-v1.js',
   '/app/human-message-bubble-v1.js',
@@ -94,7 +100,7 @@ async function purgeChatRuntimeCaches(){
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
+  return{revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
 }
 async function cacheRuntime(path,cacheName,revision,label){
   try{
@@ -125,5 +131,5 @@ self.addEventListener('message',event=>{
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,humanBubblePath:HUMAN_BUBBLE_PATH,humanBubbleCache:HUMAN_BUBBLE_CACHE,translationPath:TRANSLATION_PATH,translationWorkerPath:TRANSLATION_WORKER_PATH,translationCache:TRANSLATION_CACHE,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime,packageHumanBubble:cacheHumanMessageRuntime,packageTranslation:cacheTranslationRuntime});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,humanBubblePath:HUMAN_BUBBLE_PATH,humanBubbleCache:HUMAN_BUBBLE_CACHE,translationPath:TRANSLATION_PATH,translationWorkerPath:TRANSLATION_WORKER_PATH,translationCache:TRANSLATION_CACHE,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime,packageHumanBubble:cacheHumanMessageRuntime,packageTranslation:cacheTranslationRuntime});
 })();
