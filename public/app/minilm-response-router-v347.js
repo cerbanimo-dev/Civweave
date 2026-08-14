@@ -1,0 +1,200 @@
+(()=>{
+'use strict';
+const VERSION='1.0.0-minilm-response-router-v347';
+const ADAPTER='/app/models/all-minilm-l6-v2/adapter.js';
+const ROUTER='/app/minilm-context-router-v344.js?v=1.0.0';
+const MODEL_IDS=Object.freeze({
+  short:Object.freeze(['gemma3-1b-it-q4f16','qwen3-0.6b-q4f16','smollm2-360m-instruct-q4f16','smollm2-135m-instruct-q8-wasm']),
+  medium:Object.freeze(['qwen3-1.7b-q4f16','smollm3-3b-q4f16']),
+  fast:Object.freeze(['gemma4-e2b-it-q2f16-mobile','gemma4-e4b-it-q2f16-mobile']),
+  smart:Object.freeze(['gemma4-e4b-it-q2f16-mobile','gemma4-e2b-it-q2f16-mobile'])
+});
+const TIERS=Object.freeze({
+  short:Object.freeze({id:'short',minWords:0,maxWords:50,targetWords:45,maxTokens:96,modelClass:'<=1B',preferredModelIds:MODEL_IDS.short}),
+  medium:Object.freeze({id:'medium',minWords:100,maxWords:200,targetWords:160,maxTokens:320,modelClass:'2B-3B',preferredModelIds:MODEL_IDS.medium}),
+  fast:Object.freeze({id:'fast',minWords:250,maxWords:800,targetWords:520,maxTokens:1400,modelClass:'Gemma4-26B-fast',preferredModelIds:MODEL_IDS.fast}),
+  smart:Object.freeze({id:'smart',minWords:900,maxWords:null,targetWords:1200,maxTokens:3072,modelClass:'Gemma4-26B-smart',preferredModelIds:MODEL_IDS.smart})
+});
+const LENGTH_PROTOTYPES=Object.freeze([
+  {id:'short',text:'brief direct answer one sentence tiny reply quick confirmation simple fact concise under fifty words'},
+  {id:'medium',text:'moderate explanation useful context a few paragraphs answer in one hundred to two hundred words'},
+  {id:'fast',text:'detailed explanation analysis comparison plan several sections substantial answer two hundred fifty to eight hundred words'},
+  {id:'smart',text:'deep comprehensive exhaustive architecture research synthesis long form complex reasoning nine hundred words or more'}
+]);
+const TASK_PROTOTYPES=Object.freeze([
+  {id:'programming',text:'write code debug bug fix programming refactor implementation repository pull request commit merge tests CI API database script deploy'},
+  {id:'agentic',text:'perform multiple steps use tools investigate execute implement ship monitor deploy browse repository create pull request merge orchestrate workflow'},
+  {id:'ordinary',text:'conversation explanation question recommendation summary simple writing general information'}
+]);
+const clean=(value,max=12000)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max);
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+let adapterPromise=null,semanticPromise=null,wrappedRuntime=null,installTimer=0,installedCache={at:0,ids:new Set()},localSwitchQueue=Promise.resolve();
+function adapter(){if(!adapterPromise)adapterPromise=import(ADAPTER).catch(error=>{adapterPromise=null;throw error});return adapterPromise}
+function semanticRouter(){
+  if(globalThis.CivweaveContextRouterV344)return Promise.resolve(globalThis.CivweaveContextRouterV344);
+  if(semanticPromise)return semanticPromise;
+  semanticPromise=new Promise(resolve=>{
+    const existing=[...(document.scripts||[])].find(node=>String(node.src||'').includes('/app/minilm-context-router-v344.js'));
+    if(existing){existing.addEventListener('load',()=>resolve(globalThis.CivweaveContextRouterV344||null),{once:true});existing.addEventListener('error',()=>resolve(null),{once:true});return}
+    const script=document.createElement('script');script.src=ROUTER;script.async=true;script.dataset.cwMinilmContext='v344-response-router';script.onload=()=>resolve(globalThis.CivweaveContextRouterV344||null);script.onerror=()=>resolve(null);document.head?.append(script);
+  });
+  return semanticPromise;
+}
+function explicitWordRequest(text){
+  const t=clean(text,4000).toLowerCase();
+  let match=t.match(/\b(\d{1,4})\s*(?:-|–|—|to)\s*(\d{1,4})\s*words?\b/);
+  if(match)return{min:Number(match[1]),max:Number(match[2]),explicit:true};
+  match=t.match(/\b(?:under|fewer than|no more than|max(?:imum)?|up to|≤)\s*(\d{1,4})\s*words?\b/);
+  if(match)return{min:0,max:Number(match[1]),explicit:true};
+  match=t.match(/\b(?:at least|minimum|min(?:imum)?|over|more than|≥)\s*(\d{1,4})\s*words?\b/);
+  if(match)return{min:Number(match[1]),max:null,explicit:true};
+  match=t.match(/\b(?:about|around|roughly|approximately)?\s*(\d{1,4})\s*words?\b/);
+  if(match)return{min:Number(match[1]),max:Number(match[1]),explicit:true};
+  if(/\b(one sentence|single sentence|briefly|very brief|super brief|short answer|keep it short|concise)\b/.test(t))return{min:0,max:50,explicit:true};
+  if(/\b(medium length|medium-length)\b/.test(t))return{min:100,max:200,explicit:true};
+  if(/\b(deep dive|comprehensive|exhaustive|long form|long-form|very detailed)\b/.test(t))return{min:900,max:null,explicit:true};
+  return null;
+}
+function complexity(text){
+  const raw=String(text||''),t=raw.toLowerCase();let score=0;
+  score+=Math.min(3,Math.floor(raw.length/500));
+  score+=Math.min(2,(raw.match(/\?/g)||[]).length);
+  score+=Math.min(2,(raw.match(/\n\s*[-*\d]/g)||[]).length);
+  if(/\b(analy[sz]e|compare|architecture|design|reason|tradeoff|debug|diagnose|investigate|research|plan|strategy|evaluate|synthesize)\b/.test(t))score+=2;
+  if(/\b(step[- ]by[- ]step|multiple|all of|every|thorough|detailed)\b/.test(t))score+=1;
+  return Math.min(10,score);
+}
+function hardTaskClass(text,request={}){
+  const t=`${clean(text,6000)} ${clean(request.purpose,300)} ${clean(request.executionProfile,100)}`.toLowerCase();
+  const programming=/\b(code|coding|program(?:ming)?|debug|bug|refactor|typescript|javascript|python|rust|sql|html|css|api|function|class|stack trace|exception|unit test|integration test|pull request|\bpr\b|commit|merge|repository|repo|github|ci\b|deploy(?:ment)?)\b/.test(t);
+  const agentic=String(request.executionProfile||'').toLowerCase()==='agentic'||/\b(implement|build and merge|fix and merge|commit and merge|create (?:a )?pr|open (?:a )?pr|ship it|deploy it|monitor|use tools|browse and|investigate and|go ahead and build|execute this|agentic|orchestrate)\b/.test(t);
+  return programming?'programming':agentic?'agentic':'ordinary';
+}
+function fallbackLength(text,request={}){
+  const explicit=explicitWordRequest(text);const c=complexity(text);
+  if(explicit){
+    const ceiling=explicit.max,minimum=explicit.min||0;
+    if(ceiling!=null&&ceiling<=50)return'short';
+    if(ceiling!=null&&ceiling<100)return c>=4?'medium':'short';
+    if(ceiling!=null&&ceiling<=200)return'medium';
+    if(ceiling!=null&&ceiling<250)return c>=4?'fast':'medium';
+    if(ceiling!=null&&ceiling<=800)return'fast';
+    if(minimum>=900||(ceiling!=null&&ceiling>=900))return'smart';
+  }
+  const t=clean(text,8000).toLowerCase();
+  if(/\b(deep dive|comprehensive|exhaustive|long form|long-form|very detailed)\b/.test(t))return'smart';
+  if(c>=7)return'fast';
+  if(c>=4)return'medium';
+  if(String(text||'').length<=180)return'short';
+  return'medium';
+}
+async function semanticRank(text,prototypes,cacheKey,timeoutMs=650){
+  try{
+    const context=await semanticRouter();
+    if(context?.status?.().available&&!context.status().ready)await Promise.race([context.warm?.(),sleep(900)]);
+    const api=await adapter(),status=await api.status();if(!status.available)return null;
+    if(!status.ready)await Promise.race([api.prewarm({explicit:true,installIfMissing:false,timeoutMs:45000}),sleep(900)]);
+    const ranked=await Promise.race([api.rank(clean(text,8000),prototypes,{limit:4,cacheKey,timeoutMs:1800}),sleep(timeoutMs).then(()=>null)]);
+    return ranked?.matches?.length?ranked.matches:null;
+  }catch{return null}
+}
+function tierFor(id){return TIERS[id]||TIERS.medium}
+async function classify(text,request={}){
+  const taskHard=hardTaskClass(text,request);
+  if(taskHard!=='ordinary')return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass:'smart',taskClass:taskHard,complexity:complexity(text),confidence:1,source:'hard-task-gate',tier:tierFor('smart'),reviewRequired:true,reviewTier:'high'});
+  const fallback=fallbackLength(text,request),explicit=explicitWordRequest(text),c=complexity(text);
+  const [lengthRows,taskRows]=await Promise.all([
+    explicit?Promise.resolve(null):semanticRank(text,LENGTH_PROTOTYPES,'civweave-response-length-v347'),
+    semanticRank(text,TASK_PROTOTYPES,'civweave-response-task-v347')
+  ]);
+  let taskClass='ordinary';
+  if(taskRows?.[0]&&Number(taskRows[0].score||0)>=.28){const top=taskRows[0],second=taskRows[1],margin=Number(top.score||0)-Number(second?.score||0);if(margin>=.025&&['programming','agentic'].includes(top.id))taskClass=top.id}
+  if(taskClass!=='ordinary')return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass:'smart',taskClass,complexity:c,confidence:.82,source:'minilm-task-gate',tier:tierFor('smart'),reviewRequired:true,reviewTier:'high'});
+  let lengthClass=fallback,confidence=explicit?1:.56,source=explicit?'explicit-user-length':'rules';
+  if(lengthRows?.[0]){
+    const top=lengthRows[0],second=lengthRows[1],margin=Number(top.score||0)-Number(second?.score||0);
+    if(Number(top.score||0)>=.24&&margin>=.018){lengthClass=top.id;confidence=Math.max(.58,Math.min(.96,.62+margin*2.8));source='minilm'}
+  }
+  return Object.freeze({schema:'civweave.response-route.v1',version:VERSION,lengthClass,taskClass:'ordinary',complexity:c,confidence,source,tier:tierFor(lengthClass),reviewRequired:false,reviewTier:null});
+}
+function userText(request={}){
+  const messages=Array.isArray(request.messages)?request.messages:[];
+  for(let i=messages.length-1;i>=0;i--){if(messages[i]?.role==='user')return clean(messages[i].content,12000)}
+  return clean(request.prompt||request.input||'',12000);
+}
+function provider(request={}){return clean(request?.config?.provider||request?.config?.route||request.provider||'',80).toLowerCase()}
+async function installedIds(){
+  if(Date.now()-installedCache.at<30000)return installedCache.ids;
+  const manager=globalThis.CivweaveLocalModelDownloadV266;if(!manager?.catalogueStatus)return installedCache.ids;
+  try{const rows=await manager.catalogueStatus(),ids=new Set(rows.filter(row=>row?.status?.available).map(row=>row.spec?.id).filter(Boolean));installedCache={at:Date.now(),ids};return ids}catch{return installedCache.ids}
+}
+async function chooseInstalled(preferred=[]){const ids=await installedIds();return preferred.find(id=>ids.has(id))||null}
+async function waitActive(id,timeoutMs=12000){const start=Date.now();while(Date.now()-start<timeoutMs){if(globalThis.CivweaveLocalModelRuntimeV266?.activeSpec?.()?.id===id)return true;await sleep(80)}return false}
+async function withLocalTier(route,request,run){
+  if(provider(request)!=='downloaded-local')return run(request);
+  const manager=globalThis.CivweaveLocalModelDownloadV266;if(!manager?.selection||!manager?.select)return run(request);
+  const chosen=await chooseInstalled(route.tier.preferredModelIds);if(!chosen)return run(request);
+  const previous=manager.selection();if(previous?.id===chosen)return run(request);
+  const task=async()=>{
+    manager.select(chosen);await waitActive(chosen).catch(()=>false);
+    try{return await run(request)}finally{if(previous?.active&&previous.id)manager.select(previous.id);else manager.select(null)}
+  };
+  const queued=localSwitchQueue.then(task,task);localSwitchQueue=queued.catch(()=>{});return queued;
+}
+function reviewConfig(runtime){
+  try{
+    const agentic=runtime?.readSharedConfig?.('agentic')||null;
+    const interactive=runtime?.readSharedConfig?.('interactive')||null;
+    const candidate=agentic||interactive;if(!candidate)return null;
+    const p=clean(candidate.provider||candidate.route,80).toLowerCase();
+    if(!p||['downloaded-local','bundled','deterministic','browser','manual'].includes(p))return null;
+    return candidate;
+  }catch{return null}
+}
+function reviewMessages(request,primary){
+  const original=Array.isArray(request.messages)?request.messages.slice(-20):[];
+  const primaryText=clean(primary?.outputText||primary?.outputJson&&JSON.stringify(primary.outputJson)||'',48000);
+  return [
+    {role:'system',content:'You are the high-tier reviewer for Civweave. Review the lower-tier model result against the original request. Correct factual, reasoning, coding, safety, completeness, or instruction-following errors. Return the improved final answer only. Do not discuss the review process unless the user asked for it.'},
+    ...original,
+    {role:'assistant',content:primaryText},
+    {role:'user',content:'Review the candidate answer above and return the corrected final answer.'}
+  ];
+}
+async function reviewedResult(previous,request,primary,route,runtime){
+  if(!route.reviewRequired||request.__civweaveSkipResponseRouter)return primary;
+  const config=reviewConfig(runtime);
+  if(!config){dispatchEvent(new CustomEvent('civweave:high-tier-review-needed',{detail:{version:VERSION,route,reason:'No eligible high-tier agentic provider is configured.'}}));return{...primary,responseRouting:route,review:{required:true,completed:false,reason:'high-tier-provider-unavailable'}}}
+  try{
+    const reviewRequest={...request,__civweaveSkipResponseRouter:true,purpose:'civweave-high-tier-review',executionProfile:'agentic',config:{...config,maxTokens:Math.max(Number(config.maxTokens||0),route.tier.maxTokens)},messages:reviewMessages(request,primary)};
+    const reviewed=await previous(reviewRequest);
+    if(!['success','fallback'].includes(reviewed?.status))throw new Error(reviewed?.error?.message||'High-tier reviewer did not complete.');
+    return {...reviewed,responseRouting:route,review:{required:true,completed:true,primary:{provider:primary?.actual?.provider||primary?.requested?.provider||'',model:primary?.actual?.model||primary?.requested?.model||'',outputText:primary?.outputText||''},reviewer:{provider:reviewed?.actual?.provider||config.provider||config.route||'',model:reviewed?.actual?.model||config.model||''}}};
+  }catch(error){dispatchEvent(new CustomEvent('civweave:high-tier-review-failed',{detail:{version:VERSION,message:String(error?.message||error),route}}));return{...primary,responseRouting:route,review:{required:true,completed:false,reason:String(error?.message||error)}}}
+}
+async function enhance(request={}){
+  if(request.__civweaveSkipResponseRouter)return{request,route:null};
+  const text=userText(request),route=await classify(text,request),config={...(request.config||{})};
+  if(!Number(config.maxTokens)||Number(config.maxTokens)>route.tier.maxTokens)config.maxTokens=route.tier.maxTokens;
+  config.responseLengthClass=route.lengthClass;config.responseTargetWords=route.tier.targetWords;config.preferredLocalModelIds=[...route.tier.preferredModelIds];
+  const next={...request,config,responseRouting:route,__civweaveResponseRoute:route};
+  dispatchEvent(new CustomEvent('civweave:response-route',{detail:route}));
+  return{request:next,route};
+}
+function installRuntimeInterceptor(){
+  const runtime=globalThis.CivweaveModelRuntime;if(!runtime?.generate||runtime.__minilmResponseRouterV347)return false;if(wrappedRuntime===runtime)return true;
+  const previous=runtime.generate.bind(runtime);
+  const generate=async request=>{
+    if(request?.__civweaveSkipResponseRouter)return previous(request);
+    const {request:next,route}=await enhance(request||{});
+    const primary=await withLocalTier(route,next,previous);
+    return reviewedResult(previous,next,primary,route,runtime);
+  };
+  globalThis.CivweaveModelRuntime={...runtime,generate,__minilmResponseRouterV347:true};wrappedRuntime=globalThis.CivweaveModelRuntime;dispatchEvent(new CustomEvent('civweave:response-router-installed',{detail:{version:VERSION}}));return true;
+}
+const api=Object.freeze({version:VERSION,tiers:TIERS,models:MODEL_IDS,classify,fallbackLength,hardTaskClass,explicitWordRequest,complexity,installRuntimeInterceptor,invisibleInfrastructure:true,settingsAutostart:false});
+globalThis.CivweaveResponseRouterV347=api;
+installRuntimeInterceptor();let attempts=0;installTimer=setInterval(()=>{attempts+=1;if(!globalThis.CivweaveModelRuntime?.__minilmResponseRouterV347)installRuntimeInterceptor();if(attempts>160)clearInterval(installTimer)},250);
+addEventListener('civweave:model-runtime-ready',installRuntimeInterceptor);addEventListener('civweave:local-model-runtime-ready',installRuntimeInterceptor);addEventListener('civweave:local-model-downloaded',()=>{installedCache.at=0});addEventListener('civweave:local-model-removed',()=>{installedCache.at=0});addEventListener('pagehide',()=>clearInterval(installTimer),{once:true});
+dispatchEvent(new CustomEvent('civweave:minilm-response-router-ready',{detail:{version:VERSION,tiers:Object.keys(TIERS),reviewGate:'programming-or-agentic'}}));
+})();
