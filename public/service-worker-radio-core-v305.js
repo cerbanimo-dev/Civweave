@@ -7,6 +7,8 @@ const V305_REQUIRED_ASSETS = Object.freeze([
   '/app/experience-orchestrator-v232.js',
   '/app/system-radio-agent-v233.js',
   '/app/radio-track-suggestions-v240.js',
+  '/app/canonical-playlists-v1.js',
+  '/app/radio-playlist-governance-v1.js',
   '/app/radio-track-map-v241.json',
   '/app/radio-directory-v240/civweave.txt',
   '/app/radio-directory-v240/living-school.txt',
