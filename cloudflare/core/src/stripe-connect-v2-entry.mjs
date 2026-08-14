@@ -73,6 +73,35 @@ export default {
       }
     }
 
+    if (request.method === 'GET' && url.pathname === '/api/money-edge/territories') {
+      const edge = new CloudflareMoneyEdge(env);
+      try {
+        return json(await edge.territoryRegistry());
+      } catch (error) {
+        const safe = moneyEdgeError(error);
+        return json(safe.body, safe.status);
+      }
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/money-edge/territories/node') {
+      const edge = new CloudflareMoneyEdge(env);
+      try {
+        const rawText = await request.text();
+        let input;
+        try { input = JSON.parse(rawText || '{}'); }
+        catch { return json({ ok: false, error: 'invalid-json' }, 400); }
+        const result = await edge.setNodeTerritory(
+          input,
+          new TextEncoder().encode(rawText),
+          request.headers.get('x-civweave-node-signature')
+        );
+        return json(result);
+      } catch (error) {
+        const safe = moneyEdgeError(error);
+        return json(safe.body, safe.status);
+      }
+    }
+
     if (url.pathname.startsWith('/api/fellowfare/direct-commerce/')) {
       const direct = await handleFellowFareDirectCommerce(request, env);
       if (direct) return direct;
