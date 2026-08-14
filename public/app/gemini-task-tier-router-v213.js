@@ -1,13 +1,13 @@
 (()=>{
 'use strict';
-const VERSION='1.0.66-gemini-task-tier-router-v270-spine';
+const VERSION='1.0.67-gemini-task-tier-router-v271-spine';
 const SMALL_MODEL='gemini-3.1-flash-lite';
-const COMPLEX_MODEL='gemini-3.6-flash';
+const COMPLEX_MODEL='gemini-3.7-flash';
 const SETTINGS_KEY='civweave.universal-ai.v127';
 const PROFILES_KEY='civweave-model-profiles-v1';
 const NOTICE_ID='cw-gemini-task-tier-notice-v213';
 const STYLE_ID='cw-gemini-task-tier-style-v213';
-const MIDDLEWARE_ID='gemini-task-tier-v270';
+const MIDDLEWARE_ID='gemini-task-tier-v271';
 let noticeTimer=null;
 if(globalThis.CivweaveGeminiTaskTierRouterV213?.version===VERSION)return;
 const clean=(value,max=24000)=>String(value??'').trim().slice(0,max);
@@ -63,8 +63,8 @@ function migrateStoredGeminiPolicy(){
     if(providerName(interactive?.provider||interactive?.route)!=='gemini')return false;
     const endpoint=interactive.endpoint||saved.endpoint||'https://generativelanguage.googleapis.com/v1beta';
     const small={...interactive,route:'gemini',provider:'gemini',model:SMALL_MODEL,endpoint},complex={...interactive,route:'gemini',provider:'gemini',model:COMPLEX_MODEL,endpoint};
-    localStorage.setItem(PROFILES_KEY,JSON.stringify({...profiles,interactive:small,agentic:complex,agenticEnabled:true,geminiRouting:'capability-spine-v270'}));
-    localStorage.setItem(SETTINGS_KEY,JSON.stringify({...saved,...small,consent:Boolean(small.externalConsent??saved.consent),agenticEnabled:true,geminiRouting:'capability-spine-v270'}));
+    localStorage.setItem(PROFILES_KEY,JSON.stringify({...profiles,interactive:small,agentic:complex,agenticEnabled:true,geminiRouting:'capability-spine-v271'}));
+    localStorage.setItem(SETTINGS_KEY,JSON.stringify({...saved,...small,consent:Boolean(small.externalConsent??saved.consent),agenticEnabled:true,geminiRouting:'capability-spine-v271'}));
     return true;
   }catch{return false}
 }
@@ -87,14 +87,14 @@ function disclose(decision,model,request={}){
   try{dispatchEvent(new CustomEvent('civweave:gemini-task-tier-selected',{detail}))}catch{}
   if(typeof document==='undefined'||decision.tier!=='complex')return detail;
   installStyle();let notice=document.getElementById(NOTICE_ID);if(!notice){notice=document.createElement('div');notice.id=NOTICE_ID;notice.setAttribute('role','status');notice.setAttribute('aria-live','polite');document.body.append(notice)}
-  notice.textContent=`Capability routing selected Gemini 3.6 Flash for ${decision.reason}. Routine requests use Gemini 3.1 Flash-Lite.`;notice.hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{if(notice?.isConnected)notice.hidden=true},7000);return detail;
+  notice.textContent=`Capability routing selected Gemini 3.7 Flash for ${decision.reason}. Routine requests use Gemini 3.1 Flash-Lite.`;notice.hidden=false;clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>{if(notice?.isConnected)notice.hidden=true},7000);return detail;
 }
 function patchSettings(){
   if(typeof document==='undefined')return;installStyle();const form=document.querySelector('[data-cw-cleanroom-form]');if(!form)return;
   const route=form.elements?.namedItem?.('route'),model=form.elements?.namedItem?.('model'),remote=form.querySelector('[data-panel="remote"]'),gemini=providerName(route?.value)==='gemini';
   if(model){if(gemini){model.value=SMALL_MODEL;model.readOnly=true;model.setAttribute('aria-describedby','cw-gemini-routing-note-v213')}else{model.readOnly=false;model.removeAttribute('aria-describedby')}}
   let note=form.querySelector('#cw-gemini-routing-note-v213');
-  if(gemini&&remote){if(!note){note=document.createElement('div');note.id='cw-gemini-routing-note-v213';note.innerHTML='<b>Capability-aware Gemini routing</b><span>Routine requests use Gemini 3.1 Flash-Lite. Planning, research, code generation, and agentic work use Gemini 3.6 Flash. Capability classification is provider-neutral; Gemini selection happens only after Gemini is the chosen provider.</span>';remote.insertBefore(note,remote.querySelector('.cw-clean-secret-row')||remote.lastElementChild)}note.hidden=false;}else if(note)note.hidden=true;
+  if(gemini&&remote){if(!note){note=document.createElement('div');note.id='cw-gemini-routing-note-v213';note.innerHTML='<b>Capability-aware Gemini routing</b><span>Routine requests use Gemini 3.1 Flash-Lite. Planning, research, code generation, and agentic work use Gemini 3.7 Flash. Capability classification is provider-neutral; Gemini selection happens only after Gemini is the chosen provider.</span>';remote.insertBefore(note,remote.querySelector('.cw-clean-secret-row')||remote.lastElementChild)}note.hidden=false;}else if(note)note.hidden=true;
 }
 function middleware(){
   return{
