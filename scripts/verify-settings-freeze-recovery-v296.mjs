@@ -14,6 +14,7 @@ assert.match(gateway,/afterPaint\(\(\)=>void ensureManagement\(layer\)\)/);
 assert.match(gateway,/reloadSafeCapture:true/);
 assert.match(gateway,/controllerQuiescenceAfterPaint:true/);
 assert.match(gateway,/removeEventListener\('click',previous,true\)/);
+for(const forbidden of ['prewarm','bootstrap-v266','local-chat-runtime-v295','CivweaveLocalModelRuntimeV266'])assert.ok(!gateway.includes(forbidden),`Settings gateway reintroduced forbidden generative startup hook ${forbidden}`);
 assert.match(controller,/activationRequired:true/);
 assert.match(controller,/function requestInferenceQuiescence\(\)/);
 assert.match(controller,/civweave:local-inference-cancel-requested/);
@@ -24,6 +25,7 @@ const cancelIndex=openBlock.indexOf('afterPaint(requestInferenceQuiescence)');
 assert.ok(visibleIndex>=0,'Settings open path does not make the layer visible.');
 assert.ok(cancelIndex>visibleIndex,'Local inference cancellation must be scheduled only after Settings is visible.');
 assert.equal(openBlock.slice(0,visibleIndex).includes('requestInferenceQuiescence()'),false,'Settings regained synchronous pre-paint inference cancellation.');
+assert.doesNotMatch(openBlock,/prewarm/i,'Settings open must never prewarm a generative model.');
 assert.match(lifecycle,/activationRequired:true/);
 assert.match(lifecycle,/managementAfterPaint:true/);
 assert.match(lifecycle,/globalObserverPatch:false/);
@@ -33,6 +35,10 @@ assert.match(runtime,/generationEpoch/);
 assert.match(runtime,/if\(terminalFailure\(error\)\)return false/);
 assert.match(chatRuntime,/shutdown\?\.\(\{reason:'chat-stage-stalled'\}\)/);
 assert.match(chatOwner,/function cancelQueued\(/);
+assert.match(chatOwner,/generativePrewarmDisabled:true/);
+assert.match(chatOwner,/generativeStartsOnSubmit:true/);
+assert.doesNotMatch(chatOwner,/\.prewarm\s*\(/,'chat owner must not prewarm generative models while Settings or chat UI is open');
+assert.doesNotMatch(chatOwner,/prewarmIntent|prewarmWorkspace|beginPrewarm/);
 {
   const bus=new EventTarget(),workers=[];
   class TestEvent extends Event{constructor(type,options={}){super(type);this.detail=options.detail}}
@@ -49,4 +55,4 @@ assert.match(chatOwner,/function cancelQueued\(/);
   assert.equal(workers.length,1);
   assert.equal(workers[0].terminated,true);
 }
-console.log(JSON.stringify({ok:true,revision:'settings-freeze-recovery-v318',singleSettingsInputOwner:true,reloadSafeCapture:true,firstClickActivation:true,settingsOpenBeforeManagement:true,settingsPaintBeforeInferenceCancellation:true,managementAfterPaint:true,noGlobalObserverPatch:true,inferenceDormantOnSettingsOpen:true,terminalInferenceCancellation:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'settings-freeze-recovery-v319-no-generative-prewarm',singleSettingsInputOwner:true,reloadSafeCapture:true,firstClickActivation:true,settingsOpenBeforeManagement:true,settingsPaintBeforeInferenceCancellation:true,managementAfterPaint:true,noGlobalObserverPatch:true,inferenceDormantOnSettingsOpen:true,generativePrewarmOnSettings:false,generativePrewarmOnChat:false,generativeStartsOnSubmit:true,terminalInferenceCancellation:true},null,2));
