@@ -68,6 +68,7 @@ function looksInjectedEnglish(text) {
 }
 
 function looksLikeCodeFragment(value) {
+  if (/^`|`$/.test(value)) return true;
   if (/^[,;:.]\s/.test(value)) return true;
   if (/^[A-Za-z_$][\w$]*(?:[._/-][A-Za-z0-9_$-]+)+$/.test(value)) return true;
   if (/(?:^|[;,(])\s*(?:const|let|var|return|if|else|function|document|window)\b/.test(value)) return true;
@@ -82,6 +83,7 @@ function candidate(text) {
   const value = unescapeLiteral(text);
   if (!/[A-Za-z]/.test(value)) return '';
   if (value.length < 2 || value.length > 220) return '';
+  if (/^(?:SmolLM\w*|Qwen\w*|Gemma\w*|Llama\w*)\b.*(?:\d|Instruct|IT|MoE|class)/i.test(value)) return '';
   if (/https?:\/\//i.test(value) || /(?:^|\s)\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+/.test(value)) return '';
   if (/\.(?:js|mjs|json|css|html|png|jpg|jpeg|webp|svg|wasm|onnx|zip)\b/i.test(value)) return '';
   if (/[{}<>]=?|=>|\$\{|\\[dwsb]|--[a-z]/i.test(value)) return '';
