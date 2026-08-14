@@ -4,13 +4,15 @@ const root = new URL('../', import.meta.url);
 const read = async path => readFile(new URL(path, root), 'utf8');
 const must = (condition, message) => { if (!condition) throw new Error(message); };
 
-const [mailConfigText, mailSource, mailUi, mailPackageText, accountConfigText, claimSource] = await Promise.all([
+const [mailConfigText, mailSource, mailUi, mailPackageText, accountConfigText, claimSource, claimUi, installer] = await Promise.all([
   read('cloudflare/mail/wrangler.jsonc'),
   read('cloudflare/mail/src/index-v2.mjs'),
   read('cloudflare/mail/src/ui.mjs'),
   read('cloudflare/mail/package.json'),
   read('cloudflare/account-edge/wrangler.jsonc'),
   read('cloudflare/account-edge/src/recovery-entry-v11.mjs'),
+  read('public/app/hub-mail-claim-v1.js'),
+  read('public/app/installer-online-fallback-v225.js'),
 ]);
 const mailConfig = JSON.parse(mailConfigText);
 const mailPackage = JSON.parse(mailPackageText);
@@ -48,6 +50,13 @@ for (const token of [
   "this.state.storage.delete(key)",
 ]) must(claimSource.includes(token), `Hub mail claim service is missing ${token}.`);
 must(claimSource.includes("claimUrl: `https://mail.civweave.cc/#claim="), 'Hub does not return the first-party mail claim URL.');
+for (const token of [
+  'Claim @civweave.cc address',
+  '/api/account/mail/claim/request',
+  'CivweaveHostNodeSessionExportV1',
+  "url.hostname!=='mail.civweave.cc'",
+]) must(claimUi.includes(token), `Hub mail claim UI is missing ${token}.`);
+must(installer.includes("'/app/hub-mail-claim-v1.js'"), 'Installer does not load the Hub mail claim companion.');
 
 console.log(JSON.stringify({
   ok: true,
@@ -59,4 +68,5 @@ console.log(JSON.stringify({
   externalOutbound: 'disabled-until-paid-email-sending',
   rawStorage: 'private-r2',
   mailboxIdentity: 'separate-from-hub-passport-payment',
+  hubClaim: 'authenticated-one-use-grant',
 }, null, 2));
