@@ -58,7 +58,7 @@ await patch('public/install-v130.js',source=>replaceRequired(source,/const VERSI
 await patch('public/app/installed-entry-v146.html',source=>replaceRequired(source,/installed-entry-v146\.js\?v=\d+\.\d+\.\d+/,`installed-entry-v146.js?v=${version}`,'installed entry revision'));
 await patch('public/app/installed-entry-v146.js',source=>{
   source=replaceRequired(source,/const FALLBACK_VERSION='\d+\.\d+\.\d+';/,`const FALLBACK_VERSION='${version}';`,'installed-entry fallback version');
-  source=replaceRequired(source,/version:'\d+\.\d+\.\d+(-[^']+)'/,`version:'${version}$1`,'installed-entry exported version');
+  source=replaceRequired(source,/version:'\d+\.\d+\.\d+(-[^']+)'/,`version:'${version}$1'`,'installed-entry exported version');
   return source;
 });
 await patch('public/app/system-routes-v227.js',source=>replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'five-system route version'));
