@@ -20,7 +20,7 @@
     "NODE_DOMAIN": "nodes.commonweave.earth",
     "CIVWEAVE_WORKERS_PLAN": "free",
     "CIVWEAVE_ACCOUNT_EDGE_MODE": "path-v1",
-    "HUB_RECOVERY_INBOUND_EMAIL": "recover@commonweave.earth"
+    "HUB_RECOVERY_INBOUND_EMAIL": "recover@recovery.commonweave.earth"
   },
   "observability": { "enabled": true }
 }
