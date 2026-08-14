@@ -31,19 +31,29 @@ for(const token of [
   'nativeCompanion:false',
   'wifiDirect:false',
   'object is outside this device audience',
-  "session.peerProtocol=message.protocol||'legacy'",
+  'credential:owner.publicKey',
+  'peer identity mismatch',
+  "emit('peer-incompatible'",
+  'verifiedGroupDelivery:false',
+  'session.peerGroups=[]',
+  'hopLimit:Number(object.hopLimit)||0',
+  "session.peerProtocol=declaredProtocol||'legacy'",
   "type:'objects',items"
 ])assert(mesh.includes(token),`Foreground mesh missing ${token}.`);
 
 assert(!mesh.includes('hopLimit:object.hopLimit-1'),'Foreground mesh mutates signed hopLimit.');
 assert(!mesh.includes('object.hopLimit--'),'Foreground mesh mutates signed hopLimit.');
 assert(mesh.includes("const mayRelay=object=>object.consent==='public'||object.consent==='federated'"),'Relay policy must be public/federated only.');
+assert(mesh.includes('if(!object||!mayRelay(object))continue'),'Gateway upload must exclude direct/group objects.');
+assert(mesh.includes('if(!mayRelay(object)||!intendedFor(object'),'Gateway download must exclude direct/group objects.');
 
 for(const phrase of [
   'no Android core, native companion, Wi-Fi Direct dependency, or always-on daemon in v1',
   'Sleeping-phone/background delivery is a later transport problem',
   'Signed object fields are immutable in transit',
-  'Direct and group payloads are endpoint-only in v1',
+  'Direct payloads are endpoint-only and are sent only after the peer node ID is verified against its public credential',
+  'Group payloads are not automatically transferred in v1',
+  'Direct/group payloads are not gateway-relayed by the foreground mesh',
   'Sleeping phones later'
 ])assert(architecture.includes(phrase),`Architecture contract missing ${phrase}.`);
 
