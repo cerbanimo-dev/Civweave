@@ -6,6 +6,8 @@ Civweave Territory Stewards may operate a Host Node that can sponsor new Host No
 
 The canonical Civweave core remains the root trust anchor. A Territory Host Authority is a bounded delegation from an existing Territory Steward appointment to one specific Civweave node key.
 
+The root may issue an ordinary Host directly into any active territory. This universal root placement does **not** make the new Host a Territory Host Authority, grant Territory Steward status, or widen any delegated Steward's scope. Root-issued ordinary Hosts still prove possession of their own node key before admission.
+
 A Territory Host Authority may:
 
 - issue short-lived, single-use admissions for ordinary Host Nodes;
@@ -31,9 +33,29 @@ The Steward node instead uses its own persistent Ed25519 receipt identity. The r
 
 The candidate Host Node still proves possession of its own Ed25519 key by answering a fresh challenge from the core before the admission can be consumed.
 
+## Root ordinary-Host workflow
+
+The canonical root operator can place an ordinary Host into any active Civweave territory without first creating or consulting a Territory Host Authority. This path remains root-only and requires `NODE_FABRIC_BINDING_TOKEN`.
+
+The prospective Host must already expose its manifest and live proof challenge. From the canonical root operator environment:
+
+```powershell
+$env:NODE_FABRIC_BINDING_TOKEN = "<root-only-secret>"
+node scripts/admit-root-host-v1.mjs `
+  --territory-id jp `
+  --host-id <host-id> `
+  --node-id <node-id> `
+  --operator-id <operator-id> `
+  --callback-url https://<public-node-base>/
+```
+
+The root verifies the candidate's Ed25519 key, admits it to the canonical node directory, and persists its territory assignment. The resulting Host is explicitly ordinary: `grantsTerritoryAuthority` remains false.
+
+This path is intentionally global. The root may place a Host in `us`, `jp`, `us-mo-kc`, `us-ca-la`, or any other active territory regardless of which Territory Steward currently holds the local office.
+
 ## One-time root binding
 
-The Territory Steward first needs a publicly reachable Civweave node that exposes:
+A Territory Steward first needs a publicly reachable Civweave node that exposes:
 
 - `GET /api/ai/node/manifest`
 - `POST /api/ai/node/live/challenge`
@@ -84,11 +106,14 @@ On that node, open the same local console, paste the admission, and choose **Cla
 5. verifies the Ed25519 response against the candidate's advertised public key;
 6. atomically consumes the grant;
 7. admits the node to the canonical Civweave node directory;
-8. records both Territory Host admission audit history and canonical launch audit history.
+8. persists the Host's territory assignment;
+9. records both Territory Host admission audit history and canonical launch audit history.
 
 ## Scope inheritance
 
-Territory matching is hierarchical. An authority for `us` may sponsor a node into a child territory such as `us-mo-kc`. An authority for `us-mo-kc` cannot sponsor a node into `us`, `us-ca-la`, or `jp`.
+Territory matching is hierarchical for delegated Territory Steward authority. An authority for `us` may sponsor a node into a child territory such as `us-mo-kc`. An authority for `us-mo-kc` cannot sponsor a node into `us`, `us-ca-la`, or `jp`.
+
+The canonical root is not subject to that delegated scope limit and may admit an ordinary Host into any active territory.
 
 This follows the existing territory hierarchy rather than creating a second geographic policy system.
 
