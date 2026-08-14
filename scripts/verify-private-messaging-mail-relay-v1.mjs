@@ -4,7 +4,7 @@ const root = new URL('../', import.meta.url);
 const read = async path => readFile(new URL(path, root), 'utf8');
 const must = (condition, message) => { if (!condition) throw new Error(message); };
 
-const [mail, client, architecture, feedback, offline, setupUi, batch] = await Promise.all([
+const [mail, client, architecture, feedback, offline, setupUi, batch, ownershipText, systemsPractice] = await Promise.all([
   read('cloudflare/mail/src/index-v3.mjs'),
   read('public/app/civweave-private-messaging-v1.js'),
   read('docs/architecture/private-messaging-mail-relay-v1.md'),
@@ -12,7 +12,10 @@ const [mail, client, architecture, feedback, offline, setupUi, batch] = await Pr
   read('public/app/offline-package-v208.json'),
   read('public/app/hub-mail-claim-v1.js'),
   read('scripts/run-feedback-batch-v1.mjs'),
+  read('config/system-ownership.json'),
+  read('docs/architecture/systems-of-practice.md'),
 ]);
+const ownership = JSON.parse(ownershipText).systems?.['private-messaging'];
 
 for (const token of [
   "PM_SUFFIX = '_pm'",
@@ -40,6 +43,13 @@ for (const token of [
   'acceptEnvelope(envelope',
 ]) must(client.includes(token), `Private messaging client is missing ${token}`);
 
+must(ownership?.owner === 'public/app/civweave-private-messaging-v1.js', 'Private messaging canonical owner is not registered.');
+must(ownership?.setupCaller === 'public/app/hub-mail-claim-v1.js', 'Private messaging setup caller drifted.');
+must(ownership?.meshDependency === 'public/app/local-object-mesh-v146.js', 'Private messaging mesh dependency drifted.');
+must(ownership?.onlineAuthority === 'cloudflare/mail/src/index-v4.mjs', 'Private messaging online authority drifted.');
+must(ownership?.canonicalApi === 'globalThis.CivweavePrivateMessagingV1', 'Private messaging canonical API drifted.');
+for (const token of ['## Private messaging', 'Canonical owner: `public/app/civweave-private-messaging-v1.js`', 'derived `username_pm@civweave.cc` address is an internal routing slot only']) must(systemsPractice.includes(token), `Systems-of-practice is missing ${token}`);
+
 must(offline.includes('"/app/civweave-private-messaging-v1.js"'), 'Private messaging engine is not retained by the offline package.');
 for (const token of ['Private messaging', 'Claim username', 'not an email address', 'setupPrivateMessaging']) must(setupUi.includes(token), `PM setup UI is missing ${token}`);
 must(!setupUi.includes('Claim @civweave.cc address'), 'Free-user setup still advertises a public email claim.');
@@ -52,6 +62,7 @@ for (const token of ['createCodeAutomationPlan', "baseBranch: DEV_BRANCH", "even
 console.log(JSON.stringify({
   ok: true,
   privateMessaging: 'mesh-first-encrypted-envelope',
+  canonicalOwner: ownership.owner,
   onlineRelay: 'hidden-username_pm',
   externalMailToPm: 'rejected',
   publicPaidMail: 'separate-entitlement-lane',
