@@ -1,6 +1,6 @@
 # Civweave Cloudflare Pages Host Guide
 
-Civweave host creation now starts from the public GitHub repository and publishes a complete host surface into the steward's own Cloudflare Pages account with Wrangler.
+Civweave host creation starts from the public GitHub repository and publishes a complete host surface into the steward's own Cloudflare Pages account with Wrangler. Civweave separates the human-facing public address from the durable Cloudflare Pages underlay so a friendly domain never becomes the host's identity or only copy.
 
 ## Canonical root
 
@@ -8,16 +8,39 @@ Civweave host creation now starts from the public GitHub repository and publishe
 Repository: cerbanimo-dev/Civweave
 Production branch: main
 Canonical Pages project: civweave
-Canonical production URL: https://civweave.pages.dev
+Public canonical URL: https://civweave.cc
+Canonical Pages underlay: https://civweave.pages.dev
 Hosted source: public/
 Generated Pages output: .cloudflare-pages/
 ```
 
-`civweave.pages.dev` is the reserved OG/root Civweave project. Do not use the `civweave` project name for a community host.
+`civweave.cc` is the canonical public/install origin for the Civweave root. `civweave.pages.dev` remains the reserved OG/root Pages project, deployment underlay, and compatibility ingress. Do not use the `civweave` Pages project name for a community host.
 
-The former `https://commonweave.pages.dev` origin is a legacy install origin. Migration code may recognize it, but new installs and host documentation use `https://civweave.pages.dev`.
+The former `https://commonweave.pages.dev` origin is a legacy install origin. Migration code may recognize both it and the previous `https://civweave.pages.dev` canonical address, but new root installs use `https://civweave.cc`.
 
 Cloudflare Pages assigns a production Pages project an origin of `<project>.pages.dev`. Branch and preview deployments use additional labels such as `<branch>.<project>.pages.dev` or `<hash>.<project>.pages.dev`; those preview addresses must not be used as permanent PWA install origins.
+
+## Hub hosting plans
+
+Free community servers keep their Cloudflare Pages address and the free 28-member admission ceiling:
+
+```text
+$0/month
+up to 28 admitted members
+https://civweave-<host-id>.pages.dev
+```
+
+A paid hub-hosting subscription raises the server admission ceiling to 400 and unlocks a Civweave-managed alias:
+
+```text
+$5/month while the renewal snapshot is 0-199 members
+$10/month when the renewal snapshot is 200-400 members
+https://<host-id>.civweave.cc
+```
+
+Both paid bands permit up to 400 admitted members. Crossing member 200 does not create a mid-cycle charge and does not block admission. Before renewal, Civweave snapshots total hub membership and updates the Stripe subscription from one $5 unit to two $5 units, or back down, with proration disabled. The current paid period is always honored.
+
+The `*.civweave.cc` address is an alias, never the storage or identity layer. If hosting expires, the shared alias disables and the durable Pages origin remains online. Admission returns to the free 28-member ceiling, but existing residents above 28 are grandfathered rather than deleted or evicted; new admissions wait until the hub is within capacity or hosting resumes.
 
 ## Requirements
 
@@ -53,6 +76,8 @@ Under **Account resources**, include the specific Cloudflare account that owns t
 
 The setup helper and GitHub workflow attempt the Worker and all three nodes automatically. If the Workers permission is absent, Pages still deploys and `/host-setup.html` shows the incomplete layer, exact permission, and retry command instead of silently hiding it.
 
+The canonical repository additionally needs the zone/DNS permissions used by the separate `civweave.cc` shared-domain rollout. Those permissions are intentionally not required for an ordinary community Pages host.
+
 ## Create the canonical OG node
 
 Canonical deployment is deliberately guarded against accidental publication from the wrong Cloudflare login. Set the expected login locally; do not commit it.
@@ -68,8 +93,11 @@ It creates or reuses:
 
 ```text
 Pages project: civweave
-Production URL: https://civweave.pages.dev
+Pages underlay: https://civweave.pages.dev
+Public canonical: https://civweave.cc
 ```
+
+The direct setup establishes the Pages deployment. The canonical GitHub workflow owns the guarded custom-domain cutover and refuses to treat `civweave.cc` as ready until Cloudflare reports the Pages custom domain active.
 
 ## Create a community host
 
@@ -85,13 +113,13 @@ The default Pages project becomes:
 civweave-garden
 ```
 
-and its production origin is normally:
+and its durable free production origin is normally:
 
 ```text
 https://civweave-garden.pages.dev
 ```
 
-Cloudflare may add characters if the requested Pages project name is already globally occupied. Wrangler's deployment result is the source of truth for the final address.
+Cloudflare may add characters if the requested Pages project name is already globally occupied. Wrangler's deployment result is the source of truth for the final Pages address.
 
 A steward may choose another Pages project name explicitly:
 
@@ -101,7 +129,7 @@ node scripts/setup-cloudflare-node.mjs \
   --project-name garden-weave
 ```
 
-The host ID and Pages project name are separate so a stable Civweave identity does not have to equal the public Cloudflare project label.
+The host ID and Pages project name are separate so a stable Civweave identity does not have to equal the Cloudflare project label. An active hosting subscription may later expose that same hub as `https://garden.civweave.cc`; the Pages address remains underneath it.
 
 ## What the helper does
 
@@ -114,9 +142,9 @@ The host ID and Pages project name are separate so a stable Civweave identity do
 5. automatically deploys `civweave-host-edge` and creates or reuses exactly three starter nodes;
 6. health-checks all three starter nodes and records a `ready` or `pending` account-edge status;
 7. builds the complete `.cloudflare-pages/` package;
-8. stamps `/app/host-deployment-v1.json` with the host, account-edge status, role, and canonical root;
+8. stamps `/app/host-deployment-v1.json` with the host, Pages underlay, account-edge status, role, and canonical Civweave root;
 9. deploys the production branch with Wrangler;
-10. prints `/host-setup.html`, where the steward can see the Worker and each starter node or the exact remediation step;
+10. prints the Pages-underlay `/host-setup.html`, where the steward can see the Worker and each starter node or the exact remediation step;
 11. leaves the successful Pages deployment online while optional GitHub automation is configured.
 
 Open that steward setup URL once after deployment.
@@ -131,17 +159,17 @@ For a community host repository, configure:
 - repository variable `CIVWEAVE_HOST_ID` with the stable host ID;
 - repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` for the steward's Cloudflare account.
 
-The secrets configured in the canonical `cerbanimo-dev/Civweave` repository are specifically for the OG `civweave.pages.dev` host. Each community-host fork or repository uses its own steward-owned Cloudflare account ID and API token; it does not inherit the OG credentials.
+The secrets configured in the canonical `cerbanimo-dev/Civweave` repository are specifically for the OG `civweave.pages.dev` Pages underlay and its associated canonical Cloudflare resources. Each community-host fork or repository uses its own steward-owned Cloudflare account ID and API token; it does not inherit the OG credentials.
 
 The Actions workflows validate those credentials by requesting the exact configured Pages project. They intentionally avoid account-membership enumeration, because an account-scoped Pages token can deploy its project without that broader permission.
 
-Then enable `.github/workflows/deploy-civweave-host-pages.yml`. Every push to `main` rebuilds and deploys that same Pages project, automatically retries the account Worker and three starter nodes, and verifies the stable community hostname. The workflow refuses the reserved `civweave` project, so a community credential cannot overwrite the canonical root. Missing Workers permission produces a visible warning and pending status on `/host-setup.html`; it does not take the Pages host offline.
+Then enable `.github/workflows/deploy-civweave-host-pages.yml`. Every push to `main` rebuilds and deploys that same Pages project, automatically retries the account Worker and three starter nodes, and verifies the stable community Pages hostname. The workflow refuses the reserved `civweave` project, so a community credential cannot overwrite the canonical root. Missing Workers permission produces a visible warning and pending status on `/host-setup.html`; it does not take the Pages host offline.
 
-The canonical repository uses `.github/workflows/deploy-civweave-pages.yml` for `civweave.pages.dev`. Both workflows preserve the initial direct deployment until a successful automated replacement is available; failure or delayed GitHub setup does not take a new host offline.
+The canonical repository uses `.github/workflows/deploy-civweave-pages.yml` for the `civweave.pages.dev` underlay and the guarded `civweave.cc` attachment. Both canonical and community workflows preserve the initial direct Pages deployment until a successful automated replacement is available; failure or delayed GitHub setup does not take a new host offline.
 
 The OG workflow can also provision an optional account Worker and three starter-node records when its token has `Account > Workers Scripts > Edit`. That broader permission is not required for the Pages host: provisioning failure is reported as a warning and cannot prevent `civweave.pages.dev` from building or deploying.
 
-After upload, the OG workflow polls `https://civweave.pages.dev/app/host-deployment-v1.json` until the stable production origin reports the pushed Git commit. A green workflow therefore proves the canonical hostname updated, not only that Cloudflare accepted a preview deployment.
+After upload, the OG workflow polls `https://civweave.pages.dev/app/host-deployment-v1.json` until the Pages underlay reports the pushed Git commit. It then ensures Cloudflare has attached `civweave.cc` to the `civweave` Pages project and waits for that custom domain to report active. A green workflow therefore proves the Pages underlay updated before civweave.cc is treated as canonical, instead of merely proving that Cloudflare accepted a preview deployment.
 
 ## Host-local Anchor reminder
 
@@ -192,10 +220,13 @@ A production Civweave host is allowed to install Civweave from its own stable pr
 Valid examples:
 
 ```text
-https://civweave.pages.dev
+https://civweave.cc
 https://civweave-garden.pages.dev
 https://garden-weave.pages.dev
+https://garden.civweave.cc    # while garden's hub-hosting entitlement is active
 ```
+
+`https://civweave.pages.dev` remains a compatibility/deployment ingress for the OG root. New root installs are escorted to `https://civweave.cc`; community Pages origins remain legitimate permanent host origins.
 
 Do not install from preview/branch aliases such as:
 
@@ -214,7 +245,7 @@ Build:
 node scripts/build-cloudflare-pages.mjs
 ```
 
-Deploy the canonical root:
+Deploy the canonical Pages underlay:
 
 ```bash
 npx wrangler pages deploy .cloudflare-pages \
@@ -232,7 +263,7 @@ npx wrangler pages deploy .cloudflare-pages \
   --commit-dirty=true
 ```
 
-The setup helper is preferred because it also writes host deployment metadata and protects the canonical project name.
+The setup helper is preferred because it also writes host deployment metadata and protects the canonical project name. The `civweave.cc` public root and paid wildcard aliases are managed centrally and should not be hand-created in a community steward's DNS.
 
 ## Local preview
 
@@ -248,6 +279,7 @@ npx wrangler pages dev .cloudflare-pages
 - Never commit Cloudflare login credentials, account tokens, API tokens, or private email guards.
 - Never let a community host use the reserved `civweave` Pages project name.
 - Never advertise a branch/hash preview URL as a permanent install origin.
+- Never treat a `*.civweave.cc` alias as the hub's storage or identity layer.
 - Back up the local Anchor data directory.
 - The local Anchor is strongly recommended, not a hard requirement.
 
