@@ -1,0 +1,33 @@
+name: Installer state authority v281
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/index.html'
+      - 'public/app/installer-state-machine-v281.js'
+      - 'scripts/verify-installer-state-authority-v281.mjs'
+      - '.github/workflows/installer-state-authority-v281.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'public/app/index.html'
+      - 'public/app/installer-state-machine-v281.js'
+      - 'scripts/verify-installer-state-authority-v281.mjs'
+      - '.github/workflows/installer-state-authority-v281.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check controller
+        run: node --check public/app/installer-state-machine-v281.js
+      - name: Verify single-writer installer contract
+        run: node scripts/verify-installer-state-authority-v281.mjs
