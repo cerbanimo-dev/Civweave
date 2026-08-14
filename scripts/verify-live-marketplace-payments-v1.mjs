@@ -84,7 +84,7 @@ assert.match(moneyWithMemberships, /serviceLearningTokenMode: 'acorn-button-fulf
 assert.match(moneyWithMemberships, /serviceLearningUsdMode: 'stripe-connect-direct-charge'/);
 assert.match(moneyWithMemberships, /serviceLearningMerchantOfRecord: 'connected-provider'/);
 assert.match(moneyWithMemberships, /serviceLearningPlatformFeeMode: 'application-fee'/);
-assert.match(moneyWithMemberships, /serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo-first-stage'/);
+assert.match(moneyWithMemberships, /serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo'/);
 assert.match(moneyWithMemberships, /serviceLearningCerbanimoSecondStageSplit: '50-cerbanimo-global-50-territory-stewardship'/);
 assert.match(moneyWithMemberships, /hostNodeStewardCutChanged: false/);
 assert.match(moneyWithMemberships, /event\.type === 'application_fee\.created'/);
