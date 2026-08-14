@@ -6,12 +6,14 @@ const SETTLEMENT_KIND='civweave.node-ai.settlement-batch.v1';
 const SETTLEMENT_BATCH_SCHEMA='civweave.node-ai-mesh-settlement-batch.v1';
 const ROUTER_URL='/app/shared/civweave-node-ai-routing-v1.mjs';
 const SERVER_AI_SCRIPTS=['/app/server-ai-router-v301.js?v=1.0.116-v301','/app/server-ai-settings-v301.js?v=1.0.117-v305-community-dividend'];
+const LOCALITY_GOSSIP_SCRIPT='/app/civweave-locality-gossip-v1.js?v=node-ai-mesh-v1-region-gossip';
 const DEFAULT_SYNC_MS=90_000;
 const LEASE_KEY='civweave.node-ai-mesh.sync-lease.v1';
 const INSTANCE_ID=`node-ai-mesh:${globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
 let routerPromise=null;
 let meshPromise=null;
 let serverAiPromise=null;
+let localityPromise=null;
 let syncTimer=null;
 let onlineHandler=null;
 let pageHideHandler=null;
@@ -41,6 +43,11 @@ async function ensureServerAI(){
     return true;
   })().catch(error=>{serverAiPromise=null;dispatchEvent(new CustomEvent('civweave:server-ai-load-error',{detail:{message:error.message,at:now()}}));throw error});
   return serverAiPromise;
+}
+async function ensureLocalityGossip(){
+  if(globalThis.CivweaveLocalityGossipV1)return globalThis.CivweaveLocalityGossipV1;
+  if(!localityPromise)localityPromise=loadScript(LOCALITY_GOSSIP_SCRIPT,()=>globalThis.CivweaveLocalityGossipV1).catch(error=>{localityPromise=null;dispatchEvent(new CustomEvent('civweave:locality-gossip-load-error',{detail:{message:error.message,at:now()}}));throw error});
+  return localityPromise;
 }
 async function ensureMesh(){
   if(globalThis.CivweaveLocalMeshV146)return globalThis.CivweaveLocalMeshV146;
@@ -175,7 +182,7 @@ function scheduleNext(){
 async function start({baseUrl=location.origin,syncIntervalMs=DEFAULT_SYNC_MS,advertiseLocalNode=true}={}){
   stop();gatewayUrl=String(baseUrl||location.origin);advertiseLocal=advertiseLocalNode!==false;
   activeSyncMs=Math.max(30_000,Math.min(15*60_000,Number(syncIntervalMs)||DEFAULT_SYNC_MS));
-  const mesh=await ensureMesh();await router();ensureServerAI().catch(()=>{});
+  const mesh=await ensureMesh();await router();ensureServerAI().catch(()=>{});ensureLocalityGossip().catch(()=>{});
   await tick();
   scheduleNext();
   onlineHandler=()=>tick();addEventListener('online',onlineHandler);
@@ -195,11 +202,11 @@ function stop(){
 }
 function status(){
   let lease=null;try{lease=parse(localStorage.getItem(LEASE_KEY),null)}catch{}
-  return{version:VERSION,started:Boolean(syncTimer),baseUrl:gatewayUrl||null,serviceKind:SERVICE_KIND,settlementKind:SETTLEMENT_KIND,syncIntervalMs:activeSyncMs,leaseOwner:lease?.owner||null,leader:lease?.owner===INSTANCE_ID,serverAiLoaded:Boolean(globalThis.CivweaveServerAIRouterV301)}
+  return{version:VERSION,started:Boolean(syncTimer),baseUrl:gatewayUrl||null,serviceKind:SERVICE_KIND,settlementKind:SETTLEMENT_KIND,syncIntervalMs:activeSyncMs,leaseOwner:lease?.owner||null,leader:lease?.owner===INSTANCE_ID,serverAiLoaded:Boolean(globalThis.CivweaveServerAIRouterV301),localityGossipLoaded:Boolean(globalThis.CivweaveLocalityGossipV1)}
 }
 function autoStart(){ensureServerAI().catch(()=>{});start({baseUrl:location.origin,syncIntervalMs:DEFAULT_SYNC_MS,advertiseLocalNode:true}).catch(error=>dispatchEvent(new CustomEvent('civweave:node-ai-mesh-error',{detail:{message:error.message,phase:'auto-start',at:now()}})))}
 
-const api=Object.freeze({version:VERSION,SERVICE_KIND,SETTLEMENT_KIND,SETTLEMENT_BATCH_SCHEMA,ensureMesh,ensureServerAI,publishManifest,publishManifestFromNode,publishSettlementBatch,listServiceObjects,listSettlementObjects,discover,route,resolveBaseUrl,requestCapability,invoke,routeAndInvoke,sync,start,stop,status});
+const api=Object.freeze({version:VERSION,SERVICE_KIND,SETTLEMENT_KIND,SETTLEMENT_BATCH_SCHEMA,ensureMesh,ensureServerAI,ensureLocalityGossip,publishManifest,publishManifestFromNode,publishSettlementBatch,listServiceObjects,listSettlementObjects,discover,route,resolveBaseUrl,requestCapability,invoke,routeAndInvoke,sync,start,stop,status});
 globalThis.CivweaveNodeAIMeshV1=api;
 dispatchEvent(new CustomEvent('civweave:node-ai-mesh-ready',{detail:status()}));
 document.readyState==='loading'?addEventListener('DOMContentLoaded',autoStart,{once:true}):queueMicrotask(autoStart);
