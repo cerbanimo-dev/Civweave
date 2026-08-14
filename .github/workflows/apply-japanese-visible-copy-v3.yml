@@ -21,6 +21,24 @@ jobs:
       - name: Apply curated Japanese coverage
         run: |
           set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path('scripts/apply-japanese-visible-copy-v3.mjs')
+          text=path.read_text()
+          start=text.index('function insertExact(')
+          end=text.index('\n\nlet mode =',start)
+          replacement=r'''function insertExact(source, additions, startMarker, endMarker) {
+            const keys = existingKeys(source, startMarker, endMarker);
+            const missing = additions.filter(([key]) => !keys.has(key));
+            if (!missing.length) return source;
+            const block = missing.map(([en,ja]) => `  [${JSON.stringify(en)},${JSON.stringify(ja)}]`).join(',\n');
+            const end = source.indexOf(endMarker, source.indexOf(startMarker) + startMarker.length);
+            const close = source.lastIndexOf(']);', end);
+            if (end < 0 || close < 0) throw new Error(`Could not find exact insertion boundary for ${endMarker}`);
+            return source.slice(0, close) + `,\n${block}\n` + source.slice(close);
+          }'''
+          path.write_text(text[:start]+replacement+text[end:])
+          PY
           node --check scripts/apply-japanese-visible-copy-v3.mjs
           node scripts/apply-japanese-visible-copy-v3.mjs
           node --check public/app/japanese-mode-v1.js
