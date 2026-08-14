@@ -22,7 +22,7 @@ const civweavePrismatic='/app/logos/civweave-prismatic-wordmark-v1.png';
 const cerbanimoMark='/app/logos/cerbanimo-steward-mark-v1.png';
 const frontDoorCss='/app/front-door-prismatic-v301.css';
 const canonicalCivweave='/app/logos/civweave-pwa-512-v247.png';
-const daytimeCivweave='/app/logos/civweave-daytime-512-v1.png';
+const daytimeCivweave='/app/logos/civweave-icon-512.png?brand=daytime-v1';
 const canonicalCerbanimo='/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2';
 const pngSignature=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
 
@@ -63,10 +63,10 @@ assert.ok(hostSetup.includes("localStorage.setItem(STEWARD_KEY,'1')"),'host setu
 assert.ok(anchor.includes('href="/host-setup.html"'),'Anchor setup must return to dedicated steward setup');
 assert.ok(setup.includes('Steward setup: ${pagesOrigin}/host-setup.html'),'Cloudflare host provisioning must print the dedicated steward setup URL on the durable Pages underlay');
 assert.ok(brand.includes(`const CANONICAL_LOGO='${daytimeCivweave}'`),'brand layer must use the approved daytime Civweave logo');
-assert.ok(manifest.includes('/app/logos/civweave-daytime-192-v1.png'),'PWA manifest must use the cache-distinct daytime 192px launcher icon');
-assert.ok(manifest.includes(daytimeCivweave),'PWA manifest must use the cache-distinct daytime 512px launcher icon');
-assert.ok(manifest.includes('/app/logos/civweave-daytime-maskable-192-v1.png'),'PWA manifest must include a daytime maskable 192px icon');
-assert.ok(manifest.includes('/app/logos/civweave-daytime-maskable-512-v1.png'),'PWA manifest must include a daytime maskable 512px icon');
+assert.ok(manifest.includes('/app/logos/civweave-icon-192.png?brand=daytime-v1'),'PWA manifest must use the cache-busted daytime 192px launcher icon');
+assert.ok(manifest.includes(daytimeCivweave),'PWA manifest must use the cache-busted daytime 512px launcher icon');
+assert.ok(manifest.includes('/app/logos/civweave-icon-maskable-192.png?brand=daytime-v1'),'PWA manifest must include a daytime maskable 192px icon');
+assert.ok(manifest.includes('/app/logos/civweave-icon-maskable-512.png?brand=daytime-v1'),'PWA manifest must include a daytime maskable 512px icon');
 assert.ok(!manifest.includes('/app/logos/civweave-pwa-192-v247.png'),'PWA manifest must not regress to the retired heart launcher icon');
 assert.ok(!manifest.includes('/app/logos/civweave-pwa-512-v247.png'),'PWA manifest must not regress to the retired heart launcher icon');
 assert.ok(logoSvg.includes('/app/logos/civweave-pwa-512-v247.png'),'SVG compatibility wrapper must not reference the malformed canonical display PNG');
