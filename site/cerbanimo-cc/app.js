@@ -1,5 +1,8 @@
 const $ = (selector) => document.querySelector(selector);
 
+const isJapanese = document.documentElement.lang.toLowerCase().startsWith('ja');
+const locale = isJapanese ? 'ja-JP' : undefined;
+
 const year = $('#year');
 if (year) year.textContent = String(new Date().getFullYear());
 
@@ -9,12 +12,16 @@ const stateNode = $('#sourceState');
 
 function formatDate(value) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'public';
-  return new Intl.DateTimeFormat(undefined, {
+  if (Number.isNaN(date.getTime())) return isJapanese ? '公開' : 'public';
+  return new Intl.DateTimeFormat(locale, {
     year: 'numeric',
-    month: 'short',
+    month: isJapanese ? 'numeric' : 'short',
     day: 'numeric'
   }).format(date);
+}
+
+function formatCount(value) {
+  return Number(value).toLocaleString(locale);
 }
 
 function renderCount(value) {
@@ -22,7 +29,7 @@ function renderCount(value) {
   if (!countNode || !Number.isSafeInteger(target) || target < 1) return;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced) {
-    countNode.textContent = target.toLocaleString();
+    countNode.textContent = formatCount(target);
     return;
   }
   const duration = 900;
@@ -30,7 +37,7 @@ function renderCount(value) {
   const frame = (now) => {
     const progress = Math.min(1, (now - started) / duration);
     const eased = 1 - Math.pow(1 - progress, 3);
-    countNode.textContent = Math.max(1, Math.round(target * eased)).toLocaleString();
+    countNode.textContent = formatCount(Math.max(1, Math.round(target * eased)));
     if (progress < 1) requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
@@ -46,12 +53,12 @@ async function loadHistory() {
     const history = await response.json();
     renderCount(history.commitCount);
     if (dateNode) dateNode.textContent = formatDate(history.initialCommitDate);
-    if (stateNode) stateNode.textContent = 'live';
+    if (stateNode) stateNode.textContent = isJapanese ? '公開中' : 'live';
   } catch (error) {
     console.warn('Civweave history counter unavailable', error);
-    if (countNode) countNode.textContent = 'public';
-    if (dateNode) dateNode.textContent = 'source';
-    if (stateNode) stateNode.textContent = 'reachable';
+    if (countNode) countNode.textContent = isJapanese ? '公開' : 'public';
+    if (dateNode) dateNode.textContent = isJapanese ? 'ソース' : 'source';
+    if (stateNode) stateNode.textContent = isJapanese ? '閲覧可能' : 'reachable';
   }
 }
 
@@ -64,10 +71,10 @@ const GUIDE_SPRITES = Object.freeze([
 ]);
 
 const REALM_POSTERS = Object.freeze({
-  'Living School': ['/assets/living-school-poster.webp', 'Living School poster art'],
-  Cerbanimo: ['/assets/cerbanimo-poster.webp', 'Cerbanimo poster art'],
-  FellowFare: ['/assets/fellowfare-poster.webp', 'FellowFare poster art'],
-  Anarchadia: ['/assets/anarchadia-poster.webp', 'Anarchadia poster art']
+  'Living School': ['/assets/living-school-poster.webp', 'Living School poster art', '生学舎のポスターアート'],
+  Cerbanimo: ['/assets/cerbanimo-poster.webp', 'Cerbanimo poster art', '神織のポスターアート'],
+  FellowFare: ['/assets/fellowfare-poster.webp', 'FellowFare poster art', '共市のポスターアート'],
+  Anarchadia: ['/assets/anarchadia-poster.webp', 'Anarchadia poster art', '自治郷のポスターアート']
 });
 
 function installGuideAvatarStyles() {
@@ -157,17 +164,29 @@ function installGuideAvatars() {
 
 function installRealmPosters() {
   for (const realm of document.querySelectorAll('.realm')) {
-    const title = realm.querySelector('h3')?.textContent?.trim();
+    const title = realm.dataset.realm || realm.querySelector('h3')?.textContent?.trim();
     const poster = REALM_POSTERS[title];
     const image = realm.querySelector('img');
     if (!poster || !image) continue;
     image.src = poster[0];
-    image.alt = poster[1];
+    image.alt = isJapanese ? poster[2] : poster[1];
     image.loading = 'lazy';
     image.decoding = 'async';
   }
 }
 
+function installLanguageSwitch() {
+  if (isJapanese) return;
+  const nav = document.querySelector('.nav-links');
+  if (!nav || nav.querySelector('[lang="ja"]')) return;
+  const link = document.createElement('a');
+  link.href = 'ja/';
+  link.lang = 'ja';
+  link.textContent = '日本語';
+  nav.insertBefore(link, nav.querySelector('.nav-cta'));
+}
+
 loadHistory();
 installGuideAvatars();
 installRealmPosters();
+installLanguageSwitch();
