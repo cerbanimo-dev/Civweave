@@ -58,14 +58,23 @@ function sitePath(base, path) {
   return `${base}${String(path || '').replace(/^\/+/, '')}`;
 }
 
+function addLanguageLinks(html, englishUrl, japaneseUrl, language) {
+  if (html.includes('<link rel="canonical"')) return html;
+  const canonical = language === 'ja' ? japaneseUrl : englishUrl;
+  return html.replace('</head>', `  <link rel="canonical" href="${escapeHtml(canonical)}">\n  <link rel="alternate" hreflang="en" href="${escapeHtml(englishUrl)}">\n  <link rel="alternate" hreflang="ja" href="${escapeHtml(japaneseUrl)}">\n  <link rel="alternate" hreflang="x-default" href="${escapeHtml(englishUrl)}">\n</head>`);
+}
+
 const options = parseArgs(process.argv.slice(2));
 const output = resolve(repoRoot, options.output);
 const source = scriptDir;
 const assets = resolve(output, 'assets');
+const japaneseOutput = resolve(output, 'ja');
 rmSync(output, { recursive: true, force: true });
 mkdirSync(assets, { recursive: true });
+mkdirSync(japaneseOutput, { recursive: true });
 
 let html = readFileSync(resolve(source, 'index.html'), 'utf8');
+let htmlJa = readFileSync(resolve(source, 'index.ja.html'), 'utf8');
 let css = readFileSync(resolve(source, 'styles.css'), 'utf8');
 let app = readFileSync(resolve(source, 'app.js'), 'utf8');
 
@@ -76,14 +85,19 @@ const replacements = [
 ];
 for (const [from, to] of replacements) {
   html = html.replaceAll(from, to);
+  htmlJa = htmlJa.replaceAll(from, to);
   css = css.replaceAll(from, to);
   app = app.replaceAll(from, to);
 }
 app = app.replaceAll('/history.json', sitePath(options.base, 'history.json'));
 
-if (!html.includes('<link rel="canonical"')) {
-  const canonical = options.role === 'flagship' ? `${options.canonicalOrigin}/` : `${options.publicOrigin}${options.base}`;
-  if (canonical) html = html.replace('</head>', `  <link rel="canonical" href="${escapeHtml(canonical)}">\n</head>`);
+const englishCanonical = options.role === 'flagship'
+  ? `${options.canonicalOrigin}/`
+  : `${options.publicOrigin}${options.base}`;
+const japaneseCanonical = `${englishCanonical}ja/`;
+if (englishCanonical) {
+  html = addLanguageLinks(html, englishCanonical, japaneseCanonical, 'en');
+  htmlJa = addLanguageLinks(htmlJa, englishCanonical, japaneseCanonical, 'ja');
 }
 
 if (options.role === 'community') {
@@ -91,15 +105,21 @@ if (options.role === 'community') {
   if (!options.publicOrigin) throw new Error('--public-origin is required for a community surface.');
   const hostId = escapeHtml(options.hostId);
   const localRoot = escapeHtml(`${options.publicOrigin}/`);
+  const localJapaneseRoot = escapeHtml(`${options.publicOrigin}/ja/`);
   const stewardSetup = escapeHtml(`${options.publicOrigin}/host-setup.html`);
   html = html.replace('href="https://civweave.cc">Open Civweave</a>', `href="${localRoot}">Open this node</a>`);
   html = html.replace('href="https://civweave.cc/host-setup.html">Explore host setup</a>', `href="${stewardSetup}">Explore host setup</a>`);
+  htmlJa = htmlJa.replaceAll('href="https://civweave.cc/ja/">民織を開く</a>', `href="${localJapaneseRoot}">この民織ノードを開く</a>`);
+  htmlJa = htmlJa.replace('href="https://civweave.cc/host-setup.html">ホスト設定を見る</a>', `href="${stewardSetup}">ホスト設定を見る</a>`);
   const banner = `<aside class="host-surface" aria-label="Community host page"><span>Community Cerbanimo</span><strong>${hostId}</strong><a href="${localRoot}">Open this Civweave node ↗</a></aside>`;
+  const bannerJa = `<aside class="host-surface" aria-label="コミュニティ・ホストページ"><span>コミュニティ 神織</span><strong>${hostId}</strong><a href="${localJapaneseRoot}">この民織ノードを開く ↗</a></aside>`;
   html = html.replace('<body>', `<body>\n  ${banner}`);
+  htmlJa = htmlJa.replace('<body>', `<body>\n  ${bannerJa}`);
   css += `\n.host-surface{position:relative;z-index:30;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:9px 18px;background:linear-gradient(90deg,rgba(255,49,210,.16),rgba(32,215,255,.12));border-bottom:1px solid rgba(255,255,255,.14);font-size:.82rem;letter-spacing:.02em}.host-surface span{color:var(--muted)}.host-surface strong{color:#fff}.host-surface a{color:#8fe8ff;font-weight:750;text-decoration:none}.host-surface a:hover,.host-surface a:focus-visible{text-decoration:underline}@media(max-width:640px){.host-surface{justify-content:flex-start;padding:9px 14px}}\n`;
 }
 
 writeFileSync(resolve(output, 'index.html'), html, 'utf8');
+writeFileSync(resolve(japaneseOutput, 'index.html'), htmlJa, 'utf8');
 writeFileSync(resolve(output, 'styles.css'), css, 'utf8');
 writeFileSync(resolve(output, 'app.js'), app, 'utf8');
 cpSync(resolve(source, 'assets'), assets, { recursive: true });
@@ -133,6 +153,7 @@ const history = {
     publicOrigin: options.publicOrigin || undefined,
     pagesOrigin: options.pagesOrigin || undefined,
     canonicalOrigin: options.canonicalOrigin,
+    languages: ['en', 'ja'],
   },
 };
 if (!Number.isSafeInteger(history.commitCount) || history.commitCount < 1 || !history.initialCommitDate) {
@@ -144,6 +165,7 @@ writeFileSync(resolve(output, 'surface.json'), `${JSON.stringify(history.surface
 if (options.base !== '/') {
   const forbidden = [
     ['index.html', html, /(?:href|src)=["']\/(?:styles\.css|app\.js|assets\/)/],
+    ['ja/index.html', htmlJa, /(?:href|src)=["']\/(?:styles\.css|app\.js|assets\/)/],
     ['app.js', app, /["'`]\/(?:history\.json|assets\/)/],
   ];
   for (const [name, content, pattern] of forbidden) {
@@ -160,4 +182,5 @@ console.log(JSON.stringify({
   publicOrigin: options.publicOrigin || null,
   sourceCommit: history.latestCommit,
   commitCount: history.commitCount,
+  languages: ['en', 'ja'],
 }, null, 2));
