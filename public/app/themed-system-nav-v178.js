@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.144-five-system-navigation-v228-avatar-status';
+const VERSION='1.0.144-five-system-navigation-v227';
 const NAV_ID='cw-themed-system-nav',STYLE_ID='cw-themed-system-nav-style';
 const PATH=location.pathname,QUERY=new URLSearchParams(location.search);
 const EMBEDDED=window.self!==window.top||(QUERY.get('civweave')==='1'&&QUERY.get('cabinet')==='1');
