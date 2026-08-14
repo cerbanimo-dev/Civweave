@@ -7,7 +7,7 @@ const [publicSite, canonicalPages, territoryWorkflow, founderWorkflow, founderHe
   read('.github/workflows/deploy-civweave-pages.yml'),
   read('.github/workflows/deploy-new-new-york-territory-host-v1.yml'),
   read('.github/workflows/maintain-founder-source-node-v1.yml'),
-  read('scripts/ensure-founder-source-node-v1.mjs')
+  read('scripts/verify-founder-source-node-health-v1.mjs')
 ]);
 
 assert.match(publicSite, /PAGES_PROJECT:\s*cerbanimo-cc/);
@@ -38,7 +38,7 @@ assert.match(rootJob, /NODE_FABRIC_BINDING_TOKEN/);
 assert.doesNotMatch(rootJob, /NEW_NEW_YORK_CLOUDFLARE_API_TOKEN|NEW_NEW_YORK_CLOUDFLARE_ACCOUNT_ID/);
 
 assert.match(founderWorkflow, /cron:\s*'17 \*\/6 \* \* \*'/);
-assert.match(founderWorkflow, /ensure-founder-source-node-v1\.mjs --repair/);
+assert.match(founderWorkflow, /verify-founder-source-node-health-v1\.mjs --repair/);
 assert.match(founderWorkflow, /Browser traffic policy: not a public web origin/);
 assert.match(founderHealth, /browserTrafficPolicy:\s*'not-a-public-web-origin'/);
 assert.match(founderHealth, /machineTrafficPolicy:\s*'node-fabric-and-steward-operations'/);
