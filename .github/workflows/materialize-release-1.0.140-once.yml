@@ -30,6 +30,17 @@ jobs:
           npm version 1.0.140 --no-git-tag-version --allow-same-version
           node scripts/materialize-canonical-release.mjs
           test -f releases/1.0.140/release.json
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const path = 'config/release-contract.json';
+          const contract = JSON.parse(readFileSync(path, 'utf8'));
+          contract.canonical.current = {
+            version: '1.0.140',
+            path: 'releases/1.0.140',
+            status: 'current',
+          };
+          writeFileSync(path, `${JSON.stringify(contract, null, 2)}\n`, 'utf8');
+          NODE
           node scripts/verify-canonical-launch-release.mjs
       - name: Commit generated release and remove one-shot workflow
         shell: bash
