@@ -1,8 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.118-shared-guide-surface-v236-bubble-only-v425';
-const ROOT_ID='cw-shared-guide-surface-v236';
+const VERSION='1.0.119-shared-guide-surface-v236-source-truth-v1';
 const STYLE_ID='cw-shared-guide-surface-v236-style';
 const LAUNCHER_ID='cwp215-launcher';
 const CHAT_ROOT_ID='cw-persistent-guide-chat-v215';
@@ -15,21 +14,18 @@ const FALLBACK_PATHS=new Map([
   ['/app/anarchadia-console-v139.html','anarchadia']
 ]);
 const GUIDE=Object.freeze({
-  civweave:{name:'Weaveling',label:'Civweave',role:'Central mirror and orchestrator',avatar:'/app/assets/ai/weaveling.png',accent:'#d8dde7',accent2:'#8ee8ff',placeholder:'Tell Weaveling your wish, revise the route, or ask what connects next.'},
-  'living-school':{name:'Moss',label:'Living School',role:'Learning guide',avatar:'/app/assets/ai/moss.png',accent:'#59cf87',accent2:'#f3cf65',placeholder:'Ask Moss what you should learn, practice, or demonstrate.'},
-  cerbanimo:{name:'Kamiya',label:'Cerbanimo',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/kamiya.png',accent:'#ff54d3',accent2:'#55edff',placeholder:'Tell Kamiya what you want to build, plan, repair, or ship.'},
-  fellowfare:{name:'Rook',label:'FellowFare',role:'Quartermaster and exchange guide',avatar:'/app/assets/ai/rook.png',accent:'#f2a93b',accent2:'#55c49a',placeholder:'Tell Rook what you need, offer, or want to exchange.'},
-  anarchadia:{name:'Merlin',label:'Anarchadia',role:'Civic, feature-request, and automation guide',avatar:'/app/assets/ai/merlin.png',accent:'#ff4f9a',accent2:'#e9ff39',placeholder:'Tell Merlin what should change and how success should be tested.'}
+  civweave:{name:'Weaveling',label:'Civweave',role:'Central mirror and orchestrator',avatar:'/app/assets/ai/chat/weaveling-face-v255.webp',accent:'#d8dde7',accent2:'#8ee8ff',placeholder:'Tell Weaveling your wish, revise the route, or ask what connects next.'},
+  'living-school':{name:'Moss',label:'Living School',role:'Learning guide',avatar:'/app/assets/ai/chat/moss-face-v255.webp',accent:'#59cf87',accent2:'#f3cf65',placeholder:'Ask Moss what you should learn, practice, or demonstrate.'},
+  cerbanimo:{name:'Kamiya',label:'Cerbanimo',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/chat/kamiya-face-v255.webp',accent:'#ff54d3',accent2:'#55edff',placeholder:'Tell Kamiya what you want to build, plan, repair, or ship.'},
+  fellowfare:{name:'Rook',label:'FellowFare',role:'Quartermaster and exchange guide',avatar:'/app/assets/ai/chat/rook-face-v255.webp',accent:'#f2a93b',accent2:'#55c49a',placeholder:'Tell Rook what you need, offer, or want to exchange.'},
+  anarchadia:{name:'Merlin',label:'Anarchadia',role:'Civic, feature-request, and automation guide',avatar:'/app/assets/ai/chat/merlin-face-v255.webp',accent:'#ff4f9a',accent2:'#e9ff39',placeholder:'Tell Merlin what should change and how success should be tested.'}
 });
 
 if(globalThis.CivweaveSharedGuideSurfaceV236?.version===VERSION)return;
-
 const clean=(value,max=8000)=>String(value??'').trim().slice(0,max);
 let currentSystem='';
 let layoutObserver=null;
 let observedNav=null;
-let surfaceObserver=null;
-let repairQueued=false;
 let mounted=false;
 
 function detectSystem(){
@@ -61,117 +57,47 @@ html.cw-themed-system-nav-active body{padding-bottom:calc(var(--cw-themed-nav-he
 `;
   document.head?.append(style);
 }
-
-function removeEmbeddedGuideCards(){
-  document.getElementById(ROOT_ID)?.remove();
-  if(currentSystem==='fellowfare')document.querySelectorAll('.ffc144-rook').forEach(node=>node.remove());
-  document.documentElement.dataset.civweaveGuideSurfaceMode='bubble-only';
-  return true;
-}
-
-function buildInline(){removeEmbeddedGuideCards();return false}
+function buildInline(){return false}
 function renderTranscript(){return false}
 function setInlineInteractive(){return false}
-function syncInlineVisibility(){removeEmbeddedGuideCards();return false}
+function syncInlineVisibility(){return false}
+function removeEmbeddedGuideCards(){return false}
 
 function ownPageGuide(){
   const api=globalThis.CivweavePersistentGuideChatV215;
   if(!api||!currentSystem)return false;
   try{api.switchGuide?.(currentSystem);return true}catch{return false}
 }
-
 async function submitInline(text){
-  const value=clean(text,8000);
-  const api=globalThis.CivweavePersistentGuideChatV215;
+  const value=clean(text,8000),api=globalThis.CivweavePersistentGuideChatV215;
   if(!value||typeof api?.submitText!=='function')return false;
   api.switchGuide?.(currentSystem,{open:false});
   return (await api.submitText(value,currentSystem))!==false;
 }
-
 function normalizeFloatingLayout(){
   const themed=document.getElementById('cw-themed-system-nav');
-  if(themed){
-    const height=Math.min(72,Math.max(50,Math.round(themed.getBoundingClientRect().height||0)));
-    if(height)document.documentElement.style.setProperty('--cw-themed-nav-height',`${height}px`);
-  }
+  if(themed){const height=Math.min(72,Math.max(50,Math.round(themed.getBoundingClientRect().height||0)));if(height)document.documentElement.style.setProperty('--cw-themed-nav-height',`${height}px`)}
   document.documentElement.dataset.civweaveFloatingContract='v236';
 }
-
 function observeNav(){
   if(!('ResizeObserver'in globalThis))return false;
   if(!layoutObserver)layoutObserver=new ResizeObserver(normalizeFloatingLayout);
-  const nav=document.getElementById('cw-themed-system-nav');
-  if(!nav)return false;
-  if(observedNav!==nav){
-    if(observedNav)try{layoutObserver.unobserve(observedNav)}catch{}
-    observedNav=nav;
-    layoutObserver.observe(nav);
-  }
+  const nav=document.getElementById('cw-themed-system-nav');if(!nav)return false;
+  if(observedNav!==nav){if(observedNav)try{layoutObserver.unobserve(observedNav)}catch{};observedNav=nav;layoutObserver.observe(nav)}
   return true;
 }
-
-function ensureFloatingRuntime(){
-  ownPageGuide();
-  observeNav();
-  removeEmbeddedGuideCards();
-  normalizeFloatingLayout();
-}
-
-function repairSurface(){
-  repairQueued=false;
-  if(!currentSystem||!document.documentElement?.isConnected)return false;
-  removeEmbeddedGuideCards();
-  observeNav();
-  normalizeFloatingLayout();
-  return true;
-}
-
-function scheduleRepair(){
-  if(repairQueued)return;
-  repairQueued=true;
-  queueMicrotask(repairSurface);
-}
-
-function watchSurface(){
-  if(surfaceObserver||!document.body)return false;
-  surfaceObserver=new MutationObserver(records=>{
-    if(records.some(record=>record.addedNodes.length))scheduleRepair();
-  });
-  surfaceObserver.observe(document.body,{childList:true,subtree:true});
-  return true;
-}
-
+function repairSurface(){observeNav();normalizeFloatingLayout();return true}
 function mount(){
   if(mounted)return;
   mounted=true;
-  currentSystem=detectSystem();
-  if(!currentSystem)return;
-  installStyle();
-  removeEmbeddedGuideCards();
-  ensureFloatingRuntime();
-  watchSurface();
-  addEventListener('civweave:persistent-guide-chat-ready',()=>{ownPageGuide();removeEmbeddedGuideCards();observeNav();normalizeFloatingLayout()});
+  currentSystem=detectSystem();if(!currentSystem)return;
+  installStyle();ownPageGuide();observeNav();normalizeFloatingLayout();
+  addEventListener('civweave:persistent-guide-chat-ready',()=>{ownPageGuide();observeNav();normalizeFloatingLayout()});
   addEventListener('resize',normalizeFloatingLayout,{passive:true});
   document.documentElement.dataset.civweaveGuideSurface=VERSION;
+  document.documentElement.dataset.civweaveGuideSurfaceMode='bubble-only';
 }
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});else mount();
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});
-else mount();
-
-globalThis.CivweaveSharedGuideSurfaceV236=Object.freeze({
-  version:VERSION,
-  mode:'bubble-only',
-  detectSystem,
-  guideFor:system=>GUIDE[system]||null,
-  renderTranscript,
-  normalizeFloatingLayout,
-  ownPageGuide,
-  submitInline,
-  syncInlineVisibility,
-  setInlineInteractive,
-  buildInline,
-  repairSurface,
-  removeEmbeddedGuideCards,
-  mount
-});
+globalThis.CivweaveSharedGuideSurfaceV236=Object.freeze({version:VERSION,mode:'bubble-only',sourceTruth:true,detectSystem,guideFor:system=>GUIDE[system]||null,renderTranscript,normalizeFloatingLayout,ownPageGuide,submitInline,syncInlineVisibility,setInlineInteractive,buildInline,repairSurface,removeEmbeddedGuideCards,mount});
 })();
