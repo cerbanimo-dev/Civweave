@@ -80,6 +80,22 @@ Realm code should request the canonical guide window. It should not create anoth
 
 Settings may configure and manage downloaded models. Opening Settings must never start inference, probe a provider, validate cached weights, run a health test, or warm a model. Those actions require their own explicit user intent.
 
+## Private messaging
+
+- Canonical owner: `public/app/civweave-private-messaging-v1.js`
+- Setup caller: `public/app/hub-mail-claim-v1.js`
+- Offline mesh dependency: `public/app/local-object-mesh-v146.js`
+- Online relay authority: `cloudflare/mail/src/index-v4.mjs`
+- Canonical API: `globalThis.CivweavePrivateMessagingV1`
+
+Private messaging is one encrypted-envelope system with multiple transports, not a mail client plus a mesh chat that happen to share a screen. The device creates the private-message envelope and encrypts the plaintext before either transport sees it. Nearby/offline exchange uses the local object mesh; internet catch-up uses the hidden Civweave relay. Both carry the same envelope UUID so duplicate arrival converges locally.
+
+The member-facing identity is `@username`. The derived `username_pm@civweave.cc` address is an internal routing slot only. It must not be shown as the user's email address, offered to outside mail clients, or accepted by SMTP. Paid human-visible email is a separate entitlement and account surface.
+
+Realm code may call the canonical API or host a presentation surface. It may not create its own username registry, message database, encryption owner, key format, online relay protocol, or mesh message format. New UI should subscribe to canonical PM events rather than intercepting or cloning transport behavior.
+
+The v1 P-256 ECDH + HKDF + AES-GCM envelope is a baseline transport-privacy layer. Do not describe it as a mature Signal-equivalent protocol until forward secrecy, multi-device fanout, key transparency, prekeys/rotation, and verification UX are implemented and reviewed.
+
 ## Radio and review
 
 - Radio owner: `public/app/system-radio-agent-v233.js`
