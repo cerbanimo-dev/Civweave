@@ -62,6 +62,7 @@ assert(wrapper.includes('/service-worker-installed-launch-v282.js?v=installed-pw
 assert(wrapper.includes('/service-worker-release-coherence-v220.js?v=release-coherence-v226'),'Worker wrapper does not pin release coherence.');
 assert(wrapper.includes('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281'),'Worker wrapper does not pin shell integrity.');
 assert(wrapper.includes('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280'),'Worker wrapper does not pin resumable campus v280.');
+assert(wrapper.includes('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1'),'Worker wrapper does not pin the install-only shell repair.');
 const cleanupListeners=evaluate(cleanup,'living-school-cleanroom-worker.js');
 const coherenceListeners=evaluate(coherence,'code-coherence-worker.js');
 const coreListeners=evaluate(core,'lightweight-core-worker.js');
@@ -80,7 +81,9 @@ assert(combined.filter(row=>row.type==='message').length>=3,'Combined worker los
 assert(cleanup.includes('event.stopImmediatePropagation()'),'Living School requests are not isolated before generic caching.');
 assert(installedLaunch.includes("const V282_CAMPUS_PATH='/app/working-campus-v156.html'"),'Installed launch worker lost the Working Campus recovery path.');
 assert(installedLaunch.includes("policy:'installed-entry-then-working-campus-never-installer-substitution'"),'Installed launch worker can substitute the installer again or lose campus recovery.');
-assert(shellRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js']"),'Installer launch guard is no longer retained by the shell repair cache lane.');
+assert(shellRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'Repair-only installer guard is no longer retained by the shell repair cache lane.');
+assert(shellRepair.includes('browserRuntime:false'),'Shell repair no longer records the no-browser-runtime contract.');
+assert(!shellRepair.includes('installer-online-fallback-v225.js'),'Shell repair can resurrect the online fallback again.');
 assert(integrity.includes("crypto.subtle.digest('SHA-256'"),'Integrity worker no longer verifies SHA-256.');
 assert(integrity.includes('lastKnownGoodCache'),'Integrity worker no longer retains a previous shell cache.');
 assert(offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'"),'Offline worker revision drifted from v280.');
@@ -89,4 +92,4 @@ assert(release.includes('working-campus-v156.part5.txt'),'Release policy omits c
 assert(canonical.includes("headers.set('x-civweave-package',REVISION)"),'Canonical navigation does not authenticate package requests.');
 assert(canonical.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical navigation fallback policy drifted.');
 for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
-console.log(JSON.stringify({ok:true,revision:'v288-code-coherence-v294-installed-launch-worker-stack',legacyBridge:true,duplicateGlobalConstCrash:false,cleanroomFetchBoundary:true,codeCoherence:'network-first',retainedOfflineCore:true,installedLaunch:true,installedLaunchCampusRecovery:true,installerGuardOfflineCached:true,installerState:true,shellIntegrity:true,resumableCampus:'v280',campusFragmentCoherence:true,redirectSafety:true,shellSelfRepair:true,canonicalPackageNavigation:true,canonicalSystems:5,importLayers:orderedImports.length},null,2));
+console.log(JSON.stringify({ok:true,revision:'v288-code-coherence-v294-installed-launch-worker-stack-install-only-pwa-v1',legacyBridge:true,duplicateGlobalConstCrash:false,cleanroomFetchBoundary:true,codeCoherence:'network-first',retainedOfflineCore:true,installedLaunch:true,installedLaunchCampusRecovery:true,installerGuardOfflineCached:true,installerState:true,shellIntegrity:true,resumableCampus:'v280',campusFragmentCoherence:true,redirectSafety:true,shellSelfRepair:true,canonicalPackageNavigation:true,canonicalSystems:5,importLayers:orderedImports.length,browserRuntime:false},null,2));
