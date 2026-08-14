@@ -106,3 +106,7 @@ Capacity responses expose both target and funded values so UI can distinguish as
 ## Deployment constraint
 
 The Civweave allocator can account for paid reserve-backed overage while preserving Cloudflare's free daily allocation as the first source of compute. The deployed Worker must still be on a Cloudflare plan/capability that permits paid Workers AI overage before reserve-backed capacity above the free Cloudflare ceiling can actually be consumed. The capacity model intentionally keeps that deployment capability separate from membership accounting so a configuration mistake cannot silently create an unbounded bill.
+
+## Release validation
+
+Release `1.0.134` materializes this policy into the canonical release tree. The focused capacity arithmetic, shared top-up settlement, server-AI commerce, Cloudflare launch-kit, marketplace-surface, canonical-core, and canonical-launch release checks all pass against the materialized release before it is considered merge-ready.
