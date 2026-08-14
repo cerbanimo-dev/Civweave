@@ -23,6 +23,8 @@ const integrity=JSON.parse(integrityText);
 assert.doesNotThrow(()=>new vm.Script(guard,{filename:'working-campus-return-guard-v425.js'}),'Return guard does not compile.');
 for(const token of [
   "const VERSION='working-campus-return-v425'",
+  "const REVISION='working-campus-return-v425-race-safe-v1'",
+  "const BOOT_KEY='civweave.install-boundary.boot.v228'",
   "addEventListener('pagehide',holdBfCache,true)",
   "addEventListener('pageshow',resume,true)",
   'if(!event?.persisted)return;',
@@ -31,6 +33,8 @@ for(const token of [
   'forceReveal',
   'renderFailSafe',
   'RECOVERY_WINDOW_MS=30_000',
+  'if(verificationPromise)return verificationPromise',
+  'previous.documentToken===DOCUMENT_TOKEN',
   'location.replace(canonicalUrl(reason))',
   "location.assign('/app/index.html?manage=downloads&source=working-campus-recovery')"
 ])assert(guard.includes(token),`Return guard is missing ${token}.`);
@@ -64,8 +68,9 @@ const windowListeners=new Map(),documentListeners=new Map();
 const listen=(map,type,fn)=>{const list=map.get(type)||[];list.push(fn);map.set(type,list)};
 const app={isConnected:true,style:{setProperty(){}},removeAttribute(){},getBoundingClientRect:()=>({width:900,height:700})};
 const generic={isConnected:true,style:{setProperty(){}},removeAttribute(){},getBoundingClientRect:()=>({width:900,height:700})};
-const documentElement={isConnected:true,dataset:{},style:{setProperty(){}},removeAttribute(){}};
-const body={isConnected:true,style:{setProperty(){}},removeAttribute(){},append(){}};
+const documentElement={isConnected:true,dataset:{},style:{setProperty(){}},removeAttribute(){},setAttribute(){}};
+let bodyAppendCalls=0;
+const body={isConnected:true,style:{setProperty(){}},removeAttribute(){},append(){bodyAppendCalls+=1}};
 const selectors=new Map([
   ['main.app',app],['main.app>header.top',generic],['main.app>.campus',generic],['main.app>.main',generic],['nav.bottom',generic],['#conversation',generic],['#workspace',generic],['.version-chip',{...generic,textContent:`v${version}`}]
 ]);
@@ -78,6 +83,7 @@ const context={
   addEventListener:(type,fn)=>listen(windowListeners,type,fn),dispatchEvent:()=>true,
   CustomEvent:class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}},
   sessionStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value)),removeItem:key=>storage.delete(key)},
+  localStorage:{getItem:()=>null,setItem(){},removeItem(){}},
   location:{origin:'https://civweave.pages.dev',pathname:'/app/working-campus-v156.html',search:'',href:'https://civweave.pages.dev/app/working-campus-v156.html',replace:()=>{replaceCalls+=1},assign:()=>{}},
   document:{readyState:'loading',visibilityState:'visible',title:`Civweave Working Campus · v${version}`,documentElement,body,querySelector:selector=>selectors.get(selector)||null,addEventListener:(type,fn)=>listen(documentListeners,type,fn),createElement:()=>generic}
 };
@@ -85,6 +91,9 @@ context.globalThis=context;
 vm.runInNewContext(guard,context,{filename:'working-campus-return-guard-v425.js'});
 assert.equal(typeof context.CivweaveWorkingCampusReturnGuardV425?.inspect,'function','Guard API did not install.');
 assert.equal(context.CivweaveWorkingCampusReturnGuardV425.inspect().healthy,true,'Healthy Working Campus is misclassified.');
+assert.equal(context.CivweaveWorkingCampusReturnGuardV425.revision,'working-campus-return-v425-race-safe-v1','Race-safe revision did not install.');
+assert.equal(storage.get('civweave.install-boundary.boot.v228'),'1','Return guard did not preauthorize the current v228 install boundary.');
+assert.equal(storage.has('civweave.install-boundary.boot.v227'),false,'Return guard left the stale v227 boundary key behind.');
 let stopped=0;
 const pagehide=windowListeners.get('pagehide')?.[0];
 assert(pagehide,'Guard did not register pagehide first.');
@@ -95,4 +104,17 @@ pagehide({persisted:false,stopImmediatePropagation(){stopped+=1}});
 assert.equal(stopped,1,'Non-persisted navigation was incorrectly quarantined.');
 assert.equal(replaceCalls,0,'Healthy guard simulation unexpectedly reloaded the campus.');
 
-console.log(JSON.stringify({ok:true,version,revision:'working-campus-return-v425-v317-lifecycle',committedTreeReadOnly:true,workerIntegrityReleaseMatch:true,bfcachePagehideQuarantined:true,oneShotRecovery:true,visibleFailsafe:true,downloadsReturnCovered:true,settingsOwner:'settings-gateway-v317'},null,2));
+for(const selector of [...selectors.keys()])if(selector!=='.version-chip')selectors.delete(selector);
+const firstRecovery=context.CivweaveWorkingCampusReturnGuardV425.verifyOrRecover('initial-paint');
+const duplicateRecovery=context.CivweaveWorkingCampusReturnGuardV425.verifyOrRecover('pageshow');
+assert.equal(firstRecovery,duplicateRecovery,'Concurrent initial-paint/pageshow checks were not coalesced into one verification.');
+const [firstResult,duplicateResult]=await Promise.all([firstRecovery,duplicateRecovery]);
+assert.equal(replaceCalls,1,'Concurrent unhealthy checks must schedule exactly one canonical recovery navigation.');
+assert.equal(bodyAppendCalls,0,'Same-document concurrent checks rendered the fail-safe before the recovery navigation could complete.');
+assert.equal(firstResult.reloading,true,'Primary unhealthy check did not enter recovery navigation.');
+assert.equal(duplicateResult.reloading,true,'Coalesced unhealthy check did not share recovery state.');
+const recoveryRecord=JSON.parse(storage.get('civweave.working-campus.return-recovery.v425')||'null');
+assert.equal(recoveryRecord?.documentToken,context.CivweaveWorkingCampusReturnGuardV425.documentToken,'Recovery record is not scoped to the current document.');
+assert.equal(recoveryRecord?.revision,'working-campus-return-v425-race-safe-v1','Recovery record lost the race-safe revision marker.');
+
+console.log(JSON.stringify({ok:true,version,revision:'working-campus-return-v425-race-safe-v1-v317-lifecycle',committedTreeReadOnly:true,workerIntegrityReleaseMatch:true,bfcachePagehideQuarantined:true,oneShotRecovery:true,concurrentChecksCoalesced:true,sameDocumentFailsafeSuppressed:true,currentBoundaryPreauthorized:'v228',visibleFailsafe:true,downloadsReturnCovered:true,settingsOwner:'settings-gateway-v317'},null,2));
