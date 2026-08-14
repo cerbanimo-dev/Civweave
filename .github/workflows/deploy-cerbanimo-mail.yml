@@ -23,6 +23,9 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CERBANIMO_GMAIL_CLIENT_ID: ${{ secrets.CERBANIMO_GMAIL_CLIENT_ID }}
+      CERBANIMO_GMAIL_CLIENT_SECRET: ${{ secrets.CERBANIMO_GMAIL_CLIENT_SECRET }}
+      CERBANIMO_GMAIL_REFRESH_TOKEN: ${{ secrets.CERBANIMO_GMAIL_REFRESH_TOKEN }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -39,6 +42,21 @@ jobs:
           npx --yes wrangler@latest whoami
       - name: Deploy secure mail doorway
         run: npx --yes wrangler@latest deploy --config cloudflare/cerbanimo-mail/wrangler.jsonc
+      - name: Configure optional Gmail system sender
+        shell: bash
+        run: |
+          set -euo pipefail
+          configured=0
+          if [ -n "${CERBANIMO_GMAIL_CLIENT_ID:-}" ] && [ -n "${CERBANIMO_GMAIL_CLIENT_SECRET:-}" ] && [ -n "${CERBANIMO_GMAIL_REFRESH_TOKEN:-}" ]; then
+            printf '%s' "$CERBANIMO_GMAIL_CLIENT_ID" | npx --yes wrangler@latest secret put CERBANIMO_GMAIL_CLIENT_ID --config cloudflare/cerbanimo-mail/wrangler.jsonc
+            printf '%s' "$CERBANIMO_GMAIL_CLIENT_SECRET" | npx --yes wrangler@latest secret put CERBANIMO_GMAIL_CLIENT_SECRET --config cloudflare/cerbanimo-mail/wrangler.jsonc
+            printf '%s' "$CERBANIMO_GMAIL_REFRESH_TOKEN" | npx --yes wrangler@latest secret put CERBANIMO_GMAIL_REFRESH_TOKEN --config cloudflare/cerbanimo-mail/wrangler.jsonc
+            configured=1
+            echo 'Cerbanimo Gmail system sender credentials synchronized.'
+          else
+            echo 'Gmail system-sender repository secrets are incomplete; mail portal remains available but recovery-email sending stays disabled.'
+          fi
+          echo "SYSTEM_MAILER_CONFIGURED=$configured" >> "$GITHUB_ENV"
       - name: Verify mail.cerbanimo.cc
         shell: bash
         run: |
@@ -51,6 +69,8 @@ jobs:
           if (payload?.ok !== true || payload?.schema !== 'cerbanimo.mail-portal.v1' || payload?.provider !== 'gmail') {
             throw new Error(`Unexpected Cerbanimo Mail health payload: ${JSON.stringify(payload)}`);
           }
+          const expected = process.env.SYSTEM_MAILER_CONFIGURED === '1';
+          if (expected && payload.systemMailerConfigured !== true) throw new Error('Gmail system sender secrets were supplied but the mail Worker does not report them active.');
           console.log(JSON.stringify(payload));
           NODE
               exit 0
