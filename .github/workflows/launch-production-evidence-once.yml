@@ -28,7 +28,9 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install deployment dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          npm install --prefix cloudflare/core --ignore-scripts --no-audit --no-fund
       - name: Prove runtime tree matches merged main
         shell: bash
         run: |
