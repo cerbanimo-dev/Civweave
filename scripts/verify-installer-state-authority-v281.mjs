@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 const index = await fs.readFile(new URL('../public/app/index.html', import.meta.url), 'utf8');
 const controller = await fs.readFile(new URL('../public/app/installer-state-machine-v281.js', import.meta.url), 'utf8');
+const offlineWorker = await fs.readFile(new URL('../public/service-worker-offline-v211-override.js', import.meta.url), 'utf8');
 
 assert.match(index, /\/app\/installer-state-machine-v281\.js\?v=installer-state-authority-v281-lazy/,
   'installer must lazy-load the v281 single-owner controller by a new pathname');
@@ -37,5 +38,9 @@ assert.match(controller, /addEventListener\('civweave:offline-campus-status'/,
   'offline progress should update from events rather than polling DOM copy');
 assert.match(controller, /addEventListener\?\.\('controllerchange'/,
   'service-worker controller changes should trigger explicit reconciliation');
+assert.match(controller, /const SYNC_TAG='civweave-campus-resume-v280'/,
+  'v281 UI controller must preserve the active worker background-sync wire protocol');
+assert.match(offlineWorker, /civweave-campus-resume-v280/,
+  'offline worker and v281 UI controller must agree on the background-sync tag');
 
 console.log('installer state authority v281: ok');
