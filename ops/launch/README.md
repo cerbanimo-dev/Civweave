@@ -2,7 +2,7 @@
 
 `public-launch-readiness-v1.json` is the machine-readable promotion record. The repository may continue to develop while a manual gate is `blocked`, but a public launch may not be declared until every manual gate is `pass` and its evidence field points to a durable record.
 
-The launch-hardening branch is materialized as canonical release **1.0.136**. Generated release, service-worker, and shell-integrity assets are produced by the repository's canonical materializer rather than edited by hand.
+The launch-hardening branch is materialized as canonical release **1.0.137**. Generated release, service-worker, and shell-integrity assets are produced by the repository's canonical materializer rather than edited by hand.
 
 ## Canonical commands
 
