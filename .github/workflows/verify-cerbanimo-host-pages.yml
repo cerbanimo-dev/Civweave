@@ -47,29 +47,47 @@ jobs:
             --public-origin https://civweave-test-garden.pages.dev \
             --pages-origin https://civweave-test-garden.pages.dev
 
-      - name: Verify portable host paths and local links
+      - name: Verify portable host paths, Japanese surface, and local links
         run: |
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
           const flagship = readFileSync('.verify-cerbanimo-flagship/index.html', 'utf8');
+          const flagshipJa = readFileSync('.verify-cerbanimo-flagship/ja/index.html', 'utf8');
           const hosted = readFileSync('.verify-cerbanimo-community/index.html', 'utf8');
+          const hostedJa = readFileSync('.verify-cerbanimo-community/ja/index.html', 'utf8');
           const hostedApp = readFileSync('.verify-cerbanimo-community/app.js', 'utf8');
           const surface = JSON.parse(readFileSync('.verify-cerbanimo-community/surface.json', 'utf8'));
           const history = JSON.parse(readFileSync('.verify-cerbanimo-community/history.json', 'utf8'));
+          const japaneseNames = [
+            '民織 / シヴウィーヴ / Civweave',
+            '生学舎 / リビング・スクール / Living School',
+            '神織 / セルバニモ / Cerbanimo',
+            '共市 / フェローフェア / FellowFare',
+            '自治郷 / アナーケイディア / Anarchadia',
+          ];
           const checks = [
             [flagship.includes('id="story"'), 'flagship story section'],
+            [flagshipJa.includes('<html lang="ja">'), 'flagship Japanese language marker'],
+            [flagshipJa.includes('名前について：'), 'Civweave kanji explainer'],
+            [flagshipJa.includes('<strong>名前：</strong>'), 'realm kanji explainers'],
+            [japaneseNames.every(name => flagshipJa.includes(name)), 'canonical Japanese realm names'],
+            [flagshipJa.includes('hreflang="ja"'), 'Japanese hreflang'],
             [hosted.includes('id="story"'), 'community story section'],
             [hosted.includes('/cerbanimo/assets/civweave-on.png'), 'community asset base'],
             [hosted.includes('Community Cerbanimo'), 'community host banner'],
             [hosted.includes('https://civweave-test-garden.pages.dev/">Open this node'), 'local-node CTA'],
+            [hostedJa.includes('/cerbanimo/assets/civweave-on.png'), 'Japanese community asset base'],
+            [hostedJa.includes('コミュニティ 神織'), 'Japanese community host banner'],
+            [hostedJa.includes('https://civweave-test-garden.pages.dev/ja/">この民織ノードを開く'), 'Japanese local-node CTA'],
             [hostedApp.includes('/cerbanimo/history.json'), 'community history path'],
             [hostedApp.includes('/cerbanimo/assets/weaveling.png'), 'community guide asset path'],
             [surface.role === 'community', 'community role marker'],
             [surface.hostId === 'test-garden', 'community host marker'],
             [surface.basePath === '/cerbanimo/', 'community base-path marker'],
+            [Array.isArray(surface.languages) && surface.languages.includes('en') && surface.languages.includes('ja'), 'surface language markers'],
             [history.surface?.hostId === 'test-garden', 'history surface marker'],
           ];
           const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);
           if (failures.length) throw new Error(`Cerbanimo host packaging failed: ${failures.join(', ')}`);
-          console.log(`Verified ${checks.length} Cerbanimo flagship/community packaging invariants.`);
+          console.log(`Verified ${checks.length} Cerbanimo flagship/community/Japanese packaging invariants.`);
           NODE
