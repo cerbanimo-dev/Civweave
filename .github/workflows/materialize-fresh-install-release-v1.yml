@@ -1,0 +1,42 @@
+name: Materialize fresh install release v1
+
+on:
+  push:
+    branches:
+      - fix/fresh-install-paths-v1
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repair branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+
+      - name: Commit generated release state
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            echo 'Release state is already materialized.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'materialize Civweave 1.0.150 fresh install repair'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
