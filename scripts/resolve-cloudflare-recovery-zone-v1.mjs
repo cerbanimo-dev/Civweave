@@ -5,6 +5,7 @@ const API = 'https://api.cloudflare.com/client/v4';
 const token = String(process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const accountId = String(process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const explicitZone = String(process.env.CIVWEAVE_RECOVERY_ZONE || '').trim().toLowerCase();
+const injectedZones = String(process.env.CIVWEAVE_RECOVERY_ZONES_JSON || '').trim();
 const outputPath = process.argv.includes('--output') ? process.argv[process.argv.indexOf('--output') + 1] : '';
 const safeName = name => /(^|[.-])(civweave|cerbanimo)([.-]|$)/i.test(String(name || ''));
 const forbidden = new Set(['commonweave.earth']);
@@ -30,22 +31,31 @@ function finish(result) {
   return packet;
 }
 
-if (!token || !accountId) {
-  finish({ status: 'pending', reason: 'cloudflare-credentials-unavailable', zoneId: null, zone: null, routingDomain: null, mailbox: null });
-  process.exit(0);
+let rawZones = null;
+if (injectedZones) {
+  try { rawZones = JSON.parse(injectedZones); }
+  catch {
+    finish({ status: 'pending', reason: 'invalid-injected-zone-list', zoneId: null, zone: null, routingDomain: null, mailbox: null });
+    process.exit(0);
+  }
+} else {
+  if (!token || !accountId) {
+    finish({ status: 'pending', reason: 'cloudflare-credentials-unavailable', zoneId: null, zone: null, routingDomain: null, mailbox: null });
+    process.exit(0);
+  }
+  const response = await fetch(`${API}/zones?account.id=${encodeURIComponent(accountId)}&per_page=100`, {
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok || payload.success !== true) {
+    const detail = (payload.errors || []).map(item => item.message || item.code).join('; ') || `HTTP ${response.status}`;
+    finish({ status: 'pending', reason: 'zone-list-unavailable', detail, zoneId: null, zone: null, routingDomain: null, mailbox: null });
+    process.exit(0);
+  }
+  rawZones = payload.result;
 }
 
-const response = await fetch(`${API}/zones?account.id=${encodeURIComponent(accountId)}&per_page=100`, {
-  headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-});
-const payload = await response.json().catch(() => ({}));
-if (!response.ok || payload.success !== true) {
-  const detail = (payload.errors || []).map(item => item.message || item.code).join('; ') || `HTTP ${response.status}`;
-  finish({ status: 'pending', reason: 'zone-list-unavailable', detail, zoneId: null, zone: null, routingDomain: null, mailbox: null });
-  process.exit(0);
-}
-
-const zones = (Array.isArray(payload.result) ? payload.result : [])
+const zones = (Array.isArray(rawZones) ? rawZones : [])
   .filter(zone => zone?.id && zone?.name && zone.status === 'active')
   .map(zone => ({ id: String(zone.id), name: String(zone.name).toLowerCase() }));
 
