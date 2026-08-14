@@ -1,0 +1,43 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+import { webcrypto } from 'node:crypto';
+import { TextEncoder, TextDecoder } from 'node:util';
+const ROOT=new URL('../',import.meta.url);
+const paths=['public/app/peer-local-plan-borrow-v1.js','public/app/validation-labor-rewards-v1.js','public/app/proposal-voting-gate-v2.js','public/app/node-ai-mesh-v1.js'];
+for(const path of paths){const text=fs.readFileSync(new URL(path,ROOT),'utf8');assert.doesNotThrow(()=>new vm.Script(text),`${path} has invalid JavaScript syntax`)}
+const offline=JSON.parse(fs.readFileSync(new URL('public/app/offline-package-v208.json',ROOT),'utf8'));
+for(const asset of ['/app/peer-local-plan-borrow-v1.js','/app/validation-labor-rewards-v1.js','/app/proposal-voting-gate-v2.js'])assert(offline.assets.includes(asset),`${asset} is not in the offline package`);
+const meshSource=fs.readFileSync(new URL('public/app/node-ai-mesh-v1.js',ROOT),'utf8');
+for(const token of ['CivweavePeerLocalPlanBorrowV1','CivweaveValidationLaborRewardsV1','CivweaveProposalVotingGateV2','ensureSupport'])assert(meshSource.includes(token),`node AI mesh is missing ${token}`);
+const peerSource=fs.readFileSync(new URL('public/app/peer-local-plan-borrow-v1.js',ROOT),'utf8');
+for(const token of ['ask-every-time','requesterNeuronCharge:0','community-object-direct','nodeId','structuredOutput','planning'])assert(peerSource.includes(token),`peer borrow runtime is missing ${token}`);
+class StorageMock{constructor(){this.map=new Map()}getItem(k){return this.map.has(String(k))?this.map.get(String(k)):null}setItem(k,v){this.map.set(String(k),String(v))}removeItem(k){this.map.delete(String(k))}}
+class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}}
+const noop=()=>{};
+const rewardEntries=[];
+const rewardContext={console,crypto:webcrypto,TextEncoder,TextDecoder,structuredClone,localStorage:new StorageMock(),CustomEvent,dispatchEvent:noop,addEventListener:noop,setTimeout:()=>1,clearTimeout:noop,setInterval:()=>1,clearInterval:noop,document:undefined,globalThis:null,CivweaveCanonicalRewardsV2:{appendEntry:async row=>{rewardEntries.push(structuredClone(row));return{entry:row,duplicate:false}}}};
+rewardContext.globalThis=rewardContext;vm.createContext(rewardContext);vm.runInContext(fs.readFileSync(new URL('public/app/validation-labor-rewards-v1.js',ROOT),'utf8'),rewardContext);
+const rewards=rewardContext.CivweaveValidationLaborRewardsV1;assert.ok(rewards);
+await rewards.awardValidation({kind:'learning-module',validationId:'v-learning',validatorId:'validator-a',projectId:'project-1'});
+await rewards.awardValidation({kind:'task',validationId:'v-task',validatorId:'validator-a',projectId:'project-1'});
+const shallow=await rewards.awardValidation({kind:'generated-offering',validationId:'v-offer-shallow',validatorId:'validator-a',projectId:'project-1',exhaustiveProof:{runCount:1,coverage:.7,rubricChecks:2}});assert.equal(shallow.awarded,false);
+const deep=await rewards.awardValidation({kind:'generated-offering',validationId:'v-offer',validatorId:'validator-a',projectId:'project-1',exhaustiveProof:{runs:[{coverage:.9,rubricChecks:[1,2,3,4]},{coverage:.91,rubricChecks:[1,2,3,4]}]}});assert.equal(deep.awarded,true);
+await rewards.awardValidation({kind:'quorum-hash',validationId:'v-quorum',validatorId:'validator-a',projectId:'project-1'});
+assert.equal(rewardEntries.filter(x=>x.assetType==='acorn'&&x.amount===1).length,2,'learning + quorum should mint one acorn each');
+assert.equal(rewardEntries.filter(x=>x.assetType==='button'&&x.amount===1).length,1,'task should mint one button');
+assert.equal(rewardEntries.filter(x=>x.assetType==='acorn'&&x.amount===2).length,1,'offering should mint two acorns');
+assert.equal(rewardEntries.filter(x=>x.assetType==='button'&&x.amount===2).length,1,'offering should mint two buttons');
+const cotokens=rewards.cotokenProjection(undefined,'project-1');assert.equal(cotokens.hours,.4);assert.equal(cotokens.cotokens,4);assert.equal((await rewards.verifyCotokenLedger()).ok,true);
+let activeDevice='device:a';const voteEvents=[];
+const voteStorage=new StorageMock();const questState={schema:'cerbanimo.quest-engine.v144',version:1,quests:[{id:'quest-1',status:'active',tasks:[]}],preferences:{activeQuestId:'quest-1'}};let committedTasks=0;
+const voteContext={console,crypto:webcrypto,TextEncoder,structuredClone,localStorage:voteStorage,CustomEvent,dispatchEvent:event=>voteEvents.push(event),addEventListener:noop,setTimeout:()=>1,clearTimeout:noop,setInterval:()=>1,clearInterval:noop,document:undefined,globalThis:null,CivweaveLocalMeshV146:{deviceId:async()=>activeDevice,status:()=>({sessions:[]}),createObject:async input=>input,listObjects:async()=>[]},CivweaveCerbanimoQuestV144:{readState:()=>structuredClone(questState),addTask:(questId,input)=>{committedTasks++;questState.quests[0].tasks.push({...input,id:`task-${committedTasks}`});return{ok:true,task:questState.quests[0].tasks.at(-1)}}}};
+voteContext.globalThis=voteContext;vm.createContext(voteContext);vm.runInContext(fs.readFileSync(new URL('public/app/proposal-voting-gate-v2.js',ROOT),'utf8'),voteContext);const gate=voteContext.CivweaveProposalVotingGateV2;assert.ok(gate);assert.equal(gate.patchCerbanimo(),true);
+const voters=['device:a','device:b','device:c'].map(deviceId=>({voterId:deviceId,deviceId}));
+const proposal=await gate.createProposal({system:'cerbanimo',containerId:'quest-1',projectId:'project-1',additionType:'task',addition:{title:'Consensus task'},eligibleVoters:voters});
+activeDevice='device:a';await gate.castVote(proposal.proposalId,{decision:'approve'});activeDevice='device:b';await gate.castVote(proposal.proposalId,{decision:'approve'});activeDevice='device:a';const quorum=await gate.computeQuorum(proposal.proposalId);assert.equal(quorum.passed,true);const firstHash=quorum.quorumHash;const checked=await gate.validateQuorumReceipt(quorum);assert.equal(checked.ok,true);assert.equal(checked.recomputed.quorumHash,firstHash,'quorum hash must not change when recomputed');
+const commit=await gate.commitCerbanimoTask(proposal.proposalId);assert.equal(commit.ok,true);assert.equal(committedTasks,1);const duplicate=await gate.commitCerbanimoTask(proposal.proposalId);assert.equal(duplicate.duplicate,true);assert.equal(committedTasks,1,'approved task must commit idempotently');
+const hashValidation=await gate.validateQuorumHashes(proposal.proposalId,{validatorId:'validator-q'});assert.equal(hashValidation.ok,true);assert(voteEvents.some(event=>event.type==='civweave:quorum-hash-validated'));
+const living={school:{id:'school-1',modules:[]},progress:{}};voteStorage.setItem('civweave.living-school.cabinet.v151',JSON.stringify(living));activeDevice='device:a';const moduleProposal=await gate.createProposal({system:'living-school',containerId:'school-1',projectId:'project-2',additionType:'module',addition:{id:'module-new',title:'New module'},eligibleVoters:voters});await gate.castVote(moduleProposal.proposalId,{decision:'approve'});activeDevice='device:b';await gate.castVote(moduleProposal.proposalId,{decision:'approve'});activeDevice='device:a';await gate.computeQuorum(moduleProposal.proposalId);const moduleCommit=await gate.commitCurriculumModule(moduleProposal.proposalId);assert.equal(moduleCommit.ok,true);assert.equal(JSON.parse(voteStorage.getItem('civweave.living-school.cabinet.v151')).school.modules.length,1);
+const peerContext={console,crypto:webcrypto,TextEncoder,structuredClone,localStorage:new StorageMock(),CustomEvent,dispatchEvent:noop,addEventListener:noop,document:undefined,location:{origin:'https://example.test',href:'https://example.test/app'},navigator:{onLine:false},globalThis:null,CivweaveAICapabilityBrokerV268:{requirements:()=>({profile:'agentic',structuredOutput:true,planning:true,requiresTools:false,externalResearch:false,vision:false})}};peerContext.globalThis=peerContext;vm.createContext(peerContext);vm.runInContext(peerSource,peerContext);const peer=peerContext.CivweavePeerLocalPlanBorrowV1;const eligibility=peer.shouldOffer({schema:{type:'object'},responseFormat:'json',executionProfile:'agentic'});assert.equal(eligibility.eligible,true);assert.equal(eligibility.neurons.exhausted,true);
+console.log('peer compute, validation labor rewards, Cotokens, and proposal quorum gates verified');
