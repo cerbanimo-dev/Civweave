@@ -4,9 +4,11 @@ import {access,readFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const exists=path=>access(new URL(path,root)).then(()=>true,()=>false);
-const [topbar,campusHtml,faces,workspace,hardening,boundary,workerRepair,workerEntry,manifestText,installedEntry,realmHtml,familyLoader,release,pkgText]=await Promise.all([
+const [topbar,campusHtml,campusScript,campusSymbol,faces,workspace,hardening,boundary,workerRepair,workerEntry,manifestText,installedEntry,realmHtml,familyLoader,release,pkgText]=await Promise.all([
   read('public/app/working-campus-topbar-v243.js'),
   read('public/app/working-campus-v156.html'),
+  read('public/app/working-campus-v156.js'),
+  read('public/app/logos/civweave-symbol.svg'),
   read('public/app/shared-chat-face-icons-v255.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/mobile-ai-hardening-v302.js'),
@@ -20,12 +22,14 @@ const [topbar,campusHtml,faces,workspace,hardening,boundary,workerRepair,workerE
   read('VERSION'),
   read('package.json')
 ]);
-for(const source of [topbar,faces,workspace,hardening,boundary,workerRepair,workerEntry,installedEntry,familyLoader])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
+for(const source of [topbar,campusScript,faces,workspace,hardening,boundary,workerRepair,workerEntry,installedEntry,familyLoader])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
 const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
 check('release and package are coherent',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version);
-check('working campus source owns the Civweave brand icon before paint',campusHtml.includes('id="brand-home"')&&campusHtml.includes('src="/app/logos/civweave-symbol.svg"'));
+check('working campus source owns the Civweave brand fallback before paint',campusHtml.includes('id="brand-home"')&&campusHtml.includes('src="/app/logos/civweave-symbol.svg"')&&campusSymbol.includes('/app/logos/civweave-night-logo.jpg'));
+check('approved Civweave day and night logos are packaged',await exists('public/app/logos/civweave-day-logo.jpg')&&await exists('public/app/logos/civweave-night-logo.jpg'));
+check('working campus follows the local clock for the visible Civweave logo',campusScript.includes("const BRAND_DAY='/app/logos/civweave-day-logo.jpg'")&&campusScript.includes("const BRAND_NIGHT='/app/logos/civweave-night-logo.jpg'")&&campusScript.includes('hour>=6&&hour<18')&&campusScript.includes('next.setHours(18,0,0,0)')&&campusScript.includes('next.setHours(6,0,0,0)')&&campusScript.includes("document.addEventListener('visibilitychange'")&&campusScript.includes("addEventListener('pageshow'")&&!campusScript.includes("brand.src='/app/logos/civweave-app-icon.png'"));
 check('topbar respects source-owned branding instead of repairing it',topbar.includes('sourceTruthBrand:true')&&!topbar.includes('function repairBrand()')&&!topbar.includes('cw243ValidBrand')&&!topbar.includes('BRAND_ICON'));
 check('mobile topbar uses two safe columns',topbar.includes('grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important')&&topbar.includes('grid-template-areas:"brand brand" "modes modes" "map downloads" "settings review" "theme theme"!important'));
 check('mobile downloads control remains independently tappable',topbar.includes("DOWNLOADS_BUTTON_ID='cw-working-campus-downloads-v243'")&&topbar.includes("downloadsButton.innerHTML='<span aria-hidden=\"true\">⇩</span><span>Downloads</span>'")&&topbar.includes('grid-area:downloads'));
@@ -70,4 +74,4 @@ for(const path of ['/app/persistent-guide-chat-v215.js','/app/persistent-guide-v
 check('service worker retains current chat repair and freeze cache-bust while purging mobile hardening assets',workerEntry.includes('chat-avatar-visible-v346')&&workerEntry.includes('freeze=mobile-chat-freeze-v347')&&workerRepair.includes("const REVISION='chat-avatar-visible-v346'")&&workerRepair.includes("const FREEZE_REVISION='mobile-chat-freeze-v347'")&&workerRepair.includes("const HARDENING_REVISION='mobile-ai-hardening-v302'")&&workerRepair.includes("'/app/mobile-ai-hardening-v302.js'")&&workerRepair.includes("'/app/local-ai/test-pulse-v269.js'"));
 check('worker installs with skipWaiting',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())}"));
 
-console.log(JSON.stringify({ok:true,version,revision:'mobile-v347-source-truth-branding',checks:checks.length,mobile:{topbarRows:'brand / modes / map+downloads / settings+review / theme',realmCards:'2-column then 1-column',dynamicViewport:true,chat:'full-visual-viewport'},chat:{canonicalOwner:'v242',deletedLegacyOwners:3,embeddedComposerDelegates:true,modelFallback:true,freezeGuard:'v347',launcherSourceTruth:true},localAI:{interruptedTestRecovery:true,downloadsPreserved:true,mobileSafeHealth:true},installedBoot:{updaterFirst:true,boundedWorkerUpdate:true,workerActivation:true,legacyCachePurge:true},presentation:{brandSourceTruth:true,runtimeLogoRepair:false}},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'mobile-v347-day-night-branding',checks:checks.length,mobile:{topbarRows:'brand / modes / map+downloads / settings+review / theme',realmCards:'2-column then 1-column',dynamicViewport:true,chat:'full-visual-viewport'},chat:{canonicalOwner:'v242',deletedLegacyOwners:3,embeddedComposerDelegates:true,modelFallback:true,freezeGuard:'v347',launcherSourceTruth:true},localAI:{interruptedTestRecovery:true,downloadsPreserved:true,mobileSafeHealth:true},installedBoot:{updaterFirst:true,boundedWorkerUpdate:true,workerActivation:true,legacyCachePurge:true},presentation:{brandSourceTruth:true,runtimeLogoRepair:false,dayNightClockCycle:true,nightFallbackBeforeClock:true}},null,2));
