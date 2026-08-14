@@ -7,9 +7,15 @@ import {
   issueTerritoryHostAdmission,
   claimTerritoryHostAdmission
 } from './territory-host-authority-v1.mjs';
+import {
+  ROOT_HOST_ADMISSION_POLICY,
+  admitRootOrdinaryHost,
+  recordHostTerritoryAssignment
+} from './root-host-admission-v1.mjs';
 
 export * from './stripe-connect-v2-entry.mjs';
 export * from './territory-host-authority-v1.mjs';
+export * from './root-host-admission-v1.mjs';
 
 const json = (value, status = 200) => new Response(JSON.stringify(value, null, 2), {
   status,
@@ -21,7 +27,8 @@ async function territoryHostRoute(request, env) {
   const edge = new CloudflareMoneyEdge(env);
   try {
     if (request.method === 'GET' && url.pathname === '/api/federation/territory-host-authorities') {
-      return json(await publicTerritoryHostAuthorityRegistry(edge));
+      const registry = await publicTerritoryHostAuthorityRegistry(edge);
+      return json({ ...registry, rootOrdinaryHostAdmission: ROOT_HOST_ADMISSION_POLICY });
     }
     if (request.method === 'POST' && url.pathname === '/internal/federation/territory-host-authorities/bind') {
       const result = await bindTerritoryHostAuthority(edge, await request.json(), request.headers.get('x-civweave-fabric-token') || '');
@@ -32,6 +39,10 @@ async function territoryHostRoute(request, env) {
       const result = await revokeTerritoryHostAuthority(edge, decodeURIComponent(revoke[1]), request.headers.get('x-civweave-fabric-token') || '');
       return json({ ok: true, authority: result });
     }
+    if (request.method === 'POST' && url.pathname === '/internal/federation/host-admissions/root') {
+      const result = await admitRootOrdinaryHost(edge, await request.json(), request.headers.get('x-civweave-fabric-token') || '');
+      return json({ ok: true, admission: result }, 201);
+    }
     if (request.method === 'POST' && url.pathname === '/api/federation/host-admissions/grants') {
       const rawText = await request.text();
       const result = await issueTerritoryHostAdmission(edge, rawText, request.headers.get('x-civweave-node-signature'));
@@ -39,6 +50,12 @@ async function territoryHostRoute(request, env) {
     }
     if (request.method === 'POST' && url.pathname === '/api/federation/host-admissions/claim') {
       const result = await claimTerritoryHostAdmission(edge, await request.json());
+      await recordHostTerritoryAssignment(edge, {
+        nodeId: result.nodeId,
+        territoryId: result.territoryId,
+        sourceKind: 'territory-steward',
+        sourceId: result.authorityId
+      });
       return json({ admission: result }, 201);
     }
   } catch (error) {
