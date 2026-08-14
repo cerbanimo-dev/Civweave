@@ -1,0 +1,156 @@
+name: One-shot Reconcile Community Compute
+
+on:
+  push:
+    branches:
+      - agent/community-compute-dividend-v2
+    paths:
+      - '.github/workflows/one-shot-reconcile-community-compute.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/community-compute-dividend-v2
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Merge current main while preserving community feature files
+        run: |
+          git config user.name 'civweave-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git fetch origin main
+          set +e
+          git merge --no-edit -X theirs origin/main
+          merge_status=$?
+          set -e
+          if [ "$merge_status" -ne 0 ]; then
+            conflicts="$(git diff --name-only --diff-filter=U)"
+            if [ -z "$conflicts" ]; then
+              exit "$merge_status"
+            fi
+            echo "Resolving remaining merge conflicts in favor of current main:"
+            echo "$conflicts"
+            while IFS= read -r file; do
+              [ -z "$file" ] && continue
+              if git cat-file -e "origin/main:$file" 2>/dev/null; then
+                git checkout origin/main -- "$file"
+              else
+                git rm -f --ignore-unmatch -- "$file"
+              fi
+            done <<< "$conflicts"
+            git add -A
+            git commit -m 'Merge current main into community compute branch'
+          fi
+      - name: Compose community dividend with current user-pool runtime
+        run: |
+          node --input-type=module <<'NODE'
+          import {access,readFile,writeFile} from 'node:fs/promises';
+          import {constants} from 'node:fs';
+
+          const exists=async path=>{try{await access(path,constants.F_OK);return true}catch{return false}};
+          async function replaceRequired(file,from,to){
+            const source=await readFile(file,'utf8');
+            if(!source.includes(from)) throw new Error(`${file}: expected fragment not found: ${from}`);
+            await writeFile(file,source.replace(from,to));
+          }
+          async function ensureContains(file,needles){
+            const source=await readFile(file,'utf8');
+            for(const needle of needles) if(!source.includes(needle)) throw new Error(`${file}: missing ${needle}`);
+          }
+
+          await ensureContains('cloudflare/node-cloud/src/capacity.mjs',[
+            'starterCommunitySeats: 10',
+            'maxCommunitySeats: 16',
+            'maxMembers: 28',
+            'baseIncludedDailyNeurons: 900',
+            'communityBonusNeuronsPerMembershipUnit: 200',
+            'topupMinSharedBps: 100',
+            'topupMaxSharedBps: 500'
+          ]);
+          await ensureContains('cloudflare/node-cloud/src/capacity-community-extension-v1.mjs',[
+            'activePendingPaidCount',
+            'topup-sharing:',
+            'communityTopupReserveMicrocents'
+          ]);
+          await ensureContains('cloudflare/node-cloud/src/capacity-membership-resident-v1.mjs',["from'./capacity-community-extension-v1.mjs'"]);
+          await ensureContains('cloudflare/node-cloud/src/capacity-user-pools-v2.mjs',["from './capacity-membership-resident-v1.mjs'",'chooseUserAiPoolRoute' ].filter(Boolean).slice(0,1));
+          await ensureContains('cloudflare/node-cloud/src/server-ai-entry-v3.mjs',["from'./server-ai-entry-v2.mjs'",'minimumCommunityShareBps:100','/topups/share-preference']);
+          await ensureContains('public/app/server-ai-settings-v301.js',[
+            'server-ai-settings-v305-community-dividend',
+            'data-community-share-bps',
+            'data-node-equal-topup',
+            '+200 daily-neuron target for every member'
+          ]);
+
+          const wranglerFile='cloudflare/node-cloud/wrangler.jsonc';
+          let wrangler=await readFile(wranglerFile,'utf8');
+          if(wrangler.includes('"main": "src/server-ai-entry-v2.mjs"')) wrangler=wrangler.replace('"main": "src/server-ai-entry-v2.mjs"','"main": "src/server-ai-entry-v3.mjs"');
+          if(!wrangler.includes('"main": "src/server-ai-entry-v3.mjs"')) throw new Error('Wrangler did not compose onto server-ai-entry-v3.mjs');
+          for(const needle of ['CIVWEAVE_UNIFIED_BILLING_MODEL','CIVWEAVE_AI_GATEWAY_ID']) if(!wrangler.includes(needle)) throw new Error(`Wrangler lost current main setting ${needle}`);
+          await writeFile(wranglerFile,wrangler);
+
+          const verifierFile='scripts/verify-server-ai-commerce-v301.mjs';
+          let verifier=await readFile(verifierFile,'utf8');
+          verifier=verifier.replace(
+            'const [version, router, settings, mesh, spine, cloudEntryV1, cloudEntryV2, accountEdge, legacyAccountEdge, wrangler, offlineText] = await Promise.all([',
+            'const [version, router, settings, mesh, spine, cloudEntryV1, cloudEntryV2, cloudEntryV3, capacityExtension, accountEdge, legacyAccountEdge, wrangler, offlineText] = await Promise.all(['
+          );
+          verifier=verifier.replace(
+            "  'cloudflare/node-cloud/src/server-ai-entry-v2.mjs',\n  'cloudflare/account-edge/src/index.mjs',",
+            "  'cloudflare/node-cloud/src/server-ai-entry-v2.mjs',\n  'cloudflare/node-cloud/src/server-ai-entry-v3.mjs',\n  'cloudflare/node-cloud/src/capacity-community-extension-v1.mjs',\n  'cloudflare/account-edge/src/index.mjs',"
+          );
+          verifier=verifier.replace('const cloudRuntime = `${cloudEntryV1}\\n${cloudEntryV2}`;','const cloudRuntime = `${cloudEntryV1}\\n${cloudEntryV2}\\n${cloudEntryV3}`;');
+          verifier=verifier.replace(/assert\.match\(settings, \/1\\\.0\\\.116-server-ai-settings-v304-tabbed\/\);/,"assert.match(settings, /1\\.0\\.117-server-ai-settings-v305-community-dividend/);");
+          verifier=verifier.replace(/assert\.match\(mesh, \/server-ai-settings-v301\\\.js\\\?v=1\\\.0\\\.116-v304-tabbed\/\);/,"assert.match(mesh, /server-ai-settings-v301\\.js\\?v=1\\.0\\.117-v305-community-dividend/);");
+          const settingsAnchor="assert.match(settings, /Membership & compute/);";
+          if(!verifier.includes('data-community-share-bps')) verifier=verifier.replace(settingsAnchor,`${settingsAnchor}\nassert.match(settings, /data-community-share-bps/);\nassert.match(settings, /data-node-equal-topup/);\nassert.match(settings, /Cloudflare top-ups always share at least 1% with everyone/);\nassert.match(settings, /Every \\$5\\/month of active membership contributes \\+2 potential free seats and a \\+200 daily-neuron target for every member/);`);
+          const cloudAnchor='assert.match(cloudEntryV2, /\\/api\\/commerce\\/membership\\/prejoin/);';
+          if(!verifier.includes('minimumCommunityShareBps:100')) verifier=verifier.replace(cloudAnchor,`${cloudAnchor}\nassert.match(cloudEntryV3, /minimumCommunityShareBps:100/);\nassert.match(cloudEntryV3, /maximumCommunityShareBps:500/);\nassert.match(cloudEntryV3, /defaultCommunityShareBps:100/);\nassert.match(cloudEntryV3, /node-equal/);\nassert.match(cloudEntryV3, /\\/topups\\/share-preference/);\nassert.match(capacityExtension, /topup-sharing:/);\nassert.match(capacityExtension, /communityTopupReserveMicrocents/);\nassert.match(capacityExtension, /activePendingPaidCount/);`);
+          verifier=verifier.replace(/assert\.match\(wrangler, \/"main": "src\\\/server-ai-entry-v2\\\.mjs"\/\);/,"assert.match(wrangler, /\"main\": \"src\\/server-ai-entry-v3\\.mjs\"/);");
+          verifier=verifier.replace("revision: 'server-ai-commerce-v301-composed-user-pools',","revision: 'server-ai-commerce-v301-composed-user-pools-community-dividend',");
+          if(!verifier.includes('perUserPoolRouting: true')) throw new Error('Current main per-user pool verifier coverage was lost.');
+          if(!verifier.includes('minimumCommunityShareBps:100')) throw new Error('Community dividend verifier coverage was not composed.');
+          await writeFile(verifierFile,verifier);
+
+          const current=(await readFile('VERSION','utf8')).trim();
+          const parts=current.split('.').map(Number);
+          if(parts.length!==3||parts.some(n=>!Number.isSafeInteger(n))) throw new Error(`Invalid VERSION ${current}`);
+          let patch=parts[2]+1, next;
+          while(true){next=`${parts[0]}.${parts[1]}.${patch}`;if(!await exists(`releases/${next}`))break;patch+=1;}
+          await writeFile('VERSION',`${next}\n`);
+          const pkg=JSON.parse(await readFile('package.json','utf8'));pkg.version=next;await writeFile('package.json',JSON.stringify(pkg,null,2)+'\n');
+          const lock=JSON.parse(await readFile('package-lock.json','utf8'));lock.version=next;if(lock.packages?.[''])lock.packages[''].version=next;await writeFile('package-lock.json',JSON.stringify(lock,null,2)+'\n');
+          const contract=JSON.parse(await readFile('config/release-contract.json','utf8'));contract.canonical.current={...(contract.canonical.current||{}),version:next,path:`releases/${next}`,status:'current'};await writeFile('config/release-contract.json',JSON.stringify(contract,null,2)+'\n');
+          console.log(JSON.stringify({previous:current,next},null,2));
+          NODE
+      - name: Materialize reconciled canonical release
+        run: |
+          node scripts/materialize-canonical-release.mjs
+          node scripts/sync-release-coherence-v220.mjs
+      - name: Install Cloudflare verifier dependency
+        run: npm install --prefix cloudflare/core --omit=dev --no-audit --no-fund
+      - name: Validate community compute plus current main features
+        run: |
+          node scripts/test-cloudflare-host-capacity-v1.mjs
+          node scripts/test-community-compute-dividend-v1.mjs
+          node scripts/verify-server-ai-commerce-v301.mjs
+          node scripts/verify-cloudflare-launch-kit-v1.mjs
+          node scripts/test-user-ai-pool-routing-v2.mjs
+          node scripts/verify-user-ai-pools-v302.mjs
+          node --test scripts/test-node-ai-marketplace-surface-v1.mjs
+          node scripts/verify-canonical-core-only-v226.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-five-guide-prompt-injection-v346.mjs
+      - name: Commit reconciled branch
+        run: |
+          rm .github/workflows/one-shot-reconcile-community-compute.yml
+          git add -A
+          git commit -m 'Reconcile community compute dividend with current main'
+          git push origin HEAD:agent/community-compute-dividend-v2
