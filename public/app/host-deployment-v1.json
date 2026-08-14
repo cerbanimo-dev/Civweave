@@ -3,8 +3,9 @@
   "role": "canonical",
   "hostId": "civweave",
   "pagesProject": "civweave",
-  "publicOrigin": "https://civweave.pages.dev",
-  "canonicalOrigin": "https://civweave.pages.dev",
+  "pagesOrigin": "https://civweave.pages.dev",
+  "publicOrigin": "https://civweave.cc",
+  "canonicalOrigin": "https://civweave.cc",
   "localAnchorRecommended": true,
   "localAnchorRequired": false,
   "accountEdge": {

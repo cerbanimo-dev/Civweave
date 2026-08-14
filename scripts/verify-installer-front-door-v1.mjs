@@ -50,7 +50,7 @@ assert.ok(hostSetup.includes('http://127.0.0.1:8787/app/node-ai-operator-v1.html
 assert.ok(anchor.includes('5. Connect steward payouts'),'local Anchor setup must continue into Stripe connected-account onboarding');
 assert.ok(hostSetup.includes("localStorage.setItem(STEWARD_KEY,'1')"),'host setup must mark the current browser as steward');
 assert.ok(anchor.includes('href="/host-setup.html"'),'Anchor setup must return to dedicated steward setup');
-assert.ok(setup.includes('Steward setup: ${productionUrl}/host-setup.html'),'Cloudflare host provisioning must print the dedicated steward setup URL');
+assert.ok(setup.includes('Steward setup: ${pagesOrigin}/host-setup.html'),'Cloudflare host provisioning must print the dedicated steward setup URL on the durable Pages underlay');
 assert.ok(brand.includes("const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png'"),'brand layer must use the verified Civweave PNG');
 assert.ok(logoSvg.includes('/app/logos/civweave-pwa-512-v247.png'),'SVG compatibility wrapper must not reference the malformed canonical display PNG');
 

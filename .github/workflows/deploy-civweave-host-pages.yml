@@ -56,7 +56,7 @@ jobs:
           const payload = await response.json().catch(() => ({}));
           if (!response.ok || payload.success !== true || payload.result?.name !== project) {
             const errors = Array.isArray(payload.errors) ? JSON.stringify(payload.errors) : response.statusText;
-            console.error('Cloudflare token/account cannot access Pages project "' + project + '": ' + errors);
+            console.error('Cloudflare token/account cannot access community Pages project "' + project + '": ' + errors);
             process.exit(3);
           }
           console.log('Verified access to community Pages project "' + project + '".');
@@ -102,6 +102,7 @@ jobs:
           import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
           const project = process.env.CIVWEAVE_PAGES_PROJECT;
           const hostId = process.env.CIVWEAVE_HOST_ID || project.replace(/^civweave-/, '');
+          const pagesOrigin = `https://${project}.pages.dev`;
           let accountEdge;
           try {
             accountEdge = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
@@ -124,8 +125,16 @@ jobs:
             role: 'community',
             hostId,
             pagesProject: project,
-            publicOrigin: `https://${project}.pages.dev`,
-            canonicalOrigin: 'https://civweave.pages.dev',
+            pagesOrigin,
+            publicOrigin: pagesOrigin,
+            canonicalOrigin: 'https://civweave.cc',
+            sharedDomain: {
+              root: 'civweave.cc',
+              aliasPattern: 'https://<label>.civweave.cc',
+              status: 'inactive-free-host',
+              eligibility: 'active-hosting-cost-share',
+              freeOriginPreserved: true,
+            },
             accountEdge,
             localAnchorRecommended: true,
             localAnchorRequired: false,
@@ -167,8 +176,8 @@ jobs:
               });
               if (!response.ok) throw new Error(`HTTP ${response.status}`);
               const marker = await response.json();
-              if (marker.pagesProject === project && marker.publicOrigin === origin && marker.sourceCommit === expectedCommit) {
-                console.log(`Verified ${origin} at source commit ${expectedCommit}.`);
+              if (marker.pagesProject === project && marker.pagesOrigin === origin && marker.publicOrigin === origin && marker.canonicalOrigin === 'https://civweave.cc' && marker.sharedDomain?.eligibility === 'active-hosting-cost-share' && marker.sourceCommit === expectedCommit) {
+                console.log(`Verified free community origin ${origin} at source commit ${expectedCommit}; shared civweave.cc alias remains entitlement-gated.`);
                 process.exit(0);
               }
               lastFailure = `attempt ${attempt}: marker sourceCommit=${marker.sourceCommit || 'missing'}`;

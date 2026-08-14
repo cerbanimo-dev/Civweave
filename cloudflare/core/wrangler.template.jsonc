@@ -40,7 +40,7 @@
   },
   "vars": {
     "NODE_DOMAIN": "nodes.commonweave.earth",
-    "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.pages.dev",
+    "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.cc",
     "CIVWEAVE_MONEY_AUTHORITY": "cloudflare-core",
     "CIVWEAVE_PLATFORM_FEE_BPS": "500",
     "CIVWEAVE_MONEY_MAX_TOPUP_CENTS": "10000",

@@ -1,5 +1,5 @@
 {
-  "name": "Civweave v1.0.141",
+  "name": "Civweave v1.0.142",
   "short_name": "Civweave",
   "description": "Five connected, offline-ready Civweave systems with deterministic local operation and a non-modal AI settings layer.",
   "id": "/civweave-local",
@@ -23,6 +23,11 @@
   ],
   "prefer_related_applications": false,
   "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://civweave.cc/app/manifest.webmanifest",
+      "id": "https://civweave.cc/civweave-local"
+    },
     {
       "platform": "webapp",
       "url": "https://civweave.pages.dev/app/manifest.webmanifest",
