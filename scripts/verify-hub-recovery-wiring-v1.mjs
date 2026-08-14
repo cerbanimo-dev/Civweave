@@ -17,7 +17,7 @@ const paths = [
   '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml',
   'scripts/resolve-cloudflare-recovery-zone-v1.mjs',
   'config/launch-topology-v1.json',
-  'public/app/installer-online-fallback-v225.js',
+  'public/app/installer-repair-only-v1.js',
   'public/app/civweave-brand.js',
   'public/app/hub-recovery-api-v1.js',
   'public/app/hub-recovery-ui-v1.js',
@@ -84,7 +84,9 @@ for (const path of activeDomainSurfaces) {
 assert.match(source['public/app/civweave-brand.js'], /hub-delivery-intent-v1\.js/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /mailto:/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /#cw-hub-recover-request/);
-assert.match(source['public/app/installer-online-fallback-v225.js'], /hub-recovery-api-v1\.js/);
+assert.match(source['public/app/installer-repair-only-v1.js'], /hub-recovery-api-v1\.js/);
+assert.match(source['public/app/installer-repair-only-v1.js'], /browserRuntimePolicy:'installer-only-until-installed-display'/);
+assert.doesNotMatch(source['public/app/installer-repair-only-v1.js'], /function openCampus/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryKit:packet\.recoveryKit/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryMethod/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Save these recovery codes now/);
@@ -114,7 +116,7 @@ for (const path of recoveryNoStripeSurfaces) {
 
 console.log(JSON.stringify({
   ok: true,
-  schema: 'civweave.hub-recovery-wiring-check.v8',
+  schema: 'civweave.hub-recovery-wiring-check.v9-install-only-pwa',
   freeTierInboundProof: true,
   offlineRecoveryCodes: true,
   offlineCodeCount: 8,
@@ -123,4 +125,5 @@ console.log(JSON.stringify({
   ownedZoneOnly: true,
   unrelatedDomainGuard: true,
   relayStoresIdentity: false,
+  browserRuntime: false,
 }));
