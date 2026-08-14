@@ -2,6 +2,7 @@
 'use strict';
 const VERSION='1.0.0-minilm-context-router-v344';
 const ADAPTER='/app/models/all-minilm-l6-v2/adapter.js';
+const LOCAL_AI_POLICY=Object.freeze({basicPhoneDefault:'HuggingFaceTB/SmolLM2-360M-Instruct',contextRouter:'Xenova/all-MiniLM-L6-v2',avatarContext:'Xenova/all-MiniLM-L6-v2',smollm2ImagePicker:false});
 const SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'];
 const MODE={civweave:'Reflect','living-school':'Learn',cerbanimo:'Build',fellowfare:'Acquire',anarchadia:'Govern'};
 const ROUTES=Object.freeze([
@@ -108,6 +109,6 @@ function installRuntimeInterceptor(){
   const runtime=globalThis.CivweaveModelRuntime;if(!runtime?.generate||runtime.__minilmContextRouterV344)return false;if(wrappedRuntime===runtime)return true;const previous=runtime.generate.bind(runtime);const patched=async request=>previous(await enhanceRequest(request));globalThis.CivweaveModelRuntime={...runtime,generate:patched,__minilmContextRouterV344:true};wrappedRuntime=globalThis.CivweaveModelRuntime;return true;
 }
 function idleWarm(){const run=()=>{void warm();installRuntimeInterceptor()};if('requestIdleCallback'in globalThis)requestIdleCallback(run,{timeout:5000});else setTimeout(run,2500)}
-const api=Object.freeze({version:VERSION,model:'Xenova/all-MiniLM-L6-v2',route,emotion,warm,status:()=>({...lastStatus,version:VERSION,ready}),fallbackRoute,fallbackEmotion,installRuntimeInterceptor,invisibleInfrastructure:true,settingsAutostart:false});
-globalThis.CivweaveContextRouterV344=api;installRuntimeInterceptor();let attempts=0;const timer=setInterval(()=>{attempts+=1;if(!globalThis.CivweaveModelRuntime?.__minilmContextRouterV344)installRuntimeInterceptor();if(attempts>160)clearInterval(timer)},250);idleWarm();addEventListener('civweave:model-runtime-ready',installRuntimeInterceptor);addEventListener('civweave:local-model-runtime-ready',installRuntimeInterceptor);addEventListener('pagehide',async()=>{clearInterval(timer);clearTimeout(idleTimer);try{(await module()).shutdown('pagehide')}catch{}},{once:true});dispatchEvent(new CustomEvent('civweave:minilm-context-router-ready',{detail:{version:VERSION,invisibleInfrastructure:true}}));
+const api=Object.freeze({version:VERSION,model:'Xenova/all-MiniLM-L6-v2',route,emotion,warm,status:()=>({...lastStatus,version:VERSION,ready}),fallbackRoute,fallbackEmotion,installRuntimeInterceptor,localAIPolicy:LOCAL_AI_POLICY,invisibleInfrastructure:true,settingsAutostart:false});
+globalThis.CivweaveContextRouterV344=api;globalThis.CivweaveLocalAIPolicyV344=LOCAL_AI_POLICY;dispatchEvent(new CustomEvent('civweave:local-ai-policy-ready',{detail:LOCAL_AI_POLICY}));installRuntimeInterceptor();let attempts=0;const timer=setInterval(()=>{attempts+=1;if(!globalThis.CivweaveModelRuntime?.__minilmContextRouterV344)installRuntimeInterceptor();if(attempts>160)clearInterval(timer)},250);idleWarm();addEventListener('civweave:model-runtime-ready',installRuntimeInterceptor);addEventListener('civweave:local-model-runtime-ready',installRuntimeInterceptor);addEventListener('pagehide',async()=>{clearInterval(timer);clearTimeout(idleTimer);try{(await module()).shutdown('pagehide')}catch{}},{once:true});dispatchEvent(new CustomEvent('civweave:minilm-context-router-ready',{detail:{version:VERSION,invisibleInfrastructure:true}}));
 })();
