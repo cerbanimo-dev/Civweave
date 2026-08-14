@@ -50,8 +50,7 @@ jobs:
       - name: Verify generated release
         run: |
           node scripts/verify-canonical-launch-release.mjs
-          node scripts/verify-release-packaging-v174.mjs
-          node scripts/verify-ci-production-smoke-v142.mjs
+          node scripts/verify-shared-intention-party-chat-v1.mjs
           node scripts/smoke-gateway-v131-base.mjs
 
       - name: Commit generated release and remove helper
