@@ -1,10 +1,6 @@
 name: Finalize New New York Territory Authority v1
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/finalize-new-new-york-territory-authority-v1.yml'
   workflow_run:
     workflows:
       - 'Deploy New New York Territory Host v1'
@@ -110,15 +106,17 @@ jobs:
             --max-grant-ttl-seconds 3600 | tee /tmp/new-new-york-authority.json
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const authority = JSON.parse(fs.readFileSync('/tmp/new-new-york-authority.json', 'utf8'));
+          const packet = JSON.parse(fs.readFileSync('/tmp/new-new-york-authority.json', 'utf8'));
+          const authority = packet.authority || packet;
           if (
             authority.status !== 'active' ||
             authority.appointmentId !== process.env.STEWARD_APPOINTMENT_ID ||
-            authority.nodeId !== process.env.NODE_ID ||
+            authority.issuerNodeId !== process.env.NODE_ID ||
+            authority.issuerOperatorId !== process.env.OPERATOR_ID ||
             authority.canIssueHostAdmissions !== true ||
             authority.canDelegateAuthority !== false
           ) {
-            throw new Error(`Unexpected Territory Host Authority result: ${JSON.stringify(authority)}`);
+            throw new Error(`Unexpected Territory Host Authority result: ${JSON.stringify(packet)}`);
           }
           console.log(`New New York is active as ${authority.authorityId} for ${authority.territoryId}.`);
           NODE
