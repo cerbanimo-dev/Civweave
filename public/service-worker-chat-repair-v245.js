@@ -1,7 +1,7 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-avatar-visible-v346-human-message-v1';
+const REVISION='chat-avatar-visible-v346';
 // Non-executable legacy audit marker only: const REVISION='chat-css-contract-v343'
 const PARTY_REVISION='party-chat-v1';
 const HUMAN_BUBBLE_REVISION='human-message-bubble-v1';
