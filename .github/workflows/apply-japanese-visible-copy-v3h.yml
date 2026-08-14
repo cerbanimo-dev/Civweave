@@ -1,0 +1,37 @@
+name: Apply Japanese visible copy v3h
+
+on:
+  push:
+    branches:
+      - fix/japanese-localization-v3-coverage
+    paths:
+      - '.github/workflows/apply-japanese-visible-copy-v3h.yml'
+      - 'scripts/apply-japanese-visible-copy-v3h.mjs'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/japanese-localization-v3-coverage
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: node --check scripts/apply-japanese-visible-copy-v3h.mjs
+      - run: node scripts/apply-japanese-visible-copy-v3h.mjs
+      - run: node --check public/app/japanese-mode-v1.js
+      - run: node scripts/verify-japanese-mode-v1.mjs
+      - name: Commit translated runtime and remove applicator
+        shell: bash
+        run: |
+          git config user.name 'cerbanimo-dev'
+          git config user.email 'cerbanimo@gmail.com'
+          git add public/app/japanese-mode-v1.js
+          git rm -f scripts/apply-japanese-visible-copy-v3h.mjs
+          git rm -f .github/workflows/apply-japanese-visible-copy-v3h.yml
+          git commit -m 'Translate Anarchadia workbench Japanese coverage'
+          git push origin HEAD:fix/japanese-localization-v3-coverage
