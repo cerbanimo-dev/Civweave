@@ -1,0 +1,71 @@
+name: Verify Hub Account Lifecycle v2
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/account-edge/src/hub-passport-account-v*.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-recovery-v*.mjs'
+      - 'cloudflare/node-cloud/src/capacity-membership-admin-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v*.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'lib/local-hub-account-v1.mjs'
+      - 'lib/local-host-capacity-v2.mjs'
+      - 'server/federated.mjs'
+      - 'public/app/hub-passport-account-v1.js'
+      - 'public/app/hub-recovery-ui-v1.js'
+      - 'public/app/host-node-session-v1.js'
+      - 'public/app/host-node-local-capacity-v1.js'
+      - 'scripts/verify-hub-account-lifecycle-v2.mjs'
+      - 'scripts/verify-passport-account-passkeys-v1.mjs'
+      - '.github/workflows/verify-hub-account-lifecycle-v2.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/account-edge/src/hub-passport-account-v*.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-recovery-v*.mjs'
+      - 'cloudflare/node-cloud/src/capacity-membership-admin-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v*.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'lib/local-hub-account-v1.mjs'
+      - 'lib/local-host-capacity-v2.mjs'
+      - 'server/federated.mjs'
+      - 'public/app/hub-passport-account-v1.js'
+      - 'public/app/hub-recovery-ui-v1.js'
+      - 'public/app/host-node-session-v1.js'
+      - 'public/app/host-node-local-capacity-v1.js'
+      - 'scripts/verify-hub-account-lifecycle-v2.mjs'
+      - '.github/workflows/verify-hub-account-lifecycle-v2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Syntax check account lifecycle surfaces
+        run: |
+          node --check cloudflare/account-edge/src/hub-passport-account-v2.mjs
+          node --check cloudflare/account-edge/src/hub-passport-account-v3.mjs
+          node --check cloudflare/account-edge/src/hub-passport-account-v4.mjs
+          node --check cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs
+          node --check cloudflare/node-cloud/src/cloud-node-recovery-v3.mjs
+          node --check cloudflare/node-cloud/src/capacity-membership-admin-v1.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v6.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v7.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v8.mjs
+          node --check lib/local-hub-account-v1.mjs
+          node --check lib/local-host-capacity-v2.mjs
+          node --check server/federated.mjs
+          node --check public/app/hub-passport-account-v1.js
+          node --check public/app/hub-recovery-ui-v1.js
+          node --check public/app/host-node-session-v1.js
+          node --check public/app/host-node-local-capacity-v1.js
+      - name: Verify lifecycle and offline admission behavior
+        run: node scripts/verify-hub-account-lifecycle-v2.mjs
