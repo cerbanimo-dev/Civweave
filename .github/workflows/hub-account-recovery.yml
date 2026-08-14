@@ -36,7 +36,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,3 +50,7 @@ jobs:
         run: node scripts/verify-hub-recovery-wiring-v1.mjs
       - name: Verify account edge bootstrap
         run: node scripts/test-cloudflare-account-bootstrap-v1.mjs
+      - name: Dry-run compile recovery Workers
+        run: |
+          npx --yes wrangler@latest deploy --dry-run --config cloudflare/recovery-relay/wrangler.jsonc
+          npx --yes wrangler@latest deploy --dry-run --config cloudflare/account-edge/wrangler.jsonc
