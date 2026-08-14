@@ -4,14 +4,17 @@ import { readFile } from 'node:fs/promises';
 import { signTerritoryHostAdmissionRequest, TERRITORY_HOST_ADMISSION_REQUEST_DOMAIN } from '../lib/node-territory-host-authority-v1.mjs';
 
 const read = relative => readFile(new URL(`../${relative}`, import.meta.url), 'utf8');
-const [migration,engine,entry,origin,nodeHandler,wallet,bindScript,consolePage,docs] = await Promise.all([
+const [migration,assignmentMigration,engine,rootAdmission,entry,origin,nodeHandler,wallet,bindScript,rootScript,consolePage,docs] = await Promise.all([
   read('cloudflare/core/migrations/0010_territory_host_authority.sql'),
+  read('cloudflare/core/migrations/0011_host_node_territories.sql'),
   read('cloudflare/core/src/territory-host-authority-v1.mjs'),
+  read('cloudflare/core/src/root-host-admission-v1.mjs'),
   read('cloudflare/core/src/territory-host-entry-v1.mjs'),
   read('cloudflare/core/src/origin-entry.mjs'),
   read('lib/node-territory-host-authority-v1.mjs'),
   read('lib/ai-wallet-http-v1.mjs'),
   read('scripts/bind-territory-host-authority-v1.mjs'),
+  read('scripts/admit-root-host-v1.mjs'),
   read('public/app/territory-host-authority-v1.html'),
   read('docs/operations/territory-steward-host-authority-v1.md')
 ]);
@@ -22,6 +25,8 @@ assert.match(migration,/CREATE TABLE IF NOT EXISTS territory_host_admission_audi
 assert.match(migration,/can_delegate_authority INTEGER NOT NULL DEFAULT 0/);
 assert.match(migration,/grant_hash TEXT PRIMARY KEY/);
 assert.match(migration,/consumed_at TEXT/);
+assert.match(assignmentMigration,/CREATE TABLE IF NOT EXISTS host_node_territories/);
+assert.match(assignmentMigration,/source_kind TEXT NOT NULL CHECK\(source_kind IN \('civweave-root','territory-steward'\)\)/);
 
 assert.match(engine,/rootRemainsTrustAnchor:\s*true/);
 assert.match(engine,/territoryMayDelegateTerritoryAuthority:\s*false/);
@@ -36,10 +41,23 @@ assert.match(engine,/consumed_at IS NULL AND expires_at>\?1/);
 assert.match(engine,/INSERT INTO nodes/);
 assert.match(engine,/territory-host-admitted/);
 
+assert.match(rootAdmission,/rootMayIssueOrdinaryHostsToAnyActiveTerritory:\s*true/);
+assert.match(rootAdmission,/ordinaryHostsReceiveTerritoryAuthority:\s*false/);
+assert.match(rootAdmission,/territoryStewardScopeUnaffected:\s*true/);
+assert.match(rootAdmission,/Root Host admission requires the private Civweave root fabric binding/);
+assert.match(rootAdmission,/probePublicHostNode/);
+assert.match(rootAdmission,/INSERT INTO nodes/);
+assert.match(rootAdmission,/host_node_territories/);
+assert.match(rootAdmission,/sourceKind:\s*'civweave-root'/);
+assert.match(rootAdmission,/grantsTerritoryAuthority:\s*false/);
+assert.match(rootAdmission,/root-host-admitted/);
+
 assert.match(entry,/GET' && url\.pathname === '\/api\/federation\/territory-host-authorities'/);
 assert.match(entry,/\/internal\/federation\/territory-host-authorities\/bind/);
+assert.match(entry,/\/internal\/federation\/host-admissions\/root/);
 assert.match(entry,/\/api\/federation\/host-admissions\/grants/);
 assert.match(entry,/\/api\/federation\/host-admissions\/claim/);
+assert.match(entry,/sourceKind:\s*'territory-steward'/);
 assert.match(origin,/from '\.\/territory-host-entry-v1\.mjs'/);
 
 assert.match(nodeHandler,/requireNodeOperatorAuth/);
@@ -53,11 +71,15 @@ assert.match(wallet,/territoryHostAuthority\.handle/);
 
 assert.match(bindScript,/NODE_FABRIC_BINDING_TOKEN/);
 assert.match(bindScript,/canonical root operator only/i);
+assert.match(rootScript,/NODE_FABRIC_BINDING_TOKEN/);
+assert.match(rootScript,/\/internal\/federation\/host-admissions\/root/);
+assert.match(rootScript,/--territory-id/);
 assert.match(consolePage,/Open a trusted doorway/);
 assert.match(consolePage,/Issue Host admission/);
 assert.match(consolePage,/Claim Host admission/);
 assert.match(docs,/can_delegate_authority.*false/is);
 assert.match(docs,/Do not send the root binding token/i);
+assert.match(docs,/root.*ordinary Host.*any active territory/is);
 
 const { publicKey, privateKey } = crypto.generateKeyPairSync('ed25519');
 const raw = Buffer.from(JSON.stringify({ issuerNodeId: 'territory-node', candidateNodeId: 'candidate-node' }));
@@ -78,6 +100,9 @@ console.log(JSON.stringify({
   schema: 'civweave.territory-host-authority.v1',
   checks: [
     'root-trust-anchor-preserved',
+    'root-may-admit-ordinary-host-any-active-territory',
+    'root-admission-does-not-delegate-authority',
+    'host-territory-assignment-persisted',
     'no-root-secrets-on-territory-node',
     'authority-non-recursive',
     'appointment-bound-authority',
