@@ -101,12 +101,11 @@ jobs:
           }
           console.log(JSON.stringify({current,next}));
           NODE
-      - name: Regenerate release and shell metadata
+      - name: Materialize release then finalize shell metadata
         run: |
-          node scripts/sync-release-version-assets.mjs
+          node scripts/materialize-canonical-release.mjs
           node scripts/sync-release-coherence-v220.mjs
           node scripts/generate-prelive-metadata-v281.mjs
-          node scripts/materialize-canonical-release.mjs
       - name: Verify device lab and release contracts
         run: |
           node --check public/app/low-end-device-lab-v1.js
