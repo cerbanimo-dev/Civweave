@@ -1,7 +1,9 @@
 (()=>{
 'use strict';
 const REVISION='canonical-campus-startup-v227';
-const BRAND_REVISION='compact-shell-v235';
+const BRAND_REVISION='day-night-clock-v236';
+const BRAND_DAY='/app/logos/civweave-day-logo.jpg';
+const BRAND_NIGHT='/app/logos/civweave-night-logo.jpg';
 const WEB_ENTRY_REVISION='web-install-entry-v232';
 const HUB_REVISION='weaveling-hub-v233';
 const STATE_REPAIR_REVISION='working-campus-state-repair-v238';
@@ -12,11 +14,11 @@ const required=['conversation','weaveling-chat-form','weaveling-chat-input','wor
 const controller=new AbortController();
 const bootDocument=document.documentElement;
 const bootUrl=location.href;
-let active=true;
+let active=true,brandCycleTimer=0;
 function missingRequired(){return required.filter(id=>!document.getElementById(id));}
 function liveDocument(){return active&&document.documentElement===bootDocument&&document.documentElement?.isConnected&&document.head?.isConnected&&document.body?.isConnected&&location.href===bootUrl;}
 function campusReady(){return liveDocument()&&Boolean(document.querySelector('main.app'))&&missingRequired().length===0;}
-function stop(){active=false;controller.abort();}
+function stop(){active=false;controller.abort();if(brandCycleTimer){clearTimeout(brandCycleTimer);brandCycleTimer=0}}
 addEventListener('pagehide',stop,{once:true});
 addEventListener('beforeunload',stop,{once:true});
 function installedDisplay(){return navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches)}
@@ -121,14 +123,46 @@ function installWebEntryPrompt(){
   document.documentElement.dataset.civweaveWebEntry=WEB_ENTRY_REVISION;
   return true;
 }
+function brandAssetForLocalClock(date=new Date()){
+  const hour=Number(date?.getHours?.());
+  return Number.isFinite(hour)&&hour>=6&&hour<18?BRAND_DAY:BRAND_NIGHT;
+}
+function nextBrandBoundaryDelay(date=new Date()){
+  const nowTime=date.getTime();
+  if(!Number.isFinite(nowTime))return 60*60*1000;
+  const next=new Date(nowTime),hour=next.getHours();
+  if(hour<6)next.setHours(6,0,0,0);
+  else if(hour<18)next.setHours(18,0,0,0);
+  else{next.setDate(next.getDate()+1);next.setHours(6,0,0,0)}
+  return Math.max(1000,next.getTime()-nowTime+250);
+}
+function syncBrandPresentation(){
+  const asset=brandAssetForLocalClock(),phase=asset===BRAND_DAY?'day':'night';
+  const brand=document.querySelector('#brand-home img');
+  if(brand){
+    let current='';
+    try{current=new URL(brand.src,location.href).pathname}catch{}
+    if(current!==asset)brand.src=asset;
+    brand.alt='Civweave';
+    brand.dataset.civweaveClockLogo=phase;
+  }
+  document.documentElement.dataset.civweaveBrandCycle=phase;
+  return asset;
+}
+function scheduleBrandPresentation(){
+  if(brandCycleTimer)clearTimeout(brandCycleTimer);
+  brandCycleTimer=setTimeout(()=>{brandCycleTimer=0;if(!active)return;syncBrandPresentation();scheduleBrandPresentation()},nextBrandBoundaryDelay());
+}
 function installBrandPresentation(){
   let manifest=document.querySelector('link[rel="manifest"]');
   if(!manifest){manifest=document.createElement('link');manifest.rel='manifest';manifest.href='/app/manifest.webmanifest';document.head.append(manifest)}
   let icon=document.querySelector('link[rel~="icon"]');
   if(!icon){icon=document.createElement('link');icon.rel='icon';icon.type='image/png';document.head.append(icon)}
   icon.href='/app/logos/civweave-app-icon.png';
-  const brand=document.querySelector('#brand-home img');
-  if(brand){brand.src='/app/logos/civweave-app-icon.png';brand.alt='Civweave';}
+  syncBrandPresentation();
+  scheduleBrandPresentation();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncBrandPresentation();scheduleBrandPresentation()}},{signal:controller.signal});
+  addEventListener('pageshow',()=>{syncBrandPresentation();scheduleBrandPresentation()},{signal:controller.signal});
   document.documentElement.dataset.civweaveBrandPresentation=BRAND_REVISION;
 }
 function installDiagnosticsPolicy(){
