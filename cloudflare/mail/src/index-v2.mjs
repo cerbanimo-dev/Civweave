@@ -248,20 +248,43 @@ const worker = {
         await auth.box.authenticate(auth.accessKey);
         const toRaw = clean(input.to, 320).toLowerCase(), subject = stripCtl(input.subject, 240), body = String(input.body ?? '').slice(0, MAX_BODY_CHARS);
         if (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(toRaw) || toRaw.length > 254 || !body.trim()) throw Object.assign(new Error('A valid recipient and message body are required.'), { status: 400 });
-        const id = crypto.randomUUID(), receivedAt = nowIso(), from = auth.address, raw = buildRawMessage({ from, to: toRaw, subject, body, messageId: id }), rawKey = await storeRaw(env, id, raw);
-        const meta = { id, from, to: toRaw, subject, preview: previewText(body), rawKey, receivedAt, attachmentCount: 0 };
+        const id = crypto.randomUUID(), receivedAt = nowIso(), from = auth.address, raw = buildRawMessage({ from, to: toRaw, subject, body, messageId: id });
         const at = toRaw.lastIndexOf('@'), recipientDomain = at > 0 ? toRaw.slice(at + 1) : '';
         if (recipientDomain === domain) {
           const recipient = parseAddress(toRaw, domain), recipientBox = env.MAILBOX.getByName(recipient.localPart);
           if (!await recipientBox.exists()) throw Object.assign(new Error('That Civweave Mail address does not exist.'), { status: 404 });
-          await recipientBox.deliver({ ...meta, to: recipient.address });
-          await auth.box.recordSent(auth.accessKey, { ...meta, to: recipient.address });
-          return json({ ok: true, external: false, id });
+          const rawKey = await storeRaw(env, id, raw);
+          const meta = { id, from, to: recipient.address, subject, preview: previewText(body), rawKey, receivedAt, attachmentCount: 0 };
+          try {
+            await recipientBox.deliver(meta);
+          } catch (error) {
+            await env.MAIL_BLOBS.delete(rawKey);
+            throw error;
+          }
+          try {
+            await auth.box.recordSent(auth.accessKey, meta);
+          } catch (error) {
+            console.error(JSON.stringify({ event: 'civweave-mail-sent-copy-error', id, error: String(error?.message || error) }));
+            return json({ ok: true, external: false, id, sentCopy: false });
+          }
+          return json({ ok: true, external: false, id, sentCopy: true });
         }
         if (!env.EMAIL?.send || clean(env.EXTERNAL_OUTBOUND, 40) !== 'enabled') throw Object.assign(new Error('External outbound mail is not enabled yet. Civweave-to-Civweave mail works now.'), { status: 503 });
-        await env.EMAIL.send(new EmailMessage(from, toRaw, raw));
-        await auth.box.recordSent(auth.accessKey, meta);
-        return json({ ok: true, external: true, id });
+        const rawKey = await storeRaw(env, id, raw);
+        const meta = { id, from, to: toRaw, subject, preview: previewText(body), rawKey, receivedAt, attachmentCount: 0 };
+        try {
+          await env.EMAIL.send(new EmailMessage(from, toRaw, raw));
+        } catch (error) {
+          await env.MAIL_BLOBS.delete(rawKey);
+          throw error;
+        }
+        try {
+          await auth.box.recordSent(auth.accessKey, meta);
+        } catch (error) {
+          console.error(JSON.stringify({ event: 'civweave-mail-sent-copy-error', id, external: true, error: String(error?.message || error) }));
+          return json({ ok: true, external: true, id, sentCopy: false });
+        }
+        return json({ ok: true, external: true, id, sentCopy: true });
       }
 
       return json({ ok: false, error: 'not-found' }, 404);
