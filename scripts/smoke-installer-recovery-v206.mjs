@@ -62,7 +62,7 @@ try{
     '/service-worker-offline-v211-override.js',
     '/app/shell-integrity-v281.json',
     '/app/offline-package-v208.json',
-    '/app/installer-state-machine-v280.js',
+    '/app/installer-state-machine-v281.js',
     '/app/installer-storage-guard-v281.js',
     '/app/campus-background-download-v241.js',
     '/app/knowledge-school-installer-v1.css',
@@ -86,6 +86,7 @@ try{
     core:await readFile(path.join(root,'public/service-worker-core-v208.js'),'utf8'),
     cleanroom:await readFile(path.join(root,'public/service-worker-living-school-cleanroom-v218.js'),'utf8'),
     installer:await readFile(path.join(root,'public/service-worker-installer-state-v280.js'),'utf8'),
+    installerController:await readFile(path.join(root,'public/app/installer-state-machine-v281.js'),'utf8'),
     integrity:await readFile(path.join(root,'public/service-worker-shell-integrity-v281.js'),'utf8'),
     offline:await readFile(path.join(root,'public/service-worker-offline-v211-override.js'),'utf8'),
     background:await readFile(path.join(root,'public/app/campus-background-download-v241.js'),'utf8'),
@@ -110,7 +111,10 @@ try{
   assert(files.core.includes("const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425'")&&files.core.includes("'/app/working-campus-return-guard-v425.js'")&&files.core.includes('DOWNLOAD_OFFLINE_PACKAGE'),'retained lightweight/offline core is incomplete');
   assert(!/importScripts\(/.test(files.core),'retained lightweight core imports the retired layered stack');
   assert(files.cleanroom.includes("const REVISION='living-school-cleanroom-v218'")&&files.cleanroom.includes('event.stopImmediatePropagation()'),'Living School worker retirement boundary is incomplete');
+  assert(files.installer.includes("'/app/installer-state-machine-v281.js'")&&!files.installer.includes("'/app/installer-state-machine-v280.js'"),'installer shell does not pin the single-writer v281 controller');
   assert(files.installer.includes("'/app/installer-storage-guard-v281.js'"),'installer state worker does not pin the storage guard');
+  assert(!/MutationObserver|setInterval\(/.test(files.installerController),'installer controller reintroduced polling state reconciliation');
+  assert(!/\$\('#(?:package-state|package-assets|local-mode|install-help|install-app|check-update)'\)/.test(files.installerController),'installer controller reclaimed shell UI ownership');
   assert(files.integrity.includes("crypto.subtle.digest('SHA-256'")&&files.integrity.includes('STAGING_CACHE')&&files.integrity.includes('lastKnownGoodCache'),'verified shell staging/last-known-good fallback is incomplete');
   assert(
     files.offline.includes("const V211_REVISION = 'offline-campus-current-graph-v280'")&&
@@ -123,6 +127,7 @@ try{
     files.offline.includes('backgroundSafe: true'),
     'resumable current-graph offline retry override is incomplete'
   );
+  assert(files.installerController.includes("const SYNC_TAG='civweave-campus-resume-v280'"),'installer controller and offline worker disagree on resume sync protocol');
   assert(files.background.includes('DOWNLOAD_OFFLINE_PACKAGE')&&files.background.includes('height:4px')&&files.background.includes("navigator.serviceWorker.addEventListener('message'"),'canonical page background campus continuation is incomplete');
   assert(files.storage.includes('requiredFreeBytes')&&files.storage.includes('navigator.storage'),'installer storage preflight is incomplete');
   assert(files.legacy.includes(expectedWorkerImport),`legacy worker does not import the active ${releaseVersion} v425 wrapper`);
@@ -141,6 +146,7 @@ try{
     backgroundCampus:true,
     storagePreflight:true,
     shellIntegrity:true,
+    installerStateAuthority:'v281',
     workingCampusReturn:'v425',
     workerRevision:'v288-code-coherence-v281-integrity-v280-resumable-campus-v425'
   },null,2));
