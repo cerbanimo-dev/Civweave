@@ -8,8 +8,9 @@ import {
 const enc = new TextEncoder();
 const clean = (value, max = 1200) => String(value ?? '').trim().slice(0, max);
 const nowIso = now => new Date(now).toISOString();
-const INBOUND_SCHEMA = 'civweave.hub-inbound-email-proof.v1';
+const INBOUND_SCHEMA = 'civweave.hub-inbound-email-proof.v2';
 const GENERIC_RECOVERY_MESSAGE = 'If that email is a verified recovery method for this Hub, follow the email-proof instructions to continue.';
+const DEFAULT_RELAY_URL = 'https://civweave-recovery-relay.glaedn.workers.dev';
 
 function b64url(bytes) {
   const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
@@ -46,14 +47,37 @@ function hasOutbound(env) {
 }
 
 export function parseInboundProofSubject(value) {
-  const match = clean(value, 500).match(/^Civweave ([a-z0-9-]{1,120}) (verify-email|recover-account) ([A-Za-z0-9_-]{40,200})$/);
-  return match ? Object.freeze({ nodeId: match[1], purpose: match[2], token: match[3] }) : null;
+  const match = clean(value, 500).match(/^Civweave Hub (verify-email|recover-account) ([A-Za-z0-9_-]{40,200})$/);
+  return match ? Object.freeze({ purpose: match[1], token: match[2] }) : null;
 }
 
 export class HubAccountRecoveryInboundService extends HubAccountRecoveryService {
   mailbox() {
     const value = clean(this.env?.HUB_RECOVERY_INBOUND_EMAIL, 320).toLowerCase();
     return value ? normalizeEmail(value) : '';
+  }
+
+  relayUrl() {
+    const raw = clean(this.env?.HUB_RECOVERY_RELAY_URL || DEFAULT_RELAY_URL, 2000);
+    try {
+      const url = new URL(raw);
+      if (url.protocol !== 'https:' || url.username || url.password) throw new Error('invalid');
+      return url.origin;
+    } catch {
+      throw Object.assign(new Error('Hub recovery proof relay is unavailable.'), { status: 503 });
+    }
+  }
+
+  async relay(path, token) {
+    const response = await fetch(`${this.relayUrl()}/api/recovery-proof/${path}`, {
+      method: 'POST',
+      cache: 'no-store',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: JSON.stringify({ token: clean(token, 400) }),
+    });
+    const packet = await response.json().catch(() => ({}));
+    if (!response.ok) throw Object.assign(new Error(packet.error || `Recovery proof relay returned HTTP ${response.status}.`), { status: response.status });
+    return packet;
   }
 
   async issueInboundProof({ nodeId, purpose, email, userId = null } = {}) {
@@ -72,18 +96,17 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
       userId: clean(userId, 180) || null,
       createdAt: nowIso(now),
       expiresAt: nowIso(now + ttl),
-      approvedAt: null,
       consumedAt: null,
     });
     await this.state.storage.put(proofKey(hash), proof);
-    return { token, proof, delivery: this.inboundDelivery(normalizedNodeId, normalizedPurpose, token) };
+    return { token, proof, delivery: this.inboundDelivery(normalizedPurpose, token) };
   }
 
-  inboundDelivery(nodeId, purpose, token) {
+  inboundDelivery(purpose, token) {
     const mailbox = this.mailbox();
     if (!mailbox) return Object.freeze({ sent: false, transport: 'unconfigured' });
     const code = clean(token, 400);
-    const subject = `Civweave ${validNodeId(nodeId)} ${validPurpose(purpose)} ${code}`;
+    const subject = `Civweave Hub ${validPurpose(purpose)} ${code}`;
     const body = `Send this message from the recovery address you are proving.\n\nAfter sending, return to Civweave and paste this one-time code:\n\n${code}\n\nDo not forward this message or code.`;
     return Object.freeze({
       sent: true,
@@ -130,60 +153,65 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
     return { key, proof, now };
   }
 
-  async approveInboundProof(input = {}) {
-    const purpose = validPurpose(input.purpose);
-    const nodeId = validNodeId(input.nodeId);
-    const from = normalizeEmail(input.from);
-    const found = await this.proof(input.token, nodeId, purpose);
-    if (!found) throw Object.assign(new Error('Email proof is invalid, expired, or already used.'), { status: 400 });
-    if (found.proof.expectedEmailHash !== await normalizedEmailHash(from)) {
-      throw Object.assign(new Error('Email proof sender does not match the requested recovery address.'), { status: 403 });
+  async authenticatedProof(found, token) {
+    const relay = await this.relay('status', token);
+    if (!relay?.approved) throw Object.assign(new Error('Send the prefilled recovery email before using this code.'), { status: 409 });
+    if (relay.purpose !== found.proof.purpose || relay.emailHash !== found.proof.expectedEmailHash) {
+      throw Object.assign(new Error('The authenticated email sender does not match this Hub recovery request.'), { status: 403 });
     }
-    if (purpose === 'verify-email' && found.proof.userId) {
-      const account = await this.accountForResident(found.proof.userId);
-      if (account && account.email === from && !account.emailVerifiedAt) {
-        const challenge = await this.issueChallenge(account, 'verify-email');
-        await this.verifyEmail(challenge.token);
-      }
-    }
-    await this.state.storage.put(found.key, Object.freeze({ ...found.proof, approvedAt: found.proof.approvedAt || nowIso(found.now) }));
-    return Object.freeze({ ok: true, accepted: true });
+    return relay;
+  }
+
+  async consume(found, token) {
+    await this.state.storage.put(found.key, Object.freeze({ ...found.proof, consumedAt: nowIso(found.now) }));
+    await this.relay('consume', token).catch(() => null);
   }
 
   async completeInboundVerification(nodeId, token) {
     const found = await this.proof(token, nodeId, 'verify-email');
     if (!found) return null;
-    if (!found.proof.approvedAt) throw Object.assign(new Error('Send the prefilled verification email before using this code.'), { status: 409 });
-    await this.state.storage.put(found.key, Object.freeze({ ...found.proof, consumedAt: nowIso(found.now) }));
+    await this.authenticatedProof(found, token);
+    if (!found.proof.userId) throw Object.assign(new Error('Hub recovery account is unavailable.'), { status: 404 });
+    const account = await this.accountForResident(found.proof.userId);
+    if (!account) throw Object.assign(new Error('Hub recovery account is unavailable.'), { status: 404 });
+    if (!account.emailVerifiedAt) {
+      const challenge = await this.issueChallenge(account, 'verify-email');
+      await this.verifyEmail(challenge.token);
+    }
+    await this.consume(found, token);
     return Object.freeze({ ok: true, verified: true });
   }
 
   async completeInboundRecovery(nodeId, token) {
     const found = await this.proof(token, nodeId, 'recover-account');
     if (!found) return null;
-    if (!found.proof.approvedAt) throw Object.assign(new Error('Send the prefilled recovery email before using this code.'), { status: 409 });
+    await this.authenticatedProof(found, token);
     if (!found.proof.userId) {
-      await this.state.storage.put(found.key, Object.freeze({ ...found.proof, consumedAt: nowIso(found.now) }));
+      await this.consume(found, token);
       throw Object.assign(new Error('No recoverable Hub account was confirmed for that address.'), { status: 404 });
     }
     const account = await this.accountForResident(found.proof.userId);
     if (!account?.emailVerifiedAt) throw Object.assign(new Error('This Hub account does not have a verified recovery email.'), { status: 409 });
     const challenge = await this.issueChallenge(account, 'recover-account');
     const recovered = await super.completeRecovery(challenge.token);
-    await this.state.storage.put(found.key, Object.freeze({ ...found.proof, consumedAt: nowIso(found.now) }));
+    await this.consume(found, token);
     return recovered;
   }
 
   async pollVerification(nodeId, token) {
     const found = await this.proof(token, nodeId, 'verify-email');
     if (!found) return Object.freeze({ ok: true, verified: false, complete: true });
-    return Object.freeze({ ok: true, verified: Boolean(found.proof.approvedAt), complete: Boolean(found.proof.approvedAt) });
+    const relay = await this.relay('status', token).catch(() => ({ approved: false }));
+    const verified = Boolean(relay.approved && relay.purpose === found.proof.purpose && relay.emailHash === found.proof.expectedEmailHash);
+    return Object.freeze({ ok: true, verified, complete: verified });
   }
 
   async pollRecovery(nodeId, token) {
     const found = await this.proof(token, nodeId, 'recover-account');
     if (!found) return Object.freeze({ ok: true, ready: false, complete: true });
-    return Object.freeze({ ok: true, ready: Boolean(found.proof.approvedAt && found.proof.userId), complete: Boolean(found.proof.approvedAt) });
+    const relay = await this.relay('status', token).catch(() => ({ approved: false }));
+    const authenticated = Boolean(relay.approved && relay.purpose === found.proof.purpose && relay.emailHash === found.proof.expectedEmailHash);
+    return Object.freeze({ ok: true, ready: authenticated && Boolean(found.proof.userId), complete: authenticated });
   }
 }
 
