@@ -1,0 +1,85 @@
+name: Reconcile PR 526 with current main
+
+on:
+  push:
+    branches:
+      - feat/civweave-cc-canonical-domain
+    paths:
+      - '.reconcile-pr-526'
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: feat/civweave-cc-canonical-domain
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Merge current main and resolve install boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "civweave-merge-bot"
+          git config user.email "civweave-merge-bot@users.noreply.github.com"
+          git fetch origin main
+
+          set +e
+          git merge --no-commit --no-ff origin/main
+          merge_status=$?
+          set -e
+
+          unmerged="$(git diff --name-only --diff-filter=U)"
+          if [ "$merge_status" -ne 0 ]; then
+            if [ "$unmerged" != "public/app/install-boundary-v146.js" ]; then
+              echo "Unexpected merge conflicts:"
+              printf '%s\n' "$unmerged"
+              exit 1
+            fi
+            git checkout --theirs public/app/install-boundary-v146.js
+          fi
+
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('public/app/install-boundary-v146.js')
+          s=p.read_text()
+          old="const VERSION='1.0.141';"
+          new="const VERSION='1.0.142';"
+          if old in s:
+              s=s.replace(old,new,1)
+          elif new not in s:
+              raise SystemExit('install boundary VERSION marker not found')
+          p.write_text(s)
+          PY
+          git add public/app/install-boundary-v146.js
+
+          if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
+            echo "Unresolved conflicts remain"
+            git diff --name-only --diff-filter=U
+            exit 1
+          fi
+
+      - name: Verify reconciled feature set
+        run: |
+          node --check public/app/install-boundary-v146.js
+          node scripts/verify-foreground-phone-mesh-v1.mjs
+          node scripts/verify-civweave-shared-domain-policy-v1.mjs
+          node scripts/verify-civweave-shared-domain-billing-v1.mjs
+          node scripts/verify-civweave-hosting-capacity-v1.mjs
+          node scripts/verify-release-contract.mjs
+          node scripts/verify-canonical-launch-release.mjs
+
+      - name: Commit reconciliation
+        run: |
+          git add -A
+          git status --short
+          git commit -m "Merge current main into Civweave 1.0.142 hosting release"
+          git push origin HEAD:feat/civweave-cc-canonical-domain
