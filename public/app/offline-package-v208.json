@@ -46,6 +46,7 @@
     "/app/local-object-mesh-v146.js",
     "/app/node-ai-mesh-v1.js",
     "/app/peer-local-plan-borrow-v1.js",
+    "/app/peer-local-plan-borrow-ui-v1.js",
     "/app/validation-labor-rewards-v1.js",
     "/app/proposal-voting-gate-v2.js",
     "/app/host-node-session-v1.js",
@@ -156,9 +157,9 @@
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
-    "estimatedBytes": 8419582,
+    "estimatedBytes": 8420056,
     "safetyBytes": 67108864,
-    "requiredFreeBytes": 75528446,
+    "requiredFreeBytes": 75528920,
     "candidateAssetCount": 632,
     "estimatedAssetCount": 632,
     "conservativeUpperBound": true
