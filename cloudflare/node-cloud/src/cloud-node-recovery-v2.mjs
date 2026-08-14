@@ -1,5 +1,5 @@
 import { CivweaveCloudNode as BaseCloudNode } from './cloud-node-recovery-v1.mjs';
-import { PassportAccountService } from '../../account-edge/src/hub-passport-account-v3.mjs';
+import { PassportAccountService } from '../../account-edge/src/hub-passport-account-v4.mjs';
 
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
 const HEADERS = Object.freeze({ 'cache-control': 'no-store', 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type, x-civweave-node-id', 'access-control-max-age': '86400' });
@@ -43,6 +43,7 @@ export class CivweaveCloudNode extends BaseCloudNode {
       if (url.pathname === '/api/account/recovery-email/begin') return response(await service.beginRecoveryEmail(input));
       if (url.pathname === '/api/account/recovery-email/verify') return response(await service.verifyRecoveryEmail(nodeId, input));
       if (url.pathname === '/api/account/recovery-kit/ack') return response(await service.acknowledgeRecoveryKit(input));
+      if (url.pathname === '/api/account/recovery-kit/regenerate') return response(await service.regenerateRecoveryKit(input));
       if (url.pathname === '/api/account/recovery-kit/complete') return response(await service.consumeRecoveryCode(input));
       if (url.pathname === '/api/account/totp/begin') return response(await service.beginTotp(input));
       if (url.pathname === '/api/account/totp/verify') return response(await service.verifyTotp(input));
