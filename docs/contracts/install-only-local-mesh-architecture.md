@@ -25,7 +25,8 @@ The PWA owns:
 - per-object delivery priority;
 - automatic sync whenever paired peers are simultaneously open;
 - public/federated store-and-forward relaying within signed hop limits;
-- direct/group endpoint delivery without third-party payload relaying;
+- credential-bound direct endpoint delivery;
+- group payload transfer gated until authenticated membership proof exists;
 - deterministic retry, receipts, conflict handling, and expiry.
 
 There is **no Android core, native companion, Wi-Fi Direct dependency, or always-on daemon in v1**.
@@ -38,11 +39,11 @@ A public gateway may provide:
 
 - signed release metadata and device-package distribution;
 - optional rendezvous and signaling;
-- consented envelope relay;
+- consented public/federated envelope relay;
 - public presence and federation records;
 - community-intended object transfer.
 
-It must not be the canonical store for private local work and must not serve the campus as a live website. Foreground peer exchange must continue to work without a gateway once peers can exchange WebRTC signaling data through any supported pairing path.
+It must not be the canonical store for private local work and must not serve the campus as a live website. Foreground peer exchange must continue to work without a gateway once peers can exchange WebRTC signaling data through any supported pairing path. Direct and group community-object payloads are not gateway-relayed in v1; rendezvous signaling remains separate from object delivery.
 
 ## Install-only rule
 
@@ -67,7 +68,7 @@ Every transferable object uses a versioned signed envelope with:
 
 Signed object fields are immutable in transit. Transport state such as hops used, visited peers, chunk progress, priority, retries, and acknowledgements lives outside the signed object in a transit envelope or local delivery state. A transport must never decrement `hopLimit` or otherwise mutate signed fields before validation.
 
-Local storage is canonical. Publishing means adding a signed object to the local outbox. Delivery transports may include foreground WebRTC peers, removable export/import, or a configured community gateway.
+Local storage is canonical. Publishing means adding a signed object to the local outbox. Delivery transports may include foreground WebRTC peers, removable export/import, or a configured community gateway for public/federated objects.
 
 ## Foreground phone mesh v1
 
@@ -81,7 +82,8 @@ No automatic background discovery is promised in v1. A paired session is useful 
 
 After the encrypted WebRTC data channel opens, peers exchange:
 
-- node identity;
+- node identity bound to the peer public credential;
+- public credential used to verify that identity;
 - protocol version;
 - supported object schema;
 - foreground/background capability;
@@ -89,7 +91,9 @@ After the encrypted WebRTC data channel opens, peers exchange:
 - maximum chunk size;
 - delivery-priority support;
 - relay policy;
-- explicitly shared group identifiers when group delivery is enabled.
+- claimed group identifiers for future membership proof.
+
+Group identifiers announced by a peer are advisory only in v1. They are not trusted for payload authorization, so automatic group payload transfer stays disabled until Civweave has an authenticated membership-proof contract.
 
 Unsupported protocol versions fail closed rather than silently downgrading object validation.
 
@@ -115,7 +119,7 @@ Priority changes scheduling order only. They do not bypass consent, audience, ex
 
 Public and federated objects may be relayed by foreground peers while their signed hop limit has not been exhausted. Transit metadata records hops used and visited nodes independently of the signed object.
 
-Direct and group payloads are endpoint-only in v1. They are not stored by unrelated relay peers. This avoids turning ordinary phones into unintended custodians of private payloads before Civweave has a separate end-to-end relay-encryption contract.
+Direct payloads are endpoint-only and are sent only after the peer node ID is verified against its public credential. Legacy or unverifiable peers receive public/federated cargo only. Group payloads are not automatically transferred in v1 because a self-reported group ID is not sufficient authorization. Neither direct nor group payloads are gateway-relayed by the foreground mesh. This avoids turning ordinary phones or rendezvous infrastructure into unintended custodians of private payloads before Civweave has explicit end-to-end relay encryption and authenticated group membership contracts.
 
 ### Automatic foreground sync
 
@@ -134,7 +138,7 @@ No native Android component is reserved or required by this architecture.
 1. Install-only route boundary and complete-package readiness reporting.
 2. Local community-object database, outbox, inbox, receipts, signatures, and deduplication.
 3. Foreground phone WebRTC pairing and automatic open-app sync.
-4. Manifest-first exchange, priority scheduling, resumable chunk transfer, and safe public/federated store-and-forward.
+4. Manifest-first exchange, priority scheduling, resumable chunk transfer, credential-bound direct delivery, and safe public/federated store-and-forward.
 5. Optional gateway rendezvous, federation, and consented relay.
 6. Sleeping-phone/background transports when the product actually needs them and the platform path is justified.
 7. Governed signed package updates through the Anarchadia execution kernel.
@@ -150,7 +154,10 @@ No native Android component is reserved or required by this architecture.
 - Priority affects send order but never authorization.
 - Signed object fields are unchanged during transit.
 - Public/federated relay respects signed hop ceilings and visited-node deduplication.
-- Direct/group payloads are not relayed through unrelated peers.
+- Direct payloads require a peer identity verified against its public credential.
+- Legacy/unverifiable peers receive public/federated cargo only.
+- Group payload transfer remains disabled until membership can be authenticated.
+- Direct/group payloads are not gateway-relayed by the foreground mesh.
 - Peer or gateway delivery can be retried without duplicate application.
 - A peer cannot receive an object outside its declared audience and consent policy.
 - Cabinet Mode and Cabinet Only use the same install boundary and local exchange runtime.
