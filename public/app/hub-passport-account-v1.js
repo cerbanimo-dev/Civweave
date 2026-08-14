@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='hub-passport-account-v2.0.0-membership-gate';
+const VERSION='hub-passport-account-v2.1.0-membership-stripe';
 const PASSPORT_KEY='civweave.anarchadia.citizen-console.v139';
 const STATE_KEY='civweave.passport-account.client.v1';
 if(globalThis.CivweaveHubPassportAccountV1?.version===VERSION)return;
@@ -74,6 +74,9 @@ async function deactivateDevice(deviceId){const packet=await post('device/deacti
 async function removeDevice(deviceId){const packet=await post('device/remove',{...authPayload(),deviceId:clean(deviceId,180)});if(packet.account)saveAccount(packet.account);return packet}
 async function detachPassport(passportId=passport()){const packet=await post('passport/detach',{...authPayload(),passportId:clean(passportId,180)});if(packet.account)saveAccount(packet.account);return packet}
 async function setAnnualMemberRebateOptIn(optIn=true){const packet=await post('annual-member-rebate',{...authPayload(),optIn:optIn===true});if(packet.account)saveAccount(packet.account);return packet}
+async function stripeStatus(){return post('stripe/status',authPayload())}
+async function connectStripe({email,country='us',annualMemberRebateOptIn=false}={}){const packet=await post('stripe/connect',{...authPayload(),email:clean(email,320),country:clean(country,2).toLowerCase(),annualMemberRebateOptIn:annualMemberRebateOptIn===true});if(packet.account)saveAccount(packet.account);return packet}
+async function onboardStripe(){return post('stripe/onboard',authPayload())}
 function hasPasskey(){const account=current();return Boolean(account&&Number(account.passkeyCount||0)>0)}
 async function bootstrap(){
  try{
@@ -83,6 +86,6 @@ async function bootstrap(){
  }catch{return null}
 }
 function boot(){addEventListener('civweave:host-node-logged-in',()=>void bootstrap());addEventListener('civweave:host-node-selected',()=>dispatchEvent(new CustomEvent('civweave:passport-account',{detail:{account:current()}})));if(identity()&&passport())void bootstrap()}
-const api=Object.freeze({version:VERSION,host,nodeId,passport,identity,current,ensureAccount,registerCurrentPassport,login,beginRecoveryEmail,verifyRecoveryEmail,acknowledgeRecoveryKit,beginTotp,verifyTotp,membershipReadiness,devices,deactivateDevice,removeDevice,detachPassport,setAnnualMemberRebateOptIn,hasPasskey,bootstrap});
+const api=Object.freeze({version:VERSION,host,nodeId,passport,identity,current,ensureAccount,registerCurrentPassport,login,beginRecoveryEmail,verifyRecoveryEmail,acknowledgeRecoveryKit,beginTotp,verifyTotp,membershipReadiness,devices,deactivateDevice,removeDevice,detachPassport,setAnnualMemberRebateOptIn,stripeStatus,connectStripe,onboardStripe,hasPasskey,bootstrap});
 globalThis.CivweaveHubPassportAccountV1=api;if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
