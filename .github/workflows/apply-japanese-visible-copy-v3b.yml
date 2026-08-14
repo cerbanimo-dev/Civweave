@@ -6,6 +6,7 @@ on:
       - fix/japanese-localization-v3-coverage
     paths:
       - '.github/workflows/apply-japanese-visible-copy-v3b.yml'
+      - 'scripts/apply-japanese-visible-copy-v3b.mjs'
 
 permissions:
   contents: write
