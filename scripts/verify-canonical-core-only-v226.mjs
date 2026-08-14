@@ -38,19 +38,22 @@ const allowedExperienceSupport=[
 ];
 const retiredCanonicalChat=['/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js','/app/chat-single-owner-v245.js'];
 const fellowfareBridge='/app/fellowfare-shared-guide-bridge-v236.js';
-function runBoundary(pathname){
+function runBoundary(pathname,{installed=false}={}){
   const appended=[],replaced=[],storage=new Map(),documentElement={isConnected:true,dataset:{}},head={isConnected:true,append:node=>appended.push(node)},body={isConnected:true};
   const document={documentElement,head,body,querySelector:selector=>{const match=String(selector).match(/^script\[src\^=\"([^\"]+)\"\]$/);if(!match)return null;return appended.find(node=>String(node.src||'').startsWith(match[1]))||null},createElement:tag=>({tagName:String(tag).toUpperCase(),async:true,rel:'',href:'',src:''})};
   const location={pathname,search:'',hash:'',hostname:'civweave.invalid',origin:'https://civweave.invalid',href:`https://civweave.invalid${pathname}`,replace:url=>replaced.push(String(url))};
-  const context={console,URL,URLSearchParams,Map,Object,String,Boolean,CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},navigator:{standalone:false},matchMedia:()=>({matches:false}),sessionStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value))},localStorage:{getItem:()=>null},document,location,addEventListener:()=>{},dispatchEvent:()=>true,queueMicrotask:callback=>callback()};
+  const context={console,URL,URLSearchParams,Map,Object,String,Boolean,CustomEvent:class{constructor(type,init={}){this.type=type;this.detail=init.detail}},navigator:{standalone:installed},matchMedia:query=>({matches:installed&&String(query).includes('display-mode')}),sessionStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value))},localStorage:{getItem:()=>null},document,location,addEventListener:()=>{},dispatchEvent:()=>true,queueMicrotask:callback=>callback()};
   context.window=context;context.top=context;context.self=context;context.globalThis=context;
   vm.runInNewContext(routesSource,context,{filename:'system-routes-v227.js'});
   vm.runInNewContext(boundarySource,context,{filename:'install-boundary-v146.js'});
   return{appended,replaced,documentElement,api:context.CivweaveInstallBoundaryV146};
 }
 for(const [system,pathname] of Object.entries(systems)){
-  const result=runBoundary(pathname);
-  assert.equal(result.replaced.length,0,`${system} was redirected with empty session state.`);
+  const browser=runBoundary(pathname);
+  assert.equal(browser.replaced.length,1,`${system} must redirect ordinary browser access to the installer.`);
+  assert.equal(browser.api.allowed(),false,`${system} is incorrectly authorized in an ordinary browser.`);
+  const result=runBoundary(pathname,{installed:true});
+  assert.equal(result.replaced.length,0,`${system} redirected an installed display.`);
   assert.equal(result.api.version,version);
   assert.equal(result.api.systemSurface(),system);
   assert.equal(result.api.allowed(),true);
@@ -70,7 +73,7 @@ for(const [system,pathname] of Object.entries(systems)){
     assert(!scriptPaths.includes('/app/pwa-update-controller-v204.js'),`${system} reintroduced the update overlay during canonical startup.`);
   }
 }
-const api=runBoundary(systems.civweave).api;
+const api=runBoundary(systems.civweave,{installed:true}).api;
 assert.equal(api.canonicalSystemCount,5);
 assert.equal(api.canonicalAutoScripts,0);
 assert.equal(api.canonicalSubsystemSupportScripts,allowedCanonicalSupport.length);
@@ -97,4 +100,5 @@ assert.equal(api.fellowfareGuideBridgeRevision,'v236-native-workbench-shared-thr
 assert.equal(api.radioTrackSuggestionRevision,'v241-playlist-context-track-links');
 assert.equal(api.campusBackgroundDownloadRevision,'v241-worker-owned-download-bottom-progress-rail');
 assert.equal(api.pwaUpdateRevision,'v250-installed-entry-every-launch');
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),emptySessionAuthorized:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,settingsOwner:'settings-gateway-v317',canonicalChatOwner:'guide-workspace-v242',mobileAIHardening:'v302',systemsMesh:'v251-five-system-non-privileged-event-contract',nodeAiMesh:'v1-node-owned-service-discovery-routing',questVeil:'v1-mandatory-human-ledger-gate-plus-mesh-batches',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,hostNodeSession:true,legacyCompatibility:'noncanonical-only'},null,2));
+assert.equal(api.browserBoundaryRevision,'v228-installed-only-stale-session-chat-escape');
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),browserRequiresInstalledDisplay:true,emptySessionAuthorized:false,boundaryInstalledAuthorization:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,settingsOwner:'settings-gateway-v317',canonicalChatOwner:'guide-workspace-v242',mobileAIHardening:'v302',systemsMesh:'v251-five-system-non-privileged-event-contract',nodeAiMesh:'v1-node-owned-service-discovery-routing',questVeil:'v1-mandatory-human-ledger-gate-plus-mesh-batches',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,backgroundCampus:true,hostNodeSession:true,legacyCompatibility:'noncanonical-only'},null,2));
