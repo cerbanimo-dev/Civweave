@@ -45,9 +45,11 @@ function parseTime(value) {
 export function sharedDomainEntitlementStatus(row, now = Date.now()) {
   if (!row) return 'missing';
   const status = String(row.entitlement_status || '').trim().toLowerCase();
+  const source = String(row.entitlement_source || 'hosting-cost-share').trim().toLowerCase();
   if (status === 'suspended' || status === 'inactive') return status;
   if (status === 'active') {
     const paidThrough = parseTime(row.paid_through);
+    if (source === 'hosting-cost-share' && paidThrough === null) return 'expired';
     return paidThrough !== null && now > paidThrough ? 'expired' : 'active';
   }
   if (status === 'grace') {
