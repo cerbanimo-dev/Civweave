@@ -82,8 +82,10 @@ No automatic background discovery is promised in v1. A paired session is useful 
 
 After the encrypted WebRTC data channel opens, peers exchange:
 
-- node identity bound to the peer public credential;
+- node identity derived from the peer public credential;
 - public credential used to verify that identity;
+- a fresh per-session challenge nonce;
+- a challenge-response signature proving possession of the credential private key;
 - protocol version;
 - supported object schema;
 - foreground/background capability;
@@ -119,7 +121,7 @@ Priority changes scheduling order only. They do not bypass consent, audience, ex
 
 Public and federated objects may be relayed by foreground peers while their signed hop limit has not been exhausted. Transit metadata records hops used and visited nodes independently of the signed object.
 
-Direct payloads are endpoint-only and are sent only after the peer node ID is verified against its public credential. Legacy or unverifiable peers receive public/federated cargo only. Group payloads are not automatically transferred in v1 because a self-reported group ID is not sufficient authorization. Neither direct nor group payloads are gateway-relayed by the foreground mesh. This avoids turning ordinary phones or rendezvous infrastructure into unintended custodians of private payloads before Civweave has explicit end-to-end relay encryption and authenticated group membership contracts.
+Direct payloads are endpoint-only and are sent only after the peer node ID is derived from its public credential and the peer proves possession of the corresponding private key by signing a fresh session challenge. Legacy or unverifiable peers receive public/federated cargo only. Group payloads are not automatically transferred in v1 because a self-reported group ID is not sufficient authorization. Neither direct nor group payloads are gateway-relayed by the foreground mesh. This avoids turning ordinary phones or rendezvous infrastructure into unintended custodians of private payloads before Civweave has explicit end-to-end relay encryption and authenticated group membership contracts.
 
 ### Automatic foreground sync
 
@@ -154,7 +156,7 @@ No native Android component is reserved or required by this architecture.
 - Priority affects send order but never authorization.
 - Signed object fields are unchanged during transit.
 - Public/federated relay respects signed hop ceilings and visited-node deduplication.
-- Direct payloads require a peer identity verified against its public credential.
+- Direct payloads require a peer identity derived from its public credential plus a valid fresh-session challenge signature proving private-key possession.
 - Legacy/unverifiable peers receive public/federated cargo only.
 - Group payload transfer remains disabled until membership can be authenticated.
 - Direct/group payloads are not gateway-relayed by the foreground mesh.
