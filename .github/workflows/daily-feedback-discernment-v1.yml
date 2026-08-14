@@ -14,7 +14,7 @@ on:
         options: [discern, promote]
 
 permissions:
-  contents: read
+  contents: write
   issues: write
   actions: write
 
@@ -24,7 +24,7 @@ concurrency:
 
 jobs:
   discern:
-    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'discern' || github.event_name == 'schedule' && github.event.schedule == '17 10 * * *'
+    if: (github.event_name == 'workflow_dispatch' && inputs.mode == 'discern') || (github.event_name == 'schedule' && github.event.schedule == '17 10 * * *')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -43,7 +43,7 @@ jobs:
         run: node scripts/run-feedback-batch-v1.mjs
 
   promote:
-    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'promote' || github.event_name == 'schedule' && github.event.schedule == '37 22 * * *'
+    if: (github.event_name == 'workflow_dispatch' && inputs.mode == 'promote') || (github.event_name == 'schedule' && github.event.schedule == '37 22 * * *')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
