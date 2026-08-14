@@ -49,6 +49,8 @@ assert(installedEntry.includes("if(params.get('lang'))installer.searchParams.set
 assert(shellCopy.includes("['Installed campus','インストール済みキャンパス']"),'Installed PWA boot translation is missing.');
 assert(shellCopy.includes("['Install Civweave','Civweave をインストール']"),'Japanese installer install action is missing.');
 assert(shellCopy.includes("jp.textContent='神織 · セルバニモ'"),'Japanese installer does not place Cerbanimo Japanese branding beside the steward mark.');
+assert(shellCopy.includes("if(strong.textContent!=='Cerbanimo')strong.textContent='Cerbanimo'"),'Japanese installer steward branding must be idempotent so its MutationObserver cannot feed itself.');
+assert(shellCopy.includes("if(!strong.hasAttribute('data-cw-ja-skip'))strong.dataset.cwJaSkip=''"),'Japanese installer steward skip marker must not be rewritten on every observer pass.');
 
 assert(languageSettings.includes("LANGUAGE_KEY='civweave.language.v1'"),'Language setting does not use the canonical language preference.');
 assert(languageSettings.includes('Language / 言語'),'Settings language row is missing.');
