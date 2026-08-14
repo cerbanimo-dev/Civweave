@@ -42,6 +42,18 @@ jobs:
             await writeFile(file,source);
           }
           NODE
+      - name: Align knowledge-school verifier with bounded manifest fetch
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from 'node:fs/promises';
+          const file='scripts/verify-knowledge-school-seeds-v1.mjs';
+          let source=await readFile(file,'utf8');
+          const old="assertIncludes(installedEntry,[\"updateViaCache:'none'\",'registration.update()',\"bounded(registration.update(),WORKER_STEP_TIMEOUT_MS,'service worker update')\",\"candidate.postMessage({type:'SKIP_WAITING'})\",\"fetch(`/app/manifest.webmanifest?boot=${Date.now()}`,{cache:'no-store'})\"],'updater-first installed entry');";
+          const replacement="assertIncludes(installedEntry,[\"updateViaCache:'none'\",'registration.update()',\"bounded(registration.update(),WORKER_STEP_TIMEOUT_MS,'service worker update')\",\"candidate.postMessage({type:'SKIP_WAITING'})\",'bounded(fetch(',\"/app/manifest.webmanifest?boot=${Date.now()}\",\"cache:'no-store'\",'release manifest'],'updater-first installed entry');";
+          if(source.includes(old))source=source.replace(old,replacement);
+          else if(!source.includes("'bounded(fetch('")||!source.includes("'/app/manifest.webmanifest?boot=${Date.now()}'"))throw new Error('Knowledge-school manifest verification anchor moved.');
+          await writeFile(file,source);
+          NODE
       - name: Advance patch release for the reconciled launch contract
         run: |
           node --input-type=module <<'NODE'
