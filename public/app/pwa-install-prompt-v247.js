@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v247-front-door-v3-install-only-runtime';
-const ENTRY='/app/installed-entry-v146?installed=1&system=civweave';
+const VERSION='pwa-install-prompt-v247-front-door-v4-shell-first-install';
+const ENTRY='/app/installed-entry-v146.html?installed=1&system=civweave';
 const HOST_SETUP_PATH='/host-setup.html';
 const CANONICAL_ORIGIN='https://civweave.cc';
 const PREVIOUS_CANONICAL_ORIGIN='https://civweave.pages.dev';
@@ -159,18 +159,30 @@ async function ownInstallClick(event){
     help('Civweave is already installed. Open it from your device app launcher; browser-tab runtime is disabled.');
     return;
   }
+  const installer=globalThis.CivweaveInstallerV130;
   const prompt=promptEvent;
   event.preventDefault();
   event.stopImmediatePropagation();
+  if(!installer?.prepareShell){
+    help('The lightweight shell controller is still loading. Wait a moment, then tap Install Civweave again.');
+    return;
+  }
   if(!prompt){
     help('The browser has not offered a true Civweave app-install prompt yet. Do not use Create shortcut. Reload this installer after the shell is ready.');
     return;
   }
   prompting=true;
-  promptEvent=null;
   button.disabled=true;
-  button.textContent='Opening app install…';
+  button.textContent='Preparing app shell…';
   try{
+    await installer.prepareShell({manual:true});
+    if(!installer.shellReady){
+      help('Civweave was not installed because the lightweight app shell is not ready. Repair or retry the shell, then install again.');
+      return;
+    }
+    promptEvent=null;
+    button.disabled=true;
+    button.textContent='Opening app install…';
     await prompt.prompt();
     const choice=await prompt.userChoice.catch(()=>null);
     if(choice?.outcome==='accepted'){
@@ -184,9 +196,9 @@ async function ownInstallClick(event){
       button.textContent='Reload to install';
     }
   }catch(error){
-    help(`The native Civweave install prompt could not open: ${error?.message||error}. Reload this installer and try again.`);
+    help(`Civweave was not installed because the lightweight shell or native install prompt could not finish: ${error?.message||error}. Retry from this installer.`);
     button.disabled=false;
-    button.textContent='Reload to install';
+    button.textContent='Retry install';
   }finally{prompting=false}
 }
 
@@ -223,6 +235,7 @@ const api=Object.freeze({
   standalone,
   refresh:refreshButton,
   browserRuntimePolicy:'installer-only-until-installed-display',
+  installSequencingPolicy:'prepare-shell-before-native-prompt',
   state:()=>({available:Boolean(promptEvent),installed,prompting,standalone:standalone(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,relatedApps:[...relatedApps]})
 });
 

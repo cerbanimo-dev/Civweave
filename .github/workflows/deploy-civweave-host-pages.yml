@@ -26,8 +26,10 @@ jobs:
       CIVWEAVE_HOST_ID: ${{ vars.CIVWEAVE_HOST_ID }}
 
     steps:
-      - name: Check out main
+      - name: Check out main and complete history
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -95,6 +97,20 @@ jobs:
       - name: Build host Pages package
         run: node scripts/build-cloudflare-pages.mjs
 
+      - name: Build this host's Cerbanimo page
+        shell: bash
+        run: |
+          set -euo pipefail
+          host_id="${CIVWEAVE_HOST_ID:-${CIVWEAVE_PAGES_PROJECT#civweave-}}"
+          pages_origin="https://${CIVWEAVE_PAGES_PROJECT}.pages.dev"
+          node site/cerbanimo-cc/build.mjs \
+            --output .cloudflare-pages/cerbanimo \
+            --base /cerbanimo/ \
+            --role community \
+            --host-id "$host_id" \
+            --public-origin "$pages_origin" \
+            --pages-origin "$pages_origin"
+
       - name: Record community host deployment
         shell: bash
         run: |
@@ -103,6 +119,7 @@ jobs:
           const project = process.env.CIVWEAVE_PAGES_PROJECT;
           const hostId = process.env.CIVWEAVE_HOST_ID || project.replace(/^civweave-/, '');
           const pagesOrigin = `https://${project}.pages.dev`;
+          const cerbanimoOrigin = `${pagesOrigin}/cerbanimo/`;
           let accountEdge;
           try {
             accountEdge = JSON.parse(readFileSync('/tmp/civweave-account-edge.json', 'utf8'));
@@ -127,6 +144,7 @@ jobs:
             pagesProject: project,
             pagesOrigin,
             publicOrigin: pagesOrigin,
+            cerbanimoOrigin,
             canonicalOrigin: 'https://civweave.cc',
             sharedDomain: {
               root: 'civweave.cc',
@@ -161,26 +179,48 @@ jobs:
             exit 3
           }
 
-      - name: Verify stable community host origin
+      - name: Verify stable community host origin and Cerbanimo surface
         shell: bash
         run: |
           node --input-type=module <<'NODE'
           const project = process.env.CIVWEAVE_PAGES_PROJECT;
           const expectedCommit = process.env.GITHUB_SHA;
           const origin = `https://${project}.pages.dev`;
+          const hostId = process.env.CIVWEAVE_HOST_ID || project.replace(/^civweave-/, '');
           let lastFailure = 'Production marker did not become current.';
           for (let attempt = 1; attempt <= 12; attempt += 1) {
             try {
-              const response = await fetch(`${origin}/app/host-deployment-v1.json?verify=${encodeURIComponent(expectedCommit)}&attempt=${attempt}`, {
-                headers: { 'Cache-Control': 'no-cache' },
-              });
-              if (!response.ok) throw new Error(`HTTP ${response.status}`);
-              const marker = await response.json();
-              if (marker.pagesProject === project && marker.pagesOrigin === origin && marker.publicOrigin === origin && marker.canonicalOrigin === 'https://civweave.cc' && marker.sharedDomain?.eligibility === 'active-hosting-cost-share' && marker.sourceCommit === expectedCommit) {
-                console.log(`Verified free community origin ${origin} at source commit ${expectedCommit}; shared civweave.cc alias remains entitlement-gated.`);
+              const bust = `${encodeURIComponent(expectedCommit)}-${attempt}`;
+              const [markerResponse, cerbanimoResponse, surfaceResponse] = await Promise.all([
+                fetch(`${origin}/app/host-deployment-v1.json?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
+                fetch(`${origin}/cerbanimo/?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
+                fetch(`${origin}/cerbanimo/surface.json?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
+              ]);
+              if (!markerResponse.ok) throw new Error(`host marker HTTP ${markerResponse.status}`);
+              if (!cerbanimoResponse.ok) throw new Error(`Cerbanimo page HTTP ${cerbanimoResponse.status}`);
+              if (!surfaceResponse.ok) throw new Error(`Cerbanimo surface HTTP ${surfaceResponse.status}`);
+              const marker = await markerResponse.json();
+              const cerbanimoHtml = await cerbanimoResponse.text();
+              const surface = await surfaceResponse.json();
+              if (
+                marker.pagesProject === project &&
+                marker.pagesOrigin === origin &&
+                marker.publicOrigin === origin &&
+                marker.cerbanimoOrigin === `${origin}/cerbanimo/` &&
+                marker.canonicalOrigin === 'https://civweave.cc' &&
+                marker.sharedDomain?.eligibility === 'active-hosting-cost-share' &&
+                marker.sourceCommit === expectedCommit &&
+                surface.role === 'community' &&
+                surface.hostId === hostId &&
+                surface.basePath === '/cerbanimo/' &&
+                surface.publicOrigin === origin &&
+                cerbanimoHtml.includes('id="story"') &&
+                cerbanimoHtml.includes('Community Cerbanimo')
+              ) {
+                console.log(`Verified free community origin ${origin} and host Cerbanimo page ${origin}/cerbanimo/#story at source commit ${expectedCommit}; shared civweave.cc alias remains entitlement-gated.`);
                 process.exit(0);
               }
-              lastFailure = `attempt ${attempt}: marker sourceCommit=${marker.sourceCommit || 'missing'}`;
+              lastFailure = `attempt ${attempt}: marker sourceCommit=${marker.sourceCommit || 'missing'}, Cerbanimo host=${surface.hostId || 'missing'}`;
             } catch (error) {
               lastFailure = `attempt ${attempt}: ${error.message}`;
             }

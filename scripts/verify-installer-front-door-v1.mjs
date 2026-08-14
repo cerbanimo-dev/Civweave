@@ -15,6 +15,7 @@ const [installerHtml,bridge,brand,logoSvg,hostSetup,anchor,setup,frontDoor]=awai
 ]);
 
 const entry="/app/installed-entry-v146?installed=1&system=civweave";
+const exactEntry="/app/installed-entry-v146.html?installed=1&system=civweave";
 const civweavePrismatic='/app/logos/civweave-prismatic-wordmark-v1.png';
 const cerbanimoMark='/app/logos/cerbanimo-steward-mark-v1.png';
 const frontDoorCss='/app/front-door-prismatic-v301.css';
@@ -35,7 +36,7 @@ assert.equal(cerbanimoBytes.readUInt32BE(16),48,'Cerbanimo steward mark width mu
 assert.equal(cerbanimoBytes.readUInt32BE(20),72,'Cerbanimo steward mark height must stay at the verified uncropped display size');
 assert.equal(cerbanimoBytes.readUInt8(25),2,'Cerbanimo steward mark must stay truecolor RGB, never indexed/paletted');
 
-assert.ok(bridge.includes(`const ENTRY='${entry}'`),'installed Open Civweave button must use updater-first installed entry');
+assert.ok(bridge.includes(`const ENTRY='${exactEntry}'`),'installed Open Civweave button must use the exact updater-first installed entry');
 assert.ok(!bridge.includes("const ENTRY='/app/?system=civweave&installed=1'"),'PWA bridge must not route Open Civweave back into the installer');
 assert.ok(bridge.includes("const HOST_SETUP_PATH='/host-setup.html'"),'PWA bridge must have a dedicated steward setup destination');
 assert.ok(bridge.includes("current.searchParams.get('host_setup')!=='1'"),'legacy /app/?host_setup=1 links must redirect out of the app boundary');
@@ -79,8 +80,8 @@ assert.ok(frontDoor.includes("background:#fff url('/app/logos/cerbanimo-steward-
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installer-front-door-v6-approved-cerbanimo-uncropped',
-  installedEntry:entry,
+  revision:'installer-front-door-v7-exact-installed-entry',
+  installedEntry:exactEntry,
   hostSetup:'/host-setup.html',
   launcher:'/app/pwa-install-prompt-v247.js',
   compatibilityLogo:'/app/logos/civweave-pwa-512-v247.png',

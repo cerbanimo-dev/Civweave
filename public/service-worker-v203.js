@@ -1,14 +1,14 @@
 // GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288-language-v1 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-freeze-v347 + mobile-ai-hardening-v302 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + desktop-reload-storm-v428 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1
 'use strict';
-importScripts('/app/system-routes-v227.js?v=1.0.150-five-system-route-contract-v227');
+importScripts('/app/system-routes-v227.js?v=1.0.151-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
-importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.150-local-ai-code-coherence-v307');
+importScripts('/service-worker-local-ai-coherence-v307.js?v=1.0.151-local-ai-code-coherence-v307');
 importScripts('/service-worker-code-coherence-v288.js?v=1.0.91-code-coherence-v288-language-v1');
-importScripts('/service-worker-core-v208.js?v=1.0.150-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1');
+importScripts('/service-worker-core-v208.js?v=1.0.151-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1');
 importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery');
 importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280');
 importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281');
-importScripts('/service-worker-radio-core-v305.js?v=1.0.150-radio-core-shell-v305-playlist-only-v246');
+importScripts('/service-worker-radio-core-v305.js?v=1.0.151-radio-core-shell-v305-playlist-only-v246');
 importScripts('/service-worker-shell-repair-v293.js?v=installed-shell-repair-v293');
 importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280&references=current-manifest-only-v282');
 importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');
