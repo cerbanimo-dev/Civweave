@@ -8,6 +8,7 @@ on:
       - '.release-materialize-1.0.143-intention-landscape'
       - '.release-materialize-1.0.143-intention-landscape-retry'
       - '.release-materialize-1.0.143-intention-landscape-final'
+      - '.release-materialize-1.0.143-intention-landscape-final2'
 
 permissions:
   contents: write
@@ -54,9 +55,6 @@ jobs:
 
       - name: Materialize canonical release
         run: node scripts/materialize-canonical-release.mjs
-
-      - name: Apply release coherence
-        run: node scripts/sync-release-coherence-v220.mjs
 
       - name: Verify feature and release discipline
         run: |
