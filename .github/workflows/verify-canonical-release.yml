@@ -25,6 +25,7 @@ jobs:
       - run: node scripts/verify-release-contract.mjs
       - run: node scripts/verify-release-version-sync.mjs
       - run: node scripts/verify-working-campus-return-v425.mjs
+      - run: npm run test:anarchadia-governance
       - name: Assert verifiers did not self-heal the checkout
         run: git diff --exit-code -- .
       - run: node scripts/check-canonical-server-syntax.mjs
