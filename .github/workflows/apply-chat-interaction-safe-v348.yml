@@ -1,0 +1,44 @@
+name: Apply chat interaction safety v348
+
+on:
+  push:
+    branches:
+      - fix/chat-interaction-safe-v348
+    paths:
+      - scripts/apply-chat-interaction-safe-v348.mjs
+      - .github/workflows/apply-chat-interaction-safe-v348.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Apply interaction-safe chat hotfix
+        run: node scripts/apply-chat-interaction-safe-v348.mjs
+      - name: Verify chat launch readiness
+        run: node scripts/verify-chat-launch-readiness-v295.mjs
+      - name: Verify local AI smooth fit
+        run: node scripts/verify-local-ai-smooth-fit-v314.mjs
+      - name: Verify mobile chat layout
+        run: node scripts/verify-mobile-chat-layout-v248.mjs
+      - name: Verify chat convergence
+        run: node scripts/verify-chat-convergence-v250.mjs
+      - name: Commit patched runtime only
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f scripts/apply-chat-interaction-safe-v348.mjs .github/workflows/apply-chat-interaction-safe-v348.yml
+          git config user.name 'cerbanimo-dev'
+          git config user.email 'cerbanimo@gmail.com'
+          git add -A
+          git diff --cached --quiet && { echo 'No changes produced'; exit 1; }
+          git commit -m 'Fix chat interaction freeze and stale runtime reuse'
+          git push origin HEAD:fix/chat-interaction-safe-v348
