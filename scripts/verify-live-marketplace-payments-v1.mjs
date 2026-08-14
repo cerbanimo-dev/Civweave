@@ -46,6 +46,7 @@ assert.match(entry, /marketplace-checkout-disabled/);
 assert.match(entry, /\/api\/money-edge\/commerce\//);
 assert.doesNotMatch(entry, /handleCommerceApiRequest/);
 assert.match(originEntry, /commerce-host-fee-retired/);
+assert.match(originEntry, /from '\.\/stripe-connect-v2-entry\.mjs'/);
 assert.match(originEntry, /\/api\/commerce\/host-fee\/policy/);
 assert.match(originEntry, /\/api\/commerce\/host-fee\/quote/);
 assert.doesNotMatch(originEntry, /splitCommerceHostFee|COMMERCE_HOST_FEE_SCHEMA/);
