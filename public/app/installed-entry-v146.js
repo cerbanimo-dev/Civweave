@@ -5,7 +5,7 @@ const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
 const SAFE_KEY='civweave.boot-recovery.safe.v426';
 const LEGAL_MANIFEST='/legal/civweave-legal-release-v1.json';
-const FALLBACK_VERSION='1.0.140';
+const FALLBACK_VERSION='1.0.141';
 const RELEASE_TIMEOUT_MS=1500;
 const WORKER_STEP_TIMEOUT_MS=1800;
 const ROUTE_TIMEOUT_MS=2200;
@@ -137,5 +137,5 @@ boot().catch(error=>{
   console.error('[Civweave] Installed bootstrap recovery caught a launch failure.',error);
   recoveryUi()?.showRecovery?.(`The normal startup path stopped before the campus opened: ${error?.message||error}`);
 });
-globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.140-boot-recovery-v426-legal-consent-v1',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker,safeRecoveryRequested,ensureLegalConsent});
+globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.141-boot-recovery-v426-legal-consent-v1',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker,safeRecoveryRequested,ensureLegalConsent});
 })();
