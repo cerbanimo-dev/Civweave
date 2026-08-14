@@ -1,13 +1,16 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-avatar-visible-v346';
+const REVISION='chat-avatar-visible-v346-human-message-v1';
 // Non-executable legacy audit marker only: const REVISION='chat-css-contract-v343'
 const PARTY_REVISION='party-chat-v1';
+const HUMAN_BUBBLE_REVISION='human-message-bubble-v1';
 const HARDENING_REVISION='mobile-ai-hardening-v302';
 const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
 const PARTY_PATH='/app/shared-intention-party-chat-v1.js';
 const PARTY_CACHE='civweave-party-v1';
+const HUMAN_BUBBLE_PATH='/app/human-message-bubble-v1.js';
+const HUMAN_BUBBLE_CACHE='civweave-human-message-v1';
 const CHAT_PATHS=new Set([
   '/app/manifest.webmanifest',
   '/app/installed-entry-v146.html',
@@ -20,6 +23,7 @@ const CHAT_PATHS=new Set([
   '/app/guide-workspace-v242.js',
   '/app/shared-guide-surface-v236.js',
   '/app/shared-intention-party-chat-v1.js',
+  '/app/human-message-bubble-v1.js',
   '/app/shared-chat-face-icons-v255.js',
   '/app/avatar-expression-director-v345.js',
   '/app/minilm-context-router-v344.js',
@@ -84,18 +88,20 @@ async function purgeChatRuntimeCaches(){
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,partyRevision:PARTY_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
+  return{revision:REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
 }
-async function cachePartyRuntime(){
+async function cacheRuntime(path,cacheName,revision,label){
   try{
-    const response=await fetch(`${PARTY_PATH}?offline-package=${PARTY_REVISION}`,{cache:'no-store',headers:{'x-civweave-package':PARTY_REVISION}});
-    if(!response.ok)throw new Error(`party runtime returned ${response.status}`);
-    const cache=await caches.open(PARTY_CACHE);
-    await cache.put(PARTY_PATH,response.clone());
-    return{ok:true,revision:PARTY_REVISION,path:PARTY_PATH,cache:PARTY_CACHE};
-  }catch(error){return{ok:false,revision:PARTY_REVISION,path:PARTY_PATH,cache:PARTY_CACHE,error:String(error?.message||error)}}
+    const response=await fetch(`${path}?offline-package=${revision}`,{cache:'no-store',headers:{'x-civweave-package':revision}});
+    if(!response.ok)throw new Error(`${label} runtime returned ${response.status}`);
+    const cache=await caches.open(cacheName);
+    await cache.put(path,response.clone());
+    return{ok:true,revision,path,cache:cacheName};
+  }catch(error){return{ok:false,revision,path,cache:cacheName,error:String(error?.message||error)}}
 }
-async function repairAndPackage(){const purge=await purgeChatRuntimeCaches(),party=await cachePartyRuntime();return{...purge,party}}
+async function cachePartyRuntime(){return cacheRuntime(PARTY_PATH,PARTY_CACHE,PARTY_REVISION,'party')}
+async function cacheHumanMessageRuntime(){return cacheRuntime(HUMAN_BUBBLE_PATH,HUMAN_BUBBLE_CACHE,HUMAN_BUBBLE_REVISION,'human message')}
+async function repairAndPackage(){const purge=await purgeChatRuntimeCaches(),party=await cachePartyRuntime(),humanBubble=await cacheHumanMessageRuntime();return{...purge,party,humanBubble}}
 
 self.addEventListener('activate',event=>{
   event.waitUntil(repairAndPackage().then(result=>self.clients?.claim?.().then(()=>result)).catch(()=>null));
@@ -108,5 +114,5 @@ self.addEventListener('message',event=>{
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,partyRevision:PARTY_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,humanBubblePath:HUMAN_BUBBLE_PATH,humanBubbleCache:HUMAN_BUBBLE_CACHE,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime,packageHumanBubble:cacheHumanMessageRuntime});
 })();
