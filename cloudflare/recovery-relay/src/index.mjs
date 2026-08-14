@@ -20,6 +20,13 @@ function normalizeEmail(value) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) throw new TypeError('Email address is invalid.');
   return email;
 }
+function recoveryMailbox(value) {
+  const email = normalizeEmail(value);
+  if (!/^recover@recovery\.[^\s@]+\.[^\s@]+$/.test(email) || email.endsWith('@recovery.commonweave.earth')) {
+    throw new TypeError('Recovery mailbox is not an approved Civweave recovery address.');
+  }
+  return email;
+}
 function normalizeToken(value) {
   const token = clean(value, 400);
   if (!/^[A-Za-z0-9_-]{40,200}$/.test(token)) throw new TypeError('Recovery proof token is invalid.');
@@ -133,9 +140,10 @@ async function callRelay(env, path, input) {
 }
 
 async function handleEmail(message, env) {
-  const configured = normalizeEmail(env.RECOVERY_MAILBOX || '');
-  const to = normalizeEmail(message.to || '');
-  if (to !== configured) { message.setReject('Unknown Civweave recovery mailbox.'); return; }
+  // The exact Cloudflare Email Routing rule is the authority for which inbox
+  // may invoke this Worker. Validate the shape too, so an accidentally broad
+  // future rule cannot turn the relay into a generic mailbox processor.
+  const to = recoveryMailbox(message.to || '');
   const parsed = parseSubject(message.headers.get('subject') || '');
   if (!parsed) { message.setReject('Invalid Civweave recovery proof subject.'); return; }
   const from = normalizeEmail(message.from || '');
@@ -154,7 +162,7 @@ export default {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS' && url.pathname.startsWith('/api/recovery-proof/')) return new Response(null, { status: 204, headers: json({}).headers });
     if (request.method === 'POST' && url.pathname === '/api/recovery-proof/status') return callRelay(env, 'status', await request.json().catch(() => ({})));
-    if (request.method === 'GET' && url.pathname === '/api/health') return json({ ok: true, schema: 'civweave.recovery-proof-relay.v1', mailbox: env.RECOVERY_MAILBOX || null });
+    if (request.method === 'GET' && url.pathname === '/api/health') return json({ ok: true, schema: 'civweave.recovery-proof-relay.v1', mailboxMode: 'exact-email-routing-rule' });
     return json({ ok: false, error: 'not-found' }, 404);
   },
   async email(message, env) {
