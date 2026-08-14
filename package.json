@@ -1,6 +1,6 @@
 {
   "name": "civweave-host-node-hub",
-  "version": "1.0.144",
+  "version": "1.0.145",
   "private": true,
   "description": "Install-only Civweave device package with deterministic local operation, local sovereignty, and optional connected AI providers.",
   "type": "module",
@@ -34,6 +34,7 @@
     "anarchadia:fork": "node scripts/anarchadia-local-fork-executor-v146.mjs",
     "test:anarchadia-governance": "node --test scripts/test-anarchadia-governance-v145.mjs",
     "test:anarchadia-sovereignty": "node --test scripts/test-anarchadia-sovereignty-v146.mjs",
+    "test:anarchadia-tribunal": "node --test scripts/test-anarchadia-tribunal-v1.mjs",
     "test:node-ai-marketplace": "node --test scripts/test-node-ai-marketplace-v1.mjs",
     "test:node-ai-http": "node --test scripts/test-node-ai-http-v1.mjs",
     "test:node-ai-routing": "node --test scripts/test-node-ai-routing-v1.mjs",
