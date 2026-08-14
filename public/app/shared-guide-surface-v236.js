@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.119-shared-guide-surface-v236-avatar-v346-party-chat-v1';
+const VERSION='1.0.120-shared-guide-surface-v236-avatar-v346-party-chat-v1-human-bubble-v1';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 function liveHead(){
@@ -56,6 +56,9 @@ function install(){
         load('/app/shared-intention-party-chat-v1.js?v=1.0.0-party-chat-v1',()=>{
           try{dispatchEvent(new CustomEvent('civweave:shared-intention-party-ready',{detail:{version:VERSION}}))}catch{}
         },()=>Boolean(globalThis.CivweaveSharedIntentionPartyChatV1));
+        load('/app/human-message-bubble-v1.js?v=1.0.0-human-message-bubble-v1',()=>{
+          try{dispatchEvent(new CustomEvent('civweave:human-message-bubble-ready',{detail:{version:VERSION}}))}catch{}
+        },()=>Boolean(globalThis.CivweaveHumanMessageBubbleV1));
         load('/app/shared-chat-face-icons-v255.js?v=avatar-v346-visible',()=>{
           try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION}}))}catch{}
         },()=>Boolean(globalThis.CivweaveSharedChatFaceIconsV255));
@@ -71,5 +74,5 @@ function install(){
 install();
 addEventListener('pageshow',()=>queueMicrotask(install));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,plannerMaterialization:'v265',partyChat:'v1',partyIdentity:'anonymous-role-only',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',avatarRuntime:'v346-visible',install});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,plannerMaterialization:'v265',partyChat:'v1',partyIdentity:'anonymous-role-only',humanMessagingAttention:'v1',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',avatarRuntime:'v346-visible',install});
 })();
