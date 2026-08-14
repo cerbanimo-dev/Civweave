@@ -21,9 +21,6 @@ for (const [name, source] of [
   ['cerbanimo-commerce-distribution-v1.js', browserCommerce]
 ]) assert.doesNotThrow(() => new Function(source), `${name} contains a JavaScript syntax error.`);
 
-// Current cabinet boots v2 before the retained v1 compatibility layer. The old
-// browser distribution API remains fail-closed so cached code cannot recreate the
-// retired platform-charge/separate-transfer marketplace.
 assert.match(cabinet, /fulfillment-economy-v2\.js/);
 assert.match(cabinet, /fulfillment-economy-v1\.js/);
 assert.ok(cabinet.indexOf('fulfillment-economy-v2.js') < cabinet.indexOf('fulfillment-economy-v1.js'));
@@ -37,8 +34,6 @@ assert.match(browserCommerce, /stripeTransferInstructions:disabled/);
 assert.match(browserCommerce, /recordSale:async\(\)=>disabled\(\)/);
 assert.match(browserCommerce, /buildAnnualDistribution/);
 
-// Physical-goods marketplace payment remains retired, including the old host-fee
-// allocator. Service/learning direct commerce is routed on its own endpoint.
 assert.match(entry, /handleFellowFareDirectCommerce/);
 assert.match(entry, /\/api\/fellowfare\/direct-commerce\//);
 assert.match(entry, /marketplacePaymentsDisabled/);
@@ -46,11 +41,11 @@ assert.match(entry, /marketplace-checkout-disabled/);
 assert.match(entry, /\/api\/money-edge\/commerce\//);
 assert.doesNotMatch(entry, /handleCommerceApiRequest/);
 assert.match(originEntry, /commerce-host-fee-retired/);
+assert.match(originEntry, /from '\.\/stripe-connect-v2-entry\.mjs'/);
 assert.match(originEntry, /\/api\/commerce\/host-fee\/policy/);
 assert.match(originEntry, /\/api\/commerce\/host-fee\/quote/);
 assert.doesNotMatch(originEntry, /splitCommerceHostFee|COMMERCE_HOST_FEE_SCHEMA/);
 
-// Direct cash commerce is provider-owned and limited to service/learning/tutoring.
 assert.match(directCommerce, /\['service', 'learning', 'tutoring'\]/);
 assert.match(directCommerce, /dashboard: 'full'/);
 assert.match(directCommerce, /fees_collector: 'stripe'/);
@@ -76,14 +71,11 @@ assert.match(moneyWithMemberships, /serviceLearningPlatformFeeMode: 'application
 assert.match(moneyWithMemberships, /platformCollectsGrossSellerPayment: false/);
 assert.match(moneyWithMemberships, /platformRoutesSellerProceeds: false/);
 
-// Legacy lifecycle code is still present only so previously-created payments can
-// finish, refund, dispute, or reverse safely.
 assert.match(serverCommerce, /settleCommerceCheckout/);
 assert.match(serverCommerce, /handleCommerceRefund/);
 assert.match(serverCommerce, /handleCommerceDispute/);
 assert.match(serverCommerce, /restoreCommerceDisputeTransfers/);
 
-// Fulfillment remains the token settlement contract beside optional USD checkout.
 assert.match(fulfillment, /REWARD_PER_QUEST=5/);
 assert.match(fulfillment, /MILESTONE_SIZE=100/);
 assert.match(fulfillment, /MILESTONE_BONUS=10/);
