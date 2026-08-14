@@ -2,12 +2,12 @@
 'use strict';
 
 const REVISION='chat-avatar-visible-v346';
-const FREEZE_REVISION='mobile-chat-freeze-v347';
+const FREEZE_REVISION='mobile-chat-main-thread-quiescence-v349';
 // Non-executable legacy audit marker only: const REVISION='chat-css-contract-v343'
 const PARTY_REVISION='party-chat-v1';
 const HUMAN_BUBBLE_REVISION='human-message-bubble-v1';
 const TRANSLATION_REVISION='translation-packs-v1';
-const HARDENING_REVISION='mobile-ai-hardening-v302';
+const HARDENING_REVISION='mobile-chat-css-dvh-v349';
 const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
 const PARTY_PATH='/app/shared-intention-party-chat-v1.js';
 const PARTY_CACHE='civweave-party-v1';
