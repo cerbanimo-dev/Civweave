@@ -20,9 +20,15 @@ if (!quick) {
 }
 commands.push(['node',['scripts/verify-public-launch-readiness-v1.mjs',...(strictPublic?['--public']:[])]]);
 for (const [command,args] of commands) {
-  console.log(`\n>>> ${command} ${args.join(' ')}`);
+  const label = `${command} ${args.join(' ')}`;
+  console.log(`\n>>> ${label}`);
   const result = spawnSync(command,args,{stdio:'inherit',shell:process.platform==='win32'});
   if (result.error) throw result.error;
-  if (result.status !== 0) process.exit(result.status ?? 1);
+  if (result.status !== 0) {
+    const annotation = `Launch gate subcommand failed (${result.status ?? 1}): ${label}`
+      .replace(/%/g,'%25').replace(/\r/g,'%0D').replace(/\n/g,'%0A');
+    console.error(`::error file=scripts/run-launch-gate-v1.mjs,line=1,title=Launch readiness subcommand::${annotation}`);
+    process.exit(result.status ?? 1);
+  }
 }
 console.log(`\nLaunch gate passed${strictPublic?' for public promotion':' for code readiness'}.`);
