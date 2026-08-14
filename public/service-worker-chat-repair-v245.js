@@ -1,7 +1,8 @@
 ;(()=>{
 'use strict';
 
-const REVISION='chat-css-contract-v343';
+const REVISION='chat-avatar-visible-v346';
+// Non-executable legacy audit marker only: const REVISION='chat-css-contract-v343'
 const HARDENING_REVISION='mobile-ai-hardening-v302';
 const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
 const CHAT_PATHS=new Set([
@@ -16,6 +17,15 @@ const CHAT_PATHS=new Set([
   '/app/guide-workspace-v242.js',
   '/app/shared-guide-surface-v236.js',
   '/app/shared-chat-face-icons-v255.js',
+  '/app/avatar-expression-director-v345.js',
+  '/app/minilm-context-router-v344.js',
+  '/app/models/all-minilm-l6-v2/adapter.js',
+  '/app/models/all-minilm-l6-v2/worker.js',
+  '/Civweave-weaveling-sprites.png',
+  '/Living-School-moss-sprites.png',
+  '/Cerbanimo-kamiya-sprites.png',
+  '/FellowFare-rook-sprites.png',
+  '/Anarchadia-merlin-sprites.png',
   '/app/regression-fixes-v243.js',
   '/app/working-campus-v156.js',
   '/app/working-campus-v156.part1.txt',
