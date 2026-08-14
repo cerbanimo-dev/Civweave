@@ -75,7 +75,8 @@ assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v2.mjs'], /\/
 assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v3.mjs'], /steward\/member\/remove/);
 assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v6.mjs'], /bindSession/);
 assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v6.mjs'], /annotateMember/);
-assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v7.mjs'], /stripe\/(?:status|connect|onboard)/);
+assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v7.mjs'], /function accountRoute/);
+assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v7.mjs'], /api\\\/account\\\/stripe/);
 assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v8.mjs'], /cloud-node-recovery-v3\.mjs/);
 assert.match(source['cloudflare/node-cloud/wrangler.jsonc'], /server-ai-entry-v8\.mjs/);
 assert.match(source['cloudflare/node-cloud/wrangler.jsonc'], /"ACCOUNT_DIRECTORY"/);
