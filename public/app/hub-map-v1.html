@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07131f">
+<title>Civweave Hub Map</title>
+<style>html,body,#hubMapFrame{margin:0;width:100%;height:100%;border:0;background:#07131f;overflow:hidden}#hubMapFrame{display:block}</style>
+</head>
+<body>
+<iframe id="hubMapFrame" title="Civweave Hub Map" src="/app/federation-finder-map-v275.html?view=hub-nodes"></iframe>
+<script>
+(()=>{
+'use strict';
+const frame=document.getElementById('hubMapFrame');
+function addScript(doc,src,onload){const script=doc.createElement('script');script.src=src;script.async=false;if(onload)script.onload=onload;doc.body.append(script)}
+function install(){
+  const win=frame.contentWindow,doc=frame.contentDocument;if(!win||!doc)return;
+  doc.title='Civweave Hub Map';
+  const eyebrow=doc.querySelector('.brand small'),title=doc.querySelector('.brand strong'),heading=doc.querySelector('.panel h2'),intro=doc.querySelector('.panel h2 + p');
+  if(eyebrow)eyebrow.textContent='Physical Hub nodes + signed locality ledger + offline gossip';
+  if(title)title.textContent='Hub Map';
+  if(heading)heading.textContent='Find a Hub in place';
+  if(intro)intro.textContent='Browse steward-placed Civweave Hub nodes first. Join one, explore its most recent cached Needs, Offerings, and Ideas, or pass by through the mesh when distance is only virtual.';
+  const all=doc.getElementById('modeAll'),federations=doc.getElementById('modeFederations'),nodes=doc.getElementById('modeNodes');
+  all?.classList.remove('active');federations?.classList.remove('active');nodes?.classList.add('active');if(nodes)nodes.textContent='Hub nodes';
+  addScript(doc,'/app/civweave-locality-gossip-v1.js?v=hub-map-v1',()=>addScript(doc,'/app/civweave-hub-map-v1.js?v=hub-map-v1'));
+}
+frame.addEventListener('load',install,{once:true});
+})();
+</script>
+</body>
+</html>
