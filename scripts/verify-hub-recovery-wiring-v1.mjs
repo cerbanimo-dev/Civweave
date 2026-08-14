@@ -5,9 +5,10 @@ import { spawnSync } from 'node:child_process';
 const paths = [
   'cloudflare/account-edge/src/hub-account-recovery-v1.mjs',
   'cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs',
-  'cloudflare/account-edge/src/recovery-entry-v4.mjs',
-  'cloudflare/account-edge/src/recovery-entry-v6.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v7.mjs',
   'cloudflare/account-edge/wrangler.jsonc',
+  'cloudflare/recovery-relay/src/index.mjs',
+  'cloudflare/recovery-relay/wrangler.jsonc',
   'public/app/installer-online-fallback-v225.js',
   'public/app/civweave-brand.js',
   'public/app/hub-recovery-api-v1.js',
@@ -18,14 +19,19 @@ const paths = [
 ];
 const source = Object.fromEntries(await Promise.all(paths.map(async path => [path, await readFile(path, 'utf8')])));
 
-assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v6\.mjs/);
+assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v7\.mjs/);
 assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /recover@recovery\.commonweave\.earth/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v6.mjs'], /async email\(message,env/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v6.mjs'], /message\.reply\(new EmailMessage/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v6.mjs'], /stub\.fetch/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v6.mjs'], /\/internal\/email-proof/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v6.mjs'], /not-found/);
+assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /civweave-recovery-relay\.glaedn\.workers\.dev/);
+assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /"name": "civweave-recovery-relay"/);
+assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /CivweaveRecoveryProofRelay/);
+assert.match(source['cloudflare/recovery-relay/src/index.mjs'], /async email\(message, env/);
+assert.match(source['cloudflare/recovery-relay/src/index.mjs'], /message\.reply\(new EmailMessage/);
+assert.match(source['cloudflare/recovery-relay/src/index.mjs'], /emailHash/);
+assert.doesNotMatch(source['cloudflare/recovery-relay/src/index.mjs'], /passportId/i);
+assert.doesNotMatch(source['cloudflare/recovery-relay/src/index.mjs'], /residentId/i);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /inbound-email-proof/);
+assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /DEFAULT_RELAY_URL/);
+assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /authenticatedProof/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /completeInboundVerification/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /completeInboundRecovery/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /paste this one-time code/);
@@ -45,4 +51,10 @@ for (const path of paths.filter(path => !path.endsWith('hub-account-recovery-v1.
   assert.doesNotMatch(source[path], /stripe/i, `${path} must not add Stripe as a Hub recovery dependency`);
 }
 
-console.log(JSON.stringify({ ok: true, schema: 'civweave.hub-recovery-wiring-check.v3', freeTierInboundProof: true, privateObjectBridge: true }));
+console.log(JSON.stringify({
+  ok: true,
+  schema: 'civweave.hub-recovery-wiring-check.v4',
+  freeTierInboundProof: true,
+  crossAccountRelay: true,
+  relayStoresIdentity: false,
+}));
