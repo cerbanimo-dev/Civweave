@@ -13,7 +13,7 @@ permissions:
 jobs:
   reconcile:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
         with:
@@ -29,9 +29,48 @@ jobs:
           git config user.email "civweave-launch-bot@users.noreply.github.com"
           git fetch origin main
           git merge --no-edit origin/main
-      - name: Re-materialize current canonical release
+      - name: Make legal consent part of the required installed shell
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from 'node:fs/promises';
+          const file='public/service-worker-core-v208.js';
+          let source=await readFile(file,'utf8');
+          const anchor="  '/app/installed-entry-v146.js',";
+          if(!source.includes("'/app/legal-consent-v1.js'")){
+            if(!source.includes(anchor))throw new Error('Required shell anchor moved.');
+            source=source.replace(anchor,`${anchor}\n  '/app/legal-consent-v1.js',\n  '/legal/civweave-legal-release-v1.json',`);
+            await writeFile(file,source);
+          }
+          NODE
+      - name: Advance patch release for the reconciled launch contract
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from 'node:fs/promises';
+          const current=(await readFile('VERSION','utf8')).trim();
+          const match=/^(\d+)\.(\d+)\.(\d+)$/.exec(current);
+          if(!match)throw new Error(`Invalid VERSION ${current}`);
+          const next=`${match[1]}.${match[2]}.${Number(match[3])+1}`;
+          await writeFile('VERSION',`${next}\n`);
+          for(const file of ['package.json','package-lock.json']){
+            const data=JSON.parse(await readFile(file,'utf8'));
+            data.version=next;
+            if(file==='package-lock.json'&&data.packages?.[''])data.packages[''].version=next;
+            await writeFile(file,`${JSON.stringify(data,null,2)}\n`);
+          }
+          const contract=JSON.parse(await readFile('config/release-contract.json','utf8'));
+          contract.canonical.current.version=next;
+          contract.canonical.current.path=`releases/${next}`;
+          await writeFile('config/release-contract.json',`${JSON.stringify(contract,null,2)}\n`);
+          for(const file of ['public/app/installed-entry-v146.js','public/app/installed-entry-v146.html','ops/launch/README.md']){
+            let source=await readFile(file,'utf8');
+            source=source.replaceAll(current,next);
+            await writeFile(file,source);
+          }
+          console.log(JSON.stringify({current,next}));
+          NODE
+      - name: Materialize current canonical release
         run: node scripts/materialize-canonical-release.mjs
-      - name: Verify merged launch/recovery composition
+      - name: Verify merged launch/recovery/legal composition
         run: |
           node scripts/verify-canonical-launch-release.mjs
           node scripts/verify-release-version-sync.mjs
@@ -42,9 +81,11 @@ jobs:
           node scripts/verify-server-ai-commerce-v301.mjs
           node scripts/test-user-ai-pool-routing-v2.mjs
           node scripts/verify-user-ai-pools-v302.mjs
+          node scripts/verify-legal-consent-v1.mjs
           node scripts/verify-document-lifecycle-v221.mjs
           node scripts/smoke-service-worker-registration-watchdog-v207.mjs
           node --test scripts/test-civweave-map-v1.mjs
+          node scripts/verify-knowledge-school-seeds-v1.mjs
           git diff --check
       - name: Commit reconciliation and remove one-shot workflow
         run: |
