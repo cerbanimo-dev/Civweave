@@ -28,4 +28,4 @@
   });
 })();
 
-importScripts('/service-worker-v203.js?v=1.0.153-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425');
+importScripts('/service-worker-v203.js?v=1.0.154-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425');
