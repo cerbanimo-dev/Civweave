@@ -49,7 +49,8 @@ try{
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),OPT_IN_KEY),null,'first paint must not opt in');
   const eager=await page.evaluate(()=>performance.getEntriesByType('resource').map(entry=>entry.name));
   assert.equal(eager.some(url=>url.includes('required-campus-autostart-v1.js')),false,'legacy autostart script must not load');
-  assert.equal(eager.some(url=>url.includes('installer-state-machine-v280.js')),false,'campus state machine must stay lazy');
+  assert.equal(eager.some(url=>url.includes('installer-state-machine-v281.js')),false,'campus state controller must stay lazy');
+  assert.equal(eager.some(url=>url.includes('installer-state-machine-v280.js')),false,'retired v280 page writer must never load');
   assert.equal(eager.some(url=>url.includes('knowledge-school-seeds-v1.js')),false,'knowledge tools must stay lazy');
   assert.equal(eager.some(url=>url.includes('video-atlas-installer-v1.js')),false,'video atlas must stay lazy');
   assert.equal(eager.some(url=>url.includes('open-learning-media-installer-v1.mjs')),false,'open media must stay lazy');
@@ -68,12 +69,15 @@ try{
 
   await page.click('#download-offline-package');
   await page.waitForFunction(key=>localStorage.getItem(key)==='1',OPT_IN_KEY,{timeout:5000});
-  await page.waitForFunction(()=>globalThis.CivweaveInstallerStateV280!=null,undefined,{timeout:10000});
+  await page.waitForFunction(()=>globalThis.CivweaveInstallerStateV281!=null,undefined,{timeout:10000});
   await page.waitForFunction(()=>document.querySelector('#offline-package-state')?.textContent?.trim().toLowerCase()==='downloading'||document.querySelector('#offline-package-state')?.textContent?.trim().toLowerCase()==='ready offline',undefined,{timeout:45000});
+  const resourcesAfterOptIn=await page.evaluate(()=>performance.getEntriesByType('resource').map(entry=>entry.name));
+  assert.equal(resourcesAfterOptIn.some(url=>url.includes('installer-state-machine-v280.js')),false,'retired v280 page writer must remain absent after opt-in');
+  assert.ok(resourcesAfterOptIn.some(url=>url.includes('installer-state-machine-v281.js')),'explicit campus action must load the v281 controller');
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),OPT_IN_KEY),'1','explicit campus action must persist opt-in');
   assert.ok(offlinePackageRequests>0,'explicit campus action must begin offline traffic');
 
-  console.log(JSON.stringify({ok:true,revision:'browser-installer-gauntlet-v304',idleFirstPaint:true,shellWithoutCampusTraffic:true,noOptInAppOpen:true,explicitOptInStartsCampus:true,offlinePackageRequests},null,2));
+  console.log(JSON.stringify({ok:true,revision:'browser-installer-gauntlet-v305-state-authority-v281',idleFirstPaint:true,shellWithoutCampusTraffic:true,noOptInAppOpen:true,explicitOptInStartsCampus:true,singleWriterController:true,offlinePackageRequests},null,2));
   await context.close();
 }finally{
   await browser.close().catch(()=>{});
