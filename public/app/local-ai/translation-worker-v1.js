@@ -11,7 +11,7 @@ let loadedKey='';
 const clean=(value,max=12000)=>String(value??'').slice(0,max);
 const post=(id,type,payload={})=>self.postMessage(type==='progress'?{type,...payload}:{id,type,ok:type==='result',...payload});
 function requestUrl(input){try{return typeof input==='string'?input:input?.url||String(input)}catch{return String(input||'')}}
-function remoteUrl(spec,path){return `https://huggingface.co/${spec.repo}/resolve/${encodeURIComponent(spec.revision))}/${path}`}
+function remoteUrl(spec,path){return `https://huggingface.co/${spec.repo}/resolve/${encodeURIComponent(spec.revision)}/${path}`}
 function cacheAdapter(cache,spec){
   const localPrefix=`/models/${spec.repo}/`;
   const repoPrefix=`https://huggingface.co/${spec.repo}/resolve/`;
