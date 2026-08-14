@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='pwa-install-prompt-v247-front-door-v2-open-after-install';
+const VERSION='pwa-install-prompt-v247-front-door-v3-install-only-runtime';
 const ENTRY='/app/installed-entry-v146?installed=1&system=civweave';
 const HOST_SETUP_PATH='/host-setup.html';
 const CANONICAL_ORIGIN='https://civweave.cc';
@@ -81,16 +81,23 @@ async function discoverRelatedInstalls(){
 }
 function refreshButton(){
   const button=installButton();
-  if(!button||/reset app shell/i.test(button.textContent||''))return;
+  if(!button||/reset app shell|repair shell/i.test(button.textContent||''))return;
   if(!installOrigin()&&!standalone()){
+    button.disabled=false;
     button.textContent='Open stable Civweave installer';
     help('This address is not a stable Civweave install origin. Opening its production host instead.');
     return;
   }
-  if(standalone()||installed){
+  if(standalone()){
     button.disabled=false;
     if(button.textContent!=='Open Civweave')button.textContent='Open Civweave';
-    help(standalone()?'Civweave is installed as an app from this host origin.':'Civweave is installed. Open the campus now.');
+    help('Civweave is installed as an app from this host origin.');
+    return;
+  }
+  if(installed){
+    button.disabled=true;
+    if(button.textContent!=='Civweave installed')button.textContent='Civweave installed';
+    help('Installation is complete. Open Civweave from your device app launcher; the campus does not run in this browser tab.');
     return;
   }
   if(button.disabled)return;
@@ -133,17 +140,23 @@ function onInstalled(){
 async function ownInstallClick(event){
   const button=event.target?.closest?.('#install-app');
   if(!button||button.disabled||prompting)return;
-  if(/reset app shell/i.test(button.textContent||''))return;
+  if(/reset app shell|repair shell/i.test(button.textContent||''))return;
   if(!installOrigin()&&!standalone()){
     event.preventDefault();
     event.stopImmediatePropagation();
     location.assign(stableInstallerUrl().href);
     return;
   }
-  if(standalone()||installed){
+  if(standalone()){
     event.preventDefault();
     event.stopImmediatePropagation();
     location.assign(ENTRY);
+    return;
+  }
+  if(installed){
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    help('Civweave is already installed. Open it from your device app launcher; browser-tab runtime is disabled.');
     return;
   }
   const prompt=promptEvent;
@@ -162,9 +175,9 @@ async function ownInstallClick(event){
     const choice=await prompt.userChoice.catch(()=>null);
     if(choice?.outcome==='accepted'){
       installed=true;
-      help('Civweave app installation accepted. This installed copy stays attached to the host you chose.');
-      button.disabled=false;
-      button.textContent='Open Civweave';
+      help('Civweave app installation accepted. Open the installed app from your device launcher; this browser tab remains installer-only.');
+      button.disabled=true;
+      button.textContent='Civweave installed';
     }else{
       help('Civweave app installation was dismissed. Reload this installer when you want the native install prompt again.');
       button.disabled=false;
@@ -209,6 +222,7 @@ const api=Object.freeze({
   restore(event){if(event)promptEvent=event;return Boolean(promptEvent)},
   standalone,
   refresh:refreshButton,
+  browserRuntimePolicy:'installer-only-until-installed-display',
   state:()=>({available:Boolean(promptEvent),installed,prompting,standalone:standalone(),canonicalOrigin:CANONICAL_ORIGIN,installOrigin:location.origin,relatedApps:[...relatedApps]})
 });
 
