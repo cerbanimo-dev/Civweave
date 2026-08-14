@@ -18,9 +18,14 @@ function required(value, label, max = 4000) {
   return out;
 }
 
-function monthlyCents(env) {
+function configuredMonthlyCents(env) {
   const value = Number(env?.CIVWEAVE_SHARED_DOMAIN_MONTHLY_CENTS);
-  if (!Number.isSafeInteger(value) || value < 1 || value > 100_000) {
+  return Number.isSafeInteger(value) && value >= 1 && value <= 100_000 ? value : null;
+}
+
+function monthlyCents(env) {
+  const value = configuredMonthlyCents(env);
+  if (value === null) {
     throw Object.assign(new Error('Shared Civweave domain cost-share pricing is not configured.'), {
       status: 503,
       code: 'SHARED_DOMAIN_COST_SHARE_UNCONFIGURED'
@@ -80,15 +85,14 @@ function billingPeriodEnd(invoice) {
 }
 
 export function sharedDomainHostingReadiness(env = {}) {
-  const value = Number(env.CIVWEAVE_SHARED_DOMAIN_MONTHLY_CENTS);
-  const configured = Number.isSafeInteger(value) && value >= 1 && value <= 100_000;
+  const value = configuredMonthlyCents(env);
   return Object.freeze({
     schema: SHARED_DOMAIN_HOSTING_SCHEMA,
     sharedDomain: 'civweave.cc',
     freeHostOrigin: 'cloudflare-pages',
     aliasModel: 'hosting-cost-share-revocable-alias',
-    monthlyCostShareCents: configured ? value : null,
-    checkoutEnabled: configured,
+    monthlyCostShareCents: value,
+    checkoutEnabled: value !== null,
     lapseBehavior: 'disable-shared-alias-keep-pages-origin-live'
   });
 }
@@ -160,16 +164,9 @@ export async function settleSharedDomainHostingInvoice(edge, invoice) {
   if (invoice?.status !== 'paid' && Number(invoice?.amount_paid || 0) < 1) {
     throw Object.assign(new Error('Stripe shared-domain hosting invoice is not paid.'), { status: 409 });
   }
-  const configuredAmount = monthlyCents(edge.env);
   const billedAmount = Number(meta.civweave_monthly_cents);
   if (!Number.isSafeInteger(billedAmount) || billedAmount < 1 || Number(invoice?.amount_paid || 0) < billedAmount) {
     throw Object.assign(new Error('Stripe shared-domain invoice does not contain the promised hosting cost share.'), { status: 409 });
-  }
-  if (billedAmount !== configuredAmount) {
-    throw Object.assign(new Error('Shared-domain hosting price changed before this invoice settled; manual review is required.'), {
-      status: 409,
-      code: 'SHARED_DOMAIN_PRICE_CHANGED'
-    });
   }
   const nodeId = required(meta.civweave_node_id, 'shared-domain nodeId', 180);
   const label = normalizeSharedDomainLabel(meta.civweave_shared_label);
@@ -184,7 +181,7 @@ export async function settleSharedDomainHostingInvoice(edge, invoice) {
   }
   const invoicePaidThrough = billingPeriodEnd(invoice);
   const existing = await sharedDomainEntitlementByLabel(edge.db, label);
-  const existingPaidThrough = existing?.paidThrough && Date.parse(existing.paidThrough) > Date.parse(invoicePaidThrough)
+  const paidThrough = existing?.paidThrough && Date.parse(existing.paidThrough) > Date.parse(invoicePaidThrough)
     ? existing.paidThrough
     : invoicePaidThrough;
   const entitlement = await upsertSharedDomainEntitlement(edge.db, {
@@ -193,14 +190,17 @@ export async function settleSharedDomainHostingInvoice(edge, invoice) {
     pagesOrigin,
     status: 'active',
     source: 'hosting-cost-share',
-    paidThrough: existingPaidThrough
+    paidThrough
   }, edge.now());
+  const currentPrice = configuredMonthlyCents(edge.env);
   return Object.freeze({
     applied: true,
     schema: SHARED_DOMAIN_HOSTING_SCHEMA,
     invoiceId: invoice.id,
     subscriptionId: invoice?.parent?.subscription_details?.subscription || null,
     monthlyCostShareCents: billedAmount,
+    pricingStatus: currentPrice === null ? 'configuration-unavailable' : currentPrice === billedAmount ? 'current' : 'legacy-paid-period-honored',
+    currentCheckoutCostShareCents: currentPrice,
     entitlement
   });
 }
