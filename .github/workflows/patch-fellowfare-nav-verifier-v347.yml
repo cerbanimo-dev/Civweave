@@ -1,0 +1,41 @@
+name: Patch FellowFare avatar-nav verifier
+on:
+  push:
+    branches:
+      - agent/subsystem-avatar-nav-v347
+    paths:
+      - '.github/workflows/patch-fellowfare-nav-verifier-v347.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/subsystem-avatar-nav-v347
+          fetch-depth: 0
+      - name: Align FellowFare navigation expectation with amber design
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/verify-fellowfare-active-v203.mjs')
+          s=p.read_text()
+          old='assert(themedNav.includes("glow:\'#4f8ca8\'"),\'FellowFare selected navigation accent is not ink blue.\');'
+          new='assert(themedNav.includes("glow:\'#f5b446\'")&&themedNav.includes("shade:\'#5a3618\'"),\'FellowFare navigation accent is not amber.\');'
+          if old not in s:
+              raise SystemExit('Expected legacy FellowFare ink-blue assertion was not found.')
+          p.write_text(s.replace(old,new))
+          PY
+      - name: Commit verifier alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'civweave-verifier-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git rm .github/workflows/patch-fellowfare-nav-verifier-v347.yml
+          git add scripts/verify-fellowfare-active-v203.mjs
+          git commit -m 'Align FellowFare verification with amber navigation'
+          git push origin HEAD:agent/subsystem-avatar-nav-v347
