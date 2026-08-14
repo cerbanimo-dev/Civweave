@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
-const installerBridge = read('public/app/installer-online-fallback-v225.js');
+const installerBridge = read('public/app/installer-repair-only-v1.js');
 const lobby = read('public/app/host-node-installer-lobby-v1.js');
 const status = read('functions/api/host-node-status.ts');
 const search = read('functions/api/host-node-search.ts');
@@ -13,6 +13,8 @@ const access = read('public/app/host-node-session-v1.js');
 const checks = [
   [installerBridge.includes('host-node-installer-lobby-v1.js'), 'installer bridge loads Host Node lobby'],
   [!installerBridge.includes("if (!host || document.querySelector('script[data-civweave-host-node-lobby]'))"), 'installer bridge no longer requires a host query before loading discovery'],
+  [installerBridge.includes("browserRuntimePolicy:'installer-only-until-installed-display'"), 'installer bridge keeps discovery on an install-only browser surface'],
+  [!installerBridge.includes('function openCampus'), 'installer bridge does not expose the Civweave runtime in a browser tab'],
   [lobby.includes("/api/federation/health"), 'lobby can detect a same-origin federated Docker Host Node'],
   [lobby.includes("/.well-known/civweave"), 'local Host Node status uses the public federation profile'],
   [lobby.includes('local-federated-host'), 'lobby distinguishes local federated Host Nodes'],
