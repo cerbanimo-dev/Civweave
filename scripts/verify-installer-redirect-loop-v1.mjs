@@ -2,11 +2,13 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [repairOnly,boundary,installedEntryHtml,returnGuard]=await Promise.all([
+const version=(await read('VERSION')).trim();
+const [repairOnly,boundary,installedEntryHtml,returnGuard,localServer]=await Promise.all([
   read('public/app/installer-repair-only-v1.js'),
   read('public/app/install-boundary-v146.js'),
   read('public/app/installed-entry-v146.html'),
-  read('public/app/working-campus-return-guard-v425.js')
+  read('public/app/working-campus-return-guard-v425.js'),
+  read(`releases/${version}/server/server-local-v131.mjs`)
 ]);
 new Function(repairOnly);new Function(boundary);new Function(returnGuard);
 assert.match(repairOnly,/function resumeRequiredNext\(\)/,'Installer lost required-next recovery.');
@@ -20,4 +22,6 @@ assert.match(boundary,/installedQueryIsAuthorization:false/,'installed=1 can bec
 assert.match(installedEntryHtml,/installed-entry-browser-gate-v1/,'Installed entry lost its pre-paint browser gate.');
 assert.match(installedEntryHtml,/location\.replace\(installer\.href\)/,'Installed entry no longer redirects ordinary browser display to installer.');
 assert.match(returnGuard,/function preauthorizeCanonicalCampus\(\)/,'Working Campus lost its installed-return recovery marker.');
-console.log(JSON.stringify({ok:true,revision:'installer-redirect-loop-install-only-v1',installerRequiredNext:'allowlisted-and-installed-display-only',browserRuntime:false,installedQueryAuthorization:false,prePaintGate:true,workingCampusReturnGuardRetained:true},null,2));
+assert.match(localServer,/const isInstallerSurface = originalPathname === '\/app\/index\.html'/,'Local host no longer exempts the installer document from legacy /app redirects.');
+assert.match(localServer,/if \(!isAsset && !isInstallerSurface\)/,'Legacy route redirect can catch the installer document again.');
+console.log(JSON.stringify({ok:true,revision:'installer-redirect-loop-install-only-v2',installerRequiredNext:'allowlisted-and-installed-display-only',browserRuntime:false,installedQueryAuthorization:false,prePaintGate:true,workingCampusReturnGuardRetained:true,installerServerException:true},null,2));
