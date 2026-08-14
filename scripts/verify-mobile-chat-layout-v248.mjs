@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {access,readFile} from 'node:fs/promises';
 
+// Day/night branding is part of the mobile source-truth contract because shell repairs must never repaint it after boot.
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const exists=path=>access(new URL(path,root)).then(()=>true,()=>false);
