@@ -30,13 +30,13 @@ assert.match(runtime,/function residencyMs\(\).*?hidden.*?30000.*?mobileLike\(\)
 assert.match(runtime,/function prewarm\(/);
 assert.match(runtime,/selected\.device!=='webgpu'.*?compatibility-model-not-prewarmed/s);
 assert.match(runtime,/addEventListener\('pagehide'.*?shutdown/s);
-assert.match(owner,/document\.addEventListener\('focusin',prewarmIntent,true\)/);
-assert.match(owner,/addEventListener\('civweave:guide-workspace-state',prewarmWorkspace\)/);
-assert.match(owner,/detail\.open===true&&detail\.minimized!==true/);
-assert.match(owner,/intentPrewarm:true/);
-assert.match(owner,/chatOpenPrewarm:true/);
-assert.match(orchestrator,/CivweaveLocalChatOwnerV295\?\.intentPrewarm===true&&globalThis\.CivweaveLocalChatOwnerV295\?\.chatOpenPrewarm===true/);
-assert.match(orchestrator,/chatOpenPrewarm:true/);
+assert.doesNotMatch(owner,/document\.addEventListener\('focusin',prewarmIntent,true\)/);
+assert.doesNotMatch(owner,/addEventListener\('civweave:guide-workspace-state',prewarmWorkspace\)/);
+assert.match(owner,/automaticInteractionPrewarm:false/);
+assert.match(owner,/modelLoadOnSubmit:true/);
+assert.match(owner,/interactionSafe:true/);
+assert.match(orchestrator,/automaticInteractionPrewarm===false/);
+assert.match(orchestrator,/modelLoadOnSubmit:true/);
 assert.match(worker,/message\.type==='prewarm'/);
 assert.match(worker,/progress_total\?\?p\.progress/);
 assert.match(worker,/high=Math\.max\(high,pct\)/);
@@ -97,4 +97,4 @@ assert.match(wrapper,/adaptiveResidency===true.*?adaptiveWasmThreads===true.*?in
 assert.match(coherence,/CW_LOCAL_AI_EXTRA_PATHS[\s\S]*experience-orchestrator-v232\.js/);
 assert.match(coherence,/CW_LOCAL_AI_CRITICAL[\s\S]*experience-orchestrator-v232\.js/);
 assert.match(coherence,/smoothFitOrchestrator: true/);
-console.log(JSON.stringify({ok:true,revision:'local-ai-smooth-fit-v318-settings-stability-low-end-135m',recommendationPolicy:'measured-smoothness-first-with-low-end-wasm-floor',smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},residency:{desktopMs:300000,mobileMs:90000,hiddenMs:30000},wasm:'adaptive-threading-plus-interactive-context-cap',prewarm:'chat-open-or-input-focus',progress:'monotonic-overall',externalData:'explicit-single-file-path',management:'complete-on-demand-v317',settingsDecoration:'bounded-idempotent-observer',weakPhoneGenerator:'smollm2-135m-instruct-q8-wasm',coherence:'orchestrator-network-first'},null,2));
+console.log(JSON.stringify({ok:true,revision:'local-ai-smooth-fit-v318-settings-stability-low-end-135m',recommendationPolicy:'measured-smoothness-first-with-low-end-wasm-floor',smoothTarget:{coldStartMs:90000,ttftMs:15000,tokensPerSecond:4},residency:{desktopMs:300000,mobileMs:90000,hiddenMs:30000},wasm:'adaptive-threading-plus-interactive-context-cap',prewarm:'submit-owned-runtime',progress:'monotonic-overall',externalData:'explicit-single-file-path',management:'complete-on-demand-v317',settingsDecoration:'bounded-idempotent-observer',weakPhoneGenerator:'smollm2-135m-instruct-q8-wasm',coherence:'orchestrator-network-first'},null,2));

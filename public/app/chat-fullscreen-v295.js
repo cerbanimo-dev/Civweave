@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.106-chat-fullscreen-v299',REVISION='mobile-chat-freeze-v347',ROOT='cw-persistent-guide-chat-v215',STYLE='cw-chat-fullscreen-v299-style';
+const VERSION='1.0.106-chat-fullscreen-v299',REVISION='chat-interaction-safe-v348',ROOT='cw-persistent-guide-chat-v215',STYLE='cw-chat-fullscreen-v299-style';
 if(globalThis.CivweaveChatFullscreenV295?.version===VERSION&&globalThis.CivweaveChatFullscreenV295?.revision===REVISION)return;
 let settleTimers=[],observer=null,rootObserver=null,restingHeight=0,lastOrientation='';
 function root(){return document.getElementById(ROOT)}
@@ -34,7 +34,7 @@ function ensureStructure(){
   if(rootObserver?.target!==node){try{rootObserver?.disconnect?.()}catch{}rootObserver=new MutationObserver(()=>queueMicrotask(()=>{ensureStructure();viewport();enforceFullScreen(node)}));rootObserver.observe(node,{attributes:true,attributeFilter:['hidden','class'],childList:true,subtree:true});rootObserver.target=node}
   return true
 }
-function settleViewport(){for(const timer of settleTimers)clearTimeout(timer);settleTimers=[0,32,80,150,260,420,700].map(delay=>setTimeout(()=>{ensureStructure();viewport();enforceFullScreen()},delay))}
+function settleViewport(){for(const timer of settleTimers)clearTimeout(timer);settleTimers=[0,80,220,500].map(delay=>setTimeout(()=>{ensureStructure();viewport();enforceFullScreen()},delay))}
 function style(){
   if(document.getElementById(STYLE))return;
   const s=document.createElement('style');s.id=STYLE;s.textContent=`
@@ -56,6 +56,6 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 document.addEventListener('focusin',event=>{if(event.target?.closest?.(`#${ROOT}`))settleViewport()},{passive:true});
 document.addEventListener('focusout',event=>{if(event.target?.closest?.(`#${ROOT}`))settleViewport()},{passive:true});
 addEventListener('civweave:guide-workspace-state',settleViewport,{passive:true});
-observer=new MutationObserver(()=>queueMicrotask(()=>{ensureStructure();viewport();enforceFullScreen()}));observer.observe(document.documentElement,{childList:true,subtree:true});
-globalThis.CivweaveChatFullscreenV295=Object.freeze({version:VERSION,revision:REVISION,fullScreenMobile:true,keyboardVisualViewport:true,staleViewportRecovery:true,restingViewportMemory:true,inlineImportantEnforcement:true,workspaceStateEnforcement:true,androidKeyboardSettling:true,structuralComposerRepair:true,mutationLoopGuard:true,styleMutationObserverDisabled:true,viewport,settleViewport,ensureStructure,enforceFullScreen});
+if(!root()){observer=new MutationObserver(()=>{if(!root())return;try{observer.disconnect()}catch{}observer=null;ensureStructure();viewport();settleViewport()});observer.observe(document.documentElement,{childList:true,subtree:true})}
+globalThis.CivweaveChatFullscreenV295=Object.freeze({version:VERSION,revision:REVISION,fullScreenMobile:true,keyboardVisualViewport:true,staleViewportRecovery:true,restingViewportMemory:true,inlineImportantEnforcement:true,workspaceStateEnforcement:true,androidKeyboardSettling:true,structuralComposerRepair:true,mutationLoopGuard:true,styleMutationObserverDisabled:true,permanentDocumentObserver:false,rootMountObserverOneShot:true,boundedViewportSettlement:true,viewport,settleViewport,ensureStructure,enforceFullScreen});
 })();
