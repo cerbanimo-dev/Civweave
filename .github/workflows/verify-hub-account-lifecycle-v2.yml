@@ -68,4 +68,13 @@ jobs:
           node --check public/app/host-node-session-v1.js
           node --check public/app/host-node-local-capacity-v1.js
       - name: Verify lifecycle and offline admission behavior
-        run: node scripts/verify-hub-account-lifecycle-v2.mjs
+        run: |
+          node --input-type=module <<'NODE'
+          try {
+            await import('./scripts/verify-hub-account-lifecycle-v2.mjs');
+          } catch (error) {
+            const message = String(error?.stack || error?.message || error).replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+            console.error(`::error file=scripts/verify-hub-account-lifecycle-v2.mjs,line=1,title=Hub account lifecycle regression::${message}`);
+            process.exitCode = 1;
+          }
+          NODE
