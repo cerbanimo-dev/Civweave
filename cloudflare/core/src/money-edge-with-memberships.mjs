@@ -20,6 +20,11 @@ import {
   endMembershipFromSubscription
 } from './membership-edge.mjs';
 import {
+  SHARED_DOMAIN_HOSTING_SCHEMA,
+  sharedDomainHostingReadiness,
+  settleSharedDomainHostingInvoice
+} from './shared-domain-billing.mjs';
+import {
   CERBANIMO_COMMERCE_SCHEMA,
   CERBANIMO_COMMERCE_FEE_BPS,
   settleCommerceCheckout,
@@ -34,6 +39,8 @@ export {
   TOPUP_ECONOMY,
   MEMBERSHIP_ECONOMY,
   MEMBERSHIP_TIERS,
+  SHARED_DOMAIN_HOSTING_SCHEMA,
+  sharedDomainHostingReadiness,
   CERBANIMO_COMMERCE_SCHEMA,
   CERBANIMO_COMMERCE_FEE_BPS,
   NODE_MONEY_EDGE_SCHEMA,
@@ -52,6 +59,7 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
       membershipEconomy: MEMBERSHIP_ECONOMY,
       membershipTiers: Object.values(MEMBERSHIP_TIERS).map(tier => Object.freeze({ ...tier })),
       membershipBilling: 'monthly-platform-subscription-separate-host-transfer',
+      sharedDomainHosting: sharedDomainHostingReadiness(this.env),
       commerce: Object.freeze({
         mode: 'fellowfare-split-boundary-v2',
         legacyMarketplaceCheckoutEnabled: false,
@@ -82,11 +90,18 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
         // can be created by the public router.
         return settleCommerceCheckout(this, object, event.id);
       }
+      if (object?.metadata?.civweave_schema === SHARED_DOMAIN_HOSTING_SCHEMA) {
+        return { applied: false, pendingInvoice: true, schema: SHARED_DOMAIN_HOSTING_SCHEMA, checkoutSessionId: object.id };
+      }
       if (object?.mode === 'subscription' || object?.metadata?.civweave_schema === 'civweave.node-membership.v1') {
         return recordMembershipCheckoutCompletion(this, object);
       }
     }
-    if (event.type === 'invoice.paid') return settleMembershipInvoice(this, object, event.id);
+    if (event.type === 'invoice.paid') {
+      const meta = object?.parent?.type === 'subscription_details' ? object.parent.subscription_details?.metadata || {} : {};
+      if (meta.civweave_schema === SHARED_DOMAIN_HOSTING_SCHEMA) return settleSharedDomainHostingInvoice(this, object);
+      return settleMembershipInvoice(this, object, event.id);
+    }
     if (event.type === 'customer.subscription.deleted') return endMembershipFromSubscription(this, object, event.id);
     if (event.type === 'charge.refunded') {
       const commerce = await handleCommerceRefund(this, event, object);
