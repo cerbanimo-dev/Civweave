@@ -1,0 +1,55 @@
+name: Reconcile launch hardening once
+
+on:
+  push:
+    branches:
+      - agent/launch-readiness-hardening-v1
+    paths:
+      - .github/workflows/reconcile-launch-hardening-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/launch-readiness-hardening-v1
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Merge current main without discarding launch hardening
+        run: |
+          set -euo pipefail
+          git config user.name "civweave-launch-bot"
+          git config user.email "civweave-launch-bot@users.noreply.github.com"
+          git fetch origin main
+          git merge --no-edit origin/main
+      - name: Re-materialize current canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Verify merged launch/recovery composition
+        run: |
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-release-version-sync.mjs
+          node scripts/verify-release-coherence-v220.mjs
+          node scripts/verify-hub-recovery-wiring-v1.mjs
+          node scripts/test-hub-recovery-relay-v1.mjs
+          node scripts/test-cloudflare-account-bootstrap-v1.mjs
+          node scripts/verify-server-ai-commerce-v301.mjs
+          node scripts/test-user-ai-pool-routing-v2.mjs
+          node scripts/verify-user-ai-pools-v302.mjs
+          node scripts/verify-document-lifecycle-v221.mjs
+          node scripts/smoke-service-worker-registration-watchdog-v207.mjs
+          node --test scripts/test-civweave-map-v1.mjs
+          git diff --check
+      - name: Commit reconciliation and remove one-shot workflow
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/reconcile-launch-hardening-once.yml
+          git add -A
+          git commit -m "Reconcile launch hardening with current main"
+          git push origin HEAD:agent/launch-readiness-hardening-v1
