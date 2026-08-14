@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#141126">
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <title>Install Civweave v1.0.141</title>
-  <script src="/app/pwa-install-prompt-v247.js?v=front-door-v2-open-after-install"></script>
+  <script src="/app/pwa-install-prompt-v247.js?v=front-door-v3-install-only-runtime"></script>
   <link rel="manifest" href="/app/manifest.webmanifest?v=1.0.141">
   <link rel="icon" href="/app/logos/civweave-pwa-192-v247.png" type="image/png">
   <link rel="stylesheet" href="/install-v130.css?v=1.0.141-lightweight-shell-v208">
@@ -35,8 +35,8 @@
     <span class="version">v1.0.141</span>
   </header>
   <section class="install-card" aria-labelledby="install-title">
-    <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install the shell. Open Civweave immediately. Download offline files only when you choose.</h2><p>The installer does no large background work on arrival. Install prepares the small PWA shell. The offline campus is a separate resumable code download, while large pictures, media, knowledge packs, and local AI models arrive on demand.</p></div>
-    <div class="topology" aria-label="Civweave topology"><article><b>1</b><strong>Install shell</strong><span>Small browser-native PWA shell.</span></article><i>→</i><article><b>2</b><strong>Open Civweave</strong><span>Launch as soon as installation completes.</span></article><i>→</i><article><b>3</b><strong>Go offline when useful</strong><span>Download the code-first campus separately.</span></article></div>
+    <div class="install-copy"><small>LIGHTWEIGHT APP SHELL</small><h2 id="install-title">Install the shell. Then open Civweave as an installed app.</h2><p>The installer does no large background work on arrival. Install prepares the small PWA shell. The Civweave campus itself runs only from the installed app, while the offline campus remains a separate resumable code download and large pictures, media, knowledge packs, and local AI models arrive on demand.</p></div>
+    <div class="topology" aria-label="Civweave topology"><article><b>1</b><strong>Install shell</strong><span>Small browser-native PWA shell.</span></article><i>→</i><article><b>2</b><strong>Open installed app</strong><span>Launch Civweave from your device app launcher.</span></article><i>→</i><article><b>3</b><strong>Go offline when useful</strong><span>Download the code-first campus separately.</span></article></div>
 
     <div id="campus-install-progress" class="campus-install-progress" data-state="idle" aria-live="polite">
       <div class="campus-progress-heading"><span>Offline campus</span><strong id="offline-package-state">not downloaded</strong></div>
@@ -45,7 +45,7 @@
       <button id="download-offline-package" class="campus-retry" type="button">Download offline campus</button>
     </div>
 
-    <div class="gateway-actions"><button id="install-app" class="primary" type="button">Install Civweave</button><button id="check-update" class="secondary" type="button">Check release</button><a id="open-online-campus-v225" class="secondary" href="/app/working-campus-v156.html?installed=1&amp;launch=online">Browser fallback</a></div>
+    <div class="gateway-actions"><button id="install-app" class="primary" type="button">Install Civweave</button><button id="check-update" class="secondary" type="button">Check release</button></div>
     <p id="install-help" class="install-help" role="status">Ready when you are. Nothing large downloads until you ask for it.</p>
     <dl class="package-state" aria-label="App shell state"><div><dt>App shell</dt><dd id="package-state">not prepared</dd></div><div><dt>Shell files</dt><dd id="package-assets">starts on install</dd></div><div><dt>Storage lanes</dt><dd id="local-mode">small shell · optional code-first campus · visuals and models on demand</dd></div></dl>
   </section>
@@ -76,7 +76,7 @@
 </main>
 <script src="/app/civweave-brand.js?v=1.0.141"></script>
 <script src="/install-v130.js?v=1.0.141-lightweight-shell-v208"></script>
-<script src="/app/installer-online-fallback-v225.js?v=shell-self-repair-v225"></script>
+<script src="/app/installer-repair-only-v1.js?v=1.0.141-install-only-pwa-boundary"></script>
 <script src="/app/offline-campus-status-v210.js?v=1.0.116-current-manifest-only-v282"></script>
 <script>
 (()=>{
