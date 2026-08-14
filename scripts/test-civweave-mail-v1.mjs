@@ -4,9 +4,11 @@ const root = new URL('../', import.meta.url);
 const read = async path => readFile(new URL(path, root), 'utf8');
 const must = (condition, message) => { if (!condition) throw new Error(message); };
 
-const [mailConfigText, mailSource, mailUi, mailPackageText, accountConfigText, claimSource, claimUi, installer] = await Promise.all([
+const [mailConfigText, mailSource, mailSystemSource, mailTrafficPolicy, mailUi, mailPackageText, accountConfigText, claimSource, claimUi, installer] = await Promise.all([
   read('cloudflare/mail/wrangler.jsonc'),
   read('cloudflare/mail/src/index-v2.mjs'),
+  read('cloudflare/mail/src/index-v3.mjs'),
+  read('cloudflare/mail/src/low-traffic-policy.mjs'),
   read('cloudflare/mail/src/ui.mjs'),
   read('cloudflare/mail/package.json'),
   read('cloudflare/account-edge/wrangler.jsonc'),
@@ -19,7 +21,7 @@ const mailPackage = JSON.parse(mailPackageText);
 const accountConfig = JSON.parse(accountConfigText);
 
 must(mailConfig.name === 'civweave-mail', 'Mail Worker name drifted.');
-must(mailConfig.main === 'src/index-v2.mjs', 'Civweave Mail v2 is not the active entrypoint.');
+must(mailConfig.main === 'src/index-v3.mjs', 'Civweave Mail system-mail entrypoint is not active.');
 must(mailConfig.routes?.some(route => route.pattern === 'mail.civweave.cc' && route.custom_domain === true), 'mail.civweave.cc custom domain is missing.');
 must(mailConfig.durable_objects?.bindings?.some(binding => binding.name === 'MAILBOX' && binding.class_name === 'CivweaveMailbox'), 'Mailbox Durable Object binding is missing.');
 must(mailConfig.r2_buckets?.some(binding => binding.binding === 'MAIL_BLOBS' && binding.bucket_name === 'civweave-mail-blobs'), 'Private raw-mail R2 binding is missing.');
@@ -37,9 +39,28 @@ for (const token of [
   "recipientDomain === domain",
   "External outbound mail is not enabled yet",
   'new EmailMessage',
-]) must(mailSource.includes(token), `Active mail service is missing ${token}.`);
-must(!mailSource.includes('crypto.subtle.timingSafeEqual'), 'Active mail service uses a nonexistent Web Crypto timingSafeEqual method.');
+]) must(mailSource.includes(token), `Base mail service is missing ${token}.`);
+must(!mailSource.includes('crypto.subtle.timingSafeEqual'), 'Base mail service uses a nonexistent Web Crypto timingSafeEqual method.');
 must(!/passport|stripe/i.test(mailSource), 'Mail runtime must not persist or depend on Passport or Stripe identity.');
+
+for (const localPart of ['weaveling', 'moss', 'kamiya', 'rook', 'merlin']) {
+  must(mailSystemSource.includes(`'${localPart}'`), `System mailbox ${localPart}@civweave.cc is missing.`);
+}
+for (const token of [
+  'SYSTEM_ACCESS_HASH',
+  'ensureSystem',
+  '/api/system-mailboxes',
+  '/api/worker-interval',
+  'That address belongs to a Civweave system guide.',
+]) must(mailSystemSource.includes(token), `System mail entrypoint is missing ${token}.`);
+must(!mailSystemSource.includes('ByTheTimeIGetToAriz0n4'), 'The shared bootstrap password must never be committed in plaintext.');
+for (const token of [
+  'SYSTEM_MAIL_POLL_BACKOFF_MS',
+  'recommendedWorkerInterval',
+  "return 'low-traffic'",
+  "inboundDelivery: 'event-driven-immediate'",
+]) must(mailTrafficPolicy.includes(token), `Low-traffic policy is missing ${token}.`);
+
 for (const token of ['Civweave Mail', 'Save this recovery kit now', 'mail.css', 'mail.js']) must(mailUi.includes(token), `Mail client is missing ${token}.`);
 
 must(accountConfig.main === 'src/recovery-entry-v11.mjs', 'Account edge is not deploying mail claim grants.');
@@ -70,5 +91,8 @@ console.log(JSON.stringify({
   rawStorage: 'private-r2',
   mailboxIdentity: 'separate-from-hub-passport-payment',
   hubClaim: 'authenticated-one-use-grant',
+  systemMailboxes: ['weaveling', 'moss', 'kamiya', 'rook', 'merlin'],
+  systemCredential: 'shared-bootstrap-password-hash-only',
+  lowTraffic: 'event-driven-inbound-plus-adaptive-background-backoff',
   failedSendCleanup: 'raw-r2-delete-before-error',
 }, null, 2));
