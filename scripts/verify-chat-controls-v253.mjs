@@ -21,9 +21,10 @@ assert(workspace.includes("document.addEventListener('click',onClickCapture,true
 assert(workspace.includes("document.addEventListener('submit',onSubmitCapture,true)"),'Canonical workspace submit capture is missing.');
 assert(workspace.includes('void submitActive(text)'),'Canonical workspace does not route form submission into submitActive.');
 assert(workspace.includes('submitText:async(text,system=activeWindow)'),'Canonical workspace direct submission API is missing.');
-assert(sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'),'Shared guide loader no longer mounts the canonical inline implementation.');
+assert(sharedLoader.includes('/app/shared-guide-surface-v236-core-v244.js'),'Shared guide loader no longer mounts the canonical bubble-only implementation.');
 assert(shared.includes('await api.submitText(value,currentSystem)'),'Shared guide surface is not routed through the canonical submission API.');
 assert(sharedCore.includes("mode:'bubble-only'"),'Shared guide surface must remain bubble-only.');
-assert(sharedCore.includes('function buildInline(){removeEmbeddedGuideCards();return false}'),'Retired inline guide cards must stay disabled.');
-assert(sharedCore.includes('function removeEmbeddedGuideCards()'),'Bubble-only embedded-card cleanup is missing.');
-console.log(JSON.stringify({ok:true,revision:'v253-chat-control-single-owner',chatEventOwner:'guide-workspace-v242',realmSessionDataOnly:true,embeddedGuideCardsDisabled:true,closeMinimizeDefaultPreserved:true,canonicalWorkspaceSubmit:true,bubbleOnly:true,sharedGuideLoaderAware:true},null,2));
+assert(sharedCore.includes('function buildInline(){return false}'),'Retired inline guide cards must stay disabled without post-paint cleanup.');
+assert(sharedCore.includes('function removeEmbeddedGuideCards(){return false}'),'Embedded-guide cleanup must remain an inert compatibility API because source markup owns absence.');
+assert(!sharedCore.includes('new MutationObserver'),'Shared guide surface must not watch the DOM to delete embedded UI after paint.');
+console.log(JSON.stringify({ok:true,revision:'v253-chat-control-source-truth',chatEventOwner:'guide-workspace-v242',realmSessionDataOnly:true,embeddedGuideCardsDisabled:true,postPaintGuideCleanup:false,closeMinimizeDefaultPreserved:true,canonicalWorkspaceSubmit:true,bubbleOnly:true,sharedGuideLoaderAware:true},null,2));
