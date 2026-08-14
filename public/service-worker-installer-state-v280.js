@@ -2,7 +2,7 @@
 'use strict';
 
 const INSTALLER_STATE_ASSETS = [
-  '/app/installer-state-machine-v280.js',
+  '/app/installer-state-machine-v281.js',
   '/app/installer-storage-guard-v281.js',
   '/app/offline-campus-status-v210.js'
 ];
@@ -18,7 +18,7 @@ try {
 } catch {}
 
 self.CivweaveInstallerStateWorkerV280 = Object.freeze({
-  revision: 'installer-state-machines-v304-manual-first',
+  revision: 'installer-state-authority-v281-manual-first',
   assets: INSTALLER_STATE_ASSETS.slice(),
   shellRequired: true,
   campusAutostartRequired: false,
