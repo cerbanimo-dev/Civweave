@@ -1,10 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  createCredential,createChangeSet,applyRails,transitionChangeSet,createGroup,openBallot,castBallot,
+  canonicalJson,createCredential,createChangeSet,applyRails,transitionChangeSet,createGroup,openBallot,castBallot,
   closeBallot,recordConsent,createDissent,createNodeOutcome,verifyNodeOutcome,issueExecutionAuthorization,
-  createExecutionPacket,validateExecutionPacket,reviseChangeSet
+  createExecutionPacket,validateExecutionPacket,reviseChangeSet,sha256
 } from '../public/app/anarchadia-governance-kernel-v145.js';
+import {
+  openSignedConsensusRound,castSignedConsensusPosition,verifySignedConsensusPosition,
+  tallySignedConsensusRound,closeSignedConsensusRound
+} from '../public/app/anarchadia-consensus-kernel-v1.js';
 
 const BASE='a'.repeat(40);
 async function passingChange(extra={}){
@@ -69,4 +73,26 @@ test('signed node outcome verifies only against the trusted key',async()=>{
   const outcome=await createNodeOutcome(ballot,node.record,node.privateKey);
   assert.equal(await verifyNodeOutcome(outcome,node.record),true);
   assert.equal(await verifyNodeOutcome(outcome,other.record),false);
+});
+test('signed consensus freezes electorate and binds positions to the subject revision',async()=>{
+  const a=await createCredential('A'),b=await createCredential('B'),c=await createCredential('C');
+  const subject={id:'intention-demo',revisionHash:await sha256(canonicalJson({id:'intention-demo',revision:1}))};
+  const round=await openSignedConsensusRound(subject,{authorityLevel:'hub',electorate:[c.record,a.record,b.record],quorum:.6,threshold:.67});
+  const reordered=await openSignedConsensusRound(subject,{authorityLevel:'hub',electorate:[b.record,c.record,a.record],quorum:.6,threshold:.67});
+  assert.equal(round.snapshotHash,reordered.snapshotHash);
+  await castSignedConsensusPosition(round,a.record,a.privateKey,'support');
+  await castSignedConsensusPosition(round,b.record,b.privateKey,'support');
+  await castSignedConsensusPosition(round,c.record,c.privateKey,'abstain');
+  assert.equal(tallySignedConsensusRound(round).outcome,'ready-to-adopt');
+  assert.equal((await closeSignedConsensusRound(round,subject)).outcome,'adopted');
+});
+test('signed consensus detects tampering without choosing who belongs to an authority layer',async()=>{
+  const member=await createCredential('Member');
+  const subject={id:'proposal',revisionHash:await sha256('revision-1')};
+  const round=await openSignedConsensusRound(subject,{authorityLevel:'externally-resolved',electorate:[member.record],quorum:1,threshold:1});
+  const position=await castSignedConsensusPosition(round,member.record,member.privateKey,'support');
+  assert.equal(await verifySignedConsensusPosition(round,position),true);
+  position.choice='oppose';
+  assert.equal(await verifySignedConsensusPosition(round,position),false);
+  await assert.rejects(()=>closeSignedConsensusRound(round,subject),/Invalid consensus signature/);
 });
