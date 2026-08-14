@@ -83,13 +83,26 @@ for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {
   const result = spawnSync(process.execPath, ['--check', path], { encoding: 'utf8' });
   assert.equal(result.status, 0, `${path} syntax failed: ${result.stderr || result.stdout}`);
 }
-for (const path of paths.filter(path => !path.endsWith('hub-account-recovery-v1.mjs'))) {
+
+const recoveryNoStripeSurfaces = [
+  'cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v8.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v9.mjs',
+  'cloudflare/account-edge/wrangler.jsonc',
+  'cloudflare/recovery-relay/src/index.mjs',
+  'cloudflare/recovery-relay/wrangler.jsonc',
+  'scripts/resolve-cloudflare-recovery-zone-v1.mjs',
+  'public/app/hub-recovery-api-v1.js',
+  'public/app/hub-recovery-ui-v1.js',
+  'public/app/hub-delivery-intent-v1.js',
+];
+for (const path of recoveryNoStripeSurfaces) {
   assert.doesNotMatch(source[path], /stripe/i, `${path} must not add Stripe as a Hub recovery dependency`);
 }
 
 console.log(JSON.stringify({
   ok: true,
-  schema: 'civweave.hub-recovery-wiring-check.v6',
+  schema: 'civweave.hub-recovery-wiring-check.v7',
   freeTierInboundProof: true,
   crossAccountRelay: true,
   relayDiscovery: 'canonical-pages',
