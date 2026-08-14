@@ -85,9 +85,9 @@ function insertExact(text) {
 }
 
 function insertPatterns(text) {
-  const start=text.indexOf('const PATTERN_TRANSLATIONS=[');
+  const start=text.indexOf('const PATTERN_TRANSLATIONS=Object.freeze([');
   if(start<0)throw new Error('PATTERN_TRANSLATIONS not found');
-  const close=text.indexOf('\n];',start);
+  const close=text.indexOf('\n]);',start);
   if(close<0)throw new Error('PATTERN_TRANSLATIONS close not found');
   const missing=patterns.filter(([regex])=>!text.includes(regex.slice(1,-1)));
   if(!missing.length)return text;
