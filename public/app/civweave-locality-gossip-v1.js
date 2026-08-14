@@ -1,18 +1,29 @@
 (()=>{
 'use strict';
 
-const VERSION='civweave-locality-gossip-v1.0.0';
+const VERSION='civweave-locality-gossip-v1.1.0-region-chunks';
 const ENTRY_KIND='civweave.locality-ledger-entry.v1';
 const ENTRY_SCHEMA='civweave.locality-ledger-entry.v1';
 const HUBS_KEY='civweave.locality-gossip.hubs.v1';
 const PEERS_KEY='civweave.locality-gossip.peers.v1';
 const LAST_PASS_KEY='civweave.locality-gossip.last-pass.v1';
+const REGION_KEY='civweave.locality-gossip.region.v1';
+const REGION_LEASE_KEY='civweave.locality-gossip.region-lease.v1';
+const DIRECTORY_CACHE_KEY='civweave.hub-map.directory.v1';
+const HOST_SELECTION_KEY='civweave.host-node.selection.v1';
+const DIRECTORY_ENDPOINT='/api/hub-map-nodes';
 const DEFAULT_RADIUS_METERS=750;
 const PASS_COOLDOWN_MS=15*60*1000;
 const PEER_RELEVANCE_MS=14*24*60*60*1000;
+const REGION_NEIGHBOR_COUNT=6;
+const REGION_SYNC_MS=15*60*1000;
+const REGION_LEASE_MS=4*60*1000;
 const ENTRY_TYPES=new Set(['need','offering','idea']);
+const INSTANCE_ID=`locality-region:${globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;
 let meshPromise=null;
 let subscribed=false;
+let regionTimer=null;
+let regionStarted=false;
 
 const now=()=>new Date().toISOString();
 const clean=(value,max=1000)=>String(value??'').trim().slice(0,max);
@@ -75,7 +86,7 @@ function rememberHub(node={},reason='map'){
     firstSeenAt:prior.firstSeenAt||now(),lastSeenAt:now(),
     visits:Number(prior.visits||0)+1,
     physicalPasses:Number(prior.physicalPasses||0)+(reason==='physical'?1:0),
-    virtualPasses:Number(prior.virtualPasses||0)+(reason==='virtual'?1:0),
+    virtualPasses:Number(prior.virtualPasses||0)+(['virtual','region'].includes(reason)?1:0),
     reason:clean(reason,80),
   };
   hubs[nodeId]=row;
@@ -142,8 +153,67 @@ async function proximityUpdate(position,nodes=[],options={}){
   }
   return hits
 }
-function status(){return{version:VERSION,entryKind:ENTRY_KIND,entryTypes:[...ENTRY_TYPES],defaultRadiusMeters:DEFAULT_RADIUS_METERS,passCooldownMs:PASS_COOLDOWN_MS,frequentHubs:frequentHubs(12),recentPeerCount:recentPeers().size,privacy:'roaming coordinates are evaluated in-memory and never written by this module'}}
 
-const api=Object.freeze({version:VERSION,ENTRY_KIND,ENTRY_SCHEMA,ensureMesh,publishEntry,listRecent,summaryForHub,passByHub,proximityUpdate,rememberHub,frequentHubs,recordPeer,status,distanceMeters});
-globalThis.CivweaveLocalityGossipV1=api;ensureMesh().catch(()=>{});dispatchEvent(new CustomEvent('civweave:locality-gossip-ready',{detail:{version:VERSION,at:now()}}));
+function selectedHome(){const saved=load(HOST_SELECTION_KEY,{});return{nodeId:clean(saved?.nodeId,180),origin:safeOrigin(saved?.origin),displayName:clean(saved?.displayName,180)}}
+function nodeLocation(node={}){const location=node?.location||node?.publicLocation||{};return{latitude:finite(location.latitude??location.lat),longitude:finite(location.longitude??location.lon)}}
+function normalizeRegionNode(node={}){const nodeId=clean(node?.nodeId||node?.id,180);if(!nodeId)return null;return{nodeId,displayName:clean(node?.displayName||node?.name||nodeId,180),publicOrigin:safeOrigin(node?.publicOrigin||node?.endpoint||node?.website),location:nodeLocation(node)}}
+function computeRegion(homeNodeId,nodes=[],neighborCount=REGION_NEIGHBOR_COUNT){
+  const homeId=clean(homeNodeId,180),normalized=list(nodes).map(normalizeRegionNode).filter(Boolean),home=normalized.find(node=>node.nodeId===homeId);if(!homeId||!home)return null;
+  const count=Math.max(0,Math.min(24,Number(neighborCount)||REGION_NEIGHBOR_COUNT));
+  const neighbors=normalized.filter(node=>node.nodeId!==homeId).map(node=>({...node,distanceMeters:distanceMeters(home.location,node.location)})).filter(node=>Number.isFinite(node.distanceMeters)).sort((a,b)=>a.distanceMeters-b.distanceMeters||a.nodeId.localeCompare(b.nodeId)).slice(0,count);
+  const regionId=`region:${homeId}:${neighbors.map(node=>node.nodeId).join(',')}`;
+  return{schema:'civweave.locality-region.v1',regionId,homeNodeId:homeId,neighborNodeIds:neighbors.map(node=>node.nodeId),nodeIds:[homeId,...neighbors.map(node=>node.nodeId)],nodes:[home,...neighbors],neighborCount:neighbors.length,generatedAt:now(),anchor:'home-hub-public-map-pin'}
+}
+async function loadRegionDirectory({nodes=null,network=true}={}){
+  if(Array.isArray(nodes)&&nodes.length)return{schema:'civweave.hub-map-directory.v1',nodes};
+  let cached=load(DIRECTORY_CACHE_KEY,null);if(cached?.schema!=='civweave.hub-map-directory.v1'||!Array.isArray(cached.nodes))cached=null;
+  if(!network||navigator.onLine===false)return cached||{schema:'civweave.hub-map-directory.v1',nodes:[]};
+  try{const response=await fetch(DIRECTORY_ENDPOINT,{cache:'no-store',headers:{accept:'application/json'}}),packet=await response.json().catch(()=>({}));if(!response.ok||packet?.ok!==true||!Array.isArray(packet.nodes))throw new Error(packet?.error||`HTTP ${response.status}`);save(DIRECTORY_CACHE_KEY,packet);return packet}catch{return cached||{schema:'civweave.hub-map-directory.v1',nodes:[]}}
+}
+function regionLease(){return load(REGION_LEASE_KEY,null)}
+function acquireRegionLease(){
+  const current=regionLease(),time=Date.now();if(current?.owner&&current.owner!==INSTANCE_ID&&Number(current.expiresAt)>time)return false;
+  const next={owner:INSTANCE_ID,expiresAt:time+REGION_LEASE_MS,updatedAt:now()};save(REGION_LEASE_KEY,next);return regionLease()?.owner===INSTANCE_ID
+}
+function releaseRegionLease(){const current=regionLease();if(current?.owner===INSTANCE_ID)try{localStorage.removeItem(REGION_LEASE_KEY)}catch{}}
+function activeHomeSession(homeNodeId){const runtime=globalThis.CivweaveHostNodeSessionV1,rows=runtime?.publicStatus?.()?.sessions||[];return rows.find(item=>item?.active&&item.nodeId===homeNodeId)||null}
+function currentRegion(){return load(REGION_KEY,null)}
+function regionDue(region=currentRegion()){const last=Date.parse(region?.lastSyncedAt||0);return!Number.isFinite(last)||Date.now()-last>=REGION_SYNC_MS}
+async function syncRegion({nodes=null,networkDirectory=true,force=false,requireMember=true}={}){
+  if(navigator.onLine===false)return{ok:false,reason:'offline',region:currentRegion()};
+  const home=selectedHome();if(!home.nodeId)return{ok:false,reason:'no-home-hub',region:currentRegion()};
+  if(requireMember&&!activeHomeSession(home.nodeId))return{ok:false,reason:'inactive-hub-session',region:currentRegion()};
+  const prior=currentRegion();if(!force&&!regionDue(prior)&&prior?.homeNodeId===home.nodeId)return{ok:true,skipped:true,reason:'fresh-region',region:prior};
+  if(!acquireRegionLease())return{ok:true,skipped:true,reason:'region-sync-owned-by-another-surface',region:prior};
+  try{
+    const packet=await loadRegionDirectory({nodes,network:networkDirectory}),region=computeRegion(home.nodeId,packet.nodes,REGION_NEIGHBOR_COUNT);if(!region)return{ok:false,reason:'home-hub-not-in-directory',region:prior};
+    const mesh=await ensureMesh(),results=[];
+    for(const node of region.nodes){
+      const hub=rememberHub(node,'region');if(!hub?.publicOrigin){results.push({nodeId:node.nodeId,ok:false,reason:'missing-public-origin'});continue}
+      try{const result=await mesh.syncGateway(hub.publicOrigin);results.push({nodeId:node.nodeId,ok:true,result})}catch(error){results.push({nodeId:node.nodeId,ok:false,error:clean(error?.message||error,500)})}
+    }
+    let meshResult=null;try{meshResult=await globalThis.CivweaveMapMeshV276?.sync?.()}catch{}
+    try{await mesh.flushAll()}catch{}
+    const completed={...region,lastSyncedAt:now(),successfulHubs:results.filter(row=>row.ok).length,failedHubs:results.filter(row=>!row.ok).length};save(REGION_KEY,completed);
+    dispatchEvent(new CustomEvent('civweave:locality-region-synced',{detail:{region:clone(completed),results:clone(results),meshResult,at:now()}}));
+    return{ok:true,region:completed,results,meshResult}
+  }finally{releaseRegionLease()}
+}
+function jitter(ms){return Math.round(ms*(0.9+Math.random()*0.2))}
+function scheduleRegionSync(delay=REGION_SYNC_MS){if(regionTimer)clearTimeout(regionTimer);regionTimer=setTimeout(async()=>{try{await syncRegion()}catch{}scheduleRegionSync(jitter(REGION_SYNC_MS))},Math.max(1000,Number(delay)||REGION_SYNC_MS))}
+function kickRegionSync({force=false}={}){queueMicrotask(()=>syncRegion({force}).catch(()=>{}));scheduleRegionSync(jitter(REGION_SYNC_MS));return true}
+function startRegionSync(){
+  if(regionStarted)return true;regionStarted=true;
+  addEventListener('online',()=>kickRegionSync());
+  addEventListener('civweave:capacity-session-ready',()=>kickRegionSync({force:true}));
+  addEventListener('civweave:host-node-selected',()=>kickRegionSync({force:true}));
+  addEventListener('visibilitychange',()=>{if(!document.hidden&&regionDue())kickRegionSync()});
+  addEventListener('pagehide',()=>{if(regionTimer)clearTimeout(regionTimer);regionTimer=null;releaseRegionLease()},{once:true});
+  scheduleRegionSync(2500);return true
+}
+function stopRegionSync(){regionStarted=false;if(regionTimer)clearTimeout(regionTimer);regionTimer=null;releaseRegionLease();return true}
+function status(){return{version:VERSION,entryKind:ENTRY_KIND,entryTypes:[...ENTRY_TYPES],defaultRadiusMeters:DEFAULT_RADIUS_METERS,passCooldownMs:PASS_COOLDOWN_MS,frequentHubs:frequentHubs(12),recentPeerCount:recentPeers().size,region:currentRegion(),regionNeighborCount:REGION_NEIGHBOR_COUNT,regionSyncMs:REGION_SYNC_MS,regionDue:regionDue(),privacy:'roaming coordinates are evaluated in-memory and never written by this module; automatic Regions are anchored to the home Hub public map pin'}}
+
+const api=Object.freeze({version:VERSION,ENTRY_KIND,ENTRY_SCHEMA,REGION_NEIGHBOR_COUNT,REGION_SYNC_MS,ensureMesh,publishEntry,listRecent,summaryForHub,passByHub,proximityUpdate,rememberHub,frequentHubs,recordPeer,status,distanceMeters,computeRegion,currentRegion,syncRegion,startRegionSync,stopRegionSync});
+globalThis.CivweaveLocalityGossipV1=api;ensureMesh().catch(()=>{});startRegionSync();dispatchEvent(new CustomEvent('civweave:locality-gossip-ready',{detail:{version:VERSION,at:now()}}));
 })();
