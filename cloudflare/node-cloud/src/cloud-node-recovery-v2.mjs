@@ -1,5 +1,5 @@
 import { CivweaveCloudNode as BaseCloudNode } from './cloud-node-recovery-v1.mjs';
-import { PassportAccountService } from '../../account-edge/src/hub-passport-account-v2.mjs';
+import { PassportAccountService } from '../../account-edge/src/hub-passport-account-v3.mjs';
 
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
 const HEADERS = Object.freeze({ 'cache-control': 'no-store', 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type, x-civweave-node-id', 'access-control-max-age': '86400' });
@@ -17,6 +17,16 @@ function errorPayload(error) {
 
 export class CivweaveCloudNode extends BaseCloudNode {
   passportAccountService() { return new PassportAccountService(this.state, this.env, { vaultSecret: () => this.recoveryVaultSecret() }); }
+  async internalSessionBinding(request) {
+    const url = new URL(request.url);
+    if (url.hostname !== 'node.internal' || request.method !== 'POST') return null;
+    const input = await request.json().catch(() => ({})), service = this.passportAccountService();
+    try {
+      if (url.pathname === '/internal/account/session/bind') return response(await service.bindCapacitySession(input));
+      if (url.pathname === '/internal/account/session/check') return response(await service.checkCapacitySession(input));
+      return null;
+    } catch (error) { return response(errorPayload(error), Number.isSafeInteger(error?.status) ? error.status : 500); }
+  }
   async passportAccount(request, nodeId) {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS' && url.pathname.startsWith('/api/account/')) return new Response(null, { status: 204, headers: HEADERS });
@@ -50,6 +60,8 @@ export class CivweaveCloudNode extends BaseCloudNode {
     } catch (error) { return response(errorPayload(error), Number.isSafeInteger(error?.status) ? error.status : 500); }
   }
   async fetch(request) {
+    const internal = await this.internalSessionBinding(request);
+    if (internal) return internal;
     const url = new URL(request.url), nodeId = nodeIdFor(request);
     if (nodeId && url.pathname.startsWith('/api/account/')) {
       const handled = await this.passportAccount(request, nodeId);
