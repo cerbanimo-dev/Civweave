@@ -36,14 +36,16 @@ jobs:
           test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing repository secret CLOUDFLARE_API_TOKEN'; exit 2; }
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
 
-      - name: Activate Pages custom domain
+      - name: Activate Pages custom domain and repair apex DNS
         shell: bash
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           const account = encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID);
-          const project = encodeURIComponent(process.env.PAGES_PROJECT);
+          const projectName = process.env.PAGES_PROJECT;
+          const project = encodeURIComponent(projectName);
           const domain = process.env.PUBLIC_DOMAIN;
+          const target = `${projectName}.pages.dev`;
           const headers = {
             Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
             'Content-Type': 'application/json'
@@ -66,9 +68,55 @@ jobs:
             if (!response.ok || packet.success !== true) {
               throw new Error(`Could not attach ${domain}: ${JSON.stringify(packet.errors || packet)}`);
             }
-            console.log(`Attached ${domain} to Pages project ${process.env.PAGES_PROJECT}.`);
+            console.log(`Attached ${domain} to Pages project ${projectName}.`);
           } else if (!response.ok || packet.success !== true) {
             throw new Error(`Could not inspect ${domain}: ${JSON.stringify(packet.errors || packet)}`);
+          }
+
+          ({ response, packet } = await request(endpoint));
+          if (!response.ok || packet.success !== true) {
+            throw new Error(`Could not inspect ${domain}: ${JSON.stringify(packet.errors || packet)}`);
+          }
+
+          const zoneId = packet.result?.zone_tag;
+          if (!zoneId) {
+            throw new Error(`Pages did not return a zone_tag for ${domain}; cannot repair apex DNS safely.`);
+          }
+
+          const dnsBase = `https://api.cloudflare.com/client/v4/zones/${encodeURIComponent(zoneId)}/dns_records`;
+          const dnsLookup = await request(`${dnsBase}?name=${encodeURIComponent(domain)}&per_page=100`);
+          if (!dnsLookup.response.ok || dnsLookup.packet.success !== true) {
+            throw new Error(`Could not inspect apex DNS for ${domain}. The Cloudflare token needs Zone DNS Read/Edit on this zone. ${JSON.stringify(dnsLookup.packet.errors || dnsLookup.packet)}`);
+          }
+
+          const apexRecords = (dnsLookup.packet.result || []).filter(record => String(record.name || '').toLowerCase() === domain.toLowerCase());
+          const matchingCname = apexRecords.find(record => record.type === 'CNAME' && String(record.content || '').replace(/\.$/, '').toLowerCase() === target.toLowerCase());
+          const conflictingAddress = apexRecords.find(record => ['A', 'AAAA'].includes(record.type));
+          const conflictingCname = apexRecords.find(record => record.type === 'CNAME' && !matchingCname);
+
+          if (conflictingAddress || conflictingCname) {
+            const conflicts = apexRecords.filter(record => ['A', 'AAAA', 'CNAME'].includes(record.type)).map(record => ({ id: record.id, type: record.type, content: record.content }));
+            throw new Error(`Refusing to overwrite existing apex routing for ${domain}: ${JSON.stringify(conflicts)}`);
+          }
+
+          if (!matchingCname) {
+            const created = await request(dnsBase, {
+              method: 'POST',
+              body: JSON.stringify({
+                type: 'CNAME',
+                name: domain,
+                content: target,
+                ttl: 1,
+                proxied: true,
+                comment: 'Cerbanimo public site on Cloudflare Pages'
+              })
+            });
+            if (!created.response.ok || created.packet.success !== true) {
+              throw new Error(`Could not create apex CNAME ${domain} -> ${target}. The Cloudflare token needs Zone DNS Edit. ${JSON.stringify(created.packet.errors || created.packet)}`);
+            }
+            console.log(`Created apex CNAME ${domain} -> ${target}.`);
+          } else {
+            console.log(`Apex CNAME ${domain} -> ${target} already exists.`);
           }
 
           for (let attempt = 1; attempt <= 72; attempt += 1) {
