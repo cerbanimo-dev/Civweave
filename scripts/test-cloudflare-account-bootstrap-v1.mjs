@@ -95,7 +95,7 @@ assert.ok(accountWorkerSource.includes('legacyAccountEdge.fetch'), 'non-generati
 assert.ok(nodeFabricSource.includes("url.pathname === '/api/fabric/location'"));
 assert.ok(nodeFabricSource.includes("url.pathname === '/internal/location'"));
 assert.ok(nodeFabricSource.includes('civweave.hub-location-owner.v1'));
-assert.ok(nodeFabricSource.includes("publicPrecision, 20").replace('publicPrecision, 20','publicPrecision, 20') || nodeFabricSource.includes('publicPrecision'), 'hub location precision mode must remain explicit');
+assert.ok(nodeFabricSource.includes('publicPrecision'), 'hub location precision mode must remain explicit');
 assert.ok(nodeFabricSource.includes("['rounded', 'precise']"), 'hub location must support rounded and precise public modes');
 assert.ok(nodeFabricSource.includes('coordinateDecimals = precise ? 6 : 3'), 'hub location precision must remain 6 decimals precise / 3 decimals rounded');
 assert.ok(nodeFabricSource.includes('coordinateDecimals,'), 'hub location manifest must expose the selected coordinate precision');
