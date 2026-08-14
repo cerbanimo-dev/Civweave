@@ -1,0 +1,39 @@
+name: Verify Founder Territory Split v1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/deploy-cerbanimo-site.yml'
+      - '.github/workflows/deploy-civweave-pages.yml'
+      - '.github/workflows/deploy-new-new-york-territory-host-v1.yml'
+      - '.github/workflows/maintain-founder-source-node-v1.yml'
+      - 'scripts/ensure-founder-source-node-v1.mjs'
+      - 'scripts/verify-founder-territory-split-v1.mjs'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/deploy-cerbanimo-site.yml'
+      - '.github/workflows/deploy-civweave-pages.yml'
+      - '.github/workflows/deploy-new-new-york-territory-host-v1.yml'
+      - '.github/workflows/maintain-founder-source-node-v1.yml'
+      - 'scripts/ensure-founder-source-node-v1.mjs'
+      - 'scripts/verify-founder-territory-split-v1.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax-check founder health script
+        run: node --check scripts/ensure-founder-source-node-v1.mjs
+      - name: Verify source-node and territory-node boundaries
+        run: node scripts/verify-founder-territory-split-v1.mjs
+      - name: Re-run Territory Host Authority invariants
+        run: node scripts/verify-territory-host-authority-v1.mjs
