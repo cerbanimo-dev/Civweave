@@ -19,4 +19,11 @@ jobs:
         with:
           node-version: 22
       - run: node --check scripts/audit-japanese-visible-copy-v3.mjs
-      - run: node scripts/audit-japanese-visible-copy-v3.mjs
+      - name: Audit visible English
+        run: node scripts/audit-japanese-visible-copy-v3.mjs | tee japanese-visible-copy-audit.txt
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: japanese-visible-copy-audit-v3
+          path: japanese-visible-copy-audit.txt
+          if-no-files-found: error
