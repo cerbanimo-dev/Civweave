@@ -1,4 +1,5 @@
-import baseWorker, { CivweaveCloudNode, CivweaveCapacityAccount, CivweaveAccountDirectory } from './server-ai-entry-v5.mjs';
+import baseWorker, { CivweaveCloudNode, CivweaveAccountDirectory } from './server-ai-entry-v5.mjs';
+import { CivweaveCapacityAccount } from './capacity-membership-admin-v1.mjs';
 import { nodeIdFromHostname, normalizeNodeId } from './index.mjs';
 
 export { CivweaveCloudNode, CivweaveCapacityAccount, CivweaveAccountDirectory };
@@ -30,6 +31,10 @@ function nodeStub(env, nodeId) {
   if (!env.NODES) throw Object.assign(new Error('Node binding is unavailable.'), { status: 503 });
   return env.NODES.get(env.NODES.idFromName(nodeId));
 }
+function capacityStub(env) {
+  if (!env.CAPACITY) throw Object.assign(new Error('Capacity binding is unavailable.'), { status: 503 });
+  return env.CAPACITY.get(env.CAPACITY.idFromName('civweave-account'));
+}
 async function nodePost(env, nodeId, pathname, body) {
   const response = await nodeStub(env, nodeId).fetch(`https://node.internal${pathname}`, {
     method: 'POST',
@@ -39,11 +44,16 @@ async function nodePost(env, nodeId, pathname, body) {
   const packet = await response.json().catch(() => ({}));
   if (!response.ok) {
     const error = new Error(packet.error || `Hub account service returned HTTP ${response.status}.`);
-    error.status = response.status;
-    error.code = packet.code || '';
-    error.packet = packet;
-    throw error;
+    error.status = response.status; error.code = packet.code || ''; error.packet = packet; throw error;
   }
+  return packet;
+}
+async function capacityPost(env, pathname, body) {
+  const response = await capacityStub(env).fetch(`https://capacity.internal${pathname}`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body || {}),
+  });
+  const packet = await response.json().catch(() => ({}));
+  if (!response.ok) throw Object.assign(new Error(packet.error || `Capacity service returned HTTP ${response.status}.`), { status: response.status });
   return packet;
 }
 function isSessionPost(request, url) {
@@ -73,6 +83,16 @@ async function bindSession(env, nodeId, authorization, packet) {
 }
 async function checkBoundSession(env, nodeId, token) {
   return nodePost(env, nodeId, '/internal/account/session/check', { token });
+}
+async function annotateMember(env, nodeId, authorization) {
+  const account = authorization?.account || {};
+  return capacityPost(env, '/members/annotate-account', {
+    nodeId,
+    userId: authorization.userId,
+    accountId: account.accountId,
+    accountName: account.accountName,
+    passportIds: account.passportIds || [],
+  });
 }
 
 export default {
@@ -105,8 +125,12 @@ export default {
       const response = await baseWorker.fetch(canonical, env, ctx);
       if (!response.ok) return response;
       const packet = await response.clone().json().catch(() => ({}));
-      try { await bindSession(env, nodeId, authorization, packet); }
-      catch (error) { return json({ ok: false, error: `Hub login succeeded but device binding failed: ${error.message || error}` }, Number.isSafeInteger(error?.status) ? error.status : 503); }
+      try {
+        await annotateMember(env, nodeId, authorization);
+        await bindSession(env, nodeId, authorization, packet);
+      } catch (error) {
+        return json({ ok: false, error: `Hub login succeeded but account binding failed: ${error.message || error}` }, Number.isSafeInteger(error?.status) ? error.status : 503);
+      }
       return response;
     }
 
