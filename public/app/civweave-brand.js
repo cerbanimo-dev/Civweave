@@ -7,6 +7,7 @@ const FULL_LOGO=CANONICAL_LOGO;
 const SYMBOL_LOGO=CANONICAL_LOGO;
 const LANGUAGE_KEY='civweave.language.v1';
 const JAPANESE_RUNTIME='/app/japanese-mode-v1.js?v=japanese-shell-language-v2';
+const JAPANESE_SHELL_COPY='/app/japanese-shell-copy-v1.js?v=japanese-shell-language-v2';
 const SKIP_TAGS=new Set(['SCRIPT','STYLE','NOSCRIPT','TEMPLATE','CODE','PRE']);
 const ATTRIBUTES=['alt','title','aria-label','placeholder','content','data-label'];
 const BRAND_ASSET=/(?:^|\/)(?:commonweave|civweave)(?:-symbol|-app-icon|-adaptive-foreground-512|-icon-(?:\d+|maskable-\d+))?\.(?:svg|png|webp)(?:[?#].*)?$/i;
@@ -80,9 +81,15 @@ function wantsJapanese(){
     return localStorage.getItem(LANGUAGE_KEY)==='ja';
   }catch{return false}
 }
+function appendLanguageScript(src,marker){
+  if(document.querySelector(`script[data-civweave-language-runtime="${marker}"]`))return false;
+  const script=document.createElement('script');script.src=src;script.async=false;script.dataset.civweaveLanguageRuntime=marker;document.head.append(script);return true
+}
 function installLanguageRuntime(){
-  if(!wantsJapanese()||globalThis.CivweaveJapaneseModeV1||document.querySelector('script[data-civweave-japanese-mode]'))return false;
-  const script=document.createElement('script');script.src=JAPANESE_RUNTIME;script.async=false;script.dataset.civweaveJapaneseMode='shell';document.head.append(script);return true
+  if(!wantsJapanese())return false;
+  if(!globalThis.CivweaveJapaneseModeV1)appendLanguageScript(JAPANESE_RUNTIME,'japanese-mode');
+  if(!globalThis.CivweaveJapaneseShellCopyV1)appendLanguageScript(JAPANESE_SHELL_COPY,'japanese-shell-copy');
+  return true
 }
 function installInstallerDeliveryBridge(){
   if(location.pathname!=='/app/index.html'||document.querySelector('script[data-civweave-hub-delivery-intent]'))return false;
