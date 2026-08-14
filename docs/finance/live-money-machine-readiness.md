@@ -39,8 +39,9 @@ Status after the 2026-08-14 FellowFare 5% service-fee split pass.
 - The active Hub Node is bound into server-created Stripe Price metadata before checkout. Checkout reads that metadata instead of accepting a buyer-selected payout destination.
 - The server retrieves the connected-account Price and verifies FellowFare listing/kind/Hub metadata before checkout.
 - No buyer-supplied amount is trusted.
-- When Stripe emits `application_fee.created`, Cloudflare core transfers the Host Steward half from the platform fee balance to that Hub's registered payout account and records the settlement in D1.
-- `application_fee.refunded` proportionally reverses the Host Steward transfer for partial or full fee refunds.
+- When Stripe emits `application_fee.created`, Cloudflare core records the split and attempts the Host Steward half from the platform application-fee balance.
+- If Stripe reports that the platform balance is not available yet, the settlement remains `pending-funds` in D1 rather than losing the Steward share. `balance.available` drains those pending settlements once funds can move.
+- `application_fee.refunded` recalculates the Steward's entitlement against the net retained fee. Refunds that arrive before payout reduce the pending transfer; refunds after payout proportionally reverse the Host Steward transfer.
 - No destination charge, transfer destination, or separate seller transfer is used to pay the service provider.
 - FellowFare does not collect provider gross proceeds and does not route seller proceeds.
 
@@ -50,7 +51,7 @@ Legacy browser sale-distribution methods remain fail-closed. Legacy Stripe settl
 
 The existing read-only Stripe live preflight and guarded Cloudflare live-money workflows remain the activation path. Production readiness must include the merchant/card-payments capability needed by FellowFare service providers in addition to the platform recipient capabilities used by Host Stewards.
 
-The live snapshot webhook preflight now requires both `application_fee.created` and `application_fee.refunded`. Missing either event blocks readiness because the 50/50 Steward/Cerbanimo fee split cannot be safely maintained without settlement and refund events.
+The live snapshot webhook preflight now requires `application_fee.created`, `application_fee.refunded`, and `balance.available`. Missing any of them blocks readiness because the 50/50 Steward/Cerbanimo fee split cannot be safely maintained without settlement, refund, and pending-balance retry events.
 
 ## Human work still required
 
@@ -63,4 +64,4 @@ Acceptance must independently confirm:
 /api/fellowfare/direct-commerce/* -> service/learning/tutoring only
 ```
 
-and verify one provider-owned direct charge end to end, including the 5% FellowFare application fee, the 50/50 Host Steward/Cerbanimo fee split, a refund reversal test, and absence of a seller transfer.
+and verify one provider-owned direct charge end to end, including the 5% FellowFare application fee, the 50/50 Host Steward/Cerbanimo fee split, a pending-balance retry, a refund reversal test, and absence of a seller transfer.
