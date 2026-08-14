@@ -5,30 +5,42 @@ on:
     paths:
       - 'cloudflare/account-edge/**'
       - 'cloudflare/recovery-relay/**'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'config/launch-topology-v1.json'
       - 'public/app/hub-recovery-*.js'
       - 'public/app/hub-delivery-intent-v1.js'
       - 'public/app/civweave-brand.js'
       - 'public/app/host-node-session-import-v1.js'
       - 'public/app/host-node-session-export-v1.js'
       - 'public/app/installer-online-fallback-v225.js'
+      - 'scripts/resolve-cloudflare-recovery-zone-v1.mjs'
+      - 'scripts/test-cloudflare-recovery-zone-v1.mjs'
       - 'scripts/verify-hub-recovery-wiring-v1.mjs'
       - 'scripts/test-hub-recovery-behavior-v1.mjs'
       - 'scripts/test-hub-recovery-relay-v1.mjs'
+      - '.github/workflows/deploy-civweave-pages.yml'
+      - '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml'
       - '.github/workflows/hub-account-recovery.yml'
   push:
     branches: [main]
     paths:
       - 'cloudflare/account-edge/**'
       - 'cloudflare/recovery-relay/**'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'config/launch-topology-v1.json'
       - 'public/app/hub-recovery-*.js'
       - 'public/app/hub-delivery-intent-v1.js'
       - 'public/app/civweave-brand.js'
       - 'public/app/host-node-session-import-v1.js'
       - 'public/app/host-node-session-export-v1.js'
       - 'public/app/installer-online-fallback-v225.js'
+      - 'scripts/resolve-cloudflare-recovery-zone-v1.mjs'
+      - 'scripts/test-cloudflare-recovery-zone-v1.mjs'
       - 'scripts/verify-hub-recovery-wiring-v1.mjs'
       - 'scripts/test-hub-recovery-behavior-v1.mjs'
       - 'scripts/test-hub-recovery-relay-v1.mjs'
+      - '.github/workflows/deploy-civweave-pages.yml'
+      - '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml'
 
 permissions:
   contents: read
@@ -46,6 +58,8 @@ jobs:
         run: node scripts/test-hub-recovery-behavior-v1.mjs
       - name: Test cross-Hub recovery proof relay
         run: node scripts/test-hub-recovery-relay-v1.mjs
+      - name: Test owned recovery-zone selection
+        run: node scripts/test-cloudflare-recovery-zone-v1.mjs
       - name: Verify Hub recovery wiring
         run: node scripts/verify-hub-recovery-wiring-v1.mjs
       - name: Verify account edge bootstrap

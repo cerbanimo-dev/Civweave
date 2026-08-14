@@ -23,7 +23,7 @@
     { "binding": "CORE", "service": "civweave-core" }
   ],
   "vars": {
-    "NODE_DOMAIN": "nodes.commonweave.earth",
+    "NODE_DOMAIN": "nodes.civweave.invalid",
     "PUBLIC_FABRIC_ORIGIN": "https://civweave-node-cloud.cerbanimo.workers.dev",
     "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.pages.dev",
     "CIVWEAVE_WORKERS_PLAN": "free",
@@ -36,6 +36,10 @@
   // NODE_FABRIC_SESSION_SECRET
   // NODE_FABRIC_OPERATOR_TOKEN
   // NODE_FABRIC_BINDING_TOKEN
+  //
+  // NODE_DOMAIN intentionally uses the reserved .invalid namespace until an
+  // owned custom zone is explicitly configured. Public starter-node links are
+  // repaired to their real account-edge workers.dev paths.
   //
   // Member capacity sessions use a domain-separated HMAC derived from the dedicated
   // session secret. The operator token remains a compatibility fallback only.

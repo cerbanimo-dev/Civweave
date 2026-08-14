@@ -21,6 +21,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CIVWEAVE_RECOVERY_ZONE: ${{ vars.CIVWEAVE_RECOVERY_ZONE }}
 
     steps:
       - name: Check out main
@@ -88,6 +89,10 @@ jobs:
           console.log(JSON.stringify({ ok: true, recoveryRelay: relay }));
           NODE
 
+      - name: Resolve owned recovery-email zone
+        shell: bash
+        run: node scripts/resolve-cloudflare-recovery-zone-v1.mjs --output /tmp/civweave-recovery-zone.json
+
       - name: Provision optional account Worker and starter nodes
         id: provision_account_edge
         continue-on-error: true
@@ -123,6 +128,9 @@ jobs:
               accountResourceScope: 'Include the Cloudflare account that owns this host',
             };
           }
+          let recoveryZone;
+          try { recoveryZone = JSON.parse(readFileSync('/tmp/civweave-recovery-zone.json', 'utf8')); }
+          catch { recoveryZone = { status: 'pending', reason: 'recovery-zone-resolution-unavailable' }; }
           mkdirSync('.cloudflare-pages/app', { recursive: true });
           writeFileSync(target, `${JSON.stringify({
             schema: 'civweave.host-deployment.v1',
@@ -140,7 +148,9 @@ jobs:
           writeFileSync('.cloudflare-pages/app/recovery-relay-v1.json', `${JSON.stringify({
             schema: 'civweave.recovery-relay-discovery.v1',
             url: process.env.RECOVERY_RELAY_URL,
-            mailbox: 'recover@recovery.commonweave.earth',
+            mailbox: process.env.RECOVERY_MAILBOX || null,
+            mailboxStatus: recoveryZone.status || 'pending',
+            mailboxReason: recoveryZone.reason || null,
             sourceCommit: process.env.GITHUB_SHA,
             generatedAt: new Date().toISOString(),
           }, null, 2)}\n`, 'utf8');
@@ -169,6 +179,7 @@ jobs:
           node --input-type=module <<'NODE'
           const expectedCommit = process.env.GITHUB_SHA;
           const origin = 'https://civweave.pages.dev';
+          const expectedMailbox = process.env.RECOVERY_MAILBOX || null;
           let lastFailure = 'Production marker did not become current.';
           for (let attempt = 1; attempt <= 12; attempt += 1) {
             try {
@@ -178,11 +189,11 @@ jobs:
               const relayResponse = await fetch(`${origin}/app/recovery-relay-v1.json?verify=${encodeURIComponent(expectedCommit)}&attempt=${attempt}`, { headers: { 'Cache-Control': 'no-cache' } });
               if (!relayResponse.ok) throw new Error(`relay discovery HTTP ${relayResponse.status}`);
               const relay = await relayResponse.json();
-              if (marker.pagesProject === 'civweave' && marker.publicOrigin === origin && marker.sourceCommit === expectedCommit && relay.schema === 'civweave.recovery-relay-discovery.v1' && relay.sourceCommit === expectedCommit && relay.url === process.env.RECOVERY_RELAY_URL) {
-                console.log(`Verified ${origin} at source commit ${expectedCommit} with recovery relay ${relay.url}.`);
+              if (marker.pagesProject === 'civweave' && marker.publicOrigin === origin && marker.sourceCommit === expectedCommit && relay.schema === 'civweave.recovery-relay-discovery.v1' && relay.sourceCommit === expectedCommit && relay.url === process.env.RECOVERY_RELAY_URL && relay.mailbox === expectedMailbox) {
+                console.log(`Verified ${origin} at source commit ${expectedCommit} with recovery relay ${relay.url} and mailbox ${relay.mailbox || 'pending-owned-zone'}.`);
                 process.exit(0);
               }
-              lastFailure = `attempt ${attempt}: marker=${marker.sourceCommit || 'missing'} relay=${relay.sourceCommit || 'missing'} url=${relay.url || 'missing'}`;
+              lastFailure = `attempt ${attempt}: marker=${marker.sourceCommit || 'missing'} relay=${relay.sourceCommit || 'missing'} url=${relay.url || 'missing'} mailbox=${relay.mailbox || 'pending'}`;
             } catch (error) {
               lastFailure = `attempt ${attempt}: ${error.message}`;
             }

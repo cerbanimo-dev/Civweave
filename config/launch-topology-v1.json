@@ -45,9 +45,10 @@
     "provider": "cloudflare",
     "worker": "civweave-node-cloud",
     "publicFabricOrigin": "https://civweave-node-cloud.cerbanimo.workers.dev",
-    "domain": "nodes.commonweave.earth",
-    "wildcardDomain": "*.nodes.commonweave.earth",
-    "customDomainStatus": "pending-zone-availability",
+    "domain": null,
+    "wildcardDomain": null,
+    "reservedDomainFallback": "nodes.civweave.invalid",
+    "customDomainStatus": "not-configured-owned-zone-required",
     "state": "one-sqlite-durable-object-per-node-plus-account-capacity-object",
     "maxStarterHostsPerAccount": 3,
     "roles": [

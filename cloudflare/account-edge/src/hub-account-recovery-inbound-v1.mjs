@@ -10,7 +10,6 @@ const clean = (value, max = 1200) => String(value ?? '').trim().slice(0, max);
 const nowIso = now => new Date(now).toISOString();
 const INBOUND_SCHEMA = 'civweave.hub-inbound-email-proof.v2';
 const GENERIC_RECOVERY_MESSAGE = 'If that email is a verified recovery method for this Hub, follow the email-proof instructions to continue.';
-const DEFAULT_RELAY_URL = 'https://civweave-recovery-relay.glaedn.workers.dev';
 
 function b64url(bytes) {
   const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
@@ -58,7 +57,7 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
   }
 
   relayUrl() {
-    const raw = clean(this.env?.HUB_RECOVERY_RELAY_URL || DEFAULT_RELAY_URL, 2000);
+    const raw = clean(this.env?.HUB_RECOVERY_RELAY_URL, 2000);
     try {
       const url = new URL(raw);
       if (url.protocol !== 'https:' || url.username || url.password) throw new Error('invalid');
