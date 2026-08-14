@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "civweave-node-cloud",
-  "main": "src/server-ai-entry-v2.mjs",
+  "main": "src/server-ai-entry-v3.mjs",
   "compatibility_date": "2026-08-13",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
