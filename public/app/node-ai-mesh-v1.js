@@ -5,7 +5,7 @@ const SERVICE_KIND='civweave.node-ai.service-advert.v1';
 const SETTLEMENT_KIND='civweave.node-ai.settlement-batch.v1';
 const SETTLEMENT_BATCH_SCHEMA='civweave.node-ai-mesh-settlement-batch.v1';
 const ROUTER_URL='/app/shared/civweave-node-ai-routing-v1.mjs';
-const SERVER_AI_SCRIPTS=['/app/server-ai-router-v301.js?v=1.0.116-v301','/app/server-ai-settings-v301.js?v=1.0.116-v304-tabbed'];
+const SERVER_AI_SCRIPTS=['/app/server-ai-router-v301.js?v=1.0.116-v301','/app/server-ai-settings-v301.js?v=1.0.117-v305-community-dividend'];
 const DEFAULT_SYNC_MS=90_000;
 const LEASE_KEY='civweave.node-ai-mesh.sync-lease.v1';
 const INSTANCE_ID=`node-ai-mesh:${globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;

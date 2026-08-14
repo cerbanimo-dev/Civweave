@@ -48,7 +48,7 @@ assert.match(accountEdge,/capacity-user-pools-v2\.mjs/);
 assert.match(accountEdge,/legacyAccountEdge\.fetch/);
 assert.match(legacyAccountEdge,/central-money-edge-required/,'Legacy account-edge money authority guard must remain intact.');
 
-assert.match(wrangler,/"main": "src\/server-ai-entry-v2\.mjs"/);
+assert.match(wrangler,/"main": "src\/server-ai-entry-v3\.mjs"/);
 assert.match(wrangler,/"CIVWEAVE_UNIFIED_BILLING_MODEL": "google\/gemini-3\.1-flash-lite"/);
 assert.match(wrangler,/"CIVWEAVE_AI_GATEWAY_ID": "default"/);
 assert.match(wrangler,/"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https:\/\/civweave\.pages\.dev"/);

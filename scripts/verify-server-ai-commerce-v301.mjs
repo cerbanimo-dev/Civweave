@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [version, router, settings, mesh, spine, cloudEntryV1, cloudEntryV2, accountEdge, legacyAccountEdge, wrangler, offlineText] = await Promise.all([
+const [version, router, settings, mesh, spine, cloudEntryV1, cloudEntryV2, cloudEntryV3, capacityExtension, accountEdge, legacyAccountEdge, wrangler, offlineText] = await Promise.all([
   'VERSION',
   'public/app/server-ai-router-v301.js',
   'public/app/server-ai-settings-v301.js',
@@ -10,6 +10,8 @@ const [version, router, settings, mesh, spine, cloudEntryV1, cloudEntryV2, accou
   'public/app/fast-interactive-runtime-v192.js',
   'cloudflare/node-cloud/src/server-ai-entry-v1.mjs',
   'cloudflare/node-cloud/src/server-ai-entry-v2.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v3.mjs',
+  'cloudflare/node-cloud/src/capacity-community-extension-v1.mjs',
   'cloudflare/account-edge/src/index.mjs',
   'cloudflare/account-edge/src/index-legacy-v1.mjs',
   'cloudflare/node-cloud/wrangler.jsonc',
@@ -18,14 +20,14 @@ const [version, router, settings, mesh, spine, cloudEntryV1, cloudEntryV2, accou
 
 for (const source of [router, settings, mesh, spine]) new Function(source);
 const offline = JSON.parse(offlineText);
-const cloudRuntime = `${cloudEntryV1}\n${cloudEntryV2}`;
+const cloudRuntime = `${cloudEntryV1}\n${cloudEntryV2}\n${cloudEntryV3}`;
 const accountRuntime = `${accountEdge}\n${legacyAccountEdge}`;
 
 assert.match(version.trim(), /^\d+\.\d+\.\d+$/);
 assert.match(router, /1\.0\.116-server-ai-router-v301/);
-assert.match(settings, /1\.0\.116-server-ai-settings-v304-tabbed/);
+assert.match(settings, /1\.0\.117-server-ai-settings-v305-community-dividend/);
 assert.match(mesh, /server-ai-router-v301\.js\?v=1\.0\.116-v301/);
-assert.match(mesh, /server-ai-settings-v301\.js\?v=1\.0\.116-v304-tabbed/);
+assert.match(mesh, /server-ai-settings-v301\.js\?v=1\.0\.117-v305-community-dividend/);
 assert.match(router, /const ROUTE='server-auto'/);
 assert.match(router, /\['device-local','server-local','cloudflare-workers-ai'\]/);
 assert.match(router, /s\.register\(MIDDLEWARE_ID,\{handle\},60\)/);
@@ -53,6 +55,12 @@ assert.match(spine, /to:'server-auto-v301'/);
 assert.match(settings, /Server-side AI · local → host → Cloudflare/);
 assert.match(settings, /data-compute-buy/);
 assert.match(settings, /data-membership-buy/);
+assert.match(settings, /data-community-share-bps/);
+assert.match(settings, /data-node-equal-topup/);
+assert.match(settings, /Cloudflare top-ups always share at least 1% with everyone/);
+assert.match(settings, /Every \$5\/month of active membership contributes \+2 potential free seats and a \+200 daily-neuron target for every member/);
+assert.match(settings, /shareMode:equal\?'node-equal':'personal'/);
+assert.match(settings, /shareBps,shareMode/);
 assert.match(settings, /\/api\/commerce\/topup/);
 assert.match(settings, /\/api\/commerce\/membership/);
 assert.match(settings, /\/api\/ai\/node\/live\/topups/);
@@ -85,21 +93,32 @@ assert.match(cloudRuntime, /x-civweave-node-signature/);
 assert.match(cloudEntryV2, /chooseUserAiPoolRoute/);
 assert.match(cloudEntryV2, /ai-gateway-unified-billing/);
 assert.match(cloudEntryV2, /\/api\/commerce\/membership\/prejoin/);
+assert.match(cloudEntryV3, /minimumCommunityShareBps:100/);
+assert.match(cloudEntryV3, /maximumCommunityShareBps:500/);
+assert.match(cloudEntryV3, /defaultCommunityShareBps:100/);
+assert.match(cloudEntryV3, /node-equal/);
+assert.match(cloudEntryV3, /\/topups\/share-preference/);
+assert.match(capacityExtension, /topup-sharing:/);
+assert.match(capacityExtension, /communityTopupReserveMicrocents/);
+assert.match(capacityExtension, /activePendingPaidCount/);
 
 assert.match(accountEdge, /server-ai-entry-v2\.mjs/);
 assert.match(accountEdge, /legacyAccountEdge\.fetch/);
 assert.match(legacyAccountEdge, /server-ai-entry-v1\.mjs/);
 assert.match(accountRuntime, /central-money-edge-required/);
-assert.match(wrangler, /"main": "src\/server-ai-entry-v2\.mjs"/);
+assert.match(wrangler, /"main": "src\/server-ai-entry-v3\.mjs"/);
 assert.match(wrangler, /"CIVWEAVE_UNIFIED_BILLING_MODEL": "google\/gemini-3\.1-flash-lite"/);
 
 console.log(JSON.stringify({
   ok: true,
   version: version.trim(),
-  revision: 'server-ai-commerce-v301-composed-user-pools',
+  revision: 'server-ai-commerce-v301-composed-user-pools-community-dividend',
   routeOrder: ['device-local', 'server-local', 'cloudflare-workers-ai'],
   memberships: true,
   topups: true,
+  communityTopupMinimumPercent: 1,
+  communityTopupMaximumPercent: 5,
+  nodeEqualTopups: true,
   cloudflareGeneration: true,
   perUserPoolRouting: true,
   accountMoneyAuthorityPreserved: true,
