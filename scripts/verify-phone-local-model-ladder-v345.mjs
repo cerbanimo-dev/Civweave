@@ -41,7 +41,7 @@ if (middle.fallbackIds?.length) throw new Error('SmolLM2 360M must not be wired 
 if (middle.estimatedBytes < 250_000_000 || middle.estimatedBytes > 300_000_000) {
   throw new Error(`Unexpected SmolLM2 360M package size: ${middle.estimatedBytes}`);
 }
-if (middle.repo !== 'onnx-community/SmolLM2-360M-ONNX') {
+if (middle.repo !== 'onnx-community/SmolLM2-360M-Instruct-ONNX') {
   throw new Error(`Unexpected SmolLM2 360M repo: ${middle.repo}`);
 }
 if (!middle.artifacts.some(item => item.path === 'onnx/model_q4f16.onnx' && item.required)) {
