@@ -15,19 +15,28 @@ assert.match(bootstrap,/1\.0\.116-local-model-test-pulse-v303-mobile-safe/,'boot
 assert.doesNotMatch(bootstrap,/1\.0\.83-local-model-test-pulse-v282-health/,'stale v282 test-pulse compatibility gate must stay retired');
 assert.doesNotMatch(bootstrap,/1\.0\.86-local-model-test-pulse-v286-wasm-performance/,'stale v286 test-pulse compatibility gate must stay retired');
 
-assert.match(lifecycle,/document-lifecycle-v316-nonblocking-no-global-observer-patch/,'settings lifecycle must use the nonblocking v316 recovery contract');
-assert.doesNotMatch(lifecycle,/captureSettingsOpen|document\.addEventListener\('click'/,'document lifecycle must not compete with the orchestrator for Settings taps');
+assert.match(lifecycle,/document-lifecycle-v317-management-only/,'settings lifecycle must use the v317 management-only contract');
+assert.match(lifecycle,/document-lifecycle-v317-explicit-activation/,'settings lifecycle must require explicit v317 activation');
+assert.match(lifecycle,/searchParams\.get\('activate'\)==='1'/,'settings lifecycle must stay dormant until the canonical gateway activates it');
+assert.match(lifecycle,/activation:'settings-gateway-v317'/,'dormant lifecycle must identify the canonical Settings owner');
+assert.doesNotMatch(lifecycle,/captureSettingsOpen|document\.addEventListener\('click'/,'document lifecycle must not compete with the gateway for Settings taps');
 assert.doesNotMatch(lifecycle,/globalThis\.MutationObserver\s*=/,'document lifecycle must never replace MutationObserver globally');
 assert.match(lifecycle,/function scheduleSettingsManagement\(/,'settings management must be independently schedulable');
 assert.match(lifecycle,/managementAfterPaint:true/,'settings management must yield a browser paint before enhancement work');
-assert.match(lifecycle,/settingsStillOpen/,'local-AI enhancement failure must report without closing the settings surface');
+assert.match(lifecycle,/civweave:local-ai-settings-unavailable/,'local-AI enhancement failure must be reported without adding another Settings owner');
+assert.match(lifecycle,/settingsEntryOwner:'settings-gateway-v317'/,'document lifecycle must delegate Settings entry ownership to the gateway');
+assert.match(lifecycle,/inputOwnership:false/,'document lifecycle must not own Settings input');
+assert.match(lifecycle,/globalObserverPatch:false/,'document lifecycle must preserve browser observer primitives');
+assert.match(lifecycle,/activationRequired:true/,'document lifecycle must remain lazy');
+assert.match(lifecycle,/launchWork:'none'/,'document lifecycle must not perform startup inference work');
 
-const managementBody=lifecycle.match(/function localAIManagementReady\(\)\{([\s\S]*?)\}\nfunction localAIInferenceReady/)?.[1]||'';
+const managementBody=lifecycle.match(/function managementReady\(\)\{([\s\S]*?)\}\nfunction enhance/)?.[1]||'';
 assert.ok(managementBody,'management readiness function must be inspectable');
 assert.doesNotMatch(managementBody,/LocalModelRuntime|LocalModelBridge/,'opening/model-management readiness must not require the inference runtime or bridge');
-const inferenceBody=lifecycle.match(/function localAIInferenceReady\(\)\{([\s\S]*?)\}\nfunction enhanceLocalAISettings/)?.[1]||'';
-assert.match(inferenceBody,/LocalModelRuntimeV266/,'inference readiness must still validate the runtime');
-assert.match(inferenceBody,/LocalModelBridgeV266/,'inference readiness must still validate the bridge');
+assert.match(managementBody,/LocalAISettingsV266/,'management readiness must require the local-AI settings surface');
+assert.match(managementBody,/LocalModelRegistryV266/,'management readiness must require the model registry');
+assert.match(managementBody,/deviceFitRecommendations===true/,'management readiness must require device-fit recommendations');
+assert.match(managementBody,/observerFeedbackBounded===true/,'management readiness must require the bounded Settings decorator');
 
 assert.match(installedLaunch,/V282_CAMPUS_PATH='\/app\/working-campus-v156\.html'/,'installed launch must know the real campus recovery route');
 assert.match(installedLaunch,/installed-entry-then-working-campus-never-installer-substitution/,'installed reload recovery must never substitute the installer');
@@ -92,11 +101,12 @@ function makeContext(){
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'reload-settings-recovery-v316-nonblocking',
+  revision:'reload-settings-recovery-v317-explicit-management',
   assertions:{
     localAICompatibility:'v303-test-pulse-mobile-safe-current',
-    settingsOpen:'window-owner-then-post-paint-management',
-    inferenceGate:'separate-from-settings-management',
+    settingsOpen:'gateway-owner-then-post-paint-management',
+    managementGate:'settings-only-no-inference-runtime',
+    observerFeedback:'bounded-idempotent-decorator-required',
     globalBrowserPrimitives:'untouched',
     installedReload:'entry-then-working-campus-never-installer',
     workerCacheBust:'installed-pwa-launch-v294-campus-recovery'
