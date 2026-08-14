@@ -2,16 +2,20 @@
 'use strict';
 
 const VERSION='working-campus-return-v425';
+const REVISION='working-campus-return-v425-race-safe-v1';
 const RECOVERY_KEY='civweave.working-campus.return-recovery.v425';
 const RECOVERY_WINDOW_MS=30_000;
 const CANONICAL_PATH='/app/working-campus-v156.html';
-const BOOT_KEY='civweave.install-boundary.boot.v227';
-const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
+const BOOT_KEY='civweave.install-boundary.boot.v228';
+const STALE_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-boundary.boot.v226'];
 const LANGUAGE_KEY='civweave.language.v1';
 const JAPANESE_MODE_SRC='/app/japanese-mode-v1.js?v=japanese-mode-v1';
 const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.campus','main.app>.main','nav.bottom','#conversation','#workspace'];
+const DOCUMENT_TOKEN=`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
 let lastInspection=null;
 let recoveryPanel=null;
+let verificationPromise=null;
+let recoveryNavigationStarted=false;
 
 if(globalThis.CivweaveWorkingCampusReturnGuardV425?.version===VERSION)return;
 
@@ -45,8 +49,8 @@ function activateLanguageMode(){
 function preauthorizeCanonicalCampus(){
   try{
     sessionStorage.setItem(BOOT_KEY,'1');
-    sessionStorage.setItem(LEGACY_BOOT_KEY,'1');
-    document.documentElement?.setAttribute('data-civweave-install-boundary-preauthorized',VERSION);
+    for(const key of STALE_BOOT_KEYS)sessionStorage.removeItem(key);
+    document.documentElement?.setAttribute('data-civweave-install-boundary-preauthorized',REVISION);
     return true;
   }catch{return false}
 }
@@ -87,7 +91,7 @@ function inspect(){
   const missing=REQUIRED_SELECTORS.filter(selector=>!document.querySelector(selector));
   const app=document.querySelector('main.app');
   const healthy=Boolean(document.documentElement?.isConnected&&document.body?.isConnected&&!missing.length&&computedVisible(app));
-  lastInspection={version:VERSION,healthy,missing,appVisible:computedVisible(app),visibilityState:document.visibilityState||'unknown',at:new Date().toISOString()};
+  lastInspection={version:VERSION,revision:REVISION,healthy,missing,appVisible:computedVisible(app),visibilityState:document.visibilityState||'unknown',documentToken:DOCUMENT_TOKEN,at:new Date().toISOString()};
   if(document.documentElement)document.documentElement.dataset.civweaveWorkingCampusReturn=healthy?'healthy':'unhealthy';
   return lastInspection;
 }
@@ -119,14 +123,14 @@ function renderFailSafe(reason,inspection=inspect()){
   const detail=document.createElement('p');detail.textContent=inspection.missing.length?`Missing shell pieces: ${inspection.missing.join(', ')}`:'The shell exists but is not visibly paintable.';detail.style.cssText='margin:0 0 16px!important;color:#9eb4c7!important;font-size:12px!important;';
   const actions=document.createElement('div');actions.style.cssText='display:flex!important;gap:9px!important;flex-wrap:wrap!important;';
   const retry=document.createElement('button');retry.type='button';retry.textContent='Retry Working Campus';retry.style.cssText='padding:10px 13px!important;border:1px solid #8af5d299!important;border-radius:10px!important;background:#17394a!important;color:#fff!important;font-weight:800!important;cursor:pointer!important;';
-  retry.addEventListener('click',()=>{clearRecovery();preauthorizeCanonicalCampus();location.replace(canonicalUrl('manual-retry'))});
+  retry.addEventListener('click',()=>{clearRecovery();recoveryNavigationStarted=true;preauthorizeCanonicalCampus();location.replace(canonicalUrl('manual-retry'))});
   const downloads=document.createElement('button');downloads.type='button';downloads.textContent='Open Downloads';downloads.style.cssText='padding:10px 13px!important;border:1px solid #ffd06a88!important;border-radius:10px!important;background:#342913!important;color:#fff!important;font-weight:800!important;cursor:pointer!important;';
   downloads.addEventListener('click',()=>location.assign('/app/index.html?manage=downloads&source=working-campus-recovery'));
   actions.append(retry,downloads);card.append(title,copy,detail,actions);panel.append(card);body.append(panel);recoveryPanel=panel;
   if(document.documentElement)document.documentElement.dataset.civweaveWorkingCampusReturn='failsafe';
   return panel;
 }
-async function verifyOrRecover(reason='check'){
+async function runVerification(reason='check'){
   if(document.visibilityState==='hidden')return{deferred:true,reason};
   preauthorizeCanonicalCampus();
   await frame();await frame();
@@ -138,10 +142,19 @@ async function verifyOrRecover(reason='check'){
   if(inspection.healthy){clearRecovery();return inspection}
   const previous=readRecovery();
   const recent=previous&&Number(previous.at)>now()-RECOVERY_WINDOW_MS;
-  if(recent){renderFailSafe(reason,inspection);return{...inspection,failsafe:true}}
-  writeRecovery({at:now(),reason,count:Number(previous?.count||0)+1,path:location.pathname});
+  const sameDocument=recent&&previous.documentToken===DOCUMENT_TOKEN;
+  if(recent&&!sameDocument){renderFailSafe(reason,inspection);return{...inspection,failsafe:true}}
+  if(recoveryNavigationStarted||sameDocument)return{...inspection,reloading:true,coalesced:true};
+  writeRecovery({at:now(),reason,count:Number(previous?.count||0)+1,path:location.pathname,documentToken:DOCUMENT_TOKEN,revision:REVISION});
+  recoveryNavigationStarted=true;
   location.replace(canonicalUrl(reason));
   return{...inspection,reloading:true};
+}
+function verifyOrRecover(reason='check'){
+  if(recoveryNavigationStarted)return verificationPromise||Promise.resolve({...lastInspection,reloading:true,coalesced:true});
+  if(verificationPromise)return verificationPromise;
+  verificationPromise=runVerification(reason).finally(()=>{if(!recoveryNavigationStarted)verificationPromise=null});
+  return verificationPromise;
 }
 function holdBfCache(event){
   if(!event?.persisted)return;
@@ -152,7 +165,7 @@ function resume(event){
   preauthorizeCanonicalCampus();
   activateLanguageMode();
   if(document.documentElement)document.documentElement.dataset.civweaveBfcacheResume=event?.persisted?VERSION:'normal';
-  try{dispatchEvent(new CustomEvent('civweave:working-campus-page-resumed',{detail:{version:VERSION,persisted:Boolean(event?.persisted)}}))}catch{}
+  try{dispatchEvent(new CustomEvent('civweave:working-campus-page-resumed',{detail:{version:VERSION,revision:REVISION,persisted:Boolean(event?.persisted)}}))}catch{}
   void verifyOrRecover(event?.persisted?'bfcache-return':'pageshow');
 }
 function scheduleInitialCheck(){void verifyOrRecover('initial-paint')}
@@ -166,6 +179,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   version:VERSION,
+  revision:REVISION,
   recoveryKey:RECOVERY_KEY,
   inspect,
   forceReveal,
@@ -175,7 +189,9 @@ globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   preauthorizeCanonicalCampus,
   activateLanguageMode,
   language:requestedLanguage,
-  installBoundaryPolicy:'canonical-campus-preauthorized-before-shared-boundary',
-  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),language:requestedLanguage()})
+  documentToken:DOCUMENT_TOKEN,
+  installBoundaryPolicy:'v228-canonical-campus-preauthorized-before-shared-boundary',
+  recoveryConcurrencyPolicy:'one-verification-and-one-recovery-navigation-per-document',
+  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),language:requestedLanguage(),recoveryNavigationStarted,verificationInFlight:Boolean(verificationPromise),documentToken:DOCUMENT_TOKEN})
 });
 })();
