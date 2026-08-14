@@ -32,6 +32,7 @@ for (const token of [
   "'/api/claim'",
   'consumeHubClaim',
   'env.MAIL_BLOBS.put',
+  'env.MAIL_BLOBS.delete(rawKey)',
   'env.MAILBOX.getByName',
   "recipientDomain === domain",
   "External outbound mail is not enabled yet",
@@ -69,4 +70,5 @@ console.log(JSON.stringify({
   rawStorage: 'private-r2',
   mailboxIdentity: 'separate-from-hub-passport-payment',
   hubClaim: 'authenticated-one-use-grant',
+  failedSendCleanup: 'raw-r2-delete-before-error',
 }, null, 2));
