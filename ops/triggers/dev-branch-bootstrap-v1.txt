@@ -1,0 +1,3 @@
+Civweave automated feedback implementation targets the `dev` integration branch only.
+This sentinel exists on the feature branch so repository policy and release tooling can detect the new integration-lane contract.
+It does not grant automation authority to merge or promote `dev` to `main`.
