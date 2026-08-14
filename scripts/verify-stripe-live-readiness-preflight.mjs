@@ -10,6 +10,8 @@ const EXPECTED_EVENTS = Object.freeze([
   'charge.dispute.created',
   'charge.dispute.funds_withdrawn',
   'charge.dispute.funds_reinstated',
+  'application_fee.created',
+  'application_fee.refunded',
   'invoice.paid',
   'customer.subscription.deleted'
 ]);
@@ -18,6 +20,8 @@ const EXPECTED_ACCOUNT_MODEL = 'accounts-v2-marketplace-recipient'; // Stripe SD
 const providerSource = await readFile(new URL('../cloudflare/core/src/stripe-connect.mjs', import.meta.url), 'utf8');
 const browserCommerceSource = await readFile(new URL('../public/app/cerbanimo-commerce-distribution-v1.js', import.meta.url), 'utf8');
 const providerEventSource = await readFile(new URL('../cloudflare/core/src/money-edge-with-memberships.mjs', import.meta.url), 'utf8');
+const serviceFeeSource = await readFile(new URL('../cloudflare/core/src/fellowfare-service-fee-v1.mjs', import.meta.url), 'utf8');
+const directCommerceSource = await readFile(new URL('../cloudflare/core/src/fellowfare-direct-commerce-v1.mjs', import.meta.url), 'utf8');
 const productionEntrySource = await readFile(new URL('../cloudflare/core/src/stripe-connect-v2-entry.mjs', import.meta.url), 'utf8');
 const v2AccountCreationMarker = ['v2', 'core', 'accounts', 'create'].join('.');
 const sourceContract = Object.freeze({
@@ -38,17 +42,26 @@ const sourceContract = Object.freeze({
     && browserCommerceSource.includes("marketplacePaymentMode:'disabled'")
     && browserCommerceSource.includes('buildDistribution:disabled')
     && browserCommerceSource.includes('stripeTransferInstructions:disabled'),
-  fulfillmentBoundaryAdvertised: providerEventSource.includes('marketplaceCheckoutEnabled: false')
-    && providerEventSource.includes('marketplaceRecipientOnboardingEnabled: false')
+  fulfillmentBoundaryAdvertised: providerEventSource.includes('legacyMarketplaceCheckoutEnabled: false')
+    && providerEventSource.includes('legacyMarketplaceRecipientOnboardingEnabled: false')
     && providerEventSource.includes("goodsPaymentMode: 'seller-direct-outside-platform'")
-    && providerEventSource.includes("serviceLearningMode: 'acorn-button-fulfillment-burn'")
-    && providerEventSource.includes('platformCollectsSellerPayment: false')
-    && providerEventSource.includes('platformRoutesSellerPayment: false'),
+    && providerEventSource.includes("serviceLearningTokenMode: 'acorn-button-fulfillment-burn'")
+    && providerEventSource.includes("serviceLearningUsdMode: 'stripe-connect-direct-charge'")
+    && providerEventSource.includes('platformCollectsGrossSellerPayment: false')
+    && providerEventSource.includes('platformRoutesSellerProceeds: false'),
+  fellowFareServiceFeeSplit: directCommerceSource.includes('FELLOWFARE_DEFAULT_SERVICE_FEE_BPS = 500')
+    && directCommerceSource.includes('FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS = 5000')
+    && directCommerceSource.includes('FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS = 5000')
+    && directCommerceSource.includes('fellowfare_node_id')
+    && providerEventSource.includes("event.type === 'application_fee.created'")
+    && providerEventSource.includes("event.type === 'application_fee.refunded'")
+    && serviceFeeSource.includes('transfers.create')
+    && serviceFeeSource.includes('reverseHostTransfer'),
   legacyMarketplaceUnwindOnly: providerEventSource.includes('settleCommerceCheckout')
     && providerEventSource.includes('handleCommerceRefund')
     && providerEventSource.includes('handleCommerceDispute')
     && providerEventSource.includes('restoreCommerceDisputeTransfers')
-    && providerEventSource.includes('Legacy only')
+    && providerEventSource.includes('legacyLifecycleHandling: true')
 });
 const failedSourceChecks = Object.entries(sourceContract).filter(([, ok]) => !ok).map(([name]) => name);
 if (failedSourceChecks.length) {
@@ -118,9 +131,13 @@ const report = {
   fellowFare: {
     marketplaceCheckoutEnabled: false,
     goodsPaymentMode: 'seller-direct-outside-platform',
-    serviceLearningMode: 'acorn-button-fulfillment-burn',
-    platformCollectsSellerPayment: false,
-    platformRoutesSellerPayment: false,
+    serviceLearningTokenMode: 'acorn-button-fulfillment-burn',
+    serviceLearningUsdMode: 'stripe-connect-direct-charge',
+    merchantOfRecord: 'connected-provider',
+    serviceFeeBps: 500,
+    serviceFeeSplit: '50-host-steward-50-cerbanimo',
+    platformCollectsGrossSellerPayment: false,
+    platformRoutesSellerProceeds: false,
     publicCommerceRouteExpectedStatus: 410,
     legacyPaymentLifecycle: 'unwind-only'
   },
@@ -145,6 +162,7 @@ const report = {
     'live Stripe platform activation and factual business verification',
     'live recipient requirement/capability event destination and signing secret staging for eligible platform payouts',
     'first live Host Steward/platform recipient onboarding and stripe_transfers capability verification',
+    'confirmation that the production snapshot webhook includes application_fee.created and application_fee.refunded',
     'compliance, jurisdiction, KYC/AML, tax, and provider-terms attestations for supported platform-money lanes',
     'explicit live-money enablement after all gates are satisfied',
     'independent confirmation that FellowFare marketplace checkout remains disabled after activation'
