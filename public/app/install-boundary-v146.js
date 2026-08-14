@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.143';
+const VERSION='1.0.144';
 const REVISION='browser-install-boundary-v228-chat-escape';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;

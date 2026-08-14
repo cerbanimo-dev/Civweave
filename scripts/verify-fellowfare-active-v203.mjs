@@ -107,7 +107,7 @@ for(const token of [
 assert(themedNav.includes("const EMBEDDED=window.self!==window.top"),'The realm switcher does not detect iframe embedding.');
 assert(themedNav.includes('if(EMBEDDED)'),'The embedded realm switcher suppression path is missing.');
 assert(themedNav.includes('target="_top"'),'Realm links can still recurse a cabinet inside its iframe.');
-assert(themedNav.includes("glow:'#4f8ca8'"),'FellowFare selected navigation accent is not ink blue.');
+assert(themedNav.includes("glow:'#f5b446'")&&themedNav.includes("shade:'#5a3618'"),'FellowFare navigation accent is not amber.');
 
 assert(legacyWorker.includes("importScripts('/service-worker-v203.js"),'Legacy registrations do not reach the active worker wrapper.');
 const cleanIndex=workerWrapper.indexOf("importScripts('/service-worker-living-school-cleanroom-v218.js");

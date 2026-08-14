@@ -48,9 +48,12 @@ const checks=[
     assert.doesNotMatch(fellowfare,/class="ffc144-rook"|data-ffc-rook-form|Chat with Rook/,'FellowFare must not reserve page space for a second Rook chat');
     assert.match(boundary,/FELLOWFARE_GUIDE_BRIDGE='\/app\/fellowfare-shared-guide-bridge-v236\.js'/);assert.match(rookBridge,/mode:'bubble-only'/);assert.match(realmIntegrity,/exchangeMethod:'Buttons'/);
   }],
-  ['radio launcher and ornate nav keep their floating-layer contract',()=>{
-    assert.match(guide,/#cw-radio-suggestion-v233\{z-index:2147483610!important/);assert.match(workspace,/#\$\{LAUNCHER_ID\}\{z-index:2147483643!important/);assert.match(radio,/left:max\(14px,env\(safe-area-inset-left\)\)/);assert.match(nav,/--cw-themed-nav-height:clamp\(46\.8px,6\.3vw,64\.8px\)/);
-    for(const [id,shade] of [['civweave','#264646'],['living-school','#2d3e27'],['cerbanimo','#4a1d43'],['fellowfare','#182c37'],['anarchadia','#4a122e']]){assert.ok(nav.includes(`/app/assets/navigation/200-${id}-nav.webp?v=image-nav-r2`),`${id} lost canonical ornate nav artwork`);assert.ok(nav.includes(`shade:'${shade}'`),`${id} lost inactive navigation tint`)}
+  ['radio launcher and expressive avatar nav keep their floating-layer contract',()=>{
+    assert.match(guide,/#cw-radio-suggestion-v233\{z-index:2147483610!important/);assert.match(workspace,/#\$\{LAUNCHER_ID\}\{z-index:2147483643!important/);assert.match(radio,/left:max\(14px,env\(safe-area-inset-left\)\)/);
+    assert.match(nav,/--cw-themed-nav-height:clamp\(56px,7vw,72px\)/);assert.match(nav,/--cw-themed-nav-height:clamp\(60px,15vw,68px\)/);assert.match(nav,/top:4px;bottom:7px/);
+    for(const [id,asset] of [['civweave','Civweave-weaveling-sprites.png'],['living-school','Living-School-moss-sprites.png'],['cerbanimo','Cerbanimo-kamiya-sprites.png'],['fellowfare','FellowFare-rook-sprites.png'],['anarchadia','Anarchadia-merlin-sprites.png']])assert.ok(nav.includes(asset),`${id} lost expressive avatar atlas`);
+    for(const [id,shade] of [['civweave','#dad7ff'],['living-school','#28412f'],['cerbanimo','#4f265f'],['fellowfare','#5a3618'],['anarchadia','#621f43']])assert.ok(nav.includes(`id:'${id}'`)&&nav.includes(`shade:'${shade}'`),`${id} lost corrected navigation tint`);
+    assert.match(nav,/background-size:500% 400%,cover/);assert.match(nav,/civweave:subsystem-avatar-state/);assert.match(nav,/civweave:avatar-expression/);
   }],
   ['release syntax gate includes canonical shared guide runtimes',()=>{
     assert.equal(pkg.version,release);assert.match(pkg.scripts['check:syntax'],/public\/app\/shared-guide-surface-v236\.js/);assert.match(pkg.scripts['check:syntax'],/public\/app\/realm-session-integrity-v237\.js/);assert.match(pkg.scripts['check:syntax'],/public\/app\/guide-workspace-v242\.js/);assert.doesNotMatch(pkg.scripts['check:syntax'],/persistent-guide-viewport-v216|chat-single-owner-v245/);
