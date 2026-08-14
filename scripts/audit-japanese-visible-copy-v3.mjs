@@ -28,6 +28,8 @@ const SINGLE_WORD_UI = new Set([
 ]);
 const INJECTED_TERMS = new Set([
   'AI','API','BYOK','CPU','GPU','WebGPU','WASM','JSON','URL','HTTP','HTTPS','PWA','QR','NFC',
+  'CORS','JWT','OAuth','SSE','SQL','WebSocket','GGUF','ONNX','PMTiles','MapLibre','MapTiler',
+  'WebLLM','Transformers.js','llama.cpp','Termux','Antigravity','Git','npm','Node.js',
   'Civweave','Living School','Cerbanimo','FellowFare','Anarchadia','Commonweave','Weaveling',
   'Moss','Kamiya','Rook','Merlin','MiniLM','Qwen','SmolLM','Gemini','OpenAI','Ollama','Cloudflare',
   'Stripe','Spotify','GitHub','Google','WebAuthn','Chromium','Android','iOS','Windows','macOS','Linux',
@@ -66,6 +68,7 @@ function looksInjectedEnglish(text) {
 }
 
 function looksLikeCodeFragment(value) {
+  if (/^[,;:.]\s/.test(value)) return true;
   if (/^[A-Za-z_$][\w$]*(?:[._/-][A-Za-z0-9_$-]+)+$/.test(value)) return true;
   if (/(?:^|[;,(])\s*(?:const|let|var|return|if|else|function|document|window)\b/.test(value)) return true;
   if (/(?:\)\.|\.replace(?:All)?\(|\.map\(|\.join\(|\.filter\(|\.find\(|\.querySelector\(|\.innerHTML\b)/.test(value)) return true;
