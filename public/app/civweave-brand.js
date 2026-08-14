@@ -1,8 +1,8 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.29-brand-source-truth-v1';
-const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png';
+const VERSION='1.0.30-brand-daytime-logo-v1';
+const CANONICAL_LOGO='/app/logos/civweave-daytime-512-v1.png';
 const FULL_LOGO=CANONICAL_LOGO;
 const SYMBOL_LOGO=CANONICAL_LOGO;
 const LANGUAGE_KEY='civweave.language.v1';
