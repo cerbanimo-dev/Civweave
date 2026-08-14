@@ -1,0 +1,64 @@
+name: Civweave Mail
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/mail/**'
+      - 'cloudflare/account-edge/src/recovery-entry-v11.mjs'
+      - 'cloudflare/account-edge/wrangler.jsonc'
+      - 'public/app/civweave-private-messaging-v1.js'
+      - 'scripts/test-civweave-mail-v1.mjs'
+      - 'scripts/verify-private-messaging-mail-relay-v1.mjs'
+      - 'scripts/run-feedback-batch-v1.mjs'
+      - 'docs/architecture/private-messaging-mail-relay-v1.md'
+      - 'docs/architecture/feedback-discernment-pipeline-v1.md'
+      - '.github/workflows/civweave-mail.yml'
+      - '.github/workflows/deploy-civweave-mail.yml'
+      - '.github/workflows/verify-private-messaging-mail-relay-v1.yml'
+      - '.github/workflows/daily-feedback-discernment-v1.yml'
+  push:
+    branches: [main, dev]
+    paths:
+      - 'cloudflare/mail/**'
+      - 'cloudflare/account-edge/src/recovery-entry-v11.mjs'
+      - 'cloudflare/account-edge/wrangler.jsonc'
+      - 'public/app/civweave-private-messaging-v1.js'
+      - 'scripts/test-civweave-mail-v1.mjs'
+      - 'scripts/verify-private-messaging-mail-relay-v1.mjs'
+      - 'scripts/run-feedback-batch-v1.mjs'
+      - '.github/workflows/civweave-mail.yml'
+      - '.github/workflows/deploy-civweave-mail.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned mail parser
+        run: npm install --prefix cloudflare/mail --ignore-scripts --no-audit --no-fund
+      - name: Verify mail contracts
+        run: |
+          node scripts/test-civweave-mail-v1.mjs
+          node scripts/verify-private-messaging-mail-relay-v1.mjs
+      - name: Check Worker and controller syntax
+        run: |
+          node --check cloudflare/mail/src/index-v2.mjs
+          node --check cloudflare/mail/src/index-v3.mjs
+          node --check cloudflare/mail/src/index-v4.mjs
+          node --check cloudflare/mail/src/low-traffic-policy.mjs
+          node --check cloudflare/mail/src/ui.mjs
+          node --check cloudflare/account-edge/src/recovery-entry-v11.mjs
+          node --check public/app/civweave-private-messaging-v1.js
+          node --check scripts/run-feedback-batch-v1.mjs
+      - name: Compile account edge
+        run: npx --yes wrangler@latest deploy --dry-run --config cloudflare/account-edge/wrangler.jsonc --outdir /tmp/account-edge-mail-claim
+      - name: Compile Civweave Mail
+        run: npx --yes wrangler@latest deploy --dry-run --config cloudflare/mail/wrangler.jsonc --outdir /tmp/civweave-mail

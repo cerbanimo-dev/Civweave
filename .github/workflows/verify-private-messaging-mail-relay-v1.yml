@@ -1,0 +1,43 @@
+name: Verify private messaging mail relay v1
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/mail/**'
+      - 'public/app/civweave-private-messaging-v1.js'
+      - 'docs/architecture/private-messaging-mail-relay-v1.md'
+      - 'docs/architecture/feedback-discernment-pipeline-v1.md'
+      - 'scripts/verify-private-messaging-mail-relay-v1.mjs'
+      - '.github/workflows/verify-private-messaging-mail-relay-v1.yml'
+  push:
+    branches: [main, dev]
+    paths:
+      - 'cloudflare/mail/**'
+      - 'public/app/civweave-private-messaging-v1.js'
+      - 'docs/architecture/private-messaging-mail-relay-v1.md'
+      - 'docs/architecture/feedback-discernment-pipeline-v1.md'
+      - 'scripts/verify-private-messaging-mail-relay-v1.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify messaging boundaries
+        run: node scripts/verify-private-messaging-mail-relay-v1.mjs
+      - name: Check syntax
+        run: |
+          node --check cloudflare/mail/src/index-v3.mjs
+          node --check public/app/civweave-private-messaging-v1.js
+      - name: Compile mail worker
+        run: |
+          npm install --prefix cloudflare/mail --ignore-scripts --no-audit --no-fund
+          npx --yes wrangler@latest deploy --dry-run --config cloudflare/mail/wrangler.jsonc --outdir /tmp/civweave-mail-pm
