@@ -1,8 +1,8 @@
 {
-  "version": "1.0.103",
-  "revision": "canonical-background-campus-v241-systems-mesh-v251-cerbanimo-commerce-v1.1-economic-value-review-v1",
+  "version": "1.0.104",
+  "revision": "canonical-background-campus-v241-systems-mesh-v251-cerbanimo-commerce-v1.1-economic-value-review-v1-local-browser-tools-v1",
   "payloadPolicy": "core-first-lazy-packs-v302",
-  "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward, shared basic-value, economic-policy and valuation-review runtimes, systems-mesh runtimes, Cerbanimo commerce distribution contract, compact federation seed, deterministic offline map runtime, and the lightweight Node AI operator/marketplace UI. Full federation discovery, decorative visuals and fonts, open-learning media, bulk encyclopedia data, and device-AI model payloads hydrate as optional packs on demand.",
+  "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward, shared basic-value, economic-policy and valuation-review runtimes, systems-mesh runtimes, Cerbanimo commerce distribution contract, compact federation seed, deterministic offline map runtime, lightweight Node AI operator/marketplace UI, and the local browser-agent tool shell. Downloaded archive search remains usable without network; live Browser Run is only used when connectivity and explicit live research are available. Full federation discovery, decorative visuals and fonts, open-learning media, bulk encyclopedia data, and device-AI model payloads hydrate as optional packs on demand.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
@@ -54,7 +54,10 @@
     "/app/node-ai-operator-v1.js",
     "/app/node-ai-live-operator-v1.js",
     "/app/server-ai-router-v301.js",
-    "/app/server-ai-settings-v301.js"
+    "/app/server-ai-settings-v301.js",
+    "/app/browser-tool-v1.js",
+    "/app/local-ai/browser-agent-v1.js",
+    "/app/knowledge-school-runtime-v243.mjs"
   ],
   "lazyPacks": [
     {
@@ -153,11 +156,11 @@
   "maxDepth": 8,
   "preflight": {
     "revision": "campus-storage-budget-v281",
-    "estimatedBytes": 8557337,
+    "estimatedBytes": 8576715,
     "safetyBytes": 67108864,
-    "requiredFreeBytes": 75666201,
-    "candidateAssetCount": 639,
-    "estimatedAssetCount": 639,
+    "requiredFreeBytes": 75685579,
+    "candidateAssetCount": 641,
+    "estimatedAssetCount": 641,
     "conservativeUpperBound": true
   }
 }
