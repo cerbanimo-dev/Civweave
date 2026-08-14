@@ -1,0 +1,38 @@
+name: One-shot Fix Community Reconcile Verifier
+
+on:
+  push:
+    branches:
+      - agent/community-compute-dividend-v2
+    paths:
+      - '.github/workflows/one-shot-fix-community-reconcile-verifier.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/community-compute-dividend-v2
+          fetch-depth: 0
+      - name: Patch reconciliation verifier alignment
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from 'node:fs/promises';
+          const file='.github/workflows/one-shot-reconcile-community-compute.yml';
+          let source=await readFile(file,'utf8');
+          const anchor='          await writeFile(verifierFile,verifier);\n\n          const current=(await readFile(\'VERSION\',\'utf8\')).trim();';
+          if(!source.includes(anchor)) throw new Error('Reconciliation workflow insertion point was not found.');
+          const patch=`          await writeFile(verifierFile,verifier);\n\n          const userPoolVerifierFile='scripts/verify-user-ai-pools-v302.mjs';\n          let userPoolVerifier=await readFile(userPoolVerifierFile,'utf8');\n          let userPoolWranglerAssertionUpdated=false;\n          userPoolVerifier=userPoolVerifier.split('\\n').map(line=>{\n            if(line.includes('assert.match(wrangler,')&&line.includes('server-ai-entry-v2')){\n              userPoolWranglerAssertionUpdated=true;\n              return line.replace('server-ai-entry-v2','server-ai-entry-v3');\n            }\n            return line;\n          }).join('\\n');\n          if(!userPoolWranglerAssertionUpdated||!userPoolVerifier.includes('server-ai-entry-v3')) throw new Error('User-pool verifier did not align to the composed v3 wrapper.');\n          await writeFile(userPoolVerifierFile,userPoolVerifier);\n\n          const current=(await readFile('VERSION','utf8')).trim();`;
+          source=source.replace(anchor,patch);
+          await writeFile(file,source);
+          NODE
+          rm .github/workflows/one-shot-fix-community-reconcile-verifier.yml
+          git config user.name 'civweave-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Align user-pool verifier with community wrapper'
+          git push origin HEAD:agent/community-compute-dividend-v2
