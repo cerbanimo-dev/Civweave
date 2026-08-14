@@ -2,14 +2,14 @@
 'use strict';
 
 const VERSION='1.0.142';
-const REVISION='chat-convergence-v250-navigation-lifecycle-v424';
+const REVISION='browser-install-boundary-v228-chat-escape';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
 const INSTALLER='/app/index.html';
-const BOOT_KEY='civweave.install-boundary.boot.v227';
-const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
+const BOOT_KEY='civweave.install-boundary.boot.v228';
+const STALE_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-boundary.boot.v226'];
 const DEV_KEY='civweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424`;
+const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228`;
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js';
 const PLATFORM_STABILITY='/app/platform-stability-v159.js';
@@ -49,8 +49,6 @@ const SYSTEM_EXPERIENCE_SCRIPTS=[
   SETTINGS_GATEWAY,
   MOBILE_AI_HARDENING,
   EXPERIENCE_ORCHESTRATOR,
-  // Keep station + exact-track suggestions directly behind the orchestrator so
-  // slower mesh/guide/workspace modules cannot starve the six-second radio UI.
   SYSTEM_RADIO_AGENT,
   RADIO_TRACK_SUGGESTIONS,
   SYSTEMS_MESH_RUNTIME,
@@ -104,23 +102,24 @@ function developer(){
   try{return localhost()&&sessionStorage.getItem(DEV_KEY)==='1'}catch{return false}
 }
 function embedded(){try{return window.top!==window.self}catch{return true}}
+function clearStaleAuthorization(){
+  try{for(const key of STALE_BOOT_KEYS)sessionStorage.removeItem(key)}catch{}
+}
 function authorize(){
-  try{sessionStorage.setItem(BOOT_KEY,'1');sessionStorage.setItem(LEGACY_BOOT_KEY,'1')}catch{}
+  try{sessionStorage.setItem(BOOT_KEY,'1');for(const key of STALE_BOOT_KEYS)sessionStorage.removeItem(key)}catch{}
 }
 function explicitInstalled(){
   try{
-    if(params.get('installed')==='1'){authorize();return true}
-    return sessionStorage.getItem(BOOT_KEY)==='1'||sessionStorage.getItem(LEGACY_BOOT_KEY)==='1';
-  }catch{return params.get('installed')==='1'}
+    if(params.get('installed')==='1'&&installedDisplay()){authorize();return true}
+    return installedDisplay()&&sessionStorage.getItem(BOOT_KEY)==='1';
+  }catch{return params.get('installed')==='1'&&installedDisplay()}
 }
 function systemSurface(){
   const contract=globalThis.CivweaveSystemRoutesV227;
-  const system=contract?.identify?.(location.pathname)||FALLBACK_PATHS.get(location.pathname)||'';
-  if(system)authorize();
-  return system;
+  return contract?.identify?.(location.pathname)||FALLBACK_PATHS.get(location.pathname)||'';
 }
 function canonicalAppSurface(){return systemSurface()==='civweave'}
-function allowed(){return Boolean(systemSurface())||installedDisplay()||explicitInstalled()||developer()||embedded()}
+function allowed(){return installedDisplay()||developer()||embedded()}
 function installerUrl(){
   const target=`${location.pathname}${location.search}${location.hash}`;
   const next=new URL(INSTALLER,location.origin);
@@ -128,13 +127,19 @@ function installerUrl(){
   next.searchParams.set('next',target.slice(0,1800));
   return next.href;
 }
+function closeBrowserChatBeforeRedirect(){
+  try{
+    globalThis.CivweaveGuideWorkspaceV242?.closeWorkspace?.();
+    globalThis.CivweavePersistentGuideChatV215?.close?.();
+    const state=JSON.parse(localStorage.getItem('civweave.guide-workspace.v242')||'{}');
+    if(state&&typeof state==='object')localStorage.setItem('civweave.guide-workspace.v242',JSON.stringify({...state,open:false,minimized:false,updatedAt:new Date().toISOString()}));
+  }catch{}
+}
 function liveHead(head=document.head){return!unloading&&document.documentElement?.isConnected&&head?.isConnected}
 function addScript(src){
   const head=document.head;
   if(!liveHead(head)||document.querySelector(`script[src^="${src}"]`))return false;
-  const script=document.createElement('script');
-  script.src=`${src}?v=${ADDITIONS_VERSION}`;
-  script.async=false;
+  const script=document.createElement('script');script.src=`${src}?v=${ADDITIONS_VERSION}`;script.async=false;
   if(!liveHead(head))return false;
   head.append(script);
   return true;
@@ -145,15 +150,8 @@ function assetCustomizationConfigured(){
     return value?.personalEnabled!==false&&value?.pathOverrides&&Object.keys(value.pathOverrides).length>0;
   }catch{return false}
 }
-function installAssetCustomizationIfConfigured(){
-  if(!assetCustomizationConfigured())return false;
-  return addScript(ASSET_CUSTOMIZATION);
-}
-function installEarlyGuards(){
-  addScript(MOBILE_AI_HARDENING);
-  addScript(PLATFORM_STABILITY);
-  return true;
-}
+function installAssetCustomizationIfConfigured(){if(!assetCustomizationConfigured())return false;return addScript(ASSET_CUSTOMIZATION)}
+function installEarlyGuards(){addScript(MOBILE_AI_HARDENING);addScript(PLATFORM_STABILITY);return true}
 function installSystemExperienceSupport(){
   const system=systemSurface();
   if(!system||!liveHead())return false;
@@ -176,9 +174,7 @@ function installAdditions(){
   const head=document.head;
   if(systemSurface()||!liveHead(head))return false;
   if(!document.querySelector(`link[href^="${ADDITIONS_STYLE}"]`)){
-    const link=document.createElement('link');
-    link.rel='stylesheet';
-    link.href=`${ADDITIONS_STYLE}?v=${ADDITIONS_VERSION}`;
+    const link=document.createElement('link');link.rel='stylesheet';link.href=`${ADDITIONS_STYLE}?v=${ADDITIONS_VERSION}`;
     if(liveHead(head))head.append(link);
   }
   COMPATIBILITY_SCRIPTS.forEach(addScript);
@@ -192,6 +188,12 @@ function installAdditionsWhenReady(){
 }
 function resumeFromPageShow(){
   unloading=false;
+  if(!allowed()){
+    clearStaleAuthorization();
+    closeBrowserChatBeforeRedirect();
+    location.replace(installerUrl());
+    return false;
+  }
   const system=systemSurface();
   if(system){
     installSystemExperienceSupport();
@@ -203,12 +205,15 @@ function resumeFromPageShow(){
   return true;
 }
 function start(){
-  const root=document.documentElement,system=systemSurface();
+  const root=document.documentElement;
   if(!allowed()){
+    clearStaleAuthorization();
+    closeBrowserChatBeforeRedirect();
     if(root)root.dataset.installBoundary='blocked';
     location.replace(installerUrl());
     return;
   }
+  const system=systemSurface();
   if(system){
     root.dataset.installBoundary=system==='civweave'?'canonical':'canonical-system';
     root.dataset.civweaveSystemRoute=system;
@@ -232,27 +237,11 @@ addEventListener('pageshow',resumeFromPageShow);
 start();
 
 globalThis.CivweaveInstallBoundaryV146=Object.freeze({
-  version:VERSION,allowed,
-  revision:REVISION,
-  systemSurface,
-  canonicalAppSurface,
-  installedDisplay,
-  explicitInstalled,
-  developer,
-  embedded,
-  installerUrl,
-  installEarlyGuards,
-  installSystemExperienceSupport,
-  installCanonicalSystemSupport,
-  installCanonicalSystemSupportWhenReady,
-  installAdditions,
-  installAdditionsWhenReady,
-  resumeFromPageShow,
-  assetCustomizationConfigured,
-  installAssetCustomizationIfConfigured,
+  version:VERSION,allowed,revision:REVISION,systemSurface,canonicalAppSurface,installedDisplay,explicitInstalled,developer,embedded,installerUrl,authorize,clearStaleAuthorization,closeBrowserChatBeforeRedirect,
+  installEarlyGuards,installSystemExperienceSupport,installCanonicalSystemSupport,installCanonicalSystemSupportWhenReady,installAdditions,installAdditionsWhenReady,resumeFromPageShow,assetCustomizationConfigured,installAssetCustomizationIfConfigured,
   additionsVersion:ADDITIONS_VERSION,
   publicBrand:'Civweave',
-  canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner',
+  canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner-installed-only-v228',
   canonicalSystemCount:5,
   canonicalAutoScripts:0,
   canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
@@ -293,6 +282,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   aiSettingsPersistenceRepair:'controller-owned-on-demand-v317',
   platformStabilityGuard:'v159-dom-ready-safe',
   navigationLifecycleRevision:'v424-head-capture-bfcache-resume',
+  browserBoundaryRevision:'v228-installed-only-stale-session-chat-escape',
   compatibilityDomReady:true,
   onlineSelfHeal:true,
   missingAssetDetails:true

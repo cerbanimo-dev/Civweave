@@ -1,0 +1,23 @@
+name: Verify foreground phone mesh v1
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/local-object-mesh-v146.js'
+      - 'docs/contracts/install-only-local-mesh-architecture.md'
+      - 'scripts/verify-foreground-phone-mesh-v1.mjs'
+      - '.github/workflows/verify-foreground-phone-mesh-v1.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check mesh syntax
+        run: node --check public/app/local-object-mesh-v146.js
+      - name: Verify foreground mesh contract
+        run: node scripts/verify-foreground-phone-mesh-v1.mjs
