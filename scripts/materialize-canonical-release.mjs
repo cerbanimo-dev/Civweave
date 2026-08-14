@@ -41,6 +41,8 @@ for(const name of await fsp.readdir(path.join(currentRoot,'server'))){
 
 const sync=spawnSync(process.execPath,['scripts/sync-release-version-assets.mjs'],{cwd:root,stdio:'inherit'});
 if(sync.status!==0)throw new Error('Release synchronization failed.');
+const retire=spawnSync(process.execPath,['scripts/retire-presentation-surfaces-v350.mjs'],{cwd:root,stdio:'inherit'});
+if(retire.status!==0)throw new Error('Retired presentation surface purge failed.');
 const worker=spawnSync(process.execPath,['scripts/build-service-worker-v211.mjs'],{cwd:root,stdio:'inherit'});
 if(worker.status!==0)throw new Error('Service worker materialization failed.');
 const metadata=spawnSync(process.execPath,['scripts/generate-prelive-metadata-v281.mjs'],{cwd:root,stdio:'inherit'});
@@ -70,4 +72,4 @@ const manifest={
 };
 await fsp.writeFile(path.join(currentRoot,'release.json'),`${JSON.stringify(manifest,null,2)}\n`);
 await advanceCanonicalIndex();
-console.log(JSON.stringify({ok:true,version,path:`releases/${version}`,basedOn:previous,hashes:Object.keys(sha256).length,shellMetadata:'generated-prelive-v281',canonicalIndexAdvanced:true},null,2));
+console.log(JSON.stringify({ok:true,version,path:`releases/${version}`,basedOn:previous,hashes:Object.keys(sha256).length,shellMetadata:'generated-prelive-v281',retiredPresentationSurfaces:'v350',canonicalIndexAdvanced:true},null,2));
