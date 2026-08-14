@@ -2,7 +2,7 @@ import core, { CivweaveCoreIdentity, launchTopology as baseLaunchTopology } from
 
 export { CivweaveCoreIdentity };
 
-export const CANONICAL_CIVWEAVE_INSTALL_ORIGIN = 'https://civweave.pages.dev';
+export const CANONICAL_CIVWEAVE_INSTALL_ORIGIN = 'https://civweave.cc';
 
 const json = (value, status = 200) => new Response(JSON.stringify(value, null, 2), {
   status,

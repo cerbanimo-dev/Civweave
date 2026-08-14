@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build and deploy civweave.pages.dev
+    name: Build and deploy civweave.cc
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -68,6 +68,10 @@ jobs:
             --json > /tmp/civweave-pages-deployments.json
           node scripts/verify-cloudflare-pages-account-target-v1.mjs \
             /tmp/civweave-pages-deployments.json civweave
+
+      - name: Ensure civweave.cc is active before canonical cutover
+        shell: bash
+        run: node scripts/ensure-cloudflare-pages-domain-v1.mjs --project civweave --domain civweave.cc
 
       - name: Resolve canonical recovery relay endpoint
         shell: bash
@@ -137,8 +141,9 @@ jobs:
             role: 'canonical',
             hostId: 'civweave',
             pagesProject: 'civweave',
-            publicOrigin: 'https://civweave.pages.dev',
-            canonicalOrigin: 'https://civweave.pages.dev',
+            pagesOrigin: 'https://civweave.pages.dev',
+            publicOrigin: 'https://civweave.cc',
+            canonicalOrigin: 'https://civweave.cc',
             accountEdge,
             localAnchorRecommended: true,
             localAnchorRequired: false,
@@ -178,7 +183,7 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           const expectedCommit = process.env.GITHUB_SHA;
-          const origin = 'https://civweave.pages.dev';
+          const origin = 'https://civweave.cc';
           const expectedMailbox = process.env.RECOVERY_MAILBOX || null;
           let lastFailure = 'Production marker did not become current.';
           for (let attempt = 1; attempt <= 12; attempt += 1) {
@@ -189,7 +194,7 @@ jobs:
               const relayResponse = await fetch(`${origin}/app/recovery-relay-v1.json?verify=${encodeURIComponent(expectedCommit)}&attempt=${attempt}`, { headers: { 'Cache-Control': 'no-cache' } });
               if (!relayResponse.ok) throw new Error(`relay discovery HTTP ${relayResponse.status}`);
               const relay = await relayResponse.json();
-              if (marker.pagesProject === 'civweave' && marker.publicOrigin === origin && marker.sourceCommit === expectedCommit && relay.schema === 'civweave.recovery-relay-discovery.v1' && relay.sourceCommit === expectedCommit && relay.url === process.env.RECOVERY_RELAY_URL && relay.mailbox === expectedMailbox) {
+              if (marker.pagesProject === 'civweave' && marker.pagesOrigin === 'https://civweave.pages.dev' && marker.publicOrigin === origin && marker.canonicalOrigin === origin && marker.sourceCommit === expectedCommit && relay.schema === 'civweave.recovery-relay-discovery.v1' && relay.sourceCommit === expectedCommit && relay.url === process.env.RECOVERY_RELAY_URL && relay.mailbox === expectedMailbox) {
                 console.log(`Verified ${origin} at source commit ${expectedCommit} with recovery relay ${relay.url} and mailbox ${relay.mailbox || 'pending-owned-zone'}.`);
                 process.exit(0);
               }

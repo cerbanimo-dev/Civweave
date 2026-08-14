@@ -1,0 +1,124 @@
+name: Verify Civweave Domain Layer
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/shared-domain/**'
+      - 'cloudflare/core/src/shared-domain-policy.mjs'
+      - 'cloudflare/core/src/shared-domain-entitlements.mjs'
+      - 'cloudflare/core/src/shared-domain-billing.mjs'
+      - 'cloudflare/core/src/money-edge-with-memberships.mjs'
+      - 'cloudflare/core/src/stripe-connect-v2-entry.mjs'
+      - 'cloudflare/core/migrations/0007_shared_domains.sql'
+      - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-hosting-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v4.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'scripts/ensure-cloudflare-pages-domain-v1.mjs'
+      - 'scripts/ensure-cloudflare-shared-domain-dns-v1.mjs'
+      - 'scripts/prepare-cloudflare-launch-kit-v1.mjs'
+      - 'scripts/verify-civweave-hosting-capacity-v1.mjs'
+      - 'scripts/verify-civweave-shared-domain-*.mjs'
+      - 'scripts/setup-cloudflare-node.mjs'
+      - 'config/launch-topology-v1.json'
+      - 'public/index.html'
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/pwa-install-prompt-v246.js'
+      - 'public/app/pwa-install-prompt-v247.js'
+      - '.github/workflows/deploy-civweave-pages.yml'
+      - '.github/workflows/deploy-civweave-host-pages.yml'
+      - '.github/workflows/deploy-civweave-shared-domain-v1.yml'
+      - '.github/workflows/verify-civweave-domain-v1.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'cloudflare/shared-domain/**'
+      - 'cloudflare/core/src/shared-domain-policy.mjs'
+      - 'cloudflare/core/src/shared-domain-entitlements.mjs'
+      - 'cloudflare/core/src/shared-domain-billing.mjs'
+      - 'cloudflare/core/src/money-edge-with-memberships.mjs'
+      - 'cloudflare/core/src/stripe-connect-v2-entry.mjs'
+      - 'cloudflare/core/migrations/0007_shared_domains.sql'
+      - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-hosting-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v4.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'scripts/ensure-cloudflare-pages-domain-v1.mjs'
+      - 'scripts/ensure-cloudflare-shared-domain-dns-v1.mjs'
+      - 'scripts/prepare-cloudflare-launch-kit-v1.mjs'
+      - 'scripts/verify-civweave-hosting-capacity-v1.mjs'
+      - 'scripts/verify-civweave-shared-domain-*.mjs'
+      - 'scripts/setup-cloudflare-node.mjs'
+      - 'config/launch-topology-v1.json'
+      - 'public/index.html'
+      - 'public/app/manifest.webmanifest'
+      - 'public/app/pwa-install-prompt-v246.js'
+      - 'public/app/pwa-install-prompt-v247.js'
+      - '.github/workflows/deploy-civweave-pages.yml'
+      - '.github/workflows/deploy-civweave-host-pages.yml'
+      - '.github/workflows/deploy-civweave-shared-domain-v1.yml'
+      - '.github/workflows/verify-civweave-domain-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Syntax-check domain layer
+        run: |
+          node --check cloudflare/core/src/shared-domain-policy.mjs
+          node --check cloudflare/core/src/shared-domain-entitlements.mjs
+          node --check cloudflare/core/src/shared-domain-billing.mjs
+          node --check cloudflare/core/src/money-edge-with-memberships.mjs
+          node --check cloudflare/core/src/stripe-connect-v2-entry.mjs
+          node --check cloudflare/shared-domain/src/index.mjs
+          node --check cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs
+          node --check cloudflare/node-cloud/src/cloud-node-hosting-v1.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v4.mjs
+          node --check scripts/ensure-cloudflare-pages-domain-v1.mjs
+          node --check scripts/ensure-cloudflare-shared-domain-dns-v1.mjs
+          node --check scripts/prepare-cloudflare-launch-kit-v1.mjs
+          node --check scripts/setup-cloudflare-node.mjs
+          node --check public/app/pwa-install-prompt-v246.js
+          node --check public/app/pwa-install-prompt-v247.js
+          node --check scripts/verify-civweave-hosting-capacity-v1.mjs
+          node --check scripts/verify-civweave-shared-domain-policy-v1.mjs
+          node --check scripts/verify-civweave-shared-domain-router-v1.mjs
+          node --check scripts/verify-civweave-shared-domain-entitlements-v1.mjs
+          node --check scripts/verify-civweave-shared-domain-billing-v1.mjs
+
+      - name: Verify free and contributor address policy
+        run: node scripts/verify-civweave-shared-domain-policy-v1.mjs
+
+      - name: Verify free and hosted capacity policy
+        run: node scripts/verify-civweave-hosting-capacity-v1.mjs
+
+      - name: Verify shared-domain entitlement lifecycle
+        run: node scripts/verify-civweave-shared-domain-entitlements-v1.mjs
+
+      - name: Verify shared-domain billing lifecycle
+        run: node scripts/verify-civweave-shared-domain-billing-v1.mjs
+
+      - name: Verify shared-domain router behavior
+        run: node scripts/verify-civweave-shared-domain-router-v1.mjs
+
+      - name: Verify generated Wrangler configs
+        env:
+          CIVWEAVE_CORE_D1_ID: 11111111-1111-1111-1111-111111111111
+        run: |
+          node scripts/prepare-cloudflare-launch-kit-v1.mjs > /tmp/civweave-launch-kit.json
+          grep -Fq 'civweave-domain-router' /tmp/civweave-launch-kit.json
+          grep -Fq '"pattern": "*.civweave.cc/*"' .cloudflare-launch/shared-domain.wrangler.jsonc
+          grep -Fq '11111111-1111-1111-1111-111111111111' .cloudflare-launch/shared-domain.wrangler.jsonc
+          grep -Fq '../cloudflare/shared-domain/src/index.mjs' .cloudflare-launch/shared-domain.wrangler.jsonc

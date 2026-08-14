@@ -9,7 +9,7 @@ export * from './index.mjs';
 
 export const LIVE_CIVWEAVE_MONEY_EDGE_ORIGIN = 'https://civweave-core.cerbanimo.workers.dev';
 export const LIVE_CIVWEAVE_NODE_FABRIC_ORIGIN = 'https://civweave-node-cloud.cerbanimo.workers.dev';
-export const LIVE_CIVWEAVE_INSTALL_ORIGIN = 'https://civweave.pages.dev';
+export const LIVE_CIVWEAVE_INSTALL_ORIGIN = 'https://civweave.cc';
 
 const encoder = new TextEncoder();
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
