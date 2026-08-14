@@ -17,8 +17,8 @@ The result is a reverse-herd-immunity pattern: well-connected Hub members become
 
 | Data | Canonical home | Replication | Location policy |
 | --- | --- | --- | --- |
-| Steward's live GPS reading during Hub placement | Steward browser memory | None | Used only to create the Hub's public site claim |
-| Hub public site | Cloudflare Hub manifest (`civweave.hub-location.v1`) | Core/fabric directory, Hub Map cache, public node gossip | Steward-published physical node data. Current public precision floor is approximately 100 m / three coordinate decimals and is carried with precision metadata. |
+| Steward's live GPS reading during Hub placement | Steward browser memory | None by default | Used only to create the Hub's public site claim. It leaves the browser at full coordinate precision only when the Steward explicitly enables the precise public pin. |
+| Hub public site | Cloudflare Hub manifest (`civweave.hub-location.v1`) | Core/fabric directory, Hub Map cache, public node gossip | Rounded is the default: three coordinate decimals and an approximately 100 m or wider accuracy band. A Steward may explicitly publish a six-decimal public pin; its measured device accuracy is carried with it. |
 | Roaming user's current GPS | Browser memory while Hub Map location is active | None | Never written by locality gossip, never placed in the community ledger |
 | Need / Offering / Idea | Signed `civweave.locality-ledger-entry.v1` community object in IndexedDB | Public/federated gateway sync plus foreground phone mesh | Entries may identify relevant Hub IDs, but do not inherit the roaming user's current coordinates |
 | Recent peer encounter | Local relevance metadata | None | Peer ID, time, and encounter count only. No roaming coordinates |
@@ -26,6 +26,18 @@ The result is a reverse-herd-immunity pattern: well-connected Hub members become
 | Hub selection | Existing `civweave.host-node.selection.v1` device record | Device local | Uses canonical Host Node session infrastructure |
 | Hub login/capacity session | Existing Host Node session runtime | Device/tab according to existing session contract | Free and paid members are both eligible for virtual locality refresh |
 | Offline map tiles | Existing PMTiles/IndexedDB map package | Existing map peer healing | Separate from social/locality ledger data |
+
+## Steward physical placement
+
+The Steward setup deliberately separates **capture precision** from **publication precision**:
+
+1. The Steward stands at the Hub site and requests a fresh high-accuracy browser reading.
+2. The default publication mode is **rounded**. The client sends three decimal coordinates and the Cloudflare node manifest enforces a public accuracy band of at least 100 m.
+3. For a public venue or another site people should be able to walk directly to, the Steward can explicitly enable **Publish a precise public Hub pin**.
+4. Precise mode sends six decimal coordinates. Cloudflare preserves the device's measured accuracy rather than inflating it to 100 m, and rejects precise publication when the reading is broader than 250 m.
+5. Both modes use the existing Steward location-claim key and canonical `civweave.hub-location.v1` manifest. The same manifest is synchronized into Core and then consumed by the Hub Map directory.
+
+There is no hidden upgrade from rounded to precise. Precision changes only through an explicit Steward choice on the location setup surface.
 
 ## The locality record
 
@@ -71,7 +83,7 @@ The default `/finder` surface is Hub-node-first.
 
 A Hub pin provides:
 
-- Steward-published physical placement and freshness metadata
+- Steward-published physical placement and freshness/precision metadata
 - **Join Hub**, using the existing capacity-backed Host Node session API
 - **Explore ledger**, showing the most recent relevant offline Need / Offering / Idea records
 - **Pass by**, requesting an online locality refresh without physical proximity
@@ -103,6 +115,7 @@ Connectivity therefore spreads *freshness* outward from well-connected members i
 ## Privacy and abuse boundaries
 
 - Hub physical placement is public only because a Steward explicitly publishes a node site.
+- Rounded placement remains the default; precise public placement requires an explicit Steward opt-in and is intended for sites that are safe to make directly findable.
 - Roaming user GPS is never a community object and is not stored by the locality-gossip runtime.
 - Encounter relevance stores no coordinates.
 - Only `public` and `federated` signed objects are ferryable through generic gateways.
@@ -121,3 +134,4 @@ Connectivity therefore spreads *freshness* outward from well-connected members i
 - Hub membership/session: `public/app/host-node-session-v1.js`
 - Steward site setup: `public/host-setup.html`
 - Cloudflare Hub location manifest: `cloudflare/node-cloud/src/index.mjs`
+- Location regression: `scripts/test-hub-location-onboarding-v1.mjs`
