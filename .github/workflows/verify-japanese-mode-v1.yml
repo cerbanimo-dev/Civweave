@@ -1,0 +1,37 @@
+name: Verify Japanese mode v1
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/japanese-mode-v1.js'
+      - 'public/app/working-campus-return-guard-v425.js'
+      - 'public/app/services/**/index.html'
+      - 'public/app/cabinets/living-school/index.html'
+      - 'public/ja/index.html'
+      - 'scripts/verify-japanese-mode-v1.mjs'
+      - '.github/workflows/verify-japanese-mode-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/app/japanese-mode-v1.js'
+      - 'public/app/working-campus-return-guard-v425.js'
+      - 'public/app/services/**/index.html'
+      - 'public/app/cabinets/living-school/index.html'
+      - 'public/ja/index.html'
+      - 'scripts/verify-japanese-mode-v1.mjs'
+      - '.github/workflows/verify-japanese-mode-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check public/app/japanese-mode-v1.js
+      - run: node --check public/app/working-campus-return-guard-v425.js
+      - run: node scripts/verify-japanese-mode-v1.mjs

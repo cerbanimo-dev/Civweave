@@ -7,6 +7,8 @@ const RECOVERY_WINDOW_MS=30_000;
 const CANONICAL_PATH='/app/working-campus-v156.html';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
+const LANGUAGE_KEY='civweave.language.v1';
+const JAPANESE_MODE_SRC='/app/japanese-mode-v1.js?v=japanese-mode-v1';
 const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.campus','main.app>.main','nav.bottom','#conversation','#workspace'];
 let lastInspection=null;
 let recoveryPanel=null;
@@ -16,6 +18,30 @@ if(globalThis.CivweaveWorkingCampusReturnGuardV425?.version===VERSION)return;
 const now=()=>Date.now();
 const parse=value=>{try{return JSON.parse(value||'null')}catch{return null}};
 const frame=()=>new Promise(resolve=>(globalThis.requestAnimationFrame||((fn)=>setTimeout(fn,0)))(()=>resolve()));
+function requestedLanguage(){
+  let explicit='';
+  try{
+    const params=new URLSearchParams(location.search);
+    const value=String(params.get('lang')||params.get('locale')||'').toLowerCase();
+    if(value==='ja'||value==='ja-jp'||params.get('japanese')==='1')explicit='ja';
+    else if(value==='en'||value==='en-us')explicit='en';
+  }catch{}
+  if(explicit){try{localStorage.setItem(LANGUAGE_KEY,explicit)}catch{};return explicit}
+  try{return localStorage.getItem(LANGUAGE_KEY)==='ja'?'ja':'en'}catch{return'en'}
+}
+function activateLanguageMode(){
+  const selected=requestedLanguage();
+  if(selected!=='ja')return selected;
+  document.documentElement?.setAttribute('lang','ja');
+  document.documentElement?.setAttribute('data-civweave-language','ja');
+  if(document.querySelector(`script[src^="${JAPANESE_MODE_SRC.split('?')[0]}"]`))return selected;
+  const script=document.createElement('script');
+  script.src=JAPANESE_MODE_SRC;
+  script.async=false;
+  script.dataset.cwJapaneseMode='';
+  (document.head||document.documentElement).append(script);
+  return selected;
+}
 function preauthorizeCanonicalCampus(){
   try{
     sessionStorage.setItem(BOOT_KEY,'1');
@@ -40,6 +66,7 @@ function canonicalUrl(reason='automatic'){
   target.searchParams.set('installed','1');
   const release=currentRelease();
   if(release)target.searchParams.set('version',release);
+  if(requestedLanguage()==='ja')target.searchParams.set('lang','ja');
   target.searchParams.set('recovery',VERSION);
   target.searchParams.set('reason',String(reason||'automatic').slice(0,80));
   target.searchParams.set('epoch',String(now()));
@@ -123,6 +150,7 @@ function holdBfCache(event){
 }
 function resume(event){
   preauthorizeCanonicalCampus();
+  activateLanguageMode();
   if(document.documentElement)document.documentElement.dataset.civweaveBfcacheResume=event?.persisted?VERSION:'normal';
   try{dispatchEvent(new CustomEvent('civweave:working-campus-page-resumed',{detail:{version:VERSION,persisted:Boolean(event?.persisted)}}))}catch{}
   void verifyOrRecover(event?.persisted?'bfcache-return':'pageshow');
@@ -130,6 +158,7 @@ function resume(event){
 function scheduleInitialCheck(){void verifyOrRecover('initial-paint')}
 
 preauthorizeCanonicalCampus();
+activateLanguageMode();
 addEventListener('pagehide',holdBfCache,true);
 addEventListener('pageshow',resume,true);
 addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void verifyOrRecover('visibility-return')});
@@ -144,7 +173,9 @@ globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   clearRecovery,
   canonicalUrl,
   preauthorizeCanonicalCampus,
+  activateLanguageMode,
+  language:requestedLanguage,
   installBoundaryPolicy:'canonical-campus-preauthorized-before-shared-boundary',
-  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected)})
+  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),language:requestedLanguage()})
 });
 })();

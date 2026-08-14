@@ -41,7 +41,7 @@ const boundaryIndex=campus.indexOf('/app/install-boundary-v146.js');
 const campusRuntimeIndex=campus.indexOf('/app/working-campus-v156.js');
 assert(guardIndex>=0,'Working Campus no longer loads the return guard.');
 assert(guardIndex<lifecycleIndex&&guardIndex<boundaryIndex&&guardIndex<campusRuntimeIndex,'Return guard must load before every canonical lifecycle/runtime teardown owner.');
-assert(campus.includes('/app/install-boundary-v146.js?v=chat-convergence-v250-navigation-lifecycle-v424'),'Working Campus lost the navigation-safe boundary cache identity.');
+assert(campus.includes('/app/install-boundary-v146.js?v=browser-install-boundary-v228-chat-escape-install-only-pwa-v1'),'Working Campus lost the current install-only boundary cache identity.');
 assert(campus.includes(`Civweave Working Campus · v${version}`)&&campus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
 
 assert(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core release is stale.');
