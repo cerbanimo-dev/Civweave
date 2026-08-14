@@ -28,6 +28,7 @@ jobs:
           set -euo pipefail
           git config user.name 'civweave-release-bot'
           git config user.email 'actions@users.noreply.github.com'
+          npm version 1.0.146 --no-git-tag-version
           printf '1.0.146\n' > VERSION
           node scripts/materialize-canonical-release.mjs
           node scripts/verify-japanese-mode-v1.mjs
