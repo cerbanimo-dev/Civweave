@@ -1,5 +1,6 @@
 import {assessHateSpeech} from './anarchadia-hate-speech-v1.js';
 import {openTribunalCase,assignJury,publishTribunalToMesh} from './anarchadia-tribunal-v1.js';
+import {assignJuryFromRegistry} from './anarchadia-juror-registry-v1.js';
 import {loadTribunalPolicy,normalizeTribunalPolicy} from './anarchadia-tribunal-policy-v1.js';
 import {publicChatAccess} from './anarchadia-tribunal-enforcement-v1.js';
 import {sha256} from './anarchadia-governance-kernel-v145.js';
@@ -18,7 +19,8 @@ export async function moderatePublicChatMessage(input={},options={}){
   await options.evidenceVault?.put?.({messageHash,contextHash,text,context:input.context,access:'tribunal-only'});
   const caseRecord=await openTribunalCase({assessment,accusedActorId:input.actorId,affectedActorIds:input.affectedActorIds||[],regionId,procedure:options.procedure||policy.procedure,evidence:[{id:`message:${messageHash.slice(0,24)}`,kind:'public-chat-message',hash:messageHash,contextHash}]});
   caseRecord.policyRef={id:policy.id,revision:policy.revision};
-  if(options.juryCandidates?.length)assignJury(caseRecord,options.juryCandidates,{rng:options.rng});
+  if(options.eligibleJurorActorIds?.length)assignJuryFromRegistry(caseRecord,options.eligibleJurorActorIds,{storage:options.storage,rng:options.rng});
+  else if(options.juryCandidates?.length)assignJury(caseRecord,options.juryCandidates,{rng:options.rng});
   await options.caseStore?.put?.(caseRecord);
   result.caseRecord=caseRecord;
   try{globalThis.dispatchEvent?.(new CustomEvent('civweave:anarchadia-tribunal-candidate',{detail:{caseRecord,assessment,messageHash,policyRef:result.policyRef}}))}catch{}
