@@ -7,6 +7,8 @@ const paths = [
   'cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs',
   'cloudflare/account-edge/src/recovery-entry-v8.mjs',
   'cloudflare/account-edge/wrangler.jsonc',
+  'cloudflare/node-cloud/src/cloud-node-membership-v1.mjs',
+  'cloudflare/node-cloud/wrangler.jsonc',
   'cloudflare/recovery-relay/src/index.mjs',
   'cloudflare/recovery-relay/wrangler.jsonc',
   '.github/workflows/deploy-civweave-pages.yml',
@@ -26,6 +28,10 @@ assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /recover@recovery
 assert.doesNotMatch(source['cloudflare/account-edge/wrangler.jsonc'], /glaedn\.workers\.dev/);
 assert.match(source['cloudflare/account-edge/src/recovery-entry-v8.mjs'], /civweave\.pages\.dev\/app\/recovery-relay-v1\.json/);
 assert.match(source['cloudflare/account-edge/src/recovery-entry-v8.mjs'], /civweave\.recovery-relay-discovery\.v1/);
+assert.match(source['cloudflare/node-cloud/wrangler.jsonc'], /recover@recovery\.commonweave\.earth/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-membership-v1.mjs'], /HubAccountRecoveryInboundService/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-membership-v1.mjs'], /handleHubAccountRecoveryInbound/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-membership-v1.mjs'], /verifyMemberLogin/);
 assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /"name": "civweave-recovery-relay"/);
 assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /CivweaveRecoveryProofRelay/);
 assert.match(source['cloudflare/recovery-relay/src/index.mjs'], /async email\(message, env/);
@@ -48,7 +54,8 @@ assert.match(source['public/app/hub-delivery-intent-v1.js'], /mailto:/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /#cw-hub-recover-request/);
 assert.match(source['public/app/installer-online-fallback-v225.js'], /hub-recovery-api-v1\.js/);
 assert.match(source['public/app/installer-online-fallback-v225.js'], /hub-recovery-ui-v1\.js/);
-assert.match(source['public/app/hub-recovery-api-v1.js'], /\/nodes\/\$\{encodeURIComponent\(n\)\}\/api\/account\//);
+assert.match(source['public/app/hub-recovery-api-v1.js'], /cloudFabric\?`\/n\/\$\{encodeURIComponent\(n\)\}\/api\/account\//);
+assert.match(source['public/app/hub-recovery-api-v1.js'], /`\/nodes\/\$\{encodeURIComponent\(n\)\}\/api\/account\//);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Add a recovery email before creating this Hub account/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /not written into your Passport or exposed to FellowFare/);
 for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {
@@ -61,9 +68,10 @@ for (const path of paths.filter(path => !path.endsWith('hub-account-recovery-v1.
 
 console.log(JSON.stringify({
   ok: true,
-  schema: 'civweave.hub-recovery-wiring-check.v5',
+  schema: 'civweave.hub-recovery-wiring-check.v6',
   freeTierInboundProof: true,
   crossAccountRelay: true,
+  cloudFabricRecovery: true,
   relayDiscovery: 'canonical-pages',
   relayStoresIdentity: false,
 }));
