@@ -9,7 +9,7 @@ const [cloudEntry,poolRouter,poolCapacity,hostingCapacity,hostingNode,recoveryNo
   'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs',
   'cloudflare/node-cloud/src/cloud-node-hosting-v1.mjs',
   'cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs',
-  'cloudflare/node-cloud/src/server-ai-entry-v4.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v5.mjs',
   'cloudflare/account-edge/src/index.mjs',
   'cloudflare/account-edge/src/index-legacy-v1.mjs',
   'cloudflare/node-cloud/wrangler.jsonc',
@@ -54,7 +54,7 @@ assert.match(hostingNode,/hosting\.plan\.paid/);
 assert.match(recoveryNode,/cloud-node-hosting-v1\.mjs/,'Recovery-aware Cloud Nodes must extend the canonical hosting node instead of replacing hosting behavior.');
 assert.match(recoveryNode,/extends BaseCloudNode/,'Recovery-aware Cloud Nodes must preserve the hosting node inheritance chain.');
 assert.match(hostedEntry,/capacity-hosting-plan-v1\.mjs/);
-assert.match(hostedEntry,/cloud-node-recovery-v1\.mjs/,'The deployed v4 entry must expose the recovery-aware Cloud Node wrapper.');
+assert.match(hostedEntry,/cloud-node-recovery-v1\.mjs/,'The deployed v5 entry must expose the recovery-aware Cloud Node wrapper.');
 
 assert.match(accountEdge,/index-legacy-v1\.mjs/);
 assert.match(accountEdge,/server-ai-entry-v2\.mjs/);
@@ -62,9 +62,9 @@ assert.match(accountEdge,/capacity-user-pools-v2\.mjs/);
 assert.match(accountEdge,/legacyAccountEdge\.fetch/);
 assert.match(legacyAccountEdge,/central-money-edge-required/,'Legacy account-edge money authority guard must remain intact.');
 
-assert.match(wrangler,/"main": "src\/server-ai-entry-v4\.mjs"/);
+assert.match(wrangler,/"main": "src\/server-ai-entry-v5\.mjs"/);
 assert.match(wrangler,/"CIVWEAVE_UNIFIED_BILLING_MODEL": "google\/gemini-3\.1-flash-lite"/);
 assert.match(wrangler,/"CIVWEAVE_AI_GATEWAY_ID": "default"/);
 assert.match(wrangler,/"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https:\/\/civweave\.cc"/);
 
-console.log(JSON.stringify({ok:true,revision:'user-ai-pools-v302-membership-preserving-hosting-recovery-v1',personalIncludedPoolGuard:true,sharedFreePoolSeparated:true,unifiedBillingFallback:true,paidMembershipPreserved:true,hostedCapacity:true,recoveryAwareHosting:true,freeHostMaxMembers:28,hostedMaxMembers:400,accountEdgeDelegated:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'user-ai-pools-v302-membership-preserving-hosting-recovery-v5',personalIncludedPoolGuard:true,sharedFreePoolSeparated:true,unifiedBillingFallback:true,paidMembershipPreserved:true,hostedCapacity:true,recoveryAwareHosting:true,freeHostMaxMembers:28,hostedMaxMembers:400,accountEdgeDelegated:true},null,2));
