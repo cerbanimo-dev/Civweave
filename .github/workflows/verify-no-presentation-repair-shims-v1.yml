@@ -1,0 +1,25 @@
+name: Verify no presentation repair shims
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/**'
+      - 'site/cerbanimo-cc/**'
+      - 'scripts/verify-no-presentation-repair-shims-v1.mjs'
+      - '.github/workflows/verify-no-presentation-repair-shims-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Reject post-paint static UI repair
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/verify-no-presentation-repair-shims-v1.mjs

@@ -2,10 +2,8 @@ const $ = (selector) => document.querySelector(selector);
 
 const isJapanese = document.documentElement.lang.toLowerCase().startsWith('ja');
 const locale = isJapanese ? 'ja-JP' : undefined;
-
 const year = $('#year');
 if (year) year.textContent = String(new Date().getFullYear());
-
 const countNode = $('#commitCount');
 const dateNode = $('#initialDate');
 const stateNode = $('#sourceState');
@@ -13,42 +11,25 @@ const stateNode = $('#sourceState');
 function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return isJapanese ? '公開' : 'public';
-  return new Intl.DateTimeFormat(locale, {
-    year: 'numeric',
-    month: isJapanese ? 'numeric' : 'short',
-    day: 'numeric'
-  }).format(date);
+  return new Intl.DateTimeFormat(locale, { year: 'numeric', month: isJapanese ? 'numeric' : 'short', day: 'numeric' }).format(date);
 }
-
-function formatCount(value) {
-  return Number(value).toLocaleString(locale);
-}
-
+function formatCount(value) { return Number(value).toLocaleString(locale); }
 function renderCount(value) {
   const target = Number(value);
   if (!countNode || !Number.isSafeInteger(target) || target < 1) return;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced) {
-    countNode.textContent = formatCount(target);
-    return;
-  }
-  const duration = 900;
-  const started = performance.now();
+  if (reduced) { countNode.textContent = formatCount(target); return; }
+  const duration = 900, started = performance.now();
   const frame = (now) => {
-    const progress = Math.min(1, (now - started) / duration);
-    const eased = 1 - Math.pow(1 - progress, 3);
+    const progress = Math.min(1, (now - started) / duration), eased = 1 - Math.pow(1 - progress, 3);
     countNode.textContent = formatCount(Math.max(1, Math.round(target * eased)));
     if (progress < 1) requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
 }
-
 async function loadHistory() {
   try {
-    const response = await fetch(`/history.json?ts=${Date.now()}`, {
-      cache: 'no-store',
-      headers: { Accept: 'application/json' }
-    });
+    const response = await fetch(`/history.json?ts=${Date.now()}`, { cache: 'no-store', headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error(`History HTTP ${response.status}`);
     const history = await response.json();
     renderCount(history.commitCount);
@@ -61,132 +42,27 @@ async function loadHistory() {
     if (stateNode) stateNode.textContent = isJapanese ? '閲覧可能' : 'reachable';
   }
 }
-
-const GUIDE_SPRITES = Object.freeze([
-  { name: 'Weaveling', sheet: '/assets/weaveling.png' },
-  { name: 'Moss', sheet: '/assets/moss.png' },
-  { name: 'Kamiya', sheet: '/assets/kamiya.png' },
-  { name: 'Rook', sheet: '/assets/rook.png' },
-  { name: 'Merlin', sheet: '/assets/merlin.png' }
-]);
-
-const REALM_POSTERS = Object.freeze({
-  'Living School': ['/assets/living-school-poster.webp', 'Living School poster art', '生学舎のポスターアート'],
-  Cerbanimo: ['/assets/cerbanimo-poster.webp', 'Cerbanimo poster art', '神織のポスターアート'],
-  FellowFare: ['/assets/fellowfare-poster.webp', 'FellowFare poster art', '共市のポスターアート'],
-  Anarchadia: ['/assets/anarchadia-poster.webp', 'Anarchadia poster art', '自治郷のポスターアート']
-});
-
-function installGuideAvatarStyles() {
-  if ($('#cerbanimoGuideAvatarStyles')) return;
-  const style = document.createElement('style');
-  style.id = 'cerbanimoGuideAvatarStyles';
-  style.textContent = `
-    .cast .guide-avatar-shell {
-      width: 82px;
-      height: 82px;
-      margin-bottom: 20px;
-      padding: 3px;
-      border: 1px solid color-mix(in srgb, var(--accent) 72%, white);
-      border-radius: 22px;
-      background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 18%, #190b2f), rgba(7,3,14,.94));
-      box-shadow: inset 0 0 24px color-mix(in srgb, var(--accent) 12%, transparent), 0 9px 28px rgba(0,0,0,.25);
-      overflow: hidden;
-    }
-    .cast .guide-avatar-frame {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border-radius: 18px;
-      background-image: var(--guide-sheet);
-      background-size: 500% 400%;
-      background-position: calc(var(--sprite-col) * 25%) calc(var(--sprite-row) * 33.333333%);
-      background-repeat: no-repeat;
-      background-color: #05030c;
-      filter: saturate(.98) brightness(1.02);
-      transition: background-position 140ms steps(1), transform 180ms ease, filter 180ms ease;
-    }
-    .cast article:hover .guide-avatar-frame,
-    .cast article:focus-within .guide-avatar-frame {
-      transform: scale(1.045);
-      filter: saturate(1.08) brightness(1.06);
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .cast .guide-avatar-frame { transition: none; }
-    }
-  `;
-  document.head.append(style);
-}
-
 function setSpriteFrame(node, index) {
   const frame = Math.max(0, Math.min(19, Number(index) || 0));
   node.style.setProperty('--sprite-col', String(frame % 5));
   node.style.setProperty('--sprite-row', String(Math.floor(frame / 5)));
 }
-
-function installGuideAvatars() {
-  const cards = Array.from(document.querySelectorAll('.cast article'));
-  if (!cards.length) return;
-  installGuideAvatarStyles();
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function animateMaterializedGuides() {
+  const avatars = Array.from(document.querySelectorAll('.cast .guide-avatar-frame[data-guide-avatar-index]'));
+  if (!avatars.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const idleFrames = [0, 4, 1, 17];
-
-  cards.forEach((card, index) => {
-    const guide = GUIDE_SPRITES[index];
-    if (!guide) return;
-    const placeholder = card.querySelector('.sigil');
-    if (!placeholder) return;
-
-    const shell = document.createElement('div');
-    shell.className = 'guide-avatar-shell';
-    shell.setAttribute('aria-hidden', 'true');
-    const avatar = document.createElement('span');
-    avatar.className = 'guide-avatar-frame';
-    avatar.style.setProperty('--guide-sheet', `url("${guide.sheet}")`);
-    setSpriteFrame(avatar, 0);
-    shell.append(avatar);
-    placeholder.replaceWith(shell);
-
-    if (reduced) return;
+  avatars.forEach((avatar, index) => {
     let step = index % idleFrames.length;
-    const tick = () => {
-      step = (step + 1) % idleFrames.length;
-      setSpriteFrame(avatar, idleFrames[step]);
-    };
+    const tick = () => { step = (step + 1) % idleFrames.length; setSpriteFrame(avatar, idleFrames[step]); };
     const timer = window.setInterval(tick, 3200 + index * 170);
-    card.addEventListener('mouseenter', () => setSpriteFrame(avatar, 17));
-    card.addEventListener('mouseleave', tick);
-    card.addEventListener('focusin', () => setSpriteFrame(avatar, 16));
-    card.addEventListener('focusout', tick);
+    const card = avatar.closest('article');
+    card?.addEventListener('mouseenter', () => setSpriteFrame(avatar, 17));
+    card?.addEventListener('mouseleave', tick);
+    card?.addEventListener('focusin', () => setSpriteFrame(avatar, 16));
+    card?.addEventListener('focusout', tick);
     window.addEventListener('pagehide', () => window.clearInterval(timer), { once: true });
   });
 }
 
-function installRealmPosters() {
-  for (const realm of document.querySelectorAll('.realm')) {
-    const title = realm.dataset.realm || realm.querySelector('h3')?.textContent?.trim();
-    const poster = REALM_POSTERS[title];
-    const image = realm.querySelector('img');
-    if (!poster || !image) continue;
-    image.src = poster[0];
-    image.alt = isJapanese ? poster[2] : poster[1];
-    image.loading = 'lazy';
-    image.decoding = 'async';
-  }
-}
-
-function installLanguageSwitch() {
-  if (isJapanese) return;
-  const nav = document.querySelector('.nav-links');
-  if (!nav || nav.querySelector('[lang="ja"]')) return;
-  const link = document.createElement('a');
-  link.href = 'ja/';
-  link.lang = 'ja';
-  link.textContent = '日本語';
-  nav.insertBefore(link, nav.querySelector('.nav-cta'));
-}
-
 loadHistory();
-installGuideAvatars();
-installRealmPosters();
-installLanguageSwitch();
+animateMaterializedGuides();
