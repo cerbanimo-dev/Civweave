@@ -115,7 +115,6 @@ function translateExact(value){
   const exact=EXACT_TRANSLATIONS.get(trimmed);
   if(exact)return replacePreservingWhitespace(text,exact);
   if(trimmed==='Civweave')return text;
-  if(trimmed==='Cerbanimo')return text;
   if(trimmed.includes('Cerbanimo'))return replacePreservingWhitespace(text,trimmed.replaceAll('Cerbanimo','神織（セルバニモ / Cerbanimo）'));
   return text;
 }
@@ -123,8 +122,14 @@ function canTranslateTextNode(node){
   const parent=node?.parentElement;
   return Boolean(parent&&!parent.closest(SKIP_SELECTOR));
 }
+function preservesLatinCerbanimoBrand(node){
+  const parent=node?.parentElement;
+  if(!parent||String(node.nodeValue||'').trim()!=='Cerbanimo')return false;
+  if(parent.matches?.('[data-realm="cerbanimo"] strong'))return true;
+  return Boolean(parent.closest?.('[data-civweave-system="cerbanimo"] [data-civweave-brand],[data-civweave-system="cerbanimo"] [class*="logo"],[data-civweave-system="cerbanimo"] .brand'));
+}
 function translateTextNode(node){
-  if(!isJapanese()||!canTranslateTextNode(node))return;
+  if(!isJapanese()||!canTranslateTextNode(node)||preservesLatinCerbanimoBrand(node))return;
   const next=translateExact(node.nodeValue);
   if(next!==node.nodeValue)node.nodeValue=next;
 }
@@ -175,7 +180,7 @@ function ensureBranding(doc){
   if(root)root.dataset.civweaveLanguage=JAPANESE;
   const civCandidates=[...doc.querySelectorAll('.brand-copy strong,#brand-home strong,[data-civweave-brand] strong')].filter(node=>node.textContent.trim()==='Civweave');
   civCandidates.forEach(node=>addBrandAfter(node,'civweave'));
-  const cerbCandidates=[...doc.querySelectorAll('[data-realm="cerbanimo"] strong,h1,h2,h3,[data-civweave-system="cerbanimo"] strong,[data-civweave-system="cerbanimo"] .brand')].filter(node=>node.textContent.trim()==='Cerbanimo');
+  const cerbCandidates=[...doc.querySelectorAll('[data-realm="cerbanimo"] strong,[data-civweave-system="cerbanimo"] [data-civweave-brand] strong,[data-civweave-system="cerbanimo"] .brand strong')].filter(node=>node.textContent.trim()==='Cerbanimo');
   cerbCandidates.forEach(node=>addBrandAfter(node,'cerbanimo'));
   doc.querySelectorAll('img').forEach(img=>{
     const haystack=`${img.getAttribute('alt')||''} ${img.getAttribute('src')||''}`.toLowerCase();
