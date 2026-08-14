@@ -98,6 +98,8 @@ function scanReferences(absolute) {
 
 if (!existsSync(publicRoot)) throw new Error(`Public directory not found: ${publicRoot}`);
 
+await import('./generate-civweave-icons.mjs');
+
 const files = walk(publicRoot).filter(file => !skipped(file));
 const assets = files
   .filter(file => IMAGE_EXTENSIONS.has(extname(file).toLowerCase()))
