@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {access,readFile,stat} from 'node:fs/promises';
+import {access,readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -23,11 +23,12 @@ const sharedGuide=`${sharedLoader}\n${sharedCore}`;
 
 assert.equal(await exists('public/app/persistent-guide-viewport-v216.js'),false,'Retired viewport compatibility runtime must remain deleted.');
 assert.equal(await exists('public/app/chat-single-owner-v245.js'),false,'Retired chat owner must remain deleted.');
-assert(repairs.includes("dialog button[data-close]")&&repairs.includes("control.type='button'"),'Proof dialog close controls are not repaired.');
+assert(repairs.includes("target?.closest?.('dialog [data-close]')")&&repairs.includes('runtimeImageRepair:false'),'Regression compatibility must delegate existing dialog controls without repairing presentation.');
+assert(!repairs.includes('createElement('),'Regression compatibility must not inject missing UI controls.');
+assert(!repairs.includes('MutationObserver'),'Regression compatibility must not watch the DOM for presentation repair.');
 assert(!repairs.includes("document.addEventListener('pointerup',onPointerUp,true)"),'Retired pointerup relay is still installed.');
 assert(!repairs.includes('queueMicrotask(()=>control.click())'),'Synthetic chat click relay is still present.');
-assert(repairs.includes('/app/assets/ai/kamiya-welcoming-v243.png'),'Kamiya does not use the refreshed avatar asset.');
-assert((await stat(path.join(root,'public/app/assets/ai/kamiya-welcoming-v243.png'))).size>1000,'Kamiya avatar asset is missing or empty.');
+assert(!repairs.includes('/app/assets/ai/kamiya-welcoming-v243.png')&&!repairs.includes('/app/assets/ai/kamiya.png'),'Regression compatibility must not substitute Kamiya artwork.');
 
 assert(workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"),'Canonical workspace does not own pointer-down gestures.');
 assert(workspace.includes('suppressClickUntil=performance.now()+500'),'Workspace does not suppress the targeted compatibility click after a handled pointer gesture.');
@@ -46,8 +47,10 @@ assert(sharedGuide.includes('await api.submitText(value,currentSystem)'),'Shared
 assert(!sharedGuide.includes('form.requestSubmit()'),'Shared guide still tunnels submission through the hidden floating form.');
 assert(!sharedGuide.includes("api.open?.({guide:currentSystem,prefill:value})"),'Shared guide still opens the full composer as a submission side effect.');
 assert(sharedCore.includes("mode:'bubble-only'"),'Shared guide surface must remain bubble-only.');
-assert(sharedCore.includes('function buildInline(){removeEmbeddedGuideCards();return false}'),'Retired inline guide cards can be rebuilt.');
-assert(sharedCore.includes('function syncInlineVisibility(){removeEmbeddedGuideCards();return false}'),'Retired inline visibility path no longer removes embedded guide cards.');
+assert(sharedCore.includes('function buildInline(){return false}'),'Retired inline guide cards can be rebuilt.');
+assert(sharedCore.includes('function syncInlineVisibility(){return false}'),'Retired inline visibility path must stay inert.');
+assert(sharedCore.includes('function removeEmbeddedGuideCards(){return false}'),'Embedded guide card cleanup must remain a no-op because source markup owns absence.');
+assert(!sharedCore.includes('new MutationObserver'),'Shared guide must not repeatedly delete presentation after paint.');
 assert(sharedCore.includes("document.documentElement.dataset.civweaveGuideSurfaceMode='bubble-only'"),'Bubble-only state is not exposed for page-level coordination.');
 assert(!sharedGuide.includes('input.focus();'),'Shared guide still forces keyboard focus after submission.');
 
@@ -112,4 +115,4 @@ assert.equal(parsed.dependencies?.['@huggingface/transformers'],'3.8.1','Pinned 
 assert(!('sql.js' in (parsed.dependencies||{})),'Local knowledge search must not add sql.js to production dependencies.');
 assert(!String(parsed.scripts?.prestart||'').includes('sqljs'),'Normal startup must not stage a second database runtime.');
 
-console.log(JSON.stringify({ok:true,revision:'v243.10-v242-bubble-only',proofDialogEscapes:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directGuideSubmit:true,sharedGuideBubbleOnly:true,embeddedGuideCardsDisabled:true,forcedKeyboardRefocus:false,kamiyaAvatarFresh:true,retiredViewportDeleted:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,sourceMaterialInjectedIntoPrompt:true,localPassagesInjectedIntoPrompt:true,liveEvidenceDigestStrengthened:true,moduleDepthRepair:true,iterativePerModuleQuizCompletion:true,singleQuestionQuizRecovery:true,shortAnswerContractGuard:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,localAIRuntimePinned:true,provenanceExplicit:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'v243.11-source-truth-v1',proofDialogControlsSourceOwned:true,syntheticClickRelay:false,pointerControlsOwnedByWorkspace:true,personaPointerOwnedByWorkspace:true,singleInteractiveChatSurface:true,directGuideSubmit:true,sharedGuideBubbleOnly:true,embeddedGuideCardsSourceAbsent:true,forcedKeyboardRefocus:false,kamiyaRuntimeSubstitution:false,retiredViewportDeleted:true,downloadedKnowledgeQueryable:true,downloadedResearchBeforeModelFallback:true,dependencyFreeLocalReader:true,canonicalArticleLinks:true,sourceMaterialInjectedIntoPrompt:true,localPassagesInjectedIntoPrompt:true,liveEvidenceDigestStrengthened:true,moduleDepthRepair:true,iterativePerModuleQuizCompletion:true,singleQuestionQuizRecovery:true,shortAnswerContractGuard:true,aiQuizFillersForbidden:true,aiDeterministicQuizPathsSeparated:true,savedHybridQuizSanitized:true,deterministicModulePaddingForbiddenInAI:true,productionDependencyCount:dependencies.length,localAIRuntimePinned:true,provenanceExplicit:true},null,2));
