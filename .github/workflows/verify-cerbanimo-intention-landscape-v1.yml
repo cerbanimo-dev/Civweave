@@ -1,0 +1,32 @@
+name: Verify Cerbanimo Intention Landscape v1
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/cerbanimo-intention-landscape-v1.js'
+      - 'public/app/cerbanimo-intention-landscape-v1.css'
+      - 'public/app/realm-console-v140.html'
+      - 'scripts/verify-cerbanimo-intention-landscape-v1.mjs'
+      - 'docs/contracts/cerbanimo-intention-landscape-v1.md'
+      - '.github/workflows/verify-cerbanimo-intention-landscape-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'public/app/cerbanimo-intention-landscape-v1.js'
+      - 'public/app/cerbanimo-intention-landscape-v1.css'
+      - 'public/app/realm-console-v140.html'
+      - 'scripts/verify-cerbanimo-intention-landscape-v1.mjs'
+      - 'docs/contracts/cerbanimo-intention-landscape-v1.md'
+      - '.github/workflows/verify-cerbanimo-intention-landscape-v1.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check public/app/cerbanimo-intention-landscape-v1.js
+      - run: node --check scripts/verify-cerbanimo-intention-landscape-v1.mjs
+      - run: node scripts/verify-cerbanimo-intention-landscape-v1.mjs
