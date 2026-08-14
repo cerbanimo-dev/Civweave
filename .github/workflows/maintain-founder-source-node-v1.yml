@@ -9,7 +9,7 @@ on:
     paths:
       - 'cloudflare/account-edge/**'
       - 'scripts/provision-cloudflare-account-edge-v1.mjs'
-      - 'scripts/ensure-founder-source-node-v1.mjs'
+      - 'scripts/verify-founder-source-node-health-v1.mjs'
       - '.github/workflows/maintain-founder-source-node-v1.yml'
 
 permissions:
@@ -49,7 +49,7 @@ jobs:
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing founder CLOUDFLARE_ACCOUNT_ID'; exit 2; }
 
       - name: Check and self-heal founder source node
-        run: node scripts/ensure-founder-source-node-v1.mjs --repair --output /tmp/founder-source-node-health.json
+        run: node scripts/verify-founder-source-node-health-v1.mjs --repair --output /tmp/founder-source-node-health.json
 
       - name: Publish operator summary
         shell: bash
