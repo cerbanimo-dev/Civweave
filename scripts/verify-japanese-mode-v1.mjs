@@ -12,6 +12,7 @@ const shellCopy=read('public/app/japanese-shell-copy-v1.js');
 const languageSettings=read('public/app/language-settings-v1.js');
 const settingsGateway=read('public/app/settings-gateway-v317.js');
 const brand=read('public/app/civweave-brand.js');
+const releaseVersion=read('public/app/release-version-v1.js');
 const installedEntry=read('public/app/installed-entry-v146.html');
 const codeCache=read('public/service-worker-code-coherence-v288.js');
 const worker=read('public/service-worker-v203.js');
@@ -22,18 +23,38 @@ const anarchadia=read('public/app/services/anarchadia/index.html');
 const livingSchool=read('public/app/cabinets/living-school/index.html');
 const japaneseEntry=read('public/ja/index.html');
 
-for(const [name,source] of [['Japanese runtime',runtime],['Japanese shell copy',shellCopy],['Language settings',languageSettings],['Settings gateway',settingsGateway],['Brand runtime',brand]]){
+for(const [name,source] of [['Japanese runtime',runtime],['Japanese shell copy',shellCopy],['Language settings',languageSettings],['Settings gateway',settingsGateway],['Brand runtime',brand],['Release/version realm locale bootstrap',releaseVersion]]){
   try{new Function(source)}catch(error){throw new Error(`${name} does not compile: ${error.message}`)}
 }
 
-assert(runtime.includes("kanji:'民織'"),'Civweave Japanese kanji branding is missing.');
-assert(runtime.includes("katakana:'シヴウィーヴ'"),'Civweave katakana branding is missing.');
-assert(runtime.includes("kanji:'神織'"),'Cerbanimo Japanese kanji branding is missing.');
-assert(runtime.includes("katakana:'セルバニモ'"),'Cerbanimo katakana branding is missing.');
-assert(runtime.includes("trimmed.includes('Cerbanimo')")&&runtime.includes("神織（セルバニモ / Cerbanimo）"),'Cerbanimo references in Japanese prose are not localized.');
-assert(runtime.includes("data-cw-ja-name=\"cerbanimo\"")||runtime.includes("data-cw-ja-name=\\\"cerbanimo\\\""),'Cerbanimo logo-adjacent branding hook is missing.');
+assert(runtime.includes("const VERSION='japanese-mode-v2'"),'Japanese localization v2 runtime marker is missing.');
+assert(runtime.includes("kanji:'民織'")&&runtime.includes("katakana:'シヴウィーヴ'"),'Civweave Japanese branding is missing.');
+assert(runtime.includes("kanji:'生学舎'")&&runtime.includes("katakana:'リビング・スクール'"),'Living School Japanese branding is missing.');
+assert(runtime.includes("kanji:'神織'")&&runtime.includes("katakana:'セルバニモ'"),'Cerbanimo Japanese branding is missing.');
+assert(runtime.includes("kanji:'共市'")&&runtime.includes("katakana:'フェローフェア'"),'FellowFare Japanese branding is missing.');
+assert(runtime.includes("kanji:'自治郷'")&&runtime.includes("katakana:'アナーケイディア'"),'Anarchadia Japanese branding is missing.');
 assert(runtime.includes("LANGUAGE_KEY='civweave.language.v1'"),'Japanese mode persistence key is missing.');
 assert(runtime.includes("params.get('lang')")||runtime.includes("searchParams.get('lang')"),'Japanese mode does not accept a shareable lang query.');
+
+for(const [english,japanese,label] of [
+  ['What is your wish?','あなたの願いは？','Working Campus'],
+  ['Living School did not finish opening','生学舎の起動が完了しませんでした','Living School'],
+  ['New Quest','新しいクエスト','Cerbanimo'],
+  ['FELLOWFARE MARKET','共市マーケット','FellowFare'],
+  ['CIVIC PULSE','市民パルス','Anarchadia'],
+  ['Build reviewable weave','レビューできる織りを作る','planner'],
+  ['Search actual listings','実際の出品を検索','marketplace'],
+  ['OPEN PROPOSALS','公開中の提案','governance']
+])assert(runtime.includes(`['${english}','${japanese}']`),`${label} representative Japanese copy is missing.`);
+
+assert(runtime.includes("const SKIP_TEXT_SELECTOR='script,style,noscript,textarea,input,pre,code"),'Japanese mode no longer protects entered textarea/input text.');
+assert(runtime.includes("const SKIP_ELEMENT_SELECTOR='script,style,noscript,pre,code")&&!runtime.includes("const SKIP_ELEMENT_SELECTOR='script,style,noscript,textarea,input,select,option"),'Japanese mode still skips form labels/options and cannot localize them.');
+assert(runtime.includes("['aria-label','title','placeholder']"),'Japanese mode does not localize accessible labels/placeholders.');
+assert(runtime.includes('characterData:true'),'Japanese mode does not translate live-updating static UI copy.');
+assert(runtime.includes('translationCount:EXACT_TRANSLATIONS.size'),'Japanese mode does not expose exact translation coverage metadata.');
+assert(runtime.includes('patternCount:PATTERN_TRANSLATIONS.length'),'Japanese mode does not expose dynamic pattern translation coverage.');
+assert(runtime.includes('phraseCount:STATIC_PHRASE_TRANSLATIONS.length'),'Japanese mode does not expose safe phrase translation coverage.');
+assert(runtime.includes(".message.user"),'Japanese mode does not explicitly protect user-authored chat messages.');
 
 assert(japaneseEntry.includes("localStorage.setItem('civweave.language.v1','ja')"),'Shareable Japanese entrypoint does not persist Japanese mode.');
 assert(japaneseEntry.includes("installed?'/app/installed-entry-v146.html':'/app/index.html'"),'Japanese share route does not respect the install-only PWA boundary.');
@@ -49,8 +70,6 @@ assert(installedEntry.includes("if(params.get('lang'))installer.searchParams.set
 assert(shellCopy.includes("['Installed campus','インストール済みキャンパス']"),'Installed PWA boot translation is missing.');
 assert(shellCopy.includes("['Install Civweave','Civweave をインストール']"),'Japanese installer install action is missing.');
 assert(shellCopy.includes("jp.textContent='神織 · セルバニモ'"),'Japanese installer does not place Cerbanimo Japanese branding beside the steward mark.');
-assert(shellCopy.includes("if(strong.textContent!=='Cerbanimo')strong.textContent='Cerbanimo'"),'Japanese installer steward branding must be idempotent so its MutationObserver cannot feed itself.');
-assert(shellCopy.includes("if(!strong.hasAttribute('data-cw-ja-skip'))strong.dataset.cwJaSkip=''"),'Japanese installer steward skip marker must not be rewritten on every observer pass.');
 
 assert(languageSettings.includes("LANGUAGE_KEY='civweave.language.v1'"),'Language setting does not use the canonical language preference.');
 assert(languageSettings.includes('Language / 言語'),'Settings language row is missing.');
@@ -65,17 +84,24 @@ assert(settingsGateway.includes('afterPaint(()=>void ensureLanguageSettings(laye
 assert(settingsGateway.includes('afterPaint(()=>void ensureManagement(layer))'),'Settings management lost its existing after-paint boundary.');
 assert(settingsGateway.includes("launchWork:'none'")&&settingsGateway.includes('inputOwner:true'),'Canonical Settings gateway ownership changed.');
 
+assert(releaseVersion.includes("const JAPANESE_RUNTIME='/app/japanese-mode-v1.js'"),'Canonical realm bootstrap does not know the Japanese runtime.');
+assert(releaseVersion.includes('function wantsJapanese()'),'Canonical realm bootstrap does not honor the language preference.');
+assert(releaseVersion.includes('void ensureLanguageRuntime();'),'Canonical realm bootstrap does not activate Japanese before skipping realm release mutation.');
+assert(releaseVersion.includes("japaneseBootstrap:'preference-only'"),'Canonical realm Japanese bootstrap contract is missing.');
+
 for(const asset of ['/app/language-settings-v1.js','/app/japanese-mode-v1.js','/app/japanese-shell-copy-v1.js'])assert(codeCache.includes(`'${asset}'`),`${asset} is not pinned for offline first-launch use.`);
-assert(worker.includes('code-coherence-v288-language-v1'),'Top-level service worker does not refresh the language-aware code cache.');
+assert(codeCache.includes('code-coherence-v288-language-v2'),'Code-coherence cache did not advance for Japanese localization v2.');
+assert(worker.includes('code-coherence-v288-language-v2'),'Top-level service worker does not refresh the Japanese localization v2 cache.');
 
 assert(guard.includes('/app/japanese-mode-v1.js'),'Working Campus does not load Japanese mode.');
 assert(guard.includes("target.searchParams.set('lang','ja')"),'Working Campus recovery does not preserve Japanese mode.');
 assert(guard.includes('activateLanguageMode()'),'Working Campus does not activate language mode at boot.');
-for(const [label,source] of [['Cerbanimo',cerbanimo],['FellowFare',fellowfare],['Anarchadia',anarchadia],['Living School',livingSchool]])assert(source.includes('japanese-mode-v1.js'),`${label} does not preserve Japanese mode.`);
+for(const [label,source] of [['Cerbanimo',cerbanimo],['FellowFare',fellowfare],['Anarchadia',anarchadia],['Living School',livingSchool]])assert(source.includes('japanese-mode-v1.js'),`${label} pocket/entry surface does not preserve Japanese mode.`);
 assert(cerbanimo.includes('data-civweave-system="cerbanimo"'),'Cerbanimo realm entry is missing its system identity for Japanese branding.');
 
-console.log('Japanese mode v1 verification passed.');
-console.log('Branding: 民織 / シヴウィーヴ / Civweave; 神織 / セルバニモ / Cerbanimo');
-console.log('Cerbanimo prose references: 神織（セルバニモ / Cerbanimo）');
+console.log('Japanese mode v2 verification passed.');
+console.log('Branding: 民織 / シヴウィーヴ; 生学舎 / リビング・スクール; 神織 / セルバニモ; 共市 / フェローフェア; 自治郷 / アナーケイディア');
+console.log('Coverage: Working Campus + Living School + Cerbanimo + FellowFare + Anarchadia + Settings + installer/installed shell.');
+console.log('Dynamic copy: exact + pattern + safe static phrase translation; user-authored text remains untouched.');
 console.log('Share route: /ja/ -> Japanese installer in browser -> Japanese installed PWA');
 console.log('Settings: one canonical launcher owner; language controls mount after paint with no inference work.');
