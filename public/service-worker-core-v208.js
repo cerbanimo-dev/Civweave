@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.136';
+const VERSION = '1.0.137';
 const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';
 const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
@@ -32,6 +32,15 @@ const REQUIRED_SHELL_ASSETS = [
 ];
 
 const OPTIONAL_SHELL_ASSETS = [
+  '/app/low-end-device-lab-v1.html',
+  '/app/low-end-device-lab-v1.js',
+  '/app/local-ai/model-registry-v266.js',
+  '/app/local-ai/download-manager-v267.js',
+  '/app/local-ai/runtime-v266.js',
+  '/app/mobile-ai-hardening-v302.js',
+  '/app/local-ai/test-pulse-v269.js',
+  '/app/minilm-context-router-v344.js',
+  '/app/models/all-minilm-l6-v2/adapter.js',
   '/app/working-campus-return-guard-v425.js',
   '/app/open-learning-media-cache-v1.mjs',
   '/app/open-learning-media-installer-v1.mjs',
