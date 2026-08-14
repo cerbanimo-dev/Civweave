@@ -1,0 +1,295 @@
+name: Deploy New New York Territory Host v1
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-new-new-york-territory-host
+  cancel-in-progress: false
+
+jobs:
+  deploy-territory-host:
+    name: Deploy isolated New New York host
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      node_id: ${{ steps.authority_candidate.outputs.node_id }}
+      operator_id: ${{ steps.authority_candidate.outputs.operator_id }}
+      callback_url: ${{ steps.authority_candidate.outputs.callback_url }}
+      pages_origin: ${{ steps.authority_candidate.outputs.pages_origin }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.NEW_NEW_YORK_CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.NEW_NEW_YORK_CLOUDFLARE_ACCOUNT_ID }}
+      PAGES_PROJECT: civweave-new-new-york
+      CIVWEAVE_HOST_ID: new-new-york
+      TERRITORY_ID: us
+      TERRITORY_NAME: New New York
+      STEWARD_APPOINTMENT_ID: steward-us-cami-20260814
+
+    steps:
+      - name: Check out complete history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install deployment dependencies
+        run: npm install --ignore-scripts
+
+      - name: Require the second Cloudflare account
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing NEW_NEW_YORK_CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing NEW_NEW_YORK_CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          npx wrangler@4 whoami
+
+      - name: Ensure the New New York Pages shell exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const account = encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID);
+          const project = process.env.PAGES_PROJECT;
+          const headers = {
+            Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+            'Content-Type': 'application/json'
+          };
+          const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects`;
+          const lookup = await fetch(`${base}/${encodeURIComponent(project)}`, { headers });
+          if (lookup.status === 404) {
+            const created = await fetch(base, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({ name: project, production_branch: 'main' })
+            });
+            const packet = await created.json().catch(() => ({}));
+            if (!created.ok || packet.success !== true) {
+              throw new Error(`Could not create Pages project ${project}: ${JSON.stringify(packet.errors || packet)}`);
+            }
+            console.log(`Created ${project}.`);
+            process.exit(0);
+          }
+          const packet = await lookup.json().catch(() => ({}));
+          if (!lookup.ok || packet.success !== true || packet.result?.name !== project) {
+            throw new Error(`Could not access Pages project ${project}: ${JSON.stringify(packet.errors || packet)}`);
+          }
+          console.log(`Pages project ${project} is ready.`);
+          NODE
+
+      - name: Refuse the founder Cloudflare account by accident
+        shell: bash
+        run: |
+          set -euo pipefail
+          if npx wrangler@4 pages deployment list --project-name civweave --environment production --json >/tmp/founder-project.json 2>/dev/null; then
+            node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const rows = JSON.parse(fs.readFileSync('/tmp/founder-project.json', 'utf8'));
+          if (Array.isArray(rows) && rows.length > 0) {
+            throw new Error('The New New York credentials can see the reserved civweave Pages project. Use a separate Cloudflare account/token before deploying this territory host.');
+          }
+          NODE
+          fi
+
+      - name: Provision the territory account edge and three starter nodes
+        run: >-
+          node scripts/provision-cloudflare-account-edge-v1.mjs
+          --host-id "$CIVWEAVE_HOST_ID"
+          --strict
+          --output /tmp/new-new-york-account-edge.json
+
+      - name: Choose the Territory Host Authority node
+        id: authority_candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const snapshot = JSON.parse(fs.readFileSync('/tmp/new-new-york-account-edge.json', 'utf8'));
+          if (snapshot.status !== 'ready' || !Array.isArray(snapshot.starterNodes) || snapshot.starterNodes.length !== 3) {
+            throw new Error('New New York account edge is not fully provisioned.');
+          }
+          const candidate = snapshot.starterNodes.find(node => node.nodeId === 'new-new-york-a') || snapshot.starterNodes[0];
+          if (!candidate?.nodeId || !candidate?.publicOrigin) throw new Error('Could not choose a Territory Host Authority candidate node.');
+          const operatorId = 'cloudflare-account-new-new-york';
+          const pagesOrigin = `https://${process.env.PAGES_PROJECT}.pages.dev`;
+          const out = process.env.GITHUB_OUTPUT;
+          fs.appendFileSync(out, `node_id=${candidate.nodeId}\n`);
+          fs.appendFileSync(out, `operator_id=${operatorId}\n`);
+          fs.appendFileSync(out, `callback_url=${candidate.publicOrigin.replace(/\/+$/, '')}/\n`);
+          fs.appendFileSync(out, `pages_origin=${pagesOrigin}\n`);
+          console.log(JSON.stringify({
+            territory: process.env.TERRITORY_ID,
+            stewardAppointment: process.env.STEWARD_APPOINTMENT_ID,
+            candidateNodeId: candidate.nodeId,
+            operatorId,
+            callbackUrl: candidate.publicOrigin,
+            pagesOrigin
+          }, null, 2));
+          NODE
+
+      - name: Build the New New York Pages host
+        run: node scripts/build-cloudflare-pages.mjs
+
+      - name: Build this host's Cerbanimo surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          pages_origin="https://${PAGES_PROJECT}.pages.dev"
+          node site/cerbanimo-cc/build.mjs \
+            --output .cloudflare-pages/cerbanimo \
+            --base /cerbanimo/ \
+            --role community \
+            --host-id "$CIVWEAVE_HOST_ID" \
+            --public-origin "$pages_origin" \
+            --pages-origin "$pages_origin"
+
+      - name: Record isolated territory-host metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const accountEdge = JSON.parse(fs.readFileSync('/tmp/new-new-york-account-edge.json', 'utf8'));
+          const pagesOrigin = `https://${process.env.PAGES_PROJECT}.pages.dev`;
+          const candidate = accountEdge.starterNodes.find(node => node.nodeId === 'new-new-york-a') || accountEdge.starterNodes[0];
+          fs.mkdirSync('.cloudflare-pages/app', { recursive: true });
+          fs.writeFileSync('.cloudflare-pages/app/host-deployment-v1.json', `${JSON.stringify({
+            schema: 'civweave.host-deployment.v1',
+            role: 'territory-steward',
+            hostId: process.env.CIVWEAVE_HOST_ID,
+            displayName: process.env.TERRITORY_NAME,
+            pagesProject: process.env.PAGES_PROJECT,
+            pagesOrigin,
+            publicOrigin: pagesOrigin,
+            canonicalOrigin: 'https://civweave.cc',
+            territory: {
+              territoryId: process.env.TERRITORY_ID,
+              stewardAppointmentId: process.env.STEWARD_APPOINTMENT_ID,
+              authorityCandidateNodeId: candidate.nodeId,
+              authorityCandidateOrigin: candidate.publicOrigin,
+              authorityStatus: 'pending-root-binding'
+            },
+            trafficBoundary: {
+              browserTraffic: 'pages-only',
+              nodeFabricTraffic: 'account-edge-only',
+              founderRootSecretsPresent: false,
+              founderSourceNode: false
+            },
+            accountEdge,
+            localAnchorRecommended: true,
+            localAnchorRequired: false,
+            sourceCommit: process.env.GITHUB_SHA,
+            generatedAt: new Date().toISOString()
+          }, null, 2)}\n`);
+          NODE
+
+      - name: Deploy the New New York Pages shell
+        shell: bash
+        run: |
+          set -euo pipefail
+          commit_message="$(git log -1 --pretty=%s)"
+          npx wrangler@4 pages deploy .cloudflare-pages \
+            --project-name "$PAGES_PROJECT" \
+            --branch main \
+            --commit-hash "$GITHUB_SHA" \
+            --commit-message "$commit_message" \
+            --commit-dirty=true 2>&1 | tee /tmp/new-new-york-pages-deploy.log
+          grep -Eqi 'https://[^[:space:]]*civweave-new-new-york\.pages\.dev' /tmp/new-new-york-pages-deploy.log || {
+            echo 'Cloudflare reported a deployment outside civweave-new-new-york.pages.dev.'
+            exit 3
+          }
+
+      - name: Verify Pages traffic and node traffic remain separate
+        shell: bash
+        env:
+          CANDIDATE_URL: ${{ steps.authority_candidate.outputs.callback_url }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const pages = `https://${process.env.PAGES_PROJECT}.pages.dev`;
+          const candidate = process.env.CANDIDATE_URL;
+          let lastFailure = 'not checked';
+          for (let attempt = 1; attempt <= 12; attempt += 1) {
+            try {
+              const [markerResponse, pageResponse, manifestResponse] = await Promise.all([
+                fetch(`${pages}/app/host-deployment-v1.json?verify=${Date.now()}`, { cache: 'no-store' }),
+                fetch(`${pages}/?verify=${Date.now()}`, { cache: 'no-store' }),
+                fetch(new URL('api/ai/node/manifest', candidate), { cache: 'no-store' })
+              ]);
+              if (!markerResponse.ok) throw new Error(`Pages marker HTTP ${markerResponse.status}`);
+              if (!pageResponse.ok) throw new Error(`Pages shell HTTP ${pageResponse.status}`);
+              if (!manifestResponse.ok) throw new Error(`authority node manifest HTTP ${manifestResponse.status}`);
+              const marker = await markerResponse.json();
+              const manifestEnvelope = await manifestResponse.json();
+              const manifest = manifestEnvelope.manifest || manifestEnvelope;
+              if (marker.role !== 'territory-steward') throw new Error('Pages shell is not marked territory-steward.');
+              if (marker.trafficBoundary?.browserTraffic !== 'pages-only') throw new Error('browser traffic boundary marker is missing.');
+              if (marker.trafficBoundary?.founderRootSecretsPresent !== false) throw new Error('territory shell must not claim founder secrets.');
+              if (manifest.nodeId !== marker.territory?.authorityCandidateNodeId) throw new Error('authority candidate identity mismatch.');
+              console.log(`Verified ${pages} for browser traffic and ${candidate} for node-fabric traffic.`);
+              process.exit(0);
+            } catch (error) {
+              lastFailure = `attempt ${attempt}: ${error.message}`;
+            }
+            if (attempt < 12) await new Promise(resolve => setTimeout(resolve, 5000));
+          }
+          throw new Error(lastFailure);
+          NODE
+
+  bind-territory-authority:
+    name: Bind root authority to New New York
+    needs: deploy-territory-host
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NODE_FABRIC_BINDING_TOKEN: ${{ secrets.NODE_FABRIC_BINDING_TOKEN }}
+      CIVWEAVE_CORE_URL: https://civweave-core.cerbanimo.workers.dev
+      STEWARD_APPOINTMENT_ID: steward-us-cami-20260814
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Keep the root secret on the founder side
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${NODE_FABRIC_BINDING_TOKEN:-}" || { echo 'Missing founder NODE_FABRIC_BINDING_TOKEN'; exit 2; }
+          test ${#NODE_FABRIC_BINDING_TOKEN} -ge 32 || { echo 'Founder binding token is too short'; exit 2; }
+
+      - name: Bind New New York as the US Territory Host Authority
+        shell: bash
+        env:
+          NODE_ID: ${{ needs.deploy-territory-host.outputs.node_id }}
+          OPERATOR_ID: ${{ needs.deploy-territory-host.outputs.operator_id }}
+          CALLBACK_URL: ${{ needs.deploy-territory-host.outputs.callback_url }}
+        run: |
+          set -euo pipefail
+          node scripts/bind-territory-host-authority-v1.mjs \
+            --appointment-id "$STEWARD_APPOINTMENT_ID" \
+            --node-id "$NODE_ID" \
+            --operator-id "$OPERATOR_ID" \
+            --callback-url "$CALLBACK_URL" \
+            --max-grant-ttl-seconds 3600 | tee /tmp/new-new-york-authority.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const authority = JSON.parse(fs.readFileSync('/tmp/new-new-york-authority.json', 'utf8'));
+          if (authority.status !== 'active' || authority.appointmentId !== process.env.STEWARD_APPOINTMENT_ID || authority.canIssueHostAdmissions !== true || authority.canDelegateAuthority !== false) {
+            throw new Error(`Unexpected Territory Host Authority result: ${JSON.stringify(authority)}`);
+          }
+          console.log(`New New York is active as ${authority.authorityId} for ${authority.territoryId}.`);
+          NODE
