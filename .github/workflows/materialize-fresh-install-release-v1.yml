@@ -24,6 +24,18 @@ jobs:
         with:
           node-version: 22
 
+      - name: Align package metadata with VERSION
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const version = readFileSync('VERSION', 'utf8').trim();
+          const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+          pkg.version = version;
+          writeFileSync('package.json', `${JSON.stringify(pkg, null, 2)}\n`, 'utf8');
+          console.log(`Aligned package.json to Civweave ${version}.`);
+          NODE
+
       - name: Materialize canonical release
         run: node scripts/materialize-canonical-release.mjs
 
