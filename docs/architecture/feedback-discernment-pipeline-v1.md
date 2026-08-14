@@ -14,6 +14,10 @@ Turn incoming feature requests and bug reports sent to the five public Civweave 
 
 All five are public system-intake mailboxes. They are intentionally different from hidden member `_pm` relay identities.
 
+## Batch-feed authorization
+
+The scheduled GitHub workflow authenticates to the private Mail feedback feed with a short-lived GitHub Actions OIDC token using audience `civweave-feedback-batch`. The Mail Worker verifies the token signature and binds accepted claims to the `cerbanimo-dev/Civweave` repository, `refs/heads/main`, `.github/workflows/daily-feedback-discernment-v1.yml`, and schedule/manual-dispatch events. This avoids making a long-lived shared feedback secret an operational dependency. A static Worker secret may remain configured only as an emergency fallback.
+
 ## Daily batch
 
 Once per day, automation gathers guide-mail messages not yet assigned to a discernment batch. The batch process:
