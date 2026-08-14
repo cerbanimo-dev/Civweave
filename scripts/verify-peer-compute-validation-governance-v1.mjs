@@ -4,14 +4,14 @@ import assert from 'node:assert/strict';
 import { webcrypto } from 'node:crypto';
 import { TextEncoder, TextDecoder } from 'node:util';
 const ROOT=new URL('../',import.meta.url);
-const paths=['public/app/peer-local-plan-borrow-v1.js','public/app/peer-local-plan-borrow-ui-v1.js','public/app/validation-labor-rewards-v1.js','public/app/proposal-voting-gate-v2.js','public/app/node-ai-mesh-v1.js'];
+const paths=['public/app/peer-local-plan-borrow-v2.js','public/app/peer-local-plan-borrow-ui-v1.js','public/app/validation-labor-rewards-v1.js','public/app/proposal-voting-gate-v2.js','public/app/node-ai-mesh-v1.js'];
 for(const path of paths){const text=fs.readFileSync(new URL(path,ROOT),'utf8');assert.doesNotThrow(()=>new vm.Script(text),`${path} has invalid JavaScript syntax`)}
 const offline=JSON.parse(fs.readFileSync(new URL('public/app/offline-package-v208.json',ROOT),'utf8'));
 assert(offline.includePrefixes.includes('/app/'),'new peer runtimes must remain covered by the compact offline /app include policy');
 const meshSource=fs.readFileSync(new URL('public/app/node-ai-mesh-v1.js',ROOT),'utf8');
-for(const token of ['CivweavePeerLocalPlanBorrowV1','CivweavePeerLocalPlanBorrowUIV1','CivweaveValidationLaborRewardsV1','CivweaveProposalVotingGateV2','ensureSupport'])assert(meshSource.includes(token),`node AI mesh is missing ${token}`);
-const peerSource=fs.readFileSync(new URL('public/app/peer-local-plan-borrow-v1.js',ROOT),'utf8');
-for(const token of ['ask-every-time','requesterNeuronCharge:0','community-object-direct','nodeId','structuredOutput','planning'])assert(peerSource.includes(token),`peer borrow runtime is missing ${token}`);
+for(const token of ['peer-local-plan-borrow-v2.js','CivweavePeerLocalPlanBorrowV1','CivweavePeerLocalPlanBorrowUIV1','CivweaveValidationLaborRewardsV1','CivweaveProposalVotingGateV2','ensureSupport'])assert(meshSource.includes(token),`node AI mesh is missing ${token}`);
+const peerSource=fs.readFileSync(new URL('public/app/peer-local-plan-borrow-v2.js',ROOT),'utf8');
+for(const token of ['ask-every-time','requesterNeuronCharge:0','community-object-direct','nodeId','structuredOutput','planning','internetRelayMayCarryAddressedPayload'])assert(peerSource.includes(token),`peer borrow runtime is missing ${token}`);
 class StorageMock{constructor(){this.map=new Map()}getItem(k){return this.map.has(String(k))?this.map.get(String(k)):null}setItem(k,v){this.map.set(String(k),String(v))}removeItem(k){this.map.delete(String(k))}}
 class CustomEvent{constructor(type,options={}){this.type=type;this.detail=options.detail}}
 const noop=()=>{};
