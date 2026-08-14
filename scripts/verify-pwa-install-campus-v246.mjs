@@ -5,7 +5,7 @@ import vm from 'node:vm';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const readBytes=path=>readFile(new URL(path,root));
-const [html,rootHtml,manifestText,assetlinksText,bridge,reminder,hostMeta,autostart,statusRuntime,workerRepair,workerWrapper,installedEntry,gateway]=await Promise.all([
+const [html,rootHtml,manifestText,assetlinksText,bridge,reminder,hostMeta,autostart,statusRuntime,workerRepair,workerWrapper,installedEntry,installedEntryHtml,boundary,repairOnly,gateway]=await Promise.all([
   read('public/app/index.html'),
   read('public/index.html'),
   read('public/app/manifest.webmanifest'),
@@ -18,6 +18,9 @@ const [html,rootHtml,manifestText,assetlinksText,bridge,reminder,hostMeta,autost
   read('public/service-worker-campus-completion-v246.js'),
   read('public/service-worker-v203.js'),
   read('public/app/installed-entry-v146.js'),
+  read('public/app/installed-entry-v146.html'),
+  read('public/app/install-boundary-v146.js'),
+  read('public/app/installer-repair-only-v1.js'),
   read('server/gateway.mjs')
 ]);
 
@@ -33,6 +36,8 @@ assert.ok(installedEntry.includes("updateViaCache:'none'"));
 assert.ok(installedEntry.includes('registration.update()')&&installedEntry.includes('bounded(registration.update()'),'installed entry must perform a bounded worker update');
 assert.ok(installedEntry.includes("candidate.postMessage({type:'SKIP_WAITING'})"),'installed entry must activate a waiting worker before routing');
 assert.ok(installedEntry.indexOf('await refreshWorker(releaseVersion)')<installedEntry.indexOf('const requested='),'worker refresh must finish before installed route selection');
+assert.ok(installedEntryHtml.includes("installer.searchParams.set('source','installed-entry-browser-gate-v1')"),'installed entry HTML must reject browser tabs before the boot surface paints');
+assert.ok(installedEntryHtml.indexOf('installed-entry-browser-gate-v1')<installedEntryHtml.indexOf('<title>Civweave</title>'),'browser gate must run in the head before installed boot UI can paint');
 
 const canonicalOrigin='https://civweave.pages.dev';
 const legacyCanonicalOrigin='https://commonweave.pages.dev';
@@ -65,7 +70,7 @@ assert.ok(bridge.includes('function stableInstallerUrl()'),'native installer mus
 assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer must discover related legacy/canonical installs when supported');
 assert.ok(bridge.includes("dataset.civweaveLegacyRenderInstall"),'related Render install state must be exposed to the app');
 assert.ok(bridge.includes('/app/host-steward-reminder-v1.js'),'installer must load the steward Anchor reminder');
-assert.ok(bridge.includes('This installed copy stays attached to the host you chose.'),'installer must preserve host identity in user messaging');
+assert.ok(bridge.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'install bridge must explicitly advertise its install-only browser policy');
 
 const meta=JSON.parse(hostMeta);
 assert.equal(meta.schema,'civweave.host-deployment.v1');
@@ -120,14 +125,25 @@ assert.notDeepEqual(bytes192,bytes512,'192 and 512 install icons must not be the
 const bridgeIndex=html.indexOf('/app/pwa-install-prompt-v247.js');
 const manifestIndex=html.indexOf('rel="manifest"');
 assert.ok(bridgeIndex>=0&&manifestIndex>=0&&bridgeIndex<manifestIndex,'native install bridge must load before manifest discovery');
-assert.ok(html.includes('/app/pwa-install-prompt-v247.js?v=front-door-v2-open-after-install'),'installer must cache-bust the repaired Open-after-install bridge');
+assert.ok(html.includes('/app/pwa-install-prompt-v247.js?v=front-door-v3-install-only-runtime'),'installer must cache-bust the install-only bridge');
+assert.ok(html.includes('/app/installer-repair-only-v1.js?v=1.0.141-install-only-pwa-boundary'),'installer must load repair-only recovery instead of an online-campus fallback');
 assert.ok(html.includes('/app/offline-campus-status-v210.js?v=1.0.116-current-manifest-only-v282'),'installer must cache-bust the current-manifest-only status reader');
+assert.ok(!html.includes('open-online-campus-v225'),'installer must not expose an online-campus launcher');
+assert.ok(!html.includes('Browser fallback'),'installer must not advertise browser runtime');
 assert.ok(bridge.includes("addEventListener('beforeinstallprompt',capture)"));
 assert.ok(bridge.includes('await prompt.prompt()'));
 assert.ok(bridge.includes("document.addEventListener('click',ownInstallClick,true)"),'install bridge must own the primary gesture before the legacy installer');
 assert.ok(bridge.includes('Do not use Create shortcut'),'installer must distinguish a PWA install from a web shortcut');
-assert.ok(bridge.includes('if(standalone()||installed)'),'accepted installs must make the primary action launchable before standalone display mode changes');
-assert.ok(bridge.includes("button.textContent='Open Civweave'"),'accepted installs must immediately replace the transient install label');
+assert.ok(bridge.includes('if(standalone())'),'only standalone display mode may launch Civweave from the installer');
+assert.ok(bridge.includes('if(installed)'),'accepted installation state must be handled separately from standalone launch state');
+assert.ok(bridge.includes("button.textContent='Civweave installed'"),'accepted installs must become a non-launching installed state in the browser');
+assert.ok(bridge.includes("button.disabled=true"),'accepted installs must disable browser-tab launch');
+assert.ok(boundary.includes("function allowed(){return installedDisplay()||developer()}"),'runtime boundary must require installed display mode outside localhost developer sessions');
+assert.ok(boundary.includes("installedQueryIsAuthorization:false"),'installed=1 must be diagnostic only, never browser authorization');
+assert.ok(!boundary.includes('Boolean(systemSurface())||installedDisplay()||explicitInstalled()'),'canonical runtime routes must not self-authorize in browser tabs');
+assert.ok(repairOnly.includes('if(!required||!rawNext||!installedDisplay())return false'),'stale installer next= routes must only resume from installed display mode');
+assert.ok(!repairOnly.includes('function openCampus'),'repair bridge must not contain an online campus launcher');
+assert.ok(repairOnly.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'repair bridge must carry the no-browser-runtime contract');
 
 const installWindowListeners=new Map();
 const installDocumentListeners=new Map();
@@ -172,10 +188,11 @@ await Promise.resolve();
 const primaryClick=installDocumentListeners.get('click');
 const clickEvent={target:{closest:selector=>selector==='#install-app'?installButton:null},preventDefault(){},stopImmediatePropagation(){}};
 await primaryClick(clickEvent);
-assert.equal(installButton.textContent,'Open Civweave','accepted install remained stuck on its transient label');
-assert.equal(installButton.disabled,false,'accepted install left the Open action disabled');
+assert.equal(installButton.textContent,'Civweave installed','accepted install must end in a non-launching browser state');
+assert.equal(installButton.disabled,true,'accepted install must disable the browser-tab launch action');
+assert.equal(assignedInstallUrl,'','accepted install must not navigate the browser into the PWA boot entry');
 await primaryClick(clickEvent);
-assert.match(assignedInstallUrl,/^\/app\/installed-entry-v146\?installed=1&system=civweave$/,'Open action did not route through the installed bootstrap');
+assert.equal(assignedInstallUrl,'','repeated browser clicks must never route into the installed bootstrap');
 
 assert.ok(!autostart.includes('civweave.pwa.install-accepted'),'campus download must not gate installation using a persisted install flag');
 assert.ok(!autostart.includes("button.disabled=true"),'required campus autostart must never disable the install button');
@@ -202,4 +219,4 @@ assert.ok(workerWrapper.includes('policy=resumable-pause-v280'));
 assert.ok(workerWrapper.includes('chat-convergence-v250'),'worker wrapper must carry current convergence identity');
 assert.ok(workerWrapper.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())})"),'new worker must activate immediately');
 
-console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v284-open-after-install-current-manifest-only',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},obsoleteReferencesRetained:0,nativeInstallBridge:true,openAfterInstall:true,installedLaunch:'updater-first',canonicalInstallOrigin:canonicalOrigin,productionHostsInstallable:true,previewFallsToHostProduction:true,localAnchorReminder:true,frontDoorBridge:'/app/pwa-install-prompt-v247.js'},null,2));
+console.log(JSON.stringify({ok:true,revision:'pwa-install-campus-v285-install-only-runtime',workerRevision:'offline-campus-current-graph-v280',manifestIcons:{any192:pngDimensions(bytes192,'192 install icon'),any512:pngDimensions(bytes512,'512 install icon'),maskable512:pngDimensions(bytesMask512,'maskable 512 install icon')},obsoleteReferencesRetained:0,nativeInstallBridge:true,openAfterInstall:false,browserRuntime:false,installedLaunch:'updater-first-installed-display-only',canonicalInstallOrigin:canonicalOrigin,productionHostsInstallable:true,previewFallsToHostProduction:true,localAnchorReminder:true,frontDoorBridge:'/app/pwa-install-prompt-v247.js'},null,2));
