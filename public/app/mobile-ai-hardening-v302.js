@@ -2,12 +2,13 @@
 'use strict';
 
 const VERSION='1.0.116-mobile-ai-hardening-v302';
+const REVISION='mobile-chat-css-dvh-v349';
 const STYLE_ID='cw-mobile-ai-hardening-v302-style';
 const TEST_MARKER='civweave.local-ai.test-inflight.v302';
 const RECOVERY_KEY='civweave.local-ai.test-recovery.v302';
 const SELECTION_KEY='civweave.local-ai.selection.v266';
 const WEBGPU_QUARANTINE_KEY='civweave.local-ai.webgpu-quarantine.v299';
-if(globalThis.CivweaveMobileAIHardeningV302?.version===VERSION)return;
+if(globalThis.CivweaveMobileAIHardeningV302?.version===VERSION&&globalThis.CivweaveMobileAIHardeningV302?.revision===REVISION)return;
 
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const now=()=>new Date().toISOString();
@@ -19,18 +20,17 @@ function isMobile(){
   return Boolean(narrow||(coarse&&Math.min(Number(innerWidth)||9999,Number(innerHeight)||9999)<1000));
 }
 
+// Compatibility API only. Chat layout no longer writes viewport measurements into
+// document styles. Modern Chromium resolves 100dvh in CSS without a JS feedback loop.
 function syncViewport(){
   const viewport=globalThis.visualViewport;
-  const root=document.documentElement;
-  if(!root)return;
-  const height=Math.max(1,Math.round(viewport?.height||innerHeight||1));
-  const width=Math.max(1,Math.round(viewport?.width||innerWidth||1));
-  const top=Math.max(0,Math.round(viewport?.offsetTop||0));
-  const left=Math.max(0,Math.round(viewport?.offsetLeft||0));
-  root.style.setProperty('--cw-mobile-visual-height',`${height}px`);
-  root.style.setProperty('--cw-mobile-visual-width',`${width}px`);
-  root.style.setProperty('--cw-mobile-visual-top',`${top}px`);
-  root.style.setProperty('--cw-mobile-visual-left',`${left}px`);
+  return Object.freeze({
+    height:Math.max(1,Math.round(viewport?.height||innerHeight||1)),
+    width:Math.max(1,Math.round(viewport?.width||innerWidth||1)),
+    top:Math.max(0,Math.round(viewport?.offsetTop||0)),
+    left:Math.max(0,Math.round(viewport?.offsetLeft||0)),
+    writes:0
+  });
 }
 
 function installStyle(){
@@ -38,18 +38,21 @@ function installStyle(){
   const style=document.createElement('style');
   style.id=STYLE_ID;
   style.textContent=`
-@media(max-width:620px){
+@media(max-width:720px){
 html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized){
   position:fixed!important;
-  top:var(--cw-mobile-visual-top,0px)!important;
-  left:var(--cw-mobile-visual-left,0px)!important;
-  right:auto!important;
-  bottom:auto!important;
-  width:var(--cw-mobile-visual-width,100vw)!important;
-  height:var(--cw-mobile-visual-height,100dvh)!important;
+  inset:0!important;
+  left:0!important;
+  right:0!important;
+  top:0!important;
+  bottom:0!important;
+  width:100vw!important;
+  height:100dvh!important;
+  min-height:0!important;
   max-width:none!important;
-  max-height:none!important;
+  max-height:100dvh!important;
   margin:0!important;
+  border:0!important;
   border-radius:0!important;
   display:grid!important;
   grid-template-rows:auto auto minmax(0,1fr) auto!important;
@@ -58,7 +61,9 @@ html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v2
   background:var(--guide-panel,#111827)!important;
   box-shadow:none!important;
   contain:layout paint style!important;
-  z-index:2147483647!important;
+  z-index:2147483646!important;
+  box-sizing:border-box!important;
+  pointer-events:auto!important;
 }
 html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized):has(>.cw295-saved-chats){
   grid-template-rows:auto auto auto minmax(0,1fr) auto!important;
@@ -81,11 +86,13 @@ html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v2
   min-height:0!important;
   overflow:auto!important;
   overscroll-behavior:contain!important;
+  touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch;
 }
 html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized) [data-persistent-form]{
   min-width:0!important;
   grid-template-columns:minmax(0,1fr) auto!important;
-  padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;
+  padding:8px max(8px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))!important;
 }
 html[data-civweave-mobile-ai-hardening="v302"] body #cw-persistent-guide-chat-v215:not([hidden]):not(.is-minimized) [data-persistent-form] textarea{
   min-width:0!important;
@@ -174,17 +181,13 @@ function finishTest(spec={},detail={}){
 
 function start(){
   document.documentElement.dataset.civweaveMobileAiHardening='v302';
+  document.documentElement.dataset.civweaveChatLayout='css-dvh-v349';
   installStyle();
-  syncViewport();
   recoverInterruptedTest();
-  globalThis.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
-  globalThis.visualViewport?.addEventListener('scroll',syncViewport,{passive:true});
-  addEventListener('resize',syncViewport,{passive:true});
-  addEventListener('orientationchange',()=>setTimeout(syncViewport,0),{passive:true});
   addEventListener('civweave:model-settings-opened',()=>setTimeout(addRecoveryNotice,0));
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{syncViewport();addRecoveryNotice()},{once:true});else queueMicrotask(addRecoveryNotice);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addRecoveryNotice,{once:true});else queueMicrotask(addRecoveryNotice);
 }
 
 start();
-globalThis.CivweaveMobileAIHardeningV302=Object.freeze({version:VERSION,isMobile,syncViewport,recoverInterruptedTest,beginTest,finishTest,testMarker:TEST_MARKER,recoveryKey:RECOVERY_KEY,mobileFullscreenChat:true,interruptedTestRecovery:true,mobileSafeCompatibility:true,mobileBenchmarkDisabled:true});
+globalThis.CivweaveMobileAIHardeningV302=Object.freeze({version:VERSION,revision:REVISION,isMobile,syncViewport,recoverInterruptedTest,beginTest,finishTest,testMarker:TEST_MARKER,recoveryKey:RECOVERY_KEY,mobileFullscreenChat:true,mobileSafeCompatibility:true,mobileBenchmarkDisabled:true,interruptedTestRecovery:true,chatLayoutMode:'css-dvh-only',viewportEventOwnership:false,viewportStyleWrites:false,mainThreadQuiescentOnChatOpen:true});
 })();
