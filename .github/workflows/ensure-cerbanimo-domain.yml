@@ -1,0 +1,128 @@
+name: Ensure Cerbanimo custom domain
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/ensure-cerbanimo-domain.yml
+      - .github/workflows/deploy-cerbanimo-site.yml
+      - site/cerbanimo-cc/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerbanimo-cc-domain-cutover
+  cancel-in-progress: false
+
+jobs:
+  activate:
+    name: Activate and verify cerbanimo.cc
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      PAGES_PROJECT: cerbanimo-cc
+      PUBLIC_DOMAIN: cerbanimo.cc
+
+    steps:
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing repository secret CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+
+      - name: Activate Pages custom domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const account = encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID);
+          const project = encodeURIComponent(process.env.PAGES_PROJECT);
+          const domain = process.env.PUBLIC_DOMAIN;
+          const headers = {
+            Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+            'Content-Type': 'application/json'
+          };
+          const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${project}/domains`;
+          const endpoint = `${base}/${encodeURIComponent(domain)}`;
+
+          async function request(url, options = {}) {
+            const response = await fetch(url, { headers, ...options });
+            const packet = await response.json().catch(() => ({}));
+            return { response, packet };
+          }
+
+          let { response, packet } = await request(endpoint);
+          if (response.status === 404) {
+            ({ response, packet } = await request(base, {
+              method: 'POST',
+              body: JSON.stringify({ name: domain })
+            }));
+            if (!response.ok || packet.success !== true) {
+              throw new Error(`Could not attach ${domain}: ${JSON.stringify(packet.errors || packet)}`);
+            }
+            console.log(`Attached ${domain} to Pages project ${process.env.PAGES_PROJECT}.`);
+          } else if (!response.ok || packet.success !== true) {
+            throw new Error(`Could not inspect ${domain}: ${JSON.stringify(packet.errors || packet)}`);
+          }
+
+          for (let attempt = 1; attempt <= 72; attempt += 1) {
+            ({ response, packet } = await request(endpoint));
+            if (!response.ok || packet.success !== true) {
+              throw new Error(`Could not inspect ${domain}: ${JSON.stringify(packet.errors || packet)}`);
+            }
+            const result = packet.result || {};
+            const validation = result.validation_data?.status || result.validation_data?.error_message || 'n/a';
+            const verification = result.verification_data?.status || result.verification_data?.error_message || 'n/a';
+            console.log(`Attempt ${attempt}: ${domain} status=${result.status || 'unknown'} validation=${validation} verification=${verification}`);
+            if (result.status === 'active') {
+              console.log(`${domain} is active on Cloudflare Pages.`);
+              process.exit(0);
+            }
+            if (attempt === 1 || attempt % 6 === 0) {
+              const retried = await request(endpoint, { method: 'PATCH' });
+              if (!retried.response.ok || retried.packet.success !== true) {
+                throw new Error(`Could not retry validation for ${domain}: ${JSON.stringify(retried.packet.errors || retried.packet)}`);
+              }
+              console.log(`Requested another Pages validation pass for ${domain}.`);
+            }
+            await new Promise(resolve => setTimeout(resolve, 10000));
+          }
+          throw new Error(`${domain} did not become active within the cutover window.`);
+          NODE
+
+      - name: Verify public domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const origin = `https://${process.env.PUBLIC_DOMAIN}`;
+          let failure = 'public domain did not become reachable';
+          for (let attempt = 1; attempt <= 24; attempt += 1) {
+            try {
+              const bust = `${Date.now()}-${attempt}`;
+              const [pageResponse, historyResponse] = await Promise.all([
+                fetch(`${origin}/?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
+                fetch(`${origin}/history.json?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } })
+              ]);
+              if (!pageResponse.ok) throw new Error(`page HTTP ${pageResponse.status}`);
+              if (!historyResponse.ok) throw new Error(`history HTTP ${historyResponse.status}`);
+              const html = await pageResponse.text();
+              const history = await historyResponse.json();
+              if (!html.includes('Civweave | Cerbanimo')) throw new Error('public page marker missing');
+              if (!Number.isSafeInteger(history.commitCount) || history.commitCount < 1) throw new Error('commit counter invalid');
+              if (!history.initialCommitDate || !history.latestCommit) throw new Error('Git history metadata incomplete');
+              console.log(`LIVE ${origin}: ${history.commitCount} commits since ${history.initialCommitDate}; deployed ${history.latestCommit}.`);
+              process.exit(0);
+            } catch (error) {
+              failure = `attempt ${attempt}: ${error.message}`;
+            }
+            if (attempt < 24) await new Promise(resolve => setTimeout(resolve, 5000));
+          }
+          throw new Error(`Public verification failed for ${origin}: ${failure}`);
+          NODE
