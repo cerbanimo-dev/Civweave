@@ -1,13 +1,14 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.27-brand-canonical-v319-language';
+const VERSION='1.0.28-brand-canonical-v319-language-switch';
 const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png';
 const FULL_LOGO=CANONICAL_LOGO;
 const SYMBOL_LOGO=CANONICAL_LOGO;
 const LANGUAGE_KEY='civweave.language.v1';
 const JAPANESE_RUNTIME='/app/japanese-mode-v1.js?v=japanese-shell-language-v2';
 const JAPANESE_SHELL_COPY='/app/japanese-shell-copy-v1.js?v=japanese-shell-language-v2';
+const LANGUAGE_SWITCH_STYLE_ID='cw-language-route-control-style';
 const SKIP_TAGS=new Set(['SCRIPT','STYLE','NOSCRIPT','TEMPLATE','CODE','PRE']);
 const ATTRIBUTES=['alt','title','aria-label','placeholder','content','data-label'];
 const BRAND_ASSET=/(?:^|\/)(?:commonweave|civweave)(?:-symbol|-app-icon|-adaptive-foreground-512|-icon-(?:\d+|maskable-\d+))?\.(?:svg|png|webp)(?:[?#].*)?$/i;
@@ -91,6 +92,35 @@ function installLanguageRuntime(){
   if(!globalThis.CivweaveJapaneseShellCopyV1)appendLanguageScript(JAPANESE_SHELL_COPY,'japanese-shell-copy');
   return true
 }
+function ensureLanguageSwitchStyles(){
+  if(document.getElementById(LANGUAGE_SWITCH_STYLE_ID))return;
+  const style=document.createElement('style');
+  style.id=LANGUAGE_SWITCH_STYLE_ID;
+  style.textContent='.cw-language-route-control{position:relative;z-index:4;display:inline-flex!important;align-items:center;justify-content:center;min-height:32px;padding:6px 9px!important;border:1px solid currentColor!important;border-radius:999px!important;background:color-mix(in srgb,currentColor 9%,transparent)!important;color:inherit!important;font:800 11px/1 system-ui,-apple-system,"Noto Sans JP",sans-serif!important;cursor:pointer!important;white-space:nowrap!important}@media(max-width:560px){.cw-language-route-control{min-height:30px;padding:5px 8px!important}}';
+  (document.head||document.documentElement).append(style);
+}
+function ensureEnglishLanguageControl(){
+  if(wantsJapanese()||document.querySelector('[data-cw-en-language-control]'))return false;
+  const host=document.getElementById('cwf104-head')||document.querySelector('.top,header,[role="banner"]');
+  if(!host)return false;
+  ensureLanguageSwitchStyles();
+  const button=document.createElement('button');
+  button.type='button';
+  button.className='cw-language-route-control';
+  button.dataset.cwEnLanguageControl='';
+  button.textContent='JP';
+  button.title='日本語に切り替える';
+  button.setAttribute('aria-label','Switch Civweave to Japanese');
+  button.addEventListener('click',()=>{
+    try{localStorage.setItem(LANGUAGE_KEY,'ja')}catch{}
+    const next=new URL('/ja/',location.origin);
+    next.searchParams.set('lang','ja');
+    next.searchParams.set('source','english-language-switch-v1');
+    location.assign(next.href);
+  });
+  host.append(button);
+  return true;
+}
 function installInstallerDeliveryBridge(){
   if(location.pathname!=='/app/index.html'||document.querySelector('script[data-civweave-hub-delivery-intent]'))return false;
   const script=document.createElement('script');script.src='/app/hub-delivery-intent-v1.js?v=hub-recovery-inbound-v1';script.async=false;script.dataset.civweaveHubDeliveryIntent='v1';document.head.append(script);return true
@@ -100,6 +130,7 @@ function apply(){
   brandTree(document.documentElement);
   document.documentElement.dataset.publicBrand='civweave';
   installLanguageRuntime();
+  ensureEnglishLanguageControl();
   installInstallerDeliveryBridge();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});
@@ -114,7 +145,8 @@ const observer=new MutationObserver(records=>{
     for(const node of record.addedNodes)brandTree(node);
     if(record.type==='attributes')brandElement(record.target);
   }
+  ensureEnglishLanguageControl();
 });
 observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:ATTRIBUTES.concat('src','srcset','href','value')});
-globalThis.CivweaveBrand=Object.freeze({version:VERSION,apply,canonicalLogo:CANONICAL_LOGO,fullLogo:FULL_LOGO,symbolLogo:SYMBOL_LOGO,settingsDependency:false,installLanguageRuntime,installInstallerDeliveryBridge});
+globalThis.CivweaveBrand=Object.freeze({version:VERSION,apply,canonicalLogo:CANONICAL_LOGO,fullLogo:FULL_LOGO,symbolLogo:SYMBOL_LOGO,settingsDependency:false,installLanguageRuntime,ensureEnglishLanguageControl,installInstallerDeliveryBridge});
 })();
