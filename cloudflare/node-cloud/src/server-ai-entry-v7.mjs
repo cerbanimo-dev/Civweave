@@ -25,27 +25,35 @@ async function nodePost(env, nodeId, pathname, body) {
     method: 'POST', headers: { 'content-type': 'application/json', 'x-civweave-node-id': nodeId }, body: JSON.stringify(body || {}),
   });
   const packet = await response.json().catch(() => ({}));
-  if (!response.ok) throw Object.assign(new Error(packet.error || `Hub account service returned HTTP ${response.status}.`), { status: response.status, code: packet.code || '' });
+  if (!response.ok) throw Object.assign(new Error(packet.error || `Hub account service returned HTTP ${response.status}.`), { status: response.status, code: packet.code || '', packet });
   return packet;
 }
-async function coreFetch(env, url, init = {}) {
+async function coreFetch(env, url, init = {}, { allowNotFound = false } = {}) {
   if (!env.CORE?.fetch) throw Object.assign(new Error('Civweave commerce service is unavailable.'), { status: 503 });
   const response = await env.CORE.fetch(url, init), packet = await response.json().catch(() => ({}));
+  if (response.status === 404 && allowNotFound) return null;
   if (!response.ok) throw Object.assign(new Error(packet.error || `Commerce service returned HTTP ${response.status}.`), { status: response.status, packet });
   return packet;
 }
 function accountRoute(url) {
-  const suffix = url.pathname.match(/\/api\/account\/stripe\/(status|connect|onboard)$/)?.[1];
-  return suffix || '';
+  return url.pathname.match(/\/api\/account\/stripe\/(status|connect|onboard)$/)?.[1] || '';
 }
 async function readiness(env, nodeId, input) {
   const packet = await nodePost(env, nodeId, `/api/account/membership/readiness?nodeId=${encodeURIComponent(nodeId)}`, input);
-  if (!packet?.account?.onlineMembershipReady) throw Object.assign(new Error('Finish Hub account recovery and 2FA before connecting Stripe.'), { status: 428 });
+  if (!packet?.account?.onlineMembershipReady) throw Object.assign(new Error('Finish Hub account recovery and 2FA before connecting Stripe.'), { status: 428, code: 'hub-account-security-required' });
   return packet.account;
 }
 function publicReturnOrigin(request) {
   const forwarded = clean(request.headers.get('x-civweave-account-edge-origin'), 1000);
-  try { return new URL(forwarded || request.url).origin; } catch { return 'https://civweave.cc'; }
+  try {
+    const candidate = new URL(forwarded || request.url);
+    if (!['https:', 'http:'].includes(candidate.protocol) || candidate.username || candidate.password) throw new Error('invalid');
+    if (candidate.protocol === 'http:' && !['localhost', '127.0.0.1'].includes(candidate.hostname)) throw new Error('insecure');
+    return candidate.origin;
+  } catch { return 'https://civweave.cc'; }
+}
+function coreUrl(origin, pathname) {
+  return new URL(pathname, `${origin}/`).href;
 }
 
 export default {
@@ -59,25 +67,24 @@ export default {
     if (!nodeId) return json({ ok: false, error: 'Hub node id is required.' }, 400);
     const input = await request.json().catch(() => ({}));
     try {
-      const account = await readiness(env, nodeId, input), userId = account.userId;
-      const coreOrigin = publicReturnOrigin(request);
+      const account = await readiness(env, nodeId, input), userId = account.userId, publicOrigin = publicReturnOrigin(request);
       if (route === 'status') {
-        const merchant = await coreFetch(env, `https://civweave-core.internal/api/fellowfare/direct-commerce/accounts/${encodeURIComponent(userId)}`, { method: 'GET', headers: { 'x-civweave-public-origin': coreOrigin } });
-        return json({ ok: true, merchant, annualMemberRebateOptIn: Boolean(account.annualMemberRebateOptIn) });
+        const merchant = await coreFetch(env, coreUrl(publicOrigin, `/api/fellowfare/direct-commerce/accounts/${encodeURIComponent(userId)}`), { method: 'GET' }, { allowNotFound: true });
+        return json({ ok: true, connected: Boolean(merchant), merchant, annualMemberRebateOptIn: Boolean(account.annualMemberRebateOptIn) });
       }
       if (route === 'connect') {
         const email = clean(input.email, 320);
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw Object.assign(new TypeError('A valid Stripe contact email is required.'), { status: 400 });
-        const merchant = await coreFetch(env, 'https://civweave-core.internal/api/fellowfare/direct-commerce/accounts', {
-          method: 'POST', headers: { 'content-type': 'application/json', 'x-civweave-public-origin': coreOrigin },
+        const merchant = await coreFetch(env, coreUrl(publicOrigin, '/api/fellowfare/direct-commerce/accounts'), {
+          method: 'POST', headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ userId, displayName: account.accountName, contactEmail: email, country: clean(input.country || 'us', 2).toLowerCase() }),
         });
         const rebate = await nodePost(env, nodeId, `/api/account/annual-member-rebate?nodeId=${encodeURIComponent(nodeId)}`, { ...input, optIn: input.annualMemberRebateOptIn === true });
-        return json({ ok: true, merchant, account: rebate.account, annualMemberRebateOptIn: Boolean(rebate.account?.annualMemberRebateOptIn) }, 201);
+        return json({ ok: true, connected: true, merchant, account: rebate.account, annualMemberRebateOptIn: Boolean(rebate.account?.annualMemberRebateOptIn) }, 201);
       }
       if (route === 'onboard') {
-        const packet = await coreFetch(env, `https://civweave-core.internal/api/fellowfare/direct-commerce/accounts/${encodeURIComponent(userId)}/onboard`, {
-          method: 'POST', headers: { 'content-type': 'application/json', 'x-civweave-public-origin': coreOrigin }, body: '{}',
+        const packet = await coreFetch(env, coreUrl(publicOrigin, `/api/fellowfare/direct-commerce/accounts/${encodeURIComponent(userId)}/onboard`), {
+          method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
         });
         return json({ ok: true, onboarding: packet });
       }
