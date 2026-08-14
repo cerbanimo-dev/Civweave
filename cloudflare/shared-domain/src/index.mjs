@@ -72,6 +72,18 @@ function redirectToUnderlay(requestUrl, upstreamOrigin, label, status) {
   });
 }
 
+function redirectWwwToApex(url, root) {
+  const target = new URL(`${url.pathname}${url.search}`, `https://${root}`);
+  return new Response(null, {
+    status: 308,
+    headers: {
+      location: target.href,
+      'cache-control': 'public, max-age=3600',
+      'x-civweave-canonical-domain': root
+    }
+  });
+}
+
 function rewriteLocation(headers, upstreamOrigin, publicOrigin) {
   const location = headers.get('location');
   if (!location) return;
@@ -92,6 +104,8 @@ async function lookupAlias(env, label) {
 export async function routeSharedDomainRequest(request, env) {
   const url = new URL(request.url);
   const root = cleanRoot(env?.CIVWEAVE_SHARED_DOMAIN || CIVWEAVE_SHARED_DOMAIN);
+  if (url.hostname.toLowerCase().replace(/\.$/, '') === `www.${root}`) return redirectWwwToApex(url, root);
+
   const label = sharedLabelFromHostname(url.hostname, root);
   if (!label) return json({ ok: false, code: 'shared-domain-not-found' }, 404);
 
