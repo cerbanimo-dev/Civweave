@@ -35,7 +35,7 @@ function deviceId(){
 }
 function deviceLabel(){
   const platform=clean(navigator.userAgentData?.platform||navigator.platform,60);
-  const mode=matchMedia?.('(display-mode: standalone)')?.matches?'Civweave app':'browser';
+  const mode=globalThis.matchMedia?.('(display-mode: standalone)')?.matches?'Civweave app':'browser';
   return clean(`${platform||'Device'} · ${mode}`,100)
 }
 function credentials(){return storageObject(localStorage,CREDENTIAL_KEY)}
@@ -92,7 +92,7 @@ async function join(origin,{createCredential=true,nodeId='',replaceDeviceId='',t
   try{
     packet=await jsonRequest(endpoint,{method:'POST',headers:{'content-type':'application/json',...(requestedNodeId?{'x-civweave-node-id':requestedNodeId}:{})},body:JSON.stringify({userId:identity.userId,credential:identity.credential,deviceId:deviceId(),deviceLabel:deviceLabel(),replaceDeviceId:clean(replaceDeviceId,180)||undefined,totpCode:clean(totpCode,20)||undefined})});
   }catch(error){
-    if(error.status===428||error.code==='hub-account-security-required')dispatchEvent(new CustomEvent('civweave:hub-account-security-required',{detail:{origin:host,nodeId:requestedNodeId,account:error.payload?.account||null,error:error.message}}));
+    if(error.status===404||error.status===428||error.code==='hub-account-security-required')dispatchEvent(new CustomEvent('civweave:hub-account-security-required',{detail:{origin:host,nodeId:requestedNodeId,account:error.payload?.account||null,error:error.message}}));
     if(error.code==='active-device-limit')dispatchEvent(new CustomEvent('civweave:hub-active-device-limit',{detail:{origin:host,nodeId:requestedNodeId,activeDevices:error.payload?.activeDevices||[]}}));
     throw error
   }
