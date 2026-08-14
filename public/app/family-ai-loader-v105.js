@@ -148,7 +148,7 @@ function patchHeader(){
   button.title=`Talk to ${guide.name}`;
 }
 function canonicalChatApi(){
-  if(globalThis.CivweaveGuideWorkspaceV242?.openWindow)return{kind:'workspace',api:globalThis.CivweaveGuideWorkspaceV242};
+  if(globalThis.CivweaveGuideChatSurfaceV350?.open)return{kind:'surface',api:globalThis.CivweaveGuideChatSurfaceV350};
   const api=globalThis.CivweavePersistentGuideChatV215;
   if(api?.canonicalOwner&&typeof api.open==='function')return{kind:'compat',api};
   return null;
@@ -156,16 +156,15 @@ function canonicalChatApi(){
 function openCanonical(target,prefill=''){
   const owner=canonicalChatApi();
   if(!owner)return null;
-  if(owner.kind==='workspace')return owner.api.openWindow(target,{prefill,focus:true});
   return owner.api.open({guide:target,prefill,focus:true});
 }
 function waitForCanonicalChat(timeout=1600){
   if(canonicalChatApi())return Promise.resolve(true);
   return new Promise(resolve=>{
     let done=false;
-    const finish=value=>{if(done)return;done=true;clearTimeout(timer);removeEventListener('civweave:guide-workspace-ready',ready);resolve(value)};
+    const finish=value=>{if(done)return;done=true;clearTimeout(timer);removeEventListener('civweave:guide-chat-ready',ready);resolve(value)};
     const ready=()=>finish(true),timer=setTimeout(()=>finish(Boolean(canonicalChatApi())),timeout);
-    addEventListener('civweave:guide-workspace-ready',ready,{once:true});
+    addEventListener('civweave:guide-chat-ready',ready,{once:true});
   });
 }
 async function openChat(system=detect(),{prefill='',contextSystem=system}={}){
@@ -203,7 +202,7 @@ function boot(){patchHeader();loadValueCore().catch(error=>console.warn('[Civwea
 
 document.readyState==='loading'?addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 addEventListener('pageshow',boot);
-addEventListener('civweave:guide-workspace-ready',patchHeader);
+addEventListener('civweave:guide-chat-ready',patchHeader);
 addEventListener('civweave:working-campus-plan-built',()=>requestEconomicReview('working-campus-plan-built'));
 addEventListener('cerbanimo:quest-engine-changed',()=>requestEconomicReview('cerbanimo-quest-changed'));
 
@@ -224,7 +223,7 @@ globalThis.CivweaveFamilyAILoaderV105={
   latencyRevision:'v250-headless-explicit-demand-only',
   localModelPathway:'optional-v307-coherent-bootstrap',
   knowledgeRevision:'v271-local-encyclopedia',
-  canonicalChatOwner:'guide-workspace-v242',
+  canonicalChatOwner:'guide-chat-surface-v350',
   validationCloudOptIn:'v1',
   economicValueRevision:'v1-model-estimate-plus-rubric-review',
   eagerWarm:false

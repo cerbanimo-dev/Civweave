@@ -1,0 +1,39 @@
+{
+  "schema": "civweave.active-public-screens.v350",
+  "policy": "deny-undeclared-public-html",
+  "screens": [
+    {"path":"public/index.html","purpose":"public installer entry"},
+    {"path":"public/offline.html","purpose":"offline recovery fallback"},
+    {"path":"public/recover.html","purpose":"public recovery entry"},
+    {"path":"public/ja/index.html","purpose":"Japanese public installer entry"},
+    {"path":"public/host-setup.html","purpose":"host node setup"},
+    {"path":"public/diagnostics.html","purpose":"host diagnostics"},
+    {"path":"public/host-local-anchor.html","purpose":"local host anchor"},
+    {"path":"public/finder/index.html","purpose":"federation finder entry"},
+    {"path":"public/node-ai/operator/index.html","purpose":"Node AI operator entry"},
+
+    {"path":"public/app/index.html","purpose":"installed package installer surface"},
+    {"path":"public/app/installed-entry-v146.html","purpose":"installed app entry"},
+    {"path":"public/app/recovery-v426.html","purpose":"installed app recovery"},
+
+    {"path":"public/app/working-campus-v156.html","purpose":"Civweave canonical realm"},
+    {"path":"public/app/cabinets/living-school/index.html","purpose":"Living School canonical realm"},
+    {"path":"public/app/realm-console-v140.html","purpose":"Cerbanimo canonical realm"},
+    {"path":"public/app/fellowfare-cabinet-v144.html","purpose":"FellowFare canonical realm"},
+    {"path":"public/app/anarchadia-console-v139.html","purpose":"Anarchadia canonical realm"},
+
+    {"path":"public/app/anarchadia-governance-v145.html","purpose":"Anarchadia governance detail"},
+    {"path":"public/app/anarchadia-sovereignty-v146.html","purpose":"Anarchadia local sovereignty detail"},
+    {"path":"public/app/services/anarchadia/workbench.html","purpose":"Anarchadia governance workbench"},
+    {"path":"public/app/services/fellowfare/cabinet.html","purpose":"FellowFare service cabinet"},
+
+    {"path":"public/app/hub-map-v1.html","purpose":"Civweave hub map"},
+    {"path":"public/app/federation-finder-local-v269.html","purpose":"local federation finder"},
+    {"path":"public/app/federation-finder-map-v275.html","purpose":"federation finder map"},
+
+    {"path":"public/app/node-ai-operator-v1.html","purpose":"installed Node AI operator"},
+    {"path":"public/app/asset-lockboard-v239.html","purpose":"asset lockboard diagnostics"},
+    {"path":"public/app/low-end-device-lab-v1.html","purpose":"low-end device lab"},
+    {"path":"public/app/territory-host-authority-v1.html","purpose":"territory host authority"}
+  ]
+}

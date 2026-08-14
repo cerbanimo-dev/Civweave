@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.158';
+const VERSION='1.0.160';
 const REVISION='browser-install-boundary-v228-chat-escape-install-only-pwa-v1';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
@@ -16,7 +16,7 @@ const PLATFORM_STABILITY='/app/platform-stability-v159.js';
 const MOBILE_AI_HARDENING='/app/mobile-ai-hardening-v302.js';
 const GUIDE_IDENTITY_SCRIPT='/app/guide-identity-integrity-v216.js';
 const REALM_SESSION_INTEGRITY='/app/realm-session-integrity-v237.js';
-const GUIDE_WORKSPACE='/app/guide-workspace-v242.js';
+const GUIDE_WORKSPACE='/app/guide-chat-surface-v350.js';
 const WORKING_CAMPUS_TOPBAR='/app/working-campus-topbar-v243.js';
 const THEMED_SYSTEM_NAV='/app/themed-system-nav-v178.js';
 const CAMPUS_BACKGROUND_DOWNLOAD='/app/campus-background-download-v241.js';
@@ -133,7 +133,7 @@ function installerUrl(){
 }
 function closeBrowserChatBeforeRedirect(){
   try{
-    globalThis.CivweaveGuideWorkspaceV242?.closeWorkspace?.();
+    globalThis.CivweaveGuideChatSurfaceV350?.close?.();
     globalThis.CivweavePersistentGuideChatV215?.close?.();
     const state=JSON.parse(localStorage.getItem('civweave.guide-workspace.v242')||'{}');
     if(state&&typeof state==='object')localStorage.setItem('civweave.guide-workspace.v242',JSON.stringify({...state,open:false,minimized:false,updatedAt:new Date().toISOString()}));
@@ -245,7 +245,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   installEarlyGuards,installSystemExperienceSupport,installCanonicalSystemSupport,installCanonicalSystemSupportWhenReady,installAdditions,installAdditionsWhenReady,resumeFromPageShow,assetCustomizationConfigured,installAssetCustomizationIfConfigured,
   additionsVersion:ADDITIONS_VERSION,
   publicBrand:'Civweave',
-  canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner',
+  canonicalPolicy:'five-system-first-class-routes-v350-canonical-chat-owner',
   canonicalSystemCount:5,
   canonicalAutoScripts:0,
   canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
@@ -265,9 +265,9 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   radioTrackSuggestionRevision:'v241-playlist-context-track-links',
   radioFloatingPlacementRevision:'v236-bottom-left-above-shared-nav',
   sharedReviewSurfaceRevision:'v234-chat-owned-review-and-weaves-under-review',
-  sharedGuideSurfaceRevision:'v236-navigation-lifecycle-v424-mirror-into-v242-canonical-thread',
+  sharedGuideSurfaceRevision:'v236-navigation-lifecycle-v424-mirror-into-v350-canonical-thread',
   realmSessionIntegrityRevision:'v237-realm-local-memory-handover-state-repair',
-  guideWorkspaceRevision:'v250-v242-canonical-owner',
+  guideWorkspaceRevision:'v350-single-current-chat-surface',
   workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract',
   mobileAiHardeningRevision:'v302-mobile-fullscreen-chat-interrupted-test-recovery',
   mapLaunchRevision:'v243-register-route-handler-or-open-event',
@@ -275,12 +275,12 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   assetCustomizationRevision:'v239-local-path-overrides-on-demand',
   guideIdentityRevision:'v216-explicit-responder-ownership',
   guideIdentityPolicy:'explicit-selected-guide-or-explicit-handoff',
-  guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm',
+  guideSurfaceOwnershipPolicy:'v350-single-current-surface-five-private-ledgers-handover-only-cross-realm',
   guideIdentityMigration:'realm-action-owner',
   guideWorkspaceSubmissionPipelines:1,
   guideWorkspaceGuideCount:5,
   guideWorkspaceThreadPolicy:'five-realm-local-ledgers-plus-explicit-handover',
-  guideWorkspaceWindowPolicy:'five-switchable-windows-current-realm-launcher',
+  guideWorkspaceWindowPolicy:'single-current-surface-explicit-guide-selector',
   pwaUpdateRevision:'v250-installed-entry-every-launch',
   aiSettingsBindGuard:'retired-v317-no-input-no-prototype-patch',
   aiSettingsPersistenceRepair:'controller-owned-on-demand-v317',

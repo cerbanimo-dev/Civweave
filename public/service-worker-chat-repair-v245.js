@@ -8,6 +8,7 @@ const PARTY_REVISION='party-chat-v1';
 const HUMAN_BUBBLE_REVISION='human-message-bubble-v1';
 const TRANSLATION_REVISION='translation-packs-v1';
 const HARDENING_REVISION='mobile-chat-css-dvh-v349';
+const SCREEN_INVENTORY_REVISION='retired-screen-inventory-v350';
 const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
 const PARTY_PATH='/app/shared-intention-party-chat-v1.js';
 const PARTY_CACHE='civweave-party-v1';
@@ -28,6 +29,7 @@ const CHAT_PATHS=new Set([
   '/app/experience-orchestrator-v232.js',
   '/app/realm-session-integrity-v237.js',
   '/app/guide-workspace-v242.js',
+  '/app/guide-chat-surface-v350.js',
   '/app/chat-fullscreen-v295.js',
   '/app/saved-chat-store-v295.js',
   '/app/saved-chat-ui-v295.js',
@@ -84,7 +86,23 @@ const RETIRED_CHAT_PATHS=new Set([
   '/app/persistent-guide-chat-v214.js',
   '/app/persistent-guide-chat-v215.js',
   '/app/persistent-guide-viewport-v216.js',
-  '/app/chat-single-owner-v245.js'
+  '/app/chat-single-owner-v245.js',
+  '/app/cabinet-calibrator-v144.html',
+  '/app/cabinet-visual-v141.html',
+  '/app/cabinet-mode-v142.html',
+  '/app/cabinet-only-v144.html',
+  '/cabinetonly/index.html',
+  '/app/realm-v128.html',
+  '/app/realm-v127.html',
+  '/app/loom-v128.html',
+  '/app/loom-v127.html',
+  '/app/lite-v129.html',
+  '/app/lite-v128.html',
+  '/app/fullscreen-family-v104.html',
+  '/app/services/cerbanimo/index.html',
+  '/app/services/living-school/index.html',
+  '/app/services/fellowfare/index.html',
+  '/app/services/anarchadia/index.html'
 ]);
 const PURGE_PATHS=new Set([...CHAT_PATHS,...RETIRED_CHAT_PATHS]);
 
@@ -100,7 +118,7 @@ async function purgeChatRuntimeCaches(){
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
+  return{revision:REVISION,freezeRevision:FREEZE_REVISION,screenInventoryRevision:SCREEN_INVENTORY_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
 }
 async function cacheRuntime(path,cacheName,revision,label){
   try{
@@ -131,5 +149,5 @@ self.addEventListener('message',event=>{
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,freezeRevision:FREEZE_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,humanBubblePath:HUMAN_BUBBLE_PATH,humanBubbleCache:HUMAN_BUBBLE_CACHE,translationPath:TRANSLATION_PATH,translationWorkerPath:TRANSLATION_WORKER_PATH,translationCache:TRANSLATION_CACHE,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime,packageHumanBubble:cacheHumanMessageRuntime,packageTranslation:cacheTranslationRuntime});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,freezeRevision:FREEZE_REVISION,screenInventoryRevision:SCREEN_INVENTORY_REVISION,partyRevision:PARTY_REVISION,humanBubbleRevision:HUMAN_BUBBLE_REVISION,translationRevision:TRANSLATION_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,humanBubblePath:HUMAN_BUBBLE_PATH,humanBubbleCache:HUMAN_BUBBLE_CACHE,translationPath:TRANSLATION_PATH,translationWorkerPath:TRANSLATION_WORKER_PATH,translationCache:TRANSLATION_CACHE,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime,packageHumanBubble:cacheHumanMessageRuntime,packageTranslation:cacheTranslationRuntime});
 })();
