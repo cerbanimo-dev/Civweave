@@ -1,0 +1,22 @@
+name: Audit Japanese visible copy v3
+
+on:
+  push:
+    branches:
+      - fix/japanese-localization-v3-coverage
+  pull_request:
+    paths:
+      - 'public/**'
+      - 'scripts/audit-japanese-visible-copy-v3.mjs'
+      - '.github/workflows/audit-japanese-visible-copy-v3.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: node --check scripts/audit-japanese-visible-copy-v3.mjs
+      - run: node scripts/audit-japanese-visible-copy-v3.mjs
