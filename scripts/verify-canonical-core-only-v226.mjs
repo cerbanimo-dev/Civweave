@@ -22,6 +22,7 @@ const allowedExperienceSupport=[
   '/app/system-radio-agent-v233.js',
   '/app/radio-track-suggestions-v240.js',
   '/app/civweave-systems-mesh-v251.js',
+  '/app/host-node-session-v1.js',
   '/app/node-ai-mesh-v1.js',
   '/app/quest-veil-mesh-v1.js',
   '/app/quest-veil-ledger-gate-v1.js',
