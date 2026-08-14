@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='1.0.83-local-ai-bootstrap-v282-inference-health';
-const REVISION='1.0.117-local-ai-bootstrap-v306-browser-tools';
+const REVISION='1.0.115-local-ai-bootstrap-v302-session-handoff';
 const RUNTIME_REVISION='1.0.88-local-ai-runtime-v283-small-model-fast-path';
 const LEGACY_RUNTIME_ASSET='/app/local-ai/runtime-v266.js?v=1.0.87-v287-v283-coherence-v288';
 const existing=globalThis.CivweaveLocalAIBootstrapV266;
