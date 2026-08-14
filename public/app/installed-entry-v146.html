@@ -4,6 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#061019">
+  <script>
+  (()=>{
+    'use strict';
+    const installed=navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
+    const params=new URLSearchParams(location.search);
+    const developer=['localhost','127.0.0.1','::1'].includes(location.hostname)&&params.get('developer')==='1';
+    if(installed||developer)return;
+    const installer=new URL('/app/index.html',location.origin);
+    installer.searchParams.set('install','required');
+    installer.searchParams.set('source','installed-entry-browser-gate-v1');
+    location.replace(installer.href);
+  })();
+  </script>
   <title>Civweave</title>
   <link rel="icon" href="/app/logos/civweave-icon-192.png">
   <style>
@@ -50,7 +63,7 @@
   })();
   </script>
   <script src="/app/legal-consent-v1.js?v=1.0.137-legal-consent-v1" defer></script>
-  <script src="/app/installed-entry-v146.js?v=1.0.144-boot-recovery-v426-legal-consent-v1" defer></script>
+  <script src="/app/installed-entry-v146.js?v=1.0.144-boot-recovery-v426-legal-consent-v1-install-only-pwa-v1" defer></script>
   <noscript><p style="position:fixed;left:16px;right:16px;bottom:16px;text-align:center"><a href="/app/recovery-v426.html" style="color:#8de5ef">Open Civweave recovery</a></p></noscript>
 </body>
 </html>
