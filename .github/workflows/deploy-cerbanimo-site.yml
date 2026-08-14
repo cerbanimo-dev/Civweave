@@ -51,6 +51,7 @@ jobs:
           cp site/cerbanimo-cc/index.html .cerbanimo-pages/index.html
           cp site/cerbanimo-cc/styles.css .cerbanimo-pages/styles.css
           cp site/cerbanimo-cc/app.js .cerbanimo-pages/app.js
+          cp -R site/cerbanimo-cc/assets/. .cerbanimo-pages/assets/
           cp Civweave-on-logo.png .cerbanimo-pages/assets/civweave-on.png
           cp Civweave-off-logo.png .cerbanimo-pages/assets/civweave-off.png
           cp Civweave-weaveling-sprites.png .cerbanimo-pages/assets/weaveling.png
