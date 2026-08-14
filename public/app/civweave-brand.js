@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION='1.0.30-brand-daytime-logo-v1';
-const CANONICAL_LOGO='/app/logos/civweave-daytime-512-v1.png';
+const CANONICAL_LOGO='/app/logos/civweave-icon-512.png?brand=daytime-v1';
 const FULL_LOGO=CANONICAL_LOGO;
 const SYMBOL_LOGO=CANONICAL_LOGO;
 const LANGUAGE_KEY='civweave.language.v1';
