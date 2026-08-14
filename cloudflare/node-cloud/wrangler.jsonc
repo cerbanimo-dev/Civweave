@@ -9,6 +9,10 @@
   "ai": {
     "binding": "AI"
   },
+  "browser": {
+    "binding": "BROWSER",
+    "remote": true
+  },
   "durable_objects": {
     "bindings": [
       { "name": "NODES", "class_name": "CivweaveCloudNode" },
@@ -44,6 +48,11 @@
   // Member capacity sessions use a domain-separated HMAC derived from the dedicated
   // session secret. The operator token remains a compatibility fallback only.
   // Neither raw secret is ever sent to clients.
+  //
+  // Browser Run is a delegated web tool. Downloaded/local models never leave the
+  // device for inference; only explicit search queries or target URLs are sent to
+  // this Worker when live research has been requested. Offline archive search does
+  // not touch this binding.
   //
   // CIVWEAVE_WORKERS_PLAN is a deployment capability flag. Setting it to "paid"
   // only permits funded overage; it does not increase the 10,000-neuron free pool.
