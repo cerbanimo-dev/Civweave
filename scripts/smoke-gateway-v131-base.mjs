@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 await import('./stage-maplibre-v275.mjs');
-const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.157',BUILD='1.0.157-install-only-fullscreen-family-gateway';
+const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.158',BUILD='1.0.158-install-only-fullscreen-family-gateway';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),dataDir=await mkdtemp(path.join(os.tmpdir(),'civweave-gateway-v106-')),output=[];
 const child=spawn(process.execPath,['scripts/start-civweave-v131.mjs'],{cwd:root,env:{...process.env,RENDER:'true',HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});child.stdout.on('data',chunk=>output.push(chunk.toString()));child.stderr.on('data',chunk=>output.push(chunk.toString()));
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),assert=(condition,message)=>{if(!condition)throw new Error(message)};
