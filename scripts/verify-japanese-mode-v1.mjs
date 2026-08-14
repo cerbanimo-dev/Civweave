@@ -27,7 +27,8 @@ for(const [name,source] of [['Japanese runtime',runtime],['Japanese shell copy',
   try{new Function(source)}catch(error){throw new Error(`${name} does not compile: ${error.message}`)}
 }
 
-assert(runtime.includes("const VERSION='japanese-mode-v2'"),'Japanese localization v2 runtime marker is missing.');
+assert(runtime.includes("const VERSION='japanese-mode-v3'"),'Japanese localization v3 runtime marker is missing.');
+assert(shellCopy.includes("const VERSION='japanese-shell-copy-v2'"),'Japanese installer/boot shell v2 marker is missing.');
 assert(runtime.includes("kanji:'民織'")&&runtime.includes("katakana:'シヴウィーヴ'"),'Civweave Japanese branding is missing.');
 assert(runtime.includes("kanji:'生学舎'")&&runtime.includes("katakana:'リビング・スクール'"),'Living School Japanese branding is missing.');
 assert(runtime.includes("kanji:'神織'")&&runtime.includes("katakana:'セルバニモ'"),'Cerbanimo Japanese branding is missing.');
@@ -44,8 +45,29 @@ for(const [english,japanese,label] of [
   ['CIVIC PULSE','市民パルス','Anarchadia'],
   ['Build reviewable weave','レビューできる織りを作る','planner'],
   ['Search actual listings','実際の出品を検索','marketplace'],
-  ['OPEN PROPOSALS','公開中の提案','governance']
-])assert(runtime.includes(`['${english}','${japanese}']`),`${label} representative Japanese copy is missing.`);
+  ['OPEN PROPOSALS','公開中の提案','governance'],
+  ['Account, Passports & recovery','アカウント、パスポート、復旧','Passport account'],
+  ['Use passkey','パスキーを使用','Passport passkey'],
+  ['Offline map','オフライン地図','Hub map'],
+  ['Auto coverage on','自動カバレッジ：オン','offline map'],
+  ['UNIVERSAL AI SETTINGS','共通AI設定','AI settings'],
+  ['Choose the Compass mind','コンパスの頭脳を選ぶ','AI settings'],
+  ['Join a Civweave Hub Node','民織のハブノードに参加','Hub installer'],
+  ['Nearest Hubs with open slots','空き枠のある最寄りのハブ','Hub finder'],
+  ['Read Terms of Service','利用規約を読む','legal consent'],
+  ['Agree and continue','同意して続ける','legal consent']
+])assert(runtime.includes(`[${JSON.stringify(english)},${JSON.stringify(japanese)}]`)||runtime.includes(`['${english}','${japanese}']`),`${label} representative Japanese copy is missing.`);
+
+for(const [english,japanese,label] of [
+  ['Join a Civweave Hub Node','民織のハブノードに参加','Hub installer shell'],
+  ['Nearest Hubs with open slots','空き枠のある最寄りのハブ','Hub finder shell'],
+  ['Use my approximate location','おおよその位置情報を使う','Hub finder shell'],
+  ['Offline campus download','オフラインキャンパスのダウンロード','installer shell']
+])assert(shellCopy.includes(`[${JSON.stringify(english)},${JSON.stringify(japanese)}]`)||shellCopy.includes(`['${english}','${japanese}']`),`${label} representative Japanese copy is missing.`);
+
+assert(runtime.includes('Add \\$([0-9]+(?:\\.[0-9]{1,2})?) live credit'),'Japanese v3 does not translate dynamic live-credit amounts.');
+assert(runtime.includes('Map v1 check failed'),'Japanese v3 does not translate dynamic map-check failures.');
+assert(runtime.includes('Hub returned HTTP'),'Japanese v3 does not translate dynamic Hub HTTP status copy.');
 
 assert(runtime.includes("const SKIP_TEXT_SELECTOR='script,style,noscript,textarea,input,pre,code"),'Japanese mode no longer protects entered textarea/input text.');
 assert(runtime.includes("const SKIP_ELEMENT_SELECTOR='script,style,noscript,pre,code")&&!runtime.includes("const SKIP_ELEMENT_SELECTOR='script,style,noscript,textarea,input,select,option"),'Japanese mode still skips form labels/options and cannot localize them.');
@@ -90,8 +112,8 @@ assert(releaseVersion.includes('void ensureLanguageRuntime();'),'Canonical realm
 assert(releaseVersion.includes("japaneseBootstrap:'preference-only'"),'Canonical realm Japanese bootstrap contract is missing.');
 
 for(const asset of ['/app/language-settings-v1.js','/app/japanese-mode-v1.js','/app/japanese-shell-copy-v1.js'])assert(codeCache.includes(`'${asset}'`),`${asset} is not pinned for offline first-launch use.`);
-assert(codeCache.includes('code-coherence-v288-language-v2'),'Code-coherence cache did not advance for Japanese localization v2.');
-assert(worker.includes('code-coherence-v288-language-v2'),'Top-level service worker does not refresh the Japanese localization v2 cache.');
+assert(codeCache.includes('code-coherence-v288-language-v2'),'Code-coherence cache no longer includes the established Japanese localization cache boundary.');
+assert(worker.includes('code-coherence-v288-language-v2'),'Top-level service worker no longer includes the established Japanese localization cache boundary.');
 
 assert(guard.includes('/app/japanese-mode-v1.js'),'Working Campus does not load Japanese mode.');
 assert(guard.includes("target.searchParams.set('lang','ja')"),'Working Campus recovery does not preserve Japanese mode.');
@@ -99,9 +121,9 @@ assert(guard.includes('activateLanguageMode()'),'Working Campus does not activat
 for(const [label,source] of [['Cerbanimo',cerbanimo],['FellowFare',fellowfare],['Anarchadia',anarchadia],['Living School',livingSchool]])assert(source.includes('japanese-mode-v1.js'),`${label} pocket/entry surface does not preserve Japanese mode.`);
 assert(cerbanimo.includes('data-civweave-system="cerbanimo"'),'Cerbanimo realm entry is missing its system identity for Japanese branding.');
 
-console.log('Japanese mode v2 verification passed.');
+console.log('Japanese mode v3 verification passed.');
 console.log('Branding: 民織 / シヴウィーヴ; 生学舎 / リビング・スクール; 神織 / セルバニモ; 共市 / フェローフェア; 自治郷 / アナーケイディア');
-console.log('Coverage: Working Campus + Living School + Cerbanimo + FellowFare + Anarchadia + Settings + installer/installed shell.');
+console.log('Coverage: Working Campus + realms + Hub installer + Passport/passkeys + maps + AI settings + legal/permission surfaces.');
 console.log('Dynamic copy: exact + pattern + safe static phrase translation; user-authored text remains untouched.');
 console.log('Share route: /ja/ -> Japanese installer in browser -> Japanese installed PWA');
 console.log('Settings: one canonical launcher owner; language controls mount after paint with no inference work.');
