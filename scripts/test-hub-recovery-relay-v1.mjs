@@ -38,10 +38,11 @@ globalThis.fetch = async (url, init = {}) => {
 
 try {
   const storage = new MemoryStorage();
+  const mailbox = 'recover@recovery.cerbanimo.example';
   const service = new HubAccountRecoveryInboundService(
     { storage },
     {
-      HUB_RECOVERY_INBOUND_EMAIL: 'recover@recovery.commonweave.earth',
+      HUB_RECOVERY_INBOUND_EMAIL: mailbox,
       HUB_RECOVERY_RELAY_URL: 'https://relay.test',
     },
     { vaultSecret: 'test-recovery-vault-secret-that-is-long-enough' },
@@ -55,7 +56,7 @@ try {
 
   const signup = await service.signup(nodeId, { userId, credential, email, passportId });
   assert.equal(signup.delivery.transport, 'inbound-email-proof');
-  assert.equal(signup.delivery.mailbox, 'recover@recovery.commonweave.earth');
+  assert.equal(signup.delivery.mailbox, mailbox);
   assert.match(signup.delivery.subject, /^Civweave Hub verify-email /);
   assert.ok(!signup.delivery.subject.includes(nodeId), 'relay message must not expose the Hub/node id');
   await assert.rejects(
@@ -130,7 +131,7 @@ try {
     assert.equal('passportIds' in proof, false, 'relay proof must never carry Passport associations');
   }
 
-  console.log(JSON.stringify({ ok: true, schema: 'civweave.hub-recovery-relay-test.v1', relayStoresIdentity: false, localOneTimeUse: true }));
+  console.log(JSON.stringify({ ok: true, schema: 'civweave.hub-recovery-relay-test.v2', relayStoresIdentity: false, localOneTimeUse: true }));
 } finally {
   globalThis.fetch = priorFetch;
 }
