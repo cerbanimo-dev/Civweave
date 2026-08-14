@@ -2,7 +2,7 @@
 'use strict';
 
 const VERSION = '1.0.149';
-const ENTRY = '/app/?system=civweave&installed=1';
+const ENTRY = '/app/installed-entry-v146.html?installed=1&system=civweave';
 const WORKER_BUILD = `${VERSION}-lightweight-shell-v208`;
 const WORKER_SCRIPT_REVISION = 'release-coherence-v226';
 const WORKER_URL = `/service-worker-v203.js?v=${WORKER_BUILD}&revision=${WORKER_SCRIPT_REVISION}`;
@@ -512,14 +512,18 @@ async function installOrOpen() {
     await prompt.prompt();
     const choice = await prompt.userChoice.catch(() => null);
     if (choice?.outcome === 'accepted') {
-      help('Civweave installed. Opening the campus now; offline files remain a separate optional download.');
-      location.assign(ENTRY);
+      help('Civweave installed. Open it from your device app launcher; this browser tab remains installer-only. Offline files remain separate and optional.');
+      const button = $('#install-app');
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Civweave installed';
+      }
     } else guidance();
     return;
   }
   help(isIOS()
-    ? 'In Safari, tap Share, then Add to Home Screen. You can open the online campus immediately; offline files are separate.'
-    : 'Open the browser menu and choose Install app or Add to Home screen. You can open Civweave now; offline files are separate.');
+    ? 'In Safari, tap Share, then Add to Home Screen. Launch Civweave from the installed icon; offline files are separate.'
+    : 'Open the browser menu and choose Install app or Add to Home screen. Then launch Civweave from your device app launcher; offline files are separate.');
 }
 
 addEventListener('beforeinstallprompt', event => {
@@ -529,7 +533,7 @@ addEventListener('beforeinstallprompt', event => {
 });
 addEventListener('appinstalled', () => {
   installPrompt = null;
-  help('Civweave is installed. Open it now; download the offline campus only if you want a local code copy.');
+  help('Civweave is installed. Open it from your device app launcher; download the offline campus only if you want a local code copy.');
 });
 
 $('#install-app')?.addEventListener('click', installOrOpen);
@@ -548,4 +552,3 @@ globalThis.CivweaveInstallerV130 = Object.freeze({
   get shellReady() { return shellReady; }
 });
 })();
-
