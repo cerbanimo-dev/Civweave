@@ -4,12 +4,13 @@ import {readFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const readBytes=path=>readFile(new URL(path,root));
-const [html,rootHtml,manifestText,assetlinksText,bridge,repairOnly,workerRepair,workerWrapper,installedEntryHtml,installedEntry,hostMeta]=await Promise.all([
+const [html,rootHtml,manifestText,assetlinksText,bridge,offlineStatus,repairOnly,workerRepair,workerWrapper,installedEntryHtml,installedEntry,hostMeta]=await Promise.all([
   read('public/app/index.html'),
   read('public/index.html'),
   read('public/app/manifest.webmanifest'),
   read('public/.well-known/assetlinks.json'),
-  read('public/app/pwa-install-prompt-v248.js'),
+  read('public/app/pwa-install-prompt-v249.js'),
+  read('public/app/offline-campus-status-v211.js'),
   read('public/app/installer-repair-only-v1.js'),
   read('public/service-worker-shell-repair-v225.js'),
   read('public/service-worker-v203.js'),
@@ -47,16 +48,28 @@ assert.ok(rootHtml.includes("target.searchParams.set('install_origin',cloudflare
 assert.ok(bridge.includes(`const CANONICAL_ORIGIN='${canonicalOrigin}'`),'native install bridge must name civweave.cc as canonical');
 assert.ok(bridge.includes(`const PREVIOUS_CANONICAL_ORIGIN='${previousCanonicalOrigin}'`),'native install bridge must retain the Pages migration origin');
 assert.ok(bridge.includes(`const LEGACY_CANONICAL_ORIGIN='${legacyCanonicalOrigin}'`),'native install bridge must retain the Commonweave migration origin');
-assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer must discover related installs when supported');
+assert.ok(bridge.includes('navigator.getInstalledRelatedApps()'),'installer must retain related-install discovery when explicitly needed');
 assert.ok(bridge.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'installer bridge must declare installer-only browser policy');
 assert.ok(bridge.includes("promptAvailabilityPolicy:'prepare-shell-then-wait-for-beforeinstallprompt'"),'installer must prepare the shell before waiting for a native prompt');
+assert.ok(bridge.includes("eagerRelatedAppDiscovery:false"),'native related-app lookup must stay dormant on first paint');
+assert.ok(bridge.includes('firstInputSafe:true'),'installer bridge must declare first-input safety');
+assert.ok(!bridge.includes("DOMContentLoaded',()=>{observeButton();discoverRelatedInstalls()"),'desktop first paint must not query installed related apps');
 assert.ok(bridge.includes("if(standalone())")&&bridge.includes("if(installed){"),'installer must distinguish installed display from merely accepted installation');
 assert.ok(bridge.includes('Open Civweave from your device app launcher')||bridge.includes('device app launcher'),'accepted browser installation must direct launch through the device app launcher');
+
+assert.ok(offlineStatus.includes('eagerStatusLookup:false'),'offline campus status lookup must stay dormant before download intent');
+assert.ok(offlineStatus.includes('firstInputSafe:true'),'offline campus status must declare first-input safety');
+assert.ok(!offlineStatus.includes("addEventListener('load',askCurrentStatus"),'installer must not inspect service-worker campus state at window load');
+assert.match(offlineStatus,/addEventListener\?\.\('pointerdown',activateStatus/,'offline status may activate from explicit pointer intent');
+assert.match(offlineStatus,/addEventListener\?\.\('focusin',activateStatus/,'keyboard focus must also activate offline status lazily');
 
 assert.ok(!html.includes('id="open-online-campus-v225"'),'installer must not expose an online-campus fallback button');
 assert.ok(!html.includes('Browser fallback'),'installer must not advertise browser runtime fallback');
 assert.ok(!html.includes('/app/installer-online-fallback-v225.js'),'installer must not load the retired online fallback bridge');
-assert.ok(html.includes('/app/pwa-install-prompt-v248.js'),'installer must load the cache-distinct v248 install bridge');
+assert.ok(html.includes('/app/pwa-install-prompt-v249.js'),'installer must load the cache-distinct first-input-safe v249 install bridge');
+assert.ok(!html.includes('/app/pwa-install-prompt-v248.js'),'installer must not boot a cache-first stale v248 bridge');
+assert.ok(html.includes('/app/offline-campus-status-v211.js'),'installer must load the cache-distinct lazy offline-status bridge');
+assert.ok(!html.includes('setInterval(renderProgress,1000)'),'installer progress UI must be event-driven rather than polling before input');
 assert.ok(html.includes('/app/installer-repair-only-v1.js?v=install-only-pwa-v1'),'installer must load the repair-only bridge');
 assert.ok(html.includes('Launch Civweave from your device app launcher'),'installer headline must describe installed-app launch');
 
@@ -98,12 +111,15 @@ assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'pwa-install-campus-v248-shell-first-prompt-wait',
+  revision:'pwa-install-campus-v249-first-input-safe',
   canonicalOrigin,
   previousCanonicalOrigin,
   browserRuntime:'installed-display-only',
   onlineFallback:false,
   repairOnly:true,
   workerCacheBusted:true,
+  eagerRelatedAppDiscovery:false,
+  eagerOfflineStatus:false,
+  progressPolling:false,
   relatedOrigins:manifests.length
 },null,2));
