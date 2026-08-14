@@ -84,7 +84,12 @@ const any192=manifest.icons?.find(icon=>icon.sizes==='192x192'&&String(icon.purp
 const any512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'any').includes('any'));
 const mask512=manifest.icons?.find(icon=>icon.sizes==='512x512'&&String(icon.purpose||'').includes('maskable'));
 assert.ok(any192&&any512&&mask512,'manifest must advertise 192, 512, and maskable install icons');
-function localIconPath(src){assert.match(src,/^\/app\/logos\/[A-Za-z0-9._-]+\.png$/);return `public${src}`}
+function localIconPath(src){
+  const url=new URL(src,'https://civweave.local');
+  assert.match(url.pathname,/^\/app\/logos\/[A-Za-z0-9._-]+\.png$/);
+  assert.equal(url.search,'?brand=daytime-v1','installed icons must use the daytime cache-bust token');
+  return `public${url.pathname}`;
+}
 function pngDimensions(buffer,label){
   const signature=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
   assert.ok(buffer.length>=33&&buffer.subarray(0,8).equals(signature),`${label} must be a real PNG`);
@@ -98,12 +103,13 @@ assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'pwa-install-campus-v249-first-input-safe',
+  revision:'pwa-install-campus-v250-daytime-launcher',
   canonicalOrigin,
   previousCanonicalOrigin,
   browserRuntime:'installed-display-only',
   onlineFallback:false,
   repairOnly:true,
   workerCacheBusted:true,
+  launcherBrand:'daytime-v1',
   relatedOrigins:manifests.length
 },null,2));
