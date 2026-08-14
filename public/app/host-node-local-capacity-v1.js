@@ -1,198 +1,87 @@
 (() => {
 'use strict';
 
-const VERSION = 'host-node-local-capacity-v1';
+const VERSION = 'host-node-local-capacity-v2-offline-accounts';
 const CAPACITY_ENDPOINT = '/api/federation/capacity';
 const ADMIT_ENDPOINT = '/api/federation/residents/admit';
+const ACCOUNT_BASE = '/api/federation/account/';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
-const RESIDENT_KEY = 'civweave.host-resident-id.v1';
 const PASSPORT_KEY = 'civweave.anarchadia.citizen-console.v139';
+const ACCOUNT_KEY = 'civweave.local-hub-account.client.v1';
+const DEVICE_KEY = 'civweave.hub-device-id.v1';
+const STEWARD_KEY = 'civweave.host-steward.v1';
+const ADMIN_SESSION_KEY = 'civweave.local-hub-admin-token.session.v1';
 const REFRESH_MS = 15_000;
 const LOBBY_WAIT_MS = 10_000;
-let refreshing = false;
-let joining = false;
-let observerTimer = 0;
-let refreshTimer = 0;
-let bound = false;
+let refreshing = false, joining = false, observerTimer = 0, refreshTimer = 0, bound = false, recoveryKit = null, totpSetup = null, activeLimit = [];
 
 const el = id => document.getElementById(id);
-
-function selectedLocalHost() {
-  try { return new URL(localStorage.getItem(HOST_ENDPOINT_KEY) || '').origin === location.origin; }
-  catch { return false; }
-}
-
-function residentId() {
-  try {
-    const saved = localStorage.getItem(RESIDENT_KEY);
-    if (saved) return saved;
-    const id = `cwres:${crypto.randomUUID ? crypto.randomUUID() : Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('')}`;
-    localStorage.setItem(RESIDENT_KEY, id);
-    return id;
-  } catch {
-    return `cwres:${Date.now().toString(36)}:${Math.random().toString(36).slice(2)}`;
-  }
-}
-
-function passportId() {
-  try {
-    const state = JSON.parse(localStorage.getItem(PASSPORT_KEY) || 'null');
-    return String(state?.passportId || '').trim().slice(0, 180);
-  } catch {
-    return '';
-  }
-}
-
-async function jsonRequest(url, options = {}) {
-  const response = await fetch(url, { cache: 'no-store', ...options, headers: { accept: 'application/json', ...(options.headers || {}) } });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const error = new Error(payload.error || `HTTP ${response.status}`);
-    error.status = response.status;
-    error.payload = payload;
-    throw error;
-  }
-  return payload;
-}
+const clean = (value, max = 1000) => String(value ?? '').trim().slice(0, max);
+const esc = value => clean(value, 5000).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+function selectedLocalHost() { try { return new URL(localStorage.getItem(HOST_ENDPOINT_KEY) || '').origin === location.origin; } catch { return false; } }
+function passportId() { try { return clean(JSON.parse(localStorage.getItem(PASSPORT_KEY) || 'null')?.passportId, 180); } catch { return ''; } }
+function randomToken(bytes = 18) { const data = crypto.getRandomValues(new Uint8Array(bytes)); let binary = ''; for (const byte of data) binary += String.fromCharCode(byte); return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/g, ''); }
+function deviceId() { try { const prior = clean(localStorage.getItem(DEVICE_KEY), 180); if (prior) return prior; const next = `cwdev:${randomToken()}`; localStorage.setItem(DEVICE_KEY, next); return next; } catch { return `cwdev:${randomToken()}`; } }
+function deviceLabel() { const platform = clean(navigator.userAgentData?.platform || navigator.platform || 'Device', 60); return `${platform} · ${globalThis.matchMedia?.('(display-mode: standalone)')?.matches ? 'Civweave app' : 'browser'}`.slice(0, 100); }
+function accountState() { try { const row = JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null'); return row && typeof row === 'object' ? row : null; } catch { return null; } }
+function saveAccount(packet) { const prior = accountState() || {}; const next = { ...prior, ...(packet?.credential ? { credential: packet.credential } : {}), ...(packet?.account ? { account: packet.account, accountName: packet.account.accountName } : {}), updatedAt: new Date().toISOString() }; if (next.accountName || next.credential) localStorage.setItem(ACCOUNT_KEY, JSON.stringify(next)); return next; }
+function accountAuth(extra = {}) { const state = accountState(); if (!state?.accountName || !state?.credential) throw new Error('Create or recover this local Hub account first.'); return { accountName: state.accountName, credential: state.credential, passportId: passportId() || undefined, deviceId: deviceId(), deviceLabel: deviceLabel(), ...extra }; }
+async function jsonRequest(url, options = {}) { const response = await fetch(url, { cache: 'no-store', ...options, headers: { accept: 'application/json', ...(options.headers || {}) } }); const payload = await response.json().catch(() => ({})); if (!response.ok || payload?.ok === false) { const error = new Error(payload.error || `HTTP ${response.status}`); error.status = response.status; error.code = clean(payload.code, 120); error.payload = payload; throw error; } return payload; }
+async function accountPost(path, body = {}) { return jsonRequest(`${ACCOUNT_BASE}${path}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); }
 
 function renderCapacity(packet) {
   const capacity = packet?.capacity || packet;
   if (!capacity?.capacityAvailable || !capacity?.slots) return false;
-  const free = el('cw-host-free-slots');
-  const paid = el('cw-host-paid-slots');
-  const note = el('cw-host-node-note');
+  const free = el('cw-host-free-slots'), paid = el('cw-host-paid-slots'), note = el('cw-host-node-note');
   if (free) free.textContent = Number(capacity.slots.free).toLocaleString();
   if (paid) paid.textContent = Number(capacity.slots.paid).toLocaleString();
-  if (note) {
-    const counts = capacity.counts || {};
-    const limits = capacity.limits || {};
-    note.textContent = `${Number(counts.communityMembers || 0).toLocaleString()} / ${Number(limits.community || 0).toLocaleString()} community seats used · ${Number(counts.paidExpansionMembers || 0).toLocaleString()} / ${Number(limits.paidExpansion || 0).toLocaleString()} paid-expansion seats used · ${Number(counts.activePaidMembers || 0).toLocaleString()} paid member${Number(counts.activePaidMembers || 0) === 1 ? '' : 's'} total. A paid community resident keeps the community seat and leaves paid-expansion capacity open.`;
-  }
-  const join = el('cw-host-node-join');
-  if (join && Number(capacity.slots.free || 0) < 1 && !selectedLocalHost()) {
-    join.dataset.mode = 'search';
-    join.textContent = 'Find nearest open Hub';
-  }
-  document.getElementById('cw-host-node-lobby')?.setAttribute('data-local-capacity-live', 'true');
-  return true;
+  if (note) { const counts = capacity.counts || {}, limits = capacity.limits || {}; note.textContent = `${Number(counts.communityMembers || 0).toLocaleString()} / ${Number(limits.community || 0).toLocaleString()} community seats used · ${Number(counts.paidExpansionMembers || 0).toLocaleString()} / ${Number(limits.paidExpansion || 0).toLocaleString()} paid-expansion seats used. Offline joins are account-based, so reconnecting or adding Passports does not consume another seat.`; }
+  const join = el('cw-host-node-join'); if (join && Number(capacity.slots.free || 0) < 1 && !selectedLocalHost()) { join.dataset.mode = 'search'; join.textContent = 'Find nearest open Hub'; }
+  el('cw-host-node-lobby')?.setAttribute('data-local-capacity-live', 'true'); return true;
 }
-
-async function refreshCapacity() {
-  if (refreshing || !document.getElementById('cw-host-node-lobby')) return null;
-  refreshing = true;
-  try {
-    const packet = await jsonRequest(CAPACITY_ENDPOINT);
-    renderCapacity(packet);
-    return packet;
-  } catch (error) {
-    const note = el('cw-host-node-note');
-    if (note && /Not published|not expose|live capacity/i.test(note.textContent || '')) note.textContent = `Local seat accounting is starting: ${error.message}`;
-    return null;
-  } finally {
-    refreshing = false;
-  }
+async function refreshCapacity() { if (refreshing || !el('cw-host-node-lobby')) return null; refreshing = true; try { const packet = await jsonRequest(CAPACITY_ENDPOINT); renderCapacity(packet); return packet; } catch (error) { const note = el('cw-host-node-note'); if (note) note.textContent = `Local seat accounting is unavailable: ${error.message}`; return null; } finally { refreshing = false; } }
+function status(message, state = 'info') { const node = el('cw-local-account-status'); if (node) { node.textContent = message; node.dataset.state = state; } const help = el('cw-host-node-help'); if (help && state === 'error') help.textContent = message; }
+function styles() { if (el('cw-local-account-style-v2')) return; const style = document.createElement('style'); style.id = 'cw-local-account-style-v2'; style.textContent = `.cw-local-account{margin-top:12px;padding:13px;border:1px solid #72dfbc55;border-radius:15px;background:#071c27e8;color:#fff}.cw-local-account>summary{cursor:pointer;font:900 .8rem system-ui;color:#bdf8e4}.cw-local-account p{font:.74rem/1.45 system-ui;color:#abc1c8}.cw-local-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.cw-local-account input{min-height:42px;min-width:min(100%,210px);flex:1 1 190px;padding:8px 10px;border:1px solid #ffffff2a;border-radius:10px;background:#09141f;color:#fff}.cw-local-account button{min-height:42px;padding:8px 12px;border:1px solid #72dfbc66;border-radius:10px;background:#123b35;color:#fff;font-weight:850;cursor:pointer}.cw-local-account button.danger{background:#4b2027;border-color:#ff9fae66}.cw-local-kit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:8px 0}.cw-local-kit code{padding:7px;border-radius:8px;background:#02090e;overflow-wrap:anywhere}.cw-local-good{color:#9cf3ca!important}.cw-local-bad{color:#ffd08a!important}.cw-local-device,.cw-local-member{padding:8px;border:1px solid #ffffff1d;border-radius:10px;margin-top:6px;background:#06141d}@media(max-width:620px){.cw-local-kit{grid-template-columns:1fr}.cw-local-account button{flex:1 1 140px}}`; document.head.append(style); }
+function ensurePanel() {
+  const lobby = el('cw-host-node-lobby'); if (!lobby) return null; let root = el('cw-local-account-panel'); if (root) return root; styles(); root = document.createElement('details'); root.id = 'cw-local-account-panel'; root.className = 'cw-local-account'; root.innerHTML = `<summary>Offline Hub account & devices</summary><p id="cw-local-account-status">Internet is optional here. Local Hub membership still requires a username, recovery email, saved recovery kit, and authenticator 2FA.</p><section><strong>Create local Hub account</strong><div class="cw-local-row"><input id="cw-local-name" autocomplete="username" placeholder="username"><input id="cw-local-email" type="email" autocomplete="email" placeholder="recovery email"><button id="cw-local-create" type="button">Create account</button></div><p>The email is recorded now even during an outage. Verification is reconciled when an online account directory becomes reachable.</p></section><section id="cw-local-kit-section" hidden><strong>Save recovery kit</strong><div id="cw-local-kit" class="cw-local-kit"></div><label><input id="cw-local-kit-check" type="checkbox"> I saved these codes somewhere separate.</label><div class="cw-local-row"><button id="cw-local-kit-ack" type="button">Confirm saved kit</button><button id="cw-local-kit-new" type="button">Replace kit</button></div></section><section id="cw-local-totp-section" hidden><strong>Authenticator 2FA</strong><p>Secret: <code id="cw-local-totp-secret"></code></p><div class="cw-local-row"><input id="cw-local-totp-verify-code" inputmode="numeric" maxlength="6" placeholder="6-digit code"><button id="cw-local-totp-verify" type="button">Confirm authenticator</button></div></section><section><strong>Join this Hub</strong><div class="cw-local-row"><input id="cw-local-join-code" inputmode="numeric" maxlength="6" placeholder="Authenticator code"><button id="cw-local-secure-join" type="button">Join offline / LAN Hub</button></div><p id="cw-local-ready-note"></p><div id="cw-local-devices"></div></section><section><details><summary>Recover this account on another device</summary><div class="cw-local-row"><input id="cw-local-recover-name" autocomplete="username" placeholder="username"><input id="cw-local-recover-code" placeholder="one-time recovery code"><input id="cw-local-recover-totp" inputmode="numeric" maxlength="6" placeholder="authenticator code"><button id="cw-local-recover" type="button">Recover account</button></div></details></section><section id="cw-local-steward" hidden><strong>Local Host Steward</strong><p>Enter the federation admin token once for this app session to remove or block Hub members.</p><div class="cw-local-row"><input id="cw-local-admin-token" type="password" autocomplete="off" placeholder="Federation admin token"><button id="cw-local-members-refresh" type="button">Load members</button></div><div id="cw-local-members"></div></section>`; lobby.append(root); bindPanel(root); renderAccount(); return root;
 }
-
-async function admitResident({ quiet = false } = {}) {
-  const button = el('cw-host-node-join');
-  const help = el('cw-host-node-help');
-  const priorText = button?.textContent || '';
-  if (!quiet && button) { button.disabled = true; button.textContent = 'Reserving seat…'; }
+function renderAccount() {
+  const state = accountState(), account = state?.account, note = el('cw-local-ready-note');
+  if (note) { if (!account) note.textContent = 'No local Hub account on this device yet.'; else note.textContent = account.offlineMembershipReady ? `✓ ${account.accountName} is ready for offline membership. ${account.pairedDeviceCount || 0}/10 devices paired, ${account.activeDeviceCount || 0}/2 active.` : `${account.accountName} exists, but recovery-kit acknowledgement or authenticator setup is still incomplete.`; note.className = account?.offlineMembershipReady ? 'cw-local-good' : 'cw-local-bad'; }
+  const devices = el('cw-local-devices'); if (devices) devices.innerHTML = (account?.devices || []).map(row => `<div class="cw-local-device"><strong>${esc(row.label || row.deviceId)}${row.deviceId === deviceId() ? ' · this device' : ''}</strong><small>${row.active ? 'active' : 'paired'}</small><div class="cw-local-row">${row.active ? `<button data-local-device="deactivate" data-id="${esc(row.deviceId)}" type="button">Deactivate</button>` : ''}<button data-local-device="remove" data-id="${esc(row.deviceId)}" type="button">Remove</button>${activeLimit.some(x => x.deviceId === row.deviceId) ? `<button data-local-device="replace" data-id="${esc(row.deviceId)}" type="button">Replace with this device</button>` : ''}</div></div>`).join('');
+  const steward = el('cw-local-steward'); try { if (steward) steward.hidden = localStorage.getItem(STEWARD_KEY) !== '1'; } catch { if (steward) steward.hidden = true; }
+}
+function showSetup(packet) { if (packet?.recoveryKit?.codes) { recoveryKit = packet.recoveryKit; const kit = el('cw-local-kit'); if (kit) kit.innerHTML = recoveryKit.codes.map(code => `<code>${esc(code)}</code>`).join(''); if (el('cw-local-kit-section')) el('cw-local-kit-section').hidden = false; } if (packet?.totp?.secret) { totpSetup = packet.totp; el('cw-local-totp-secret').textContent = packet.totp.secret; if (el('cw-local-totp-section')) el('cw-local-totp-section').hidden = false; } }
+async function createAccount(root) { const name = clean(root.querySelector('#cw-local-name')?.value, 64).toLowerCase(), email = clean(root.querySelector('#cw-local-email')?.value, 320); if (!name || !email) return status('Choose a username and recovery email first.', 'error'); try { status('Creating local account without consuming a seat…'); const packet = await accountPost('create', { accountName: name, recoveryEmail: email, passportId: passportId(), deviceId: deviceId(), deviceLabel: deviceLabel() }); saveAccount(packet); showSetup(packet); renderAccount(); status('Account created. Save the recovery kit and confirm authenticator 2FA before joining.', 'ok'); } catch (error) { status(error.message, 'error'); } }
+async function verifyTotp(root) { const code = clean(root.querySelector('#cw-local-totp-verify-code')?.value, 20); try { const packet = await accountPost('totp/verify', accountAuth({ code })); saveAccount(packet); renderAccount(); status('Authenticator 2FA confirmed. This proof works without the internet.', 'ok'); } catch (error) { status(error.message, 'error'); } }
+async function ackKit(root) { if (!root.querySelector('#cw-local-kit-check')?.checked) return status('Confirm that you saved the recovery kit first.', 'error'); try { const packet = await accountPost('recovery/ack', accountAuth()); saveAccount(packet); recoveryKit = null; el('cw-local-kit-section').hidden = true; renderAccount(); status('Recovery kit acknowledged.', 'ok'); } catch (error) { status(error.message, 'error'); } }
+async function regenerateKit() { try { const packet = await accountPost('recovery/regenerate', accountAuth()); saveAccount(packet); showSetup(packet); renderAccount(); status('Recovery kit replaced; old codes no longer work.', 'ok'); } catch (error) { status(error.message, 'error'); } }
+async function readiness() { try { const packet = await accountPost('readiness', accountAuth()); saveAccount(packet); renderAccount(); return packet; } catch { return null; } }
+async function admitResident({ replaceDeviceId = '', quiet = false } = {}) {
+  const button = el('cw-host-node-join'), localButton = el('cw-local-secure-join'), help = el('cw-host-node-help'), priorText = button?.textContent || '', code = clean(el('cw-local-join-code')?.value, 20);
+  if (!code) throw Object.assign(new Error('Enter the current authenticator code to join this local Hub.'), { status: 428 });
+  if (!quiet && button) { button.disabled = true; button.textContent = 'Checking account…'; } if (localButton) localButton.disabled = true;
   try {
-    const packet = await jsonRequest(ADMIT_ENDPOINT, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ residentId: residentId(), userId: passportId() || undefined, seatClass: 'community' }),
-    });
-    renderCapacity(packet);
-    return packet;
+    const packet = await jsonRequest(ADMIT_ENDPOINT, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(accountAuth({ totpCode: code, replaceDeviceId: replaceDeviceId || undefined, seatClass: 'community' })) });
+    saveAccount({ account: packet.account }); activeLimit = []; renderCapacity(packet); renderAccount(); return packet;
   } catch (error) {
-    if (help) {
-      help.textContent = error.status === 409
-        ? 'This Host Node has no free community seats right now. A steward can expand capacity or you can choose another Host Node.'
-        : `Civweave could not reserve a community seat on this local Host Node: ${error.message}`;
-    }
+    if (error.code === 'active-device-limit') { activeLimit = error.payload?.activeDevices || []; renderAccount(); status('Two devices are already active. Choose one below to replace.', 'error'); }
+    else if (help) help.textContent = error.status === 409 ? 'This Host Node has no free community seats right now.' : `Civweave could not join this local Hub: ${error.message}`;
     throw error;
-  } finally {
-    if (!quiet && button) { button.disabled = false; button.textContent = priorText || 'Use this Host Node'; }
-  }
+  } finally { if (!quiet && button) { button.disabled = false; button.textContent = priorText || 'Use this Host Node'; } if (localButton) localButton.disabled = false; }
 }
-
-async function interceptJoin(event) {
-  const button = event.target?.closest?.('#cw-host-node-join');
-  const lobby = document.getElementById('cw-host-node-lobby');
-  if (!button || !lobby || lobby.dataset.localFederated !== 'true') return;
-  if (button.dataset.mode === 'search') return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  if (joining) return;
-  joining = true;
-  try {
-    await admitResident();
-    await globalThis.CivweaveHostNodeInstallerLobbyV1?.joinHostNode?.();
-    await refreshCapacity();
-  } catch {
-    // admitResident already leaves a useful status message and deliberately does not select a full host.
-  } finally {
-    joining = false;
-  }
-}
-
-function observeLobby() {
-  const lobby = document.getElementById('cw-host-node-lobby');
-  if (!lobby) return false;
-  const observer = new MutationObserver(() => {
-    clearTimeout(observerTimer);
-    observerTimer = setTimeout(() => {
-      const free = el('cw-host-free-slots')?.textContent || '';
-      const paid = el('cw-host-paid-slots')?.textContent || '';
-      if (/Not published|^—$/.test(free) || /Not published|^—$/.test(paid)) refreshCapacity();
-    }, 80);
-  });
-  observer.observe(lobby, { subtree: true, childList: true, characterData: true });
-  addEventListener('pagehide', () => observer.disconnect(), { once: true });
-  return true;
-}
-
-function waitForLobby(timeoutMs = LOBBY_WAIT_MS) {
-  const existing = document.getElementById('cw-host-node-lobby');
-  if (existing) return Promise.resolve(existing);
-  return new Promise(resolve => {
-    const root = document.documentElement || document;
-    let settled = false;
-    const finish = value => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      observer.disconnect();
-      resolve(value);
-    };
-    const observer = new MutationObserver(() => {
-      const lobby = document.getElementById('cw-host-node-lobby');
-      if (lobby) finish(lobby);
-    });
-    observer.observe(root, { childList: true, subtree: true });
-    const timer = setTimeout(() => finish(null), timeoutMs);
-  });
-}
-
-async function boot() {
-  if (bound) return true;
-  const lobby = await waitForLobby();
-  if (!lobby || bound) return false;
-  bound = true;
-  document.addEventListener('click', interceptJoin, true);
-  observeLobby();
-  await refreshCapacity();
-  if (selectedLocalHost()) admitResident({ quiet: true }).then(refreshCapacity).catch(() => {});
-  clearInterval(refreshTimer);
-  refreshTimer = setInterval(() => { if (document.visibilityState === 'visible') refreshCapacity(); }, REFRESH_MS);
-  addEventListener('pagehide', () => clearInterval(refreshTimer), { once: true });
-  return true;
-}
-
-if (document.readyState === 'loading') addEventListener('DOMContentLoaded', boot, { once: true });
-else boot();
-
-globalThis.CivweaveHostNodeLocalCapacityV1 = Object.freeze({ version: VERSION, refreshCapacity, admitResident, residentId, passportId, waitForLobby, boot });
+async function secureJoin(replaceDeviceId = '') { if (joining) return; joining = true; try { await admitResident({ replaceDeviceId }); await globalThis.CivweaveHostNodeInstallerLobbyV1?.joinHostNode?.(); await refreshCapacity(); status('Joined this local Hub with one stable account seat.', 'ok'); } catch (error) { if (error.code !== 'active-device-limit') status(error.message, 'error'); } finally { joining = false; } }
+async function recover(root) { const name = clean(root.querySelector('#cw-local-recover-name')?.value, 64), recoveryCode = clean(root.querySelector('#cw-local-recover-code')?.value, 400), code = clean(root.querySelector('#cw-local-recover-totp')?.value, 20); try { const packet = await accountPost('recover', { accountName: name, recoveryCode, totpCode: code, deviceId: deviceId(), deviceLabel: deviceLabel() }); saveAccount(packet); await readiness(); status(`Recovered ${packet.account?.accountName || name} on this device.`, 'ok'); } catch (error) { status(error.message, 'error'); } }
+async function deviceAction(action, id) { try { if (action === 'replace') return secureJoin(id); const packet = await accountPost(`device/${action}`, accountAuth({ deviceId: id })); saveAccount(packet); renderAccount(); status(action === 'remove' ? 'Device removed.' : 'Device deactivated.', 'ok'); } catch (error) { status(error.message, 'error'); } }
+function adminToken(root) { const typed = clean(root.querySelector('#cw-local-admin-token')?.value, 1000); if (typed) { sessionStorage.setItem(ADMIN_SESSION_KEY, typed); return typed; } return clean(sessionStorage.getItem(ADMIN_SESSION_KEY), 1000); }
+async function adminRequest(path, options = {}, root = el('cw-local-account-panel')) { const token = adminToken(root); if (!token) throw new Error('Enter the federation admin token first.'); return jsonRequest(`/api/federation/${path}`, { ...options, headers: { ...(options.headers || {}), authorization: `Bearer ${token}` } }); }
+async function loadMembers(root) { try { const packet = await adminRequest('residents', {}, root), list = el('cw-local-members'), rows = packet.members || []; if (list) list.innerHTML = rows.length ? rows.map(row => `<div class="cw-local-member"><strong>${esc(row.accountName || row.userId || row.residentId)}</strong><small>${esc(row.seatClass || '')} · ${esc(row.billingStatus || '')}</small><div class="cw-local-row"><button class="danger" data-local-member="remove" data-user="${esc(row.userId || '')}" data-resident="${esc(row.residentId || '')}" type="button">Remove from Hub</button><button class="danger" data-local-member="block" data-user="${esc(row.userId || '')}" data-resident="${esc(row.residentId || '')}" type="button">Remove + block</button></div></div>`).join('') : '<p>No residents occupy seats.</p>'; status(`Loaded ${rows.length} local Hub member${rows.length === 1 ? '' : 's'}.`, 'ok'); } catch (error) { status(error.message, 'error'); } }
+async function removeMember(button, root) { try { const blockRejoin = button.dataset.localMember === 'block', body = { userId: clean(button.dataset.user, 180) || undefined, residentId: clean(button.dataset.resident, 180) || undefined, blockRejoin, reason: 'removed-by-host-steward' }; const packet = await adminRequest('residents/remove', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }, root); status(packet.billingActionRequired ? 'Seat freed. Paid billing also needs money-edge cancellation.' : 'Seat freed; the user account remains intact.', packet.billingActionRequired ? 'error' : 'ok'); await loadMembers(root); await refreshCapacity(); } catch (error) { status(error.message, 'error'); } }
+function bindPanel(root) { root.querySelector('#cw-local-create')?.addEventListener('click', () => createAccount(root)); root.querySelector('#cw-local-totp-verify')?.addEventListener('click', () => verifyTotp(root)); root.querySelector('#cw-local-kit-ack')?.addEventListener('click', () => ackKit(root)); root.querySelector('#cw-local-kit-new')?.addEventListener('click', regenerateKit); root.querySelector('#cw-local-secure-join')?.addEventListener('click', () => secureJoin()); root.querySelector('#cw-local-recover')?.addEventListener('click', () => recover(root)); root.querySelector('#cw-local-members-refresh')?.addEventListener('click', () => loadMembers(root)); root.addEventListener('click', event => { const device = event.target?.closest?.('[data-local-device]'); if (device) { void deviceAction(device.dataset.localDevice, device.dataset.id); return; } const member = event.target?.closest?.('[data-local-member]'); if (member) void removeMember(member, root); }); }
+async function interceptJoin(event) { const button = event.target?.closest?.('#cw-host-node-join'), lobby = el('cw-host-node-lobby'); if (!button || !lobby || lobby.dataset.localFederated !== 'true' || button.dataset.mode === 'search') return; event.preventDefault(); event.stopImmediatePropagation(); ensurePanel()?.setAttribute('open', ''); const ready = await readiness(); if (!ready?.account?.offlineMembershipReady) return status('Finish the local account recovery-kit and authenticator steps before joining.', 'error'); await secureJoin(); }
+function observeLobby() { const lobby = el('cw-host-node-lobby'); if (!lobby) return false; const observer = new MutationObserver(() => { clearTimeout(observerTimer); observerTimer = setTimeout(() => { const free = el('cw-host-free-slots')?.textContent || '', paid = el('cw-host-paid-slots')?.textContent || ''; if (/Not published|^—$/.test(free) || /Not published|^—$/.test(paid)) refreshCapacity(); }, 80); }); observer.observe(lobby, { subtree: true, childList: true, characterData: true }); addEventListener('pagehide', () => observer.disconnect(), { once: true }); return true; }
+function waitForLobby(timeoutMs = LOBBY_WAIT_MS) { const existing = el('cw-host-node-lobby'); if (existing) return Promise.resolve(existing); return new Promise(resolve => { const root = document.documentElement || document; let settled = false; const finish = value => { if (settled) return; settled = true; clearTimeout(timer); observer.disconnect(); resolve(value); }; const observer = new MutationObserver(() => { const lobby = el('cw-host-node-lobby'); if (lobby) finish(lobby); }); observer.observe(root, { childList: true, subtree: true }); const timer = setTimeout(() => finish(null), timeoutMs); }); }
+async function boot() { if (bound) return true; const lobby = await waitForLobby(); if (!lobby || bound) return false; bound = true; ensurePanel(); document.addEventListener('click', interceptJoin, true); observeLobby(); await refreshCapacity(); await readiness(); clearInterval(refreshTimer); refreshTimer = setInterval(() => { if (document.visibilityState === 'visible') { refreshCapacity(); readiness(); } }, REFRESH_MS); addEventListener('pagehide', () => clearInterval(refreshTimer), { once: true }); return true; }
+if (document.readyState === 'loading') addEventListener('DOMContentLoaded', boot, { once: true }); else boot();
+globalThis.CivweaveHostNodeLocalCapacityV1 = Object.freeze({ version: VERSION, refreshCapacity, admitResident, passportId, deviceId, accountState, readiness, waitForLobby, boot });
 })();
