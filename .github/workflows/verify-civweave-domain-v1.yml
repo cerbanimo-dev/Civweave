@@ -59,9 +59,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
 
@@ -101,7 +101,7 @@ jobs:
           CIVWEAVE_CORE_D1_ID: 11111111-1111-1111-1111-111111111111
         run: |
           node scripts/prepare-cloudflare-launch-kit-v1.mjs > /tmp/civweave-launch-kit.json
-          grep -q 'civweave-domain-router' /tmp/civweave-launch-kit.json
-          grep -q '"pattern": "*.civweave.cc/*"' .cloudflare-launch/shared-domain.wrangler.jsonc
-          grep -q '11111111-1111-1111-1111-111111111111' .cloudflare-launch/shared-domain.wrangler.jsonc
-          grep -q '../cloudflare/shared-domain/src/index.mjs' .cloudflare-launch/shared-domain.wrangler.jsonc
+          grep -Fq 'civweave-domain-router' /tmp/civweave-launch-kit.json
+          grep -Fq '"pattern": "*.civweave.cc/*"' .cloudflare-launch/shared-domain.wrangler.jsonc
+          grep -Fq '11111111-1111-1111-1111-111111111111' .cloudflare-launch/shared-domain.wrangler.jsonc
+          grep -Fq '../cloudflare/shared-domain/src/index.mjs' .cloudflare-launch/shared-domain.wrangler.jsonc
