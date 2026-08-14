@@ -24,7 +24,10 @@ export function hostingPlanActive(config = {}, now = Date.now()) {
 }
 
 export function hostingBillingBand(memberCount) {
-  const count = Math.max(0, Number(memberCount || 0));
+  const count = Number(memberCount);
+  if (!Number.isSafeInteger(count) || count < 0 || count > CIVWEAVE_HUB_HOSTING.hostedMaxMembers) {
+    throw new RangeError(`Hub member count must be from 0 through ${CIVWEAVE_HUB_HOSTING.hostedMaxMembers}.`);
+  }
   return Object.freeze(count >= CIVWEAVE_HUB_HOSTING.scaleThresholdMembers
     ? { id: 'scale', monthlyCents: CIVWEAVE_HUB_HOSTING.scaleMonthlyCents, minMembers: 200, maxMembers: 400 }
     : { id: 'standard', monthlyCents: CIVWEAVE_HUB_HOSTING.standardMonthlyCents, minMembers: 0, maxMembers: 199 });
@@ -117,6 +120,8 @@ export class CivweaveCapacityAccount extends BaseCapacityAccount {
     }
     const seatClass = clean(input.seatClass, 40).toLowerCase();
     if (!['community', 'paid-expansion'].includes(seatClass)) throw Object.assign(new RangeError('invalid-seat-class'), { status: 409 });
+    const billingStatus = clean(input.billingStatus || 'free', 40).toLowerCase() === 'paid' ? 'paid' : 'free';
+    if (seatClass === 'paid-expansion' && billingStatus !== 'paid') throw Object.assign(new RangeError('paid-expansion-requires-active-membership'), { status: 409 });
     const pendingPaidReservations = seatClass === 'community' && typeof this.activePendingPaidCount === 'function' ? await this.activePendingPaidCount() : 0;
     if (capacity.memberCount + pendingPaidReservations >= capacity.maxMembers) throw Object.assign(new RangeError('instance-capacity-full'), { status: 409 });
     const at = new Date().toISOString();
@@ -125,8 +130,8 @@ export class CivweaveCapacityAccount extends BaseCapacityAccount {
       nodeId,
       userId,
       seatClass,
-      billingStatus: clean(input.billingStatus || 'free', 40).toLowerCase() === 'paid' ? 'paid' : 'free',
-      membershipTierId: clean(input.membershipTierId, 80) || null,
+      billingStatus,
+      membershipTierId: billingStatus === 'paid' ? clean(input.membershipTierId, 80) || null : null,
       loginCredentialHash: clean(input.loginCredentialHash, 128) || null,
       admittedAt: at,
       updatedAt: at,
