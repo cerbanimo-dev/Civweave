@@ -50,8 +50,13 @@ async function main(){
   console.log(`[Civweave] Generated ${summary.files.length} app icon assets from the approved daytime logo.`);
 }
 
-main().catch(error=>{
-  if(soft){console.warn(`[Civweave] Icon generation skipped: ${error.message}`);return}
-  console.error(error);
-  process.exitCode=1;
-});
+try{
+  await main();
+}catch(error){
+  if(soft){console.warn(`[Civweave] Icon generation skipped: ${error.message}`)}
+  else{
+    console.error(error);
+    process.exitCode=1;
+    throw error;
+  }
+}
