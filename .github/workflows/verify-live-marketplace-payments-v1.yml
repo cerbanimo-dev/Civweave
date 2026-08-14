@@ -17,8 +17,10 @@ on:
       - 'public/app/services/fellowfare/app.js'
       - 'public/app/fellowfare-cabinet-v144.html'
       - 'public/app/cerbanimo-commerce-distribution-v1.js'
+      - 'cloudflare/core/migrations/0008_fellowfare_service_fees.sql'
       - 'cloudflare/core/src/commerce-edge.mjs'
       - 'cloudflare/core/src/fellowfare-direct-commerce-v1.mjs'
+      - 'cloudflare/core/src/fellowfare-service-fee-v1.mjs'
       - 'cloudflare/core/src/money-edge-with-memberships.mjs'
       - 'cloudflare/core/src/stripe-connect-v2-entry.mjs'
       - 'cloudflare/core/src/origin-entry.mjs'
@@ -27,6 +29,7 @@ on:
       - 'scripts/verify-fellowfare-seller-direct-guardrails-v1.mjs'
       - 'scripts/verify-cerbanimo-commerce-distribution-v1.mjs'
       - 'scripts/verify-fellowfare-marketplace-v2.mjs'
+      - 'scripts/verify-stripe-live-readiness-preflight.mjs'
       - 'docs/finance/fellowfare-fulfillment-economy-v1.md'
       - 'docs/finance/cerbanimo-commerce-distribution-v1.md'
       - 'docs/finance/cross-node-commerce-host-fee-v1.md'
@@ -54,6 +57,7 @@ jobs:
           node --check cloudflare/core/src/stripe-connect-v2-entry.mjs
           node --check cloudflare/core/src/money-edge-with-memberships.mjs
           node --check cloudflare/core/src/fellowfare-direct-commerce-v1.mjs
+          node --check cloudflare/core/src/fellowfare-service-fee-v1.mjs
           node --check public/app/services/fellowfare/fulfillment-economy-v2.js
           node --check public/app/services/fellowfare/jurisdiction-policy-v1.js
           node --check public/app/services/fellowfare/seller-method-types-v1.js
@@ -62,6 +66,7 @@ jobs:
           node --check public/app/services/fellowfare/tax-records-v1.js
           node --check public/app/services/fellowfare/tax-record-bridge-v1.js
           node --check public/app/services/fellowfare/seller-record-export-v1.js
+          node --check scripts/verify-stripe-live-readiness-preflight.mjs
           node --check scripts/verify-fellowfare-seller-direct-guardrails-v1.mjs
           node scripts/verify-fellowfare-direct-commerce-v2.mjs
           node scripts/verify-live-marketplace-payments-v1.mjs
