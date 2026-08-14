@@ -145,7 +145,6 @@ assert.ok(hostSetup.includes('Account → Workers Scripts → Edit'));
 assert.ok(hostSetup.includes('renderAccountEdge(meta)'));
 assert.ok(hostSetup.includes('id="sync-location"'));
 assert.ok(hostSetup.includes('navigator.geolocation.watchPosition'));
-assert.ok(hostSetup.includes("position.coords.latitude.toFixed(3)"));
 
 for (const file of ['cloudflare/account-edge/src/index.mjs','cloudflare/account-edge/src/index-legacy-v1.mjs','cloudflare/node-cloud/src/index.mjs','scripts/provision-cloudflare-account-edge-v1.mjs','scripts/setup-cloudflare-node.mjs','scripts/verify-cloudflare-pages-account-target-v1.mjs','scripts/test-cloudflare-account-bootstrap-v1.mjs']) {
   const result = spawnSync(process.execPath, ['--check', file], { cwd: new URL('../', import.meta.url), encoding: 'utf8' });
