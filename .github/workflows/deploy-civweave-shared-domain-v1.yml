@@ -71,7 +71,7 @@ jobs:
           node scripts/prepare-cloudflare-launch-kit-v1.mjs "--d1-id=$D1_ID"
 
       - name: Ensure wildcard civweave.cc DNS ingress
-        run: node scripts/ensure-cloudflare-shared-domain-dns-v1.mjs --zone civweave.cc
+        run: node scripts/ensure-cloudflare-shared-domain-dns-v1.mjs --zone civweave.cc --repair
 
       - name: Apply shared-domain D1 migration
         run: npx --yes wrangler@latest d1 migrations apply civweave-core --remote --config .cloudflare-launch/core.wrangler.jsonc
