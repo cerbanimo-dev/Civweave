@@ -2,7 +2,7 @@
 'use strict';
 
 const REVISION='chat-avatar-visible-v346';
-const FREEZE_REVISION='mobile-chat-freeze-v347';
+const FREEZE_REVISION='chat-interaction-safe-v348';
 // Non-executable legacy audit marker only: const REVISION='chat-css-contract-v343'
 const PARTY_REVISION='party-chat-v1';
 const HUMAN_BUBBLE_REVISION='human-message-bubble-v1';

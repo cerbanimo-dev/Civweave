@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
-const VERSION='1.0.115-local-chat-owner-v302',SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'],GUIDE={civweave:['Weaveling','central mirror and orchestrator'],'living-school':['Moss','learning guide'],cerbanimo:['Kamiya','questwright and skilled-work guide'],fellowfare:['Rook','quartermaster and exchange guide'],anarchadia:['Merlin','civic and automation guide']};
-if(globalThis.CivweaveLocalChatOwnerV295?.version===VERSION&&globalThis.CivweaveLocalChatOwnerV295?.intentPrewarm===true&&globalThis.CivweaveLocalChatOwnerV295?.chatOpenPrewarm===true)return;
+const VERSION='1.0.115-local-chat-owner-v302',REVISION='chat-interaction-safe-v348',SYSTEMS=['civweave','living-school','cerbanimo','fellowfare','anarchadia'],GUIDE={civweave:['Weaveling','central mirror and orchestrator'],'living-school':['Moss','learning guide'],cerbanimo:['Kamiya','questwright and skilled-work guide'],fellowfare:['Rook','quartermaster and exchange guide'],anarchadia:['Merlin','civic and automation guide']};
+if(globalThis.CivweaveLocalChatOwnerV295?.version===VERSION&&globalThis.CivweaveLocalChatOwnerV295?.revision===REVISION)return;
 const clean=(v,n=12000)=>String(v??'').trim().slice(0,n),now=()=>new Date().toISOString(),uid=p=>`${p}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`,queues=new Map(),running=new Set(),api=()=>globalThis.CivweaveRealmSessionIntegrityV237,runtime=()=>globalThis.CivweaveLocalChatRuntimeV295;
 let prewarmFlight=null;
 function queue(system){let value=queues.get(system);if(!value){value=[];queues.set(system,value)}return value}
@@ -44,7 +44,5 @@ function submit(system,text,form){return enqueue(system,text,form)}
 function queued(system){return queue(system).length+(running.has(system)?1:0)}
 function cancelQueued(reason='settings-open'){let count=0;for(const [system,items] of queues){for(const item of items){update(system,item.messageId,{queuePending:false,queueCancelled:true,queueCancelReason:reason});count+=1}items.length=0}queues.clear();return count}
 addEventListener('civweave:local-inference-cancel-requested',event=>cancelQueued(event?.detail?.reason||'external-request'));
-addEventListener('civweave:guide-workspace-state',prewarmWorkspace);
-document.addEventListener('focusin',prewarmIntent,true);
-globalThis.CivweaveLocalChatOwnerV295=Object.freeze({version:VERSION,capturePhase:false,canonicalSubmitOwner:false,fiveGuideWindows:true,truthfulLoadProgress:true,boundedStartupRecovery:true,freshWorkerFallback:true,truthfulExecutionModel:true,fifoQueue:true,terminalCancellation:true,settingsTeardown:true,intentPrewarm:true,chatOpenPrewarm:true,prewarmTrigger:'chat-open-or-input-focus-v314',beginPrewarm,enqueue,submit,queued,drain,cancelQueued});
+globalThis.CivweaveLocalChatOwnerV295=Object.freeze({version:VERSION,capturePhase:false,canonicalSubmitOwner:false,fiveGuideWindows:true,truthfulLoadProgress:true,boundedStartupRecovery:true,freshWorkerFallback:true,truthfulExecutionModel:true,fifoQueue:true,terminalCancellation:true,settingsTeardown:true,revision:REVISION,intentPrewarm:false,chatOpenPrewarm:false,automaticInteractionPrewarm:false,modelLoadOnSubmit:true,interactionSafe:true,prewarmTrigger:'submit-owned-runtime-v348',beginPrewarm,enqueue,submit,queued,drain,cancelQueued});
 })();
