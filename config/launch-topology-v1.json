@@ -17,7 +17,31 @@
       "lifetimeCredits": "monthly-non-expiring-tier-grant"
     }
   },
-  "canonicalInstallOrigin": "https://civweave.pages.dev",
+  "canonicalInstallOrigin": "https://civweave.cc",
+  "communityHostDomains": {
+    "freeDefault": "cloudflare-pages-project-origin",
+    "freePattern": "https://civweave-<host-id>.pages.dev",
+    "sharedDomain": "civweave.cc",
+    "contributorPattern": "https://<host-id>.civweave.cc",
+    "contributorEligibility": "active-hosting-cost-share",
+    "contributorAddressIsAlias": true,
+    "preservePagesOrigin": true,
+    "lapseBehavior": "disable-shared-alias-keep-pages-origin-live",
+    "reservedLabels": [
+      "www",
+      "app",
+      "api",
+      "hub",
+      "node",
+      "nodes",
+      "docs",
+      "status",
+      "support",
+      "admin",
+      "mail",
+      "recovery"
+    ]
+  },
   "backbone": {
     "provider": "cloudflare",
     "staticProject": "civweave",
@@ -84,6 +108,7 @@
   },
   "transition": {
     "legacyCanonicalInstallOrigin": "https://commonweave.pages.dev",
+    "previousCanonicalInstallOrigin": "https://civweave.pages.dev",
     "renderFallbackDiscoverable": true,
     "renderIsAuthority": false,
     "renderMoneyEdgeEnabled": false,
