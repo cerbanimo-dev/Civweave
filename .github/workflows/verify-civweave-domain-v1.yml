@@ -10,9 +10,14 @@ on:
       - 'cloudflare/core/src/money-edge-with-memberships.mjs'
       - 'cloudflare/core/src/stripe-connect-v2-entry.mjs'
       - 'cloudflare/core/migrations/0007_shared_domains.sql'
+      - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-hosting-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v4.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'scripts/ensure-cloudflare-pages-domain-v1.mjs'
       - 'scripts/ensure-cloudflare-shared-domain-dns-v1.mjs'
       - 'scripts/prepare-cloudflare-launch-kit-v1.mjs'
+      - 'scripts/verify-civweave-hosting-capacity-v1.mjs'
       - 'scripts/verify-civweave-shared-domain-*.mjs'
       - 'scripts/setup-cloudflare-node.mjs'
       - 'config/launch-topology-v1.json'
@@ -35,9 +40,14 @@ on:
       - 'cloudflare/core/src/money-edge-with-memberships.mjs'
       - 'cloudflare/core/src/stripe-connect-v2-entry.mjs'
       - 'cloudflare/core/migrations/0007_shared_domains.sql'
+      - 'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs'
+      - 'cloudflare/node-cloud/src/cloud-node-hosting-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v4.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
       - 'scripts/ensure-cloudflare-pages-domain-v1.mjs'
       - 'scripts/ensure-cloudflare-shared-domain-dns-v1.mjs'
       - 'scripts/prepare-cloudflare-launch-kit-v1.mjs'
+      - 'scripts/verify-civweave-hosting-capacity-v1.mjs'
       - 'scripts/verify-civweave-shared-domain-*.mjs'
       - 'scripts/setup-cloudflare-node.mjs'
       - 'config/launch-topology-v1.json'
@@ -73,12 +83,16 @@ jobs:
           node --check cloudflare/core/src/money-edge-with-memberships.mjs
           node --check cloudflare/core/src/stripe-connect-v2-entry.mjs
           node --check cloudflare/shared-domain/src/index.mjs
+          node --check cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs
+          node --check cloudflare/node-cloud/src/cloud-node-hosting-v1.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v4.mjs
           node --check scripts/ensure-cloudflare-pages-domain-v1.mjs
           node --check scripts/ensure-cloudflare-shared-domain-dns-v1.mjs
           node --check scripts/prepare-cloudflare-launch-kit-v1.mjs
           node --check scripts/setup-cloudflare-node.mjs
           node --check public/app/pwa-install-prompt-v246.js
           node --check public/app/pwa-install-prompt-v247.js
+          node --check scripts/verify-civweave-hosting-capacity-v1.mjs
           node --check scripts/verify-civweave-shared-domain-policy-v1.mjs
           node --check scripts/verify-civweave-shared-domain-router-v1.mjs
           node --check scripts/verify-civweave-shared-domain-entitlements-v1.mjs
@@ -86,6 +100,9 @@ jobs:
 
       - name: Verify free and contributor address policy
         run: node scripts/verify-civweave-shared-domain-policy-v1.mjs
+
+      - name: Verify free and hosted capacity policy
+        run: node scripts/verify-civweave-hosting-capacity-v1.mjs
 
       - name: Verify shared-domain entitlement lifecycle
         run: node scripts/verify-civweave-shared-domain-entitlements-v1.mjs
