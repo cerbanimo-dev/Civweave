@@ -36,6 +36,8 @@ const QUEST_VEIL_MESH='/app/quest-veil-mesh-v1.js';
 const QUEST_VEIL_LEDGER_GATE='/app/quest-veil-ledger-gate-v1.js';
 const SYSTEM_RADIO_AGENT='/app/system-radio-agent-v233.js';
 const RADIO_TRACK_SUGGESTIONS='/app/radio-track-suggestions-v240.js';
+const CANONICAL_PLAYLISTS='/app/canonical-playlists-v1.js';
+const RADIO_PLAYLIST_GOVERNANCE='/app/radio-playlist-governance-v1.js';
 const SHARED_REVIEW_SURFACE='/app/shared-review-surface-v234.js';
 const FALLBACK_PATHS=new Map([
   ['/app/working-campus-v156.html','civweave'],
@@ -51,6 +53,8 @@ const SYSTEM_EXPERIENCE_SCRIPTS=[
   EXPERIENCE_ORCHESTRATOR,
   SYSTEM_RADIO_AGENT,
   RADIO_TRACK_SUGGESTIONS,
+  CANONICAL_PLAYLISTS,
+  RADIO_PLAYLIST_GOVERNANCE,
   SYSTEMS_MESH_RUNTIME,
   HOST_NODE_SESSION,
   NODE_AI_MESH_RUNTIME,

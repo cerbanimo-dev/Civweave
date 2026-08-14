@@ -1,0 +1,32 @@
+{
+  "schema": "civweave.open-music-harvest-config.v1",
+  "accepted_licenses": ["PUBLIC-DOMAIN", "CC0", "CC-BY", "CC-BY-SA"],
+  "daily_batch_per_playlist": 20,
+  "playlists": [
+    {
+      "id": "civweave",
+      "name": "Civweave",
+      "queries": ["indie electronic experimental", "art pop electronic", "ambient electronic hopeful", "post rock electronic"]
+    },
+    {
+      "id": "living-school",
+      "name": "Living School",
+      "queries": ["ambient acoustic instrumental", "lofi jazz instrumental", "folk experimental", "calm electronic study"]
+    },
+    {
+      "id": "cerbanimo",
+      "name": "Cerbanimo",
+      "queries": ["synthwave industrial electronic", "future funk electronic", "electro rock energetic", "cyberpunk electronic instrumental"]
+    },
+    {
+      "id": "fellowfare",
+      "name": "FellowFare",
+      "queries": ["funk soul groove", "global groove instrumental", "folk funk", "jazz funk upbeat"]
+    },
+    {
+      "id": "anarchadia",
+      "name": "Anarchadia",
+      "queries": ["punk experimental", "riot punk", "noise rock", "post punk electronic"]
+    }
+  ]
+}

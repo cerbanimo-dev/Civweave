@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [version, router, settings, mesh, spine, cloudEntryV1, cloudEntryV2, cloudEntryV3, cloudEntryV4, capacityExtension, hostingCapacity, hostingNode, accountEdge, legacyAccountEdge, wrangler, offlineText] = await Promise.all([
+const [version, router, settings, mesh, spine, cloudEntryV1, cloudEntryV2, cloudEntryV3, cloudEntryV4, capacityExtension, hostingCapacity, hostingNode, recoveryNode, accountEdge, legacyAccountEdge, wrangler, offlineText] = await Promise.all([
   'VERSION',
   'public/app/server-ai-router-v301.js',
   'public/app/server-ai-settings-v301.js',
@@ -15,6 +15,7 @@ const [version, router, settings, mesh, spine, cloudEntryV1, cloudEntryV2, cloud
   'cloudflare/node-cloud/src/capacity-community-extension-v1.mjs',
   'cloudflare/node-cloud/src/capacity-hosting-plan-v1.mjs',
   'cloudflare/node-cloud/src/cloud-node-hosting-v1.mjs',
+  'cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs',
   'cloudflare/account-edge/src/index.mjs',
   'cloudflare/account-edge/src/index-legacy-v1.mjs',
   'cloudflare/node-cloud/wrangler.jsonc',
@@ -23,7 +24,7 @@ const [version, router, settings, mesh, spine, cloudEntryV1, cloudEntryV2, cloud
 
 for (const source of [router, settings, mesh, spine]) new Function(source);
 const offline = JSON.parse(offlineText);
-const cloudRuntime = `${cloudEntryV1}\n${cloudEntryV2}\n${cloudEntryV3}\n${cloudEntryV4}\n${hostingCapacity}\n${hostingNode}`;
+const cloudRuntime = `${cloudEntryV1}\n${cloudEntryV2}\n${cloudEntryV3}\n${cloudEntryV4}\n${hostingCapacity}\n${hostingNode}\n${recoveryNode}`;
 const accountRuntime = `${accountEdge}\n${legacyAccountEdge}`;
 
 assert.match(version.trim(), /^\d+\.\d+\.\d+$/);
@@ -102,7 +103,9 @@ assert.match(cloudEntryV3, /defaultCommunityShareBps:100/);
 assert.match(cloudEntryV3, /node-equal/);
 assert.match(cloudEntryV3, /\/topups\/share-preference/);
 assert.match(cloudEntryV4, /capacity-hosting-plan-v1\.mjs/);
-assert.match(cloudEntryV4, /cloud-node-hosting-v1\.mjs/);
+assert.match(cloudEntryV4, /cloud-node-recovery-v1\.mjs/);
+assert.match(recoveryNode, /cloud-node-hosting-v1\.mjs/);
+assert.match(recoveryNode, /HubAccountRecoveryOfflineService/);
 assert.match(hostingCapacity, /freeMaxMembers:\s*28/);
 assert.match(hostingCapacity, /hostedMaxMembers:\s*400/);
 assert.match(hostingCapacity, /scaleThresholdMembers:\s*200/);
@@ -122,7 +125,7 @@ assert.match(wrangler, /"CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https:\/\/civweave
 console.log(JSON.stringify({
   ok: true,
   version: version.trim(),
-  revision: 'server-ai-commerce-v301-composed-user-pools-community-dividend-hosting-v1',
+  revision: 'server-ai-commerce-v301-composed-user-pools-community-dividend-hosting-recovery-v1',
   routeOrder: ['device-local', 'server-local', 'cloudflare-workers-ai'],
   memberships: true,
   topups: true,
@@ -132,6 +135,7 @@ console.log(JSON.stringify({
   cloudflareGeneration: true,
   perUserPoolRouting: true,
   hostedCapacity: true,
+  recoveryComposition: true,
   freeHostMaxMembers: 28,
   hostedMaxMembers: 400,
   accountMoneyAuthorityPreserved: true,
