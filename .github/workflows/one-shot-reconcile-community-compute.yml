@@ -144,6 +144,8 @@ jobs:
           node scripts/sync-release-coherence-v220.mjs
       - name: Install Cloudflare verifier dependency
         run: npm install --prefix cloudflare/core --omit=dev --no-audit --no-fund
+      - name: Remove temporary reconciliation workflow from final tree
+        run: rm .github/workflows/one-shot-reconcile-community-compute.yml
       - name: Validate community compute plus current main features
         run: |
           node scripts/test-cloudflare-host-capacity-v1.mjs
@@ -158,7 +160,6 @@ jobs:
           node scripts/verify-five-guide-prompt-injection-v346.mjs
       - name: Commit reconciled branch
         run: |
-          rm .github/workflows/one-shot-reconcile-community-compute.yml
           git config user.name 'civweave-release-bot'
           git config user.email 'actions@users.noreply.github.com'
           git add -A
