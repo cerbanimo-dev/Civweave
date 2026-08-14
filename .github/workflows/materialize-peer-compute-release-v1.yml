@@ -1,0 +1,53 @@
+name: Materialize peer compute release
+
+on:
+  push:
+    branches:
+      - agent/peer-local-plan-borrow-validation-rewards-current
+    paths:
+      - '.github/workflows/materialize-peer-compute-release-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.repository == 'cerbanimo-dev/Civweave'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/peer-local-plan-borrow-validation-rewards-current
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Align package version to VERSION
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const version=fs.readFileSync('VERSION','utf8').trim();
+          const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+          pkg.version=version;
+          fs.writeFileSync('package.json',JSON.stringify(pkg,null,2)+'\n');
+          NODE
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Verify generated release
+        run: |
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-release-version-sync.mjs
+          node scripts/verify-release-contract.mjs
+      - name: Commit generated release assets to feature branch
+        run: |
+          if git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git config user.name 'civweave-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Materialize Civweave 1.0.150 release assets'
+          git push origin HEAD:agent/peer-local-plan-borrow-validation-rewards-current
