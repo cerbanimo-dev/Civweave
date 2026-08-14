@@ -55,11 +55,6 @@ jobs:
           import {constants} from 'node:fs';
 
           const exists=async path=>{try{await access(path,constants.F_OK);return true}catch{return false}};
-          async function replaceRequired(file,from,to){
-            const source=await readFile(file,'utf8');
-            if(!source.includes(from)) throw new Error(`${file}: expected fragment not found: ${from}`);
-            await writeFile(file,source.replace(from,to));
-          }
           async function ensureContains(file,needles){
             const source=await readFile(file,'utf8');
             for(const needle of needles) if(!source.includes(needle)) throw new Error(`${file}: missing ${needle}`);
@@ -80,7 +75,7 @@ jobs:
             'communityTopupReserveMicrocents'
           ]);
           await ensureContains('cloudflare/node-cloud/src/capacity-membership-resident-v1.mjs',["from'./capacity-community-extension-v1.mjs'"]);
-          await ensureContains('cloudflare/node-cloud/src/capacity-user-pools-v2.mjs',["from './capacity-membership-resident-v1.mjs'",'chooseUserAiPoolRoute' ].filter(Boolean).slice(0,1));
+          await ensureContains('cloudflare/node-cloud/src/capacity-user-pools-v2.mjs',["from './capacity-membership-resident-v1.mjs'"]);
           await ensureContains('cloudflare/node-cloud/src/server-ai-entry-v3.mjs',["from'./server-ai-entry-v2.mjs'",'minimumCommunityShareBps:100','/topups/share-preference']);
           await ensureContains('public/app/server-ai-settings-v301.js',[
             'server-ai-settings-v305-community-dividend',
@@ -119,6 +114,19 @@ jobs:
           if(!verifier.includes('minimumCommunityShareBps:100')) throw new Error('Community dividend verifier coverage was not composed.');
           await writeFile(verifierFile,verifier);
 
+          const userPoolVerifierFile='scripts/verify-user-ai-pools-v302.mjs';
+          let userPoolVerifier=await readFile(userPoolVerifierFile,'utf8');
+          let userPoolWranglerAssertionUpdated=false;
+          userPoolVerifier=userPoolVerifier.split('\n').map(line=>{
+            if(line.includes('assert.match(wrangler,')&&line.includes('server-ai-entry-v2')){
+              userPoolWranglerAssertionUpdated=true;
+              return line.replace('server-ai-entry-v2','server-ai-entry-v3');
+            }
+            return line;
+          }).join('\n');
+          if(!userPoolWranglerAssertionUpdated||!userPoolVerifier.includes('server-ai-entry-v3')) throw new Error('User-pool verifier did not align to the composed v3 wrapper.');
+          await writeFile(userPoolVerifierFile,userPoolVerifier);
+
           const current=(await readFile('VERSION','utf8')).trim();
           const parts=current.split('.').map(Number);
           if(parts.length!==3||parts.some(n=>!Number.isSafeInteger(n))) throw new Error(`Invalid VERSION ${current}`);
@@ -151,6 +159,8 @@ jobs:
       - name: Commit reconciled branch
         run: |
           rm .github/workflows/one-shot-reconcile-community-compute.yml
+          git config user.name 'civweave-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
           git add -A
           git commit -m 'Reconcile community compute dividend with current main'
           git push origin HEAD:agent/community-compute-dividend-v2
