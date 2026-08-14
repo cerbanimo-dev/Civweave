@@ -1,11 +1,11 @@
 (()=>{
 'use strict';
-const VERSION='1.1.1-node-ai-mesh-v1-server-auto';
+const VERSION='1.1.2-node-ai-mesh-v1-capability-cloud';
 const SERVICE_KIND='civweave.node-ai.service-advert.v1';
 const SETTLEMENT_KIND='civweave.node-ai.settlement-batch.v1';
 const SETTLEMENT_BATCH_SCHEMA='civweave.node-ai-mesh-settlement-batch.v1';
 const ROUTER_URL='/app/shared/civweave-node-ai-routing-v1.mjs';
-const SERVER_AI_SCRIPTS=['/app/server-ai-router-v301.js?v=1.0.116-v301','/app/server-ai-settings-v301.js?v=1.0.116-v304-tabbed'];
+const SERVER_AI_SCRIPTS=['/app/server-ai-router-v301.js?v=1.0.134-v303-public-capacity','/app/server-ai-settings-v301.js?v=1.0.134-v306-lazy-local-model-tab'];
 const DEFAULT_SYNC_MS=90_000;
 const LEASE_KEY='civweave.node-ai-mesh.sync-lease.v1';
 const INSTANCE_ID=`node-ai-mesh:${globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`}`;

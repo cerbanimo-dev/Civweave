@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
 const version=(await read('VERSION')).trim();
-const [guard,campus,workerCore,workerWrapper,integrityText,releaseVerifier,syncSource,topbar,lifecycle]=await Promise.all([
+const [guard,campus,workerCore,workerWrapper,integrityText,releaseVerifier,syncSource,topbar,lifecycle,releaseVersion]=await Promise.all([
   read('public/app/working-campus-return-guard-v425.js'),
   read('public/app/working-campus-v156.html'),
   read('public/service-worker-core-v208.js'),
@@ -16,7 +16,8 @@ const [guard,campus,workerCore,workerWrapper,integrityText,releaseVerifier,syncS
   read('scripts/verify-release-version-sync.mjs'),
   read('scripts/sync-release-version-assets.mjs'),
   read('public/app/working-campus-topbar-v243.js'),
-  read('public/app/document-lifecycle-v221.js')
+  read('public/app/document-lifecycle-v221.js'),
+  read('public/app/release-version-v1.js')
 ]);
 const integrity=JSON.parse(integrityText);
 
@@ -31,6 +32,8 @@ for(const token of [
   'forceReveal',
   'renderFailSafe',
   'RECOVERY_WINDOW_MS=30_000',
+  "const NAVIGATION_SELECTORS=['#cw-themed-system-nav','nav.bottom']",
+  'recent||recoveryNavigation()',
   'location.replace(canonicalUrl(reason))',
   "location.assign('/app/index.html?manage=downloads&source=working-campus-recovery')"
 ])assert(guard.includes(token),`Return guard is missing ${token}.`);
@@ -53,6 +56,7 @@ assert(workerWrapper.includes(`service-worker-core-v208.js?v=${version}-chat-con
 assert(topbar.includes("target.searchParams.set('manage','downloads')")&&topbar.includes('location.assign(downloadsUrl())'),'Downloads navigation contract drifted; update the return test with any intentional navigation change.');
 assert(lifecycle.includes('function stopOnPageHide(event){if(event?.persisted)return;stop()}'),'Document lifecycle once again tears down BFCache pages.');
 assert(lifecycle.includes("addEventListener('pageshow',reviveFromPageShow)"),'Document lifecycle no longer revives on pageshow.');
+assert(releaseVersion.includes('if(node===root)continue'),'Release-version synchronization may write textContent onto the document root and erase the entire application.');
 
 assert(!releaseVerifier.includes("await import('./sync-release-version-assets.mjs')"),'Release verifier self-heals the tree before verifying it.');
 assert(!releaseVerifier.includes("await import('./sync-release-coherence-v220.mjs')"),'Release verifier still mutates coherence before verifying it.');
@@ -94,4 +98,4 @@ pagehide({persisted:false,stopImmediatePropagation(){stopped+=1}});
 assert.equal(stopped,1,'Non-persisted navigation was incorrectly quarantined.');
 assert.equal(replaceCalls,0,'Healthy guard simulation unexpectedly reloaded the campus.');
 
-console.log(JSON.stringify({ok:true,version,revision:'working-campus-return-v425',committedTreeReadOnly:true,workerIntegrityReleaseMatch:true,bfcachePagehideQuarantined:true,oneShotRecovery:true,visibleFailsafe:true,downloadsReturnCovered:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'working-campus-return-v425',committedTreeReadOnly:true,workerIntegrityReleaseMatch:true,bfcachePagehideQuarantined:true,oneShotRecovery:true,visibleFailsafe:true,downloadsReturnCovered:true,documentRootProtected:true},null,2));

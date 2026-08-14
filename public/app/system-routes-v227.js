@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.129';
+const VERSION='1.0.134';
 const REVISION='five-system-route-contract-v227';
 const BOOT_KEY='civweave.install-boundary.boot.v227';
 const ROUTES=Object.freeze({
@@ -10,7 +10,13 @@ const ROUTES=Object.freeze({
   fellowfare:Object.freeze({id:'fellowfare',label:'FellowFare',pathname:'/app/fellowfare-cabinet-v144.html',params:Object.freeze({cabinet:'1'})}),
   anarchadia:Object.freeze({id:'anarchadia',label:'Anarchadia',pathname:'/app/anarchadia-console-v139.html',params:Object.freeze({cabinet:'1'})})
 });
-const PATH_TO_ID=new Map(Object.values(ROUTES).map(route=>[route.pathname,route.id]));
+function routeAliases(route){
+  const aliases=[route.pathname];
+  if(route.pathname.endsWith('/index.html'))aliases.push(route.pathname.slice(0,-'/index.html'.length));
+  else if(route.pathname.endsWith('.html'))aliases.push(route.pathname.slice(0,-'.html'.length));
+  return aliases;
+}
+const PATH_TO_ID=new Map(Object.values(ROUTES).flatMap(route=>routeAliases(route).map(pathname=>[pathname,route.id])));
 function normalizePathname(value){
   let pathname=String(value||'/').split(/[?#]/,1)[0]||'/';
   try{pathname=decodeURI(pathname)}catch{}
@@ -56,4 +62,3 @@ if(typeof document!=='undefined'&&identify()){
   document.documentElement.dataset.civweaveSystemRoute=identify();
 }
 })();
-

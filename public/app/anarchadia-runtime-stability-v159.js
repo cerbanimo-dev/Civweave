@@ -3,7 +3,7 @@
 const VERSION='1.0.4-anarchadia-runtime-stability-v159-canonical-chat-r2';
 if(globalThis.AnarchadiaRuntimeStabilityV159?.version===VERSION)return;
 const STORAGE_KEY='civweave.anarchadia.citizen-console.v139';
-const LOADER_SRC='/app/family-ai-loader-v105.js?v=headless-canonical-r1';
+const LOADER_SRC='/app/family-ai-loader-v105.js?v=1.0.134-ai-tier-map-v1';
 let loaderPromise=null;
 const clean=(value,max=12000)=>String(value??'').slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};

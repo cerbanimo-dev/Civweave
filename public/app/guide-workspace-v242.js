@@ -149,15 +149,18 @@ function deterministicReply(system,text){
   if(system==='anarchadia')return`Merlin kept your message locally. For “${value}”, name the proposed change, who it affects, and the reversible test for success.`;
   return`${guide.name} kept your message locally. For “${value}”, start with the outcome you want, then separate what must be learned, built, acquired, or agreed.`
 }
-async function fallbackReply(system,text){
+async function fallbackReply(system,text,priorError=null){
   try{await globalThis.CivweaveFamilyAILoaderV105?.ensure?.()}catch{}
   const runtime=globalThis.CivweaveModelRuntime;
+  let failure=priorError;
   if(typeof runtime?.generate==='function'){
     try{
-      const result=await runtime.generate({purpose:`${system}-guide-workspace-v250`,executionProfile:'interactive',messages:[{role:'system',content:`You are ${GUIDE[system].name}, ${GUIDE[system].role}. Give a useful, concise next response while preserving user control.`},...historyFor(system).slice(-10).map(row=>({role:row.role,content:row.text})),{role:'user',content:text}],deterministic:()=>deterministicReply(system,text),fallback:()=>deterministicReply(system,text)});
+      const task={schema:'civweave.ai-task.v1',kind:'dialogue',text:clean(text,12000),systemId:system,complexity:'routine'};
+      const result=await runtime.generate({purpose:`${system}-guide-workspace-v250`,executionProfile:'interactive',task,capabilityRequirements:{profile:'interactive',requiresTools:false,externalResearch:false,code:false,planning:false,structuredOutput:false,vision:false,complexity:false},messages:[{role:'system',content:`You are ${GUIDE[system].name}, ${GUIDE[system].role}. Give a useful, concise next response while preserving user control.`},...historyFor(system).slice(-10).map(row=>({role:row.role,content:row.text})),{role:'user',content:text}],deterministic:()=>deterministicReply(system,text),fallback:()=>deterministicReply(system,text)});
       const answer=clean(result?.outputText,10000);if(answer)return{text:answer,provider:result?.actual?.provider||result?.fallback?.provider||result?.provider||'shared-model',model:result?.actual?.model||result?.model||''}
-    }catch{}
+    }catch(error){failure=error}
   }
+  if(globalThis.CivweaveFastInteractiveV192?.serverAuto?.({executionProfile:'interactive'}))return{text:`${GUIDE[system].name} could not reach server-side AI: ${clean(failure?.message||failure||'Cloudflare capacity is unavailable.',600)} Your message stayed on this device so you can retry.`,provider:'server-auto-error',model:''}
   return{text:deterministicReply(system,text),provider:'deterministic-local',model:''}
 }
 
@@ -169,8 +172,8 @@ async function submitActive(text){
     if(!assistant?.respond)throw new Error('The shared assistant runtime is not ready.');
     const result=await assistant.respond({text:value,systemId:system,handoffSystem:system!==pageSystem?system:undefined,history:historyFor(system)});
     const thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),next=clean(result?.response?.choice?.nextAction,1200),replacement={role:'assistant',guide:system,responderSystem:system,text:[clean(result?.response?.answer,10000),next?`Next: ${next}`:''].filter(Boolean).join('\n\n'),provider:result?.provider,model:result?.model,approvalGate:result?.response?.approvalGate||null,planSnapshot:result?.plan?clone(result.plan):null,actionSnapshot:result?.action?clone(result.action):null};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread);const target=explicitHandoffTarget(result,system);if(target)await realmApi()?.createHandover?.(system,target,result)
-  }catch{
-    const fallback=await fallbackReply(system,value),thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-workspace-v250'};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread)
+  }catch(error){
+    const fallback=await fallbackReply(system,value,error),thread=readThread(system),index=(thread.messages||[]).findIndex(row=>row.id===pendingId),replacement={role:'assistant',guide:system,responderSystem:system,text:fallback.text,provider:fallback.provider,model:fallback.model||'',recoveredBy:'guide-workspace-v250'};if(index>=0)thread.messages[index]=replacement;else thread.messages.push(replacement);writeThread(system,thread)
   }finally{busy=false;if(button)button.disabled=false;render()}return true
 }
 

@@ -49,6 +49,7 @@
   // Central fabric secrets only, never distributed to community/physical nodes:
   // NODE_FABRIC_OPERATOR_TOKEN
   // NODE_FABRIC_BINDING_TOKEN
+  // NODE_FABRIC_SESSION_SECRET
   //
   // Member capacity sessions use a domain-separated HMAC derived from the operator token.
   // The raw operator secret is never sent to clients.

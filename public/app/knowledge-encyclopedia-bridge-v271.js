@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.3-knowledge-encyclopedia-bridge-v271';
+const VERSION='1.0.134-knowledge-encyclopedia-bridge-v272-server-failover';
 if(globalThis.CivweaveKnowledgeEncyclopediaBridgeV271?.version===VERSION)return;
 const state={version:VERSION,ready:false,error:'',installed:false};
 globalThis.CivweaveKnowledgeEncyclopediaBridgeV271=state;
@@ -53,6 +53,10 @@ function patchGenerate(runtime,encyclopedia){
     const classification=encyclopedia.classifyKnowledgeQuestion(text);
     if(!classification.eligible)return original(options);
     const knowledge=await encyclopedia.buildKnowledgeContext(text,system);
+    const selected=clean(options?.config?.provider||options?.config?.route,80).toLowerCase();
+    if(!Array.isArray(knowledge?.sources)||!knowledge.sources.length){
+      if(selected==='server-auto')return original(options);
+    }
     const messages=[...(Array.isArray(options.messages)?options.messages:[]),{role:'system',content:knowledgeOverrideMessage(knowledge)}];
     let result;
     try{result=await original({...options,context:{...(options.context||{}),knowledgeEncyclopedia:knowledge},messages})}catch(error){result={status:'error',error:{message:error?.message||String(error)}}}
@@ -65,7 +69,8 @@ function patchGenerate(runtime,encyclopedia){
       fallback:{used:true,reason:clean(result?.error?.message||'Selected model failed during local encyclopedia synthesis.',500)}
     };
   };
-  wrapped.__cwKnowledgeV271=true;wrapped.__cwOriginal=original;runtime.generate=wrapped;
+  wrapped.__cwKnowledgeV271=true;wrapped.__cwOriginal=original;
+  try{runtime.generate=wrapped}catch{globalThis.CivweaveModelRuntime=Object.freeze({...runtime,generate:wrapped,knowledgeEncyclopediaRevision:VERSION})}
 }
 async function install(){
   if(state.installed)return state;

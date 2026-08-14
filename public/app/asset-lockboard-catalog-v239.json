@@ -1,10 +1,10 @@
 {
   "schema": "civweave.asset-lockboard.catalog.v239",
-  "generatedAt": "2026-08-11T14:39:20.124Z",
+  "generatedAt": "2026-08-13T16:42:54.246Z",
   "publicRoot": "/",
-  "assetCount": 418,
-  "slotCount": 481,
-  "missingReferenceCount": 26,
+  "assetCount": 420,
+  "slotCount": 610,
+  "missingReferenceCount": 28,
   "assets": [
     {
       "path": "/app/assets/ai/chat/kamiya-face-v255.webp",
@@ -60,7 +60,7 @@
       "extension": "png",
       "bytes": 277767,
       "filename": "kamiya.png",
-      "usageCount": 18
+      "usageCount": 11
     },
     {
       "path": "/app/assets/ai/merlin-hat.png",
@@ -74,7 +74,7 @@
       "extension": "png",
       "bytes": 399552,
       "filename": "merlin.png",
-      "usageCount": 20
+      "usageCount": 13
     },
     {
       "path": "/app/assets/ai/moss-acorn.png",
@@ -95,7 +95,7 @@
       "extension": "png",
       "bytes": 339790,
       "filename": "moss.png",
-      "usageCount": 24
+      "usageCount": 17
     },
     {
       "path": "/app/assets/ai/rook-coin-button.png",
@@ -109,7 +109,7 @@
       "extension": "png",
       "bytes": 400764,
       "filename": "rook.png",
-      "usageCount": 20
+      "usageCount": 11
     },
     {
       "path": "/app/assets/ai/weaveling-compass.png",
@@ -123,7 +123,7 @@
       "extension": "png",
       "bytes": 581027,
       "filename": "weaveling.png",
-      "usageCount": 23
+      "usageCount": 14
     },
     {
       "path": "/app/assets/cabinets/anarchadia.webp",
@@ -571,14 +571,14 @@
       "extension": "png",
       "bytes": 177940,
       "filename": "civweave-ai-config.png",
-      "usageCount": 13
+      "usageCount": 9
     },
     {
       "path": "/app/assets/generated/civweave-navigation-icons/civweave-home.png",
       "extension": "png",
       "bytes": 201098,
       "filename": "civweave-home.png",
-      "usageCount": 6
+      "usageCount": 4
     },
     {
       "path": "/app/assets/generated/civweave-navigation-icons/civweave-journal.png",
@@ -599,21 +599,21 @@
       "extension": "png",
       "bytes": 410733,
       "filename": "civweave-realms.png",
-      "usageCount": 12
+      "usageCount": 8
     },
     {
       "path": "/app/assets/generated/civweave-navigation-icons/civweave-route.png",
       "extension": "png",
       "bytes": 183752,
       "filename": "civweave-route.png",
-      "usageCount": 6
+      "usageCount": 4
     },
     {
       "path": "/app/assets/generated/civweave-navigation-icons/weaveling-compass.png",
       "extension": "png",
       "bytes": 281860,
       "filename": "weaveling-compass.png",
-      "usageCount": 11
+      "usageCount": 7
     },
     {
       "path": "/app/assets/generated/fellowfare-assets-2/favorites-pinboard.png",
@@ -956,7 +956,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "dispatch-hall.webp",
-      "usageCount": 0
+      "usageCount": 5
     },
     {
       "path": "/app/assets/world/federation-harbor.webp",
@@ -970,7 +970,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "festival-grounds.webp",
-      "usageCount": 0
+      "usageCount": 3
     },
     {
       "path": "/app/assets/world/frontier-outpost.webp",
@@ -998,14 +998,14 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "inside-quad.webp",
-      "usageCount": 2
+      "usageCount": 6
     },
     {
       "path": "/app/assets/world/personal-chronicle.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "personal-chronicle.webp",
-      "usageCount": 0
+      "usageCount": 3
     },
     {
       "path": "/app/assets/world/regional-world-map.webp",
@@ -1026,7 +1026,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "settings-accessibility-hall.webp",
-      "usageCount": 0
+      "usageCount": 5
     },
     {
       "path": "/app/assets/world/town-square-home.webp",
@@ -1075,14 +1075,21 @@
       "extension": "webp",
       "bytes": 530984,
       "filename": "anarchadia.webp",
-      "usageCount": 0
+      "usageCount": 1
+    },
+    {
+      "path": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "extension": "png",
+      "bytes": 5570,
+      "filename": "cerbanimo-steward-mark-v1.png",
+      "usageCount": 12
     },
     {
       "path": "/app/logos/cerbanimo.webp",
       "extension": "webp",
       "bytes": 877614,
       "filename": "cerbanimo.webp",
-      "usageCount": 4
+      "usageCount": 5
     },
     {
       "path": "/app/logos/civweave-adaptive-foreground-512.png",
@@ -1110,7 +1117,7 @@
       "extension": "png",
       "bytes": 15007,
       "filename": "civweave-canonical.png",
-      "usageCount": 3
+      "usageCount": 2
     },
     {
       "path": "/app/logos/civweave-icon-1024.png",
@@ -1159,7 +1166,7 @@
       "extension": "png",
       "bytes": 78101,
       "filename": "civweave-icon-192.png",
-      "usageCount": 23
+      "usageCount": 19
     },
     {
       "path": "/app/logos/civweave-icon-32.png",
@@ -1218,18 +1225,25 @@
       "usageCount": 2
     },
     {
+      "path": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "extension": "png",
+      "bytes": 16730,
+      "filename": "civweave-prismatic-wordmark-v1.png",
+      "usageCount": 10
+    },
+    {
       "path": "/app/logos/civweave-pwa-192-v247.png",
       "extension": "png",
       "bytes": 78101,
       "filename": "civweave-pwa-192-v247.png",
-      "usageCount": 2
+      "usageCount": 17
     },
     {
       "path": "/app/logos/civweave-pwa-512-v247.png",
       "extension": "png",
       "bytes": 474076,
       "filename": "civweave-pwa-512-v247.png",
-      "usageCount": 6
+      "usageCount": 9
     },
     {
       "path": "/app/logos/civweave-pwa-maskable-512-v247.png",
@@ -1241,9 +1255,9 @@
     {
       "path": "/app/logos/civweave-symbol.svg",
       "extension": "svg",
-      "bytes": 286,
+      "bytes": 290,
       "filename": "civweave-symbol.svg",
-      "usageCount": 4
+      "usageCount": 2
     },
     {
       "path": "/app/logos/civweave-title-screen.png",
@@ -1262,9 +1276,9 @@
     {
       "path": "/app/logos/civweave.svg",
       "extension": "svg",
-      "bytes": 286,
+      "bytes": 293,
       "filename": "civweave.svg",
-      "usageCount": 2
+      "usageCount": 0
     },
     {
       "path": "/app/logos/civweave.webp",
@@ -1292,7 +1306,7 @@
       "extension": "png",
       "bytes": 87386,
       "filename": "fellowfare.png",
-      "usageCount": 6
+      "usageCount": 2
     },
     {
       "path": "/app/logos/living-school-v2.webp",
@@ -1306,7 +1320,7 @@
       "extension": "webp",
       "bytes": 263240,
       "filename": "living-school.webp",
-      "usageCount": 0
+      "usageCount": 1
     },
     {
       "path": "/app/services/anarchadia/assets/icon-180.png",
@@ -1355,7 +1369,7 @@
       "extension": "webp",
       "bytes": 263858,
       "filename": "bug-portrait.webp",
-      "usageCount": 1
+      "usageCount": 4
     },
     {
       "path": "/app/services/anarchadia/assets/screens/federation-landscape.webp",
@@ -1369,7 +1383,7 @@
       "extension": "webp",
       "bytes": 268608,
       "filename": "federation-portrait.webp",
-      "usageCount": 1
+      "usageCount": 5
     },
     {
       "path": "/app/services/anarchadia/assets/screens/forge-landscape.webp",
@@ -1383,7 +1397,7 @@
       "extension": "webp",
       "bytes": 263858,
       "filename": "forge-portrait.webp",
-      "usageCount": 0
+      "usageCount": 5
     },
     {
       "path": "/app/services/anarchadia/assets/screens/home-landscape.webp",
@@ -1397,7 +1411,7 @@
       "extension": "webp",
       "bytes": 284304,
       "filename": "home-portrait.webp",
-      "usageCount": 4
+      "usageCount": 9
     },
     {
       "path": "/app/services/anarchadia/assets/screens/hub-landscape.webp",
@@ -1411,7 +1425,7 @@
       "extension": "webp",
       "bytes": 260770,
       "filename": "hub-portrait.webp",
-      "usageCount": 1
+      "usageCount": 4
     },
     {
       "path": "/app/services/anarchadia/assets/screens/ledger-landscape.webp",
@@ -1425,7 +1439,7 @@
       "extension": "webp",
       "bytes": 296526,
       "filename": "ledger-portrait.webp",
-      "usageCount": 0
+      "usageCount": 4
     },
     {
       "path": "/app/services/anarchadia/assets/screens/observatory-landscape.webp",
@@ -1439,7 +1453,7 @@
       "extension": "webp",
       "bytes": 286278,
       "filename": "observatory-portrait.webp",
-      "usageCount": 0
+      "usageCount": 3
     },
     {
       "path": "/app/services/anarchadia/assets/screens/proposal-landscape.webp",
@@ -1453,7 +1467,7 @@
       "extension": "webp",
       "bytes": 263858,
       "filename": "proposal-portrait.webp",
-      "usageCount": 1
+      "usageCount": 6
     },
     {
       "path": "/app/services/anarchadia/assets/screens/rails-landscape.webp",
@@ -1467,7 +1481,7 @@
       "extension": "webp",
       "bytes": 268608,
       "filename": "rails-portrait.webp",
-      "usageCount": 0
+      "usageCount": 5
     },
     {
       "path": "/app/services/anarchadia/assets/wave2/automation/agent-capsule.png",
@@ -1859,7 +1873,7 @@
       "extension": "webp",
       "bytes": 342124,
       "filename": "ai-core.webp",
-      "usageCount": 0
+      "usageCount": 2
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/asset-atlas.webp",
@@ -1880,14 +1894,14 @@
       "extension": "webp",
       "bytes": 3026,
       "filename": "hangar.webp",
-      "usageCount": 0
+      "usageCount": 3
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
       "extension": "webp",
       "bytes": 342124,
       "filename": "kamiya-chamber.webp",
-      "usageCount": 0
+      "usageCount": 3
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/kiosks.webp",
@@ -1915,7 +1929,7 @@
       "extension": "webp",
       "bytes": 358468,
       "filename": "mission-room.webp",
-      "usageCount": 0
+      "usageCount": 2
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/mission.webp",
@@ -1929,7 +1943,7 @@
       "extension": "webp",
       "bytes": 277468,
       "filename": "nexus.webp",
-      "usageCount": 3
+      "usageCount": 5
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/object-viewer.webp",
@@ -1943,49 +1957,49 @@
       "extension": "webp",
       "bytes": 301738,
       "filename": "observatory.webp",
-      "usageCount": 0
+      "usageCount": 5
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/project-workbench.webp",
       "extension": "webp",
       "bytes": 378922,
       "filename": "project-workbench.webp",
-      "usageCount": 0
+      "usageCount": 2
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/quest.webp",
       "extension": "webp",
       "bytes": 367312,
       "filename": "quest.webp",
-      "usageCount": 1
+      "usageCount": 4
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/resource.webp",
       "extension": "webp",
       "bytes": 3026,
       "filename": "resource.webp",
-      "usageCount": 0
+      "usageCount": 4
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/showroom.webp",
       "extension": "webp",
       "bytes": 2972,
       "filename": "showroom.webp",
-      "usageCount": 0
+      "usageCount": 3
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/skill.webp",
       "extension": "webp",
       "bytes": 3026,
       "filename": "skill.webp",
-      "usageCount": 0
+      "usageCount": 2
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/systems.webp",
       "extension": "webp",
       "bytes": 3026,
       "filename": "systems.webp",
-      "usageCount": 1
+      "usageCount": 4
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/title.webp",
@@ -1999,14 +2013,14 @@
       "extension": "webp",
       "bytes": 3026,
       "filename": "transit.webp",
-      "usageCount": 0
+      "usageCount": 2
     },
     {
       "path": "/app/services/cerbanimo/assets/visual/workshop.webp",
       "extension": "webp",
       "bytes": 378922,
       "filename": "workshop.webp",
-      "usageCount": 1
+      "usageCount": 3
     },
     {
       "path": "/app/services/cerbanimo/icons/favicon-64.png",
@@ -2125,7 +2139,7 @@
       "extension": "webp",
       "bytes": 270564,
       "filename": "exchange-galleria.webp",
-      "usageCount": 2
+      "usageCount": 7
     },
     {
       "path": "/app/services/fellowfare/assets/mall/free-store.webp",
@@ -2139,14 +2153,14 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "help-desk.webp",
-      "usageCount": 2
+      "usageCount": 3
     },
     {
       "path": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "logistics-concourse.webp",
-      "usageCount": 2
+      "usageCount": 3
     },
     {
       "path": "/app/services/fellowfare/assets/mall/main-atrium.webp",
@@ -2167,28 +2181,28 @@
       "extension": "webp",
       "bytes": 306380,
       "filename": "marketplace.webp",
-      "usageCount": 3
+      "usageCount": 5
     },
     {
       "path": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "mutual-aid-wing.webp",
-      "usageCount": 1
+      "usageCount": 2
     },
     {
       "path": "/app/services/fellowfare/assets/mall/pantry.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "pantry.webp",
-      "usageCount": 1
+      "usageCount": 2
     },
     {
       "path": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "repair-cafe.webp",
-      "usageCount": 1
+      "usageCount": 2
     },
     {
       "path": "/app/services/fellowfare/assets/mall/resource-center.webp",
@@ -2202,7 +2216,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "rooftop-commons.webp",
-      "usageCount": 1
+      "usageCount": 4
     },
     {
       "path": "/app/services/fellowfare/assets/mall/skill-shop.webp",
@@ -2216,26 +2230,26 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "tool-rental.webp",
-      "usageCount": 1
+      "usageCount": 2
     },
     {
       "path": "/app/services/fellowfare/assets/mall/upper-gallery.webp",
       "extension": "webp",
       "bytes": 227926,
       "filename": "upper-gallery.webp",
-      "usageCount": 1
+      "usageCount": 0
     },
     {
       "path": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "volunteer-hub.webp",
-      "usageCount": 2
+      "usageCount": 3
     },
     {
       "path": "/app/services/living-school/icon.svg",
       "extension": "svg",
-      "bytes": 467,
+      "bytes": 468,
       "filename": "icon.svg",
       "usageCount": 0
     },
@@ -2244,7 +2258,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "bridge.webp",
-      "usageCount": 1
+      "usageCount": 3
     },
     {
       "path": "/app/services/living-school/visual-assets/challenge.webp",
@@ -2279,14 +2293,14 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "commons.webp",
-      "usageCount": 2
+      "usageCount": 4
     },
     {
       "path": "/app/services/living-school/visual-assets/core/credential.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "credential.webp",
-      "usageCount": 2
+      "usageCount": 5
     },
     {
       "path": "/app/services/living-school/visual-assets/core/exchange.webp",
@@ -2300,21 +2314,21 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "faculty.webp",
-      "usageCount": 2
+      "usageCount": 5
     },
     {
       "path": "/app/services/living-school/visual-assets/core/forge.webp",
       "extension": "webp",
       "bytes": 289272,
       "filename": "forge.webp",
-      "usageCount": 3
+      "usageCount": 7
     },
     {
       "path": "/app/services/living-school/visual-assets/core/home.webp",
       "extension": "webp",
       "bytes": 307082,
       "filename": "home.webp",
-      "usageCount": 5
+      "usageCount": 8
     },
     {
       "path": "/app/services/living-school/visual-assets/core/journal.webp",
@@ -2328,14 +2342,14 @@
       "extension": "webp",
       "bytes": 267920,
       "filename": "library.webp",
-      "usageCount": 3
+      "usageCount": 5
     },
     {
       "path": "/app/services/living-school/visual-assets/core/moss.webp",
       "extension": "webp",
       "bytes": 238876,
       "filename": "moss.webp",
-      "usageCount": 3
+      "usageCount": 4
     },
     {
       "path": "/app/services/living-school/visual-assets/core/notices.webp",
@@ -2349,21 +2363,21 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "observatory.webp",
-      "usageCount": 2
+      "usageCount": 5
     },
     {
       "path": "/app/services/living-school/visual-assets/core/opportunity.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "opportunity.webp",
-      "usageCount": 2
+      "usageCount": 5
     },
     {
       "path": "/app/services/living-school/visual-assets/core/passport.webp",
       "extension": "webp",
       "bytes": 2994,
       "filename": "passport.webp",
-      "usageCount": 2
+      "usageCount": 4
     },
     {
       "path": "/app/services/living-school/visual-assets/core/profile.webp",
@@ -2377,7 +2391,7 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "project-map.webp",
-      "usageCount": 2
+      "usageCount": 5
     },
     {
       "path": "/app/services/living-school/visual-assets/core/projects.webp",
@@ -2398,21 +2412,21 @@
       "extension": "webp",
       "bytes": 2994,
       "filename": "review.webp",
-      "usageCount": 2
+      "usageCount": 5
     },
     {
       "path": "/app/services/living-school/visual-assets/core/tower.webp",
       "extension": "webp",
       "bytes": 264414,
       "filename": "tower.webp",
-      "usageCount": 2
+      "usageCount": 6
     },
     {
       "path": "/app/services/living-school/visual-assets/core/workshop.webp",
       "extension": "webp",
       "bytes": 257104,
       "filename": "workshop.webp",
-      "usageCount": 3
+      "usageCount": 6
     },
     {
       "path": "/app/services/living-school/visual-assets/courtyard.webp",
@@ -2879,56 +2893,56 @@
     {
       "path": "/app/ui-icons/back.svg",
       "extension": "svg",
-      "bytes": 474,
+      "bytes": 475,
       "filename": "back.svg",
       "usageCount": 0
     },
     {
       "path": "/app/ui-icons/directory.svg",
       "extension": "svg",
-      "bytes": 427,
+      "bytes": 428,
       "filename": "directory.svg",
       "usageCount": 0
     },
     {
       "path": "/app/ui-icons/home.svg",
       "extension": "svg",
-      "bytes": 495,
+      "bytes": 496,
       "filename": "home.svg",
       "usageCount": 0
     },
     {
       "path": "/app/ui-icons/inbox.svg",
       "extension": "svg",
-      "bytes": 467,
+      "bytes": 468,
       "filename": "inbox.svg",
       "usageCount": 0
     },
     {
       "path": "/app/ui-icons/map.svg",
       "extension": "svg",
-      "bytes": 416,
+      "bytes": 417,
       "filename": "map.svg",
       "usageCount": 1
     },
     {
       "path": "/app/ui-icons/nexus.svg",
       "extension": "svg",
-      "bytes": 479,
+      "bytes": 480,
       "filename": "nexus.svg",
       "usageCount": 0
     },
     {
       "path": "/app/ui-icons/search.svg",
       "extension": "svg",
-      "bytes": 346,
+      "bytes": 347,
       "filename": "search.svg",
       "usageCount": 0
     },
     {
       "path": "/app/ui-icons/settings.svg",
       "extension": "svg",
-      "bytes": 405,
+      "bytes": 406,
       "filename": "settings.svg",
       "usageCount": 2
     }
@@ -3043,61 +3057,6 @@
       "assetPath": "/app/assets/cabinets/${systemId}.webp",
       "context": "function artFor(){return shells[systemId]?.asset||`/app/assets/cabinets/${systemId}.webp`}",
       "exists": false
-    },
-    {
-      "id": "slot-8317cb919ff876",
-      "sourcePath": "/app/cabinet-home-v142.js",
-      "line": 5,
-      "column": 93,
-      "kind": "string",
-      "raw": "/app/assets/ai/weaveling.png",
-      "assetPath": "/app/assets/ai/weaveling.png",
-      "context": "civweave:{name:'Civweave',guide:'Weaveling',role:'central mirror and orchestrator',mascot:'/app/assets/ai/weaveling.png',prompt:'Tell Weaveling what you want to become true.',primary:[",
-      "exists": true
-    },
-    {
-      "id": "slot-fe40ab1157806c",
-      "sourcePath": "/app/cabinet-home-v142.js",
-      "line": 12,
-      "column": 83,
-      "kind": "string",
-      "raw": "/app/assets/ai/moss.png",
-      "assetPath": "/app/assets/ai/moss.png",
-      "context": "'living-school':{name:'Living School',guide:'Moss',role:'learning guide',mascot:'/app/assets/ai/moss.png',prompt:'Tell Moss what you want to learn or demonstrate.',primary:[",
-      "exists": true
-    },
-    {
-      "id": "slot-c20fc5393adaae",
-      "sourcePath": "/app/cabinet-home-v142.js",
-      "line": 19,
-      "column": 95,
-      "kind": "string",
-      "raw": "/app/assets/ai/kamiya.png",
-      "assetPath": "/app/assets/ai/kamiya.png",
-      "context": "cerbanimo:{name:'Cerbanimo',guide:'Kamiya',role:'Questwright and skilled-work guide',mascot:'/app/assets/ai/kamiya.png',prompt:'Tell Kamiya what visible result should exist.',primary:[",
-      "exists": true
-    },
-    {
-      "id": "slot-9cedd0d5eeceb6",
-      "sourcePath": "/app/cabinet-home-v142.js",
-      "line": 26,
-      "column": 93,
-      "kind": "string",
-      "raw": "/app/assets/ai/rook.png",
-      "assetPath": "/app/assets/ai/rook.png",
-      "context": "fellowfare:{name:'FellowFare',guide:'Rook',role:'quartermaster and exchange guide',mascot:'/app/assets/ai/rook.png',prompt:'Tell Rook what is needed or offered, where, and by when.',primary:[",
-      "exists": true
-    },
-    {
-      "id": "slot-51ef19d9fa66c7",
-      "sourcePath": "/app/cabinet-home-v142.js",
-      "line": 33,
-      "column": 107,
-      "kind": "string",
-      "raw": "/app/assets/ai/merlin.png",
-      "assetPath": "/app/assets/ai/merlin.png",
-      "context": "anarchadia:{name:'Anarchadia',guide:'Merlin',role:'civic, feature-request, and automation guide',mascot:'/app/assets/ai/merlin.png',prompt:'Tell Merlin what should change and how success should be tested.',primary:[]}",
-      "exists": true
     },
     {
       "id": "slot-75cbe8dee01d1d",
@@ -3309,9 +3268,9 @@
       "exists": true
     },
     {
-      "id": "slot-609dea80b69489",
+      "id": "slot-4e175e1ba3acf6",
       "sourcePath": "/app/cabinets/living-school/index.html",
-      "line": 30,
+      "line": 46,
       "column": 14,
       "kind": "markup",
       "raw": "/app/assets/ai/moss.png",
@@ -3320,9 +3279,9 @@
       "exists": true
     },
     {
-      "id": "slot-ce60ee5ec4e371",
+      "id": "slot-96312e84b5ec60",
       "sourcePath": "/app/cabinets/living-school/index.html",
-      "line": 30,
+      "line": 46,
       "column": 18,
       "kind": "string",
       "raw": "/app/assets/ai/moss.png",
@@ -3331,14 +3290,14 @@
       "exists": true
     },
     {
-      "id": "slot-d7e8710ccdd403",
+      "id": "slot-2050f082e6a3bd",
       "sourcePath": "/app/civweave-brand.js",
       "line": 5,
       "column": 22,
       "kind": "string",
-      "raw": "/app/logos/civweave-canonical.png",
-      "assetPath": "/app/logos/civweave-canonical.png",
-      "context": "const CANONICAL_LOGO='/app/logos/civweave-canonical.png';",
+      "raw": "/app/logos/civweave-pwa-512-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-512-v247.png",
+      "context": "const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png';",
       "exists": true
     },
     {
@@ -3540,61 +3499,6 @@
       "exists": true
     },
     {
-      "id": "slot-c6dc7d1de9377c",
-      "sourcePath": "/app/family-ai-loader-v105.js",
-      "line": 30,
-      "column": 88,
-      "kind": "string",
-      "raw": "/app/assets/ai/weaveling.png",
-      "assetPath": "/app/assets/ai/weaveling.png",
-      "context": "civweave:{name:'Weaveling',role:'Central mirror and project-memory assistant',avatar:'/app/assets/ai/weaveling.png',prompt:'Ask about this workspace or say “remember that…”'},",
-      "exists": true
-    },
-    {
-      "id": "slot-1684f37e6df0b4",
-      "sourcePath": "/app/family-ai-loader-v105.js",
-      "line": 31,
-      "column": 61,
-      "kind": "string",
-      "raw": "/app/assets/ai/moss.png",
-      "assetPath": "/app/assets/ai/moss.png",
-      "context": "'living-school':{name:'Moss',role:'Learning guide',avatar:'/app/assets/ai/moss.png',prompt:'Ask Moss what you want to learn, practice, or demonstrate.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-ba145c49c54ac4",
-      "sourcePath": "/app/family-ai-loader-v105.js",
-      "line": 32,
-      "column": 77,
-      "kind": "string",
-      "raw": "/app/assets/ai/kamiya.png",
-      "assetPath": "/app/assets/ai/kamiya.png",
-      "context": "cerbanimo:{name:'Kamiya',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/kamiya.png',prompt:'Tell Kamiya what you want to build, plan, repair, or ship.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-5cd6ad254869c7",
-      "sourcePath": "/app/family-ai-loader-v105.js",
-      "line": 33,
-      "column": 74,
-      "kind": "string",
-      "raw": "/app/assets/ai/rook.png",
-      "assetPath": "/app/assets/ai/rook.png",
-      "context": "fellowfare:{name:'Rook',role:'Quartermaster and exchange guide',avatar:'/app/assets/ai/rook.png',prompt:'Tell Rook what you need, offer, or want to exchange.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-9211b28ba198c8",
-      "sourcePath": "/app/family-ai-loader-v105.js",
-      "line": 34,
-      "column": 88,
-      "kind": "string",
-      "raw": "/app/assets/ai/merlin.png",
-      "assetPath": "/app/assets/ai/merlin.png",
-      "context": "anarchadia:{name:'Merlin',role:'Civic, feature-request, and automation guide',avatar:'/app/assets/ai/merlin.png',prompt:'Tell Merlin what should change and how success should be tested.'}",
-      "exists": true
-    },
-    {
       "id": "slot-648ab9f55e4f8e",
       "sourcePath": "/app/family-shell-v104.css",
       "line": 60,
@@ -3683,9 +3587,9 @@
       "exists": true
     },
     {
-      "id": "slot-9011de5707e96f",
+      "id": "slot-2fa7520705f65e",
       "sourcePath": "/app/family-shell-v104.js",
-      "line": 7,
+      "line": 8,
       "column": 142,
       "kind": "string",
       "raw": "/app/assets/ai/weaveling-compass.png",
@@ -3694,9 +3598,9 @@
       "exists": true
     },
     {
-      "id": "slot-994359a38b0020",
+      "id": "slot-134049e0ea4eb0",
       "sourcePath": "/app/family-shell-v104.js",
-      "line": 7,
+      "line": 8,
       "column": 188,
       "kind": "string",
       "raw": "/app/assets/ai/weaveling.png",
@@ -3705,9 +3609,9 @@
       "exists": true
     },
     {
-      "id": "slot-a4fe12e4cbac33",
+      "id": "slot-c2b1946d5ed3c8",
       "sourcePath": "/app/family-shell-v104.js",
-      "line": 8,
+      "line": 9,
       "column": 141,
       "kind": "string",
       "raw": "/app/assets/ai/moss-acorn.png",
@@ -3716,9 +3620,9 @@
       "exists": true
     },
     {
-      "id": "slot-43a70d8fe4a62d",
+      "id": "slot-97b18690053ea8",
       "sourcePath": "/app/family-shell-v104.js",
-      "line": 8,
+      "line": 9,
       "column": 180,
       "kind": "string",
       "raw": "/app/assets/ai/moss.png",
@@ -3727,9 +3631,9 @@
       "exists": true
     },
     {
-      "id": "slot-96c41d41789597",
+      "id": "slot-fbbf1750f14cbd",
       "sourcePath": "/app/family-shell-v104.js",
-      "line": 9,
+      "line": 10,
       "column": 141,
       "kind": "string",
       "raw": "/app/assets/ai/kamiya-gift.png",
@@ -3738,9 +3642,9 @@
       "exists": true
     },
     {
-      "id": "slot-deb1ffef97b3c0",
+      "id": "slot-979a0820d4e426",
       "sourcePath": "/app/family-shell-v104.js",
-      "line": 9,
+      "line": 10,
       "column": 181,
       "kind": "string",
       "raw": "/app/assets/ai/kamiya.png",
@@ -3749,9 +3653,9 @@
       "exists": true
     },
     {
-      "id": "slot-3b9648bb7c77d8",
+      "id": "slot-2591997dd6e44e",
       "sourcePath": "/app/family-shell-v104.js",
-      "line": 10,
+      "line": 11,
       "column": 134,
       "kind": "string",
       "raw": "/app/assets/ai/rook-coin-button.png",
@@ -3760,9 +3664,9 @@
       "exists": true
     },
     {
-      "id": "slot-17ef90b1d3800d",
+      "id": "slot-690b76dc98119e",
       "sourcePath": "/app/family-shell-v104.js",
-      "line": 10,
+      "line": 11,
       "column": 179,
       "kind": "string",
       "raw": "/app/assets/ai/rook.png",
@@ -3771,9 +3675,9 @@
       "exists": true
     },
     {
-      "id": "slot-ebda05de77218e",
+      "id": "slot-d9646619317d1c",
       "sourcePath": "/app/family-shell-v104.js",
-      "line": 11,
+      "line": 12,
       "column": 133,
       "kind": "string",
       "raw": "/app/assets/ai/merlin-hat.png",
@@ -3782,9 +3686,9 @@
       "exists": true
     },
     {
-      "id": "slot-afb6aae6f85eec",
+      "id": "slot-6fa5e4857cc63b",
       "sourcePath": "/app/family-shell-v104.js",
-      "line": 11,
+      "line": 12,
       "column": 172,
       "kind": "string",
       "raw": "/app/assets/ai/merlin.png",
@@ -3793,157 +3697,69 @@
       "exists": true
     },
     {
-      "id": "slot-ebb442b0c56506",
+      "id": "slot-9ad0112b93ece7",
       "sourcePath": "/app/fellowfare-cabinet-v144.html",
-      "line": 20,
+      "line": 21,
       "column": 32,
       "kind": "markup",
       "raw": "/app/logos/fellowfare-v2.webp",
       "assetPath": "/app/logos/fellowfare-v2.webp",
-      "context": "<div class=\"rc-brand\"><img src=\"/app/logos/fellowfare-v2.webp\" alt=\"\"><div><small>FELLOWFARE // CABINET MARKET</small><b>Rook's Exchange Workbench</b></div></div>",
+      "context": "<div class=\"rc-brand\"><img src=\"/app/logos/fellowfare-v2.webp\" alt=\"\"><div><small>FELLOWFARE // LIVE MARKET</small><b>Rook's Marketplace</b></div></div>",
       "exists": true
     },
     {
-      "id": "slot-60ea6b918cc1c1",
+      "id": "slot-fb5a404150db1b",
       "sourcePath": "/app/fellowfare-cabinet-v144.html",
-      "line": 20,
+      "line": 21,
       "column": 36,
       "kind": "string",
       "raw": "/app/logos/fellowfare-v2.webp",
       "assetPath": "/app/logos/fellowfare-v2.webp",
-      "context": "<div class=\"rc-brand\"><img src=\"/app/logos/fellowfare-v2.webp\" alt=\"\"><div><small>FELLOWFARE // CABINET MARKET</small><b>Rook's Exchange Workbench</b></div></div>",
+      "context": "<div class=\"rc-brand\"><img src=\"/app/logos/fellowfare-v2.webp\" alt=\"\"><div><small>FELLOWFARE // LIVE MARKET</small><b>Rook's Marketplace</b></div></div>",
       "exists": true
     },
     {
-      "id": "slot-0028d2300dbbbe",
-      "sourcePath": "/app/fellowfare-cabinet-v144.html",
-      "line": 26,
+      "id": "slot-815e197c33accb",
+      "sourcePath": "/app/front-door-prismatic-v301.css",
+      "line": 344,
       "column": 14,
-      "kind": "markup",
-      "raw": "/app/assets/ai/rook.png",
-      "assetPath": "/app/assets/ai/rook.png",
-      "context": "<img src=\"/app/assets/ai/rook.png\" alt=\"Rook the Raven\">",
+      "kind": "css-url",
+      "raw": "/app/logos/civweave-pwa-512-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-512-v247.png",
+      "context": "background:url('/app/logos/civweave-pwa-512-v247.png') left center/contain no-repeat;",
       "exists": true
     },
     {
-      "id": "slot-cff706f09a104a",
-      "sourcePath": "/app/fellowfare-cabinet-v144.html",
-      "line": 26,
+      "id": "slot-ac322962a6423d",
+      "sourcePath": "/app/front-door-prismatic-v301.css",
+      "line": 344,
       "column": 18,
       "kind": "string",
-      "raw": "/app/assets/ai/rook.png",
-      "assetPath": "/app/assets/ai/rook.png",
-      "context": "<img src=\"/app/assets/ai/rook.png\" alt=\"Rook the Raven\">",
+      "raw": "/app/logos/civweave-pwa-512-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-512-v247.png",
+      "context": "background:url('/app/logos/civweave-pwa-512-v247.png') left center/contain no-repeat;",
       "exists": true
     },
     {
-      "id": "slot-d3ee153347e43b",
-      "sourcePath": "/app/guide-chat-v153.js",
-      "line": 6,
-      "column": 145,
-      "kind": "string",
-      "raw": "/app/assets/ai/weaveling.png",
-      "assetPath": "/app/assets/ai/weaveling.png",
-      "context": "civweave:{name:'Civweave',guide:'Weaveling',role:'central mirror and orchestrator',prompt:'Tell Weaveling what you want to become true.',icon:'/app/assets/ai/weaveling.png'},",
+      "id": "slot-42e2e607fee46e",
+      "sourcePath": "/app/front-door-prismatic-v301.css",
+      "line": 352,
+      "column": 19,
+      "kind": "css-url",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "background:#fff url('/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2') center/contain no-repeat;",
       "exists": true
     },
     {
-      "id": "slot-42aab021971170",
-      "sourcePath": "/app/guide-chat-v153.js",
-      "line": 7,
-      "column": 139,
+      "id": "slot-e684d30cab9b16",
+      "sourcePath": "/app/front-door-prismatic-v301.css",
+      "line": 352,
+      "column": 23,
       "kind": "string",
-      "raw": "/app/assets/ai/moss.png",
-      "assetPath": "/app/assets/ai/moss.png",
-      "context": "'living-school':{name:'Living School',guide:'Moss',role:'learning guide',prompt:'Tell Moss what you want to learn or demonstrate.',icon:'/app/assets/ai/moss.png'},",
-      "exists": true
-    },
-    {
-      "id": "slot-3552ef7c60f557",
-      "sourcePath": "/app/guide-chat-v153.js",
-      "line": 8,
-      "column": 148,
-      "kind": "string",
-      "raw": "/app/assets/ai/kamiya.png",
-      "assetPath": "/app/assets/ai/kamiya.png",
-      "context": "cerbanimo:{name:'Cerbanimo',guide:'Kamiya',role:'Questwright and skilled-work guide',prompt:'Tell Kamiya what visible result should exist.',icon:'/app/assets/ai/kamiya.png'},",
-      "exists": true
-    },
-    {
-      "id": "slot-01e913e9e1d052",
-      "sourcePath": "/app/guide-chat-v153.js",
-      "line": 9,
-      "column": 157,
-      "kind": "string",
-      "raw": "/app/assets/ai/rook.png",
-      "assetPath": "/app/assets/ai/rook.png",
-      "context": "fellowfare:{name:'FellowFare',guide:'Rook',role:'quartermaster and exchange guide',prompt:'Tell Rook what is needed or offered, where, and by when.',icon:'/app/assets/ai/rook.png'},",
-      "exists": true
-    },
-    {
-      "id": "slot-92706731d102b6",
-      "sourcePath": "/app/guide-chat-v153.js",
-      "line": 10,
-      "column": 161,
-      "kind": "string",
-      "raw": "/app/assets/ai/merlin.png",
-      "assetPath": "/app/assets/ai/merlin.png",
-      "context": "anarchadia:{name:'Anarchadia',guide:'Merlin',role:'civic and automation guide',prompt:'Tell Merlin what should change and how success should be tested.',icon:'/app/assets/ai/merlin.png'}",
-      "exists": true
-    },
-    {
-      "id": "slot-053eb6321739aa",
-      "sourcePath": "/app/guide-identity-integrity-v216.js",
-      "line": 9,
-      "column": 76,
-      "kind": "string",
-      "raw": "/app/assets/ai/weaveling.png",
-      "assetPath": "/app/assets/ai/weaveling.png",
-      "context": "civweave:{name:'Weaveling',role:'central mirror and orchestrator',avatar:'/app/assets/ai/weaveling.png',palette:'#ebe7dd'},",
-      "exists": true
-    },
-    {
-      "id": "slot-2b7cd7dcb9ed6e",
-      "sourcePath": "/app/guide-identity-integrity-v216.js",
-      "line": 10,
-      "column": 61,
-      "kind": "string",
-      "raw": "/app/assets/ai/moss.png",
-      "assetPath": "/app/assets/ai/moss.png",
-      "context": "'living-school':{name:'Moss',role:'learning guide',avatar:'/app/assets/ai/moss.png',palette:'#59cf87'},",
-      "exists": true
-    },
-    {
-      "id": "slot-f3d95af44f9705",
-      "sourcePath": "/app/guide-identity-integrity-v216.js",
-      "line": 11,
-      "column": 77,
-      "kind": "string",
-      "raw": "/app/assets/ai/kamiya.png",
-      "assetPath": "/app/assets/ai/kamiya.png",
-      "context": "cerbanimo:{name:'Kamiya',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/kamiya.png',palette:'#a66cff'},",
-      "exists": true
-    },
-    {
-      "id": "slot-0aad8f86a3fbc5",
-      "sourcePath": "/app/guide-identity-integrity-v216.js",
-      "line": 12,
-      "column": 74,
-      "kind": "string",
-      "raw": "/app/assets/ai/rook.png",
-      "assetPath": "/app/assets/ai/rook.png",
-      "context": "fellowfare:{name:'Rook',role:'quartermaster and exchange guide',avatar:'/app/assets/ai/rook.png',palette:'#f2a93b'},",
-      "exists": true
-    },
-    {
-      "id": "slot-ea5d65158beb4d",
-      "sourcePath": "/app/guide-identity-integrity-v216.js",
-      "line": 13,
-      "column": 88,
-      "kind": "string",
-      "raw": "/app/assets/ai/merlin.png",
-      "assetPath": "/app/assets/ai/merlin.png",
-      "context": "anarchadia:{name:'Merlin',role:'civic, feature-request, and automation guide',avatar:'/app/assets/ai/merlin.png',palette:'#ff4f9a'}",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "background:#fff url('/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2') center/contain no-repeat;",
       "exists": true
     },
     {
@@ -4167,47 +3983,91 @@
       "exists": true
     },
     {
-      "id": "slot-99623425d5f673",
+      "id": "slot-eb3c702dba0eb8",
       "sourcePath": "/app/index.html",
       "line": 11,
       "column": 20,
       "kind": "markup",
-      "raw": "/app/logos/civweave-symbol.svg",
-      "assetPath": "/app/logos/civweave-symbol.svg",
-      "context": "<link rel=\"icon\" href=\"/app/logos/civweave-symbol.svg\" type=\"image/svg+xml\">",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<link rel=\"icon\" href=\"/app/logos/civweave-pwa-192-v247.png\" type=\"image/png\">",
       "exists": true
     },
     {
-      "id": "slot-3e2b3d3c2e6d6e",
+      "id": "slot-fc910ce56b2866",
       "sourcePath": "/app/index.html",
       "line": 11,
       "column": 25,
       "kind": "string",
-      "raw": "/app/logos/civweave-symbol.svg",
-      "assetPath": "/app/logos/civweave-symbol.svg",
-      "context": "<link rel=\"icon\" href=\"/app/logos/civweave-symbol.svg\" type=\"image/svg+xml\">",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<link rel=\"icon\" href=\"/app/logos/civweave-pwa-192-v247.png\" type=\"image/png\">",
       "exists": true
     },
     {
-      "id": "slot-b15cf176f52a5e",
+      "id": "slot-f683f5c5119823",
       "sourcePath": "/app/index.html",
-      "line": 22,
+      "line": 24,
+      "column": 37,
+      "kind": "markup",
+      "raw": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "assetPath": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "context": "<img class=\"cw-platform-logo\" src=\"/app/logos/civweave-prismatic-wordmark-v1.png\" alt=\"Civweave\">",
+      "exists": true
+    },
+    {
+      "id": "slot-622b0ea0cdffae",
+      "sourcePath": "/app/index.html",
+      "line": 24,
+      "column": 41,
+      "kind": "string",
+      "raw": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "assetPath": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "context": "<img class=\"cw-platform-logo\" src=\"/app/logos/civweave-prismatic-wordmark-v1.png\" alt=\"Civweave\">",
+      "exists": true
+    },
+    {
+      "id": "slot-5c3a06293a92e6",
+      "sourcePath": "/app/index.html",
+      "line": 28,
+      "column": 36,
+      "kind": "markup",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "<img class=\"cw-steward-logo\" src=\"/app/logos/cerbanimo-steward-mark-v1.png\" alt=\"Cerbanimo\">",
+      "exists": true
+    },
+    {
+      "id": "slot-e84d048d1d1c43",
+      "sourcePath": "/app/index.html",
+      "line": 28,
+      "column": 40,
+      "kind": "string",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "<img class=\"cw-steward-logo\" src=\"/app/logos/cerbanimo-steward-mark-v1.png\" alt=\"Cerbanimo\">",
+      "exists": true
+    },
+    {
+      "id": "slot-aadee7632adcfd",
+      "sourcePath": "/app/index.html",
+      "line": 33,
       "column": 10,
       "kind": "markup",
-      "raw": "/app/logos/civweave.svg",
-      "assetPath": "/app/logos/civweave.svg",
-      "context": "<img src=\"/app/logos/civweave.svg\" alt=\"Civweave\">",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<img src=\"/app/logos/civweave-pwa-192-v247.png\" alt=\"Civweave\">",
       "exists": true
     },
     {
-      "id": "slot-fec633c5675e94",
+      "id": "slot-549aa4b053cb8c",
       "sourcePath": "/app/index.html",
-      "line": 22,
+      "line": 33,
       "column": 14,
       "kind": "string",
-      "raw": "/app/logos/civweave.svg",
-      "assetPath": "/app/logos/civweave.svg",
-      "context": "<img src=\"/app/logos/civweave.svg\" alt=\"Civweave\">",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<img src=\"/app/logos/civweave-pwa-192-v247.png\" alt=\"Civweave\">",
       "exists": true
     },
     {
@@ -4230,6 +4090,28 @@
       "raw": "/app/logos/civweave-icon-192.png",
       "assetPath": "/app/logos/civweave-icon-192.png",
       "context": "<link rel=\"icon\" href=\"/app/logos/civweave-icon-192.png\">",
+      "exists": true
+    },
+    {
+      "id": "slot-0a363b4d9d694b",
+      "sourcePath": "/app/installed-entry-v146.html",
+      "line": 15,
+      "column": 10,
+      "kind": "markup",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<img src=\"/app/logos/civweave-pwa-192-v247.png\" alt=\"Civweave\">",
+      "exists": true
+    },
+    {
+      "id": "slot-398cd4d25ea1a4",
+      "sourcePath": "/app/installed-entry-v146.html",
+      "line": 15,
+      "column": 14,
+      "kind": "string",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<img src=\"/app/logos/civweave-pwa-192-v247.png\" alt=\"Civweave\">",
       "exists": true
     },
     {
@@ -4662,270 +4544,6 @@
       "exists": true
     },
     {
-      "id": "slot-8fc290609f422b",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 10,
-      "column": 20,
-      "kind": "markup",
-      "raw": "/app/logos/civweave-icon-192.png?v=tight-r2",
-      "assetPath": "/app/logos/civweave-icon-192.png",
-      "context": "<link rel=\"icon\" href=\"/app/logos/civweave-icon-192.png?v=tight-r2\">",
-      "exists": true
-    },
-    {
-      "id": "slot-806f3350d8a060",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 10,
-      "column": 25,
-      "kind": "string",
-      "raw": "/app/logos/civweave-icon-192.png?v=tight-r2",
-      "assetPath": "/app/logos/civweave-icon-192.png",
-      "context": "<link rel=\"icon\" href=\"/app/logos/civweave-icon-192.png?v=tight-r2\">",
-      "exists": true
-    },
-    {
-      "id": "slot-8aa908ea90d79b",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 25,
-      "column": 33,
-      "kind": "markup",
-      "raw": "/app/assets/world/town-square-home.webp",
-      "assetPath": "/app/assets/world/town-square-home.webp",
-      "context": "<img class=\"cw127-scene-bg\" src=\"/app/assets/world/town-square-home.webp\" alt=\"The Civweave campus, with Living School, Cerbanimo, FellowFare, Anarchadia, and the central Quad.\" fetchpriority=\"high\">",
-      "exists": true
-    },
-    {
-      "id": "slot-d35647a011c298",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 25,
-      "column": 37,
-      "kind": "string",
-      "raw": "/app/assets/world/town-square-home.webp",
-      "assetPath": "/app/assets/world/town-square-home.webp",
-      "context": "<img class=\"cw127-scene-bg\" src=\"/app/assets/world/town-square-home.webp\" alt=\"The Civweave campus, with Living School, Cerbanimo, FellowFare, Anarchadia, and the central Quad.\" fetchpriority=\"high\">",
-      "exists": true
-    },
-    {
-      "id": "slot-7d3c22322edb41",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 31,
-      "column": 94,
-      "kind": "markup",
-      "raw": "/app/assets/ai/weaveling.png",
-      "assetPath": "/app/assets/ai/weaveling.png",
-      "context": "<button class=\"cw127-weaveling\" data-action=\"chat\" aria-label=\"Chat with Weaveling\"><img src=\"/app/assets/ai/weaveling.png\" alt=\"Weaveling hologram\"><b id=\"cw127-context-label\">Reflect</b></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-dc6e3f0999310e",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 31,
-      "column": 98,
-      "kind": "string",
-      "raw": "/app/assets/ai/weaveling.png",
-      "assetPath": "/app/assets/ai/weaveling.png",
-      "context": "<button class=\"cw127-weaveling\" data-action=\"chat\" aria-label=\"Chat with Weaveling\"><img src=\"/app/assets/ai/weaveling.png\" alt=\"Weaveling hologram\"><b id=\"cw127-context-label\">Reflect</b></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-ca61564a1f5000",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 37,
-      "column": 99,
-      "kind": "markup",
-      "raw": "/app/logos/civweave-icon-192.png?v=tight-r2",
-      "assetPath": "/app/logos/civweave-icon-192.png",
-      "context": "<button class=\"cw127-version\" data-action=\"version\" aria-label=\"Civweave version 1.0.32\"><img src=\"/app/logos/civweave-icon-192.png?v=tight-r2\" alt=\"\"><span>v1.0.32</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-fdc828b5c463ad",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 37,
-      "column": 103,
-      "kind": "string",
-      "raw": "/app/logos/civweave-icon-192.png?v=tight-r2",
-      "assetPath": "/app/logos/civweave-icon-192.png",
-      "context": "<button class=\"cw127-version\" data-action=\"version\" aria-label=\"Civweave version 1.0.32\"><img src=\"/app/logos/civweave-icon-192.png?v=tight-r2\" alt=\"\"><span>v1.0.32</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-8bd3c44c5acd71",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 42,
-      "column": 70,
-      "kind": "markup",
-      "raw": "/app/assets/generated/civweave-navigation-icons/weaveling-compass.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/weaveling-compass.png",
-      "context": "<button data-action=\"chat\" aria-label=\"Chat with Weaveling\"><img src=\"/app/assets/generated/civweave-navigation-icons/weaveling-compass.png\" alt=\"\"></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-7c2bf4f6d77b58",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 42,
-      "column": 74,
-      "kind": "string",
-      "raw": "/app/assets/generated/civweave-navigation-icons/weaveling-compass.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/weaveling-compass.png",
-      "context": "<button data-action=\"chat\" aria-label=\"Chat with Weaveling\"><img src=\"/app/assets/generated/civweave-navigation-icons/weaveling-compass.png\" alt=\"\"></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-aa9430fe1f8820",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 43,
-      "column": 71,
-      "kind": "markup",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-realms.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-realms.png",
-      "context": "<button data-action=\"cabinet\" aria-label=\"Open Cabinet Mode\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-realms.png\" alt=\"\"></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-f6dbc7b2bc4b0b",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 43,
-      "column": 75,
-      "kind": "string",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-realms.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-realms.png",
-      "context": "<button data-action=\"cabinet\" aria-label=\"Open Cabinet Mode\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-realms.png\" alt=\"\"></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-720ca01b11c0ef",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 44,
-      "column": 76,
-      "kind": "markup",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png",
-      "context": "<button data-action=\"settings\" aria-label=\"Universal AI settings\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png\" alt=\"\"></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-263f45dc8a65f0",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 44,
-      "column": 80,
-      "kind": "string",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png",
-      "context": "<button data-action=\"settings\" aria-label=\"Universal AI settings\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png\" alt=\"\"></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-e3156a289e2002",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 48,
-      "column": 35,
-      "kind": "markup",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-home.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-home.png",
-      "context": "<button data-action=\"home\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-home.png\" alt=\"\"><span>Home</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-76168a7a7b043b",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 48,
-      "column": 39,
-      "kind": "string",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-home.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-home.png",
-      "context": "<button data-action=\"home\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-home.png\" alt=\"\"><span>Home</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-4ad6b6833425e9",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 49,
-      "column": 41,
-      "kind": "markup",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-route.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-route.png",
-      "context": "<button data-action=\"intentions\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-route.png\" alt=\"\"><span>Intentions</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-b43385cbd80642",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 49,
-      "column": 45,
-      "kind": "string",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-route.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-route.png",
-      "context": "<button data-action=\"intentions\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-route.png\" alt=\"\"><span>Intentions</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-a7459e9a1b4f00",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 50,
-      "column": 35,
-      "kind": "markup",
-      "raw": "/app/assets/generated/civweave-navigation-icons/weaveling-compass.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/weaveling-compass.png",
-      "context": "<button data-action=\"chat\"><img src=\"/app/assets/generated/civweave-navigation-icons/weaveling-compass.png\" alt=\"\"><span>Weaveling</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-fd420313a2a930",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 50,
-      "column": 39,
-      "kind": "string",
-      "raw": "/app/assets/generated/civweave-navigation-icons/weaveling-compass.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/weaveling-compass.png",
-      "context": "<button data-action=\"chat\"><img src=\"/app/assets/generated/civweave-navigation-icons/weaveling-compass.png\" alt=\"\"><span>Weaveling</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-b1560b199a9f2c",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 51,
-      "column": 37,
-      "kind": "markup",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-realms.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-realms.png",
-      "context": "<button data-action=\"realms\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-realms.png\" alt=\"\"><span>Cabinets</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-94b19205dc2ab0",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 51,
-      "column": 41,
-      "kind": "string",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-realms.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-realms.png",
-      "context": "<button data-action=\"realms\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-realms.png\" alt=\"\"><span>Cabinets</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-6e9809b92e33f0",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 52,
-      "column": 39,
-      "kind": "markup",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png",
-      "context": "<button data-action=\"settings\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png\" alt=\"\"><span>AI settings</span></button>",
-      "exists": true
-    },
-    {
-      "id": "slot-ae14bb56ea8e34",
-      "sourcePath": "/app/loom-v128.html",
-      "line": 52,
-      "column": 43,
-      "kind": "string",
-      "raw": "/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png",
-      "assetPath": "/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png",
-      "context": "<button data-action=\"settings\"><img src=\"/app/assets/generated/civweave-navigation-icons/civweave-ai-config.png\" alt=\"\"><span>AI settings</span></button>",
-      "exists": true
-    },
-    {
       "id": "slot-e651b1da62c8a8",
       "sourcePath": "/app/loom-v128.js",
       "line": 10,
@@ -4970,53 +4588,9 @@
       "exists": true
     },
     {
-      "id": "slot-c4531aa3e34a6b",
-      "sourcePath": "/app/loom-v141.js",
-      "line": 9,
-      "column": 121,
-      "kind": "string",
-      "raw": "/app/assets/cabinets/living-school.webp",
-      "assetPath": "/app/assets/cabinets/living-school.webp",
-      "context": "'living-school':{name:'Living School',copy:'Learning paths, curriculum, practice, reflection, and credentials.',image:'/app/assets/cabinets/living-school.webp'},",
-      "exists": true
-    },
-    {
-      "id": "slot-66ed7f2a690de6",
-      "sourcePath": "/app/loom-v141.js",
-      "line": 10,
-      "column": 99,
-      "kind": "string",
-      "raw": "/app/assets/cabinets/cerbanimo.webp",
-      "assetPath": "/app/assets/cabinets/cerbanimo.webp",
-      "context": "cerbanimo:{name:'Cerbanimo',copy:'Skilled work, quests, projects, proof, and completion.',image:'/app/assets/cabinets/cerbanimo.webp'},",
-      "exists": true
-    },
-    {
-      "id": "slot-b169c2dc8b754d",
-      "sourcePath": "/app/loom-v141.js",
-      "line": 11,
-      "column": 106,
-      "kind": "string",
-      "raw": "/app/assets/cabinets/fellowfare.webp",
-      "assetPath": "/app/assets/cabinets/fellowfare.webp",
-      "context": "fellowfare:{name:'FellowFare',copy:'Needs, offers, exchanges, resources, makers, and logistics.',image:'/app/assets/cabinets/fellowfare.webp'},",
-      "exists": true
-    },
-    {
-      "id": "slot-610f8a5a2fd297",
-      "sourcePath": "/app/loom-v141.js",
-      "line": 12,
-      "column": 112,
-      "kind": "string",
-      "raw": "/app/assets/cabinets/anarchadia.webp",
-      "assetPath": "/app/assets/cabinets/anarchadia.webp",
-      "context": "anarchadia:{name:'Anarchadia',copy:'Proposals, bugs, assemblies, consent, federation, and governance.',image:'/app/assets/cabinets/anarchadia.webp'}",
-      "exists": true
-    },
-    {
-      "id": "slot-617a59cff53bae",
+      "id": "slot-857f868a8fe822",
       "sourcePath": "/app/manifest.webmanifest",
-      "line": 40,
+      "line": 44,
       "column": 14,
       "kind": "string",
       "raw": "/app/logos/civweave-pwa-192-v247.png",
@@ -5025,9 +4599,9 @@
       "exists": true
     },
     {
-      "id": "slot-0fc03a929f0174",
+      "id": "slot-5cbd2295448011",
       "sourcePath": "/app/manifest.webmanifest",
-      "line": 46,
+      "line": 50,
       "column": 14,
       "kind": "string",
       "raw": "/app/logos/civweave-pwa-512-v247.png",
@@ -5036,9 +4610,9 @@
       "exists": true
     },
     {
-      "id": "slot-316915876f74f9",
+      "id": "slot-7364831cb17740",
       "sourcePath": "/app/manifest.webmanifest",
-      "line": 52,
+      "line": 56,
       "column": 14,
       "kind": "string",
       "raw": "/app/logos/civweave-pwa-maskable-512-v247.png",
@@ -5047,9 +4621,9 @@
       "exists": true
     },
     {
-      "id": "slot-fb927756337556",
+      "id": "slot-8686d5e37d26b0",
       "sourcePath": "/app/manifest.webmanifest",
-      "line": 64,
+      "line": 68,
       "column": 18,
       "kind": "string",
       "raw": "/app/logos/civweave-pwa-512-v247.png",
@@ -5058,9 +4632,9 @@
       "exists": true
     },
     {
-      "id": "slot-c9525966d47a69",
+      "id": "slot-03e3659cf381a5",
       "sourcePath": "/app/manifest.webmanifest",
-      "line": 75,
+      "line": 79,
       "column": 18,
       "kind": "string",
       "raw": "/app/logos/civweave-pwa-512-v247.png",
@@ -5069,9 +4643,9 @@
       "exists": true
     },
     {
-      "id": "slot-fe9f8ca283f5fb",
+      "id": "slot-f69e05effa0127",
       "sourcePath": "/app/manifest.webmanifest",
-      "line": 86,
+      "line": 90,
       "column": 18,
       "kind": "string",
       "raw": "/app/logos/civweave-pwa-512-v247.png",
@@ -5080,9 +4654,9 @@
       "exists": true
     },
     {
-      "id": "slot-f48fd5b15d5a7f",
+      "id": "slot-9ee32c62b8cf63",
       "sourcePath": "/app/manifest.webmanifest",
-      "line": 97,
+      "line": 101,
       "column": 18,
       "kind": "string",
       "raw": "/app/logos/civweave-pwa-512-v247.png",
@@ -5091,9 +4665,9 @@
       "exists": true
     },
     {
-      "id": "slot-4b9e0b6cec01d9",
+      "id": "slot-cd247af08d0df6",
       "sourcePath": "/app/manifest.webmanifest",
-      "line": 108,
+      "line": 112,
       "column": 18,
       "kind": "string",
       "raw": "/app/logos/civweave-pwa-512-v247.png",
@@ -5121,116 +4695,6 @@
       "raw": "/app/assets/ai/weaveling-compass.png",
       "assetPath": "/app/assets/ai/weaveling-compass.png",
       "context": ".cwf104-chat:before{content:\"\";position:absolute;inset:4px;background:url('/app/assets/ai/weaveling-compass.png') center/contain no-repeat;filter:drop-shadow(0 0 6px #8ee9ff99);pointer-events:none}",
-      "exists": true
-    },
-    {
-      "id": "slot-e38de3463fd2f3",
-      "sourcePath": "/app/persistent-guide-chat-v214.js",
-      "line": 13,
-      "column": 76,
-      "kind": "string",
-      "raw": "/app/assets/ai/weaveling.png",
-      "assetPath": "/app/assets/ai/weaveling.png",
-      "context": "civweave:{name:'Weaveling',role:'Central mirror and orchestrator',avatar:'/app/assets/ai/weaveling.png',symbol:'✦',placeholder:'Tell Weaveling your wish, revise the route, or ask what connects next.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-d1bb58d9d2ff82",
-      "sourcePath": "/app/persistent-guide-chat-v214.js",
-      "line": 14,
-      "column": 61,
-      "kind": "string",
-      "raw": "/app/assets/ai/moss.png",
-      "assetPath": "/app/assets/ai/moss.png",
-      "context": "'living-school':{name:'Moss',role:'Learning guide',avatar:'/app/assets/ai/moss.png',symbol:'●',placeholder:'Ask Moss what you should learn, practice, or demonstrate.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-bc5c97b1c6c22d",
-      "sourcePath": "/app/persistent-guide-chat-v214.js",
-      "line": 15,
-      "column": 77,
-      "kind": "string",
-      "raw": "/app/assets/ai/kamiya.png",
-      "assetPath": "/app/assets/ai/kamiya.png",
-      "context": "cerbanimo:{name:'Kamiya',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/kamiya.png',symbol:'◆',placeholder:'Tell Kamiya what you want to build, plan, repair, or ship.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-a54dcfd39c567a",
-      "sourcePath": "/app/persistent-guide-chat-v214.js",
-      "line": 16,
-      "column": 74,
-      "kind": "string",
-      "raw": "/app/assets/ai/rook.png",
-      "assetPath": "/app/assets/ai/rook.png",
-      "context": "fellowfare:{name:'Rook',role:'Quartermaster and exchange guide',avatar:'/app/assets/ai/rook.png',symbol:'⊙',placeholder:'Tell Rook what you need, offer, or want to exchange.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-78b8b016ec98fc",
-      "sourcePath": "/app/persistent-guide-chat-v214.js",
-      "line": 17,
-      "column": 88,
-      "kind": "string",
-      "raw": "/app/assets/ai/merlin.png",
-      "assetPath": "/app/assets/ai/merlin.png",
-      "context": "anarchadia:{name:'Merlin',role:'Civic, feature-request, and automation guide',avatar:'/app/assets/ai/merlin.png',symbol:'Ⓐ',placeholder:'Tell Merlin what should change and how success should be tested.'}",
-      "exists": true
-    },
-    {
-      "id": "slot-bdcb7069bec885",
-      "sourcePath": "/app/persistent-guide-chat-v215.js",
-      "line": 22,
-      "column": 76,
-      "kind": "string",
-      "raw": "/app/assets/ai/weaveling.png",
-      "assetPath": "/app/assets/ai/weaveling.png",
-      "context": "civweave:{name:'Weaveling',role:'Central mirror and orchestrator',avatar:'/app/assets/ai/weaveling.png',placeholder:'Tell Weaveling your wish, revise the route, or ask what connects next.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-0c35c9d3e94786",
-      "sourcePath": "/app/persistent-guide-chat-v215.js",
-      "line": 23,
-      "column": 61,
-      "kind": "string",
-      "raw": "/app/assets/ai/moss.png",
-      "assetPath": "/app/assets/ai/moss.png",
-      "context": "'living-school':{name:'Moss',role:'Learning guide',avatar:'/app/assets/ai/moss.png',placeholder:'Ask Moss what you should learn, practice, or demonstrate.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-744a4e93fb91c2",
-      "sourcePath": "/app/persistent-guide-chat-v215.js",
-      "line": 24,
-      "column": 77,
-      "kind": "string",
-      "raw": "/app/assets/ai/kamiya.png",
-      "assetPath": "/app/assets/ai/kamiya.png",
-      "context": "cerbanimo:{name:'Kamiya',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/kamiya.png',placeholder:'Tell Kamiya what you want to build, plan, repair, or ship.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-5ebebfa98051b3",
-      "sourcePath": "/app/persistent-guide-chat-v215.js",
-      "line": 25,
-      "column": 74,
-      "kind": "string",
-      "raw": "/app/assets/ai/rook.png",
-      "assetPath": "/app/assets/ai/rook.png",
-      "context": "fellowfare:{name:'Rook',role:'Quartermaster and exchange guide',avatar:'/app/assets/ai/rook.png',placeholder:'Tell Rook what you need, offer, or want to exchange.'},",
-      "exists": true
-    },
-    {
-      "id": "slot-ff553b1a686fb0",
-      "sourcePath": "/app/persistent-guide-chat-v215.js",
-      "line": 26,
-      "column": 88,
-      "kind": "string",
-      "raw": "/app/assets/ai/merlin.png",
-      "assetPath": "/app/assets/ai/merlin.png",
-      "context": "anarchadia:{name:'Merlin',role:'Civic, feature-request, and automation guide',avatar:'/app/assets/ai/merlin.png',placeholder:'Tell Merlin what should change and how success should be tested.'}",
       "exists": true
     },
     {
@@ -5278,64 +4742,9 @@
       "exists": true
     },
     {
-      "id": "slot-42df7844c75b95",
+      "id": "slot-7348ed9721dcb3",
       "sourcePath": "/app/realm-session-integrity-v237.js",
-      "line": 13,
-      "column": 93,
-      "kind": "string",
-      "raw": "/app/assets/ai/weaveling.png",
-      "assetPath": "/app/assets/ai/weaveling.png",
-      "context": "civweave:{name:'Weaveling',label:'Civweave',role:'Central mirror and orchestrator',avatar:'/app/assets/ai/weaveling.png',accent:'#d8dde7',panel:'#111827'},",
-      "exists": true
-    },
-    {
-      "id": "slot-d7f0a864eb8217",
-      "sourcePath": "/app/realm-session-integrity-v237.js",
-      "line": 14,
-      "column": 83,
-      "kind": "string",
-      "raw": "/app/assets/ai/moss.png",
-      "assetPath": "/app/assets/ai/moss.png",
-      "context": "'living-school':{name:'Moss',label:'Living School',role:'Learning guide',avatar:'/app/assets/ai/moss.png',accent:'#59cf87',panel:'#17342c'},",
-      "exists": true
-    },
-    {
-      "id": "slot-3df21942e441b7",
-      "sourcePath": "/app/realm-session-integrity-v237.js",
-      "line": 15,
-      "column": 95,
-      "kind": "string",
-      "raw": "/app/assets/ai/kamiya.png",
-      "assetPath": "/app/assets/ai/kamiya.png",
-      "context": "cerbanimo:{name:'Kamiya',label:'Cerbanimo',role:'Questwright and skilled-work guide',avatar:'/app/assets/ai/kamiya.png',accent:'#ff54d3',panel:'#170824'},",
-      "exists": true
-    },
-    {
-      "id": "slot-a45ce32fb3e695",
-      "sourcePath": "/app/realm-session-integrity-v237.js",
-      "line": 16,
-      "column": 93,
-      "kind": "string",
-      "raw": "/app/assets/ai/rook.png",
-      "assetPath": "/app/assets/ai/rook.png",
-      "context": "fellowfare:{name:'Rook',label:'FellowFare',role:'Quartermaster and exchange guide',avatar:'/app/assets/ai/rook.png',accent:'#f2a93b',panel:'#2c1b17'},",
-      "exists": true
-    },
-    {
-      "id": "slot-a359f5f0769fb8",
-      "sourcePath": "/app/realm-session-integrity-v237.js",
-      "line": 17,
-      "column": 107,
-      "kind": "string",
-      "raw": "/app/assets/ai/merlin.png",
-      "assetPath": "/app/assets/ai/merlin.png",
-      "context": "anarchadia:{name:'Merlin',label:'Anarchadia',role:'Civic, feature-request, and automation guide',avatar:'/app/assets/ai/merlin.png',accent:'#ff4f9a',panel:'#090909'}",
-      "exists": true
-    },
-    {
-      "id": "slot-b2ef8ffbf364e0",
-      "sourcePath": "/app/realm-session-integrity-v237.js",
-      "line": 212,
+      "line": 104,
       "column": 142,
       "kind": "string",
       "raw": "/app/logos/civweave-app-icon.png",
@@ -6224,292 +5633,6 @@
       "exists": false
     },
     {
-      "id": "slot-bc1a2054e45d79",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 307,
-      "column": 11,
-      "kind": "string",
-      "raw": "./assets/mall/marketplace.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/marketplace.webp",
-      "context": "market: './assets/mall/marketplace.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-a12a89ce402f1e",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 308,
-      "column": 9,
-      "kind": "string",
-      "raw": "./assets/mall/skill-shop.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/skill-shop.webp",
-      "context": "loom: './assets/mall/skill-shop.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-bc54728cdad5a8",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 309,
-      "column": 15,
-      "kind": "string",
-      "raw": "./assets/mall/volunteer-hub.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
-      "context": "assemblies: './assets/mall/volunteer-hub.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-0268d064cddc35",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 310,
-      "column": 10,
-      "kind": "string",
-      "raw": "./assets/mall/help-desk.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/help-desk.webp",
-      "context": "inbox: './assets/mall/help-desk.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-93b3d0e308133b",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 311,
-      "column": 12,
-      "kind": "string",
-      "raw": "./assets/mall/resource-center.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/resource-center.webp",
-      "context": "profile: './assets/mall/resource-center.webp'",
-      "exists": true
-    },
-    {
-      "id": "slot-c0e0f69b30287f",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 322,
-      "column": 52,
-      "kind": "string",
-      "raw": "./assets/mall/main-atrium.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/main-atrium.webp",
-      "context": "const art = FELLOWFARE_ROUTE_ART[state.route] || './assets/mall/main-atrium.webp';",
-      "exists": true
-    },
-    {
-      "id": "slot-7674c760eb2393",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 381,
-      "column": 10,
-      "kind": "string",
-      "raw": "./assets/mall/main-atrium.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/main-atrium.webp",
-      "context": "atrium:'./assets/mall/main-atrium.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-26a70301088d78",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 382,
-      "column": 12,
-      "kind": "string",
-      "raw": "./assets/mall/exchange-galleria.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
-      "context": "exchange:'./assets/mall/exchange-galleria.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-72ceb4bb6c16ee",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 383,
-      "column": 7,
-      "kind": "string",
-      "raw": "./assets/mall/mutual-aid-wing.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
-      "context": "aid:'./assets/mall/mutual-aid-wing.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-de4c1acf52c3e8",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 384,
-      "column": 10,
-      "kind": "string",
-      "raw": "./assets/mall/makers-arcade.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/makers-arcade.webp",
-      "context": "makers:'./assets/mall/makers-arcade.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-a3df9d47f4facd",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 385,
-      "column": 13,
-      "kind": "string",
-      "raw": "./assets/mall/logistics-concourse.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
-      "context": "logistics:'./assets/mall/logistics-concourse.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-803b3e8675039a",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 386,
-      "column": 9,
-      "kind": "string",
-      "raw": "./assets/mall/upper-gallery.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/upper-gallery.webp",
-      "context": "upper:'./assets/mall/upper-gallery.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-8ebdc58feb161e",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 387,
-      "column": 11,
-      "kind": "string",
-      "raw": "./assets/mall/rooftop-commons.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
-      "context": "rooftop:'./assets/mall/rooftop-commons.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-7d00e5e61e6851",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 388,
-      "column": 15,
-      "kind": "string",
-      "raw": "./assets/mall/marketplace.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/marketplace.webp",
-      "context": "marketplace:'./assets/mall/marketplace.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-370e6f2311dcf5",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 389,
-      "column": 16,
-      "kind": "string",
-      "raw": "./assets/mall/free-store.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/free-store.webp",
-      "context": "'free-store':'./assets/mall/free-store.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-7695b0451ed96a",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 390,
-      "column": 15,
-      "kind": "string",
-      "raw": "./assets/mall/help-desk.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/help-desk.webp",
-      "context": "'help-desk':'./assets/mall/help-desk.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-c19ea98d83516a",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 391,
-      "column": 17,
-      "kind": "string",
-      "raw": "./assets/mall/repair-cafe.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
-      "context": "'repair-cafe':'./assets/mall/repair-cafe.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-c753235e8436b3",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 392,
-      "column": 16,
-      "kind": "string",
-      "raw": "./assets/mall/skill-shop.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/skill-shop.webp",
-      "context": "'skill-shop':'./assets/mall/skill-shop.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-29ffacfee71a16",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 393,
-      "column": 17,
-      "kind": "string",
-      "raw": "./assets/mall/tool-rental.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/tool-rental.webp",
-      "context": "'tool-rental':'./assets/mall/tool-rental.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-70d912c15ad523",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 394,
-      "column": 21,
-      "kind": "string",
-      "raw": "./assets/mall/resource-center.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/resource-center.webp",
-      "context": "'resource-center':'./assets/mall/resource-center.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-ccf3ee6e18eb31",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 395,
-      "column": 19,
-      "kind": "string",
-      "raw": "./assets/mall/volunteer-hub.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
-      "context": "'volunteer-hub':'./assets/mall/volunteer-hub.webp',",
-      "exists": true
-    },
-    {
-      "id": "slot-2d182ff3d404a8",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 396,
-      "column": 10,
-      "kind": "string",
-      "raw": "./assets/mall/pantry.webp",
-      "assetPath": "/app/services/fellowfare/assets/mall/pantry.webp",
-      "context": "pantry:'./assets/mall/pantry.webp'",
-      "exists": true
-    },
-    {
-      "id": "slot-aa567ad50b5c3c",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 1114,
-      "column": 92,
-      "kind": "markup",
-      "raw": "../../logos/fellowfare.png",
-      "assetPath": "/app/logos/fellowfare.png",
-      "context": "${loom.result ? renderLoomResult(loom) : `<div class=\"empty-state loom-empty\"><img src=\"../../logos/fellowfare.png\" alt=\"\"><h3>The shuttle is ready</h3><p>Choose a thread and a job. Results stay local unless you configure an external model.</p></div>`}",
-      "exists": true
-    },
-    {
-      "id": "slot-f0fea50f525bc8",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 1114,
-      "column": 96,
-      "kind": "string",
-      "raw": "../../logos/fellowfare.png",
-      "assetPath": "/app/logos/fellowfare.png",
-      "context": "${loom.result ? renderLoomResult(loom) : `<div class=\"empty-state loom-empty\"><img src=\"../../logos/fellowfare.png\" alt=\"\"><h3>The shuttle is ready</h3><p>Choose a thread and a job. Results stay local unless you configure an external model.</p></div>`}",
-      "exists": true
-    },
-    {
-      "id": "slot-65245d79c1e82a",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 1409,
-      "column": 41,
-      "kind": "markup",
-      "raw": "../../logos/fellowfare.png",
-      "assetPath": "/app/logos/fellowfare.png",
-      "context": "return `<div class=\"empty-state\"><img src=\"../../logos/fellowfare.png\" alt=\"\"><h3>${esc(title)}</h3><p>${esc(text)}</p></div>`;",
-      "exists": true
-    },
-    {
-      "id": "slot-32384ed9a80b14",
-      "sourcePath": "/app/services/fellowfare/app.js",
-      "line": 1409,
-      "column": 45,
-      "kind": "string",
-      "raw": "../../logos/fellowfare.png",
-      "assetPath": "/app/logos/fellowfare.png",
-      "context": "return `<div class=\"empty-state\"><img src=\"../../logos/fellowfare.png\" alt=\"\"><h3>${esc(title)}</h3><p>${esc(text)}</p></div>`;",
-      "exists": true
-    },
-    {
       "id": "slot-68a461dea84191",
       "sourcePath": "/app/services/fellowfare/styles.css",
       "line": 98,
@@ -7236,9 +6359,9 @@
       "exists": true
     },
     {
-      "id": "slot-486db5233d306e",
+      "id": "slot-665ec4e502d6b2",
       "sourcePath": "/app/shared-guide-surface-v236-core-v244.js",
-      "line": 19,
+      "line": 18,
       "column": 93,
       "kind": "string",
       "raw": "/app/assets/ai/weaveling.png",
@@ -7247,9 +6370,9 @@
       "exists": true
     },
     {
-      "id": "slot-f5cd22f6ccb729",
+      "id": "slot-e6c1feb96445c7",
       "sourcePath": "/app/shared-guide-surface-v236-core-v244.js",
-      "line": 20,
+      "line": 19,
       "column": 83,
       "kind": "string",
       "raw": "/app/assets/ai/moss.png",
@@ -7258,9 +6381,9 @@
       "exists": true
     },
     {
-      "id": "slot-d98ea2c5bc1096",
+      "id": "slot-9d2426154d4596",
       "sourcePath": "/app/shared-guide-surface-v236-core-v244.js",
-      "line": 21,
+      "line": 20,
       "column": 95,
       "kind": "string",
       "raw": "/app/assets/ai/kamiya.png",
@@ -7269,9 +6392,9 @@
       "exists": true
     },
     {
-      "id": "slot-ac78543ac6da13",
+      "id": "slot-8b00fd0ed0758e",
       "sourcePath": "/app/shared-guide-surface-v236-core-v244.js",
-      "line": 22,
+      "line": 21,
       "column": 93,
       "kind": "string",
       "raw": "/app/assets/ai/rook.png",
@@ -7280,9 +6403,9 @@
       "exists": true
     },
     {
-      "id": "slot-b179ab512c02e1",
+      "id": "slot-6788fb21d3f112",
       "sourcePath": "/app/shared-guide-surface-v236-core-v244.js",
-      "line": 23,
+      "line": 22,
       "column": 107,
       "kind": "string",
       "raw": "/app/assets/ai/merlin.png",
@@ -7343,6 +6466,2041 @@
       "raw": "/app/assets/cabinets/anarchadia.webp",
       "assetPath": "/app/assets/cabinets/anarchadia.webp",
       "context": "\"asset\": \"/app/assets/cabinets/anarchadia.webp\"",
+      "exists": true
+    },
+    {
+      "id": "slot-529135fbea3b7d",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 61,
+      "column": 15,
+      "kind": "string",
+      "raw": "/app/logos/commonweave.webp",
+      "assetPath": "/app/logos/commonweave.webp",
+      "context": "\"logo\": \"/app/logos/commonweave.webp\",",
+      "exists": false
+    },
+    {
+      "id": "slot-a21fefc11a4209",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 69,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/assets/world/town-square-home.webp",
+      "assetPath": "/app/assets/world/town-square-home.webp",
+      "context": "\"visualAsset\": \"/app/assets/world/town-square-home.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-d894cbcccd771b",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 80,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/assets/world/inside-quad.webp",
+      "assetPath": "/app/assets/world/inside-quad.webp",
+      "context": "\"visualAsset\": \"/app/assets/world/inside-quad.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-2731c4a4c9208a",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 93,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/assets/world/dispatch-hall.webp",
+      "assetPath": "/app/assets/world/dispatch-hall.webp",
+      "context": "\"visualAsset\": \"/app/assets/world/dispatch-hall.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-fd25f13f505d4d",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 107,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/assets/world/personal-chronicle.webp",
+      "assetPath": "/app/assets/world/personal-chronicle.webp",
+      "context": "\"visualAsset\": \"/app/assets/world/personal-chronicle.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-9cbcc1c2dacef4",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 119,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/assets/world/festival-grounds.webp",
+      "assetPath": "/app/assets/world/festival-grounds.webp",
+      "context": "\"visualAsset\": \"/app/assets/world/festival-grounds.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-39ae5a968d7239",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 131,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/assets/world/settings-accessibility-hall.webp",
+      "assetPath": "/app/assets/world/settings-accessibility-hall.webp",
+      "context": "\"visualAsset\": \"/app/assets/world/settings-accessibility-hall.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-d517ed0ae63073",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 148,
+      "column": 15,
+      "kind": "string",
+      "raw": "/app/logos/living-school.webp",
+      "assetPath": "/app/logos/living-school.webp",
+      "context": "\"logo\": \"/app/logos/living-school.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-1652ece4b1aa5e",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 156,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/home.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/home.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/home.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-e13764339c82a8",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 168,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/observatory.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/observatory.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/observatory.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-6dc070646e0e39",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 180,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/faculty.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/faculty.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/faculty.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-faa347082d3a9d",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 192,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/forge.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/forge.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/forge.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-8ccbace72bad32",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 205,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/project-map.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/project-map.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/project-map.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-ff9a7b40d30c89",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 217,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/moss.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/moss.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/moss.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-a6094947c0d5aa",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 226,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/commons.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/commons.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/commons.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-4c8cac8d38a3ac",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 237,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/opportunity.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/opportunity.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/opportunity.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-f5ce7592977cc6",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 249,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/workshop.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/workshop.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/workshop.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-2871f5a65949f5",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 261,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/library.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/library.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/library.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-9ee346c3057655",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 272,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/review.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/review.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/review.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-1a7b6ea802a302",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 284,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/credential.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/credential.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/credential.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-a699f72712c3f1",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 296,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/passport.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/passport.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/passport.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-0090c8b6f417ac",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 307,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/bridge.webp",
+      "assetPath": "/app/services/living-school/visual-assets/bridge.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/bridge.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-88464a4f853543",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 318,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/tower.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/tower.webp",
+      "context": "\"visualAsset\": \"/app/services/living-school/visual-assets/core/tower.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-231c12e8eae8f5",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 385,
+      "column": 18,
+      "kind": "string",
+      "raw": "/app/assets/cabinets/living-school.webp",
+      "assetPath": "/app/assets/cabinets/living-school.webp",
+      "context": "\"asset\": \"/app/assets/cabinets/living-school.webp\"",
+      "exists": true
+    },
+    {
+      "id": "slot-3c95492e867042",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 393,
+      "column": 15,
+      "kind": "string",
+      "raw": "/app/logos/cerbanimo.webp",
+      "assetPath": "/app/logos/cerbanimo.webp",
+      "context": "\"logo\": \"/app/logos/cerbanimo.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-a87becbc9378c3",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 401,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/nexus.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/nexus.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/nexus.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-b708eb9ce9875a",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 412,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/kamiya-chamber.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-384a20af3e1e9e",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 424,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/mission-room.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/mission-room.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/mission-room.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-3f2eb7cf76f9a8",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 435,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/quest.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/quest.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/quest.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-a64cd43741af42",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 447,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/project-workbench.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/project-workbench.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/project-workbench.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-740b6fedc6b3df",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 458,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/workshop.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/workshop.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/workshop.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-556c955cec18ed",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 469,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/skill.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/skill.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/skill.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-15bb47186e994b",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 480,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/resource.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/resource.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/resource.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-5317e78a7d4cf8",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 493,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/observatory.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/observatory.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/observatory.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-892f6404f281a0",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 507,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/hangar.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/hangar.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/hangar.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-cdfd89ea42ffcc",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 519,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/systems.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/systems.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/systems.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-f772bf0fc8a59b",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 531,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/ai-core.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/ai-core.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/ai-core.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-0456157623c904",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 542,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/showroom.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/showroom.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/showroom.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-a0cfb7bd7c8ad5",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 554,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/transit.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/transit.webp",
+      "context": "\"visualAsset\": \"/app/services/cerbanimo/assets/visual/transit.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-23b81293087c7a",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 619,
+      "column": 18,
+      "kind": "string",
+      "raw": "/app/assets/cabinets/cerbanimo.webp",
+      "assetPath": "/app/assets/cabinets/cerbanimo.webp",
+      "context": "\"asset\": \"/app/assets/cabinets/cerbanimo.webp\"",
+      "exists": true
+    },
+    {
+      "id": "slot-5b55813935a358",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 627,
+      "column": 15,
+      "kind": "string",
+      "raw": "/app/logos/fellowfare.webp",
+      "assetPath": "/app/logos/fellowfare.webp",
+      "context": "\"logo\": \"/app/logos/fellowfare.webp\",",
+      "exists": false
+    },
+    {
+      "id": "slot-365b160a562db7",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 635,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/main-atrium.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/main-atrium.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/main-atrium.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-12fd187ee8a434",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 646,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/marketplace.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/marketplace.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/marketplace.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-1f53619d191c8d",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 659,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/mutual-aid-wing.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-9e38c94bfaa749",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 670,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/free-store.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/free-store.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/free-store.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-82c84dba67fa84",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 679,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/resource-center.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/resource-center.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/resource-center.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-8a2aed8d9cef02",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 690,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/makers-arcade.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/makers-arcade.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/makers-arcade.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-01f3cd8d0dccd8",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 699,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/skill-shop.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/skill-shop.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/skill-shop.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-8cdf0dab7723b9",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 710,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/repair-cafe.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-5bfe78fb3f1755",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 721,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/tool-rental.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/tool-rental.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/tool-rental.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-bddadad79e11f4",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 732,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/pantry.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/pantry.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/pantry.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-6b42aa9eee3039",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 743,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/logistics-concourse.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-2ca3b5654a2bc3",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 754,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-b6c5ffed3b967f",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 769,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/volunteer-hub.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-900e558be56591",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 781,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/help-desk.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/help-desk.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/help-desk.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-c919507606f2ee",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 793,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
+      "context": "\"visualAsset\": \"/app/services/fellowfare/assets/mall/rooftop-commons.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-d7d1378c2376ec",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 860,
+      "column": 18,
+      "kind": "string",
+      "raw": "/app/assets/cabinets/fellowfare.webp",
+      "assetPath": "/app/assets/cabinets/fellowfare.webp",
+      "context": "\"asset\": \"/app/assets/cabinets/fellowfare.webp\"",
+      "exists": true
+    },
+    {
+      "id": "slot-0c21a9ba167c93",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 868,
+      "column": 15,
+      "kind": "string",
+      "raw": "/app/logos/anarchadia.webp",
+      "assetPath": "/app/logos/anarchadia.webp",
+      "context": "\"logo\": \"/app/logos/anarchadia.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-53ce76737423e7",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 876,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/home-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/home-portrait.webp",
+      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/home-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-2a62c40eb92517",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 890,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
+      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/proposal-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-952a2c207d1523",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 904,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
+      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/bug-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-5d72ecbf92db12",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 916,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
+      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/hub-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-e74d57c3ad45fe",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 928,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
+      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/federation-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-79657283530130",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 941,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
+      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/rails-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-fd371fbb1ede97",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 955,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
+      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/forge-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-69f4b93ca970ad",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 969,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
+      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/ledger-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-6cd55d6c6b9f03",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 982,
+      "column": 26,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
+      "context": "\"visualAsset\": \"/app/services/anarchadia/assets/screens/observatory-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-ce321b059b9bdd",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1049,
+      "column": 18,
+      "kind": "string",
+      "raw": "/app/assets/cabinets/anarchadia.webp",
+      "assetPath": "/app/assets/cabinets/anarchadia.webp",
+      "context": "\"asset\": \"/app/assets/cabinets/anarchadia.webp\"",
+      "exists": true
+    },
+    {
+      "id": "slot-e591482f46cd7c",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1069,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/settings-accessibility-hall.webp",
+      "assetPath": "/app/assets/world/settings-accessibility-hall.webp",
+      "context": "\"surface\": \"/app/assets/world/settings-accessibility-hall.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-07976882c09e09",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1094,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/town-square-home.webp",
+      "assetPath": "/app/assets/world/town-square-home.webp",
+      "context": "\"surface\": \"/app/assets/world/town-square-home.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-34dc0bfc2ec208",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1120,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/inside-quad.webp",
+      "assetPath": "/app/assets/world/inside-quad.webp",
+      "context": "\"surface\": \"/app/assets/world/inside-quad.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-01fff08e60e212",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1145,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/inside-quad.webp",
+      "assetPath": "/app/assets/world/inside-quad.webp",
+      "context": "\"surface\": \"/app/assets/world/inside-quad.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-9d137ab1cdb151",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1170,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/inside-quad.webp",
+      "assetPath": "/app/assets/world/inside-quad.webp",
+      "context": "\"surface\": \"/app/assets/world/inside-quad.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-298fa80a1c977c",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1195,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/dispatch-hall.webp",
+      "assetPath": "/app/assets/world/dispatch-hall.webp",
+      "context": "\"surface\": \"/app/assets/world/dispatch-hall.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-717cd46ccd5b05",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1225,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/dispatch-hall.webp",
+      "assetPath": "/app/assets/world/dispatch-hall.webp",
+      "context": "\"surface\": \"/app/assets/world/dispatch-hall.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-34931f7887eb95",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1250,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/dispatch-hall.webp",
+      "assetPath": "/app/assets/world/dispatch-hall.webp",
+      "context": "\"surface\": \"/app/assets/world/dispatch-hall.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-6cfd872434bcb4",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1280,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/dispatch-hall.webp",
+      "assetPath": "/app/assets/world/dispatch-hall.webp",
+      "context": "\"surface\": \"/app/assets/world/dispatch-hall.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-f09e48d8fd11d4",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1305,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/personal-chronicle.webp",
+      "assetPath": "/app/assets/world/personal-chronicle.webp",
+      "context": "\"surface\": \"/app/assets/world/personal-chronicle.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-c1272dea17755b",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1332,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/personal-chronicle.webp",
+      "assetPath": "/app/assets/world/personal-chronicle.webp",
+      "context": "\"surface\": \"/app/assets/world/personal-chronicle.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-c12927bced4a68",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1357,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/festival-grounds.webp",
+      "assetPath": "/app/assets/world/festival-grounds.webp",
+      "context": "\"surface\": \"/app/assets/world/festival-grounds.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-50968c74a6a378",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1382,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/festival-grounds.webp",
+      "assetPath": "/app/assets/world/festival-grounds.webp",
+      "context": "\"surface\": \"/app/assets/world/festival-grounds.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-44f39884e3bb09",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1410,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/settings-accessibility-hall.webp",
+      "assetPath": "/app/assets/world/settings-accessibility-hall.webp",
+      "context": "\"surface\": \"/app/assets/world/settings-accessibility-hall.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-fd3a325fa412f1",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1435,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/settings-accessibility-hall.webp",
+      "assetPath": "/app/assets/world/settings-accessibility-hall.webp",
+      "context": "\"surface\": \"/app/assets/world/settings-accessibility-hall.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-74a42f39e79dc8",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1460,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/assets/world/settings-accessibility-hall.webp",
+      "assetPath": "/app/assets/world/settings-accessibility-hall.webp",
+      "context": "\"surface\": \"/app/assets/world/settings-accessibility-hall.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-f823b97ffdee1c",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1485,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/home.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/home.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/home.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-c11ca591e6e5b9",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1510,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/home.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/home.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/home.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-f007d554e609e0",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1535,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/forge.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/forge.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/forge.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-8ba2ce86aab977",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1560,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/forge.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/forge.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/forge.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-50e9496c4d4b37",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1585,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/forge.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/forge.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/forge.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-c6fb1226222087",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1610,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/library.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/library.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/library.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-d543dc94b34a3a",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1635,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/observatory.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/observatory.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/observatory.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-24ed546878bfeb",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1660,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/observatory.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/observatory.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/observatory.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-3753ca2546b3b5",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1685,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/project-map.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/project-map.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/project-map.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-9d66994e914746",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1710,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/project-map.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/project-map.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/project-map.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-0df0e8f192f6ea",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1735,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/faculty.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/faculty.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/faculty.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-0fc9aebb3854bf",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1760,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/faculty.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/faculty.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/faculty.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-dc2b29b78e8498",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1785,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/commons.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/commons.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/commons.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-4af2eb0b19085e",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1810,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/opportunity.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/opportunity.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/opportunity.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-d5e6bf5d11155b",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1835,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/opportunity.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/opportunity.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/opportunity.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-deae7624b1c8f0",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1860,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/workshop.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/workshop.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/workshop.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-4dbb9a96bc9d6b",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1887,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/workshop.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/workshop.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/workshop.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-29e1f622319e2f",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1912,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/bridge.webp",
+      "assetPath": "/app/services/living-school/visual-assets/bridge.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/bridge.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-d6d8d642b24a77",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1939,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/review.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/review.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/review.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-49b6a4aa19db24",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1964,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/review.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/review.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/review.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-bee5dff2665949",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 1989,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/credential.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/credential.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/credential.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-1b8c4f0064be5f",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2016,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/credential.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/credential.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/credential.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-6f142e5676f87c",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2043,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/passport.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/passport.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/passport.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-65b6e81c37dce2",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2068,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/tower.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/tower.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/tower.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-7b63a1a79cee86",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2093,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/tower.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/tower.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/tower.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-fd2d1339dfd11e",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2118,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/living-school/visual-assets/core/tower.webp",
+      "assetPath": "/app/services/living-school/visual-assets/core/tower.webp",
+      "context": "\"surface\": \"/app/services/living-school/visual-assets/core/tower.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-8cbf39c2981ac1",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2143,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/nexus.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/nexus.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/nexus.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-780278260bb1d8",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2168,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/kamiya-chamber.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-77db150d1be4d6",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2193,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/kamiya-chamber.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/kamiya-chamber.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-d38b52c52a49a3",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2218,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/mission-room.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/mission-room.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/mission-room.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-5844d1aea7311c",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2243,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/quest.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/quest.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/quest.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-0150efc1a75e28",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2268,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/quest.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/quest.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/quest.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-cdf3fc7ca3049f",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2293,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/project-workbench.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/project-workbench.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/project-workbench.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-7b2a99a6f53539",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2318,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/workshop.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/workshop.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/workshop.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-5f1417723db78d",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2343,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/skill.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/skill.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/skill.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-3c8d449a0dc6ca",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2368,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/resource.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/resource.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/resource.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-ddec503e168a26",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2395,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/resource.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/resource.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/resource.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-06c85fe6c4d93e",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2422,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/resource.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/resource.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/resource.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-38dc58fc820ceb",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2449,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/observatory.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/observatory.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/observatory.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-cff9b24e0b839b",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2474,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/observatory.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/observatory.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/observatory.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-92c0007721a9ad",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2499,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/observatory.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/observatory.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/observatory.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-1aa92fd2d8b082",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2524,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/observatory.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/observatory.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/observatory.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-e77cfce8b42114",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2552,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/hangar.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/hangar.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/hangar.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-8c55cbc0886f91",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2577,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/hangar.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/hangar.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/hangar.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-b4c540c3bd5f4f",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2602,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/systems.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/systems.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/systems.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-4b91fd9a25e56c",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2627,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/systems.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/systems.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/systems.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-9a333358b12aeb",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2654,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/ai-core.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/ai-core.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/ai-core.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-075a7e31615f47",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2679,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/showroom.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/showroom.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/showroom.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-809a43a8a1b953",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2704,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/showroom.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/showroom.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/showroom.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-2c6d214e872f61",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2729,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/cerbanimo/assets/visual/transit.webp",
+      "assetPath": "/app/services/cerbanimo/assets/visual/transit.webp",
+      "context": "\"surface\": \"/app/services/cerbanimo/assets/visual/transit.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-b7cc9c376bacdf",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2754,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/main-atrium.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/main-atrium.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/main-atrium.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-caae08057f7d7e",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2779,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/marketplace.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/marketplace.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/marketplace.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-2f5f18885eddd6",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2804,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/marketplace.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/marketplace.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/marketplace.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-043cbed3f033e8",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2829,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/mutual-aid-wing.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/mutual-aid-wing.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-0e99614db61eb1",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2854,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/marketplace.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/marketplace.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/marketplace.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-9eb7c899d2a880",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2879,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/volunteer-hub.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-419737001fe087",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2904,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/resource-center.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/resource-center.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/resource-center.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-e871181af27097",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2929,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/skill-shop.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/skill-shop.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/skill-shop.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-d741dcf363b644",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2956,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/repair-cafe.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/repair-cafe.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-fb0f3cfaa53c59",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 2981,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/tool-rental.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/tool-rental.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/tool-rental.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-8743a84790095c",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3006,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/pantry.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/pantry.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/pantry.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-0ef2b4532104bb",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3031,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/logistics-concourse.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/logistics-concourse.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-ede28651a996f0",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3056,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-d340fab5c625ea",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3081,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-5b582ed2781d86",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3106,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-846135a4b381b4",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3131,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-be0d7de90feca8",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3156,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/exchange-galleria.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/exchange-galleria.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-a298c2d52ded6b",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3183,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/help-desk.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/help-desk.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/help-desk.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-f420e3a859db15",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3208,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/help-desk.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/help-desk.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/help-desk.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-7699ac3fb9a305",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3233,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/volunteer-hub.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/volunteer-hub.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-32b2ea2b0a81fc",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3258,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/rooftop-commons.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-9eddc7843b8419",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3283,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/rooftop-commons.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-d83292a6a96e3d",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3308,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
+      "assetPath": "/app/services/fellowfare/assets/mall/rooftop-commons.webp",
+      "context": "\"surface\": \"/app/services/fellowfare/assets/mall/rooftop-commons.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-444325a214a0fa",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3333,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/home-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/home-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/home-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-5379236c9b33d8",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3358,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/home-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/home-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/home-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-0d3777d584638a",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3383,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/home-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/home-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/home-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-c6028ad68ec50d",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3408,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/proposal-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-5e2274d53fea92",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3433,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/proposal-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-083a215f0084ab",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3458,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/proposal-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-3217d81652d7f4",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3483,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/proposal-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/proposal-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-9e9d4414711b81",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3508,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/bug-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-00b88cc99f4828",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3533,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/bug-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/bug-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-015a5c0268dcd8",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3558,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/hub-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-0ccc1f0818a340",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3583,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/hub-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/hub-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-edcfcec49ce80b",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3608,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/federation-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-2583cdc48c351b",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3633,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/federation-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-13784f924014bb",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3658,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/federation-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/federation-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-6104a5256a8f91",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3683,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/rails-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-211b0d70920148",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3708,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/rails-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-8cf478d18f7665",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3733,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/rails-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-340d28ce110ede",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3758,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/rails-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/rails-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-301ecf2e66a004",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3783,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/forge-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-37b5ca4de68c49",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3808,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/forge-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-6548beded26c41",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3833,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/forge-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-1bff28169125ff",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3858,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/forge-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/forge-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-afab41be7fa453",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3883,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/ledger-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-3960b8e38c932c",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3908,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/ledger-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-35f872034b77cc",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3933,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/ledger-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/ledger-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-c80038fa73fb23",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3958,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/observatory-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-e581fe60ed8f92",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 3983,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/observatory-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/observatory-portrait.webp\",",
+      "exists": true
+    },
+    {
+      "id": "slot-b93bdb3747e3f7",
+      "sourcePath": "/app/shared/civweave-parity-ledger.json",
+      "line": 4008,
+      "column": 20,
+      "kind": "string",
+      "raw": "/app/services/anarchadia/assets/screens/home-portrait.webp",
+      "assetPath": "/app/services/anarchadia/assets/screens/home-portrait.webp",
+      "context": "\"surface\": \"/app/services/anarchadia/assets/screens/home-portrait.webp\",",
       "exists": true
     },
     {
@@ -7409,6 +8567,39 @@
       "raw": "/app/logos/civweave-icon-512.png",
       "assetPath": "/app/logos/civweave-icon-512.png",
       "context": "\"/app/logos/civweave-icon-512.png\": \"83c649211fb9fad53c2d44ab774ba5ab153e3f635d0864a84596b45b33c70b4d\",",
+      "exists": true
+    },
+    {
+      "id": "slot-cd71cfd156451c",
+      "sourcePath": "/app/shell-integrity-v281.json",
+      "line": 19,
+      "column": 5,
+      "kind": "string",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "\"/app/logos/civweave-pwa-192-v247.png\": \"7f56100fcaa4b6096bc031df735ee74b124cb0f7884f6b392ff5bf2816a71958\",",
+      "exists": true
+    },
+    {
+      "id": "slot-648be38ba2bba7",
+      "sourcePath": "/app/shell-integrity-v281.json",
+      "line": 20,
+      "column": 5,
+      "kind": "string",
+      "raw": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "assetPath": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "context": "\"/app/logos/civweave-prismatic-wordmark-v1.png\": \"7c2b202d740c29a7ac41fc91175c3df8de5a5ac877f98f359f99de9daa7b8f86\",",
+      "exists": true
+    },
+    {
+      "id": "slot-df98fabf30a776",
+      "sourcePath": "/app/shell-integrity-v281.json",
+      "line": 21,
+      "column": 5,
+      "kind": "string",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "\"/app/logos/cerbanimo-steward-mark-v1.png\": \"6ed0764c38d8d6221539d5c49d4086cad3fbe9ddf85f163f97c2f8c1a4b9eb2f\",",
       "exists": true
     },
     {
@@ -7522,9 +8713,9 @@
       "exists": true
     },
     {
-      "id": "slot-bc9d4427cb3124",
+      "id": "slot-a6eb34481c019f",
       "sourcePath": "/app/working-campus-topbar-v243.js",
-      "line": 12,
+      "line": 15,
       "column": 18,
       "kind": "string",
       "raw": "/app/logos/civweave-pwa-192-v247.png",
@@ -7533,9 +8724,9 @@
       "exists": true
     },
     {
-      "id": "slot-55c2284cb5f31c",
+      "id": "slot-512d0f65c7fe5b",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 18,
+      "line": 19,
       "column": 12,
       "kind": "markup",
       "raw": "/app/logos/civweave-symbol.svg",
@@ -7544,9 +8735,9 @@
       "exists": true
     },
     {
-      "id": "slot-57d8f95c04016a",
+      "id": "slot-88610434cb1046",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 18,
+      "line": 19,
       "column": 16,
       "kind": "string",
       "raw": "/app/logos/civweave-symbol.svg",
@@ -7555,9 +8746,9 @@
       "exists": true
     },
     {
-      "id": "slot-615d9b3aa0a0a4",
+      "id": "slot-0b3a40cf292e63",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 29,
+      "line": 30,
       "column": 150,
       "kind": "markup",
       "raw": "/app/assets/ai/moss.png",
@@ -7566,9 +8757,9 @@
       "exists": true
     },
     {
-      "id": "slot-6f39b43bf8ed29",
+      "id": "slot-b96135694793b6",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 29,
+      "line": 30,
       "column": 154,
       "kind": "string",
       "raw": "/app/assets/ai/moss.png",
@@ -7577,9 +8768,9 @@
       "exists": true
     },
     {
-      "id": "slot-cb3453dca08dc4",
+      "id": "slot-07f7e87fe8b62f",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 30,
+      "line": 31,
       "column": 140,
       "kind": "markup",
       "raw": "/app/assets/ai/kamiya.png",
@@ -7588,9 +8779,9 @@
       "exists": true
     },
     {
-      "id": "slot-19d2f31824789f",
+      "id": "slot-39af09d930ff43",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 30,
+      "line": 31,
       "column": 144,
       "kind": "string",
       "raw": "/app/assets/ai/kamiya.png",
@@ -7599,9 +8790,9 @@
       "exists": true
     },
     {
-      "id": "slot-b52a54553a6436",
+      "id": "slot-c7d1ceebcf5452",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 31,
+      "line": 32,
       "column": 142,
       "kind": "markup",
       "raw": "/app/assets/ai/rook.png",
@@ -7610,9 +8801,9 @@
       "exists": true
     },
     {
-      "id": "slot-f3095a4ede699e",
+      "id": "slot-e6c7b837b8515d",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 31,
+      "line": 32,
       "column": 146,
       "kind": "string",
       "raw": "/app/assets/ai/rook.png",
@@ -7621,9 +8812,9 @@
       "exists": true
     },
     {
-      "id": "slot-2970f0f6ec9c61",
+      "id": "slot-820710553d37a5",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 32,
+      "line": 33,
       "column": 140,
       "kind": "markup",
       "raw": "/app/assets/ai/merlin.png",
@@ -7632,9 +8823,9 @@
       "exists": true
     },
     {
-      "id": "slot-f58e8bf67b9494",
+      "id": "slot-a532516a988c42",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 32,
+      "line": 33,
       "column": 144,
       "kind": "string",
       "raw": "/app/assets/ai/merlin.png",
@@ -7643,9 +8834,9 @@
       "exists": true
     },
     {
-      "id": "slot-f5872332b783c2",
+      "id": "slot-389800193ced8b",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 36,
+      "line": 37,
       "column": 36,
       "kind": "markup",
       "raw": "/app/assets/ai/weaveling.png",
@@ -7654,9 +8845,9 @@
       "exists": true
     },
     {
-      "id": "slot-b4ae35131572ea",
+      "id": "slot-ce5b5c7b970fb9",
       "sourcePath": "/app/working-campus-v156.html",
-      "line": 36,
+      "line": 37,
       "column": 40,
       "kind": "string",
       "raw": "/app/assets/ai/weaveling.png",
@@ -7706,6 +8897,160 @@
       "raw": "/app/logos/civweave-app-icon.png",
       "assetPath": "/app/logos/civweave-app-icon.png",
       "context": "if(brand){brand.src='/app/logos/civweave-app-icon.png';brand.alt='Civweave';}",
+      "exists": true
+    },
+    {
+      "id": "slot-e6b6ef621578f6",
+      "sourcePath": "/host-local-anchor.html",
+      "line": 8,
+      "column": 18,
+      "kind": "markup",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<link rel=\"icon\" href=\"/app/logos/civweave-pwa-192-v247.png\" type=\"image/png\">",
+      "exists": true
+    },
+    {
+      "id": "slot-1f7a092f1723a0",
+      "sourcePath": "/host-local-anchor.html",
+      "line": 8,
+      "column": 23,
+      "kind": "string",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<link rel=\"icon\" href=\"/app/logos/civweave-pwa-192-v247.png\" type=\"image/png\">",
+      "exists": true
+    },
+    {
+      "id": "slot-70b8f9d2c73221",
+      "sourcePath": "/host-local-anchor.html",
+      "line": 18,
+      "column": 35,
+      "kind": "markup",
+      "raw": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "assetPath": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "context": "<img class=\"cw-platform-logo\" src=\"/app/logos/civweave-prismatic-wordmark-v1.png\" alt=\"Civweave\">",
+      "exists": true
+    },
+    {
+      "id": "slot-a1dcf575cbc8be",
+      "sourcePath": "/host-local-anchor.html",
+      "line": 18,
+      "column": 39,
+      "kind": "string",
+      "raw": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "assetPath": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "context": "<img class=\"cw-platform-logo\" src=\"/app/logos/civweave-prismatic-wordmark-v1.png\" alt=\"Civweave\">",
+      "exists": true
+    },
+    {
+      "id": "slot-ced04f922e3b66",
+      "sourcePath": "/host-local-anchor.html",
+      "line": 22,
+      "column": 34,
+      "kind": "markup",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "<img class=\"cw-steward-logo\" src=\"/app/logos/cerbanimo-steward-mark-v1.png\" alt=\"Cerbanimo\">",
+      "exists": true
+    },
+    {
+      "id": "slot-a9bbaa1233c1e0",
+      "sourcePath": "/host-local-anchor.html",
+      "line": 22,
+      "column": 38,
+      "kind": "string",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "<img class=\"cw-steward-logo\" src=\"/app/logos/cerbanimo-steward-mark-v1.png\" alt=\"Cerbanimo\">",
+      "exists": true
+    },
+    {
+      "id": "slot-34d726d8d5027e",
+      "sourcePath": "/host-setup.html",
+      "line": 8,
+      "column": 18,
+      "kind": "markup",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<link rel=\"icon\" href=\"/app/logos/civweave-pwa-192-v247.png\" type=\"image/png\">",
+      "exists": true
+    },
+    {
+      "id": "slot-0d5a25e75d1795",
+      "sourcePath": "/host-setup.html",
+      "line": 8,
+      "column": 23,
+      "kind": "string",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<link rel=\"icon\" href=\"/app/logos/civweave-pwa-192-v247.png\" type=\"image/png\">",
+      "exists": true
+    },
+    {
+      "id": "slot-fbd3a6a41537fa",
+      "sourcePath": "/host-setup.html",
+      "line": 19,
+      "column": 35,
+      "kind": "markup",
+      "raw": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "assetPath": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "context": "<img class=\"cw-platform-logo\" src=\"/app/logos/civweave-prismatic-wordmark-v1.png\" alt=\"Civweave\">",
+      "exists": true
+    },
+    {
+      "id": "slot-6048e60bdb02e5",
+      "sourcePath": "/host-setup.html",
+      "line": 19,
+      "column": 39,
+      "kind": "string",
+      "raw": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "assetPath": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "context": "<img class=\"cw-platform-logo\" src=\"/app/logos/civweave-prismatic-wordmark-v1.png\" alt=\"Civweave\">",
+      "exists": true
+    },
+    {
+      "id": "slot-3526b44fbadcae",
+      "sourcePath": "/host-setup.html",
+      "line": 23,
+      "column": 34,
+      "kind": "markup",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "<img class=\"cw-steward-logo\" src=\"/app/logos/cerbanimo-steward-mark-v1.png\" alt=\"Cerbanimo\">",
+      "exists": true
+    },
+    {
+      "id": "slot-ceb16dd4a8481c",
+      "sourcePath": "/host-setup.html",
+      "line": 23,
+      "column": 38,
+      "kind": "string",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "<img class=\"cw-steward-logo\" src=\"/app/logos/cerbanimo-steward-mark-v1.png\" alt=\"Cerbanimo\">",
+      "exists": true
+    },
+    {
+      "id": "slot-2619f8fb046e6f",
+      "sourcePath": "/host-setup.html",
+      "line": 27,
+      "column": 28,
+      "kind": "markup",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<header class=\"brand\"><img src=\"/app/logos/civweave-pwa-192-v247.png\" alt=\"Civweave\"><div><small>Host steward</small><h1>Civweave</h1></div></header>",
+      "exists": true
+    },
+    {
+      "id": "slot-ef0c12097c3973",
+      "sourcePath": "/host-setup.html",
+      "line": 27,
+      "column": 32,
+      "kind": "string",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "<header class=\"brand\"><img src=\"/app/logos/civweave-pwa-192-v247.png\" alt=\"Civweave\"><div><small>Host steward</small><h1>Civweave</h1></div></header>",
       "exists": true
     },
     {
@@ -7771,13 +9116,46 @@
       "kind": "string",
       "raw": "/app/logos/civweave-icon-512.png",
       "assetPath": "/app/logos/civweave-icon-512.png",
-      "context": "'/app/logos/civweave-icon-512.png'",
+      "context": "'/app/logos/civweave-icon-512.png',",
       "exists": true
     },
     {
-      "id": "slot-061e926b889f53",
+      "id": "slot-4f07a347fc4fa3",
       "sourcePath": "/service-worker-core-v208.js",
-      "line": 37,
+      "line": 27,
+      "column": 3,
+      "kind": "string",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "'/app/logos/civweave-pwa-192-v247.png',",
+      "exists": true
+    },
+    {
+      "id": "slot-6031a2aa5ff873",
+      "sourcePath": "/service-worker-core-v208.js",
+      "line": 28,
+      "column": 3,
+      "kind": "string",
+      "raw": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "assetPath": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "context": "'/app/logos/civweave-prismatic-wordmark-v1.png',",
+      "exists": true
+    },
+    {
+      "id": "slot-2222e29af6c9be",
+      "sourcePath": "/service-worker-core-v208.js",
+      "line": 29,
+      "column": 3,
+      "kind": "string",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "'/app/logos/cerbanimo-steward-mark-v1.png'",
+      "exists": true
+    },
+    {
+      "id": "slot-455510515b6ed5",
+      "sourcePath": "/service-worker-core-v208.js",
+      "line": 41,
       "column": 3,
       "kind": "string",
       "raw": "/app/logos/civweave-app-icon.png",
@@ -7786,9 +9164,9 @@
       "exists": true
     },
     {
-      "id": "slot-ea75ab9929e0a0",
+      "id": "slot-83508ec1aaa573",
       "sourcePath": "/service-worker-core-v208.js",
-      "line": 38,
+      "line": 42,
       "column": 3,
       "kind": "string",
       "raw": "/app/logos/civweave-icon-maskable-192.png",
@@ -7797,9 +9175,9 @@
       "exists": true
     },
     {
-      "id": "slot-523b8493eee321",
+      "id": "slot-ef2fa26507ce73",
       "sourcePath": "/service-worker-core-v208.js",
-      "line": 39,
+      "line": 43,
       "column": 3,
       "kind": "string",
       "raw": "/app/logos/civweave-icon-maskable-512.png",
@@ -8072,9 +9450,31 @@
       "exists": true
     },
     {
-      "id": "slot-0a06ab69f645e8",
+      "id": "slot-df1e43a840a5ab",
       "sourcePath": "/service-worker-shared-images-v203.js",
       "line": 25,
+      "column": 3,
+      "kind": "string",
+      "raw": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "assetPath": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "context": "'/app/logos/civweave-prismatic-wordmark-v1.png',",
+      "exists": true
+    },
+    {
+      "id": "slot-76a449100c7c19",
+      "sourcePath": "/service-worker-shared-images-v203.js",
+      "line": 26,
+      "column": 3,
+      "kind": "string",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "'/app/logos/cerbanimo-steward-mark-v1.png',",
+      "exists": true
+    },
+    {
+      "id": "slot-6b4a83fba8ce60",
+      "sourcePath": "/service-worker-shared-images-v203.js",
+      "line": 27,
       "column": 3,
       "kind": "string",
       "raw": "/app/logos/fellowfare-v2.webp",
@@ -8083,97 +9483,130 @@
       "exists": true
     },
     {
-      "id": "slot-01f3afc5aa40bd",
+      "id": "slot-9e15911eff7911",
       "sourcePath": "/service-worker.js",
-      "line": 67,
+      "line": 82,
       "column": 3,
       "kind": "string",
       "raw": "/app/logos/civweave.webp",
       "assetPath": "/app/logos/civweave.webp",
-      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png',",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
       "exists": true
     },
     {
-      "id": "slot-37d38245cab985",
+      "id": "slot-b852482a55d936",
       "sourcePath": "/service-worker.js",
-      "line": 67,
+      "line": 82,
       "column": 30,
       "kind": "string",
       "raw": "/app/logos/civweave-app-icon.png",
       "assetPath": "/app/logos/civweave-app-icon.png",
-      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png',",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
       "exists": true
     },
     {
-      "id": "slot-86686fd1ddb8b4",
+      "id": "slot-2e1cf6af48d283",
       "sourcePath": "/service-worker.js",
-      "line": 67,
+      "line": 82,
       "column": 65,
       "kind": "string",
       "raw": "/app/logos/cerbanimo.webp",
       "assetPath": "/app/logos/cerbanimo.webp",
-      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png',",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
       "exists": true
     },
     {
-      "id": "slot-4352708ddd5110",
+      "id": "slot-e9a933ad74d1ac",
       "sourcePath": "/service-worker.js",
-      "line": 67,
+      "line": 82,
       "column": 93,
       "kind": "string",
       "raw": "/app/logos/fellowfare-v2.webp",
       "assetPath": "/app/logos/fellowfare-v2.webp",
-      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png',",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
       "exists": true
     },
     {
-      "id": "slot-26e858e05a719a",
+      "id": "slot-8904a5ed2586db",
       "sourcePath": "/service-worker.js",
-      "line": 67,
+      "line": 82,
       "column": 125,
       "kind": "string",
       "raw": "/app/logos/civweave-icon-192.png",
       "assetPath": "/app/logos/civweave-icon-192.png",
-      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png',",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
       "exists": true
     },
     {
-      "id": "slot-56f182360522fe",
+      "id": "slot-3134c0481cc829",
       "sourcePath": "/service-worker.js",
-      "line": 67,
+      "line": 82,
       "column": 160,
       "kind": "string",
       "raw": "/app/logos/civweave-icon-512.png",
       "assetPath": "/app/logos/civweave-icon-512.png",
-      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png',",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
       "exists": true
     },
     {
-      "id": "slot-391bc764fa0403",
+      "id": "slot-7fdddf29a1d453",
       "sourcePath": "/service-worker.js",
-      "line": 67,
+      "line": 82,
       "column": 195,
       "kind": "string",
       "raw": "/app/logos/civweave-icon-maskable-192.png",
       "assetPath": "/app/logos/civweave-icon-maskable-192.png",
-      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png',",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
       "exists": true
     },
     {
-      "id": "slot-e7f2992a1ffdc8",
+      "id": "slot-2f696f47bfb7a6",
       "sourcePath": "/service-worker.js",
-      "line": 67,
+      "line": 82,
       "column": 239,
       "kind": "string",
       "raw": "/app/logos/civweave-icon-maskable-512.png",
       "assetPath": "/app/logos/civweave-icon-maskable-512.png",
-      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png',",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
       "exists": true
     },
     {
-      "id": "slot-082dc011b5c841",
+      "id": "slot-72fcfae160ed24",
       "sourcePath": "/service-worker.js",
-      "line": 68,
+      "line": 82,
+      "column": 283,
+      "kind": "string",
+      "raw": "/app/logos/civweave-pwa-192-v247.png",
+      "assetPath": "/app/logos/civweave-pwa-192-v247.png",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
+      "exists": true
+    },
+    {
+      "id": "slot-50609affdce483",
+      "sourcePath": "/service-worker.js",
+      "line": 82,
+      "column": 322,
+      "kind": "string",
+      "raw": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "assetPath": "/app/logos/civweave-prismatic-wordmark-v1.png",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
+      "exists": true
+    },
+    {
+      "id": "slot-e0e5e245da0328",
+      "sourcePath": "/service-worker.js",
+      "line": 82,
+      "column": 370,
+      "kind": "string",
+      "raw": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "assetPath": "/app/logos/cerbanimo-steward-mark-v1.png",
+      "context": "'/app/logos/civweave.webp','/app/logos/civweave-app-icon.png','/app/logos/cerbanimo.webp','/app/logos/fellowfare-v2.webp','/app/logos/civweave-icon-192.png','/app/logos/civweave-icon-512.png','/app/logos/civweave-icon-maskable-192.png','/app/logos/civweave-icon-maskable-512.png','/app/logos/civweave-pwa-192-v247.png','/app/logos/civweave-prismatic-wordmark-v",
+      "exists": true
+    },
+    {
+      "id": "slot-70fa4e64b861c9",
+      "sourcePath": "/service-worker.js",
+      "line": 83,
       "column": 3,
       "kind": "string",
       "raw": "/app/assets/ai/weaveling.png",
@@ -8182,9 +9615,9 @@
       "exists": true
     },
     {
-      "id": "slot-62550fdbbae3bb",
+      "id": "slot-c9c0083bb8d2f2",
       "sourcePath": "/service-worker.js",
-      "line": 68,
+      "line": 83,
       "column": 34,
       "kind": "string",
       "raw": "/app/assets/ai/moss.png",
@@ -8193,9 +9626,9 @@
       "exists": true
     },
     {
-      "id": "slot-44d5353d5c50b5",
+      "id": "slot-b19965f069a5f2",
       "sourcePath": "/service-worker.js",
-      "line": 68,
+      "line": 83,
       "column": 60,
       "kind": "string",
       "raw": "/app/assets/ai/kamiya.png",
@@ -8204,9 +9637,9 @@
       "exists": true
     },
     {
-      "id": "slot-15ff2aceffd793",
+      "id": "slot-4283000bec35c4",
       "sourcePath": "/service-worker.js",
-      "line": 68,
+      "line": 83,
       "column": 88,
       "kind": "string",
       "raw": "/app/assets/ai/rook.png",
@@ -8215,9 +9648,9 @@
       "exists": true
     },
     {
-      "id": "slot-d7db92ce1e08dd",
+      "id": "slot-7896505b903ba8",
       "sourcePath": "/service-worker.js",
-      "line": 68,
+      "line": 83,
       "column": 114,
       "kind": "string",
       "raw": "/app/assets/ai/merlin.png",

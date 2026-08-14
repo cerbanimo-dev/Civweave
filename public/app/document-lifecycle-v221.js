@@ -15,9 +15,9 @@ const LOCAL_AI_MANAGEMENT_FILES=[
   ['/app/local-ai/download-manager-v267.js?v=1.0.67-v271',()=>Boolean(globalThis.CivweaveLocalModelDownloadV266?.status&&globalThis.CivweaveLocalModelDownloadV266?.selection&&globalThis.CivweaveLocalModelDownloadV266?.state)],
   ['/app/local-ai/download-policy-v278.js?v=1.0.81-v278',()=>globalThis.CivweaveLocalModelDownloadV266?.largeExternalDataForeground===true],
   ['/app/local-ai/metadata-repair-v276.js?v=1.0.81-v277',()=>globalThis.CivweaveLocalModelDownloadV266?.metadataOnlyRepair===true&&globalThis.CivweaveLocalModelDownloadV266?.metadataRepairRaceSafe===true],
-  ['/app/local-ai/settings-panel-v267.js?v=1.0.116-v305-download-dock-layout',()=>Boolean(globalThis.CivweaveLocalAISettingsV266?.enhance&&globalThis.CivweaveLocalAISettingsV266?.cacheIntegrityOnDemand===true&&globalThis.CivweaveLocalAISettingsV266?.openPath==='snapshot-first-v287')],
+  ['/app/local-ai/settings-panel-v267.js?v=1.0.130-v317-lazy-tab-render',()=>Boolean(globalThis.CivweaveLocalAISettingsV266?.enhance&&globalThis.CivweaveLocalAISettingsV266?.cacheIntegrityOnDemand===true&&globalThis.CivweaveLocalAISettingsV266?.openPath==='snapshot-first-v287'&&globalThis.CivweaveLocalAISettingsV266?.lazyTabRender===true)],
   ['/app/local-ai/primary-route-v283.js?v=1.0.88-v283',()=>globalThis.CivweaveLocalAIPrimaryRouteV283?.version==='1.0.85-local-ai-primary-route-v283'],
-  ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.81-v278',()=>globalThis.CivweaveLocalModelHardwareTierUIV278?.version==='1.0.81-local-ai-hardware-tier-ui-v278'&&globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations===true]
+  ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.130-v279-settings-safe',()=>globalThis.CivweaveLocalModelHardwareTierUIV278?.version==='1.0.130-local-ai-hardware-tier-ui-v279-settings-safe'&&globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations===true&&globalThis.CivweaveLocalModelHardwareTierUIV278?.settingsSafeActivation===true]
 ];
 const LOCAL_AI_VISIBLE_FILES=[LOCAL_AI_MANAGEMENT_FILES[0],LOCAL_AI_MANAGEMENT_FILES[1],LOCAL_AI_MANAGEMENT_FILES[4]];
 let settingsDelegationPromise=null,localAISettingsPromise=null,minimalManagementPromise=null,visibleManagementPromise=null;

@@ -6,7 +6,7 @@ const WEB_ENTRY_REVISION='web-install-entry-v232';
 const HUB_REVISION='weaveling-hub-v233';
 const STATE_REPAIR_REVISION='working-campus-state-repair-v238';
 const HUB_SCRIPT='/app/weaveling-hub-v233.js';
-const routeScript='/app/system-routes-v227.js?v=1.0.129-five-system-route-contract-v227';
+const routeScript='/app/system-routes-v227.js?v=1.0.134-five-system-route-contract-v227';
 const parts=['/app/working-campus-v156.part1.txt','/app/working-campus-v156.part2.txt','/app/working-campus-v156.part3.txt','/app/working-campus-v156.part4.txt','/app/working-campus-v156.part5.txt'];
 const required=['conversation','weaveling-chat-form','weaveling-chat-input','workspace','view-title','state-label'];
 const controller=new AbortController();

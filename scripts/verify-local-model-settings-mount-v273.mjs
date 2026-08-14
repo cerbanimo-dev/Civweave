@@ -29,6 +29,7 @@ assert.doesNotMatch(settingsOpenBody,/bootstrap\.ready|runtime-v266|runtime-brid
 assert.match(settingsOpenBody,/managementOnly:true/);assert.match(settingsOpenBody,/inferenceDormantOnOpen:true/);
 for(const text of ['Downloaded local AI','Download','Resume','Use locally','Remove','Model window','Civweave working default','TTFT'])assert.ok(settings.toLowerCase().includes(text.toLowerCase()));
 assert.match(settings,/truthfulCompletion:true/);assert.match(settings,/cacheIntegrityOnDemand:true/);assert.match(settings,/openPath:'snapshot-first-v287'/);
+assert.match(settings,/lazyTabRender:true/);assert.match(settings,/function renderDeferred\(/);assert.match(settings,/civweave:settings-tab-selected/);
 assert.match(pulse,/1\.0\.116-local-model-test-pulse-v303-mobile-safe/);assert.match(pulse,/Test model/);assert.match(pulse,/raceSafeRepair:true/);
 assert.match(bootstrap,/capability-contract-v307/);assert.match(bootstrap,/package-revision-guard-v307\.js/);assert.match(bootstrap,/backendFallback:true/);assert.match(bootstrap,/canonicalCausalLM:true/);
 assert.match(controller,/civweave:model-settings-opened/);

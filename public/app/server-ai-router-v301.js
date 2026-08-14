@@ -1,13 +1,15 @@
 (()=>{
 'use strict';
-const VERSION='1.0.116-server-ai-router-v301';
+const VERSION='1.0.134-server-ai-router-v303-public-capacity';
 const MIDDLEWARE_ID='server-auto-v301';
 const MARKET_SESSION_KEY='civweave.node-ai-marketplace.sessions.v1';
 const CAPACITY_SESSION_KEY='civweave.host-capacity.sessions.v1';
 const MARKET_PREF_KEY='civweave.node-ai-marketplace.preferences.v1';
+const PUBLIC_FABRIC_ORIGIN='https://civweave-node-cloud.cerbanimo.workers.dev';
+const PUBLIC_CAPACITY_NODE_ID='civweave-cloud';
 const ROUTE='server-auto';
 if(globalThis.CivweaveServerAIRouterV301?.version===VERSION)return;
-let registered=false;
+let registered=false,capacityJoinPromise=null;
 const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{return fallback}};
 const clone=value=>value==null?value:structuredClone(value);
@@ -52,6 +54,7 @@ function serviceCeiling(candidate){
 }
 function requestPayload(request={}){
   const messages=Array.isArray(request.messages)?request.messages.map(item=>({role:item?.role==='assistant'?'assistant':item?.role==='system'?'system':'user',content:clean(item?.content,48000)})).filter(item=>item.content):[];
+  const inferred=globalThis.CivweaveAICapabilityBrokerV268?.requirements?.(request)||{};
   return{
     messages,
     system:clean(request.system,48000)||undefined,
@@ -61,8 +64,29 @@ function requestPayload(request={}){
     maxTokens:Math.max(32,Math.min(4096,Number(request?.config?.maxTokens||request.maxTokens||1024)||1024)),
     temperature:Math.max(0,Math.min(2,Number(request?.config?.temperature??request.temperature??0.2))),
     purpose:clean(request.purpose,160)||'interactive',
-    executionProfile:clean(request.executionProfile,40)||'interactive'
+    executionProfile:clean(request.executionProfile,40)||'interactive',
+    task:clone(request.task&&typeof request.task==='object'?request.task:null),
+    taskText:clean(request.taskText||request.context?.userMessage,12000)||undefined,
+    capabilityRequirements:clone(request.capabilityRequirements&&typeof request.capabilityRequirements==='object'?request.capabilityRequirements:inferred)
   };
+}
+function codeTierRequested(payload={}){
+  const requirements=payload.capabilityRequirements||{},kind=clean(payload.task?.kind,80).toLowerCase(),text=clean(payload.task?.text||payload.taskText||payload.prompt,12000).toLowerCase();
+  return requirements.code===true||kind==='code-project'||/\b(code|software|debug|refactor|patch|program|script|typescript|javascript|python|react|sql|api|database|compiler|repository|pull request)\b/.test(text);
+}
+function kimiApproval(payload={}){
+  if(!codeTierRequested(payload))return Promise.resolve('not-needed');
+  if(!globalThis.document?.body)return Promise.resolve('smart');
+  const old=document.getElementById('cw-kimi-approval-v1');if(old)old.remove();
+  return new Promise(resolve=>{
+    const wrap=document.createElement('div');wrap.id='cw-kimi-approval-v1';wrap.setAttribute('role','dialog');wrap.setAttribute('aria-modal','true');wrap.setAttribute('aria-labelledby','cw-kimi-title-v1');
+    wrap.innerHTML=`<style>#cw-kimi-approval-v1{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;padding:18px;background:rgba(5,7,12,.82);backdrop-filter:blur(8px);font:16px/1.45 system-ui,sans-serif;color:#f7f3ff}#cw-kimi-approval-v1>section{width:min(560px,100%);box-sizing:border-box;padding:24px;border:1px solid rgba(255,88,177,.65);border-radius:22px;background:#15101d;box-shadow:0 24px 90px #000}#cw-kimi-approval-v1 h2{margin:0 0 10px;font-size:1.35rem}#cw-kimi-approval-v1 p{margin:8px 0;color:#ddd3e8}#cw-kimi-approval-v1 strong{color:#ff9bcc}#cw-kimi-approval-v1 .cw-kimi-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:22px}#cw-kimi-approval-v1 button{min-height:46px;padding:0 16px;border:1px solid #8d789e;border-radius:13px;background:#241b2e;color:#fff;font:inherit;font-weight:750}#cw-kimi-approval-v1 [data-kimi-approve]{border-color:#ff58b1;background:#b31c69}</style><section><h2 id="cw-kimi-title-v1">Approve Code-tier AI?</h2><p>This task would call <strong>Kimi K2.7 Code</strong>, the specialist route for implementation, debugging, repo-scale edits, and long software-agent loops.</p><p>Its listed price is <strong>$0.95 per 1M input tokens and $4.00 per 1M output tokens</strong>. Approval applies to this request only. Your current Cloudflare host plan may not include this paid-only model.</p><div class="cw-kimi-actions"><button type="button" data-kimi-smart>Use Smart instead</button><button type="button" data-kimi-approve>Approve Kimi once</button></div></section>`;
+    const finish=choice=>{wrap.remove();resolve(choice)};
+    wrap.querySelector('[data-kimi-smart]').addEventListener('click',()=>finish('smart'),{once:true});
+    wrap.querySelector('[data-kimi-approve]').addEventListener('click',()=>finish('approve'),{once:true});
+    wrap.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();finish('smart')}});
+    document.body.append(wrap);wrap.querySelector('[data-kimi-smart]').focus();
+  });
 }
 function textFromOutput(value){
   if(typeof value==='string')return value;
@@ -124,13 +148,40 @@ function usableCapacitySession(){
   const all=capacitySessions(),preferred=clean(marketPrefs().preferredNodeId,180),rows=Object.values(all).filter(item=>item?.nodeId&&item?.token&&item?.origin&&(!item.expiresAt||Date.parse(item.expiresAt)>Date.now()));
   return rows.find(item=>item.nodeId===preferred)||rows[0]||null;
 }
-async function cloudflare(request,trace){
-  const session=usableCapacitySession();
-  if(!session){trace.push({route:'cloudflare-workers-ai',status:'skipped',reason:'no active host-capacity session'});return null}
-  const endpointUrl=new URL('/api/ai/node/generate',session.origin);
-  const payload=requestPayload(request);
-  const response=await fetch(endpointUrl,{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${session.token}`},body:JSON.stringify({...payload,allowLifetimeCredits:request.allowLifetimeCredits===true||request?.config?.allowLifetimeCredits===true})});
+function persistCapacitySession(session){
+  const next={...capacitySessions(),[session.nodeId]:session};
+  sessionStorage.setItem(CAPACITY_SESSION_KEY,JSON.stringify(next));
+  try{dispatchEvent(new CustomEvent('civweave:capacity-session-ready',{detail:{nodeId:session.nodeId,origin:session.origin,expiresAt:session.expiresAt||null,at:now()}}))}catch{}
+  return session;
+}
+async function joinPublicCapacity(){
+  const response=await fetch(`${PUBLIC_FABRIC_ORIGIN}/api/fabric/capacity/members/admit`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({mode:'public-community'})});
   const body=await response.json().catch(()=>({}));
+  if(!response.ok)throw Object.assign(new Error(clean(body?.error||`Cloudflare community capacity returned HTTP ${response.status}.`,1000)),{status:response.status});
+  const session=body?.capacitySession;
+  if(!session?.token||session.nodeId!==PUBLIC_CAPACITY_NODE_ID||!session.origin)throw new Error('Cloudflare community capacity returned an invalid session.');
+  let origin;try{origin=new URL(session.origin).origin}catch{throw new Error('Cloudflare community capacity returned an invalid origin.')}
+  if(origin!==PUBLIC_FABRIC_ORIGIN)throw new Error('Cloudflare community capacity returned an unexpected origin.');
+  return persistCapacitySession({...session,origin});
+}
+async function ensureCapacitySession(){
+  const active=usableCapacitySession();if(active)return active;
+  if(!capacityJoinPromise)capacityJoinPromise=joinPublicCapacity().finally(()=>{capacityJoinPromise=null});
+  return capacityJoinPromise;
+}
+async function cloudflare(request,trace){
+  let session;
+  try{session=await ensureCapacitySession()}catch(error){trace.push({route:'cloudflare-workers-ai',status:'failed',reason:clean(error?.message||error,500)});throw error}
+  const endpointUrl=new URL('/api/ai/node/generate',session.origin);
+  let payload=requestPayload(request);
+  const send=body=>fetch(endpointUrl,{method:'POST',headers:{'content-type':'application/json','authorization':`Bearer ${session.token}`,'x-civweave-node-id':session.nodeId},body:JSON.stringify({...body,allowLifetimeCredits:request.allowLifetimeCredits===true||request?.config?.allowLifetimeCredits===true})});
+  let response=await send(payload),body=await response.json().catch(()=>({}));
+  if(response.status===428&&body?.code==='KIMI_APPROVAL_REQUIRED'){
+    const codeChoice=await kimiApproval(payload);
+    if(codeChoice==='approve')payload={...payload,modelApproval:{approved:true,scope:'single-request',model:'@cf/moonshotai/kimi-k2.7-code',warningShown:true}};
+    else payload={...payload,modelTierCeiling:'smart',modelApproval:{approved:false,scope:'single-request',model:'@cf/moonshotai/kimi-k2.7-code',warningShown:true}};
+    response=await send(payload);body=await response.json().catch(()=>({}));
+  }
   if(!response.ok){
     const message=clean(body?.error||`Cloudflare Workers AI returned HTTP ${response.status}.`,1000);
     trace.push({route:'cloudflare-workers-ai',status:'failed',nodeId:session.nodeId,httpStatus:response.status,reason:message});
@@ -160,5 +211,5 @@ function register(){
 }
 function status(){return{version:VERSION,registered,selectedRoute:selectedRoute({}),marketSessions:Object.keys(marketSessions()).length,capacitySessions:Object.keys(capacitySessions()).length,order:['device-local','server-local','cloudflare-workers-ai']}}
 addEventListener('civweave:runtime-spine-ready',register);addEventListener('civweave:model-runtime-ready',register);addEventListener('civweave:local-model-bridge-installed',register);addEventListener('pageshow',register);register();
-globalThis.CivweaveServerAIRouterV301=Object.freeze({version:VERSION,route:ROUTE,register,status,isServerAuto,handle,order:Object.freeze(['device-local','server-local','cloudflare-workers-ai'])});
+globalThis.CivweaveServerAIRouterV301=Object.freeze({version:VERSION,route:ROUTE,register,status,isServerAuto,requestPayload,ensureCapacitySession,handle,order:Object.freeze(['device-local','server-local','cloudflare-workers-ai'])});
 })();

@@ -89,7 +89,7 @@ function installPatchedGlobal(name,patch){
 function patchAssistant(api){
   if(!api?.respond||api.__cw160ActionRouting)return api;
   const original=api.respond.bind(api);
-  api.respond=async options=>{
+  const respond=async options=>{
     const request={...(options||{})},startedIn=request.systemId||'civweave';
     let target='';
     if(startedIn==='civweave'){
@@ -101,6 +101,8 @@ function patchAssistant(api){
     if(target&&result?.action&&result.response?.answer)result.response.answer=`Weaveling routed this to ${target==='anarchadia'?'Anarchadia':target==='fellowfare'?'FellowFare':target==='living-school'?'Living School':'Cerbanimo'}. ${result.response.answer}`;
     return result;
   };
+  if(Object.isFrozen(api)||!Object.isExtensible(api))return Object.freeze({...api,respond,__cw160ActionRouting:true});
+  api.respond=respond;
   Object.defineProperty(api,'__cw160ActionRouting',{value:true});
   return api;
 }

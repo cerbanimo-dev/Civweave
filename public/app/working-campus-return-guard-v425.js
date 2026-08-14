@@ -5,7 +5,8 @@ const VERSION='working-campus-return-v425';
 const RECOVERY_KEY='civweave.working-campus.return-recovery.v425';
 const RECOVERY_WINDOW_MS=30_000;
 const CANONICAL_PATH='/app/working-campus-v156.html';
-const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.campus','main.app>.main','nav.bottom','#conversation','#workspace'];
+const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.campus','main.app>.main','#conversation','#workspace'];
+const NAVIGATION_SELECTORS=['#cw-themed-system-nav','nav.bottom'];
 let lastInspection=null;
 let recoveryPanel=null;
 
@@ -35,6 +36,10 @@ function canonicalUrl(reason='automatic'){
   target.searchParams.set('epoch',String(now()));
   return target.href;
 }
+function recoveryNavigation(){
+  const params=new URLSearchParams(location.search);
+  return params.get('recovery')===VERSION&&params.has('epoch');
+}
 function computedVisible(node){
   if(!node?.isConnected)return false;
   if(typeof getComputedStyle!=='function')return true;
@@ -48,6 +53,7 @@ function computedVisible(node){
 }
 function inspect(){
   const missing=REQUIRED_SELECTORS.filter(selector=>!document.querySelector(selector));
+  if(!NAVIGATION_SELECTORS.some(selector=>document.querySelector(selector)))missing.push(NAVIGATION_SELECTORS.join(' or '));
   const app=document.querySelector('main.app');
   const healthy=Boolean(document.documentElement?.isConnected&&document.body?.isConnected&&!missing.length&&computedVisible(app));
   lastInspection={version:VERSION,healthy,missing,appVisible:computedVisible(app),visibilityState:document.visibilityState||'unknown',at:new Date().toISOString()};
@@ -100,7 +106,7 @@ async function verifyOrRecover(reason='check'){
   if(inspection.healthy){clearRecovery();return inspection}
   const previous=readRecovery();
   const recent=previous&&Number(previous.at)>now()-RECOVERY_WINDOW_MS;
-  if(recent){renderFailSafe(reason,inspection);return{...inspection,failsafe:true}}
+  if(recent||recoveryNavigation()){renderFailSafe(reason,inspection);return{...inspection,failsafe:true}}
   writeRecovery({at:now(),reason,count:Number(previous?.count||0)+1,path:location.pathname});
   location.replace(canonicalUrl(reason));
   return{...inspection,reloading:true};

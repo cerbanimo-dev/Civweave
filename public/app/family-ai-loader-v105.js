@@ -23,11 +23,11 @@ const VALUE_MODEL=[
   ['/app/civweave-basic-value-systems-v1.js?v=economic-review-v1',()=>globalThis.CivweaveBasicValueSystemsV1]
 ];
 const FAST_RUNTIME=['/app/fast-interactive-runtime-v192.js?v=1.0.7-v192',()=>globalThis.CivweaveFastInteractiveV192];
-const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.4',()=>globalThis.CivweaveAssistantV141];
+const ASSISTANT=['/app/assistant-runtime-v141.js?v=1.0.134-server-auto-v305',()=>globalThis.CivweaveAssistantV141];
 const PATCHES=[
-  ['/app/deterministic-mode-v175.js?v=deterministic-r1',()=>globalThis.CivweaveDeterministicModeV175],
+  ['/app/deterministic-mode-v175.js?v=1.0.134-server-auto-v304',()=>globalThis.CivweaveDeterministicModeV175],
   ['/app/weaveling-memory-bridge-v191.js?v=1.0.7-v191',()=>globalThis.CivweaveWeavelingMemoryBridgeV191],
-  ['/app/knowledge-encyclopedia-bridge-v271.js?v=knowledge-encyclopedia-v271',()=>globalThis.CivweaveKnowledgeEncyclopediaBridgeV271]
+  ['/app/knowledge-encyclopedia-bridge-v271.js?v=1.0.134-knowledge-encyclopedia-v272-server-failover',()=>globalThis.CivweaveKnowledgeEncyclopediaBridgeV271]
 ];
 const OPTIONAL=[
   ['/app/intention-ui-v138.js?v=1.0.4',()=>globalThis.CivweaveIntentionUI],

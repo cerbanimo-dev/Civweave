@@ -61,7 +61,7 @@ const context={
   CivweaveLocalModelBridgeV266:{version:'1.0.83-local-ai-bridge-v282-health-fallback',revision:'1.0.88-local-ai-bridge-v283-small-model-fast-path',continuationValidation:true},
   CivweaveLocalAISettingsV266:{version:'1.0.116-local-ai-settings-v305-download-dock-layout',truthfulCompletion:true,cacheIntegrityOnDemand:true,openPath:'snapshot-first-v287'},
   CivweaveLocalAIPrimaryRouteV283:{version:'1.0.85-local-ai-primary-route-v283'},
-  CivweaveLocalModelHardwareTierUIV278:{version:'1.0.81-local-ai-hardware-tier-ui-v278',deviceFitRecommendations:true},
+  CivweaveLocalModelHardwareTierUIV278:{version:'1.0.130-local-ai-hardware-tier-ui-v279-settings-safe',deviceFitRecommendations:true,settingsSafeActivation:true},
   CivweaveLocalModelTestPulseV269:{version:'1.0.116-local-model-test-pulse-v303-mobile-safe'},
 };
 context.globalThis=context;

@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 // shell-v304 keeps OS titlebar and bottom safe areas outside Civweave navigation.
-const VERSION='1.0.129-five-system-navigation-v227';
+const VERSION='1.0.134-five-system-navigation-v227';
 const NAV_ID='cw-themed-system-nav';
 const STYLE_ID='cw-themed-system-nav-style';
 const PATH=location.pathname;
@@ -17,7 +17,7 @@ const SYSTEMS=[
   {id:'anarchadia',label:'Anarchadia',image:'/app/assets/navigation/200-anarchadia-nav.webp?v=image-nav-r2',fallback:'/app/anarchadia-console-v139.html?cabinet=1&installed=1',glow:'#ff2f87',shade:'#4a122e'}
 ];
 
-function href(item){return ROUTES?.urlFor?.(item.id,{version:'1.0.129',source:currentSystem()||'navigation'}).href||item.fallback}
+function href(item){return ROUTES?.urlFor?.(item.id,{version:'1.0.134',source:currentSystem()||'navigation'}).href||item.fallback}
 function clearEmbeddedCopy(){
   document.getElementById(NAV_ID)?.remove();
   document.getElementById(STYLE_ID)?.remove();
@@ -40,9 +40,14 @@ function currentSystem(){
   if(document.documentElement.hasAttribute('data-living-school-cabinet')||PATH.includes('/cabinets/living-school/'))return'living-school';
   if(PATH.includes('fellowfare'))return'fellowfare';
   if(PATH.includes('anarchadia'))return'anarchadia';
-  if(PATH.includes('realm-console-v140.html'))return explicit==='civweave'?'civweave':'cerbanimo';
-  if(PATH.includes('working-campus-v156.html'))return'civweave';
+  if(PATH.includes('realm-console-v140'))return explicit==='civweave'?'civweave':'cerbanimo';
+  if(PATH.includes('working-campus-v156'))return'civweave';
   return'';
+}
+
+function removeLegacyCivweaveNavigation(current){
+  if(current!=='civweave')return;
+  for(const nav of document.querySelectorAll('nav.bottom'))nav.remove();
 }
 
 function installStyle(){
@@ -94,7 +99,9 @@ html[data-civweave-system="living-school"] #cw-shared-guide-surface-v236 .cwsg23
 
 function mount(){
   const current=currentSystem();
-  if(!current||document.getElementById(NAV_ID))return;
+  if(!current)return;
+  removeLegacyCivweaveNavigation(current);
+  if(document.getElementById(NAV_ID))return;
   ROUTES?.authorize?.();
   installStyle();
   document.documentElement.classList.add('cw-themed-system-nav-active');
@@ -112,7 +119,7 @@ function mount(){
     const link=event.target.closest('a[data-system]');
     if(!link||!ROUTES?.navigate)return;
     event.preventDefault();
-    ROUTES.navigate(link.dataset.system,{version:'1.0.129',source:current});
+    ROUTES.navigate(link.dataset.system,{version:'1.0.134',source:current});
   });
   document.body.append(nav);
 }

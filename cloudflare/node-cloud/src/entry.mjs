@@ -12,6 +12,9 @@ const VALIDATION_INPUT_NEURONS_PER_MILLION = 4_119;
 const VALIDATION_OUTPUT_NEURONS_PER_MILLION = 34_868;
 const SESSION_DOMAIN = 'civweave.capacity-session.v1';
 const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
+const PUBLIC_CAPACITY_NODE_ID = 'civweave-cloud';
+const PUBLIC_CAPACITY_USER_ID = 'civweave-public-guest';
+const CAMPUS_ORIGIN = 'https://civweave.pages.dev';
 
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
 const b64url = bytes => {
@@ -26,15 +29,40 @@ const fromB64url = value => {
   const binary = atob(padded);
   return Uint8Array.from(binary, char => char.charCodeAt(0));
 };
-const json = (value, status = 200) => Response.json(value, { status, headers: { 'cache-control': 'no-store' } });
+const json = (value, status = 200, headers = {}) => Response.json(value, { status, headers: { 'cache-control': 'no-store', ...headers } });
+export function allowedCampusOrigin(request) {
+  const origin = clean(request.headers.get('origin'), 2000).toLowerCase();
+  if (!origin) return '';
+  if (origin === CAMPUS_ORIGIN || /^https:\/\/[a-z0-9-]+\.civweave\.pages\.dev$/.test(origin)) return origin;
+  try {
+    const url = new URL(origin);
+    if (url.protocol === 'http:' && ['127.0.0.1', 'localhost'].includes(url.hostname)) return url.origin;
+  } catch {}
+  return '';
+}
+export function campusCorsHeaders(request) {
+  const origin = allowedCampusOrigin(request);
+  return origin ? {
+    'access-control-allow-origin': origin,
+    'access-control-allow-methods': 'GET, POST, OPTIONS',
+    'access-control-allow-headers': 'authorization, content-type, x-civweave-node-id',
+    'access-control-max-age': '86400',
+    'vary': 'Origin'
+  } : {};
+}
+function publicFabricOrigin(env, request) {
+  const configured = clean(env.PUBLIC_FABRIC_ORIGIN, 2000);
+  try { return new URL(configured || request.url).origin; }
+  catch { return new URL(request.url).origin; }
+}
 
 async function hmacKey(env) {
-  const source = clean(env.NODE_FABRIC_OPERATOR_TOKEN, 10000);
+  const source = clean(env.NODE_FABRIC_SESSION_SECRET || env.NODE_FABRIC_OPERATOR_TOKEN, 10000);
   if (source.length < 24) throw Object.assign(new Error('Node fabric operator secret is unavailable for member sessions.'), { status: 503 });
   const material = await crypto.subtle.digest('SHA-256', enc.encode(`${SESSION_DOMAIN}\0${source}`));
   return crypto.subtle.importKey('raw', material, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
 }
-async function issueCapacitySession(env, member, domain) {
+async function issueCapacitySession(env, member, origin) {
   const now = Math.floor(Date.now() / 1000);
   const payload = Object.freeze({
     v: 1,
@@ -43,7 +71,7 @@ async function issueCapacitySession(env, member, domain) {
     seatClass: clean(member?.seatClass, 40),
     iat: now,
     exp: now + SESSION_TTL_SECONDS,
-    origin: `https://${clean(member?.nodeId, 180)}.${domain}`
+    origin
   });
   if (!payload.nodeId || !payload.userId) throw Object.assign(new Error('Capacity session cannot be issued without nodeId and userId.'), { status: 500 });
   const encoded = b64url(enc.encode(JSON.stringify(payload)));
@@ -56,6 +84,21 @@ async function issueCapacitySession(env, member, domain) {
     origin: payload.origin,
     expiresAt: new Date(payload.exp * 1000).toISOString()
   });
+}
+async function admitPublicCapacity(request, env) {
+  const cors = campusCorsHeaders(request);
+  if (!allowedCampusOrigin(request)) return json({ ok: false, error: 'campus-origin-required' }, 403);
+  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+  if (request.method !== 'POST') return json({ ok: false, error: 'Method not allowed.' }, 405, cors);
+  await capacityPost(env, '/nodes/register', { nodeId: PUBLIC_CAPACITY_NODE_ID });
+  const payload = await capacityPost(env, '/members/admit', {
+    nodeId: PUBLIC_CAPACITY_NODE_ID,
+    userId: PUBLIC_CAPACITY_USER_ID,
+    seatClass: 'community',
+    billingStatus: 'free'
+  });
+  const capacitySession = await issueCapacitySession(env, payload.member, publicFabricOrigin(env, request));
+  return json({ ...payload, ok: true, schema: 'civweave.public-capacity-admission.v1', capacitySession }, 200, cors);
 }
 async function verifyCapacitySession(env, token, expectedNodeId) {
   const [encoded, signatureText, extra] = clean(token, 12000).split('.');
@@ -220,16 +263,10 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url), domain = env.NODE_DOMAIN || 'nodes.commonweave.earth', nodeId = nodeIdFromHostname(url.hostname, domain);
     if (nodeId && request.method === 'POST' && url.pathname === '/api/ai/node/validation') return handleValidation(request, env, nodeId);
-
-    const admission = !nodeId && request.method === 'POST' && url.pathname === '/api/fabric/capacity/members/admit';
-    const response = await worker.fetch(request, env, ctx);
-    if (!admission || !response.ok) return response;
-    const payload = await response.json().catch(() => null);
-    if (!payload?.member) return json(payload || { ok: false, error: 'capacity-admission-response-invalid' }, 502);
-    try {
-      return json({ ...payload, capacitySession: await issueCapacitySession(env, payload.member, domain) }, response.status);
-    } catch (error) {
-      return json({ ...payload, capacitySession: null, sessionError: String(error?.message || error) }, response.status);
+    if (!nodeId && url.pathname === '/api/fabric/capacity/members/admit') {
+      try { return await admitPublicCapacity(request, env); }
+      catch (error) { return json({ ok: false, error: String(error?.message || error) }, Number.isSafeInteger(error?.status) ? error.status : 500, campusCorsHeaders(request)); }
     }
+    return worker.fetch(request, env, ctx);
   }
 };

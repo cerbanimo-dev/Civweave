@@ -38,8 +38,10 @@ function installedEntryUrl() {
 }
 
 function campusUrl() {
-  const url = new URL('/app/working-campus-v156.html', location.origin);
+  const url = new URL('/app/installed-entry-v146.html', location.origin);
   url.searchParams.set('installed', '1');
+  url.searchParams.set('system', 'civweave');
+  url.searchParams.set('source', 'browser-fallback');
   url.searchParams.set('version', releaseVersion());
   url.searchParams.set('launch', 'online');
   return url.href;

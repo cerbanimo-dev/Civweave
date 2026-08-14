@@ -31,8 +31,9 @@ function selectedProvider(profile='interactive'){
 }
 function requestText(request={}){
   const messages=Array.isArray(request.messages)?request.messages:[];
-  const text=messages.map(item=>typeof item==='string'?item:item?.content??item?.text??'').join('\n');
-  return clean([request.purpose,request.task,request.instructions,request.systemId,request.realm,request.context?.userMessage,text].filter(Boolean).join('\n'));
+  const userMessages=messages.filter(item=>typeof item==='string'||item?.role!=='system').map(item=>typeof item==='string'?item:item?.content??item?.text??'').join('\n');
+  const task=request.task&&typeof request.task==='object'?request.task:{};
+  return clean([task.text,request.taskText,request.context?.userMessage,request.prompt,userMessages].filter(Boolean).join('\n'));
 }
 function explicitCapabilities(request={}){
   const explicit=request.capabilityRequirements&&typeof request.capabilityRequirements==='object'?request.capabilityRequirements:{};

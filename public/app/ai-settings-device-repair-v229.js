@@ -33,6 +33,7 @@ const now=()=>new Date().toISOString();
 
 function providerName(value){
   const provider=String(value||'').trim().toLowerCase();
+  if(provider==='server-auto')return'server-auto';
   if(provider==='gemini')return'gemini';
   if(provider==='ollama'||provider==='local-api')return'ollama';
   if(['openai','compatible','openai-compatible','hosted'].includes(provider))return'openai-compatible';
@@ -117,7 +118,7 @@ function capture(form){
   return{route:provider,provider,model:String(field(form,'model')?.value||defaults.model||'').trim(),endpoint:String(field(form,'endpoint')?.value||defaults.endpoint||'').trim(),apiKey:String(field(form,'apiKey')?.value||'').trim()||existingKey(),credentialMode:field(form,'credentialMode')?.value==='device'?'device':'session',consent:Boolean(field(form,'consent')?.checked)};
 }
 function persistCaptured(state){
-  if(!state||state.provider==='deterministic')return false;
+  if(!state||state.provider==='deterministic'||state.provider==='server-auto')return false;
   const defaults=DEFAULTS[state.provider]||{};
   const model=String(state.model||defaults.model||'').trim(),endpoint=String(state.endpoint||defaults.endpoint||'').trim();
   const interactive={route:state.provider,provider:state.provider,model,endpoint,externalConsent:Boolean(state.consent)};
@@ -155,7 +156,7 @@ function saveStatus(remembered){const form=document.querySelector(FORM_SELECTOR)
 restoreRemembered();
 document.addEventListener('click',event=>{if(!(event.target instanceof Element)||!event.target.closest(SETTINGS_SELECTOR))return;queueMicrotask(bindForms)},true);
 addEventListener('civweave:model-settings-opened',afterOpen);
-addEventListener('civweave:model-settings-saved',()=>{const form=document.querySelector(FORM_SELECTOR),state=pendingSave||(form?capture(form):null);pendingSave=null;if(!state||state.provider==='deterministic')return;const remembered=persistCaptured(state);queueMicrotask(()=>{bindForms();saveStatus(remembered)})});
+addEventListener('civweave:model-settings-saved',()=>{const form=document.querySelector(FORM_SELECTOR),state=pendingSave||(form?capture(form):null);pendingSave=null;if(!state||state.provider==='deterministic'||state.provider==='server-auto')return;const remembered=persistCaptured(state);queueMicrotask(()=>{bindForms();saveStatus(remembered)})});
 addEventListener('pageshow',()=>{restoreRemembered();bindForms()});
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',()=>{restoreRemembered();bindForms()},{once:true});else bindForms();
 

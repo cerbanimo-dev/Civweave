@@ -14,8 +14,12 @@ function canonicalRealm(){
 }
 function apply(version){
   if(!/^\d+\.\d+\.\d+$/.test(version))return false;
-  document.documentElement.dataset.civweaveVersion=version;
-  for(const node of document.querySelectorAll('.version,.version-chip,[data-civweave-version]'))node.textContent=`v${version}`;
+  const root=document.documentElement;
+  root.dataset.civweaveVersion=version;
+  for(const node of document.querySelectorAll('.version,.version-chip,[data-civweave-version]')){
+    if(node===root)continue;
+    node.textContent=`v${version}`;
+  }
   if(/\bv\d+\.\d+\.\d+\b/.test(document.title))document.title=document.title.replace(/\bv\d+\.\d+\.\d+\b/g,`v${version}`);
   globalThis.CivweaveReleaseVersionV1=Object.freeze({apiVersion:API_VERSION,version,apply,realmMutation:false});
   dispatchEvent(new CustomEvent('civweave:release-version',{detail:{version,apiVersion:API_VERSION}}));

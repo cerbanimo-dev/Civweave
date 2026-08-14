@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='175.3-deterministic-minilm-template-planning';
+const VERSION='175.4-server-auto-preservation';
 const SETTINGS_KEY='civweave.universal-ai.v127';
 const PROFILES_KEY='civweave-model-profiles-v1';
 const LEGACY_LOCAL=new Set(['','bundled','packaged','reflex','minilm','local-reflex','smollm2','browser','deterministic']);
@@ -16,7 +16,7 @@ const clean=(value,max=12000)=>String(value??'').trim().slice(0,max);
 const low=value=>clean(value).toLowerCase();
 const config=()=>({route:'deterministic',provider:'deterministic',model:'civweave-deterministic-v175',endpoint:'',externalConsent:false});
 let planningPromise=null;
-function canonicalProvider(value){const raw=String(value||'deterministic').toLowerCase();if(LEGACY_LOCAL.has(raw))return'deterministic';if(['openai','compatible','openai-compatible'].includes(raw))return'openai-compatible';if(raw==='local-api')return'ollama';return['gemini','ollama','openai-compatible','hosted'].includes(raw)?raw:'deterministic'}
+function canonicalProvider(value){const raw=String(value||'deterministic').toLowerCase();if(LEGACY_LOCAL.has(raw))return'deterministic';if(['openai','compatible','openai-compatible'].includes(raw))return'openai-compatible';if(raw==='local-api')return'ollama';return['gemini','ollama','openai-compatible','hosted','server-auto'].includes(raw)?raw:'deterministic'}
 function migrate(){const legacy=parse(localStorage.getItem(SETTINGS_KEY),{}),legacyRaw=String(legacy.provider||legacy.route||'').toLowerCase();if(!legacy.route||LEGACY_LOCAL.has(legacyRaw))localStorage.setItem(SETTINGS_KEY,JSON.stringify({...config(),consent:false,agenticEnabled:false}));const profiles=parse(localStorage.getItem(PROFILES_KEY),{}),interactive=profiles.interactive,profileRaw=String(interactive?.provider||interactive?.route||'').toLowerCase();if(!interactive||LEGACY_LOCAL.has(profileRaw)){profiles.interactive=config();profiles.agentic=null;profiles.agenticEnabled=false;localStorage.setItem(PROFILES_KEY,JSON.stringify(profiles))}}
 function currentProvider(){try{const shared=globalThis.CivweaveModelRuntime?.readSharedConfig?.('interactive');if(shared)return canonicalProvider(shared.provider||shared.route)}catch{}const profiles=parse(localStorage.getItem(PROFILES_KEY),{}),legacy=parse(localStorage.getItem(SETTINGS_KEY),{}),active=profiles.interactive||legacy;return canonicalProvider(active?.provider||active?.route)}
 function mode(system){return system==='living-school'?'Learn':system==='cerbanimo'?'Build':system==='fellowfare'?'Acquire':system==='anarchadia'?'Govern':'Reflect'}

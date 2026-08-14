@@ -16,8 +16,9 @@ assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.i
 assert(indexHtml.includes('/app/installer-online-fallback-v225.js?v=shell-self-repair-v225'),'Installer does not load online fallback.');
 assert(indexHtml.includes('Download offline files only when you choose.'),'Installer copy no longer preserves the manual-first campus boundary.');
 assert(indexHtml.includes('id="open-online-campus-v225"'),'Installer no longer exposes an immediate online-campus fallback.');
+assert(indexHtml.includes('/app/installed-entry-v146.html?installed=1&amp;system=civweave&amp;source=browser-fallback&amp;launch=online'),'Browser fallback must refresh and activate the current service worker before opening Working Campus.');
 for(const token of ['REPAIR_DEVICE_PACKAGE','repairableCacheShell','selfRepairingShellStatus','activate-incomplete-retry-required-shell-and-report-paths'])assert(source.includes(token),`Shell repair is missing ${token}.`);
-for(const token of ['Open online campus','Open Civweave online','working-campus-v156.html','launch','online'])assert(installerFallback.includes(token),`Installer fallback is missing ${token}.`);
+for(const token of ['Open online campus','Open Civweave online','installed-entry-v146.html','browser-fallback','launch','online'])assert(installerFallback.includes(token),`Installer fallback is missing ${token}.`);
 assert(canonicalNavigation.includes('exact-route-network-first-exact-route-cache-never-launcher-fallback'),'Canonical navigation can be replaced by shell fallback.');
 assert.doesNotThrow(()=>new vm.Script(source));assert.doesNotThrow(()=>new vm.Script(installerFallback));
 const listeners=[],replies=[];let attempts=0,cached=false;

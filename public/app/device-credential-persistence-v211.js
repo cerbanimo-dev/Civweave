@@ -22,6 +22,7 @@ const runtime=()=>globalThis.CivweaveModelRuntime||null;
 
 function providerName(value){
   const provider=String(value||'').trim().toLowerCase();
+  if(provider==='server-auto')return'server-auto';
   if(provider==='gemini')return'gemini';
   if(provider==='ollama'||provider==='local-api')return'ollama';
   if(['openai','compatible','openai-compatible','hosted'].includes(provider))return'openai-compatible';

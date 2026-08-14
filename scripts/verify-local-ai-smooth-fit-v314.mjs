@@ -62,6 +62,10 @@ assert.match(hardware,/qwen3-0\.6b-q4f16.*?Best first try/s);
 assert.match(hardware,/smollm3-3b-q4f16.*?Benchmark first/s);
 assert.match(hardware,/fallbackUsed.*?Fallback only/s,'a fallback result must not promote the selected model');
 assert.match(hardware,/deviceFitRecommendations:true/);
+assert.match(hardware,/settingsSafeActivation:true/);
+assert.match(hardware,/mutationStableSummary:true/);
+assert.match(hardware,/if\(node\.textContent!==copy\)node\.textContent=copy/,'device-fit summary must not mutate itself forever');
+assert.doesNotMatch(hardware,/\['civweave:model-settings-opened'/,'opening the General settings tab must not probe graphics hardware');
 assert.match(settings,/HEALTH='civweave\.local-ai\.health\.v286'/,'settings must read the same health ledger as Test model');
 
 // Management preload must not declare completion before policy, metadata,
