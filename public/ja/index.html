@@ -12,14 +12,16 @@
     <div class="brand">民織</div>
     <div class="kana">シヴウィーヴ · Civweave</div>
     <p class="copy">日本語モードを開いています…</p>
-    <noscript><p><a href="/app/working-campus-v156.html?lang=ja" style="color:#9ce8ff">日本語モードを開く</a></p></noscript>
+    <noscript><p><a href="/app/index.html?lang=ja&amp;source=ja-share" style="color:#9ce8ff">日本語インストーラーを開く</a></p></noscript>
   </main>
   <script>
   (()=>{
     try{localStorage.setItem('civweave.language.v1','ja')}catch{}
-    const target=new URL('/app/working-campus-v156.html',location.origin);
+    const installed=navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
+    const target=new URL(installed?'/app/installed-entry-v146.html':'/app/index.html',location.origin);
     target.searchParams.set('lang','ja');
     target.searchParams.set('source','ja-share');
+    if(installed)target.searchParams.set('installed','1');
     const inbound=new URLSearchParams(location.search);
     const version=inbound.get('version');
     if(/^\d+\.\d+\.\d+$/.test(version||''))target.searchParams.set('version',version);
