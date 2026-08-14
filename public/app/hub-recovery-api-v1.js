@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.133-hub-recovery-api-v3-offline-codes';
+const VERSION='1.0.133-hub-recovery-api-v4-offline-ack';
 const EMAIL_KEY='civweave.hub-account-recovery-emails.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const PASSPORT_KEY='civweave.anarchadia.citizen-console.v139';
@@ -35,6 +35,7 @@ async function enroll(){
  const h=host(),n=nodeId(),mail=email(h,n),identity=globalThis.CivweaveHostNodeSessionExportV1?.current?.(h,n);if(!h||!n||!mail||!identity)return null;
  const packet=await post('signup',{...identity,email:mail,passportId:passport()||undefined},h,n);dispatchEvent(new CustomEvent('civweave:hub-account-enrolled',{detail:{nodeId:n,account:packet.account||null,verificationPending:Boolean(packet.verificationPending),delivery:packet.delivery||null,recoveryKit:packet.recoveryKit||null}}));return packet
 }
+async function acknowledgeRecoveryKit(){const h=host(),n=nodeId(),identity=globalThis.CivweaveHostNodeSessionExportV1?.current?.(h,n);if(!identity?.userId||!identity?.credential)throw new Error('The signed-in Hub session is required to confirm recovery codes.');return post('recovery/codes/ack',{userId:identity.userId,credential:identity.credential},h,n)}
 async function verify(token){const packet=await post('verify',{token:clean(token,400)});dispatchEvent(new CustomEvent('civweave:hub-account-email-verified',{detail:{nodeId:nodeId(),account:packet.account||null}}));return packet}
 async function pollVerification(token){const packet=await post('verify/poll',{token:clean(token,400)});if(packet?.verified)dispatchEvent(new CustomEvent('civweave:hub-account-email-verified',{detail:{nodeId:nodeId(),inboundProof:true}}));return packet}
 async function requestRecovery(mail){const value=clean(mail,320).toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))throw new TypeError('Enter a valid recovery email.');return post('recovery/request',{email:value})}
@@ -48,5 +49,5 @@ function installRecovered(packet,h=host(),n=nodeId()){
 async function complete(token){const h=host(),n=nodeId(),packet=await post('recovery/complete',{token:clean(token,400)},h,n);return installRecovered(packet,h,n)}
 async function pollRecovery(token){const h=host(),n=nodeId(),packet=await post('recovery/poll',{token:clean(token,400)},h,n);return packet?.ready?installRecovered(packet,h,n):packet}
 function needsEmail(){const h=host(),n=nodeId();return Boolean(h&&n&&!session()?.hasCredential?.(h,n)&&!email(h,n))}
-globalThis.CivweaveHubRecoveryApiV1=Object.freeze({version:VERSION,host,nodeId,email,saveEmail,enroll,verify,pollVerification,requestRecovery,complete,pollRecovery,needsEmail});
+globalThis.CivweaveHubRecoveryApiV1=Object.freeze({version:VERSION,host,nodeId,email,saveEmail,enroll,acknowledgeRecoveryKit,verify,pollVerification,requestRecovery,complete,pollRecovery,needsEmail});
 })();
