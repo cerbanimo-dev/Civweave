@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const VERSION='1.0.83-local-ai-bootstrap-v282-inference-health';
-const REVISION='1.0.116-local-ai-bootstrap-v306-browser-tools';
+const REVISION='1.0.117-local-ai-bootstrap-v306-browser-tools';
 const RUNTIME_REVISION='1.0.88-local-ai-runtime-v283-small-model-fast-path';
 const LEGACY_RUNTIME_ASSET='/app/local-ai/runtime-v266.js?v=1.0.87-v287-v283-coherence-v288';
 const existing=globalThis.CivweaveLocalAIBootstrapV266;
@@ -26,7 +26,7 @@ const files=[
   ['/app/local-ai/runtime-v266.js?v=1.0.121-v307-coherence-reload',runtimeReady,'CivweaveLocalModelRuntimeV266'],
   ['/app/local-ai/runtime-bridge-v266.js?v=1.0.121-v307',bridgeReady,'CivweaveLocalModelBridgeV266'],
   ['/app/browser-tool-v1.js?v=1.0.0',()=>globalThis.CivweaveBrowserToolV1?.version==='1.0.0-browser-tool-v1','CivweaveBrowserToolV1'],
-  ['/app/local-ai/browser-agent-v1.js?v=1.0.0',()=>globalThis.CivweaveLocalBrowserAgentV1?.version==='1.0.0-local-browser-agent-v1','CivweaveLocalBrowserAgentV1'],
+  ['/app/local-ai/browser-agent-v1.js?v=1.0.1',()=>globalThis.CivweaveLocalBrowserAgentV1?.version==='1.0.1-local-browser-agent-v1','CivweaveLocalBrowserAgentV1'],
   ['/app/local-ai/settings-panel-v267.js?v=1.0.121-v307',settingsReady,'CivweaveLocalAISettingsV266'],
   ['/app/local-ai/primary-route-v283.js?v=1.0.88-v283',()=>globalThis.CivweaveLocalAIPrimaryRouteV283?.version==='1.0.85-local-ai-primary-route-v283','CivweaveLocalAIPrimaryRouteV283'],
   ['/app/local-ai/hardware-tier-ui-v278.js?v=1.0.81-v278',()=>globalThis.CivweaveLocalModelHardwareTierUIV278?.version==='1.0.81-local-ai-hardware-tier-ui-v278'&&globalThis.CivweaveLocalModelHardwareTierUIV278?.deviceFitRecommendations===true,'CivweaveLocalModelHardwareTierUIV278'],
