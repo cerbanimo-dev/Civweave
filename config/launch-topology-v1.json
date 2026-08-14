@@ -23,10 +23,32 @@
     "freePattern": "https://civweave-<host-id>.pages.dev",
     "sharedDomain": "civweave.cc",
     "contributorPattern": "https://<host-id>.civweave.cc",
-    "contributorEligibility": "active-hosting-cost-share",
+    "contributorEligibility": "active-hub-hosting-subscription",
     "contributorAddressIsAlias": true,
     "preservePagesOrigin": true,
-    "lapseBehavior": "disable-shared-alias-keep-pages-origin-live",
+    "hostingPlans": {
+      "free": {
+        "monthlyCents": 0,
+        "maxMembers": 28,
+        "publicAddress": "pages.dev"
+      },
+      "hostedStandard": {
+        "monthlyCents": 500,
+        "memberBand": "0-199-at-renewal-snapshot",
+        "runtimeMaxMembers": 400,
+        "publicAddress": "<host-id>.civweave.cc"
+      },
+      "hostedScale": {
+        "monthlyCents": 1000,
+        "memberBand": "200-400-at-renewal-snapshot",
+        "thresholdMembers": 200,
+        "maxMembers": 400,
+        "publicAddress": "<host-id>.civweave.cc"
+      },
+      "billingTransition": "next-renewal-no-proration",
+      "overCapacityLapse": "grandfather-existing-residents-block-new-admissions"
+    },
+    "lapseBehavior": "disable-shared-alias-keep-pages-origin-live-return-capacity-to-28",
     "reservedLabels": [
       "www",
       "app",
