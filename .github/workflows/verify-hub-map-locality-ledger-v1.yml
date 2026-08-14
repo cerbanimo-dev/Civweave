@@ -7,6 +7,7 @@ on:
       - 'public/app/hub-map-v1.html'
       - 'public/app/civweave-hub-map-v1.js'
       - 'public/app/civweave-locality-gossip-v1.js'
+      - 'public/app/node-ai-mesh-v1.js'
       - 'public/app/civweave-map-v1-manifest.json'
       - 'functions/api/hub-map-nodes.ts'
       - 'public/host-setup.html'
@@ -35,6 +36,7 @@ jobs:
         run: |
           node --check public/app/civweave-hub-map-v1.js
           node --check public/app/civweave-locality-gossip-v1.js
+          node --check public/app/node-ai-mesh-v1.js
           node --check cloudflare/node-cloud/src/index.mjs
           node --check scripts/test-hub-location-onboarding-v1.mjs
           node --check scripts/verify-hub-map-locality-ledger-v1.mjs
