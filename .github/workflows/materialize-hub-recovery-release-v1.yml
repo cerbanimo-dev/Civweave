@@ -1,0 +1,47 @@
+name: Materialize Hub recovery release v1
+
+on:
+  push:
+    branches:
+      - fix/hub-recovery-node-cloud-current
+    paths:
+      - '.github/workflows/materialize-hub-recovery-release-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/hub-recovery-node-cloud-current
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Synchronize package and canonical release state
+        run: |
+          node --input-type=module - <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const version = (await readFile('VERSION', 'utf8')).trim();
+          const pkg = JSON.parse(await readFile('package.json', 'utf8'));
+          pkg.version = version;
+          await writeFile('package.json', `${JSON.stringify(pkg, null, 2)}\n`);
+          NODE
+          node scripts/materialize-canonical-release.mjs
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+      - name: Commit generated release state
+        run: |
+          git config user.name 'civweave-release-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add package.json public config releases scripts
+          if git diff --cached --quiet; then
+            echo 'Release state already synchronized.'
+            exit 0
+          fi
+          git commit -m 'materialize Civweave 1.0.148 recovery release'
+          git push origin HEAD:fix/hub-recovery-node-cloud-current
