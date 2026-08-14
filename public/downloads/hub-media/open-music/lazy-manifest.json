@@ -1,7 +1,7 @@
 {
   "schema": "civweave.open-music-lazy-manifest.v1",
-  "built_at": "2026-08-14T12:07:51Z",
-  "entry_count": 36,
+  "built_at": "2026-08-14T12:14:38Z",
+  "entry_count": 43,
   "entries": [
     {
       "candidate_id": "openmusic:569ec9ac3677c7bc12286dbb",
@@ -284,6 +284,98 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
+      "candidate_id": "openmusic:872147ec633f41b7190822f8",
+      "title": "[GT040] RedSK - White Lotus",
+      "artist": "Patrick Shaun-Robert Doyle",
+      "source_url": "https://archive.org/details/gt040Redsk-WhiteLotus",
+      "license": {
+        "spdx": "CC0",
+        "label": "CC0",
+        "url": "http://creativecommons.org/publicdomain/zero/1.0/",
+        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/zero/1.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "Patrick Shaun-Robert Doyle",
+        "source_title": "[GT040] RedSK - White Lotus",
+        "source_url": "https://archive.org/details/gt040Redsk-WhiteLotus",
+        "license": "CC0",
+        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/"
+      },
+      "files": [
+        {
+          "url": "https://archive.org/download/gt040Redsk-WhiteLotus/13Sk028-YouJustMadeNoiseYourFirstTime.mp3",
+          "bytes": 19387123,
+          "provider_sha1": "cc499e1474bef84b6c39bfcf25abedceabbb528e",
+          "provider_md5": "faaf3ba455baa8ce218fcfd429cc2827",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/gt040Redsk-WhiteLotus/06Nryy-ShadowRnailsOnWindowpainRmxByRedsk.mp3",
+          "bytes": 16951465,
+          "provider_sha1": "fed3aa26f6e2fa401160de4f96265e76f5aedd3c",
+          "provider_md5": "c0561f90bfd7d06336b16890d5864275",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/gt040Redsk-WhiteLotus/04Redsk-Maassalama.mp3",
+          "bytes": 15890894,
+          "provider_sha1": "84e5a181eeedba1b43b169621298ece295028792",
+          "provider_md5": "4b26cf27f56033f705b2d349689d9e10",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/gt040Redsk-WhiteLotus/05LittleMack-LoveTheBlossomredskVs.NyarlathotepRmx.mp3",
+          "bytes": 15558616,
+          "provider_sha1": "27a3348d89e46ed129577eacab4564cf83495731",
+          "provider_md5": "54b08f3ca6c91c53f616c01dd1d50db4",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/gt040Redsk-WhiteLotus/11AnemiaProject-Track1withDrumShit.mp3",
+          "bytes": 15209621,
+          "provider_sha1": "f60798b2ff8af2652685a945eab6e1ead6cd8a94",
+          "provider_md5": "a7ab6f7dd3a91e584537ca384d3b61db",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/gt040Redsk-WhiteLotus/02Redsk-AllTheseFeelingsIFeel.mp3",
+          "bytes": 10737457,
+          "provider_sha1": "eaf64bd3e89581f717afc2339ec0a483ad475ab5",
+          "provider_md5": "f271c58a6ef9a135c36932c87cb07b1a",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/gt040Redsk-WhiteLotus/12SwineFlu-GarageDays.mp3",
+          "bytes": 9050968,
+          "provider_sha1": "e92150a1a9fbfeb354a37294d8bf78ad8c3a0f15",
+          "provider_md5": "01908b4def277ddaba06e1c20306fe8d",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/gt040Redsk-WhiteLotus/14BlackBaby-VakkeyBahBlahDerDerr.mp3",
+          "bytes": 8675874,
+          "provider_sha1": "9a0b9ed50277002e70f5ae1ff9b6ef4f198757c1",
+          "provider_md5": "fe8fe34c6377448dc242794b0f67cef2",
+          "format": "VBR MP3",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
+    },
+    {
       "candidate_id": "openmusic:3b6288e685d691b8abbfb7a4",
       "title": "Cказки пустыни",
       "artist": "Symbiosis Inc.",
@@ -368,6 +460,98 @@
           "provider_sha1": "7c5b794e8bcbf67cf34ba0ee99e22e0cce7f2bb0",
           "provider_md5": "b6b70fd35f09e5fc500a714955f03fc2",
           "format": "WAVE",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
+    },
+    {
+      "candidate_id": "openmusic:a2b50d2658053a17ce16883c",
+      "title": "IF I LIVED IN IGNORANCE",
+      "artist": "Haunted Disco",
+      "source_url": "https://archive.org/details/if-i-lived-in-ignorance_",
+      "license": {
+        "spdx": "CC0",
+        "label": "CC0",
+        "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/publicdomain/zero/1.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "Haunted Disco",
+        "source_title": "IF I LIVED IN IGNORANCE",
+        "source_url": "https://archive.org/details/if-i-lived-in-ignorance_",
+        "license": "CC0",
+        "license_url": "https://creativecommons.org/publicdomain/zero/1.0/"
+      },
+      "files": [
+        {
+          "url": "https://archive.org/download/if-i-lived-in-ignorance_/Haunted%20Disco%20-%20IF%20I%20LIVED%20IN%20IGNORANCE%20-%2005%20WAITING%20GAME.flac",
+          "bytes": 31644102,
+          "provider_sha1": "3b952d9900ab4878a01577ec09e4d21b8d469996",
+          "provider_md5": "24afa203447867c8e3ac211f0956243c",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/if-i-lived-in-ignorance_/Haunted%20Disco%20-%20IF%20I%20LIVED%20IN%20IGNORANCE%20-%2009%20GIVEN%20UP%20ON%20LOVE.flac",
+          "bytes": 29568652,
+          "provider_sha1": "39275e0bbef055f59ca5ea8e02bae28b4aa47ae7",
+          "provider_md5": "7b5e9702a18b3a429b79fdb0f9689481",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/if-i-lived-in-ignorance_/Haunted%20Disco%20-%20IF%20I%20LIVED%20IN%20IGNORANCE%20-%2007%20ONE%20GUN%20ARMY.flac",
+          "bytes": 29282034,
+          "provider_sha1": "df3be718f3a3115a232bc3d2610481202ef46bd8",
+          "provider_md5": "2a1524db71be45f007aee601c1b37689",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/if-i-lived-in-ignorance_/Haunted%20Disco%20-%20IF%20I%20LIVED%20IN%20IGNORANCE%20-%2006%20THIS%20WASN'T%20SUPPOSED%20TO%20HAPPEN.flac",
+          "bytes": 27022108,
+          "provider_sha1": "d00717a35bb39d55f802b1e55ca4c4c64165b308",
+          "provider_md5": "2e3cee85ac192ac24044267c8db72e02",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/if-i-lived-in-ignorance_/Haunted%20Disco%20-%20IF%20I%20LIVED%20IN%20IGNORANCE%20-%2010%20BAD%20ENDING.flac",
+          "bytes": 26258486,
+          "provider_sha1": "894a789ae66e753b4dc0b69da02cb36719e46284",
+          "provider_md5": "e64ff45a8f4dcfa28647a1d5d4b99e20",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/if-i-lived-in-ignorance_/Haunted%20Disco%20-%20IF%20I%20LIVED%20IN%20IGNORANCE%20-%2004%20DEATH%20RATTLE.flac",
+          "bytes": 22988626,
+          "provider_sha1": "7f1faaccb9dade91d8a1fa0c059244b59c3f6dc7",
+          "provider_md5": "fcf6c2382025548a531bf80ec98ecfcb",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/if-i-lived-in-ignorance_/Haunted%20Disco%20-%20IF%20I%20LIVED%20IN%20IGNORANCE%20-%2001%20STILL%20LIFE.flac",
+          "bytes": 20400267,
+          "provider_sha1": "9ca720eccd7eb84d84b4b58996176594ec3be573",
+          "provider_md5": "562d2f1d283884e57ca145cc6b93492f",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/if-i-lived-in-ignorance_/Haunted%20Disco%20-%20IF%20I%20LIVED%20IN%20IGNORANCE%20-%2002%20PORTRAIT%20OF%20YOU.flac",
+          "bytes": 19099324,
+          "provider_sha1": "45dc4d51e5903427eb33e511bdca16906a91b5ff",
+          "provider_md5": "3b0fea64add83b3b3b032da732a57435",
+          "format": "Flac",
           "role": "original"
         }
       ],
@@ -468,183 +652,91 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
-      "candidate_id": "openmusic:363054694b5d107fc22e9a80",
-      "title": "Pretty and Invisible",
-      "artist": "Monplaisir",
-      "source_url": "https://archive.org/details/PrettyAndInvisible",
+      "candidate_id": "openmusic:1dea0e5bb92bd3470b92be2c",
+      "title": "Pure Drone",
+      "artist": "Grandchild",
+      "source_url": "https://archive.org/details/grandchild-pure-drone",
       "license": {
         "spdx": "CC0",
         "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/zero/1.0/",
+        "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/publicdomain/zero/1.0/",
         "commercial_use": true,
         "redistribution": true,
         "derivatives": true,
         "share_alike": false
       },
       "attribution": {
-        "creator": "Monplaisir",
-        "source_title": "Pretty and Invisible",
-        "source_url": "https://archive.org/details/PrettyAndInvisible",
+        "creator": "Grandchild",
+        "source_title": "Pure Drone",
+        "source_url": "https://archive.org/details/grandchild-pure-drone",
         "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/"
+        "license_url": "https://creativecommons.org/publicdomain/zero/1.0/"
       },
       "files": [
         {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2001%20Loved%20and%20Respected.flac",
-          "bytes": 27786047,
-          "provider_sha1": "2dcdf33fb8298369cb9bc72ba7f2edac98f273cd",
-          "provider_md5": "38442aa87d93df70b79ce9afeba0ed40",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2005%20Harsh%20and%20Soft.flac",
-          "bytes": 26092851,
-          "provider_sha1": "fb2d0749681817c426271ccd9abb1d3ac54f12c1",
-          "provider_md5": "357160bb9d2dda3d8a31ee204c1b61ce",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2002%20Far%20and%20High.flac",
-          "bytes": 22746629,
-          "provider_sha1": "d7c2eb9f5e122b8c81d9a0f18b447a4d1db8ed6a",
-          "provider_md5": "22fdcb0928182befaf1e87bb1cef4ba1",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2004%20Safe%20and%20Clear.flac",
-          "bytes": 22697291,
-          "provider_sha1": "3e212da825f504c36ee3f4c24e84757dce6ba8b5",
-          "provider_md5": "17dd306de2afb708b0d870ea7b999339",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2006%20Talentuous%20and%20Shy.flac",
-          "bytes": 22488418,
-          "provider_sha1": "f222cb5b8850997b8f4058ae5be6830f6c7994ab",
-          "provider_md5": "d9d973096255ab5a5197f258ac64bfe2",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2003%20Sticky%20and%20Addictive.flac",
-          "bytes": 21063361,
-          "provider_sha1": "38131d33f269079e8c55da1abac5b80d265cc9f9",
-          "provider_md5": "37afacaa4b8b8eea5f4c186b36420887",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2008%20Pretty%20and%20Invisible.flac",
-          "bytes": 16218037,
-          "provider_sha1": "26fae85586252e3606ad9796816cbb8cc1e0a29e",
-          "provider_md5": "551923acc05188daf1548904715029a1",
-          "format": "Flac",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/PrettyAndInvisible/Monplaisir%20-%20Pretty%20and%20Invisible%20-%2007%20Sacred%20and%20Empty.flac",
-          "bytes": 7950879,
-          "provider_sha1": "6df2524543ad42d3c6ddff5b753e70eaa0168924",
-          "provider_md5": "e6ce845655c3963126095a4ff618f00c",
-          "format": "Flac",
-          "role": "original"
-        }
-      ],
-      "content_hash": null,
-      "hash_state": "compute-sha256-on-cache",
-      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
-    },
-    {
-      "candidate_id": "openmusic:f85a4448f10370dbf3ce3807",
-      "title": "Weeping Icon - Weeping Icon vinyl rip",
-      "artist": "Weeping Icon",
-      "source_url": "https://archive.org/details/weeping-icon-raw-wav",
-      "license": {
-        "spdx": "CC0",
-        "label": "CC0",
-        "url": "http://creativecommons.org/publicdomain/zero/1.0/",
-        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/publicdomain/zero/1.0/",
-        "commercial_use": true,
-        "redistribution": true,
-        "derivatives": true,
-        "share_alike": false
-      },
-      "attribution": {
-        "creator": "Weeping Icon",
-        "source_title": "Weeping Icon - Weeping Icon vinyl rip",
-        "source_url": "https://archive.org/details/weeping-icon-raw-wav",
-        "license": "CC0",
-        "license_url": "http://creativecommons.org/publicdomain/zero/1.0/"
-      },
-      "files": [
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/Weeping%20Icon%20Raw%20WAV.wav",
-          "bytes": 828196962,
-          "provider_sha1": "3c52fe7971736d3e20c5fdf188f0ca348226c163",
-          "provider_md5": "7992337931b1d32a2e451f5105cee9bc",
-          "format": "WAVE",
-          "role": "original"
-        },
-        {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/Weeping%20Icon%20Raw%20FLAC.flac",
-          "bytes": 417207231,
-          "provider_sha1": "850c6ff47b12471900efbb2d7fa67de68276ee29",
-          "provider_md5": "c01d0d1bb55d127dbf81c8e3b11de67c",
+          "url": "https://archive.org/download/grandchild-pure-drone/GRANDCHILD%20-%20Pure%20Drone%20-%2006%20Departed%20Sunset.flac",
+          "bytes": 65260947,
+          "provider_sha1": "3990c04df494b544f79888da2d4367d79a512c89",
+          "provider_md5": "a36dffb90415916587a633e85387cead",
           "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/B6%20Control.mp3",
-          "bytes": 14566230,
-          "provider_sha1": "70e5fa4fa5858d94ff5d08b2d01a39cca9980f3b",
-          "provider_md5": "4c8c895d6b2af5793ba8a7f01cba1cbd",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/grandchild-pure-drone/GRANDCHILD%20-%20Pure%20Drone%20-%2003%20Unsuffer%20Pt.%201.flac",
+          "bytes": 52622073,
+          "provider_sha1": "f5318e21f8cfa6b948969ade8f747e3425d6eafa",
+          "provider_md5": "290329b82d975a36075255a96d169914",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/A8%20Natural%20Selection.mp3",
-          "bytes": 10444959,
-          "provider_sha1": "6ad5a2d5d64548431b06f0b82306011d53800776",
-          "provider_md5": "0c21830fa9090d23b563b46af628b835",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/grandchild-pure-drone/GRANDCHILD%20-%20Pure%20Drone%20-%2002%20Exitus.flac",
+          "bytes": 46198561,
+          "provider_sha1": "de4404c0e9212678c1dc8dfb6b9559d2e14616c4",
+          "provider_md5": "91c8cb696b6813f17a820b5d7e312717",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/B4%20Live%20Envy.mp3",
-          "bytes": 10010072,
-          "provider_sha1": "00eb8852a7a77859320bd3ef6bc23abe092e6c45",
-          "provider_md5": "2cc6b69f473b51947c4ef8ccb67a8462",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/grandchild-pure-drone/GRANDCHILD%20-%20Pure%20Drone%20-%2001%20Pouring%20Over.flac",
+          "bytes": 44121129,
+          "provider_sha1": "4d9694236d39155e5f3b1c2e8072a51d1ab57522",
+          "provider_md5": "ded15124d5181b66c11abb84c4b40f8a",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/B2%20Power%20Trip.mp3",
-          "bytes": 9670233,
-          "provider_sha1": "67aca8a202fdef8145f8de4dd1cd5b3a6eb99e40",
-          "provider_md5": "1bb1a9b79383651bfa4e295622929430",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/grandchild-pure-drone/GRANDCHILD%20-%20Pure%20Drone%20-%2005%20Ash.flac",
+          "bytes": 42908788,
+          "provider_sha1": "c9cc667a22201fea0d4583a5f5a561ddb3b2d046",
+          "provider_md5": "51af2555b6f6c8a19a5eaa31bb1fb968",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/A6%20Ripe%20for%20Consumption.mp3",
-          "bytes": 8510562,
-          "provider_sha1": "f1710c5d2a180800e94bb70c3b22b5fa50fb9e89",
-          "provider_md5": "723769e5d611043c33a836a2e62406ff",
-          "format": "VBR MP3",
+          "url": "https://archive.org/download/grandchild-pure-drone/GRANDCHILD%20-%20Pure%20Drone%20-%2004%20Unsuffer%20Pt.%202.flac",
+          "bytes": 26808644,
+          "provider_sha1": "e96c3d8e0d4358fb3d8a3d2637ce8d9bc87c5e88",
+          "provider_md5": "5f315c0da8d2b9433d6c580a8ccea784",
+          "format": "24bit Flac",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/weeping-icon-raw-wav/A2%20Ankles.mp3",
-          "bytes": 8414548,
-          "provider_sha1": "9e49867a806a328517d4f07a5523a185fe17a340",
-          "provider_md5": "43c5a70b3ed8a87b0b04f6ae44729566",
+          "url": "https://archive.org/download/grandchild-pure-drone/GRANDCHILD%20-%20Pure%20Drone%20-%2006%20Departed%20Sunset.mp3",
+          "bytes": 8394968,
+          "provider_sha1": "67aaabe2bb7dbf7b04879cc685acf634bb832c38",
+          "provider_md5": "22ad71df976c5f5e6bd857effc305e7a",
           "format": "VBR MP3",
-          "role": "original"
+          "role": "derivative"
+        },
+        {
+          "url": "https://archive.org/download/grandchild-pure-drone/GRANDCHILD%20-%20Pure%20Drone%20-%2003%20Unsuffer%20Pt.%201.mp3",
+          "bytes": 6360541,
+          "provider_sha1": "538507aca97b12099dc25231508d899963ffa436",
+          "provider_md5": "5c444e8b918ad599c65cf476436f6f57",
+          "format": "VBR MP3",
+          "role": "derivative"
         }
       ],
       "content_hash": null,
@@ -967,6 +1059,98 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
+      "candidate_id": "openmusic:1a687cc2aaae2580d009eb47",
+      "title": "crashzendo - Moon",
+      "artist": "crashzendo",
+      "source_url": "https://archive.org/details/cz009_216",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "crashzendo",
+        "source_title": "crashzendo - Moon",
+        "source_url": "https://archive.org/details/cz009_216",
+        "license": "CC-BY",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "files": [
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_04_wandering_panasonic_spirit.mp3",
+          "bytes": 26433536,
+          "provider_sha1": "241bb8cc18e50185d16dd9a4e6e4e0256b270566",
+          "provider_md5": "9b645c52fe005b7cebcd8aa6b3029ce6",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_08_technopolder_wattenmeer.mp3",
+          "bytes": 24840192,
+          "provider_sha1": "a5e2265d4aa366bbb51738aa96e8d4e06fa02bd3",
+          "provider_md5": "a7bf677c9d06c01f0d3ec1b90f15f5df",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_06_neutrino.mp3",
+          "bytes": 16936960,
+          "provider_sha1": "35e9cb404f893007749048ab02065bd98888dc4b",
+          "provider_md5": "d894397e059fa32d09b187ec586e1655",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_02_ashzen_hyperspace.mp3",
+          "bytes": 13733888,
+          "provider_sha1": "9e3536ed627cd85a065b847f025fae10680ed373",
+          "provider_md5": "9ed67dc60c30f1d8da4254ee82b848bb",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_05_fun.mp3",
+          "bytes": 12810240,
+          "provider_sha1": "f65e00e2d2860e54fdf84d62d52dcb64e5a881f4",
+          "provider_md5": "ef3605a5815ba41710c3d53acea70c11",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_03_i_was_looking_for_you.mp3",
+          "bytes": 12619776,
+          "provider_sha1": "b8839f98d904c7f94bb8f0a52dc96fa8e4efa3b5",
+          "provider_md5": "164a0bd3b30da65f89dbd4dd57d1ddb4",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_07_plunging_headfirst_into_cotton_candy_clouds.mp3",
+          "bytes": 5033984,
+          "provider_sha1": "0ac936736db8d52a33b0591c31f01b6c26adeb47",
+          "provider_md5": "0b27773748aacaefbcabea23d8206b17",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/cz009_216/cz009_01_fly_me_to_the_moon.mp3",
+          "bytes": 3758080,
+          "provider_sha1": "14fba93ebd4893c8c37c1c857d170cfc3e09d334",
+          "provider_md5": "ed0c2c4ef2710931c2e769bd57b64023",
+          "format": "VBR MP3",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
+    },
+    {
       "candidate_id": "openmusic:f7ee36f3919da8a5156a7579",
       "title": "Hit the Shop",
       "artist": "JML",
@@ -1019,10 +1203,194 @@
       "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
     },
     {
-      "candidate_id": "openmusic:6e3591aaedeab371a92e877e",
-      "title": "Music Manumit Music Only Podcast - Happy New Year!",
-      "artist": "tom@lorenzosmusic.com",
-      "source_url": "https://archive.org/details/MusicManumitMusicOnlyPodcast-HappyNewYear_",
+      "candidate_id": "openmusic:ab4b58e9a3ed6ba9b29c3045",
+      "title": "Изразец — Izrazets (2021, FLAC, addicted label, album)",
+      "artist": "Изразец | Izrazets",
+      "source_url": "https://archive.org/details/a-771",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC-BY",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/4.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "Изразец | Izrazets",
+        "source_title": "Изразец — Izrazets (2021, FLAC, addicted label, album)",
+        "source_url": "https://archive.org/details/a-771",
+        "license": "CC-BY",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "files": [
+        {
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2005%20%D0%A1%D0%BA%D0%BE%D0%BB%D1%8C%D0%B7%D1%81%D0%BA%D0%B0%D1%8F%20%D0%B8%D0%B3%D1%80%D0%B0.flac",
+          "bytes": 125550565,
+          "provider_sha1": "b055e62695a01b0dfe23e45c69cf73b9e58f604d",
+          "provider_md5": "e1e84bf36954abe2d8e5fe86f0c022fd",
+          "format": "24bit Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2003%20%D0%9E%D0%B6%D0%B5%D1%80%D0%B5%D0%BB%D1%8C%D0%B5.flac",
+          "bytes": 122577941,
+          "provider_sha1": "801100a1469622b23ca8714be014b21cbcca4a36",
+          "provider_md5": "dc835a526106cce4bef727779ab11312",
+          "format": "24bit Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2002%20%D0%94%D1%80%D1%83%D0%B7%D1%8C%D1%8F%20c%20%D0%BF%D1%80%D0%B8%D0%B2%D0%B8%D0%BB%D0%B5%D0%B3%D0%B8%D1%8F%D0%BC%D0%B8.flac",
+          "bytes": 92781778,
+          "provider_sha1": "4180d16d9e709272b2a1116313289e62bd875715",
+          "provider_md5": "99f811d9e951d6b3fdae08c90cdd90d1",
+          "format": "24bit Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2006%20%D0%A1%D0%BC%D0%B5%D1%80%D1%82%D1%8C%20%D0%BD%D0%B0%20%D0%B4%D0%B8%D1%81%D0%BA%D0%BE%D0%BD%D1%82%D0%B5%D0%BA%D1%81%D1%82%D0%B5.flac",
+          "bytes": 91914090,
+          "provider_sha1": "5f3385c3c9258e0fb104a19812617926e79f1d21",
+          "provider_md5": "059838dd9e34d2ab1f5e41660d4cb0fb",
+          "format": "24bit Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2004%20%D0%A2%D0%B2%D0%B0%D1%80%D1%8C.flac",
+          "bytes": 82622043,
+          "provider_sha1": "68aa6dc15dc00dcf48f40ca21329d89d6f4141ea",
+          "provider_md5": "9ba0ded4a154bef034758cb239a61087",
+          "format": "24bit Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2001%20%D0%9B%D0%BE%D0%B1%D1%81%D1%82%D0%B5%D1%80.flac",
+          "bytes": 28286382,
+          "provider_sha1": "234a833472489ba5f33b9b98d9ad07d49139b1fe",
+          "provider_md5": "0ac17f9b6c0d373fc3cb5f9da1759076",
+          "format": "24bit Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2003%20%D0%9E%D0%B6%D0%B5%D1%80%D0%B5%D0%BB%D1%8C%D0%B5.mp3",
+          "bytes": 15655100,
+          "provider_sha1": "d488a5090f890b86ea4abdbfada241434d8c98b5",
+          "provider_md5": "55299ddbde78e4d17f87d06e7da80632",
+          "format": "VBR MP3",
+          "role": "derivative"
+        },
+        {
+          "url": "https://archive.org/download/a-771/%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%20%D0%98%D0%B7%D1%80%D0%B0%D0%B7%D0%B5%D1%86%20-%2005%20%D0%A1%D0%BA%D0%BE%D0%BB%D1%8C%D0%B7%D1%81%D0%BA%D0%B0%D1%8F%20%D0%B8%D0%B3%D1%80%D0%B0.mp3",
+          "bytes": 15247330,
+          "provider_sha1": "cdca04a52457be9df678d1d1c61339a9a52a746e",
+          "provider_md5": "dbbcc687f46b005f4330ee63bc839ad1",
+          "format": "VBR MP3",
+          "role": "derivative"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
+    },
+    {
+      "candidate_id": "openmusic:01387e13d700a2d3a80ed3ad",
+      "title": "Резина — 1619 (2020, FLAC, addicted label, album)",
+      "artist": "Rezina",
+      "source_url": "https://archive.org/details/a-758",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "CC-BY",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "evidence": "Internet Archive metadata licenseurl=https://creativecommons.org/licenses/by/4.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "Rezina",
+        "source_title": "Резина — 1619 (2020, FLAC, addicted label, album)",
+        "source_url": "https://archive.org/details/a-758",
+        "license": "CC-BY",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/"
+      },
+      "files": [
+        {
+          "url": "https://archive.org/download/a-758/06%20%D0%91%D0%BB%D0%B8%D0%B6%D0%B5%20feat%20%D0%95%D0%BB%D0%B5%D0%BD%D0%B0%20%D0%92%D0%BE%D0%B9%D0%BD%D0%B0%D1%80%D0%BE%D0%B2%D1%81%D0%BA%D0%B0%D1%8F.flac",
+          "bytes": 68273895,
+          "provider_sha1": "395abafbdc82d1c2ad23e94093a589ac77148708",
+          "provider_md5": "fbb6a3bb13c7436130a2e877f1eaef87",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/07%20%D0%9F%D0%BE%D0%B4%D0%BC%D0%B5%D0%BD%D0%B0%20feat%20%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80%20%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B0%D0%BD%D0%B4%D1%80%D0%BE%D0%B2.flac",
+          "bytes": 57348786,
+          "provider_sha1": "69d9f85f865277c3367d39f5bd7eb6f702f39792",
+          "provider_md5": "10d36a124164f55155a942f6a88d5e92",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/03%20Economy%20of%20Shit%20feat%20Ron%20Gallipoli.flac",
+          "bytes": 52514249,
+          "provider_sha1": "13309c0e01f61a6aa106fd2cd95aad2f6ae6ef51",
+          "provider_md5": "794f6fe840aa805b15c2e266966daed7",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/05%20%D0%A4%D0%B5%D0%B2%D1%80%D0%B0%D0%BB%D1%8C%202017%20feat%20%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B5%D0%B9%20%D0%9D%D0%B8%D0%BA%D0%BE%D0%BD%D0%BE%D0%B2.flac",
+          "bytes": 50828219,
+          "provider_sha1": "1f1cda750a8db274e0a7c62be8dadaf54e93d295",
+          "provider_md5": "2bc3195ccf33acbc57135409f0b4cf19",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/04%20%D0%A0%D0%B5%D0%B7%D0%B8%D0%BD%D0%B0%20feat%20%D0%90%D0%BD%D0%B4%D1%80%D0%B5%D0%B9%20%D0%9C%D0%B0%D1%88%D0%BD%D0%B8%D0%BD.flac",
+          "bytes": 49381148,
+          "provider_sha1": "c061eef670c58499d2ca333d7d6054f540517c0d",
+          "provider_md5": "921d079b5cc850a2d522e6ebe5aaadc9",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/01%20%D0%9F%D0%BE%D0%BB%D0%BD%D0%BE%D0%BB%D1%83%D0%BD%D0%B8%D0%B5%20feat%20%D0%9E%D0%BB%D0%B5%D0%B3%20%D0%AF%D0%B3%D0%BE%D0%B4%D0%B8%D0%BD.flac",
+          "bytes": 48665107,
+          "provider_sha1": "65a239ecd80e3a155242a0908e44a4a041f8ee18",
+          "provider_md5": "fa71075ecbf6801298cae1a5b3785555",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/02%20%D0%A1%D0%B5%D1%80%D0%B4%D1%86%D0%B5%20feat%20%D0%98%D0%BB%D1%8C%D1%8F%20%D0%A7%D0%B5%D1%80%D0%B5%D0%BF%D0%BA%D0%BE-%D0%A1%D0%B0%D0%BC%D0%BE%D1%85%D0%B2%D0%B0%D0%BB%D0%BE%D0%B2.flac",
+          "bytes": 43830483,
+          "provider_sha1": "bbfc1bb921856d7b9ec8051a80d7c0d36c369925",
+          "provider_md5": "951f34e7e51d59577b9d4cbde740a120",
+          "format": "Flac",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/a-758/09%20%D0%A3%D1%80%D0%B0%D0%BD%D0%BE%D0%B2%D1%8B%D0%B5%20%D1%81%D1%80%D0%B5%D0%B4%D1%8B%20%D1%81%D1%80%D0%B5%D0%B4%D0%B8%20feat%20%D0%AF%D0%BD%20%D0%9D%D0%B8%D0%BA%D0%B8%D1%82%D0%B8%D0%BD.flac",
+          "bytes": 40943458,
+          "provider_sha1": "22c32a3615f7bbc56faac3f29dcc4027ffbc9940",
+          "provider_md5": "c28f418d560574a9a179f1dca0b3b63f",
+          "format": "Flac",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
+    },
+    {
+      "candidate_id": "openmusic:b4521446651552ec0ddfa086",
+      "title": "Music Manumit Music Only Podcast - 120302",
+      "artist": "Music Manumit Podcast",
+      "source_url": "https://archive.org/details/MusicManumitMusicOnlyPodcast-120302",
       "license": {
         "spdx": "CC-BY-SA",
         "label": "CC-BY-SA",
@@ -1034,28 +1402,154 @@
         "share_alike": true
       },
       "attribution": {
-        "creator": "tom@lorenzosmusic.com",
-        "source_title": "Music Manumit Music Only Podcast - Happy New Year!",
-        "source_url": "https://archive.org/details/MusicManumitMusicOnlyPodcast-HappyNewYear_",
+        "creator": "Music Manumit Podcast",
+        "source_title": "Music Manumit Music Only Podcast - 120302",
+        "source_url": "https://archive.org/details/MusicManumitMusicOnlyPodcast-120302",
         "license": "CC-BY-SA",
         "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
       },
       "files": [
         {
-          "url": "https://archive.org/download/MusicManumitMusicOnlyPodcast-HappyNewYear_/110101musicmanumitmusiconly.ogg",
-          "bytes": 44008204,
-          "provider_sha1": "162a15f151c9dac67cefc7f94aa68f0d30ac186e",
-          "provider_md5": "bc2e340a8fb01157b16d7e0f0c050f44",
-          "format": "Ogg Vorbis",
+          "url": "https://archive.org/download/MusicManumitMusicOnlyPodcast-120302/musicmanumit-music-only-120302.mp3",
+          "bytes": 25620165,
+          "provider_sha1": "f62fa5bd29f9f5f6c58dc5a574ec39c6fbf80bca",
+          "provider_md5": "78730e6dc1a1d377cb22dc66a3e91bf8",
+          "format": "VBR MP3",
           "role": "original"
         },
         {
-          "url": "https://archive.org/download/MusicManumitMusicOnlyPodcast-HappyNewYear_/110101musicmanumitmusiconly.mp3",
-          "bytes": 47504070,
-          "provider_sha1": "969e8616640467978e585067990bcc3dbf2816da",
-          "provider_md5": "ba1c087f43528f29392cb58657eb75dc",
+          "url": "https://archive.org/download/MusicManumitMusicOnlyPodcast-120302/musicmanumit-music-only-120302.ogg",
+          "bytes": 19024021,
+          "provider_sha1": "d16b443526d52212cca2ca0ca7f58047c8924a4c",
+          "provider_md5": "389ee7716b9ff91ba50a4b76e29ac38f",
+          "format": "Ogg Vorbis",
+          "role": "original"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
+    },
+    {
+      "candidate_id": "openmusic:76e229f95148164096701202",
+      "title": "The GoodLuck Boys - ChinPunKanPun",
+      "artist": "The GoodLuck Boys",
+      "source_url": "https://archive.org/details/TheGoodluckBoys-Chinpunkanpun",
+      "license": {
+        "spdx": "CC-BY-SA",
+        "label": "CC-BY-SA",
+        "url": "http://creativecommons.org/licenses/by-sa/3.0/",
+        "evidence": "Internet Archive metadata licenseurl=http://creativecommons.org/licenses/by-sa/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": true
+      },
+      "attribution": {
+        "creator": "The GoodLuck Boys",
+        "source_title": "The GoodLuck Boys - ChinPunKanPun",
+        "source_url": "https://archive.org/details/TheGoodluckBoys-Chinpunkanpun",
+        "license": "CC-BY-SA",
+        "license_url": "http://creativecommons.org/licenses/by-sa/3.0/"
+      },
+      "files": [
+        {
+          "url": "https://archive.org/download/TheGoodluckBoys-Chinpunkanpun/03RainbowMistContraption.mp3",
+          "bytes": 24463753,
+          "provider_sha1": "c0cc37c85d4943f599a36a9f9fd9ae08a252491b",
+          "provider_md5": "c75a7e813b5a728058259b4728959163",
           "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/TheGoodluckBoys-Chinpunkanpun/01Caravan.mp3",
+          "bytes": 24101156,
+          "provider_sha1": "b01c76fd73ead97feda9ca24c13fc2a3c55abe39",
+          "provider_md5": "e4f54e61ef49c0a424db668b6b1764d6",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/TheGoodluckBoys-Chinpunkanpun/04Wetback-tongue.mp3",
+          "bytes": 19552722,
+          "provider_sha1": "195e4d43609000715f6ee2cca85938d2382e387a",
+          "provider_md5": "ad02da2463250bac16a51f06a0104734",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/TheGoodluckBoys-Chinpunkanpun/02Rewind.mp3",
+          "bytes": 17473367,
+          "provider_sha1": "d9617f3fe5e0b883e8fe3e0aefbc7f669a65c21f",
+          "provider_md5": "928c6db3381161a8b2782b81dac79108",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/TheGoodluckBoys-Chinpunkanpun/07TurningBack.mp3",
+          "bytes": 13723235,
+          "provider_sha1": "a3702b4ff04b4929ebb0610c2b3ce425635532bc",
+          "provider_md5": "761d43a8f5d36f8a959d0c8a616bd7d7",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/TheGoodluckBoys-Chinpunkanpun/06TheCaseOfTheSixSidedComb.mp3",
+          "bytes": 12479824,
+          "provider_sha1": "17056fd4dc968a36acc83eacd5946fe2afdc5e72",
+          "provider_md5": "7ac949d319612d64faf6fad66e05f53f",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/TheGoodluckBoys-Chinpunkanpun/05PuzzleSolvingBackgroundmusic.mp3",
+          "bytes": 12052461,
+          "provider_sha1": "0ec5accc55d07b2dbad900cf544d70a14114a84c",
+          "provider_md5": "831795fc912b69155de6f6a29134330f",
+          "format": "VBR MP3",
+          "role": "original"
+        },
+        {
+          "url": "https://archive.org/download/TheGoodluckBoys-Chinpunkanpun/01Caravan.ogg",
+          "bytes": 6101110,
+          "provider_sha1": "b0825d765d6e07d1e36a18c3d6d21037e1068544",
+          "provider_md5": "aa15a7ba71caa8c30f83f8eca6216174",
+          "format": "Ogg Vorbis",
           "role": "derivative"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
+    },
+    {
+      "candidate_id": "openmusic:cd8380d641fb1319a466ca95",
+      "title": "Anadolu Pop Theme",
+      "artist": "murat ses",
+      "source_url": "https://ccmixter.org/files/murat_ses/12780",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution",
+        "url": "http://creativecommons.org/licenses/by/2.5/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution; url=http://creativecommons.org/licenses/by/2.5/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "murat ses",
+        "source_title": "Anadolu Pop Theme",
+        "source_url": "https://ccmixter.org/files/murat_ses/12780",
+        "license": "Attribution",
+        "license_url": "http://creativecommons.org/licenses/by/2.5/"
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/murat_ses/murat_ses_-_Anadolu_Pop_Theme.mp3",
+          "mime": "",
+          "bytes": 2050551,
+          "role": "source-download"
         }
       ],
       "content_hash": null,
@@ -1089,6 +1583,40 @@
           "url": "https://ccmixter.org/content/stringfactory/stringfactory_-_B_Calm_Violin_Track_2.mp3",
           "mime": "",
           "bytes": 4354134,
+          "role": "source-download"
+        }
+      ],
+      "content_hash": null,
+      "hash_state": "compute-sha256-on-cache",
+      "cache_policy": "MESH_REDISTRIBUTABLE_LAZY"
+    },
+    {
+      "candidate_id": "openmusic:13c3ed22532feb3da4d647ea",
+      "title": "Clean",
+      "artist": "Donnie Ozone",
+      "source_url": "https://ccmixter.org/files/donnieozone/39961",
+      "license": {
+        "spdx": "CC-BY",
+        "label": "Attribution (3.0)",
+        "url": "http://creativecommons.org/licenses/by/3.0/",
+        "evidence": "ccMixter Query API lic=by; license=Attribution (3.0); url=http://creativecommons.org/licenses/by/3.0/",
+        "commercial_use": true,
+        "redistribution": true,
+        "derivatives": true,
+        "share_alike": false
+      },
+      "attribution": {
+        "creator": "Donnie Ozone",
+        "source_title": "Clean",
+        "source_url": "https://ccmixter.org/files/donnieozone/39961",
+        "license": "Attribution (3.0)",
+        "license_url": "http://creativecommons.org/licenses/by/3.0/"
+      },
+      "files": [
+        {
+          "url": "https://ccmixter.org/content/donnieozone/donnieozone_-_Clean.mp3",
+          "mime": "",
+          "bytes": 10406183,
           "role": "source-download"
         }
       ],
