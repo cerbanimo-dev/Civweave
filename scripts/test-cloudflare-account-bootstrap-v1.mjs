@@ -140,7 +140,9 @@ assert.ok(hostSetup.includes('Account → Workers Scripts → Edit'));
 assert.ok(hostSetup.includes('renderAccountEdge(meta)'));
 assert.ok(hostSetup.includes('id="sync-location"'));
 assert.ok(hostSetup.includes('navigator.geolocation.watchPosition'));
-assert.ok(hostSetup.includes("position.coords.latitude.toFixed(3)"));
+assert.ok(hostSetup.includes('coordinateDecimals=precise?6:3'));
+assert.ok(hostSetup.includes('position.coords.latitude.toFixed(coordinateDecimals)'));
+assert.ok(hostSetup.includes("publicPrecision:precise?'precise':'rounded'"));
 
 for (const file of [
   'cloudflare/account-edge/src/index.mjs',
