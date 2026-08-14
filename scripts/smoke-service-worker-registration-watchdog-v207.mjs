@@ -35,11 +35,14 @@ assert.ok(updaterSource.includes('withTimeout(registration.update()'),'Installed
 assert.ok(updaterSource.includes("setState('Open updater','error'"),'Installed updater must expose a repair action after timeout.');
 assert.ok(boundarySource.includes("const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'"),'Installed boundary no longer names the shared update controller.');
 assert.ok(boundarySource.includes("canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions'"),'Canonical startup corridor changed unexpectedly.');
-assert.ok(boundarySource.includes("const REVISION='chat-convergence-v250-navigation-lifecycle-v424';"),'Installed boundary lost the navigation lifecycle revision.');
+assert.ok(boundarySource.includes("const REVISION='chat-convergence-v250-navigation-lifecycle-v424-install-only-pwa-v1';"),'Installed boundary lost the install-only navigation lifecycle revision.');
+assert.ok(boundarySource.includes("function allowed(){return installedDisplay()||developer()}"),'Installed boundary can authorize ordinary browser runtime again.');
+assert.ok(boundarySource.includes('installedQueryIsAuthorization:false'),'installed=1 became an authorization token again.');
 assert.ok(!statusSource.includes('registration.update()'),'Offline status reader must not compete with the installer update watchdog.');
 assert.ok(!statusSource.includes('SKIP_WAITING'),'Offline status reader must not activate workers behind the installer watchdog.');
 assert.ok(workerWrapperSource.includes('/service-worker-core-v208.js'),'Active worker wrapper omits the retained core.');
-assert.ok(workerWrapperSource.includes('working-campus-return-v425'),'Active worker wrapper omits the Working Campus return epoch.');
+assert.ok(workerWrapperSource.includes('working-campus-return-v425-install-only-pwa-v1'),'Active worker wrapper omits the install-only Working Campus return epoch.');
+assert.ok(workerWrapperSource.includes('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1'),'Active worker wrapper can restore the browser fallback shell repair.');
 assert.ok(workerWrapperSource.includes('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343'),'Active worker wrapper omits the current stale-chat migration.');
 assert.ok(workerCoreSource.includes("const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425'"),'Worker core build identity drifted.');
 assert.ok(offlineOverrideSource.includes("const V211_POLICY = 'resumable-pause-v280'"),'Offline resume/pause policy is missing.');
@@ -111,4 +114,4 @@ const recoveryKey='civweave.shell.registration-watchdog.v208';
   assert.equal(updateButton.dataset.state,'error','A stalled in-app update did not leave checking state.');
 }
 
-console.log(JSON.stringify({ok:true,revision:'current-registration-watchdog',version,workerRevision:revision,registrationDeadline:true,activationDeadline:true,exactWorkerReuse:true,oneShotRecovery:true,knowledgeCachePreserved:true,inAppUpdateRepairAction:true},null,2));
+console.log(JSON.stringify({ok:true,revision:'current-registration-watchdog-install-only-pwa-v1',version,workerRevision:revision,registrationDeadline:true,activationDeadline:true,exactWorkerReuse:true,oneShotRecovery:true,knowledgeCachePreserved:true,inAppUpdateRepairAction:true,browserRuntime:false},null,2));
