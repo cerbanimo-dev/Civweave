@@ -36,6 +36,9 @@ for(const [label,pattern] of [
   ['preserved storage policy',/storagePolicy:'preserve-campus-model-media-school-storage'/],
   ['repair button copy',/installButton\.textContent='Repair shell'/]
 ])assert.match(repairOnly,pattern,`Repair-only UI is missing ${label}`);
+assert.ok(repairOnly.includes("if(installButton.textContent!=='Repair shell')installButton.textContent='Repair shell'"),'Repair observer must not rewrite the install button on every MutationObserver pass.');
+assert.ok(repairOnly.includes("if(updateButton&&updateButton.textContent!=='Repair shell')updateButton.textContent='Repair shell'"),'Repair observer must not rewrite the update button on every MutationObserver pass.');
+assert.ok(repairOnly.includes("if(installButton.dataset.civweaveRepairOnly!==REVISION)installButton.dataset.civweaveRepairOnly=REVISION"),'Repair observer marker writes must be idempotent.');
 assert.match(repairOnly,/new MessageChannel\(\)/,'Repair UI no longer uses a reply channel.');
 assert.match(repairOnly,/\[channel\.port2\]/,'Repair UI no longer transfers the reply port.');
 assert.match(repairOnly,/browserRuntimePolicy:'installer-only-until-installed-display'/,'Repair UI can reopen browser runtime.');
