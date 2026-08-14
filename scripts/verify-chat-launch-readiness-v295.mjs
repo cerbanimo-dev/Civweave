@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=p=>readFile(new URL(`../${p}`,import.meta.url),'utf8');
-const [orchestrator,fullscreen,store,ui,localRuntime,localOwner,settings,workspace,runtime266,bootstrap,gateway]=await Promise.all([
+const [orchestrator,fullscreen,store,ui,localRuntime,localOwner,settings,workspace,runtime266,bootstrap,gateway,repair]=await Promise.all([
   'public/app/experience-orchestrator-v232.js',
   'public/app/chat-fullscreen-v295.js',
   'public/app/saved-chat-store-v295.js',
@@ -12,9 +12,11 @@ const [orchestrator,fullscreen,store,ui,localRuntime,localOwner,settings,workspa
   'public/app/guide-workspace-v242.js',
   'public/app/local-ai/runtime-v266.js',
   'public/app/local-ai/bootstrap-v266.js',
-  'public/app/settings-gateway-v317.js'
+  'public/app/settings-gateway-v317.js',
+  'public/service-worker-chat-repair-v245.js'
 ].map(read));
 for(const source of [orchestrator,fullscreen,store,ui,localRuntime,localOwner,settings,workspace,runtime266,bootstrap,gateway])new Function(source);
+new Function('self','caches','fetch',repair)({addEventListener(){},CivweaveChatCacheRepairV245:null},{keys:async()=>[]},async()=>({ok:true,clone(){return this}}));
 
 assert.match(orchestrator,/REVISION='experience-orchestrator-v317-settings-neutral'/);
 for(const file of ['chat-fullscreen-v295.js','saved-chat-store-v295.js','saved-chat-ui-v295.js','local-chat-runtime-v295.js','local-chat-owner-v295.js'])assert.ok(orchestrator.includes(file),`orchestrator lost ${file}`);
@@ -41,7 +43,9 @@ assert.match(orchestrator,/chatOpenPrewarm:true/);
 assert.match(workspace,/document\.addEventListener\('submit',onSubmitCapture,true\)/);
 
 assert.match(fullscreen,/1\.0\.106-chat-fullscreen-v299/);
+assert.match(fullscreen,/REVISION='mobile-chat-freeze-v347'/);
 assert.match(fullscreen,/function enforceFullScreen\(/);
+assert.match(fullscreen,/getPropertyValue\(prop\)===value&&node\.style\.getPropertyPriority\(prop\)==='important'/);
 assert.match(fullscreen,/setProperty\(prop,value,'important'\)/);
 assert.match(fullscreen,/restingHeight/);
 assert.match(fullscreen,/civweave:guide-workspace-state/);
@@ -52,8 +56,16 @@ assert.match(fullscreen,/height','var\(--cw299-vv-height,100dvh\)'/);
 assert.match(fullscreen,/display','flex'/);
 assert.match(fullscreen,/structuralComposerRepair:true/);
 assert.match(fullscreen,/inlineImportantEnforcement:true/);
+assert.match(fullscreen,/mutationLoopGuard:true/);
+assert.match(fullscreen,/styleMutationObserverDisabled:true/);
+assert.match(fullscreen,/attributeFilter:\['hidden','class'\]/);
+assert.doesNotMatch(fullscreen,/attributeFilter:\[[^\]]*'style'/,'fullscreen root observer must not subscribe to its own style writes');
 assert.doesNotMatch(fullscreen,/offsetTop/);
 assert.match(fullscreen,/grid-template-columns:minmax\(0,1fr\) auto/);
+for(const path of ['/app/experience-orchestrator-v232.js','/app/realm-session-integrity-v237.js','/app/guide-workspace-v242.js','/app/chat-fullscreen-v295.js','/app/saved-chat-store-v295.js','/app/saved-chat-ui-v295.js'])assert.ok(repair.includes(`'${path}'`),`repair cache purge lost ${path}`);
+assert.match(repair,/REVISION='chat-avatar-visible-v346'/);
+assert.match(repair,/FREEZE_REVISION='mobile-chat-freeze-v347'/);
+assert.match(repair,/packageHumanBubble:cacheHumanMessageRuntime/);
 for(const id of ['civweave','living-school','cerbanimo','fellowfare','anarchadia'])assert.ok(store.includes(`'${id}'`),`saved-chat store lost ${id}`);
 assert.match(store,/civweave\.guide-saved-chats\.v295/);
 assert.match(ui,/data-cw295-new/);
@@ -123,4 +135,4 @@ assert.match(localOwner,/document\.addEventListener\('focusin',prewarmIntent,tru
 assert.match(localOwner,/intentPrewarm:true/);
 assert.match(settings,/settingsIndependentOfChat:true/);
 assert.match(settings,/inferenceDormantOnOpen:true/);
-console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v317-settings-separated',features:{fiveChats:true,settingsOwner:'settings-gateway-v317',settingsIndependentOfChat:true,deterministicFullscreenBoot:true,localFifoQueue:true,runtimeOwnedWebGPUFallback:true,runtimeFirstBootstrap:true,bootstrapAuxiliaryFailureNonFatal:true,freshWorkerFallback:true,failedBootstrapRecovery:true,truthfulExecutionModel:true,adaptiveWasmCompatibility:true,webgpuSessionQuarantine:true,boundedStartup:true,startupProgress:true,intentPrewarm:true,adaptiveResidency:true,smoothFitRuntime:true}},null,2));
+console.log(JSON.stringify({ok:true,revision:'chat-launch-readiness-v347-mobile-freeze-guard',features:{fiveChats:true,settingsOwner:'settings-gateway-v317',settingsIndependentOfChat:true,deterministicFullscreenBoot:true,localFifoQueue:true,runtimeOwnedWebGPUFallback:true,runtimeFirstBootstrap:true,bootstrapAuxiliaryFailureNonFatal:true,freshWorkerFallback:true,failedBootstrapRecovery:true,truthfulExecutionModel:true,adaptiveWasmCompatibility:true,webgpuSessionQuarantine:true,boundedStartup:true,startupProgress:true,intentPrewarm:true,adaptiveResidency:true,smoothFitRuntime:true,mutationLoopGuard:true,fullChatRepairCoverage:true}},null,2));
