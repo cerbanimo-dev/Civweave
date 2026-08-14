@@ -4,8 +4,10 @@ import {access,readFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const exists=path=>access(new URL(path,root)).then(()=>true,()=>false);
-const [topbar,workspace,hardening,boundary,workerRepair,workerEntry,manifestText,installedEntry,realmHtml,familyLoader,release,pkgText]=await Promise.all([
+const [topbar,campusHtml,faces,workspace,hardening,boundary,workerRepair,workerEntry,manifestText,installedEntry,realmHtml,familyLoader,release,pkgText]=await Promise.all([
   read('public/app/working-campus-topbar-v243.js'),
+  read('public/app/working-campus-v156.html'),
+  read('public/app/shared-chat-face-icons-v255.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/mobile-ai-hardening-v302.js'),
   read('public/app/install-boundary-v146.js'),
@@ -18,18 +20,23 @@ const [topbar,workspace,hardening,boundary,workerRepair,workerEntry,manifestText
   read('VERSION'),
   read('package.json')
 ]);
-for(const source of [topbar,workspace,hardening,boundary,workerRepair,workerEntry,installedEntry,familyLoader])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
+for(const source of [topbar,faces,workspace,hardening,boundary,workerRepair,workerEntry,installedEntry,familyLoader])new Function(source.replace(/^\s*importScripts\([^\n]+\);/gm,''));
 const manifest=JSON.parse(manifestText),pkg=JSON.parse(pkgText),version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 
 check('release and package are coherent',/^\d+\.\d+\.\d+$/.test(version)&&pkg.version===version);
-check('working campus repairs the brand to a known-good cache-safe icon',topbar.includes("const BRAND_ICON='/app/logos/civweave-pwa-192-v247.png'")&&topbar.includes('function repairBrand()'));
+check('working campus source owns the Civweave brand icon before paint',campusHtml.includes('id="brand-home"')&&campusHtml.includes('src="/app/civweave-symbol.svg"'));
+check('topbar respects source-owned branding instead of repairing it',topbar.includes('sourceTruthBrand:true')&&!topbar.includes('function repairBrand()')&&!topbar.includes('cw243ValidBrand')&&!topbar.includes('BRAND_ICON'));
 check('mobile topbar uses two safe columns',topbar.includes('grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important')&&topbar.includes('grid-template-areas:"brand brand" "modes modes" "map downloads" "settings review" "theme theme"!important'));
 check('mobile downloads control remains independently tappable',topbar.includes("DOWNLOADS_BUTTON_ID='cw-working-campus-downloads-v243'")&&topbar.includes("downloadsButton.innerHTML='<span aria-hidden=\"true\">⇩</span><span>Downloads</span>'")&&topbar.includes('grid-area:downloads'));
 check('mobile mode switch can shrink inside viewport',topbar.includes('white-space:normal!important')&&topbar.includes('overflow-wrap:anywhere!important'));
-check('mobile realm cards use a viewport-contained grid',topbar.includes('main.app>.campus')&&topbar.includes('grid-template-columns:repeat(2,minmax(0,1fr))!important'));
+check('mobile diagnostics row remains isolated when enabled',topbar.includes('data-civweave-diagnostics="true"')&&topbar.includes('"diagnostics diagnostics"'));
+check('mobile realm cards use a viewport-contained grid',topbar.includes('main.app>.campus')&&topbar.includes('grid-template-columns:repeat(2,minmax(0,1fr))!important')&&topbar.includes('overscroll-behavior:auto!important'));
+check('mobile realm cards cannot exceed their grid cell',topbar.includes('main.app>.campus .realm-node')&&topbar.includes('max-width:100%!important'));
+check('shared guide surface remains viewport-contained',topbar.includes('#cw-shared-guide-surface-v236')&&topbar.includes('max-width:calc(100vw - 14px)!important'));
 check('very narrow phones stack realm cards',topbar.includes('@media(max-width:420px)')&&topbar.includes('grid-template-columns:1fr!important'));
 check('working campus clips accidental horizontal overflow',topbar.includes('overflow-x:clip'));
+check('chat launcher retains circular fixed geometry without neutral-source rewrite',faces.includes("launcherShape:'circle'")&&faces.includes("launcherPosition:'fixed'")&&faces.includes('launcherDesktopPx:52')&&faces.includes('launcherMobilePx:48')&&faces.includes('launcherNarrowPx:46')&&faces.includes('neutralSourceRewrite:false')&&!faces.includes('OLD_SRC_TO_SYSTEM')&&!faces.includes('new MutationObserver'));
 
 check('v242 owns persona taps directly on pointerdown',workspace.includes('switchControl')&&workspace.includes('data-cw242-window')&&workspace.includes("document.addEventListener('pointerdown',onPointerDownCapture,true)"));
 check('v242 owns full chat send directly at capture phase',workspace.includes('data-persistent-form')&&workspace.includes("document.addEventListener('submit',onSubmitCapture,true)"));
@@ -63,4 +70,4 @@ for(const path of ['/app/persistent-guide-chat-v215.js','/app/persistent-guide-v
 check('service worker retains current chat repair and freeze cache-bust while purging mobile hardening assets',workerEntry.includes('chat-avatar-visible-v346')&&workerEntry.includes('freeze=mobile-chat-freeze-v347')&&workerRepair.includes("const REVISION='chat-avatar-visible-v346'")&&workerRepair.includes("const FREEZE_REVISION='mobile-chat-freeze-v347'")&&workerRepair.includes("const HARDENING_REVISION='mobile-ai-hardening-v302'")&&workerRepair.includes("'/app/mobile-ai-hardening-v302.js'")&&workerRepair.includes("'/app/local-ai/test-pulse-v269.js'"));
 check('worker installs with skipWaiting',workerEntry.includes("self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())}"));
 
-console.log(JSON.stringify({ok:true,version,revision:'mobile-v347-fullscreen-freeze-guard',checks:checks.length,mobile:{topbarRows:'brand / modes / map+downloads / settings+review / theme',realmCards:'2-column then 1-column',dynamicViewport:true,chat:'full-visual-viewport'},chat:{canonicalOwner:'v242',deletedLegacyOwners:3,embeddedComposerDelegates:true,modelFallback:true,freezeGuard:'v347'},localAI:{interruptedTestRecovery:true,downloadsPreserved:true,mobileSafeHealth:true},installedBoot:{updaterFirst:true,boundedWorkerUpdate:true,workerActivation:true,legacyCachePurge:true}},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'mobile-v347-source-truth-branding',checks:checks.length,mobile:{topbarRows:'brand / modes / map+downloads / settings+review / theme',realmCards:'2-column then 1-column',dynamicViewport:true,chat:'full-visual-viewport'},chat:{canonicalOwner:'v242',deletedLegacyOwners:3,embeddedComposerDelegates:true,modelFallback:true,freezeGuard:'v347',launcherSourceTruth:true},localAI:{interruptedTestRecovery:true,downloadsPreserved:true,mobileSafeHealth:true},installedBoot:{updaterFirst:true,boundedWorkerUpdate:true,workerActivation:true,legacyCachePurge:true},presentation:{brandSourceTruth:true,runtimeLogoRepair:false}},null,2));
