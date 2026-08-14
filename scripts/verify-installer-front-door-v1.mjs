@@ -3,11 +3,12 @@ import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const readBytes=path=>readFile(new URL(`../${path}`,import.meta.url));
-const [installerHtml,bridge,offlineStatus,brand,logoSvg,hostSetup,anchor,setup,frontDoor]=await Promise.all([
+const [installerHtml,bridge,offlineStatus,brand,manifest,logoSvg,hostSetup,anchor,setup,frontDoor]=await Promise.all([
   read('public/app/index.html'),
   read('public/app/pwa-install-prompt-v249.js'),
   read('public/app/offline-campus-status-v211.js'),
   read('public/app/civweave-brand.js'),
+  read('public/app/manifest.webmanifest'),
   read('public/app/logos/civweave.svg'),
   read('public/host-setup.html'),
   read('public/host-local-anchor.html'),
@@ -21,6 +22,7 @@ const civweavePrismatic='/app/logos/civweave-prismatic-wordmark-v1.png';
 const cerbanimoMark='/app/logos/cerbanimo-steward-mark-v1.png';
 const frontDoorCss='/app/front-door-prismatic-v301.css';
 const canonicalCivweave='/app/logos/civweave-pwa-512-v247.png';
+const daytimeCivweave='/app/logos/civweave-daytime-512-v1.png';
 const canonicalCerbanimo='/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2';
 const pngSignature=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
 
@@ -60,7 +62,13 @@ assert.ok(anchor.includes('5. Connect steward payouts'),'local Anchor setup must
 assert.ok(hostSetup.includes("localStorage.setItem(STEWARD_KEY,'1')"),'host setup must mark the current browser as steward');
 assert.ok(anchor.includes('href="/host-setup.html"'),'Anchor setup must return to dedicated steward setup');
 assert.ok(setup.includes('Steward setup: ${pagesOrigin}/host-setup.html'),'Cloudflare host provisioning must print the dedicated steward setup URL on the durable Pages underlay');
-assert.ok(brand.includes("const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png'"),'brand layer must use the verified Civweave PNG');
+assert.ok(brand.includes(`const CANONICAL_LOGO='${daytimeCivweave}'`),'brand layer must use the approved daytime Civweave logo');
+assert.ok(manifest.includes('/app/logos/civweave-daytime-192-v1.png'),'PWA manifest must use the cache-distinct daytime 192px launcher icon');
+assert.ok(manifest.includes(daytimeCivweave),'PWA manifest must use the cache-distinct daytime 512px launcher icon');
+assert.ok(manifest.includes('/app/logos/civweave-daytime-maskable-192-v1.png'),'PWA manifest must include a daytime maskable 192px icon');
+assert.ok(manifest.includes('/app/logos/civweave-daytime-maskable-512-v1.png'),'PWA manifest must include a daytime maskable 512px icon');
+assert.ok(!manifest.includes('/app/logos/civweave-pwa-192-v247.png'),'PWA manifest must not regress to the retired heart launcher icon');
+assert.ok(!manifest.includes('/app/logos/civweave-pwa-512-v247.png'),'PWA manifest must not regress to the retired heart launcher icon');
 assert.ok(logoSvg.includes('/app/logos/civweave-pwa-512-v247.png'),'SVG compatibility wrapper must not reference the malformed canonical display PNG');
 
 for(const [name,source] of [['installer',installerHtml],['host steward',hostSetup],['local Anchor',anchor]]){
@@ -81,19 +89,20 @@ assert.ok(frontDoor.includes('body.cw-installer'),'front-door design must cover 
 assert.ok(frontDoor.includes('body.cw-steward'),'front-door design must cover host stewardship');
 assert.ok(frontDoor.includes('body.cw-anchor'),'front-door design must cover local Anchor setup');
 assert.ok(frontDoor.includes('@media(prefers-reduced-motion:reduce)'),'front-door ambient motion must respect reduced-motion preferences');
-assert.ok(frontDoor.includes(canonicalCivweave),'front-door display must bypass the damaged v1 Civweave raster and use the verified canonical logo');
+assert.ok(frontDoor.includes(canonicalCivweave),'front-door display must bypass the damaged v1 Civweave raster and use the verified compatibility logo');
 assert.ok(frontDoor.includes(canonicalCerbanimo),'front-door display must use the verified white-background truecolor Cerbanimo steward mark');
 assert.ok(frontDoor.includes('.cw-platform-logo,.cw-steward-logo{display:none!important}'),'damaged compatibility rasters must not be rendered directly');
 assert.ok(frontDoor.includes("background:#fff url('/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2')"),'Cerbanimo steward mark must render its verified RGB asset on an opaque white field');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installer-front-door-v9-first-input-safe',
+  revision:'installer-front-door-v10-daytime-launcher',
   installedEntry:exactEntry,
   hostSetup:'/host-setup.html',
   launcher:'/app/pwa-install-prompt-v249.js',
   offlineStatus:'/app/offline-campus-status-v211.js',
   firstInputSafe:true,
+  appLauncherLogo:daytimeCivweave,
   compatibilityLogo:'/app/logos/civweave-pwa-512-v247.png',
   civweavePrismatic,
   cerbanimoMark,
