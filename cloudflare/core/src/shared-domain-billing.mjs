@@ -91,7 +91,7 @@ async function fetchHostCapacity(edge, node) {
   const envelope = await response.json().catch(() => ({}));
   if (!response.ok) throw Object.assign(new Error(`The registered host capacity endpoint returned HTTP ${response.status}.`), { status: 503 });
   const capacity = envelope?.capacity && typeof envelope.capacity === 'object' ? envelope.capacity : envelope;
-  const memberCount = Number(capacity?.nodeMembers ?? capacity?.memberCount);
+  const memberCount = Number(capacity?.memberCount ?? capacity?.nodeMembers);
   if (!Number.isSafeInteger(memberCount) || memberCount < 0 || memberCount > SHARED_DOMAIN_HOSTING_POLICY.hostedMaxMembers) {
     throw Object.assign(new Error('The registered host did not report a valid Civweave member count.'), { status: 409 });
   }
