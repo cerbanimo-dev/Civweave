@@ -32,11 +32,18 @@ for(const token of [
   'wifiDirect:false',
   'object is outside this device audience',
   'credential:owner.publicKey',
+  'nonce:session.localNonce',
+  'identityProofValue',
+  "type:'identity-proof'",
+  'verify(session.peerCredential',
+  'peer proof rejected',
   'peer identity mismatch',
   "emit('peer-incompatible'",
   'verifiedGroupDelivery:false',
   'session.peerGroups=[]',
   'hopLimit:Number(object.hopLimit)||0',
+  "if(session.peerProtocol!==PROTOCOL)return;const object=await getObject(message.objectId)",
+  "['direct','group'].includes(object.consent)&&!session.peerVerified",
   "session.peerProtocol=declaredProtocol||'legacy'",
   "type:'objects',items"
 ])assert(mesh.includes(token),`Foreground mesh missing ${token}.`);
@@ -51,7 +58,7 @@ for(const phrase of [
   'no Android core, native companion, Wi-Fi Direct dependency, or always-on daemon in v1',
   'Sleeping-phone/background delivery is a later transport problem',
   'Signed object fields are immutable in transit',
-  'Direct payloads are endpoint-only and are sent only after the peer node ID is verified against its public credential',
+  'Direct payloads are endpoint-only and are sent only after the peer node ID is derived from its public credential and the peer proves possession of the corresponding private key by signing a fresh session challenge',
   'Group payloads are not automatically transferred in v1',
   'Direct/group payloads are not gateway-relayed by the foreground mesh',
   'Sleeping phones later'
