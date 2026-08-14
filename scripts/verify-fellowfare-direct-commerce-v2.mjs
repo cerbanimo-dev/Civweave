@@ -67,15 +67,25 @@ assert.match(feeSettlement, /destination: node\.connected_account_id/);
 assert.match(feeSettlement, /50-host-steward-50-cerbanimo/);
 assert.match(feeSettlement, /reverseHostTransfer/);
 assert.match(feeSettlement, /host_reversed_cents/);
+assert.match(feeSettlement, /host_transferred_cents/);
+assert.match(feeSettlement, /availableBalanceError/);
+assert.match(feeSettlement, /status='pending-funds'/);
+assert.match(feeSettlement, /retryPendingFellowFareServiceFees/);
 assert.match(migration, /CREATE TABLE IF NOT EXISTS money_edge_fellowfare_service_fees/);
 assert.match(migration, /host_share_cents INTEGER NOT NULL/);
 assert.match(migration, /cerbanimo_share_cents INTEGER NOT NULL/);
+assert.match(migration, /host_transferred_cents INTEGER NOT NULL DEFAULT 0/);
+assert.match(migration, /settlement_error TEXT/);
+assert.match(migration, /WHERE status = 'pending-funds'/);
 assert.match(money, /event\.type === 'application_fee\.created'/);
 assert.match(money, /event\.type === 'application_fee\.refunded'/);
+assert.match(money, /event\.type === 'balance\.available'/);
+assert.match(money, /retryPendingFellowFareServiceFees\(this\)/);
 assert.match(money, /serviceLearningDefaultPlatformFeeBps: FELLOWFARE_DEFAULT_SERVICE_FEE_BPS/);
 assert.match(money, /serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo'/);
 assert.match(money, /serviceLearningHostStewardShareBpsOfFee: FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS/);
 assert.match(money, /serviceLearningCerbanimoShareBpsOfFee: FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS/);
+assert.match(money, /serviceLearningHostSettlement: 'application-fee-event-plus-balance-available-retry'/);
 
 // The new direct rail is production-routed separately. The old platform-charge
 // marketplace API remains intentionally dead.
@@ -139,6 +149,7 @@ console.log(JSON.stringify({
     applicationFeeSplit: '50-host-steward-50-cerbanimo',
     hostStewardShareBpsOfFee: 5000,
     cerbanimoShareBpsOfFee: 5000,
+    hostSettlement: 'application-fee-event-plus-balance-available-retry',
     platformCollectsGross: false,
     platformRoutesSellerProceeds: false
   }
