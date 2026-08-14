@@ -10,6 +10,8 @@ const paths = [
   'cloudflare/account-edge/src/recovery-entry-v9.mjs',
   'cloudflare/account-edge/src/recovery-entry-v10.mjs',
   'cloudflare/account-edge/wrangler.jsonc',
+  'cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v4.mjs',
   'cloudflare/node-cloud/wrangler.jsonc',
   'cloudflare/recovery-relay/src/index.mjs',
   'cloudflare/recovery-relay/wrangler.jsonc',
@@ -42,6 +44,13 @@ assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /offlineRecoveryRemaining/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /recoveryMethod: 'offline-code'/);
 assert.doesNotMatch(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /storage\.put\([^\n]*codes/i, 'plaintext offline codes must not be persisted');
+assert.match(source['cloudflare/node-cloud/src/server-ai-entry-v4.mjs'], /cloud-node-recovery-v1\.mjs/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /HubAccountRecoveryOfflineService/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /handleHubAccountRecoveryInbound/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /recovery\/codes\/ack/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /civweave\.pages\.dev\/app\/recovery-relay-v1\.json/);
+assert.match(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /offline-code-only/);
+assert.doesNotMatch(source['cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs'], /HUB_RECOVERY_INBOUND_EMAIL/);
 assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /"name": "civweave-recovery-relay"/);
 assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /CivweaveRecoveryProofRelay/);
 assert.doesNotMatch(source['cloudflare/recovery-relay/wrangler.jsonc'], /RECOVERY_MAILBOX/);
@@ -82,12 +91,15 @@ assert.match(source['public/app/installer-online-fallback-v225.js'], /retired:tr
 assert.match(source['public/app/installer-online-fallback-v225.js'], /browserRuntime:false/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryKit:packet\.recoveryKit/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryMethod/);
+assert.match(source['public/app/hub-recovery-api-v1.js'], /cloudFabric=\/\^civweave-node-cloud\\\./);
+assert.match(source['public/app/hub-recovery-api-v1.js'], /`\/n\/\$\{encodeURIComponent\(n\)\}\/api\/account\//);
+assert.match(source['public/app/hub-recovery-api-v1.js'], /`\/nodes\/\$\{encodeURIComponent\(n\)\}\/api\/account\//);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Save these recovery codes now/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Use a saved recovery code/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Add a recovery email before creating this Hub account/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /not written into your Passport or exposed to FellowFare/);
 for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {const result = spawnSync(process.execPath, ['--check', path], { encoding: 'utf8' });assert.equal(result.status, 0, `${path} syntax failed: ${result.stderr || result.stdout}`);}
 
-const recoveryNoStripeSurfaces = ['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs','cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs','cloudflare/account-edge/src/recovery-entry-v10.mjs','cloudflare/account-edge/wrangler.jsonc','cloudflare/recovery-relay/src/index.mjs','cloudflare/recovery-relay/wrangler.jsonc','scripts/resolve-cloudflare-recovery-zone-v1.mjs','public/app/hub-recovery-api-v1.js','public/app/hub-recovery-ui-v1.js','public/app/hub-delivery-intent-v1.js'];
+const recoveryNoStripeSurfaces = ['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs','cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs','cloudflare/account-edge/src/recovery-entry-v10.mjs','cloudflare/account-edge/wrangler.jsonc','cloudflare/node-cloud/src/cloud-node-recovery-v1.mjs','cloudflare/recovery-relay/src/index.mjs','cloudflare/recovery-relay/wrangler.jsonc','scripts/resolve-cloudflare-recovery-zone-v1.mjs','public/app/hub-recovery-api-v1.js','public/app/hub-recovery-ui-v1.js','public/app/hub-delivery-intent-v1.js'];
 for (const path of recoveryNoStripeSurfaces) assert.doesNotMatch(source[path], /stripe/i, `${path} must not add Stripe as a Hub recovery dependency`);
-console.log(JSON.stringify({ok:true,schema:'civweave.hub-recovery-wiring-check.v8-install-only',freeTierInboundProof:true,offlineRecoveryCodes:true,offlineCodeCount:8,crossAccountRelay:true,relayDiscovery:'canonical-pages',ownedZoneOnly:true,unrelatedDomainGuard:true,relayStoresIdentity:false,browserRuntime:false}));
+console.log(JSON.stringify({ok:true,schema:'civweave.hub-recovery-wiring-check.v9-cloud-fabric',freeTierInboundProof:true,offlineRecoveryCodes:true,offlineCodeCount:8,crossAccountRelay:true,cloudFabricRecovery:true,relayDiscovery:'canonical-pages',ownedZoneOnly:true,unrelatedDomainGuard:true,relayStoresIdentity:false,browserRuntime:false}));
