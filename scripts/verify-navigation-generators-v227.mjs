@@ -9,8 +9,8 @@ const version=versionText.trim();
 const manifest=JSON.parse(manifestText);
 new Function(installedEntry);new Function(installedLaunch);new Function(repairOnly);new Function(boundary);
 for(const token of[
-  `importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227')`,
-  `importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1')`,
+  "importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227')",
+  "importScripts('/service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1')",
   "importScripts('/service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery')",
   "importScripts('/service-worker-installer-state-v280.js?v=installer-state-machines-v280')",
   "importScripts('/service-worker-shell-integrity-v281.js?v=shell-integrity-v281')",
