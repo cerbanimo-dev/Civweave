@@ -2,13 +2,15 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [version, router, settings, mesh, spine, cloudEntry, accountEdge, wrangler, offlineText] = await Promise.all([
+const [version, router, settings, mesh, spine, cloudEntry, communityEntry, capacityExtension, accountEdge, wrangler, offlineText] = await Promise.all([
   'VERSION',
   'public/app/server-ai-router-v301.js',
   'public/app/server-ai-settings-v301.js',
   'public/app/node-ai-mesh-v1.js',
   'public/app/fast-interactive-runtime-v192.js',
   'cloudflare/node-cloud/src/server-ai-entry-v1.mjs',
+  'cloudflare/node-cloud/src/server-ai-entry-v3.mjs',
+  'cloudflare/node-cloud/src/capacity-community-extension-v1.mjs',
   'cloudflare/account-edge/src/index.mjs',
   'cloudflare/node-cloud/wrangler.jsonc',
   'public/app/offline-package-v208.json',
@@ -79,16 +81,29 @@ assert.match(cloudEntry, /input\.allowLifetimeCredits === true/);
 assert.match(cloudEntry, /@cf\/meta\/llama-3\.1-8b-instruct-fast/);
 assert.match(cloudEntry, /x-civweave-node-signature/);
 
+assert.match(communityEntry, /minimumCommunityShareBps:100/);
+assert.match(communityEntry, /maximumCommunityShareBps:500/);
+assert.match(communityEntry, /defaultCommunityShareBps:100/);
+assert.match(communityEntry, /node-equal/);
+assert.match(communityEntry, /\/topups\/share-preference/);
+assert.match(capacityExtension, /topup-sharing:/);
+assert.match(capacityExtension, /communityTopupReserveMicrocents/);
+assert.match(capacityExtension, /activePendingPaidCount/);
+assert.match(capacityExtension, /systemCreditCents/);
+
 assert.match(accountEdge, /node-cloud\/src\/server-ai-entry-v1\.mjs/);
-assert.match(wrangler, /"main": "src\/server-ai-entry-v2\.mjs"/);
+assert.match(wrangler, /"main": "src\/server-ai-entry-v3\.mjs"/);
 
 console.log(JSON.stringify({
   ok: true,
   version: version.trim(),
-  revision: 'server-ai-commerce-v301',
+  revision: 'server-ai-commerce-v301-community-dividend',
   routeOrder: ['device-local', 'server-local', 'cloudflare-workers-ai'],
   memberships: true,
   topups: true,
+  communityTopupMinimumPercent: 1,
+  communityTopupMaximumPercent: 5,
+  nodeEqualTopups: true,
   cloudflareGeneration: true,
   localFailureFailover: true,
   incompleteLocalResultFailover: true,
