@@ -14,7 +14,7 @@ importScripts('/service-worker-offline-v211-override.js?v=offline-campus-current
 importScripts('/service-worker-campus-completion-v246.js?v=campus-retired-completion-v246');
 importScripts('/service-worker-release-coherence-v220.js?v=release-coherence-v226');
 importScripts('/service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224');
-importScripts('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225');
+importScripts('/service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1');
 importScripts('/service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227');
 importScripts('/service-worker-chat-repair-v245.js?v=chat-avatar-visible-v346&purge=chat-avatar-visible-v346');
 // Non-executable legacy audit marker only: importScripts('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343');
