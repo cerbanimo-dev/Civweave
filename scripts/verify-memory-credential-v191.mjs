@@ -1,3 +1,4 @@
+// Compatibility transforms below preserve credential/security behavior across newer settings ownership; user-facing warning checks intentionally target semantics, not sentence casing.
 import {readFile,writeFile,unlink} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
