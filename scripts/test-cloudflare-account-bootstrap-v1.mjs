@@ -95,7 +95,9 @@ assert.ok(accountWorkerSource.includes('legacyAccountEdge.fetch'), 'non-generati
 assert.ok(nodeFabricSource.includes("url.pathname === '/api/fabric/location'"));
 assert.ok(nodeFabricSource.includes("url.pathname === '/internal/location'"));
 assert.ok(nodeFabricSource.includes('civweave.hub-location-owner.v1'));
-assert.ok(nodeFabricSource.includes('coordinateDecimals: 3'));
+assert.ok(nodeFabricSource.includes('coordinateDecimals = precise ? 6 : 3'));
+assert.ok(nodeFabricSource.includes('latitude: Number(latitude.toFixed(coordinateDecimals))'));
+assert.ok(nodeFabricSource.includes('coordinateDecimals,'));
 
 assert.ok(setupSource.includes('Provisioning contract:'));
 assert.ok(setupSource.includes('Worker + 3 starter Durable Object nodes'));
