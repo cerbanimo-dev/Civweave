@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const [bridge,installer,manifestText,installedEntryHtml,installedEntryRuntime]=await Promise.all([
-  read('public/app/pwa-install-prompt-v247.js'),
+  read('public/app/pwa-install-prompt-v248.js'),
   read('public/install-v130.js'),
   read('public/app/manifest.webmanifest'),
   read('public/app/installed-entry-v146.html'),
@@ -18,15 +18,19 @@ assert.equal(manifest.start_url,'/app/installed-entry-v146.html?installed=1','fr
 assert.ok(bridge.includes(`const ENTRY='${exactEntry}'`),'front-door bridge must use the exact installed entry');
 assert.ok(installer.includes(`const ENTRY = '${exactEntry}';`),'fallback installer must use the exact installed entry');
 assert.ok(!bridge.includes(`const ENTRY='${staleInstallerEntry}'`),'front-door bridge must never point installed launch back at /app/');
-assert.ok(!installer.includes(`const ENTRY = '${staleInstallerEntry}';`),'fallback installer must never point installed launch back at /app/');
+assert.ok(!installer.includes(`const ENTRY = '${staleInstallerEntry}'`),'fallback installer must never point installed launch back at /app/');
 
 const bridgePrepare=bridge.indexOf('await installer.prepareShell({manual:true})');
 const bridgeReadyGate=bridge.indexOf('if(!installer.shellReady)',bridgePrepare);
-const bridgePrompt=bridge.indexOf('await prompt.prompt()',bridgePrepare);
+const bridgePromptWait=bridge.indexOf('const prompt=promptEvent||await waitForPrompt()',bridgeReadyGate);
+const bridgePrompt=bridge.indexOf('await prompt.prompt()',bridgePromptWait);
 assert.ok(bridgePrepare>=0,'native install bridge must prepare the lightweight shell');
-assert.ok(bridgeReadyGate>bridgePrepare&&bridgeReadyGate<bridgePrompt,'native prompt must be gated on confirmed shell readiness');
-assert.ok(bridgePrompt>bridgePrepare,'native prompt must open only after shell preparation');
+assert.ok(bridgeReadyGate>bridgePrepare,'native prompt must be gated on confirmed shell readiness');
+assert.ok(bridgePromptWait>bridgeReadyGate,'bridge must wait for beforeinstallprompt only after the shell is ready');
+assert.ok(bridgePrompt>bridgePromptWait,'native prompt must open only after shell preparation and prompt availability');
+assert.ok(!bridge.slice(0,bridgePrepare).includes('if(!prompt)'),'front-door bridge must never require a prompt before preparing the shell');
 assert.ok(bridge.includes("installSequencingPolicy:'prepare-shell-before-native-prompt'"),'bridge must publish its shell-first sequencing contract');
+assert.ok(bridge.includes("promptAvailabilityPolicy:'prepare-shell-then-wait-for-beforeinstallprompt'"),'bridge must publish the no-deadlock prompt availability contract');
 
 const fallbackPrepare=installer.indexOf('await prepareShell({ manual: true });');
 const fallbackPrompt=installer.indexOf('await prompt.prompt();',fallbackPrepare);
@@ -42,9 +46,10 @@ assert.ok(installedEntryRuntime.includes("if(!installedDisplay()&&!localDevelope
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'fresh-install-paths-v1',
+  revision:'fresh-install-paths-v2-shell-first-prompt-wait',
   exactEntry,
   shellFirst:true,
+  waitsForPromptAfterShell:true,
   browserInstallStaysInstallerOnly:true,
   staleAppInstallerEntry:false
 },null,2));
