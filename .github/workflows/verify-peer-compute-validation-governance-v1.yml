@@ -1,0 +1,36 @@
+name: Verify peer compute validation governance
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/peer-local-plan-borrow-v1.js'
+      - 'public/app/peer-local-plan-borrow-ui-v1.js'
+      - 'public/app/validation-labor-rewards-v1.js'
+      - 'public/app/proposal-voting-gate-v2.js'
+      - 'public/app/node-ai-mesh-v1.js'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/verify-peer-compute-validation-governance-v1.mjs'
+      - '.github/workflows/verify-peer-compute-validation-governance-v1.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'public/app/peer-local-plan-borrow-v1.js'
+      - 'public/app/peer-local-plan-borrow-ui-v1.js'
+      - 'public/app/validation-labor-rewards-v1.js'
+      - 'public/app/proposal-voting-gate-v2.js'
+      - 'public/app/node-ai-mesh-v1.js'
+      - 'public/app/offline-package-v208.json'
+      - 'scripts/verify-peer-compute-validation-governance-v1.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/verify-peer-compute-validation-governance-v1.mjs
