@@ -38,6 +38,23 @@ for(const required of [
 if(source.includes('function allowed(){return installedDisplay()||developer()||embedded()}')){
   throw new Error('Embedded browser runtime authorization survived normalization.');
 }
-
 await writeFile(path,source);
-console.log(JSON.stringify({ok:true,path,policy:'installed-display-only-v1',embeddedRuntime:false},null,2));
+
+const repairVerifierPath='scripts/verify-shell-self-repair-v225.mjs';
+let repairVerifier=await readFile(repairVerifierPath,'utf8');
+repairVerifier=repairVerifier.replace(
+  "assert(indexHtml.includes('/app/installer-repair-only-v1.js?v=1.0.141-install-only-pwa-boundary'),'Installer does not load repair-only recovery.');",
+  "assert(indexHtml.includes(`/app/installer-repair-only-v1.js?v=${version}-install-only-pwa-boundary`),'Installer does not load repair-only recovery.');"
+);
+if(repairVerifier.includes('1.0.141-install-only-pwa-boundary')){
+  throw new Error('Shell self-repair verifier still hard-codes the retired 1.0.141 release.');
+}
+await writeFile(repairVerifierPath,repairVerifier);
+
+console.log(JSON.stringify({
+  ok:true,
+  path,
+  policy:'installed-display-only-v1',
+  embeddedRuntime:false,
+  repairVerifier:'release-dynamic'
+},null,2));
