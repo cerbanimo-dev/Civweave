@@ -41,14 +41,14 @@ const boundaryIndex=campus.indexOf('/app/install-boundary-v146.js');
 const campusRuntimeIndex=campus.indexOf('/app/working-campus-v156.js');
 assert(guardIndex>=0,'Working Campus no longer loads the return guard.');
 assert(guardIndex<lifecycleIndex&&guardIndex<boundaryIndex&&guardIndex<campusRuntimeIndex,'Return guard must load before every canonical lifecycle/runtime teardown owner.');
-assert(campus.includes('/app/install-boundary-v146.js?v=chat-convergence-v250-navigation-lifecycle-v424'),'Working Campus lost the navigation-safe boundary cache identity.');
+assert(campus.includes('/app/install-boundary-v146.js?v=chat-convergence-v250-navigation-lifecycle-v424')||campus.includes('/app/install-boundary-v146.js?v=chat-convergence-v250-navigation-lifecycle-v424-install-only-pwa-v1'),'Working Campus lost the navigation-safe boundary cache identity.');
 assert(campus.includes(`Civweave Working Campus · v${version}`)&&campus.includes(`<b class="version-chip">v${version}</b>`),'Working Campus visible release is stale.');
 
 assert(workerCore.includes(`const VERSION = '${version}';`),'Service-worker core release is stale.');
 assert.equal(integrity.version,version,'Shell-integrity manifest and worker core release must match or worker installation can fail.');
 assert(workerCore.includes("const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';"),'Worker cache epoch lost v425.');
 assert(workerCore.includes("'/app/working-campus-return-guard-v425.js'"),'Return guard is not in the shell precache graph.');
-assert(workerWrapper.includes(`service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425`),'Worker wrapper no longer forces a v425 core refresh.');
+assert(workerWrapper.includes(`service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1`),'Worker wrapper no longer forces the install-only shell refresh.');
 
 assert(topbar.includes("target.searchParams.set('manage','downloads')")&&topbar.includes('location.assign(downloadsUrl())'),'Downloads navigation contract drifted; update the return test with any intentional navigation change.');
 assert(lifecycle.includes('function stopOnPageHide(event){if(!event?.persisted)active=false}'),'Document lifecycle once again tears down BFCache pages.');
@@ -58,7 +58,7 @@ assert(lifecycle.includes("settingsEntryOwner:'settings-gateway-v317'")&&lifecyc
 assert(!releaseVerifier.includes("await import('./sync-release-version-assets.mjs')"),'Release verifier self-heals the tree before verifying it.');
 assert(!releaseVerifier.includes("await import('./sync-release-coherence-v220.mjs')"),'Release verifier still mutates coherence before verifying it.');
 assert(releaseVerifier.includes('committedTreeVerified:true')&&releaseVerifier.includes('verifierMutation:false'),'Read-only release verification contract is missing.');
-for(const token of ['working-campus-return-v425',"const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';","'/app/working-campus-return-guard-v425.js'"])assert(syncSource.includes(token),`Release sync would erase ${token}.`);
+for(const token of ['working-campus-return-v425','install-only-pwa-v1',"const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';","'/app/working-campus-return-guard-v425.js'"])assert(syncSource.includes(token),`Release sync would erase ${token}.`);
 
 const windowListeners=new Map(),documentListeners=new Map();
 const listen=(map,type,fn)=>{const list=map.get(type)||[];list.push(fn);map.set(type,list)};
@@ -95,4 +95,4 @@ pagehide({persisted:false,stopImmediatePropagation(){stopped+=1}});
 assert.equal(stopped,1,'Non-persisted navigation was incorrectly quarantined.');
 assert.equal(replaceCalls,0,'Healthy guard simulation unexpectedly reloaded the campus.');
 
-console.log(JSON.stringify({ok:true,version,revision:'working-campus-return-v425-v317-lifecycle',committedTreeReadOnly:true,workerIntegrityReleaseMatch:true,bfcachePagehideQuarantined:true,oneShotRecovery:true,visibleFailsafe:true,downloadsReturnCovered:true,settingsOwner:'settings-gateway-v317'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'working-campus-return-v425-v317-lifecycle-install-only-pwa-v1',committedTreeReadOnly:true,workerIntegrityReleaseMatch:true,bfcachePagehideQuarantined:true,oneShotRecovery:true,visibleFailsafe:true,downloadsReturnCovered:true,settingsOwner:'settings-gateway-v317',browserRuntime:false},null,2));
