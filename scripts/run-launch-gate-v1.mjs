@@ -8,6 +8,7 @@ const commands = [
   ['node',['--check','cloudflare/account-edge/src/index.mjs']],
   ['node',['scripts/test-user-ai-pool-routing-v2.mjs']],
   ['node',['scripts/verify-user-ai-pools-v302.mjs']],
+  ['node',['scripts/verify-legal-consent-v1.mjs']],
   ['node',['scripts/verify-pwa-cold-launch-recovery-v426.mjs']],
   ['node',['scripts/verify-local-ai-smooth-fit-v314.mjs']],
   ['python3',['scripts/civweave_d1_backup.py','--help']],
