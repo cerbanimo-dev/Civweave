@@ -61,6 +61,24 @@ jobs:
             if(next!==source)await writeFile(path,next);
           }
 
+          const installerPath='public/app/index.html';
+          let installer=await readFile(installerPath,'utf8');
+          installer=installer.replace('pwa-install-prompt-v247.js?v=front-door-v2-open-after-install','pwa-install-prompt-v247.js?v=front-door-v3-install-only-runtime');
+          installer=installer.replace(
+            'Install the shell. Open Civweave immediately. Download offline files only when you choose.</h2><p>The installer does no large background work on arrival. Install prepares the small PWA shell. The offline campus is a separate resumable code download, while large pictures, media, knowledge packs, and local AI models arrive on demand.',
+            'Install the shell. Then open Civweave as an installed app.</h2><p>The installer does no large background work on arrival. Install prepares the small PWA shell. The Civweave campus itself runs only from the installed app, while the offline campus remains a separate resumable code download and large pictures, media, knowledge packs, and local AI models arrive on demand.'
+          );
+          installer=installer.replace(
+            '<article><b>2</b><strong>Open Civweave</strong><span>Launch as soon as installation completes.</span></article>',
+            '<article><b>2</b><strong>Open installed app</strong><span>Launch Civweave from your device app launcher.</span></article>'
+          );
+          installer=installer.replace(/<a id="open-online-campus-v225" class="secondary" href="\/app\/working-campus-v156\.html\?installed=1&amp;launch=online">Browser fallback<\/a>/,'');
+          installer=installer.replace(
+            '/app/installer-online-fallback-v225.js?v=shell-self-repair-v225',
+            `/app/installer-repair-only-v1.js?v=${version}-install-only-pwa-boundary`
+          );
+          await writeFile(installerPath,installer);
+
           const linksPath='public/.well-known/assetlinks.json';
           const links=JSON.parse(await readFile(linksPath,'utf8'));
           const canonicalSite='https://civweave.cc/app/manifest.webmanifest';
