@@ -13,7 +13,9 @@ on:
       - 'cloudflare/node-cloud/src/index.mjs'
       - 'public/app/local-object-mesh-v146.js'
       - 'public/app/host-node-session-v1.js'
+      - 'scripts/test-hub-location-onboarding-v1.mjs'
       - 'scripts/verify-hub-map-locality-ledger-v1.mjs'
+      - 'docs/architecture/locality-gossip-ledger-v1.md'
       - '.github/workflows/verify-hub-map-locality-ledger-v1.yml'
   push:
     branches: ['agent/hub-map-locality-ledger-v1']
@@ -33,6 +35,10 @@ jobs:
         run: |
           node --check public/app/civweave-hub-map-v1.js
           node --check public/app/civweave-locality-gossip-v1.js
+          node --check cloudflare/node-cloud/src/index.mjs
+          node --check scripts/test-hub-location-onboarding-v1.mjs
           node --check scripts/verify-hub-map-locality-ledger-v1.mjs
+      - name: Test Steward Hub location publication
+        run: node scripts/test-hub-location-onboarding-v1.mjs
       - name: Verify end-to-end Hub Map contract
         run: node scripts/verify-hub-map-locality-ledger-v1.mjs
