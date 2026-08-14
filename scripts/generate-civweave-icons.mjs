@@ -25,12 +25,14 @@ async function main(){
     await writeIcon(`civweave-icon-${size}.png`,buffer);
   }
   await writeIcon('civweave-app-icon.png',rendered.get(1024));
+  await writeIcon('civweave-canonical.png',rendered.get(1024));
   for(const size of [192,512])await writeIcon(`civweave-icon-maskable-${size}.png`,rendered.get(size));
   await writeIcon('civweave-adaptive-foreground-512.png',rendered.get(512));
 
-  // Compatibility tombstones only. No live source may point at these names,
-  // but old installed workers can still request them during upgrade. They now
-  // return the current daytime artwork, never the retired heart logo.
+  // Compatibility aliases remain addressable during the installed-PWA migration
+  // window because an old worker can still request these exact URLs. They are no
+  // longer alternate artwork: every supported build overwrites their bytes with
+  // the approved daytime logo, so stale requests cannot resurrect the heart mark.
   await writeIcon('civweave-pwa-192-v247.png',rendered.get(192));
   await writeIcon('civweave-pwa-512-v247.png',rendered.get(512));
   await writeIcon('civweave-pwa-maskable-512-v247.png',rendered.get(512));
@@ -45,6 +47,7 @@ async function main(){
     files:[
       ...ICON_SIZES.map(size=>`civweave-icon-${size}.png`),
       'civweave-app-icon.png',
+      'civweave-canonical.png',
       'civweave-icon-maskable-192.png',
       'civweave-icon-maskable-512.png',
       'civweave-adaptive-foreground-512.png'
@@ -56,7 +59,7 @@ async function main(){
     ]
   };
   await fsp.writeFile(path.join(logoDir,'civweave-icon-generation.json'),JSON.stringify(summary,null,2));
-  console.log(`[Civweave] Generated ${summary.files.length} launcher assets from the approved daytime logo; retired PWA aliases were overwritten with the same current pixels.`);
+  console.log(`[Civweave] Generated ${summary.files.length} launcher/compatibility assets from the approved daytime logo; retired logo byte paths now resolve to current artwork.`);
 }
 
 main().catch(error=>{
