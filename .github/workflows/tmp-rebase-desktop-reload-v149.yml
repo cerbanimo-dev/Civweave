@@ -1,0 +1,56 @@
+name: Temporary rebase desktop reload v1.0.149
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  rebase-and-materialize:
+    if: github.head_ref == 'agent/fix-desktop-home-reload-storm'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Merge current main and materialize 1.0.149
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts
+          premerge="$(git rev-parse HEAD)"
+          git config user.name 'civweave-release-materializer'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git merge --no-edit -X theirs origin/main
+
+          # Reapply only the desktop reload repair and the CI guards it exposed.
+          git checkout "$premerge" -- \
+            public/app/working-campus-return-guard-v425.js \
+            scripts/build-service-worker-v211.mjs \
+            scripts/smoke-installer-recovery-v206.mjs \
+            scripts/verify-five-system-navigation-v227.mjs
+
+          printf '1.0.149\n' > VERSION
+          node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('package.json','utf8')); p.version='1.0.149'; fs.writeFileSync('package.json', JSON.stringify(p,null,2)+'\n')"
+          node scripts/materialize-canonical-release.mjs
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+          node --check public/app/working-campus-return-guard-v425.js
+          node --check scripts/verify-five-system-navigation-v227.mjs
+          node scripts/verify-five-system-navigation-v227.mjs
+          node scripts/verify-working-campus-return-v425.mjs
+
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m 'Rebase desktop reload repair onto Civweave 1.0.149'
+          fi
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
