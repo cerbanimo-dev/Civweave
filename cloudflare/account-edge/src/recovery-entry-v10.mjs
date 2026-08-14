@@ -4,9 +4,20 @@ import { HubAccountRecoveryOfflineService } from './hub-account-recovery-offline
 const DISCOVERY_URL = 'https://civweave.pages.dev/app/recovery-relay-v1.json';
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
 const CACHE_MS = 5 * 60 * 1000;
+const ACCOUNT_HEADERS = Object.freeze({
+  'cache-control': 'no-store',
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'POST, OPTIONS',
+  'access-control-allow-headers': 'content-type, x-civweave-node-id',
+});
 let cachedRecovery = null;
 let cachedAt = 0;
 
+function nodeIdFor(request) {
+  const url = new URL(request.url);
+  return clean(request.headers.get('x-civweave-node-id') || url.searchParams.get('nodeId'), 180)
+    .toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+}
 function validMailbox(value) {
   const mailbox = clean(value, 320).toLowerCase();
   if (!mailbox) return '';
@@ -79,6 +90,25 @@ export class CivweaveAccountNode extends BaseNode {
       return packet;
     };
     return service;
+  }
+
+  async fetch(request) {
+    const url = new URL(request.url);
+    if (request.method === 'POST' && url.pathname === '/api/account/recovery/codes/ack') {
+      const input = await request.json().catch(() => ({}));
+      const nodeId = nodeIdFor(request);
+      try {
+        await this.verifyMemberLogin(nodeId, clean(input.userId, 180), clean(input.credential, 400));
+        const result = await this.recoveryService().acknowledgeOfflineRecovery(clean(input.userId, 180));
+        return Response.json(result, { headers: ACCOUNT_HEADERS });
+      } catch (error) {
+        return Response.json({ ok: false, error: String(error?.message || error) }, {
+          status: Number.isSafeInteger(error?.status) ? error.status : 500,
+          headers: ACCOUNT_HEADERS,
+        });
+      }
+    }
+    return super.fetch(request);
   }
 }
 
