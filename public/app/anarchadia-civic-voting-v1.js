@@ -41,6 +41,11 @@ export async function castQuadraticAllocation(ballot,credential,privateKey,alloc
   const castAt=now(),payload=allocationPayload(ballot,credential.id,rows,castAt),record={...payload,cost,publicKey:credential.publicKey,signature:await signPayload(privateKey,payload)};
   ballot.allocations=ballot.allocations.filter(x=>x.actorId!==credential.id);ballot.allocations.push(record);return record;
 }
+export async function verifyQuadraticAllocation(ballot,record){
+  if(!record||record.schema!==QUADRATIC_ALLOCATION_SCHEMA||record.ballotId!==ballot.id||record.subjectRevisionHash!==ballot.subjectRevisionHash||record.snapshotHash!==ballot.snapshotHash)return false;
+  const voter=ballot.electorate.find(x=>x.actorId===record.actorId);if(!voter||JSON.stringify(voter.publicKey)!==JSON.stringify(record.publicKey))return false;
+  const payload=allocationPayload(ballot,record.actorId,record.allocations,record.castAt);return verifySignature(record.publicKey,payload,record.signature);
+}
 export function tallyQuadraticPolicyBallot(ballot,delegations=[]){
   const totals=Object.fromEntries(ballot.options.map(x=>[x,0])),represented=[];
   const direct=new Map(ballot.allocations.map(x=>[x.actorId,x]));
@@ -54,4 +59,11 @@ export function tallyQuadraticPolicyBallot(ballot,delegations=[]){
   const participation=ballot.electorate.length?represented.length/ballot.electorate.length:0;
   const winner=Object.entries(totals).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0]?.[0]||null;
   return {totals,represented,participation,quorumMet:participation>=ballot.procedure.quorum,winner};
+}
+
+export async function closeQuadraticPolicyBallot(ballot,delegations=[]){
+  if(ballot.status!=='open')return ballot.outcome;
+  for(const record of ballot.allocations)if(!await verifyQuadraticAllocation(ballot,record))throw new Error(`Invalid quadratic allocation signature for ${record.actorId}.`);
+  const tally=tallyQuadraticPolicyBallot(ballot,delegations);if(!tally.quorumMet)throw new Error('Quadratic policy ballot quorum has not been reached.');
+  ballot.status='closed';ballot.closedAt=now();ballot.outcome={...tally,closedAt:ballot.closedAt};return ballot.outcome;
 }
