@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { createCodeAutomationPlan } from './lib/code-automation-core.mjs';
 
 const API = 'https://api.github.com';
 const REPO = process.env.GITHUB_REPOSITORY || 'cerbanimo-dev/Civweave';
@@ -7,13 +8,14 @@ const MODE = process.env.FEEDBACK_BATCH_MODE || 'discern';
 const NOW = new Date(process.env.FEEDBACK_NOW || Date.now());
 const VETO_HOURS = Math.max(1, Math.min(168, Number(process.env.FEEDBACK_VETO_HOURS || 12)));
 const DEV_BRANCH = process.env.FEEDBACK_DEV_BRANCH || 'dev';
-const MAIL_BATCH_URL = process.env.CIVWEAVE_FEEDBACK_BATCH_URL || 'https://mail.civweave.cc/api/feedback/batch';
+const MAIL_ORIGIN = String(process.env.CIVWEAVE_FEEDBACK_MAIL_ORIGIN || 'https://mail.civweave.cc').replace(/\/$/, '');
 const MAIL_TOKEN = process.env.CIVWEAVE_FEEDBACK_BATCH_TOKEN || '';
 const MODEL_ENDPOINT = process.env.CIVWEAVE_FEEDBACK_DISCERN_ENDPOINT || '';
 const LABEL_BATCH = 'feedback-batch';
 const LABEL_VETO = 'feedback-veto';
 const LABEL_HUMAN = 'feedback-human-review';
 const LABEL_READY = 'feedback-ready-for-dev';
+const LABEL_DISPATCHED = 'feedback-dispatched';
 
 const fatal = message => { throw new Error(message); };
 const jsonHeaders = () => ({
@@ -25,15 +27,19 @@ const jsonHeaders = () => ({
 async function gh(path, init = {}) {
   if (!TOKEN) fatal('GITHUB_TOKEN is required.');
   const response = await fetch(`${API}${path}`, { ...init, headers: { ...jsonHeaders(), ...(init.headers || {}) } });
-  const packet = await response.json().catch(() => ({}));
+  const packet = response.status === 204 ? {} : await response.json().catch(() => ({}));
   if (!response.ok) fatal(`GitHub ${response.status}: ${packet?.message || path}`);
   return packet;
 }
-async function mail(path = MAIL_BATCH_URL) {
-  if (!MAIL_TOKEN) return { ok: true, items: [], source: 'mail-token-unconfigured' };
-  const response = await fetch(path, { headers: { authorization: `Bearer ${MAIL_TOKEN}`, accept: 'application/json' } });
+async function mail(path, { method = 'GET', body } = {}) {
+  if (!MAIL_TOKEN) fatal('CIVWEAVE_FEEDBACK_BATCH_TOKEN is required.');
+  const response = await fetch(`${MAIL_ORIGIN}${path}`, {
+    method,
+    headers: { authorization: `Bearer ${MAIL_TOKEN}`, accept: 'application/json', ...(body ? { 'content-type': 'application/json' } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
   const packet = await response.json().catch(() => ({}));
-  if (!response.ok || packet?.ok !== true) fatal(`Feedback mail batch failed: ${packet?.error || response.status}`);
+  if (!response.ok || packet?.ok !== true) fatal(`Feedback mail ${path} failed: ${packet?.error || response.status}`);
   return packet;
 }
 const text = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
@@ -83,6 +89,26 @@ function priority(row) {
   const corroboration = Math.min(0.2, row.corroborating.length * 0.04);
   return Number((t.severity * 0.4 + t.evidence * 0.25 + typeBoost + corroboration + (t.bounded ? 0.2 : 0)).toFixed(3));
 }
+function machineState(batch) {
+  return {
+    schema: 'civweave.feedback-batch.v1',
+    id: batch.id,
+    createdAt: batch.createdAt,
+    vetoUntil: batch.vetoUntil,
+    devBranch: DEV_BRANCH,
+    candidates: batch.groups.map(row => ({
+      id: row.primary.id,
+      guide: row.primary.guide,
+      title: row.primary.triage.subject || '(no subject)',
+      summary: row.primary.triage.summary,
+      classification: row.primary.triage.classification,
+      recommendation: row.primary.triage.recommendation,
+      flags: row.primary.triage.flags,
+      priority: row.priority,
+      corroborating: row.corroborating,
+    })),
+  };
+}
 function issueBody(batch) {
   const lines = [
     `<!-- civweave-feedback-batch:${batch.id} -->`,
@@ -98,10 +124,16 @@ function issueBody(batch) {
   ];
   for (const [index, row] of batch.groups.entries()) {
     const t = row.primary.triage;
-    lines.push('', `### ${index + 1}. ${t.subject || '(no subject)'}`, `- item: \`${row.primary.id}\``, `- class: **${t.classification}**`, `- recommendation: **${t.recommendation}**`, `- priority: **${row.priority}**`, `- evidence: ${t.evidence}`, `- severity: ${t.severity}`, `- flags: ${t.flags.length ? t.flags.join(', ') : 'none'}`, `- corroborating reports: ${row.corroborating.length}`, '', redact(t.summary));
+    lines.push('', `### ${index + 1}. ${t.subject || '(no subject)'}`, `- item: \`${row.primary.id}\``, `- guide: \`${row.primary.guide}\``, `- class: **${t.classification}**`, `- recommendation: **${t.recommendation}**`, `- priority: **${row.priority}**`, `- evidence: ${t.evidence}`, `- severity: ${t.severity}`, `- flags: ${t.flags.length ? t.flags.join(', ') : 'none'}`, `- corroborating reports: ${row.corroborating.length}`, '', redact(t.summary));
   }
-  lines.push('', '## Machine state', '```json', JSON.stringify({ schema: 'civweave.feedback-batch.v1', id: batch.id, createdAt: batch.createdAt, vetoUntil: batch.vetoUntil, devBranch: DEV_BRANCH, candidateIds: batch.groups.filter(r => r.primary.triage.recommendation === 'queue-for-dev').map(r => r.primary.id) }, null, 2), '```');
+  lines.push('', '## Machine state', '```json', JSON.stringify(machineState(batch), null, 2), '```');
   return lines.join('\n');
+}
+function parseMachineState(issue) {
+  const match = String(issue.body || '').match(/## Machine state\s*```json\s*([\s\S]*?)\s*```/);
+  if (!match) return null;
+  try { const state = JSON.parse(match[1]); return state?.schema === 'civweave.feedback-batch.v1' ? state : null; }
+  catch { return null; }
 }
 async function ensureLabels() {
   const labels = [
@@ -109,6 +141,7 @@ async function ensureLabels() {
     [LABEL_VETO, 'Human veto blocks automation'],
     [LABEL_HUMAN, 'Requires human review'],
     [LABEL_READY, 'Veto window passed; eligible for dev automation'],
+    [LABEL_DISPATCHED, 'Eligible feedback dispatched to code automation'],
   ];
   for (const [name, description] of labels) {
     const response = await fetch(`${API}/repos/${REPO}/labels/${encodeURIComponent(name)}`, { headers: jsonHeaders() });
@@ -117,7 +150,7 @@ async function ensureLabels() {
 }
 async function discern() {
   await ensureLabels();
-  const packet = await mail();
+  const packet = await mail('/api/feedback/batch');
   const raw = Array.isArray(packet.items) ? packet.items : [];
   if (!raw.length) { console.log(JSON.stringify({ ok: true, mode: MODE, batch: null, message: 'No new guide-mail feedback.' })); return; }
   const items = raw.slice(0, 200).map((item, index) => ({ id: text(item.id || `mail-${index}`, 120), guide: text(item.guide || item.to, 120), receivedAt: text(item.receivedAt, 64), triage: deterministicTriage(item) }));
@@ -136,21 +169,53 @@ async function discern() {
   const id = NOW.toISOString().slice(0, 10), vetoUntil = new Date(NOW.getTime() + VETO_HOURS * 60 * 60 * 1000).toISOString();
   const batch = { id, createdAt: NOW.toISOString(), vetoUntil, groups };
   const issue = await gh(`/repos/${REPO}/issues`, { method: 'POST', body: JSON.stringify({ title: `Feedback discernment ${id}`, body: issueBody(batch), labels: [LABEL_BATCH] }) });
+  await mail('/api/feedback/ack', { method: 'POST', body: { batchId: id, items: items.map(item => ({ id: item.id, guide: item.guide })) } });
   console.log(JSON.stringify({ ok: true, mode: MODE, batch: id, issue: issue.number, vetoUntil, items: items.length, candidates: groups.filter(r => r.primary.triage.recommendation === 'queue-for-dev').length }));
+}
+function automationRequest(candidate, batchId) {
+  return `Please implement this bounded Civweave ${candidate.classification} reported through the daily guide-mail feedback process.\n\nTitle: ${candidate.title}\n\nRedacted report:\n${candidate.summary}\n\nFeedback batch: ${batchId}. Preserve offline-first behavior, existing user data, compatibility boundaries, and the explicit dev-only integration target.`;
+}
+async function dispatchCandidate(candidate, batchId) {
+  const plan = createCodeAutomationPlan({
+    requestText: automationRequest(candidate, batchId),
+    systemId: 'cerbanimo',
+    settings: {
+      repository: REPO,
+      baseBranch: DEV_BRANCH,
+      implementationAgent: 'jules',
+      mergeMethod: 'squash',
+      bridgeAvailable: true,
+      validatorBridgeAvailable: true,
+    },
+    now: NOW,
+  });
+  if (!plan) throw new Error(`Could not create an automation plan for feedback item ${candidate.id}.`);
+  await gh(`/repos/${REPO}/dispatches`, { method: 'POST', body: JSON.stringify({ event_type: 'civweave-code-automation', client_payload: { schema: 'civweave.code-automation-dispatch.v1', source: 'daily-guide-mail-feedback', feedbackBatchId: batchId, feedbackItemId: candidate.id, plan } }) });
+  return plan;
 }
 async function promote() {
   await ensureLabels();
   const issues = await gh(`/repos/${REPO}/issues?state=open&labels=${encodeURIComponent(LABEL_BATCH)}&per_page=100`);
-  const ready = [];
+  const results = [];
   for (const issue of issues) {
     const labels = new Set((issue.labels || []).map(label => typeof label === 'string' ? label : label.name));
-    if (labels.has(LABEL_VETO) || labels.has(LABEL_HUMAN)) continue;
-    const marker = String(issue.body || '').match(/"vetoUntil":\s*"([^"]+)"/);
-    if (!marker || Date.parse(marker[1]) > NOW.getTime()) continue;
-    if (!labels.has(LABEL_READY)) await gh(`/repos/${REPO}/issues/${issue.number}/labels`, { method: 'POST', body: JSON.stringify({ labels: [LABEL_READY] }) });
-    ready.push(issue.number);
+    if (labels.has(LABEL_VETO) || labels.has(LABEL_HUMAN) || labels.has(LABEL_DISPATCHED)) continue;
+    const state = parseMachineState(issue);
+    if (!state || Date.parse(state.vetoUntil || 0) > NOW.getTime()) continue;
+    const candidates = (state.candidates || []).filter(candidate => candidate.recommendation === 'queue-for-dev' && !(candidate.flags || []).length);
+    if (!candidates.length) {
+      await gh(`/repos/${REPO}/issues/${issue.number}/labels`, { method: 'POST', body: JSON.stringify({ labels: [LABEL_HUMAN] }) });
+      results.push({ issue: issue.number, dispatched: 0, reason: 'no-auto-eligible-candidates' });
+      continue;
+    }
+    await gh(`/repos/${REPO}/issues/${issue.number}/labels`, { method: 'POST', body: JSON.stringify({ labels: [LABEL_READY] }) });
+    const plans = [];
+    for (const candidate of candidates.slice(0, 8)) plans.push(await dispatchCandidate(candidate, state.id));
+    await gh(`/repos/${REPO}/issues/${issue.number}/labels`, { method: 'POST', body: JSON.stringify({ labels: [LABEL_DISPATCHED] }) });
+    await gh(`/repos/${REPO}/issues/${issue.number}/comments`, { method: 'POST', body: JSON.stringify({ body: `🧵 Veto window closed with no veto. Dispatched ${plans.length} bounded item${plans.length === 1 ? '' : 's'} through the canonical Civweave code-automation controller, all based on \`${DEV_BRANCH}\`. Plan IDs: ${plans.map(plan => `\`${plan.id}\``).join(', ')}. The existing dual validation gate must pass before any PR can auto-merge to \`${DEV_BRANCH}\`; this pipeline cannot promote \`${DEV_BRANCH}\` to \`main\`.` }) });
+    results.push({ issue: issue.number, dispatched: plans.length, planIds: plans.map(plan => plan.id) });
   }
-  console.log(JSON.stringify({ ok: true, mode: MODE, readyIssues: ready, devBranch: DEV_BRANCH, note: 'Ready issues are dispatch-eligible; implementation agents must still satisfy AGENTS.md, testing, validation, and dev-only merge gates.' }));
+  console.log(JSON.stringify({ ok: true, mode: MODE, results, devBranch: DEV_BRANCH }));
 }
 
 if (!['discern', 'promote'].includes(MODE)) fatal('FEEDBACK_BATCH_MODE must be discern or promote.');
