@@ -46,16 +46,20 @@ export function nodeIdFromHostname(hostname, domain = 'nodes.commonweave.earth')
 export function normalizeHubLocation(input = {}, now = Date.now()) {
   const latitude = Number(input.latitude), longitude = Number(input.longitude), accuracyMeters = Number(input.accuracyMeters);
   const capturedMs = Date.parse(clean(input.capturedAt, 80));
+  const precisionRequest = clean(input.publicPrecision, 20).toLowerCase() || 'rounded';
+  if (!['rounded', 'precise'].includes(precisionRequest)) throw Object.assign(new RangeError('Hub public precision must be rounded or precise.'), { status: 400 });
+  const precise = precisionRequest === 'precise', coordinateDecimals = precise ? 6 : 3;
   if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) throw Object.assign(new RangeError('Hub latitude is invalid.'), { status: 400 });
   if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) throw Object.assign(new RangeError('Hub longitude is invalid.'), { status: 400 });
   if (!Number.isFinite(accuracyMeters) || accuracyMeters <= 0 || accuracyMeters > 5_000) throw Object.assign(new RangeError('Hub location accuracy must be between 1 and 5,000 meters.'), { status: 400 });
+  if (precise && accuracyMeters > 250) throw Object.assign(new RangeError('A precise public Hub pin requires a location reading within 250 meters.'), { status: 400 });
   if (!Number.isFinite(capturedMs) || Math.abs(now - capturedMs) > 10 * 60 * 1000) throw Object.assign(new RangeError('Hub location reading is stale.'), { status: 400 });
   return Object.freeze({
     schema: 'civweave.hub-location.v1',
-    latitude: Number(latitude.toFixed(3)),
-    longitude: Number(longitude.toFixed(3)),
-    precisionMeters: Math.max(100, Math.ceil(accuracyMeters / 100) * 100),
-    coordinateDecimals: 3,
+    latitude: Number(latitude.toFixed(coordinateDecimals)),
+    longitude: Number(longitude.toFixed(coordinateDecimals)),
+    precisionMeters: precise ? Math.max(1, Math.ceil(accuracyMeters)) : Math.max(100, Math.ceil(accuracyMeters / 100) * 100),
+    coordinateDecimals,
     source: 'steward-browser-geolocation',
     capturedAt: new Date(capturedMs).toISOString(),
     syncedAt: new Date(now).toISOString()
