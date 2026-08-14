@@ -4,6 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#061019">
+  <script>
+  (()=>{
+    'use strict';
+    const installed=navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
+    const params=new URLSearchParams(location.search);
+    const developer=['localhost','127.0.0.1','::1'].includes(location.hostname)&&params.get('developer')==='1';
+    if(installed||developer)return;
+    const installer=new URL('/app/index.html',location.origin);
+    installer.searchParams.set('install','required');
+    installer.searchParams.set('source','installed-entry-browser-gate-v1');
+    location.replace(installer.href);
+  })();
+  </script>
   <title>Civweave</title>
   <link rel="icon" href="/app/logos/civweave-icon-192.png">
   <style>
