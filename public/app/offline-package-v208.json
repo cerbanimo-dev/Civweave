@@ -1,8 +1,8 @@
 {
   "version": "1.0.103",
-  "revision": "canonical-background-campus-v241-systems-mesh-v251-cerbanimo-commerce-v1.1-economic-value-review-v1",
+  "revision": "canonical-background-campus-v241-systems-mesh-v251-cerbanimo-commerce-v1.1-economic-value-review-v1-pm-relay-v1",
   "payloadPolicy": "core-first-lazy-packs-v302",
-  "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward, shared basic-value, economic-policy and valuation-review runtimes, systems-mesh runtimes, Cerbanimo commerce distribution contract, compact federation seed, deterministic offline map runtime, and the lightweight Node AI operator/marketplace UI. Full federation discovery, decorative visuals and fonts, open-learning media, bulk encyclopedia data, and device-AI model payloads hydrate as optional packs on demand.",
+  "description": "Compact Civweave offline core. The required campus contains the canonical system surfaces, reward, shared basic-value, economic-policy and valuation-review runtimes, systems-mesh runtimes, encrypted private-messaging mesh/relay engine, Cerbanimo commerce distribution contract, compact federation seed, deterministic offline map runtime, and the lightweight Node AI operator/marketplace UI. Full federation discovery, decorative visuals and fonts, open-learning media, bulk encyclopedia data, and device-AI model payloads hydrate as optional packs on demand.",
   "seeds": [
     "/app/installed-entry-v146.html",
     "/app/cw-reward-ledger-v2.js",
@@ -44,6 +44,7 @@
     "/app/federation-finder-local-v269.js",
     "/app/federation-finder-data/federation-seed-v269.json",
     "/app/local-object-mesh-v146.js",
+    "/app/civweave-private-messaging-v1.js",
     "/app/node-ai-mesh-v1.js",
     "/app/host-node-session-v1.js",
     "/app/shared/civweave-node-ai-routing-v1.mjs",
