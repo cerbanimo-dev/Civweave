@@ -241,7 +241,7 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   installEarlyGuards,installSystemExperienceSupport,installCanonicalSystemSupport,installCanonicalSystemSupportWhenReady,installAdditions,installAdditionsWhenReady,resumeFromPageShow,assetCustomizationConfigured,installAssetCustomizationIfConfigured,
   additionsVersion:ADDITIONS_VERSION,
   publicBrand:'Civweave',
-  canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner-installed-only-v228',
+  canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner',
   canonicalSystemCount:5,
   canonicalAutoScripts:0,
   canonicalSubsystemSupportScripts:CANONICAL_SYSTEM_SCRIPTS.length,
