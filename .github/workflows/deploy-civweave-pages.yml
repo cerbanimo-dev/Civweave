@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: civweave-pages-production
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -69,9 +69,15 @@ jobs:
           node scripts/verify-cloudflare-pages-account-target-v1.mjs \
             /tmp/civweave-pages-deployments.json civweave
 
-      - name: Ensure civweave.cc is active before canonical cutover
+      - name: Repair and activate civweave.cc before canonical cutover
         shell: bash
-        run: node scripts/ensure-cloudflare-pages-domain-v1.mjs --project civweave --domain civweave.cc
+        run: >-
+          node scripts/ensure-cloudflare-pages-domain-v1.mjs
+          --project civweave
+          --domain civweave.cc
+          --repair
+          --attempts 60
+          --interval-ms 15000
 
       - name: Resolve canonical recovery relay endpoint
         shell: bash
