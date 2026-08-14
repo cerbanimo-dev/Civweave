@@ -15,6 +15,7 @@ on:
       - 'public/app/installer-online-fallback-v225.js'
       - 'scripts/resolve-cloudflare-recovery-zone-v1.mjs'
       - 'scripts/test-cloudflare-recovery-zone-v1.mjs'
+      - 'scripts/test-hub-offline-recovery-v1.mjs'
       - 'scripts/verify-hub-recovery-wiring-v1.mjs'
       - 'scripts/test-hub-recovery-behavior-v1.mjs'
       - 'scripts/test-hub-recovery-relay-v1.mjs'
@@ -36,6 +37,7 @@ on:
       - 'public/app/installer-online-fallback-v225.js'
       - 'scripts/resolve-cloudflare-recovery-zone-v1.mjs'
       - 'scripts/test-cloudflare-recovery-zone-v1.mjs'
+      - 'scripts/test-hub-offline-recovery-v1.mjs'
       - 'scripts/verify-hub-recovery-wiring-v1.mjs'
       - 'scripts/test-hub-recovery-behavior-v1.mjs'
       - 'scripts/test-hub-recovery-relay-v1.mjs'
@@ -58,6 +60,8 @@ jobs:
         run: node scripts/test-hub-recovery-behavior-v1.mjs
       - name: Test cross-Hub recovery proof relay
         run: node scripts/test-hub-recovery-relay-v1.mjs
+      - name: Test offline Hub recovery codes
+        run: node scripts/test-hub-offline-recovery-v1.mjs
       - name: Test owned recovery-zone selection
         run: node scripts/test-cloudflare-recovery-zone-v1.mjs
       - name: Verify Hub recovery wiring

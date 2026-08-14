@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "civweave-host-edge",
-  "main": "src/recovery-entry-v9.mjs",
+  "main": "src/recovery-entry-v10.mjs",
   "compatibility_date": "2026-08-12",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
