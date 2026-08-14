@@ -1,6 +1,5 @@
 import {
   HubAccountRecoveryService,
-  HUB_ACCOUNT_RECOVERY_COOLDOWN_MS,
   HUB_ACCOUNT_RECOVERY_TTL_MS,
   HUB_ACCOUNT_VERIFICATION_TTL_MS,
   normalizeEmail,
@@ -83,15 +82,16 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
   inboundDelivery(nodeId, purpose, token) {
     const mailbox = this.mailbox();
     if (!mailbox) return Object.freeze({ sent: false, transport: 'unconfigured' });
-    const subject = `Civweave ${validNodeId(nodeId)} ${validPurpose(purpose)} ${clean(token, 400)}`;
+    const code = clean(token, 400);
+    const subject = `Civweave ${validNodeId(nodeId)} ${validPurpose(purpose)} ${code}`;
+    const body = `Send this message from the recovery address you are proving.\n\nAfter sending, return to Civweave and paste this one-time code:\n\n${code}\n\nDo not forward this message or code.`;
     return Object.freeze({
-      sent: false,
+      sent: true,
       transport: 'inbound-email-proof',
       mailbox,
       subject,
-      proofToken: clean(token, 400),
-      mailto: `mailto:${mailbox}?subject=${encodeURIComponent(subject)}`,
-      pollPath: purpose === 'verify-email' ? '/api/account/verify/poll' : '/api/account/recovery/poll',
+      proofToken: code,
+      mailto: `mailto:${mailbox}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
     });
   }
 
@@ -99,28 +99,17 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
     const packet = await super.signup(nodeId, input);
     if (packet.account?.emailVerified || packet.delivery?.sent || !this.mailbox()) return packet;
     const account = await this.accountForResident(input.userId);
-    const inbound = await this.issueInboundProof({
-      nodeId,
-      purpose: 'verify-email',
-      email: input.email,
-      userId: account?.userId || input.userId,
-    });
+    const inbound = await this.issueInboundProof({ nodeId, purpose: 'verify-email', email: input.email, userId: account?.userId || input.userId });
     return Object.freeze({ ...packet, delivery: inbound.delivery });
   }
 
   async requestRecoveryForNode(nodeId, input = {}) {
     if (hasOutbound(this.env)) return super.requestRecovery(input);
     const email = normalizeEmail(input.email);
-    const now = this.now();
     let account = null;
     try { account = await this.accountForEmail(email); } catch { account = null; }
-    let userId = null;
-    if (account?.emailVerifiedAt) {
-      const prior = Date.parse(account.recoveryRequestedAt || 0);
-      if (!Number.isFinite(prior) || now - prior >= HUB_ACCOUNT_RECOVERY_COOLDOWN_MS) userId = account.userId;
-    }
     const inbound = this.mailbox()
-      ? await this.issueInboundProof({ nodeId, purpose: 'recover-account', email, userId })
+      ? await this.issueInboundProof({ nodeId, purpose: 'recover-account', email, userId: account?.emailVerifiedAt ? account.userId : null })
       : null;
     return Object.freeze({
       ok: true,
@@ -130,65 +119,71 @@ export class HubAccountRecoveryInboundService extends HubAccountRecoveryService 
     });
   }
 
+  async proof(token, nodeId, purpose) {
+    const key = proofKey(await inboundTokenHash(token));
+    const proof = await this.state.storage.get(key);
+    if (!proof) return null;
+    const now = this.now();
+    if (proof.nodeId !== validNodeId(nodeId) || proof.purpose !== validPurpose(purpose) || proof.consumedAt || Date.parse(proof.expiresAt) <= now) {
+      throw Object.assign(new Error('Email proof is invalid, expired, or already used.'), { status: 400 });
+    }
+    return { key, proof, now };
+  }
+
   async approveInboundProof(input = {}) {
-    const token = clean(input.token, 400);
     const purpose = validPurpose(input.purpose);
     const nodeId = validNodeId(input.nodeId);
     const from = normalizeEmail(input.from);
-    const key = proofKey(await inboundTokenHash(token));
-    const proof = await this.state.storage.get(key);
-    const now = this.now();
-    if (!proof || proof.nodeId !== nodeId || proof.purpose !== purpose || proof.consumedAt || Date.parse(proof.expiresAt) <= now) {
-      throw Object.assign(new Error('Email proof is invalid, expired, or already used.'), { status: 400 });
-    }
-    if (proof.expectedEmailHash !== await normalizedEmailHash(from)) {
+    const found = await this.proof(input.token, nodeId, purpose);
+    if (!found) throw Object.assign(new Error('Email proof is invalid, expired, or already used.'), { status: 400 });
+    if (found.proof.expectedEmailHash !== await normalizedEmailHash(from)) {
       throw Object.assign(new Error('Email proof sender does not match the requested recovery address.'), { status: 403 });
     }
-    if (purpose === 'verify-email' && proof.userId) {
-      const account = await this.accountForResident(proof.userId);
+    if (purpose === 'verify-email' && found.proof.userId) {
+      const account = await this.accountForResident(found.proof.userId);
       if (account && account.email === from && !account.emailVerifiedAt) {
         const challenge = await this.issueChallenge(account, 'verify-email');
         await this.verifyEmail(challenge.token);
       }
     }
-    const next = Object.freeze({ ...proof, approvedAt: proof.approvedAt || nowIso(now) });
-    await this.state.storage.put(key, next);
+    await this.state.storage.put(found.key, Object.freeze({ ...found.proof, approvedAt: found.proof.approvedAt || nowIso(found.now) }));
     return Object.freeze({ ok: true, accepted: true });
   }
 
-  async pollVerification(nodeId, token) {
-    const key = proofKey(await inboundTokenHash(token));
-    const proof = await this.state.storage.get(key);
-    const now = this.now();
-    if (!proof || proof.nodeId !== validNodeId(nodeId) || proof.purpose !== 'verify-email' || Date.parse(proof.expiresAt) <= now || proof.consumedAt) {
-      return Object.freeze({ ok: true, verified: false, complete: true });
+  async completeInboundVerification(nodeId, token) {
+    const found = await this.proof(token, nodeId, 'verify-email');
+    if (!found) return null;
+    if (!found.proof.approvedAt) throw Object.assign(new Error('Send the prefilled verification email before using this code.'), { status: 409 });
+    await this.state.storage.put(found.key, Object.freeze({ ...found.proof, consumedAt: nowIso(found.now) }));
+    return Object.freeze({ ok: true, verified: true });
+  }
+
+  async completeInboundRecovery(nodeId, token) {
+    const found = await this.proof(token, nodeId, 'recover-account');
+    if (!found) return null;
+    if (!found.proof.approvedAt) throw Object.assign(new Error('Send the prefilled recovery email before using this code.'), { status: 409 });
+    if (!found.proof.userId) {
+      await this.state.storage.put(found.key, Object.freeze({ ...found.proof, consumedAt: nowIso(found.now) }));
+      throw Object.assign(new Error('No recoverable Hub account was confirmed for that address.'), { status: 404 });
     }
-    if (!proof.approvedAt) return Object.freeze({ ok: true, verified: false, complete: false });
-    await this.state.storage.put(key, Object.freeze({ ...proof, consumedAt: nowIso(now) }));
-    return Object.freeze({ ok: true, verified: true, complete: true });
+    const account = await this.accountForResident(found.proof.userId);
+    if (!account?.emailVerifiedAt) throw Object.assign(new Error('This Hub account does not have a verified recovery email.'), { status: 409 });
+    const challenge = await this.issueChallenge(account, 'recover-account');
+    const recovered = await super.completeRecovery(challenge.token);
+    await this.state.storage.put(found.key, Object.freeze({ ...found.proof, consumedAt: nowIso(found.now) }));
+    return recovered;
+  }
+
+  async pollVerification(nodeId, token) {
+    const found = await this.proof(token, nodeId, 'verify-email');
+    if (!found) return Object.freeze({ ok: true, verified: false, complete: true });
+    return Object.freeze({ ok: true, verified: Boolean(found.proof.approvedAt), complete: Boolean(found.proof.approvedAt) });
   }
 
   async pollRecovery(nodeId, token) {
-    const key = proofKey(await inboundTokenHash(token));
-    const proof = await this.state.storage.get(key);
-    const now = this.now();
-    if (!proof || proof.nodeId !== validNodeId(nodeId) || proof.purpose !== 'recover-account' || Date.parse(proof.expiresAt) <= now || proof.consumedAt) {
-      return Object.freeze({ ok: true, ready: false, complete: true });
-    }
-    if (!proof.approvedAt) return Object.freeze({ ok: true, ready: false, complete: false });
-    if (!proof.userId) {
-      await this.state.storage.put(key, Object.freeze({ ...proof, consumedAt: nowIso(now) }));
-      return Object.freeze({ ok: true, ready: false, complete: true });
-    }
-    const account = await this.accountForResident(proof.userId);
-    if (!account?.emailVerifiedAt) {
-      await this.state.storage.put(key, Object.freeze({ ...proof, consumedAt: nowIso(now) }));
-      return Object.freeze({ ok: true, ready: false, complete: true });
-    }
-    const challenge = await this.issueChallenge(account, 'recover-account');
-    const recovered = await super.completeRecovery(challenge.token);
-    await this.state.storage.put(key, Object.freeze({ ...proof, consumedAt: nowIso(now) }));
-    return Object.freeze({ ...recovered, ready: true, complete: true });
+    const found = await this.proof(token, nodeId, 'recover-account');
+    if (!found) return Object.freeze({ ok: true, ready: false, complete: true });
+    return Object.freeze({ ok: true, ready: Boolean(found.proof.approvedAt && found.proof.userId), complete: Boolean(found.proof.approvedAt) });
   }
 }
 
@@ -203,20 +198,19 @@ export async function handleHubAccountRecoveryInbound(service, request, nodeId, 
     'access-control-max-age': '86400',
   };
   try {
-    if (request.method === 'POST' && url.pathname === '/api/account/recovery/request') {
-      return Response.json(await service.requestRecoveryForNode(nodeId, input), { status: 202, headers });
+    if (request.method === 'POST' && url.pathname === '/api/account/recovery/request') return Response.json(await service.requestRecoveryForNode(nodeId, input), { status: 202, headers });
+    if (request.method === 'POST' && url.pathname === '/api/account/verify') {
+      const result = await service.completeInboundVerification(nodeId, input.token);
+      if (result) return Response.json(result, { headers });
     }
-    if (request.method === 'POST' && url.pathname === '/api/account/verify/poll') {
-      return Response.json(await service.pollVerification(nodeId, input.token), { headers });
+    if (request.method === 'POST' && url.pathname === '/api/account/recovery/complete') {
+      const result = await service.completeInboundRecovery(nodeId, input.token);
+      if (result) return Response.json(result, { headers });
     }
-    if (request.method === 'POST' && url.pathname === '/api/account/recovery/poll') {
-      return Response.json(await service.pollRecovery(nodeId, input.token), { headers });
-    }
+    if (request.method === 'POST' && url.pathname === '/api/account/verify/poll') return Response.json(await service.pollVerification(nodeId, input.token), { headers });
+    if (request.method === 'POST' && url.pathname === '/api/account/recovery/poll') return Response.json(await service.pollRecovery(nodeId, input.token), { headers });
     return fallbackHandler(service, request, nodeId);
   } catch (error) {
-    return Response.json({ ok: false, error: String(error?.message || error) }, {
-      status: Number.isSafeInteger(error?.status) ? error.status : 500,
-      headers,
-    });
+    return Response.json({ ok: false, error: String(error?.message || error) }, { status: Number.isSafeInteger(error?.status) ? error.status : 500, headers });
   }
 }
