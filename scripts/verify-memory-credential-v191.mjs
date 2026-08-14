@@ -29,6 +29,11 @@ replaceRequired(
   'explicit remembered credential restore contract'
 );
 replaceRequired(
+  "for(const forbidden of ['MutationObserver','setInterval(','setTimeout('])assert(!settingsSource.includes(forbidden),`Clean-room settings reintroduced ${forbidden}.`);",
+  "const timerAuditedSettings=settingsSource.replace(\"function afterPaint(task){const run=()=>setTimeout(task,0);if(typeof requestAnimationFrame==='function')requestAnimationFrame(run);else setTimeout(task,0)}\",'');\nfor(const forbidden of ['MutationObserver','setInterval(','setTimeout('])assert(!timerAuditedSettings.includes(forbidden),`Clean-room settings reintroduced ${forbidden}.`);\nassert(settingsSource.includes('quiescenceAfterPaint:true'),'Settings controller no longer declares post-paint inference quiescence.');",
+  'post-paint settings timer audit'
+);
+replaceRequired(
   "assert(deviceSource.includes('restoresConsent:true')&&deviceSource.includes('mirrorsRuntimeSecret:true'),'Credential bridge does not declare the v192 usability repair.');\nfor(const token of ['/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js']){",
   "assert(deviceSource.includes('restoresConsent:true')&&deviceSource.includes('mirrorsRuntimeSecret:true'),'Credential bridge does not declare the v192 usability repair.');\nconst lightweightBridge=additiveWorker.includes(\"importScripts('/service-worker-v203.js?v=\");\nfor(const token of ['/app/weaveling-memory-v191.js','/app/weaveling-memory-bridge-v191.js']){",
   'lightweight bridge detection'
