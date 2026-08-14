@@ -59,9 +59,15 @@ function replyMime(from, to) {
 export class CivweaveRecoveryProofRelay {
   constructor(state, env) { this.state = state; this.env = env; }
 
+  async scheduleCleanup(deadline) {
+    if (!this.state.storage.getAlarm || !this.state.storage.setAlarm) return;
+    const current = await this.state.storage.getAlarm();
+    if (current == null || current > deadline) await this.state.storage.setAlarm(deadline);
+  }
+
   async approve(input = {}) {
     const token = normalizeToken(input.token), purpose = normalizePurpose(input.purpose), sender = normalizeEmail(input.from);
-    const now = Date.now(), hash = await tokenHash(token), key = proofKey(hash);
+    const now = Date.now(), expires = now + PROOF_TTL_MS, hash = await tokenHash(token), key = proofKey(hash);
     const prior = await this.state.storage.get(key);
     const proof = Object.freeze({
       schema: 'civweave.recovery-proof-relay.v1',
@@ -69,16 +75,20 @@ export class CivweaveRecoveryProofRelay {
       purpose,
       emailHash: await emailHash(sender),
       approvedAt: prior?.approvedAt || nowIso(now),
-      expiresAt: nowIso(now + PROOF_TTL_MS),
-      consumedAt: null,
+      expiresAt: nowIso(expires),
     });
     await this.state.storage.put(key, proof);
+    await this.scheduleCleanup(expires);
     return Object.freeze({ ok: true, approved: true, purpose, expiresAt: proof.expiresAt });
   }
 
   async status(token) {
     const key = proofKey(await tokenHash(token)), proof = await this.state.storage.get(key), now = Date.now();
-    if (!proof || proof.consumedAt || Date.parse(proof.expiresAt) <= now) return Object.freeze({ ok: true, approved: false });
+    if (!proof) return Object.freeze({ ok: true, approved: false });
+    if (Date.parse(proof.expiresAt) <= now) {
+      await this.state.storage.delete(key);
+      return Object.freeze({ ok: true, approved: false });
+    }
     return Object.freeze({
       ok: true,
       approved: true,
@@ -90,11 +100,15 @@ export class CivweaveRecoveryProofRelay {
     });
   }
 
-  async consume(token) {
-    const key = proofKey(await tokenHash(token)), proof = await this.state.storage.get(key), now = Date.now();
-    if (!proof || proof.consumedAt || Date.parse(proof.expiresAt) <= now) return Object.freeze({ ok: true, consumed: false });
-    await this.state.storage.put(key, Object.freeze({ ...proof, consumedAt: nowIso(now) }));
-    return Object.freeze({ ok: true, consumed: true });
+  async alarm() {
+    const now = Date.now(), rows = await this.state.storage.list({ prefix: 'proof:' });
+    let next = null;
+    for (const [key, proof] of rows) {
+      const expiry = Date.parse(proof?.expiresAt || 0);
+      if (!Number.isFinite(expiry) || expiry <= now) await this.state.storage.delete(key);
+      else if (next == null || expiry < next) next = expiry;
+    }
+    if (next != null && this.state.storage.setAlarm) await this.state.storage.setAlarm(next);
   }
 
   async fetch(request) {
@@ -102,7 +116,6 @@ export class CivweaveRecoveryProofRelay {
     try {
       if (request.method === 'POST' && url.pathname === '/approve') return json(await this.approve(await request.json().catch(() => ({}))));
       if (request.method === 'POST' && url.pathname === '/status') return json(await this.status((await request.json().catch(() => ({}))).token));
-      if (request.method === 'POST' && url.pathname === '/consume') return json(await this.consume((await request.json().catch(() => ({}))).token));
       return json({ ok: false, error: 'not-found' }, 404);
     } catch (error) {
       return json({ ok: false, error: String(error?.message || error) }, 400);
@@ -141,7 +154,6 @@ export default {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS' && url.pathname.startsWith('/api/recovery-proof/')) return new Response(null, { status: 204, headers: json({}).headers });
     if (request.method === 'POST' && url.pathname === '/api/recovery-proof/status') return callRelay(env, 'status', await request.json().catch(() => ({})));
-    if (request.method === 'POST' && url.pathname === '/api/recovery-proof/consume') return callRelay(env, 'consume', await request.json().catch(() => ({})));
     if (request.method === 'GET' && url.pathname === '/api/health') return json({ ok: true, schema: 'civweave.recovery-proof-relay.v1', mailbox: env.RECOVERY_MAILBOX || null });
     return json({ ok: false, error: 'not-found' }, 404);
   },
