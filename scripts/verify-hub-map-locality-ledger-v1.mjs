@@ -13,6 +13,7 @@ const gossip = read('public/app/civweave-locality-gossip-v1.js');
 const directory = read('functions/api/hub-map-nodes.ts');
 const stewardSetup = read('public/host-setup.html');
 const cloudNode = read('cloudflare/node-cloud/src/index.mjs');
+const locationTest = read('scripts/test-hub-location-onboarding-v1.mjs');
 const localMesh = read('public/app/local-object-mesh-v146.js');
 const hostSession = read('public/app/host-node-session-v1.js');
 const installBoundary = read('public/app/install-boundary-v146.js');
@@ -38,8 +39,10 @@ const checks = [
   [gossip.includes('roaming coordinates are evaluated in-memory and never written by this module'), 'roaming device coordinates are not persisted by gossip'],
   [directory.includes('CORE_DIRECTORY') && directory.includes('FABRIC_ORIGIN') && directory.includes('/api/ai/node/manifest'), 'Hub directory is built from registered Cloudflare Hub manifests'],
   [directory.includes('node?.location || node?.publicLocation') && directory.includes('publicLocationsAreStewardPublished: true'), 'Hub directory returns only steward-published node locations'],
-  [stewardSetup.includes('navigator.geolocation.watchPosition') && stewardSetup.includes('/api/fabric/location') && stewardSetup.includes("position.coords.latitude.toFixed(3)"), 'steward setup captures a fresh physical site and publishes the privacy-rounded site position'],
-  [cloudNode.includes("schema: 'civweave.hub-location.v1'") && cloudNode.includes('location: input.location?.schema') && cloudNode.includes("'hub-location'"), 'Cloudflare Hub stores steward location in the canonical node manifest'],
+  [stewardSetup.includes('navigator.geolocation.watchPosition') && stewardSetup.includes('/api/fabric/location') && stewardSetup.includes('publish-precise-location') && stewardSetup.includes('position.coords.latitude.toFixed(coordinateDecimals)') && stewardSetup.includes("publicPrecision:precise?'precise':'rounded'"), 'Steward setup supports rounded-by-default or explicit precise public physical placement'],
+  [cloudNode.includes("precisionRequest === 'precise'") && cloudNode.includes('coordinateDecimals = precise ? 6 : 3') && cloudNode.includes('precise ? Math.max(1, Math.ceil(accuracyMeters))'), 'Cloudflare Hub preserves explicit precise public coordinates and measured accuracy'],
+  [locationTest.includes("publicPrecision: 'precise'") && locationTest.includes('precisePublicCoordinateDecimals: 6') && locationTest.includes('exactReadingLeavesDeviceByDefault: false'), 'Hub location tests cover both privacy-rounded default and precise public opt-in'],
+  [cloudNode.includes("schema: 'civweave.hub-location.v1'") && cloudNode.includes('location: input.location?.schema') && cloudNode.includes("'hub-location'"), 'Cloudflare Hub stores Steward location in the canonical node manifest'],
   [localMesh.includes('signature=await sign') && localMesh.includes("const mayRelay=object=>object.consent==='public'||object.consent==='federated'"), 'gossip inherits signed object integrity and public/federated store-and-forward'],
   [installBoundary.includes('NODE_AI_MESH_RUNTIME') && installBoundary.includes('SYSTEM_EXPERIENCE_SCRIPTS') && installBoundary.includes('NODE_AI_MESH_RUNTIME,'), 'canonical installed Civweave surfaces load the generic node mesh runtime'],
   [nodeAiMesh.includes('DEFAULT_SYNC_MS=90_000') && nodeAiMesh.includes('await mesh.syncGateway') && nodeAiMesh.includes('queueMicrotask(autoStart)'), 'installed node mesh automatically relays generic public/federated community objects on its normal online loop'],
