@@ -1,0 +1,75 @@
+name: Verify Cerbanimo host pages
+
+on:
+  pull_request:
+    paths:
+      - 'site/cerbanimo-cc/**'
+      - '.github/workflows/deploy-cerbanimo-site.yml'
+      - '.github/workflows/deploy-civweave-host-pages.yml'
+      - '.github/workflows/verify-cerbanimo-host-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build flagship and community surfaces
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out complete history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build flagship surface
+        run: |
+          node site/cerbanimo-cc/build.mjs \
+            --output .verify-cerbanimo-flagship \
+            --base / \
+            --role flagship \
+            --public-origin https://cerbanimo.cc \
+            --pages-origin https://cerbanimo-cc.pages.dev
+
+      - name: Build community-host surface
+        run: |
+          node site/cerbanimo-cc/build.mjs \
+            --output .verify-cerbanimo-community \
+            --base /cerbanimo/ \
+            --role community \
+            --host-id test-garden \
+            --public-origin https://civweave-test-garden.pages.dev \
+            --pages-origin https://civweave-test-garden.pages.dev
+
+      - name: Verify portable host paths and local links
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const flagship = readFileSync('.verify-cerbanimo-flagship/index.html', 'utf8');
+          const hosted = readFileSync('.verify-cerbanimo-community/index.html', 'utf8');
+          const hostedApp = readFileSync('.verify-cerbanimo-community/app.js', 'utf8');
+          const surface = JSON.parse(readFileSync('.verify-cerbanimo-community/surface.json', 'utf8'));
+          const history = JSON.parse(readFileSync('.verify-cerbanimo-community/history.json', 'utf8'));
+          const checks = [
+            [flagship.includes('id="story"'), 'flagship story section'],
+            [hosted.includes('id="story"'), 'community story section'],
+            [hosted.includes('/cerbanimo/assets/civweave-on.png'), 'community asset base'],
+            [hosted.includes('Community Cerbanimo'), 'community host banner'],
+            [hosted.includes('https://civweave-test-garden.pages.dev/">Open this node'), 'local-node CTA'],
+            [hostedApp.includes('/cerbanimo/history.json'), 'community history path'],
+            [hostedApp.includes('/cerbanimo/assets/weaveling.png'), 'community guide asset path'],
+            [surface.role === 'community', 'community role marker'],
+            [surface.hostId === 'test-garden', 'community host marker'],
+            [surface.basePath === '/cerbanimo/', 'community base-path marker'],
+            [history.surface?.hostId === 'test-garden', 'history surface marker'],
+          ];
+          const failures = checks.filter(([ok]) => !ok).map(([, label]) => label);
+          if (failures.length) throw new Error(`Cerbanimo host packaging failed: ${failures.join(', ')}`);
+          console.log(`Verified ${checks.length} Cerbanimo flagship/community packaging invariants.`);
+          NODE
