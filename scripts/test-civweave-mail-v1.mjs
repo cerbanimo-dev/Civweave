@@ -15,7 +15,7 @@ const [mailConfigText, mailBase, mailPm, mailFeedback, mailTrafficPolicy, mailUi
   read('cloudflare/account-edge/wrangler.jsonc'),
   read('cloudflare/account-edge/src/recovery-entry-v11.mjs'),
   read('public/app/hub-mail-claim-v1.js'),
-  read('public/app/installer-online-fallback-v225.js'),
+  read('public/app/installer-repair-only-v1.js'),
 ]);
 const mailConfig = JSON.parse(mailConfigText);
 const mailPackage = JSON.parse(mailPackageText);
