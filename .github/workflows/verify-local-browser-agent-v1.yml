@@ -1,0 +1,37 @@
+name: Verify local browser agent v1
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/browser-tool-v1.js'
+      - 'public/app/local-ai/browser-agent-v1.js'
+      - 'public/app/local-ai/bootstrap-v266.js'
+      - 'public/app/offline-package-v208.json'
+      - 'cloudflare/node-cloud/src/browser-tool-entry-v1.mjs'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v3.mjs'
+      - 'cloudflare/node-cloud/wrangler.jsonc'
+      - 'scripts/verify-local-browser-agent-v1.mjs'
+      - '.github/workflows/verify-local-browser-agent-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check public/app/browser-tool-v1.js
+          node --check public/app/local-ai/browser-agent-v1.js
+          node --check public/app/local-ai/bootstrap-v266.js
+          node --check cloudflare/node-cloud/src/browser-tool-entry-v1.mjs
+          node --check cloudflare/node-cloud/src/server-ai-entry-v3.mjs
+          node --check scripts/verify-local-browser-agent-v1.mjs
+      - name: Contract regression
+        run: node scripts/verify-local-browser-agent-v1.mjs
