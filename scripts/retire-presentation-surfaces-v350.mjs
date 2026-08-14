@@ -8,7 +8,9 @@ const deleted=[
   '/app/fullscreen-family-v104.html','/app/lite-v128.html','/app/lite-v129.html',
   '/app/loom-v127.html','/app/loom-v128.html','/app/realm-v127.html','/app/realm-v128.html',
   '/cabinetonly/index.html','/app/cabinet-only-v144.html','/app/cabinet-mode-v142.html',
-  '/app/cabinet-visual-v141.html','/app/cabinet-calibrator-v144.html'
+  '/app/cabinet-visual-v141.html','/app/cabinet-calibrator-v144.html',
+  '/app/services/cerbanimo/index.html','/app/services/living-school/index.html',
+  '/app/services/fellowfare/index.html','/app/services/anarchadia/index.html'
 ];
 const changed=[];
 async function edit(relative,transform,{required=true}={}){
@@ -19,6 +21,7 @@ async function edit(relative,transform,{required=true}={}){
   if(after===before)return;
   await fs.writeFile(file,after,'utf8');changed.push(relative);
 }
+const normalize=value=>'/'+String(value||'').replace(/^\/+/, '');
 
 await edit('public/service-worker-core-v208.js',source=>source
   .split(/\r?\n/)
@@ -30,6 +33,14 @@ await edit('public/service-worker-chat-repair-v245.js',source=>{
   if(!next.includes("'/app/guide-chat-surface-v350.js'"))next=next.replace("  '/app/guide-workspace-v242.js',","  '/app/guide-workspace-v242.js',\n  '/app/guide-chat-surface-v350.js',");
   for(const route of deleted){if(!next.includes(`'${route}'`))next=next.replace("  '/app/chat-single-owner-v245.js'","  '/app/chat-single-owner-v245.js',\n  '"+route+"'");}
   return next;
+});
+
+await edit('public/app/seed.json',source=>{
+  const data=JSON.parse(source),retired=new Set(deleted);
+  if(Array.isArray(data.files))data.files=data.files.filter(row=>!retired.has(normalize(row?.path||row?.entry)));
+  data.presentationPolicy='active-public-screen-inventory-v350';
+  data.retiredScreensPurged=deleted.length;
+  return `${JSON.stringify(data,null,2)}\n`;
 });
 
 await edit('public/app/install-boundary-v146.js',source=>source
