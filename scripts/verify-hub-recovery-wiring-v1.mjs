@@ -6,6 +6,7 @@ const paths = [
   'cloudflare/account-edge/src/hub-account-recovery-v1.mjs',
   'cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs',
   'cloudflare/account-edge/src/recovery-entry-v4.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v6.mjs',
   'cloudflare/account-edge/wrangler.jsonc',
   'public/app/installer-online-fallback-v225.js',
   'public/app/civweave-brand.js',
@@ -17,11 +18,13 @@ const paths = [
 ];
 const source = Object.fromEntries(await Promise.all(paths.map(async path => [path, await readFile(path, 'utf8')])));
 
-assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v4\.mjs/);
+assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v6\.mjs/);
 assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /recover@recovery\.commonweave\.earth/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v4.mjs'], /async email\(message, env/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v4.mjs'], /message\.reply\(new EmailMessage/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v4.mjs'], /approveInboundEmailProof/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v6.mjs'], /async email\(message,env/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v6.mjs'], /message\.reply\(new EmailMessage/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v6.mjs'], /stub\.fetch/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v6.mjs'], /\/internal\/email-proof/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v6.mjs'], /not-found/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /inbound-email-proof/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /completeInboundVerification/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs'], /completeInboundRecovery/);
@@ -42,4 +45,4 @@ for (const path of paths.filter(path => !path.endsWith('hub-account-recovery-v1.
   assert.doesNotMatch(source[path], /stripe/i, `${path} must not add Stripe as a Hub recovery dependency`);
 }
 
-console.log(JSON.stringify({ ok: true, schema: 'civweave.hub-recovery-wiring-check.v2', freeTierInboundProof: true }));
+console.log(JSON.stringify({ ok: true, schema: 'civweave.hub-recovery-wiring-check.v3', freeTierInboundProof: true, privateObjectBridge: true }));
