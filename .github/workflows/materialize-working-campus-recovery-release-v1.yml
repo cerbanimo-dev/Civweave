@@ -1,0 +1,59 @@
+name: Materialize Working Campus recovery release
+
+on:
+  push:
+    branches:
+      - fix/working-campus-recovery-race-v425
+    paths:
+      - .github/workflows/materialize-working-campus-recovery-release-v1.yml
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/working-campus-recovery-race-v425
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Advance release to 1.0.146
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from 'node:fs/promises';
+          const next='1.0.146';
+          await writeFile('VERSION',`${next}\n`);
+          const pkg=JSON.parse(await readFile('package.json','utf8'));
+          pkg.version=next;
+          await writeFile('package.json',`${JSON.stringify(pkg,null,2)}\n`);
+          const lock=JSON.parse(await readFile('package-lock.json','utf8'));
+          lock.version=next;
+          if(lock.packages?.[''])lock.packages[''].version=next;
+          await writeFile('package-lock.json',`${JSON.stringify(lock,null,2)}\n`);
+          const contract=JSON.parse(await readFile('config/release-contract.json','utf8'));
+          contract.canonical.current={...contract.canonical.current,version:next,path:`releases/${next}`,status:'current'};
+          await writeFile('config/release-contract.json',`${JSON.stringify(contract,null,2)}\n`);
+          NODE
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Verify focused recovery and release contracts
+        run: |
+          node scripts/verify-working-campus-return-v425.mjs
+          node scripts/verify-release-version-sync.mjs
+          node scripts/verify-canonical-launch-release.mjs
+      - name: Commit generated release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'cerbanimo-dev'
+          git config user.email 'cerbanimo@gmail.com'
+          git add -A
+          git commit -m 'Materialize Civweave 1.0.146 recovery release'
+          git push origin HEAD:fix/working-campus-recovery-race-v425
