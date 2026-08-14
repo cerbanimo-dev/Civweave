@@ -15,6 +15,8 @@ const stewardSetup = read('public/host-setup.html');
 const cloudNode = read('cloudflare/node-cloud/src/index.mjs');
 const localMesh = read('public/app/local-object-mesh-v146.js');
 const hostSession = read('public/app/host-node-session-v1.js');
+const installBoundary = read('public/app/install-boundary-v146.js');
+const nodeAiMesh = read('public/app/node-ai-mesh-v1.js');
 
 const checks = [
   [finder.includes('/app/hub-map-v1.html'), 'Finder routes to the Hub Map entry'],
@@ -39,6 +41,8 @@ const checks = [
   [stewardSetup.includes('navigator.geolocation.watchPosition') && stewardSetup.includes('/api/fabric/location') && stewardSetup.includes("position.coords.latitude.toFixed(3)"), 'steward setup captures a fresh physical site and publishes the privacy-rounded site position'],
   [cloudNode.includes("schema: 'civweave.hub-location.v1'") && cloudNode.includes('location: input.location?.schema') && cloudNode.includes("'hub-location'"), 'Cloudflare Hub stores steward location in the canonical node manifest'],
   [localMesh.includes('signature=await sign') && localMesh.includes("const mayRelay=object=>object.consent==='public'||object.consent==='federated'"), 'gossip inherits signed object integrity and public/federated store-and-forward'],
+  [installBoundary.includes('NODE_AI_MESH_RUNTIME') && installBoundary.includes('SYSTEM_EXPERIENCE_SCRIPTS') && installBoundary.includes('NODE_AI_MESH_RUNTIME,'), 'canonical installed Civweave surfaces load the generic node mesh runtime'],
+  [nodeAiMesh.includes('DEFAULT_SYNC_MS=90_000') && nodeAiMesh.includes('await mesh.syncGateway') && nodeAiMesh.includes('queueMicrotask(autoStart)'), 'installed node mesh automatically relays generic public/federated community objects on its normal online loop'],
 ];
 
 const failed = checks.filter(([ok]) => !ok).map(([, label]) => label);
