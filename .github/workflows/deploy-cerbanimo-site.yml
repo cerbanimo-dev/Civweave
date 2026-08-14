@@ -1,0 +1,177 @@
+name: Deploy Cerbanimo public site
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerbanimo-cc-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy cerbanimo.cc
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      PAGES_PROJECT: cerbanimo-cc
+      PUBLIC_DOMAIN: cerbanimo.cc
+
+    steps:
+      - name: Check out complete history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install deployment dependencies
+        run: npm install --ignore-scripts
+
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing repository secret CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing repository secret CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+
+      - name: Build public site and live history marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf .cerbanimo-pages
+          mkdir -p .cerbanimo-pages/assets
+          cp site/cerbanimo-cc/index.html .cerbanimo-pages/index.html
+          cp site/cerbanimo-cc/styles.css .cerbanimo-pages/styles.css
+          cp site/cerbanimo-cc/app.js .cerbanimo-pages/app.js
+          cp Civweave-on-logo.png .cerbanimo-pages/assets/civweave-on.png
+          cp Civweave-off-logo.png .cerbanimo-pages/assets/civweave-off.png
+          cp Civweave-weaveling-sprites.png .cerbanimo-pages/assets/weaveling.png
+          cp Living-School-moss-sprites.png .cerbanimo-pages/assets/moss.png
+          cp Cerbanimo-kamiya-sprites.png .cerbanimo-pages/assets/kamiya.png
+          cp FellowFare-rook-sprites.png .cerbanimo-pages/assets/rook.png
+          cp Anarchadia-merlin-sprites.png .cerbanimo-pages/assets/merlin.png
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { writeFileSync } from 'node:fs';
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+          const initialCommitDate = git('log', '--reverse', '--format=%cI').split(/\r?\n/)[0];
+          const history = {
+            schema: 'cerbanimo.civweave-history.v1',
+            repository: 'cerbanimo-dev/Civweave',
+            branch: 'main',
+            commitCount: Number(git('rev-list', '--count', 'HEAD')),
+            initialCommitDate,
+            latestCommit: git('rev-parse', 'HEAD'),
+            generatedAt: new Date().toISOString()
+          };
+          if (!Number.isSafeInteger(history.commitCount) || history.commitCount < 1 || !history.initialCommitDate) {
+            throw new Error(`Invalid Git history marker: ${JSON.stringify(history)}`);
+          }
+          writeFileSync('.cerbanimo-pages/history.json', `${JSON.stringify(history, null, 2)}\n`, 'utf8');
+          console.log(JSON.stringify(history));
+          NODE
+
+      - name: Ensure Cloudflare Pages project exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const account = encodeURIComponent(process.env.CLOUDFLARE_ACCOUNT_ID);
+          const project = process.env.PAGES_PROJECT;
+          const headers = {
+            Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+            'Content-Type': 'application/json'
+          };
+          const base = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects`;
+          const lookup = await fetch(`${base}/${encodeURIComponent(project)}`, { headers });
+          if (lookup.status === 404) {
+            const created = await fetch(base, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({ name: project, production_branch: 'main' })
+            });
+            const packet = await created.json().catch(() => ({}));
+            if (!created.ok || packet.success !== true) {
+              throw new Error(`Could not create Cloudflare Pages project ${project}: ${JSON.stringify(packet.errors || packet)}`);
+            }
+            console.log(`Created Cloudflare Pages project ${project}.`);
+            process.exit(0);
+          }
+          const packet = await lookup.json().catch(() => ({}));
+          if (!lookup.ok || packet.success !== true || packet.result?.name !== project) {
+            throw new Error(`Could not access Cloudflare Pages project ${project}: ${JSON.stringify(packet.errors || packet)}`);
+          }
+          console.log(`Cloudflare Pages project ${project} is ready.`);
+          NODE
+
+      - name: Deploy production Pages project
+        shell: bash
+        run: |
+          set -euo pipefail
+          commit_message="$(git log -1 --pretty=%s)"
+          npx wrangler pages deploy .cerbanimo-pages \
+            --project-name "$PAGES_PROJECT" \
+            --branch main \
+            --commit-hash "$GITHUB_SHA" \
+            --commit-message "$commit_message" \
+            --commit-dirty=true 2>&1 | tee /tmp/cerbanimo-pages-deploy.log
+          grep -Eqi 'https://[^[:space:]]*\.pages\.dev' /tmp/cerbanimo-pages-deploy.log || {
+            echo 'Cloudflare did not report a Pages deployment URL.'
+            cat /tmp/cerbanimo-pages-deploy.log
+            exit 3
+          }
+
+      - name: Attach and repair cerbanimo.cc
+        shell: bash
+        run: >-
+          node scripts/ensure-cloudflare-pages-domain-v1.mjs
+          --project "$PAGES_PROJECT"
+          --domain "$PUBLIC_DOMAIN"
+          --repair
+          --attempts 60
+          --interval-ms 10000
+
+      - name: Verify live public site and history
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const origin = `https://${process.env.PUBLIC_DOMAIN}`;
+          const expectedCommit = process.env.GITHUB_SHA;
+          let failure = 'site did not become current';
+          for (let attempt = 1; attempt <= 18; attempt += 1) {
+            try {
+              const bust = `${Date.now()}-${attempt}`;
+              const [pageResponse, historyResponse] = await Promise.all([
+                fetch(`${origin}/?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } }),
+                fetch(`${origin}/history.json?verify=${bust}`, { headers: { 'Cache-Control': 'no-cache' } })
+              ]);
+              if (!pageResponse.ok) throw new Error(`page HTTP ${pageResponse.status}`);
+              if (!historyResponse.ok) throw new Error(`history HTTP ${historyResponse.status}`);
+              const html = await pageResponse.text();
+              const history = await historyResponse.json();
+              if (!html.includes('Civweave | Cerbanimo')) throw new Error('public page marker missing');
+              if (history.latestCommit !== expectedCommit) throw new Error(`history is at ${history.latestCommit || 'missing'}, expected ${expectedCommit}`);
+              if (!Number.isSafeInteger(history.commitCount) || history.commitCount < 1) throw new Error('commit counter is invalid');
+              if (!history.initialCommitDate) throw new Error('initial commit date is missing');
+              console.log(`Verified ${origin} at ${history.latestCommit} with ${history.commitCount} commits since ${history.initialCommitDate}.`);
+              process.exit(0);
+            } catch (error) {
+              failure = `attempt ${attempt}: ${error.message}`;
+            }
+            if (attempt < 18) await new Promise(resolve => setTimeout(resolve, 5000));
+          }
+          throw new Error(`Production verification failed: ${failure}`);
+          NODE
