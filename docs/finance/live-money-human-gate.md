@@ -2,7 +2,7 @@
 
 Machine-side payment plumbing may advance through sandbox testing, read-only live preflight, deployment, credential staging, and fail-closed hardening. A verified human must supply factual business information and make the legal/operational attestations before live money is enabled.
 
-This gate covers Civweave platform-money lanes and FellowFare **service/learning/tutoring direct charges**. It never authorizes FellowFare physical-goods checkout or revival of the retired platform-charge/separate-transfer marketplace.
+This gate covers Civweave platform-money lanes, Territory Stewardship payouts, and FellowFare **service/learning/tutoring direct charges**. It never authorizes FellowFare physical-goods checkout or revival of the retired platform-charge/separate-transfer marketplace.
 
 Production authority:
 
@@ -27,7 +27,7 @@ Automation must never infer or self-approve these statements.
 
 - [ ] Use the verified Cerbanimo LLC live Stripe account.
 - [ ] Complete truthful business/entity verification.
-- [ ] Confirm the platform can create the supported live charges and application fees.
+- [ ] Confirm the platform can create the supported live charges, application fees, Host Node Steward transfers, and Territory Stewardship transfers.
 - [ ] Stage the minimum required live server credential through the guarded secret workflow, never source control or chat.
 
 ## Human checkpoint B: live event destinations
@@ -58,10 +58,11 @@ Legacy marketplace events may still arrive for transactions predating the new bo
 
 ## Human checkpoint C: live connected accounts
 
-Test both applicable account roles separately:
+Test applicable account roles separately:
 
-1. A real Host Steward/platform payout recipient, with the required recipient transfer capability active.
+1. A real Host Node Steward/platform payout recipient, with the required recipient transfer capability active.
 2. A real FellowFare service/learning/tutoring provider, using an Accounts v2 merchant configuration with a full Stripe dashboard and active card-payments capability.
+3. At least one payout-ready Territory Steward or legally appropriate territorial payer, after the Stewardship Agreement and identity/tax review are complete.
 
 For the FellowFare provider verify:
 
@@ -73,6 +74,19 @@ For the FellowFare provider verify:
 - [ ] FellowFare does not receive gross proceeds and does not create a seller transfer;
 - [ ] physical-goods listings cannot use this route.
 
+For Territory Stewardship verify:
+
+- [ ] the August 14, 2026 Territory Stewardship Resolution has actually been executed by an authorized Cerbanimo LLC person;
+- [ ] the applicable individual Stewardship Agreement has actually been signed;
+- [ ] the Steward's legal identity has been verified independently from their public/professional Civweave name;
+- [ ] worker/payment classification has been reviewed for the actual relationship and work location;
+- [ ] required tax forms, withholding/reporting setup, and payment-provider onboarding are complete;
+- [ ] the payout account belongs to the legally approved recipient or payer arrangement;
+- [ ] the D1 appointment may move from `pending-signature` / `held-pending-onboarding` to the corresponding accepted/ready states only after those facts are true;
+- [ ] an unassigned, vacant, unsigned, or unonboarded office keeps its share in the Territory Operations Reserve rather than enlarging Cerbanimo Global's share.
+
+Initial execution drafts live in `docs/legal/stewardship/` for Cami Ryn Stormcaller (United States, home region New York), Taki (Japan, home region Tokyo), Anthony Stematz-Breitling (Kansas City, Missouri), and Saphirah Pociluyko (Los Angeles, California). Repository presence alone is not execution.
+
 ## Human checkpoint D: Cerbanimo attestations
 
 Before enabling live money, a responsible human must confirm:
@@ -80,9 +94,10 @@ Before enabling live money, a responsible human must confirm:
 - [ ] compliance approval for the intended launch scope;
 - [ ] jurisdiction review for launch geography;
 - [ ] KYC/AML responsibilities and operating procedures;
-- [ ] tax collection/reporting responsibilities for platform-money and direct-charge service/learning lanes;
+- [ ] tax collection/reporting responsibilities for platform-money, Territory Stewardship, and direct-charge service/learning lanes;
 - [ ] current Stripe/provider terms and Connect obligations;
-- [ ] the FellowFare three-rail boundary remains intentional: goods seller-direct, tokens fulfillment-burn, service/learning/tutoring USD provider-owned direct charges.
+- [ ] the FellowFare three-rail boundary remains intentional: goods seller-direct, tokens fulfillment-burn, service/learning/tutoring USD provider-owned direct charges;
+- [ ] Territory Stewardship remains a second-stage split only of the existing Cerbanimo share and leaves Host Node Steward, provider, contributor, and compute/system shares untouched.
 
 ## Guarded promotion
 
@@ -92,6 +107,8 @@ Acceptance must include:
 
 - a platform-money transaction such as a compute top-up or membership;
 - one provider-owned FellowFare service/learning/tutoring direct charge with the application fee verified;
+- one held Territory case and one payout-ready Territory case;
+- verification that refunds/reversals proportionally reduce both applicable Steward entitlements;
 - confirmation that `/api/money-edge/commerce/*` still returns `410 marketplace-checkout-disabled`;
 - confirmation that a physical-goods kind is rejected by `/api/fellowfare/direct-commerce/*`;
 - confirmation that Acorn/Button settlement remains fulfillment burn with no recipient transfer.
@@ -104,10 +121,12 @@ The existing Cloudflare Money Emergency Stop can disable live money without repl
 
 Automation may verify reported facts, but it must not:
 
-- invent business, owner, tax, bank, or identity information;
+- invent business, owner, Steward, tax, bank, payout-account, or identity information;
+- mark a Stewardship Agreement signed because a repository draft exists;
 - mark a legal/compliance attestation true because a test passed;
 - move secrets through source control or chat;
 - enable live money before required Stripe and human checkpoints are complete;
 - create a FellowFare physical-goods charge;
 - recreate destination-charge or platform-charge/separate-transfer seller settlement for new FellowFare commerce;
-- reinterpret direct-charge authorization as permission for FellowFare to collect provider gross proceeds.
+- reinterpret direct-charge authorization as permission for FellowFare to collect provider gross proceeds;
+- redirect a Territory Stewardship Share from checkout/buyer input or silently return a vacant Territory share to Cerbanimo Global.

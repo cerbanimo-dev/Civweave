@@ -2,7 +2,7 @@
 'use strict';
 if(globalThis.CivweaveCerbanimoCommerceV1)return;
 
-const VERSION='2.0.0-fulfillment-boundary';
+const VERSION='2.1.0-territory-stewardship';
 const SCHEMA='civweave.cerbanimo-commerce-distribution.v1';
 const ANNUAL_SCHEMA='civweave.cerbanimo-annual-distribution.v1';
 const RECEIPT_SCHEMA='civweave.cerbanimo-commerce-receipt.v1';
@@ -10,6 +10,8 @@ const STORAGE_KEY='civweave.cerbanimo-commerce-receipts.v1';
 const DEFAULT_ANNUAL_RESERVE_SHARE_BPS=5000;
 const DEFAULT_ANNUAL_HOST_BPS=1000;
 const DEFAULT_ANNUAL_CERBANIMO_BPS=500;
+const CERBANIMO_GLOBAL_SHARE_BPS_OF_CERBANIMO=5000;
+const TERRITORY_SHARE_BPS_OF_CERBANIMO=5000;
 const clean=(v,n=500)=>String(v??'').trim().slice(0,n);
 const num=v=>Number.isFinite(Number(v))?Number(v):0;
 const list=v=>Array.isArray(v)?v:[];
@@ -84,14 +86,23 @@ function combineCashRows(rows){
       stripeAccountId:row.stripeAccountId||null,
       roles:[],
       amountMinor:0,
-      sourceContributionIds:[]
+      sourceContributionIds:[],
+      holdForPayout:Boolean(row.holdForPayout),
+      territoryId:row.territoryId||null
     };
     prior.amountMinor+=row.amountMinor;
     prior.roles=[...new Set([...prior.roles,row.role])];
     prior.sourceContributionIds=[...new Set([...prior.sourceContributionIds,...list(row.sourceContributionIds)])];
+    prior.holdForPayout=prior.holdForPayout||Boolean(row.holdForPayout);
+    if(!prior.territoryId&&row.territoryId)prior.territoryId=row.territoryId;
     map.set(id,prior);
   }
   return[...map.values()].sort((a,b)=>a.contributorId.localeCompare(b.contributorId));
+}
+function splitCerbanimoBps(cerbanimoBps){
+  const gross=bps(cerbanimoBps,'cerbanimoBps');
+  const cerbanimoGlobalBps=Math.floor(gross*CERBANIMO_GLOBAL_SHARE_BPS_OF_CERBANIMO/10000);
+  return{cerbanimoGlobalBps,territoryStewardshipBps:gross-cerbanimoGlobalBps};
 }
 function buildAnnualDistribution(input={}){
   const annualId=clean(input.annualId||input.distributionId,220);if(!annualId)throw new TypeError('annualId is required.');
@@ -103,17 +114,20 @@ function buildAnnualDistribution(input={}){
   const cerbanimoBps=bps(input.cerbanimoBps??DEFAULT_ANNUAL_CERBANIMO_BPS,'cerbanimoBps');
   if(hostBps+cerbanimoBps>10000)throw new RangeError('Annual host and Cerbanimo shares cannot exceed 100%.');
   const contributorBps=10000-hostBps-cerbanimoBps;
+  const {cerbanimoGlobalBps,territoryStewardshipBps}=splitCerbanimoBps(cerbanimoBps);
   const annualPayoutMinor=Math.floor(eligibleReserveMinor*reserveShareBps/10000);
   const retainedReserveMinor=eligibleReserveMinor-annualPayoutMinor;
   const buckets=largestRemainder(annualPayoutMinor,[
     {contributorId:'annual-contributors',weight:contributorBps},
     {contributorId:'annual-node-host',weight:hostBps},
-    {contributorId:'annual-cerbanimo',weight:cerbanimoBps}
+    {contributorId:'annual-cerbanimo-global',weight:cerbanimoGlobalBps},
+    {contributorId:'annual-territory-stewardship',weight:territoryStewardshipBps}
   ]);
   const bucket=id=>buckets.find(row=>row.contributorId===id)?.amount||0;
   const contributorPoolMinor=bucket('annual-contributors');
   const hostAmountMinor=bucket('annual-node-host');
-  const cerbanimoAmountMinor=bucket('annual-cerbanimo');
+  const cerbanimoGlobalAmountMinor=bucket('annual-cerbanimo-global');
+  const territoryAmountMinor=bucket('annual-territory-stewardship');
   const participants=normalizeContributors(input.contributors||input.participantContributors);
   if(contributorPoolMinor&&!participants.length)throw new Error('Annual contributor pool requires eligible cotoken contributors.');
   const participantRows=contributorPoolMinor?roleAllocation(contributorPoolMinor,'annual-cotoken-contributor',participants):[];
@@ -124,40 +138,67 @@ function buildAnnualDistribution(input={}){
     weight:1
   };
   const cerbanimo={
-    contributorId:clean(input.cerbanimo?.contributorId||input.cerbanimoId||'cerbanimo',180),
-    contributorName:clean(input.cerbanimo?.contributorName||input.cerbanimo?.name||'Cerbanimo',180),
+    contributorId:clean(input.cerbanimo?.contributorId||input.cerbanimoId||'cerbanimo-global',180),
+    contributorName:clean(input.cerbanimo?.contributorName||input.cerbanimo?.name||'Cerbanimo Global',180),
     stripeAccountId:clean(input.cerbanimo?.stripeAccountId||input.cerbanimoStripeAccountId,180)||null,
     weight:1
   };
+  const territoryId=clean(input.territoryId||input.territory?.territoryId||'unassigned',120).toLowerCase();
+  const stewardInput=input.territorySteward||input.steward||null;
+  const territoryPayoutReady=Boolean(stewardInput&&clean(stewardInput.stripeAccountId||stewardInput.connectedAccountId,180));
+  const territory={
+    contributorId:territoryPayoutReady
+      ? clean(stewardInput.contributorId||stewardInput.appointmentId||`territory-steward:${territoryId}`,180)
+      : `territory-reserve:${territoryId}`,
+    contributorName:territoryPayoutReady
+      ? clean(stewardInput.contributorName||stewardInput.publicName||stewardInput.name||'Territory Steward',180)
+      : `Territory Operations Reserve · ${territoryId}`,
+    stripeAccountId:territoryPayoutReady?clean(stewardInput.stripeAccountId||stewardInput.connectedAccountId,180):null,
+    territoryId,
+    holdForPayout:!territoryPayoutReady,
+    weight:1
+  };
   const hostRows=hostAmountMinor?roleAllocation(hostAmountMinor,'annual-node-host',[host]):[];
-  const cerbanimoRows=cerbanimoAmountMinor?roleAllocation(cerbanimoAmountMinor,'annual-cerbanimo',[cerbanimo]):[];
-  const payouts=combineCashRows([...participantRows,...hostRows,...cerbanimoRows]);
+  const cerbanimoRows=cerbanimoGlobalAmountMinor?roleAllocation(cerbanimoGlobalAmountMinor,'annual-cerbanimo-global',[cerbanimo]):[];
+  const territoryRows=territoryAmountMinor?roleAllocation(territoryAmountMinor,territoryPayoutReady?'annual-territory-steward':'annual-territory-reserve',[territory]).map(row=>({...row,territoryId,holdForPayout:!territoryPayoutReady})):[];
+  const payouts=combineCashRows([...participantRows,...hostRows,...cerbanimoRows,...territoryRows]);
   if(payouts.reduce((sum,row)=>sum+row.amountMinor,0)!==annualPayoutMinor)throw new Error('Annual distribution must conserve the full payout amount.');
   return Object.freeze({
     schema:ANNUAL_SCHEMA,
     version:VERSION,
     annualId,
     nodeId,
+    territoryId,
     currency,
     eventDate:clean(input.eventDate||`${new Date().getUTCFullYear()}-12-01`,40),
     eligibleReserveMinor,
     reserveShareBps,
     annualPayoutMinor,
     retainedReserveMinor,
-    policy:{basis:'annual-payout',contributorBps,hostBps,cerbanimoBps},
+    policy:{
+      basis:'annual-payout',
+      contributorBps,
+      hostBps,
+      existingCerbanimoBps:cerbanimoBps,
+      cerbanimoGlobalBps,
+      territoryStewardshipBps,
+      hostShareChanged:false,
+      sourceBoundary:'existing-cerbanimo-share-only'
+    },
     weightSource:'eligible-cerbanimo-cotokens',
     cotokensConsumed:false,
     payouts,
+    heldTerritoryPayoutMinor:payouts.filter(row=>row.holdForPayout).reduce((sum,row)=>sum+row.amountMinor,0),
     createdAt:clean(input.createdAt||now(),80)
   });
 }
 function annualStripeTransferInstructions(distribution,{transferGroup}={}){
   if(distribution?.schema!==ANNUAL_SCHEMA)throw new TypeError('Annual distribution is required.');
-  return distribution.payouts.filter(x=>x.amountMinor>0).map((p,index)=>({
+  return distribution.payouts.filter(x=>x.amountMinor>0&&x.stripeAccountId&&!x.holdForPayout).map((p,index)=>({
     schema:'civweave.cerbanimo-annual-transfer.v1',
     annualId:distribution.annualId,
     recipientId:p.contributorId,
-    destinationAccountId:p.stripeAccountId||null,
+    destinationAccountId:p.stripeAccountId,
     amountCents:p.amountMinor,
     currency:distribution.currency.toLowerCase(),
     fundingMode:'platform-reserve',
@@ -167,6 +208,7 @@ function annualStripeTransferInstructions(distribution,{transferGroup}={}){
       civweave_schema:ANNUAL_SCHEMA,
       civweave_annual_id:distribution.annualId,
       civweave_node_id:distribution.nodeId,
+      civweave_territory_id:distribution.territoryId||'',
       civweave_recipient_id:p.contributorId,
       civweave_roles:p.roles.join(','),
       civweave_event_date:distribution.eventDate
@@ -191,8 +233,11 @@ const api=Object.freeze({
   DEFAULT_ANNUAL_RESERVE_SHARE_BPS,
   DEFAULT_ANNUAL_HOST_BPS,
   DEFAULT_ANNUAL_CERBANIMO_BPS,
+  CERBANIMO_GLOBAL_SHARE_BPS_OF_CERBANIMO,
+  TERRITORY_SHARE_BPS_OF_CERBANIMO,
   normalizeContributors,
   largestRemainder,
+  splitCerbanimoBps,
   buildDistribution:disabled,
   stripeTransferInstructions:disabled,
   recordSale:async()=>disabled(),
