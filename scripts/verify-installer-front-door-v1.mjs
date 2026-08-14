@@ -14,7 +14,7 @@ const [installerHtml,bridge,brand,logoSvg,hostSetup,anchor,setup,frontDoor]=awai
   read('public/app/front-door-prismatic-v301.css')
 ]);
 
-const entry="/app/installed-entry-v146?installed=1&system=civweave";
+const entry="/app/installed-entry-v146.html?installed=1&system=civweave";
 const civweavePrismatic='/app/logos/civweave-prismatic-wordmark-v1.png';
 const cerbanimoMark='/app/logos/cerbanimo-steward-mark-v1.png';
 const frontDoorCss='/app/front-door-prismatic-v301.css';
@@ -79,7 +79,7 @@ assert.ok(frontDoor.includes("background:#fff url('/app/logos/cerbanimo-steward-
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installer-front-door-v6-approved-cerbanimo-uncropped',
+  revision:'installer-front-door-v7-exact-installed-entry',
   installedEntry:entry,
   hostSetup:'/host-setup.html',
   launcher:'/app/pwa-install-prompt-v247.js',
