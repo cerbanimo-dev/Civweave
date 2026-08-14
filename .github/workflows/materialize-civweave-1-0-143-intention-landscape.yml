@@ -30,6 +30,7 @@ jobs:
           git config user.email "civweave-release-bot@users.noreply.github.com"
           git fetch origin main
           git merge --no-edit origin/main
+          git push origin HEAD:feature/cerbanimo-intention-landscape-v1
 
       - name: Advance release metadata to 1.0.143
         run: |
