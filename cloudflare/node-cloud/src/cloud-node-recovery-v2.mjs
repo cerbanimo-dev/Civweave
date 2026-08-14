@@ -1,5 +1,5 @@
 import { CivweaveCloudNode as BaseCloudNode } from './cloud-node-recovery-v1.mjs';
-import { PassportAccountService } from '../../account-edge/src/hub-passport-account-v4.mjs';
+import { PassportAccountService } from '../../account-edge/src/hub-passport-account-v5.mjs';
 
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
 const HEADERS = Object.freeze({ 'cache-control': 'no-store', 'access-control-allow-origin': '*', 'access-control-allow-methods': 'POST, OPTIONS', 'access-control-allow-headers': 'content-type, x-civweave-node-id', 'access-control-max-age': '86400' });
