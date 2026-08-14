@@ -1,6 +1,7 @@
 @import url('/app/go-live-visual-v300.css?v=go-live-v300');
 @import url('/app/custom-scrollbars-v309.css?v=system-scrollbars-v309');
 @import url('/app/working-campus-desktop-v309.css?v=desktop-composition-v309');
+@import url('/app/weaveling-scroll-owner-v265.css?v=weaveling-scroll-owner-v265');
 :root{--cw160-bg:#f3efe6;--cw160-panel:#fffdf8;--cw160-panel-2:#eee6d8;--cw160-text:#17201e;--cw160-muted:#59635f;--cw160-line:#283d3833;--cw160-shadow:#1116;--cw160-focus:#007f73;--cw160-attention:#bf6418;color-scheme:light}
 html[data-civweave-resolved-theme="dark"]{--cw160-bg:#071018;--cw160-panel:#0d1b24;--cw160-panel-2:#122832;--cw160-text:#eef8f6;--cw160-muted:#a9bfbb;--cw160-line:#9bd8cb35;--cw160-shadow:#000b;--cw160-focus:#79ead2;--cw160-attention:#ffc06d;color-scheme:dark}
 html[data-civweave-resolved-theme="dark"] body{background-color:var(--cw160-bg);color:var(--cw160-text)}
