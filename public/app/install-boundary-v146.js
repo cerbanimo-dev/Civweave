@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.133';
+const VERSION='1.0.136';
 const REVISION='chat-convergence-v250-navigation-lifecycle-v424';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;

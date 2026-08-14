@@ -1,0 +1,26 @@
+{
+  "schema": "civweave.low-end-device-matrix.v1",
+  "status": "blocked",
+  "reviewedAt": null,
+  "devices": [],
+  "requiredEvidence": [
+    "coldLaunchOnline",
+    "coldLaunchOffline",
+    "warmMiniLmClassification",
+    "smolLm135mGeneration",
+    "memoryPressureRecovery",
+    "workerShutdown",
+    "interruptedModelDownloadRecovery",
+    "fullyDisconnectedRelaunch",
+    "thermalAndBatteryObservation"
+  ],
+  "requiredMeasurements": [
+    "startupMs",
+    "miniLmColdMs",
+    "miniLmWarmMs",
+    "smolLm135mFirstTokenMs",
+    "smolLm135mTokensPerSecond",
+    "peakMemoryMb"
+  ],
+  "policy": "Physical evidence must come from a real low-end device. Synthetic CI and desktop throttling may supplement but cannot satisfy this gate. A pass requires every required scenario to complete without unrecoverable state loss, boot lockout, or a required reinstall."
+}

@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '1.0.133';
+const VERSION = '1.0.136';
 const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';
 const SHELL_CACHE = `civweave-shell-${VERSION}-${BUILD}`;
 const RUNTIME_CACHE = `civweave-runtime-${VERSION}-${BUILD}`;
@@ -20,6 +20,8 @@ const REQUIRED_SHELL_ASSETS = [
   '/app/index.html',
   '/app/installed-entry-v146.html',
   '/app/installed-entry-v146.js',
+  '/app/legal-consent-v1.js',
+  '/legal/civweave-legal-release-v1.json',
   '/app/document-lifecycle-v221.js',
   '/app/fullscreen-family-v104.html',
   '/app/logos/civweave-icon-192.png',

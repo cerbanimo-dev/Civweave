@@ -18,8 +18,8 @@
       "sourceCommit": "395ec2394edad86e0b5ce092300dd613f7ce4a7d"
     },
     "current": {
-      "version": "1.0.133",
-      "path": "releases/1.0.133",
+      "version": "1.0.136",
+      "path": "releases/1.0.136",
       "status": "current"
     },
     "currentPathTemplate": "releases/{VERSION}",

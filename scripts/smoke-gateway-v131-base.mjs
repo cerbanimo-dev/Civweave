@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 await import('./stage-maplibre-v275.mjs');
-const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.133',BUILD='1.0.133-install-only-fullscreen-family-gateway';
+const PORT=18792,origin=`http://127.0.0.1:${PORT}`,VERSION='1.0.136',BUILD='1.0.136-install-only-fullscreen-family-gateway';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),dataDir=await mkdtemp(path.join(os.tmpdir(),'civweave-gateway-v106-')),output=[];
 const child=spawn(process.execPath,['scripts/start-civweave-v131.mjs'],{cwd:root,env:{...process.env,RENDER:'true',HOST:'127.0.0.1',PORT:String(PORT),DATA_DIR:dataDir},stdio:['ignore','pipe','pipe']});child.stdout.on('data',chunk=>output.push(chunk.toString()));child.stderr.on('data',chunk=>output.push(chunk.toString()));
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms)),assert=(condition,message)=>{if(!condition)throw new Error(message)};
@@ -21,10 +21,10 @@ try{
 
   const controller=await fetch(`${origin}/app/model-settings-controller-v173.js`,{headers:packageHeaders}).then(response=>response.text());
   for(const token of [
-    "VERSION='1.0.7-ai-settings-cleanroom-v188'",
-    "authority:'ai-settings-cleanroom-v188'",
-    "eventOwnership:'single-cleanroom-controller'",
-    "presentation:'cleanroom-v188'",
+    "VERSION='1.0.8-ai-settings-cleanroom-v188-v317'",
+    "authority:'ai-settings-cleanroom-v188-v317'",
+    "eventOwnership:'none-input-owned-by-settings-gateway-v317'",
+    "presentation:'cleanroom-v188-v317'",
     'providerRuntimeOnOpen:false',
     'providerRuntimeAvailable:false',
     'providerTestsAvailable:false',
@@ -47,7 +47,7 @@ try{
   const settings=await fetch(`${origin}/app/unified-ai-settings-v175.js`,{headers:packageHeaders}).then(response=>response.text());
   assert(settings.includes("VERSION='1.0.7-unified-settings-compat-v188'")&&settings.includes('retiredRuntime:true')&&settings.includes("authority:'ai-settings-cleanroom-v188'")&&!settings.includes('MutationObserver')&&!settings.includes('ensureRuntime')&&!settings.includes('detectCapabilities')&&!settings.includes('.generate('),'unified settings compatibility file is not inert');
   const delegation=await fetch(`${origin}/app/settings-delegation-v175.js`,{headers:packageHeaders}).then(response=>response.text());
-  assert(delegation.includes("VERSION='188.0-ai-settings-cleanroom-delegation'")&&delegation.includes("document.addEventListener('click',onClick);")&&delegation.includes("listenerPhase:'bubble'")&&delegation.includes('listenerCount:1')&&delegation.includes('mutationObserver:false')&&delegation.includes('polling:false')&&delegation.includes('timers:false')&&!delegation.includes('MutationObserver')&&!delegation.includes('PerformanceObserver')&&!delegation.includes('setInterval(')&&!delegation.includes("addEventListener('click',onClick,true)"),'settings delegation is not the one-listener clean-room bridge');
+  assert(delegation.includes("VERSION='188.1-retired-settings-gateway-v317'")&&delegation.includes("REVISION='317.0-single-settings-gateway'")&&delegation.includes('retired:true')&&delegation.includes('listenerCount:0')&&delegation.includes('inputOwnership:false')&&delegation.includes('mutationObserver:false')&&delegation.includes('polling:false')&&delegation.includes('timers:false')&&delegation.includes('CivweaveSettingsGatewayV317?.open?.(launcher)')&&!delegation.includes('MutationObserver')&&!delegation.includes('PerformanceObserver')&&!delegation.includes('setInterval(')&&!delegation.includes("document.addEventListener('click'"),'settings delegation is not retired behind the v317 single gateway');
 
   const campus=await fetch(`${origin}/app/working-campus-v156.html`,{headers:packageHeaders}).then(response=>response.text());assert(campus.includes('/app/logos/civweave-symbol.svg')&&campus.includes(VERSION)&&!campus.includes('/app/logos/civweave.webp'),'Working Campus header is stale');
   const campusCss=await fetch(`${origin}/app/working-campus-v156.css`,{headers:packageHeaders}).then(response=>response.text());assert(campusCss.includes('#brand-home.brand{grid-template-columns:64px')&&campusCss.includes('.app .campus .realm-node{min-height:96px!important')&&campusCss.includes('--cw-themed-nav-height:58px'),'Working Campus compact shell contract is stale');
@@ -55,5 +55,5 @@ try{
   const sharedTools=await fetch(`${origin}/extensions/civweave-additions-v156.js`,{headers:packageHeaders}).then(response=>response.text());assert(sharedTools.includes('Node & friends')&&sharedTools.includes('aiVault:false'),'Shared Tools regressed');
   const packageLedger=await fetch(`${origin}/app/shared/civweave-parity-ledger.json`,{cache:'no-store',headers:packageHeaders});assert(packageLedger.ok,`marked parity ledger returned ${packageLedger.status}`);const ledger=await packageLedger.json();assert(Array.isArray(ledger.systems)&&ledger.systems.length>=5,'parity ledger is missing systems');
   const telemetry=await fetch(`${origin}/api/boot-log`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({kind:'room-opened'})});assert(telemetry.status===204,`boot telemetry returned ${telemetry.status}`);
-  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsPresentation:'cleanroom-v188',nativeDialog:false,outsideTap:'safe-close',settingsTransformerWork:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,captureListener:false,mutationObserver:false,polling:false,timers:false,campusIconPixels:64,campusShell:'compact-v235',manualFirstInstaller:true},null,2));
+  console.log(JSON.stringify({ok:true,version:VERSION,build:BUILD,requiredCoreAssetCount:requiredAssets.length,defaultProvider:'deterministic',settingsPresentation:'cleanroom-v188-v317',settingsDelegation:'retired-v317-single-gateway',nativeDialog:false,outsideTap:'safe-close',settingsTransformerWork:false,providerRuntimeOnOpen:false,providerTestsAvailable:false,modelDiscoveryAvailable:false,captureListener:false,mutationObserver:false,polling:false,timers:false,campusIconPixels:64,campusShell:'compact-v235',manualFirstInstaller:true},null,2));
 }catch(error){console.error(output.join(''));throw error}finally{child.kill('SIGTERM');await Promise.race([new Promise(resolve=>child.once('exit',resolve)),sleep(1500)]);if(!child.killed)child.kill('SIGKILL');await rm(dataDir,{recursive:true,force:true})}

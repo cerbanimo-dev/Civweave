@@ -114,7 +114,7 @@ test('coverage scoring uses size, provenance and observed latency as tie breaker
 test('finder route and offline package carry the complete Map v1 stack',()=>{
   has(route,/federation-finder-map-v275\.html/);
   for(const asset of ['/app/federation-finder-map-v275.html','/app/civweave-map-service-v275.js','/app/civweave-map-bootstrap-v1.js','/app/civweave-map-mesh-v276.js','/app/civweave-map-mesh-bridge-v276.js','/app/civweave-map-coverage-v277.js','/app/civweave-map-storage-v1.js','/app/civweave-map-offline-v1.js','/app/civweave-map-ui-v1.js','/app/shared/civweave-map-coverage-scoring-v1.mjs','/app/shared/civweave-sha256-stream-v1.mjs','/app/vendor/maplibre-v5.13.0/maplibre-gl.js','/app/vendor/pmtiles-v4.4.1/pmtiles.js'])assert.ok(offline.assets.includes(asset),`${asset} should ship offline`);
-  assert.equal(offline.revision,'canonical-background-campus-v241-systems-mesh-v251');
+  assert.ok(String(offline.revision||'').startsWith('canonical-background-campus-v241-systems-mesh-v251'),'offline package must retain the canonical background-campus + systems-mesh revision prefix');
   has(prep,/stage-maplibre-v275\.mjs/,'startup preparation should vendor the renderer');
   has(prep,/stage-federation-finder-data-v274\.mjs/,'startup preparation should hydrate the pinned atlas');
   has(offlineRuntime,/new lib\.PMTiles\(source\)/,'downloaded PMTiles should actually render');

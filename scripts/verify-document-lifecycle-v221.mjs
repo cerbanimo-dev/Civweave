@@ -6,18 +6,20 @@ import {fileURLToPath} from 'node:url';
 await import('./verify-system-ownership-v317.mjs');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=relative=>readFile(path.join(root,relative),'utf8');
-const [manifestText,installedEntry,campusLoader,campusPart4,lifecycle,boundary,routes,additions,workerCore,releaseCoherence,wrapper,canonicalNavigation]=await Promise.all([
-  read('public/app/manifest.webmanifest'),read('public/app/installed-entry-v146.js'),read('public/app/working-campus-v156.js'),read('public/app/working-campus-v156.part4.txt'),read('public/app/document-lifecycle-v221.js'),read('public/app/install-boundary-v146.js'),read('public/app/system-routes-v227.js'),read('public/extensions/civweave-additions-v156.js'),read('public/service-worker-core-v208.js'),read('public/service-worker-release-coherence-v220.js'),read('public/service-worker-v203.js'),read('public/service-worker-canonical-navigation-v227.js')
+const [manifestText,installedEntry,campusLoader,lifecycle,boundary,routes,additions,workerCore,releaseCoherence,wrapper,canonicalNavigation]=await Promise.all([
+  read('public/app/manifest.webmanifest'),read('public/app/installed-entry-v146.js'),read('public/app/working-campus-v156.js'),read('public/app/document-lifecycle-v221.js'),read('public/app/install-boundary-v146.js'),read('public/app/system-routes-v227.js'),read('public/extensions/civweave-additions-v156.js'),read('public/service-worker-core-v208.js'),read('public/service-worker-release-coherence-v220.js'),read('public/service-worker-v203.js'),read('public/service-worker-canonical-navigation-v227.js')
 ]);
 const manifest=JSON.parse(manifestText);
 assert.equal(manifest.start_url,'/app/installed-entry-v146.html?installed=1');
 assert(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('registration.update()'));
 for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert(routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);
+assert.match(routes,/function navigate\(id,options=\{\}\)/,'Canonical route owner must implement navigation directly.');
+assert.match(routes,/const api=Object\.freeze\([^;]*navigate[^;]*\);/,'Canonical route API must export navigation.');
+assert.match(routes,/globalThis\.CivweaveSystemRoutesV227=api/,'Canonical route owner must publish its API.');
 for(const token of ["['/app/working-campus-v156.html','civweave']","['/app/cabinets/living-school/index.html','living-school']","['/app/realm-console-v140.html','cerbanimo']","['/app/fellowfare-cabinet-v144.html','fellowfare']","['/app/anarchadia-console-v139.html','anarchadia']","canonicalSystemCount:5","settingsGatewayRevision:'v317-single-owner-first-click-only'"])assert(boundary.includes(token),`Install boundary is missing ${token}.`);
 const experienceStart=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),experienceEnd=boundary.indexOf('];',experienceStart),experience=boundary.slice(experienceStart,experienceEnd);
 assert(experience.includes('SETTINGS_GATEWAY')&&experience.includes('GUIDE_WORKSPACE'));
 assert(!experience.includes('DOCUMENT_LIFECYCLE')&&!experience.includes('AI_SETTINGS_BIND_GUARD')&&!experience.includes('AI_SETTINGS_REPAIR'));
-assert(campusPart4.includes('CivweaveSystemRoutesV227')&&campusPart4.includes('routes.navigate(id)'));
 assert.match(lifecycle,/document-lifecycle-v317-explicit-activation/);
 assert.match(lifecycle,/searchParams\.get\('activate'\)==='1'/);
 assert.match(lifecycle,/settingsEntryOwner:'settings-gateway-v317'/);
@@ -31,4 +33,4 @@ for(const token of ['release-coherence-v226','working-campus-v156.part5.txt','ve
 assert(wrapper.includes('/service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343'));
 assert(canonicalNavigation.includes("headers.set('x-civweave-package',REVISION)"));
 for(const [name,source] of [['installed entry',installedEntry],['campus loader',campusLoader],['lifecycle guard',lifecycle],['install boundary',boundary],['route contract',routes],['shared additions',additions],['release coherence',releaseCoherence],['canonical navigation',canonicalNavigation]])assert.doesNotThrow(()=>new vm.Script(source,{filename:name}),`${name} does not compile.`);
-console.log(JSON.stringify({ok:true,revision:'canonical-campus-startup-v317',updaterFirstStart:true,canonicalSystems:5,settingsOwner:'settings-gateway-v317',settingsManagementActivation:'explicit-first-click',managementAfterPaint:true,globalObserverPatch:false},null,2));
+console.log(JSON.stringify({ok:true,revision:'canonical-campus-startup-v317',updaterFirstStart:true,canonicalSystems:5,navigationOwner:'system-routes-v227',settingsOwner:'settings-gateway-v317',settingsManagementActivation:'explicit-first-click',managementAfterPaint:true,globalObserverPatch:false},null,2));
