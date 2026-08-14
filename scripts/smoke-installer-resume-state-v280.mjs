@@ -9,7 +9,7 @@ const root=path.resolve(here,'..');
 const read=relative=>fs.readFileSync(path.join(root,relative),'utf8');
 const files={
   worker:read('public/service-worker-offline-v211-override.js'),
-  controller:read('public/app/installer-state-machine-v280.js'),
+  controller:read('public/app/installer-state-machine-v281.js'),
   autostart:read('public/app/required-campus-autostart-v1.js'),
   background:read('public/app/campus-background-download-v241.js'),
   entry:read('public/service-worker-v203.js'),
@@ -23,10 +23,11 @@ assert.match(files.worker,/interrupted:\s*true/);
 assert.match(files.worker,/civweave-campus-resume-v280/);
 assert.match(files.worker,/current-manifest-only-v282/);
 assert.match(files.controller,/Pause download/);
-assert.match(files.controller,/Resume download/);
-assert.match(files.controller,/calculating storage/);
-assert.match(files.controller,/needs repair/);
-assert.match(files.controller,/addEventListener\('click',onCampusButton,true\)/);
+assert.match(files.controller,/civweave-campus-resume-v280/);
+assert.match(files.controller,/CivweaveInstallerStateV281/);
+assert.match(files.controller,/addEventListener\('civweave:offline-campus-status'/);
+assert.doesNotMatch(files.controller,/MutationObserver|setInterval\(/);
+assert.doesNotMatch(files.controller,/\$\('#(?:package-state|package-assets|local-mode|install-help|install-app|check-update)'\)/);
 assert.match(files.autostart,/required-campus-autostart-v304-disabled/);
 assert.match(files.autostart,/disabled:true/);
 assert.match(files.autostart,/explicit-user-opt-in-only/);
@@ -42,7 +43,8 @@ assert.match(files.background,/!lastStatus\?\.paused/);
 assert.match(files.background,/data-state="paused"/);
 assert.match(files.entry,/service-worker-installer-state-v280/);
 assert.match(files.entry,/resumable-pause-v280/);
-assert.match(files.shell,/installer-state-machine-v280\.js/);
+assert.match(files.shell,/installer-state-machine-v281\.js/);
+assert.doesNotMatch(files.shell,/installer-state-machine-v280\.js/);
 assert.match(files.shell,/installer-storage-guard-v281\.js/);
 assert.match(files.shell,/offline-campus-status-v210\.js/);
 assert.match(files.shell,/campusAutostartRequired:\s*false/);
@@ -120,4 +122,4 @@ assert.equal(metadataWrites[0].skipped.length,0);
 assert.ok((listeners.message||[]).length>=1);
 assert.ok((listeners.sync||[]).length>=1);
 
-console.log('installer resume state v280 + current-manifest-only v282 smoke: ok');
+console.log('installer resume state v281 UI + v280 worker protocol smoke: ok');
