@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [nav,mapper,release,fellowfareVerifier]=await Promise.all([read('public/app/themed-system-nav-v178.js'),read('public/app/subsystem-avatar-state-v347.js'),read('VERSION'),read('scripts/verify-fellowfare-active-v203.mjs')]);
+const [nav,mapper,release,fellowfareVerifier,platformCss]=await Promise.all([read('public/app/themed-system-nav-v178.js'),read('public/app/subsystem-avatar-state-v347.js'),read('VERSION'),read('scripts/verify-fellowfare-active-v203.mjs'),read('public/app/platform-experience-v160.css')]);
 const version=release.trim();
 new Function(nav);new Function(mapper);
 const match=version.match(/^(\d+)\.(\d+)\.(\d+)$/);assert.ok(match,'Avatar navigation requires a semantic Civweave release version.');
@@ -16,8 +16,12 @@ assert.doesNotMatch(fellowfareVerifier,/selected navigation accent is not ink bl
 assert.match(nav,/cerbanimo'.*glow:'#bb79ff'.*shade:'#4f265f'/s,'Kamiya button must be purple.');
 assert.match(nav,/anarchadia'.*glow:'#ff3d96'.*shade:'#621f43'/s,'Merlin button must be magenta\/pink.');
 assert.match(nav,/civweave'.*panel:'linear-gradient\(135deg,#fbf8ff/s,'Weaveling button must be pearl\/rainbow.');
-assert.match(nav,/--cw-themed-nav-height:clamp\(60px,15vw,68px\)/,'Mobile nav buttons must be taller.');
+assert.match(nav,/--cw-themed-nav-height:clamp\(60px,15vw,68px\)/,'Base mobile nav contract remains available before platform sizing.');
+assert.match(nav,/bottom:calc\(env\(safe-area-inset-bottom\) \+ var\(--cw-themed-nav-bottom-gap\)\)/,'The nav must remain anchored above the platform safe-area inset.');
 assert.match(nav,/top:4px;bottom:7px/,'Mobile tray must be shorter than its buttons.');
+assert.match(platformCss,/html\.cw-themed-system-nav-active\{--cw-themed-nav-height:clamp\(92px,10vw,100px\)!important\}/,'Platform CSS must own the final doubled desktop rail height.');
+assert.match(platformCss,/@media\(max-width:680px\)\{html\.cw-themed-system-nav-active\{--cw-themed-nav-height:clamp\(88px,22vw,96px\)!important;--cw-themed-nav-bottom-gap:10px!important\}/,'Phone rail height and bottom guard must beat stale shared-surface geometry.');
+assert.match(platformCss,/@media\(max-width:430px\)\{html\.cw-themed-system-nav-active\{--cw-themed-nav-height:clamp\(80px,22vw,88px\)!important;--cw-themed-nav-bottom-gap:10px!important\}/,'Narrow phones must retain the full avatar rail above the viewport edge.');
 assert.match(nav,/background-size:500% 400%,cover/,'Nav must crop the 5x4 avatar atlases.');
 assert.match(nav,/civweave:subsystem-avatar-state/);assert.match(nav,/civweave:avatar-expression/);assert.match(nav,/subsystemActive\(system\)/,'Subsystem state must override chat mood while active.');
 const listeners=new Map(),storage=new Map(),localStorage={getItem:key=>storage.has(key)?storage.get(key):null,setItem:(key,value)=>storage.set(key,String(value)),removeItem:key=>storage.delete(key)};
@@ -27,4 +31,4 @@ assert.equal(api.expressionFor('civweave','healthy'),'hopeful');assert.equal(api
 api.set('cerbanimo','needs-attention',{sticky:true,source:'test',reason:'needs you'});assert.equal(api.status('cerbanimo').expression,'worried');api.clear('cerbanimo');assert.equal(api.status('cerbanimo'),null);
 context.dispatchEvent(new context.CustomEvent('civweave:systems-mesh:projection-candidate',{detail:{projection:{targetSystem:'fellowfare',projectionId:'p1',projectionType:'offer'}}}));assert.equal(api.status('fellowfare').state,'needs-attention');assert.equal(api.status('fellowfare').expression,'worried');
 context.dispatchEvent(new context.CustomEvent('civweave:capacity-session-ready',{detail:{}}));assert.equal(api.status('civweave').expression,'hopeful');
-console.log(JSON.stringify({ok:true,version,revision:'subsystem-avatar-nav-v347',atlasCount:5,stateContract:'civweave.subsystem-avatar-state/v1',quiet:'sleepy',lonely:'shy',attention:'worried'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'subsystem-avatar-nav-v347',atlasCount:5,stateContract:'civweave.subsystem-avatar-state/v1',quiet:'sleepy',lonely:'shy',attention:'worried',mobileRail:{platformOwnsHeight:true,bottomGuardPx:10,safeArea:true}},null,2));
