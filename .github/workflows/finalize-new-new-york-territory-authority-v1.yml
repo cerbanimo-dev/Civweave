@@ -1,0 +1,124 @@
+name: Finalize New New York Territory Authority v1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/finalize-new-new-york-territory-authority-v1.yml'
+  workflow_run:
+    workflows:
+      - 'Deploy New New York Territory Host v1'
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-root-territory-authority-new-new-york
+  cancel-in-progress: false
+
+jobs:
+  finalize-authority:
+    name: Finalize New New York root binding
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      EXISTING_BINDING_TOKEN: ${{ secrets.NODE_FABRIC_BINDING_TOKEN }}
+      CIVWEAVE_CORE_URL: https://civweave-core.cerbanimo.workers.dev
+      NODE_CLOUD_URL: https://civweave-node-cloud.cerbanimo.workers.dev
+      STEWARD_APPOINTMENT_ID: steward-us-cami-20260814
+      NODE_ID: new-new-york-a
+      OPERATOR_ID: cloudflare-account-new-new-york
+      CALLBACK_URL: https://civweave-host-edge.new-new-york-84759cba63.workers.dev/nodes/new-new-york-a/
+      PAGES_ORIGIN: https://civweave-new-new-york.pages.dev
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify New New York is actually deployed
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const markerUrl = `${process.env.PAGES_ORIGIN}/app/host-deployment-v1.json?finalize=${Date.now()}`;
+          const manifestUrl = new URL('api/ai/node/manifest', process.env.CALLBACK_URL);
+          const [markerResponse, manifestResponse] = await Promise.all([
+            fetch(markerUrl, { cache: 'no-store' }),
+            fetch(manifestUrl, { cache: 'no-store' }),
+          ]);
+          if (!markerResponse.ok) throw new Error(`New New York deployment marker returned HTTP ${markerResponse.status}`);
+          if (!manifestResponse.ok) throw new Error(`New New York authority node returned HTTP ${manifestResponse.status}`);
+          const marker = await markerResponse.json();
+          const envelope = await manifestResponse.json();
+          const manifest = envelope.manifest || envelope;
+          if (marker.role !== 'territory-steward') throw new Error('New New York Pages host is not marked territory-steward.');
+          if (marker.territory?.stewardAppointmentId !== process.env.STEWARD_APPOINTMENT_ID) throw new Error('New New York steward appointment does not match the root appointment.');
+          if (marker.territory?.authorityCandidateNodeId !== process.env.NODE_ID) throw new Error('New New York authority candidate does not match the expected node.');
+          if (manifest.nodeId !== process.env.NODE_ID) throw new Error('New New York node manifest identity mismatch.');
+          console.log(`Verified deployed territory host ${process.env.PAGES_ORIGIN} and authority candidate ${process.env.NODE_ID}.`);
+          NODE
+
+      - name: Resolve founder-only root binding token
+        shell: bash
+        run: |
+          set -euo pipefail
+          binding_token="${EXISTING_BINDING_TOKEN:-}"
+          if [ -n "$binding_token" ]; then
+            test ${#binding_token} -ge 32 || { echo 'Existing founder NODE_FABRIC_BINDING_TOKEN is too short'; exit 2; }
+            echo 'Using the repository-provided founder binding token.'
+          else
+            test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing founder CLOUDFLARE_API_TOKEN'; exit 2; }
+            test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing founder CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+            npx --yes wrangler@latest whoami
+            npx --yes wrangler@latest secret list --name civweave-core --format json >/tmp/civweave-core-secrets.json
+            npx --yes wrangler@latest secret list --name civweave-node-cloud --format json >/tmp/civweave-node-cloud-secrets.json
+            binding_token="$(node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))")"
+            echo "::add-mask::$binding_token"
+            printf '%s' "$binding_token" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --name civweave-core
+            printf '%s' "$binding_token" | npx --yes wrangler@latest secret put NODE_FABRIC_BINDING_TOKEN --name civweave-node-cloud
+            echo 'Rotated the founder-only binding token across core and central node fabric without exposing it to New New York.'
+          fi
+          echo "::add-mask::$binding_token"
+          printf 'NODE_FABRIC_BINDING_TOKEN=%s\n' "$binding_token" >> "$GITHUB_ENV"
+
+      - name: Probe founder authority after token resolution
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 "$CIVWEAVE_CORE_URL/api/health" >/tmp/core-health.json
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 "$NODE_CLOUD_URL/api/fabric/health" >/tmp/node-health.json
+          echo 'Founder core and central node fabric are healthy.'
+
+      - name: Bind New New York as the US Territory Host Authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/bind-territory-host-authority-v1.mjs \
+            --appointment-id "$STEWARD_APPOINTMENT_ID" \
+            --node-id "$NODE_ID" \
+            --operator-id "$OPERATOR_ID" \
+            --callback-url "$CALLBACK_URL" \
+            --max-grant-ttl-seconds 3600 | tee /tmp/new-new-york-authority.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const authority = JSON.parse(fs.readFileSync('/tmp/new-new-york-authority.json', 'utf8'));
+          if (
+            authority.status !== 'active' ||
+            authority.appointmentId !== process.env.STEWARD_APPOINTMENT_ID ||
+            authority.nodeId !== process.env.NODE_ID ||
+            authority.canIssueHostAdmissions !== true ||
+            authority.canDelegateAuthority !== false
+          ) {
+            throw new Error(`Unexpected Territory Host Authority result: ${JSON.stringify(authority)}`);
+          }
+          console.log(`New New York is active as ${authority.authorityId} for ${authority.territoryId}.`);
+          NODE
