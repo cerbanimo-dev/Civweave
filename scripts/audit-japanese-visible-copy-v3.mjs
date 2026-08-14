@@ -66,6 +66,7 @@ function looksInjectedEnglish(text) {
 }
 
 function looksLikeCodeFragment(value) {
+  if (/^[A-Za-z_$][\w$]*(?:[._/-][A-Za-z0-9_$-]+)+$/.test(value)) return true;
   if (/(?:^|[;,(])\s*(?:const|let|var|return|if|else|function|document|window)\b/.test(value)) return true;
   if (/(?:\)\.|\.replace(?:All)?\(|\.map\(|\.join\(|\.filter\(|\.find\(|\.querySelector\(|\.innerHTML\b)/.test(value)) return true;
   if (/===|!==|&&|\|\||\?\.|=>/.test(value)) return true;
