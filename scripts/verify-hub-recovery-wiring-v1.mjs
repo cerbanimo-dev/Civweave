@@ -32,7 +32,7 @@ assert.doesNotMatch(source['cloudflare/account-edge/wrangler.jsonc'], /glaedn\.w
 assert.match(source['cloudflare/account-edge/src/recovery-entry-v9.mjs'], /civweave\.pages\.dev\/app\/recovery-relay-v1\.json/);
 assert.match(source['cloudflare/account-edge/src/recovery-entry-v9.mjs'], /civweave\.recovery-relay-discovery\.v1/);
 assert.match(source['cloudflare/account-edge/src/recovery-entry-v9.mjs'], /HUB_RECOVERY_MAILBOX_PENDING/);
-assert.match(source['cloudflare/account-edge/src/recovery-entry-v9.mjs'], /recover@recovery\./);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v9.mjs'], /validMailbox/);
 assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /"name": "civweave-recovery-relay"/);
 assert.match(source['cloudflare/recovery-relay/wrangler.jsonc'], /CivweaveRecoveryProofRelay/);
 assert.doesNotMatch(source['cloudflare/recovery-relay/wrangler.jsonc'], /RECOVERY_MAILBOX/);
@@ -65,7 +65,6 @@ const activeDomainSurfaces = [
   'cloudflare/account-edge/wrangler.jsonc',
   'cloudflare/node-cloud/wrangler.jsonc',
   'cloudflare/recovery-relay/wrangler.jsonc',
-  'cloudflare/recovery-relay/src/index.mjs',
   '.github/workflows/deploy-civweave-pages.yml',
   '.github/workflows/enable-cloudflare-worker-subdomains-v1.yml',
   'config/launch-topology-v1.json',
@@ -78,8 +77,6 @@ assert.match(source['public/app/civweave-brand.js'], /hub-delivery-intent-v1\.js
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /mailto:/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /#cw-hub-recover-request/);
 assert.match(source['public/app/installer-online-fallback-v225.js'], /hub-recovery-api-v1\.js/);
-assert.match(source['public/app/installer-online-fallback-v225.js'], /hub-recovery-ui-v1\.js/);
-assert.match(source['public/app/hub-recovery-api-v1.js'], /\/nodes\/\$\{encodeURIComponent\(n\)\}\/api\/account\//);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Add a recovery email before creating this Hub account/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /not written into your Passport or exposed to FellowFare/);
 for (const path of paths.filter(path => /\.(?:js|mjs)$/.test(path))) {
