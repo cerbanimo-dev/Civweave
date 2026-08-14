@@ -3,8 +3,11 @@
 
 const REVISION='chat-avatar-visible-v346';
 // Non-executable legacy audit marker only: const REVISION='chat-css-contract-v343'
+const PARTY_REVISION='party-chat-v1';
 const HARDENING_REVISION='mobile-ai-hardening-v302';
 const LOCAL_AI_COHERENCE_REVISION='local-ai-cache-coherence-v306';
+const PARTY_PATH='/app/shared-intention-party-chat-v1.js';
+const PARTY_CACHE='civweave-party-v1';
 const CHAT_PATHS=new Set([
   '/app/manifest.webmanifest',
   '/app/installed-entry-v146.html',
@@ -16,6 +19,7 @@ const CHAT_PATHS=new Set([
   '/app/platform-stability-v159.js',
   '/app/guide-workspace-v242.js',
   '/app/shared-guide-surface-v236.js',
+  '/app/shared-intention-party-chat-v1.js',
   '/app/shared-chat-face-icons-v255.js',
   '/app/avatar-expression-director-v345.js',
   '/app/minilm-context-router-v344.js',
@@ -80,19 +84,29 @@ async function purgeChatRuntimeCaches(){
       if(await cache.delete(request,{ignoreSearch:true}))deleted+=1;
     }
   }
-  return{revision:REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
+  return{revision:REVISION,partyRevision:PARTY_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,deleted,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS]};
 }
+async function cachePartyRuntime(){
+  try{
+    const response=await fetch(`${PARTY_PATH}?offline-package=${PARTY_REVISION}`,{cache:'no-store',headers:{'x-civweave-package':PARTY_REVISION}});
+    if(!response.ok)throw new Error(`party runtime returned ${response.status}`);
+    const cache=await caches.open(PARTY_CACHE);
+    await cache.put(PARTY_PATH,response.clone());
+    return{ok:true,revision:PARTY_REVISION,path:PARTY_PATH,cache:PARTY_CACHE};
+  }catch(error){return{ok:false,revision:PARTY_REVISION,path:PARTY_PATH,cache:PARTY_CACHE,error:String(error?.message||error)}}
+}
+async function repairAndPackage(){const purge=await purgeChatRuntimeCaches(),party=await cachePartyRuntime();return{...purge,party}}
 
 self.addEventListener('activate',event=>{
-  event.waitUntil(purgeChatRuntimeCaches().then(result=>self.clients?.claim?.().then(()=>result)).catch(()=>null));
+  event.waitUntil(repairAndPackage().then(result=>self.clients?.claim?.().then(()=>result)).catch(()=>null));
 });
 self.addEventListener('message',event=>{
   if(event.data?.type!=='CIVWEAVE_CHAT_CACHE_REPAIR')return;
-  event.waitUntil(purgeChatRuntimeCaches().then(result=>{
+  event.waitUntil(repairAndPackage().then(result=>{
     try{event.ports?.[0]?.postMessage({type:'CIVWEAVE_CHAT_CACHE_REPAIRED',...result})}catch{}
     try{event.source?.postMessage?.({type:'CIVWEAVE_CHAT_CACHE_REPAIRED',...result})}catch{}
   }));
 });
 
-self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches});
+self.CivweaveChatCacheRepairV245=Object.freeze({revision:REVISION,partyRevision:PARTY_REVISION,hardeningRevision:HARDENING_REVISION,localAICoherenceRevision:LOCAL_AI_COHERENCE_REVISION,partyPath:PARTY_PATH,partyCache:PARTY_CACHE,paths:[...PURGE_PATHS],retired:[...RETIRED_CHAT_PATHS],purge:purgeChatRuntimeCaches,packageParty:cachePartyRuntime});
 })();
