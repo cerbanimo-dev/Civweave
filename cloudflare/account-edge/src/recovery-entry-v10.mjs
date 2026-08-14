@@ -51,6 +51,20 @@ export class CivweaveAccountNode extends BaseNode {
       service.mailbox = () => recovery.mailbox || '';
       return signup(nodeId, input);
     };
+    const requestRecoveryForNode = service.requestRecoveryForNode.bind(service);
+    service.requestRecoveryForNode = async (nodeId, input = {}) => {
+      const recovery = await discoverRecovery().catch(() => Object.freeze({ relay: '', mailbox: '' }));
+      service.mailbox = () => recovery.mailbox || '';
+      if (!recovery.mailbox && !this.env?.HUB_RECOVERY_MAILER_URL && !this.env?.HUB_RECOVERY_EMAIL?.send) {
+        return Object.freeze({
+          ok: true,
+          accepted: true,
+          message: 'Email recovery is not available on this Hub yet. Use one of your saved one-time recovery codes.',
+          delivery: Object.freeze({ sent: false, transport: 'offline-code-only' }),
+        });
+      }
+      return requestRecoveryForNode(nodeId, input);
+    };
     service.mailbox = () => cachedRecovery?.mailbox || '';
     service.relay = async (path, token) => {
       const recovery = cachedRecovery || await discoverRecovery();
