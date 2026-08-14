@@ -31,7 +31,23 @@ assert.ok(operatorHtml.includes('/app/node-ai-operator-v1.js'),'Operator status 
 assert.ok(operatorRuntime.includes('/api/ai/node/manifest')&&operatorRuntime.includes('/api/ai/node/inference/status'),'Operator status does not use safe public status endpoints.');
 assert.ok(!/FIREWORKS_API_KEY|NODE_AI_CAPABILITY_SECRET/.test(operatorRuntime),'Operator surface references provider or capability credential values.');
 assert.deepEqual(manifest.seeds,[
-  '/app/installed-entry-v146.html','/app/cw-reward-ledger-v2.js','/app/cw-reward-receivers-v2.js','/app/cw-reward-legacy-bridge-v2.js','/app/cw-reward-surfaces-v2.js','/app/cerbanimo-commerce-distribution-v1.js','/app/civweave-systems-mesh-v251.js','/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'
+  '/app/installed-entry-v146.html',
+  '/app/cw-reward-ledger-v2.js',
+  '/app/civweave-basic-value-v1.js',
+  '/app/civweave-economic-policy-v1.js',
+  '/app/civweave-basic-value-model-v1.js',
+  '/app/civweave-basic-value-review-v1.js',
+  '/app/civweave-basic-value-systems-v1.js',
+  '/app/cw-reward-receivers-v2.js',
+  '/app/cw-reward-legacy-bridge-v2.js',
+  '/app/cw-reward-surfaces-v2.js',
+  '/app/cerbanimo-commerce-distribution-v1.js',
+  '/app/civweave-systems-mesh-v251.js',
+  '/app/working-campus-v156.html',
+  '/app/cabinets/living-school/index.html',
+  '/app/realm-console-v140.html',
+  '/app/fellowfare-cabinet-v144.html',
+  '/app/anarchadia-console-v139.html'
 ],'Canonical offline roots changed.');
 for(const asset of ['/finder','/app/federation-finder-local-v269.html','/app/federation-finder-local-v269.js','/app/federation-finder-data/federation-seed-v269.json','/app/node-ai-marketplace-surface-v1.js','/app/node-ai-operator-v1.html','/app/node-ai-operator-v1.js'])assert.ok(manifest.assets.includes(asset),`Offline marketplace asset ${asset} is missing.`);
 assert.ok(offlineWorker.includes("const initialAssets = [...new Set((manifest.seeds || []).filter(Boolean))]"),'Canonical current-graph seed contract changed.');
