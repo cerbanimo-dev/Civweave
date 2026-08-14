@@ -12,6 +12,7 @@ export function housekeepingPath(input){
   const file=String(input||'').replaceAll('\\','/').replace(/^\.\//,'');
   return /^(?:docs|ops)\//.test(file)
     || /^\.github\//.test(file)
+    || /^site\/cerbanimo-cc\//.test(file)
     || /^(?:README|AGENTS|RELEASE-NOTES)\.md$/.test(file)
     || /^scripts\/(?:verify|test|smoke|align)-[^/]+\.mjs$/.test(file)
     || /^scripts\/migrations\//.test(file);
@@ -30,6 +31,7 @@ export function evaluateVersionPolicy({base,proposed,files}){
 function selfTest(){
   const cases=[
     {base:'1.0.75',proposed:'1.0.75',files:['docs/README.md','.github/workflows/test.yml','scripts/verify-root-hygiene.mjs'],ok:true},
+    {base:'1.0.75',proposed:'1.0.75',files:['site/cerbanimo-cc/app.js','site/cerbanimo-cc/assets/poster.webp'],ok:true},
     {base:'1.0.75',proposed:'1.0.75',files:['public/app/index.html'],ok:false},
     {base:'1.0.75',proposed:'1.0.76',files:['public/app/index.html'],ok:true},
     {base:'1.0.76',proposed:'1.0.75',files:['docs/README.md'],ok:false},
