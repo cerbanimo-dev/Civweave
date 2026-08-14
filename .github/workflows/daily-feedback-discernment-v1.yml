@@ -1,0 +1,61 @@
+name: Daily Civweave Feedback Discernment
+
+on:
+  schedule:
+    - cron: '17 10 * * *'
+    - cron: '37 22 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Run discernment or veto-window promotion
+        required: true
+        default: discern
+        type: choice
+        options: [discern, promote]
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+concurrency:
+  group: civweave-daily-feedback-${{ github.event.schedule || inputs.mode || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  discern:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'discern' || github.event_name == 'schedule' && github.event.schedule == '17 10 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build the daily redacted discernment batch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CIVWEAVE_FEEDBACK_BATCH_TOKEN: ${{ secrets.CIVWEAVE_FEEDBACK_BATCH_TOKEN }}
+          CIVWEAVE_FEEDBACK_DISCERN_ENDPOINT: ${{ secrets.CIVWEAVE_FEEDBACK_DISCERN_ENDPOINT }}
+          FEEDBACK_BATCH_MODE: discern
+          FEEDBACK_VETO_HOURS: '12'
+          FEEDBACK_DEV_BRANCH: dev
+        run: node scripts/run-feedback-batch-v1.mjs
+
+  promote:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'promote' || github.event_name == 'schedule' && github.event.schedule == '37 22 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Close veto windows and dispatch safe bounded candidates
+        env:
+          GITHUB_TOKEN: ${{ secrets.CODE_AUTOMATION_GITHUB_TOKEN || github.token }}
+          CIVWEAVE_FEEDBACK_BATCH_TOKEN: ${{ secrets.CIVWEAVE_FEEDBACK_BATCH_TOKEN }}
+          FEEDBACK_BATCH_MODE: promote
+          FEEDBACK_VETO_HOURS: '12'
+          FEEDBACK_DEV_BRANCH: dev
+        run: node scripts/run-feedback-batch-v1.mjs
