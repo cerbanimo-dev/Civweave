@@ -33,7 +33,9 @@ async function copyTree(source,destination,root,files){
 run('stage-maplibre-v275.mjs');
 run('stage-federation-finder-data-v274.mjs');
 const contract=JSON.parse(await fs.readFile(CONTRACT,'utf8'));
-if(contract?.name!=='Civweave Map'||contract?.version!=='1.0.0')throw new Error('Civweave Map v1 package contract is invalid.');
+const validName=contract?.name==='Civweave Map'||contract?.name==='Civweave Hub Map';
+const validVersion=typeof contract?.version==='string'&&/^1\.\d+\.\d+$/.test(contract.version);
+if(contract?.schema!=='civweave.map.package/v1'||!validName||!validVersion)throw new Error('Civweave Map v1 package contract is invalid.');
 const atlas=JSON.parse(await fs.readFile(ATLAS,'utf8'));
 await fs.mkdir(DOWNLOADS,{recursive:true});
 const work=await fs.mkdtemp(path.join(os.tmpdir(),'civweave-map-v1-'));
@@ -50,5 +52,5 @@ try{
   await fs.rm(ARCHIVE,{force:true});await fs.rm(CHECKSUM,{force:true});await createZipArchive(ARCHIVE,work,'civweave-map-v1',{level:9});const archiveInfo=await hashFile(ARCHIVE);
   if(archiveInfo.bytes>CLOUDFLARE_LIMIT)throw new Error(`Civweave Map v1 archive is ${(archiveInfo.bytes/1024/1024).toFixed(2)} MiB and exceeds the 24 MiB Cloudflare release boundary.`);
   await fs.writeFile(CHECKSUM,`${archiveInfo.sha256}  ${path.basename(ARCHIVE)}\n`,'utf8');
-  console.log(JSON.stringify({ok:true,name:'Civweave Map',version:'1.0.0',archive:path.relative(ROOT,ARCHIVE),bytes:archiveInfo.bytes,sha256:archiveInfo.sha256,assets:files.length,atlasFeatureCount:atlas.featureCount,atlasBytes},null,2));
+  console.log(JSON.stringify({ok:true,name:contract.name,version:contract.version,archive:path.relative(ROOT,ARCHIVE),bytes:archiveInfo.bytes,sha256:archiveInfo.sha256,assets:files.length,atlasFeatureCount:atlas.featureCount,atlasBytes},null,2));
 }finally{await fs.rm(work,{recursive:true,force:true})}
