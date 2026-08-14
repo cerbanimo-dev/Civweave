@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 const read = relative => readFile(new URL(`../${relative}`, import.meta.url), 'utf8');
-const [fulfillment,cabinet,legacyShim,browserCommerce,symbols,moneyWithMemberships,entry,originEntry,serverCommerce,directCommerce,serviceFee] = await Promise.all([
+const [fulfillment,cabinet,legacyShim,browserCommerce,symbols,moneyWithMemberships,entry,originEntry,serverCommerce,directCommerce,serviceFee,territory] = await Promise.all([
   read('public/app/services/fellowfare/fulfillment-economy-v2.js'),
   read('public/app/services/fellowfare/cabinet.html'),
   read('public/app/services/fellowfare/app.js'),
@@ -13,7 +13,8 @@ const [fulfillment,cabinet,legacyShim,browserCommerce,symbols,moneyWithMembershi
   read('cloudflare/core/src/origin-entry.mjs'),
   read('cloudflare/core/src/commerce-edge.mjs'),
   read('cloudflare/core/src/fellowfare-direct-commerce-v1.mjs'),
-  read('cloudflare/core/src/fellowfare-service-fee-v1.mjs')
+  read('cloudflare/core/src/fellowfare-service-fee-v1.mjs'),
+  read('cloudflare/core/src/territory-stewardship-v1.mjs')
 ]);
 
 for (const [name, source] of [
@@ -76,16 +77,25 @@ assert.match(serviceFee, /transfers\.create/);
 assert.match(serviceFee, /reverseHostTransfer/);
 assert.match(serviceFee, /50-host-steward-50-cerbanimo/);
 
+// The Stripe application fee still performs the original 50/50 first stage. Only
+// the Cerbanimo half then enters the 50/50 global/territory second stage.
 assert.match(moneyWithMemberships, /goodsPaymentMode: 'seller-direct-outside-platform'/);
 assert.match(moneyWithMemberships, /serviceLearningTokenMode: 'acorn-button-fulfillment-burn'/);
 assert.match(moneyWithMemberships, /serviceLearningUsdMode: 'stripe-connect-direct-charge'/);
 assert.match(moneyWithMemberships, /serviceLearningMerchantOfRecord: 'connected-provider'/);
 assert.match(moneyWithMemberships, /serviceLearningPlatformFeeMode: 'application-fee'/);
-assert.match(moneyWithMemberships, /serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo'/);
+assert.match(moneyWithMemberships, /serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo-first-stage'/);
+assert.match(moneyWithMemberships, /serviceLearningCerbanimoSecondStageSplit: '50-cerbanimo-global-50-territory-stewardship'/);
+assert.match(moneyWithMemberships, /hostNodeStewardCutChanged: false/);
 assert.match(moneyWithMemberships, /event\.type === 'application_fee\.created'/);
 assert.match(moneyWithMemberships, /event\.type === 'application_fee\.refunded'/);
+assert.match(moneyWithMemberships, /settleTerritoryForFellowFareFee/);
+assert.match(moneyWithMemberships, /reverseTerritoryForFellowFareFee/);
 assert.match(moneyWithMemberships, /platformCollectsGrossSellerPayment: false/);
 assert.match(moneyWithMemberships, /platformRoutesSellerProceeds: false/);
+assert.match(territory, /cerbanimoGlobalShareBpsOfExistingCerbanimoShare:\s*5000/);
+assert.match(territory, /territoryStewardshipShareBpsOfExistingCerbanimoShare:\s*5000/);
+assert.match(territory, /hostNodeStewardShareInvariant:\s*true/);
 
 // Legacy lifecycle code is still present only so previously-created payments can
 // finish, refund, dispute, or reverse safely.
@@ -116,7 +126,7 @@ assert.match(symbols, /Acorns\/Buttons are fulfilled and burned/);
 
 console.log(JSON.stringify({
   ok: true,
-  revision: 'fellowfare-fulfillment-direct-commerce-v2',
+  revision: 'fellowfare-fulfillment-direct-commerce-v2-territory-stewardship',
   checks: [
     'goods-seller-direct',
     'legacy-platform-marketplace-checkout-retired',
@@ -124,9 +134,12 @@ console.log(JSON.stringify({
     'service-learning-provider-direct-charge',
     'connected-provider-merchant-of-record',
     'fellowfare-five-percent-application-fee',
-    'application-fee-half-host-half-cerbanimo',
+    'application-fee-half-host-half-existing-cerbanimo',
+    'existing-cerbanimo-half-global-half-territory',
+    'host-node-steward-cut-preserved',
     'service-price-bound-to-facilitating-hub',
     'service-fee-refund-reversal',
+    'territory-fee-refund-reversal',
     'no-platform-gross-collection',
     'no-seller-proceeds-routing',
     'services-learning-fulfillment-burn',
