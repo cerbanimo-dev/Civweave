@@ -1,4 +1,4 @@
-import{CivweaveCapacityAccount as BaseCapacityAccount}from'./capacity.mjs';
+import{CivweaveCapacityAccount as BaseCapacityAccount}from'./capacity-community-extension-v1.mjs';
 import{ensureMembershipResident}from'./membership-resident-v1.mjs';
 import{prepareCapacityJoin}from'./capacity-prejoin-policy-v1.mjs';
 export class CivweaveCapacityAccount extends BaseCapacityAccount{
