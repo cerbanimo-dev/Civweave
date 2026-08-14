@@ -14,8 +14,16 @@ const rules = [
       [/\bcreateTreeWalker\s*\(/, 'brand runtime must not crawl text nodes'],
       [/\bbrandTree\s*\(/, 'brand runtime must not run a tree-wide brand migration'],
       [/replaceAll\(\s*['"](?:COMMONWEAVE|Commonweave)['"]/, 'brand runtime must not rewrite legacy names after paint'],
+      [/createElement\s*\(\s*['"]button['"]\s*\)/, 'brand runtime must not create the language control after paint'],
     ],
     require: [[/runtimeBrandRewrite:false/, 'brand runtime declares source-truth branding']],
+  },
+  {
+    path: 'public/app/index.html',
+    require: [
+      [/data-cw-en-language-control/, 'English installer owns its Japanese language control in source markup'],
+      [/>JP<\/button>/, 'English installer source labels the Japanese control before paint'],
+    ],
   },
   {
     path: 'public/app/regression-fixes-v243.js',
@@ -25,6 +33,28 @@ const rules = [
       [/\bimage\.src\s*=/, 'regression compatibility must not replace canonical images'],
     ],
     require: [[/runtimeImageRepair:false/, 'image-repair compatibility explicitly disabled']],
+  },
+  {
+    path: 'public/app/installer-online-fallback-v225.js',
+    forbid: [
+      [/\bnew\s+MutationObserver\s*\(/, 'retired online fallback must not clean up rendered UI'],
+      [/removeLegacyBrowserLaunchers|open-online-campus-v225|launch=online/, 'retired online fallback must not delete browser controls after paint'],
+      [/\.remove\s*\(/, 'retired online fallback must remain a loader alias only'],
+    ],
+    require: [
+      [/sourceTruth:true/, 'retired online fallback declares source truth'],
+      [/domCleanup:false/, 'retired online fallback declares DOM cleanup disabled'],
+    ],
+  },
+  {
+    path: 'public/app/installer-repair-only-v1.js',
+    forbid: [
+      [/removeBrowserLaunchers|open-online-campus-v225|launch=online/, 'shell repair must not delete retired launchers after paint'],
+    ],
+    require: [
+      [/sourceTruth:true/, 'shell repair declares source truth'],
+      [/staticLauncherCleanup:false/, 'shell repair declares static launcher cleanup disabled'],
+    ],
   },
   {
     path: 'public/app/services/fellowfare/marketplace-v2-symbols.js',
@@ -133,7 +163,7 @@ for (const scanRoot of ['public/app', 'site/cerbanimo-cc']) {
 }
 
 console.log(JSON.stringify({
-  schema: 'civweave.presentation-source-truth.v2',
+  schema: 'civweave.presentation-source-truth.v3',
   enforcedFiles: rules.map(rule => rule.path),
   discoveryCandidates: [...new Set(discovery)].sort(),
   failures,
