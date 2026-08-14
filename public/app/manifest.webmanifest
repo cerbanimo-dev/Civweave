@@ -25,6 +25,11 @@
   "related_applications": [
     {
       "platform": "webapp",
+      "url": "https://civweave.cc/app/manifest.webmanifest",
+      "id": "https://civweave.cc/civweave-local"
+    },
+    {
+      "platform": "webapp",
       "url": "https://civweave.pages.dev/app/manifest.webmanifest",
       "id": "https://civweave.pages.dev/civweave-local"
     },
