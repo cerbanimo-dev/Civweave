@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='japanese-shell-copy-v1';
+const VERSION='japanese-shell-copy-v2';
 const LANGUAGE_KEY='civweave.language.v1';
 const supported=new Set(['/app/index.html','/app/index','/app/installed-entry-v146.html','/app/installed-entry-v146']);
 if(globalThis.CivweaveJapaneseShellCopyV1?.version===VERSION)return;
@@ -81,6 +81,51 @@ const translations=new Map([
   ['Civweave installed','Civweave インストール済み'],
   ['Opening app install…','アプリのインストールを開いています…'],
   ['Reload to install','再読み込みしてインストール']
+,
+  ["LOCAL HUB NODE","ローカル・ハブノード"],
+  ["HUB NODE","ハブノード"],
+  ["Checking this Hub Node…","このハブノードを確認しています…"],
+  ["Checking this Hub Node...","このハブノードを確認しています…"],
+  ["Join a Civweave Hub Node","民織のハブノードに参加"],
+  ["Hub login unlocks capacity-backed Cloudflare AI.","ハブログインすると、容量枠に基づく Cloudflare AI を利用できます。"],
+  ["Checking status","状態を確認中"],
+  ["Choose a Hub","ハブを選ぶ"],
+  ["Host Node membership capacity","ホストノードのメンバー枠"],
+  ["Free slots","無料枠"],
+  ["Community residency available on this host.","このホストにはコミュニティ向けの無料参加枠があります。"],
+  ["Paid slots","有料枠"],
+  ["Additional paid-expansion residency available.","追加の有料拡張参加枠があります。"],
+  ["Reading the Hub’s live capacity before you join.","参加前にハブの現在の空き枠を確認しています。"],
+  ["Find the nearest Hub with community or paid-expansion capacity. Your exact location is never sent; Civweave rounds it before searching.","無料または有料拡張の空きがある最寄りのハブを探します。正確な位置情報は送信せず、民織が概略化してから検索します。"],
+  ["Use this Hub Node","このハブノードを使用"],
+  ["Join & log in","参加してログイン"],
+  ["Find an open Hub","空きのあるハブを探す"],
+  ["Hub steward tools","ハブ・スチュワード用ツール"],
+  ["Refresh status","状態を更新"],
+  ["This installer is being served by a Civweave federated Hub Node. Steward controls stay local to this node.","このインストーラーは民織の連合ハブノードから配信されています。スチュワード操作はこのノード内に留まります。"],
+  ["A Hub login is device-bound and stored locally. Joining never silently starts a paid membership.","ハブログインはこの端末に結び付けてローカル保存されます。参加しただけで有料メンバーシップが勝手に始まることはありません。"],
+  ["Nearest Hubs with open slots","空き枠のある最寄りのハブ"],
+  ["Choose which capacity counts as open. Paid-expansion access still requires an active Civweave membership.","検索対象にする空き枠の種類を選んでください。有料拡張枠の利用には有効な民織メンバーシップが必要です。"],
+  ["Show slots","表示する枠"],
+  ["Free or paid","無料または有料"],
+  ["Free only","無料枠のみ"],
+  ["Paid only","有料枠のみ"],
+  ["Use my approximate location","おおよその位置情報を使う"],
+  ["Location is requested only when you start a nearest-Hub search.","位置情報は最寄りハブの検索を開始したときだけ要求されます。"],
+  ["small shell · optional code-first campus · visuals and models on demand","小さなシェル · 任意のコード中心キャンパス · 画像とモデルは必要時に取得"],
+  ["Saved schools survive app-shell cleanup and updates.","保存した学校はアプリシェルのクリーンアップや更新後も残ります。"],
+  ["Manual and node install","手動およびノード・インストール"],
+  ["The page paints first. Shell setup begins only when you install, check the release, or explicitly request the offline campus.","まずページを表示します。シェルの準備は、インストール、リリース確認、またはオフラインキャンパスを明示的に要求したときだけ始まります。"],
+  ["Large visual assets and fonts no longer belong to offline-campus completion. Normal runtime caching keeps them as the device actually visits those spaces.","大容量の画像やフォントはオフラインキャンパス完了条件には含まれません。通常のランタイムキャッシュが、端末で実際に訪れた場所に応じて保持します。"],
+  ["Mobile install kit","モバイル・インストールキット"],
+  ["Pocket Campus seed","ポケット・キャンパスのシード"],
+  ["Knowledge school catalog","知識学校カタログ"],
+  ["Civweave platform and Cerbanimo stewardship","民織プラットフォームと神織のスチュワードシップ"],
+  ["Stewarded by Cerbanimo","神織が運営・保守"],
+  ["Civweave topology","民織トポロジー"],
+  ["Offline campus download","オフラインキャンパスのダウンロード"],
+  ["App shell state","アプリシェルの状態"],
+  ["Knowledge school presets","知識学校プリセット"]
 ]);
 function translate(value){
   const text=String(value??''),trimmed=text.trim(),next=translations.get(trimmed);
