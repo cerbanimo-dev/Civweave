@@ -14,9 +14,11 @@
     const installer=new URL('/app/index.html',location.origin);
     installer.searchParams.set('install','required');
     installer.searchParams.set('source','installed-entry-browser-gate-v1');
+    if(params.get('lang'))installer.searchParams.set('lang',params.get('lang'));
     location.replace(installer.href);
   })();
   </script>
+  <script src="/app/japanese-mode-v1.js?v=japanese-shell-language-v2"></script>
   <title>Civweave</title>
   <link rel="icon" href="/app/logos/civweave-icon-192.png">
   <style>
