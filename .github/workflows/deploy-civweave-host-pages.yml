@@ -179,7 +179,7 @@ jobs:
             exit 3
           }
 
-      - name: Verify stable community host and Cerbanimo origin
+      - name: Verify stable community host origin and Cerbanimo surface
         shell: bash
         run: |
           node --input-type=module <<'NODE'
