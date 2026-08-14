@@ -25,7 +25,9 @@ jobs:
         with:
           node-version: '22'
       - name: Purge retired presentation references
-        run: node scripts/retire-presentation-surfaces-v350.mjs
+        run: |
+          node scripts/retire-presentation-surfaces-v350.mjs
+          node scripts/sync-package-lock-version-v350.mjs
       - name: Rebuild generated release surfaces
         run: |
           node scripts/build-service-worker-v211.mjs
