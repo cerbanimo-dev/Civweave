@@ -11,6 +11,7 @@ import {
   accountNodePath,
   scopeAccountNodeHtml,
 } from '../cloudflare/account-edge/src/index.mjs';
+import { normalizeHubLocation } from '../cloudflare/node-cloud/src/index.mjs';
 
 const root = new URL('../', import.meta.url);
 const read = path => readFile(new URL(path, root), 'utf8');
@@ -49,15 +50,21 @@ assert.equal(starterNodeIds('civweave').length, 3);
 assert.equal(needsBootstrap({ hostNodeIds: [] }), true);
 assert.equal(needsBootstrap({ hostNodeIds: ['a', 'b'] }), true);
 assert.equal(needsBootstrap({ hostNodeIds: ['a', 'b', 'c'] }), false);
-assert.equal(
-  parseWorkersDevUrl('Deployment complete! https://civweave-host-edge.example.workers.dev'),
-  'https://civweave-host-edge.example.workers.dev',
-);
-assert.deepEqual(accountNodePath('/nodes/garden-a/api/node/health'), {
-  nodeId: 'garden-a',
-  pathname: '/api/node/health',
-});
+assert.equal(parseWorkersDevUrl('Deployment complete! https://civweave-host-edge.example.workers.dev'), 'https://civweave-host-edge.example.workers.dev');
+assert.deepEqual(accountNodePath('/nodes/garden-a/api/node/health'), { nodeId: 'garden-a', pathname: '/api/node/health' });
 assert.equal(accountNodePath('/api/fabric/health'), null);
+
+const locationNow = Date.parse('2026-08-14T09:00:00.000Z');
+const roundedLocation = normalizeHubLocation({ latitude: 43.1234567, longitude: -75.9876543, accuracyMeters: 42, publicPrecision: 'rounded', capturedAt: new Date(locationNow).toISOString() }, locationNow);
+assert.equal(roundedLocation.coordinateDecimals, 3);
+assert.equal(roundedLocation.latitude, 43.123);
+assert.equal(roundedLocation.longitude, -75.988);
+assert.equal(roundedLocation.precisionMeters, 100);
+const preciseLocation = normalizeHubLocation({ latitude: 43.1234567, longitude: -75.9876543, accuracyMeters: 42, publicPrecision: 'precise', capturedAt: new Date(locationNow).toISOString() }, locationNow);
+assert.equal(preciseLocation.coordinateDecimals, 6);
+assert.equal(preciseLocation.latitude, 43.123457);
+assert.equal(preciseLocation.longitude, -75.987654);
+assert.equal(preciseLocation.precisionMeters, 42);
 
 const sampleNodeHtml = '<a href="/api/ai/node/manifest">Manifest</a><a href="/api/ai/node/capacity">Capacity</a><a href="/api/node/health">Health</a>';
 for (const nodeId of ['civweave-a', 'civweave-b', 'civweave-c']) {
@@ -79,9 +86,7 @@ assert.ok(accountWrangler.durable_objects.bindings.some(item => item.name === 'N
 assert.ok(accountWrangler.durable_objects.bindings.some(item => item.name === 'CAPACITY' && item.class_name === 'CivweaveCapacityAccount'));
 assert.ok(accountWrangler.migrations.some(item => item.new_sqlite_classes?.includes('CivweaveAccountNode')));
 assert.ok(accountWrangler.migrations.some(item => item.new_sqlite_classes?.includes('CivweaveCapacityAccount')));
-for (const forbidden of ['STRIPE_SECRET_KEY', 'STRIPE_CONNECT_WEBHOOK_SECRET', 'CIVWEAVE_MONEY_EDGE_PRIVATE_KEY', 'NODE_FABRIC_BINDING_TOKEN']) {
-  assert.ok(!accountWranglerText.includes(forbidden), `account Worker config must not mention central secret ${forbidden}`);
-}
+for (const forbidden of ['STRIPE_SECRET_KEY', 'STRIPE_CONNECT_WEBHOOK_SECRET', 'CIVWEAVE_MONEY_EDGE_PRIVATE_KEY', 'NODE_FABRIC_BINDING_TOKEN']) assert.ok(!accountWranglerText.includes(forbidden), `account Worker config must not mention central secret ${forbidden}`);
 
 assert.ok(capacitySource.includes('maxHostNodes: 3'));
 assert.ok(capacitySource.includes('This account already has its three host nodes.'));
@@ -95,7 +100,7 @@ assert.ok(accountWorkerSource.includes('legacyAccountEdge.fetch'), 'non-generati
 assert.ok(nodeFabricSource.includes("url.pathname === '/api/fabric/location'"));
 assert.ok(nodeFabricSource.includes("url.pathname === '/internal/location'"));
 assert.ok(nodeFabricSource.includes('civweave.hub-location-owner.v1'));
-assert.ok(nodeFabricSource.includes('coordinateDecimals: 3'));
+assert.ok(nodeFabricSource.includes('coordinateDecimals = precise ? 6 : 3'));
 
 assert.ok(setupSource.includes('Provisioning contract:'));
 assert.ok(setupSource.includes('Worker + 3 starter Durable Object nodes'));
@@ -142,18 +147,8 @@ assert.ok(hostSetup.includes('id="sync-location"'));
 assert.ok(hostSetup.includes('navigator.geolocation.watchPosition'));
 assert.ok(hostSetup.includes("position.coords.latitude.toFixed(3)"));
 
-for (const file of [
-  'cloudflare/account-edge/src/index.mjs',
-  'cloudflare/account-edge/src/index-legacy-v1.mjs',
-  'scripts/provision-cloudflare-account-edge-v1.mjs',
-  'scripts/setup-cloudflare-node.mjs',
-  'scripts/verify-cloudflare-pages-account-target-v1.mjs',
-  'scripts/test-cloudflare-account-bootstrap-v1.mjs',
-]) {
-  const result = spawnSync(process.execPath, ['--check', file], {
-    cwd: new URL('../', import.meta.url),
-    encoding: 'utf8',
-  });
+for (const file of ['cloudflare/account-edge/src/index.mjs','cloudflare/account-edge/src/index-legacy-v1.mjs','cloudflare/node-cloud/src/index.mjs','scripts/provision-cloudflare-account-edge-v1.mjs','scripts/setup-cloudflare-node.mjs','scripts/verify-cloudflare-pages-account-target-v1.mjs','scripts/test-cloudflare-account-bootstrap-v1.mjs']) {
+  const result = spawnSync(process.execPath, ['--check', file], { cwd: new URL('../', import.meta.url), encoding: 'utf8' });
   assert.equal(result.status, 0, `${file} syntax failed: ${result.stderr || result.stdout}`);
 }
 
@@ -165,6 +160,7 @@ console.log(JSON.stringify({
   durableObjects: ['NODES:CivweaveAccountNode', 'CAPACITY:CivweaveCapacityAccount'],
   accountMoneyAuthority: false,
   composedAccountEdge: true,
+  locationPrecision: { roundedDecimals: 3, preciseDecimals: 6 },
   partialSetupBlocksPages: false,
   githubMainAccountAffinityRequired: true,
 }, null, 2));

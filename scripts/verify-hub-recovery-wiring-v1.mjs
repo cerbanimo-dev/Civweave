@@ -9,6 +9,7 @@ const paths = [
   'cloudflare/account-edge/src/recovery-entry-v8.mjs',
   'cloudflare/account-edge/src/recovery-entry-v9.mjs',
   'cloudflare/account-edge/src/recovery-entry-v10.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v11.mjs',
   'cloudflare/account-edge/wrangler.jsonc',
   'cloudflare/node-cloud/wrangler.jsonc',
   'cloudflare/recovery-relay/src/index.mjs',
@@ -27,7 +28,7 @@ const paths = [
 ];
 const source = Object.fromEntries(await Promise.all(paths.map(async path => [path, await readFile(path, 'utf8')])));
 
-assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v10\.mjs/);
+assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /src\/recovery-entry-v11\.mjs/);
 assert.match(source['cloudflare/account-edge/wrangler.jsonc'], /nodes\.civweave\.invalid/);
 assert.doesNotMatch(source['cloudflare/account-edge/wrangler.jsonc'], /recover@/);
 assert.doesNotMatch(source['cloudflare/account-edge/wrangler.jsonc'], /glaedn\.workers\.dev/);
@@ -36,6 +37,12 @@ assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /civw
 assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /offline-code-only/);
 assert.match(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /validMailbox/);
 assert.doesNotMatch(source['cloudflare/account-edge/src/recovery-entry-v10.mjs'], /HUB_RECOVERY_MAILBOX_PENDING/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v11.mjs'], /from '\.\/recovery-entry-v10\.mjs'/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v11.mjs'], /MAIL_CLAIM_TTL_MS = 10 \* 60 \* 1000/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v11.mjs'], /verifyMemberLogin/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v11.mjs'], /\/api\/account\/mail\/claim\/request/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v11.mjs'], /\/api\/account\/mail\/claim\/consume/);
+assert.match(source['cloudflare/account-edge/src/recovery-entry-v11.mjs'], /this\.state\.storage\.delete\(key\)/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /HUB_OFFLINE_RECOVERY_CODE_COUNT = 8/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /hub-offline-recovery:/);
 assert.match(source['cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs'], /offlineRecoveryRemaining/);
@@ -85,6 +92,7 @@ assert.match(source['public/app/civweave-brand.js'], /hub-delivery-intent-v1\.js
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /mailto:/);
 assert.match(source['public/app/hub-delivery-intent-v1.js'], /#cw-hub-recover-request/);
 assert.match(source['public/app/installer-online-fallback-v225.js'], /hub-recovery-api-v1\.js/);
+assert.match(source['public/app/installer-online-fallback-v225.js'], /hub-mail-claim-v1\.js/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryKit:packet\.recoveryKit/);
 assert.match(source['public/app/hub-recovery-api-v1.js'], /recoveryMethod/);
 assert.match(source['public/app/hub-recovery-ui-v1.js'], /Save these recovery codes now/);
@@ -100,6 +108,7 @@ const recoveryNoStripeSurfaces = [
   'cloudflare/account-edge/src/hub-account-recovery-inbound-v1.mjs',
   'cloudflare/account-edge/src/hub-account-recovery-offline-v1.mjs',
   'cloudflare/account-edge/src/recovery-entry-v10.mjs',
+  'cloudflare/account-edge/src/recovery-entry-v11.mjs',
   'cloudflare/account-edge/wrangler.jsonc',
   'cloudflare/recovery-relay/src/index.mjs',
   'cloudflare/recovery-relay/wrangler.jsonc',
@@ -114,7 +123,7 @@ for (const path of recoveryNoStripeSurfaces) {
 
 console.log(JSON.stringify({
   ok: true,
-  schema: 'civweave.hub-recovery-wiring-check.v8',
+  schema: 'civweave.hub-recovery-wiring-check.v9',
   freeTierInboundProof: true,
   offlineRecoveryCodes: true,
   offlineCodeCount: 8,
@@ -123,4 +132,5 @@ console.log(JSON.stringify({
   ownedZoneOnly: true,
   unrelatedDomainGuard: true,
   relayStoresIdentity: false,
+  privateMessagingClaimGrant: 'one-use-10-minute-v11',
 }));
