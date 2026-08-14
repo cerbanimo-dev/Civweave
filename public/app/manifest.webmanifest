@@ -46,19 +46,25 @@
   ],
   "icons": [
     {
-      "src": "/app/logos/civweave-pwa-192-v247.png",
+      "src": "/app/logos/civweave-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/app/logos/civweave-pwa-512-v247.png",
+      "src": "/app/logos/civweave-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/app/logos/civweave-pwa-maskable-512-v247.png",
+      "src": "/app/logos/civweave-icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/app/logos/civweave-icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -70,7 +76,7 @@
       "url": "/app/installed-entry-v146.html?installed=1&system=civweave",
       "icons": [
         {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
+          "src": "/app/logos/civweave-icon-512.png",
           "sizes": "512x512",
           "type": "image/png"
         }
@@ -81,7 +87,7 @@
       "url": "/app/installed-entry-v146.html?installed=1&system=living-school",
       "icons": [
         {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
+          "src": "/app/logos/civweave-icon-512.png",
           "sizes": "512x512",
           "type": "image/png"
         }
@@ -92,7 +98,7 @@
       "url": "/app/installed-entry-v146.html?installed=1&system=cerbanimo",
       "icons": [
         {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
+          "src": "/app/logos/civweave-icon-512.png",
           "sizes": "512x512",
           "type": "image/png"
         }
@@ -103,7 +109,7 @@
       "url": "/app/installed-entry-v146.html?installed=1&system=fellowfare",
       "icons": [
         {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
+          "src": "/app/logos/civweave-icon-512.png",
           "sizes": "512x512",
           "type": "image/png"
         }
@@ -114,7 +120,7 @@
       "url": "/app/installed-entry-v146.html?installed=1&system=anarchadia",
       "icons": [
         {
-          "src": "/app/logos/civweave-pwa-512-v247.png",
+          "src": "/app/logos/civweave-icon-512.png",
           "sizes": "512x512",
           "type": "image/png"
         }
