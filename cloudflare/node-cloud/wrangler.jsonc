@@ -25,7 +25,7 @@
   "vars": {
     "NODE_DOMAIN": "nodes.civweave.invalid",
     "PUBLIC_FABRIC_ORIGIN": "https://civweave-node-cloud.cerbanimo.workers.dev",
-    "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.pages.dev",
+    "CIVWEAVE_CANONICAL_INSTALL_ORIGIN": "https://civweave.cc",
     "CIVWEAVE_WORKERS_PLAN": "free",
     "CIVWEAVE_UNIFIED_BILLING_MODEL": "google/gemini-3.1-flash-lite",
     "CIVWEAVE_AI_GATEWAY_ID": "default"
