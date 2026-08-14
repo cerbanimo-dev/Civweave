@@ -1,6 +1,6 @@
 import accountWorker, { CivweaveAccountNode as BaseNode, CivweaveCapacityAccount } from './recovery-entry-v8.mjs';
 
-const DISCOVERY_URL = 'https://civweave.pages.dev/app/recovery-relay-v1.json';
+const DISCOVERY_URL = 'https://civweave.cc/app/recovery-relay-v1.json';
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
 const CACHE_MS = 5 * 60 * 1000;
 let cachedRecovery = null;
