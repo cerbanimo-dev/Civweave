@@ -1,7 +1,7 @@
 {
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "civweave-host-edge",
-  "main": "src/recovery-entry-v8.mjs",
+  "main": "src/recovery-entry-v9.mjs",
   "compatibility_date": "2026-08-12",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
@@ -17,10 +17,8 @@
     { "tag": "v1", "new_sqlite_classes": ["CivweaveAccountNode", "CivweaveCapacityAccount"] }
   ],
   "vars": {
-    "NODE_DOMAIN": "nodes.commonweave.earth",
     "CIVWEAVE_WORKERS_PLAN": "free",
-    "CIVWEAVE_ACCOUNT_EDGE_MODE": "path-v1",
-    "HUB_RECOVERY_INBOUND_EMAIL": "recover@recovery.commonweave.earth"
+    "CIVWEAVE_ACCOUNT_EDGE_MODE": "path-v1"
   },
   "observability": { "enabled": true }
 }
