@@ -2,10 +2,12 @@ import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 const read = relative => readFile(new URL(`../${relative}`, import.meta.url), 'utf8');
-const [server, entry, money, frontend, compat, cabinet, symbols] = await Promise.all([
+const [server, entry, money, feeSettlement, migration, frontend, compat, cabinet, symbols] = await Promise.all([
   read('cloudflare/core/src/fellowfare-direct-commerce-v1.mjs'),
   read('cloudflare/core/src/stripe-connect-v2-entry.mjs'),
   read('cloudflare/core/src/money-edge-with-memberships.mjs'),
+  read('cloudflare/core/src/fellowfare-service-fee-v1.mjs'),
+  read('cloudflare/core/migrations/0008_fellowfare_service_fees.sql'),
   read('public/app/services/fellowfare/fulfillment-economy-v2.js'),
   read('public/app/services/fellowfare/fulfillment-economy-v1.js'),
   read('public/app/services/fellowfare/cabinet.html'),
@@ -35,18 +37,55 @@ assert.match(server, /merchantOfRecord: 'connected-account'/);
 assert.match(server, /platformCollectsGross: false/);
 assert.match(server, /platformRoutesSellerProceeds: false/);
 assert.match(server, /CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS/);
-assert.match(server, /FELLOWFARE_DEFAULT_SERVICE_FEE_BPS = 100/);
+assert.match(server, /FELLOWFARE_DEFAULT_SERVICE_FEE_BPS = 500/);
+assert.match(server, /FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS = 5000/);
+assert.match(server, /FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS = 5000/);
 assert.match(server, /integration_identifier: integrationIdentifier\(\)/);
 assert.doesNotMatch(server, /payment_method_types/);
 assert.doesNotMatch(server, /automatic_tax/);
 assert.doesNotMatch(server, /\/v1\/transfers|transfer_data|destination:/);
 
-// Price integrity: checkout retrieves the seller-owned Stripe Price and requires
-// its FellowFare listing metadata to match instead of trusting a buyer-supplied amount.
+// Price integrity and host attribution: checkout retrieves the seller-owned Stripe
+// Price and reads the facilitating Hub from server-created metadata, not buyer input.
 assert.match(server, /stripe\.prices\.retrieve\(priceId, \{\}, \{ stripeAccount: accountId \}\)/);
 assert.match(server, /fellowfare_listing_id/);
 assert.match(server, /fellowfare_kind/);
+assert.match(server, /fellowfare_node_id/);
+assert.match(server, /facilitatingNode\(env, input\?\.nodeId\)/);
+assert.match(server, /required\(price\?\.metadata\?\.fellowfare_node_id/);
 assert.match(server, /The Stripe Price does not match this FellowFare listing/);
+assert.match(frontend, /CivweaveHostNodeSessionV1/);
+assert.match(frontend, /selectedHostNodeId/);
+assert.match(frontend, /nodeId,listingId:listing\.id/);
+assert.match(frontend, /hostNodeId:price\.nodeId/);
+
+// Application-fee proceeds are actually split and recorded. Cerbanimo keeps the
+// remainder in the platform balance; the Host Steward receives a platform transfer.
+assert.match(feeSettlement, /splitFellowFareServiceFee/);
+assert.match(feeSettlement, /transfers\.create/);
+assert.match(feeSettlement, /destination: node\.connected_account_id/);
+assert.match(feeSettlement, /50-host-steward-50-cerbanimo/);
+assert.match(feeSettlement, /reverseHostTransfer/);
+assert.match(feeSettlement, /host_reversed_cents/);
+assert.match(feeSettlement, /host_transferred_cents/);
+assert.match(feeSettlement, /availableBalanceError/);
+assert.match(feeSettlement, /status='pending-funds'/);
+assert.match(feeSettlement, /retryPendingFellowFareServiceFees/);
+assert.match(migration, /CREATE TABLE IF NOT EXISTS money_edge_fellowfare_service_fees/);
+assert.match(migration, /host_share_cents INTEGER NOT NULL/);
+assert.match(migration, /cerbanimo_share_cents INTEGER NOT NULL/);
+assert.match(migration, /host_transferred_cents INTEGER NOT NULL DEFAULT 0/);
+assert.match(migration, /settlement_error TEXT/);
+assert.match(migration, /WHERE status = 'pending-funds'/);
+assert.match(money, /event\.type === 'application_fee\.created'/);
+assert.match(money, /event\.type === 'application_fee\.refunded'/);
+assert.match(money, /event\.type === 'balance\.available'/);
+assert.match(money, /retryPendingFellowFareServiceFees\(this\)/);
+assert.match(money, /serviceLearningDefaultPlatformFeeBps: FELLOWFARE_DEFAULT_SERVICE_FEE_BPS/);
+assert.match(money, /serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo'/);
+assert.match(money, /serviceLearningHostStewardShareBpsOfFee: FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS/);
+assert.match(money, /serviceLearningCerbanimoShareBpsOfFee: FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS/);
+assert.match(money, /serviceLearningHostSettlement: 'application-fee-event-plus-balance-available-retry'/);
 
 // The new direct rail is production-routed separately. The old platform-charge
 // marketplace API remains intentionally dead.
@@ -71,6 +110,7 @@ assert.match(frontend, /recipientCredited:false/);
 assert.match(frontend, /TOKEN_KINDS=new Set\(\['service','learning','tutoring'\]\)/);
 assert.match(frontend, /cashMode:cash\?'stripe-connect-direct-charge':'none'/);
 assert.match(frontend, /Offer USD, Acorn\/Button fulfillment, or both/);
+assert.match(frontend, /5% service fee/);
 assert.match(frontend, /Pay \$\{money\(listing\.pricing\.usdMinor\)\} with Stripe/);
 assert.match(frontend, /syncOwnCashListings/);
 assert.match(frontend, /beginMerchantOnboarding/);
@@ -105,7 +145,11 @@ console.log(JSON.stringify({
     serviceLearningUsd: 'stripe-connect-direct-charge',
     merchantOfRecord: 'connected-provider',
     platformFee: 'application-fee',
-    defaultPlatformFeeBps: 100,
+    defaultPlatformFeeBps: 500,
+    applicationFeeSplit: '50-host-steward-50-cerbanimo',
+    hostStewardShareBpsOfFee: 5000,
+    cerbanimoShareBpsOfFee: 5000,
+    hostSettlement: 'application-fee-event-plus-balance-available-retry',
     platformCollectsGross: false,
     platformRoutesSellerProceeds: false
   }

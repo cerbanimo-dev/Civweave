@@ -1,6 +1,6 @@
 # Civweave live-money machine readiness
 
-Status after the 2026-08-13 FellowFare fulfillment + direct-commerce v2 pass.
+Status after the 2026-08-14 FellowFare 5% service-fee split pass.
 
 ## Green machine-side invariants
 
@@ -34,10 +34,15 @@ Status after the 2026-08-13 FellowFare fulfillment + direct-commerce v2 pass.
 - Stripe Products/Prices live on the connected provider account.
 - Checkout is created with the connected account as charge owner.
 - FellowFare receives `application_fee_amount` only.
-- Default FellowFare fee is 1% / 100 bps, configurable with `CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS`.
-- The server retrieves the connected-account Price and verifies FellowFare listing/kind metadata before checkout.
+- Default FellowFare fee is **5% / 500 bps**, configurable with `CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS`.
+- The application fee is split **50/50** between the facilitating Hub Steward and Cerbanimo, making the default economic shares **2.5% of the service sale each**.
+- The active Hub Node is bound into server-created Stripe Price metadata before checkout. Checkout reads that metadata instead of accepting a buyer-selected payout destination.
+- The server retrieves the connected-account Price and verifies FellowFare listing/kind/Hub metadata before checkout.
 - No buyer-supplied amount is trusted.
-- No destination charge, transfer destination, or separate seller transfer is used.
+- When Stripe emits `application_fee.created`, Cloudflare core records the split and attempts the Host Steward half from the platform application-fee balance.
+- If Stripe reports that the platform balance is not available yet, the settlement remains `pending-funds` in D1 rather than losing the Steward share. `balance.available` drains those pending settlements once funds can move.
+- `application_fee.refunded` recalculates the Steward's entitlement against the net retained fee. Refunds that arrive before payout reduce the pending transfer; refunds after payout proportionally reverse the Host Steward transfer.
+- No destination charge, transfer destination, or separate seller transfer is used to pay the service provider.
 - FellowFare does not collect provider gross proceeds and does not route seller proceeds.
 
 Legacy browser sale-distribution methods remain fail-closed. Legacy Stripe settlement/refund/dispute handlers remain only so transactions created under the retired model can finish or unwind safely. The December 1 compute-reserve distribution remains separate and available.
@@ -45,6 +50,8 @@ Legacy browser sale-distribution methods remain fail-closed. Legacy Stripe settl
 ## Automation prepared for live mode
 
 The existing read-only Stripe live preflight and guarded Cloudflare live-money workflows remain the activation path. Production readiness must include the merchant/card-payments capability needed by FellowFare service providers in addition to the platform recipient capabilities used by Host Stewards.
+
+The live snapshot webhook preflight now requires `application_fee.created`, `application_fee.refunded`, and `balance.available`. Missing any of them blocks readiness because the 50/50 Steward/Cerbanimo fee split cannot be safely maintained without settlement, refund, and pending-balance retry events.
 
 ## Human work still required
 
@@ -57,4 +64,4 @@ Acceptance must independently confirm:
 /api/fellowfare/direct-commerce/* -> service/learning/tutoring only
 ```
 
-and verify one provider-owned direct charge end to end, including the FellowFare application fee and absence of a seller transfer.
+and verify one provider-owned direct charge end to end, including the 5% FellowFare application fee, the 50/50 Host Steward/Cerbanimo fee split, a pending-balance retry, a refund reversal test, and absence of a seller transfer.

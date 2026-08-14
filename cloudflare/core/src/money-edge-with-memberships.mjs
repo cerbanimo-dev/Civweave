@@ -33,6 +33,17 @@ import {
   handleCommerceDispute,
   restoreCommerceDisputeTransfers
 } from './commerce-edge.mjs';
+import {
+  FELLOWFARE_SERVICE_FEE_SETTLEMENT_SCHEMA,
+  settleFellowFareServiceFee,
+  refundFellowFareServiceFee,
+  retryPendingFellowFareServiceFees
+} from './fellowfare-service-fee-v1.mjs';
+import {
+  FELLOWFARE_DEFAULT_SERVICE_FEE_BPS,
+  FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS,
+  FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS
+} from './fellowfare-direct-commerce-v1.mjs';
 
 export {
   moneyEdgeError,
@@ -44,6 +55,7 @@ export {
   sharedDomainHostingReadiness,
   CERBANIMO_COMMERCE_SCHEMA,
   CERBANIMO_COMMERCE_FEE_BPS,
+  FELLOWFARE_SERVICE_FEE_SETTLEMENT_SCHEMA,
   NODE_MONEY_EDGE_SCHEMA,
   NODE_MONEY_EVENT_SCHEMA,
   NODE_MONEY_CHALLENGE_DOMAIN,
@@ -70,11 +82,15 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
         serviceLearningUsdMode: 'stripe-connect-direct-charge',
         serviceLearningMerchantOfRecord: 'connected-provider',
         serviceLearningPlatformFeeMode: 'application-fee',
-        serviceLearningDefaultPlatformFeeBps: 100,
+        serviceLearningDefaultPlatformFeeBps: FELLOWFARE_DEFAULT_SERVICE_FEE_BPS,
+        serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo',
+        serviceLearningHostStewardShareBpsOfFee: FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS,
+        serviceLearningCerbanimoShareBpsOfFee: FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS,
+        serviceLearningHostSettlement: 'application-fee-event-plus-balance-available-retry',
         platformCollectsGrossSellerPayment: false,
         platformRoutesSellerProceeds: false,
         legacyLifecycleHandling: true,
-        note: 'Physical goods remain seller-direct. Services, learning, and tutoring may use fulfillment burn and/or provider-owned Stripe direct charges with a FellowFare application fee. Legacy platform-charge marketplace records remain unwind-only.'
+        note: 'Physical goods remain seller-direct. Services, learning, and tutoring may use fulfillment burn and/or provider-owned Stripe direct charges with a 5% FellowFare application fee split equally between the facilitating Hub Steward and Cerbanimo. Host fee shares queue safely until Stripe platform funds are available. Legacy platform-charge marketplace records remain unwind-only.'
       })
     });
   }
@@ -85,6 +101,9 @@ export class CloudflareMoneyEdge extends BaseMoneyEdge {
 
   async handleProviderEvent(event) {
     const object = event?.data?.object || {};
+    if (event.type === 'application_fee.created') return settleFellowFareServiceFee(this, object);
+    if (event.type === 'application_fee.refunded') return refundFellowFareServiceFee(this, object);
+    if (event.type === 'balance.available') return retryPendingFellowFareServiceFees(this);
     if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       if (object?.metadata?.civweave_schema === CERBANIMO_COMMERCE_SCHEMA) {
         return settleCommerceCheckout(this, object, event.id);

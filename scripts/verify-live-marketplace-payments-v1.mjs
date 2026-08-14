@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 
 const read = relative => readFile(new URL(`../${relative}`, import.meta.url), 'utf8');
-const [fulfillment,cabinet,legacyShim,browserCommerce,symbols,moneyWithMemberships,entry,originEntry,serverCommerce,directCommerce] = await Promise.all([
+const [fulfillment,cabinet,legacyShim,browserCommerce,symbols,moneyWithMemberships,entry,originEntry,serverCommerce,directCommerce,serviceFee] = await Promise.all([
   read('public/app/services/fellowfare/fulfillment-economy-v2.js'),
   read('public/app/services/fellowfare/cabinet.html'),
   read('public/app/services/fellowfare/app.js'),
@@ -12,7 +12,8 @@ const [fulfillment,cabinet,legacyShim,browserCommerce,symbols,moneyWithMembershi
   read('cloudflare/core/src/stripe-connect-v2-entry.mjs'),
   read('cloudflare/core/src/origin-entry.mjs'),
   read('cloudflare/core/src/commerce-edge.mjs'),
-  read('cloudflare/core/src/fellowfare-direct-commerce-v1.mjs')
+  read('cloudflare/core/src/fellowfare-direct-commerce-v1.mjs'),
+  read('cloudflare/core/src/fellowfare-service-fee-v1.mjs')
 ]);
 
 for (const [name, source] of [
@@ -62,18 +63,27 @@ assert.match(directCommerce, /stripeAccount: accountId/);
 assert.match(directCommerce, /merchantOfRecord: 'connected-account'/);
 assert.match(directCommerce, /platformCollectsGross: false/);
 assert.match(directCommerce, /platformRoutesSellerProceeds: false/);
-assert.match(directCommerce, /FELLOWFARE_DEFAULT_SERVICE_FEE_BPS = 100/);
+assert.match(directCommerce, /FELLOWFARE_DEFAULT_SERVICE_FEE_BPS = 500/);
+assert.match(directCommerce, /FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS = 5000/);
+assert.match(directCommerce, /FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS = 5000/);
 assert.match(directCommerce, /CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS/);
+assert.match(directCommerce, /fellowfare_node_id/);
 assert.match(directCommerce, /integration_identifier: integrationIdentifier\(\)/);
 assert.doesNotMatch(directCommerce, /payment_method_types/);
 assert.doesNotMatch(directCommerce, /automatic_tax/);
 assert.doesNotMatch(directCommerce, /\/v1\/transfers|transfer_data|destination:/);
+assert.match(serviceFee, /transfers\.create/);
+assert.match(serviceFee, /reverseHostTransfer/);
+assert.match(serviceFee, /50-host-steward-50-cerbanimo/);
 
 assert.match(moneyWithMemberships, /goodsPaymentMode: 'seller-direct-outside-platform'/);
 assert.match(moneyWithMemberships, /serviceLearningTokenMode: 'acorn-button-fulfillment-burn'/);
 assert.match(moneyWithMemberships, /serviceLearningUsdMode: 'stripe-connect-direct-charge'/);
 assert.match(moneyWithMemberships, /serviceLearningMerchantOfRecord: 'connected-provider'/);
 assert.match(moneyWithMemberships, /serviceLearningPlatformFeeMode: 'application-fee'/);
+assert.match(moneyWithMemberships, /serviceLearningApplicationFeeSplit: '50-host-steward-50-cerbanimo'/);
+assert.match(moneyWithMemberships, /event\.type === 'application_fee\.created'/);
+assert.match(moneyWithMemberships, /event\.type === 'application_fee\.refunded'/);
 assert.match(moneyWithMemberships, /platformCollectsGrossSellerPayment: false/);
 assert.match(moneyWithMemberships, /platformRoutesSellerProceeds: false/);
 
@@ -97,6 +107,7 @@ assert.match(fulfillment, /TOKEN_KINDS=new Set\(\['service','learning','tutoring
 assert.match(fulfillment, /listing\.pricing=\{\.\.\.pricing,usdMinor:0,buttons:0,acorns:0\}/);
 assert.match(fulfillment, /cashMode:cash\?'stripe-connect-direct-charge':'none'/);
 assert.match(fulfillment, /Offer USD, Acorn\/Button fulfillment, or both/);
+assert.match(fulfillment, /5% service fee/);
 
 assert.match(symbols, /does not collect or route a goods payment/);
 assert.match(symbols, /provider Stripe direct checkout/);
@@ -112,7 +123,10 @@ console.log(JSON.stringify({
     'commerce-host-fee-retired',
     'service-learning-provider-direct-charge',
     'connected-provider-merchant-of-record',
-    'fellowfare-application-fee-only',
+    'fellowfare-five-percent-application-fee',
+    'application-fee-half-host-half-cerbanimo',
+    'service-price-bound-to-facilitating-hub',
+    'service-fee-refund-reversal',
     'no-platform-gross-collection',
     'no-seller-proceeds-routing',
     'services-learning-fulfillment-burn',

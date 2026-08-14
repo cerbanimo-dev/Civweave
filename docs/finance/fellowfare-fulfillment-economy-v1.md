@@ -60,7 +60,10 @@ USD service/learning/tutoring sales use Stripe Connect **direct charges**:
 ```text
 buyer -> provider's connected Stripe account
              |
-             +-> FellowFare application fee
+             +-> 5% FellowFare application fee
+                       |
+                       +-> 50% facilitating Hub Steward
+                       +-> 50% Cerbanimo
 ```
 
 Canonical properties:
@@ -69,7 +72,11 @@ Canonical properties:
 - The provider uses an Accounts v2 merchant configuration with card-payments capability.
 - The Checkout Session and Price live on the connected provider account.
 - FellowFare receives an `application_fee_amount` from the direct charge.
-- The default FellowFare fee is **1% / 100 bps**, configurable by `CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS`.
+- The default FellowFare service fee is **5% / 500 bps**, configurable by `CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS`.
+- The application fee is split **50/50**: half to the facilitating Hub Node's Steward and half to Cerbanimo. At the default 5% fee, that is **2.5% of the service sale to the Steward and 2.5% to Cerbanimo**.
+- A USD service listing is bound to its facilitating Hub Node when its connected-account Stripe Price is created. Checkout reads that server-created Price metadata rather than accepting a buyer-supplied Hub ID.
+- The Steward half is paid from the platform's application-fee balance to the registered Host Steward payout account. Cerbanimo retains the other half.
+- Application-fee refunds proportionally reverse the Steward transfer so the 50/50 split remains true after partial or full fee refunds.
 - FellowFare does not receive the provider's gross sale and then transfer proceeds.
 - No destination charge or separate seller transfer is used for this rail.
 - The server retrieves the connected-account Stripe Price and verifies its FellowFare listing metadata before checkout. Buyer-supplied amounts are not trusted.
@@ -115,7 +122,7 @@ The old platform-charge/separate-transfer route `/api/money-edge/commerce/*` rem
 
 The old browser commerce-distribution compatibility API fails closed for new sale distribution, Stripe seller-transfer instructions, and `recordSale`. Legacy webhook settlement/refund/dispute code remains only to safely finish or unwind payments created under the old architecture.
 
-The former cross-node commerce host fee remains retired.
+The former cross-node **gross-sale commerce host fee** remains retired. The active Steward share described above is different: it is half of FellowFare's 5% application fee on provider-owned service/learning/tutoring direct charges, never a share of goods payments or routed seller gross.
 
 Stripe remains separately available for compute top-ups, memberships, Host Steward/platform earnings, and the December 1 compute-reserve distribution.
 
@@ -127,6 +134,8 @@ Future changes must preserve these unless this contract is deliberately supersed
 - services/learning/tutoring may use fulfillment, provider-owned Stripe direct charges, or both;
 - burned tokens never become a recipient token transfer;
 - USD service charges belong to the connected provider and FellowFare receives only its application fee;
+- the default application fee is 5% and its proceeds are split 50/50 between the facilitating Hub Steward and Cerbanimo;
+- service Price metadata binds the facilitating Hub before checkout, and buyer input cannot redirect the Steward share;
 - FellowFare does not collect service gross and route seller proceeds;
 - no destination charge or separate seller transfer is used for new FellowFare service commerce;
 - each day has exactly three quest buckets and fixed ordinary rewards;

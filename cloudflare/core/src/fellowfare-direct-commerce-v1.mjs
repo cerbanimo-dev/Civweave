@@ -2,7 +2,9 @@ import Stripe from 'stripe';
 
 export const FELLOWFARE_DIRECT_COMMERCE_SCHEMA = 'civweave.fellowfare-direct-commerce.v1';
 export const FELLOWFARE_DIRECT_COMMERCE_KINDS = Object.freeze(['service', 'learning', 'tutoring']);
-export const FELLOWFARE_DEFAULT_SERVICE_FEE_BPS = 100;
+export const FELLOWFARE_DEFAULT_SERVICE_FEE_BPS = 500;
+export const FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS = 5000;
+export const FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS = 5000;
 
 const ELIGIBLE_KINDS = new Set(FELLOWFARE_DIRECT_COMMERCE_KINDS);
 const clean = (value, max = 4000) => String(value ?? '').trim().slice(0, max);
@@ -87,6 +89,13 @@ async function saveMapping(env, userId, accountId) {
     ON CONFLICT(user_id) DO UPDATE SET account_id=excluded.account_id,updated_at=excluded.updated_at`)
     .bind(required(userId, 'userId', 180), required(accountId, 'accountId', 180), at, at).run();
   return mappingForUser(env, userId);
+}
+async function facilitatingNode(env, nodeId) {
+  const id = required(nodeId, 'nodeId', 180);
+  const node = await requireDb(env).prepare('SELECT node_id AS nodeId,connected_account_id AS connectedAccountId FROM money_edge_nodes WHERE node_id=?1')
+    .bind(id).first();
+  if (!node?.connectedAccountId) throw Object.assign(new Error('Join a registered Hub Node before enabling USD service checkout so its Steward can receive the service-fee share.'), { status: 409 });
+  return node;
 }
 
 async function retrieveMerchantStatus(stripe, accountId) {
@@ -195,20 +204,29 @@ export async function createFellowFareServicePrice(env, input, options = {}) {
   const amountMinor = integer(input?.amountMinor, 'amountMinor', 50, 100000000);
   const currency = clean(input?.currency || 'usd', 12).toLowerCase();
   const listingId = required(input?.listingId, 'listingId', 220);
+  const node = await facilitatingNode(env, input?.nodeId);
+  const feeBps = integer(env?.CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS ?? FELLOWFARE_DEFAULT_SERVICE_FEE_BPS, 'CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS', 0, 10000);
+  const feeMetadata = {
+    fellowfare_node_id: node.nodeId,
+    fellowfare_service_fee_bps: String(feeBps),
+    fellowfare_fee_split: '50-host-steward-50-cerbanimo'
+  };
   const product = await stripe.products.create({
     name: required(input?.name, 'name', 180),
     description: clean(input?.description, 1000) || undefined,
     metadata: {
       civweave_schema: FELLOWFARE_DIRECT_COMMERCE_SCHEMA,
       fellowfare_listing_id: listingId,
-      fellowfare_kind: listingKind
+      fellowfare_kind: listingKind,
+      ...feeMetadata
     },
     default_price_data: {
       unit_amount: amountMinor,
       currency,
       metadata: {
         fellowfare_listing_id: listingId,
-        fellowfare_kind: listingKind
+        fellowfare_kind: listingKind,
+        ...feeMetadata
       }
     }
   }, { stripeAccount: mapping.accountId });
@@ -224,7 +242,10 @@ export async function createFellowFareServicePrice(env, input, options = {}) {
     kind: listingKind,
     amountMinor,
     currency,
-    platformFeeBps: integer(env?.CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS ?? FELLOWFARE_DEFAULT_SERVICE_FEE_BPS, 'CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS', 0, 10000),
+    nodeId: node.nodeId,
+    platformFeeBps: feeBps,
+    hostStewardFeeShareBps: FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS,
+    cerbanimoFeeShareBps: FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS,
     merchantOfRecord: 'connected-account'
   });
 }
@@ -247,9 +268,13 @@ export async function createFellowFareDirectCheckout(request, env, input, option
   if (clean(price?.metadata?.fellowfare_listing_id, 220) !== listingId || clean(price?.metadata?.fellowfare_kind, 40) !== listingKind) {
     throw Object.assign(new Error('The Stripe Price does not match this FellowFare listing.'), { status: 400 });
   }
+  const nodeId = required(price?.metadata?.fellowfare_node_id, 'FellowFare Price facilitating Hub Node ID', 180);
+  await facilitatingNode(env, nodeId);
   const gross = price.unit_amount * quantity;
   const feeBps = integer(env?.CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS ?? FELLOWFARE_DEFAULT_SERVICE_FEE_BPS, 'CIVWEAVE_FELLOWFARE_SERVICE_FEE_BPS', 0, 10000);
   const applicationFeeAmount = Math.floor(gross * feeBps / 10000);
+  const hostStewardFeeAmount = Math.floor(applicationFeeAmount * FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS / 10000);
+  const cerbanimoFeeAmount = applicationFeeAmount - hostStewardFeeAmount;
   const origin = new URL(request.url).origin;
   const successUrl = `${origin}/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1&ffcash=success&listingId=${encodeURIComponent(listingId)}&session_id={CHECKOUT_SESSION_ID}#assemblies`;
   const cancelUrl = `${origin}/app/services/fellowfare/cabinet.html?civweave=1&cabinet=1&ffcash=cancelled&listingId=${encodeURIComponent(listingId)}#market`;
@@ -258,7 +283,10 @@ export async function createFellowFareDirectCheckout(request, env, input, option
       civweave_schema: FELLOWFARE_DIRECT_COMMERCE_SCHEMA,
       fellowfare_listing_id: listingId,
       fellowfare_kind: listingKind,
-      fellowfare_merchant_user_id: mapping.userId
+      fellowfare_merchant_user_id: mapping.userId,
+      fellowfare_node_id: nodeId,
+      fellowfare_service_fee_bps: String(feeBps),
+      fellowfare_fee_split: '50-host-steward-50-cerbanimo'
     }
   };
   if (applicationFeeAmount > 0) paymentIntentData.application_fee_amount = applicationFeeAmount;
@@ -271,6 +299,9 @@ export async function createFellowFareDirectCheckout(request, env, input, option
       civweave_schema: FELLOWFARE_DIRECT_COMMERCE_SCHEMA,
       fellowfare_listing_id: listingId,
       fellowfare_kind: listingKind,
+      fellowfare_node_id: nodeId,
+      fellowfare_service_fee_bps: String(feeBps),
+      fellowfare_fee_split: '50-host-steward-50-cerbanimo',
       fellowfare_charge_pattern: 'direct-charge'
     },
     mode: 'payment',
@@ -285,10 +316,15 @@ export async function createFellowFareDirectCheckout(request, env, input, option
     accountId,
     listingId,
     kind: listingKind,
+    nodeId,
     grossMinor: gross,
     currency: price.currency,
     platformFeeBps: feeBps,
     applicationFeeAmount,
+    hostStewardFeeAmount,
+    cerbanimoFeeAmount,
+    hostStewardFeeShareBps: FELLOWFARE_SERVICE_FEE_HOST_SHARE_BPS,
+    cerbanimoFeeShareBps: FELLOWFARE_SERVICE_FEE_CERBANIMO_SHARE_BPS,
     chargePattern: 'direct-charge',
     merchantOfRecord: 'connected-account',
     platformCollectsGross: false,
