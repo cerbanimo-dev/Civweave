@@ -56,6 +56,11 @@ jobs:
             "assert.ok(capacitySource.includes(\"const seatClass = billingStatus === 'paid' || billingStatus === 'grace' ? 'paid-expansion' : 'community';\"));"
           );
           await replaceRequired(
+            'scripts/verify-cloudflare-launch-kit-v1.mjs',
+            "const paidEmpty = capacityModule.deriveCapacity({ workersPlan:'paid', memberCount:18, communityMemberCount:18 });\nassert.equal(paidEmpty.dailyCeilingNeurons, 10000);\nassert.equal(paidEmpty.communitySeatLimit, 18);",
+            "const paidEmpty = capacityModule.deriveCapacity({ workersPlan:'paid', memberCount:10, communityMemberCount:10 });\nassert.equal(paidEmpty.dailyCeilingNeurons, 10000);\nassert.equal(paidEmpty.includedDailyNeurons, 900);\nassert.equal(paidEmpty.communitySeatLimit, 10);"
+          );
+          await replaceRequired(
             'scripts/test-node-ai-marketplace-surface-v1.mjs',
             "  '/app/installed-entry-v146.html','/app/cw-reward-ledger-v2.js','/app/cw-reward-receivers-v2.js'",
             "  '/app/installed-entry-v146.html','/app/cw-reward-ledger-v2.js','/app/civweave-basic-value-v1.js','/app/civweave-economic-policy-v1.js','/app/civweave-basic-value-model-v1.js','/app/civweave-basic-value-review-v1.js','/app/civweave-basic-value-systems-v1.js','/app/cw-reward-receivers-v2.js'"
