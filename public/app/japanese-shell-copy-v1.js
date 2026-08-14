@@ -104,7 +104,8 @@ function translateTree(root=document.body){
 }
 function stewardBrand(){
   const strong=document.querySelector('.cw-steward-copy strong');if(!strong)return;
-  strong.dataset.cwJaSkip='';strong.textContent='Cerbanimo';
+  if(!strong.hasAttribute('data-cw-ja-skip'))strong.dataset.cwJaSkip='';
+  if(strong.textContent!=='Cerbanimo')strong.textContent='Cerbanimo';
   let jp=strong.parentElement?.querySelector('[data-cw-shell-cerbanimo-ja]');
   if(!jp){jp=document.createElement('span');jp.dataset.cwShellCerbanimoJa='';jp.dataset.cwJaSkip='';jp.lang='ja';jp.textContent='神織 · セルバニモ';jp.style.cssText='display:block;margin-top:2px;font-size:.86em;font-weight:850;letter-spacing:.04em';strong.insertAdjacentElement('afterend',jp)}
 }
