@@ -47,7 +47,7 @@ jobs:
             --public-origin https://civweave-test-garden.pages.dev \
             --pages-origin https://civweave-test-garden.pages.dev
 
-      - name: Verify portable host paths, Japanese surface, and local links
+      - name: Verify portable host paths, Japanese surface, posters, and local links
         run: |
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
@@ -65,20 +65,47 @@ jobs:
             '共市 / フェローフェア / FellowFare',
             '自治郷 / アナーケイディア / Anarchadia',
           ];
+          const posterFiles = [
+            'living-school-poster.webp',
+            'cerbanimo-poster.webp',
+            'fellowfare-poster.webp',
+            'anarchadia-poster.webp',
+          ];
+          const forbiddenRealmSprites = [
+            'moss.png',
+            'kamiya.png',
+            'rook.png',
+            'merlin.png',
+          ];
+          const realmMarkup = html => html.match(/<div class="realms">[\s\S]*?<\/div>\s*<\/section>/)?.[0] || '';
+          const flagshipRealms = realmMarkup(flagship);
+          const flagshipJaRealms = realmMarkup(flagshipJa);
+          const hostedRealms = realmMarkup(hosted);
+          const hostedJaRealms = realmMarkup(hostedJa);
+          const hasAllPosters = html => posterFiles.every(file => html.includes(file));
+          const hasNoRealmSprites = html => forbiddenRealmSprites.every(file => !html.includes(file));
           const checks = [
             [flagship.includes('id="story"'), 'flagship story section'],
+            [hasAllPosters(flagshipRealms), 'flagship realm posters'],
+            [hasNoRealmSprites(flagshipRealms), 'flagship realms contain no guide sprites'],
             [flagshipJa.includes('<html lang="ja">'), 'flagship Japanese language marker'],
             [flagshipJa.includes('名前について：'), 'Civweave kanji explainer'],
             [flagshipJa.includes('<strong>名前：</strong>'), 'realm kanji explainers'],
             [japaneseNames.every(name => flagshipJa.includes(name)), 'canonical Japanese realm names'],
             [flagshipJa.includes('hreflang="ja"'), 'Japanese hreflang'],
+            [hasAllPosters(flagshipJaRealms), 'Japanese flagship realm posters'],
+            [hasNoRealmSprites(flagshipJaRealms), 'Japanese flagship realms contain no guide sprites'],
             [hosted.includes('id="story"'), 'community story section'],
             [hosted.includes('/cerbanimo/assets/civweave-on.png'), 'community asset base'],
             [hosted.includes('Community Cerbanimo'), 'community host banner'],
             [hosted.includes('https://civweave-test-garden.pages.dev/">Open this node'), 'local-node CTA'],
+            [hasAllPosters(hostedRealms), 'community realm posters'],
+            [hasNoRealmSprites(hostedRealms), 'community realms contain no guide sprites'],
             [hostedJa.includes('/cerbanimo/assets/civweave-on.png'), 'Japanese community asset base'],
             [hostedJa.includes('コミュニティ 神織'), 'Japanese community host banner'],
             [hostedJa.includes('https://civweave-test-garden.pages.dev/ja/">この民織ノードを開く'), 'Japanese local-node CTA'],
+            [hasAllPosters(hostedJaRealms), 'Japanese community realm posters'],
+            [hasNoRealmSprites(hostedJaRealms), 'Japanese community realms contain no guide sprites'],
             [hostedApp.includes('/cerbanimo/history.json'), 'community history path'],
             [hostedApp.includes('/cerbanimo/assets/weaveling.png'), 'community guide asset path'],
             [surface.role === 'community', 'community role marker'],
