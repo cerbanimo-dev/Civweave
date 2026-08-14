@@ -1,0 +1,42 @@
+name: Temporary materialize desktop reload v1.0.148
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.head_ref == 'agent/fix-desktop-home-reload-storm'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Materialize canonical 1.0.148 release
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts
+          printf '1.0.148\n' > VERSION
+          node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('package.json','utf8')); p.version='1.0.148'; fs.writeFileSync('package.json', JSON.stringify(p,null,2)+'\n')"
+          node scripts/materialize-canonical-release.mjs
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+          git config user.name 'civweave-release-materializer'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No release materialization changes produced.'
+            exit 0
+          fi
+          git commit -m 'Materialize Civweave 1.0.148 release state'
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
