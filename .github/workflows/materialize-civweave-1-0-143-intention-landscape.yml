@@ -7,6 +7,7 @@ on:
     paths:
       - '.release-materialize-1.0.143-intention-landscape'
       - '.release-materialize-1.0.143-intention-landscape-retry'
+      - '.release-materialize-1.0.143-intention-landscape-final'
 
 permissions:
   contents: write
