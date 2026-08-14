@@ -3,7 +3,7 @@ name: Verify peer compute validation governance
 on:
   pull_request:
     paths:
-      - 'public/app/peer-local-plan-borrow-v1.js'
+      - 'public/app/peer-local-plan-borrow-v2.js'
       - 'public/app/peer-local-plan-borrow-ui-v1.js'
       - 'public/app/validation-labor-rewards-v1.js'
       - 'public/app/proposal-voting-gate-v2.js'
@@ -14,7 +14,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'public/app/peer-local-plan-borrow-v1.js'
+      - 'public/app/peer-local-plan-borrow-v2.js'
       - 'public/app/peer-local-plan-borrow-ui-v1.js'
       - 'public/app/validation-labor-rewards-v1.js'
       - 'public/app/proposal-voting-gate-v2.js'
