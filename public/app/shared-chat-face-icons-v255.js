@@ -1,12 +1,12 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.110-shared-chat-face-icons-v255-minilm-lamp-v345';
+const VERSION='1.0.111-shared-chat-face-icons-v255-avatar-visible-v346';
 const ROOT_ID='cw-persistent-guide-chat-v215';
 const SHARED_ROOT_ID='cw-shared-guide-surface-v236';
 const LAUNCHER_ID='cwp215-launcher';
 const STYLE_ID='cw-shared-chat-face-icons-v255-style';
-const EXPRESSION_DIRECTOR='/app/avatar-expression-director-v345.js?v=1.0.0-avatar-v345';
+const EXPRESSION_DIRECTOR='/app/avatar-expression-director-v345.js?v=1.0.1-avatar-v346';
 const ICONS=Object.freeze({
   civweave:'/app/assets/ai/chat/weaveling-face-v255.webp',
   'living-school':'/app/assets/ai/chat/moss-face-v255.webp',
@@ -19,14 +19,14 @@ const OLD_SRC_TO_SYSTEM=Object.freeze({'weaveling.png':'civweave','moss.png':'li
 
 if(globalThis.CivweaveSharedChatFaceIconsV255?.version===VERSION)return;
 
-let directorPromise=null,miniLmLampTimer=0;
+let directorPromise=null,miniLmLampTimer=0,avatarPrimed=false;
 function ensureExpressionDirector(){
   if(globalThis.CivweaveAvatarExpressionDirectorV343)return Promise.resolve(globalThis.CivweaveAvatarExpressionDirectorV343);
   if(directorPromise)return directorPromise;
   directorPromise=new Promise(resolve=>{
     const existing=Array.from(document.scripts||[]).find(node=>String(node.src||'').includes('/app/avatar-expression-director-v345.js'));
     if(existing){existing.addEventListener('load',()=>resolve(globalThis.CivweaveAvatarExpressionDirectorV343||null),{once:true});existing.addEventListener('error',()=>resolve(null),{once:true});return}
-    const script=document.createElement('script');script.src=EXPRESSION_DIRECTOR;script.async=true;script.dataset.cwAvatarExpressionDirector='v345';script.addEventListener('load',()=>resolve(globalThis.CivweaveAvatarExpressionDirectorV343||null),{once:true});script.addEventListener('error',()=>resolve(null),{once:true});document.head?.append(script);
+    const script=document.createElement('script');script.src=EXPRESSION_DIRECTOR;script.async=true;script.dataset.cwAvatarExpressionDirector='v346';script.addEventListener('load',()=>resolve(globalThis.CivweaveAvatarExpressionDirectorV343||null),{once:true});script.addEventListener('error',()=>resolve(null),{once:true});document.head?.append(script);
   });
   return directorPromise;
 }
@@ -107,7 +107,13 @@ function refreshMiniLmLamp(){
   if(selected){selected.dataset.cwMinilmActive=active?'true':'false';selected.setAttribute('aria-description',active?'MiniLM active for selected AI avatar':'MiniLM inactive for selected AI avatar')}
   return active;
 }
-function refresh(){installStyle();apply(document);refreshMiniLmLamp();void ensureExpressionDirector().then(api=>{api?.refresh?.();refreshMiniLmLamp()})}
+function primeAvatars(api){
+  if(avatarPrimed||!api?.classify)return false;
+  avatarPrimed=true;
+  for(const system of Object.keys(ICONS))api.classify('',{system,phase:'response'});
+  return true;
+}
+function refresh(){installStyle();apply(document);refreshMiniLmLamp();void ensureExpressionDirector().then(api=>{api?.refresh?.();primeAvatars(api);refreshMiniLmLamp()})}
 function start(){
   refresh();
   const observer=new MutationObserver(records=>{
@@ -119,8 +125,8 @@ function start(){
   ['civweave:guide-workspace-ready','civweave:guide-workspace-state','civweave:realm-guide-thread-changed','civweave:chat-single-owner-ready','civweave:minilm-context-ready','civweave:minilm-context-fallback','civweave:minilm-package-needed'].forEach(name=>addEventListener(name,()=>queueMicrotask(refreshMiniLmLamp)));
   miniLmLampTimer=setInterval(refreshMiniLmLamp,1500);
   addEventListener('pagehide',()=>clearInterval(miniLmLampTimer),{once:true});
-  globalThis.CivweaveSharedChatFaceIconsV255=Object.freeze({version:VERSION,icons:ICONS,refresh,applyExpression,refreshMiniLmLamp,ensureExpressionDirector,destroy:()=>{observer.disconnect();clearInterval(miniLmLampTimer)},switcherDesktopPx:60,switcherMobilePx:54,launcherShape:'circle',launcherPosition:'fixed',launcherDesktopPx:52,launcherMobilePx:48,expressiveSprites:true,miniLmActivityLamp:true});
-  try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION,expressiveSprites:true,miniLmActivityLamp:true}}))}catch{}
+  globalThis.CivweaveSharedChatFaceIconsV255=Object.freeze({version:VERSION,icons:ICONS,refresh,applyExpression,refreshMiniLmLamp,primeAvatars,ensureExpressionDirector,destroy:()=>{observer.disconnect();clearInterval(miniLmLampTimer)},switcherDesktopPx:60,switcherMobilePx:54,launcherShape:'circle',launcherPosition:'fixed',launcherDesktopPx:52,launcherMobilePx:48,expressiveSprites:true,miniLmActivityLamp:true,neutralSpriteBoot:true});
+  try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION,expressiveSprites:true,miniLmActivityLamp:true,neutralSpriteBoot:true}}))}catch{}
 }
 
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();

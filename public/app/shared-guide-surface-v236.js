@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='1.0.118-shared-guide-surface-v236-bubble-only-v425';
+const VERSION='1.0.119-shared-guide-surface-v236-avatar-v346';
 if(globalThis.CivweaveSharedGuideSurfaceV236Loader?.version===VERSION)return;
 
 function liveHead(){
@@ -53,7 +53,7 @@ function install(){
   load('/app/intention-planner-v141.js?v=1.0.57-v265-review-materialization',()=>{
     load('/app/weaveling-plan-materialization-v265.js?v=1.0.57-v265',()=>{
       load('/app/shared-guide-surface-v236-core-v244.js?v=1.0.118-v425-bubble-only',()=>{
-        load('/app/shared-chat-face-icons-v255.js?v=1.0.57-v257',()=>{
+        load('/app/shared-chat-face-icons-v255.js?v=avatar-v346-visible',()=>{
           try{dispatchEvent(new CustomEvent('civweave:shared-chat-face-icons-ready',{detail:{version:VERSION}}))}catch{}
         },()=>Boolean(globalThis.CivweaveSharedChatFaceIconsV255));
         load('/app/living-school-chat-workbench-v255.js?v=1.0.57-v265-learning-pathway',()=>{
@@ -68,5 +68,5 @@ function install(){
 install();
 addEventListener('pageshow',()=>queueMicrotask(install));
 
-globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,plannerMaterialization:'v265',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',install});
+globalThis.CivweaveSharedGuideSurfaceV236Loader=Object.freeze({version:VERSION,plannerMaterialization:'v265',scrollOwnership:'document-v265',preloadedDependencyReadyCheck:true,streamThinking:'v249',navigationLifecycle:'v424',surfaceMode:'bubble-only',avatarRuntime:'v346-visible',install});
 })();

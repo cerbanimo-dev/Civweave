@@ -76,13 +76,17 @@ for(const token of [
   'const status=await shellStatus()',
   "policy:'verified-shell-only-preserve-campus-model-school-storage'"
 ])assert.ok(repairWorker.includes(token),`Installed shell repair worker is missing ${token}`);
-for(const token of [
-  'needs? repair',
-  "worker.postMessage({ type: 'REPAIR_DEVICE_PACKAGE' }",
-  "packet?.type !== 'CIVWEAVE_DEVICE_PACKAGE_REPAIR'",
-  "storagePolicy: 'preserve-campus-model-media-school-storage'",
-  "installButton.textContent = 'Repair shell'"
-])assert.ok(fallback.includes(token),`Installer repair UI is missing ${token}`);
+
+const fallbackContracts=[
+  ['repair-state detection',/needs\? repair/],
+  ['repair message dispatch',/worker\.postMessage\(\{\s*type\s*:\s*['"]REPAIR_DEVICE_PACKAGE['"]\s*\}/],
+  ['repair response validation',/packet\?\.type\s*!==\s*['"]CIVWEAVE_DEVICE_PACKAGE_REPAIR['"]/],
+  ['preserved storage policy',/storagePolicy\s*:\s*['"]preserve-campus-model-media-school-storage['"]/],
+  ['repair button copy',/installButton\.textContent\s*=\s*['"]Repair shell['"]/]
+];
+for(const [label,pattern] of fallbackContracts)assert.match(fallback,pattern,`Installer repair UI is missing ${label}`);
+assert.match(fallback,/new MessageChannel\(\)/,'Installer repair UI no longer uses a reply channel for shell repair.');
+assert.match(fallback,/\[\s*channel\.port2\s*\]/,'Installer repair UI no longer transfers the reply port with the repair request.');
 
 function repairHarness({fail=false}={}){
   let messageHandler=null;
@@ -128,7 +132,7 @@ assert.equal(failure?.failures?.[0]?.pathname,'/app/installed-entry-v146.html');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installed-shell-repair-v293',
+  revision:'installed-shell-repair-v293-behavioral-contract',
   version,
   shellIntegrityAssets:integrity.requiredAssetCount,
   shellIntegrityDerivedFromRuntime:true,
@@ -137,5 +141,6 @@ console.log(JSON.stringify({
   preservedStorage:['offline-campus','models','open-learning-media','knowledge-schools'],
   workerGeneratorLocked:true,
   canonicalMaterializerRegeneratesIntegrity:true,
-  manualFirstShell:true
+  manualFirstShell:true,
+  sourceFormattingAgnostic:true
 },null,2));
