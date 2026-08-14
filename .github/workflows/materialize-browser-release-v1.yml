@@ -1,0 +1,48 @@
+name: Materialize browser research release
+
+on:
+  push:
+    branches:
+      - agent/offline-ai-browser-tool-v1
+    paths:
+      - '.github/workflows/materialize-browser-release-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/offline-ai-browser-tool-v1
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Advance shipping version
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from 'node:fs/promises';
+          const version='1.0.142';
+          await writeFile('VERSION',`${version}\n`);
+          const pkg=JSON.parse(await readFile('package.json','utf8'));
+          pkg.version=version;
+          await writeFile('package.json',`${JSON.stringify(pkg,null,2)}\n`);
+          NODE
+      - name: Materialize canonical release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Verify browser and bootstrap contracts
+        run: |
+          node scripts/verify-local-browser-agent-v1.mjs
+          node scripts/verify-small-model-fast-path-v283.mjs
+          node scripts/verify-local-ai-bootstrap-retry-v312.mjs
+      - name: Commit synchronized release
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'Materialize Civweave 1.0.142 browser research release'
+          git push origin HEAD:agent/offline-ai-browser-tool-v1
