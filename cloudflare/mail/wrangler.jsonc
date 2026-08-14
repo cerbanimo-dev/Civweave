@@ -1,0 +1,34 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "civweave-mail",
+  "main": "src/index.mjs",
+  "compatibility_date": "2026-08-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "mail.civweave.cc", "custom_domain": true }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "MAILBOX", "class_name": "CivweaveMailbox" }
+    ]
+  },
+  "migrations": [
+    { "tag": "mail-v1", "new_sqlite_classes": ["CivweaveMailbox"] }
+  ],
+  "r2_buckets": [
+    { "binding": "MAIL_BLOBS", "bucket_name": "civweave-mail-blobs" }
+  ],
+  "services": [
+    { "binding": "ACCOUNT_EDGE", "service": "civweave-host-edge" }
+  ],
+  "vars": {
+    "MAIL_DOMAIN": "civweave.cc",
+    "EXTERNAL_OUTBOUND": "disabled"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}
