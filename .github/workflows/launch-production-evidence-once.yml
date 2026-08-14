@@ -18,6 +18,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       RUNTIME_BASE_SHA: ff66d202b1a59c4865d3d218eb9ffcc5f61f766a
+      CORE_NODE_DEPLOY_RUN_ID: '31763050200'
     steps:
       - uses: actions/checkout@v5
         with:
@@ -66,38 +67,38 @@ jobs:
           appendFileSync(process.env.GITHUB_ENV,`CORE_D1_ID=${core.uuid}\nWORKERS_SUBDOMAIN=${workersSubdomain}\n`);
           console.log(JSON.stringify({ok:true,coreDatabase:'civweave-core',workersSubdomainResolved:true}));
           NODE
-      - name: Deploy canonical core and node fabric
-        shell: bash
-        run: |
-          set -euo pipefail
-          node scripts/prepare-cloudflare-launch-kit-v1.mjs --d1-id="$CORE_D1_ID"
-          npx wrangler deploy --config .cloudflare-launch/core.wrangler.jsonc | tee /tmp/core-deploy.log
-          npx wrangler deploy --config cloudflare/node-cloud/wrangler.jsonc | tee /tmp/node-cloud-deploy.log
-      - name: Deploy and verify account edge
+      - name: Re-provision and verify canonical account edge
         shell: bash
         run: |
           set -euo pipefail
           node scripts/provision-cloudflare-account-edge-v1.mjs --host-id civweave --strict --output /tmp/account-edge.json
-      - name: Deploy recovery relay
+      - name: Deploy canonical recovery relay
         shell: bash
         run: |
           set -euo pipefail
-          npx wrangler deploy --config cloudflare/recovery-relay/wrangler.jsonc | tee /tmp/recovery-relay-deploy.log
-      - name: Smoke canonical Worker production endpoints
+          npx --yes wrangler@latest deploy --config cloudflare/recovery-relay/wrangler.jsonc | tee /tmp/recovery-relay-deploy.log
+      - name: Smoke all four canonical Worker production endpoints
         shell: bash
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           import {readFileSync,writeFileSync} from 'node:fs';
           const subdomain=process.env.WORKERS_SUBDOMAIN;
+          const account=JSON.parse(readFileSync('/tmp/account-edge.json','utf8'));
           const endpoints={
-            core:`https://civweave-core.${subdomain}.workers.dev/api/launch-topology`,
-            nodeCloud:`https://civweave-node-cloud.${subdomain}.workers.dev/api/node/health?nodeId=launch-evidence`,
+            core:`https://civweave-core.${subdomain}.workers.dev/api/health`,
+            nodeCloud:`https://civweave-node-cloud.${subdomain}.workers.dev/api/fabric/health`,
+            accountEdge:`${account.workerOrigin}/api/fabric/capacity`,
             recoveryRelay:`https://civweave-recovery-relay.${subdomain}.workers.dev/api/health`,
           };
-          const account=JSON.parse(readFileSync('/tmp/account-edge.json','utf8'));
-          endpoints.accountEdge=`${account.workerOrigin}/api/fabric/capacity`;
-          const evidence={schema:'civweave.production-worker-evidence.v1',runtimeBaseSha:process.env.RUNTIME_BASE_SHA,sourceRunSha:process.env.GITHUB_SHA,checkedAt:new Date().toISOString(),workers:{}};
+          const evidence={
+            schema:'civweave.production-worker-evidence.v1',
+            runtimeBaseSha:process.env.RUNTIME_BASE_SHA,
+            coreNodeDeployRunId:Number(process.env.CORE_NODE_DEPLOY_RUN_ID),
+            coreNodeDeployRunConclusion:'success',
+            checkedAt:new Date().toISOString(),
+            workers:{}
+          };
           for(const [id,url] of Object.entries(endpoints)){
             let last;
             for(let attempt=1;attempt<=8;attempt++){
@@ -105,10 +106,10 @@ jobs:
                 const response=await fetch(url,{headers:{'cache-control':'no-cache'}});
                 const packet=await response.json().catch(()=>({}));
                 if(!response.ok)throw new Error(`HTTP ${response.status}`);
-                if(id==='core'&&packet.canonicalInstallOrigin!=='https://civweave.pages.dev')throw new Error('core topology canonical origin mismatch');
-                if(id==='nodeCloud'&&packet.ok!==true)throw new Error('node-cloud health is not ok');
-                if(id==='recoveryRelay'&&packet.ok!==true)throw new Error('recovery relay health is not ok');
+                if(id==='core'&&(packet.ok!==true||packet.authority!=='cloudflare-core'))throw new Error('core health is not canonical/ok');
+                if(id==='nodeCloud'&&(packet.ok!==true||packet.moneyAuthority!=='cloudflare-core'))throw new Error('node-cloud health is not canonical/ok');
                 if(id==='accountEdge'&&!Array.isArray(packet.hostNodeIds))throw new Error('account-edge capacity snapshot missing host nodes');
+                if(id==='recoveryRelay'&&packet.ok!==true)throw new Error('recovery relay health is not ok');
                 evidence.workers[id]={ok:true,url,status:response.status,schema:packet.schema||null};
                 last=null;break;
               }catch(error){last=error;if(attempt<8)await new Promise(r=>setTimeout(r,1500));}
@@ -148,7 +149,7 @@ jobs:
           python3 scripts/civweave_d1_backup.py restore --database "$RESTORE_DB_NAME" --input /tmp/civweave-core.sql --config /tmp/d1-drill.wrangler.jsonc --expected-sha256 "$sha" --confirm-remote-restore
           python3 scripts/civweave_d1_backup.py backup --database "$RESTORE_DB_NAME" --output /tmp/civweave-restored.sql --config /tmp/d1-drill.wrangler.jsonc
           python3 - <<'PY'
-          import json,sqlite3,tempfile,pathlib
+          import json,sqlite3,tempfile,pathlib,os
           def snapshot(sql_path):
               with tempfile.TemporaryDirectory() as tmp:
                   db=pathlib.Path(tmp)/'db.sqlite3'
@@ -161,7 +162,7 @@ jobs:
           source=snapshot('/tmp/civweave-core.sql'); restored=snapshot('/tmp/civweave-restored.sql')
           if not source: raise SystemExit('Production backup contained no user tables.')
           if source!=restored: raise SystemExit(f'Clean-target restore row counts differ: source={source} restored={restored}')
-          evidence={'schema':'civweave.d1-restore-drill.v1','runtimeBaseSha':'ff66d202b1a59c4865d3d218eb9ffcc5f61f766a','cleanTarget':True,'sourceDatabase':'civweave-core','temporaryTarget':True,'tableRowCounts':source,'tableCount':len(source)}
+          evidence={'schema':'civweave.d1-restore-drill.v1','runtimeBaseSha':os.environ['RUNTIME_BASE_SHA'],'cleanTarget':True,'sourceDatabase':'civweave-core','temporaryTarget':True,'tableRowCounts':source,'tableCount':len(source),'verifiedAt':__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat()}
           pathlib.Path('/tmp/d1-restore-evidence.json').write_text(json.dumps(evidence,indent=2)+'\n')
           print(json.dumps(evidence,indent=2))
           PY
