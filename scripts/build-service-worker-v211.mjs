@@ -28,7 +28,7 @@ const required=[
   'public/service-worker-boot-recovery-v426.js'
 ];
 for(const relative of required)await readFile(path.join(root,relative),'utf8');
-const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288-language-v1 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-freeze-v347 + mobile-ai-hardening-v302 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1
+const output=`// GENERATED: five-system route contract v227 + living-school clean-room cache boundary + local-ai-code-coherence-v307 + code-coherence-v288-language-v1 + retained lightweight shell core + installed-pwa-launch-v294-campus-recovery + installer-state-machines-v280 + shell-integrity-v281 + radio-core-shell-v305 + installed-shell-repair-v293 + offline-campus-current-graph-v280 current-manifest-only-v282 + campus-retired-completion-v246 + release-coherence-v226 + navigation-redirect-safety-v224 + shell-self-repair-v225 + canonical-navigation-v227 + chat-avatar-visible-v346 + mobile-chat-freeze-v347 + mobile-ai-hardening-v302 + local-model-background-v267 + open-learning-media-v1 + working-campus-return-v425 + desktop-reload-storm-v428 + boot-recovery-v426 + atomic-update-handoff-v427 + install-only-pwa-v1
 'use strict';
 importScripts('/app/system-routes-v227.js?v=${version}-five-system-route-contract-v227');
 importScripts('/service-worker-living-school-cleanroom-v218.js?v=living-school-cleanroom-v218');
@@ -73,7 +73,7 @@ console.log(JSON.stringify({
   chatRepair:'chat-avatar-visible-v346',
   chatFreezeRepair:'mobile-chat-freeze-v347',
   mobileAIHardening:'v302',
-  workingCampusReturn:'v425',
+  workingCampusReturn:'v425-desktop-reload-storm-v428',
   bootRecovery:'v426',
   installOnlyPwa:'v1',
   updateActivation:'explicit-waiting-worker-handoff-v427',

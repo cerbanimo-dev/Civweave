@@ -2,18 +2,26 @@
 'use strict';
 
 const VERSION='working-campus-return-v425';
+const REVISION='desktop-reload-storm-v428';
 const RECOVERY_KEY='civweave.working-campus.return-recovery.v425';
 const RECOVERY_WINDOW_MS=30_000;
+const STARTUP_GRACE_MS=2400;
+const UNHEALTHY_HOLD_MS=900;
+const RETRY_DELAY_MS=260;
 const CANONICAL_PATH='/app/working-campus-v156.html';
-const BOOT_KEY='civweave.install-boundary.boot.v227';
-const LEGACY_BOOT_KEY='civweave.install-boundary.boot.v226';
+const BOOT_KEY='civweave.install-boundary.boot.v228';
+const LEGACY_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-boundary.boot.v226'];
 const LANGUAGE_KEY='civweave.language.v1';
 const JAPANESE_MODE_SRC='/app/japanese-mode-v1.js?v=japanese-mode-v1';
 const REQUIRED_SELECTORS=['main.app','main.app>header.top','main.app>.campus','main.app>.main','nav.bottom','#conversation','#workspace'];
 let lastInspection=null;
 let recoveryPanel=null;
+let verifyFlight=null;
+let retryTimer=0;
+let unhealthySince=0;
+const bootStartedAt=Date.now();
 
-if(globalThis.CivweaveWorkingCampusReturnGuardV425?.version===VERSION)return;
+if(globalThis.CivweaveWorkingCampusReturnGuardV425?.version===VERSION&&globalThis.CivweaveWorkingCampusReturnGuardV425?.revision===REVISION)return;
 
 const now=()=>Date.now();
 const parse=value=>{try{return JSON.parse(value||'null')}catch{return null}};
@@ -45,7 +53,7 @@ function activateLanguageMode(){
 function preauthorizeCanonicalCampus(){
   try{
     sessionStorage.setItem(BOOT_KEY,'1');
-    sessionStorage.setItem(LEGACY_BOOT_KEY,'1');
+    for(const key of LEGACY_BOOT_KEYS)sessionStorage.removeItem(key);
     document.documentElement?.setAttribute('data-civweave-install-boundary-preauthorized',VERSION);
     return true;
   }catch{return false}
@@ -87,7 +95,7 @@ function inspect(){
   const missing=REQUIRED_SELECTORS.filter(selector=>!document.querySelector(selector));
   const app=document.querySelector('main.app');
   const healthy=Boolean(document.documentElement?.isConnected&&document.body?.isConnected&&!missing.length&&computedVisible(app));
-  lastInspection={version:VERSION,healthy,missing,appVisible:computedVisible(app),visibilityState:document.visibilityState||'unknown',at:new Date().toISOString()};
+  lastInspection={version:VERSION,revision:REVISION,healthy,missing,appVisible:computedVisible(app),visibilityState:document.visibilityState||'unknown',at:new Date().toISOString()};
   if(document.documentElement)document.documentElement.dataset.civweaveWorkingCampusReturn=healthy?'healthy':'unhealthy';
   return lastInspection;
 }
@@ -126,25 +134,50 @@ function renderFailSafe(reason,inspection=inspect()){
   if(document.documentElement)document.documentElement.dataset.civweaveWorkingCampusReturn='failsafe';
   return panel;
 }
-async function verifyOrRecover(reason='check'){
+function clearRetry(){if(retryTimer){clearTimeout(retryTimer);retryTimer=0}}
+function scheduleVerify(reason='settle',delay=RETRY_DELAY_MS){
+  clearRetry();
+  retryTimer=setTimeout(()=>{retryTimer=0;void verifyOrRecover(reason)},Math.max(0,Number(delay)||0));
+  return true;
+}
+async function verifyOnce(reason='check'){
   if(document.visibilityState==='hidden')return{deferred:true,reason};
   preauthorizeCanonicalCampus();
   await frame();await frame();
   let inspection=inspect();
-  if(inspection.healthy){clearRecovery();return inspection}
+  if(inspection.healthy){unhealthySince=0;clearRetry();clearRecovery();return inspection}
   forceReveal();
   await frame();
   inspection=inspect();
-  if(inspection.healthy){clearRecovery();return inspection}
+  if(inspection.healthy){unhealthySince=0;clearRetry();clearRecovery();return inspection}
+  const observedAt=now();
+  if(!unhealthySince)unhealthySince=observedAt;
+  const startupAge=observedAt-bootStartedAt;
+  const unhealthyAge=observedAt-unhealthySince;
+  const startupSettled=document.readyState==='complete'&&startupAge>=STARTUP_GRACE_MS;
+  const failureSustained=unhealthyAge>=UNHEALTHY_HOLD_MS;
+  if(!startupSettled||!failureSustained){
+    const remaining=Math.max(RETRY_DELAY_MS,Math.min(1000,Math.max(STARTUP_GRACE_MS-startupAge,UNHEALTHY_HOLD_MS-unhealthyAge,0)));
+    scheduleVerify(`${reason}-settle`,remaining);
+    if(document.documentElement)document.documentElement.dataset.civweaveWorkingCampusReturn='settling';
+    return{...inspection,deferred:true,settling:true,startupAge,unhealthyAge};
+  }
   const previous=readRecovery();
   const recent=previous&&Number(previous.at)>now()-RECOVERY_WINDOW_MS;
   if(recent){renderFailSafe(reason,inspection);return{...inspection,failsafe:true}}
-  writeRecovery({at:now(),reason,count:Number(previous?.count||0)+1,path:location.pathname});
+  writeRecovery({at:now(),reason,count:Number(previous?.count||0)+1,path:location.pathname,revision:REVISION});
+  clearRetry();
   location.replace(canonicalUrl(reason));
   return{...inspection,reloading:true};
 }
+function verifyOrRecover(reason='check'){
+  if(verifyFlight)return verifyFlight;
+  verifyFlight=verifyOnce(reason).finally(()=>{verifyFlight=null});
+  return verifyFlight;
+}
 function holdBfCache(event){
   if(!event?.persisted)return;
+  clearRetry();
   if(document.documentElement)document.documentElement.dataset.civweaveBfcacheHold=VERSION;
   event.stopImmediatePropagation?.();
 }
@@ -152,30 +185,36 @@ function resume(event){
   preauthorizeCanonicalCampus();
   activateLanguageMode();
   if(document.documentElement)document.documentElement.dataset.civweaveBfcacheResume=event?.persisted?VERSION:'normal';
-  try{dispatchEvent(new CustomEvent('civweave:working-campus-page-resumed',{detail:{version:VERSION,persisted:Boolean(event?.persisted)}}))}catch{}
-  void verifyOrRecover(event?.persisted?'bfcache-return':'pageshow');
+  try{dispatchEvent(new CustomEvent('civweave:working-campus-page-resumed',{detail:{version:VERSION,revision:REVISION,persisted:Boolean(event?.persisted)}}))}catch{}
+  if(event?.persisted)void verifyOrRecover('bfcache-return');
+  else scheduleVerify('pageshow',RETRY_DELAY_MS);
 }
-function scheduleInitialCheck(){void verifyOrRecover('initial-paint')}
+function scheduleInitialCheck(){scheduleVerify('initial-paint',RETRY_DELAY_MS)}
 
 preauthorizeCanonicalCampus();
 activateLanguageMode();
 addEventListener('pagehide',holdBfCache,true);
 addEventListener('pageshow',resume,true);
-addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void verifyOrRecover('visibility-return')});
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleInitialCheck,{once:true});else queueMicrotask(scheduleInitialCheck);
+addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')scheduleVerify('visibility-return',RETRY_DELAY_MS)});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',scheduleInitialCheck,{once:true});else scheduleInitialCheck();
 
 globalThis.CivweaveWorkingCampusReturnGuardV425=Object.freeze({
   version:VERSION,
+  revision:REVISION,
   recoveryKey:RECOVERY_KEY,
   inspect,
   forceReveal,
   verifyOrRecover,
+  scheduleVerify,
   clearRecovery,
   canonicalUrl,
   preauthorizeCanonicalCampus,
   activateLanguageMode,
   language:requestedLanguage,
-  installBoundaryPolicy:'canonical-campus-preauthorized-before-shared-boundary',
-  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),language:requestedLanguage()})
+  startupGraceMs:STARTUP_GRACE_MS,
+  unhealthyHoldMs:UNHEALTHY_HOLD_MS,
+  installBoundaryPolicy:'canonical-campus-preauthorized-before-shared-boundary-v228',
+  reloadPolicy:'sustained-failure-only-single-flight',
+  state:()=>({lastInspection,recovery:readRecovery(),failsafe:Boolean(recoveryPanel?.isConnected),language:requestedLanguage(),unhealthySince,verificationActive:Boolean(verifyFlight),retryScheduled:Boolean(retryTimer)})
 });
 })();
