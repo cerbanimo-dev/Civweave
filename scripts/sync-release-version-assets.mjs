@@ -30,7 +30,7 @@ await patch('public/index.html',source=>{
 await patch('public/app/index.html',source=>{
   source=replaceRequired(source,/<title>Install Civweave v\d+\.\d+\.\d+<\/title>/,`<title>Install Civweave v${version}</title>`,'installer title');
   source=replaceRequired(source,/<span class="version">v\d+\.\d+\.\d+<\/span>/,`<span class="version">v${version}</span>`,'installer version badge');
-  source=replaceRequired(source,/(?:Install Civweave v\d+\.\d+\.\d+\. The campus downloads automatically\.|Install the shell\. Open Civweave immediately\. Download offline files only when you choose\.)/,`Install the shell. Open Civweave immediately. Download offline files only when you choose.`,'installer headline');
+  source=replaceRequired(source,/(?:Install Civweave v\d+\.\d+\.\d+\. The campus downloads automatically\.|Install the shell\. Open Civweave immediately\. Download offline files only when you choose\.|Install the shell\. Launch Civweave from your device app launcher\. Download offline files only when you choose\.)/,`Install the shell. Launch Civweave from your device app launcher. Download offline files only when you choose.`,'installer headline');
   source=source.replace(/manifest\.webmanifest\?v=\d+\.\d+\.\d+/g,`manifest.webmanifest?v=${version}`);
   source=source.replace(/civweave-brand\.js\?v=\d+\.\d+\.\d+/g,`civweave-brand.js?v=${version}`);
   source=source.replace(/\d+\.\d+\.\d+-lightweight-shell-v208/g,`${version}-lightweight-shell-v208`);
@@ -77,14 +77,15 @@ await patch('public/service-worker-core-v208.js',source=>{
 });
 await patch('public/service-worker-v203.js',source=>{
   source=replaceRequired(source,/system-routes-v227\.js\?v=\d+\.\d+\.\d+-five-system-route-contract-v227/,`system-routes-v227.js?v=${version}-five-system-route-contract-v227`,'worker route contract revision');
-  source=replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+(?:-[^'\n]+)?/,`service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425`,'service-worker wrapper revision');
+  source=replaceRequired(source,/service-worker-core-v208\.js\?v=\d+\.\d+\.\d+(?:-[^'\n]+)?/,`service-worker-core-v208.js?v=${version}-chat-convergence-v250-installer-brand-v1-working-campus-return-v425-install-only-pwa-v1`,'service-worker wrapper revision');
+  source=source.replace(/service-worker-shell-repair-v225\.js\?v=[^'\n]+/,`service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1`);
   return source;
 });
 await patch('public/service-worker-v156.js',source=>replaceRequired(source,/service-worker-v203\.js\?v=\d+\.\d+\.\d+(?:-code-coherence-v288)?-lightweight-shell-v208-legacy-v156-bridge-v209(?:-working-campus-return-v425)?/,`service-worker-v203.js?v=${version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209-working-campus-return-v425`,'legacy worker bridge revision'));
 await patch('public/app/install-boundary-v146.js',source=>{
   source=replaceRequired(source,/const VERSION='\d+\.\d+\.\d+';/,`const VERSION='${version}';`,'install-boundary runtime version');
-  if(!source.includes("const REVISION='browser-install-boundary-v228-chat-escape';"))throw new Error(`install-boundary browser lifecycle revision was not found while synchronizing Civweave ${version}.`);
-  if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228`;'))throw new Error(`install-boundary release-aware additions revision was not found while synchronizing Civweave ${version}.`);
+  if(!source.includes("const REVISION='browser-install-boundary-v228-chat-escape-install-only-pwa-v1';"))throw new Error(`install-boundary install-only browser lifecycle revision was not found while synchronizing Civweave ${version}.`);
+  if(!source.includes('const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228-install-only-pwa-v1`;'))throw new Error(`install-boundary install-only release-aware additions revision was not found while synchronizing Civweave ${version}.`);
   return source;
 });
 
@@ -92,7 +93,7 @@ await patch('public/app/working-campus-v156.html',source=>{
   source=replaceRequired(source,/Civweave Working Campus · v\d+\.\d+\.\d+/,`Civweave Working Campus · v${version}`,'working-campus title');
   source=replaceRequired(source,/<b class="version-chip">v\d+\.\d+\.\d+<\/b>/,`<b class="version-chip">v${version}</b>`,'working-campus version chip');
   if(!source.includes('/app/working-campus-return-guard-v425.js'))source=source.replace('<script src="/app/document-lifecycle-v221.js',`<script src="/app/working-campus-return-guard-v425.js?v=working-campus-return-v425"></script>\n<script src="/app/document-lifecycle-v221.js`);
-  source=replaceRequired(source,/\/app\/install-boundary-v146\.js\?v=[^"]+/,`/app/install-boundary-v146.js?v=chat-convergence-v250-navigation-lifecycle-v424`,'working-campus boundary navigation revision');
+  source=replaceRequired(source,/\/app\/install-boundary-v146\.js\?v=[^"]+/,`/app/install-boundary-v146.js?v=browser-install-boundary-v228-chat-escape-install-only-pwa-v1`,'working-campus install-only boundary revision');
   source=source.replace(/const VERSION='\d+\.\d+\.\d+-working-campus-planner-v199';/,`const VERSION='${version}-working-campus-planner-v199';`);
   return source;
 });
@@ -126,4 +127,4 @@ await patch('scripts/smoke-gateway-v131-base.mjs',source=>{
 
 await patch('scripts/verify-device-package-self-heal-v184.mjs',source=>source.replace(/v1\.0\.7/g,`v${version}`).replace(/1\.0\.7/g,version));
 
-console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,workingCampusReturnGuard:'v425',changed},null,2));
+console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,workingCampusReturnGuard:'v425',installOnlyPwa:'v1',changed},null,2));
