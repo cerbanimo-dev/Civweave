@@ -4,15 +4,18 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
-const installerBridge = read('public/app/installer-online-fallback-v225.js');
+const installerBridge = read('public/app/installer-repair-only-v1.js');
+const legacyAlias = read('public/app/installer-online-fallback-v225.js');
 const lobby = read('public/app/host-node-installer-lobby-v1.js');
 const status = read('functions/api/host-node-status.ts');
 const search = read('functions/api/host-node-search.ts');
 const access = read('public/app/host-node-session-v1.js');
 
 const checks = [
-  [installerBridge.includes('host-node-installer-lobby-v1.js'), 'installer bridge loads Host Node lobby'],
+  [installerBridge.includes('host-node-installer-lobby-v1.js'), 'repair-only installer bridge loads Host Node lobby'],
   [!installerBridge.includes("if (!host || document.querySelector('script[data-civweave-host-node-lobby]'))"), 'installer bridge no longer requires a host query before loading discovery'],
+  [installerBridge.includes("browserRuntimePolicy:'installer-only-until-installed-display'"), 'Host discovery remains available without reopening browser runtime'],
+  [legacyAlias.includes('retired:true') && legacyAlias.includes('browserRuntime:false'), 'legacy online fallback aliases safely to repair-only installer behavior'],
   [lobby.includes("/api/federation/health"), 'lobby can detect a same-origin federated Docker Host Node'],
   [lobby.includes("/.well-known/civweave"), 'local Host Node status uses the public federation profile'],
   [lobby.includes('local-federated-host'), 'lobby distinguishes local federated Host Nodes'],
@@ -35,12 +38,5 @@ const checks = [
   [status.includes('civweave-host-node.onrender.com'), 'known legacy hosted installer remains detectable'],
   [status.includes('host-node-not-allowed'), 'status proxy rejects arbitrary remote host targets'],
 ];
-
 const failed = checks.filter(([ok]) => !ok).map(([, label]) => label);
-if (failed.length) {
-  console.error('Host Node installer lobby verification failed:');
-  failed.forEach(label => console.error(` - ${label}`));
-  process.exitCode = 1;
-} else {
-  console.log(`Host Node installer lobby verification passed (${checks.length} checks).`);
-}
+if (failed.length) {console.error('Host Node installer lobby verification failed:');failed.forEach(label => console.error(` - ${label}`));process.exitCode = 1;} else console.log(`Host Node installer lobby verification passed (${checks.length} checks).`);
