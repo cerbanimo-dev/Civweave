@@ -23,7 +23,7 @@ assert.doesNotMatch(agent,/api\/ai\/node\/generate|server-auto-v301/,'The local 
 
 assert.match(edge,/verifyCapacitySession/,'Browser Run must require the existing member capacity session.');
 assert.match(edge,/safeUrl/,'Browser Run targets must pass URL safety checks.');
-assert.match(edge,/quickAction\(action,payload\)/,'Live research must use the Browser Run binding.');
+assert.match(edge,/quickAction\(action,\s*payload\)/,'Live research must use the Browser Run binding.');
 assert.match(edge,/html\.duckduckgo\.com\/html\/\?q=/,'Live search must send only a bounded query to the search surface.');
 assert.match(entry,/\/api\/browser\/tool/,'Node-cloud entry must expose the delegated browser endpoint.');
 assert.match(wrangler,/"browser"\s*:\s*\{[\s\S]*"binding"\s*:\s*"BROWSER"/,'Node-cloud must declare the Browser Run binding.');
