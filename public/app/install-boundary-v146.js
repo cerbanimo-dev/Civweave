@@ -2,14 +2,14 @@
 'use strict';
 
 const VERSION='1.0.144';
-const REVISION='browser-install-boundary-v228-chat-escape';
+const REVISION='browser-install-boundary-v228-chat-escape-install-only-pwa-v1';
 const params=new URLSearchParams(location.search);
 const requestedRelease=/^\d+\.\d+\.\d+$/.test(params.get('version')||'')?params.get('version'):VERSION;
 const INSTALLER='/app/index.html';
 const BOOT_KEY='civweave.install-boundary.boot.v228';
 const STALE_BOOT_KEYS=['civweave.install-boundary.boot.v227','civweave.install-boundary.boot.v226'];
 const DEV_KEY='civweave.install-boundary.developer.v146';
-const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228`;
+const ADDITIONS_VERSION=`${requestedRelease}-chat-convergence-v250-navigation-lifecycle-v424-browser-boundary-v228-install-only-pwa-v1`;
 const ADDITIONS_STYLE='/extensions/civweave-additions-v156.css';
 const SETTINGS_GATEWAY='/app/settings-gateway-v317.js';
 const PLATFORM_STABILITY='/app/platform-stability-v159.js';
@@ -119,7 +119,7 @@ function systemSurface(){
   return contract?.identify?.(location.pathname)||FALLBACK_PATHS.get(location.pathname)||'';
 }
 function canonicalAppSurface(){return systemSurface()==='civweave'}
-function allowed(){return installedDisplay()||developer()||embedded()}
+function allowed(){return installedDisplay()||developer()}
 function installerUrl(){
   const target=`${location.pathname}${location.search}${location.hash}`;
   const next=new URL(INSTALLER,location.origin);
@@ -218,7 +218,7 @@ function start(){
     root.dataset.installBoundary=system==='civweave'?'canonical':'canonical-system';
     root.dataset.civweaveSystemRoute=system;
     installSystemExperienceSupport();
-  }else if(root)root.dataset.installBoundary=installedDisplay()?'installed':developer()?'developer':'embedded';
+  }else if(root)root.dataset.installBoundary=installedDisplay()?'installed':'developer';
   if(system==='civweave'){
     root.dataset.civweaveCanonicalCore='only';
     queueMicrotask(()=>dispatchEvent(new CustomEvent('civweave:canonical-core-only',{detail:{version:VERSION,revision:REVISION,system}})));
@@ -282,9 +282,11 @@ globalThis.CivweaveInstallBoundaryV146=Object.freeze({
   aiSettingsPersistenceRepair:'controller-owned-on-demand-v317',
   platformStabilityGuard:'v159-dom-ready-safe',
   navigationLifecycleRevision:'v424-head-capture-bfcache-resume',
-  browserBoundaryRevision:'v228-installed-only-stale-session-chat-escape',
+  browserBoundaryRevision:'v228-installed-only-stale-session-chat-escape-install-only-pwa-v1',
+  browserRuntimePolicy:'installed-display-only',
+  installedQueryIsAuthorization:false,
   compatibilityDomReady:true,
-  onlineSelfHeal:true,
+  onlineSelfHeal:false,
   missingAssetDetails:true
 });
 })();
