@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const VERSION='1.0.133-hub-recovery-api-v2-inbound-proof';
+const VERSION='1.0.133-hub-recovery-api-v3-offline-codes';
 const EMAIL_KEY='civweave.hub-account-recovery-emails.v1';
 const SELECTION_KEY='civweave.host-node.selection.v1';
 const PASSPORT_KEY='civweave.anarchadia.citizen-console.v139';
@@ -29,11 +29,11 @@ function passport(){try{return clean(parse(localStorage.getItem(PASSPORT_KEY),{}
 function endpoint(path,h=host(),n=nodeId()){if(!h||!n)throw new Error('Hub identity is not ready yet.');return new URL(`/nodes/${encodeURIComponent(n)}/api/account/${clean(path,120).replace(/^\/+/, '')}`,h)}
 async function post(path,body,h=host(),n=nodeId()){
  const response=await fetch(endpoint(path,h,n),{method:'POST',cache:'no-store',headers:{accept:'application/json','content-type':'application/json','x-civweave-node-id':n},body:JSON.stringify(body||{})});
- const packet=await response.json().catch(()=>({}));if(!response.ok){const e=new Error(clean(packet?.error||`Hub returned HTTP ${response.status}.`,1200));e.status=response.status;throw e}return packet
+ const packet=await response.json().catch(()=>({}));if(!response.ok){const e=new Error(clean(packet?.error||`Hub returned HTTP ${response.status}.`,1200));e.status=response.status;e.code=clean(packet?.code,120);throw e}return packet
 }
 async function enroll(){
  const h=host(),n=nodeId(),mail=email(h,n),identity=globalThis.CivweaveHostNodeSessionExportV1?.current?.(h,n);if(!h||!n||!mail||!identity)return null;
- const packet=await post('signup',{...identity,email:mail,passportId:passport()||undefined},h,n);dispatchEvent(new CustomEvent('civweave:hub-account-enrolled',{detail:{nodeId:n,account:packet.account||null,verificationPending:Boolean(packet.verificationPending),delivery:packet.delivery||null}}));return packet
+ const packet=await post('signup',{...identity,email:mail,passportId:passport()||undefined},h,n);dispatchEvent(new CustomEvent('civweave:hub-account-enrolled',{detail:{nodeId:n,account:packet.account||null,verificationPending:Boolean(packet.verificationPending),delivery:packet.delivery||null,recoveryKit:packet.recoveryKit||null}}));return packet
 }
 async function verify(token){const packet=await post('verify',{token:clean(token,400)});dispatchEvent(new CustomEvent('civweave:hub-account-email-verified',{detail:{nodeId:nodeId(),account:packet.account||null}}));return packet}
 async function pollVerification(token){const packet=await post('verify/poll',{token:clean(token,400)});if(packet?.verified)dispatchEvent(new CustomEvent('civweave:hub-account-email-verified',{detail:{nodeId:nodeId(),inboundProof:true}}));return packet}
@@ -43,7 +43,7 @@ function installRecovered(packet,h=host(),n=nodeId()){
  globalThis.CivweaveHostNodeSessionImportV1?.install?.(h,n,packet.userId,packet.credential,packet.recoveredAt);
  const ids=Array.isArray(packet.passportIds)?packet.passportIds.map(x=>clean(x,180)).filter(Boolean):[];
  if(ids.length)localStorage.setItem(RECOVERED_KEY,JSON.stringify({schema:'civweave.recovered-passport-associations.v1',nodeId:n,passportIds:ids,recoveredAt:packet.recoveredAt||new Date().toISOString()}));
- dispatchEvent(new CustomEvent('civweave:hub-account-recovered',{detail:{nodeId:n,userId:packet.userId,passportIds:ids,recoveredAt:packet.recoveredAt||null}}));return packet
+ dispatchEvent(new CustomEvent('civweave:hub-account-recovered',{detail:{nodeId:n,userId:packet.userId,passportIds:ids,recoveryMethod:packet.recoveryMethod||'email',offlineRecoveryRemaining:Number(packet.offlineRecoveryRemaining||0),recoveredAt:packet.recoveredAt||null}}));return packet
 }
 async function complete(token){const h=host(),n=nodeId(),packet=await post('recovery/complete',{token:clean(token,400)},h,n);return installRecovered(packet,h,n)}
 async function pollRecovery(token){const h=host(),n=nodeId(),packet=await post('recovery/poll',{token:clean(token,400)},h,n);return packet?.ready?installRecovered(packet,h,n):packet}
