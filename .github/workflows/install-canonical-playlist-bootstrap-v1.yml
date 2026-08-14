@@ -1,0 +1,46 @@
+name: Install Canonical Playlist Bootstrap v1
+
+on:
+  push:
+    branches:
+      - 'agent/canonical-playlist-hub-music-*'
+    paths:
+      - public/app/canonical-playlists-v1.js
+      - public/app/radio-playlist-governance-v1.js
+      - public/app/services/fellowfare/goods-fulfillment-v1.js
+      - scripts/install-canonical-playlist-bootstrap-v1.mjs
+      - .github/workflows/install-canonical-playlist-bootstrap-v1.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: install-canonical-playlist-bootstrap-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Wire playlist governance into the shared radio shell
+        run: node scripts/install-canonical-playlist-bootstrap-v1.mjs
+      - name: Verify JavaScript syntax
+        run: |
+          node --check public/app/canonical-playlists-v1.js
+          node --check public/app/radio-playlist-governance-v1.js
+          node --check public/app/services/fellowfare/goods-fulfillment-v1.js
+          node scripts/verify-canonical-playlists-v1.mjs
+      - name: Commit bootstrap wiring
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add public/app/install-boundary-v146.js public/service-worker-radio-core-v305.js public/app/services/fellowfare/app.js
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m '[CF-Pages-Skip] Wire canonical playlist governance into radio shell'
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
