@@ -1,0 +1,40 @@
+name: Verify Territory Host Authority v1
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/core/migrations/0010_territory_host_authority.sql'
+      - 'cloudflare/core/src/territory-host-authority-v1.mjs'
+      - 'cloudflare/core/src/territory-host-entry-v1.mjs'
+      - 'cloudflare/core/src/origin-entry.mjs'
+      - 'lib/node-territory-host-authority-v1.mjs'
+      - 'lib/ai-wallet-http-v1.mjs'
+      - 'scripts/bind-territory-host-authority-v1.mjs'
+      - 'scripts/verify-territory-host-authority-v1.mjs'
+      - 'public/app/territory-host-authority-v1.html'
+      - 'docs/operations/territory-steward-host-authority-v1.md'
+      - '.github/workflows/verify-territory-host-authority-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Verify Territory Steward host delegation
+        run: |
+          node --check cloudflare/core/src/territory-host-authority-v1.mjs
+          node --check cloudflare/core/src/territory-host-entry-v1.mjs
+          node --check cloudflare/core/src/origin-entry.mjs
+          node --check lib/node-territory-host-authority-v1.mjs
+          node --check lib/ai-wallet-http-v1.mjs
+          node --check scripts/bind-territory-host-authority-v1.mjs
+          node --check scripts/verify-territory-host-authority-v1.mjs
+          node scripts/verify-territory-host-authority-v1.mjs
