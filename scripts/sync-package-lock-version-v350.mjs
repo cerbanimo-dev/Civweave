@@ -1,0 +1,11 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const version=(await fs.readFile(path.join(root,'VERSION'),'utf8')).trim();
+const file=path.join(root,'package-lock.json');
+const lock=JSON.parse(await fs.readFile(file,'utf8'));
+lock.version=version;
+if(lock.packages?.[''])lock.packages[''].version=version;
+await fs.writeFile(file,`${JSON.stringify(lock,null,2)}\n`,'utf8');
+console.log(JSON.stringify({ok:true,version,revision:'package-lock-version-v350'},null,2));
