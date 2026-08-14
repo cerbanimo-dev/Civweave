@@ -10,12 +10,14 @@ const root=path.resolve(here,'..');
 const read=relative=>fs.readFile(path.join(root,relative),'utf8');
 const syntaxTargets=[
   'public/install-v130.js',
+  'public/app/installer-state-machine-v281.js',
   'public/app/campus-background-download-v241.js',
   'public/app/required-campus-autostart-v1.js',
   'public/service-worker-installer-state-v280.js',
   'public/service-worker-offline-v211-override.js',
   'public/service-worker-v203.js',
-  'scripts/browser-installer-gauntlet-v281.mjs'
+  'scripts/browser-installer-gauntlet-v281.mjs',
+  'scripts/verify-installer-state-authority-v281.mjs'
 ];
 for(const relative of syntaxTargets){
   const result=spawnSync(process.execPath,['--check',path.join(root,relative)],{encoding:'utf8'});
@@ -27,6 +29,7 @@ const pkg=JSON.parse(await read('package.json'));
 const manifest=JSON.parse(await read('public/app/manifest.webmanifest'));
 const installerHtml=await read('public/app/index.html');
 const installerJs=await read('public/install-v130.js');
+const controller=await read('public/app/installer-state-machine-v281.js');
 const autostart=await read('public/app/required-campus-autostart-v1.js');
 const background=await read('public/app/campus-background-download-v241.js');
 const installerWorker=await read('public/service-worker-installer-state-v280.js');
@@ -40,7 +43,11 @@ assert.doesNotMatch(installerHtml,/<script[^>]+required-campus-autostart-v1\.js/
 assert.doesNotMatch(installerHtml,/<script[^>]+knowledge-school-seeds-v1\.js/i,'knowledge-school runtime must stay lazy');
 assert.doesNotMatch(installerHtml,/<script[^>]+video-atlas-installer-v1\.js/i,'video atlas installer must stay lazy');
 assert.doesNotMatch(installerHtml,/<script[^>]+open-learning-media-installer-v1\.mjs/i,'open media installer must stay lazy');
-assert.match(installerHtml,/installer-state-machine-v280\.js\?v=installer-state-machines-v280-lazy/,'campus state machine must load only after the explicit campus action');
+assert.match(installerHtml,/installer-state-machine-v281\.js\?v=installer-state-authority-v281-lazy/,'campus state controller must load only after the explicit campus action');
+assert.doesNotMatch(installerHtml,/installer-state-machine-v280\.js\?v=installer-state-machines-v280-lazy/,'retired v280 page writer must not be lazy-loaded by the installer');
+assert.match(installerHtml,/CivweaveInstallerStateV281/,'installer must gate the lazy controller with the v281 singleton');
+assert.doesNotMatch(controller,/MutationObserver|setInterval\(/,'v281 controller must remain event-driven instead of polling installer copy');
+assert.doesNotMatch(controller,/\$\('#(?:package-state|package-assets|local-mode|install-help|install-app|check-update)'\)/,'v281 controller must not reclaim installer shell UI nodes');
 assert.match(installerHtml,/civweave\.offline-campus\.explicit-opt-in\.v304/,'explicit campus opt-in must persist before background continuation is possible');
 assert.doesNotMatch(installerJs,/\nprepareShell\(\);\s*\n\}\)\(\);\s*$/,'installer must not prepare the shell on page load');
 assert.match(installerJs,/Nothing large downloads until you choose Install or Download offline campus/,'install action must be available before shell preparation');
@@ -63,4 +70,4 @@ for(const [pathname,expected] of Object.entries(integrity.assets||{})){
   assert.equal(actual,expected,`${pathname} integrity digest is stale`);
 }
 
-console.log(JSON.stringify({ok:true,version,manualFirst:true,autostart:false,explicitCampusOptIn:true,lazyOptionalTools:true,integrityAssets:Object.keys(integrity.assets||{}).length},null,2));
+console.log(JSON.stringify({ok:true,version,manualFirst:true,autostart:false,explicitCampusOptIn:true,lazyOptionalTools:true,singleWriterController:'v281',integrityAssets:Object.keys(integrity.assets||{}).length},null,2));
