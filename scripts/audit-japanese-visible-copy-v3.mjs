@@ -65,6 +65,15 @@ function looksInjectedEnglish(text) {
   return words.every(word => INJECTED_TERMS.has(word) || /^[A-Z0-9]{2,8}$/.test(word));
 }
 
+function looksLikeCodeFragment(value) {
+  if (/(?:^|[;,(])\s*(?:const|let|var|return|if|else|function|document|window)\b/.test(value)) return true;
+  if (/(?:\)\.|\.replace(?:All)?\(|\.map\(|\.join\(|\.filter\(|\.find\(|\.querySelector\(|\.innerHTML\b)/.test(value)) return true;
+  if (/===|!==|&&|\|\||\?\.|=>/.test(value)) return true;
+  if (/(?:^|\s)(?:row|item|entry|state|data|result|body|panel)\.[A-Za-z_$][\w$]*/.test(value)) return true;
+  if (/[`'"]/.test(value) && /[();={}\[\]]/.test(value)) return true;
+  return false;
+}
+
 function candidate(text) {
   const value = unescapeLiteral(text);
   if (!/[A-Za-z]/.test(value)) return '';
@@ -72,6 +81,7 @@ function candidate(text) {
   if (/https?:\/\//i.test(value) || /(?:^|\s)\/[A-Za-z0-9._~!$&'()*+,;=:@%/-]+/.test(value)) return '';
   if (/\.(?:js|mjs|json|css|html|png|jpg|jpeg|webp|svg|wasm|onnx|zip)\b/i.test(value)) return '';
   if (/[{}<>]=?|=>|\$\{|\\[dwsb]|--[a-z]/i.test(value)) return '';
+  if (looksLikeCodeFragment(value)) return '';
   if (/^[a-z][A-Za-z0-9]*$/.test(value) && !SINGLE_WORD_UI.has(value)) return '';
   if (/^[A-Z0-9_.:-]+$/.test(value) && !SINGLE_WORD_UI.has(value)) return '';
   if (looksInjectedEnglish(value)) return '';
