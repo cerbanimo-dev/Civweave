@@ -56,7 +56,7 @@ The install prompt cannot be forced. Chromium exposes `beforeinstallprompt` only
 Every transferable object uses a versioned signed envelope with:
 
 - immutable object ID and revision hash;
-- origin node and author credential;
+- origin node and author credential, with the node ID cryptographically derived from that credential;
 - object kind and schema;
 - intended audience and community purpose;
 - consent class: private, direct, group, public, or federated;
@@ -155,6 +155,7 @@ No native Android component is reserved or required by this architecture.
 - A foreground reconnection can request only missing chunks from an interrupted transfer.
 - Priority affects send order but never authorization.
 - Signed object fields are unchanged during transit.
+- An object claiming an origin node ID that does not match its signing credential is rejected.
 - Public/federated relay respects signed hop ceilings and visited-node deduplication.
 - Direct payloads require a peer identity derived from its public credential plus a valid fresh-session challenge signature proving private-key possession.
 - Legacy/unverifiable peers receive public/federated cargo only.
