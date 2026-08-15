@@ -9,8 +9,9 @@ const RELEASE_TIMEOUT_MS=1500;
 const WORKER_STEP_TIMEOUT_MS=1800;
 const ROUTE_TIMEOUT_MS=2200;
 const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
-const explicitInstalled=params.get('installed')==='1'&&installedDisplay();
+const launchGate=()=>globalThis.CivweaveInstalledLaunchGateV1||null;
 const localDeveloper=()=>['localhost','127.0.0.1','::1'].includes(location.hostname)&&params.get('developer')==='1';
+const explicitInstalled=params.get('installed')==='1'&&(installedDisplay()||Boolean(launchGate()?.readCapability?.()));
 const semver=value=>/^\d+\.\d+\.\d+$/.test(String(value||''))?String(value):'';
 const recoveryUi=()=>globalThis.CivweaveBootRecoveryV426||null;
 function bounded(promise,timeoutMs,label='operation'){
@@ -20,10 +21,21 @@ function bounded(promise,timeoutMs,label='operation'){
     Promise.resolve(promise).then(value=>{if(settled)return;settled=true;clearTimeout(timer);resolve(value)},error=>{if(settled)return;settled=true;clearTimeout(timer);reject(error)});
   });
 }
+async function installedLaunchAuthorized(){
+  if(installedDisplay()||localDeveloper())return true;
+  if(params.get('installed')!=='1')return false;
+  const gate=launchGate();
+  if(gate?.readCapability?.())return true;
+  if(gate?.authorization){
+    try{return Boolean(await bounded(gate.authorization,2500,'installed app authorization'))}catch{return false}
+  }
+  return false;
+}
 function installerUrl(){
   const installer=new URL('/app/index.html',location.origin);
   installer.searchParams.set('install','required');
-  installer.searchParams.set('source','installed-entry-runtime-browser-gate-v1');
+  installer.searchParams.set('source','installed-entry-runtime-browser-gate-v2');
+  installer.searchParams.set('next','/app/working-campus-v156.html');
   return installer.href;
 }
 function authorize(){try{sessionStorage.setItem(BOOT_KEY,'1')}catch{}}
@@ -74,7 +86,7 @@ async function refreshWorker(releaseVersion){
   if(!('serviceWorker'in navigator))return null;
   const ui=recoveryUi();
   try{
-    const workerUrl=`/service-worker-v203.js?v=${encodeURIComponent(releaseVersion)}-lightweight-shell-v208&revision=boot-recovery-v426-install-only-pwa-v1`;
+    const workerUrl=`/service-worker-v203.js?v=${encodeURIComponent(releaseVersion)}-lightweight-shell-v208&revision=boot-recovery-v427-installed-capability-v1`;
     ui?.setStatus?.('Checking the installed app shell…');
     let registration=await bounded(navigator.serviceWorker.register(workerUrl,{scope:'/',updateViaCache:'none'}),WORKER_STEP_TIMEOUT_MS,'service worker registration');
     await bounded(registration.update(),WORKER_STEP_TIMEOUT_MS,'service worker update').catch(()=>null);
@@ -110,12 +122,12 @@ function fallbackDestination(releaseVersion){
   destination.searchParams.set('installed','1');
   destination.searchParams.set('version',releaseVersion);
   destination.searchParams.set('navigation','five-system-route-contract-v227-fallback');
-  destination.searchParams.set('launch','installed-entry-v426');
+  destination.searchParams.set('launch','installed-entry-v427');
   if(safeRecoveryRequested())destination.searchParams.set('recovery','safe');
   return destination;
 }
 async function boot(){
-  if(!installedDisplay()&&!localDeveloper()){
+  if(!(await installedLaunchAuthorized())){
     location.replace(installerUrl());
     return;
   }
@@ -133,7 +145,7 @@ async function boot(){
   let destination;
   try{
     const routes=await ensureRoutes(releaseVersion);
-    destination=routes.urlFor(routes.routeFor(system)?system:'civweave',{origin:location.origin,version:releaseVersion,source:'installed-entry-v426',developer:localDeveloper()});
+    destination=routes.urlFor(routes.routeFor(system)?system:'civweave',{origin:location.origin,version:releaseVersion,source:'installed-entry-v427',developer:localDeveloper()});
     if(safeRecoveryRequested())destination.searchParams.set('recovery','safe');
   }catch{
     destination=fallbackDestination(releaseVersion);
@@ -145,5 +157,5 @@ boot().catch(error=>{
   console.error('[Civweave] Installed bootstrap recovery caught a launch failure.',error);
   recoveryUi()?.showRecovery?.(`The normal startup path stopped before the campus opened: ${error?.message||error}`);
 });
-globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.162-boot-recovery-v426-legal-consent-v1-install-only-pwa-v1',installedDisplay,explicitInstalled,resolveReleaseVersion,refreshWorker,safeRecoveryRequested,ensureLegalConsent,installerUrl,browserRuntimePolicy:'installed-display-only'});
+globalThis.CivweaveInstalledEntryV146=Object.freeze({version:'1.0.162-boot-recovery-v427-installed-capability-v1',installedDisplay,explicitInstalled,installedLaunchAuthorized,resolveReleaseVersion,refreshWorker,safeRecoveryRequested,ensureLegalConsent,installerUrl,browserRuntimePolicy:'installed-display-or-verified-installed-capability'});
 })();
