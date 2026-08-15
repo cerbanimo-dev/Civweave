@@ -48,7 +48,7 @@ assert(settings.includes('gemini-3.5-flash-lite')&&settings.includes('https://ge
 assert(!surface.includes('Test Gemini')&&!surface.includes('Test Antigravity'),'Working Campus should not own retired provider-test controls.');
 
 for(const path of ['/app/new-user-onboarding-v1.css','/app/new-user-onboarding-v1.js'])assert(html.includes(path),`Working Campus must declare ${path} directly.`);
-for(const token of ['Hero','Quest','Party','Guild','Quartermaster','Skip tour','soloAllowed:true','partyEncouraged:true'])assert(onboarding.includes(token),`Hero onboarding is missing ${token}.`);
+for(const token of ['Hero','Quest','Party','Guild','Guildkeeper','Quartermaster','Skip tour','soloAllowed:true','partyEncouraged:true'])assert(onboarding.includes(token),`Hero onboarding is missing ${token}.`);
 for(const sprite of ['/Civweave-weaveling-sprites.png','/Living-School-moss-sprites.png','/Cerbanimo-kamiya-sprites.png','/FellowFare-rook-sprites.png','/Anarchadia-merlin-sprites.png'])assert(onboarding.includes(sprite),`Hero onboarding is missing sprite sheet ${sprite}.`);
 const stepSource=onboarding.slice(onboarding.indexOf('const STEPS='),onboarding.indexOf('let root='));
 let prior=-1;
@@ -57,13 +57,13 @@ assert(onboarding.includes("get('onboarding')")&&onboarding.includes("value==='r
 assert(html.includes('data-cw-onboarding-replay')&&html.includes('>Tour</button>')&&onboarding.includes('function bindReplay()')&&onboarding.includes("button.addEventListener('click',()=>open({force:true}))"),'Skipped onboarding must remain deliberately replayable from Weaveling without re-enabling automatic nagging.');
 assert(onboarding.includes("record?.status==='completed'||record?.status==='skipped'"),'Hero onboarding must remember both completion and skip choices.');
 assert(onboarding.includes("hasRows('civweave.intentions.v127')")&&onboarding.includes("hasRows('civweave.cerbanimo.quest-queue.v1')"),'Hero onboarding must avoid auto-opening over established Quest activity.');
+assert(onboarding.includes("guildStewardLore:'Guildkeeper'"),'Hero onboarding must call Guild Stewards Guildkeepers in the story-world.');
 assert(!onboarding.includes("document.createElement('script')")&&!onboarding.includes('MutationObserver')&&!onboarding.includes('setInterval(')&&!onboarding.includes('fetch('),'Hero onboarding must remain a static presentation owner and must not start models, inject runtimes, poll, or fetch its own dependencies.');
 assert(onboardingCss.includes('.cw-onboarding-rail')&&onboardingCss.includes('grid-template-columns:repeat(5'),'Hero onboarding must visibly preserve the five-guide left-to-right rail.');
 assert(offlineManifest.includes('"/app/working-campus-v156.html"'),'Offline campus must retain Working Campus as a seed for recursive onboarding dependency discovery.');
 assert(serviceWorker.includes('discoverReferences')&&serviceWorker.includes("'/app/'")&&serviceWorker.includes("'/extensions/'"),'Offline campus worker must continue recursively discovering same-origin Working Campus CSS/JS dependencies.');
 for(const [name,guideSource] of [['family loader',familyLoader],['identity boundary',identityGuide],['shared guide surface',sharedGuide]]){
-  assert(guideSource.includes("name:'Rook'")&&/role:'(?:Trade|trade) steward and exchange guide'/.test(guideSource),`${name} must describe Rook as the trade steward and exchange guide.`);
-  assert(!/Rook[^\n]{0,120}Quartermaster/i.test(guideSource),`${name} must reserve Quartermaster for Guild Stewards instead of Rook.`);
+  assert(guideSource.includes("name:'Rook'")&&/role:'(?:Quartermaster|quartermaster) and exchange guide'/.test(guideSource),`${name} must describe Rook as the Quartermaster and exchange guide.`);
 }
 
 const expectedRoutes={
@@ -91,4 +91,4 @@ new vm.Script(onboarding,{filename:'new-user-onboarding-v1.js'});
 new vm.Script(familyLoader,{filename:'family-ai-loader-v105.js'});
 new vm.Script(identityGuide,{filename:'guide-identity-integrity-v216.js'});
 new vm.Script(sharedGuide,{filename:'shared-guide-surface-v236-core-v244.js'});
-console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'wish -> aptitude -> review -> activation -> realm handoffs',onboarding:'optional Hero -> Weaveling -> Moss -> Kamiya -> Rook -> Merlin sprite-led tour',onboardingPolicy:'skippable, replayable from Weaveling, solo-valid, Party/Guild encouraged, no model startup',guideLore:'Rook is trade steward; Quartermaster is reserved for Guild Steward',aiSettings:'gateway-activated deterministic-default clean-room controller with explicit provider options',providerTests:'retired from Working Campus',navigation:'canonical five-system route owner with direct Working Campus fallback',installedBoot:'bounded service-worker update before routing',offlineState:'local canonical with recursive onboarding JS/CSS discovery and lazy visual sprites'},null,2));
+console.log(JSON.stringify({ok:true,surface:'working-campus-v156',sourceFiles:parts.length,coreLoop:'wish -> aptitude -> review -> activation -> realm handoffs',onboarding:'optional Hero -> Weaveling -> Moss -> Kamiya -> Rook -> Merlin sprite-led tour',onboardingPolicy:'skippable, replayable from Weaveling, solo-valid, Party/Guild encouraged, no model startup',guideLore:'Rook is Quartermaster; Guild Steward is Guildkeeper',aiSettings:'gateway-activated deterministic-default clean-room controller with explicit provider options',providerTests:'retired from Working Campus',navigation:'canonical five-system route owner with direct Working Campus fallback',installedBoot:'bounded service-worker update before routing',offlineState:'local canonical with recursive onboarding JS/CSS discovery and lazy visual sprites'},null,2));

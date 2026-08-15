@@ -47,7 +47,7 @@ const STEPS=Object.freeze([
     handoff:'Rook keeps the practical exchange layer legible, because noble intentions remain stubbornly dependent on tools, materials, time, and other humans.',next:'Meet Rook'
   }),
   Object.freeze({
-    system:'fellowfare',expression:'special',kicker:'FellowFare',title:'Find what the Party needs.',role:'Rook · Exchange guide',
+    system:'fellowfare',expression:'special',kicker:'FellowFare',title:'Find what the Party needs.',role:'Rook · Quartermaster and exchange guide',
     paragraphs:[
       'I help Heroes find needs, offers, goods, services, gifts, and fair exchanges across the reachable network. A Quest can ask for resources without turning every relationship into a storefront.',
       'What you find here can attach back to the work: a tool, a service, a supplier, a gift, or another Hero who has exactly the strange little capability your Party was missing.'
@@ -59,7 +59,7 @@ const STEPS=Object.freeze([
     system:'anarchadia',expression:'special',kicker:'Anarchadia',title:'Keep cooperation answerable to people.',role:'Merlin · Civic and governance guide',
     paragraphs:[
       'I help with Passports, intentions, consent, roles, proposals, review, tribunals, and the rules a community chooses for itself. The point is not more procedure. The point is making power visible and revisable.',
-      'Guild Quartermasters keep local infrastructure dependable and look for Heroes to join their Guild. They are caretakers of the hearth, not rulers of the Heroes gathered around it.'
+      'Guildkeepers keep local infrastructure dependable and look for Heroes to join their Guild. They are caretakers of the hearth, not rulers of the Heroes gathered around it.'
     ],
     connection:'Anarchadia supplies the civic memory beneath the other realms: who agreed to what, what can change, how disputes are reviewed, and how a Guild remains governed by its people instead of by whoever happens to run the server.',
     handoff:'That is the circuit. Find a Guild, gather a Party when it helps, begin a Quest, and move left to right only as far as the work actually needs.',next:'Begin your Quest'
@@ -188,6 +188,6 @@ function bindReplay(){
 }
 function boot(){createRoot();bindReplay();if(shouldAutoOpen())requestAnimationFrame(()=>requestAnimationFrame(()=>open({force:true})))}
 
-globalThis.CivweaveNewUserOnboardingV1=Object.freeze({version:VERSION,storageKey:STORAGE_KEY,steps:STEPS,sprites:SPRITES,open,close,reset,status,bindReplay,autoSkipsExistingActivity:true,soloAllowed:true,partyEncouraged:true,guildStewardLore:'Quartermaster',runtimeInjection:false,replayControl:true});
+globalThis.CivweaveNewUserOnboardingV1=Object.freeze({version:VERSION,storageKey:STORAGE_KEY,steps:STEPS,sprites:SPRITES,open,close,reset,status,bindReplay,autoSkipsExistingActivity:true,soloAllowed:true,partyEncouraged:true,guildStewardLore:'Guildkeeper',runtimeInjection:false,replayControl:true});
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
