@@ -28,9 +28,8 @@ const fastGenerate=async request=>patched.generate(request);Object.definePropert
 const fastProxy=Object.freeze({...patched,generate:fastGenerate});
 context.CivweaveModelRuntime=fastProxy;
 assert.equal(context.CivweaveModelRuntime,fastProxy,'fast runtime identity should survive when it inherits the reward contract marker');
-const oldMoss=input=>[{slug:'wrong',name:'Wrong',baseXp:Number(input.rewardXp||40)}];
-context.CivweaveRewardWeave={core:{mossTagTask:oldMoss},skills:oldMoss,submit:value=>value,registerQuest:value=>value};
-vm.runInContext(read('public/app/cw-reward-legacy-bridge-v2.js'),context,{filename:'cw-reward-legacy-bridge-v2.js'});
-const exact=context.CivweaveRewardWeave.core.mossTagTask({title:'Exact decimals',skillRewards:[{skillId:'Carpentry',amount:2.5},{skillId:'Planning',amount:1.25}]});
-assert.deepEqual(JSON.parse(JSON.stringify(exact.map(row=>[row.slug,row.baseXp]))),[['carpentry',2.5],['planning',1.25]]);
-console.log('reward model contract and legacy bridge v2 verified');
+const exact=context.CivweaveCanonicalRewardsV2.normalizeRewardBundle({skillRewards:[{skillId:'Carpentry',amount:2.5},{skillId:'Planning',amount:1.25}]},{sourceSystem:'living-school',sourceKind:'learning'});
+assert.equal(exact.exactSkillAmounts,true,'canonical reward ledger did not recognize explicit skill amounts');
+assert.equal(exact.legacyFallback,false,'explicit skill amounts must not enter the legacy fallback path');
+assert.deepEqual(JSON.parse(JSON.stringify(exact.skillXp.map(row=>[row.skillId,row.amount]))),[['carpentry',2.5],['planning',1.25]]);
+console.log('reward model contract and canonical exact skill rewards v2 verified');
