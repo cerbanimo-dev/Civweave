@@ -4,11 +4,12 @@ import assert from 'node:assert/strict';
 
 const runtime=fs.readFileSync(new URL('../public/app/realm-session-integrity-v237.js',import.meta.url),'utf8');
 const boundary=fs.readFileSync(new URL('../public/app/install-boundary-v146.js',import.meta.url),'utf8');
+const coreRuntime=fs.readFileSync(new URL('../public/app/core-interface-runtime-v1.js',import.meta.url),'utf8');
 const workspace=fs.readFileSync(new URL('../public/app/guide-workspace-v242.js',import.meta.url),'utf8');
 const pkg=JSON.parse(fs.readFileSync(new URL('../package.json',import.meta.url),'utf8'));
 const version=fs.readFileSync(new URL('../VERSION',import.meta.url),'utf8').trim();
 
-new Function(runtime);new Function(boundary);new Function(workspace);
+new Function(runtime);new Function(boundary);new Function(coreRuntime);new Function(workspace);
 
 const checks=[
   ['realm-local ledgers are data-only and migrate old storage once',()=>{
@@ -37,11 +38,11 @@ const checks=[
     assert.match(runtime,/cw237-setup-tutorial/);assert.match(runtime,/FOUNDATION_SCHOOLS/);assert.match(runtime,/evaluate-assessment/);assert.match(runtime,/\/app\/logos\/civweave-app-icon\.png/);assert.match(runtime,/--cw-top-safe-height/);
     assert.doesNotMatch(runtime,/setInterval\(/);assert.doesNotMatch(runtime,/new MutationObserver/);
   }],
-  ['canonical boundary loads data layer then one v242 chat owner',()=>{
-    assert.match(boundary,/REALM_SESSION_INTEGRITY='\/app\/realm-session-integrity-v237\.js'/);assert.match(boundary,/GUIDE_WORKSPACE='\/app\/guide-workspace-v242\.js'/);
-    const start=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),end=boundary.indexOf('];',start),experience=boundary.slice(start,end);
-    assert.ok(experience.indexOf('REALM_SESSION_INTEGRITY,')<experience.indexOf('GUIDE_WORKSPACE,'));
-    assert.doesNotMatch(boundary,/PERSISTENT_GUIDE_CHAT_SCRIPT|PERSISTENT_GUIDE_VIEWPORT_SCRIPT/);
+  ['core interface runtime loads data layer then one v242 chat owner',()=>{
+    const realmIndex=coreRuntime.indexOf("'/app/realm-session-integrity-v237.js'"),workspaceIndex=coreRuntime.indexOf("'/app/guide-workspace-v242.js'");
+    assert.ok(realmIndex>=0&&workspaceIndex>realmIndex);
+    assert.match(boundary,/const CORE_INTERFACE_RUNTIME='\/app\/core-interface-runtime-v1\.js'/);
+    assert.doesNotMatch(boundary,/SYSTEM_EXPERIENCE_SCRIPTS|CANONICAL_SYSTEM_SCRIPTS|PERSISTENT_GUIDE_CHAT_SCRIPT|PERSISTENT_GUIDE_VIEWPORT_SCRIPT/);
     assert.match(workspace,/canonicalOwner:true/);
   }],
   ['release metadata agrees and syntax gate includes the data layer',()=>{
@@ -61,4 +62,4 @@ assert.equal(api.dataOnly,true);assert.equal(api.canonicalChatOwner,'guide-works
 const action={id:'rook-1',system:'fellowfare',state:'clarifying',fields:{needOrOffer:'Need'},missingRequired:['maximum budget or exchange method'],approval:{required:true,label:'Submit request'}};
 store.set('civweave.realm-actions.v141',JSON.stringify([action]));api.repairFellowFareAction(action,'maximum budget is unlimited and exchange method is buttons finalize_exchange_parameters');assert.equal(action.fields.exchangeMethod,'Buttons');assert.equal(action.fields.budgetPolicy,'Unlimited');assert.deepEqual(action.missingRequired,[]);assert.equal(action.state,'review');assert.equal(action.approval.label,'Finalize & publish request');
 
-console.log(`Realm session integrity v237 verified data-only: ${checks.length}/${checks.length} static contracts plus behavioral state checks passed.`);
+console.log(`Realm session integrity v237 verified data-only with core-interface assembly: ${checks.length}/${checks.length} static contracts plus behavioral state checks passed.`);

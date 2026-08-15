@@ -89,6 +89,41 @@
         "Realm stability/recovery layers may call the canonical Settings API programmatically but may not intercept Settings controls or carry dormant fallback listeners."
       ]
     },
+    "interface-runtime": {
+      "capability": "Five-system interface boot lifecycle, shared structural slots, and realm adapter contract",
+      "owner": "public/app/core-interface-runtime-v1.js",
+      "bootstrapCaller": "public/app/install-boundary-v146.js",
+      "routeContract": "public/app/system-routes-v227.js",
+      "navigationSubscriber": "public/app/family-shell-v104.js",
+      "canonicalApi": "globalThis.CivweaveCoreInterfaceRuntimeV1",
+      "canonicalEvents": [
+        "civweave:interface-runtime-phase",
+        "civweave:interface-runtime-ready",
+        "civweave:interface-system-ready",
+        "civweave:interface-shared-support-ready",
+        "civweave:interface-system-changed",
+        "civweave:interface-adapter-registered",
+        "civweave:interface-adapter-unmounted",
+        "civweave:interface-feature-ready",
+        "civweave:interface-feature-error",
+        "civweave:interface-runtime-error"
+      ],
+      "activeEntryRoutes": [
+        "public/app/working-campus-v156.html",
+        "public/app/cabinets/living-school/index.html",
+        "public/app/realm-console-v140.html",
+        "public/app/fellowfare-cabinet-v144.html",
+        "public/app/anarchadia-console-v139.html"
+      ],
+      "rules": [
+        "The install boundary may decide whether a canonical surface can boot and may request the runtime, but it does not own realm UI lifecycle.",
+        "All five systems boot the same interface runtime before realm-specific shared capabilities.",
+        "The install boundary boots the runtime but never iterates or executes the shared system dependency manifest; shared loading belongs to core-interface-runtime-v1.js.",
+        "Realm-specific features register adapters or subscribe to lifecycle events; they do not fork the core loader.",
+        "Family navigation remains owned by family-shell-v104.js and Settings input remains owned by settings-gateway-v317.js.",
+        "The runtime must be idempotent and safe across pageshow/BFCache resume."
+      ]
+    },
     "family-navigation": {
       "capability": "Five-system navigation and realm status chrome",
       "owner": "public/app/family-shell-v104.js",

@@ -4,13 +4,14 @@ import {access,readFile} from 'node:fs/promises';
 const root=new URL('../',import.meta.url);
 const read=path=>readFile(new URL(path,root),'utf8');
 const exists=path=>access(new URL(path,root)).then(()=>true,()=>false);
-const [workspace,boundary,campusCss,release]=await Promise.all([
+const [workspace,boundary,coreRuntime,campusCss,release]=await Promise.all([
   read('public/app/guide-workspace-v242.js'),
   read('public/app/install-boundary-v146.js'),
+  read('public/app/core-interface-runtime-v1.js'),
   read('public/app/working-campus-v156.css'),
   read('VERSION')
 ]);
-new Function(workspace);new Function(boundary);
+new Function(workspace);new Function(boundary);new Function(coreRuntime);
 const version=release.trim(),checks=[];
 const check=(name,condition)=>{assert.ok(condition,name);checks.push(name)};
 check('repository release is semantic',/^\d+\.\d+\.\d+$/.test(version));
@@ -41,9 +42,9 @@ check('chat log releases edge scrolling',workspace.includes('overscroll-behavior
 check('workspace directly owns visual viewport resize',workspace.includes('globalThis.visualViewport?.addEventListener')&&workspace.includes('--cw242-visual-height'));
 check('workspace uses dynamic viewport and safe area sizing',workspace.includes('100dvh')&&workspace.includes('env(safe-area-inset-bottom)'));
 for(const retired of ['public/app/persistent-guide-chat-v215.js','public/app/persistent-guide-viewport-v216.js','public/app/chat-single-owner-v245.js'])check(`retired owner deleted: ${retired}`,!(await exists(retired)));
-const realmIndex=boundary.indexOf('REALM_SESSION_INTEGRITY,'),workspaceIndex=boundary.indexOf('GUIDE_WORKSPACE,');
+const realmIndex=coreRuntime.indexOf("'/app/realm-session-integrity-v237.js'"),workspaceIndex=coreRuntime.indexOf("'/app/guide-workspace-v242.js'");
 check('workspace loads after realm session integrity',realmIndex>=0&&workspaceIndex>realmIndex);
-const experienceStart=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),experienceEnd=boundary.indexOf('];',experienceStart),experience=boundary.slice(experienceStart,experienceEnd);
-check('canonical boundary boots workspace without retired runtime constants',experience.includes('GUIDE_WORKSPACE')&&!boundary.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!boundary.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'));
+check('core runtime owns workspace assembly',coreRuntime.includes('const SHARED_BOOT_SCRIPTS=Object.freeze([')&&coreRuntime.includes("'/app/guide-workspace-v242.js'"));
+check('install boundary boots only core runtime',boundary.includes("const CORE_INTERFACE_RUNTIME='/app/core-interface-runtime-v1.js'")&&!boundary.includes('SYSTEM_EXPERIENCE_SCRIPTS')&&!boundary.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!boundary.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'));
 check('boundary exposes v250 policy',boundary.includes("guideWorkspaceRevision:'v250-v242-canonical-owner'"));
-console.log(JSON.stringify({ok:true,version,checks:checks.length,workspace:'v242-canonical-v250',viewportOwner:'v242',scrollTrap:false,launcherFirst:true,duplicateOwners:0,deletedOwners:3},null,2));
+console.log(JSON.stringify({ok:true,version,checks:checks.length,workspace:'v242-canonical-v250',interfaceRuntime:'core-interface-runtime-v1',viewportOwner:'v242',scrollTrap:false,launcherFirst:true,duplicateOwners:0,deletedOwners:3},null,2));

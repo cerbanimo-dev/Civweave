@@ -79,23 +79,46 @@ await patch('public/app/install-boundary-v146.js',source=>{
     "['/app/realm-console-v140.html','cerbanimo']",
     "['/app/fellowfare-cabinet-v144.html','fellowfare']",
     "['/app/anarchadia-console-v139.html','anarchadia']",
+    "const CORE_INTERFACE_RUNTIME='/app/core-interface-runtime-v1.js'",
     "root.dataset.civweaveCanonicalCore='only'",
     "canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner'",
     "guideWorkspaceRevision:'v250-v242-canonical-owner'",
     "guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm'",
     "navigationLifecycleRevision:'v424-head-capture-bfcache-resume'",
     "browserRuntimePolicy:'installed-display-only'",
+    "sharedLoadingOwner:'core-interface-runtime-v1'",
     'installedQueryIsAuthorization:false',
     'canonicalSystemCount:5',
-    'canonicalAutoScripts:0'
+    'canonicalAutoScripts:0',
+    'canonicalRuntimeScripts:1'
   ])if(!source.includes(token))throw new Error(`Five-system install boundary is missing ${token}.`);
   if(source.includes('function allowed(){return installedDisplay()||developer()||embedded()}'))throw new Error('Embedded browser documents must not authorize Civweave runtime.');
-  const start=source.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),end=source.indexOf('];',start),experience=source.slice(start,end);
-  if(!experience.includes('GUIDE_WORKSPACE'))throw new Error('Canonical system experience must boot the v242 workspace.');
+  if(source.includes('SYSTEM_EXPERIENCE_SCRIPTS')||source.includes('CANONICAL_SYSTEM_SCRIPTS'))throw new Error('Install boundary must not retain superseded canonical dependency manifests.');
+  const boot=source.match(/function installSystemExperienceSupport\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
+  if(!boot.includes('addScript(CORE_INTERFACE_RUNTIME)'))throw new Error('Install boundary must bootstrap the core interface runtime.');
+  if(/\.forEach\(|SETTINGS_GATEWAY|GUIDE_WORKSPACE|SYSTEM_RADIO_AGENT/.test(boot))throw new Error('Install boundary regained shared-system loading ownership.');
   for(const retired of ['PERSISTENT_GUIDE_CHAT_SCRIPT','PERSISTENT_GUIDE_VIEWPORT_SCRIPT','/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js'])if(source.includes(retired))throw new Error(`Release coherence must not resurrect ${retired}.`);
   if(source.includes('function startAdditions()'))throw new Error('Canonical boundary still contains delayed automatic additions.');
   return source;
 });
+
+const coreInterfaceRuntime=await readFile(path.join(root,'public/app/core-interface-runtime-v1.js'),'utf8');
+for(const token of [
+  "const SYSTEM_ORDER=Object.freeze(['civweave','living-school','cerbanimo','fellowfare','anarchadia'])",
+  'const SHARED_BOOT_SCRIPTS=Object.freeze([',
+  "'/app/settings-gateway-v317.js'",
+  "'/app/mobile-ai-hardening-v302.js'",
+  "'/app/realm-session-integrity-v237.js'",
+  "'/app/guide-workspace-v242.js'",
+  "'/app/themed-system-nav-v178.js'",
+  "'/app/shared-review-surface-v234.js'",
+  "'/app/shared-guide-surface-v236.js'",
+  "const FELLOWFARE_GUIDE_BRIDGE='/app/fellowfare-shared-guide-bridge-v236.js'",
+  "if(currentSystem==='fellowfare')scripts.push(FELLOWFARE_GUIDE_BRIDGE)",
+  "settingsInputOwner:'settings-gateway-v317'",
+  "familyNavigationOwner:'family-shell-v104'"
+])if(!coreInterfaceRuntime.includes(token))throw new Error(`Core interface runtime is missing ${token}.`);
+if(/data-open-unified-ai-settings|addEventListener[^\n]*\('click'/.test(coreInterfaceRuntime))throw new Error('Core interface runtime may assemble shared owners but may not become a second Settings input owner.');
 
 await patch('public/app/system-routes-v227.js',source=>{
   source=replaceRequired(source,/const VERSION='[^']+';/,`const VERSION='${version}';`,'five-system route version');
@@ -154,4 +177,4 @@ for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pin
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,interfaceRuntime:'core-interface-runtime-v1',routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));

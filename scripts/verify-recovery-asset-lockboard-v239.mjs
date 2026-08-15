@@ -19,6 +19,7 @@ const lockboardHtml=read('public/app/asset-lockboard-v239.html');
 const lockboard=read('public/app/asset-lockboard-v239.js');
 const customizer=read('public/app/asset-customization-v239.js');
 const boundary=read('public/app/install-boundary-v146.js');
+const interfaceRuntime=read('public/app/core-interface-runtime-v1.js');
 const background=read('public/app/campus-background-download-v241.js');
 
 const checks=[
@@ -49,7 +50,7 @@ const checks=[
     assert.match(offline,/backgroundSafe: true/);
     assert.match(background,/DOWNLOAD_OFFLINE_PACKAGE/);
     assert.match(background,/height:4px/);
-    assert.match(boundary,/CAMPUS_BACKGROUND_DOWNLOAD='\/app\/campus-background-download-v241\.js'/);
+    assert.match(interfaceRuntime,/'\/app\/campus-background-download-v241\.js'/);
     assert.match(boundary,/v241-worker-owned-download-bottom-progress-rail/);
   }],
   ['installer runtime is the sole service-worker registration owner',()=>{
@@ -98,7 +99,9 @@ const checks=[
     assert.match(customizer,/civweave\.asset-lockboard\.v239/);
     assert.match(customizer,/pathOverrides/);
     assert.match(customizer,/applyStylesheets/);
-    assert.match(boundary,/installAssetCustomizationIfConfigured/);
+    assert.match(interfaceRuntime,/const ASSET_CUSTOMIZATION='\/app\/asset-customization-v239\.js'/);
+    assert.match(interfaceRuntime,/function assetCustomizationConfigured\(\)/);
+    assert.match(interfaceRuntime,/scripts\.push\(ASSET_CUSTOMIZATION\)/);
     assert.match(boundary,/v239-local-path-overrides-on-demand/);
   }]
 ];

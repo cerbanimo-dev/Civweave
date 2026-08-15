@@ -7,14 +7,15 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
 const exists=file=>access(path.join(root,file)).then(()=>true,()=>false);
-const [identity,boundary,workspace,assistant]=await Promise.all([
+const [identity,boundary,coreRuntime,workspace,assistant]=await Promise.all([
   read('public/app/guide-identity-integrity-v216.js'),
   read('public/app/install-boundary-v146.js'),
+  read('public/app/core-interface-runtime-v1.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/assistant-runtime-v141.js')
 ]);
 
-new Function(identity);new Function(boundary);new Function(workspace);
+new Function(identity);new Function(boundary);new Function(coreRuntime);new Function(workspace);
 for(const token of [
   "const VERSION='1.0.2-guide-identity-integrity-v216-v242-only'",
   'Identity boundary:',
@@ -36,10 +37,11 @@ for(const token of [
   "guideIdentityMigration:'realm-action-owner'"
 ])assert(boundary.includes(token),`Install boundary is missing ${token}`);
 assert(!boundary.includes('PERSISTENT_GUIDE_CHAT_SCRIPT')&&!boundary.includes('PERSISTENT_GUIDE_VIEWPORT_SCRIPT'),'Install boundary must not retain deleted chat runtime constants.');
-const expStart=boundary.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),expEnd=boundary.indexOf('];',expStart),experience=boundary.slice(expStart,expEnd);
-assert(experience.includes('GUIDE_IDENTITY_SCRIPT'),'Canonical experience no longer loads identity integrity.');
-assert(experience.includes('GUIDE_WORKSPACE'),'Canonical experience no longer loads the guide workspace.');
-assert(experience.indexOf('GUIDE_IDENTITY_SCRIPT')<experience.indexOf('GUIDE_WORKSPACE'),'Identity integrity must load before the canonical workspace reads realm history.');
+assert.doesNotMatch(boundary,/SYSTEM_EXPERIENCE_SCRIPTS|CANONICAL_SYSTEM_SCRIPTS/,'Install boundary must not retain a second canonical loader manifest.');
+const identityIndex=coreRuntime.indexOf("'/app/guide-identity-integrity-v216.js'"),workspaceIndex=coreRuntime.indexOf("'/app/guide-workspace-v242.js'");
+assert(identityIndex>=0,'Core interface runtime no longer loads identity integrity.');
+assert(workspaceIndex>=0,'Core interface runtime no longer loads the guide workspace.');
+assert(identityIndex<workspaceIndex,'Identity integrity must load before the canonical workspace reads realm history.');
 assert(workspace.includes('canonicalOwner:true'),'Guide workspace must remain canonical.');
 assert(assistant.includes("if(systemId==='civweave'&&routedSystem!=='civweave')systemId=routedSystem"),'Verifier no longer covers the realm-handoff boundary.');
 for(const retired of ['public/app/persistent-guide-chat-v215.js','public/app/persistent-guide-viewport-v216.js'])assert.equal(await exists(retired),false,`${retired} must remain deleted.`);
@@ -59,4 +61,4 @@ assert.equal(handedOff.requestedSystem,'civweave');assert.equal(handedOff.respon
 assert.equal(switched.at(-1)?.system,'living-school','Canonical workspace did not switch to the receiving guide after handoff.');
 assert.equal(switched.at(-1)?.open,false,'Identity handoff must not force the chat window open.');
 
-console.log(JSON.stringify({ok:true,revision:'v216-identity-integrity-v242-only',canonicalChatOwner:'guide-workspace-v242',legacyChatMigration:false,documentObservers:0},null,2));
+console.log(JSON.stringify({ok:true,revision:'v216-identity-integrity-v242-only',interfaceRuntime:'core-interface-runtime-v1',canonicalChatOwner:'guide-workspace-v242',legacyChatMigration:false,documentObservers:0},null,2));

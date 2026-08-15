@@ -16,6 +16,7 @@ on:
       - 'public/node-ai/**'
       - 'public/app/shared/civweave-node-ai-routing-v1.mjs'
       - 'public/app/install-boundary-v146.js'
+      - 'public/app/core-interface-runtime-v1.js'
       - 'public/app/offline-package-v208.json'
       - 'scripts/stage-federation-finder-data-v274.mjs'
       - 'scripts/test-node-ai-*.mjs'
@@ -36,6 +37,7 @@ on:
       - 'public/finder/**'
       - 'public/node-ai/**'
       - 'public/app/install-boundary-v146.js'
+      - 'public/app/core-interface-runtime-v1.js'
       - 'public/app/offline-package-v208.json'
       - 'scripts/test-node-ai-*.mjs'
       - 'package.json'
@@ -79,8 +81,9 @@ jobs:
         run: node --test scripts/test-node-ai-marketplace-v1.mjs scripts/test-node-ai-http-v1.mjs scripts/test-node-ai-routing-v1.mjs scripts/test-node-ai-service-package-v1.mjs scripts/test-node-ai-marketplace-surface-v1.mjs scripts/test-node-ai-fireworks-package-v1.mjs
       - name: Verify canonical bootstrap and offline carriage
         run: |
-          grep -q "const NODE_AI_MESH_RUNTIME='/app/node-ai-mesh-v1.js'" public/app/install-boundary-v146.js
-          grep -q 'NODE_AI_MESH_RUNTIME' public/app/install-boundary-v146.js
+          grep -q "const CORE_INTERFACE_RUNTIME='/app/core-interface-runtime-v1.js'" public/app/install-boundary-v146.js
+          ! grep -q 'NODE_AI_MESH_RUNTIME' public/app/install-boundary-v146.js
+          grep -q "'/app/node-ai-mesh-v1.js'" public/app/core-interface-runtime-v1.js
           grep -q "'/app/local-object-mesh-v146.js?v=node-ai-mesh-v1'" public/app/node-ai-mesh-v1.js
           grep -q "const ROUTER_URL='/app/shared/civweave-node-ai-routing-v1.mjs'" public/app/node-ai-mesh-v1.js
           node -e "const p=require('./public/app/offline-package-v208.json'); if(!Array.isArray(p.seeds)||p.seeds.length<11) throw new Error('canonical offline roots unexpectedly shrank'); for(const f of ['/finder','/app/federation-finder-local-v269.html','/app/node-ai-marketplace-surface-v1.js','/app/node-ai-operator-v1.html']) if(!p.assets.includes(f)) throw new Error('missing optional offline marketplace asset '+f)"

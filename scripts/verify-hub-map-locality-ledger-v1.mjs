@@ -17,8 +17,11 @@ const locationTest = read('scripts/test-hub-location-onboarding-v1.mjs');
 const localMesh = read('public/app/local-object-mesh-v146.js');
 const hostSession = read('public/app/host-node-session-v1.js');
 const installBoundary = read('public/app/install-boundary-v146.js');
+const coreRuntime = read('public/app/core-interface-runtime-v1.js');
 const nodeAiMesh = read('public/app/node-ai-mesh-v1.js');
 
+const hostSessionIndex=coreRuntime.indexOf("'/app/host-node-session-v1.js'");
+const nodeMeshIndex=coreRuntime.indexOf("'/app/node-ai-mesh-v1.js'");
 const checks = [
   [finder.includes('/app/hub-map-v1.html'), 'Finder routes to the Hub Map entry'],
   [manifest.entry === '/app/hub-map-v1.html' && manifest.route === '/finder', 'map package entry is Hub-first'],
@@ -44,7 +47,7 @@ const checks = [
   [gossip.includes('mesh.syncGateway(hub.publicOrigin)') && gossip.includes('CivweaveMapMeshV276?.sync'), 'manual virtual pass-by tries the Hub gateway then the federated map mesh'],
   [gossip.includes('for(const node of region.nodes)') && gossip.includes('mesh.syncGateway(hub.publicOrigin)') && gossip.includes('await mesh.flushAll()'), 'a Region sync downloads its Hub gateways as one logical chunk and flushes once after the sweep'],
   [gossip.includes('roaming coordinates are evaluated in-memory and never written by this module') && gossip.includes('automatic Regions are anchored to the home Hub public map pin'), 'roaming device coordinates are not persisted by automatic Region gossip'],
-  [installBoundary.indexOf('HOST_NODE_SESSION,') >= 0 && installBoundary.indexOf('NODE_AI_MESH_RUNTIME,') > installBoundary.indexOf('HOST_NODE_SESSION,'), 'canonical installed surfaces load Hub session ownership before the approved node mesh runtime'],
+  [hostSessionIndex>=0 && nodeMeshIndex>hostSessionIndex, 'core interface runtime loads Hub session ownership before the approved node mesh runtime'],
   [nodeAiMesh.includes("LOCALITY_GOSSIP_SCRIPT='/app/civweave-locality-gossip-v1.js") && nodeAiMesh.includes('async function ensureLocalityGossip()') && nodeAiMesh.includes('ensureLocalityGossip().catch(()=>{})'), 'approved node mesh runtime loads automatic Region gossip across installed Civweave surfaces'],
   [directory.includes('CORE_DIRECTORY') && directory.includes('FABRIC_ORIGIN') && directory.includes('/api/ai/node/manifest'), 'Hub directory is built from registered Cloudflare Hub manifests'],
   [directory.includes('node?.location || node?.publicLocation') && directory.includes('publicLocationsAreStewardPublished: true'), 'Hub directory returns only steward-published node locations'],
@@ -53,7 +56,7 @@ const checks = [
   [locationTest.includes("publicPrecision: 'precise'") && locationTest.includes('precisePublicCoordinateDecimals: 6') && locationTest.includes('exactReadingLeavesDeviceByDefault: false'), 'Hub location tests cover both privacy-rounded default and precise public opt-in'],
   [cloudNode.includes("schema: 'civweave.hub-location.v1'") && cloudNode.includes('location: input.location?.schema') && cloudNode.includes("'hub-location'"), 'Cloudflare Hub stores Steward location in the canonical node manifest'],
   [localMesh.includes('signature=await sign') && localMesh.includes("const mayRelay=object=>object.consent==='public'||object.consent==='federated'"), 'gossip inherits signed object integrity and public/federated store-and-forward'],
-  [installBoundary.includes('NODE_AI_MESH_RUNTIME') && installBoundary.includes('SYSTEM_EXPERIENCE_SCRIPTS') && installBoundary.includes('NODE_AI_MESH_RUNTIME,'), 'canonical installed Civweave surfaces still load the generic node mesh runtime'],
+  [coreRuntime.includes("'/app/node-ai-mesh-v1.js'") && installBoundary.includes("const CORE_INTERFACE_RUNTIME='/app/core-interface-runtime-v1.js'") && !installBoundary.includes('SYSTEM_EXPERIENCE_SCRIPTS'), 'canonical installed Civweave surfaces use the core interface runtime to load the generic node mesh runtime'],
   [nodeAiMesh.includes('DEFAULT_SYNC_MS=90_000') && nodeAiMesh.includes('await mesh.syncGateway') && nodeAiMesh.includes('queueMicrotask(autoStart)'), 'installed node mesh automatically relays generic public/federated community objects on its normal online loop'],
 ];
 

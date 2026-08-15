@@ -4,10 +4,12 @@ import assert from 'node:assert/strict';
 import { webcrypto } from 'node:crypto';
 
 const runtimePath='public/app/civweave-systems-mesh-v251.js';
+const interfaceRuntimePath='public/app/core-interface-runtime-v1.js';
 const routesPath='public/app/system-routes-v227.js';
 const boundaryPath='public/app/install-boundary-v146.js';
 const offlinePath='public/app/offline-package-v208.json';
 const runtime=fs.readFileSync(runtimePath,'utf8');
+const interfaceRuntime=fs.readFileSync(interfaceRuntimePath,'utf8');
 const routes=fs.readFileSync(routesPath,'utf8');
 const boundary=fs.readFileSync(boundaryPath,'utf8');
 const offline=JSON.parse(fs.readFileSync(offlinePath,'utf8'));
@@ -18,8 +20,10 @@ for(const forbidden of ['X-Civweave-System-Token','X-Civweave-Admin-Token','x-ci
 for(const id of ['civweave','living-school','cerbanimo','fellowfare','anarchadia'])assert.match(runtime,new RegExp(`['\"]${id.replace('-','\\-')}['\"]`));
 for(const type of ['civweave.intention.created','living-school.learning.verified','living-school.validation.completed','cerbanimo.labor.completed','cerbanimo.task.available','fellowfare.exchange.completed','fellowfare.resource.available','anarchadia.policy.published','anarchadia.passport.updated'])assert.ok(runtime.includes(type),`missing ${type}`);
 assert.match(routes,/civweave:Object\.freeze\(\{id:'civweave'/);
-assert.ok(boundary.includes("const SYSTEMS_MESH_RUNTIME='/app/civweave-systems-mesh-v251.js'"));
-assert.match(boundary,/SYSTEM_EXPERIENCE_SCRIPTS=\[[\s\S]*SYSTEMS_MESH_RUNTIME/);
+assert.match(interfaceRuntime,/['"]\/app\/civweave-systems-mesh-v251\.js['"]/,'Core interface runtime must assemble the systems mesh.');
+assert.match(interfaceRuntime,/const SHARED_BOOT_SCRIPTS=Object\.freeze\(\[/);
+assert.match(boundary,/const CORE_INTERFACE_RUNTIME='\/app\/core-interface-runtime-v1\.js'/);
+assert.doesNotMatch(boundary,/SYSTEM_EXPERIENCE_SCRIPTS|SYSTEMS_MESH_RUNTIME='\/app\/civweave-systems-mesh-v251\.js'/,'Install boundary must not retain a second systems-mesh loader.');
 assert.match(boundary,/systemsMeshRevision:'v251-five-system-non-privileged-event-contract'/);
 assert.ok(offline.seeds.includes('/app/civweave-systems-mesh-v251.js'));
 

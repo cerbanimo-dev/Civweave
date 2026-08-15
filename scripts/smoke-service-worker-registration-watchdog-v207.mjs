@@ -34,7 +34,9 @@ assert.match(updaterSource,/const\s+REGISTRATION_QUERY_TIMEOUT_MS\s*=\s*6000/,'I
 assert.ok(updaterSource.includes('withTimeout(registration.update()'),'Installed updater must bound registration.update().');
 assert.ok(updaterSource.includes("setState('Open updater','error'"),'Installed updater must expose a repair action after timeout.');
 assert.ok(boundarySource.includes("const PWA_UPDATE_SCRIPT='/app/pwa-update-controller-v204.js'"),'Installed boundary no longer names the shared update controller.');
-assert.ok(boundarySource.includes("canonicalSubsystemCompatibility:'route-version-settings-only-no-legacy-additions'"),'Canonical startup corridor changed unexpectedly.');
+assert.ok(boundarySource.includes("const CORE_INTERFACE_RUNTIME='/app/core-interface-runtime-v1.js'"),'Installed boundary no longer boots the shared core interface runtime.');
+assert.ok(boundarySource.includes("canonicalSubsystemCompatibility:'core-interface-runtime-owned-shared-loading'"),'Canonical startup corridor no longer delegates shared loading to the core runtime.');
+assert.ok(boundarySource.includes("sharedLoadingOwner:'core-interface-runtime-v1'"),'Installed boundary no longer declares the core runtime as shared loading owner.');
 assert.ok(boundarySource.includes("const REVISION='browser-install-boundary-v228-chat-escape-install-only-pwa-v1';"),'Installed boundary lost the install-only browser revision.');
 assert.ok(boundarySource.includes("browserRuntimePolicy:'installed-display-only'"),'Installed boundary no longer rejects browser runtime.');
 assert.ok(!statusSource.includes('registration.update()'),'Offline status reader must not compete with the installer update watchdog.');
