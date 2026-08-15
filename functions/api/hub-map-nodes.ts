@@ -1,3 +1,9 @@
+import {
+  isStagingRequest,
+  requestOrigin,
+  STAGING_GUILDS,
+} from "../_shared/staging-runtime";
+
 const CORE_DIRECTORY = "https://civweave-core.cerbanimo.workers.dev/api/nodes?limit=100";
 const FABRIC_ORIGIN = "https://civweave-node-cloud.cerbanimo.workers.dev";
 const MAX_NODES = 64;
@@ -59,7 +65,52 @@ function publicLocation(node: JsonRecord) {
   };
 }
 
-export const onRequestGet: PagesFunction = async () => {
+function stagingDirectory(request: Request) {
+  const origin = requestOrigin(request);
+  return reply({
+    schema: "civweave.hub-map-directory.v1",
+    ok: true,
+    environment: "staging",
+    stagingSynthetic: true,
+    productionIsolation: true,
+    generatedAt: new Date().toISOString(),
+    nodes: STAGING_GUILDS.map(guild => ({
+      schema: "civweave.hub-map-node.v1",
+      nodeId: guild.nodeId,
+      displayName: guild.displayName,
+      publicOrigin: origin,
+      runtime: "civweave-staging-pages-fixture",
+      status: "active",
+      capabilities: ["staging-session", "staging-synthetic-ai"],
+      location: {
+        schema: "civweave.hub-map-public-location.v1",
+        latitude: guild.latitude,
+        longitude: guild.longitude,
+        precisionMeters: 5000,
+        coordinateDecimals: 3,
+        source: "staging-fixture-city-center",
+        capturedAt: null,
+        syncedAt: null,
+      },
+      updatedAt: null,
+      slots: { free: guild.freeSlots, paid: guild.paidSlots },
+      stagingSynthetic: true,
+    })),
+    source: {
+      directory: "staging-fixture",
+      fabric: "staging-fixture",
+    },
+    privacy: {
+      publicLocationsAreStewardPublished: false,
+      roamingDeviceLocationIncluded: false,
+      syntheticCityCentersOnly: true,
+    },
+  }, 200, "no-store");
+}
+
+export const onRequestGet: PagesFunction = async context => {
+  if (isStagingRequest(context.request)) return stagingDirectory(context.request);
+
   try {
     const [directoryResult, fabricResult] = await Promise.all([
       getJson(CORE_DIRECTORY).catch(() => ({ ok: false, status: 502, payload: {} })),
