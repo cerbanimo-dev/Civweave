@@ -2,7 +2,7 @@
 'use strict';
 
 const V225_REVISION = 'shell-self-repair-v225-install-only-pwa-v1';
-const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js'];
+const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v2.js'];
 const v225OriginalCacheShell = cacheShell;
 const v225OriginalShellStatus = shellStatus;
 let v225LastFailures = [];

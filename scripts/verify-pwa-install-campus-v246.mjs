@@ -9,8 +9,8 @@ const [html,rootHtml,manifestText,assetlinksText,bridge,repairOnly,workerRepair,
   read('public/index.html'),
   read('public/app/manifest.webmanifest'),
   read('public/.well-known/assetlinks.json'),
-  read('public/app/pwa-install-prompt-v249.js'),
-  read('public/app/installer-repair-only-v1.js'),
+  read('public/app/pwa-install-prompt-v250.js'),
+  read('public/app/installer-repair-only-v2.js'),
   read('public/service-worker-shell-repair-v225.js'),
   read('public/service-worker-v203.js'),
   read('public/app/installed-entry-v146.html'),
@@ -53,6 +53,7 @@ assert.ok(bridge.includes("installSequencingPolicy:'prepare-on-first-install-int
 assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click'"),'installer must invoke the captured native prompt synchronously from the fresh install gesture');
 assert.ok(bridge.includes('eagerShellPreparation:false'),'installer bridge must explicitly forbid eager shell preparation');
 assert.ok(bridge.includes('firstPaintShellWork:false'),'installer bridge must explicitly forbid first-paint shell work');
+assert.ok(bridge.includes('cacheDistinctPath:true'),'installer bridge must declare its stale-service-worker cache escape');
 assert.ok(!bridge.includes('queueMicrotask(()=>void primeInstallability())'),'installer bridge must not queue shell preparation from page startup');
 assert.ok(bridge.includes("if(standalone())")&&bridge.includes("if(installed){"),'installer must distinguish installed display from merely accepted installation');
 assert.ok(bridge.includes('Open Civweave from your device app launcher')||bridge.includes('device app launcher'),'accepted browser installation must direct launch through the device app launcher');
@@ -60,8 +61,10 @@ assert.ok(bridge.includes('Open Civweave from your device app launcher')||bridge
 assert.ok(!html.includes('id="open-online-campus-v225"'),'installer must not expose an online-campus fallback button');
 assert.ok(!html.includes('Browser fallback'),'installer must not advertise browser runtime fallback');
 assert.ok(!html.includes('/app/installer-online-fallback-v225.js'),'installer must not load the retired online fallback bridge');
-assert.ok(html.includes('/app/pwa-install-prompt-v249.js'),'installer must load the current cache-distinct v249 install bridge');
-assert.ok(html.includes('/app/installer-repair-only-v1.js?v=install-only-pwa-v1'),'installer must load the repair-only bridge');
+assert.ok(html.includes('/app/pwa-install-prompt-v250.js'),'installer must load the cache-distinct v250 install bridge');
+assert.ok(!html.includes('/app/pwa-install-prompt-v249.js'),'installer must not load the stale-cache-prone v249 install bridge');
+assert.ok(html.includes('/app/installer-repair-only-v2.js'),'installer must load the cache-distinct repair bridge v2');
+assert.ok(!html.includes('/app/installer-repair-only-v1.js'),'installer must not load the shell-cached repair bridge v1');
 assert.ok(html.includes('Launch Civweave from your device app launcher'),'installer headline must describe installed-app launch');
 
 assert.ok(repairOnly.includes('function installedDisplay()'),'repair bridge must prove installed display before resuming runtime');
@@ -70,9 +73,10 @@ assert.ok(!repairOnly.includes("launch','online"),'repair bridge must not synthe
 assert.ok(repairOnly.includes("browserRuntimePolicy:'installer-only-until-installed-display'"),'repair bridge must declare installer-only browser policy');
 assert.ok(repairOnly.includes("hubToolsPolicy:'explicit-user-load-only'"),'Hub and account tools must be explicit opt-in work');
 assert.ok(repairOnly.includes('firstPaintHubWork:false'),'repair bridge must explicitly forbid Hub/account work on first paint');
+assert.ok(repairOnly.includes('cacheDistinctPath:true'),'repair bridge must declare its stale-shell-cache escape');
 assert.ok(repairOnly.includes('installHubToolsGate();'),'installer startup must install only the lightweight Hub tools gate');
 assert.ok(repairOnly.includes("addEventListener('click',loadHubTools)"),'Hub/account scripts must start from an explicit user click');
-const startupTail=repairOnly.slice(repairOnly.indexOf('if(resumeRequiredNext())return;'),repairOnly.indexOf('globalThis.CivweaveInstallerRepairOnlyV1'));
+const startupTail=repairOnly.slice(repairOnly.indexOf('if(resumeRequiredNext())return;'),repairOnly.indexOf('const api=Object.freeze'));
 assert.ok(!startupTail.includes('installHostNodeLobby();'),'installer startup must not boot Host Node scripts before user intent');
 assert.ok(!startupTail.includes('installHubRecovery();'),'installer startup must not boot recovery scripts before user intent');
 
@@ -82,10 +86,11 @@ assert.ok(installedEntry.includes("if(!installedDisplay()&&!localDeveloper())"),
 assert.ok(installedEntry.includes("browserRuntimePolicy:'installed-display-only'"),'installed bootstrap must declare installed-display-only runtime policy');
 assert.ok(installedEntry.includes("updateViaCache:'none'")&&installedEntry.includes('bounded(registration.update()'),'installed entry must perform a bounded no-cache worker refresh');
 
-assert.ok(workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'shell repair must cache the repair-only bridge');
+assert.ok(workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v2.js']"),'future shell installs must cache the cache-distinct repair bridge v2');
+assert.ok(!workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-repair-only-v1.js']"),'future shell installs must not seed the stale v1 repair bridge');
 assert.ok(!workerRepair.includes("const V225_OPTIONAL_ASSETS = ['/app/installer-online-fallback-v225.js']"),'shell repair must not resurrect the retired browser fallback');
 assert.ok(workerWrapper.includes('working-campus-return-v425-install-only-pwa-v1'),'worker core cache identity must carry install-only boundary');
-assert.ok(workerWrapper.includes('shell-self-repair-v225-install-only-pwa-v1'),'worker repair import must carry install-only boundary');
+assert.ok(workerWrapper.includes('shell-self-repair-v225-install-only-pwa-v1'),'worker wrapper must preserve the stable V225 repair module epoch');
 
 const meta=JSON.parse(hostMeta);
 assert.equal(meta.schema,'civweave.host-deployment.v1');
@@ -109,7 +114,7 @@ assert.deepEqual(pngDimensions(bytesMask512,'maskable 512 icon'),[512,512]);
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'pwa-install-campus-v249-no-load-prewarm-lazy-hub-tools',
+  revision:'pwa-install-campus-v250-cache-distinct-freeze-recovery',
   canonicalOrigin,
   previousCanonicalOrigin,
   browserRuntime:'installed-display-only',
@@ -117,6 +122,7 @@ console.log(JSON.stringify({
   repairOnly:true,
   firstPaintShellWork:false,
   firstPaintHubWork:false,
-  workerCacheBusted:true,
+  cacheDistinctInstallerPaths:true,
+  stableWorkerEpoch:true,
   relatedOrigins:manifests.length
 },null,2));

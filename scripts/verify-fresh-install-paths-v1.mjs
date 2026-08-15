@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const [bridge,installer,manifestText,installedEntryHtml,installedEntryRuntime]=await Promise.all([
-  read('public/app/pwa-install-prompt-v249.js'),
+  read('public/app/pwa-install-prompt-v250.js'),
   read('public/install-v130.js'),
   read('public/app/manifest.webmanifest'),
   read('public/app/installed-entry-v146.html'),
@@ -39,6 +39,7 @@ assert.ok(bridge.includes("installSequencingPolicy:'prepare-on-first-install-int
 assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click'"),'bridge must publish its native prompt user-gesture contract');
 assert.ok(bridge.includes('eagerShellPreparation:false'),'bridge must explicitly forbid eager shell preparation');
 assert.ok(bridge.includes('firstPaintShellWork:false'),'bridge must explicitly forbid first-paint shell work');
+assert.ok(bridge.includes('cacheDistinctPath:true'),'bridge must escape old service-worker cache entries by pathname');
 
 assert.equal((installer.match(/location\.assign\(ENTRY\)/g)||[]).length,1,'fallback installer may navigate to ENTRY only from installed display, never after browser install acceptance');
 assert.ok(installer.includes('this browser tab remains installer-only'),'accepted browser install must remain on the installer');
@@ -51,11 +52,12 @@ assert.ok(installedEntryRuntime.includes("if(!installedDisplay()&&!localDevelope
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'fresh-install-paths-v4-no-load-prewarm',
+  revision:'fresh-install-paths-v5-cache-distinct-v250',
   exactEntry,
   shellPrimedBeforeClick:false,
   shellPreparationUserInitiated:true,
   promptSynchronousOnFreshClick:true,
+  cacheDistinctPath:true,
   browserInstallStaysInstallerOnly:true,
   staleAppInstallerEntry:false
 },null,2));

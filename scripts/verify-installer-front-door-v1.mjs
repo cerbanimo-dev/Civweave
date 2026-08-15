@@ -5,7 +5,7 @@ const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const readBytes=path=>readFile(new URL(`../${path}`,import.meta.url));
 const [installerHtml,bridge,offlineStatus,brand,logoSvg,hostSetup,anchor,setup,frontDoor]=await Promise.all([
   read('public/app/index.html'),
-  read('public/app/pwa-install-prompt-v249.js'),
+  read('public/app/pwa-install-prompt-v250.js'),
   read('public/app/offline-campus-status-v211.js'),
   read('public/app/civweave-brand.js'),
   read('public/app/logos/civweave.svg'),
@@ -41,11 +41,14 @@ assert.ok(bridge.includes(`const ENTRY='${exactEntry}'`),'installed Open Civweav
 assert.ok(!bridge.includes("const ENTRY='/app/?system=civweave&installed=1'"),'PWA bridge must not route Open Civweave back into the installer');
 assert.ok(bridge.includes("const HOST_SETUP_PATH='/host-setup.html'"),'PWA bridge must have a dedicated steward setup destination');
 assert.ok(bridge.includes("current.searchParams.get('host_setup')!=='1'"),'legacy /app/?host_setup=1 links must redirect out of the app boundary');
-assert.ok(installerHtml.includes('/app/pwa-install-prompt-v249.js'),'installer must load the cache-distinct first-input-safe PWA front-door bridge');
-assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v248.js'),'installer must not load the cache-first stale v248 bridge');
+assert.ok(installerHtml.includes('/app/pwa-install-prompt-v250.js'),'installer must load the cache-distinct v250 PWA front-door bridge');
+assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v249.js'),'installer must not load the stale-cache-prone v249 bridge');
+assert.ok(installerHtml.includes('/app/installer-repair-only-v2.js'),'installer must load the cache-distinct v2 repair bridge');
+assert.ok(!installerHtml.includes('/app/installer-repair-only-v1.js'),'installer must not load the stale shell-cached v1 repair bridge');
 assert.ok(installerHtml.includes('/app/offline-campus-status-v211.js'),'installer must load the cache-distinct lazy offline status bridge');
 assert.ok(!installerHtml.includes('setInterval(renderProgress,1000)'),'installer must not churn progress DOM every second before input');
 assert.ok(bridge.includes('eagerRelatedAppDiscovery:false')&&bridge.includes('firstInputSafe:true'),'PWA bridge must keep native related-app discovery off the first-paint path');
+assert.ok(bridge.includes('cacheDistinctPath:true'),'PWA bridge must declare that its pathname escapes stale service-worker caches');
 assert.ok(offlineStatus.includes('eagerStatusLookup:false')&&offlineStatus.includes('firstInputSafe:true'),'offline status must stay dormant until download intent');
 assert.ok(!offlineStatus.includes("addEventListener('load',askCurrentStatus"),'offline status must not touch service-worker campus state at page load');
 assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v247.js?v=front-door-v3-install-only-runtime'),'installer must not boot the deadlocking v247 bridge');
@@ -88,10 +91,11 @@ assert.ok(frontDoor.includes("background:#fff url('/app/logos/cerbanimo-steward-
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installer-front-door-v9-first-input-safe',
+  revision:'installer-front-door-v10-cache-distinct-v250',
   installedEntry:exactEntry,
   hostSetup:'/host-setup.html',
-  launcher:'/app/pwa-install-prompt-v249.js',
+  launcher:'/app/pwa-install-prompt-v250.js',
+  repairBridge:'/app/installer-repair-only-v2.js',
   offlineStatus:'/app/offline-campus-status-v211.js',
   firstInputSafe:true,
   compatibilityLogo:'/app/logos/civweave-pwa-512-v247.png',

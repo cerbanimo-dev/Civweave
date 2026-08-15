@@ -54,7 +54,10 @@ function replaceRequired(source,pattern,replacement,label){
 await patch('public/app/index.html',source=>{
   if(/navigator\.serviceWorker\.register\s*\(/.test(source))throw new Error('Installer page must not register a second service worker; install-v130.js owns installer registration.');
   if(source.includes('open-online-campus-v225')||source.includes('Browser fallback'))throw new Error('Installer must not expose browser runtime fallback.');
-  if(!source.includes('/app/installer-repair-only-v1.js'))throw new Error('Installer must retain the repair-only bridge.');
+  if(!source.includes('/app/pwa-install-prompt-v250.js'))throw new Error('Installer must retain the cache-distinct v250 install bridge.');
+  if(source.includes('/app/pwa-install-prompt-v249.js'))throw new Error('Installer must not restore the stale-cache-prone v249 install bridge.');
+  if(!source.includes('/app/installer-repair-only-v2.js'))throw new Error('Installer must retain the cache-distinct repair-only bridge v2.');
+  if(source.includes('/app/installer-repair-only-v1.js'))throw new Error('Installer must not restore the stale shell-cached v1 repair bridge.');
   return source;
 });
 await patch('public/install-v130.js',source=>replaceRequired(source,/const WORKER_SCRIPT_REVISION = '[^']+';/,`const WORKER_SCRIPT_REVISION = '${revision}';`,'installer worker revision constant'));
@@ -154,4 +157,4 @@ for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pin
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',installerRegistrationOwner:'install-v130.js',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',installerRegistrationOwner:'install-v130.js',installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));

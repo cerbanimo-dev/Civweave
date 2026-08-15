@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
-const installerBridge = read('public/app/installer-repair-only-v1.js');
+const installerBridge = read('public/app/installer-repair-only-v2.js');
 const legacyAlias = read('public/app/installer-online-fallback-v225.js');
 const lobby = read('public/app/host-node-installer-lobby-v1.js');
 const status = read('functions/api/host-node-status.ts');
@@ -12,10 +12,12 @@ const search = read('functions/api/host-node-search.ts');
 const access = read('public/app/host-node-session-v1.js');
 
 const checks = [
-  [installerBridge.includes('host-node-installer-lobby-v1.js'), 'repair-only installer bridge loads Host Node lobby'],
-  [!installerBridge.includes("if (!host || document.querySelector('script[data-civweave-host-node-lobby]'))"), 'installer bridge no longer requires a host query before loading discovery'],
+  [installerBridge.includes('host-node-installer-lobby-v1.js'), 'current repair-only installer bridge retains the Host Node lobby loader'],
+  [installerBridge.includes('Load Hub & account tools') && installerBridge.includes("addEventListener('click',loadHubTools)"), 'Host Node discovery starts only after explicit user intent'],
+  [installerBridge.includes("hubToolsPolicy:'explicit-user-load-only'") && installerBridge.includes('firstPaintHubWork:false'), 'installer first paint does not boot Host discovery'],
   [installerBridge.includes("browserRuntimePolicy:'installer-only-until-installed-display'"), 'Host discovery remains available without reopening browser runtime'],
-  [legacyAlias.includes('retired:true') && legacyAlias.includes('browserRuntime:false'), 'legacy online fallback aliases safely to repair-only installer behavior'],
+  [installerBridge.includes('cacheDistinctPath:true'), 'current Hub tools gate escapes stale installer service-worker caches'],
+  [legacyAlias.includes('retired:true') && legacyAlias.includes('browserRuntime:false'), 'legacy online fallback remains retired without restoring browser runtime'],
   [lobby.includes("/api/federation/health"), 'lobby can detect a same-origin federated Docker Host Node'],
   [lobby.includes("/.well-known/civweave"), 'local Host Node status uses the public federation profile'],
   [lobby.includes('local-federated-host'), 'lobby distinguishes local federated Host Nodes'],

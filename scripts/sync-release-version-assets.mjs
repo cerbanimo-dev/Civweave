@@ -36,6 +36,10 @@ await patch('public/app/index.html',source=>{
   source=source.replace(/\d+\.\d+\.\d+-lightweight-shell-v208/g,`${version}-lightweight-shell-v208`);
   source=source.replace(/\d+\.\d+\.\d+-offline-retry-loop-v211/g,`${version}-offline-retry-loop-v211`);
   source=source.replace(/\d+\.\d+\.\d+-required-campus-v1/g,`${version}-required-campus-v1`);
+  if(!source.includes('/app/pwa-install-prompt-v250.js'))throw new Error(`installer cache-distinct v250 install bridge was not found while synchronizing Civweave ${version}.`);
+  if(source.includes('/app/pwa-install-prompt-v249.js'))throw new Error(`installer stale v249 install bridge returned while synchronizing Civweave ${version}.`);
+  if(!source.includes('/app/installer-repair-only-v2.js'))throw new Error(`installer cache-distinct repair bridge v2 was not found while synchronizing Civweave ${version}.`);
+  if(source.includes('/app/installer-repair-only-v1.js'))throw new Error(`installer stale shell-cached repair bridge v1 returned while synchronizing Civweave ${version}.`);
   return source;
 });
 
@@ -127,4 +131,4 @@ await patch('scripts/smoke-gateway-v131-base.mjs',source=>{
 
 await patch('scripts/verify-device-package-self-heal-v184.mjs',source=>source.replace(/v1\.0\.7/g,`v${version}`).replace(/1\.0\.7/g,version));
 
-console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,workingCampusReturnGuard:'v425',installOnlyPwa:'v1',changed},null,2));
+console.log(JSON.stringify({ok:true,version,serverTargets:`releases/${version}/server`,workingCampusReturnGuard:'v425',installOnlyPwa:'v1',installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',changed},null,2));

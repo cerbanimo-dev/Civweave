@@ -23,7 +23,8 @@ const required=[
   [launcherHtml,`/app/installed-entry-v146.js?v=${version}`,'root launcher installed-entry revision'],
   [installerHtml,`<title>Install Civweave v${version}</title>`,'installer title'],
   [installerHtml,'Launch Civweave from your device app launcher','installer install-only headline'],
-  [installerHtml,'/app/installer-repair-only-v1.js?v=install-only-pwa-v1','installer repair-only bridge'],
+  [installerHtml,'/app/pwa-install-prompt-v250.js','installer cache-distinct install bridge'],
+  [installerHtml,'/app/installer-repair-only-v2.js','installer cache-distinct repair bridge'],
   [installRuntime,`const VERSION = '${version}';`,'installer runtime'],
   [installedEntryHtml,`/app/installed-entry-v146.js?v=${version}`,'installed entry HTML'],
   [installedEntryHtml,'installed-entry-browser-gate-v1','installed entry pre-paint gate'],
@@ -45,6 +46,8 @@ const required=[
 ];
 for(const [source,token,label] of required)check(source.includes(token),`${label} is not synchronized to Civweave ${version}: missing ${token}`);
 
+check(!installerHtml.includes('/app/pwa-install-prompt-v249.js'),'Installer still loads the stale-cache-prone v249 install bridge.');
+check(!installerHtml.includes('/app/installer-repair-only-v1.js'),'Installer still loads the stale shell-cached v1 repair bridge.');
 check(!installerHtml.includes('open-online-campus-v225'),'Installer still exposes the retired browser fallback.');
 check(!installerHtml.includes('/app/installer-online-fallback-v225.js'),'Installer still loads the retired browser fallback runtime.');
 check(workerCore.includes("const BUILD = 'lightweight-shell-v208-installer-brand-v1-working-campus-return-v425';"),'Service-worker core cache epoch lost the Working Campus return repair.');
@@ -57,11 +60,13 @@ check(integrity.version===version&&workerCore.includes(`const VERSION = '${integ
 
 for(const token of [
   'Launch Civweave from your device app launcher',
+  '/app/pwa-install-prompt-v250.js',
+  '/app/installer-repair-only-v2.js',
   'browser-install-boundary-v228-chat-escape-install-only-pwa-v1',
   'working-campus-return-v425-install-only-pwa-v1',
   'shell-self-repair-v225-install-only-pwa-v1',
   "'/app/working-campus-return-guard-v425.js'",
   'installOnlyPwa'
-])check(syncSource.includes(token),`Release synchronizer would erase the install-only repair: missing ${token}`);
+])check(syncSource.includes(token),`Release synchronizer would erase the install-only/cache-distinct repair: missing ${token}`);
 
-console.log(JSON.stringify({ok:true,version,committedTreeVerified:true,verifierMutation:false,shellIntegrityCoherent:true,workingCampusReturnGuard:'v425',browserRuntime:'installed-display-only',installOnlyPwa:'v1',securityScriptsRevalidate:true},null,2));
+console.log(JSON.stringify({ok:true,version,committedTreeVerified:true,verifierMutation:false,shellIntegrityCoherent:true,workingCampusReturnGuard:'v425',browserRuntime:'installed-display-only',installOnlyPwa:'v1',cacheDistinctInstallerPaths:true,installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',securityScriptsRevalidate:true},null,2));

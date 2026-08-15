@@ -50,6 +50,16 @@ try{
   await page.waitForTimeout(900);
   assert.equal((await page.textContent('#package-state'))?.trim().toLowerCase(),'not prepared','first paint must remain idle');
   assert.equal(await page.isEnabled('#install-app'),true,'Install must be usable immediately');
+  assert.equal(await page.evaluate(()=>globalThis.CivweavePWAInstallV250?.observerPolicy),'idempotent-writes-coalesced-refresh','Install bridge must publish its observer feedback-loop guard');
+  const idleButtonMutations=await page.evaluate(()=>new Promise(resolve=>{
+    const button=document.querySelector('#install-app');
+    if(!button){resolve(-1);return}
+    let count=0;
+    const observer=new MutationObserver(rows=>{count+=rows.length});
+    observer.observe(button,{attributes:true,attributeFilter:['disabled'],childList:true});
+    setTimeout(()=>{observer.disconnect();resolve(count)},250);
+  }));
+  assert.equal(idleButtonMutations,0,'idle Install button must not mutate itself through its observer');
   assert.equal(offlinePackageRequests,0,'first paint must make zero offline-campus requests');
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),OPT_IN_KEY),null,'first paint must not opt in');
   const eager=await page.evaluate(()=>performance.getEntriesByType('resource').map(entry=>entry.name));
@@ -82,7 +92,7 @@ try{
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),OPT_IN_KEY),'1','explicit campus action must persist opt-in');
   assert.equal(await waitUntil(()=>offlinePackageRequests>0,10000),true,'explicit campus action must begin offline traffic');
 
-  console.log(JSON.stringify({ok:true,revision:'browser-installer-gauntlet-v306-first-package-request',idleFirstPaint:true,shellWithoutCampusTraffic:true,noOptInAppOpen:true,explicitOptInStartsCampus:true,singleWriterController:true,offlinePackageRequests},null,2));
+  console.log(JSON.stringify({ok:true,revision:'browser-installer-gauntlet-v307-observer-idle',idleFirstPaint:true,idleButtonMutations,shellWithoutCampusTraffic:true,noOptInAppOpen:true,explicitOptInStartsCampus:true,singleWriterController:true,offlinePackageRequests},null,2));
   await context.close();
 }finally{
   await browser.close().catch(()=>{});
