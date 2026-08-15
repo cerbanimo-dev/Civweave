@@ -7,7 +7,10 @@ on:
       - 'public/app/go-live-visual-v300.css'
       - 'public/app/working-campus-v156.js'
       - 'public/app/working-campus-v156.html'
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/core-interface-runtime-v1.js'
       - 'scripts/verify-working-campus-shell-v235.mjs'
+      - 'scripts/verify-working-campus-mvp-v155.mjs'
       - '.github/workflows/verify-working-campus-shell-v235.yml'
       - 'VERSION'
       - 'package.json'
@@ -19,7 +22,10 @@ on:
       - 'public/app/go-live-visual-v300.css'
       - 'public/app/working-campus-v156.js'
       - 'public/app/working-campus-v156.html'
+      - 'public/app/settings-gateway-v317.js'
+      - 'public/app/core-interface-runtime-v1.js'
       - 'scripts/verify-working-campus-shell-v235.mjs'
+      - 'scripts/verify-working-campus-mvp-v155.mjs'
       - '.github/workflows/verify-working-campus-shell-v235.yml'
       - 'VERSION'
       - 'package.json'
@@ -36,6 +42,7 @@ jobs:
         run: |
           node --check public/app/working-campus-v156.js
           node --check scripts/verify-working-campus-shell-v235.mjs
+          node --check scripts/verify-working-campus-mvp-v155.mjs
       - name: Verify compact shell contract
         run: node scripts/verify-working-campus-shell-v235.mjs
       - name: Verify Working Campus behavior contract
