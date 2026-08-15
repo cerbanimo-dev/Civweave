@@ -17,3 +17,12 @@ data/*.tmp
 .dev.vars
 .dev.vars.*
 .DS_Store
+
+# Keep external source bundles, archives, and editable source artwork out of the app repository.
+/mempalace-develop/
+/mempalace-develop.zip
+/source-assets/
+
+# Materialized release history belongs in Git history / release artifacts, not the live worktree.
+/releases/*
+!/releases/1.0.160/
