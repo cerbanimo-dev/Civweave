@@ -4,9 +4,10 @@ import {readFile} from 'node:fs/promises';
 await import('./sync-release-version-assets.mjs');
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
-const [topbar,boundary,workspace,campus,release,manifest,pkg,workflow]=await Promise.all([
+const [topbar,boundary,runtime,workspace,campus,release,manifest,pkg,workflow]=await Promise.all([
   read('public/app/working-campus-topbar-v243.js'),
   read('public/app/install-boundary-v146.js'),
+  read('public/app/core-interface-runtime-v1.js'),
   read('public/app/guide-workspace-v242.js'),
   read('public/app/working-campus-v156.js'),
   read('VERSION'),
@@ -14,7 +15,7 @@ const [topbar,boundary,workspace,campus,release,manifest,pkg,workflow]=await Pro
   read('package.json'),
   read('.github/workflows/verify-working-campus-topbar-v243.yml')
 ]);
-new Function(topbar);new Function(boundary);
+new Function(topbar);new Function(boundary);new Function(runtime);
 const version=release.trim();
 const manifestJson=JSON.parse(manifest);
 const packageJson=JSON.parse(pkg);
@@ -24,7 +25,7 @@ check('repository release is semantic',/^\d+\.\d+\.\d+$/.test(version));
 check('release surfaces are coherent',packageJson.version===version&&manifestJson.name===`Civweave v${version}`);
 check('topbar runtime remains v243',topbar.includes('working-campus-topbar-v243'));
 check('topbar runtime is syntax checked',workflow.includes('node --check public/app/working-campus-topbar-v243.js'));
-check('v243 is approved experience support',boundary.includes("const WORKING_CAMPUS_TOPBAR='/app/working-campus-topbar-v243.js'")&&boundary.includes('WORKING_CAMPUS_TOPBAR,')&&boundary.includes("workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract'"));
+check('v243 is approved core-runtime experience support',runtime.includes("'/app/working-campus-topbar-v243.js'")&&boundary.includes("workingCampusTopbarRevision:'v243-sticky-top-map-launch-contract'")&&!boundary.includes('WORKING_CAMPUS_TOPBAR='));
 check('old hit safety remains lower-specificity compatibility only',campus.includes("main.app>.top{position:relative!important")&&topbar.includes('main.app>header.top{position:sticky!important'));
 check('topbar is sticky to safe top edge',topbar.includes('position:sticky!important;top:max(6px,env(safe-area-inset-top))!important'));
 check('topbar stays above chat without sharing its paint layer',topbar.includes('z-index:2147483646!important')&&workspace.includes('z-index:2147483644!important'));
@@ -48,4 +49,4 @@ check('map launch retains registration handshake fallback',topbar.includes("MAP_
 check('map launch retains cancellable open request fallback',topbar.includes("MAP_EVENT='civweave:map-open-request'")&&topbar.includes('cancelable:true'));
 check('legacy map route remains same-origin constrained',topbar.includes("url.origin===location.origin"));
 check('finder failure degrades visibly instead of dead-clicking',topbar.includes('Federation Finder could not open and no fallback map runtime is registered.'));
-console.log(JSON.stringify({ok:true,version,revision:'working-campus-topbar-v243-downloads-entry-v2',checks:checks.length,stickyTop:true,chatSafe:true,downloadsManager:'/app/index.html?manage=downloads',hostSelectionRestore:true,mapHandshake:['federation-finder-v1.7.2','same-origin-pwa-navigation','explicit-remote-node-fallback','direct-api-fallback','register-fallback','event-fallback','same-origin-route-fallback']},null,2));
+console.log(JSON.stringify({ok:true,version,revision:'working-campus-topbar-v243-downloads-entry-v2',checks:checks.length,loaderOwner:'core-interface-runtime-v1',stickyTop:true,chatSafe:true,downloadsManager:'/app/index.html?manage=downloads',hostSelectionRestore:true,mapHandshake:['federation-finder-v1.7.2','same-origin-pwa-navigation','explicit-remote-node-fallback','direct-api-fallback','register-fallback','event-fallback','same-origin-route-fallback']},null,2));
