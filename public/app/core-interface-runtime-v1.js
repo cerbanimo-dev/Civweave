@@ -5,6 +5,11 @@ if(globalThis.CivweaveCoreInterfaceRuntimeV1?.version)return;
 
 const VERSION='1.0.0';
 const REVISION='five-system-interface-runtime-v1';
+const requestedRelease=/^\d+\.\d+\.\d+$/.test(new URLSearchParams(globalThis.location?.search||'').get('version')||'')?new URLSearchParams(globalThis.location?.search||'').get('version'):'1.0.160';
+const ASSET_REVISION=`${requestedRelease}-core-interface-runtime-v1`;
+const FELLOWFARE_GUIDE_BRIDGE='/app/fellowfare-shared-guide-bridge-v236.js';
+const ASSET_CUSTOMIZATION='/app/asset-customization-v239.js';
+const ASSET_CUSTOMIZATION_STORAGE='civweave.asset-lockboard.v239';
 const SYSTEM_ORDER=Object.freeze(['civweave','living-school','cerbanimo','fellowfare','anarchadia']);
 const SHARED_NEEDS=Object.freeze([
   'lifecycle',
@@ -51,6 +56,31 @@ const SYSTEMS=Object.freeze({
     features:Object.freeze(['governance','consent','review'])
   })
 });
+const SHARED_BOOT_SCRIPTS=Object.freeze([
+  '/app/system-routes-v227.js',
+  '/app/release-version-v1.js',
+  '/app/settings-gateway-v317.js',
+  '/app/mobile-ai-hardening-v302.js',
+  '/app/experience-orchestrator-v232.js',
+  '/app/system-radio-agent-v233.js',
+  '/app/radio-track-suggestions-v240.js',
+  '/app/canonical-playlists-v1.js',
+  '/app/radio-playlist-governance-v1.js',
+  '/app/civweave-systems-mesh-v251.js',
+  '/app/host-node-session-v1.js',
+  '/app/node-ai-mesh-v1.js',
+  '/app/quest-veil-mesh-v1.js',
+  '/app/quest-veil-ledger-gate-v1.js',
+  '/app/quest-veil-v1.js',
+  '/app/guide-identity-integrity-v216.js',
+  '/app/realm-session-integrity-v237.js',
+  '/app/guide-workspace-v242.js',
+  '/app/working-campus-topbar-v243.js',
+  '/app/themed-system-nav-v178.js',
+  '/app/campus-background-download-v241.js',
+  '/app/shared-review-surface-v234.js',
+  '/app/shared-guide-surface-v236.js'
+]);
 const PATH_TO_SYSTEM=new Map(Object.values(SYSTEMS).map(item=>[item.pathname,item.id]));
 const PHASE_ORDER=Object.freeze(['created','booting','dom-ready','shared-ready','system-ready','interactive','suspended','failed']);
 const adapters=new Map();
@@ -62,7 +92,9 @@ const readyWaiters=new Set();
 let currentSystem=identify();
 let phase='created';
 let bootPromise=null;
+let sharedBootPromise=null;
 let suspended=false;
+const sharedLoadFailures=new Map();
 
 function clean(value,max=240){return String(value??'').trim().slice(0,max)}
 function normalizePathname(value){
@@ -110,6 +142,49 @@ function setPhase(next,extra={}){
   }
   return phase;
 }
+function scriptPresent(src){
+  const document=globalThis.document;
+  if(!document)return false;
+  return [...document.scripts].some(script=>{
+    if(!script.src)return false;
+    try{return new URL(script.src,globalThis.location?.href||'https://civweave.invalid').pathname===src}catch{return false}
+  });
+}
+function queueScript(src){
+  const document=globalThis.document;
+  const head=document?.head;
+  if(!head)return Promise.resolve({src,ok:false,reason:'missing-head'});
+  if(scriptPresent(src))return Promise.resolve({src,ok:true,existing:true});
+  return new Promise(resolve=>{
+    const script=document.createElement('script');
+    script.src=`${src}?v=${encodeURIComponent(ASSET_REVISION)}`;
+    script.async=false;
+    script.onload=()=>resolve({src,ok:true,existing:false});
+    script.onerror=()=>{
+      sharedLoadFailures.set(src,'load-error');
+      emit('civweave:interface-feature-error',{feature:src,message:`Shared runtime dependency failed to load: ${src}`});
+      resolve({src,ok:false,reason:'load-error'});
+    };
+    head.append(script);
+  });
+}
+function assetCustomizationConfigured(){
+  try{
+    const value=JSON.parse(globalThis.localStorage?.getItem(ASSET_CUSTOMIZATION_STORAGE)||'{}');
+    return value?.personalEnabled!==false&&value?.pathOverrides&&Object.keys(value.pathOverrides).length>0;
+  }catch{return false}
+}
+function installSharedSupport(){
+  if(sharedBootPromise)return sharedBootPromise;
+  const scripts=[...SHARED_BOOT_SCRIPTS];
+  if(currentSystem==='fellowfare')scripts.push(FELLOWFARE_GUIDE_BRIDGE);
+  if(assetCustomizationConfigured())scripts.push(ASSET_CUSTOMIZATION);
+  sharedBootPromise=Promise.all(scripts.map(queueScript)).then(results=>{
+    emit('civweave:interface-shared-support-ready',{attempted:results.length,failed:results.filter(result=>!result.ok).length});
+    return Object.freeze(results);
+  });
+  return sharedBootPromise;
+}
 function ensureStructuralSlots(){
   const document=globalThis.document;
   const body=document?.body;
@@ -143,6 +218,7 @@ function adapterContext(reason='mount'){
     system:currentSystem,
     definition:systemDefinition(),
     sharedNeeds:SHARED_NEEDS,
+    sharedBootScripts:SHARED_BOOT_SCRIPTS,
     slots:slots(),
     navigate,
     requestFeature,
@@ -236,6 +312,8 @@ function status(){
     adapterMounted:mountedAdapters.has(currentSystem),
     registeredFeatures:Object.freeze([...featureLoaders.keys()]),
     loadedFeatures:Object.freeze([...featurePromises.keys()]),
+    sharedBootScripts:SHARED_BOOT_SCRIPTS,
+    sharedLoadFailures:Object.freeze([...sharedLoadFailures.entries()]),
     suspended
   });
 }
@@ -279,12 +357,13 @@ async function boot(){
   if(bootPromise)return bootPromise;
   bootPromise=(async()=>{
     setPhase('booting');
+    const sharedSupport=installSharedSupport();
     await afterDomReady();
     currentSystem=identify();
     ensureStructuralSlots();
     setPhase('dom-ready');
-    await Promise.resolve();
-    setPhase('shared-ready');
+    await sharedSupport;
+    setPhase('shared-ready',{failedSharedLoads:sharedLoadFailures.size});
     await mountAdapter(currentSystem,'boot');
     setPhase('system-ready',{adapterMounted:mountedAdapters.has(currentSystem)});
     await afterPaint();
@@ -304,6 +383,7 @@ const api=Object.freeze({
   systems:SYSTEMS,
   systemOrder:SYSTEM_ORDER,
   sharedNeeds:SHARED_NEEDS,
+  sharedBootScripts:SHARED_BOOT_SCRIPTS,
   identify,
   currentSystem:()=>currentSystem,
   systemDefinition,
@@ -313,6 +393,8 @@ const api=Object.freeze({
   unmountAdapter,
   registerFeature,
   requestFeature,
+  installSharedSupport,
+  assetCustomizationConfigured,
   navigate,
   slots,
   status,
