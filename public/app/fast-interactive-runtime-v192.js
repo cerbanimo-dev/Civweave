@@ -8,6 +8,8 @@ const state={installed:false,mode:'waiting',lastError:'',baseVersion:'',calls:0,
 let base=null,proxy=null;
 const clock=()=>Number(root.performance?.now?.())||Date.now();
 function dispatch(name,detail){try{root.dispatchEvent?.(new CustomEvent(name,{detail}))}catch{}}
+function ludditeEnabled(){if(root.CivweaveLudditeModeV1?.isEnabled)return root.CivweaveLudditeModeV1.isEnabled();try{return JSON.parse(localStorage.getItem('civweave.operating-mode.v1')||'{}')?.mode==='luddite'}catch{return false}}
+function ludditeError(){const error=new Error('AI generation is unavailable in Luddite Mode.');error.code='CIVWEAVE_LUDDITE_AI_DISABLED';error.mode='luddite';return error}
 function optimizedRequest(request={}){
   const purpose=String(request?.purpose||'');
   if(!/^civweave-guide-response-v141/.test(purpose))return request;
@@ -54,6 +56,7 @@ function generationMetadata(result,request={}){
   });
 }
 async function generate(input={}){
+  if(ludditeEnabled())throw ludditeError();
   if(!base?.generate)throw new Error('Civweave model runtime spine has no base generator.');
   state.calls+=1;
   let request=input&&typeof input==='object'?input:{};
@@ -101,9 +104,9 @@ function install(){
   }catch(error){state.installed=false;state.mode='fallback';state.lastError=String(error?.message||error||'Unknown runtime spine installation error.');dispatch('civweave:runtime-spine-fallback',{version:VERSION,error:state.lastError});return false;}
 }
 function stabilize(){return install();}
-function diagnostics(){return Object.freeze({version:VERSION,installed:state.installed,mode:state.mode,lastError:state.lastError,baseVersion:state.baseVersion,calls:state.calls,middleware:ordered().map(item=>item.id),lastTrace:[...state.lastTrace],lastRequest:state.lastRequest,runtimeFrozen:Object.isFrozen(root.CivweaveModelRuntime||{}),serverAutoFailover:true});}
+function diagnostics(){return Object.freeze({version:VERSION,installed:state.installed,mode:state.mode,lastError:state.lastError,baseVersion:state.baseVersion,calls:state.calls,middleware:ordered().map(item=>item.id),lastTrace:[...state.lastTrace],lastRequest:state.lastRequest,runtimeFrozen:Object.isFrozen(root.CivweaveModelRuntime||{}),serverAutoFailover:true,ludditeBlocked:ludditeEnabled()});}
 function status(){return diagnostics();}
-const api=Object.freeze({version:VERSION,install,stabilize,optimizedRequest,register,unregister,diagnostics,status,base:()=>base,proxy:()=>proxy,serverAuto,localResultNeedsFailover,generationMetadata});
+const api=Object.freeze({version:VERSION,install,stabilize,optimizedRequest,register,unregister,diagnostics,status,base:()=>base,proxy:()=>proxy,serverAuto,localResultNeedsFailover,generationMetadata,aiAllowed:()=>!ludditeEnabled()});
 root.CivweaveFastInteractiveV192=api;
 register('fast-interactive',{before(request){const next=optimizedRequest(request);return next===request?request:{request:next,state:{started:clock()}};},after(result,_request,ctx){const started=ctx.states['fast-interactive']?.started;if(started==null||!result||typeof result!=='object')return result;return{...result,latency:{...(result.latency||{}),interactiveMs:Math.max(0,Math.round(clock()-started)),revision:VERSION}};}},20);
 root.addEventListener?.('civweave:model-runtime-ready',install);root.addEventListener?.('pageshow',install);install();
