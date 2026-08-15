@@ -1,0 +1,191 @@
+name: Migrate Knowledge Packs to R2 (Staging)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - staging
+    paths:
+      - .github/workflows/migrate-knowledge-packs-r2-staging.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: civweave-knowledge-packs-r2-staging
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Copy knowledge-school ZIPs to staging R2
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      R2_BUCKET: civweave-resource-packs-staging
+      R2_DOMAIN: resources-staging.civweave.cc
+
+    steps:
+      - name: Check out staging
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Wrangler without package scripts
+        run: npm install --ignore-scripts
+
+      - name: Verify Cloudflare credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}" || { echo 'Missing CLOUDFLARE_API_TOKEN'; exit 2; }
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}" || { echo 'Missing CLOUDFLARE_ACCOUNT_ID'; exit 2; }
+          curl --fail-with-body --silent --show-error \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/r2/buckets" \
+            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            --header 'Content-Type: application/json' > /tmp/r2-buckets.json
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const payload = JSON.parse(readFileSync('/tmp/r2-buckets.json', 'utf8'));
+          if (payload.success !== true) throw new Error(`Cloudflare R2 access failed: ${JSON.stringify(payload.errors || payload)}`);
+          console.log(`R2 credential check passed; ${payload.result?.buckets?.length ?? 0} bucket(s) visible.`);
+          NODE
+
+      - name: Ensure isolated staging bucket exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(curl --silent --output /tmp/r2-bucket.json --write-out '%{http_code}' \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/r2/buckets/${R2_BUCKET}" \
+            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            --header 'Content-Type: application/json')"
+          if [ "$status" = "404" ]; then
+            curl --fail-with-body --silent --show-error \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/r2/buckets" \
+              --request POST \
+              --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              --header 'Content-Type: application/json' \
+              --data "{\"name\":\"${R2_BUCKET}\"}" > /tmp/r2-bucket-create.json
+            node --input-type=module <<'NODE'
+            import { readFileSync } from 'node:fs';
+            const payload = JSON.parse(readFileSync('/tmp/r2-bucket-create.json', 'utf8'));
+            if (payload.success !== true) throw new Error(`R2 bucket creation failed: ${JSON.stringify(payload.errors || payload)}`);
+            console.log(`Created ${payload.result?.name}.`);
+          NODE
+          elif [ "$status" != "200" ]; then
+            cat /tmp/r2-bucket.json
+            echo "Unexpected R2 bucket lookup status: $status"
+            exit 3
+          else
+            echo "R2 bucket ${R2_BUCKET} already exists."
+          fi
+
+      - name: Apply public-read browser CORS
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/civweave-r2-cors.json <<'JSON'
+          {
+            "rules": [
+              {
+                "allowed": {
+                  "origins": ["*"],
+                  "methods": ["GET", "HEAD"]
+                },
+                "exposeHeaders": ["Content-Length", "Content-Type", "ETag", "Last-Modified"],
+                "maxAgeSeconds": 7200
+              }
+            ]
+          }
+          JSON
+          npx --no-install wrangler r2 bucket cors set "${R2_BUCKET}" --file /tmp/civweave-r2-cors.json
+
+      - name: Upload immutable knowledge-school packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(public/downloads/knowledge-schools/schools/*.zip)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo 'No knowledge-school ZIPs found; refusing an empty migration.'
+            exit 4
+          fi
+          for file in "${files[@]}"; do
+            name="$(basename "$file")"
+            key="knowledge-schools/schools/${name}"
+            echo "Uploading ${file} -> r2://${R2_BUCKET}/${key}"
+            npx --no-install wrangler r2 object put "${R2_BUCKET}/${key}" \
+              --file "$file" \
+              --content-type application/zip \
+              --content-disposition "attachment; filename=\"${name}\"" \
+              --cache-control 'public, max-age=31536000, immutable' \
+              --remote \
+              --force
+          done
+
+      - name: Resolve civweave.cc zone
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail-with-body --silent --show-error \
+            "https://api.cloudflare.com/client/v4/zones?name=civweave.cc&status=active" \
+            --header "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            --header 'Content-Type: application/json' > /tmp/civweave-zone.json
+          node --input-type=module <<'NODE'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          const payload = JSON.parse(readFileSync('/tmp/civweave-zone.json', 'utf8'));
+          const zone = Array.isArray(payload.result) ? payload.result.find((row) => row?.name === 'civweave.cc') : null;
+          if (payload.success !== true || !zone?.id) throw new Error(`Could not resolve civweave.cc zone: ${JSON.stringify(payload.errors || payload)}`);
+          appendFileSync(process.env.GITHUB_ENV, `CIVWEAVE_ZONE_ID=${zone.id}\n`);
+          console.log('Resolved civweave.cc zone.');
+          NODE
+
+      - name: Attach staging resource domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          if npx --no-install wrangler r2 bucket domain get "${R2_BUCKET}" --domain "${R2_DOMAIN}" >/tmp/r2-domain.txt 2>&1; then
+            cat /tmp/r2-domain.txt
+          else
+            npx --no-install wrangler r2 bucket domain add "${R2_BUCKET}" \
+              --domain "${R2_DOMAIN}" \
+              --zone-id "${CIVWEAVE_ZONE_ID}"
+          fi
+
+      - name: Verify public package sizes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const catalog = JSON.parse(readFileSync('public/downloads/knowledge-schools/catalog.json', 'utf8'));
+          const base = `https://${process.env.R2_DOMAIN}/knowledge-schools/`;
+          for (const school of catalog.schools || []) {
+            const url = new URL(school.zip_file, base).href;
+            let last = '';
+            let ok = false;
+            for (let attempt = 1; attempt <= 12; attempt += 1) {
+              try {
+                const response = await fetch(url, { method: 'HEAD', headers: { Origin: 'https://civweave-staging.pages.dev' } });
+                const length = Number(response.headers.get('content-length') || 0);
+                if (response.ok && length === Number(school.zip_bytes)) {
+                  const allowOrigin = response.headers.get('access-control-allow-origin');
+                  if (allowOrigin !== '*') throw new Error(`CORS header is ${allowOrigin || 'missing'}`);
+                  ok = true;
+                  console.log(`${school.school_slug}: ${length} bytes verified at ${url}`);
+                  break;
+                }
+                last = `HTTP ${response.status}, content-length=${length}`;
+              } catch (error) {
+                last = error.message;
+              }
+              await new Promise((resolve) => setTimeout(resolve, 5000));
+            }
+            if (!ok) throw new Error(`${school.school_slug} failed public R2 verification: ${last}`);
+          }
+          NODE
