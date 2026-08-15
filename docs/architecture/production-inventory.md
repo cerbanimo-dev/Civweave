@@ -2,13 +2,13 @@
 
 **Status: RE-AUDIT REQUIRED BEFORE MERGE.**
 
-The previous draft of this inventory incorrectly reconstructed the retired Visual/Spatial mode into a new simplified sitemap. That assumption is withdrawn.
+The previous draft incorrectly reconstructed the retired Visual/Spatial mode into a new simplified sitemap. That assumption is withdrawn.
 
 ## Current interface direction
 
 Civweave is not using the retired full-screen Visual/Spatial mode as its canonical interface. Recent history explicitly restored flat application content without introducing spatial mode, and later work removed runtime visual-asset repair and post-paint presentation repair. The active product direction is responsive HTML/application UI enhanced by intentional imagery and game-like character, not a separate world-map/spatial renderer.
 
-This inventory must therefore be rebuilt from the **newest actively exercised application files on `main`**, cross-checked against the newest twenty commits, before destructive cleanup resumes.
+This inventory must be rebuilt from the newest actively exercised application files on `main`, cross-checked against the newest twenty commits, before destructive cleanup resumes.
 
 ## Audit rules
 
