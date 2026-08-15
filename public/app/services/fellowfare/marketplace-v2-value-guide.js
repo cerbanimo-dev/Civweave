@@ -28,7 +28,7 @@ function baselineText(kind,input={}){
  const g=GUIDE(),b=baseline(kind,input),parts=[];
  if(b.buttons>0){const rate=num(b.wageRateButtonsPerHour||g?.guide?.labor?.wageButtonsPerHour||5);parts.push(`${g?.formatButtons?.(b.buttons)||`${b.buttons} 🔘 Buttons`} wage${rate?` at ${rate} 🔘/h`:''}`)}
  if(b.acorns>0)parts.push(g?.formatAcorns?.(b.acorns)||`${b.acorns} 🌰 Acorns`);
- if(kind==='learning'&&!parts.length)parts.push('5–50 🌰 Acorns');
+ if(kind==='learning'&&!parts.length)parts.push('50–500 🌰 Acorns');
  if(!parts.length)return b.hours>0?'No wage/value currency applies to this type.':'Add or import human-equivalent labor hours to calculate the shared wage/value reference.';
  return `${parts.join(' · ')}${b.hours>0?` from ${Number(b.hours.toFixed(2))} human-equivalent hour${b.hours===1?'':'s'}`:''}`;
 }
@@ -36,7 +36,7 @@ function renderGuide(){
  if(currentRoute()!=='loom')return;
  const priceDesk=document.querySelector('.ffv2-rook-price');if(!priceDesk||document.querySelector('#ffv2BasicValueGuide'))return;
  const rows=GUIDE()?.chartRows?.()||[];
- const html=`<section id="ffv2BasicValueGuide" class="ffv2-value-guide" aria-labelledby="ffv2ValueGuideTitle"><div class="ffv2-section-head"><div><p class="ffv2-eyebrow">SHARED BASIC VALUE GUIDE</p><h2 id="ffv2ValueGuideTitle">Starting wage first. Market second.</h2></div></div><p class="ffv2-value-intro">Civweave uses one starting Button wage for everybody: 5 🔘 per human-equivalent labor hour. Models estimate hours, not rank-based rates. Learning and education keep their separate Acorn references. Live comparables may inform an asking price, but they never rewrite the worker wage rate.</p><div class="ffv2-value-table" role="table" aria-label="Civweave basic value guide">${rows.map(row=>`<article role="row"><strong role="cell">${esc(row.label)}</strong><b role="cell">${esc(row.value)}</b><small role="cell">${esc(row.note)}</small></article>`).join('')}</div></section>`;
+ const html=`<section id="ffv2BasicValueGuide" class="ffv2-value-guide" aria-labelledby="ffv2ValueGuideTitle"><div class="ffv2-section-head"><div><p class="ffv2-eyebrow">SHARED BASIC VALUE GUIDE</p><h2 id="ffv2ValueGuideTitle">Starting wage first. Market second.</h2></div></div><p class="ffv2-value-intro">Civweave uses one starting Button wage for everybody: 5 🔘 per human-equivalent labor hour. Models estimate hours, not rank-based rates. Learning and education keep their separate, more granular Acorn price scale. Live comparables may inform an asking price, but they never rewrite the worker wage rate or imply a Button/Acorn exchange rate.</p><div class="ffv2-value-table" role="table" aria-label="Civweave basic value guide">${rows.map(row=>`<article role="row"><strong role="cell">${esc(row.label)}</strong><b role="cell">${esc(row.value)}</b><small role="cell">${esc(row.note)}</small></article>`).join('')}</div></section>`;
  priceDesk.insertAdjacentHTML('beforebegin',html);
  const heading=priceDesk.querySelector('h2');if(heading)heading.textContent='Compare non-wage market terms with the live market.';
  const copy=priceDesk.querySelector('#ffv2PriceAdvice')||priceDesk.querySelector('p:not(.ffv2-eyebrow)');if(copy&&/only calculate|invent a market/i.test(copy.textContent))copy.textContent='Live comparables are the market layer. They can inform an asking price but never change the shared labor wage, and Rook still will not invent market evidence.';
@@ -93,6 +93,6 @@ function submits(event){
  if(event.target.id!=='ffv2ComposerForm')return;const form=event.target,hours=Math.max(0,num(form.elements.laborWorthHours?.value)),raw=candidate(clean(form.elements.draftId?.value,220));pendingValuation={title:clean(form.elements.title?.value,180),laborWorthHours:hours,curriculumAcorns:num(raw?.curriculumAcorns||raw?.valuation?.curriculumAcorns),source:raw?'cross-realm-model':'composer'};
 }
 function start(){document.addEventListener('click',clicks);document.addEventListener('input',changes);document.addEventListener('change',changes);document.addEventListener('submit',submits,true);addEventListener('hashchange',enhance);addEventListener('fellowfare:marketplace-changed',event=>{if(event.detail?.reason==='listing-published')savePublishedValuation();enhance()});new MutationObserver(enhance).observe(document.querySelector('#main')||document.body,{childList:true,subtree:true});enhance()}
-const api=Object.freeze({version:'1.1.0',enhance,baselineText});globalThis.CivweaveFellowFareValueGuideV1=api;
+const api=Object.freeze({version:'1.2.0',enhance,baselineText});globalThis.CivweaveFellowFareValueGuideV1=api;
 if(document.readyState==='loading')addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();
