@@ -43,11 +43,14 @@ Every canonical surface moves through the same runtime phases:
 
 `pagehide` suspends the active adapter. A BFCache `pageshow` resumes it through the same runtime instead of asking a realm-specific recovery layer to reconstruct the interface.
 
+The runtime begins loading the existing shared capability owners immediately, while the DOM continues toward readiness. A failed optional shared script is recorded and reported without turning one auxiliary feature failure into a total interface boot failure.
+
 The canonical lifecycle events are:
 
 - `civweave:interface-runtime-phase`
 - `civweave:interface-runtime-ready`
 - `civweave:interface-system-ready`
+- `civweave:interface-shared-support-ready`
 - `civweave:interface-system-changed`
 - `civweave:interface-adapter-registered`
 - `civweave:interface-adapter-unmounted`
@@ -83,15 +86,17 @@ The runtime also exposes existing family-shell slots when present:
 
 The core does not dictate each realm's art direction or feature layout. Standardization is at the lifecycle and ownership boundary, not a demand that five distinct applications become the same screen in different colors.
 
-## Shared feature loading
+## Shared loading
 
-Cross-system features can register a lazy loader with `registerFeature(name, loader)` and be requested with `requestFeature(name)`. The runtime memoizes the feature promise so a feature has one load attempt per document rather than five realm-specific boot variants.
+The runtime owns the ordered shared boot manifest for the five core systems. It loads the route/version contracts and the existing shared capability owners once per document, de-duplicating scripts that a realm already declared statically. The capability modules remain authoritative for their own behavior; the core runtime owns only their assembly and lifecycle.
 
-Existing capability owners can migrate into this registry independently. Until a capability migrates, its existing canonical owner remains authoritative.
+FellowFare's shared-guide bridge is selected by the system manifest instead of by a separate FellowFare boot path. Asset customization is likewise selected by the core runtime only when local customization is configured.
+
+Cross-system features can also register a lazy loader with `registerFeature(name, loader)` and be requested with `requestFeature(name)`. The runtime memoizes the feature promise so optional future capabilities do not grow new realm-specific loaders.
 
 ## Boot boundary
 
-`install-boundary-v146.js` requests the core runtime once for every canonical system. It remains responsible for deciding whether the installed application may run. It is not the realm UI lifecycle owner.
+`install-boundary-v146.js` requests the core runtime once for every canonical system. It remains responsible for deciding whether the installed application may run. It does not iterate the shared dependency manifest and is not the realm UI lifecycle or shared-loading owner.
 
 The core runtime is part of the critical offline cache. A user who can open a canonical system offline therefore has the same interface spine available regardless of which system was opened last.
 
