@@ -5,7 +5,8 @@ import sharp from 'sharp';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const logoDir=path.join(root,'public','app','logos');
-const sourcePath=path.join(logoDir,'civweave-canonical.png');
+const sourcePath=path.join(logoDir,'civweave-day-logo.jpg');
+const nightSourcePath=path.join(logoDir,'civweave-night-logo.jpg');
 const soft=process.argv.includes('--soft');
 const ICON_SIZES=[16,32,48,72,96,128,144,152,180,192,384,512,1024];
 
@@ -18,26 +19,40 @@ async function render(size){
 async function writeIcon(file,buffer){await fsp.writeFile(path.join(logoDir,file),buffer)}
 
 async function main(){
-  for(const size of ICON_SIZES)await writeIcon(`civweave-icon-${size}.png`,await render(size));
-  await writeIcon('civweave-app-icon.png',await render(1024));
-  for(const size of [192,512])await writeIcon(`civweave-icon-maskable-${size}.png`,await render(size));
-  await writeIcon('civweave-adaptive-foreground-512.png',await render(512));
+  await Promise.all([fsp.access(sourcePath),fsp.access(nightSourcePath)]);
+  const rendered=new Map();
+  for(const size of ICON_SIZES){
+    const buffer=await render(size);
+    rendered.set(size,buffer);
+    await writeIcon(`civweave-icon-${size}.png`,buffer);
+  }
+  await writeIcon('civweave-app-icon.png',rendered.get(1024));
+  await writeIcon('civweave-icon-maskable-192.png',rendered.get(192));
+  await writeIcon('civweave-icon-maskable-512.png',rendered.get(512));
+  await writeIcon('civweave-adaptive-foreground-512.png',rendered.get(512));
+  await writeIcon('civweave-pwa-192-v247.png',rendered.get(192));
+  await writeIcon('civweave-pwa-512-v247.png',rendered.get(512));
+  await writeIcon('civweave-pwa-maskable-512-v247.png',rendered.get(512));
   const summary={
-    schema:'civweave.icon-generation.v2',
-    source:'civweave-canonical.png',
-    treatment:'canonical-artwork-resize-only',
-    targetFill:'100% source canvas; no crop, no dark tile, no substitute mark',
+    schema:'civweave.icon-generation.v3',
+    source:'civweave-day-logo.jpg',
+    nightCompanion:'civweave-night-logo.jpg',
+    treatment:'current-approved-artwork-resize-only',
+    targetFill:'100% source canvas; no crop, no substitute mark',
     generatedAt:new Date().toISOString(),
     files:[
       ...ICON_SIZES.map(size=>`civweave-icon-${size}.png`),
       'civweave-app-icon.png',
       'civweave-icon-maskable-192.png',
       'civweave-icon-maskable-512.png',
-      'civweave-adaptive-foreground-512.png'
+      'civweave-adaptive-foreground-512.png',
+      'civweave-pwa-192-v247.png',
+      'civweave-pwa-512-v247.png',
+      'civweave-pwa-maskable-512-v247.png'
     ]
   };
   await fsp.writeFile(path.join(logoDir,'civweave-icon-generation.json'),JSON.stringify(summary,null,2));
-  console.log(`[Civweave] Generated ${summary.files.length} canonical Civweave icon assets from the single approved logo.`);
+  console.log(`[Civweave] Generated ${summary.files.length} Civweave icon assets from the preserved current day logo. Night artwork remains preserved for clock-aware browser presentation.`);
 }
 
 main().catch(error=>{
