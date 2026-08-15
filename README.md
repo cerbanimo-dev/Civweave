@@ -2,42 +2,15 @@
 
 Civweave is a local-first social operating system that connects intentions to learning, useful work, fair exchange, and governance.
 
-## One current source tree
+## Interface direction
 
-- Browser entry: `public/app/campus.html`
-- Canonical screens: `public/app/routes.js`
-- Host runtime: `server/runtime.mjs`
-- PWA delivery: `public/service-worker.js`
-- Production inventory: `docs/architecture/production-inventory.md`
-- Agent rules: `AGENTS.md`
+Civweave is currently a responsive HTML/application interface enhanced with deliberate imagery and game-like character. The retired Visual/Spatial mode is not the canonical product surface and must not be reconstructed from historical cabinet/world/room files.
 
-Git history is the code archive. Runtime code does not select, restore, inject, materialize, or rewrite historical Civweave source.
+## Source of truth
 
-## Run locally
+- Git history is the archive.
+- The checked-out active tree is the program.
+- Runtime code must not select, restore, inject, or materialize historical Civweave source.
+- The canonical sitemap and production inventory are rebuilt from the newest actively exercised files on `main`, cross-checked against recent commit history.
 
-```bash
-npm install
-npm start
-```
-
-Open `http://localhost:8787/`.
-
-`prestart` stages the pinned ONNX Runtime Web files and attempts to make the optional fixed MiniLM package available. MiniLM is separate from generative inference. The Campus may keep installed MiniLM warm during idle time. Opening Chat or Settings does not start or warm MiniLM or a generative model.
-
-## Verify
-
-```bash
-npm run check
-```
-
-The production-surface verifier enforces the 16-screen sitemap, the exact browser file set, the absence of historical source selectors and realtime production bug-fix injection, the Chat/Settings model-start boundary, and Merlin's isolated user-customization rollback contract.
-
-## Merlin customization
-
-Merlin may stage and activate **user-authored** CSS/JavaScript through the dedicated customization layer. Exactly one last-known-good customization is retained. `/app/recovery/` does not boot the normal application runtime, so a broken customization can be disabled, edited, staged, or reverted after a crash.
-
-This capability is never a production bug-fix path. Civweave source changes go through Git, tests, review, and deployment.
-
-## Other current deployment surfaces
-
-The repository also contains active Cloudflare node/core/territory infrastructure, the current Cerbanimo public site, current Node-AI/money-edge server modules, and current business/governance/legal/localization records. They are separate from the Civweave browser bundle and are listed in the production inventory.
+See `AGENTS.md` for the non-negotiable architecture rules and `docs/architecture/production-inventory.md` for the current audit state.
