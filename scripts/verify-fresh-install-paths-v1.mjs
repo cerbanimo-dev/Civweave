@@ -27,7 +27,7 @@ const installClickEnd=bridge.indexOf('function start()',installClickStart);
 const installClick=bridge.slice(installClickStart,installClickEnd);
 const promptCall=installClick.indexOf('prompt.prompt();');
 const firstAwait=installClick.indexOf('await ');
-const choiceAwait=installClick.indexOf('const choice=await prompt.userChoice',promptCall);
+const choiceAwait=installClick.indexOf('await prompt.userChoice',promptCall);
 
 assert.ok(primeStart>=0&&primePrepare>primeStart,'front door must prepare the lightweight shell before the install gesture');
 assert.ok(bridge.includes('queueMicrotask(()=>void primeInstallability())'),'front door must begin installability preparation after the installer controller has loaded');
