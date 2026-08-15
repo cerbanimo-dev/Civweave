@@ -35,19 +35,19 @@ async function offlineCodeHash(code) {
 }
 async function vaultKey(secret) {
   const source = clean(secret, 20000);
-  if (source.length < 20) throw Object.assign(new Error('Hub recovery vault identity is unavailable.'), { status: 503 });
+  if (source.length < 20) throw Object.assign(new Error('Guild recovery vault identity is unavailable.'), { status: 503 });
   const digest = await crypto.subtle.digest('SHA-256', enc.encode(`civweave.hub-account-vault.v1\n${source}`));
   return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['decrypt']);
 }
 async function decryptCredential(record, secret) {
-  if (record?.algorithm !== 'AES-GCM' || !record.iv || !record.ciphertext) throw Object.assign(new Error('Hub recovery vault record is invalid.'), { status: 500 });
+  if (record?.algorithm !== 'AES-GCM' || !record.iv || !record.ciphertext) throw Object.assign(new Error('Guild recovery vault record is invalid.'), { status: 500 });
   try {
     const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64url(record.iv) }, await vaultKey(secret), fromB64url(record.ciphertext));
     const credential = clean(dec.decode(plaintext), 400);
     if (!/^[A-Za-z0-9_-]{40,200}$/.test(credential)) throw new Error('invalid credential');
     return credential;
   } catch {
-    throw Object.assign(new Error('Hub recovery vault could not unlock this account.'), { status: 503 });
+    throw Object.assign(new Error('Guild recovery vault could not unlock this account.'), { status: 503 });
   }
 }
 function accountKey(accountId) { return `hub-account:${clean(accountId, 180)}`; }
@@ -104,7 +104,7 @@ export class HubAccountRecoveryOfflineService extends HubAccountRecoveryInboundS
         codes: Object.freeze([...codes]),
         issuedAt: next.offlineRecoveryIssuedAt,
         acknowledgementRequired: true,
-        instruction: 'Save these codes somewhere separate from this device, then confirm that you saved them. Each code can recover this Hub account once.',
+        instruction: 'Save these codes somewhere separate from this device, then confirm that you saved them. Each code can recover this Guild account once.',
       }),
     };
   }
@@ -124,9 +124,9 @@ export class HubAccountRecoveryOfflineService extends HubAccountRecoveryInboundS
 
   async acknowledgeOfflineRecovery(userId) {
     const account = await this.accountForResident(userId);
-    if (!account) throw Object.assign(new Error('Hub account is unavailable.'), { status: 404 });
+    if (!account) throw Object.assign(new Error('Guild account is unavailable.'), { status: 404 });
     if (!hashes(account).length || Number(account.offlineRecoveryRemaining || 0) < 1) {
-      throw Object.assign(new Error('This Hub account does not have an active recovery kit to acknowledge.'), { status: 409 });
+      throw Object.assign(new Error('This Guild account does not have an active recovery kit to acknowledge.'), { status: 409 });
     }
     const now = this.now();
     const next = Object.freeze({ ...account, offlineRecoveryAcknowledgedAt: account.offlineRecoveryAcknowledgedAt || nowIso(now), updatedAt: nowIso(now) });
@@ -154,7 +154,7 @@ export class HubAccountRecoveryOfflineService extends HubAccountRecoveryInboundS
     const account = await this.state.storage.get(accountKey(record.accountId));
     if (!account) {
       await this.state.storage.delete(key);
-      throw Object.assign(new Error('Hub account is unavailable.'), { status: 404 });
+      throw Object.assign(new Error('Guild account is unavailable.'), { status: 404 });
     }
     const now = this.now();
     const credential = await decryptCredential(account.credentialVault, await this.secret());
