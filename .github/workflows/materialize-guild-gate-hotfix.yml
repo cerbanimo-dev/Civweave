@@ -25,6 +25,19 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - name: Synchronize package version
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('node:fs');
+          const version=fs.readFileSync('VERSION','utf8').trim();
+          for(const path of ['package.json','package-lock.json']){
+            const data=JSON.parse(fs.readFileSync(path,'utf8'));
+            data.version=version;
+            if(data.packages?.[''])data.packages[''].version=version;
+            fs.writeFileSync(path,JSON.stringify(data,null,2)+'\n');
+          }
+          NODE
       - name: Materialize canonical 1.0.163 release
         run: node scripts/materialize-canonical-release.mjs
       - name: Commit generated release assets
