@@ -14,9 +14,9 @@ const [source,wrapper,indexHtml,repairOnly,canonicalNavigation,versionText,packa
   readFile(path.join(root,'VERSION'),'utf8'),
   readFile(path.join(root,'package.json'),'utf8')
 ]);
-const version=versionText.trim(),pkg=JSON.parse(packageText),revision='shell-self-repair-v225-cache-distinct-installer-v2';
+const version=versionText.trim(),pkg=JSON.parse(packageText),revision='shell-self-repair-v225-install-only-pwa-v1';
 assert.equal(pkg.version,version);
-assert(wrapper.includes(`/service-worker-shell-repair-v225.js?v=${revision}`),'Worker wrapper does not import cache-distinct shell repair.');
+assert(wrapper.includes(`/service-worker-shell-repair-v225.js?v=${revision}`),'Worker wrapper does not import the stable V225 shell-repair module.');
 assert(wrapper.indexOf('/service-worker-shell-repair-v225.js')>wrapper.indexOf('/service-worker-navigation-safety-v224.js'),'Shell repair must follow generic redirect safety.');
 assert(wrapper.indexOf('/service-worker-canonical-navigation-v227.js')>wrapper.indexOf('/service-worker-shell-repair-v225.js'),'Canonical navigation must remain final after shell repair.');
 assert(indexHtml.includes('/app/installer-repair-only-v2.js'),'Installer does not load cache-distinct repair bridge v2.');
@@ -41,4 +41,4 @@ assert(context.OPTIONAL_SHELL_ASSETS.includes('/app/installer-repair-only-v2.js'
 assert(!context.OPTIONAL_SHELL_ASSETS.includes('/app/installer-repair-only-v1.js'));
 assert(!context.OPTIONAL_SHELL_ASSETS.includes('/app/installer-online-fallback-v225.js'));
 const handler=listeners.find(row=>row.type==='message')?.handler;assert(handler);let promise=null;handler({data:{type:'REPAIR_DEVICE_PACKAGE'},waitUntil:value=>{promise=value},ports:[],source:null});await promise;assert.equal(replies.at(-1)?.type,'CIVWEAVE_DEVICE_PACKAGE');assert.equal(replies.at(-1)?.ready,true);
-console.log(JSON.stringify({ok:true,version,revision,activatedIncomplete:true,retryAttempts:attempts,repaired:true,onlineFallback:false,repairOnly:true,cacheDistinctRepair:true,canonicalNavigationFinal:true,manualFirst:true},null,2));
+console.log(JSON.stringify({ok:true,version,revision,activatedIncomplete:true,retryAttempts:attempts,repaired:true,onlineFallback:false,repairOnly:true,cacheDistinctRepair:true,stableWorkerEpoch:true,canonicalNavigationFinal:true,manualFirst:true},null,2));
