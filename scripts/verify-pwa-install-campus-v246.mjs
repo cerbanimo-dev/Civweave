@@ -60,7 +60,7 @@ assert.ok(bridge.includes("if(appRuntime()){setButton(button,{disabled:false,tex
 assert.ok(bridge.includes("browserRuntimePolicy:'installed-display-or-pwa-launch-session-only'"),'installer bridge must keep runtime authorization session-scoped');
 assert.ok(bridge.includes("installSequencingPolicy:'prepare-on-first-install-interaction-then-prompt-on-fresh-gesture'"),'installer must prepare the shell only after explicit install interaction, then require a fresh install gesture');
 assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click'"),'installer must invoke the captured native prompt synchronously from the fresh install gesture');
-assert.ok(bridge.includes('eagerRelatedAppDiscovery:true'),'installer may recover installed UX state without forcing reinstall');
+assert.ok(bridge.includes('eagerRelatedAppDiscovery:false'),'installer must keep related-app discovery off the first-paint path');
 assert.ok(bridge.includes('eagerShellPreparation:false'),'installer bridge must explicitly forbid eager shell preparation');
 assert.ok(bridge.includes('firstPaintShellWork:false'),'installer bridge must explicitly forbid first-paint shell work');
 assert.ok(bridge.includes('cacheDistinctPath:true'),'installer bridge must declare its stale-service-worker cache escape');
