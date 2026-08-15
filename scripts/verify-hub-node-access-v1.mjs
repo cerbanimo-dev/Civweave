@@ -6,12 +6,12 @@ import { CivweaveCapacityAccount } from '../cloudflare/node-cloud/src/capacity.m
 import nodeWorker from '../cloudflare/node-cloud/src/entry.mjs';
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
-const [access, lobby, router, topbar, workspace, assistant, nodeEntry, serverEntry, coreEntry, locationMigration, searchFunction, statusFunction, boundary, ownership, offline] = await Promise.all([
+const [access, lobby, router, topbar, guideChat, assistant, nodeEntry, serverEntry, coreEntry, locationMigration, searchFunction, statusFunction, boundary, ownership, offline] = await Promise.all([
   'public/app/host-node-session-v1.js',
   'public/app/host-node-installer-lobby-v1.js',
   'public/app/server-ai-router-v301.js',
   'public/app/working-campus-topbar-v243.js',
-  'public/app/guide-workspace-v242.js',
+  'public/app/guide-chat-surface-v350.js',
   'public/app/assistant-runtime-v141.js',
   'cloudflare/node-cloud/src/entry.mjs',
   'cloudflare/node-cloud/src/server-ai-entry-v1.mjs',
@@ -24,7 +24,7 @@ const [access, lobby, router, topbar, workspace, assistant, nodeEntry, serverEnt
   'public/app/offline-package-v208.json',
 ].map(read));
 
-for (const source of [access, lobby, router, topbar, workspace, assistant]) new Function(source);
+for (const source of [access, lobby, router, topbar, guideChat, assistant]) new Function(source);
 const registry = JSON.parse(ownership), offlinePackage = JSON.parse(offline);
 
 class WebStorage {
@@ -63,7 +63,7 @@ assert.equal(browserRequests.length, 1);
 assert.match(browserRequests[0].url, /\/api\/ai\/node\/session\?nodeId=seed-nearby$/);
 assert.ok(JSON.parse(localStorage.getItem('civweave.host-node.credentials.v1'))['https://civweave-node-cloud.cerbanimo.workers.dev#seed-nearby'].credential.length >= 40);
 assert.equal(JSON.parse(sessionStorage.getItem('civweave.host-capacity.sessions.v1'))['seed-nearby'].token, 'signed.capacity.token');
-assert.ok(!JSON.stringify(browserEvents).includes('credential'), 'Hub events must never publish the reusable device credential');
+assert.ok(!JSON.stringify(browserEvents).includes('credential'), 'Guild events must never publish the reusable device credential');
 
 class MemoryStorage {
   constructor() { this.map = new Map(); }
@@ -130,12 +130,17 @@ assert.match(serverEntry, /quota: memberStatus\.quota/);
 assert.match(serverEntry, /access-control-allow-origin/);
 assert.match(router, /recordUsage/);
 assert.match(router, /approximateTurnsLeft/);
-assert.match(lobby, /Nearest Hubs with open slots/);
+assert.match(lobby, /Nearest Guilds with open slots/);
 for (const mode of ['free', 'paid', 'both']) assert.ok(lobby.includes(`<option value="${mode}">`) || searchFunction.includes(`"${mode}"`));
+assert.match(lobby, /Citizen only/);
+assert.match(lobby, /Patron only/);
 assert.match(lobby, /Use my approximate location/);
 assert.match(searchFunction, /MAX_CAPACITY_PROBES = 24/);
 assert.match(searchFunction, /toFixed\(3\)/);
 assert.match(searchFunction, /exactLocationStored: false/);
+assert.match(searchFunction, /environment: "production"/);
+assert.match(searchFunction, /stagingSynthetic: false/);
+assert.doesNotMatch(searchFunction, /STAGING_GUILDS|stagingSearch|_shared\/staging-runtime/);
 assert.match(coreEntry, /location_json AS locationJson/);
 assert.match(coreEntry, /latitude: Number\(latitude\.toFixed\(3\)\)/);
 assert.match(coreEntry, /canonicalInstallOrigin: 'https:\/\/civweave\.pages\.dev'/);
@@ -143,9 +148,8 @@ assert.match(locationMigration, /ALTER TABLE nodes ADD COLUMN location_json TEXT
 assert.match(statusFunction, /\/api\/node\/health/);
 assert.match(topbar, /NODE_STATUS_ID='cw-working-campus-node-v243'/);
 assert.match(topbar, /neurons left today/);
-assert.match(workspace, /data-neuron-status/);
-assert.match(workspace, /neurons last turn/);
-assert.match(workspace, /chats left/);
+assert.match(guideChat, /const ROOT_ID='cw-persistent-guide-chat-v215'/);
+assert.match(guideChat, /canonicalOwner:true/);
 assert.match(assistant, /usage:result\.usage\|\|null/);
 assert.match(boundary, /HOST_NODE_SESSION/);
 assert.equal(registry.systems['host-node-access'].owner, 'public/app/host-node-session-v1.js');
@@ -157,6 +161,7 @@ console.log(JSON.stringify({
   credentialBoundLogin: true,
   capacitySessionRequired: true,
   nearestSearchModes: ['free', 'paid', 'both'],
+  productionGuildDiscovery: 'live-registry-no-staging-fixtures',
   topbarHealth: true,
-  chatNeuronTelemetry: true,
+  canonicalGuideChat: true,
 }, null, 2));
