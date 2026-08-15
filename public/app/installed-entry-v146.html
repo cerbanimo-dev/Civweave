@@ -7,15 +7,56 @@
   <script>
   (()=>{
     'use strict';
-    const installed=navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
+    const INSTALL_CAPABILITY_KEY='civweave.pwa.installed-capability.v1';
     const params=new URLSearchParams(location.search);
+    const installedDisplay=()=>navigator.standalone===true||['standalone','fullscreen','minimal-ui','window-controls-overlay'].some(mode=>matchMedia(`(display-mode: ${mode})`).matches);
     const developer=['localhost','127.0.0.1','::1'].includes(location.hostname)&&params.get('developer')==='1';
-    if(installed||developer)return;
-    const installer=new URL('/app/index.html',location.origin);
-    installer.searchParams.set('install','required');
-    installer.searchParams.set('source','installed-entry-browser-gate-v1');
-    if(params.get('lang'))installer.searchParams.set('lang',params.get('lang'));
-    location.replace(installer.href);
+    const readCapability=()=>{
+      try{
+        const packet=JSON.parse(localStorage.getItem(INSTALL_CAPABILITY_KEY)||'null');
+        return Boolean(packet&&packet.origin===location.origin&&packet.manifestId==='/civweave-local');
+      }catch{return false}
+    };
+    const rememberCapability=source=>{
+      try{
+        localStorage.setItem(INSTALL_CAPABILITY_KEY,JSON.stringify({origin:location.origin,manifestId:'/civweave-local',source,installedAt:new Date().toISOString()}));
+      }catch{}
+      document.documentElement.dataset.civweaveInstalledCapability='present';
+      return true;
+    };
+    const redirectInstaller=()=>{
+      const installer=new URL('/app/index.html',location.origin);
+      installer.searchParams.set('install','required');
+      installer.searchParams.set('source','installed-entry-browser-gate-v2');
+      installer.searchParams.set('next','/app/working-campus-v156.html');
+      if(params.get('lang'))installer.searchParams.set('lang',params.get('lang'));
+      location.replace(installer.href);
+      return false;
+    };
+    const discoverInstalledSelf=async()=>{
+      if(typeof navigator.getInstalledRelatedApps!=='function')return false;
+      let apps=[];
+      try{apps=await navigator.getInstalledRelatedApps()||[]}catch{return false}
+      const manifest=`${location.origin}/app/manifest.webmanifest`;
+      return apps.some(app=>String(app?.url||'')===manifest);
+    };
+    const authorization=(async()=>{
+      if(installedDisplay()||developer)return true;
+      if(params.get('installed')!=='1')return false;
+      if(readCapability())return true;
+      if(await discoverInstalledSelf())return rememberCapability('installed-entry-related-app-discovery');
+      return false;
+    })();
+    globalThis.CivweaveInstalledLaunchGateV1=Object.freeze({
+      version:'installed-launch-gate-v2-capability',
+      authorization,
+      installedDisplay,
+      readCapability,
+      rememberCapability,
+      installCapabilityKey:INSTALL_CAPABILITY_KEY,
+      policy:'installed-display-or-verified-installed-capability'
+    });
+    authorization.then(authorized=>{if(!authorized)redirectInstaller()}).catch(redirectInstaller);
   })();
   </script>
   <script src="/app/japanese-mode-v1.js?v=japanese-shell-language-v2"></script>
@@ -66,7 +107,7 @@
   })();
   </script>
   <script src="/app/legal-consent-v1.js?v=1.0.137-legal-consent-v1" defer></script>
-  <script src="/app/installed-entry-v146.js?v=1.0.162-boot-recovery-v426-legal-consent-v1-install-only-pwa-v1" defer></script>
+  <script src="/app/installed-entry-v146.js?v=1.0.162-boot-recovery-v427-installed-capability-v1" defer></script>
   <noscript><p style="position:fixed;left:16px;right:16px;bottom:16px;text-align:center"><a href="/app/recovery-v426.html" style="color:#8de5ef">Open Civweave recovery</a></p></noscript>
 </body>
 </html>
