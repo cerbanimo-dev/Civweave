@@ -53,3 +53,5 @@ jobs:
           git add VERSION package.json package-lock.json config/release-contract.json releases/1.0.163 public scripts
           git commit -m 'Materialize Civweave 1.0.163 Guild gate hotfix release'
           git push origin HEAD:hotfix/production-guild-gate-copy
+
+# retry epoch: v2
