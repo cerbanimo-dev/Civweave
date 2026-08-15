@@ -21,6 +21,7 @@ export function housekeepingPath(input){
     || /^tools\/civweave-dev-mcp\//.test(file)
     || /^(?:README|AGENTS|RELEASE-NOTES)\.md$/.test(file)
     || /^scripts\/(?:verify|test|smoke|align)-[^/]+\.mjs$/.test(file)
+    || file==='scripts/sync-release-coherence-v220.mjs'
     || /^scripts\/migrations\//.test(file);
 }
 
@@ -67,6 +68,7 @@ function selfTest(){
     {base:'1.0.75',proposed:'1.0.75',files:['docs/README.md','.github/workflows/test.yml','scripts/verify-root-hygiene.mjs'],ok:true},
     {base:'1.0.75',proposed:'1.0.75',files:['site/cerbanimo-cc/app.js','site/cerbanimo-cc/assets/poster.webp'],ok:true},
     {base:'1.0.75',proposed:'1.0.75',files:['tools/civweave-dev-mcp/server.mjs','tools/civweave-dev-mcp/test/dev-tools-mcp.test.mjs'],ok:true},
+    {base:'1.0.75',proposed:'1.0.75',files:['scripts/sync-release-coherence-v220.mjs','scripts/verify-chat-convergence-v250.mjs'],ok:true},
     {base:'1.0.75',proposed:'1.0.75',files:['public/app/index.html'],ok:false},
     {base:'1.0.75',proposed:'1.0.76',files:['public/app/index.html'],ok:true},
     {base:'1.0.76',proposed:'1.0.75',files:['docs/README.md'],ok:false},
@@ -76,7 +78,7 @@ function selfTest(){
     const result=evaluateVersionPolicy(test);
     if(result.ok!==test.ok)throw new Error(`Version-policy self-test failed: ${JSON.stringify({test,result})}`);
   }
-  console.log(JSON.stringify({ok:true,cases:cases.length,policy:'housekeeping-and-dev-tools-may-retain-version; shipping-must-advance; verified-canonical-hash-repair-may-retain'},null,2));
+  console.log(JSON.stringify({ok:true,cases:cases.length,policy:'housekeeping-release-coherence-and-dev-tools-may-retain-version; shipping-must-advance; verified-canonical-hash-repair-may-retain'},null,2));
 }
 
 if(process.argv.includes('--self-test'))selfTest();

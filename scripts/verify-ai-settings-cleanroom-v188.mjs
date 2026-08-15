@@ -41,7 +41,7 @@ for(const forbidden of ['openSharedSettings','ensureSettingsRepairs','settingsRe
 assert.match(sources.campusRuntime,/setAttribute\('data-open-unified-ai-settings',''\)/);
 
 assert.match(sources.boundary,/const SETTINGS_GATEWAY='\/app\/settings-gateway-v317\.js'/);
-const experience=sources.boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\n\];/)?.[1]||'';
+const experience=sources.boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\];/)?.[1]||'';
 assert.match(experience,/SETTINGS_GATEWAY/);
 for(const forbidden of ['AI_SETTINGS_BIND_GUARD','AI_SETTINGS_REPAIR','DOCUMENT_LIFECYCLE','model-settings-controller-v173','settings-delegation-v175'])assert.ok(!experience.includes(forbidden),`Boundary eagerly includes ${forbidden}.`);
 for(const pathname of ['/app/working-campus-v156.html','/app/cabinets/living-school/index.html','/app/realm-console-v140.html','/app/fellowfare-cabinet-v144.html','/app/anarchadia-console-v139.html'])assert.ok(sources.routes.includes(`pathname:'${pathname}'`),`Route contract is missing ${pathname}.`);

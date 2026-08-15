@@ -4,6 +4,15 @@ import {fileURLToPath} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const version=(await readFile(path.join(root,'VERSION'),'utf8')).trim();
+const ownership=JSON.parse(await readFile(path.join(root,'config/system-ownership.json'),'utf8'));
+const guideChatOwner=ownership?.systems?.['guide-chat']?.owner;
+if(typeof guideChatOwner!=='string'||!/^public\/app\/[a-z0-9-]+\.js$/i.test(guideChatOwner))throw new Error('System ownership must declare a canonical guide-chat JavaScript owner.');
+const guideChatPath=`/${guideChatOwner.slice('public/'.length)}`;
+const guideChatRevision=guideChatOwner.match(/-(v\d+)\.js$/i)?.[1];
+if(!guideChatRevision)throw new Error(`Canonical guide-chat owner must expose a revisioned filename: ${guideChatOwner}.`);
+const guideChatCanonicalPolicy=`five-system-first-class-routes-${guideChatRevision}-canonical-chat-owner`;
+const guideChatWorkspaceRevision=`${guideChatRevision}-single-current-chat-surface`;
+const guideChatOwnershipPolicy=`${guideChatRevision}-single-current-surface-five-private-ledgers-handover-only-cross-realm`;
 const revision='release-coherence-v226';
 const chatRevision='chat-convergence-v250';
 const chatCachePurgeRevision='chat-convergence-v251-legacy-purge';
@@ -83,9 +92,10 @@ await patch('public/app/install-boundary-v146.js',source=>{
     "['/app/fellowfare-cabinet-v144.html','fellowfare']",
     "['/app/anarchadia-console-v139.html','anarchadia']",
     "root.dataset.civweaveCanonicalCore='only'",
-    "canonicalPolicy:'five-system-first-class-routes-v242-canonical-chat-owner'",
-    "guideWorkspaceRevision:'v250-v242-canonical-owner'",
-    "guideSurfaceOwnershipPolicy:'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm'",
+    `const GUIDE_WORKSPACE='${guideChatPath}';`,
+    `canonicalPolicy:'${guideChatCanonicalPolicy}'`,
+    `guideWorkspaceRevision:'${guideChatWorkspaceRevision}'`,
+    `guideSurfaceOwnershipPolicy:'${guideChatOwnershipPolicy}'`,
     "navigationLifecycleRevision:'v424-head-capture-bfcache-resume'",
     "browserRuntimePolicy:'installed-display-only'",
     'installedQueryIsAuthorization:false',
@@ -94,7 +104,7 @@ await patch('public/app/install-boundary-v146.js',source=>{
   ])if(!source.includes(token))throw new Error(`Five-system install boundary is missing ${token}.`);
   if(source.includes('function allowed(){return installedDisplay()||developer()||embedded()}'))throw new Error('Embedded browser documents must not authorize Civweave runtime.');
   const start=source.indexOf('const SYSTEM_EXPERIENCE_SCRIPTS=['),end=source.indexOf('];',start),experience=source.slice(start,end);
-  if(!experience.includes('GUIDE_WORKSPACE'))throw new Error('Canonical system experience must boot the v242 workspace.');
+  if(!experience.includes('GUIDE_WORKSPACE'))throw new Error('Canonical system experience must boot the guide-chat owner from system ownership.');
   for(const retired of ['PERSISTENT_GUIDE_CHAT_SCRIPT','PERSISTENT_GUIDE_VIEWPORT_SCRIPT','/app/persistent-guide-chat-v215.js','/app/persistent-guide-viewport-v216.js'])if(source.includes(retired))throw new Error(`Release coherence must not resurrect ${retired}.`);
   if(source.includes('function startAdditions()'))throw new Error('Canonical boundary still contains delayed automatic additions.');
   return source;
@@ -157,4 +167,4 @@ for(const token of [revision,'|txt','working-campus-v156.part5.txt','version-pin
 const campus=await readFile(path.join(root,'public/app/working-campus-v156.js'),'utf8');
 for(const token of [campusRevision,'Promise.all(parts.map(fetchPart))','civweave:working-campus-runtime-ready',"policy:'canonical-core-only-five-system-routing'",'ensureRouteContract'])if(!campus.includes(token))throw new Error(`Working Campus canonical loader is missing ${token}.`);
 
-console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',installerRegistrationOwner:'install-v130.js',installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:'guide-workspace-v242',navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));
+console.log(JSON.stringify({ok:true,version,revision,chatRevision,chatCachePurgeRevision,installedEntryRevision,activeChatRepairRevision,lifecycleRevision,campusRevision,boundaryRevision,boundaryRuntimeRevision,routeRevision,offlineRevision,offlinePolicy,installOnlyPwa:'v1',installerRegistrationOwner:'install-v130.js',installerInstallBridge:'pwa-install-prompt-v250',installerRepairBridge:'installer-repair-only-v2',installedLaunchUpdater:'installed-entry-v146.js',canonicalSystems:5,canonicalChatOwner:guideChatOwner,navigationLifecycle:'v424',retiredChatRuntimeCount:retiredChatPaths.length,retiredRootCorePathCount:retiredRootCorePaths.length,changed},null,2));

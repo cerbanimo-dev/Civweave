@@ -7,12 +7,19 @@ import {fileURLToPath} from 'node:url';
 await import('./sync-release-version-assets.mjs');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const read=file=>readFile(path.join(root,file),'utf8');
-const [routesSource,boundarySource,versionText]=await Promise.all([
+const [routesSource,boundarySource,versionText,ownershipText]=await Promise.all([
   read('public/app/system-routes-v227.js'),
   read('public/app/install-boundary-v146.js'),
-  read('VERSION')
+  read('VERSION'),
+  read('config/system-ownership.json')
 ]);
 const version=versionText.trim();
+const ownership=JSON.parse(ownershipText);
+const canonicalChatOwner=ownership?.systems?.['guide-chat']?.owner;
+assert.equal(canonicalChatOwner,'public/app/guide-chat-surface-v350.js','Canonical core must use the V350 guide-chat owner.');
+const canonicalChatPath=`/${canonicalChatOwner.replace(/^public\//,'')}`;
+const canonicalChatRevision=canonicalChatOwner.match(/-(v\d+)\.js$/i)?.[1];
+assert.ok(canonicalChatRevision,'Canonical guide-chat owner must expose a revisioned filename.');
 const systems={civweave:'/app/working-campus-v156.html','living-school':'/app/cabinets/living-school/index.html',cerbanimo:'/app/realm-console-v140.html',fellowfare:'/app/fellowfare-cabinet-v144.html',anarchadia:'/app/anarchadia-console-v139.html'};
 const allowedCanonicalSupport=['/app/system-routes-v227.js','/app/release-version-v1.js'];
 const allowedExperienceSupport=[
@@ -31,7 +38,7 @@ const allowedExperienceSupport=[
   '/app/quest-veil-v1.js',
   '/app/guide-identity-integrity-v216.js',
   '/app/realm-session-integrity-v237.js',
-  '/app/guide-workspace-v242.js',
+  canonicalChatPath,
   '/app/working-campus-topbar-v243.js',
   '/app/themed-system-nav-v178.js',
   '/app/campus-background-download-v241.js',
@@ -81,7 +88,7 @@ assert.equal(api.canonicalAutoScripts,0);
 assert.equal(api.canonicalSubsystemSupportScripts,allowedCanonicalSupport.length);
 assert.equal(api.canonicalExperienceScripts,allowedExperienceSupport.length);
 assert.equal(api.canonicalSubsystemCompatibility,'route-version-settings-only-no-legacy-additions');
-assert.equal(api.canonicalPolicy,'five-system-first-class-routes-v242-canonical-chat-owner');
+assert.equal(api.canonicalPolicy,`five-system-first-class-routes-${canonicalChatRevision}-canonical-chat-owner`);
 assert.equal(api.settingsGatewayRevision,'v317-single-owner-first-click-only');
 assert.equal(api.settingsLaunchPolicy,'gateway-only-no-controller-lifecycle-repair-or-delegation');
 assert.equal(api.systemsMeshRevision,'v251-five-system-non-privileged-event-contract');
@@ -92,12 +99,12 @@ assert.equal(api.questVeilMeshBountyPolicy,'per-item:learning=1-acorn;labor-mate
 assert.equal(api.guideWorkspaceSubmissionPipelines,1);
 assert.equal(api.guideWorkspaceGuideCount,5);
 assert.equal(api.guideWorkspaceThreadPolicy,'five-realm-local-ledgers-plus-explicit-handover');
-assert.equal(api.guideWorkspaceWindowPolicy,'five-switchable-windows-current-realm-launcher');
+assert.equal(api.guideWorkspaceWindowPolicy,'single-current-surface-explicit-guide-selector');
 assert.equal(api.realmSessionIntegrityRevision,'v237-realm-local-memory-handover-state-repair');
-assert.equal(api.guideWorkspaceRevision,'v250-v242-canonical-owner');
+assert.equal(api.guideWorkspaceRevision,`${canonicalChatRevision}-single-current-chat-surface`);
 assert.equal(api.workingCampusTopbarRevision,'v243-sticky-top-map-launch-contract');
 assert.equal(api.mapLaunchRevision,'v243-register-route-handler-or-open-event');
-assert.equal(api.guideSurfaceOwnershipPolicy,'v250-single-v242-runtime-five-local-window-ledgers-handover-only-cross-realm');
+assert.equal(api.guideSurfaceOwnershipPolicy,`${canonicalChatRevision}-single-current-surface-five-private-ledgers-handover-only-cross-realm`);
 assert.equal(api.fellowfareGuideBridgeRevision,'v236-native-workbench-shared-thread');
 assert.equal(api.radioTrackSuggestionRevision,'v241-playlist-context-track-links');
 assert.equal(api.campusBackgroundDownloadRevision,'v241-worker-owned-download-bottom-progress-rail');
@@ -114,4 +121,4 @@ assert.equal(trackIndex,radioIndex+1,'Track suggestions must immediately follow 
 assert.equal(playlistsIndex,trackIndex+1,'Canonical playlists must immediately follow track suggestions.');
 assert.equal(governanceIndex,playlistsIndex+1,'Playlist governance must immediately follow canonical playlists.');
 assert.equal(meshIndex,governanceIndex+1,'Systems mesh must immediately follow playlist governance.');
-console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),browserRequiresInstalledDisplay:true,emptySessionAuthorized:false,boundaryInstalledAuthorization:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,settingsOwner:'settings-gateway-v317',canonicalChatOwner:'guide-workspace-v242',mobileAIHardening:'v302',systemsMesh:'v251-five-system-non-privileged-event-contract',nodeAiMesh:'v1-node-owned-service-discovery-routing',questVeil:'v1-mandatory-human-ledger-gate-plus-mesh-batches',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:'v250-v242-canonical-owner',workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,canonicalPlaylists:true,playlistGovernance:true,backgroundCampus:true,hostNodeSession:true,legacyCompatibility:'noncanonical-only'},null,2));
+console.log(JSON.stringify({ok:true,version,revision:api.revision,canonicalSystems:Object.keys(systems),browserRequiresInstalledDisplay:true,emptySessionAuthorized:false,boundaryInstalledAuthorization:true,civweaveGlobalAdditions:0,canonicalExperienceScripts:api.canonicalExperienceScripts,canonicalSubsystemSupportScripts:api.canonicalSubsystemSupportScripts,settingsOwner:'settings-gateway-v317',canonicalChatOwner,mobileAIHardening:'v302',systemsMesh:'v251-five-system-non-privileged-event-contract',nodeAiMesh:'v1-node-owned-service-discovery-routing',questVeil:'v1-mandatory-human-ledger-gate-plus-mesh-batches',retiredCanonicalChat,realmLocalGuideThreads:true,guideWorkspace:`${canonicalChatRevision}-single-current-chat-surface`,workingCampusTopbar:'v243-sticky-map',fellowfareNativeSharedThread:true,radioTrackSuggestions:true,canonicalPlaylists:true,playlistGovernance:true,backgroundCampus:true,hostNodeSession:true,legacyCompatibility:'noncanonical-only'},null,2));
