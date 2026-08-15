@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 
-const VERSION='japanese-shell-copy-v4-guild-terminology';
+const VERSION='japanese-shell-copy-v5-guild-terminology';
 const LANGUAGE_KEY='civweave.language.v1';
 const supported=new Set(['/app/index.html','/app/index','/app/installed-entry-v146.html','/app/installed-entry-v146']);
 if(globalThis.CivweaveJapaneseShellCopyV1?.version===VERSION)return;
@@ -19,7 +19,7 @@ const translations=new Map([
   ['INSTALLER · UPDATER · RECOVERY','インストーラー · アップデーター · リカバリー'],
   ['Your doorway into Civweave','Civweave への入口'],
   ['One luminous shell for the four realms, built to travel lightly and grow with the device.','4つの領域をひとつにつなぐ、軽やかで端末とともに育つシェルです。'],
-  ['Stewarded by','運営・保守'],
+  ['Maintained by','保守・運用'],
   ['Platform craft & continuity','プラットフォーム設計・継続運用'],
   ['LIGHTWEIGHT APP SHELL','軽量アプリシェル'],
   ['Install the shell. Launch Civweave from your device app launcher. Download offline files only when you choose.','シェルをインストールし、端末のアプリランチャーから Civweave を起動してください。オフライン用ファイルは必要なときだけダウンロードできます。'],
@@ -91,9 +91,9 @@ const translations=new Map([
   ['Choose a Guild','ギルドを選ぶ'],
   ['Guild membership capacity','ギルドのメンバー枠'],
   ['Citizen slots','市民枠'],
-  ['Citizen residency available on this host.','このギルドには市民枠があります。'],
+  ['Citizen residency available in this Guild.','このギルドには市民枠があります。'],
   ['Patron slots','パトロン枠'],
-  ['Additional Patron residency available on this host.','このギルドには追加のパトロン枠があります。'],
+  ['Additional Patron residency available in this Guild.','このギルドには追加のパトロン枠があります。'],
   ['Reading the Guild’s live capacity before you join.','参加前にギルドの現在の空き枠を確認しています。'],
   ['Find the nearest Guild with Citizen or Patron capacity. Your exact location is never sent; Civweave rounds it before searching.','市民枠またはパトロン枠の空きがある最寄りのギルドを探します。正確な位置情報は送信せず、民織が概略化してから検索します。'],
   ['Use this Guild','このギルドを使用'],
@@ -101,7 +101,8 @@ const translations=new Map([
   ['Find an open Guild','空きのあるギルドを探す'],
   ['Guildkeeper tools','ギルドキーパー用ツール'],
   ['Refresh status','状態を更新'],
-  ['This installer is being served by a local Civweave Guild. Guildkeeper controls stay local to this node.','このインストーラーはローカルの民織ギルドから配信されています。ギルドキーパーの操作はこのノード内に留まります。'],
+  ['This installer is being served by a local Civweave Guild. Guildkeeper controls stay local to this Guild.','このインストーラーはローカルの民織ギルドから配信されています。ギルドキーパーの操作はこのギルド内に留まります。'],
+  ['Use this Guild makes this local Guild the selected Guild for this device. Open Guildkeeper tools for local operator controls.','「このギルドを使用」を選ぶと、この端末で使うギルドとして設定されます。ローカル管理はギルドキーパー用ツールから行えます。'],
   ['A Guild login is device-bound and stored locally. Joining never silently starts a Patron membership.','ギルドへのログインはこの端末に結び付けてローカル保存されます。参加しただけでパトロン・メンバーシップが勝手に始まることはありません。'],
   ['Nearest Guilds with open slots','空き枠のある最寄りのギルド'],
   ['Choose which capacity counts as open. Patron capacity still requires an active Civweave membership.','検索対象にする空き枠の種類を選んでください。パトロン枠の利用には有効な民織メンバーシップが必要です。'],
@@ -122,14 +123,15 @@ const translations=new Map([
   ['Checking nearby Guild capacity…','近くのギルドの空き枠を確認しています…'],
   ['small shell · optional code-first campus · visuals and models on demand','小さなシェル · 任意のコード中心キャンパス · 画像とモデルは必要時に取得'],
   ['Saved schools survive app-shell cleanup and updates.','保存した学校はアプリシェルのクリーンアップや更新後も残ります。'],
-  ['Manual and node install','手動およびノード・インストール'],
+  ['Manual and Guild install','手動およびギルド・インストール'],
   ['The page paints first. Shell setup begins only when you install, check the release, or explicitly request the offline campus.','まずページを表示します。シェルの準備は、インストール、リリース確認、またはオフラインキャンパスを明示的に要求したときだけ始まります。'],
   ['Large visual assets and fonts no longer belong to offline-campus completion. Normal runtime caching keeps them as the device actually visits those spaces.','大容量の画像やフォントはオフラインキャンパス完了条件には含まれません。通常のランタイムキャッシュが、端末で実際に訪れた場所に応じて保持します。'],
   ['Mobile install kit','モバイル・インストールキット'],
   ['Pocket Campus seed','ポケット・キャンパスのシード'],
   ['Knowledge school catalog','知識学校カタログ'],
-  ['Civweave platform and Cerbanimo stewardship','民織プラットフォームと神織のスチュワードシップ'],
-  ['Stewarded by Cerbanimo','神織が運営・保守'],
+  ['Civweave platform and Cerbanimo maintenance','民織プラットフォームと神織の保守・継続運用'],
+  ['Maintained by Cerbanimo','神織が保守・運用'],
+  ['Guilds are Civweave community hosts. Their Guildkeepers keep infrastructure dependable and welcome Heroes into a community that can share capacity, find collaborators, and keep working when the wider network gets unreliable.','ギルドは民織のコミュニティ拠点です。ギルドキーパーが基盤を安定して保ち、英雄を迎え、処理能力の共有や協力者探しを支え、広域ネットワークが不安定でも活動を続けられるようにします。'],
   ['Civweave topology','民織トポロジー'],
   ['Offline campus download','オフラインキャンパスのダウンロード'],
   ['App shell state','アプリシェルの状態'],
