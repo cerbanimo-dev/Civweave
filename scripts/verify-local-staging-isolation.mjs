@@ -11,6 +11,7 @@ const stagingRuntimePath = resolve(functionsRoot, '_shared', 'staging-runtime.ts
 const localToolsRoot = resolve(repoRoot, 'tools', 'civweave-dev-mcp');
 const localConfigPath = resolve(localToolsRoot, 'wrangler.local-staging.jsonc');
 const localLauncherPath = resolve(localToolsRoot, 'start-local-staging.mjs');
+const localSpawnPath = resolve(localToolsRoot, 'lib', 'local-staging-spawn.mjs');
 
 const productionTargets = [
   'civweave-core.cerbanimo.workers.dev',
@@ -84,11 +85,22 @@ for (const marker of [
   "'127.0.0.1'",
   '8788',
   'wrangler.local-staging.jsonc',
+  'localStagingSpawnSpec',
 ]) {
   if (!launcher.includes(marker)) fail(`local staging launcher is missing expected contract marker: ${marker}`);
 }
 if (!launcher.includes("const loopbackHosts = new Set(['127.0.0.1', 'localhost', '::1'])")) {
   fail('local staging launcher must remain loopback-only.');
+}
+
+const spawnContract = readFileSync(localSpawnPath, 'utf8');
+for (const marker of [
+  "platform === 'win32'",
+  'env.ComSpec || env.COMSPEC',
+  "['/d', '/s', '/c', 'npx'",
+  "command: 'npx'",
+]) {
+  if (!spawnContract.includes(marker)) fail(`local staging spawn contract is missing Windows compatibility marker: ${marker}`);
 }
 
 for (const file of walk(functionsRoot)) {
@@ -108,5 +120,5 @@ for (const file of walk(functionsRoot)) {
 }
 
 if (!process.exitCode) {
-  process.stdout.write('[local-staging] isolation verified: dev-tool-owned loopback staging uses staging fixtures and known production service targets are guarded.\n');
+  process.stdout.write('[local-staging] isolation verified: dev-tool-owned loopback staging uses staging fixtures, Windows launches through ComSpec, and known production service targets are guarded.\n');
 }
