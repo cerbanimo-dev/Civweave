@@ -31,15 +31,15 @@ for(const path of ['public/app/logos/civweave-prismatic-wordmark-v1.png']){
   assert.ok(bytes.readUInt32BE(16)>=512&&bytes.readUInt32BE(20)>=512,`${path} must be at least 512px in both dimensions`);
 }
 const cerbanimoBytes=await readBytes('public/app/logos/cerbanimo-steward-mark-v1.png');
-assert.ok(cerbanimoBytes.subarray(0,8).equals(pngSignature),'Cerbanimo steward mark must contain real PNG bytes');
-assert.equal(cerbanimoBytes.subarray(12,16).toString('ascii'),'IHDR','Cerbanimo steward mark must contain a PNG IHDR');
-assert.equal(cerbanimoBytes.readUInt32BE(16),48,'Cerbanimo steward mark width must stay at the verified uncropped display size');
-assert.equal(cerbanimoBytes.readUInt32BE(20),72,'Cerbanimo steward mark height must stay at the verified uncropped display size');
-assert.equal(cerbanimoBytes.readUInt8(25),2,'Cerbanimo steward mark must stay truecolor RGB, never indexed/paletted');
+assert.ok(cerbanimoBytes.subarray(0,8).equals(pngSignature),'Cerbanimo compatibility mark must contain real PNG bytes');
+assert.equal(cerbanimoBytes.subarray(12,16).toString('ascii'),'IHDR','Cerbanimo compatibility mark must contain a PNG IHDR');
+assert.equal(cerbanimoBytes.readUInt32BE(16),48,'Cerbanimo compatibility mark width must stay at the verified uncropped display size');
+assert.equal(cerbanimoBytes.readUInt32BE(20),72,'Cerbanimo compatibility mark height must stay at the verified uncropped display size');
+assert.equal(cerbanimoBytes.readUInt8(25),2,'Cerbanimo compatibility mark must stay truecolor RGB, never indexed/paletted');
 
 assert.ok(bridge.includes(`const ENTRY='${exactEntry}'`),'installed Open Civweave button must use the exact updater-first installed entry');
 assert.ok(!bridge.includes("const ENTRY='/app/?system=civweave&installed=1'"),'PWA bridge must not route Open Civweave back into the installer');
-assert.ok(bridge.includes("const HOST_SETUP_PATH='/host-setup.html'"),'PWA bridge must have a dedicated steward setup destination');
+assert.ok(bridge.includes("const HOST_SETUP_PATH='/host-setup.html'"),'PWA bridge must have a dedicated Guildkeeper setup destination');
 assert.ok(bridge.includes("current.searchParams.get('host_setup')!=='1'"),'legacy /app/?host_setup=1 links must redirect out of the app boundary');
 assert.ok(installerHtml.includes('/app/pwa-install-prompt-v250.js'),'installer must load the cache-distinct v250 PWA front-door bridge');
 assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v249.js'),'installer must not load the stale-cache-prone v249 bridge');
@@ -55,25 +55,25 @@ assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v247.js?v=front-door-
 assert.ok(!installerHtml.includes('/app/pwa-install-prompt-v246.js?v=pwa-install-v246'),'installer must not boot the cache-colliding legacy bridge');
 assert.ok(installerHtml.includes('<img src="/app/logos/civweave-pwa-192-v247.png" alt="Civweave">'),'installer header must keep the verified PNG compatibility mark directly');
 assert.ok(installerHtml.includes('<link rel="icon" href="/app/logos/civweave-pwa-192-v247.png" type="image/png">'),'installer favicon must use the verified PNG directly');
-assert.ok(hostSetup.includes(`${entry}&source=host-setup`),'host setup must enter Civweave through installed entry');
-assert.ok(hostSetup.includes('/host-local-anchor.html'),'host setup must expose local Anchor setup');
-assert.ok(hostSetup.includes('CONNECT STEWARD PAYOUTS'),'host setup must include connected payout onboarding for the steward');
-assert.ok(hostSetup.includes('http://127.0.0.1:8787/app/node-ai-operator-v1.html#liveCommerce'),'host setup must route payout connection through the local operator console');
-assert.ok(anchor.includes('5. Connect steward payouts'),'local Anchor setup must continue into Stripe connected-account onboarding');
-assert.ok(hostSetup.includes("localStorage.setItem(STEWARD_KEY,'1')"),'host setup must mark the current browser as steward');
-assert.ok(anchor.includes('href="/host-setup.html"'),'Anchor setup must return to dedicated steward setup');
-assert.ok(setup.includes('Steward setup: ${pagesOrigin}/host-setup.html'),'Cloudflare host provisioning must print the dedicated steward setup URL on the durable Pages underlay');
+assert.ok(hostSetup.includes(`${entry}&source=host-setup`),'Guildkeeper setup must enter Civweave through installed entry');
+assert.ok(hostSetup.includes('/host-local-anchor.html'),'Guildkeeper setup must expose local Anchor setup');
+assert.ok(hostSetup.includes('CONNECT GUILDKEEPER PAYOUTS'),'Guildkeeper setup must include connected payout onboarding');
+assert.ok(hostSetup.includes('http://127.0.0.1:8787/app/node-ai-operator-v1.html#liveCommerce'),'Guildkeeper setup must route payout connection through the local operator console');
+assert.ok(anchor.includes('5. Connect Guildkeeper payouts'),'local Anchor setup must continue into Stripe connected-account onboarding');
+assert.ok(hostSetup.includes("localStorage.setItem(STEWARD_KEY,'1')"),'Guildkeeper setup must retain the compatibility browser marker');
+assert.ok(anchor.includes('href="/host-setup.html"'),'Anchor setup must return to dedicated Guildkeeper setup');
+assert.ok(setup.includes('Guildkeeper setup: ${pagesOrigin}/host-setup.html'),'Cloudflare Guild provisioning must print the dedicated Guildkeeper setup URL on the durable Pages underlay');
 assert.ok(brand.includes("const CANONICAL_LOGO='/app/logos/civweave-pwa-512-v247.png'"),'brand layer must use the verified Civweave PNG');
 assert.ok(logoSvg.includes('/app/logos/civweave-pwa-512-v247.png'),'SVG compatibility wrapper must not reference the malformed canonical display PNG');
 
-for(const [name,source] of [['installer',installerHtml],['host steward',hostSetup],['local Anchor',anchor]]){
+for(const [name,source] of [['installer',installerHtml],['Guildkeeper setup',hostSetup],['local Anchor',anchor]]){
   assert.ok(source.includes(civweavePrismatic),`${name} must retain the legacy Civweave compatibility path`);
   assert.ok(source.includes(cerbanimoMark),`${name} must retain the legacy Cerbanimo compatibility path`);
   assert.ok(source.includes(frontDoorCss),`${name} must load the shared prismatic front-door design`);
   assert.ok(source.includes('cw-frontdoor'),`${name} must opt into the shared front-door surface`);
 }
 assert.ok(installerHtml.includes('cw-installer'),'installer must use the installer-specific prismatic layout');
-assert.ok(hostSetup.includes('cw-steward'),'host setup must use the steward-specific prismatic layout');
+assert.ok(hostSetup.includes('cw-steward'),'Guildkeeper setup must retain the legacy prismatic layout selector');
 assert.ok(anchor.includes('cw-anchor'),'Anchor setup must use the Anchor-specific prismatic layout');
 assert.ok(frontDoor.includes('--fd-pink:#ff69c8'),'front-door design must retain the pink convergence lane');
 assert.ok(frontDoor.includes('--fd-cyan:#6fddff'),'front-door design must retain the cyan convergence lane');
@@ -81,17 +81,17 @@ assert.ok(frontDoor.includes('--fd-gold:#ffc96d'),'front-door design must retain
 assert.ok(frontDoor.includes('--fd-violet:#9b72ff'),'front-door design must retain the violet convergence lane');
 assert.ok(frontDoor.includes('.cw-brand-lockup'),'front-door design must keep the shared dual-brand lockup');
 assert.ok(frontDoor.includes('body.cw-installer'),'front-door design must cover the installer');
-assert.ok(frontDoor.includes('body.cw-steward'),'front-door design must cover host stewardship');
+assert.ok(frontDoor.includes('body.cw-steward'),'front-door design must retain the legacy Guildkeeper layout selector');
 assert.ok(frontDoor.includes('body.cw-anchor'),'front-door design must cover local Anchor setup');
 assert.ok(frontDoor.includes('@media(prefers-reduced-motion:reduce)'),'front-door ambient motion must respect reduced-motion preferences');
 assert.ok(frontDoor.includes(canonicalCivweave),'front-door display must bypass the damaged v1 Civweave raster and use the verified canonical logo');
-assert.ok(frontDoor.includes(canonicalCerbanimo),'front-door display must use the verified white-background truecolor Cerbanimo steward mark');
+assert.ok(frontDoor.includes(canonicalCerbanimo),'front-door display must use the verified white-background truecolor Cerbanimo compatibility mark');
 assert.ok(frontDoor.includes('.cw-platform-logo,.cw-steward-logo{display:none!important}'),'damaged compatibility rasters must not be rendered directly');
-assert.ok(frontDoor.includes("background:#fff url('/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2')"),'Cerbanimo steward mark must render its verified RGB asset on an opaque white field');
+assert.ok(frontDoor.includes("background:#fff url('/app/logos/cerbanimo-steward-mark-v1.png?v=white-rgb-v2')"),'Cerbanimo compatibility mark must render its verified RGB asset on an opaque white field');
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'installer-front-door-v10-cache-distinct-v250',
+  revision:'installer-front-door-v11-guildkeeper-terminology',
   installedEntry:exactEntry,
   hostSetup:'/host-setup.html',
   launcher:'/app/pwa-install-prompt-v250.js',
