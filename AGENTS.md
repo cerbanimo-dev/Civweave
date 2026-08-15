@@ -4,183 +4,161 @@ This file applies to the entire repository. Every coding agent must read it befo
 
 ## Canonical interface and runtime contract
 
-Before changing any interface, chat, shared runtime, loader, cross-realm behavior, mobile interaction, or verification architecture, read:
+Before changing any interface, chat, shared runtime, loader, cross-system behavior, mobile interaction, or verification architecture, read:
 
 `docs/contracts/mobile-interface-contract.md`
 
 That file is the single canonical interface and runtime contract for the active project. It defines the offline-first mesh boundary, the one-chat/five-theme architecture, runtime discipline, the prohibition on runtime replacement injection, the rule that obsolete artifacts are deleted rather than versioned or archived, and the placement of static verification in CI/review.
 
-Do not restore, recreate, consult as architectural authority, or point new work at superseded visual contracts, realm-specific chat builds, archived replacement implementations, or other removed predecessors. Git history is the archive. If a replacement makes an active artifact obsolete, delete the obsolete artifact and its stale references in the same change.
+Do not restore, recreate, consult as architectural authority, or point new work at superseded visual contracts, spatial/cabinet architecture documents, realm-specific chat builds, archived replacement implementations, or other removed predecessors. Git history is the archive.
 
-## Prime directive
+## Prime directive: capabilities own behavior, not places
 
-**Do not select code by folder name alone. Trace the live route from the current dispatcher.**
+**Do not derive application architecture from screens, scenes, rooms, cabinets, realm pages, folders, images, or visual placement.**
 
-For cabinet work, begin at:
+Civweave is a functional system with presentation layers. A visual surface may expose a capability, but its location does not make that surface the capability owner.
 
-`public/app/fullscreen-family-v104.html`
+Architectural ownership must be determined from:
 
-Read its current `sites` map, identify the entry for the requested realm, and follow that entry's imported scripts, stylesheets, modules, iframes, and service-worker references. The dispatcher and the newest commits touching those referenced files define the current implementation.
+1. `docs/contracts/mobile-interface-contract.md`.
+2. `docs/architecture/systems-of-practice.md` for current shared-system ownership.
+3. `config/system-ownership.json` for declared capability owners.
+4. The active shared implementation and its callers.
+5. The active route only when needed to determine how a concrete visible surface reaches that implementation.
 
-As of August 5, 2026, the dispatcher routes to:
+Presentation routes are evidence about rendering and composition, not the source of architectural truth.
 
-- Civweave: `public/app/working-campus-v156.html`
-- Living School: `public/app/cabinets/living-school/index.html`
-- Cerbanimo: `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1`
-- FellowFare: `public/app/fellowfare-cabinet-v144.html?cabinet=1`
-- Anarchadia: `public/app/anarchadia-console-v139.html?cabinet=1`
+## No spatial-architecture regression
 
-Treat this list as an orientation aid, not permission to skip checking the dispatcher. Versioned entry files can move.
+Civweave must not regress into an architecture where functionality is defined by locations in a visual world.
 
-## Source-of-truth hierarchy
+- Do not make an illustrated scene, cabinet, room, terminal, hotspot, background image, or realm page the required owner of a capability merely because it displays that capability.
+- Do not require navigation, chat, settings, forms, account management, installation, recovery, or messaging to live inside an in-world object or image-backed surface.
+- Do not create separate implementations because the same function appears in different themes, realms, screens, or visual environments.
+- Do not interpret five themes as five applications. Shared functional needs belong to shared systems.
+- Artwork and game-like presentation are engagement layers. They may theme or frame functionality but must not determine application structure.
+- Semantic mobile interaction, accessibility, offline operation, and direct state ownership take precedence over spatial metaphors.
+- If an existing spatial wrapper is only duplicating a shared capability, consolidate the capability into its canonical owner and remove the obsolete wrapper when it no longer has an independent purpose.
 
-Architectural rules come from `docs/contracts/mobile-interface-contract.md`. For locating the live implementation of a specific feature, use this order:
+## One chat system
 
-1. The entry referenced by `public/app/fullscreen-family-v104.html`.
-2. Files directly loaded or imported by that entry.
-3. Active embedded surfaces under `public/app/services/<realm>/`.
-4. Shared runtime and contracts under `public/app/shared/`, plus shared family-shell files under `public/app/`.
-5. Packaging and cache declarations that retain those canonical files.
+Civweave has one canonical chat system.
 
-Historical, backup, superseded, generated-copy, and installer-mirror implementations are never alternate sources of truth. If they were made obsolete by a canonical replacement, remove them rather than routing new work through them.
+The five guide identities are themes and memory contexts of that system:
 
-Realm routing may still use different entry structures while non-chat capabilities are consolidated, but **chat is not realm-specific infrastructure**:
+- Weaveling / Civweave
+- Moss / Living School
+- Kamiya / Cerbanimo
+- Rook / FellowFare
+- Merlin / Anarchadia
 
-- All five guide identities use the single canonical chat system defined by `docs/contracts/mobile-interface-contract.md`.
-- Living School may own curriculum and learning capabilities, but it must not own a separate Moss chat UI, event loop, composer, transcript renderer, streaming path, or memory runtime.
-- Realm-specific entry files may expose capabilities to the shared chat system. They may not fork the chat system.
+They share one composer, transcript renderer, lifecycle, input/event owner, streaming path, local-model path, saved-chat UI, and responsive mobile behavior. Each theme keeps its own memory namespace.
 
-Do not force unrelated realm-specific capabilities into one structure as part of an unrelated repair.
+Realm-specific capabilities may be invoked from chat through capability handlers. They must not create another chat UI, polling loop, event owner, model path, or transcript system.
 
-## Paths that are not normal edit targets
-
-Unless the task explicitly names one of these surfaces, do not implement current cabinet behavior in:
-
-- `public/cabinet/`
-- root-level historical pages such as `public/cabinet-v*.html`
-- root-level historical pages such as `public/civweave-v*.html`
-- `public/index_old.html` or files with backup, old, legacy, supplied, or similar archival naming
-- copied `www/app/` directories inside installer or release bundles
-- ZIP archives or extracted package mirrors
-- `public/cabinetonly/index.html`, which is a redirect rather than the cabinet implementation
-
-Do not hand-edit generated installer copies to make a source bug appear fixed. Fix canonical files under `public/app/`, update package manifests or cache lists where necessary, run verification, and regenerate the package. If a generated or copied artifact is no longer required after the replacement, delete it instead of preserving it as an archive.
+Living School curriculum and learning tools are capabilities. They do not justify a separate Moss chat cabinet or workbench.
 
 ## Required investigation before editing
 
-For any cabinet or cross-realm task:
-
-1. Read `docs/contracts/mobile-interface-contract.md` for interface/runtime rules.
-2. Read `public/app/fullscreen-family-v104.html`.
-3. Inspect recent commits affecting the active entry and its dependencies.
-4. Search the repository for every reference to the file, version marker, route, DOM ID, storage key, and service-worker cache entry you expect to change.
-5. Determine whether the visible surface is a parent page, an embedded `services/<realm>/` page, or both.
-6. Confirm whether installer, service-worker, verifier, and workflow files retain exact filename lists.
-7. Edit the smallest canonical surface that owns the behavior.
-8. If the change makes another active artifact obsolete, delete that artifact and all stale references before considering the change complete.
-
-### Mandatory system-of-practice lookup
-
-Before adding or changing any cross-cutting button handler, global event listener, loader, overlay, shared state store, service-worker hook, or shared runtime:
+For any interface, shared-system, or cross-system task:
 
 1. Read `docs/contracts/mobile-interface-contract.md`.
-2. Read `docs/architecture/systems-of-practice.md`.
-3. Read `config/system-ownership.json`.
-4. Identify the existing capability owner and canonical control/event/API.
-5. Search the active route graph for every existing owner, subscriber, caller, compatibility shim, and retired implementation.
-6. **If the capability already exists, extend or repair its declared owner. Do not add a parallel owner.**
-7. If duplicated ownership already exists, consolidation is the task. Do not add a third path to bridge the first two.
-8. Any intentional ownership change must update the registry, applicable CI/review verification, and documentation in the same change.
-9. Remove any implementation made obsolete by the ownership change. Do not archive or version it beside the replacement.
-10. Run the currently canonical system-ownership check for any file covered by the ownership registry.
+2. Read `docs/architecture/systems-of-practice.md` when the change affects shared ownership.
+3. Read `config/system-ownership.json` when the capability is registered there.
+4. Identify the canonical functional owner before editing presentation code.
+5. Search the repository for every owner, caller, subscriber, loader, registration, storage key, service-worker entry, workflow reference, and obsolete predecessor related to the capability.
+6. Trace the active route only as needed to understand how the visible UI reaches the canonical implementation.
+7. Repair or extend the existing owner. Do not add a parallel owner.
+8. If duplicated ownership already exists, consolidation is the task. Do not bridge duplicates with a third layer.
+9. If the change makes another active artifact obsolete, delete that artifact and every stale reference in the same change.
 
-A visible button does not own its behavior merely because it is nearby. Realm-specific markup may expose a canonical shared control, but it may not independently intercept that control. Browser prototypes and globals must never be patched to compensate for an implementation bug that can be fixed at its source.
+A visible button does not own its behavior merely because it is nearby. A realm page may expose a canonical shared control, but it may not independently intercept or reimplement that control.
 
-Useful local commands include:
+Browser prototypes and globals must never be patched to compensate for an implementation bug that can be fixed at its source.
 
-```bash
-git log --date=short --name-status -- public/app public/extensions public/service-worker* scripts .github/workflows
-git log -n 20 --oneline -- public/app/fullscreen-family-v104.html
-rg "exact-file-name|version-marker|storage-key|element-id" public scripts .github
-```
+## Active-route tracing
 
-If recent commits and an older document disagree, prefer the active route and current code, subject to the canonical interface/runtime contract. Update or delete misleading documentation in the same change.
+When debugging a concrete rendered surface, trace the route actually used by the current application rather than guessing from filenames or directories.
+
+`public/app/fullscreen-family-v104.html` may be used to discover current presentation entrypoints when it is still the active dispatcher, but it is not an architectural contract. Do not encode its current visual routing topology into shared-system design.
+
+If recent commits, an active route, and an older document disagree, the canonical contract and current functional ownership win. Update or delete misleading documentation in the same change.
+
+## Source-of-truth rules
+
+- A shared capability has one canonical owner.
+- A presentation surface is not a second implementation.
+- A theme is configuration, not a fork.
+- A memory folder is a namespace, not a separate chat runtime.
+- Generated installer assets follow source changes; they do not lead them.
+- Packaging and caches may reference canonical files but must not become alternate implementations.
+- Historical, backup, superseded, generated-copy, installer-mirror, and spatial-prototype implementations are never alternate sources of truth.
+- If an artifact was made obsolete, delete it rather than routing new work through it.
+
+## Runtime discipline
+
+- Offline-first operation is primary.
+- Hosted services widen capability but must not become mandatory for basic local work.
+- One interaction must have one authoritative event owner.
+- Prefer bounded work, bounded rendering, explicit lifecycle ownership, and backpressure.
+- Do not stack polling loops, mutation observers, capture handlers, synthetic clicks, repair interceptors, or retry layers around a broken owner.
+- Do not repeatedly throw events at the DOM to discover or repair state.
+- Expensive local-model work begins from explicit user demand and respects device resource limits.
+- Runtime replacement injection, self-patching, source rewriting, and emergency repair loaders are forbidden.
+
+## Obsolete means delete
+
+If an implementation, file, system, workflow, script, interface, contract, loader, registration, test, or documentation artifact has been made obsolete by its replacement, delete it from the active repository in the same change.
+
+Do not preserve obsolete implementations as:
+
+- versioned duplicates,
+- archived copies,
+- tombstones,
+- legacy fallbacks,
+- compatibility copies,
+- backup files,
+- side-by-side replacements,
+- retired implementation folders,
+- or alternate architectural documentation.
+
+Git history is the archive. A replacement is not complete until the superseded active artifact and stale references are gone.
 
 ## Versioned-file rules
 
-Many filenames are stable compatibility boundaries even when their internal build markers advance.
-
 - Do not create a higher-numbered file merely because you changed it.
-- Preserve the current filename unless the task or release process requires a version bump.
+- Preserve a stable filename when it is a compatibility boundary and the release process does not require a rename.
 - When a filename changes, update every caller, redirect, workflow path filter, service-worker cache list, installer manifest, and documentation reference in the same change.
-- Search for the old filename after the edit. Any obsolete predecessor or stale reference must be deleted; do not retain it as a fallback or archive.
+- Search for the old filename after the edit. Any obsolete predecessor or stale reference must be removed.
 - Keep query-string cache revisions coherent with the actual files being loaded.
 
-## Root hygiene
+## Repository hygiene
 
 Treat the repository root as a control surface, not a storage location.
 
 - New general documentation belongs under `docs/`.
-- Release notes, audits, and design records may live under `docs/history/` when they are genuinely records rather than copies of obsolete implementations. Do not create retired implementation archives.
+- Release notes, audits, and planning records may live under `docs/history/` when they are genuine records rather than copies of obsolete implementations.
+- Do not create retired implementation archives.
 - Workflow touch/sentinel files belong under `ops/triggers/`, never as hidden files at `/`.
-- Keep only runtime entrypoints, tool-required configuration, stable pointer documents, and explicitly grandfathered executable contracts at the root.
+- Keep only runtime entrypoints, tool-required configuration, stable pointer documents, and explicitly required executable contracts at the root.
 - Do not add a new root Markdown file simply because it is convenient for one release.
-- If an executable contract genuinely must remain at root because code or packaging consumes that exact path, document that exception in the canonical root-hygiene check rather than weakening the rule.
-- Run the current root-hygiene CI/review check after changing root layout, docs placement, or workflow sentinels.
 
-The root-hygiene workflow rejects unapproved root Markdown and root-level trigger/materialize/watchdog sentinels. Prefer adding an index or link to a folder over adding another root artifact.
+## Cross-cutting ownership constraints
 
-## Cabinet ownership boundaries
-
-### Shared family shell
-
-`public/app/family-shell-v104.js` and `public/app/family-shell-v104.css` own shared cabinet chrome and family navigation. A realm-specific visual or behavior change should not be placed here unless it truly applies across the family.
-
-The shared chat system is governed separately by `docs/contracts/mobile-interface-contract.md`; do not infer chat ownership from whichever realm entry happens to display it.
-
-### Civweave
-
-Begin with `public/app/working-campus-v156.html`, then follow its loaded assets and runtimes.
-
-### Living School
-
-Begin with `public/app/cabinets/living-school/index.html` for Living School-specific curriculum and learning capabilities. Its modular realm code, styles, bootstrap, and learning loaders may live under `public/app/cabinets/living-school/`, with mature service modules under `public/app/services/living-school/`.
-
-Moss chat is not owned here. Moss is the Living School theme and memory context of the one shared chat system. Do not create or restore a Living School-specific chat cabinet, workbench, polling loop, composer, transcript renderer, model path, or saved-chat implementation.
-
-### Cerbanimo
-
-Begin with `public/app/realm-console-v140.html?system=cerbanimo&cabinet=1`, then trace Cerbanimo-specific routes, engines, and service surfaces from that console.
-
-### FellowFare
-
-Begin with `public/app/fellowfare-cabinet-v144.html?cabinet=1`. The parent cabinet and the embedded market under `public/app/services/fellowfare/` can both affect the visible result. Inspect both before changing layout, scrolling, navigation, or Rook-specific capabilities. Rook chat itself remains owned by the shared chat system.
-
-### Anarchadia
-
-Begin with `public/app/anarchadia-console-v139.html?cabinet=1`, then follow governance, sovereignty, and embedded service dependencies from that entry. Merlin chat itself remains owned by the shared chat system.
-
-## Cross-cutting constraints
-
-Preserve these architectural expectations unless the task explicitly changes them:
+Preserve these architectural expectations unless the user explicitly changes them:
 
 - `docs/contracts/mobile-interface-contract.md` is the canonical interface/runtime rule set.
-- Offline-first operation is primary.
-- Hosted services widen capability but must not become mandatory for basic local work.
-- The five guide identities share one chat system; themes and memory folders do not justify separate chat implementations.
-- Shared Settings input belongs only to `public/app/settings-gateway-v317.js`; the presentation belongs to `public/app/model-settings-controller-v173.js`. Do not add duplicate Settings listeners, loaders, overlays, repair interceptors, or realm-local Settings implementations.
-- Living School uses the same shared family Settings control and canonical Settings surface as Cerbanimo, FellowFare, and Anarchadia.
-- The global five-system navigation belongs to the family shell. Embedded realm pages should not create a second competing switcher.
-- Canonical cross-realm state and capability semantics live in shared contracts and parity code, not in visually convenient duplicates.
-- Generated installer assets follow source changes; they do not lead them.
-- Runtime replacement injection, self-patching, source rewriting, and repair loaders are forbidden.
+- Capabilities are organized by functional ownership, not spatial placement.
+- The five guide identities share one chat system.
+- Shared Settings input belongs to its canonical shared settings owner. Do not add duplicate Settings listeners, loaders, overlays, repair interceptors, or realm-local Settings implementations.
+- Global five-system navigation is shared navigation. Individual realm/theme surfaces must not create competing navigation systems.
+- Canonical cross-system state and capability semantics live in shared contracts and declared owners, not in visually convenient duplicates.
+- Images, scenes, cabinets, rooms, terminals, and other visual metaphors may present functionality but never define ownership by themselves.
 - If a replacement makes an artifact obsolete, delete it and its stale references. Git history is the archive.
 
 ## Verification
 
-Use the narrowest relevant CI/review check while developing, then the repository checks appropriate to the change. Static repository-contract verification belongs in GitHub Actions, tests, linting, type checks, or review checks rather than standalone verifier files when practical.
-
-For cross-cutting ownership changes, run the current system-ownership CI/review check.
+Static repository-contract verification belongs in GitHub Actions, tests, linting, type checks, or review checks rather than standalone verifier files when practical.
 
 For broad runtime changes:
 
@@ -196,17 +174,16 @@ npm run build:install
 
 For documentation-only changes, verify every named path against the current branch and inspect the Markdown diff.
 
-A task is not complete when only a legacy copy works. Confirm the route reached from `fullscreen-family-v104.html` uses the changed code, and delete any active predecessor made obsolete by the change.
+A task is not complete when only a legacy or spatially duplicated copy works. Confirm the active presentation route reaches the canonical shared implementation and delete any predecessor made obsolete by the change.
 
 ## Commit and pull-request hygiene
 
-- Keep unrelated cleanup out of feature repairs unless the changed feature makes an artifact obsolete. Obsolete artifacts must be removed as part of the replacement.
-- Name the active surface in the commit or pull-request summary.
-- Explain whether the change affects the parent cabinet, embedded service, shared shell, package cache, or several of these.
+- Name the canonical functional system affected by the change, not merely the screen or room where the symptom appeared.
+- Explain whether the change affects shared runtime, a capability handler, presentation, packaging/cache, or several of these.
 - List the verification performed.
-- When a migration retires an old path, delete the retired active artifact and stale references in the same change, then update this file and any other current pointer documentation that would otherwise mislead agents.
+- When a migration retires an old path, delete the retired active artifact and stale references in the same change, then update current pointer documentation that would otherwise mislead agents.
 
-When uncertain, stop wandering through similarly named rooms and return to the dispatcher and `docs/contracts/mobile-interface-contract.md`. Those are the map and the architectural rules pinned to the front door.
+When uncertain, return to `docs/contracts/mobile-interface-contract.md`, the ownership registry, and the active shared implementation. Do not infer architecture from scenery.
 
 ## Long-horizon agentic pipeline mode
 
@@ -233,7 +210,7 @@ Pipeline rules:
 
 - One bundle per branch and pull request.
 - Default to a draft pull request.
-- Do not merge or push directly to `main`.
+- Do not merge or push directly to `main` unless the explicit task directs a direct merge.
 - Do not skip forward because a later bundle is more interesting.
 - Do not duplicate work already present on current `main` or in a valid open pull request.
 - Do not mark a bundle complete until every gate passes.
@@ -241,7 +218,7 @@ Pipeline rules:
 - A scheduled rebase is planning-only. Do not hide production feature changes inside it.
 - When the queue is exhausted, create the next epoch from fresh screenshots, redacted feedback, incidents, measurements, and current code. The old plan is a structural example, not the source of truth.
 
-The pipeline coordinates work. It does not grant authority. Human approval remains required for merge, compatibility removal, destructive migration, paid-service activation, and high-stakes governance or economic actions.
+The pipeline coordinates work. It does not grant architectural authority. Human approval remains required for destructive migration, paid-service activation, and high-stakes governance or economic actions.
 
 ## Canonical release storage
 
