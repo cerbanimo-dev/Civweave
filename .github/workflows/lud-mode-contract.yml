@@ -1,0 +1,64 @@
+name: Lud Mode contract
+
+on:
+  pull_request:
+    paths:
+      - 'public/app/content-provenance-v1.js'
+      - 'public/app/lud/**'
+      - 'public/app/lud-*.js'
+      - 'public/app/lud-*.json'
+      - 'public/app/shared/civweave-identity-sync.js'
+      - 'public/app/fast-interactive-runtime-v192.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
+      - 'functions/api/ai/node/generate.ts'
+      - 'public/service-worker-lud-package-v1.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/test-lud-mode-v1.mjs'
+      - 'config/system-ownership.json'
+      - '.github/workflows/lud-mode-contract.yml'
+  push:
+    branches:
+      - staging
+    paths:
+      - 'public/app/content-provenance-v1.js'
+      - 'public/app/lud/**'
+      - 'public/app/lud-*.js'
+      - 'public/app/lud-*.json'
+      - 'public/app/shared/civweave-identity-sync.js'
+      - 'public/app/fast-interactive-runtime-v192.js'
+      - 'public/app/family-ai-loader-v105.js'
+      - 'cloudflare/node-cloud/src/server-ai-entry-v2.mjs'
+      - 'functions/api/ai/node/generate.ts'
+      - 'public/service-worker-lud-package-v1.js'
+      - 'public/service-worker-v203.js'
+      - 'scripts/build-service-worker-v211.mjs'
+      - 'scripts/test-lud-mode-v1.mjs'
+      - 'config/system-ownership.json'
+      - '.github/workflows/lud-mode-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Syntax check Lud runtime
+        run: |
+          node --check public/app/content-provenance-v1.js
+          node --check public/app/lud-mode-v1.js
+          node --check public/app/lud-manual-authoring-v1.js
+          node --check public/app/lud-installer-v1.js
+          node --check public/app/shared/civweave-identity-sync.js
+          node --check public/app/fast-interactive-runtime-v192.js
+          node --check public/app/family-ai-loader-v105.js
+          node --check public/service-worker-lud-package-v1.js
+          node --check cloudflare/node-cloud/src/server-ai-entry-v2.mjs
+      - name: Verify no-AI, no-generated-visual, and provenance contracts
+        run: node --test scripts/test-lud-mode-v1.mjs
