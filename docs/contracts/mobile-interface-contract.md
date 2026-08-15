@@ -30,8 +30,15 @@ This is the canonical interface and runtime contract for the active Civweave pro
 
 - Active Civweave code must not inject replacement application files, replacement source, or repair code at runtime.
 - Do not add runtime self-patching, source rewriting, emergency replacement loaders, code-injection repair systems, or scripts whose purpose is to replace another implementation after boot.
-- When a broken implementation is replaced, remove the broken active implementation from the repository rather than retaining parallel versions, tombstones, archives, compatibility copies, or fallback owners.
-- Git history is the history. The active repository should describe the current architecture, not carry duplicate historical implementations.
+
+## Obsolete means delete
+
+- If an implementation, file, system, workflow, script, interface, or contract has been made obsolete by its replacement, delete the obsolete artifact from the active repository in the same change.
+- Do not keep obsolete implementations as versioned duplicates, archived copies, tombstones, legacy fallbacks, compatibility copies, backup files, or side-by-side replacements.
+- Do not preserve superseded behavior by leaving a second active or discoverable source of truth behind.
+- Do not create new filenames solely to retain the old implementation after a replacement becomes canonical.
+- Git history is the archive. The active repository must describe only the current canonical implementation.
+- A replacement is not complete until the superseded active artifact and its stale references, loaders, registrations, tests, workflows, and documentation are removed.
 
 ## Verification belongs in CI and review
 
