@@ -1,7 +1,7 @@
 (() => {
 'use strict';
 
-const VERSION = 'host-node-local-capacity-v2-citizen-patron-copy';
+const VERSION = 'host-node-local-capacity-v3-guild-copy';
 const CAPACITY_ENDPOINT = '/api/federation/capacity';
 const ADMIT_ENDPOINT = '/api/federation/residents/admit';
 const HOST_ENDPOINT_KEY = 'federation-finder.physical-node-endpoint';
@@ -71,7 +71,7 @@ function renderCapacity(packet) {
   const join = el('cw-host-node-join');
   if (join && Number(capacity.slots.free || 0) < 1 && !selectedLocalHost()) {
     join.dataset.mode = 'search';
-    join.textContent = 'Find nearest open Hub';
+    join.textContent = 'Find nearest open Guild';
   }
   document.getElementById('cw-host-node-lobby')?.setAttribute('data-local-capacity-live', 'true');
   return true;
@@ -109,12 +109,12 @@ async function admitResident({ quiet = false } = {}) {
   } catch (error) {
     if (help) {
       help.textContent = error.status === 409
-        ? 'This Host Node has no Citizen slots right now. A Guildkeeper can expand capacity or you can choose another Host Node.'
-        : `Civweave could not reserve a Citizen slot on this local Host Node: ${error.message}`;
+        ? 'This Guild has no Citizen slots right now. A Guildkeeper can expand capacity or you can choose another Guild.'
+        : `Civweave could not reserve a Citizen slot on this local Guild: ${error.message}`;
     }
     throw error;
   } finally {
-    if (!quiet && button) { button.disabled = false; button.textContent = priorText || 'Use this Host Node'; }
+    if (!quiet && button) { button.disabled = false; button.textContent = priorText || 'Use this Guild'; }
   }
 }
 
