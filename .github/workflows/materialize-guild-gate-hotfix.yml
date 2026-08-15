@@ -1,0 +1,42 @@
+name: Materialize Guild gate hotfix release
+
+on:
+  push:
+    branches:
+      - hotfix/production-guild-gate-copy
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-guild-gate-hotfix-release
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: hotfix/production-guild-gate-copy
+          fetch-depth: 1
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Materialize canonical 1.0.163 release
+        run: node scripts/materialize-canonical-release.mjs
+      - name: Commit generated release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet && test -z "$(git ls-files --others --exclude-standard)"; then
+            echo 'No generated release changes to commit.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add VERSION package.json package-lock.json config/release-contract.json releases/1.0.163 public scripts
+          git commit -m 'Materialize Civweave 1.0.163 Guild gate hotfix release'
+          git push origin HEAD:hotfix/production-guild-gate-copy
