@@ -13,5 +13,13 @@ const symlinks=[];for(const e of entries){if((await lstat(path.join(root,e.name)
 if(symlinks.length)failures.push('Root compatibility symlinks are forbidden: '+symlinks.sort().join(', '));
 if(entries.some(e=>e.isDirectory()&&e.name==='archive'))failures.push('archive/ is forbidden; Git history is the archive.');
 try{await lstat(path.join(root,'server','compat'));failures.push('server/compat is forbidden; use releases/{VERSION}/server.')}catch(error){if(error.code!=='ENOENT')throw error}
+const forbiddenRepoPayloads=[
+  ['mempalace-develop.zip','Redundant Memory Palace ZIP must not be tracked.'],
+  ['public/app/models/smollm2-360m-instruct/tokenizer.json','SmolLM tokenizer payload must not be tracked.'],
+  ['public/app/models/smollm2-360m-instruct/onnx/model_q4f16.onnx','SmolLM model graph must not be tracked.']
+];
+for(const [relativePath,message] of forbiddenRepoPayloads){
+  try{await lstat(path.join(root,...relativePath.split('/')));failures.push(message+' ('+relativePath+')')}catch(error){if(error.code!=='ENOENT')throw error}
+}
 if(failures.length){console.error('Root hygiene check failed.');for(const failure of failures)console.error('- '+failure);process.exit(1)}
-console.log(JSON.stringify({ok:true,allowedRootMarkdown:[...allowedRootMarkdown].sort(),rootServerFiles:0,compatibilityPointers:0,archiveDirectory:false,canonicalReleaseDirectory:'releases'},null,2));
+console.log(JSON.stringify({ok:true,allowedRootMarkdown:[...allowedRootMarkdown].sort(),rootServerFiles:0,compatibilityPointers:0,archiveDirectory:false,forbiddenRepoPayloads:forbiddenRepoPayloads.map(([relativePath])=>relativePath),canonicalReleaseDirectory:'releases'},null,2));
