@@ -74,6 +74,7 @@ jobs:
           name: civweave-staging-pages-${{ github.sha }}
           path: .cloudflare-pages
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 7
 
   deploy:
@@ -149,6 +150,9 @@ jobs:
           if (!currentResponse.ok || current.success !== true) {
             throw new Error(`Could not read staging Pages project: ${JSON.stringify(current.errors || current)}`);
           }
+          if (current.result?.name === 'civweave') {
+            throw new Error('Refusing to operate on canonical production Pages project.');
+          }
           if (current.result?.production_branch !== 'staging') {
             const updateResponse = await fetch(endpoint, {
               method: 'PATCH',
@@ -159,9 +163,6 @@ jobs:
             if (!updateResponse.ok || updated.success !== true || updated.result?.production_branch !== 'staging') {
               throw new Error(`Could not set staging production branch: ${JSON.stringify(updated.errors || updated)}`);
             }
-          }
-          if (current.result?.name === 'civweave') {
-            throw new Error('Refusing to operate on canonical production Pages project.');
           }
           console.log('Verified isolated project civweave-staging with production branch staging.');
           NODE
