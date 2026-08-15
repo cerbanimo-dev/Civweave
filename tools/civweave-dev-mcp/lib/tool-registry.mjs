@@ -1,16 +1,24 @@
 import { connectToTarget } from './cdp-client.mjs';
 import { registerBrowserActionTools } from './browser-action-tools.mjs';
 import { registerBrowserReadTools } from './browser-read-tools.mjs';
+import { registerLocalStagingTools } from './local-staging-tools.mjs';
 import { registerRepoTools } from './repo-tool-registry.mjs';
 import { errorResult } from './tool-utils.mjs';
 
-export function createToolRegistry({ repoRoot = process.cwd(), cdpEndpoint = process.env.CIVWEAVE_CDP_ENDPOINT || 'http://127.0.0.1:9222', cdpFactory = connectToTarget, fetchImpl = fetch } = {}) {
-  const config = { repoRoot, cdpEndpoint, cdpFactory, fetchImpl };
+export function createToolRegistry({
+  repoRoot = process.cwd(),
+  cdpEndpoint = process.env.CIVWEAVE_CDP_ENDPOINT || 'http://127.0.0.1:9222',
+  localStagingOrigin = process.env.CIVWEAVE_LOCAL_STAGING_ORIGIN || 'http://127.0.0.1:8788',
+  cdpFactory = connectToTarget,
+  fetchImpl = fetch,
+} = {}) {
+  const config = { repoRoot, cdpEndpoint, localStagingOrigin, cdpFactory, fetchImpl };
   const tools = new Map();
   const add = (definition, handler) => tools.set(definition.name, { definition, handler });
 
   registerBrowserReadTools(add, config);
   registerBrowserActionTools(add, config);
+  registerLocalStagingTools(add, config);
   registerRepoTools(add, config);
 
   return {
