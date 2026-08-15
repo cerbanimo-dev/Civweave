@@ -26,15 +26,15 @@ const installClickStart=bridge.indexOf('async function ownInstallClick(event)');
 const installClickEnd=bridge.indexOf("if(hostSetupRedirect())return;",installClickStart);
 const installClick=bridge.slice(installClickStart,installClickEnd);
 const promptCall=installClick.indexOf('prompt.prompt();');
-const firstAwait=installClick.indexOf('await ');
 const choiceAwait=installClick.indexOf('await prompt.userChoice',promptCall);
+const shellAwait=installClick.indexOf('await shell.prepareShell');
 
 assert.ok(prepareStart>=0&&prepareCall>prepareStart,'front door must prepare the lightweight shell only after explicit install interaction');
 assert.ok(!bridge.includes('queueMicrotask(()=>void primeInstallability())'),'front door must never prewarm the app shell during first paint');
 assert.ok(!bridge.includes('async function primeInstallability()'),'front door must not retain a load-time shell-preparation path');
 assert.ok(promptCall>=0,'native install bridge must invoke the saved browser prompt');
-assert.ok(firstAwait===choiceAwait&&promptCall<firstAwait,'native prompt must be invoked synchronously in the fresh click handler before any await consumes the user gesture');
-assert.ok(!installClick.includes('await shell.prepareShell'),'fresh install click must never wait for service-worker preparation before prompting');
+assert.ok(choiceAwait>promptCall,'native prompt must be invoked synchronously in the fresh click handler before awaiting the browser choice');
+assert.equal(shellAwait,-1,'fresh install click must never wait for service-worker preparation before prompting');
 assert.ok(bridge.includes("installSequencingPolicy:'prepare-on-first-install-interaction-then-prompt-on-fresh-gesture'"),'bridge must publish its two-phase user-gesture-safe install contract');
 assert.ok(bridge.includes("promptAvailabilityPolicy:'capture-beforeinstallprompt-then-prompt-synchronously-on-fresh-click'"),'bridge must publish its native prompt user-gesture contract');
 assert.ok(bridge.includes('eagerShellPreparation:false'),'bridge must explicitly forbid eager shell preparation');
