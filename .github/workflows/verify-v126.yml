@@ -43,7 +43,7 @@ jobs:
         run: npm run build:release
       - name: Build Cloudflare Pages package
         run: node scripts/build-cloudflare-pages.mjs
-      - name: Verify packaged clean-room files
+      - name: Verify packaged clean-room and local-first files
         run: |
           set -euxo pipefail
           release_version="$(tr -d '[:space:]' < VERSION)"
@@ -55,13 +55,21 @@ jobs:
           test -f .cloudflare-pages/app/manifest.webmanifest
           test -f .cloudflare-pages/app/installer-storage-guard-v281.js
           test -f .cloudflare-pages/app/shell-integrity-v281.json
+          test -f .cloudflare-pages/service-worker-install-v1.js
           test -f .cloudflare-pages/service-worker-v156.js
           test -f .cloudflare-pages/service-worker-v203.js
           test -f .cloudflare-pages/service-worker-code-coherence-v288.js
+          test -f .cloudflare-pages/service-worker-local-ai-coherence-v307.js
+          test -f .cloudflare-pages/service-worker-living-school-cleanroom-v218.js
           test -f .cloudflare-pages/service-worker-core-v208.js
+          test -f .cloudflare-pages/service-worker-installed-launch-v282.js
           test -f .cloudflare-pages/service-worker-installer-state-v280.js
           test -f .cloudflare-pages/service-worker-shell-integrity-v281.js
           test -f .cloudflare-pages/service-worker-release-coherence-v220.js
+          test -f .cloudflare-pages/service-worker-navigation-safety-v224.js
+          test -f .cloudflare-pages/service-worker-shell-repair-v225.js
+          test -f .cloudflare-pages/service-worker-canonical-navigation-v227.js
+
           grep -Fq "authority:'ai-settings-cleanroom-v188-v317'" .cloudflare-pages/app/model-settings-controller-v173.js
           grep -Fq "eventOwnership:'none-input-owned-by-settings-gateway-v317'" .cloudflare-pages/app/model-settings-controller-v173.js
           grep -Fq "VERSION='188.1-retired-settings-gateway-v317'" .cloudflare-pages/app/settings-delegation-v175.js
@@ -69,35 +77,66 @@ jobs:
           grep -Fq "listenerCount:0" .cloudflare-pages/app/settings-delegation-v175.js
           grep -Fq "inputOwnership:false" .cloudflare-pages/app/settings-delegation-v175.js
           grep -Fq "CivweaveSettingsGatewayV317?.open?.(launcher)" .cloudflare-pages/app/settings-delegation-v175.js
+
           grep -q "legacy-v156-bridge-v209" .cloudflare-pages/service-worker-v156.js
           grep -q "service-worker-v203.js?v=${release_version}-code-coherence-v288-lightweight-shell-v208-legacy-v156-bridge-v209" .cloudflare-pages/service-worker-v156.js
-          grep -q "const VERSION = '${release_version}';" .cloudflare-pages/install-v130.js
+          grep -Eq "const VERSION[[:space:]]*=[[:space:]]*'${release_version}';" .cloudflare-pages/install-v130.js
           grep -q "const VERSION = '${release_version}';" .cloudflare-pages/service-worker-core-v208.js
-          grep -q "const WORKER_SCRIPT_REVISION = 'release-coherence-v226';" .cloudflare-pages/install-v130.js
           ! grep -q "navigator.serviceWorker.register" .cloudflare-pages/app/index.html
-          grep -q "navigator.serviceWorker.register(WORKER_URL" .cloudflare-pages/install-v130.js
+          grep -Fq "BOOTSTRAP_BUILD='installer-bootstrap-v1-local-first'" .cloudflare-pages/install-v130.js
+          grep -Fq "ensureLocalPackage" .cloudflare-pages/install-v130.js
+          grep -Fq "'x-civweave-package':'campus-preflight'" .cloudflare-pages/install-v130.js
+          grep -Fq "Installation will wait rather than fall back to an online runtime." .cloudflare-pages/install-v130.js
+          grep -Fq "offlinePackageOptional: false" .cloudflare-pages/service-worker-install-v1.js
+          grep -Fq "localCampusRequiredForLaunch: true" .cloudflare-pages/service-worker-install-v1.js
+          grep -Fq "runtimeNetworkFallback: false" .cloudflare-pages/service-worker-install-v1.js
+          grep -Fq "error: 'LOCAL_PACKAGE_REQUIRED'" .cloudflare-pages/service-worker-install-v1.js
+
           grep -q '"start_url": "/app/installed-entry-v146.html?installed=1"' .cloudflare-pages/app/manifest.webmanifest
-          grep -q "revision=boot-recovery-v426" .cloudflare-pages/app/installed-entry-v146.js
-          grep -Fq "version:'${release_version}-boot-recovery-v426" .cloudflare-pages/app/installed-entry-v146.js
-          grep -q "updateViaCache:'none'" .cloudflare-pages/app/installed-entry-v146.js
-          grep -q "bounded(registration.update()" .cloudflare-pages/app/installed-entry-v146.js
-          grep -q "service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v288-language-v2" .cloudflare-pages/service-worker-v203.js
-          grep -q "network-first-current-version-cache-legacy-offline-fallback" .cloudflare-pages/service-worker-code-coherence-v288.js
+          grep -Fq "allowProvision:localDeveloper()" .cloudflare-pages/app/installed-entry-v146.js
+          grep -Fq "installed-entry-local-package-required" .cloudflare-pages/app/installed-entry-v146.js
+          grep -Fq "browserRuntimePolicy:'installed-display-cache-only'" .cloudflare-pages/app/installed-entry-v146.js
+          grep -Fq "localCampusReady" .cloudflare-pages/app/installed-entry-v146.js
+
+          grep -q "service-worker-local-ai-coherence-v307.js?v=${release_version}-local-ai-code-coherence-v307-local-first" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-code-coherence-v288.js?v=1.0.92-code-coherence-v288-language-v2-local-first" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-installed-launch-v282.js?v=installed-pwa-launch-v294-campus-recovery-local-first" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-release-coherence-v220.js?v=release-coherence-v226-local-first" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-navigation-safety-v224.js?v=navigation-redirect-safety-v224-local-first" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-shell-repair-v225.js?v=shell-self-repair-v225-install-only-pwa-v1-local-first" .cloudflare-pages/service-worker-v203.js
+          grep -q "service-worker-canonical-navigation-v227.js?v=canonical-five-system-navigation-v227-local-first" .cloudflare-pages/service-worker-v203.js
           grep -q "service-worker-core-v208.js?v=${release_version}-chat-convergence-v250" .cloudflare-pages/service-worker-v203.js
           grep -q "service-worker-installer-state-v280.js?v=installer-state-machines-v280" .cloudflare-pages/service-worker-v203.js
           grep -q "service-worker-shell-integrity-v281.js?v=shell-integrity-v281" .cloudflare-pages/service-worker-v203.js
           grep -q "service-worker-offline-v211-override.js?v=offline-campus-current-graph-v280&policy=resumable-pause-v280" .cloudflare-pages/service-worker-v203.js
-          grep -q "service-worker-release-coherence-v220.js?v=release-coherence-v226" .cloudflare-pages/service-worker-v203.js
-          grep -q "service-worker-chat-repair-v245.js?v=chat-css-contract-v343&purge=chat-css-contract-v343" .cloudflare-pages/service-worker-v203.js
+
+          grep -Fq "policy: 'explicit-package-install-cache-only-runtime'" .cloudflare-pages/service-worker-code-coherence-v288.js
+          grep -Fq "runtimeNetworkFallback: false" .cloudflare-pages/service-worker-code-coherence-v288.js
+          grep -Fq "policy: 'explicit-package-install-cache-only-runtime'" .cloudflare-pages/service-worker-local-ai-coherence-v307.js
+          grep -Fq "runtimeNetworkFallback: false" .cloudflare-pages/service-worker-local-ai-coherence-v307.js
+          grep -Fq "policy:'cache-only-runtime'" .cloudflare-pages/service-worker-living-school-cleanroom-v218.js
+          grep -Fq "runtimeNetworkFallback:false" .cloudflare-pages/service-worker-living-school-cleanroom-v218.js
+          grep -Fq "version-pinned-cache-only-runtime-explicit-update-only" .cloudflare-pages/service-worker-release-coherence-v220.js
+          grep -Fq "runtimeNetworkFallback: false" .cloudflare-pages/service-worker-release-coherence-v220.js
+          grep -Fq "cache-only-runtime-explicit-package-acquisition" .cloudflare-pages/service-worker-navigation-safety-v224.js
+          grep -Fq "modelRuntimeNetworkFallback: false" .cloudflare-pages/service-worker-navigation-safety-v224.js
+          grep -Fq "exact-route-cache-only-never-runtime-network-fallback" .cloudflare-pages/service-worker-canonical-navigation-v227.js
+          grep -Fq "runtimeNetworkFallback:false" .cloudflare-pages/service-worker-canonical-navigation-v227.js
+          grep -Fq "runtimeAutoRepair: false" .cloudflare-pages/service-worker-shell-repair-v225.js
+          grep -Fq "installed-entry-then-local-working-campus-never-network-fallback" .cloudflare-pages/service-worker-installed-launch-v282.js
+
+          ! grep -q "network-first-current-version-cache-legacy-offline-fallback" .cloudflare-pages/service-worker-code-coherence-v288.js
+          ! grep -q "version-pinned-html-js-css-json-txt-network-first-cached-fallback" .cloudflare-pages/service-worker-release-coherence-v220.js
+          ! grep -Eq "^[[:space:]]*importScripts\('/service-worker\.js" .cloudflare-pages/service-worker-v156.js
+          ! grep -Eq "^[[:space:]]*importScripts\('/service-worker-critical-v199\.js" .cloudflare-pages/service-worker-v156.js
+
           grep -q "crypto.subtle.digest('SHA-256'" .cloudflare-pages/service-worker-shell-integrity-v281.js
           grep -q "installer-storage-guard-v281.js" .cloudflare-pages/service-worker-installer-state-v280.js
           grep -q '"revision": "shell-integrity-v281"' .cloudflare-pages/app/shell-integrity-v281.json
           grep -q '"revision": "campus-storage-budget-v281"' .cloudflare-pages/app/offline-package-v208.json
           grep -q "Civweave Working Campus · v${release_version}" .cloudflare-pages/app/working-campus-v156.html
           grep -q "<b class=\"version-chip\">v${release_version}</b>" .cloudflare-pages/app/working-campus-v156.html
-          grep -q "version-pinned-html-js-css-json-txt-network-first-cached-fallback" .cloudflare-pages/service-worker-release-coherence-v220.js
-          ! grep -Eq "^[[:space:]]*importScripts\('/service-worker\.js" .cloudflare-pages/service-worker-v156.js
-          ! grep -Eq "^[[:space:]]*importScripts\('/service-worker-critical-v199\.js" .cloudflare-pages/service-worker-v156.js
+
           ! grep -q "MutationObserver" .cloudflare-pages/app/settings-delegation-v175.js
           ! grep -q "PerformanceObserver" .cloudflare-pages/app/settings-delegation-v175.js
           ! grep -q "setInterval(" .cloudflare-pages/app/settings-delegation-v175.js
