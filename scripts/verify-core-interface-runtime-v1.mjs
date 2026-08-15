@@ -43,6 +43,11 @@ assert.match(runtime,/function registerFeature\(/);
 assert.match(runtime,/async function requestFeature\(/);
 assert.match(runtime,/function navigate\(/);
 assert.match(runtime,/function ensureStructuralSlots\(/);
+assert.match(runtime,/const SHARED_BOOT_SCRIPTS=Object\.freeze\(\[/);
+assert.match(runtime,/function queueScript\(/);
+assert.match(runtime,/function installSharedSupport\(/);
+assert.match(runtime,/civweave:interface-shared-support-ready/);
+assert.match(runtime,/if\(currentSystem==='fellowfare'\)scripts\.push\(FELLOWFARE_GUIDE_BRIDGE\)/);
 assert.match(runtime,/civweave:interface-runtime-phase/);
 assert.match(runtime,/civweave:interface-runtime-ready/);
 assert.match(runtime,/civweave:interface-system-ready/);
@@ -57,7 +62,12 @@ assert.match(boundary,/const CORE_INTERFACE_RUNTIME='\/app\/core-interface-runti
 const experience=boundary.match(/const SYSTEM_EXPERIENCE_SCRIPTS=\[([\s\S]*?)\n\];/)?.[1]||'';
 assert.match(experience,/CORE_INTERFACE_RUNTIME/,'Install boundary does not request the core interface runtime for canonical systems.');
 assert.ok(experience.indexOf('CORE_INTERFACE_RUNTIME')<experience.indexOf('SETTINGS_GATEWAY'),'Core interface runtime must establish lifecycle before optional shared feature gateways are requested.');
-assert.equal((experience.match(/CORE_INTERFACE_RUNTIME/g)||[]).length,1,'Core interface runtime must appear exactly once in the canonical experience list.');
+assert.equal((experience.match(/CORE_INTERFACE_RUNTIME/g)||[]).length,1,'Core interface runtime must appear exactly once in the compatibility experience manifest.');
+const installSystemExperience=boundary.match(/function installSystemExperienceSupport\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
+assert.match(installSystemExperience,/addScript\(CORE_INTERFACE_RUNTIME\)/,'Install boundary must bootstrap the core runtime.');
+assert.doesNotMatch(installSystemExperience,/SYSTEM_EXPERIENCE_SCRIPTS\.forEach|FELLOWFARE_GUIDE_BRIDGE|installAssetCustomizationIfConfigured/,'Install boundary regained shared-system loading ownership.');
+assert.doesNotMatch(boundary,/CANONICAL_SYSTEM_SCRIPTS\.forEach\(addScript\)/,'Install boundary regained canonical dependency loading ownership.');
+assert.match(boundary,/sharedLoadingOwner:'core-interface-runtime-v1'/);
 assert.ok(critical.includes("'/app/core-interface-runtime-v1.js'"),'Offline critical cache does not include the core interface runtime.');
 
 assert.equal(registry.systems.settings.inputOwner,'public/app/settings-gateway-v317.js');
@@ -73,6 +83,7 @@ console.log(JSON.stringify({
   activeRoutes:expectedRoutes,
   invariants:{
     oneCoreRuntime:true,
+    oneSharedLoader:true,
     oneSettingsInputOwner:true,
     familyNavigationOwnerPreserved:true,
     adapterContract:true,
