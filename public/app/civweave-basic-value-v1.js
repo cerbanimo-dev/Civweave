@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 if(globalThis.CivweaveBasicValueV1)return;
-const VERSION='1.1.0';
+const VERSION='1.2.0';
 const SCHEMA='civweave.basic-value-guide.v1';
 const LIVING_STATE_KEY='civweave.living-school.cabinet.v151';
 const clean=(value,max=500)=>String(value??'').trim().slice(0,max);
@@ -12,7 +12,7 @@ const parse=(value,fallback)=>{try{return JSON.parse(value)??fallback}catch{retu
 const copy=value=>JSON.parse(JSON.stringify(value));
 const GUIDE=Object.freeze({
   schema:SCHEMA,
-  version:2,
+  version:3,
   symbols:Object.freeze({button:'🔘',acorn:'🌰'}),
   labor:Object.freeze({
     wageButtonsPerHour:5,
@@ -21,11 +21,11 @@ const GUIDE=Object.freeze({
     basis:'uniform starting wage for human-equivalent labor at an ordinary competent pace; every worker receives the same Button wage rate, while models estimate only the hours represented by the work; automation does not reduce the wage or hours baseline'
   }),
   learning:Object.freeze({moduleCompletionAcorns:2,externalValidationBonusAcorns:2,validatorContributionAcorns:1}),
-  education:Object.freeze({acornsPerHour:10,curriculumMinAcorns:5,curriculumMaxAcorns:50,curriculumBasis:'length and quality'}),
+  education:Object.freeze({acornsPerHour:100,curriculumMinAcorns:50,curriculumMaxAcorns:500,curriculumBasis:'length and quality'}),
   mentorship:Object.freeze({
-    balanced:Object.freeze({id:'balanced',label:'Learning + doing',buttons:5,acorns:5}),
+    balanced:Object.freeze({id:'balanced',label:'Learning + doing',buttons:5,acorns:50}),
     doingHeavy:Object.freeze({id:'doing-heavy',label:'Doing-heavy mentorship',buttons:15,acorns:0}),
-    learningHeavy:Object.freeze({id:'learning-heavy',label:'Learning-heavy mentorship',buttons:0,acorns:20})
+    learningHeavy:Object.freeze({id:'learning-heavy',label:'Learning-heavy mentorship',buttons:0,acorns:200})
   })
 });
 function laborButtons(hours){return round(Math.max(0,num(hours))*GUIDE.labor.wageButtonsPerHour)}
@@ -63,8 +63,8 @@ function mentorship(mode='balanced'){
 }
 function baselineFor(kind,input={}){
   const type=clean(kind,40).toLowerCase(),hours=sumLaborHours(input)||Math.max(0,num(input?.hours));
-  if(['learning','curriculum'].includes(type))return{kind:type,hours,buttons:0,acorns:curriculumAcorns({hours,recommendedAcorns:input?.recommendedAcorns}),basis:'curriculum length + quality, with 10 🌰 Acorns/hour as the time baseline and a 5–50 🌰 range'};
-  if(['tutoring','education','educational-time'].includes(type))return{kind:type,hours,buttons:0,acorns:educationalAcorns(hours),basis:'10 🌰 Acorns per educational hour'};
+  if(['learning','curriculum'].includes(type))return{kind:type,hours,buttons:0,acorns:curriculumAcorns({hours,recommendedAcorns:input?.recommendedAcorns}),basis:'curriculum length + quality, with 100 🌰 Acorns/hour as the time baseline and a 50–500 🌰 range'};
+  if(['tutoring','education','educational-time'].includes(type))return{kind:type,hours,buttons:0,acorns:educationalAcorns(hours),basis:'100 🌰 Acorns per educational hour'};
   if(type==='mentorship')return{kind:type,hours,...mentorship(input?.mode||input?.mentorshipMode),basis:'mentorship mix of learning and doing'};
   const wage=laborButtons(hours);
   return{kind:type||'labor',hours,buttons:wage,wageButtons:wage,wageRateButtonsPerHour:GUIDE.labor.wageButtonsPerHour,acorns:0,wagePolicy:GUIDE.labor.wagePolicy,basis:'uniform starting wage: 5 🔘 Buttons per human-equivalent labor hour for every worker; models value hours, not rank'};
@@ -76,11 +76,11 @@ function chartRows(){return[
   {id:'module-complete',label:'Learning module completed',value:formatAcorns(2),note:'Completion grant.'},
   {id:'module-validated',label:'External successful validation',value:`+${formatAcorns(2)}`,note:'Bonus after successful external confidence validation.'},
   {id:'validation-help',label:'Validate someone’s learning',value:formatAcorns(1),note:'For a qualified model/neuron validation contribution.'},
-  {id:'education-hour',label:'Curriculum / tutoring time',value:`${formatAcorns(10)} / hour`,note:'Marketed educational time.'},
-  {id:'curriculum',label:'Curriculum package',value:`${formatAcorns(5)}–${formatAcorns(50)}`,note:'Length and quality set the final suggestion.'},
-  {id:'mentor-balanced',label:'Mentorship: learning + doing',value:`${formatButtons(5)} + ${formatAcorns(5)}`,note:'Balanced on-the-job learning and productive work.'},
+  {id:'education-hour',label:'Curriculum / tutoring time',value:`${formatAcorns(100)} / hour`,note:'Marketed educational time. Acorn prices intentionally use a more granular numeric scale than Button wages.'},
+  {id:'curriculum',label:'Curriculum package',value:`${formatAcorns(50)}–${formatAcorns(500)}`,note:'Length and quality set the final suggestion on the Acorn price scale.'},
+  {id:'mentor-balanced',label:'Mentorship: learning + doing',value:`${formatButtons(5)} + ${formatAcorns(50)}`,note:'Balanced on-the-job learning and productive work.'},
   {id:'mentor-doing',label:'Mentorship: doing-heavy',value:formatButtons(15),note:'Primarily productive work with mentorship.'},
-  {id:'mentor-learning',label:'Mentorship: learning-heavy',value:formatAcorns(20),note:'Primarily instruction / guided learning.'}
+  {id:'mentor-learning',label:'Mentorship: learning-heavy',value:formatAcorns(200),note:'Primarily instruction / guided learning.'}
 ]}
 function ledger(){return globalThis.CivweaveCanonicalRewardsV2||null}
 async function grantAcorns({amount,sourceId,sourceKey,sourceSystem='living-school',sourceKind='learning',validatorIds=[],metadata={}}){
