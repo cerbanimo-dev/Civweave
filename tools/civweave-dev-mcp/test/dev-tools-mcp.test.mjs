@@ -47,6 +47,18 @@ function fakeCdpFactory(){
   return async()=>({client,target:{id:'page-1',url:'http://localhost/app'}});
 }
 
+function fakeStagingFetch(url){
+  assert.equal(String(url),'http://127.0.0.1:8788/api/health');
+  return Promise.resolve(new Response(JSON.stringify({
+    ok:true,
+    service:'civweave-cloudflare-pages',
+    environment:'staging',
+    origin:'http://127.0.0.1:8788',
+    productionIsolation:true,
+    stagingSyntheticHub:true,
+  }),{status:200,headers:{'content-type':'application/json'}}));
+}
+
 test('repo path guard rejects traversal', async()=>{
   const root=await makeRepo();
   assert.throws(()=>resolveRepoPath(root,'../escape.txt'),/escapes/);
@@ -59,6 +71,7 @@ test('registry reads, searches, applies checked patches, and only runs safe npm 
   assert(names.includes('repo.apply_patch'));
   assert(names.includes('pwa.snapshot'));
   assert(names.includes('pwa.query'));
+  assert(names.includes('dev.local_staging_status'));
   assert(!names.includes('pwa.eval'));
 
   const read=await registry.call('repo.read_file',{path:'public/app.js'});
@@ -85,6 +98,32 @@ test('registry reads, searches, applies checked patches, and only runs safe npm 
   assert.match(blockedMetadata.content[0].text,/git metadata/);
 });
 
+test('local staging status tool verifies isolated loopback staging', async()=>{
+  const root=await makeRepo();
+  const registry=createToolRegistry({
+    repoRoot:root,
+    cdpFactory:fakeCdpFactory(),
+    localStagingOrigin:'http://127.0.0.1:8788',
+    fetchImpl:fakeStagingFetch,
+  });
+  const status=await registry.call('dev.local_staging_status',{});
+  assert.equal(status.isError,undefined,status.content?.[0]?.text);
+  assert.equal(status.structuredContent.reachable,true);
+  assert.equal(status.structuredContent.isolated,true);
+  assert.equal(status.structuredContent.productionIsolation,true);
+  assert.equal(status.structuredContent.appUrl,'http://127.0.0.1:8788/app/');
+
+  const unsafe=createToolRegistry({
+    repoRoot:root,
+    cdpFactory:fakeCdpFactory(),
+    localStagingOrigin:'https://civweave.cc',
+    fetchImpl:fakeStagingFetch,
+  });
+  const blocked=await unsafe.call('dev.local_staging_status',{});
+  assert.equal(blocked.isError,true);
+  assert.match(blocked.content[0].text,/loopback/);
+});
+
 test('browser tools expose bounded inspection and interaction without caller-supplied runtime eval', async()=>{
   const root=await makeRepo();
   const registry=createToolRegistry({repoRoot:root,cdpFactory:fakeCdpFactory()});
@@ -106,15 +145,17 @@ test('browser tools expose bounded inspection and interaction without caller-sup
 
 test('MCP HTTP endpoint supports discovery, list, call, header mismatch rejection, and localhost origin policy', async()=>{
   const root=await makeRepo();
-  const registry=createToolRegistry({repoRoot:root,cdpFactory:fakeCdpFactory()});
+  const registry=createToolRegistry({repoRoot:root,cdpFactory:fakeCdpFactory(),fetchImpl:fakeStagingFetch});
   assert.throws(()=>createMcpHttpServer({repoRoot:root,host:'0.0.0.0',port:0,registry}),/CIVWEAVE_DEV_TOKEN/);
-  const bridge=createMcpHttpServer({repoRoot:root,host:'127.0.0.1',port:0,registry});
+  const bridge=createMcpHttpServer({repoRoot:root,host:'127.0.0.1',port:0,registry,localStagingOrigin:'http://127.0.0.1:8788'});
   const address=await bridge.listen();
   const base=`http://127.0.0.1:${address.port}`;
   try{
     const health=await fetch(`${base}/health`); assert.equal(health.status,200);
+    const healthPayload=await health.json();
+    assert.equal(healthPayload.localStagingOrigin,'http://127.0.0.1:8788');
     const list=await fetch(`${base}/mcp`,{method:'POST',headers:{'content-type':'application/json','mcp-protocol-version':'2026-07-28','mcp-method':'tools/list'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/list',params:{_meta:{'io.modelcontextprotocol/clientInfo':{name:'test',version:'1'}}}})});
-    assert.equal(list.status,200); const listed=await list.json(); assert(listed.result.tools.some((t)=>t.name==='repo.read_file'));
+    assert.equal(list.status,200); const listed=await list.json(); assert(listed.result.tools.some((t)=>t.name==='repo.read_file')); assert(listed.result.tools.some((t)=>t.name==='dev.local_staging_status'));
 
     const call=await fetch(`${base}/mcp`,{method:'POST',headers:{'content-type':'application/json','mcp-protocol-version':'2026-07-28','mcp-method':'tools/call','mcp-name':'repo.status'},body:JSON.stringify({jsonrpc:'2.0',id:2,method:'tools/call',params:{name:'repo.status',arguments:{},_meta:{'io.modelcontextprotocol/clientInfo':{name:'test',version:'1'}}}})});
     assert.equal(call.status,200); const called=await call.json(); assert.match(called.result.content[0].text,/master|main/);

@@ -7,6 +7,7 @@ import { createToolRegistry } from './lib/tool-registry.mjs';
 const CURRENT_PROTOCOL = '2026-07-28';
 const LEGACY_PROTOCOL = '2025-11-25';
 const SERVER_INFO = { name:'civweave-dev-tools', version:'1.0.0' };
+const DEFAULT_LOCAL_STAGING_ORIGIN = 'http://127.0.0.1:8788';
 
 function parseList(value) { return String(value || '').split(',').map((item)=>item.trim()).filter(Boolean); }
 function isLoopback(host) { return ['127.0.0.1','::1','localhost'].includes(host); }
@@ -17,7 +18,8 @@ export function createMcpHttpServer({
   port = Number(process.env.CIVWEAVE_DEV_PORT || 7331),
   token = process.env.CIVWEAVE_DEV_TOKEN || '',
   allowedOrigins = parseList(process.env.CIVWEAVE_DEV_ALLOWED_ORIGINS),
-  registry = createToolRegistry({repoRoot}),
+  localStagingOrigin = process.env.CIVWEAVE_LOCAL_STAGING_ORIGIN || DEFAULT_LOCAL_STAGING_ORIGIN,
+  registry = createToolRegistry({repoRoot, localStagingOrigin}),
 } = {}) {
   if (!isLoopback(host) && !token) throw new Error('CIVWEAVE_DEV_TOKEN is required when binding outside localhost');
 
@@ -29,7 +31,7 @@ export function createMcpHttpServer({
 
   const server = http.createServer(async (req,res) => {
     const sendJson=(status,payload,extra={})=>{ const body=JSON.stringify(payload); res.writeHead(status,{'content-type':'application/json','content-length':Buffer.byteLength(body),...extra}); res.end(body); };
-    if (req.method==='GET' && req.url==='/health') return sendJson(200,{ok:true,server:SERVER_INFO,protocol:CURRENT_PROTOCOL});
+    if (req.method==='GET' && req.url==='/health') return sendJson(200,{ok:true,server:SERVER_INFO,protocol:CURRENT_PROTOCOL,localStagingOrigin});
     if (req.url!=='/mcp') return sendJson(404,{error:'not_found'});
     if (!allowOrigin(req.headers.origin)) return sendJson(403,{jsonrpc:'2.0',error:{code:-32001,message:'Origin not allowed'}});
     if (token && req.headers.authorization!==`Bearer ${token}`) return sendJson(401,{jsonrpc:'2.0',error:{code:-32002,message:'Unauthorized'}},{'www-authenticate':'Bearer'});
@@ -65,7 +67,7 @@ export function createMcpHttpServer({
   });
 
   return {
-    server, host, port,
+    server, host, port, localStagingOrigin,
     listen(){ return new Promise((resolve,reject)=>{ server.once('error',reject); server.listen(port,host,()=>{ server.off('error',reject); resolve(server.address()); }); }); },
     close(){ return new Promise((resolve,reject)=>server.close((error)=>error?reject(error):resolve())); },
   };
@@ -75,5 +77,6 @@ if (process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta
   const bridge=createMcpHttpServer();
   const address=await bridge.listen();
   process.stderr.write(`[civweave-dev-tools] MCP listening on http://${address.address}:${address.port}/mcp\n`);
+  process.stderr.write(`[civweave-dev-tools] Local staging target: ${bridge.localStagingOrigin}\n`);
   process.stderr.write('[civweave-dev-tools] Browser actions are interaction-only; source changes must use repo.apply_patch.\n');
 }
