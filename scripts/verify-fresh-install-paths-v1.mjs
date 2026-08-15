@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 
 const read=path=>readFile(new URL(`../${path}`,import.meta.url),'utf8');
 const [bridge,installer,manifestText,installedEntryHtml,installedEntryRuntime]=await Promise.all([
-  read('public/app/pwa-install-prompt-v248.js'),
+  read('public/app/pwa-install-prompt-v249.js'),
   read('public/install-v130.js'),
   read('public/app/manifest.webmanifest'),
   read('public/app/installed-entry-v146.html'),
@@ -31,6 +31,8 @@ assert.ok(bridgePrompt>bridgePromptWait,'native prompt must open only after shel
 assert.ok(!bridge.slice(0,bridgePrepare).includes('if(!prompt)'),'front-door bridge must never require a prompt before preparing the shell');
 assert.ok(bridge.includes("installSequencingPolicy:'prepare-shell-before-native-prompt'"),'bridge must publish its shell-first sequencing contract');
 assert.ok(bridge.includes("promptAvailabilityPolicy:'prepare-shell-then-wait-for-beforeinstallprompt'"),'bridge must publish the no-deadlock prompt availability contract');
+assert.ok(bridge.includes('globalThis.CivweavePWAInstallV249=api'),'v249 must remain the canonical install API');
+assert.ok(bridge.includes('globalThis.CivweavePWAInstallV248=api')&&bridge.includes('globalThis.CivweavePWAInstallV247=api')&&bridge.includes('globalThis.CivweavePWAInstallV246=api'),'v249 must retain compatibility aliases without shipping parallel old runtimes');
 
 const fallbackPrepare=installer.indexOf('await prepareShell({ manual: true });');
 const fallbackPrompt=installer.indexOf('await prompt.prompt();',fallbackPrepare);
@@ -46,8 +48,11 @@ assert.ok(installedEntryRuntime.includes("if(!installedDisplay()&&!localDevelope
 
 console.log(JSON.stringify({
   ok:true,
-  revision:'fresh-install-paths-v2-shell-first-prompt-wait',
+  revision:'fresh-install-paths-v3-canonical-v249',
   exactEntry,
+  canonicalBridge:'/app/pwa-install-prompt-v249.js',
+  parallelPromptRuntimes:false,
+  compatibilityAliases:true,
   shellFirst:true,
   waitsForPromptAfterShell:true,
   browserInstallStaysInstallerOnly:true,
