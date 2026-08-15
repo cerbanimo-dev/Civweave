@@ -1,0 +1,50 @@
+name: Materialize release 1.0.160
+
+on:
+  push:
+    branches:
+      - agent/release-coherence-v159
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.repository == 'cerbanimo-dev/Civweave'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: agent/release-coherence-v159
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Advance release version
+        run: |
+          printf '1.0.160\n' > VERSION
+          npm version 1.0.160 --no-git-tag-version --allow-same-version
+      - name: Materialize canonical 1.0.160 release
+        run: |
+          node scripts/materialize-canonical-release.mjs
+          node scripts/sync-release-coherence-v220.mjs
+          node scripts/generate-prelive-metadata-v281.mjs
+          node scripts/sync-canonical-release-hashes.mjs
+      - name: Verify release policy and coherence
+        run: |
+          export CHANGED_FILES="$(git diff --name-only origin/main...HEAD; git diff --name-only)"
+          node scripts/verify-version-policy.mjs 1.0.159 1.0.160
+          node scripts/verify-version-policy.mjs --self-test
+          node scripts/verify-release-version-sync.mjs
+          node scripts/verify-canonical-launch-release.mjs
+          node scripts/verify-release-contract.mjs
+          node scripts/verify-pwa-cold-launch-recovery-v426.mjs
+          node --check scripts/sync-canonical-release-hashes.mjs
+      - name: Commit materialized release state
+        run: |
+          git rm .github/workflows/materialize-release-v160.yml
+          git config user.name 'civweave-release-coherence'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Advance repaired release to Civweave 1.0.160'
+          git push origin HEAD:agent/release-coherence-v159
